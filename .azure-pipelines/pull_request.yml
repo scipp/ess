@@ -29,9 +29,18 @@ stages:
             submodules: true
           - bash: echo "##vso[task.prependpath]$CONDA/bin"
             displayName: 'add conda to PATH'
-          - bash: |
-             set -ex
-             echo is master $(is_main)
-             echo is master $(is_next)
-             echo target branch $(System.PullRequest.TargetBranch)
+          ${{ if eq( variables['System.PullRequest.TargetBranch'], 'main' ) }}:
+            - bash: |
+               set -ex
+               echo as main
+               echo is master $(is_main)
+               echo is next $(is_next)
+               echo target branch $(System.PullRequest.TargetBranch)
+          ${{ if eq( variables['System.PullRequest.TargetBranch'], 'next' ) }}:
+            - bash: |
+               set -ex
+               echo as next
+               echo is master $(is_main)
+               echo is next $(is_next)
+               echo target branch $(System.PullRequest.TargetBranch)
 
