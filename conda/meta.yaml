@@ -12,7 +12,7 @@ requirements:
     - ipywidgets
     - matplotlib
     - pooch
-    - scippneutron>=0.5
+    - scippneutron>=0.7
 
 test:
   imports:
