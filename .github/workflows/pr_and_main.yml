@@ -49,7 +49,7 @@ jobs:
   #         path: conda/package/*/ess*.tar.bz2
 
   tests_and_docs:
-    needs: conda_build
+    needs: formatting
     runs-on: ubuntu-latest
     env:
       DOCS_HTML_DIR: ${{ github.workspace }}/docs_html
