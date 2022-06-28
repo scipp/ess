@@ -44,9 +44,7 @@ def mask_from_adj_pixels(mask):
 
     def make_flip(fill):
         flip = sc.empty(dims=['neighbor', 'y', 'x'],
-                        shape=[
-                            8,
-                        ] + mask.shape,
+                        shape=(8, ) + mask.shape,
                         dtype=bool)
         flip['neighbor', 0] = _shift(mask, "x", True, fill)
         flip['neighbor', 1] = _shift(mask, "x", False, fill)
@@ -75,11 +73,9 @@ def mean_from_adj_pixels(data):
     """
     fill = np.finfo(data.values.dtype).min
     has_variances = data.variances is not None
-    container = sc.empty(dims=['neighbor'] + data.dims,
+    container = sc.empty(dims=('neighbor', ) + data.dims,
                          dtype=data.dtype,
-                         shape=[
-                             9,
-                         ] + data.shape,
+                         shape=(9, ) + data.shape,
                          with_variances=has_variances,
                          unit=data.unit)
     container['neighbor', 0] = data
@@ -119,11 +115,9 @@ def median_from_adj_pixels(data):
     """
     fill = np.finfo(data.values.dtype).min
     has_variances = data.variances is not None
-    container = sc.empty(dims=['neighbor'] + data.dims,
+    container = sc.empty(dims=('neighbor', ) + data.dims,
                          dtype=data.dtype,
-                         shape=[
-                             9,
-                         ] + data.shape,
+                         shape=(9, ) + data.shape,
                          with_variances=has_variances)
     container['neighbor', 0] = data
     container['neighbor', 1] = _shift(data, "x", True, fill)
