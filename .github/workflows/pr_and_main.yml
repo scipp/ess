@@ -25,7 +25,7 @@ jobs:
       - run: |
           find . -type f -not -path '.git/*' -exec sed -ri "s/[0-9]{4} (Scipp contributors)/$(date +%Y) \1/g" {} +
           git diff --exit-code
-      - run: pip install flake8 nb-clean==2.1.0 yapf==0.30.0
+      - run: pip install flake8==4.0.1 nb-clean==2.1.0 yapf==0.32.0
       - run: find . -type f -regex '.*\.ipynb' | xargs nb-clean clean --remove-empty-cells --preserve-cell-metadata
       - run: yapf --recursive --in-place .
       - run: flake8 .
@@ -59,8 +59,8 @@ jobs:
         with:
           miniforge-version: latest
           miniforge-variant: Mambaforge
-          environment-file: docs/environment.yml
-          activate-environment: ess-docs-build
+          environment-file: .buildconfig/ci.yml
+          activate-environment: ci
           auto-activate-base: false
       - uses: actions/download-artifact@v2
       - run: mamba install conda-package-*/*/*.tar.bz2

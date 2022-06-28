@@ -1,0 +1,31 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
+
+name: ess-developer
+
+channels:
+  - conda-forge
+  - mantid
+  - scipp
+  - nodefaults
+
+dependencies:
+  - flake8
+  - ipympl
+  - mantid
+  - nbsphinx
+  - pandoc
+  - pip
+  - pooch
+  - pytest
+  - pythreejs
+  - python-graphviz
+  - scippneutron>=0.7
+  - sphinx
+  - sphinx-book-theme=0.2  # custom buttons in top bar do not work with version 0.3
+  - sphinx-copybutton
+  - yapf
+  - pip:
+    - nb-clean
+    - sphinx-autodoc-typehints>=1.17.0
+    - orsopy
