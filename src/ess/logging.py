@@ -51,7 +51,6 @@ def log_call(*,
     level = logging.getLevelName(level) if isinstance(level, str) else level
 
     def deco(f: Callable):
-
         @functools.wraps(f)
         def impl(*args, **kwargs):
             if message is not None:
@@ -69,7 +68,6 @@ class Formatter(logging.Formatter):
     """
     Logging formatter that indents messages and optionally shows threading information.
     """
-
     def __init__(self, show_thread: bool, show_process: bool):
         """
         Initialize the formatter.
