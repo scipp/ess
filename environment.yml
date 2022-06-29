@@ -20,7 +20,7 @@ dependencies:
   - pytest
   - pythreejs
   - python-graphviz
-  - scippneutron>=0.7
+  - scippneutron=0.7.*
   - sphinx
   - sphinx-book-theme=0.2  # custom buttons in top bar do not work with version 0.3
   - sphinx-copybutton
