@@ -3,28 +3,32 @@
 Release Notes
 =============
 
+v0.7.0 (June 2022)
+------------------
+
+See full changelog `here <https://github.com/scipp/ess/releases/tag/0.7.0>`_.
+
+Features
+~~~~~~~~
+
+* Made ``ess`` compatible with ``scippneutron=0.7`` `#128 <https://github.com/scipp/ess/pull/128>`_.
+
+Contributors
+~~~~~~~~~~~~
+
+Simon Heybrock :sup:`a`\ ,
+Neil Vaytet :sup:`a`\ ,
+and Jan-Lukas Wynen :sup:`a`
+
 v0.6.0 (April 2022)
 -------------------
+
+See full changelog `here <https://github.com/scipp/ess/releases/tag/0.6.0>`_.
 
 Features
 ~~~~~~~~
 
 * Added exploratory POWGEN workflow and powder diffraction modules `#113 <https://github.com/scipp/ess/pull/113>`_
-
-Breaking changes
-~~~~~~~~~~~~~~~~
-
-Bugfixes
-~~~~~~~~
-
-Documentation
-~~~~~~~~~~~~~
-
-Deprecations
-~~~~~~~~~~~~
-
-Stability, Maintainability, and Testing
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Contributors
 ~~~~~~~~~~~~
@@ -35,6 +39,8 @@ and Jan-Lukas Wynen :sup:`a`
 
 v0.5.0 (April 2022)
 -------------------
+
+See full changelog `here <https://github.com/scipp/ess/releases/tag/0.5.0>`_.
 
 Features
 ~~~~~~~~
@@ -53,6 +59,8 @@ and Jan-Lukas Wynen :sup:`a`
 v0.4.0 (February 2022)
 ----------------------
 
+See full changelog `here <https://github.com/scipp/ess/releases/tag/0.4.0>`_.
+
 Breaking changes
 ~~~~~~~~~~~~~~~~
 
@@ -67,6 +75,8 @@ and Jan-Lukas Wynen :sup:`a`
 
 v0.3.0 (February 2022)
 ----------------------
+
+See full changelog `here <https://github.com/scipp/ess/releases/tag/0.3.0>`_.
 
 Features
 ~~~~~~~~
