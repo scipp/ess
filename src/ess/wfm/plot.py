@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 import scipp as sc
-from .wfm import get_frames
+from .frames import get_frames
 from .stitch import stitch
 from .. import choppers as ch
 
@@ -159,20 +159,6 @@ def _sum_remaining_dims(data: sc.DataArray, dim: str) -> sc.DataArray:
     return summed
 
 
-def _bin_event_data_for_ploting(data, frame, bins_per_frame):
-    """
-    Bin event data using `bins_per_frame` to make a meaningful plot.
-    """
-    return sc.bin(data,
-                  edges=[
-                      sc.linspace(dim='tof',
-                                  start=frame["time_min"].value,
-                                  stop=frame["time_max"].value,
-                                  num=bins_per_frame,
-                                  unit=frame['time_min'].unit)
-                  ]).bins.sum()
-
-
 def frames_before_stitching(data: sc.DataArray,
                             frames: sc.Dataset,
                             dim: str,
@@ -190,10 +176,6 @@ def frames_before_stitching(data: sc.DataArray,
                           data=summed,
                           dim=dim,
                           bins=bins_per_frame)
-        # TODO: is this still required with the new plotting in scipp 0.8?
-        if out[key].bins is not None:
-            out[key] = _bin_event_data_for_ploting(out[key], frames['frame', i],
-                                                   bins_per_frame)
     return sc.plot(out)
 
 
@@ -212,13 +194,4 @@ def frames_after_stitching(data: sc.DataArray,
                           data=summed,
                           dim=dim,
                           bins=bins_per_frame)
-        # TODO: is this still required with the new plotting in scipp 0.8?
-        if out[key].bins is not None:
-            frame = frames['frame', i]
-            new_frame = {
-                "time_min": frame['time_min'] - frame['time_correction'],
-                "time_max": frame['time_max'] - frame['time_correction']
-            }
-            out[key] = _bin_event_data_for_ploting(out[key], new_frame, bins_per_frame)
-
     return sc.plot(out)

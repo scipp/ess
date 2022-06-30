@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
+
 name: PR and Main
 
 on:
@@ -25,7 +28,7 @@ jobs:
       - run: |
           find . -type f -not -path '.git/*' -exec sed -ri "s/[0-9]{4} (Scipp contributors)/$(date +%Y) \1/g" {} +
           git diff --exit-code
-      - run: pip install flake8 nb-clean==2.1.0 yapf==0.30.0
+      - run: pip install flake8==4.0.1 nb-clean==2.1.0 yapf==0.32.0
       - run: find . -type f -regex '.*\.ipynb' | xargs nb-clean clean --remove-empty-cells --preserve-cell-metadata
       - run: yapf --recursive --in-place .
       - run: flake8 .
@@ -33,37 +36,23 @@ jobs:
         with:
           commit_message: Apply automatic formatting
 
-  conda_build:
-    needs: formatting
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0  # history required so cmake can determine version
-      - uses: conda-incubator/setup-miniconda@v2
-      - run: conda install --channel conda-forge --yes conda-build mamba boa
-      - run: conda mambabuild --channel conda-forge --channel scipp --channel mantid --no-anaconda-upload --override-channels --output-folder conda/package conda
-      - uses: actions/upload-artifact@v2
-        with:
-          name: conda-package-ess
-          path: conda/package/*/ess*.tar.bz2
-
   tests_and_docs:
-    needs: conda_build
+    needs: formatting
     runs-on: ubuntu-latest
     env:
       DOCS_HTML_DIR: ${{ github.workspace }}/docs_html
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # history required so cmake can determine version
       - uses: conda-incubator/setup-miniconda@v2
         with:
           miniforge-version: latest
           miniforge-variant: Mambaforge
-          environment-file: docs/environment.yml
-          activate-environment: ess-docs-build
+          environment-file: .buildconfig/ci.yml
+          activate-environment: ci
           auto-activate-base: false
-      - uses: actions/download-artifact@v2
-      - run: mamba install conda-package-*/*/*.tar.bz2
+      - run: python -m pip install -e .
       - run: python -m pytest -v tests
       - run: python docs/make_docs.py
 

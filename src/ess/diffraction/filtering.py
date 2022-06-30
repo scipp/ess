@@ -13,11 +13,11 @@ import scipp as sc
 
 
 def _equivalent_bin_indices(a, b) -> bool:
-    a_begin = a.bins.constituents['begin'].squeeze()
-    a_end = a.bins.constituents['end'].squeeze()
-    b_begin = b.bins.constituents['begin'].squeeze()
-    b_end = b.bins.constituents['end'].squeeze()
-    non_empty = (a_begin != a_end)
+    a_begin = a.bins.constituents['begin'].flatten(to='')
+    a_end = a.bins.constituents['end'].flatten(to='')
+    b_begin = b.bins.constituents['begin'].flatten(to='')
+    b_end = b.bins.constituents['end'].flatten(to='')
+    non_empty = a_begin != a_end
     return sc.all((a_begin == b_begin)[non_empty]).value and sc.all(
         (a_end == b_end)[non_empty]).value
 

@@ -81,10 +81,7 @@ def denoise_and_rebin_monitors(monitors: Union[dict, sc.DataArray],
             dim = non_background_range.dim
             below = monitors[dim, :non_background_range[0]]
             above = monitors[dim, non_background_range[1]:]
-            # TODO: if we implement `ones_like` for data arrays, we could use that here
-            # instead of dividing the below and above pieces by themselves
-            divisor = sc.nansum(below / below).data + sc.nansum(above / above).data
-            background = (below.sum().data + above.sum().data) / divisor
+            background = sc.concat([below.data, above.data], dim=dim).mean()
             monitors = monitors - background
         return sc.rebin(monitors, "wavelength", wavelength_bins)
 
@@ -156,10 +153,6 @@ def _convert_events_to_q_and_merge_spectra(
     Convert event data to momentum vector Q.
     """
     data_q = data.transform_coords("Q", graph=graph)
-
-    # TODO: once scipp-0.12 is out, we no longer need to move the attr into the coords
-    data_q.bins.coords['wavelength'] = data_q.bins.attrs.pop('wavelength')
-
     q_summed = data_q.bins.concat('spectrum')
     return sc.bin(q_summed, edges=[wavelength_bands, q_bins])
 

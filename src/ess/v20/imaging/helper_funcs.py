@@ -48,6 +48,7 @@ def _load_images(image_dir, extension, loader):
 
 
 def _load_fits(image_dir):
+
     def loader(filenames):
         from astropy.io import fits
         stack = []

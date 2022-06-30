@@ -6,7 +6,7 @@ from .. import choppers as ch
 import scipp.constants as constants
 
 
-def frames_analytical(data: Union[sc.DataArray, sc.Dataset]) -> sc.Dataset:
+def get_frames(data: Union[sc.DataArray, sc.Dataset]) -> sc.Dataset:
     """
     Compute analytical frame boundaries and shifts based on chopper
     parameters and detector pixel positions.

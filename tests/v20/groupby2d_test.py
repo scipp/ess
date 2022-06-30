@@ -20,9 +20,9 @@ def test_groupby2d_simple_case_neutron_specific():
                         'source_position': source_position
                     })
     grouped = groupby2D(ds, 5, 5)
-    assert grouped['a'].shape == [1, 5, 5]
+    assert grouped['a'].shape == (1, 5, 5)
     grouped = groupby2D(ds, 1, 1)
-    assert grouped['a'].shape == [1, 1, 1]
+    assert grouped['a'].shape == (1, 1, 1)
     assert 'source_position' in grouped['a'].meta
 
 
@@ -41,7 +41,7 @@ def _make_simple_dataset(u, v, w):
 def test_simple_case_any_naming():
     ds = _make_simple_dataset(u=2, v=10, w=10)
     grouped = groupby2D(ds, nx_target=5, ny_target=5, x='w', y='v', z='u')
-    assert grouped['a'].shape == [2, 5, 5]
+    assert grouped['a'].shape == (2, 5, 5)
     projection = sc.array(dims=['v', 'w'], values=np.ones((5, 5))) * 4
     expected_data = sc.concat([projection, projection], dim='u')
     assert sc.all(
