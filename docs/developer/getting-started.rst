@@ -16,17 +16,11 @@ Creating a development environment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To install all non-optional dependencies for a complete development environment,
-we recommend creating a ``conda`` environment from a generated ``ess-developer.yml``
-file.
-We use the ``tools/metatoenv.py`` script to merge the dependencies in the
-``conda/meta.yaml`` and ``developer-extra.yml`` files into a single
-``ess-developer.yml`` file.
+we recommend creating a ``conda`` environment from the ``environment.yml`` file.
 
 .. code-block:: bash
 
-  python tools/metatoenv.py --dir=conda --env-file=ess-developer.yml \
-    --channels=conda-forge,scipp,mantid --merge-with=developer-extra.yml
-  conda env create -f ess-developer.yml
+  conda env create -f environment.yml
   conda activate ess-developer
 
 Once you have activated the environment, you want to ``pip`` install it locally using

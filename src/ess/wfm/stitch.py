@@ -65,9 +65,8 @@ def _stitch_event_data(item: sc.DataArray, frames: sc.Dataset, dim: str, new_dim
     binned = sc.bin(item, edges=[edges])
 
     for i in range(frames.sizes["frame"]):
-        # TODO: temporary fix working on the .value because read-only flag is set
-        binned[dim, i * 2].value.coords[dim] -= frames["time_correction"].data["frame",
-                                                                               i]
+        binned[dim, i * 2].bins.coords[dim] -= frames["time_correction"].data["frame",
+                                                                              i]
 
     erase = None
     if new_dim != dim:

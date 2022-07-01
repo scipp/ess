@@ -8,6 +8,7 @@ import ess.v20.imaging.operations as operations
 
 
 class OperationsTest(unittest.TestCase):
+
     @staticmethod
     def _run_test(val_in):
         test_input = np.array(val_in)

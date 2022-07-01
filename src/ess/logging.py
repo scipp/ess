@@ -51,6 +51,7 @@ def log_call(*,
     level = logging.getLevelName(level) if isinstance(level, str) else level
 
     def deco(f: Callable):
+
         @functools.wraps(f)
         def impl(*args, **kwargs):
             if message is not None:
@@ -68,6 +69,7 @@ class Formatter(logging.Formatter):
     """
     Logging formatter that indents messages and optionally shows threading information.
     """
+
     def __init__(self, show_thread: bool, show_process: bool):
         """
         Initialize the formatter.
@@ -248,10 +250,6 @@ def _make_file_handler(filename: Union[str, PathLike], level: Union[str, int],
     return handler
 
 
-def _make_widget_handler(level: Union[str, int]) -> sc.logging.WidgetHandler:
-    return sc.logging.WidgetHandler(level=level, widget=sc.logging.LogWidget())
-
-
 def _make_handlers(filename: Optional[Union[str, PathLike]], file_level: Union[str,
                                                                                int],
                    stream_level: Union[str, int], widget_level: Union[str, int],
@@ -261,7 +259,7 @@ def _make_handlers(filename: Optional[Union[str, PathLike]], file_level: Union[s
         handlers.append(
             _make_file_handler(filename, file_level, show_thread, show_process))
     if sc.utils.running_in_jupyter():
-        handlers.append(_make_widget_handler(widget_level))
+        handlers.append(sc.logging.make_widget_handler())
     return handlers
 
 

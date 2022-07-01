@@ -64,9 +64,7 @@ def compute_denominator(direct_beam: sc.DataArray, data_incident_monitor: sc.Dat
     """
     denominator = (solid_angle * direct_beam * data_incident_monitor *
                    transmission_fraction)
-    # TODO: once scipp-0.12 is released, use sc.midpoints()
-    denominator.coords['wavelength'] = 0.5 * (denominator.coords['wavelength'][1:] +
-                                              denominator.coords['wavelength'][:-1])
+    denominator.coords['wavelength'] = sc.midpoints(denominator.coords['wavelength'])
     return denominator
 
 

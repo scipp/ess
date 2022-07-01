@@ -101,7 +101,6 @@ pygments_style = 'sphinx'
 todo_include_todos = False
 
 # -- Options for HTML output -------------------------------------------------
-# Should only use this theme on READTHEDOCS. TODO.
 html_theme = 'sphinx_book_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
