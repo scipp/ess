@@ -3,6 +3,23 @@
 Release Notes
 =============
 
+v0.7.1 (June 2022)
+------------------
+
+See full changelog `here <https://github.com/scipp/ess/releases/tag/0.7.1>`_.
+
+Features
+~~~~~~~~
+
+* Removed cap on version pinning for ``scippneutron`` `#132 <https://github.com/scipp/ess/pull/132>`_.
+
+Contributors
+~~~~~~~~~~~~
+
+Simon Heybrock :sup:`a`\ ,
+Neil Vaytet :sup:`a`\ ,
+and Jan-Lukas Wynen :sup:`a`
+
 v0.7.0 (June 2022)
 ------------------
 
