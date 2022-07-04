@@ -11,7 +11,7 @@ See full changelog `here <https://github.com/scipp/ess/releases/tag/0.7.1>`_.
 Features
 ~~~~~~~~
 
-* Removed cap on version pinning for ``scippneutron`` `#130 <https://github.com/scipp/ess/pull/130>`_.
+* Removed cap on version pinning for ``scippneutron`` `#132 <https://github.com/scipp/ess/pull/132>`_.
 
 Contributors
 ~~~~~~~~~~~~
