@@ -72,9 +72,8 @@ if __name__ == "__main__":
     no_events = len(data.bins.constituents['data'].values)
     start_tof = data.coords['tof'][0].values
     end_tof = data.coords['tof'][-1].values
-
-    tof_edges = sc.linspace(dim='tof', start=start_tof, stop=end_tof,
-                                num=100, unit='ns')
+    nbins = 100
+    tof_edges = sc.linspace(dim='tof', start=start_tof, stop=end_tof, num=nbins, unit='ns')
     histogrammed = sc.histogram(data, bins=tof_edges)
 
     monitors = {
@@ -89,7 +88,7 @@ if __name__ == "__main__":
     monitors['sample']['transmission'].coords['source_position'] = sc.vector(value=np.array([0, 0, -25.3]),
                                                                                  unit=sc.units.m)
 
-    tof_edges = sc.linspace(dim='tof',start=data.coords['tof'][0].values, stop=data.coords['tof'][-1].values, num=100, unit='ns')
+    #Using same tof_edges as for histogramming data
     histogrammed_monitor1 = sc.histogram(monitors['sample']['incident'], bins=tof_edges)
     histogrammed_monitor2 = sc.histogram(monitors['sample']['transmission'], bins=tof_edges)
 
