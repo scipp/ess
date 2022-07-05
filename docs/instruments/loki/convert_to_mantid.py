@@ -60,6 +60,8 @@ if __name__ == "__main__":
     "_scipp" file is required by scipp but it doesn't load in Mantid
     Note: *_monitors.nxs file is saved to the path defined by Mantid Workbench
     It can be change from "Manage Directories" menu in Mantid Workbench
+    
+    Usage: python convert_to_mantid.py 60378-2022-02-28_2215.nxs
     """
     input_file = sys.argv[1]
     fixed_file = f'{input_file[:-4]}_scipp.nxs'
