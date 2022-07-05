@@ -1,5 +1,5 @@
 
-* Install ess according to https://scipp.github.io/ess/getting-started/installation.html
+* Install `ess` package according to https://scipp.github.io/ess/getting-started/installation.html
 * Activate enviroment: `conda activate ess`
 * Clone ess repository: `git clone https://github.com/scipp/ess`
 * Checkout to loki_detector_test branch: `git checkout loki_detector_test`
