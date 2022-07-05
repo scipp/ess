@@ -59,7 +59,7 @@ if __name__ == "__main__":
     Script for converting to nexus Mantid files. Separate file for data and monitors are create. 
     "_scipp" file is required by scipp but it doesn't load in Mantid
     Note: *_monitors.nxs file is saved to the path defined by Mantid Workbench
-    It can be change from "Managed Directories" menu in Mantid Workbench
+    It can be change from "Manage Directories" menu in Mantid Workbench
     """
     input_file = sys.argv[1]
     fixed_file = f'{input_file[:-4]}_scipp.nxs'
