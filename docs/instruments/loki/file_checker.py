@@ -3,8 +3,41 @@ import scippneutron as scn
 import numpy as np
 import h5py as h5
 from shutil import copyfile
+import mantid.simpleapi as mantid
 import sys
 
+
+def fix_nexus_mantid(infile, outfile):
+    """
+    Additional tweaks for loading into Mantid
+    """
+
+    copyfile(infile, outfile)
+    with h5.File(outfile, 'r+') as f:
+
+        f['entry/instrument/name'] = 'LARMOR'
+
+        group_entry = f['entry']
+        nx_class = group_entry.create_group('sample')
+        nx_class.attrs["NX_class"] = 'NXsample'
+
+        f['entry/larmor_detector_events'] = f['entry/instrument/larmor_detector/larmor_detector_events']
+        del f['entry/instrument/larmor_detector/larmor_detector_events']
+
+        f['entry/instrument/larmor_detector/monitor_1'] = f['entry/instrument/monitor_1']
+        f['entry/instrument/larmor_detector/monitor_2'] = f['entry/instrument/monitor_2']
+
+        del f['entry/instrument/monitor_1']
+        del f['entry/instrument/monitor_2']
+
+
+        group = f['entry/instrument']
+        for monitor_name in filter(lambda k: k.startswith('monitor'), group):
+            monitor_group = group[monitor_name]
+            monitor_event_group = monitor_group[f'{monitor_name}_events']
+            for key in list(monitor_event_group):
+                monitor_group[key] = monitor_event_group.pop(key)
+            del monitor_group[f'{monitor_name}_events']
 
 def fix_nexus_scipp(infile, outfile):
     """
@@ -43,42 +76,39 @@ def html_table(list_of_strings):
 if __name__ == "__main__":
 
     files = ['60247-2022-02-28_2215.nxs',
-     '60248-2022-02-28_2215.nxs',
-     '60249-2022-02-28_2215.nxs',
-     '60250-2022-02-28_2215.nxs',
-     '60251-2022-02-28_2215.nxs',
-     '60252-2022-02-28_2215.nxs',
-     '60253-2022-02-28_2215.nxs',
-     '60254-2022-02-28_2215.nxs',
-     '60255-2022-02-28_2215.nxs',
-     '60256-2022-02-28_2215.nxs',
-     '60257-2022-02-28_2215.nxs',
-     '60258-2022-02-28_2215.nxs',
-     '60259-2022-02-28_2215.nxs',
-     '60260-2022-02-28_2215.nxs',
-     '60261-2022-02-28_2215.nxs',
-     '60262-2022-02-28_2215.nxs',
-     '60263-2022-02-28_2215.nxs',
-     '60264-2022-02-28_2215.nxs',
-     '60265-2022-02-28_2215.nxs',
-     '60266-2022-02-28_2215.nxs',
-     '60287-2022-02-28_2215.nxs',
-     '60288-2022-02-28_2215.nxs',
-     '60289-2022-02-28_2215.nxs',
-     '60290-2022-02-28_2215.nxs',
-     '60291-2022-02-28_2215.nxs',
-     '60292-2022-02-28_2215.nxs',
-     '60293-2022-02-28_2215.nxs',
-     '60294-2022-02-28_2215.nxs',
-     '60295-2022-02-28_2215.nxs',
-     '60296-2022-02-28_2215.nxs',
-     '60297-2022-02-28_2215.nxs',
-     '60298-2022-02-28_2215.nxs',
-     '60299-2022-02-28_2215.nxs',
-     '60300-2022-02-28_2215.nxs',
-     '60301-2022-02-28_2215.nxs']
-
-    files = ['60300-2022-02-28_2215.nxs',
+             '60248-2022-02-28_2215.nxs',
+             '60249-2022-02-28_2215.nxs',
+             '60250-2022-02-28_2215.nxs',
+             '60251-2022-02-28_2215.nxs',
+             '60252-2022-02-28_2215.nxs',
+             '60253-2022-02-28_2215.nxs',
+             '60254-2022-02-28_2215.nxs',
+             '60255-2022-02-28_2215.nxs',
+             '60256-2022-02-28_2215.nxs',
+             '60257-2022-02-28_2215.nxs',
+             '60258-2022-02-28_2215.nxs',
+             '60259-2022-02-28_2215.nxs',
+             '60260-2022-02-28_2215.nxs',
+             '60261-2022-02-28_2215.nxs',
+             '60262-2022-02-28_2215.nxs',
+             '60263-2022-02-28_2215.nxs',
+             '60264-2022-02-28_2215.nxs',
+             '60265-2022-02-28_2215.nxs',
+             '60266-2022-02-28_2215.nxs',
+             '60287-2022-02-28_2215.nxs',
+             '60288-2022-02-28_2215.nxs',
+             '60289-2022-02-28_2215.nxs',
+             '60290-2022-02-28_2215.nxs',
+             '60291-2022-02-28_2215.nxs',
+             '60292-2022-02-28_2215.nxs',
+             '60293-2022-02-28_2215.nxs',
+             '60294-2022-02-28_2215.nxs',
+            '60295-2022-02-28_2215.nxs',
+            '60296-2022-02-28_2215.nxs',
+            '60297-2022-02-28_2215.nxs',
+            '60298-2022-02-28_2215.nxs',
+            '60299-2022-02-28_2215.nxs',
+            '60300-2022-02-28_2215.nxs',
             '60301-2022-02-28_2215.nxs',
             '60303-2022-02-28_2215.nxs',
             '60304-2022-02-28_2215.nxs',
@@ -186,12 +216,15 @@ if __name__ == "__main__":
     #         '60375-2022-02-28_2215.nxs',
     #         '60395-2022-02-28_2215.nxs']
 
+    files = ['overnight_calibrated-2022-02-28_2215.nxs']
     html_strings = [['File', 'Events', 'TOF', 'Detector', 'M1', 'M2']]
     for input_file in files:
 
         html_row = [input_file]
         fixed_file = f'{input_file[:-4]}_fixed.nxs'
+        fixed_mantid_file = f'{input_file[:-4]}_mantid.nxs'
         fix_nexus_scipp(input_file, fixed_file)
+        fix_nexus_mantid(input_file, fixed_mantid_file)
         data = scn.load_nexus(data_file=fixed_file)
 
         no_events = len(data.bins.constituents['data'].values)
@@ -229,11 +262,16 @@ if __name__ == "__main__":
         histogrammed_monitor1 = sc.histogram(monitors['sample']['incident'], bins=tof_edges)
         histogrammed_monitor2 = sc.histogram(monitors['sample']['transmission'], bins=tof_edges)
 
+        monitor1_mantid = scn.to_mantid(histogrammed_monitor1, dim='tof')
+        monitor2_mantid = scn.to_mantid(histogrammed_monitor2, dim='tof')
+        monitor_mantid_file = f'{input_file[:-4]}_monitors.nxs'
+        mantid.SaveNexus(monitor1_mantid, monitor_mantid_file)
+        mantid.SaveNexus(monitor2_mantid, monitor_mantid_file, Append=True)
         m1_image = f'{input_file}_m1_plot.png'
         m2_image = f'{input_file}_m2_plot.png'
 
-        histogrammed_monitor1.sum('detector_id').plot(filename=m1_image)
-        histogrammed_monitor2.sum('detector_id').plot(filename=m2_image)
+        histogrammed_monitor1.plot(filename=m1_image)
+        histogrammed_monitor2.plot(filename=m2_image)
         html_row.append(f'<img src={m1_image}>')
         html_row.append(f'<img src={m2_image}>')
 
