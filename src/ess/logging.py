@@ -29,13 +29,20 @@ import scippneutron as scn
 
 
 def get_logger(subname: Optional[str] = None) -> logging.Logger:
-    """
-    Return one of ess's loggers.
+    """Return one of ess's loggers.
 
-    :param subname: Name of an instrument, technique, or workflow.
-                    If given, return the logger with the given name
-                    as a child of the ess logger.
-                    Otherwise, return the general ess logger.
+    Parameters
+    ----------
+    subname:
+        Name of an instrument, technique, or workflow.
+        If given, return the logger with the given name
+        as a child of the ess logger.
+        Otherwise, return the general ess logger.
+
+    Returns
+    -------
+    :
+        The requested logger.
     """
     name = 'scipp.ess' + ('.' + subname if subname else '')
     return logging.getLogger(name)
@@ -137,18 +144,31 @@ def configure(*,
       - *Widget Handler* Writes to a :py:class:`scipp.logging.LogWidget`
         if Python is running in a Jupyter notebook.
 
-    :param filename: Name of the log file.
-                     Overwrites existing files.
-                     Setting this to `None` disables logging to file.
-    :param file_level: Log level for the file handler.
-    :param stream_level: Log level for the stream handler.
-    :param widget_level: Log level for the widget handler.
-    :param show_thread: If `True`, log messages include the name of the thread
-                        the message originates from.
-    :param show_process: If `True`, log messages include the name of the process
-                         the message originates from.
-    :param loggers: Collection of loggers or names of loggers to configure.
-                    If not given, uses :py:func:`default_loggers_to_configure`.
+    Parameters
+    ----------
+    filename:
+        Name of the log file. Overwrites existing files.
+        Setting this to `None` disables logging to file.
+    file_level:
+        Log level for the file handler.
+    stream_level:
+        Log level for the stream handler.
+    widget_level:
+        Log level for the widget handler.
+    show_thread:
+        If `True`, log messages include the name of the thread
+        the message originates from.
+    show_process:
+        If `True`, log messages include the name of the process
+        the message originates from.
+    loggers:
+        Collection of loggers or names of loggers to configure.
+        If not given, uses :py:func:`default_loggers_to_configure`.
+
+    See Also
+    --------
+    ess.logging.configure_workflow:
+        Configure logging and do some additional setup for a reduction workflow.
     """
     if configure.is_configured:
         get_logger().warning(
@@ -176,16 +196,32 @@ def configure_workflow(workflow_name: Optional[str] = None,
                        *,
                        display: Optional[bool] = None,
                        **kwargs) -> logging.Logger:
-    """
-    Configure logging for a reduction workflow.
+    """Configure logging for a reduction workflow.
 
-    :param workflow_name: Used as the name of the returned logger.
-    :param display: If `True`, show a :py:class:`scipp.logging.LogWidget`
-                    in the outputs of the current cell.
-                    Defaults to `True` in Jupyter and `False` otherwise.
-    :param kwargs: Forwarded to :py:func:`ess.logging.configure`.
-                   Refer to that function for details.
-    :return: A logger for use in the workflow.
+    Configures loggers, logs a greeting message, sets up a logger for a workflow,
+    and optionally creates and displays a log widget.
+
+    Parameters
+    ----------
+    workflow_name:
+        Used as the name of the returned logger.
+    display:
+        If `True`, show a :py:class:`scipp.logging.LogWidget`
+        in the outputs of the current cell.
+        Defaults to `True` in Jupyter and `False` otherwise.
+    kwargs:
+        Forwarded to :py:func:`ess.logging.configure`.
+        Refer to that function for details.
+
+    Returns
+    -------
+    :
+        A logger for use in the workflow.
+
+    See Also
+    --------
+    ess.logging.configure:
+        General logging setup.
     """
     configure(**kwargs)
     greet()
