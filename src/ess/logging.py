@@ -184,7 +184,8 @@ def configure(*,
     }
     for logger in loggers:
         _configure_logger(logger, handlers, base_level)
-    # TODO mantid's own config
+    if any(logger.name == 'Mantid' for logger in loggers):
+        _configure_mantid_logging('notice')
 
     configure.is_configured = True
 
@@ -304,6 +305,14 @@ def _configure_logger(logger: logging.Logger, handlers: List[logging.Handler],
     for handler in handlers:
         logger.addHandler(handler)
     logger.setLevel(level)
+
+
+def _configure_mantid_logging(level: str):
+    try:
+        from mantid.utils.logging import log_to_python
+        log_to_python(level)
+    except ImportError:
+        pass
 
 
 def _base_level(levels: List[Union[str, int]]) -> int:
