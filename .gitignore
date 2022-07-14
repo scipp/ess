@@ -16,5 +16,11 @@ src/ess/_version.py
 .virtual_documents
 __pycache__
 
+# Data
+*.h5
+*.hdf5
+*.nxs
+*.ort
+
 # Misc
 *.log
