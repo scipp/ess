@@ -15,3 +15,6 @@ src/ess/_version.py
 .mypy_cache
 .virtual_documents
 __pycache__
+
+# Misc
+*.log
