@@ -154,7 +154,7 @@ def _convert_events_to_q_and_merge_spectra(
     """
     data_q = data.transform_coords("Q", graph=graph)
     q_summed = data_q.bins.concat('spectrum')
-    return sc.bin(q_summed, edges=[wavelength_bands, q_bins])
+    return sc.make_binned(q_summed, edges=[wavelength_bands, q_bins])
 
 
 def _convert_dense_to_q_and_merge_spectra(

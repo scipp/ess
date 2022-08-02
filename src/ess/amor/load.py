@@ -35,13 +35,13 @@ def _tof_correction(data: sc.DataArray, dim: str = 'tof') -> sc.DataArray:
     tof_offset = tau * chopper_phase / (180.0 * sc.units.deg)
     # Make 2 bins, one for each pulse
     edges = sc.concat([-tof_offset, tau - tof_offset, 2 * tau - tof_offset], dim)
-    data = sc.bin(data, edges=[sc.to_unit(edges, data.coords[dim].unit)])
+    data = data.bin({dim: sc.to_unit(edges, data.coords[dim].unit)})
     # Make one offset for each bin
     offset = sc.concat([tof_offset, tof_offset - tau], dim)
     # Apply the offset on both bins
     data.bins.coords[dim] += offset
     # Rebin to exclude second (empty) pulse range
-    return sc.bin(data, edges=[sc.concat([0. * sc.units.us, tau], dim)])
+    return data.bin({dim: sc.concat([0. * sc.units.us, tau], dim)})
 
 
 def load(filename,

@@ -62,7 +62,7 @@ def _stitch_event_data(item: sc.DataArray, frames: sc.Dataset, dim: str, new_dim
                                     dims=['frame', 'dummy']),
                        to=dim)
 
-    binned = sc.bin(item, edges=[edges])
+    binned = item.bin({dim: edges})
 
     for i in range(frames.sizes["frame"]):
         binned[dim, i * 2].bins.coords[dim] -= frames["time_correction"].data["frame",
@@ -74,15 +74,14 @@ def _stitch_event_data(item: sc.DataArray, frames: sc.Dataset, dim: str, new_dim
         del binned.bins.coords[dim]
         erase = [dim]
 
-    binned.masks['frame_gaps'] = (sc.arange(dim, 2 * frames.sizes["frame"] - 1) %
-                                  2).astype(bool)
-    binned.masks['frame_gaps'].unit = None
+    binned.masks['frame_gaps'] = (
+        sc.arange(dim, 2 * frames.sizes["frame"] - 1, unit=None) % 2).astype(bool)
 
     new_edges = sc.concat([
         (frames["time_min"]["frame", 0] - frames["time_correction"]["frame", 0]).data,
         (frames["time_max"]["frame", -1] - frames["time_correction"]["frame", -1]).data
     ], new_dim)
-    return sc.bin(binned, edges=[new_edges], erase=erase)
+    return sc.make_binned(binned, edges=[new_edges], erase=erase)
 
 
 def _stitch_item(item: sc.DataArray, frames: sc.Dataset,
