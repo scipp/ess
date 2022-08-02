@@ -16,7 +16,7 @@ def load_sans2d(filename: str,
     if tof_bins is None:
         return out.copy()
     else:
-        return sc.bin(out, edges=[tof_bins])
+        return out.bin({tof_bins.dim: tof_bins})
 
 
 def load_rkh_wav(filename: str) -> sc.DataArray:

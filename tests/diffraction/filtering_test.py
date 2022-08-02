@@ -27,9 +27,10 @@ def make_data_with_pulse_time(rng, n_event):
                                        values=rng.integers(0, 10, n_event),
                                        unit=None),
                           })
-    return sc.bin(events,
-                  edges=[sc.array(dims=['tof'], values=[10, 500, 1000], unit='us')],
-                  groups=[sc.arange('spectrum', 0, 10, unit=None)])
+    return sc.binning.make_binned(
+        events,
+        edges=[sc.array(dims=['tof'], values=[10, 500, 1000], unit='us')],
+        groups=[sc.arange('spectrum', 0, 10, unit=None)])
 
 
 def test_make_data_with_pulse_time():
