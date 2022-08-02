@@ -83,7 +83,7 @@ def denoise_and_rebin_monitors(monitors: Union[dict, sc.DataArray],
             above = monitors[dim, non_background_range[1]:]
             background = sc.concat([below.data, above.data], dim=dim).mean()
             monitors = monitors - background
-        return sc.rebin(monitors, "wavelength", wavelength_bins)
+        return monitors.rebin(wavelength=wavelength_bins)
 
 
 def resample_direct_beam(direct_beam: sc.DataArray,
@@ -154,7 +154,7 @@ def _convert_events_to_q_and_merge_spectra(
     """
     data_q = data.transform_coords("Q", graph=graph)
     q_summed = data_q.bins.concat('spectrum')
-    return sc.make_binned(q_summed, edges=[wavelength_bands, q_bins])
+    return sc.binning.make_binned(q_summed, edges=[wavelength_bands, q_bins])
 
 
 def _convert_dense_to_q_and_merge_spectra(

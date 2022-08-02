@@ -50,7 +50,7 @@ def normalize_by_monitor(data: sc.DataArray,
                                    keep_aliases=False)
 
     if wavelength_edges is not None:
-        mon = sc.rebin(mon, 'wavelength', wavelength_edges)
+        mon = mon.rebin(wavelength=wavelength_edges)
     if smooth_args is not None:
         get_logger('diffraction').info(
             "Smoothing monitor '%s' for normalisation using "

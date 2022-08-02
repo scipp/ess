@@ -82,9 +82,9 @@ def _do_stitching_on_beamline(wavelengths, dim, event_mode=False):
                                        with_variances=True),
                           coords=coords)
     if event_mode:
-        da = sc.bin(events, edges=[time_binning])
+        da = events.bin({dim: time_binning})
     else:
-        da = sc.histogram(events, bins=time_binning)
+        da = events.hist({dim: time_binning})
 
     # Find location of frames
     frames = wfm.get_frames(da)
@@ -95,13 +95,8 @@ def _do_stitching_on_beamline(wavelengths, dim, event_mode=False):
     if event_mode:
         out = wav
     else:
-        out = sc.rebin(wav,
-                       dim='wavelength',
-                       bins=sc.linspace(dim='wavelength',
-                                        start=1.0,
-                                        stop=10.0,
-                                        num=1001,
-                                        unit='angstrom'))
+        out = wav.rebin(wavelength=sc.linspace(
+            dim='wavelength', start=1.0, stop=10.0, num=1001, unit='angstrom'))
 
     choppers = {key: da.meta[key].value for key in ch.find_chopper_keys(da)}
     # Distance between WFM choppers
@@ -121,13 +116,10 @@ def _check_lambda_inside_resolution(lam,
                                     check_value=True):
     dlam = 0.5 * dlam_over_lam * lam
     if event_mode:
-        sum_in_range = sc.bin(data,
-                              edges=[
-                                  sc.array(dims=['wavelength'],
-                                           values=[(lam - dlam).value,
-                                                   (lam + dlam).value],
-                                           unit=lam.unit)
-                              ]).bins.sum().data['wavelength', 0]
+        sum_in_range = data.bin(
+            wavelength=sc.array(dims=['wavelength'],
+                                values=[(lam - dlam).value, (lam + dlam).value],
+                                unit=lam.unit)).hist().data['wavelength', 0]
     else:
         sum_in_range = sc.sum(data['wavelength', lam - dlam:lam + dlam]).data
     assert sc.isclose(sum_in_range, 1.0 * sc.units.counts).value is check_value
