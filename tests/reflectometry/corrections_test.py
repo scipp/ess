@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
-import warnings
 import scipp as sc
 from ess.reflectometry import corrections
 from orsopy import fileio
