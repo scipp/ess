@@ -18,11 +18,7 @@ def test_normalize_by_counts():
                        values=values,
                        variances=values)
     array = sc.DataArray(data=data)
-    with warnings.catch_warnings(record=True) as w:
-        array_normalized = corrections.normalize_by_counts(array)
-        assert len(w) == 1
-        assert issubclass(w[-1].category, UserWarning)
-        assert 'orsopy' in str(w[-1].message)
+    array_normalized = corrections.normalize_by_counts(array)
     result = sc.DataArray(data=sc.Variable(dims=['position'],
                                            unit=sc.units.dimensionless,
                                            values=[1 / N] * N,
