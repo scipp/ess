@@ -3,6 +3,25 @@
 Release Notes
 =============
 
+v0.8.0 (August 2022)
+--------------------
+
+See full changelog `here <https://github.com/scipp/ess/releases/tag/0.8.0>`_.
+
+Features
+~~~~~~~~
+
+* Made ``ess`` compatible with ``scippneutron=0.8`` `#136 <https://github.com/scipp/ess/pull/136>`_.
+* Now catching Mantid output in the logger `#134 <https://github.com/scipp/ess/pull/134>`_.
+
+Contributors
+~~~~~~~~~~~~
+
+Simon Heybrock :sup:`a`\ ,
+Neil Vaytet :sup:`a`\ ,
+and Jan-Lukas Wynen :sup:`a`
+
+
 v0.7.1 (June 2022)
 ------------------
 
