@@ -92,6 +92,9 @@ source_suffix = '.rst'
 # The master toctree document.
 master_doc = 'index'
 
+# Turn warnings into errors
+warning_is_error = True
+
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '**.ipynb_checkpoints']
 
 # The name of the Pygments (syntax highlighting) style to use.

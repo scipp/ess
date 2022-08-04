@@ -124,7 +124,7 @@ def tof_to_wavelength(data_array: sc.DataArray,
     graph = graph if graph is not None else specular_reflection()
     data_array_wav = data_array.transform_coords(["wavelength"], graph=graph)
     if wavelength_edges is not None:
-        data_array_wav = sc.bin(data_array_wav, edges=[wavelength_edges])
+        data_array_wav = data_array_wav.bin({wavelength_edges.dim: wavelength_edges})
     try:
         from orsopy import fileio
         unit = data_array_wav.coords['wavelength'].unit
@@ -167,7 +167,7 @@ def wavelength_to_theta(data_array: sc.DataArray,
     graph = graph if graph is not None else specular_reflection()
     data_array_theta = data_array.transform_coords(['theta'], graph=graph)
     if theta_edges is not None:
-        data_array_theta = sc.bin(data_array_theta, edges=[theta_edges])
+        data_array_theta = data_array_theta.bin({theta_edges.dim: theta_edges})
     try:
         from orsopy import fileio
         data_array_theta.attrs[
@@ -214,7 +214,7 @@ def theta_to_q(data_array: sc.DataArray,
     graph = graph if graph is not None else specular_reflection()
     data_array_q = data_array.transform_coords(["Q"], graph=graph)
     if q_edges is not None:
-        data_array_q = sc.bin(data_array_q, edges=[q_edges])
+        data_array_q = data_array_q.bin({q_edges.dim: q_edges})
     return data_array_q
 
 

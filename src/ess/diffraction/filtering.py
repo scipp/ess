@@ -55,7 +55,7 @@ def remove_bad_pulses(data: sc.DataArray, *, proton_charge: sc.DataArray,
     with _temporary_bin_coord(
             data, 'good_pulse',
             sc.lookup(good_pulse, good_pulse.dim)[data.bins.coords[good_pulse.dim]]):
-        filtered = sc.bin(data, groups=[sc.array(dims=['good_pulse'], values=[True])])
+        filtered = data.group(sc.array(dims=['good_pulse'], values=[True]))
     filtered = filtered.squeeze('good_pulse').copy(deep=False)
     del filtered.attrs['good_pulse']
     return filtered
