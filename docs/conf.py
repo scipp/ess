@@ -1,30 +1,76 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
-# Configuration file for the Sphinx documentation builder.
-#
-# This file only contains a selection of the most common options. For a full
-# list see the documentation:
-# https://www.sphinx-doc.org/en/master/usage/configuration.html
-
-# -- Path setup --------------------------------------------------------------
-
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
 
 import doctest
+import os
+import sys
+from typing import Any, Dict, Optional
+from docutils.nodes import document
+from sphinx.application import Sphinx
+import sphinx_book_theme
+import ess
 
-html_show_sourcelink = True
+sys.path.insert(0, os.path.abspath('.'))
 
-# -- Project information -----------------------------------------------------
+from version import VersionInfo  # noqa: E402
 
+# General information about the project.
 project = u'ess'
 copyright = u'2022 Scipp contributors'
 copyright = u'scipp contributors'
+
+version_info = VersionInfo(repo=project)
+long_version = ess.__version__
+outdated = not version_info.is_latest(long_version)
+
+
+def add_buttons(
+    app: Sphinx,
+    pagename: str,
+    templatename: str,
+    context: Dict[str, Any],
+    doctree: Optional[document],
+):
+    base = "https://scipp.github.io"
+    l1 = []
+    l1.append({"type": "link", "text": "scipp", "url": f"{base}"})
+    l1.append({"type": "link", "text": "scippnexus", "url": f"{base}/scippnexus"})
+    l1.append({"type": "link", "text": "scippneutron", "url": f"{base}/scippneutron"})
+    l1.append({"type": "link", "text": "ess", "url": f"{base}/ess"})
+    header_buttons = context["header_buttons"]
+    header_buttons.append({
+        "type": "group",
+        "buttons": l1,
+        "icon": "fa fa-caret-down",
+        "text": "Related projects"
+    })
+    releases = version_info.minor_releases(first='0.4')
+    if outdated:
+        current = f"{long_version} (outdated)"
+        latest = "latest"
+        entries = ['.'.join(long_version.split('.')[:2])]
+    else:
+        current = f"{long_version} (latest)"
+        latest = f"{releases[0]} (latest)"
+        entries = releases[1:]
+    lines = [{"type": "link", "text": latest, "url": f"{base}/{project}"}]
+    for r in entries:
+        lines.append({
+            "type": "link",
+            "text": f"{r}",
+            "url": f"{base}/{project}/release/{r}"
+        })
+    header_buttons.append({
+        "type": "group",
+        "buttons": lines,
+        "icon": "fa fa-caret-down",
+        "text": current
+    })
+
+
+sphinx_book_theme.add_launch_buttons = add_buttons
+
+html_show_sourcelink = True
 
 # The full version, including alpha/beta/rc tags
 version = u''
@@ -120,6 +166,14 @@ html_theme_options = {
     "use_edit_page_button": True,
     "show_toc_level": 2,  # Show subheadings in secondary sidebar
 }
+
+if outdated:
+    html_theme_options["announcement"] = (
+        f"⚠️ You are viewing the documentation for an old version of {project}. "
+        f"Switch to <a href='https://scipp.github.io/{project}' "
+        "style='color:white;text-decoration:underline;'"
+        ">latest</a> version. ⚠️")
+
 html_logo = "_static/logo.png"
 html_favicon = "_static/favicon.ico"
 
