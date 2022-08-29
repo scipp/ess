@@ -6,9 +6,6 @@ from scipp.constants import m_n, h
 from scippneutron.conversion.graph import beamline, tof
 from scippneutron._utils import elem_unit
 
-# from scippneutron.tof import conversions
-# from scippneutron.core.conversions import _elem_unit
-
 
 def two_theta(gravity: sc.Variable, wavelength: sc.Variable, incident_beam: sc.Variable,
               scattered_beam: sc.Variable) -> sc.Variable:
