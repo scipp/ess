@@ -2,8 +2,8 @@
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 from scipp.constants import m_n, h, pi
-from scippneutron.tof import conversions
-from scippneutron.core.conversions import _elem_dtype, _elem_unit
+from scippneutron.conversion.graph import beamline, tof
+from scippneutron._utils import elem_dtype, elem_unit
 from . import orso
 
 
@@ -37,7 +37,7 @@ def theta(gravity: sc.Variable, wavelength: sc.Variable, incident_beam: sc.Varia
     grav = sc.norm(gravity)
     L2 = sc.norm(scattered_beam)
     y = sc.dot(scattered_beam, gravity) / grav
-    y_correction = sc.to_unit(wavelength, _elem_unit(L2), copy=True)
+    y_correction = sc.to_unit(wavelength, elem_unit(L2), copy=True)
     y_correction *= y_correction
     drop = L2**2
     drop *= grav * (m_n**2 / (2 * h**2))
@@ -75,7 +75,7 @@ def reflectometry_q(wavelength: sc.Variable, theta: sc.Variable) -> sc.Variable:
     :
         Q-values.
     """
-    dtype = _elem_dtype(wavelength)
+    dtype = elem_dtype(wavelength)
     c = (4 * pi).astype(dtype)
     return c * sc.sin(theta.astype(dtype, copy=False)) / wavelength
 
@@ -89,13 +89,14 @@ def specular_reflection() -> dict:
     :
         Specular reflectometry graph.
     """
-    graph = {**conversions.beamline(scatter=True), **conversions.elastic("tof")}
+    graph = {
+        **beamline.beamline(scatter=True),
+        **tof.elastic("tof"), "theta": theta,
+        "Q": reflectometry_q
+    }
     del graph['two_theta']
     del graph['dspacing']
-    del graph['Q']
     del graph['energy']
-    graph["theta"] = theta
-    graph["Q"] = reflectometry_q
     return graph
 
 

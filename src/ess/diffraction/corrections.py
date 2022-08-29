@@ -3,7 +3,7 @@
 from typing import Any, Optional, Dict
 
 import scipp as sc
-from scippneutron.tof.conversions import beamline, elastic
+from scippneutron.conversion.graph import beamline, tof
 
 from .smoothing import lowpass
 from ..logging import get_logger
@@ -42,8 +42,8 @@ def normalize_by_monitor(data: sc.DataArray,
     if 'wavelength' not in mon.coords:
         mon = mon.transform_coords('wavelength',
                                    graph={
-                                       **beamline(scatter=False),
-                                       **elastic("tof")
+                                       **beamline.beamline(scatter=False),
+                                       **tof.elastic("tof")
                                    },
                                    keep_inputs=False,
                                    keep_intermediate=False,

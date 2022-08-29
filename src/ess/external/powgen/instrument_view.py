@@ -3,6 +3,7 @@
 from typing import Optional
 
 import scipp as sc
+from scipp.plotting.objects import Plot
 import scippneutron as scn
 
 
@@ -10,7 +11,7 @@ def instrument_view(da: sc.DataArray,
                     positions: str = "position",
                     pixel_size: Optional[float] = None,
                     components: Optional[dict] = None,
-                    **kwargs) -> sc.plotting.objects.Plot:
+                    **kwargs) -> Plot:
     """
     Instrument view for the POWGEN instrument, with adjusted default arguments.
 

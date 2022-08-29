@@ -10,6 +10,7 @@ from typing import List, Union
 
 import scipp as sc
 import scippneutron as scn
+from scippneutron.conversion.graph import beamline, tof
 
 from ...logging import get_logger
 from ...diffraction.filtering import remove_bad_pulses
@@ -158,10 +159,7 @@ def load_and_preprocess_vanadium(
                  name=d.name) for d in data
     ]
     _replace_by_common_edges(data, dim='tof')
-    tof_to_wavelength = {
-        **scn.tof.conversions.beamline(scatter=True),
-        **scn.tof.conversions.elastic("tof")
-    }
+    tof_to_wavelength = {**beamline.beamline(scatter=True), **tof.elastic("tof")}
     for d in data:
         _normalize_by_proton_charge_in_place(d)
         d.da = d.da.transform_coords('wavelength', graph=tof_to_wavelength)

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 import scipp as sc
-from scippneutron.tof import conversions
+from scippneutron.conversion.graph import beamline
 
 
 def group_by_two_theta(data: sc.DataArray,
@@ -27,7 +27,7 @@ def group_by_two_theta(data: sc.DataArray,
     :
         `data` grouped into two_theta bins.
     """
-    data = data.transform_coords('two_theta', graph=conversions.beamline(scatter=True))
+    data = data.transform_coords('two_theta', graph=beamline.beamline(scatter=True))
     return sc.groupby(data,
                       'two_theta',
                       bins=edges.to(unit=data.coords['two_theta'].unit,
