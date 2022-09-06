@@ -5,6 +5,7 @@ from os import PathLike
 from typing import Dict, Union
 import scipp as sc
 import scippnexus as snx
+from ._classes import Instrument, Entry
 
 
 def _get_entry(group: snx.NXobject) -> snx.NXentry:
@@ -38,7 +39,7 @@ def _load_instrument(group: snx.NXobject,
         instrument['disk_choppers'] = disk_chopper
     if group[snx.NXsource]:
         instrument['source'] = group.source[()]
-    return instrument
+    return Instrument(**instrument)
 
 
 def _load_entry(
@@ -51,7 +52,7 @@ def _load_entry(
     #    content['monitors'] = monitors
     if entry[snx.NXsample]:
         content['sample'] = entry.sample[()]
-    return content
+    return Entry(**content)
 
 
 def load(filename: Union[str, PathLike]) -> dict:
@@ -59,8 +60,8 @@ def load(filename: Union[str, PathLike]) -> dict:
         entry = _load_entry(f.entry, skip_errors=True)
         detectors = _load(f.entry.instrument, snx.NXdetector, skip_errors=True)
         monitors = _load(f.entry, snx.NXmonitor, skip_errors=True)
-        entry.setdefault('instrument', {})['detectors'] = detectors
-        entry['monitors'] = monitors
+        entry.instrument.detectors = detectors
+        entry.monitors = monitors
     return entry
 
 
