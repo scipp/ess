@@ -29,21 +29,11 @@ def _load(group: snx.NXobject,
     return _load_items(group[nxclass], skip_errors=skip_errors)
 
 
-def load_monitors(group: snx.NXobject,
-                  skip_errors: bool = False) -> Dict[str, sc.DataArray]:
-    return _load_items(group[snx.NXmonitor], skip_errors=skip_errors)
-
-
-def load_detectors(group: snx.NXobject,
-                   skip_errors: bool = False) -> Dict[str, sc.DataArray]:
-    return _load_items(group[snx.NXdetector], skip_errors=skip_errors)
-
-
-def load_instrument(group: snx.NXobject,
-                    skip_errors: bool = False) -> Dict[str, sc.DataArray]:
+def _load_instrument(group: snx.NXobject,
+                     skip_errors: bool = False) -> Dict[str, sc.DataArray]:
     instrument = {}
-    if (detectors := _load(group, snx.NXdetector, skip_errors=skip_errors)):
-        instrument['detectors'] = detectors
+    #if (detectors := _load(group, snx.NXdetector, skip_errors=skip_errors)):
+    #    instrument['detectors'] = detectors
     if (disk_choppers := _load(group, snx.NXdisk_chopper, skip_errors=skip_errors)):
         instrument['disk_choppers'] = disk_chopper
     if group[snx.NXsource]:
@@ -51,15 +41,40 @@ def load_instrument(group: snx.NXobject,
     return instrument
 
 
-def load_entry(
-        group: snx.NXobject,
+def _load_entry(
+        entry: snx.NXentry,
         skip_errors: bool = False) -> Dict[str, Union[Dict, sc.DataArray, sc.Dataset]]:
-    entry = _get_entry(group)
     content = {}
-    if (instrument := load_instrument(entry.instrument, skip_errors=skip_errors)):
+    if (instrument := _load_instrument(entry.instrument, skip_errors=skip_errors)):
         content['instrument'] = instrument
-    if (monitors := _load(group, snx.NXmonitor, skip_errors=skip_errors)):
-        content['monitors'] = monitors
+    #if (monitors := _load(group, snx.NXmonitor, skip_errors=skip_errors)):
+    #    content['monitors'] = monitors
     if entry[snx.NXsample]:
         content['sample'] = entry.sample[()]
     return content
+
+
+def load(filename: Union[str, PathLike]) -> dict:
+    with snx.File(filename) as f:
+        entry = _load_entry(f.entry, skip_errors=True)
+        detectors = _load(f.entry.instrument, snx.NXdetector, skip_errors=True)
+        monitors = _load(f.entry, snx.NXmonitor, skip_errors=True)
+        entry.setdefault('instrument', {})['detectors'] = detectors
+        entry['monitors'] = monitors
+    return entry
+
+
+def load_detectors(filename: Union[str, PathLike]) -> dict:
+    with snx.File(filename) as f:
+        return _load(f.entry.instrument, snx.NXdetector, skip_errors=True)
+
+
+def load_monitors(filename: Union[str, PathLike]) -> dict:
+    with snx.File(filename) as f:
+        return _load(f.entry, snx.NXmonitor, skip_errors=True)
+
+
+def load_metadata(filename: Union[str, PathLike]) -> dict:
+    """Load everything except detectors and monitors, which could be large."""
+    with snx.File(filename) as f:
+        entry = _load_entry(f.entry)
