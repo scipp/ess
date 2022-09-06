@@ -7,6 +7,17 @@ import scippnexus as snx
 from ess import nexus
 
 
+def create_event_data_ids_1234(group):
+    group.create_field('event_id',
+                       sc.array(dims=[''], unit=None, values=[1, 2, 4, 1, 2, 2]))
+    group.create_field('event_time_offset',
+                       sc.array(dims=[''], unit='s', values=[456, 7, 3, 345, 632, 23]))
+    group.create_field('event_time_zero',
+                       sc.array(dims=[''], unit='s', values=[1, 2, 3, 4]))
+    group.create_field('event_index',
+                       sc.array(dims=[''], unit='None', values=[0, 3, 3, 5]))
+
+
 @pytest.fixture()
 def nxroot(request):
     """
@@ -33,8 +44,13 @@ def nxroot(request):
         instrument = entry.create_class('instr', snx.NXinstrument)
         source = instrument.create_class('src', snx.NXsource)
         det0 = instrument.create_class('det0', snx.NXdetector)
+        detector_numbers = sc.array(dims=[''], unit=None, values=[1, 2, 3, 4])
+        det0.create_field('detector_number', detector_numbers)
+        create_event_data_ids_1234(det0.create_class('events', snx.NXevent_data))
         det1 = instrument.create_class('det1', snx.NXdetector)
-        events0 = det0.create_class('events', snx.NXevent_data)
+        detector_numbers = sc.array(dims=[''], unit=None, values=[5, 6, 7, 8])
+        det1.create_field('detector_number', detector_numbers)
+        create_event_data_ids_1234(det1.create_class('events', snx.NXevent_data))
         yield root
 
 
@@ -46,3 +62,13 @@ def test_load_monitors_descends_into_unique_entry(nxroot):
 def test_load_monitors_loads_from_entry(nxroot):
     monitors = nexus.load_monitors(nxroot.entry)
     assert len(monitors) == 2
+
+
+def test_load_detectors_descends_into_unique_entry(nxroot):
+    detectors = nexus.load_detectors(nxroot)
+    assert len(detectors) == 2
+
+
+def test_load_detectors_loads_from_entry(nxroot):
+    detectors = nexus.load_detectors(nxroot.entry)
+    assert len(detectors) == 2
