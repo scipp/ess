@@ -29,6 +29,13 @@ def _load(group: snx.NXobject,
           skip_errors: bool = False) -> Dict[str, sc.DataArray]:
     return _load_items(group[nxclass], skip_errors=skip_errors)
 
+def _load_sections(group: snx.NXobject, nxclasses,
+                   skip_errors: bool = False):
+    data = {}
+    for key, nxclass in nxclasses.items():
+        data[key] = _load(group, nxclass, skip_errors=skip_errors)
+    return data
+
 
 def _load_instrument(group: snx.NXobject,
                      skip_errors: bool = False) -> Dict[str, sc.DataArray]:
