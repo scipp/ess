@@ -5,7 +5,6 @@ from os import PathLike
 from typing import Dict, Union, Tuple, Callable
 import scipp as sc
 import scippnexus as snx
-from ._classes import Instrument, Entry
 from functools import partial
 
 
@@ -36,41 +35,6 @@ def _load_sections(group: snx.NXobject, nxclasses, skip_errors: bool = False):
     for key, nxclass in nxclasses.items():
         data[key] = _load(group, nxclass, skip_errors=skip_errors)
     return data
-
-
-def _load_instrument(group: snx.NXobject,
-                     skip_errors: bool = False) -> Dict[str, sc.DataArray]:
-    instrument = {}
-    #if (detectors := _load(group, snx.NXdetector, skip_errors=skip_errors)):
-    #    instrument['detectors'] = detectors
-    if (disk_choppers := _load(group, snx.NXdisk_chopper, skip_errors=skip_errors)):
-        instrument['disk_choppers'] = disk_chopper
-    if group[snx.NXsource]:
-        instrument['source'] = group.source[()]
-    return Instrument(**instrument)
-
-
-def _load_entry(
-        entry: snx.NXentry,
-        skip_errors: bool = False) -> Dict[str, Union[Dict, sc.DataArray, sc.Dataset]]:
-    content = {}
-    if (instrument := _load_instrument(entry.instrument, skip_errors=skip_errors)):
-        content['instrument'] = instrument
-    #if (monitors := _load(group, snx.NXmonitor, skip_errors=skip_errors)):
-    #    content['monitors'] = monitors
-    if entry[snx.NXsample]:
-        content['sample'] = entry.sample[()]
-    return Entry(**content)
-
-
-def load(filename: Union[str, PathLike]) -> dict:
-    with snx.File(filename) as f:
-        entry = _load_entry(f.entry, skip_errors=True)
-        detectors = _load(f.entry.instrument, snx.NXdetector, skip_errors=True)
-        monitors = _load(f.entry, snx.NXmonitor, skip_errors=True)
-        entry.instrument.detectors = detectors
-        entry.monitors = monitors
-    return entry
 
 
 def load_detectors(filename: Union[str, PathLike]) -> dict:

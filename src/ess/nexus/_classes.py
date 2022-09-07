@@ -1,9 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 # Author: Simon Heybrock
-from dataclasses import dataclass, field, fields
-from typing import Dict, Optional, Union, Any
-import scipp as sc
+from dataclasses import fields
 import scippnexus as snx
 
 # Use dataclasses since dict keys such as `source` or `detectors` might clash with
@@ -15,63 +13,7 @@ import scippnexus as snx
 # How can we ensure code<->file compatibility over many years of changes?
 
 
-@dataclass
-class Instrument:
-    source: Dict[str, Union[sc.Variable, sc.DataArray]] = field(default_factory=dict)
-    detectors: Dict[str, sc.DataArray] = field(default_factory=dict)
-    disk_choppers: Dict[str, Dict[str,
-                                  Union[sc.Variable,
-                                        sc.DataArray]]] = field(default_factory=dict)
-
-
-@dataclass
-class Entry:
-    instrument: Optional[Instrument] = None
-    monitors: Dict[str, sc.DataArray] = field(default_factory=dict)
-    sample: Dict[str, Union[sc.Variable, sc.DataArray]] = field(default_factory=dict)
-
-
-@dataclass
-class Fields:
-    fields: dict = field(default_factory=dict)
-
-
-@dataclass
-class Sample:
-    sample: Optional[sc.DataArray] = None
-
-
-@dataclass
-class Monitors:
-    monitors: dict = field(default_factory=dict)
-
-
-@dataclass
-class Detectors:
-    detectors: dict = field(default_factory=dict)
-
-
-@dataclass
-class DiskChoppers:
-    disk_choppers: dict = field(default_factory=dict)
-
-
-@dataclass
-class Instrument:
-    instrument: Any = None
-
-
-@dataclass
-class GenericInstrument(Detectors, Fields):
-    pass
-
-
-@dataclass
-class GenericEntry(Instrument, Sample, Monitors, Fields):
-    pass
-
-
-def load(group, schema):
+def load(group: snx.NXobject, schema: type):
     loaded = {}
     for field in fields(schema):
         key = field.name
@@ -91,4 +33,9 @@ class EntryMixin:
 
     @classmethod
     def from_nexus(cls, group):
-        return load(group.entry, cls)
+        if isinstance(group, snx.NXentry):
+            return load(group, cls)
+        if isinstance(group, snx.NXroot):
+            return cls.from_nexus(group.entry)
+        with snx.File(group) as f:
+            return cls.from_nexus(f)
