@@ -12,15 +12,20 @@ def _get_entry(group: snx.NXobject) -> snx.NXentry:
     return group if group.nx_class == snx.NXentry else group.entry
 
 
+def _load_single(group, index=(), skip_errors=False):
+    try:
+        return group[index]
+    except IndexError as e:
+        if not skip_errors:
+            raise e from None
+
+
 def _load_items(items: Dict[str, snx.NXobject],
                 skip_errors: bool = False) -> Dict[str, sc.DataArray]:
     result = {}
     for k, v in items.items():
-        try:
-            result[k] = v[()]
-        except IndexError as e:
-            if not skip_errors:
-                raise e from None
+        if (loaded := _load_single(v, skip_errors=skip_errors)) is not None:
+            result[k] = loaded
     return result
 
 
@@ -52,16 +57,20 @@ def load_metadata(filename: Union[str, PathLike]) -> dict:
     with snx.File(filename) as f:
         entry = _load_entry(f.entry)
 
+def as_classfactory(func: Callable) -> Callable:
+    def f(cls, *args, **kwargs):
+        return cls(func(*args, **kwargs))
+    return classmethod(f)
 
 def make_field(name, from_nexus):
-    return type(name, (dict, ), dict(from_nexus=classmethod(from_nexus)))
+    return type(name, (dict, ), dict(from_nexus=as_classfactory(from_nexus)))
 
 
 def make_loader(nxclass: Union[type, Tuple[type]],
                 skip_errors: bool = False) -> Callable:
 
-    def func(cls, group: snx.NXobject, **kwargs) -> Dict[str, sc.DataArray]:
-        return cls(_load(group, nxclass, **kwargs))
+    def func(group: snx.NXobject, **kwargs) -> Dict[str, sc.DataArray]:
+        return _load(group, nxclass, **kwargs)
 
     return func
 
@@ -82,9 +91,16 @@ def loader(*args, **kwargs):
         return function
     return decorator
 
+# configure 2 things:
+# 0. single or multi
+# 1. how to find/select
+# 2. how to load
+
+#def _load_sample(group):
+#    return _load_single(group.sample)
 
 Fields = make_field("Fields", make_loader(nxclass=(snx.Field, snx.NXlog)))
 Detectors = make_field("Detectors", make_loader(nxclass=snx.NXdetector,
                                                 skip_errors=True))
 Monitors = make_field("Monitors", make_loader(nxclass=snx.NXmonitor))
-Sample = make_field("Sample", lambda cls, group: cls(group.sample[()]))
+Sample = make_field("Sample", lambda group: group.sample[()])
