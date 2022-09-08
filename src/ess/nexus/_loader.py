@@ -3,8 +3,38 @@
 # Author: Simon Heybrock
 from os import PathLike
 from typing import Dict, Union, Tuple, Callable
+from dataclasses import dataclass, fields
 import scipp as sc
 import scippnexus as snx
+
+
+def _load_dataclass(group: snx.NXobject, schema: type, arg_dict):
+    loaded = {}
+    for field in fields(schema):
+        key = field.name
+        cls = field.type
+        field_kwargs = arg_dict.get(key, {})
+        loaded[key] = cls.from_nexus(group, **field_kwargs)
+    return schema(**loaded)
+
+
+class InstrumentMixin:
+
+    @classmethod
+    def from_nexus(cls, group, /, **kwargs):
+        return _load_dataclass(group.instrument, cls, kwargs)
+
+
+class EntryMixin:
+
+    @classmethod
+    def from_nexus(cls, group, /, **kwargs):
+        if isinstance(group, snx.NXentry):
+            return _load_dataclass(group, cls, kwargs)
+        if isinstance(group, snx.NXroot):
+            return cls.from_nexus(group.entry, **kwargs)
+        with snx.File(group) as f:
+            return cls.from_nexus(f, **kwargs)
 
 
 # TODO make decorator factory, list exception types
@@ -18,11 +48,10 @@ def _load_single(group, index=(), skip_errors=False):
 
 def _load_multi(load: Callable, items: Dict[str, snx.NXobject], /,
                 **kwargs) -> Dict[str, sc.DataArray]:
-    result = {}
-    for k, v in items.items():
-        if (loaded := load(v, **kwargs)) is not None:
-            result[k] = loaded
-    return result
+    return {
+        key: loaded
+        for key in items if (loaded := load(items[key], **kwargs)) is not None
+    }
 
 
 def select_events_and_load(detector, pulse_min=None, pulse_max=None, **kwargs):
@@ -50,3 +79,15 @@ Fields = make_multi_field("Fields", [snx.Field, snx.NXlog])
 Detectors = make_multi_field("Detectors", snx.NXdetector, select_events_and_load)
 Monitors = make_multi_field("Monitors", snx.NXmonitor)
 Sample = make_field("Sample", snx.NXsample)
+
+@dataclass
+class BasicInstrument(InstrumentMixin):
+    fields: Fields
+    detectors: Detectors
+
+@dataclass
+class BasicEntry(EntryMixin):
+    fields: Fields
+    instrument: BasicInstrument
+    monitors: Monitors
+    sample: Sample

@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
-from ._classes import EntryMixin, InstrumentMixin
+from ._loader import EntryMixin, InstrumentMixin
 from ._loader import Fields, Detectors, Monitors, Sample
 
 # What API do we WANT?
