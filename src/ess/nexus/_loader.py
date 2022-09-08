@@ -29,14 +29,6 @@ def _load_items(items: Dict[str, snx.NXobject],
     return result
 
 
-def as_classfactory(func: Callable) -> Callable:
-
-    def f(cls, *args, **kwargs):
-        return cls(func(*args, **kwargs))
-
-    return classmethod(f)
-
-
 def select_nxclass(key) -> Callable:
 
     def func(group: snx.NXobject) -> dict:
@@ -60,10 +52,10 @@ def select_events_and_load(targets, pulse_max=None, **kwargs):
 
 def make_field(name, select: Callable, load: Callable = default_load):
 
-    def from_nexus(group, **kwargs):
-        return load(select(group), **kwargs)
+    def from_nexus(cls, group, **kwargs):
+        return cls(load(select(group), **kwargs))
 
-    return type(name, (dict, ), dict(from_nexus=as_classfactory(from_nexus)))
+    return type(name, (dict, ), dict(from_nexus=classmethod(from_nexus)))
 
 
 Fields = make_field("Fields", select=select_nxclass((snx.Field, snx.NXlog)))
