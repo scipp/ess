@@ -12,6 +12,7 @@ def _get_entry(group: snx.NXobject) -> snx.NXentry:
     return group if group.nx_class == snx.NXentry else group.entry
 
 
+# TODO make decorator factory, list exception types
 def _load_single(group, index=(), skip_errors=False):
     try:
         return group[index]
@@ -20,43 +21,24 @@ def _load_single(group, index=(), skip_errors=False):
             raise e from None
 
 
-def _load_items(items: Dict[str, snx.NXobject],
-                skip_errors: bool = False) -> Dict[str, sc.DataArray]:
+def _load_multi(items: Dict[str, snx.NXobject], load, /,
+                **kwargs) -> Dict[str, sc.DataArray]:
     result = {}
     for k, v in items.items():
-        if (loaded := _load_single(v, skip_errors=skip_errors)) is not None:
+        if (loaded := load(v, **kwargs)) is not None:
             result[k] = loaded
     return result
 
 
-def find_nxclass(key) -> Callable:
-
-    def func(group: snx.NXobject) -> dict:
-        return group[key]
-
-    return func
+def select_events_and_load(detector, pulse_min=None, pulse_max=None, **kwargs):
+    detector = detector.select_events['pulse', pulse_min:pulse_max]
+    return _load_single(detector, **kwargs)
 
 
-def default_load(targets, skip_errors=False):
-    if isinstance(targets, dict):
-        return _load_items(targets, skip_errors=skip_errors)
-    else:
-        return _load_single(targets, skip_errors=skip_errors)
-
-
-def select_events_and_load(targets, pulse_min=None, pulse_max=None, **kwargs):
-    if pulse_min is not None or pulse_max is not None:
-        targets = {
-            k: v.select_events['pulse', pulse_min:pulse_max]
-            for k, v in targets.items()
-        }
-    return default_load(targets, **kwargs)
-
-
-def make_multi_field(name, key, load: Callable = _load_items):
+def make_multi_field(name, key, load: Callable = _load_single):
 
     def from_nexus(cls, group, **kwargs):
-        return cls(load(group[key], **kwargs))
+        return cls(_load_multi(group[key], load, **kwargs))
 
     return type(name, (dict, ), dict(from_nexus=classmethod(from_nexus)))
 
