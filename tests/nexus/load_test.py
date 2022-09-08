@@ -107,3 +107,18 @@ def test_load_custom_entry(nxroot):
     assert len(data.instrument.fields) == 1
     assert not hasattr(data, 'sample')
     assert not hasattr(data.instrument, 'detectors')
+
+
+DetectorByPulse = nexus.make_section("DetectorPyPulse", snx.NXdetector,
+                                     lambda group: group.events[()])
+
+
+@dataclass
+class InstrumentWithDetectorsPyPulse(nexus.InstrumentMixin):
+    detectors: DetectorByPulse
+
+
+def test_load_instrument_without_binning_to_pixels(nxroot):
+    data = InstrumentWithDetectorsPyPulse.from_nexus(nxroot.entry)
+    assert set(data.detectors) == {'det0', 'det1'}
+    assert 'event_time_zero' in data.detectors['det0'].coords
