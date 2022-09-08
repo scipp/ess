@@ -59,7 +59,7 @@ def select_events_and_load(detector, pulse_min=None, pulse_max=None, **kwargs):
     return _load_single(detector, **kwargs)
 
 
-def make_multi_field(name, key, load: Callable = _load_single):
+def make_section(name, key, load: Callable = _load_single):
 
     def from_nexus(cls, group, **kwargs):
         return cls(_load_multi(load, group[key], **kwargs))
@@ -75,15 +75,18 @@ def make_field(name, key, load: Callable = _load_single):
     return type(name, (dict, ), dict(from_nexus=classmethod(from_nexus)))
 
 
-Fields = make_multi_field("Fields", [snx.Field, snx.NXlog])
-Detectors = make_multi_field("Detectors", snx.NXdetector, select_events_and_load)
-Monitors = make_multi_field("Monitors", snx.NXmonitor)
+Fields = make_section("Fields", [snx.Field, snx.NXlog])
+Detectors = make_section("Detectors", snx.NXdetector, select_events_and_load)
+Monitors = make_section("Monitors", snx.NXmonitor)
 Sample = make_field("Sample", snx.NXsample)
+Source = make_field("Source", snx.NXsource)
+
 
 @dataclass
 class BasicInstrument(InstrumentMixin):
     fields: Fields
     detectors: Detectors
+
 
 @dataclass
 class BasicEntry(EntryMixin):

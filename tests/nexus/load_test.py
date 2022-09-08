@@ -28,7 +28,9 @@ def nxroot(request):
         root = snx.NXroot(f)
         # This is modelled after the basic recommended NeXus structure
         entry = root.create_class('entry0', snx.NXentry)
+        entry['start_time'] = sc.scalar("yesterday")
         sample = entry.create_class('sample0', snx.NXsample)
+        sample['temperature'] = sc.scalar(1.2, unit='K')
         # Event mode monitor
         mon0 = entry.create_class('monitor0', snx.NXmonitor)
         mon0['event_time_offset'] = sc.array(dims=[''],
@@ -42,6 +44,7 @@ def nxroot(request):
         mon1.attrs['axes'] = ['time']
 
         instrument = entry.create_class('instr', snx.NXinstrument)
+        instrument['field'] = sc.scalar('abc')
         source = instrument.create_class('src', snx.NXsource)
         det0 = instrument.create_class('det0', snx.NXdetector)
         detector_numbers = sc.array(dims=[''], unit=None, values=[1, 2, 3, 4])
@@ -54,21 +57,17 @@ def nxroot(request):
         yield root
 
 
-def test_load_monitors_descends_into_unique_entry(nxroot):
-    monitors = nexus.load_monitors(nxroot)
-    assert len(monitors) == 2
+def test_instrument_from_nexus_loads_detectors_and_fields(nxroot):
+    instrument = nexus.BasicInstrument.from_nexus(nxroot.entry)
+    assert len(instrument.detectors) == 2
+    assert len(instrument.fields) == 1
 
 
-def test_load_monitors_loads_from_entry(nxroot):
-    monitors = nexus.load_monitors(nxroot.entry)
-    assert len(monitors) == 2
-
-
-def test_load_detectors_descends_into_unique_entry(nxroot):
-    detectors = nexus.load_detectors(nxroot)
-    assert len(detectors) == 2
-
-
-def test_load_detectors_loads_from_entry(nxroot):
-    detectors = nexus.load_detectors(nxroot.entry)
-    assert len(detectors) == 2
+def test_entry_from_nexus_loads_instrument_monitors_sample_and_fields(nxroot):
+    entry = nexus.BasicEntry.from_nexus(nxroot)
+    assert len(entry.instrument.detectors) == 2
+    assert len(entry.instrument.fields) == 1
+    assert len(entry.monitors) == 2
+    assert sc.identical(entry.sample['temperature'], sc.scalar(1.2, unit='K'))
+    assert len(entry.fields) == 1
+    assert entry.fields['start_time'] == "yesterday"
