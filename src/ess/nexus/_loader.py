@@ -52,13 +52,14 @@ class EntryMixin:
             return cls.from_nexus(f, **kwargs)
 
 
-# TODO make decorator factory, list exception types
 def _load_single(group,
                  index=(),
                  skip_errors=False) -> Optional[Union[sc.DataArray, dict]]:
+    # The list of caugth exceptions is copied from scippneutron.load_nexus. We will
+    # likely wanto to add better customization options.
     try:
         return group[index]
-    except IndexError as e:
+    except (NexusStructureError, KeyError, sc.DTypeError, ValueError, IndexError) as e:
         if not skip_errors:
             raise e from None
 

@@ -46,7 +46,7 @@ def nxroot(request):
 
         instrument = entry.create_class('instr', snx.NXinstrument)
         instrument['field'] = sc.scalar('abc')
-        source = instrument.create_class('src', snx.NXsource)
+        instrument.create_class('src', snx.NXsource)
         det0 = instrument.create_class('det0', snx.NXdetector)
         detector_numbers = sc.array(dims=[''], unit=None, values=[1, 2, 3, 4])
         det0.create_field('detector_number', detector_numbers)
