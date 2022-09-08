@@ -5,11 +5,6 @@ from os import PathLike
 from typing import Dict, Union, Tuple, Callable
 import scipp as sc
 import scippnexus as snx
-from functools import partial
-
-
-def _get_entry(group: snx.NXobject) -> snx.NXentry:
-    return group if group.nx_class == snx.NXentry else group.entry
 
 
 # TODO make decorator factory, list exception types
@@ -21,7 +16,7 @@ def _load_single(group, index=(), skip_errors=False):
             raise e from None
 
 
-def _load_multi(items: Dict[str, snx.NXobject], load, /,
+def _load_multi(load: Callable, items: Dict[str, snx.NXobject], /,
                 **kwargs) -> Dict[str, sc.DataArray]:
     result = {}
     for k, v in items.items():
@@ -38,7 +33,7 @@ def select_events_and_load(detector, pulse_min=None, pulse_max=None, **kwargs):
 def make_multi_field(name, key, load: Callable = _load_single):
 
     def from_nexus(cls, group, **kwargs):
-        return cls(_load_multi(group[key], load, **kwargs))
+        return cls(_load_multi(load, group[key], **kwargs))
 
     return type(name, (dict, ), dict(from_nexus=classmethod(from_nexus)))
 

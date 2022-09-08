@@ -5,7 +5,7 @@ from dataclasses import fields
 import scippnexus as snx
 
 
-def load(group: snx.NXobject, schema: type, arg_dict):
+def _load_dataclass(group: snx.NXobject, schema: type, arg_dict):
     loaded = {}
     for field in fields(schema):
         key = field.name
@@ -19,7 +19,7 @@ class InstrumentMixin:
 
     @classmethod
     def from_nexus(cls, group, /, **kwargs):
-        return load(group.instrument, cls, kwargs)
+        return _load_dataclass(group.instrument, cls, kwargs)
 
 
 class EntryMixin:
@@ -27,7 +27,7 @@ class EntryMixin:
     @classmethod
     def from_nexus(cls, group, /, **kwargs):
         if isinstance(group, snx.NXentry):
-            return load(group, cls, kwargs)
+            return _load_dataclass(group, cls, kwargs)
         if isinstance(group, snx.NXroot):
             return cls.from_nexus(group.entry, **kwargs)
         with snx.File(group) as f:
