@@ -13,29 +13,30 @@ import scippnexus as snx
 # How can we ensure code<->file compatibility over many years of changes?
 
 
-def load(group: snx.NXobject, schema: type):
+def load(group: snx.NXobject, schema: type, arg_dict):
     loaded = {}
     for field in fields(schema):
         key = field.name
         cls = field.type
-        loaded[key] = cls.from_nexus(group)
+        field_kwargs = arg_dict.get(key, {})
+        loaded[key] = cls.from_nexus(group, **field_kwargs)
     return schema(**loaded)
 
 
 class InstrumentMixin:
 
     @classmethod
-    def from_nexus(cls, group):
-        return load(group.instrument, cls)
+    def from_nexus(cls, group, /, **kwargs):
+        return load(group.instrument, cls, kwargs)
 
 
 class EntryMixin:
 
     @classmethod
-    def from_nexus(cls, group):
+    def from_nexus(cls, group, /, **kwargs):
         if isinstance(group, snx.NXentry):
-            return load(group, cls)
+            return load(group, cls, kwargs)
         if isinstance(group, snx.NXroot):
-            return cls.from_nexus(group.entry)
+            return cls.from_nexus(group.entry, **kwargs)
         with snx.File(group) as f:
-            return cls.from_nexus(f)
+            return cls.from_nexus(f, **kwargs)

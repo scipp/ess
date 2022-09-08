@@ -60,10 +60,27 @@ def make_field(name, from_nexus):
 def make_loader(nxclass: Union[type, Tuple[type]],
                 skip_errors: bool = False) -> Callable:
 
-    def func(cls, group: snx.NXobject) -> Dict[str, sc.DataArray]:
-        return cls(_load_items(group[nxclass], skip_errors=skip_errors))
+    def func(cls, group: snx.NXobject, **kwargs) -> Dict[str, sc.DataArray]:
+        return cls(_load(group, nxclass, **kwargs))
 
     return func
+
+def load_multiple(nxclass, func):
+    def f(cls, group):
+        groups = group[nxclass]
+        groups = {k:func(v) for k,v in groups.items()}
+        return cls(groups)
+    return f
+
+
+
+def loader(*args, **kwargs):
+    def decorator(func: Callable) -> Callable:
+        #@wraps(func)
+        def function(cls, group: snx.NXobject):
+            return cls(func(group, *args, **kwargs))
+        return function
+    return decorator
 
 
 Fields = make_field("Fields", make_loader(nxclass=(snx.Field, snx.NXlog)))
