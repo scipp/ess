@@ -29,7 +29,7 @@ def _load_items(items: Dict[str, snx.NXobject],
     return result
 
 
-def select_nxclass(key) -> Callable:
+def find_nxclass(key) -> Callable:
 
     def func(group: snx.NXobject) -> dict:
         return group[key]
@@ -44,22 +44,32 @@ def default_load(targets, skip_errors=False):
         return _load_single(targets, skip_errors=skip_errors)
 
 
-def select_events_and_load(targets, pulse_max=None, **kwargs):
-    if pulse_max is not None:
-        targets = {k: v.select_events['pulse', :pulse_max] for k, v in targets.items()}
+def select_events_and_load(targets, pulse_min=None, pulse_max=None, **kwargs):
+    if pulse_min is not None or pulse_max is not None:
+        targets = {
+            k: v.select_events['pulse', pulse_min:pulse_max]
+            for k, v in targets.items()
+        }
     return default_load(targets, **kwargs)
 
 
-def make_field(name, select: Callable, load: Callable = default_load):
+def make_multi_field(name, key, load: Callable = _load_items):
 
     def from_nexus(cls, group, **kwargs):
-        return cls(load(select(group), **kwargs))
+        return cls(load(group[key], **kwargs))
 
     return type(name, (dict, ), dict(from_nexus=classmethod(from_nexus)))
 
 
-Fields = make_field("Fields", select=select_nxclass((snx.Field, snx.NXlog)))
-Detectors = make_field("Detectors", select_nxclass(snx.NXdetector),
-                       select_events_and_load)
-Monitors = make_field("Monitors", select_nxclass(snx.NXmonitor))
-Sample = make_field("Sample", select=lambda group: group.sample)
+def make_field(name, key, load: Callable = _load_single):
+
+    def from_nexus(cls, group, **kwargs):
+        return cls(load(group.__getattr__(key.__name__[2:]), **kwargs))
+
+    return type(name, (dict, ), dict(from_nexus=classmethod(from_nexus)))
+
+
+Fields = make_multi_field("Fields", [snx.Field, snx.NXlog])
+Detectors = make_multi_field("Detectors", snx.NXdetector, select_events_and_load)
+Monitors = make_multi_field("Monitors", snx.NXmonitor)
+Sample = make_field("Sample", snx.NXsample)

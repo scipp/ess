@@ -4,14 +4,6 @@
 from dataclasses import fields
 import scippnexus as snx
 
-# Use dataclasses since dict keys such as `source` or `detectors` might clash with
-# other field names
-
-# Nesting is a bad idea for user facing
-# Must write loaders in a way that upstream ading new groups/class does not break anything
-# -> explicit list of everything we load?
-# How can we ensure code<->file compatibility over many years of changes?
-
 
 def load(group: snx.NXobject, schema: type, arg_dict):
     loaded = {}
