@@ -2,13 +2,13 @@
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 # Author: Simon Heybrock
 from os import PathLike
-from typing import Dict, Union, Tuple, Callable
+from typing import Dict, Union, Tuple, Callable, List, Any, Optional
 from dataclasses import dataclass, fields
 import scipp as sc
 import scippnexus as snx
 
 
-def _load_dataclass(group: snx.NXobject, schema: type, arg_dict):
+def _load_dataclass(group: snx.NXobject, schema: type, arg_dict: dict):
     loaded = {}
     for field in fields(schema):
         key = field.name
@@ -21,14 +21,14 @@ def _load_dataclass(group: snx.NXobject, schema: type, arg_dict):
 class InstrumentMixin:
 
     @classmethod
-    def from_nexus(cls, group, /, **kwargs):
+    def from_nexus(cls, group: snx.NXobject, /, **kwargs: Any):
         return _load_dataclass(group.instrument, cls, kwargs)
 
 
 class EntryMixin:
 
     @classmethod
-    def from_nexus(cls, group, /, **kwargs):
+    def from_nexus(cls, group: Union[snx.NXobject, PathLike], /, **kwargs: Any):
         if isinstance(group, snx.NXentry):
             return _load_dataclass(group, cls, kwargs)
         if isinstance(group, snx.NXroot):
@@ -38,7 +38,9 @@ class EntryMixin:
 
 
 # TODO make decorator factory, list exception types
-def _load_single(group, index=(), skip_errors=False):
+def _load_single(group,
+                 index=(),
+                 skip_errors=False) -> Optional[Union[sc.DataArray, dict]]:
     try:
         return group[index]
     except IndexError as e:
@@ -59,17 +61,21 @@ def _select_events_and_load(detector, pulse_min=None, pulse_max=None, **kwargs):
     return _load_single(detector, **kwargs)
 
 
-def make_section(name, key, load: Callable = _load_single):
+def make_section(name: str,
+                 key: Union[type, List[type]],
+                 load: Callable = _load_single) -> type:
 
-    def from_nexus(cls, group, **kwargs):
+    def from_nexus(cls, group: snx.NXobject, **kwargs):
         return cls(_load_multi(load, group[key], **kwargs))
 
     return type(name, (dict, ), dict(from_nexus=classmethod(from_nexus)))
 
 
-def make_field(name, key, load: Callable = _load_single):
+def make_field(name: str,
+               key: Union[type, List[type]],
+               load: Callable = _load_single) -> type:
 
-    def from_nexus(cls, group, **kwargs):
+    def from_nexus(cls, group: snx.NXobject, **kwargs):
         return cls(load(group.__getattr__(key.__name__[2:]), **kwargs))
 
     return type(name, (dict, ), dict(from_nexus=classmethod(from_nexus)))
