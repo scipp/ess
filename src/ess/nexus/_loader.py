@@ -2,7 +2,7 @@
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 # Author: Simon Heybrock
 from os import PathLike
-from typing import Dict, Union, Tuple, Callable, List, Any, Optional, TypeVar, Type
+from typing import Dict, Union, Callable, List, Any, Optional, TypeVar, Type
 from dataclasses import dataclass, fields
 import scipp as sc
 import scippnexus as snx
@@ -59,7 +59,8 @@ def _load_single(group,
     # likely wanto to add better customization options.
     try:
         return group[index]
-    except (NexusStructureError, KeyError, sc.DTypeError, ValueError, IndexError) as e:
+    except (snx.NexusStructureError, KeyError, sc.DTypeError, ValueError,
+            IndexError) as e:
         if not skip_errors:
             raise e from None
 
