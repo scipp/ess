@@ -64,6 +64,20 @@ def _select_events_and_load(detector, pulse_min=None, pulse_max=None, **kwargs):
 def make_section(name: str,
                  key: Union[type, List[type]],
                  load: Callable = _load_single) -> type:
+    """
+    Make a loader component for a dict-like section containing all children with
+    NX_class matching the given key.
+
+    Parameters
+    ----------
+    key:
+        Key as accepted by :py:meth:`scippnexus.NXobject.__getitem__` for selecting a
+        subset of children based on the class. Examples: ``scippnexus.NXdetector``,
+        ``[scippnexus.Field, scippnexus.NXlog]``.
+    load:
+        Callable to perform the loading of a single group. This will be called once for
+        each child matching ``key``.
+    """
 
     def from_nexus(cls, group: snx.NXobject, **kwargs):
         return cls(_load_multi(load, group[key], **kwargs))
@@ -71,9 +85,20 @@ def make_section(name: str,
     return type(name, (dict, ), dict(from_nexus=classmethod(from_nexus)))
 
 
-def make_field(name: str,
-               key: Union[type, List[type]],
-               load: Callable = _load_single) -> type:
+def make_leaf(name: str,
+              key: Union[type, List[type]],
+              load: Callable = _load_single) -> type:
+    """
+    Make a loader component for a "leaf" containing a single child with NX_class
+    matching the given key.
+
+    Parameters
+    ----------
+    key:
+        Subclass of :py:class:`scippnexus.NXobject`.
+    load:
+        Callable to perform the loading the child group.
+    """
 
     def from_nexus(cls, group: snx.NXobject, **kwargs):
         return cls(load(group.__getattr__(key.__name__[2:]), **kwargs))
@@ -84,18 +109,28 @@ def make_field(name: str,
 Fields = make_section("Fields", [snx.Field, snx.NXlog])
 Detectors = make_section("Detectors", snx.NXdetector, _select_events_and_load)
 Monitors = make_section("Monitors", snx.NXmonitor)
-Sample = make_field("Sample", snx.NXsample)
-Source = make_field("Source", snx.NXsource)
+Sample = make_leaf("Sample", snx.NXsample)
+Source = make_leaf("Source", snx.NXsource)
 
 
 @dataclass
 class BasicInstrument(InstrumentMixin):
+    """
+    Basic (incomplete) loader component for NXinstrument.
+
+    Represent a basic subset of NXinstrument, loading NXdetector children and fields
+    (including NXlog).
+    """
     fields: Fields
     detectors: Detectors
 
 
 @dataclass
 class BasicEntry(EntryMixin):
+    """
+    Subset of NXentry, loading NXinstrument, NXmonitor, and NXsample children as well
+    as fields (including NXlog).
+    """
     fields: Fields
     instrument: BasicInstrument
     monitors: Monitors
