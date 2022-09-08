@@ -29,78 +29,38 @@ def _load_items(items: Dict[str, snx.NXobject],
     return result
 
 
-def _load(group: snx.NXobject,
-          nxclass: Union[type, Tuple[type]],
-          skip_errors: bool = False) -> Dict[str, sc.DataArray]:
-    return _load_items(group[nxclass], skip_errors=skip_errors)
-
-
-def _load_sections(group: snx.NXobject, nxclasses, skip_errors: bool = False):
-    data = {}
-    for key, nxclass in nxclasses.items():
-        data[key] = _load(group, nxclass, skip_errors=skip_errors)
-    return data
-
-
-def load_detectors(filename: Union[str, PathLike]) -> dict:
-    with snx.File(filename) as f:
-        return _load(f.entry.instrument, snx.NXdetector, skip_errors=True)
-
-
-def load_monitors(filename: Union[str, PathLike]) -> dict:
-    with snx.File(filename) as f:
-        return _load(f.entry, snx.NXmonitor, skip_errors=True)
-
-
-def load_metadata(filename: Union[str, PathLike]) -> dict:
-    """Load everything except detectors and monitors, which could be large."""
-    with snx.File(filename) as f:
-        entry = _load_entry(f.entry)
-
 def as_classfactory(func: Callable) -> Callable:
+
     def f(cls, *args, **kwargs):
         return cls(func(*args, **kwargs))
+
     return classmethod(f)
 
-def make_field(name, from_nexus):
-    return type(name, (dict, ), dict(from_nexus=as_classfactory(from_nexus)))
 
+def select_nxclass(key) -> Callable:
 
-def make_loader(nxclass: Union[type, Tuple[type]],
-                skip_errors: bool = False) -> Callable:
-
-    def func(group: snx.NXobject, **kwargs) -> Dict[str, sc.DataArray]:
-        return _load(group, nxclass, **kwargs)
+    def func(group: snx.NXobject) -> dict:
+        return group[key]
 
     return func
 
-def load_multiple(nxclass, func):
-    def f(cls, group):
-        groups = group[nxclass]
-        groups = {k:func(v) for k,v in groups.items()}
-        return cls(groups)
-    return f
+
+def default_load(targets, skip_errors=False):
+    if isinstance(targets, dict):
+        return _load_items(targets, skip_errors=skip_errors)
+    else:
+        return _load_single(targets, skip_errors=skip_errors)
 
 
+def make_field(name, select: Callable, load: Callable = default_load):
 
-def loader(*args, **kwargs):
-    def decorator(func: Callable) -> Callable:
-        #@wraps(func)
-        def function(cls, group: snx.NXobject):
-            return cls(func(group, *args, **kwargs))
-        return function
-    return decorator
+    def from_nexus(group, **kwargs):
+        return load(select(group), **kwargs)
 
-# configure 2 things:
-# 0. single or multi
-# 1. how to find/select
-# 2. how to load
+    return type(name, (dict, ), dict(from_nexus=as_classfactory(from_nexus)))
 
-#def _load_sample(group):
-#    return _load_single(group.sample)
 
-Fields = make_field("Fields", make_loader(nxclass=(snx.Field, snx.NXlog)))
-Detectors = make_field("Detectors", make_loader(nxclass=snx.NXdetector,
-                                                skip_errors=True))
-Monitors = make_field("Monitors", make_loader(nxclass=snx.NXmonitor))
-Sample = make_field("Sample", lambda group: group.sample[()])
+Fields = make_field("Fields", select=select_nxclass((snx.Field, snx.NXlog)))
+Detectors = make_field("Detectors", select_nxclass(snx.NXdetector))
+Monitors = make_field("Monitors", select_nxclass(snx.NXmonitor))
+Sample = make_field("Sample", select=lambda group: group.sample)
