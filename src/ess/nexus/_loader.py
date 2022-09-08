@@ -2,7 +2,7 @@
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 # Author: Simon Heybrock
 from os import PathLike
-from typing import Dict, Union, Tuple, Callable, List, Any, Optional
+from typing import Dict, Union, Tuple, Callable, List, Any, Optional, TypeVar, Type
 from dataclasses import dataclass, fields
 import scipp as sc
 import scippnexus as snx
@@ -18,17 +18,32 @@ def _load_dataclass(group: snx.NXobject, schema: type, arg_dict: dict):
     return schema(**loaded)
 
 
+T1 = TypeVar('T1', bound='InstrumentMixin')
+
+
 class InstrumentMixin:
+    """Mixin providing the ``from_nexus`` classmethod for dataclasses representing
+    NXinstrument.
+    """
 
     @classmethod
-    def from_nexus(cls, group: snx.NXobject, /, **kwargs: Any):
+    def from_nexus(cls: Type[T1], group: snx.NXobject, /, **kwargs: Any) -> T1:
+        """Load data from the NXinstrument group."""
         return _load_dataclass(group.instrument, cls, kwargs)
 
 
+T2 = TypeVar('T2', bound='EntryMixin')
+
+
 class EntryMixin:
+    """Mixin providing the ``from_nexus`` classmethod for dataclasses representing
+    NXentry.
+    """
 
     @classmethod
-    def from_nexus(cls, group: Union[snx.NXobject, PathLike], /, **kwargs: Any):
+    def from_nexus(cls: Type[T2], group: Union[snx.NXobject, PathLike], /,
+                   **kwargs: Any) -> T2:
+        """Load data from the NXentry group."""
         if isinstance(group, snx.NXentry):
             return _load_dataclass(group, cls, kwargs)
         if isinstance(group, snx.NXroot):
@@ -116,10 +131,11 @@ Source = make_leaf("Source", snx.NXsource)
 @dataclass
 class BasicInstrument(InstrumentMixin):
     """
-    Basic (incomplete) loader component for NXinstrument.
+    Basic loader component for NXinstrument.
 
-    Represent a basic subset of NXinstrument, loading NXdetector children and fields
-    (including NXlog).
+    Produces a basic subset of NXinstrument, loading NXdetector children and fields
+    (including NXlog). Subclass this in a new dataclass to add sections for more NeXus
+    classes.
     """
     fields: Fields
     detectors: Detectors
@@ -128,8 +144,11 @@ class BasicInstrument(InstrumentMixin):
 @dataclass
 class BasicEntry(EntryMixin):
     """
-    Subset of NXentry, loading NXinstrument, NXmonitor, and NXsample children as well
-    as fields (including NXlog).
+    Basic loader component for NXentry.
+
+    Produces a basic subset of NXentry, loading NXinstrument, NXmonitor, and NXsample
+    children as well as fields (including NXlog). Subclass this in a new dataclass to
+    add sections for more NeXus classes.
     """
     fields: Fields
     instrument: BasicInstrument
