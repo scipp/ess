@@ -3,6 +3,7 @@
 from ._loader import EntryMixin, InstrumentMixin
 from ._loader import BasicEntry, BasicInstrument
 from ._loader import Fields, Detectors, Monitors, Sample
+from ._loader import make_field, make_section
 
 # What API do we WANT?
 

@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
+from dataclasses import dataclass
 import h5py
 import pytest
 import scipp as sc
@@ -71,3 +72,38 @@ def test_entry_from_nexus_loads_instrument_monitors_sample_and_fields(nxroot):
     assert sc.identical(entry.sample['temperature'], sc.scalar(1.2, unit='K'))
     assert len(entry.fields) == 1
     assert entry.fields['start_time'] == "yesterday"
+
+
+def filter_and_load(group):
+    if group.name.split('/')[-1] == 'det1':
+        return group[()]
+
+
+FilteredDetectors = nexus.make_section("FilteredDetectors", snx.NXdetector,
+                                       filter_and_load)
+
+
+def test_filter_via_load_function(nxroot):
+    assert len(nxroot.entry.instrument[snx.NXdetector]) == 2
+    dets = FilteredDetectors.from_nexus(nxroot.entry.instrument)
+    assert len(dets) == 1
+    assert 'det1' in dets
+
+
+@dataclass
+class InstrumentWithoutDetectors(nexus.InstrumentMixin):
+    fields: nexus.Fields
+
+
+@dataclass
+class EntryWithoutDetectorsOrSample(nexus.EntryMixin):
+    fields: nexus.Fields
+    instrument: InstrumentWithoutDetectors
+
+
+def test_load_custom_entry(nxroot):
+    data = EntryWithoutDetectorsOrSample.from_nexus(nxroot)
+    assert len(data.fields) == 1
+    assert len(data.instrument.fields) == 1
+    assert not hasattr(data, 'sample')
+    assert not hasattr(data.instrument, 'detectors')

@@ -54,7 +54,7 @@ def _load_multi(load: Callable, items: Dict[str, snx.NXobject], /,
     }
 
 
-def select_events_and_load(detector, pulse_min=None, pulse_max=None, **kwargs):
+def _select_events_and_load(detector, pulse_min=None, pulse_max=None, **kwargs):
     detector = detector.select_events['pulse', pulse_min:pulse_max]
     return _load_single(detector, **kwargs)
 
@@ -76,7 +76,7 @@ def make_field(name, key, load: Callable = _load_single):
 
 
 Fields = make_section("Fields", [snx.Field, snx.NXlog])
-Detectors = make_section("Detectors", snx.NXdetector, select_events_and_load)
+Detectors = make_section("Detectors", snx.NXdetector, _select_events_and_load)
 Monitors = make_section("Monitors", snx.NXmonitor)
 Sample = make_field("Sample", snx.NXsample)
 Source = make_field("Source", snx.NXsource)
