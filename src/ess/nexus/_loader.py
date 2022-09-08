@@ -124,6 +124,7 @@ def make_leaf(name: str,
 
 
 Fields = make_section("Fields", [snx.Field, snx.NXlog])
+Choppers = make_section("Choppers", [snx.NXdisk_chopper, snx.NXfermi_chopper])
 Detectors = make_section("Detectors", snx.NXdetector, _select_events_and_load)
 Monitors = make_section("Monitors", snx.NXmonitor)
 Sample = make_leaf("Sample", snx.NXsample)

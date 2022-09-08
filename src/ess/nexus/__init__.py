@@ -2,5 +2,5 @@
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 from ._loader import EntryMixin, InstrumentMixin
 from ._loader import BasicEntry, BasicInstrument
-from ._loader import Fields, Detectors, Monitors, Sample
+from ._loader import Fields, Choppers, Detectors, Monitors, Sample, Source
 from ._loader import make_leaf, make_section
