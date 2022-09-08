@@ -52,6 +52,12 @@ def default_load(targets, skip_errors=False):
         return _load_single(targets, skip_errors=skip_errors)
 
 
+def select_events_and_load(targets, pulse_max=None, **kwargs):
+    if pulse_max is not None:
+        targets = {k: v.select_events['pulse', :pulse_max] for k, v in targets.items()}
+    return default_load(targets, **kwargs)
+
+
 def make_field(name, select: Callable, load: Callable = default_load):
 
     def from_nexus(group, **kwargs):
@@ -61,6 +67,7 @@ def make_field(name, select: Callable, load: Callable = default_load):
 
 
 Fields = make_field("Fields", select=select_nxclass((snx.Field, snx.NXlog)))
-Detectors = make_field("Detectors", select_nxclass(snx.NXdetector))
+Detectors = make_field("Detectors", select_nxclass(snx.NXdetector),
+                       select_events_and_load)
 Monitors = make_field("Monitors", select_nxclass(snx.NXmonitor))
 Sample = make_field("Sample", select=lambda group: group.sample)
