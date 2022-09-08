@@ -9,3 +9,4 @@ Modules
    :recursive:
 
    logging
+   nexus
