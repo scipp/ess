@@ -102,9 +102,7 @@ def make_section(name: str,
     return type(name, (dict, ), dict(from_nexus=classmethod(from_nexus)))
 
 
-def make_leaf(name: str,
-              key: Union[type, List[type]],
-              load: Callable = _load_single) -> type:
+def make_leaf(name: str, key: Union[str, type], load: Callable = _load_single) -> type:
     """
     Make a loader component for a "leaf" containing a single child with NX_class
     matching the given key.
@@ -112,13 +110,15 @@ def make_leaf(name: str,
     Parameters
     ----------
     key:
-        Subclass of :py:class:`scippnexus.NXobject`.
+        Child name or child's NX_class (subclass of :py:class:`scippnexus.NXobject`).
     load:
         Callable to perform the loading the child group.
     """
 
     def from_nexus(cls, group: snx.NXobject, **kwargs):
-        return cls(load(group.__getattr__(key.__name__[2:]), **kwargs))
+        c = group[key] if isinstance(key, str) else group.__getattr__(key.__name__[2:])
+        data = load(c, **kwargs)
+        return cls(data) if isinstance(data, dict) else data
 
     return type(name, (dict, ), dict(from_nexus=classmethod(from_nexus)))
 

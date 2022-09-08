@@ -122,3 +122,11 @@ def test_load_instrument_without_binning_to_pixels(nxroot):
     data = InstrumentWithDetectorsPyPulse.from_nexus(nxroot.entry)
     assert set(data.detectors) == {'det0', 'det1'}
     assert 'event_time_zero' in data.detectors['det0'].coords
+
+
+NamedLeaf = nexus.make_leaf("NamedLeaf", "det1")
+
+
+def test_loaded_named_leaf(nxroot):
+    data = NamedLeaf.from_nexus(nxroot.entry.instrument)
+    assert sc.identical(data, nxroot.entry.instrument['det1'][()])
