@@ -130,3 +130,28 @@ NamedLeaf = nexus.make_leaf("NamedLeaf", "det1")
 def test_loaded_named_leaf(nxroot):
     data = NamedLeaf.from_nexus(nxroot.entry.instrument)
     assert sc.identical(data, nxroot.entry.instrument['det1'][()])
+
+
+DetectorsWithKwarg = nexus.make_section("DetectorsWithKwarg", snx.NXdetector,
+                                        lambda group, *, extra: extra)
+
+
+@dataclass
+class InstrumentKwarg(nexus.BasicInstrument):
+    detectors: DetectorsWithKwarg
+
+
+@dataclass
+class EntryKwarg(nexus.BasicEntry):
+    instrument: InstrumentKwarg
+
+
+def test_from_nexus_passes_kwarg_through_tree(nxroot):
+    with pytest.raises(TypeError):
+        data = EntryKwarg.from_nexus(nxroot)
+    data = EntryKwarg.from_nexus(nxroot, instrument={'detectors': {'extra': 1.2}})
+    assert data.instrument.detectors['det0'] == 1.2
+    assert data.instrument.detectors['det1'] == 1.2
+    data = EntryKwarg.from_nexus(nxroot, instrument={'detectors': {'extra': 1.3}})
+    assert data.instrument.detectors['det0'] == 1.3
+    assert data.instrument.detectors['det1'] == 1.3
