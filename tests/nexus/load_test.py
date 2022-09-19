@@ -114,12 +114,12 @@ DetectorByPulse = nexus.make_section("DetectorPyPulse", snx.NXdetector,
 
 
 @dataclass
-class InstrumentWithDetectorsPyPulse(nexus.InstrumentMixin):
+class InstrumentWithDetectorsByPulse(nexus.InstrumentMixin):
     detectors: DetectorByPulse
 
 
 def test_load_instrument_without_binning_to_pixels(nxroot):
-    data = InstrumentWithDetectorsPyPulse.from_nexus(nxroot.entry)
+    data = InstrumentWithDetectorsByPulse.from_nexus(nxroot.entry)
     assert set(data.detectors) == {'det0', 'det1'}
     assert 'event_time_zero' in data.detectors['det0'].coords
 
