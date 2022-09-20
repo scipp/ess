@@ -346,5 +346,7 @@ def q_resolution(data, direct_beam, lam_edges, moderator, l_collimation, r1, r2,
     std_dev_lam_sq *= sc.reciprocal(lam * lam)
     f = (4 * sc.pi * sc.pi) * sc.reciprocal(12 * lam * lam)
 
+    # We also want to store individual distributions to functions. i.e take each sub function
+    # and generate Gaussian curve out of it
     return sc.DataArray(f * (a1 + a2 + a3) + (q_sq * std_dev_lam_sq),
                         coords={'wavelength': lam, 'spectrum': d.coords['spectrum'].copy()})
