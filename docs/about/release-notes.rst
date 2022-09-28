@@ -3,8 +3,8 @@
 Release Notes
 =============
 
-v0.9.0 (August 2022)
---------------------
+v0.9.0 (September 2022)
+-----------------------
 
 See full changelog `here <https://github.com/scipp/ess/releases/tag/0.9.0>`_.
 
