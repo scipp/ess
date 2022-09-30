@@ -15,6 +15,7 @@ requirements:
     - ipywidgets
     - matplotlib
     - pooch
+    - scipp>=0.16.4
     - scippneutron>=0.9
 
 test:
