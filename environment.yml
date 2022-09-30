@@ -22,7 +22,7 @@ dependencies:
   - python-graphviz
   - scippneutron>=0.9.4
   - sphinx
-  - sphinx-book-theme
+  - sphinx-book-theme>=0.3
   - sphinx-copybutton
   - yapf
   - pip:
