@@ -22,10 +22,10 @@ dependencies:
   - python-graphviz
   - scippneutron>=0.9.4
   - sphinx
-  - sphinx-book-theme=0.2  # custom buttons in top bar do not work with version 0.3
+  - sphinx-book-theme>=0.3
   - sphinx-copybutton
   - yapf
   - pip:
     - nb-clean
-    - sphinx-autodoc-typehints>=1.17.0
+    - sphinx-autodoc-typehints==1.18.3
     - orsopy

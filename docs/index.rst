@@ -1,5 +1,21 @@
-ess - Data reduction for ESS instrumentation
-============================================
+.. raw:: html
+
+   <div style="display: block; margin-left: auto; margin-right: auto; width: 40%;">
+      <img src="_static/logo.svg" width="100%" />
+   </div>
+   <style> .transparent {opacity:0; font-size:10px} </style>
+
+.. role:: transparent
+
+:transparent:`ess`
+******************
+
+.. raw:: html
+
+   <div style="display: block;width: 100%;font-size:1.2em;font-style:italic;color:#5a5a5a;text-align: center;">
+      Data reduction for ESS instrumentation
+      </br></br>
+   </div>
 
 `European Spallation Source`_ (ESS) toolkit for neutron scattering data reduction powered by `scipp`_ and `scippneutron`_.
 Provides ESS facility and instrument bespoke tools.
@@ -21,17 +37,16 @@ This involves a "filtering" process, since scope and contribution guidelines are
 .. _scipp: https://scipp.github.io
 .. _scippneutron: https://scipp.github.io/scippneutron/index.html
 
-Documentation
-=============
-
 .. toctree::
    :maxdepth: 3
+   :hidden:
    :caption: Getting started
 
    getting-started/installation
 
 .. toctree::
    :maxdepth: 3
+   :hidden:
    :caption: Instruments
 
    instruments/amor/amor
@@ -40,6 +55,7 @@ Documentation
 
 .. toctree::
    :maxdepth: 3
+   :hidden:
    :caption: Techniques
 
    techniques/diffraction/diffraction
@@ -49,12 +65,14 @@ Documentation
 
 .. toctree::
    :maxdepth: 2
+   :hidden:
    :caption: Utilities
 
    utilities/utilities
 
 .. toctree::
    :caption: Developer documentation
+   :hidden:
    :maxdepth: 3
 
    developer/style-guide
@@ -62,6 +80,7 @@ Documentation
 
 .. toctree::
    :caption: About
+   :hidden:
    :maxdepth: 3
 
    about/release-notes

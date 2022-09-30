@@ -3,6 +3,23 @@
 Release Notes
 =============
 
+v0.9.0 (September 2022)
+-----------------------
+
+See full changelog `here <https://github.com/scipp/ess/releases/tag/0.9.0>`_.
+
+Features
+~~~~~~~~
+
+* Made ``ess`` compatible with ``scippneutron=0.9`` `#138 <https://github.com/scipp/ess/pull/136>`_.
+
+Contributors
+~~~~~~~~~~~~
+
+Simon Heybrock :sup:`a`\ ,
+Neil Vaytet :sup:`a`\ ,
+and Jan-Lukas Wynen :sup:`a`
+
 v0.8.0 (August 2022)
 --------------------
 
