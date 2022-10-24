@@ -60,10 +60,9 @@ def _load_single(group,
     # likely wanto to add better customization options.
     try:
         return group[index]
-    except (snx.NexusStructureError, KeyError, sc.DTypeError, ValueError,
-            IndexError) as e:
+    except (snx.NexusStructureError, KeyError, sc.DTypeError, ValueError, IndexError):
         if not skip_errors:
-            raise e from None
+            raise
 
 
 def _load_multi(load: Callable, items: Dict[str, snx.NXobject], /,
