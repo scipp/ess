@@ -18,7 +18,7 @@ def _load_dataclass(group: snx.NXobject, schema: type, arg_dict: dict):
     return schema(**loaded)
 
 
-T1 = TypeVar('T1', bound='InstrumentMixin')
+InstrumentMixinT = TypeVar('InstrumentMixinT', bound='InstrumentMixin')
 
 
 class InstrumentMixin:
@@ -27,12 +27,13 @@ class InstrumentMixin:
     """
 
     @classmethod
-    def from_nexus(cls: Type[T1], group: snx.NXobject, /, **kwargs: Any) -> T1:
+    def from_nexus(cls: Type[InstrumentMixinT], group: snx.NXobject, /,
+                   **kwargs: Any) -> InstrumentMixinT:
         """Load data from the NXinstrument group."""
         return _load_dataclass(group.instrument, cls, kwargs)
 
 
-T2 = TypeVar('T2', bound='EntryMixin')
+EntryMixinT = TypeVar('EntryMixinT', bound='EntryMixin')
 
 
 class EntryMixin:
@@ -41,8 +42,8 @@ class EntryMixin:
     """
 
     @classmethod
-    def from_nexus(cls: Type[T2], group: Union[snx.NXobject, PathLike], /,
-                   **kwargs: Any) -> T2:
+    def from_nexus(cls: Type[EntryMixinT], group: Union[snx.NXobject, PathLike], /,
+                   **kwargs: Any) -> EntryMixinT:
         """Load data from the NXentry group."""
         if isinstance(group, snx.NXentry):
             return _load_dataclass(group, cls, kwargs)
