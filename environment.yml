@@ -27,5 +27,6 @@ dependencies:
   - yapf
   - pip:
     - nb-clean
+    - plopp
     - sphinx-autodoc-typehints==1.18.3
     - orsopy
