@@ -315,3 +315,4 @@ dependencies:
     - nb-clean==2.3.0
     - orsopy==1.0.1
     - sphinx-autodoc-typehints==1.18.3
+    - plopp=0.3.3
