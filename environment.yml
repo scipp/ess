@@ -17,6 +17,7 @@ dependencies:
   - pandoc
   - pip
   - pooch
+  - plopp
   - pytest
   - pythreejs
   - python-graphviz
@@ -27,6 +28,5 @@ dependencies:
   - yapf
   - pip:
     - nb-clean
-    - plopp
     - sphinx-autodoc-typehints==1.18.3
     - orsopy
