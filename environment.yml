@@ -17,6 +17,7 @@ dependencies:
   - pandoc
   - pip
   - pooch
+  - plopp
   - pytest
   - pythreejs
   - python-graphviz
