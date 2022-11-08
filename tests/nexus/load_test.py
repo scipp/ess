@@ -40,8 +40,7 @@ def nxroot(request):
         mon0['event_time_zero'] = sc.array(dims=[''], unit='s', values=[1, 2, 3, 4])
         mon0['event_index'] = sc.array(dims=[''], unit=None, values=[0, 3, 3, 5])
         mon1 = entry.create_class('monitor1', snx.NXmonitor)
-        mon1['values'] = sc.array(dims=['time'], unit='ms', values=[10, 12, 9])
-        mon1.attrs['signal'] = 'values'
+        mon1['data'] = sc.array(dims=['time'], unit='ms', values=[10, 12, 9])
         mon1.attrs['axes'] = ['time']
 
         instrument = entry.create_class('instr', snx.NXinstrument)
