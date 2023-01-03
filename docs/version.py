@@ -10,7 +10,7 @@ import argparse
 
 def _get_releases() -> List[Version]:
     """Return reversed sorted list of release tag names."""
-    repo = git.Repo('.')
+    repo = git.Repo('..')
     return sorted([parse(t.name) for t in repo.tags], reverse=True)
 
 
