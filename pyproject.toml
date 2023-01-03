@@ -1,0 +1,23 @@
+[build-system]
+requires = [
+  "setuptools>=42",
+  "setuptools_scm[toml]>=6.2",
+]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+
+[tool.pytest.ini_options]
+addopts = "-ra -v"
+testpaths = "tests"
+filterwarnings = [
+  "error",
+  "ignore::UserWarning",
+  'ignore:\n            Sentinel is not a public part of the traitlets API:DeprecationWarning',
+  'ignore:Keyword `trait` is deprecated in traitlets 5.0, use `value_trait` instead:DeprecationWarning',
+  'ignore:Keyword `traits` is deprecated in traitlets 5.0, use `per_key_traits` instead:DeprecationWarning',
+  'ignore:Passing None into shape arguments as an alias for ():DeprecationWarning',]
+
+[tool.mypy]
+mypy_path = "src"
+ignore_missing_imports = true
