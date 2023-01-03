@@ -6,7 +6,7 @@ import scipp as sc
 from .common import gravity_vector
 from . import conversions
 from . import normalization
-from scipp.interpolate import interp1d
+from scipp.scipy.interpolate import interp1d
 
 
 def make_coordinate_transform_graphs(gravity: bool) -> Tuple[dict, dict]:
