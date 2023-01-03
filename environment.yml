@@ -12,6 +12,7 @@ channels:
 dependencies:
   - flake8
   - ipympl
+  - ipython==8.5.0
   - mantid
   - nbsphinx
   - pandoc
