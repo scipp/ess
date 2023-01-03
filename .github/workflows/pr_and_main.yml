@@ -42,8 +42,8 @@ jobs:
       matrix:
         os: ["ubuntu-22.04", "macos-11", "windows-2019"]
         python-version: ["3.8"]
-    # env:
-    #   DOCS_HTML_DIR: ${{ github.workspace }}/docs_html
+    env:
+      JUPYTER_PLATFORM_DIRS: 1
 
     steps:
       - uses: actions/checkout@v3
@@ -61,6 +61,7 @@ jobs:
             conda-build
 
       - run: conda develop src
+      - run: jupyter --paths
       - run: python -m pytest -v tests
       - run: python docs/make_docs.py --build_dir=docs_html_${{ matrix.os }}
 
