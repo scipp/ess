@@ -20,7 +20,10 @@ def _get_releases(repo: str, organization: str = 'scipp') -> List[Version]:
     if not ok:
         return []
     data = r.json()
-    return sorted([parse(e['tag_name']) for e in data if not e['draft']], reverse=True)
+    print(data)
+    out = sorted([parse(e['tag_name']) for e in data if not e['draft']], reverse=True)
+    print(out)
+    return out
 
 
 class VersionInfo:
