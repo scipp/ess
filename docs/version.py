@@ -12,8 +12,10 @@ def _get_releases(repo: str, organization: str = 'scipp') -> List[Version]:
     """Return reversed sorted list of release tag names."""
     max_tries = 3
     ok = False
+    print("IN _get_releases")
     for n in range(max_tries):
         r = requests.get(f'https://api.github.com/repos/{organization}/{repo}/releases')
+        print(r.status_code)
         ok = r.status_code == 200
         if ok:
             break
@@ -30,6 +32,7 @@ class VersionInfo:
 
     def __init__(self, repo: str, organization: str = 'scipp'):
         self._releases = _get_releases(repo=repo, organization=organization)
+        print('self._releases', self._releases)
 
     def _to_version(self, version) -> Version:
         if isinstance(version, str):
