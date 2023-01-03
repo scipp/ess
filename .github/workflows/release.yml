@@ -13,37 +13,58 @@ defaults:
     shell: bash -l {0}  # required for conda env
 
 jobs:
-  formatting:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      # Run this before any other commands so that git diff does not pick up formatting changes.
-      - run: |
-          find . -type f -not -path '.git/*' -exec sed -ri "s/[0-9]{4} (Scipp contributors)/$(date +%Y) \1/g" {} +
-          git diff --exit-code
-      - run: pip install flake8==4.0.1 nb-clean==2.1.0 yapf==0.32.0
-      - run: find . -type f -regex '.*\.ipynb' | xargs nb-clean clean --remove-empty-cells --preserve-cell-metadata
-      - run: yapf --recursive --in-place .
-      - run: flake8 .
-      - uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: Apply automatic formatting
 
   conda_build:
-    needs: formatting
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: ${{ github.head_ref }}
           fetch-depth: 0  # history required so cmake can determine version
-      - uses: conda-incubator/setup-miniconda@v2
-      - run: conda install --channel conda-forge --yes conda-build mamba boa
+
+      - name: Setup conda environment
+        uses: mamba-org/provision-with-micromamba@main
+        with:
+          micromamba-version: 1.1.0
+          environment-file: false
+          environment-name: build-release
+          channels: conda-forge
+          extra-specs: |
+            python=3.8
+            conda-build
+            boa
       - run: conda mambabuild --channel conda-forge --channel scipp --channel mantid --no-anaconda-upload --override-channels --output-folder conda/package conda
-      - uses: actions/upload-artifact@v2
+
+      - uses: actions/upload-artifact@v3
         with:
           name: conda-package-ess
           path: conda/package/*/ess*.tar.bz2
+
+  build_wheels:
+    name: Wheels
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # history required so setuptools_scm can determine version
+
+      - uses: actions/setup-python@v3
+        with:
+          python-version: 3.8
+
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -r requirements/wheels.txt
+
+      - name: Build wheels
+        run: python -m build
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: dist
+
 
   tests_and_docs:
     needs: conda_build

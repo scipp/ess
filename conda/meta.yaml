@@ -11,12 +11,12 @@ source:
 requirements:
   build:
     - setuptools
+    - setuptools_scm
   run:
     - ipywidgets
     - matplotlib
     - pooch
-    - scipp>=0.16.4
-    - scippneutron>=0.9
+    - scippneutron>=22.12.4
 
 test:
   imports:
@@ -28,7 +28,6 @@ test:
     - ess.loki
 
 build:
-  number: {{ environ.get('GIT_DESCRIBE_NUMBER', 0) }}
   noarch: python
   script:
     - pip install .

@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 
+import git
 import sys
 from typing import List
 from packaging.version import parse, Version, InvalidVersion
@@ -8,30 +9,32 @@ import requests
 import argparse
 
 
-def _get_releases(repo: str, organization: str = 'scipp') -> List[Version]:
+def _get_releases() -> List[Version]:
     """Return reversed sorted list of release tag names."""
-    max_tries = 3
-    ok = False
-    print("IN _get_releases")
-    for n in range(max_tries):
-        r = requests.get(f'https://api.github.com/repos/{organization}/{repo}/releases')
-        print(r.status_code)
-        ok = r.status_code == 200
-        if ok:
-            break
-    if not ok:
-        return []
-    data = r.json()
-    print(data)
-    out = sorted([parse(e['tag_name']) for e in data if not e['draft']], reverse=True)
-    print(out)
-    return out
+    repo = git.Repo('.')
+    return sorted([parse(t.name) for t in repo.tags], reverse=True)
+    # max_tries = 3
+    # ok = False
+    # print("IN _get_releases")
+    # for n in range(max_tries):
+    #     r = requests.get(f'https://api.github.com/repos/{organization}/{repo}/releases')
+    #     print(r.status_code)
+    #     ok = r.status_code == 200
+    #     if ok:
+    #         break
+    # if not ok:
+    #     return []
+    # data = r.json()
+    # print(data)
+    # out = sorted([parse(e['tag_name']) for e in data if not e['draft']], reverse=True)
+    # print(out)
+    # return out
 
 
 class VersionInfo:
 
-    def __init__(self, repo: str, organization: str = 'scipp'):
-        self._releases = _get_releases(repo=repo, organization=organization)
+    def __init__(self):
+        self._releases = _get_releases()
         print('self._releases', self._releases)
 
     def _to_version(self, version) -> Version:

@@ -11,6 +11,7 @@ channels:
 
 dependencies:
   - flake8
+  - gitpython
   - ipympl
   - ipython==8.5.0
   - mantid
