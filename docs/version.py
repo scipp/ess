@@ -10,15 +10,20 @@ import argparse
 
 def _get_releases() -> List[Version]:
     """Return reversed sorted list of release tag names."""
-    repo = git.Repo('..')
-    return sorted([parse(t.name) for t in repo.tags], reverse=True)
+    tags = git.Repo('..').tags
+    versions = []
+    for t in tags:
+        try:
+            versions.append(parse(t.name))
+        except InvalidVersion:
+            pass
+    return sorted(versions, reverse=True)
 
 
 class VersionInfo:
 
     def __init__(self):
         self._releases = _get_releases()
-        print('self._releases', self._releases)
 
     def _to_version(self, version) -> Version:
         if isinstance(version, str):
