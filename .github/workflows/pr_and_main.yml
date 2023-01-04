@@ -33,17 +33,15 @@ jobs:
         with:
           commit_message: Apply automatic formatting
 
-  tests_and_docs:
+  tests:
     needs: formatting
-    name: build ${{ matrix.os }}, py${{ matrix.python-version }}
+    name: ${{ matrix.os }}, py${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: ["ubuntu-22.04", "macos-11", "windows-2019"]
         python-version: ["3.8"]
-    env:
-      JUPYTER_PLATFORM_DIRS: 1
 
     steps:
       - uses: actions/checkout@v3
@@ -70,3 +68,10 @@ jobs:
         with:
           name: DocumentationHTML
           path: docs_html_${{ matrix.os }}
+
+
+  docs:
+    needs: tests
+    uses: ./.github/workflows/docs.yml
+    with:
+      platforms: ["ubuntu-22.04", "macos-11", "windows-2019"]
