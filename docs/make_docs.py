@@ -26,7 +26,6 @@ if __name__ == '__main__':
     docs_dir = pathlib.Path(__file__).parent.absolute()
     work_dir = get_abs_path(path=args.work_dir, root=docs_dir)
     build_dir = get_abs_path(path=args.build_dir, root=docs_dir)
-    build_dir = os.environ.get('DOCS_HTML_DIR', build_dir)
     if not os.path.exists(build_dir):
         os.makedirs(build_dir)
 

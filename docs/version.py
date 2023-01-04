@@ -1,33 +1,37 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 
+import git
 import sys
 from typing import List
-from packaging.version import parse, Version, LegacyVersion
-import requests
+from packaging.version import parse, Version, InvalidVersion
 import argparse
 
 
-def _get_releases(repo: str, organization: str = 'scipp') -> List[Version]:
+def _get_releases() -> List[Version]:
     """Return reversed sorted list of release tag names."""
-    r = requests.get(f'https://api.github.com/repos/{organization}/{repo}/releases')
-    if r.status_code != 200:
-        return []
-    data = r.json()
-    return sorted([parse(e['tag_name']) for e in data if not e['draft']], reverse=True)
+    tags = git.Repo('..').tags
+    versions = []
+    for t in tags:
+        try:
+            versions.append(parse(t.name))
+        except InvalidVersion:
+            pass
+    return sorted(versions, reverse=True)
 
 
 class VersionInfo:
 
-    def __init__(self, repo: str, organization: str = 'scipp'):
-        self._releases = _get_releases(repo=repo, organization=organization)
+    def __init__(self):
+        self._releases = _get_releases()
 
     def _to_version(self, version) -> Version:
         if isinstance(version, str):
-            version = parse(version)
-            # When not building for a tagged release we may get, e.g., 'main'.
-            # Pretend this means the current latest release.
-            if isinstance(version, LegacyVersion):
+            try:
+                return parse(version)
+            except InvalidVersion:
+                # When not building for a tagged release we may get, e.g., 'main'.
+                # Pretend this means the current latest release.
                 return self._releases[0]
         return version
 

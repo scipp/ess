@@ -1,0 +1,67 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
+
+name: Docs
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        default: false
+        type: boolean
+      version:
+        default: ''
+        required: false
+        type: string
+  workflow_call:
+    inputs:
+      publish:
+        default: false
+        type: boolean
+      version:
+        default: ''
+        required: false
+        type: string
+
+env:
+  VERSION: ${{ inputs.version }}
+  JUPYTER_PLATFORM_DIRS: 1
+
+jobs:
+  docs:
+    name: Build documentation
+    runs-on: 'ubuntu-22.04'
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.version }}
+          fetch-depth: 0  # history required so setuptools_scm can determine version
+
+      - name: Setup conda environment
+        uses: mamba-org/provision-with-micromamba@main
+        with:
+          micromamba-version: 1.1.0
+          environment-file: environment.yml
+          cache-env: true
+          extra-specs: |
+            python=${{ matrix.python-version }}
+            conda-build
+
+      - run: conda develop src
+      - run: jupyter --paths
+      - run: python docs/make_docs.py --build_dir=html
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: DocumentationHTML
+          path: html
+
+      - uses: JamesIves/github-pages-deploy-action@v4.4.1
+        if: ${{ inputs.publish }} && ${{ contains(matrix.os, 'ubuntu') }}
+        with:
+          branch: gh-pages
+          folder: html
+          target-folder: ${{ env.target }}
+          single-commit: true
+          clean-exclude: release

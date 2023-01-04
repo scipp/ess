@@ -22,7 +22,7 @@ project = u'ess'
 copyright = u'2022 Scipp contributors'
 author = u'Scipp contributors'
 
-version_info = VersionInfo(repo=project)
+version_info = VersionInfo()
 long_version = ess.__version__
 outdated = not version_info.is_latest(long_version)
 

@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
-# flake8: noqa
+
+# flake8: noqa F401
 
 from .beamline import make_fake_beamline
 from .stitch import stitch

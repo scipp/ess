@@ -11,7 +11,9 @@ channels:
 
 dependencies:
   - flake8
+  - gitpython
   - ipympl
+  - ipython==8.5.0
   - mantid
   - nbsphinx
   - pandoc
@@ -21,7 +23,7 @@ dependencies:
   - pytest
   - pythreejs
   - python-graphviz
-  - scippneutron>=0.9.4
+  - scippneutron==22.12.4
   - sphinx
   - sphinx-book-theme>=0.3
   - sphinx-copybutton

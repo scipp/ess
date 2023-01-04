@@ -9,28 +9,34 @@ from ess.diffraction import filtering
 
 def make_data_with_pulse_time(rng, n_event):
     start_time = sc.scalar(np.datetime64('2022-03-14T14:42:37.12345', 'ns'))
-    pulse_time = (
-        start_time +
-        sc.array(dims=['event'], values=rng.integers(0, 10**6, n_event), unit='ns'))
+    pulse_time = (start_time + sc.array(dims=['event'],
+                                        values=rng.integers(0, 10**6, n_event),
+                                        unit='ns',
+                                        dtype='int64'))
     events = sc.DataArray(sc.array(dims=['event'],
                                    values=rng.uniform(0.0, 2.0, n_event),
-                                   unit='counts'),
+                                   unit='counts',
+                                   dtype='int64'),
                           coords={
                               'tof':
                               sc.array(dims=['event'],
                                        values=rng.integers(10, 1000, n_event),
-                                       unit='us'),
+                                       unit='us',
+                                       dtype='int64'),
                               'pulse_time':
                               pulse_time,
                               'spectrum':
                               sc.array(dims=['event'],
                                        values=rng.integers(0, 10, n_event),
-                                       unit=None),
+                                       unit=None,
+                                       dtype='int64'),
                           })
     return sc.binning.make_binned(
         events,
-        edges=[sc.array(dims=['tof'], values=[10, 500, 1000], unit='us')],
-        groups=[sc.arange('spectrum', 0, 10, unit=None)])
+        edges=[
+            sc.array(dims=['tof'], values=[10, 500, 1000], unit='us', dtype='int64')
+        ],
+        groups=[sc.arange('spectrum', 0, 10, unit=None, dtype='int64')])
 
 
 def test_make_data_with_pulse_time():

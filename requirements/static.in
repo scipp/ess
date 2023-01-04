@@ -1,0 +1,5 @@
+flake8
+nbstripout
+toml
+tox
+yapf
