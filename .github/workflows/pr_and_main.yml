@@ -35,7 +35,7 @@ jobs:
 
   tests_and_docs:
     needs: formatting
-    name: ${{ matrix.os }}, py${{ matrix.python-version }}
+    name: ${{ matrix.os }}-py${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
