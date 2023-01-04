@@ -13,9 +13,6 @@ on:
         default: ''
         required: false
         type: string
-      platforms:
-        default: ['ubuntu-22.04']
-        type: choice
   workflow_call:
     inputs:
       publish:
@@ -25,9 +22,6 @@ on:
         default: ''
         required: false
         type: string
-      platforms:
-        default: ['ubuntu-22.04']
-        type: choice
 
 env:
   VERSION: ${{ inputs.version }}
@@ -36,12 +30,7 @@ env:
 jobs:
   docs:
     name: Build documentation
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: ${{ inputs.platforms }}
-        python-version: ["3.8"]
+    runs-on: 'ubuntu-22.04'
 
     steps:
       - uses: actions/checkout@v3
@@ -61,19 +50,18 @@ jobs:
 
       - run: conda develop src
       - run: jupyter --paths
-      - run: python docs/make_docs.py --build_dir=docs_html_${{ matrix.os }}
+      - run: python docs/make_docs.py --build_dir=html
 
       - uses: actions/upload-artifact@v3
-        if: ${{ contains(matrix.os, 'ubuntu') }}
         with:
           name: DocumentationHTML
-          path: docs_html_${{ matrix.os }}
+          path: html
 
       - uses: JamesIves/github-pages-deploy-action@v4.4.1
         if: ${{ inputs.publish }} && ${{ contains(matrix.os, 'ubuntu') }}
         with:
           branch: gh-pages
-          folder: docs_html_${{ matrix.os }}
+          folder: html
           target-folder: ${{ env.target }}
           single-commit: true
           clean-exclude: release
