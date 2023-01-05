@@ -63,7 +63,7 @@ jobs:
       - run: conda develop src
       - run: jupyter --paths
       - run: python -m pytest -v tests
-      - run: python docs/make_docs.py --build_dir=docs_html_${{ matrix.os }}
+      - run: python docs/make_docs.py --build-dir=docs_html_${{ matrix.os }}
 
       - uses: actions/upload-artifact@v3
         if: ${{ contains(matrix.os, 'ubuntu') }}
