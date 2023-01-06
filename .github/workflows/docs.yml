@@ -50,7 +50,7 @@ jobs:
 
       - run: conda develop src
       - run: jupyter --paths
-      - run: python docs/make_docs.py --build_dir=html
+      - run: python docs/make_docs.py --build-dir=html
 
       - uses: actions/upload-artifact@v3
         with:

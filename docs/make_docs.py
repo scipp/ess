@@ -8,26 +8,18 @@ import subprocess
 import sys
 
 parser = argparse.ArgumentParser(description='Build doc pages with sphinx')
-parser.add_argument('--build_dir', default='build')
-parser.add_argument('--work_dir', default='.doctrees')
+parser.add_argument('--build-dir', default=None)
+parser.add_argument('--work-dir', default=None)
 parser.add_argument('--builder', default='html')
-
-
-def get_abs_path(path, root):
-    if os.path.isabs(path):
-        return path
-    else:
-        return os.path.join(root, path)
-
 
 if __name__ == '__main__':
     args = parser.parse_args()
 
     docs_dir = pathlib.Path(__file__).parent.absolute()
-    work_dir = get_abs_path(path=args.work_dir, root=docs_dir)
-    build_dir = get_abs_path(path=args.build_dir, root=docs_dir)
-    if not os.path.exists(build_dir):
-        os.makedirs(build_dir)
+    work_dir = args.work_dir if args.work_dir is not None else os.path.join(
+        docs_dir, '.doctrees')
+    build_dir = args.build_dir if args.build_dir is not None else os.path.join(
+        docs_dir, 'build')
 
     # Build the docs with sphinx-build
     subprocess.check_call(
