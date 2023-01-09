@@ -1,4 +1,4 @@
-[![Anaconda-Server Badge](https://anaconda.org/scipp/ess/badges/installer/conda.svg)](https://conda.anaconda.org/scipp)
+[![Anaconda-Server Badge](https://anaconda.org/scipp/ess/badges/version.svg)](https://anaconda.org/scipp/ess)
 [![License: BSD 3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](LICENSE)
 [![Builds](https://github.com/scipp/ess/actions/workflows/release.yml/badge.svg)](https://github.com/scipp/ess/actions/workflows/release.yml)
 
