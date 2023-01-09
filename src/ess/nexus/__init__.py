@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # Author: Simon Heybrock
 """
 This package contains components (functions and classes) for custom loaders for NeXus
