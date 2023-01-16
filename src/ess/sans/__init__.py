@@ -3,7 +3,5 @@
 
 # flake8: noqa: F401
 
-from . import common
-from . import conversions
-from . import normalization
+from . import common, conversions, normalization
 from .i_of_q import to_I_of_Q

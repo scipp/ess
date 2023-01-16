@@ -6,8 +6,8 @@ Smoothing arrays data.
 
 from typing import Optional
 
-from scipp.scipy.signal import butter
 import scipp as sc
+from scipp.scipy.signal import butter
 
 from ..logging import get_logger
 

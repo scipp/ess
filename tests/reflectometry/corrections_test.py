@@ -1,8 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
-from ess.reflectometry import corrections
 from orsopy import fileio
+
+from ess.reflectometry import corrections
 
 
 def test_normalize_by_counts():

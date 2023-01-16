@@ -2,6 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 from scipp.constants import g
+
 from ..choppers import make_chopper
 from ..logging import log_call
 

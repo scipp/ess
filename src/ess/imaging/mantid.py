@@ -1,10 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
-import scippneutron as scn
-import scipp as sc
 import operator
 from functools import reduce
+
+import scipp as sc
+import scippneutron as scn
 
 
 def load_component_info_to_2d(geometry_file, sizes, advanced_geometry=False):

@@ -3,7 +3,7 @@
 
 # flake8: noqa F401
 
-from .beamline import make_fake_beamline
-from .stitch import stitch
-from .frames import get_frames
 from . import plot
+from .beamline import make_fake_beamline
+from .frames import get_frames
+from .stitch import stitch

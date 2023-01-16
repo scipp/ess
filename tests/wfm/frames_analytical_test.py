@@ -1,9 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-import ess.wfm as wfm
-import ess.choppers as ch
 import scipp as sc
 from scipp import constants
+
+import ess.choppers as ch
+import ess.wfm as wfm
 
 
 def _frames_from_slopes(data):

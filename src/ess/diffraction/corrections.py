@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-from typing import Any, Optional, Dict
+from typing import Any, Dict, Optional
 
 import scipp as sc
 from scippneutron.conversion.graph import beamline, tof
 
-from .smoothing import lowpass
 from ..logging import get_logger
+from .smoothing import lowpass
 
 
 def normalize_by_monitor(data: sc.DataArray,

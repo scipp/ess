@@ -4,4 +4,4 @@
 # flake8: noqa: F401
 
 from . import data
-from .io import load_sans2d, load_rkh_wav, load_rkh_q
+from .io import load_rkh_q, load_rkh_wav, load_sans2d

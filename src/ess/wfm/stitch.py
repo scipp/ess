@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-import scipp as sc
 from typing import Union
+
+import scipp as sc
 
 
 def _stitch_dense_data(item: sc.DataArray, frames: sc.Dataset, dim: str, new_dim: str,

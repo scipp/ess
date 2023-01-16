@@ -1,8 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+from typing import Union
+
 import numpy as np
 import scipp as sc
-from typing import Union
 
 _STD_TO_FWHM = sc.scalar(2.) * sc.sqrt(sc.scalar(2.) * sc.log(sc.scalar(2.)))
 
@@ -66,7 +67,7 @@ def linlogspace(dim: str,
     Parameters
     ----------
     dim:
-        The dimension of the ouptut Variable.
+        The dimension of the output Variable.
     edges:
         The edges for the different parts of the mesh.
     scale:
@@ -79,7 +80,7 @@ def linlogspace(dim: str,
         in each part of the mesh. If a list is supplied, the length of the list must be
         one less than the length of the `edges` parameter.
     unit:
-        The unit of the ouptut Variable.
+        The unit of the output Variable.
 
     Returns
     -------

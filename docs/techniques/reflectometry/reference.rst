@@ -21,10 +21,10 @@ Corrections
    corrections.normalize_by_counts
    corrections.beam_on_sample
 
-IO 
+IO
 --
 
-.. autosummary:: 
+.. autosummary::
    :toctree: ../../generated
-   
+
    io.save_ort

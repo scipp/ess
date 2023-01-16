@@ -2,11 +2,12 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 from typing import Tuple, Union
+
 import scipp as sc
-from .common import gravity_vector
-from . import conversions
-from . import normalization
 from scipp.scipy.interpolate import interp1d
+
+from . import conversions, normalization
+from .common import gravity_vector
 
 
 def make_coordinate_transform_graphs(gravity: bool) -> Tuple[dict, dict]:

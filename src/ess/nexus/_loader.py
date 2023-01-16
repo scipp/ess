@@ -1,9 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # Author: Simon Heybrock
-from os import PathLike
-from typing import Dict, Union, Callable, List, Any, Optional, TypeVar, Type
 from dataclasses import dataclass, fields
+from os import PathLike
+from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
+
 import scipp as sc
 import scippnexus as snx
 

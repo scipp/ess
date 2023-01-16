@@ -2,9 +2,9 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 import scipp as sc
-from scipp.constants import m_n, h
-from scippneutron.conversion.graph import beamline, tof
+from scipp.constants import h, m_n
 from scippneutron._utils import elem_unit
+from scippneutron.conversion.graph import beamline, tof
 
 
 def two_theta(gravity: sc.Variable, wavelength: sc.Variable, incident_beam: sc.Variable,

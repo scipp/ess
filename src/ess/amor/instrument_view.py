@@ -1,8 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
-from scipp.plotting.objects import Plot
 import scippneutron as scn
+from scipp.plotting.objects import Plot
+
 from .beamline import instrument_view_components
 
 
