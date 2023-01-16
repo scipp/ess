@@ -7,7 +7,7 @@ The easiest way to install ``ess`` is using `conda <https://docs.conda.io>`_.
 Packages from `Anaconda Cloud <https://conda.anaconda.org/scipp>`_ are available for Linux, macOS, and Windows.
 It is recommended to create an environment rather than installing individual packages.
 
-Mamba
+Install mamba
 -------------
 
 Instead of ``conda``, we recommend ``mamba`` as a conda package manager.
