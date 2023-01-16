@@ -24,7 +24,8 @@ def _equivalent_bin_indices(a, b) -> bool:
 
 @contextmanager
 def _temporary_bin_coord(data: sc.DataArray, name: str, coord: sc.Variable) -> None:
-    assert _equivalent_bin_indices(data, coord)
+    if not _equivalent_bin_indices(data, coord):
+        raise ValueError("data and coord do not have equivalent bin indices")
     coord = sc.bins(data=coord.bins.constituents['data'],
                     begin=data.bins.coords['pulse_time'].bins.constituents['begin'],
                     end=data.bins.coords['pulse_time'].bins.constituents['end'],

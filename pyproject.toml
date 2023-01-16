@@ -9,7 +9,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.bandit]
 # Excluding tests because bandit doesn't like `assert`.
-exclude_dirs = ["docs/conf.py", "tests", "install", "tools"]
+exclude_dirs = ["docs/conf.py", "docs/make_docs.py", "tests", "install", "tools"]
 
 [tool.codespell]
 ignore-words-list = "elemt"
