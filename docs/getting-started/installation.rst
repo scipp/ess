@@ -40,11 +40,13 @@ Mantid included environment file
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you want to install `mantid` along with `ess`` environment, download :download:`ess-mantid.yml <../environments/ess-mantid.yml>` and run the commands below.
-```
-conda env create -f ess-mantid.yml
-conda activate ess-mantid
-jupyter lab
-```
+
+.. code-block:: sh
+
+   conda env create -f ess-mantid.yml
+   conda activate ess-mantid
+   jupyter lab
+   
 
 Without the provided environment file
 -------------------------------------
