@@ -154,7 +154,7 @@ Breaking changes
 * A major rewrite of the reflectometry code was undertaken `#61 <https://github.com/scipp/ess/pull/61>`_:
 
   * The reflectometry and Amor Data classes were removed in favour of a formalism consisting of free-functions that accept Scipp DataArrays and Datasets.
-  * Moved the chopper class from the `wfm` submodule to free functions in its own ``choppers`` module.
+  * Moved the chopper class from the ``wfm`` submodule to free functions in its own ``choppers`` module.
   * The unit conversion (computing wavelength and Q) now use ``transform_coords``.
   * The Amor reduction notebook from ``ess-notebooks`` has been imported into the ``ess`` repository.
 
