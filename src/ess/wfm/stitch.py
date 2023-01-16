@@ -141,7 +141,7 @@ def stitch(
 
     if isinstance(data, sc.Dataset):
         stitched = sc.Dataset()
-        for i, (key, item) in enumerate(data.items()):
+        for key, item in data.items():
             stitched[key] = _stitch_item(item=item,
                                          dim=dim,
                                          frames=frames,
