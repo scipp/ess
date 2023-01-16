@@ -7,6 +7,19 @@ The easiest way to install ``ess`` is using `conda <https://docs.conda.io>`_.
 Packages from `Anaconda Cloud <https://conda.anaconda.org/scipp>`_ are available for Linux, macOS, and Windows.
 It is recommended to create an environment rather than installing individual packages.
 
+Mamba
+-------------
+
+Instead of ``conda``, we recommend ``mamba`` as a conda package manager.
+It is known that ``conda`` can be very slow and ``mamba`` can solve the problem.
+You can install ``mamba`` with the command below.
+
+   .. code-block:: sh
+      
+      conda install mamba -n base -c conda-forge
+
+Replace ``conda`` with ``mamba`` when you install any packages or create an environment.
+
 With the provided environment file
 ----------------------------------
 
@@ -16,7 +29,7 @@ With the provided environment file
    .. code-block:: sh
 
       conda activate
-      conda env create -f ess.yml
+      mamba env create -f ess.yml  # same as `conda env create -f ess.yml`
       conda activate ess
       jupyter lab
 
@@ -43,7 +56,8 @@ If you want to install ``mantid`` along with ``ess`` environment, download :down
 
 .. code-block:: sh
 
-   conda env create -f ess-mantid.yml
+   mamba env create -f ess-mantid.yml  # same as `conda env create -f ess-mantid.yml`
+   
    conda activate ess-mantid
    jupyter lab
    
@@ -55,12 +69,16 @@ To create a new conda environment with ``ess``:
 
 .. code-block:: sh
 
+   mamba create -n env_with_ess -c conda-forge -c scipp ess
+   # or
    conda create -n env_with_ess -c conda-forge -c scipp ess
 
 To add ``ess`` to an existing conda environment:
 
 .. code-block:: sh
 
+   mamba install -c conda-forge -c scipp ess
+   # or
    conda install -c conda-forge -c scipp ess
 
 .. note::
