@@ -70,8 +70,6 @@ To create a new conda environment with ``ess``:
 .. code-block:: sh
 
    mamba create -n env_with_ess -c conda-forge -c scipp ess
-   # or
-   conda create -n env_with_ess -c conda-forge -c scipp ess
 
 To add ``ess`` to an existing conda environment:
 
