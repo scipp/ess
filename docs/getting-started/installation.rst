@@ -52,7 +52,7 @@ The ``conda activate`` ensures that you are in your ``base`` environment.
 Using Mantid
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you want to install ``mantid`` along with ``ess`` environment, download :download:`ess-mantid.yml <../environments/ess-mantid.yml>` and run the commands below.
+If you want to install ``mantid`` alongside ``ess`` in your environment, use the :download:`ess-mantid.yml <../environments/ess-mantid.yml>` environment file instead:
 
 .. code-block:: sh
 
