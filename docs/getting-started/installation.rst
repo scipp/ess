@@ -49,7 +49,7 @@ You may want to remove your old environment first, e.g.,
 and then proceed as per instructions above.
 The ``conda activate`` ensures that you are in your ``base`` environment.
 
-Mantid included environment file
+Using Mantid
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you want to install ``mantid`` along with ``ess`` environment, download :download:`ess-mantid.yml <../environments/ess-mantid.yml>` and run the commands below.
