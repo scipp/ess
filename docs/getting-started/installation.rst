@@ -76,8 +76,6 @@ To add ``ess`` to an existing conda environment:
 .. code-block:: sh
 
    mamba install -c conda-forge -c scipp ess
-   # or
-   conda install -c conda-forge -c scipp ess
 
 .. note::
    Installing ``ess`` on Windows requires ``Microsoft Visual Studio 2019 C++ Runtime`` installed.
