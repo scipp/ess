@@ -18,7 +18,7 @@ You can install ``mamba`` with the command below.
       
       conda install mamba -n base -c conda-forge
 
-Replace ``conda`` with ``mamba`` when you install any packages or create an environment.
+Once ``mamba`` is installed, you can replace ``conda`` with ``mamba`` when you install any packages or create an environment.
 
 With the provided environment file
 ----------------------------------
