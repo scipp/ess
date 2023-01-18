@@ -20,7 +20,7 @@ You can install ``mamba`` with the command below.
 
 Once ``mamba`` is installed, you can replace ``conda`` with ``mamba`` when you install any packages or create an environment.
 
-With the provided environment file
+Use the provided environment file
 ----------------------------------
 
 1. Download :download:`ess.yml <../environments/ess.yml>`.
