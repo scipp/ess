@@ -8,9 +8,9 @@
 
 name: ci
 channels:
+  - conda-forge
   - scipp
   - mantid
-  - conda-forge
   - nodefaults
 dependencies:
   - _libgcc_mutex=0.1
@@ -299,4 +299,3 @@ dependencies:
     - nb-clean==2.4.0
     - orsopy==1.0.1
     - sphinx-autodoc-typehints==1.18.3
-prefix: /home/nvaytet/software/miniconda3/envs/ess-ci2
