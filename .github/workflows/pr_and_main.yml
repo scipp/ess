@@ -35,13 +35,12 @@ jobs:
 
   tests_and_docs:
     needs: formatting
-    name: ${{ matrix.os }}-py${{ matrix.python-version }}
+    name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: ["ubuntu-22.04", "macos-11", "windows-2019"]
-        python-version: ["3.8"]
     env:
       JUPYTER_PLATFORM_DIRS: 1
 
@@ -56,9 +55,6 @@ jobs:
           micromamba-version: 1.1.0
           environment-file: .buildconfig/ci.yml
           cache-env: true
-          extra-specs: |
-            python=${{ matrix.python-version }}
-            conda-build
 
       - run: conda develop src
       - run: jupyter --paths

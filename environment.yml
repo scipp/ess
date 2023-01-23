@@ -10,6 +10,7 @@ channels:
   - nodefaults
 
 dependencies:
+  - conda-build
   - flake8
   - gitpython
   - ipympl
