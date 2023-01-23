@@ -53,7 +53,7 @@ jobs:
         uses: mamba-org/provision-with-micromamba@main
         with:
           micromamba-version: 1.1.0
-          environment-file: .buildconfig/ci.yml
+          environment-file: environment.yml
           cache-env: true
 
       - run: conda develop src

@@ -10,26 +10,26 @@ channels:
   - nodefaults
 
 dependencies:
-  - conda-build
-  - flake8
-  - gitpython
-  - ipympl
+  - conda-build=3.23.3
+  - flake8=6.0.0
+  - gitpython=3.1.30
+  - ipympl=0.9.2
   - ipython==8.5.0
-  - mantid
-  - nbsphinx
-  - pandoc
-  - pip
-  - pooch
-  - plopp
-  - pytest
-  - pythreejs
-  - python-graphviz
+  - mantid=6.5.0
+  - nbsphinx=0.8.12
+  - pandoc=2.19.2
+  - pip=22.3.1
+  - plopp=23.01.0
+  - pooch=1.6.0
+  - pytest=7.2.1
+  - python-graphviz=0.20.1
+  - pythreejs=2.4.1
   - scippneutron==22.12.4
-  - sphinx
-  - sphinx-book-theme>=0.3
-  - sphinx-copybutton
-  - yapf
+  - sphinx=4.5.0
+  - sphinx-book-theme=0.3.3
+  - sphinx-copybutton=0.5.0
+  - yapf=0.32.0
   - pip:
-    - nb-clean
+    - nb-clean==2.4.0
+    - orsopy==1.0.1
     - sphinx-autodoc-typehints==1.18.3
-    - orsopy
