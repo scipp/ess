@@ -46,7 +46,7 @@ jobs:
         uses: mamba-org/provision-with-micromamba@main
         with:
           micromamba-version: 1.1.0
-          environment-file: environment.yml
+          environment-file: .buildconfig/ci.yml
           cache-env: true
           extra-specs: |
             python=3.8
