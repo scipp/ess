@@ -1,8 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
-from . import orso
+
 from ..amor.tools import fwhm_to_std
+from . import orso
 
 
 def footprint_correction(data_array: sc.DataArray) -> sc.DataArray:

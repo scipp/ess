@@ -1,10 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 from dataclasses import dataclass
+
 import h5py
 import pytest
 import scipp as sc
 import scippnexus as snx
+
 from ess import nexus
 
 

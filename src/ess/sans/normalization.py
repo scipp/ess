@@ -70,7 +70,7 @@ def compute_denominator(direct_beam: sc.DataArray, data_incident_monitor: sc.Dat
 
 def normalize(numerator: sc.DataArray, denominator: sc.DataArray) -> sc.DataArray:
     """
-    Perform normalization of counts as a fucntion of Q.
+    Perform normalization of counts as a function of Q.
     If the numerator contains events, we use the sc.lookup function to perform the
     division.
 

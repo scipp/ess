@@ -3,8 +3,8 @@
 from typing import Optional
 
 import scipp as sc
-from scipp.plotting.objects import Plot
 import scippneutron as scn
+from scipp.plotting.objects import Plot
 
 
 def instrument_view(da: sc.DataArray,

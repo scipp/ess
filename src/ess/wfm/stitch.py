@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-import scipp as sc
 from typing import Union
+
+import scipp as sc
 
 
 def _stitch_dense_data(item: sc.DataArray, frames: sc.Dataset, dim: str, new_dim: str,
@@ -140,7 +141,7 @@ def stitch(
 
     if isinstance(data, sc.Dataset):
         stitched = sc.Dataset()
-        for i, (key, item) in enumerate(data.items()):
+        for key, item in data.items():
             stitched[key] = _stitch_item(item=item,
                                          dim=dim,
                                          frames=frames,

@@ -8,7 +8,5 @@ files, as well as some pre-build loaders for common cases.
 
 # flake8: noqa F401
 
-from ._loader import EntryMixin, InstrumentMixin
-from ._loader import BasicEntry, BasicInstrument
-from ._loader import Fields, Choppers, Detectors, Monitors, Sample, Source
-from ._loader import make_leaf, make_section
+from ._loader import BasicEntry, BasicInstrument, Choppers, Detectors, EntryMixin, \
+    Fields, InstrumentMixin, Monitors, Sample, Source, make_leaf, make_section

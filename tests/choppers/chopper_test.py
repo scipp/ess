@@ -1,8 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import numpy as np
-import scipp as sc
 import pytest
+import scipp as sc
+
 import ess.choppers as ch
 
 

@@ -1,17 +1,19 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-from typing import Any, Optional
 import warnings
 from datetime import datetime
+from typing import Any, Optional
+
 import scipp as sc
 import scippneutron as scn
-from .beamline import make_beamline
+
 from ..logging import get_logger
+from .beamline import make_beamline
 
 
 def _tof_correction(data: sc.DataArray, dim: str = 'tof') -> sc.DataArray:
     """
-    A correction for the presense of the chopper with respect to the "true" ToF.
+    A correction for the presence of the chopper with respect to the "true" ToF.
     Also fold the two pulses.
     TODO: generalise mechanism to fold any number of pulses.
 

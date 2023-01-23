@@ -1,9 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-import scipp as sc
 from typing import Union
-from .. import choppers as ch
+
+import scipp as sc
 import scipp.constants as constants
+
+from .. import choppers as ch
 
 
 def get_frames(data: Union[sc.DataArray, sc.Dataset]) -> sc.Dataset:

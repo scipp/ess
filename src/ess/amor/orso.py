@@ -1,10 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-from .. import __version__
-
-from datetime import datetime
 import platform
+from datetime import datetime
+
 from orsopy import fileio
+
+from .. import __version__
 
 
 def make_orso(owner: fileio.base.Person, sample: fileio.data_source.Sample,
