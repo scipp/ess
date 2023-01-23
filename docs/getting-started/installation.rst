@@ -15,7 +15,7 @@ It is known that ``conda`` can be very slow and ``mamba`` can solve the problem.
 You can install ``mamba`` with the command below.
 
    .. code-block:: sh
-      
+
       conda install mamba -n base -c conda-forge
 
 Once ``mamba`` is installed, you can replace ``conda`` with ``mamba`` when you install any packages or create an environment.
@@ -29,7 +29,7 @@ Use the provided environment file
    .. code-block:: sh
 
       conda activate
-      mamba env create -f ess.yml  # same as `conda env create -f ess.yml`
+      mamba env create -f ess.yml  # same as ``conda env create -f ess.yml``
       conda activate ess
       jupyter lab
 
@@ -56,11 +56,11 @@ If you want to install ``mantid`` alongside ``ess`` in your environment, use the
 
 .. code-block:: sh
 
-   mamba env create -f ess-mantid.yml  # same as `conda env create -f ess-mantid.yml`
-   
+   mamba env create -f ess-mantid.yml  # same as ``conda env create -f ess-mantid.yml``
+
    conda activate ess-mantid
    jupyter lab
-   
+
 
 Without the provided environment file
 -------------------------------------
