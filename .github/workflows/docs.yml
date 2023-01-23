@@ -23,6 +23,10 @@ on:
         required: false
         type: string
 
+defaults:
+  run:
+    shell: bash -l {0}  # required for conda env
+
 env:
   VERSION: ${{ inputs.version }}
   JUPYTER_PLATFORM_DIRS: 1
@@ -45,7 +49,7 @@ jobs:
           environment-file: environment.yml
           cache-env: true
           extra-specs: |
-            python=${{ matrix.python-version }}
+            python=3.8
             conda-build
 
       - run: conda develop src
@@ -58,7 +62,7 @@ jobs:
           path: html
 
       - uses: JamesIves/github-pages-deploy-action@v4.4.1
-        if: ${{ inputs.publish }} && ${{ contains(matrix.os, 'ubuntu') }}
+        if: ${{ inputs.publish }}
         with:
           branch: gh-pages
           folder: html
