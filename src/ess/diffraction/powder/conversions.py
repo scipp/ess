@@ -4,13 +4,13 @@
 Coordinate transformations for powder diffraction.
 """
 
-from typing import Optional
 import uuid
+from typing import Optional
 
 import scipp as sc
 
-from .corrections import merge_calibration
 from ...logging import get_logger
+from .corrections import merge_calibration
 
 
 def _dspacing_from_diff_calibration_generic_impl(t, t0, a, c):

@@ -12,8 +12,8 @@ import scipp as sc
 import scippneutron as scn
 from scippneutron.conversion.graph import beamline, tof
 
-from ...logging import get_logger
 from ...diffraction.filtering import remove_bad_pulses
+from ...logging import get_logger
 
 # TODO Normalization by and filtering based on proton charge
 #  with subtraction of the empty instrument

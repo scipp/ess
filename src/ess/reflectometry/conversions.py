@@ -1,9 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
-from scipp.constants import m_n, h, pi
-from scippneutron.conversion.graph import beamline, tof
+from scipp.constants import h, m_n, pi
 from scippneutron._utils import elem_dtype, elem_unit
+from scippneutron.conversion.graph import beamline, tof
+
 from . import orso
 
 
@@ -178,6 +179,7 @@ def wavelength_to_theta(data_array: sc.DataArray,
                     data_array_theta.coords['theta'].max().value,
                     data_array_theta.bins.coords['theta'].min().unit))
         import inspect
+
         # Determine if 'gravity' is in the graph and if to add the gravity correction
         if any([
                 'gravity' in i.parameters.keys()
@@ -221,7 +223,7 @@ def theta_to_q(data_array: sc.DataArray,
 
 def sum_bins(data_array: sc.DataArray):
     """
-    Sum the event bins and propogate the maximum resolution, where available.
+    Sum the event bins and propagate the maximum resolution, where available.
 
     Parameters
     ----------

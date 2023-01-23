@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
+
 from .tools import fwhm_to_std
 
 
@@ -37,7 +38,7 @@ def sample_size_resolution(pixel_position: sc.Variable,
                            sample_size: sc.Variable) -> sc.Variable:
     """
     The resolution from the projected sample size, where it may be bigger
-    than the detector pixel resolution as described in Secion 4.3.3 of the Amor
+    than the detector pixel resolution as described in Section 4.3.3 of the Amor
     publication (doi: 10.1016/j.nima.2016.03.007).
 
     Parameters

@@ -15,17 +15,17 @@ Logging can be configured using :py:func:`ess.logging.configure` or
 Use the latter at the beginning of workflow notebooks.
 """
 
-from copy import copy
 import functools
-import logging.config
-import logging
 import inspect
+import logging
+import logging.config
+from copy import copy
 from os import PathLike
 from typing import Any, Callable, List, Optional, Sequence, Union
 
-from scipp.utils import running_in_jupyter
 import scipp as sc
 import scippneutron as scn
+from scipp.utils import running_in_jupyter
 
 
 def get_logger(subname: Optional[str] = None) -> logging.Logger:
@@ -82,7 +82,7 @@ class Formatter(logging.Formatter):
         Initialize the formatter.
 
         The formatting is mostly fixed.
-        Only printing of thread and processor names cna be toggled using the
+        Only printing of thread and processor names can be toggled using the
         corresponding arguments.
         Times are always printed in ISO 8601 format.
         """

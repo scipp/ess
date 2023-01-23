@@ -3,6 +3,4 @@
 
 # flake8: noqa: F401
 
-from . import corrections
-from . import conversions
-from . import io
+from . import conversions, corrections, io

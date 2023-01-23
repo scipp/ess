@@ -9,5 +9,5 @@ try:
 except ImportError:
     __version__ = "0.0.0-unknown"
 
-from .logging import get_logger
 from . import logging
+from .logging import get_logger

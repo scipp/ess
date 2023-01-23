@@ -7,8 +7,7 @@ Note that this module is temporary and will be removed in favor of
 the ``dream`` module when that is available.
 """
 
-from . import beamline
-from . import data
+from . import beamline, data
 from .instrument_view import instrument_view
 from .load import load, load_and_preprocess_vanadium
 

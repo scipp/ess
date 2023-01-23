@@ -2,6 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import numpy as np
 import scipp as sc
+
 from ...choppers import make_chopper
 
 

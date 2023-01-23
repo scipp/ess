@@ -1,12 +1,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle
+import numpy as np
 import scipp as sc
+from matplotlib.patches import Rectangle
+
+from .. import choppers as ch
 from .frames import get_frames
 from .stitch import stitch
-from .. import choppers as ch
 
 
 def time_distance_diagram(data: sc.DataArray, **kwargs) -> plt.Figure:
