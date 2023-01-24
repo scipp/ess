@@ -41,8 +41,8 @@ jobs:
       fail-fast: false
       matrix:
         os: ["ubuntu-22.04", "macos-11", "windows-2019"]
-    # env:
-    #   JUPYTER_PLATFORM_DIRS: 1
+    env:
+      JUPYTER_PLATFORM_DIRS: 1
 
     steps:
       - uses: actions/checkout@v3
