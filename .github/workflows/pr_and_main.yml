@@ -33,16 +33,16 @@ jobs:
         with:
           commit_message: Apply automatic formatting
 
-  tests_and_docs:
+  tests:
     needs: formatting
-    name: ${{ matrix.os }}
+    name: tests-${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: ["ubuntu-22.04", "macos-11", "windows-2019"]
-    env:
-      JUPYTER_PLATFORM_DIRS: 1
+    # env:
+    #   JUPYTER_PLATFORM_DIRS: 1
 
     steps:
       - uses: actions/checkout@v3
@@ -57,12 +57,50 @@ jobs:
           cache-env: true
 
       - run: conda develop src
-      - run: jupyter --paths
+      # - run: jupyter --paths
       - run: python -m pytest -v tests
-      - run: python docs/make_docs.py --build-dir=docs_html_${{ matrix.os }}
+      # - run: python docs/make_docs.py --build-dir=docs_html_${{ matrix.os }}
 
-      - uses: actions/upload-artifact@v3
-        if: ${{ contains(matrix.os, 'ubuntu') }}
-        with:
-          name: DocumentationHTML
-          path: docs_html_${{ matrix.os }}
+      # - uses: actions/upload-artifact@v3
+      #   if: ${{ contains(matrix.os, 'ubuntu') }}
+      #   with:
+      #     name: DocumentationHTML
+      #     path: docs_html_${{ matrix.os }}
+
+  docs:
+    needs: tests
+    name: docs-${{ matrix.os }}
+    uses: ./.github/workflows/docs.yml
+    with:
+      publish: false
+      platform: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu-22.04", "macos-11", "windows-2019"]
+
+    # env:
+    #   JUPYTER_PLATFORM_DIRS: 1
+
+    # steps:
+    #   - uses: actions/checkout@v3
+    #     with:
+    #       fetch-depth: 0  # history required so cmake can determine version
+
+    #   - name: Setup conda environment
+    #     uses: mamba-org/provision-with-micromamba@main
+    #     with:
+    #       micromamba-version: 1.1.0
+    #       environment-file: environment.yml
+    #       cache-env: true
+
+    #   - run: conda develop src
+    #   - run: jupyter --paths
+    #   - run: python -m pytest -v tests
+    #   - run: python docs/make_docs.py --build-dir=docs_html_${{ matrix.os }}
+
+    #   - uses: actions/upload-artifact@v3
+    #     if: ${{ contains(matrix.os, 'ubuntu') }}
+    #     with:
+    #       name: DocumentationHTML
+    #       path: docs_html_${{ matrix.os }}
