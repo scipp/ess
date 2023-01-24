@@ -61,11 +61,11 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: DocumentationHTML
+          name: html_${{ inputs.platform }}
           path: html_${{ inputs.platform }}
 
       - uses: JamesIves/github-pages-deploy-action@v4.4.1
-        if: ${{ inputs.publish }} && ${{ contains(inputs.platform, 'ubuntu') }}
+        if: ${{ inputs.publish && contains(inputs.platform, 'ubuntu') }}
         with:
           branch: gh-pages
           folder: html_${{ inputs.platform }}
