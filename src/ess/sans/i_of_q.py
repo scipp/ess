@@ -169,7 +169,7 @@ def _convert_dense_to_q_and_merge_spectra(
     data_q.coords['wavelength'] = data_q.attrs.pop('wavelength')
     for i in range(wavelength_bands.sizes['wavelength'] - 1):
         band = data_q['wavelength', wavelength_bands[i]:wavelength_bands[i + 1]]
-        bands.append(sc.histogram(band, bins=q_bins).sum('spectrum'))
+        bands.append(band.hist({q_bins.dim: q_bins}).sum('spectrum'))
     q_summed = sc.concat(bands, 'wavelength')
     return q_summed
 
