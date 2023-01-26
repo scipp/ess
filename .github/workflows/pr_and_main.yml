@@ -33,15 +33,14 @@ jobs:
         with:
           commit_message: Apply automatic formatting
 
-  tests_and_docs:
+  tests:
     needs: formatting
-    name: ${{ matrix.os }}-py${{ matrix.python-version }}
+    name: tests-${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: ["ubuntu-22.04", "macos-11", "windows-2019"]
-        python-version: ["3.8"]
     env:
       JUPYTER_PLATFORM_DIRS: 1
 
@@ -56,17 +55,18 @@ jobs:
           micromamba-version: 1.1.0
           environment-file: environment.yml
           cache-env: true
-          extra-specs: |
-            python=${{ matrix.python-version }}
-            conda-build
 
       - run: conda develop src
-      - run: jupyter --paths
       - run: python -m pytest -v tests
-      - run: python docs/make_docs.py --build-dir=docs_html_${{ matrix.os }}
 
-      - uses: actions/upload-artifact@v3
-        if: ${{ contains(matrix.os, 'ubuntu') }}
-        with:
-          name: DocumentationHTML
-          path: docs_html_${{ matrix.os }}
+  docs:
+    needs: tests
+    name: docs-${{ matrix.os }}
+    uses: ./.github/workflows/docs.yml
+    with:
+      publish: false
+      platform: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu-22.04", "macos-11", "windows-2019"]

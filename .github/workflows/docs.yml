@@ -13,6 +13,9 @@ on:
         default: ''
         required: false
         type: string
+      platform:
+        default: 'ubuntu-22.04'
+        type: string
   workflow_call:
     inputs:
       publish:
@@ -22,6 +25,13 @@ on:
         default: ''
         required: false
         type: string
+      platform:
+        default: 'ubuntu-22.04'
+        type: string
+
+defaults:
+  run:
+    shell: bash -l {0}  # required for conda env
 
 env:
   VERSION: ${{ inputs.version }}
@@ -29,8 +39,8 @@ env:
 
 jobs:
   docs:
-    name: Build documentation
-    runs-on: 'ubuntu-22.04'
+    name: Documentation
+    runs-on: ${{ inputs.platform }}
 
     steps:
       - uses: actions/checkout@v3
@@ -44,24 +54,21 @@ jobs:
           micromamba-version: 1.1.0
           environment-file: environment.yml
           cache-env: true
-          extra-specs: |
-            python=${{ matrix.python-version }}
-            conda-build
 
       - run: conda develop src
       - run: jupyter --paths
-      - run: python docs/make_docs.py --build-dir=html
+      - run: python docs/make_docs.py --build-dir=html_${{ inputs.platform }}
 
       - uses: actions/upload-artifact@v3
         with:
-          name: DocumentationHTML
-          path: html
+          name: html_${{ inputs.platform }}
+          path: html_${{ inputs.platform }}
 
       - uses: JamesIves/github-pages-deploy-action@v4.4.1
-        if: ${{ inputs.publish }} && ${{ contains(matrix.os, 'ubuntu') }}
+        if: ${{ inputs.publish && contains(inputs.platform, 'ubuntu') }}
         with:
           branch: gh-pages
-          folder: html
+          folder: html_${{ inputs.platform }}
           target-folder: ${{ env.target }}
           single-commit: true
           clean-exclude: release
