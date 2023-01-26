@@ -24,6 +24,7 @@ dependencies:
   - pytest=7.2.1
   - python-graphviz=0.20.1
   - pythreejs=2.4.1
+  - scipp==22.11.0
   - scippneutron==22.12.4
   - sphinx=4.5.0
   - sphinx-book-theme=0.3.3
