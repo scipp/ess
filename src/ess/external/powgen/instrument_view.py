@@ -32,7 +32,8 @@ def instrument_view(da: sc.DataArray,
     # if 'camera' not in kwargs:
     #     kwargs = {
     #         **kwargs, 'camera': {
-    #             'position': sc.vector(value=[-3, 3, 3], unit=da.coords[positions].unit)
+    #             'position': sc.vector(value=[-3, 3, 3],
+    #                                   unit=da.coords[positions].unit)
     #         }
     #     }
     return scn.instrument_view(da,
