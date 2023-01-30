@@ -28,12 +28,14 @@ def instrument_view(da: sc.DataArray,
     kwargs:
         See :func:`scippneutron.instrument_view`
     """
-    if 'camera' not in kwargs:
-        kwargs = {
-            **kwargs, 'camera': {
-                'position': sc.vector(value=[-3, 3, 3], unit=da.coords[positions].unit)
-            }
-        }
+    # TODO: the camera argument does not work with the Plopp instrument view
+    # if 'camera' not in kwargs:
+    #     kwargs = {
+    #         **kwargs, 'camera': {
+    #             'position': sc.vector(value=[-3, 3, 3],
+    #                                   unit=da.coords[positions].unit)
+    #         }
+    #     }
     return scn.instrument_view(da,
                                positions=positions,
                                components=components,

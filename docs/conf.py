@@ -3,6 +3,7 @@
 
 import doctest
 import os
+import pathlib
 import sys
 from datetime import date
 from typing import Any, Dict, Optional
@@ -264,3 +265,7 @@ linkcheck_ignore = [
     # Specific lines in Github blobs cannot be found by linkcheck.
     r'https?://github\.com/.*?/blob/[a-f0-9]+/.+?#',
 ]
+
+# Set env variable to enable plopp
+docs_dir = pathlib.Path(__file__).parent.absolute()
+os.environ["SCIPPDIR"] = os.path.join(docs_dir, 'buildconfig')

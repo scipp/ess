@@ -78,7 +78,7 @@ def normalize_by_vanadium(data: sc.DataArray, *, vanadium: sc.DataArray,
     :
         `data` normalized by `vanadium`.
     """
-    norm = sc.lookup(sc.histogram(vanadium, bins=edges), dim=edges.dim)
+    norm = sc.lookup(vanadium.hist({edges.dim: edges}), dim=edges.dim)
     # Converting to unit 'one' because the division might produce a unit
     # with a large scale if the proton charges in data and vanadium were
     # measured with different units.

@@ -4,10 +4,7 @@ import scipp as sc
 from scippneutron.conversion.graph import beamline
 
 
-def group_by_two_theta(data: sc.DataArray,
-                       *,
-                       edges: sc.Variable,
-                       replace_dim: str = 'spectrum') -> sc.DataArray:
+def group_by_two_theta(data: sc.DataArray, *, edges: sc.Variable) -> sc.DataArray:
     """
     Group data into two_theta bins.
 
@@ -18,17 +15,11 @@ def group_by_two_theta(data: sc.DataArray,
         or coords or attrs that can be used to compute it.
     edges:
         Bin edges in two_theta. `data` is grouped into those bins.
-    replace_dim:
-        Dimension that is replaced by two_theta.
-        All events are concatenated along this dimension.
 
     Returns
     -------
     :
         `data` grouped into two_theta bins.
     """
-    data = data.transform_coords('two_theta', graph=beamline.beamline(scatter=True))
-    return sc.groupby(data,
-                      'two_theta',
-                      bins=edges.to(unit=data.coords['two_theta'].unit,
-                                    copy=False)).bins.concat(replace_dim)
+    out = data.transform_coords('two_theta', graph=beamline.beamline(scatter=True))
+    return out.bin(two_theta=edges.to(unit=out.coords['two_theta'].unit, copy=False))
