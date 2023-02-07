@@ -10,7 +10,8 @@ from . import conversions, normalization
 from .common import gravity_vector
 
 
-def make_coordinate_transform_graphs(gravity: bool) -> Tuple[dict, dict]:
+def make_coordinate_transform_graphs(gravity: bool,
+                                     scatter: bool = True) -> Tuple[dict, dict]:
     """
     Create unit conversion graphs.
     The gravity parameter can be used to turn on or off the effects of gravity.
@@ -19,7 +20,7 @@ def make_coordinate_transform_graphs(gravity: bool) -> Tuple[dict, dict]:
         effects of the Earth's gravitational field on the flight path of the neutrons
         when computing the scattering angle.
     """
-    data_graph = conversions.sans_elastic(gravity=gravity)
+    data_graph = conversions.sans_elastic(gravity=gravity, scatter=scatter)
     monitor_graph = conversions.sans_monitor()
     return data_graph, monitor_graph
 

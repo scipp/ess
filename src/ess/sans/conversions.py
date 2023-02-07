@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
+import numpy as np
 import scipp as sc
 from scipp.constants import h, m_n
 from scippneutron._utils import elem_unit
@@ -41,7 +42,13 @@ def two_theta(gravity: sc.Variable, wavelength: sc.Variable, incident_beam: sc.V
     return out
 
 
-def sans_elastic(gravity: bool = False) -> dict:
+def phi(position: sc.Variable) -> sc.Variable:
+    out = sc.atan2(y=position.fields.y, x=position.fields.x)
+    out.values = np.where(out.values < 0, 2 * np.pi + out.values, out.values)
+    return out
+
+
+def sans_elastic(gravity: bool = False, scatter: bool = True) -> dict:
     """
     Generate a coordinate transformation graph for SANS elastic scattering.
     By default, the effects of gravity on the neutron flight paths are not included.
@@ -49,9 +56,10 @@ def sans_elastic(gravity: bool = False) -> dict:
     :param gravity: Take into account the bending of the neutron flight paths from the
         Earth's gravitational field if ``True``.
     """
-    graph = {**beamline.beamline(scatter=True), **tof.elastic_Q("tof")}
+    graph = {**beamline.beamline(scatter=scatter), **tof.elastic_Q("tof")}
     if gravity:
         graph["two_theta"] = two_theta
+    graph['phi'] = phi
     return graph
 
 
