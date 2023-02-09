@@ -8,6 +8,7 @@ from scipp.scipy.interpolate import interp1d
 
 from . import conversions, normalization
 from .common import gravity_vector
+from ..logging import get_logger
 
 
 def make_coordinate_transform_graphs(gravity: bool,
@@ -103,7 +104,7 @@ def resample_direct_beam(direct_beam: sc.DataArray,
         return direct_beam
     func = interp1d(sc.values(direct_beam), 'wavelength')
     direct_beam = func(wavelength_bins, midpoints=True)
-    logger = sc.get_logger()
+    logger = get_logger('sans')
     logger.warning('An interpolation was performed on the direct_beam function. '
                    'The variances in the direct_beam function have been dropped.')
     return direct_beam
