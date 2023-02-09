@@ -162,7 +162,7 @@ def _convert_events_to_q_and_merge_spectra(
     # TODO: once scipp-0.12 is out, we no longer need to move the attr into the coords
     data_q.bins.coords['wavelength'] = data_q.bins.attrs.pop('wavelength')
 
-    q_summed = data_q.bins.concat('spectrum')
+    q_summed = data_q.bins.concat('detector_id')
     return sc.bin(q_summed, edges=[wavelength_bands, q_bins])
 
 
@@ -177,7 +177,7 @@ def _convert_dense_to_q_and_merge_spectra(
     data_q.coords['wavelength'] = data_q.attrs.pop('wavelength')
     for i in range(wavelength_bands.sizes['wavelength'] - 1):
         band = data_q['wavelength', wavelength_bands[i]:wavelength_bands[i + 1]]
-        bands.append(sc.histogram(band, bins=q_bins).sum('spectrum'))
+        bands.append(sc.histogram(band, bins=q_bins).sum('detector_id'))
     q_summed = sc.concat(bands, 'wavelength')
     return q_summed
 
