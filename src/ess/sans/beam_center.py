@@ -52,8 +52,7 @@ def beam_center(data: sc.DataArray,
                 masking_radius,
                 gravity: bool = False,
                 minimizer='Nelder-Mead',
-                tolerance=0.1,
-                debug=False):
+                tolerance=0.1):
     logger = get_logger('sans')
     if gravity and ('gravity' not in data.coords):
         data = data.copy(deep=False)
@@ -74,7 +73,7 @@ def beam_center(data: sc.DataArray,
                            (y.min().value, y.max().value)],
                    method=minimizer,
                    tol=tolerance)
-    out = [sc.scalar(res.x[0], unit=x.unit), sc.scalar(res.x[1], unit=y.unit)]
-    if debug:
-        out.append({'initialguess': (xc, yc), 'result': res})
-    return out
+    logger.info('Final beam center value: '
+                f'x={res.x[0]}[{xc.unit}], y={res.x[1]}[{yc.unit}]')
+    logger.info(f'Beam center finder minimizer info: {res}')
+    return sc.scalar(res.x[0], unit=x.unit), sc.scalar(res.x[1], unit=y.unit)
