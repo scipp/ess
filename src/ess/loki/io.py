@@ -6,10 +6,13 @@ import scippneutron as scn
 
 
 def load_sans2d(filename: str,
-                spectrum_size: int,
+                spectrum_size: int = 245760 // 4,
                 tof_bins: sc.Variable = None) -> sc.DataArray:
     """
-    Loading wrapper for ISIS SANS2D files
+    Loading wrapper for ISIS SANS2D files.
+    By default, we keep only a quater of the pixels:
+      - there are two detector panels, the second one is unused
+      - half of the pixels in each panel are used for live display
     """
     out = scn.load(filename=filename, mantid_args={"LoadMonitors": True})
     out = out["spectrum", :spectrum_size]
