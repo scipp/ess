@@ -18,6 +18,13 @@ def _center_of_mass(data):
     return com.fields.x, com.fields.y
 
 
+def _cost(data):
+    ref = data['phi', 0]
+    cost = ((data['phi', 1] - ref)**2 + (data['phi', 2] - ref)**2 +
+            (data['phi', 3] - ref)**2) / ref**2
+    return cost.sum().value
+
+
 def _refine(xy, data, graph, q_bins, masking_radius):
     """
     Compute the intensity as a function of Q inside 4 quadrants in Phi.
@@ -41,10 +48,10 @@ def _refine(xy, data, graph, q_bins, masking_radius):
     phi_bins = sc.linspace('phi', 0, pi * 2, 5, unit='rad') + phi_offset
     da_gr = sc.groupby(da_h, group='phi', bins=phi_bins).sum(
         (set(da_h.dims) - {'Q'}).pop())
-    ref = da_gr['phi', 0]
-    cost = ((da_gr['phi', 1] - ref)**2 + (da_gr['phi', 2] - ref)**2 +
-            (da_gr['phi', 3] - ref)**2) / ref**2
-    return cost.sum().value
+    # Normalize
+    out = da_gr / da_gr.sum('Q')
+    # Compute cost
+    return _cost(out)
 
 
 def beam_center(data: sc.DataArray,
