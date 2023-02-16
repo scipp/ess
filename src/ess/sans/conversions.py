@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
-import numpy as np
 import scipp as sc
 from scipp.constants import h, m_n, pi
 from scippneutron._utils import elem_unit
@@ -45,8 +44,6 @@ def two_theta(gravity: sc.Variable, wavelength: sc.Variable, incident_beam: sc.V
 def phi(position: sc.Variable) -> sc.Variable:
     return sc.atan2(y=position.fields.y,
                     x=position.fields.x) % (2 * (pi.value * sc.units.rad))
-    out.values = np.where(out.values < 0, 2 * np.pi + out.values, out.values)
-    return out
 
 
 def sans_elastic(gravity: bool = False, scatter: bool = True) -> dict:

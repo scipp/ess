@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
-from typing import Tuple, Union
+from typing import Dict, Optional, Tuple, Union
+import uuid
 
 import scipp as sc
 from scipp.scipy.interpolate import interp1d
@@ -17,9 +18,20 @@ def make_coordinate_transform_graphs(gravity: bool,
     Create unit conversion graphs.
     The gravity parameter can be used to turn on or off the effects of gravity.
 
-    :param gravity: If True, the coordinate transformation graph will incorporate the
+    Parameters
+    ----------
+    gravity:
+        If ``True``, the coordinate transformation graph will incorporate the
         effects of the Earth's gravitational field on the flight path of the neutrons
         when computing the scattering angle.
+    scatter:
+        If ``True``, make graph for scattering beamlines.
+
+    Returns
+    -------
+    :
+        Two coordinate transformation graphs: the first for the detector pixels, and
+        the second for the beam monitors.
     """
     data_graph = conversions.sans_elastic(gravity=gravity, scatter=scatter)
     monitor_graph = conversions.sans_monitor()
@@ -32,21 +44,44 @@ def convert_to_wavelength(data: sc.DataArray, monitors: dict, data_graph: dict,
     Convert the data array and all the items inside the dict of monitors to wavelength
     using a pre-defined conversion graph.
 
-    :param data: The data from the measurement that is to be converted to wavelength.
-    :param monitors: A dict of monitors. All entries in the dict will be converted to
-        wavelength.
-    :param data_graph: The coordinate transformation graph to be used for the data.
-    :param monitor_graph: The coordinate transformation graph to be used for the
-        monitors.
+    Parameters
+    ----------
+    data:
+        The data from the measurement that is to be converted to wavelength.
+    monitors:
+        A dict of monitors. All entries in the dict will be converted to wavelength.
+    data_graph:
+        The coordinate transformation graph to be used for the data.
+    monitor_graph:
+        The coordinate transformation graph to be used for the monitors.
+
+    Returns
+    -------
+    :
+        The input ``data`` and ``monitors`` converted to wavelength.
     """
     data = data.transform_coords("wavelength", graph=data_graph)
     monitors = _monitors_to_wavelength(monitors=monitors, graph=monitor_graph)
     return data, monitors
 
 
-def _monitors_to_wavelength(monitors, graph):
+def _monitors_to_wavelength(
+        monitors: Union[Dict[str, sc.DataArray], sc.DataArray],
+        graph: dict) -> Union[Dict[str, sc.DataArray], sc.DataArray]:
     """
     Recursively convert all monitors in dict.
+
+    Parameters
+    ----------
+    monitors:
+        The monitors whose time-of-flight coordinate is to be converted to wavelength.
+    graph:
+        The coordinate transformation graph to be used for the monitors.
+
+    Returns
+    -------
+    :
+        The input monitors converted to wavelength.
     """
     if isinstance(monitors, dict):
         return {
@@ -57,20 +92,31 @@ def _monitors_to_wavelength(monitors, graph):
         return monitors.transform_coords("wavelength", graph=graph)
 
 
-def denoise_and_rebin_monitors(monitors: Union[dict, sc.DataArray],
-                               wavelength_bins: sc.Variable,
-                               non_background_range: sc.Variable = None) -> dict:
+def denoise_and_rebin_monitors(
+    monitors: Union[Dict[str, sc.DataArray], sc.DataArray],
+    wavelength_bins: sc.Variable,
+    non_background_range: Optional[sc.Variable] = None
+) -> Union[Dict[str, sc.DataArray], sc.DataArray]:
     """
     Subtract a background baseline from monitor counts, taken as the mean of the counts
     outside the specified ``non_background_range``.
 
-    :param monitors: A DataArray containing monitor data, or a dict of monitor
-        DataArrays. In the case of a dict of monitors, all entries in the dict will
-        be background subtracted and rebinned.
-    :param wavelength_bins: The binning in wavelength to use for the rebinning.
-    :param non_background_range: The range of wavelengths that defines the data which
-        does not constitute background. Everything outside this range is treated as
-        background counts.
+    Parameters
+    ----------
+    monitors:
+        A DataArray containing monitor data, or a dict of monitor DataArrays.
+        In the case of a dict of monitors, all entries in the dict will be background
+        subtracted and rebinned.
+    wavelength_bins:
+        The binning in wavelength to use for the rebinning.
+    non_background_range:
+        The range of wavelengths that defines the data which does not constitute
+        background. Everything outside this range is treated as background counts.
+
+    Returns
+    -------
+    :
+        The input monitors with background signal subtracted from data counts.
     """
     if isinstance(monitors, dict):
         return {
@@ -95,10 +141,18 @@ def resample_direct_beam(direct_beam: sc.DataArray,
     If the wavelength binning of the direct beam function does not match the requested
     ``wavelength_bins``, perform a 1d interpolation of the function onto the bins.
 
-    :param direct_beam: The DataArray containing the direct beam function (it should
-        have a dimension of wavelength).
-    :param wavelength_bins: The binning in wavelength that the direct beam function
-        should be resampled to.
+    Parameters
+    ----------
+    direct_beam:
+        The DataArray containing the direct beam function (it should have a dimension
+        of wavelength).
+    wavelength_bins:
+        The binning in wavelength that the direct beam function should be resampled to.
+
+    Returns
+    -------
+    :
+        The direct beam function resampled to the requested resolution.
     """
     if sc.identical(direct_beam.coords['wavelength'], wavelength_bins):
         return direct_beam
@@ -119,16 +173,26 @@ def convert_to_q_and_merge_spectra(data: sc.DataArray, graph: dict,
       - In the case of event data, events in all bins are concatenated
       - In the case of dense data, counts in all spectra are summed
 
-    :param data: A DataArray containing the data that is to be converted to Q.
-    :param graph: The coordinate conversion graph used to perform the conversion to Q.
-    :param wavelength_bands: Defines bands in wavelength that can be used to separate
-        different wavelength ranges that contribute to different regions in Q space.
-        Note that this needs to be defined, so if all wavelengths should be used, this
-        should simply be a start and end edges that encompass the entire wavelength
-        range.
-    :param q_bins: The binning in Q to be used.
-    :param gravity: If True, include the effects of gravity when computing the
-        scattering angle.
+    Parameters
+    ----------
+    data:
+        A DataArray containing the data that is to be converted to Q.
+    graph:
+        The coordinate conversion graph used to perform the conversion to Q.
+    wavelength_bands:
+        Defines bands in wavelength that can be used to separate different wavelength
+        ranges that contribute to different regions in Q space. Note that this needs to
+        be defined, so if all wavelengths should be used, this should simply be a start
+        and end edges that encompass the entire wavelength range.
+    q_bins:
+        The binning in Q to be used.
+    gravity:
+        If ``True``, include the effects of gravity when computing the scattering angle.
+
+    Returns
+    -------
+    :
+        The input data converted to Q and then summed over all detector pixels.
     """
     if gravity:
         data = data.copy(deep=False)
@@ -190,6 +254,41 @@ def _make_dict_of_monitors(data_monitors, direct_monitors):
     return {'data': data_monitors, 'direct': direct_monitors}
 
 
+def _add_mask(da: sc.DataArray, mask: sc.DataArray, name: str) -> sc.DataArray:
+    """
+    Add wavelength mask to data array. If it contains binned data, use a top-level
+    mask. It the data is dense, use lookup to find the mask value for each bin.
+    """
+    if da.bins is not None:
+        da = da.bin({mask.dim: mask.coords[mask.dim]})
+        da.masks[name] = mask.data
+    else:
+        lu = sc.lookup(mask, mask.dim)
+        if da.coords.is_edges(mask.dim):
+            sampling = sc.midpoints(da.coords[mask.dim])
+        else:
+            sampling = da.coords[mask.dim]
+        da.masks[name] = lu[sampling]
+    return da
+
+
+def add_wavelength_mask(data: sc.DataArray, monitors: dict,
+                        mask: sc.DataArray) -> Tuple[sc.DataArray, dict]:
+    """
+    Add wavelength mask to data and monitors.
+    """
+    mask_name = uuid.uuid4().hex
+    data = _add_mask(data, mask=mask, name=mask_name)
+    monitors_out = {}
+    for group in monitors:
+        monitors_out[group] = {}
+        for key in monitors[group]:
+            monitors_out[group][key] = _add_mask(monitors[group][key],
+                                                 mask=mask,
+                                                 name=mask_name)
+    return data, monitors_out
+
+
 def to_I_of_Q(data: sc.DataArray,
               data_monitors: dict,
               direct_monitors: dict,
@@ -197,8 +296,9 @@ def to_I_of_Q(data: sc.DataArray,
               wavelength_bins: sc.Variable,
               q_bins: sc.Variable,
               gravity: bool = False,
-              monitor_non_background_range: sc.Variable = None,
-              wavelength_bands: sc.Variable = None) -> sc.DataArray:
+              monitor_non_background_range: Optional[sc.Variable] = None,
+              wavelength_mask: Optional[sc.DataArray] = None,
+              wavelength_bands: Optional[sc.Variable] = None) -> sc.DataArray:
     """
     Compute the scattering cross-section I(Q) for a SANS experimental run, performing
     binning in Q and a normalization based on monitor data and a direct beam function.
@@ -220,25 +320,42 @@ def to_I_of_Q(data: sc.DataArray,
        * Convert the denominator to momentum vector Q.
        * Normalize the detector data.
 
-    :param data: The DataArray containing the detector data. This can be both events
+    Parameters
+    ----------
+    data:
+        The DataArray containing the detector data. This can be both events
         or dense (histogrammed) data.
-    :param data_monitors: A dict containing the data array for the incident and
+    data_monitors:
+        A dict containing the data array for the incident and
         transmission monitors for the measurement run
-    :param direct_monitors: A dict containing the data array for the incident and
+    direct_monitors:
+        A dict containing the data array for the incident and
         transmission monitors for the direct (empty sample holder) run.
-    :param direct_beam: The direct beam function of the instrument (histogrammed,
+    direct_beam:
+        The direct beam function of the instrument (histogrammed,
         depends on wavelength).
-    :param wavelength_bins: The binning in the wavelength dimension to be used.
-    :param q_bins: The binning in the Q dimension to be used.
-    :param gravity: Include the effects of gravity when computing the scattering angle
-        if True.
-    :param monitor_non_background_range: The range of wavelengths for the monitors that
-        are considered to not be part of the background. This is used to compute the
-        background level on each monitor, which then gets subtracted from each monitor's
-        counts.
-    :param wavelength_bands: If defined, return the data as a set of bands in the
-        wavelength dimension. This is useful for separating different wavelength ranges
-        that contribute to different regions in Q space.
+    wavelength_bins:
+        The binning in the wavelength dimension to be used.
+    q_bins:
+        The binning in the Q dimension to be used.
+    gravity:
+        Include the effects of gravity when computing the scattering angle if ``True``.
+    monitor_non_background_range:
+        The range of wavelengths for the monitors that are considered to not be part of
+        the background. This is used to compute the background level on each monitor,
+        which then gets subtracted from each monitor's counts.
+    wavelength_mask:
+        Mask to apply to the wavelength coordinate (to mask out artifacts from the
+        instrument beamline).
+    wavelength_bands:
+        If defined, return the data as a set of bands in the wavelength dimension. This
+        is useful for separating different wavelength ranges that contribute to
+        different regions in Q space.
+
+    Returns
+    -------
+    :
+        The intensity as a function of Q.
     """
 
     monitors = _make_dict_of_monitors(data_monitors=data_monitors,
@@ -255,6 +372,11 @@ def to_I_of_Q(data: sc.DataArray,
         monitors=monitors,
         wavelength_bins=wavelength_bins,
         non_background_range=monitor_non_background_range)
+
+    if wavelength_mask is not None:
+        data, monitors = add_wavelength_mask(data=data,
+                                             monitors=monitors,
+                                             mask=wavelength_mask)
 
     transmission_fraction = normalization.transmission_fraction(
         data_monitors=monitors['data'], direct_monitors=monitors['direct'])

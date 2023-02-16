@@ -19,7 +19,14 @@ def solid_angle_of_rectangular_pixels(data: sc.DataArray, pixel_width: sc.Variab
     :param pixel_height: The height of the rectangular pixels.
     """
     L2 = scn.L2(data)
-    return (pixel_width * pixel_height) / (L2 * L2)
+    omega = (pixel_width * pixel_height) / (L2 * L2)
+    solid_angle = sc.DataArray(data=omega)
+    for key, mask in data.masks.items():
+        omega_dims = set(omega.dims)
+        mask_dims = set(mask.dims)
+        if omega_dims.issubset(mask_dims) or mask_dims.issubset(omega_dims):
+            solid_angle.masks[key] = mask
+    return solid_angle
 
 
 def transmission_fraction(data_monitors: dict, direct_monitors: dict) -> sc.DataArray:
