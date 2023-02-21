@@ -2,14 +2,20 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 """Tools for handling statistical uncertainties."""
 
-import scipp as sc
-from typing import Union, TypeVar
-from .logging import get_logger
+from typing import TypeVar, Union
 
+import scipp as sc
+
+from .logging import get_logger
 
 T = TypeVar("T", bound=Union[sc.Variable, sc.DataArray])
 
-def drop_variances(da: T, *, reference: Union[sc.Variable, sc.DataArray], name: str='', threshold: float=1.0) -> T:
+
+def drop_variances(da: T,
+                   *,
+                   reference: Union[sc.Variable, sc.DataArray],
+                   name: str = '',
+                   threshold: float = 1.0) -> T:
     # TODO cite our paper
     """Return the input values without variances.
 
@@ -47,13 +53,16 @@ def drop_variances(da: T, *, reference: Union[sc.Variable, sc.DataArray], name: 
     if alpha < threshold:
         logger.info(msg, f" of '{name}'" if name else '', alpha)
     else:
-        logger.warning(msg + ' This value may be too large and the uncertainties of the result may be underestimated.',
-                       f"of '{name}'" if name else '', alpha)
+        logger.warning(
+            msg + ' This value may be too large and the uncertainties of the result '
+            'may be underestimated.', f"of '{name}'" if name else '', alpha)
     return sc.values(da)
 
 
-def _compute_alpha(numerator: Union[sc.Variable, sc.DataArray], denominator: Union[sc.Variable, sc.DataArray]) -> float:
+def _compute_alpha(numerator: Union[sc.Variable, sc.DataArray],
+                   denominator: Union[sc.Variable, sc.DataArray]) -> float:
     alpha = numerator.sum().data / denominator.sum().data
     if alpha.unit != 'one':
-        raise sc.UnitError('Cannot compare counts, the reference has a different unit from the data.')
+        raise sc.UnitError(
+            'Cannot compare counts, the reference has a different unit from the data.')
     return float(alpha.value)
