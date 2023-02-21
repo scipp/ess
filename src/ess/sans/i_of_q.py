@@ -1,13 +1,14 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
-from typing import Tuple, Union
+from typing import Tuple, Union,Dict
 
 import scipp as sc
 from scipp.scipy.interpolate import interp1d
 
 from . import conversions, normalization
 from .common import gravity_vector
+from ..uncertainty import drop_variances
 
 
 def make_coordinate_transform_graphs(gravity: bool) -> Tuple[dict, dict]:
@@ -188,6 +189,35 @@ def _make_dict_of_monitors(data_monitors, direct_monitors):
     return {'data': data_monitors, 'direct': direct_monitors}
 
 
+def drop_monitor_variances(monitors: Dict[str, sc.DataArray], *, data: sc.DataArray) -> Dict[str, sc.DataArray]:
+    """
+    Return monitors without variances.
+
+    This is only valid if the monitors have significantly more counts
+    than the detector data.
+
+    Parameters
+    ----------
+    monitors:
+        Dict of monitors.
+    data:
+        Detector data the monitors correspond to.
+
+    Returns
+    -------
+    :
+        ``monitors`` without variances.
+
+    See Also
+    --------
+    ess.uncertainty.drop_monitor_variances:
+        Generic function for dropping variances.
+    """
+    return {name: drop_variances(monitor, reference=data, name=name+' monitor')
+            for name, monitor in monitors.items()}
+
+
+
 def to_I_of_Q(data: sc.DataArray,
               data_monitors: dict,
               direct_monitors: dict,
@@ -239,8 +269,8 @@ def to_I_of_Q(data: sc.DataArray,
         that contribute to different regions in Q space.
     """
 
-    monitors = _make_dict_of_monitors(data_monitors=data_monitors,
-                                      direct_monitors=direct_monitors)
+    monitors = _make_dict_of_monitors(data_monitors=drop_monitor_variances(data_monitors, data=data),
+                                      direct_monitors=drop_monitor_variances(direct_monitors, data=direct_beam))
 
     data_graph, monitor_graph = make_coordinate_transform_graphs(gravity=gravity)
 
