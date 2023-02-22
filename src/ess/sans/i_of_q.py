@@ -61,13 +61,12 @@ def convert_to_wavelength(data: sc.DataArray, monitors: dict, data_graph: dict,
         The input ``data`` and ``monitors`` converted to wavelength.
     """
     data = data.transform_coords("wavelength", graph=data_graph)
-    monitors = _monitors_to_wavelength(monitors=monitors, graph=monitor_graph)
+    monitors = monitors_to_wavelength(monitors=monitors, graph=monitor_graph)
     return data, monitors
 
 
-def _monitors_to_wavelength(
-        monitors: Union[Dict[str, sc.DataArray], sc.DataArray],
-        graph: dict) -> Union[Dict[str, sc.DataArray], sc.DataArray]:
+def monitors_to_wavelength(monitors: Union[Dict[str, sc.DataArray], sc.DataArray],
+                           graph: dict) -> Union[Dict[str, sc.DataArray], sc.DataArray]:
     """
     Recursively convert all monitors in dict.
 
@@ -85,7 +84,7 @@ def _monitors_to_wavelength(
     """
     if isinstance(monitors, dict):
         return {
-            key: _monitors_to_wavelength(monitors[key], graph=graph)
+            key: monitors_to_wavelength(monitors[key], graph=graph)
             for key in monitors
         }
     else:
@@ -128,6 +127,7 @@ def denoise_and_rebin_monitors(
     else:
         if non_background_range is not None:
             dim = non_background_range.dim
+            monitors.variances = None  # TODO: Hack to set variances to None
             below = monitors[dim, :non_background_range[0]]
             above = monitors[dim, non_background_range[1]:]
             background = sc.concat([below.data, above.data], dim=dim).mean()
@@ -164,9 +164,12 @@ def resample_direct_beam(direct_beam: sc.DataArray,
     return direct_beam
 
 
-def convert_to_q_and_merge_spectra(data: sc.DataArray, graph: dict,
-                                   wavelength_bands: sc.Variable, q_bins: sc.Variable,
-                                   gravity: bool) -> sc.DataArray:
+def convert_to_q_and_merge_spectra(
+        data: sc.DataArray,
+        graph: dict,
+        q_bins: sc.Variable,
+        gravity: bool,
+        wavelength_bands: Optional[sc.Variable] = None) -> sc.DataArray:
     """
     Convert the data to momentum vector Q. This accepts both dense and event data.
     The final step merges all spectra:
@@ -179,15 +182,15 @@ def convert_to_q_and_merge_spectra(data: sc.DataArray, graph: dict,
         A DataArray containing the data that is to be converted to Q.
     graph:
         The coordinate conversion graph used to perform the conversion to Q.
+    q_bins:
+        The binning in Q to be used.
+    gravity:
+        If ``True``, include the effects of gravity when computing the scattering angle.
     wavelength_bands:
         Defines bands in wavelength that can be used to separate different wavelength
         ranges that contribute to different regions in Q space. Note that this needs to
         be defined, so if all wavelengths should be used, this should simply be a start
         and end edges that encompass the entire wavelength range.
-    q_bins:
-        The binning in Q to be used.
-    gravity:
-        If ``True``, include the effects of gravity when computing the scattering angle.
 
     Returns
     -------
@@ -208,31 +211,40 @@ def convert_to_q_and_merge_spectra(data: sc.DataArray, graph: dict,
                                                     graph=graph,
                                                     q_bins=q_bins,
                                                     wavelength_bands=wavelength_bands)
-    if wavelength_bands.sizes['wavelength'] == 2:
+    if (wavelength_bands is not None) and (wavelength_bands.sizes['wavelength'] == 2):
         out = out['wavelength', 0]
     return out
 
 
 def _convert_events_to_q_and_merge_spectra(
-        data: sc.DataArray, graph: dict, q_bins: sc.Variable,
-        wavelength_bands: sc.Variable) -> sc.DataArray:
+        data: sc.DataArray,
+        graph: dict,
+        q_bins: sc.Variable,
+        wavelength_bands: Optional[sc.Variable] = None) -> sc.DataArray:
     """
     Convert event data to momentum vector Q.
     """
     data_q = data.transform_coords("Q", graph=graph)
     q_summed = data_q.bins.concat('spectrum')
-    return sc.binning.make_binned(q_summed, edges=[wavelength_bands, q_bins])
+    edges = [q_bins]
+    if wavelength_bands is not None:
+        edges = [wavelength_bands] + edges
+    return sc.binning.make_binned(q_summed, edges=edges)
 
 
 def _convert_dense_to_q_and_merge_spectra(
-        data: sc.DataArray, graph: dict, q_bins: sc.Variable,
-        wavelength_bands: sc.Variable) -> sc.DataArray:
+        data: sc.DataArray,
+        graph: dict,
+        q_bins: sc.Variable,
+        wavelength_bands: Optional[sc.Variable] = None) -> sc.DataArray:
     """
     Convert dense data to momentum vector Q.
     """
     bands = []
     data_q = data.transform_coords("Q", graph=graph)
     data_q.coords['wavelength'] = data_q.attrs.pop('wavelength')
+    if wavelength_bands is None:
+        return data_q.hist({q_bins.dim: q_bins}).sum('spectrum')
     for i in range(wavelength_bands.sizes['wavelength'] - 1):
         band = data_q['wavelength', wavelength_bands[i]:wavelength_bands[i + 1]]
         bands.append(band.hist({q_bins.dim: q_bins}).sum('spectrum'))
