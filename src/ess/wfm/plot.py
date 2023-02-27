@@ -33,7 +33,7 @@ def time_distance_diagram(data: sc.DataArray, **kwargs) -> plt.Figure:
     ax.grid(True, color='lightgray', linestyle="dotted")
     ax.set_axisbelow(True)
 
-    # Draw a light grey rectangle from the origin to t_0 + pulse_length + t_0
+    # Draw a light gray rectangle from the origin to t_0 + pulse_length + t_0
     # The second t_0 should in fact be the end of the pulse tail, but since this
     # information is not needed for computing the frame properties, it may
     # not be present in the description of the beamline.
@@ -47,7 +47,7 @@ def time_distance_diagram(data: sc.DataArray, **kwargs) -> plt.Figure:
                   fc='lightgrey',
                   ec='k',
                   zorder=10))
-    # Draw a dark grey rectangle from t_0 to t_0 + pulse_length to represent the usable
+    # Draw a dark gray rectangle from t_0 to t_0 + pulse_length to represent the usable
     # pulse.
     ax.add_patch(
         Rectangle((data.meta["source_pulse_t_0"].value, 0),

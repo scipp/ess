@@ -53,7 +53,7 @@ def normalize_by_monitor(data: sc.DataArray,
         mon = mon.rebin(wavelength=wavelength_edges)
     if smooth_args is not None:
         get_logger('diffraction').info(
-            "Smoothing monitor '%s' for normalisation using "
+            "Smoothing monitor '%s' for normalization using "
             "ess.diffraction.smoothing.lowpass with %s.", monitor, smooth_args)
         mon = lowpass(mon, dim='wavelength', **smooth_args)
     return data.bins / sc.lookup(func=mon, dim='wavelength')

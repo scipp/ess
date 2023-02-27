@@ -65,7 +65,7 @@ class OperationsTest(unittest.TestCase):
         test_value = 4
         data = np.array([bulk_value] * 9 * 9 * 4, dtype=np.float64).reshape(9, 9, 4)
         data = sc.Variable(dims=['y', 'x', 'z'], values=data)
-        data['z', 1]['x', 4]['y', 4].value = test_value  # centre at z == 1
+        data['z', 1]['x', 4]['y', 4].value = test_value  # center at z == 1
         data['z', 2]['x', 4]['y', 0].value = test_value  # edge at z == 3
         data['z', 3]['x', 0]['y', 0].value = test_value  # corner at z == 2
 
@@ -98,7 +98,7 @@ class OperationsTest(unittest.TestCase):
         test_value = 4.0
         data = np.array([bulk_value] * 9 * 9 * 4, dtype=np.float64).reshape(9, 9, 4)
         data = sc.Variable(dims=['y', 'x', 'z'], values=data)
-        data['z', 1]['x', 4]['y', 4].value = test_value  # centre at z == 1
+        data['z', 1]['x', 4]['y', 4].value = test_value  # center at z == 1
 
         data['z', 2]['x', 3]['y', 0].value = test_value  # edge at z == 3
         data['z', 2]['x', 4]['y', 0].value = test_value  # edge at z == 3
