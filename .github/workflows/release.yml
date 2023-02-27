@@ -78,7 +78,7 @@ jobs:
       - run: anaconda --token ${{ secrets.ANACONDATOKEN }} upload --user scipp --label main $(ls conda-package-*/*/*.tar.bz2)
       - uses: actions/setup-python@v3
 
-      # We disable pypi upload for now, because the name `ess` is not authorised
+      # We disable pypi upload for now, because the name `ess` is not authorized
       # - uses: pypa/gh-action-pypi-publish@v1.6.4
       #   with:
       #     user: __token__

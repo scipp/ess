@@ -13,7 +13,7 @@ def make_beamline() -> dict:
     https://doi.org/10.1016/j.nima.2016.09.034
 
     The +15.0 increments added to the angles correspond to an offset between the
-    zero angle and the chopper top-dead centre.
+    zero angle and the chopper top-dead center.
     """
 
     dim = 'frame'
