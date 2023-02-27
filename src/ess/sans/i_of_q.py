@@ -40,63 +40,36 @@ from ..logging import get_logger
 #     else:
 #         return conversions.sans_elastic(gravity=gravity, scatter=scatter)
 
+# def convert_to_wavelength(data: sc.DataArray, monitors: dict, data_graph: dict,
+#                           monitor_graph: dict) -> Tuple[sc.DataArray, dict]:
+#     """
+#     Convert the data array and all the items inside the dict of monitors to wavelength
+#     using a pre-defined conversion graph.
 
-def convert_to_wavelength(data: sc.DataArray, monitors: dict, data_graph: dict,
-                          monitor_graph: dict) -> Tuple[sc.DataArray, dict]:
-    """
-    Convert the data array and all the items inside the dict of monitors to wavelength
-    using a pre-defined conversion graph.
+#     Parameters
+#     ----------
+#     data:
+#         The data from the measurement that is to be converted to wavelength.
+#     monitors:
+#         A dict of monitors. All entries in the dict will be converted to wavelength.
+#     data_graph:
+#         The coordinate transformation graph to be used for the data.
+#     monitor_graph:
+#         The coordinate transformation graph to be used for the monitors.
 
-    Parameters
-    ----------
-    data:
-        The data from the measurement that is to be converted to wavelength.
-    monitors:
-        A dict of monitors. All entries in the dict will be converted to wavelength.
-    data_graph:
-        The coordinate transformation graph to be used for the data.
-    monitor_graph:
-        The coordinate transformation graph to be used for the monitors.
-
-    Returns
-    -------
-    :
-        The input ``data`` and ``monitors`` converted to wavelength.
-    """
-    data = data.transform_coords("wavelength", graph=data_graph)
-    monitors = monitors_to_wavelength(monitors=monitors, graph=monitor_graph)
-    return data, monitors
-
-
-def monitors_to_wavelength(monitors: Union[Dict[str, sc.DataArray], sc.DataArray],
-                           graph: dict) -> Union[Dict[str, sc.DataArray], sc.DataArray]:
-    """
-    Recursively convert all monitors in dict.
-
-    Parameters
-    ----------
-    monitors:
-        The monitors whose time-of-flight coordinate is to be converted to wavelength.
-    graph:
-        The coordinate transformation graph to be used for the monitors.
-
-    Returns
-    -------
-    :
-        The input monitors converted to wavelength.
-    """
-    if isinstance(monitors, dict):
-        return {
-            key: monitors_to_wavelength(monitors[key], graph=graph)
-            for key in monitors
-        }
-    else:
-        return monitors.transform_coords("wavelength", graph=graph)
+#     Returns
+#     -------
+#     :
+#         The input ``data`` and ``monitors`` converted to wavelength.
+#     """
+#     data = data.transform_coords("wavelength", graph=data_graph)
+#     monitors = monitors_to_wavelength(monitors=monitors, graph=monitor_graph)
+#     return data, monitors
 
 
-def denoise_and_rebin_monitors(
-    monitors: Union[Dict[str, sc.DataArray], sc.DataArray],
-    wavelength_bins: sc.Variable,
+def _denoise_and_rebin_monitor(
+    monitor: Union[Dict[str, sc.DataArray], sc.DataArray],
+    wavelength_bins: Optional[sc.Variable] = None,
     non_background_range: Optional[sc.Variable] = None
 ) -> Union[Dict[str, sc.DataArray], sc.DataArray]:
     """
@@ -105,10 +78,8 @@ def denoise_and_rebin_monitors(
 
     Parameters
     ----------
-    monitors:
-        A DataArray containing monitor data, or a dict of monitor DataArrays.
-        In the case of a dict of monitors, all entries in the dict will be background
-        subtracted and rebinned.
+    monitor:
+        A DataArray containing monitor data to be background subtracted and rebinned.
     wavelength_bins:
         The binning in wavelength to use for the rebinning.
     non_background_range:
@@ -118,24 +89,58 @@ def denoise_and_rebin_monitors(
     Returns
     -------
     :
-        The input monitors with background signal subtracted from data counts.
+        The input monitor with background signal subtracted from raw counts.
+    """
+    if non_background_range is not None:
+        dim = non_background_range.dim
+        monitor.variances = None  # TODO: Hack to set variances to None
+        below = monitor[dim, :non_background_range[0]]
+        above = monitor[dim, non_background_range[1]:]
+        background = sc.concat([below.data, above.data], dim=dim).mean()
+        monitor = monitor - background
+    if wavelength_bins is None:
+        return monitor
+    else:
+        return monitor.rebin(wavelength=wavelength_bins)
+
+
+def monitors_to_wavelength(
+    monitors: Union[Dict[str, sc.DataArray], sc.DataArray],
+    graph: dict,
+    wavelength_bins: sc.Variable,
+    non_background_range: Optional[sc.Variable] = None
+) -> Union[Dict[str, sc.DataArray], sc.DataArray]:
+    """
+    Recursively convert all monitors in dict.
+
+    Parameters
+    ----------
+    monitors:
+        The monitors whose time-of-flight coordinate is to be converted to wavelength.
+    graph:
+        The coordinate transformation graph to be used for the monitors.
+    wavelength_bins:
+        The binning in wavelength to use for the rebinning.
+    non_background_range:
+        The range of wavelengths that defines the data which does not constitute
+        background. Everything outside this range is treated as background counts.
+
+    Returns
+    -------
+    :
+        The input monitors converted to wavelength, cleaned of background counts, and
+        rebinned to the requested wavelength binning.
     """
     if isinstance(monitors, dict):
         return {
-            key: denoise_and_rebin_monitors(monitors[key],
-                                            wavelength_bins=wavelength_bins,
-                                            non_background_range=non_background_range)
+            key: monitors_to_wavelength(monitors[key], graph=graph)
             for key in monitors
         }
     else:
-        if non_background_range is not None:
-            dim = non_background_range.dim
-            monitors.variances = None  # TODO: Hack to set variances to None
-            below = monitors[dim, :non_background_range[0]]
-            above = monitors[dim, non_background_range[1]:]
-            background = sc.concat([below.data, above.data], dim=dim).mean()
-            monitors = monitors - background
-        return monitors.rebin(wavelength=wavelength_bins)
+        out = monitors.transform_coords("wavelength", graph=graph)
+        return _denoise_and_rebin_monitor(out,
+                                          wavelength_bins=wavelength_bins,
+                                          non_background_range=non_background_range)
 
 
 def resample_direct_beam(direct_beam: sc.DataArray,
