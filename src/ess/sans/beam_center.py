@@ -2,10 +2,13 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 import scipp as sc
+from typing import Dict
 
 from .common import gravity_vector
+from .conversions import sans_elastic
+from . import i_of_q
 from ..logging import get_logger
-from .i_of_q import make_coordinate_transform_graphs
+from .normalization import normalize
 
 
 def _center_of_mass(data):
@@ -18,48 +21,125 @@ def _center_of_mass(data):
     return com.fields.x, com.fields.y
 
 
-def _cost(data):
-    ref = data['phi', 0]
-    cost = ((data['phi', 1] - ref)**2 + (data['phi', 2] - ref)**2 +
-            (data['phi', 3] - ref)**2) / ref**2
-    return cost.sum().value
+def _cost(xy, data):
+    """
+    Cost function for determining how close the I(Q) curves are in all four quadrants.
+    """
+    ref = data['right']
+    c = ((data['top'] - ref)**2 + (data['left'] - ref)**2 +
+         (data['bottom'] - ref)**2) / ref**2
+    out = c.sum().value
+    print(xy, out)
+    return out
 
 
-def _refine(xy, data, graph, q_bins, masking_radius):
+def _refine(xy, sample, denominator, graph, q_bins, masking_radius, gravity):
     """
     Compute the intensity as a function of Q inside 4 quadrants in Phi.
     Return the sum of the squares of the relative differences between the 4 quadrants.
     """
-    da_init = data.copy(deep=False)
-    da_init.coords['position'] = data.coords['position'].copy(deep=True)
-    u = da_init.coords['position'].unit
-    da_init.coords['position'].fields.x -= sc.scalar(xy[0], unit=u)
-    da_init.coords['position'].fields.y -= sc.scalar(xy[1], unit=u)
-    r = sc.sqrt(da_init.coords['position'].fields.x**2 +
-                da_init.coords['position'].fields.y**2)
-    da_init.masks['m'] = r > masking_radius
-    da_q = da_init.transform_coords('Q', graph=graph)
-    da_phi = da_q.transform_coords('phi', graph=graph)
-    # Offset the phi angle by 45 degrees to get left,right,top,bottom quandrants.
+    # Make a copy of the original data
+    data = sample.copy(deep=False)
+    data.coords['position'] = data.coords['position'].copy(deep=True)
+    # Offset the position according to the initial guess from the center-of-mass
+    u = data.coords['position'].unit
+    data.coords['position'].fields.x -= sc.scalar(xy[0], unit=u)
+    data.coords['position'].fields.y -= sc.scalar(xy[1], unit=u)
+    # Add the circular mask
+    r = sc.sqrt(data.coords['position'].fields.x**2 +
+                data.coords['position'].fields.y**2)
+    data.masks['circle'] = r > masking_radius
+
+    # Insert a copy of coords and masks needed for conversion to Q
+    for coord in ['position', 'sample_position', 'source_position']:
+        denominator.coords[coord] = data.meta[coord]
+    denominator.masks.update(data.masks)
+
     pi = sc.constants.pi.value
     phi_offset = sc.scalar(pi / 4, unit='rad')
-    da_phi.coords['phi'] += phi_offset
-    da_h = da_phi.hist(Q=q_bins)
-    phi_bins = sc.linspace('phi', 0, pi * 2, 5, unit='rad') + phi_offset
-    da_gr = sc.groupby(da_h, group='phi', bins=phi_bins).sum(
-        (set(da_h.dims) - {'Q'}).pop())
-    # Normalize
-    out = da_gr / da_gr.sum('Q')
+    phi = (sc.atan2(y=data.coords['position'].fields.y,
+                    x=data.coords['position'].fields.x) +
+           phi_offset) % (2 * (pi * sc.units.rad))
+    phi_bins = sc.linspace('phi', 0, pi * 2, 5, unit='rad')
+    quadrants = ['right', 'top', 'left', 'bottom']
+
+    out = {}
+    for i, quad in enumerate(quadrants):
+        # Select pixels based on phi
+        sel = (phi >= phi_bins[i]) & (phi < phi_bins[i + 1])
+        # Data counts into Q bins
+        data_q = i_of_q.convert_to_q_and_merge_spectra(data=data[sel],
+                                                       graph=graph,
+                                                       q_bins=q_bins,
+                                                       gravity=gravity)
+        # Denominator counts into Q bins
+        denominator_q = i_of_q.convert_to_q_and_merge_spectra(data=denominator[sel],
+                                                              graph=graph,
+                                                              q_bins=q_bins,
+                                                              gravity=gravity)
+        # Normalize
+        out[quad] = normalize(numerator=data_q, denominator=denominator_q).hist()
     # Compute cost
-    return _cost(out)
+    return _cost(xy=xy, data=out)
 
 
 def beam_center(data: sc.DataArray,
-                q_bins,
-                masking_radius,
+                sample_monitors: Dict[str, sc.DataArray],
+                direct_monitors: Dict[str, sc.DataArray],
+                direct_beam: sc.DataArray,
+                wavelength_bins: sc.Variable,
+                monitor_non_background_range: sc.Variable,
+                q_bins: sc.Variable,
+                masking_radius: sc.Variable,
                 gravity: bool = False,
-                minimizer='Nelder-Mead',
-                tolerance=0.1):
+                minimizer: str = 'Nelder-Mead',
+                tolerance: float = 0.1):
+    """
+    Find the beam center of a SANS scattering pattern.
+    Description of the procedure:
+
+    1. obtain an initial guess by computing the center-of-mass of the pixels,
+       weighted by the counts on each pixel
+    2. from that initial guess, divide the panel into 4 quadrants
+    3. compute $I(Q)$ inside each quadrant and compute the residual difference between
+       all 4 quadrants
+    4. iteratively move the centre position and repeat 2. and 3. until all 4 $I(Q)$
+       curves lie on top of each other
+
+    Parameters
+    ----------
+    data:
+        The DataArray containing the detector data.
+    data_monitors:
+        A dict containing the data array for the incident and
+        transmission monitors for the measurement run
+    direct_monitors:
+        A dict containing the data array for the incident and
+        transmission monitors for the direct (empty sample holder) run.
+    direct_beam:
+        The direct beam function of the instrument (histogrammed,
+        depends on wavelength).
+    wavelength_bins:
+        The binning in the wavelength dimension to be used.
+    monitor_non_background_range:
+        The range of wavelengths for the monitors that are considered to not be part of
+        the background. This is used to compute the background level on each monitor,
+        which then gets subtracted from each monitor's counts.
+    q_bins:
+        The binning in the Q dimension to be used.
+    masking_radius:
+        The radius of the circular mask to apply to the data while iterating.
+    gravity:
+        Include the effects of gravity when computing the scattering angle if ``True``.
+    minimizer:
+        The Scipy minimizer method to use (see
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html
+        for details).
+    tolerance:
+        Tolerance for termination (see
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html
+        for details).
+    """  # noqa: E501
     logger = get_logger('sans')
     if gravity and ('gravity' not in data.coords):
         data = data.copy(deep=False)
@@ -70,12 +150,22 @@ def beam_center(data: sc.DataArray,
                 f'x={xc.value}[{xc.unit}], y={yc.value}[{yc.unit}]')
     # Refine using Scipy optimize
     from scipy.optimize import minimize
-    graph, _ = make_coordinate_transform_graphs(gravity=gravity, scatter=True)
+    graph = sans_elastic(gravity=gravity)
+
+    # Compute the denominator used for normalization
+    denominator = i_of_q.normalization_denominator(
+        data=data,
+        data_monitors=sample_monitors,
+        direct_monitors=direct_monitors,
+        direct_beam=direct_beam,
+        wavelength_bins=wavelength_bins,
+        monitor_non_background_range=monitor_non_background_range)
+
     x = data.coords['position'].fields.x
     y = data.coords['position'].fields.y
     res = minimize(_refine,
                    x0=[xc.value, yc.value],
-                   args=(data, graph, q_bins, masking_radius),
+                   args=(data, denominator, graph, q_bins, masking_radius, gravity),
                    bounds=[(x.min().value, x.max().value),
                            (y.min().value, y.max().value)],
                    method=minimizer,

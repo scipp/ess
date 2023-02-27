@@ -11,31 +11,34 @@ from . import conversions, normalization
 from .common import gravity_vector
 from ..logging import get_logger
 
+# def make_coordinate_transform_graphs(gravity: bool,
+#                                      monitor: bool = False,
+#                                      scatter: bool = True) -> dict:
+#     """
+#     Create unit conversion graphs.
+#     The gravity parameter can be used to turn on or off the effects of gravity.
 
-def make_coordinate_transform_graphs(gravity: bool,
-                                     scatter: bool = True) -> Tuple[dict, dict]:
-    """
-    Create unit conversion graphs.
-    The gravity parameter can be used to turn on or off the effects of gravity.
+#     Parameters
+#     ----------
+#     gravity:
+#         If ``True``, the coordinate transformation graph will incorporate the
+#         effects of the Earth's gravitational field on the flight path of the neutrons
+#         when computing the scattering angle.
+#     monitor:
+#         Re
+#     scatter:
+#         If ``True``, make graph for scattering beamlines.
 
-    Parameters
-    ----------
-    gravity:
-        If ``True``, the coordinate transformation graph will incorporate the
-        effects of the Earth's gravitational field on the flight path of the neutrons
-        when computing the scattering angle.
-    scatter:
-        If ``True``, make graph for scattering beamlines.
-
-    Returns
-    -------
-    :
-        Two coordinate transformation graphs: the first for the detector pixels, and
-        the second for the beam monitors.
-    """
-    data_graph = conversions.sans_elastic(gravity=gravity, scatter=scatter)
-    monitor_graph = conversions.sans_monitor()
-    return data_graph, monitor_graph
+#     Returns
+#     -------
+#     :
+#         Two coordinate transformation graphs: the first for the detector pixels, and
+#         the second for the beam monitors.
+#     """
+#     if monitor:
+#         return conversions.sans_monitor()
+#     else:
+#         return conversions.sans_elastic(gravity=gravity, scatter=scatter)
 
 
 def convert_to_wavelength(data: sc.DataArray, monitors: dict, data_graph: dict,
@@ -301,6 +304,84 @@ def add_wavelength_mask(data: sc.DataArray, monitors: dict,
     return data, monitors_out
 
 
+def normalization_denominator(
+        data: sc.DataArray,
+        data_monitors: dict,
+        direct_monitors: dict,
+        direct_beam: sc.DataArray,
+        wavelength_bins: sc.Variable,
+        monitor_non_background_range: Optional[sc.Variable] = None,
+        wavelength_mask: Optional[sc.DataArray] = None) -> sc.DataArray:
+    """
+    Compute the normalizing term for the SANS I(Q).
+    This is basically:
+      solid_angle * direct_beam * data_incident_monitor_counts * transmission_fraction
+
+    Parameters
+    ----------
+    data:
+        The DataArray containing the detector data. This can be both events
+        or dense (histogrammed) data.
+    data_monitors:
+        A dict containing the data array for the incident and
+        transmission monitors for the measurement run
+    direct_monitors:
+        A dict containing the data array for the incident and
+        transmission monitors for the direct (empty sample holder) run.
+    direct_beam:
+        The direct beam function of the instrument (histogrammed,
+        depends on wavelength).
+    wavelength_bins:
+        The binning in the wavelength dimension to be used.
+    monitor_non_background_range:
+        The range of wavelengths for the monitors that are considered to not be part of
+        the background. This is used to compute the background level on each monitor,
+        which then gets subtracted from each monitor's counts.
+    wavelength_mask:
+        Mask to apply to the wavelength coordinate (to mask out artifacts from the
+        instrument beamline).
+
+    Returns
+    -------
+    :
+        The normalizing term (denominator) in the SANS I(Q) equation.
+    """
+
+    monitors = _make_dict_of_monitors(data_monitors=data_monitors,
+                                      direct_monitors=direct_monitors)
+
+    monitor_graph = conversions.sans_monitor()
+
+    monitors = monitors_to_wavelength(monitors, graph=monitor_graph)
+
+    monitors = denoise_and_rebin_monitors(
+        monitors=monitors,
+        wavelength_bins=wavelength_bins,
+        non_background_range=monitor_non_background_range)
+
+    if wavelength_mask is not None:
+        data, monitors = add_wavelength_mask(data=data,
+                                             monitors=monitors,
+                                             mask=wavelength_mask)
+
+    transmission_fraction = normalization.transmission_fraction(
+        data_monitors=monitors['data'], direct_monitors=monitors['direct'])
+
+    direct_beam = resample_direct_beam(direct_beam=direct_beam,
+                                       wavelength_bins=wavelength_bins)
+
+    solid_angle = normalization.solid_angle_of_rectangular_pixels(
+        data,
+        pixel_width=data.coords['pixel_width'],
+        pixel_height=data.coords['pixel_height'])
+
+    return normalization.compute_denominator(
+        direct_beam=direct_beam,
+        data_incident_monitor=monitors['data']['incident'],
+        transmission_fraction=transmission_fraction,
+        solid_angle=solid_angle)
+
+
 def to_I_of_Q(data: sc.DataArray,
               data_monitors: dict,
               direct_monitors: dict,
@@ -370,42 +451,58 @@ def to_I_of_Q(data: sc.DataArray,
         The intensity as a function of Q.
     """
 
-    monitors = _make_dict_of_monitors(data_monitors=data_monitors,
-                                      direct_monitors=direct_monitors)
+    graph = conversions.sans_elastic(gravity=gravity)
 
-    data_graph, monitor_graph = make_coordinate_transform_graphs(gravity=gravity)
+    # Convert data to wavelength
+    data = data.transform_coords("wavelength", graph=graph)
 
-    data, monitors = convert_to_wavelength(data=data,
-                                           monitors=monitors,
-                                           data_graph=data_graph,
-                                           monitor_graph=monitor_graph)
+    # monitors = _make_dict_of_monitors(data_monitors=data_monitors,
+    #                                   direct_monitors=direct_monitors)
 
-    monitors = denoise_and_rebin_monitors(
-        monitors=monitors,
-        wavelength_bins=wavelength_bins,
-        non_background_range=monitor_non_background_range)
+    # data_graph, monitor_graph = make_coordinate_transform_graphs(gravity=gravity)
 
-    if wavelength_mask is not None:
-        data, monitors = add_wavelength_mask(data=data,
-                                             monitors=monitors,
-                                             mask=wavelength_mask)
+    # data, monitors = convert_to_wavelength(data=data,
+    #                                        monitors=monitors,
+    #                                        data_graph=data_graph,
+    #                                        monitor_graph=monitor_graph)
 
-    transmission_fraction = normalization.transmission_fraction(
-        data_monitors=monitors['data'], direct_monitors=monitors['direct'])
+    # monitors = denoise_and_rebin_monitors(
+    #     monitors=monitors,
+    #     wavelength_bins=wavelength_bins,
+    #     non_background_range=monitor_non_background_range)
 
-    direct_beam = resample_direct_beam(direct_beam=direct_beam,
-                                       wavelength_bins=wavelength_bins)
+    # if wavelength_mask is not None:
+    #     data, monitors = add_wavelength_mask(data=data,
+    #                                          monitors=monitors,
+    #                                          mask=wavelength_mask)
 
-    solid_angle = normalization.solid_angle_of_rectangular_pixels(
-        data,
-        pixel_width=data.coords['pixel_width'],
-        pixel_height=data.coords['pixel_height'])
+    # transmission_fraction = normalization.transmission_fraction(
+    #     data_monitors=monitors['data'], direct_monitors=monitors['direct'])
 
-    denominator = normalization.compute_denominator(
+    # direct_beam = resample_direct_beam(direct_beam=direct_beam,
+    #                                    wavelength_bins=wavelength_bins)
+
+    # solid_angle = normalization.solid_angle_of_rectangular_pixels(
+    #     data,
+    #     pixel_width=data.coords['pixel_width'],
+    #     pixel_height=data.coords['pixel_height'])
+
+    # denominator = normalization.compute_denominator(
+    #     direct_beam=direct_beam,
+    #     data_incident_monitor=monitors['data']['incident'],
+    #     transmission_fraction=transmission_fraction,
+    #     solid_angle=solid_angle)
+
+    # Compute normalizing term
+    denominator = normalization_denominator(
+        data=data,
+        data_monitors=data_monitors,
+        direct_monitors=direct_monitors,
         direct_beam=direct_beam,
-        data_incident_monitor=monitors['data']['incident'],
-        transmission_fraction=transmission_fraction,
-        solid_angle=solid_angle)
+        wavelength_bins=wavelength_bins,
+        monitor_non_background_range=monitor_non_background_range,
+        wavelength_mask=wavelength_mask)
+
     # Insert a copy of coords needed for conversion to Q.
     # TODO: can this be avoided by copying the Q coords from the converted numerator?
     for coord in ['position', 'sample_position', 'source_position']:
@@ -419,13 +516,13 @@ def to_I_of_Q(data: sc.DataArray,
             [wavelength_bins.min(), wavelength_bins.max()], dim='wavelength')
 
     data_q = convert_to_q_and_merge_spectra(data=data,
-                                            graph=data_graph,
+                                            graph=graph,
                                             wavelength_bands=wavelength_bands,
                                             q_bins=q_bins,
                                             gravity=gravity)
 
     denominator_q = convert_to_q_and_merge_spectra(data=denominator,
-                                                   graph=data_graph,
+                                                   graph=graph,
                                                    wavelength_bands=wavelength_bands,
                                                    q_bins=q_bins,
                                                    gravity=gravity)
