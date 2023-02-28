@@ -3,6 +3,7 @@
 
 import scipp as sc
 import scippneutron as scn
+from typing import Dict, Union
 
 
 def solid_angle_of_rectangular_pixels(data: sc.DataArray, pixel_width: sc.Variable,
@@ -29,24 +30,31 @@ def solid_angle_of_rectangular_pixels(data: sc.DataArray, pixel_width: sc.Variab
     return solid_angle
 
 
-def transmission_fraction(data_monitors: dict, direct_monitors: dict) -> sc.DataArray:
+def transmission_fraction(
+        data_monitors: Union[Dict[str, sc.DataArray], sc.DataGroup],
+        direct_monitors: Union[Dict[str, sc.DataArray], sc.DataGroup]) -> sc.DataArray:
     """
-    Approximation based on equations in CalculateTransmission documentation
+    Approximation based on equations in
+    [CalculateTransmission](https://docs.mantidproject.org/v4.0.0/algorithms/CalculateTransmission-v1.html)
+    documentation
     p = \frac{S_T}{D_T}\frac{D_I}{S_I}
-    This is equivalent to mantid.CalculateTransmission without fitting.
+    This is equivalent to ``mantid.CalculateTransmission`` without fitting.
+    Inputs should be wavelength-dependent.
 
     TODO: It seems we are always multiplying this by data_monitors['incident'] to
     compute the normalization term. We could consider just returning
     data_monitors['transmission'] * direct_monitors['incident'] /
         direct_monitors['transmission']
 
-    :param data_monitors: A dict containing the DataArrays for the incident and
-        transmission monitors for the measurement run (monitor data should depend on
-        wavelength).
-    :param direct_monitors: A dict containing the DataArrays for the incident and
-        transmission monitors for the direct run (monitor data should depend on
-        wavelength).
-    """
+    Parameters
+    ----------
+    data_monitors:
+        The data arrays for the incident and transmission monitors for the measurement
+        run (monitor data should depend on wavelength).
+    direct_monitors:
+        The data arrays for the incident and transmission monitors for the direct
+        run (monitor data should depend on wavelength).
+    """  # noqa: E501
     return (data_monitors['transmission'] / direct_monitors['transmission']) * (
         direct_monitors['incident'] / data_monitors['incident'])
 

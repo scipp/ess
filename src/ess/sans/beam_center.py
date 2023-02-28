@@ -2,7 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 import scipp as sc
-from typing import Dict
+from typing import Dict, Union
 
 from .common import gravity_vector
 from .conversions import sans_elastic
@@ -15,9 +15,9 @@ def _center_of_mass(data):
     """
     Find the center of mass of the data counts.
     """
-    summed = data.sum(list(set(data.dims) - set(data.coords['position'].dims)))
+    summed = data.sum(list(set(data.dims) - set(data.meta['position'].dims)))
     v = sc.values(summed.data)
-    com = sc.sum(summed.coords['position'] * v) / v.sum()
+    com = sc.sum(summed.meta['position'] * v) / v.sum()
     return com.fields.x, com.fields.y
 
 
@@ -40,7 +40,9 @@ def _refine(xy, sample, denominator, graph, q_bins, masking_radius, gravity):
     """
     # Make a copy of the original data
     data = sample.copy(deep=False)
-    data.coords['position'] = data.coords['position'].copy(deep=True)
+    if 'position' in data.attrs:
+        del data.attrs['position']
+    data.coords['position'] = sample.meta['position'].copy(deep=True)
     # Offset the position according to the initial guess from the center-of-mass
     u = data.coords['position'].unit
     data.coords['position'].fields.x -= sc.scalar(xy[0], unit=u)
@@ -53,7 +55,7 @@ def _refine(xy, sample, denominator, graph, q_bins, masking_radius, gravity):
     # Insert a copy of coords and masks needed for conversion to Q
     for coord in ['position', 'sample_position', 'source_position']:
         denominator.coords[coord] = data.meta[coord]
-    denominator.masks.update(data.masks)
+    # denominator.masks.update(data.masks)
 
     pi = sc.constants.pi.value
     phi_offset = sc.scalar(pi / 4, unit='rad')
@@ -84,11 +86,10 @@ def _refine(xy, sample, denominator, graph, q_bins, masking_radius, gravity):
 
 
 def beam_center(data: sc.DataArray,
-                sample_monitors: Dict[str, sc.DataArray],
-                direct_monitors: Dict[str, sc.DataArray],
+                data_monitors: Union[Dict[str, sc.DataArray], sc.DataGroup],
+                direct_monitors: Union[Dict[str, sc.DataArray], sc.DataGroup],
                 direct_beam: sc.DataArray,
                 wavelength_bins: sc.Variable,
-                monitor_non_background_range: sc.Variable,
                 q_bins: sc.Variable,
                 masking_radius: sc.Variable,
                 gravity: bool = False,
@@ -111,20 +112,16 @@ def beam_center(data: sc.DataArray,
     data:
         The DataArray containing the detector data.
     data_monitors:
-        A dict containing the data array for the incident and
-        transmission monitors for the measurement run
+        The data arrays for the incident and transmission monitors for the measurement
+        run.
     direct_monitors:
-        A dict containing the data array for the incident and
-        transmission monitors for the direct (empty sample holder) run.
+        The data arrays for the incident and transmission monitors for the direct
+        run.
     direct_beam:
         The direct beam function of the instrument (histogrammed,
         depends on wavelength).
     wavelength_bins:
         The binning in the wavelength dimension to be used.
-    monitor_non_background_range:
-        The range of wavelengths for the monitors that are considered to not be part of
-        the background. This is used to compute the background level on each monitor,
-        which then gets subtracted from each monitor's counts.
     q_bins:
         The binning in the Q dimension to be used.
     masking_radius:
@@ -141,7 +138,7 @@ def beam_center(data: sc.DataArray,
         for details).
     """  # noqa: E501
     logger = get_logger('sans')
-    if gravity and ('gravity' not in data.coords):
+    if gravity and ('gravity' not in data.meta):
         data = data.copy(deep=False)
         data.coords['gravity'] = gravity_vector()
     # Use center of mass to get initial guess for beam center
@@ -153,16 +150,15 @@ def beam_center(data: sc.DataArray,
     graph = sans_elastic(gravity=gravity)
 
     # Compute the denominator used for normalization
-    denominator = i_of_q.normalization_denominator(
-        data=data,
-        data_monitors=sample_monitors,
-        direct_monitors=direct_monitors,
-        direct_beam=direct_beam,
-        wavelength_bins=wavelength_bins,
-        monitor_non_background_range=monitor_non_background_range)
+    denominator = i_of_q.normalization_denominator(data=data,
+                                                   data_monitors=data_monitors,
+                                                   direct_monitors=direct_monitors,
+                                                   direct_beam=direct_beam,
+                                                   wavelength_bins=wavelength_bins)
+    # return denominator
 
-    x = data.coords['position'].fields.x
-    y = data.coords['position'].fields.y
+    x = data.meta['position'].fields.x
+    y = data.meta['position'].fields.y
     res = minimize(_refine,
                    x0=[xc.value, yc.value],
                    args=(data, denominator, graph, q_bins, masking_radius, gravity),
