@@ -9,7 +9,7 @@ from typing import Optional
 def load_sans2d(filename: str, spectrum_size: Optional[int] = None) -> sc.DataArray:
     """
     Loading wrapper for ISIS SANS2D files.
-    
+
     Parameters
     ----------
     filename:
