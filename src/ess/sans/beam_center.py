@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
+import numpy as np
 import scipp as sc
 from typing import Dict, Union
 
@@ -33,16 +34,17 @@ def _cost(xy, data):
     return out
 
 
-def _refine(xy, sample, denominator, graph, q_bins, masking_radius, gravity):
+def _refine(xy, sample, denominator, graph, q_bins, masking_radius, gravity,
+            wavelength_bands):
     """
     Compute the intensity as a function of Q inside 4 quadrants in Phi.
     Return the sum of the squares of the relative differences between the 4 quadrants.
     """
     # Make a copy of the original data
-    data = sample.copy(deep=False)
-    if 'position' in data.attrs:
-        del data.attrs['position']
-    data.coords['position'] = sample.meta['position'].copy(deep=True)
+    data = sc.DataArray(data=sample.data)
+    coord_list = ['position', 'sample_position', 'source_position']
+    for c in coord_list:
+        data.coords[c] = sample.meta[c].copy(deep=True)
     # Offset the position according to the initial guess from the center-of-mass
     u = data.coords['position'].unit
     data.coords['position'].fields.x -= sc.scalar(xy[0], unit=u)
@@ -53,9 +55,9 @@ def _refine(xy, sample, denominator, graph, q_bins, masking_radius, gravity):
     data.masks['circle'] = r > masking_radius
 
     # Insert a copy of coords and masks needed for conversion to Q
-    for coord in ['position', 'sample_position', 'source_position']:
-        denominator.coords[coord] = data.meta[coord]
-    # denominator.masks.update(data.masks)
+    for c in coord_list:
+        denominator.coords[c] = data.coords[c]
+    denominator.masks['circle'] = data.masks['circle']
 
     pi = sc.constants.pi.value
     phi_offset = sc.scalar(pi / 4, unit='rad')
@@ -70,19 +72,28 @@ def _refine(xy, sample, denominator, graph, q_bins, masking_radius, gravity):
         # Select pixels based on phi
         sel = (phi >= phi_bins[i]) & (phi < phi_bins[i + 1])
         # Data counts into Q bins
-        data_q = i_of_q.convert_to_q_and_merge_spectra(data=data[sel],
-                                                       graph=graph,
-                                                       q_bins=q_bins,
-                                                       gravity=gravity)
+        data_q = i_of_q.convert_to_q_and_merge_spectra(
+            data=data[sel],
+            graph=graph,
+            q_bins=q_bins,
+            gravity=gravity,
+            wavelength_bands=wavelength_bands)
         # Denominator counts into Q bins
-        denominator_q = i_of_q.convert_to_q_and_merge_spectra(data=denominator[sel],
-                                                              graph=graph,
-                                                              q_bins=q_bins,
-                                                              gravity=gravity)
+        denominator_q = i_of_q.convert_to_q_and_merge_spectra(
+            data=denominator[sel],
+            graph=graph,
+            q_bins=q_bins,
+            gravity=gravity,
+            wavelength_bands=wavelength_bands)
         # Normalize
         out[quad] = normalize(numerator=data_q, denominator=denominator_q).hist()
     # Compute cost
-    return _cost(xy=xy, data=out)
+    cost = _cost(xy=xy, data=out)
+    if not np.isfinite(cost):
+        raise ValueError('Non-finite value computed in cost. This is likely due to a '
+                         'division by zero. Try increasing the size of your Q bins to '
+                         'improve statistics in the denominator.')
+    return cost
 
 
 def beam_center(data: sc.DataArray,
@@ -157,11 +168,15 @@ def beam_center(data: sc.DataArray,
                                                    wavelength_bins=wavelength_bins)
     # return denominator
 
+    wavelength_bands = sc.concat(
+        [wavelength_bins.min(), wavelength_bins.max()], dim='wavelength')
+
     x = data.meta['position'].fields.x
     y = data.meta['position'].fields.y
     res = minimize(_refine,
                    x0=[xc.value, yc.value],
-                   args=(data, denominator, graph, q_bins, masking_radius, gravity),
+                   args=(data, denominator, graph, q_bins, masking_radius, gravity,
+                         wavelength_bands),
                    bounds=[(x.min().value, x.max().value),
                            (y.min().value, y.max().value)],
                    method=minimizer,

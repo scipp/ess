@@ -11,97 +11,6 @@ from . import conversions, normalization
 from .common import gravity_vector
 from ..logging import get_logger
 
-# def make_coordinate_transform_graphs(gravity: bool,
-#                                      monitor: bool = False,
-#                                      scatter: bool = True) -> dict:
-#     """
-#     Create unit conversion graphs.
-#     The gravity parameter can be used to turn on or off the effects of gravity.
-
-#     Parameters
-#     ----------
-#     gravity:
-#         If ``True``, the coordinate transformation graph will incorporate the
-#         effects of the Earth's gravitational field on the flight path of the neutrons
-#         when computing the scattering angle.
-#     monitor:
-#         Re
-#     scatter:
-#         If ``True``, make graph for scattering beamlines.
-
-#     Returns
-#     -------
-#     :
-#         Two coordinate transformation graphs: the first for the detector pixels, and
-#         the second for the beam monitors.
-#     """
-#     if monitor:
-#         return conversions.sans_monitor()
-#     else:
-#         return conversions.sans_elastic(gravity=gravity, scatter=scatter)
-
-# def convert_to_wavelength(data: sc.DataArray, monitors: dict, data_graph: dict,
-#                           monitor_graph: dict) -> Tuple[sc.DataArray, dict]:
-#     """
-#     Convert the data array and all the items inside the dict of monitors to wavelength
-#     using a pre-defined conversion graph.
-
-#     Parameters
-#     ----------
-#     data:
-#         The data from the measurement that is to be converted to wavelength.
-#     monitors:
-#         A dict of monitors. All entries in the dict will be converted to wavelength.
-#     data_graph:
-#         The coordinate transformation graph to be used for the data.
-#     monitor_graph:
-#         The coordinate transformation graph to be used for the monitors.
-
-#     Returns
-#     -------
-#     :
-#         The input ``data`` and ``monitors`` converted to wavelength.
-#     """
-#     data = data.transform_coords("wavelength", graph=data_graph)
-#     monitors = monitors_to_wavelength(monitors=monitors, graph=monitor_graph)
-#     return data, monitors
-
-# def _denoise_and_rebin_monitor(
-#     monitor: Union[Dict[str, sc.DataArray], sc.DataArray],
-#     wavelength_bins: Optional[sc.Variable] = None,
-#     non_background_range: Optional[sc.Variable] = None
-# ) -> Union[Dict[str, sc.DataArray], sc.DataArray]:
-#     """
-#     Subtract a background baseline from monitor counts, taken as the mean of the counts
-#     outside the specified ``non_background_range``.
-
-#     Parameters
-#     ----------
-#     monitor:
-#         A DataArray containing monitor data to be background subtracted and rebinned.
-#     wavelength_bins:
-#         The binning in wavelength to use for the rebinning.
-#     non_background_range:
-#         The range of wavelengths that defines the data which does not constitute
-#         background. Everything outside this range is treated as background counts.
-
-#     Returns
-#     -------
-#     :
-#         The input monitor with background signal subtracted from raw counts.
-#     """
-#     if non_background_range is not None:
-#         dim = non_background_range.dim
-#         monitor.variances = None  # TODO: Hack to set variances to None
-#         below = monitor[dim, :non_background_range[0]]
-#         above = monitor[dim, non_background_range[1]:]
-#         background = sc.concat([below.data, above.data], dim=dim).mean()
-#         monitor = monitor - background
-#     if wavelength_bins is None:
-#         return monitor
-#     else:
-#         return monitor.rebin(wavelength=wavelength_bins)
-
 
 def preprocess_monitor_data(
     monitor: Union[Dict[str, sc.DataArray], sc.DataGroup, sc.DataArray],
@@ -276,20 +185,6 @@ def _convert_dense_to_q_and_merge_spectra(
     return q_summed
 
 
-# def _make_dict_of_monitors(data_monitors, direct_monitors):
-#     """
-#     Also verify that no entries are missing in the monitors and place them into a
-#     single dict for convenience.
-#     """
-#     for group, monitor_dict in zip(('data', 'direct'),
-#                                    (data_monitors, direct_monitors)):
-#         for key in ('incident', 'transmission'):
-#             if key not in monitor_dict:
-#                 raise KeyError(
-#                     f'The dict of monitors for the {group} run is missing entry {key}.')
-#     return {'data': data_monitors, 'direct': direct_monitors}
-
-
 def add_mask(da: sc.DataArray, mask: sc.DataArray, name: str) -> sc.DataArray:
     """
     Add wavelength mask to data array. If it contains binned data, use a top-level
@@ -306,20 +201,6 @@ def add_mask(da: sc.DataArray, mask: sc.DataArray, name: str) -> sc.DataArray:
             sampling = da.coords[mask.dim]
         da.masks[name] = lu[sampling]
     return da
-
-
-# def add_wavelength_mask(data: sc.DataArray, monitors: Union[Dict[str, sc.DataArray],
-#                                                             sc.DataGroup],
-#                         mask: sc.DataArray) -> Tuple[sc.DataArray, dict]:
-#     """
-#     Add wavelength mask to data and monitors.
-#     """
-#     mask_name = uuid.uuid4().hex
-#     data = _add_mask(data, mask=mask, name=mask_name)
-#     monitors_out = {}
-#     for key, monitor in monitors.items():
-#         monitors_out[key] = _add_mask(monitor, mask=mask, name=mask_name)
-#     return _add_mask(data, mask=mask, name=mask_name), {monitors_out}
 
 
 def normalization_denominator(
@@ -364,18 +245,6 @@ def normalization_denominator(
         The normalizing term (denominator) in the SANS I(Q) equation.
     """
 
-    # monitors = _make_dict_of_monitors(data_monitors=data_monitors,
-    #                                   direct_monitors=direct_monitors)
-
-    # monitor_graph = conversions.sans_monitor()
-
-    # monitors = monitors_to_wavelength(monitors, graph=monitor_graph)
-
-    # monitors = denoise_and_rebin_monitors(
-    #     monitors=monitors,
-    #     wavelength_bins=wavelength_bins,
-    #     non_background_range=monitor_non_background_range)
-
     if wavelength_mask is not None:
         mask_name = uuid.uuid4().hex
         data = add_mask(data, mask=wavelength_mask, name=mask_name)
@@ -385,10 +254,6 @@ def normalization_denominator(
         direct_monitors = sc.DataGroup(direct_monitors).apply(add_mask,
                                                               mask=wavelength_mask,
                                                               name=mask_name)
-
-        # data, monitors = add_wavelength_mask(data=data,
-        #                                      monitors=monitors,
-        #                                      mask=wavelength_mask)
 
     transmission_fraction = normalization.transmission_fraction(
         data_monitors=data_monitors, direct_monitors=direct_monitors)
@@ -489,43 +354,6 @@ def to_I_of_Q(data: sc.DataArray,
     # Convert sample data to wavelength
     graph = conversions.sans_elastic(gravity=gravity)
     data = data.transform_coords("wavelength", graph=graph)
-
-    # monitors = _make_dict_of_monitors(data_monitors=data_monitors,
-    #                                   direct_monitors=direct_monitors)
-
-    # data_graph, monitor_graph = make_coordinate_transform_graphs(gravity=gravity)
-
-    # data, monitors = convert_to_wavelength(data=data,
-    #                                        monitors=monitors,
-    #                                        data_graph=data_graph,
-    #                                        monitor_graph=monitor_graph)
-
-    # monitors = denoise_and_rebin_monitors(
-    #     monitors=monitors,
-    #     wavelength_bins=wavelength_bins,
-    #     non_background_range=monitor_non_background_range)
-
-    # if wavelength_mask is not None:
-    #     data, monitors = add_wavelength_mask(data=data,
-    #                                          monitors=monitors,
-    #                                          mask=wavelength_mask)
-
-    # transmission_fraction = normalization.transmission_fraction(
-    #     data_monitors=monitors['data'], direct_monitors=monitors['direct'])
-
-    # direct_beam = resample_direct_beam(direct_beam=direct_beam,
-    #                                    wavelength_bins=wavelength_bins)
-
-    # solid_angle = normalization.solid_angle_of_rectangular_pixels(
-    #     data,
-    #     pixel_width=data.coords['pixel_width'],
-    #     pixel_height=data.coords['pixel_height'])
-
-    # denominator = normalization.compute_denominator(
-    #     direct_beam=direct_beam,
-    #     data_incident_monitor=monitors['data']['incident'],
-    #     transmission_fraction=transmission_fraction,
-    #     solid_angle=solid_angle)
 
     # Compute normalizing term
     denominator = normalization_denominator(data=data,
