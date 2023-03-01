@@ -247,7 +247,6 @@ def normalization_denominator(
 
     if wavelength_mask is not None:
         mask_name = uuid.uuid4().hex
-        data = add_mask(data, mask=wavelength_mask, name=mask_name)
         data_monitors = sc.DataGroup(data_monitors).apply(add_mask,
                                                           mask=wavelength_mask,
                                                           name=mask_name)
@@ -280,7 +279,6 @@ def to_I_of_Q(data: sc.DataArray,
               wavelength_bins: sc.Variable,
               q_bins: sc.Variable,
               gravity: bool = False,
-              monitor_non_background_range: Optional[sc.Variable] = None,
               wavelength_mask: Optional[sc.DataArray] = None,
               wavelength_bands: Optional[sc.Variable] = None) -> sc.DataArray:
     """
@@ -291,9 +289,7 @@ def to_I_of_Q(data: sc.DataArray,
 
        * Generate a coordinate transformation graph from ``tof`` to ``Q``, that also
          includes ``wavelength``.
-       * Convert the detector data and monitors to wavelength.
-       * Remove the background noise from the monitors and align them to a common
-         binning axis.
+       * Convert the detector data to wavelength.
        * Compute the transmission fraction from the monitor data.
        * Compute the solid angles of the detector pixels.
        * Resample the direct beam function to the same wavelength binning as the
@@ -310,10 +306,10 @@ def to_I_of_Q(data: sc.DataArray,
         The detector data. This can be both events or dense (histogrammed) data.
     data_monitors:
         The data arrays for the incident and transmission monitors for the measurement
-        run.
+        run (background noise removed and converted to wavelength).
     direct_monitors:
         The data arrays for the incident and transmission monitors for the direct
-        run.
+        run (background noise removed and converted to wavelength).
     direct_beam:
         The direct beam function of the instrument (histogrammed,
         depends on wavelength).
@@ -323,10 +319,6 @@ def to_I_of_Q(data: sc.DataArray,
         The binning in the Q dimension to be used.
     gravity:
         Include the effects of gravity when computing the scattering angle if ``True``.
-    monitor_non_background_range:
-        The range of wavelengths for the monitors that are considered to not be part of
-        the background. This is used to compute the background level on each monitor,
-        which then gets subtracted from each monitor's counts.
     wavelength_mask:
         Mask to apply to the wavelength coordinate (to mask out artifacts from the
         instrument beamline).
@@ -341,19 +333,12 @@ def to_I_of_Q(data: sc.DataArray,
         The intensity as a function of Q.
     """
 
-    # Pre-process monitor data
-    data_monitors = preprocess_monitor_data(
-        sc.DataGroup(data_monitors),
-        wavelength_bins=wavelength_bins,
-        non_background_range=monitor_non_background_range)
-    direct_monitors = preprocess_monitor_data(
-        sc.DataGroup(direct_monitors),
-        wavelength_bins=wavelength_bins,
-        non_background_range=monitor_non_background_range)
-
     # Convert sample data to wavelength
     graph = conversions.sans_elastic(gravity=gravity)
     data = data.transform_coords("wavelength", graph=graph)
+
+    if wavelength_mask is not None:
+        data = add_mask(data, mask=wavelength_mask, name=uuid.uuid4().hex)
 
     # Compute normalizing term
     denominator = normalization_denominator(data=data,

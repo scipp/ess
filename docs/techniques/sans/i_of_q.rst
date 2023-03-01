@@ -17,8 +17,7 @@ Building blocks
 .. autosummary::
    :toctree: ../../generated
 
-   make_coordinate_transform_graphs
-   convert_to_wavelength
-   denoise_and_rebin_monitors
-   resample_direct_beam
    convert_to_q_and_merge_spectra
+   normalization_denominator
+   preprocess_monitor_data
+   resample_direct_beam
