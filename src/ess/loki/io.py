@@ -17,7 +17,7 @@ def load_sans2d(filename: str, spectrum_size: Optional[int] = None) -> sc.DataAr
         The path to the file that will be loaded from disk.
     spectrum_size:
         Read only the first ``spectrum_size`` pixels. In many SANS2D experiments, only
-        a quater of the pixels are kept:
+        a quarter of the pixels are kept:
           - there are two detector panels, the second one is unused
           - half of the pixels in each panel are used for live display
     """
