@@ -167,7 +167,6 @@ def beam_center(data: sc.DataArray,
                                                    direct_monitors=direct_monitors,
                                                    direct_beam=direct_beam,
                                                    wavelength_bins=wavelength_bins)
-    # return denominator
 
     wavelength_bands = sc.concat(
         [wavelength_bins.min(), wavelength_bins.max()], dim='wavelength')
