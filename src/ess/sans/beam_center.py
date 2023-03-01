@@ -1,14 +1,15 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
-import numpy as np
-import scipp as sc
 from typing import Dict, Union
 
+import numpy as np
+import scipp as sc
+
+from ..logging import get_logger
+from . import i_of_q
 from .common import gravity_vector
 from .conversions import sans_elastic
-from . import i_of_q
-from ..logging import get_logger
 from .normalization import normalize
 
 

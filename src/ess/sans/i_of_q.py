@@ -1,15 +1,15 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
-from typing import Dict, Optional, Union
 import uuid
+from typing import Dict, Optional, Union
 
 import scipp as sc
 from scipp.scipy.interpolate import interp1d
 
+from ..logging import get_logger
 from . import conversions, normalization
 from .common import gravity_vector
-from ..logging import get_logger
 
 
 def preprocess_monitor_data(

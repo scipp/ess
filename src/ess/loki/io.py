@@ -1,9 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
+from typing import Optional
+
 import scipp as sc
 import scippneutron as scn
-from typing import Optional
 
 
 def load_sans2d(filename: str, spectrum_size: Optional[int] = None) -> sc.DataArray:

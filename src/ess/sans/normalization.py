@@ -1,9 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
+from typing import Dict, Union
+
 import scipp as sc
 import scippneutron as scn
-from typing import Dict, Union
 
 
 def solid_angle_of_rectangular_pixels(data: sc.DataArray, pixel_width: sc.Variable,
