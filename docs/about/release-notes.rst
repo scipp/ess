@@ -99,7 +99,7 @@ Features
 ~~~~~~~~
 
 * Added resolution function for Amor and support for Orso file format in the ``reflectometry`` module `#115 <https://github.com/scipp/ess/pull/115>`_ (*Reflectometry*).
-* Added footprint correction, super-mirror calibration, and normalisation between sample and supermirror measurements on a per-pixel & per-Q-bin level in the Amor workflow `#97 <https://github.com/scipp/ess/pull/97>`_ (*Reflectometry*).
+* Added footprint correction, super-mirror calibration, and normalization between sample and supermirror measurements on a per-pixel & per-Q-bin level in the Amor workflow `#97 <https://github.com/scipp/ess/pull/97>`_ (*Reflectometry*).
 
 Contributors
 ~~~~~~~~~~~~
@@ -153,7 +153,7 @@ Breaking changes
 
 * A major rewrite of the reflectometry code was undertaken `#61 <https://github.com/scipp/ess/pull/61>`_:
 
-  * The reflectometry and Amor Data classes were removed in favour of a formalism consisting of free-functions that accept Scipp DataArrays and Datasets.
+  * The reflectometry and Amor Data classes were removed in favor of a formalism consisting of free-functions that accept Scipp DataArrays and Datasets.
   * Moved the chopper class from the ``wfm`` submodule to free functions in its own ``choppers`` module.
   * The unit conversion (computing wavelength and Q) now use ``transform_coords``.
   * The Amor reduction notebook from ``ess-notebooks`` has been imported into the ``ess`` repository.

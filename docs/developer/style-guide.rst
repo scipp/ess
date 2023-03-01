@@ -15,7 +15,7 @@ Layout
 ------
 
 This repository is ESS instrument centric,
-and we therefore strongly prefer having all code organised into ``src/ess/{instrument}`` directories.
+and we therefore strongly prefer having all code organized into ``src/ess/{instrument}`` directories.
 
 If your code is specific to the ESS facility,
 but is intended to be ubiquitous across a class of instruments,

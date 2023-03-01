@@ -17,7 +17,7 @@ def mask_from_adj_pixels(mask):
     """
     Checks if the adjacent pixels (in 8 directions) are masked to remove
     any noisy pixels which are erroneously masked or unmasked compared to
-    it's neighbours
+    it's neighbors
 
     If all adj. pixels are then the pixel considered is set to True
     If no adj. pixels are then the pixel considered is set to False
@@ -63,13 +63,13 @@ def mask_from_adj_pixels(mask):
 
 def mean_from_adj_pixels(data):
     """
-    Applies a mean across 8 neighboring pixels (plus centre value)
+    Applies a mean across 8 neighboring pixels (plus center value)
     for data with 'x' and 'y' dimensions (at least).
     Result will calculate mean from slices across additional dimensions.
 
     For example if there is a tof dimension in addition to x, and y,
-    for each set of neighbours the returned mean will take the mean
-    tof value in the neighbour group.
+    for each set of neighbors the returned mean will take the mean
+    tof value in the neighbor group.
     """
     fill = np.finfo(data.values.dtype).min
     has_variances = data.variances is not None
@@ -105,13 +105,13 @@ def _median(neighbors, edges_mask, dim):
 
 def median_from_adj_pixels(data):
     """
-    Applies a median across 8 neighboring pixels (plus centre value)
+    Applies a median across 8 neighboring pixels (plus center value)
     for data with 'x' and 'y' dimensions (at least).
     Result will calculate median from slices across additional dimensions.
 
     For example if there is a tof dimension in addition to x, and y,
-    for each set of neighbours the returned median will take the median
-    tof value in the neighbour group.
+    for each set of neighbors the returned median will take the median
+    tof value in the neighbor group.
     """
     fill = np.finfo(data.values.dtype).min
     has_variances = data.variances is not None

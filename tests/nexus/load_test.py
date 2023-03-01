@@ -29,7 +29,7 @@ def nxroot(request):
     """
     with h5py.File('dummy.nxs', mode='w', driver="core", backing_store=False) as f:
         root = snx.NXroot(f)
-        # This is modelled after the basic recommended NeXus structure
+        # This is modeled after the basic recommended NeXus structure
         entry = root.create_class('entry0', snx.NXentry)
         entry['start_time'] = sc.scalar("yesterday")
         sample = entry.create_class('sample0', snx.NXsample)

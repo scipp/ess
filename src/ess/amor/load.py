@@ -15,7 +15,7 @@ def _tof_correction(data: sc.DataArray, dim: str = 'tof') -> sc.DataArray:
     """
     A correction for the presence of the chopper with respect to the "true" ToF.
     Also fold the two pulses.
-    TODO: generalise mechanism to fold any number of pulses.
+    TODO: generalize mechanism to fold any number of pulses.
 
     Parameters
     ----------
