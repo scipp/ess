@@ -43,9 +43,8 @@ def solid_angle_of_rectangular_pixels(data: sc.DataArray, pixel_width: sc.Variab
     return solid_angle
 
 
-def transmission_fraction(
-        data_monitors: Union[Dict[str, sc.DataArray], sc.DataGroup],
-        direct_monitors: Union[Dict[str, sc.DataArray], sc.DataGroup]) -> sc.DataArray:
+def transmission_fraction(data_monitors: Dict[str, sc.DataArray],
+                          direct_monitors: Dict[str, sc.DataArray]) -> sc.DataArray:
     """
     Approximation based on equations in
     [CalculateTransmission](https://docs.mantidproject.org/v4.0.0/algorithms/CalculateTransmission-v1.html)

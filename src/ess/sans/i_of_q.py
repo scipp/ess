@@ -13,11 +13,11 @@ from .common import gravity_vector
 
 
 def preprocess_monitor_data(
-    monitor: Union[Dict[str, sc.DataArray], sc.DataGroup, sc.DataArray],
+    monitor: Union[Dict[str, sc.DataArray], sc.DataArray],
     *,
     wavelength_bins: Optional[sc.Variable] = None,
     non_background_range: Optional[sc.Variable] = None
-) -> Union[Dict[str, sc.DataArray], sc.DataGroup]:
+) -> Union[Dict[str, sc.DataArray], sc.DataArray]:
     """
     Prepare monitor data for computing the transmission fraction.
     The input data are first converted to wavelength (if needed).
@@ -205,8 +205,8 @@ def add_mask(da: sc.DataArray, mask: sc.DataArray, name: str) -> sc.DataArray:
 
 def normalization_denominator(
         data: sc.DataArray,
-        data_monitors: Union[Dict[str, sc.DataArray], sc.DataGroup],
-        direct_monitors: Union[Dict[str, sc.DataArray], sc.DataGroup],
+        data_monitors: Dict[str, sc.DataArray],
+        direct_monitors: Dict[str, sc.DataArray],
         direct_beam: sc.DataArray,
         wavelength_bins: sc.Variable,
         wavelength_mask: Optional[sc.DataArray] = None) -> sc.DataArray:
@@ -247,12 +247,14 @@ def normalization_denominator(
 
     if wavelength_mask is not None:
         mask_name = uuid.uuid4().hex
-        data_monitors = sc.DataGroup(data_monitors).apply(add_mask,
-                                                          mask=wavelength_mask,
-                                                          name=mask_name)
-        direct_monitors = sc.DataGroup(direct_monitors).apply(add_mask,
-                                                              mask=wavelength_mask,
-                                                              name=mask_name)
+        data_monitors = {
+            key: add_mask(mon, mask=wavelength_mask, name=mask_name)
+            for key, mon in data_monitors.items()
+        }
+        direct_monitors = {
+            key: add_mask(mon, mask=wavelength_mask, name=mask_name)
+            for key, mon in direct_monitors.items()
+        }
 
     transmission_fraction = normalization.transmission_fraction(
         data_monitors=data_monitors, direct_monitors=direct_monitors)
@@ -273,8 +275,8 @@ def normalization_denominator(
 
 
 def to_I_of_Q(data: sc.DataArray,
-              data_monitors: Union[Dict[str, sc.DataArray], sc.DataGroup],
-              direct_monitors: Union[Dict[str, sc.DataArray], sc.DataGroup],
+              data_monitors: Dict[str, sc.DataArray],
+              direct_monitors: Dict[str, sc.DataArray],
               direct_beam: sc.DataArray,
               wavelength_bins: sc.Variable,
               q_bins: sc.Variable,

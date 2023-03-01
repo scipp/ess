@@ -98,8 +98,8 @@ def _refine(xy, sample, denominator, graph, q_bins, masking_radius, gravity,
 
 
 def beam_center(data: sc.DataArray,
-                data_monitors: Union[Dict[str, sc.DataArray], sc.DataGroup],
-                direct_monitors: Union[Dict[str, sc.DataArray], sc.DataGroup],
+                data_monitors: Dict[str, sc.DataArray],
+                direct_monitors: Dict[str, sc.DataArray],
                 direct_beam: sc.DataArray,
                 wavelength_bins: sc.Variable,
                 q_bins: sc.Variable,
