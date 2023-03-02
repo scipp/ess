@@ -106,8 +106,9 @@ def convert_to_q_and_merge_spectra(
     """
     Convert the data to momentum vector Q. This accepts both dense and event data.
     The final step merges all spectra:
-      - In the case of event data, events in all bins are concatenated
-      - In the case of dense data, counts in all spectra are summed
+
+    * In the case of event data, events in all bins are concatenated
+    * In the case of dense data, counts in all spectra are summed
 
     Parameters
     ----------
@@ -213,7 +214,7 @@ def normalization_denominator(
     """
     Compute the normalizing term for the SANS I(Q).
     This is basically:
-      solid_angle * direct_beam * data_incident_monitor_counts * transmission_fraction
+    ``solid_angle * direct_beam * data_incident_monitor_counts * transmission_fraction``
 
     Parameters
     ----------
@@ -289,18 +290,18 @@ def to_I_of_Q(data: sc.DataArray,
 
     The main steps of the workflow are:
 
-       * Generate a coordinate transformation graph from ``tof`` to ``Q``, that also
-         includes ``wavelength``.
-       * Convert the detector data to wavelength.
-       * Compute the transmission fraction from the monitor data.
-       * Compute the solid angles of the detector pixels.
-       * Resample the direct beam function to the same wavelength binning as the
-         monitors.
-       * Combine solid angle, direct beam, transmission fraction and incident monitor
-         counts to compute the denominator for the normalization.
-       * Convert the detector data to momentum vector Q.
-       * Convert the denominator to momentum vector Q.
-       * Normalize the detector data.
+    * Generate a coordinate transformation graph from ``tof`` to ``Q``, that also
+      includes ``wavelength``.
+    * Convert the detector data to wavelength.
+    * Compute the transmission fraction from the monitor data.
+    * Compute the solid angles of the detector pixels.
+    * Resample the direct beam function to the same wavelength binning as the
+      monitors.
+    * Combine solid angle, direct beam, transmission fraction and incident monitor
+      counts to compute the denominator for the normalization.
+    * Convert the detector data to momentum vector Q.
+    * Convert the denominator to momentum vector Q.
+    * Normalize the detector data.
 
     Parameters
     ----------

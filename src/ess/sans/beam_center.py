@@ -111,13 +111,13 @@ def beam_center(data: sc.DataArray,
     Find the beam center of a SANS scattering pattern.
     Description of the procedure:
 
-    1. obtain an initial guess by computing the center-of-mass of the pixels,
+    #. obtain an initial guess by computing the center-of-mass of the pixels,
        weighted by the counts on each pixel
-    2. from that initial guess, divide the panel into 4 quadrants
-    3. compute $I(Q)$ inside each quadrant and compute the residual difference between
-       all 4 quadrants
-    4. iteratively move the centre position and repeat 2. and 3. until all 4 $I(Q)$
-       curves lie on top of each other
+    #. from that initial guess, divide the panel into 4 quadrants
+    #. compute :math:`I(Q)` inside each quadrant and compute the residual difference
+       between all 4 quadrants
+    #. iteratively move the centre position and repeat 2. and 3. until all 4
+       :math:`I(Q)` curves lie on top of each other
 
     Parameters
     ----------

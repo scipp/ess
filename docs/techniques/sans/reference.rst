@@ -11,6 +11,13 @@ Reduction workflows
 
    i_of_q
 
+Utilities
+---------
+
+.. autosummary::
+   :toctree: ../../generated
+
+   beam_center
 
 Conversions
 -----------

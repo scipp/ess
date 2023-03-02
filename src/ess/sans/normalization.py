@@ -48,15 +48,15 @@ def transmission_fraction(data_monitors: Dict[str, sc.DataArray],
     """
     Approximation based on equations in
     [CalculateTransmission](https://docs.mantidproject.org/v4.0.0/algorithms/CalculateTransmission-v1.html)
-    documentation
-    p = \frac{S_T}{D_T}\frac{D_I}{S_I}
+    documentation:
+    ``(Sample_T_monitor / Direct_T_monitor) * (Direct_I_monitor / Sample_I_monitor)``
+
     This is equivalent to ``mantid.CalculateTransmission`` without fitting.
     Inputs should be wavelength-dependent.
 
     TODO: It seems we are always multiplying this by data_monitors['incident'] to
     compute the normalization term. We could consider just returning
-    data_monitors['transmission'] * direct_monitors['incident'] /
-        direct_monitors['transmission']
+    ``(Sample_T_monitor / Direct_T_monitor) * Direct_I_monitor``
 
     Parameters
     ----------
