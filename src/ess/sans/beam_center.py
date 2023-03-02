@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
-from typing import Dict
+from typing import Dict, List, Tuple
 
 import numpy as np
 import scipp as sc
@@ -13,7 +13,7 @@ from .conversions import sans_elastic
 from .normalization import normalize
 
 
-def _center_of_mass(data):
+def _center_of_mass(data: sc.DataArray) -> Tuple[sc.Variable, sc.Variable]:
     """
     Find the center of mass of the data counts.
     """
@@ -23,20 +23,19 @@ def _center_of_mass(data):
     return com.fields.x, com.fields.y
 
 
-def _cost(xy, data):
+def _cost(data: Dict[str, sc.DataArray]) -> float:
     """
     Cost function for determining how close the I(Q) curves are in all four quadrants.
     """
     ref = data['right']
     c = ((data['top'] - ref)**2 + (data['left'] - ref)**2 +
          (data['bottom'] - ref)**2) / ref**2
-    out = c.sum().value
-    print(xy, out)
-    return out
+    return c.sum().value
 
 
-def _refine(xy, sample, denominator, graph, q_bins, masking_radius, gravity,
-            wavelength_bands):
+def _refine(xy: List[float, float], sample: sc.DataArray, denominator: sc.DataArray,
+            graph: dict, q_bins: sc.Variable, masking_radius: sc.Variable,
+            gravity: bool, wavelength_bands: sc.Variable) -> float:
     """
     Compute the intensity as a function of Q inside 4 quadrants in Phi.
     Return the sum of the squares of the relative differences between the 4 quadrants.
@@ -89,7 +88,9 @@ def _refine(xy, sample, denominator, graph, q_bins, masking_radius, gravity,
         # Normalize
         out[quad] = normalize(numerator=data_q, denominator=denominator_q).hist()
     # Compute cost
-    cost = _cost(xy=xy, data=out)
+    cost = _cost(out)
+    logger = get_logger('sans')
+    logger.info(f'Beam center finder: x={xy[0]}, y={xy[1]}, cost={cost}')
     if not np.isfinite(cost):
         raise ValueError('Non-finite value computed in cost. This is likely due to a '
                          'division by zero. Try increasing the size of your Q bins to '
@@ -106,7 +107,7 @@ def beam_center(data: sc.DataArray,
                 masking_radius: sc.Variable,
                 gravity: bool = False,
                 minimizer: str = 'Nelder-Mead',
-                tolerance: float = 0.1):
+                tolerance: float = 0.1) -> Tuple[sc.Variable, sc.Variable]:
     """
     Find the beam center of a SANS scattering pattern.
     Description of the procedure:
