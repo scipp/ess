@@ -27,13 +27,13 @@ def _cost(data: Dict[str, sc.DataArray]) -> float:
     """
     Cost function for determining how close the I(Q) curves are in all four quadrants.
     """
-    ref = data['right']
-    c = ((data['top'] - ref)**2 + (data['left'] - ref)**2 +
-         (data['bottom'] - ref)**2) / ref**2
+    ref = data['north-east']
+    c = ((data['north-west'] - ref)**2 + (data['south-west'] - ref)**2 +
+         (data['south-east'] - ref)**2) / ref**2
     return c.sum().value
 
 
-def _refine(xy: List[float, float], sample: sc.DataArray, denominator: sc.DataArray,
+def _refine(xy: List[float], sample: sc.DataArray, denominator: sc.DataArray,
             graph: dict, q_bins: sc.Variable, masking_radius: sc.Variable,
             gravity: bool, wavelength_bands: sc.Variable) -> float:
     """
@@ -60,12 +60,10 @@ def _refine(xy: List[float, float], sample: sc.DataArray, denominator: sc.DataAr
     denominator.masks['circle'] = data.masks['circle']
 
     pi = sc.constants.pi.value
-    phi_offset = sc.scalar(pi / 4, unit='rad')
-    phi = (sc.atan2(y=data.coords['position'].fields.y,
-                    x=data.coords['position'].fields.x) +
-           phi_offset) % (2 * (pi * sc.units.rad))
-    phi_bins = sc.linspace('phi', 0, pi * 2, 5, unit='rad')
-    quadrants = ['right', 'top', 'left', 'bottom']
+    phi = sc.atan2(y=data.coords['position'].fields.y,
+                   x=data.coords['position'].fields.x)
+    phi_bins = sc.linspace('phi', -pi, pi, 5, unit='rad')
+    quadrants = ['south-west', 'south-east', 'north-east', 'north-west']
 
     out = {}
     for i, quad in enumerate(quadrants):
