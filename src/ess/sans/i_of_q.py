@@ -238,7 +238,8 @@ def normalization_denominator(
         which then gets subtracted from each monitor's counts.
     wavelength_mask:
         Mask to apply to the wavelength coordinate (to mask out artifacts from the
-        instrument beamline).
+        instrument beamline). It is assumed that the mask is represented by a data array
+        where the dim
 
     Returns
     -------
@@ -246,16 +247,16 @@ def normalization_denominator(
         The normalizing term (denominator) in the SANS I(Q) equation.
     """
 
-    if wavelength_mask is not None:
-        mask_name = uuid.uuid4().hex
-        data_monitors = {
-            key: add_mask(mon, mask=wavelength_mask, name=mask_name)
-            for key, mon in data_monitors.items()
-        }
-        direct_monitors = {
-            key: add_mask(mon, mask=wavelength_mask, name=mask_name)
-            for key, mon in direct_monitors.items()
-        }
+    # if wavelength_mask is not None:
+    #     mask_name = uuid.uuid4().hex
+    #     data_monitors = {
+    #         key: add_mask(mon, mask=wavelength_mask, name=mask_name)
+    #         for key, mon in data_monitors.items()
+    #     }
+    #     direct_monitors = {
+    #         key: add_mask(mon, mask=wavelength_mask, name=mask_name)
+    #         for key, mon in direct_monitors.items()
+    #     }
 
     transmission_fraction = normalization.transmission_fraction(
         data_monitors=data_monitors, direct_monitors=direct_monitors)

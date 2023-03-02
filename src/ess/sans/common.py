@@ -1,6 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
+from typing import Optional
+import uuid
+
 import scipp as sc
 from scipp.constants import g
 
@@ -11,3 +14,48 @@ def gravity_vector() -> sc.Variable:
     gravitational field.
     """
     return sc.vector(value=[0, -1, 0]) * g
+
+
+def mask_range(da: sc.DataArray,
+               edges: sc.Variable,
+               mask: sc.Variable,
+               name: Optional[str] = None) -> sc.DataArray:
+    """
+    Mask a range on a data array.
+    The provided edges are used to define the ranges to be masked.
+
+    Parameters
+    ----------
+    da:
+        The data array to be masked.
+    edges:
+        The edges of the ranges to be masked.
+    mask:
+        The mask values to be applied within the ranges defined by ``edges``.
+    name:
+        The name of the mask to be applied. If not provided, a random name will be used.
+    
+    Returns
+    -------
+    :
+        A copy of the input data array with the mask applied.
+    """
+    dim = edges.dim
+    if edges.sizes[dim] != mask.sizes[dim] + 1:
+        raise RuntimeError(
+            f"Size of {dim} in edges ({edges.sizes[dim]}) does not match "
+            f"size of {dim} in mask ({mask.sizes[dim]})")
+    if name is None:
+        name = uuid.uuid4().hex
+    if da.bins is not None:
+        out = da.bin({dim: edges})
+        out.masks[name] = mask
+    else:
+        out = da.copy(deep=False)
+        lu = sc.DataArray(data=mask, coords={dim: edges})
+        dense_edges = sc.lookup(lu, dim)[da.coords[dim]]
+        if da.coords.is_edges(dim):
+            out.masks[name] = dense_edges[dim, 1:] | dense_edges[dim, :-1]
+        else:
+            out.masks[name] = dense_edges
+    return out
