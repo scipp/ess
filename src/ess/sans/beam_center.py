@@ -40,11 +40,18 @@ def _refine(xy: List[float], sample: sc.DataArray, denominator: sc.DataArray,
     Compute the intensity as a function of Q inside 4 quadrants in Phi.
     Return the sum of the squares of the relative differences between the 4 quadrants.
     """
-    # Make a copy of the original data
+    # Make a copy of the original data value, but only add the relevant coords, to avoid
+    # inserting coordinates that need to be recomputed once the positions are altered
+    # (e.g. wavelength). If those coordinates are already present, they will be used
+    # as is instead of being recomputed during the conversion to Q.
+    # TODO: once we can use the latest Scipp version, refactor this to use da.copy() and
+    # da.coords.clear().
     data = sc.DataArray(data=sample.data)
     coord_list = ['position', 'sample_position', 'source_position']
     for c in coord_list:
         data.coords[c] = sample.meta[c].copy(deep=True)
+    for key, mask in sample.masks.items():
+        data.masks[key] = mask
     # Offset the position according to the initial guess from the center-of-mass
     u = data.coords['position'].unit
     data.coords['position'].fields.x -= sc.scalar(xy[0], unit=u)
