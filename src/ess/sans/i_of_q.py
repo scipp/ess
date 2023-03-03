@@ -9,7 +9,7 @@ from scipp.scipy.interpolate import interp1d
 
 from ..logging import get_logger
 from . import conversions, normalization
-from .common import gravity_vector
+from .common import gravity_vector, mask_range
 
 
 def preprocess_monitor_data(
@@ -204,13 +204,11 @@ def add_mask(da: sc.DataArray, mask: sc.DataArray, name: str) -> sc.DataArray:
     return da
 
 
-def normalization_denominator(
-        data: sc.DataArray,
-        data_monitors: Dict[str, sc.DataArray],
-        direct_monitors: Dict[str, sc.DataArray],
-        direct_beam: sc.DataArray,
-        wavelength_bins: sc.Variable,
-        wavelength_mask: Optional[sc.DataArray] = None) -> sc.DataArray:
+def normalization_denominator(data: sc.DataArray, data_monitors: Dict[str,
+                                                                      sc.DataArray],
+                              direct_monitors: Dict[str, sc.DataArray],
+                              direct_beam: sc.DataArray,
+                              wavelength_bins: sc.Variable) -> sc.DataArray:
     """
     Compute the normalizing term for the SANS I(Q).
     This is basically:
@@ -236,27 +234,12 @@ def normalization_denominator(
         The range of wavelengths for the monitors that are considered to not be part of
         the background. This is used to compute the background level on each monitor,
         which then gets subtracted from each monitor's counts.
-    wavelength_mask:
-        Mask to apply to the wavelength coordinate (to mask out artifacts from the
-        instrument beamline). It is assumed that the mask is represented by a data array
-        where the dim
 
     Returns
     -------
     :
         The normalizing term (denominator) in the SANS I(Q) equation.
     """
-
-    # if wavelength_mask is not None:
-    #     mask_name = uuid.uuid4().hex
-    #     data_monitors = {
-    #         key: add_mask(mon, mask=wavelength_mask, name=mask_name)
-    #         for key, mon in data_monitors.items()
-    #     }
-    #     direct_monitors = {
-    #         key: add_mask(mon, mask=wavelength_mask, name=mask_name)
-    #         for key, mon in direct_monitors.items()
-    #     }
 
     transmission_fraction = normalization.transmission_fraction(
         data_monitors=data_monitors, direct_monitors=direct_monitors)
@@ -283,7 +266,7 @@ def to_I_of_Q(data: sc.DataArray,
               wavelength_bins: sc.Variable,
               q_bins: sc.Variable,
               gravity: bool = False,
-              wavelength_mask: Optional[sc.DataArray] = None,
+              wavelength_mask: Optional[Dict[str, sc.Variable]] = None,
               wavelength_bands: Optional[sc.Variable] = None) -> sc.DataArray:
     """
     Compute the scattering cross-section I(Q) for a SANS experimental run, performing
@@ -325,7 +308,9 @@ def to_I_of_Q(data: sc.DataArray,
         Include the effects of gravity when computing the scattering angle if ``True``.
     wavelength_mask:
         Mask to apply to the wavelength coordinate (to mask out artifacts from the
-        instrument beamline).
+        instrument beamline). Needs to contain the keys ``edges`` (the bin edges of)
+        the regions to be masked, and ``mask`` (the boolean values for the mask). It
+        can also contain the key ``name`` (the name of the mask).
     wavelength_bands:
         If defined, return the data as a set of bands in the wavelength dimension. This
         is useful for separating different wavelength ranges that contribute to
@@ -341,16 +326,16 @@ def to_I_of_Q(data: sc.DataArray,
     graph = conversions.sans_elastic(gravity=gravity)
     data = data.transform_coords("wavelength", graph=graph)
 
-    if wavelength_mask is not None:
-        data = add_mask(data, mask=wavelength_mask, name=uuid.uuid4().hex)
-
     # Compute normalizing term
     denominator = normalization_denominator(data=data,
                                             data_monitors=data_monitors,
                                             direct_monitors=direct_monitors,
                                             direct_beam=direct_beam,
-                                            wavelength_bins=wavelength_bins,
-                                            wavelength_mask=wavelength_mask)
+                                            wavelength_bins=wavelength_bins)
+
+    if wavelength_mask is not None:
+        data = mask_range(data, **wavelength_mask)
+        denominator = mask_range(denominator, **wavelength_mask)
 
     # Insert a copy of coords needed for conversion to Q.
     # TODO: can this be avoided by copying the Q coords from the converted numerator?
