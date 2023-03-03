@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
-from typing import Optional
 import uuid
+from typing import Optional
 
 import scipp as sc
 from scipp.constants import g
@@ -34,7 +34,7 @@ def mask_range(da: sc.DataArray,
         The mask values to be applied within the ranges defined by ``edges``.
     name:
         The name of the mask to be applied. If not provided, a random name will be used.
-    
+
     Returns
     -------
     :
@@ -47,15 +47,20 @@ def mask_range(da: sc.DataArray,
             f"size of {dim} in mask ({mask.sizes[dim]})")
     if name is None:
         name = uuid.uuid4().hex
+    lu = sc.DataArray(data=mask, coords={dim: edges})
     if da.bins is not None:
-        out = da.bin({dim: edges})
-        out.masks[name] = mask
+        if dim in da.coords:
+            new_bins = sc.sort(sc.concat([da.coords[dim], edges], dim=dim), key=dim)
+            out = da.bin({dim: new_bins})
+            out.masks[name] = sc.lookup(lu, dim)[sc.midpoints(new_bins, dim=dim)]
+        else:
+            out = da.bin({dim: edges})
+            out.masks[name] = mask
     else:
         out = da.copy(deep=False)
-        lu = sc.DataArray(data=mask, coords={dim: edges})
-        dense_edges = sc.lookup(lu, dim)[da.coords[dim]]
+        mask_values = sc.lookup(lu, dim)[da.coords[dim]]
         if da.coords.is_edges(dim):
-            out.masks[name] = dense_edges[dim, 1:] | dense_edges[dim, :-1]
+            out.masks[name] = mask_values[dim, 1:] | mask_values[dim, :-1]
         else:
-            out.masks[name] = dense_edges
+            out.masks[name] = mask_values
     return out
