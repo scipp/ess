@@ -45,27 +45,37 @@ def preprocess_monitor_data(
         rebinned to the requested wavelength binning.
     """
 
-    if isinstance(monitor, sc.DataArray):
-        if 'wavelength' not in monitor.dims:
-            monitor = monitor.transform_coords('wavelength',
-                                               graph=conversions.sans_monitor())
-        if non_background_range is not None:
-            dim = non_background_range.dim
-            monitor.variances = None  # TODO: Hack to set variances to None
-            below = monitor[dim, :non_background_range[0]]
-            above = monitor[dim, non_background_range[1]:]
-            background = sc.concat([below.data, above.data], dim=dim).mean()
-            monitor = monitor - background
-        if wavelength_bins is not None:
-            monitor = monitor.rebin(wavelength=wavelength_bins)
-        return monitor
-    else:
+    if not isinstance(monitor, sc.DataArray):
+        # Case of a dict or a group of monitors
         return monitor.__class__({
             key: preprocess_monitor_data(mon,
                                          wavelength_bins=wavelength_bins,
                                          non_background_range=non_background_range)
             for key, mon in monitor.items()
         })
+
+    if 'wavelength' not in monitor.dims:
+        monitor = monitor.transform_coords('wavelength',
+                                           graph=conversions.sans_monitor())
+
+    if monitor.variances is not None:
+        monitor.variances = None  # TODO: Hack to set variances to None
+
+    background = None
+    if non_background_range is not None:
+        background = mask_range(monitor,
+                                edges=non_background_range,
+                                mask=sc.array(dims=[non_background_range.dim],
+                                              values=[True])).mean()
+
+    if wavelength_bins is not None:
+        if monitor.bins is not None:
+            monitor = monitor.hist(wavelength=wavelength_bins)
+        else:
+            monitor = monitor.rebin(wavelength=wavelength_bins)
+    if background is not None:
+        monitor -= background
+    return monitor
 
 
 def resample_direct_beam(direct_beam: sc.DataArray,
@@ -158,8 +168,8 @@ def _convert_events_to_q_and_merge_spectra(
     """
     Convert event data to momentum vector Q.
     """
-    data_q = data.transform_coords("Q", graph=graph)
-    q_summed = data_q.bins.concat('spectrum')
+    data_q = data.transform_coords('Q', graph=graph)
+    q_summed = data_q.bins.concat(set(data_q.dims) - {'Q'})
     edges = [q_bins]
     if wavelength_bands is not None:
         edges = [wavelength_bands] + edges
@@ -175,13 +185,14 @@ def _convert_dense_to_q_and_merge_spectra(
     Convert dense data to momentum vector Q.
     """
     bands = []
-    data_q = data.transform_coords("Q", graph=graph)
+    data_q = data.transform_coords('Q', graph=graph)
     data_q.coords['wavelength'] = data_q.attrs.pop('wavelength')
+    sum_dims = set(data_q.dims) - {'Q'}
     if wavelength_bands is None:
-        return data_q.hist({q_bins.dim: q_bins}).sum('spectrum')
+        return data_q.hist({q_bins.dim: q_bins}).sum(sum_dims)
     for i in range(wavelength_bands.sizes['wavelength'] - 1):
         band = data_q['wavelength', wavelength_bands[i]:wavelength_bands[i + 1]]
-        bands.append(band.hist({q_bins.dim: q_bins}).sum('spectrum'))
+        bands.append(band.hist({q_bins.dim: q_bins}).sum(sum_dims))
     q_summed = sc.concat(bands, 'wavelength')
     return q_summed
 

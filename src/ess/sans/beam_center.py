@@ -10,7 +10,7 @@ from ..logging import get_logger
 from . import i_of_q
 from .common import gravity_vector
 from .conversions import sans_elastic
-from .normalization import normalize
+from .normalization import normalize, solid_angle_of_rectangular_pixels
 
 
 def _center_of_mass(data: sc.DataArray) -> Tuple[sc.Variable, sc.Variable]:
@@ -167,12 +167,20 @@ def beam_center(data: sc.DataArray,
     from scipy.optimize import minimize
     graph = sans_elastic(gravity=gravity)
 
-    # Compute the denominator used for normalization
-    denominator = i_of_q.normalization_denominator(data=data,
-                                                   data_monitors=data_monitors,
-                                                   direct_monitors=direct_monitors,
-                                                   direct_beam=direct_beam,
-                                                   wavelength_bins=wavelength_bins)
+    # Compute the denominator used for normalization. The denominator is defined as:
+    # pixel_solid_angles * Sample_T_monitor * Direct_I_monitor / Direct_T_monitor
+
+    # Get pixel solid angles
+    solid_angle = solid_angle_of_rectangular_pixels(
+        data,
+        pixel_width=data.coords['pixel_width'],
+        pixel_height=data.coords['pixel_height'])
+
+    # Compute denominator
+    denominator = (solid_angle * data_monitors['transmission'] *
+                   direct_monitors['incident'] / direct_monitors['transmission'])
+    # Convert wavelength coordinate to midpoints for future histogramming
+    denominator.coords['wavelength'] = sc.midpoints(denominator.coords['wavelength'])
 
     wavelength_bands = sc.concat(
         [wavelength_bins.min(), wavelength_bins.max()], dim='wavelength')
