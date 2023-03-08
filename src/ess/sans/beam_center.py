@@ -40,18 +40,8 @@ def _refine(xy: List[float], sample: sc.DataArray, denominator: sc.DataArray,
     Compute the intensity as a function of Q inside 4 quadrants in Phi.
     Return the sum of the squares of the relative differences between the 4 quadrants.
     """
-    # Make a copy of the original data value, but only add the relevant coords, to avoid
-    # inserting coordinates that need to be recomputed once the positions are altered
-    # (e.g. wavelength). If those coordinates are already present, they will be used
-    # as is instead of being recomputed during the conversion to Q.
-    # TODO: once we can use the latest Scipp version, refactor this to use da.copy() and
-    # da.coords.clear().
-    data = sc.DataArray(data=sample.data)
-    coord_list = ['position', 'sample_position', 'source_position']
-    for c in coord_list:
-        data.coords[c] = sample.meta[c].copy(deep=True)
-    for key, mask in sample.masks.items():
-        data.masks[key] = mask
+    data = sample.copy(deep=False)
+    data.coords['position'] = sample.coords['position'].copy(deep=True)
     # Offset the position according to the initial guess from the center-of-mass
     u = data.coords['position'].unit
     data.coords['position'].fields.x -= sc.scalar(xy[0], unit=u)
@@ -62,13 +52,15 @@ def _refine(xy: List[float], sample: sc.DataArray, denominator: sc.DataArray,
     data.masks['circle'] = r > masking_radius
 
     # Insert a copy of coords and masks needed for conversion to Q
-    for c in coord_list:
+    for c in ['position', 'sample_position', 'source_position']:
         denominator.coords[c] = data.coords[c]
     denominator.masks['circle'] = data.masks['circle']
 
     pi = sc.constants.pi.value
-    phi = sc.atan2(y=data.coords['position'].fields.y,
-                   x=data.coords['position'].fields.x)
+    phi = data.transform_coords('phi',
+                                graph=graph,
+                                keep_intermediate=False,
+                                keep_inputs=False).coords['phi']
     phi_bins = sc.linspace('phi', -pi, pi, 5, unit='rad')
     quadrants = ['south-west', 'south-east', 'north-east', 'north-west']
 
@@ -106,7 +98,6 @@ def _refine(xy: List[float], sample: sc.DataArray, denominator: sc.DataArray,
 def beam_center(data: sc.DataArray,
                 data_monitors: Dict[str, sc.DataArray],
                 direct_monitors: Dict[str, sc.DataArray],
-                direct_beam: sc.DataArray,
                 wavelength_bins: sc.Variable,
                 q_bins: sc.Variable,
                 masking_radius: sc.Variable,
@@ -135,9 +126,6 @@ def beam_center(data: sc.DataArray,
     direct_monitors:
         The data arrays for the incident and transmission monitors for the direct
         run.
-    direct_beam:
-        The direct beam function of the instrument (histogrammed,
-        depends on wavelength).
     wavelength_bins:
         The binning in the wavelength dimension to be used.
     q_bins:
@@ -169,16 +157,14 @@ def beam_center(data: sc.DataArray,
 
     # Compute the denominator used for normalization. The denominator is defined as:
     # pixel_solid_angles * Sample_T_monitor * Direct_I_monitor / Direct_T_monitor
-
-    # Get pixel solid angles
     solid_angle = solid_angle_of_rectangular_pixels(
         data,
         pixel_width=data.coords['pixel_width'],
         pixel_height=data.coords['pixel_height'])
 
-    # Compute denominator
     denominator = (solid_angle * data_monitors['transmission'] *
                    direct_monitors['incident'] / direct_monitors['transmission'])
+
     # Convert wavelength coordinate to midpoints for future histogramming
     denominator.coords['wavelength'] = sc.midpoints(denominator.coords['wavelength'])
 

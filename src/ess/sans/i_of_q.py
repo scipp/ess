@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
-import uuid
 from typing import Dict, Optional, Union
 
 import scipp as sc
@@ -141,7 +140,7 @@ def convert_to_q_and_merge_spectra(
     :
         The input data converted to Q and then summed over all detector pixels.
     """
-    if gravity:
+    if gravity and ('gravity' not in data.meta):
         data = data.copy(deep=False)
         data.coords["gravity"] = gravity_vector()
 
