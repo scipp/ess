@@ -7,8 +7,32 @@ from scippneutron._utils import elem_unit
 from scippneutron.conversion.graph import beamline, tof
 
 
-def two_theta(gravity: sc.Variable, wavelength: sc.Variable, incident_beam: sc.Variable,
-              scattered_beam: sc.Variable) -> sc.Variable:
+def cylindrical_x(gravity: sc.Variable, incident_beam: sc.Variable,
+                  scattered_beam: sc.Variable) -> sc.Variable:
+    """
+    Compute the horizontal x coordinate perpendicular to the incident beam direction.
+    Note that it is assumed here that the incident beam is perpendicular to the gravity
+    vector.
+    """
+    n = sc.cross(incident_beam, -gravity)
+    n /= sc.norm(n)
+    return sc.dot(scattered_beam, n)
+
+
+def cylindrical_y(gravity: sc.Variable, scattered_beam: sc.Variable) -> sc.Variable:
+    """
+    Compute the vertical y coordinate perpendicular to the incident beam direction.
+    Note that it is assumed here that the incident beam is perpendicular to the gravity
+    vector.
+    """
+    y = sc.dot(scattered_beam, -gravity)
+    y /= sc.norm(gravity)
+    return y
+
+
+def two_theta(cylindrical_x: sc.Variable, cylindrical_y: sc.Variable,
+              scattered_beam: sc.Variable, wavelength: sc.Variable,
+              gravity: sc.Variable) -> sc.Variable:
     """
     Compute the scattering angle from the incident and scattered beam vectors, taking
     into account the effects of gravity.
@@ -17,11 +41,9 @@ def two_theta(gravity: sc.Variable, wavelength: sc.Variable, incident_beam: sc.V
     """
     grav = sc.norm(gravity)
     L2 = sc.norm(scattered_beam)
-    y = sc.dot(scattered_beam, -gravity) / grav
-    n = sc.cross(incident_beam, -gravity)
-    n /= sc.norm(n)
-    x_term = sc.dot(scattered_beam, n)
-    x_term *= x_term
+
+    # TODO: Using cylindrical_x means we can no longer raise to the power of 2 in place
+    x_term = cylindrical_x * cylindrical_x
 
     y_term = sc.to_unit(wavelength, elem_unit(L2), copy=True)
     y_term *= y_term
@@ -34,7 +56,7 @@ def two_theta(gravity: sc.Variable, wavelength: sc.Variable, incident_beam: sc.V
         y_term *= drop
     else:
         y_term = drop * y_term
-    y_term += y
+    y_term += cylindrical_y
     y_term *= y_term
 
     if set(x_term.dims).issubset(set(y_term.dims)):
@@ -47,20 +69,12 @@ def two_theta(gravity: sc.Variable, wavelength: sc.Variable, incident_beam: sc.V
     return out
 
 
-def phi(gravity: sc.Variable, incident_beam: sc.Variable,
-        scattered_beam: sc.Variable) -> sc.Variable:
+def phi(cylindrical_x: sc.Variable, cylindrical_y: sc.Variable) -> sc.Variable:
     """
-    Compute the cylindrial phi angle around the incident beam, taking into account the
-    effects of gravity. Note that it is assumed here that the incident beam is
-    perpendicular to the gravity vector.
+    Compute the cylindrial phi angle around the incident beam. Note that it is assumed
+    here that the incident beam is perpendicular to the gravity vector.
     """
-
-    grav = sc.norm(gravity)
-    y = sc.dot(scattered_beam, -gravity) / grav
-    n = sc.cross(incident_beam, -gravity)
-    n /= sc.norm(n)
-    x = sc.dot(scattered_beam, n)
-    return sc.atan2(y=y, x=x, out=y)
+    return sc.atan2(y=cylindrical_y, x=cylindrical_x)
 
 
 def sans_elastic(gravity: bool = False, scatter: bool = True) -> dict:
@@ -74,7 +88,9 @@ def sans_elastic(gravity: bool = False, scatter: bool = True) -> dict:
     graph = {**beamline.beamline(scatter=scatter), **tof.elastic_Q('tof')}
     if gravity:
         graph['two_theta'] = two_theta
-        graph['phi'] = phi
+    graph['cylindrical_x'] = cylindrical_x
+    graph['cylindrical_y'] = cylindrical_y
+    graph['phi'] = phi
     return graph
 
 
