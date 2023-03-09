@@ -7,27 +7,44 @@ from scippneutron._utils import elem_unit
 from scippneutron.conversion.graph import beamline, tof
 
 
-def cylindrical_x(gravity: sc.Variable, incident_beam: sc.Variable,
+def cyl_x_unit_vector(gravity: sc.Variable, incident_beam: sc.Variable) -> sc.Variable:
+    """
+    Compute the horizontal unit vector in the plane normal to the incident beam
+    direction. Note that it is assumed here that the incident beam is perpendicular to
+    the gravity vector.
+    """
+    v_x = sc.cross(incident_beam, gravity)
+    return v_x / sc.norm(v_x)
+
+
+def cyl_y_unit_vector(gravity: sc.Variable) -> sc.Variable:
+    """
+    Compute the vertical unit vector in the plane normal to the incident beam
+    direction. Note that it is assumed here that the incident beam is perpendicular to
+    the gravity vector.
+    """
+    v_y = -gravity
+    return v_y / sc.norm(v_y)
+
+
+def cylindrical_x(cyl_x_unit_vector: sc.Variable,
                   scattered_beam: sc.Variable) -> sc.Variable:
     """
     Compute the horizontal x coordinate perpendicular to the incident beam direction.
     Note that it is assumed here that the incident beam is perpendicular to the gravity
     vector.
     """
-    n = sc.cross(incident_beam, -gravity)
-    n /= sc.norm(n)
-    return sc.dot(scattered_beam, n)
+    return sc.dot(scattered_beam, cyl_x_unit_vector)
 
 
-def cylindrical_y(gravity: sc.Variable, scattered_beam: sc.Variable) -> sc.Variable:
+def cylindrical_y(cyl_y_unit_vector: sc.Variable,
+                  scattered_beam: sc.Variable) -> sc.Variable:
     """
     Compute the vertical y coordinate perpendicular to the incident beam direction.
     Note that it is assumed here that the incident beam is perpendicular to the gravity
     vector.
     """
-    y = sc.dot(scattered_beam, -gravity)
-    y /= sc.norm(gravity)
-    return y
+    return sc.dot(scattered_beam, cyl_y_unit_vector)
 
 
 def two_theta(cylindrical_x: sc.Variable, cylindrical_y: sc.Variable,
@@ -88,6 +105,8 @@ def sans_elastic(gravity: bool = False, scatter: bool = True) -> dict:
     graph = {**beamline.beamline(scatter=scatter), **tof.elastic_Q('tof')}
     if gravity:
         graph['two_theta'] = two_theta
+    graph['cyl_x_unit_vector'] = cyl_x_unit_vector
+    graph['cyl_y_unit_vector'] = cyl_y_unit_vector
     graph['cylindrical_x'] = cylindrical_x
     graph['cylindrical_y'] = cylindrical_y
     graph['phi'] = phi

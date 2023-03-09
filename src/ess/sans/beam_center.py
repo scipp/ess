@@ -19,8 +19,7 @@ def _center_of_mass(data: sc.DataArray) -> Tuple[sc.Variable, sc.Variable]:
     """
     summed = data.sum(list(set(data.dims) - set(data.meta['position'].dims)))
     v = sc.values(summed.data)
-    com = sc.sum(summed.meta['position'] * v) / v.sum()
-    return com.fields.x, com.fields.y
+    return sc.sum(summed.meta['position'] * v) / v.sum()
 
 
 def _cost(data: Dict[str, sc.DataArray]) -> float:
@@ -33,6 +32,20 @@ def _cost(data: Dict[str, sc.DataArray]) -> float:
     return c.sum().value
 
 
+def _offsets_to_vector(data: sc.DataArray, xy: List[float], graph: dict) -> sc.Variable:
+    """
+    Convert x,y offsets inside the plane normal to the beam to a vector in absolute
+    coordinates.
+    """
+    u = data.coords['position'].unit
+    # Get two vectors that define the plane normal to the beam
+    coords = data.transform_coords(['cyl_x_unit_vector', 'cyl_y_unit_vector'],
+                                   graph=graph).coords
+    center = xy[0] * coords['cyl_x_unit_vector'] + xy[1] * coords['cyl_y_unit_vector']
+    center.unit = u
+    return center
+
+
 def _refine(xy: List[float], sample: sc.DataArray, denominator: sc.DataArray,
             graph: dict, q_bins: sc.Variable, masking_radius: sc.Variable,
             gravity: bool, wavelength_bands: sc.Variable) -> float:
@@ -42,15 +55,16 @@ def _refine(xy: List[float], sample: sc.DataArray, denominator: sc.DataArray,
     """
     data = sample.copy(deep=False)
     data.coords['position'] = sample.coords['position'].copy(deep=True)
-    # Offset the position according to the initial guess from the center-of-mass
-    u = data.coords['position'].unit
-    data.coords['position'].fields.x -= sc.scalar(xy[0], unit=u)
-    data.coords['position'].fields.y -= sc.scalar(xy[1], unit=u)
-    # Add the circular mask
-    r = sc.sqrt(data.coords['position'].fields.x**2 +
-                data.coords['position'].fields.y**2)
-    data.masks['circle'] = r > masking_radius
 
+    # Offset the position according to the input shift
+    center = _offsets_to_vector(data=data, xy=xy, graph=graph)
+    data.coords['position'] -= center
+
+    # Add the circular mask
+    coords = data.transform_coords(['cylindrical_x', 'cylindrical_y'],
+                                   graph=graph).coords
+    r = sc.sqrt(coords['cylindrical_x']**2 + coords['cylindrical_y']**2)
+    data.masks['circle'] = r > masking_radius
     # Insert a copy of coords and masks needed for conversion to Q
     for c in ['position', 'sample_position', 'source_position']:
         denominator.coords[c] = data.coords[c]
@@ -144,16 +158,19 @@ def beam_center(data: sc.DataArray,
         for details).
     """  # noqa: E501
     logger = get_logger('sans')
-    if gravity and ('gravity' not in data.meta):
+    if 'gravity' not in data.meta:
         data = data.copy(deep=False)
         data.coords['gravity'] = gravity_vector()
     # Use center of mass to get initial guess for beam center
-    xc, yc = _center_of_mass(data)
-    logger.info('Initial guess for beam center: '
-                f'x={xc.value}[{xc.unit}], y={yc.value}[{yc.unit}]')
-    # Refine using Scipy optimize
-    from scipy.optimize import minimize
+    com = _center_of_mass(data)
+    logger.info(f'Initial guess for beam center: {com}')
     graph = sans_elastic(gravity=gravity)
+
+    # We compute the shift between the incident beam direction and the center-of-mass
+    incident_beam = data.transform_coords('incident_beam',
+                                          graph=graph).coords['incident_beam']
+    n_beam = incident_beam / sc.norm(incident_beam)
+    com_shift = com - sc.dot(com, n_beam) * n_beam
 
     # Compute the denominator used for normalization. The denominator is defined as:
     # pixel_solid_angles * Sample_T_monitor * Direct_I_monitor / Direct_T_monitor
@@ -171,17 +188,22 @@ def beam_center(data: sc.DataArray,
     wavelength_bands = sc.concat(
         [wavelength_bins.min(), wavelength_bins.max()], dim='wavelength')
 
-    x = data.meta['position'].fields.x
-    y = data.meta['position'].fields.y
+    coords = data.transform_coords(['cylindrical_x', 'cylindrical_y'],
+                                   graph=graph).coords
+
+    # Refine using Scipy optimize
+    from scipy.optimize import minimize
     res = minimize(_refine,
-                   x0=[xc.value, yc.value],
+                   x0=[com_shift.fields.x.value, com_shift.fields.y.value],
                    args=(data, denominator, graph, q_bins, masking_radius, gravity,
                          wavelength_bands),
-                   bounds=[(x.min().value, x.max().value),
-                           (y.min().value, y.max().value)],
+                   bounds=[(coords['cylindrical_x'].min().value,
+                            coords['cylindrical_x'].max().value),
+                           (coords['cylindrical_y'].min().value,
+                            coords['cylindrical_y'].max().value)],
                    method=minimizer,
                    tol=tolerance)
-    logger.info('Final beam center value: '
-                f'x={res.x[0]}[{xc.unit}], y={res.x[1]}[{yc.unit}]')
+    center = _offsets_to_vector(data=data, xy=res.x, graph=graph)
+    logger.info(f'Final beam center value: {center}')
     logger.info(f'Beam center finder minimizer info: {res}')
-    return sc.scalar(res.x[0], unit=x.unit), sc.scalar(res.x[1], unit=y.unit)
+    return center
