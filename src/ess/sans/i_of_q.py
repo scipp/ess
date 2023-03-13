@@ -196,24 +196,6 @@ def _convert_dense_to_q_and_merge_spectra(
     return q_summed
 
 
-def add_mask(da: sc.DataArray, mask: sc.DataArray, name: str) -> sc.DataArray:
-    """
-    Add wavelength mask to data array. If it contains binned data, use a top-level
-    mask. It the data is dense, use lookup to find the mask value for each bin.
-    """
-    if da.bins is not None:
-        da = da.bin({mask.dim: mask.coords[mask.dim]})
-        da.masks[name] = mask.data
-    else:
-        lu = sc.lookup(mask, mask.dim)
-        if da.coords.is_edges(mask.dim):
-            sampling = sc.midpoints(da.coords[mask.dim])
-        else:
-            sampling = da.coords[mask.dim]
-        da.masks[name] = lu[sampling]
-    return da
-
-
 def normalization_denominator(data: sc.DataArray, data_monitors: Dict[str,
                                                                       sc.DataArray],
                               direct_monitors: Dict[str, sc.DataArray],
