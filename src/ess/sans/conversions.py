@@ -47,9 +47,8 @@ def cylindrical_y(cyl_y_unit_vector: sc.Variable,
     return sc.dot(scattered_beam, cyl_y_unit_vector)
 
 
-def two_theta(cylindrical_x: sc.Variable, cylindrical_y: sc.Variable,
-              scattered_beam: sc.Variable, wavelength: sc.Variable,
-              gravity: sc.Variable) -> sc.Variable:
+def two_theta(incident_beam: sc.Variable, scattered_beam: sc.Variable,
+              wavelength: sc.Variable, gravity: sc.Variable) -> sc.Variable:
     """
     Compute the scattering angle from the incident and scattered beam vectors, taking
     into account the effects of gravity.
@@ -59,8 +58,8 @@ def two_theta(cylindrical_x: sc.Variable, cylindrical_y: sc.Variable,
     grav = sc.norm(gravity)
     L2 = sc.norm(scattered_beam)
 
-    # TODO: Using cylindrical_x means we can no longer raise to the power of 2 in place
-    x_term = cylindrical_x * cylindrical_x
+    x_term = cylindrical_x(cyl_x_unit_vector(gravity, incident_beam), scattered_beam)
+    x_term *= x_term
 
     y_term = sc.to_unit(wavelength, elem_unit(L2), copy=True)
     y_term *= y_term
@@ -73,7 +72,7 @@ def two_theta(cylindrical_x: sc.Variable, cylindrical_y: sc.Variable,
         y_term *= drop
     else:
         y_term = drop * y_term
-    y_term += cylindrical_y
+    y_term += cylindrical_y(cyl_y_unit_vector(gravity), scattered_beam)
     y_term *= y_term
 
     if set(x_term.dims).issubset(set(y_term.dims)):
