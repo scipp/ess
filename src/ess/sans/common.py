@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
+import numpy as np
 import uuid
 from typing import Optional
 
@@ -50,7 +51,13 @@ def mask_range(da: sc.DataArray,
     lu = sc.DataArray(data=mask, coords={dim: edges})
     if da.bins is not None:
         if dim in da.coords:
-            new_bins = sc.sort(sc.concat([da.coords[dim], edges], dim=dim), key=dim)
+            not_in_coord = np.setdiff1d(edges.values, da.coords[dim].values)
+            new_bins = sc.sort(sc.concat([
+                da.coords[dim],
+                sc.array(dims=edges.dims, values=not_in_coord, unit=edges.unit)
+            ],
+                                         dim=dim),
+                               key=dim)
             out = da.bin({dim: new_bins})
             out.masks[name] = sc.lookup(lu, dim)[sc.midpoints(new_bins, dim=dim)]
         else:

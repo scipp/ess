@@ -78,3 +78,16 @@ def test_mask_range_binned_data_has_prior_multiple_bins():
                         name='mymask')
     assert masked.masks['mymask'].values.tolist() == [False, True, True, False]
     assert np.allclose(masked.coords['x'].values, [0., 1.5, 2., 3.001, 4.])
+
+
+def test_mask_range_binned_data_has_already_same_edge_as_mask():
+    x = sc.arange('x', 5., unit='m')
+    da = sc.DataArray(data=x, coords={'x': x, 'y': x + x.max()})
+    binned = da.bin(x=2)
+    edges = sc.array(dims=['x'], values=[binned.coords['x'][1].value, 3.001], unit='m')
+    masked = mask_range(binned,
+                        edges=edges,
+                        mask=sc.array(dims=['x'], values=[True]),
+                        name='mymask')
+    assert masked.masks['mymask'].values.tolist() == [False, True, False]
+    assert np.allclose(masked.coords['x'].values, [0., 2., 3.001, 4.])
