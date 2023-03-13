@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
-import numpy as np
 import uuid
 from typing import Optional
 
+import numpy as np
 import scipp as sc
 from scipp.constants import g
 
