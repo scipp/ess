@@ -2,9 +2,8 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 import numpy as np
-import scipp as sc
-
 import pytest
+import scipp as sc
 
 from ess.sans.common import mask_range
 
