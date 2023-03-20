@@ -62,10 +62,10 @@ def preprocess_monitor_data(
 
     background = None
     if non_background_range is not None:
-        background = mask_range(monitor,
-                                edges=non_background_range,
-                                mask=sc.array(dims=[non_background_range.dim],
-                                              values=[True])).mean()
+        mask = sc.DataArray(data=sc.array(dims=[non_background_range.dim],
+                                          values=[True]),
+                            coords={non_background_range.dim: non_background_range})
+        background = mask_range(monitor, mask=mask).mean()
 
     if wavelength_bins is not None:
         if monitor.bins is not None:
@@ -258,7 +258,7 @@ def to_I_of_Q(data: sc.DataArray,
               wavelength_bins: sc.Variable,
               q_bins: sc.Variable,
               gravity: bool = False,
-              wavelength_mask: Optional[Dict[str, sc.Variable]] = None,
+              wavelength_mask: Optional[sc.DataArray] = None,
               wavelength_bands: Optional[sc.Variable] = None) -> sc.DataArray:
     """
     Compute the scattering cross-section I(Q) for a SANS experimental run, performing
@@ -300,9 +300,7 @@ def to_I_of_Q(data: sc.DataArray,
         Include the effects of gravity when computing the scattering angle if ``True``.
     wavelength_mask:
         Mask to apply to the wavelength coordinate (to mask out artifacts from the
-        instrument beamline). Needs to contain the keys ``edges`` (the bin edges of)
-        the regions to be masked, and ``mask`` (the boolean values for the mask). It
-        can also contain the key ``name`` (the name of the mask).
+        instrument beamline). See :func:`common.mask_range` for more details.
     wavelength_bands:
         If defined, return the data as a set of bands in the wavelength dimension. This
         is useful for separating different wavelength ranges that contribute to
@@ -326,8 +324,14 @@ def to_I_of_Q(data: sc.DataArray,
                                             wavelength_bins=wavelength_bins)
 
     if wavelength_mask is not None:
-        data = mask_range(data, **wavelength_mask)
-        denominator = mask_range(denominator, **wavelength_mask)
+        # If we have binned data and the wavelength coord is multi-dimensional, we need
+        # to make a single wavelength bin before we can mask the range.
+        if data.bins is not None:
+            dim = wavelength_mask.dim
+            if (dim in data.bins.coords) and (dim in data.coords):
+                data = data.bin({dim: 1})
+        data = mask_range(data, wavelength_mask, name='wavelength_mask')
+        denominator = mask_range(denominator, wavelength_mask, name='wavelength_mask')
 
     # Insert a copy of coords needed for conversion to Q.
     # TODO: can this be avoided by copying the Q coords from the converted numerator?
