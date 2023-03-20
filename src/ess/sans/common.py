@@ -18,8 +18,7 @@ def gravity_vector() -> sc.Variable:
 
 
 def mask_range(da: sc.DataArray,
-               edges: sc.Variable,
-               mask: sc.Variable,
+               mask: sc.DataArray,
                name: Optional[str] = None) -> sc.DataArray:
     """
     Mask a range on a data array.
@@ -29,10 +28,11 @@ def mask_range(da: sc.DataArray,
     ----------
     da:
         The data array to be masked.
-    edges:
-        The edges of the ranges to be masked.
     mask:
-        The mask values to be applied within the ranges defined by ``edges``.
+        A data array defining the mask to be applied. Only one-dimensional masks are
+        supported. The data array should contain a bin-edge coordinate which represents
+        the edges of the ranges to be masked. The values of the data array represent the
+        mask values (``True`` or ``False``) inside each range defined by the coordinate.
     name:
         The name of the mask to be applied. If not provided, a random name will be used.
 
@@ -41,14 +41,15 @@ def mask_range(da: sc.DataArray,
     :
         A copy of the input data array with the mask applied.
     """
-    dim = edges.dim
-    if edges.sizes[dim] != mask.sizes[dim] + 1:
-        raise RuntimeError(
-            f"Size of {dim} in edges ({edges.sizes[dim]}) does not match "
-            f"size of {dim} in mask ({mask.sizes[dim]})")
+    dim = mask.dim
+    edges = mask.coords[dim]
+    if (dim in da.coords) and (da.coords[dim].ndim > 1):
+        raise sc.DimensionError(
+            'Cannot mask range on data with multi-dimensional coordinate. '
+            f'Found dimensions {da.coords[dim].dims} for coordinate {dim}.')
     if name is None:
         name = uuid.uuid4().hex
-    lu = sc.DataArray(data=mask, coords={dim: edges})
+    lu = sc.DataArray(data=mask.data, coords={dim: edges})
     if da.bins is not None:
         if dim in da.coords:
             new_bins = sc.array(dims=[dim],
@@ -58,7 +59,7 @@ def mask_range(da: sc.DataArray,
             out.masks[name] = sc.lookup(lu, dim)[sc.midpoints(new_bins, dim=dim)]
         else:
             out = da.bin({dim: edges})
-            out.masks[name] = mask
+            out.masks[name] = mask.data
     else:
         out = da.copy(deep=False)
         mask_values = sc.lookup(lu, dim)[da.coords[dim]]
