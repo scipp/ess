@@ -174,7 +174,7 @@ def beam_center(data: sc.DataArray,
     pixels. It is indeed very common to mask broken pixels, as well as the region of
     the detector where the sample holder is casting a shadow.
     Such a sample holder will not appear in all 4 quadrants, and because it spans a
-    range of scattering (:math:`2\theta`) angles, it spans a range of :math:`Q` bins.
+    range of scattering (:math:`2\\theta`) angles, it spans a range of :math:`Q` bins.
 
     All this means that we in fact need to perform a reduction as close as possible to
     the full :math:`I(Q)` reduction in each of the 4 quadrants to achieve a reliable
@@ -205,16 +205,20 @@ def beam_center(data: sc.DataArray,
     q_bins:
         The binning in the Q dimension to be used.
     masking_radius:
-        The radius of the circular mask to apply to the data while iterating.
+        While iterating to find the beam center, the current center will not be in the
+        center of the detector panel. This can introduce bias in the shape of the
+        :math:`I(Q)` inside the 4 quadrants. To avoid this, we apply a circular mask
+        around the current center, to ensure all directions contribute equally to
+        :math:`Q` bins.
     gravity:
         Include the effects of gravity when computing the scattering angle if ``True``.
     minimizer:
-        The Scipy minimizer method to use (see
-        https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html
+        The Scipy minimizer method to use (see the
+        `Scipy docs <https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html>`_
         for details).
     tolerance:
-        Tolerance for termination (see
-        https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html
+        Tolerance for termination (see the
+        `Scipy docs <https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html>`_
         for details).
     """  # noqa: E501
     logger = get_logger('sans')
