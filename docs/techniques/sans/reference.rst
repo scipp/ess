@@ -11,13 +11,18 @@ Reduction workflows
 
    i_of_q
 
-Utilities
----------
+Beam center finder
+------------------
 
 .. autosummary::
    :toctree: ../../generated
 
-   beam_center
+   beam_center_finder.beam_center
+   beam_center_finder.center_of_mass
+   beam_center_finder.cost
+   beam_center_finder.iofq_in_quadrants
+   beam_center_finder.iofq_normalization
+   beam_center_finder.minimize
 
 Conversions
 -----------

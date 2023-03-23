@@ -13,23 +13,24 @@ from .conversions import sans_elastic
 from .normalization import normalize, solid_angle_of_rectangular_pixels
 
 
-def _center_of_mass(data: sc.DataArray) -> Tuple[sc.Variable, sc.Variable]:
+def center_of_mass(data: sc.DataArray) -> sc.Variable:
     """
-    Find the center of mass of the data counts.
+    Find the center-of-mass of the data counts.
+    The center-of-mass is simply the weighted mean of the positions.
+
+    Parameters:
+    -----------
+    data:
+        The data to find the center-of-mass of.
+
+    Returns:
+    --------
+    :
+        The position of the center-of-mass, as a vector.
     """
     summed = data.sum(list(set(data.dims) - set(data.meta['position'].dims)))
     v = sc.values(summed.data)
     return sc.sum(summed.meta['position'] * v) / v.sum()
-
-
-def _cost(data: Dict[str, sc.DataArray]) -> float:
-    """
-    Cost function for determining how close the I(Q) curves are in all four quadrants.
-    """
-    all_q = sc.concat(list(data.values()), dim='quadrant')
-    ref = sc.values(all_q.mean('quadrant'))
-    c = sc.abs(all_q - ref) / ref
-    return c.sum().value
 
 
 def _offsets_to_vector(data: sc.DataArray, xy: List[float], graph: dict) -> sc.Variable:
@@ -46,12 +47,73 @@ def _offsets_to_vector(data: sc.DataArray, xy: List[float], graph: dict) -> sc.V
     return center
 
 
-def _refine(xy: List[float], sample: sc.DataArray, denominator: sc.DataArray,
-            graph: dict, q_bins: sc.Variable, masking_radius: sc.Variable,
-            gravity: bool, wavelength_bands: sc.Variable) -> float:
+def iofq_normalization(data: sc.DataArray, data_monitors: Dict[str, sc.DataArray],
+                       direct_monitors: Dict[str, sc.DataArray]) -> sc.DataArray:
+    """
+    Compute the denominator used for normalization. The denominator is defined as:
+    pixel_solid_angles * Sample_T_monitor * Direct_I_monitor / Direct_T_monitor
+
+    Parameters:
+    -----------
+    data:
+        The data to compute the normalization for (this is the sample data, and should
+        contain coodinates and masks for the detector pixels).
+    data_monitors:
+        The monitors for the sample run.
+    direct_monitors:
+        The monitors for the direct run.
+
+    Returns:
+    --------
+    :
+        The denominator term used in the normalization to compute :math:`I(Q)`.
+    """
+    solid_angle = solid_angle_of_rectangular_pixels(
+        data,
+        pixel_width=data.coords['pixel_width'],
+        pixel_height=data.coords['pixel_height'])
+
+    norm = (solid_angle * data_monitors['transmission'] * direct_monitors['incident'] /
+            direct_monitors['transmission'])
+
+    # Convert wavelength coordinate to midpoints for future histogramming
+    norm.coords['wavelength'] = sc.midpoints(norm.coords['wavelength'])
+    return norm
+
+
+def iofq_in_quadrants(xy: List[float], sample: sc.DataArray, norm: sc.DataArray,
+                      graph: dict, q_bins: sc.Variable, masking_radius: sc.Variable,
+                      gravity: bool,
+                      wavelength_range: sc.Variable) -> Dict[str, sc.DataArray]:
     """
     Compute the intensity as a function of Q inside 4 quadrants in Phi.
-    Return the sum of the squares of the relative differences between the 4 quadrants.
+
+    Parameters:
+    -----------
+    xy:
+        The x,y offsets in the plane normal to the beam.
+    sample:
+        The sample data.
+    norm:
+        The denominator data for normalization.
+    graph:
+        Coodinate transformation graph.
+    q_bins:
+        Bin edges for Q.
+    masking_radius:
+        Radius of the circular mask to be applied around the current center, to ensure
+        all directions contribute equally to :math:`Q` bins.
+    gravity:
+        If true, the gravity vector is used to compute the scattering angle.
+    wavelength_range:
+        The wavelength range to use for computing the intensity as a function of Q.
+
+    Returns:
+    --------
+    :
+        A dictionary containing the intensity as a function of Q in each quadrant.
+        The quadrants are named 'south-west', 'south-east', 'north-east', and
+        'north-west'.
     """
     data = sample.copy(deep=False)
     data.coords['position'] = sample.coords['position'].copy(deep=True)
@@ -67,8 +129,8 @@ def _refine(xy: List[float], sample: sc.DataArray, denominator: sc.DataArray,
     data.masks['circle'] = r > masking_radius
     # Insert a copy of coords and masks needed for conversion to Q
     for c in ['position', 'sample_position', 'source_position']:
-        denominator.coords[c] = data.coords[c]
-    denominator.masks['circle'] = data.masks['circle']
+        norm.coords[c] = data.coords[c]
+    norm.masks['circle'] = data.masks['circle']
 
     pi = sc.constants.pi.value
     phi = data.transform_coords('phi',
@@ -88,25 +150,82 @@ def _refine(xy: List[float], sample: sc.DataArray, denominator: sc.DataArray,
             graph=graph,
             q_bins=q_bins,
             gravity=gravity,
-            wavelength_bands=wavelength_bands)
+            wavelength_bands=wavelength_range)
         # Denominator counts into Q bins
-        denominator_q = i_of_q.convert_to_q_and_merge_spectra(
-            data=denominator[sel],
+        norm_q = i_of_q.convert_to_q_and_merge_spectra(
+            data=norm[sel],
             graph=graph,
             q_bins=q_bins,
             gravity=gravity,
-            wavelength_bands=wavelength_bands)
+            wavelength_bands=wavelength_range)
         # Normalize
-        out[quad] = normalize(numerator=data_q, denominator=denominator_q).hist()
-    # Compute cost
-    cost = _cost(out)
+        out[quad] = normalize(numerator=data_q, denominator=norm_q).hist()
+    return out
+
+
+def cost(xy: List[float], *args) -> float:
+    """
+    Cost function for determining how close the :math:`I(Q)` curves are in all four
+    quadrants.
+
+    Parameters
+    ----------
+    xy:
+        The x,y offsets in the plane normal to the beam.
+    *args:
+        Arguments passed to :func:`iofq_in_quadrants`.
+
+    Returns
+    -------
+    :
+        The sum of the residuals for :math:`I(Q)` in the 4 quadrants, with respect to
+        the mean :math:`I(Q)` in all quadrants.
+    """
+    iofq = iofq_in_quadrants(xy, *args)
+    all_q = sc.concat(list(iofq.values()), dim='quadrant')
+    ref = sc.values(all_q.mean('quadrant'))
+    c = sc.abs(all_q - ref) / ref
+    out = c.sum().value
     logger = get_logger('sans')
-    logger.info(f'Beam center finder: x={xy[0]}, y={xy[1]}, cost={cost}')
-    if not np.isfinite(cost):
+    logger.info(f'Beam center finder: x={xy[0]}, y={xy[1]}, cost={out}')
+    if not np.isfinite(out):
         raise ValueError('Non-finite value computed in cost. This is likely due to a '
                          'division by zero. Try increasing the size of your Q bins to '
                          'improve statistics in the denominator.')
-    return cost
+    return out
+
+
+def minimize(fun,
+             x0,
+             args=(),
+             bounds=None,
+             method: str = 'Nelder-Mead',
+             tol: float = 0.1):
+    """
+    Minimize the supplied cost function using Scipy's optimize.minimize.
+
+    Parameters
+    ----------
+    fun:
+        The cost function to minimize.
+    x0:
+        Initial guess.
+    args:
+        Additional arguments passed to the cost function.
+    bounds:
+        Bounds on the variables.
+    method:
+        The minimization method to use.
+    tol:
+        The tolerance for termination.
+
+    Returns
+    -------
+    :
+        The result of the minimization.
+    """
+    from scipy.optimize import minimize as scipy_minimize
+    return scipy_minimize(fun, x0=x0, args=args, bounds=bounds, method=method, tol=tol)
 
 
 def beam_center(data: sc.DataArray,
@@ -174,7 +293,7 @@ def beam_center(data: sc.DataArray,
     pixels. It is indeed very common to mask broken pixels, as well as the region of
     the detector where the sample holder is casting a shadow.
     Such a sample holder will not appear in all 4 quadrants, and because it spans a
-    range of scattering (:math:`2{\theta}`) angles, it spans a range of :math:`Q` bins.
+    range of scattering (:math:`2{\\theta}`) angles, it spans a range of :math:`Q` bins.
 
     All this means that we in fact need to perform a reduction as close as possible to
     the full :math:`I(Q)` reduction in each of the 4 quadrants to achieve a reliable
@@ -226,7 +345,7 @@ def beam_center(data: sc.DataArray,
         data = data.copy(deep=False)
         data.coords['gravity'] = gravity_vector()
     # Use center of mass to get initial guess for beam center
-    com = _center_of_mass(data)
+    com = center_of_mass(data)
     logger.info(f'Initial guess for beam center: {com}')
     graph = sans_elastic(gravity=gravity)
 
@@ -236,37 +355,54 @@ def beam_center(data: sc.DataArray,
     n_beam = incident_beam / sc.norm(incident_beam)
     com_shift = com - sc.dot(com, n_beam) * n_beam
 
-    # Compute the denominator used for normalization. The denominator is defined as:
-    # pixel_solid_angles * Sample_T_monitor * Direct_I_monitor / Direct_T_monitor
-    solid_angle = solid_angle_of_rectangular_pixels(
-        data,
-        pixel_width=data.coords['pixel_width'],
-        pixel_height=data.coords['pixel_height'])
+    # # Compute the denominator used for normalization. The denominator is defined as:
+    # # pixel_solid_angles * Sample_T_monitor * Direct_I_monitor / Direct_T_monitor
+    # solid_angle = solid_angle_of_rectangular_pixels(
+    #     data,
+    #     pixel_width=data.coords['pixel_width'],
+    #     pixel_height=data.coords['pixel_height'])
 
-    denominator = (solid_angle * data_monitors['transmission'] *
-                   direct_monitors['incident'] / direct_monitors['transmission'])
+    # denominator = (solid_angle * data_monitors['transmission'] *
+    #                direct_monitors['incident'] / direct_monitors['transmission'])
 
-    # Convert wavelength coordinate to midpoints for future histogramming
-    denominator.coords['wavelength'] = sc.midpoints(denominator.coords['wavelength'])
+    # # Convert wavelength coordinate to midpoints for future histogramming
+    # denominator.coords['wavelength'] = sc.midpoints(denominator.coords['wavelength'])
 
-    wavelength_bands = sc.concat(
+    norm = iofq_normalization(data=data,
+                              data_monitors=data_monitors,
+                              direct_monitors=direct_monitors)
+
+    wavelength_range = sc.concat(
         [wavelength_bins.min(), wavelength_bins.max()], dim='wavelength')
 
     coords = data.transform_coords(['cylindrical_x', 'cylindrical_y'],
                                    graph=graph).coords
+    bounds = [
+        (coords['cylindrical_x'].min().value, coords['cylindrical_x'].max().value),
+        (coords['cylindrical_y'].min().value, coords['cylindrical_y'].max().value)
+    ]
 
     # Refine using Scipy optimize
-    from scipy.optimize import minimize
-    res = minimize(_refine,
+    res = minimize(cost,
                    x0=[com_shift.fields.x.value, com_shift.fields.y.value],
-                   args=(data, denominator, graph, q_bins, masking_radius, gravity,
-                         wavelength_bands),
-                   bounds=[(coords['cylindrical_x'].min().value,
-                            coords['cylindrical_x'].max().value),
-                           (coords['cylindrical_y'].min().value,
-                            coords['cylindrical_y'].max().value)],
+                   args=(data, norm, graph, q_bins, masking_radius, gravity,
+                         wavelength_range),
+                   bounds=bounds,
                    method=minimizer,
                    tol=tolerance)
+
+    # # Refine using Scipy optimize
+    # from scipy.optimize import minimize
+    # res = minimize(cost,
+    #                x0=[com_shift.fields.x.value, com_shift.fields.y.value],
+    #                args=(data, norm, graph, q_bins, masking_radius, gravity,
+    #                      wavelength_range),
+    #                bounds=[(coords['cylindrical_x'].min().value,
+    #                         coords['cylindrical_x'].max().value),
+    #                        (coords['cylindrical_y'].min().value,
+    #                         coords['cylindrical_y'].max().value)],
+    #                method=minimizer,
+    #                tol=tolerance)
     center = _offsets_to_vector(data=data, xy=res.x, graph=graph)
     logger.info(f'Final beam center value: {center}')
     logger.info(f'Beam center finder minimizer info: {res}')
