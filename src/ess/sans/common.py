@@ -41,6 +41,11 @@ def mask_range(da: sc.DataArray,
     :
         A copy of the input data array with the mask applied.
     """
+    if name is None:
+        name = uuid.uuid4().hex
+    if name in da.masks:
+        raise ValueError(
+            f'Mask {name} already exists in data array and would be overwritten.')
     dim = mask.dim
     edges = mask.coords[dim]
     if not mask.coords.is_edges(dim):
@@ -50,8 +55,7 @@ def mask_range(da: sc.DataArray,
         raise sc.DimensionError(
             'Cannot mask range on data with multi-dimensional coordinate. '
             f'Found dimensions {da.coords[dim].dims} for coordinate {dim}.')
-    if name is None:
-        name = uuid.uuid4().hex
+
     lu = sc.DataArray(data=mask.data, coords={dim: edges})
     if da.bins is not None:
         if dim in da.coords:

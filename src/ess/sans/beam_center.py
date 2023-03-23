@@ -174,18 +174,18 @@ def beam_center(data: sc.DataArray,
     pixels. It is indeed very common to mask broken pixels, as well as the region of
     the detector where the sample holder is casting a shadow.
     Such a sample holder will not appear in all 4 quadrants, and because it spans a
-    range of scattering (:math:`2\\theta`) angles, it spans a range of :math:`Q` bins.
+    range of scattering (:math:`2{\theta}`) angles, it spans a range of :math:`Q` bins.
 
     All this means that we in fact need to perform a reduction as close as possible to
     the full :math:`I(Q)` reduction in each of the 4 quadrants to achieve a reliable
     result.
     We write 'as close as possible' because In the full :math:`I(Q)` reduction, there
-    is a term :math:`D(\lambda)` in the normalization called the 'direct beam' which
+    is a term :math:`D({\\lambda})` in the normalization called the 'direct beam' which
     gives the efficiency of the detectors as a function of wavelength.
     Because finding the beam center is required to compute the direct beam in the first
     place, we do not include this term in the computation of :math:`I(Q)` for finding
     the beam center. This changes the shape of the :math:`I(Q)` curve, but since it
-    changes it in the same manner for all :math:`\phi` angles, this does not affect the
+    changes it in the same manner for all :math:`{\\phi}` angles, this does not affect the
     results for finding the beam center.
 
     This is what is now implemented in this version of the algorithm.

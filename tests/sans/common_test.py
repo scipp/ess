@@ -139,3 +139,21 @@ def test_mask_range_on_binned_data_with_two_dimensional_coord_raises():
             sc.DimensionError,
             match='Cannot mask range on data with multi-dimensional coordinate'):
         _ = mask_range(binned, mask=mask, name='mymask')
+
+
+def test_mask_range_on_data_with_existing_mask_of_same_name_raises():
+    x = sc.arange('x', 10., unit='m')
+    da = sc.DataArray(data=x,
+                      coords={
+                          'x': x,
+                          'y': x * 1.5
+                      },
+                      masks={'mymask': x > sc.scalar(5., unit='m')})
+    mask = sc.DataArray(data=sc.array(dims=['x'], values=[True]),
+                        coords={
+                            'x': sc.array(dims=['x'], values=[1.9, 3.001], unit='m'),
+                        })
+    with pytest.raises(
+            ValueError,
+            match='Mask mymask already exists in data array and would be overwritten'):
+        _ = mask_range(da, mask=mask, name='mymask')
