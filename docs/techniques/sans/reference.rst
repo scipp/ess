@@ -46,3 +46,4 @@ Common
    :toctree: ../../generated
 
    common.gravity_vector
+   common.mask_range
