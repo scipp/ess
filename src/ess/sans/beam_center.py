@@ -26,9 +26,9 @@ def _cost(data: Dict[str, sc.DataArray]) -> float:
     """
     Cost function for determining how close the I(Q) curves are in all four quadrants.
     """
-    ref = data['north-east']
-    c = ((data['north-west'] - ref)**2 + (data['south-west'] - ref)**2 +
-         (data['south-east'] - ref)**2) / ref**2
+    all_q = sc.concat(list(data.values()), dim='quadrant')
+    ref = sc.values(all_q.mean('quadrant'))
+    c = sc.abs(all_q - ref) / ref
     return c.sum().value
 
 
@@ -129,6 +129,66 @@ def beam_center(data: sc.DataArray,
        between all 4 quadrants
     #. iteratively move the centre position and repeat 2. and 3. until all 4
        :math:`I(Q)` curves lie on top of each other
+
+    Notes
+    -----
+    We record here the thought process we went through during the writing of this
+    algorithm. This information is important for understanding why the beam center
+    finding is implemented the way it is, and should be considered carefully before
+    making changes to the logic of the algorithm.
+
+    **Use a + cut, not an X cut**
+
+    The first idea for implementing the beam center finder was to cut the detector
+    panel into 4 wedges using a cross (X) shape. This seemed natural, because the
+    offsets when searching for the beam center would be applied along the horizontal
+    and vertical directions.
+    This worked well on square detector panels (like the SANS2D detector), but on
+    rectangular detectors, the north and south wedges ended up holding many less pixels
+    than the east and west panels.
+    More pixels means more contributions to a particular :math:`Q` bin, and comparing
+    the :math:`I(Q)` curves in the 4 wedges was thus not possible.
+    We therefore divided the detector panel into 4 quadrants using a ``+`` cut instead.
+    Note that since we are looking at an isotropic scattering pattern, the shape of the
+    cut (and the number of quadrants) should not matter for the resulting shapes of the
+    :math:`I(Q)` curves.
+
+    **Normalization inside the 4 quadrants**
+
+    The first attempt at implementing the beam center finder was to only compute the
+    raw counts as a function of $Q$ for the sample run, and not compute any
+    normalization term.
+    The idea was that even though this would change the shape of the :math:`I(Q)` curve,
+    because we were looking at isotropic scattering, it would change the shape of the
+    curve isotropically, thus still allowing us to find the center when the curves in
+    all 4 quadrants overlap.
+    The motivation for this was to save computational cost.
+
+    After discovering the issue that using a ``X`` shaped cut for dividing the detector
+    panel would yield different contributions to :math:`I(Q)` in the different wedges,
+    we concluded that some normalization was necessary.
+    The first version was to simply sum the counts in each quadrant and use this to
+    normalize the counts for each intensity curve.
+
+    This was, however, not sufficient in cases where masks are applied to the detector
+    pixels. It is indeed very common to mask broken pixels, as well as the region of
+    the detector where the sample holder is casting a shadow.
+    Such a sample holder will not appear in all 4 quadrants, and because it spans a
+    range of scattering (:math:`2\theta`) angles, it spans a range of :math:`Q` bins.
+
+    All this means that we in fact need to perform a reduction as close as possible to
+    the full :math:`I(Q)` reduction in each of the 4 quadrants to achieve a reliable
+    result.
+    We write 'as close as possible' because In the full :math:`I(Q)` reduction, there
+    is a term :math:`D(\lambda)` in the normalization called the 'direct beam' which
+    gives the efficiency of the detectors as a function of wavelength.
+    Because finding the beam center is required to compute the direct beam in the first
+    place, we do not include this term in the computation of :math:`I(Q)` for finding
+    the beam center. This changes the shape of the :math:`I(Q)` curve, but since it
+    changes it in the same manner for all :math:`\phi` angles, this does not affect the
+    results for finding the beam center.
+
+    This is what is now implemented in this version of the algorithm.
 
     Parameters
     ----------
