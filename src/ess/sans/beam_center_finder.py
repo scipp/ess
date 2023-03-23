@@ -57,7 +57,7 @@ def iofq_normalization(data: sc.DataArray, data_monitors: Dict[str, sc.DataArray
     -----------
     data:
         The data to compute the normalization for (this is the sample data, and should
-        contain coodinates and masks for the detector pixels).
+        contain coordinates and masks for the detector pixels).
     data_monitors:
         The monitors for the sample run.
     direct_monitors:
@@ -97,7 +97,7 @@ def iofq_in_quadrants(xy: List[float], sample: sc.DataArray, norm: sc.DataArray,
     norm:
         The denominator data for normalization.
     graph:
-        Coodinate transformation graph.
+        Coordinate transformation graph.
     q_bins:
         Bin edges for Q.
     masking_radius:
