@@ -256,6 +256,42 @@ def beam_center(data: sc.DataArray,
     #. iteratively move the centre position and repeat 2. and 3. until all 4
        :math:`I(Q)` curves lie on top of each other
 
+    Parameters
+    ----------
+    data:
+        The DataArray containing the detector data.
+    data_monitors:
+        The data arrays for the incident and transmission monitors for the measurement
+        run.
+    direct_monitors:
+        The data arrays for the incident and transmission monitors for the direct
+        run.
+    wavelength_bins:
+        The binning in the wavelength dimension to be used.
+    q_bins:
+        The binning in the Q dimension to be used.
+    masking_radius:
+        While iterating to find the beam center, the current center will not be in the
+        center of the detector panel. This can introduce bias in the shape of the
+        :math:`I(Q)` inside the 4 quadrants. To avoid this, we apply a circular mask
+        around the current center, to ensure all directions contribute equally to
+        :math:`Q` bins.
+    gravity:
+        Include the effects of gravity when computing the scattering angle if ``True``.
+    minimizer:
+        The Scipy minimizer method to use (see the
+        `Scipy docs <https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html>`_
+        for details).
+    tolerance:
+        Tolerance for termination (see the
+        `Scipy docs <https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html>`_
+        for details).
+
+    Returns
+    -------
+    :
+        The beam center position as a vector.
+
     Notes
     -----
     We record here the thought process we went through during the writing of this
@@ -315,37 +351,6 @@ def beam_center(data: sc.DataArray,
     results for finding the beam center.
 
     This is what is now implemented in this version of the algorithm.
-
-    Parameters
-    ----------
-    data:
-        The DataArray containing the detector data.
-    data_monitors:
-        The data arrays for the incident and transmission monitors for the measurement
-        run.
-    direct_monitors:
-        The data arrays for the incident and transmission monitors for the direct
-        run.
-    wavelength_bins:
-        The binning in the wavelength dimension to be used.
-    q_bins:
-        The binning in the Q dimension to be used.
-    masking_radius:
-        While iterating to find the beam center, the current center will not be in the
-        center of the detector panel. This can introduce bias in the shape of the
-        :math:`I(Q)` inside the 4 quadrants. To avoid this, we apply a circular mask
-        around the current center, to ensure all directions contribute equally to
-        :math:`Q` bins.
-    gravity:
-        Include the effects of gravity when computing the scattering angle if ``True``.
-    minimizer:
-        The Scipy minimizer method to use (see the
-        `Scipy docs <https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html>`_
-        for details).
-    tolerance:
-        Tolerance for termination (see the
-        `Scipy docs <https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html>`_
-        for details).
     """  # noqa: E501
     logger = get_logger('sans')
     if 'gravity' not in data.meta:
