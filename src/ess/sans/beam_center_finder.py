@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Union
 
 import numpy as np
 import scipp as sc
@@ -82,8 +82,7 @@ def iofq_normalization(data: sc.DataArray, data_monitors: Dict[str, sc.DataArray
 
 
 def iofq_in_quadrants(xy: List[float], sample: sc.DataArray, norm: sc.DataArray,
-                      graph: dict, q_bins: sc.Variable, masking_radius: sc.Variable,
-                      gravity: bool,
+                      graph: dict, q_bins: Union[int, sc.Variable], gravity: bool,
                       wavelength_range: sc.Variable) -> Dict[str, sc.DataArray]:
     """
     Compute the intensity as a function of Q inside 4 quadrants in Phi.
@@ -100,9 +99,6 @@ def iofq_in_quadrants(xy: List[float], sample: sc.DataArray, norm: sc.DataArray,
         Coordinate transformation graph.
     q_bins:
         Bin edges for Q.
-    masking_radius:
-        Radius of the circular mask to be applied around the current center, to ensure
-        all directions contribute equally to :math:`Q` bins.
     gravity:
         If true, the gravity vector is used to compute the scattering angle.
     wavelength_range:
@@ -126,11 +122,9 @@ def iofq_in_quadrants(xy: List[float], sample: sc.DataArray, norm: sc.DataArray,
     coords = data.transform_coords(['cylindrical_x', 'cylindrical_y'],
                                    graph=graph).coords
     r = sc.sqrt(coords['cylindrical_x']**2 + coords['cylindrical_y']**2)
-    data.masks['circle'] = r > masking_radius
     # Insert a copy of coords and masks needed for conversion to Q
     for c in ['position', 'sample_position', 'source_position']:
         norm.coords[c] = data.coords[c]
-    norm.masks['circle'] = data.masks['circle']
 
     pi = sc.constants.pi.value
     phi = data.transform_coords('phi',
@@ -170,10 +164,16 @@ def cost(xy: List[float], *args) -> float:
 
     .. math::
 
-       \\text{cost} = \\sum_{Q}\\frac{\\sum_{i=1}^{i=4} \\left|I(Q)_{i} - \\overline{I}(Q)\\right|}{\\overline{I}(Q)} ~,
+       \\text{cost} = \\frac{\\sum_{Q}\\sum_{i=1}^{i=4} \\overline{I}(Q)\\left(I(Q)_{i} - \\overline{I}(Q)\\right)^2}{\\sum_{Q}\\overline{I}(Q)} ~,
 
-    where :math:`\\overline{I}(Q)` is the mean intensity of the 4 quadrants as a
-    function of Q.
+    where :math:`i` represents the 4 quadrants and :math:`\\overline{I}(Q)` is the mean
+    intensity of the 4 quadrants as a function of :math:`Q`. This is basically a
+    weighted mean of the square of the differences between the :math:`I(Q)` curves in
+    the 4 quadrants with respect to the mean, and where the weights are
+    :math:`\\overline{I}(Q)`.
+    We use a weighted mean, as opposed to relative (percentage) differences to give
+    less importance to regions with low statistics which are potentially noisy and
+    would contribute significantly to the computed cost.
 
     Parameters
     ----------
@@ -187,18 +187,38 @@ def cost(xy: List[float], *args) -> float:
     :
         The sum of the residuals for :math:`I(Q)` in the 4 quadrants, with respect to
         the mean :math:`I(Q)` in all quadrants.
+
+    Notes
+    -----
+    Mantid uses a different cost function. They compute the horizontal (Left - Right)
+    and the vertical (Top - Bottom) costs, and require both to be below the tolerance.
+    The costs are defined as
+
+    .. math::
+
+       \\text{cost} = \\sum_{Q} \\left(I(Q)_{\\text{L,T}} - I(Q)_{\\text{R,B}}\\right)^2} ~.
+
+    Using absolute differences instead of a weighted mean is similar to our cost
+    function in the way that it would give a lot of weight to even a small difference
+    in a high-intensity region. However, it also means that an absolute difference of
+    e.g. 2 in a high-intensity region would be weighted the same as a difference of 2
+    in a low-intensity region.
+    It is also not documented why two separate costs are computed, instead of a single
+    one. The Mantid implementation is available at
+    https://github.com/mantidproject/mantid/blob/main/Framework/PythonInterface/plugins/algorithms/WorkflowAlgorithms/SANS/SANSBeamCentreFinder.py
     """  # noqa: E501
     iofq = iofq_in_quadrants(xy, *args)
-    all_q = sc.concat(list(iofq.values()), dim='quadrant')
-    ref = sc.values(all_q.mean('quadrant'))
-    c = sc.abs(all_q - ref) / ref
-    out = c.sum().value
+    all_q = sc.concat([sc.values(da) for da in iofq.values()], dim='quadrant')
+    ref = all_q.mean('quadrant')
+    c = (all_q - ref)**2
+    out = (sc.sum(ref * c) / sc.sum(ref)).value
     logger = get_logger('sans')
     logger.info(f'Beam center finder: x={xy[0]}, y={xy[1]}, cost={out}')
     if not np.isfinite(out):
-        raise ValueError('Non-finite value computed in cost. This is likely due to a '
-                         'division by zero. Try increasing the size of your Q bins to '
-                         'improve statistics in the denominator.')
+        raise ValueError(
+            'Non-finite value computed in cost. This is likely due to a division by '
+            'zero. Try restricting your Q range, or increasing the size of your Q bins '
+            'to improve statistics in the denominator.')
     return out
 
 
@@ -239,8 +259,7 @@ def beam_center(data: sc.DataArray,
                 data_monitors: Dict[str, sc.DataArray],
                 direct_monitors: Dict[str, sc.DataArray],
                 wavelength_bins: sc.Variable,
-                q_bins: sc.Variable,
-                masking_radius: sc.Variable,
+                q_bins: Union[int, sc.Variable],
                 gravity: bool = False,
                 minimizer: str = 'Nelder-Mead',
                 tolerance: float = 0.1) -> Tuple[sc.Variable, sc.Variable]:
@@ -270,12 +289,6 @@ def beam_center(data: sc.DataArray,
         The binning in the wavelength dimension to be used.
     q_bins:
         The binning in the Q dimension to be used.
-    masking_radius:
-        While iterating to find the beam center, the current center will not be in the
-        center of the detector panel. This can introduce bias in the shape of the
-        :math:`I(Q)` inside the 4 quadrants. To avoid this, we apply a circular mask
-        around the current center, to ensure all directions contribute equally to
-        :math:`Q` bins.
     gravity:
         Include the effects of gravity when computing the scattering angle if ``True``.
     minimizer:
@@ -302,9 +315,9 @@ def beam_center(data: sc.DataArray,
     **Use a + cut, not an X cut**
 
     The first idea for implementing the beam center finder was to cut the detector
-    panel into 4 wedges using a cross (X) shape. This seemed natural, because the
-    offsets when searching for the beam center would be applied along the horizontal
-    and vertical directions.
+    panel into 4 wedges using a cross (X) shape. This is what Mantid does, and seemed
+    natural, because the offsets when searching for the beam center would be applied
+    along the horizontal and vertical directions.
     This worked well on square detector panels (like the SANS2D detector), but on
     rectangular detectors, the north and south wedges ended up holding many less pixels
     than the east and west panels.
@@ -385,8 +398,7 @@ def beam_center(data: sc.DataArray,
     # Refine using Scipy optimize
     res = minimize(cost,
                    x0=[com_shift.fields.x.value, com_shift.fields.y.value],
-                   args=(data, norm, graph, q_bins, masking_radius, gravity,
-                         wavelength_range),
+                   args=(data, norm, graph, q_bins, gravity, wavelength_range),
                    bounds=bounds,
                    method=minimizer,
                    tol=tolerance)

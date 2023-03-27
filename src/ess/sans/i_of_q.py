@@ -109,7 +109,7 @@ def resample_direct_beam(direct_beam: sc.DataArray,
 def convert_to_q_and_merge_spectra(
         data: sc.DataArray,
         graph: dict,
-        q_bins: sc.Variable,
+        q_bins: Union[int, sc.Variable],
         gravity: bool,
         wavelength_bands: Optional[sc.Variable] = None) -> sc.DataArray:
     """
@@ -159,26 +159,36 @@ def convert_to_q_and_merge_spectra(
     return out
 
 
+def _to_q_bins(q_bins: Union[int, sc.Variable]) -> Dict[str, Union[int, sc.Variable]]:
+    """
+    If the input bins are an integer, convert them to a dictionary that can be used
+    to bin a DataArray.
+    """
+    if isinstance(q_bins, int):
+        return {'Q': q_bins}
+    return {q_bins.dim: q_bins}
+
+
 def _convert_events_to_q_and_merge_spectra(
         data: sc.DataArray,
         graph: dict,
-        q_bins: sc.Variable,
+        q_bins: Union[int, sc.Variable],
         wavelength_bands: Optional[sc.Variable] = None) -> sc.DataArray:
     """
     Convert event data to momentum vector Q.
     """
     data_q = data.transform_coords('Q', graph=graph)
-    q_summed = data_q.bins.concat(set(data_q.dims) - {'Q'})
-    edges = [q_bins]
+    q_all_pixels = data_q.bins.concat(set(data_q.dims) - {'Q'})
+    edges = _to_q_bins(q_bins)
     if wavelength_bands is not None:
-        edges = [wavelength_bands] + edges
-    return sc.binning.make_binned(q_summed, edges=edges)
+        edges[wavelength_bands.dim] = wavelength_bands
+    return q_all_pixels.bin(**edges)
 
 
 def _convert_dense_to_q_and_merge_spectra(
         data: sc.DataArray,
         graph: dict,
-        q_bins: sc.Variable,
+        q_bins: Union[int, sc.Variable],
         wavelength_bands: Optional[sc.Variable] = None) -> sc.DataArray:
     """
     Convert dense data to momentum vector Q.
@@ -187,11 +197,12 @@ def _convert_dense_to_q_and_merge_spectra(
     data_q = data.transform_coords('Q', graph=graph)
     data_q.coords['wavelength'] = data_q.attrs.pop('wavelength')
     sum_dims = set(data_q.dims) - {'Q'}
+    edges = _to_q_bins(q_bins)
     if wavelength_bands is None:
-        return data_q.hist({q_bins.dim: q_bins}).sum(sum_dims)
+        return data_q.hist(**edges).sum(sum_dims)
     for i in range(wavelength_bands.sizes['wavelength'] - 1):
         band = data_q['wavelength', wavelength_bands[i]:wavelength_bands[i + 1]]
-        bands.append(band.hist({q_bins.dim: q_bins}).sum(sum_dims))
+        bands.append(band.hist(**edges).sum(sum_dims))
     q_summed = sc.concat(bands, 'wavelength')
     return q_summed
 
@@ -256,7 +267,7 @@ def to_I_of_Q(data: sc.DataArray,
               direct_monitors: Dict[str, sc.DataArray],
               direct_beam: sc.DataArray,
               wavelength_bins: sc.Variable,
-              q_bins: sc.Variable,
+              q_bins: Union[int, sc.Variable],
               gravity: bool = False,
               wavelength_mask: Optional[sc.DataArray] = None,
               wavelength_bands: Optional[sc.Variable] = None) -> sc.DataArray:
