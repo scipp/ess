@@ -200,8 +200,8 @@ def cost(xy: List[float], *args) -> float:
     e.g. 2 in a high-intensity region would be weighted the same as a difference of 2
     in a low-intensity region.
     It is also not documented why two separate costs are computed, instead of a single
-    one. The Mantid implementation is available at
-    https://github.com/mantidproject/mantid/blob/main/Framework/PythonInterface/plugins/algorithms/WorkflowAlgorithms/SANS/SANSBeamCentreFinder.py
+    one. The Mantid implementation is available
+    `here <https://github.com/mantidproject/mantid/blob/main/Framework/PythonInterface/plugins/algorithms/WorkflowAlgorithms/SANS/SANSBeamCentreFinder.py`_.
     """  # noqa: E501
     iofq = iofq_in_quadrants(xy, *args)
     all_q = sc.concat([sc.values(da) for da in iofq.values()], dim='quadrant')
