@@ -192,7 +192,7 @@ def cost(xy: List[float], *args) -> float:
 
     .. math::
 
-       \\text{cost} = \\sum_{Q} \\left(I(Q)_{\\text{L,T}} - I(Q)_{\\text{R,B}}\\right)^2} ~.
+       \\text{cost} = \\sum_{Q} \\left(I(Q)_{\\text{L,T}} - I(Q)_{\\text{R,B}}\\right)^2 ~.
 
     Using absolute differences instead of a weighted mean is similar to our cost
     function in the way that it would give a lot of weight to even a small difference
