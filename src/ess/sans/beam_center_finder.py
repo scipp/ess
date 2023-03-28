@@ -51,7 +51,7 @@ def iofq_normalization(data: sc.DataArray, data_monitors: Dict[str, sc.DataArray
                        direct_monitors: Dict[str, sc.DataArray]) -> sc.DataArray:
     """
     Compute the denominator used for normalization. The denominator is defined as:
-    pixel_solid_angles * Sample_T_monitor * Direct_I_monitor / Direct_T_monitor
+    ``pixel_solid_angles * Sample_T_monitor * Direct_I_monitor / Direct_T_monitor``
 
     Parameters
     ----------
@@ -225,7 +225,9 @@ def minimize(fun,
              method: str = 'Nelder-Mead',
              tol: float = 0.1):
     """
-    Minimize the supplied cost function using Scipy's optimize.minimize.
+    Minimize the supplied cost function using Scipy's optimize.minimize. See the
+    `Scipy docs <https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html>`_
+    for more details.
 
     Parameters
     ----------
