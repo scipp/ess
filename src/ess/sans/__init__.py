@@ -4,4 +4,5 @@
 # flake8: noqa: F401
 
 from . import common, conversions, normalization
+from .beam_center_finder import beam_center
 from .i_of_q import to_I_of_Q

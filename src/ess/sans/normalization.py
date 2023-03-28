@@ -1,45 +1,76 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
+from typing import Dict
+
 import scipp as sc
 import scippneutron as scn
 
 
 def solid_angle_of_rectangular_pixels(data: sc.DataArray, pixel_width: sc.Variable,
-                                      pixel_height: sc.Variable) -> sc.Variable:
+                                      pixel_height: sc.Variable) -> sc.DataArray:
     """
     Solid angle computed from rectangular pixels with a 'width' and a 'height'.
 
     Note that this is an approximation which is only valid for small angles
     between the line of sight and the rectangle normal.
 
-    :param data: The DataArray that contains the positions for the detector pixels and
-        the sample.
-    :param pixel_width: The width of the rectangular pixels.
-    :param pixel_height: The height of the rectangular pixels.
+    Parameters
+    ----------
+    data:
+        The DataArray that contains the positions for the detector pixels and the
+        sample.
+    pixel_width:
+        The width of the rectangular pixels.
+    pixel_height:
+        The height of the rectangular pixels.
+
+    Returns
+    -------
+    :
+        The solid angle of the detector pixels, as viewed from the sample position.
+        Any masks that have a dimension common to the dimensions of the position
+        coordinate are retained to the output.
     """
     L2 = scn.L2(data)
-    return (pixel_width * pixel_height) / (L2 * L2)
+    omega = (pixel_width * pixel_height) / (L2 * L2)
+    solid_angle = sc.DataArray(data=omega)
+    omega_dims = set(omega.dims)
+    for key, mask in data.masks.items():
+        if set(mask.dims).issubset(omega_dims):
+            solid_angle.masks[key] = mask
+    return solid_angle
 
 
-def transmission_fraction(data_monitors: dict, direct_monitors: dict) -> sc.DataArray:
+def transmission_fraction(data_monitors: Dict[str, sc.DataArray],
+                          direct_monitors: Dict[str, sc.DataArray]) -> sc.DataArray:
     """
-    Approximation based on equations in CalculateTransmission documentation
-    p = \frac{S_T}{D_T}\frac{D_I}{S_I}
-    This is equivalent to mantid.CalculateTransmission without fitting.
+    Approximation based on equations in
+    [CalculateTransmission](https://docs.mantidproject.org/v4.0.0/algorithms/CalculateTransmission-v1.html)
+    documentation:
+    ``(Sample_T_monitor / Direct_T_monitor) * (Direct_I_monitor / Sample_I_monitor)``
+
+    This is equivalent to ``mantid.CalculateTransmission`` without fitting.
+    Inputs should be wavelength-dependent.
 
     TODO: It seems we are always multiplying this by data_monitors['incident'] to
     compute the normalization term. We could consider just returning
-    data_monitors['transmission'] * direct_monitors['incident'] /
-        direct_monitors['transmission']
+    ``(Sample_T_monitor / Direct_T_monitor) * Direct_I_monitor``
 
-    :param data_monitors: A dict containing the DataArrays for the incident and
-        transmission monitors for the measurement run (monitor data should depend on
-        wavelength).
-    :param direct_monitors: A dict containing the DataArrays for the incident and
-        transmission monitors for the direct run (monitor data should depend on
-        wavelength).
-    """
+    Parameters
+    ----------
+    data_monitors:
+        The data arrays for the incident and transmission monitors for the measurement
+        run (monitor data should depend on wavelength).
+    direct_monitors:
+        The data arrays for the incident and transmission monitors for the direct
+        run (monitor data should depend on wavelength).
+
+    Returns
+    -------
+    :
+        The transmission fraction computed from the monitor counts.
+    """  # noqa: E501
     return (data_monitors['transmission'] / direct_monitors['transmission']) * (
         direct_monitors['incident'] / data_monitors['incident'])
 
@@ -48,19 +79,29 @@ def compute_denominator(direct_beam: sc.DataArray, data_incident_monitor: sc.Dat
                         transmission_fraction: sc.DataArray,
                         solid_angle: sc.Variable) -> sc.DataArray:
     """
-    Compute the denominator term.
+    Compute the denominator term. This is basically:
+      solid_angle * direct_beam * data_incident_monitor_counts * transmission_fraction
+
     Because we are histogramming the Q values of the denominator further down in the
     workflow, we convert the wavelength coordinate of the denominator from bin edges to
     bin centers.
 
-    :param direct_beam: The DataArray containing the direct beam function (depends on
-        wavelength).
-    :param data_incident_monitor: The DataArray containing the incident monitor counts
-        from the measurement run (depends on wavelength).
-    :param transmission_fraction: The DataArray containing the transmission fraction
+    Parameters
+    ----------
+    direct_beam:
+        The DataArray containing the direct beam function (depends on wavelength).
+    data_incident_monitor:
+        The DataArray containing the incident monitor counts from the measurement run
         (depends on wavelength).
-    :param solid_angle: The solid angle of the detector pixels (depends on detector
-        position).
+    transmission_fraction:
+        The DataArray containing the transmission fraction (depends on wavelength).
+    solid_angle:
+        The solid angle of the detector pixels (depends on detector position).
+
+    Returns
+    -------
+    :
+        The denominator for the SANS I(Q) normalization.
     """
     denominator = (solid_angle * direct_beam * data_incident_monitor *
                    transmission_fraction)
@@ -74,10 +115,19 @@ def normalize(numerator: sc.DataArray, denominator: sc.DataArray) -> sc.DataArra
     If the numerator contains events, we use the sc.lookup function to perform the
     division.
 
-    :param numerator: The data whose counts will be divided by the denominator. This
-        can either be event or dense (histogrammed) data.
-    :param denominator: The divisor for the normalization operation. This cannot be
-        event data, it must contain histogrammed data.
+    Parameters
+    ----------
+    numerator:
+        The data whose counts will be divided by the denominator. This can either be
+        event or dense (histogrammed) data.
+    denominator:
+        The divisor for the normalization operation. This cannot be event data, it must
+        contain histogrammed data.
+
+    Returns
+    -------
+    :
+        The input data normalized by the supplied denominator.
     """
     if numerator.bins is not None:
         return numerator.bins / sc.lookup(func=denominator, dim='Q')

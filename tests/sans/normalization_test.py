@@ -17,18 +17,45 @@ def test_solid_angle():
     solid_angle = normalization.solid_angle_of_rectangular_pixels(
         data=da, pixel_width=pixel_width, pixel_height=pixel_height)
 
-    assert sc.isclose(solid_angle[0], solid_angle[1] * 4).value
-    assert sc.isclose(solid_angle[0], solid_angle[-1] * 100).value
+    assert sc.isclose(solid_angle[0].data, solid_angle[1].data * 4).value
+    assert sc.isclose(solid_angle[0].data, solid_angle[-1].data * 100).value
     assert sc.allclose(
-        solid_angle * 2,
+        solid_angle.data * 2,
         normalization.solid_angle_of_rectangular_pixels(data=da,
                                                         pixel_width=pixel_width * 2,
-                                                        pixel_height=pixel_height))
+                                                        pixel_height=pixel_height).data)
     assert sc.allclose(
-        solid_angle * 3,
+        solid_angle.data * 3,
         normalization.solid_angle_of_rectangular_pixels(data=da,
                                                         pixel_width=pixel_width,
-                                                        pixel_height=pixel_height * 3))
+                                                        pixel_height=pixel_height *
+                                                        3).data)
+
+
+def test_solid_angle_keeps_relevant_masks():
+    l2 = np.arange(1., 11.)
+    tof = sc.arange('tof', 101, unit='us')
+    da = sc.DataArray(data=sc.array(dims=['spectrum', 'tof'],
+                                    values=np.random.random([10, 100]),
+                                    unit='counts'),
+                      coords={
+                          'L2': sc.array(dims=['spectrum'], values=l2, unit='m'),
+                          'tof': tof
+                      },
+                      masks={
+                          'mask1':
+                          sc.array(dims=['spectrum'], values=l2 > 5),
+                          'mask2':
+                          sc.array(dims=['tof'], values=tof < sc.scalar(50, unit='us'))
+                      })
+    pixel_width = 2.0
+    pixel_height = 3.0
+
+    solid_angle = normalization.solid_angle_of_rectangular_pixels(
+        data=da, pixel_width=pixel_width, pixel_height=pixel_height)
+
+    assert 'mask1' in solid_angle.masks
+    assert 'mask2' not in solid_angle.masks
 
 
 def test_transmission_fraction():
