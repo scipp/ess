@@ -248,7 +248,7 @@ def minimize(fun,
     -------
     :
         The result of the minimization.
-    """
+    """  # noqa: E501
     from scipy.optimize import minimize as scipy_minimize
     return scipy_minimize(fun, x0=x0, args=args, bounds=bounds, method=method, tol=tol)
 
