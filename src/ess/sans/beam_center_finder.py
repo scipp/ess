@@ -118,11 +118,7 @@ def iofq_in_quadrants(xy: List[float], sample: sc.DataArray, norm: sc.DataArray,
     center = _offsets_to_vector(data=data, xy=xy, graph=graph)
     data.coords['position'] -= center
 
-    # Add the circular mask
-    coords = data.transform_coords(['cylindrical_x', 'cylindrical_y'],
-                                   graph=graph).coords
-    r = sc.sqrt(coords['cylindrical_x']**2 + coords['cylindrical_y']**2)
-    # Insert a copy of coords and masks needed for conversion to Q
+    # Insert a copy of coords needed for conversion to Q
     for c in ['position', 'sample_position', 'source_position']:
         norm.coords[c] = data.coords[c]
 
