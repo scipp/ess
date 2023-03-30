@@ -21,13 +21,13 @@ dependencies:
   - nbsphinx=0.8.12
   - pandoc=2.19.2
   - pip=22.3.1
-  - plopp=23.01.0
+  - plopp=23.03.0
   - pooch=1.6.0
   - pytest=7.2.1
   - python-graphviz=0.20.1
   - pythreejs=2.4.1
-  - scipp==22.11.0
-  - scippneutron==22.12.4
+  - scipp==23.03.0
+  - scippneutron==23.03.0
   - sphinx=4.5.0
   - sphinx-book-theme=0.3.3
   - sphinx-copybutton=0.5.0
