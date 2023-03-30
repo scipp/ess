@@ -58,7 +58,15 @@ def preprocess_monitor_data(
                                            graph=conversions.sans_monitor())
 
     if monitor.variances is not None:
-        monitor.variances = None  # TODO: Hack to set variances to None
+        # TODO: reference paper
+        # For subtracting the background from the monitors, and later using them in
+        # the beam center finder, we need to remove the variances because the
+        # broadcasting operations will fail.
+        # We then need to have a check, once the sample data has been converted to
+        # wavelength that this approximation is valid, by comparing the sample data
+        # counts to the monitor counts.
+        monitor = monitor.copy(deep=False)
+        monitor.data = sc.values(monitor.data)
 
     background = None
     if non_background_range is not None:

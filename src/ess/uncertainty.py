@@ -20,9 +20,8 @@ def drop_variances(da: T, *, reference: T, name: str = '', threshold: float = 0.
     needs to be broadcast to the shape of ``reference`` in that operation.
     This broadcast would be forbidden with variances in Scipp, hence the need
     to drop them.
-    A message will be logged showing :math:`\\alpha`, the ratio
-    ``reference.sum() / da.sum()``, which indicates whether dropping variances
-    might lead to underestimated uncertainties in the final result.
+    A message will be logged showing :math:`\\alpha`, which indicates whether dropping
+    variances might lead to underestimated uncertainties in the final result.
 
     Parameters
     ----------
@@ -41,7 +40,7 @@ def drop_variances(da: T, *, reference: T, name: str = '', threshold: float = 0.
     :
         ``sc.values(da)``
     """
-    alpha = _compute_alpha(numerator=reference, denominator=da)
+    alpha = alpha_ratio(numerator=reference, denominator=da)
     logger = get_logger()
     if alpha < threshold:
         name_str = f" of '{name}'" if name else ''
@@ -53,13 +52,22 @@ def drop_variances(da: T, *, reference: T, name: str = '', threshold: float = 0.
     return sc.values(da)
 
 
-def _compute_alpha(numerator: T, denominator: T) -> float:
+def alpha_ratio(numerator: T, denominator: T) -> float:
     """
     .. math::
-       \\alpha = \\frac{\\sum_{i} N_{i} \\text{var}(D_{i})}{\\sum_{i} D_{i}^{2}}
+       \\alpha = \\frac{\\sum_{i} \\text{var}_{i}(b) a_{i}^{2}}{\\text{var}_{i}(a) b_{i}^{2}}
+
+    where :math:`a` is the numerator and :math:`b` the denominator.
+
+    Parameters
+    ----------
+    numerator:
+        Numerator of the ratio.
+    denominator:
+        Denominator of the ratio.
     """
-    alpha = sc.sum(numerator * sc.variances(denominator)).data / (denominator.sum().data
-                                                                  **2)
+    alpha = sc.sum(sc.variances(denominator) * sc.values(numerator)**2).data / sc.sum(
+        sc.variances(numerator) * sc.values(denominator)**2).data
     if alpha.unit != 'one':
         raise sc.UnitError(
             'Cannot compare counts, the reference has a different unit from the data.')
