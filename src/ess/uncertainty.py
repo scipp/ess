@@ -65,7 +65,7 @@ def alpha_ratio(numerator: T, denominator: T) -> float:
         Numerator of the ratio.
     denominator:
         Denominator of the ratio.
-    """
+    """  # noqa: E501
     alpha = sc.sum(sc.variances(denominator) * sc.values(numerator)**2).data / sc.sum(
         sc.variances(numerator) * sc.values(denominator)**2).data
     if alpha.unit != 'one':

@@ -73,8 +73,12 @@ def iofq_normalization(data: sc.DataArray, data_monitors: Dict[str, sc.DataArray
         pixel_width=data.coords['pixel_width'],
         pixel_height=data.coords['pixel_height'])
 
-    norm = (solid_angle * data_monitors['transmission'] * direct_monitors['incident'] /
-            direct_monitors['transmission'])
+    # TODO: reference Heybrock et al. (2023) paper
+    # We need to remove the variances because the broadcasting operation between
+    # solid_angle (pixel-dependent) and monitors (wavelength-dependent) will fail.
+    norm = sc.values(solid_angle) * sc.values(
+        data_monitors['transmission'] * direct_monitors['incident'] /
+        direct_monitors['transmission'])
 
     # Convert wavelength coordinate to midpoints for future histogramming
     norm.coords['wavelength'] = sc.midpoints(norm.coords['wavelength'])

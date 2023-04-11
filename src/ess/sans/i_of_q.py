@@ -7,6 +7,7 @@ import scipp as sc
 from scipp.scipy.interpolate import interp1d
 
 from ..logging import get_logger
+from ..uncertainty import alpha_ratio
 from . import conversions, normalization
 from .common import gravity_vector, mask_range
 
@@ -57,17 +58,6 @@ def preprocess_monitor_data(
         monitor = monitor.transform_coords('wavelength',
                                            graph=conversions.sans_monitor())
 
-    if monitor.variances is not None:
-        # TODO: reference paper
-        # For subtracting the background from the monitors, and later using them in
-        # the beam center finder, we need to remove the variances because the
-        # broadcasting operations will fail.
-        # We then need to have a check, once the sample data has been converted to
-        # wavelength that this approximation is valid, by comparing the sample data
-        # counts to the monitor counts.
-        monitor = monitor.copy(deep=False)
-        monitor.data = sc.values(monitor.data)
-
     background = None
     if non_background_range is not None:
         mask = sc.DataArray(data=sc.array(dims=[non_background_range.dim],
@@ -81,7 +71,13 @@ def preprocess_monitor_data(
         else:
             monitor = monitor.rebin(wavelength=wavelength_bins)
     if background is not None:
-        monitor -= background
+        # TODO: reference Heybrock et al. (2023) paper
+        # For subtracting the background from the monitors, we need to remove the
+        # variances because the broadcasting operation will fail.
+        # We then need to have a check, once the sample data has been converted to
+        # wavelength that this approximation is valid, by comparing the sample data
+        # counts to the monitor counts. See :func:`to_I_of_Q`.
+        monitor = monitor - sc.values(background)
     return monitor
 
 
@@ -278,7 +274,8 @@ def to_I_of_Q(data: sc.DataArray,
               q_bins: Union[int, sc.Variable],
               gravity: bool = False,
               wavelength_mask: Optional[sc.DataArray] = None,
-              wavelength_bands: Optional[sc.Variable] = None) -> sc.DataArray:
+              wavelength_bands: Optional[sc.Variable] = None,
+              alpha_threshold: float = 0.1) -> sc.DataArray:
     """
     Compute the scattering cross-section I(Q) for a SANS experimental run, performing
     binning in Q and a normalization based on monitor data and a direct beam function.
@@ -324,6 +321,9 @@ def to_I_of_Q(data: sc.DataArray,
         If defined, return the data as a set of bands in the wavelength dimension. This
         is useful for separating different wavelength ranges that contribute to
         different regions in Q space.
+    alpha_threshold:
+        The threshold for the ratio of detector counts to monitor counts above which
+        an error is raised because it is not safe to drop the variances of the monitor.
 
     Returns
     -------
@@ -356,6 +356,17 @@ def to_I_of_Q(data: sc.DataArray,
     # TODO: can this be avoided by copying the Q coords from the converted numerator?
     for coord in ['position', 'sample_position', 'source_position']:
         denominator.coords[coord] = data.meta[coord]
+
+    # Verify that the ratio of sample detector counts to monitor counts is small, so
+    # we can safely drop the variances of the monitor to avoid broadcasting issues.
+    # See Heybrock et al. (2023).
+    alpha = alpha_ratio(data.hist(wavelength=wavelength_bins),
+                        data_monitors['transmission'].rebin(wavelength=wavelength_bins))
+    if alpha > alpha_threshold:
+        raise ValueError(
+            f'alpha = {alpha} > {alpha_threshold}! This means that the ratio of '
+            'detector counts to monitor counts is too high, and the variances of the '
+            'monitor data cannot be safely dropped.')
 
     # In the case where no wavelength bands are requested, we create a single wavelength
     # band to make sure we select the correct wavelength range that corresponds to

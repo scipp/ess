@@ -103,8 +103,11 @@ def compute_denominator(direct_beam: sc.DataArray, data_incident_monitor: sc.Dat
     :
         The denominator for the SANS I(Q) normalization.
     """
-    denominator = (solid_angle * direct_beam * data_incident_monitor *
-                   transmission_fraction)
+    # TODO: reference Heybrock et al. (2023) paper
+    # We need to remove the variances because the broadcasting operation between
+    # solid_angle (pixel-dependent) and monitors (wavelength-dependent) will fail.
+    denominator = sc.values(solid_angle) * sc.values(
+        direct_beam * data_incident_monitor * transmission_fraction)
     denominator.coords['wavelength'] = sc.midpoints(denominator.coords['wavelength'])
     return denominator
 
