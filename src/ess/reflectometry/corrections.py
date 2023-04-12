@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+import numpy as np
 import scipp as sc
 
 from ..amor.tools import fwhm_to_std
@@ -49,8 +50,19 @@ def normalize_by_counts(data_array: sc.DataArray) -> sc.DataArray:
     :
         Normalized data array.
     """
-    ncounts = data_array.sum()
+    # Dividing by ncounts fails because ncounts also has variances, and this introduces
+    # correlations. According to Heybrock et al. (2023), we can however safely drop the
+    # variances of ncounts if counts_in_bin / ncounts is small everywhere.
+    ncounts = sc.values(data_array.sum())
     norm = data_array / ncounts
+    if norm.max().value > 0.1:
+        ind = np.argmax(data_array.values)
+        raise ValueError(
+            'One or more bins contain a number of counts of the same order as the '
+            'total number of counts. It is not safe to drop the variances of the '
+            'denominator when normalizing by the total number of counts in this '
+            f'regime. The maximum counts found is {data_array.values[ind]} at '
+            f'index {ind}. The total number of counts is {ncounts.value}.')
     try:
         norm.attrs['orso'].value.reduction.corrections += ['total counts']
     except KeyError:

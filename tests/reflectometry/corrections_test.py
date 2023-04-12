@@ -2,6 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 from orsopy import fileio
+import pytest
 
 from ess.reflectometry import corrections
 
@@ -22,9 +23,23 @@ def test_normalize_by_counts():
     result = sc.DataArray(data=sc.Variable(dims=['position'],
                                            unit=sc.units.dimensionless,
                                            values=[1 / N] * N,
-                                           variances=[1 / (N * N) + 1 / (N * N * N)] *
-                                           N))
+                                           variances=[1 / (N * N)] * N))
     assert sc.allclose(array_normalized.data, result.data)
+
+
+def test_normalize_by_counts_fails_when_ncounts_is_too_small():
+    N = 10
+    values = [1.] * N
+    values[3] = 20.0
+    data = sc.Variable(dims=['position'],
+                       unit=sc.units.counts,
+                       values=values,
+                       variances=values)
+    array = sc.DataArray(data=data)
+    with pytest.raises(ValueError,
+                       match='One or more bins contain a number of counts of the same '
+                       'order as the total number of counts'):
+        _ = corrections.normalize_by_counts(array)
 
 
 def test_normalize_by_counts_orso():
@@ -44,8 +59,7 @@ def test_normalize_by_counts_orso():
     result = sc.DataArray(data=sc.Variable(dims=['position'],
                                            unit=sc.units.dimensionless,
                                            values=[1 / N] * N,
-                                           variances=[1 / (N * N) + 1 / (N * N * N)] *
-                                           N))
+                                           variances=[1 / (N * N)] * N))
     assert sc.allclose(array_normalized.data, result.data)
     assert 'total counts' in array.attrs['orso'].value.reduction.corrections
 
