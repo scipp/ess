@@ -21,7 +21,6 @@ Beam center finder
    beam_center_finder.center_of_mass
    beam_center_finder.cost
    beam_center_finder.iofq_in_quadrants
-   beam_center_finder.iofq_normalization
    beam_center_finder.minimize
 
 Conversions
@@ -41,7 +40,7 @@ Normalization
 
    normalization.solid_angle_of_rectangular_pixels
    normalization.transmission_fraction
-   normalization.compute_denominator
+   normalization.iofq_denominator
    normalization.normalize
 
 Common
