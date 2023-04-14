@@ -6,6 +6,9 @@ from typing import Dict, Optional
 import scipp as sc
 import scippneutron as scn
 
+from ..logging import get_logger
+from ..uncertainty import alpha_ratio
+
 
 def solid_angle_of_rectangular_pixels(data: sc.DataArray, pixel_width: sc.Variable,
                                       pixel_height: sc.Variable) -> sc.DataArray:
@@ -75,12 +78,34 @@ def transmission_fraction(data_monitors: Dict[str, sc.DataArray],
         direct_monitors['incident'] / data_monitors['incident'])
 
 
-def iofq_denominator(data_transmission_monitor: sc.DataArray,
+def _verify_normalization_alpha(numerator: sc.DataArray,
+                                denominator: sc.DataArray,
+                                alpha_threshold: float = 0.1):
+    """
+    Verify that the ratio of sample detector counts to monitor counts is small, so
+    we can safely drop the variances of the monitor to avoid broadcasting issues.
+    See Heybrock et al. (2023).
+    """
+    alpha = alpha_ratio(numerator, denominator)
+    if alpha > 0.25 * alpha_threshold:
+        logger = get_logger('sans')
+        logger.warning(
+            f'alpha = {alpha} is close to the specified threshold of '
+            f'{alpha_threshold}. This means we are close to the regime where it is no '
+            'longer safe to drop the variances of the normalization term.')
+    if alpha > alpha_threshold:
+        raise ValueError(
+            f'alpha = {alpha} > {alpha_threshold}! This means that the ratio of '
+            'detector counts to monitor counts is too high, and the variances of the '
+            'monitor data cannot be safely dropped.')
+
+
+def iofq_denominator(data: sc.DataArray,
+                     data_transmission_monitor: sc.DataArray,
                      direct_incident_monitor: sc.DataArray,
                      direct_transmission_monitor: sc.DataArray,
-                     solid_angle: Optional[sc.Variable] = None,
                      direct_beam: Optional[sc.DataArray] = None,
-                     wavelength_to_midpoints: bool = False) -> sc.DataArray:
+                     alpha_threshold: float = 0.1) -> sc.DataArray:
     """
     Compute the denominator term for the I(Q) normalization. This is basically:
     ``solid_angle * direct_beam * data_transmission_monitor * direct_incident_monitor /
@@ -96,6 +121,8 @@ def iofq_denominator(data_transmission_monitor: sc.DataArray,
 
     Parameters
     ----------
+    data:
+        The detector counts.
     data_transmission_monitor:
         The transmission monitor counts from the measurement run (depends on
         wavelength).
@@ -103,10 +130,11 @@ def iofq_denominator(data_transmission_monitor: sc.DataArray,
         The incident monitor counts from the direct run (depends on wavelength).
     direct_transmission_monitor:
         The transmission monitor counts from the direct run (depends on wavelength).
-    solid_angle:
-        The solid angle of the detector pixels (depends on detector position).
     direct_beam:
         The DataArray containing the direct beam function (depends on wavelength).
+    alpha_threshold:
+        The threshold for the ratio of detector counts to monitor counts above which
+        an error is raised because it is not safe to drop the variances of the monitor.
 
     Returns
     -------
@@ -117,14 +145,25 @@ def iofq_denominator(data_transmission_monitor: sc.DataArray,
                    direct_transmission_monitor)
     if direct_beam is not None:
         denominator *= direct_beam
-    if solid_angle is not None:
-        # We need to remove the variances because the broadcasting operation between
-        # solid_angle (pixel-dependent) and monitors (wavelength-dependent) will fail.
-        denominator = sc.values(solid_angle) * sc.values(denominator)
+
+    # We need to remove the variances because the broadcasting operation between
+    # solid_angle (pixel-dependent) and monitors (wavelength-dependent) will fail.
+    # We check beforehand that the ratio of sample detector counts to monitor
+    # counts is small
+    if denominator.variances is not None:
+        _verify_normalization_alpha(
+            numerator=data.hist(wavelength=denominator.coords['wavelength']),
+            denominator=denominator,
+            alpha_threshold=alpha_threshold)
+
+    solid_angle = solid_angle_of_rectangular_pixels(
+        data,
+        pixel_width=data.coords['pixel_width'],
+        pixel_height=data.coords['pixel_height'])
+    denominator = solid_angle * sc.values(denominator)
     # Convert wavelength coordinate to midpoints for future histogramming
-    if wavelength_to_midpoints:
-        denominator.coords['wavelength'] = sc.midpoints(
-            denominator.coords['wavelength'])
+    # if wavelength_to_midpoints:
+    denominator.coords['wavelength'] = sc.midpoints(denominator.coords['wavelength'])
     return denominator
 
 

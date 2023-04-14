@@ -346,14 +346,11 @@ def beam_center(data: sc.DataArray,
     com_shift = com - sc.dot(com, n_beam) * n_beam
 
     # Compute the denominator used for normalization.
-    norm = iofq_denominator(data_transmission_monitor=data_monitors['transmission'],
-                            direct_incident_monitor=direct_monitors['incident'],
-                            direct_transmission_monitor=direct_monitors['transmission'],
-                            solid_angle=solid_angle_of_rectangular_pixels(
-                                data,
-                                pixel_width=data.coords['pixel_width'],
-                                pixel_height=data.coords['pixel_height']),
-                            wavelength_to_midpoints=True)
+    norm = iofq_denominator(
+        data=data,
+        data_transmission_monitor=sc.values(data_monitors['transmission']),
+        direct_incident_monitor=sc.values(direct_monitors['incident']),
+        direct_transmission_monitor=sc.values(direct_monitors['transmission']))
 
     wavelength_range = sc.concat(
         [wavelength_bins.min(), wavelength_bins.max()], dim='wavelength')
