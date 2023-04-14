@@ -216,6 +216,22 @@ def _convert_dense_to_q_and_merge_spectra(
     return q_summed
 
 
+def _verify_normalization_alpha(numerator: sc.DataArray,
+                                denominator: sc.DataArray,
+                                alpha_threshold: float = 0.1):
+    """
+    Verify that the ratio of sample detector counts to monitor counts is small, so
+    we can safely drop the variances of the monitor to avoid broadcasting issues.
+    See Heybrock et al. (2023).
+    """
+    alpha = alpha_ratio(numerator, denominator)
+    if alpha > alpha_threshold:
+        raise ValueError(
+            f'alpha = {alpha} > {alpha_threshold}! This means that the ratio of '
+            'detector counts to monitor counts is too high, and the variances of the '
+            'monitor data cannot be safely dropped.')
+
+
 def to_I_of_Q(data: sc.DataArray,
               data_monitors: Dict[str, sc.DataArray],
               direct_monitors: Dict[str, sc.DataArray],
@@ -292,10 +308,8 @@ def to_I_of_Q(data: sc.DataArray,
         data_transmission_monitor=data_monitors['transmission'],
         direct_incident_monitor=direct_monitors['incident'],
         direct_transmission_monitor=direct_monitors['transmission'],
-        solid_angle=normalization.solid_angle_of_rectangular_pixels(
-            data,
-            pixel_width=data.coords['pixel_width'],
-            pixel_height=data.coords['pixel_height']))
+        direct_beam=direct_beam,
+        wavelength_to_midpoints=False)
 
     if wavelength_mask is not None:
         # If we have binned data and the wavelength coord is multi-dimensional, we need
@@ -307,21 +321,25 @@ def to_I_of_Q(data: sc.DataArray,
         data = mask_range(data, wavelength_mask, name='wavelength_mask')
         denominator = mask_range(denominator, wavelength_mask, name='wavelength_mask')
 
+    # Check that the ratio of sample detector counts to monitor counts is small
+    _verify_normalization_alpha(
+        numerator=data.hist(wavelength=wavelength_bins),
+        denominator=denominator.rebin(wavelength=wavelength_bins),
+        alpha_threshold=alpha_threshold)
+
+    # Multiply by pixel solid angles
+    denominator = sc.values(
+        denominator) * normalization.solid_angle_of_rectangular_pixels(
+            data,
+            pixel_width=data.coords['pixel_width'],
+            pixel_height=data.coords['pixel_height'])
+
     # Insert a copy of coords needed for conversion to Q.
     # TODO: can this be avoided by copying the Q coords from the converted numerator?
     for coord in ['position', 'sample_position', 'source_position']:
         denominator.coords[coord] = data.meta[coord]
-
-    # Verify that the ratio of sample detector counts to monitor counts is small, so
-    # we can safely drop the variances of the monitor to avoid broadcasting issues.
-    # See Heybrock et al. (2023).
-    alpha = alpha_ratio(data.hist(wavelength=wavelength_bins),
-                        data_monitors['transmission'].rebin(wavelength=wavelength_bins))
-    if alpha > alpha_threshold:
-        raise ValueError(
-            f'alpha = {alpha} > {alpha_threshold}! This means that the ratio of '
-            'detector counts to monitor counts is too high, and the variances of the '
-            'monitor data cannot be safely dropped.')
+    # Convert wavelength coordinate to midpoints for future histogramming
+    denominator.coords['wavelength'] = sc.midpoints(denominator.coords['wavelength'])
 
     # In the case where no wavelength bands are requested, we create a single wavelength
     # band to make sure we select the correct wavelength range that corresponds to

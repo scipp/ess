@@ -78,13 +78,14 @@ def transmission_fraction(data_monitors: Dict[str, sc.DataArray],
 def iofq_denominator(data_transmission_monitor: sc.DataArray,
                      direct_incident_monitor: sc.DataArray,
                      direct_transmission_monitor: sc.DataArray,
-                     solid_angle: sc.Variable,
+                     solid_angle: Optional[sc.Variable] = None,
                      direct_beam: Optional[sc.DataArray] = None,
-                     wavelength_to_midpoints: bool = True) -> sc.DataArray:
+                     wavelength_to_midpoints: bool = False) -> sc.DataArray:
     """
     Compute the denominator term for the I(Q) normalization. This is basically:
     ``solid_angle * direct_beam * data_transmission_monitor * direct_incident_monitor /
         direct_transmission_monitor``
+    If the solid angle is not supplied, it is assumed to be 1.
     If the direct beam is not supplied, it is assumed to be 1.
 
     Because the multiplication between the wavelength dependent terms (monitor counts)
@@ -112,13 +113,14 @@ def iofq_denominator(data_transmission_monitor: sc.DataArray,
     :
         The denominator for the SANS I(Q) normalization.
     """ # noqa: E501
-    # We need to remove the variances because the broadcasting operation between
-    # solid_angle (pixel-dependent) and monitors (wavelength-dependent) will fail.
-    denominator = sc.values(solid_angle) * sc.values(
-        data_transmission_monitor * direct_incident_monitor /
-        direct_transmission_monitor)
+    denominator = (data_transmission_monitor * direct_incident_monitor /
+                   direct_transmission_monitor)
     if direct_beam is not None:
-        denominator *= sc.values(direct_beam)
+        denominator *= direct_beam
+    if solid_angle is not None:
+        # We need to remove the variances because the broadcasting operation between
+        # solid_angle (pixel-dependent) and monitors (wavelength-dependent) will fail.
+        denominator = sc.values(solid_angle) * sc.values(denominator)
     # Convert wavelength coordinate to midpoints for future histogramming
     if wavelength_to_midpoints:
         denominator.coords['wavelength'] = sc.midpoints(

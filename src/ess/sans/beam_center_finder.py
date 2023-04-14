@@ -352,7 +352,8 @@ def beam_center(data: sc.DataArray,
                             solid_angle=solid_angle_of_rectangular_pixels(
                                 data,
                                 pixel_width=data.coords['pixel_width'],
-                                pixel_height=data.coords['pixel_height']))
+                                pixel_height=data.coords['pixel_height']),
+                            wavelength_to_midpoints=True)
 
     wavelength_range = sc.concat(
         [wavelength_bins.min(), wavelength_bins.max()], dim='wavelength')
