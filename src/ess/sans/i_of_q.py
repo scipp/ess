@@ -225,6 +225,12 @@ def _verify_normalization_alpha(numerator: sc.DataArray,
     See Heybrock et al. (2023).
     """
     alpha = alpha_ratio(numerator, denominator)
+    if alpha > 0.25 * alpha_threshold:
+        logger = get_logger('sans')
+        logger.warning(
+            f'alpha = {alpha} is close to the specified threshold of '
+            f'{alpha_threshold}. This means we are close to the regime where it is no '
+            'longer safe to drop the variances of the normalization term.')
     if alpha > alpha_threshold:
         raise ValueError(
             f'alpha = {alpha} > {alpha_threshold}! This means that the ratio of '
