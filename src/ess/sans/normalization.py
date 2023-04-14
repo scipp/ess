@@ -140,7 +140,7 @@ def iofq_denominator(data: sc.DataArray,
     -------
     :
         The denominator for the SANS I(Q) normalization.
-    """ # noqa: E501
+    """  # noqa: E501
     denominator = (data_transmission_monitor * direct_incident_monitor /
                    direct_transmission_monitor)
     if direct_beam is not None:

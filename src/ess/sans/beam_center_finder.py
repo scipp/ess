@@ -10,8 +10,7 @@ from ..logging import get_logger
 from . import i_of_q
 from .common import gravity_vector
 from .conversions import sans_elastic
-from .normalization import (iofq_denominator, normalize,
-                            solid_angle_of_rectangular_pixels)
+from .normalization import iofq_denominator, normalize
 
 
 def center_of_mass(data: sc.DataArray) -> sc.Variable:
