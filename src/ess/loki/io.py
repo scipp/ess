@@ -22,7 +22,7 @@ def load_sans2d(filename: str, spectrum_size: Optional[int] = None) -> sc.DataAr
           - half of the pixels in each panel are used for live display
     """
     try:
-        out = sc.io.open_hdf5(filename)
+        out = sc.io.load_hdf5(filename)
     except KeyError:
         out = scn.load(filename=filename, mantid_args={"LoadMonitors": True})
     if spectrum_size is None:

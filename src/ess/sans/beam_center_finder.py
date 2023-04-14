@@ -10,7 +10,8 @@ from ..logging import get_logger
 from . import i_of_q
 from .common import gravity_vector
 from .conversions import sans_elastic
-from .normalization import normalize, solid_angle_of_rectangular_pixels
+from .normalization import (iofq_denominator, normalize,
+                            solid_angle_of_rectangular_pixels)
 
 
 def center_of_mass(data: sc.DataArray) -> sc.Variable:
@@ -45,44 +46,6 @@ def _offsets_to_vector(data: sc.DataArray, xy: List[float], graph: dict) -> sc.V
     center = xy[0] * coords['cyl_x_unit_vector'] + xy[1] * coords['cyl_y_unit_vector']
     center.unit = u
     return center
-
-
-def iofq_normalization(data: sc.DataArray, data_monitors: Dict[str, sc.DataArray],
-                       direct_monitors: Dict[str, sc.DataArray]) -> sc.DataArray:
-    """
-    Compute the denominator used for normalization. The denominator is defined as:
-    ``pixel_solid_angles * Sample_T_monitor * Direct_I_monitor / Direct_T_monitor``
-
-    Parameters
-    ----------
-    data:
-        The data to compute the normalization for (this is the sample data, and should
-        contain coordinates and masks for the detector pixels).
-    data_monitors:
-        The monitors for the sample run.
-    direct_monitors:
-        The monitors for the direct run.
-
-    Returns
-    -------
-    :
-        The denominator term used in the normalization to compute :math:`I(Q)`.
-    """
-    solid_angle = solid_angle_of_rectangular_pixels(
-        data,
-        pixel_width=data.coords['pixel_width'],
-        pixel_height=data.coords['pixel_height'])
-
-    # TODO: reference Heybrock et al. (2023) paper
-    # We need to remove the variances because the broadcasting operation between
-    # solid_angle (pixel-dependent) and monitors (wavelength-dependent) will fail.
-    norm = sc.values(solid_angle) * sc.values(
-        data_monitors['transmission'] * direct_monitors['incident'] /
-        direct_monitors['transmission'])
-
-    # Convert wavelength coordinate to midpoints for future histogramming
-    norm.coords['wavelength'] = sc.midpoints(norm.coords['wavelength'])
-    return norm
 
 
 def iofq_in_quadrants(xy: List[float], sample: sc.DataArray, norm: sc.DataArray,
@@ -383,9 +346,13 @@ def beam_center(data: sc.DataArray,
     com_shift = com - sc.dot(com, n_beam) * n_beam
 
     # Compute the denominator used for normalization.
-    norm = iofq_normalization(data=data,
-                              data_monitors=data_monitors,
-                              direct_monitors=direct_monitors)
+    norm = iofq_denominator(data_transmission_monitor=data_monitors['transmission'],
+                            direct_incident_monitor=direct_monitors['incident'],
+                            direct_transmission_monitor=direct_monitors['transmission'],
+                            solid_angle=solid_angle_of_rectangular_pixels(
+                                data,
+                                pixel_width=data.coords['pixel_width'],
+                                pixel_height=data.coords['pixel_height']))
 
     wavelength_range = sc.concat(
         [wavelength_bins.min(), wavelength_bins.max()], dim='wavelength')

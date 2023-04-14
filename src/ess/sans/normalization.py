@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
-from typing import Dict
+from typing import Dict, Optional
 
 import scipp as sc
 import scippneutron as scn
@@ -75,40 +75,54 @@ def transmission_fraction(data_monitors: Dict[str, sc.DataArray],
         direct_monitors['incident'] / data_monitors['incident'])
 
 
-def compute_denominator(direct_beam: sc.DataArray, data_incident_monitor: sc.DataArray,
-                        transmission_fraction: sc.DataArray,
-                        solid_angle: sc.Variable) -> sc.DataArray:
+def iofq_denominator(data_transmission_monitor: sc.DataArray,
+                     direct_incident_monitor: sc.DataArray,
+                     direct_transmission_monitor: sc.DataArray,
+                     solid_angle: sc.Variable,
+                     direct_beam: Optional[sc.DataArray] = None,
+                     wavelength_to_midpoints: bool = True) -> sc.DataArray:
     """
-    Compute the denominator term. This is basically:
-      solid_angle * direct_beam * data_incident_monitor_counts * transmission_fraction
+    Compute the denominator term for the I(Q) normalization. This is basically:
+    ``solid_angle * direct_beam * data_transmission_monitor * direct_incident_monitor /
+        direct_transmission_monitor``
+    If the direct beam is not supplied, it is assumed to be 1.
 
-    Because we are histogramming the Q values of the denominator further down in the
-    workflow, we convert the wavelength coordinate of the denominator from bin edges to
-    bin centers.
+    Because the multiplication between the wavelength dependent terms (monitor counts)
+    and the pixel dependent term (solid angle) consists of a broadcast operation which
+    would introduce correlations, we strip the data of variances.
+    It is the responsibility of the user to ensure that the variances are small enough
+    that they can be ignored. See more details in Heybrock et al. (2023).
 
     Parameters
     ----------
-    direct_beam:
-        The DataArray containing the direct beam function (depends on wavelength).
-    data_incident_monitor:
-        The DataArray containing the incident monitor counts from the measurement run
-        (depends on wavelength).
-    transmission_fraction:
-        The DataArray containing the transmission fraction (depends on wavelength).
+    data_transmission_monitor:
+        The transmission monitor counts from the measurement run (depends on
+        wavelength).
+    direct_incident_monitor:
+        The incident monitor counts from the direct run (depends on wavelength).
+    direct_transmission_monitor:
+        The transmission monitor counts from the direct run (depends on wavelength).
     solid_angle:
         The solid angle of the detector pixels (depends on detector position).
+    direct_beam:
+        The DataArray containing the direct beam function (depends on wavelength).
 
     Returns
     -------
     :
         The denominator for the SANS I(Q) normalization.
-    """
-    # TODO: reference Heybrock et al. (2023) paper
+    """ # noqa: E501
     # We need to remove the variances because the broadcasting operation between
     # solid_angle (pixel-dependent) and monitors (wavelength-dependent) will fail.
     denominator = sc.values(solid_angle) * sc.values(
-        direct_beam * data_incident_monitor * transmission_fraction)
-    denominator.coords['wavelength'] = sc.midpoints(denominator.coords['wavelength'])
+        data_transmission_monitor * direct_incident_monitor /
+        direct_transmission_monitor)
+    if direct_beam is not None:
+        denominator *= sc.values(direct_beam)
+    # Convert wavelength coordinate to midpoints for future histogramming
+    if wavelength_to_midpoints:
+        denominator.coords['wavelength'] = sc.midpoints(
+            denominator.coords['wavelength'])
     return denominator
 
 

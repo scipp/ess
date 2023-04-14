@@ -39,6 +39,12 @@ def footprint_correction(data_array: sc.DataArray) -> sc.DataArray:
 def normalize_by_counts(data_array: sc.DataArray) -> sc.DataArray:
     """
     Normalize the bin-summed data by the total number of counts.
+    If the data has variances, a check is performed to ensure that the counts in each
+    bin is much lower than the total counts. If this is not the case, an error is raised
+    because the normalization would introduce non-negligible correlations which are not
+    handled Scipp's basic error propagation. See Heybrock et al. (2023).
+    If the check passes, the input data is simply divided by the total number of counts,
+    ignoring the variances of the denominator.
 
     Parameters
     ----------
@@ -55,7 +61,7 @@ def normalize_by_counts(data_array: sc.DataArray) -> sc.DataArray:
     # variances of ncounts if counts_in_bin / ncounts is small everywhere.
     ncounts = sc.values(data_array.sum())
     norm = data_array / ncounts
-    if norm.max().value > 0.1:
+    if (data_array.variances is not None) and (norm.max().value > 0.1):
         ind = np.argmax(data_array.values)
         raise ValueError(
             'One or more bins contain a number of counts of the same order as the '

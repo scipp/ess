@@ -74,10 +74,15 @@ def preprocess_monitor_data(
         # TODO: reference Heybrock et al. (2023) paper
         # For subtracting the background from the monitors, we need to remove the
         # variances because the broadcasting operation will fail.
-        # We then need to have a check, once the sample data has been converted to
-        # wavelength that this approximation is valid, by comparing the sample data
-        # counts to the monitor counts. See :func:`to_I_of_Q`.
-        monitor = monitor - sc.values(background)
+        # We add a simple check comparing the background level to the total number
+        # of counts. TODO: is this check good enough?
+        bg = sc.values(background)
+        if (bg / monitor.sum()).value > 0.1:
+            raise ValueError(
+                'The background level is more than 10% of the total monitor counts. '
+                'Dropping the variances of the background would drop non-negligible '
+                'contributions to uncertainties from correlations.')
+        monitor = monitor - bg
     return monitor
 
 
@@ -211,61 +216,6 @@ def _convert_dense_to_q_and_merge_spectra(
     return q_summed
 
 
-def normalization_denominator(data: sc.DataArray, data_monitors: Dict[str,
-                                                                      sc.DataArray],
-                              direct_monitors: Dict[str, sc.DataArray],
-                              direct_beam: sc.DataArray,
-                              wavelength_bins: sc.Variable) -> sc.DataArray:
-    """
-    Compute the normalizing term for the SANS I(Q).
-    This is basically:
-    ``solid_angle * direct_beam * data_incident_monitor_counts * transmission_fraction``
-
-    Parameters
-    ----------
-    data:
-        The DataArray containing the detector data. This can be both events
-        or dense (histogrammed) data.
-    data_monitors:
-        The data arrays for the incident and transmission monitors for the measurement
-        run.
-    direct_monitors:
-        The data arrays for the incident and transmission monitors for the direct
-        run.
-    direct_beam:
-        The direct beam function of the instrument (histogrammed,
-        depends on wavelength).
-    wavelength_bins:
-        The binning in the wavelength dimension to be used.
-    monitor_non_background_range:
-        The range of wavelengths for the monitors that are considered to not be part of
-        the background. This is used to compute the background level on each monitor,
-        which then gets subtracted from each monitor's counts.
-
-    Returns
-    -------
-    :
-        The normalizing term (denominator) in the SANS I(Q) equation.
-    """
-
-    transmission_fraction = normalization.transmission_fraction(
-        data_monitors=data_monitors, direct_monitors=direct_monitors)
-
-    direct_beam = resample_direct_beam(direct_beam=direct_beam,
-                                       wavelength_bins=wavelength_bins)
-
-    solid_angle = normalization.solid_angle_of_rectangular_pixels(
-        data,
-        pixel_width=data.coords['pixel_width'],
-        pixel_height=data.coords['pixel_height'])
-
-    return normalization.compute_denominator(
-        direct_beam=direct_beam,
-        data_incident_monitor=data_monitors['incident'],
-        transmission_fraction=transmission_fraction,
-        solid_angle=solid_angle)
-
-
 def to_I_of_Q(data: sc.DataArray,
               data_monitors: Dict[str, sc.DataArray],
               direct_monitors: Dict[str, sc.DataArray],
@@ -336,11 +286,16 @@ def to_I_of_Q(data: sc.DataArray,
     data = data.transform_coords("wavelength", graph=graph)
 
     # Compute normalizing term
-    denominator = normalization_denominator(data=data,
-                                            data_monitors=data_monitors,
-                                            direct_monitors=direct_monitors,
-                                            direct_beam=direct_beam,
-                                            wavelength_bins=wavelength_bins)
+    direct_beam = resample_direct_beam(direct_beam=direct_beam,
+                                       wavelength_bins=wavelength_bins)
+    denominator = normalization.iofq_denominator(
+        data_transmission_monitor=data_monitors['transmission'],
+        direct_incident_monitor=direct_monitors['incident'],
+        direct_transmission_monitor=direct_monitors['transmission'],
+        solid_angle=normalization.solid_angle_of_rectangular_pixels(
+            data,
+            pixel_width=data.coords['pixel_width'],
+            pixel_height=data.coords['pixel_height']))
 
     if wavelength_mask is not None:
         # If we have binned data and the wavelength coord is multi-dimensional, we need
