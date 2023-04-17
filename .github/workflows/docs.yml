@@ -13,6 +13,11 @@ on:
         default: ''
         required: false
         type: string
+      branch:
+        description: 'Branch/tag with documentation source. If not set, the current branch will be used.'
+        default: ''
+        required: false
+        type: string
       platform:
         default: 'ubuntu-22.04'
         type: string
@@ -22,6 +27,11 @@ on:
         default: false
         type: boolean
       version:
+        default: ''
+        required: false
+        type: string
+      branch:
+        description: 'Branch/tag with documentation source. If not set, the current branch will be used.'
         default: ''
         required: false
         type: string
@@ -45,7 +55,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          ref: ${{ inputs.version }}
+          ref: ${{ inputs.branch == '' && github.ref_name || inputs.branch }}
           fetch-depth: 0  # history required so setuptools_scm can determine version
 
       - name: Setup conda environment

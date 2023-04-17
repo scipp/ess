@@ -3,12 +3,12 @@
 
 # flake8: noqa: F401
 
-try:
-    from . import _version
+import importlib.metadata
 
-    __version__ = _version.__version__
-except ImportError:
-    __version__ = "0.0.0-unknown"
+try:
+    __version__ = importlib.metadata.version(__package__ or __name__)
+except importlib.metadata.PackageNotFoundError:
+    __version__ = "0.0.0"
 
 from . import logging
 from .logging import get_logger
