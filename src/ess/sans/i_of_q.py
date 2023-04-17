@@ -57,9 +57,6 @@ def preprocess_monitor_data(
         monitor = monitor.transform_coords('wavelength',
                                            graph=conversions.sans_monitor())
 
-    if monitor.variances is not None:
-        monitor.variances = None  # TODO: Hack to set variances to None
-
     background = None
     if non_background_range is not None:
         mask = sc.DataArray(data=sc.array(dims=[non_background_range.dim],
@@ -73,7 +70,19 @@ def preprocess_monitor_data(
         else:
             monitor = monitor.rebin(wavelength=wavelength_bins)
     if background is not None:
-        monitor -= background
+        # TODO: reference Heybrock et al. (2023) paper
+        # For subtracting the background from the monitors, we need to remove the
+        # variances because the broadcasting operation will fail.
+        # We add a simple check comparing the background level to the total number
+        # of counts.
+        # TODO: is this check good enough? See https://github.com/scipp/ess/issues/174
+        bg = sc.values(background)
+        if (bg / monitor.sum()).value > 0.1:
+            raise ValueError(
+                'The background level is more than 10% of the total monitor counts. '
+                'Dropping the variances of the background would drop non-negligible '
+                'contributions to uncertainties from correlations.')
+        monitor = monitor - bg
     return monitor
 
 
@@ -207,61 +216,6 @@ def _convert_dense_to_q_and_merge_spectra(
     return q_summed
 
 
-def normalization_denominator(data: sc.DataArray, data_monitors: Dict[str,
-                                                                      sc.DataArray],
-                              direct_monitors: Dict[str, sc.DataArray],
-                              direct_beam: sc.DataArray,
-                              wavelength_bins: sc.Variable) -> sc.DataArray:
-    """
-    Compute the normalizing term for the SANS I(Q).
-    This is basically:
-    ``solid_angle * direct_beam * data_incident_monitor_counts * transmission_fraction``
-
-    Parameters
-    ----------
-    data:
-        The DataArray containing the detector data. This can be both events
-        or dense (histogrammed) data.
-    data_monitors:
-        The data arrays for the incident and transmission monitors for the measurement
-        run.
-    direct_monitors:
-        The data arrays for the incident and transmission monitors for the direct
-        run.
-    direct_beam:
-        The direct beam function of the instrument (histogrammed,
-        depends on wavelength).
-    wavelength_bins:
-        The binning in the wavelength dimension to be used.
-    monitor_non_background_range:
-        The range of wavelengths for the monitors that are considered to not be part of
-        the background. This is used to compute the background level on each monitor,
-        which then gets subtracted from each monitor's counts.
-
-    Returns
-    -------
-    :
-        The normalizing term (denominator) in the SANS I(Q) equation.
-    """
-
-    transmission_fraction = normalization.transmission_fraction(
-        data_monitors=data_monitors, direct_monitors=direct_monitors)
-
-    direct_beam = resample_direct_beam(direct_beam=direct_beam,
-                                       wavelength_bins=wavelength_bins)
-
-    solid_angle = normalization.solid_angle_of_rectangular_pixels(
-        data,
-        pixel_width=data.coords['pixel_width'],
-        pixel_height=data.coords['pixel_height'])
-
-    return normalization.compute_denominator(
-        direct_beam=direct_beam,
-        data_incident_monitor=data_monitors['incident'],
-        transmission_fraction=transmission_fraction,
-        solid_angle=solid_angle)
-
-
 def to_I_of_Q(data: sc.DataArray,
               data_monitors: Dict[str, sc.DataArray],
               direct_monitors: Dict[str, sc.DataArray],
@@ -270,7 +224,8 @@ def to_I_of_Q(data: sc.DataArray,
               q_bins: Union[int, sc.Variable],
               gravity: bool = False,
               wavelength_mask: Optional[sc.DataArray] = None,
-              wavelength_bands: Optional[sc.Variable] = None) -> sc.DataArray:
+              wavelength_bands: Optional[sc.Variable] = None,
+              signal_over_monitor_threshold: float = 0.1) -> sc.DataArray:
     """
     Compute the scattering cross-section I(Q) for a SANS experimental run, performing
     binning in Q and a normalization based on monitor data and a direct beam function.
@@ -316,6 +271,9 @@ def to_I_of_Q(data: sc.DataArray,
         If defined, return the data as a set of bands in the wavelength dimension. This
         is useful for separating different wavelength ranges that contribute to
         different regions in Q space.
+    signal_over_monitor_threshold:
+        The threshold for the ratio of detector counts to monitor counts above which
+        an error is raised because it is not safe to drop the variances of the monitor.
 
     Returns
     -------
@@ -327,13 +285,6 @@ def to_I_of_Q(data: sc.DataArray,
     graph = conversions.sans_elastic(gravity=gravity)
     data = data.transform_coords("wavelength", graph=graph)
 
-    # Compute normalizing term
-    denominator = normalization_denominator(data=data,
-                                            data_monitors=data_monitors,
-                                            direct_monitors=direct_monitors,
-                                            direct_beam=direct_beam,
-                                            wavelength_bins=wavelength_bins)
-
     if wavelength_mask is not None:
         # If we have binned data and the wavelength coord is multi-dimensional, we need
         # to make a single wavelength bin before we can mask the range.
@@ -341,8 +292,26 @@ def to_I_of_Q(data: sc.DataArray,
             dim = wavelength_mask.dim
             if (dim in data.bins.coords) and (dim in data.coords):
                 data = data.bin({dim: 1})
-        data = mask_range(data, wavelength_mask, name='wavelength_mask')
-        denominator = mask_range(denominator, wavelength_mask, name='wavelength_mask')
+        data = mask_range(data, wavelength_mask)
+        data_monitors = {
+            key: mask_range(mon, wavelength_mask)
+            for key, mon in data_monitors.items()
+        }
+        direct_monitors = {
+            key: mask_range(mon, wavelength_mask)
+            for key, mon in direct_monitors.items()
+        }
+
+    # Compute normalizing term
+    direct_beam = resample_direct_beam(direct_beam=direct_beam,
+                                       wavelength_bins=wavelength_bins)
+    denominator = normalization.iofq_denominator(
+        data=data,
+        data_transmission_monitor=data_monitors['transmission'],
+        direct_incident_monitor=direct_monitors['incident'],
+        direct_transmission_monitor=direct_monitors['transmission'],
+        direct_beam=direct_beam,
+        signal_over_monitor_threshold=signal_over_monitor_threshold)
 
     # Insert a copy of coords needed for conversion to Q.
     # TODO: can this be avoided by copying the Q coords from the converted numerator?

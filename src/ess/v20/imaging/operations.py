@@ -127,7 +127,7 @@ def median_from_adj_pixels(data):
     container['neighbor', 5:7] = _shift(container['neighbor', 1:3], "y", True, fill)
     container['neighbor', 7:9] = _shift(container['neighbor', 1:3], "y", False, fill)
 
-    edges_mask = container <= sc.scalar(value=fill, variance=fill)
+    edges_mask = container <= sc.scalar(value=fill)
     return _median(container, edges_mask, dim='neighbor')
 
 

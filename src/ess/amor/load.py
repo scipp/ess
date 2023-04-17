@@ -79,6 +79,12 @@ def load(filename,
     else:
         data = scn.load_nexus(filename)
 
+    # Recent versions of scippnexus no longer add variances for events by default, so
+    # we add them here if they are missing.
+    if data.bins.constituents['data'].data.variances is None:
+        data.bins.constituents['data'].data.variances = data.bins.constituents[
+            'data'].data.values
+
     # Convert tof nanoseconds to microseconds for convenience
     # TODO: is it safe to assume that the dtype of the binned wrapper coordinate is
     # the same as the dtype of the underlying event coordinate?

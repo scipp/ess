@@ -136,9 +136,9 @@ def tof_to_wavelength(data_array: sc.DataArray,
             unit = 'angstrom'
         data_array_wav.attrs[
             'orso'].value.data_source.measurement.instrument_settings.wavelength = (
-                fileio.base.ValueRange(data_array_wav.coords['wavelength'].min().value,
-                                       data_array_wav.coords['wavelength'].max().value,
-                                       unit))
+                fileio.base.ValueRange(
+                    float(data_array_wav.coords['wavelength'].min().value),
+                    float(data_array_wav.coords['wavelength'].max().value), unit))
     except ImportError:
         orso.not_found_warning()
     return data_array_wav
@@ -175,8 +175,8 @@ def wavelength_to_theta(data_array: sc.DataArray,
         data_array_theta.attrs[
             'orso'].value.data_source.measurement.instrument_settings.incident_angle = (
                 fileio.base.ValueRange(
-                    data_array_theta.coords['theta'].min().value,
-                    data_array_theta.coords['theta'].max().value,
+                    float(data_array_theta.coords['theta'].min().value),
+                    float(data_array_theta.coords['theta'].max().value),
                     data_array_theta.bins.coords['theta'].min().unit))
         import inspect
 

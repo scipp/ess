@@ -18,6 +18,5 @@ Building blocks
    :toctree: ../../generated
 
    convert_to_q_and_merge_spectra
-   normalization_denominator
    preprocess_monitor_data
    resample_direct_beam
