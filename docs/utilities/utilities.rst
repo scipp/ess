@@ -10,3 +10,4 @@ Modules
 
    logging
    nexus
+   uncertainty

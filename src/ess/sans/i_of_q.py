@@ -225,7 +225,7 @@ def to_I_of_Q(data: sc.DataArray,
               gravity: bool = False,
               wavelength_mask: Optional[sc.DataArray] = None,
               wavelength_bands: Optional[sc.Variable] = None,
-              alpha_threshold: float = 0.1) -> sc.DataArray:
+              signal_over_monitor_threshold: float = 0.1) -> sc.DataArray:
     """
     Compute the scattering cross-section I(Q) for a SANS experimental run, performing
     binning in Q and a normalization based on monitor data and a direct beam function.
@@ -271,7 +271,7 @@ def to_I_of_Q(data: sc.DataArray,
         If defined, return the data as a set of bands in the wavelength dimension. This
         is useful for separating different wavelength ranges that contribute to
         different regions in Q space.
-    alpha_threshold:
+    signal_over_monitor_threshold:
         The threshold for the ratio of detector counts to monitor counts above which
         an error is raised because it is not safe to drop the variances of the monitor.
 
@@ -311,7 +311,7 @@ def to_I_of_Q(data: sc.DataArray,
         direct_incident_monitor=direct_monitors['incident'],
         direct_transmission_monitor=direct_monitors['transmission'],
         direct_beam=direct_beam,
-        alpha_threshold=alpha_threshold)
+        signal_over_monitor_threshold=signal_over_monitor_threshold)
 
     # Insert a copy of coords needed for conversion to Q.
     # TODO: can this be avoided by copying the Q coords from the converted numerator?
