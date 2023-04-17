@@ -74,7 +74,8 @@ def preprocess_monitor_data(
         # For subtracting the background from the monitors, we need to remove the
         # variances because the broadcasting operation will fail.
         # We add a simple check comparing the background level to the total number
-        # of counts. TODO: is this check good enough?
+        # of counts.
+        # TODO: is this check good enough? See https://github.com/scipp/ess/issues/174
         bg = sc.values(background)
         if (bg / monitor.sum()).value > 0.1:
             raise ValueError(
