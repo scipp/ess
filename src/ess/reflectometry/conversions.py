@@ -141,9 +141,8 @@ def tof_to_wavelength(
         # angstrom in the ORSO object.
         if unit == 'angstrom':
             unit = 'angstrom'
-        data_array_wav.attrs[
-            'orso'
-        ].value.data_source.measurement.instrument_settings.wavelength = fileio.base.ValueRange(
+        orso_measurement = data_array_wav.attrs['orso'].value.data_source.measurement
+        orso_measurement.instrument_settings.wavelength = fileio.base.ValueRange(
             float(data_array_wav.coords['wavelength'].min().value),
             float(data_array_wav.coords['wavelength'].max().value),
             unit,
@@ -182,9 +181,8 @@ def wavelength_to_theta(
     try:
         from orsopy import fileio
 
-        data_array_theta.attrs[
-            'orso'
-        ].value.data_source.measurement.instrument_settings.incident_angle = fileio.base.ValueRange(
+        orso_measurement = data_array_theta.attrs['orso'].value.data_source.measurement
+        orso_measurement.instrument_settings.incident_angle = fileio.base.ValueRange(
             float(data_array_theta.coords['theta'].min().value),
             float(data_array_theta.coords['theta'].max().value),
             data_array_theta.bins.coords['theta'].min().unit,

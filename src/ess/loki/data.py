@@ -14,8 +14,8 @@ def _make_pooch():
         base_url='https://public.esss.dk/groups/scipp/ess/loki/{version}/',
         version=_version,
         registry={
-            'DIRECT_SANS2D_REAR_34327_4m_8mm_16Feb16.dat': 'md5:d64495831325a63e1b961776a8544599',
-            'DIRECT_SANS2D_REAR_34327_4m_8mm_16Feb16.hdf5': 'md5:43f4188301d709aa49df0631d03a67cb',
+            'DIRECT_SANS2D_REAR_34327_4m_8mm_16Feb16.dat': 'md5:d64495831325a63e1b961776a8544599',  # noqa: E501
+            'DIRECT_SANS2D_REAR_34327_4m_8mm_16Feb16.hdf5': 'md5:43f4188301d709aa49df0631d03a67cb',  # noqa: E501
             'SANS2D00063091.nxs': 'md5:05929753ea06eca5fe4be164cb06b4d6',
             'SANS2D00063091.hdf5': 'md5:c212f1c8c68db69eae88eca90a19e7e6',
             'SANS2D00063114.nxs': 'md5:b3a3f7527ef871d728942cac3da52289',
