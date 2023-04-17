@@ -35,15 +35,19 @@ def load_rkh_wav(filename: str) -> sc.DataArray:
     """
     Loading wrapper for RKH files
     """
-    return scn.load(filename=filename,
-                    mantid_alg="LoadRKH",
-                    mantid_args={"FirstColumnValue": "Wavelength"})
+    return scn.load(
+        filename=filename,
+        mantid_alg="LoadRKH",
+        mantid_args={"FirstColumnValue": "Wavelength"},
+    )
 
 
 def load_rkh_q(filename: str) -> sc.DataArray:
     """
     Loading wrapper for RKH files
     """
-    return scn.load(filename=filename,
-                    mantid_alg="LoadRKH",
-                    mantid_args={"FirstColumnValue": "MomentumTransfer"})
+    return scn.load(
+        filename=filename,
+        mantid_alg="LoadRKH",
+        mantid_args={"FirstColumnValue": "MomentumTransfer"},
+    )

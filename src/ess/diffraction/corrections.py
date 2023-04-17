@@ -9,11 +9,13 @@ from ..logging import get_logger
 from .smoothing import lowpass
 
 
-def normalize_by_monitor(data: sc.DataArray,
-                         *,
-                         monitor: str,
-                         wavelength_edges: Optional[sc.Variable] = None,
-                         smooth_args: Optional[Dict[str, Any]] = None) -> sc.DataArray:
+def normalize_by_monitor(
+    data: sc.DataArray,
+    *,
+    monitor: str,
+    wavelength_edges: Optional[sc.Variable] = None,
+    smooth_args: Optional[Dict[str, Any]] = None
+) -> sc.DataArray:
     """
     Normalize event data by a monitor.
 
@@ -40,27 +42,30 @@ def normalize_by_monitor(data: sc.DataArray,
     """
     mon = data.meta[monitor].value
     if 'wavelength' not in mon.coords:
-        mon = mon.transform_coords('wavelength',
-                                   graph={
-                                       **beamline.beamline(scatter=False),
-                                       **tof.elastic("tof")
-                                   },
-                                   keep_inputs=False,
-                                   keep_intermediate=False,
-                                   keep_aliases=False)
+        mon = mon.transform_coords(
+            'wavelength',
+            graph={**beamline.beamline(scatter=False), **tof.elastic("tof")},
+            keep_inputs=False,
+            keep_intermediate=False,
+            keep_aliases=False,
+        )
 
     if wavelength_edges is not None:
         mon = mon.rebin(wavelength=wavelength_edges)
     if smooth_args is not None:
         get_logger('diffraction').info(
             "Smoothing monitor '%s' for normalization using "
-            "ess.diffraction.smoothing.lowpass with %s.", monitor, smooth_args)
+            "ess.diffraction.smoothing.lowpass with %s.",
+            monitor,
+            smooth_args,
+        )
         mon = lowpass(mon, dim='wavelength', **smooth_args)
     return data.bins / sc.lookup(func=mon, dim='wavelength')
 
 
-def normalize_by_vanadium(data: sc.DataArray, *, vanadium: sc.DataArray,
-                          edges: sc.Variable) -> sc.DataArray:
+def normalize_by_vanadium(
+    data: sc.DataArray, *, vanadium: sc.DataArray, edges: sc.Variable
+) -> sc.DataArray:
     """
     Normalize sample data by a vanadium measurement.
 

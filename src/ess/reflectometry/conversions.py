@@ -8,8 +8,13 @@ from scippneutron.conversion.graph import beamline, tof
 from . import orso
 
 
-def theta(gravity: sc.Variable, wavelength: sc.Variable, incident_beam: sc.Variable,
-          scattered_beam: sc.Variable, sample_rotation: sc.Variable) -> sc.Variable:
+def theta(
+    gravity: sc.Variable,
+    wavelength: sc.Variable,
+    incident_beam: sc.Variable,
+    scattered_beam: sc.Variable,
+    sample_rotation: sc.Variable,
+) -> sc.Variable:
     """
     Compute the theta angle, including gravity correction,
     This is similar to the theta calculation in SANS (see
@@ -92,8 +97,9 @@ def specular_reflection() -> dict:
     """
     graph = {
         **beamline.beamline(scatter=True),
-        **tof.elastic("tof"), "theta": theta,
-        "Q": reflectometry_q
+        **tof.elastic("tof"),
+        "theta": theta,
+        "Q": reflectometry_q,
     }
     del graph['two_theta']
     del graph['dspacing']
@@ -101,9 +107,9 @@ def specular_reflection() -> dict:
     return graph
 
 
-def tof_to_wavelength(data_array: sc.DataArray,
-                      wavelength_edges: sc.Variable = None,
-                      graph: dict = None) -> sc.DataArray:
+def tof_to_wavelength(
+    data_array: sc.DataArray, wavelength_edges: sc.Variable = None, graph: dict = None
+) -> sc.DataArray:
     """
     Use :code:`transform_coords` to convert from ToF to wavelength, cutoff high and
     low limits for wavelength, and add necessary ORSO metadata.
@@ -129,24 +135,27 @@ def tof_to_wavelength(data_array: sc.DataArray,
         data_array_wav = data_array_wav.bin({wavelength_edges.dim: wavelength_edges})
     try:
         from orsopy import fileio
+
         unit = data_array_wav.coords['wavelength'].unit
         # This insures that when the unit is Å it is written as
         # angstrom in the ORSO object.
         if unit == 'angstrom':
             unit = 'angstrom'
         data_array_wav.attrs[
-            'orso'].value.data_source.measurement.instrument_settings.wavelength = (
-                fileio.base.ValueRange(
-                    float(data_array_wav.coords['wavelength'].min().value),
-                    float(data_array_wav.coords['wavelength'].max().value), unit))
+            'orso'
+        ].value.data_source.measurement.instrument_settings.wavelength = fileio.base.ValueRange(
+            float(data_array_wav.coords['wavelength'].min().value),
+            float(data_array_wav.coords['wavelength'].max().value),
+            unit,
+        )
     except ImportError:
         orso.not_found_warning()
     return data_array_wav
 
 
-def wavelength_to_theta(data_array: sc.DataArray,
-                        theta_edges: sc.Variable = None,
-                        graph: dict = None) -> sc.DataArray:
+def wavelength_to_theta(
+    data_array: sc.DataArray, theta_edges: sc.Variable = None, graph: dict = None
+) -> sc.DataArray:
     """
     Use :code:`transform_coords` to find the theta values for the events and
     potentially add ORSO metadata.
@@ -172,19 +181,23 @@ def wavelength_to_theta(data_array: sc.DataArray,
         data_array_theta = data_array_theta.bin({theta_edges.dim: theta_edges})
     try:
         from orsopy import fileio
+
         data_array_theta.attrs[
-            'orso'].value.data_source.measurement.instrument_settings.incident_angle = (
-                fileio.base.ValueRange(
-                    float(data_array_theta.coords['theta'].min().value),
-                    float(data_array_theta.coords['theta'].max().value),
-                    data_array_theta.bins.coords['theta'].min().unit))
+            'orso'
+        ].value.data_source.measurement.instrument_settings.incident_angle = fileio.base.ValueRange(
+            float(data_array_theta.coords['theta'].min().value),
+            float(data_array_theta.coords['theta'].max().value),
+            data_array_theta.bins.coords['theta'].min().unit,
+        )
         import inspect
 
         # Determine if 'gravity' is in the graph and if to add the gravity correction
-        if any([
+        if any(
+            [
                 'gravity' in i.parameters.keys()
                 for i in map(inspect.signature, graph.values())
-        ]):
+            ]
+        ):
             data_array_theta.attrs['orso'].value.reduction.corrections += [
                 'gravity correction'
             ]
@@ -193,9 +206,9 @@ def wavelength_to_theta(data_array: sc.DataArray,
     return data_array_theta
 
 
-def theta_to_q(data_array: sc.DataArray,
-               q_edges: sc.Variable = None,
-               graph: dict = None) -> sc.DataArray:
+def theta_to_q(
+    data_array: sc.DataArray, q_edges: sc.Variable = None, graph: dict = None
+) -> sc.DataArray:
     """
     Convert from theta to Q and if necessary bin in Q.
 
@@ -238,5 +251,6 @@ def sum_bins(data_array: sc.DataArray):
     data_array_summed = data_array.bins.sum()
     if 'angular_resolution' in data_array.bins.coords:
         data_array_summed.coords['angular_resolution'] = data_array.bins.coords[
-            'angular_resolution'].max('detector_id')
+            'angular_resolution'
+        ].max('detector_id')
     return data_array_summed

@@ -67,19 +67,26 @@ class _AuxData:
 
 def _load_aux_file(filename: Union[str, Path], *, data_name: str) -> _AuxData:
     get_logger('powgen').info('Loading %s from file %s.', data_name, filename)
-    da = scn.load(filename,
-                  advanced_geometry=False,
-                  load_pulse_times=True,
-                  mantid_args={'LoadMonitors': False})
+    da = scn.load(
+        filename,
+        advanced_geometry=False,
+        load_pulse_times=True,
+        mantid_args={'LoadMonitors': False},
+    )
     da.attrs['proton_charge'] = sc.scalar(
-        da.attrs['proton_charge'].value.rename(time='pulse_time'))
+        da.attrs['proton_charge'].value.rename(time='pulse_time')
+    )
     return _AuxData(da=da, name=data_name)
 
 
 def _normalize_by_proton_charge_in_place(data: _AuxData):
     total_charge = data.da.meta['proton_charge'].value.data.sum()
-    get_logger('powgen').info('Normalizing %s by proton charge %e%s', data.name,
-                              total_charge.value, total_charge.unit)
+    get_logger('powgen').info(
+        'Normalizing %s by proton charge %e%s',
+        data.name,
+        total_charge.value,
+        total_charge.unit,
+    )
     data.da /= total_charge
 
 
@@ -111,16 +118,18 @@ def _replace_by_common_edges(data: List[_AuxData], dim: str):
             raise RuntimeError(
                 f"Cannot process vanadium data, coordinate '{dim}' of dataset "
                 f"'{d.name}' must have sizes {{{dim}: 2}}, "
-                f"got {d.da.coords[dim].sizes}")
+                f"got {d.da.coords[dim].sizes}"
+            )
     edges = _common_edges(*(d.da.coords[dim] for d in data), dim=dim)
     for d in data:
         d.da.coords[dim] = edges
 
 
 def load_and_preprocess_vanadium(
-        vanadium_file: Union[str, Path],
-        empty_instrument_file: Union[str, Path],
-        proton_charge_filter_threshold: Real = 0.9) -> sc.DataArray:
+    vanadium_file: Union[str, Path],
+    empty_instrument_file: Union[str, Path],
+    proton_charge_filter_threshold: Real = 0.9,
+) -> sc.DataArray:
     """
     Load and return data from a vanadium measurement.
 
@@ -153,10 +162,15 @@ def load_and_preprocess_vanadium(
         # _load_aux_file(empty_instrument_file, data_name='empty instrument')
     ]
     data = [
-        _AuxData(da=remove_bad_pulses(d.da,
-                                      proton_charge=d.da.meta['proton_charge'].value,
-                                      threshold_factor=proton_charge_filter_threshold),
-                 name=d.name) for d in data
+        _AuxData(
+            da=remove_bad_pulses(
+                d.da,
+                proton_charge=d.da.meta['proton_charge'].value,
+                threshold_factor=proton_charge_filter_threshold,
+            ),
+            name=d.name,
+        )
+        for d in data
     ]
     _replace_by_common_edges(data, dim='tof')
     tof_to_wavelength = {**beamline.beamline(scatter=True), **tof.elastic("tof")}

@@ -40,16 +40,23 @@ def _offsets_to_vector(data: sc.DataArray, xy: List[float], graph: dict) -> sc.V
     """
     u = data.coords['position'].unit
     # Get two vectors that define the plane normal to the beam
-    coords = data.transform_coords(['cyl_x_unit_vector', 'cyl_y_unit_vector'],
-                                   graph=graph).coords
+    coords = data.transform_coords(
+        ['cyl_x_unit_vector', 'cyl_y_unit_vector'], graph=graph
+    ).coords
     center = xy[0] * coords['cyl_x_unit_vector'] + xy[1] * coords['cyl_y_unit_vector']
     center.unit = u
     return center
 
 
-def iofq_in_quadrants(xy: List[float], sample: sc.DataArray, norm: sc.DataArray,
-                      graph: dict, q_bins: Union[int, sc.Variable], gravity: bool,
-                      wavelength_range: sc.Variable) -> Dict[str, sc.DataArray]:
+def iofq_in_quadrants(
+    xy: List[float],
+    sample: sc.DataArray,
+    norm: sc.DataArray,
+    graph: dict,
+    q_bins: Union[int, sc.Variable],
+    gravity: bool,
+    wavelength_range: sc.Variable,
+) -> Dict[str, sc.DataArray]:
     """
     Compute the intensity as a function of Q inside 4 quadrants in Phi.
 
@@ -89,10 +96,9 @@ def iofq_in_quadrants(xy: List[float], sample: sc.DataArray, norm: sc.DataArray,
         norm.coords[c] = data.coords[c]
 
     pi = sc.constants.pi.value
-    phi = data.transform_coords('phi',
-                                graph=graph,
-                                keep_intermediate=False,
-                                keep_inputs=False).coords['phi']
+    phi = data.transform_coords(
+        'phi', graph=graph, keep_intermediate=False, keep_inputs=False
+    ).coords['phi']
     phi_bins = sc.linspace('phi', -pi, pi, 5, unit='rad')
     quadrants = ['south-west', 'south-east', 'north-east', 'north-west']
 
@@ -106,14 +112,16 @@ def iofq_in_quadrants(xy: List[float], sample: sc.DataArray, norm: sc.DataArray,
             graph=graph,
             q_bins=q_bins,
             gravity=gravity,
-            wavelength_bands=wavelength_range)
+            wavelength_bands=wavelength_range,
+        )
         # Denominator counts into Q bins
         norm_q = i_of_q.convert_to_q_and_merge_spectra(
             data=norm[sel],
             graph=graph,
             q_bins=q_bins,
             gravity=gravity,
-            wavelength_bands=wavelength_range)
+            wavelength_bands=wavelength_range,
+        )
         # Normalize
         out[quad] = normalize(numerator=data_q, denominator=norm_q).hist()
     return out
@@ -172,7 +180,7 @@ def cost(xy: List[float], *args) -> float:
     iofq = iofq_in_quadrants(xy, *args)
     all_q = sc.concat([sc.values(da) for da in iofq.values()], dim='quadrant')
     ref = all_q.mean('quadrant')
-    c = (all_q - ref)**2
+    c = (all_q - ref) ** 2
     out = (sc.sum(ref * c) / sc.sum(ref)).value
     logger = get_logger('sans')
     logger.info(f'Beam center finder: x={xy[0]}, y={xy[1]}, cost={out}')
@@ -180,16 +188,14 @@ def cost(xy: List[float], *args) -> float:
         raise ValueError(
             'Non-finite value computed in cost. This is likely due to a division by '
             'zero. Try restricting your Q range, or increasing the size of your Q bins '
-            'to improve statistics in the denominator.')
+            'to improve statistics in the denominator.'
+        )
     return out
 
 
-def minimize(fun,
-             x0,
-             args=(),
-             bounds=None,
-             method: str = 'Nelder-Mead',
-             tol: float = 0.1):
+def minimize(
+    fun, x0, args=(), bounds=None, method: str = 'Nelder-Mead', tol: float = 0.1
+):
     """
     Minimize the supplied cost function using Scipy's optimize.minimize. See the
     `Scipy docs <https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html>`_
@@ -216,17 +222,20 @@ def minimize(fun,
         The result of the minimization.
     """  # noqa: E501
     from scipy.optimize import minimize as scipy_minimize
+
     return scipy_minimize(fun, x0=x0, args=args, bounds=bounds, method=method, tol=tol)
 
 
-def beam_center(data: sc.DataArray,
-                data_monitors: Dict[str, sc.DataArray],
-                direct_monitors: Dict[str, sc.DataArray],
-                wavelength_bins: sc.Variable,
-                q_bins: Union[int, sc.Variable],
-                gravity: bool = False,
-                minimizer: str = 'Nelder-Mead',
-                tolerance: float = 0.1) -> Tuple[sc.Variable, sc.Variable]:
+def beam_center(
+    data: sc.DataArray,
+    data_monitors: Dict[str, sc.DataArray],
+    direct_monitors: Dict[str, sc.DataArray],
+    wavelength_bins: sc.Variable,
+    q_bins: Union[int, sc.Variable],
+    gravity: bool = False,
+    minimizer: str = 'Nelder-Mead',
+    tolerance: float = 0.1,
+) -> Tuple[sc.Variable, sc.Variable]:
     """
     Find the beam center of a SANS scattering pattern.
     Description of the procedure:
@@ -339,8 +348,9 @@ def beam_center(data: sc.DataArray,
     graph = sans_elastic(gravity=gravity)
 
     # We compute the shift between the incident beam direction and the center-of-mass
-    incident_beam = data.transform_coords('incident_beam',
-                                          graph=graph).coords['incident_beam']
+    incident_beam = data.transform_coords('incident_beam', graph=graph).coords[
+        'incident_beam'
+    ]
     n_beam = incident_beam / sc.norm(incident_beam)
     com_shift = com - sc.dot(com, n_beam) * n_beam
 
@@ -349,25 +359,30 @@ def beam_center(data: sc.DataArray,
         data=data,
         data_transmission_monitor=sc.values(data_monitors['transmission']),
         direct_incident_monitor=sc.values(direct_monitors['incident']),
-        direct_transmission_monitor=sc.values(direct_monitors['transmission']))
+        direct_transmission_monitor=sc.values(direct_monitors['transmission']),
+    )
 
     wavelength_range = sc.concat(
-        [wavelength_bins.min(), wavelength_bins.max()], dim='wavelength')
+        [wavelength_bins.min(), wavelength_bins.max()], dim='wavelength'
+    )
 
-    coords = data.transform_coords(['cylindrical_x', 'cylindrical_y'],
-                                   graph=graph).coords
+    coords = data.transform_coords(
+        ['cylindrical_x', 'cylindrical_y'], graph=graph
+    ).coords
     bounds = [
         (coords['cylindrical_x'].min().value, coords['cylindrical_x'].max().value),
-        (coords['cylindrical_y'].min().value, coords['cylindrical_y'].max().value)
+        (coords['cylindrical_y'].min().value, coords['cylindrical_y'].max().value),
     ]
 
     # Refine using Scipy optimize
-    res = minimize(cost,
-                   x0=[com_shift.fields.x.value, com_shift.fields.y.value],
-                   args=(data, norm, graph, q_bins, gravity, wavelength_range),
-                   bounds=bounds,
-                   method=minimizer,
-                   tol=tolerance)
+    res = minimize(
+        cost,
+        x0=[com_shift.fields.x.value, com_shift.fields.y.value],
+        args=(data, norm, graph, q_bins, gravity, wavelength_range),
+        bounds=bounds,
+        method=minimizer,
+        tol=tolerance,
+    )
 
     center = _offsets_to_vector(data=data, xy=res.x, graph=graph)
     logger.info(f'Final beam center value: {center}')

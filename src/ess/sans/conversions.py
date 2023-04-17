@@ -27,8 +27,9 @@ def cyl_y_unit_vector(gravity: sc.Variable) -> sc.Variable:
     return v_y / sc.norm(v_y)
 
 
-def cylindrical_x(cyl_x_unit_vector: sc.Variable,
-                  scattered_beam: sc.Variable) -> sc.Variable:
+def cylindrical_x(
+    cyl_x_unit_vector: sc.Variable, scattered_beam: sc.Variable
+) -> sc.Variable:
     """
     Compute the horizontal x coordinate perpendicular to the incident beam direction.
     Note that it is assumed here that the incident beam is perpendicular to the gravity
@@ -37,8 +38,9 @@ def cylindrical_x(cyl_x_unit_vector: sc.Variable,
     return sc.dot(scattered_beam, cyl_x_unit_vector)
 
 
-def cylindrical_y(cyl_y_unit_vector: sc.Variable,
-                  scattered_beam: sc.Variable) -> sc.Variable:
+def cylindrical_y(
+    cyl_y_unit_vector: sc.Variable, scattered_beam: sc.Variable
+) -> sc.Variable:
     """
     Compute the vertical y coordinate perpendicular to the incident beam direction.
     Note that it is assumed here that the incident beam is perpendicular to the gravity
@@ -47,8 +49,12 @@ def cylindrical_y(cyl_y_unit_vector: sc.Variable,
     return sc.dot(scattered_beam, cyl_y_unit_vector)
 
 
-def two_theta(incident_beam: sc.Variable, scattered_beam: sc.Variable,
-              wavelength: sc.Variable, gravity: sc.Variable) -> sc.Variable:
+def two_theta(
+    incident_beam: sc.Variable,
+    scattered_beam: sc.Variable,
+    wavelength: sc.Variable,
+    gravity: sc.Variable,
+) -> sc.Variable:
     """
     Compute the scattering angle from the incident and scattered beam vectors, taking
     into account the effects of gravity.

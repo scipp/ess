@@ -14,11 +14,15 @@ def cutout_angles_begin(chopper: sc.Dataset, unit="rad") -> sc.Variable:
     if "cutout_angles_begin" in chopper:
         out = chopper["cutout_angles_begin"].data
     elif all(x in chopper for x in ["cutout_angles_width", "cutout_angles_center"]):
-        out = chopper[
-            "cutout_angles_center"].data - 0.5 * chopper["cutout_angles_width"].data
+        out = (
+            chopper["cutout_angles_center"].data
+            - 0.5 * chopper["cutout_angles_width"].data
+        )
     else:
-        raise KeyError("Chopper does not contain the information required to compute "
-                       "the cutout_angles_begin.")
+        raise KeyError(
+            "Chopper does not contain the information required to compute "
+            "the cutout_angles_begin."
+        )
     return sc.to_unit(out, unit, copy=False)
 
 
@@ -32,11 +36,15 @@ def cutout_angles_end(chopper: sc.Dataset, unit="rad") -> sc.Variable:
     if "cutout_angles_end" in chopper:
         out = chopper["cutout_angles_end"].data
     elif all(x in chopper for x in ["cutout_angles_width", "cutout_angles_center"]):
-        out = chopper[
-            "cutout_angles_center"].data + 0.5 * chopper["cutout_angles_width"].data
+        out = (
+            chopper["cutout_angles_center"].data
+            + 0.5 * chopper["cutout_angles_width"].data
+        )
     else:
-        raise KeyError("Chopper does not contain the information required to compute "
-                       "the cutout_angles_end.")
+        raise KeyError(
+            "Chopper does not contain the information required to compute "
+            "the cutout_angles_end."
+        )
     return sc.to_unit(out, unit, copy=False)
 
 
@@ -52,8 +60,10 @@ def cutout_angles_width(chopper: sc.Dataset, unit="rad") -> sc.Variable:
     elif all(x in chopper for x in ["cutout_angles_begin", "cutout_angles_end"]):
         out = chopper["cutout_angles_end"].data - chopper["cutout_angles_begin"].data
     else:
-        raise KeyError("Chopper does not contain the information required to compute "
-                       "the cutout_angles_width.")
+        raise KeyError(
+            "Chopper does not contain the information required to compute "
+            "the cutout_angles_width."
+        )
     return sc.to_unit(out, unit, copy=False)
 
 
@@ -67,11 +77,14 @@ def cutout_angles_center(chopper: sc.Dataset, unit="rad") -> sc.Variable:
     if "cutout_angles_center" in chopper:
         out = chopper["cutout_angles_center"].data
     elif all(x in chopper for x in ["cutout_angles_begin", "cutout_angles_end"]):
-        out = 0.5 * (chopper["cutout_angles_begin"].data +
-                     chopper["cutout_angles_end"].data)
+        out = 0.5 * (
+            chopper["cutout_angles_begin"].data + chopper["cutout_angles_end"].data
+        )
     else:
-        raise KeyError("Chopper does not contain the information required to compute "
-                       "the cutout_angles_center.")
+        raise KeyError(
+            "Chopper does not contain the information required to compute "
+            "the cutout_angles_center."
+        )
     return sc.to_unit(out, unit, copy=False)
 
 
@@ -92,10 +105,11 @@ def time_open(chopper: sc.Dataset, unit: str = "us") -> sc.Variable:
     :param unit: Convert to this unit before returning. Default is `'rad'`.
     """
     return sc.to_unit(
-        (cutout_angles_begin(chopper) + sc.to_unit(chopper["phase"].data, "rad")) /
-        angular_frequency(chopper),
+        (cutout_angles_begin(chopper) + sc.to_unit(chopper["phase"].data, "rad"))
+        / angular_frequency(chopper),
         unit,
-        copy=False)
+        copy=False,
+    )
 
 
 def time_closed(chopper: sc.Dataset, unit: str = "us") -> sc.Variable:
@@ -106,10 +120,11 @@ def time_closed(chopper: sc.Dataset, unit: str = "us") -> sc.Variable:
     :param unit: Convert to this unit before returning. Default is `'rad'`.
     """
     return sc.to_unit(
-        (cutout_angles_end(chopper) + sc.to_unit(chopper["phase"].data, "rad")) /
-        angular_frequency(chopper),
+        (cutout_angles_end(chopper) + sc.to_unit(chopper["phase"].data, "rad"))
+        / angular_frequency(chopper),
         unit,
-        copy=False)
+        copy=False,
+    )
 
 
 def find_chopper_keys(da: sc.DataArray) -> list:
