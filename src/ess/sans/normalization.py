@@ -108,8 +108,7 @@ def iofq_denominator(data: sc.DataArray,
                      alpha_threshold: float = 0.1) -> sc.DataArray:
     """
     Compute the denominator term for the I(Q) normalization. This is basically:
-    ``solid_angle * direct_beam * data_transmission_monitor * direct_incident_monitor /
-        direct_transmission_monitor``
+    ``solid_angle * direct_beam * data_transmission_monitor * direct_incident_monitor / direct_transmission_monitor``
     If the solid angle is not supplied, it is assumed to be 1.
     If the direct beam is not supplied, it is assumed to be 1.
 
