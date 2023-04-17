@@ -15,7 +15,7 @@ def variance_normalized_signal_over_monitor(numerator: T, denominator: T) -> flo
     variance-normalized counts:
 
     .. math::
-       \\alpha = \\frac{\\sum_{i} \\text{var}_{i}(b) a_{i}^{2}}{\\text{var}_{i}(a) b_{i}^{2}}
+       \\alpha = \\frac{\\sum_{i} \\text{var}_{i}(b) a_{i}^{2}}{\\sum_{i} \\text{var}_{i}(a) b_{i}^{2}}
 
     where :math:`a` is the numerator and :math:`b` the denominator.
     See Heybrock et al. (2023) for more details.
