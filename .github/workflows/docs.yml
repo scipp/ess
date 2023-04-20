@@ -65,7 +65,7 @@ jobs:
           environment-file: environment.yml
           cache-env: true
 
-      - run: conda develop src
+      - run: python -m pip install .
       - run: jupyter --paths
       - run: python docs/make_docs.py --build-dir=html_${{ inputs.platform }}
 
