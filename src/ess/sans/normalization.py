@@ -10,8 +10,9 @@ from ..logging import get_logger
 from ..uncertainty import variance_normalized_signal_over_monitor
 
 
-def solid_angle_of_rectangular_pixels(data: sc.DataArray, pixel_width: sc.Variable,
-                                      pixel_height: sc.Variable) -> sc.DataArray:
+def solid_angle_of_rectangular_pixels(
+    data: sc.DataArray, pixel_width: sc.Variable, pixel_height: sc.Variable
+) -> sc.DataArray:
     """
     Solid angle computed from rectangular pixels with a 'width' and a 'height'.
 
@@ -45,8 +46,9 @@ def solid_angle_of_rectangular_pixels(data: sc.DataArray, pixel_width: sc.Variab
     return solid_angle
 
 
-def transmission_fraction(data_monitors: Dict[str, sc.DataArray],
-                          direct_monitors: Dict[str, sc.DataArray]) -> sc.DataArray:
+def transmission_fraction(
+    data_monitors: Dict[str, sc.DataArray], direct_monitors: Dict[str, sc.DataArray]
+) -> sc.DataArray:
     """
     Approximation based on equations in
     [CalculateTransmission](https://docs.mantidproject.org/v4.0.0/algorithms/CalculateTransmission-v1.html)
@@ -75,12 +77,15 @@ def transmission_fraction(data_monitors: Dict[str, sc.DataArray],
         The transmission fraction computed from the monitor counts.
     """  # noqa: E501
     return (data_monitors['transmission'] / direct_monitors['transmission']) * (
-        direct_monitors['incident'] / data_monitors['incident'])
+        direct_monitors['incident'] / data_monitors['incident']
+    )
 
 
-def _verify_normalization_alpha(numerator: sc.DataArray,
-                                denominator: sc.DataArray,
-                                signal_over_monitor_threshold: float = 0.1):
+def _verify_normalization_alpha(
+    numerator: sc.DataArray,
+    denominator: sc.DataArray,
+    signal_over_monitor_threshold: float = 0.1,
+):
     """
     Verify that the ratio of sample detector counts to monitor counts is small, so
     we can safely drop the variances of the monitor to avoid broadcasting issues.
@@ -93,20 +98,24 @@ def _verify_normalization_alpha(numerator: sc.DataArray,
             f'signal_over_monitor = {alpha} is close to the specified threshold of '
             f'{signal_over_monitor_threshold}. This means we are close to the regime '
             'where it is no longer safe to drop the variances of the normalization '
-            'term.')
+            'term.'
+        )
     if alpha > signal_over_monitor_threshold:
         raise ValueError(
             f'signal_over_monitor = {alpha} > {signal_over_monitor_threshold}! '
             'This means that the ratio of detector counts to monitor counts is too '
-            'high, and the variances of the monitor data cannot be safely dropped.')
+            'high, and the variances of the monitor data cannot be safely dropped.'
+        )
 
 
-def iofq_denominator(data: sc.DataArray,
-                     data_transmission_monitor: sc.DataArray,
-                     direct_incident_monitor: sc.DataArray,
-                     direct_transmission_monitor: sc.DataArray,
-                     direct_beam: Optional[sc.DataArray] = None,
-                     signal_over_monitor_threshold: float = 0.1) -> sc.DataArray:
+def iofq_denominator(
+    data: sc.DataArray,
+    data_transmission_monitor: sc.DataArray,
+    direct_incident_monitor: sc.DataArray,
+    direct_transmission_monitor: sc.DataArray,
+    direct_beam: Optional[sc.DataArray] = None,
+    signal_over_monitor_threshold: float = 0.1,
+) -> sc.DataArray:
     """
     Compute the denominator term for the I(Q) normalization. This is basically:
     ``solid_angle * direct_beam * data_transmission_monitor * direct_incident_monitor / direct_transmission_monitor``
@@ -141,8 +150,11 @@ def iofq_denominator(data: sc.DataArray,
     :
         The denominator for the SANS I(Q) normalization.
     """  # noqa: E501
-    denominator = (data_transmission_monitor * direct_incident_monitor /
-                   direct_transmission_monitor)
+    denominator = (
+        data_transmission_monitor
+        * direct_incident_monitor
+        / direct_transmission_monitor
+    )
     if direct_beam is not None:
         denominator *= direct_beam
 
@@ -154,12 +166,14 @@ def iofq_denominator(data: sc.DataArray,
         _verify_normalization_alpha(
             numerator=data.hist(wavelength=denominator.coords['wavelength']),
             denominator=denominator,
-            signal_over_monitor_threshold=signal_over_monitor_threshold)
+            signal_over_monitor_threshold=signal_over_monitor_threshold,
+        )
 
     solid_angle = solid_angle_of_rectangular_pixels(
         data,
         pixel_width=data.coords['pixel_width'],
-        pixel_height=data.coords['pixel_height'])
+        pixel_height=data.coords['pixel_height'],
+    )
     denominator = solid_angle * sc.values(denominator)
     # Convert wavelength coordinate to midpoints for future histogramming
     # if wavelength_to_midpoints:

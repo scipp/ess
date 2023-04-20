@@ -5,14 +5,16 @@ import scipp as sc
 from . import utils
 
 
-def make_chopper(frequency: sc.Variable,
-                 position: sc.Variable,
-                 phase: sc.Variable = None,
-                 cutout_angles_center: sc.Variable = None,
-                 cutout_angles_width: sc.Variable = None,
-                 cutout_angles_begin: sc.Variable = None,
-                 cutout_angles_end: sc.Variable = None,
-                 kind: str = None) -> sc.Dataset:
+def make_chopper(
+    frequency: sc.Variable,
+    position: sc.Variable,
+    phase: sc.Variable = None,
+    cutout_angles_center: sc.Variable = None,
+    cutout_angles_width: sc.Variable = None,
+    cutout_angles_begin: sc.Variable = None,
+    cutout_angles_end: sc.Variable = None,
+    kind: str = None,
+) -> sc.Dataset:
     """
     Create a Dataset that holds chopper parameters.
     This ensures the Dataset is compatible with the other functions in the choppers
@@ -47,8 +49,9 @@ def make_chopper(frequency: sc.Variable,
     chopper = sc.Dataset(data=data)
 
     # Sanitize input parameters
-    if (None not in [cutout_angles_begin, cutout_angles_end
-                     ]) or (None not in [cutout_angles_center, cutout_angles_width]):
+    if (None not in [cutout_angles_begin, cutout_angles_end]) or (
+        None not in [cutout_angles_center, cutout_angles_width]
+    ):
         widths = utils.cutout_angles_width(chopper)
         if (sc.min(widths) < sc.scalar(0.0, unit=widths.unit)).value:
             raise ValueError("Negative window width found in chopper cutout angles.")

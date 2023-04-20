@@ -11,14 +11,19 @@ from ess import nexus
 
 
 def create_event_data_ids_1234(group):
-    group.create_field('event_id',
-                       sc.array(dims=[''], unit=None, values=[1, 2, 4, 1, 2, 2]))
-    group.create_field('event_time_offset',
-                       sc.array(dims=[''], unit='s', values=[456, 7, 3, 345, 632, 23]))
-    group.create_field('event_time_zero',
-                       sc.array(dims=[''], unit='s', values=[1, 2, 3, 4]))
-    group.create_field('event_index',
-                       sc.array(dims=[''], unit='None', values=[0, 3, 3, 5]))
+    group.create_field(
+        'event_id', sc.array(dims=[''], unit=None, values=[1, 2, 4, 1, 2, 2])
+    )
+    group.create_field(
+        'event_time_offset',
+        sc.array(dims=[''], unit='s', values=[456, 7, 3, 345, 632, 23]),
+    )
+    group.create_field(
+        'event_time_zero', sc.array(dims=[''], unit='s', values=[1, 2, 3, 4])
+    )
+    group.create_field(
+        'event_index', sc.array(dims=[''], unit='None', values=[0, 3, 3, 5])
+    )
 
 
 @pytest.fixture()
@@ -36,9 +41,9 @@ def nxroot(request):
         sample['temperature'] = sc.scalar(1.2, unit='K')
         # Event mode monitor
         mon0 = entry.create_class('monitor0', snx.NXmonitor)
-        mon0['event_time_offset'] = sc.array(dims=[''],
-                                             unit='s',
-                                             values=[456, 7, 3, 345, 632, 23])
+        mon0['event_time_offset'] = sc.array(
+            dims=[''], unit='s', values=[456, 7, 3, 345, 632, 23]
+        )
         mon0['event_time_zero'] = sc.array(dims=[''], unit='s', values=[1, 2, 3, 4])
         mon0['event_index'] = sc.array(dims=[''], unit=None, values=[0, 3, 3, 5])
         mon1 = entry.create_class('monitor1', snx.NXmonitor)
@@ -80,8 +85,9 @@ def filter_and_load(group):
         return group[()]
 
 
-FilteredDetectors = nexus.make_section("FilteredDetectors", snx.NXdetector,
-                                       filter_and_load)
+FilteredDetectors = nexus.make_section(
+    "FilteredDetectors", snx.NXdetector, filter_and_load
+)
 
 
 def test_filter_via_load_function(nxroot):
@@ -110,8 +116,9 @@ def test_load_custom_entry(nxroot):
     assert not hasattr(data.instrument, 'detectors')
 
 
-DetectorByPulse = nexus.make_section("DetectorPyPulse", snx.NXdetector,
-                                     lambda group: group.events[()])
+DetectorByPulse = nexus.make_section(
+    "DetectorPyPulse", snx.NXdetector, lambda group: group.events[()]
+)
 
 
 @dataclass
@@ -133,8 +140,9 @@ def test_loaded_named_leaf(nxroot):
     assert sc.identical(data, nxroot.entry.instrument['det1'][()])
 
 
-DetectorsWithKwarg = nexus.make_section("DetectorsWithKwarg", snx.NXdetector,
-                                        lambda group, *, extra: extra)
+DetectorsWithKwarg = nexus.make_section(
+    "DetectorsWithKwarg", snx.NXdetector, lambda group, *, extra: extra
+)
 
 
 @dataclass

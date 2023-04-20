@@ -27,9 +27,12 @@ def variance_normalized_signal_over_monitor(numerator: T, denominator: T) -> flo
     denominator:
         Denominator of the ratio.
     """  # noqa: E501
-    alpha = sc.sum(sc.variances(denominator) * sc.values(numerator)**2).data / sc.sum(
-        sc.variances(numerator) * sc.values(denominator)**2).data
+    alpha = (
+        sc.sum(sc.variances(denominator) * sc.values(numerator) ** 2).data
+        / sc.sum(sc.variances(numerator) * sc.values(denominator) ** 2).data
+    )
     if alpha.unit != 'one':
         raise sc.UnitError(
-            'Cannot compare counts, the reference has a different unit from the data.')
+            'Cannot compare counts, the reference has a different unit from the data.'
+        )
     return float(alpha.value)

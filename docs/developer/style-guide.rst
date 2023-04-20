@@ -73,7 +73,7 @@ Formatting
 
 Your Python code will be checked for errors and formatting when opening a PR.
 We use the `flake8 <https://flake8.pycqa.org/en/latest/>`_ linter to check code quality,
-and `yapf <https://github.com/google/yapf>`_ to enforce code formatting.
+and `black <https://github.com/psf/black>`_ to enforce code formatting.
 Make sure that running your code though these tools does not generate any output before
 you push your changes.
 
@@ -82,7 +82,7 @@ From the top level directory, you can use
 .. code-block:: sh
 
    >$ flake8 .
-   >$ yapf --diff --recursive .
+   >$ black .
 
 Jupyter notebooks style
 -----------------------

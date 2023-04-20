@@ -31,8 +31,10 @@ def _tof_correction(data: sc.DataArray, dim: str = 'tof') -> sc.DataArray:
     """
     if 'orso' in data.attrs:
         data.attrs['orso'].value.reduction.corrections += ['chopper ToF correction']
-    tau = sc.to_unit(1 / (2 * data.coords['source_chopper_2'].value['frequency'].data),
-                     data.coords[dim].unit)
+    tau = sc.to_unit(
+        1 / (2 * data.coords['source_chopper_2'].value['frequency'].data),
+        data.coords[dim].unit,
+    )
     chopper_phase = data.coords['source_chopper_2'].value['phase'].data
     tof_offset = tau * chopper_phase / (180.0 * sc.units.deg)
     # Make 2 bins, one for each pulse
@@ -43,13 +45,15 @@ def _tof_correction(data: sc.DataArray, dim: str = 'tof') -> sc.DataArray:
     # Apply the offset on both bins
     data.bins.coords[dim] += offset
     # Rebin to exclude second (empty) pulse range
-    return data.bin({dim: sc.concat([0. * sc.units.us, tau], dim)})
+    return data.bin({dim: sc.concat([0.0 * sc.units.us, tau], dim)})
 
 
-def load(filename,
-         orso: Optional[Any] = None,
-         beamline: Optional[dict] = None,
-         disable_warnings: Optional[bool] = True) -> sc.DataArray:
+def load(
+    filename,
+    orso: Optional[Any] = None,
+    beamline: Optional[dict] = None,
+    disable_warnings: Optional[bool] = True,
+) -> sc.DataArray:
     """
     Loader for a single Amor data file.
 
@@ -71,7 +75,8 @@ def load(filename,
     """
     get_logger('amor').info(
         "Loading '%s' as an Amor NeXus file",
-        filename.filename if hasattr(filename, 'filename') else filename)
+        filename.filename if hasattr(filename, 'filename') else filename,
+    )
     if disable_warnings:
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
@@ -83,7 +88,8 @@ def load(filename,
     # we add them here if they are missing.
     if data.bins.constituents['data'].data.variances is None:
         data.bins.constituents['data'].data.variances = data.bins.constituents[
-            'data'].data.values
+            'data'
+        ].data.values
 
     # Convert tof nanoseconds to microseconds for convenience
     # TODO: is it safe to assume that the dtype of the binned wrapper coordinate is
@@ -124,5 +130,6 @@ def populate_orso(orso: Any, data: sc.DataArray, filename: str) -> Any:
     orso.data_source.experiment.instrument = data.attrs['instrument_name'].value
     orso.data_source.experiment.start_date = datetime.strftime(
         datetime.strptime(data.attrs['start_time'].value[:-3], '%Y-%m-%dT%H:%M:%S.%f'),
-        '%Y-%m-%d')
+        '%Y-%m-%d',
+    )
     orso.data_source.measurement.data_files = [filename]

@@ -22,17 +22,15 @@ def _ensure_no_variances(var: sc.Variable) -> sc.Variable:
             '\n--------------------------------------------------\n'
             'If you know a good solution for handling uncertainties in such a case, '
             'please contact the scipp developers! (e.g. via https://github.com/scipp)'
-            '\n--------------------------------------------------\n')
+            '\n--------------------------------------------------\n'
+        )
         return sc.values(var)
     return var
 
 
-def lowpass(da: sc.DataArray,
-            *,
-            dim: str,
-            N: int,
-            Wn: sc.Variable,
-            coord: Optional[str] = None) -> sc.DataArray:
+def lowpass(
+    da: sc.DataArray, *, dim: str, N: int, Wn: sc.Variable, coord: Optional[str] = None
+) -> sc.DataArray:
     """
     Smooth data using a lowpass frequency filter.
 

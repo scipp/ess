@@ -28,8 +28,9 @@ class InstrumentMixin:
     """
 
     @classmethod
-    def from_nexus(cls: Type[InstrumentMixinT], group: snx.NXobject, /,
-                   **kwargs: Any) -> InstrumentMixinT:
+    def from_nexus(
+        cls: Type[InstrumentMixinT], group: snx.NXobject, /, **kwargs: Any
+    ) -> InstrumentMixinT:
         """Load data from the NXinstrument group."""
         return _load_dataclass(group.instrument, cls, kwargs)
 
@@ -43,8 +44,9 @@ class EntryMixin:
     """
 
     @classmethod
-    def from_nexus(cls: Type[EntryMixinT], group: Union[snx.NXobject, PathLike], /,
-                   **kwargs: Any) -> EntryMixinT:
+    def from_nexus(
+        cls: Type[EntryMixinT], group: Union[snx.NXobject, PathLike], /, **kwargs: Any
+    ) -> EntryMixinT:
         """Load data from the NXentry group."""
         if isinstance(group, snx.NXentry):
             return _load_dataclass(group, cls, kwargs)
@@ -54,9 +56,9 @@ class EntryMixin:
             return cls.from_nexus(f, **kwargs)
 
 
-def _load_single(group,
-                 index=(),
-                 skip_errors=False) -> Optional[Union[sc.DataArray, dict]]:
+def _load_single(
+    group, index=(), skip_errors=False
+) -> Optional[Union[sc.DataArray, dict]]:
     # The list of caugth exceptions is copied from scippneutron.load_nexus. We will
     # likely wanto to add better customization options.
     try:
@@ -66,11 +68,13 @@ def _load_single(group,
             raise
 
 
-def _load_multi(load: Callable, items: Dict[str, snx.NXobject], /,
-                **kwargs) -> Dict[str, sc.DataArray]:
+def _load_multi(
+    load: Callable, items: Dict[str, snx.NXobject], /, **kwargs
+) -> Dict[str, sc.DataArray]:
     return {
         key: loaded
-        for key in items if (loaded := load(items[key], **kwargs)) is not None
+        for key in items
+        if (loaded := load(items[key], **kwargs)) is not None
     }
 
 
@@ -79,9 +83,9 @@ def _select_events_and_load(detector, pulse_min=None, pulse_max=None, **kwargs):
     return _load_single(detector, **kwargs)
 
 
-def make_section(name: str,
-                 key: Union[type, List[type]],
-                 load: Callable = _load_single) -> type:
+def make_section(
+    name: str, key: Union[type, List[type]], load: Callable = _load_single
+) -> type:
     """
     Make a loader component for a dict-like section containing all children with
     NX_class matching the given key.
@@ -100,7 +104,7 @@ def make_section(name: str,
     def from_nexus(cls, group: snx.NXobject, **kwargs):
         return cls(_load_multi(load, group[key], **kwargs))
 
-    return type(name, (dict, ), dict(from_nexus=classmethod(from_nexus)))
+    return type(name, (dict,), dict(from_nexus=classmethod(from_nexus)))
 
 
 def make_leaf(name: str, key: Union[str, type], load: Callable = _load_single) -> type:
@@ -121,7 +125,7 @@ def make_leaf(name: str, key: Union[str, type], load: Callable = _load_single) -
         data = load(c, **kwargs)
         return cls(data) if isinstance(data, dict) else data
 
-    return type(name, (dict, ), dict(from_nexus=classmethod(from_nexus)))
+    return type(name, (dict,), dict(from_nexus=classmethod(from_nexus)))
 
 
 Fields = make_section("Fields", [snx.Field, snx.NXlog])
@@ -141,6 +145,7 @@ class BasicInstrument(InstrumentMixin):
     (including NXlog). Subclass this in a new dataclass to add sections for more NeXus
     classes.
     """
+
     fields: Fields
     detectors: Detectors
 
@@ -154,6 +159,7 @@ class BasicEntry(EntryMixin):
     children as well as fields (including NXlog). Subclass this in a new dataclass to
     add sections for more NeXus classes.
     """
+
     fields: Fields
     instrument: BasicInstrument
     monitors: Monitors

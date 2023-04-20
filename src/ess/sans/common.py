@@ -17,9 +17,9 @@ def gravity_vector() -> sc.Variable:
     return sc.vector(value=[0, -1, 0]) * g
 
 
-def mask_range(da: sc.DataArray,
-               mask: sc.DataArray,
-               name: Optional[str] = None) -> sc.DataArray:
+def mask_range(
+    da: sc.DataArray, mask: sc.DataArray, name: Optional[str] = None
+) -> sc.DataArray:
     """
     Mask a range on a data array.
     The provided edges are used to define the ranges to be masked.
@@ -45,23 +45,28 @@ def mask_range(da: sc.DataArray,
         name = uuid.uuid4().hex
     if name in da.masks:
         raise ValueError(
-            f'Mask {name} already exists in data array and would be overwritten.')
+            f'Mask {name} already exists in data array and would be overwritten.'
+        )
     dim = mask.dim
     edges = mask.coords[dim]
     if not mask.coords.is_edges(dim):
         raise sc.DimensionError(
-            f'Coordinate {dim} must be bin-edges to mask a range, found midpoints.')
+            f'Coordinate {dim} must be bin-edges to mask a range, found midpoints.'
+        )
     if (dim in da.coords) and (da.coords[dim].ndim > 1):
         raise sc.DimensionError(
             'Cannot mask range on data with multi-dimensional coordinate. '
-            f'Found dimensions {da.coords[dim].dims} for coordinate {dim}.')
+            f'Found dimensions {da.coords[dim].dims} for coordinate {dim}.'
+        )
 
     lu = sc.DataArray(data=mask.data, coords={dim: edges})
     if da.bins is not None:
         if dim in da.coords:
-            new_bins = sc.array(dims=[dim],
-                                values=np.union1d(edges.values, da.coords[dim].values),
-                                unit=edges.unit)
+            new_bins = sc.array(
+                dims=[dim],
+                values=np.union1d(edges.values, da.coords[dim].values),
+                unit=edges.unit,
+            )
             out = da.bin({dim: new_bins})
             out.masks[name] = sc.lookup(lu, dim)[sc.midpoints(new_bins, dim=dim)]
         else:

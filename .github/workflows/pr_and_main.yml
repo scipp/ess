@@ -65,6 +65,8 @@ jobs:
     uses: ./.github/workflows/docs.yml
     with:
       publish: false
+      version: ${{ github.ref_name }}
+      branch: ${{ github.head_ref == '' && github.ref_name || github.head_ref }}
       platform: ${{ matrix.os }}
     strategy:
       fail-fast: false
