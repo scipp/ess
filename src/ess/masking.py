@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 from pathlib import Path
-from typing import Union, Mapping, Optional
+from typing import Mapping, Optional, Union
+
 import h5py
 import scipp as sc
 
