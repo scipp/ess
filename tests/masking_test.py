@@ -1,8 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
-import pytest
 import tempfile
+
+import pytest
 import scipp as sc
 import scippnexus.v2 as snx
 from scipp.testing import assert_identical
