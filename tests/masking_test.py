@@ -11,10 +11,10 @@ from scipp.testing import assert_identical
 from ess.masking import save_detector_masks
 
 
-def roundtrip(obj):
+def roundtrip(obj, **kwargs):
     with tempfile.TemporaryDirectory() as path:
         name = f'{path}/test.hdf5'
-        save_detector_masks(name, obj)
+        save_detector_masks(name, obj, **kwargs)
         with snx.File(name) as f:
             return f[()]
 
@@ -35,6 +35,23 @@ def test_save_detector_masks_rountrip():
     )
     dg['det3'] = sc.DataArray(data=sc.ones(dims=['x', 'y'], shape=[2, 2]))
     result = roundtrip(dg)
+    for name in dg:
+        assert_identical(
+            result['entry']['instrument'][name], sc.DataGroup(dg[name].masks)
+        )
+
+
+def test_save_detector_masks_metadata_roundtrip():
+    dg = sc.DataGroup()
+    dg['det'] = sc.DataArray(
+        data=sc.ones(dims=['x', 'y'], shape=[2, 2]),
+        masks={'x': sc.array(dims=['x'], values=[True, False])},
+    )
+    result = roundtrip(
+        dg, entry_metadata={'experiment_identifier': 12345, 'mycomment': 'abc'}
+    )
+    assert result['entry']['experiment_identifier'] == 12345
+    assert result['entry']['mycomment'] == 'abc'  # Not NeXus, but we are not strict
     for name in dg:
         assert_identical(
             result['entry']['instrument'][name], sc.DataGroup(dg[name].masks)

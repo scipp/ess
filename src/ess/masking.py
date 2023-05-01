@@ -1,14 +1,16 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 from pathlib import Path
-from typing import Mapping, Union
-
+from typing import Union, Mapping, Optional
 import h5py
 import scipp as sc
 
 
 def save_detector_masks(
-    filename: Union[str, Path], detectors: Mapping[str, sc.DataArray]
+    filename: Union[str, Path],
+    detectors: Mapping[str, sc.DataArray],
+    *,
+    entry_metadata: Optional[Mapping[str, Union[str, int]]] = None,
 ) -> None:
     """
     Save detector masks to an HDF5/NeXus file.
@@ -22,10 +24,16 @@ def save_detector_masks(
         Name of the file to save to.
     detectors:
         Dictionary of data arrays whose masks should be saved.
+    entry_metadata:
+        Optional dictionary of metadata to save in the NXentry group. Typically this
+        should contain 'experiment_identifier', 'start_time', and 'end_time'.
     """
     with h5py.File(filename, "w-") as f:
         entry = f.require_group("entry")
         entry.attrs["NX_class"] = "NXentry"
+        if entry_metadata:
+            for key, value in entry_metadata.items():
+                entry[key] = value
         instrument = entry.require_group("instrument")
         instrument.attrs["NX_class"] = "NXinstrument"
         for name, det in detectors.items():
