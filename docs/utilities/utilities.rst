@@ -9,5 +9,6 @@ Modules
    :recursive:
 
    logging
+   masking
    nexus
    uncertainty
