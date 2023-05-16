@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, Optional, Union
 
 import scipp as sc
-import scippnexus as snx
+import scippnexus.v2 as snx
 
 from ..logging import get_logger
 from .beamline import make_beamline
