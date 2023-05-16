@@ -28,6 +28,37 @@ def save_detector_masks(
     entry_metadata:
         Optional dictionary of metadata to save in the NXentry group. Typically this
         should contain 'experiment_identifier', 'start_time', and 'end_time'.
+
+    Examples
+    --------
+
+    Consider a data group with two detectors, one with a mask and one without, as well
+    as some metadata:
+
+      >>> import scipp as sc
+      >>>
+      >>> dg = sc.DataGroup()
+      >>> dg['mantle_detector'] = sc.DataArray(
+      ...     data=sc.ones(dims=['tube', 'pixel'], shape=[3, 100]),
+      ...     masks={'bad_tube': sc.array(dims=['tube'], values=[False, True, False])},
+      ... )
+      >>> dg['endcap_detector'] = sc.DataArray(
+      ...     data=sc.ones(dims=['x', 'y'], shape=[2, 2]), masks={}
+      ... )
+      >>> metadata = {'experiment_identifier': 12345}
+
+    Save the masks to a file:
+
+      >>> from ess.masking import save_detector_masks
+      >>>
+      >>> save_detector_masks('masks.h5', dg, entry_metadata=metadata)
+
+    Use ScippNexus to load the resulting file:
+
+      >>> import scippnexus.v2 as snx
+      >>>
+      >>> with snx.File('masks.h5') as f:
+      >>>     masks = f['entry'][()]
     """
     with h5py.File(filename, "w-") as f:
         entry = f.require_group("entry")
