@@ -75,7 +75,6 @@ def load(
     filename: Union[str, Path],
     orso: Optional[Any] = None,
     beamline: Optional[dict] = None,
-    disable_warnings: Optional[bool] = True,  # TODO
 ) -> sc.DataArray:
     """
     Loader for a single Amor data file.
