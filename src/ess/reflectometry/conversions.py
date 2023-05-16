@@ -97,13 +97,10 @@ def specular_reflection() -> dict:
     """
     graph = {
         **beamline.beamline(scatter=True),
-        **tof.elastic("tof"),
+        **tof.elastic_wavelength("tof"),
         "theta": theta,
         "Q": reflectometry_q,
     }
-    del graph['two_theta']
-    del graph['dspacing']
-    del graph['energy']
     return graph
 
 
