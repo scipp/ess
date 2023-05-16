@@ -250,5 +250,5 @@ def sum_bins(data_array: sc.DataArray):
     if 'angular_resolution' in data_array.bins.coords:
         data_array_summed.coords['angular_resolution'] = data_array.bins.coords[
             'angular_resolution'
-        ].max('detector_id')
+        ].max('detector_number')
     return data_array_summed
