@@ -50,6 +50,18 @@ def _tof_correction(data: sc.DataArray, dim: str = 'tof') -> sc.DataArray:
 
 
 def _assemble_event_data(dg: sc.DataGroup) -> sc.DataArray:
+    """Extract the events as a data array with all required coords.
+
+    Parameters
+    ----------
+    dg:
+        A data group with the structure of an Amor NeXus file.
+
+    Returns
+    -------
+    :
+        A data array with the events extracted from ``dg``.
+    """
     events = dg['instrument']['multiblade_detector']
     events.bins.coords['tof'] = events.bins.coords.pop('event_time_offset')
     del events.bins.coords['event_time_zero']
@@ -63,6 +75,7 @@ def _assemble_event_data(dg: sc.DataGroup) -> sc.DataArray:
 
 
 def _load_nexus_entry(filename: Union[str, Path]) -> sc.DataGroup:
+    """Load the single entry of a nexus file."""
     with snx.File(filename, 'r') as f:
         if len(f.keys()) != 1:
             raise snx.NexusStructureError(
@@ -76,8 +89,7 @@ def load(
     orso: Optional[Any] = None,
     beamline: Optional[dict] = None,
 ) -> sc.DataArray:
-    """
-    Loader for a single Amor data file.
+    """Load a single Amor data file.
 
     Parameters
     ----------
@@ -87,8 +99,6 @@ def load(
         The orso object to be populated by additional information from the loaded file.
     beamline:
         A dict defining the beamline parameters.
-    disable_warnings:
-        Do not show warnings from file loading if `True`. Default is `True`.
 
     Returns
     -------
