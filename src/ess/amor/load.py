@@ -31,7 +31,7 @@ def _tof_correction(data: sc.DataArray, dim: str = 'tof') -> sc.DataArray:
     """
     if 'orso' in data.attrs:
         data.attrs['orso'].value.reduction.corrections += ['chopper ToF correction']
-    tof_unit = data.bins.constituents['data'].coords[dim].unit
+    tof_unit = data.bins.coords[dim].bins.unit
     tau = sc.to_unit(
         1 / (2 * data.coords['source_chopper_2'].value['frequency'].data),
         tof_unit,
