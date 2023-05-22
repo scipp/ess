@@ -17,6 +17,7 @@ requirements:
     - matplotlib
     - pooch
     - scippneutron>=22.12.4
+    - scippnexus>=23.04.1
 
 test:
   imports:

@@ -97,13 +97,10 @@ def specular_reflection() -> dict:
     """
     graph = {
         **beamline.beamline(scatter=True),
-        **tof.elastic("tof"),
+        **tof.elastic_wavelength("tof"),
         "theta": theta,
         "Q": reflectometry_q,
     }
-    del graph['two_theta']
-    del graph['dspacing']
-    del graph['energy']
     return graph
 
 
@@ -250,5 +247,5 @@ def sum_bins(data_array: sc.DataArray):
     if 'angular_resolution' in data_array.bins.coords:
         data_array_summed.coords['angular_resolution'] = data_array.bins.coords[
             'angular_resolution'
-        ].max('detector_id')
+        ].max('detector_number')
     return data_array_summed

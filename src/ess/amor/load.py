@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-import warnings
 from datetime import datetime
-from typing import Any, Optional
+from pathlib import Path
+from typing import Any, Optional, Union
 
 import scipp as sc
-import scippneutron as scn
+import scippnexus.v2 as snx
 
 from ..logging import get_logger
 from .beamline import make_beamline
@@ -31,15 +31,16 @@ def _tof_correction(data: sc.DataArray, dim: str = 'tof') -> sc.DataArray:
     """
     if 'orso' in data.attrs:
         data.attrs['orso'].value.reduction.corrections += ['chopper ToF correction']
+    tof_unit = data.bins.coords[dim].bins.unit
     tau = sc.to_unit(
         1 / (2 * data.coords['source_chopper_2'].value['frequency'].data),
-        data.coords[dim].unit,
+        tof_unit,
     )
     chopper_phase = data.coords['source_chopper_2'].value['phase'].data
     tof_offset = tau * chopper_phase / (180.0 * sc.units.deg)
     # Make 2 bins, one for each pulse
     edges = sc.concat([-tof_offset, tau - tof_offset, 2 * tau - tof_offset], dim)
-    data = data.bin({dim: sc.to_unit(edges, data.coords[dim].unit)})
+    data = data.bin({dim: sc.to_unit(edges, tof_unit)})
     # Make one offset for each bin
     offset = sc.concat([tof_offset, tof_offset - tau], dim)
     # Apply the offset on both bins
@@ -48,14 +49,46 @@ def _tof_correction(data: sc.DataArray, dim: str = 'tof') -> sc.DataArray:
     return data.bin({dim: sc.concat([0.0 * sc.units.us, tau], dim)})
 
 
+def _assemble_event_data(dg: sc.DataGroup) -> sc.DataArray:
+    """Extract the events as a data array with all required coords.
+
+    Parameters
+    ----------
+    dg:
+        A data group with the structure of an Amor NeXus file.
+
+    Returns
+    -------
+    :
+        A data array with the events extracted from ``dg``.
+    """
+    events = dg['instrument']['multiblade_detector']
+    events.bins.coords['tof'] = events.bins.coords.pop('event_time_offset')
+    events.coords['position'] = sc.spatial.as_vectors(
+        events.coords.pop('x_pixel_offset'),
+        events.coords.pop('y_pixel_offset'),
+        events.coords.pop('z_pixel_offset'),
+    )
+    events.coords['sample_position'] = sc.vector([0, 0, 0], unit='m')
+    return events
+
+
+def _load_nexus_entry(filename: Union[str, Path]) -> sc.DataGroup:
+    """Load the single entry of a nexus file."""
+    with snx.File(filename, 'r') as f:
+        if len(f.keys()) != 1:
+            raise snx.NexusStructureError(
+                f"Expected a single entry in file {filename}, got {len(f.keys())}"
+            )
+        return f['entry'][()]
+
+
 def load(
-    filename,
+    filename: Union[str, Path],
     orso: Optional[Any] = None,
     beamline: Optional[dict] = None,
-    disable_warnings: Optional[bool] = True,
 ) -> sc.DataArray:
-    """
-    Loader for a single Amor data file.
+    """Load a single Amor data file.
 
     Parameters
     ----------
@@ -65,8 +98,6 @@ def load(
         The orso object to be populated by additional information from the loaded file.
     beamline:
         A dict defining the beamline parameters.
-    disable_warnings:
-        Do not show warnings from file loading if `True`. Default is `True`.
 
     Returns
     -------
@@ -77,12 +108,8 @@ def load(
         "Loading '%s' as an Amor NeXus file",
         filename.filename if hasattr(filename, 'filename') else filename,
     )
-    if disable_warnings:
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=UserWarning)
-            data = scn.load_nexus(filename)
-    else:
-        data = scn.load_nexus(filename)
+    full_data = _load_nexus_entry(filename)
+    data = _assemble_event_data(full_data)
 
     # Recent versions of scippnexus no longer add variances for events by default, so
     # we add them here if they are missing.
@@ -92,12 +119,9 @@ def load(
         ].data.values
 
     # Convert tof nanoseconds to microseconds for convenience
-    # TODO: is it safe to assume that the dtype of the binned wrapper coordinate is
-    # the same as the dtype of the underlying event coordinate?
-    data.bins.coords['tof'] = data.bins.coords['tof'].astype('float64', copy=False)
-    data.coords['tof'] = data.coords['tof'].astype('float64', copy=False)
-    data.bins.coords['tof'] = sc.to_unit(data.bins.coords['tof'], 'us', copy=False)
-    data.coords['tof'] = sc.to_unit(data.coords['tof'], 'us', copy=False)
+    data.bins.coords['tof'] = data.bins.coords['tof'].to(
+        unit='us', dtype='float64', copy=False
+    )
 
     # Add beamline parameters
     beamline = make_beamline() if beamline is None else beamline
@@ -105,14 +129,14 @@ def load(
         data.coords[key] = value
 
     if orso is not None:
-        populate_orso(orso=orso, data=data, filename=filename)
+        populate_orso(orso=orso, data=full_data, filename=filename)
         data.attrs['orso'] = sc.scalar(orso)
 
     # Perform tof correction and fold two pulses
     return _tof_correction(data)
 
 
-def populate_orso(orso: Any, data: sc.DataArray, filename: str) -> Any:
+def populate_orso(orso: Any, data: sc.DataGroup, filename: str) -> Any:
     """
     Populate the Orso object, by calling the :code:`base_orso` and adding data from the
     file.
@@ -122,14 +146,15 @@ def populate_orso(orso: Any, data: sc.DataArray, filename: str) -> Any:
     orso:
         The orso object to be populated by additional information from the loaded file.
     data:
-        Data array to source information from.
+        Data group to source information from.
+        Should mimic the structure of the NeXus file.
     filename:
         Path of the file to load.
     """
-    orso.data_source.experiment.title = data.attrs['experiment_title'].value
-    orso.data_source.experiment.instrument = data.attrs['instrument_name'].value
+    orso.data_source.experiment.title = data['title']
+    orso.data_source.experiment.instrument = data['name']
     orso.data_source.experiment.start_date = datetime.strftime(
-        datetime.strptime(data.attrs['start_time'].value[:-3], '%Y-%m-%dT%H:%M:%S.%f'),
+        datetime.strptime(data['start_time'][:-3], '%Y-%m-%dT%H:%M:%S.%f'),
         '%Y-%m-%d',
     )
     orso.data_source.measurement.data_files = [filename]

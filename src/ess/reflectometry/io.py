@@ -19,7 +19,7 @@ def save_ort(data_array: sc.DataArray, filename: str, dimension: str = None):
         String for dimension to perform mean over, defaults to 'detector_id'.
     """
     if dimension is None:
-        dimension = 'detector_id'
+        dimension = 'detector_number'
     from orsopy import fileio
 
     if filename[:-4] == '.ort':

@@ -132,4 +132,4 @@ def sigma_Q(
         angular_resolution**2
         + wavelength_resolution**2
         + sample_size_resolution**2
-    ).max('detector_id') * sc.midpoints(q_bins)
+    ).max('detector_number') * sc.midpoints(q_bins)
