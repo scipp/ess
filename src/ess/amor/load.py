@@ -64,7 +64,6 @@ def _assemble_event_data(dg: sc.DataGroup) -> sc.DataArray:
     """
     events = dg['instrument']['multiblade_detector']
     events.bins.coords['tof'] = events.bins.coords.pop('event_time_offset')
-    del events.bins.coords['event_time_zero']
     events.coords['position'] = sc.spatial.as_vectors(
         events.coords.pop('x_pixel_offset'),
         events.coords.pop('y_pixel_offset'),
