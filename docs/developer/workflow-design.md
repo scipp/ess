@@ -1,6 +1,8 @@
 # Workflow Design
 
-## Traditional data-reduction workflows
+## Introduction
+
+### Traditional data-reduction workflows
 
 Traditionally, users are supplied with a toolbox of algorithms and optionally a reduction script or notebooks that uses those algorithms.
 Conceptually this looks similar to the following:
@@ -59,10 +61,12 @@ However, with dynamic workflows, i.e., users modifying workflows in a Jupyter no
 Aside from this, such an approach would still not help with the several of other issues listed above.
 
 
-## High-level summary of proposed approach
+### High-level summary of proposed approach
 
-We propose to use dependency injection to build a declarative workflow.
-In the manner of a domain-driven design, we define components that correspond to concepts that are meaningful to the (instrument) scientist.
+We propose an architecture combining *domain-driven design* with *dependency injection*.
+Dependency injection aids in building a declarative workflow.
+We define domain-specific concepts that are meaningful to the (instrument) scientist.
+Simple functions provide workflow components that define relations between these domain concepts.
 
 Specifically, we propose to define specific domain types, such as `IncidentMonitor`, `TransmissionMonitor`, and `TransmissionFraction` in the example above.
 However, instead of the user having to pass these to functions, we use dependency injection to provide them to the functions.
@@ -76,25 +80,109 @@ From the [Guice documentation](https://github.com/google/guice/wiki/MentalModel#
 > (emphasis added)
 
 
-## Domain-Driven Design
+### Domain-driven design
 
 Domain-Driven Design (DDD) is an approach to software development that aims to make software more closely match the domain it is used in.
 The obvious benefit of this is that it makes it easier for domain experts to understand and modify the software.
 
 How should we define the domain for the purpose of data reduction?
-Looking at, e.g., Mantid, we see that the domain is defined as data reduction for any typ of neutron scattering.
+Looking at, e.g., Mantid, we see that the domain is defined as data reduction for any type of neutron scattering.
 This has led to more than 1000 algorithms, making it hard for users to know how to use them.
 Furthermore, while algorithms provide some sort of domain-specific language, the data types are generic and do not.
 
-What we propose here is to define the domain more narrowly, specific to a technique or even specific to an instrument.
+What we propose here is to define the domain more narrowly, highly specific to a technique or even specific to an instrument.
 This will reduce the scope to cover in the domain-specific language.
 
 
-## Dependency Injection
+### Dependency injection
 
 Dependency injection is a common technique for implementing the [inversion of control](https://en.wikipedia.org/wiki/Inversion_of_control) principle.
 It makes components of a system more loosely coupled, and makes it easier to replace components, including for testing purposes.
 Dependency injection can be performed manually, but there are also frameworks that can help with this.
+
+## Architecture
+
+### Key requirements
+
+1. Configuration of and access to data and metdata sources such as SciCat and Scitacean.
+2. Configuration of data-reduction parameters.
+3. Computation of final results as well as a configurable subset of intermediate results.
+4. Ability to run reduction on a single run or on a set of runs.
+5. Ability to run reduction on a single node or on a cluster.
+6. Ability to run reduction in a Jupyter notebook or in a script.
+7. Logging of all steps of the reduction.
+8. Ability to swap out steps in the reduction, or to add new steps.
+9. Visualization of the reduction workflow, i.e., a (high-level) task graph.
+
+### Model workflow
+
+We define a model workflow, which we will use to illustrate the architecture.
+
+```mermaid
+%%{init: {"flowchart": {"defaultRenderer": "elk"}} }%%
+graph TD
+    ExperimentId-->DirectBeam
+    ExperimentId-->PixelMask
+    subgraph "sample reduction"
+    RawSample([RawSample])
+    MaskedSample([MaskedSample])
+    Sample([Sample])
+    SampleIofQ([SampleIofQ])
+    SampleIncidentMonitor
+    SampleTransmissionMonitor
+    SampleTransmissionFraction
+    SampleSolidAngle
+    end
+    subgraph "background reduction"
+    RawBackground([RawBackground])
+    MaskedBackground([MaskedBackground])
+    Background([Background])
+    BackgroundIofQ([BackgroundIofQ])
+    BackgroundIncidentMonitor
+    BackgroundTransmissionMonitor
+    BackgroundTransmissionFraction
+    BackgroundSolidAngle
+    end
+    SampleRunId-->RawSample
+    DirectRunId-->RawDirect
+    BackgroundRunId-->RawBackground
+    RawSample-->SampleIncidentMonitor
+    RawSample-->SampleTransmissionMonitor
+    RawDirect-->DirectIncidentMonitor
+    RawDirect-->DirectTransmissionMonitor
+    RawBackground-->BackgroundIncidentMonitor
+    RawBackground-->BackgroundTransmissionMonitor
+    SampleIncidentMonitor-->SampleTransmissionFraction
+    SampleTransmissionMonitor-->SampleTransmissionFraction
+    BackgroundIncidentMonitor-->BackgroundTransmissionFraction
+    BackgroundTransmissionMonitor-->BackgroundTransmissionFraction
+    DirectIncidentMonitor-->SampleTransmissionFraction
+    DirectTransmissionMonitor-->SampleTransmissionFraction
+    DirectIncidentMonitor-->BackgroundTransmissionFraction
+    DirectTransmissionMonitor-->BackgroundTransmissionFraction
+    RawSample==>MaskedSample==>Sample==>SampleIofQ
+    RawBackground==>MaskedBackground==>Background==>BackgroundIofQ
+    PixelMask-->MaskedSample
+    PixelMask-->MaskedBackground
+    BeamCenter-->Sample
+    BeamCenter-->Background
+    Sample-->SampleSolidAngle
+    Background-->BackgroundSolidAngle
+    QBinning-->SampleIofQ
+    QBinning-->BackgroundIofQ
+    SampleSolidAngle-->SampleIofQ
+    BackgroundSolidAngle-->BackgroundIofQ
+    SampleTransmissionFraction-->SampleIofQ
+    BackgroundTransmissionFraction-->BackgroundIofQ
+    DirectBeam-->SampleIofQ
+    DirectBeam-->BackgroundIofQ
+    SampleIofQ==>IofQ([IofQ])
+    BackgroundIofQ==>IofQ
+```
+
+Note that the subgraphs for sample and background reduction are identical.
+A number of details have been omitted for clarity.
+For example, there are typically more parameters provided by the user.
 
 ```mermaid
 graph TD
@@ -146,7 +234,6 @@ graph TD
     SolidAngle-->NormalizedIofQ
 ```
 
-
 ### Examples
 
 1. Swap provider of `TransmissionFraction` for provider that handles wide-angle-correction
@@ -160,6 +247,29 @@ We can use this to build a dask graph.
 This will allow for computing intermediate results without recomputing everything for every subresult.
 
 ## Multiple injectors
+
+- Top level "experiment injector".
+  Provdes everything that is experiment-specific.
+- Sub-injectors for sample and background reduction.
+  They may pull things from the experiment injector, but otherwise provide an independent scope.
+- More advanced example/problem: We may want to compute an experiment-level `BeamCenter`, based on a sample run, but it has to be made available to other sub-injectors.
+
+```python
+iofq = reduction.get(IfofQ)
+iofq.compute()  # maybe
+
+# Better
+def save(iofq: IofQ, meta: ReductionMetadata):
+    pass
+
+# `call` would call dask.compute on the injected parameters
+# or the task made from the function.
+reduction.call(save)
+```
+
+We can also use injection for dataclasses to request multiple outputs.
+It is not clear how to handle sub-injectors in the syntax.
+
 
 ## Meta data handling
 
@@ -184,3 +294,7 @@ def process_results(sample_iofq: IofQ, iofq: BackgroundSubtractedIofQ):
 
 injector.call_with_injection(process_results)
 ```
+
+## TODO
+
+- Validators, and validation ahead of computation?
