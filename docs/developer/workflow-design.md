@@ -281,6 +281,17 @@ reduction.call(save)
 We can also use injection for dataclasses to request multiple outputs.
 It is not clear how to handle sub-injectors in the syntax.
 
+Top-level container:
+
+- scicat
+- exp config
+- reduction module
+- global params
+
+Two child containers, sample and background, each adding run config as well as run-specific user params, inheriting others from containing scope.
+How would a user refer to those on the top level?
+Is it allowed to access nested containers?
+
 ## Parameter handling
 
 Generally, the user must provide configuration parameters to a workflow.
@@ -305,6 +316,13 @@ For nested workflows, we can use a child injector, which provides a scope for pa
 Parent-scopes can be searched for parameters that are not found in the child-scope, providing a mechanism for "global" parameters.
 
 ## Meta data handling
+
+There have been a number of dicussions about how to handle meta data.
+For example, the support (or non-support) of an arbitrary `attrs` dict as part of `scipp.Variable` and `scipp.DataArray`.
+Furthermore, we may have meta-data that is part of the data-catalog, which may partially overlap with the meta-data that is part of the data itself.
+The current conclusion is that any attempt to handle meta-data in a generic and automatic way will not work.
+Therefore, if a user needs to provide meta-data for a workflow result, they must do so explicitly by specifying functions that can assemble that meta-data.
+As with regular results, this can be done by injecting the input meta-data into the function that computes the result's meta-data.
 
 ## Reducing multiple runs
 
@@ -331,3 +349,5 @@ injector.call_with_injection(process_results)
 ## TODO
 
 - Validators, and validation ahead of computation?
+- Can we inject the "runner" into the workflow?
+  This could be dask (to build a task graph), or a tracer object, to build a tree for display in documentation.
