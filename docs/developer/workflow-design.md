@@ -4,7 +4,7 @@
 
 ### Traditional data-reduction workflows
 
-Traditionally, users are supplied with a toolbox of algorithms and optionally a reduction script or notebooks that uses those algorithms.
+Traditionally, users are supplied with a toolbox of algorithms and optionally a reduction script or a notebook that uses those algorithms.
 Conceptually this looks similar to the following:
 
 ```python
@@ -39,6 +39,16 @@ For example we typically write components of reduction workflows as functions of
 def transmission_fraction(
     incident_monitor: sc.DataArray,
     transmission_monitor: sc.DataArray,
+"""
+Compute transmission fraction from incident and transmission monitors.
+
+Parameters
+----------
+incident_monitor:
+    Incident monitor.
+transmission_monitor:
+    Transmission monitor.
+"""
 ) -> sc.DataArray:
     return transmission_monitor / incident_monitor
 ```
@@ -56,9 +66,9 @@ def transmission_fraction(
     return transmission_monitor / incident_monitor
 ```
 
-We could now run [mypy](https://mypy-lang.org/) on reduction scipts, to ensure that the correct types are passed to each function.
-However, with dynamic workflows, i.e., users modifying workflows in a Jupyter notebooks on the fly, this is not practical.
-Aside from this, such an approach would still not help with the several of other issues listed above.
+We could now run [mypy](https://mypy-lang.org/) on reduction scipts to ensure that the correct types are passed to each function.
+However, this is not practical with dynamic workflows, i.e., when users modifying workflows in a Jupyter notebooks on the fly.
+Aside from this, such an approach would still not help with several of the other issues listed above.
 
 
 ### High-level summary of proposed approach
@@ -68,9 +78,9 @@ Dependency injection aids in building a declarative workflow.
 We define domain-specific concepts that are meaningful to the (instrument) scientist.
 Simple functions provide workflow components that define relations between these domain concepts.
 
-Specifically, we propose to define specific domain types, such as `IncidentMonitor`, `TransmissionMonitor`, and `TransmissionFraction` in the example above.
+Concretely, we propose to define specific domain types, such as `IncidentMonitor`, `TransmissionMonitor`, and `TransmissionFraction` in the example above.
 However, instead of the user having to pass these to functions, we use dependency injection to provide them to the functions.
-In essence this will build a workflow's task graph, and the user will only have to specify the inputs and outputs of the workflow.
+In essence this will build a workflow's task graph.
 
 From the [Guice documentation](https://github.com/google/guice/wiki/MentalModel#injection) (Guice is a dependency injection framework for Java):
 
@@ -86,12 +96,13 @@ Domain-Driven Design (DDD) is an approach to software development that aims to m
 The obvious benefit of this is that it makes it easier for domain experts to understand and modify the software.
 
 How should we define the domain for the purpose of data reduction?
-Looking at, e.g., Mantid, we see that the domain is defined as data reduction for any type of neutron scattering.
+Looking at, e.g., Mantid, we see that the domain is defined as data reduction for any type of neutron scattering experiment.
 This has led to more than 1000 algorithms, making it hard for users to know how to use them.
-Furthermore, while algorithms provide some sort of domain-specific language, the data types are generic and do not.
+Furthermore, while algorithms provide some sort of domain-specific language, the data types are generic.
 
 What we propose here is to define the domain more narrowly, highly specific to a technique or even specific to an instrument.
 This will reduce the scope to cover in the domain-specific language.
+By making data types specific to the domain, we provide nouns for the domain-specific language.
 
 
 ### Dependency injection
