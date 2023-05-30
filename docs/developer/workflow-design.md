@@ -260,8 +260,8 @@ This will allow for computing intermediate results without recomputing everythin
 ## Multiple injectors
 
 - Top level "experiment injector".
-  Provdes everything that is experiment-specific.
-- Sub-injectors for sample and background reduction.
+  Provides everything that is experiment-specific.
+- Sub-injectors (child injectors) for sample and background reduction.
   They may pull things from the experiment injector, but otherwise provide an independent scope.
 - More advanced example/problem: We may want to compute an experiment-level `BeamCenter`, based on a sample run, but it has to be made available to other sub-injectors.
 
@@ -281,6 +281,28 @@ reduction.call(save)
 We can also use injection for dataclasses to request multiple outputs.
 It is not clear how to handle sub-injectors in the syntax.
 
+## Parameter handling
+
+Generally, the user must provide configuration parameters to a workflow.
+In many cases there are defaults that can be used.
+In either case, these parameters must be associated with the correct step in the workflow.
+This is complicated by the non-linear nature of the workflow.
+A flat list of parameters has been used traditionally, relying entirely on parameter naming.
+This is problematic for two reasons:
+First, certain basic workflow steps may be used in multiple places.
+Second, workflows frequently contain nested steps, which may have the same parameters (or not).
+This makes the process of setting parameters somewhat opaque and error-prone.
+Furthermore, it relies on a hand-written higher-level workflow to set parameters for nested nested steps, mapping between globally-uniquely-named parameters and the parameters of the nested steps.
+These, in turn, require complicated testing.
+
+A hierarchical parameter system could provide an alternative, but makes it harder to set "global" parameters.
+For example, we may want to use the same wavelength-binning for all steps in the workflow.
+
+We propose to handle parameters as dependencies of workflow steps.
+That is, the dependency-injection system is used to provide parameters to workflow steps.
+Parameters are identified via their type.
+For nested workflows, we can use a child injector, which provides a scope for parameters.
+Parent-scopes can be searched for parameters that are not found in the child-scope, providing a mechanism for "global" parameters.
 
 ## Meta data handling
 
