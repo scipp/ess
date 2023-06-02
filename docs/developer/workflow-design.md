@@ -374,3 +374,127 @@ Applying an operation to a domain type will generally result in a different type
 - Can we inject the "runner" into the workflow?
   This could be dask (to build a task graph), or a tracer object, to build a tree for display in documentation.
   It is also very simple to hard-code building an injection-level task graph for visualization purposes.
+
+
+Our top-level container is the composition root.
+It is the only place where we should use `injector.get` directly, to get the top-level workflow.
+Example:
+
+```python
+container = Injector()
+workflow = container.get(BackgroundSubtractedIofQ)
+workflow.run()
+```
+
+The container must contain bindings for all dependencies of the workflow.
+In particular, it needs `SampleIofQ` and `BackgroundIofQ`.
+These are provided by child containers, which are basically identical, aside from configuration.
+The child containers are created by the top-level container, which provides the configuration.
+We need to translate from an `IofQ` which can be provided by a child container, to a `BackgroundIofQ` which is required by the top-level container.
+This can be done by a binding in the top-level container, which uses the child container to get the `IofQ` and then converts it to a `BackgroundIofQ`.
+This is a bit of a hack, but it is the only way to get the child container to provide the `IofQ` to the top-level container.
+The top-level container can then use the `BackgroundIofQ` to create the `BackgroundSubtractedIofQ` workflow.
+
+We can also directly create such a binding:
+
+```python
+def get_background_iofq(background: Injector):
+    return BackgroundIofQ(background.get(IofQ))
+
+container.bind(BackgroundIofQ, get_background_iofq)
+```
+
+As we will likely use this repeatedly, we can create a helper function:
+
+```python
+def bind_child(container, child, parent_type, child_type):
+    """
+    Bind a child injector to a parent injector.
+
+    Example
+    -------
+        bind_child(container, child, IofQ, BackgroundIofQ)
+    """
+    def get_child(parent: parent_type) -> child_type:
+        return child_type(child.get(child_type))
+    container.bind(child_type, get_child)
+```
+
+```python
+container.bind_from_child(BackgroundIofQ, IofQ, modules)
+```
+
+Should the child add the binding in the parent?
+But then the child needs to know "what" it is.
+
+```python
+container = injector.Injector()
+background = container.create_child_injector(modules)
+```
+
+Dependency injection is all about separation of concerns.
+To make `BackgroundIofQ` we need a background run (given by `BackgroundRunID`) and a container that can provide `IofQ`.
+
+```python
+import injector
+from typing import NewType
+
+BackgroundContainer = NewType('BackgroundContainer', injector.Injector)
+
+class BackgroundModule(injector.Module):
+    def configure(self, binder: injector.Binder):
+        # Binder does not have this method, but knows its parent, so we can solve this.
+        background = binder.create_child_injector(background_config)
+        binder.bind(BackgroundContainer, background, scope=injector.SingletonScope)
+
+    @injector.provide
+    def get_background_iofq(self, background: BackgroundContainer) -> BackgroundIofQ:
+        return BackgroundIofQ(background.get(IofQ))
+```
+
+The same would be done for `SampleIofQ`.
+But how can we handle multiple samples?
+One solution is to make a new container for every sample, creating one workflow per sample, but then the background cannot be shared.
+What we really want is to configure the container with a list of sample run IDs.
+Then the container should provide us with a workflow that processes all of them, and returns a list of results.
+
+```python
+sample_modules = [SampleModule(run_id) for run_id in sample_run_ids]
+container = injector.Injector([BackgroundModule, sample_modules])
+container.get(BackgroundSubtractedIofQ)  # Returns a list of results.
+```
+
+How can we make this work?
+We do not want to change the code that does the background subtraction.
+That is, we have a list of `SampleIofQ`, but need to iterate over the list in all subsequent code.
+
+We could use `injector.Binder.multibind` to create a list of `SampleIofQ`.
+This may work, but we would need to change the code that does the background subtraction, but maybe that is the best solution?
+And how can be bind the result, as list/dict seems to be reserved for multibind?
+
+```python
+import injector
+from typing import NewType
+
+
+def SampleModule(run_id):
+    SampleContainer = NewType('SampleContainer', injector.Injector)
+    class SampleModule(injector.Module):
+        def configure(self, binder: injector.Binder):
+            sample = binder.create_child_injector(sample_config(run_id))
+            binder.bind(SampleContainer, sample, scope=injector.SingletonScope)
+
+        @injector.provide
+        def provide_sample_iofq(self, sample: SampleContainer) -> SampleIofQ:
+            return SampleIofQ(sample.get(IofQ))
+
+        # If we have multiple samples, we need to multibind them. Not like this.
+        @injector.provide
+        def provide_background_subtracted(self,
+                                          sample: SampleIofQ,
+                                          background: BackgroundIofQ
+        ) -> BackgroundSubtractedIofQ:
+            return BackgroundSubtractedIofQ(sample - background)
+
+    return SampleModule
+```
