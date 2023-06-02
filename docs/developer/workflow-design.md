@@ -195,6 +195,9 @@ Note that the subgraphs for sample and background reduction are identical.
 A number of details have been omitted for clarity.
 For example, there are typically more parameters provided by the user.
 
+![Model workflow](workflow-design-containers-and-modules.svg)
+
+
 ```mermaid
 graph TD
     subgraph params['Reduction Parameters']
@@ -346,8 +349,28 @@ def process_results(sample_iofq: IofQ, iofq: BackgroundSubtractedIofQ):
 injector.call_with_injection(process_results)
 ```
 
+### Domain-specific types
+
+`typing.NewType` can be used as a simple way of creating a domain-specific type for type-checking.
+For example, we can use it to create a type for a `scipp.DataArray` that represents a transmission monitor.
+This avoids a more complex solution such as creating a wrapper class or a subclass:
+
+```python
+import typing
+
+TransmissionMonitor = typing.NewType('TransmissionMonitor', scipp.DataArray)
+```
+
+Note that this does not create a new type, but rather a new name for an existing type.
+That is, `isinstance(monitor, TransmissionMonitor)` does not work, since `TransmissionMonitor` is not a type.
+Furthermore, operations will revert to the underlying type, e.g., `monitor * 2` will return a `scipp.DataArray`.
+For this application this would actually be desired behavior:
+Applying an operation to a domain type will generally result in a different type, so falling back to the underlying type is the correct behavior and forces the user to be explicit about the type of the result.
+
+
 ## TODO
 
 - Validators, and validation ahead of computation?
 - Can we inject the "runner" into the workflow?
   This could be dask (to build a task graph), or a tracer object, to build a tree for display in documentation.
+  It is also very simple to hard-code building an injection-level task graph for visualization purposes.
