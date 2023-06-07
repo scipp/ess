@@ -113,23 +113,79 @@ Dependency injection can be performed manually, but there are also frameworks th
 
 ## Architecture
 
-### Key requirements
+### In a nutshell
 
-1. Configuration of and access to data and metdata sources such as SciCat and Scitacean.
-2. Configuration of data-reduction parameters.
-3. Computation of final results as well as a configurable subset of intermediate results.
-4. Ability to run reduction on a single run or on a set of runs.
-5. Ability to run reduction on a single node or on a cluster.
-6. Ability to run reduction in a Jupyter notebook or in a script.
-7. Logging of all steps of the reduction.
-8. Ability to swap out steps in the reduction, or to add new steps.
-9. Visualization of the reduction workflow, i.e., a (high-level) task graph.
+1. The user will define building blocks of a workflow using highly specific domain types for the type-hints, such as `IncidentMonitor`, `TransmissionMonitor`, and `TransmissionFraction`, e.g.,
+
+   ```python
+   def transmission_fraction(
+       incident_monitor: IncidentMonitor,
+       transmission_monitor: TransmissionMonitor,
+   ) -> TransmissionFraction:
+       return transmission_monitor / incident_monitor
+   ```
+
+2. The user passes a set of building blocks to the system, which assembles a dependency graph based on the type-hints.
+3. The user requests a specific output from the system using one of the domain types.
+   This may be computed directly, or the system may construct a `dask` graph to compute the output.
+
+Depending on the level of expertise of the user and the level of control they need, step 1.) or step 1.) and 2.) will be omitted, as we will provide pre-defined building blocks and sets of building blocks for common use cases.
+
+### Parameter handling
+
+Generally, the user must provide configuration parameters to a workflow.
+In many cases there are defaults that can be used.
+In either case, these parameters must be associated with the correct step in the workflow.
+This is complicated by the non-linear nature of the workflow.
+A flat list of parameters has been used traditionally, relying entirely on parameter naming.
+This is problematic for two reasons:
+First, certain basic workflow steps may be used in multiple places.
+Second, workflows frequently contain nested steps, which may have the same parameters (or not).
+This makes the process of setting parameters somewhat opaque and error-prone.
+Furthermore, it relies on a hand-written higher-level workflow to set parameters for nested steps, mapping between globally-uniquely-named parameters and the parameters of the nested steps.
+These, in turn, require complicated testing.
+
+A hierarchical parameter system could provide an alternative, but makes it harder to set "global" parameters.
+For example, we may want to use the same wavelength-binning for all steps in the workflow.
+
+We propose to handle parameters as dependencies of workflow steps.
+That is, the dependency-injection system is used to provide parameters to workflow steps.
+Parameters are identified via their type, i.e., we will require defining a domain-specific type for each parameter, such as `WavelengthBinning`.
+For nested workflows, we can use a child injector, which provides a scope for parameters.
+Parent-scopes can be searched for parameters that are not found in the child-scope, providing a mechanism for "global" parameters.
+
+### Metadata handling
+
+There have been a number of dicussions around metadata handling.
+For example, the support (or non-support) of an arbitrary `attrs` dict as part of `scipp.Variable` and `scipp.DataArray`.
+Furthermore, we may have metadata that is part of the data-catalog, which may partially overlap with the metadata that is part of the data itself.
+The current conclusion is that any attempt to handle metadata in a generic and automatic way will not work.
+Therefore, if a user wants to provide metadata for a workflow result, they must do so *explicitly* by specifying functions that can assemble that metadata.
+As with regular results, this can be done by injecting the input metadata into the function that computes the result's metadata.
+
+### Domain-specific types
+
+`typing.NewType` can be used as a simple way of creating a domain-specific type for type-checking.
+For example, we can use it to create a type for a `scipp.DataArray` that represents a transmission monitor.
+This avoids a more complex solution such as creating a wrapper class or a subclass:
+
+```python
+import typing
+
+TransmissionMonitor = typing.NewType('TransmissionMonitor', scipp.DataArray)
+```
+
+Note that this does not create a new type, but rather a new name for an existing type.
+That is, `isinstance(monitor, TransmissionMonitor)` does not work, since `TransmissionMonitor` is not a type.
+Furthermore, operations will revert to the underlying type, e.g., `monitor * 2` will return a `scipp.DataArray`.
+For this application this would actually be desired behavior:
+Applying an operation to a domain type will generally result in a different type, so falling back to the underlying type is the correct behavior and forces the user to be explicit about the type of the result.
 
 ### Model workflow
 
 We define a model workflow, which we will use to illustrate the architecture.
 
-```mermaid
+```xmermaid
 %%{init: {"flowchart": {"defaultRenderer": "elk"}} }%%
 graph TD
     ExperimentId-->DirectBeam
@@ -198,7 +254,7 @@ For example, there are typically more parameters provided by the user.
 ![Model workflow](workflow-design-containers-and-modules.svg)
 
 
-```mermaid
+```xmermaid
 graph TD
     subgraph params['Reduction Parameters']
     QBinning
@@ -295,38 +351,6 @@ Two child containers, sample and background, each adding run config as well as r
 How would a user refer to those on the top level?
 Is it allowed to access nested containers?
 
-## Parameter handling
-
-Generally, the user must provide configuration parameters to a workflow.
-In many cases there are defaults that can be used.
-In either case, these parameters must be associated with the correct step in the workflow.
-This is complicated by the non-linear nature of the workflow.
-A flat list of parameters has been used traditionally, relying entirely on parameter naming.
-This is problematic for two reasons:
-First, certain basic workflow steps may be used in multiple places.
-Second, workflows frequently contain nested steps, which may have the same parameters (or not).
-This makes the process of setting parameters somewhat opaque and error-prone.
-Furthermore, it relies on a hand-written higher-level workflow to set parameters for nested nested steps, mapping between globally-uniquely-named parameters and the parameters of the nested steps.
-These, in turn, require complicated testing.
-
-A hierarchical parameter system could provide an alternative, but makes it harder to set "global" parameters.
-For example, we may want to use the same wavelength-binning for all steps in the workflow.
-
-We propose to handle parameters as dependencies of workflow steps.
-That is, the dependency-injection system is used to provide parameters to workflow steps.
-Parameters are identified via their type.
-For nested workflows, we can use a child injector, which provides a scope for parameters.
-Parent-scopes can be searched for parameters that are not found in the child-scope, providing a mechanism for "global" parameters.
-
-## Meta data handling
-
-There have been a number of dicussions about how to handle meta data.
-For example, the support (or non-support) of an arbitrary `attrs` dict as part of `scipp.Variable` and `scipp.DataArray`.
-Furthermore, we may have meta-data that is part of the data-catalog, which may partially overlap with the meta-data that is part of the data itself.
-The current conclusion is that any attempt to handle meta-data in a generic and automatic way will not work.
-Therefore, if a user needs to provide meta-data for a workflow result, they must do so explicitly by specifying functions that can assemble that meta-data.
-As with regular results, this can be done by injecting the input meta-data into the function that computes the result's meta-data.
-
 ## Reducing multiple runs
 
 ## Notes
@@ -348,24 +372,6 @@ def process_results(sample_iofq: IofQ, iofq: BackgroundSubtractedIofQ):
 
 injector.call_with_injection(process_results)
 ```
-
-### Domain-specific types
-
-`typing.NewType` can be used as a simple way of creating a domain-specific type for type-checking.
-For example, we can use it to create a type for a `scipp.DataArray` that represents a transmission monitor.
-This avoids a more complex solution such as creating a wrapper class or a subclass:
-
-```python
-import typing
-
-TransmissionMonitor = typing.NewType('TransmissionMonitor', scipp.DataArray)
-```
-
-Note that this does not create a new type, but rather a new name for an existing type.
-That is, `isinstance(monitor, TransmissionMonitor)` does not work, since `TransmissionMonitor` is not a type.
-Furthermore, operations will revert to the underlying type, e.g., `monitor * 2` will return a `scipp.DataArray`.
-For this application this would actually be desired behavior:
-Applying an operation to a domain type will generally result in a different type, so falling back to the underlying type is the correct behavior and forces the user to be explicit about the type of the result.
 
 
 ## TODO
@@ -389,7 +395,7 @@ workflow.run()
 The container must contain bindings for all dependencies of the workflow.
 In particular, it needs `SampleIofQ` and `BackgroundIofQ`.
 These are provided by child containers, which are basically identical, aside from configuration.
-The child containers are created by the top-level container, which provides the configuration.
+The child containers could be created by the top-level container, which provides the configuration.
 We need to translate from an `IofQ` which can be provided by a child container, to a `BackgroundIofQ` which is required by the top-level container.
 This can be done by a binding in the top-level container, which uses the child container to get the `IofQ` and then converts it to a `BackgroundIofQ`.
 This is a bit of a hack, but it is the only way to get the child container to provide the `IofQ` to the top-level container.
@@ -497,4 +503,80 @@ def SampleModule(run_id):
             return BackgroundSubtractedIofQ(sample - background)
 
     return SampleModule
+```
+
+Can we use a special container type for automatic handling of workflow branch replicas?
+
+```python
+import injector
+from typing import NewType
+
+# Use a dedicated container type, specific to the meaning!
+Runs = NewType('Runs', list)
+# Question to ask: Why do we have different samples?
+# This should be used as a name for the container type.
+# Example 1: We grew different crystals, and want to compare them.
+Crystals = NewType('Crystals', list)
+
+def get_all_iofq(samples: Runs[IofQ]):
+    # samples is injected with an iterable of IofQ, each from
+    # a different child container.
+```
+
+We would then have a provider of a container of, e.g., `RunID`, and a template container that takes a single `RunID` and returns an `IofQ`.
+The template container would be used to create a child container for each `RunID` in the list, with an automatic system of bindings for containers of results as well as index-based access to the results.
+
+```python
+import injector
+from typing import NewType
+
+Runs = NewType('Runs', list)
+RunID = NewType('RunID', int)
+IofQ = NewType('IofQ', float)
+
+class Config(injector.Module):
+    def configure(self, binder: injector.Binder):
+        # Can we use bind or multibind, or do we need something custom?
+        binder.bind(Runs[RunID], [RunID(1), RunID(2), RunID(3)])
+
+# Is this a module, or do we need a new type, "ModuleTemplate",
+# which is used internally to instantiate a module for each item in the list?
+class Reduction(injector.Module):
+    @injector.provide
+    def get_iofq(self, run_id: RunID) -> IofQ:
+        return IofQ(0.5* run_id)
+
+reduction_module = from_template(Runs, template=Reduction)
+container = injector.Injector([Config, reduction_module])
+container.get(Runs[IofQ])  # Returns [IofQ(0.5), IofQ(1.0), IofQ(1.5)]
+```
+
+```python
+import injector
+from typing import NewType, TypeVar, Generic
+
+# Config providers Runs[RunID], we need to create a container for each RunID.
+
+T = TypeVar('T')
+
+class Runs(Generic[T], list):
+    pass
+
+class Container:
+    def get(self, key):
+        # Check if key is Runs[T]
+        # If so, get T from all child containers, and return a list.
+        return Runs([c.get(T) for c in self.children])
+
+container.get(Runs[IofQ])
+```
+
+
+```python
+class MappingModule(injector.Module):
+    @injector.provide
+    def provide_iofq(self, Runs[Container]) -> Runs[IofQ]:
+        return Runs([c.get(IofQ) for c in self.children])
+
+get(Runs[IofQ])
 ```
