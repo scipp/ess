@@ -50,6 +50,7 @@ This involves a "filtering" process, since scope and contribution guidelines are
    :caption: Instruments
 
    instruments/amor/amor
+   instruments/dream/dream
    instruments/loki/loki
    instruments/external/external
 

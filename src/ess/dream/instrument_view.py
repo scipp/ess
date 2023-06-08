@@ -15,11 +15,10 @@ def instrument_view(data, dim=None, bins=50, pixel_size=10, **kwargs):
         data = data.flatten(to='pixel')
 
     if dim is not None:
-        slider_widget = pw.SliceWidget(
-            sc.DataArray(data=bins, coords={dim: bins}), dims=[dim]
-        )
+        histogrammed = data.hist({dim: bins})
+        slider_widget = pw.SliceWidget(histogrammed, dims=[dim])
         slider_node = pp.widget_node(slider_widget)
-        nodes = [pw.slice_dims(data_array=data.hist({dim: bins}), slices=slider_node)]
+        nodes = [pw.slice_dims(data_array=histogrammed, slices=slider_node)]
     else:
         nodes = [pp.Node(data.hist())]
 
