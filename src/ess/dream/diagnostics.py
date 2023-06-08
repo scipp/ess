@@ -112,9 +112,7 @@ def segment_vs_wire(da: sc.DataArray) -> sc.DataArray:
     return _group_and_concat(da, dims=('segment', 'wire'))
 
 
-def tof_navigator(
-    da: sc.DataArray, bins: Union[int, sc.Variable] = 300
-) -> sc.DataArray:
+def tof_slicer(da: sc.DataArray, bins: Union[int, sc.Variable] = 300) -> sc.DataArray:
     """
     Make a plot of the data with a slider to navigate the time-of-flight dimension.
 
