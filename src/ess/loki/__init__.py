@@ -3,5 +3,5 @@
 
 # flake8: noqa: F401
 
-from . import data
+from .data_files import data_registry as data
 from .io import load_rkh_q, load_rkh_wav, load_sans2d
