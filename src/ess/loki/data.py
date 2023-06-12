@@ -4,7 +4,7 @@
 
 from ..data import Registry
 
-data_registry = Registry(
+_registry = Registry(
     instrument='loki',
     files={
         'DIRECT_SANS2D_REAR_34327_4m_8mm_16Feb16.dat': 'md5:d64495831325a63e1b961776a8544599',  # noqa: E501
@@ -19,3 +19,6 @@ data_registry = Registry(
     },
     version='1',
 )
+
+
+get_path = _registry.get_path

@@ -4,7 +4,7 @@
 
 from ..data import Registry
 
-data_registry = Registry(
+_registry = Registry(
     instrument='amor',
     files={
         "reference.nxs": "md5:56d493c8051e1c5c86fb7a95f8ec643b",
@@ -12,3 +12,5 @@ data_registry = Registry(
     },
     version='1',
 )
+
+get_path = _registry.get_path

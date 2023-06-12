@@ -7,7 +7,7 @@ __all__ = ['Registry']
 
 
 class Registry:
-    def __init__(self, instrument: str, files: Dict[str, str], version: str = '1'):
+    def __init__(self, instrument: str, files: Dict[str, str], version: str):
         import pooch
 
         self._registry = pooch.create(
@@ -19,7 +19,7 @@ class Registry:
             registry=files,
         )
 
-    def __getitem__(self, name: str) -> str:
+    def get_path(self, name: str) -> str:
         """
         Get the path to a file in the registry.
 
@@ -29,17 +29,3 @@ class Registry:
             Name of the file to get the path for.
         """
         return self._registry.fetch(name)
-
-    def get_path(self, name: str) -> str:
-        """
-        Get the path to a file in the registry.
-        This is the deprecated way of getting a file path, and is mostly there for
-        backwards compatibility.
-        Use ``__getitem__`` instead.
-
-        Parameters
-        ----------
-        name:
-            Name of the file to get the path for.
-        """
-        return self[name]

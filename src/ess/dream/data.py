@@ -3,10 +3,12 @@
 
 from ..data import Registry
 
-data_registry = Registry(
+_registry = Registry(
     instrument='dream',
     files={
         'data_dream_HF_mil_closed_alldets_1e9.csv.zip': 'md5:2997f33d3ddc792083bfab661cf1d93a'
     },
     version='1',
 )
+
+get_path = _registry.get_path
