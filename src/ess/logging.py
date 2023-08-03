@@ -326,7 +326,7 @@ def _make_handlers(
         handlers.append(
             _make_file_handler(filename, file_level, show_thread, show_process)
         )
-    if sc.utils.running_in_jupyter():
+    if running_in_jupyter():
         handlers.append(sc.logging.make_widget_handler())
     return handlers
 
