@@ -1,10 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
-import numpy as np
-import scipp as sc
+# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 from typing import Union
 
-_STD_TO_FWHM = sc.scalar(2.) * sc.sqrt(sc.scalar(2.) * sc.log(sc.scalar(2.)))
+import numpy as np
+import scipp as sc
+
+_STD_TO_FWHM = sc.scalar(2.0) * sc.sqrt(sc.scalar(2.0) * sc.log(sc.scalar(2.0)))
 
 
 def fwhm_to_std(fwhm: sc.Variable) -> sc.Variable:
@@ -45,11 +46,13 @@ def std_to_fwhm(std: sc.Variable) -> sc.Variable:
     return std * _STD_TO_FWHM
 
 
-def linlogspace(dim: str,
-                edges: Union[list, np.ndarray],
-                scale: Union[list, str],
-                num: Union[list, int],
-                unit: str = None) -> sc.Variable:
+def linlogspace(
+    dim: str,
+    edges: Union[list, np.ndarray],
+    scale: Union[list, str],
+    num: Union[list, int],
+    unit: str = None,
+) -> sc.Variable:
     """
     Generate a 1d array of bin edges with a mixture of linear and/or logarithmic
     spacings.
@@ -66,7 +69,7 @@ def linlogspace(dim: str,
     Parameters
     ----------
     dim:
-        The dimension of the ouptut Variable.
+        The dimension of the output Variable.
     edges:
         The edges for the different parts of the mesh.
     scale:
@@ -79,7 +82,7 @@ def linlogspace(dim: str,
         in each part of the mesh. If a list is supplied, the length of the list must be
         one less than the length of the `edges` parameter.
     unit:
-        The unit of the ouptut Variable.
+        The unit of the output Variable.
 
     Returns
     -------
@@ -91,19 +94,19 @@ def linlogspace(dim: str,
     if not isinstance(num, list):
         num = [num]
     if len(scale) != len(edges) - 1:
-        raise ValueError("Sizes do not match. The length of edges should be one "
-                         "greater than scale.")
+        raise ValueError(
+            "Sizes do not match. The length of edges should be one "
+            "greater than scale."
+        )
 
     funcs = {"linear": sc.linspace, "log": sc.geomspace}
     grids = []
     for i in range(len(edges) - 1):
         # Skip the leading edge in the piece when concatenating
         start = int(i > 0)
-        mesh = funcs[scale[i]](dim=dim,
-                               start=edges[i],
-                               stop=edges[i + 1],
-                               num=num[i] + start,
-                               unit=unit)
+        mesh = funcs[scale[i]](
+            dim=dim, start=edges[i], stop=edges[i + 1], num=num[i] + start, unit=unit
+        )
         grids.append(mesh[dim, start:])
 
     return sc.concat(grids, dim)

@@ -1,22 +1,26 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 from scipp.constants import g
+
 from ..choppers import make_chopper
 from ..logging import log_call
 
 
-@log_call(instrument='amor',
-          message='Constructing AMOR beamline from default parameters')
-def make_beamline(sample_rotation: sc.Variable,
-                  beam_size: sc.Variable = None,
-                  sample_size: sc.Variable = None,
-                  detector_spatial_resolution: sc.Variable = None,
-                  gravity: sc.Variable = None,
-                  chopper_frequency: sc.Variable = None,
-                  chopper_phase: sc.Variable = None,
-                  chopper_1_position: sc.Variable = None,
-                  chopper_2_position: sc.Variable = None) -> dict:
+@log_call(
+    instrument='amor', message='Constructing AMOR beamline from default parameters'
+)
+def make_beamline(
+    sample_rotation: sc.Variable,
+    beam_size: sc.Variable = None,
+    sample_size: sc.Variable = None,
+    detector_spatial_resolution: sc.Variable = None,
+    gravity: sc.Variable = None,
+    chopper_frequency: sc.Variable = None,
+    chopper_phase: sc.Variable = None,
+    chopper_1_position: sc.Variable = None,
+    chopper_2_position: sc.Variable = None,
+) -> dict:
     """
     Amor beamline components.
 
@@ -67,20 +71,26 @@ def make_beamline(sample_rotation: sc.Variable,
         'beam_size': beam_size,
         'sample_size': sample_size,
         'detector_spatial_resolution': detector_spatial_resolution,
-        'gravity': gravity
+        'gravity': gravity,
     }
     # TODO: in scn.load_nexus, the chopper parameters are stored as coordinates
     # of a DataArray, and the data value is a string containing the name of the
     # chopper. This does not allow storing e.g. chopper cutout angles.
     # We should change this to be a Dataset, which is what we do here.
     beamline["source_chopper_2"] = sc.scalar(
-        make_chopper(frequency=chopper_frequency,
-                     phase=chopper_phase,
-                     position=chopper_2_position))
+        make_chopper(
+            frequency=chopper_frequency,
+            phase=chopper_phase,
+            position=chopper_2_position,
+        )
+    )
     beamline["source_chopper_1"] = sc.scalar(
-        make_chopper(frequency=chopper_frequency,
-                     phase=chopper_phase,
-                     position=chopper_1_position))
+        make_chopper(
+            frequency=chopper_frequency,
+            phase=chopper_phase,
+            position=chopper_1_position,
+        )
+    )
     return beamline
 
 
@@ -106,18 +116,18 @@ def instrument_view_components(da: sc.DataArray) -> dict:
             'center': da.meta['sample_position'],
             'color': 'red',
             'size': sc.vector(value=[0.2, 0.01, 0.2], unit=sc.units.m),
-            'type': 'box'
+            'type': 'box',
         },
         "source_chopper_2": {
             'center': da.meta['source_chopper_2'].value["position"].data,
             'color': 'blue',
             'size': sc.vector(value=[0.5, 0, 0], unit=sc.units.m),
-            'type': 'disk'
+            'type': 'disk',
         },
         "source_chopper_1": {
             'center': da.meta['source_chopper_1'].value["position"].data,
             'color': 'blue',
             'size': sc.vector(value=[0.5, 0, 0], unit=sc.units.m),
-            'type': 'disk'
-        }
+            'type': 'disk',
+        },
     }

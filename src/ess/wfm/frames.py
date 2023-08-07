@@ -1,9 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
-import scipp as sc
+# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 from typing import Union
-from .. import choppers as ch
+
+import scipp as sc
 import scipp.constants as constants
+
+from .. import choppers as ch
 
 
 def get_frames(data: Union[sc.DataArray, sc.Dataset]) -> sc.Dataset:
@@ -29,14 +31,22 @@ def get_frames(data: Union[sc.DataArray, sc.Dataset]) -> sc.Dataset:
         if chopper["kind"].value == "wfm":
             wfm_choppers[name] = chopper
     if len(wfm_choppers) != 2:
-        raise RuntimeError("The number of WFM choppers is expected to be 2, "
-                           "found {}".format(len(wfm_choppers)))
+        raise RuntimeError(
+            "The number of WFM choppers is expected to be 2, "
+            "found {}".format(len(wfm_choppers))
+        )
     # Find the near and far WFM choppers based on their positions relative to the source
     wfm_chopper_names = list(wfm_choppers.keys())
-    if (sc.norm(wfm_choppers[wfm_chopper_names[0]]["position"].data -
-                data.meta["source_position"]) <
-            sc.norm(wfm_choppers[wfm_chopper_names[1]]["position"].data -
-                    data.meta["source_position"])).value:
+    if (
+        sc.norm(
+            wfm_choppers[wfm_chopper_names[0]]["position"].data
+            - data.meta["source_position"]
+        )
+        < sc.norm(
+            wfm_choppers[wfm_chopper_names[1]]["position"].data
+            - data.meta["source_position"]
+        )
+    ).value:
         near_index = 0
         far_index = 1
     else:
@@ -52,15 +62,18 @@ def get_frames(data: Union[sc.DataArray, sc.Dataset]) -> sc.Dataset:
     frames = sc.Dataset()
 
     # Distance between WFM choppers
-    dz_wfm = sc.norm(far_wfm_chopper["position"].data -
-                     near_wfm_chopper["position"].data)
+    dz_wfm = sc.norm(
+        far_wfm_chopper["position"].data - near_wfm_chopper["position"].data
+    )
     # Mid-point between WFM choppers
-    z_wfm = 0.5 * (near_wfm_chopper["position"].data +
-                   far_wfm_chopper["position"].data) - data.meta["source_position"]
+    z_wfm = (
+        0.5 * (near_wfm_chopper["position"].data + far_wfm_chopper["position"].data)
+        - data.meta["source_position"]
+    )
     # Ratio of WFM chopper distances
-    z_ratio_wfm = (
-        sc.norm(far_wfm_chopper["position"].data - data.meta["source_position"]) /
-        sc.norm(near_wfm_chopper["position"].data - data.meta["source_position"]))
+    z_ratio_wfm = sc.norm(
+        far_wfm_chopper["position"].data - data.meta["source_position"]
+    ) / sc.norm(near_wfm_chopper["position"].data - data.meta["source_position"])
     # Distance between detector positions and wfm chopper mid-point
     zdet_minus_zwfm = sc.norm(detector_positions - z_wfm)
 
@@ -83,14 +96,17 @@ def get_frames(data: Union[sc.DataArray, sc.Dataset]) -> sc.Dataset:
     # t_lambda_min is found from the relation between lambda_N and lambda_N+1,
     # equation (3) in Schmakat et al. (2020).
     t_lambda_min = t_lambda_max * z_ratio_wfm - data.meta["source_pulse_length"] * (
-        zdet_minus_zwfm /
-        sc.norm(near_wfm_chopper["position"].data - data.meta["source_position"]))
+        zdet_minus_zwfm
+        / sc.norm(near_wfm_chopper["position"].data - data.meta["source_position"])
+    )
 
     # dt_lambda_min is found from the relation between t and delta_t: equation (2)
     # in Schmakat et al. (2020), and using the expression for t_lambda_max.
     dt_lambda_min = dt_lambda_max * z_ratio_wfm - data.meta[
-        "source_pulse_length"] * dz_wfm / sc.norm(near_wfm_chopper["position"].data -
-                                                  data.meta["source_position"])
+        "source_pulse_length"
+    ] * dz_wfm / sc.norm(
+        near_wfm_chopper["position"].data - data.meta["source_position"]
+    )
 
     # Compute wavelength information
     lambda_min = t_lambda_min / (alpha * zdet_minus_zwfm)
@@ -101,19 +117,22 @@ def get_frames(data: Union[sc.DataArray, sc.Dataset]) -> sc.Dataset:
     # Frame edges and resolutions for each pixel.
     # The frames do not stop at t_lambda_min and t_lambda_max, they also include the
     # fuzzy areas (delta_t) at the edges.
-    frames["time_min"] = t_lambda_min - (0.5 *
-                                         dt_lambda_min) + frames["time_correction"]
+    frames["time_min"] = (
+        t_lambda_min - (0.5 * dt_lambda_min) + frames["time_correction"]
+    )
     frames["delta_time_min"] = dt_lambda_min
 
-    frames["time_max"] = t_lambda_max + (0.5 *
-                                         dt_lambda_max) + frames["time_correction"]
+    frames["time_max"] = (
+        t_lambda_max + (0.5 * dt_lambda_max) + frames["time_correction"]
+    )
     frames["delta_time_max"] = dt_lambda_max
     frames["wavelength_min"] = lambda_min
     frames["wavelength_max"] = lambda_max
     frames["delta_wavelength_min"] = dlambda_min
     frames["delta_wavelength_max"] = dlambda_max
 
-    frames["wfm_chopper_mid_point"] = 0.5 * (near_wfm_chopper["position"].data +
-                                             far_wfm_chopper["position"].data)
+    frames["wfm_chopper_mid_point"] = 0.5 * (
+        near_wfm_chopper["position"].data + far_wfm_chopper["position"].data
+    )
 
     return frames

@@ -1,13 +1,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 """
 Smoothing arrays data.
 """
 
 from typing import Optional
 
-from scipp.signal import butter
 import scipp as sc
+from scipp.scipy.signal import butter
 
 from ..logging import get_logger
 
@@ -22,17 +22,15 @@ def _ensure_no_variances(var: sc.Variable) -> sc.Variable:
             '\n--------------------------------------------------\n'
             'If you know a good solution for handling uncertainties in such a case, '
             'please contact the scipp developers! (e.g. via https://github.com/scipp)'
-            '\n--------------------------------------------------\n')
+            '\n--------------------------------------------------\n'
+        )
         return sc.values(var)
     return var
 
 
-def lowpass(da: sc.DataArray,
-            *,
-            dim: str,
-            N: int,
-            Wn: sc.Variable,
-            coord: Optional[str] = None) -> sc.DataArray:
+def lowpass(
+    da: sc.DataArray, *, dim: str, N: int, Wn: sc.Variable, coord: Optional[str] = None
+) -> sc.DataArray:
     """
     Smooth data using a lowpass frequency filter.
 

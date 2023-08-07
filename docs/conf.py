@@ -1,17 +1,18 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 import doctest
-from datetime import date
-import ess
-
 import os
+import pathlib
 import sys
-
+from datetime import date
 from typing import Any, Dict, Optional
+
+import sphinx_book_theme
 from docutils.nodes import document
 from sphinx.application import Sphinx
-import sphinx_book_theme
+
+import ess
 
 sys.path.insert(0, os.path.abspath('.'))
 
@@ -19,10 +20,10 @@ from version import VersionInfo  # noqa: E402
 
 # General information about the project.
 project = u'ess'
-copyright = u'2022 Scipp contributors'
+copyright = u'2023 Scipp contributors'
 author = u'Scipp contributors'
 
-version_info = VersionInfo(repo=project)
+version_info = VersionInfo()
 long_version = ess.__version__
 outdated = not version_info.is_latest(long_version)
 
@@ -37,16 +38,19 @@ def add_buttons(
     base = "https://scipp.github.io"
     l1 = []
     l1.append({"type": "link", "text": "scipp", "url": f"{base}"})
+    l1.append({"type": "link", "text": "plopp", "url": f"{base}/plopp"})
     l1.append({"type": "link", "text": "scippnexus", "url": f"{base}/scippnexus"})
     l1.append({"type": "link", "text": "scippneutron", "url": f"{base}/scippneutron"})
     l1.append({"type": "link", "text": "ess", "url": f"{base}/ess"})
     header_buttons = context["header_buttons"]
-    header_buttons.append({
-        "type": "group",
-        "buttons": l1,
-        "icon": "fa fa-caret-down",
-        "text": "Related projects"
-    })
+    header_buttons.append(
+        {
+            "type": "group",
+            "buttons": l1,
+            "icon": "fa fa-caret-down",
+            "text": "Related projects",
+        }
+    )
     releases = version_info.minor_releases(first='0.1')
     if outdated:
         current = f"{long_version} (outdated)"
@@ -58,17 +62,12 @@ def add_buttons(
         entries = releases[1:]
     lines = [{"type": "link", "text": latest, "url": f"{base}/{project}"}]
     for r in entries:
-        lines.append({
-            "type": "link",
-            "text": f"{r}",
-            "url": f"{base}/{project}/release/{r}"
-        })
-    header_buttons.append({
-        "type": "group",
-        "buttons": lines,
-        "icon": "fa fa-caret-down",
-        "text": current
-    })
+        lines.append(
+            {"type": "link", "text": f"{r}", "url": f"{base}/{project}/release/{r}"}
+        )
+    header_buttons.append(
+        {"type": "group", "buttons": lines, "icon": "fa fa-caret-down", "text": current}
+    )
 
 
 sphinx_book_theme.add_launch_buttons = add_buttons
@@ -103,7 +102,7 @@ intersphinx_mapping = {
     'numpy': ('https://numpy.org/doc/stable/', None),
     'scipp': ('https://scipp.github.io/', None),
     'scipy': ('https://docs.scipy.org/doc/scipy/', None),
-    'xarray': ('https://xarray.pydata.org/en/stable/', None)
+    'xarray': ('https://xarray.pydata.org/en/stable/', None),
 }
 
 # autodocs includes everything, even irrelevant API internals. autosummary
@@ -197,7 +196,8 @@ if outdated:
         f"⚠️ You are viewing the documentation for an old version of {project}. "
         f"Switch to <a href='https://scipp.github.io/{project}' "
         "style='color:white;text-decoration:underline;'"
-        ">latest</a> version. ⚠️")
+        ">latest</a> version. ⚠️"
+    )
 
 html_logo = "_static/logo.svg"
 html_favicon = "_static/favicon.ico"
@@ -235,8 +235,15 @@ man_pages = [(master_doc, 'ess', u'ess Documentation', [author], 1)]
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'ess', u'ess Documentation', author, 'ess',
-     'One line description of project.', 'Miscellaneous'),
+    (
+        master_doc,
+        'ess',
+        u'ess Documentation',
+        author,
+        'ess',
+        'One line description of project.',
+        'Miscellaneous',
+    ),
 ]
 
 # -- Options for Matplotlib in notebooks ----------------------------------
@@ -254,9 +261,12 @@ import scipp as sc
 
 # Using normalize whitespace because many __str__ functions in scipp produce
 # extraneous empty lines and it would look strange to include them in the docs.
-doctest_default_flags = doctest.ELLIPSIS | doctest.IGNORE_EXCEPTION_DETAIL | \
-                        doctest.DONT_ACCEPT_TRUE_FOR_1 | \
-                        doctest.NORMALIZE_WHITESPACE
+doctest_default_flags = (
+    doctest.ELLIPSIS
+    | doctest.IGNORE_EXCEPTION_DETAIL
+    | doctest.DONT_ACCEPT_TRUE_FOR_1
+    | doctest.NORMALIZE_WHITESPACE
+)
 
 # -- Options for linkcheck ------------------------------------------------
 
@@ -264,3 +274,7 @@ linkcheck_ignore = [
     # Specific lines in Github blobs cannot be found by linkcheck.
     r'https?://github\.com/.*?/blob/[a-f0-9]+/.+?#',
 ]
+
+# Set env variable to enable plopp
+docs_dir = pathlib.Path(__file__).parent.absolute()
+os.environ["SCIPPDIR"] = os.path.join(docs_dir, 'buildconfig')

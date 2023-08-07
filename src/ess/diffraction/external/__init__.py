@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 """
 Components for non-ESS diffraction experiments.
 
@@ -21,7 +21,8 @@ def _as_boolean_mask(var: sc.Variable) -> sc.Variable:
     if var.dtype in ('float32', 'float64'):
         if sc.any(var != var.to(dtype='int64')).value:
             raise ValueError(
-                'Cannot construct boolean mask, the input mask has fractional values.')
+                'Cannot construct boolean mask, the input mask has fractional values.'
+            )
     return var.to(dtype=bool)
 
 
@@ -33,27 +34,34 @@ def _parse_calibration_instrument_args(
 ) -> Dict[str, str]:
     if instrument_filename is not None:
         if instrument_name is not None:
-            raise ValueError('Only one argument of `instrument_name` and '
-                             '`instrument_filename` is allowed, got both.')
+            raise ValueError(
+                'Only one argument of `instrument_name` and '
+                '`instrument_filename` is allowed, got both.'
+            )
         instrument_arg = {'InstrumentFilename': instrument_filename}
         instrument_message = f'with instrument file {instrument_filename}'
     else:
         if instrument_name is None:
-            raise ValueError('Need one argument of `instrument_name` and '
-                             '`instrument_filename` is allowed, got neither.')
+            raise ValueError(
+                'Need one argument of `instrument_name` and '
+                '`instrument_filename` is allowed, got neither.'
+            )
         instrument_arg = {'InstrumentName': instrument_name}
         instrument_message = f'with instrument {instrument_name}'
 
-    get_logger('diffraction').info('Loading calibration from file %s %s', filename,
-                                   instrument_message)
+    get_logger('diffraction').info(
+        'Loading calibration from file %s %s', filename, instrument_message
+    )
     return instrument_arg
 
 
-def load_calibration(filename: Union[str, Path],
-                     *,
-                     instrument_filename: Optional[str] = None,
-                     instrument_name: Optional[str] = None,
-                     mantid_args: Optional[dict] = None) -> sc.Dataset:
+def load_calibration(
+    filename: Union[str, Path],
+    *,
+    instrument_filename: Optional[str] = None,
+    instrument_name: Optional[str] = None,
+    mantid_args: Optional[dict] = None,
+) -> sc.Dataset:
     """
     Load and return calibration data.
 
@@ -90,22 +98,29 @@ def load_calibration(filename: Union[str, Path],
 
     mantid_args = {} if mantid_args is None else mantid_args
     mantid_args.update(
-        _parse_calibration_instrument_args(filename,
-                                           instrument_filename=instrument_filename,
-                                           instrument_name=instrument_name))
+        _parse_calibration_instrument_args(
+            filename,
+            instrument_filename=instrument_filename,
+            instrument_name=instrument_name,
+        )
+    )
 
-    with scn.mantid.run_mantid_alg('LoadDiffCal',
-                                   Filename=str(filename),
-                                   MakeGroupingWorkspace=False,
-                                   **mantid_args) as ws:
+    with scn.mantid.run_mantid_alg(
+        'LoadDiffCal',
+        Filename=str(filename),
+        MakeGroupingWorkspace=False,
+        **mantid_args,
+    ) as ws:
         ds = scn.from_mantid(ws.OutputCalWorkspace)
         mask_ws = ws.OutputMaskWorkspace
         rows = mask_ws.getNumberHistograms()
-        mask = sc.array(dims=['row'],
-                        values=np.fromiter((mask_ws.readY(i)[0] for i in range(rows)),
-                                           count=rows,
-                                           dtype=np.bool_),
-                        unit=None)
+        mask = sc.array(
+            dims=['row'],
+            values=np.fromiter(
+                (mask_ws.readY(i)[0] for i in range(rows)), count=rows, dtype=np.bool_
+            ),
+            unit=None,
+        )
     # This is deliberately not stored as a mask since that would make
     # subsequent handling, e.g., with groupby, more complicated. The mask
     # is conceptually not masking rows in this table, i.e., it is not

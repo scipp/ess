@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 name: Release
 
@@ -13,85 +13,111 @@ defaults:
     shell: bash -l {0}  # required for conda env
 
 jobs:
-  formatting:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      # Run this before any other commands so that git diff does not pick up formatting changes.
-      - run: |
-          find . -type f -not -path '.git/*' -exec sed -ri "s/[0-9]{4} (Scipp contributors)/$(date +%Y) \1/g" {} +
-          git diff --exit-code
-      - run: pip install flake8==4.0.1 nb-clean==2.1.0 yapf==0.32.0
-      - run: find . -type f -regex '.*\.ipynb' | xargs nb-clean clean --remove-empty-cells --preserve-cell-metadata
-      - run: yapf --recursive --in-place .
-      - run: flake8 .
-      - uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: Apply automatic formatting
 
-  conda_build:
-    needs: formatting
-    runs-on: ubuntu-latest
+  build_conda:
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: ${{ github.head_ref }}
           fetch-depth: 0  # history required so cmake can determine version
-      - uses: conda-incubator/setup-miniconda@v2
-      - run: conda install --channel conda-forge --yes conda-build mamba boa
+
+      - name: Setup conda environment
+        uses: mamba-org/provision-with-micromamba@main
+        with:
+          micromamba-version: 1.1.0
+          environment-file: false
+          environment-name: build-release
+          channels: conda-forge
+          extra-specs: |
+            python=3.8
+            conda-build
+            boa
       - run: conda mambabuild --channel conda-forge --channel scipp --channel mantid --no-anaconda-upload --override-channels --output-folder conda/package conda
-      - uses: actions/upload-artifact@v2
+
+      - uses: actions/upload-artifact@v3
         with:
           name: conda-package-ess
           path: conda/package/*/ess*.tar.bz2
 
-  tests_and_docs:
-    needs: conda_build
-    runs-on: ubuntu-latest
-    env:
-      DOCS_HTML_DIR: ${{ github.workspace }}/docs_html
+  build_wheels:
+    name: Wheels
+    runs-on: ubuntu-22.04
+
     steps:
-      - uses: actions/checkout@v2
-      - uses: conda-incubator/setup-miniconda@v2
+      - uses: actions/checkout@v3
         with:
-          miniforge-version: latest
-          miniforge-variant: Mambaforge
-          environment-file: .buildconfig/ci.yml
-          activate-environment: ci
-          auto-activate-base: false
+          fetch-depth: 0  # history required so setuptools_scm can determine version
+
+      - uses: actions/setup-python@v3
+        with:
+          python-version: 3.8
+
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -r requirements/wheels.txt
+
+      - name: Build wheels
+        run: python -m build
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: dist
+
+  upload_packages:
+    name: Deploy packages
+    needs: [build_conda, build_wheels]
+    runs-on: ubuntu-22.04
+    if: github.event_name == 'release' && github.event.action == 'published'
+
+    steps:
       - uses: actions/download-artifact@v2
-      - run: mamba install conda-package-*/*/*.tar.bz2
-      - run: python -m pytest -v tests
-      - run: python docs/make_docs.py
-
-      - uses: actions/upload-artifact@v2
-        with:
-          name: DocumentationHTML
-          path: ${{ env.DOCS_HTML_DIR }}
-
-  deploy_package:
-    needs: tests_and_docs
-    runs-on: ubuntu-latest
-    steps:
       - uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: 3.10
       - run: conda install -c conda-forge --yes anaconda-client
-      - uses: actions/download-artifact@v2
       - run: anaconda --token ${{ secrets.ANACONDATOKEN }} upload --user scipp --label main $(ls conda-package-*/*/*.tar.bz2)
+      - uses: actions/setup-python@v3
 
-  deploy_docs:
-    needs: deploy_package
-    runs-on: ubuntu-latest
-    strategy:
-      max-parallel: 1  # Avoid potential race condition when pushing to github pages
-      matrix:
-        docs-folder: ['latest', 'release']
+      # We disable pypi upload for now, because the name `ess` is not authorized
+      # - uses: pypa/gh-action-pypi-publish@v1.6.4
+      #   with:
+      #     user: __token__
+      #     password: ${{ secrets.PYPI_TOKEN }}
+
+  manage-versions:
+    name: Manage Versions
+    runs-on: ubuntu-22.04
+    outputs:
+      version-new: ${{ steps.version.outputs.new }}
+      version-replaced: ${{ steps.version.outputs.replaced }}
     steps:
-      - uses: actions/checkout@v2  # Need to checkout repo so github-pages-deploy-action works
-      - uses: actions/download-artifact@v2
-      - uses: JamesIves/github-pages-deploy-action@v4.4.1
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
         with:
-          branch: gh-pages
-          folder: DocumentationHTML
-          target-folder: ${{ matrix.docs-folder == 'latest' && format('release/{0}', github.ref_name) || '' }}
-          single-commit: true
-          clean-exclude: release
+          python-version: 3.8
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -r requirements/ci.txt
+      - name: Set outputs
+        id: version
+        run: |
+          echo "new=$(python docs/version.py --version=${GITHUB_REF_NAME} --action=is-new)" >> $GITHUB_OUTPUT
+          echo "replaced=$(python docs/version.py --version=${GITHUB_REF_NAME} --action=get-replaced)" >> $GITHUB_OUTPUT
+
+  replaced-docs:
+    needs: [upload_packages, manage-versions]
+    if: github.event_name == 'release' && github.event.action == 'published' && needs.manage-versions.outputs.version-new == 'True'
+    uses: ./.github/workflows/docs.yml
+    with:
+      publish: true
+      version: ${{ needs.manage-versions.outputs.version-replaced }}
+    secrets: inherit
+
+  docs:
+    needs: upload_packages
+    uses: ./.github/workflows/docs.yml
+    with:
+      publish: ${{ github.event_name == 'release' && github.event.action == 'published' }}
+      version: ${{ github.ref_name }}
+    secrets: inherit

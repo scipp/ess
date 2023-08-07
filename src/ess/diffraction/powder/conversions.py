@@ -1,16 +1,16 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 """
 Coordinate transformations for powder diffraction.
 """
 
-from typing import Optional
 import uuid
+from typing import Optional
 
 import scipp as sc
 
-from .corrections import merge_calibration
 from ...logging import get_logger
+from .corrections import merge_calibration
 
 
 def _dspacing_from_diff_calibration_generic_impl(t, t0, a, c):
@@ -44,9 +44,13 @@ def _dspacing_from_diff_calibration_a0_impl(t, t0, c):
     return out
 
 
-def dspacing_from_diff_calibration(tof: sc.Variable, tzero: sc.Variable,
-                                   difa: sc.Variable, difc: sc.Variable,
-                                   _tag_positions_consumed: sc.Variable) -> sc.Variable:
+def dspacing_from_diff_calibration(
+    tof: sc.Variable,
+    tzero: sc.Variable,
+    difa: sc.Variable,
+    difc: sc.Variable,
+    _tag_positions_consumed: sc.Variable,
+) -> sc.Variable:
     r"""
     Compute d-spacing from calibration parameters.
 
@@ -70,16 +74,18 @@ def _restore_tof_if_in_wavelength(data: sc.DataArray) -> sc.DataArray:
         return data
 
     get_logger('diffraction').info(
-        "Discarding coordinate 'wavelength' in favor of 'tof'.")
+        "Discarding coordinate 'wavelength' in favor of 'tof'."
+    )
     temp_name = uuid.uuid4().hex
-    aux = data.transform_coords(temp_name, {
-        temp_name: lambda wavelength, tof: tof
-    },
-                                keep_inputs=False,
-                                quiet=True)
-    return aux.transform_coords('tof', {'tof': temp_name},
-                                keep_inputs=False,
-                                quiet=True)
+    aux = data.transform_coords(
+        temp_name,
+        {temp_name: lambda wavelength, tof: tof},
+        keep_inputs=False,
+        quiet=True,
+    )
+    return aux.transform_coords(
+        'tof', {'tof': temp_name}, keep_inputs=False, quiet=True
+    )
 
 
 def _consume_positions(position, sample_position, source_position):
@@ -90,9 +96,8 @@ def _consume_positions(position, sample_position, source_position):
 
 
 def to_dspacing_with_calibration(
-        data: sc.DataArray,
-        *,
-        calibration: Optional[sc.Dataset] = None) -> sc.DataArray:
+    data: sc.DataArray, *, calibration: Optional[sc.Dataset] = None
+) -> sc.DataArray:
     """
     Transform coordinates to d-spacing from calibration parameters.
 

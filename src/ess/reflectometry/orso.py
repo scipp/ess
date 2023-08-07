@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import warnings
 
 
@@ -9,4 +9,6 @@ def not_found_warning():
     """
     warnings.warn(
         "For metadata to be logged in the data array, "
-        "it is necessary to install the orsopy package.", UserWarning)
+        "it is necessary to install the orsopy package.",
+        UserWarning,
+    )

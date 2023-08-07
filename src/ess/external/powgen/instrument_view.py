@@ -1,17 +1,19 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 from typing import Optional
 
 import scipp as sc
-from scipp.plotting.objects import Plot
 import scippneutron as scn
+from scipp.plotting.objects import Plot
 
 
-def instrument_view(da: sc.DataArray,
-                    positions: str = "position",
-                    pixel_size: Optional[float] = None,
-                    components: Optional[dict] = None,
-                    **kwargs) -> Plot:
+def instrument_view(
+    da: sc.DataArray,
+    positions: str = "position",
+    pixel_size: Optional[float] = None,
+    components: Optional[dict] = None,
+    **kwargs
+) -> Plot:
     """
     Instrument view for the POWGEN instrument, with adjusted default arguments.
 
@@ -28,14 +30,14 @@ def instrument_view(da: sc.DataArray,
     kwargs:
         See :func:`scippneutron.instrument_view`
     """
-    if 'camera' not in kwargs:
-        kwargs = {
-            **kwargs, 'camera': {
-                'position': sc.vector(value=[-3, 3, 3], unit=da.coords[positions].unit)
-            }
-        }
-    return scn.instrument_view(da,
-                               positions=positions,
-                               components=components,
-                               pixel_size=pixel_size,
-                               **kwargs)
+    # TODO: the camera argument does not work with the Plopp instrument view
+    # if 'camera' not in kwargs:
+    #     kwargs = {
+    #         **kwargs, 'camera': {
+    #             'position': sc.vector(value=[-3, 3, 3],
+    #                                   unit=da.coords[positions].unit)
+    #         }
+    #     }
+    return scn.instrument_view(
+        da, positions=positions, components=components, pixel_size=pixel_size, **kwargs
+    )

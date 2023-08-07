@@ -1,8 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+import numpy as np
 import scipp as sc
-from . import orso
+
 from ..amor.tools import fwhm_to_std
+from . import orso
 
 
 def footprint_correction(data_array: sc.DataArray) -> sc.DataArray:
@@ -20,10 +22,12 @@ def footprint_correction(data_array: sc.DataArray) -> sc.DataArray:
     :
        Footprint corrected data array.
     """
-    size_of_beam_on_sample = beam_on_sample(data_array.coords['beam_size'],
-                                            data_array.bins.coords['theta'])
+    size_of_beam_on_sample = beam_on_sample(
+        data_array.coords['beam_size'], data_array.bins.coords['theta']
+    )
     footprint_scale = sc.erf(
-        fwhm_to_std(data_array.coords['sample_size'] / size_of_beam_on_sample))
+        fwhm_to_std(data_array.coords['sample_size'] / size_of_beam_on_sample)
+    )
     data_array_fp_correction = data_array / footprint_scale.squeeze()
     try:
         data_array_fp_correction.attrs['orso'].value.reduction.corrections += [
@@ -37,6 +41,12 @@ def footprint_correction(data_array: sc.DataArray) -> sc.DataArray:
 def normalize_by_counts(data_array: sc.DataArray) -> sc.DataArray:
     """
     Normalize the bin-summed data by the total number of counts.
+    If the data has variances, a check is performed to ensure that the counts in each
+    bin is much lower than the total counts. If this is not the case, an error is raised
+    because the normalization would introduce non-negligible correlations which are not
+    handled Scipp's basic error propagation. See Heybrock et al. (2023).
+    If the check passes, the input data is simply divided by the total number of counts,
+    ignoring the variances of the denominator.
 
     Parameters
     ----------
@@ -48,8 +58,20 @@ def normalize_by_counts(data_array: sc.DataArray) -> sc.DataArray:
     :
         Normalized data array.
     """
-    ncounts = data_array.sum()
+    # Dividing by ncounts fails because ncounts also has variances, and this introduces
+    # correlations. According to Heybrock et al. (2023), we can however safely drop the
+    # variances of ncounts if counts_in_bin / ncounts is small everywhere.
+    ncounts = sc.values(data_array.sum())
     norm = data_array / ncounts
+    if (data_array.variances is not None) and (norm.max().value > 0.1):
+        ind = np.argmax(data_array.values)
+        raise ValueError(
+            'One or more bins contain a number of counts of the same order as the '
+            'total number of counts. It is not safe to drop the variances of the '
+            'denominator when normalizing by the total number of counts in this '
+            f'regime. The maximum counts found is {data_array.values[ind]} at '
+            f'index {ind}. The total number of counts is {ncounts.value}.'
+        )
     try:
         norm.attrs['orso'].value.reduction.corrections += ['total counts']
     except KeyError:

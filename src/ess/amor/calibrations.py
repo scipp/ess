@@ -1,13 +1,16 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
+
 from ..reflectometry import orso
 
 
-def supermirror_calibration(data_array: sc.DataArray,
-                            m_value: sc.Variable = None,
-                            critical_edge: sc.Variable = None,
-                            alpha: sc.Variable = None) -> sc.Variable:
+def supermirror_calibration(
+    data_array: sc.DataArray,
+    m_value: sc.Variable = None,
+    critical_edge: sc.Variable = None,
+    alpha: sc.Variable = None,
+) -> sc.Variable:
     """
     Calibrate supermirror measurements
 
@@ -44,10 +47,12 @@ def supermirror_calibration(data_array: sc.DataArray,
     return data_array_cal
 
 
-def calibration_factor(data_array: sc.DataArray,
-                       m_value: sc.Variable = None,
-                       critical_edge: sc.Variable = None,
-                       alpha: sc.Variable = None) -> sc.Variable:
+def calibration_factor(
+    data_array: sc.DataArray,
+    m_value: sc.Variable = None,
+    critical_edge: sc.Variable = None,
+    alpha: sc.Variable = None,
+) -> sc.Variable:
     """
     Return the calibration factor for the supermirror.
 

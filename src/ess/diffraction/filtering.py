@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Jan-Lukas Wynen
 """
 Prototype for event filtering.
@@ -18,17 +18,22 @@ def _equivalent_bin_indices(a, b) -> bool:
     b_begin = b.bins.constituents['begin'].flatten(to='')
     b_end = b.bins.constituents['end'].flatten(to='')
     non_empty = a_begin != a_end
-    return sc.all((a_begin == b_begin)[non_empty]).value and sc.all(
-        (a_end == b_end)[non_empty]).value
+    return (
+        sc.all((a_begin == b_begin)[non_empty]).value
+        and sc.all((a_end == b_end)[non_empty]).value
+    )
 
 
 @contextmanager
 def _temporary_bin_coord(data: sc.DataArray, name: str, coord: sc.Variable) -> None:
-    assert _equivalent_bin_indices(data, coord)
-    coord = sc.bins(data=coord.bins.constituents['data'],
-                    begin=data.bins.coords['pulse_time'].bins.constituents['begin'],
-                    end=data.bins.coords['pulse_time'].bins.constituents['end'],
-                    dim=coord.bins.constituents['dim'])
+    if not _equivalent_bin_indices(data, coord):
+        raise ValueError("data and coord do not have equivalent bin indices")
+    coord = sc.bins(
+        data=coord.bins.constituents['data'],
+        begin=data.bins.coords['pulse_time'].bins.constituents['begin'],
+        end=data.bins.coords['pulse_time'].bins.constituents['end'],
+        dim=coord.bins.constituents['dim'],
+    )
     data.bins.coords[name] = coord
     yield
     del data.bins.coords[name]
@@ -45,16 +50,19 @@ def _with_pulse_time_edges(da: sc.DataArray, dim: str) -> sc.DataArray:
     return da
 
 
-def remove_bad_pulses(data: sc.DataArray, *, proton_charge: sc.DataArray,
-                      threshold_factor: Real) -> sc.DataArray:
+def remove_bad_pulses(
+    data: sc.DataArray, *, proton_charge: sc.DataArray, threshold_factor: Real
+) -> sc.DataArray:
     """
     assumes that there are bad pulses
     """
     min_charge = proton_charge.data.mean() * threshold_factor
     good_pulse = _with_pulse_time_edges(proton_charge >= min_charge, proton_charge.dim)
     with _temporary_bin_coord(
-            data, 'good_pulse',
-            sc.lookup(good_pulse, good_pulse.dim)[data.bins.coords[good_pulse.dim]]):
+        data,
+        'good_pulse',
+        sc.lookup(good_pulse, good_pulse.dim)[data.bins.coords[good_pulse.dim]],
+    ):
         filtered = data.group(sc.array(dims=['good_pulse'], values=[True]))
     filtered = filtered.squeeze('good_pulse').copy(deep=False)
     del filtered.attrs['good_pulse']

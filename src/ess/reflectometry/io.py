@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 import numpy as np
 import scipp as sc
@@ -19,8 +19,9 @@ def save_ort(data_array: sc.DataArray, filename: str, dimension: str = None):
         String for dimension to perform mean over, defaults to 'detector_id'.
     """
     if dimension is None:
-        dimension = 'detector_id'
+        dimension = 'detector_number'
     from orsopy import fileio
+
     if filename[:-4] == '.ort':
         raise ValueError("The expected output file ending is .ort.")
     q = data_array.mean(dimension).coords['Q']
@@ -31,5 +32,6 @@ def save_ort(data_array: sc.DataArray, filename: str, dimension: str = None):
     sq = data_array.coords['sigma_Q']
     dataset = fileio.orso.OrsoDataset(
         data_array.attrs['orso'].value,
-        np.array([q.values, R.values, sR.values, sq.values]).T)
+        np.array([q.values, R.values, sR.values, sq.values]).T,
+    )
     fileio.orso.save_orso([dataset], filename)
