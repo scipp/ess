@@ -25,6 +25,7 @@ dependencies:
   - plopp=23.04.0
   - pooch=1.6.0
   - pytest=7.2.1
+  - python=3.8.*
   - python-graphviz=0.20.1
   - pythreejs=2.4.1
   - scipp==23.03.2
