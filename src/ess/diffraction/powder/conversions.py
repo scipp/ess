@@ -148,9 +148,13 @@ def to_dspacing_with_calibration(
     else:
         out.coords['_tag_positions_consumed'] = sc.scalar(0)
 
+    # TODO: The need for attribute popping is a side-effect from using the deprecated
+    # scippneutron.load() function. Once we switch to using `load_with_mantid`, we
+    # should be able to remove this.
     for key in ('difc', 'difa', 'tzero'):
         if key not in out.coords:
             out.coords[key] = out.attrs.pop(key)
+
     out = out.transform_coords('dspacing', graph=graph, keep_intermediate=False)
     out.coords.pop('_tag_positions_consumed', None)
     return out
