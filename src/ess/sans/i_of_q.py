@@ -215,7 +215,6 @@ def _convert_dense_to_q_and_merge_spectra(
     """
     bands = []
     data_q = data.transform_coords('Q', graph=graph)
-    data_q.coords['wavelength'] = data_q.attrs.pop('wavelength')
     sum_dims = set(data_q.dims) - {'Q'}
     edges = _to_q_bins(q_bins)
     if wavelength_bands is None:
