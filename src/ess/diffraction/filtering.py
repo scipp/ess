@@ -65,5 +65,5 @@ def remove_bad_pulses(
     ):
         filtered = data.group(sc.array(dims=['good_pulse'], values=[True]))
     filtered = filtered.squeeze('good_pulse').copy(deep=False)
-    del filtered.attrs['good_pulse']
+    del filtered.coords['good_pulse']
     return filtered
