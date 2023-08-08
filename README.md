@@ -1,6 +1,6 @@
-[![Anaconda-Server Badge](https://anaconda.org/scipp/ess/badges/installer/conda.svg)](https://conda.anaconda.org/scipp)
+[![Anaconda-Server Badge](https://anaconda.org/scipp/ess/badges/version.svg)](https://anaconda.org/scipp/ess)
 [![License: BSD 3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](LICENSE)
-[![Builds](https://github.com/scipp/ess/actions/workflows/weekly_and_release.yml/badge.svg)](https://github.com/scipp/ess/actions/workflows/weekly_and_release.yml)
+[![Builds](https://github.com/scipp/ess/actions/workflows/release.yml/badge.svg)](https://github.com/scipp/ess/actions/workflows/release.yml)
 
 # ess
 
@@ -15,9 +15,3 @@ This is built on and complemented by neutron and technique specific support avai
 [scippneutron](https://github.com/scipp/scippneutron).
 
 Please read the [contribution guidelines](https://scipp.github.io/ess/developer/style-guide.html) before making additions.
-
-# Branch organisation
-
-Developments `release` are pinned to the latest
-[stable release](https://github.com/scipp/scipp/tags) of scipp.
-Other ongoing feature developments should be merged into `main`.

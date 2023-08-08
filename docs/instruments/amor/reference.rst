@@ -12,7 +12,11 @@ Modules
    :recursive:
 
    beamline
+   calibrations
    conversions
+   normalize
+   orso
+   resolution
    tools
 
 

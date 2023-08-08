@@ -1,35 +1,98 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import numpy as np
 import scipp as sc
 
+from ..amor.tools import fwhm_to_std
+from . import orso
 
-def illumination_correction(beam_size: sc.Variable, sample_size: sc.Variable,
-                            theta: sc.Variable) -> sc.Variable:
+
+def footprint_correction(data_array: sc.DataArray) -> sc.DataArray:
     """
-    Compute the factor by which the intensity should be multiplied to account for the
-    scattering geometry, where the beam is Gaussian in shape.
+    Perform the footprint correction on the data array that has a :code:`beam_size` and
+    binned :code:`theta` values.
 
-    :param beam_size: Width of incident beam.
-    :param sample_size: Width of sample in the dimension of the beam.
-    :param theta: Incident angle.
+    Parameters
+    ----------
+    data_array:
+        Data array to perform footprint correction on.
+
+    Returns
+    -------
+    :
+       Footprint corrected data array.
     """
-    beam_on_sample = beam_size / sc.sin(theta)
-    fwhm_to_std = 2 * np.sqrt(2 * np.log(2))
-    return sc.erf(sample_size / beam_on_sample * fwhm_to_std)
+    size_of_beam_on_sample = beam_on_sample(
+        data_array.coords['beam_size'], data_array.bins.coords['theta']
+    )
+    footprint_scale = sc.erf(
+        fwhm_to_std(data_array.coords['sample_size'] / size_of_beam_on_sample)
+    )
+    data_array_fp_correction = data_array / footprint_scale.squeeze()
+    try:
+        data_array_fp_correction.attrs['orso'].value.reduction.corrections += [
+            'footprint correction'
+        ]
+    except KeyError:
+        orso.not_found_warning()
+    return data_array_fp_correction
 
 
-def illumination_of_sample(beam_size: sc.Variable, sample_size: sc.Variable,
-                           theta: sc.Variable) -> sc.Variable:
+def normalize_by_counts(data_array: sc.DataArray) -> sc.DataArray:
     """
-    Determine the illumination of the sample by the beam and therefore the size of its
-    illuminated length.
+    Normalize the bin-summed data by the total number of counts.
+    If the data has variances, a check is performed to ensure that the counts in each
+    bin is much lower than the total counts. If this is not the case, an error is raised
+    because the normalization would introduce non-negligible correlations which are not
+    handled Scipp's basic error propagation. See Heybrock et al. (2023).
+    If the check passes, the input data is simply divided by the total number of counts,
+    ignoring the variances of the denominator.
 
-    :param beam_size: Width of incident beam.
-    :param sample_size: Width of sample in the dimension of the beam.
-    :param theta: Incident angle.
+    Parameters
+    ----------
+    data_array:
+        Data array to be normalized.
+
+    Returns
+    -------
+    :
+        Normalized data array.
     """
-    beam_on_sample = beam_size / sc.sin(theta)
-    if ((sc.mean(beam_on_sample)) > sample_size).value:
-        beam_on_sample = sc.broadcast(sample_size, shape=theta.shape, dims=theta.dims)
-    return beam_on_sample
+    # Dividing by ncounts fails because ncounts also has variances, and this introduces
+    # correlations. According to Heybrock et al. (2023), we can however safely drop the
+    # variances of ncounts if counts_in_bin / ncounts is small everywhere.
+    ncounts = sc.values(data_array.sum())
+    norm = data_array / ncounts
+    if (data_array.variances is not None) and (norm.max().value > 0.1):
+        ind = np.argmax(data_array.values)
+        raise ValueError(
+            'One or more bins contain a number of counts of the same order as the '
+            'total number of counts. It is not safe to drop the variances of the '
+            'denominator when normalizing by the total number of counts in this '
+            f'regime. The maximum counts found is {data_array.values[ind]} at '
+            f'index {ind}. The total number of counts is {ncounts.value}.'
+        )
+    try:
+        norm.attrs['orso'].value.reduction.corrections += ['total counts']
+    except KeyError:
+        orso.not_found_warning()
+    return norm
+
+
+def beam_on_sample(beam_size: sc.Variable, theta: sc.Variable) -> sc.Variable:
+    """
+    Size of the beam on the sample.
+
+    Parameters
+    ----------
+    beam_size:
+        Full width half maximum of the beam.
+    theta:
+        Angular of incidence with the sample.
+
+    Returns
+    -------
+    :
+        Size of the beam on the sample.
+    """
+    return beam_size / sc.sin(theta)

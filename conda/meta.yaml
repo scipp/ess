@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+
 package:
   name: ess
   version: {{ GIT_DESCRIBE_TAG }}
@@ -8,14 +11,13 @@ source:
 requirements:
   build:
     - setuptools
+    - setuptools_scm
   run:
-    - astropy
     - ipywidgets
     - matplotlib
     - pooch
-    - scippneutron>=0.4.2
-    - scipy
-    - tifffile
+    - scippneutron>=22.12.4
+    - scippnexus>=23.04.1
 
 test:
   imports:
@@ -23,26 +25,10 @@ test:
     - ess.wfm
     - ess.amor
     - ess.reflectometry
-  requires:
-    - ipympl
-    - mantid-framework
-    - pytest
-    - pandoc
-    - pythreejs
-    - python-graphviz
-    - sphinx
-    - sphinx-book-theme
-    - sphinx-copybutton
-    - nbsphinx
-  source_files:
-    - tests/
-    - docs/
-  commands:
-    - python -m pytest -v tests
-    - python docs/make_docs.py
+    - ess.sans
+    - ess.loki
 
 build:
-  number: {{ environ.get('GIT_DESCRIBE_NUMBER', 0) }}
   noarch: python
   script:
     - pip install .

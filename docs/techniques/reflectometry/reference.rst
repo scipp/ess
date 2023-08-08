@@ -17,14 +17,14 @@ Corrections
 .. autosummary::
    :toctree: ../../generated
 
-   corrections.illumination_correction
-   corrections.illumination_of_sample
+   corrections.footprint_correction
+   corrections.normalize_by_counts
+   corrections.beam_on_sample
 
-Resolution
-----------
+IO
+--
 
 .. autosummary::
    :toctree: ../../generated
 
-   resolution.detector_resolution
-   resolution.z_offset
+   io.save_ort

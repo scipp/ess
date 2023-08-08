@@ -15,7 +15,7 @@ Layout
 ------
 
 This repository is ESS instrument centric,
-and we therefore strongly prefer having all code organised into ``src/ess/{instrument}`` directories.
+and we therefore strongly prefer having all code organized into ``src/ess/{instrument}`` directories.
 
 If your code is specific to the ESS facility,
 but is intended to be ubiquitous across a class of instruments,
@@ -54,7 +54,8 @@ If you have functions in your workflow that represent important steps
 (or costly operations) in your data processing, it is recommended to register the calls
 to those functions via Scipp's logging framework.
 
-More details can be found `here <https://scipp.github.io/reference/logging.html>`_,
+More details can be found in the
+`logging documentation <https://scipp.github.io/reference/logging.html>`_,
 as well as in the
 `Scipp documentation on logging <https://scipp.github.io/reference/logging.html>`_.
 
@@ -72,7 +73,7 @@ Formatting
 
 Your Python code will be checked for errors and formatting when opening a PR.
 We use the `flake8 <https://flake8.pycqa.org/en/latest/>`_ linter to check code quality,
-and `yapf <https://github.com/google/yapf>`_ to enforce code formatting.
+and `black <https://github.com/psf/black>`_ to enforce code formatting.
 Make sure that running your code though these tools does not generate any output before
 you push your changes.
 
@@ -81,7 +82,7 @@ From the top level directory, you can use
 .. code-block:: sh
 
    >$ flake8 .
-   >$ yapf --diff --recursive .
+   >$ black .
 
 Jupyter notebooks style
 -----------------------
@@ -102,7 +103,7 @@ Using data files
 
 If your notebooks require data files, you should use the ``pooch`` utility to handle
 file paths.
-See `here <https://github.com/scipp/ess/blob/main/src/ess/amor/data.py>`_ for an
+See `amor.data <https://github.com/scipp/ess/blob/main/src/ess/amor/data.py>`_ for an
 example showing how it is used in practice.
 
 References
@@ -151,7 +152,7 @@ This involves
 
 - including python docstrings on your user facing functions
 - providing code comments
-- adding type-hints to your function arguments and return types (see `here <https://docs.python.org/3/library/typing.html>`_)
+- adding type-hints to your function arguments and return types (see `typing <https://docs.python.org/3/library/typing.html>`_)
 - adding your functions to the API reference for your technique or instrument
 - including any additional document (Jupyter notebook or .rst file) that helps explain or describe how your functions or module work
 

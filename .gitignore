@@ -11,7 +11,19 @@ src/ess/_version.py
 .vs
 
 # Caches
-.ipynb_checkpoints
-.mypy_cache
+.tox
+*.ipynb_checkpoints
+__pycache__/
 .virtual_documents
-__pycache__
+.hypothesis
+.pytest_cache
+.mypy_cache
+
+# Data
+*.h5
+*.hdf5
+*.nxs
+*.ort
+
+# Misc
+*.log

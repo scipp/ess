@@ -1,14 +1,15 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 import scippneutron as scn
+from scipp.plotting.objects import Plot
+
 from .beamline import instrument_view_components
 
 
-def instrument_view(da: sc.DataArray,
-                    components: dict = None,
-                    pixel_size: float = 0.0035,
-                    **kwargs) -> sc.plotting.objects.Plot:
+def instrument_view(
+    da: sc.DataArray, components: dict = None, pixel_size: float = 0.0035, **kwargs
+) -> Plot:
     """
     Instrument view for the Amor instrument, which automatically populates a list of
     additional beamline components, and sets the pixel size.
@@ -22,7 +23,6 @@ def instrument_view(da: sc.DataArray,
     if components is not None:
         default_components = {**default_components, **components}
 
-    return scn.instrument_view(da,
-                               components=default_components,
-                               pixel_size=pixel_size,
-                               **kwargs)
+    return scn.instrument_view(
+        da, components=default_components, pixel_size=pixel_size, **kwargs
+    )
