@@ -30,7 +30,6 @@ dependencies:
   - pythreejs=2.4.1
   - scipp==23.07.0
   - scippneutron==23.04.0
-  - scitacean==23.3.2
   - sphinx=4.5.0
   - sphinx-book-theme=0.3.3
   - sphinx-copybutton=0.5.0
@@ -38,3 +37,4 @@ dependencies:
     - nb-clean==2.4.0
     - orsopy==1.0.1
     - sphinx-autodoc-typehints==1.18.3
+    - scitacean==23.7.0
