@@ -30,7 +30,7 @@ _pooch = _make_pooch()
 
 def get_path(name: str) -> str:
     """
-    Return the path to a data file bundled with scippneutron.
+    Return the path to a data file on the public scipp server.
 
     This function only works with example data and cannot handle
     paths to custom files.
@@ -48,13 +48,13 @@ def get_direct_beam(client: scitacean.Client):
         owner="Joshanial F. K. Cooper",
         principal_investigator="Joshanial F. K. Cooper",
         contact_email="jos.cooper@stfc.ac.uk",
-        end_time=datetime.now(),
+        end_time='2020-11-26T18:19:24',
         data_format="ISIS NeXus file",
-        creation_location="ISIS Neutron and Muon Source",
+        creation_location="RAL/ISIS/OFFSPEC",
         instrument_id="OFFSPEC",
     )
     file = Path(get_path('direct_beam.nxs'))
-    direct_beam_dataset.add_local_files(str(file), base_path=str(file.parents[0]))
+    direct_beam_dataset.add_local_files(file, base_path=file.parents[0])
     return client.upload_new_dataset_now(direct_beam_dataset)
 
 
@@ -69,13 +69,13 @@ def get_sample(client: scitacean.Client, direct_beam_uploaded: Dataset):
         owner="Joshanial F. K. Cooper",
         principal_investigator="Joshanial F. K. Cooper",
         contact_email="jos.cooper@stfc.ac.uk",
-        end_time=datetime.now(),
+        end_time='2020-12-14T10:34:02',
         data_format="ISIS NeXus file",
-        creation_location="ISIS Neutron and Muon Source",
+        creation_location="RAL/ISIS/OFFSPEC",
         instrument_id="OFFSPEC",
     )
     file = Path(get_path('sample.nxs'))
-    sample_dataset.add_local_files(str(file), base_path=str(file.parents[0]))
+    sample_dataset.add_local_files(file, base_path=file.parents[0])
     sample_dataset.meta['direct_beam_pid'] = str(direct_beam_uploaded.pid)
     sample_dataset.meta['sample_name'] = "QCS sample"
     sample_dataset.meta['sample_category'] = "gas/solid"
