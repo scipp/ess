@@ -1,11 +1,11 @@
-# SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-_version = '1'
-
 import scitacean
 from pathlib import Path
 from scitacean import Dataset
 from datetime import datetime
+
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+_version = '1'
 
 
 def _make_pooch():
@@ -35,7 +35,6 @@ def get_path(name: str) -> str:
     return _pooch.fetch(name)
 
 
-
 def get_direct_beam(client: scitacean.Client):
     direct_beam_dataset = Dataset(
         name="OFFSPEC Direct Beam Data",
@@ -51,8 +50,8 @@ def get_direct_beam(client: scitacean.Client):
         end_time=datetime.now(),
 
         data_format="ISIS NeXus file",
-        creation_location = "ISIS Neutron and Muon Source",
-        instrument_id = "OFFSPEC"
+        creation_location="ISIS Neutron and Muon Source",
+        instrument_id="OFFSPEC"
     )
     file = Path(get_path('direct_beam.nxs'))
     direct_beam_dataset.add_local_files(str(file), base_path=str(file.parents[0]))
@@ -62,7 +61,8 @@ def get_direct_beam(client: scitacean.Client):
 def get_sample(client: scitacean.Client, direct_beam_uploaded: Dataset):
     sample_dataset = Dataset(
         name="OFFSPEC Sample Data",
-        description="Raw OFFSPEC data from quartz and copper at the air-silicon interface.",
+        description="Raw OFFSPEC data from quartz and "
+                    "copper at the air-silicon interface.",
         type="raw",
 
         owner_group="ess",
@@ -74,8 +74,8 @@ def get_sample(client: scitacean.Client, direct_beam_uploaded: Dataset):
         end_time=datetime.now(),
 
         data_format="ISIS NeXus file",
-        creation_location = "ISIS Neutron and Muon Source",
-        instrument_id = "OFFSPEC"
+        creation_location="ISIS Neutron and Muon Source",
+        instrument_id="OFFSPEC"
     )
     file = Path(get_path('sample.nxs'))
     sample_dataset.add_local_files(str(file), base_path=str(file.parents[0]))
