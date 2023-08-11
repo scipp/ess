@@ -48,17 +48,15 @@ def get_logger(subname: Optional[str] = None) -> logging.Logger:
     return logging.getLogger(name)
 
 
-def log_call(*,
-             instrument: str,
-             message: str = None,
-             level: Union[int, str] = logging.INFO):
+def log_call(
+    *, instrument: str, message: str = None, level: Union[int, str] = logging.INFO
+):
     """
     Decorator that logs a message every time the function is called.
     """
     level = logging.getLevelName(level) if isinstance(level, str) else level
 
     def deco(f: Callable):
-
         @functools.wraps(f)
         def impl(*args, **kwargs):
             if message is not None:
@@ -98,8 +96,11 @@ class Formatter(logging.Formatter):
             fmt_proc_thread = ''
         fmt_pre = '[%(asctime)s] %(levelname)-8s '
         fmt_post = '<%(name)s> : %(message)s'
-        fmt = fmt_pre + ('{' + fmt_proc_thread +
-                         '} ' if fmt_proc_thread else '') + fmt_post
+        fmt = (
+            fmt_pre
+            + ('{' + fmt_proc_thread + '} ' if fmt_proc_thread else '')
+            + fmt_post
+        )
         super().__init__(fmt, datefmt='%Y-%m-%dT%H:%M:%S%z')
 
     def format(self, record: logging.LogRecord) -> str:
@@ -113,6 +114,7 @@ def default_loggers_to_configure() -> List[logging.Logger]:
     Return a list of all loggers that get configured by ess by default.
     """
     import pooch
+
     return [
         sc.get_logger(),
         logging.getLogger('Mantid'),
@@ -120,14 +122,16 @@ def default_loggers_to_configure() -> List[logging.Logger]:
     ]
 
 
-def configure(*,
-              filename: Optional[Union[str, PathLike]] = 'scipp.ess.log',
-              file_level: Union[str, int] = logging.INFO,
-              stream_level: Union[str, int] = logging.WARNING,
-              widget_level: Union[str, int] = logging.INFO,
-              show_thread: bool = False,
-              show_process: bool = False,
-              loggers: Optional[Sequence[Union[str, logging.Logger]]] = None):
+def configure(
+    *,
+    filename: Optional[Union[str, PathLike]] = 'scipp.ess.log',
+    file_level: Union[str, int] = logging.INFO,
+    stream_level: Union[str, int] = logging.WARNING,
+    widget_level: Union[str, int] = logging.INFO,
+    show_thread: bool = False,
+    show_process: bool = False,
+    loggers: Optional[Sequence[Union[str, logging.Logger]]] = None,
+):
     """Set up logging for the ess package.
 
     This function is meant as a helper for application (or notebook) developers.
@@ -172,11 +176,13 @@ def configure(*,
     """
     if configure.is_configured:
         get_logger().warning(
-            'Called `logging.configure` but logging is already configured')
+            'Called `logging.configure` but logging is already configured'
+        )
         return
 
-    handlers = _make_handlers(filename, file_level, stream_level, widget_level,
-                              show_thread, show_process)
+    handlers = _make_handlers(
+        filename, file_level, stream_level, widget_level, show_thread, show_process
+    )
     base_level = _base_level([file_level, stream_level, widget_level])
     loggers = {
         logging.getLogger(logger) if isinstance(logger, str) else logger
@@ -193,10 +199,9 @@ def configure(*,
 configure.is_configured = False
 
 
-def configure_workflow(workflow_name: Optional[str] = None,
-                       *,
-                       display: Optional[bool] = None,
-                       **kwargs) -> logging.Logger:
+def configure_workflow(
+    workflow_name: Optional[str] = None, *, display: Optional[bool] = None, **kwargs
+) -> logging.Logger:
     """Configure logging for a reduction workflow.
 
     Configures loggers, logs a greeting message, sets up a logger for a workflow,
@@ -235,6 +240,7 @@ def greet():
     """Log a message showing the versions of important packages."""
     # Import here so we don't import from a partially built package.
     from . import __version__
+
     msg = f'''Software Versions:
   ess: {__version__} (https://scipp.github.io/ess)
   scippneutron: {scn.__version__} (https://scipp.github.io/scippneutron)
@@ -246,8 +252,23 @@ def greet():
 
 
 _INSTRUMENTS = [
-    'amor', 'beer', 'bifrost', 'cspec', 'dream', 'estia', 'freia', 'heimdal', 'loki',
-    'magic', 'miracles', 'nmx', 'odin', 'skadi', 'trex', 'v20', 'vespa'
+    'amor',
+    'beer',
+    'bifrost',
+    'cspec',
+    'dream',
+    'estia',
+    'freia',
+    'heimdal',
+    'loki',
+    'magic',
+    'miracles',
+    'nmx',
+    'odin',
+    'skadi',
+    'trex',
+    'v20',
+    'vespa',
 ]
 
 
@@ -271,37 +292,48 @@ def _function_name(f: Callable) -> str:
     return f.__name__
 
 
-def _make_stream_handler(level: Union[str, int], show_thread: bool,
-                         show_process: bool) -> logging.StreamHandler:
+def _make_stream_handler(
+    level: Union[str, int], show_thread: bool, show_process: bool
+) -> logging.StreamHandler:
     handler = logging.StreamHandler()
     handler.setLevel(level)
     handler.setFormatter(Formatter(show_thread, show_process))
     return handler
 
 
-def _make_file_handler(filename: Union[str, PathLike], level: Union[str, int],
-                       show_thread: bool, show_process: bool) -> logging.FileHandler:
+def _make_file_handler(
+    filename: Union[str, PathLike],
+    level: Union[str, int],
+    show_thread: bool,
+    show_process: bool,
+) -> logging.FileHandler:
     handler = logging.FileHandler(filename, mode='w')
     handler.setLevel(level)
     handler.setFormatter(Formatter(show_thread, show_process))
     return handler
 
 
-def _make_handlers(filename: Optional[Union[str, PathLike]], file_level: Union[str,
-                                                                               int],
-                   stream_level: Union[str, int], widget_level: Union[str, int],
-                   show_thread: bool, show_process: bool) -> List[logging.Handler]:
+def _make_handlers(
+    filename: Optional[Union[str, PathLike]],
+    file_level: Union[str, int],
+    stream_level: Union[str, int],
+    widget_level: Union[str, int],
+    show_thread: bool,
+    show_process: bool,
+) -> List[logging.Handler]:
     handlers = [_make_stream_handler(stream_level, show_thread, show_process)]
     if filename is not None:
         handlers.append(
-            _make_file_handler(filename, file_level, show_thread, show_process))
-    if sc.utils.running_in_jupyter():
+            _make_file_handler(filename, file_level, show_thread, show_process)
+        )
+    if running_in_jupyter():
         handlers.append(sc.logging.make_widget_handler())
     return handlers
 
 
-def _configure_logger(logger: logging.Logger, handlers: List[logging.Handler],
-                      level: Union[str, int]):
+def _configure_logger(
+    logger: logging.Logger, handlers: List[logging.Handler], level: Union[str, int]
+):
     for handler in handlers:
         logger.addHandler(handler)
     logger.setLevel(level)
@@ -310,19 +342,25 @@ def _configure_logger(logger: logging.Logger, handlers: List[logging.Handler],
 def _configure_mantid_logging(level: str):
     try:
         from mantid.utils.logging import log_to_python
+
         log_to_python(level)
     except ImportError:
         pass
 
 
 def _base_level(levels: List[Union[str, int]]) -> int:
-    return min((logging.getLevelName(level) if isinstance(level, str) else level
-                for level in levels))
+    return min(
+        (
+            logging.getLevelName(level) if isinstance(level, str) else level
+            for level in levels
+        )
+    )
 
 
 def _mantid_version() -> Optional[str]:
     try:
         import mantid
+
         return mantid.__version__
     except ImportError:
         return None

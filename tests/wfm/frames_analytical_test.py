@@ -20,23 +20,24 @@ def _frames_from_slopes(data):
     frames["time_max"] = sc.zeros_like(frames["time_min"])
     frames["delta_time_min"] = sc.zeros_like(frames["time_min"])
     frames["delta_time_max"] = sc.zeros_like(frames["time_min"])
-    frames["wavelength_min"] = sc.zeros(dims=["frame"],
-                                        shape=[nframes],
-                                        unit=sc.units.angstrom)
+    frames["wavelength_min"] = sc.zeros(
+        dims=["frame"], shape=[nframes], unit=sc.units.angstrom
+    )
     frames["wavelength_max"] = sc.zeros_like(frames["wavelength_min"])
     frames["delta_wavelength_min"] = sc.zeros_like(frames["wavelength_min"])
     frames["delta_wavelength_max"] = sc.zeros_like(frames["wavelength_min"])
 
-    frames["time_correction"] = sc.zeros(dims=["frame"],
-                                         shape=[nframes],
-                                         unit=sc.units.us)
+    frames["time_correction"] = sc.zeros(
+        dims=["frame"], shape=[nframes], unit=sc.units.us
+    )
 
     near_wfm_chopper = choppers["chopper_wfm_1"]
     far_wfm_chopper = choppers["chopper_wfm_2"]
 
     # Distance between WFM choppers
-    dz_wfm = sc.norm(far_wfm_chopper["position"].data -
-                     near_wfm_chopper["position"].data)
+    dz_wfm = sc.norm(
+        far_wfm_chopper["position"].data - near_wfm_chopper["position"].data
+    )
     # Mid-point between WFM choppers
     z_wfm = 0.5 * (near_wfm_chopper["position"].data + far_wfm_chopper["position"].data)
     # Distance between detector positions and wfm chopper mid-point
@@ -51,28 +52,38 @@ def _frames_from_slopes(data):
     for i in range(nframes):
         dt_lambda_max = near_t_close["frame", i] - near_t_open["frame", i]
         slope_lambda_max = dz_wfm / dt_lambda_max
-        intercept_lambda_max = sc.norm(near_wfm_chopper["position"].data
-                                       ) - slope_lambda_max * near_t_close["frame", i]
+        intercept_lambda_max = (
+            sc.norm(near_wfm_chopper["position"].data)
+            - slope_lambda_max * near_t_close["frame", i]
+        )
         t_lambda_max = (detector_pos_norm - intercept_lambda_max) / slope_lambda_max
 
         slope_lambda_min = sc.norm(near_wfm_chopper["position"].data) / (
-            near_t_close["frame", i] -
-            (data.meta["source_pulse_length"] + data.meta["source_pulse_t_0"]))
-        intercept_lambda_min = sc.norm(far_wfm_chopper["position"].data
-                                       ) - slope_lambda_min * far_t_open["frame", i]
+            near_t_close["frame", i]
+            - (data.meta["source_pulse_length"] + data.meta["source_pulse_t_0"])
+        )
+        intercept_lambda_min = (
+            sc.norm(far_wfm_chopper["position"].data)
+            - slope_lambda_min * far_t_open["frame", i]
+        )
         t_lambda_min = (detector_pos_norm - intercept_lambda_min) / slope_lambda_min
 
         t_lambda_min_plus_dt = (
-            detector_pos_norm -
-            (sc.norm(near_wfm_chopper["position"].data) -
-             slope_lambda_min * near_t_close["frame", i])) / slope_lambda_min
+            detector_pos_norm
+            - (
+                sc.norm(near_wfm_chopper["position"].data)
+                - slope_lambda_min * near_t_close["frame", i]
+            )
+        ) / slope_lambda_min
         dt_lambda_min = t_lambda_min_plus_dt - t_lambda_min
 
         # Compute wavelength information
-        lambda_min = (t_lambda_min + 0.5 * dt_lambda_min -
-                      far_t_open["frame", i]) / (alpha * zdet_minus_zwfm)
-        lambda_max = (t_lambda_max - 0.5 * dt_lambda_max -
-                      far_t_open["frame", i]) / (alpha * zdet_minus_zwfm)
+        lambda_min = (t_lambda_min + 0.5 * dt_lambda_min - far_t_open["frame", i]) / (
+            alpha * zdet_minus_zwfm
+        )
+        lambda_max = (t_lambda_max - 0.5 * dt_lambda_max - far_t_open["frame", i]) / (
+            alpha * zdet_minus_zwfm
+        )
         dlambda_min = dz_wfm * lambda_min / zdet_minus_zwfm
         dlambda_max = dz_wfm * lambda_max / zdet_minus_zwfm
 
@@ -95,8 +106,10 @@ def _check_against_reference(ds, frames):
     for key in frames:
         assert sc.allclose(reference[key].data, frames[key].data)
     for i in range(frames.sizes['frame'] - 1):
-        assert sc.allclose(frames["delta_time_max"]["frame", i].data,
-                           frames["delta_time_min"]["frame", i + 1].data)
+        assert sc.allclose(
+            frames["delta_time_max"]["frame", i].data,
+            frames["delta_time_min"]["frame", i + 1].data,
+        )
 
 
 def test_frames_analytical():
@@ -106,23 +119,32 @@ def test_frames_analytical():
 
 
 def test_frames_analytical_large_dz_wfm():
-    ds = sc.Dataset(coords=wfm.make_fake_beamline(
-        chopper_wfm_1_position=sc.vector(value=[0.0, 0.0, 6.0], unit='m'),
-        chopper_wfm_2_position=sc.vector(value=[0.0, 0.0, 8.0], unit='m')))
+    ds = sc.Dataset(
+        coords=wfm.make_fake_beamline(
+            chopper_wfm_1_position=sc.vector(value=[0.0, 0.0, 6.0], unit='m'),
+            chopper_wfm_2_position=sc.vector(value=[0.0, 0.0, 8.0], unit='m'),
+        )
+    )
     frames = wfm.get_frames(ds)
     _check_against_reference(ds, frames)
 
 
 def test_frames_analytical_short_pulse():
-    ds = sc.Dataset(coords=wfm.make_fake_beamline(
-        pulse_length=sc.to_unit(sc.scalar(1.86e+03, unit='us'), 's')))
+    ds = sc.Dataset(
+        coords=wfm.make_fake_beamline(
+            pulse_length=sc.to_unit(sc.scalar(1.86e03, unit='us'), 's')
+        )
+    )
     frames = wfm.get_frames(ds)
     _check_against_reference(ds, frames)
 
 
 def test_frames_analytical_large_t_0():
-    ds = sc.Dataset(coords=wfm.make_fake_beamline(
-        pulse_t_0=sc.to_unit(sc.scalar(300., unit='us'), 's')))
+    ds = sc.Dataset(
+        coords=wfm.make_fake_beamline(
+            pulse_t_0=sc.to_unit(sc.scalar(300.0, unit='us'), 's')
+        )
+    )
     frames = wfm.get_frames(ds)
     _check_against_reference(ds, frames)
 
@@ -134,7 +156,8 @@ def test_frames_analytical_6_frames():
 
 
 def test_frames_analytical_short_lambda_min():
-    ds = sc.Dataset(coords=wfm.make_fake_beamline(
-        lambda_min=sc.scalar(0.5, unit='angstrom')))
+    ds = sc.Dataset(
+        coords=wfm.make_fake_beamline(lambda_min=sc.scalar(0.5, unit='angstrom'))
+    )
     frames = wfm.get_frames(ds)
     _check_against_reference(ds, frames)

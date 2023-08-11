@@ -7,6 +7,7 @@ __all__ = ['get_path']
 
 def _make_pooch():
     import pooch
+
     return pooch.create(
         path=pooch.os_cache('ess/amor'),
         env='ESS_AMOR_DATA_DIR',
@@ -14,8 +15,9 @@ def _make_pooch():
         version=_version,
         registry={
             "reference.nxs": "md5:56d493c8051e1c5c86fb7a95f8ec643b",
-            "sample.nxs": "md5:4e07ccc87b5c6549e190bc372c298e83"
-        })
+            "sample.nxs": "md5:4e07ccc87b5c6549e190bc372c298e83",
+        },
+    )
 
 
 _pooch = _make_pooch()

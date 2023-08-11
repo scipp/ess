@@ -9,4 +9,6 @@ def not_found_warning():
     """
     warnings.warn(
         "For metadata to be logged in the data array, "
-        "it is necessary to install the orsopy package.", UserWarning)
+        "it is necessary to install the orsopy package.",
+        UserWarning,
+    )

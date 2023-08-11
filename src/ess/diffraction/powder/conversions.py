@@ -44,9 +44,13 @@ def _dspacing_from_diff_calibration_a0_impl(t, t0, c):
     return out
 
 
-def dspacing_from_diff_calibration(tof: sc.Variable, tzero: sc.Variable,
-                                   difa: sc.Variable, difc: sc.Variable,
-                                   _tag_positions_consumed: sc.Variable) -> sc.Variable:
+def dspacing_from_diff_calibration(
+    tof: sc.Variable,
+    tzero: sc.Variable,
+    difa: sc.Variable,
+    difc: sc.Variable,
+    _tag_positions_consumed: sc.Variable,
+) -> sc.Variable:
     r"""
     Compute d-spacing from calibration parameters.
 
@@ -70,16 +74,18 @@ def _restore_tof_if_in_wavelength(data: sc.DataArray) -> sc.DataArray:
         return data
 
     get_logger('diffraction').info(
-        "Discarding coordinate 'wavelength' in favor of 'tof'.")
+        "Discarding coordinate 'wavelength' in favor of 'tof'."
+    )
     temp_name = uuid.uuid4().hex
-    aux = data.transform_coords(temp_name, {
-        temp_name: lambda wavelength, tof: tof
-    },
-                                keep_inputs=False,
-                                quiet=True)
-    return aux.transform_coords('tof', {'tof': temp_name},
-                                keep_inputs=False,
-                                quiet=True)
+    aux = data.transform_coords(
+        temp_name,
+        {temp_name: lambda wavelength, tof: tof},
+        keep_inputs=False,
+        quiet=True,
+    )
+    return aux.transform_coords(
+        'tof', {'tof': temp_name}, keep_inputs=False, quiet=True
+    )
 
 
 def _consume_positions(position, sample_position, source_position):
@@ -90,9 +96,8 @@ def _consume_positions(position, sample_position, source_position):
 
 
 def to_dspacing_with_calibration(
-        data: sc.DataArray,
-        *,
-        calibration: Optional[sc.Dataset] = None) -> sc.DataArray:
+    data: sc.DataArray, *, calibration: Optional[sc.Dataset] = None
+) -> sc.DataArray:
     """
     Transform coordinates to d-spacing from calibration parameters.
 
@@ -138,11 +143,18 @@ def to_dspacing_with_calibration(
         'dspacing': dspacing_from_diff_calibration,
     }
 
-    if 'position' in out.meta:
+    if 'position' in out.coords:
         graph['_tag_positions_consumed'] = _consume_positions
     else:
-        out.attrs['_tag_positions_consumed'] = sc.scalar(0)
+        out.coords['_tag_positions_consumed'] = sc.scalar(0)
+
+    # TODO: The need for attribute popping is a side-effect from using the deprecated
+    # scippneutron.load() function. Once we switch to using `load_with_mantid`, we
+    # should be able to remove this.
+    for key in ('difc', 'difa', 'tzero'):
+        if key not in out.coords:
+            out.coords[key] = out.attrs.pop(key)
 
     out = out.transform_coords('dspacing', graph=graph, keep_intermediate=False)
-    out.attrs.pop('_tag_positions_consumed', None)
+    out.coords.pop('_tag_positions_consumed', None)
     return out

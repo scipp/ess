@@ -7,13 +7,15 @@ from scipp.constants import h, m_n
 from ..choppers import make_chopper
 
 
-def make_fake_beamline(chopper_wfm_1_position=None,
-                       chopper_wfm_2_position=None,
-                       frequency=None,
-                       lambda_min=None,
-                       pulse_length=None,
-                       pulse_t_0=None,
-                       nframes=2):
+def make_fake_beamline(
+    chopper_wfm_1_position=None,
+    chopper_wfm_2_position=None,
+    frequency=None,
+    lambda_min=None,
+    pulse_length=None,
+    pulse_t_0=None,
+    nframes=2,
+):
     """
     Fake chopper cascade with 2 optically blind WFM choppers.
     Based on mathematical description in Schmakat et al. (2020);
@@ -42,8 +44,15 @@ def make_fake_beamline(chopper_wfm_1_position=None,
     return _make_fake_beamline_impl(nframes=nframes, **kwargs)
 
 
-def _make_fake_beamline_impl(chopper_wfm_1_position, chopper_wfm_2_position, frequency,
-                             lambda_min, pulse_length, pulse_t_0, nframes):
+def _make_fake_beamline_impl(
+    chopper_wfm_1_position,
+    chopper_wfm_2_position,
+    frequency,
+    lambda_min,
+    pulse_length,
+    pulse_t_0,
+    nframes,
+):
     dim = 'frame'
     # Neutron mass to Planck constant ratio
     alpha = sc.to_unit(m_n / h, 's/m/angstrom')
@@ -55,19 +64,29 @@ def _make_fake_beamline_impl(chopper_wfm_1_position, chopper_wfm_2_position, fre
 
     for i in range(nframes):
         # Equation (3) in Schmakat et al. (2020)
-        lambda_max = (pulse_length +
-                      alpha * lambda_min * sc.norm(chopper_wfm_1_position)) / (
-                          alpha * sc.norm(chopper_wfm_2_position))
+        lambda_max = (
+            pulse_length + alpha * lambda_min * sc.norm(chopper_wfm_1_position)
+        ) / (alpha * sc.norm(chopper_wfm_2_position))
         # Equation (4) in Schmakat et al. (2020)
-        theta = omega * (pulse_length + alpha *
-                         (lambda_min - lambda_max) * sc.norm(chopper_wfm_1_position))
+        theta = omega * (
+            pulse_length
+            + alpha * (lambda_min - lambda_max) * sc.norm(chopper_wfm_1_position)
+        )
         # Equation (5) in Schmakat et al. (2020)
         phi_wfm_1 = omega * (
-            pulse_t_0 + 0.5 * pulse_length + 0.5 * alpha *
-            (lambda_min + lambda_max) * sc.norm(chopper_wfm_1_position))
+            pulse_t_0
+            + 0.5 * pulse_length
+            + 0.5 * alpha * (lambda_min + lambda_max) * sc.norm(chopper_wfm_1_position)
+        )
         # Equation (6) in Schmakat et al. (2020)
-        phi_wfm_2 = omega * (pulse_t_0 + 1.5 * pulse_length + 0.5 * alpha * (
-            (3.0 * lambda_min) - lambda_max) * sc.norm(chopper_wfm_1_position))
+        phi_wfm_2 = omega * (
+            pulse_t_0
+            + 1.5 * pulse_length
+            + 0.5
+            * alpha
+            * ((3.0 * lambda_min) - lambda_max)
+            * sc.norm(chopper_wfm_1_position)
+        )
 
         cutout_angles_width[dim, i] = theta
         cutout_angles_center_wfm_1[dim, i] = phi_wfm_1
@@ -76,28 +95,28 @@ def _make_fake_beamline_impl(chopper_wfm_1_position, chopper_wfm_2_position, fre
         lambda_min = lambda_max
 
     return {
-        "chopper_wfm_1":
-        sc.scalar(
-            make_chopper(frequency=frequency,
-                         phase=sc.scalar(0.0, unit='deg'),
-                         position=chopper_wfm_1_position,
-                         cutout_angles_center=cutout_angles_center_wfm_1,
-                         cutout_angles_width=cutout_angles_width,
-                         kind=sc.scalar('wfm'))),
-        "chopper_wfm_2":
-        sc.scalar(
-            make_chopper(frequency=frequency,
-                         phase=sc.scalar(0.0, unit='deg'),
-                         position=chopper_wfm_2_position,
-                         cutout_angles_center=cutout_angles_center_wfm_2,
-                         cutout_angles_width=cutout_angles_width,
-                         kind=sc.scalar('wfm'))),
-        'position':
-        sc.vector(value=[0., 0., 60.], unit='m'),
-        "source_pulse_length":
-        sc.to_unit(pulse_length, 'us'),
-        "source_pulse_t_0":
-        sc.to_unit(pulse_t_0, 'us'),
-        "source_position":
-        sc.vector(value=[0.0, 0.0, 0.0], unit='m')
+        "chopper_wfm_1": sc.scalar(
+            make_chopper(
+                frequency=frequency,
+                phase=sc.scalar(0.0, unit='deg'),
+                position=chopper_wfm_1_position,
+                cutout_angles_center=cutout_angles_center_wfm_1,
+                cutout_angles_width=cutout_angles_width,
+                kind=sc.scalar('wfm'),
+            )
+        ),
+        "chopper_wfm_2": sc.scalar(
+            make_chopper(
+                frequency=frequency,
+                phase=sc.scalar(0.0, unit='deg'),
+                position=chopper_wfm_2_position,
+                cutout_angles_center=cutout_angles_center_wfm_2,
+                cutout_angles_width=cutout_angles_width,
+                kind=sc.scalar('wfm'),
+            )
+        ),
+        'position': sc.vector(value=[0.0, 0.0, 60.0], unit='m'),
+        "source_pulse_length": sc.to_unit(pulse_length, 'us'),
+        "source_pulse_t_0": sc.to_unit(pulse_t_0, 'us'),
+        "source_position": sc.vector(value=[0.0, 0.0, 0.0], unit='m'),
     }

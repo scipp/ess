@@ -5,17 +5,23 @@ from typing import Union
 import scipp as sc
 
 
-def _stitch_dense_data(item: sc.DataArray, frames: sc.Dataset, dim: str, new_dim: str,
-                       bins: Union[int, sc.Variable]) -> Union[sc.DataArray, dict]:
-
+def _stitch_dense_data(
+    item: sc.DataArray,
+    frames: sc.Dataset,
+    dim: str,
+    new_dim: str,
+    bins: Union[int, sc.Variable],
+) -> Union[sc.DataArray, dict]:
     # Make empty data container
     if isinstance(bins, int):
         new_coord = sc.linspace(
             dim=new_dim,
-            start=(frames["time_min"]["frame", 0] -
-                   frames["time_correction"]["frame", 0]).value,
-            stop=(frames["time_max"]["frame", -1] -
-                  frames["time_correction"]["frame", -1]).value,
+            start=(
+                frames["time_min"]["frame", 0] - frames["time_correction"]["frame", 0]
+            ).value,
+            stop=(
+                frames["time_max"]["frame", -1] - frames["time_correction"]["frame", -1]
+            ).value,
             num=bins + 1,
             unit=frames["time_min"].unit,
         )
@@ -32,21 +38,28 @@ def _stitch_dense_data(item: sc.DataArray, frames: sc.Dataset, dim: str, new_dim
             dims.append(new_dim)
             shape.append(new_coord.sizes[new_dim] - 1)
 
-    out = sc.DataArray(data=sc.zeros(dims=dims,
-                                     shape=shape,
-                                     with_variances=item.variances is not None,
-                                     unit=item.unit),
-                       coords={new_dim: new_coord})
+    out = sc.DataArray(
+        data=sc.zeros(
+            dims=dims,
+            shape=shape,
+            with_variances=item.variances is not None,
+            unit=item.unit,
+        ),
+        coords={new_dim: new_coord},
+    )
     for group in ["coords", "attrs"]:
         for key in getattr(item, group):
             if key != dim:
                 getattr(out, group)[key] = getattr(item, group)[key].copy()
 
     for i in range(frames.sizes["frame"]):
-        section = item[dim, frames["time_min"].data["frame", i]:frames["time_max"].data[
-            "frame", i]].rename_dims({dim: new_dim})
-        section.coords[new_dim] = section.coords[dim] - frames["time_correction"].data[
-            "frame", i]
+        section = item[
+            dim,
+            frames["time_min"].data["frame", i] : frames["time_max"].data["frame", i],
+        ].rename_dims({dim: new_dim})
+        section.coords[new_dim] = (
+            section.coords[dim] - frames["time_correction"].data["frame", i]
+        )
         if new_dim != dim:
             del section.coords[dim]
 
@@ -55,19 +68,27 @@ def _stitch_dense_data(item: sc.DataArray, frames: sc.Dataset, dim: str, new_dim
     return out
 
 
-def _stitch_event_data(item: sc.DataArray, frames: sc.Dataset, dim: str, new_dim: str,
-                       bins: Union[int, sc.Variable]) -> Union[sc.DataArray, dict]:
-
-    edges = sc.flatten(sc.transpose(sc.concat(
-        [frames["time_min"].data, frames["time_max"].data], 'dummy'),
-                                    dims=['frame', 'dummy']),
-                       to=dim)
+def _stitch_event_data(
+    item: sc.DataArray,
+    frames: sc.Dataset,
+    dim: str,
+    new_dim: str,
+    bins: Union[int, sc.Variable],
+) -> Union[sc.DataArray, dict]:
+    edges = sc.flatten(
+        sc.transpose(
+            sc.concat([frames["time_min"].data, frames["time_max"].data], 'dummy'),
+            dims=['frame', 'dummy'],
+        ),
+        to=dim,
+    )
 
     binned = item.bin({dim: edges})
 
     for i in range(frames.sizes["frame"]):
-        binned[dim, i * 2].bins.coords[dim] -= frames["time_correction"].data["frame",
-                                                                              i]
+        binned[dim, i * 2].bins.coords[dim] -= frames["time_correction"].data[
+            "frame", i
+        ]
 
     erase = None
     if new_dim != dim:
@@ -75,20 +96,28 @@ def _stitch_event_data(item: sc.DataArray, frames: sc.Dataset, dim: str, new_dim
         del binned.bins.coords[dim]
         erase = [dim]
 
-    binned.masks['frame_gaps'] = (sc.arange(dim, 2 * frames.sizes["frame"] - 1) %
-                                  2).astype(bool)
+    binned.masks['frame_gaps'] = (
+        sc.arange(dim, 2 * frames.sizes["frame"] - 1) % 2
+    ).astype(bool)
     binned.masks['frame_gaps'].unit = None
 
-    new_edges = sc.concat([
-        (frames["time_min"]["frame", 0] - frames["time_correction"]["frame", 0]).data,
-        (frames["time_max"]["frame", -1] - frames["time_correction"]["frame", -1]).data
-    ], new_dim)
+    new_edges = sc.concat(
+        [
+            (
+                frames["time_min"]["frame", 0] - frames["time_correction"]["frame", 0]
+            ).data,
+            (
+                frames["time_max"]["frame", -1] - frames["time_correction"]["frame", -1]
+            ).data,
+        ],
+        new_dim,
+    )
     return sc.binning.make_binned(binned, edges=[new_edges], erase=erase)
 
 
-def _stitch_item(item: sc.DataArray, frames: sc.Dataset,
-                 **kwargs) -> Union[sc.DataArray, dict]:
-
+def _stitch_item(
+    item: sc.DataArray, frames: sc.Dataset, **kwargs
+) -> Union[sc.DataArray, dict]:
     if item.bins is not None:
         out = _stitch_event_data(item=item, frames=frames, **kwargs)
     else:
@@ -111,11 +140,12 @@ def _stitch_item(item: sc.DataArray, frames: sc.Dataset,
 
 
 def stitch(
-        data: Union[sc.DataArray, sc.Dataset],
-        dim: str,
-        frames: sc.Dataset,
-        new_dim: str = 'tof',
-        bins: Union[int, sc.Variable] = 256) -> Union[sc.DataArray, sc.Dataset, dict]:
+    data: Union[sc.DataArray, sc.Dataset],
+    dim: str,
+    frames: sc.Dataset,
+    new_dim: str = 'tof',
+    bins: Union[int, sc.Variable] = 256,
+) -> Union[sc.DataArray, sc.Dataset, dict]:
     """
     Convert raw arrival time WFM data to time-of-flight by shifting each frame
     (described by the `frames` argument) by a time offset defined by the position
@@ -142,16 +172,12 @@ def stitch(
     if isinstance(data, sc.Dataset):
         stitched = sc.Dataset()
         for key, item in data.items():
-            stitched[key] = _stitch_item(item=item,
-                                         dim=dim,
-                                         frames=frames,
-                                         new_dim=new_dim,
-                                         bins=bins)
+            stitched[key] = _stitch_item(
+                item=item, dim=dim, frames=frames, new_dim=new_dim, bins=bins
+            )
     else:
-        stitched = _stitch_item(item=data,
-                                dim=dim,
-                                frames=frames,
-                                new_dim=new_dim,
-                                bins=bins)
+        stitched = _stitch_item(
+            item=data, dim=dim, frames=frames, new_dim=new_dim, bins=bins
+        )
 
     return stitched

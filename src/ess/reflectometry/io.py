@@ -5,7 +5,7 @@ import numpy as np
 import scipp as sc
 
 
-def save_ort(data_array: sc.DataArray, filename: str, dimension: str = None):
+def save_ort(data_array: sc.DataArray, filename: str, dimension: str):
     """
     Save a data array with the ORSO .ort file format.
 
@@ -16,9 +16,10 @@ def save_ort(data_array: sc.DataArray, filename: str, dimension: str = None):
     filename:
         Filename.
     dimension:
-        String for dimension to perform mean over, defaults to 'detector_id'.
+        String for dimension to perform mean over.
     """
     from orsopy import fileio
+
     if filename[:-4] == '.ort':
         raise ValueError("The expected output file ending is .ort.")
     if dimension is not None:
@@ -31,5 +32,6 @@ def save_ort(data_array: sc.DataArray, filename: str, dimension: str = None):
     sq = data_array.coords['sigma_Q']
     dataset = fileio.orso.OrsoDataset(
         data_array.attrs['orso'].value,
-        np.array([q.values, R.values, sR.values, sq.values]).T)
+        np.array([q.values, R.values, sR.values, sq.values]).T,
+    )
     fileio.orso.save_orso([dataset], filename)

@@ -16,16 +16,23 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     docs_dir = pathlib.Path(__file__).parent.absolute()
-    work_dir = args.work_dir if args.work_dir is not None else os.path.join(
-        docs_dir, '.doctrees')
-    build_dir = args.build_dir if args.build_dir is not None else os.path.join(
-        docs_dir, 'build')
+    work_dir = (
+        args.work_dir
+        if args.work_dir is not None
+        else os.path.join(docs_dir, '.doctrees')
+    )
+    build_dir = (
+        args.build_dir
+        if args.build_dir is not None
+        else os.path.join(docs_dir, 'build')
+    )
 
     # Build the docs with sphinx-build
     subprocess.check_call(
         ['sphinx-build', '-v', '-b', args.builder, '-d', work_dir, docs_dir, build_dir],
         stderr=subprocess.STDOUT,
-        shell=sys.platform == "win32")
+        shell=sys.platform == "win32",
+    )
 
     # Remove Jupyter notebooks used for documentation build,
     # they are not accessible and create size bloat.

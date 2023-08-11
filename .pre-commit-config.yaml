@@ -14,17 +14,14 @@ repos:
         args: [ --markdown-linebreak-ext=md ]
         exclude: '\.svg'
   - repo: https://github.com/pycqa/isort
-    rev: 5.10.1
+    rev: 5.12.0
     hooks:
       - id: isort
         name: isort (python)
-  - repo: https://github.com/pre-commit/mirrors-yapf
-    rev: v0.32.0
+  - repo: https://github.com/psf/black
+    rev: 23.3.0
     hooks:
-      - id: yapf
-        args: [ "-i", "-r" ]
-        types: [ "python" ]
-        additional_dependencies: [ "toml" ]
+      - id: black
   - repo: https://github.com/kynan/nbstripout
     rev: 0.6.0
     hooks:

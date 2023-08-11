@@ -7,10 +7,12 @@ from ess.external.powgen import data
 
 
 @pytest.mark.skip(
-    reason='mantid.LoadDiffCal causes SEGFAULT on CI but seems to work fine elsewhere')
+    reason='mantid.LoadDiffCal causes SEGFAULT on CI but seems to work fine elsewhere'
+)
 def test_load_calibration_loads_required_data():
-    loaded = load_calibration(data.calibration_file(),
-                              instrument_filename='POWGEN_Definition_2011-02-25.xml')
+    loaded = load_calibration(
+        data.calibration_file(), instrument_filename='POWGEN_Definition_2011-02-25.xml'
+    )
 
     assert 'difa' in loaded
     assert 'difc' in loaded
@@ -21,16 +23,20 @@ def test_load_calibration_loads_required_data():
 
 
 @pytest.mark.skip(
-    reason='mantid.LoadDiffCal causes SEGFAULT on CI but seems to work fine elsewhere')
+    reason='mantid.LoadDiffCal causes SEGFAULT on CI but seems to work fine elsewhere'
+)
 def test_load_calibration_requires_instrument_definition():
     with pytest.raises(ValueError):
         load_calibration(data.calibration_file())
 
 
 @pytest.mark.skip(
-    reason='mantid.LoadDiffCal causes SEGFAULT on CI but seems to work fine elsewhere')
+    reason='mantid.LoadDiffCal causes SEGFAULT on CI but seems to work fine elsewhere'
+)
 def test_load_calibration_can_only_have_1_instrument_definition():
     with pytest.raises(ValueError):
-        load_calibration(data.calibration_file(),
-                         instrument_name='POWGEN',
-                         instrument_filename='POWGEN_Definition_2011-02-25.xml')
+        load_calibration(
+            data.calibration_file(),
+            instrument_name='POWGEN',
+            instrument_filename='POWGEN_Definition_2011-02-25.xml',
+        )
