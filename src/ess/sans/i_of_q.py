@@ -172,8 +172,8 @@ def convert_to_q_and_merge_spectra(
         out = _convert_dense_to_q_and_merge_spectra(
             data=data, graph=graph, q_bins=q_bins, wavelength_bands=wavelength_bands
         )
-    if (wavelength_bands is not None) and (wavelength_bands.sizes['wavelength'] == 2):
-        out = out['wavelength', 0]
+        if (wavelength_bands is not None) and (wavelength_bands.sizes['wavelength'] == 2):
+            out = out['wavelength', 0]
     return out
 
 
@@ -197,11 +197,12 @@ def _convert_events_to_q_and_merge_spectra(
     Convert event data to momentum vector Q.
     """
     data_q = data.transform_coords('Q', graph=graph)
-    q_all_pixels = data_q.bins.concat(set(data_q.dims) - {'Q'})
-    edges = _to_q_bins(q_bins)
-    if wavelength_bands is not None:
-        edges[wavelength_bands.dim] = wavelength_bands
-    return q_all_pixels.bin(**edges)
+    # q_all_pixels = data_q.bins.concat(set(data_q.dims) - {'Q'})
+    # edges = _to_q_bins(q_bins)
+    # if wavelength_bands is not None:
+    #     edges[wavelength_bands.dim] = wavelength_bands
+    # return q_all_pixels.bin(**edges)
+    return data_q.hist(Q=q_bins)
 
 
 def _convert_dense_to_q_and_merge_spectra(
@@ -222,7 +223,7 @@ def _convert_dense_to_q_and_merge_spectra(
         return data_q.hist(**edges).sum(sum_dims)
     for i in range(wavelength_bands.sizes['wavelength'] - 1):
         band = data_q['wavelength', wavelength_bands[i] : wavelength_bands[i + 1]]
-        bands.append(band.hist(**edges).sum(sum_dims))
+        bands.append(band.hist(**edges))
     q_summed = sc.concat(bands, 'wavelength')
     return q_summed
 
@@ -357,5 +358,4 @@ def to_I_of_Q(
     )
 
     normalized = normalization.normalize(numerator=data_q, denominator=denominator_q)
-
     return normalized
