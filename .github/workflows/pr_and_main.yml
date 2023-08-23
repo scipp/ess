@@ -25,7 +25,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
         with:
-          python-version: 3.8
+          python-version: '3.8'
       - run: python -m pip install --upgrade pip
       - run: python -m pip install -r requirements/ci.txt
       - run: tox -e static
@@ -50,11 +50,10 @@ jobs:
           fetch-depth: 0  # history required so cmake can determine version
 
       - name: Setup conda environment
-        uses: mamba-org/provision-with-micromamba@main
+        uses: mamba-org/setup-micromamba@v1
         with:
-          micromamba-version: 1.1.0
           environment-file: environment.yml
-          cache-env: true
+          cache-environment: true
 
       - run: conda develop src
       - run: python -m pytest -v tests

@@ -59,11 +59,10 @@ jobs:
           fetch-depth: 0  # history required so setuptools_scm can determine version
 
       - name: Setup conda environment
-        uses: mamba-org/provision-with-micromamba@main
+        uses: mamba-org/setup-micromamba@v1
         with:
-          micromamba-version: 1.1.0
           environment-file: environment.yml
-          cache-env: true
+          cache-environment: true
 
       - run: python -m pip install --no-deps .
       - run: jupyter --paths
