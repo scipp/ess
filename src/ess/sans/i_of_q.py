@@ -172,8 +172,8 @@ def convert_to_q_and_merge_spectra(
         out = _convert_dense_to_q_and_merge_spectra(
             data=data, graph=graph, q_bins=q_bins, wavelength_bands=wavelength_bands
         )
-        if (wavelength_bands is not None) and (wavelength_bands.sizes['wavelength'] == 2):
-            out = out['wavelength', 0]
+    if (wavelength_bands is not None) and (wavelength_bands.sizes['wavelength'] == 2):
+        out = out['wavelength', 0]
     return out
 
 
@@ -197,13 +197,11 @@ def _convert_events_to_q_and_merge_spectra(
     Convert event data to momentum vector Q.
     """
     data_q = data.transform_coords('Q', graph=graph)
-    # q_all_pixels = data_q.bins.concat(set(data_q.dims) - {'Q'})
-    # edges = _to_q_bins(q_bins)
-    # if wavelength_bands is not None:
-    #     edges[wavelength_bands.dim] = wavelength_bands
-    # return q_all_pixels.bin(**edges)
-    return data_q.hist(Q=q_bins)
-
+    q_all_pixels = data_q.bins.concat(set(data_q.dims) - {'Q'})
+    edges = _to_q_bins(q_bins)
+    if wavelength_bands is not None:
+        edges[wavelength_bands.dim] = wavelength_bands
+    return q_all_pixels.bin(**edges)
 
 def _convert_dense_to_q_and_merge_spectra(
     data: sc.DataArray,
