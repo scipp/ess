@@ -1,6 +1,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import os
-from typing import Union, Dict, Any
+from typing import Any, Dict, Union
+
 import scipp as sc
 import scippnexus as snx
 
