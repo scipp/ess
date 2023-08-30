@@ -6,10 +6,10 @@ from typing import Dict, List, Tuple, Union
 import numpy as np
 import scipp as sc
 
-from .logging import get_logger
 from . import i_of_q
 from .common import gravity_vector
 from .conversions import sans_elastic
+from .logging import get_logger
 from .normalization import iofq_denominator, normalize
 
 

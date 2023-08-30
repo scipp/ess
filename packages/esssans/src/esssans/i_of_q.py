@@ -6,16 +6,16 @@ from typing import Dict, Optional, Union
 import scipp as sc
 from scipp.scipy.interpolate import interp1d
 
-from .logging import get_logger
 from . import conversions, normalization
 from .common import gravity_vector, mask_range
+from .logging import get_logger
 
 
 def preprocess_monitor_data(
     monitor: Union[Dict[str, sc.DataArray], sc.DataArray],
     *,
     wavelength_bins: Optional[sc.Variable] = None,
-    non_background_range: Optional[sc.Variable] = None
+    non_background_range: Optional[sc.Variable] = None,
 ) -> Union[Dict[str, sc.DataArray], sc.DataArray]:
     """
     Prepare monitor data for computing the transmission fraction.
