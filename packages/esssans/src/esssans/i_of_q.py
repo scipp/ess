@@ -9,14 +9,21 @@ from scipp.scipy.interpolate import interp1d
 from .logging import get_logger
 from . import conversions, normalization
 from .common import gravity_vector, mask_range
+from .types import (
+    WavelengthMonitor,
+    RunType,
+    MonitorType,
+    CleanMonitor,
+    WavelengthBins,
+    NonBackgroundWavelengthRange,
+)
 
 
 def preprocess_monitor_data(
-    monitor: Union[Dict[str, sc.DataArray], sc.DataArray],
-    *,
-    wavelength_bins: Optional[sc.Variable] = None,
-    non_background_range: Optional[sc.Variable] = None
-) -> Union[Dict[str, sc.DataArray], sc.DataArray]:
+    monitor: WavelengthMonitor[RunType, MonitorType],
+    wavelength_bins: WavelengthBins,
+    non_background_range: NonBackgroundWavelengthRange,
+) -> CleanMonitor[RunType, MonitorType]:
     """
     Prepare monitor data for computing the transmission fraction.
     The input data are first converted to wavelength (if needed).
@@ -30,7 +37,7 @@ def preprocess_monitor_data(
     Parameters
     ----------
     monitor:
-        The monitor (or group of monitors) to be pre-processed.
+        The monitor to be pre-processed.
     wavelength_bins:
         The binning in wavelength to use for the rebinning.
     non_background_range:
@@ -43,25 +50,7 @@ def preprocess_monitor_data(
         The input monitors converted to wavelength, cleaned of background counts, and
         rebinned to the requested wavelength binning.
     """
-
-    if not isinstance(monitor, sc.DataArray):
-        # Case of a dict or a group of monitors
-        return monitor.__class__(
-            {
-                key: preprocess_monitor_data(
-                    mon,
-                    wavelength_bins=wavelength_bins,
-                    non_background_range=non_background_range,
-                )
-                for key, mon in monitor.items()
-            }
-        )
-
-    if 'wavelength' not in monitor.dims:
-        monitor = monitor.transform_coords(
-            'wavelength', graph=conversions.sans_monitor()
-        )
-
+    monitor = monitor.value
     background = None
     if non_background_range is not None:
         mask = sc.DataArray(
@@ -70,11 +59,10 @@ def preprocess_monitor_data(
         )
         background = mask_range(monitor, mask=mask).mean()
 
-    if wavelength_bins is not None:
-        if monitor.bins is not None:
-            monitor = monitor.hist(wavelength=wavelength_bins)
-        else:
-            monitor = monitor.rebin(wavelength=wavelength_bins)
+    if monitor.bins is not None:
+        monitor = monitor.hist(wavelength=wavelength_bins)
+    else:
+        monitor = monitor.rebin(wavelength=wavelength_bins)
     if background is not None:
         # TODO: reference Heybrock et al. (2023) paper
         # For subtracting the background from the monitors, we need to remove the
@@ -90,7 +78,7 @@ def preprocess_monitor_data(
                 'contributions to uncertainties from correlations.'
             )
         monitor = monitor - bg
-    return monitor
+    return CleanMonitor(monitor)
 
 
 def resample_direct_beam(
@@ -358,3 +346,6 @@ def to_I_of_Q(
     normalized = normalization.normalize(numerator=data_q, denominator=denominator_q)
 
     return normalized
+
+
+providers = [preprocess_monitor_data]

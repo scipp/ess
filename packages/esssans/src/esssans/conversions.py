@@ -1,10 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-
+from typing import NewType
 import scipp as sc
 from scipp.constants import h, m_n
 from scippneutron._utils import elem_unit
 from scippneutron.conversion.graph import beamline, tof
+from .types import MonitorType, RunType, RawMonitor, WavelengthMonitor
 
 
 def cyl_x_unit_vector(gravity: sc.Variable, incident_beam: sc.Variable) -> sc.Variable:
@@ -118,8 +119,20 @@ def sans_elastic(gravity: bool = False, scatter: bool = True) -> dict:
     return graph
 
 
-def sans_monitor() -> dict:
+MonitorCoordTransformGraph = NewType('MonitorCoordTransformGraph', dict)
+
+
+def sans_monitor() -> MonitorCoordTransformGraph:
     """
     Generate a coordinate transformation graph for SANS monitor (no scattering).
     """
     return {**beamline.beamline(scatter=False), **tof.elastic_wavelength('tof')}
+
+
+def transform_monitor_to_wavelength(
+    monitor: RawMonitor[RunType, MonitorType], graph: MonitorCoordTransformGraph
+) -> WavelengthMonitor[RunType, MonitorType]:
+    return WavelengthMonitor(monitor.value.transform_coords('wavelength', graph=graph))
+
+
+providers = [sans_monitor, transform_monitor_to_wavelength]
