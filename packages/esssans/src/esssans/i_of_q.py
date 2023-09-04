@@ -163,13 +163,14 @@ def convert_to_q_and_merge_spectra(
         data = data.copy(deep=False)
         data.coords["gravity"] = gravity_vector()
 
-    if data.bins is not None:
-        out = _convert_events_to_q_and_merge_spectra(
-            data=data, graph=graph, q_bins=q_bins, wavelength_bands=wavelength_bands
+    data_q = data.transform_coords('Q', graph=graph)
+    if data_q.bins is not None:
+        out = _events_merge_spectra(
+            data_q=data_q, q_bins=q_bins, wavelength_bands=wavelength_bands
         )
     else:
-        out = _convert_dense_to_q_and_merge_spectra(
-            data=data, graph=graph, q_bins=q_bins, wavelength_bands=wavelength_bands
+        out = _dense_merge_spectra(
+            data_q=data_q, q_bins=q_bins, wavelength_bands=wavelength_bands
         )
     if (wavelength_bands is not None) and (wavelength_bands.sizes['wavelength'] == 2):
         out = out['wavelength', 0]
@@ -186,16 +187,14 @@ def _to_q_bins(q_bins: Union[int, sc.Variable]) -> Dict[str, Union[int, sc.Varia
     return {q_bins.dim: q_bins}
 
 
-def _convert_events_to_q_and_merge_spectra(
-    data: sc.DataArray,
-    graph: dict,
+def _events_merge_spectra(
+    data_q: sc.DataArray,
     q_bins: Union[int, sc.Variable],
     wavelength_bands: Optional[sc.Variable] = None,
 ) -> sc.DataArray:
     """
-    Convert event data to momentum vector Q.
+    Merge spectra of event data
     """
-    data_q = data.transform_coords('Q', graph=graph)
     q_all_pixels = data_q.bins.concat(set(data_q.dims) - {'Q'})
     edges = _to_q_bins(q_bins)
     if wavelength_bands is not None:
@@ -203,17 +202,15 @@ def _convert_events_to_q_and_merge_spectra(
     return q_all_pixels.bin(**edges)
 
 
-def _convert_dense_to_q_and_merge_spectra(
-    data: sc.DataArray,
-    graph: dict,
+def _dense_merge_spectra(
+    data_q: sc.DataArray,
     q_bins: Union[int, sc.Variable],
     wavelength_bands: Optional[sc.Variable] = None,
 ) -> sc.DataArray:
     """
-    Convert dense data to momentum vector Q.
+    Merge spectra of dense data
     """
     bands = []
-    data_q = data.transform_coords('Q', graph=graph)
     sum_dims = set(data_q.dims) - {'Q'}
     edges = _to_q_bins(q_bins)
     if wavelength_bands is None:
