@@ -1,19 +1,20 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
+
 from .types import (
-    DirectBeamFilename,
-    DirectBeam,
-    Filename,
-    RunType,
-    RawData,
-    MonitorType,
-    RawMonitor,
-    NeXusMonitorName,
     DetectorEdgeMask,
+    DirectBeam,
+    DirectBeamFilename,
+    Filename,
+    MaskedData,
+    MonitorType,
+    NeXusMonitorName,
+    RawData,
+    RawMonitor,
+    RunType,
     SampleHolderMask,
     SampleRun,
-    MaskedData,
 )
 
 
@@ -28,9 +29,7 @@ def load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
 def get_monitor(
     da: RawData[RunType], nexus_name: NeXusMonitorName[MonitorType]
 ) -> RawMonitor[RunType, MonitorType]:
-    return RawMonitor(da.attrs[nexus_name].value)
-    # TODO We get an exception about __init__ when using this with a DataArray:
-    return IncidentMonitor[RunType](da.attrs['monitor2'].value)
+    return RawMonitor[RunType, MonitorType](da.attrs[nexus_name].value)
 
 
 def detector_edge_mask(sample: RawData[SampleRun]) -> DetectorEdgeMask:

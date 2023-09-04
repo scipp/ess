@@ -1,17 +1,20 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 from typing import NewType
+
 import scipp as sc
 from scipp.constants import h, m_n
 from scippneutron._utils import elem_unit
 from scippneutron.conversion.graph import beamline, tof
+
 from .types import (
-    MonitorType,
-    RunType,
-    RawMonitor,
-    WavelengthMonitor,
-    WavelengthData,
+    BeamCenter,
     MaskedData,
+    MonitorType,
+    RawMonitor,
+    RunType,
+    WavelengthData,
+    WavelengthMonitor,
 )
 
 
@@ -154,9 +157,17 @@ def transform_monitor_to_wavelength(
 # for RawData, MaskedData, ... no reason to restrict necessarily.
 # Would we be fine with just choosing on option, or will this get in the way for users?
 def transform_detector_to_wavelength(
-    detector: MaskedData[RunType], graph: ElasticCoordTransformGraph
+    detector: MaskedData[RunType],
+    beam_center: BeamCenter,
+    graph: ElasticCoordTransformGraph,
 ) -> WavelengthData[RunType]:
-    return WavelengthData(detector.transform_coords('wavelength', graph=graph))
+    detector = detector.copy(deep=False)
+    detector.coords['position'] -= beam_center
+    da = WavelengthData(detector.transform_coords('wavelength', graph=graph))
+    # TODO Why are these losing their alignment flag?
+    for coord in ['position', 'source_position', 'sample_position']:
+        da.coords.set_aligned(coord, True)
+    return da
 
 
 providers = [

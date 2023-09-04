@@ -6,19 +6,27 @@ from typing import Dict, Optional, Union
 import scipp as sc
 from scipp.scipy.interpolate import interp1d
 
-from .logging import get_logger
-from . import conversions, normalization
+from . import normalization
 from .common import gravity_vector, mask_range
+from .conversions import ElasticCoordTransformGraph
+from .logging import get_logger
 from .types import (
-    DirectBeam,
+    BackgroundRun,
+    BackgroundSubtractedIofQ,
     CleanDirectBeam,
-    WavelengthBins,
-    WavelengthMonitor,
-    RunType,
-    MonitorType,
     CleanMonitor,
-    WavelengthBins,
+    DirectBeam,
+    IofQ,
+    IofQDenominator,
+    MonitorType,
     NonBackgroundWavelengthRange,
+    QBins,
+    RunType,
+    SampleRun,
+    WavelengthBins,
+    WavelengthData,
+    WavelengthMask,
+    WavelengthMonitor,
 )
 
 
@@ -218,17 +226,13 @@ def _convert_dense_to_q_and_merge_spectra(
 
 
 def to_I_of_Q(
-    data: sc.DataArray,
-    data_monitors: Dict[str, sc.DataArray],
-    direct_monitors: Dict[str, sc.DataArray],
-    direct_beam: sc.DataArray,
-    wavelength_bins: sc.Variable,
-    q_bins: Union[int, sc.Variable],
-    gravity: bool = False,
-    wavelength_mask: Optional[sc.DataArray] = None,
-    wavelength_bands: Optional[sc.Variable] = None,
-    signal_over_monitor_threshold: float = 0.1,
-) -> sc.DataArray:
+    data: WavelengthData[RunType],
+    denominator: IofQDenominator[RunType],
+    wavelength_bins: WavelengthBins,
+    q_bins: QBins,
+    graph: ElasticCoordTransformGraph,
+    wavelength_mask: Optional[WavelengthMask],
+) -> IofQ[RunType]:
     """
     Compute the scattering cross-section I(Q) for a SANS experimental run, performing
     binning in Q and a normalization based on monitor data and a direct beam function.
@@ -252,17 +256,6 @@ def to_I_of_Q(
     ----------
     data:
         The detector data. This can be both events or dense (histogrammed) data.
-    data_monitors:
-        The data arrays for the incident and transmission monitors for the measurement
-        run (background noise removed and converted to wavelength).
-    direct_monitors:
-        The data arrays for the incident and transmission monitors for the direct
-        run (background noise removed and converted to wavelength).
-    direct_beam:
-        The direct beam function of the instrument (histogrammed,
-        depends on wavelength).
-    wavelength_bins:
-        The binning in the wavelength dimension to be used.
     q_bins:
         The binning in the Q dimension to be used.
     gravity:
@@ -284,10 +277,6 @@ def to_I_of_Q(
         The intensity as a function of Q.
     """
 
-    # Convert sample data to wavelength
-    graph = conversions.sans_elastic(gravity=gravity)
-    data = data.transform_coords("wavelength", graph=graph)
-
     if wavelength_mask is not None:
         # If we have binned data and the wavelength coord is multi-dimensional, we need
         # to make a single wavelength bin before we can mask the range.
@@ -296,35 +285,18 @@ def to_I_of_Q(
             if (dim in data.bins.coords) and (dim in data.coords):
                 data = data.bin({dim: 1})
         data = mask_range(data, wavelength_mask)
-        data_monitors = {
-            key: mask_range(mon, wavelength_mask) for key, mon in data_monitors.items()
-        }
-        direct_monitors = {
-            key: mask_range(mon, wavelength_mask)
-            for key, mon in direct_monitors.items()
-        }
-
-    # Compute normalizing term
-    direct_beam = resample_direct_beam(
-        direct_beam=direct_beam, wavelength_bins=wavelength_bins
-    )
-    denominator = normalization.iofq_denominator(
-        data=data,
-        data_transmission_monitor=data_monitors['transmission'],
-        direct_incident_monitor=direct_monitors['incident'],
-        direct_transmission_monitor=direct_monitors['transmission'],
-        direct_beam=direct_beam,
-        signal_over_monitor_threshold=signal_over_monitor_threshold,
-    )
+        denominator = mask_range(denominator, wavelength_mask)
 
     # Insert a copy of coords needed for conversion to Q.
     # TODO: can this be avoided by copying the Q coords from the converted numerator?
-    for coord in ['position', 'sample_position', 'source_position']:
-        denominator.coords[coord] = data.meta[coord]
+    # for coord in ['position', 'sample_position', 'source_position']:
+    #    denominator.coords[coord] = data.meta[coord]
 
     # In the case where no wavelength bands are requested, we create a single wavelength
     # band to make sure we select the correct wavelength range that corresponds to
     # wavelength_bins
+    gravity = False
+    wavelength_bands = None
     if wavelength_bands is None:
         wavelength_bands = sc.concat(
             [wavelength_bins.min(), wavelength_bins.max()], dim='wavelength'
@@ -348,7 +320,18 @@ def to_I_of_Q(
 
     normalized = normalization.normalize(numerator=data_q, denominator=denominator_q)
 
-    return normalized
+    return IofQ[RunType](normalized)
 
 
-providers = [preprocess_monitor_data]
+def subtract_background(
+    sample: IofQ[SampleRun], background: IofQ[BackgroundRun]
+) -> BackgroundSubtractedIofQ:
+    return BackgroundSubtractedIofQ(sample.bins.sum() - background.bins.sum())
+
+
+providers = [
+    preprocess_monitor_data,
+    resample_direct_beam,
+    to_I_of_Q,
+    subtract_background,
+]
