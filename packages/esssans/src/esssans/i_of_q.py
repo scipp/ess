@@ -6,7 +6,6 @@ from typing import Dict, Optional, Union
 import scipp as sc
 from scipp.scipy.interpolate import interp1d
 
-from . import normalization
 from .common import mask_range
 from .logging import get_logger
 from .types import (
@@ -15,17 +14,17 @@ from .types import (
     CleanDirectBeam,
     CleanMonitor,
     CleanQ,
-    Denominator,
+    CleanSummedQ,
     DirectBeam,
     IofQ,
+    IofQPart,
     MonitorType,
     NonBackgroundWavelengthRange,
-    Numerator,
     QBins,
     RunType,
     SampleRun,
+    WavelengthBands,
     WavelengthBins,
-    WavelengthMask,
     WavelengthMonitor,
 )
 
@@ -125,10 +124,10 @@ def resample_direct_beam(
 
 
 def merge_spectra(
-    data: sc.DataArray,
-    q_bins: Union[int, sc.Variable],
-    wavelength_bands: Optional[sc.Variable] = None,
-) -> sc.DataArray:
+    data: CleanQ[RunType, IofQPart],
+    q_bins: QBins,
+    wavelength_bands: WavelengthBands,
+) -> CleanSummedQ[RunType, IofQPart]:
     """
     Convert the data to momentum vector Q. This accepts both dense and event data.
     The final step merges all spectra:
@@ -161,7 +160,7 @@ def merge_spectra(
     #    data = data.copy(deep=False)
     #    data.coords["gravity"] = gravity_vector()
 
-    data_q = data
+    data_q = data.value
     if data_q.bins is not None:
         out = _events_merge_spectra(
             data_q=data_q, q_bins=q_bins, wavelength_bands=wavelength_bands
@@ -172,7 +171,7 @@ def merge_spectra(
         )
     if (wavelength_bands is not None) and (wavelength_bands.sizes['wavelength'] == 2):
         out = out['wavelength', 0]
-    return out
+    return CleanSummedQ[RunType, IofQPart](out)
 
 
 def _to_q_bins(q_bins: Union[int, sc.Variable]) -> Dict[str, Union[int, sc.Variable]]:
@@ -220,89 +219,6 @@ def _dense_merge_spectra(
     return q_summed
 
 
-def to_I_of_Q(
-    data: CleanQ[RunType, Numerator],
-    denominator: CleanQ[RunType, Denominator],
-    wavelength_bins: WavelengthBins,
-    q_bins: QBins,
-    wavelength_mask: Optional[WavelengthMask],
-) -> IofQ[RunType]:
-    """
-    Compute the scattering cross-section I(Q) for a SANS experimental run, performing
-    binning in Q and a normalization based on monitor data and a direct beam function.
-
-    The main steps of the workflow are:
-
-    * Generate a coordinate transformation graph from ``tof`` to ``Q``, that also
-      includes ``wavelength``.
-    * Convert the detector data to wavelength.
-    * Compute the transmission fraction from the monitor data.
-    * Compute the solid angles of the detector pixels.
-    * Resample the direct beam function to the same wavelength binning as the
-      monitors.
-    * Combine solid angle, direct beam, transmission fraction and incident monitor
-      counts to compute the denominator for the normalization.
-    * Convert the detector data to momentum vector Q.
-    * Convert the denominator to momentum vector Q.
-    * Normalize the detector data.
-
-    Parameters
-    ----------
-    data:
-        The detector data. This can be both events or dense (histogrammed) data.
-    q_bins:
-        The binning in the Q dimension to be used.
-    gravity:
-        Include the effects of gravity when computing the scattering angle if ``True``.
-    wavelength_mask:
-        Mask to apply to the wavelength coordinate (to mask out artifacts from the
-        instrument beamline). See :func:`common.mask_range` for more details.
-    wavelength_bands:
-        If defined, return the data as a set of bands in the wavelength dimension. This
-        is useful for separating different wavelength ranges that contribute to
-        different regions in Q space.
-    signal_over_monitor_threshold:
-        The threshold for the ratio of detector counts to monitor counts above which
-        an error is raised because it is not safe to drop the variances of the monitor.
-
-    Returns
-    -------
-    :
-        The intensity as a function of Q.
-    """
-    data = data.value
-    denominator = denominator.value
-
-    # Insert a copy of coords needed for conversion to Q.
-    # for coord in ['position', 'sample_position', 'source_position']:
-    #    denominator.coords[coord] = data.meta[coord]
-
-    # In the case where no wavelength bands are requested, we create a single wavelength
-    # band to make sure we select the correct wavelength range that corresponds to
-    # wavelength_bins
-    wavelength_bands = None
-    if wavelength_bands is None:
-        wavelength_bands = sc.concat(
-            [wavelength_bins.min(), wavelength_bins.max()], dim='wavelength'
-        )
-
-    data_q = merge_spectra(
-        data=data,
-        wavelength_bands=wavelength_bands,
-        q_bins=q_bins,
-    )
-
-    denominator_q = merge_spectra(
-        data=denominator,
-        wavelength_bands=wavelength_bands,
-        q_bins=q_bins,
-    )
-
-    normalized = normalization.normalize(numerator=data_q, denominator=denominator_q)
-
-    return IofQ[RunType](normalized)
-
-
 def subtract_background(
     sample: IofQ[SampleRun], background: IofQ[BackgroundRun]
 ) -> BackgroundSubtractedIofQ:
@@ -312,6 +228,6 @@ def subtract_background(
 providers = [
     preprocess_monitor_data,
     resample_direct_beam,
-    to_I_of_Q,
+    merge_spectra,
     subtract_background,
 ]

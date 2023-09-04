@@ -6,6 +6,7 @@ from typing import Generic, NewType, TypeVar
 import sciline
 import scipp as sc
 
+WavelengthBands = NewType('WavelengthBands', sc.Variable)
 WavelengthBins = NewType('WavelengthBins', sc.Variable)
 QBins = NewType('QBins', sc.Variable)
 NonBackgroundWavelengthRange = NewType('NonBackgroundWavelengthRange', sc.Variable)
@@ -70,6 +71,11 @@ class Clean(Generic[RunType, IofQPart]):
 
 @dataclass
 class CleanQ(Generic[RunType, IofQPart]):
+    value: sc.DataArray
+
+
+@dataclass
+class CleanSummedQ(Generic[RunType, IofQPart]):
     value: sc.DataArray
 
 

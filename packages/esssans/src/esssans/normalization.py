@@ -12,9 +12,11 @@ from .types import (
     Clean,
     CleanDirectBeam,
     CleanMonitor,
+    CleanSummedQ,
     Denominator,
     DirectRun,
     Incident,
+    IofQ,
     Numerator,
     RunType,
     SampleRun,
@@ -219,7 +221,10 @@ def iofq_denominator(
     return Clean[RunType, Denominator](denominator)
 
 
-def normalize(numerator: sc.DataArray, denominator: sc.DataArray) -> sc.DataArray:
+def normalize(
+    numerator: CleanSummedQ[RunType, Numerator],
+    denominator: CleanSummedQ[RunType, Denominator],
+) -> IofQ[RunType]:
     """
     Perform normalization of counts as a function of Q.
     If the numerator contains events, we use the sc.lookup function to perform the
@@ -239,14 +244,18 @@ def normalize(numerator: sc.DataArray, denominator: sc.DataArray) -> sc.DataArra
     :
         The input data normalized by the supplied denominator.
     """
+    numerator = numerator.value
+    denominator = denominator.value
     if numerator.bins is not None:
-        return numerator.bins / sc.lookup(func=denominator, dim='Q')
+        da = numerator.bins / sc.lookup(func=denominator, dim='Q')
     else:
-        return numerator / denominator
+        da = numerator / denominator
+    return IofQ[RunType](da)
 
 
 providers = [
     transmission_fraction,
     iofq_denominator,
+    normalize,
     solid_angle_rectangular_approximation,
 ]
