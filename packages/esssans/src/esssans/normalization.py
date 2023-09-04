@@ -6,19 +6,22 @@ from typing import Optional
 import scipp as sc
 import scippneutron as scn
 
+from .common import mask_range
 from .logging import get_logger
 from .types import (
+    Clean,
     CleanDirectBeam,
     CleanMonitor,
+    Denominator,
     DirectRun,
     Incident,
-    IofQDenominator,
+    Numerator,
     RunType,
     SampleRun,
     SolidAngle,
     Transmission,
     TransmissionFraction,
-    WavelengthData,
+    WavelengthMask,
 )
 from .uncertainty import variance_normalized_signal_over_monitor
 
@@ -63,8 +66,9 @@ def solid_angle_of_rectangular_pixels(
 
 
 def solid_angle_rectangular_approximation(
-    data: WavelengthData[RunType],
+    data: Clean[RunType, Numerator],
 ) -> SolidAngle[RunType]:
+    data = data.value
     return SolidAngle[RunType](
         solid_angle_of_rectangular_pixels(
             data,
@@ -147,8 +151,9 @@ def iofq_denominator(
     direct_transmission_monitor: CleanMonitor[DirectRun, Transmission],
     solid_angle: SolidAngle[RunType],
     direct_beam: Optional[CleanDirectBeam],
+    wavelength_mask: Optional[WavelengthMask],
     # signal_over_monitor_threshold: float = 0.1,
-) -> IofQDenominator[RunType]:
+) -> Clean[RunType, Denominator]:
     """
     Compute the denominator term for the I(Q) normalization. This is basically:
     ``solid_angle * direct_beam * data_transmission_monitor * direct_incident_monitor / direct_transmission_monitor``
@@ -209,7 +214,9 @@ def iofq_denominator(
     # Convert wavelength coordinate to midpoints for future histogramming
     # if wavelength_to_midpoints:
     denominator.coords['wavelength'] = sc.midpoints(denominator.coords['wavelength'])
-    return IofQDenominator[RunType](denominator)
+    if wavelength_mask is not None:
+        denominator = mask_range(denominator, mask=wavelength_mask)
+    return Clean[RunType, Denominator](denominator)
 
 
 def normalize(numerator: sc.DataArray, denominator: sc.DataArray) -> sc.DataArray:

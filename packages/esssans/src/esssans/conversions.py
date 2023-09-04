@@ -1,19 +1,24 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-from typing import NewType
+from typing import NewType, Optional
 
 import scipp as sc
 from scipp.constants import h, m_n
 from scippneutron._utils import elem_unit
 from scippneutron.conversion.graph import beamline, tof
 
+from .common import mask_range
 from .types import (
     BeamCenter,
+    Clean,
+    CleanQ,
+    IofQPart,
     MaskedData,
     MonitorType,
+    Numerator,
     RawMonitor,
     RunType,
-    WavelengthData,
+    WavelengthMask,
     WavelengthMonitor,
 )
 
@@ -159,15 +164,34 @@ def transform_monitor_to_wavelength(
 def transform_detector_to_wavelength(
     detector: MaskedData[RunType],
     beam_center: BeamCenter,
+    wavelength_mask: Optional[WavelengthMask],
     graph: ElasticCoordTransformGraph,
-) -> WavelengthData[RunType]:
+) -> Clean[RunType, Numerator]:
     detector = detector.copy(deep=False)
     detector.coords['position'] -= beam_center
-    da = WavelengthData(detector.transform_coords('wavelength', graph=graph))
+    da = detector.transform_coords('wavelength', graph=graph)
     # TODO Why are these losing their alignment flag?
     for coord in ['position', 'source_position', 'sample_position']:
         da.coords.set_aligned(coord, True)
-    return da
+    if wavelength_mask is not None:
+        # If we have binned data and the wavelength coord is multi-dimensional, we need
+        # to make a single wavelength bin before we can mask the range.
+        if da.bins is not None:
+            dim = wavelength_mask.dim
+            if (dim in da.bins.coords) and (dim in da.coords):
+                da = da.bin({dim: 1})
+        da = mask_range(da, mask=wavelength_mask)
+
+    return Clean[RunType, Numerator](da)
+
+
+def to_Q(
+    data: Clean[RunType, IofQPart], graph: ElasticCoordTransformGraph
+) -> CleanQ[RunType, IofQPart]:
+    """
+    Convert a data array from wavelength to Q.
+    """
+    return CleanQ[RunType, IofQPart](data.value.transform_coords('Q', graph=graph))
 
 
 providers = [
@@ -175,4 +199,5 @@ providers = [
     sans_monitor,
     transform_monitor_to_wavelength,
     transform_detector_to_wavelength,
+    to_Q,
 ]

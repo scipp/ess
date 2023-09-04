@@ -14,6 +14,7 @@ BeamCenter = NewType('BeamCenter', sc.Variable)
 DetectorEdgeMask = NewType('DetectorEdgeMask', sc.Variable)
 SampleHolderMask = NewType('SampleHolderMask', sc.Variable)
 WavelengthMask = NewType('WavelengthMask', sc.DataArray)
+# Note: Unused by IofQDenominator, it uses monitors directly?
 TransmissionFraction = NewType('TransmissionFraction', sc.DataArray)
 DirectBeam = NewType('DirectBeam', sc.DataArray)
 CleanDirectBeam = NewType('CleanDirectBeam', sc.DataArray)  # after resample
@@ -29,13 +30,17 @@ Incident = NewType('Incident', int)
 Transmission = NewType('Transmission', int)
 MonitorType = TypeVar('MonitorType', Incident, Transmission)
 
+Numerator = NewType('Numerator', sc.DataArray)
+Denominator = NewType('Denominator', sc.DataArray)
+IofQPart = TypeVar('IofQPart')
+
 
 class SolidAngle(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     ...
 
 
-class IofQDenominator(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    ...
+# class IofQDenominator(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+#    ...
 
 
 class NeXusMonitorName(sciline.Scope[MonitorType, str], str):
@@ -54,8 +59,18 @@ class MaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     ...
 
 
-class WavelengthData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    ...
+# class WavelengthData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+#    ...
+
+
+@dataclass
+class Clean(Generic[RunType, IofQPart]):
+    value: sc.DataArray
+
+
+@dataclass
+class CleanQ(Generic[RunType, IofQPart]):
+    value: sc.DataArray
 
 
 class IofQ(sciline.Scope[RunType, sc.DataArray], sc.DataArray):

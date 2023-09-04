@@ -7,24 +7,24 @@ import scipp as sc
 from scipp.scipy.interpolate import interp1d
 
 from . import normalization
-from .common import gravity_vector, mask_range
-from .conversions import ElasticCoordTransformGraph
+from .common import mask_range
 from .logging import get_logger
 from .types import (
     BackgroundRun,
     BackgroundSubtractedIofQ,
     CleanDirectBeam,
     CleanMonitor,
+    CleanQ,
+    Denominator,
     DirectBeam,
     IofQ,
-    IofQDenominator,
     MonitorType,
     NonBackgroundWavelengthRange,
+    Numerator,
     QBins,
     RunType,
     SampleRun,
     WavelengthBins,
-    WavelengthData,
     WavelengthMask,
     WavelengthMonitor,
 )
@@ -124,11 +124,9 @@ def resample_direct_beam(
     return CleanDirectBeam(direct_beam)
 
 
-def convert_to_q_and_merge_spectra(
+def merge_spectra(
     data: sc.DataArray,
-    graph: dict,
     q_bins: Union[int, sc.Variable],
-    gravity: bool,
     wavelength_bands: Optional[sc.Variable] = None,
 ) -> sc.DataArray:
     """
@@ -159,11 +157,11 @@ def convert_to_q_and_merge_spectra(
     :
         The input data converted to Q and then summed over all detector pixels.
     """
-    if gravity and ('gravity' not in data.meta):
-        data = data.copy(deep=False)
-        data.coords["gravity"] = gravity_vector()
+    # if gravity and ('gravity' not in data.meta):
+    #    data = data.copy(deep=False)
+    #    data.coords["gravity"] = gravity_vector()
 
-    data_q = data.transform_coords('Q', graph=graph)
+    data_q = data
     if data_q.bins is not None:
         out = _events_merge_spectra(
             data_q=data_q, q_bins=q_bins, wavelength_bands=wavelength_bands
@@ -223,11 +221,10 @@ def _dense_merge_spectra(
 
 
 def to_I_of_Q(
-    data: WavelengthData[RunType],
-    denominator: IofQDenominator[RunType],
+    data: CleanQ[RunType, Numerator],
+    denominator: CleanQ[RunType, Denominator],
     wavelength_bins: WavelengthBins,
     q_bins: QBins,
-    graph: ElasticCoordTransformGraph,
     wavelength_mask: Optional[WavelengthMask],
 ) -> IofQ[RunType]:
     """
@@ -273,46 +270,32 @@ def to_I_of_Q(
     :
         The intensity as a function of Q.
     """
-
-    if wavelength_mask is not None:
-        # If we have binned data and the wavelength coord is multi-dimensional, we need
-        # to make a single wavelength bin before we can mask the range.
-        if data.bins is not None:
-            dim = wavelength_mask.dim
-            if (dim in data.bins.coords) and (dim in data.coords):
-                data = data.bin({dim: 1})
-        data = mask_range(data, wavelength_mask)
-        denominator = mask_range(denominator, wavelength_mask)
+    data = data.value
+    denominator = denominator.value
 
     # Insert a copy of coords needed for conversion to Q.
-    # TODO: can this be avoided by copying the Q coords from the converted numerator?
     # for coord in ['position', 'sample_position', 'source_position']:
     #    denominator.coords[coord] = data.meta[coord]
 
     # In the case where no wavelength bands are requested, we create a single wavelength
     # band to make sure we select the correct wavelength range that corresponds to
     # wavelength_bins
-    gravity = False
     wavelength_bands = None
     if wavelength_bands is None:
         wavelength_bands = sc.concat(
             [wavelength_bins.min(), wavelength_bins.max()], dim='wavelength'
         )
 
-    data_q = convert_to_q_and_merge_spectra(
+    data_q = merge_spectra(
         data=data,
-        graph=graph,
         wavelength_bands=wavelength_bands,
         q_bins=q_bins,
-        gravity=gravity,
     )
 
-    denominator_q = convert_to_q_and_merge_spectra(
+    denominator_q = merge_spectra(
         data=denominator,
-        graph=graph,
         wavelength_bands=wavelength_bands,
         q_bins=q_bins,
-        gravity=gravity,
     )
 
     normalized = normalization.normalize(numerator=data_q, denominator=denominator_q)
