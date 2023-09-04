@@ -12,7 +12,6 @@ except importlib.metadata.PackageNotFoundError:
 from . import common, conversions, i_of_q, io, normalization
 
 # from .beam_center_finder import beam_center
-from .i_of_q import to_I_of_Q
 
 providers = (
     conversions.providers + io.providers + i_of_q.providers + normalization.providers
