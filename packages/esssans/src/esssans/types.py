@@ -12,9 +12,15 @@ DirectBeamFilename = NewType('DirectBeamFilename', str)
 BeamCenter = NewType('BeamCenter', Tuple[sc.Variable, sc.Variable])
 DetectorEdgeMask = NewType('DetectorEdgeMask', sc.Variable)
 SampleHolderMask = NewType('SampleHolderMask', sc.Variable)
+TransmissionFraction = NewType('TransmissionFraction', sc.DataArray)
+DirectBeam = NewType('DirectBeam', sc.DataArray)
+CleanDirectBeam = NewType('CleanDirectBeam', sc.DataArray)  # after resample
+IofQDenominator = NewType('IofQDenominator', sc.DataArray)
+SolidAngle = NewType('SolidAngle', sc.DataArray)
 
-SampleRun = NewType('SampleRun', int)
+BackgroundRun = NewType('BackgroundRun', int)
 DirectRun = NewType('DirectRun', int)
+SampleRun = NewType('SampleRun', int)
 RunType = TypeVar('RunType', SampleRun, DirectRun)
 
 # TODO Need Scope with multiple params, see scipp/sciline#42
@@ -36,6 +42,10 @@ class RawData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
 
 
 class MaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    ...
+
+
+class WavelengthData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     ...
 
 

@@ -14,4 +14,6 @@ from .beam_center_finder import beam_center
 from .i_of_q import to_I_of_Q
 from . import io
 
-providers = conversions.providers + io.providers + i_of_q.providers
+providers = (
+    conversions.providers + io.providers + i_of_q.providers + normalization.providers
+)

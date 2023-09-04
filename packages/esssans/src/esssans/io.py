@@ -2,6 +2,8 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 from .types import (
+    DirectBeamFilename,
+    DirectBeam,
     Filename,
     RunType,
     RawData,
@@ -17,6 +19,10 @@ from .types import (
 
 def load(filename: Filename[RunType]) -> RawData[RunType]:
     return RawData[RunType](sc.io.load_hdf5(filename=filename))
+
+
+def load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
+    return DirectBeam(sc.io.load_hdf5(filename=filename))
 
 
 def get_monitor(
@@ -46,6 +52,7 @@ def sample_holder_mask(sample: RawData[SampleRun]) -> SampleHolderMask:
     return SampleHolderMask(holder_mask)
 
 
+# TODO Use Scilines upcoming support for Optional
 def mask_detectors(
     da: RawData[RunType], edge_mask: DetectorEdgeMask, holder_mask: SampleHolderMask
 ) -> MaskedData[RunType]:
@@ -55,4 +62,11 @@ def mask_detectors(
     return MaskedData[RunType](da)
 
 
-providers = [load, get_monitor, detector_edge_mask, sample_holder_mask, mask_detectors]
+providers = [
+    load,
+    load_direct_beam,
+    get_monitor,
+    detector_edge_mask,
+    sample_holder_mask,
+    mask_detectors,
+]

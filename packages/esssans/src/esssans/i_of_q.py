@@ -10,6 +10,9 @@ from .logging import get_logger
 from . import conversions, normalization
 from .common import gravity_vector, mask_range
 from .types import (
+    DirectBeam,
+    CleanDirectBeam,
+    WavelengthBins,
     WavelengthMonitor,
     RunType,
     MonitorType,
@@ -82,8 +85,8 @@ def preprocess_monitor_data(
 
 
 def resample_direct_beam(
-    direct_beam: sc.DataArray, wavelength_bins: sc.Variable
-) -> sc.DataArray:
+    direct_beam: DirectBeam, wavelength_bins: WavelengthBins
+) -> CleanDirectBeam:
     """
     If the wavelength binning of the direct beam function does not match the requested
     ``wavelength_bins``, perform a 1d interpolation of the function onto the bins.
@@ -110,7 +113,7 @@ def resample_direct_beam(
         'An interpolation was performed on the direct_beam function. '
         'The variances in the direct_beam function have been dropped.'
     )
-    return direct_beam
+    return CleanDirectBeam(direct_beam)
 
 
 def convert_to_q_and_merge_spectra(
