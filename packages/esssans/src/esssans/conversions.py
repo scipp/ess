@@ -11,6 +11,7 @@ from .common import mask_range
 from .types import (
     BeamCenter,
     Clean,
+    CleanMasked,
     CleanQ,
     CorrectForGravity,
     IofQPart,
@@ -148,7 +149,7 @@ def sans_monitor() -> MonitorCoordTransformGraph:
     )
 
 
-def transform_monitor_to_wavelength(
+def monitor_to_wavelength(
     monitor: RawMonitor[RunType, MonitorType], graph: MonitorCoordTransformGraph
 ) -> WavelengthMonitor[RunType, MonitorType]:
     return WavelengthMonitor(monitor.value.transform_coords('wavelength', graph=graph))
@@ -157,29 +158,35 @@ def transform_monitor_to_wavelength(
 # TODO This demonstrates a problem: Transforming to wavelength should be possible
 # for RawData, MaskedData, ... no reason to restrict necessarily.
 # Would we be fine with just choosing on option, or will this get in the way for users?
-def transform_detector_to_wavelength(
+def detector_to_wavelength(
     detector: MaskedData[RunType],
     beam_center: BeamCenter,
-    wavelength_mask: Optional[WavelengthMask],
     graph: ElasticCoordTransformGraph,
 ) -> Clean[RunType, Numerator]:
     detector = detector.copy(deep=False)
     detector.coords['position'] -= beam_center
     da = detector.transform_coords('wavelength', graph=graph)
-    if wavelength_mask is not None:
-        # If we have binned data and the wavelength coord is multi-dimensional, we need
-        # to make a single wavelength bin before we can mask the range.
-        if da.bins is not None:
-            dim = wavelength_mask.dim
-            if (dim in da.bins.coords) and (dim in da.coords):
-                da = da.bin({dim: 1})
-        da = mask_range(da, mask=wavelength_mask)
 
     return Clean[RunType, Numerator](da)
 
 
+def mask_wavelength(
+    da: Clean[RunType, IofQPart], mask: Optional[WavelengthMask]
+) -> CleanMasked[RunType, IofQPart]:
+    da = da.value
+    if mask is not None:
+        # If we have binned data and the wavelength coord is multi-dimensional, we need
+        # to make a single wavelength bin before we can mask the range.
+        if da.bins is not None:
+            dim = mask.dim
+            if (dim in da.bins.coords) and (dim in da.coords):
+                da = da.bin({dim: 1})
+        da = mask_range(da, mask=mask)
+    return CleanMasked[RunType, IofQPart](da)
+
+
 def to_Q(
-    data: Clean[RunType, IofQPart], graph: ElasticCoordTransformGraph
+    data: CleanMasked[RunType, IofQPart], graph: ElasticCoordTransformGraph
 ) -> CleanQ[RunType, IofQPart]:
     """
     Convert a data array from wavelength to Q.
@@ -190,7 +197,8 @@ def to_Q(
 providers = [
     sans_elastic,
     sans_monitor,
-    transform_monitor_to_wavelength,
-    transform_detector_to_wavelength,
+    monitor_to_wavelength,
+    detector_to_wavelength,
+    mask_wavelength,
     to_Q,
 ]

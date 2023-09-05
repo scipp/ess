@@ -6,6 +6,9 @@ from typing import Generic, NewType, TypeVar
 import sciline
 import scipp as sc
 
+# Note: Unused by IofQ workflow, it uses monitors directly?
+TransmissionFraction = NewType('TransmissionFraction', sc.DataArray)
+
 WavelengthBands = NewType('WavelengthBands', sc.Variable)
 WavelengthBins = NewType('WavelengthBins', sc.Variable)
 QBins = NewType('QBins', sc.Variable)
@@ -15,8 +18,6 @@ BeamCenter = NewType('BeamCenter', sc.Variable)
 DetectorEdgeMask = NewType('DetectorEdgeMask', sc.Variable)
 SampleHolderMask = NewType('SampleHolderMask', sc.Variable)
 WavelengthMask = NewType('WavelengthMask', sc.DataArray)
-# Note: Unused by IofQDenominator, it uses monitors directly?
-TransmissionFraction = NewType('TransmissionFraction', sc.DataArray)
 DirectBeam = NewType('DirectBeam', sc.DataArray)
 CleanDirectBeam = NewType('CleanDirectBeam', sc.DataArray)  # after resample
 BackgroundSubtractedIofQ = NewType('BackgroundSubtractedIofQ', sc.DataArray)
@@ -41,10 +42,6 @@ class SolidAngle(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     ...
 
 
-# class IofQDenominator(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-#    ...
-
-
 class NeXusMonitorName(sciline.Scope[MonitorType, str], str):
     ...
 
@@ -61,12 +58,13 @@ class MaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     ...
 
 
-# class WavelengthData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-#    ...
+@dataclass
+class Clean(Generic[RunType, IofQPart]):
+    value: sc.DataArray
 
 
 @dataclass
-class Clean(Generic[RunType, IofQPart]):
+class CleanMasked(Generic[RunType, IofQPart]):
     value: sc.DataArray
 
 

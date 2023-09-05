@@ -7,7 +7,6 @@ import scipp as sc
 import scippneutron as scn
 from scipp.core import concepts
 
-from .common import mask_range
 from .logging import get_logger
 from .types import (
     Clean,
@@ -25,7 +24,6 @@ from .types import (
     SolidAngle,
     Transmission,
     TransmissionFraction,
-    WavelengthMask,
 )
 from .uncertainty import variance_normalized_signal_over_monitor
 
@@ -147,7 +145,6 @@ def iofq_denominator(
     direct_transmission_monitor: CleanMonitor[DirectRun, Transmission],
     solid_angle: SolidAngle[RunType],
     direct_beam: Optional[CleanDirectBeam],
-    wavelength_mask: Optional[WavelengthMask],
     # signal_over_monitor_threshold: float = 0.1,
 ) -> Clean[RunType, Denominator]:
     """
@@ -210,8 +207,6 @@ def iofq_denominator(
     # Convert wavelength coordinate to midpoints for future histogramming
     # if wavelength_to_midpoints:
     denominator.coords['wavelength'] = sc.midpoints(denominator.coords['wavelength'])
-    if wavelength_mask is not None:
-        denominator = mask_range(denominator, mask=wavelength_mask)
     return Clean[RunType, Denominator](denominator)
 
 
