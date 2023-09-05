@@ -5,6 +5,7 @@ from typing import Optional
 
 import scipp as sc
 import scippneutron as scn
+from scipp.core import concepts
 
 from .common import mask_range
 from .logging import get_logger
@@ -51,20 +52,13 @@ def solid_angle_of_rectangular_pixels(
     -------
     :
         The solid angle of the detector pixels, as viewed from the sample position.
-        Any masks that have a dimension common to the dimensions of the position
-        coordinate are retained to the output.
+        Any coords and masks that have a dimension common to the dimensions of the
+        position coordinate are retained to the output.
     """
     L2 = scn.L2(data)
     omega = (pixel_width * pixel_height) / (L2 * L2)
-    # TODO Make this less brittle
-    solid_angle = data['wavelength', 0].copy()
-    solid_angle.data = omega
-    # solid_angle = sc.DataArray(data=omega)
-    # omega_dims = set(omega.dims)
-    # for key, mask in data.masks.items():
-    #    if set(mask.dims).issubset(omega_dims):
-    #        solid_angle.masks[key] = mask
-    return solid_angle
+    dims = set(data.dims) - set(omega.dims)
+    return concepts.rewrap_reduced_data(prototype=data, data=omega, dim=dims)
 
 
 def solid_angle_rectangular_approximation(
