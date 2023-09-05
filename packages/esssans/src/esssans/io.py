@@ -38,14 +38,14 @@ def get_monitor(
     return RawMonitor[RunType, MonitorType](da.attrs[nexus_name].value)
 
 
-def detector_edge_mask(sample: RawData[SampleRun]) -> DetectorEdgeMask:
+def sans2d_detector_edge_mask(sample: RawData[SampleRun]) -> DetectorEdgeMask:
     mask_edges = (
         sc.abs(sample.coords['position'].fields.x) > sc.scalar(0.48, unit='m')
     ) | (sc.abs(sample.coords['position'].fields.y) > sc.scalar(0.45, unit='m'))
     return DetectorEdgeMask(mask_edges)
 
 
-def sample_holder_mask(sample: RawData[SampleRun]) -> SampleHolderMask:
+def sans2d_sample_holder_mask(sample: RawData[SampleRun]) -> SampleHolderMask:
     summed = sample.sum('tof')
     holder_mask = (
         (summed.data < sc.scalar(100, unit='counts'))
@@ -74,7 +74,7 @@ providers = [
     load,
     load_direct_beam,
     get_monitor,
-    detector_edge_mask,
-    sample_holder_mask,
+    sans2d_detector_edge_mask,
+    sans2d_sample_holder_mask,
     mask_detectors,
 ]
