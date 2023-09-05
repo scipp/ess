@@ -18,6 +18,7 @@ from .types import (
     DirectRun,
     Incident,
     IofQ,
+    MaskedData,
     Numerator,
     RunType,
     SampleRun,
@@ -62,9 +63,8 @@ def solid_angle_of_rectangular_pixels(
 
 
 def solid_angle_rectangular_approximation(
-    data: Clean[RunType, Numerator],
+    data: MaskedData[RunType],
 ) -> SolidAngle[RunType]:
-    data = data.value
     return SolidAngle[RunType](
         solid_angle_of_rectangular_pixels(
             data,

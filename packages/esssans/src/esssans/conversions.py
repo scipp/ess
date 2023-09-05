@@ -128,8 +128,7 @@ def sans_elastic(gravity: Optional[CorrectForGravity]) -> ElasticCoordTransformG
     :param gravity: Take into account the bending of the neutron flight paths from the
         Earth's gravitational field if ``True``.
     """
-    scatter: bool = True
-    graph = {**beamline.beamline(scatter=scatter), **tof.elastic_Q('tof')}
+    graph = {**beamline.beamline(scatter=True), **tof.elastic_Q('tof')}
     if gravity:
         graph['two_theta'] = two_theta
     graph['cyl_x_unit_vector'] = cyl_x_unit_vector
@@ -167,9 +166,6 @@ def transform_detector_to_wavelength(
     detector = detector.copy(deep=False)
     detector.coords['position'] -= beam_center
     da = detector.transform_coords('wavelength', graph=graph)
-    # TODO Why are these losing their alignment flag?
-    for coord in ['position', 'source_position', 'sample_position']:
-        da.coords.set_aligned(coord, True)
     if wavelength_mask is not None:
         # If we have binned data and the wavelength coord is multi-dimensional, we need
         # to make a single wavelength bin before we can mask the range.
