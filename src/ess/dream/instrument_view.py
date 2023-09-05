@@ -14,8 +14,7 @@ def instrument_view(
     z: Optional[str] = None,
     pos: Optional[str] = None,
     dim: Optional[str] = None,
-    bins: Union[sc.Variable, int] = 50,
-    pixel_size: Union[sc.Variable, float] = 10,
+    pixel_size: Union[sc.Variable, float] = sc.scalar(1.0, unit='cm'),
     **kwargs,
 ):
     """
@@ -41,8 +40,6 @@ def instrument_view(
         The name of the vector coordinate that is to be used for the positions.
     dim:
         Dimension to use for the slider.
-    bins:
-        Number of bins to use for the slider.
     pixel_size:
         Size of the pixels. If a float is provided, it will assume the same unit as the
         pixel coordinates.
@@ -53,10 +50,14 @@ def instrument_view(
     from plopp.graphics import figure3d
     import plopp.widgets as pw
 
+    dims = list(data.dims)
+    if dim is not None:
+        dims.remove(dim)
+    to = 'pixel'
     if not isinstance(data, sc.DataArray):
-        data = sc.concat([da.flatten(to='pixel') for da in data.values()], dim='pixel')
+        data = sc.concat([da.flatten(dims=dims, to=to) for da in data.values()], dim=to)
     else:
-        data = data.flatten(to='pixel')
+        data = data.flatten(dims=dims, to=to)
 
     if pos is not None:
         if any((x, y, z)):
@@ -79,13 +80,12 @@ def instrument_view(
     data.coords.update(coords)
 
     if dim is not None:
-        histogrammed = data.hist({dim: bins}) if data.bins is not None else data
-        slider_widget = pw.SliceWidget(histogrammed, dims=[dim])
+        slider_widget = pw.SliceWidget(data, dims=[dim])
         slider_widget.controls[dim]['slider'].layout = {"width": "400px"}
         slider_node = pp.widget_node(slider_widget)
-        nodes = [pw.slice_dims(data_array=histogrammed, slices=slider_node)]
+        nodes = [pw.slice_dims(data_array=data, slices=slider_node)]
     else:
-        nodes = [pp.Node(data.hist() if data.bins is not None else data)]
+        nodes = [pp.Node(data)]
 
     fig = figure3d(*nodes, x=x, y=y, z=z, pixel_size=pixel_size, **kwargs)
     tri_cutter = pw.TriCutTool(fig)
