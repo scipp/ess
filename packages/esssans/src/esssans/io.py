@@ -1,7 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+from typing import Optional
+
 import scipp as sc
 
+from .common import gravity_vector
 from .types import (
     DetectorEdgeMask,
     DirectBeam,
@@ -19,7 +22,10 @@ from .types import (
 
 
 def load(filename: Filename[RunType]) -> RawData[RunType]:
-    return RawData[RunType](sc.io.load_hdf5(filename=filename))
+    da = sc.io.load_hdf5(filename=filename)
+    if 'gravity' not in da.coords:
+        da.coords["gravity"] = gravity_vector()
+    return RawData[RunType](da)
 
 
 def load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
@@ -51,13 +57,16 @@ def sample_holder_mask(sample: RawData[SampleRun]) -> SampleHolderMask:
     return SampleHolderMask(holder_mask)
 
 
-# TODO Use Scilines upcoming support for Optional
 def mask_detectors(
-    da: RawData[RunType], edge_mask: DetectorEdgeMask, holder_mask: SampleHolderMask
+    da: RawData[RunType],
+    edge_mask: Optional[DetectorEdgeMask],
+    holder_mask: Optional[SampleHolderMask],
 ) -> MaskedData[RunType]:
     da = da.copy(deep=False)
-    da.masks['edges'] = edge_mask
-    da.masks['holder_mask'] = holder_mask
+    if edge_mask is not None:
+        da.masks['edges'] = edge_mask
+    if holder_mask is not None:
+        da.masks['holder_mask'] = holder_mask
     return MaskedData[RunType](da)
 
 

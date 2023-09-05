@@ -156,10 +156,6 @@ def merge_spectra(
     :
         The input data converted to Q and then summed over all detector pixels.
     """
-    # if gravity and ('gravity' not in data.meta):
-    #    data = data.copy(deep=False)
-    #    data.coords["gravity"] = gravity_vector()
-
     data_q = data.value
     if data_q.bins is not None:
         out = _events_merge_spectra(

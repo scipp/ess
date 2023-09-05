@@ -20,6 +20,7 @@ TransmissionFraction = NewType('TransmissionFraction', sc.DataArray)
 DirectBeam = NewType('DirectBeam', sc.DataArray)
 CleanDirectBeam = NewType('CleanDirectBeam', sc.DataArray)  # after resample
 BackgroundSubtractedIofQ = NewType('BackgroundSubtractedIofQ', sc.DataArray)
+CorrectForGravity = NewType('CorrectForGravity', bool)
 
 BackgroundRun = NewType('BackgroundRun', int)
 DirectRun = NewType('DirectRun', int)

@@ -12,6 +12,7 @@ from .types import (
     BeamCenter,
     Clean,
     CleanQ,
+    CorrectForGravity,
     IofQPart,
     MaskedData,
     MonitorType,
@@ -119,10 +120,7 @@ ElasticCoordTransformGraph = NewType('ElasticCoordTransformGraph', dict)
 MonitorCoordTransformGraph = NewType('MonitorCoordTransformGraph', dict)
 
 
-# TODO Handle params better. Should gravity be Optional[GravityVector]?
-def sans_elastic(
-    # gravity: bool = False, scatter: bool = True
-) -> ElasticCoordTransformGraph:
+def sans_elastic(gravity: Optional[CorrectForGravity]) -> ElasticCoordTransformGraph:
     """
     Generate a coordinate transformation graph for SANS elastic scattering.
     By default, the effects of gravity on the neutron flight paths are not included.
@@ -130,7 +128,6 @@ def sans_elastic(
     :param gravity: Take into account the bending of the neutron flight paths from the
         Earth's gravitational field if ``True``.
     """
-    gravity: bool = False
     scatter: bool = True
     graph = {**beamline.beamline(scatter=scatter), **tof.elastic_Q('tof')}
     if gravity:
