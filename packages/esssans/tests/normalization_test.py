@@ -65,38 +65,37 @@ def test_transmission_fraction():
     wavelength = sc.linspace(
         dim='wavelength', start=2.0, stop=16.0, num=N + 1, unit='angstrom'
     )
-    data_monitors = {
-        'incident': sc.DataArray(
-            data=sc.array(
-                dims=['wavelength'], values=100.0 * np.random.random(N), unit='counts'
-            ),
-            coords={'wavelength': wavelength},
+    sample_incident_monitor = sc.DataArray(
+        data=sc.array(
+            dims=['wavelength'], values=100.0 * np.random.random(N), unit='counts'
         ),
-        'transmission': sc.DataArray(
-            data=sc.array(
-                dims=['wavelength'], values=50.0 * np.random.random(N), unit='counts'
-            ),
-            coords={'wavelength': wavelength},
+        coords={'wavelength': wavelength},
+    )
+    sample_transmission_monitor = sc.DataArray(
+        data=sc.array(
+            dims=['wavelength'], values=50.0 * np.random.random(N), unit='counts'
         ),
-    }
+        coords={'wavelength': wavelength},
+    )
 
-    direct_monitors = {
-        'incident': sc.DataArray(
-            data=sc.array(
-                dims=['wavelength'], values=100.0 * np.random.random(N), unit='counts'
-            ),
-            coords={'wavelength': wavelength},
+    direct_incident_monitor = sc.DataArray(
+        data=sc.array(
+            dims=['wavelength'], values=100.0 * np.random.random(N), unit='counts'
         ),
-        'transmission': sc.DataArray(
-            data=sc.array(
-                dims=['wavelength'], values=80.0 * np.random.random(N), unit='counts'
-            ),
-            coords={'wavelength': wavelength},
+        coords={'wavelength': wavelength},
+    )
+    direct_transmission_monitor = sc.DataArray(
+        data=sc.array(
+            dims=['wavelength'], values=80.0 * np.random.random(N), unit='counts'
         ),
-    }
+        coords={'wavelength': wavelength},
+    )
 
     trans_frac = normalization.transmission_fraction(
-        data_monitors=data_monitors, direct_monitors=direct_monitors
+        sample_incident_monitor=sample_incident_monitor,
+        sample_transmission_monitor=sample_transmission_monitor,
+        direct_incident_monitor=direct_incident_monitor,
+        direct_transmission_monitor=direct_transmission_monitor,
     )
 
     # If counts on data transmission monitor have increased, it means less neutrons
@@ -106,11 +105,10 @@ def test_transmission_fraction():
     assert sc.allclose(
         (trans_frac * sc.scalar(1.5)).data,
         normalization.transmission_fraction(
-            data_monitors={
-                'incident': data_monitors['incident'],
-                'transmission': data_monitors['transmission'] * sc.scalar(1.5),
-            },
-            direct_monitors=direct_monitors,
+            sample_incident_monitor=sample_incident_monitor,
+            sample_transmission_monitor=sample_transmission_monitor * sc.scalar(1.5),
+            direct_incident_monitor=direct_incident_monitor,
+            direct_transmission_monitor=direct_transmission_monitor,
         ).data,
     )
 
@@ -122,11 +120,10 @@ def test_transmission_fraction():
     assert sc.allclose(
         (trans_frac / sc.scalar(9 / 8)).data,
         normalization.transmission_fraction(
-            data_monitors=data_monitors,
-            direct_monitors={
-                'incident': direct_monitors['incident'],
-                'transmission': direct_monitors['transmission'] * sc.scalar(9 / 8),
-            },
+            sample_incident_monitor=sample_incident_monitor,
+            sample_transmission_monitor=sample_transmission_monitor,
+            direct_incident_monitor=direct_incident_monitor,
+            direct_transmission_monitor=direct_transmission_monitor * sc.scalar(9 / 8),
         ).data,
     )
 
@@ -141,11 +138,10 @@ def test_transmission_fraction():
     assert sc.allclose(
         (trans_frac * sc.scalar(1.1)).data,
         normalization.transmission_fraction(
-            data_monitors=data_monitors,
-            direct_monitors={
-                'incident': direct_monitors['incident'] * sc.scalar(1.1),
-                'transmission': direct_monitors['transmission'],
-            },
+            sample_incident_monitor=sample_incident_monitor,
+            sample_transmission_monitor=sample_transmission_monitor,
+            direct_incident_monitor=direct_incident_monitor * sc.scalar(1.1),
+            direct_transmission_monitor=direct_transmission_monitor,
         ).data,
     )
 
@@ -157,10 +153,9 @@ def test_transmission_fraction():
     assert sc.allclose(
         (trans_frac / sc.scalar(1.1)).data,
         normalization.transmission_fraction(
-            data_monitors={
-                'incident': data_monitors['incident'] * sc.scalar(1.1),
-                'transmission': data_monitors['transmission'],
-            },
-            direct_monitors=direct_monitors,
+            sample_incident_monitor=sample_incident_monitor * sc.scalar(1.1),
+            sample_transmission_monitor=sample_transmission_monitor,
+            direct_incident_monitor=direct_incident_monitor,
+            direct_transmission_monitor=direct_transmission_monitor,
         ).data,
     )
