@@ -60,7 +60,6 @@ def preprocess_monitor_data(
         The input monitors converted to wavelength, cleaned of background counts, and
         rebinned to the requested wavelength binning.
     """
-    monitor = monitor.value
     background = None
     if non_background_range is not None:
         mask = sc.DataArray(
@@ -156,14 +155,13 @@ def merge_spectra(
     :
         The input data converted to Q and then summed over all detector pixels.
     """
-    data_q = data.value
-    if data_q.bins is not None:
+    if data.bins is not None:
         out = _events_merge_spectra(
-            data_q=data_q, q_bins=q_bins, wavelength_bands=wavelength_bands
+            data_q=data, q_bins=q_bins, wavelength_bands=wavelength_bands
         )
     else:
         out = _dense_merge_spectra(
-            data_q=data_q, q_bins=q_bins, wavelength_bands=wavelength_bands
+            data_q=data, q_bins=q_bins, wavelength_bands=wavelength_bands
         )
     if (wavelength_bands is not None) and (wavelength_bands.sizes['wavelength'] == 2):
         out = out['wavelength', 0]

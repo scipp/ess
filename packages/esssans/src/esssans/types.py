@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-from dataclasses import dataclass
-from typing import Generic, NewType, TypeVar
+from typing import NewType, TypeVar
 
 import sciline
 import scipp as sc
@@ -104,9 +103,7 @@ class MaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Raw data with pixel-specific masks applied"""
 
 
-# TODO Need Scope with multiple params, see scipp/sciline#42
-@dataclass
-class Clean(Generic[RunType, IofQPart]):
+class Clean(sciline.ScopeTwoParams[RunType, IofQPart, sc.DataArray], sc.DataArray):
     """
     Prerequisite for IofQ numerator or denominator.
 
@@ -118,25 +115,20 @@ class Clean(Generic[RunType, IofQPart]):
     value: sc.DataArray
 
 
-@dataclass
-class CleanMasked(Generic[RunType, IofQPart]):
+class CleanMasked(
+    sciline.ScopeTwoParams[RunType, IofQPart, sc.DataArray], sc.DataArray
+):
     """Result of applying wavelength masking to :py:class:`Clean`"""
 
-    value: sc.DataArray
 
-
-@dataclass
-class CleanQ(Generic[RunType, IofQPart]):
+class CleanQ(sciline.ScopeTwoParams[RunType, IofQPart, sc.DataArray], sc.DataArray):
     """Result of converting :py:class:`CleanMasked` to Q"""
 
-    value: sc.DataArray
 
-
-@dataclass
-class CleanSummedQ(Generic[RunType, IofQPart]):
+class CleanSummedQ(
+    sciline.ScopeTwoParams[RunType, IofQPart, sc.DataArray], sc.DataArray
+):
     """Result of histogramming/binning :py:class:`CleanQ` over all pixels into Q bins"""
-
-    value: sc.DataArray
 
 
 class IofQ(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
@@ -147,22 +139,19 @@ BackgroundSubtractedIofQ = NewType('BackgroundSubtractedIofQ', sc.DataArray)
 """I(Q) with background (given by I(Q) of the background run) subtracted"""
 
 
-@dataclass
-class RawMonitor(Generic[RunType, MonitorType]):
+class RawMonitor(
+    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
+):
     """Raw monitor data"""
 
-    value: sc.DataArray
 
-
-@dataclass
-class WavelengthMonitor(Generic[RunType, MonitorType]):
+class WavelengthMonitor(
+    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
+):
     """Monitor data converted to wavelength"""
 
-    value: sc.DataArray
 
-
-@dataclass
-class CleanMonitor(Generic[RunType, MonitorType]):
+class CleanMonitor(
+    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
+):
     """Monitor data cleaned of background counts"""
-
-    value: sc.DataArray

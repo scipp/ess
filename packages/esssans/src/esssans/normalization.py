@@ -184,9 +184,9 @@ def iofq_denominator(
     # TODO
     # signal_over_monitor_threshold: float = (0.1,)
     denominator = (
-        data_transmission_monitor.value
-        * direct_incident_monitor.value
-        / direct_transmission_monitor.value
+        data_transmission_monitor
+        * direct_incident_monitor
+        / direct_transmission_monitor
     )
     if direct_beam is not None:
         denominator = direct_beam * denominator
@@ -233,8 +233,6 @@ def normalize(
     :
         The input data normalized by the supplied denominator.
     """
-    numerator = numerator.value
-    denominator = denominator.value
     if numerator.bins is not None:
         da = numerator.bins / sc.lookup(func=denominator, dim='Q')
     else:

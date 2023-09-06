@@ -43,7 +43,9 @@ def pooch_load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
 def get_monitor(
     da: RawData[RunType], nexus_name: NeXusMonitorName[MonitorType]
 ) -> RawMonitor[RunType, MonitorType]:
-    return RawMonitor[RunType, MonitorType](da.attrs[nexus_name].value)
+    # See https://github.com/scipp/sciline/issues/52 why copy needed
+    mon = da.attrs[nexus_name].value.copy()
+    return RawMonitor[RunType, MonitorType](mon)
 
 
 def detector_edge_mask(sample: RawData[SampleRun]) -> DetectorEdgeMask:

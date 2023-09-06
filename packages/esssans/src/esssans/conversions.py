@@ -152,7 +152,9 @@ def sans_monitor() -> MonitorCoordTransformGraph:
 def monitor_to_wavelength(
     monitor: RawMonitor[RunType, MonitorType], graph: MonitorCoordTransformGraph
 ) -> WavelengthMonitor[RunType, MonitorType]:
-    return WavelengthMonitor(monitor.value.transform_coords('wavelength', graph=graph))
+    return WavelengthMonitor[RunType, MonitorType](
+        monitor.transform_coords('wavelength', graph=graph)
+    )
 
 
 # TODO This demonstrates a problem: Transforming to wavelength should be possible
@@ -173,7 +175,6 @@ def detector_to_wavelength(
 def mask_wavelength(
     da: Clean[RunType, IofQPart], mask: Optional[WavelengthMask]
 ) -> CleanMasked[RunType, IofQPart]:
-    da = da.value
     if mask is not None:
         # If we have binned data and the wavelength coord is multi-dimensional, we need
         # to make a single wavelength bin before we can mask the range.
@@ -191,7 +192,7 @@ def to_Q(
     """
     Convert a data array from wavelength to Q.
     """
-    return CleanQ[RunType, IofQPart](data.value.transform_coords('Q', graph=graph))
+    return CleanQ[RunType, IofQPart](data.transform_coords('Q', graph=graph))
 
 
 providers = [
