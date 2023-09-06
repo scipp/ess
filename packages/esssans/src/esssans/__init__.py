@@ -9,10 +9,6 @@ try:
 except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
-from . import common, conversions, i_of_q, io, normalization
+from . import common, conversions, i_of_q, normalization, sans2d
 
-# from .beam_center_finder import beam_center
-
-providers = (
-    conversions.providers + io.providers + i_of_q.providers + normalization.providers
-)
+providers = conversions.providers + i_of_q.providers + normalization.providers

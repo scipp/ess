@@ -1,5 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+"""
+Loading and masking specific to the ISIS Sans2d instrument and files stored in Scipp's
+HDF5 format.
+"""
 from typing import Optional
 
 import scipp as sc
@@ -21,15 +25,19 @@ from .types import (
 )
 
 
-def load(filename: Filename[RunType]) -> RawData[RunType]:
-    da = sc.io.load_hdf5(filename=filename)
+def pooch_load(filename: Filename[RunType]) -> RawData[RunType]:
+    from .data import get_path
+
+    da = sc.io.load_hdf5(filename=get_path(filename))
     if 'gravity' not in da.coords:
         da.coords["gravity"] = gravity_vector()
     return RawData[RunType](da)
 
 
-def load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
-    return DirectBeam(sc.io.load_hdf5(filename=filename))
+def pooch_load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
+    from .data import get_path
+
+    return DirectBeam(sc.io.load_hdf5(filename=get_path(filename)))
 
 
 def get_monitor(
@@ -38,14 +46,14 @@ def get_monitor(
     return RawMonitor[RunType, MonitorType](da.attrs[nexus_name].value)
 
 
-def sans2d_detector_edge_mask(sample: RawData[SampleRun]) -> DetectorEdgeMask:
+def detector_edge_mask(sample: RawData[SampleRun]) -> DetectorEdgeMask:
     mask_edges = (
         sc.abs(sample.coords['position'].fields.x) > sc.scalar(0.48, unit='m')
     ) | (sc.abs(sample.coords['position'].fields.y) > sc.scalar(0.45, unit='m'))
     return DetectorEdgeMask(mask_edges)
 
 
-def sans2d_sample_holder_mask(sample: RawData[SampleRun]) -> SampleHolderMask:
+def sample_holder_mask(sample: RawData[SampleRun]) -> SampleHolderMask:
     summed = sample.sum('tof')
     holder_mask = (
         (summed.data < sc.scalar(100, unit='counts'))
@@ -71,10 +79,10 @@ def mask_detectors(
 
 
 providers = [
-    load,
-    load_direct_beam,
+    pooch_load,
+    pooch_load_direct_beam,
     get_monitor,
-    sans2d_detector_edge_mask,
-    sans2d_sample_holder_mask,
+    detector_edge_mask,
+    sample_holder_mask,
     mask_detectors,
 ]
