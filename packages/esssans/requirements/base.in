@@ -1,2 +1,6 @@
-sciline
+graphviz
+plopp
+pythreejs
+sciline @ git+https://github.com/scipp/sciline@next
+scipp==23.7.0  # Until scippneutron release
 scippneutron
