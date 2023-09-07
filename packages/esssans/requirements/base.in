@@ -1,6 +1,6 @@
 graphviz
 plopp
 pythreejs
-sciline @ git+https://github.com/scipp/sciline@next
+sciline>=23.9.0
 scipp==23.7.0  # Until scippneutron release
 scippneutron
