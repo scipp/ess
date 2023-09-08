@@ -13,26 +13,23 @@ def test_solid_angle():
         data=sc.array(dims=['x'], values=l2, unit='counts'),
         coords={'L2': sc.array(dims=['x'], values=l2, unit='m')},
     )
-    pixel_width = 2.0
-    pixel_height = 3.0
+    da.coords['pixel_width'] = sc.scalar(2.0)
+    da.coords['pixel_height'] = sc.scalar(3.0)
 
-    solid_angle = normalization.solid_angle_of_rectangular_pixels(
-        data=da, pixel_width=pixel_width, pixel_height=pixel_height
-    )
+    solid_angle = normalization.solid_angle_rectangular_approximation(da)
 
     assert sc.isclose(solid_angle[0].data, solid_angle[1].data * 4).value
     assert sc.isclose(solid_angle[0].data, solid_angle[-1].data * 100).value
+    da.coords['pixel_width'] *= 2
     assert sc.allclose(
         solid_angle.data * 2,
-        normalization.solid_angle_of_rectangular_pixels(
-            data=da, pixel_width=pixel_width * 2, pixel_height=pixel_height
-        ).data,
+        normalization.solid_angle_rectangular_approximation(da).data,
     )
+    da.coords['pixel_width'] *= 0.5
+    da.coords['pixel_height'] *= 3
     assert sc.allclose(
         solid_angle.data * 3,
-        normalization.solid_angle_of_rectangular_pixels(
-            data=da, pixel_width=pixel_width, pixel_height=pixel_height * 3
-        ).data,
+        normalization.solid_angle_rectangular_approximation(da).data,
     )
 
 
@@ -49,12 +46,10 @@ def test_solid_angle_keeps_relevant_masks():
             'mask2': sc.array(dims=['tof'], values=tof < sc.scalar(50, unit='us')),
         },
     )
-    pixel_width = 2.0
-    pixel_height = 3.0
+    da.coords['pixel_width'] = sc.scalar(2.0)
+    da.coords['pixel_height'] = sc.scalar(3.0)
 
-    solid_angle = normalization.solid_angle_of_rectangular_pixels(
-        data=da, pixel_width=pixel_width, pixel_height=pixel_height
-    )
+    solid_angle = normalization.solid_angle_rectangular_approximation(data=da)
 
     assert 'mask1' in solid_angle.masks
     assert 'mask2' not in solid_angle.masks

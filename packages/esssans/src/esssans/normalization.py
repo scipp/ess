@@ -28,9 +28,9 @@ from .types import (
 from .uncertainty import variance_normalized_signal_over_monitor
 
 
-def solid_angle_of_rectangular_pixels(
-    data: sc.DataArray, pixel_width: sc.Variable, pixel_height: sc.Variable
-) -> sc.DataArray:
+def solid_angle_rectangular_approximation(
+    data: MaskedData[RunType],
+) -> SolidAngle[RunType]:
     """
     Solid angle computed from rectangular pixels with a 'width' and a 'height'.
 
@@ -41,34 +41,22 @@ def solid_angle_of_rectangular_pixels(
     ----------
     data:
         The DataArray that contains the positions for the detector pixels and the
-        sample.
-    pixel_width:
-        The width of the rectangular pixels.
-    pixel_height:
-        The height of the rectangular pixels.
+        sample, as well as `pixel_width` and `pixel_height` as coordinates.
 
     Returns
     -------
     :
         The solid angle of the detector pixels, as viewed from the sample position.
         Any coords and masks that have a dimension common to the dimensions of the
-        position coordinate are retained to the output.
+        position coordinate are retained in the output.
     """
+    pixel_width = data.coords['pixel_width']
+    pixel_height = data.coords['pixel_height']
     L2 = scn.L2(data)
     omega = (pixel_width * pixel_height) / (L2 * L2)
     dims = set(data.dims) - set(omega.dims)
-    return concepts.rewrap_reduced_data(prototype=data, data=omega, dim=dims)
-
-
-def solid_angle_rectangular_approximation(
-    data: MaskedData[RunType],
-) -> SolidAngle[RunType]:
     return SolidAngle[RunType](
-        solid_angle_of_rectangular_pixels(
-            data,
-            pixel_width=data.coords['pixel_width'],
-            pixel_height=data.coords['pixel_height'],
-        )
+        concepts.rewrap_reduced_data(prototype=data, data=omega, dim=dims)
     )
 
 
