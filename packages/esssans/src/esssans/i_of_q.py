@@ -128,8 +128,7 @@ def merge_spectra(
     wavelength_bands: WavelengthBands,
 ) -> CleanSummedQ[RunType, IofQPart]:
     """
-    Convert the data to momentum vector Q. This accepts both dense and event data.
-    The final step merges all spectra:
+    Merges all spectra:
 
     * In the case of event data, events in all bins are concatenated
     * In the case of dense data, counts in all spectra are summed
@@ -138,12 +137,8 @@ def merge_spectra(
     ----------
     data:
         A DataArray containing the data that is to be converted to Q.
-    graph:
-        The coordinate conversion graph used to perform the conversion to Q.
     q_bins:
         The binning in Q to be used.
-    gravity:
-        If ``True``, include the effects of gravity when computing the scattering angle.
     wavelength_bands:
         Defines bands in wavelength that can be used to separate different wavelength
         ranges that contribute to different regions in Q space. Note that this needs to
