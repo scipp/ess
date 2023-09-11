@@ -2,7 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 import os
-from typing import Dict, Union
+from typing import Dict, Optional, Union
 
 import scipp as sc
 
@@ -54,18 +54,36 @@ def _split_detectors(
     data: sc.DataArray, detector_id_name: str = 'det ID'
 ) -> Dict[str, sc.DataArray]:
     groups = data.group(detector_id_name)
-    mantle = groups[detector_id_name, MANTLE_DETECTOR_ID].value
-    high_res = groups[detector_id_name, HIGH_RES_DETECTOR_ID].value
+    mantle = _extract_detector(groups, detector_id_name, MANTLE_DETECTOR_ID)
+    high_res = _extract_detector(groups, detector_id_name, HIGH_RES_DETECTOR_ID)
 
-    endcaps = sc.concat(
-        [groups[detector_id_name, i].value for i in ENDCAPS_DETECTOR_IDS], data.dim
-    )
-    endcap_forward = endcaps[endcaps.coords['z_pos'] > sc.scalar(0, unit='mm')]
-    endcap_backward = endcaps[endcaps.coords['z_pos'] < sc.scalar(0, unit='mm')]
+    endcaps_list = [
+        det
+        for i in ENDCAPS_DETECTOR_IDS
+        if (det := _extract_detector(groups, detector_id_name, i)) is not None
+    ]
+    if endcaps_list:
+        endcaps = sc.concat(endcaps_list, data.dim)
+        endcap_forward = endcaps[endcaps.coords['z_pos'] > sc.scalar(0, unit='mm')]
+        endcap_backward = endcaps[endcaps.coords['z_pos'] < sc.scalar(0, unit='mm')]
+    else:
+        endcap_forward = None
+        endcap_backward = None
 
     return {
-        'mantle': mantle.copy(),
-        'high_resolution': high_res.copy(),
-        'endcap_forward': endcap_forward.copy(),
-        'endcap_backward': endcap_backward.copy(),
+        key: val
+        for key, val in zip(
+            ('mantle', 'high_resolution', 'endcap_forward', 'endcap_backward'),
+            (mantle, high_res, endcap_forward, endcap_backward),
+        )
+        if val is not None
     }
+
+
+def _extract_detector(
+    detector_groups: sc.DataArray, detector_id_name: str, detector_id: sc.Variable
+) -> Optional[sc.DataArray]:
+    try:
+        return detector_groups[detector_id_name, detector_id].value.copy()
+    except IndexError:
+        return None
