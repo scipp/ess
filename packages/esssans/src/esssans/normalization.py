@@ -7,7 +7,6 @@ import scipp as sc
 import scippneutron as scn
 from scipp.core import concepts
 
-from .logging import get_logger
 from .types import (
     Clean,
     CleanDirectBeam,
@@ -24,8 +23,9 @@ from .types import (
     SolidAngle,
     Transmission,
     TransmissionFraction,
+    UncertaintyBroadcastMode,
 )
-from .uncertainty import variance_normalized_signal_over_monitor
+from .uncertainty import broadcast_with_upper_bound_variances
 
 
 def solid_angle_rectangular_approximation(
@@ -99,41 +99,13 @@ def transmission_fraction(
     return TransmissionFraction(frac)
 
 
-def _verify_normalization_alpha(
-    numerator: sc.DataArray,
-    denominator: sc.DataArray,
-    signal_over_monitor_threshold: float = 0.1,
-):
-    """
-    Verify that the ratio of sample detector counts to monitor counts is small, so
-    we can safely drop the variances of the monitor to avoid broadcasting issues.
-    See Heybrock et al. (2023).
-    """
-    alpha = variance_normalized_signal_over_monitor(numerator, denominator)
-    if alpha > 0.25 * signal_over_monitor_threshold:
-        logger = get_logger('sans')
-        logger.warning(
-            f'signal_over_monitor = {alpha} is close to the specified threshold of '
-            f'{signal_over_monitor_threshold}. This means we are close to the regime '
-            'where it is no longer safe to drop the variances of the normalization '
-            'term.'
-        )
-    if alpha > signal_over_monitor_threshold:
-        raise ValueError(
-            f'signal_over_monitor = {alpha} > {signal_over_monitor_threshold}! '
-            'This means that the ratio of detector counts to monitor counts is too '
-            'high, and the variances of the monitor data cannot be safely dropped.'
-        )
-
-
 def iofq_denominator(
-    # data: WavelengthData[SampleRun],
     data_transmission_monitor: CleanMonitor[RunType, Transmission],
     direct_incident_monitor: CleanMonitor[DirectRun, Incident],
     direct_transmission_monitor: CleanMonitor[DirectRun, Transmission],
     solid_angle: SolidAngle[RunType],
     direct_beam: Optional[CleanDirectBeam],
-    # signal_over_monitor_threshold: float = 0.1,
+    uncertainties: UncertaintyBroadcastMode,
 ) -> Clean[RunType, Denominator]:
     """
     Compute the denominator term for the I(Q) normalization. This is basically:
@@ -191,7 +163,23 @@ def iofq_denominator(
     #        signal_over_monitor_threshold=signal_over_monitor_threshold,
     #    )
 
-    denominator = solid_angle * sc.values(denominator)
+    if uncertainties == UncertaintyBroadcastMode.drop:
+        if direct_beam is not None:
+            denominator = direct_beam * denominator
+        denominator = solid_angle * sc.values(denominator)
+    elif uncertainties == UncertaintyBroadcastMode.upper_bound:
+        if direct_beam is not None:
+            # Broadcast in case direct_beam depends on pixel
+            denominator = direct_beam * broadcast_with_upper_bound_variances(
+                denominator, sizes=direct_beam.sizes
+            )
+        denominator = solid_angle * broadcast_with_upper_bound_variances(
+            denominator, sizes=solid_angle.sizes
+        )
+    else:
+        if direct_beam is not None:
+            denominator = direct_beam * denominator
+        denominator = solid_angle * denominator
     # Convert wavelength coordinate to midpoints for future histogramming
     # if wavelength_to_midpoints:
     denominator.coords['wavelength'] = sc.midpoints(denominator.coords['wavelength'])
@@ -221,6 +209,7 @@ def normalize(
     :
         The input data normalized by the supplied denominator.
     """
+    numerator = numerator.hist()
     if numerator.bins is not None:
         da = numerator.bins / sc.lookup(func=denominator, dim='Q')
     else:

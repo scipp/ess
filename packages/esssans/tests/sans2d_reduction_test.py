@@ -19,6 +19,7 @@ from esssans.types import (
     SampleRun,
     SolidAngle,
     Transmission,
+    UncertaintyBroadcastMode,
     WavelengthBands,
     WavelengthBins,
     WavelengthMask,
@@ -55,6 +56,7 @@ def make_params() -> dict:
         dims=['wavelength'], values=[0.7, 17.1], unit='angstrom'
     )
     params[CorrectForGravity] = True
+    params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
     return params
 
 

@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+from enum import Enum
 from typing import NewType, TypeVar
 
 import sciline
@@ -34,6 +35,11 @@ IofQPart = TypeVar('IofQPart', Numerator, Denominator)
 """TypeVar used for specifying Numerator or Denominator of IofQ""" ""
 
 # 2  Workflow parameters
+
+UncertaintyBroadcastMode = Enum(
+    'UncertaintyBroadcastMode', ['drop', 'upper_bound', 'fail']
+)
+
 
 WavelengthBins = NewType('WavelengthBins', sc.Variable)
 """Wavelength binning"""
