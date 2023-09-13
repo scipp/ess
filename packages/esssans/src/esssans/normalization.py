@@ -193,7 +193,10 @@ def normalize(
     :
         The input data normalized by the supplied denominator.
     """
-    numerator = numerator.hist()
+    if denominator.variances is not None and numerator.bins is not None:
+        # Event-mode normalization is not correct of norm-term has variances.
+        # See https://doi.org/10.3233/JNR-220049 for context.
+        numerator = numerator.hist()
     if numerator.bins is not None:
         da = numerator.bins / sc.lookup(func=denominator, dim='Q')
     else:

@@ -68,8 +68,18 @@ def test_can_create_pipeline():
     sciline.Pipeline(sans2d_providers(), params=make_params())
 
 
-def test_pipeline_can_compute_background_subtracted_IofQ():
-    pipeline = sciline.Pipeline(sans2d_providers(), params=make_params())
+def test_pipeline_can_compute_background_subtracted_IofQ_with_upper_bound_errors():
+    params = make_params()
+    params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
+    pipeline = sciline.Pipeline(sans2d_providers(), params=params)
+    result = pipeline.compute(BackgroundSubtractedIofQ)
+    assert result.dims == ('Q',)
+
+
+def test_pipeline_can_compute_background_subtracted_IofQ_with_dropped_norm_errors():
+    params = make_params()
+    params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
+    pipeline = sciline.Pipeline(sans2d_providers(), params=params)
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('Q',)
 

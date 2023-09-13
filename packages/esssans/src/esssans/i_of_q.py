@@ -212,8 +212,11 @@ def _dense_merge_spectra(
 def subtract_background(
     sample: IofQ[SampleRun], background: IofQ[BackgroundRun]
 ) -> BackgroundSubtractedIofQ:
+    if sample.bins is not None:
+        sample = sample.bins.sum()
+    if background.bins is not None:
+        background = background.bins.sum()
     return BackgroundSubtractedIofQ(sample - background)
-    return BackgroundSubtractedIofQ(sample.bins.sum() - background.bins.sum())
 
 
 providers = [
