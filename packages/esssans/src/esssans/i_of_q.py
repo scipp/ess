@@ -56,6 +56,9 @@ def preprocess_monitor_data(
     non_background_range:
         The range of wavelengths that defines the data which does not constitute
         background. Everything outside this range is treated as background counts.
+    uncertainties:
+        The mode for broadcasting uncertainties. See
+        :py:class:`UncertaintyBroadcastMode` for details.
 
     Returns
     -------

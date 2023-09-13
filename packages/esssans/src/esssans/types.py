@@ -32,14 +32,18 @@ Numerator = NewType('Numerator', sc.DataArray)
 Denominator = NewType('Denominator', sc.DataArray)
 """Denominator of IofQ"""
 IofQPart = TypeVar('IofQPart', Numerator, Denominator)
-"""TypeVar used for specifying Numerator or Denominator of IofQ""" ""
+"""TypeVar used for specifying Numerator or Denominator of IofQ"""
 
 # 2  Workflow parameters
 
 UncertaintyBroadcastMode = Enum(
     'UncertaintyBroadcastMode', ['drop', 'upper_bound', 'fail']
 )
+"""
+Mode for broadcasting uncertainties.
 
+See https://doi.org/10.3233/JNR-220049 for context.
+"""
 
 WavelengthBins = NewType('WavelengthBins', sc.Variable)
 """Wavelength binning"""

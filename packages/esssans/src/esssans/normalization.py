@@ -121,8 +121,6 @@ def iofq_denominator(
 
     Parameters
     ----------
-    data:
-        The detector counts.
     data_transmission_monitor:
         The transmission monitor counts from the measurement run (depends on
         wavelength).
@@ -132,37 +130,23 @@ def iofq_denominator(
         The transmission monitor counts from the direct run (depends on wavelength).
     direct_beam:
         The DataArray containing the direct beam function (depends on wavelength).
-    signal_over_monitor_threshold:
-        The threshold for the ratio of detector counts to monitor counts above which
-        an error is raised because it is not safe to drop the variances of the monitor.
+    uncertainties:
+        The mode for broadcasting uncertainties. See
+        :py:class:`UncertaintyBroadcastMode` for details.
 
     Returns
     -------
     :
         The denominator for the SANS I(Q) normalization.
     """  # noqa: E501
-    # TODO
-    # signal_over_monitor_threshold: float = (0.1,)
     denominator = (
         data_transmission_monitor
         * direct_incident_monitor
         / direct_transmission_monitor
     )
-    if direct_beam is not None:
-        denominator = direct_beam * denominator
 
     # We need to remove the variances because the broadcasting operation between
     # solid_angle (pixel-dependent) and monitors (wavelength-dependent) will fail.
-    # We check beforehand that the ratio of sample detector counts to monitor
-    # counts is small
-    # TODO move this into separate provider?
-    # if denominator.variances is not None:
-    #    _verify_normalization_alpha(
-    #        numerator=data.hist(wavelength=denominator.coords['wavelength']),
-    #        denominator=denominator,
-    #        signal_over_monitor_threshold=signal_over_monitor_threshold,
-    #    )
-
     if uncertainties == UncertaintyBroadcastMode.drop:
         if direct_beam is not None:
             denominator = direct_beam * denominator
