@@ -1,10 +1,44 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 import plopp as pp
 import scipp as sc
+
+DREAM_DETECTOR_DIMENSIONS = ('module', 'segment', 'counter', 'wire', 'strip')
+
+
+def _preprocess_data(
+    data: sc.DataArray, to_be_flattened: List[str], dim: str, to: str
+) -> sc.DataArray:
+    """
+    The 3D scatter visualization requires a flattened one-dimensional data array.
+    This function flattens the data array along the dimensions that are known to be
+    detector dimensions.
+    Because flattening can only happen for contiguous dimensions, the data array is
+    transposed to the correct dimension order before flattening.
+
+    Parameters
+    ----------
+    data:
+        Data to be flattened.
+    to_be_flattened:
+        List of dimensions to be flattened.
+    dim:
+        Dimension to be used for the slider (this will not be flattened)
+    to:
+        Name of the new dimension to which the data will be flattened.
+    """
+    if not to_be_flattened:
+        # Need to return a copy here because `flatten` makes a copy below.
+        return data.copy(deep=False)
+    transpose = list(data.dims)
+    if dim is not None:
+        # Move slider dim to the end of the list to allow flattening of the other dims
+        transpose.remove(dim)
+        transpose.append(dim)
+    return data.transpose(dims=transpose).flatten(dims=to_be_flattened, to=to)
 
 
 def instrument_view(
@@ -50,14 +84,18 @@ def instrument_view(
     from plopp.graphics import figure3d
     import plopp.widgets as pw
 
-    dims = list(data.dims)
-    if dim is not None:
-        dims.remove(dim)
+    dims = [d for d in data.dims if (d in DREAM_DETECTOR_DIMENSIONS) and (d != dim)]
     to = 'pixel'
     if not isinstance(data, sc.DataArray):
-        data = sc.concat([da.flatten(dims=dims, to=to) for da in data.values()], dim=to)
+        data = sc.concat(
+            [
+                _preprocess_data(data=da, to_be_flattened=dims, dim=dim, to=to)
+                for da in data.values()
+            ],
+            dim=to,
+        )
     else:
-        data = data.flatten(dims=dims, to=to)
+        data = _preprocess_data(data=data, to_be_flattened=dims, dim=dim, to=to)
 
     if pos is not None:
         if any((x, y, z)):
@@ -76,7 +114,7 @@ def instrument_view(
         z = z if z is not None else 'z'
         coords = {k: data.coords[k] for k in (x, y, z)}
 
-    # No need to make a copy here because one was made higher up with `flatten`.
+    # No need to make a copy here because one was made higher up with `preprocess_data`.
     data.coords.update(coords)
 
     if dim is not None:
