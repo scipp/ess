@@ -35,5 +35,5 @@ def broadcast_with_upper_bound_variances(
         if dim not in data.dims:
             size *= dim_size
     data = data.copy()
-    data.variances = data.variances * size
+    data.variances *= size
     return data.broadcast(sizes={**sizes, **data.sizes}).copy()
