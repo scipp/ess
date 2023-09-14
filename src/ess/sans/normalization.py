@@ -156,8 +156,8 @@ def iofq_denominator(
         / direct_transmission_monitor
     )
     if direct_beam is not None:
-        #TODO: Changing here to support different type of denomitor
-        denominator = denominator * direct_beam
+        #Changing here to support different type of denomitor
+        denominator = direct_beam * denominator
 
     # We need to remove the variances because the broadcasting operation between
     # solid_angle (pixel-dependent) and monitors (wavelength-dependent) will fail.
