@@ -55,7 +55,7 @@ def save_detector_masks(
 
     Use ScippNexus to load the resulting file:
 
-      >>> import scippnexus.v2 as snx
+      >>> import scippnexus as snx
       >>>
       >>> with snx.File('masks.h5') as f:
       >>>     masks = f['entry'][()]
