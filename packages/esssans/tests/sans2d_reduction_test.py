@@ -1,5 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+from typing import Callable, List
+
+import pytest
 import sciline
 import scipp as sc
 
@@ -9,6 +12,7 @@ from esssans.types import (
     BackgroundSubtractedIofQ,
     BeamCenter,
     CorrectForGravity,
+    DirectBeam,
     DirectBeamFilename,
     DirectRun,
     Filename,
@@ -16,6 +20,7 @@ from esssans.types import (
     NeXusMonitorName,
     NonBackgroundWavelengthRange,
     QBins,
+    RawData,
     SampleRun,
     SolidAngle,
     Transmission,
@@ -68,17 +73,13 @@ def test_can_create_pipeline():
     sciline.Pipeline(sans2d_providers(), params=make_params())
 
 
-def test_pipeline_can_compute_background_subtracted_IofQ_with_upper_bound_errors():
+@pytest.mark.parametrize(
+    'uncertainties',
+    [UncertaintyBroadcastMode.drop, UncertaintyBroadcastMode.upper_bound],
+)
+def test_pipeline_can_compute_background_subtracted_IofQ(uncertainties):
     params = make_params()
-    params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
-    pipeline = sciline.Pipeline(sans2d_providers(), params=params)
-    result = pipeline.compute(BackgroundSubtractedIofQ)
-    assert result.dims == ('Q',)
-
-
-def test_pipeline_can_compute_background_subtracted_IofQ_with_dropped_norm_errors():
-    params = make_params()
-    params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
+    params[UncertaintyBroadcastMode] = uncertainties
     pipeline = sciline.Pipeline(sans2d_providers(), params=params)
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('Q',)
@@ -93,3 +94,32 @@ def test_pipeline_can_compute_intermediate_results():
     pipeline = sciline.Pipeline(sans2d_providers(), params=make_params())
     result = pipeline.compute(SolidAngle[SampleRun])
     assert result.dims == ('spectrum',)
+
+
+# TODO See scipp/sciline#57 for plans on a builtin way to do this
+def as_dict(funcs: List[Callable[..., type]]) -> dict:
+    from typing import get_type_hints
+
+    return dict(zip([get_type_hints(func)['return'] for func in funcs], funcs))
+
+
+def pixel_dependent_direct_beam(
+    filename: DirectBeamFilename, shape: RawData[SampleRun]
+) -> DirectBeam:
+    direct_beam = sans.sans2d.pooch_load_direct_beam(filename)
+    sizes = {'spectrum': shape.sizes['spectrum'], **direct_beam.sizes}
+    return DirectBeam(direct_beam.broadcast(sizes=sizes).copy())
+
+
+@pytest.mark.parametrize(
+    'uncertainties',
+    [UncertaintyBroadcastMode.drop, UncertaintyBroadcastMode.upper_bound],
+)
+def test_pixel_dependent_direct_beam_is_supported(uncertainties):
+    params = make_params()
+    params[UncertaintyBroadcastMode] = uncertainties
+    providers = as_dict(sans2d_providers())
+    providers[DirectBeam] = pixel_dependent_direct_beam
+    pipeline = sciline.Pipeline(providers.values(), params=params)
+    result = pipeline.compute(BackgroundSubtractedIofQ)
+    assert result.dims == ('Q',)

@@ -149,8 +149,10 @@ def iofq_denominator(
     # solid_angle (pixel-dependent) and monitors (wavelength-dependent) will fail.
     if uncertainties == UncertaintyBroadcastMode.drop:
         if direct_beam is not None:
-            denominator = direct_beam * denominator
-        denominator = solid_angle * sc.values(denominator)
+            denominator = direct_beam * sc.values(denominator)
+        if set(solid_angle.dims) < set(denominator.dims):
+            denominator = sc.values(denominator)
+        denominator = solid_angle * denominator
     elif uncertainties == UncertaintyBroadcastMode.upper_bound:
         if direct_beam is not None:
             # Broadcast in case direct_beam depends on pixel
