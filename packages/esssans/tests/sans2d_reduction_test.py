@@ -17,6 +17,7 @@ from esssans.types import (
     DirectRun,
     Filename,
     Incident,
+    IofQ,
     NeXusMonitorName,
     NonBackgroundWavelengthRange,
     QBins,
@@ -50,7 +51,7 @@ def make_params() -> dict:
     )
 
     params[QBins] = sc.linspace(
-        dim='Q', start=0.01, stop=0.6, num=141, unit='1/angstrom'
+        dim='Q', start=0.01, stop=0.55, num=141, unit='1/angstrom'
     )
     params[Filename[BackgroundRun]] = 'SANS2D00063159.hdf5'
     params[Filename[SampleRun]] = 'SANS2D00063114.hdf5'
@@ -83,6 +84,17 @@ def test_pipeline_can_compute_background_subtracted_IofQ(uncertainties):
     pipeline = sciline.Pipeline(sans2d_providers(), params=params)
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('Q',)
+
+
+def test_uncertainty_broadcast_mode_drop_yields_smaller_variances():
+    params = make_params()
+    params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
+    pipeline = sciline.Pipeline(sans2d_providers(), params=params)
+    drop = pipeline.compute(IofQ[SampleRun]).hist().data
+    params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
+    pipeline = sciline.Pipeline(sans2d_providers(), params=params)
+    upper_bound = pipeline.compute(IofQ[SampleRun]).data
+    assert sc.all(sc.variances(drop) < sc.variances(upper_bound)).value
 
 
 def test_pipeline_can_visualize_background_subtracted_IofQ():
