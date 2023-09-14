@@ -12,6 +12,12 @@ requirements:
     - setuptools_scm
   run:
     - python>=3.8
+    - python-graphviz
+    - plopp
+    - pythreejs
+    - sciline>=23.9.0
+    - scipp==23.7.0
+    - scippneutron
 
 test:
   imports:

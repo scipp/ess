@@ -1,18 +1,36 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
-from typing import Dict, Optional
+from typing import Optional
 
 import scipp as sc
 import scippneutron as scn
+from scipp.core import concepts
 
 from .logging import get_logger
+from .types import (
+    Clean,
+    CleanDirectBeam,
+    CleanMonitor,
+    CleanSummedQ,
+    Denominator,
+    DirectRun,
+    Incident,
+    IofQ,
+    MaskedData,
+    Numerator,
+    RunType,
+    SampleRun,
+    SolidAngle,
+    Transmission,
+    TransmissionFraction,
+)
 from .uncertainty import variance_normalized_signal_over_monitor
 
 
-def solid_angle_of_rectangular_pixels(
-    data: sc.DataArray, pixel_width: sc.Variable, pixel_height: sc.Variable
-) -> sc.DataArray:
+def solid_angle_rectangular_approximation(
+    data: MaskedData[RunType],
+) -> SolidAngle[RunType]:
     """
     Solid angle computed from rectangular pixels with a 'width' and a 'height'.
 
@@ -23,32 +41,31 @@ def solid_angle_of_rectangular_pixels(
     ----------
     data:
         The DataArray that contains the positions for the detector pixels and the
-        sample.
-    pixel_width:
-        The width of the rectangular pixels.
-    pixel_height:
-        The height of the rectangular pixels.
+        sample, as well as `pixel_width` and `pixel_height` as coordinates.
 
     Returns
     -------
     :
         The solid angle of the detector pixels, as viewed from the sample position.
-        Any masks that have a dimension common to the dimensions of the position
-        coordinate are retained to the output.
+        Any coords and masks that have a dimension common to the dimensions of the
+        position coordinate are retained in the output.
     """
+    pixel_width = data.coords['pixel_width']
+    pixel_height = data.coords['pixel_height']
     L2 = scn.L2(data)
     omega = (pixel_width * pixel_height) / (L2 * L2)
-    solid_angle = sc.DataArray(data=omega)
-    omega_dims = set(omega.dims)
-    for key, mask in data.masks.items():
-        if set(mask.dims).issubset(omega_dims):
-            solid_angle.masks[key] = mask
-    return solid_angle
+    dims = set(data.dims) - set(omega.dims)
+    return SolidAngle[RunType](
+        concepts.rewrap_reduced_data(prototype=data, data=omega, dim=dims)
+    )
 
 
 def transmission_fraction(
-    data_monitors: Dict[str, sc.DataArray], direct_monitors: Dict[str, sc.DataArray]
-) -> sc.DataArray:
+    sample_incident_monitor: CleanMonitor[SampleRun, Incident],
+    sample_transmission_monitor: CleanMonitor[SampleRun, Transmission],
+    direct_incident_monitor: CleanMonitor[DirectRun, Incident],
+    direct_transmission_monitor: CleanMonitor[DirectRun, Transmission],
+) -> TransmissionFraction:
     """
     Approximation based on equations in
     [CalculateTransmission](https://docs.mantidproject.org/v4.0.0/algorithms/CalculateTransmission-v1.html)
@@ -76,9 +93,10 @@ def transmission_fraction(
     :
         The transmission fraction computed from the monitor counts.
     """  # noqa: E501
-    return (data_monitors['transmission'] / direct_monitors['transmission']) * (
-        direct_monitors['incident'] / data_monitors['incident']
+    frac = (sample_transmission_monitor / direct_transmission_monitor) * (
+        direct_incident_monitor / sample_incident_monitor
     )
+    return TransmissionFraction(frac)
 
 
 def _verify_normalization_alpha(
@@ -109,13 +127,14 @@ def _verify_normalization_alpha(
 
 
 def iofq_denominator(
-    data: sc.DataArray,
-    data_transmission_monitor: sc.DataArray,
-    direct_incident_monitor: sc.DataArray,
-    direct_transmission_monitor: sc.DataArray,
-    direct_beam: Optional[sc.DataArray] = None,
-    signal_over_monitor_threshold: float = 0.1,
-) -> sc.DataArray:
+    # data: WavelengthData[SampleRun],
+    data_transmission_monitor: CleanMonitor[RunType, Transmission],
+    direct_incident_monitor: CleanMonitor[DirectRun, Incident],
+    direct_transmission_monitor: CleanMonitor[DirectRun, Transmission],
+    solid_angle: SolidAngle[RunType],
+    direct_beam: Optional[CleanDirectBeam],
+    # signal_over_monitor_threshold: float = 0.1,
+) -> Clean[RunType, Denominator]:
     """
     Compute the denominator term for the I(Q) normalization. This is basically:
     ``solid_angle * direct_beam * data_transmission_monitor * direct_incident_monitor / direct_transmission_monitor``
@@ -150,38 +169,39 @@ def iofq_denominator(
     :
         The denominator for the SANS I(Q) normalization.
     """  # noqa: E501
+    # TODO
+    # signal_over_monitor_threshold: float = (0.1,)
     denominator = (
         data_transmission_monitor
         * direct_incident_monitor
         / direct_transmission_monitor
     )
     if direct_beam is not None:
-        denominator *= direct_beam
+        denominator = direct_beam * denominator
 
     # We need to remove the variances because the broadcasting operation between
     # solid_angle (pixel-dependent) and monitors (wavelength-dependent) will fail.
     # We check beforehand that the ratio of sample detector counts to monitor
     # counts is small
-    if denominator.variances is not None:
-        _verify_normalization_alpha(
-            numerator=data.hist(wavelength=denominator.coords['wavelength']),
-            denominator=denominator,
-            signal_over_monitor_threshold=signal_over_monitor_threshold,
-        )
+    # TODO move this into separate provider?
+    # if denominator.variances is not None:
+    #    _verify_normalization_alpha(
+    #        numerator=data.hist(wavelength=denominator.coords['wavelength']),
+    #        denominator=denominator,
+    #        signal_over_monitor_threshold=signal_over_monitor_threshold,
+    #    )
 
-    solid_angle = solid_angle_of_rectangular_pixels(
-        data,
-        pixel_width=data.coords['pixel_width'],
-        pixel_height=data.coords['pixel_height'],
-    )
     denominator = solid_angle * sc.values(denominator)
     # Convert wavelength coordinate to midpoints for future histogramming
     # if wavelength_to_midpoints:
     denominator.coords['wavelength'] = sc.midpoints(denominator.coords['wavelength'])
-    return denominator
+    return Clean[RunType, Denominator](denominator)
 
 
-def normalize(numerator: sc.DataArray, denominator: sc.DataArray) -> sc.DataArray:
+def normalize(
+    numerator: CleanSummedQ[RunType, Numerator],
+    denominator: CleanSummedQ[RunType, Denominator],
+) -> IofQ[RunType]:
     """
     Perform normalization of counts as a function of Q.
     If the numerator contains events, we use the sc.lookup function to perform the
@@ -202,6 +222,15 @@ def normalize(numerator: sc.DataArray, denominator: sc.DataArray) -> sc.DataArra
         The input data normalized by the supplied denominator.
     """
     if numerator.bins is not None:
-        return numerator.bins / sc.lookup(func=denominator, dim='Q')
+        da = numerator.bins / sc.lookup(func=denominator, dim='Q')
     else:
-        return numerator / denominator
+        da = numerator / denominator
+    return IofQ[RunType](da)
+
+
+providers = [
+    transmission_fraction,
+    iofq_denominator,
+    normalize,
+    solid_angle_rectangular_approximation,
+]

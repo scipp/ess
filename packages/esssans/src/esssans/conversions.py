@@ -1,10 +1,28 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+from typing import NewType, Optional
 
 import scipp as sc
 from scipp.constants import h, m_n
 from scippneutron._utils import elem_unit
 from scippneutron.conversion.graph import beamline, tof
+
+from .common import mask_range
+from .types import (
+    BeamCenter,
+    Clean,
+    CleanMasked,
+    CleanQ,
+    CorrectForGravity,
+    IofQPart,
+    MaskedData,
+    MonitorType,
+    Numerator,
+    RawMonitor,
+    RunType,
+    WavelengthMask,
+    WavelengthMonitor,
+)
 
 
 def cyl_x_unit_vector(gravity: sc.Variable, incident_beam: sc.Variable) -> sc.Variable:
@@ -99,7 +117,11 @@ def phi(cylindrical_x: sc.Variable, cylindrical_y: sc.Variable) -> sc.Variable:
     return sc.atan2(y=cylindrical_y, x=cylindrical_x)
 
 
-def sans_elastic(gravity: bool = False, scatter: bool = True) -> dict:
+ElasticCoordTransformGraph = NewType('ElasticCoordTransformGraph', dict)
+MonitorCoordTransformGraph = NewType('MonitorCoordTransformGraph', dict)
+
+
+def sans_elastic(gravity: Optional[CorrectForGravity]) -> ElasticCoordTransformGraph:
     """
     Generate a coordinate transformation graph for SANS elastic scattering.
     By default, the effects of gravity on the neutron flight paths are not included.
@@ -107,7 +129,7 @@ def sans_elastic(gravity: bool = False, scatter: bool = True) -> dict:
     :param gravity: Take into account the bending of the neutron flight paths from the
         Earth's gravitational field if ``True``.
     """
-    graph = {**beamline.beamline(scatter=scatter), **tof.elastic_Q('tof')}
+    graph = {**beamline.beamline(scatter=True), **tof.elastic_Q('tof')}
     if gravity:
         graph['two_theta'] = two_theta
     graph['cyl_x_unit_vector'] = cyl_x_unit_vector
@@ -115,11 +137,69 @@ def sans_elastic(gravity: bool = False, scatter: bool = True) -> dict:
     graph['cylindrical_x'] = cylindrical_x
     graph['cylindrical_y'] = cylindrical_y
     graph['phi'] = phi
-    return graph
+    return ElasticCoordTransformGraph(graph)
 
 
-def sans_monitor() -> dict:
+def sans_monitor() -> MonitorCoordTransformGraph:
     """
     Generate a coordinate transformation graph for SANS monitor (no scattering).
     """
-    return {**beamline.beamline(scatter=False), **tof.elastic_wavelength('tof')}
+    return MonitorCoordTransformGraph(
+        {**beamline.beamline(scatter=False), **tof.elastic_wavelength('tof')}
+    )
+
+
+def monitor_to_wavelength(
+    monitor: RawMonitor[RunType, MonitorType], graph: MonitorCoordTransformGraph
+) -> WavelengthMonitor[RunType, MonitorType]:
+    return WavelengthMonitor[RunType, MonitorType](
+        monitor.transform_coords('wavelength', graph=graph)
+    )
+
+
+# TODO This demonstrates a problem: Transforming to wavelength should be possible
+# for RawData, MaskedData, ... no reason to restrict necessarily.
+# Would we be fine with just choosing on option, or will this get in the way for users?
+def detector_to_wavelength(
+    detector: MaskedData[RunType],
+    beam_center: BeamCenter,
+    graph: ElasticCoordTransformGraph,
+) -> Clean[RunType, Numerator]:
+    detector = detector.copy(deep=False)
+    detector.coords['position'] -= beam_center
+    da = detector.transform_coords('wavelength', graph=graph)
+
+    return Clean[RunType, Numerator](da)
+
+
+def mask_wavelength(
+    da: Clean[RunType, IofQPart], mask: Optional[WavelengthMask]
+) -> CleanMasked[RunType, IofQPart]:
+    if mask is not None:
+        # If we have binned data and the wavelength coord is multi-dimensional, we need
+        # to make a single wavelength bin before we can mask the range.
+        if da.bins is not None:
+            dim = mask.dim
+            if (dim in da.bins.coords) and (dim in da.coords):
+                da = da.bin({dim: 1})
+        da = mask_range(da, mask=mask)
+    return CleanMasked[RunType, IofQPart](da)
+
+
+def to_Q(
+    data: CleanMasked[RunType, IofQPart], graph: ElasticCoordTransformGraph
+) -> CleanQ[RunType, IofQPart]:
+    """
+    Convert a data array from wavelength to Q.
+    """
+    return CleanQ[RunType, IofQPart](data.transform_coords('Q', graph=graph))
+
+
+providers = [
+    sans_elastic,
+    sans_monitor,
+    monitor_to_wavelength,
+    detector_to_wavelength,
+    mask_wavelength,
+    to_Q,
+]

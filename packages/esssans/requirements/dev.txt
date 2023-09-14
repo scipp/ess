@@ -12,7 +12,7 @@
 -r static.txt
 -r test.txt
 -r wheels.txt
-anyio==3.7.1
+anyio==4.0.0
     # via jupyter-server
 argon2-cffi==23.1.0
     # via jupyter-server
@@ -45,7 +45,7 @@ jupyter-events==0.7.0
     # via jupyter-server
 jupyter-lsp==2.2.0
     # via jupyterlab
-jupyter-server==2.7.2
+jupyter-server==2.7.3
     # via
     #   jupyter-lsp
     #   jupyterlab
