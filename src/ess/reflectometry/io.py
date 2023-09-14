@@ -1,11 +1,15 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
+from typing import Optional
+
 import numpy as np
 import scipp as sc
 
 
-def save_ort(data_array: sc.DataArray, filename: str, dimension: Optional[str]):
+def save_ort(
+    data_array: sc.DataArray, filename: str, dimension: Optional[str] = None
+) -> None:
     """
     Save a data array with the ORSO .ort file format.
 
