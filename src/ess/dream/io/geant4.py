@@ -40,9 +40,9 @@ def _load_raw_events(filename: Union[str, os.PathLike]) -> sc.DataArray:
 
 
 def _adjust_coords(da: sc.DataArray) -> None:
-    da.coords['wavelength'] = da.coords['lambda']
+    da.coords['wavelength'] = da.coords.pop('lambda')
     da.coords['position'] = sc.spatial.as_vectors(
-        da.coords['x_pos'], da.coords['y_pos'], da.coords['z_pos']
+        da.coords.pop('x_pos'), da.coords.pop('y_pos'), da.coords.pop('z_pos')
     )
 
 
