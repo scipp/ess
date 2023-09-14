@@ -250,16 +250,10 @@ def beam_center(
     ----------
     data:
         The DataArray containing the detector data.
-    data_monitors:
-        The data arrays for the incident and transmission monitors for the measurement
-        run.
-    direct_monitors:
-        The data arrays for the incident and transmission monitors for the direct
-        run.
     wavelength_bins:
         The binning in the wavelength dimension to be used.
-    gravity:
-        Include the effects of gravity when computing the scattering angle if ``True``.
+    q_bins:
+        The binning in the Q dimension to be used.
     minimizer:
         The Scipy minimizer method to use (see the
         `Scipy docs <https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html>`_
