@@ -25,7 +25,10 @@ from .types import (
     TransmissionFraction,
     UncertaintyBroadcastMode,
 )
-from .uncertainty import broadcast_with_upper_bound_variances
+from .uncertainty import (
+    broadcast_with_upper_bound_variances,
+    drop_variances_if_broadcast,
+)
 
 
 def solid_angle_rectangular_approximation(
@@ -147,25 +150,16 @@ def iofq_denominator(
 
     # We need to remove the variances because the broadcasting operation between
     # solid_angle (pixel-dependent) and monitors (wavelength-dependent) will fail.
-    if uncertainties == UncertaintyBroadcastMode.drop:
-        if direct_beam is not None:
-            denominator = direct_beam * sc.values(denominator)
-        if set(solid_angle.dims) < set(denominator.dims):
-            denominator = sc.values(denominator)
-        denominator = solid_angle * denominator
-    elif uncertainties == UncertaintyBroadcastMode.upper_bound:
-        if direct_beam is not None:
-            # Broadcast in case direct_beam depends on pixel
-            denominator = direct_beam * broadcast_with_upper_bound_variances(
-                denominator, sizes=direct_beam.sizes
-            )
-        denominator = solid_angle * broadcast_with_upper_bound_variances(
-            denominator, sizes=solid_angle.sizes
-        )
-    else:
-        if direct_beam is not None:
-            denominator = direct_beam * denominator
-        denominator = solid_angle * denominator
+    # The direct beam may also be pixel-dependent. In this case we need to drop
+    # variances of the other term already before multiplying by solid_angle.
+    broadcast = {
+        UncertaintyBroadcastMode.drop: drop_variances_if_broadcast,
+        UncertaintyBroadcastMode.upper_bound: broadcast_with_upper_bound_variances,
+        UncertaintyBroadcastMode.fail: lambda x, sizes: x,
+    }[uncertainties]
+    if direct_beam is not None:
+        denominator = direct_beam * broadcast(denominator, sizes=direct_beam.sizes)
+    denominator = solid_angle * broadcast(denominator, sizes=solid_angle.sizes)
     # Convert wavelength coordinate to midpoints for future histogramming
     # if wavelength_to_midpoints:
     denominator.coords['wavelength'] = sc.midpoints(denominator.coords['wavelength'])

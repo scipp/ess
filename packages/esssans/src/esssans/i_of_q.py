@@ -34,7 +34,7 @@ from .uncertainty import broadcast_with_upper_bound_variances
 def preprocess_monitor_data(
     monitor: WavelengthMonitor[RunType, MonitorType],
     wavelength_bins: WavelengthBins,
-    non_background_range: NonBackgroundWavelengthRange,
+    non_background_range: Optional[NonBackgroundWavelengthRange],
     uncertainties: UncertaintyBroadcastMode,
 ) -> CleanMonitor[RunType, MonitorType]:
     """

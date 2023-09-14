@@ -86,6 +86,15 @@ def test_pipeline_can_compute_background_subtracted_IofQ(uncertainties):
     assert result.dims == ('Q',)
 
 
+def test_pipeline_raisesVariancesError_if_normalization_errors_not_dropped():
+    params = make_params()
+    del params[NonBackgroundWavelengthRange]  # Make sure we raise in iofq_denominator
+    params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.fail
+    pipeline = sciline.Pipeline(sans2d_providers(), params=params)
+    with pytest.raises(sc.VariancesError):
+        pipeline.compute(BackgroundSubtractedIofQ)
+
+
 def test_uncertainty_broadcast_mode_drop_yields_smaller_variances():
     params = make_params()
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
