@@ -59,8 +59,15 @@ def _split_detectors(
             dim=detector_id_name,
         )
     )
-    mantle = _extract_detector(groups, detector_id_name, MANTLE_DETECTOR_ID).copy()
-    high_res = _extract_detector(groups, detector_id_name, HIGH_RES_DETECTOR_ID).copy()
+    detectors = {}
+    if (
+        mantle := _extract_detector(groups, detector_id_name, MANTLE_DETECTOR_ID)
+    ) is not None:
+        detectors['mantle'] = mantle.copy()
+    if (
+        high_res := _extract_detector(groups, detector_id_name, HIGH_RES_DETECTOR_ID)
+    ) is not None:
+        detectors['high_resolution'] = high_res.copy()
 
     endcaps_list = [
         det
@@ -69,20 +76,14 @@ def _split_detectors(
     ]
     if endcaps_list:
         endcaps = sc.concat(endcaps_list, data.dim)
-        endcap_forward = endcaps[endcaps.coords['z_pos'] > sc.scalar(0, unit='mm')]
-        endcap_backward = endcaps[endcaps.coords['z_pos'] < sc.scalar(0, unit='mm')]
-    else:
-        endcap_forward = None
-        endcap_backward = None
+        detectors['endcap_forward'] = endcaps[
+            endcaps.coords['z_pos'] > sc.scalar(0, unit='mm')
+        ]
+        detectors['endcap_backward'] = endcaps[
+            endcaps.coords['z_pos'] < sc.scalar(0, unit='mm')
+        ]
 
-    return {
-        key: val
-        for key, val in zip(
-            ('mantle', 'high_resolution', 'endcap_forward', 'endcap_backward'),
-            (mantle, high_res, endcap_forward, endcap_backward),
-        )
-        if val is not None
-    }
+    return detectors
 
 
 def _extract_detector(
