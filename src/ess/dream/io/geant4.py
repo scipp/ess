@@ -59,8 +59,8 @@ def _split_detectors(
             dim=detector_id_name,
         )
     )
-    mantle = _extract_detector(groups, detector_id_name, MANTLE_DETECTOR_ID)
-    high_res = _extract_detector(groups, detector_id_name, HIGH_RES_DETECTOR_ID)
+    mantle = _extract_detector(groups, detector_id_name, MANTLE_DETECTOR_ID).copy()
+    high_res = _extract_detector(groups, detector_id_name, HIGH_RES_DETECTOR_ID).copy()
 
     endcaps_list = [
         det
@@ -89,6 +89,6 @@ def _extract_detector(
     detector_groups: sc.DataArray, detector_id_name: str, detector_id: sc.Variable
 ) -> Optional[sc.DataArray]:
     try:
-        return detector_groups[detector_id_name, detector_id].value.copy()
+        return detector_groups[detector_id_name, detector_id].value
     except IndexError:
         return None
