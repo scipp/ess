@@ -7,6 +7,7 @@ import plopp as pp
 import scipp as sc
 
 DREAM_DETECTOR_DIMENSIONS = ('module', 'segment', 'counter', 'wire', 'strip')
+DREAM_PIXEL_SIZE = sc.scalar(1.0, unit='cm')
 
 
 def _preprocess_data(
@@ -48,7 +49,7 @@ def instrument_view(
     z: Optional[str] = None,
     pos: Optional[str] = None,
     dim: Optional[str] = None,
-    pixel_size: Union[sc.Variable, float] = sc.scalar(1.0, unit='cm'),
+    pixel_size: Union[sc.Variable, float] = DREAM_PIXEL_SIZE,
     **kwargs,
 ):
     """
@@ -81,8 +82,8 @@ def instrument_view(
         Additional arguments to pass to the plopp figure
         (see https://scipp.github.io/plopp/about/generated/plopp.scatter3d.html).
     """
-    from plopp.graphics import figure3d
     import plopp.widgets as pw
+    from plopp.graphics import figure3d
 
     dims = [d for d in data.dims if (d in DREAM_DETECTOR_DIMENSIONS) and (d != dim)]
     to = 'pixel'

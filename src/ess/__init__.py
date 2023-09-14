@@ -10,6 +10,5 @@ try:
 except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
-from . import data
-from . import logging
+from . import data, logging
 from .logging import get_logger
