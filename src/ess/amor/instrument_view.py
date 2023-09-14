@@ -2,14 +2,13 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 import scippneutron as scn
-from scipp.plotting.objects import Plot
 
 from .beamline import instrument_view_components
 
 
 def instrument_view(
     da: sc.DataArray, components: dict = None, pixel_size: float = 0.0035, **kwargs
-) -> Plot:
+):
     """
     Instrument view for the Amor instrument, which automatically populates a list of
     additional beamline components, and sets the pixel size.
