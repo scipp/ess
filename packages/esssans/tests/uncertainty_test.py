@@ -13,6 +13,11 @@ def test_broadcast_returns_original_if_no_new_dims():
     assert broadcast_with_upper_bound_variances(var, {'y': 3}) is var
 
 
+def test_broadcast_returns_original_if_no_variances():
+    var = sc.ones(dims=['x'], shape=[2], with_variances=False)
+    assert broadcast_with_upper_bound_variances(var, {'y': 3}) is var
+
+
 def test_broadcast_scales_variances_by_new_subspace_volume():
     x = sc.linspace('x', 0.0, 1.0, 2)
     y = sc.linspace('y', 0.0, 2.0, 3)

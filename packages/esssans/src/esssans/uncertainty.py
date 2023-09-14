@@ -26,6 +26,8 @@ def broadcast_with_upper_bound_variances(
 def broadcast_with_upper_bound_variances(
     data: Union[sc.Variable, sc.DataArray], sizes: Dict[str, int]
 ) -> Union[sc.Variable, sc.DataArray]:
+    if data.variances is None:
+        return data
     if all(data.sizes.get(dim) == size for dim, size in sizes.items()):
         return data
     size = 1
