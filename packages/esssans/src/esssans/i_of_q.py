@@ -23,16 +23,19 @@ from .types import (
     QBins,
     RunType,
     SampleRun,
+    UncertaintyBroadcastMode,
     WavelengthBands,
     WavelengthBins,
     WavelengthMonitor,
 )
+from .uncertainty import broadcast_with_upper_bound_variances
 
 
 def preprocess_monitor_data(
     monitor: WavelengthMonitor[RunType, MonitorType],
     wavelength_bins: WavelengthBins,
-    non_background_range: NonBackgroundWavelengthRange,
+    non_background_range: Optional[NonBackgroundWavelengthRange],
+    uncertainties: UncertaintyBroadcastMode,
 ) -> CleanMonitor[RunType, MonitorType]:
     """
     Prepare monitor data for computing the transmission fraction.
@@ -53,6 +56,9 @@ def preprocess_monitor_data(
     non_background_range:
         The range of wavelengths that defines the data which does not constitute
         background. Everything outside this range is treated as background counts.
+    uncertainties:
+        The mode for broadcasting uncertainties. See
+        :py:class:`UncertaintyBroadcastMode` for details.
 
     Returns
     -------
@@ -72,21 +78,16 @@ def preprocess_monitor_data(
         monitor = monitor.hist(wavelength=wavelength_bins)
     else:
         monitor = monitor.rebin(wavelength=wavelength_bins)
+
     if background is not None:
-        # TODO: reference Heybrock et al. (2023) paper
-        # For subtracting the background from the monitors, we need to remove the
-        # variances because the broadcasting operation will fail.
-        # We add a simple check comparing the background level to the total number
-        # of counts.
-        # TODO: is this check good enough? See https://github.com/scipp/ess/issues/174
-        bg = sc.values(background)
-        if (bg / monitor.sum()).value > 0.1:
-            raise ValueError(
-                'The background level is more than 10% of the total monitor counts. '
-                'Dropping the variances of the background would drop non-negligible '
-                'contributions to uncertainties from correlations.'
+        if uncertainties == UncertaintyBroadcastMode.drop:
+            monitor -= sc.values(background)
+        elif uncertainties == UncertaintyBroadcastMode.upper_bound:
+            monitor -= broadcast_with_upper_bound_variances(
+                background, sizes=monitor.sizes
             )
-        monitor = monitor - bg
+        else:
+            monitor -= background
     return CleanMonitor(monitor)
 
 
@@ -211,7 +212,11 @@ def _dense_merge_spectra(
 def subtract_background(
     sample: IofQ[SampleRun], background: IofQ[BackgroundRun]
 ) -> BackgroundSubtractedIofQ:
-    return BackgroundSubtractedIofQ(sample.bins.sum() - background.bins.sum())
+    if sample.bins is not None:
+        sample = sample.bins.sum()
+    if background.bins is not None:
+        background = background.bins.sum()
+    return BackgroundSubtractedIofQ(sample - background)
 
 
 providers = [
