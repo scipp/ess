@@ -53,7 +53,12 @@ def _group(dg: sc.DataGroup) -> sc.DataGroup:
 def _split_detectors(
     data: sc.DataArray, detector_id_name: str = 'det ID'
 ) -> Dict[str, sc.DataArray]:
-    groups = data.group(detector_id_name)
+    groups = data.group(
+        sc.concat(
+            [MANTLE_DETECTOR_ID, HIGH_RES_DETECTOR_ID, *ENDCAPS_DETECTOR_IDS],
+            dim=detector_id_name,
+        )
+    )
     mantle = _extract_detector(groups, detector_id_name, MANTLE_DETECTOR_ID)
     high_res = _extract_detector(groups, detector_id_name, HIGH_RES_DETECTOR_ID)
 
