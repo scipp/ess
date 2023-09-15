@@ -95,15 +95,12 @@ def iofq_in_quadrants(
         'north-west'.
     """
     data = sample.copy(deep=False)
-    data.coords['position'] = sample.coords['position'].copy(deep=True)
+    norm = norm.copy(deep=False)
 
     # Offset the position according to the input shift
     center = _offsets_to_vector(data=data, xy=xy, graph=graph)
-    data.coords['position'] -= center
-
-    # Insert a copy of coords needed for conversion to Q
-    for c in ['position', 'sample_position', 'source_position']:
-        norm.coords[c] = data.coords[c]
+    data.coords['position'] = data.coords['position'] - center
+    norm.coords['position'] = data.coords['position']
 
     pi = sc.constants.pi.value
     phi = data.transform_coords(
