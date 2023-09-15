@@ -1,16 +1,29 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, NewType, Optional, Union
 
 import numpy as np
+import sciline
 import scipp as sc
 
-from . import i_of_q
-from .common import gravity_vector
-from .conversions import sans_elastic
+from .conversions import ElasticCoordTransformGraph, to_Q
+from .i_of_q import merge_spectra
 from .logging import get_logger
-from .normalization import iofq_denominator, normalize
+from .normalization import normalize
+from .types import (
+    BeamCenter,
+    Clean,
+    CleanMasked,
+    Denominator,
+    IofQ,
+    MaskedData,
+    Numerator,
+    QBins,
+    SampleRun,
+    WavelengthBands,
+    WavelengthBins,
+)
 
 
 def center_of_mass(data: sc.DataArray) -> sc.Variable:
@@ -54,7 +67,6 @@ def iofq_in_quadrants(
     norm: sc.DataArray,
     graph: dict,
     q_bins: Union[int, sc.Variable],
-    gravity: bool,
     wavelength_range: sc.Variable,
 ) -> Dict[str, sc.DataArray]:
     """
@@ -72,8 +84,6 @@ def iofq_in_quadrants(
         Coordinate transformation graph.
     q_bins:
         Bin edges for Q.
-    gravity:
-        If true, the gravity vector is used to compute the scattering angle.
     wavelength_range:
         The wavelength range to use for computing the intensity as a function of Q.
 
@@ -85,15 +95,12 @@ def iofq_in_quadrants(
         'north-west'.
     """
     data = sample.copy(deep=False)
-    data.coords['position'] = sample.coords['position'].copy(deep=True)
+    norm = norm.copy(deep=False)
 
     # Offset the position according to the input shift
     center = _offsets_to_vector(data=data, xy=xy, graph=graph)
-    data.coords['position'] -= center
-
-    # Insert a copy of coords needed for conversion to Q
-    for c in ['position', 'sample_position', 'source_position']:
-        norm.coords[c] = data.coords[c]
+    data.coords['position'] = data.coords['position'] - center
+    norm.coords['position'] = data.coords['position']
 
     pi = sc.constants.pi.value
     phi = data.transform_coords(
@@ -102,28 +109,20 @@ def iofq_in_quadrants(
     phi_bins = sc.linspace('phi', -pi, pi, 5, unit='rad')
     quadrants = ['south-west', 'south-east', 'north-east', 'north-west']
 
+    providers = [to_Q, merge_spectra, normalize]
+    params = {}
+    params[WavelengthBands] = wavelength_range
+    params[QBins] = q_bins
+    params[ElasticCoordTransformGraph] = graph
+
     out = {}
     for i, quad in enumerate(quadrants):
         # Select pixels based on phi
         sel = (phi >= phi_bins[i]) & (phi < phi_bins[i + 1])
-        # Data counts into Q bins
-        data_q = i_of_q.convert_to_q_and_merge_spectra(
-            data=data[sel],
-            graph=graph,
-            q_bins=q_bins,
-            gravity=gravity,
-            wavelength_bands=wavelength_range,
-        )
-        # Denominator counts into Q bins
-        norm_q = i_of_q.convert_to_q_and_merge_spectra(
-            data=norm[sel],
-            graph=graph,
-            q_bins=q_bins,
-            gravity=gravity,
-            wavelength_bands=wavelength_range,
-        )
-        # Normalize
-        out[quad] = normalize(numerator=data_q, denominator=norm_q).hist()
+        params[CleanMasked[SampleRun, Numerator]] = data[sel]
+        params[CleanMasked[SampleRun, Denominator]] = norm[sel]
+        pipeline = sciline.Pipeline(providers, params=params)
+        out[quad] = pipeline.compute(IofQ[SampleRun])
     return out
 
 
@@ -193,49 +192,25 @@ def cost(xy: List[float], *args) -> float:
     return out
 
 
-def minimize(
-    fun, x0, args=(), bounds=None, method: str = 'Nelder-Mead', tol: float = 0.1
-):
-    """
-    Minimize the supplied cost function using Scipy's optimize.minimize. See the
-    `Scipy docs <https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html>`_
-    for more details.
+BeamCenterFinderQBins = NewType('BeamCenterFinderQBins', sc.Variable)
+"""Q binning used for the beam center finder"""
 
-    Parameters
-    ----------
-    fun:
-        The cost function to minimize.
-    x0:
-        Initial guess.
-    args:
-        Additional arguments passed to the cost function.
-    bounds:
-        Bounds on the variables.
-    method:
-        The minimization method to use.
-    tol:
-        The tolerance for termination.
+BeamCenterFinderTolerance = NewType('BeamCenterFinderTolerance', float)
+"""Tolerance used for the beam center finder"""
 
-    Returns
-    -------
-    :
-        The result of the minimization.
-    """  # noqa: E501
-    from scipy.optimize import minimize as scipy_minimize
-
-    return scipy_minimize(fun, x0=x0, args=args, bounds=bounds, method=method, tol=tol)
+BeamCenterFinderMinimizer = NewType('BeamCenterFinderMinimizer', str)
+"""Minimizer used for the beam center finder"""
 
 
 def beam_center(
-    data: sc.DataArray,
-    data_monitors: Dict[str, sc.DataArray],
-    direct_monitors: Dict[str, sc.DataArray],
-    wavelength_bins: sc.Variable,
-    q_bins: Union[int, sc.Variable],
-    gravity: bool = False,
-    minimizer: str = 'Nelder-Mead',
-    tolerance: float = 0.1,
-) -> Tuple[sc.Variable, sc.Variable]:
+    data: MaskedData[SampleRun],
+    graph: ElasticCoordTransformGraph,
+    wavelength_bins: WavelengthBins,
+    norm: Clean[SampleRun, Denominator],
+    q_bins: BeamCenterFinderQBins,
+    minimizer: Optional[BeamCenterFinderMinimizer],
+    tolerance: Optional[BeamCenterFinderTolerance],
+) -> BeamCenter:
     """
     Find the beam center of a SANS scattering pattern.
     Description of the procedure:
@@ -252,18 +227,10 @@ def beam_center(
     ----------
     data:
         The DataArray containing the detector data.
-    data_monitors:
-        The data arrays for the incident and transmission monitors for the measurement
-        run.
-    direct_monitors:
-        The data arrays for the incident and transmission monitors for the direct
-        run.
     wavelength_bins:
         The binning in the wavelength dimension to be used.
     q_bins:
         The binning in the Q dimension to be used.
-    gravity:
-        Include the effects of gravity when computing the scattering angle if ``True``.
     minimizer:
         The Scipy minimizer method to use (see the
         `Scipy docs <https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html>`_
@@ -338,14 +305,20 @@ def beam_center(
 
     This is what is now implemented in this version of the algorithm.
     """  # noqa: E501
+    from scipy.optimize import minimize
+
     logger = get_logger('sans')
-    if 'gravity' not in data.meta:
-        data = data.copy(deep=False)
-        data.coords['gravity'] = gravity_vector()
+
+    logger.info(f'Requested minimizer: {minimizer}')
+    logger.info(f'Requested tolerance: {tolerance}')
+    minimizer = minimizer or 'Nelder-Mead'
+    tolerance = tolerance or 0.1
+    logger.info(f'Using minimizer: {minimizer}')
+    logger.info(f'Using tolerance: {tolerance}')
+
     # Use center of mass to get initial guess for beam center
     com = center_of_mass(data)
     logger.info(f'Initial guess for beam center: {com}')
-    graph = sans_elastic(gravity=gravity)
 
     # We compute the shift between the incident beam direction and the center-of-mass
     incident_beam = data.transform_coords('incident_beam', graph=graph).coords[
@@ -353,14 +326,6 @@ def beam_center(
     ]
     n_beam = incident_beam / sc.norm(incident_beam)
     com_shift = com - sc.dot(com, n_beam) * n_beam
-
-    # Compute the denominator used for normalization.
-    norm = iofq_denominator(
-        data=data,
-        data_transmission_monitor=sc.values(data_monitors['transmission']),
-        direct_incident_monitor=sc.values(direct_monitors['incident']),
-        direct_transmission_monitor=sc.values(direct_monitors['transmission']),
-    )
 
     wavelength_range = sc.concat(
         [wavelength_bins.min(), wavelength_bins.max()], dim='wavelength'
@@ -378,7 +343,7 @@ def beam_center(
     res = minimize(
         cost,
         x0=[com_shift.fields.x.value, com_shift.fields.y.value],
-        args=(data, norm, graph, q_bins, gravity, wavelength_range),
+        args=(data, norm, graph, q_bins, wavelength_range),
         bounds=bounds,
         method=minimizer,
         tol=tolerance,
