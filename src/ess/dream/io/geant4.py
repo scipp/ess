@@ -4,6 +4,7 @@
 import os
 from typing import Dict, Optional, Union
 
+import numpy as np
 import scipp as sc
 
 MANTLE_DETECTOR_ID = sc.index(7)
@@ -76,12 +77,15 @@ def _split_detectors(
     ]
     if endcaps_list:
         endcaps = sc.concat(endcaps_list, data.dim)
-        detectors['endcap_forward'] = endcaps[
-            endcaps.coords['z_pos'] > sc.scalar(0, unit='mm')
-        ]
-        detectors['endcap_backward'] = endcaps[
-            endcaps.coords['z_pos'] < sc.scalar(0, unit='mm')
-        ]
+        endcaps = endcaps.bin(
+            z_pos=sc.array(
+                dims=['z_pos'],
+                values=[-np.inf, 0.0, np.inf],
+                unit=endcaps.coords['z_pos'].unit,
+            )
+        )
+        detectors['endcap_backward'] = endcaps[0].bins.concat().value.copy()
+        detectors['endcap_forward'] = endcaps[1].bins.concat().value.copy()
 
     return detectors
 
