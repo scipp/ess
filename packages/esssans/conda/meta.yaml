@@ -16,8 +16,8 @@ requirements:
     - plopp
     - pythreejs
     - sciline>=23.9.0
-    - scipp==23.7.0
-    - scippneutron
+    - scipp>=23.8.0
+    - scippneutron>=23.9.0
 
 test:
   imports:
