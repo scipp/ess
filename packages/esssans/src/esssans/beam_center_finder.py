@@ -192,39 +192,6 @@ def cost(xy: List[float], *args) -> float:
     return out
 
 
-def minimize(
-    fun, x0, args=(), bounds=None, method: str = 'Nelder-Mead', tol: float = 0.1
-):
-    """
-    Minimize the supplied cost function using Scipy's optimize.minimize. See the
-    `Scipy docs <https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html>`_
-    for more details.
-
-    Parameters
-    ----------
-    fun:
-        The cost function to minimize.
-    x0:
-        Initial guess.
-    args:
-        Additional arguments passed to the cost function.
-    bounds:
-        Bounds on the variables.
-    method:
-        The minimization method to use.
-    tol:
-        The tolerance for termination.
-
-    Returns
-    -------
-    :
-        The result of the minimization.
-    """  # noqa: E501
-    from scipy.optimize import minimize as scipy_minimize
-
-    return scipy_minimize(fun, x0=x0, args=args, bounds=bounds, method=method, tol=tol)
-
-
 def beam_center(
     data: MaskedData[SampleRun],
     graph: ElasticCoordTransformGraph,
@@ -325,6 +292,8 @@ def beam_center(
 
     This is what is now implemented in this version of the algorithm.
     """  # noqa: E501
+    from scipy.optimize import minimize
+
     # TODO Turn this into user-facing settings
     minimizer: str = 'Nelder-Mead'
     tolerance: float = 0.1
