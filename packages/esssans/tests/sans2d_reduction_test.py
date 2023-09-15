@@ -144,3 +144,31 @@ def test_pixel_dependent_direct_beam_is_supported(uncertainties):
     pipeline = sciline.Pipeline(providers.values(), params=params)
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('Q',)
+
+
+def test_beam_center_finder_without_direct_beam_reproduces_verified_result():
+    params = make_params()
+    del params[BeamCenter]
+    del params[DirectBeamFilename]
+    providers = sans2d_providers()
+    providers.append(sans.beam_center_finder.beam_center)
+    pipeline = sciline.Pipeline(providers, params=params)
+    center = pipeline.compute(BeamCenter)
+    # This is the result we got with the pre-sciline implementation
+    assert sc.allclose(center, sc.vector([0.0945643, -0.082074, 0], unit='m'))
+
+
+def test_beam_center_finder_works_with_direct_beam():
+    params = make_params()
+    del params[BeamCenter]
+    providers = sans2d_providers()
+    providers.append(sans.beam_center_finder.beam_center)
+    pipeline = sciline.Pipeline(providers, params=params)
+    center = pipeline.compute(BeamCenter)  # (0.0935541, -0.0807718, 0)
+    center_no_direct_beam = sc.vector([0.0945643, -0.082074, 0], unit='m')
+
+    assert sc.allclose(
+        center,
+        center_no_direct_beam,
+        atol=sc.scalar(1e-2, unit='m'),
+    )
