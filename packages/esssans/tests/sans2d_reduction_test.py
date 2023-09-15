@@ -148,6 +148,9 @@ def test_pixel_dependent_direct_beam_is_supported(uncertainties):
 
 def test_beam_center_finder_without_direct_beam_reproduces_verified_result():
     params = make_params()
+    params[sans.beam_center_finder.BeamCenterFinderQBins] = sc.linspace(
+        'Q', 0.02, 0.3, 71, unit='1/angstrom'
+    )
     del params[BeamCenter]
     del params[DirectBeamFilename]
     providers = sans2d_providers()
@@ -160,6 +163,9 @@ def test_beam_center_finder_without_direct_beam_reproduces_verified_result():
 
 def test_beam_center_finder_works_with_direct_beam():
     params = make_params()
+    params[sans.beam_center_finder.BeamCenterFinderQBins] = sc.linspace(
+        'Q', 0.02, 0.3, 71, unit='1/angstrom'
+    )
     del params[BeamCenter]
     providers = sans2d_providers()
     providers.append(sans.beam_center_finder.beam_center)

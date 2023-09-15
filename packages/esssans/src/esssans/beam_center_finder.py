@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
-from typing import Dict, List, Union
+from typing import Dict, List, NewType, Optional, Union
 
 import numpy as np
 import sciline
@@ -192,11 +192,24 @@ def cost(xy: List[float], *args) -> float:
     return out
 
 
+BeamCenterFinderQBins = NewType('BeamCenterFinderQBins', sc.Variable)
+"""Q binning used for the beam center finder"""
+
+BeamCenterFinderTolerance = NewType('BeamCenterFinderTolerance', float)
+"""Tolerance used for the beam center finder"""
+
+BeamCenterFinderMinimizer = NewType('BeamCenterFinderMinimizer', str)
+"""Minimizer used for the beam center finder"""
+
+
 def beam_center(
     data: MaskedData[SampleRun],
     graph: ElasticCoordTransformGraph,
     wavelength_bins: WavelengthBins,
     norm: Clean[SampleRun, Denominator],
+    q_bins: BeamCenterFinderQBins,
+    minimizer: Optional[BeamCenterFinderMinimizer],
+    tolerance: Optional[BeamCenterFinderTolerance],
 ) -> BeamCenter:
     """
     Find the beam center of a SANS scattering pattern.
@@ -294,12 +307,14 @@ def beam_center(
     """  # noqa: E501
     from scipy.optimize import minimize
 
-    # TODO Turn this into user-facing settings
-    minimizer: str = 'Nelder-Mead'
-    tolerance: float = 0.1
-    q_bins = sc.linspace('Q', 0.02, 0.3, 71, unit='1/angstrom')
-
     logger = get_logger('sans')
+
+    logger.info(f'Requested minimizer: {minimizer}')
+    logger.info(f'Requested tolerance: {tolerance}')
+    minimizer = minimizer or 'Nelder-Mead'
+    tolerance = tolerance or 0.1
+    logger.info(f'Using minimizer: {minimizer}')
+    logger.info(f'Using tolerance: {tolerance}')
 
     # Use center of mass to get initial guess for beam center
     com = center_of_mass(data)
