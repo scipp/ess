@@ -9,12 +9,9 @@ the ``dream`` module when that is available.
 
 from . import beamline, data
 from .instrument_view import instrument_view
-from .load import load, load_and_preprocess_vanadium
 
 __all__ = [
     'beamline',
     'data',
     'instrument_view',
-    'load',
-    'load_and_preprocess_vanadium',
 ]

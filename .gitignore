@@ -20,10 +20,13 @@ __pycache__/
 .mypy_cache
 
 # Data
+*.csv
+*.dat
 *.h5
 *.hdf5
 *.nxs
 *.ort
+*.zip
 
 # Misc
 *.log
