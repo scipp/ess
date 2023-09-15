@@ -165,7 +165,7 @@ exclude_patterns = [
     'Thumbs.db',
     '.DS_Store',
     '**.ipynb_checkpoints',
-    'powgen/preprocess_files.ipynb',
+    '**/powgen/preprocess_files.ipynb',
 ]
 
 # The name of the Pygments (syntax highlighting) style to use.
