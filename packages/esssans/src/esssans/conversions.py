@@ -10,13 +10,13 @@ from scippneutron.conversion.graph import beamline, tof
 from .common import mask_range
 from .types import (
     BeamCenter,
+    CalibratedMaskedData,
     Clean,
     CleanMasked,
     CleanQ,
     CorrectForGravity,
     IofQPart,
     MaskedData,
-    CalibratedMaskedData,
     MonitorType,
     Numerator,
     RawMonitor,

@@ -9,37 +9,37 @@ import scipp as sc
 
 from .conversions import (
     ElasticCoordTransformGraph,
-    to_Q,
-    mask_wavelength,
     calibrate_positions,
     detector_to_wavelength,
+    mask_wavelength,
+    to_Q,
 )
 from .i_of_q import merge_spectra
 from .logging import get_logger
 from .normalization import (
-    normalize,
     iofq_denominator,
+    normalize,
     solid_angle_rectangular_approximation,
 )
 from .types import (
     BeamCenter,
     Clean,
+    CleanDirectBeam,
     CleanMasked,
+    CleanMonitor,
     Denominator,
+    DirectRun,
+    Incident,
     IofQ,
     MaskedData,
     Numerator,
     QBins,
     SampleRun,
+    SolidAngle,
+    Transmission,
+    UncertaintyBroadcastMode,
     WavelengthBands,
     WavelengthBins,
-    CleanMonitor,
-    Transmission,
-    DirectRun,
-    Incident,
-    SolidAngle,
-    CleanDirectBeam,
-    UncertaintyBroadcastMode,
 )
 
 

@@ -8,6 +8,7 @@ import scippneutron as scn
 from scipp.core import concepts
 
 from .types import (
+    CalibratedMaskedData,
     Clean,
     CleanDirectBeam,
     CleanMonitor,
@@ -16,7 +17,7 @@ from .types import (
     DirectRun,
     Incident,
     IofQ,
-    CalibratedMaskedData,
+    NormWavelengthTerm,
     Numerator,
     RunType,
     SampleRun,
@@ -102,14 +103,20 @@ def transmission_fraction(
     return TransmissionFraction(frac)
 
 
-def iofq_denominator(
+_broadcasters = {
+    UncertaintyBroadcastMode.drop: drop_variances_if_broadcast,
+    UncertaintyBroadcastMode.upper_bound: broadcast_with_upper_bound_variances,
+    UncertaintyBroadcastMode.fail: lambda x, sizes: x,
+}
+
+
+def iofq_norm_wavelength_term(
     data_transmission_monitor: CleanMonitor[RunType, Transmission],
     direct_incident_monitor: CleanMonitor[DirectRun, Incident],
     direct_transmission_monitor: CleanMonitor[DirectRun, Transmission],
-    solid_angle: SolidAngle[RunType],
     direct_beam: Optional[CleanDirectBeam],
     uncertainties: UncertaintyBroadcastMode,
-) -> Clean[RunType, Denominator]:
+) -> NormWavelengthTerm[RunType]:
     """
     Compute the denominator term for the I(Q) normalization. This is basically:
     ``solid_angle * direct_beam * data_transmission_monitor * direct_incident_monitor / direct_transmission_monitor``
@@ -152,17 +159,22 @@ def iofq_denominator(
     # solid_angle (pixel-dependent) and monitors (wavelength-dependent) will fail.
     # The direct beam may also be pixel-dependent. In this case we need to drop
     # variances of the other term already before multiplying by solid_angle.
-    broadcast = {
-        UncertaintyBroadcastMode.drop: drop_variances_if_broadcast,
-        UncertaintyBroadcastMode.upper_bound: broadcast_with_upper_bound_variances,
-        UncertaintyBroadcastMode.fail: lambda x, sizes: x,
-    }[uncertainties]
+    broadcast = _broadcasters[uncertainties]
     if direct_beam is not None:
         denominator = direct_beam * broadcast(denominator, sizes=direct_beam.sizes)
-    denominator = solid_angle * broadcast(denominator, sizes=solid_angle.sizes)
     # Convert wavelength coordinate to midpoints for future histogramming
     # if wavelength_to_midpoints:
     denominator.coords['wavelength'] = sc.midpoints(denominator.coords['wavelength'])
+    return NormWavelengthTerm[RunType](denominator)
+
+
+def iofq_denominator(
+    wavelength_term: NormWavelengthTerm[RunType],
+    solid_angle: SolidAngle[RunType],
+    uncertainties: UncertaintyBroadcastMode,
+) -> Clean[RunType, Denominator]:
+    broadcast = _broadcasters[uncertainties]
+    denominator = solid_angle * broadcast(wavelength_term, sizes=solid_angle.sizes)
     return Clean[RunType, Denominator](denominator)
 
 
@@ -202,6 +214,7 @@ def normalize(
 
 providers = [
     transmission_fraction,
+    iofq_norm_wavelength_term,
     iofq_denominator,
     normalize,
     solid_angle_rectangular_approximation,

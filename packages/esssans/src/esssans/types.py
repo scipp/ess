@@ -117,6 +117,10 @@ class CalibratedMaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Raw data with pixel-specific masks applied and calibrated pixel positions"""
 
 
+class NormWavelengthTerm(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    pass
+
+
 class Clean(sciline.ScopeTwoParams[RunType, IofQPart, sc.DataArray], sc.DataArray):
     """
     Prerequisite for IofQ numerator or denominator.
@@ -125,8 +129,6 @@ class Clean(sciline.ScopeTwoParams[RunType, IofQPart, sc.DataArray], sc.DataArra
     or the respective normalization terms computed from the respective solid angle,
     direct beam, and monitors.
     """
-
-    value: sc.DataArray
 
 
 class CleanMasked(
