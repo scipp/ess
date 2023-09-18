@@ -102,9 +102,6 @@ def iofq_in_quadrants(
         The quadrants are named 'south-west', 'south-east', 'north-east', and
         'north-west'.
     """
-    # Offset the position according to the input shift
-    center = _offsets_to_vector(data=data, xy=xy, graph=graph)
-
     pi = sc.constants.pi.value
     phi = data.transform_coords(
         'phi', graph=graph, keep_intermediate=False, keep_inputs=False
@@ -127,17 +124,16 @@ def iofq_in_quadrants(
     params[WavelengthBands] = wavelength_range
     params[QBins] = q_bins
     params[ElasticCoordTransformGraph] = graph
-    params[BeamCenter] = center
+    params[BeamCenter] = _offsets_to_vector(data=data, xy=xy, graph=graph)
 
     out = {}
     for i, quad in enumerate(quadrants):
         # Select pixels based on phi
         sel = (phi >= phi_bins[i]) & (phi < phi_bins[i + 1])
         params[MaskedData[SampleRun]] = data[sel]
-        if norm.dims == ('wavelength',):
-            params[NormWavelengthTerm[SampleRun]] = norm
-        else:
-            params[NormWavelengthTerm[SampleRun]] = norm[sel]
+        params[NormWavelengthTerm[SampleRun]] = (
+            norm if norm.dims == ('wavelength',) else norm[sel]
+        )
         pipeline = sciline.Pipeline(providers, params=params)
         out[quad] = pipeline.compute(IofQ[SampleRun])
     return out
