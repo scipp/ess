@@ -81,8 +81,8 @@ def mask_detectors(
 
 
 providers = [
-    pooch_load,
     pooch_load_direct_beam,
+    pooch_load,
     get_monitor,
     detector_edge_mask,
     sample_holder_mask,

@@ -127,8 +127,6 @@ def iofq_in_quadrants(
     params[WavelengthBands] = wavelength_range
     params[QBins] = q_bins
     params[ElasticCoordTransformGraph] = graph
-    # TODO must use sel if direct bema added pixel dim here
-    params[NormWavelengthTerm[SampleRun]] = norm
     params[BeamCenter] = center
 
     out = {}
@@ -136,6 +134,10 @@ def iofq_in_quadrants(
         # Select pixels based on phi
         sel = (phi >= phi_bins[i]) & (phi < phi_bins[i + 1])
         params[MaskedData[SampleRun]] = data[sel]
+        if norm.dims == ('wavelength',):
+            params[NormWavelengthTerm[SampleRun]] = norm
+        else:
+            params[NormWavelengthTerm[SampleRun]] = norm[sel]
         pipeline = sciline.Pipeline(providers, params=params)
         out[quad] = pipeline.compute(IofQ[SampleRun])
     return out
