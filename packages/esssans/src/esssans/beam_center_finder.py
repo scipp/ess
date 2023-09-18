@@ -23,20 +23,11 @@ from .normalization import (
 )
 from .types import (
     BeamCenter,
-    Clean,
-    CleanDirectBeam,
-    CleanMasked,
-    CleanMonitor,
-    Denominator,
-    DirectRun,
-    Incident,
     IofQ,
     MaskedData,
-    Numerator,
+    NormWavelengthTerm,
     QBins,
     SampleRun,
-    SolidAngle,
-    Transmission,
     UncertaintyBroadcastMode,
     WavelengthBands,
     WavelengthBins,
@@ -80,7 +71,7 @@ def _offsets_to_vector(data: sc.DataArray, xy: List[float], graph: dict) -> sc.V
 
 def iofq_in_quadrants(
     xy: List[float],
-    sample: sc.DataArray,
+    data: sc.DataArray,
     norm: sc.DataArray,
     graph: dict,
     q_bins: Union[int, sc.Variable],
@@ -93,7 +84,7 @@ def iofq_in_quadrants(
     ----------
     xy:
         The x,y offsets in the plane normal to the beam.
-    sample:
+    data:
         The sample data.
     norm:
         The denominator data for normalization.
@@ -111,13 +102,8 @@ def iofq_in_quadrants(
         The quadrants are named 'south-west', 'south-east', 'north-east', and
         'north-west'.
     """
-    data = sample.copy(deep=False)
-    # norm = norm.copy(deep=False)
-
     # Offset the position according to the input shift
     center = _offsets_to_vector(data=data, xy=xy, graph=graph)
-    # data.coords['position'] = data.coords['position'] - center
-    # norm.coords['position'] = data.coords['position']
 
     pi = sc.constants.pi.value
     phi = data.transform_coords(
@@ -141,20 +127,15 @@ def iofq_in_quadrants(
     params[WavelengthBands] = wavelength_range
     params[QBins] = q_bins
     params[ElasticCoordTransformGraph] = graph
-    params[CleanMonitor[SampleRun, Transmission]] = norm['sample_trans']
-    params[CleanMonitor[DirectRun, Incident]] = norm['direct_incident']
-    params[CleanMonitor[DirectRun, Transmission]] = norm['direct_trans']
+    # TODO must use sel if direct bema added pixel dim here
+    params[NormWavelengthTerm[SampleRun]] = norm
     params[BeamCenter] = center
-    if (db := norm.get('direct_beam')) is not None:
-        params[CleanDirectBeam] = db
 
     out = {}
     for i, quad in enumerate(quadrants):
         # Select pixels based on phi
         sel = (phi >= phi_bins[i]) & (phi < phi_bins[i + 1])
         params[MaskedData[SampleRun]] = data[sel]
-        # params[CleanMasked[SampleRun, Numerator]] = data[sel]
-        # params[CleanMasked[SampleRun, Denominator]] = norm[sel]
         pipeline = sciline.Pipeline(providers, params=params)
         out[quad] = pipeline.compute(IofQ[SampleRun])
     return out
@@ -240,15 +221,10 @@ def beam_center(
     data: MaskedData[SampleRun],
     graph: ElasticCoordTransformGraph,
     wavelength_bins: WavelengthBins,
-    # norm: Clean[SampleRun, Denominator],
+    norm: NormWavelengthTerm[SampleRun],
     q_bins: BeamCenterFinderQBins,
     minimizer: Optional[BeamCenterFinderMinimizer],
     tolerance: Optional[BeamCenterFinderTolerance],
-    data_transmission_monitor: CleanMonitor[SampleRun, Transmission],
-    direct_incident_monitor: CleanMonitor[DirectRun, Incident],
-    direct_transmission_monitor: CleanMonitor[DirectRun, Transmission],
-    # solid_angle: SolidAngle[RunType],
-    direct_beam: Optional[CleanDirectBeam],
 ) -> BeamCenter:
     """
     Find the beam center of a SANS scattering pattern.
@@ -378,14 +354,6 @@ def beam_center(
         (coords['cylindrical_y'].min().value, coords['cylindrical_y'].max().value),
     ]
 
-    # TODO Would be better to split iofq_denominator to not use solid_angle.
-    # If we do that in a separate provider then this here will be much cleaner
-    norm = dict(
-        sample_trans=data_transmission_monitor,
-        direct_incident=direct_incident_monitor,
-        direct_trans=direct_transmission_monitor,
-        direct_beam=direct_beam,
-    )
     # Refine using Scipy optimize
     res = minimize(
         cost,

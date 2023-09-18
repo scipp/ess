@@ -118,7 +118,7 @@ class CalibratedMaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
 
 
 class NormWavelengthTerm(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    pass
+    """Normalization term (numerator) for IofQ before scaling with solid-angle."""
 
 
 class Clean(sciline.ScopeTwoParams[RunType, IofQPart, sc.DataArray], sc.DataArray):
