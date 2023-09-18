@@ -42,12 +42,6 @@ fastjsonschema==2.18.0
     # via nbformat
 imagesize==1.4.1
     # via sphinx
-importlib-metadata==6.8.0
-    # via
-    #   autodoc-pydantic
-    #   jupyter-client
-    #   nbconvert
-    #   sphinx
 ipykernel==6.25.2
     # via -r docs.in
 jinja2==3.1.2
@@ -100,7 +94,7 @@ nbformat==5.9.2
     #   nbsphinx
 nbsphinx==0.9.3
     # via -r docs.in
-nest-asyncio==1.5.7
+nest-asyncio==1.5.8
     # via ipykernel
 pandocfilters==1.5.0
     # via nbconvert

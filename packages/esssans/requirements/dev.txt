@@ -24,10 +24,6 @@ async-lru==2.0.4
     # via jupyterlab
 cffi==1.15.1
     # via argon2-cffi-bindings
-click==8.1.7
-    # via
-    #   pip-compile-multi
-    #   pip-tools
 fqdn==1.5.1
     # via jsonschema
 isoduration==20.11.0

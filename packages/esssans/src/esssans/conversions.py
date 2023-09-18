@@ -166,7 +166,7 @@ def detector_to_wavelength(
     graph: ElasticCoordTransformGraph,
 ) -> Clean[RunType, Numerator]:
     detector = detector.copy(deep=False)
-    detector.coords['position'] -= beam_center
+    detector.coords['position'] = detector.coords['position'] - beam_center
     da = detector.transform_coords('wavelength', graph=graph)
 
     return Clean[RunType, Numerator](da)

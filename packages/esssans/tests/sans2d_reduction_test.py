@@ -86,6 +86,18 @@ def test_pipeline_can_compute_background_subtracted_IofQ(uncertainties):
     assert result.dims == ('Q',)
 
 
+def test_workflow_is_deterministic():
+    params = make_params()
+    params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
+    pipeline = sciline.Pipeline(sans2d_providers(), params=params)
+    # This is Sciline's default scheduler, but we want to be explicit here
+    scheduler = sciline.scheduler.DaskScheduler()
+    graph = pipeline.get(IofQ[SampleRun], scheduler=scheduler)
+    reference = graph.compute().data
+    result = graph.compute().data
+    assert sc.identical(sc.values(result), sc.values(reference))
+
+
 def test_pipeline_raisesVariancesError_if_normalization_errors_not_dropped():
     params = make_params()
     del params[NonBackgroundWavelengthRange]  # Make sure we raise in iofq_denominator
@@ -97,6 +109,10 @@ def test_pipeline_raisesVariancesError_if_normalization_errors_not_dropped():
 
 def test_uncertainty_broadcast_mode_drop_yields_smaller_variances():
     params = make_params()
+    # Errors with the full range have some NaNs or infs
+    params[QBins] = sc.linspace(
+        dim='Q', start=0.01, stop=0.5, num=141, unit='1/angstrom'
+    )
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
     pipeline = sciline.Pipeline(sans2d_providers(), params=params)
     drop = pipeline.compute(IofQ[SampleRun]).hist().data
