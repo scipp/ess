@@ -16,7 +16,7 @@ from .types import (
     DirectRun,
     Incident,
     IofQ,
-    MaskedData,
+    CalibratedMaskedData,
     Numerator,
     RunType,
     SampleRun,
@@ -32,7 +32,7 @@ from .uncertainty import (
 
 
 def solid_angle_rectangular_approximation(
-    data: MaskedData[RunType],
+    data: CalibratedMaskedData[RunType],
 ) -> SolidAngle[RunType]:
     """
     Solid angle computed from rectangular pixels with a 'width' and a 'height'.

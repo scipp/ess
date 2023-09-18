@@ -113,6 +113,10 @@ class MaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Raw data with pixel-specific masks applied"""
 
 
+class CalibratedMaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Raw data with pixel-specific masks applied and calibrated pixel positions"""
+
+
 class Clean(sciline.ScopeTwoParams[RunType, IofQPart, sc.DataArray], sc.DataArray):
     """
     Prerequisite for IofQ numerator or denominator.

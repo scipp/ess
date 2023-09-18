@@ -16,6 +16,7 @@ from .types import (
     CorrectForGravity,
     IofQPart,
     MaskedData,
+    CalibratedMaskedData,
     MonitorType,
     Numerator,
     RawMonitor,
@@ -157,19 +158,29 @@ def monitor_to_wavelength(
     )
 
 
+def calibrate_positions(
+    detector: MaskedData[RunType], beam_center: BeamCenter
+) -> CalibratedMaskedData[RunType]:
+    """
+    Calibrate pixel positions.
+
+    Currently the only applied calibration is the beam-center offset.
+    """
+    detector = detector.copy(deep=False)
+    detector.coords['position'] = detector.coords['position'] - beam_center
+    return detector
+
+
 # TODO This demonstrates a problem: Transforming to wavelength should be possible
 # for RawData, MaskedData, ... no reason to restrict necessarily.
 # Would we be fine with just choosing on option, or will this get in the way for users?
 def detector_to_wavelength(
-    detector: MaskedData[RunType],
-    beam_center: BeamCenter,
+    detector: CalibratedMaskedData[RunType],
     graph: ElasticCoordTransformGraph,
 ) -> Clean[RunType, Numerator]:
-    detector = detector.copy(deep=False)
-    detector.coords['position'] = detector.coords['position'] - beam_center
-    da = detector.transform_coords('wavelength', graph=graph)
-
-    return Clean[RunType, Numerator](da)
+    return Clean[RunType, Numerator](
+        detector.transform_coords('wavelength', graph=graph)
+    )
 
 
 def mask_wavelength(
@@ -198,6 +209,7 @@ def to_Q(
 providers = [
     sans_elastic,
     sans_monitor,
+    calibrate_positions,
     monitor_to_wavelength,
     detector_to_wavelength,
     mask_wavelength,
