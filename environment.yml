@@ -35,4 +35,3 @@ dependencies:
   - pip:
     - orsopy==1.0.1
     - sphinx-autodoc-typehints==1.18.3
-    - scitacean==23.7.0
