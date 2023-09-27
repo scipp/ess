@@ -29,9 +29,9 @@ def load_geant4_csv(filename: Union[str, os.PathLike]) -> sc.DataGroup:
     detectors = _split_detectors(events)
     for det in detectors.values():
         _adjust_coords(det)
+    detectors = _group(detectors)
 
-    dg = sc.DataGroup({'instrument': sc.DataGroup(detectors)})
-    return _group(dg)
+    return sc.DataGroup({'instrument': sc.DataGroup(detectors)})
 
 
 def _load_raw_events(filename: Union[str, os.PathLike]) -> sc.DataArray:
@@ -47,8 +47,15 @@ def _adjust_coords(da: sc.DataArray) -> None:
     )
 
 
-def _group(dg: sc.DataGroup) -> sc.DataGroup:
-    return dg.group('counter', 'segment', 'module', 'strip', 'wire')
+def _group(detectors: Dict[str, sc.DataArray]) -> Dict[str, sc.DataArray]:
+    # Only the HR detector has sectors.
+    elements = ('module', 'segment', 'counter', 'wire', 'strip')
+    return {
+        key: da.group('sector', *elements)
+        if key == 'high_resolution'
+        else da.group(*elements)
+        for key, da in detectors.items()
+    }
 
 
 def _split_detectors(
