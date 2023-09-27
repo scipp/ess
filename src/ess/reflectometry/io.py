@@ -1,11 +1,15 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
+from typing import Optional
+
 import numpy as np
 import scipp as sc
 
 
-def save_ort(data_array: sc.DataArray, filename: str, dimension: str = None):
+def save_ort(
+    data_array: sc.DataArray, filename: str, dimension: Optional[str] = None
+) -> None:
     """
     Save a data array with the ORSO .ort file format.
 
@@ -16,19 +20,19 @@ def save_ort(data_array: sc.DataArray, filename: str, dimension: str = None):
     filename:
         Filename.
     dimension:
-        String for dimension to perform mean over, defaults to 'detector_id'.
+        String for dimension to perform mean over.
     """
-    if dimension is None:
-        dimension = 'detector_number'
     from orsopy import fileio
 
     if filename[:-4] == '.ort':
         raise ValueError("The expected output file ending is .ort.")
-    q = data_array.mean(dimension).coords['Q']
-    if data_array.mean(dimension).coords.is_edges('Q'):
+    if dimension is not None:
+        data_array = data_array.mean(dimension)
+    q = data_array.coords['Q']
+    if data_array.coords.is_edges('Q'):
         q = sc.midpoints(q)
-    R = data_array.mean(dimension).data
-    sR = sc.stddevs(data_array.mean(dimension).data)
+    R = data_array.data
+    sR = sc.stddevs(data_array.data)
     sq = data_array.coords['sigma_Q']
     dataset = fileio.orso.OrsoDataset(
         data_array.attrs['orso'].value,
