@@ -2,6 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 import os
+from io import BytesIO, StringIO
 from typing import Dict, Optional, Union
 
 import numpy as np
@@ -12,7 +13,9 @@ HIGH_RES_DETECTOR_ID = sc.index(8)
 ENDCAPS_DETECTOR_IDS = tuple(map(sc.index, (3, 4, 5, 6)))
 
 
-def load_geant4_csv(filename: Union[str, os.PathLike]) -> sc.DataGroup:
+def load_geant4_csv(
+    filename: Union[str, os.PathLike, StringIO, BytesIO]
+) -> sc.DataGroup:
     """Load a GEANT4 CSV file for DREAM.
 
     Parameters
@@ -34,7 +37,9 @@ def load_geant4_csv(filename: Union[str, os.PathLike]) -> sc.DataGroup:
     return sc.DataGroup({'instrument': sc.DataGroup(detectors)})
 
 
-def _load_raw_events(filename: Union[str, os.PathLike]) -> sc.DataArray:
+def _load_raw_events(
+    filename: Union[str, os.PathLike, StringIO, BytesIO]
+) -> sc.DataArray:
     table = sc.io.load_csv(filename, sep='\t', header_parser='bracket', data_columns=[])
     table = table.rename_dims(row='event')
     return sc.DataArray(sc.ones(sizes=table.sizes), coords=table.coords)
