@@ -48,14 +48,17 @@ def _adjust_coords(da: sc.DataArray) -> None:
 
 
 def _group(detectors: Dict[str, sc.DataArray]) -> Dict[str, sc.DataArray]:
-    # Only the HR detector has sectors.
     elements = ('module', 'segment', 'counter', 'wire', 'strip')
-    return {
-        key: da.group('sector', *elements)
-        if key == 'high_resolution'
-        else da.group(*elements)
-        for key, da in detectors.items()
-    }
+
+    def group(key: str, da: sc.DataArray) -> sc.DataArray:
+        if key == 'high_resolution':
+            # Only the HR detector has sectors.
+            return da.group('sector', *elements)
+        res = da.group(*elements)
+        res.bins.coords.pop('sector', None)
+        return res
+
+    return {key: group(key, da) for key, da in detectors.items()}
 
 
 def _split_detectors(
