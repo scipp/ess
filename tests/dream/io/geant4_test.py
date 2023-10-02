@@ -8,6 +8,7 @@ from typing import Optional, Set
 import numpy as np
 import pytest
 import scipp as sc
+import scipp.testing
 
 from ess.dream import data, load_geant4_csv
 
@@ -52,6 +53,17 @@ def test_load_geant4_csv_loads_expected_structure(file):
         'endcap_forward',
         'endcap_backward',
     }
+
+
+@pytest.mark.parametrize(
+    'key', ('mantle', 'high_resolution', 'endcap_forward', 'endcap_backward')
+)
+def test_load_gean4_csv_set_weights_to_one(file, key):
+    detector = load_geant4_csv(file)['instrument'][key]
+    events = detector.bins.constituents['data'].data
+    sc.testing.assert_identical(
+        events, sc.ones(sizes=events.sizes, with_variances=True, unit='counts')
+    )
 
 
 def test_load_geant4_csv_mantle_has_expected_coords(file):

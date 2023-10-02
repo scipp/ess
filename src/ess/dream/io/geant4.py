@@ -42,7 +42,10 @@ def _load_raw_events(
 ) -> sc.DataArray:
     table = sc.io.load_csv(filename, sep='\t', header_parser='bracket', data_columns=[])
     table = table.rename_dims(row='event')
-    return sc.DataArray(sc.ones(sizes=table.sizes), coords=table.coords)
+    return sc.DataArray(
+        sc.ones(sizes=table.sizes, with_variances=True, unit='counts'),
+        coords=table.coords,
+    )
 
 
 def _adjust_coords(da: sc.DataArray) -> None:
