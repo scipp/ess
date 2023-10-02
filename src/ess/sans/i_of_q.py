@@ -115,7 +115,12 @@ def resample_direct_beam(
     """
     if sc.identical(direct_beam.coords['wavelength'], wavelength_bins):
         return direct_beam
-    func = interp1d(sc.values(direct_beam), 'wavelength')
+    func = interp1d(
+        sc.values(direct_beam),
+        'wavelength',
+        fill_value="extrapolate",
+        bounds_error=False,
+    )
     direct_beam = func(wavelength_bins, midpoints=True)
     logger = get_logger('sans')
     logger.warning(
