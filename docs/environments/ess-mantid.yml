@@ -16,6 +16,5 @@ dependencies:
   - jupyterlab_widgets
   - plopp
   - pythreejs
-  - scipp<23.08.0  # TODO: remove version pin when mantid and scipp have compatible versions of TBB
   - scipy
   - ipympl
