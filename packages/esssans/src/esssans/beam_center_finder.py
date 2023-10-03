@@ -53,8 +53,9 @@ def beam_center_from_center_of_mass(
     The center-of-mass is simply the weighted mean of the positions.
     Areas with low counts are excluded from the center of mass calculation, as they
     typically fall into asymmetric regions of the detector panel and would thus lead
-    to a biased result. The Z component is set to zero, as the detector panel is
-    assumed to lie in the X-Y plane.
+    to a biased result. The beam is assumed to be roughly aligned with the Z axis.
+    The returned beam center is the component normal to the bema direction, projected
+    onto the X-Y plane.
 
     Parameters
     ----------
