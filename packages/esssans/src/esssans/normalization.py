@@ -118,9 +118,10 @@ def iofq_norm_wavelength_term(
     uncertainties: UncertaintyBroadcastMode,
 ) -> NormWavelengthTerm[RunType]:
     """
-    Compute the denominator term for the I(Q) normalization. This is basically:
-    ``solid_angle * direct_beam * data_transmission_monitor * direct_incident_monitor / direct_transmission_monitor``
-    If the solid angle is not supplied, it is assumed to be 1.
+    Compute the wavelength-dependen contribution to the denominator term for the I(Q) normalization.
+
+    This is basically:
+    ``direct_beam * data_transmission_monitor * direct_incident_monitor / direct_transmission_monitor``
     If the direct beam is not supplied, it is assumed to be 1.
 
     Because the multiplication between the wavelength dependent terms (monitor counts)
@@ -147,7 +148,8 @@ def iofq_norm_wavelength_term(
     Returns
     -------
     :
-        The denominator for the SANS I(Q) normalization.
+        Wavelength-dependent term for the denominator of the SANS I(Q) normalization.
+        Used by :py:func:`iofq_denominator`.
     """  # noqa: E501
     denominator = (
         data_transmission_monitor
@@ -173,6 +175,35 @@ def iofq_denominator(
     solid_angle: SolidAngle[RunType],
     uncertainties: UncertaintyBroadcastMode,
 ) -> Clean[RunType, Denominator]:
+    """
+    Compute the denominator term for the I(Q) normalization.
+
+    This is basically:
+    ``solid_angle * direct_beam * data_transmission_monitor * direct_incident_monitor / direct_transmission_monitor``
+    The `wavelength_term` included all but the `solid_angle` and is computed by
+    :py:func:`iofq_norm_wavelength_term`.
+
+    Because the multiplication between the wavelength dependent terms (monitor counts)
+    and the pixel dependent term (solid angle) consists of a broadcast operation which
+    would introduce correlations, we strip the data of variances.
+    It is the responsibility of the user to ensure that the variances are small enough
+    that they can be ignored. See more details in Heybrock et al. (2023).
+
+    Parameters
+    ----------
+    solid_angle:
+        The solid angle of the detector pixels, as viewed from the sample position.
+    wavelength_term:
+        The term that depends on wavelength, computed by :py:func:`iofq_norm_wavelength_term`.
+    uncertainties:
+        The mode for broadcasting uncertainties. See
+        :py:class:`UncertaintyBroadcastMode` for details.
+
+    Returns
+    -------
+    :
+        The denominator for the SANS I(Q) normalization.
+    """  # noqa: E501
     broadcast = _broadcasters[uncertainties]
     denominator = solid_angle * broadcast(wavelength_term, sizes=solid_angle.sizes)
     return Clean[RunType, Denominator](denominator)
