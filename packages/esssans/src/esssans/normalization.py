@@ -161,8 +161,8 @@ def iofq_norm_wavelength_term(
     # solid_angle (pixel-dependent) and monitors (wavelength-dependent) will fail.
     # The direct beam may also be pixel-dependent. In this case we need to drop
     # variances of the other term already before multiplying by solid_angle.
-    broadcast = _broadcasters[uncertainties]
     if direct_beam is not None:
+        broadcast = _broadcasters[uncertainties]
         denominator = direct_beam * broadcast(denominator, sizes=direct_beam.sizes)
     # Convert wavelength coordinate to midpoints for future histogramming
     # if wavelength_to_midpoints:
