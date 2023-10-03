@@ -6,6 +6,7 @@ from typing import Dict, List, NewType, Optional, Union
 import numpy as np
 import sciline
 import scipp as sc
+from scipp.core import concepts
 
 from .conversions import (
     ElasticCoordTransformGraph,
@@ -34,24 +35,67 @@ from .types import (
 )
 
 
-def center_of_mass(data: sc.DataArray) -> sc.Variable:
+def _xy_extrema(pos: sc.Variable) -> sc.Variable:
+    x_min = pos.fields.x.min()
+    x_max = pos.fields.x.max()
+    y_min = pos.fields.y.min()
+    y_max = pos.fields.y.max()
+    return sc.concat([x_min, x_max, y_min, y_max], dim='extremes')
+
+
+def beam_center_from_center_of_mass(
+    data: MaskedData[SampleRun],
+    graph: ElasticCoordTransformGraph,
+) -> BeamCenter:
     """
-    Find the center-of-mass of the data counts.
+    Estimate the beam center via the center-of-mass of the data counts.
+
     The center-of-mass is simply the weighted mean of the positions.
+    Areas with low counts are excluded from the center of mass calculation, as they
+    typically fall into asymmetric regions of the detector panel and would thus lead
+    to a biased result. The Z component is set to zero, as the detector panel is
+    assumed to lie in the X-Y plane.
 
     Parameters
     ----------
     data:
-        The data to find the center-of-mass of.
+        The data to find the beam center of.
+    graph:
+        Coordinate transformation graph for elastic SANS.
 
     Returns
     -------
     :
-        The position of the center-of-mass, as a vector.
+        The beam center position as a vector.
     """
-    summed = data.sum(list(set(data.dims) - set(data.meta['position'].dims)))
-    v = sc.values(summed.data)
-    return sc.sum(summed.meta['position'] * v) / v.sum()
+
+    summed = data.sum(list(set(data.dims) - set(data.coords['position'].dims)))
+    v = sc.values(summed)
+    mask = concepts.irreducible_mask(summed, dim=None)
+    pos = data.coords['position']
+    extrema = _xy_extrema(pos[~mask])
+    # Mean including existing masks
+    cutoff = 0.1 * v.mean().data
+    low_counts = v.data < cutoff
+    # Increase cutoff until we no longer include pixels at the X/Y min/max.
+    # This would be simpler if the logical panel shape was reflected in the
+    # dims of the input data, instead of having a flat list of pixels.
+    while sc.any(_xy_extrema(pos[~(mask | low_counts)]) == extrema):
+        cutoff *= 2.0
+        low_counts = v.data < cutoff
+    # See scipp/scipp#3271, the following lines are a workaround
+    select = ~(low_counts | mask)
+    v = v.data[select]
+    pos = pos[select]
+    com = sc.sum(pos * v) / v.sum()
+    # We compute the shift between the incident beam direction and the center-of-mass
+    incident_beam = data.transform_coords('incident_beam', graph=graph).coords[
+        'incident_beam'
+    ]
+    n_beam = incident_beam / sc.norm(incident_beam)
+    com_shift = com - sc.dot(com, n_beam) * n_beam
+    xy = [com_shift.fields.x.value, com_shift.fields.y.value]
+    return _offsets_to_vector(data=data, xy=xy, graph=graph)
 
 
 def _offsets_to_vector(data: sc.DataArray, xy: List[float], graph: dict) -> sc.Variable:
@@ -215,7 +259,7 @@ BeamCenterFinderMinimizer = NewType('BeamCenterFinderMinimizer', str)
 """Minimizer used for the beam center finder"""
 
 
-def beam_center(
+def beam_center_from_iofq(
     data: MaskedData[SampleRun],
     graph: ElasticCoordTransformGraph,
     wavelength_bins: WavelengthBins,
@@ -240,6 +284,8 @@ def beam_center(
     ----------
     data:
         The DataArray containing the detector data.
+    graph:
+        Coordinate transformation graph for elastic SANS.
     wavelength_bins:
         The binning in the wavelength dimension to be used.
     q_bins:
@@ -330,15 +376,8 @@ def beam_center(
     logger.info(f'Using tolerance: {tolerance}')
 
     # Use center of mass to get initial guess for beam center
-    com = center_of_mass(data)
-    logger.info(f'Initial guess for beam center: {com}')
-
-    # We compute the shift between the incident beam direction and the center-of-mass
-    incident_beam = data.transform_coords('incident_beam', graph=graph).coords[
-        'incident_beam'
-    ]
-    n_beam = incident_beam / sc.norm(incident_beam)
-    com_shift = com - sc.dot(com, n_beam) * n_beam
+    com_shift = beam_center_from_center_of_mass(data, graph)
+    logger.info(f'Initial guess for beam center: {com_shift}')
 
     wavelength_range = sc.concat(
         [wavelength_bins.min(), wavelength_bins.max()], dim='wavelength'
