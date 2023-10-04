@@ -1,5 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+"""
+This modules defines the domain types uses in esssans.
+
+The domain types are used to define parameters and to request results from a Sciline
+pipeline."""
 from enum import Enum
 from typing import NewType, TypeVar
 
@@ -10,7 +15,7 @@ import scipp as sc
 
 # 1.1  Run types
 BackgroundRun = NewType('BackgroundRun', int)
-"""Background run""" ""
+"""Background run"""
 DirectRun = NewType('DirectRun', int)
 """Direct run"""
 SampleRun = NewType('SampleRun', int)

@@ -3,7 +3,7 @@
 ## Classes
 
 ```{eval-rst}
-.. currentmodule:: {{projectname}}
+.. currentmodule:: esssans
 
 .. autosummary::
    :toctree: ../generated/classes
@@ -11,12 +11,14 @@
    :recursive:
 ```
 
-## Top-level functions
+## Top-level functions and attributes
 
 ```{eval-rst}
 .. autosummary::
    :toctree: ../generated/functions
    :recursive:
+
+   providers
 ```
 
 ## Submodules
@@ -26,4 +28,8 @@
    :toctree: ../generated/modules
    :template: module-template.rst
    :recursive:
+
+   beam_center_finder
+   sans2d
+   types
 ```

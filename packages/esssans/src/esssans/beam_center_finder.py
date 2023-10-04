@@ -114,7 +114,7 @@ def _offsets_to_vector(data: sc.DataArray, xy: List[float], graph: dict) -> sc.V
     return center
 
 
-def iofq_in_quadrants(
+def _iofq_in_quadrants(
     xy: List[float],
     data: sc.DataArray,
     norm: sc.DataArray,
@@ -184,7 +184,7 @@ def iofq_in_quadrants(
     return out
 
 
-def cost(xy: List[float], *args) -> float:
+def _cost(xy: List[float], *args) -> float:
     """
     Cost function for determining how close the :math:`I(Q)` curves are in all four
     quadrants. The cost is defined as
@@ -234,7 +234,7 @@ def cost(xy: List[float], *args) -> float:
     one. The Mantid implementation is available
     `here <https://github.com/mantidproject/mantid/blob/main/Framework/PythonInterface/plugins/algorithms/WorkflowAlgorithms/SANS/SANSBeamCentreFinder.py`_.
     """  # noqa: E501
-    iofq = iofq_in_quadrants(xy, *args)
+    iofq = _iofq_in_quadrants(xy, *args)
     all_q = sc.concat([sc.values(da) for da in iofq.values()], dim='quadrant')
     ref = all_q.mean('quadrant')
     c = (all_q - ref) ** 2
@@ -270,7 +270,8 @@ def beam_center_from_iofq(
     tolerance: Optional[BeamCenterFinderTolerance],
 ) -> BeamCenter:
     """
-    Find the beam center of a SANS scattering pattern.
+    Find the beam center of a SANS scattering pattern using an I(Q) calculation.
+
     Description of the procedure:
 
     #. obtain an initial guess by computing the center-of-mass of the pixels,
@@ -394,7 +395,7 @@ def beam_center_from_iofq(
 
     # Refine using Scipy optimize
     res = minimize(
-        cost,
+        _cost,
         x0=[com_shift.fields.x.value, com_shift.fields.y.value],
         args=(data, norm, graph, q_bins, wavelength_range),
         bounds=bounds,

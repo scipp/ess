@@ -1,5 +1,5 @@
 # Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
-_commit: ec7ed2d
+_commit: f5f0cb9
 _src_path: gh:scipp/copier_template
 description: SANS data reduction for the European Spallation Source
 github_linux_image: ubuntu-20.04
