@@ -42,9 +42,9 @@ jobs:
       python-version: ${{ matrix.python.version }}
       tox-env: ${{ matrix.python.tox-env }}
 
-
   docs:
     needs: tests
     uses: ./.github/workflows/docs.yml
     with:
       publish: false
+      branch: ${{ github.head_ref == '' && github.ref_name || github.head_ref }}
