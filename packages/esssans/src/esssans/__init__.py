@@ -12,3 +12,5 @@ except importlib.metadata.PackageNotFoundError:
 from . import beam_center_finder, common, conversions, i_of_q, normalization, sans2d
 
 providers = conversions.providers + i_of_q.providers + normalization.providers
+# Default to fast but potentially inaccurate beam center finder
+providers.append(beam_center_finder.beam_center_from_center_of_mass)

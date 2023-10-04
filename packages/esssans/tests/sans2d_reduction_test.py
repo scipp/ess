@@ -57,7 +57,6 @@ def make_params() -> dict:
     params[Filename[SampleRun]] = 'SANS2D00063114.hdf5'
     params[Filename[DirectRun]] = 'SANS2D00063091.hdf5'
     params[DirectBeamFilename] = 'DIRECT_SANS2D_REAR_34327_4m_8mm_16Feb16.hdf5'
-    params[BeamCenter] = sc.vector(value=[0.0945643, -0.082074, 0.0], unit='m')
     params[NonBackgroundWavelengthRange] = sc.array(
         dims=['wavelength'], values=[0.7, 17.1], unit='angstrom'
     )
@@ -162,15 +161,29 @@ def test_pixel_dependent_direct_beam_is_supported(uncertainties):
     assert result.dims == ('Q',)
 
 
+def test_beam_center_from_center_of_mass_is_close_to_verified_result():
+    params = make_params()
+    providers = sans2d_providers()
+    pipeline = sciline.Pipeline(providers, params=params)
+    center = pipeline.compute(BeamCenter)
+    # This is the result we got with the pre-sciline implementation, using the full IofQ
+    # calculation. The difference is about 5 mm in X or Y, probably due to a bias
+    # introduced by the sample holder, which the center-of-mass approach cannot ignore.
+    center_pre_sciline_raw_solid_angle = sc.vector([0.0945643, -0.082074, 0], unit='m')
+    assert sc.allclose(
+        center, center_pre_sciline_raw_solid_angle, atol=sc.scalar(5e-3, unit='m')
+    )
+
+
 def test_beam_center_finder_without_direct_beam_reproduces_verified_result():
     params = make_params()
     params[sans.beam_center_finder.BeamCenterFinderQBins] = sc.linspace(
         'Q', 0.02, 0.3, 71, unit='1/angstrom'
     )
-    del params[BeamCenter]
     del params[DirectBeamFilename]
     providers = sans2d_providers()
-    providers.append(sans.beam_center_finder.beam_center)
+    providers.remove(sans.beam_center_finder.beam_center_from_center_of_mass)
+    providers.append(sans.beam_center_finder.beam_center_from_iofq)
     pipeline = sciline.Pipeline(providers, params=params)
     center = pipeline.compute(BeamCenter)
     # This is the result we got with the pre-sciline implementation
@@ -187,9 +200,9 @@ def test_beam_center_finder_works_with_direct_beam():
     params[sans.beam_center_finder.BeamCenterFinderQBins] = sc.linspace(
         'Q', 0.02, 0.3, 71, unit='1/angstrom'
     )
-    del params[BeamCenter]
     providers = sans2d_providers()
-    providers.append(sans.beam_center_finder.beam_center)
+    providers.remove(sans.beam_center_finder.beam_center_from_center_of_mass)
+    providers.append(sans.beam_center_finder.beam_center_from_iofq)
     pipeline = sciline.Pipeline(providers, params=params)
     center = pipeline.compute(BeamCenter)  # (0.0951122, -0.079375, 0)
     center_no_direct_beam = sc.vector([0.0945643, -0.082074, 0], unit='m')
@@ -202,9 +215,9 @@ def test_beam_center_finder_works_with_pixel_dependent_direct_beam():
     params[sans.beam_center_finder.BeamCenterFinderQBins] = sc.linspace(
         'Q', 0.02, 0.3, 71, unit='1/angstrom'
     )
-    del params[BeamCenter]
     providers = sans2d_providers()
-    providers.append(sans.beam_center_finder.beam_center)
+    providers.remove(sans.beam_center_finder.beam_center_from_center_of_mass)
+    providers.append(sans.beam_center_finder.beam_center_from_iofq)
     pipeline = sciline.Pipeline(providers, params=params)
     center_pixel_independent_direct_beam = pipeline.compute(BeamCenter)
 
@@ -218,7 +231,8 @@ def test_beam_center_finder_works_with_pixel_dependent_direct_beam():
     params[DirectBeam] = direct_beam
     # Hack to remove direct-beam provider, until Sciline API improved
     providers = sans.providers + sans.sans2d.providers[1:]
-    providers.append(sans.beam_center_finder.beam_center)
+    providers.remove(sans.beam_center_finder.beam_center_from_center_of_mass)
+    providers.append(sans.beam_center_finder.beam_center_from_iofq)
     pipeline = sciline.Pipeline(providers, params=params)
 
     center = pipeline.compute(BeamCenter)
