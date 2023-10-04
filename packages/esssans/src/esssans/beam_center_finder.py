@@ -7,20 +7,28 @@ import numpy as np
 import sciline
 import scipp as sc
 
-from .conversions import ElasticCoordTransformGraph, to_Q
+from .conversions import (
+    ElasticCoordTransformGraph,
+    calibrate_positions,
+    detector_to_wavelength,
+    mask_wavelength,
+    to_Q,
+)
 from .i_of_q import merge_spectra
 from .logging import get_logger
-from .normalization import normalize
+from .normalization import (
+    iofq_denominator,
+    normalize,
+    solid_angle_rectangular_approximation,
+)
 from .types import (
     BeamCenter,
-    Clean,
-    CleanMasked,
-    Denominator,
     IofQ,
     MaskedData,
-    Numerator,
+    NormWavelengthTerm,
     QBins,
     SampleRun,
+    UncertaintyBroadcastMode,
     WavelengthBands,
     WavelengthBins,
 )
@@ -63,7 +71,7 @@ def _offsets_to_vector(data: sc.DataArray, xy: List[float], graph: dict) -> sc.V
 
 def iofq_in_quadrants(
     xy: List[float],
-    sample: sc.DataArray,
+    data: sc.DataArray,
     norm: sc.DataArray,
     graph: dict,
     q_bins: Union[int, sc.Variable],
@@ -76,7 +84,7 @@ def iofq_in_quadrants(
     ----------
     xy:
         The x,y offsets in the plane normal to the beam.
-    sample:
+    data:
         The sample data.
     norm:
         The denominator data for normalization.
@@ -94,14 +102,6 @@ def iofq_in_quadrants(
         The quadrants are named 'south-west', 'south-east', 'north-east', and
         'north-west'.
     """
-    data = sample.copy(deep=False)
-    norm = norm.copy(deep=False)
-
-    # Offset the position according to the input shift
-    center = _offsets_to_vector(data=data, xy=xy, graph=graph)
-    data.coords['position'] = data.coords['position'] - center
-    norm.coords['position'] = data.coords['position']
-
     pi = sc.constants.pi.value
     phi = data.transform_coords(
         'phi', graph=graph, keep_intermediate=False, keep_inputs=False
@@ -109,18 +109,31 @@ def iofq_in_quadrants(
     phi_bins = sc.linspace('phi', -pi, pi, 5, unit='rad')
     quadrants = ['south-west', 'south-east', 'north-east', 'north-west']
 
-    providers = [to_Q, merge_spectra, normalize]
+    providers = [
+        to_Q,
+        merge_spectra,
+        normalize,
+        iofq_denominator,
+        mask_wavelength,
+        detector_to_wavelength,
+        calibrate_positions,
+        solid_angle_rectangular_approximation,
+    ]
     params = {}
+    params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
     params[WavelengthBands] = wavelength_range
     params[QBins] = q_bins
     params[ElasticCoordTransformGraph] = graph
+    params[BeamCenter] = _offsets_to_vector(data=data, xy=xy, graph=graph)
 
     out = {}
     for i, quad in enumerate(quadrants):
         # Select pixels based on phi
         sel = (phi >= phi_bins[i]) & (phi < phi_bins[i + 1])
-        params[CleanMasked[SampleRun, Numerator]] = data[sel]
-        params[CleanMasked[SampleRun, Denominator]] = norm[sel]
+        params[MaskedData[SampleRun]] = data[sel]
+        params[NormWavelengthTerm[SampleRun]] = (
+            norm if norm.dims == ('wavelength',) else norm[sel]
+        )
         pipeline = sciline.Pipeline(providers, params=params)
         out[quad] = pipeline.compute(IofQ[SampleRun])
     return out
@@ -206,7 +219,7 @@ def beam_center(
     data: MaskedData[SampleRun],
     graph: ElasticCoordTransformGraph,
     wavelength_bins: WavelengthBins,
-    norm: Clean[SampleRun, Denominator],
+    norm: NormWavelengthTerm[SampleRun],
     q_bins: BeamCenterFinderQBins,
     minimizer: Optional[BeamCenterFinderMinimizer],
     tolerance: Optional[BeamCenterFinderTolerance],

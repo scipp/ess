@@ -174,7 +174,12 @@ def test_beam_center_finder_without_direct_beam_reproduces_verified_result():
     pipeline = sciline.Pipeline(providers, params=params)
     center = pipeline.compute(BeamCenter)
     # This is the result we got with the pre-sciline implementation
-    assert sc.allclose(center, sc.vector([0.0945643, -0.082074, 0], unit='m'))
+    # The difference is that the reference result computed the solid angle only once,
+    # before applying any detector positions shifts.
+    center_pre_sciline_raw_solid_angle = sc.vector([0.0945643, -0.082074, 0], unit='m')
+    assert sc.allclose(
+        center, center_pre_sciline_raw_solid_angle, atol=sc.scalar(4e-3, unit='m')
+    )
 
 
 def test_beam_center_finder_works_with_direct_beam():
@@ -186,11 +191,35 @@ def test_beam_center_finder_works_with_direct_beam():
     providers = sans2d_providers()
     providers.append(sans.beam_center_finder.beam_center)
     pipeline = sciline.Pipeline(providers, params=params)
-    center = pipeline.compute(BeamCenter)  # (0.0935541, -0.0807718, 0)
+    center = pipeline.compute(BeamCenter)  # (0.0951122, -0.079375, 0)
     center_no_direct_beam = sc.vector([0.0945643, -0.082074, 0], unit='m')
 
-    assert sc.allclose(
-        center,
-        center_no_direct_beam,
-        atol=sc.scalar(1e-2, unit='m'),
+    assert sc.allclose(center, center_no_direct_beam, atol=sc.scalar(1e-2, unit='m'))
+
+
+def test_beam_center_finder_works_with_pixel_dependent_direct_beam():
+    params = make_params()
+    params[sans.beam_center_finder.BeamCenterFinderQBins] = sc.linspace(
+        'Q', 0.02, 0.3, 71, unit='1/angstrom'
     )
+    del params[BeamCenter]
+    providers = sans2d_providers()
+    providers.append(sans.beam_center_finder.beam_center)
+    pipeline = sciline.Pipeline(providers, params=params)
+    center_pixel_independent_direct_beam = pipeline.compute(BeamCenter)
+
+    direct_beam = (
+        pipeline.compute(DirectBeam)
+        .broadcast(sizes={'spectrum': 61440, 'wavelength': 175})
+        .copy()
+    )
+
+    del params[DirectBeamFilename]
+    params[DirectBeam] = direct_beam
+    # Hack to remove direct-beam provider, until Sciline API improved
+    providers = sans.providers + sans.sans2d.providers[1:]
+    providers.append(sans.beam_center_finder.beam_center)
+    pipeline = sciline.Pipeline(providers, params=params)
+
+    center = pipeline.compute(BeamCenter)
+    assert sc.identical(center, center_pixel_independent_direct_beam)
