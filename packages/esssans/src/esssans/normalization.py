@@ -126,9 +126,8 @@ def iofq_norm_wavelength_term(
 
     Because the multiplication between the wavelength dependent terms (monitor counts)
     and the pixel dependent term (solid angle) consists of a broadcast operation which
-    would introduce correlations, we strip the data of variances.
-    It is the responsibility of the user to ensure that the variances are small enough
-    that they can be ignored. See more details in Heybrock et al. (2023).
+    would introduce correlations, variances are dropped or replaced by an upper-bound
+    estimation, depending on the configured mode.
 
     Parameters
     ----------
@@ -185,9 +184,9 @@ def iofq_denominator(
 
     Because the multiplication between the wavelength dependent terms (monitor counts)
     and the pixel dependent term (solid angle) consists of a broadcast operation which
-    would introduce correlations, we strip the data of variances.
-    It is the responsibility of the user to ensure that the variances are small enough
-    that they can be ignored. See more details in Heybrock et al. (2023).
+    would introduce correlations, variances are dropped or replaced by an upper-bound
+    estimation, depending on the configured mode.
+
 
     Parameters
     ----------
