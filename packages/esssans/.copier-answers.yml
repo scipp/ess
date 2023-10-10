@@ -1,9 +1,9 @@
 # Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
-_commit: 4b69fcf
+_commit: f5f0cb9
 _src_path: gh:scipp/copier_template
 description: SANS data reduction for the European Spallation Source
 github_linux_image: ubuntu-20.04
-max_python: '3.11'
+max_python: '3.12'
 min_python: '3.8'
 orgname: scipp
 projectname: esssans

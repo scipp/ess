@@ -18,6 +18,7 @@ maxdepth: 2
 ---
 
 examples/index
+api-reference/index
 developer/index
 about/index
 ```

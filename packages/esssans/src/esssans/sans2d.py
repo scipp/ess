@@ -72,6 +72,17 @@ def mask_detectors(
     edge_mask: Optional[DetectorEdgeMask],
     holder_mask: Optional[SampleHolderMask],
 ) -> MaskedData[RunType]:
+    """Apply pixel-specific masks to raw data.
+
+    Parameters
+    ----------
+    da:
+        Raw data.
+    edge_mask:
+        Mask for detector edges.
+    holder_mask:
+        Mask for sample holder.
+    """
     da = da.copy(deep=False)
     if edge_mask is not None:
         da.masks['edges'] = edge_mask
@@ -88,3 +99,8 @@ providers = [
     sample_holder_mask,
     mask_detectors,
 ]
+"""
+Providers for loading and masking Sans2d data.
+
+These are meant for complementing the top-level :py:data:`esssans.providers` list.
+"""
