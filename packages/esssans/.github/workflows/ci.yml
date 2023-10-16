@@ -14,11 +14,19 @@ jobs:
   formatting:
     name: Formatting and static analysis
     runs-on: 'ubuntu-20.04'
+    outputs:
+      min_python: ${{ steps.vars.outputs.min_python }}
+      min_tox_env: ${{ steps.vars.outputs.min_tox_env }}
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v3
+      - uses: actions/checkout@v4
+      - name: Get Python version for other CI jobs
+        id: vars
+        run: |
+          echo "min_python=$(cat .github/workflows/python-version-ci)" >> $GITHUB_OUTPUT
+          echo "min_tox_env=py$(cat .github/workflows/python-version-ci | sed 's/\.//g')" >> $GITHUB_OUTPUT
+      - uses: actions/setup-python@v4
         with:
-          python-version: '3.8'
+          python-version-file: '.github/workflows/python-version-ci'
       - run: python -m pip install --upgrade pip
       - run: python -m pip install -r requirements/ci.txt
       - run: tox -e static
@@ -33,9 +41,8 @@ jobs:
       matrix:
         os: ['ubuntu-20.04']
         python:
-          - version: '3.8'
-            tox-env: 'py38'
-
+          - version: '${{needs.formatting.outputs.min_python}}'
+            tox-env: '${{needs.formatting.outputs.min_tox_env}}'
     uses: ./.github/workflows/test.yml
     with:
       os-variant: ${{ matrix.os }}
