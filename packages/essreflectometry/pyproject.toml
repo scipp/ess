@@ -27,6 +27,14 @@ classifiers = [
 ]
 requires-python = ">=3.8"
 dependencies = [
+  "dask",
+  "graphviz",
+  "plopp",
+  "pythreejs",
+  "orsopy",
+  "sciline>=23.9.1",
+  "scipp>=23.8.0",
+  "scippneutron>=23.9.0",
 ]
 dynamic = ["version"]
 
@@ -42,6 +50,7 @@ addopts = "-ra -v"
 testpaths = "tests"
 filterwarnings = [
   "error",
+  "ignore::DeprecationWarning",
 ]
 
 [tool.bandit]
