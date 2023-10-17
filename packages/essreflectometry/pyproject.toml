@@ -51,6 +51,7 @@ testpaths = "tests"
 filterwarnings = [
   "error",
   "ignore::DeprecationWarning",
+  "ignore:For metadata to be logged in the data array, it is necessary to install the orsopy package.:UserWarning",
 ]
 
 [tool.bandit]
