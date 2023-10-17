@@ -50,8 +50,8 @@ addopts = "-ra -v"
 testpaths = "tests"
 filterwarnings = [
   "error",
-  "ignore::DeprecationWarning",
-  "ignore:For metadata to be logged in the data array, it is necessary to install the orsopy package.:UserWarning",
+  'ignore:\n.*Sentinel is not a public part of the traitlets API.*:DeprecationWarning',
+  "ignore:.*metadata to be logged in the data array, it is necessary to install the orsopy package.:UserWarning",
 ]
 
 [tool.bandit]
