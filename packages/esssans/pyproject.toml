@@ -27,6 +27,10 @@ classifiers = [
     "Typing :: Typed",
 ]
 requires-python = ">=3.8"
+
+# IMPORTANT:
+# Run 'tox -e deps' after making changes here. This will update requirement files.
+# Make sure to list one dependency per line.
 dependencies = [
   "dask",
   "graphviz",
@@ -36,6 +40,7 @@ dependencies = [
   "scipp>=23.8.0",
   "scippneutron>=23.9.0",
 ]
+
 dynamic = ["version"]
 
 [project.urls]
