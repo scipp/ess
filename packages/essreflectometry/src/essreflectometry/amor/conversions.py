@@ -9,7 +9,7 @@ def incident_beam(
     *,
     source_chopper_1: sc.Variable,
     source_chopper_2: sc.Variable,
-    sample_position: sc.Variable
+    sample_position: sc.Variable,
 ) -> sc.Variable:
     """
     Compute the incident beam vector from the source chopper position vector,
