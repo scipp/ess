@@ -1,5 +1,5 @@
 # Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
-_commit: dca331a
+_commit: 31bdf85
 _src_path: gh:scipp/copier_template
 description: SANS data reduction for the European Spallation Source
 max_python: '3.12'
@@ -7,4 +7,5 @@ min_python: '3.8'
 nightly_deps: plopp,sciline,scippneutron,scippnexus,scipp
 orgname: scipp
 projectname: esssans
+related_projects: Scipp,ScippNexus,ScippNeutron,Sciline,Plopp
 year: 2023
