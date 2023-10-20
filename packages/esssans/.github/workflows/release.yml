@@ -87,7 +87,7 @@ jobs:
           # frozen python du to breaking removal of 'imp' in 3.12
           create-args: >-
             anaconda-client
-            python='3.11'
+            python=3.11
       - run: anaconda --token ${{ secrets.ANACONDATOKEN }} upload --user scipp --label main $(ls conda-package-noarch/*.tar.bz2)
 
   docs:
