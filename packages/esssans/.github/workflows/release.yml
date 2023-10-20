@@ -86,6 +86,7 @@ jobs:
           environment-name: upload-env
           create-args: >-
             anaconda-client
+            python='3.11'  # frozen to to breaking removal of 'imp' in 3.12
       - run: anaconda --token ${{ secrets.ANACONDATOKEN }} upload --user scipp --label main $(ls conda-package-noarch/*.tar.bz2)
 
   docs:
