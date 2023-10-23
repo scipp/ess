@@ -28,9 +28,9 @@ def center_of_mass(data: sc.DataArray) -> sc.Variable:
     :
         The position of the center-of-mass, as a vector.
     """
-    summed = data.sum(list(set(data.dims) - set(data.meta['position'].dims)))
+    summed = data.sum(list(set(data.dims) - set(data.deprecated_meta['position'].dims)))
     v = sc.values(summed.data)
-    return sc.sum(summed.meta['position'] * v) / v.sum()
+    return sc.sum(summed.deprecated_meta['position'] * v) / v.sum()
 
 
 def _offsets_to_vector(data: sc.DataArray, xy: List[float], graph: dict) -> sc.Variable:
@@ -339,7 +339,7 @@ def beam_center(
     This is what is now implemented in this version of the algorithm.
     """  # noqa: E501
     logger = get_logger('sans')
-    if 'gravity' not in data.meta:
+    if 'gravity' not in data.deprecated_meta:
         data = data.copy(deep=False)
         data.coords['gravity'] = gravity_vector()
     # Use center of mass to get initial guess for beam center
