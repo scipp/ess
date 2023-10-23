@@ -47,7 +47,7 @@ def _stitch_dense_data(
         ),
         coords={new_dim: new_coord},
     )
-    for group in ["coords", "attrs"]:
+    for group in ["coords", "deprecated_attrs"]:
         for key in getattr(item, group):
             if key != dim:
                 getattr(out, group)[key] = getattr(item, group)[key].copy()
@@ -164,11 +164,14 @@ def stitch(
         frames["time_max"] = sc.mean(frames["time_max"], _dim)
 
     if isinstance(data, sc.Dataset):
-        stitched = sc.Dataset()
-        for key, item in data.items():
-            stitched[key] = _stitch_item(
-                item=item, dim=dim, frames=frames, new_dim=new_dim, bins=bins
-            )
+        stitched = sc.Dataset(
+            {
+                key: _stitch_item(
+                    item=item, dim=dim, frames=frames, new_dim=new_dim, bins=bins
+                )
+                for key, item in data.items()
+            }
+        )
     else:
         stitched = _stitch_item(
             item=data, dim=dim, frames=frames, new_dim=new_dim, bins=bins
