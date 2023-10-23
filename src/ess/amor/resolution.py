@@ -29,11 +29,9 @@ def wavelength_resolution(
         The angular resolution variable, as standard deviation.
     """
     distance_between_choppers = (
-        chopper_2_position.data.fields.z - chopper_1_position.data.fields.z
+        chopper_2_position.fields.z - chopper_1_position.fields.z
     )
-    chopper_midpoint = (chopper_1_position.data + chopper_2_position.data) * sc.scalar(
-        0.5
-    )
+    chopper_midpoint = (chopper_1_position + chopper_2_position) * sc.scalar(0.5)
     chopper_detector_distance = pixel_position.fields.z - chopper_midpoint.fields.z
     return fwhm_to_std(distance_between_choppers / chopper_detector_distance)
 

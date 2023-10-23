@@ -16,8 +16,7 @@ def incident_beam(
     instead of the source_position vector.
     """
     chopper_midpoint = (
-        source_chopper_1.value['position'].data
-        + source_chopper_2.value['position'].data
+        source_chopper_1.value['position'] + source_chopper_2.value['position']
     ) * sc.scalar(0.5)
     return sample_position - chopper_midpoint
 
