@@ -153,7 +153,7 @@ def to_dspacing_with_calibration(
     # should be able to remove this.
     for key in ('difc', 'difa', 'tzero'):
         if key not in out.coords:
-            out.coords[key] = out.attrs.pop(key)
+            out.coords[key] = out.deprecated_attrs.pop(key)
 
     out = out.transform_coords('dspacing', graph=graph, keep_intermediate=False)
     out.coords.pop('_tag_positions_consumed', None)
