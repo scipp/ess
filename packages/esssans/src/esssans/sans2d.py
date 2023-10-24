@@ -28,10 +28,13 @@ from .types import (
 def pooch_load(filename: Filename[RunType]) -> RawData[RunType]:
     from .data import get_path
 
-    da = sc.io.load_hdf5(filename=get_path(filename))
-    if 'gravity' not in da.coords:
-        da.coords["gravity"] = gravity_vector()
-    return RawData[RunType](da)
+    dg = sc.io.load_hdf5(filename=get_path(filename))
+    data = dg['data']
+    if 'gravity' not in data.coords:
+        data.coords["gravity"] = gravity_vector()
+    data.coords['pixel_width'] = sc.scalar(0.002033984375, unit='m')
+    data.coords['pixel_height'] = sc.scalar(0.0035, unit='m')
+    return RawData[RunType](dg)
 
 
 def pooch_load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
@@ -41,21 +44,23 @@ def pooch_load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
 
 
 def get_monitor(
-    da: RawData[RunType], nexus_name: NeXusMonitorName[MonitorType]
+    dg: RawData[RunType], nexus_name: NeXusMonitorName[MonitorType]
 ) -> RawMonitor[RunType, MonitorType]:
     # See https://github.com/scipp/sciline/issues/52 why copy needed
-    mon = da.attrs[nexus_name].value.copy()
+    mon = dg['monitors'][nexus_name]['data'].copy()
     return RawMonitor[RunType, MonitorType](mon)
 
 
-def detector_edge_mask(sample: RawData[SampleRun]) -> DetectorEdgeMask:
+def detector_edge_mask(raw: RawData[SampleRun]) -> DetectorEdgeMask:
+    sample = raw['data']
     mask_edges = (
         sc.abs(sample.coords['position'].fields.x) > sc.scalar(0.48, unit='m')
     ) | (sc.abs(sample.coords['position'].fields.y) > sc.scalar(0.45, unit='m'))
     return DetectorEdgeMask(mask_edges)
 
 
-def sample_holder_mask(sample: RawData[SampleRun]) -> SampleHolderMask:
+def sample_holder_mask(raw: RawData[SampleRun]) -> SampleHolderMask:
+    sample = raw['data']
     summed = sample.sum('tof')
     holder_mask = (
         (summed.data < sc.scalar(100, unit='counts'))
@@ -68,7 +73,7 @@ def sample_holder_mask(sample: RawData[SampleRun]) -> SampleHolderMask:
 
 
 def mask_detectors(
-    da: RawData[RunType],
+    dg: RawData[RunType],
     edge_mask: Optional[DetectorEdgeMask],
     holder_mask: Optional[SampleHolderMask],
 ) -> MaskedData[RunType]:
@@ -83,7 +88,7 @@ def mask_detectors(
     holder_mask:
         Mask for sample holder.
     """
-    da = da.copy(deep=False)
+    da = dg['data'].copy(deep=False)
     if edge_mask is not None:
         da.masks['edges'] = edge_mask
     if holder_mask is not None:
