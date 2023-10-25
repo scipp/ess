@@ -24,10 +24,6 @@ async-lru==2.0.4
     # via jupyterlab
 cffi==1.16.0
     # via argon2-cffi-bindings
-click==8.1.7
-    # via
-    #   pip-compile-multi
-    #   pip-tools
 fqdn==1.5.1
     # via jsonschema
 isoduration==20.11.0
@@ -41,11 +37,11 @@ jsonschema[format-nongpl]==4.19.1
     #   jupyter-events
     #   jupyterlab-server
     #   nbformat
-jupyter-events==0.7.0
+jupyter-events==0.8.0
     # via jupyter-server
 jupyter-lsp==2.2.0
     # via jupyterlab
-jupyter-server==2.7.3
+jupyter-server==2.9.0
     # via
     #   jupyter-lsp
     #   jupyterlab
@@ -53,7 +49,7 @@ jupyter-server==2.7.3
     #   notebook-shim
 jupyter-server-terminals==0.4.4
     # via jupyter-server
-jupyterlab==4.0.6
+jupyterlab==4.0.7
     # via -r dev.in
 jupyterlab-server==2.25.0
     # via jupyterlab
