@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-_version = '1'
+_version = '2'
 
 __all__ = ['get_path']
 
@@ -15,9 +15,9 @@ def _make_pooch():
         version=_version,
         registry={
             'DIRECT_SANS2D_REAR_34327_4m_8mm_16Feb16.hdf5': 'md5:43f4188301d709aa49df0631d03a67cb',  # noqa: E501
-            'SANS2D00063091.hdf5': 'md5:c212f1c8c68db69eae88eca90a19e7e6',
-            'SANS2D00063114.hdf5': 'md5:806a5780ff02676afcea1c3d8777ee21',
-            'SANS2D00063159.hdf5': 'md5:7be098bcc1f4ca73394584076a99146d',
+            'SANS2D00063091.hdf5': 'md5:1fdbe36a496e914336f2f9b5cad9f00e',
+            'SANS2D00063114.hdf5': 'md5:536303077b9f55286af5ef6ec5124e1c',
+            'SANS2D00063159.hdf5': 'md5:e2f2aea3ed9251e579210718de568203',
         },
     )
 
