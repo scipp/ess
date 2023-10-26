@@ -34,6 +34,19 @@ def pooch_load(filename: Filename[RunType]) -> RawData[RunType]:
         data.coords["gravity"] = gravity_vector()
     data.coords['pixel_width'] = sc.scalar(0.002033984375, unit='m')
     data.coords['pixel_height'] = sc.scalar(0.0035, unit='m')
+
+    # Some fixes specific for these Sans2d runs
+    sample_pos_z_offset = 0.053 * sc.units.m
+    # There is some uncertainty here
+    monitor4_pos_z_offset = -6.719 * sc.units.m
+
+    data.coords['sample_position'].fields.z += sample_pos_z_offset
+    # Results are actually slightly better at high-Q if we do not apply a bench offset
+    # bench_pos_y_offset = 0.001 * sc.units.m
+    # data.coords['position'].fields.y += bench_pos_y_offset
+    dg['monitors']['monitor4']['data'].coords[
+        'position'
+    ].fields.z += monitor4_pos_z_offset
     return RawData[RunType](dg)
 
 
