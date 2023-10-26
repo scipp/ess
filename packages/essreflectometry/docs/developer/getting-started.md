@@ -40,7 +40,7 @@ Alternatively, if you want a different workflow, take a look at ``tox.ini`` or `
 Run the tests using
 
 ```sh
-tox -e py310
+tox -e py38
 ```
 
 (or just `tox` if you want to run all environments).
