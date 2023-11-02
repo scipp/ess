@@ -84,7 +84,7 @@ jobs:
       - uses: mamba-org/setup-micromamba@v1
         with:
           environment-name: upload-env
-          # frozen python du to breaking removal of 'imp' in 3.12
+          # frozen python due to breaking removal of 'imp' in 3.12
           create-args: >-
             anaconda-client
             python=3.11
