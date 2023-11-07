@@ -6,6 +6,7 @@ from typing import Dict, List, Tuple, Union
 import numpy as np
 import scipp as sc
 
+from .._migration import get_meta
 from ..logging import get_logger
 from . import i_of_q
 from .common import gravity_vector
@@ -28,9 +29,9 @@ def center_of_mass(data: sc.DataArray) -> sc.Variable:
     :
         The position of the center-of-mass, as a vector.
     """
-    summed = data.sum(list(set(data.dims) - set(data.deprecated_meta['position'].dims)))
+    summed = data.sum(list(set(data.dims) - set(get_meta(data)['position'].dims)))
     v = sc.values(summed.data)
-    return sc.sum(summed.deprecated_meta['position'] * v) / v.sum()
+    return sc.sum(get_meta(summed)['position'] * v) / v.sum()
 
 
 def _offsets_to_vector(data: sc.DataArray, xy: List[float], graph: dict) -> sc.Variable:
@@ -339,7 +340,7 @@ def beam_center(
     This is what is now implemented in this version of the algorithm.
     """  # noqa: E501
     logger = get_logger('sans')
-    if 'gravity' not in data.deprecated_meta:
+    if 'gravity' not in get_meta(data):
         data = data.copy(deep=False)
         data.coords['gravity'] = gravity_vector()
     # Use center of mass to get initial guess for beam center

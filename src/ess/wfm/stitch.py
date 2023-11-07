@@ -4,6 +4,8 @@ from typing import Union
 
 import scipp as sc
 
+from .._migration import get_attrs
+
 
 def _stitch_dense_data(
     item: sc.DataArray,
@@ -47,10 +49,13 @@ def _stitch_dense_data(
         ),
         coords={new_dim: new_coord},
     )
-    for group in ["coords", "deprecated_attrs"]:
-        for key in getattr(item, group):
-            if key != dim:
-                getattr(out, group)[key] = getattr(item, group)[key].copy()
+
+    for key in item.coords:
+        if key != dim:
+            out.coords[key] = item.coords[key].copy()
+    for key in get_attrs(item):
+        if key != dim:
+            get_attrs(out)[key] = get_attrs(item)[key].copy()
 
     for i in range(frames.sizes["frame"]):
         section = item[

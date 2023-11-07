@@ -6,6 +6,7 @@ from typing import Dict, Optional, Union
 import scipp as sc
 from scipp.scipy.interpolate import interp1d
 
+from .._migration import get_meta
 from ..logging import get_logger
 from . import conversions, normalization
 from .common import gravity_vector, mask_range
@@ -160,7 +161,7 @@ def convert_to_q_and_merge_spectra(
     :
         The input data converted to Q and then summed over all detector pixels.
     """
-    if gravity and ('gravity' not in data.deprecated_meta):
+    if gravity and ('gravity' not in get_meta(data)):
         data = data.copy(deep=False)
         data.coords["gravity"] = gravity_vector()
 
@@ -329,7 +330,7 @@ def to_I_of_Q(
     # Insert a copy of coords needed for conversion to Q.
     # TODO: can this be avoided by copying the Q coords from the converted numerator?
     for coord in ['position', 'sample_position', 'source_position']:
-        denominator.coords[coord] = data.deprecated_meta[coord]
+        denominator.coords[coord] = get_meta(data)[coord]
 
     # In the case where no wavelength bands are requested, we create a single wavelength
     # band to make sure we select the correct wavelength range that corresponds to

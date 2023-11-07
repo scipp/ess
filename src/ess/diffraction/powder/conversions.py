@@ -9,6 +9,7 @@ from typing import Optional
 
 import scipp as sc
 
+from ..._migration import get_attrs
 from ...logging import get_logger
 from .corrections import merge_calibration
 
@@ -153,7 +154,7 @@ def to_dspacing_with_calibration(
     # should be able to remove this.
     for key in ('difc', 'difa', 'tzero'):
         if key not in out.coords:
-            out.coords[key] = out.deprecated_attrs.pop(key)
+            out.coords[key] = get_attrs(out).pop(key)
 
     out = out.transform_coords('dspacing', graph=graph, keep_intermediate=False)
     out.coords.pop('_tag_positions_consumed', None)
