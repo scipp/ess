@@ -26,7 +26,7 @@ def time_distance_diagram(data: sc.DataArray, **kwargs) -> plt.Figure:
     source_pos = data.meta["source_position"]
     furthest_detector_pos = sc.max(sc.norm(data.meta["position"] - source_pos)).value
     pulse_rectangle_height = furthest_detector_pos / 50.0
-    tmax_glob = sc.max(frames["time_max"].data).value
+    tmax_glob = sc.max(frames["time_max"]).value
 
     # Create figure and axes
     fig, ax = plt.subplots(1, 1, figsize=(9, 7))
@@ -81,7 +81,7 @@ def time_distance_diagram(data: sc.DataArray, **kwargs) -> plt.Figure:
     # for name, chopper in data.meta["choppers"].value.items():
     for name in ch.find_chopper_keys(data):
         chopper = data.meta[name].value
-        yframe = sc.norm(chopper["position"].data - source_pos).value
+        yframe = sc.norm(chopper["position"] - source_pos).value
         time_open = ch.time_open(chopper).values
         time_close = ch.time_closed(chopper).values
         tmin = 0.0
@@ -208,7 +208,7 @@ def frames_before_stitching(
     """
     summed = _sum_remaining_dims(data, dim)
     frames_no_shift = frames.copy()
-    frames_no_shift['time_correction'].data *= 0.0
+    frames_no_shift['time_correction'] *= 0.0
     out = {}
     for i in range(frames_no_shift['time_min'].sizes['frame']):
         key = 'frame{}'.format(i)

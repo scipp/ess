@@ -4,10 +4,12 @@ from typing import Union
 
 import scipp as sc
 
+from .._migration import get_attrs
+
 
 def _stitch_dense_data(
     item: sc.DataArray,
-    frames: sc.Dataset,
+    frames: sc.DataGroup,
     dim: str,
     new_dim: str,
     bins: Union[int, sc.Variable],
@@ -47,18 +49,21 @@ def _stitch_dense_data(
         ),
         coords={new_dim: new_coord},
     )
-    for group in ["coords", "attrs"]:
-        for key in getattr(item, group):
-            if key != dim:
-                getattr(out, group)[key] = getattr(item, group)[key].copy()
+
+    for key in item.coords:
+        if key != dim:
+            out.coords[key] = item.coords[key].copy()
+    for key in get_attrs(item):
+        if key != dim:
+            get_attrs(out)[key] = get_attrs(item)[key].copy()
 
     for i in range(frames.sizes["frame"]):
         section = item[
             dim,
-            frames["time_min"].data["frame", i] : frames["time_max"].data["frame", i],
+            frames["time_min"]["frame", i] : frames["time_max"]["frame", i],
         ].rename_dims({dim: new_dim})
         section.coords[new_dim] = (
-            section.coords[dim] - frames["time_correction"].data["frame", i]
+            section.coords[dim] - frames["time_correction"]["frame", i]
         )
         if new_dim != dim:
             del section.coords[dim]
@@ -70,14 +75,14 @@ def _stitch_dense_data(
 
 def _stitch_event_data(
     item: sc.DataArray,
-    frames: sc.Dataset,
+    frames: sc.DataGroup,
     dim: str,
     new_dim: str,
     bins: Union[int, sc.Variable],
 ) -> Union[sc.DataArray, dict]:
     edges = sc.flatten(
         sc.transpose(
-            sc.concat([frames["time_min"].data, frames["time_max"].data], 'dummy'),
+            sc.concat([frames["time_min"], frames["time_max"]], 'dummy'),
             dims=['frame', 'dummy'],
         ),
         to=dim,
@@ -86,9 +91,7 @@ def _stitch_event_data(
     binned = item.bin({dim: edges})
 
     for i in range(frames.sizes["frame"]):
-        binned[dim, i * 2].bins.coords[dim] -= frames["time_correction"].data[
-            "frame", i
-        ]
+        binned[dim, i * 2].bins.coords[dim] -= frames["time_correction"]["frame", i]
 
     erase = None
     if new_dim != dim:
@@ -103,12 +106,8 @@ def _stitch_event_data(
 
     new_edges = sc.concat(
         [
-            (
-                frames["time_min"]["frame", 0] - frames["time_correction"]["frame", 0]
-            ).data,
-            (
-                frames["time_max"]["frame", -1] - frames["time_correction"]["frame", -1]
-            ).data,
+            (frames["time_min"]["frame", 0] - frames["time_correction"]["frame", 0]),
+            (frames["time_max"]["frame", -1] - frames["time_correction"]["frame", -1]),
         ],
         new_dim,
     )
@@ -116,7 +115,7 @@ def _stitch_event_data(
 
 
 def _stitch_item(
-    item: sc.DataArray, frames: sc.Dataset, **kwargs
+    item: sc.DataArray, frames: sc.DataGroup, **kwargs
 ) -> Union[sc.DataArray, dict]:
     if item.bins is not None:
         out = _stitch_event_data(item=item, frames=frames, **kwargs)
@@ -135,14 +134,14 @@ def _stitch_item(
     # WFM conversion graph that looks for `wfm_chopper_mid_point` in the coords.
     if "source_position" in item.coords:
         del out.coords["source_position"]
-    out.coords['source_position'] = frames["wfm_chopper_mid_point"].data
+    out.coords['source_position'] = frames["wfm_chopper_mid_point"]
     return out
 
 
 def stitch(
     data: Union[sc.DataArray, sc.Dataset],
     dim: str,
-    frames: sc.Dataset,
+    frames: sc.DataGroup,
     new_dim: str = 'tof',
     bins: Union[int, sc.Variable] = 256,
 ) -> Union[sc.DataArray, sc.Dataset, dict]:
@@ -154,7 +153,7 @@ def stitch(
 
     :param data: The DataArray or Dataset to be stitched.
     :param dim: The dimension along which the stitching will be performed.
-    :param frames: The Dataset containing the information on the frame boundaries.
+    :param frames: The data group containing the information on the frame boundaries.
     :param new_dim: New dimension of the returned data, after stitching. Default: 'tof'.
     :param bins: Number or Variable describing the bins for the returned data. Default:
         256.
@@ -170,11 +169,14 @@ def stitch(
         frames["time_max"] = sc.mean(frames["time_max"], _dim)
 
     if isinstance(data, sc.Dataset):
-        stitched = sc.Dataset()
-        for key, item in data.items():
-            stitched[key] = _stitch_item(
-                item=item, dim=dim, frames=frames, new_dim=new_dim, bins=bins
-            )
+        stitched = sc.Dataset(
+            {
+                key: _stitch_item(
+                    item=item, dim=dim, frames=frames, new_dim=new_dim, bins=bins
+                )
+                for key, item in data.items()
+            }
+        )
     else:
         stitched = _stitch_item(
             item=data, dim=dim, frames=frames, new_dim=new_dim, bins=bins

@@ -10,7 +10,7 @@ import ess.wfm as wfm
 
 
 def test_basic_stitching():
-    frames = sc.Dataset()
+    frames = sc.DataGroup()
     shift = -5.0
     frames['time_min'] = sc.array(dims=['frame'], values=[0.0], unit=sc.units.us)
     frames['time_max'] = sc.array(dims=['frame'], values=[10.0], unit=sc.units.us)
@@ -107,12 +107,11 @@ def _do_stitching_on_beamline(wavelengths, dim, event_mode=False):
     choppers = {key: da.meta[key].value for key in ch.find_chopper_keys(da)}
     # Distance between WFM choppers
     dz_wfm = sc.norm(
-        choppers["chopper_wfm_2"]["position"].data
-        - choppers["chopper_wfm_1"]["position"].data
+        choppers["chopper_wfm_2"]["position"] - choppers["chopper_wfm_1"]["position"]
     )
     # Delta_lambda  / lambda
     dlambda_over_lambda = dz_wfm / sc.norm(
-        coords['position'] - frames['wfm_chopper_mid_point'].data
+        coords['position'] - frames['wfm_chopper_mid_point']
     )
 
     return out, dlambda_over_lambda
