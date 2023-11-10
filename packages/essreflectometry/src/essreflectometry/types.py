@@ -24,15 +24,16 @@ class ThetaData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
 
 
 class QData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
-    """Event data with wavelength, incidence angle and momentum transfer computed per event.
+    """Event data with wavelength, incidence angle,
+    and momentum transfer computed per event.
     Binned by momentum transfer according to the QBins provider,
     and by `detector_number` (pixel of the detector frame).
     """
 
 
 class FootprintCorrectedData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
-    """Event data with weight corrected for the footprint of the beam on the sample for the
-    incidence angle of the event."""
+    """Event data with weight corrected for the footprint of the beam
+    on the sample for the incidence angle of the event."""
 
 
 SpecularReflectionCoordTransformGraph = NewType(

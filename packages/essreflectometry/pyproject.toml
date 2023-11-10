@@ -46,6 +46,7 @@ dynamic = ["version"]
 
 [project.urls]
 "Bug Tracker" = "https://github.com/scipp/essreflectometry/issues"
+"Documentation" = "https://scipp.github.io/essreflectometry"
 "Source" = "https://github.com/scipp/essreflectometry"
 
 [tool.setuptools_scm]
@@ -70,6 +71,7 @@ skip-string-normalization = true
 [tool.isort]
 skip_gitignore = true
 profile = "black"
+known_first_party = ["essreflectometry"]
 
 [tool.mypy]
 strict = true
