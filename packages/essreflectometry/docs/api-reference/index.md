@@ -17,6 +17,8 @@
 .. autosummary::
    :toctree: ../generated/functions
    :recursive:
+
+   providers
 ```
 
 ## Submodules
@@ -26,4 +28,8 @@
    :toctree: ../generated/modules
    :template: module-template.rst
    :recursive:
+
+   types
+   amor
+   supermirror
 ```

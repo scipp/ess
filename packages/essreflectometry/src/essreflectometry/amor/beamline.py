@@ -1,26 +1,40 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
-from scipp.constants import g
 
 from ..choppers import make_chopper
 from ..logging import log_call
+from ..types import (
+    BeamSize,
+    DetectorSpatialResolution,
+    Gravity,
+    Run,
+    SampleRotation,
+    SampleSize,
+)
+from .types import (
+    BeamlineParams,
+    Chopper1Position,
+    Chopper2Position,
+    ChopperFrequency,
+    ChopperPhase,
+)
 
 
 @log_call(
     instrument='amor', message='Constructing AMOR beamline from default parameters'
 )
 def make_beamline(
-    sample_rotation: sc.Variable,
-    beam_size: sc.Variable = None,
-    sample_size: sc.Variable = None,
-    detector_spatial_resolution: sc.Variable = None,
-    gravity: sc.Variable = None,
-    chopper_frequency: sc.Variable = None,
-    chopper_phase: sc.Variable = None,
-    chopper_1_position: sc.Variable = None,
-    chopper_2_position: sc.Variable = None,
-) -> dict:
+    sample_rotation: SampleRotation[Run],
+    beam_size: BeamSize[Run],
+    sample_size: SampleSize[Run],
+    detector_spatial_resolution: DetectorSpatialResolution[Run],
+    gravity: Gravity,
+    chopper_frequency: ChopperFrequency[Run],
+    chopper_phase: ChopperPhase[Run],
+    chopper_1_position: Chopper1Position[Run],
+    chopper_2_position: Chopper2Position[Run],
+) -> BeamlineParams[Run]:
     """
     Amor beamline components.
 
@@ -50,22 +64,6 @@ def make_beamline(
     :
         A dict.
     """
-    if beam_size is None:
-        beam_size = 2.0 * sc.units.mm
-    if sample_size is None:
-        sample_size = 10.0 * sc.units.mm
-    if detector_spatial_resolution is None:
-        detector_spatial_resolution = 0.0025 * sc.units.m
-    if gravity is None:
-        gravity = sc.vector(value=[0, -1, 0]) * g
-    if chopper_frequency is None:
-        chopper_frequency = sc.scalar(20 / 3, unit='Hz')
-    if chopper_phase is None:
-        chopper_phase = sc.scalar(-8.0, unit='deg')
-    if chopper_1_position is None:
-        chopper_1_position = sc.vector(value=[0, 0, -15.5], unit='m')
-    if chopper_2_position is None:
-        chopper_2_position = sc.vector(value=[0, 0, -14.5], unit='m')
     beamline = {
         'sample_rotation': sample_rotation,
         'beam_size': beam_size,
@@ -91,7 +89,7 @@ def make_beamline(
             position=chopper_1_position,
         )
     )
-    return beamline
+    return BeamlineParams(beamline)
 
 
 @log_call(instrument='amor', level='DEBUG')
@@ -131,3 +129,6 @@ def instrument_view_components(da: sc.DataArray) -> dict:
             'type': 'disk',
         },
     }
+
+
+providers = [make_beamline]

@@ -1,14 +1,15 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Union
 
 import scipp as sc
 import scippnexus as snx
 
 from ..logging import get_logger
-from .beamline import make_beamline
+from ..types import Filename, RawData, Run
+from .data import get_path
+from .types import BeamlineParams
 
 
 def _tof_correction(data: sc.DataArray, dim: str = 'tof') -> sc.DataArray:
@@ -29,8 +30,9 @@ def _tof_correction(data: sc.DataArray, dim: str = 'tof') -> sc.DataArray:
     :
         ToF corrected data array.
     """
-    if 'orso' in data.attrs:
-        data.attrs['orso'].value.reduction.corrections += ['chopper ToF correction']
+    # TODO
+    # if 'orso' in data.attrs:
+    #    data.attrs['orso'].value.reduction.corrections += ['chopper ToF correction']
     tof_unit = data.bins.coords[dim].bins.unit
     tau = sc.to_unit(
         1 / (2 * data.coords['source_chopper_2'].value['frequency'].data),
@@ -83,19 +85,13 @@ def _load_nexus_entry(filename: Union[str, Path]) -> sc.DataGroup:
         return f['entry'][()]
 
 
-def load(
-    filename: Union[str, Path],
-    orso: Optional[Any] = None,
-    beamline: Optional[dict] = None,
-) -> sc.DataArray:
+def load(filename: Filename[Run], beamline: BeamlineParams[Run]) -> RawData[Run]:
     """Load a single Amor data file.
 
     Parameters
     ----------
     filename:
         Path of the file to load.
-    orso:
-        The orso object to be populated by additional information from the loaded file.
     beamline:
         A dict defining the beamline parameters.
 
@@ -104,6 +100,7 @@ def load(
     :
         Data array object for Amor dataset.
     """
+    filename = get_path(filename)
     get_logger('amor').info(
         "Loading '%s' as an Amor NeXus file",
         filename.filename if hasattr(filename, 'filename') else filename,
@@ -124,37 +121,47 @@ def load(
     )
 
     # Add beamline parameters
-    beamline = make_beamline() if beamline is None else beamline
     for key, value in beamline.items():
         data.coords[key] = value
 
-    if orso is not None:
-        populate_orso(orso=orso, data=full_data, filename=filename)
-        data.attrs['orso'] = sc.scalar(orso)
+    # if orso is not None:
+    #    populate_orso(orso=orso, data=full_data, filename=filename)
+    #    data.attrs['orso'] = sc.scalar(orso)
 
     # Perform tof correction and fold two pulses
-    return _tof_correction(data)
+    data = _tof_correction(data)
 
-
-def populate_orso(orso: Any, data: sc.DataGroup, filename: str) -> Any:
-    """
-    Populate the Orso object, by calling the :code:`base_orso` and adding data from the
-    file.
-
-    Parameters
-    ----------
-    orso:
-        The orso object to be populated by additional information from the loaded file.
-    data:
-        Data group to source information from.
-        Should mimic the structure of the NeXus file.
-    filename:
-        Path of the file to load.
-    """
-    orso.data_source.experiment.title = data['title']
-    orso.data_source.experiment.instrument = data['name']
-    orso.data_source.experiment.start_date = datetime.strftime(
-        datetime.strptime(data['start_time'][:-3], '%Y-%m-%dT%H:%M:%S.%f'),
-        '%Y-%m-%d',
+    # Ad-hoc correction described in
+    # https://scipp.github.io/ess/instruments/amor/amor_reduction.html
+    data.coords['position'].fields.y += data.coords['position'].fields.z * sc.tan(
+        2.0 * data.coords['sample_rotation'] - (0.955 * sc.units.deg)
     )
-    orso.data_source.measurement.data_files = [filename]
+    return data
+
+
+# TODO
+# def populate_orso(orso: Any, data: sc.DataGroup, filename: str) -> Any:
+#    """
+#    Populate the Orso object, by calling the :code:`base_orso` and adding data from the
+#    file.
+#
+#    Parameters
+#    ----------
+#    orso:
+#        The orso object to be populated by additional information from the loaded file.
+#    data:
+#        Data group to source information from.
+#        Should mimic the structure of the NeXus file.
+#    filename:
+#        Path of the file to load.
+#    """
+#    orso.data_source.experiment.title = data['title']
+#    orso.data_source.experiment.instrument = data['name']
+#    orso.data_source.experiment.start_date = datetime.strftime(
+#        datetime.strptime(data['start_time'][:-3], '%Y-%m-%dT%H:%M:%S.%f'),
+#        '%Y-%m-%d',
+#    )
+#    orso.data_source.measurement.data_files = [filename]
+
+
+providers = [load]

@@ -4,7 +4,7 @@ import pytest
 import scipp as sc
 from orsopy import fileio
 
-from essreflectometry.reflectometry import corrections
+from essreflectometry import corrections
 
 
 def test_normalize_by_counts():
@@ -46,6 +46,8 @@ def test_normalize_by_counts_fails_when_ncounts_is_too_small():
         _ = corrections.normalize_by_counts(array)
 
 
+# TODO
+@pytest.mark.skip(reason="Orso disabled for now.")
 def test_normalize_by_counts_orso():
     """
     Tests the corrections.normalize_by_counts function

@@ -2,10 +2,41 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 
-from .tools import fwhm_to_std
+from ..tools import fwhm_to_std
+from ..types import QBins, QData, QResolution, Sample
+from .types import AngularResolution, SampleSizeResolution, WavelengthResolution
 
 
-def wavelength_resolution(
+def wavelength_resolution(da: QData[Sample]) -> WavelengthResolution:
+    return WavelengthResolution(
+        _wavelength_resolution(
+            chopper_1_position=da.coords['source_chopper_1'].value['position'],
+            chopper_2_position=da.coords['source_chopper_2'].value['position'],
+            pixel_position=da.coords['position'],
+        )
+    )
+
+
+def angular_resolution(da: QData[Sample]) -> AngularResolution:
+    return AngularResolution(
+        _angular_resolution(
+            pixel_position=da.coords['position'],
+            theta=da.bins.coords['theta'],
+            detector_spatial_resolution=da.coords['detector_spatial_resolution'],
+        )
+    )
+
+
+def sample_size_resolution(da: QData[Sample]) -> SampleSizeResolution:
+    return SampleSizeResolution(
+        _sample_size_resolution(
+            pixel_position=da.coords['position'],
+            sample_size=da.coords['sample_size'],
+        )
+    )
+
+
+def _wavelength_resolution(
     chopper_1_position: sc.Variable,
     chopper_2_position: sc.Variable,
     pixel_position: sc.Variable,
@@ -38,7 +69,7 @@ def wavelength_resolution(
     return fwhm_to_std(distance_between_choppers / chopper_detector_distance)
 
 
-def sample_size_resolution(
+def _sample_size_resolution(
     pixel_position: sc.Variable, sample_size: sc.Variable
 ) -> sc.Variable:
     """
@@ -64,7 +95,7 @@ def sample_size_resolution(
     )
 
 
-def angular_resolution(
+def _angular_resolution(
     pixel_position: sc.Variable,
     theta: sc.Variable,
     detector_spatial_resolution: sc.Variable,
@@ -104,11 +135,11 @@ def angular_resolution(
 
 
 def sigma_Q(
-    angular_resolution: sc.Variable,
-    wavelength_resolution: sc.Variable,
-    sample_size_resolution: sc.Variable,
-    q_bins: sc.Variable,
-) -> sc.Variable:
+    angular_resolution: AngularResolution,
+    wavelength_resolution: WavelengthResolution,
+    sample_size_resolution: SampleSizeResolution,
+    q_bins: QBins,
+) -> QResolution:
     """
     Combine all of the components of the resolution and add Q contribution.
 
@@ -133,3 +164,6 @@ def sigma_Q(
         + wavelength_resolution**2
         + sample_size_resolution**2
     ).max('detector_number') * sc.midpoints(q_bins)
+
+
+providers = [sigma_Q, angular_resolution, wavelength_resolution, sample_size_resolution]

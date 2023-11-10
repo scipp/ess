@@ -5,11 +5,19 @@
   </br></br>
 </span>
 
+## Overview
+
+This documentation is under construction.
+See the [Amor data reduction](examples/amor) example for a quick start.
+
+## Table of contents
+
 ```{toctree}
 ---
-hidden:
+maxdepth: 2
 ---
 
+examples/index
 api-reference/index
 developer/index
 about/index

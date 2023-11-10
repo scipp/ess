@@ -2,7 +2,8 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 
-from ..reflectometry.conversions import specular_reflection as spec_relf_graph
+from ..conversions import specular_reflection as spec_relf_graph
+from ..types import SpecularReflectionCoordTransformGraph
 
 
 def incident_beam(
@@ -22,10 +23,13 @@ def incident_beam(
     return sample_position - chopper_midpoint
 
 
-def specular_reflection() -> dict:
+def specular_reflection() -> SpecularReflectionCoordTransformGraph:
     """
     Generate a coordinate transformation graph for Amor reflectometry.
     """
     graph = spec_relf_graph()
     graph['incident_beam'] = incident_beam
-    return graph
+    return SpecularReflectionCoordTransformGraph(graph)
+
+
+providers = [specular_reflection]
