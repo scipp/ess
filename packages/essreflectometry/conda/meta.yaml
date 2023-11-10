@@ -11,6 +11,14 @@ requirements:
     - setuptools
     - setuptools_scm
   run:
+    - dask
+    - graphviz
+    - plopp
+    - pythreejs
+    - orsopy
+    - sciline>=23.9.1
+    - scipp>=23.8.0
+    - scippneutron>=23.9.0
     - python>=3.8
 
 test:
