@@ -12,6 +12,7 @@ dependencies:
   - tifffile
   - jupyterlab
   - jupyterlab_widgets
+  - plopp
   - pythreejs
   - scipy
   - ipympl

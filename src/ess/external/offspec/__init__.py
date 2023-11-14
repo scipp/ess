@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-"""
-Components for single crystal diffraction experiments.
-"""
+
+from . import data
+
+__all__ = ['data']

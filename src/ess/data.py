@@ -19,7 +19,9 @@ class Registry:
             registry=files,
         )
 
-    def get_path(self, name: str) -> str:
+        self._unzip = pooch.Unzip()
+
+    def get_path(self, name: str, unzip: bool = False) -> str:
         """
         Get the path to a file in the registry.
 
@@ -27,5 +29,7 @@ class Registry:
         ----------
         name:
             Name of the file to get the path for.
+        unzip:
+            If `True`, unzip the file before returning the path.
         """
-        return self._registry.fetch(name)
+        return self._registry.fetch(name, processor=self._unzip if unzip else None)

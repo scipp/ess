@@ -4,7 +4,7 @@ import scipp as sc
 from scipp.constants import pi
 
 
-def cutout_angles_begin(chopper: sc.Dataset, unit="rad") -> sc.Variable:
+def cutout_angles_begin(chopper: sc.DataGroup, unit="rad") -> sc.Variable:
     """
     Get the starting/opening angles of the chopper cutouts.
 
@@ -12,12 +12,9 @@ def cutout_angles_begin(chopper: sc.Dataset, unit="rad") -> sc.Variable:
     :param unit: Convert to this unit before returning. Default is `'rad'`.
     """
     if "cutout_angles_begin" in chopper:
-        out = chopper["cutout_angles_begin"].data
+        out = chopper["cutout_angles_begin"]
     elif all(x in chopper for x in ["cutout_angles_width", "cutout_angles_center"]):
-        out = (
-            chopper["cutout_angles_center"].data
-            - 0.5 * chopper["cutout_angles_width"].data
-        )
+        out = chopper["cutout_angles_center"] - 0.5 * chopper["cutout_angles_width"]
     else:
         raise KeyError(
             "Chopper does not contain the information required to compute "
@@ -26,7 +23,7 @@ def cutout_angles_begin(chopper: sc.Dataset, unit="rad") -> sc.Variable:
     return sc.to_unit(out, unit, copy=False)
 
 
-def cutout_angles_end(chopper: sc.Dataset, unit="rad") -> sc.Variable:
+def cutout_angles_end(chopper: sc.DataGroup, unit="rad") -> sc.Variable:
     """
     Get the ending/closing angles of the chopper cutouts.
 
@@ -34,12 +31,9 @@ def cutout_angles_end(chopper: sc.Dataset, unit="rad") -> sc.Variable:
     :param unit: Convert to this unit before returning. Default is `'rad'`.
     """
     if "cutout_angles_end" in chopper:
-        out = chopper["cutout_angles_end"].data
+        out = chopper["cutout_angles_end"]
     elif all(x in chopper for x in ["cutout_angles_width", "cutout_angles_center"]):
-        out = (
-            chopper["cutout_angles_center"].data
-            + 0.5 * chopper["cutout_angles_width"].data
-        )
+        out = chopper["cutout_angles_center"] + 0.5 * chopper["cutout_angles_width"]
     else:
         raise KeyError(
             "Chopper does not contain the information required to compute "
@@ -48,7 +42,7 @@ def cutout_angles_end(chopper: sc.Dataset, unit="rad") -> sc.Variable:
     return sc.to_unit(out, unit, copy=False)
 
 
-def cutout_angles_width(chopper: sc.Dataset, unit="rad") -> sc.Variable:
+def cutout_angles_width(chopper: sc.DataGroup, unit="rad") -> sc.Variable:
     """
     Get the angular widths of the chopper cutouts.
 
@@ -56,9 +50,9 @@ def cutout_angles_width(chopper: sc.Dataset, unit="rad") -> sc.Variable:
     :param unit: Convert to this unit before returning. Default is `'rad'`.
     """
     if "cutout_angles_width" in chopper:
-        out = chopper["cutout_angles_width"].data
+        out = chopper["cutout_angles_width"]
     elif all(x in chopper for x in ["cutout_angles_begin", "cutout_angles_end"]):
-        out = chopper["cutout_angles_end"].data - chopper["cutout_angles_begin"].data
+        out = chopper["cutout_angles_end"] - chopper["cutout_angles_begin"]
     else:
         raise KeyError(
             "Chopper does not contain the information required to compute "
@@ -67,7 +61,7 @@ def cutout_angles_width(chopper: sc.Dataset, unit="rad") -> sc.Variable:
     return sc.to_unit(out, unit, copy=False)
 
 
-def cutout_angles_center(chopper: sc.Dataset, unit="rad") -> sc.Variable:
+def cutout_angles_center(chopper: sc.DataGroup, unit="rad") -> sc.Variable:
     """
     Get the angular centers of the chopper cutouts.
 
@@ -75,11 +69,9 @@ def cutout_angles_center(chopper: sc.Dataset, unit="rad") -> sc.Variable:
     :param unit: Convert to this unit before returning. Default is `'rad'`.
     """
     if "cutout_angles_center" in chopper:
-        out = chopper["cutout_angles_center"].data
+        out = chopper["cutout_angles_center"]
     elif all(x in chopper for x in ["cutout_angles_begin", "cutout_angles_end"]):
-        out = 0.5 * (
-            chopper["cutout_angles_begin"].data + chopper["cutout_angles_end"].data
-        )
+        out = 0.5 * (chopper["cutout_angles_begin"] + chopper["cutout_angles_end"])
     else:
         raise KeyError(
             "Chopper does not contain the information required to compute "
@@ -88,16 +80,16 @@ def cutout_angles_center(chopper: sc.Dataset, unit="rad") -> sc.Variable:
     return sc.to_unit(out, unit, copy=False)
 
 
-def angular_frequency(chopper: sc.Dataset) -> sc.Variable:
+def angular_frequency(chopper: sc.DataGroup) -> sc.Variable:
     """
     Get the angular frequency of the chopper.
 
     :param chopper: The Dataset containing the chopper parameters.
     """
-    return (2.0 * sc.units.rad) * pi * chopper["frequency"].data
+    return (2.0 * sc.units.rad) * pi * chopper["frequency"]
 
 
-def time_open(chopper: sc.Dataset, unit: str = "us") -> sc.Variable:
+def time_open(chopper: sc.DataGroup, unit: str = "us") -> sc.Variable:
     """
     Get the times when a chopper window is open.
 
@@ -105,14 +97,14 @@ def time_open(chopper: sc.Dataset, unit: str = "us") -> sc.Variable:
     :param unit: Convert to this unit before returning. Default is `'rad'`.
     """
     return sc.to_unit(
-        (cutout_angles_begin(chopper) + sc.to_unit(chopper["phase"].data, "rad"))
+        (cutout_angles_begin(chopper) + sc.to_unit(chopper["phase"], "rad"))
         / angular_frequency(chopper),
         unit,
         copy=False,
     )
 
 
-def time_closed(chopper: sc.Dataset, unit: str = "us") -> sc.Variable:
+def time_closed(chopper: sc.DataGroup, unit: str = "us") -> sc.Variable:
     """
     Get the times when a chopper window is closed.
 
@@ -120,7 +112,7 @@ def time_closed(chopper: sc.Dataset, unit: str = "us") -> sc.Variable:
     :param unit: Convert to this unit before returning. Default is `'rad'`.
     """
     return sc.to_unit(
-        (cutout_angles_end(chopper) + sc.to_unit(chopper["phase"].data, "rad"))
+        (cutout_angles_end(chopper) + sc.to_unit(chopper["phase"], "rad"))
         / angular_frequency(chopper),
         unit,
         copy=False,

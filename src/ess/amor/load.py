@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, Optional, Union
 
 import scipp as sc
-import scippnexus.v2 as snx
+import scippnexus as snx
 
 from ..logging import get_logger
 from .beamline import make_beamline
@@ -33,10 +33,10 @@ def _tof_correction(data: sc.DataArray, dim: str = 'tof') -> sc.DataArray:
         data.attrs['orso'].value.reduction.corrections += ['chopper ToF correction']
     tof_unit = data.bins.coords[dim].bins.unit
     tau = sc.to_unit(
-        1 / (2 * data.coords['source_chopper_2'].value['frequency'].data),
+        1 / (2 * data.coords['source_chopper_2'].value['frequency']),
         tof_unit,
     )
-    chopper_phase = data.coords['source_chopper_2'].value['phase'].data
+    chopper_phase = data.coords['source_chopper_2'].value['phase']
     tof_offset = tau * chopper_phase / (180.0 * sc.units.deg)
     # Make 2 bins, one for each pulse
     edges = sc.concat([-tof_offset, tau - tof_offset, 2 * tau - tof_offset], dim)

@@ -4,7 +4,6 @@ from typing import Optional
 
 import scipp as sc
 import scippneutron as scn
-from scipp.plotting.objects import Plot
 
 
 def instrument_view(
@@ -13,7 +12,7 @@ def instrument_view(
     pixel_size: Optional[float] = None,
     components: Optional[dict] = None,
     **kwargs
-) -> Plot:
+):
     """
     Instrument view for the POWGEN instrument, with adjusted default arguments.
 

@@ -146,18 +146,22 @@ def groupby2D(data, nx_target, ny_target, x='x', y='y', z='wavelength'):
         dims=["spectrum"], values=np.ravel(grid.values, order='F')
     )
 
-    reshaped = sc.Dataset()
-    for key, val in data.items():
-        reshaped[key] = sc.flatten(x=val, dims=[y, x], to='spectrum')
-
+    reshaped = sc.Dataset(
+        {
+            key: sc.flatten(x=val, dims=[y, x], to='spectrum')
+            for key, val in data.items()
+        }
+    )
     reshaped.coords["spectrum_mapping"] = spectrum_mapping
 
     grouped = sc.groupby(reshaped, "spectrum_mapping").sum("spectrum")
 
-    reshaped = sc.Dataset()
-    for key, val in grouped.items():
-        item = sc.fold(
-            x=val, dim="spectrum_mapping", dims=[y, x], shape=(ny_target, nx_target)
-        )
-        reshaped[key] = item
+    reshaped = sc.Dataset(
+        {
+            key: sc.fold(
+                x=val, dim="spectrum_mapping", dims=[y, x], shape=(ny_target, nx_target)
+            )
+            for key, val in grouped.items()
+        }
+    )
     return reshaped
