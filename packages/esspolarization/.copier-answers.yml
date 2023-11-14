@@ -1,0 +1,13 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: 3e3c192
+_src_path: gh:scipp/copier_template
+description: Polarization data reduction for the European Spallation Source
+max_python: '3.11'
+min_python: '3.8'
+namespace_package: ess
+nightly_deps: scipp,sciline
+orgname: scipp
+prettyname: Esspolarization
+projectname: esspolarization
+related_projects: Scipp,Sciline
+year: 2023
