@@ -25,7 +25,8 @@ def slice_range(da, trunc_range):
 @pp.node
 def post_process(da, dim):
     dims = list(da.dims)
-    dims.remove(dim)
+    if dim is not None:
+        dims.remove(dim)
     out = da.flatten(dims=dims, to='pixel')
     sel = sc.isfinite(out.coords['x'])
     return out[sel]
