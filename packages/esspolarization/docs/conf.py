@@ -4,7 +4,7 @@ import doctest
 import os
 import sys
 
-import esspolarization
+from ess import polarization
 
 sys.path.insert(0, os.path.abspath('.'))
 
@@ -91,9 +91,9 @@ master_doc = 'index'
 #
 
 # The short X.Y version.
-version = esspolarization.__version__
+version = polarization.__version__
 # The full version, including alpha/beta/rc tags.
-release = esspolarization.__version__
+release = polarization.__version__
 
 warning_is_error = True
 
@@ -133,6 +133,7 @@ html_theme_options = {
     "external_links": [
         {"name": "Sciline", "url": "https://scipp.github.io/sciline"},
         {"name": "Scipp", "url": "https://scipp.github.io"},
+        {"name": "ScippNexus", "url": "https://scipp.github.io/scippnexus"},
         ],
     "icon_links": [
         {
