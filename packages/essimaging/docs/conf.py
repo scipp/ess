@@ -4,7 +4,7 @@ import doctest
 import os
 import sys
 
-import essimaging
+from ess import imaging
 
 sys.path.insert(0, os.path.abspath('.'))
 
@@ -91,9 +91,9 @@ master_doc = 'index'
 #
 
 # The short X.Y version.
-version = essimaging.__version__
+version = imaging.__version__
 # The full version, including alpha/beta/rc tags.
-release = essimaging.__version__
+release = imaging.__version__
 
 warning_is_error = True
 
