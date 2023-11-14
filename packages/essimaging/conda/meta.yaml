@@ -1,0 +1,44 @@
+package:
+  name: essimaging
+
+  version: {{ GIT_DESCRIBE_TAG }}
+
+source:
+  path: ..
+
+requirements:
+  build:
+    - setuptools
+    - setuptools_scm
+  run:
+    - dask
+    - python>=3.8
+    - python-graphviz
+    - plopp
+    - sciline>=23.9.1
+    - scipp>=23.8.0
+    - scippnexus>=23.11.1
+
+test:
+  imports:
+    - essimaging
+  requires:
+    - pytest
+  source_files:
+    - pyproject.toml
+    - tests/
+  commands:
+    - python -m pytest tests
+
+build:
+  noarch: python
+  script:
+    - pip install .
+
+about:
+  home: https://github.com/scipp/essimaging
+  license: BSD-3-Clause
+  summary: Imaging data reduction for the European Spallation Source
+  description: Imaging data reduction for the European Spallation Source
+  dev_url: https://github.com/scipp/essimaging
+  doc_url: https://scipp.github.io/essimaging

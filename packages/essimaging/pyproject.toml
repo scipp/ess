@@ -1,0 +1,82 @@
+[build-system]
+requires = [
+  "setuptools>=68",
+  "setuptools_scm[toml]>=8.0",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "essimaging"
+description = "Imaging data reduction for the European Spallation Source"
+authors = [{ name = "Scipp contributors" }]
+license = { file = "LICENSE" }
+readme = "README.md"
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: BSD License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering",
+    "Typing :: Typed",
+]
+requires-python = ">=3.8"
+
+# IMPORTANT:
+# Run 'tox -e deps' after making changes here. This will update requirement files.
+# Make sure to list one dependency per line.
+dependencies = [
+  "dask",
+  "graphviz",
+  "plopp",
+  "sciline>=23.9.1",
+  "scipp>=23.8.0",
+  "scippnexus>=23.11.1",
+  "platformdirs<4",  # temporary to make pip-compile-multi happy
+]
+
+dynamic = ["version"]
+
+[project.urls]
+"Bug Tracker" = "https://github.com/scipp/essimaging/issues"
+"Documentation" = "https://scipp.github.io/essimaging"
+"Source" = "https://github.com/scipp/essimaging"
+
+[tool.setuptools_scm]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -v"
+testpaths = "tests"
+filterwarnings = [
+  "error",
+]
+
+[tool.bandit]
+# Excluding tests because bandit doesn't like `assert`.
+exclude_dirs = ["docs/conf.py", "tests"]
+
+[tool.black]
+skip-string-normalization = true
+
+[tool.isort]
+skip_gitignore = true
+profile = "black"
+known_first_party = ["essimaging"]
+
+[tool.mypy]
+strict = true
+ignore_missing_imports = true
+enable_error_code = [
+    "ignore-without-code",
+    "redundant-expr",
+    "truthy-bool",
+]
+show_error_codes = true
+warn_unreachable = true
