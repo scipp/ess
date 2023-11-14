@@ -134,7 +134,7 @@ html_theme_options = {
         {"name": "Sciline", "url": "https://scipp.github.io/sciline"},
         {"name": "Scipp", "url": "https://scipp.github.io"},
         {"name": "ScippNexus", "url": "https://scipp.github.io/scippnexus"},
-        ],
+    ],
     "icon_links": [
         {
             "name": "GitHub",
