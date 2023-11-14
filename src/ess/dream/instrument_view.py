@@ -1,139 +1,143 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
+from html import escape
 from typing import List, Optional, Union
 
 import plopp as pp
 import scipp as sc
 
-DREAM_DETECTOR_DIMENSIONS = ('module', 'segment', 'counter', 'wire', 'strip')
-DREAM_PIXEL_SIZE = sc.scalar(1.0, unit='cm')
+
+def _to_data_group(data: Union[sc.DataArray, sc.DataGroup, dict]) -> sc.DataGroup:
+    if isinstance(data, sc.DataArray):
+        data = sc.DataGroup({data.name or 'data': data})
+    elif isinstance(data, dict):
+        data = sc.DataGroup(data)
+    return data
 
 
-def _preprocess_data(
-    data: sc.DataArray, to_be_flattened: List[str], dim: str, to: str
-) -> sc.DataArray:
+@pp.node
+def slice_range(da, trunc_range):
+    min_tr, max_tr = trunc_range
+    return da['tof', min_tr:max_tr].sum('tof')
+
+
+@pp.node
+def post_process(da, dim):
+    dims = list(da.dims)
+    dims.remove(dim)
+    out = da.flatten(dims=dims, to='pixel')
+    sel = sc.isfinite(out.coords['x'])
+    return out[sel]
+
+
+class InstrumentView:
+    def __init__(self, data, dim=None, pixel_size=None, **kwargs):
+        import ipywidgets as ipw
+
+        self.data = _to_data_group(data)
+
+        self.post_process_nodes = {
+            key: post_process(da, dim) for key, da in self.data.items()
+        }
+
+        self.children = []
+
+        if dim is not None:
+            # Once https://github.com/scipp/plopp/issues/277 is resolved, we can
+            # use Plopp's range slicer so that the value of the coordinates are
+            # displayed next to the slider, instead of the raw indices.
+            self.slider = ipw.IntRangeSlider(
+                value=[0, self.data.sizes[dim] - 1],
+                max=self.data.sizes[dim] - 1,
+                description=dim,
+                layout={'width': '700px'},
+                continuous_update=False,
+            )
+            self.slider_node = pp.widget_node(self.slider)
+            self.slice_nodes = {
+                key: slice_range(n, trunc_range=self.slider_node)
+                for key, n in self.post_process_nodes.items()
+            }
+            to_scatter = self.slice_nodes
+            self.children.append(self.slider)
+        else:
+            self.slice_nodes = self.post_process_nodes
+            to_scatter = self.post_process_nodes
+
+        self.scatter = pp.scatter3d(
+            to_scatter,
+            pixel_size=1.0 * sc.Unit('cm') if pixel_size is None else pixel_size,
+            **kwargs,
+        )
+
+        self.children.insert(0, self.scatter)
+
+        if len(self.data) > 1:
+            self._add_module_control()
+
+    def _add_module_control(self):
+        import ipywidgets as ipw
+
+        self.fig = self.scatter[0]
+        self.cutting_tool = self.scatter[1]
+        self.mapping = {
+            name: key for name, key in zip(self.data.keys(), self.fig.artists.keys())
+        }
+        self.checkboxes = {
+            key: ipw.Checkbox(
+                value=True,
+                description=f"{escape(key)}",
+                indent=False,
+                layout={"width": "initial"},
+            )
+            for key in self.data
+        }
+
+        self.modules_widget = ipw.HBox(
+            [ipw.HTML(value="Modules: &nbsp;&nbsp;&nbsp;&nbsp;")]
+            + list(self.checkboxes.values())
+        )
+        for key, ch in self.checkboxes.items():
+            ch.key = key
+            ch.observe(self._check_visibility, names='value')
+        self.cutting_tool.cut_x.button.observe(self._check_visibility, names="value")
+        self.cutting_tool.cut_y.button.observe(self._check_visibility, names="value")
+        self.cutting_tool.cut_z.button.observe(self._check_visibility, names="value")
+        self.children.insert(0, self.modules_widget)
+
+    def _check_visibility(self, _):
+        # Note that this brute force method of looping over all artists is not optimal
+        # but it is non-invasive in the sense that it does not require changes to the
+        # plopp code. If performance becomes an issue, we will consider a different
+        # approach.
+        for name, ch in self.checkboxes.items():
+            key = self.mapping[name]
+            val = ch.value
+            self.fig.artists[key].points.visible = val
+            for c in "xyz":
+                cut_nodes = getattr(self.cutting_tool, f'cut_{c}').select_nodes
+                if key in cut_nodes:
+                    self.fig.artists[cut_nodes[key].id].points.visible = val
+
+
+def instrument_view(data, dim=None, pixel_size=None, **kwargs):
     """
-    The 3D scatter visualization requires a flattened one-dimensional data array.
-    This function flattens the data array along the dimensions that are known to be
-    detector dimensions.
-    Because flattening can only happen for contiguous dimensions, the data array is
-    transposed to the correct dimension order before flattening.
-
-    Parameters
-    ----------
-    data:
-        Data to be flattened.
-    to_be_flattened:
-        List of dimensions to be flattened.
-    dim:
-        Dimension to be used for the slider (this will not be flattened)
-    to:
-        Name of the new dimension to which the data will be flattened.
-    """
-    if not to_be_flattened:
-        # Need to return a copy here because `flatten` makes a copy below.
-        return data.copy(deep=False)
-    transpose = list(data.dims)
-    if dim is not None:
-        # Move slider dim to the end of the list to allow flattening of the other dims
-        transpose.remove(dim)
-        transpose.append(dim)
-    return data.transpose(dims=transpose).flatten(dims=to_be_flattened, to=to)
-
-
-def instrument_view(
-    data: Union[sc.DataArray, sc.DataGroup],
-    x: Optional[str] = None,
-    y: Optional[str] = None,
-    z: Optional[str] = None,
-    pos: Optional[str] = None,
-    dim: Optional[str] = None,
-    pixel_size: Union[sc.Variable, float] = DREAM_PIXEL_SIZE,
-    **kwargs,
-):
-    """
-    Three-dimensional visualization of the DREAM instrument pixels.
-    By default, the data counts will be integrated for all tofs/wavelengths.
-    It is possible to add a tof/wavelength slider by specifying the ``dim`` and ``bins``
-    arguments (see parameters below).
+    Three-dimensional visualization of the DREAM instrument.
 
     Parameters
     ----------
     data:
         Data to visualize.
-    x:
-        The name of the coordinate that is to be used for the X positions.
-        Default is 'x'.
-    y:
-        The name of the coordinate that is to be used for the Y positions.
-        Default is 'y'.
-    z:
-        The name of the coordinate that is to be used for the Z positions.
-        Default is 'z'.
-    pos:
-        The name of the vector coordinate that is to be used for the positions.
     dim:
-        Dimension to use for the slider.
+        Dimension to use for the slider. No slider will be shown if this is None.
     pixel_size:
-        Size of the pixels. If a float is provided, it will assume the same unit as the
-        pixel coordinates.
+        Size of the pixels.
     **kwargs:
-        Additional arguments to pass to the plopp figure
-        (see https://scipp.github.io/plopp/about/generated/plopp.scatter3d.html).
+        Additional arguments are forwarded to the scatter3d figure
+        (see https://scipp.github.io/plopp/reference/generated/plopp.scatter3d.html).
     """
-    import plopp.widgets as pw
-    from plopp.graphics import figure3d
+    from plopp.widgets import Box
 
-    dims = [d for d in data.dims if (d in DREAM_DETECTOR_DIMENSIONS) and (d != dim)]
-    to = 'pixel'
-    if not isinstance(data, sc.DataArray):
-        data = sc.concat(
-            [
-                _preprocess_data(data=da, to_be_flattened=dims, dim=dim, to=to)
-                for da in data.values()
-            ],
-            dim=to,
-        )
-    else:
-        data = _preprocess_data(data=data, to_be_flattened=dims, dim=dim, to=to)
-
-    if pos is not None:
-        if any((x, y, z)):
-            raise ValueError(
-                f'If pos ({pos}) is defined, all of '
-                f'x ({x}), y ({y}), and z ({z}) must be None.'
-            )
-        coords = {
-            (x := f'{pos}.x'): data.coords[pos].fields.x,
-            (y := f'{pos}.y'): data.coords[pos].fields.y,
-            (z := f'{pos}.z'): data.coords[pos].fields.z,
-        }
-    else:
-        x = x if x is not None else 'x'
-        y = y if y is not None else 'y'
-        z = z if z is not None else 'z'
-        coords = {k: data.coords[k] for k in (x, y, z)}
-
-    # No need to make a copy here because one was made higher up with `preprocess_data`.
-    data.coords.update(coords)
-
-    if dim is not None:
-        slider_widget = pw.SliceWidget(data, dims=[dim])
-        slider_widget.controls[dim]['slider'].layout = {"width": "400px"}
-        slider_node = pp.widget_node(slider_widget)
-        nodes = [pw.slice_dims(data_array=data, slices=slider_node)]
-    else:
-        nodes = [pp.Node(data)]
-
-    fig = figure3d(*nodes, x=x, y=y, z=z, pixel_size=pixel_size, **kwargs)
-    tri_cutter = pw.TriCutTool(fig)
-    fig.toolbar['cut3d'] = pw.ToggleTool(
-        callback=tri_cutter.toggle_visibility,
-        icon='cube',
-        tooltip='Hide/show spatial cutting tool',
-    )
-    out = [fig, tri_cutter]
-    if dim is not None:
-        out.append(slider_widget)
-    return pw.Box(out)
+    view = InstrumentView(data, dim=dim, pixel_size=pixel_size, **kwargs)
+    return Box(view.children)
