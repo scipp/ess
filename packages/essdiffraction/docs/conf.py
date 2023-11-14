@@ -136,7 +136,7 @@ html_theme_options = {
         {"name": "Scipp", "url": "https://scipp.github.io"},
         {"name": "ScippNeutron", "url": "https://scipp.github.io/scippneutron"},
         {"name": "ScippNexus", "url": "https://scipp.github.io/scippnexus"},
-        ],
+    ],
     "icon_links": [
         {
             "name": "GitHub",
