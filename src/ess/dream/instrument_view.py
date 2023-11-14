@@ -82,7 +82,7 @@ class InstrumentView:
 
         self.fig = self.scatter[0]
         self.cutting_tool = self.scatter[1]
-        self.mapping = {
+        self.artist_mapping = {
             name: key for name, key in zip(self.data.keys(), self.fig.artists.keys())
         }
         self.checkboxes = {
@@ -113,7 +113,7 @@ class InstrumentView:
         # plopp code. If performance becomes an issue, we will consider a different
         # approach.
         for name, ch in self.checkboxes.items():
-            key = self.mapping[name]
+            key = self.artist_mapping[name]
             val = ch.value
             self.fig.artists[key].points.visible = val
             for c in "xyz":
