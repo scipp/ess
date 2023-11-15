@@ -9,8 +9,6 @@ click==8.1.7
     # via dask
 cloudpickle==3.0.0
     # via dask
-confuse==2.0.1
-    # via scipp
 dask==2023.5.0
     # via -r base.in
 fsspec==2023.10.0
@@ -39,12 +37,10 @@ partd==1.4.1
 python-dateutil==2.8.2
     # via scippnexus
 pyyaml==6.0.1
-    # via
-    #   confuse
-    #   dask
+    # via dask
 sciline==23.9.1
     # via -r base.in
-scipp==23.8.0
+scipp==23.11.0
     # via
     #   -r base.in
     #   scippnexus
