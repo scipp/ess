@@ -40,18 +40,15 @@ def mantid_calibration_file() -> str:
 
 
 def sample_file() -> str:
-    print(get_path('PG3_4844_event.zip', unzip=True))
     (path,) = get_path('PG3_4844_event.zip', unzip=True)
     return path
 
 
 def vanadium_file() -> str:
-    print(get_path('PG3_4866_event.zip', unzip=True))
     (path,) = get_path('PG3_4866_event.zip', unzip=True)
     return path
 
 
 def calibration_file() -> str:
-    print(get_path('PG3_FERNS_d4832_2011_08_24.zip', unzip=True))
     (path,) = get_path('PG3_FERNS_d4832_2011_08_24.zip', unzip=True)
     return path
