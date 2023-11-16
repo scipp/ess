@@ -10,6 +10,7 @@ import scipp as sc
 
 from .common import gravity_vector
 from .types import (
+    DataNormalizedByIncidentMonitor,
     DetectorEdgeMask,
     DirectBeam,
     DirectBeamFilename,
@@ -64,7 +65,9 @@ def get_monitor(
     return RawMonitor[RunType, MonitorType](mon)
 
 
-def detector_edge_mask(raw: RawData[SampleRun]) -> DetectorEdgeMask:
+def detector_edge_mask(
+    raw: DataNormalizedByIncidentMonitor[SampleRun],
+) -> DetectorEdgeMask:
     sample = raw['data']
     mask_edges = (
         sc.abs(sample.coords['position'].fields.x) > sc.scalar(0.48, unit='m')
@@ -72,7 +75,9 @@ def detector_edge_mask(raw: RawData[SampleRun]) -> DetectorEdgeMask:
     return DetectorEdgeMask(mask_edges)
 
 
-def sample_holder_mask(raw: RawData[SampleRun]) -> SampleHolderMask:
+def sample_holder_mask(
+    raw: DataNormalizedByIncidentMonitor[SampleRun],
+) -> SampleHolderMask:
     sample = raw['data']
     summed = sample.sum('tof')
     holder_mask = (
@@ -86,7 +91,7 @@ def sample_holder_mask(raw: RawData[SampleRun]) -> SampleHolderMask:
 
 
 def mask_detectors(
-    dg: RawData[RunType],
+    dg: DataNormalizedByIncidentMonitor[RunType],
     edge_mask: Optional[DetectorEdgeMask],
     holder_mask: Optional[SampleHolderMask],
 ) -> MaskedData[RunType]:

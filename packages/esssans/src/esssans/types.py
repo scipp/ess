@@ -16,12 +16,31 @@ import scipp as sc
 # 1.1  Run types
 BackgroundRun = NewType('BackgroundRun', int)
 """Background run"""
+BackgroundTransmissionRun = NewType('BackgroundTransmissionRun', int)
+"""Background run with transmission monitor"""
 DirectRun = NewType('DirectRun', int)
 """Direct run"""
 SampleRun = NewType('SampleRun', int)
 """Sample run"""
-RunType = TypeVar('RunType', BackgroundRun, DirectRun, SampleRun)
-"""TypeVar used for specifying BackgroundRun, DirectRun or SampleRun"""
+SampleTransmissionRun = NewType('SampleTransmissionRun', int)
+"""Sample run with transmission monitor"""
+RunType = TypeVar(
+    'RunType',
+    BackgroundRun,
+    BackgroundTransmissionRun,
+    DirectRun,
+    SampleRun,
+    SampleTransmissionRun,
+)
+"""TypeVar used for specifying BackgroundRun, BackgroundTransmissionRun, DirectRun,
+SampleRun, or SampleTransmissionRun"""
+
+TransmissionRunType = TypeVar(
+    'TransmissionRunType',
+    BackgroundTransmissionRun,
+    SampleTransmissionRun,
+)
+"""TypeVar used for specifying BackgroundTransmissionRun or SampleTransmissionRun"""
 
 # 1.2  Monitor types
 Incident = NewType('Incident', int)
@@ -94,12 +113,11 @@ SampleHolderMask = NewType('SampleHolderMask', sc.Variable)
 DirectBeam = NewType('DirectBeam', sc.DataArray)
 """Direct beam"""
 
-TransmissionFraction = NewType('TransmissionFraction', sc.DataArray)
-"""
-Transmission fraction for inspection purposes.
 
-The IofQ computation does not use this, it uses the monitors directly.
-"""
+class TransmissionFraction(
+    sciline.Scope[TransmissionRunType, sc.DataArray], sc.DataArray
+):
+    """Transmission fraction"""
 
 
 CleanDirectBeam = NewType('CleanDirectBeam', sc.DataArray)
@@ -114,6 +132,12 @@ class RawData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Raw data"""
 
 
+class DataNormalizedByIncidentMonitor(
+    sciline.Scope[RunType, sc.DataArray], sc.DataArray
+):
+    """Data where raw counts have been normalized by the incident monitor counts"""
+
+
 class MaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Raw data with pixel-specific masks applied"""
 
@@ -122,7 +146,9 @@ class CalibratedMaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Raw data with pixel-specific masks applied and calibrated pixel positions"""
 
 
-class NormWavelengthTerm(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+class TransmissionFractionTimesDirectBeam(
+    sciline.Scope[TransmissionRunType, sc.DataArray], sc.DataArray
+):
     """Normalization term (numerator) for IofQ before scaling with solid-angle."""
 
 
