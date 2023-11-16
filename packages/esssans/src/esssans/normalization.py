@@ -129,10 +129,10 @@ _broadcasters = {
 
 
 def transmission_fraction_times_direct_beam(
-    transmission_fraction: TransmissionFraction,
+    transmission_fraction: TransmissionFraction[TransmissionRunType],
     direct_beam: Optional[CleanDirectBeam],
     uncertainties: UncertaintyBroadcastMode,
-) -> TransmissionFractionTimesDirectBeam[RunType]:
+) -> TransmissionFractionTimesDirectBeam[TransmissionRunType]:
     """
     Compute the wavelength-dependen contribution to the denominator term for the I(Q) normalization.
 
@@ -182,7 +182,7 @@ def transmission_fraction_times_direct_beam(
 
 def iofq_denominator(
     transmission_fraction_times_direct_beam: TransmissionFractionTimesDirectBeam[
-        RunType
+        TransmissionRunType
     ],
     solid_angle: SolidAngle[RunType],
     uncertainties: UncertaintyBroadcastMode,
