@@ -125,9 +125,31 @@ MonitorCoordTransformGraph = NewType('MonitorCoordTransformGraph', dict)
 def sans_elastic(gravity: Optional[CorrectForGravity]) -> ElasticCoordTransformGraph:
     """
     Generate a coordinate transformation graph for SANS elastic scattering.
-    By default, the effects of gravity on the neutron flight paths are not included.
 
-    :param gravity: Take into account the bending of the neutron flight paths from the
+    It is based on classical conversions from ``tof`` and pixel ``position`` to
+    $\lambda$ (``wavelength``), $\theta$ (``theta``) and $Q$ (``Q``),
+    but can take into account the Earth's gravitational field, which bends the flight
+    path of the neutrons, to compute the scattering angle $\theta$.
+
+    The angle can be found using the following expression
+    (Seeger & Hjelm 1991,  J. Appl. Cryst., 24, 467-478):
+
+    $$\theta = \frac{1}{2}\sin^{-1}\left(\frac{\sqrt{ x^{2} + \left( y + \frac{g m_{\rm n}}{2 h^{2}} \lambda^{2} L_{2}^{2} \right)^{2} } }{L_{2}}\right)$$
+
+    where $x$ and $y$ are the spatial coordinates of the pixels in the horizontal and
+    vertical directions, respectively,
+    $m_{\rm n}$ is the neutron mass,
+    $L_{2}$ is the distance between the sample and a detector pixel,
+    $g$ is the acceleration due to gravity,
+    and $h$ is Planck's constant.
+
+    By default, the effects of gravity on the neutron flight paths are not included
+    (equivalent to $g=0$ in the expression above).
+
+    Parameters
+    ----------
+    gravity:
+        Take into account the bending of the neutron flight paths from the
         Earth's gravitational field if ``True``.
     """
     graph = {**beamline.beamline(scatter=True), **tof.elastic_Q('tof')}
