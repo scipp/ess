@@ -23,7 +23,7 @@ def slice_range(da, trunc_range):
 
 
 @pp.node
-def post_process(da, dim):
+def pre_process(da, dim):
     dims = list(da.dims)
     if dim is not None:
         dims.remove(dim)
@@ -34,37 +34,28 @@ def post_process(da, dim):
 
 class InstrumentView:
     def __init__(self, data, dim=None, pixel_size=None, **kwargs):
-        import ipywidgets as ipw
+        from plopp.widgets import SliceWidget, slice_dims
 
         self.data = _to_data_group(data)
-
-        self.post_process_nodes = {
-            key: post_process(da, dim) for key, da in self.data.items()
+        self.pre_process_nodes = {
+            key: pre_process(da, dim) for key, da in self.data.items()
         }
 
         self.children = []
 
         if dim is not None:
-            # Once https://github.com/scipp/plopp/issues/277 is resolved, we can
-            # use Plopp's range slicer so that the value of the coordinates are
-            # displayed next to the slider, instead of the raw indices.
-            self.slider = ipw.IntRangeSlider(
-                value=[0, self.data.sizes[dim] - 1],
-                max=self.data.sizes[dim] - 1,
-                description=dim,
-                layout={'width': '700px'},
-                continuous_update=False,
-            )
+            self.slider = SliceWidget(next(iter(self.data.values())), dims=[dim])
+            self.slider.controls[dim]['slider'].layout = {'width': '600px'}
             self.slider_node = pp.widget_node(self.slider)
             self.slice_nodes = {
-                key: slice_range(n, trunc_range=self.slider_node)
-                for key, n in self.post_process_nodes.items()
+                key: slice_dims(n, self.slider_node)
+                for key, n in self.pre_process_nodes.items()
             }
             to_scatter = self.slice_nodes
             self.children.append(self.slider)
         else:
-            self.slice_nodes = self.post_process_nodes
-            to_scatter = self.post_process_nodes
+            self.slice_nodes = self.pre_process_nodes
+            to_scatter = self.pre_process_nodes
 
         self.scatter = pp.scatter3d(
             to_scatter,
