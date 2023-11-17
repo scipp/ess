@@ -18,7 +18,8 @@ from .conversions import (
 from .i_of_q import merge_spectra
 from .logging import get_logger
 from .normalization import (
-    iofq_denominator,
+    iofq_denominator_background,
+    iofq_denominator_sample,
     normalize,
     solid_angle_rectangular_approximation,
 )
@@ -160,7 +161,8 @@ def _iofq_in_quadrants(
         to_Q,
         merge_spectra,
         normalize,
-        iofq_denominator,
+        iofq_denominator_background,
+        iofq_denominator_sample,
         mask_wavelength,
         detector_to_wavelength,
         calibrate_positions,

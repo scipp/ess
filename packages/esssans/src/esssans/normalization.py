@@ -8,6 +8,8 @@ import scippneutron as scn
 from scipp.core import concepts
 
 from .types import (
+    BackgroundRun,
+    BackgroundTransmissionRun,
     CalibratedMaskedData,
     Clean,
     CleanDirectBeam,
@@ -22,6 +24,7 @@ from .types import (
     RawData,
     RawMonitor,
     RunType,
+    SampleRun,
     SampleTransmissionRun,
     SolidAngle,
     Transmission,
@@ -118,7 +121,7 @@ def transmission_fraction(
     frac = (sample_transmission_monitor / direct_transmission_monitor) * (
         direct_incident_monitor / sample_incident_monitor
     )
-    return TransmissionFraction(frac)
+    return TransmissionFraction[TransmissionRunType](frac)
 
 
 _broadcasters = {
@@ -177,16 +180,14 @@ def transmission_fraction_times_direct_beam(
     # Convert wavelength coordinate to midpoints for future histogramming
     # if wavelength_to_midpoints:
     out.coords['wavelength'] = sc.midpoints(out.coords['wavelength'])
-    return TransmissionFractionTimesDirectBeam[RunType](out)
+    return TransmissionFractionTimesDirectBeam[TransmissionRunType](out)
 
 
-def iofq_denominator(
-    transmission_fraction_times_direct_beam: TransmissionFractionTimesDirectBeam[
-        TransmissionRunType
-    ],
-    solid_angle: SolidAngle[RunType],
+def _iofq_denominator(
+    transmission_fraction_times_direct_beam: sc.DataArray,
+    solid_angle: sc.DataArray,
     uncertainties: UncertaintyBroadcastMode,
-) -> Clean[RunType, Denominator]:
+) -> sc.DataArray:
     """
     Compute the denominator term for the I(Q) normalization.
 
@@ -222,7 +223,41 @@ def iofq_denominator(
     denominator = solid_angle * broadcast(
         transmission_fraction_times_direct_beam, sizes=solid_angle.sizes
     )
-    return Clean[RunType, Denominator](denominator)
+    return denominator
+
+
+def iofq_denominator_sample(
+    transmission_fraction_times_direct_beam: TransmissionFractionTimesDirectBeam[
+        SampleTransmissionRun
+    ],
+    solid_angle: SolidAngle[SampleRun],
+    uncertainties: UncertaintyBroadcastMode,
+) -> Clean[SampleRun, Denominator]:
+    """
+    Compute the denominator term for the I(Q) normalization for the sample run.
+    """
+    return Clean[SampleRun, Denominator](
+        _iofq_denominator(
+            transmission_fraction_times_direct_beam, solid_angle, uncertainties
+        )
+    )
+
+
+def iofq_denominator_background(
+    transmission_fraction_times_direct_beam: TransmissionFractionTimesDirectBeam[
+        BackgroundTransmissionRun
+    ],
+    solid_angle: SolidAngle[BackgroundRun],
+    uncertainties: UncertaintyBroadcastMode,
+) -> Clean[BackgroundRun, Denominator]:
+    """
+    Compute the denominator term for the I(Q) normalization for the background run.
+    """
+    return Clean[BackgroundRun, Denominator](
+        _iofq_denominator(
+            transmission_fraction_times_direct_beam, solid_angle, uncertainties
+        )
+    )
 
 
 def normalize(
@@ -262,7 +297,9 @@ def normalize(
 providers = [
     transmission_fraction,
     transmission_fraction_times_direct_beam,
-    iofq_denominator,
+    # iofq_denominator,
+    iofq_denominator_sample,
+    iofq_denominator_background,
     normalize,
     normalize_by_incident_monitor,
     solid_angle_rectangular_approximation,

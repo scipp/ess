@@ -15,6 +15,7 @@ from .types import (
     DirectBeam,
     DirectBeamFilename,
     Filename,
+    LoadedFileContents,
     MaskedData,
     MonitorType,
     NeXusMonitorName,
@@ -26,7 +27,7 @@ from .types import (
 )
 
 
-def pooch_load(filename: Filename[RunType]) -> RawData[RunType]:
+def pooch_load(filename: Filename[RunType]) -> LoadedFileContents[RunType]:
     from .data import get_path
 
     dg = sc.io.load_hdf5(filename=get_path(filename))
@@ -48,7 +49,7 @@ def pooch_load(filename: Filename[RunType]) -> RawData[RunType]:
     dg['monitors']['monitor4']['data'].coords[
         'position'
     ].fields.z += monitor4_pos_z_offset
-    return RawData[RunType](dg)
+    return LoadedFileContents[RunType](dg)
 
 
 def pooch_load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
@@ -57,8 +58,14 @@ def pooch_load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
     return DirectBeam(sc.io.load_hdf5(filename=get_path(filename)))
 
 
+def get_detector_data(
+    dg: LoadedFileContents[RunType],
+) -> RawData[RunType]:
+    return RawData[RunType](dg['data'])
+
+
 def get_monitor(
-    dg: RawData[RunType], nexus_name: NeXusMonitorName[MonitorType]
+    dg: LoadedFileContents[RunType], nexus_name: NeXusMonitorName[MonitorType]
 ) -> RawMonitor[RunType, MonitorType]:
     # See https://github.com/scipp/sciline/issues/52 why copy needed
     mon = dg['monitors'][nexus_name]['data'].copy()
@@ -66,9 +73,9 @@ def get_monitor(
 
 
 def detector_edge_mask(
-    raw: DataNormalizedByIncidentMonitor[SampleRun],
+    sample: DataNormalizedByIncidentMonitor[SampleRun],
 ) -> DetectorEdgeMask:
-    sample = raw['data']
+    # sample = raw['data']
     mask_edges = (
         sc.abs(sample.coords['position'].fields.x) > sc.scalar(0.48, unit='m')
     ) | (sc.abs(sample.coords['position'].fields.y) > sc.scalar(0.45, unit='m'))
@@ -76,12 +83,13 @@ def detector_edge_mask(
 
 
 def sample_holder_mask(
-    raw: DataNormalizedByIncidentMonitor[SampleRun],
+    sample: DataNormalizedByIncidentMonitor[SampleRun],
 ) -> SampleHolderMask:
-    sample = raw['data']
+    # sample = raw['data']
     summed = sample.sum('tof')
     holder_mask = (
-        (summed.data < sc.scalar(100, unit='counts'))
+        # (summed.data < sc.scalar(100, unit='counts'))
+        (summed.data < sc.scalar(4.4e-06))
         & (sample.coords['position'].fields.x > sc.scalar(0, unit='m'))
         & (sample.coords['position'].fields.x < sc.scalar(0.42, unit='m'))
         & (sample.coords['position'].fields.y < sc.scalar(0.05, unit='m'))
@@ -91,7 +99,7 @@ def sample_holder_mask(
 
 
 def mask_detectors(
-    dg: DataNormalizedByIncidentMonitor[RunType],
+    da: DataNormalizedByIncidentMonitor[RunType],
     edge_mask: Optional[DetectorEdgeMask],
     holder_mask: Optional[SampleHolderMask],
 ) -> MaskedData[RunType]:
@@ -106,7 +114,7 @@ def mask_detectors(
     holder_mask:
         Mask for sample holder.
     """
-    da = dg['data'].copy(deep=False)
+    da = da.copy(deep=False)
     if edge_mask is not None:
         da.masks['edges'] = edge_mask
     if holder_mask is not None:
@@ -117,6 +125,7 @@ def mask_detectors(
 providers = [
     pooch_load_direct_beam,
     pooch_load,
+    get_detector_data,
     get_monitor,
     detector_edge_mask,
     sample_holder_mask,

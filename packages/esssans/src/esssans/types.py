@@ -128,6 +128,10 @@ class SolidAngle(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Solid angle of detector pixels seen from sample position"""
 
 
+class LoadedFileContents(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+    """The entire contents of the loaded filed"""
+
+
 class RawData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Raw data"""
 
