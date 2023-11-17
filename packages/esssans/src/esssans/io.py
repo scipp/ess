@@ -17,7 +17,8 @@ def save_background_subtracted_iofq(
 ) -> None:
     """Save background subtracted IofQ as an NXcanSAS file."""
     da = iofq.copy(deep=False)
-    da.coords['Q'] = sc.midpoints(da.coords['Q'])
+    if da.coords.is_edges('Q'):
+        da.coords['Q'] = sc.midpoints(da.coords['Q'])
     with snx.File(out_filename, 'w') as f:
         f['sasentry'] = nxcansas.SASentry(title=run_title, run=run_number)
         f['sasentry']['sasdata'] = nxcansas.SASdata(da, Q_variances='resolutions')
