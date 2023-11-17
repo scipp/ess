@@ -11,7 +11,13 @@ except importlib.metadata.PackageNotFoundError:
 
 from . import beam_center_finder, common, conversions, i_of_q, io, normalization, sans2d
 
-providers = conversions.providers + i_of_q.providers + normalization.providers
+providers = (
+    *conversions.providers,
+    *i_of_q.providers,
+    *normalization.providers,
+    # Default to fast but potentially inaccurate beam center finder
+    beam_center_finder.beam_center_from_center_of_mass,
+)
 """
 List of providers for setting up a Sciline pipeline.
 
@@ -20,7 +26,5 @@ center-of-mass approach. Providers for loadings files are not included. Combine 
 the providers for a specific instrument, such as :py:data:`esssans.sans2d.providers`
 to setup a complete workflow.
 """
-# Default to fast but potentially inaccurate beam center finder
-providers.append(beam_center_finder.beam_center_from_center_of_mass)
 
 del importlib

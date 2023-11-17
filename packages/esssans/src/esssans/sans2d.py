@@ -109,14 +109,14 @@ def mask_detectors(
     return MaskedData[RunType](da)
 
 
-providers = [
+providers = (
     pooch_load_direct_beam,
     pooch_load,
     get_monitor,
     detector_edge_mask,
     sample_holder_mask,
     mask_detectors,
-]
+)
 """
 Providers for loading and masking Sans2d data.
 
