@@ -9,12 +9,22 @@ try:
 except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
-from . import beam_center_finder, common, conversions, i_of_q, io, normalization, sans2d
+from . import (
+    beam_center_finder,
+    common,
+    conversions,
+    i_of_q,
+    io,
+    metadata,
+    normalization,
+    sans2d,
+)
 
 providers = (
     *conversions.providers,
     *i_of_q.providers,
     *normalization.providers,
+    *metadata.providers,
     # Default to fast but potentially inaccurate beam center finder
     beam_center_finder.beam_center_from_center_of_mass,
 )

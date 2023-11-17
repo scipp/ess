@@ -179,3 +179,12 @@ class CleanMonitor(
     sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
 ):
     """Monitor data cleaned of background counts"""
+
+
+# 4  Metadata
+
+RunTitle = NewType('RunTitle', str)
+"""Title of the run."""
+
+RunNumber = NewType('RunNumber', int)
+"""Run number."""
