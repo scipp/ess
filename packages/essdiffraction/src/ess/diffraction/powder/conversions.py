@@ -73,9 +73,7 @@ def _restore_tof_if_in_wavelength(data: sc.DataArray) -> sc.DataArray:
     if 'wavelength' not in data.dims:
         return data
 
-    get_logger().info(
-        "Discarding coordinate 'wavelength' in favor of 'tof'."
-    )
+    get_logger().info("Discarding coordinate 'wavelength' in favor of 'tof'.")
     temp_name = uuid.uuid4().hex
     aux = data.transform_coords(
         temp_name,

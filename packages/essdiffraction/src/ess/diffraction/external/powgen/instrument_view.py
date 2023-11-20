@@ -11,7 +11,7 @@ def instrument_view(
     positions: str = "position",
     pixel_size: Optional[float] = None,
     components: Optional[dict] = None,
-    **kwargs
+    **kwargs,
 ):
     """
     Instrument view for the POWGEN instrument, with adjusted default arguments.
