@@ -19,9 +19,9 @@ from .types import (
     NeXusMonitorName,
     RawData,
     RawMonitor,
-RunNumber,
+    RunNumber,
+    RunTitle,
     RunType,
-RunTitle,
     SampleHolderMask,
     SampleRun,
 )
