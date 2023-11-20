@@ -175,7 +175,6 @@ def _iofq_in_quadrants(
     for i, quad in enumerate(quadrants):
         # Select pixels based on phi
         sel = (phi >= phi_bins[i]) & (phi < phi_bins[i + 1])
-        # TODO: we need detector data normalized by monitor counts here
         params[MaskedData[SampleRun]] = data[sel]
         params[NormWavelengthTerm[SampleRun]] = (
             norm if norm.dims == ('wavelength',) else norm[sel]
