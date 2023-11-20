@@ -76,7 +76,7 @@ def transmission_fraction(
 ) -> TransmissionFraction[TransmissionRunType]:
     """
     Approximation based on equations in
-    [CalculateTransmission](https://docs.mantidproject.org/v4.0.0/algorithms/CalculateTransmission-v1.html)
+    `CalculateTransmission <https://docs.mantidproject.org/v4.0.0/algorithms/CalculateTransmission-v1.html>`_
     documentation:
     ``(sample_transmission_monitor / direct_transmission_monitor) * (direct_incident_monitor / sample_incident_monitor)``
 
@@ -212,37 +212,42 @@ def iofq_denominator(
     """
     Compute the denominator term for the I(Q) normalization.
 
-    In a SANS experiment, the scattering cross section $I(Q)$ is defined as
-    (Heenan et al. 1997, J. Appl. Cryst., 30, 1140-1147):
+    In a SANS experiment, the scattering cross section :math:`I(Q)` is defined as
+    (`Heenan et al. 1997 <https://doi.org/10.1107/S0021889897002173>`_):
 
-    $$ I(Q) = \frac{\partial\Sigma{Q}}{\partial\Omega} = \frac{A_{H} \Sigma_{R,\lambda\subset Q} C(R, \lambda)}{A_{M} t \Sigma_{R,\lambda\subset Q}M(\lambda)T(\lambda)D(\lambda)\Omega(R)} $$
+    .. math::
 
-    where $A_{H}$ is the area of a mask (which avoids saturating the detector) placed
-    between the monitor of area $A_{M}$ and the main detector.
-    $\Omega$ is the detector solid angle, and $C$ is the count rate on the main
-    detector, which depends on the position $R$ and the wavelength.
-    $t$ is the sample thickness, $M$ represents the incident monitor count rate for the
-    sample run, and $T$ is known as the transmission fraction.
+       I(Q) = \\frac{\\partial\\Sigma{Q}}{\\partial\\Omega} = \\frac{A_{H} \\Sigma_{R,\\lambda\\subset Q} C(R, \\lambda)}{A_{M} t \\Sigma_{R,\\lambda\\subset Q}M(\\lambda)T(\\lambda)D(\\lambda)\\Omega(R)}
+
+    where :math:`A_{H}` is the area of a mask (which avoids saturating the detector)
+    placed between the monitor of area :math:`A_{M}` and the main detector.
+    :math:`\\Omega` is the detector solid angle, and :math:`C` is the count rate on the
+    main detector, which depends on the position :math:`R` and the wavelength.
+    :math:`t` is the sample thickness, :math:`M` represents the incident monitor count
+    rate for the sample run, and :math:`T` is known as the transmission fraction.
 
     Note that the incident monitor used to compute the transmission fraction is not
-    necessarily the same as $M$, as the transmission fraction is usually computed from
-    a separate 'transmission' run (in the 'sample' run, the transmission monitor is
+    necessarily the same as :math:`M`, as the transmission fraction is usually computed
+    from a separate 'transmission' run (in the 'sample' run, the transmission monitor is
     commonly moved out of the beam path, to avoid polluting the sample detector signal).
 
-    Finally, $D$ is the 'direct beam function', and is defined as
+    Finally, :math:`D` is the 'direct beam function', and is defined as
 
-    $$ D(\lambda) = \frac{\eta(\lambda)}{\eta_{M}(\lambda)} \frac{A_{H}}{A_{M}} $$
+    .. math::
 
-    where $\eta$ and $\eta_{M}$ are the detector and monitor efficiencies, respectively.
+       D(\\lambda) = \\frac{\\eta(\\lambda)}{\\eta_{M}(\\lambda)} \\frac{A_{H}}{A_{M}}
 
-    Hence, in order to normalize the main detector counts $C$, we need compute the
-    transmission fraction $T(\lambda)$, the direct beam function $D(\lambda)$ and the
-    solid angle $\Omega(R)$.
+    where :math:`\\eta` and :math:`\\eta_{M}` are the detector and monitor
+    efficiencies, respectively.
 
-    This denominator is then simply:
-    $M_{\lambda} T_{\lambda} D_{\lambda} * \Omega_{R}$,
+    Hence, in order to normalize the main detector counts :math:`C`, we need compute the
+    transmission fraction :math:`T(\\lambda)`, the direct beam function
+    :math:`D(\\lambda)` and the solid angle :math:`\\Omega(R)`.
+
+    The denominator is then simply:
+    :math:`M_{\\lambda} T_{\\lambda} D_{\\lambda} \\Omega_{R}`,
     which is equivalent to ``wavelength_term * solid_angle``.
-    The `wavelength_term` includes all but the `solid_angle` and is computed by
+    The ``wavelength_term`` includes all but the ``solid_angle`` and is computed by
     :py:func:`iofq_norm_wavelength_term_sample` or
     :py:func:`iofq_norm_wavelength_term_background`.
 
@@ -266,7 +271,7 @@ def iofq_denominator(
     -------
     :
         The denominator for the SANS I(Q) normalization.
-    """  # noqa: E501, W605
+    """  # noqa: E501
     broadcast = _broadcasters[uncertainties]
     denominator = solid_angle * broadcast(wavelength_term, sizes=solid_angle.sizes)
     return Clean[RunType, Denominator](denominator)
