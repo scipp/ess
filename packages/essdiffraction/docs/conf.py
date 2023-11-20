@@ -4,12 +4,12 @@ import doctest
 import os
 import sys
 
-import essdiffraction
+from ess import diffraction
 
 sys.path.insert(0, os.path.abspath('.'))
 
 # General information about the project.
-project = u'EssDiffraction'
+project = u'ESSDiffraction'
 copyright = u'2023 Scipp contributors'
 author = u'Scipp contributors'
 
@@ -91,9 +91,9 @@ master_doc = 'index'
 #
 
 # The short X.Y version.
-version = essdiffraction.__version__
+version = diffraction.__version__
 # The full version, including alpha/beta/rc tags.
-release = essdiffraction.__version__
+release = diffraction.__version__
 
 warning_is_error = True
 
@@ -168,7 +168,7 @@ html_sidebars = {
     "**": ["sidebar-nav-bs", "page-toc"],
 }
 
-html_title = "EssDiffraction"
+html_title = "ESSDiffraction"
 html_logo = "_static/logo.svg"
 html_favicon = "_static/favicon.svg"
 

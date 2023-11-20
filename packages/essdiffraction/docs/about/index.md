@@ -2,19 +2,19 @@
 
 ## Development
 
-EssDiffraction is an open source project by the [European Spallation Source ERIC](https://europeanspallationsource.se/) (ESS).
+ESSDiffraction is an open source project by the [European Spallation Source ERIC](https://europeanspallationsource.se/) (ESS).
 
 ## License
 
-EssDiffraction is available as open source under the [BSD-3 license](https://opensource.org/licenses/BSD-3-Clause).
+ESSDiffraction is available as open source under the [BSD-3 license](https://opensource.org/licenses/BSD-3-Clause).
 
-## Citing EssDiffraction
+## Citing ESSDiffraction
 
 Please cite the following:
 
 [![DOI](https://zenodo.org/badge/FIXME.svg)](https://zenodo.org/doi/10.5281/zenodo.FIXME)
 
-To cite a specific version of EssDiffraction, select the desired version on Zenodo to get the corresponding DOI.
+To cite a specific version of ESSDiffraction, select the desired version on Zenodo to get the corresponding DOI.
 
 ## Older versions of the documentation
 
@@ -23,4 +23,4 @@ Simply download the archive, unzip and view locally in a web browser.
 
 ## Source code and development
 
-EssDiffraction is hosted and developed [on GitHub](https://github.com/scipp/essdiffraction).
+ESSDiffraction is hosted and developed [on GitHub](https://github.com/scipp/essdiffraction).
