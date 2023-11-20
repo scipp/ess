@@ -75,6 +75,9 @@ WavelengthMask = NewType('WavelengthMask', sc.DataArray)
 CorrectForGravity = NewType('CorrectForGravity', bool)
 """Whether to correct for gravity when computing wavelength and Q."""
 
+OutFilename = NewType('OutFilename', str)
+"""Filename of the output"""
+
 
 class NeXusMonitorName(sciline.Scope[MonitorType, str], str):
     """Name of Incident|Transmission monitor in NeXus file"""
@@ -176,3 +179,12 @@ class CleanMonitor(
     sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
 ):
     """Monitor data cleaned of background counts"""
+
+
+# 4  Metadata
+
+RunTitle = NewType('RunTitle', str)
+"""Title of the run."""
+
+RunNumber = NewType('RunNumber', int)
+"""Run number."""

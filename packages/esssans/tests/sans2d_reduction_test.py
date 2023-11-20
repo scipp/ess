@@ -66,7 +66,7 @@ def make_params() -> dict:
 
 
 def sans2d_providers():
-    return sans.providers + sans.sans2d.providers
+    return list(sans.providers + sans.sans2d.providers)
 
 
 def test_can_create_pipeline():
@@ -230,7 +230,7 @@ def test_beam_center_finder_works_with_pixel_dependent_direct_beam():
     del params[DirectBeamFilename]
     params[DirectBeam] = direct_beam
     # Hack to remove direct-beam provider, until Sciline API improved
-    providers = sans.providers + sans.sans2d.providers[1:]
+    providers = list(sans.providers + sans.sans2d.providers[1:])
     providers.remove(sans.beam_center_finder.beam_center_from_center_of_mass)
     providers.append(sans.beam_center_finder.beam_center_from_iofq)
     pipeline = sciline.Pipeline(providers, params=params)
