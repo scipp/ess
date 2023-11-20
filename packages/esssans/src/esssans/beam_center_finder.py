@@ -18,8 +18,7 @@ from .conversions import (
 from .i_of_q import merge_spectra
 from .logging import get_logger
 from .normalization import (
-    iofq_denominator_background,
-    iofq_denominator_sample,
+    iofq_denominator,
     normalize,
     solid_angle_rectangular_approximation,
 )
@@ -27,11 +26,10 @@ from .types import (
     BeamCenter,
     IofQ,
     MaskedData,
-    # NormWavelengthTerm,
+    NormWavelengthTerm,
     QBins,
     SampleRun,
     SampleTransmissionRun,
-    TransmissionFractionTimesDirectBeam,
     UncertaintyBroadcastMode,
     WavelengthBands,
     WavelengthBins,
@@ -161,8 +159,7 @@ def _iofq_in_quadrants(
         to_Q,
         merge_spectra,
         normalize,
-        iofq_denominator_background,
-        iofq_denominator_sample,
+        iofq_denominator,
         mask_wavelength,
         detector_to_wavelength,
         calibrate_positions,
@@ -181,7 +178,7 @@ def _iofq_in_quadrants(
         sel = (phi >= phi_bins[i]) & (phi < phi_bins[i + 1])
         # TODO: we need detector data normalized by monitor counts here
         params[MaskedData[SampleRun]] = data[sel]
-        params[TransmissionFractionTimesDirectBeam[SampleTransmissionRun]] = (
+        params[NormWavelengthTerm[SampleRun]] = (
             norm if norm.dims == ('wavelength',) else norm[sel]
         )
         pipeline = sciline.Pipeline(providers, params=params)
@@ -269,7 +266,7 @@ def beam_center_from_iofq(
     data: MaskedData[SampleRun],
     graph: ElasticCoordTransformGraph,
     wavelength_bins: WavelengthBins,
-    norm: TransmissionFractionTimesDirectBeam[SampleTransmissionRun],
+    norm: NormWavelengthTerm[SampleRun],
     q_bins: BeamCenterFinderQBins,
     minimizer: Optional[BeamCenterFinderMinimizer],
     tolerance: Optional[BeamCenterFinderTolerance],

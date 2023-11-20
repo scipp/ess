@@ -75,7 +75,6 @@ def get_monitor(
 def detector_edge_mask(
     sample: RawData[SampleRun],
 ) -> DetectorEdgeMask:
-    # sample = raw['data']
     mask_edges = (
         sc.abs(sample.coords['position'].fields.x) > sc.scalar(0.48, unit='m')
     ) | (sc.abs(sample.coords['position'].fields.y) > sc.scalar(0.45, unit='m'))

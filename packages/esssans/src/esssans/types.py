@@ -149,9 +149,7 @@ class CalibratedMaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Raw data with pixel-specific masks applied and calibrated pixel positions"""
 
 
-class TransmissionFractionTimesDirectBeam(
-    sciline.Scope[TransmissionRunType, sc.DataArray], sc.DataArray
-):
+class NormWavelengthTerm(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Normalization term (numerator) for IofQ before scaling with solid-angle."""
 
 
