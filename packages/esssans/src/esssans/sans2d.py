@@ -21,6 +21,8 @@ from .types import (
     NeXusMonitorName,
     RawData,
     RawMonitor,
+    RunNumber,
+    RunTitle,
     RunType,
     SampleHolderMask,
     SampleRun,
@@ -120,7 +122,17 @@ def mask_detectors(
     return MaskedData[RunType](da)
 
 
-providers = [
+def run_number(dg: LoadedFileContents[SampleRun]) -> RunNumber:
+    """Get the run number from the raw sample data."""
+    return RunNumber(int(dg['run_number']))
+
+
+def run_title(dg: LoadedFileContents[SampleRun]) -> RunTitle:
+    """Get the run title from the raw sample data."""
+    return RunTitle(dg['run_title'].value)
+
+
+providers = (
     pooch_load_direct_beam,
     pooch_load,
     get_detector_data,
@@ -128,7 +140,9 @@ providers = [
     detector_edge_mask,
     sample_holder_mask,
     mask_detectors,
-]
+    run_number,
+    run_title,
+)
 """
 Providers for loading and masking Sans2d data.
 

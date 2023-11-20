@@ -228,7 +228,7 @@ def to_Q(
     return CleanQ[RunType, IofQPart](data.transform_coords('Q', graph=graph))
 
 
-providers = [
+providers = (
     sans_elastic,
     sans_monitor,
     calibrate_positions,
@@ -236,4 +236,4 @@ providers = [
     detector_to_wavelength,
     mask_wavelength,
     to_Q,
-]
+)

@@ -277,11 +277,11 @@ def normalize(
     return IofQ[RunType](da)
 
 
-providers = [
+providers = (
     transmission_fraction,
     iofq_norm_wavelength_term_sample,
     iofq_norm_wavelength_term_background,
     iofq_denominator,
     normalize,
     solid_angle_rectangular_approximation,
-]
+)

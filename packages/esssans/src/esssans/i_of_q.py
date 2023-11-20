@@ -219,9 +219,9 @@ def subtract_background(
     return BackgroundSubtractedIofQ(sample - background)
 
 
-providers = [
+providers = (
     preprocess_monitor_data,
     resample_direct_beam,
     merge_spectra,
     subtract_background,
-]
+)
