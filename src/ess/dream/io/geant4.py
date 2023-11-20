@@ -59,7 +59,7 @@ def _group(detectors: Dict[str, sc.DataArray]) -> Dict[str, sc.DataArray]:
     elements = ('module', 'segment', 'counter', 'wire', 'strip')
 
     def group(key: str, da: sc.DataArray) -> sc.DataArray:
-        if key == 'high_resolution':
+        if (key == 'high_resolution') and ('sector' in da.coords):
             # Only the HR detector has sectors.
             return da.group('sector', *elements)
         res = da.group(*elements)
