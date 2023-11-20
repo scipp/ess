@@ -3,7 +3,7 @@
 ## Classes
 
 ```{eval-rst}
-.. currentmodule:: essdiffraction
+.. currentmodule:: ess.diffraction
 
 .. autosummary::
    :toctree: ../generated/classes
