@@ -1,9 +1,9 @@
 # Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
-_commit: 27c01e2
+_commit: '8422361'
 _src_path: gh:scipp/copier_template
 description: Diffraction data reduction for the European Spallation Source
 max_python: '3.11'
-min_python: '3.8'
+min_python: '3.9'
 namespace_package: ess
 nightly_deps: scipp,scippnexus,sciline,plopp,scippneutron
 orgname: scipp
