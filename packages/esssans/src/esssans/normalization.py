@@ -15,14 +15,11 @@ from .types import (
     CleanDirectBeam,
     CleanMonitor,
     CleanSummedQ,
-    DataNormalizedByIncidentMonitor,
     Denominator,
     DirectRun,
     Incident,
     IofQ,
     Numerator,
-    RawData,
-    RawMonitor,
     RunType,
     SampleRun,
     SampleTransmissionRun,
@@ -37,24 +34,6 @@ from .uncertainty import (
     broadcast_with_upper_bound_variances,
     drop_variances_if_broadcast,
 )
-
-
-def normalize_by_incident_monitor(
-    data: RawData[RunType], incident_monitor: RawMonitor[RunType, Incident]
-) -> DataNormalizedByIncidentMonitor[RunType]:
-    """
-    Normalize data by incident monitor counts.
-
-    Parameters
-    ----------
-    data:
-        The data to be normalized.
-    incident_monitor:
-        The incident monitor data.
-    """
-    return DataNormalizedByIncidentMonitor[RunType](
-        data / sc.values(incident_monitor.data.sum())
-    )
 
 
 def solid_angle_rectangular_approximation(
@@ -143,20 +122,15 @@ def transmission_fraction_times_direct_beam(
     ``transmission_fraction * direct_beam``
     If the direct beam is not supplied, it is assumed to be 1.
 
-    Because the multiplication between the wavelength dependent terms (monitor counts)
-    and the pixel dependent term (solid angle) consists of a broadcast operation which
-    would introduce correlations, variances are dropped or replaced by an upper-bound
-    estimation, depending on the configured mode.
+    Because the multiplication between the transmission fraction (pixel-independent)
+    and the direct beam (potentially pixel-dependent) consists of a broadcast operation
+    which would introduce correlations, variances of the direct beam are dropped or
+    replaced by an upper-bound estimation, depending on the configured mode.
 
     Parameters
     ----------
-    data_transmission_monitor:
-        The transmission monitor counts from the measurement run (depends on
-        wavelength).
-    direct_incident_monitor:
-        The incident monitor counts from the direct run (depends on wavelength).
-    direct_transmission_monitor:
-        The transmission monitor counts from the direct run (depends on wavelength).
+    transmission_fraction:
+        The transmission fraction (depends on wavelength).
     direct_beam:
         The DataArray containing the direct beam function (depends on wavelength).
     uncertainties:
@@ -166,8 +140,10 @@ def transmission_fraction_times_direct_beam(
     Returns
     -------
     :
-        Wavelength-dependent term for the denominator of the SANS I(Q) normalization.
-        Used by :py:func:`iofq_denominator`.
+        Wavelength-dependent term transmission_fraction * direct_beam to be used for
+        the denominator of the SANS I(Q) normalization.
+        Used by :py:func:`iofq_denominator_sample` and
+        :py:func:`iofq_denominator_background`.
     """
     out = transmission_fraction
     # We need to remove the variances because the broadcasting operation between
@@ -176,14 +152,15 @@ def transmission_fraction_times_direct_beam(
     # variances of the other term already before multiplying by solid_angle.
     if direct_beam is not None:
         broadcast = _broadcasters[uncertainties]
+        # TODO: Do we need an additional check for the case where the direct beam
+        # could be bin centers and the transmission fraction is bin edges? In that case
+        # we would want to raise instead of broadcasting.
         out = direct_beam * broadcast(out, sizes=direct_beam.sizes)
-    # Convert wavelength coordinate to midpoints for future histogramming
-    # if wavelength_to_midpoints:
-    out.coords['wavelength'] = sc.midpoints(out.coords['wavelength'])
     return TransmissionFractionTimesDirectBeam[TransmissionRunType](out)
 
 
 def _iofq_denominator(
+    incident_monitor: sc.DataArray,
     transmission_fraction_times_direct_beam: sc.DataArray,
     solid_angle: sc.DataArray,
     uncertainties: UncertaintyBroadcastMode,
@@ -192,11 +169,11 @@ def _iofq_denominator(
     Compute the denominator term for the I(Q) normalization.
 
     This is basically:
-    ``solid_angle * direct_beam * transmission_fraction``
-    The `wavelength_term` included all but the `solid_angle` and is computed by
-    :py:func:`iofq_norm_wavelength_term`.
+    ``(incident_monitor * direct_beam * transmission_fraction) * solid_angle``
+    The `transmission_fraction_times_direct_beam` is computed by
+    :py:func:`transmission_fraction_times_direct_beam`.
 
-    Because the multiplication between the wavelength dependent terms (monitor counts)
+    Because the multiplication between the wavelength dependent terms
     and the pixel dependent term (solid angle) consists of a broadcast operation which
     would introduce correlations, variances are dropped or replaced by an upper-bound
     estimation, depending on the configured mode.
@@ -204,6 +181,8 @@ def _iofq_denominator(
 
     Parameters
     ----------
+    incident_monitor:
+        The incident monitor data (depends on wavelength).
     transmission_fraction_times_direct_beam:
         The wavelength-dependent term for the denominator of the SANS I(Q)
         normalization. This is the output of
@@ -220,13 +199,20 @@ def _iofq_denominator(
         The denominator for the SANS I(Q) normalization.
     """  # noqa: E501
     broadcast = _broadcasters[uncertainties]
+    wavelength_term = incident_monitor * transmission_fraction_times_direct_beam
+    # Convert wavelength coordinate to midpoints for future histogramming
+    wavelength_term.coords['wavelength'] = sc.midpoints(
+        wavelength_term.coords['wavelength']
+    )
     denominator = solid_angle * broadcast(
-        transmission_fraction_times_direct_beam, sizes=solid_angle.sizes
+        wavelength_term,
+        sizes=solid_angle.sizes,
     )
     return denominator
 
 
 def iofq_denominator_sample(
+    incident_monitor: CleanMonitor[SampleRun, Incident],
     transmission_fraction_times_direct_beam: TransmissionFractionTimesDirectBeam[
         SampleTransmissionRun
     ],
@@ -238,12 +224,16 @@ def iofq_denominator_sample(
     """
     return Clean[SampleRun, Denominator](
         _iofq_denominator(
-            transmission_fraction_times_direct_beam, solid_angle, uncertainties
+            incident_monitor,
+            transmission_fraction_times_direct_beam,
+            solid_angle,
+            uncertainties,
         )
     )
 
 
 def iofq_denominator_background(
+    incident_monitor: CleanMonitor[BackgroundRun, Incident],
     transmission_fraction_times_direct_beam: TransmissionFractionTimesDirectBeam[
         BackgroundTransmissionRun
     ],
@@ -255,7 +245,10 @@ def iofq_denominator_background(
     """
     return Clean[BackgroundRun, Denominator](
         _iofq_denominator(
-            transmission_fraction_times_direct_beam, solid_angle, uncertainties
+            incident_monitor,
+            transmission_fraction_times_direct_beam,
+            solid_angle,
+            uncertainties,
         )
     )
 
@@ -297,10 +290,8 @@ def normalize(
 providers = [
     transmission_fraction,
     transmission_fraction_times_direct_beam,
-    # iofq_denominator,
     iofq_denominator_sample,
     iofq_denominator_background,
     normalize,
-    normalize_by_incident_monitor,
     solid_angle_rectangular_approximation,
 ]

@@ -88,6 +88,11 @@ DirectBeamFilename = NewType('DirectBeamFilename', str)
 BeamCenter = NewType('BeamCenter', sc.Variable)
 """Beam center, may be set directly or computed using beam-center finder"""
 
+MaskingCountsThreshold = NewType('MaskingCountsThreshold', sc.Variable)
+"""Threshold below which detector pixels should be masked
+(low-counts on the edges of the detector panel, and the beam stop)"""
+
+
 WavelengthMask = NewType('WavelengthMask', sc.DataArray)
 """Optional wavelength mask"""
 
@@ -134,12 +139,6 @@ class LoadedFileContents(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
 
 class RawData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Raw data"""
-
-
-class DataNormalizedByIncidentMonitor(
-    sciline.Scope[RunType, sc.DataArray], sc.DataArray
-):
-    """Data where raw counts have been normalized by the incident monitor counts"""
 
 
 class MaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):

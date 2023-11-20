@@ -10,13 +10,13 @@ import scipp as sc
 
 from .common import gravity_vector
 from .types import (
-    DataNormalizedByIncidentMonitor,
     DetectorEdgeMask,
     DirectBeam,
     DirectBeamFilename,
     Filename,
     LoadedFileContents,
     MaskedData,
+    MaskingCountsThreshold,
     MonitorType,
     NeXusMonitorName,
     RawData,
@@ -73,7 +73,7 @@ def get_monitor(
 
 
 def detector_edge_mask(
-    sample: DataNormalizedByIncidentMonitor[SampleRun],
+    sample: RawData[SampleRun],
 ) -> DetectorEdgeMask:
     # sample = raw['data']
     mask_edges = (
@@ -83,13 +83,12 @@ def detector_edge_mask(
 
 
 def sample_holder_mask(
-    sample: DataNormalizedByIncidentMonitor[SampleRun],
+    sample: RawData[SampleRun],
+    low_counts_threshold: MaskingCountsThreshold,
 ) -> SampleHolderMask:
-    # sample = raw['data']
     summed = sample.sum('tof')
     holder_mask = (
-        # (summed.data < sc.scalar(100, unit='counts'))
-        (summed.data < sc.scalar(4.4e-06))
+        (summed.data < low_counts_threshold)
         & (sample.coords['position'].fields.x > sc.scalar(0, unit='m'))
         & (sample.coords['position'].fields.x < sc.scalar(0.42, unit='m'))
         & (sample.coords['position'].fields.y < sc.scalar(0.05, unit='m'))
@@ -99,7 +98,7 @@ def sample_holder_mask(
 
 
 def mask_detectors(
-    da: DataNormalizedByIncidentMonitor[RunType],
+    da: RawData[RunType],
     edge_mask: Optional[DetectorEdgeMask],
     holder_mask: Optional[SampleHolderMask],
 ) -> MaskedData[RunType]:
