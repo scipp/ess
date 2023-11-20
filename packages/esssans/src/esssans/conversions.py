@@ -151,7 +151,7 @@ def sans_elastic(gravity: Optional[CorrectForGravity]) -> ElasticCoordTransformG
     gravity:
         Take into account the bending of the neutron flight paths from the
         Earth's gravitational field if ``True``.
-    """  # noqa: E501
+    """  # noqa: E501, W605
     graph = {**beamline.beamline(scatter=True), **tof.elastic_Q('tof')}
     if gravity:
         graph['two_theta'] = two_theta

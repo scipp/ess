@@ -29,7 +29,6 @@ from .types import (
     NormWavelengthTerm,
     QBins,
     SampleRun,
-    SampleTransmissionRun,
     UncertaintyBroadcastMode,
     WavelengthBands,
     WavelengthBins,
