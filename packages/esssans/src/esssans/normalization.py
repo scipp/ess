@@ -78,19 +78,21 @@ def transmission_fraction(
     Approximation based on equations in
     [CalculateTransmission](https://docs.mantidproject.org/v4.0.0/algorithms/CalculateTransmission-v1.html)
     documentation:
-    ``(Sample_T_monitor / Direct_T_monitor) * (Direct_I_monitor / Sample_I_monitor)``
+    ``(sample_transmission_monitor / direct_transmission_monitor) * (direct_incident_monitor / sample_incident_monitor)``
 
     This is equivalent to ``mantid.CalculateTransmission`` without fitting.
     Inputs should be wavelength-dependent.
 
     Parameters
     ----------
-    data_monitors:
-        The data arrays for the incident and transmission monitors for the transmission
-        run (monitor data should depend on wavelength).
-    direct_monitors:
-        The data arrays for the incident and transmission monitors for the direct
-        run (monitor data should depend on wavelength).
+    sample_incident_monitor:
+        The incident monitor data for the sample (transmission) run.
+    sample_transmission_monitor:
+        The transmission monitor data for the sample (transmission) run.
+    direct_incident_monitor:
+        The incident monitor data for the direct beam run.
+    direct_transmission_monitor:
+        The transmission monitor data for the direct beam run.
 
     Returns
     -------
@@ -210,9 +212,37 @@ def iofq_denominator(
     """
     Compute the denominator term for the I(Q) normalization.
 
-    This is basically:
-    ``incident_monitor * direct_beam * transmission_fraction * solid_angle``
-    The `wavelength_term` included all but the `solid_angle` and is computed by
+    In a SANS experiment, the scattering cross section $I(Q)$ is defined as
+    (Heenan et al. 1997, J. Appl. Cryst., 30, 1140-1147):
+
+    $$ I(Q) = \frac{\partial\Sigma{Q}}{\partial\Omega} = \frac{A_{H} \Sigma_{R,\lambda\subset Q} C(R, \lambda)}{A_{M} t \Sigma_{R,\lambda\subset Q}M(\lambda)T(\lambda)D(\lambda)\Omega(R)} $$
+
+    where $A_{H}$ is the area of a mask (which avoids saturating the detector) placed
+    between the monitor of area $A_{M}$ and the main detector.
+    $\Omega$ is the detector solid angle, and $C$ is the count rate on the main
+    detector, which depends on the position $R$ and the wavelength.
+    $t$ is the sample thickness, $M$ represents the incident monitor count rate for the
+    sample run, and $T$ is known as the transmission fraction.
+
+    Note that the incident monitor used to compute the transmission fraction is not
+    necessarily the same as $M$, as the transmission fraction is usually computed from
+    a separate 'transmission' run (in the 'sample' run, the transmission monitor is
+    commonly moved out of the beam path, to avoid polluting the sample detector signal).
+
+    Finally, $D$ is the 'direct beam function', and is defined as
+
+    $$ D(\lambda) = \frac{\eta(\lambda)}{\eta_{M}(\lambda)} \frac{A_{H}}{A_{M}} $$
+
+    where $\eta$ and $\eta_{M}$ are the detector and monitor efficiencies, respectively.
+
+    Hence, in order to normalize the main detector counts $C$, we need compute the
+    transmission fraction $T(\lambda)$, the direct beam function $D(\lambda)$ and the
+    solid angle $\Omega(R)$.
+
+    This denominator is then simply:
+    $M_{\lambda} T_{\lambda} D_{\lambda} * \Omega_{R}$,
+    which is equivalent to ``wavelength_term * solid_angle``.
+    The `wavelength_term` includes all but the `solid_angle` and is computed by
     :py:func:`iofq_norm_wavelength_term_sample` or
     :py:func:`iofq_norm_wavelength_term_background`.
 
@@ -221,14 +251,13 @@ def iofq_denominator(
     would introduce correlations, variances are dropped or replaced by an upper-bound
     estimation, depending on the configured mode.
 
-
     Parameters
     ----------
-    solid_angle:
-        The solid angle of the detector pixels, as viewed from the sample position.
     wavelength_term:
         The term that depends on wavelength, computed by
         :py:func:`iofq_norm_wavelength_term`.
+    solid_angle:
+        The solid angle of the detector pixels, as viewed from the sample position.
     uncertainties:
         The mode for broadcasting uncertainties. See
         :py:class:`UncertaintyBroadcastMode` for details.
