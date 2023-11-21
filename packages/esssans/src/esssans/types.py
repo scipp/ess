@@ -137,7 +137,7 @@ class SolidAngle(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
 
 
 class LoadedFileContents(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
-    """The entire contents of the loaded filed"""
+    """The entire contents of a loaded file"""
 
 
 class RawData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
