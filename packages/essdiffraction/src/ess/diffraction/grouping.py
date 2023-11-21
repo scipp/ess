@@ -11,8 +11,8 @@ def group_by_two_theta(data: sc.DataArray, *, edges: sc.Variable) -> sc.DataArra
     Parameters
     ----------
     data:
-        Input data array with events. Must contain a coord or attr called 'two_theta'
-        or coords or attrs that can be used to compute it.
+        Input data array with events. Must contain a coord called 'two_theta'
+        or coords that can be used to compute it.
     edges:
         Bin edges in two_theta. `data` is grouped into those bins.
 

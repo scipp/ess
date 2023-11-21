@@ -111,13 +111,13 @@ def to_dspacing_with_calibration(
     Raises
     ------
     KeyError
-        If `data` does not contain a 'tof' metadata.
+        If `data` does not contain a 'tof' coordinate.
 
     Parameters
     ----------
     data:
         Input data in tof or wavelength dimension.
-        Must have a tof coordinate or attribute.
+        Must have a tof coordinate.
     calibration:
         Calibration data. If given, use it for the conversion.
         Otherwise, the calibration data must be stored in `data`.
@@ -145,13 +145,6 @@ def to_dspacing_with_calibration(
         graph['_tag_positions_consumed'] = _consume_positions
     else:
         out.coords['_tag_positions_consumed'] = sc.scalar(0)
-
-    # TODO: The need for attribute popping is a side-effect from using the deprecated
-    # scippneutron.load() function. Once we switch to using `load_with_mantid`, we
-    # should be able to remove this.
-    for key in ('difc', 'difa', 'tzero'):
-        if key not in out.coords:
-            out.coords[key] = out.attrs.pop(key)
 
     out = out.transform_coords('dspacing', graph=graph, keep_intermediate=False)
     out.coords.pop('_tag_positions_consumed', None)

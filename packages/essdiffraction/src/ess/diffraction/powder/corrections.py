@@ -5,7 +5,7 @@ import scipp as sc
 
 def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.DataArray:
     """
-    Return a scipp.DataArray containing calibration metadata.
+    Return a scipp.DataArray containing calibration metadata as coordinates.
 
     Parameters
     ----------
@@ -31,12 +31,12 @@ def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.Data
         )
     out = into.copy(deep=False)
     for name in ('difa', 'difc', 'tzero'):
-        if name in out.meta:
+        if name in out.coords:
             raise ValueError(
                 f"Cannot add calibration parameter '{name}' to data, "
                 "there already is metadata with the same name."
             )
-        out.attrs[name] = calibration[name].data
+        out.coords[name] = calibration[name].data
     if 'calibration' in out.masks:
         raise ValueError(
             "Cannot add calibration mask 'calibration' tp data, "
