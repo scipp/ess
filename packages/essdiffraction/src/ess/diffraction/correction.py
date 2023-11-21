@@ -7,6 +7,12 @@ from scippneutron.conversion.graph import beamline, tof
 
 from .logging import get_logger
 from .smoothing import lowpass
+from .types import (
+    AccumulatedProtonCharge,
+    FilteredData,
+    NormalizedByProtonCharge,
+    RunType,
+)
 
 
 def normalize_by_monitor(
@@ -86,3 +92,27 @@ def normalize_by_vanadium(
     # with a large scale if the proton charges in data and vanadium were
     # measured with different units.
     return (data.bins / norm).to(unit='one', copy=False)
+
+
+def normalize_by_proton_charge(
+    data: FilteredData[RunType], proton_charge: AccumulatedProtonCharge[RunType]
+) -> NormalizedByProtonCharge[RunType]:
+    """Normalize data by an accumulated proton charge.
+
+    Parameters
+    ----------
+    data:
+        Un-normalized data array as events or a histogram.
+    proton_charge:
+        Accumulated proton charge over the entire run.
+
+    Returns
+    -------
+    :
+        ``data / proton_charge``
+    """
+    return NormalizedByProtonCharge[RunType](data / proton_charge)
+
+
+providers = (normalize_by_proton_charge,)
+"""Sciline providers for diffraction corrections."""

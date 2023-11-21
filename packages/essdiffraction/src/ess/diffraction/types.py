@@ -27,6 +27,9 @@ RunType = TypeVar('RunType', EmptyInstrumentRun, SampleRun, VanadiumRun)
 
 # 2 Workflow parameters
 
+CalibrationFilename = NewType('CalibrationFilename', str)
+"""Filename of the instrument calibration file."""
+
 
 class Filename(sciline.Scope[RunType, str], str):
     """Filename of a run."""
@@ -37,18 +40,38 @@ ValidTofRange = NewType('ValidTofRange', sc.Variable)
 
 # 3 Workflow (intermediate) results
 
+
+class AccumulatedProtonCharge(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """Total proton charge."""
+
+
+CalibrationData = NewType('CalibrationData', sc.Dataset)
+"""Detector calibration data."""
+
 # This is Mantid-specific and can probably be removed when the POWGEN
 # workflow is removed.
 DetectorInfo = NewType('DetectorInfo', sc.Dataset)
 """Mapping between detector numbers and spectra."""
 
 
+class DspacingData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Data converted to d-spacing."""
+
+
 class FilteredData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Raw data without invalid events."""
 
 
+class NormalizedByProtonCharge(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Data that has been normalized by proton charge."""
+
+
 class ProtonCharge(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Time-dependent proton charge."""
+
+
+RawCalibrationData = NewType('CalibrationData', sc.Dataset)
+"""Calibration data as loaded from file, needs preprocessing before using."""
 
 
 class RawData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):

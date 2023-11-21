@@ -6,9 +6,12 @@
 import scipp as sc
 
 from ...types import (
+    AccumulatedProtonCharge,
+    CalibrationFilename,
     DetectorInfo,
     Filename,
     ProtonCharge,
+    RawCalibrationData,
     RawData,
     RawDataAndMetadata,
     RunType,
@@ -103,6 +106,15 @@ def pooch_load(filename: Filename[RunType]) -> RawDataAndMetadata[RunType]:
     return RawDataAndMetadata[RunType](sc.io.load_hdf5(path))
 
 
+def pooch_load_calibration(filename: CalibrationFilename) -> RawCalibrationData:
+    """Load the calibration data for the POWGEN test data."""
+    if filename.endswith('.zip'):
+        (path,) = get_path(filename, unzip=True)
+    else:
+        path = get_path(filename)
+    return RawCalibrationData(sc.io.load_hdf5(path))
+
+
 def extract_raw_data(dg: RawDataAndMetadata[RunType]) -> RawData[RunType]:
     """Return the events from a loaded data group."""
     return RawData[RunType](dg['data'])
@@ -118,10 +130,19 @@ def extract_proton_charge(dg: RawDataAndMetadata[RunType]) -> ProtonCharge[RunTy
     return ProtonCharge[RunType](dg['proton_charge'])
 
 
+def extract_accumulated_proton_charge(
+    data: RawData[SampleRun],
+) -> AccumulatedProtonCharge[SampleRun]:
+    """Return the stored accumulated proton charge from a loaded data group."""
+    return AccumulatedProtonCharge[SampleRun](data.coords['gd_prtn_chrg'])
+
+
 providers = (
     pooch_load,
-    extract_raw_data,
+    pooch_load_calibration,
+    extract_accumulated_proton_charge,
     extract_detector_info,
     extract_proton_charge,
+    extract_raw_data,
 )
 """Sciline Providers for loading POWGEN data."""
