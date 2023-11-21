@@ -2,7 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 from html import escape
-from typing import Union, Optional
+from typing import Optional, Union
 
 import plopp as pp
 import scipp as sc
