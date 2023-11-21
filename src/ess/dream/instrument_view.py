@@ -17,18 +17,12 @@ def _to_data_group(data: Union[sc.DataArray, sc.DataGroup, dict]) -> sc.DataGrou
 
 
 @pp.node
-def slice_range(da, trunc_range):
-    min_tr, max_tr = trunc_range
-    return da['tof', min_tr:max_tr].sum('tof')
-
-
-@pp.node
 def pre_process(da, dim):
     dims = list(da.dims)
     if dim is not None:
         dims.remove(dim)
     out = da.flatten(dims=dims, to='pixel')
-    sel = sc.isfinite(out.coords['x'])
+    sel = sc.isfinite(out.coords['position'])
     return out[sel]
 
 
@@ -59,6 +53,7 @@ class InstrumentView:
 
         self.scatter = pp.scatter3d(
             to_scatter,
+            pos='position',
             pixel_size=1.0 * sc.Unit('cm') if pixel_size is None else pixel_size,
             **kwargs,
         )
