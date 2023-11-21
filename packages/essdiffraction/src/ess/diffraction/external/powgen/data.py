@@ -1,5 +1,20 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+
+"""Utilities for loading example data for POWGEN."""
+
+import scipp as sc
+
+from ...types import (
+    DetectorInfo,
+    Filename,
+    ProtonCharge,
+    RawData,
+    RawDataAndMetadata,
+    RunType,
+    SampleRun,
+)
+
 _version = '1'
 
 __all__ = ['get_path']
@@ -71,3 +86,42 @@ def vanadium_file() -> str:
 def calibration_file() -> str:
     (path,) = get_path('PG3_FERNS_d4832_2011_08_24.zip', unzip=True)
     return path
+
+
+def pooch_load(filename: Filename[RunType]) -> RawDataAndMetadata[RunType]:
+    """Load a file with pooch.
+
+    If the file is a zip archive, it is extracted and a path to the contained
+    file is returned.
+
+    The loaded data holds both the events and any metadata from the file.
+    """
+    if filename.endswith('.zip'):
+        (path,) = get_path(filename, unzip=True)
+    else:
+        path = get_path(filename)
+    return RawDataAndMetadata[RunType](sc.io.load_hdf5(path))
+
+
+def extract_raw_data(dg: RawDataAndMetadata[RunType]) -> RawData[RunType]:
+    """Return the events from a loaded data group."""
+    return RawData[RunType](dg['data'])
+
+
+def extract_detector_info(dg: RawDataAndMetadata[SampleRun]) -> DetectorInfo:
+    """Return the detector info from a loaded data group."""
+    return DetectorInfo(dg['detector_info'])
+
+
+def extract_proton_charge(dg: RawDataAndMetadata[RunType]) -> ProtonCharge[RunType]:
+    """Return the proton charge from a loaded data group."""
+    return ProtonCharge[RunType](dg['proton_charge'])
+
+
+providers = (
+    pooch_load,
+    extract_raw_data,
+    extract_detector_info,
+    extract_proton_charge,
+)
+"""Sciline Providers for loading POWGEN data."""

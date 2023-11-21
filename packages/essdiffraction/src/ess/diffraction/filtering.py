@@ -11,6 +11,8 @@ from numbers import Real
 
 import scipp as sc
 
+from .types import FilteredData, RawData, RunType, TofCroppedData, ValidTofRange
+
 
 def _equivalent_bin_indices(a, b) -> bool:
     a_begin = a.bins.constituents['begin'].flatten(to='')
@@ -67,3 +69,23 @@ def remove_bad_pulses(
     filtered = filtered.squeeze('good_pulse').copy(deep=False)
     del filtered.coords['good_pulse']
     return filtered
+
+
+def crop_tof(
+    data: RawData[RunType], tof_range: ValidTofRange
+) -> TofCroppedData[RunType]:
+    return TofCroppedData[RunType](
+        data.bin(tof=tof_range.to(unit=data.coords['tof'].unit))
+    )
+
+
+def filter_events(data: TofCroppedData[RunType]) -> FilteredData[RunType]:
+    # TODO this needs to filter by proton charge once we know how
+    return FilteredData[RunType](data)
+
+
+providers = (
+    crop_tof,
+    filter_events,
+)
+"""Sciline providers for event filtering."""

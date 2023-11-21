@@ -10,6 +10,9 @@ the ``dream`` module when that is available.
 from . import beamline, data
 from .instrument_view import instrument_view
 
+providers = (*data.providers,)
+"""Sciline Providers for POWGEN-specific functionality."""
+
 __all__ = [
     'beamline',
     'data',

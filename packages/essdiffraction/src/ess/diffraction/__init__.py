@@ -7,6 +7,7 @@ Components for diffraction experiments (powder and single crystal).
 
 import importlib.metadata
 
+from . import filtering
 from .corrections import normalize_by_monitor, normalize_by_vanadium
 from .grouping import group_by_two_theta
 from .smoothing import lowpass
@@ -17,6 +18,13 @@ except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
 del importlib
+
+providers = (*filtering.providers,)
+"""Sciline providers for setting up a diffraction pipeline.
+
+These implement basic diffraction data-reduction functionality and need to be
+extended with instrument-specific and sub-technique-specific providers.
+"""
 
 __all__ = [
     'lowpass',
