@@ -88,7 +88,7 @@ DirectBeamFilename = NewType('DirectBeamFilename', str)
 BeamCenter = NewType('BeamCenter', sc.Variable)
 """Beam center, may be set directly or computed using beam-center finder"""
 
-MaskingCountsThreshold = NewType('MaskingCountsThreshold', sc.Variable)
+LowCountThreshold = NewType('LowCountThreshold', sc.Variable)
 """Threshold below which detector pixels should be masked
 (low-counts on the edges of the detector panel, and the beam stop)"""
 
