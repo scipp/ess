@@ -12,7 +12,7 @@ from .smoothing import lowpass
 def normalize_by_monitor(
     data: sc.DataArray,
     *,
-    monitor: str,
+    monitor: sc.DataArray,
     wavelength_edges: Optional[sc.Variable] = None,
     smooth_args: Optional[Dict[str, Any]] = None,
 ) -> sc.DataArray:
@@ -26,7 +26,7 @@ def normalize_by_monitor(
     data:
         Input event data.
     monitor:
-        Name of a histogrammed monitor. Must be stored as metadata in `data`.
+        A histogrammed monitor.
     wavelength_edges:
         If given, rebin the monitor with these edges.
     smooth_args:
@@ -40,9 +40,8 @@ def normalize_by_monitor(
     :
         `data` normalized by a monitor.
     """
-    mon = data.meta[monitor].value
-    if 'wavelength' not in mon.coords:
-        mon = mon.transform_coords(
+    if 'wavelength' not in monitor.coords:
+        monitor = monitor.transform_coords(
             'wavelength',
             graph={**beamline.beamline(scatter=False), **tof.elastic("tof")},
             keep_inputs=False,
@@ -51,16 +50,15 @@ def normalize_by_monitor(
         )
 
     if wavelength_edges is not None:
-        mon = mon.rebin(wavelength=wavelength_edges)
+        monitor = monitor.rebin(wavelength=wavelength_edges)
     if smooth_args is not None:
         get_logger().info(
-            "Smoothing monitor '%s' for normalization using "
+            "Smoothing monitor for normalization using "
             "ess.diffraction.smoothing.lowpass with %s.",
-            monitor,
             smooth_args,
         )
-        mon = lowpass(mon, dim='wavelength', **smooth_args)
-    return data.bins / sc.lookup(func=mon, dim='wavelength')
+        monitor = lowpass(monitor, dim='wavelength', **smooth_args)
+    return data.bins / sc.lookup(func=monitor, dim='wavelength')
 
 
 def normalize_by_vanadium(

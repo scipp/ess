@@ -42,9 +42,9 @@ def test_merge_calibration_add_all_parameters(calibration):
     )
     with_cal = merge_calibration(into=da, calibration=calibration)
 
-    assert sc.identical(with_cal.attrs['difa'], calibration['difa'].data)
-    assert sc.identical(with_cal.attrs['difc'], calibration['difc'].data)
-    assert sc.identical(with_cal.attrs['tzero'], calibration['tzero'].data)
+    assert sc.identical(with_cal.coords['difa'], calibration['difa'].data)
+    assert sc.identical(with_cal.coords['difc'], calibration['difc'].data)
+    assert sc.identical(with_cal.coords['tzero'], calibration['tzero'].data)
     assert sc.identical(with_cal.masks['calibration'], calibration['mask'].data)
 
 
@@ -89,9 +89,9 @@ def test_merge_calibration_raises_if_tzero_exists(calibration):
     da = sc.DataArray(
         sc.ones(sizes=calibration.sizes),
         coords={
-            'spectrum': sc.arange('spectrum', calibration.sizes['spectrum'], unit=None)
+            'spectrum': sc.arange('spectrum', calibration.sizes['spectrum'], unit=None),
+            'tzero': sc.ones(sizes={'spectrum': calibration.sizes['spectrum']}),
         },
-        attrs={'tzero': sc.ones(sizes={'spectrum': calibration.sizes['spectrum']})},
     )
     with pytest.raises(ValueError):
         merge_calibration(into=da, calibration=calibration)

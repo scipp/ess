@@ -19,7 +19,7 @@ def instrument_view(
     Parameters
     ----------
     positions:
-        Key for coord/attr holding positions to use for pixels
+        Key for coord holding positions to use for pixels
     pixel_size:
         Custom pixel size to use for detector pixels
     components:
