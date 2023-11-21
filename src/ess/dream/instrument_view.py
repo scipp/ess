@@ -2,7 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 from html import escape
-from typing import Union
+from typing import Union, Optional
 
 import plopp as pp
 import scipp as sc
@@ -17,7 +17,7 @@ def _to_data_group(data: Union[sc.DataArray, sc.DataGroup, dict]) -> sc.DataGrou
 
 
 @pp.node
-def pre_process(da, dim):
+def pre_process(da: sc.DataArray, dim: str) -> sc.DataArray:
     dims = list(da.dims)
     if dim is not None:
         dims.remove(dim)
@@ -27,7 +27,13 @@ def pre_process(da, dim):
 
 
 class InstrumentView:
-    def __init__(self, data, dim=None, pixel_size=None, **kwargs):
+    def __init__(
+        self,
+        data: Union[sc.DataArray, sc.DataGroup, dict],
+        dim: Optional[str] = None,
+        pixel_size: Optional[Union[float, sc.Variable]] = None,
+        **kwargs,
+    ):
         from plopp.widgets import SliceWidget, slice_dims
 
         self.data = _to_data_group(data)
@@ -108,14 +114,25 @@ class InstrumentView:
                     self.fig.artists[cut_nodes[key].id].points.visible = val
 
 
-def instrument_view(data, dim=None, pixel_size=None, **kwargs):
+def instrument_view(
+    data: Union[sc.DataArray, sc.DataGroup, dict],
+    dim: Optional[str] = None,
+    pixel_size: Optional[Union[float, sc.Variable]] = None,
+    **kwargs,
+):
     """
     Three-dimensional visualization of the DREAM instrument.
+    The instrument view is capable of slicing the input data with a slider widget along
+    a dimension (e.g. ``tof``) by using the ``dim`` argument.
+    It will also generate checkboxes to hide/show the different modules that make up
+    the DREAM detectors.
 
     Parameters
     ----------
     data:
-        Data to visualize.
+        Data to visualize. The data can be a single detector module (``DataArray``),
+        or a group of detector modules (``dict`` or ``DataGroup``).
+        The data must contain a ``position`` coordinate.
     dim:
         Dimension to use for the slider. No slider will be shown if this is None.
     pixel_size:
