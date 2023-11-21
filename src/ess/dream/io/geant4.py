@@ -67,7 +67,7 @@ def _group(detectors: Dict[str, sc.DataArray]) -> Dict[str, sc.DataArray]:
         else:
             elems = elements
         res = da.group(*elems)
-        if 'sector' in elems:
+        if 'sector' not in elems:
             res.bins.coords.pop('sector', None)
         return res
 

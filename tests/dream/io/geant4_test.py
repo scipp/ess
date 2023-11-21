@@ -89,6 +89,7 @@ def test_load_geant4_csv_endcap_backward_has_expected_coords(file):
     assert_index_coord(endcap.coords['counter'])
     assert_index_coord(endcap.coords['wire'], values=set(range(1, 17)))
     assert_index_coord(endcap.coords['strip'], values=set(range(1, 17)))
+    assert_index_coord(endcap.coords['sumo'], values=set(range(3, 7)))
     assert 'sector' not in endcap.coords
 
     assert 'sector' not in endcap.bins.coords
@@ -104,6 +105,7 @@ def test_load_geant4_csv_endcap_forward_has_expected_coords(file):
     assert_index_coord(endcap.coords['counter'])
     assert_index_coord(endcap.coords['wire'], values=set(range(1, 17)))
     assert_index_coord(endcap.coords['strip'], values=set(range(1, 17)))
+    assert_index_coord(endcap.coords['sumo'], values=set(range(3, 7)))
     assert 'sector' not in endcap.coords
 
     assert 'sector' not in endcap.bins.coords
