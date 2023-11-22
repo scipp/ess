@@ -10,7 +10,6 @@ import esssans as sans
 from esssans.types import (
     BackgroundRun,
     BackgroundSubtractedIofQ,
-    BackgroundTransmissionRun,
     BeamCenter,
     CorrectForGravity,
     DirectBeam,
@@ -19,15 +18,15 @@ from esssans.types import (
     Filename,
     Incident,
     IofQ,
-    MaskingCountsThreshold,
+    LowCountThreshold,
     NeXusMonitorName,
     NonBackgroundWavelengthRange,
     QBins,
     RawData,
     SampleRun,
-    SampleTransmissionRun,
     SolidAngle,
     Transmission,
+    TransmissionRun,
     UncertaintyBroadcastMode,
     WavelengthBands,
     WavelengthBins,
@@ -52,15 +51,15 @@ def make_params() -> dict:
             )
         },
     )
-    params[MaskingCountsThreshold] = sc.scalar(100.0, unit='counts')
+    params[LowCountThreshold] = sc.scalar(100.0, unit='counts')
 
     params[QBins] = sc.linspace(
         dim='Q', start=0.01, stop=0.55, num=141, unit='1/angstrom'
     )
     params[Filename[BackgroundRun]] = 'SANS2D00063159.hdf5'
-    params[Filename[BackgroundTransmissionRun]] = params[Filename[BackgroundRun]]
+    params[Filename[TransmissionRun[BackgroundRun]]] = params[Filename[BackgroundRun]]
     params[Filename[SampleRun]] = 'SANS2D00063114.hdf5'
-    params[Filename[SampleTransmissionRun]] = params[Filename[SampleRun]]
+    params[Filename[TransmissionRun[SampleRun]]] = params[Filename[SampleRun]]
     params[Filename[DirectRun]] = 'SANS2D00063091.hdf5'
     params[DirectBeamFilename] = 'DIRECT_SANS2D_REAR_34327_4m_8mm_16Feb16.hdf5'
     params[NonBackgroundWavelengthRange] = sc.array(
