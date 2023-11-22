@@ -20,13 +20,8 @@ DirectRun = NewType('DirectRun', int)
 """Direct run"""
 SampleRun = NewType('SampleRun', int)
 """Sample run"""
-RunType = TypeVar(
-    'RunType',
-    BackgroundRun,
-    DirectRun,
-    SampleRun,
-)
-"""TypeVar used for specifying BackgroundRun, DirectRun, SampleRun"""
+RunType = TypeVar('RunType', BackgroundRun, DirectRun, SampleRun)
+"""TypeVar used for specifying BackgroundRun, DirectRun or SampleRun"""
 
 
 class TransmissionRun(sciline.Scope[RunType, int], int):
