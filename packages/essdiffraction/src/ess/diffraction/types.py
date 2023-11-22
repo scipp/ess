@@ -38,6 +38,9 @@ class Filename(sciline.Scope[RunType, str], str):
     """Filename of a run."""
 
 
+TwoThetaBins = NewType('TwoThetaBins', sc.Variable)
+"""Bin edges for 2theta."""
+
 ValidTofRange = NewType('ValidTofRange', sc.Variable)
 """Min and max tof value of the instrument."""
 

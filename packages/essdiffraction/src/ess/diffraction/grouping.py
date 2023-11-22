@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-import scipp as sc
+
 from scippneutron.conversion.graph import beamline
 
 from .types import (
@@ -10,10 +10,13 @@ from .types import (
     MergedPixels,
     NormalizedByVanadium,
     RunType,
+    TwoThetaBins,
 )
 
 
-def group_by_two_theta(data: sc.DataArray, *, edges: sc.Variable) -> sc.DataArray:
+def group_by_two_theta(
+    data: DspacingData[RunType], edges: TwoThetaBins
+) -> MergedPixels[RunType]:
     """
     Group data into two_theta bins.
 
@@ -31,7 +34,9 @@ def group_by_two_theta(data: sc.DataArray, *, edges: sc.Variable) -> sc.DataArra
         `data` grouped into two_theta bins.
     """
     out = data.transform_coords('two_theta', graph=beamline.beamline(scatter=True))
-    return out.bin(two_theta=edges.to(unit=out.coords['two_theta'].unit, copy=False))
+    return MergedPixels[RunType](
+        out.bin(two_theta=edges.to(unit=out.coords['two_theta'].unit, copy=False))
+    )
 
 
 def merge_all_pixels(data: DspacingData[RunType]) -> MergedPixels[RunType]:
