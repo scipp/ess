@@ -9,9 +9,14 @@ from .logging import get_logger
 from .smoothing import lowpass
 from .types import (
     AccumulatedProtonCharge,
+    DspacingBins,
     FilteredData,
+    MergedPixels,
     NormalizedByProtonCharge,
+    NormalizedByVanadium,
     RunType,
+    SampleRun,
+    VanadiumRun,
 )
 
 
@@ -68,8 +73,10 @@ def normalize_by_monitor(
 
 
 def normalize_by_vanadium(
-    data: sc.DataArray, *, vanadium: sc.DataArray, edges: sc.Variable
-) -> sc.DataArray:
+    data: MergedPixels[SampleRun],
+    vanadium: MergedPixels[VanadiumRun],
+    edges: DspacingBins,
+) -> NormalizedByVanadium:
     """
     Normalize sample data by a vanadium measurement.
 
@@ -114,5 +121,5 @@ def normalize_by_proton_charge(
     return NormalizedByProtonCharge[RunType](data / proton_charge)
 
 
-providers = (normalize_by_proton_charge,)
+providers = (normalize_by_proton_charge, normalize_by_vanadium)
 """Sciline providers for diffraction corrections."""

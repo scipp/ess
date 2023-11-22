@@ -14,8 +14,10 @@ from ...types import (
     RawCalibrationData,
     RawData,
     RawDataAndMetadata,
+    RawDataWithvariances,
     RunType,
     SampleRun,
+    VanadiumRun,
 )
 
 _version = '1'
@@ -115,9 +117,17 @@ def pooch_load_calibration(filename: CalibrationFilename) -> RawCalibrationData:
     return RawCalibrationData(sc.io.load_hdf5(path))
 
 
-def extract_raw_data(dg: RawDataAndMetadata[RunType]) -> RawData[RunType]:
+# This can be generalized with https://github.com/scipp/sciline/issues/69.
+def extract_raw_data_sample(dg: RawDataAndMetadata[SampleRun]) -> RawData[SampleRun]:
     """Return the events from a loaded data group."""
-    return RawData[RunType](dg['data'])
+    return RawData[SampleRun](dg['data'])
+
+
+def extract_raw_data_vanadium(
+    dg: RawDataAndMetadata[VanadiumRun],
+) -> RawDataWithvariances[VanadiumRun]:
+    """Return the events from a loaded data group."""
+    return RawDataWithvariances[VanadiumRun](dg['data'])
 
 
 def extract_detector_info(dg: RawDataAndMetadata[SampleRun]) -> DetectorInfo:
@@ -131,10 +141,10 @@ def extract_proton_charge(dg: RawDataAndMetadata[RunType]) -> ProtonCharge[RunTy
 
 
 def extract_accumulated_proton_charge(
-    data: RawData[SampleRun],
-) -> AccumulatedProtonCharge[SampleRun]:
+    data: RawData[RunType],
+) -> AccumulatedProtonCharge[RunType]:
     """Return the stored accumulated proton charge from a loaded data group."""
-    return AccumulatedProtonCharge[SampleRun](data.coords['gd_prtn_chrg'])
+    return AccumulatedProtonCharge[RunType](data.coords['gd_prtn_chrg'])
 
 
 providers = (
@@ -143,6 +153,7 @@ providers = (
     extract_accumulated_proton_charge,
     extract_detector_info,
     extract_proton_charge,
-    extract_raw_data,
+    extract_raw_data_sample,
+    extract_raw_data_vanadium,
 )
 """Sciline Providers for loading POWGEN data."""

@@ -30,6 +30,9 @@ RunType = TypeVar('RunType', EmptyInstrumentRun, SampleRun, VanadiumRun)
 CalibrationFilename = NewType('CalibrationFilename', str)
 """Filename of the instrument calibration file."""
 
+DspacingBins = NewType('DSpacingBins', sc.Variable)
+"""Bin edges for d-spacing."""
+
 
 class Filename(sciline.Scope[RunType, str], str):
     """Filename of a run."""
@@ -58,24 +61,44 @@ class DspacingData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Data converted to d-spacing."""
 
 
+class DspacingDataWithoutVariances(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Data converted to d-spacing where variances where removed."""
+
+
+DspacingHistogram = NewType('DspacingHistogram', sc.DataArray)
+"""Histogrammed intensity vs d-spacing."""
+
+
 class FilteredData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Raw data without invalid events."""
+
+
+class MergedPixels(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Intensity vs d-spacing for all detector pixels combined."""
 
 
 class NormalizedByProtonCharge(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Data that has been normalized by proton charge."""
 
 
+NormalizedByVanadium = NewType('NormalizedByVanadium', sc.DataArray)
+"""Data that has been normalized by a vanadium run."""
+
+
 class ProtonCharge(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Time-dependent proton charge."""
 
 
-RawCalibrationData = NewType('CalibrationData', sc.Dataset)
+RawCalibrationData = NewType('RawCalibrationData', sc.Dataset)
 """Calibration data as loaded from file, needs preprocessing before using."""
 
 
 class RawData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Raw data."""
+
+
+class RawDataWithvariances(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Raw data that has variances which need special handling."""
 
 
 class RawDataAndMetadata(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
