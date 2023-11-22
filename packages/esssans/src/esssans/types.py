@@ -25,7 +25,9 @@ RunType = TypeVar('RunType', BackgroundRun, DirectRun, SampleRun)
 
 
 class TransmissionRun(sciline.Scope[RunType, int], int):
-    """Mapping between RunType and transmission run"""
+    """Mapping between RunType and transmission run.
+    In the case where no transmission run is provided, the transmission run should be
+    the same as the measurement (sample or background) run."""
 
 
 # 1.2  Monitor types
