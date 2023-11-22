@@ -15,8 +15,8 @@ from .types import (
     DirectBeamFilename,
     Filename,
     LoadedFileContents,
+    LowCountThreshold,
     MaskedData,
-    MaskingCountsThreshold,
     MonitorType,
     NeXusMonitorName,
     RawData,
@@ -85,7 +85,7 @@ def detector_edge_mask(
 
 def sample_holder_mask(
     sample: RawData[SampleRun],
-    low_counts_threshold: MaskingCountsThreshold,
+    low_counts_threshold: LowCountThreshold,
 ) -> SampleHolderMask:
     summed = sample.sum('tof')
     holder_mask = (

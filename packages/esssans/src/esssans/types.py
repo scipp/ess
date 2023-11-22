@@ -16,31 +16,22 @@ import scipp as sc
 # 1.1  Run types
 BackgroundRun = NewType('BackgroundRun', int)
 """Background run"""
-BackgroundTransmissionRun = NewType('BackgroundTransmissionRun', int)
-"""Background run with transmission monitor"""
 DirectRun = NewType('DirectRun', int)
 """Direct run"""
 SampleRun = NewType('SampleRun', int)
 """Sample run"""
-SampleTransmissionRun = NewType('SampleTransmissionRun', int)
-"""Sample run with transmission monitor"""
 RunType = TypeVar(
     'RunType',
     BackgroundRun,
-    BackgroundTransmissionRun,
     DirectRun,
     SampleRun,
-    SampleTransmissionRun,
 )
-"""TypeVar used for specifying BackgroundRun, BackgroundTransmissionRun, DirectRun,
-SampleRun, or SampleTransmissionRun"""
+"""TypeVar used for specifying BackgroundRun, DirectRun, SampleRun"""
 
-TransmissionRunType = TypeVar(
-    'TransmissionRunType',
-    BackgroundTransmissionRun,
-    SampleTransmissionRun,
-)
-"""TypeVar used for specifying BackgroundTransmissionRun or SampleTransmissionRun"""
+
+class TransmissionRun(sciline.Scope[RunType, int], int):
+    """Mapping between RunType and transmission run"""
+
 
 # 1.2  Monitor types
 Incident = NewType('Incident', int)
@@ -122,9 +113,7 @@ DirectBeam = NewType('DirectBeam', sc.DataArray)
 """Direct beam"""
 
 
-class TransmissionFraction(
-    sciline.Scope[TransmissionRunType, sc.DataArray], sc.DataArray
-):
+class TransmissionFraction(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Transmission fraction"""
 
 

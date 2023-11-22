@@ -8,8 +8,6 @@ import scippneutron as scn
 from scipp.core import concepts
 
 from .types import (
-    BackgroundRun,
-    BackgroundTransmissionRun,
     CalibratedMaskedData,
     Clean,
     CleanDirectBeam,
@@ -22,12 +20,10 @@ from .types import (
     NormWavelengthTerm,
     Numerator,
     RunType,
-    SampleRun,
-    SampleTransmissionRun,
     SolidAngle,
     Transmission,
     TransmissionFraction,
-    TransmissionRunType,
+    TransmissionRun,
     UncertaintyBroadcastMode,
 )
 from .uncertainty import (
@@ -69,11 +65,11 @@ def solid_angle_rectangular_approximation(
 
 
 def transmission_fraction(
-    sample_incident_monitor: CleanMonitor[TransmissionRunType, Incident],
-    sample_transmission_monitor: CleanMonitor[TransmissionRunType, Transmission],
+    sample_incident_monitor: CleanMonitor[TransmissionRun[RunType], Incident],
+    sample_transmission_monitor: CleanMonitor[TransmissionRun[RunType], Transmission],
     direct_incident_monitor: CleanMonitor[DirectRun, Incident],
     direct_transmission_monitor: CleanMonitor[DirectRun, Transmission],
-) -> TransmissionFraction[TransmissionRunType]:
+) -> TransmissionFraction[RunType]:
     """
     Approximation based on equations in
     `CalculateTransmission <https://docs.mantidproject.org/v4.0.0/algorithms/CalculateTransmission-v1.html>`_
@@ -102,7 +98,7 @@ def transmission_fraction(
     frac = (sample_transmission_monitor / direct_transmission_monitor) * (
         direct_incident_monitor / sample_incident_monitor
     )
-    return TransmissionFraction[TransmissionRunType](frac)
+    return TransmissionFraction[RunType](frac)
 
 
 _broadcasters = {
@@ -112,15 +108,18 @@ _broadcasters = {
 }
 
 
-def _iofq_norm_wavelength_term(
-    incident_monitor: sc.DataArray,
-    transmission_fraction: sc.DataArray,
-    direct_beam: Optional[sc.DataArray],
+def iofq_norm_wavelength_term(
+    incident_monitor: CleanMonitor[RunType, Incident],
+    transmission_fraction: TransmissionFraction[RunType],
+    direct_beam: Optional[CleanDirectBeam],
     uncertainties: UncertaintyBroadcastMode,
-) -> sc.DataArray:
+) -> NormWavelengthTerm[RunType]:
     """
     Compute the wavelength-dependent contribution to the denominator term for the I(Q)
     normalization.
+    Keeping this as a separate function allows us to compute it once during the
+    iterations for finding the beam center, while the solid angle is recomputed
+    for each iteration.
 
     This is basically:
     ``incident_monitor * transmission_fraction * direct_beam``
@@ -161,47 +160,7 @@ def _iofq_norm_wavelength_term(
         out = direct_beam * broadcast(out, sizes=direct_beam.sizes)
     # Convert wavelength coordinate to midpoints for future histogramming
     out.coords['wavelength'] = sc.midpoints(out.coords['wavelength'])
-    return out
-
-
-def iofq_norm_wavelength_term_sample(
-    incident_monitor: CleanMonitor[SampleRun, Incident],
-    transmission_fraction: TransmissionFraction[SampleTransmissionRun],
-    direct_beam: Optional[CleanDirectBeam],
-    uncertainties: UncertaintyBroadcastMode,
-) -> NormWavelengthTerm[SampleRun]:
-    """
-    Compute the wavelength-dependent contribution to the denominator term for the I(Q)
-    normalization, for the sample run.
-    """
-    return NormWavelengthTerm[SampleRun](
-        _iofq_norm_wavelength_term(
-            incident_monitor=incident_monitor,
-            transmission_fraction=transmission_fraction,
-            direct_beam=direct_beam,
-            uncertainties=uncertainties,
-        )
-    )
-
-
-def iofq_norm_wavelength_term_background(
-    incident_monitor: CleanMonitor[BackgroundRun, Incident],
-    transmission_fraction: TransmissionFraction[BackgroundTransmissionRun],
-    direct_beam: Optional[CleanDirectBeam],
-    uncertainties: UncertaintyBroadcastMode,
-) -> NormWavelengthTerm[BackgroundRun]:
-    """
-    Compute the wavelength-dependent contribution to the denominator term for the I(Q)
-    normalization, for the background run.
-    """
-    return NormWavelengthTerm[BackgroundRun](
-        _iofq_norm_wavelength_term(
-            incident_monitor=incident_monitor,
-            transmission_fraction=transmission_fraction,
-            direct_beam=direct_beam,
-            uncertainties=uncertainties,
-        )
-    )
+    return NormWavelengthTerm[RunType](out)
 
 
 def iofq_denominator(
@@ -313,8 +272,7 @@ def normalize(
 
 providers = (
     transmission_fraction,
-    iofq_norm_wavelength_term_sample,
-    iofq_norm_wavelength_term_background,
+    iofq_norm_wavelength_term,
     iofq_denominator,
     normalize,
     solid_angle_rectangular_approximation,
