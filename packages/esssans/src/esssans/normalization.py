@@ -154,9 +154,6 @@ def iofq_norm_wavelength_term(
     out = incident_monitor * transmission_fraction
     if direct_beam is not None:
         broadcast = _broadcasters[uncertainties]
-        # TODO: Do we need an additional check for the case where the direct beam
-        # could be bin centers and the transmission fraction is bin edges? In that case
-        # we would want to raise instead of broadcasting.
         out = direct_beam * broadcast(out, sizes=direct_beam.sizes)
     # Convert wavelength coordinate to midpoints for future histogramming
     out.coords['wavelength'] = sc.midpoints(out.coords['wavelength'])
