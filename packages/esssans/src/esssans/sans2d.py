@@ -4,12 +4,12 @@
 Loading and masking specific to the ISIS Sans2d instrument and files stored in Scipp's
 HDF5 format.
 """
-from typing import Optional
+from typing import NewType, Optional
 
 import scipp as sc
 
-from ..common import gravity_vector
-from ..types import (
+from .common import gravity_vector
+from .types import (
     DetectorEdgeMask,
     DirectBeam,
     DirectBeamFilename,
@@ -26,11 +26,15 @@ from ..types import (
     SampleHolderMask,
     SampleRun,
 )
-from .types import LowCountThreshold
+
+
+LowCountThreshold = NewType('LowCountThreshold', sc.Variable)
+"""Threshold below which detector pixels should be masked
+(low-counts on the edges of the detector panel, and the beam stop)"""
 
 
 def pooch_load(filename: Filename[RunType]) -> LoadedFileContents[RunType]:
-    from ..data import get_path
+    from .data import get_path
 
     dg = sc.io.load_hdf5(filename=get_path(filename))
     data = dg['data']
@@ -55,7 +59,7 @@ def pooch_load(filename: Filename[RunType]) -> LoadedFileContents[RunType]:
 
 
 def pooch_load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
-    from ..data import get_path
+    from .data import get_path
 
     return DirectBeam(sc.io.load_hdf5(filename=get_path(filename)))
 
