@@ -30,6 +30,14 @@
    :recursive:
 
    beam_center_finder
+   common
+   conversions
+   normalization
+   data
+   i_of_q
+   io
+   logging
    sans2d
    types
+   uncertainty
 ```

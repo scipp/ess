@@ -20,10 +20,10 @@ from .types import (
     NormWavelengthTerm,
     Numerator,
     RunType,
-    SampleRun,
     SolidAngle,
     Transmission,
     TransmissionFraction,
+    TransmissionRun,
     UncertaintyBroadcastMode,
 )
 from .uncertainty import (
@@ -65,32 +65,30 @@ def solid_angle_rectangular_approximation(
 
 
 def transmission_fraction(
-    sample_incident_monitor: CleanMonitor[SampleRun, Incident],
-    sample_transmission_monitor: CleanMonitor[SampleRun, Transmission],
+    sample_incident_monitor: CleanMonitor[TransmissionRun[RunType], Incident],
+    sample_transmission_monitor: CleanMonitor[TransmissionRun[RunType], Transmission],
     direct_incident_monitor: CleanMonitor[DirectRun, Incident],
     direct_transmission_monitor: CleanMonitor[DirectRun, Transmission],
-) -> TransmissionFraction:
+) -> TransmissionFraction[RunType]:
     """
     Approximation based on equations in
-    [CalculateTransmission](https://docs.mantidproject.org/v4.0.0/algorithms/CalculateTransmission-v1.html)
+    `CalculateTransmission <https://docs.mantidproject.org/v4.0.0/algorithms/CalculateTransmission-v1.html>`_
     documentation:
-    ``(Sample_T_monitor / Direct_T_monitor) * (Direct_I_monitor / Sample_I_monitor)``
+    ``(sample_transmission_monitor / direct_transmission_monitor) * (direct_incident_monitor / sample_incident_monitor)``
 
     This is equivalent to ``mantid.CalculateTransmission`` without fitting.
     Inputs should be wavelength-dependent.
 
-    TODO: It seems we are always multiplying this by data_monitors['incident'] to
-    compute the normalization term. We could consider just returning
-    ``(Sample_T_monitor / Direct_T_monitor) * Direct_I_monitor``
-
     Parameters
     ----------
-    data_monitors:
-        The data arrays for the incident and transmission monitors for the measurement
-        run (monitor data should depend on wavelength).
-    direct_monitors:
-        The data arrays for the incident and transmission monitors for the direct
-        run (monitor data should depend on wavelength).
+    sample_incident_monitor:
+        The incident monitor data for the sample (transmission) run.
+    sample_transmission_monitor:
+        The transmission monitor data for the sample (transmission) run.
+    direct_incident_monitor:
+        The incident monitor data for the direct beam run.
+    direct_transmission_monitor:
+        The transmission monitor data for the direct beam run.
 
     Returns
     -------
@@ -100,7 +98,7 @@ def transmission_fraction(
     frac = (sample_transmission_monitor / direct_transmission_monitor) * (
         direct_incident_monitor / sample_incident_monitor
     )
-    return TransmissionFraction(frac)
+    return TransmissionFraction[RunType](frac)
 
 
 _broadcasters = {
@@ -111,35 +109,36 @@ _broadcasters = {
 
 
 def iofq_norm_wavelength_term(
-    data_transmission_monitor: CleanMonitor[RunType, Transmission],
-    direct_incident_monitor: CleanMonitor[DirectRun, Incident],
-    direct_transmission_monitor: CleanMonitor[DirectRun, Transmission],
+    incident_monitor: CleanMonitor[RunType, Incident],
+    transmission_fraction: TransmissionFraction[RunType],
     direct_beam: Optional[CleanDirectBeam],
     uncertainties: UncertaintyBroadcastMode,
 ) -> NormWavelengthTerm[RunType]:
     """
-    Compute the wavelength-dependen contribution to the denominator term for the I(Q) normalization.
+    Compute the wavelength-dependent contribution to the denominator term for the I(Q)
+    normalization.
+    Keeping this as a separate function allows us to compute it once during the
+    iterations for finding the beam center, while the solid angle is recomputed
+    for each iteration.
 
     This is basically:
-    ``direct_beam * data_transmission_monitor * direct_incident_monitor / direct_transmission_monitor``
+    ``incident_monitor * transmission_fraction * direct_beam``
     If the direct beam is not supplied, it is assumed to be 1.
 
-    Because the multiplication between the wavelength dependent terms (monitor counts)
-    and the pixel dependent term (solid angle) consists of a broadcast operation which
-    would introduce correlations, variances are dropped or replaced by an upper-bound
-    estimation, depending on the configured mode.
+    Because the multiplication between the ``incident_monitor * transmission_fraction``
+    (pixel-independent) and the direct beam (potentially pixel-dependent) consists of a
+    broadcast operation which would introduce correlations, variances of the direct
+    beam are dropped or replaced by an upper-bound estimation, depending on the
+    configured mode.
 
     Parameters
     ----------
-    data_transmission_monitor:
-        The transmission monitor counts from the measurement run (depends on
-        wavelength).
-    direct_incident_monitor:
-        The incident monitor counts from the direct run (depends on wavelength).
-    direct_transmission_monitor:
-        The transmission monitor counts from the direct run (depends on wavelength).
+    incident_monitor:
+        The incident monitor data (depends on wavelength).
+    transmission_fraction:
+        The transmission fraction (depends on wavelength).
     direct_beam:
-        The DataArray containing the direct beam function (depends on wavelength).
+        The direct beam function (depends on wavelength).
     uncertainties:
         The mode for broadcasting uncertainties. See
         :py:class:`UncertaintyBroadcastMode` for details.
@@ -147,26 +146,18 @@ def iofq_norm_wavelength_term(
     Returns
     -------
     :
-        Wavelength-dependent term for the denominator of the SANS I(Q) normalization.
+        Wavelength-dependent term
+        (incident_monitor * transmission_fraction * direct_beam) to be used for
+        the denominator of the SANS I(Q) normalization.
         Used by :py:func:`iofq_denominator`.
-    """  # noqa: E501
-    denominator = (
-        data_transmission_monitor
-        * direct_incident_monitor
-        / direct_transmission_monitor
-    )
-
-    # We need to remove the variances because the broadcasting operation between
-    # solid_angle (pixel-dependent) and monitors (wavelength-dependent) will fail.
-    # The direct beam may also be pixel-dependent. In this case we need to drop
-    # variances of the other term already before multiplying by solid_angle.
+    """
+    out = incident_monitor * transmission_fraction
     if direct_beam is not None:
         broadcast = _broadcasters[uncertainties]
-        denominator = direct_beam * broadcast(denominator, sizes=direct_beam.sizes)
+        out = direct_beam * broadcast(out, sizes=direct_beam.sizes)
     # Convert wavelength coordinate to midpoints for future histogramming
-    # if wavelength_to_midpoints:
-    denominator.coords['wavelength'] = sc.midpoints(denominator.coords['wavelength'])
-    return NormWavelengthTerm[RunType](denominator)
+    out.coords['wavelength'] = sc.midpoints(out.coords['wavelength'])
+    return NormWavelengthTerm[RunType](out)
 
 
 def iofq_denominator(
@@ -177,23 +168,57 @@ def iofq_denominator(
     """
     Compute the denominator term for the I(Q) normalization.
 
-    This is basically:
-    ``solid_angle * direct_beam * data_transmission_monitor * direct_incident_monitor / direct_transmission_monitor``
-    The `wavelength_term` included all but the `solid_angle` and is computed by
-    :py:func:`iofq_norm_wavelength_term`.
+    In a SANS experiment, the scattering cross section :math:`I(Q)` is defined as
+    (`Heenan et al. 1997 <https://doi.org/10.1107/S0021889897002173>`_):
 
-    Because the multiplication between the wavelength dependent terms (monitor counts)
+    .. math::
+
+       I(Q) = \\frac{\\partial\\Sigma{Q}}{\\partial\\Omega} = \\frac{A_{H} \\Sigma_{R,\\lambda\\subset Q} C(R, \\lambda)}{A_{M} t \\Sigma_{R,\\lambda\\subset Q}M(\\lambda)T(\\lambda)D(\\lambda)\\Omega(R)}
+
+    where :math:`A_{H}` is the area of a mask (which avoids saturating the detector)
+    placed between the monitor of area :math:`A_{M}` and the main detector.
+    :math:`\\Omega` is the detector solid angle, and :math:`C` is the count rate on the
+    main detector, which depends on the position :math:`R` and the wavelength.
+    :math:`t` is the sample thickness, :math:`M` represents the incident monitor count
+    rate for the sample run, and :math:`T` is known as the transmission fraction.
+
+    Note that the incident monitor used to compute the transmission fraction is not
+    necessarily the same as :math:`M`, as the transmission fraction is usually computed
+    from a separate 'transmission' run (in the 'sample' run, the transmission monitor is
+    commonly moved out of the beam path, to avoid polluting the sample detector signal).
+
+    Finally, :math:`D` is the 'direct beam function', and is defined as
+
+    .. math::
+
+       D(\\lambda) = \\frac{\\eta(\\lambda)}{\\eta_{M}(\\lambda)} \\frac{A_{H}}{A_{M}}
+
+    where :math:`\\eta` and :math:`\\eta_{M}` are the detector and monitor
+    efficiencies, respectively.
+
+    Hence, in order to normalize the main detector counts :math:`C`, we need compute the
+    transmission fraction :math:`T(\\lambda)`, the direct beam function
+    :math:`D(\\lambda)` and the solid angle :math:`\\Omega(R)`.
+
+    The denominator is then simply:
+    :math:`M_{\\lambda} T_{\\lambda} D_{\\lambda} \\Omega_{R}`,
+    which is equivalent to ``wavelength_term * solid_angle``.
+    The ``wavelength_term`` includes all but the ``solid_angle`` and is computed by
+    :py:func:`iofq_norm_wavelength_term_sample` or
+    :py:func:`iofq_norm_wavelength_term_background`.
+
+    Because the multiplication between the wavelength dependent terms
     and the pixel dependent term (solid angle) consists of a broadcast operation which
     would introduce correlations, variances are dropped or replaced by an upper-bound
     estimation, depending on the configured mode.
 
-
     Parameters
     ----------
+    wavelength_term:
+        The term that depends on wavelength, computed by
+        :py:func:`iofq_norm_wavelength_term`.
     solid_angle:
         The solid angle of the detector pixels, as viewed from the sample position.
-    wavelength_term:
-        The term that depends on wavelength, computed by :py:func:`iofq_norm_wavelength_term`.
     uncertainties:
         The mode for broadcasting uncertainties. See
         :py:class:`UncertaintyBroadcastMode` for details.

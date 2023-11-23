@@ -23,6 +23,13 @@ SampleRun = NewType('SampleRun', int)
 RunType = TypeVar('RunType', BackgroundRun, DirectRun, SampleRun)
 """TypeVar used for specifying BackgroundRun, DirectRun or SampleRun"""
 
+
+class TransmissionRun(sciline.Scope[RunType, int], int):
+    """Mapping between RunType and transmission run.
+    In the case where no transmission run is provided, the transmission run should be
+    the same as the measurement (sample or background) run."""
+
+
 # 1.2  Monitor types
 Incident = NewType('Incident', int)
 """Incident monitor"""
@@ -91,18 +98,16 @@ class Filename(sciline.Scope[RunType, str], str):
 
 DetectorEdgeMask = NewType('DetectorEdgeMask', sc.Variable)
 """Detector edge mask"""
+
 SampleHolderMask = NewType('SampleHolderMask', sc.Variable)
 """Sample holder mask"""
 
 DirectBeam = NewType('DirectBeam', sc.DataArray)
 """Direct beam"""
 
-TransmissionFraction = NewType('TransmissionFraction', sc.DataArray)
-"""
-Transmission fraction for inspection purposes.
 
-The IofQ computation does not use this, it uses the monitors directly.
-"""
+class TransmissionFraction(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Transmission fraction"""
 
 
 CleanDirectBeam = NewType('CleanDirectBeam', sc.DataArray)
@@ -111,6 +116,10 @@ CleanDirectBeam = NewType('CleanDirectBeam', sc.DataArray)
 
 class SolidAngle(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Solid angle of detector pixels seen from sample position"""
+
+
+class LoadedFileContents(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+    """The entire contents of a loaded file"""
 
 
 class RawData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
