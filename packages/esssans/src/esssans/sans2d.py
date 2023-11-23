@@ -27,7 +27,6 @@ from .types import (
     SampleRun,
 )
 
-
 LowCountThreshold = NewType('LowCountThreshold', sc.Variable)
 """Threshold below which detector pixels should be masked
 (low-counts on the edges of the detector panel, and the beam stop)"""
