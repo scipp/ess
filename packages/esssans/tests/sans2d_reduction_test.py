@@ -18,7 +18,6 @@ from esssans.types import (
     Filename,
     Incident,
     IofQ,
-    LowCountThreshold,
     NeXusMonitorName,
     NonBackgroundWavelengthRange,
     QBins,
@@ -51,7 +50,7 @@ def make_params() -> dict:
             )
         },
     )
-    params[LowCountThreshold] = sc.scalar(100.0, unit='counts')
+    params[sans.sans2d.LowCountThreshold] = sc.scalar(100.0, unit='counts')
 
     params[QBins] = sc.linspace(
         dim='Q', start=0.01, stop=0.55, num=141, unit='1/angstrom'
