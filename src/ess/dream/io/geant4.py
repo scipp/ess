@@ -59,11 +59,16 @@ def _group(detectors: Dict[str, sc.DataArray]) -> Dict[str, sc.DataArray]:
     elements = ('module', 'segment', 'counter', 'wire', 'strip')
 
     def group(key: str, da: sc.DataArray) -> sc.DataArray:
-        if key == 'high_resolution':
+        if (key == 'high_resolution') and ('sector' in da.coords):
             # Only the HR detector has sectors.
-            return da.group('sector', *elements)
-        res = da.group(*elements)
-        res.bins.coords.pop('sector', None)
+            elems = ('sector', *elements)
+        elif 'sumo' in da.coords:
+            elems = ('sumo', *elements)
+        else:
+            elems = elements
+        res = da.group(*elems)
+        if 'sector' not in elems:
+            res.bins.coords.pop('sector', None)
         return res
 
     return {key: group(key, da) for key, da in detectors.items()}
@@ -94,6 +99,10 @@ def _split_detectors(
         if (det := _extract_detector(groups, detector_id_name, i)) is not None
     ]
     if endcaps_list:
+        endcaps_list = [
+            endcap.assign_coords(sumo=sc.full(sizes=endcap.sizes, value=i, unit=None))
+            for i, endcap in enumerate(endcaps_list, 3)
+        ]
         endcaps = sc.concat(endcaps_list, data.dim)
         endcaps = endcaps.bin(
             z_pos=sc.array(
