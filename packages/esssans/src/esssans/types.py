@@ -76,11 +76,6 @@ DirectBeamFilename = NewType('DirectBeamFilename', str)
 BeamCenter = NewType('BeamCenter', sc.Variable)
 """Beam center, may be set directly or computed using beam-center finder"""
 
-LowCountThreshold = NewType('LowCountThreshold', sc.Variable)
-"""Threshold below which detector pixels should be masked
-(low-counts on the edges of the detector panel, and the beam stop)"""
-
-
 WavelengthMask = NewType('WavelengthMask', sc.DataArray)
 """Optional wavelength mask"""
 
@@ -103,6 +98,7 @@ class Filename(sciline.Scope[RunType, str], str):
 
 DetectorEdgeMask = NewType('DetectorEdgeMask', sc.Variable)
 """Detector edge mask"""
+
 SampleHolderMask = NewType('SampleHolderMask', sc.Variable)
 """Sample holder mask"""
 
