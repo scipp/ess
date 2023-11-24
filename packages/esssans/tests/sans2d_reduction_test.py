@@ -14,7 +14,7 @@ from esssans.types import (
     CorrectForGravity,
     DirectBeam,
     DirectBeamFilename,
-    DirectRun,
+    EmptyBeamRun,
     Filename,
     Incident,
     IofQ,
@@ -59,7 +59,7 @@ def make_params() -> dict:
     params[Filename[TransmissionRun[BackgroundRun]]] = params[Filename[BackgroundRun]]
     params[Filename[SampleRun]] = 'SANS2D00063114.hdf5'
     params[Filename[TransmissionRun[SampleRun]]] = params[Filename[SampleRun]]
-    params[Filename[DirectRun]] = 'SANS2D00063091.hdf5'
+    params[Filename[EmptyBeamRun]] = 'SANS2D00063091.hdf5'
     params[DirectBeamFilename] = 'DIRECT_SANS2D_REAR_34327_4m_8mm_16Feb16.hdf5'
     params[NonBackgroundWavelengthRange] = sc.array(
         dims=['wavelength'], values=[0.7, 17.1], unit='angstrom'
