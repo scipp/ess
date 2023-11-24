@@ -123,6 +123,12 @@ def mask_detectors(
     return MaskedData[RunType](da)
 
 
+def mask_after_calibration(
+    da: CalibratedMaskedData[RunType],
+) -> CleanMasked[RunType, Numerator]:
+    return CleanMasked[RunType, Numerator](da)
+
+
 def run_number(dg: LoadedFileContents[SampleRun]) -> RunNumber:
     """Get the run number from the raw sample data."""
     return RunNumber(int(dg['run_number']))
@@ -140,6 +146,7 @@ providers = (
     get_monitor,
     detector_edge_mask,
     sample_holder_mask,
+    mask_after_calibration,
     mask_detectors,
     run_number,
     run_title,

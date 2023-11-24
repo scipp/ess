@@ -14,7 +14,7 @@ from .types import (
     CleanMonitor,
     CleanSummedQ,
     Denominator,
-    DirectRun,
+    EmptyBeamRun,
     Incident,
     IofQ,
     NormWavelengthTerm,
@@ -33,7 +33,7 @@ from .uncertainty import (
 
 
 def solid_angle_rectangular_approximation(
-    data: CalibratedMaskedData[RunType],
+    data: CleanMasked[RunType, Numerator],
 ) -> SolidAngle[RunType]:
     """
     Solid angle computed from rectangular pixels with a 'width' and a 'height'.
@@ -67,8 +67,8 @@ def solid_angle_rectangular_approximation(
 def transmission_fraction(
     sample_incident_monitor: CleanMonitor[TransmissionRun[RunType], Incident],
     sample_transmission_monitor: CleanMonitor[TransmissionRun[RunType], Transmission],
-    direct_incident_monitor: CleanMonitor[DirectRun, Incident],
-    direct_transmission_monitor: CleanMonitor[DirectRun, Transmission],
+    direct_incident_monitor: CleanMonitor[EmptyBeamRun, Incident],
+    direct_transmission_monitor: CleanMonitor[EmptyBeamRun, Transmission],
 ) -> TransmissionFraction[RunType]:
     """
     Approximation based on equations in
@@ -164,7 +164,7 @@ def iofq_denominator(
     wavelength_term: NormWavelengthTerm[RunType],
     solid_angle: SolidAngle[RunType],
     uncertainties: UncertaintyBroadcastMode,
-) -> Clean[RunType, Denominator]:
+) -> CleanWavelength[RunType, Denominator]:
     """
     Compute the denominator term for the I(Q) normalization.
 
@@ -230,7 +230,7 @@ def iofq_denominator(
     """  # noqa: E501
     broadcast = _broadcasters[uncertainties]
     denominator = solid_angle * broadcast(wavelength_term, sizes=solid_angle.sizes)
-    return Clean[RunType, Denominator](denominator)
+    return CleanWavelength[RunType, Denominator](denominator)
 
 
 def normalize(
