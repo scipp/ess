@@ -139,6 +139,7 @@ def direct_beam(
         },
     )
 
+    # TODO: This feels like an ugly hack. What is the best way to achieve this?
     pipeline_full._providers[DirectBeam] = lambda: direct_beam
     pipeline_bands._providers[DirectBeam] = lambda: direct_beam
 
