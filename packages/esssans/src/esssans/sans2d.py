@@ -10,6 +10,8 @@ import scipp as sc
 
 from .common import gravity_vector
 from .types import (
+    CalibratedMaskedData,
+    CleanMasked,
     DetectorEdgeMask,
     DirectBeam,
     DirectBeamFilename,
@@ -18,6 +20,7 @@ from .types import (
     MaskedData,
     MonitorType,
     NeXusMonitorName,
+    Numerator,
     RawData,
     RawMonitor,
     RunNumber,

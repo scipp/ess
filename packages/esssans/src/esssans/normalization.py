@@ -8,11 +8,11 @@ import scippneutron as scn
 from scipp.core import concepts
 
 from .types import (
-    CalibratedMaskedData,
-    Clean,
     CleanDirectBeam,
+    CleanMasked,
     CleanMonitor,
     CleanSummedQ,
+    CleanWavelength,
     Denominator,
     EmptyBeamRun,
     Incident,

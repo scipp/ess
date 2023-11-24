@@ -14,13 +14,12 @@ import scippneutron as scn
 from .common import gravity_vector
 from .types import (
     BackgroundRun,
-    BackgroundTransmissionRun,
     CalibratedMaskedData,
     CleanMasked,
     EmptyBeamRun,
     Filename,
-    Incident,
     MaskedData,
+    MonitorType,
     NeXusMonitorName,
     Numerator,
     RawData,
@@ -28,8 +27,7 @@ from .types import (
     RunType,
     SampleRun,
     SampleRunID,
-    SampleTransmissionRun,
-    Transmission,
+    TransmissionRun,
     UnmergedSampleRawData,
 )
 
@@ -91,9 +89,9 @@ def load_emptybeam_loki_run(
 
 
 def load_sampletransmission_loki_run(
-    filename: Filename[SampleTransmissionRun],
-) -> RawData[SampleTransmissionRun]:
-    return RawData[SampleTransmissionRun](load_loki_run(filename))
+    filename: Filename[TransmissionRun[SampleRun]],
+) -> RawData[TransmissionRun[SampleRun]]:
+    return RawData[TransmissionRun[SampleRun]](load_loki_run(filename))
 
 
 def _merge_run_events(a, b):
@@ -120,62 +118,6 @@ def get_monitor(
     return RawMonitor[RunType, MonitorType](da.attrs[nexus_name].value.copy())
 
 
-# def get_empty_beam_incident_monitor(
-#     da: RawData[EmptyBeamRun], nexus_name: NeXusMonitorName[Incident]
-# ) -> RawMonitor[EmptyBeamRun, Incident]:
-#     return RawMonitor[EmptyBeamRun, Incident](_get_monitor(da, nexus_name))
-
-
-# def get_empty_beam_transmission_monitor(
-#     da: RawData[EmptyBeamRun], nexus_name: NeXusMonitorName[Transmission]
-# ) -> RawMonitor[EmptyBeamRun, Transmission]:
-#     return RawMonitor[EmptyBeamRun, Transmission](_get_monitor(da, nexus_name))
-
-
-# def get_background_incident_monitor(
-#     da: RawData[BackgroundRun], nexus_name: NeXusMonitorName[Incident]
-# ) -> RawMonitor[BackgroundRun, Incident]:
-#     return RawMonitor[BackgroundRun, Incident](_get_monitor(da, nexus_name))
-
-
-# def get_background_transmission_monitor(
-#     da: RawData[BackgroundRun], nexus_name: NeXusMonitorName[Transmission]
-# ) -> RawMonitor[BackgroundRun, Transmission]:
-#     return RawMonitor[BackgroundRun, Transmission](_get_monitor(da, nexus_name))
-
-
-# def get_sample_incident_monitor(
-#     da: RawData[SampleRun], nexus_name: NeXusMonitorName[Incident]
-# ) -> RawMonitor[SampleRun, Incident]:
-#     return RawMonitor[SampleRun, Incident](_get_monitor(da, nexus_name))
-
-
-# def get_sample_transmission_monitor(
-#     da: RawData[SampleTransmissionRun], nexus_name: NeXusMonitorName[Transmission]
-# ) -> RawMonitor[SampleRun, Transmission]:
-#     return RawMonitor[SampleRun, Transmission](_get_monitor(da, nexus_name))
-
-
-# def get_sampletransmission_incident_monitor(
-#     da: RawData[SampleTransmissionRun], nexus_name: NeXusMonitorName[Incident]
-# ) -> RawMonitor[SampleTransmissionRun, Incident]:
-#     return RawMonitor[SampleTransmissionRun, Incident](_get_monitor(da, nexus_name))
-
-
-# def get_backgroundtransmission_incident_monitor(
-#     da: RawData[BackgroundTransmissionRun], nexus_name: NeXusMonitorName[Incident]
-# ) -> RawMonitor[BackgroundTransmissionRun, Incident]:
-#     return RawMonitor[BackgroundTransmissionRun, Incident](_get_monitor(da, nexus_name))
-
-
-# def normalize_detector_counts_by_incident_monitor(
-#     da: RawData[RunType], incident_monitor: RawMonitor[RunType, Incident]
-# ) -> DataNormalizedByIncidentMonitor[RunType]:
-#     return DataNormalizedByIncidentMonitor[RunType](
-#         da / sc.values(incident_monitor.data.sum())
-#     )
-
-
 def to_straws(da: RawData[RunType]) -> DataAsStraws[RunType]:
     return DataAsStraws[RunType](
         da.fold(
@@ -188,9 +130,7 @@ def detector_straw_mask(
     sample_straws: CalibratedMaskedData[SampleRun],
 ) -> DetectorLowCountsStrawMask:
     return DetectorLowCountsStrawMask(
-        # sample_straws.sum(['tof', 'pixel']).data < sc.scalar(300.0, unit='counts')
-        sample_straws.sum(['tof', 'pixel']).data
-        < sc.scalar(2.5e-5)
+        sample_straws.sum(['tof', 'pixel']).data < sc.scalar(300.0, unit='counts')
     )
 
 

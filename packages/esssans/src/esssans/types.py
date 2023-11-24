@@ -7,7 +7,7 @@ The domain types are used to define parameters and to request results from a Sci
 pipeline."""
 from collections.abc import Iterable
 from enum import Enum
-from typing import NewType, TypeVar, Union
+from typing import NewType, TypeVar
 
 import sciline
 import scipp as sc
