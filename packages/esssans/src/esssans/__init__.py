@@ -12,8 +12,8 @@ except importlib.metadata.PackageNotFoundError:
 from . import (
     beam_center_finder,
     common,
-    directbeam,
     conversions,
+    directbeam,
     i_of_q,
     io,
     loki,
