@@ -18,6 +18,10 @@ def _make_pooch():
             'SANS2D00063091.hdf5': 'md5:1fdbe36a496e914336f2f9b5cad9f00e',
             'SANS2D00063114.hdf5': 'md5:536303077b9f55286af5ef6ec5124e1c',
             'SANS2D00063159.hdf5': 'md5:e2f2aea3ed9251e579210718de568203',
+            '60339-2022-02-28_2215.nxs': 'md5:03c86f6389566326bb0cbbd80b8f8c4f',
+            '60392-2022-02-28_2215.nxs': 'md5:9ecc1a9a2c05a880144afb299fc11042',
+            '60394-2022-02-28_2215.nxs': 'md5:c40f38a62337d86957af925296c4c615',
+            'PolyGauss_I0-50_Rg-60.txt': 'md5:389ee172a139c06d062c26b5340ae9ce',
         },
     )
 
