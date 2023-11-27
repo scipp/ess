@@ -315,9 +315,10 @@ def to_I_of_Q(
         }
 
     # Compute normalizing term
-    direct_beam = resample_direct_beam(
-        direct_beam=direct_beam, wavelength_bins=wavelength_bins
-    )
+    if direct_beam is not None:
+        direct_beam = resample_direct_beam(
+            direct_beam=direct_beam, wavelength_bins=wavelength_bins
+        )
     denominator = normalization.iofq_denominator(
         data=data,
         data_transmission_monitor=data_monitors['transmission'],
