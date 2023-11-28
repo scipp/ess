@@ -45,6 +45,7 @@ dynamic = ["version"]
 
 [project.urls]
 "Bug Tracker" = "https://github.com/scipp/esssans/issues"
+"Documentation" = "https://scipp.github.io/esssans"
 "Source" = "https://github.com/scipp/esssans"
 
 [tool.setuptools_scm]
@@ -68,6 +69,7 @@ skip-string-normalization = true
 [tool.isort]
 skip_gitignore = true
 profile = "black"
+known_first_party = ["esssans"]
 
 [tool.mypy]
 strict = true
