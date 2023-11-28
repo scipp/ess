@@ -3,7 +3,7 @@
 [![Anaconda-Server Badge](https://anaconda.org/scipp/essreflectometry/badges/version.svg)](https://anaconda.org/scipp/essreflectometry)
 [![License: BSD 3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](LICENSE)
 
-# essreflectometry
+# Essreflectometry
 
 ## About
 
