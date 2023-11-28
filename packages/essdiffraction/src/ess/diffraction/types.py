@@ -38,6 +38,9 @@ class Filename(sciline.Scope[RunType, str], str):
     """Filename of a run."""
 
 
+OutFilename = NewType('OutFilename', str)
+"""Filename of the output."""
+
 TwoThetaBins = NewType('TwoThetaBins', sc.Variable)
 """Bin edges for 2theta."""
 
