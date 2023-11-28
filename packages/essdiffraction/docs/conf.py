@@ -200,6 +200,21 @@ nbsphinx_execute_arguments = [
 
 doctest_global_setup = '''
 import numpy as np
+
+try:
+    import scipp as sc
+
+    def do_not_plot(*args, **kwargs):
+        pass
+
+    sc.plot = do_not_plot
+    sc.Variable.plot = do_not_plot
+    sc.DataArray.plot = do_not_plot
+    sc.DataGroup.plot = do_not_plot
+    sc.Dataset.plot = do_not_plot
+except ImportError:
+    # Scipp is not needed by docs if it is not installed.
+    pass
 '''
 
 # Using normalize whitespace because many __str__ functions in scipp produce
