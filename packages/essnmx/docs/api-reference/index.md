@@ -3,7 +3,7 @@
 ## Classes
 
 ```{eval-rst}
-.. currentmodule:: essnmx
+.. currentmodule:: ess.nmx
 
 .. autosummary::
    :toctree: ../generated/classes
