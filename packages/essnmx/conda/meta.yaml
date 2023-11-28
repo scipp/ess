@@ -11,8 +11,8 @@ requirements:
     - setuptools
     - setuptools_scm
   run:
+    - python>=3.9
     - dask
-    - python>=3.8
     - python-graphviz
     - plopp
     - sciline>=23.9.1

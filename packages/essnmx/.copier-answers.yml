@@ -1,9 +1,9 @@
 # Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
-_commit: 3ad29de
+_commit: ff7f76b
 _src_path: gh:scipp/copier_template
 description: Data reduction for NMX at the European Spallation Source
 max_python: '3.11'
-min_python: '3.8'
+min_python: '3.9'
 namespace_package: ess
 nightly_deps: scipp,sciline,scippnexus,plopp
 orgname: scipp

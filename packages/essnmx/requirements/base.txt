@@ -9,13 +9,13 @@ click==8.1.7
     # via dask
 cloudpickle==3.0.0
     # via dask
-contourpy==1.1.1
+contourpy==1.2.0
     # via matplotlib
 cycler==0.12.1
     # via matplotlib
-dask==2023.5.0
+dask==2023.11.0
     # via -r base.in
-fonttools==4.44.1
+fonttools==4.45.1
     # via matplotlib
 fsspec==2023.10.0
     # via dask
@@ -29,13 +29,15 @@ h5py==3.10.0
     # via scippnexus
 importlib-metadata==6.8.0
     # via dask
+importlib-resources==6.1.1
+    # via matplotlib
 kiwisolver==1.4.5
     # via matplotlib
 locket==1.0.0
     # via partd
-matplotlib==3.7.3
+matplotlib==3.8.2
     # via plopp
-numpy==1.24.4
+numpy==1.26.2
     # via
     #   contourpy
     #   h5py
@@ -50,7 +52,7 @@ partd==1.4.1
     # via dask
 pillow==10.1.0
     # via matplotlib
-plopp==23.10.1
+plopp==23.11.0
     # via -r base.in
 pyparsing==3.1.1
     # via matplotlib
@@ -68,7 +70,7 @@ scipp==23.11.0
     #   scippnexus
 scippnexus==23.11.1
     # via -r base.in
-scipy==1.10.1
+scipy==1.11.4
     # via scippnexus
 six==1.16.0
     # via python-dateutil
@@ -77,4 +79,6 @@ toolz==0.12.0
     #   dask
     #   partd
 zipp==3.17.0
-    # via importlib-metadata
+    # via
+    #   importlib-metadata
+    #   importlib-resources

@@ -1,4 +1,4 @@
-# About Essnmx
+# About
 
 ## Development
 
