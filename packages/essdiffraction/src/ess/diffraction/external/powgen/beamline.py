@@ -51,6 +51,12 @@ def map_detector_to_spectrum(
 def preprocess_calibration_data(
     data: RawCalibrationData, detector_info: DetectorInfo
 ) -> CalibrationData:
+    """Convert calibration data to a format that can be used by Scipp.
+
+    The raw calibration data is encoded in terms of a `'detector'` coordinate.
+    This needs to be converted to a `'spectrum'` coordinate to align
+    if with sample data.
+    """
     return CalibrationData(map_detector_to_spectrum(data, detector_info=detector_info))
 
 

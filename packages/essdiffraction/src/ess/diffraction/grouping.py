@@ -40,14 +40,40 @@ def group_by_two_theta(
 
 
 def merge_all_pixels(data: DspacingData[RunType]) -> MergedPixels[RunType]:
-    """Combine all pixels (spectra) of the detector."""
+    """Combine all pixels (spectra) of the detector.
+
+    Parameters
+    ----------
+    data:
+        Input data with a `'spectrum'` dimension.
+
+    Returns
+    -------
+    :
+        The input without a `'spectrum'` dimension.
+    """
     return MergedPixels(data.bins.concat('spectrum'))
 
 
 def finalize_histogram(
     data: NormalizedByVanadium, edges: DspacingBins
 ) -> DspacingHistogram:
-    """Finalize the d-spacing histogram."""
+    """Finalize the d-spacing histogram.
+
+    Histograms the input data into the given d-spacing bins.
+
+    Parameters
+    ----------
+    data:
+        Data to be histogrammed.
+    edges:
+        Bin edges in d-spacing.
+
+    Returns
+    -------
+    :
+        Histogrammed data.
+    """
     return DspacingHistogram(data.hist(dspacing=edges))
 
 
