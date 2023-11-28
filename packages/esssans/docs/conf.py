@@ -9,7 +9,7 @@ import esssans
 sys.path.insert(0, os.path.abspath('.'))
 
 # General information about the project.
-project = u'esssans'
+project = u'Esssans'
 copyright = u'2023 Scipp contributors'
 author = u'Scipp contributors'
 
@@ -121,6 +121,7 @@ html_theme = "pydata_sphinx_theme"
 html_theme_options = {
     "primary_sidebar_end": ["edit-this-page", "sourcelink"],
     "secondary_sidebar_items": [],
+    "navbar_persistent": ["search-button"],
     "show_nav_level": 1,
     # Adjust this to ensure external links are moved to "Move" menu
     "header_links_before_dropdown": 4,
@@ -153,8 +154,8 @@ html_theme_options = {
         {
             "name": "Conda",
             "url": "https://anaconda.org/conda-forge/esssans",
-            "icon": "_static/anaconda-logo.svg",
-            "type": "local",
+            "icon": "fa-custom fa-anaconda",
+            "type": "fontawesome",
         },
     ],
     "footer_start": ["copyright", "sphinx-version"],
@@ -167,7 +168,7 @@ html_sidebars = {
     "**": ["sidebar-nav-bs", "page-toc"],
 }
 
-html_title = "esssans"
+html_title = "Esssans"
 html_logo = "_static/logo.svg"
 html_favicon = "_static/favicon.ico"
 
@@ -175,7 +176,8 @@ html_favicon = "_static/favicon.ico"
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
-html_css_files = ["css/custom.css"]
+html_css_files = []
+html_js_files = ["anaconda-icon.js"]
 
 # -- Options for HTMLHelp output ------------------------------------------
 
@@ -185,7 +187,7 @@ htmlhelp_basename = 'esssansdoc'
 # -- Options for Matplotlib in notebooks ----------------------------------
 
 nbsphinx_execute_arguments = [
-    "--Session.metadata=scipp_docs_build=True",
+    "--Session.metadata=scipp_sphinx_build=True",
 ]
 
 # -- Options for doctest --------------------------------------------------
