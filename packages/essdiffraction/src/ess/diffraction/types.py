@@ -113,3 +113,6 @@ class RawDataAndMetadata(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
 
 class TofCroppedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Raw data cropped to the valid TOF range."""
+
+
+del sc, sciline, NewType, TypeVar
