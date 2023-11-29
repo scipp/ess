@@ -174,6 +174,13 @@ def polarization_corrected_sample_data(
     transmission_polarizer: He3Transmission[Polarizer],
     transmission_analyzer: He3Transmission[Analyzer],
 ) -> PolarizationCorrectedSampleData[PolarizerSpin, AnalyzerSpin]:
+    """
+    Apply polarization correction for the case of He3 polarizers and analyzers.
+
+    There will be a different version of this function for handling the supermirror
+    case, since transmission is not time-dependent but spin-flippers need to be
+    accounted for.
+    """
     # apply matrix inverse
     pass
 
