@@ -5,7 +5,7 @@ This modules defines the domain types uses in esssans.
 
 The domain types are used to define parameters and to request results from a Sciline
 pipeline."""
-from collections.abc import Iterable
+from collections.abc import Sequence
 from enum import Enum
 from typing import NewType, TypeVar
 
@@ -83,7 +83,7 @@ WavelengthMask = NewType('WavelengthMask', sc.DataArray)
 CorrectForGravity = NewType('CorrectForGravity', bool)
 """Whether to correct for gravity when computing wavelength and Q."""
 
-FinalDims = NewType('FinalDims', Iterable[str])
+FinalDims = NewType('FinalDims', Sequence[str])
 """Final dimensions of IofQ"""
 
 OutFilename = NewType('OutFilename', str)
@@ -102,6 +102,11 @@ SampleRunID = NewType('SampleRunID', int)
 """Sample run ID when multiple runs are used"""
 
 # 3  Workflow (intermediate) results
+
+
+class DataWithLogicalDims(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Raw data reshaped to have logical dimensions"""
+
 
 DetectorEdgeMask = NewType('DetectorEdgeMask', sc.Variable)
 """Detector edge mask"""

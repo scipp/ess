@@ -16,6 +16,7 @@ from .types import (
     BackgroundRun,
     CalibratedMaskedData,
     CleanMasked,
+    DataWithLogicalDims,
     EmptyBeamRun,
     Filename,
     MaskedData,
@@ -39,10 +40,6 @@ DetectorBeamStopMask = NewType('DetectorBeamStopMask', sc.Variable)
 """Detector beam stop mask"""
 DetectorTubeEdgeMask = NewType('DetectorTubeEdgeMask', sc.Variable)
 """Detector tube edge mask"""
-
-
-class DataAsStraws(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Data reshaped to have a straw dimension"""
 
 
 @lru_cache
@@ -118,8 +115,8 @@ def get_monitor(
     return RawMonitor[RunType, MonitorType](da.attrs[nexus_name].value.copy())
 
 
-def to_straws(da: RawData[RunType]) -> DataAsStraws[RunType]:
-    return DataAsStraws[RunType](
+def to_logical_dims(da: RawData[RunType]) -> DataWithLogicalDims[RunType]:
+    return DataWithLogicalDims[RunType](
         da.fold(
             dim='detector_id', sizes=dict(layer=4, tube=32, straw=7, pixel=512)
         ).flatten(dims=['tube', 'straw'], to='straw')
@@ -152,7 +149,7 @@ def detector_tube_edge_mask(
 
 
 def mask_detectors(
-    da: DataAsStraws[RunType],
+    da: DataWithLogicalDims[RunType],
 ) -> MaskedData[RunType]:
     """Apply pixel-specific masks to raw data.
 
@@ -208,7 +205,7 @@ def mask_after_calibration(
 
 
 providers = (
-    to_straws,
+    to_logical_dims,
     detector_straw_mask,
     detector_beam_stop_mask,
     detector_tube_edge_mask,

@@ -12,6 +12,7 @@ from .common import gravity_vector
 from .types import (
     CalibratedMaskedData,
     CleanMasked,
+    DataWithLogicalDims,
     DetectorEdgeMask,
     DirectBeam,
     DirectBeamFilename,
@@ -33,6 +34,9 @@ from .types import (
 LowCountThreshold = NewType('LowCountThreshold', sc.Variable)
 """Threshold below which detector pixels should be masked
 (low-counts on the edges of the detector panel, and the beam stop)"""
+
+ReshapeToLogicalDims = NewType('ReshapeToLogicalDims', bool)
+"""Reshape raw data to logical dimensions if True"""
 
 
 def pooch_load(filename: Filename[RunType]) -> LoadedFileContents[RunType]:
@@ -80,7 +84,17 @@ def get_monitor(
     return RawMonitor[RunType, MonitorType](mon)
 
 
-def detector_edge_mask(sample: RawData[SampleRun]) -> DetectorEdgeMask:
+def to_logical_dims(
+    da: RawData[RunType], reshape: Optional[ReshapeToLogicalDims]
+) -> DataWithLogicalDims[RunType]:
+    if reshape is None or not reshape:
+        return DataWithLogicalDims[RunType](da)
+    return DataWithLogicalDims[RunType](
+        da.fold(dim='spectrum', sizes={'y': -1, 'x': 1024})
+    )
+
+
+def detector_edge_mask(sample: DataWithLogicalDims[SampleRun]) -> DetectorEdgeMask:
     mask_edges = (
         sc.abs(sample.coords['position'].fields.x) > sc.scalar(0.48, unit='m')
     ) | (sc.abs(sample.coords['position'].fields.y) > sc.scalar(0.45, unit='m'))
@@ -88,7 +102,7 @@ def detector_edge_mask(sample: RawData[SampleRun]) -> DetectorEdgeMask:
 
 
 def sample_holder_mask(
-    sample: RawData[SampleRun],
+    sample: DataWithLogicalDims[SampleRun],
     low_counts_threshold: LowCountThreshold,
 ) -> SampleHolderMask:
     summed = sample.sum('tof')
@@ -103,7 +117,7 @@ def sample_holder_mask(
 
 
 def mask_detectors(
-    da: RawData[RunType],
+    da: DataWithLogicalDims[RunType],
     edge_mask: Optional[DetectorEdgeMask],
     holder_mask: Optional[SampleHolderMask],
 ) -> MaskedData[RunType]:
@@ -153,6 +167,7 @@ providers = (
     mask_detectors,
     run_number,
     run_title,
+    to_logical_dims,
 )
 """
 Providers for loading and masking Sans2d data.
