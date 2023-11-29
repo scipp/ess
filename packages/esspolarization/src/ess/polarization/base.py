@@ -14,35 +14,33 @@ AnalyzerSpin = TypeVar('AnalyzerSpin', Up, Down)
 
 Analyzer = NewType('Analyzer', str)
 Polarizer = NewType('Polarizer', str)
-CellType = TypeVar('CellType', Analyzer, Polarizer)
+Cell = TypeVar('Cell', Analyzer, Polarizer)
 
 WavelengthBins = NewType('WavelengthBins', sc.Variable)
 RawEventData = NewType('RawEventData', sc.DataArray)
 
 
-class He3Transmission(sl.Scope[CellType, sc.DataArray], sc.DataArray):
+class He3Transmission(sl.Scope[Cell, sc.DataArray], sc.DataArray):
     """Spin-, Time-, and wavelength-dependent transmission for a given cell."""
 
 
-class He3CellPressure(sl.Scope[CellType, sc.Variable], sc.Variable):
+class He3CellPressure(sl.Scope[Cell, sc.Variable], sc.Variable):
     """Pressure for a given cell."""
 
 
-class He3CellLength(sl.Scope[CellType, sc.Variable], sc.Variable):
+class He3CellLength(sl.Scope[Cell, sc.Variable], sc.Variable):
     """Length for a given cell."""
 
 
-class He3FillingTime(sl.Scope[CellType, sc.Variable], sc.Variable):
+class He3FillingTime(sl.Scope[Cell, sc.Variable], sc.Variable):
     """Filling wall-clock time for a given cell."""
 
 
-class He3Opacity(sl.Scope[CellType, sc.DataArray], sc.DataArray):
+class He3Opacity(sl.Scope[Cell, sc.DataArray], sc.DataArray):
     """Wavelength-dependent opacity for a given cell."""
 
 
-class DirectBeamTimeIntervals(
-    sl.ScopeTwoParams[CellType, Spin, sc.Variable], sc.Variable
-):
+class DirectBeamTimeIntervals(sl.ScopeTwoParams[Cell, Spin, sc.Variable], sc.Variable):
     """
     Wall-clock time intervals for a given cell.
 
@@ -51,7 +49,7 @@ class DirectBeamTimeIntervals(
     """
 
 
-class He3DirectBeam(sl.ScopeTwoParams[CellType, Spin, sc.DataArray], sc.DataArray):
+class He3DirectBeam(sl.ScopeTwoParams[Cell, Spin, sc.DataArray], sc.DataArray):
     """
     Direct beam data for a given cell and spin state.
 
@@ -60,7 +58,7 @@ class He3DirectBeam(sl.ScopeTwoParams[CellType, Spin, sc.DataArray], sc.DataArra
     """
 
 
-class He3InitialAtomicPolarization(sl.Scope[CellType, sc.DataArray], sc.DataArray):
+class He3InitialAtomicPolarization(sl.Scope[Cell, sc.DataArray], sc.DataArray):
     """
     Initial atomic polarization for a given cell.
 
@@ -100,15 +98,15 @@ def dummy_event_data() -> RawEventData:
     pass
 
 
-def dummy_time_intervals() -> DirectBeamTimeIntervals[CellType, Spin]:
+def dummy_time_intervals() -> DirectBeamTimeIntervals[Cell, Spin]:
     pass
 
 
 def he3_direct_beam(
     event_data: RawEventData,
-    time_intervals: DirectBeamTimeIntervals[CellType, Spin],
+    time_intervals: DirectBeamTimeIntervals[Cell, Spin],
     wavelength: WavelengthBins,
-) -> He3DirectBeam[CellType, Spin]:
+) -> He3DirectBeam[Cell, Spin]:
     """
     Returns the direct beam data for a given cell and spin state.
 
@@ -120,40 +118,40 @@ def he3_direct_beam(
 
 
 def he3_opacity(
-    pressure: He3CellPressure[CellType],
-    cell_length: He3CellLength[CellType],
+    pressure: He3CellPressure[Cell],
+    cell_length: He3CellLength[Cell],
     wavelength: WavelengthBins,
-) -> He3Opacity[CellType]:
-    return He3Opacity[CellType]()
+) -> He3Opacity[Cell]:
+    return He3Opacity[Cell]()
 
 
 def he3_initial_atomic_polarization(
-    direct_beam: He3DirectBeam[CellType, Unpolarized],
-    opacity: He3Opacity[CellType],
-    filling_time: He3FillingTime[CellType],
-) -> He3InitialAtomicPolarization[CellType]:
+    direct_beam: He3DirectBeam[Cell, Unpolarized],
+    opacity: He3Opacity[Cell],
+    filling_time: He3FillingTime[Cell],
+) -> He3InitialAtomicPolarization[Cell]:
     """
     Returns the initial atomic polarization for a given cell.
 
     The initial atomic polarization is computed from the direct beam data.
     """
     # results dims: spin state, wavelength
-    return He3InitialAtomicPolarization[CellType](1)
+    return He3InitialAtomicPolarization[Cell](1)
 
 
 def he3_transmission(
-    opacity: He3Opacity[CellType],
-    filling_time: He3FillingTime[CellType],
-    direct_beam_up: He3DirectBeam[CellType, Up],
-    direct_beam_down: He3DirectBeam[CellType, Down],
-    initial_polarization: He3InitialAtomicPolarization[CellType],
-) -> He3Transmission[CellType]:
+    opacity: He3Opacity[Cell],
+    filling_time: He3FillingTime[Cell],
+    direct_beam_up: He3DirectBeam[Cell, Up],
+    direct_beam_down: He3DirectBeam[Cell, Down],
+    initial_polarization: He3InitialAtomicPolarization[Cell],
+) -> He3Transmission[Cell]:
     # Each time bin corresponds to a direct beam measurement. Take the mean for each
     # but keep the time binning.
     # time_up = direct_beam_up.bins.coords['time'].bins.mean()
     # time_down = direct_beam_down.bins.coords['time'].bins.mean()
     # results dims: spin state, wavelength, time
-    return He3Transmission[CellType](1)
+    return He3Transmission[Cell](1)
 
 
 def sample_data(
