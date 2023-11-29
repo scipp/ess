@@ -198,6 +198,7 @@ def _iofq_in_quadrants(
     if phi.ndim > 1:
         to_be_flattened = phi.dims
         phi = phi.flatten(to='pixel')
+        data = data.flatten(dims=to_be_flattened, to='pixel')
         if norm.ndim > 1:
             norm = norm.flatten(dims=to_be_flattened, to='pixel')
 
