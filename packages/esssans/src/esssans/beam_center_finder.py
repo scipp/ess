@@ -24,15 +24,32 @@ from .normalization import (
 )
 from .types import (
     BeamCenter,
+    CalibratedMaskedData,
+    CleanMasked,
     IofQ,
     MaskedData,
     NormWavelengthTerm,
+    Numerator,
     QBins,
     SampleRun,
     UncertaintyBroadcastMode,
     WavelengthBands,
     WavelengthBins,
 )
+
+
+def _clean_masked_provider(
+    da: CalibratedMaskedData[SampleRun],
+) -> CleanMasked[SampleRun, Numerator]:
+    """
+    This provider is used to replace a step in the main I(Q) pipeline that would mask
+    some detector pixels after the calibration from the beam center finder has been
+    applied.
+
+    Here, we are only interested in the beam center, and not the remainder of the
+    pipeline, so we simply return the input data.
+    """
+    return CleanMasked[SampleRun, Numerator](da)
 
 
 def _xy_extrema(pos: sc.Variable) -> sc.Variable:
@@ -71,11 +88,11 @@ def beam_center_from_center_of_mass(
     """
 
     summed = data.sum(list(set(data.dims) - set(data.coords['position'].dims))).flatten(
-        to='position'
+        to='pixel'
     )
     v = sc.values(summed)
     mask = concepts.irreducible_mask(summed, dim=None)
-    pos = data.coords['position'].flatten(to='position')
+    pos = data.coords['position'].flatten(to='pixel')
     if mask is None:
         mask = sc.zeros(sizes=pos.sizes, dtype='bool')
     extrema = _xy_extrema(pos[~mask])
@@ -167,6 +184,7 @@ def _iofq_in_quadrants(
         detector_to_wavelength,
         calibrate_positions,
         solid_angle_rectangular_approximation,
+        _clean_masked_provider,
     ]
     params = {}
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
@@ -174,6 +192,14 @@ def _iofq_in_quadrants(
     params[QBins] = q_bins
     params[ElasticCoordTransformGraph] = graph
     params[BeamCenter] = _offsets_to_vector(data=data, xy=xy, graph=graph)
+
+    # Below we are doing selection based on a phi mask, which is only supported on 1D
+    # selection mask, so we flatten all dimensions of phi.
+    if phi.ndim > 1:
+        to_be_flattened = phi.dims
+        phi = phi.flatten(to='pixel')
+        if norm.ndim > 1:
+            norm = norm.flatten(dims=to_be_flattened, to='pixel')
 
     out = {}
     for i, quad in enumerate(quadrants):

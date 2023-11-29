@@ -160,11 +160,18 @@ def mask_detectors(
     ----------
     da:
         Raw data.
-    edge_mask:
-        Mask for detector edges.
-    holder_mask:
-        Mask for sample holder.
     """
+    # Beam stop
+    da = da.copy(deep=False)
+    counts = da.sum('tof').data
+    r = sc.sqrt(
+        da.coords['position'].fields.x ** 2 + da.coords['position'].fields.y ** 2
+    )
+    da.masks['low_counts_middle'] = (counts < sc.scalar(20.0, unit='counts')) & (
+        r < sc.scalar(0.075, unit='m')
+    )
+    # Low counts
+    da.masks['very_low_counts'] = counts < sc.scalar(3.0, unit='counts')
     return MaskedData[RunType](da)
 
 
@@ -180,12 +187,17 @@ def mask_after_calibration(
     ----------
     da:
         Raw data.
-    edge_mask:
-        Mask for detector edges.
-    holder_mask:
-        Mask for sample holder.
+    lowcounts_straw_mask:
+        Mask for straws with low counts.
+    beam_stop_mask:
+        Mask for beam stop.
+    tube_edge_mask:
+        Mask for tube edges.
     """
     da = da.copy(deep=False)
+    # Clear masks from beam center finding step, as they are potentially using harsh
+    # thresholds which could remove some of the interesting signal.
+    da.masks.clear()
     if lowcounts_straw_mask is not None:
         da.masks['low_counts'] = lowcounts_straw_mask
     if beam_stop_mask is not None:
