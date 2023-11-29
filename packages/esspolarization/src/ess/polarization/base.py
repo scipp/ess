@@ -94,14 +94,6 @@ class SampleTimeIntervals(
     """
 
 
-def dummy_event_data() -> RawEventData:
-    pass
-
-
-def dummy_time_intervals() -> DirectBeamTimeIntervals[Cell, Spin]:
-    pass
-
-
 def he3_direct_beam(
     event_data: RawEventData,
     time_intervals: DirectBeamTimeIntervals[Cell, Spin],
@@ -180,6 +172,14 @@ def polarization_corrected_sample_data(
     accounted for.
     """
     # apply matrix inverse
+    pass
+
+
+def dummy_event_data() -> RawEventData:
+    pass
+
+
+def dummy_time_intervals() -> DirectBeamTimeIntervals[Cell, Spin]:
     pass
 
 
