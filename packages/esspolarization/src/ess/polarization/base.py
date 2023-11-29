@@ -1,66 +1,107 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+from typing import NewType, TypeVar
+
+import sciline as sl
 import scipp as sc
-from typing import NewType, TypeVar, Generic
-from dataclasses import dataclass
 
 Up = NewType('Up', int)
 Down = NewType('Down', int)
 Unpolarized = NewType('Unpolarized', int)
+Spin = TypeVar('Spin', Up, Down, Unpolarized)
+PolarizerSpin = TypeVar('PolarizerSpin', Up, Down)
+AnalyzerSpin = TypeVar('AnalyzerSpin', Up, Down)
 
-Spin = TypeVar('Spin', bound=int)
-PolarizerSpin = TypeVar('PolarizerSpin', bound=int)
-AnalyzerSpin = TypeVar('AnalyzerSpin', bound=int)
-CellType = TypeVar('CellType', bound=str)
 Analyzer = NewType('Analyzer', str)
 Polarizer = NewType('Polarizer', str)
-
-
-@dataclass
-class He3Transmission(Generic[CellType]):
-    value: sc.DataArray
-
-
-@dataclass
-class He3CellPressure(Generic[CellType]):
-    value: sc.Variable
-
-
-@dataclass
-class He3CellLength(Generic[CellType]):
-    value: sc.Variable
-
-
-@dataclass
-class He3FillingTime(Generic[CellType]):
-    value: sc.Variable
-
-
-@dataclass
-class He3Opacity(Generic[CellType]):
-    value: sc.Variable
-
+CellType = TypeVar('CellType', Analyzer, Polarizer)
 
 WavelengthBins = NewType('WavelengthBins', sc.Variable)
 RawEventData = NewType('RawEventData', sc.DataArray)
+
+
+class He3Transmission(sl.Scope[CellType, sc.DataArray], sc.DataArray):
+    """Spin-, Time-, and wavelength-dependent transmission for a given cell."""
+
+
+class He3CellPressure(sl.Scope[CellType, sc.Variable], sc.Variable):
+    """Pressure for a given cell."""
+
+
+class He3CellLength(sl.Scope[CellType, sc.Variable], sc.Variable):
+    """Length for a given cell."""
+
+
+class He3FillingTime(sl.Scope[CellType, sc.Variable], sc.Variable):
+    """Filling wall-clock time for a given cell."""
+
+
+class He3Opacity(sl.Scope[CellType, sc.DataArray], sc.DataArray):
+    """Wavelength-dependent opacity for a given cell."""
+
+
+class DirectBeamTimeIntervals(
+    sl.ScopeTwoParams[CellType, Spin, sc.Variable], sc.Variable
+):
+    """
+    Wall-clock time intervals for a given cell.
+
+    This defines the time intervals that correspond the direct beam measurements. This
+    is used to extract the direct beam data from the total event data.
+    """
+
+
+class He3DirectBeam(sl.ScopeTwoParams[CellType, Spin, sc.DataArray], sc.DataArray):
+    """
+    Direct beam data for a given cell and spin state.
+
+    TODO How is this defined? It is a processed version of the raw direct beam event
+    data.
+    """
+
+
+class He3InitialAtomicPolarization(sl.Scope[CellType, sc.DataArray], sc.DataArray):
+    """
+    Initial atomic polarization for a given cell.
+
+    This is computed from the direct beam data with an unpolarized cell.
+    """
+
+
+class SampleData(
+    sl.ScopeTwoParams[PolarizerSpin, AnalyzerSpin, sc.DataArray], sc.DataArray
+):
+    """
+    Uncorrected sample data.
+
+    TODO How exactly is this defined? Which normal (non-polarization) corrections
+    have been applied already?
+    """
+
+
+class PolarizationCorrectedSampleData(
+    sl.ScopeTwoParams[PolarizerSpin, AnalyzerSpin, sc.DataArray], sc.DataArray
+):
+    """Polarization-corrected sample data."""
+
+
+class SampleTimeIntervals(
+    sl.ScopeTwoParams[PolarizerSpin, AnalyzerSpin, sc.Variable], sc.Variable
+):
+    """
+    Wall-clock time intervals for a given sample.
+
+    This defines the time intervals that correspond the sample measurements. This is
+    used to extract the sample data from the total event data.
+    """
 
 
 def dummy_event_data() -> RawEventData:
     pass
 
 
-@dataclass
-class DirectBeamTimeIntervals(Generic[CellType, Spin]):
-    value: sc.Variable
-
-
 def dummy_time_intervals() -> DirectBeamTimeIntervals[CellType, Spin]:
     pass
-
-
-@dataclass
-class He3DirectBeam(Generic[CellType, Spin]):
-    value: sc.DataArray
 
 
 def he3_direct_beam(
@@ -86,11 +127,6 @@ def he3_opacity(
     return He3Opacity[CellType]()
 
 
-@dataclass
-class He3InitialAtomicPolarization(Generic[CellType]):
-    value: sc.DataArray
-
-
 def he3_initial_atomic_polarization(
     direct_beam: He3DirectBeam[CellType, Unpolarized],
     opacity: He3Opacity[CellType],
@@ -112,25 +148,12 @@ def he3_transmission(
     direct_beam_down: He3DirectBeam[CellType, Down],
     initial_polarization: He3InitialAtomicPolarization[CellType],
 ) -> He3Transmission[CellType]:
-    time_up = direct_beam_up.bins.coords['time'].mean()
-    time_down = direct_beam_down.bins.coords['time'].mean()
+    # Each time bin corresponds to a direct beam measurement. Take the mean for each
+    # but keep the time binning.
+    # time_up = direct_beam_up.bins.coords['time'].bins.mean()
+    # time_down = direct_beam_down.bins.coords['time'].bins.mean()
     # results dims: spin state, wavelength, time
     return He3Transmission[CellType](1)
-
-
-@dataclass
-class SampleData(Generic[PolarizerSpin, AnalyzerSpin]):
-    value: sc.DataArray
-
-
-@dataclass
-class PolarizationCorrectedSampleData(Generic[PolarizerSpin, AnalyzerSpin]):
-    value: sc.DataArray
-
-
-@dataclass
-class SampleTimeIntervals(Generic[PolarizerSpin, AnalyzerSpin]):
-    value: sc.Variable
 
 
 def sample_data(
