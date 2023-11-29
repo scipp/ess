@@ -1,4 +1,4 @@
-# About Esssans
+# About
 
 ## Development
 
