@@ -25,7 +25,7 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx_autodoc_typehints',
     'sphinx_copybutton',
-    "sphinx_design",
+    'sphinx_design',
     'nbsphinx',
     'myst_parser',
 ]
@@ -153,7 +153,7 @@ html_theme_options = {
         },
         {
             "name": "Conda",
-            "url": "https://anaconda.org/conda-forge/esssans",
+            "url": "https://anaconda.org/scipp/esssans",
             "icon": "fa-custom fa-anaconda",
             "type": "fontawesome",
         },
