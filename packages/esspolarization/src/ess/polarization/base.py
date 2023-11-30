@@ -120,7 +120,6 @@ def he3_opacity(
 def he3_initial_atomic_polarization(
     direct_beam: He3DirectBeam[Cell, Unpolarized],
     opacity: He3Opacity[Cell],
-    filling_time: He3FillingTime[Cell],
 ) -> He3InitialAtomicPolarization[Cell]:
     """
     Returns the initial atomic polarization for a given cell.
