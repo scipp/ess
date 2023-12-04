@@ -73,7 +73,7 @@ jobs:
           name: html_${{ inputs.platform }}
           path: html_${{ inputs.platform }}
 
-      - uses: JamesIves/github-pages-deploy-action@v4.4.3
+      - uses: JamesIves/github-pages-deploy-action@v4.5.0
         if: ${{ inputs.publish && contains(inputs.platform, 'ubuntu') }}
         with:
           branch: gh-pages
