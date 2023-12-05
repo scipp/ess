@@ -49,15 +49,12 @@ class He3TransmissionEmptyGlass(sl.Scope[Cell, sc.DataArray], sc.DataArray):
 
 
 DirectBeam = NewType('DirectBeam', sc.DataArray)
-"""Direct beam without cells and sample."""
+"""Direct beam without cells and sample as a function of wavelength."""
 
 
 class He3DirectBeam(sl.ScopeTwoParams[Cell, Spin, sc.DataArray], sc.DataArray):
     """
-    Direct beam data for a given cell and spin state.
-
-    TODO How is this defined? It is a processed version of the raw direct beam event
-    data.
+    Direct beam data for a given cell and spin state as a function of wavelength.
     """
 
 
@@ -109,16 +106,6 @@ Raw direct beam event data with events labeled (or grouped) by cell and spin sta
 """
 
 
-def dummy_cell_spin() -> CellSpin[Cell]:
-    """
-    Return a dummy cell spin.
-
-    This needs to be derived from some time-series log in the NeXus file, relating to
-    the switching of the He3 cell.
-    """
-    pass
-
-
 def spin_channel(
     polarizer_spin: CellSpin[Polarizer], analyzer_spin: CellSpin[Analyzer]
 ) -> SpinChannel:
@@ -132,9 +119,16 @@ def spin_channel(
     return SpinChannel()
 
 
-def direct_beam(event_data: DirectBeamData, wavelength: WavelengthBins) -> DirectBeam:
+def direct_beam(
+    event_data: DirectBeamData,
+    wavelength: WavelengthBins,
+    direct_beam_region: DirectBeamRegion,
+    direct_beam_background_region: DirectBeamBackgroundRegion,
+) -> DirectBeam:
     """
     Extract direct beam without any cells from direct beam data.
+
+    The result is background-subtracted and returned as function of wavelength.
     """
     return DirectBeam()
 
@@ -142,15 +136,15 @@ def direct_beam(event_data: DirectBeamData, wavelength: WavelengthBins) -> Direc
 def he3_direct_beam(
     event_data: DirectBeamData,
     wavelength: WavelengthBins,
+    direct_beam_region: DirectBeamRegion,
+    direct_beam_background_region: DirectBeamBackgroundRegion,
 ) -> He3DirectBeam[Cell, Spin]:
     """
     Returns the direct beam data for a given cell and spin state.
 
-    We have a sequence of direct beam measurements, e.g., defined by a list of wall
-    clock time intervals.
+    The result is background-subtracted and returned as function of wavelength.
     """
-    # compute wavelength
-    # return event data, dims=(interval,wavelength)
+    return He3DirectBeam[Cell, Spin]()
 
 
 def he3_opacity_from_cell_params(
@@ -172,8 +166,6 @@ def he3_opacity_from_beam_data(
     transmission_empty_glass: He3TransmissionEmptyGlass[Cell],
     direct_beam: DirectBeam,
     direct_beam_cell: He3DirectBeam[Cell, Unpolarized],
-    direct_beam_region: DirectBeamRegion,
-    direct_beam_background_region: DirectBeamBackgroundRegion,
 ) -> He3Opacity[Cell]:
     """
     Opacity for a given cell, based on direct beam data.
@@ -191,8 +183,6 @@ def he3_initial_atomic_polarization(
     direct_beam_down: He3DirectBeam[Cell, Down],
     transmission_empty_glass: He3TransmissionEmptyGlass[Cell],
     opacity: He3Opacity[Cell],
-    direct_beam_region: DirectBeamRegion,
-    direct_beam_background_region: DirectBeamBackgroundRegion,
 ) -> He3InitialAtomicPolarization[Cell]:
     """
     Returns the initial atomic polarization for a given cell.
@@ -201,8 +191,12 @@ def he3_initial_atomic_polarization(
 
     Note that we could use either direct_beam_up or direct_beam_down here, since the
     initial atomic polarization is the same for both.
+
+    Note also that if He3Opacity is computed from beam params certain terms would
+    cancel here, but this is available only at the end of the cell lifetime. Therefore
+    we compute this based on the opacity, which may be computed alternatively from
+    cell params.
     """
-    # TODO I think some bits cancel here, so not all inputs may be needed
     # results dims: spin state, wavelength
     return He3InitialAtomicPolarization[Cell](1)
 
