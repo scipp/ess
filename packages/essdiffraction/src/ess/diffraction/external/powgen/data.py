@@ -8,7 +8,6 @@ import scipp as sc
 from ...types import (
     AccumulatedProtonCharge,
     CalibrationFilename,
-    DetectorInfo,
     Filename,
     ProtonCharge,
     RawCalibrationData,
@@ -19,6 +18,7 @@ from ...types import (
     SampleRun,
     VanadiumRun,
 )
+from .types import DetectorInfo
 
 _version = '1'
 

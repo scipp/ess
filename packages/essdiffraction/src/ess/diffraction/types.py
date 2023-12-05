@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
-"""This module defines the domain types uses in ess.diffraction.
+"""This module defines the domain types used in ess.diffraction.
 
 The domain types are used to define parameters and to request results from a Sciline
 pipeline.
@@ -60,11 +60,6 @@ class AccumulatedProtonCharge(sciline.Scope[RunType, sc.Variable], sc.Variable):
 
 CalibrationData = NewType('CalibrationData', sc.Dataset)
 """Detector calibration data."""
-
-# This is Mantid-specific and can probably be removed when the POWGEN
-# workflow is removed.
-DetectorInfo = NewType('DetectorInfo', sc.Dataset)
-"""Mapping between detector numbers and spectra."""
 
 
 class DspacingData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):

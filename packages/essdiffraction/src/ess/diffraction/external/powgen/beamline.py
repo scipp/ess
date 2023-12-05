@@ -6,7 +6,8 @@ Beamline parameters and utilities for POWGEN.
 
 import scipp as sc
 
-from ...types import CalibrationData, DetectorInfo, RawCalibrationData
+from ...types import CalibrationData, RawCalibrationData
+from .types import DetectorInfo
 
 
 def map_detector_to_spectrum(
