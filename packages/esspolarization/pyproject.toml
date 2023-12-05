@@ -32,7 +32,7 @@ requires-python = ">=3.9"
 dependencies = [
   "dask",
   "graphviz",
-  "sciline>=23.9.1",
+  "sciline@git+https://github.com/scipp/sciline#egg=main",
   "scipp>=23.8.0",
   "scippnexus>=23.11.0",
 ]
