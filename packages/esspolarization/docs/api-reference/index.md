@@ -3,7 +3,7 @@
 ## Classes
 
 ```{eval-rst}
-.. currentmodule:: esspolarization
+.. currentmodule:: ess.polarization
 
 .. autosummary::
    :toctree: ../generated/classes

@@ -1,4 +1,4 @@
-# About Esspolarization
+# About
 
 ## Development
 

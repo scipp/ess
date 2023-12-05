@@ -12,7 +12,7 @@ requirements:
     - setuptools_scm
   run:
     - dask
-    - python>=3.8
+    - python>=3.9
     - python-graphviz
     - sciline>=23.9.1
     - scipp>=23.8.0
@@ -32,7 +32,7 @@ test:
 build:
   noarch: python
   script:
-    - pip install .
+    - python -m pip install .
 
 about:
   home: https://github.com/scipp/esspolarization
