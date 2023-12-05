@@ -42,7 +42,11 @@ OutFilename = NewType('OutFilename', str)
 """Filename of the output."""
 
 TwoThetaBins = NewType('TwoThetaBins', sc.Variable)
-"""Bin edges for 2theta."""
+"""Bin edges for grouping in 2theta.
+
+This is used by an alternative focussing step that groups detector
+pixels by scattering angle into bins given by these edges.
+"""
 
 ValidTofRange = NewType('ValidTofRange', sc.Variable)
 """Min and max tof value of the instrument."""
