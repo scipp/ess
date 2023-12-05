@@ -102,7 +102,7 @@ class RawData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Raw data."""
 
 
-class RawDataWithvariances(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+class RawDataWithVariances(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Raw data that has variances which need special handling."""
 
 

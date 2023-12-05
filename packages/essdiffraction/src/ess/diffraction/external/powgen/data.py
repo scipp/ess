@@ -13,7 +13,7 @@ from ...types import (
     RawCalibrationData,
     RawData,
     RawDataAndMetadata,
-    RawDataWithvariances,
+    RawDataWithVariances,
     RunType,
     SampleRun,
     VanadiumRun,
@@ -125,9 +125,9 @@ def extract_raw_data_sample(dg: RawDataAndMetadata[SampleRun]) -> RawData[Sample
 
 def extract_raw_data_vanadium(
     dg: RawDataAndMetadata[VanadiumRun],
-) -> RawDataWithvariances[VanadiumRun]:
+) -> RawDataWithVariances[VanadiumRun]:
     """Return the events from a loaded data group."""
-    return RawDataWithvariances[VanadiumRun](dg['data'])
+    return RawDataWithVariances[VanadiumRun](dg['data'])
 
 
 def extract_detector_info(dg: RawDataAndMetadata[SampleRun]) -> DetectorInfo:

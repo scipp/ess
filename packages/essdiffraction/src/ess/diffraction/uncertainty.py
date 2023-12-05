@@ -2,10 +2,10 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 """Tools for handling statistical uncertainties."""
 
-from .types import RawData, RawDataWithvariances, VanadiumRun
+from .types import RawData, RawDataWithVariances, VanadiumRun
 
 
-def drop_variances(data: RawDataWithvariances[VanadiumRun]) -> RawData[VanadiumRun]:
+def drop_variances(data: RawDataWithVariances[VanadiumRun]) -> RawData[VanadiumRun]:
     res = data.copy(deep=False)
     if res.bins is not None:
         res.bins.constituents['data'].variances = None
