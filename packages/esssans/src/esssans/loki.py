@@ -6,6 +6,7 @@ HDF5 format.
 """
 from functools import lru_cache, reduce
 from typing import NewType, Optional
+import warnings
 
 import sciline
 import scipp as sc
@@ -48,24 +49,27 @@ def load_loki_run(filename: str) -> sc.DataArray:
 
     # TODO: Use the new scippnexus to avoid using load_nexus, now that transformations
     # are supported.
-    da = scn.load_nexus(get_path(filename))
-    if 'gravity' not in da.coords:
-        da.coords["gravity"] = gravity_vector()
-    if 'sample_position' not in da.coords:
-        da.coords['sample_position'] = sc.vector([0, 0, 0], unit='m')
-    da.bins.constituents['data'].variances = da.bins.constituents['data'].values
-    for name in ('monitor_1', 'monitor_2'):
-        monitor = da.attrs[name].value
-        if 'source_position' not in monitor.coords:
-            monitor.coords["source_position"] = da.coords['source_position']
-        monitor.values[0].variances = monitor.values[0].values
-    pixel_shape = da.coords['pixel_shape'].values[0]
-    da.coords['pixel_width'] = sc.norm(
-        pixel_shape['face1_edge'] - pixel_shape['face1_center']
-    ).data
-    da.coords['pixel_height'] = sc.norm(
-        pixel_shape['face2_center'] - pixel_shape['face1_center']
-    ).data
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=sc.VisibleDeprecationWarning)
+
+        da = scn.load_nexus(get_path(filename))
+        if 'gravity' not in da.coords:
+            da.coords["gravity"] = gravity_vector()
+        if 'sample_position' not in da.coords:
+            da.coords['sample_position'] = sc.vector([0, 0, 0], unit='m')
+        da.bins.constituents['data'].variances = da.bins.constituents['data'].values
+        for name in ('monitor_1', 'monitor_2'):
+            monitor = da.attrs[name].value
+            if 'source_position' not in monitor.coords:
+                monitor.coords["source_position"] = da.coords['source_position']
+            monitor.values[0].variances = monitor.values[0].values
+        pixel_shape = da.coords['pixel_shape'].values[0]
+        da.coords['pixel_width'] = sc.norm(
+            pixel_shape['face1_edge'] - pixel_shape['face1_center']
+        ).data
+        da.coords['pixel_height'] = sc.norm(
+            pixel_shape['face2_center'] - pixel_shape['face1_center']
+        ).data
     return da
 
 
@@ -112,7 +116,12 @@ def get_monitor(
     da: RawData[RunType], nexus_name: NeXusMonitorName[MonitorType]
 ) -> RawMonitor[RunType, MonitorType]:
     # See https://github.com/scipp/sciline/issues/52 why copy needed
-    return RawMonitor[RunType, MonitorType](da.attrs[nexus_name].value.copy())
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=sc.VisibleDeprecationWarning)
+
+        out = da.attrs[nexus_name].value.copy()
+
+    return RawMonitor[RunType, MonitorType](out)
 
 
 def to_logical_dims(da: RawData[RunType]) -> DataWithLogicalDims[RunType]:

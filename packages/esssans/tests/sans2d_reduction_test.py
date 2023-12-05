@@ -2,6 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 from typing import Callable, List, Optional
 
+import numpy as np
 import pytest
 import sciline
 import scipp as sc
@@ -99,6 +100,20 @@ def test_pipeline_can_compute_background_subtracted_IofQ(
     pipeline = sciline.Pipeline(sans2d_providers(), params=params)
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('Q',)
+
+
+def test_pipeline_can_compute_background_subtracted_IofQ_in_wavelength_slices():
+    params = make_params()
+    band = np.linspace(2.0, 16.0, num=11)
+    params[WavelengthBands] = sc.array(
+        dims=['band', 'wavelength'],
+        values=np.vstack([band[:-1], band[1:]]).T,
+        unit='angstrom',
+    )
+    pipeline = sciline.Pipeline(sans2d_providers(), params=params)
+    result = pipeline.compute(BackgroundSubtractedIofQ)
+    assert result.dims == ('band', 'Q')
+    assert result.sizes['band'] == 10
 
 
 def test_workflow_is_deterministic():
