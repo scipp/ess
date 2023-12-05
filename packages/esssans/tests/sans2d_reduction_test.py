@@ -186,8 +186,12 @@ def test_pixel_dependent_direct_beam_is_supported(to_logical_dims, uncertainties
     assert result.dims == ('Q',)
 
 
-def test_beam_center_from_center_of_mass_is_close_to_verified_result():
-    params = make_params()
+@pytest.mark.parametrize(
+    'to_logical_dims',
+    [True, False],
+)
+def test_beam_center_from_center_of_mass_is_close_to_verified_result(to_logical_dims):
+    params = make_params(to_logical_dims)
     providers = sans2d_providers()
     pipeline = sciline.Pipeline(providers, params=params)
     center = pipeline.compute(BeamCenter)
@@ -200,8 +204,14 @@ def test_beam_center_from_center_of_mass_is_close_to_verified_result():
     )
 
 
-def test_beam_center_finder_without_direct_beam_reproduces_verified_result():
-    params = make_params()
+@pytest.mark.parametrize(
+    'to_logical_dims',
+    [True, False],
+)
+def test_beam_center_finder_without_direct_beam_reproduces_verified_result(
+    to_logical_dims,
+):
+    params = make_params(to_logical_dims)
     params[sans.beam_center_finder.BeamCenterFinderQBins] = sc.linspace(
         'Q', 0.02, 0.3, 71, unit='1/angstrom'
     )
