@@ -273,6 +273,8 @@ def test_beam_center_finder_works_with_pixel_dependent_direct_beam(to_logical_di
         .broadcast(sizes={'spectrum': 61440, 'wavelength': 175})
         .copy()
     )
+    if to_logical_dims:
+        direct_beam = direct_beam.fold(dim='spectrum', sizes={'y': -1, 'x': 1024})
 
     del params[DirectBeamFilename]
     params[DirectBeam] = direct_beam

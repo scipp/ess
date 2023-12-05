@@ -2,6 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 from typing import Dict, List, NewType, Optional, Union
+import uuid
 
 import numpy as np
 import sciline
@@ -52,11 +53,13 @@ def _clean_masked_provider(
     return CleanMasked[SampleRun, Numerator](da)
 
 
-def _xy_extrema(pos: sc.Variable) -> sc.Variable:
-    x_min = pos.fields.x.min()
-    x_max = pos.fields.x.max()
-    y_min = pos.fields.y.min()
-    y_max = pos.fields.y.max()
+def _xy_extrema(pos: sc.Variable, mask: sc.Variable) -> sc.Variable:
+    da_x = sc.DataArray(data=pos.fields.x, masks={'mask': mask})
+    da_y = sc.DataArray(data=pos.fields.y, masks={'mask': mask})
+    x_min = da_x.min().data
+    x_max = da_x.max().data
+    y_min = da_y.min().data
+    y_max = da_y.max().data
     return sc.concat([x_min, x_max, y_min, y_max], dim='extremes')
 
 
@@ -87,29 +90,27 @@ def beam_center_from_center_of_mass(
         The beam center position as a vector.
     """
 
-    summed = data.sum(list(set(data.dims) - set(data.coords['position'].dims))).flatten(
-        to='pixel'
-    )
+    summed = data.sum(list(set(data.dims) - set(data.coords['position'].dims)))
     v = sc.values(summed)
     mask = concepts.irreducible_mask(summed, dim=None)
-    pos = data.coords['position'].flatten(to='pixel')
+    pos = data.coords['position']
     if mask is None:
         mask = sc.zeros(sizes=pos.sizes, dtype='bool')
-    extrema = _xy_extrema(pos[~mask])
+    extrema = _xy_extrema(pos, mask=mask)
     # Mean including existing masks
     cutoff = 0.1 * v.mean().data
     low_counts = v.data < cutoff
     # Increase cutoff until we no longer include pixels at the X/Y min/max.
     # This would be simpler if the logical panel shape was reflected in the
     # dims of the input data, instead of having a flat list of pixels.
-    while sc.any(_xy_extrema(pos[~(mask | low_counts)]) == extrema):
+    while sc.any(_xy_extrema(pos, mask=(mask | low_counts)) == extrema):
         cutoff *= 2.0
         low_counts = v.data < cutoff
-    # See scipp/scipp#3271, the following lines are a workaround
-    select = ~(low_counts | mask)
-    v = v.data[select]
-    pos = pos[select]
-    com = sc.sum(pos * v) / v.sum()
+    onemask = low_counts | mask
+    num = sc.DataArray(data=pos * v.data, masks={'mask': onemask})
+    den = sc.DataArray(data=v.data, masks={'mask': onemask})
+    com = (num.sum() / den.sum()).data
+
     # We compute the shift between the incident beam direction and the center-of-mass
     incident_beam = data.transform_coords('incident_beam', graph=graph).coords[
         'incident_beam'
@@ -193,23 +194,18 @@ def _iofq_in_quadrants(
     params[ElasticCoordTransformGraph] = graph
     params[BeamCenter] = _offsets_to_vector(data=data, xy=xy, graph=graph)
 
-    # Below we are doing selection based on a phi mask, which is only supported on 1D
-    # selection mask, so we flatten all dimensions of phi.
-    if phi.ndim > 1:
-        to_be_flattened = phi.dims
-        phi = phi.flatten(to='pixel')
-        data = data.flatten(dims=to_be_flattened, to='pixel')
-        if norm.ndim > 1:
-            norm = norm.flatten(dims=to_be_flattened, to='pixel')
-
     out = {}
     for i, quad in enumerate(quadrants):
         # Select pixels based on phi
-        sel = (phi >= phi_bins[i]) & (phi < phi_bins[i + 1])
-        params[MaskedData[SampleRun]] = data[sel]
-        params[NormWavelengthTerm[SampleRun]] = (
-            norm if norm.dims == ('wavelength',) else norm[sel]
-        )
+        phi_mask = ~((phi >= phi_bins[i]) & (phi < phi_bins[i + 1]))
+        mask_name = uuid.uuid4().hex
+        sample_run = data.copy(deep=False)
+        sample_run.masks[mask_name] = phi_mask
+        params[MaskedData[SampleRun]] = sample_run
+        norm_wavelength = norm.copy(deep=False)
+        if norm_wavelength.ndim > 1:
+            norm_wavelength.masks[mask_name] = phi_mask
+        params[NormWavelengthTerm[SampleRun]] = norm_wavelength
         pipeline = sciline.Pipeline(providers, params=params)
         out[quad] = pipeline.compute(IofQ[SampleRun])
     return out

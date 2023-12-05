@@ -229,8 +229,6 @@ def iofq_denominator(
         The denominator for the SANS I(Q) normalization.
     """  # noqa: E501
     broadcast = _broadcasters[uncertainties]
-    print(solid_angle.sizes, wavelength_term.sizes)
-    print(broadcast(wavelength_term, sizes=solid_angle.sizes))
     denominator = solid_angle * broadcast(wavelength_term, sizes=solid_angle.sizes)
     return CleanWavelength[RunType, Denominator](denominator)
 
