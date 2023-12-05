@@ -7,7 +7,7 @@ from .types import (
     DspacingBins,
     DspacingData,
     DspacingHistogram,
-    MergedPixels,
+    FocussedData,
     NormalizedByVanadium,
     RunType,
     TwoThetaBins,
@@ -16,7 +16,7 @@ from .types import (
 
 def group_by_two_theta(
     data: DspacingData[RunType], edges: TwoThetaBins
-) -> MergedPixels[RunType]:
+) -> FocussedData[RunType]:
     """
     Group data into two_theta bins.
 
@@ -34,12 +34,12 @@ def group_by_two_theta(
         `data` grouped into two_theta bins.
     """
     out = data.transform_coords('two_theta', graph=beamline.beamline(scatter=True))
-    return MergedPixels[RunType](
+    return FocussedData[RunType](
         out.bin(two_theta=edges.to(unit=out.coords['two_theta'].unit, copy=False))
     )
 
 
-def merge_all_pixels(data: DspacingData[RunType]) -> MergedPixels[RunType]:
+def merge_all_pixels(data: DspacingData[RunType]) -> FocussedData[RunType]:
     """Combine all pixels (spectra) of the detector.
 
     Parameters
@@ -52,7 +52,7 @@ def merge_all_pixels(data: DspacingData[RunType]) -> MergedPixels[RunType]:
     :
         The input without a `'spectrum'` dimension.
     """
-    return MergedPixels(data.bins.concat('spectrum'))
+    return FocussedData(data.bins.concat('spectrum'))
 
 
 def finalize_histogram(

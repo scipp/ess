@@ -79,8 +79,8 @@ class FilteredData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Raw data without invalid events."""
 
 
-class MergedPixels(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Intensity vs d-spacing for all detector pixels combined."""
+class FocussedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Intensity vs d-spacing after focussing pixels."""
 
 
 class NormalizedByProtonCharge(sciline.Scope[RunType, sc.DataArray], sc.DataArray):

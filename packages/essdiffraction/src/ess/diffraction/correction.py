@@ -11,7 +11,7 @@ from .types import (
     AccumulatedProtonCharge,
     DspacingBins,
     FilteredData,
-    MergedPixels,
+    FocussedData,
     NormalizedByProtonCharge,
     NormalizedByVanadium,
     RunType,
@@ -73,8 +73,8 @@ def normalize_by_monitor(
 
 
 def normalize_by_vanadium(
-    data: MergedPixels[SampleRun],
-    vanadium: MergedPixels[VanadiumRun],
+    data: FocussedData[SampleRun],
+    vanadium: FocussedData[VanadiumRun],
     edges: DspacingBins,
 ) -> NormalizedByVanadium:
     """
