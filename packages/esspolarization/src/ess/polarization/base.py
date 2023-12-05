@@ -17,6 +17,12 @@ Cell = TypeVar('Cell', Analyzer, Polarizer)
 WavelengthBins = NewType('WavelengthBins', sc.Variable)
 RawEventData = NewType('RawEventData', sc.DataArray)
 
+DirectBeamRegion = NewType('DirectBeamRegion', sc.Variable)
+"""ROI for the direct beam region in a direct beam measurement."""
+
+DirectBeamBackgroundRegion = NewType('DirectBeamBackgroundRegion', sc.Variable)
+"""ROI for the direct beam background region in a direct beam measurement."""
+
 
 class He3Transmission(sl.Scope[Cell, sc.DataArray], sc.DataArray):
     """Spin-, Time-, and wavelength-dependent transmission for a given cell."""
@@ -36,6 +42,14 @@ class He3FillingTime(sl.Scope[Cell, sc.Variable], sc.Variable):
 
 class He3Opacity(sl.Scope[Cell, sc.DataArray], sc.DataArray):
     """Wavelength-dependent opacity for a given cell."""
+
+
+class He3TransmissionEmptyGlass(sl.Scope[Cell, sc.DataArray], sc.DataArray):
+    """Transmission of the empty glass for a given cell."""
+
+
+DirectBeam = NewType('DirectBeam', sc.DataArray)
+"""Direct beam without cells and sample."""
 
 
 class He3DirectBeam(sl.ScopeTwoParams[Cell, Spin, sc.DataArray], sc.DataArray):
@@ -118,6 +132,13 @@ def spin_channel(
     return SpinChannel()
 
 
+def direct_beam(event_data: DirectBeamData, wavelength: WavelengthBins) -> DirectBeam:
+    """
+    Extract direct beam without any cells from direct beam data.
+    """
+    return DirectBeam()
+
+
 def he3_direct_beam(
     event_data: DirectBeamData,
     wavelength: WavelengthBins,
@@ -132,23 +153,56 @@ def he3_direct_beam(
     # return event data, dims=(interval,wavelength)
 
 
-def he3_opacity(
+def he3_opacity_from_cell_params(
     pressure: He3CellPressure[Cell],
     cell_length: He3CellLength[Cell],
     wavelength: WavelengthBins,
 ) -> He3Opacity[Cell]:
+    """
+    Opacity for a given cell, based on pressure and cell length.
+
+    Note that this can alternatively be computed from neutron beam data, see
+    :py:func:`he3_opacity_from_beam_data`.
+    """
+    # TODO What is this magic number?
+    return He3Opacity[Cell](0.07733 * pressure * cell_length * wavelength)
+
+
+def he3_opacity_from_beam_data(
+    transmission_empty_glass: He3TransmissionEmptyGlass[Cell],
+    direct_beam: DirectBeam,
+    direct_beam_cell: He3DirectBeam[Cell, Unpolarized],
+    direct_beam_region: DirectBeamRegion,
+    direct_beam_background_region: DirectBeamBackgroundRegion,
+) -> He3Opacity[Cell]:
+    """
+    Opacity for a given cell, based on direct beam data.
+
+    Note that this can alternatively be computed from cell parameters, see
+    :py:func:`he3_opacity_from_cell_params`.
+    """
+    # TODO What is I_bg? Is it also computed from the direct beam data?
     return He3Opacity[Cell]()
 
 
 def he3_initial_atomic_polarization(
-    direct_beam: He3DirectBeam[Cell, Unpolarized],
+    direct_beam: DirectBeam,
+    direct_beam_up: He3DirectBeam[Cell, Up],
+    direct_beam_down: He3DirectBeam[Cell, Down],
+    transmission_empty_glass: He3TransmissionEmptyGlass[Cell],
     opacity: He3Opacity[Cell],
+    direct_beam_region: DirectBeamRegion,
+    direct_beam_background_region: DirectBeamBackgroundRegion,
 ) -> He3InitialAtomicPolarization[Cell]:
     """
     Returns the initial atomic polarization for a given cell.
 
     The initial atomic polarization is computed from the direct beam data.
+
+    Note that we could use either direct_beam_up or direct_beam_down here, since the
+    initial atomic polarization is the same for both.
     """
+    # TODO I think some bits cancel here, so not all inputs may be needed
     # results dims: spin state, wavelength
     return He3InitialAtomicPolarization[Cell](1)
 
@@ -156,9 +210,8 @@ def he3_initial_atomic_polarization(
 def he3_transmission(
     opacity: He3Opacity[Cell],
     filling_time: He3FillingTime[Cell],
-    direct_beam_up: He3DirectBeam[Cell, Up],
-    direct_beam_down: He3DirectBeam[Cell, Down],
     initial_polarization: He3InitialAtomicPolarization[Cell],
+    transmission_empty_glass: He3TransmissionEmptyGlass[Cell],
 ) -> He3Transmission[Cell]:
     # Each time bin corresponds to a direct beam measurement. Take the mean for each
     # but keep the time binning.
@@ -221,21 +274,11 @@ def polarization_corrected_sample_data(
     pass
 
 
-def dummy_event_data() -> RawEventData:
-    pass
-
-
-def dummy_run_section() -> RunSection:
-    pass
-
-
 providers = [
-    dummy_run_section,
-    dummy_cell_spin,
-    dummy_event_data,
+    direct_beam,
     he3_direct_beam,
     he3_initial_atomic_polarization,
-    he3_opacity,
+    he3_opacity_from_beam_data,
     he3_transmission,
     polarization_corrected_sample_data,
     sample_data_by_spin_channel,
