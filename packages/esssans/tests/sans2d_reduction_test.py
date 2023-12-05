@@ -142,14 +142,10 @@ def test_pipeline_can_visualize_background_subtracted_IofQ():
     pipeline.visualize(BackgroundSubtractedIofQ)
 
 
-@pytest.mark.parametrize(
-    'to_logical_dims',
-    [True, False],
-)
-def test_pipeline_can_compute_intermediate_results(to_logical_dims):
-    pipeline = sciline.Pipeline(sans2d_providers(), params=make_params(to_logical_dims))
+def test_pipeline_can_compute_intermediate_results():
+    pipeline = sciline.Pipeline(sans2d_providers(), params=make_params())
     result = pipeline.compute(SolidAngle[SampleRun])
-    assert result.dims == ('y', 'x') if to_logical_dims else ('spectrum',)
+    assert result.dims == ('spectrum',)
 
 
 # TODO See scipp/sciline#57 for plans on a builtin way to do this
@@ -190,12 +186,8 @@ def test_pixel_dependent_direct_beam_is_supported(to_logical_dims, uncertainties
     assert result.dims == ('Q',)
 
 
-@pytest.mark.parametrize(
-    'to_logical_dims',
-    [True, False],
-)
-def test_beam_center_from_center_of_mass_is_close_to_verified_result(to_logical_dims):
-    params = make_params(to_logical_dims)
+def test_beam_center_from_center_of_mass_is_close_to_verified_result():
+    params = make_params()
     providers = sans2d_providers()
     pipeline = sciline.Pipeline(providers, params=params)
     center = pipeline.compute(BeamCenter)
@@ -208,14 +200,8 @@ def test_beam_center_from_center_of_mass_is_close_to_verified_result(to_logical_
     )
 
 
-@pytest.mark.parametrize(
-    'to_logical_dims',
-    [True, False],
-)
-def test_beam_center_finder_without_direct_beam_reproduces_verified_result(
-    to_logical_dims,
-):
-    params = make_params(to_logical_dims)
+def test_beam_center_finder_without_direct_beam_reproduces_verified_result():
+    params = make_params()
     params[sans.beam_center_finder.BeamCenterFinderQBins] = sc.linspace(
         'Q', 0.02, 0.3, 71, unit='1/angstrom'
     )
@@ -234,12 +220,8 @@ def test_beam_center_finder_without_direct_beam_reproduces_verified_result(
     )
 
 
-@pytest.mark.parametrize(
-    'to_logical_dims',
-    [True, False],
-)
-def test_beam_center_finder_works_with_direct_beam(to_logical_dims):
-    params = make_params(to_logical_dims)
+def test_beam_center_finder_works_with_direct_beam():
+    params = make_params()
     params[sans.beam_center_finder.BeamCenterFinderQBins] = sc.linspace(
         'Q', 0.02, 0.3, 71, unit='1/angstrom'
     )
@@ -253,12 +235,8 @@ def test_beam_center_finder_works_with_direct_beam(to_logical_dims):
     assert sc.allclose(center, center_no_direct_beam, atol=sc.scalar(1e-2, unit='m'))
 
 
-@pytest.mark.parametrize(
-    'to_logical_dims',
-    [True, False],
-)
-def test_beam_center_finder_works_with_pixel_dependent_direct_beam(to_logical_dims):
-    params = make_params(to_logical_dims)
+def test_beam_center_finder_works_with_pixel_dependent_direct_beam():
+    params = make_params()
     params[sans.beam_center_finder.BeamCenterFinderQBins] = sc.linspace(
         'Q', 0.02, 0.3, 71, unit='1/angstrom'
     )
@@ -273,8 +251,6 @@ def test_beam_center_finder_works_with_pixel_dependent_direct_beam(to_logical_di
         .broadcast(sizes={'spectrum': 61440, 'wavelength': 175})
         .copy()
     )
-    if to_logical_dims:
-        direct_beam = direct_beam.fold(dim='spectrum', sizes={'y': -1, 'x': 1024})
 
     del params[DirectBeamFilename]
     params[DirectBeam] = direct_beam
