@@ -58,25 +58,6 @@ def make_params() -> dict:
         'wavelength', start=band[0], stop=band[-1], num=141
     )
 
-    # wavelength_min = sc.scalar(1.0, unit='angstrom')
-    # wavelength_max = sc.scalar(13.0, unit='angstrom')
-    # n_wavelength_bins = 200
-    # # Wavelength bands parameters
-    # n_wavelength_bands = 50
-    # sampling_width = sc.scalar(0.25, unit='angstrom')
-
-    # # Wavelength binning and bands
-    # wavelength_bins, wavelength_bands = sans.directbeam.make_wavelength_bins_and_bands(
-    #     wavelength_min=wavelength_min,
-    #     wavelength_max=wavelength_max,
-    #     n_wavelength_bins=n_wavelength_bins,
-    #     n_wavelength_bands=n_wavelength_bands,
-    #     sampling_width=sampling_width,
-    # )
-
-    # params[WavelengthBins] = wavelength_bins
-    # params[WavelengthBands] = wavelength_bands
-
     params[CorrectForGravity] = True
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
 
@@ -137,3 +118,11 @@ def test_pipeline_can_compute_IofQ_in_layers():
     result = pipeline.compute(IofQ[SampleRun])
     assert result.dims == ('layer', 'Q')
     assert result.sizes['layer'] == 4
+
+
+# sample_runs = [60250, 60264, 60292, 60308, 60322, 60339, 60353, 60367, 60381, 60395]
+# sample_transmission_run_number = 60394
+# #background_run_number = 60393
+# background_runs = [60248, 60262, 60290, 60306, 60320, 60337, 60351, 60365, 60379,  60393]
+# background_transmission_run_number = 60392
+# empty_beam_run_number = 60392

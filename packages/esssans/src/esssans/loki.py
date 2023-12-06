@@ -4,6 +4,7 @@
 Loading and masking specific to the ISIS Sans2d instrument and files stored in Scipp's
 HDF5 format.
 """
+from collections.abc import Iterable
 from functools import lru_cache, reduce
 from typing import NewType, Optional
 import warnings
@@ -14,10 +15,12 @@ import scippneutron as scn
 
 from .common import gravity_vector
 from .types import (
+    AuxiliaryRuns,
     BackgroundRun,
     CalibratedMaskedData,
     CleanMasked,
     DataWithLogicalDims,
+    DataRuns,
     EmptyBeamRun,
     Filename,
     MaskedData,
@@ -26,11 +29,12 @@ from .types import (
     Numerator,
     RawData,
     RawMonitor,
+    RunID,
     RunType,
+    # SampleOrBackground,
     SampleRun,
-    SampleRunID,
     TransmissionRun,
-    UnmergedSampleRawData,
+    UnmergedRawData,
 )
 
 DetectorLowCountsStrawMask = NewType('DetectorLowCountsStrawMask', sc.Variable)
@@ -44,7 +48,7 @@ DetectorTubeEdgeMask = NewType('DetectorTubeEdgeMask', sc.Variable)
 
 
 @lru_cache
-def load_loki_run(filename: str) -> sc.DataArray:
+def _load_loki_file(filename: str) -> sc.DataArray:
     from .data import get_path
 
     # TODO: Use the new scippnexus to avoid using load_nexus, now that transformations
@@ -73,26 +77,44 @@ def load_loki_run(filename: str) -> sc.DataArray:
     return da
 
 
-def load_sample_loki_run(filename: Filename[SampleRun]) -> UnmergedSampleRawData:
-    return UnmergedSampleRawData(load_loki_run(filename))
+def load_loki_data_run(filename: Filename[DataRuns]) -> UnmergedRawData[DataRuns]:
+    return UnmergedRawData[DataRuns](_load_loki_file(filename))
 
 
-def load_background_loki_run(
-    filename: Filename[BackgroundRun],
-) -> RawData[BackgroundRun]:
-    return RawData[BackgroundRun](load_loki_run(filename))
+# def load_loki_background_run(
+#     filename: Filename[BackgroundRun],
+# ) -> UnmergedRawData[BackgroundRun]:
+#     return UnmergedRawData[BackgroundRun](load_loki_run(filename))
 
 
-def load_emptybeam_loki_run(
-    filename: Filename[EmptyBeamRun],
-) -> RawData[EmptyBeamRun]:
-    return RawData[EmptyBeamRun](load_loki_run(filename))
+# def load_background_loki_run(
+#     filename: Filename[BackgroundRun],
+# ) -> RawData[BackgroundRun]:
+#     return RawData[BackgroundRun](load_loki_run(filename))
 
 
-def load_sampletransmission_loki_run(
-    filename: Filename[TransmissionRun[SampleRun]],
-) -> RawData[TransmissionRun[SampleRun]]:
-    return RawData[TransmissionRun[SampleRun]](load_loki_run(filename))
+def load_loki_auxiliary_run(
+    filename: Filename[AuxiliaryRuns],
+) -> RawData[AuxiliaryRuns]:
+    return RawData[AuxiliaryRuns](_load_loki_file(filename))
+
+
+# def load_loki_transmission_run(
+#     filename: Filename[TransmissionRun[RunType]],
+# ) -> RawData[TransmissionRun[RunType]]:
+#     return RawData[TransmissionRun[RunType]](load_loki_run(filename))
+
+
+# def load_loki_sample_transmission_run(
+#     filename: Filename[TransmissionRun[SampleRun]],
+# ) -> RawData[TransmissionRun[SampleRun]]:
+#     return RawData[TransmissionRun[SampleRun]](load_loki_run(filename))
+
+
+# def load_loki_background_transmission_run(
+#     filename: Filename[TransmissionRun[BackgroundRun]],
+# ) -> RawData[TransmissionRun[BackgroundRun]]:
+#     return RawData[TransmissionRun[BackgroundRun]](load_loki_run(filename))
 
 
 def _merge_run_events(a, b):
@@ -105,11 +127,24 @@ def _merge_run_events(a, b):
     return out
 
 
-def merge_sample_runs(
-    runs: sciline.Series[SampleRunID, UnmergedSampleRawData]
-) -> RawData[SampleRun]:
-    out = reduce(_merge_run_events, runs.values())
-    return RawData[SampleRun](out.bin(tof=1))
+def merge_runs(
+    runs: sciline.Series[RunID[SampleOrBackground], UnmergedRawData[SampleOrBackground]]
+) -> RawData[SampleOrBackground]:
+    return RawData[SampleOrBackground](
+        reduce(_merge_run_events, runs.values()).bin(tof=1)
+    )
+
+
+# def merge_sample_runs(
+#     runs: sciline.Series[RunID[SampleRun], UnmergedRawData[SampleRun]]
+# ) -> RawData[SampleRun]:
+#     return RawData[SampleRun](_merge_runs(runs))
+
+
+# def merge_background_runs(
+#     runs: sciline.Series[RunID[BackgroundRun], UnmergedRawData[BackgroundRun]]
+# ) -> RawData[BackgroundRun]:
+#     return RawData[BackgroundRun](_merge_runs(runs))
 
 
 def get_monitor(
@@ -221,11 +256,13 @@ providers = (
     get_monitor,
     mask_detectors,
     mask_after_calibration,
-    load_background_loki_run,
-    load_emptybeam_loki_run,
-    load_sample_loki_run,
-    load_sampletransmission_loki_run,
-    merge_sample_runs,
+    load_loki_data_run,
+    load_loki_auxiliary_run,
+    # load_loki_transmission_run,
+    merge_runs,
+    # merge_sample_runs,
+    # load_loki_sample_transmission_run,
+    # load_loki_background_transmission_run,
 )
 """
 Providers for LoKI

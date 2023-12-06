@@ -21,14 +21,44 @@ EmptyBeamRun = NewType('EmptyBeamRun', int)
 """Run where the sample holder was empty (sometimes called 'direct run')"""
 SampleRun = NewType('SampleRun', int)
 """Sample run"""
-RunType = TypeVar('RunType', BackgroundRun, EmptyBeamRun, SampleRun)
-"""TypeVar used for specifying BackgroundRun, EmptyBeamRun or SampleRun"""
 
 
-class TransmissionRun(sciline.Scope[RunType, int], int):
+SampleOrBackground = TypeVar('SampleOrBackground', BackgroundRun, SampleRun)
+"""TypeVar used for specifying BackgroundRun or SampleRun"""
+
+
+class DataRun(sciline.Scope[SampleOrBackground, int], int):
+    """Mapping between RunType and data run."""
+
+
+class TransmissionRun(sciline.Scope[SampleOrBackground, int], int):
     """Mapping between RunType and transmission run.
     In the case where no transmission run is provided, the transmission run should be
     the same as the measurement (sample or background) run."""
+
+
+OtherRuns = TypeVar(
+    'OtherRuns',
+    EmptyBeamRun,
+    TransmissionRun[BackgroundRun],
+    TransmissionRun[SampleRun],
+)
+
+
+class AuxiliaryRun(sciline.Scope[OtherRuns, int], int):
+    """"""
+
+
+RunType = TypeVar(
+    'RunType',
+    BackgroundRun,
+    EmptyBeamRun,
+    SampleRun,
+    TransmissionRun[BackgroundRun],
+    TransmissionRun[SampleRun],
+)
+"""TypeVar used for specifying BackgroundRun, EmptyBeamRun, SampleRun,
+TransmissionRun[BackgroundRun], or TransmissionRun[SampleRun]"""
 
 
 # 1.2  Monitor types
@@ -98,8 +128,9 @@ class Filename(sciline.Scope[RunType, str], str):
     """Filename of BackgroundRun|EmptyBeamRun|SampleRun"""
 
 
-SampleRunID = NewType('SampleRunID', int)
-"""Sample run ID when multiple runs are used"""
+class RunID(sciline.Scope[RunType, int], int):
+    """Sample run ID when multiple runs are used"""
+
 
 # 3  Workflow (intermediate) results
 
@@ -138,8 +169,12 @@ class RawData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Raw data"""
 
 
-UnmergedSampleRawData = NewType('UnmergedSampleRawData', sc.DataArray)
-"""Single sample run"""
+class UnmergedRawData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Single raw data run"""
+
+
+# UnmergedSampleRawData = NewType('UnmergedSampleRawData', sc.DataArray)
+# """Single sample run"""
 
 
 class MaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
