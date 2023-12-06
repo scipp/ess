@@ -27,8 +27,8 @@ SampleOrBackground = TypeVar('SampleOrBackground', BackgroundRun, SampleRun)
 """TypeVar used for specifying BackgroundRun or SampleRun"""
 
 
-class DataRun(sciline.Scope[SampleOrBackground, int], int):
-    """Mapping between RunType and data run."""
+# class DataRun(sciline.Scope[SampleOrBackground, int], int):
+#     """Mapping between RunType and data run."""
 
 
 class TransmissionRun(sciline.Scope[SampleOrBackground, int], int):
@@ -37,16 +37,16 @@ class TransmissionRun(sciline.Scope[SampleOrBackground, int], int):
     the same as the measurement (sample or background) run."""
 
 
-OtherRuns = TypeVar(
-    'OtherRuns',
+AuxiliaryRun = TypeVar(
+    'AuxiliaryRun',
     EmptyBeamRun,
-    TransmissionRun[BackgroundRun],
-    TransmissionRun[SampleRun],
+    TransmissionRun  # [BackgroundRun],
+    # TransmissionRun[SampleRun],
 )
 
 
-class AuxiliaryRun(sciline.Scope[OtherRuns, int], int):
-    """"""
+# class AuxiliaryRun(sciline.Scope[OtherRuns, int], int):
+#     """"""
 
 
 RunType = TypeVar(
@@ -54,8 +54,8 @@ RunType = TypeVar(
     BackgroundRun,
     EmptyBeamRun,
     SampleRun,
-    TransmissionRun[BackgroundRun],
-    TransmissionRun[SampleRun],
+    # TransmissionRun[BackgroundRun],
+    # TransmissionRun[SampleRun],
 )
 """TypeVar used for specifying BackgroundRun, EmptyBeamRun, SampleRun,
 TransmissionRun[BackgroundRun], or TransmissionRun[SampleRun]"""
@@ -128,7 +128,7 @@ class Filename(sciline.Scope[RunType, str], str):
     """Filename of BackgroundRun|EmptyBeamRun|SampleRun"""
 
 
-class RunID(sciline.Scope[RunType, int], int):
+class RunID(sciline.Scope[SampleOrBackground, int], int):
     """Sample run ID when multiple runs are used"""
 
 
@@ -169,7 +169,7 @@ class RawData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Raw data"""
 
 
-class UnmergedRawData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+class UnmergedRawData(sciline.Scope[SampleOrBackground, sc.DataArray], sc.DataArray):
     """Single raw data run"""
 
 

@@ -15,23 +15,24 @@ import scippneutron as scn
 
 from .common import gravity_vector
 from .types import (
-    AuxiliaryRuns,
+    AuxiliaryRun,
     BackgroundRun,
     CalibratedMaskedData,
     CleanMasked,
     DataWithLogicalDims,
-    DataRuns,
+    # DataRun,
     EmptyBeamRun,
     Filename,
     MaskedData,
     MonitorType,
     NeXusMonitorName,
     Numerator,
+    # OtherRuns,
     RawData,
     RawMonitor,
     RunID,
     RunType,
-    # SampleOrBackground,
+    SampleOrBackground,
     SampleRun,
     TransmissionRun,
     UnmergedRawData,
@@ -77,8 +78,10 @@ def _load_loki_file(filename: str) -> sc.DataArray:
     return da
 
 
-def load_loki_data_run(filename: Filename[DataRuns]) -> UnmergedRawData[DataRuns]:
-    return UnmergedRawData[DataRuns](_load_loki_file(filename))
+def load_loki_data_run(
+    filename: Filename[SampleOrBackground],
+) -> UnmergedRawData[SampleOrBackground]:
+    return UnmergedRawData[SampleOrBackground](_load_loki_file(filename))
 
 
 # def load_loki_background_run(
@@ -93,28 +96,34 @@ def load_loki_data_run(filename: Filename[DataRuns]) -> UnmergedRawData[DataRuns
 #     return RawData[BackgroundRun](load_loki_run(filename))
 
 
-def load_loki_auxiliary_run(
-    filename: Filename[AuxiliaryRuns],
-) -> RawData[AuxiliaryRuns]:
-    return RawData[AuxiliaryRuns](_load_loki_file(filename))
+# def load_loki_auxiliary_run(
+#     filename: Filename[AuxiliaryRun],
+# ) -> RawData[AuxiliaryRun]:
+#     return RawData[AuxiliaryRun](_load_loki_file(filename))
+
+
+def load_loki_emptybeam_run(
+    filename: Filename[EmptyBeamRun],
+) -> RawData[EmptyBeamRun]:
+    return RawData[EmptyBeamRun](_load_loki_file(filename))
 
 
 # def load_loki_transmission_run(
-#     filename: Filename[TransmissionRun[RunType]],
-# ) -> RawData[TransmissionRun[RunType]]:
-#     return RawData[TransmissionRun[RunType]](load_loki_run(filename))
+#     filename: Filename[TransmissionRun[SampleOrBackground]],
+# ) -> RawData[TransmissionRun[SampleOrBackground]]:
+#     return RawData[TransmissionRun[SampleOrBackground]](_load_loki_file(filename))
 
 
-# def load_loki_sample_transmission_run(
-#     filename: Filename[TransmissionRun[SampleRun]],
-# ) -> RawData[TransmissionRun[SampleRun]]:
-#     return RawData[TransmissionRun[SampleRun]](load_loki_run(filename))
+def load_loki_sample_transmission_run(
+    filename: Filename[TransmissionRun[SampleRun]],
+) -> RawData[TransmissionRun[SampleRun]]:
+    return RawData[TransmissionRun[SampleRun]](_load_loki_file(filename))
 
 
-# def load_loki_background_transmission_run(
-#     filename: Filename[TransmissionRun[BackgroundRun]],
-# ) -> RawData[TransmissionRun[BackgroundRun]]:
-#     return RawData[TransmissionRun[BackgroundRun]](load_loki_run(filename))
+def load_loki_background_transmission_run(
+    filename: Filename[TransmissionRun[BackgroundRun]],
+) -> RawData[TransmissionRun[BackgroundRun]]:
+    return RawData[TransmissionRun[BackgroundRun]](_load_loki_file(filename))
 
 
 def _merge_run_events(a, b):
@@ -257,12 +266,14 @@ providers = (
     mask_detectors,
     mask_after_calibration,
     load_loki_data_run,
-    load_loki_auxiliary_run,
+    load_loki_emptybeam_run,
+    # load_loki_transmission_run,
+    # load_loki_auxiliary_run,
     # load_loki_transmission_run,
     merge_runs,
     # merge_sample_runs,
-    # load_loki_sample_transmission_run,
-    # load_loki_background_transmission_run,
+    load_loki_sample_transmission_run,
+    load_loki_background_transmission_run,
 )
 """
 Providers for LoKI
