@@ -7,7 +7,7 @@ Components for DREAM
 import importlib.metadata
 
 from . import data
-from .io import load_nexus
+from .io import fold_nexus_detectors, load_nexus
 
 try:
     __version__ = importlib.metadata.version(__package__ or __name__)
@@ -18,5 +18,6 @@ del importlib
 
 __all__ = [
     "data",
+    "fold_nexus_detectors",
     "load_nexus",
 ]

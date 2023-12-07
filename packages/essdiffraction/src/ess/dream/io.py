@@ -59,8 +59,19 @@ def load_nexus(
     with snx.File(path, definitions=definitions) as f:
         dg = f[entry][()]
     dg = snx.compute_positions(dg)
-    if not fold_detectors:
-        return dg
+    return fold_nexus_detectors(dg) if fold_detectors else dg
+
+
+def fold_nexus_detectors(dg: sc.DataGroup) -> sc.DataGroup:
+    """
+    Fold the detector data in a DREAM NeXus file.
+
+    The detector banks in the returned data group will have a multi-dimensional shape,
+    following the logical structure as far as possible. Note that the full structure
+    cannot be folded, as some dimensions are irregular.
+    """
+    dg = dg.copy()
+    dg['instrument'] = dg['instrument'].copy()
     instrument = dg['instrument']
     mantle = instrument['mantle_detector']
     mantle['mantle_event_data'] = mantle['mantle_event_data'].fold(
