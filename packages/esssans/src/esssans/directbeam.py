@@ -7,7 +7,7 @@ import numpy as np
 import scipp as sc
 from sciline import Pipeline
 
-from .types import DirectBeam, FinalDims, IofQ, SampleRun, WavelengthBands
+from .types import BackgroundSubtractedIofQ, DirectBeam, FinalDims, WavelengthBands
 
 
 def make_wavelength_bins_and_bands(
@@ -148,8 +148,8 @@ def direct_beam(
     for it in range(niter):
         print("Iteration", it)
 
-        iofq_full = pipeline_full.compute(IofQ[SampleRun])
-        iofq_slices = pipeline_bands.compute(IofQ[SampleRun])
+        iofq_full = pipeline_full.compute(BackgroundSubtractedIofQ)
+        iofq_slices = pipeline_bands.compute(BackgroundSubtractedIofQ)
 
         if per_layer:
             for i in range(iofq_full.sizes['layer']):

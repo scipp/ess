@@ -4,10 +4,8 @@
 Loading and masking specific to the ISIS Sans2d instrument and files stored in Scipp's
 HDF5 format.
 """
-from collections.abc import Iterable
 from functools import lru_cache, reduce
 from typing import NewType, Optional
-import warnings
 
 import sciline
 import scipp as sc
@@ -15,24 +13,20 @@ import scippneutron as scn
 
 from .common import gravity_vector
 from .types import (
-    AuxiliaryRun,
     BackgroundRun,
     CalibratedMaskedData,
     CleanMasked,
     DataWithLogicalDims,
-    # DataRun,
     EmptyBeamRun,
     Filename,
     MaskedData,
     MonitorType,
     NeXusMonitorName,
     Numerator,
-    # OtherRuns,
     RawData,
     RawMonitor,
     RunID,
     RunType,
-    SampleOrBackground,
     SampleRun,
     TransmissionRun,
     UnmergedRawData,
@@ -54,64 +48,37 @@ def _load_loki_file(filename: str) -> sc.DataArray:
 
     # TODO: Use the new scippnexus to avoid using load_nexus, now that transformations
     # are supported.
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", category=sc.VisibleDeprecationWarning)
-
-        da = scn.load_nexus(get_path(filename))
-        if 'gravity' not in da.coords:
-            da.coords["gravity"] = gravity_vector()
-        if 'sample_position' not in da.coords:
-            da.coords['sample_position'] = sc.vector([0, 0, 0], unit='m')
-        da.bins.constituents['data'].variances = da.bins.constituents['data'].values
-        for name in ('monitor_1', 'monitor_2'):
-            monitor = da.attrs[name].value
-            if 'source_position' not in monitor.coords:
-                monitor.coords["source_position"] = da.coords['source_position']
-            monitor.values[0].variances = monitor.values[0].values
-        pixel_shape = da.coords['pixel_shape'].values[0]
-        da.coords['pixel_width'] = sc.norm(
-            pixel_shape['face1_edge'] - pixel_shape['face1_center']
-        ).data
-        da.coords['pixel_height'] = sc.norm(
-            pixel_shape['face2_center'] - pixel_shape['face1_center']
-        ).data
+    da = scn.load_nexus(get_path(filename))
+    if 'gravity' not in da.coords:
+        da.coords["gravity"] = gravity_vector()
+    if 'sample_position' not in da.coords:
+        da.coords['sample_position'] = sc.vector([0, 0, 0], unit='m')
+    da.bins.constituents['data'].variances = da.bins.constituents['data'].values
+    for name in ('monitor_1', 'monitor_2'):
+        monitor = da.attrs[name].value
+        if 'source_position' not in monitor.coords:
+            monitor.coords["source_position"] = da.coords['source_position']
+        monitor.values[0].variances = monitor.values[0].values
+    pixel_shape = da.coords['pixel_shape'].values[0]
+    da.coords['pixel_width'] = sc.norm(
+        pixel_shape['face1_edge'] - pixel_shape['face1_center']
+    ).data
+    da.coords['pixel_height'] = sc.norm(
+        pixel_shape['face2_center'] - pixel_shape['face1_center']
+    ).data
     return da
 
 
 def load_loki_data_run(
-    filename: Filename[SampleOrBackground],
-) -> UnmergedRawData[SampleOrBackground]:
-    return UnmergedRawData[SampleOrBackground](_load_loki_file(filename))
-
-
-# def load_loki_background_run(
-#     filename: Filename[BackgroundRun],
-# ) -> UnmergedRawData[BackgroundRun]:
-#     return UnmergedRawData[BackgroundRun](load_loki_run(filename))
-
-
-# def load_background_loki_run(
-#     filename: Filename[BackgroundRun],
-# ) -> RawData[BackgroundRun]:
-#     return RawData[BackgroundRun](load_loki_run(filename))
-
-
-# def load_loki_auxiliary_run(
-#     filename: Filename[AuxiliaryRun],
-# ) -> RawData[AuxiliaryRun]:
-#     return RawData[AuxiliaryRun](_load_loki_file(filename))
+    filename: Filename[RunType],
+) -> UnmergedRawData[RunType]:
+    return UnmergedRawData[RunType](_load_loki_file(filename))
 
 
 def load_loki_emptybeam_run(
     filename: Filename[EmptyBeamRun],
 ) -> RawData[EmptyBeamRun]:
     return RawData[EmptyBeamRun](_load_loki_file(filename))
-
-
-# def load_loki_transmission_run(
-#     filename: Filename[TransmissionRun[SampleOrBackground]],
-# ) -> RawData[TransmissionRun[SampleOrBackground]]:
-#     return RawData[TransmissionRun[SampleOrBackground]](_load_loki_file(filename))
 
 
 def load_loki_sample_transmission_run(
@@ -137,35 +104,16 @@ def _merge_run_events(a, b):
 
 
 def merge_runs(
-    runs: sciline.Series[RunID[SampleOrBackground], UnmergedRawData[SampleOrBackground]]
-) -> RawData[SampleOrBackground]:
-    return RawData[SampleOrBackground](
-        reduce(_merge_run_events, runs.values()).bin(tof=1)
-    )
-
-
-# def merge_sample_runs(
-#     runs: sciline.Series[RunID[SampleRun], UnmergedRawData[SampleRun]]
-# ) -> RawData[SampleRun]:
-#     return RawData[SampleRun](_merge_runs(runs))
-
-
-# def merge_background_runs(
-#     runs: sciline.Series[RunID[BackgroundRun], UnmergedRawData[BackgroundRun]]
-# ) -> RawData[BackgroundRun]:
-#     return RawData[BackgroundRun](_merge_runs(runs))
+    runs: sciline.Series[RunID[RunType], UnmergedRawData[RunType]]
+) -> RawData[RunType]:
+    return RawData[RunType](reduce(_merge_run_events, runs.values()).bin(tof=1))
 
 
 def get_monitor(
     da: RawData[RunType], nexus_name: NeXusMonitorName[MonitorType]
 ) -> RawMonitor[RunType, MonitorType]:
     # See https://github.com/scipp/sciline/issues/52 why copy needed
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", category=sc.VisibleDeprecationWarning)
-
-        out = da.attrs[nexus_name].value.copy()
-
-    return RawMonitor[RunType, MonitorType](out)
+    return RawMonitor[RunType, MonitorType](da.attrs[nexus_name].value.copy())
 
 
 def to_logical_dims(da: RawData[RunType]) -> DataWithLogicalDims[RunType]:
@@ -267,13 +215,9 @@ providers = (
     mask_after_calibration,
     load_loki_data_run,
     load_loki_emptybeam_run,
-    # load_loki_transmission_run,
-    # load_loki_auxiliary_run,
-    # load_loki_transmission_run,
-    merge_runs,
-    # merge_sample_runs,
     load_loki_sample_transmission_run,
     load_loki_background_transmission_run,
+    merge_runs,
 )
 """
 Providers for LoKI
