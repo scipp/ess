@@ -6,6 +6,7 @@ Components for DREAM
 """
 import importlib.metadata
 
+from . import data
 from .io import load_nexus
 
 try:
@@ -16,5 +17,6 @@ except importlib.metadata.PackageNotFoundError:
 del importlib
 
 __all__ = [
+    "data",
     "load_nexus",
 ]

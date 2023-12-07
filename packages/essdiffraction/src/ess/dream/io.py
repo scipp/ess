@@ -10,6 +10,7 @@ import scippnexus as snx
 
 def load_nexus(
     path: Union[str, os.PathLike],
+    *,
     load_pixel_shape: bool = False,
     entry: str = 'entry',
     fold_detectors: bool = True,
@@ -24,10 +25,10 @@ def load_nexus(
 
     - Mounting-unit, cassette, and counter roughly correspond to the azimuthal angle
       in the mantle detector. However, counter is reversed in the current files. This
-      may also be the case in the other detectors
+      may also be the case in the other detectors.
     - The endcap detectors have a irregular structure that cannot be fully folded.
-      This is not a problem but not again that the counter may be reversed. It is
-      current not clear if this is a bug in the file.
+      This is not a problem but note again that the counter may be reversed. It is
+      currently not clear if this is a bug in the file.
     - The high-resolution detector has a very odd numbering scheme. The SANS detector
       is using the same, but is not populated in the current files. The scheme
       attempts to follows some sort of physical ordering in space (x,y,z), but it
