@@ -5,5 +5,5 @@
 maxdepth: 2
 ---
 
-powgen_reduction
+POWGEN_data_reduction
 ```

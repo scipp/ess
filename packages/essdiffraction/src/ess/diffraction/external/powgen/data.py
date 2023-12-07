@@ -1,5 +1,25 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+
+"""Utilities for loading example data for POWGEN."""
+
+import scipp as sc
+
+from ...types import (
+    AccumulatedProtonCharge,
+    CalibrationFilename,
+    Filename,
+    ProtonCharge,
+    RawCalibrationData,
+    RawData,
+    RawDataAndMetadata,
+    RawDataWithVariances,
+    RunType,
+    SampleRun,
+    VanadiumRun,
+)
+from .types import DetectorInfo
+
 _version = '1'
 
 __all__ = ['get_path']
@@ -71,3 +91,69 @@ def vanadium_file() -> str:
 def calibration_file() -> str:
     (path,) = get_path('PG3_FERNS_d4832_2011_08_24.zip', unzip=True)
     return path
+
+
+def pooch_load(filename: Filename[RunType]) -> RawDataAndMetadata[RunType]:
+    """Load a file with pooch.
+
+    If the file is a zip archive, it is extracted and a path to the contained
+    file is returned.
+
+    The loaded data holds both the events and any metadata from the file.
+    """
+    if filename.endswith('.zip'):
+        (path,) = get_path(filename, unzip=True)
+    else:
+        path = get_path(filename)
+    return RawDataAndMetadata[RunType](sc.io.load_hdf5(path))
+
+
+def pooch_load_calibration(filename: CalibrationFilename) -> RawCalibrationData:
+    """Load the calibration data for the POWGEN test data."""
+    if filename.endswith('.zip'):
+        (path,) = get_path(filename, unzip=True)
+    else:
+        path = get_path(filename)
+    return RawCalibrationData(sc.io.load_hdf5(path))
+
+
+# This can be generalized with https://github.com/scipp/sciline/issues/69.
+def extract_raw_data_sample(dg: RawDataAndMetadata[SampleRun]) -> RawData[SampleRun]:
+    """Return the events from a loaded data group."""
+    return RawData[SampleRun](dg['data'])
+
+
+def extract_raw_data_vanadium(
+    dg: RawDataAndMetadata[VanadiumRun],
+) -> RawDataWithVariances[VanadiumRun]:
+    """Return the events from a loaded data group."""
+    return RawDataWithVariances[VanadiumRun](dg['data'])
+
+
+def extract_detector_info(dg: RawDataAndMetadata[SampleRun]) -> DetectorInfo:
+    """Return the detector info from a loaded data group."""
+    return DetectorInfo(dg['detector_info'])
+
+
+def extract_proton_charge(dg: RawDataAndMetadata[RunType]) -> ProtonCharge[RunType]:
+    """Return the proton charge from a loaded data group."""
+    return ProtonCharge[RunType](dg['proton_charge'])
+
+
+def extract_accumulated_proton_charge(
+    data: RawData[RunType],
+) -> AccumulatedProtonCharge[RunType]:
+    """Return the stored accumulated proton charge from a loaded data group."""
+    return AccumulatedProtonCharge[RunType](data.coords['gd_prtn_chrg'])
+
+
+providers = (
+    pooch_load,
+    pooch_load_calibration,
+    extract_accumulated_proton_charge,
+    extract_detector_info,
+    extract_proton_charge,
+    extract_raw_data_sample,
+    extract_raw_data_vanadium,
+)
+"""Sciline Providers for loading POWGEN data."""

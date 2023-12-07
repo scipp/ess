@@ -10,7 +10,8 @@ from typing import Optional
 import scipp as sc
 
 from ..logging import get_logger
-from .corrections import merge_calibration
+from ..types import CalibrationData, DspacingData, NormalizedByProtonCharge, RunType
+from .correction import merge_calibration
 
 
 def _dspacing_from_diff_calibration_generic_impl(t, t0, a, c):
@@ -94,8 +95,9 @@ def _consume_positions(position, sample_position, source_position):
 
 
 def to_dspacing_with_calibration(
-    data: sc.DataArray, *, calibration: Optional[sc.Dataset] = None
-) -> sc.DataArray:
+    data: NormalizedByProtonCharge[RunType],
+    calibration: Optional[CalibrationData] = None,
+) -> DspacingData[RunType]:
     """
     Transform coordinates to d-spacing from calibration parameters.
 
@@ -148,4 +150,8 @@ def to_dspacing_with_calibration(
 
     out = out.transform_coords('dspacing', graph=graph, keep_intermediate=False)
     out.coords.pop('_tag_positions_consumed', None)
-    return out
+    return DspacingData[RunType](out)
+
+
+providers = (to_dspacing_with_calibration,)
+"""Sciline providers for coordinate transformations."""

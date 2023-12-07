@@ -11,6 +11,8 @@ from numbers import Real
 
 import scipp as sc
 
+from .types import FilteredData, RawData, RunType, TofCroppedData, ValidTofRange
+
 
 def _equivalent_bin_indices(a, b) -> bool:
     a_begin = a.bins.constituents['begin'].flatten(to='')
@@ -67,3 +69,58 @@ def remove_bad_pulses(
     filtered = filtered.squeeze('good_pulse').copy(deep=False)
     del filtered.coords['good_pulse']
     return filtered
+
+
+def crop_tof(
+    data: RawData[RunType], tof_range: ValidTofRange
+) -> TofCroppedData[RunType]:
+    """Remove events outside the specified TOF range.
+
+    Parameters
+    ----------
+    data:
+        Data to be cropped.
+        Expected to have a coordinate called `'tof'`.
+    tof_range:
+        1d, len-2 variable containing the lower and upper bounds for
+        time-of-flight.
+
+    Returns
+    -------
+    :
+        Cropped data.
+    """
+    return TofCroppedData[RunType](
+        data.bin(tof=tof_range.to(unit=data.coords['tof'].unit))
+    )
+
+
+def filter_events(data: TofCroppedData[RunType]) -> FilteredData[RunType]:
+    """Remove bad events.
+
+    Attention
+    ---------
+    This function currently does nothing because it is unclear how to filter
+    events at ESS.
+    In the future, this function will filter out events that
+    cannot be used for analysis.
+
+    Parameters
+    ----------
+    data:
+        Input events to be filtered.
+
+    Returns
+    -------
+    :
+        `data` with bad events removed.
+    """
+    # TODO this needs to filter by proton charge once we know how
+    return FilteredData[RunType](data)
+
+
+providers = (
+    crop_tof,
+    filter_events,
+)
+"""Sciline providers for event filtering."""

@@ -3,7 +3,12 @@
 """
 Components for powder diffraction experiments.
 """
-from .conversions import to_dspacing_with_calibration
-from .corrections import merge_calibration
+from .conversion import providers as conversion_providers
+from .conversion import to_dspacing_with_calibration
+from .correction import merge_calibration
+
+providers = (*conversion_providers,)
+"""Sciline providers for powder diffraction."""
+del conversion_providers
 
 __all__ = ['merge_calibration', 'to_dspacing_with_calibration']

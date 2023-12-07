@@ -6,10 +6,13 @@ Beamline parameters and utilities for POWGEN.
 
 import scipp as sc
 
+from ...types import CalibrationData, RawCalibrationData
+from .types import DetectorInfo
+
 
 def map_detector_to_spectrum(
-    data: sc.DataArray, *, detector_info: sc.DataArray
-) -> sc.DataArray:
+    data: sc.Dataset, *, detector_info: sc.Dataset
+) -> sc.Dataset:
     """
     Transform 'detector' coords to 'spectrum'.
 
@@ -44,3 +47,19 @@ def map_detector_to_spectrum(
     )
 
     return out.rename_dims({'detector': 'spectrum'})
+
+
+def preprocess_calibration_data(
+    data: RawCalibrationData, detector_info: DetectorInfo
+) -> CalibrationData:
+    """Convert calibration data to a format that can be used by Scipp.
+
+    The raw calibration data is encoded in terms of a `'detector'` coordinate.
+    This needs to be converted to a `'spectrum'` coordinate to align
+    if with sample data.
+    """
+    return CalibrationData(map_detector_to_spectrum(data, detector_info=detector_info))
+
+
+providers = (preprocess_calibration_data,)
+"""Sciline providers for POWGEN beamline processing."""
