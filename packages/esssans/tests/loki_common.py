@@ -48,7 +48,7 @@ def make_param_tables(
     return sample_runs_table, background_runs_table
 
 
-def make_params() -> dict:
+def make_params(n_wavelength_bands: int = 1) -> dict:
     params = {}
 
     params[Filename[TransmissionRun[SampleRun]]] = '60394-2022-02-28_2215.nxs'
@@ -62,13 +62,15 @@ def make_params() -> dict:
     wavelength_min = sc.scalar(1.0, unit='angstrom')
     wavelength_max = sc.scalar(13.0, unit='angstrom')
     n_wavelength_bins = 200
-    # Wavelength bands parameters
-    n_wavelength_bands = 1
-    sampling_width = sc.scalar(0.25, unit='angstrom')
 
     params[WavelengthBins] = sc.linspace(
         'wavelength', wavelength_min, wavelength_max, n_wavelength_bins + 1
     )
+
+    if n_wavelength_bands == 1:
+        sampling_width = wavelength_max - wavelength_min
+    else:
+        sampling_width = 2.0 * (params[WavelengthBins][1] - params[WavelengthBins][0])
 
     band_start = sc.linspace(
         'band', wavelength_min, wavelength_max - sampling_width, n_wavelength_bands

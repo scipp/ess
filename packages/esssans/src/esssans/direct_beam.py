@@ -13,7 +13,7 @@ from .types import BackgroundSubtractedIofQ, DirectBeam, FinalDims, WavelengthBa
 def _direct_beam_iteration(
     iofq_full: sc.DataArray,
     iofq_slices: sc.DataArray,
-    direct_beam: sc.DataArray,
+    direct_beam_function: sc.DataArray,
     I0: sc.Variable,
 ) -> sc.DataArray:
     eff = []
@@ -23,7 +23,7 @@ def _direct_beam_iteration(
         f = np.median(vals[sel] / iofq_full.values[sel])
         eff.append(f)
 
-    out = direct_beam * sc.array(dims=['wavelength'], values=eff)
+    out = direct_beam_function * sc.array(dims=['wavelength'], values=eff)
     scaling = sc.values(iofq_full['Q', 0].data) / I0
     out *= scaling
     return out
@@ -83,7 +83,7 @@ def direct_beam(
     sizes = {'wavelength': wavelength_bands.sizes['band']}
     if per_layer:
         sizes['layer'] = 4
-    direct_beam = sc.DataArray(
+    direct_beam_function = sc.DataArray(
         data=sc.ones(sizes=sizes),
         coords={
             'wavelength': sc.midpoints(wavelength_bands, dim='wavelength')
@@ -93,8 +93,8 @@ def direct_beam(
     )
 
     # TODO: This feels like an ugly hack. What is the best way to achieve this?
-    pipeline_full._providers[DirectBeam] = lambda: direct_beam
-    pipeline_bands._providers[DirectBeam] = lambda: direct_beam
+    pipeline_full._providers[DirectBeam] = lambda: direct_beam_function
+    pipeline_bands._providers[DirectBeam] = lambda: direct_beam_function
 
     results = []
 
@@ -106,17 +106,17 @@ def direct_beam(
 
         if per_layer:
             for i in range(iofq_full.sizes['layer']):
-                direct_beam['layer', i] = _direct_beam_iteration(
+                direct_beam_function['layer', i] = _direct_beam_iteration(
                     iofq_full=iofq_full['layer', i],
                     iofq_slices=iofq_slices['layer', i],
-                    direct_beam=direct_beam['layer', i],
+                    direct_beam_function=direct_beam_function['layer', i],
                     I0=I0,
                 )
         else:
-            direct_beam = _direct_beam_iteration(
+            direct_beam_function = _direct_beam_iteration(
                 iofq_full=iofq_full,
                 iofq_slices=iofq_slices,
-                direct_beam=direct_beam,
+                direct_beam_function=direct_beam_function,
                 I0=I0,
             )
 
@@ -124,7 +124,7 @@ def direct_beam(
             {
                 'iofq_full': iofq_full,
                 'iofq_slices': iofq_slices,
-                'direct_beam': direct_beam,
+                'direct_beam': direct_beam_function,
             }
         )
     return results

@@ -27,78 +27,22 @@ from esssans.types import (
     WavelengthBins,
 )
 
+from loki_common import make_param_tables, make_params
 
-def make_param_tables(
-    sample_runs: Optional[List[int]] = None, background_runs: Optional[List[int]] = None
-) -> List[sciline.ParamTable]:
-    suffix = '-2022-02-28_2215.nxs'
 
-    if sample_runs is None:
-        sample_runs = [60339]
-    sample_filenames = [f'{i}{suffix}' for i in sample_runs]
-    sample_runs_table = sciline.ParamTable(
-        RunID[SampleRun], {Filename[SampleRun]: sample_filenames}, index=sample_runs
+def get_I0(q_loc: sc.Variable) -> sc.Variable:
+    from esssans.data import get_path
+
+    data = np.loadtxt(get_path('PolyGauss_I0-50_Rg-60.txt'))
+    qcoord = sc.array(dims=["Q"], values=data[:, 0], unit='1/angstrom')
+    theory = sc.DataArray(
+        data=sc.array(dims=["Q"], values=data[:, 1], unit=''), coords={"Q": qcoord}
     )
-
-    if background_runs is None:
-        background_runs = [60393]
-    background_filenames = [f'{i}{suffix}' for i in background_runs]
-    background_runs_table = sciline.ParamTable(
-        RunID[BackgroundRun],
-        {Filename[BackgroundRun]: background_filenames},
-        index=background_runs,
-    )
-    return sample_runs_table, background_runs_table
-
-
-def make_params() -> dict:
-    params = {}
-    suffix = '-2022-02-28_2215.nxs'
-
-    params[Filename[TransmissionRun[SampleRun]]] = f'60394{suffix}'
-    params[Filename[TransmissionRun[BackgroundRun]]] = f'60392{suffix}'
-    params[Filename[EmptyBeamRun]] = f'60392{suffix}'
-
-    params[NeXusMonitorName[Incident]] = 'monitor_1'
-    params[NeXusMonitorName[Transmission]] = 'monitor_2'
-
-    # Wavelength binning parameters
-    wavelength_min = sc.scalar(1.0, unit='angstrom')
-    wavelength_max = sc.scalar(13.0, unit='angstrom')
-    n_wavelength_bins = 200
-    # Wavelength bands parameters
-    n_wavelength_bands = 20
-    sampling_width = sc.scalar(0.75, unit='angstrom')
-
-    # Wavelength binning and bands
-    wavelength_bins, wavelength_bands = sans.directbeam.make_wavelength_bins_and_bands(
-        wavelength_min=wavelength_min,
-        wavelength_max=wavelength_max,
-        n_wavelength_bins=n_wavelength_bins,
-        n_wavelength_bands=n_wavelength_bands,
-        sampling_width=sampling_width,
-    )
-
-    params[WavelengthBins] = wavelength_bins
-    params[WavelengthBands] = wavelength_bands
-
-    params[CorrectForGravity] = True
-    params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
-
-    params[QBins] = sc.linspace(
-        dim='Q', start=0.01, stop=0.3, num=101, unit='1/angstrom'
-    )
-
-    # The final result should have dims of Q only
-    params[FinalDims] = ['Q']
-
-    # params_full = params.copy()
-    # params_full[WavelengthBands] = sc.concat(
-    #     [wavelength_min, wavelength_max], dim='wavelength'
-    # )
-
-    return params
-    # , params_full
+    ind = np.argmax((qcoord > q_loc).values)
+    I0 = (theory.data[ind] - theory.data[ind - 1]) / (qcoord[ind] - qcoord[ind - 1]) * (
+        q_loc - qcoord[ind - 1]
+    ) + theory.data[ind - 1]
+    return I0
 
 
 def loki_providers() -> List[Callable]:
@@ -106,70 +50,59 @@ def loki_providers() -> List[Callable]:
 
 
 def test_can_compute_direct_beam_for_all_pixels():
-    params, params_full, param_tables = make_params()
-
-    params_full = params.copy()
-    params_full[WavelengthBands] = sc.concat(
-        [wavelength_min, wavelength_max], dim='wavelength'
-    )
-
+    n_wavelength_bands = 10
+    tables = make_param_tables()
+    params_full = make_params()
+    params_bands = make_params(n_wavelength_bands=n_wavelength_bands)
     providers = loki_providers()
     pipelines = [
-        sciline.Pipeline(providers, params=params),
+        sciline.Pipeline(providers, params=params_bands),
         sciline.Pipeline(providers, params=params_full),
     ]
     for pipeline in pipelines:
-        for table in param_tables:
+        for table in tables:
             pipeline.set_param_table(table)
+    I0 = get_I0(sc.midpoints(params_full[QBins])[0])
+
+    results = sans.direct_beam(pipelines=pipelines, I0=I0, niter=4)
+    # Unpack the final result
+    iofq_full = results[-1]['iofq_full']
+    iofq_slices = results[-1]['iofq_slices']
+    direct_beam_function = results[-1]['direct_beam']
+    assert iofq_full.dims == ('Q',)
+    assert iofq_slices.dims == ('band', 'Q')
+    assert iofq_slices.sizes['band'] == n_wavelength_bands
+    assert direct_beam_function.sizes['wavelength'] == n_wavelength_bands
 
 
-@pytest.mark.parametrize(
-    'uncertainties',
-    [UncertaintyBroadcastMode.drop, UncertaintyBroadcastMode.upper_bound],
-)
-def test_pipeline_can_compute_IofQ(uncertainties):
-    params, param_tables = make_params()
-    params[UncertaintyBroadcastMode] = uncertainties
-    pipeline = sciline.Pipeline(loki_providers(), params=params)
-    for table in param_tables:
-        pipeline.set_param_table(table)
-    result = pipeline.compute(BackgroundSubtractedIofQ)
-    assert result.dims == ('Q',)
+def test_can_compute_direct_beam_per_layer():
+    n_wavelength_bands = 10
+    tables = make_param_tables()
+    params_full = make_params()
+    params_bands = make_params(n_wavelength_bands=n_wavelength_bands)
+    params_full[FinalDims] = ['layer', 'Q']
+    params_bands[FinalDims] = ['layer', 'Q']
+    providers = loki_providers()
+    pipelines = [
+        sciline.Pipeline(providers, params=params_bands),
+        sciline.Pipeline(providers, params=params_full),
+    ]
+    for pipeline in pipelines:
+        for table in tables:
+            pipeline.set_param_table(table)
+    I0 = get_I0(sc.midpoints(params_full[QBins])[0])
 
-
-def test_pipeline_can_compute_IofQ_in_wavelength_slices():
-    params, param_tables = make_params()
-    band = np.linspace(1.0, 13.0, num=11)
-    params[WavelengthBands] = sc.array(
-        dims=['band', 'wavelength'],
-        values=np.vstack([band[:-1], band[1:]]).T,
-        unit='angstrom',
+    results = sans.direct_beam(pipelines=pipelines, I0=I0, niter=4)
+    # Unpack the final result
+    iofq_full = results[-1]['iofq_full']
+    iofq_slices = results[-1]['iofq_slices']
+    direct_beam_function = results[-1]['direct_beam']
+    assert iofq_full.dims == (
+        'layer',
+        'Q',
     )
-    pipeline = sciline.Pipeline(loki_providers(), params=params)
-    for table in param_tables:
-        pipeline.set_param_table(table)
-    result = pipeline.compute(BackgroundSubtractedIofQ)
-    assert result.dims == ('band', 'Q')
-    assert result.sizes['band'] == 10
-
-
-def test_pipeline_can_compute_IofQ_in_layers():
-    params, param_tables = make_params()
-    params[FinalDims] = ['layer', 'Q']
-    pipeline = sciline.Pipeline(loki_providers(), params=params)
-    for table in param_tables:
-        pipeline.set_param_table(table)
-    result = pipeline.compute(BackgroundSubtractedIofQ)
-    assert result.dims == ('layer', 'Q')
-    assert result.sizes['layer'] == 4
-
-
-def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs():
-    params, param_tables = make_params(
-        sample_runs=[60250, 60339], background_runs=[60248, 60393]
-    )
-    pipeline = sciline.Pipeline(loki_providers(), params=params)
-    for table in param_tables:
-        pipeline.set_param_table(table)
-    result = pipeline.compute(BackgroundSubtractedIofQ)
-    assert result.dims == ('Q',)
+    assert iofq_slices.dims == ('band', 'layer', 'Q')
+    assert iofq_slices.sizes['band'] == n_wavelength_bands
+    assert iofq_slices.sizes['layer'] == 4
+    assert direct_beam_function.sizes['wavelength'] == n_wavelength_bands
+    assert direct_beam_function.sizes['layer'] == 4

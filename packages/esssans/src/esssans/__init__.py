@@ -13,13 +13,14 @@ from . import (
     beam_center_finder,
     common,
     conversions,
-    directbeam,
+    # directbeam,
     i_of_q,
     io,
     loki,
     normalization,
     sans2d,
 )
+from .direct_beam import direct_beam
 
 providers = (
     *conversions.providers,
