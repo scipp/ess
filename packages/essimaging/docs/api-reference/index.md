@@ -3,7 +3,7 @@
 ## Classes
 
 ```{eval-rst}
-.. currentmodule:: essimaging
+.. currentmodule:: ess.imaging
 
 .. autosummary::
    :toctree: ../generated/classes
