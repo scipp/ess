@@ -10,53 +10,6 @@ from sciline import Pipeline
 from .types import BackgroundSubtractedIofQ, DirectBeam, FinalDims, WavelengthBands
 
 
-def make_wavelength_bins_and_bands(
-    wavelength_min: sc.Variable,
-    wavelength_max: sc.Variable,
-    n_wavelength_bins: int,
-    n_wavelength_bands: int,
-    sampling_width: sc.Variable,
-) -> Tuple[sc.Variable, sc.Variable]:
-    """
-    Make wavelength bins and bands from a wavelength range and a sampling width.
-
-    Parameters
-    ----------
-    wavelength_min:
-        The minimum wavelength.
-    wavelength_max:
-        The maximum wavelength.
-    n_wavelength_bins:
-        The number of wavelength bins.
-    n_wavelength_bands:
-        The number of wavelength bands.
-    sampling_width:
-        The width of the wavelength bands.
-    """
-    sampling_half_width = sampling_width * 0.5
-
-    wavelength_sampling_points = sc.linspace(
-        dim='wavelength',
-        start=wavelength_min + sampling_half_width,
-        stop=wavelength_max - sampling_half_width,
-        num=n_wavelength_bands,
-    )
-
-    band_start = wavelength_sampling_points - sampling_half_width
-    band_end = wavelength_sampling_points + sampling_half_width
-    wavelength_bins = sc.linspace(
-        'wavelength', wavelength_min, wavelength_max, n_wavelength_bins + 1
-    )
-    wavelength_bands = sc.concat(
-        [
-            sc.concat([start, end], dim='wavelength')
-            for start, end in zip(band_start, band_end)
-        ],
-        dim='band',
-    )
-    return wavelength_bins, wavelength_bands
-
-
 def _direct_beam_iteration(
     iofq_full: sc.DataArray,
     iofq_slices: sc.DataArray,
