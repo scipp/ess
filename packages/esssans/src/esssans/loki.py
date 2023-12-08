@@ -4,7 +4,7 @@
 Loading and masking specific to the ISIS Sans2d instrument and files stored in Scipp's
 HDF5 format.
 """
-from functools import lru_cache, reduce
+from functools import reduce
 from typing import NewType, Optional
 
 import sciline
@@ -42,7 +42,6 @@ DetectorTubeEdgeMask = NewType('DetectorTubeEdgeMask', sc.Variable)
 """Detector tube edge mask"""
 
 
-@lru_cache
 def _load_loki_file(filename: str) -> sc.DataArray:
     from .data import get_path
 

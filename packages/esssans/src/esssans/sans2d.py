@@ -4,7 +4,6 @@
 Loading and masking specific to the ISIS Sans2d instrument and files stored in Scipp's
 HDF5 format.
 """
-from functools import lru_cache
 from typing import NewType, Optional
 
 import scipp as sc
@@ -40,7 +39,6 @@ ReshapeToLogicalDims = NewType('ReshapeToLogicalDims', bool)
 """Reshape raw data to logical dimensions if True"""
 
 
-@lru_cache
 def pooch_load(filename: Filename[RunType]) -> LoadedFileContents[RunType]:
     from .data import get_path
 
