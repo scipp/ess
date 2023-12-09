@@ -1,31 +1,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-from typing import Callable, List, Optional
+from typing import Callable, List
 
 import numpy as np
-import pytest
 import sciline
 import scipp as sc
 
 import esssans as sans
-from esssans.types import (
-    BackgroundRun,
-    BackgroundSubtractedIofQ,
-    CorrectForGravity,
-    EmptyBeamRun,
-    Filename,
-    FinalDims,
-    Incident,
-    NeXusMonitorName,
-    QBins,
-    RunID,
-    SampleRun,
-    Transmission,
-    TransmissionRun,
-    UncertaintyBroadcastMode,
-    WavelengthBands,
-    WavelengthBins,
-)
+from esssans.types import FinalDims, QBins
 
 from loki_common import make_param_tables, make_params
 
