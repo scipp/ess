@@ -9,11 +9,10 @@ try:
 except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
-from . import (
+from . import (  # directbeam,
     beam_center_finder,
     common,
     conversions,
-    # directbeam,
     i_of_q,
     io,
     loki,

@@ -5,7 +5,6 @@ from typing import List, Optional
 import sciline
 import scipp as sc
 
-
 from esssans.types import (
     BackgroundRun,
     CorrectForGravity,
