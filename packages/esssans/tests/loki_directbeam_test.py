@@ -5,11 +5,10 @@ from typing import Callable, List
 import numpy as np
 import sciline
 import scipp as sc
+from loki_common import make_param_tables, make_params
 
 import esssans as sans
 from esssans.types import FinalDims, QBins
-
-from loki_common import make_param_tables, make_params
 
 
 def get_I0(q_loc: sc.Variable) -> sc.Variable:

@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 import sciline
 import scipp as sc
+from loki_common import make_param_tables, make_params
 
 import esssans as sans
 from esssans.types import (
@@ -14,8 +15,6 @@ from esssans.types import (
     UncertaintyBroadcastMode,
     WavelengthBands,
 )
-
-from loki_common import make_param_tables, make_params
 
 
 def loki_providers() -> List[Callable]:
