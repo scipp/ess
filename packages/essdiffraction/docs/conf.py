@@ -9,7 +9,7 @@ from ess import diffraction
 sys.path.insert(0, os.path.abspath('.'))
 
 # General information about the project.
-project = u'ESSDiffraction'
+project = u'ESSdiffraction'
 copyright = u'2023 Scipp contributors'
 author = u'Scipp contributors'
 
@@ -25,7 +25,7 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx_autodoc_typehints',
     'sphinx_copybutton',
-    "sphinx_design",
+    'sphinx_design',
     'nbsphinx',
     'myst_parser',
 ]
@@ -159,7 +159,7 @@ html_theme_options = {
         },
         {
             "name": "Conda",
-            "url": "https://anaconda.org/conda-forge/essdiffraction",
+            "url": "https://anaconda.org/scipp/essdiffraction",
             "icon": "fa-custom fa-anaconda",
             "type": "fontawesome",
         },
@@ -174,7 +174,7 @@ html_sidebars = {
     "**": ["sidebar-nav-bs", "page-toc"],
 }
 
-html_title = "ESSDiffraction"
+html_title = "ESSdiffraction"
 html_logo = "_static/logo.svg"
 html_favicon = "_static/favicon.svg"
 
@@ -198,6 +198,12 @@ nbsphinx_execute_arguments = [
 
 # -- Options for doctest --------------------------------------------------
 
+# sc.plot returns a Figure object and doctest compares that against the
+# output written in the docstring. But we only want to show an image of the
+# figure, not its `repr`.
+# In addition, there is no need to make plots in doctest as the documentation
+# build already tests if those plots can be made.
+# So we simply disable plots in doctests.
 doctest_global_setup = '''
 import numpy as np
 

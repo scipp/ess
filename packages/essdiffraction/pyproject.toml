@@ -37,7 +37,7 @@ dependencies = [
   "sciline>=23.9.1",
   "scipp>=23.8.0",
   "scippneutron>=23.9.0",
-  "scippnexus>=23.9.0",
+  "scippnexus>=23.12.0",
 ]
 
 dynamic = ["version"]
@@ -51,7 +51,12 @@ dynamic = ["version"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
-addopts = "-ra -v"
+addopts = """
+--strict-config
+--strict-markers
+-ra
+-v
+"""
 testpaths = "tests"
 filterwarnings = [
   "error",

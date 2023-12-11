@@ -9,4 +9,3 @@ sphinx
 sphinx-autodoc-typehints
 sphinx-copybutton
 sphinx-design
-platformdirs<4  # temporary until virtualenv has release with support for this
