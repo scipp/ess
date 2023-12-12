@@ -7,7 +7,7 @@
 
 ## About
 
-Data reduction for NMX at the European Spallation Source
+Data reduction for NMX at the European Spallation Source.
 
 ## Installation
 
