@@ -60,14 +60,6 @@ class He3DirectBeam(sl.ScopeTwoParams[Cell, Spin, sc.DataArray], sc.DataArray):
     """
 
 
-class He3InitialNuclearPolarization(sl.Scope[Cell, sc.DataArray], sc.DataArray):
-    """
-    Initial nuclear polarization for a given cell.
-
-    This is computed from the direct beam data with an unpolarized cell.
-    """
-
-
 SampleData = NewType('SampleData', sc.DataArray)
 """
 Uncorrected sample data.
@@ -186,7 +178,6 @@ def he3_polarization(
     direct_beam_polarized: He3DirectBeam[Cell, Polarized],
     opacity: He3Opacity[Cell],
     filling_time: He3FillingTime[Cell],
-    # initial_polarization: He3InitialNuclearPolarization[Cell],
     transmission_empty_glass: He3TransmissionEmptyGlass[Cell],
 ) -> He3Polarization[Cell]:
     """
