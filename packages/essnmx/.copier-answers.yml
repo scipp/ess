@@ -1,7 +1,7 @@
 # Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
-_commit: ff7f76b
+_commit: ec09f73
 _src_path: gh:scipp/copier_template
-description: Data reduction for NMX at the European Spallation Source
+description: Data reduction for NMX at the European Spallation Source.
 max_python: '3.11'
 min_python: '3.9'
 namespace_package: ess

@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "essnmx"
-description = "Data reduction for NMX at the European Spallation Source"
+description = "Data reduction for NMX at the European Spallation Source."
 authors = [{ name = "Scipp contributors" }]
 license = { file = "LICENSE" }
 readme = "README.md"
@@ -36,6 +36,7 @@ dependencies = [
   "sciline>=23.9.1",
   "scipp>=23.8.0",
   "scippnexus>=23.9.0",
+  "pooch",
 ]
 
 dynamic = ["version"]
@@ -49,7 +50,12 @@ dynamic = ["version"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
-addopts = "-ra -v"
+addopts = """
+--strict-config
+--strict-markers
+-ra
+-v
+"""
 testpaths = "tests"
 filterwarnings = [
   "error",
