@@ -15,7 +15,7 @@ charset-normalizer==3.3.2
     # via requests
 colorama==0.4.6
     # via tox
-distlib==0.3.7
+distlib==0.3.8
     # via virtualenv
 filelock==3.13.1
     # via
@@ -32,7 +32,7 @@ packaging==23.2
     #   -r ci.in
     #   pyproject-api
     #   tox
-platformdirs==4.0.0
+platformdirs==4.1.0
     # via
     #   tox
     #   virtualenv
@@ -52,5 +52,5 @@ tox==4.11.4
     # via -r ci.in
 urllib3==2.1.0
     # via requests
-virtualenv==20.24.7
+virtualenv==20.25.0
     # via tox
