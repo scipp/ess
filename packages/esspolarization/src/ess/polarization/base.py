@@ -30,6 +30,10 @@ class He3Polarization(sl.Scope[Cell, sc.DataArray], sc.DataArray):
     """Time-dependent polarization for a given cell."""
 
 
+class He3Transmission(sl.Scope[Cell, sc.DataArray], sc.DataArray):
+    """Wavelength- and time-dependent transmission for a given cell."""
+
+
 class He3CellPressure(sl.Scope[Cell, sc.Variable], sc.Variable):
     """Pressure for a given cell."""
 
@@ -230,10 +234,23 @@ def direct_beam_data_by_cell_and_polarization(
     """ """
 
 
+def he3_transmission(
+    opacity: He3Opacity[Cell],
+    polarization: He3Polarization[Cell],
+    transmission_empty_glass: He3TransmissionEmptyGlass[Cell],
+) -> He3Transmission[Cell]:
+    """
+    Transmission for a given cell.
+
+    This is computed from the opacity and polarization.
+    """
+    return He3Transmission[Cell]()
+
+
 def correct_sample_data_for_polarization(
     sample_data: SampleData,
-    transmission_polarizer: He3Polarization[Polarizer],
-    transmission_analyzer: He3Polarization[Analyzer],
+    transmission_polarizer: He3Transmission[Polarizer],
+    transmission_analyzer: He3Transmission[Analyzer],
 ) -> PolarizationCorrectedSampleData:
     """
     Apply polarization correction for the case of He3 polarizers and analyzers.
@@ -249,6 +266,7 @@ def correct_sample_data_for_polarization(
 providers = [
     direct_beam,
     he3_direct_beam,
+    he3_transmission,
     he3_opacity_from_beam_data,
     he3_polarization,
     correct_sample_data_for_polarization,
