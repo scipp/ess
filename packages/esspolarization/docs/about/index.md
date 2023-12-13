@@ -2,19 +2,19 @@
 
 ## Development
 
-Esspolarization is an open source project by the [European Spallation Source ERIC](https://europeanspallationsource.se/) (ESS).
+ESSpolarization is an open source project by the [European Spallation Source ERIC](https://europeanspallationsource.se/) (ESS).
 
 ## License
 
-Esspolarization is available as open source under the [BSD-3 license](https://opensource.org/licenses/BSD-3-Clause).
+ESSpolarization is available as open source under the [BSD-3 license](https://opensource.org/licenses/BSD-3-Clause).
 
-## Citing Esspolarization
+## Citing ESSpolarization
 
 Please cite the following:
 
 [![DOI](https://zenodo.org/badge/FIXME.svg)](https://zenodo.org/doi/10.5281/zenodo.FIXME)
 
-To cite a specific version of Esspolarization, select the desired version on Zenodo to get the corresponding DOI.
+To cite a specific version of ESSpolarization, select the desired version on Zenodo to get the corresponding DOI.
 
 ## Older versions of the documentation
 
@@ -23,4 +23,4 @@ Simply download the archive, unzip and view locally in a web browser.
 
 ## Source code and development
 
-Esspolarization is hosted and developed [on GitHub](https://github.com/scipp/esspolarization).
+ESSpolarization is hosted and developed [on GitHub](https://github.com/scipp/esspolarization).
