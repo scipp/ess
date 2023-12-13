@@ -7,7 +7,7 @@ import scipp as sc
 import scippnexus as snx
 
 PixelIDs = NewType("PixelIDs", sc.Variable)
-InputFileName = NewType("InputFileName", str)
+InputFilename = NewType("InputFilename", str)
 Events = NewType("Events", sc.DataArray)
 
 # McStas Configurations
@@ -26,8 +26,8 @@ def _copy_partial_var(
     var: sc.Variable, dim: str, idx: int, unit: str, dtype: Optional[str] = None
 ) -> sc.Variable:
     """Retrieve property from variable."""
-    original_var = var[dim, idx]
-    var = original_var.copy().astype(dtype) if dtype else original_var.copy()
+    original_var = var[dim, idx].copy()
+    var = original_var.astype(dtype) if dtype else original_var
     var.unit = sc.Unit(unit)
     return var
 
