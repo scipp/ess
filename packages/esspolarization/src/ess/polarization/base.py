@@ -7,8 +7,10 @@ import scipp as sc
 
 Up = NewType('Up', int)
 Down = NewType('Down', int)
-Unpolarized = NewType('Unpolarized', int)
-Spin = TypeVar('Spin', Up, Down, Unpolarized)
+Depolarized = NewType('Depolarized', int)
+Polarized = NewType('Polarized', int)
+"""Polarized either up or down, don't care."""
+Spin = TypeVar('Spin', Up, Down, Depolarized)
 
 Analyzer = NewType('Analyzer', str)
 Polarizer = NewType('Polarizer', str)
@@ -24,8 +26,8 @@ DirectBeamBackgroundRegion = NewType('DirectBeamBackgroundRegion', sc.Variable)
 """ROI for the direct beam background region in a direct beam measurement."""
 
 
-class He3Transmission(sl.Scope[Cell, sc.DataArray], sc.DataArray):
-    """Spin-, Time-, and wavelength-dependent transmission for a given cell."""
+class He3Polarization(sl.Scope[Cell, sc.DataArray], sc.DataArray):
+    """Time-dependent polarization for a given cell."""
 
 
 class He3CellPressure(sl.Scope[Cell, sc.Variable], sc.Variable):
@@ -48,7 +50,7 @@ class He3TransmissionEmptyGlass(sl.Scope[Cell, sc.DataArray], sc.DataArray):
     """Transmission of the empty glass for a given cell."""
 
 
-DirectBeam = NewType('DirectBeam', sc.DataArray)
+DirectBeamNoCell = NewType('DirectBeamNoCell', sc.DataArray)
 """Direct beam without cells and sample as a function of wavelength."""
 
 
@@ -58,9 +60,9 @@ class He3DirectBeam(sl.ScopeTwoParams[Cell, Spin, sc.DataArray], sc.DataArray):
     """
 
 
-class He3InitialAtomicPolarization(sl.Scope[Cell, sc.DataArray], sc.DataArray):
+class He3InitialNuclearPolarization(sl.Scope[Cell, sc.DataArray], sc.DataArray):
     """
-    Initial atomic polarization for a given cell.
+    Initial nuclear polarization for a given cell.
 
     This is computed from the direct beam data with an unpolarized cell.
     """
@@ -124,13 +126,13 @@ def direct_beam(
     wavelength: WavelengthBins,
     direct_beam_region: DirectBeamRegion,
     direct_beam_background_region: DirectBeamBackgroundRegion,
-) -> DirectBeam:
+) -> DirectBeamNoCell:
     """
     Extract direct beam without any cells from direct beam data.
 
     The result is background-subtracted and returned as function of wavelength.
     """
-    return DirectBeam()
+    return DirectBeamNoCell()
 
 
 def he3_direct_beam(
@@ -142,7 +144,9 @@ def he3_direct_beam(
     """
     Returns the direct beam data for a given cell and spin state.
 
-    The result is background-subtracted and returned as function of wavelength.
+    The result is background-subtracted and returned as function of wavelength and
+    wall-clock time. The time dependence is coarse, i.e., due to different time
+    intervals at which the direct beam is measured.
     """
     return He3DirectBeam[Cell, Spin]()
 
@@ -164,8 +168,8 @@ def he3_opacity_from_cell_params(
 
 def he3_opacity_from_beam_data(
     transmission_empty_glass: He3TransmissionEmptyGlass[Cell],
-    direct_beam: DirectBeam,
-    direct_beam_cell: He3DirectBeam[Cell, Unpolarized],
+    direct_beam: DirectBeamNoCell,
+    direct_beam_cell: He3DirectBeam[Cell, Depolarized],
 ) -> He3Opacity[Cell]:
     """
     Opacity for a given cell, based on direct beam data.
@@ -177,42 +181,25 @@ def he3_opacity_from_beam_data(
     return He3Opacity[Cell]()
 
 
-def he3_initial_atomic_polarization(
-    direct_beam: DirectBeam,
-    direct_beam_up: He3DirectBeam[Cell, Up],
-    direct_beam_down: He3DirectBeam[Cell, Down],
-    transmission_empty_glass: He3TransmissionEmptyGlass[Cell],
-    opacity: He3Opacity[Cell],
-) -> He3InitialAtomicPolarization[Cell]:
-    """
-    Returns the initial atomic polarization for a given cell.
-
-    The initial atomic polarization is computed from the direct beam data.
-
-    Note that we could use either direct_beam_up or direct_beam_down here, since the
-    initial atomic polarization is the same for both.
-
-    Note also that if He3Opacity is computed from beam params certain terms would
-    cancel here, but this is available only at the end of the cell lifetime. Therefore
-    we compute this based on the opacity, which may be computed alternatively from
-    cell params.
-    """
-    # results dims: spin state, wavelength
-    return He3InitialAtomicPolarization[Cell](1)
-
-
-def he3_transmission(
+def he3_polarization(
+    direct_beam_no_cell: DirectBeamNoCell,
+    direct_beam_polarized: He3DirectBeam[Cell, Polarized],
     opacity: He3Opacity[Cell],
     filling_time: He3FillingTime[Cell],
-    initial_polarization: He3InitialAtomicPolarization[Cell],
+    # initial_polarization: He3InitialNuclearPolarization[Cell],
     transmission_empty_glass: He3TransmissionEmptyGlass[Cell],
-) -> He3Transmission[Cell]:
+) -> He3Polarization[Cell]:
+    """
+    Fit time- and wavelength-dependent equation and return the fit param P(t).
+
+    DB_pol/DB = T_E * cosh(O(lambda)*P(t))*exp(-O(lambda))
+    """
     # Each time bin corresponds to a direct beam measurement. Take the mean for each
     # but keep the time binning.
     # time_up = direct_beam_up.bins.coords['time'].bins.mean()
     # time_down = direct_beam_down.bins.coords['time'].bins.mean()
     # results dims: spin state, wavelength, time
-    return He3Transmission[Cell](1)
+    return He3Polarization[Cell](1)
 
 
 def raw_data_by_run_section(
@@ -252,10 +239,10 @@ def direct_beam_data_by_cell_and_polarization(
     """ """
 
 
-def polarization_corrected_sample_data(
+def correct_sample_data_for_polarization(
     sample_data: SampleData,
-    transmission_polarizer: He3Transmission[Polarizer],
-    transmission_analyzer: He3Transmission[Analyzer],
+    transmission_polarizer: He3Polarization[Polarizer],
+    transmission_analyzer: He3Polarization[Analyzer],
 ) -> PolarizationCorrectedSampleData:
     """
     Apply polarization correction for the case of He3 polarizers and analyzers.
@@ -271,10 +258,9 @@ def polarization_corrected_sample_data(
 providers = [
     direct_beam,
     he3_direct_beam,
-    he3_initial_atomic_polarization,
     he3_opacity_from_beam_data,
-    he3_transmission,
-    polarization_corrected_sample_data,
+    he3_polarization,
+    correct_sample_data_for_polarization,
     sample_data_by_spin_channel,
     spin_channel,
     raw_data_by_run_section,
