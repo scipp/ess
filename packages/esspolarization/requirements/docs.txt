@@ -14,7 +14,7 @@ attrs==23.1.0
     # via
     #   jsonschema
     #   referencing
-babel==2.13.1
+babel==2.14.0
     # via
     #   pydata-sphinx-theme
     #   sphinx
@@ -112,7 +112,7 @@ pyzmq==25.1.2
     # via
     #   ipykernel
     #   jupyter-client
-referencing==0.31.1
+referencing==0.32.0
     # via
     #   jsonschema
     #   jsonschema-specifications
@@ -164,7 +164,7 @@ tornado==6.4
     # via
     #   ipykernel
     #   jupyter-client
-typing-extensions==4.8.0
+typing-extensions==4.9.0
     # via pydata-sphinx-theme
 urllib3==2.1.0
     # via requests
