@@ -20,14 +20,15 @@ requirements:
 
 test:
   imports:
-    - esspolarization
+    - ess.polarization
   requires:
     - pytest
   source_files:
     - pyproject.toml
     - tests/
   commands:
-    - python -m pytest tests
+    # We ignore warnings during release package builds
+    - python -m pytest -Wignore tests
 
 build:
   noarch: python
