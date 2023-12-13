@@ -7,23 +7,23 @@ def test_file_reader_mcstas() -> None:
     import scippnexus as snx
 
     from ess.nmx.data import small_mcstas_sample
-    from ess.nmx.loader import DefaultMaximumProbability, InputFileName, load_nmx_file
+    from ess.nmx.mcstas_loader import (
+        DefaultMaximumProbability,
+        InputFilename,
+        load_mcstas_nmx_file,
+    )
 
-    file_path = InputFileName(small_mcstas_sample())
+    file_path = InputFilename(small_mcstas_sample())
+    da = load_mcstas_nmx_file(file_path)
+
     entry_path = "entry1/data/bank01_events_dat_list_p_x_y_n_id_t"
-    da = load_nmx_file(file_path).events
-
     with snx.File(file_path) as file:
-        raw_data: sc.Variable = file[entry_path]["events"][()]
+        raw_data = file[entry_path]["events"][()]
+        data_length = raw_data.sizes['dim_0']
 
-    weights = raw_data['dim_1', 0].copy()
-    weights.unit = '1'
-    expected_data = (DefaultMaximumProbability / weights.max()) * weights
+    expected_weight_max = sc.scalar(DefaultMaximumProbability, unit='1', dtype=float)
 
     assert isinstance(da, sc.DataArray)
-    assert list(da.values) == list(expected_data.values)
-    assert list(da.coords['id'].values) == list(raw_data['dim_1', 4].values)
-    assert list(da.coords['t'].values) == list(raw_data['dim_1', 5].values)
-    assert da.unit == '1'
-    assert da.coords['id'].unit == 'dimensionless'
-    assert da.coords['t'].unit == 's'
+    assert da.shape == (3, 1280 * 1280)
+    assert da.bins.size().sum().value == data_length
+    assert sc.identical(da.data.max(), expected_weight_max)
