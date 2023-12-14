@@ -18,16 +18,14 @@ from .conversions import (
 )
 from .i_of_q import merge_spectra
 from .logging import get_logger
-from .normalization import (
-    iofq_denominator,
-    normalize,
-    solid_angle_rectangular_approximation,
-)
+from .normalization import iofq_denominator, normalize, solid_angle
 from .types import (
     BeamCenter,
     CalibratedMaskedData,
     CleanMasked,
+    DetectorPixelShape,
     IofQ,
+    LabFrameTransform,
     MaskedData,
     NormWavelengthTerm,
     Numerator,
@@ -143,6 +141,8 @@ def _iofq_in_quadrants(
     graph: dict,
     q_bins: Union[int, sc.Variable],
     wavelength_range: sc.Variable,
+    transform: sc.Variable,
+    pixel_shape: sc.DataGroup,
 ) -> Dict[str, sc.DataArray]:
     """
     Compute the intensity as a function of Q inside 4 quadrants in Phi.
@@ -183,14 +183,16 @@ def _iofq_in_quadrants(
         iofq_denominator,
         mask_wavelength,
         detector_to_wavelength,
+        solid_angle,
         calibrate_positions,
-        solid_angle_rectangular_approximation,
         _clean_masked_provider,
     ]
     params = {}
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
     params[WavelengthBands] = wavelength_range
     params[QBins] = q_bins
+    params[DetectorPixelShape[SampleRun]] = pixel_shape
+    params[LabFrameTransform[SampleRun]] = transform
     params[ElasticCoordTransformGraph] = graph
     params[BeamCenter] = _offsets_to_vector(data=data, xy=xy, graph=graph)
 
@@ -293,6 +295,8 @@ def beam_center_from_iofq(
     wavelength_bins: WavelengthBins,
     norm: NormWavelengthTerm[SampleRun],
     q_bins: BeamCenterFinderQBins,
+    transform: LabFrameTransform[SampleRun],
+    pixel_shape: DetectorPixelShape[SampleRun],
     minimizer: Optional[BeamCenterFinderMinimizer],
     tolerance: Optional[BeamCenterFinderTolerance],
 ) -> BeamCenter:
@@ -424,7 +428,7 @@ def beam_center_from_iofq(
     res = minimize(
         _cost,
         x0=[com_shift.fields.x.value, com_shift.fields.y.value],
-        args=(data, norm, graph, q_bins, wavelength_range),
+        args=(data, norm, graph, q_bins, wavelength_range, transform, pixel_shape),
         bounds=bounds,
         method=minimizer,
         tol=tolerance,

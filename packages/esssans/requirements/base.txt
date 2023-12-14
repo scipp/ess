@@ -47,8 +47,6 @@ idna==3.6
     # via requests
 importlib-metadata==6.8.0
     # via dask
-importlib-resources==6.1.1
-    # via matplotlib
 ipydatawidgets==4.3.5
     # via pythreejs
 ipython==8.9.0
@@ -166,6 +164,4 @@ wcwidth==0.2.12
 widgetsnbextension==4.0.9
     # via ipywidgets
 zipp==3.17.0
-    # via
-    #   importlib-metadata
-    #   importlib-resources
+    # via importlib-metadata

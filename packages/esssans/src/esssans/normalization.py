@@ -4,7 +4,6 @@
 from typing import Optional
 
 import scipp as sc
-import scippneutron as scn
 from scipp.core import concepts
 
 from .types import (
@@ -14,9 +13,15 @@ from .types import (
     CleanSummedQ,
     CleanWavelength,
     Denominator,
+<<<<<<< HEAD
     EmptyBeamRun,
+=======
+    DetectorPixelShape,
+    DirectRun,
+>>>>>>> main
     Incident,
     IofQ,
+    LabFrameTransform,
     NormWavelengthTerm,
     Numerator,
     RunType,
@@ -32,36 +37,92 @@ from .uncertainty import (
 )
 
 
-def solid_angle_rectangular_approximation(
+def solid_angle(
     data: CleanMasked[RunType, Numerator],
+    pixel_shape: DetectorPixelShape[RunType],
+    transform: LabFrameTransform[RunType],
 ) -> SolidAngle[RunType]:
     """
-    Solid angle computed from rectangular pixels with a 'width' and a 'height'.
+    Solid angle for cylindrical pixels.
 
-    Note that this is an approximation which is only valid for small angles
-    between the line of sight and the rectangle normal.
+    Note that the approximation is valid when the distance from sample
+    to pixel is much larger than the length or the radius of the pixels.
 
     Parameters
     ----------
     data:
-        The DataArray that contains the positions for the detector pixels and the
-        sample, as well as `pixel_width` and `pixel_height` as coordinates.
+        The DataArray that contains the positions of the detector pixels in coords.
+        The positions must be in the sample reference frame.
+
+    pixel_shape:
+        Contains the description of the detector pixel shape.
+
+    transform:
+        Transformation from the local coordinate system of the detector
+        to the coordinate system of the sample.
 
     Returns
     -------
     :
         The solid angle of the detector pixels, as viewed from the sample position.
-        Any coords and masks that have a dimension common to the dimensions of the
-        position coordinate are retained in the output.
     """
-    pixel_width = data.coords['pixel_width']
-    pixel_height = data.coords['pixel_height']
-    L2 = scn.L2(data)
-    omega = (pixel_width * pixel_height) / (L2 * L2)
-    dims = set(data.dims) - set(omega.dims)
-    return SolidAngle[RunType](
-        concepts.rewrap_reduced_data(prototype=data, data=omega, dim=dims)
+    face_1_center, face_1_edge, face_2_center = (
+        pixel_shape['vertices']['vertex', i] for i in range(3)
     )
+    cylinder_axis = transform * face_2_center - transform * face_1_center
+    radius = sc.norm(face_1_center - face_1_edge)
+    length = sc.norm(cylinder_axis)
+
+    omega = _approximate_solid_angle_for_cylinder_shaped_pixel_of_detector(
+        pixel_position=data.coords['position'],
+        cylinder_axis=cylinder_axis,
+        radius=radius,
+        length=length,
+    )
+    return SolidAngle[RunType](
+        concepts.rewrap_reduced_data(
+            prototype=data, data=omega, dim=set(data.dims) - set(omega.dims)
+        )
+    )
+
+
+def _approximate_solid_angle_for_cylinder_shaped_pixel_of_detector(
+    pixel_position: sc.Variable,
+    cylinder_axis: sc.Variable,
+    radius: sc.Variable,
+    length: sc.Variable,
+):
+    r"""Computes solid angle of a detector pixel under the assumption that the
+    distance to the detector pixel from the sample is large compared to the radius
+    and to the length of the piece of the detector cylinder that makes up the pixel.
+
+    The cylinder is approximated by a rectangle element contained in the cylinder.
+    The normal of the rectangle is selected to
+    1. be orthogonal to the cylinder axis and
+    2. "maximally parallel" to the pixel position vector.
+    This occurs when the normal :math:`n`, the cylinder axis :math:`c` and the
+    pixel position :math:`r` fall in a shared plane such that
+    .. math::
+        r = (n\cdot r)n + (c \cdot r)c.
+
+    From the above relationship we get the scalar product of the position
+    vector and the normal:
+
+    .. math::
+        |\hat{r}\cdot n| = \sqrt{\frac{r \cdot r - (c \cdot r^2)}{||r||^2}}
+
+    The solid angle contribution from the detector element is approximated as
+    .. math::
+        \Delta\Omega =  A \frac{|\hat{r}\cdot n|}{||r||^2}
+    where :math:`A = 2 R L` is the area of the rectangular element
+    and :math:`\hat{r}` is the normalized pixel position vector.
+    """
+    norm_pp = sc.norm(pixel_position)
+    norm_ca = sc.norm(cylinder_axis)
+    cosalpha = sc.sqrt(
+        1 - (sc.dot(pixel_position, cylinder_axis) / (norm_pp * norm_ca)) ** 2
+    )
+    return (2 * radius * length) * cosalpha / norm_pp**2
 
 
 def transmission_fraction(
@@ -272,5 +333,5 @@ providers = (
     iofq_norm_wavelength_term,
     iofq_denominator,
     normalize,
-    solid_angle_rectangular_approximation,
+    solid_angle,
 )

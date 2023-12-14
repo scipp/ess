@@ -133,6 +133,15 @@ CleanDirectBeam = NewType('CleanDirectBeam', sc.DataArray)
 """Direct beam after resampling to required wavelength bins"""
 
 
+class DetectorPixelShape(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+    """Geometry of the detector from description in nexus file."""
+
+
+class LabFrameTransform(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """Coordinate transformation from detector local coordinates
+    to the sample frame of reference."""
+
+
 class SolidAngle(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Solid angle of detector pixels seen from sample position"""
 

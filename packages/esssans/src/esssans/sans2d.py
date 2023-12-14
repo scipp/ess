@@ -14,9 +14,11 @@ from .types import (
     CleanMasked,
     DataWithLogicalDims,
     DetectorEdgeMask,
+    DetectorPixelShape,
     DirectBeam,
     DirectBeamFilename,
     Filename,
+    LabFrameTransform,
     LoadedFileContents,
     MaskedData,
     MonitorType,
@@ -46,8 +48,6 @@ def pooch_load(filename: Filename[RunType]) -> LoadedFileContents[RunType]:
     data = dg['data']
     if 'gravity' not in data.coords:
         data.coords["gravity"] = gravity_vector()
-    data.coords['pixel_width'] = sc.scalar(0.002033984375, unit='m')
-    data.coords['pixel_height'] = sc.scalar(0.0035, unit='m')
 
     # Some fixes specific for these Sans2d runs
     sample_pos_z_offset = 0.053 * sc.units.m
@@ -156,6 +156,38 @@ def run_title(dg: LoadedFileContents[SampleRun]) -> RunTitle:
     return RunTitle(dg['run_title'].value)
 
 
+def sans2d_tube_detector_pixel_shape() -> DetectorPixelShape[RunType]:
+    # Pixel radius and length
+    # found here:
+    # https://github.com/mantidproject/mantid/blob/main/instrument/SANS2D_Definition_Tubes.xml
+    R = 0.00405
+    L = 0.002033984375
+    pixel_shape = sc.DataGroup(
+        {
+            'vertices': sc.vectors(
+                dims=['vertex'],
+                values=[
+                    # Coordinates in pixel-local coordinate system
+                    # Bottom face center
+                    [0, 0, 0],
+                    # Bottom face edge
+                    [R, 0, 0],
+                    # Top face center
+                    [0, L, 0],
+                ],
+                unit='m',
+            ),
+            'nexus_class': 'NXcylindrical_geometry',
+        }
+    )
+    return pixel_shape
+
+
+def lab_frame_transform() -> LabFrameTransform[RunType]:
+    # Rotate +y to -x
+    return sc.spatial.rotation(value=[0, 0, 1 / 2**0.5, 1 / 2**0.5])
+
+
 providers = (
     pooch_load_direct_beam,
     pooch_load,
@@ -168,6 +200,8 @@ providers = (
     run_number,
     run_title,
     to_logical_dims,
+    lab_frame_transform,
+    sans2d_tube_detector_pixel_shape,
 )
 """
 Providers for loading and masking Sans2d data.
