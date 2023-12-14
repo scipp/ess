@@ -13,12 +13,8 @@ from .types import (
     CleanSummedQ,
     CleanWavelength,
     Denominator,
-<<<<<<< HEAD
-    EmptyBeamRun,
-=======
     DetectorPixelShape,
-    DirectRun,
->>>>>>> main
+    EmptyBeamRun,
     Incident,
     IofQ,
     LabFrameTransform,
