@@ -9,12 +9,12 @@ def test_file_reader_mcstas() -> None:
     from ess.nmx.data import small_mcstas_sample
     from ess.nmx.mcstas_loader import (
         DefaultMaximumProbability,
-        InputFilename,
-        load_mcstas_nmx_file,
+        InputFilepath,
+        load_mcstas_nexus,
     )
 
-    file_path = InputFilename(small_mcstas_sample())
-    da = load_mcstas_nmx_file(file_path)
+    file_path = InputFilepath(small_mcstas_sample())
+    da = load_mcstas_nexus(file_path)
 
     entry_path = "entry1/data/bank01_events_dat_list_p_x_y_n_id_t"
     with snx.File(file_path) as file:

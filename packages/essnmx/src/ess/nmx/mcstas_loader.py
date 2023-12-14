@@ -8,7 +8,7 @@ import scippnexus as snx
 from .detector import NumberOfDetectors
 
 PixelIDs = NewType("PixelIDs", sc.Variable)
-InputFilename = NewType("InputFilename", str)
+InputFilepath = NewType("InputFilepath", str)
 NMXData = NewType("NMXData", sc.DataArray)
 
 # McStas Configurations
@@ -38,7 +38,7 @@ def _retrieve_event_list_name(keys: Iterable[str]) -> str:
 def _copy_partial_var(
     var: sc.Variable, idx: int, unit: Optional[str] = None, dtype: Optional[str] = None
 ) -> sc.Variable:
-    """Retrieve property from variable."""
+    """Retrieve a property from a variable."""
     original_var = var['dim_1', idx].copy()
     var = original_var.astype(dtype) if dtype else original_var
     if unit:
@@ -53,17 +53,17 @@ def _get_mcstas_pixel_ids() -> PixelIDs:
     return PixelIDs(sc.concat(ids, 'id'))
 
 
-def load_mcstas_nmx_file(
-    file_name: InputFilename,
+def load_mcstas_nexus(
+    file_path: InputFilepath,
     max_prop: Optional[MaximumProbability] = None,
     num_panels: Optional[NumberOfDetectors] = None,
 ) -> NMXData:
-    """Load McStas NMX data from h5 file.
+    """Load McStas simulation result from h5(nexus) file.
 
     Parameters
     ----------
-    file:
-        The file to load.
+    file_path:
+        File name to load.
 
     max_prop:
         The maximum probability to scale the weights.
@@ -77,7 +77,7 @@ def load_mcstas_nmx_file(
     prop = max_prop or DefaultMaximumProbability
     panels = num_panels or NumberOfDetectors(3)
 
-    with snx.File(file_name) as file:
+    with snx.File(file_path) as file:
         bank_name = _retrieve_event_list_name(file["entry1/data"].keys())
         var: sc.Variable
         var = file["entry1/data/" + bank_name]["events"][()].rename_dims(

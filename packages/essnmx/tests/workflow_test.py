@@ -10,17 +10,17 @@ def mcstas_workflow() -> sl.Pipeline:
     from ess.nmx.data import small_mcstas_sample
     from ess.nmx.mcstas_loader import (
         DefaultMaximumProbability,
-        InputFilename,
+        InputFilepath,
         MaximumProbability,
-        load_mcstas_nmx_file,
+        load_mcstas_nexus,
     )
     from ess.nmx.workflow import collect_default_parameters
 
     return sl.Pipeline(
-        [load_mcstas_nmx_file],
+        [load_mcstas_nexus],
         params={
             **collect_default_parameters(),
-            InputFilename: small_mcstas_sample(),
+            InputFilepath: small_mcstas_sample(),
             MaximumProbability: DefaultMaximumProbability,
         },
     )
@@ -28,9 +28,9 @@ def mcstas_workflow() -> sl.Pipeline:
 
 def test_pipeline_builder(mcstas_workflow: sl.Pipeline) -> None:
     from ess.nmx.data import small_mcstas_sample
-    from ess.nmx.mcstas_loader import InputFilename
+    from ess.nmx.mcstas_loader import InputFilepath
 
-    assert mcstas_workflow.get(InputFilename).compute() == small_mcstas_sample()
+    assert mcstas_workflow.get(InputFilepath).compute() == small_mcstas_sample()
 
 
 def test_pipeline_mcstas_loader(mcstas_workflow: sl.Pipeline) -> None:

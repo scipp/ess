@@ -9,6 +9,14 @@
    :toctree: ../generated/classes
    :template: class-template.rst
    :recursive:
+
+   NumberOfDetectors
+   NMXData
+   InputFilepath
+   PixelIDs
+   MaximumProbability
+   DefaultMaximumProbability
+
 ```
 
 ## Top-level functions
@@ -17,6 +25,10 @@
 .. autosummary::
    :toctree: ../generated/functions
    :recursive:
+
+   small_mcstas_sample,
+   load_mcstas_nexus,
+   collect_default_parameters,
 ```
 
 ## Submodules
@@ -26,4 +38,8 @@
    :toctree: ../generated/modules
    :template: module-template.rst
    :recursive:
+
+   workflow
+   detector
+   mcstas_loader
 ```
