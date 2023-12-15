@@ -53,6 +53,15 @@ Denominator = NewType('Denominator', sc.DataArray)
 IofQPart = TypeVar('IofQPart', Numerator, Denominator)
 """TypeVar used for specifying Numerator or Denominator of IofQ"""
 
+# 1.4  Entry paths in Nexus files
+NexusInstrumentPath = NewType('NexusInstrumentPath', str)
+
+NexusSampleName = NewType('NexusSampleName', str)
+
+NexusSourceName = NewType('NexusSourceName', str)
+
+NexusDetectorName = NewType('NexusDetectorName', str)
+
 # 2  Workflow parameters
 
 UncertaintyBroadcastMode = Enum(
@@ -111,6 +120,14 @@ class RunID(sciline.Scope[RunType, int], int):
 # 3  Workflow (intermediate) results
 
 
+class SamplePosition(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """Sample position"""
+
+
+class SourcePosition(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """Source position"""
+
+
 class DataWithLogicalDims(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Raw data reshaped to have logical dimensions"""
 
@@ -146,12 +163,20 @@ class SolidAngle(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Solid angle of detector pixels seen from sample position"""
 
 
-class LoadedFileContents(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
-    """The entire contents of a loaded file"""
+class LoadedDetectorContents(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+    """The entire contents of a loaded detector data"""
 
 
 class RawData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Raw data"""
+
+
+class PatchedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Patched with added sample and source positions data"""
+
+
+class TofData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Detector data converted to time-of-flight"""
 
 
 class UnmergedRawData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
@@ -212,10 +237,34 @@ BackgroundSubtractedIofQ = NewType('BackgroundSubtractedIofQ', sc.DataArray)
 """I(Q) with background (given by I(Q) of the background run) subtracted"""
 
 
+class LoadedMonitorContents(
+    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataGroup], sc.DataGroup
+):
+    """The entire contents of a loaded monitor"""
+
+
+class UnmergedRawMonitor(
+    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
+):
+    """Unmerged raw monitor data"""
+
+
 class RawMonitor(
     sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
 ):
     """Raw monitor data"""
+
+
+class PatchedMonitor(
+    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
+):
+    """Patched monitor data with source position"""
+
+
+class TofMonitor(
+    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
+):
+    """Monitor data converted to time-of-flight"""
 
 
 class WavelengthMonitor(
