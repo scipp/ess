@@ -35,8 +35,6 @@ from ..types import (
     NexusSampleName,
     NexusSourceName,
     Numerator,
-    PatchedData,
-    PatchedMonitor,
     RawData,
     RawMonitor,
     RunID,
@@ -48,6 +46,8 @@ from ..types import (
     TofMonitor,
     Transmission,
     TransmissionRun,
+    UnmergedPatchedData,
+    UnmergedPatchedMonitor,
     UnmergedRawData,
     UnmergedRawMonitor,
 )
@@ -159,7 +159,8 @@ def get_detector_data(
 
 
 def _merge_events(a, b):
-    return a.squeeze().bins.concatenate(b.squeeze())
+    # Note: the concatenate operation will check that all coordinates are the same.
+    return a.bins.concatenate(b)
     # for key in a.attrs:
     #     if key.startswith('monitor'):
     #         out.attrs[key] = sc.scalar(
@@ -169,14 +170,14 @@ def _merge_events(a, b):
 
 
 def merge_detector_events(
-    runs: sciline.Series[RunID[RunType], UnmergedRawData[RunType]]
+    runs: sciline.Series[RunID[RunType], UnmergedPatchedData[RunType]]
 ) -> RawData[RunType]:
     # return RawData[RunType](list(runs.values())[0])  # .bin(tof=1))
     return RawData[RunType](reduce(_merge_events, runs.values()))  # .bin(tof=1))
 
 
 def merge_monitor_events(
-    runs: sciline.Series[RunID[RunType], UnmergedRawMonitor[RunType, MonitorType]]
+    runs: sciline.Series[RunID[RunType], UnmergedPatchedMonitor[RunType, MonitorType]]
 ) -> RawMonitor[RunType, MonitorType]:
     return RawMonitor[RunType, MonitorType](reduce(_merge_events, runs.values()))
 
@@ -196,7 +197,9 @@ def get_monitor_data(
     dg: LoadedMonitorContents[RunType, MonitorType],
     monitor_name: NeXusMonitorName[MonitorType],
 ) -> UnmergedRawMonitor[RunType, MonitorType]:
-    return UnmergedRawMonitor[RunType, MonitorType](dg[f'{monitor_name}_events'])
+    out = dg[f'{monitor_name}_events']
+    out.coords['position'] = dg['position']
+    return UnmergedRawMonitor[RunType, MonitorType](out)
 
 
 def load_sample_position(
@@ -224,27 +227,48 @@ def load_source_position(
     return SourcePosition[RunType](dg['position'])
 
 
+def _patch_data(
+    da: sc.DataArray,
+    sample_position: sc.Variable,
+    source_position: sc.Variable,
+) -> sc.DataArray:
+    out = da.copy(deep=False)
+    out.coords['sample_position'] = sample_position
+    out.coords['source_position'] = source_position
+    out.coords['gravity'] = gravity_vector()
+    return out
+
+
 def patch_detector_data(
-    da: RawData[RunType],
+    da: UnmergedRawData[RunType],
     sample_position: SamplePosition[RunType],
     source_position: SourcePosition[RunType],
-) -> PatchedData[RunType]:
-    da.coords['sample_position'] = sample_position
-    da.coords['source_position'] = source_position
-    return PatchedData[RunType](da)
+) -> UnmergedPatchedData[RunType]:
+    return UnmergedPatchedData[RunType](
+        _patch_data(
+            da=da, sample_position=sample_position, source_position=source_position
+        )
+    )
 
 
 def patch_monitor_data(
-    da: RawMonitor[RunType, MonitorType],
+    da: UnmergedRawMonitor[RunType, MonitorType],
+    sample_position: SamplePosition[RunType],
     source_position: SourcePosition[RunType],
-) -> PatchedMonitor[RunType, MonitorType]:
-    da.coords['source_position'] = source_position
-    return PatchedMonitor[RunType, MonitorType](da)
+) -> UnmergedPatchedMonitor[RunType, MonitorType]:
+    return UnmergedPatchedMonitor[RunType, MonitorType](
+        _patch_data(
+            da=da, sample_position=sample_position, source_position=source_position
+        )
+    )
 
 
 def _convert_to_tof(da: sc.DataArray) -> sc.DataArray:
-    da.bins.coords['tof'] = da.bins.coords.pop('event_time_offset')
-    return da
+    out = da.copy(deep=False)
+    out.bins.coords['tof'] = out.bins.coords.pop('event_time_offset')
+    if 'event_time_zero' in out.dims:
+        out = out.bins.concat('event_time_zero')
+    return out.bin(tof=1)
 
 
 def convert_detector_to_tof(
@@ -266,7 +290,7 @@ def convert_monitor_to_tof(
 def to_logical_dims(da: TofData[RunType]) -> DataWithLogicalDims[RunType]:
     return DataWithLogicalDims[RunType](
         da.fold(
-            dim='detector_id', sizes=dict(layer=4, tube=32, straw=7, pixel=512)
+            dim='detector_number', sizes=dict(layer=4, tube=32, straw=7, pixel=512)
         ).flatten(dims=['tube', 'straw'], to='straw')
     )
 

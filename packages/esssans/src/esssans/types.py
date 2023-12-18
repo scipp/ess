@@ -171,7 +171,7 @@ class RawData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Raw data"""
 
 
-class PatchedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+class UnmergedPatchedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Patched with added sample and source positions data"""
 
 
@@ -255,7 +255,7 @@ class RawMonitor(
     """Raw monitor data"""
 
 
-class PatchedMonitor(
+class UnmergedPatchedMonitor(
     sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
 ):
     """Patched monitor data with source position"""
