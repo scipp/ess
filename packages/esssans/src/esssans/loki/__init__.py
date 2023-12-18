@@ -2,42 +2,11 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 
-from .loki import providers, default_parameters
+from .general import default_parameters, providers as general_providers
+from .io import providers as io_providers
+from .masking import providers as masking_providers
 from .utils import make_parameter_tables
 
+providers = general_providers + io_providers + masking_providers
+
 __all__ = ['providers', 'default_parameters', 'make_parameter_tables']
-
-# providers = (
-#     to_logical_dims,
-#     detector_straw_mask,
-#     detector_beam_stop_mask,
-#     detector_tube_edge_mask,
-#     get_detector_data,
-#     get_monitor_data,
-#     load_monitor,
-#     mask_detectors,
-#     mask_after_calibration,
-#     load_data_run,
-#     # load_emptybeam_run,
-#     # load_sample_transmission_run,
-#     # load_background_transmission_run,
-#     merge_detector_events,
-#     merge_monitor_events,
-# )
-# # providers = (
-#     *conversions.providers,
-#     *i_of_q.providers,
-#     *normalization.providers,
-#     # Default to fast but potentially inaccurate beam center finder
-#     beam_center_finder.beam_center_from_center_of_mass,
-# )
-# """
-# List of providers for setting up a Sciline pipeline.
-
-# This provides a default workflow, including a beam-center estimation based on a
-# center-of-mass approach. Providers for loadings files are not included. Combine with
-# the providers for a specific instrument, such as :py:data:`esssans.sans2d.providers`
-# to setup a complete workflow.
-# """
-
-# del importlib
