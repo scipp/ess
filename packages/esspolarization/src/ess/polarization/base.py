@@ -19,11 +19,11 @@ Cell = TypeVar('Cell', Analyzer, Polarizer)
 WavelengthBins = NewType('WavelengthBins', sc.Variable)
 RawEventData = NewType('RawEventData', sc.DataArray)
 
-DirectBeamRegion = NewType('DirectBeamRegion', sc.Variable)
-"""ROI for the direct beam region in a direct beam measurement."""
+DirectBeamQRange = NewType('DirectBeamQRange', sc.Variable)
+"""Q-range defining the direct beam region in a direct beam measurement."""
 
-DirectBeamBackgroundRegion = NewType('DirectBeamBackgroundRegion', sc.Variable)
-"""ROI for the direct beam background region in a direct beam measurement."""
+DirectBeamBackgroundQRange = NewType('DirectBeamBackgroundQRange', sc.Variable)
+"""Q-range defining the direct beam background region in a direct beam measurement."""
 
 
 class He3Polarization(sl.Scope[Cell, sc.DataArray], sc.DataArray):
@@ -120,22 +120,23 @@ def spin_channel(
 def direct_beam(
     event_data: DirectBeamData,
     wavelength: WavelengthBins,
-    direct_beam_region: DirectBeamRegion,
-    direct_beam_background_region: DirectBeamBackgroundRegion,
+    direct_beam_Qrange: DirectBeamQRange,
+    direct_beam_background_Qrange: DirectBeamBackgroundQRange,
 ) -> DirectBeamNoCell:
     """
     Extract direct beam without any cells from direct beam data.
 
     The result is background-subtracted and returned as function of wavelength.
     """
+    # assume event_data in Q-space. take Q-intervals
     return DirectBeamNoCell()
 
 
 def he3_direct_beam(
     event_data: DirectBeamData,
     wavelength: WavelengthBins,
-    direct_beam_region: DirectBeamRegion,
-    direct_beam_background_region: DirectBeamBackgroundRegion,
+    direct_beam_Qrange: DirectBeamQRange,
+    direct_beam_background_Qrange: DirectBeamBackgroundQRange,
 ) -> He3DirectBeam[Cell, Spin]:
     """
     Returns the direct beam data for a given cell and spin state.
