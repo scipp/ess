@@ -17,7 +17,7 @@ from .base import (
     CellSpin,
     Depolarized,
     DirectBeamBackgroundQRange,
-    DirectBeamData,
+    DirectBeamReducedI,
     DirectBeamNoCell,
     DirectBeamQRange,
     Down,
@@ -94,5 +94,5 @@ __all__ = [
     "RunSection",
     "SpinChannel",
     "RawDataByRunSection",
-    "DirectBeamData",
+    "DirectBeamReducedI",
 ]
