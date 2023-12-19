@@ -10,12 +10,8 @@
    :template: class-template.rst
    :recursive:
 
-   NumberOfDetectors
    NMXData
    InputFilepath
-   PixelIDs
-   MaximumProbability
-   DefaultMaximumProbability
 
 ```
 

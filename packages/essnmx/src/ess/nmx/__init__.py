@@ -12,25 +12,13 @@ except importlib.metadata.PackageNotFoundError:
 del importlib
 
 from .data import small_mcstas_sample
-from .detector import NumberOfDetectors
-from .mcstas_loader import (
-    DefaultMaximumProbability,
-    InputFilepath,
-    MaximumProbability,
-    NMXData,
-    PixelIDs,
-    load_mcstas_nexus,
-)
+from .mcstas_loader import InputFilepath, NMXData, load_mcstas_nexus
 from .workflow import collect_default_parameters
 
 __all__ = [
     "small_mcstas_sample",
-    "NumberOfDetectors",
-    "load_mcstas_nexus",
     "NMXData",
     "InputFilepath",
-    "PixelIDs",
-    "MaximumProbability",
-    "DefaultMaximumProbability",
+    "load_mcstas_nexus",
     "collect_default_parameters",
 ]
