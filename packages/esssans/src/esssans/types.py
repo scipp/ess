@@ -62,7 +62,7 @@ NexusSourceName = NewType('NexusSourceName', str)
 
 NexusDetectorName = NewType('NexusDetectorName', str)
 
-TransformationChainPath = NewType('TransformationChainName', str)
+TransformationChainPath = NewType('TransformationChainPath', str)
 
 # 2  Workflow parameters
 
