@@ -138,11 +138,6 @@ def direct_beam(
     # DirectBeamQRange will be a user input from a given start point [0] to a given
     # end point [0]
 
-    # TODO  :
-    # 0. Define on which data to apply this:
-    # event_data = event_data.bins[]
-    # want to insert I(Q) on reduced data (sum_pulses(sum_bins(C)/sum_bins(M))...
-
     # 1. input Q-ranges
     direct_beam = event_data.bins['Q', start_DB:stop_DB]
     background = event_data.bins['Q', start_BG:stop_BG]
@@ -220,8 +215,31 @@ def he3_polarization(
     return He3Polarization[Cell](1)
 
 
+def run_section_label(
+    run_section: RunSection,  # sample, direct[pol|ana], no cell, ignore
+    polarizer_spin: CellSpin[Polarizer],
+    analyzer_spin: CellSpin[Analyzer],
+) -> RunSectionLabel:
+    # TODO combine with `raw_data_by_run_section`?
+    # 10 options:
+    # - sample ++, +- , -+, --
+    # - direct beam polarizer +, -
+    # - direct beam analyzer +, -
+    # - no cell
+    # - ignore (motor moving, ...)
+
+    # 1. Define combined time bounds (concat and sort)
+    # 2. Remap input values to new time bounds
+    # 3. Return as scipp.Dataset
+    pass
+
+
 def raw_data_by_run_section(
-    raw: RawEventData, run_section: RunSection
+    # TODO this is not actually raw data, but IofQ data (in event mode)
+    raw: RawEventData,
+    run_section: RunSection,
+    polarizer_spin: CellSpin[Polarizer],
+    analyzer_spin: CellSpin[Analyzer],
 ) -> RawDataByRunSection:
     """
     Split raw event data into sample data and direct beam data.
@@ -233,9 +251,27 @@ def raw_data_by_run_section(
     various direct runs is to avoid performance issues from multiple passes over the
     full data set.
     """
-    return RawDataByRunSection()
+    # Option 1, but do not have required time bounds
+    # raw.bins.coords['run_section'] = sc.lookup(run_section)[raw.bins.coords['time']]
+    # sections = sc.array(dims=['run_section'], values=[0, 1, 2, 3], unit=None)
+    # return RawDataByRunSection(raw.group(sections))
+
+    # Option 2
+    da = raw.bin(time=run_section.coords['time'])
+    # 0123012340123...
+    for name in (
+        'sample_inout',
+        'polarizer_inout',
+        'analyzer_inout',
+        'polarizer_spin',
+        'analyzer_spin',
+    ):
+        da.coords[name] = run_section.coords[name]
+    da.coords['time'] = sc.midpoints(da.coords['time'])
+    return RawDataByRunSection(da)
 
 
+# TODO remove, merged with `raw_data_by_run_section` (to be renamed)
 def sample_data_by_spin_channel(
     event_data: RawDataByRunSection,
     spin_channel: SpinChannel,
@@ -247,14 +283,6 @@ def sample_data_by_spin_channel(
     an output dimension of length 4 (++, +-, -+, --).
     """
     pass
-
-
-def direct_beam_data_by_cell_and_polarization(
-    event_data: RawDataByRunSection,
-    polarizer_spin: CellSpin[Polarizer],
-    analyzer_spin: CellSpin[Analyzer],
-) -> DirectBeamReducedI:
-    """ """
 
 
 def he3_transmission(
