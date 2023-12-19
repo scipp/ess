@@ -5,8 +5,6 @@ from typing import Iterable, NewType, Optional
 import scipp as sc
 import scippnexus as snx
 
-from .detector import NumberOfDetectors
-
 PixelIDs = NewType("PixelIDs", sc.Variable)
 InputFilepath = NewType("InputFilepath", str)
 NMXData = NewType("NMXData", sc.DataArray)
@@ -16,20 +14,14 @@ MaximumProbability = NewType("MaximumProbability", int)
 DefaultMaximumProbability = MaximumProbability(100_000)
 
 
-def _find_all(name: str, *properties: str) -> bool:
-    if not properties:
-        return True
-    return name.find(properties[0]) != -1 and _find_all(name, *properties[1:])
-
-
 def _retrieve_event_list_name(keys: Iterable[str]) -> str:
     prefix = "bank01_events_dat_list"
-    mandatory_keys = ('_p', '_x', '_y', '_n', '_id', '_t')
+
+    # (weight, x, y, n, pixel id, time of arrival)
+    mandatory_fields = 'p_x_y_n_id_t'
 
     for key in keys:
-        if key.startswith(prefix) and _find_all(
-            key.removeprefix(prefix), *mandatory_keys
-        ):
+        if key.startswith(prefix) and mandatory_fields in key:
             return key
 
     raise ValueError("Can not find event list name.")
@@ -56,7 +48,6 @@ def _get_mcstas_pixel_ids() -> PixelIDs:
 def load_mcstas_nexus(
     file_path: InputFilepath,
     max_prop: Optional[MaximumProbability] = None,
-    num_panels: Optional[NumberOfDetectors] = None,
 ) -> NMXData:
     """Load McStas simulation result from h5(nexus) file.
 
@@ -68,14 +59,9 @@ def load_mcstas_nexus(
     max_prop:
         The maximum probability to scale the weights.
 
-    num_panels:
-        The number of detector panels.
-        The data will be folded into number of panels.
-
     """
 
     prop = max_prop or DefaultMaximumProbability
-    panels = num_panels or NumberOfDetectors(3)
 
     with snx.File(file_path) as file:
         bank_name = _retrieve_event_list_name(file["entry1/data"].keys())
@@ -84,13 +70,13 @@ def load_mcstas_nexus(
             {'dim_0': 'event'}
         )
 
-        weights = _copy_partial_var(var, idx=0, unit='counts')
-        id_list = _copy_partial_var(var, idx=4, dtype='int64')
-        t_list = _copy_partial_var(var, idx=5, unit='s')
+        weights = _copy_partial_var(var, idx=0, unit='counts')  # p
+        id_list = _copy_partial_var(var, idx=4, dtype='int64')  # id
+        t_list = _copy_partial_var(var, idx=5, unit='s')  # t
 
         weights = (prop / weights.max()) * weights
 
         loaded = sc.DataArray(data=weights, coords={'t': t_list, 'id': id_list})
         grouped = loaded.group(_get_mcstas_pixel_ids())
 
-        return NMXData(grouped.fold(dim='id', sizes={'panel': panels, 'id': -1}))
+        return NMXData(grouped.fold(dim='id', sizes={'panel': 3, 'id': -1}))
