@@ -10,7 +10,7 @@ Down = NewType('Down', int)
 Depolarized = NewType('Depolarized', int)
 Polarized = NewType('Polarized', int)
 """Polarized either up or down, don't care."""
-Spin = TypeVar('Spin', Up, Down, Depolarized)
+Spin = TypeVar('Spin', Up, Down, Depolarized, Polarized)
 
 Analyzer = NewType('Analyzer', str)
 Polarizer = NewType('Polarizer', str)
