@@ -4,6 +4,9 @@
 Default parameters, providers and utility functions for the loki workflow.
 """
 
+from collections.abc import Iterable
+from itertools import groupby
+
 import sciline
 import scipp as sc
 
@@ -27,6 +30,7 @@ from ..types import (
     SourcePosition,
     TofData,
     TofMonitor,
+    TransformationChainPath,
     Transmission,
     UnmergedPatchedData,
     UnmergedPatchedMonitor,
@@ -43,6 +47,7 @@ default_parameters = {
     NexusSourceName: 'source',
     # TODO: sample is not in the files, so by not adding the name here, we use the
     # default value of [0, 0, 0] when loading the sample position.
+    TransformationChainPath: 'transformation_chain',
 }
 
 
@@ -111,18 +116,32 @@ def to_logical_dims(da: TofData[RunType]) -> DataWithLogicalDims[RunType]:
     )
 
 
+def _all_equal(iterable: Iterable[sc.Variable]) -> bool:
+    """
+    Returns True if all the elements are equal to each other.
+    From https://stackoverflow.com/a/3844832.
+    """
+    g = groupby(iterable)
+    return next(g, True) and not next(g, False)
+
+
 def detector_pixel_shape(
     data_groups: sciline.Series[RunID[RunType], LoadedDetectorContents[RunType]],
 ) -> DetectorPixelShape[RunType]:
-    return DetectorPixelShape[RunType](list(data_groups.values())[0]['pixel_shape'])
+    pixel_shapes = (dg['pixel_shape'] for dg in data_groups.values())
+    if not _all_equal(pixel_shapes):
+        raise RuntimeError(f'All pixel shapes must be the same for {RunType}')
+    return DetectorPixelShape[RunType](next(pixel_shapes))
 
 
 def detector_lab_frame_transform(
     data_groups: sciline.Series[RunID[RunType], LoadedDetectorContents[RunType]],
+    transform_path: TransformationChainPath,
 ) -> LabFrameTransform[RunType]:
-    return LabFrameTransform[RunType](
-        list(data_groups.values())[0]['transformation_chain']
-    )
+    transforms = (dg[transform_path] for dg in data_groups.values())
+    if not _all_equal(transforms):
+        raise RuntimeError(f'All lab frame transforms must be the same for {RunType}')
+    return LabFrameTransform[RunType](next(transforms))
 
 
 providers = (

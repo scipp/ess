@@ -6,7 +6,7 @@ from typing import NewType, Optional
 
 import scipp as sc
 
-from .types import (
+from ..types import (
     CalibratedMaskedData,
     CleanMasked,
     DataWithLogicalDims,

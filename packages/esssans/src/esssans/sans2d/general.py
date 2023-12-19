@@ -8,18 +8,18 @@ from typing import NewType, Optional
 
 import scipp as sc
 
-from .types import (
+from ..types import (
     DataWithLogicalDims,
     DetectorPixelShape,
     Incident,
     LabFrameTransform,
-    LoadedFileContents,
+    LoadedDetectorContents,
     NeXusMonitorName,
-    RawData,
     RunNumber,
     RunTitle,
     RunType,
     SampleRun,
+    TofData,
     Transmission,
 )
 
@@ -34,7 +34,7 @@ default_parameters = {
 
 
 def to_logical_dims(
-    da: RawData[RunType], reshape: Optional[ReshapeToLogicalDims]
+    da: TofData[RunType], reshape: Optional[ReshapeToLogicalDims]
 ) -> DataWithLogicalDims[RunType]:
     if reshape is None or not reshape:
         return DataWithLogicalDims[RunType](da)
@@ -43,12 +43,12 @@ def to_logical_dims(
     )
 
 
-def run_number(dg: LoadedFileContents[SampleRun]) -> RunNumber:
+def run_number(dg: LoadedDetectorContents[SampleRun]) -> RunNumber:
     """Get the run number from the raw sample data."""
     return RunNumber(int(dg['run_number']))
 
 
-def run_title(dg: LoadedFileContents[SampleRun]) -> RunTitle:
+def run_title(dg: LoadedDetectorContents[SampleRun]) -> RunTitle:
     """Get the run title from the raw sample data."""
     return RunTitle(dg['run_title'].value)
 

@@ -62,6 +62,8 @@ NexusSourceName = NewType('NexusSourceName', str)
 
 NexusDetectorName = NewType('NexusDetectorName', str)
 
+TransformationChainPath = NewType('TransformationChainName', str)
+
 # 2  Workflow parameters
 
 UncertaintyBroadcastMode = Enum(
