@@ -34,9 +34,7 @@ fonttools==4.45.1
 fsspec==2023.10.0
     # via dask
 graphlib-backport==1.0.3
-    # via
-    #   sciline
-    #   scipp
+    # via sciline
 graphviz==0.20.1
     # via -r base.in
 h5py==3.10.0
@@ -124,7 +122,7 @@ requests==2.31.0
     # via pooch
 sciline==23.9.1
     # via -r base.in
-scipp==23.11.1
+scipp==23.12.0
     # via
     #   -r base.in
     #   scippneutron
