@@ -9,22 +9,20 @@ from ..common import gravity_vector
 from ..types import (
     DirectBeam,
     DirectBeamFilename,
-    Filename,
-    LoadedDetectorContents,
+    FileList,
+    LoadedFileContents,
     MonitorType,
     NeXusMonitorName,
     RawData,
     RawMonitor,
     RunType,
-    # TofData,
-    # TofMonitor,
 )
 
 
-def pooch_load(filename: Filename[RunType]) -> LoadedDetectorContents[RunType]:
+def pooch_load(filelist: FileList[RunType]) -> LoadedFileContents[RunType]:
     from .data import get_path
 
-    dg = sc.io.load_hdf5(filename=get_path(filename))
+    dg = sc.io.load_hdf5(filename=get_path(filelist[0]))
     data = dg['data']
     if 'gravity' not in data.coords:
         data.coords["gravity"] = gravity_vector()
@@ -41,7 +39,7 @@ def pooch_load(filename: Filename[RunType]) -> LoadedDetectorContents[RunType]:
     dg['monitors']['monitor4']['data'].coords[
         'position'
     ].fields.z += monitor4_pos_z_offset
-    return LoadedDetectorContents[RunType](dg)
+    return LoadedFileContents[RunType](dg)
 
 
 def pooch_load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
@@ -51,13 +49,13 @@ def pooch_load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
 
 
 def get_detector_data(
-    dg: LoadedDetectorContents[RunType],
+    dg: LoadedFileContents[RunType],
 ) -> RawData[RunType]:
     return RawData[RunType](dg['data'])
 
 
 def get_monitor(
-    dg: LoadedDetectorContents[RunType], nexus_name: NeXusMonitorName[MonitorType]
+    dg: LoadedFileContents[RunType], nexus_name: NeXusMonitorName[MonitorType]
 ) -> RawMonitor[RunType, MonitorType]:
     # See https://github.com/scipp/sciline/issues/52 why copy needed
     mon = dg['monitors'][nexus_name]['data'].copy()

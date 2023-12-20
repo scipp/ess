@@ -13,7 +13,7 @@ from ..types import (
     DetectorPixelShape,
     Incident,
     LabFrameTransform,
-    LoadedDetectorContents,
+    LoadedFileContents,
     NeXusMonitorName,
     RawData,
     RunNumber,
@@ -43,12 +43,12 @@ def to_logical_dims(
     )
 
 
-def run_number(dg: LoadedDetectorContents[SampleRun]) -> RunNumber:
+def run_number(dg: LoadedFileContents[SampleRun]) -> RunNumber:
     """Get the run number from the raw sample data."""
     return RunNumber(int(dg['run_number']))
 
 
-def run_title(dg: LoadedDetectorContents[SampleRun]) -> RunTitle:
+def run_title(dg: LoadedFileContents[SampleRun]) -> RunTitle:
     """Get the run title from the raw sample data."""
     return RunTitle(dg['run_title'].value)
 

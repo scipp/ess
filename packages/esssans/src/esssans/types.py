@@ -111,17 +111,8 @@ class NeXusMonitorName(sciline.Scope[MonitorType, str], str):
     """Name of Incident|Transmission monitor in NeXus file"""
 
 
-class Filelist(sciline.Scope[RunType, list], list):
+class FileList(sciline.Scope[RunType, list], list):
     """Filenames of BackgroundRun|EmptyBeamRun|SampleRun"""
-
-
-# TODO: remove
-class Filename(sciline.Scope[RunType, list], list):
-    """Filenames of BackgroundRun|EmptyBeamRun|SampleRun"""
-
-
-class RunID(sciline.Scope[RunType, int], int):
-    """Sample run ID when multiple runs are used"""
 
 
 # 3  Workflow (intermediate) results
@@ -174,25 +165,8 @@ class LoadedFileContents(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
     """The entire contents of a loaded file"""
 
 
-# TODO: remove
-class LoadedDetectorContents(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
-    """The entire contents of a loaded file"""
-
-
 class RawData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Raw data"""
-
-
-class UnmergedPatchedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Patched with added sample and source positions data"""
-
-
-# class TofData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-#     """Detector data converted to time-of-flight"""
-
-
-class UnmergedRawData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Single raw data run"""
 
 
 class MaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
@@ -249,34 +223,10 @@ BackgroundSubtractedIofQ = NewType('BackgroundSubtractedIofQ', sc.DataArray)
 """I(Q) with background (given by I(Q) of the background run) subtracted"""
 
 
-class LoadedMonitorContents(
-    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataGroup], sc.DataGroup
-):
-    """The entire contents of a loaded monitor"""
-
-
-class UnmergedRawMonitor(
-    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
-):
-    """Unmerged raw monitor data"""
-
-
 class RawMonitor(
     sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
 ):
     """Raw monitor data"""
-
-
-class UnmergedPatchedMonitor(
-    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
-):
-    """Patched monitor data with source position"""
-
-
-# class TofMonitor(
-#     sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
-# ):
-#     """Monitor data converted to time-of-flight"""
 
 
 class WavelengthMonitor(

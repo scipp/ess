@@ -5,20 +5,17 @@ Loading and merging of LoKI data.
 """
 
 from collections.abc import Iterable
-from functools import partial, reduce
-from pathlib import Path
-from typing import Optional, Union
+from functools import reduce
+from typing import Optional
 
-import sciline
 import scipp as sc
 import scippnexus as snx
 
 from ..common import gravity_vector
 from ..types import (
-    Filelist,
+    FileList,
     Incident,
     LoadedFileContents,
-    # LoadedMonitorContents,
     MonitorType,
     NexusDetectorName,
     NexusInstrumentPath,
@@ -27,16 +24,9 @@ from ..types import (
     NexusSourceName,
     RawData,
     RawMonitor,
-    RunID,
     RunType,
-    SamplePosition,
-    SourcePosition,
     TransformationChainPath,
     Transmission,
-    UnmergedPatchedData,
-    UnmergedPatchedMonitor,
-    UnmergedRawData,
-    UnmergedRawMonitor,
 )
 
 
@@ -96,7 +86,7 @@ def _merge_runs(
 
 
 def load_nexus(
-    filelist: Filelist[RunType],
+    filelist: FileList[RunType],
     instrument_path: NexusInstrumentPath,
     detector_name: NexusDetectorName,
     incident_monitor_name: NeXusMonitorName[Incident],
@@ -126,7 +116,6 @@ def load_nexus(
     source_position = out[instrument_path][source_name]['position']
 
     for name in data_entries:
-        # da = out[instrument_path][name][f'{name}_events']
         out[instrument_path][name][f'{name}_events'] = _preprocess_data(
             out[instrument_path][name][f'{name}_events'],
             sample_position=sample_position,
@@ -136,17 +125,6 @@ def load_nexus(
     return LoadedFileContents[RunType](out)
 
 
-# def load_data_run(
-#     filename: Filename[RunType],
-#     instrument_path: NexusInstrumentPath,
-#     detector_name: NexusDetectorName,
-#     transform_path: TransformationChainPath,
-# ) -> LoadedDetectorContents[RunType]:
-#     entry = Path(instrument_path) / Path(detector_name)
-#     dg = _load_file_entry(filename=filename, entry=entry, transform_path=transform_path)
-#     return LoadedDetectorContents[RunType](dg)
-
-
 def get_detector_data(
     dg: LoadedFileContents[RunType],
     detector_name: NexusDetectorName,
@@ -154,34 +132,6 @@ def get_detector_data(
 ) -> RawData[RunType]:
     da = dg[instrument_path][detector_name][f'{detector_name}_events']
     return RawData[RunType](da)
-
-
-# def _merge_events(a, b):
-#     # Note: the concatenate operation will check that all coordinates are the same.
-#     return a.bins.concatenate(b)
-
-
-# def merge_detector_events(
-#     runs: sciline.Series[RunID[RunType], UnmergedPatchedData[RunType]]
-# ) -> RawData[RunType]:
-#     return RawData[RunType](reduce(_merge_events, runs.values()))
-
-
-# def merge_monitor_events(
-#     runs: sciline.Series[RunID[RunType], UnmergedPatchedMonitor[RunType, MonitorType]]
-# ) -> RawMonitor[RunType, MonitorType]:
-#     return RawMonitor[RunType, MonitorType](reduce(_merge_events, runs.values()))
-
-
-# def load_monitor(
-#     filename: Filename[RunType],
-#     instrument_path: NexusInstrumentPath,
-#     monitor_name: NeXusMonitorName[MonitorType],
-#     transform_path: TransformationChainPath,
-# ) -> LoadedMonitorContents[RunType, MonitorType]:
-#     entry = Path(instrument_path) / Path(monitor_name)
-#     dg = _load_file_entry(filename=filename, entry=entry, transform_path=transform_path)
-#     return LoadedMonitorContents[RunType, MonitorType](dg)
 
 
 def get_monitor_data(
@@ -195,45 +145,8 @@ def get_monitor_data(
     return RawMonitor[RunType, MonitorType](out)
 
 
-# def load_sample_position(
-#     filename: Filename[RunType],
-#     instrument_path: NexusInstrumentPath,
-#     sample_name: Optional[NexusSampleName],
-#     transform_path: TransformationChainPath,
-# ) -> SamplePosition[RunType]:
-#     # TODO: sample_name is optional for now because it is not found in all the files.
-#     if sample_name is None:
-#         out = sc.vector(value=[0, 0, 0], unit='m')
-#     else:
-#         entry = Path(instrument_path) / Path(sample_name)
-#         dg = _load_file_entry(
-#             filename=filename, entry=entry, transform_path=transform_path
-#         )
-#         out = SamplePosition[RunType](dg['position'])
-#     return SamplePosition[RunType](out)
-
-
-# def load_source_position(
-#     filename: Filename[RunType],
-#     instrument_path: NexusInstrumentPath,
-#     source_name: NexusSourceName,
-#     transform_path: TransformationChainPath,
-# ) -> SourcePosition[RunType]:
-#     entry = Path(instrument_path) / Path(source_name)
-#     dg = _load_file_entry(filename=filename, entry=entry, transform_path=transform_path)
-#     return SourcePosition[RunType](dg['position'])
-
-
 providers = (
     get_detector_data,
     get_monitor_data,
     load_nexus,
-    # get_detector_data,
-    # get_monitor_data,
-    # load_monitor,
-    # load_data_run,
-    # load_sample_position,
-    # load_source_position,
-    # merge_detector_events,
-    # merge_monitor_events,
 )
