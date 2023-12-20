@@ -2,6 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 from typing import NewType, TypeVar
 
+import numpy as np
 import sciline as sl
 import scipp as sc
 
@@ -10,14 +11,15 @@ Down = NewType('Down', int)
 Depolarized = NewType('Depolarized', int)
 Polarized = NewType('Polarized', int)
 """Polarized either up or down, don't care."""
-Spin = TypeVar('Spin', Up, Down, Depolarized, Polarized)
+Spin = TypeVar('Spin', Up, Down)
+
+PolarizationState = TypeVar('PolarizationState', Polarized, Depolarized)
 
 Analyzer = NewType('Analyzer', str)
 Polarizer = NewType('Polarizer', str)
 Cell = TypeVar('Cell', Analyzer, Polarizer)
 
 WavelengthBins = NewType('WavelengthBins', sc.Variable)
-RawEventData = NewType('RawEventData', sc.DataArray)
 
 DirectBeamQRange = NewType('DirectBeamQRange', sc.Variable)
 """Q-range defining the direct beam region in a direct beam measurement."""
@@ -58,19 +60,12 @@ DirectBeamNoCell = NewType('DirectBeamNoCell', sc.DataArray)
 """Direct beam without cells and sample as a function of wavelength."""
 
 
-class He3DirectBeam(sl.ScopeTwoParams[Cell, Spin, sc.DataArray], sc.DataArray):
+class He3DirectBeam(
+    sl.ScopeTwoParams[Cell, PolarizationState, sc.DataArray], sc.DataArray
+):
     """
     Direct beam data for a given cell and spin state as a function of wavelength.
     """
-
-
-SampleData = NewType('SampleData', sc.DataArray)
-"""
-Uncorrected sample data.
-
-TODO How exactly is this defined? Which normal (non-polarization) corrections
-have been applied already?
-"""
 
 
 PolarizationCorrectedSampleData = NewType(
@@ -79,90 +74,225 @@ PolarizationCorrectedSampleData = NewType(
 """Polarization-corrected sample data."""
 
 
-class CellSpin(sl.Scope[Cell, sc.DataArray], sc.DataArray):
+SampleInBeamLog = NewType('SampleInBeamLog', sc.DataArray)
+"""Whether the sample is in the beam as a time series."""
+
+
+class CellInBeamLog(sl.Scope[Cell, sc.DataArray], sc.DataArray):
+    """Whether a given cell is in the beam as a time series."""
+
+
+class CellSpinLog(sl.Scope[Cell, sc.DataArray], sc.DataArray):
     """Spin state of a given cell, as a time series."""
 
 
-RunSection = NewType('RunSection', sc.DataArray)
+RunSectionLog = NewType('RunSectionLog', sc.Dataset)
 """
-Run type (sample/direct/neither/...) as a time series.
+Run section as a time series.
 
-This needs to be derived from some time-series logs in the NeXus file, e.g.,
-whether the sample is in the beam or not.
+Derived from several time-series logs in the NeXus file, e.g.,
+whether the sample and cells are in the beam or not.
 """
 
 
 SpinChannel = NewType('SpinChannel', sc.DataArray)
 """Time series of the combined spin channel (++, +-, -+, --)."""
 
-RawDataByRunSection = NewType('RawDataByRunSection', sc.DataArray)
-"""Raw event data with events labeled (or grouped) by run section (sample/direct)."""
 
-DirectBeamReducedI = NewType('DirectBeamReducedI', sc.DataArray)
-"""
-Reduced direct beam event data with events labeled (or grouped) by cell and spin state.
-"""
+def determine_run_section(
+    sample_in_beam: SampleInBeamLog,
+    polarizer_in_beam: CellInBeamLog[Polarizer],
+    analyzer_in_beam: CellInBeamLog[Analyzer],
+    polarizer_spin: CellSpinLog[Polarizer],
+    analyzer_spin: CellSpinLog[Analyzer],
+) -> RunSectionLog:
+    from scipp.scipy.interpolate import interp1d
+
+    logs = {
+        'sample_in_beam': sample_in_beam,
+        'polarizer_in_beam': polarizer_in_beam,
+        'analyzer_in_beam': analyzer_in_beam,
+        'polarizer_spin': polarizer_spin,
+        'analyzer_spin': analyzer_spin,
+    }
+    # TODO Change this to datetime64
+    times = [
+        log.coords['time'].to(unit='s', dtype='float64', copy=False)
+        for log in logs.values()
+    ]
+    times = sc.concat(times, 'time')
+    times = sc.array(dims=times.dims, unit=times.unit, values=np.unique(times.values))
+    logs = {
+        name: interp1d(log, 'time', kind='previous', fill_value='extrapolate')(times)
+        for name, log in logs.items()
+    }
+    return RunSectionLog(sc.Dataset(logs))
 
 
-def spin_channel(
-    polarizer_spin: CellSpin[Polarizer], analyzer_spin: CellSpin[Analyzer]
-) -> SpinChannel:
+ReducedDataByRunSectionAndWavelength = NewType(
+    'ReducedDataByRunSectionAndWavelength', sc.DataArray
+)
+
+
+def dummy_reduction(
+    time_bands: sc.Variable,
+    wavelength_bands: sc.Variable,
+) -> sc.DataArray:
+    data = time_bands[:-1] * wavelength_bands[:-1]
+    data = data / data.sum()
+    return sc.DataArray(
+        data, coords={'time': time_bands, 'wavelength': wavelength_bands}
+    )
+
+
+def run_reduction_workflow(
+    run_section: RunSectionLog,
+    wavelength_bands: WavelengthBins,
+) -> ReducedDataByRunSectionAndWavelength:
     """
-    Returns a time series of the combined spin channel (++, +-, -+, --).
+    Run the reduction workflow.
 
-    This will be used to split the raw detector data into the four spin channels.
+    Note that is it currently not clear if we will wrap the workflow in a function,
+    or assemble a common workflow. The structural details may thus be subject to
+    change.
+
+    The reduction workflow must return normalized event data, binned into time and
+    wavelength bins. The time bands define intervals of different meaning, such as
+    sample runs, direct beam runs, and spin states.
     """
-    # TODO In practice, are switching times instant? Do we need to drop events that
-    # occur during switching? How is this marked in the meta data?
-    return SpinChannel()
+    # TODO subdivide into smaller intervals, or return numerator/denominator
+    # separately? The latter would complicate things when supporting different
+    # kinds of workflows, performing different kinds of normalizations.
+    data = dummy_reduction(
+        time_bands=run_section.coords['time'],
+        wavelength_bands=wavelength_bands,
+    )
+    for name, log in run_section.items():
+        data.coords[name] = log.data
+    return ReducedDataByRunSectionAndWavelength(data)
+
+
+def compute_direct_beam(
+    data: sc.DataArray,
+    q_range: sc.Variable,
+    background_q_range: sc.Variable,
+) -> sc.DataArray:
+    """Compute background-subtracted direct beam function."""
+    start_db = q_range[0]
+    stop_db = q_range[-1]
+    start_bg = background_q_range[0]
+    stop_bg = background_q_range[-1]
+    # The input is binned in time and wavelength, we simply histogram without changes.
+    direct_beam = data.bins['Q', start_db:stop_db].hist()
+    background = data.bins['Q', start_bg:stop_bg].hist()
+    return direct_beam - background
+
+
+ReducedSampleData = NewType('ReducedSampleData', sc.DataArray)
+ReducedDirectBeamDataNoCell = NewType('ReducedDirectBeamDataNoCell', sc.DataArray)
+
+
+class ReducedDirectBeamData(
+    sl.ScopeTwoParams[Cell, PolarizationState, sc.DataArray], sc.DataArray
+):
+    """Direct beam data for a given cell, as a function of wavelength and time."""
+
+
+def extract_sample_data(
+    data: ReducedDataByRunSectionAndWavelength,
+) -> ReducedSampleData:
+    """Extract sample data from reduced data."""
+    is_sample = (
+        data.coords['sample_in_beam']
+        & data.coords['polarizer_in_beam']
+        & data.coords['analyzer_in_beam']
+    )
+    return ReducedSampleData(data[is_sample])
+
+
+def extract_direct_beam(
+    data: ReducedDataByRunSectionAndWavelength,
+) -> ReducedDirectBeamDataNoCell:
+    """Extract direct beam without any cells from direct beam data."""
+    is_direct_beam = ~(
+        data.coords['sample_in_beam']
+        | data.coords['polarizer_in_beam']
+        | data.coords['analyzer_in_beam']
+    )
+    # We select all bins that correspond to direct-beam run sections. This preserves
+    # the separation into distinct direct beam runs, which is required later for
+    # fitting a time-decay function.
+    return ReducedDirectBeamDataNoCell(data[is_direct_beam])
+
+
+def extract_polarizer_direct_beam_polarized(
+    data: ReducedDataByRunSectionAndWavelength,
+) -> ReducedDirectBeamData[Polarizer, Polarized]:
+    """Extract run sections with polarized polarizer from direct beam data."""
+    # TODO We need all "polarized" runs, can we assume that
+    # ReducedDataByRunSectionAndWavelength does not contain any depolarized data?
+    select = (
+        data.coords['polarizer_in_beam']
+        & ~data.coords['sample_in_beam']
+        & ~data.coords['analyzer_in_beam']
+    )
+    return ReducedDirectBeamData[Polarizer, Polarized](data[select])
+
+
+def extract_analyzer_direct_beam_polarized(
+    data: ReducedDataByRunSectionAndWavelength,
+) -> ReducedDirectBeamData[Analyzer, Polarized]:
+    """Extract run sections with polarized analyzer from direct beam data."""
+    # TODO We need all "polarized" runs, can we assume that
+    # ReducedDataByRunSectionAndWavelength does not contain any depolarized data?
+    select = (
+        data.coords['analyzer_in_beam']
+        & ~data.coords['sample_in_beam']
+        & ~data.coords['polarizer_in_beam']
+    )
+    return ReducedDirectBeamData[Analyzer, Polarized](data[select])
 
 
 def direct_beam(
-    event_data: DirectBeamReducedI,
-    wavelength: WavelengthBins,
+    data: ReducedDirectBeamDataNoCell,
     q_range: DirectBeamQRange,
     background_q_range: DirectBeamBackgroundQRange,
 ) -> DirectBeamNoCell:
     """
-    Extract direct beam without any cells from direct beam data.
+    Returns the direct beam function without any cells.
 
     The result is background-subtracted and returned as function of wavelength.
     Other dimensions of the input are preserved. In particular, the time dimension,
     corresponding to different direct beam measurements, is preserved.
     """
-    # assume event_data in Q-space. take Q-intervals
-    start_DB = q_range[0]
-    stop_DB = q_range[-1]
-    start_BG = background_q_range[0]
-    stop_BG = background_q_range[-1]
-    # DirectBeamQRange will be a user input from a given start point [0] to a given
-    # end point [0]
-
-    # 1. input Q-ranges
-    direct_beam = event_data.bins['Q', start_DB:stop_DB]
-    background = event_data.bins['Q', start_BG:stop_BG]
-    # 2. histogramm into wavelength
-    direct_beam = direct_beam.hist(wavelength=wavelength)
-    background = background.hist(wavelength=wavelength)
-    # 3. Now make subtraction (better after histogramming)
-    direct_beam_no_cell = direct_beam - background
-    return DirectBeamNoCell(direct_beam_no_cell)
+    return DirectBeamNoCell(
+        compute_direct_beam(
+            data=data,
+            q_range=q_range,
+            background_q_range=background_q_range,
+        )
+    )
 
 
-def he3_direct_beam(
-    event_data: DirectBeamReducedI,
-    wavelength: WavelengthBins,
-    direct_beam_Qrange: DirectBeamQRange,
-    direct_beam_background_Qrange: DirectBeamBackgroundQRange,
-) -> He3DirectBeam[Cell, Spin]:
+def direct_beam_with_cell(
+    data: ReducedDirectBeamData[Cell, PolarizationState],
+    q_range: DirectBeamQRange,
+    background_q_range: DirectBeamBackgroundQRange,
+) -> He3DirectBeam[Cell, PolarizationState]:
     """
-    Returns the direct beam data for a given cell and spin state.
+    Returns the direct beam function for a given cell.
 
     The result is background-subtracted and returned as function of wavelength and
     wall-clock time. The time dependence is coarse, i.e., due to different time
     intervals at which the direct beam is measured.
     """
-    return He3DirectBeam[Cell, Spin]()
+    return He3DirectBeam[Analyzer, Polarized](
+        compute_direct_beam(
+            data=data,
+            q_range=q_range,
+            background_q_range=background_q_range,
+        )
+    )
 
 
 def he3_opacity_from_cell_params(
@@ -192,6 +322,7 @@ def he3_opacity_from_beam_data(
     :py:func:`he3_opacity_from_cell_params`.
     """
     # TODO What is I_bg? Is it also computed from the direct beam data?
+    raise NotImplementedError()
     return He3Opacity[Cell]()
 
 
@@ -212,77 +343,22 @@ def he3_polarization(
     # time_up = direct_beam_up.bins.coords['time'].bins.mean()
     # time_down = direct_beam_down.bins.coords['time'].bins.mean()
     # results dims: spin state, wavelength, time
+    raise NotImplementedError()
     return He3Polarization[Cell](1)
 
 
-def run_section_label(
-    run_section: RunSection,  # sample, direct[pol|ana], no cell, ignore
-    polarizer_spin: CellSpin[Polarizer],
-    analyzer_spin: CellSpin[Analyzer],
-) -> RunSectionLabel:
-    # TODO combine with `raw_data_by_run_section`?
-    # 10 options:
-    # - sample ++, +- , -+, --
-    # - direct beam polarizer +, -
-    # - direct beam analyzer +, -
-    # - no cell
-    # - ignore (motor moving, ...)
-
-    # 1. Define combined time bounds (concat and sort)
-    # 2. Remap input values to new time bounds
-    # 3. Return as scipp.Dataset
-    pass
-
-
-def raw_data_by_run_section(
-    # TODO this is not actually raw data, but IofQ data (in event mode)
-    raw: RawEventData,
-    run_section: RunSection,
-    polarizer_spin: CellSpin[Polarizer],
-    analyzer_spin: CellSpin[Analyzer],
-) -> RawDataByRunSection:
+# TODO unused
+def spin_channel(
+    polarizer_spin: CellSpinLog[Polarizer], analyzer_spin: CellSpinLog[Analyzer]
+) -> SpinChannel:
     """
-    Split raw event data into sample data and direct beam data.
+    Returns a time series of the combined spin channel (++, +-, -+, --).
 
-    This assigns each raw event to either the sample run or the direct beam run,
-    based in the time-dependent run type.
-
-    The reason for splitting the data here before splitting into spin channels and the
-    various direct runs is to avoid performance issues from multiple passes over the
-    full data set.
+    This will be used to split the raw detector data into the four spin channels.
     """
-    # Option 1, but do not have required time bounds
-    # raw.bins.coords['run_section'] = sc.lookup(run_section)[raw.bins.coords['time']]
-    # sections = sc.array(dims=['run_section'], values=[0, 1, 2, 3], unit=None)
-    # return RawDataByRunSection(raw.group(sections))
-
-    # Option 2
-    da = raw.bin(time=run_section.coords['time'])
-    # 0123012340123...
-    for name in (
-        'sample_inout',
-        'polarizer_inout',
-        'analyzer_inout',
-        'polarizer_spin',
-        'analyzer_spin',
-    ):
-        da.coords[name] = run_section.coords[name]
-    da.coords['time'] = sc.midpoints(da.coords['time'])
-    return RawDataByRunSection(da)
-
-
-# TODO remove, merged with `raw_data_by_run_section` (to be renamed)
-def sample_data_by_spin_channel(
-    event_data: RawDataByRunSection,
-    spin_channel: SpinChannel,
-) -> SampleData:
-    """
-    Wavelength-dependent sample data for all spin channels.
-
-    This labels event with their spin channel and maybe groups by channel, so we have
-    an output dimension of length 4 (++, +-, -+, --).
-    """
-    pass
+    # TODO In practice, are switching times instant? Do we need to drop events that
+    # occur during switching? How is this marked in the meta data?
+    raise NotImplementedError()
 
 
 def he3_transmission(
@@ -295,11 +371,11 @@ def he3_transmission(
 
     This is computed from the opacity and polarization.
     """
-    return He3Transmission[Cell]()
+    raise NotImplementedError()
 
 
 def correct_sample_data_for_polarization(
-    sample_data: SampleData,
+    data: ReducedSampleData,
     transmission_polarizer: He3Transmission[Polarizer],
     transmission_analyzer: He3Transmission[Analyzer],
 ) -> PolarizationCorrectedSampleData:
@@ -310,19 +386,23 @@ def correct_sample_data_for_polarization(
     case, since transmission is not time-dependent but spin-flippers need to be
     accounted for.
     """
-    # apply matrix inverse
-    pass
+    # 1. Split into spin channels
+    # 2. Apply polarization correction (matrix inverse)
+    # 3. Compute weighted mean over time and wavelength, bin into Q-bins
+    raise NotImplementedError()
 
 
 providers = [
+    determine_run_section,
+    run_reduction_workflow,
     direct_beam,
-    he3_direct_beam,
+    direct_beam_with_cell,
+    extract_sample_data,
+    extract_direct_beam,
+    extract_polarizer_direct_beam_polarized,
+    extract_analyzer_direct_beam_polarized,
     he3_transmission,
     he3_opacity_from_beam_data,
     he3_polarization,
     correct_sample_data_for_polarization,
-    sample_data_by_spin_channel,
-    spin_channel,
-    raw_data_by_run_section,
-    direct_beam_data_by_cell_and_polarization,
 ]

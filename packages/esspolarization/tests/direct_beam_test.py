@@ -6,31 +6,68 @@ import scipp as sc
 from ess import polarization as pol
 
 
-def dummy_analyzer_spin() -> pol.CellSpin[pol.Analyzer]:
-    time = sc.array(dims=['time'], values=[0, 500, 1000], unit='s')
+def dummy_analyzer_spin() -> pol.CellSpinLog[pol.Analyzer]:
+    time = sc.array(dims=['time'], values=[0, 500], unit='s')
     spin = sc.array(dims=['time'], values=[-1, 1], unit=None)
-    return pol.CellSpin[pol.Analyzer](sc.DataArray(spin, coords={'time': time}))
+    return pol.CellSpinLog[pol.Analyzer](sc.DataArray(spin, coords={'time': time}))
 
 
-def dummy_polarizer_spin() -> pol.CellSpin[pol.Polarizer]:
-    time = sc.array(dims=['time'], values=[0, 250, 750, 1000], unit='s')
+def dummy_polarizer_spin() -> pol.CellSpinLog[pol.Polarizer]:
+    time = sc.array(dims=['time'], values=[0, 250, 750], unit='s')
     spin = sc.array(dims=['time'], values=[-1, 1, -1], unit=None)
-    return pol.CellSpin[pol.Polarizer](sc.DataArray(spin, coords={'time': time}))
+    return pol.CellSpinLog[pol.Polarizer](sc.DataArray(spin, coords={'time': time}))
 
 
-# TODO we might not want this combine RunSection, keep inout states separate
-def dummy_run_section() -> pol.RunSection:
-    time = sc.array(dims=['time'], values=[0, 250, 500, 750], unit='s')
-    subtime = sc.array(dims=['subtime'], values=[0, 20, 60, 100], unit='s')
-    time = (time + subtime).flatten(to='time')
-    time = sc.concat([time, sc.scalar(1000, unit='s')], 'time')
-    # 0 = direct beam no cell
-    # 1 = direct beam with polarizer
-    # 2 = direct beam with analyzer
-    # 3 = sample run
-    section = sc.array(dims=['time'], values=[0, 1, 2, 3], unit=None)
-    section = sc.concat([section] * 4, 'time')
-    return pol.RunSection(sc.DataArray(section, coords={'time': time}))
+# Setup logs for for sections of length 250:
+# - 10 s direct beam no cell
+# - 20 s direct beam with polarizer
+# - 20 s direct beam with analyzer
+# - 200 s sample run
+section_length = sc.scalar(250.0, unit='s')
+
+
+def dummy_sample_in_beam() -> pol.SampleInBeamLog:
+    time = sc.array(
+        dims=['time'], values=[0, 50, 250, 300, 500, 550, 750, 800], unit='s'
+    )
+    in_beam = sc.array(
+        dims=['time'], values=[False, True, False, True, False, True, False, True]
+    )
+    return pol.SampleInBeamLog(sc.DataArray(in_beam, coords={'time': time}))
+
+
+def dummy_polarizer_in_beam() -> pol.CellInBeamLog[pol.Polarizer]:
+    time = sc.array(dims=['time'], values=[0, 10, 30, 50], unit='s')
+    time = sc.concat(
+        [
+            time + 0 * section_length,
+            time + 1 * section_length,
+            time + 2 * section_length,
+            time + 3 * section_length,
+        ],
+        'time',
+    )
+    in_beam = sc.array(dims=['time'], values=[False, True, False, True], unit=None)
+    in_beam = sc.concat([in_beam] * 4, 'time')
+    return pol.CellInBeamLog[pol.Polarizer](
+        sc.DataArray(in_beam, coords={'time': time})
+    )
+
+
+def dummy_analyzer_in_beam() -> pol.CellInBeamLog[pol.Analyzer]:
+    time = sc.array(dims=['time'], values=[0, 30], unit='s')
+    time = sc.concat(
+        [
+            time + 0 * section_length,
+            time + 1 * section_length,
+            time + 2 * section_length,
+            time + 3 * section_length,
+        ],
+        'time',
+    )
+    in_beam = sc.array(dims=['time'], values=[False, True], unit=None)
+    in_beam = sc.concat([in_beam] * 4, 'time')
+    return pol.CellInBeamLog[pol.Analyzer](sc.DataArray(in_beam, coords={'time': time}))
 
 
 def make_events(size: int = 1000) -> sc.DataArray:
@@ -40,17 +77,20 @@ def make_events(size: int = 1000) -> sc.DataArray:
     return sc.DataArray(values, coords={'time': time})
 
 
-def test_raw_data_by_run_section() -> None:
-    events = make_events()
-    section = dummy_run_section()
-    result = pol.raw_data_by_run_section(events, section)
-    result = result[result.coords['run_section'] == sc.index(0)]
-    print(result)
-    assert False
-
-
-def make_iofq_numerator(size: int = 1000) -> sc.DataArray:
-    pass
+def test_determine_run_section() -> None:
+    analyzer_spin = dummy_analyzer_spin()
+    polarizer_spin = dummy_polarizer_spin()
+    sample_in_beam = dummy_sample_in_beam()
+    analyzer_in_beam = dummy_analyzer_in_beam()
+    polarizer_in_beam = dummy_polarizer_in_beam()
+    result = pol.determine_run_section(
+        sample_in_beam=sample_in_beam,
+        analyzer_in_beam=analyzer_in_beam,
+        polarizer_in_beam=polarizer_in_beam,
+        analyzer_spin=analyzer_spin,
+        polarizer_spin=polarizer_spin,
+    )
+    assert result.sizes == {'time': 16}
 
 
 def make_IofQ(size: int = 1000) -> sc.DataArray:
@@ -74,13 +114,6 @@ def make_IofQ(size: int = 1000) -> sc.DataArray:
     return events.group('time')
 
 
-def test_run_section() -> None:
-    section = dummy_run_section()
-    print(section.coords['time'].values)
-    print(section.values)
-    assert False
-
-
 def test_direct_beam_returns_expected_dims() -> None:
     data = make_IofQ()
     wavelength = sc.linspace(
@@ -90,8 +123,7 @@ def test_direct_beam_returns_expected_dims() -> None:
     background_q_range = sc.array(dims=['Q'], values=[1.0, 2.0], unit='1/angstrom')
 
     db = pol.direct_beam(
-        event_data=data,
-        wavelength=wavelength,
+        data=data.bin(wavelength=wavelength),
         q_range=q_range,
         background_q_range=background_q_range,
     )
