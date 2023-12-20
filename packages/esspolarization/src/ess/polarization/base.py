@@ -1,19 +1,23 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-from typing import NewType, TypeVar
+from typing import Mapping, NewType, TypeVar
 
 import numpy as np
 import sciline as sl
 import scipp as sc
 
-Up = NewType('Up', int)
-Down = NewType('Down', int)
+spin_up = sc.scalar(1, dtype='int64', unit=None)
+spin_down = sc.scalar(-1, dtype='int64', unit=None)
+
 Depolarized = NewType('Depolarized', int)
 Polarized = NewType('Polarized', int)
 """Polarized either up or down, don't care."""
-Spin = TypeVar('Spin', Up, Down)
-
 PolarizationState = TypeVar('PolarizationState', Polarized, Depolarized)
+
+Up = NewType('Up', int)
+Down = NewType('Down', int)
+PolarizerSpin = TypeVar('PolarizerSpin', Up, Down)
+AnalyzerSpin = TypeVar('AnalyzerSpin', Up, Down)
 
 Analyzer = NewType('Analyzer', str)
 Polarizer = NewType('Polarizer', str)
@@ -95,10 +99,6 @@ whether the sample and cells are in the beam or not.
 """
 
 
-SpinChannel = NewType('SpinChannel', sc.DataArray)
-"""Time series of the combined spin channel (++, +-, -+, --)."""
-
-
 def determine_run_section(
     sample_in_beam: SampleInBeamLog,
     polarizer_in_beam: CellInBeamLog[Polarizer],
@@ -138,6 +138,7 @@ def dummy_reduction(
     time_bands: sc.Variable,
     wavelength_bands: sc.Variable,
 ) -> sc.DataArray:
+    """This is a placeholder returning meaningless data with correct shape."""
     data = time_bands[:-1] * wavelength_bands[:-1]
     data = data / data.sum()
     return sc.DataArray(
@@ -160,9 +161,13 @@ def run_reduction_workflow(
     wavelength bins. The time bands define intervals of different meaning, such as
     sample runs, direct beam runs, and spin states.
     """
-    # TODO subdivide into smaller intervals, or return numerator/denominator
+    # TODO
+    # Subdivide sample section into smaller intervals, or returnnumerator/denominator
     # separately? The latter would complicate things when supporting different
     # kinds of workflows, performing different kinds of normalizations.
+    # We need to be careful when subdividing and (1) exactly preserve existing bounds
+    # and (2) introduced new bounds using some heuristics that yield approximately
+    # equal time intervals (for the sample runs).
     data = dummy_reduction(
         time_bands=run_section.coords['time'],
         wavelength_bands=wavelength_bands,
@@ -188,7 +193,6 @@ def compute_direct_beam(
     return direct_beam - background
 
 
-ReducedSampleData = NewType('ReducedSampleData', sc.DataArray)
 ReducedDirectBeamDataNoCell = NewType('ReducedDirectBeamDataNoCell', sc.DataArray)
 
 
@@ -196,18 +200,6 @@ class ReducedDirectBeamData(
     sl.ScopeTwoParams[Cell, PolarizationState, sc.DataArray], sc.DataArray
 ):
     """Direct beam data for a given cell, as a function of wavelength and time."""
-
-
-def extract_sample_data(
-    data: ReducedDataByRunSectionAndWavelength,
-) -> ReducedSampleData:
-    """Extract sample data from reduced data."""
-    is_sample = (
-        data.coords['sample_in_beam']
-        & data.coords['polarizer_in_beam']
-        & data.coords['analyzer_in_beam']
-    )
-    return ReducedSampleData(data[is_sample])
 
 
 def extract_direct_beam(
@@ -321,7 +313,6 @@ def he3_opacity_from_beam_data(
     Note that this can alternatively be computed from cell parameters, see
     :py:func:`he3_opacity_from_cell_params`.
     """
-    # TODO What is I_bg? Is it also computed from the direct beam data?
     raise NotImplementedError()
     return He3Opacity[Cell]()
 
@@ -347,20 +338,6 @@ def he3_polarization(
     return He3Polarization[Cell](1)
 
 
-# TODO unused
-def spin_channel(
-    polarizer_spin: CellSpinLog[Polarizer], analyzer_spin: CellSpinLog[Analyzer]
-) -> SpinChannel:
-    """
-    Returns a time series of the combined spin channel (++, +-, -+, --).
-
-    This will be used to split the raw detector data into the four spin channels.
-    """
-    # TODO In practice, are switching times instant? Do we need to drop events that
-    # occur during switching? How is this marked in the meta data?
-    raise NotImplementedError()
-
-
 def he3_transmission(
     opacity: He3Opacity[Cell],
     polarization: He3Polarization[Cell],
@@ -374,8 +351,67 @@ def he3_transmission(
     raise NotImplementedError()
 
 
+class ReducedSampleDataBySpinChannel(
+    sl.ScopeTwoParams[PolarizerSpin, AnalyzerSpin, sc.DataArray], sc.DataArray
+):
+    """Sample data for a given spin channel."""
+
+
+def is_sample_channel(
+    coords: Mapping[str, sc.Variable],
+    polarizer_spin: sc.Variable,
+    analyzer_spin: sc.Variable,
+) -> sc.Variable:
+    return (
+        coords['sample_in_beam']
+        & coords['polarizer_in_beam']
+        & coords['analyzer_in_beam']
+        & (coords['polarizer_spin'] == polarizer_spin)
+        & (coords['analyzer_spin'] == analyzer_spin)
+    )
+
+
+def extract_sample_data_up_up(
+    data: ReducedDataByRunSectionAndWavelength,
+) -> ReducedSampleDataBySpinChannel[Up, Up]:
+    """Extract sample data for spin channel up-up."""
+    return ReducedSampleDataBySpinChannel[Up, Up](
+        is_sample_channel(data, spin_up, spin_up)
+    )
+
+
+def extract_sample_data_up_down(
+    data: ReducedDataByRunSectionAndWavelength,
+) -> ReducedSampleDataBySpinChannel[Up, Down]:
+    """Extract sample data for spin channel up-down."""
+    return ReducedSampleDataBySpinChannel[Up, Down](
+        is_sample_channel(data, spin_up, spin_down)
+    )
+
+
+def extract_sample_data_down_up(
+    data: ReducedDataByRunSectionAndWavelength,
+) -> ReducedSampleDataBySpinChannel[Down, Up]:
+    """Extract sample data for spin channel down-up."""
+    return ReducedSampleDataBySpinChannel[Down, Up](
+        is_sample_channel(data, spin_down, spin_up)
+    )
+
+
+def extract_sample_data_down_down(
+    data: ReducedDataByRunSectionAndWavelength,
+) -> ReducedSampleDataBySpinChannel[Down, Down]:
+    """Extract sample data for spin channel down-down."""
+    return ReducedSampleDataBySpinChannel[Down, Down](
+        is_sample_channel(data, spin_down, spin_down)
+    )
+
+
 def correct_sample_data_for_polarization(
-    data: ReducedSampleData,
+    upup: ReducedSampleDataBySpinChannel[Up, Up],
+    updown: ReducedSampleDataBySpinChannel[Up, Down],
+    downup: ReducedSampleDataBySpinChannel[Down, Up],
+    downdown: ReducedSampleDataBySpinChannel[Down, Down],
     transmission_polarizer: He3Transmission[Polarizer],
     transmission_analyzer: He3Transmission[Analyzer],
 ) -> PolarizationCorrectedSampleData:
@@ -386,9 +422,8 @@ def correct_sample_data_for_polarization(
     case, since transmission is not time-dependent but spin-flippers need to be
     accounted for.
     """
-    # 1. Split into spin channels
-    # 2. Apply polarization correction (matrix inverse)
-    # 3. Compute weighted mean over time and wavelength, bin into Q-bins
+    # 1. Apply polarization correction (matrix inverse)
+    # 2. Compute weighted mean over time and wavelength, bin into Q-bins
     raise NotImplementedError()
 
 
@@ -397,10 +432,13 @@ providers = [
     run_reduction_workflow,
     direct_beam,
     direct_beam_with_cell,
-    extract_sample_data,
     extract_direct_beam,
     extract_polarizer_direct_beam_polarized,
     extract_analyzer_direct_beam_polarized,
+    extract_sample_data_down_down,
+    extract_sample_data_down_up,
+    extract_sample_data_up_down,
+    extract_sample_data_up_up,
     he3_transmission,
     he3_opacity_from_beam_data,
     he3_polarization,
