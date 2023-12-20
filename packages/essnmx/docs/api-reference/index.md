@@ -22,9 +22,9 @@
    :toctree: ../generated/functions
    :recursive:
 
-   small_mcstas_sample,
-   load_mcstas_nexus,
-   collect_default_parameters,
+   small_mcstas_sample
+   load_mcstas_nexus
+
 ```
 
 ## Submodules
@@ -35,7 +35,7 @@
    :template: module-template.rst
    :recursive:
 
-   workflow
-   detector
+   data
    mcstas_loader
+
 ```

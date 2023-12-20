@@ -13,12 +13,10 @@ del importlib
 
 from .data import small_mcstas_sample
 from .mcstas_loader import InputFilepath, NMXData, load_mcstas_nexus
-from .workflow import collect_default_parameters
 
 __all__ = [
     "small_mcstas_sample",
     "NMXData",
     "InputFilepath",
     "load_mcstas_nexus",
-    "collect_default_parameters",
 ]
