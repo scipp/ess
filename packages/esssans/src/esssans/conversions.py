@@ -8,7 +8,7 @@ from scippneutron._utils import elem_unit
 from scippneutron.conversion.graph import beamline, tof
 
 from .common import mask_range
-from .types import (
+from .types import (  # TofMonitor,
     BeamCenter,
     CalibratedMaskedData,
     CleanMasked,
@@ -22,7 +22,6 @@ from .types import (
     Numerator,
     RawMonitor,
     RunType,
-    # TofMonitor,
     WavelengthMask,
     WavelengthMonitor,
 )

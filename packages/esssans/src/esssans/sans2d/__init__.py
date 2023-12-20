@@ -2,9 +2,11 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 
-from .general import default_parameters, providers as general_providers
+from .general import default_parameters
+from .general import providers as general_providers
 from .io import providers as io_providers
-from .masking import LowCountThreshold, providers as masking_providers
+from .masking import LowCountThreshold
+from .masking import providers as masking_providers
 
 providers = general_providers + io_providers + masking_providers
 

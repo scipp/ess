@@ -21,7 +21,6 @@ from ..types import (
     Transmission,
 )
 
-
 default_parameters = {
     NexusInstrumentPath: 'instrument',
     NexusDetectorName: 'larmor_detector',
