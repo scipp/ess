@@ -424,6 +424,14 @@ def correct_sample_data_for_polarization(
     """
     # 1. Apply polarization correction (matrix inverse)
     # 2. Compute weighted mean over time and wavelength, bin into Q-bins
+
+    # Pseudo code:
+    # result = [0,0,0,0]
+    # for j in range(4):
+    #     for i, channel in enumerate((upup, updown, downup, downdown)):
+    #         da = PA_inv[j, i] * channel
+    #         da *= weights  # weights from error bars or event counts?
+    #         result[j] += da.bins.concat('time', 'wavelength').hist(Qx=100, Qy=100)
     raise NotImplementedError()
 
 
