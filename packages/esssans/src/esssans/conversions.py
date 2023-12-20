@@ -22,7 +22,7 @@ from .types import (
     Numerator,
     RawMonitor,
     RunType,
-    TofMonitor,
+    # TofMonitor,
     WavelengthMask,
     WavelengthMonitor,
 )
@@ -178,7 +178,7 @@ def sans_monitor() -> MonitorCoordTransformGraph:
 
 
 def monitor_to_wavelength(
-    monitor: TofMonitor[RunType, MonitorType], graph: MonitorCoordTransformGraph
+    monitor: RawMonitor[RunType, MonitorType], graph: MonitorCoordTransformGraph
 ) -> WavelengthMonitor[RunType, MonitorType]:
     return WavelengthMonitor[RunType, MonitorType](
         monitor.transform_coords('wavelength', graph=graph)

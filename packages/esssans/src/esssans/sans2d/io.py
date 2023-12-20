@@ -13,9 +13,11 @@ from ..types import (
     LoadedDetectorContents,
     MonitorType,
     NeXusMonitorName,
+    RawData,
+    RawMonitor,
     RunType,
-    TofData,
-    TofMonitor,
+    # TofData,
+    # TofMonitor,
 )
 
 
@@ -50,16 +52,16 @@ def pooch_load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
 
 def get_detector_data(
     dg: LoadedDetectorContents[RunType],
-) -> TofData[RunType]:
-    return TofData[RunType](dg['data'])
+) -> RawData[RunType]:
+    return RawData[RunType](dg['data'])
 
 
 def get_monitor(
     dg: LoadedDetectorContents[RunType], nexus_name: NeXusMonitorName[MonitorType]
-) -> TofMonitor[RunType, MonitorType]:
+) -> RawMonitor[RunType, MonitorType]:
     # See https://github.com/scipp/sciline/issues/52 why copy needed
     mon = dg['monitors'][nexus_name]['data'].copy()
-    return TofMonitor[RunType, MonitorType](mon)
+    return RawMonitor[RunType, MonitorType](mon)
 
 
 providers = (

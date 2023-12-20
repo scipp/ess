@@ -111,8 +111,13 @@ class NeXusMonitorName(sciline.Scope[MonitorType, str], str):
     """Name of Incident|Transmission monitor in NeXus file"""
 
 
-class Filename(sciline.Scope[RunType, str], str):
-    """Filename of BackgroundRun|EmptyBeamRun|SampleRun"""
+class Filelist(sciline.Scope[RunType, list], list):
+    """Filenames of BackgroundRun|EmptyBeamRun|SampleRun"""
+
+
+# TODO: remove
+class Filename(sciline.Scope[RunType, list], list):
+    """Filenames of BackgroundRun|EmptyBeamRun|SampleRun"""
 
 
 class RunID(sciline.Scope[RunType, int], int):
@@ -165,8 +170,13 @@ class SolidAngle(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Solid angle of detector pixels seen from sample position"""
 
 
+class LoadedFileContents(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+    """The entire contents of a loaded file"""
+
+
+# TODO: remove
 class LoadedDetectorContents(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
-    """The entire contents of a loaded detector data"""
+    """The entire contents of a loaded file"""
 
 
 class RawData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
@@ -177,8 +187,8 @@ class UnmergedPatchedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Patched with added sample and source positions data"""
 
 
-class TofData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Detector data converted to time-of-flight"""
+# class TofData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+#     """Detector data converted to time-of-flight"""
 
 
 class UnmergedRawData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
@@ -263,10 +273,10 @@ class UnmergedPatchedMonitor(
     """Patched monitor data with source position"""
 
 
-class TofMonitor(
-    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
-):
-    """Monitor data converted to time-of-flight"""
+# class TofMonitor(
+#     sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
+# ):
+#     """Monitor data converted to time-of-flight"""
 
 
 class WavelengthMonitor(

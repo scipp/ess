@@ -15,11 +15,11 @@ from ..types import (
     LabFrameTransform,
     LoadedDetectorContents,
     NeXusMonitorName,
+    RawData,
     RunNumber,
     RunTitle,
     RunType,
     SampleRun,
-    TofData,
     Transmission,
 )
 
@@ -34,7 +34,7 @@ default_parameters = {
 
 
 def to_logical_dims(
-    da: TofData[RunType], reshape: Optional[ReshapeToLogicalDims]
+    da: RawData[RunType], reshape: Optional[ReshapeToLogicalDims]
 ) -> DataWithLogicalDims[RunType]:
     if reshape is None or not reshape:
         return DataWithLogicalDims[RunType](da)
