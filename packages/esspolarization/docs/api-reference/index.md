@@ -12,12 +12,11 @@
 
    Analyzer
    Cell
-   CellSpin
+   CellInBeamLog
    Depolarized
    DirectBeamBackgroundRegion
-   DirectBeamData
    DirectBeamNoCell
-   DirectBeamRegion
+   DirectBeamQRange
    Down
    He3CellLength
    He3CellPressure
@@ -30,12 +29,8 @@
    PolarizationCorrectedSampleData
    Polarized
    Polarizer
-   RawDataByRunSection
-   RawEventData
-   RunSection
-   SampleData
-   Spin
-   SpinChannel
+   RunSectionLog
+   SampleInBeamLog
    Up
    WavelengthBins
 ```
@@ -46,18 +41,6 @@
 .. autosummary::
    :toctree: ../generated/functions
    :recursive:
-
-   correct_sample_data_for_polarization
-   direct_beam
-   direct_beam_data_by_cell_and_polarization
-   he3_direct_beam
-   he3_opacity_from_beam_data
-   he3_opacity_from_cell_params
-   he3_polarization
-   he3_transmission
-   raw_data_by_run_section
-   sample_data_by_spin_channel
-   spin_channel
 ```
 
 ## Submodules
