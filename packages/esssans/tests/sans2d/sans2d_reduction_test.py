@@ -172,8 +172,7 @@ def as_dict(funcs: List[Callable[..., type]]) -> dict:
 def pixel_dependent_direct_beam(
     filename: DirectBeamFilename, shape: DataWithLogicalDims[SampleRun]
 ) -> DirectBeam:
-    direct_beam = sans.sans2d.pooch_load_direct_beam(filename)
-    # sizes = {'spectrum': shape.sizes['spectrum'], **direct_beam.sizes}
+    direct_beam = sans.sans2d.io.pooch_load_direct_beam(filename)
     if 'spectrum' in shape.sizes:
         detector_shape = {'spectrum': shape.sizes['spectrum']}
     else:
