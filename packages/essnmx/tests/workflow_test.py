@@ -14,12 +14,10 @@ def mcstas_workflow() -> sl.Pipeline:
         MaximumProbability,
         load_mcstas_nexus,
     )
-    from ess.nmx.workflow import collect_default_parameters
 
     return sl.Pipeline(
         [load_mcstas_nexus],
         params={
-            **collect_default_parameters(),
             InputFilepath: small_mcstas_sample(),
             MaximumProbability: DefaultMaximumProbability,
         },
