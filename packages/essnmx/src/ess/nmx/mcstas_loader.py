@@ -31,7 +31,7 @@ def _copy_partial_var(
     var: sc.Variable, idx: int, unit: Optional[str] = None, dtype: Optional[str] = None
 ) -> sc.Variable:
     """Retrieve a property from a variable."""
-    var = var['dim_1', idx].astype(dtype or var.dtype , copy=True)
+    var = var['dim_1', idx].astype(dtype or var.dtype, copy=True)
     if unit:
         var.unit = sc.Unit(unit)
     return var
