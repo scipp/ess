@@ -207,7 +207,7 @@ def _events_merge_spectra(
     if wavelength_bands is None:
         return q_binned
 
-    # Note: cannot simply add the wavenlength_bands to the edges, because the
+    # Note: cannot simply add the wavelength_bands to the edges, because the
     # wavelength_bands may overlap. So instead, we loop over the bands and bin each
     # band separately.
     #
