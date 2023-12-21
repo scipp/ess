@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 import sciline
 import scipp as sc
-from loki_common import make_param_tables, make_params
+from loki_common import make_params
 
 import esssans as sans
 from esssans.types import (
@@ -22,11 +22,7 @@ def loki_providers() -> List[Callable]:
 
 
 def test_can_create_pipeline():
-    params = make_params()
-    tables = make_param_tables()
-    pipeline = sciline.Pipeline(loki_providers(), params=params)
-    for table in tables:
-        pipeline.set_param_table(table)
+    pipeline = sciline.Pipeline(loki_providers(), params=make_params())
     pipeline.get(BackgroundSubtractedIofQ)
 
 
@@ -36,18 +32,14 @@ def test_can_create_pipeline():
 )
 def test_pipeline_can_compute_IofQ(uncertainties):
     params = make_params()
-    tables = make_param_tables()
     params[UncertaintyBroadcastMode] = uncertainties
     pipeline = sciline.Pipeline(loki_providers(), params=params)
-    for table in tables:
-        pipeline.set_param_table(table)
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('Q',)
 
 
 def test_pipeline_can_compute_IofQ_in_wavelength_slices():
     params = make_params()
-    tables = make_param_tables()
     band = np.linspace(1.0, 13.0, num=11)
     params[WavelengthBands] = sc.array(
         dims=['band', 'wavelength'],
@@ -55,8 +47,6 @@ def test_pipeline_can_compute_IofQ_in_wavelength_slices():
         unit='angstrom',
     )
     pipeline = sciline.Pipeline(loki_providers(), params=params)
-    for table in tables:
-        pipeline.set_param_table(table)
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('band', 'Q')
     assert result.sizes['band'] == 10
@@ -64,23 +54,18 @@ def test_pipeline_can_compute_IofQ_in_wavelength_slices():
 
 def test_pipeline_can_compute_IofQ_in_layers():
     params = make_params()
-    tables = make_param_tables()
     params[FinalDims] = ['layer', 'Q']
     pipeline = sciline.Pipeline(loki_providers(), params=params)
-    for table in tables:
-        pipeline.set_param_table(table)
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('layer', 'Q')
     assert result.sizes['layer'] == 4
 
 
 def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs():
-    params = make_params()
-    tables = make_param_tables(
-        sample_runs=[60250, 60339], background_runs=[60248, 60393]
+    params = make_params(
+        sample_runs=['60250-2022-02-28_2215.nxs', '60339-2022-02-28_2215.nxs'],
+        background_runs=['60248-2022-02-28_2215.nxs', '60393-2022-02-28_2215.nxs'],
     )
     pipeline = sciline.Pipeline(loki_providers(), params=params)
-    for table in tables:
-        pipeline.set_param_table(table)
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('Q',)

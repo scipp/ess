@@ -76,9 +76,12 @@ def _merge_runs(
     # detector geometry (pixel_shapes, lab transform) should be the same for all runs.
     out = data_groups[0].copy(deep=False)
     for name in entries:
-        data_arrays = [
-            dg[instrument_path][name][f'{name}_events'] for dg in data_groups
-        ]
+        data_arrays = []
+        for dg in data_groups:
+            events = dg[instrument_path][name][f'{name}_events']
+            if 'event_time_zero' in events.dims:
+                events = events.bins.concat('event_time_zero')
+            data_arrays.append(events)
         out[instrument_path][name][f'{name}_events'] = reduce(
             _merge_events, data_arrays
         )

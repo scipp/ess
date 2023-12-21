@@ -5,14 +5,14 @@ from typing import Callable, List
 import numpy as np
 import sciline
 import scipp as sc
-from loki_common import make_param_tables, make_params
+from loki_common import make_params
 
 import esssans as sans
 from esssans.types import FinalDims, QBins
 
 
 def get_I0(q_loc: sc.Variable) -> sc.Variable:
-    from esssans.data import get_path
+    from esssans.loki.data import get_path
 
     data = np.loadtxt(get_path('PolyGauss_I0-50_Rg-60.txt'))
     qcoord = sc.array(dims=["Q"], values=data[:, 0], unit='1/angstrom')
@@ -32,7 +32,6 @@ def loki_providers() -> List[Callable]:
 
 def test_can_compute_direct_beam_for_all_pixels():
     n_wavelength_bands = 10
-    tables = make_param_tables()
     params_full = make_params()
     params_bands = make_params(n_wavelength_bands=n_wavelength_bands)
     providers = loki_providers()
@@ -40,9 +39,6 @@ def test_can_compute_direct_beam_for_all_pixels():
         sciline.Pipeline(providers, params=params_bands),
         sciline.Pipeline(providers, params=params_full),
     ]
-    for pipeline in pipelines:
-        for table in tables:
-            pipeline.set_param_table(table)
     I0 = get_I0(sc.midpoints(params_full[QBins])[0])
 
     results = sans.direct_beam(pipelines=pipelines, I0=I0, niter=4)
@@ -58,7 +54,6 @@ def test_can_compute_direct_beam_for_all_pixels():
 
 def test_can_compute_direct_beam_per_layer():
     n_wavelength_bands = 10
-    tables = make_param_tables()
     params_full = make_params()
     params_bands = make_params(n_wavelength_bands=n_wavelength_bands)
     params_full[FinalDims] = ['layer', 'Q']
@@ -68,9 +63,6 @@ def test_can_compute_direct_beam_per_layer():
         sciline.Pipeline(providers, params=params_bands),
         sciline.Pipeline(providers, params=params_full),
     ]
-    for pipeline in pipelines:
-        for table in tables:
-            pipeline.set_param_table(table)
     I0 = get_I0(sc.midpoints(params_full[QBins])[0])
 
     results = sans.direct_beam(pipelines=pipelines, I0=I0, niter=4)

@@ -8,6 +8,7 @@ import sciline
 import scipp as sc
 
 import esssans as sans
+from esssans.sans2d import default_parameters
 from esssans.types import (
     BackgroundRun,
     BackgroundSubtractedIofQ,
@@ -17,7 +18,7 @@ from esssans.types import (
     DirectBeam,
     DirectBeamFilename,
     EmptyBeamRun,
-    Filename,
+    FileList,
     Incident,
     IofQ,
     NeXusMonitorName,
@@ -35,9 +36,7 @@ from esssans.types import (
 
 
 def make_params(to_logical_dims: Optional[bool] = None) -> dict:
-    params = {}
-    params[NeXusMonitorName[Incident]] = 'monitor2'
-    params[NeXusMonitorName[Transmission]] = 'monitor4'
+    params = default_parameters.copy()
     band = sc.linspace('wavelength', 2.0, 16.0, num=2, unit='angstrom')
     params[WavelengthBands] = band
     params[WavelengthBins] = sc.linspace(
@@ -56,11 +55,11 @@ def make_params(to_logical_dims: Optional[bool] = None) -> dict:
     params[QBins] = sc.linspace(
         dim='Q', start=0.01, stop=0.55, num=141, unit='1/angstrom'
     )
-    params[Filename[BackgroundRun]] = 'SANS2D00063159.hdf5'
-    params[Filename[TransmissionRun[BackgroundRun]]] = params[Filename[BackgroundRun]]
-    params[Filename[SampleRun]] = 'SANS2D00063114.hdf5'
-    params[Filename[TransmissionRun[SampleRun]]] = params[Filename[SampleRun]]
-    params[Filename[EmptyBeamRun]] = 'SANS2D00063091.hdf5'
+    params[FileList[BackgroundRun]] = ['SANS2D00063159.hdf5']
+    params[FileList[TransmissionRun[BackgroundRun]]] = params[FileList[BackgroundRun]]
+    params[FileList[SampleRun]] = ['SANS2D00063114.hdf5']
+    params[FileList[TransmissionRun[SampleRun]]] = params[FileList[SampleRun]]
+    params[FileList[EmptyBeamRun]] = ['SANS2D00063091.hdf5']
     params[DirectBeamFilename] = 'DIRECT_SANS2D_REAR_34327_4m_8mm_16Feb16.hdf5'
     params[NonBackgroundWavelengthRange] = sc.array(
         dims=['wavelength'], values=[0.7, 17.1], unit='angstrom'
