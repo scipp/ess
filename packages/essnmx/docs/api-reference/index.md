@@ -9,6 +9,10 @@
    :toctree: ../generated/classes
    :template: class-template.rst
    :recursive:
+
+   NMXData
+   InputFilepath
+
 ```
 
 ## Top-level functions
@@ -17,6 +21,10 @@
 .. autosummary::
    :toctree: ../generated/functions
    :recursive:
+
+   small_mcstas_sample
+   load_mcstas_nexus
+
 ```
 
 ## Submodules
@@ -26,4 +34,8 @@
    :toctree: ../generated/modules
    :template: module-template.rst
    :recursive:
+
+   data
+   mcstas_loader
+
 ```

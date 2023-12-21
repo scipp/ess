@@ -10,3 +10,13 @@ except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
 del importlib
+
+from .data import small_mcstas_sample
+from .mcstas_loader import InputFilepath, NMXData, load_mcstas_nexus
+
+__all__ = [
+    "small_mcstas_sample",
+    "NMXData",
+    "InputFilepath",
+    "load_mcstas_nexus",
+]
