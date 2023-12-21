@@ -2,7 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 
-from .general import default_parameters, ReshapeToLogicalDims
+from .general import ReshapeToLogicalDims, default_parameters
 from .general import providers as general_providers
 from .io import providers as io_providers
 from .masking import LowCountThreshold
