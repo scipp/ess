@@ -46,7 +46,7 @@ def _get_mcstas_pixel_ids() -> PixelIDs:
 
 def load_mcstas_nexus(
     file_path: InputFilepath,
-    max_prop: Optional[MaximumProbability] = None,
+    max_probability: Optional[MaximumProbability] = None,
 ) -> NMXData:
     """Load McStas simulation result from h5(nexus) file.
 
@@ -55,12 +55,12 @@ def load_mcstas_nexus(
     file_path:
         File name to load.
 
-    max_prop:
+    max_probability:
         The maximum probability to scale the weights.
 
     """
 
-    prop = max_prop or DefaultMaximumProbability
+    probability = max_probability or DefaultMaximumProbability
 
     with snx.File(file_path) as file:
         bank_name = _retrieve_event_list_name(file["entry1/data"].keys())
@@ -73,7 +73,7 @@ def load_mcstas_nexus(
         id_list = _copy_partial_var(var, idx=4, dtype='int64')  # id
         t_list = _copy_partial_var(var, idx=5, unit='s')  # t
 
-        weights = (prop / weights.max()) * weights
+        weights = (probability / weights.max()) * weights
 
         loaded = sc.DataArray(data=weights, coords={'t': t_list, 'id': id_list})
         grouped = loaded.group(_get_mcstas_pixel_ids())
