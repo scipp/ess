@@ -407,7 +407,11 @@ def beam_center_from_iofq(
     # Flatten positions dim which is required during the iterations for slicing with a
     # boolean mask
     pos_dims = data.coords['position'].dims
-    data = data.flatten(dims=pos_dims, to=uuid.uuid4().hex)
+    new_dim = uuid.uuid4().hex
+    data = data.flatten(dims=pos_dims, to=new_dim)
+    dims_to_flatten = [dim for dim in norm.dims if dim in pos_dims]
+    if dims_to_flatten:
+        norm = norm.flatten(dims=dims_to_flatten, to=new_dim)
 
     # Use center of mass to get initial guess for beam center
     com_shift = beam_center_from_center_of_mass(data, graph)
