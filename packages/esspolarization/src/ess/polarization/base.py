@@ -162,11 +162,11 @@ def run_reduction_workflow(
     sample runs, direct beam runs, and spin states.
     """
     # TODO
-    # Subdivide sample section into smaller intervals, or returnnumerator/denominator
+    # Subdivide sample section into smaller intervals, or return numerator/denominator
     # separately? The latter would complicate things when supporting different
     # kinds of workflows, performing different kinds of normalizations.
     # We need to be careful when subdividing and (1) exactly preserve existing bounds
-    # and (2) introduced new bounds using some heuristics that yield approximately
+    # and (2) introduce new bounds using some heuristics that yield approximately
     # equal time intervals (for the sample runs).
     data = dummy_reduction(
         time_bands=run_section.coords['time'],
@@ -278,7 +278,7 @@ def direct_beam_with_cell(
     wall-clock time. The time dependence is coarse, i.e., due to different time
     intervals at which the direct beam is measured.
     """
-    return He3DirectBeam[Analyzer, Polarized](
+    return He3DirectBeam[Cell, PolarizationState](
         compute_direct_beam(
             data=data,
             q_range=q_range,
