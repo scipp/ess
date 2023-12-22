@@ -86,10 +86,13 @@ def beam_center_from_center_of_mass(
         The beam center position as a vector.
     """
 
-    summed = data.sum(list(set(data.dims) - set(data.coords['position'].dims)))
+    data = data.flatten(dims=data.coords['position'].dims, to=uuid.uuid4().hex)
+    pos = data.coords['position']
+    summed = data.sum(list(set(data.dims) - set(pos.dims)))
     v = sc.values(summed)
     mask = concepts.irreducible_mask(summed, dim=None)
-    pos = data.coords['position']
+    if mask is None:
+        mask = sc.zeros(sizes=pos.sizes, dtype='bool')
     extrema = _xy_extrema(pos[~mask])
     # Mean including existing masks
     cutoff = 0.1 * v.mean().data
