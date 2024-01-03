@@ -50,10 +50,8 @@ class IofQ(sciline.Scope[Run, sc.DataArray], sc.DataArray):
     The normalization for the sample consists of scaling
     with the inverse of the total weight.
     The normalization for the reference consists of
-        1. multiplication with the calibration factor
-           from the supermirror calibration and
-        2. scaling with the inverse of the total weight.
-    """
+    1. multiplication with the calibration factor from the supermirror calibration and
+    2. scaling with the inverse of the total weight."""
 
 
 NormalizedIofQ = NewType('NormalizedIofQ', sc.DataArray)
