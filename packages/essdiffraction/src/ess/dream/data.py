@@ -14,6 +14,7 @@ def _make_pooch():
         base_url='https://public.esss.dk/groups/scipp/ess/dream/{version}/',
         version=_version,
         registry={
+            'data_dream_with_sectors.csv.zip': 'md5:52ae6eb3705e5e54306a001bc0ae85d8',
             'DREAM_nexus_sorted-2023-12-07.nxs': 'md5:22824e14f6eb950d24a720b2a0e2cb66',
         },
     )
