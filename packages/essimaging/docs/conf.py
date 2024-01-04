@@ -9,7 +9,7 @@ from ess import imaging
 sys.path.insert(0, os.path.abspath('.'))
 
 # General information about the project.
-project = u'Essimaging'
+project = u'ESSimaging'
 copyright = u'2023 Scipp contributors'
 author = u'Scipp contributors'
 
@@ -167,7 +167,7 @@ html_sidebars = {
     "**": ["sidebar-nav-bs", "page-toc"],
 }
 
-html_title = "Essimaging"
+html_title = "ESSimaging"
 html_logo = "_static/logo.svg"
 html_favicon = "_static/favicon.ico"
 
