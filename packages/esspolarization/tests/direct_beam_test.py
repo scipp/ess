@@ -8,17 +8,17 @@ from ess import polarization as pol
 
 def dummy_analyzer_spin() -> pol.CellSpinLog[pol.Analyzer]:
     time = sc.array(dims=['time'], values=[0, 500], unit='s')
-    spin = sc.array(dims=['time'], values=[-1, 1], unit=None)
+    spin = sc.array(dims=['time'], values=[1, -1], unit=None)
     return pol.CellSpinLog[pol.Analyzer](sc.DataArray(spin, coords={'time': time}))
 
 
 def dummy_polarizer_spin() -> pol.CellSpinLog[pol.Polarizer]:
     time = sc.array(dims=['time'], values=[0, 250, 750], unit='s')
-    spin = sc.array(dims=['time'], values=[-1, 1, -1], unit=None)
+    spin = sc.array(dims=['time'], values=[1, -1, 1], unit=None)
     return pol.CellSpinLog[pol.Polarizer](sc.DataArray(spin, coords={'time': time}))
 
 
-# Setup logs for for sections of length 250:
+# Setup logs for four sections of length 250:
 # - 10 s direct beam no cell
 # - 20 s direct beam with polarizer
 # - 20 s direct beam with analyzer
