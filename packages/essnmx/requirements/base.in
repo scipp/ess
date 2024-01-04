@@ -12,3 +12,4 @@ sciline>=23.9.1
 scipp>=23.8.0
 scippnexus>=23.9.0
 pooch
+defusedxml
