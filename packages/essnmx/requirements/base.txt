@@ -5,8 +5,6 @@
 #
 #    pip-compile-multi
 #
-appnope==0.1.3
-    # via ipython
 asttokens==2.4.1
     # via stack-data
 backcall==0.2.0
@@ -35,15 +33,13 @@ fonttools==4.47.0
     # via matplotlib
 fsspec==2023.12.2
     # via dask
-graphlib-backport==1.0.3
-    # via sciline
 graphviz==0.20.1
     # via -r base.in
 h5py==3.10.0
     # via scippnexus
 idna==3.6
     # via requests
-importlib-metadata==7.0.0
+importlib-metadata==7.0.1
     # via dask
 importlib-resources==6.1.1
     # via matplotlib
@@ -59,7 +55,7 @@ matplotlib==3.8.2
     # via plopp
 matplotlib-inline==0.1.6
     # via ipython
-numpy==1.26.2
+numpy==1.26.3
     # via
     #   contourpy
     #   h5py
@@ -79,7 +75,7 @@ pexpect==4.9.0
     # via ipython
 pickleshare==0.7.5
     # via ipython
-pillow==10.1.0
+pillow==10.2.0
     # via matplotlib
 platformdirs==4.1.0
     # via pooch
@@ -107,7 +103,7 @@ pyyaml==6.0.1
     # via dask
 requests==2.31.0
     # via pooch
-sciline==23.12.0
+sciline==24.1.0
     # via -r base.in
 scipp==23.12.0
     # via
@@ -127,7 +123,7 @@ toolz==0.12.0
     # via
     #   dask
     #   partd
-traitlets==5.14.0
+traitlets==5.14.1
     # via
     #   ipython
     #   matplotlib-inline
