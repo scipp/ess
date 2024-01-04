@@ -1,18 +1,18 @@
-## Contributing to Essnmx
+## Contributing to ESSnmx
 
-Welcome to the developer side of Essnmx!
+Welcome to the developer side of ESSnmx!
 
 Contributions are always welcome.
 This includes reporting bugs or other issues, submitting pull requests, requesting new features, etc.
 
-If you need help with using Essnmx or contributing to it, have a look at the GitHub [discussions](https://github.com/scipp/essnmx/discussions) and start a new [Q&A discussion](https://github.com/scipp/essnmx/discussions/categories/q-a) if you can't find what you are looking for.
+If you need help with using ESSnmx or contributing to it, have a look at the GitHub [discussions](https://github.com/scipp/essnmx/discussions) and start a new [Q&A discussion](https://github.com/scipp/essnmx/discussions/categories/q-a) if you can't find what you are looking for.
 
 For bug reports and other problems, please open an [issue](https://github.com/scipp/essnmx/issues/new) in GitHub.
 
 You are welcome to submit pull requests at any time.
 But to avoid having to make large modifications during review or even have your PR rejected, please first open an issue first to discuss your idea!
 
-Check out the subsections of the [Developer documentation](https://scipp.github.io/essnmx/developer/index.html) for details on how Essnmx is developed.
+Check out the subsections of the [Developer documentation](https://scipp.github.io/essnmx/developer/index.html) for details on how ESSnmx is developed.
 
 ## Code of conduct
 
