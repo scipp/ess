@@ -3,7 +3,7 @@
 [![Anaconda-Server Badge](https://anaconda.org/scipp/essnmx/badges/version.svg)](https://anaconda.org/scipp/essnmx)
 [![License: BSD 3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](LICENSE)
 
-# Essnmx
+# ESSnmx
 
 ## About
 
