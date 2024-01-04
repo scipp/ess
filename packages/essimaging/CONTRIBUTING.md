@@ -1,18 +1,18 @@
-## Contributing to Essimaging
+## Contributing to ESSimaging
 
-Welcome to the developer side of Essimaging!
+Welcome to the developer side of ESSimaging!
 
 Contributions are always welcome.
 This includes reporting bugs or other issues, submitting pull requests, requesting new features, etc.
 
-If you need help with using Essimaging or contributing to it, have a look at the GitHub [discussions](https://github.com/scipp/essimaging/discussions) and start a new [Q&A discussion](https://github.com/scipp/essimaging/discussions/categories/q-a) if you can't find what you are looking for.
+If you need help with using ESSimaging or contributing to it, have a look at the GitHub [discussions](https://github.com/scipp/essimaging/discussions) and start a new [Q&A discussion](https://github.com/scipp/essimaging/discussions/categories/q-a) if you can't find what you are looking for.
 
 For bug reports and other problems, please open an [issue](https://github.com/scipp/essimaging/issues/new) in GitHub.
 
 You are welcome to submit pull requests at any time.
 But to avoid having to make large modifications during review or even have your PR rejected, please first open an issue first to discuss your idea!
 
-Check out the subsections of the [Developer documentation](https://scipp.github.io/essimaging/developer/index.html) for details on how Essimaging is developed.
+Check out the subsections of the [Developer documentation](https://scipp.github.io/essimaging/developer/index.html) for details on how ESSimaging is developed.
 
 ## Code of conduct
 

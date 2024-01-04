@@ -1,5 +1,5 @@
 # Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
-_commit: ec09f73
+_commit: 8cfdb1b
 _src_path: gh:scipp/copier_template
 description: Imaging data reduction for the European Spallation Source
 max_python: '3.12'
@@ -7,7 +7,7 @@ min_python: '3.9'
 namespace_package: ess
 nightly_deps: scipp,sciline,scippnexus,plopp
 orgname: scipp
-prettyname: Essimaging
+prettyname: ESSimaging
 projectname: essimaging
 related_projects: Scipp,Sciline,ScippNexus,Plopp
 year: 2023
