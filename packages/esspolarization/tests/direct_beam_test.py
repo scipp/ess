@@ -129,39 +129,48 @@ def test_determine_run_section() -> None:
     )
     # 1 no-cell + 4 sections of (2 single-cell direct-beam + 4 sample runs)
     assert result.sizes == {'time': 1 + 4 * (2 + 4)}
-    expected_time = sc.array(
-        dims=['time'],
-        values=[
-            -10.0,
-            0.0,
-            25.0,
-            50.0,
-            100.0,
-            150.0,
-            200.0,
-            250.0,
-            275.0,
-            300.0,
-            350.0,
-            400.0,
-            450.0,
-            500.0,
-            525.0,
-            550.0,
-            600.0,
-            650.0,
-            700.0,
-            750.0,
-            775.0,
-            800.0,
-            850.0,
-            900.0,
-            950.0,
+
+    # Each section is: DB_pol, DB_ana, ++, -+, --, +-
+
+    section = sc.array(
+        dims=['time'], values=[0.0, 25.0, 50.0, 100.0, 150.0, 200.0], unit='s'
+    )
+    expected_time = sc.concat(
+        [
+            no_cell_start,
+            section + 0 * section_length,
+            section + 1 * section_length,
+            section + 2 * section_length,
+            section + 3 * section_length,
         ],
-        unit='s',
+        'time',
     )
     for value in result.values():
         assert_identical(value.coords['time'], expected_time)
+
+    section = [False, False, True, True, True, True]
+    expected_sample_in_beam = sc.array(dims=['time'], values=[False] + 4 * section)
+    assert_identical(result['sample_in_beam'].data, expected_sample_in_beam)
+
+    section = [True, False, True, True, True, True]
+    expected_polarizer_in_beam = sc.array(dims=['time'], values=[False] + 4 * section)
+    assert_identical(result['polarizer_in_beam'].data, expected_polarizer_in_beam)
+
+    section = [False, True, True, True, True, True]
+    expected_analyzer_in_beam = sc.array(dims=['time'], values=[False] + 4 * section)
+    assert_identical(result['analyzer_in_beam'].data, expected_analyzer_in_beam)
+
+    section = [1, 1, 1, -1, -1, 1]
+    expected_polarizer_spin = sc.array(
+        dims=['time'], values=[1] + 4 * section, unit=None
+    )
+    assert_identical(result['polarizer_spin'].data, expected_polarizer_spin)
+
+    section = [1, 1, 1, 1, -1, -1]
+    expected_analyzer_spin = sc.array(
+        dims=['time'], values=[1] + 4 * section, unit=None
+    )
+    assert_identical(result['analyzer_spin'].data, expected_analyzer_spin)
 
 
 def make_IofQ(size: int = 1000) -> sc.DataArray:
