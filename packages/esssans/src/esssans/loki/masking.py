@@ -30,8 +30,9 @@ DetectorTubeEdgeMask = NewType('DetectorTubeEdgeMask', sc.Variable)
 def detector_straw_mask(
     sample_straws: CalibratedMaskedData[SampleRun],
 ) -> DetectorLowCountsStrawMask:
+    dims = list(set(sample_straws.dims) - {'straw'})
     return DetectorLowCountsStrawMask(
-        sample_straws.sum(['tof', 'pixel']).data < sc.scalar(300.0, unit='counts')
+        sample_straws.sum(dims).data < sc.scalar(300.0, unit='counts')
     )
 
 
@@ -64,7 +65,7 @@ def mask_detectors(
     """
     # Beam stop
     da = da.copy(deep=False)
-    counts = da.sum('tof').data
+    counts = da.bins.sum().data
     r = sc.sqrt(
         da.coords['position'].fields.x ** 2 + da.coords['position'].fields.y ** 2
     )

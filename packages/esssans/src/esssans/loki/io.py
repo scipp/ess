@@ -46,7 +46,7 @@ def _convert_to_tof(da: sc.DataArray) -> sc.DataArray:
     da.bins.coords['tof'] = da.bins.coords.pop('event_time_offset')
     if 'event_time_zero' in da.dims:
         da = da.bins.concat('event_time_zero')
-    return da.bin(tof=1)
+    return da
 
 
 def _preprocess_data(

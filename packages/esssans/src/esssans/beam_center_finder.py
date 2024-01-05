@@ -88,7 +88,7 @@ def beam_center_from_center_of_mass(
 
     data = data.flatten(dims=data.coords['position'].dims, to=uuid.uuid4().hex)
     pos = data.coords['position']
-    summed = data.sum(list(set(data.dims) - set(pos.dims)))
+    summed = data.bins.sum()
     v = sc.values(summed)
     mask = concepts.irreducible_mask(summed, dim=None)
     if mask is None:
