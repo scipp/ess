@@ -80,7 +80,20 @@ WavelengthBins = NewType('WavelengthBins', sc.Variable)
 
 WavelengthBands = NewType('WavelengthBands', sc.Variable)
 """Wavelength bands. Typically a single band, set to first and last value of
-WavelengthBins."""
+WavelengthBins.
+
+The wavelength bands can however be used to compute the scattering cross section inside
+multiple wavelength bands. In this case, the wavelength bands must be either one- or
+two-dimensional.
+
+In the case of a one-dimensional array, the values represent a set of non-overlapping
+bins in the wavelength dimension.
+
+In the case of a two-dimensional array, the values represent a set of (possibly
+overlapping or non-contiguous) wavelength bands, with the first dimension being the
+band index and the second dimension being the wavelength. For each band, there must be
+two wavelength values defining the start and end wavelength of the band.
+"""
 
 QBins = NewType('QBins', sc.Variable)
 """Q binning"""
