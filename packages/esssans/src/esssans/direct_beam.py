@@ -112,22 +112,27 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
     # pipeline_full._providers[DirectBeam] = lambda: direct_beam_function
     # pipeline_bands._providers[DirectBeam] = lambda: direct_beam_function
 
-    def full_wavelength_range() -> WavelengthBands:
-        bands = pipeline.compute(WavelengthBands)
-        return WavelengthBands(sc.concat([bands.min(), bands.max()], dim='wavelength'))
+    # def full_wavelength_range() -> WavelengthBands:
+    bands = pipeline.compute(WavelengthBands)
+    full_wavelength_range = sc.concat([bands.min(), bands.max()], dim='wavelength')
 
-    def provide_direct_beam() -> DirectBeam:
-        return DirectBeam(direct_beam_function)
+    # def provide_direct_beam() -> DirectBeam:
+    #     return DirectBeam(direct_beam_function)
 
-    pipeline_full = _copy_pipeline(
-        pipeline,
-        update={
-            WavelengthBands: full_wavelength_range,
-            DirectBeam: provide_direct_beam,
-        },
-    )
-    # We make a copy here so as to not modify the original pipeline
-    pipeline_bands = _copy_pipeline(pipeline, update={DirectBeam: provide_direct_beam})
+    pipeline_bands = pipeline.copy()
+    pipeline_bands[DirectBeam] = direct_beam_function
+    pipeline_full = pipeline_bands.copy()
+    pipeline_full[WavelengthBands] = full_wavelength_range
+
+    # pipeline_full = _copy_pipeline(
+    #     pipeline,
+    #     update={
+    #         WavelengthBands: full_wavelength_range,
+    #         DirectBeam: provide_direct_beam,
+    #     },
+    # )
+    # # We make a copy here so as to not modify the original pipeline
+    # pipeline_bands = _copy_pipeline(pipeline, update={DirectBeam: provide_direct_beam})
 
     results = []
 
