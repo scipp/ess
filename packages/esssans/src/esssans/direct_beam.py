@@ -1,13 +1,25 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
-from typing import List
+from typing import Any, Callable, Dict, List, Optional
 
 import numpy as np
 import scipp as sc
 from sciline import Pipeline
 
 from .types import BackgroundSubtractedIofQ, DirectBeam, FinalDims, WavelengthBands
+
+
+def _copy_pipeline(
+    pipeline: Pipeline, update: Optional[Dict[Any, Callable]] = None
+) -> Pipeline:
+    providers = pipeline._providers.copy()
+    if update is not None:
+        providers.update(update)
+    out = Pipeline(providers=providers.values())
+    for table in pipeline._param_tables.values():
+        out.set_param_table(table)
+    return out
 
 
 def _direct_beam_iteration(
@@ -29,9 +41,7 @@ def _direct_beam_iteration(
     return out
 
 
-def direct_beam(
-    pipelines: List[Pipeline], I0: sc.Variable, niter: int = 5
-) -> List[dict]:
+def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dict]:
     """
     Compute the direct beam function.
 
@@ -64,27 +74,28 @@ def direct_beam(
 
     Parameters
     ----------
-    pipelines:
-        List of two pipelines, one for the full wavelength range and one for the bands.
-        The order in which the pipelines are given does not matter.
+    pipeline:
+        The pipeline to compute the differential scattering cross section I(Q).
     I0:
         The intensity of the I(Q) for the known sample at the lowest Q value.
     niter:
         The number of iterations to perform.
     """
-    if len(pipelines) != 2:
-        raise ValueError("Expected two pipelines, got {}".format(len(pipelines)))
 
-    # Determine which pipeline is for the full wavelength range
-    if pipelines[0].compute(WavelengthBands).ndim == 1:
-        pipeline_full, pipeline_bands = pipelines
-    else:
-        pipeline_bands, pipeline_full = pipelines
+    # # Determine which pipeline is for the full wavelength range
+    # if pipelines[0].compute(WavelengthBands).ndim == 1:
+    #     pipeline_full, pipeline_bands = pipelines
+    # else:
+    #     pipeline_bands, pipeline_full = pipelines
 
-    per_layer = 'layer' in pipeline_bands.compute(FinalDims)
+    # pipeline_full = Pipeline(providers=pipeline._providers.values())
+    # for table in pipeline._param_tables.values():
+    #     pipeline_full.set_param_table(table)
+
+    per_layer = 'layer' in pipeline.compute(FinalDims)
 
     # Make a flat direct beam to start with
-    wavelength_bands = pipeline_bands.compute(WavelengthBands)
+    wavelength_bands = pipeline.compute(WavelengthBands)
     sizes = {'wavelength': wavelength_bands.sizes['band']}
     if per_layer:
         sizes['layer'] = 4
@@ -97,9 +108,26 @@ def direct_beam(
         },
     )
 
-    # TODO: This feels like an ugly hack. What is the best way to achieve this?
-    pipeline_full._providers[DirectBeam] = lambda: direct_beam_function
-    pipeline_bands._providers[DirectBeam] = lambda: direct_beam_function
+    # # TODO: This feels like an ugly hack. What is the best way to achieve this?
+    # pipeline_full._providers[DirectBeam] = lambda: direct_beam_function
+    # pipeline_bands._providers[DirectBeam] = lambda: direct_beam_function
+
+    def full_wavelength_range() -> WavelengthBands:
+        bands = pipeline.compute(WavelengthBands)
+        return WavelengthBands(sc.concat([bands.min(), bands.max()], dim='wavelength'))
+
+    def provide_direct_beam() -> DirectBeam:
+        return DirectBeam(direct_beam_function)
+
+    pipeline_full = _copy_pipeline(
+        pipeline,
+        update={
+            WavelengthBands: full_wavelength_range,
+            DirectBeam: provide_direct_beam,
+        },
+    )
+    # We make a copy here so as to not modify the original pipeline
+    pipeline_bands = _copy_pipeline(pipeline, update={DirectBeam: provide_direct_beam})
 
     results = []
 
