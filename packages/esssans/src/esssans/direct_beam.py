@@ -55,7 +55,12 @@ def direct_beam(
      3. Multiply the direct beam values inside each wavelength band by this factor
      4. Compare the full-range $I(Q)$ to a theoretical reference and add the
         corresponding additional scaling to the direct beam function
-     5. Iterate until the changes to the direct beam function become small
+     5. Iterate a given number of times (typically less than 10) so as to gradually
+        converge on a direct beam function
+
+    TODO: For simplicity and robustness, we currently specify the number of times to
+    iterate. We could imagine in the future having a convergence criterion instead to
+    determine when to stop iterating.
 
     Parameters
     ----------
