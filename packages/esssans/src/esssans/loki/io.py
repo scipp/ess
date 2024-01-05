@@ -25,7 +25,7 @@ from ..types import (
     RawData,
     RawMonitor,
     RunType,
-    TransformationChainPath,
+    TransformationPath,
     Transmission,
 )
 
@@ -94,7 +94,7 @@ def load_nexus(
     detector_name: NexusDetectorName,
     incident_monitor_name: NeXusMonitorName[Incident],
     transmission_monitor_name: NeXusMonitorName[Transmission],
-    transform_path: TransformationChainPath,
+    transform_path: TransformationPath,
     source_name: NexusSourceName,
     sample_name: Optional[NexusSampleName],
 ) -> LoadedFileContents[RunType]:

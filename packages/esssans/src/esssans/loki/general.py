@@ -17,7 +17,7 @@ from ..types import (
     NexusSourceName,
     RawData,
     RunType,
-    TransformationChainPath,
+    TransformationPath,
     Transmission,
 )
 
@@ -29,7 +29,7 @@ default_parameters = {
     NexusSourceName: 'source',
     # TODO: sample is not in the files, so by not adding the name here, we use the
     # default value of [0, 0, 0] when loading the sample position.
-    TransformationChainPath: 'transformation_chain',
+    TransformationPath: 'esssans_loki_transformation',
 }
 
 
@@ -55,7 +55,7 @@ def detector_lab_frame_transform(
     dg: LoadedFileContents[RunType],
     instrument_path: NexusInstrumentPath,
     detector_name: NexusDetectorName,
-    transform_path: TransformationChainPath,
+    transform_path: TransformationPath,
 ) -> LabFrameTransform[RunType]:
     return LabFrameTransform[RunType](
         dg[instrument_path][detector_name][transform_path]
