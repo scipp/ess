@@ -7,8 +7,8 @@ import scipp as sc
 from scipp.core import concepts
 
 from .types import (
+    CalibratedMaskedData,
     CleanDirectBeam,
-    CleanMasked,
     CleanMonitor,
     CleanSummedQ,
     CleanWavelength,
@@ -34,7 +34,7 @@ from .uncertainty import (
 
 
 def solid_angle(
-    data: CleanMasked[RunType, Numerator],
+    data: CalibratedMaskedData[RunType],
     pixel_shape: DetectorPixelShape[RunType],
     transform: LabFrameTransform[RunType],
 ) -> SolidAngle[RunType]:

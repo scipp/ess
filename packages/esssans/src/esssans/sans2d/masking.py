@@ -7,20 +7,22 @@ from typing import NewType, Optional
 import scipp as sc
 
 from ..types import (
-    CalibratedMaskedData,
-    CleanMasked,
     DataWithLogicalDims,
-    DetectorEdgeMask,
     MaskedData,
-    Numerator,
     RunType,
-    SampleHolderMask,
     SampleRun,
 )
+
+
+DetectorEdgeMask = NewType('DetectorEdgeMask', sc.Variable)
+"""Detector edge mask"""
 
 LowCountThreshold = NewType('LowCountThreshold', sc.Variable)
 """Threshold below which detector pixels should be masked
 (low-counts on the edges of the detector panel, and the beam stop)"""
+
+SampleHolderMask = NewType('SampleHolderMask', sc.Variable)
+"""Sample holder mask"""
 
 
 def detector_edge_mask(sample: DataWithLogicalDims[SampleRun]) -> DetectorEdgeMask:
@@ -69,16 +71,9 @@ def mask_detectors(
     return MaskedData[RunType](da)
 
 
-def mask_after_calibration(
-    da: CalibratedMaskedData[RunType],
-) -> CleanMasked[RunType, Numerator]:
-    return CleanMasked[RunType, Numerator](da)
-
-
 providers = (
     detector_edge_mask,
     sample_holder_mask,
-    mask_after_calibration,
     mask_detectors,
 )
 """

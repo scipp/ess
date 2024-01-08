@@ -11,7 +11,6 @@ from .common import mask_range
 from .types import (
     BeamCenter,
     CalibratedMaskedData,
-    CleanMasked,
     CleanQ,
     CleanWavelength,
     CleanWavelengthMasked,
@@ -201,7 +200,7 @@ def calibrate_positions(
 # for RawData, MaskedData, ... no reason to restrict necessarily.
 # Would we be fine with just choosing on option, or will this get in the way for users?
 def detector_to_wavelength(
-    detector: CleanMasked[RunType, Numerator],
+    detector: CalibratedMaskedData[RunType],
     graph: ElasticCoordTransformGraph,
 ) -> CleanWavelength[RunType, Numerator]:
     return CleanWavelength[RunType, Numerator](

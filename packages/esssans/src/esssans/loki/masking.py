@@ -5,22 +5,20 @@ Masking functions for the loki workflow.
 """
 from typing import NewType, Optional
 
+import numpy as np
 import scipp as sc
 
 from ..types import (
-    CalibratedMaskedData,
-    CleanMasked,
+    BeamStopPosition,
+    BeamStopRadius,
     DataWithLogicalDims,
     MaskedData,
-    Numerator,
     RunType,
     SampleRun,
 )
 
 DetectorLowCountsStrawMask = NewType('DetectorLowCountsStrawMask', sc.Variable)
 """Detector low-counts straw mask"""
-DetectorBadStrawsMask = NewType('DetectorBadStrawsMask', sc.Variable)
-"""Detector bad straws mask"""
 DetectorBeamStopMask = NewType('DetectorBeamStopMask', sc.Variable)
 """Detector beam stop mask"""
 DetectorTubeEdgeMask = NewType('DetectorTubeEdgeMask', sc.Variable)
@@ -28,61 +26,40 @@ DetectorTubeEdgeMask = NewType('DetectorTubeEdgeMask', sc.Variable)
 
 
 def detector_straw_mask(
-    sample_straws: CalibratedMaskedData[SampleRun],
+    sample_straws: DataWithLogicalDims[SampleRun],
 ) -> DetectorLowCountsStrawMask:
-    dims = list(set(sample_straws.dims) - {'straw'})
     return DetectorLowCountsStrawMask(
-        sample_straws.sum(dims).data < sc.scalar(300.0, unit='counts')
+        sample_straws.sum('pixel').data
+        < sc.scalar(sample_straws.sizes['pixel'] * 0.5, unit='counts')
     )
 
 
 def detector_beam_stop_mask(
-    sample_straws: CalibratedMaskedData[SampleRun],
+    sample_straws: DataWithLogicalDims[SampleRun],
+    beam_stop_position: BeamStopPosition,
+    beam_stop_radius: BeamStopRadius,
 ) -> DetectorBeamStopMask:
-    pos = sample_straws.coords['position'].copy()
+    pos = sample_straws.coords['position'] - beam_stop_position
     pos.fields.z *= 0.0
-    return DetectorBeamStopMask((sc.norm(pos) < sc.scalar(0.042, unit='m')))
+    return DetectorBeamStopMask((sc.norm(pos) < beam_stop_radius))
 
 
 def detector_tube_edge_mask(
-    sample_straws: CalibratedMaskedData[SampleRun],
+    sample_straws: DataWithLogicalDims[SampleRun],
 ) -> DetectorTubeEdgeMask:
+    other_dims = set(sample_straws.dims) - {'pixel'}
+    size = np.prod([sample_straws.sizes[dim] for dim in other_dims])
     return DetectorTubeEdgeMask(
-        (abs(sample_straws.coords['position'].fields.x) > sc.scalar(0.36, unit='m'))
-        | (abs(sample_straws.coords['position'].fields.y) > sc.scalar(0.28, unit='m'))
+        sample_straws.sum(other_dims).data < sc.scalar(size * 0.5, unit='counts')
     )
 
 
 def mask_detectors(
     da: DataWithLogicalDims[RunType],
-) -> MaskedData[RunType]:
-    """Apply pixel-specific masks to raw data.
-
-    Parameters
-    ----------
-    da:
-        Raw data.
-    """
-    # Beam stop
-    da = da.copy(deep=False)
-    counts = da.bins.sum().data
-    r = sc.sqrt(
-        da.coords['position'].fields.x ** 2 + da.coords['position'].fields.y ** 2
-    )
-    da.masks['low_counts_middle'] = (counts < sc.scalar(20.0, unit='counts')) & (
-        r < sc.scalar(0.075, unit='m')
-    )
-    # Low counts
-    da.masks['very_low_counts'] = counts < sc.scalar(3.0, unit='counts')
-    return MaskedData[RunType](da)
-
-
-def mask_after_calibration(
-    da: CalibratedMaskedData[RunType],
     lowcounts_straw_mask: Optional[DetectorLowCountsStrawMask],
     beam_stop_mask: Optional[DetectorBeamStopMask],
     tube_edge_mask: Optional[DetectorTubeEdgeMask],
-) -> CleanMasked[RunType, Numerator]:
+) -> MaskedData[RunType]:
     """Apply pixel-specific masks to raw data.
 
     Parameters
@@ -97,16 +74,13 @@ def mask_after_calibration(
         Mask for tube edges.
     """
     da = da.copy(deep=False)
-    # Clear masks from beam center finding step, as they are potentially using harsh
-    # thresholds which could remove some of the interesting signal.
-    da.masks.clear()
     if lowcounts_straw_mask is not None:
         da.masks['low_counts'] = lowcounts_straw_mask
     if beam_stop_mask is not None:
         da.masks['beam_stop'] = beam_stop_mask
     if tube_edge_mask is not None:
         da.masks['tube_edges'] = tube_edge_mask
-    return CleanMasked[RunType, Numerator](da)
+    return MaskedData[RunType](da)
 
 
 providers = (
@@ -114,5 +88,4 @@ providers = (
     detector_beam_stop_mask,
     detector_tube_edge_mask,
     mask_detectors,
-    mask_after_calibration,
 )

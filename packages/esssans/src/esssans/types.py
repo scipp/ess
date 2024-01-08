@@ -128,6 +128,12 @@ class FileList(sciline.Scope[RunType, list], list):
     """Filenames of BackgroundRun|EmptyBeamRun|SampleRun"""
 
 
+BeamStopPosition = NewType('BeamStopPosition', sc.Variable)
+"""Center of the beam stop position"""
+
+BeamStopRadius = NewType('BeamStopRadius', sc.Variable)
+"""Radius of the beam stop"""
+
 # 3  Workflow (intermediate) results
 
 
@@ -142,12 +148,6 @@ class SourcePosition(sciline.Scope[RunType, sc.Variable], sc.Variable):
 class DataWithLogicalDims(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Raw data reshaped to have logical dimensions"""
 
-
-DetectorEdgeMask = NewType('DetectorEdgeMask', sc.Variable)
-"""Detector edge mask"""
-
-SampleHolderMask = NewType('SampleHolderMask', sc.Variable)
-"""Sample holder mask"""
 
 DirectBeam = NewType('DirectBeam', sc.DataArray)
 """Direct beam"""

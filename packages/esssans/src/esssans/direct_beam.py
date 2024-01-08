@@ -10,18 +10,6 @@ from sciline import Pipeline
 from .types import BackgroundSubtractedIofQ, DirectBeam, FinalDims, WavelengthBands
 
 
-def _copy_pipeline(
-    pipeline: Pipeline, update: Optional[Dict[Any, Callable]] = None
-) -> Pipeline:
-    providers = pipeline._providers.copy()
-    if update is not None:
-        providers.update(update)
-    out = Pipeline(providers=providers.values())
-    for table in pipeline._param_tables.values():
-        out.set_param_table(table)
-    return out
-
-
 def _direct_beam_iteration(
     iofq_full: sc.DataArray,
     iofq_slices: sc.DataArray,
@@ -108,31 +96,13 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
         },
     )
 
-    # # TODO: This feels like an ugly hack. What is the best way to achieve this?
-    # pipeline_full._providers[DirectBeam] = lambda: direct_beam_function
-    # pipeline_bands._providers[DirectBeam] = lambda: direct_beam_function
-
-    # def full_wavelength_range() -> WavelengthBands:
     bands = pipeline.compute(WavelengthBands)
     full_wavelength_range = sc.concat([bands.min(), bands.max()], dim='wavelength')
-
-    # def provide_direct_beam() -> DirectBeam:
-    #     return DirectBeam(direct_beam_function)
 
     pipeline_bands = pipeline.copy()
     pipeline_bands[DirectBeam] = direct_beam_function
     pipeline_full = pipeline_bands.copy()
     pipeline_full[WavelengthBands] = full_wavelength_range
-
-    # pipeline_full = _copy_pipeline(
-    #     pipeline,
-    #     update={
-    #         WavelengthBands: full_wavelength_range,
-    #         DirectBeam: provide_direct_beam,
-    #     },
-    # )
-    # # We make a copy here so as to not modify the original pipeline
-    # pipeline_bands = _copy_pipeline(pipeline, update={DirectBeam: provide_direct_beam})
 
     results = []
 
