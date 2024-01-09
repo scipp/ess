@@ -40,12 +40,15 @@ def test_file_reader_mcstas() -> None:
     assert sc.identical(
         da.coords['fast_axis'],
         sc.vectors(
-            dims=['panel'], values=[[0, 0, -0.01], [-0.01, 0, -1], [0.01, 0, 1]]
+            dims=['panel'],
+            values=[(1.0, 0.0, -0.01), (-0.01, 0.0, -1.0), (0.01, 0.0, 1.0)],
         ),
     )
     assert sc.identical(
         da.coords['slow_axis'],
-        sc.vectors(dims=['panel'], values=[[0, 1, 0], [0, 1, 0], [0, 1, 0]]),
+        sc.vectors(
+            dims=['panel'], values=[[0.0, 1.0, 0.0], [0.0, 1.0, 0.0], [0.0, 1.0, 0.0]]
+        ),
     )
 
 
