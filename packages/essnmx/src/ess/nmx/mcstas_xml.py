@@ -8,7 +8,6 @@ from typing import Iterable, Optional, Protocol, Tuple, TypeVar, Union
 
 import numpy as np
 import scipp as sc
-from typing_extensions import Self
 
 T = TypeVar('T')
 
@@ -31,13 +30,13 @@ class _XML(Protocol):
     tag: str
     attrib: dict[str, str]
 
-    def find(self, name: str) -> Optional[Self]:
+    def find(self, name: str) -> Optional['_XML']:
         ...
 
-    def __iter__(self) -> Self:
+    def __iter__(self) -> '_XML':
         ...
 
-    def __next__(self) -> Self:
+    def __next__(self) -> '_XML':
         ...
 
 
@@ -94,7 +93,7 @@ class SimulationSettings:
     handedness: str  # 'val' of <handedness>
 
     @classmethod
-    def from_xml(cls, tree: _XML) -> Self:
+    def from_xml(cls, tree: _XML) -> 'SimulationSettings':
         """Create simulation settings from xml."""
         defaults = select_by_tag(tree, 'defaults')
         length_desc = select_by_tag(defaults, 'length')
@@ -157,7 +156,7 @@ class DetectorDesc:
     @classmethod
     def from_xml(
         cls, component: _XML, type_desc: _XML, simulation_settings: SimulationSettings
-    ) -> Self:
+    ) -> 'DetectorDesc':
         """Create detector description from xml component and type."""
 
         def _rotate_axis(matrix: sc.Variable, axis: sc.Variable) -> sc.Variable:
@@ -246,7 +245,9 @@ class SampleDesc:
     rotation_matrix: sc.Variable
 
     @classmethod
-    def from_xml(cls, tree: _XML, simulation_settings: SimulationSettings) -> Self:
+    def from_xml(
+        cls, tree: _XML, simulation_settings: SimulationSettings
+    ) -> 'SampleDesc':
         """Create sample description from xml component."""
         source_xml = select_by_type_prefix(tree, 'sampleMantid-type')
         location = select_by_tag(source_xml, 'location')
@@ -286,7 +287,9 @@ class SourceDesc:
     position: sc.Variable
 
     @classmethod
-    def from_xml(cls, tree: _XML, simulation_settings: SimulationSettings) -> Self:
+    def from_xml(
+        cls, tree: _XML, simulation_settings: SimulationSettings
+    ) -> 'SourceDesc':
         """Create source description from xml component."""
         source_xml = select_by_type_prefix(tree, 'sourceMantid-type')
         location = select_by_tag(source_xml, 'location')
@@ -350,7 +353,7 @@ class McStasInstrument:
     sample: SampleDesc
 
     @classmethod
-    def from_xml(cls, tree: _XML) -> Self:
+    def from_xml(cls, tree: _XML) -> 'McStasInstrument':
         """Create McStas instrument from xml."""
         simulation_settings = SimulationSettings.from_xml(tree)
 
