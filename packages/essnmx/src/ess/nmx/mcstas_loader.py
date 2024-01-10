@@ -7,7 +7,7 @@ import scippnexus as snx
 
 PixelIDs = NewType("PixelIDs", sc.Variable)
 InputFilepath = NewType("InputFilepath", str)
-NMXData = NewType("NMXData", sc.DataArray)
+NMXData = NewType("NMXData", sc.DataGroup)
 
 # McStas Configurations
 MaximumProbability = NewType("MaximumProbability", int)
@@ -37,13 +37,6 @@ def _copy_partial_var(
     return var
 
 
-def _get_mcstas_pixel_ids() -> PixelIDs:
-    """pixel IDs for each detector"""
-    intervals = [(1, 1638401), (2000001, 3638401), (4000001, 5638401)]
-    ids = [sc.arange('id', start, stop, unit=None) for start, stop in intervals]
-    return PixelIDs(sc.concat(ids, 'id'))
-
-
 def load_mcstas_nexus(
     file_path: InputFilepath,
     max_probability: Optional[MaximumProbability] = None,
@@ -60,6 +53,9 @@ def load_mcstas_nexus(
 
     """
 
+    from .mcstas_xml import read_mcstas_geometry_xml
+
+    geometry = read_mcstas_geometry_xml(file_path)
     probability = max_probability or DefaultMaximumProbability
 
     with snx.File(file_path) as file:
@@ -76,6 +72,9 @@ def load_mcstas_nexus(
         weights = (probability / weights.max()) * weights
 
         loaded = sc.DataArray(data=weights, coords={'t': t_list, 'id': id_list})
-        grouped = loaded.group(_get_mcstas_pixel_ids())
+        coords = geometry.to_coords()
+        grouped = loaded.group(coords.pop('pixel_id'))
+        da = grouped.fold(dim='id', sizes={'panel': len(geometry.detectors), 'id': -1})
+        da.coords.update(coords)
 
-        return NMXData(grouped.fold(dim='id', sizes={'panel': 3, 'id': -1}))
+        return NMXData(da)
