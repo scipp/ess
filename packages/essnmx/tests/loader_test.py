@@ -10,6 +10,7 @@ from ess.nmx.data import small_mcstas_sample
 
 
 def test_file_reader_mcstas() -> None:
+    import numpy as np
     import scippnexus as snx
 
     from ess.nmx.mcstas_loader import (
@@ -30,8 +31,27 @@ def test_file_reader_mcstas() -> None:
 
     assert isinstance(da, sc.DataArray)
     assert da.shape == (3, 1280 * 1280)
+    assert sc.identical(
+        da.coords['sample_position'], sc.vector(value=[0, 0, 0], unit='m')
+    )
     assert da.bins.size().sum().value == data_length
     assert sc.identical(da.data.max(), expected_weight_max)
+    # Expected coordinate values are provided by the IDS
+    # based on the simulation settings of the sample file.
+    # The expected values are rounded to 2 decimal places.
+    assert np.all(
+        np.round(da.coords['fast_axis'].values, 2)
+        == sc.vectors(
+            dims=['panel'],
+            values=[(1.0, 0.0, -0.01), (-0.01, 0.0, -1.0), (0.01, 0.0, 1.0)],
+        ).values,
+    )
+    assert sc.identical(
+        da.coords['slow_axis'],
+        sc.vectors(
+            dims=['panel'], values=[[0.0, 1.0, 0.0], [0.0, 1.0, 0.0], [0.0, 1.0, 0.0]]
+        ),
+    )
 
 
 @pytest.fixture
