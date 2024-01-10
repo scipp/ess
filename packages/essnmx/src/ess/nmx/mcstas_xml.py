@@ -6,7 +6,6 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import Iterable, Optional, Protocol, Tuple, TypeVar, Union
 
-import numpy as np
 import scipp as sc
 
 T = TypeVar('T')
@@ -122,11 +121,14 @@ def _rotation_matrix_from_location(
     """Retrieve rotation matrix from location."""
     from .rotation import axis_angle_to_quaternion, quaternion_to_matrix
 
-    theta, x, y, z = find_attributes(
-        location, 'rot', 'axis-x', 'axis-y', 'axis-z'
-    ).values()
-    q = axis_angle_to_quaternion(x, y, z, sc.scalar(-theta, unit=angle_unit))
-    return quaternion_to_matrix(*q)
+    attribs = find_attributes(location, 'axis-x', 'axis-y', 'axis-z', 'rot')
+    x, y, z, w = axis_angle_to_quaternion(
+        x=attribs['axis-x'],
+        y=attribs['axis-y'],
+        z=attribs['axis-z'],
+        theta=sc.scalar(-attribs['rot'], unit=angle_unit),
+    )
+    return quaternion_to_matrix(x=x, y=y, z=z, w=w)
 
 
 @dataclass
@@ -155,12 +157,16 @@ class DetectorDesc:
 
     @classmethod
     def from_xml(
-        cls, component: _XML, type_desc: _XML, simulation_settings: SimulationSettings
+        cls,
+        *,
+        component: _XML,
+        type_desc: _XML,
+        simulation_settings: SimulationSettings,
     ) -> 'DetectorDesc':
         """Create detector description from xml component and type."""
 
         def _rotate_axis(matrix: sc.Variable, axis: sc.Variable) -> sc.Variable:
-            return sc.vector(np.round((matrix * axis).values, 2))
+            return matrix * axis
 
         location = select_by_tag(component, 'location')
         rotation_matrix = _rotation_matrix_from_location(
@@ -226,7 +232,11 @@ def _collect_detector_descriptions(tree: _XML) -> Tuple[DetectorDesc, ...]:
         )
 
     detector_components = [
-        DetectorDesc.from_xml(det, _find_type_desc(det), simulation_settings)
+        DetectorDesc.from_xml(
+            component=det,
+            type_desc=_find_type_desc(det),
+            simulation_settings=simulation_settings,
+        )
         for det in filter_by_type_prefix(filter_by_tag(tree, 'component'), 'MonNDtype')
     ]
 
@@ -246,7 +256,7 @@ class SampleDesc:
 
     @classmethod
     def from_xml(
-        cls, tree: _XML, simulation_settings: SimulationSettings
+        cls, *, tree: _XML, simulation_settings: SimulationSettings
     ) -> 'SampleDesc':
         """Create sample description from xml component."""
         source_xml = select_by_type_prefix(tree, 'sampleMantid-type')
@@ -288,7 +298,7 @@ class SourceDesc:
 
     @classmethod
     def from_xml(
-        cls, tree: _XML, simulation_settings: SimulationSettings
+        cls, *, tree: _XML, simulation_settings: SimulationSettings
     ) -> 'SourceDesc':
         """Create source description from xml component."""
         source_xml = select_by_type_prefix(tree, 'sourceMantid-type')
@@ -318,10 +328,10 @@ def _pixel_positions(
     Position of each pixel is relative to the position_offset.
     """
     pixel_idx = sc.arange('id', detector.total_pixels)
-    n_row = sc.scalar(detector.num_fast_pixels_per_row)
+    n_col = sc.scalar(detector.num_fast_pixels_per_row)
 
-    pixel_n_slow = pixel_idx // n_row
-    pixel_n_fast = pixel_idx % n_row
+    pixel_n_slow = pixel_idx // n_col
+    pixel_n_fast = pixel_idx % n_col
 
     fast_axis_steps = detector.fast_axis * detector.fast_step
     slow_axis_steps = detector.slow_axis * detector.slow_step
@@ -360,8 +370,12 @@ class McStasInstrument:
         return cls(
             simulation_settings=simulation_settings,
             detectors=_collect_detector_descriptions(tree),
-            source=SourceDesc.from_xml(tree, simulation_settings),
-            sample=SampleDesc.from_xml(tree, simulation_settings),
+            source=SourceDesc.from_xml(
+                tree=tree, simulation_settings=simulation_settings
+            ),
+            sample=SampleDesc.from_xml(
+                tree=tree, simulation_settings=simulation_settings
+            ),
         )
 
     def to_coords(self) -> dict[str, sc.Variable]:
