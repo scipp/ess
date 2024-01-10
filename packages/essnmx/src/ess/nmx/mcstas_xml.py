@@ -264,7 +264,7 @@ class SampleDesc:
     def position_from_sample(self, other: sc.Variable) -> sc.Variable:
         """Position of ``other`` relative to the sample.
 
-        All positions and distance are stored respect to the sample position.
+        All positions and distance are stored relative to the sample position.
 
         Parameters
         ----------
@@ -374,7 +374,7 @@ class McStasInstrument:
         detector_dim = 'panel'
 
         return {
-            'pixel_ids': _construct_pixel_ids(self.detectors),
+            'pixel_id': _construct_pixel_ids(self.detectors),
             'fast_axis': sc.concat(fast_axes, detector_dim),
             'slow_axis': sc.concat(slow_axes, detector_dim),
             'origin_position': sc.concat(origins, detector_dim),
