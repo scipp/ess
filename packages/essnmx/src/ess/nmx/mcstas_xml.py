@@ -165,9 +165,6 @@ class DetectorDesc:
     ) -> 'DetectorDesc':
         """Create detector description from xml component and type."""
 
-        def _rotate_axis(matrix: sc.Variable, axis: sc.Variable) -> sc.Variable:
-            return matrix * axis
-
         location = select_by_tag(component, 'location')
         rotation_matrix = _rotation_matrix_from_location(
             location, simulation_settings.angle_unit
@@ -191,12 +188,8 @@ class DetectorDesc:
             start_y=float(type_desc.attrib['ystart']),
             position=_position_from_location(location, simulation_settings.length_unit),
             rotation_matrix=rotation_matrix,
-            fast_axis=_rotate_axis(
-                rotation_matrix, _AXISNAME_TO_UNIT_VECTOR[fast_axis_name]
-            ),
-            slow_axis=_rotate_axis(
-                rotation_matrix, _AXISNAME_TO_UNIT_VECTOR[slow_axis_name]
-            ),
+            fast_axis=rotation_matrix * _AXISNAME_TO_UNIT_VECTOR[fast_axis_name],
+            slow_axis=rotation_matrix * _AXISNAME_TO_UNIT_VECTOR[slow_axis_name],
         )
 
     @property
