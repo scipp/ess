@@ -25,7 +25,7 @@ def axis_angle_to_quaternion(
     Returns
     -------
     :
-        A list of (normalized) queternions, [x, y, z, w].
+        A list of (normalized) quaternions, [x, y, z, w].
 
     Notes
     -----
@@ -57,7 +57,7 @@ def quaternion_to_matrix(x: float, y: float, z: float, w: float) -> sc.Variable:
     Returns
     -------
     :
-        A 3X3 rotation matrix (3 vectors).
+        A 3x3 rotation matrix.
 
     """
     from scipy.spatial.transform import Rotation
