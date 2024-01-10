@@ -73,7 +73,7 @@ def load_mcstas_nexus(
 
         loaded = sc.DataArray(data=weights, coords={'t': t_list, 'id': id_list})
         coords = geometry.to_coords()
-        grouped = loaded.group(coords.pop('pixel_ids'))
+        grouped = loaded.group(coords.pop('pixel_id'))
         da = grouped.fold(dim='id', sizes={'panel': len(geometry.detectors), 'id': -1})
         da.coords.update(coords)
 

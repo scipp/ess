@@ -7,7 +7,7 @@ from numpy.typing import NDArray
 
 
 def axis_angle_to_quaternion(
-    x: float, y: float, z: float, theta: sc.Variable
+    *, x: float, y: float, z: float, theta: sc.Variable
 ) -> NDArray:
     """Convert axis-angle to queternions, [x, y, z, w].
 
@@ -40,7 +40,7 @@ def axis_angle_to_quaternion(
     return q / np.linalg.norm(q)
 
 
-def quaternion_to_matrix(x: float, y: float, z: float, w: float) -> sc.Variable:
+def quaternion_to_matrix(*, x: float, y: float, z: float, w: float) -> sc.Variable:
     """Convert quaternion to rotation matrix.
 
     Parameters
