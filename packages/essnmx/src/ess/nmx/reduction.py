@@ -93,6 +93,19 @@ class NMXReducedData(_SharedFields, sc.DataGroup):
 
         return nx_sample
 
+    def _create_compressed_dataset(
+        self, nx_entry: h5py.Group, name: str, var: sc.Variable, *, long_name: str
+    ) -> h5py.Dataset:
+        dataset = nx_entry.create_dataset(
+            name,
+            data=var.values,
+            compression="gzip",
+            compression_opts=4,
+        )
+        dataset.attrs["units"] = str(var.unit)
+        dataset.attrs["long_name"] = name
+        return dataset
+
     def _create_instrument_group(self, nx_entry: h5py.Group) -> h5py.Group:
         nx_instrument = nx_entry.create_group("NXinstrument")
         nx_instrument.attrs["nr_detector"] = self.origin_position.sizes['panel']
@@ -100,7 +113,7 @@ class NMXReducedData(_SharedFields, sc.DataGroup):
 
         nx_detector_1 = nx_instrument.create_group("detector_1")
         counts = nx_detector_1.create_dataset(
-            "counts", data=self.counts.values, compression="gzip", compression_opts=4
+            "counts", data=[self.counts.values], compression="gzip", compression_opts=4
         )
         counts.attrs["units"] = "counts"
         t_spectrum = nx_detector_1.create_dataset(
