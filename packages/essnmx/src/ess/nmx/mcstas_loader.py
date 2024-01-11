@@ -39,6 +39,15 @@ def _copy_partial_var(
     return var
 
 
+def _retrieve_crystal_rotation(file: snx.File, unit: str) -> sc.Variable:
+    """Retrieve crystal rotation from the file."""
+
+    return sc.vector(
+        value=[file[f"entry1/simulation/Param/XtalPhi{key}"][...] for key in "XYZ"],
+        unit=unit,
+    )
+
+
 def load_mcstas_nexus(
     file_path: InputFilepath,
     max_probability: Optional[MaximumProbability] = None,
@@ -79,6 +88,9 @@ def load_mcstas_nexus(
         da: sc.DataArray = grouped.fold(
             dim='id', sizes={'panel': len(geometry.detectors), 'id': -1}
         )
+        crystal_rotation = _retrieve_crystal_rotation(
+            file, geometry.simulation_settings.angle_unit
+        )
         # Proton charge is proportional to the number of neutrons,
         # which is proportional to the number of events.
         # The scale factor is chosen by previous results
@@ -87,4 +99,11 @@ def load_mcstas_nexus(
         # the protons are not part of McStas simulation,
         # and the number of neutrons is not included in the result.
         proton_charge = _PROTON_CHARGE_SCALE_FACTOR * da.bins.size().sum().value
-        return NMXData(sc.DataGroup(weights=da, proton_charge=proton_charge, **coords))
+        return NMXData(
+            sc.DataGroup(
+                weights=da,
+                proton_charge=proton_charge,
+                crystal_rotation=crystal_rotation,
+                **coords,
+            )
+        )
