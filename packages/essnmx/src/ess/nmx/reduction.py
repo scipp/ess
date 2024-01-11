@@ -9,13 +9,17 @@ import scipp as sc
 TimeBinSteps = NewType("TimeBinSteps", int)
 
 
-class NMXData(sc.DataGroup):
-    @property
-    def weights(self) -> sc.DataArray:
-        return self['weights']
+class _SharedFields(sc.DataGroup):
+    """All shared fields between NMXData and NMXReducedData.
+
+    ``weights`` is only present in NMXData due to potential memory issues.
+    """
 
     @property
     def origin_position(self) -> sc.Variable:
+        """Position of the first pixel (lowest ID) in the detector.
+
+        Relative position from the sample."""
         return self['origin_position']
 
     @property
@@ -24,28 +28,43 @@ class NMXData(sc.DataGroup):
 
     @property
     def fast_axis(self) -> sc.Variable:
+        """Fast axis, along where the pixel ID increases by 1."""
         return self['fast_axis']
 
     @property
     def slow_axis(self) -> sc.Variable:
+        """Slow axis, along where the pixel ID increases by > 1.
+
+        The pixel ID increases by the number of pixels in the fast axis."""
         return self['slow_axis']
 
     @property
     def proton_charge(self) -> float:
+        """Accumulated number of protons during the measurement."""
         return self['proton_charge']
 
     @property
     def source_position(self) -> sc.Variable:
+        """Relative position of the source from the sample."""
         return self['source_position']
 
     @property
     def sample_position(self) -> sc.Variable:
+        """Relative position of the sample from the sample. (0, 0, 0)"""
         return self['sample_position']
 
 
-class NMXReducedData(NMXData):
+class NMXData(_SharedFields, sc.DataGroup):
+    @property
+    def weights(self) -> sc.DataArray:
+        """Event data grouped by pixel id and panel."""
+        return self['weights']
+
+
+class NMXReducedData(_SharedFields, sc.DataGroup):
     @property
     def counts(self) -> sc.DataArray:
+        """Binned time of arrival data from flattened event data."""
         return self['counts']
 
     def _create_root_data_entry(self, file_obj: h5py.File) -> h5py.Group:
