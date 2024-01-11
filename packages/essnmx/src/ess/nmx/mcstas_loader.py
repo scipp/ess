@@ -5,9 +5,11 @@ from typing import Iterable, NewType, Optional
 import scipp as sc
 import scippnexus as snx
 
+from .reduction import NMXData
+
+_PROTON_CHARGE_SCALE_FACTOR = 1 / 10_000  # Arbitrary number to scale the proton charge
 PixelIDs = NewType("PixelIDs", sc.Variable)
 InputFilepath = NewType("InputFilepath", str)
-NMXData = NewType("NMXData", sc.DataGroup)
 
 # McStas Configurations
 MaximumProbability = NewType("MaximumProbability", int)
@@ -73,8 +75,16 @@ def load_mcstas_nexus(
 
         loaded = sc.DataArray(data=weights, coords={'t': t_list, 'id': id_list})
         coords = geometry.to_coords()
-        grouped = loaded.group(coords.pop('pixel_id'))
-        da = grouped.fold(dim='id', sizes={'panel': len(geometry.detectors), 'id': -1})
-        da.coords.update(coords)
-
-        return NMXData(da)
+        grouped: sc.DataArray = loaded.group(coords.pop('pixel_id'))
+        da: sc.DataArray = grouped.fold(
+            dim='id', sizes={'panel': len(geometry.detectors), 'id': -1}
+        )
+        # Proton charge is proportional to the number of neutrons,
+        # which is proportional to the number of events.
+        # The scale factor is chosen by previous results
+        # to be convenient for data manipulation in the next steps.
+        # It is derived this way since
+        # the protons are not part of McStas simulation,
+        # and the number of neutrons is not included in the result.
+        proton_charge = _PROTON_CHARGE_SCALE_FACTOR * da.bins.size().sum().value
+        return NMXData(sc.DataGroup(weights=da, proton_charge=proton_charge, **coords))
