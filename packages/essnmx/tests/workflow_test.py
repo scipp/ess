@@ -14,12 +14,14 @@ def mcstas_workflow() -> sl.Pipeline:
         MaximumProbability,
         load_mcstas_nexus,
     )
+    from ess.nmx.reduction import TimeBinSteps, bin_time_of_arrival
 
     return sl.Pipeline(
-        [load_mcstas_nexus],
+        [load_mcstas_nexus, bin_time_of_arrival],
         params={
             InputFilepath: small_mcstas_sample(),
             MaximumProbability: DefaultMaximumProbability,
+            TimeBinSteps: TimeBinSteps(50),
         },
     )
 
@@ -36,4 +38,16 @@ def test_pipeline_mcstas_loader(mcstas_workflow: sl.Pipeline) -> None:
     from ess.nmx.mcstas_loader import NMXData
 
     nmx_data = mcstas_workflow.compute(NMXData)
-    assert isinstance(nmx_data, sc.DataArray)
+    assert isinstance(nmx_data, sc.DataGroup)
+    assert nmx_data.sizes['panel'] == 3
+    assert nmx_data.sizes['id'] == 1280 * 1280
+
+
+def test_pipeline_mcstas_reduction(mcstas_workflow: sl.Pipeline) -> None:
+    """Test if the loader graph is complete."""
+    from ess.nmx.reduction import NMXReducedData
+
+    nmx_reduced_data = mcstas_workflow.compute(NMXReducedData)
+    assert isinstance(nmx_reduced_data, sc.DataGroup)
+    assert nmx_reduced_data.sizes['panel'] == 3
+    assert nmx_reduced_data.sizes['t'] == 50

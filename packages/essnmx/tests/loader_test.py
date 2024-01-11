@@ -20,7 +20,7 @@ def test_file_reader_mcstas() -> None:
     )
 
     file_path = InputFilepath(small_mcstas_sample())
-    da = load_mcstas_nexus(file_path)
+    dg = load_mcstas_nexus(file_path)
 
     entry_path = "entry1/data/bank01_events_dat_list_p_x_y_n_id_t"
     with snx.File(file_path) as file:
@@ -29,25 +29,23 @@ def test_file_reader_mcstas() -> None:
 
     expected_weight_max = sc.scalar(DefaultMaximumProbability, unit='1', dtype=float)
 
-    assert isinstance(da, sc.DataArray)
-    assert da.shape == (3, 1280 * 1280)
-    assert sc.identical(
-        da.coords['sample_position'], sc.vector(value=[0, 0, 0], unit='m')
-    )
-    assert da.bins.size().sum().value == data_length
-    assert sc.identical(da.data.max(), expected_weight_max)
+    assert isinstance(dg, sc.DataGroup)
+    assert dg.shape == (3, 1280 * 1280)
+    assert sc.identical(dg.sample_position, sc.vector(value=[0, 0, 0], unit='m'))
+    assert dg.weights.bins.size().sum().value == data_length
+    assert sc.identical(dg.weights.max().data, expected_weight_max)
     # Expected coordinate values are provided by the IDS
     # based on the simulation settings of the sample file.
     # The expected values are rounded to 2 decimal places.
     assert np.all(
-        np.round(da.coords['fast_axis'].values, 2)
+        np.round(dg.fast_axis.values, 2)
         == sc.vectors(
             dims=['panel'],
             values=[(1.0, 0.0, -0.01), (-0.01, 0.0, -1.0), (0.01, 0.0, 1.0)],
         ).values,
     )
     assert sc.identical(
-        da.coords['slow_axis'],
+        dg.slow_axis,
         sc.vectors(
             dims=['panel'], values=[[0.0, 1.0, 0.0], [0.0, 1.0, 0.0], [0.0, 1.0, 0.0]]
         ),
@@ -79,7 +77,7 @@ def test_file_reader_mcstas_additional_fields(tmp_mcstas_file: pathlib.Path) -> 
         del file[entry_path]
         file[new_entry_path] = dataset
 
-    da = load_mcstas_nexus(InputFilepath(str(tmp_mcstas_file)))
+    dg = load_mcstas_nexus(InputFilepath(str(tmp_mcstas_file)))
 
-    assert isinstance(da, sc.DataArray)
-    assert da.shape == (3, 1280 * 1280)
+    assert isinstance(dg, sc.DataGroup)
+    assert dg.shape == (3, 1280 * 1280)
