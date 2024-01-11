@@ -23,6 +23,12 @@ class _SharedFields(sc.DataGroup):
         return self['origin_position']
 
     @property
+    def crystal_rotation(self) -> sc.Variable:
+        """Rotation of the crystal."""
+
+        return self['crystal_rotation']
+
+    @property
     def sample_name(self) -> sc.Variable:
         return self['sample_name']
 
@@ -79,6 +85,12 @@ class NMXReducedData(_SharedFields, sc.DataGroup):
     def _create_sample_group(self, nx_entry: h5py.Group) -> h5py.Group:
         nx_sample = nx_entry.create_group("NXsample")
         nx_sample["name"] = self.sample_name.value
+        crystal_rotation = nx_sample.create_dataset(
+            'crystal_rotation', data=self.crystal_rotation.values
+        )
+        crystal_rotation.attrs["units"] = str(self.crystal_rotation.unit)
+        crystal_rotation.attrs["long_name"] = 'crystal rotation in Phi (XYZ)'
+
         return nx_sample
 
     def _create_instrument_group(self, nx_entry: h5py.Group) -> h5py.Group:
