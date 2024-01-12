@@ -86,6 +86,9 @@ def beam_center_from_center_of_mass(
         The beam center position as a vector.
     """
 
+    # TODO: the flattening is required for the selection with a boolean mask to work.
+    # Until slicing with a multi-dimensional mask is supported in Scipp, we could avoid
+    # the copy made here by working with the underlying numpy arrays.
     data = data.flatten(dims=data.coords['position'].dims, to=uuid.uuid4().hex)
     pos = data.coords['position']
     summed = data.bins.sum()

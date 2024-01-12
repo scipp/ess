@@ -7,7 +7,7 @@ from typing import NewType, Optional
 import scipp as sc
 
 from ..types import (
-    DataWithLogicalDims,
+    RawData,
     MaskedData,
     RunType,
     SampleRun,
@@ -25,7 +25,7 @@ SampleHolderMask = NewType('SampleHolderMask', sc.Variable)
 """Sample holder mask"""
 
 
-def detector_edge_mask(sample: DataWithLogicalDims[SampleRun]) -> DetectorEdgeMask:
+def detector_edge_mask(sample: RawData[SampleRun]) -> DetectorEdgeMask:
     mask_edges = (
         sc.abs(sample.coords['position'].fields.x) > sc.scalar(0.48, unit='m')
     ) | (sc.abs(sample.coords['position'].fields.y) > sc.scalar(0.45, unit='m'))
@@ -33,7 +33,7 @@ def detector_edge_mask(sample: DataWithLogicalDims[SampleRun]) -> DetectorEdgeMa
 
 
 def sample_holder_mask(
-    sample: DataWithLogicalDims[SampleRun],
+    sample: RawData[SampleRun],
     low_counts_threshold: LowCountThreshold,
 ) -> SampleHolderMask:
     summed = sample.sum('tof')
@@ -48,7 +48,7 @@ def sample_holder_mask(
 
 
 def mask_detectors(
-    da: DataWithLogicalDims[RunType],
+    da: RawData[RunType],
     edge_mask: Optional[DetectorEdgeMask],
     holder_mask: Optional[SampleHolderMask],
 ) -> MaskedData[RunType]:

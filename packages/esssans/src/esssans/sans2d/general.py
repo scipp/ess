@@ -9,13 +9,11 @@ from typing import NewType, Optional
 import scipp as sc
 
 from ..types import (
-    DataWithLogicalDims,
     DetectorPixelShape,
     Incident,
     LabFrameTransform,
     LoadedFileContents,
     NeXusMonitorName,
-    RawData,
     RunNumber,
     RunTitle,
     RunType,
@@ -23,24 +21,11 @@ from ..types import (
     Transmission,
 )
 
-ReshapeToLogicalDims = NewType('ReshapeToLogicalDims', bool)
-"""Reshape raw data to logical dimensions if True"""
-
 
 default_parameters = {
     NeXusMonitorName[Incident]: 'monitor2',
     NeXusMonitorName[Transmission]: 'monitor4',
 }
-
-
-def to_logical_dims(
-    da: RawData[RunType], reshape: Optional[ReshapeToLogicalDims]
-) -> DataWithLogicalDims[RunType]:
-    if reshape is None or not reshape:
-        return DataWithLogicalDims[RunType](da)
-    return DataWithLogicalDims[RunType](
-        da.fold(dim='spectrum', sizes={'y': -1, 'x': 1024})
-    )
 
 
 def run_number(dg: LoadedFileContents[SampleRun]) -> RunNumber:
@@ -88,7 +73,6 @@ def lab_frame_transform() -> LabFrameTransform[RunType]:
 providers = (
     run_number,
     run_title,
-    to_logical_dims,
     lab_frame_transform,
     sans2d_tube_detector_pixel_shape,
 )

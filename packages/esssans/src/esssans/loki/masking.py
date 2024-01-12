@@ -11,8 +11,8 @@ import scipp as sc
 from ..types import (
     BeamStopPosition,
     BeamStopRadius,
-    DataWithLogicalDims,
     MaskedData,
+    RawData,
     RunType,
     SampleRun,
 )
@@ -26,7 +26,7 @@ DetectorTubeEdgeMask = NewType('DetectorTubeEdgeMask', sc.Variable)
 
 
 def detector_straw_mask(
-    sample_straws: DataWithLogicalDims[SampleRun],
+    sample_straws: RawData[SampleRun],
 ) -> DetectorLowCountsStrawMask:
     return DetectorLowCountsStrawMask(
         sample_straws.sum('pixel').data
@@ -35,7 +35,7 @@ def detector_straw_mask(
 
 
 def detector_beam_stop_mask(
-    sample_straws: DataWithLogicalDims[SampleRun],
+    sample_straws: RawData[SampleRun],
     beam_stop_position: BeamStopPosition,
     beam_stop_radius: BeamStopRadius,
 ) -> DetectorBeamStopMask:
@@ -45,7 +45,7 @@ def detector_beam_stop_mask(
 
 
 def detector_tube_edge_mask(
-    sample_straws: DataWithLogicalDims[SampleRun],
+    sample_straws: RawData[SampleRun],
 ) -> DetectorTubeEdgeMask:
     other_dims = set(sample_straws.dims) - {'pixel'}
     size = np.prod([sample_straws.sizes[dim] for dim in other_dims])
@@ -55,7 +55,7 @@ def detector_tube_edge_mask(
 
 
 def mask_detectors(
-    da: DataWithLogicalDims[RunType],
+    da: RawData[RunType],
     lowcounts_straw_mask: Optional[DetectorLowCountsStrawMask],
     beam_stop_mask: Optional[DetectorBeamStopMask],
     tube_edge_mask: Optional[DetectorTubeEdgeMask],

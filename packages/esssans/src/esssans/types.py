@@ -145,10 +145,6 @@ class SourcePosition(sciline.Scope[RunType, sc.Variable], sc.Variable):
     """Source position"""
 
 
-class DataWithLogicalDims(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Raw data reshaped to have logical dimensions"""
-
-
 DirectBeam = NewType('DirectBeam', sc.DataArray)
 """Direct beam"""
 

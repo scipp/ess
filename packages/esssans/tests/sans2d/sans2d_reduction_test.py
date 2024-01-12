@@ -14,7 +14,6 @@ from esssans.types import (
     BackgroundSubtractedIofQ,
     BeamCenter,
     CorrectForGravity,
-    DataWithLogicalDims,
     DirectBeam,
     DirectBeamFilename,
     EmptyBeamRun,
@@ -22,6 +21,7 @@ from esssans.types import (
     IofQ,
     NonBackgroundWavelengthRange,
     QBins,
+    RawData,
     SampleRun,
     SolidAngle,
     TransmissionRun,
@@ -32,7 +32,7 @@ from esssans.types import (
 )
 
 
-def make_params(to_logical_dims: Optional[bool] = None) -> dict:
+def make_params() -> dict:
     params = default_parameters.copy()
     band = sc.linspace('wavelength', 2.0, 16.0, num=2, unit='angstrom')
     params[WavelengthBands] = band
@@ -63,8 +63,6 @@ def make_params(to_logical_dims: Optional[bool] = None) -> dict:
     )
     params[CorrectForGravity] = True
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
-    if to_logical_dims is not None:
-        params[sans.sans2d.ReshapeToLogicalDims] = to_logical_dims
     return params
 
 
@@ -72,26 +70,16 @@ def sans2d_providers():
     return list(sans.providers + sans.sans2d.providers)
 
 
-@pytest.mark.parametrize(
-    'to_logical_dims',
-    [None, True, False],
-)
-def test_can_create_pipeline(to_logical_dims):
-    sciline.Pipeline(sans2d_providers(), params=make_params(to_logical_dims))
+def test_can_create_pipeline():
+    sciline.Pipeline(sans2d_providers(), params=make_params())
 
 
-@pytest.mark.parametrize(
-    'to_logical_dims',
-    [True, False],
-)
 @pytest.mark.parametrize(
     'uncertainties',
     [UncertaintyBroadcastMode.drop, UncertaintyBroadcastMode.upper_bound],
 )
-def test_pipeline_can_compute_background_subtracted_IofQ(
-    to_logical_dims, uncertainties
-):
-    params = make_params(to_logical_dims)
+def test_pipeline_can_compute_background_subtracted_IofQ(uncertainties):
+    params = make_params()
     params[UncertaintyBroadcastMode] = uncertainties
     pipeline = sciline.Pipeline(sans2d_providers(), params=params)
     result = pipeline.compute(BackgroundSubtractedIofQ)
@@ -167,27 +155,19 @@ def as_dict(funcs: List[Callable[..., type]]) -> dict:
 
 
 def pixel_dependent_direct_beam(
-    filename: DirectBeamFilename, shape: DataWithLogicalDims[SampleRun]
+    filename: DirectBeamFilename, shape: RawData[SampleRun]
 ) -> DirectBeam:
     direct_beam = sans.sans2d.io.pooch_load_direct_beam(filename)
-    if 'spectrum' in shape.sizes:
-        detector_shape = {'spectrum': shape.sizes['spectrum']}
-    else:
-        detector_shape = {'y': shape.sizes['y'], 'x': shape.sizes['x']}
-    sizes = {**detector_shape, **direct_beam.sizes}
+    sizes = {'spectrum': shape.sizes['spectrum'], **direct_beam.sizes}
     return DirectBeam(direct_beam.broadcast(sizes=sizes).copy())
 
 
 @pytest.mark.parametrize(
-    'to_logical_dims',
-    [True, False],
-)
-@pytest.mark.parametrize(
     'uncertainties',
     [UncertaintyBroadcastMode.drop, UncertaintyBroadcastMode.upper_bound],
 )
-def test_pixel_dependent_direct_beam_is_supported(to_logical_dims, uncertainties):
-    params = make_params(to_logical_dims)
+def test_pixel_dependent_direct_beam_is_supported(uncertainties):
+    params = make_params()
     params[UncertaintyBroadcastMode] = uncertainties
     providers = as_dict(sans2d_providers())
     providers[DirectBeam] = pixel_dependent_direct_beam
@@ -196,12 +176,8 @@ def test_pixel_dependent_direct_beam_is_supported(to_logical_dims, uncertainties
     assert result.dims == ('Q',)
 
 
-@pytest.mark.parametrize(
-    'to_logical_dims',
-    [True, False],
-)
-def test_beam_center_from_center_of_mass_is_close_to_verified_result(to_logical_dims):
-    params = make_params(to_logical_dims)
+def test_beam_center_from_center_of_mass_is_close_to_verified_result():
+    params = make_params()
     providers = sans2d_providers()
     pipeline = sciline.Pipeline(providers, params=params)
     center = pipeline.compute(BeamCenter)
@@ -214,14 +190,8 @@ def test_beam_center_from_center_of_mass_is_close_to_verified_result(to_logical_
     )
 
 
-@pytest.mark.parametrize(
-    'to_logical_dims',
-    [True, False],
-)
-def test_beam_center_finder_without_direct_beam_reproduces_verified_result(
-    to_logical_dims,
-):
-    params = make_params(to_logical_dims)
+def test_beam_center_finder_without_direct_beam_reproduces_verified_result():
+    params = make_params()
     params[sans.beam_center_finder.BeamCenterFinderQBins] = sc.linspace(
         'Q', 0.02, 0.3, 71, unit='1/angstrom'
     )

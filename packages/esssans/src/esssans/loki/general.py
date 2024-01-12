@@ -6,7 +6,6 @@ Default parameters, providers and utility functions for the loki workflow.
 
 
 from ..types import (
-    DataWithLogicalDims,
     DetectorPixelShape,
     Incident,
     LabFrameTransform,
@@ -15,7 +14,6 @@ from ..types import (
     NexusInstrumentPath,
     NeXusMonitorName,
     NexusSourceName,
-    RawData,
     RunType,
     TransformationPath,
     Transmission,
@@ -31,14 +29,6 @@ default_parameters = {
     # default value of [0, 0, 0] when loading the sample position.
     TransformationPath: 'esssans_loki_transformation',
 }
-
-
-def to_logical_dims(da: RawData[RunType]) -> DataWithLogicalDims[RunType]:
-    return DataWithLogicalDims[RunType](
-        da.fold(
-            dim='detector_number', sizes=dict(layer=4, tube=32, straw=7, pixel=512)
-        ).flatten(dims=['tube', 'straw'], to='straw')
-    )
 
 
 def detector_pixel_shape(
@@ -65,5 +55,4 @@ def detector_lab_frame_transform(
 providers = (
     detector_pixel_shape,
     detector_lab_frame_transform,
-    to_logical_dims,
 )

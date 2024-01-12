@@ -28,6 +28,13 @@ from ..types import (
     TransformationPath,
     Transmission,
 )
+from .general import default_parameters as params
+
+DETECTOR_BANK_RESHAPING = {
+    params[NexusDetectorName]: lambda x: x.fold(
+        dim='detector_number', sizes=dict(layer=4, tube=32, straw=7, pixel=512)
+    ).flatten(dims=['tube', 'straw'], to='straw')
+}
 
 
 def _patch_data(
@@ -119,11 +126,15 @@ def load_nexus(
     source_position = out[instrument_path][source_name]['position']
 
     for name in data_entries:
-        out[instrument_path][name][f'{name}_events'] = _preprocess_data(
+        data = _preprocess_data(
             out[instrument_path][name][f'{name}_events'],
             sample_position=sample_position,
             source_position=source_position,
         )
+        if name in DETECTOR_BANK_RESHAPING:
+            data = DETECTOR_BANK_RESHAPING[name](data)
+
+        out[instrument_path][name][f'{name}_events'] = data
 
     return LoadedFileContents[RunType](out)
 
