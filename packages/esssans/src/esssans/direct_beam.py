@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
-from typing import Any, Callable, Dict, List, Optional
+from typing import List
 
 import numpy as np
 import scipp as sc
@@ -70,16 +70,6 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
         The number of iterations to perform.
     """
 
-    # # Determine which pipeline is for the full wavelength range
-    # if pipelines[0].compute(WavelengthBands).ndim == 1:
-    #     pipeline_full, pipeline_bands = pipelines
-    # else:
-    #     pipeline_bands, pipeline_full = pipelines
-
-    # pipeline_full = Pipeline(providers=pipeline._providers.values())
-    # for table in pipeline._param_tables.values():
-    #     pipeline_full.set_param_table(table)
-
     per_layer = 'layer' in pipeline.compute(FinalDims)
 
     # Make a flat direct beam to start with
@@ -100,7 +90,6 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
     full_wavelength_range = sc.concat([bands.min(), bands.max()], dim='wavelength')
 
     pipeline_bands = pipeline.copy()
-    # pipeline_bands[DirectBeam] = direct_beam_function
     pipeline_full = pipeline_bands.copy()
     pipeline_full[WavelengthBands] = full_wavelength_range
 

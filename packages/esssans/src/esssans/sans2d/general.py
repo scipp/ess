@@ -4,8 +4,6 @@
 Loading and masking specific to the ISIS Sans2d instrument and files stored in Scipp's
 HDF5 format.
 """
-from typing import NewType, Optional
-
 import scipp as sc
 
 from ..types import (
