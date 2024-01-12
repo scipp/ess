@@ -32,16 +32,12 @@ def loki_providers() -> List[Callable]:
 
 def test_can_compute_direct_beam_for_all_pixels():
     n_wavelength_bands = 10
-    params_full = make_params()
-    params_bands = make_params(n_wavelength_bands=n_wavelength_bands)
+    params = make_params(n_wavelength_bands=n_wavelength_bands)
     providers = loki_providers()
-    pipelines = [
-        sciline.Pipeline(providers, params=params_bands),
-        sciline.Pipeline(providers, params=params_full),
-    ]
-    I0 = get_I0(sc.midpoints(params_full[QBins])[0])
+    pipeline = sciline.Pipeline(providers, params=params)
+    I0 = get_I0(sc.midpoints(params[QBins])[0])
 
-    results = sans.direct_beam(pipelines=pipelines, I0=I0, niter=4)
+    results = sans.direct_beam(pipeline=pipeline, I0=I0, niter=4)
     # Unpack the final result
     iofq_full = results[-1]['iofq_full']
     iofq_slices = results[-1]['iofq_slices']
@@ -54,18 +50,13 @@ def test_can_compute_direct_beam_for_all_pixels():
 
 def test_can_compute_direct_beam_per_layer():
     n_wavelength_bands = 10
-    params_full = make_params()
-    params_bands = make_params(n_wavelength_bands=n_wavelength_bands)
-    params_full[FinalDims] = ['layer', 'Q']
-    params_bands[FinalDims] = ['layer', 'Q']
+    params = make_params(n_wavelength_bands=n_wavelength_bands)
+    params[FinalDims] = ['layer', 'Q']
     providers = loki_providers()
-    pipelines = [
-        sciline.Pipeline(providers, params=params_bands),
-        sciline.Pipeline(providers, params=params_full),
-    ]
-    I0 = get_I0(sc.midpoints(params_full[QBins])[0])
+    pipeline = sciline.Pipeline(providers, params=params)
+    I0 = get_I0(sc.midpoints(params[QBins])[0])
 
-    results = sans.direct_beam(pipelines=pipelines, I0=I0, niter=4)
+    results = sans.direct_beam(pipeline=pipeline, I0=I0, niter=4)
     # Unpack the final result
     iofq_full = results[-1]['iofq_full']
     iofq_slices = results[-1]['iofq_slices']

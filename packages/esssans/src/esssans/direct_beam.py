@@ -100,7 +100,7 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
     full_wavelength_range = sc.concat([bands.min(), bands.max()], dim='wavelength')
 
     pipeline_bands = pipeline.copy()
-    pipeline_bands[DirectBeam] = direct_beam_function
+    # pipeline_bands[DirectBeam] = direct_beam_function
     pipeline_full = pipeline_bands.copy()
     pipeline_full[WavelengthBands] = full_wavelength_range
 
@@ -108,6 +108,9 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
 
     for it in range(niter):
         print("Iteration", it)
+
+        pipeline_bands[DirectBeam] = direct_beam_function
+        pipeline_full[DirectBeam] = direct_beam_function
 
         iofq_full = pipeline_full.compute(BackgroundSubtractedIofQ)
         iofq_slices = pipeline_bands.compute(BackgroundSubtractedIofQ)

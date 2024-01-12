@@ -107,34 +107,36 @@ def load_nexus(
 ) -> LoadedFileContents[RunType]:
     from .data import get_path
 
+    data_entries = (detector_name, incident_monitor_name, transmission_monitor_name)
+
     data_groups = []
     for filename in filelist:
         with snx.File(get_path(filename)) as f:
             dg = f['entry'][()]
         dg = snx.compute_positions(dg, store_transform=transform_path)
+
+        if sample_name is None:
+            sample_position = sc.vector(value=[0, 0, 0], unit='m')
+        else:
+            sample_position = dg[instrument_path][sample_name]['position']
+        source_position = dg[instrument_path][source_name]['position']
+
+        for name in data_entries:
+            data = _preprocess_data(
+                dg[instrument_path][name][f'{name}_events'],
+                sample_position=sample_position,
+                source_position=source_position,
+            )
+            if name in DETECTOR_BANK_RESHAPING:
+                data = DETECTOR_BANK_RESHAPING[name](data)
+
+            dg[instrument_path][name][f'{name}_events'] = data
+
         data_groups.append(dg)
 
-    data_entries = (detector_name, incident_monitor_name, transmission_monitor_name)
     out = _merge_runs(
         data_groups=data_groups, instrument_path=instrument_path, entries=data_entries
     )
-
-    if sample_name is None:
-        sample_position = sc.vector(value=[0, 0, 0], unit='m')
-    else:
-        sample_position = out[instrument_path][sample_name]['position']
-    source_position = out[instrument_path][source_name]['position']
-
-    for name in data_entries:
-        data = _preprocess_data(
-            out[instrument_path][name][f'{name}_events'],
-            sample_position=sample_position,
-            source_position=source_position,
-        )
-        if name in DETECTOR_BANK_RESHAPING:
-            data = DETECTOR_BANK_RESHAPING[name](data)
-
-        out[instrument_path][name][f'{name}_events'] = data
 
     return LoadedFileContents[RunType](out)
 

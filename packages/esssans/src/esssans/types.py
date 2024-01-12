@@ -129,7 +129,7 @@ class FileList(sciline.Scope[RunType, list], list):
 
 
 BeamStopPosition = NewType('BeamStopPosition', sc.Variable)
-"""Center of the beam stop position"""
+"""Approximate center of the beam stop position"""
 
 BeamStopRadius = NewType('BeamStopRadius', sc.Variable)
 """Radius of the beam stop"""

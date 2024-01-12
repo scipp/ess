@@ -7,6 +7,8 @@ import scipp as sc
 from esssans.loki import default_parameters
 from esssans.types import (
     BackgroundRun,
+    BeamStopPosition,
+    BeamStopRadius,
     CorrectForGravity,
     EmptyBeamRun,
     FileList,
@@ -60,6 +62,8 @@ def make_params(
         [band_start, band_end], dim='wavelength'
     ).transpose()
 
+    params[BeamStopPosition] = sc.vector([-0.026, -0.022, 0.0], unit='m')
+    params[BeamStopRadius] = sc.scalar(0.042, unit='m')
     params[CorrectForGravity] = True
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
 
