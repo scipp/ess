@@ -19,7 +19,6 @@ from ..types import (
     Transmission,
 )
 
-
 default_parameters = {
     NeXusMonitorName[Incident]: 'monitor2',
     NeXusMonitorName[Transmission]: 'monitor4',

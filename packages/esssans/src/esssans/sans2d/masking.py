@@ -6,13 +6,7 @@ from typing import NewType, Optional
 
 import scipp as sc
 
-from ..types import (
-    RawData,
-    MaskedData,
-    RunType,
-    SampleRun,
-)
-
+from ..types import MaskedData, RawData, RunType, SampleRun
 
 DetectorEdgeMask = NewType('DetectorEdgeMask', sc.Variable)
 """Detector edge mask"""
