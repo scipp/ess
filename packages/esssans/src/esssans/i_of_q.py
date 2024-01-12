@@ -238,20 +238,20 @@ def _events_merge_spectra(
     if wavelength_bands is None:
         return q_binned
 
-    # Note: cannot simply add the wavelength_bands to the edges, because the
-    # wavelength_bands may overlap. So instead, we loop over the bands and bin each
-    # band separately.
-    #
-    # Note: it is more memory efficient to concatenate the bands as we loop, rather
-    # than to keep all bands in a list and then concatenate the results.
+    dim = 'wavelength'
+    wav_binned = q_binned.bin({dim: sc.sort(wavelength_bands.flatten(to=dim), dim)})
+    # At this point we kind of already have what we need, would be cheapest to just
+    # return, if follow up providers can work with the result.
+    # Otherwise we need to duplicate events:
+    sections = []
+    for bounds in sc.collapse(wavelength_bands, keep=dim).values():
+        # The extra concat can probably be avoided if we insert some dummy edges for
+        # first and last band, but we would need to know how many edges to insert, as
+        # the bands can be very wide and overlap by more than one bin.
+        sections.append(wav_binned[dim, bounds[0] : bounds[1]].bins.concat(dim))
     band_dim = (set(wavelength_bands.dims) - {'wavelength'}).pop()
-    out = None
-    for wav_range in sc.collapse(wavelength_bands, keep='wavelength').values():
-        band = q_binned.bin(wavelength=wav_range).squeeze()
-        if out is None:
-            out = band
-        else:
-            out = sc.concat([out, band], band_dim)
+    out = sc.concat(sections, band_dim)
+    out.coords[dim] = wavelength_bands
     return out
 
 
