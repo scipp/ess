@@ -7,26 +7,45 @@ import numpy as np
 import scipp as sc
 from sciline import Pipeline
 
-from .types import BackgroundSubtractedIofQ, DirectBeam, FinalDims, WavelengthBands
+from .types import (
+    BackgroundSubtractedIofQ,
+    DirectBeam,
+    WavelengthBands,
+)
 
 
-def _direct_beam_iteration(
+def _compute_efficiency_correction(
     iofq_full: sc.DataArray,
-    iofq_slices: sc.DataArray,
-    direct_beam_function: sc.DataArray,
+    iofq_bands: sc.DataArray,
+    wavelength_band_dim: str,
     I0: sc.Variable,
 ) -> sc.DataArray:
-    eff = []
-    for sl in sc.collapse(iofq_slices, keep='Q').values():
-        vals = sl.values
-        sel = (vals > 0.0) & np.isfinite(vals)
-        f = np.median(vals[sel] / iofq_full.values[sel])
-        eff.append(f)
+    """
+    Compute the factor by which to multiply the direct beam function inside each
+    wavelength band so that the $I(Q)$ curves for the full wavelength range and inside
+    the bands overlap.
 
-    out = direct_beam_function * sc.array(dims=['wavelength'], values=eff)
+    Parameters
+    ----------
+    iofq_full:
+        The $I(Q)$ for the full wavelength range.
+    iofq_bands:
+        The $I(Q)$ for the wavelength bands.
+    wavelength_band_dim:
+        The name of the wavelength band dimension.
+    I0:
+        The intensity of the I(Q) for the known sample at the lowest Q value.
+    """
+    invalid = (iofq_bands.data <= sc.scalar(0.0)) | ~sc.isfinite(iofq_bands.data)
+    data = np.where(invalid.values, np.nan, (iofq_bands.data / iofq_full).values)
+    eff = np.nanmedian(data, axis=iofq_bands.dims.index('Q'))
+
+    dims = set(iofq_bands.dims) - {'Q'}
+    dims.remove(wavelength_band_dim)
+    dims.add('wavelength')
+
     scaling = sc.values(iofq_full['Q', 0].data) / I0
-    out *= scaling
-    return out
+    return sc.array(dims=dims, values=eff) * scaling
 
 
 def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dict]:
@@ -70,24 +89,13 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
         The number of iterations to perform.
     """
 
-    per_layer = 'layer' in pipeline.compute(FinalDims)
-
-    # Make a flat direct beam to start with
+    direct_beam_function = None
     wavelength_bands = pipeline.compute(WavelengthBands)
-    sizes = {'wavelength': wavelength_bands.sizes['band']}
-    if per_layer:
-        sizes['layer'] = 4
-    direct_beam_function = sc.DataArray(
-        data=sc.ones(sizes=sizes),
-        coords={
-            'wavelength': sc.midpoints(wavelength_bands, dim='wavelength')
-            .squeeze()
-            .rename_dims(band='wavelength')
-        },
-    )
+    band_dim = (set(wavelength_bands.dims) - {'wavelength'}).pop()
 
-    bands = pipeline.compute(WavelengthBands)
-    full_wavelength_range = sc.concat([bands.min(), bands.max()], dim='wavelength')
+    full_wavelength_range = sc.concat(
+        [wavelength_bands.min(), wavelength_bands.max()], dim='wavelength'
+    )
 
     pipeline_bands = pipeline.copy()
     pipeline_full = pipeline_bands.copy()
@@ -98,32 +106,38 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
     for it in range(niter):
         print("Iteration", it)
 
+        # The first time we compute I(Q), the direct beam function is not in the
+        # parameters, nor given by any providers, so it will be considered flat.
+        # TODO: Should we have a check that DirectBeam cannot be computed from the
+        # pipeline?
+        iofq_full = pipeline_full.compute(BackgroundSubtractedIofQ)
+        iofq_bands = pipeline_bands.compute(BackgroundSubtractedIofQ)
+
+        if direct_beam_function is None:
+            # Make a flat direct beam
+            dims = set(iofq_bands.dims) - {'Q'}
+            direct_beam_function = sc.DataArray(
+                data=sc.ones(sizes={dim: iofq_bands.sizes[dim] for dim in dims}),
+                coords={
+                    band_dim: sc.midpoints(wavelength_bands, dim='wavelength').squeeze()
+                },
+            ).rename({band_dim: 'wavelength'})
+
+        direct_beam_function *= _compute_efficiency_correction(
+            iofq_full=iofq_full,
+            iofq_bands=iofq_bands,
+            wavelength_band_dim=band_dim,
+            I0=I0,
+        )
+
+        # Insert new direct beam function into pipelines
         pipeline_bands[DirectBeam] = direct_beam_function
         pipeline_full[DirectBeam] = direct_beam_function
-
-        iofq_full = pipeline_full.compute(BackgroundSubtractedIofQ)
-        iofq_slices = pipeline_bands.compute(BackgroundSubtractedIofQ)
-
-        if per_layer:
-            for i in range(iofq_full.sizes['layer']):
-                direct_beam_function['layer', i] = _direct_beam_iteration(
-                    iofq_full=iofq_full['layer', i],
-                    iofq_slices=iofq_slices['layer', i],
-                    direct_beam_function=direct_beam_function['layer', i],
-                    I0=I0,
-                )
-        else:
-            direct_beam_function = _direct_beam_iteration(
-                iofq_full=iofq_full,
-                iofq_slices=iofq_slices,
-                direct_beam_function=direct_beam_function,
-                I0=I0,
-            )
 
         results.append(
             {
                 'iofq_full': iofq_full,
-                'iofq_slices': iofq_slices,
+                'iofq_bands': iofq_bands,
                 'direct_beam': direct_beam_function,
             }
         )

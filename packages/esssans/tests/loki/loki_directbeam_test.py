@@ -8,7 +8,7 @@ import scipp as sc
 from loki_common import make_params
 
 import esssans as sans
-from esssans.types import FinalDims, QBins
+from esssans.types import DimsToKeep, QBins
 
 
 def get_I0(q_loc: sc.Variable) -> sc.Variable:
@@ -51,7 +51,7 @@ def test_can_compute_direct_beam_for_all_pixels():
 def test_can_compute_direct_beam_per_layer():
     n_wavelength_bands = 10
     params = make_params(n_wavelength_bands=n_wavelength_bands)
-    params[FinalDims] = ['layer', 'Q']
+    params[DimsToKeep] = ['layer']
     providers = loki_providers()
     pipeline = sciline.Pipeline(providers, params=params)
     I0 = get_I0(sc.midpoints(params[QBins])[0])

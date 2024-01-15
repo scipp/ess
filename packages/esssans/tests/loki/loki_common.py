@@ -12,7 +12,6 @@ from esssans.types import (
     CorrectForGravity,
     EmptyBeamRun,
     FileList,
-    FinalDims,
     QBins,
     SampleRun,
     TransmissionRun,
@@ -70,8 +69,5 @@ def make_params(
     params[QBins] = sc.linspace(
         dim='Q', start=0.01, stop=0.3, num=101, unit='1/angstrom'
     )
-
-    # The final result should have dims of Q only
-    params[FinalDims] = ['Q']
 
     return params

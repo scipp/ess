@@ -55,14 +55,22 @@ IofQPart = TypeVar('IofQPart', Numerator, Denominator)
 
 # 1.4  Entry paths in Nexus files
 NexusInstrumentPath = NewType('NexusInstrumentPath', str)
+"""Path to instrument in Nexus file"""
 
 NexusSampleName = NewType('NexusSampleName', str)
+"""Name of sample entry in Nexus file"""
 
 NexusSourceName = NewType('NexusSourceName', str)
+"""Name of source entry in Nexus file"""
 
 NexusDetectorName = NewType('NexusDetectorName', str)
+"""Name of detector entry in Nexus file"""
 
 TransformationPath = NewType('TransformationPath', str)
+"""
+Name of the entry under which to store the transformation computed from the
+transformation chain, for the detectors and the monitors
+"""
 
 # 2  Workflow parameters
 
@@ -113,8 +121,9 @@ WavelengthMask = NewType('WavelengthMask', sc.DataArray)
 CorrectForGravity = NewType('CorrectForGravity', bool)
 """Whether to correct for gravity when computing wavelength and Q."""
 
-FinalDims = NewType('FinalDims', Sequence[str])
-"""Final dimensions of IofQ"""
+DimsToKeep = NewType('DimsToKeep', Sequence[str])
+"""Dimensions that should not be reduced and thus still be present in the final
+I(Q) result (this is typically the layer dimension)."""
 
 OutFilename = NewType('OutFilename', str)
 """Filename of the output"""

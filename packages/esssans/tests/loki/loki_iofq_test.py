@@ -11,7 +11,7 @@ from loki_common import make_params
 import esssans as sans
 from esssans.types import (
     BackgroundSubtractedIofQ,
-    FinalDims,
+    DimsToKeep,
     UncertaintyBroadcastMode,
     WavelengthBands,
 )
@@ -54,7 +54,7 @@ def test_pipeline_can_compute_IofQ_in_wavelength_slices():
 
 def test_pipeline_can_compute_IofQ_in_layers():
     params = make_params()
-    params[FinalDims] = ['layer', 'Q']
+    params[DimsToKeep] = ['layer']
     pipeline = sciline.Pipeline(loki_providers(), params=params)
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('layer', 'Q')
