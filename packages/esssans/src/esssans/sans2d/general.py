@@ -92,4 +92,3 @@ providers = (
     lab_frame_transform,
     sans2d_tube_detector_pixel_shape,
 )
-"""General providers for the sans2d workflow."""

@@ -65,13 +65,4 @@ def mask_detectors(
     return MaskedData[RunType](da)
 
 
-providers = (
-    detector_edge_mask,
-    sample_holder_mask,
-    mask_detectors,
-)
-"""
-Providers for loading and masking Sans2d data.
-
-These are meant for complementing the top-level :py:data:`esssans.providers` list.
-"""
+providers = (detector_edge_mask, sample_holder_mask, mask_detectors)

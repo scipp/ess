@@ -45,5 +45,3 @@ def pooch_load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
 
 
 providers = (pooch_load_direct_beam, pooch_load)
-"""
-"""
