@@ -53,18 +53,15 @@ Denominator = NewType('Denominator', sc.DataArray)
 IofQPart = TypeVar('IofQPart', Numerator, Denominator)
 """TypeVar used for specifying Numerator or Denominator of IofQ"""
 
-# 1.4  Entry paths in Nexus files
-NexusInstrumentPath = NewType('NexusInstrumentPath', str)
-"""Path to instrument in Nexus file"""
+# 1.4  Entry paths in NeXus files
+NeXusSampleName = NewType('NeXusSampleName', str)
+"""Name of sample entry in NeXus file"""
 
-NexusSampleName = NewType('NexusSampleName', str)
-"""Name of sample entry in Nexus file"""
+NeXusSourceName = NewType('NeXusSourceName', str)
+"""Name of source entry in NeXus file"""
 
-NexusSourceName = NewType('NexusSourceName', str)
-"""Name of source entry in Nexus file"""
-
-NexusDetectorName = NewType('NexusDetectorName', str)
-"""Name of detector entry in Nexus file"""
+NeXusDetectorName = NewType('NeXusDetectorName', str)
+"""Name of detector entry in NeXus file"""
 
 TransformationPath = NewType('TransformationPath', str)
 """

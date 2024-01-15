@@ -9,7 +9,7 @@ _registry = Registry(
     files={
         # Direct beam file (efficiency of detectors as a function of wavelength)
         'DIRECT_SANS2D_REAR_34327_4m_8mm_16Feb16.hdf5': 'md5:43f4188301d709aa49df0631d03a67cb',  # noqa: E501
-        # Empty beam run (no sample and no sample holder/can) - Nexus format
+        # Empty beam run (no sample and no sample holder/can) - NeXus format
         'SANS2D00063091.nxs': 'md5:05929753ea06eca5fe4be164cb06b4d6',
         # Empty beam run (no sample and no sample holder/can) - Scipp-hdf5 format
         'SANS2D00063091.hdf5': 'md5:1fdbe36a496e914336f2f9b5cad9f00e',

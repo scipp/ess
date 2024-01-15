@@ -11,7 +11,10 @@ from ..types import (
     Incident,
     LabFrameTransform,
     LoadedFileContents,
+    MonitorType,
     NeXusMonitorName,
+    RawData,
+    RawMonitor,
     RunNumber,
     RunTitle,
     RunType,
@@ -23,6 +26,20 @@ default_parameters = {
     NeXusMonitorName[Incident]: 'monitor2',
     NeXusMonitorName[Transmission]: 'monitor4',
 }
+
+
+def get_detector_data(
+    dg: LoadedFileContents[RunType],
+) -> RawData[RunType]:
+    return RawData[RunType](dg['data'])
+
+
+def get_monitor(
+    dg: LoadedFileContents[RunType], nexus_name: NeXusMonitorName[MonitorType]
+) -> RawMonitor[RunType, MonitorType]:
+    # See https://github.com/scipp/sciline/issues/52 why copy needed
+    mon = dg['monitors'][nexus_name]['data'].copy()
+    return RawMonitor[RunType, MonitorType](mon)
 
 
 def run_number(dg: LoadedFileContents[SampleRun]) -> RunNumber:
@@ -68,10 +85,11 @@ def lab_frame_transform() -> LabFrameTransform[RunType]:
 
 
 providers = (
+    get_detector_data,
+    get_monitor,
     run_number,
     run_title,
     lab_frame_transform,
     sans2d_tube_detector_pixel_shape,
 )
-"""
-"""
+"""General providers for the sans2d workflow."""

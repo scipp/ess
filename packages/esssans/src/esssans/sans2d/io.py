@@ -11,10 +11,6 @@ from ..types import (
     DirectBeamFilename,
     FileList,
     LoadedFileContents,
-    MonitorType,
-    NeXusMonitorName,
-    RawData,
-    RawMonitor,
     RunType,
 )
 
@@ -48,25 +44,6 @@ def pooch_load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
     return DirectBeam(sc.io.load_hdf5(filename=get_path(filename)))
 
 
-def get_detector_data(
-    dg: LoadedFileContents[RunType],
-) -> RawData[RunType]:
-    return RawData[RunType](dg['data'])
-
-
-def get_monitor(
-    dg: LoadedFileContents[RunType], nexus_name: NeXusMonitorName[MonitorType]
-) -> RawMonitor[RunType, MonitorType]:
-    # See https://github.com/scipp/sciline/issues/52 why copy needed
-    mon = dg['monitors'][nexus_name]['data'].copy()
-    return RawMonitor[RunType, MonitorType](mon)
-
-
-providers = (
-    pooch_load_direct_beam,
-    pooch_load,
-    get_detector_data,
-    get_monitor,
-)
+providers = (pooch_load_direct_beam, pooch_load)
 """
 """

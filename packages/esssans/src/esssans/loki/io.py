@@ -16,31 +16,25 @@ from ..types import (
     FileList,
     Incident,
     LoadedFileContents,
-    MonitorType,
-    NexusDetectorName,
-    NexusInstrumentPath,
+    NeXusDetectorName,
     NeXusMonitorName,
-    NexusSampleName,
-    NexusSourceName,
-    RawData,
-    RawMonitor,
+    NeXusSampleName,
+    NeXusSourceName,
     RunType,
     TransformationPath,
     Transmission,
 )
-from .general import default_parameters as params
+from .general import NEXUS_INSTRUMENT_PATH, default_parameters as params
 
 DETECTOR_BANK_RESHAPING = {
-    params[NexusDetectorName]: lambda x: x.fold(
+    params[NeXusDetectorName]: lambda x: x.fold(
         dim='detector_number', sizes=dict(layer=4, tube=32, straw=7, pixel=512)
     ).flatten(dims=['tube', 'straw'], to='straw')
 }
 
 
 def _patch_data(
-    da: sc.DataArray,
-    sample_position: sc.Variable,
-    source_position: sc.Variable,
+    da: sc.DataArray, sample_position: sc.Variable, source_position: sc.Variable
 ) -> sc.DataArray:
     out = da.copy(deep=False)
     out.coords['sample_position'] = sample_position
@@ -57,9 +51,7 @@ def _convert_to_tof(da: sc.DataArray) -> sc.DataArray:
 
 
 def _preprocess_data(
-    da: sc.DataArray,
-    sample_position: sc.Variable,
-    source_position: sc.Variable,
+    da: sc.DataArray, sample_position: sc.Variable, source_position: sc.Variable
 ) -> sc.DataArray:
     out = _patch_data(
         da=da, sample_position=sample_position, source_position=source_position
@@ -73,11 +65,7 @@ def _merge_events(a, b):
     return a.bins.concatenate(b)
 
 
-def _merge_runs(
-    data_groups: Iterable[sc.DataGroup],
-    instrument_path: NexusInstrumentPath,
-    entries: Iterable[str],
-):
+def _merge_runs(data_groups: Iterable[sc.DataGroup], entries: Iterable[str]):
     # TODO: we need some additional checks that the data is compatible. For example,
     # the sample and the source positions should be the same for all runs. Also, the
     # detector geometry (pixel_shapes, lab transform) should be the same for all runs.
@@ -85,11 +73,11 @@ def _merge_runs(
     for name in entries:
         data_arrays = []
         for dg in data_groups:
-            events = dg[instrument_path][name][f'{name}_events']
+            events = dg[NEXUS_INSTRUMENT_PATH][name][f'{name}_events']
             if 'event_time_zero' in events.dims:
                 events = events.bins.concat('event_time_zero')
             data_arrays.append(events)
-        out[instrument_path][name][f'{name}_events'] = reduce(
+        out[NEXUS_INSTRUMENT_PATH][name][f'{name}_events'] = reduce(
             _merge_events, data_arrays
         )
     return out
@@ -97,13 +85,12 @@ def _merge_runs(
 
 def load_nexus(
     filelist: FileList[RunType],
-    instrument_path: NexusInstrumentPath,
-    detector_name: NexusDetectorName,
+    detector_name: NeXusDetectorName,
     incident_monitor_name: NeXusMonitorName[Incident],
     transmission_monitor_name: NeXusMonitorName[Transmission],
     transform_path: TransformationPath,
-    source_name: NexusSourceName,
-    sample_name: Optional[NexusSampleName],
+    source_name: NeXusSourceName,
+    sample_name: Optional[NeXusSampleName],
 ) -> LoadedFileContents[RunType]:
     from .data import get_path
 
@@ -118,51 +105,24 @@ def load_nexus(
         if sample_name is None:
             sample_position = sc.vector(value=[0, 0, 0], unit='m')
         else:
-            sample_position = dg[instrument_path][sample_name]['position']
-        source_position = dg[instrument_path][source_name]['position']
+            sample_position = dg[NEXUS_INSTRUMENT_PATH][sample_name]['position']
+        source_position = dg[NEXUS_INSTRUMENT_PATH][source_name]['position']
 
         for name in data_entries:
             data = _preprocess_data(
-                dg[instrument_path][name][f'{name}_events'],
+                dg[NEXUS_INSTRUMENT_PATH][name][f'{name}_events'],
                 sample_position=sample_position,
                 source_position=source_position,
             )
             if name in DETECTOR_BANK_RESHAPING:
                 data = DETECTOR_BANK_RESHAPING[name](data)
 
-            dg[instrument_path][name][f'{name}_events'] = data
+            dg[NEXUS_INSTRUMENT_PATH][name][f'{name}_events'] = data
 
         data_groups.append(dg)
 
-    out = _merge_runs(
-        data_groups=data_groups, instrument_path=instrument_path, entries=data_entries
-    )
-
+    out = _merge_runs(data_groups=data_groups, entries=data_entries)
     return LoadedFileContents[RunType](out)
 
 
-def get_detector_data(
-    dg: LoadedFileContents[RunType],
-    detector_name: NexusDetectorName,
-    instrument_path: NexusInstrumentPath,
-) -> RawData[RunType]:
-    da = dg[instrument_path][detector_name][f'{detector_name}_events']
-    return RawData[RunType](da)
-
-
-def get_monitor_data(
-    dg: LoadedFileContents[RunType],
-    monitor_name: NeXusMonitorName[MonitorType],
-    instrument_path: NexusInstrumentPath,
-) -> RawMonitor[RunType, MonitorType]:
-    mon_dg = dg[instrument_path][monitor_name]
-    out = mon_dg[f'{monitor_name}_events']
-    out.coords['position'] = mon_dg['position']
-    return RawMonitor[RunType, MonitorType](out)
-
-
-providers = (
-    get_detector_data,
-    get_monitor_data,
-    load_nexus,
-)
+providers = (load_nexus,)
