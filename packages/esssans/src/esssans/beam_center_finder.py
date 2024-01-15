@@ -86,11 +86,18 @@ def beam_center_from_center_of_mass(
         The beam center position as a vector.
     """
 
-    # TODO: the flattening is required for the selection with a boolean mask to work.
-    # We could avoid the copy made here by working with the underlying numpy arrays.
-    data = data.flatten(dims=data.coords['position'].dims, to=uuid.uuid4().hex)
-    pos = data.coords['position']
-    summed = data.bins.sum()
+    dims_to_sum = set(data.dims) - set(data.coords['position'].dims)
+    if dims_to_sum:
+        summed = data.sum(dims_to_sum)
+    else:
+        summed = data.bins.sum()
+    if summed.ndim > 1:
+        # TODO: the flattening is required for the selection with a boolean mask to
+        # work. We could avoid the copy made here by working with the underlying numpy
+        # arrays.
+        summed = summed.flatten(to=uuid.uuid4().hex)
+
+    pos = summed.coords['position']
     v = sc.values(summed)
     mask = concepts.irreducible_mask(summed, dim=None)
     if mask is None:
@@ -112,13 +119,13 @@ def beam_center_from_center_of_mass(
     com = sc.sum(pos * v) / v.sum()
 
     # We compute the shift between the incident beam direction and the center-of-mass
-    incident_beam = data.transform_coords('incident_beam', graph=graph).coords[
+    incident_beam = summed.transform_coords('incident_beam', graph=graph).coords[
         'incident_beam'
     ]
     n_beam = incident_beam / sc.norm(incident_beam)
     com_shift = com - sc.dot(com, n_beam) * n_beam
     xy = [com_shift.fields.x.value, com_shift.fields.y.value]
-    return _offsets_to_vector(data=data, xy=xy, graph=graph)
+    return _offsets_to_vector(data=summed, xy=xy, graph=graph)
 
 
 def _offsets_to_vector(data: sc.DataArray, xy: List[float], graph: dict) -> sc.Variable:
