@@ -2,14 +2,13 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 from typing import Callable, List
 
-import numpy as np
 import sciline
 import scipp as sc
 from loki_common import make_params
 
 import esssans as sans
-from esssans.types import DimsToKeep, QBins
 from esssans.direct_beam import get_I0
+from esssans.types import DimsToKeep, QBins
 
 
 def loki_providers() -> List[Callable]:

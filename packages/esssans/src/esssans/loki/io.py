@@ -24,7 +24,8 @@ from ..types import (
     TransformationPath,
     Transmission,
 )
-from .general import NEXUS_INSTRUMENT_PATH, default_parameters as params
+from .general import NEXUS_INSTRUMENT_PATH
+from .general import default_parameters as params
 
 DETECTOR_BANK_RESHAPING = {
     params[NeXusDetectorName]: lambda x: x.fold(
