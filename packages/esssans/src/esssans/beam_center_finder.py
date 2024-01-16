@@ -174,7 +174,6 @@ def _iofq_in_quadrants(
         detector_to_wavelength,
         solid_angle,
         calibrate_positions,
-        _clean_masked_provider,
     ]
     params = {}
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
