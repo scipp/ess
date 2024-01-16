@@ -4,10 +4,12 @@
 """
 from typing import NewType
 
+import sciline
 import scipp as sc
 import scippneutron as scn
 
-from ..types import DirectBeam, DirectBeamFilename
+from ..common import gravity_vector
+from ..types import DirectBeam, DirectBeamFilename, LoadedFileContents, RunType
 
 IDFFilename = NewType('IDFFilename', str)
 PixelMaskFilename = NewType('PixelMaskFilename', str)
@@ -30,3 +32,18 @@ def load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
     da = dg['data']
     del da.coords['spectrum']
     return DirectBeam(da)
+
+
+class Filename(sciline.Scope[RunType, str], str):
+    """Filename of a run"""
+
+
+# It would be nice if we could use the generic run-merging facility,
+# but this does not work directly since we need to rely on a different loader.
+# Could we use a param table for the filenames, apply the loader to each,
+# and then merge?
+def load_run(filename: Filename[RunType]) -> LoadedFileContents[RunType]:
+    dg = scn.load_with_mantid(filename=filename, mantid_args={'LoadMonitors': True})
+    # TODO Is this correct for ISIS? Can we get it from the workspace?
+    dg['data'].coords['gravity'] = gravity_vector()
+    return LoadedFileContents[RunType](dg)

@@ -4,20 +4,24 @@
 
 from .mantid_io import (
     DirectBeamFilename,
+    Filename,
     IDFFilename,
     PixelMask,
     PixelMaskFilename,
     load_direct_beam,
     load_pixel_mask,
+    load_run,
 )
 
-providers = [load_direct_beam, load_pixel_mask]
+providers = [load_direct_beam, load_run, load_pixel_mask]
 
 __all__ = [
     'DirectBeamFilename',
+    'Filename',
     'IDFFilename',
     'PixelMask',
     'PixelMaskFilename',
     'load_direct_beam',
     'load_pixel_mask',
+    'load_run',
 ]
