@@ -53,9 +53,11 @@ def load_pixel_mask(
         # This is a hack to get the correct spectrum numbers. It would be better
         # to use the `RefWorkspace` argument to `LoadMask`, but this would require
         # exposing the underlying Mantid workspaces in the Sciline graph.
-        mask.coords['spectrum'] = detector_info['spectrum'].rename_dims(
-            detector='spectrum'
-        ) + sc.index(9, dtype='int32')
+        first_non_monitor_spectrum = sc.index(9, dtype='int32')
+        mask.coords['spectrum'] = (
+            detector_info['spectrum'].rename_dims(detector='spectrum')
+            + first_non_monitor_spectrum
+        )
         mask = sc.sort(mask, 'spectrum')
     return PixelMask(mask)
 
@@ -83,10 +85,6 @@ def _get_idf_path(ws) -> str:
     return path
 
 
-# It would be nice if we could use the generic run-merging facility,
-# but this does not work directly since we need to rely on a different loader.
-# Could we use a param table for the filenames, apply the loader to each,
-# and then merge?
 def load_run(filename: Filename[RunType]) -> LoadedFileContents[RunType]:
     with scn.mantid.run_mantid_alg('Load', str(filename), LoadMonitors=True) as loaded:
         data_ws = loaded.OutputWorkspace
