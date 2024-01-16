@@ -92,9 +92,6 @@ def beam_center_from_center_of_mass(
     else:
         summed = data.bins.sum()
     if summed.ndim > 1:
-        # TODO: the flattening is required for the selection with a boolean mask to
-        # work. We could avoid the copy made here by working with the underlying numpy
-        # arrays.
         summed = summed.flatten(to=uuid.uuid4().hex)
 
     pos = summed.coords['position']
