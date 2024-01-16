@@ -5,11 +5,17 @@ from typing import Callable, List
 import sciline
 import scipp as sc
 from common import make_params
+from scipp.scipy.interpolate import interp1d
 
 import esssans as sans
-from esssans.direct_beam import get_I0
 from esssans.loki.data import get_path
 from esssans.types import DimsToKeep, QBins
+
+
+def _get_I0(qbins: sc.Variable) -> sc.Variable:
+    Iq_theory = sc.io.load_hdf5(get_path('PolyGauss_I0-50_Rg-60.h5'))
+    f = interp1d(Iq_theory, 'Q')
+    return f(sc.midpoints(qbins)).data[0]
 
 
 def loki_providers() -> List[Callable]:
@@ -21,9 +27,7 @@ def test_can_compute_direct_beam_for_all_pixels():
     params = make_params(n_wavelength_bands=n_wavelength_bands)
     providers = loki_providers()
     pipeline = sciline.Pipeline(providers, params=params)
-    I0 = get_I0(
-        filename=get_path('PolyGauss_I0-50_Rg-60.txt'), q=sc.midpoints(params[QBins])[0]
-    )
+    I0 = _get_I0(qbins=params[QBins])
 
     results = sans.direct_beam(pipeline=pipeline, I0=I0, niter=4)
     iofq_full = results[-1]['iofq_full']
@@ -42,9 +46,7 @@ def test_can_compute_direct_beam_per_layer():
     params[DimsToKeep] = ['layer']
     providers = loki_providers()
     pipeline = sciline.Pipeline(providers, params=params)
-    I0 = get_I0(
-        filename=get_path('PolyGauss_I0-50_Rg-60.txt'), q=sc.midpoints(params[QBins])[0]
-    )
+    I0 = _get_I0(qbins=params[QBins])
 
     results = sans.direct_beam(pipeline=pipeline, I0=I0, niter=4)
     iofq_full = results[-1]['iofq_full']

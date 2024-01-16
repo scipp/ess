@@ -10,36 +10,6 @@ from sciline import Pipeline
 from .types import BackgroundSubtractedIofQ, DirectBeam, WavelengthBands
 
 
-def get_I0(filename: str, q: sc.Variable) -> sc.Variable:
-    """
-    Get the intensity of the I(Q) for the known sample at a specified Q value from a
-    reference file.
-
-    Parameters
-    ----------
-    filename:
-        The name of the reference file.
-    q:
-        The Q value at which to compute the intensity.
-
-    Returns
-    -------
-    :
-        The interpolated intensity of the I(Q) for the requested Q value.
-
-    """
-    data = np.loadtxt(filename)
-    qcoord = sc.array(dims=["Q"], values=data[:, 0], unit='1/angstrom')
-    theory = sc.DataArray(
-        data=sc.array(dims=["Q"], values=data[:, 1], unit=''), coords={"Q": qcoord}
-    )
-    ind = np.argmax((qcoord > q).values)
-    I0 = (theory.data[ind] - theory.data[ind - 1]) / (qcoord[ind] - qcoord[ind - 1]) * (
-        q - qcoord[ind - 1]
-    ) + theory.data[ind - 1]
-    return I0
-
-
 def _compute_efficiency_correction(
     iofq_full: sc.DataArray,
     iofq_bands: sc.DataArray,

@@ -22,7 +22,7 @@ _registry = Registry(
         # Sample transmission run (sample + sample holder/can + transmission monitor)
         '60394-2022-02-28_2215.nxs': 'md5:c40f38a62337d86957af925296c4c615',
         # Analytical model for the I(Q) of the Poly-Gauss sample
-        'PolyGauss_I0-50_Rg-60.txt': 'md5:389ee172a139c06d062c26b5340ae9ce',
+        'PolyGauss_I0-50_Rg-60.h5': 'md5:f5d60d9c2286cb197b8cd4dc82db3d7e',
     },
     version='2',
 )
