@@ -28,6 +28,15 @@ DetectorTubeEdgeMask = NewType('DetectorTubeEdgeMask', sc.Variable)
 def detector_straw_mask(
     sample_straws: RawData[SampleRun],
 ) -> DetectorLowCountsStrawMask:
+    """
+    This mask aims to remove straws with low counts. It is based on the assumption
+    that the integrated counts in a straw should be at least greater than the number of
+    pixels in the straw (within a fudge factor of 0.5).
+    This is not true for straws that are not hit by the beam.
+    Because the straws are horizontal, this mask will typically mask straws that are
+    at the top and bottom edges of the detector panel.
+    Note that this has only been tested on the main rear detector panel.
+    """
     return DetectorLowCountsStrawMask(
         sample_straws.sum('pixel').data
         < sc.scalar(sample_straws.sizes['pixel'] * 0.5, unit='counts')
@@ -39,6 +48,13 @@ def detector_beam_stop_mask(
     beam_stop_position: BeamStopPosition,
     beam_stop_radius: BeamStopRadius,
 ) -> DetectorBeamStopMask:
+    """
+    This mask aims to remove the beam stop. It masks a circular region around the beam.
+    Usually, at this point in the workflow, the position of the beam is not accurately
+    know (the beam center finder has not been called yet, because it requires masked
+    data as an input). Therefore, only a rough estimate of the beam position is used.
+    Note that this has only been tested on the main rear detector panel.
+    """
     pos = sample_straws.coords['position'] - beam_stop_position
     pos.fields.z *= 0.0
     return DetectorBeamStopMask((sc.norm(pos) < beam_stop_radius))
@@ -47,6 +63,15 @@ def detector_beam_stop_mask(
 def detector_tube_edge_mask(
     sample_straws: RawData[SampleRun],
 ) -> DetectorTubeEdgeMask:
+    """
+    This mask aims to remove the left and right edges of the detector panel.
+    Those areas typically have low counts. This mask is based on the assumption
+    that the counts integrated inside a vertical slab (summed over the ``straw`` and
+    ``layer`` dimensions) should be at least greater that the number of pixels that
+    make up the slab (within a fudge factor of 0.5).
+    This is not true for slabs that are not hit by the beam.
+    Note that this has only been tested on the main rear detector panel.
+    """
     other_dims = set(sample_straws.dims) - {'pixel'}
     size = np.prod([sample_straws.sizes[dim] for dim in other_dims])
     return DetectorTubeEdgeMask(
