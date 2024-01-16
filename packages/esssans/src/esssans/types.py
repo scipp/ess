@@ -196,12 +196,6 @@ class NormWavelengthTerm(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Normalization term (numerator) for IofQ before scaling with solid-angle."""
 
 
-class CleanMasked(
-    sciline.ScopeTwoParams[RunType, IofQPart, sc.DataArray], sc.DataArray
-):
-    """Data with calibrated pixel positions and pixel-specific masks applied"""
-
-
 class CleanWavelength(
     sciline.ScopeTwoParams[RunType, IofQPart, sc.DataArray], sc.DataArray
 ):

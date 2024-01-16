@@ -21,34 +21,17 @@ from .logging import get_logger
 from .normalization import iofq_denominator, normalize, solid_angle
 from .types import (
     BeamCenter,
-    CalibratedMaskedData,
-    CleanMasked,
     DetectorPixelShape,
     IofQ,
     LabFrameTransform,
     MaskedData,
     NormWavelengthTerm,
-    Numerator,
     QBins,
     SampleRun,
     UncertaintyBroadcastMode,
     WavelengthBands,
     WavelengthBins,
 )
-
-
-def _clean_masked_provider(
-    da: CalibratedMaskedData[SampleRun],
-) -> CleanMasked[SampleRun, Numerator]:
-    """
-    This provider is used to replace a step in the main I(Q) pipeline that would mask
-    some detector pixels after the calibration from the beam center finder has been
-    applied.
-
-    Here, we are only interested in the beam center, and not the remainder of the
-    pipeline, so we simply return the input data.
-    """
-    return CleanMasked[SampleRun, Numerator](da)
 
 
 def _xy_extrema(pos: sc.Variable) -> sc.Variable:
