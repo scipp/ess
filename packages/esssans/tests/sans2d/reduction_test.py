@@ -242,13 +242,11 @@ def test_beam_center_finder_works_with_pixel_dependent_direct_beam():
         .copy()
     )
 
-    del params[DirectBeamFilename]
-    params[DirectBeam] = direct_beam
-    # Hack to remove direct-beam provider, until Sciline API improved
-    providers = list(sans.providers + sans.sans2d.providers[1:])
+    providers = list(sans.providers + sans.sans2d.providers)
     providers.remove(sans.beam_center_finder.beam_center_from_center_of_mass)
     providers.append(sans.beam_center_finder.beam_center_from_iofq)
     pipeline = sciline.Pipeline(providers, params=params)
+    pipeline[DirectBeam] = direct_beam
 
     center = pipeline.compute(BeamCenter)
     assert sc.identical(center, center_pixel_independent_direct_beam)

@@ -4,7 +4,7 @@ from typing import Callable, List
 
 import sciline
 import scipp as sc
-from loki_common import make_params
+from common import make_params
 
 import esssans as sans
 from esssans.direct_beam import get_I0
@@ -21,7 +21,9 @@ def test_can_compute_direct_beam_for_all_pixels():
     params = make_params(n_wavelength_bands=n_wavelength_bands)
     providers = loki_providers()
     pipeline = sciline.Pipeline(providers, params=params)
-    I0 = get_I0(filename='PolyGauss_I0-50_Rg-60.txt', q=sc.midpoints(params[QBins])[0])
+    I0 = get_I0(
+        filename=get_path('PolyGauss_I0-50_Rg-60.txt'), q=sc.midpoints(params[QBins])[0]
+    )
 
     results = sans.direct_beam(pipeline=pipeline, I0=I0, niter=4)
     iofq_full = results[-1]['iofq_full']

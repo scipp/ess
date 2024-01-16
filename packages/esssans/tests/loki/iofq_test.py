@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 import sciline
 import scipp as sc
-from loki_common import make_params
+from common import make_params
 
 import esssans as sans
 from esssans.types import (
