@@ -8,6 +8,7 @@ from loki_common import make_params
 
 import esssans as sans
 from esssans.direct_beam import get_I0
+from esssans.loki.data import get_path
 from esssans.types import DimsToKeep, QBins
 
 
@@ -39,7 +40,9 @@ def test_can_compute_direct_beam_per_layer():
     params[DimsToKeep] = ['layer']
     providers = loki_providers()
     pipeline = sciline.Pipeline(providers, params=params)
-    I0 = get_I0(filename='PolyGauss_I0-50_Rg-60.txt', q=sc.midpoints(params[QBins])[0])
+    I0 = get_I0(
+        filename=get_path('PolyGauss_I0-50_Rg-60.txt'), q=sc.midpoints(params[QBins])[0]
+    )
 
     results = sans.direct_beam(pipeline=pipeline, I0=I0, niter=4)
     iofq_full = results[-1]['iofq_full']

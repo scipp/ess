@@ -28,15 +28,11 @@ def get_I0(filename: str, q: sc.Variable) -> sc.Variable:
         The interpolated intensity of the I(Q) for the requested Q value.
 
     """
-    from .loki.data import get_path
-
-    data = np.loadtxt(get_path(filename))
-
+    data = np.loadtxt(filename)
     qcoord = sc.array(dims=["Q"], values=data[:, 0], unit='1/angstrom')
     theory = sc.DataArray(
         data=sc.array(dims=["Q"], values=data[:, 1], unit=''), coords={"Q": qcoord}
     )
-
     ind = np.argmax((qcoord > q).values)
     I0 = (theory.data[ind] - theory.data[ind - 1]) / (qcoord[ind] - qcoord[ind - 1]) * (
         q - qcoord[ind - 1]
@@ -67,7 +63,7 @@ def _compute_efficiency_correction(
         The intensity of the I(Q) for the known sample at the lowest Q value.
     """
     invalid = (iofq_bands.data <= sc.scalar(0.0)) | ~sc.isfinite(iofq_bands.data)
-    data = np.where(invalid.values, np.nan, (iofq_bands.data / iofq_full).values)
+    data = np.where(invalid.values, np.nan, (iofq_bands.data / iofq_full.data).values)
     eff = np.nanmedian(data, axis=iofq_bands.dims.index('Q'))
 
     dims = set(iofq_bands.dims) - {'Q'}
