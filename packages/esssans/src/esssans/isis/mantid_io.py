@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 """
+File loading function for ISIS data, using Mantid.
 """
 from typing import NewType
 
@@ -44,6 +45,7 @@ class Filename(sciline.Scope[RunType, str], str):
 # and then merge?
 def load_run(filename: Filename[RunType]) -> LoadedFileContents[RunType]:
     dg = scn.load_with_mantid(filename=filename, mantid_args={'LoadMonitors': True})
+    dg['data'] = dg['data'].squeeze()
     # TODO Is this correct for ISIS? Can we get it from the workspace?
     dg['data'].coords['gravity'] = gravity_vector()
     return LoadedFileContents[RunType](dg)
