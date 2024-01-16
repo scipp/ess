@@ -36,12 +36,11 @@ def _compute_efficiency_correction(
     data = np.where(invalid.values, np.nan, (iofq_bands.data / iofq_full.data).values)
     eff = np.nanmedian(data, axis=iofq_bands.dims.index('Q'))
 
-    dims = set(iofq_bands.dims) - {'Q'}
-    dims.remove(wavelength_band_dim)
-    dims.add('wavelength')
-
     scaling = sc.values(iofq_full['Q', 0].data) / I0
-    return sc.array(dims=dims, values=eff) * scaling
+    # Note: do not use a `set` here because the order of dimensions is important
+    dims = [dim for dim in iofq_bands.dims if dim != 'Q']
+    out = sc.array(dims=dims, values=eff) * scaling
+    return out.rename_dims({wavelength_band_dim: 'wavelength'})
 
 
 def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dict]:
@@ -111,7 +110,7 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
 
         if direct_beam_function is None:
             # Make a flat direct beam
-            dims = set(iofq_bands.dims) - {'Q'}
+            dims = [dim for dim in iofq_bands.dims if dim != 'Q']
             direct_beam_function = sc.DataArray(
                 data=sc.ones(sizes={dim: iofq_bands.sizes[dim] for dim in dims}),
                 coords={
