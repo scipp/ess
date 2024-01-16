@@ -11,6 +11,7 @@ from common import make_params
 import esssans as sans
 from esssans.types import (
     BackgroundSubtractedIofQ,
+    BeamCenter,
     DimsToKeep,
     UncertaintyBroadcastMode,
     WavelengthBands,
@@ -69,3 +70,11 @@ def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs():
     pipeline = sciline.Pipeline(loki_providers(), params=params)
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('Q',)
+
+
+def test_beam_center_from_center_of_mass_is_close_to_verified_result():
+    params = make_params()
+    pipeline = sciline.Pipeline(loki_providers(), params=params)
+    center = pipeline.compute(BeamCenter)
+    reference = sc.vector([-0.0309889, -0.0168854, 0], unit='m')
+    assert sc.allclose(center, reference)
