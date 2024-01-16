@@ -10,8 +10,4 @@ from .masking import providers as masking_providers
 
 providers = general_providers + io_providers + masking_providers
 
-__all__ = [
-    'LowCountThreshold',
-    'providers',
-    'default_parameters',
-]
+__all__ = ['LowCountThreshold', 'providers', 'default_parameters']

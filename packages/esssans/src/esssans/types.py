@@ -16,11 +16,13 @@ import scipp as sc
 
 # 1.1  Run types
 BackgroundRun = NewType('BackgroundRun', int)
-"""Background run"""
+"""Background run: the run with only the solvent which the sample is placed in."""
 EmptyBeamRun = NewType('EmptyBeamRun', int)
-"""Run where the sample holder was empty (sometimes called 'direct run')"""
+"""Run (sometimes called 'direct run') where the sample holder was empty.
+It is used for reading the data from the transmission monitor."""
 SampleRun = NewType('SampleRun', int)
-"""Sample run"""
+"""Sample run: the run with the sample placed in the solvent inside the sample holder.
+"""
 
 RunType = TypeVar(
     'RunType',
