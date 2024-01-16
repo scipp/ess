@@ -9,6 +9,6 @@ dask
 graphviz
 plopp
 pythreejs
-sciline>=24.01.0
+sciline>=24.1.0
 scipp>=23.11.1
 scippneutron>=23.9.0
