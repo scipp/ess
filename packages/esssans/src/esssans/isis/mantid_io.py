@@ -8,8 +8,8 @@ from typing import NewType
 import sciline
 import scipp as sc
 import scippneutron as scn
+from scipp.constants import g
 
-from ..common import gravity_vector
 from ..types import (
     DirectBeam,
     DirectBeamFilename,
@@ -93,9 +93,9 @@ def load_run(filename: Filename[RunType]) -> LoadedFileContents[RunType]:
         dg = scn.from_mantid(data_ws)
         det_info = scn.mantid.make_detector_info(data_ws, 'spectrum')
         idf = _get_idf_path(data_ws)
+        up = data_ws.getInstrument().getReferenceFrame().vecPointingUp()
     dg['detector_info'] = sc.DataGroup(det_info.coords)
     dg['idf_filename'] = idf
     dg['data'] = dg['data'].squeeze()
-    # TODO Is this correct for ISIS? Can we get it from the workspace?
-    dg['data'].coords['gravity'] = gravity_vector()
+    dg['data'].coords['gravity'] = sc.vector(value=-up) * g
     return LoadedFileContents[RunType](dg)
