@@ -9,7 +9,17 @@ try:
 except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
-from . import beam_center_finder, common, conversions, i_of_q, io, normalization, sans2d
+from . import (
+    beam_center_finder,
+    common,
+    conversions,
+    i_of_q,
+    io,
+    loki,
+    normalization,
+    sans2d,
+)
+from .direct_beam import direct_beam
 
 providers = (
     *conversions.providers,
@@ -28,3 +38,16 @@ to setup a complete workflow.
 """
 
 del importlib
+
+__all__ = [
+    'beam_center_finder',
+    'common',
+    'conversions',
+    'direct_beam',
+    'i_of_q',
+    'io',
+    'loki',
+    'normalization',
+    'providers',
+    'sans2d',
+]

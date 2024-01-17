@@ -42,8 +42,6 @@ idna==3.6
     # via requests
 importlib-metadata==7.0.1
     # via dask
-importlib-resources==6.1.1
-    # via matplotlib
 ipydatawidgets==4.3.5
     # via pythreejs
 ipython==8.18.1
@@ -145,8 +143,6 @@ traitlets==5.14.1
     #   traittypes
 traittypes==0.2.1
     # via ipydatawidgets
-typing-extensions==4.9.0
-    # via ipython
 urllib3==2.1.0
     # via requests
 wcwidth==0.2.12
@@ -154,6 +150,4 @@ wcwidth==0.2.12
 widgetsnbextension==4.0.9
     # via ipywidgets
 zipp==3.17.0
-    # via
-    #   importlib-metadata
-    #   importlib-resources
+    # via importlib-metadata

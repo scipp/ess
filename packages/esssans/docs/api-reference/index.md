@@ -34,9 +34,11 @@
    conversions
    normalization
    data
+   direct_beam
    i_of_q
    io
    logging
+   loki
    sans2d
    types
    uncertainty

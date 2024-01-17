@@ -6,7 +6,7 @@ import pytest
 import scipp as sc
 
 from esssans import normalization
-from esssans.data import get_path
+from esssans.sans2d.data import get_path
 
 # See https://github.com/mantidproject/mantid/blob/main/instrument/SANS2D_Definition_Tubes.xml  # noqa: E501
 _SANS2D_PIXEL_RADIUS = 0.00405 * sc.Unit('m')

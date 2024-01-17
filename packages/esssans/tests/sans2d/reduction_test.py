@@ -2,11 +2,13 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 from typing import Callable, List
 
+import numpy as np
 import pytest
 import sciline
 import scipp as sc
 
 import esssans as sans
+from esssans.sans2d import default_parameters
 from esssans.types import (
     BackgroundRun,
     BackgroundSubtractedIofQ,
@@ -14,17 +16,14 @@ from esssans.types import (
     CorrectForGravity,
     DirectBeam,
     DirectBeamFilename,
-    DirectRun,
-    Filename,
-    Incident,
+    EmptyBeamRun,
+    FileList,
     IofQ,
-    NeXusMonitorName,
     NonBackgroundWavelengthRange,
     QBins,
     RawData,
     SampleRun,
     SolidAngle,
-    Transmission,
     TransmissionRun,
     UncertaintyBroadcastMode,
     WavelengthBands,
@@ -34,9 +33,7 @@ from esssans.types import (
 
 
 def make_params() -> dict:
-    params = {}
-    params[NeXusMonitorName[Incident]] = 'monitor2'
-    params[NeXusMonitorName[Transmission]] = 'monitor4'
+    params = default_parameters.copy()
     band = sc.linspace('wavelength', 2.0, 16.0, num=2, unit='angstrom')
     params[WavelengthBands] = band
     params[WavelengthBins] = sc.linspace(
@@ -55,11 +52,11 @@ def make_params() -> dict:
     params[QBins] = sc.linspace(
         dim='Q', start=0.01, stop=0.55, num=141, unit='1/angstrom'
     )
-    params[Filename[BackgroundRun]] = 'SANS2D00063159.hdf5'
-    params[Filename[TransmissionRun[BackgroundRun]]] = params[Filename[BackgroundRun]]
-    params[Filename[SampleRun]] = 'SANS2D00063114.hdf5'
-    params[Filename[TransmissionRun[SampleRun]]] = params[Filename[SampleRun]]
-    params[Filename[DirectRun]] = 'SANS2D00063091.hdf5'
+    params[FileList[BackgroundRun]] = ['SANS2D00063159.hdf5']
+    params[FileList[TransmissionRun[BackgroundRun]]] = params[FileList[BackgroundRun]]
+    params[FileList[SampleRun]] = ['SANS2D00063114.hdf5']
+    params[FileList[TransmissionRun[SampleRun]]] = params[FileList[SampleRun]]
+    params[FileList[EmptyBeamRun]] = ['SANS2D00063091.hdf5']
     params[DirectBeamFilename] = 'DIRECT_SANS2D_REAR_34327_4m_8mm_16Feb16.hdf5'
     params[NonBackgroundWavelengthRange] = sc.array(
         dims=['wavelength'], values=[0.7, 17.1], unit='angstrom'
@@ -87,6 +84,20 @@ def test_pipeline_can_compute_background_subtracted_IofQ(uncertainties):
     pipeline = sciline.Pipeline(sans2d_providers(), params=params)
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('Q',)
+
+
+def test_pipeline_can_compute_background_subtracted_IofQ_in_wavelength_slices():
+    params = make_params()
+    band = np.linspace(2.0, 16.0, num=11)
+    params[WavelengthBands] = sc.array(
+        dims=['band', 'wavelength'],
+        values=np.vstack([band[:-1], band[1:]]).T,
+        unit='angstrom',
+    )
+    pipeline = sciline.Pipeline(sans2d_providers(), params=params)
+    result = pipeline.compute(BackgroundSubtractedIofQ)
+    assert result.dims == ('band', 'Q')
+    assert result.sizes['band'] == 10
 
 
 def test_workflow_is_deterministic():
@@ -146,7 +157,7 @@ def as_dict(funcs: List[Callable[..., type]]) -> dict:
 def pixel_dependent_direct_beam(
     filename: DirectBeamFilename, shape: RawData[SampleRun]
 ) -> DirectBeam:
-    direct_beam = sans.sans2d.pooch_load_direct_beam(filename)
+    direct_beam = sans.sans2d.io.pooch_load_direct_beam(filename)
     sizes = {'spectrum': shape.sizes['spectrum'], **direct_beam.sizes}
     return DirectBeam(direct_beam.broadcast(sizes=sizes).copy())
 
@@ -231,13 +242,11 @@ def test_beam_center_finder_works_with_pixel_dependent_direct_beam():
         .copy()
     )
 
-    del params[DirectBeamFilename]
-    params[DirectBeam] = direct_beam
-    # Hack to remove direct-beam provider, until Sciline API improved
-    providers = list(sans.providers + sans.sans2d.providers[1:])
+    providers = list(sans.providers + sans.sans2d.providers)
     providers.remove(sans.beam_center_finder.beam_center_from_center_of_mass)
     providers.append(sans.beam_center_finder.beam_center_from_iofq)
     pipeline = sciline.Pipeline(providers, params=params)
+    pipeline[DirectBeam] = direct_beam
 
     center = pipeline.compute(BeamCenter)
     assert sc.identical(center, center_pixel_independent_direct_beam)

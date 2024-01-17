@@ -8,13 +8,13 @@ from scipp.core import concepts
 
 from .types import (
     CalibratedMaskedData,
-    Clean,
     CleanDirectBeam,
     CleanMonitor,
     CleanSummedQ,
+    CleanWavelength,
     Denominator,
     DetectorPixelShape,
-    DirectRun,
+    EmptyBeamRun,
     Incident,
     IofQ,
     LabFrameTransform,
@@ -124,8 +124,8 @@ def _approximate_solid_angle_for_cylinder_shaped_pixel_of_detector(
 def transmission_fraction(
     sample_incident_monitor: CleanMonitor[TransmissionRun[RunType], Incident],
     sample_transmission_monitor: CleanMonitor[TransmissionRun[RunType], Transmission],
-    direct_incident_monitor: CleanMonitor[DirectRun, Incident],
-    direct_transmission_monitor: CleanMonitor[DirectRun, Transmission],
+    direct_incident_monitor: CleanMonitor[EmptyBeamRun, Incident],
+    direct_transmission_monitor: CleanMonitor[EmptyBeamRun, Transmission],
 ) -> TransmissionFraction[RunType]:
     """
     Approximation based on equations in
@@ -221,7 +221,7 @@ def iofq_denominator(
     wavelength_term: NormWavelengthTerm[RunType],
     solid_angle: SolidAngle[RunType],
     uncertainties: UncertaintyBroadcastMode,
-) -> Clean[RunType, Denominator]:
+) -> CleanWavelength[RunType, Denominator]:
     """
     Compute the denominator term for the I(Q) normalization.
 
@@ -287,7 +287,7 @@ def iofq_denominator(
     """  # noqa: E501
     broadcast = _broadcasters[uncertainties]
     denominator = solid_angle * broadcast(wavelength_term, sizes=solid_angle.sizes)
-    return Clean[RunType, Denominator](denominator)
+    return CleanWavelength[RunType, Denominator](denominator)
 
 
 def normalize(

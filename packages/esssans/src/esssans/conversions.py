@@ -11,9 +11,9 @@ from .common import mask_range
 from .types import (
     BeamCenter,
     CalibratedMaskedData,
-    Clean,
-    CleanMasked,
     CleanQ,
+    CleanWavelength,
+    CleanWavelengthMasked,
     CorrectForGravity,
     IofQPart,
     MaskedData,
@@ -202,15 +202,15 @@ def calibrate_positions(
 def detector_to_wavelength(
     detector: CalibratedMaskedData[RunType],
     graph: ElasticCoordTransformGraph,
-) -> Clean[RunType, Numerator]:
-    return Clean[RunType, Numerator](
+) -> CleanWavelength[RunType, Numerator]:
+    return CleanWavelength[RunType, Numerator](
         detector.transform_coords('wavelength', graph=graph)
     )
 
 
 def mask_wavelength(
-    da: Clean[RunType, IofQPart], mask: Optional[WavelengthMask]
-) -> CleanMasked[RunType, IofQPart]:
+    da: CleanWavelength[RunType, IofQPart], mask: Optional[WavelengthMask]
+) -> CleanWavelengthMasked[RunType, IofQPart]:
     if mask is not None:
         # If we have binned data and the wavelength coord is multi-dimensional, we need
         # to make a single wavelength bin before we can mask the range.
@@ -219,11 +219,11 @@ def mask_wavelength(
             if (dim in da.bins.coords) and (dim in da.coords):
                 da = da.bin({dim: 1})
         da = mask_range(da, mask=mask)
-    return CleanMasked[RunType, IofQPart](da)
+    return CleanWavelengthMasked[RunType, IofQPart](da)
 
 
 def to_Q(
-    data: CleanMasked[RunType, IofQPart], graph: ElasticCoordTransformGraph
+    data: CleanWavelengthMasked[RunType, IofQPart], graph: ElasticCoordTransformGraph
 ) -> CleanQ[RunType, IofQPart]:
     """
     Convert a data array from wavelength to Q.

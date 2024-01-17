@@ -5,6 +5,7 @@ This modules defines the domain types uses in esssans.
 
 The domain types are used to define parameters and to request results from a Sciline
 pipeline."""
+from collections.abc import Sequence
 from enum import Enum
 from typing import NewType, TypeVar
 
@@ -15,13 +16,21 @@ import scipp as sc
 
 # 1.1  Run types
 BackgroundRun = NewType('BackgroundRun', int)
-"""Background run"""
-DirectRun = NewType('DirectRun', int)
-"""Direct run"""
+"""Background run: the run with only the solvent which the sample is placed in."""
+EmptyBeamRun = NewType('EmptyBeamRun', int)
+"""Run (sometimes called 'direct run') where the sample holder was empty.
+It is used for reading the data from the transmission monitor."""
 SampleRun = NewType('SampleRun', int)
-"""Sample run"""
-RunType = TypeVar('RunType', BackgroundRun, DirectRun, SampleRun)
-"""TypeVar used for specifying BackgroundRun, DirectRun or SampleRun"""
+"""Sample run: the run with the sample placed in the solvent inside the sample holder.
+"""
+
+RunType = TypeVar(
+    'RunType',
+    BackgroundRun,
+    EmptyBeamRun,
+    SampleRun,
+)
+"""TypeVar used for specifying BackgroundRun, EmptyBeamRun or SampleRun"""
 
 
 class TransmissionRun(sciline.Scope[RunType, int], int):
@@ -46,6 +55,22 @@ Denominator = NewType('Denominator', sc.DataArray)
 IofQPart = TypeVar('IofQPart', Numerator, Denominator)
 """TypeVar used for specifying Numerator or Denominator of IofQ"""
 
+# 1.4  Entry paths in NeXus files
+NeXusSampleName = NewType('NeXusSampleName', str)
+"""Name of sample entry in NeXus file"""
+
+NeXusSourceName = NewType('NeXusSourceName', str)
+"""Name of source entry in NeXus file"""
+
+NeXusDetectorName = NewType('NeXusDetectorName', str)
+"""Name of detector entry in NeXus file"""
+
+TransformationPath = NewType('TransformationPath', str)
+"""
+Name of the entry under which to store the transformation computed from the
+transformation chain, for the detectors and the monitors
+"""
+
 # 2  Workflow parameters
 
 UncertaintyBroadcastMode = Enum(
@@ -62,7 +87,20 @@ WavelengthBins = NewType('WavelengthBins', sc.Variable)
 
 WavelengthBands = NewType('WavelengthBands', sc.Variable)
 """Wavelength bands. Typically a single band, set to first and last value of
-WavelengthBins."""
+WavelengthBins.
+
+The wavelength bands can however be used to compute the scattering cross section inside
+multiple wavelength bands. In this case, the wavelength bands must be either one- or
+two-dimensional.
+
+In the case of a one-dimensional array, the values represent a set of non-overlapping
+bins in the wavelength dimension.
+
+In the case of a two-dimensional array, the values represent a set of (possibly
+overlapping or non-contiguous) wavelength bands, with the first dimension being the
+band index and the second dimension being the wavelength. For each band, there must be
+two wavelength values defining the start and end wavelength of the band.
+"""
 
 QBins = NewType('QBins', sc.Variable)
 """Q binning"""
@@ -82,6 +120,10 @@ WavelengthMask = NewType('WavelengthMask', sc.DataArray)
 CorrectForGravity = NewType('CorrectForGravity', bool)
 """Whether to correct for gravity when computing wavelength and Q."""
 
+DimsToKeep = NewType('DimsToKeep', Sequence[str])
+"""Dimensions that should not be reduced and thus still be present in the final
+I(Q) result (this is typically the layer dimension)."""
+
 OutFilename = NewType('OutFilename', str)
 """Filename of the output"""
 
@@ -90,17 +132,26 @@ class NeXusMonitorName(sciline.Scope[MonitorType, str], str):
     """Name of Incident|Transmission monitor in NeXus file"""
 
 
-class Filename(sciline.Scope[RunType, str], str):
-    """Filename of BackgroundRun|DirectRun|SampleRun"""
+class FileList(sciline.Scope[RunType, list], list):
+    """Filenames of BackgroundRun|EmptyBeamRun|SampleRun"""
 
+
+BeamStopPosition = NewType('BeamStopPosition', sc.Variable)
+"""Approximate center of the beam stop position"""
+
+BeamStopRadius = NewType('BeamStopRadius', sc.Variable)
+"""Radius of the beam stop"""
 
 # 3  Workflow (intermediate) results
 
-DetectorEdgeMask = NewType('DetectorEdgeMask', sc.Variable)
-"""Detector edge mask"""
 
-SampleHolderMask = NewType('SampleHolderMask', sc.Variable)
-"""Sample holder mask"""
+class SamplePosition(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """Sample position"""
+
+
+class SourcePosition(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """Source position"""
+
 
 DirectBeam = NewType('DirectBeam', sc.DataArray)
 """Direct beam"""
@@ -147,7 +198,9 @@ class NormWavelengthTerm(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Normalization term (numerator) for IofQ before scaling with solid-angle."""
 
 
-class Clean(sciline.ScopeTwoParams[RunType, IofQPart, sc.DataArray], sc.DataArray):
+class CleanWavelength(
+    sciline.ScopeTwoParams[RunType, IofQPart, sc.DataArray], sc.DataArray
+):
     """
     Prerequisite for IofQ numerator or denominator.
 
@@ -157,14 +210,14 @@ class Clean(sciline.ScopeTwoParams[RunType, IofQPart, sc.DataArray], sc.DataArra
     """
 
 
-class CleanMasked(
+class CleanWavelengthMasked(
     sciline.ScopeTwoParams[RunType, IofQPart, sc.DataArray], sc.DataArray
 ):
-    """Result of applying wavelength masking to :py:class:`Clean`"""
+    """Result of applying wavelength masking to :py:class:`CleanWavelength`"""
 
 
 class CleanQ(sciline.ScopeTwoParams[RunType, IofQPart, sc.DataArray], sc.DataArray):
-    """Result of converting :py:class:`CleanMasked` to Q"""
+    """Result of converting :py:class:`CleanWavelengthMasked` to Q"""
 
 
 class CleanSummedQ(
