@@ -50,8 +50,9 @@ def pooch_load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
 
 
 # TODO: Remove locking once https://github.com/scipp/scippnexus/issues/188 is resolved
-pooch_load._lock = threading.Lock()
-pooch_load_direct_beam._lock = threading.Lock()
+lock = threading.Lock()
+pooch_load._lock = lock
+pooch_load_direct_beam._lock = lock
 
 
 providers = (pooch_load_direct_beam, pooch_load)
