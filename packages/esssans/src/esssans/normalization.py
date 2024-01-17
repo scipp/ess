@@ -47,8 +47,8 @@ def solid_angle(
     Parameters
     ----------
     data:
-        The DataArray that contains the positions of the detector pixels in coords.
-        The positions must be in the sample reference frame.
+        The DataArray that contains the positions of the detector pixels
+        and the position of the sample in the coords.
 
     pixel_shape:
         Contains the description of the detector pixel shape.
@@ -70,7 +70,7 @@ def solid_angle(
     length = sc.norm(cylinder_axis)
 
     omega = _approximate_solid_angle_for_cylinder_shaped_pixel_of_detector(
-        pixel_position=data.coords['position'],
+        pixel_position=data.coords['position'] - data.coords['sample_position'],
         cylinder_axis=cylinder_axis,
         radius=radius,
         length=length,
