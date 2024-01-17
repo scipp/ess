@@ -3,6 +3,8 @@
 """
 """
 
+import threading
+
 import scipp as sc
 
 from ..common import gravity_vector
@@ -18,7 +20,8 @@ from ..types import (
 def pooch_load(filelist: FileList[RunType]) -> LoadedFileContents[RunType]:
     from .data import get_path
 
-    dg = sc.io.load_hdf5(filename=get_path(filelist[0]))
+    with pooch_load._lock:
+        dg = sc.io.load_hdf5(filename=get_path(filelist[0]))
     data = dg['data']
     if 'gravity' not in data.coords:
         data.coords["gravity"] = gravity_vector()
@@ -41,7 +44,14 @@ def pooch_load(filelist: FileList[RunType]) -> LoadedFileContents[RunType]:
 def pooch_load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
     from .data import get_path
 
-    return DirectBeam(sc.io.load_hdf5(filename=get_path(filename)))
+    with pooch_load_direct_beam._lock:
+        out = sc.io.load_hdf5(filename=get_path(filename))
+    return DirectBeam(out)
+
+
+# TODO: Remove locking once https://github.com/scipp/scippnexus/issues/188 is resolved
+pooch_load._lock = threading.Lock()
+pooch_load_direct_beam._lock = threading.Lock()
 
 
 providers = (pooch_load_direct_beam, pooch_load)
