@@ -42,7 +42,7 @@ def _make_detector_info(ws: MatrixWorkspace) -> sc.DataGroup:
     return sc.DataGroup(det_info.coords)
 
 
-def make_detector_info(ws: DataWorkspace[SampleRun]) -> DetectorIDs:
+def get_detector_ids(ws: DataWorkspace[SampleRun]) -> DetectorIDs:
     det_info = _make_detector_info(ws)
     dim = 'spectrum'
     da = sc.DataArray(det_info['detector'], coords={dim: det_info[dim]})
@@ -139,12 +139,12 @@ def load_run(filename: Filename[RunType]) -> DataWorkspace[RunType]:
 
 
 providers = (
-    get_idf_filename,
     from_data_workspace,
     from_pixel_mask_workspace,
+    get_detector_ids,
+    get_idf_filename,
+    load_calibration,
     load_direct_beam,
     load_pixel_mask,
     load_run,
-    load_calibration,
-    make_detector_info,
 )
