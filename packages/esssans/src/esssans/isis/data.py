@@ -45,12 +45,12 @@ def get_path(filename: FilenameType) -> Path[FilenameType]:
 
 def load_run(filename: Filename[RunType]) -> LoadedFileContents[RunType]:
     with load_run._lock:
-        return LoadedFileContents[RunType](sc.io.load_hdf5(f'{filename}.h5'))
+        return LoadedFileContents[RunType](sc.io.load_hdf5(filename))
 
 
 def load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
     with load_run._lock:
-        return DirectBeam(sc.io.load_hdf5(f'{filename}.h5'))
+        return DirectBeam(sc.io.load_hdf5(filename))
 
 
 load_run._lock = Lock()
