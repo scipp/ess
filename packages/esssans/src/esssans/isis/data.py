@@ -40,15 +40,23 @@ _registry = Registry(
 
 def get_path(filename: FilenameType) -> Path[FilenameType]:
     """Translate any filename to a path to the file obtained from pooch registry."""
-    return _registry.get_path(filename, unzip=filename.endswith('.zip'))
+    mapping = {
+        'Direct_Zoom_4m_8mm_100522.txt': 'Direct_Zoom_4m_8mm_100522.txt.h5',
+        'ZOOM00034786.nxs': 'ZOOM00034786.nxs.h5.zip',
+        'ZOOM00034787.nxs': 'ZOOM00034787.nxs.h5',
+    }
+    filename = mapping.get(filename, filename)
+    if filename.endswith('.zip'):
+        return _registry.get_path(filename, unzip=True)[0]
+    return _registry.get_path(filename)
 
 
-def load_run(filename: Filename[RunType]) -> LoadedFileContents[RunType]:
+def load_run(filename: Path[Filename[RunType]]) -> LoadedFileContents[RunType]:
     with load_run._lock:
         return LoadedFileContents[RunType](sc.io.load_hdf5(filename))
 
 
-def load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
+def load_direct_beam(filename: Path[DirectBeamFilename]) -> DirectBeam:
     with load_run._lock:
         return DirectBeam(sc.io.load_hdf5(filename))
 
