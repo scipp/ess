@@ -40,7 +40,7 @@ _registry = Registry(
 
 def get_path(filename: FilenameType) -> Path[FilenameType]:
     """Translate any filename to a path to the file obtained from pooch registry."""
-    return _registry.get_path(filename)
+    return _registry.get_path(filename, unzip=filename.endswith('.zip'))
 
 
 def load_run(filename: Filename[RunType]) -> LoadedFileContents[RunType]:
