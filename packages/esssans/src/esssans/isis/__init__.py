@@ -21,17 +21,25 @@ providers = (
         lab_frame_transform,
         sans2d_tube_detector_pixel_shape,
     )
+    + io.providers
     + mantidio.providers
     + masking.providers
-    + io.providers
 )
 
+del get_detector_data
+del get_monitor
+del lab_frame_transform
+del sans2d_tube_detector_pixel_shape
+
 __all__ = [
+    'CalibrationFilename',
     'Filename',
+    'io',
+    'mantidio',
+    'masking',
     'PixelMask',
     'PixelMaskFilename',
-    'CalibrationFilename',
+    'providers',
     'transmission_from_background_run',
     'transmission_from_sample_run',
-    'providers',
 ]
