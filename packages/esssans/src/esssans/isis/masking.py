@@ -1,9 +1,31 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-import sciline
+from typing import NewType
 
-from ..types import MaskedData, RawData, RunType
-from .mantidio import PixelMask
+import numpy as np
+import sciline
+import scipp as sc
+
+from ..types import MaskedData, RawData, RunType, SampleRun
+from .io import MaskedDetectorIDs
+
+PixelMask = NewType('PixelMask', sc.Variable)
+
+
+def to_pixel_mask(data: RawData[SampleRun], masked: MaskedDetectorIDs) -> PixelMask:
+    """Convert a list of masked detector IDs to a pixel mask.
+
+    Parameters
+    ----------
+    data:
+        Raw data.
+    masked:
+        The masked detector IDs.
+    """
+    ids = data.coords['detector_id']
+    mask = sc.zeros(sizes=ids.sizes, dtype='bool')
+    mask.values[np.isin(ids.values, masked.values)] = True
+    return PixelMask(mask)
 
 
 def apply_pixel_masks(
@@ -22,3 +44,9 @@ def apply_pixel_masks(
     for name, mask in masks.items():
         data.masks[name] = mask
     return MaskedData[RunType](data)
+
+
+providers = (
+    to_pixel_mask,
+    apply_pixel_masks,
+)
