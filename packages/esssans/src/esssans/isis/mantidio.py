@@ -19,8 +19,8 @@ from ..types import (
     RunType,
     SampleRun,
 )
+from .io import CalibrationFilename, Filename, Path
 
-CalibrationFilename = NewType('CalibrationFilename', str)
 CalibrationWorkspace = NewType('CalibrationWorkspace', MatrixWorkspace)
 
 
@@ -46,12 +46,12 @@ def get_detector_ids(ws: DataWorkspace[SampleRun]) -> sc.Variable:
     return da.data.rename_dims(detector='spectrum')
 
 
-def load_calibration(filename: CalibrationFilename) -> CalibrationWorkspace:
+def load_calibration(filename: Path[CalibrationFilename]) -> CalibrationWorkspace:
     ws = Load(Filename=str(filename), StoreInADS=False)
     return CalibrationWorkspace(ws)
 
 
-def load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
+def load_direct_beam(filename: Path[DirectBeamFilename]) -> DirectBeam:
     dg = scn.load_with_mantid(
         filename=filename,
         mantid_alg="LoadRKH",
@@ -60,10 +60,6 @@ def load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
     da = dg['data']
     del da.coords['spectrum']
     return DirectBeam(da)
-
-
-class Filename(sciline.Scope[RunType, str], str):
-    """Filename of a run"""
 
 
 def from_data_workspace(
@@ -81,7 +77,7 @@ def from_data_workspace(
     return LoadedFileContents[RunType](dg)
 
 
-def load_run(filename: Filename[RunType]) -> DataWorkspace[RunType]:
+def load_run(filename: Path[Filename[RunType]]) -> DataWorkspace[RunType]:
     loaded = Load(Filename=str(filename), LoadMonitors=True, StoreInADS=False)
     if isinstance(loaded, Workspace):
         # A single workspace

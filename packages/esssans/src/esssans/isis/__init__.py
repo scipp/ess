@@ -8,10 +8,9 @@ from ..sans2d.general import (
     lab_frame_transform,
     sans2d_tube_detector_pixel_shape,
 )
-from . import io, mantidio, masking
+from . import io, masking
 from .common import transmission_from_background_run, transmission_from_sample_run
-from .io import PixelMaskFilename
-from .mantidio import CalibrationFilename, Filename
+from .io import CalibrationFilename, DataFolder, Filename, PixelMaskFilename
 from .masking import PixelMask
 
 providers = (
@@ -22,7 +21,6 @@ providers = (
         sans2d_tube_detector_pixel_shape,
     )
     + io.providers
-    + mantidio.providers
     + masking.providers
 )
 
@@ -33,9 +31,9 @@ del sans2d_tube_detector_pixel_shape
 
 __all__ = [
     'CalibrationFilename',
+    'DataFolder',
     'Filename',
     'io',
-    'mantidio',
     'masking',
     'PixelMask',
     'PixelMaskFilename',

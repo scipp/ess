@@ -3,18 +3,39 @@
 """
 File loading functions for ISIS data, NOT using Mantid.
 """
-from typing import NewType
+from typing import NewType, TypeVar
 
+import sciline
 import scipp as sc
 
+from ..types import RunType
+
 PixelMaskFilename = NewType('PixelMaskFilename', str)
+CalibrationFilename = NewType('CalibrationFilename', str)
+
+FilenameType = TypeVar('FilenameType', bound=str)
+
+
+DataFolder = NewType('DataFolder', str)
+
+
+class Path(sciline.Scope[FilenameType, str], str):
+    """Path to a file"""
+
+
+class Filename(sciline.Scope[RunType, str], str):
+    """Filename of a run"""
 
 
 MaskedDetectorIDs = NewType('MaskedDetectorIDs', sc.Variable)
 """1-D variable listing all masked detector IDs."""
 
 
-def read_xml_detector_masking(filename: PixelMaskFilename) -> MaskedDetectorIDs:
+def to_path(filename: FilenameType, path: DataFolder) -> Path[FilenameType]:
+    return f'{path}/{filename}'
+
+
+def read_xml_detector_masking(filename: Path[PixelMaskFilename]) -> MaskedDetectorIDs:
     """Read a pixel mask from an XML file.
 
     The format is as follows, where the detids are inclusive ranges of detector IDs:
@@ -52,4 +73,4 @@ def read_xml_detector_masking(filename: PixelMaskFilename) -> MaskedDetectorIDs:
     )
 
 
-providers = (read_xml_detector_masking,)
+providers = (read_xml_detector_masking, to_path)
