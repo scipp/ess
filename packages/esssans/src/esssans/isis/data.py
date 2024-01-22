@@ -13,7 +13,7 @@ from .io import Filename, FilenameType, Path
 _registry = Registry(
     instrument='zoom',
     files={
-        # Sample run (sample and sample holder/can)
+        # Sample run (sample and sample holder/can) with applied 192tubeCalibration_11-02-2019_r5_10lines.nxs  # noqa: E501
         'ZOOM00034786.nxs.h5.zip': 'md5:b27e56358151ba3eed18b9857932eee8',
         # Empty beam run (no sample and no sample holder/can) - Scipp-hdf5 format
         'ZOOM00034787.nxs.h5': 'md5:8b1e1842c8efc473de0cce756016cac2',
