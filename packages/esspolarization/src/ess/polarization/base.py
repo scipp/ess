@@ -313,6 +313,7 @@ def he3_opacity_from_cell_params(
     """
     # TODO Is this the correct unit?
     factor_from_he3_number_density = 0.07733 * sc.Unit('1/N')
+    # TODO What unit scale should we use?
     opacity0 = factor_from_he3_number_density * pressure * cell_length
     return He3OpacityFunction[Cell](OpacityFunction(opacity0))
 
