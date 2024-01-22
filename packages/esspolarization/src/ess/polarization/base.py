@@ -52,8 +52,8 @@ class He3FillingTime(sl.Scope[Cell, sc.Variable], sc.Variable):
     """Filling wall-clock time for a given cell."""
 
 
-class He3Opacity(sl.Scope[Cell, sc.DataArray], sc.DataArray):
-    """Wavelength-dependent opacity for a given cell."""
+class He3OpacityFunction(sl.Scope[Cell, sc.DataArray], sc.DataArray):
+    """Wavelength-dependent opacity function for a given cell."""
 
 
 class He3TransmissionEmptyGlass(sl.Scope[Cell, sc.DataArray], sc.DataArray):
@@ -287,40 +287,66 @@ def direct_beam_with_cell(
     )
 
 
+class OpacityFunction:
+    """Wavelength-dependent opacity function."""
+
+    def __init__(self, opacity0: sc.Variable):
+        self._opacity0 = opacity0
+
+    @property
+    def opacity0(self) -> sc.Variable:
+        return self._opacity0
+
+    def __call__(self, wavelength: sc.Variable) -> sc.Variable:
+        return (self.opacity0 * wavelength).to(unit='')
+
+
 def he3_opacity_from_cell_params(
     pressure: He3CellPressure[Cell],
     cell_length: He3CellLength[Cell],
-    wavelength: WavelengthBins,
-) -> He3Opacity[Cell]:
+) -> He3OpacityFunction[Cell]:
     """
-    Opacity for a given cell, based on pressure and cell length.
+    Opacity function for a given cell, based on pressure and cell length.
 
-    Note that this can alternatively be computed from neutron beam data, see
+    Note that this can alternatively be defined via neutron beam data, see
     :py:func:`he3_opacity_from_beam_data`.
     """
-    # TODO What is this magic number?
-    return He3Opacity[Cell](0.07733 * pressure * cell_length * wavelength)
+    # TODO Is this the correct unit?
+    factor_from_he3_number_density = 0.07733 * sc.Unit('1/N')
+    opacity0 = factor_from_he3_number_density * pressure * cell_length
+    return He3OpacityFunction[Cell](OpacityFunction(opacity0))
 
 
 def he3_opacity_from_beam_data(
     transmission_empty_glass: He3TransmissionEmptyGlass[Cell],
     direct_beam: DirectBeamNoCell,
     direct_beam_cell: He3DirectBeam[Cell, Depolarized],
-) -> He3Opacity[Cell]:
+) -> He3OpacityFunction[Cell]:
     """
-    Opacity for a given cell, based on direct beam data.
+    Opacity function for a given cell, based on direct beam data.
 
-    Note that this can alternatively be computed from cell parameters, see
+    Note that this can alternatively be defined via cell parameters, see
     :py:func:`he3_opacity_from_cell_params`.
     """
-    raise NotImplementedError()
-    return He3Opacity[Cell]()
+
+    def intensity(wavelength: sc.Variable, opacity0: sc.Variable) -> sc.Variable:
+        opacity = OpacityFunction(opacity0)
+        return transmission_empty_glass * sc.exp(-opacity(wavelength))
+
+    popt, _ = sc.curve_fit(
+        ['wavelength'],
+        intensity,
+        direct_beam_cell / direct_beam,
+        # TODO We could use opacity0 from cell parameters as initial guess.
+        p0={'opacity0': sc.scalar(1.0, unit='1/nm')},
+    )
+    return He3OpacityFunction[Cell](OpacityFunction(sc.values(popt['opacity0'].data)))
 
 
 def he3_polarization(
     direct_beam_no_cell: DirectBeamNoCell,
     direct_beam_polarized: He3DirectBeam[Cell, Polarized],
-    opacity: He3Opacity[Cell],
+    opacity: He3OpacityFunction[Cell],
     filling_time: He3FillingTime[Cell],
     transmission_empty_glass: He3TransmissionEmptyGlass[Cell],
 ) -> He3Polarization[Cell]:
@@ -339,7 +365,7 @@ def he3_polarization(
 
 
 def he3_transmission(
-    opacity: He3Opacity[Cell],
+    opacity: He3OpacityFunction[Cell],
     polarization: He3Polarization[Cell],
     transmission_empty_glass: He3TransmissionEmptyGlass[Cell],
 ) -> He3Transmission[Cell]:
