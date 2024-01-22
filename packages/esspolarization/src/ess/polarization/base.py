@@ -298,7 +298,7 @@ class OpacityFunction:
         return self._opacity0
 
     def __call__(self, wavelength: sc.Variable) -> sc.Variable:
-        return (self.opacity0 * wavelength).to(unit='')
+        return (self.opacity0 * wavelength).to(unit='', copy=False)
 
 
 def he3_opacity_from_cell_params(
