@@ -8,7 +8,7 @@ import scipp as sc
 
 from ..data import Registry
 from ..types import DirectBeam, DirectBeamFilename, LoadedFileContents, RunType
-from .io import Filename, FilenameType, Path
+from .io import Filename, FilenameType, FilePath
 
 _registry = Registry(
     instrument='zoom',
@@ -38,7 +38,7 @@ _registry = Registry(
 )
 
 
-def get_path(filename: FilenameType) -> Path[FilenameType]:
+def get_path(filename: FilenameType) -> FilePath[FilenameType]:
     """Translate any filename to a path to the file obtained from pooch registry."""
     mapping = {
         'Direct_Zoom_4m_8mm_100522.txt': 'Direct_Zoom_4m_8mm_100522.txt.h5',
@@ -51,12 +51,12 @@ def get_path(filename: FilenameType) -> Path[FilenameType]:
     return _registry.get_path(filename)
 
 
-def load_run(filename: Path[Filename[RunType]]) -> LoadedFileContents[RunType]:
+def load_run(filename: FilePath[Filename[RunType]]) -> LoadedFileContents[RunType]:
     with load_run._lock:
         return LoadedFileContents[RunType](sc.io.load_hdf5(filename))
 
 
-def load_direct_beam(filename: Path[DirectBeamFilename]) -> DirectBeam:
+def load_direct_beam(filename: FilePath[DirectBeamFilename]) -> DirectBeam:
     with load_run._lock:
         return DirectBeam(sc.io.load_hdf5(filename))
 

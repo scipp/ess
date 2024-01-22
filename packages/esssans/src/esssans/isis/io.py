@@ -19,7 +19,7 @@ FilenameType = TypeVar('FilenameType', bound=str)
 DataFolder = NewType('DataFolder', str)
 
 
-class Path(sciline.Scope[FilenameType, str], str):
+class FilePath(sciline.Scope[FilenameType, str], str):
     """Path to a file"""
 
 
@@ -31,11 +31,13 @@ MaskedDetectorIDs = NewType('MaskedDetectorIDs', sc.Variable)
 """1-D variable listing all masked detector IDs."""
 
 
-def to_path(filename: FilenameType, path: DataFolder) -> Path[FilenameType]:
+def to_path(filename: FilenameType, path: DataFolder) -> FilePath[FilenameType]:
     return f'{path}/{filename}'
 
 
-def read_xml_detector_masking(filename: Path[PixelMaskFilename]) -> MaskedDetectorIDs:
+def read_xml_detector_masking(
+    filename: FilePath[PixelMaskFilename],
+) -> MaskedDetectorIDs:
     """Read a pixel mask from an XML file.
 
     The format is as follows, where the detids are inclusive ranges of detector IDs:
