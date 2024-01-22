@@ -1,0 +1,983 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "5ccf2874",
+   "metadata": {},
+   "source": [
+    "# Reducing WFM data\n",
+    "\n",
+    "This notebook aims to illustrate how to work with the wavelength frame multiplication submodule `wfm`.\n",
+    "\n",
+    "We will create a beamline that resembles the ODIN instrument beamline,\n",
+    "generate some fake neutron data,\n",
+    "and then show how to convert the neutron arrival times at the detector to neutron time-of-flight,\n",
+    "from which a wavelength can then be computed (or process also commonly known as 'stitching')."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "f5716e61",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import matplotlib.pyplot as plt\n",
+    "plt.ioff() # Turn of auto-showing of figures\n",
+    "import scipp as sc\n",
+    "from scipp import constants\n",
+    "import scippneutron as scn\n",
+    "import ess.wfm as wfm\n",
+    "import ess.choppers as ch\n",
+    "np.random.seed(1) # Fixed for reproducibility"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3ae587f5",
+   "metadata": {},
+   "source": [
+    "## Create beamline components\n",
+    "\n",
+    "We first create all the components necessary to a beamline to run in WFM mode\n",
+    "(see [Introduction to WFM](introduction-to-wfm.ipynb) for the meanings of the different symbols).\n",
+    "The beamline will contain\n",
+    "\n",
+    "- a neutron source, located at the origin ($x = y = z =  0$)\n",
+    "- a pulse with a defined length ($2860 ~\\mu s$) and $t_0$ ($130 ~\\mu s$)\n",
+    "- a single pixel detector, located at $z = 60$ m\n",
+    "- two WFM choppers, located at $z = 6.775$ m and $z = 7.225$ m, each with 6 frame windows/openings\n",
+    "\n",
+    "The `wfm` module provides a helper function to quickly create such a beamline.\n",
+    "It returns a `dict` of coordinates, that can then be subsequently added to a data container."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "1a7055c5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "coords = wfm.make_fake_beamline(nframes=6)\n",
+    "coords"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5589384e",
+   "metadata": {},
+   "source": [
+    "## Generate some fake data\n",
+    "\n",
+    "Next, we will generate some fake imaging data (no scattering will be considered),\n",
+    "that is supposed to mimic a spectrum with a Bragg edge located at $4\\unicode{x212B}$.\n",
+    "We start with describing a function which will act as our underlying distribution"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "51ad4053",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "x = np.linspace(1, 10.0, 100000)\n",
+    "a = 20.0\n",
+    "b = 4.0\n",
+    "y1 = 0.7 / (np.exp(-a * (x - b)) + 1.0)\n",
+    "y2 = 1.4-0.2*x\n",
+    "y = y1 + y2\n",
+    "fig1, ax1 = plt.subplots()\n",
+    "ax1.plot(x, y)\n",
+    "ax1.set_xlabel(\"Wavelength [angstroms]\")\n",
+    "fig1"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "8c93a07a",
+   "metadata": {},
+   "source": [
+    "We then proceed to generate two sets of 1,000,000 events:\n",
+    "- one for the `sample` using the distribution defined above\n",
+    "- and one for the `vanadium` which will be just a flat random distribution\n",
+    "\n",
+    "For the events in both `sample` and `vanadium`,\n",
+    "we define a wavelength for the neutrons as well as a birth time,\n",
+    "which will be a random time between the pulse $t_0$ and the end of the useable pulse $t_0$ + pulse_length."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "f326c6c9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "nevents = 1_000_000\n",
+    "events = {\n",
+    "    \"sample\": {\n",
+    "        \"wavelengths\": sc.array(\n",
+    "            dims=[\"event\"],\n",
+    "            values=np.random.choice(x, size=nevents, p=y/np.sum(y)),\n",
+    "            unit=\"angstrom\"),\n",
+    "        \"birth_times\": sc.array(\n",
+    "            dims=[\"event\"],\n",
+    "            values=np.random.random(nevents) * coords[\"source_pulse_length\"].value,\n",
+    "            unit=\"us\") + coords[\"source_pulse_t_0\"]\n",
+    "    },\n",
+    "    \"vanadium\": {\n",
+    "        \"wavelengths\": sc.array(\n",
+    "            dims=[\"event\"],\n",
+    "            values=np.random.random(nevents) * 9.0 + 1.0,\n",
+    "            unit=\"angstrom\"),\n",
+    "        \"birth_times\": sc.array(\n",
+    "            dims=[\"event\"],\n",
+    "            values=np.random.random(nevents) * coords[\"source_pulse_length\"].value,\n",
+    "            unit=\"us\") + coords[\"source_pulse_t_0\"]\n",
+    "    }\n",
+    "}"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "1fbe21dc",
+   "metadata": {},
+   "source": [
+    "We can then take a quick look at our fake data by histogramming the events"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "b0e727e8",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Histogram and plot the event data\n",
+    "bins = np.linspace(1.0, 10.0, 129)\n",
+    "fig2, ax2 = plt.subplots()\n",
+    "for key in events:\n",
+    "    h = ax2.hist(events[key][\"wavelengths\"].values, bins=128, alpha=0.5, label=key)\n",
+    "ax2.set_xlabel(\"Wavelength [angstroms]\")\n",
+    "ax2.set_ylabel(\"Counts\")\n",
+    "ax2.legend()\n",
+    "fig2"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "ca30aeab",
+   "metadata": {},
+   "source": [
+    "We can also verify that the birth times fall within the expected range:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a2e6fce2",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "for key, item in events.items():\n",
+    "    print(key)\n",
+    "    print(sc.min(item[\"birth_times\"]))\n",
+    "    print(sc.max(item[\"birth_times\"]))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "047f6d61",
+   "metadata": {},
+   "source": [
+    "We can then compute the arrival times of the events at the detector pixel"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "1bca7897",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# The ratio of neutron mass to the Planck constant\n",
+    "alpha = sc.to_unit(constants.m_n / constants.h, 'us/m/angstrom')\n",
+    "# The distance between the source and the detector\n",
+    "dz = sc.norm(coords['position'] - coords['source_position'])\n",
+    "for key, item in events.items():\n",
+    "    item[\"arrival_times\"] = alpha * dz * item[\"wavelengths\"] + item[\"birth_times\"]\n",
+    "events[\"sample\"][\"arrival_times\"]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "ec5ed9af",
+   "metadata": {},
+   "source": [
+    "## Visualize the beamline's chopper cascade\n",
+    "\n",
+    "We first attach the beamline geometry to a Dataset"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "35e2d1d9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ds = sc.Dataset(coords=coords)\n",
+    "ds"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d59e57c4",
+   "metadata": {},
+   "source": [
+    "The `wfm.plot` submodule provides a useful tool to visualise the chopper cascade as a time-distance diagram.\n",
+    "This is achieved by calling"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "ec0ac640",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "wfm.plot.time_distance_diagram(ds)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f97be372",
+   "metadata": {},
+   "source": [
+    "This shows the 6 frames, generated by the WFM choppers,\n",
+    "as well as their predicted time boundaries at the position of the detector.\n",
+    "\n",
+    "Each frame has a time window during which neutrons are allowed to pass through,\n",
+    "as well as minimum and maximum allowed wavelengths.\n",
+    "\n",
+    "This information is obtained from the beamline geometry by calling"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "8333d948",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "frames = wfm.get_frames(ds)\n",
+    "frames"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "ddd0e8e8",
+   "metadata": {},
+   "source": [
+    "## Discard neutrons that do not make it through the chopper windows\n",
+    "\n",
+    "Once we have the parameters of the 6 wavelength frames,\n",
+    "we need to run through all our generated neutrons and filter out all the neutrons with invalid flight paths,\n",
+    "i.e. the ones that do not make it through both chopper openings in a given frame."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "88110376",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "for item in events.values():\n",
+    "    item[\"valid_indices\"] = []\n",
+    "near_wfm_chopper = ds.coords[\"chopper_wfm_1\"].value\n",
+    "far_wfm_chopper = ds.coords[\"chopper_wfm_2\"].value\n",
+    "near_time_open = ch.time_open(near_wfm_chopper)\n",
+    "near_time_close = ch.time_closed(near_wfm_chopper)\n",
+    "far_time_open = ch.time_open(far_wfm_chopper)\n",
+    "far_time_close = ch.time_closed(far_wfm_chopper)\n",
+    "\n",
+    "for item in events.values():\n",
+    "    # Compute event arrival times at wfm choppers 1 and 2\n",
+    "    slopes = 1.0 / (alpha * item[\"wavelengths\"])\n",
+    "    intercepts = -slopes * item[\"birth_times\"]\n",
+    "    times_at_wfm1 = (sc.norm(near_wfm_chopper[\"position\"].data) - intercepts) / slopes\n",
+    "    times_at_wfm2 = (sc.norm(far_wfm_chopper[\"position\"].data) - intercepts) / slopes\n",
+    "    # Create a mask to see if neutrons go through one of the openings\n",
+    "    mask = sc.zeros(dims=times_at_wfm1.dims, shape=times_at_wfm1.shape, dtype=bool)\n",
+    "    for i in range(len(frames[\"time_min\"])):\n",
+    "        mask |= ((times_at_wfm1 >= near_time_open[\"frame\", i]) &\n",
+    "                 (times_at_wfm1 <= near_time_close[\"frame\", i]) &\n",
+    "                 (item[\"wavelengths\"] >= frames[\"wavelength_min\"][\"frame\", i]).data &\n",
+    "                 (item[\"wavelengths\"] <= frames[\"wavelength_max\"][\"frame\", i]).data)\n",
+    "    item[\"valid_indices\"] = np.ravel(np.where(mask.values))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c8728d4b",
+   "metadata": {},
+   "source": [
+    "## Create a realistic Dataset\n",
+    "\n",
+    "We now create a dataset that contains:\n",
+    "- the beamline geometry\n",
+    "- the time coordinate\n",
+    "- the histogrammed events"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "23446a23",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "for item in events.values():\n",
+    "    item[\"valid_times\"] = item[\"arrival_times\"].values[item[\"valid_indices\"]]\n",
+    "\n",
+    "tmin = min([item[\"valid_times\"].min() for item in events.values()])\n",
+    "tmax = max([item[\"valid_times\"].max() for item in events.values()])\n",
+    "\n",
+    "dt = 0.1 * (tmax - tmin)\n",
+    "time_coord = sc.linspace(dim='time',\n",
+    "                         start=tmin - dt,\n",
+    "                         stop=tmax + dt,\n",
+    "                         num=257,\n",
+    "                         unit=events[\"sample\"][\"arrival_times\"].unit)\n",
+    "\n",
+    "# Histogram the data\n",
+    "for key, item in events.items():\n",
+    "    da = sc.DataArray(\n",
+    "        data=sc.ones(dims=['time'], shape=[len(item[\"valid_times\"])],\n",
+    "                     unit=sc.units.counts, with_variances=True),\n",
+    "        coords={\n",
+    "            'time': sc.array(dims=['time'], values=item[\"valid_times\"], unit=sc.units.us)})\n",
+    "    ds[key] = sc.histogram(da, bins=time_coord)\n",
+    "\n",
+    "ds"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "b8ab179d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ds.plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "21b8c2dc",
+   "metadata": {},
+   "source": [
+    "## Stitch the frames\n",
+    "\n",
+    "Wave-frame multiplication consists of making 6 new pulses from the original pulse.\n",
+    "This implies that the WFM choppers are acting as a source chopper.\n",
+    "Hence, to compute a wavelength from a time and a distance between source and detector,\n",
+    "the location of the source must now be at the position of the WFM choppers,\n",
+    "or more exactly at the mid-point between the two WFM choppers.\n",
+    "\n",
+    "The stitching operation equates to converting the `time` dimension to `time-of-flight`,\n",
+    "by subtracting from each frame a time shift equal to the mid-point between the two WFM choppers.\n",
+    "\n",
+    "This is performed with the `stitch` function in the `wfm` module:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "f43f9e95",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "stitched = wfm.stitch(frames=frames,\n",
+    "                      data=ds,\n",
+    "                      dim='time',\n",
+    "                      bins=257)\n",
+    "stitched"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "d17cbc88",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "stitched.plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "bf191dce",
+   "metadata": {},
+   "source": [
+    "For diagnostic purposes,\n",
+    "it can be useful to visualize the individual frames before and after the stitching process.\n",
+    "The `wfm.plot` module provides two helper functions to do just this:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "f4f4f118",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "wfm.plot.frames_before_stitching(data=ds['sample'], frames=frames, dim='time')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "6e4b009e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "wfm.plot.frames_after_stitching(data=ds['sample'], frames=frames, dim='time')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "1340ec33",
+   "metadata": {},
+   "source": [
+    "## Convert to wavelength\n",
+    "\n",
+    "Now that the data coordinate is time-of-flight (`tof`),\n",
+    "we can use `scippneutron` to perform the unit conversion from `tof` to `wavelength`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "f760e23c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from scippneutron.tof.conversions import beamline, elastic\n",
+    "graph = {**beamline(scatter=False), **elastic(\"tof\")}\n",
+    "converted = stitched.transform_coords(\"wavelength\", graph=graph)\n",
+    "converted.plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "64b7d00e",
+   "metadata": {},
+   "source": [
+    "## Normalization\n",
+    "\n",
+    "Normalization is performed simply by dividing the counts of the `sample` run by the counts of the `vanadium` run."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "f3344fcc",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "normalized = converted['sample'] / converted['vanadium']\n",
+    "normalized.plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f7779c9a",
+   "metadata": {},
+   "source": [
+    "## Comparing to the raw wavelengths\n",
+    "\n",
+    "The final step is a sanity check to verify that the wavelength-dependent data obtained from the stitching process\n",
+    "agrees (to within the beamline resolution) with the original wavelength distribution that was generated at\n",
+    "the start of the workflow.\n",
+    "\n",
+    "For this, we simply histogram the raw neutron events using the same bins as the `normalized` data,\n",
+    "filtering out the neutrons with invalid flight paths."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "00ce50bd",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "for item in events.values():\n",
+    "    item[\"wavelength_counts\"], _ = np.histogram(\n",
+    "        item[\"wavelengths\"].values[item[\"valid_indices\"]],\n",
+    "        bins=normalized.coords['wavelength'].values)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "56576089",
+   "metadata": {},
+   "source": [
+    "We then normalize the `sample` by the `vanadium` run,\n",
+    "and plot the resulting spectrum alongside the one obtained from the stitching."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "72db4a28",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "original = sc.DataArray(\n",
+    "    data=sc.array(dims=['wavelength'],\n",
+    "                  values=events[\"sample\"][\"wavelength_counts\"] /\n",
+    "                         events[\"vanadium\"][\"wavelength_counts\"]),\n",
+    "    coords = {\"wavelength\": normalized.coords['wavelength']})\n",
+    "\n",
+    "sc.plot({\"stitched\": normalized, \"original\": original})"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c3409ea4",
+   "metadata": {},
+   "source": [
+    "We can see that the counts in the `stitched` data agree very well with the original data.\n",
+    "There is some smoothing of the data seen in the `stitched` result,\n",
+    "and this is expected because of the resolution limitations of the beamline due to its long source pulse.\n",
+    "This smoothing (or smearing) would, however, be much stronger if WFM choppers were not used.\n",
+    "\n",
+    "## Without WFM choppers\n",
+    "\n",
+    "In this section, we compare the results obtained above to a beamline that does not have a WFM chopper system.\n",
+    "We make a new set of events,\n",
+    "where the number of events is equal to the number of neutrons that make it through the chopper cascade in the previous case."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "7e67c9d8",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "nevents_no_wfm = len(events[\"sample\"][\"valid_times\"])\n",
+    "events_no_wfm = {\n",
+    "    \"sample\": {\n",
+    "        \"wavelengths\": sc.array(\n",
+    "            dims=[\"event\"],\n",
+    "            values=np.random.choice(x, size=nevents_no_wfm, p=y/np.sum(y)),\n",
+    "            unit=\"angstrom\"),\n",
+    "        \"birth_times\": sc.array(\n",
+    "            dims=[\"event\"],\n",
+    "            values=np.random.random(nevents_no_wfm) * coords[\"source_pulse_length\"].value,\n",
+    "            unit=\"us\") + coords[\"source_pulse_t_0\"]\n",
+    "    },\n",
+    "    \"vanadium\": {\n",
+    "        \"wavelengths\": sc.array(\n",
+    "            dims=[\"event\"],\n",
+    "            values=np.random.random(nevents_no_wfm) * 9.0 + 1.0,\n",
+    "            unit=\"angstrom\"),\n",
+    "        \"birth_times\": sc.array(\n",
+    "            dims=[\"event\"],\n",
+    "            values=np.random.random(nevents_no_wfm) * coords[\"source_pulse_length\"].value,\n",
+    "            unit=\"us\") + coords[\"source_pulse_t_0\"]\n",
+    "    }\n",
+    "}\n",
+    "for key, item in events_no_wfm.items():\n",
+    "    item[\"arrival_times\"] = alpha * dz * item[\"wavelengths\"] + item[\"birth_times\"]\n",
+    "events_no_wfm[\"sample\"][\"arrival_times\"]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "6540b401",
+   "metadata": {},
+   "source": [
+    "We then histogram these events to create a new Dataset.\n",
+    "Because we are no longer make new pulses with the WFM choppers,\n",
+    "the event time-of-flight is simply the arrival time of the event at the detector."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "b3c6b37e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "tmin = min([item[\"arrival_times\"].values.min() for item in events_no_wfm.values()])\n",
+    "tmax = max([item[\"arrival_times\"].values.max() for item in events_no_wfm.values()])\n",
+    "\n",
+    "dt = 0.1 * (tmax - tmin)\n",
+    "time_coord_no_wfm = sc.linspace(dim='tof',\n",
+    "                         start=tmin - dt,\n",
+    "                         stop=tmax + dt,\n",
+    "                         num=257,\n",
+    "                         unit=events_no_wfm[\"sample\"][\"arrival_times\"].unit)\n",
+    "\n",
+    "ds_no_wfm = sc.Dataset(coords=coords)\n",
+    "\n",
+    "# Histogram the data\n",
+    "for key, item in events_no_wfm.items():\n",
+    "    da = sc.DataArray(\n",
+    "        data=sc.ones(dims=['tof'], shape=[len(item[\"arrival_times\"])],\n",
+    "                     unit=sc.units.counts, with_variances=True),\n",
+    "        coords={\n",
+    "            'tof': sc.array(dims=['tof'], values=item[\"arrival_times\"].values, unit=sc.units.us)})\n",
+    "    ds_no_wfm[key] = sc.histogram(da, bins=time_coord_no_wfm)\n",
+    "\n",
+    "ds_no_wfm"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "d89f7e1c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sc.plot(ds_no_wfm)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "1c840b2c",
+   "metadata": {},
+   "source": [
+    "We then perform the standard unit conversion and normalization"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "b6e8a6cb",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "converted_no_wfm = ds_no_wfm.transform_coords(\"wavelength\", graph=graph)\n",
+    "normalized_no_wfm = converted_no_wfm['sample'] / converted_no_wfm['vanadium']\n",
+    "normalized_no_wfm.plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "caf84fd6",
+   "metadata": {},
+   "source": [
+    "In the same manner and in the previous section, we compare to the real neutron wavelengths"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e378dd5c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "for item in events_no_wfm.values():\n",
+    "    item[\"wavelength_counts\"], _ = np.histogram(\n",
+    "        item[\"wavelengths\"].values,\n",
+    "        bins=normalized_no_wfm.coords['wavelength'].values)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "1d215096",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "original_no_wfm = sc.DataArray(\n",
+    "    data=sc.array(dims=['wavelength'],\n",
+    "                  values=events_no_wfm[\"sample\"][\"wavelength_counts\"] /\n",
+    "                         events_no_wfm[\"vanadium\"][\"wavelength_counts\"]),\n",
+    "    coords = {\"wavelength\": normalized_no_wfm.coords['wavelength']})\n",
+    "\n",
+    "w_min = 2.0 * sc.units.angstrom\n",
+    "w_max = 5.5 * sc.units.angstrom\n",
+    "sc.plot({\"without WFM\": normalized_no_wfm['wavelength', w_min:w_max],\n",
+    "         \"original\": original_no_wfm['wavelength', w_min:w_max]},\n",
+    "        errorbars=False)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "4742d5b7",
+   "metadata": {},
+   "source": [
+    "We can see that there is a significant shift between the calculated wavelength of the Bragg edge around $4\\unicode{x212B}$\n",
+    "and the original underlying wavelengths.\n",
+    "In comparison, the same plot for the WFM run yields a much better agreement"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "4280bc97",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sc.plot({\"stitched\": normalized['wavelength', w_min:w_max],\n",
+    "         \"original\": original['wavelength', w_min:w_max]},\n",
+    "        errorbars=False)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "b8d7592f",
+   "metadata": {},
+   "source": [
+    "## Working in event mode\n",
+    "\n",
+    "It is also possible to work with WFM data in event mode.\n",
+    "The `stitch` utility will accept both histogrammed and binned (event) data.\n",
+    "\n",
+    "We first create a new dataset, with the same events as in the first example,\n",
+    "but this time we bin the data with `sc.bin` instead of using `sc.histogram`,\n",
+    "so we can retain the raw events."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "42990340",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "for item in events.values():\n",
+    "    item[\"valid_times\"] = item[\"arrival_times\"].values[item[\"valid_indices\"]]\n",
+    "\n",
+    "tmin = min([item[\"valid_times\"].min() for item in events.values()])\n",
+    "tmax = max([item[\"valid_times\"].max() for item in events.values()])\n",
+    "\n",
+    "dt = 0.1 * (tmax - tmin)\n",
+    "time_coord = sc.linspace(dim='time',\n",
+    "                         start=tmin - dt,\n",
+    "                         stop=tmax + dt,\n",
+    "                         num=257,\n",
+    "                         unit=events[\"sample\"][\"arrival_times\"].unit)\n",
+    "\n",
+    "ds_event = sc.Dataset(coords=coords)\n",
+    "\n",
+    "# Bin the data\n",
+    "for key, item in events.items():\n",
+    "    da = sc.DataArray(\n",
+    "        data=sc.ones(dims=['event'], shape=[len(item[\"valid_times\"])], unit=sc.units.counts,\n",
+    "                     with_variances=True),\n",
+    "        coords={\n",
+    "            'time': sc.array(dims=['event'], values=item[\"valid_times\"], unit=sc.units.us)})\n",
+    "    ds_event[key] = sc.bin(da, edges=[time_coord])\n",
+    "\n",
+    "ds_event"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f1e67008",
+   "metadata": {},
+   "source": [
+    "The underlying events can be inspected by using the `.bins.constituents['data']` property of our objects:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "eace3d5e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ds_event[\"sample\"].bins.constituents['data']"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "2878ba82",
+   "metadata": {},
+   "source": [
+    "We can visualize this to make sure it looks the same as the histogrammed case above:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "59f289fa",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sc.plot(ds_event.bins.sum())"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a0794cb2",
+   "metadata": {},
+   "source": [
+    "As explained above, the `stitch` routine accepts both histogrammed and binned (event) data.\n",
+    "So stitching the binned data works in the exact same way as above, namely"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "f142c62b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "stitched_event = wfm.stitch(frames=frames,\n",
+    "                            data=ds_event,\n",
+    "                            dim='time')\n",
+    "stitched_event"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e9bcfd42",
+   "metadata": {},
+   "source": [
+    "The `stitch` function will return a data structure with a single bin in the `'tof'` dimension.\n",
+    "Visualizing this data is therefore slightly more tricky,\n",
+    "because the data needs to be histogrammed using a finer binning before a useful plot can be made."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "bab0141b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sc.plot(sc.histogram(stitched_event,\n",
+    "                     bins=sc.linspace(\n",
+    "                         dim='tof',\n",
+    "                         start=stitched_event.coords['tof']['tof', 0].value,\n",
+    "                         stop=stitched_event.coords['tof']['tof', -1].value,\n",
+    "                         num=257,\n",
+    "                         unit=stitched_event.coords['tof'].unit)))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "bc580d4a",
+   "metadata": {},
+   "source": [
+    "At this point, it may be useful to compare the results of the two different stitching operations."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "321d873b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "rebinned = sc.bin(stitched_event[\"sample\"], edges=[stitched[\"sample\"].coords['tof']])\n",
+    "sc.plot({\"events\": rebinned.bins.sum(), \"histogram\": stitched[\"sample\"]}, errorbars=False)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "eaeecbe7",
+   "metadata": {},
+   "source": [
+    "We note that histogramming the data early introduces some smoothing in the data.\n",
+    "\n",
+    "We can of course continue in event mode and perform the unit conversion and normalization to the Vanadium."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "119aacea",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "converted_event = stitched_event.transform_coords(\"wavelength\", graph=graph)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "8b98d524",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Normalizing binned data is done using the sc.lookup helper\n",
+    "hist = sc.histogram(\n",
+    "    converted_event[\"vanadium\"], bins=converted[\"sample\"].coords['wavelength'])\n",
+    "normalized_event = converted_event[\"sample\"].bins / sc.lookup(func=hist, dim='wavelength')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "94e755c3",
+   "metadata": {},
+   "source": [
+    "Finally, we compare the end result with the original wavelengths, and see that the agreement is once again good."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "ff50114b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "to_plot = sc.bin(normalized_event,\n",
+    "                            edges=[converted[\"sample\"].coords['wavelength']]).bins.sum()\n",
+    "sc.plot({\"stitched_event\": to_plot, \"original\": original})"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "4b91c43a",
+   "metadata": {},
+   "source": [
+    "We can also compare directly to the histogrammed version,\n",
+    "to see that both methods remain in agreement to a high degree. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "4b20e212",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sc.plot({\"stitched\": normalized['wavelength', w_min:w_max],\n",
+    "         \"original\": original['wavelength', w_min:w_max],\n",
+    "         \"stitched_event\": to_plot['wavelength', w_min:w_max]})"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

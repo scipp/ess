@@ -1,0 +1,1674 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ess - Data reduction for ESS instrumentation &#8212; ess  documentation</title>
+    
+  <link href="_static/css/theme.css" rel="stylesheet">
+  <link href="_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    
+      
+
+    
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-book-theme.css?digest=84ace793992934648b4de8eed757e5a2" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    
+  <link rel="preload" as="script" href="_static/js/index.be7d3bbb2ef33a8344ce.js">
+
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/sphinx-book-theme.9d8b4a8b9bb19db25eeaddc40d639ba2.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.1/dist/embed-amd.js"></script>
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="getting-started/installation.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="None">
+    
+
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<!-- Checkboxes to toggle the left sidebar -->
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle navigation sidebar">
+<label class="overlay" for="__navigation">
+    <div class="visually-hidden">Toggle navigation sidebar</div>
+</label>
+<div class="col-12 col-md-3 bd-sidebar site-navigation " id="site-navigation">
+    
+        <div class="navbar-brand-box">
+    <a class="navbar-brand text-wrap" href="#">
+      
+        <!-- `logo` is deprecated in Sphinx 4.0, so remove this when we stop supporting 3 -->
+        
+      
+      
+      <img src="_static/logo.png" class="logo" alt="logo">
+      
+      
+    </a>
+</div><form class="bd-search d-flex align-items-center" action="search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item active">
+        <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Getting started
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="getting-started/installation.html">
+   Installation
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Instruments
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="instruments/amor/amor.html">
+   Amor
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <label for="toctree-checkbox-1">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="instruments/amor/amor_reduction.html">
+     Divergent data reduction for Amor
+    </a>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="instruments/amor/reference.html">
+     Reference
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/>
+    <label for="toctree-checkbox-2">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="generated/ess.amor.beamline.html">
+       ess.amor.beamline
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/>
+      <label for="toctree-checkbox-3">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="generated/ess.amor.beamline.instrument_view_components.html">
+         ess.amor.beamline.instrument_view_components
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="generated/ess.amor.beamline.make_beamline.html">
+         ess.amor.beamline.make_beamline
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="generated/ess.amor.calibrations.html">
+       ess.amor.calibrations
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/>
+      <label for="toctree-checkbox-4">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="generated/ess.amor.calibrations.calibration_factor.html">
+         ess.amor.calibrations.calibration_factor
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="generated/ess.amor.calibrations.supermirror_calibration.html">
+         ess.amor.calibrations.supermirror_calibration
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="generated/ess.amor.conversions.html">
+       ess.amor.conversions
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/>
+      <label for="toctree-checkbox-5">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="generated/ess.amor.conversions.incident_beam.html">
+         ess.amor.conversions.incident_beam
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="generated/ess.amor.conversions.specular_reflection.html">
+         ess.amor.conversions.specular_reflection
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="generated/ess.amor.normalize.html">
+       ess.amor.normalize
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/>
+      <label for="toctree-checkbox-6">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="generated/ess.amor.normalize.normalize_by_supermirror.html">
+         ess.amor.normalize.normalize_by_supermirror
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="generated/ess.amor.orso.html">
+       ess.amor.orso
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/>
+      <label for="toctree-checkbox-7">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="generated/ess.amor.orso.make_orso.html">
+         ess.amor.orso.make_orso
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="generated/ess.amor.resolution.html">
+       ess.amor.resolution
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/>
+      <label for="toctree-checkbox-8">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="generated/ess.amor.resolution.angular_resolution.html">
+         ess.amor.resolution.angular_resolution
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="generated/ess.amor.resolution.sample_size_resolution.html">
+         ess.amor.resolution.sample_size_resolution
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="generated/ess.amor.resolution.sigma_Q.html">
+         ess.amor.resolution.sigma_Q
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="generated/ess.amor.resolution.wavelength_resolution.html">
+         ess.amor.resolution.wavelength_resolution
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="generated/ess.amor.tools.html">
+       ess.amor.tools
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" type="checkbox"/>
+      <label for="toctree-checkbox-9">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="generated/ess.amor.tools.fwhm_to_std.html">
+         ess.amor.tools.fwhm_to_std
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="generated/ess.amor.tools.linlogspace.html">
+         ess.amor.tools.linlogspace
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="generated/ess.amor.tools.std_to_fwhm.html">
+         ess.amor.tools.std_to_fwhm
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="generated/ess.amor.instrument_view.instrument_view.html">
+       ess.amor.instrument_view.instrument_view
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="generated/ess.amor.load.load.html">
+       ess.amor.load.load
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="instruments/loki/loki.html">
+   Loki
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" type="checkbox"/>
+  <label for="toctree-checkbox-10">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="instruments/loki/sans2d_to_I_of_Q.html">
+     SANS2D: I(Q) workflow for a single run (sample)
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="instruments/loki/sans2d_reduction.html">
+     SANS2D: I(Q) for sample and background
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Techniques
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="techniques/reflectometry/reflectometry.html">
+   Reflectometry
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" type="checkbox"/>
+  <label for="toctree-checkbox-11">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="techniques/reflectometry/reference.html">
+     Reference
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" type="checkbox"/>
+    <label for="toctree-checkbox-12">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="generated/ess.reflectometry.conversions.specular_reflection.html">
+       ess.reflectometry.conversions.specular_reflection
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="generated/ess.reflectometry.corrections.footprint_correction.html">
+       ess.reflectometry.corrections.footprint_correction
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="generated/ess.reflectometry.corrections.normalize_by_counts.html">
+       ess.reflectometry.corrections.normalize_by_counts
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="generated/ess.reflectometry.corrections.beam_on_sample.html">
+       ess.reflectometry.corrections.beam_on_sample
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="generated/ess.reflectometry.io.save_ort.html">
+       ess.reflectometry.io.save_ort
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="techniques/sans/sans.html">
+   SANS
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" type="checkbox"/>
+  <label for="toctree-checkbox-13">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="techniques/sans/reference.html">
+     Reference
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" type="checkbox"/>
+    <label for="toctree-checkbox-14">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="techniques/sans/i_of_q.html">
+       I(Q) reduction workflow
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" type="checkbox"/>
+      <label for="toctree-checkbox-15">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="generated/ess.sans.i_of_q.to_I_of_Q.html">
+         ess.sans.i_of_q.to_I_of_Q
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="generated/ess.sans.i_of_q.make_coordinate_transform_graphs.html">
+         ess.sans.i_of_q.make_coordinate_transform_graphs
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="generated/ess.sans.i_of_q.convert_to_wavelength.html">
+         ess.sans.i_of_q.convert_to_wavelength
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="generated/ess.sans.i_of_q.denoise_and_rebin_monitors.html">
+         ess.sans.i_of_q.denoise_and_rebin_monitors
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="generated/ess.sans.i_of_q.resample_direct_beam.html">
+         ess.sans.i_of_q.resample_direct_beam
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="generated/ess.sans.i_of_q.convert_to_q_and_merge_spectra.html">
+         ess.sans.i_of_q.convert_to_q_and_merge_spectra
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="generated/ess.sans.conversions.sans_elastic.html">
+       ess.sans.conversions.sans_elastic
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="generated/ess.sans.conversions.sans_monitor.html">
+       ess.sans.conversions.sans_monitor
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="generated/ess.sans.normalization.solid_angle_of_rectangular_pixels.html">
+       ess.sans.normalization.solid_angle_of_rectangular_pixels
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="generated/ess.sans.normalization.transmission_fraction.html">
+       ess.sans.normalization.transmission_fraction
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="generated/ess.sans.normalization.compute_denominator.html">
+       ess.sans.normalization.compute_denominator
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="generated/ess.sans.normalization.normalize.html">
+       ess.sans.normalization.normalize
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="generated/ess.sans.common.gravity_vector.html">
+       ess.sans.common.gravity_vector
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="techniques/wfm/wfm.html">
+   Wavelength frame multiplication
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" type="checkbox"/>
+  <label for="toctree-checkbox-16">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="techniques/wfm/introduction-to-wfm.html">
+     Introduction to Wavelength Frame Multiplication
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="techniques/wfm/reducing-wfm-data.html">
+     Reducing WFM data
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Utilities
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="utilities/utilities.html">
+   Modules
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" type="checkbox"/>
+  <label for="toctree-checkbox-17">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="generated/modules/ess.logging.html">
+     ess.logging
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" type="checkbox"/>
+    <label for="toctree-checkbox-18">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="generated/modules/ess.logging.configure.html">
+       ess.logging.configure
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="generated/modules/ess.logging.configure_workflow.html">
+       ess.logging.configure_workflow
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="generated/modules/ess.logging.default_loggers_to_configure.html">
+       ess.logging.default_loggers_to_configure
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="generated/modules/ess.logging.get_logger.html">
+       ess.logging.get_logger
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="generated/modules/ess.logging.greet.html">
+       ess.logging.greet
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="generated/modules/ess.logging.log_call.html">
+       ess.logging.log_call
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="generated/modules/ess.logging.Formatter.html">
+       ess.logging.Formatter
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Developer documentation
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="developer/style-guide.html">
+   Style guide
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="developer/getting-started.html">
+   Getting Started
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  About
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="about/release-notes.html">
+   Release Notes
+  </a>
+ </li>
+</ul>
+
+    </div>
+</nav> <!-- To handle the deprecated key -->
+
+<div class="navbar_extra_footer">
+  Theme by the <a href="https://ebp.jupyterbook.org">Executable Book Project</a>
+</div>
+
+</div>
+
+
+          
+
+
+          
+<!-- This is an invisible pixel that we watch to see if we've scrolled. -->
+<div class="sbt-scroll-pixel-helper"></div>
+<main class="col py-md-3 pl-md-4 bd-content overflow-auto" role="main">
+    
+    <div class="topbar container-xl fixed-top">
+    <div class="topbar-contents row">
+        <div class="col-12 col-md-3 bd-topbar-whitespace site-navigation show"></div>
+        <div class="col pl-md-4 topbar-main">
+            <div class="topbar-left">
+                
+                <label class="nav-toggle-button" for="__navigation">
+                    <div class="visually-hidden">Toggle navigation</div>
+                    <i class="fas fa-bars"></i>
+                </label>
+                
+            </div>
+            
+<!-- Minimally modifed from original theme to specify "download" attribute in <a> so ipynb is downloaded instead of opened by browser. -->
+<div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn" aria-label="Download this page"><i
+            class="fas fa-download"></i></button>
+
+    <div class="dropdown-buttons">
+        <!-- ipynb file if we had a myst markdown file -->
+        
+        <!-- Download raw file -->
+        <a class="dropdown-buttons" href="_sources/index.rst.txt" download><button type="button"
+                class="btn btn-secondary topbarbtn" title="Download source file" data-toggle="tooltip"
+                data-placement="left">.rst</button></a>
+        <!-- Download PDF via print -->
+        <button type="button" id="download-print" class="btn btn-secondary topbarbtn" title="Print to PDF"
+            onClick="window.print()" data-toggle="tooltip" data-placement="left">.pdf</button>
+    </div>
+</div>
+
+            <!-- Source interaction buttons -->
+
+<div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn"
+        aria-label="Connect with source repository"><i class="fab fa-github"></i></button>
+    <div class="dropdown-buttons sourcebuttons">
+        <a class="repository-button"
+            href="https://github.com/scipp/ess"><button type="button" class="btn btn-secondary topbarbtn"
+                data-toggle="tooltip" data-placement="left" title="Source repository"><i
+                    class="fab fa-github"></i>repository</button></a>
+        <a class="issues-button"
+            href="https://github.com/scipp/ess/issues/new?title=Issue%20on%20page%20%2Findex.html&body=Your%20issue%20content%20here."><button
+                type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip" data-placement="left"
+                title="Open an issue"><i class="fas fa-lightbulb"></i>open issue</button></a>
+        <a class="edit-button" href="https://github.com/scipp/ess/edit/main/docs/index.rst"><button
+                type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip" data-placement="left"
+                title="Edit this page"><i class="fas fa-pencil-alt"></i>suggest edit</button></a>
+    </div>
+</div>
+
+            <!-- Full screen (wrap in <a> to have style consistency -->
+
+<a class="full-screen-button"><button type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip"
+        data-placement="bottom" onclick="toggleFullScreen()" aria-label="Fullscreen mode"
+        title="Fullscreen mode"><i
+            class="fas fa-expand"></i></button></a>
+
+            <!-- Here, we override the default launchbuttons.html by replacing it with our
+     version selection menu, since we do not intend to use the launchbuttons.
+     This allows us to add the version selection menu in some unused white space
+     that is always visible. -->
+<div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn" style="font-size: 1em;padding-top:0.33rem;">Version
+      <i class="fa fa-caret-down"></i>
+    </button>
+
+    <div class="dropdown-buttons" style="transform:translate(10%);">
+        <a class="dropdown-buttons"
+            href="https://scipp.github.io/ess"><button type="button"
+                class="btn btn-secondary topbarbtn">latest</button></a>
+        <a class="dropdown-buttons"
+            href="https://scipp.github.io/ess/release/0.5.0"><button type="button"
+                class="btn btn-secondary topbarbtn">v0.5</button></a>
+        <a class="dropdown-buttons"
+            href="https://scipp.github.io/ess/release/0.4.0"><button type="button"
+                class="btn btn-secondary topbarbtn">v0.4</button></a>
+        <a class="dropdown-buttons"
+            href="https://scipp.github.io/ess/release/0.3.0"><button type="button"
+                class="btn btn-secondary topbarbtn">v0.3</button></a>
+        <a class="dropdown-buttons"
+            href="https://scipp.github.io/ess/release/0.2.0"><button type="button"
+                class="btn btn-secondary topbarbtn">v0.2</button></a>
+        <a class="dropdown-buttons"
+            href="https://scipp.github.io/ess/release/0.1.0"><button type="button"
+                class="btn btn-secondary topbarbtn">v0.1</button></a>
+    </div>
+</div>
+<div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn" style="font-size: 1em;padding-top:0.33rem;">Related projects
+      <i class="fa fa-caret-down"></i>
+    </button>
+
+    <div class="dropdown-buttons" style="transform:translate(10%);">
+        <a class="dropdown-buttons"
+            href="https://scipp.github.io"><button type="button"
+                class="btn btn-secondary topbarbtn">scipp</button></a>
+        <a class="dropdown-buttons"
+            href="https://scipp.github.io/scippneutron"><button type="button"
+                class="btn btn-secondary topbarbtn">scippneutron</button></a>
+        <a class="dropdown-buttons"
+            href="https://scipp.github.io/ess"><button type="button"
+                class="btn btn-secondary topbarbtn">ess</button></a>
+        <a class="dropdown-buttons"
+            href="https://scipp.github.io/scippnexus"><button type="button"
+                class="btn btn-secondary topbarbtn">scippnexus</button></a>
+    </div>
+</div>
+        </div>
+
+        <!-- Table of contents -->
+        <div class="d-none d-md-block col-md-2 bd-toc show noprint">
+            
+            <div class="tocsection onthispage pt-5 pb-3">
+                <i class="fas fa-list"></i> Contents
+            </div>
+            <nav id="bd-toc-nav" aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#">
+   ess - Data reduction for ESS instrumentation
+  </a>
+ </li>
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#documentation">
+   Documentation
+  </a>
+  <ul class="visible nav section-nav flex-column">
+  </ul>
+ </li>
+</ul>
+
+            </nav>
+        </div>
+    </div>
+</div>
+    <div id="main-content" class="row">
+        <div class="col-12 col-md-9 pl-md-3 pr-md-0">
+            <!-- Table of contents that is only displayed when printing the page -->
+            <div id="jb-print-docs-body" class="onlyprint">
+                <h1>ess - Data reduction for ESS instrumentation</h1>
+                <!-- Table of contents -->
+                <div id="print-main-content">
+                    <div id="jb-print-toc">
+                        
+                        <div>
+                            <h2> Contents </h2>
+                        </div>
+                        <nav aria-label="Page">
+                            <ul class="visible nav section-nav flex-column">
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#">
+   ess - Data reduction for ESS instrumentation
+  </a>
+ </li>
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#documentation">
+   Documentation
+  </a>
+  <ul class="visible nav section-nav flex-column">
+  </ul>
+ </li>
+</ul>
+
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            
+              <div>
+                
+  <div class="section" id="ess-data-reduction-for-ess-instrumentation">
+<h1>ess - Data reduction for ESS instrumentation<a class="headerlink" href="#ess-data-reduction-for-ess-instrumentation" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="https://europeanspallationsource.se">European Spallation Source</a> (ESS) toolkit for neutron scattering data reduction powered by <a class="reference external" href="https://scipp.github.io">scipp</a> and <a class="reference external" href="https://scipp.github.io/scippneutron/index.html">scippneutron</a>.
+Provides ESS facility and instrument bespoke tools.
+The <code class="docutils literal notranslate"><span class="pre">ess</span></code> module is part of the software stack for data reduction:</p>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="161.47255mm"
+   height="78.791664mm"
+   viewBox="0 0 161.47255 78.791664"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"
+   sodipodi:docname="software-stack.svg"
+   inkscape:export-filename="/home/simon/code/ess/docs/images/software-stack.png"
+   inkscape:export-xdpi="299.99231"
+   inkscape:export-ydpi="299.99231">
+  <defs
+     id="defs2">
+    <rect
+       x="55.560047"
+       y="71.575813"
+       width="3.4567065"
+       height="30.424299"
+       id="rect1966" />
+    <marker
+       style="overflow:visible"
+       id="marker1753"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Arrow2Mend"
+       inkscape:isstock="true">
+      <path
+         transform="scale(-0.6)"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         id="path1751"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="marker1665"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Arrow2Mend"
+       inkscape:isstock="true"
+       inkscape:collect="always">
+      <path
+         transform="scale(-0.6)"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         id="path1663"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="marker1585"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Arrow2Mend"
+       inkscape:isstock="true"
+       inkscape:collect="always">
+      <path
+         transform="scale(-0.6)"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         id="path1583"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="marker1489"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Arrow2Mend"
+       inkscape:isstock="true">
+      <path
+         transform="scale(-0.6)"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         id="path1487"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="marker1413"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Arrow2Mend"
+       inkscape:isstock="true"
+       inkscape:collect="always">
+      <path
+         transform="scale(-0.6)"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         id="path1411"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <inkscape:path-effect
+       effect="bspline"
+       id="path-effect1359"
+       is_visible="true"
+       lpeversion="1"
+       weight="33.333333"
+       steps="2"
+       helper_size="0"
+       apply_no_weight="true"
+       apply_with_weight="true"
+       only_selected="false" />
+    <inkscape:path-effect
+       effect="bspline"
+       id="path-effect1355"
+       is_visible="true"
+       lpeversion="1"
+       weight="33.333333"
+       steps="2"
+       helper_size="0"
+       apply_no_weight="true"
+       apply_with_weight="true"
+       only_selected="false" />
+    <marker
+       style="overflow:visible"
+       id="marker1279"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Arrow2Mend"
+       inkscape:isstock="true">
+      <path
+         transform="scale(-0.6)"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         id="path1277"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="Arrow2Mend"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Arrow2Mend"
+       inkscape:isstock="true"
+       inkscape:collect="always">
+      <path
+         transform="scale(-0.6)"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         id="path900"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="Arrow1Mend"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Arrow1Mend"
+       inkscape:isstock="true">
+      <path
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-opacity:1"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         id="path882"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="Arrow1Lend"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Arrow1Lend"
+       inkscape:isstock="true">
+      <path
+         transform="matrix(-0.8,0,0,-0.8,-10,0)"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-opacity:1"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         id="path876"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <inkscape:path-effect
+       effect="bspline"
+       id="path-effect871"
+       is_visible="true"
+       lpeversion="1"
+       weight="33.333333"
+       steps="2"
+       helper_size="0"
+       apply_no_weight="true"
+       apply_with_weight="true"
+       only_selected="false" />
+    <inkscape:path-effect
+       effect="bspline"
+       id="path-effect867"
+       is_visible="true"
+       lpeversion="1"
+       weight="33.333333"
+       steps="2"
+       helper_size="0"
+       apply_no_weight="true"
+       apply_with_weight="true"
+       only_selected="false" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="2.8"
+     inkscape:cx="252.21533"
+     inkscape:cy="96.200387"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer2"
+     inkscape:document-rotation="0"
+     showgrid="false"
+     inkscape:snap-object-midpoints="true"
+     inkscape:snap-smooth-nodes="true"
+     inkscape:window-width="2689"
+     inkscape:window-height="2039"
+     inkscape:window-x="0"
+     inkscape:window-y="15"
+     inkscape:window-maximized="0"
+     inkscape:snap-bbox="true"
+     inkscape:bbox-paths="true"
+     inkscape:bbox-nodes="true"
+     inkscape:snap-text-baseline="true"
+     showguides="false"
+     inkscape:guide-bbox="true"
+     fit-margin-top="5"
+     fit-margin-left="5"
+     fit-margin-right="5"
+     fit-margin-bottom="5">
+    <inkscape:grid
+       type="xygrid"
+       id="grid833"
+       originx="-47.596963"
+       originy="-130.60416" />
+    <sodipodi:guide
+       position="123.05928,65.854168"
+       orientation="1,0"
+       id="guide2008"
+       inkscape:locked="false" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-47.596966,-87.604172)">
+    <a
+       id="a4655"
+       xlink:href="https://scipp.github.io/scippneutron/">
+      <rect
+         ry="1.3229218"
+         y="129.59416"
+         x="66.145836"
+         height="13.229166"
+         width="79.375"
+         id="rect835"
+         style="fill:#b8dcf6;fill-opacity:1;stroke-width:1.73000002;stroke-miterlimit:4;stroke-dasharray:none"
+         rx="1.3229218" />
+    </a>
+    <a
+       id="a949"
+       xlink:href="https://scipp.github.io/">
+      <rect
+         ry="1.3229218"
+         y="148.16667"
+         x="66.145836"
+         height="13.229166"
+         width="79.375"
+         id="rect847"
+         style="fill:#b8dcf6;fill-opacity:1;stroke-width:1.73000002;stroke-miterlimit:4;stroke-dasharray:none"
+         rx="1.3229218" />
+    </a>
+    <rect
+       style="fill:#b8dcf6;fill-opacity:1;stroke-width:1.73000002;stroke-miterlimit:4;stroke-dasharray:none"
+       id="rect853"
+       width="79.375"
+       height="13.229166"
+       x="66.145836"
+       y="111.125"
+       ry="1.3229218"
+       rx="1.3229218" />
+    <a
+       id="a4658"
+       xlink:href="https://scipp.github.io/ess-notebooks/">
+      <rect
+         ry="1.3229218"
+         y="92.604172"
+         x="66.145836"
+         height="13.229166"
+         width="79.375"
+         id="rect859"
+         style="fill:#b8dcf6;fill-opacity:1;stroke-width:1.73000002;stroke-miterlimit:4;stroke-dasharray:none"
+         rx="1.3229218" />
+    </a>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow2Mend)"
+       d="m 64.822917,100.54167 c -4.180445,6.5194 -3.96875,9.26041 0,15.875"
+       id="path869"
+       sodipodi:nodetypes="cc"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker1413)"
+       d="m 64.822917,119.0625 c -4.180445,6.5194 -3.96875,9.26041 0,15.875"
+       id="path1409"
+       sodipodi:nodetypes="cc"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker1489)"
+       d="m 64.822917,137.58333 c -4.180445,6.5194 -3.96875,9.26041 0,15.875"
+       id="path1485"
+       sodipodi:nodetypes="cc"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker1585)"
+       d="m 146.84375,100.54167 c 4.18044,6.5194 3.96875,9.26041 0,15.875"
+       id="path1581"
+       sodipodi:nodetypes="cc"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.667;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker1665)"
+       d="m 146.84375,119.0625 c 4.18044,6.5194 3.96875,9.26041 0,15.875"
+       id="path1661"
+       sodipodi:nodetypes="cc"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.333;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker1753)"
+       d="m 146.84375,138.90625 c 4.18044,6.5194 3.96875,9.26041 0,15.875"
+       id="path1749"
+       sodipodi:nodetypes="cc"
+       inkscape:connector-curvature="0" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="Layer 2"
+     transform="translate(-47.596966,-87.604172)">
+    <a
+       id="a4661"
+       xlink:href="https://scipp.github.io/ess/">
+      <rect
+         ry="1.3229218"
+         y="111.125"
+         x="66.145836"
+         height="13.229166"
+         width="79.375"
+         id="rect1899"
+         style="fill:#f4c4a4;fill-opacity:1;stroke-width:1.73000002;stroke-miterlimit:4;stroke-dasharray:none"
+         rx="1.3229218" />
+    </a>
+    <rect
+       style="fill:#eb7b61;fill-opacity:1;stroke-width:0.45771599;stroke-miterlimit:4;stroke-dasharray:none"
+       id="rect1916"
+       width="18.520844"
+       height="3.9687603"
+       x="125.67709"
+       y="113.77084"
+       ry="0.39687756"
+       rx="0.39687756" />
+    <rect
+       style="fill:#eb7b61;fill-opacity:1;stroke-width:0.45771599;stroke-miterlimit:4;stroke-dasharray:none"
+       id="rect1920"
+       width="18.520844"
+       height="3.9687603"
+       x="105.83334"
+       y="113.77084"
+       ry="0.39687756"
+       rx="0.39687756" />
+    <rect
+       style="fill:#eb7b61;fill-opacity:1;stroke-width:0.45771599;stroke-miterlimit:4;stroke-dasharray:none"
+       id="rect1922"
+       width="18.520844"
+       height="3.9687603"
+       x="85.989571"
+       y="113.77083"
+       ry="0.39687756"
+       rx="0.39687756" />
+    <rect
+       style="fill:#eb7b61;fill-opacity:1;stroke-width:0.45771599;stroke-miterlimit:4;stroke-dasharray:none"
+       id="rect1924"
+       width="18.520844"
+       height="3.9687603"
+       x="125.67711"
+       y="119.06251"
+       ry="0.39687756"
+       rx="0.39687756" />
+    <rect
+       style="fill:#eb7b61;fill-opacity:1;stroke-width:0.45771599;stroke-miterlimit:4;stroke-dasharray:none"
+       id="rect1926"
+       width="18.520844"
+       height="3.9687603"
+       x="105.83336"
+       y="119.06251"
+       ry="0.39687756"
+       rx="0.39687756" />
+    <rect
+       style="fill:#eb7b61;fill-opacity:1;stroke-width:0.45771599;stroke-miterlimit:4;stroke-dasharray:none"
+       id="rect1928"
+       width="18.520844"
+       height="3.9687603"
+       x="85.989586"
+       y="119.0625"
+       ry="0.39687756"
+       rx="0.39687756" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="text"
+     style="opacity:1"
+     transform="translate(-47.596966,-87.604172)">
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93888998px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+       x="84.666664"
+       y="134.9375"
+       id="text839"><tspan
+         sodipodi:role="line"
+         id="tspan837"
+         x="84.666664"
+         y="134.9375"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93888998px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;text-align:center;text-anchor:middle;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none">scippneutron</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93888998px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+       x="74.989395"
+       y="153.45833"
+       id="text851"><tspan
+         sodipodi:role="line"
+         id="tspan849"
+         x="74.989395"
+         y="153.45833"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93888998px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;text-align:center;text-anchor:middle;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none">scipp</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93888998px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+       x="72.611588"
+       y="116.34673"
+       id="text857"><tspan
+         sodipodi:role="line"
+         id="tspan855"
+         x="72.611588"
+         y="116.34673"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93888998px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;text-align:center;text-anchor:middle;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none">ess</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93888998px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;text-align:start;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+       x="68.519157"
+       y="97.825897"
+       id="text863"><tspan
+         sodipodi:role="line"
+         id="tspan861"
+         x="68.519157"
+         y="97.825897"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93888998px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;text-align:start;text-anchor:start;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none">ess-notebooks</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444017px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+       x="-127"
+       y="56.885418"
+       id="text1904"
+       transform="rotate(-90)"><tspan
+         sodipodi:role="line"
+         id="tspan1902"
+         x="-127"
+         y="56.885418"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444017px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;text-align:center;text-anchor:middle;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none">requirements</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444017px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+       x="127"
+       y="-154.78125"
+       id="text1908"
+       transform="rotate(90)"><tspan
+         sodipodi:role="line"
+         id="tspan1906"
+         x="127"
+         y="-154.78125"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444017px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;text-align:center;text-anchor:middle;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none">filtered features</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222009px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+       x="95.25"
+       y="116.68125"
+       id="text1932"><tspan
+         sodipodi:role="line"
+         id="tspan1930"
+         x="95.25"
+         y="116.68125"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222009px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;text-align:center;text-anchor:middle;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none">imaging</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222009px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+       x="115.09375"
+       y="116.68125"
+       id="text1936"><tspan
+         sodipodi:role="line"
+         id="tspan1934"
+         x="115.09375"
+         y="116.68125"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222009px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;text-align:center;text-anchor:middle;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none">sans</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222009px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+       x="134.9375"
+       y="116.41666"
+       id="text1940"><tspan
+         sodipodi:role="line"
+         id="tspan1938"
+         x="134.9375"
+         y="116.41666"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222009px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;text-align:center;text-anchor:middle;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none">...</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222009px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+       x="134.9375"
+       y="116.41666"
+       id="text1944"><tspan
+         sodipodi:role="line"
+         id="tspan1942"
+         x="134.9375"
+         y="116.41666"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222009px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;text-align:center;text-anchor:middle;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none">...</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222009px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+       x="95.25"
+       y="121.97292"
+       id="text1948"><tspan
+         sodipodi:role="line"
+         id="tspan1946"
+         x="95.25"
+         y="121.97292"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222009px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;text-align:center;text-anchor:middle;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none">dream</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222009px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+       x="115.09375"
+       y="121.97292"
+       id="text1952"><tspan
+         sodipodi:role="line"
+         id="tspan1950"
+         x="115.09375"
+         y="121.97292"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222009px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;text-align:center;text-anchor:middle;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none">estia</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222009px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+       x="134.9375"
+       y="121.70834"
+       id="text1956"><tspan
+         sodipodi:role="line"
+         id="tspan1954"
+         x="134.9375"
+         y="121.70834"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222009px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;text-align:center;text-anchor:middle;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none">...</tspan></text>
+    <text
+       xml:space="preserve"
+       id="text1964"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect1966);fill:#000000;fill-opacity:1;stroke:none" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222009px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;text-align:start;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+       x="170.65625"
+       y="154.0695"
+       id="text1972"><tspan
+         sodipodi:role="line"
+         id="tspan1970"
+         x="170.65625"
+         y="154.0695"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222009px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;text-align:start;text-anchor:start;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none">generic</tspan><tspan
+         sodipodi:role="line"
+         x="170.65625"
+         y="157.59727"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222009px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;text-align:start;text-anchor:start;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+         id="tspan1974">scientific</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222009px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;text-align:start;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+       x="170.65625"
+       y="135.22345"
+       id="text1980"><tspan
+         sodipodi:role="line"
+         x="170.65625"
+         y="135.22345"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222009px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;text-align:start;text-anchor:start;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+         id="tspan1978">neutron-scattering</tspan><tspan
+         sodipodi:role="line"
+         x="170.65625"
+         y="138.75122"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222009px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;text-align:start;text-anchor:start;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+         id="tspan1984">specific</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58329964px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458299"
+       x="166.6875"
+       y="117.73958"
+       id="text1988"><tspan
+         sodipodi:role="line"
+         id="tspan1986"
+         x="166.6875"
+         y="127.10332"
+         style="stroke-width:0.26458299" /></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222009px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;text-align:start;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+       x="170.73341"
+       y="115.26394"
+       id="text1994"><tspan
+         sodipodi:role="line"
+         x="170.73341"
+         y="115.26394"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222009px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;text-align:start;text-anchor:start;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+         id="tspan1992">ESS specific</tspan><tspan
+         sodipodi:role="line"
+         x="170.73341"
+         y="118.79172"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222009px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;text-align:start;text-anchor:start;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+         id="tspan2004">technique submodules</tspan><tspan
+         sodipodi:role="line"
+         x="170.73341"
+         y="122.31949"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222009px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;text-align:start;text-anchor:start;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+         id="tspan2006">instrument submodules</tspan></text>
+  </g>
+</svg>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">scipp</span></code>, <code class="docutils literal notranslate"><span class="pre">scippneutron</span></code>, and <code class="docutils literal notranslate"><span class="pre">ess</span></code> are Python packages that can be installed using <code class="docutils literal notranslate"><span class="pre">conda</span></code>.
+Each package is released independently.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ess-notebooks</span></code> is a <code class="docutils literal notranslate"><span class="pre">git</span></code> repository containing Jupyter notebooks with exampels and actual reduction workflows.</p></li>
+<li><p>Higher levels of the stack are optional, and it is absolutely possible to use <code class="docutils literal notranslate"><span class="pre">scippneutron</span></code> without <code class="docutils literal notranslate"><span class="pre">ess</span></code>, or <code class="docutils literal notranslate"><span class="pre">ess</span></code> without <code class="docutils literal notranslate"><span class="pre">ess-notebooks</span></code>.</p></li>
+</ul>
+<p>New features may frequently be introduced on the top of the software stack, for example in <code class="docutils literal notranslate"><span class="pre">ess-notebooks</span></code>.
+Depending on the feature this may then gradually move to lower levels.
+This involves a “filtering” process, since scope and contribution guidelines are different the lower the level in the stack.</p>
+</div>
+<div class="section" id="documentation">
+<h1>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="getting-started/installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting-started/installation.html#with-the-provided-environment-file">With the provided environment file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started/installation.html#without-the-provided-environment-file">Without the provided environment file</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Instruments</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="instruments/amor/amor.html">Amor</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="instruments/amor/amor_reduction.html">Divergent data reduction for Amor</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="instruments/amor/amor_reduction.html#The-Amor-beamline">The Amor beamline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instruments/amor/amor_reduction.html#Setting-the-experiment-metadata">Setting the experiment metadata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instruments/amor/amor_reduction.html#Loading-the-data">Loading the data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instruments/amor/amor_reduction.html#Coordinate-transformation-graph">Coordinate transformation graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instruments/amor/amor_reduction.html#Computing-the-wavelength">Computing the wavelength</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instruments/amor/amor_reduction.html#Compute-the-angle-and-perform-the-footprint-correction">Compute the angle and perform the footprint correction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instruments/amor/amor_reduction.html#Resolution-function">Resolution function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instruments/amor/amor_reduction.html#Compute-the-Q-vector">Compute the Q vector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instruments/amor/amor_reduction.html#Calibration-of-the-super-mirror">Calibration of the super-mirror</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instruments/amor/amor_reduction.html#Normalization-by-the-super-mirror">Normalization by the super-mirror</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instruments/amor/amor_reduction.html#Writing-to-a-file">Writing to a file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instruments/amor/amor_reduction.html#Make-a-(\lambda,-\theta)-map">Make a <span class="math notranslate nohighlight">\((\lambda, \theta)\)</span> map</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instruments/amor/amor_reduction.html#References">References</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="instruments/amor/reference.html">Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="instruments/amor/reference.html#modules">Modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instruments/amor/reference.html#functions">Functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="instruments/loki/loki.html">Loki</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="instruments/loki/sans2d_to_I_of_Q.html">SANS2D: I(Q) workflow for a single run (sample)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="instruments/loki/sans2d_to_I_of_Q.html#Define-reduction-parameters">Define reduction parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instruments/loki/sans2d_to_I_of_Q.html#Loading-data-files">Loading data files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instruments/loki/sans2d_to_I_of_Q.html#Extract-monitors">Extract monitors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instruments/loki/sans2d_to_I_of_Q.html#Apply-offsets-to-pixel-positions">Apply offsets to pixel positions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instruments/loki/sans2d_to_I_of_Q.html#Masking">Masking</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instruments/loki/sans2d_to_I_of_Q.html#Coordinate-transformation-graph">Coordinate transformation graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instruments/loki/sans2d_to_I_of_Q.html#Convert-the-data-to-wavelength">Convert the data to wavelength</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instruments/loki/sans2d_to_I_of_Q.html#Compute-normalization-term">Compute normalization term</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instruments/loki/sans2d_to_I_of_Q.html#Convert-to-Q">Convert to Q</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instruments/loki/sans2d_to_I_of_Q.html#Normalize-the-sample">Normalize the sample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instruments/loki/sans2d_to_I_of_Q.html#References">References</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="instruments/loki/sans2d_reduction.html">SANS2D: I(Q) for sample and background</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="instruments/loki/sans2d_reduction.html#Define-reduction-workflow-parameters">Define reduction workflow parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instruments/loki/sans2d_reduction.html#Loading-data-files">Loading data files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instruments/loki/sans2d_reduction.html#Apply-corrections-to-pixel-positions">Apply corrections to pixel positions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instruments/loki/sans2d_reduction.html#Masking">Masking</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instruments/loki/sans2d_reduction.html#Use-to_I_of_Q-workflow">Use to_I_of_Q workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instruments/loki/sans2d_reduction.html#Wavelength-bands">Wavelength bands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instruments/loki/sans2d_reduction.html#References">References</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Techniques</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="techniques/reflectometry/reflectometry.html">Reflectometry</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="techniques/reflectometry/reference.html">Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="techniques/reflectometry/reference.html#conversions">Conversions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="techniques/reflectometry/reference.html#corrections">Corrections</a></li>
+<li class="toctree-l3"><a class="reference internal" href="techniques/reflectometry/reference.html#io">IO</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="techniques/sans/sans.html">SANS</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="techniques/sans/reference.html">Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="techniques/sans/reference.html#reduction-workflows">Reduction workflows</a></li>
+<li class="toctree-l3"><a class="reference internal" href="techniques/sans/reference.html#conversions">Conversions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="techniques/sans/reference.html#normalization">Normalization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="techniques/sans/reference.html#common">Common</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="techniques/wfm/wfm.html">Wavelength frame multiplication</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="techniques/wfm/introduction-to-wfm.html">Introduction to Wavelength Frame Multiplication</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="techniques/wfm/introduction-to-wfm.html#The-long-ESS-pulse">The long ESS pulse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="techniques/wfm/introduction-to-wfm.html#So-what-is-WFM-anyway?">So what is WFM anyway?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="techniques/wfm/introduction-to-wfm.html#A-closer-look">A closer look</a></li>
+<li class="toctree-l3"><a class="reference internal" href="techniques/wfm/introduction-to-wfm.html#A-short-example">A short example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="techniques/wfm/introduction-to-wfm.html#References">References</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="techniques/wfm/reducing-wfm-data.html">Reducing WFM data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="techniques/wfm/reducing-wfm-data.html#Create-beamline-components">Create beamline components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="techniques/wfm/reducing-wfm-data.html#Generate-some-fake-data">Generate some fake data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="techniques/wfm/reducing-wfm-data.html#Visualize-the-beamline’s-chopper-cascade">Visualize the beamline’s chopper cascade</a></li>
+<li class="toctree-l3"><a class="reference internal" href="techniques/wfm/reducing-wfm-data.html#Discard-neutrons-that-do-not-make-it-through-the-chopper-windows">Discard neutrons that do not make it through the chopper windows</a></li>
+<li class="toctree-l3"><a class="reference internal" href="techniques/wfm/reducing-wfm-data.html#Create-a-realistic-Dataset">Create a realistic Dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="techniques/wfm/reducing-wfm-data.html#Stitch-the-frames">Stitch the frames</a></li>
+<li class="toctree-l3"><a class="reference internal" href="techniques/wfm/reducing-wfm-data.html#Convert-to-wavelength">Convert to wavelength</a></li>
+<li class="toctree-l3"><a class="reference internal" href="techniques/wfm/reducing-wfm-data.html#Normalization">Normalization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="techniques/wfm/reducing-wfm-data.html#Comparing-to-the-raw-wavelengths">Comparing to the raw wavelengths</a></li>
+<li class="toctree-l3"><a class="reference internal" href="techniques/wfm/reducing-wfm-data.html#Without-WFM-choppers">Without WFM choppers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="techniques/wfm/reducing-wfm-data.html#Working-in-event-mode">Working in event mode</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Utilities</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="utilities/utilities.html">Modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/modules/ess.logging.html">ess.logging</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Developer documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="developer/style-guide.html">Style guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="developer/style-guide.html#layout">Layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developer/style-guide.html#coding-guidelines">Coding guidelines</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="developer/style-guide.html#prefer-a-functional-design">Prefer a functional design</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer/style-guide.html#logging">Logging</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer/style-guide.html#testing">Testing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer/style-guide.html#formatting">Formatting</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="developer/style-guide.html#jupyter-notebooks-style">Jupyter notebooks style</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="developer/style-guide.html#using-data-files">Using data files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="developer/style-guide.html#references">References</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="developer/style-guide.html#documentation">Documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="developer/getting-started.html">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="developer/getting-started.html#getting-the-source-code">Getting the source code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developer/getting-started.html#creating-a-development-environment">Creating a development environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developer/getting-started.html#running-the-unit-tests">Running the unit tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developer/getting-started.html#building-documentation">Building Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="about/release-notes.html">Release Notes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="about/release-notes.html#v0-5-0-april-2022">v0.5.0 (April 2022)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="about/release-notes.html#features">Features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="about/release-notes.html#contributors">Contributors</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="about/release-notes.html#v0-4-0-february-2022">v0.4.0 (February 2022)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="about/release-notes.html#breaking-changes">Breaking changes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="about/release-notes.html#id5">Contributors</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="about/release-notes.html#v0-3-0-february-2022">v0.3.0 (February 2022)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="about/release-notes.html#id6">Features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="about/release-notes.html#id9">Contributors</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="about/release-notes.html#v0-2-0-january-2022">v0.2.0 (January 2022)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="about/release-notes.html#id10">Breaking changes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="about/release-notes.html#id12">Contributors</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="about/release-notes.html#v0-1-0-september-2021">v0.1.0 (September 2021)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="about/release-notes.html#id13">Features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="about/release-notes.html#id14">Contributors</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="about/release-notes.html#contributing-organizations">Contributing Organizations</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+              </div>
+              
+            
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+    <a class='right-next' id="next-link" href="getting-started/installation.html" title="next page">
+    <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Installation</p>
+    </div>
+    <i class="fas fa-angle-right"></i>
+    </a>
+</div>
+            
+        </div>
+    </div>
+    <footer class="footer">
+  <p>
+    
+        &copy; Copyright scipp contributors.<br/>
+  </p>
+</footer>
+</main>
+
+
+      </div>
+    </div>
+  
+  <script src="_static/js/index.be7d3bbb2ef33a8344ce.js"></script>
+
+  </body>
+</html>

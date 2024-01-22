@@ -1,0 +1,20 @@
+name: ess-mantid
+
+channels:
+  - conda-forge
+  - scipp
+  - nodefaults
+  - mantid
+
+dependencies:
+  - ess
+  - mantid
+  - astropy
+  - matplotlib
+  - tifffile
+  - jupyterlab
+  - jupyterlab_widgets
+  - plopp
+  - pythreejs
+  - scipy
+  - ipympl

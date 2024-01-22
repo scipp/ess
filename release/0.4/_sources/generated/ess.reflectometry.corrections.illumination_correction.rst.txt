@@ -1,0 +1,6 @@
+﻿ess.reflectometry.corrections.illumination\_correction
+======================================================
+
+.. currentmodule:: ess.reflectometry.corrections
+
+.. autofunction:: illumination_correction

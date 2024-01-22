@@ -1,0 +1,6 @@
+﻿ess.reflectometry.resolution.z\_offset
+======================================
+
+.. currentmodule:: ess.reflectometry.resolution
+
+.. autofunction:: z_offset

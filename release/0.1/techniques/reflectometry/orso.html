@@ -1,0 +1,453 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>ess.reflectometry.orso &mdash; ess  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="ess.reflectometry.resolution" href="resolution.html" />
+    <link rel="prev" title="ess.reflectometry.data" href="data.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html">
+          
+
+          
+            
+            <img src="../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+    
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started/installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Instruments</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../instruments/amor.html">Amor</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Techniques</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../reflectometry.html">Reflectometry</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="binning.html">ess.reflectometry.binning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="corrections.html">ess.reflectometry.corrections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.html">ess.reflectometry.data</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">ess.reflectometry.orso</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resolution.html">ess.reflectometry.resolution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="write.html">ess.reflectometry.write</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../wfm.html">Wavelength frame multiplication</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../about/release-notes.html">Release Notes</a></li>
+</ul>
+
+            
+          
+    <div style="height: 32px; position: fixed; bottom: 0; left: 15px;">
+      Select version:&nbsp;
+      <select onchange="location = this.value;"
+              style="height: 30px; color: #27a54b; background-color: #403d3d;
+                    border: 0px; box-shadow: none;">
+        <option value="" selected>Pick version</option>
+        <option value="https://scipp.github.io/ess">latest (unstable)</option>
+        <option value="https://scipp.github.io/release/0.1.0">v0.1</option>
+      </select>
+    </div>
+  
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">ess</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../reflectometry.html">Reflectometry</a> &raquo;</li>
+        
+      <li>ess.reflectometry.orso</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../../_sources/techniques/reflectometry/orso.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="module-ess.reflectometry.orso">
+<span id="ess-reflectometry-orso"></span><h1>ess.reflectometry.orso<a class="headerlink" href="#module-ess.reflectometry.orso" title="Permalink to this headline">¶</a></h1>
+<p>This is the implementation of the ORSO header information.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="ess.reflectometry.orso.Column">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ess.reflectometry.orso.</span></span><span class="sig-name descname"><span class="pre">Column</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'dimensionless'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ess.reflectometry.orso.Column" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Information on a data column.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>quantity (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>): The name of the column.
+unit (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>, optional): The unit. Optional, defaults to <code class="code docutils literal notranslate"><span class="pre">'dimensionless'</span></code>.
+comments (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>, optional): An additional comment on the column (ie. the definition for an uncertainty column). Optional, defaults to <code class="code docutils literal notranslate"><span class="pre">'None'</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ess.reflectometry.orso.Creator">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ess.reflectometry.orso.</span></span><span class="sig-name descname"><span class="pre">Creator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">affiliation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ess.reflectometry.orso.Creator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ess.reflectometry.orso.Header" title="ess.reflectometry.orso.Header"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reflectometry.orso.Header</span></code></a></p>
+<p>The information about who and when the reduced data was created, ie. when the reduction was performed and by whom.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>name (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>, optional): The name of the person that performed the reduction, can also include an email address. Optional, defaults to the machine username.
+affiliation (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>, optional): The affiliation of the person that performed the reduction. Optional, defaults to <code class="code docutils literal notranslate"><span class="pre">None</span></code>.
+time (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>, optional): The time that the reduction was performed, in the format <code class="code docutils literal notranslate"><span class="pre">&quot;%Y-%m-%dT%H:%M:%S&quot;</span></code>. Optional, defaults to the current time.
+system (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>, optional): The machine that the reduction was performed on. Optional, defaults to the machine’s host name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ess.reflectometry.orso.DataSource">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ess.reflectometry.orso.</span></span><span class="sig-name descname"><span class="pre">DataSource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">owner</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">facility</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ess.reflectometry.orso.DataSource" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ess.reflectometry.orso.Header" title="ess.reflectometry.orso.Header"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reflectometry.orso.Header</span></code></a></p>
+<p>Details of where and who the data came from.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>owner (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>, optional): The name (and affiliation/email address) of the owner of the data. Optional, defaults to <code class="code docutils literal notranslate"><span class="pre">'None'</span></code>.
+facility (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>, optional): The name of the facility the data was generated at. Optional, defaults to <code class="code docutils literal notranslate"><span class="pre">'None'</span></code>.
+experiment_id (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>, optional): An identifier for the experiment (ie. proposal ID). Optional, defaults to <code class="code docutils literal notranslate"><span class="pre">'None'</span></code>.
+experiment_date (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>, optional): The date or date range that the experiment was conducted on, in the format <code class="code docutils literal notranslate"><span class="pre">&quot;%Y-%m-%d&quot;</span></code>. Optional, defaults to <code class="code docutils literal notranslate"><span class="pre">'None'</span></code>.
+title (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>, optional): A name of the data source. Optional, defaults to <code class="code docutils literal notranslate"><span class="pre">'None'</span></code>.
+experiment (<code class="xref py py-class docutils literal notranslate"><span class="pre">orso.Experiment</span></code>, optional): Information about the experimental setup. Optional, defaults to <code class="code docutils literal notranslate"><span class="pre">'None'</span></code>.
+measurement (<code class="xref py py-class docutils literal notranslate"><span class="pre">orso.Measurement</span></code>, optional): Details of the measurement scheme. Optional, defaults to <code class="code docutils literal notranslate"><span class="pre">'None'</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ess.reflectometry.orso.Experiment">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ess.reflectometry.orso.</span></span><span class="sig-name descname"><span class="pre">Experiment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">probe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ess.reflectometry.orso.Experiment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ess.reflectometry.orso.Header" title="ess.reflectometry.orso.Header"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reflectometry.orso.Header</span></code></a></p>
+<p>Experimental details.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>instrument (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>, optional): The name of the instrument. Optional, defaults to <code class="code docutils literal notranslate"><span class="pre">'None'</span></code>.
+probe (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>, optional): The name of the probing radiation. Optional, defaults to <code class="code docutils literal notranslate"><span class="pre">'None'</span></code>.
+sample (<code class="xref py py-class docutils literal notranslate"><span class="pre">orso.Sample</span></code>, optional): A description of the sample. Optional, defaults to <code class="code docutils literal notranslate"><span class="pre">'None'</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ess.reflectometry.orso.File">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ess.reflectometry.orso.</span></span><span class="sig-name descname"><span class="pre">File</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ess.reflectometry.orso.File" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ess.reflectometry.orso.Header" title="ess.reflectometry.orso.Header"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reflectometry.orso.Header</span></code></a></p>
+<p>Information for a given file.</p>
+<dl class="simple">
+<dt>Attributes:</dt><dd><p>creation (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>): The date and time of the file creation.</p>
+</dd>
+<dt>Args:</dt><dd><p>file (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>): The file name/path.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ess.reflectometry.orso.Files">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ess.reflectometry.orso.</span></span><span class="sig-name descname"><span class="pre">Files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_files</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ess.reflectometry.orso.Files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ess.reflectometry.orso.Header" title="ess.reflectometry.orso.Header"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reflectometry.orso.Header</span></code></a></p>
+<p>Information on data files and associated reference files.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>data_files (<code class="xref py py-attr docutils literal notranslate"><span class="pre">list</span></code> of <code class="xref py py-class docutils literal notranslate"><span class="pre">orso.File</span></code>): The experimental data files.
+reference_files (<code class="xref py py-attr docutils literal notranslate"><span class="pre">list</span></code> of <code class="xref py py-class docutils literal notranslate"><span class="pre">orso.File</span></code>, optional): The reference files. Optional, defaults to <code class="code docutils literal notranslate"><span class="pre">'None'</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ess.reflectometry.orso.Header">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ess.reflectometry.orso.</span></span><span class="sig-name descname"><span class="pre">Header</span></span><a class="headerlink" href="#ess.reflectometry.orso.Header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The super class for all of the __repr__ items in the orso module</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ess.reflectometry.orso.Measurement">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ess.reflectometry.orso.</span></span><span class="sig-name descname"><span class="pre">Measurement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scheme</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omega</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wavelength</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polarisation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ess.reflectometry.orso.Measurement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ess.reflectometry.orso.Header" title="ess.reflectometry.orso.Header"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reflectometry.orso.Header</span></code></a></p>
+<p>Details of the measurement that is performed.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>scheme (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>, optional): The measurement scheme (ie. <code class="code docutils literal notranslate"><span class="pre">'energy-dispersive'</span></code>). Optional, defaults to <code class="code docutils literal notranslate"><span class="pre">'None'</span></code>.
+omega (<code class="xref py py-class docutils literal notranslate"><span class="pre">orso.ValueScalar</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">orso.ValueRange</span></code>, optional): The incident angle value or range. Optional, defaults to <code class="code docutils literal notranslate"><span class="pre">'None'</span></code>.
+wavelength (<code class="xref py py-class docutils literal notranslate"><span class="pre">orso.ValueScalar</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">orso.ValueRange</span></code>, optional): The measured wavelength value or range. Optional, defaults to <code class="code docutils literal notranslate"><span class="pre">'None'</span></code>.
+polarisation (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>, optional): The polarisation present, typically as a <code class="code docutils literal notranslate"><span class="pre">'+'</span></code> or <code class="code docutils literal notranslate"><span class="pre">'-'</span></code> or combination. Optional, defaults to <code class="code docutils literal notranslate"><span class="pre">'None'</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ess.reflectometry.orso.Orso">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ess.reflectometry.orso.</span></span><span class="sig-name descname"><span class="pre">Orso</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">creator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columns</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ess.reflectometry.orso.Orso" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The class for the Orso header object.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>creator (<code class="xref py py-class docutils literal notranslate"><span class="pre">orso.Creator</span></code>): Information about the creation of the reduction.
+data_source (<code class="xref py py-class docutils literal notranslate"><span class="pre">orso.DataSource</span></code>): Details of the data being reduced.
+reduction (<code class="xref py py-class docutils literal notranslate"><span class="pre">orso.Reduction</span></code>): Information about the reduction that is performed.
+columns (<code class="xref py py-attr docutils literal notranslate"><span class="pre">list</span></code> of <code class="xref py py-class docutils literal notranslate"><span class="pre">orso.Column</span></code>): A list of the different columns persent in the data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ess.reflectometry.orso.Reduction">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ess.reflectometry.orso.</span></span><span class="sig-name descname"><span class="pre">Reduction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">script</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_files</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ess.reflectometry.orso.Reduction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ess.reflectometry.orso.Header" title="ess.reflectometry.orso.Header"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reflectometry.orso.Header</span></code></a></p>
+<p>Details of the reduction processes.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>script (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>, optional): The file name/path for the reduction script or notebook. Optional, defaults to <code class="code docutils literal notranslate"><span class="pre">'None'</span></code>.
+input_files (<code class="xref py py-class docutils literal notranslate"><span class="pre">orso.Files</span></code>, optional): The input files for the reduction. Optional defaults to <code class="code docutils literal notranslate"><span class="pre">'None'</span></code>.
+comments (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>, optional): An additional comment on the reduction. Optional, defaults to <code class="code docutils literal notranslate"><span class="pre">'None'</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ess.reflectometry.orso.Sample">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ess.reflectometry.orso.</span></span><span class="sig-name descname"><span class="pre">Sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Sample'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ess.reflectometry.orso.Sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ess.reflectometry.orso.Header" title="ess.reflectometry.orso.Header"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reflectometry.orso.Header</span></code></a></p>
+<p>Sample information.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>name (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>, optional): A identifiable description for the sample. Optional, defaults to <code class="code docutils literal notranslate"><span class="pre">'Sample'</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ess.reflectometry.orso.ValueRange">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ess.reflectometry.orso.</span></span><span class="sig-name descname"><span class="pre">ValueRange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'dimensionless'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ess.reflectometry.orso.ValueRange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ess.reflectometry.orso.Header" title="ess.reflectometry.orso.Header"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reflectometry.orso.Header</span></code></a></p>
+<p>A range with an upper and lower limit and a unit.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>min (<code class="xref py py-attr docutils literal notranslate"><span class="pre">float</span></code>): The minimum value.
+max (<code class="xref py py-attr docutils literal notranslate"><span class="pre">float</span></code>): The maximum value.
+unit (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>, optional): The unit. Optional, defaults to <code class="code docutils literal notranslate"><span class="pre">'dimensionless'</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ess.reflectometry.orso.ValueScalar">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ess.reflectometry.orso.</span></span><span class="sig-name descname"><span class="pre">ValueScalar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">magnitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'dimensionless'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ess.reflectometry.orso.ValueScalar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ess.reflectometry.orso.Header" title="ess.reflectometry.orso.Header"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reflectometry.orso.Header</span></code></a></p>
+<p>A single value with an unit.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>magnitude (<code class="xref py py-attr docutils literal notranslate"><span class="pre">float</span></code>): The value.
+unit (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>, optional): The unit. Optional, defaults to <code class="code docutils literal notranslate"><span class="pre">'dimensionless'</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ess.reflectometry.orso.noop">
+<span class="sig-prename descclassname"><span class="pre">ess.reflectometry.orso.</span></span><span class="sig-name descname"><span class="pre">noop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ess.reflectometry.orso.noop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="resolution.html" class="btn btn-neutral float-right" title="ess.reflectometry.resolution" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="data.html" class="btn btn-neutral float-left" title="ess.reflectometry.data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright scipp ess contributors.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+    
+    <style>
+      .wy-nav-content { max-width: 1100px; }
+    </style>
+  
+
+</body>
+</html>

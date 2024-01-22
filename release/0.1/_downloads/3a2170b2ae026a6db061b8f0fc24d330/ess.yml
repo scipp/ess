@@ -1,0 +1,17 @@
+name: ess
+
+channels:
+  - conda-forge
+  - scipp
+  - nodefaults
+
+dependencies:
+  - ess
+  - astropy
+  - matplotlib
+  - tifffile
+  - jupyterlab
+  - jupyterlab_widgets
+  - pythreejs
+  - scipy
+  - ipympl
