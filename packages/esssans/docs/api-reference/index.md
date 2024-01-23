@@ -37,6 +37,7 @@
    direct_beam
    i_of_q
    io
+   isis
    logging
    loki
    sans2d
