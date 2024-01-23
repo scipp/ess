@@ -12,6 +12,7 @@ from . import io, masking
 from .common import transmission_from_background_run, transmission_from_sample_run
 from .io import CalibrationFilename, DataFolder, Filename, PixelMaskFilename
 from .masking import PixelMask
+from .visualization import plot_instrument
 
 providers = (
     (
@@ -40,4 +41,5 @@ __all__ = [
     'providers',
     'transmission_from_background_run',
     'transmission_from_sample_run',
+    'plot_instrument',
 ]
