@@ -38,6 +38,6 @@ def plot_instrument(da: sc.DataArray, pixels_per_tube: int = 512, **kwargs: Any)
             'Cannot plot 2-D instrument view of data array with non-constant '
             'y coordinate along tubes. Use scippneutron.instrument_view instead.'
         )
-    plot_kwargs = dict(aspect='equal', norm='log', figsize=(6, 10))
+    plot_kwargs = dict(aspect='equal')
     plot_kwargs.update(kwargs)
     return folded.plot(**plot_kwargs)
