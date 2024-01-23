@@ -29,7 +29,6 @@ from .types import (
     QBins,
     SampleRun,
     UncertaintyBroadcastMode,
-    WavelengthBands,
     WavelengthBins,
 )
 
@@ -129,7 +128,7 @@ def _iofq_in_quadrants(
     norm: sc.DataArray,
     graph: dict,
     q_bins: Union[int, sc.Variable],
-    wavelength_range: sc.Variable,
+    wavelength_bins: sc.Variable,
     transform: sc.Variable,
     pixel_shape: sc.DataGroup,
 ) -> Dict[str, sc.DataArray]:
@@ -148,8 +147,8 @@ def _iofq_in_quadrants(
         Coordinate transformation graph.
     q_bins:
         Bin edges for Q.
-    wavelength_range:
-        The wavelength range to use for computing the intensity as a function of Q.
+    wavelength_bins:
+        The binning in wavelength to use for computing the intensity as a function of Q.
 
     Returns
     -------
@@ -177,7 +176,7 @@ def _iofq_in_quadrants(
     ]
     params = {}
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
-    params[WavelengthBands] = wavelength_range
+    params[WavelengthBins] = wavelength_bins
     params[QBins] = q_bins
     params[DetectorPixelShape[SampleRun]] = pixel_shape
     params[LabFrameTransform[SampleRun]] = transform
@@ -405,10 +404,6 @@ def beam_center_from_iofq(
     com_shift = beam_center_from_center_of_mass(data, graph)
     logger.info(f'Initial guess for beam center: {com_shift}')
 
-    wavelength_range = sc.concat(
-        [wavelength_bins.min(), wavelength_bins.max()], dim='wavelength'
-    )
-
     coords = data.transform_coords(
         ['cylindrical_x', 'cylindrical_y'], graph=graph
     ).coords
@@ -421,7 +416,7 @@ def beam_center_from_iofq(
     res = minimize(
         _cost,
         x0=[com_shift.fields.x.value, com_shift.fields.y.value],
-        args=(data, norm, graph, q_bins, wavelength_range, transform, pixel_shape),
+        args=(data, norm, graph, q_bins, wavelength_bins, transform, pixel_shape),
         bounds=bounds,
         method=minimizer,
         tol=tolerance,

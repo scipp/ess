@@ -131,6 +131,7 @@ def resample_direct_beam(
 
 def _process_wavelength_bands(
     wavelength_bands: Optional[WavelengthBands],
+    wavelength_bins: WavelengthBins,
 ) -> Optional[WavelengthBands]:
     """
     Perform some checks and potential reshaping on the wavelength bands.
@@ -143,7 +144,9 @@ def _process_wavelength_bands(
     and an end wavelength.
     """
     if wavelength_bands is None:
-        return wavelength_bands
+        wavelength_bands = sc.concat(
+            [wavelength_bins.min(), wavelength_bins.max()], dim='wavelength'
+        )
     if wavelength_bands.ndim == 1:
         wavelength_bands = sc.concat(
             [wavelength_bands[:-1], wavelength_bands[1:]], dim='x'
@@ -165,6 +168,7 @@ def _process_wavelength_bands(
 def merge_spectra(
     data: CleanQ[RunType, IofQPart],
     q_bins: QBins,
+    wavelength_bins: WavelengthBins,
     wavelength_bands: Optional[WavelengthBands],
     dims_to_keep: Optional[DimsToKeep],
 ) -> CleanSummedQ[RunType, IofQPart]:
@@ -180,6 +184,8 @@ def merge_spectra(
         A DataArray containing the data that is to be converted to Q.
     q_bins:
         The binning in Q to be used.
+    wavelength_bins:
+        The binning in wavelength to be used.
     wavelength_bands:
         Defines bands in wavelength that can be used to separate different wavelength
         ranges that contribute to different regions in Q space. Note that this needs to
@@ -198,7 +204,9 @@ def merge_spectra(
     if dims_to_keep is not None:
         dims_to_reduce -= set(dims_to_keep)
 
-    wavelength_bands = _process_wavelength_bands(wavelength_bands)
+    wavelength_bands = _process_wavelength_bands(
+        wavelength_bands=wavelength_bands, wavelength_bins=wavelength_bins
+    )
 
     if data.bins is not None:
         out = _events_merge_spectra(
@@ -231,7 +239,7 @@ def _events_merge_spectra(
     data_q: sc.DataArray,
     q_bins: Union[int, sc.Variable],
     dims_to_reduce: List[str],
-    wavelength_bands: Optional[sc.Variable] = None,
+    wavelength_bands: sc.Variable,
 ) -> sc.DataArray:
     """
     Merge spectra of event data
@@ -239,9 +247,6 @@ def _events_merge_spectra(
     q_all_pixels = data_q.bins.concat(dims_to_reduce)
     edges = _to_q_bins(q_bins)
     q_binned = q_all_pixels.bin(**edges)
-    if wavelength_bands is None:
-        return q_binned
-
     dim = 'wavelength'
     wav_binned = q_binned.bin({dim: sc.sort(wavelength_bands.flatten(to=dim), dim)})
     # At this point we kind of already have what we need, would be cheapest to just
@@ -263,14 +268,12 @@ def _dense_merge_spectra(
     data_q: sc.DataArray,
     q_bins: Union[int, sc.Variable],
     dims_to_reduce: List[str],
-    wavelength_bands: Optional[sc.Variable] = None,
+    wavelength_bands: sc.Variable,
 ) -> sc.DataArray:
     """
     Merge spectra of dense data
     """
     edges = _to_q_bins(q_bins)
-    if wavelength_bands is None:
-        return data_q.hist(**edges).sum(dims_to_reduce)
     bands = []
     band_dim = (set(wavelength_bands.dims) - {'wavelength'}).pop()
     for wav_range in sc.collapse(wavelength_bands, keep='wavelength').values():
