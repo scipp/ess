@@ -8,13 +8,18 @@ from typing import Any
 import scipp as sc
 
 
-def plot_instrument(da: sc.DataArray, pixels_per_tube: int = 512, **kwargs: Any) -> Any:
+def plot_flat_detector_xy(
+    da: sc.DataArray, pixels_per_tube: int = 512, **kwargs: Any
+) -> Any:
     """
-    Plot a 2-D instrument view of a data array.
+    Plot a 2-D view of data from a single flat detector bank.
 
     This is an alternative to the `scn.instrument_view` function, avoiding the 3-D
     rendering of the instrument. The exact X and Y coordinates of the pixels are
     used for the 2-D plot.
+
+    There are currently no checks that the data array is actually from a single
+    detector bank, or that it is flat. The caller is responsible for ensuring this.
 
     Parameters
     ----------
