@@ -29,7 +29,6 @@ from .types import (
     QBins,
     SampleRun,
     UncertaintyBroadcastMode,
-    WavelengthBands,
     WavelengthBins,
 )
 
