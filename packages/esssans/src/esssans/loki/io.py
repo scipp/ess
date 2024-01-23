@@ -3,8 +3,6 @@
 """
 Loading and merging of LoKI data.
 """
-
-import threading
 from collections.abc import Iterable
 from functools import reduce
 from typing import Optional
@@ -100,7 +98,7 @@ def load_nexus(
 
     data_groups = []
     for filename in filelist:
-        with load_nexus._lock, snx.File(get_path(filename)) as f:
+        with snx.File(get_path(filename)) as f:
             dg = f['entry'][()]
         dg = snx.compute_positions(dg, store_transform=transform_path)
 
@@ -126,8 +124,5 @@ def load_nexus(
     out = _merge_runs(data_groups=data_groups, entries=data_entries)
     return LoadedFileContents[RunType](out)
 
-
-# TODO: Remove locking once https://github.com/scipp/scippnexus/issues/188 is resolved
-load_nexus._lock = threading.Lock()
 
 providers = (load_nexus,)
