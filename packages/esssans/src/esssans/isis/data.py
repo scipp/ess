@@ -25,7 +25,7 @@ _registry = Registry(
         'ModeratorStdDev_TS2_SANS_LETexptl_07Aug2015.txt': 'md5:5fc389340d453b9095a5dfcc33608dae',  # noqa: E501
         # ISIS user file configuring the data reduction
         'USER_ZOOM_Cabral_4m_TJump_233G_8x8mm_Small_BEAMSTOP_v1_M5.toml': 'md5:4423ecb7d924c79711aba5b0a30a23e7',  # noqa: E501
-        # Mask files
+        # 7 pixel mask files for the ZOOM00034786.nxs run
         'andru_test.xml': 'md5:c59e0c4a80640a387df7beca4857e66f',
         'left_beg_18_2.xml': 'md5:5b24a8954d4d8a291f59f5392cd61681',
         'right_beg_18_2.xml': 'md5:fae95a5056e5f5ba4996c8dff83ec109',
