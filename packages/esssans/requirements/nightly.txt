@@ -22,13 +22,13 @@ contourpy==1.2.0
     # via matplotlib
 cycler==0.12.1
     # via matplotlib
-dask==2023.12.1
+dask==2024.1.0
     # via -r nightly.in
 decorator==5.1.1
     # via ipython
 executing==2.0.1
     # via stack-data
-fonttools==4.47.0
+fonttools==4.47.2
     # via matplotlib
 fsspec==2023.12.2
     # via dask
@@ -42,6 +42,8 @@ idna==3.6
     # via requests
 importlib-metadata==7.0.1
     # via dask
+importlib-resources==6.1.1
+    # via matplotlib
 ipydatawidgets==4.3.5
     # via pythreejs
 ipython==8.18.1
@@ -119,7 +121,7 @@ scippnexus @ git+https://github.com/scipp/scippnexus@main
     # via
     #   -r nightly.in
     #   scippneutron
-scipy==1.11.4
+scipy==1.12.0
     # via
     #   scippneutron
     #   scippnexus
@@ -129,7 +131,7 @@ six==1.16.0
     #   python-dateutil
 stack-data==0.6.3
     # via ipython
-toolz==0.12.0
+toolz==0.12.1
     # via
     #   dask
     #   partd
@@ -143,11 +145,15 @@ traitlets==5.14.1
     #   traittypes
 traittypes==0.2.1
     # via ipydatawidgets
+typing-extensions==4.9.0
+    # via ipython
 urllib3==2.1.0
     # via requests
-wcwidth==0.2.12
+wcwidth==0.2.13
     # via prompt-toolkit
 widgetsnbextension==4.0.9
     # via ipywidgets
 zipp==3.17.0
-    # via importlib-metadata
+    # via
+    #   importlib-metadata
+    #   importlib-resources
