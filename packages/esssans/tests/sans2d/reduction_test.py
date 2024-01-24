@@ -34,10 +34,8 @@ from esssans.types import (
 
 def make_params() -> dict:
     params = default_parameters.copy()
-    band = sc.linspace('wavelength', 2.0, 16.0, num=2, unit='angstrom')
-    params[WavelengthBands] = band
     params[WavelengthBins] = sc.linspace(
-        'wavelength', start=band[0], stop=band[-1], num=141
+        'wavelength', start=2.0, stop=16.0, num=141, unit='angstrom'
     )
     params[WavelengthMask] = sc.DataArray(
         data=sc.array(dims=['wavelength'], values=[True]),
@@ -98,6 +96,19 @@ def test_pipeline_can_compute_background_subtracted_IofQ_in_wavelength_slices():
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('band', 'Q')
     assert result.sizes['band'] == 10
+
+
+def test_pipeline_wavelength_bands_is_optional():
+    params = make_params()
+    pipeline = sciline.Pipeline(sans2d_providers(), params=params)
+    noband = pipeline.compute(BackgroundSubtractedIofQ)
+    with pytest.raises(sciline.UnsatisfiedRequirement):
+        pipeline.compute(WavelengthBands)
+    band = sc.linspace('wavelength', 2.0, 16.0, num=2, unit='angstrom')
+    pipeline[WavelengthBands] = band
+    assert sc.identical(band, pipeline.compute(WavelengthBands))
+    withband = pipeline.compute(BackgroundSubtractedIofQ)
+    assert sc.identical(noband, withband)
 
 
 def test_workflow_is_deterministic():
