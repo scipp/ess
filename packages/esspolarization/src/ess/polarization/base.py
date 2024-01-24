@@ -6,6 +6,8 @@ import numpy as np
 import sciline as sl
 import scipp as sc
 
+from .uncertainty import broadcast_with_upper_bound_variances
+
 spin_up = sc.scalar(1, dtype='int64', unit=None)
 spin_down = sc.scalar(-1, dtype='int64', unit=None)
 
@@ -298,7 +300,10 @@ class OpacityFunction:
         return self._opacity0
 
     def __call__(self, wavelength: sc.Variable) -> sc.Variable:
-        return (self.opacity0 * wavelength).to(unit='', copy=False)
+        scale = broadcast_with_upper_bound_variances(
+            self.opacity0, sizes=wavelength.sizes
+        )
+        return (scale * wavelength).to(unit='', copy=False)
 
 
 def he3_opacity_from_cell_params(
@@ -341,7 +346,7 @@ def he3_opacity_from_beam_data(
         # TODO We could use opacity0 from cell parameters as initial guess.
         p0={'opacity0': sc.scalar(1.0, unit='1/nm')},
     )
-    return He3OpacityFunction[Cell](OpacityFunction(sc.values(popt['opacity0'].data)))
+    return He3OpacityFunction[Cell](OpacityFunction(popt['opacity0'].data))
 
 
 def he3_polarization(
