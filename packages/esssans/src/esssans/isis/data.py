@@ -2,8 +2,6 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 
 
-from threading import Lock
-
 import scipp as sc
 
 from ..data import Registry
@@ -52,15 +50,11 @@ def get_path(filename: FilenameType) -> FilePath[FilenameType]:
 
 
 def load_run(filename: FilePath[Filename[RunType]]) -> LoadedFileContents[RunType]:
-    with load_run._lock:
-        return LoadedFileContents[RunType](sc.io.load_hdf5(filename))
+    return LoadedFileContents[RunType](sc.io.load_hdf5(filename))
 
 
 def load_direct_beam(filename: FilePath[DirectBeamFilename]) -> DirectBeam:
-    with load_run._lock:
-        return DirectBeam(sc.io.load_hdf5(filename))
+    return DirectBeam(sc.io.load_hdf5(filename))
 
-
-load_run._lock = Lock()
 
 providers = (get_path, load_run, load_direct_beam)
