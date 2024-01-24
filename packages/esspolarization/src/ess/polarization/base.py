@@ -50,6 +50,10 @@ class He3CellLength(sl.Scope[Cell, sc.Variable], sc.Variable):
     """Length for a given cell."""
 
 
+class He3CellTemperature(sl.Scope[Cell, sc.Variable], sc.Variable):
+    """Temperature for a given cell."""
+
+
 class He3FillingTime(sl.Scope[Cell, sc.Variable], sc.Variable):
     """Filling wall-clock time for a given cell."""
 
@@ -293,7 +297,7 @@ class OpacityFunction:
     """Wavelength-dependent opacity function."""
 
     def __init__(self, opacity0: sc.Variable):
-        self._opacity0 = opacity0
+        self._opacity0 = opacity0.to(unit='1/Angstrom')
 
     @property
     def opacity0(self) -> sc.Variable:
@@ -308,7 +312,8 @@ class OpacityFunction:
 
 def he3_opacity_from_cell_params(
     pressure: He3CellPressure[Cell],
-    cell_length: He3CellLength[Cell],
+    length: He3CellLength[Cell],
+    temperature: He3CellTemperature[Cell],
 ) -> He3OpacityFunction[Cell]:
     """
     Opacity function for a given cell, based on pressure and cell length.
@@ -316,10 +321,21 @@ def he3_opacity_from_cell_params(
     Note that this can alternatively be defined via neutron beam data, see
     :py:func:`he3_opacity_from_beam_data`.
     """
-    # TODO Is this the correct unit?
-    factor_from_he3_number_density = 0.07733 * sc.Unit('1/N')
-    # TODO What unit scale should we use?
-    opacity0 = factor_from_he3_number_density * pressure * cell_length
+    from scipp.constants import Boltzmann as k_B
+
+    he3_neutron_absorption_cross_section_at_1_angstrom = 2966.0e-24 * sc.Unit(
+        'cm^2/Angstrom'
+    )
+    # Try to convert to Kelvin, since we get a more cryptic error message later if we
+    # do not, in case the user passes in a temperature in degree Celsius.
+    temperature = temperature.to(unit='K')
+
+    opacity0 = (
+        he3_neutron_absorption_cross_section_at_1_angstrom
+        / (k_B * temperature)
+        * pressure
+        * length
+    )
     return He3OpacityFunction[Cell](OpacityFunction(opacity0))
 
 
