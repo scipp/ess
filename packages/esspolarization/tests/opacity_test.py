@@ -25,6 +25,21 @@ def test_opacity_from_cell_params() -> None:
     assert opacity.unit == ''
 
 
+def test_opacity_from_cell_params_reproduces_literature_value() -> None:
+    # From Lee, Wai et al. (2023). Polarisation Development at the European Spallation
+    # Source. EPJ Web of Conferences. 286. 10.1051/epjconf/202328603004.
+    # At T = 20 deg C, p = 1 bar, lambda = 1 Angstrom, l = 1 cm we should get 0.0733.
+    pressure = sc.scalar(1.0, unit='bar')
+    length = sc.scalar(0.01, unit='m')
+    temperature = sc.scalar(293.15, unit='K')
+    wavelength = sc.scalar(1.0, unit='angstrom')
+    opacity_function = pol.he3_opacity_from_cell_params(
+        pressure=pressure, length=length, temperature=temperature
+    )
+    opacity = opacity_function(wavelength)
+    assert sc.isclose(opacity, sc.scalar(0.0733, unit=''), rtol=sc.scalar(1e-3))
+
+
 def test_opacity_from_cell_params_raises_with_temperature_in_degree_celsius() -> None:
     pressure = sc.scalar(1.0, unit='bar')
     length = sc.scalar(1.0, unit='m')
