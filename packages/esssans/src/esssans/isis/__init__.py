@@ -42,14 +42,6 @@ __all__ = [
     'PixelMask',
     'PixelMaskFilename',
     'providers',
-<<<<<<< HEAD
-||||||| parent of 30d58f1 (Add mechanism for setting sample and detector bank offset in Zoom workflow)
-    'transmission_from_background_run',
-    'transmission_from_sample_run',
-=======
     'SampleOffset',
-    'transmission_from_background_run',
-    'transmission_from_sample_run',
->>>>>>> 30d58f1 (Add mechanism for setting sample and detector bank offset in Zoom workflow)
     'plot_flat_detector_xy',
 ]
