@@ -36,7 +36,9 @@ def configure_raw_data(
     """
     data = data.copy(deep=False)
     sample_pos = data.coords['sample_position']
-    sample_pos += sample_offset.to(unit=sample_pos.unit, copy=False)
+    data.coords['sample_position'] = sample_pos + sample_offset.to(
+        unit=sample_pos.unit, copy=False
+    )
     pos = data.coords['position']
-    pos += detector_bank_offset.to(unit=pos.unit, copy=False)
+    data.coords['position'] = pos + detector_bank_offset.to(unit=pos.unit, copy=False)
     return ConfiguredRawData[RunType](data)
