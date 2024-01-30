@@ -9,7 +9,6 @@ from ..sans2d.general import (
     sans2d_tube_detector_pixel_shape,
 )
 from . import io, masking
-from .common import transmission_from_background_run, transmission_from_sample_run
 from .io import CalibrationFilename, DataFolder, Filename, PixelMaskFilename
 from .masking import PixelMask
 from .visualization import plot_flat_detector_xy
@@ -39,7 +38,5 @@ __all__ = [
     'PixelMask',
     'PixelMaskFilename',
     'providers',
-    'transmission_from_background_run',
-    'transmission_from_sample_run',
     'plot_flat_detector_xy',
 ]
