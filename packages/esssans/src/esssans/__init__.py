@@ -19,6 +19,7 @@ from . import (
     normalization,
     sans2d,
 )
+from .common import transmission_from_background_run, transmission_from_sample_run
 from .direct_beam import direct_beam
 
 providers = (
@@ -50,4 +51,6 @@ __all__ = [
     'normalization',
     'providers',
     'sans2d',
+    'transmission_from_sample_run',
+    'transmission_from_background_run',
 ]
