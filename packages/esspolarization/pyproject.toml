@@ -81,3 +81,6 @@ enable_error_code = [
 ]
 show_error_codes = true
 warn_unreachable = true
+
+[tool.codespell]
+ignore-words-list = "tung"
