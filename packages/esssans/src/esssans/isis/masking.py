@@ -7,7 +7,7 @@ import sciline
 import scipp as sc
 
 from ..types import MaskedData, RawData, RunType, SampleRun
-from .components import ConfiguredRawData
+from .components import RawDataWithComponentUserOffsets
 from .io import MaskedDetectorIDs
 
 PixelMask = NewType('PixelMask', sc.Variable)
@@ -30,7 +30,8 @@ def to_pixel_mask(data: RawData[SampleRun], masked: MaskedDetectorIDs) -> PixelM
 
 
 def apply_pixel_masks(
-    data: ConfiguredRawData[RunType], masks: sciline.Series[str, PixelMask]
+    data: RawDataWithComponentUserOffsets[RunType],
+    masks: sciline.Series[str, PixelMask],
 ) -> MaskedData[RunType]:
     """Apply pixel-specific masks to raw data.
 

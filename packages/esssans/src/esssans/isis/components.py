@@ -8,7 +8,9 @@ import scipp as sc
 from ..types import RawData, RunType
 
 
-class ConfiguredRawData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+class RawDataWithComponentUserOffsets(
+    sciline.Scope[RunType, sc.DataArray], sc.DataArray
+):
     """Raw data with applied user configuration for component positions."""
 
 
@@ -20,7 +22,7 @@ def configure_raw_data(
     data: RawData[RunType],
     sample_offset: SampleOffset,
     detector_bank_offset: DetectorBankOffset,
-) -> ConfiguredRawData[RunType]:
+) -> RawDataWithComponentUserOffsets[RunType]:
     """Apply user configuration to raw data.
 
     Parameters
@@ -39,4 +41,4 @@ def configure_raw_data(
     )
     pos = data.coords['position']
     data.coords['position'] = pos + detector_bank_offset.to(unit=pos.unit, copy=False)
-    return ConfiguredRawData[RunType](data)
+    return RawDataWithComponentUserOffsets[RunType](data)
