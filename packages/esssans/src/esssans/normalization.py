@@ -6,7 +6,6 @@ from typing import Optional
 import scipp as sc
 from scipp.core import concepts
 
-from .timed import timed
 from .types import (
     CalibratedMaskedData,
     CleanDirectBeam,
@@ -222,7 +221,6 @@ def iofq_norm_wavelength_term(
     return NormWavelengthTerm[RunType](out)
 
 
-@timed
 def iofq_denominator(
     wavelength_term: NormWavelengthTerm[RunType],
     solid_angle: SolidAngle[RunType],
@@ -296,7 +294,6 @@ def iofq_denominator(
     return CleanWavelength[RunType, Denominator](denominator)
 
 
-@timed
 def normalize(
     numerator: CleanSummedQ[RunType, Numerator],
     denominator: CleanSummedQ[RunType, Denominator],

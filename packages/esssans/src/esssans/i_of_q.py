@@ -2,8 +2,10 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 from typing import Dict, List, Optional, Union
+from uuid import uuid4
 
 import scipp as sc
+from scipp.core.concepts import irreducible_mask
 from scipp.scipy.interpolate import interp1d
 
 from .common import mask_range
@@ -264,7 +266,6 @@ def _events_merge_spectra(
     return out
 
 
-@timed
 def _dense_merge_spectra(
     data_q: sc.DataArray,
     q_bins: Union[int, sc.Variable],
@@ -278,6 +279,9 @@ def _dense_merge_spectra(
     bands = []
     band_dim = (set(wavelength_bands.dims) - {'wavelength'}).pop()
 
+    # We want to flatten data to make histogramming cheaper (avoiding allocation of
+    # large output before summing). We strip unnecessary content since it makes
+    # flattening more expensive.
     stripped = data_q.copy(deep=False)
     for name, coord in data_q.coords.items():
         if name not in ['Q', 'wavelength'] and any(
@@ -286,21 +290,26 @@ def _dense_merge_spectra(
             del stripped.coords[name]
     to_flatten = [dim for dim in data_q.dims if dim in dims_to_reduce]
 
-    flat = stripped.flatten(dims=to_flatten, to='dummy')
-    from scipp.core import concepts
+    dummy_dim = str(uuid4())
+    flat = stripped.flatten(dims=to_flatten, to=dummy_dim)
 
-    mask = concepts.irreducible_mask(flat, 'dummy')
-    flat = flat.drop_masks(
-        [name for name, mask in flat.masks.items() if 'dummy' in mask.dims]
-    )
-    flat = flat[~mask]
+    # Apply masks once, to avoid repeated work when iterating over bands
+    mask = irreducible_mask(flat, dummy_dim)
+    # When not all dims are reduce there may be extra dims in the mask and it is not
+    # possible to select data based on it. In this case the masks will be applied
+    # in the loop below, which is slightly slower.
+    if mask.ndim == 1:
+        flat = flat.drop_masks(
+            [name for name, mask in flat.masks.items() if dummy_dim in mask.dims]
+        )
+        flat = flat[~mask]
 
     dims_to_reduce = tuple(dim for dim in dims_to_reduce if dim not in to_flatten)
     for wav_range in sc.collapse(wavelength_bands, keep='wavelength').values():
         band = flat['wavelength', wav_range[0] : wav_range[1]]
-        # bands.append(band.flatten(dims=to_flatten, to='Q'))
-        bands.append(band.flatten(dims=('dummy', 'Q'), to='Q').hist(**edges))
-        # bands.append(band.hist(**edges).sum(dims_to_reduce))
+        # By flattening before histogramming we avoid allocating a large output array,
+        # which would then require summing over all pixels.
+        bands.append(band.flatten(dims=(dummy_dim, 'Q'), to='Q').hist(**edges))
     return sc.concat(bands, band_dim)
 
 
