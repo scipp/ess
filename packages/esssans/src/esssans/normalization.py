@@ -7,7 +7,6 @@ import scipp as sc
 from scipp.core import concepts
 
 from .timed import timed
-
 from .types import (
     CalibratedMaskedData,
     CleanDirectBeam,
