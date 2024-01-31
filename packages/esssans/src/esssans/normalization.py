@@ -6,6 +6,8 @@ from typing import Optional
 import scipp as sc
 from scipp.core import concepts
 
+from .timed import timed
+
 from .types import (
     CalibratedMaskedData,
     CleanDirectBeam,
@@ -210,6 +212,10 @@ def iofq_norm_wavelength_term(
     """
     out = incident_monitor * transmission_fraction
     if direct_beam is not None:
+        dims = list(direct_beam.dims)
+        dims.remove('wavelength')
+        dims.append('wavelength')
+        direct_beam = direct_beam.transpose(dims)
         broadcast = _broadcasters[uncertainties]
         out = direct_beam * broadcast(out, sizes=direct_beam.sizes)
     # Convert wavelength coordinate to midpoints for future histogramming
@@ -217,6 +223,7 @@ def iofq_norm_wavelength_term(
     return NormWavelengthTerm[RunType](out)
 
 
+@timed
 def iofq_denominator(
     wavelength_term: NormWavelengthTerm[RunType],
     solid_angle: SolidAngle[RunType],
@@ -290,6 +297,7 @@ def iofq_denominator(
     return CleanWavelength[RunType, Denominator](denominator)
 
 
+@timed
 def normalize(
     numerator: CleanSummedQ[RunType, Numerator],
     denominator: CleanSummedQ[RunType, Denominator],

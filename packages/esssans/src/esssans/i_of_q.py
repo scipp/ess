@@ -264,6 +264,40 @@ def _events_merge_spectra(
     return out
 
 
+@timed
+def _as_events(dense: sc.DataArray, dim: str) -> sc.DataArray:
+    """
+    Convert a DataArray containing dense data to event data.
+    """
+    if dim != dense.dims[-1]:
+        raise ValueError(
+            f'Expected dim to be the last dimension, got {dim} '
+            f'while dense data has dimensions {dense.dims}.'
+        )
+    events = sc.DataArray(dense.data.flatten(to='event'))
+    for name, coord in dense.coords.items():
+        if coord.dims == dense.dims:
+            events.coords[name] = coord.transpose(dense.dims).flatten(to='event')
+    events.coords['wavelength'] = (
+        dense.coords['wavelength'].broadcast(sizes=dense.sizes).flatten(to='event')
+    )
+    sizes = {dim: size for dim, size in dense.sizes.items() if dim != 'Q'}
+    begin = sc.arange('dummy', 0, dense.size, dense.sizes[dim], unit=None).fold(
+        'dummy', sizes=sizes
+    )
+    binned = sc.bins(
+        begin=begin, end=begin + sc.index(dense.sizes[dim]), data=events, dim='event'
+    )
+    return sc.DataArray(
+        binned,
+        coords={
+            name: coord for name, coord in dense.coords.items() if 'Q' not in coord.dims
+        },
+        masks=dense.masks,
+    )
+
+
+@timed
 def _dense_merge_spectra(
     data_q: sc.DataArray,
     q_bins: Union[int, sc.Variable],
@@ -273,12 +307,78 @@ def _dense_merge_spectra(
     """
     Merge spectra of dense data
     """
+    if False and wavelength_bands.size > 2:
+        da = _as_events(data_q, dim='Q')
+        return _events_merge_spectra(
+            data_q=da,
+            q_bins=q_bins,
+            wavelength_bands=wavelength_bands,
+            dims_to_reduce=dims_to_reduce,
+        ).hist()
+
+    # sections = []
+    # for bounds in sc.collapse(wavelength_bands, keep=dim).values():
+
+    # to_flatten = ('pixel', 'Q')
     edges = _to_q_bins(q_bins)
     bands = []
     band_dim = (set(wavelength_bands.dims) - {'wavelength'}).pop()
+
+    # from time import time
+
+    # start = time()
+
+    # dim = 'wavelength'
+    # wav_split = sc.sort(wavelength_bands.flatten(to=dim), dim)
+
+    # print("Flatten took", time() - start, "seconds")
+    # start = time()
+
+    # hist = data_q.flatten(dims=to_flatten, to='dummy').hist(
+    #     **edges, wavelength=wav_split
+    # )
+    # print(hist.sizes)
+    # print("Hist took", time() - start, "seconds")
+    # start = time()
+    # sections = []
+    # for bounds in sc.collapse(wavelength_bands, keep=dim).values():
+    #     sections.append(hist[dim, bounds[0] : bounds[1]].sum(dim))
+
+    # print("Sum took", time() - start, "seconds")
+    # start = time()
+
+    # band_dim = (set(wavelength_bands.dims) - {'wavelength'}).pop()
+    # out = sc.concat(sections, band_dim)
+    # print("Concat took", time() - start, "seconds")
+
+    # out.coords[dim] = wavelength_bands
+    # return out
+
+    stripped = data_q.copy(deep=False)
+    for name, coord in data_q.coords.items():
+        if name not in ['Q', 'wavelength'] and any(
+            [dim in dims_to_reduce for dim in coord.dims]
+        ):
+            del stripped.coords[name]
+    to_flatten = [dim for dim in data_q.dims if dim in dims_to_reduce]
+
+    flat = stripped.flatten(
+        dims=to_flatten, to='dummy'
+    )  # Keep Q since we slice wavelength
+    from scipp.core import concepts
+
+    mask = concepts.irreducible_mask(flat, 'dummy')
+    flat = flat.drop_masks(
+        [name for name, mask in flat.masks.items() if 'dummy' in mask.dims]
+    )
+    flat = flat[~mask]
+
+    dims_to_reduce = tuple(dim for dim in dims_to_reduce if dim not in to_flatten)
     for wav_range in sc.collapse(wavelength_bands, keep='wavelength').values():
-        band = data_q['wavelength', wav_range[0] : wav_range[1]]
-        bands.append(band.hist(**edges).sum(dims_to_reduce))
+        band = flat['wavelength', wav_range[0] : wav_range[1]]
+        # bands.append(band.flatten(dims=to_flatten, to='Q'))
+        bands.append(band.flatten(dims=('dummy', 'Q'), to='Q').hist(**edges))
+        # bands.append(band.hist(**edges).sum(dims_to_reduce))
     return sc.concat(bands, band_dim)
 
 
