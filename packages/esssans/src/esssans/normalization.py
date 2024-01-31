@@ -210,6 +210,7 @@ def iofq_norm_wavelength_term(
     """
     out = incident_monitor * transmission_fraction
     if direct_beam is not None:
+        # Make wavelength the inner dim
         dims = list(direct_beam.dims)
         dims.remove('wavelength')
         dims.append('wavelength')
