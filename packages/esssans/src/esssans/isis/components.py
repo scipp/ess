@@ -7,8 +7,6 @@ import scipp as sc
 
 from ..types import RawData, RunType
 
-PixelMask = NewType('PixelMask', sc.Variable)
-
 
 class ConfiguredRawData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Raw data with applied user configuration for component positions."""
