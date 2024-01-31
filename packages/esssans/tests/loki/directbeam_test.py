@@ -1,15 +1,19 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+import sys
+from pathlib import Path
 from typing import Callable, List
 
 import sciline
 import scipp as sc
-from common import make_params
 from scipp.scipy.interpolate import interp1d
 
 import esssans as sans
 from esssans.loki.data import get_path
 from esssans.types import DimsToKeep, QBins
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from common import make_params  # noqa: E402
 
 
 def _get_I0(qbins: sc.Variable) -> sc.Variable:

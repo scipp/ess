@@ -1,12 +1,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+import sys
+from pathlib import Path
 from typing import Callable, List
 
 import numpy as np
 import pytest
 import sciline
 import scipp as sc
-from common import make_params
 
 import esssans as sans
 from esssans.types import (
@@ -16,6 +17,9 @@ from esssans.types import (
     UncertaintyBroadcastMode,
     WavelengthBands,
 )
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from common import make_params  # noqa: E402
 
 
 def loki_providers() -> List[Callable]:
