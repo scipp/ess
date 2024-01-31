@@ -7,7 +7,19 @@ import numpy as np
 import scipp as sc
 from sciline import Pipeline
 
-from .types import BackgroundSubtractedIofQ, DirectBeam, WavelengthBands
+from .types import (
+    BackgroundRun,
+    BackgroundSubtractedIofQ,
+    CleanMonitor,
+    CleanSummedQ,
+    DirectBeam,
+    Incident,
+    Numerator,
+    SampleRun,
+    SolidAngle,
+    TransmissionFraction,
+    WavelengthBands,
+)
 
 
 def _compute_efficiency_correction(
@@ -97,6 +109,22 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
     pipeline_full[WavelengthBands] = full_wavelength_range
 
     results = []
+
+    # Compute checkpoints to avoid recomputing the same things in every iteration
+    checkpoints = (
+        TransmissionFraction[SampleRun],
+        TransmissionFraction[BackgroundRun],
+        SolidAngle[SampleRun],
+        SolidAngle[BackgroundRun],
+        CleanMonitor[SampleRun, Incident],
+        CleanMonitor[BackgroundRun, Incident],
+        CleanSummedQ[SampleRun, Numerator],
+        CleanSummedQ[BackgroundRun, Numerator],
+    )
+
+    for pl in [pipeline_bands, pipeline_full]:
+        for key, result in pl.compute(checkpoints).items():
+            pl[key] = result
 
     for it in range(niter):
         print("Iteration", it)
