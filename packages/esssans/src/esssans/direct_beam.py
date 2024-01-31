@@ -97,16 +97,16 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
     """
 
     direct_beam_function = None
-    wavelength_bands = pipeline.compute(WavelengthBands)
-    band_dim = (set(wavelength_bands.dims) - {'wavelength'}).pop()
+    bands = pipeline.compute(WavelengthBands)
+    band_dim = (set(bands.dims) - {'wavelength'}).pop()
 
-    full_wavelength_range = sc.concat(
-        [wavelength_bands.min(), wavelength_bands.max()], dim='wavelength'
-    )
+    full_wavelength_range = sc.concat([bands.min(), bands.max()], dim='wavelength')
 
-    pipeline_bands = pipeline.copy()
-    pipeline_full = pipeline_bands.copy()
-    pipeline_full[WavelengthBands] = full_wavelength_range
+    pipeline = pipeline.copy()
+    # Append full wavelength range as extra band. This allows for running only a
+    # single pipeline to compute both the I(Q) in bands and the I(Q) for the full
+    # wavelength range.
+    pipeline[WavelengthBands] = sc.concat([bands, full_wavelength_range], dim=band_dim)
 
     results = []
 
@@ -122,9 +122,8 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
         CleanSummedQ[BackgroundRun, Numerator],
     )
 
-    for pl in [pipeline_bands, pipeline_full]:
-        for key, result in pl.compute(checkpoints).items():
-            pl[key] = result
+    for key, result in pipeline.compute(checkpoints).items():
+        pipeline[key] = result
 
     for it in range(niter):
         print("Iteration", it)
@@ -133,17 +132,16 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
         # parameters, nor given by any providers, so it will be considered flat.
         # TODO: Should we have a check that DirectBeam cannot be computed from the
         # pipeline?
-        iofq_full = pipeline_full.compute(BackgroundSubtractedIofQ)
-        iofq_bands = pipeline_bands.compute(BackgroundSubtractedIofQ)
+        iofq = pipeline.compute(BackgroundSubtractedIofQ)
+        iofq_full = iofq['band', -1]
+        iofq_bands = iofq['band', :-1]
 
         if direct_beam_function is None:
             # Make a flat direct beam
             dims = [dim for dim in iofq_bands.dims if dim != 'Q']
             direct_beam_function = sc.DataArray(
                 data=sc.ones(sizes={dim: iofq_bands.sizes[dim] for dim in dims}),
-                coords={
-                    band_dim: sc.midpoints(wavelength_bands, dim='wavelength').squeeze()
-                },
+                coords={band_dim: sc.midpoints(bands, dim='wavelength').squeeze()},
             ).rename({band_dim: 'wavelength'})
 
         direct_beam_function *= _compute_efficiency_correction(
@@ -153,9 +151,8 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
             I0=I0,
         )
 
-        # Insert new direct beam function into pipelines
-        pipeline_bands[DirectBeam] = direct_beam_function
-        pipeline_full[DirectBeam] = direct_beam_function
+        # Insert new direct beam function into pipeline
+        pipeline[DirectBeam] = direct_beam_function
 
         results.append(
             {
