@@ -301,6 +301,7 @@ def normalize(
     numerator: CleanSummedQ[RunType, Numerator],
     denominator: CleanSummedQ[RunType, Denominator],
     return_events: ReturnEvents,
+    uncertainties: UncertaintyBroadcastMode,
 ) -> IofQ[RunType]:
     """
     Perform normalization of counts as a function of Q.
@@ -327,9 +328,12 @@ def normalize(
         # Naive event-mode normalization is not correct if norm-term has variances.
         # See https://doi.org/10.3233/JNR-220049 for context.
         if denominator.variances is not None:
-            denominator = broadcast_to_events_with_upper_bound_variances(
-                denominator, events=numerator
-            )
+            if uncertainties == UncertaintyBroadcastMode.drop:
+                denominator = sc.values(denominator)
+            else:
+                denominator = broadcast_to_events_with_upper_bound_variances(
+                    denominator, events=numerator
+                )
     else:
         numerator = numerator.hist()
     if numerator.bins is not None and denominator.bins is None:
