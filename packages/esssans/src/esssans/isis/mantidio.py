@@ -27,9 +27,9 @@ except ModuleNotFoundError:
     # Catch runtime usages of Mantid
     class _MantidFallback:
         def __getattr__(self, name: str) -> NoReturn:
-            raise RuntimeError(
+            raise ImportError(
                 'Mantid is required to use `sans.isis.mantidio` ' 'but is not installed'
-            )
+            ) from None
 
     _mantid_api = _MantidFallback()
     _mantid_simpleapi = _MantidFallback
