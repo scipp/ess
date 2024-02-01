@@ -27,6 +27,7 @@ from .types import (
     MaskedData,
     NormWavelengthTerm,
     QBins,
+    ReturnEvents,
     SampleRun,
     UncertaintyBroadcastMode,
     WavelengthBins,
@@ -176,6 +177,7 @@ def _iofq_in_quadrants(
     ]
     params = {}
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
+    params[ReturnEvents] = False
     params[WavelengthBins] = wavelength_bins
     params[QBins] = q_bins
     params[DetectorPixelShape[SampleRun]] = pixel_shape

@@ -21,7 +21,7 @@ from . import (
 )
 from .common import transmission_from_background_run, transmission_from_sample_run
 from .direct_beam import direct_beam
-from .types import ReturnEvents
+from .types import BackgroundSubtractedIofQ, IofQ, ReturnEvents, SampleRun
 
 providers = (
     *conversions.providers,
