@@ -295,7 +295,7 @@ def _dense_merge_spectra(
 
     # Apply masks once, to avoid repeated work when iterating over bands
     mask = irreducible_mask(flat, dummy_dim)
-    # When not all dims are reduce there may be extra dims in the mask and it is not
+    # When not all dims are reduced there may be extra dims in the mask and it is not
     # possible to select data based on it. In this case the masks will be applied
     # in the loop below, which is slightly slower.
     if mask.ndim == 1:
