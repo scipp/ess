@@ -18,7 +18,7 @@ SampleOffset = NewType('SampleOffset', sc.Variable)
 DetectorBankOffset = NewType('DetectorBankOffset', sc.Variable)
 
 
-def configure_raw_data(
+def apply_component_user_offsets_to_raw_data(
     data: RawData[RunType],
     sample_offset: SampleOffset,
     detector_bank_offset: DetectorBankOffset,
