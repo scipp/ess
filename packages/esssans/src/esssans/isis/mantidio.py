@@ -3,13 +3,11 @@
 """
 File loading functions for ISIS data using Mantid.
 """
-from typing import NewType
+from typing import NewType, NoReturn
 
 import sciline
 import scipp as sc
 import scippneutron as scn
-from mantid.api import MatrixWorkspace, Workspace
-from mantid.simpleapi import CopyInstrumentParameters, Load
 from scipp.constants import g
 
 from ..types import (
@@ -20,6 +18,24 @@ from ..types import (
     SampleRun,
 )
 from .io import CalibrationFilename, Filename, FilePath
+
+try:
+    import mantid.api as _mantid_api
+    import mantid.simpleapi as _mantid_simpleapi
+    from mantid.api import MatrixWorkspace
+except ModuleNotFoundError:
+    # Catch runtime usages of Mantid
+    class _MantidFallback:
+        def __getattr__(self, name: str) -> NoReturn:
+            raise ImportError(
+                'Mantid is required to use `sans.isis.mantidio` ' 'but is not installed'
+            ) from None
+
+    _mantid_api = _MantidFallback()
+    _mantid_simpleapi = _MantidFallback
+    # Needed for type annotations
+    MatrixWorkspace = object
+
 
 CalibrationWorkspace = NewType('CalibrationWorkspace', MatrixWorkspace)
 
@@ -47,7 +63,7 @@ def get_detector_ids(ws: DataWorkspace[SampleRun]) -> sc.Variable:
 
 
 def load_calibration(filename: FilePath[CalibrationFilename]) -> CalibrationWorkspace:
-    ws = Load(Filename=str(filename), StoreInADS=False)
+    ws = _mantid_simpleapi.Load(Filename=str(filename), StoreInADS=False)
     return CalibrationWorkspace(ws)
 
 
@@ -66,7 +82,7 @@ def from_data_workspace(
     ws: DataWorkspace[RunType],
     calibration: CalibrationWorkspace,
 ) -> LoadedFileContents[RunType]:
-    CopyInstrumentParameters(
+    _mantid_simpleapi.CopyInstrumentParameters(
         InputWorkspace=calibration, OutputWorkspace=ws, StoreInADS=False
     )
     up = ws.getInstrument().getReferenceFrame().vecPointingUp()
@@ -78,8 +94,10 @@ def from_data_workspace(
 
 
 def load_run(filename: FilePath[Filename[RunType]]) -> DataWorkspace[RunType]:
-    loaded = Load(Filename=str(filename), LoadMonitors=True, StoreInADS=False)
-    if isinstance(loaded, Workspace):
+    loaded = _mantid_simpleapi.Load(
+        Filename=str(filename), LoadMonitors=True, StoreInADS=False
+    )
+    if isinstance(loaded, _mantid_api.Workspace):
         # A single workspace
         data_ws = loaded
     else:
