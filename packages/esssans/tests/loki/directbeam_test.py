@@ -10,12 +10,7 @@ from scipp.scipy.interpolate import interp1d
 
 import esssans as sans
 from esssans.loki.data import get_path
-from esssans.types import (
-    DimsToKeep,
-    QBins,
-    WavelengthBands,
-    WavelengthBins,
-)
+from esssans.types import DimsToKeep, QBins, WavelengthBands, WavelengthBins
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from common import make_params  # noqa: E402
