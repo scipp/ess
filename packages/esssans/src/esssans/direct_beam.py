@@ -19,7 +19,6 @@ from .types import (
     SampleRun,
     SolidAngle,
     TransmissionFraction,
-    WavelengthBands,
 )
 
 

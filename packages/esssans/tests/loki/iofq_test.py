@@ -4,7 +4,6 @@ import sys
 from pathlib import Path
 from typing import Callable, List
 
-import numpy as np
 import pytest
 import sciline
 import scipp as sc

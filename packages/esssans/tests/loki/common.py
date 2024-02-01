@@ -16,7 +16,6 @@ from esssans.types import (
     SampleRun,
     TransmissionRun,
     UncertaintyBroadcastMode,
-    WavelengthBands,
     WavelengthBins,
 )
 
