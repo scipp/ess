@@ -43,7 +43,7 @@ def test_pipeline_can_compute_IofQ(uncertainties):
     assert result.dims == ('Q',)
 
 
-def test_pipeline_can_compute_IofQ_in_wavelength_slices():
+def test_pipeline_can_compute_IofQ_in_wavelength_bands():
     params = make_params()
     params[WavelengthBands] = sc.linspace(
         'wavelength',
@@ -51,6 +51,21 @@ def test_pipeline_can_compute_IofQ_in_wavelength_slices():
         params[WavelengthBins].max(),
         11,
     )
+    pipeline = sciline.Pipeline(loki_providers(), params=params)
+    result = pipeline.compute(BackgroundSubtractedIofQ)
+    assert result.dims == ('band', 'Q')
+    assert result.sizes['band'] == 10
+
+
+def test_pipeline_can_compute_IofQ_in_overlapping_wavelength_bands():
+    params = make_params()
+    # Bands have double the width
+    edges = sc.linspace(
+        'band', params[WavelengthBins].min(), params[WavelengthBins].max(), 12
+    )
+    params[WavelengthBands] = sc.concat(
+        [edges[:-2], edges[2::]], dim='wavelength'
+    ).transpose()
     pipeline = sciline.Pipeline(loki_providers(), params=params)
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('band', 'Q')
