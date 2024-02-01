@@ -210,6 +210,11 @@ def iofq_norm_wavelength_term(
     """
     out = incident_monitor * transmission_fraction
     if direct_beam is not None:
+        # Make wavelength the inner dim
+        dims = list(direct_beam.dims)
+        dims.remove('wavelength')
+        dims.append('wavelength')
+        direct_beam = direct_beam.transpose(dims)
         broadcast = _broadcasters[uncertainties]
         out = direct_beam * broadcast(out, sizes=direct_beam.sizes)
     # Convert wavelength coordinate to midpoints for future histogramming
