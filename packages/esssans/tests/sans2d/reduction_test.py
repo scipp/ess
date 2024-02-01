@@ -83,7 +83,7 @@ def test_pipeline_can_compute_background_subtracted_IofQ(uncertainties):
     assert result.dims == ('Q',)
 
 
-def test_pipeline_can_compute_background_subtracted_IofQ_in_wavelength_slices():
+def test_pipeline_can_compute_background_subtracted_IofQ_in_wavelength_bands():
     params = make_params()
     params[WavelengthBands] = sc.linspace(
         'wavelength', start=2.0, stop=16.0, num=11, unit='angstrom'
