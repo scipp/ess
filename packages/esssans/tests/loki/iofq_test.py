@@ -16,6 +16,7 @@ from esssans.types import (
     DimsToKeep,
     UncertaintyBroadcastMode,
     WavelengthBands,
+    WavelengthBins,
 )
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -45,11 +46,11 @@ def test_pipeline_can_compute_IofQ(uncertainties):
 
 def test_pipeline_can_compute_IofQ_in_wavelength_slices():
     params = make_params()
-    band = np.linspace(1.0, 13.0, num=11)
-    params[WavelengthBands] = sc.array(
-        dims=['band', 'wavelength'],
-        values=np.vstack([band[:-1], band[1:]]).T,
-        unit='angstrom',
+    params[WavelengthBands] = sc.linspace(
+        'wavelength',
+        params[WavelengthBins].min(),
+        params[WavelengthBins].max(),
+        11,
     )
     pipeline = sciline.Pipeline(loki_providers(), params=params)
     result = pipeline.compute(BackgroundSubtractedIofQ)
