@@ -42,12 +42,14 @@ def read_xml_detector_masking(
 
     The format is as follows, where the detids are inclusive ranges of detector IDs:
 
-    <?xml version="1.0"?>
-    <detector-masking>
-        <group>
-            <detids>1400203-1400218,1401199,1402190-1402223</detids>
-        </group>
-    </detector-masking>
+    .. code-block:: xml
+
+        <?xml version="1.0"?>
+        <detector-masking>
+            <group>
+                <detids>1400203-1400218,1401199,1402190-1402223</detids>
+            </group>
+        </detector-masking>
 
     Parameters
     ----------
