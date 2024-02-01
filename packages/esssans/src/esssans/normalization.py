@@ -20,6 +20,7 @@ from .types import (
     LabFrameTransform,
     NormWavelengthTerm,
     Numerator,
+    ReturnEvents,
     RunType,
     SolidAngle,
     Transmission,
@@ -28,6 +29,7 @@ from .types import (
     UncertaintyBroadcastMode,
 )
 from .uncertainty import (
+    broadcast_to_events_with_upper_bound_variances,
     broadcast_with_upper_bound_variances,
     drop_variances_if_broadcast,
 )
@@ -298,6 +300,7 @@ def iofq_denominator(
 def normalize(
     numerator: CleanSummedQ[RunType, Numerator],
     denominator: CleanSummedQ[RunType, Denominator],
+    return_events: ReturnEvents,
 ) -> IofQ[RunType]:
     """
     Perform normalization of counts as a function of Q.
@@ -312,17 +315,24 @@ def normalize(
     denominator:
         The divisor for the normalization operation. This cannot be event data, it must
         contain histogrammed data.
+    return_events:
+        Whether to return the result as event data or histogrammed data.
 
     Returns
     -------
     :
         The input data normalized by the supplied denominator.
     """
-    if denominator.variances is not None and numerator.bins is not None:
-        # Event-mode normalization is not correct of norm-term has variances.
+    if return_events and numerator.bins is not None:
+        # Naive event-mode normalization is not correct if norm-term has variances.
         # See https://doi.org/10.3233/JNR-220049 for context.
+        if denominator.variances is not None:
+            denominator = broadcast_to_events_with_upper_bound_variances(
+                denominator, events=numerator
+            )
+    else:
         numerator = numerator.hist()
-    if numerator.bins is not None:
+    if numerator.bins is not None and denominator.bins is None:
         da = numerator.bins / sc.lookup(func=denominator, dim='Q')
     else:
         da = numerator / denominator

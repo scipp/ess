@@ -24,6 +24,7 @@ from .types import (
     MonitorType,
     NonBackgroundWavelengthRange,
     QBins,
+    ReturnEvents,
     RunType,
     SampleRun,
     UncertaintyBroadcastMode,
@@ -314,8 +315,12 @@ def _dense_merge_spectra(
 
 
 def subtract_background(
-    sample: IofQ[SampleRun], background: IofQ[BackgroundRun]
+    sample: IofQ[SampleRun],
+    background: IofQ[BackgroundRun],
+    return_events: ReturnEvents,
 ) -> BackgroundSubtractedIofQ:
+    if return_events and sample.bins is not None and background.bins is not None:
+        return sample.bins.concatenate(-background)
     if sample.bins is not None:
         sample = sample.bins.sum()
     if background.bins is not None:

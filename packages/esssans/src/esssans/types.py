@@ -82,6 +82,9 @@ Mode for broadcasting uncertainties.
 See https://doi.org/10.3233/JNR-220049 for context.
 """
 
+ReturnEvents = NewType('ReturnEvents', bool)
+"""Whether to return events in the output I(Q)"""
+
 WavelengthBins = NewType('WavelengthBins', sc.Variable)
 """Wavelength binning"""
 
