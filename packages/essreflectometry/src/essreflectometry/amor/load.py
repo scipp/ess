@@ -7,7 +7,7 @@ import scipp as sc
 import scippnexus as snx
 
 from ..logging import get_logger
-from ..types import Filename, RawData, Run
+from ..types import Filename, RawData, RawEvents, Run
 from .data import get_path
 from .types import BeamlineParams
 
@@ -64,7 +64,7 @@ def _assemble_event_data(dg: sc.DataGroup) -> sc.DataArray:
     :
         A data array with the events extracted from ``dg``.
     """
-    events = dg['instrument']['multiblade_detector']['data']
+    events = dg['instrument']['multiblade_detector']['data'].copy(deep=False)
     events.bins.coords['tof'] = events.bins.coords.pop('event_time_offset')
     events.coords['position'] = sc.spatial.as_vectors(
         events.coords.pop('x_pixel_offset'),
@@ -85,13 +85,36 @@ def _load_nexus_entry(filename: Union[str, Path]) -> sc.DataGroup:
         return f['entry'][()]
 
 
-def load(filename: Filename[Run], beamline: BeamlineParams[Run]) -> RawData[Run]:
-    """Load a single Amor data file.
+def load_raw_nexus(filename: Filename[Run]) -> RawData[Run]:
+    """Load unprocessed data and metadata from an Amor NeXus file.
 
     Parameters
     ----------
     filename:
-        Path of the file to load.
+        Filename of the NeXus file.
+
+    Returns
+    -------
+    :
+        Data and metadata.
+    """
+    filename = get_path(filename)
+    get_logger('amor').info(
+        "Loading '%s' as an Amor NeXus file",
+        filename.filename if hasattr(filename, 'filename') else filename,
+    )
+    return RawData(_load_nexus_entry(filename))
+
+
+def extract_events(
+    raw_data: RawData[Run], beamline: BeamlineParams[Run]
+) -> RawEvents[Run]:
+    """Extract the events from unprocessed NeXus data.
+
+    Parameters
+    ----------
+    raw_data:
+        Data in a form representing an Amor NeXus file.
     beamline:
         A dict defining the beamline parameters.
 
@@ -100,13 +123,7 @@ def load(filename: Filename[Run], beamline: BeamlineParams[Run]) -> RawData[Run]
     :
         Data array object for Amor dataset.
     """
-    filename = get_path(filename)
-    get_logger('amor').info(
-        "Loading '%s' as an Amor NeXus file",
-        filename.filename if hasattr(filename, 'filename') else filename,
-    )
-    full_data = _load_nexus_entry(filename)
-    data = _assemble_event_data(full_data)
+    data = _assemble_event_data(raw_data)
 
     # Recent versions of scippnexus no longer add variances for events by default, so
     # we add them here if they are missing.
@@ -136,7 +153,7 @@ def load(filename: Filename[Run], beamline: BeamlineParams[Run]) -> RawData[Run]
     data.coords['position'].fields.y += data.coords['position'].fields.z * sc.tan(
         2.0 * data.coords['sample_rotation'] - (0.955 * sc.units.deg)
     )
-    return data
+    return RawData[Run](data)
 
 
 # TODO
@@ -164,4 +181,4 @@ def load(filename: Filename[Run], beamline: BeamlineParams[Run]) -> RawData[Run]
 #    orso.data_source.measurement.data_files = [filename]
 
 
-providers = [load]
+providers = [extract_events, load_raw_nexus]

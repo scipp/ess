@@ -8,7 +8,11 @@ Sample = NewType('Sample', str)
 Run = TypeVar('Run', Reference, Sample)
 
 
-class RawData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
+class RawData(sciline.Scope[Run, sc.DataGroup], sc.DataGroup):
+    """Data as loaded from a NeXus file."""
+
+
+class RawEvents(sciline.Scope[Run, sc.DataArray], sc.DataArray):
     """Event time data from nexus file,
     binned by `detector_number` (pixel of the detector frame)."""
 
