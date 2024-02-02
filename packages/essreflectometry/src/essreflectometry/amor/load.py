@@ -153,32 +153,7 @@ def extract_events(
     data.coords['position'].fields.y += data.coords['position'].fields.z * sc.tan(
         2.0 * data.coords['sample_rotation'] - (0.955 * sc.units.deg)
     )
-    return RawData[Run](data)
-
-
-# TODO
-# def populate_orso(orso: Any, data: sc.DataGroup, filename: str) -> Any:
-#    """
-#    Populate the Orso object, by calling the :code:`base_orso` and adding data from the
-#    file.
-#
-#    Parameters
-#    ----------
-#    orso:
-#        The orso object to be populated by additional information from the loaded file.
-#    data:
-#        Data group to source information from.
-#        Should mimic the structure of the NeXus file.
-#    filename:
-#        Path of the file to load.
-#    """
-#    orso.data_source.experiment.title = data['title']
-#    orso.data_source.experiment.instrument = data['name']
-#    orso.data_source.experiment.start_date = datetime.strftime(
-#        datetime.strptime(data['start_time'][:-3], '%Y-%m-%dT%H:%M:%S.%f'),
-#        '%Y-%m-%d',
-#    )
-#    orso.data_source.measurement.data_files = [filename]
+    return RawEvents[Run](data)
 
 
 providers = (extract_events, load_raw_nexus)

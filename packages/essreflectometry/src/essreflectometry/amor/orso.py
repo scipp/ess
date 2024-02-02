@@ -1,60 +1,79 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-import platform
-from datetime import datetime
+"""ORSO utilities for Amor."""
+import os
+from typing import Optional
 
-from orsopy import fileio
+from dateutil.parser import parse as parse_datetime
+from orsopy.fileio import base as orso_base
+from orsopy.fileio import data_source
 
-from .. import __version__
+from ..orso import (
+    OrsoExperiment,
+    OrsoInstrument,
+    OrsoMeasurement,
+    OrsoOwner,
+    OrsoSample,
+)
+from ..types import Filename, RawData, Reference, Run, Sample
 
 
-def make_orso(
-    owner: fileio.base.Person,
-    sample: fileio.data_source.Sample,
-    creator: fileio.base.Person,
-    reduction_script: str,
-) -> fileio.orso.Orso:
-    """
-    Generate the base Orso object for the Amor instrument.
-    Populate the Orso object for metadata storage.
-
-    Parameters
-    ----------
-    owner:
-        The owner of the data set, i.e. the main proposer of the measurement.
-    sample:
-        A description of the sample.
-    creator:
-        The creator of the reduced data, the person responsible for the
-        reduction process.
-    reduction_script:
-        The script or notebook used for reduction.
-
-    Returns
-    -------
-    :
-        Orso object with the default parameters for the Amor instrument.
-    """
-    orso = fileio.orso.Orso.empty()
-    orso.data_source.experiment.probe = 'neutrons'
-    orso.data_source.experiment.facility = 'Paul Scherrer Institut'
-    orso.data_source.measurement.scheme = 'angle- and energy-dispersive'
-    orso.reduction.software = fileio.reduction.Software(
-        'scipp-ess', __version__, platform.platform()
+def parse_orso_experiment(raw_data: RawData[Run]) -> OrsoExperiment[Run]:
+    """Parse ORSO experiment data from raw Amor NeXus data."""
+    return OrsoExperiment(
+        data_source.Experiment(
+            title=raw_data['title'],
+            instrument=raw_data['name'],
+            facility=raw_data['facility'],
+            start_date=parse_datetime(raw_data['start_time']),
+            probe='neutron',
+        )
     )
-    orso.reduction.timestep = datetime.now()
-    orso.reduction.corrections = []
-    orso.reduction.computer = platform.node()
-    orso.columns = [
-        fileio.base.Column('Qz', '1/angstrom', 'wavevector transfer'),
-        fileio.base.Column('R', None, 'reflectivity'),
-        fileio.base.Column('sR', None, 'standard deivation of reflectivity'),
-        fileio.base.Column(
-            'sQz', '1/angstrom', 'standard deviation of wavevector transfer resolution'
-        ),
-    ]
-    orso.data_source.owner = owner
-    orso.data_source.sample = sample
-    orso.reduction.creator = creator
-    orso.reduction.script = reduction_script
-    return orso
+
+
+def parse_orso_owner(raw_data: RawData[Run]) -> OrsoOwner[Run]:
+    """Parse ORSO owner data from raw Amor NeXus data."""
+    return OrsoOwner(
+        orso_base.Person(
+            name=raw_data['user']['name'],
+            contact=raw_data['user']['email'],
+            affiliation=None,
+        )
+    )
+
+
+def parse_orso_sample(raw_data: RawData[Run]) -> OrsoSample[Run]:
+    """Parse ORSO sample data from raw Amor NeXus data."""
+    if not raw_data.get('sample'):
+        return OrsoSample(data_source.Sample.empty())
+    raise NotImplementedError('Amor NsXus sample parsing is not implemented')
+
+
+def build_orso_measurement(
+    sample_filename: Filename[Sample],
+    reference_filename: Filename[Reference],
+    instrument: Optional[OrsoInstrument],
+) -> OrsoMeasurement:
+    """Assemble ORSO measurement data."""
+    # TODO populate timestamp
+    #      doesn't work with a local file because we need the timestamp of the original,
+    #      SciCat can provide that
+    return OrsoMeasurement(
+        data_source.Measurement(
+            instrument_settings=instrument,
+            data_files=[orso_base.File(file=os.path.basename(sample_filename))],
+            additional_files=[
+                orso_base.File(
+                    file=os.path.basename(reference_filename), comment='supermirror'
+                )
+            ],
+        )
+    )
+
+
+providers = (
+    parse_orso_experiment,
+    build_orso_measurement,
+    parse_orso_owner,
+    parse_orso_sample,
+)
