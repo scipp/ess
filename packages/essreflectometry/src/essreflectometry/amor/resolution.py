@@ -166,4 +166,4 @@ def sigma_Q(
     ).max('detector_number') * sc.midpoints(q_bins)
 
 
-providers = [sigma_Q, angular_resolution, wavelength_resolution, sample_size_resolution]
+providers = (sigma_Q, angular_resolution, wavelength_resolution, sample_size_resolution)

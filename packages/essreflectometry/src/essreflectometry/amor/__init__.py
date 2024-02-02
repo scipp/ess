@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # flake8: noqa: F401
-import itertools
-
 import scipp as sc
 
 from .. import providers as reflectometry_providers
@@ -29,14 +27,12 @@ from .types import (
     WavelengthResolution,
 )
 
-providers = list(
-    itertools.chain(
-        reflectometry_providers,
-        load.providers,
-        conversions.providers,
-        resolution.providers,
-        beamline.providers,
-    )
+providers = (
+    *reflectometry_providers,
+    *load.providers,
+    *conversions.providers,
+    *resolution.providers,
+    *beamline.providers,
 )
 """
 List of providers for setting up a Sciline pipeline.
@@ -59,4 +55,3 @@ default_parameters = {
 }
 
 del sc
-del itertools

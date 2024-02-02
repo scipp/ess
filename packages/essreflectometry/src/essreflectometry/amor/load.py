@@ -181,4 +181,4 @@ def extract_events(
 #    orso.data_source.measurement.data_files = [filename]
 
 
-providers = [extract_events, load_raw_nexus]
+providers = (extract_events, load_raw_nexus)

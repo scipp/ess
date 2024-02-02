@@ -125,8 +125,8 @@ def beam_on_sample(beam_size: sc.Variable, theta: sc.Variable) -> sc.Variable:
     return beam_size / sc.sin(theta)
 
 
-providers = [
+providers = (
     footprint_correction,
     normalize_sample,
     normalize_reference,
-]
+)

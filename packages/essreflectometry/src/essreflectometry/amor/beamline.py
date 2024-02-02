@@ -131,4 +131,4 @@ def instrument_view_components(da: sc.DataArray) -> dict:
     }
 
 
-providers = [make_beamline]
+providers = (make_beamline,)

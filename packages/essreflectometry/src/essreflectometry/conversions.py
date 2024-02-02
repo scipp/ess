@@ -256,9 +256,9 @@ def histogram(data_array: QData[Run]) -> HistogrammedQData[Run]:
     return HistogrammedQData[Run](data_array.hist())
 
 
-providers = [
+providers = (
     tof_to_wavelength,
     wavelength_to_theta,
     theta_to_q,
     histogram,
-]
+)

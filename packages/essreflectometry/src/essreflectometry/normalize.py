@@ -47,4 +47,4 @@ def normalize_by_supermirror(
     return NormalizedIofQ(normalized)
 
 
-providers = [normalize_by_supermirror]
+providers = (normalize_by_supermirror,)

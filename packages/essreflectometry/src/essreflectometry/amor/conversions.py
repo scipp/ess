@@ -32,4 +32,4 @@ def specular_reflection() -> SpecularReflectionCoordTransformGraph:
     return SpecularReflectionCoordTransformGraph(graph)
 
 
-providers = [specular_reflection]
+providers = (specular_reflection,)
