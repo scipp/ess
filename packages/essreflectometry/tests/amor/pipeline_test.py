@@ -12,6 +12,7 @@ from essreflectometry import orso
 from essreflectometry.amor import default_parameters
 from essreflectometry.amor import orso as amor_orso
 from essreflectometry.amor import providers
+from essreflectometry.amor.data import get_path
 from essreflectometry.types import *
 
 
@@ -23,9 +24,9 @@ def amor_pipeline() -> sciline.Pipeline:
             dim='Q', start=0.008, stop=0.075, num=200, unit='1/angstrom'
         ),
         SampleRotation[Sample]: sc.scalar(0.7989, unit='deg'),
-        Filename[Sample]: "sample.nxs",
+        PoochFilename[Sample]: "sample.nxs",
         SampleRotation[Reference]: sc.scalar(0.8389, unit='deg'),
-        Filename[Reference]: "reference.nxs",
+        PoochFilename[Reference]: "reference.nxs",
         WavelengthEdges: sc.array(
             dims=['wavelength'], values=[2.4, 16.0], unit='angstrom'
         ),
@@ -38,7 +39,7 @@ def amor_pipeline() -> sciline.Pipeline:
         ),
     }
     return sciline.Pipeline(
-        (*providers, *orso.providers, *amor_orso.providers), params=params
+        (*providers, *orso.providers, *amor_orso.providers, get_path), params=params
     )
 
 

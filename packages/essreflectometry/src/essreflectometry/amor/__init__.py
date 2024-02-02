@@ -13,7 +13,7 @@ from ..types import (
     SampleSize,
     WavelengthEdges,
 )
-from . import beamline, conversions, load, resolution
+from . import beamline, conversions, data, load, resolution
 from .beamline import instrument_view_components
 from .instrument_view import instrument_view
 from .types import (

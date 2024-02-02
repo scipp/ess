@@ -19,7 +19,7 @@ from orsopy.fileio import data_source, orso, reduction
 from .supermirror import SupermirrorCalibrationFactor
 from .types import (
     ChopperCorrectedTofEvents,
-    Filename,
+    FilePath,
     FootprintCorrectedData,
     IofQ,
     RawData,
@@ -93,18 +93,18 @@ def parse_orso_sample(raw_data: RawData[Sample]) -> OrsoSample:
 
 
 def build_orso_measurement(
-    sample_filename: Filename[Sample],
-    reference_filename: Optional[Filename[Reference]],
+    sample_filepath: FilePath[Sample],
+    reference_filepath: Optional[FilePath[Reference]],
     instrument: Optional[OrsoInstrument],
 ) -> OrsoMeasurement:
     """Assemble ORSO measurement metadata."""
     # TODO populate timestamp
     #      doesn't work with a local file because we need the timestamp of the original,
     #      SciCat can provide that
-    if reference_filename:
+    if reference_filepath:
         additional_files = [
             orso_base.File(
-                file=os.path.basename(reference_filename), comment='supermirror'
+                file=os.path.basename(reference_filepath), comment='supermirror'
             )
         ]
     else:
@@ -112,7 +112,7 @@ def build_orso_measurement(
     return OrsoMeasurement(
         data_source.Measurement(
             instrument_settings=instrument,
-            data_files=[orso_base.File(file=os.path.basename(sample_filename))],
+            data_files=[orso_base.File(file=os.path.basename(sample_filepath))],
             additional_files=additional_files,
         )
     )

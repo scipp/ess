@@ -82,8 +82,12 @@ WavelengthEdges = NewType('WavelengthEdges', sc.Variable)
 '''Include only events within the specified edges.'''
 
 
-class Filename(sciline.Scope[Run, str], str):
-    """Filename of the event data nexus file."""
+class PoochFilename(sciline.Scope[Run, str], str):
+    """Name of an event data nexus file in the pooch data repository."""
+
+
+class FilePath(sciline.Scope[Run, str], str):
+    """File path of an event data nexus file."""
 
 
 class SampleRotation(sciline.Scope[Run, sc.Variable], sc.Variable):

@@ -7,8 +7,7 @@ import scipp as sc
 import scippnexus as snx
 
 from ..logging import get_logger
-from ..types import ChopperCorrectedTofEvents, Filename, RawData, RawEvents, Run
-from .data import get_path
+from ..types import ChopperCorrectedTofEvents, FilePath, RawData, RawEvents, Run
 from .types import BeamlineParams
 
 
@@ -79,35 +78,34 @@ def _assemble_event_data(dg: sc.DataGroup) -> sc.DataArray:
     return events
 
 
-def _load_nexus_entry(filename: Union[str, Path]) -> sc.DataGroup:
+def _load_nexus_entry(filepath: Union[str, Path]) -> sc.DataGroup:
     """Load the single entry of a nexus file."""
-    with snx.File(filename, 'r') as f:
+    with snx.File(filepath, 'r') as f:
         if len(f.keys()) != 1:
             raise snx.NexusStructureError(
-                f"Expected a single entry in file {filename}, got {len(f.keys())}"
+                f"Expected a single entry in file {filepath}, got {len(f.keys())}"
             )
         return f['entry'][()]
 
 
-def load_raw_nexus(filename: Filename[Run]) -> RawData[Run]:
+def load_raw_nexus(filepath: FilePath[Run]) -> RawData[Run]:
     """Load unprocessed data and metadata from an Amor NeXus file.
 
     Parameters
     ----------
-    filename:
-        Filename of the NeXus file.
+    filepath:
+        File path of the NeXus file.
 
     Returns
     -------
     :
         Data and metadata.
     """
-    filename = get_path(filename)
     get_logger('amor').info(
         "Loading '%s' as an Amor NeXus file",
-        filename.filename if hasattr(filename, 'filename') else filename,
+        filepath.filename if hasattr(filepath, 'filename') else filepath,
     )
-    return RawData(_load_nexus_entry(filename))
+    return RawData(_load_nexus_entry(filepath))
 
 
 def extract_events(
@@ -128,7 +126,6 @@ def extract_events(
         Data array object for Amor dataset.
     """
     data = _assemble_event_data(raw_data)
-
     # Recent versions of scippnexus no longer add variances for events by default, so
     # we add them here if they are missing.
     if data.bins.constituents['data'].data.variances is None:
