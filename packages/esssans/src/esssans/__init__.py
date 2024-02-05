@@ -42,6 +42,9 @@ to setup a complete workflow.
 del importlib
 
 __all__ = [
+    'BackgroundSubtractedIofQ',
+    'IofQ',
+    'SampleRun',
     'ReturnEvents',
     'beam_center_finder',
     'common',
