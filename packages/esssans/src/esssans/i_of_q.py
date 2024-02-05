@@ -2,10 +2,8 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 from typing import Dict, List, Optional, Union
-from uuid import uuid4
 
 import scipp as sc
-from scipp.core.concepts import irreducible_mask
 from scipp.scipy.interpolate import interp1d
 
 from .common import mask_range
@@ -170,11 +168,7 @@ def process_wavelength_bands(
 
 
 def merge_spectra(
-    data: CleanQ[RunType, IofQPart],
-    q_bins: QBins,
-    wavelength_bins: WavelengthBins,
-    wavelength_bands: ProcessedWavelengthBands,
-    dims_to_keep: Optional[DimsToKeep],
+    data: CleanQ[RunType, IofQPart], q_bins: QBins, dims_to_keep: Optional[DimsToKeep]
 ) -> CleanSummedQ[RunType, IofQPart]:
     """
     Merges all spectra:
@@ -188,13 +182,6 @@ def merge_spectra(
         A DataArray containing the data that is to be converted to Q.
     q_bins:
         The binning in Q to be used.
-    wavelength_bins:
-        The binning in wavelength to be used.
-    wavelength_bands:
-        Defines bands in wavelength that can be used to separate different wavelength
-        ranges that contribute to different regions in Q space. Note that this needs to
-        be defined, so if all wavelengths should be used, this should simply be a start
-        and end edges that encompass the entire wavelength range.
     dims_to_keep:
         Dimensions that should not be reduced and thus still be present in the final
         I(Q) result (this is typically the layer dimension).
@@ -204,23 +191,17 @@ def merge_spectra(
     :
         The input data converted to Q and then summed over all detector pixels.
     """
-    dims_to_reduce = set(data.dims) - {'Q'}
+    dims_to_reduce = set(data.dims) - {'wavelength'}
     if dims_to_keep is not None:
         dims_to_reduce -= set(dims_to_keep)
 
     if data.bins is not None:
         out = _events_merge_spectra(
-            data_q=data,
-            q_bins=q_bins,
-            wavelength_bands=wavelength_bands,
-            dims_to_reduce=dims_to_reduce,
+            data_q=data, q_bins=q_bins, dims_to_reduce=dims_to_reduce
         )
     else:
         out = _dense_merge_spectra(
-            data_q=data,
-            q_bins=q_bins,
-            wavelength_bands=wavelength_bands,
-            dims_to_reduce=dims_to_reduce,
+            data_q=data, q_bins=q_bins, dims_to_reduce=dims_to_reduce
         )
     return CleanSummedQ[RunType, IofQPart](out.squeeze())
 
@@ -236,87 +217,43 @@ def _to_q_bins(q_bins: Union[int, sc.Variable]) -> Dict[str, Union[int, sc.Varia
 
 
 def _events_merge_spectra(
-    data_q: sc.DataArray,
-    q_bins: Union[int, sc.Variable],
-    dims_to_reduce: List[str],
-    wavelength_bands: sc.Variable,
+    data_q: sc.DataArray, q_bins: Union[int, sc.Variable], dims_to_reduce: List[str]
 ) -> sc.DataArray:
     """
     Merge spectra of event data
     """
-    q_all_pixels = data_q.bins.concat(dims_to_reduce)
     edges = _to_q_bins(q_bins)
-    q_binned = q_all_pixels.bin(**edges)
-    dim = 'wavelength'
-    wav_binned = q_binned.bin({dim: sc.sort(wavelength_bands.flatten(to=dim), dim)})
-    # At this point we kind of already have what we need, would be cheapest to just
-    # return, if follow up providers can work with the result.
-    # Otherwise we need to duplicate events:
-    sections = []
-    for bounds in sc.collapse(wavelength_bands, keep=dim).values():
-        # The extra concat can probably be avoided if we insert some dummy edges for
-        # first and last band, but we would need to know how many edges to insert, as
-        # the bands can be very wide and overlap by more than one bin.
-        sections.append(wav_binned[dim, bounds[0] : bounds[1]].bins.concat(dim))
-    band_dim = (set(wavelength_bands.dims) - {'wavelength'}).pop()
-    out = sc.concat(sections, band_dim)
-    out.coords[dim] = wavelength_bands
-    return out
+    q_all_pixels = data_q.bins.concat(dims_to_reduce)
+    return q_all_pixels.bin(**edges)
 
 
 def _dense_merge_spectra(
-    data_q: sc.DataArray,
-    q_bins: Union[int, sc.Variable],
-    dims_to_reduce: List[str],
-    wavelength_bands: sc.Variable,
+    data_q: sc.DataArray, q_bins: Union[int, sc.Variable], dims_to_reduce: set[str]
 ) -> sc.DataArray:
     """
     Merge spectra of dense data
     """
     edges = _to_q_bins(q_bins)
-    bands = []
-    band_dim = (set(wavelength_bands.dims) - {'wavelength'}).pop()
 
     # We want to flatten data to make histogramming cheaper (avoiding allocation of
     # large output before summing). We strip unnecessary content since it makes
     # flattening more expensive.
     stripped = data_q.copy(deep=False)
     for name, coord in data_q.coords.items():
-        if name not in ['Q', 'wavelength'] and any(
-            [dim in dims_to_reduce for dim in coord.dims]
-        ):
+        if name not in {'Q', 'wavelength'} and set(coord.dims) & dims_to_reduce:
             del stripped.coords[name]
     to_flatten = [dim for dim in data_q.dims if dim in dims_to_reduce]
 
-    dummy_dim = str(uuid4())
-    # Make sure that dims to flatten are contiguous, and that Q is the last dim
+    # Make dims to flatten contiguous, keep wavelength is the last dim
     data_dims = list(stripped.dims)
-    rearranged_dims = to_flatten + ['Q']
-    for dim in rearranged_dims:
+    for dim in to_flatten + ['wavelength']:
         data_dims.remove(dim)
-    for dim in rearranged_dims:
         data_dims.append(dim)
     stripped = stripped.transpose(data_dims)
-    flat = stripped.flatten(dims=to_flatten, to=dummy_dim)
+    # Flatten to Q such that `hist` below will turn this into the new Q dim.
+    flat = stripped.flatten(dims=to_flatten, to='Q')
 
-    # Apply masks once, to avoid repeated work when iterating over bands
-    mask = irreducible_mask(flat, dummy_dim)
-    # When not all dims are reduced there may be extra dims in the mask and it is not
-    # possible to select data based on it. In this case the masks will be applied
-    # in the loop below, which is slightly slower.
-    if mask.ndim == 1:
-        flat = flat.drop_masks(
-            [name for name, mask in flat.masks.items() if dummy_dim in mask.dims]
-        )
-        flat = flat[~mask]
-
-    dims_to_reduce = tuple(dim for dim in dims_to_reduce if dim not in to_flatten)
-    for wav_range in sc.collapse(wavelength_bands, keep='wavelength').values():
-        band = flat['wavelength', wav_range[0] : wav_range[1]]
-        # By flattening before histogramming we avoid allocating a large output array,
-        # which would then require summing over all pixels.
-        bands.append(band.flatten(dims=(dummy_dim, 'Q'), to='Q').hist(**edges))
-    return sc.concat(bands, band_dim)
+    return flat.hist(**edges)
 
 
 def subtract_background(

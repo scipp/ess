@@ -20,6 +20,7 @@ from .types import (
     LabFrameTransform,
     NormWavelengthTerm,
     Numerator,
+    ProcessedWavelengthBands,
     ReturnEvents,
     RunType,
     SolidAngle,
@@ -302,6 +303,7 @@ def normalize(
     denominator: CleanSummedQ[RunType, Denominator],
     return_events: ReturnEvents,
     uncertainties: UncertaintyBroadcastMode,
+    wavelength_bands: ProcessedWavelengthBands,
 ) -> IofQ[RunType]:
     """
     Perform normalization of counts as a function of Q.
@@ -318,12 +320,42 @@ def normalize(
         contain histogrammed data.
     return_events:
         Whether to return the result as event data or histogrammed data.
+    wavelength_bands:
+        Defines bands in wavelength that can be used to separate different wavelength
+        ranges that contribute to different regions in Q space. Note that this needs to
+        be defined, so if all wavelengths should be used, this should simply be a start
+        and end edges that encompass the entire wavelength range.
 
     Returns
     -------
     :
         The input data normalized by the supplied denominator.
     """
+    wav = 'wavelength'
+    wavelength_bounds = sc.sort(wavelength_bands.flatten(to=wav), wav)
+    if numerator.bins is not None:
+        # If in event mode the desired wavelength binning has not been applied, we need
+        # it for splitting by bands, or restricting the range in case of a single band.
+        numerator = numerator.bin(wavelength=wavelength_bounds)
+
+    def _reduce(da: sc.DataArray) -> sc.DataArray:
+        return da.sum(wav) if da.bins is None else da.bins.concat(wav)
+
+    num_parts = []
+    denom_parts = []
+    for wav_range in sc.collapse(wavelength_bands, keep=wav).values():
+        num_parts.append(_reduce(numerator[wav, wav_range[0] : wav_range[1]]))
+        denom_parts.append(_reduce(denominator[wav, wav_range[0] : wav_range[1]]))
+    band_dim = (set(wavelength_bands.dims) - {'wavelength'}).pop()
+    if len(num_parts) == 1:
+        numerator = num_parts[0]
+        denominator = denom_parts[0]
+    else:
+        numerator = sc.concat(num_parts, band_dim)
+        denominator = sc.concat(denom_parts, band_dim)
+    numerator.coords[wav] = wavelength_bands.squeeze()
+    denominator.coords[wav] = wavelength_bands.squeeze()
+
     if return_events and numerator.bins is not None:
         # Naive event-mode normalization is not correct if norm-term has variances.
         # See https://doi.org/10.3233/JNR-220049 for context.

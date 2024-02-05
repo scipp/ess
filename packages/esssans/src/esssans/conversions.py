@@ -228,7 +228,10 @@ def to_Q(
     """
     Convert a data array from wavelength to Q.
     """
-    return CleanQ[RunType, IofQPart](data.transform_coords('Q', graph=graph))
+    # Keep naming of wavelength dim, subsequent steps use a (Q, wavelength) binning.
+    return CleanQ[RunType, IofQPart](
+        data.transform_coords('Q', graph=graph, rename_dims=False)
+    )
 
 
 providers = (
