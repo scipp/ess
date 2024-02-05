@@ -1,16 +1,18 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 """ORSO utilities for reflectometry."""
+import os
 import platform
 from datetime import datetime, timezone
 from typing import NewType, Optional
 
 import sciline
+from dateutil.parser import parse as parse_datetime
 from orsopy.fileio import base as orso_base
 from orsopy.fileio import data_source, reduction
 
 from . import __version__
-from .types import Reference, Run, Sample
+from .types import Filename, RawData, Reference, Run, Sample
 
 
 class OrsoExperiment(
@@ -47,8 +49,61 @@ OrsoMeasurement = NewType('OrsoMeasurement', data_source.Measurement)
 """ORSO measurement."""
 
 
+def parse_orso_experiment(raw_data: RawData[Run]) -> OrsoExperiment[Run]:
+    """Parse ORSO experiment metadata from raw NeXus data."""
+    return OrsoExperiment(
+        data_source.Experiment(
+            title=raw_data['title'],
+            instrument=raw_data['name'],
+            facility=raw_data['facility'],
+            start_date=parse_datetime(raw_data['start_time']),
+            probe='neutron',
+        )
+    )
+
+
+def parse_orso_owner(raw_data: RawData[Run]) -> OrsoOwner[Run]:
+    """Parse ORSO owner metadata from raw NeXus data."""
+    return OrsoOwner(
+        orso_base.Person(
+            name=raw_data['user']['name'],
+            contact=raw_data['user']['email'],
+            affiliation=None,
+        )
+    )
+
+
+def parse_orso_sample(raw_data: RawData[Run]) -> OrsoSample[Run]:
+    """Parse ORSO sample metadata from raw NeXus data."""
+    if not raw_data.get('sample'):
+        return OrsoSample(data_source.Sample.empty())
+    raise NotImplementedError('NeXus sample parsing is not implemented')
+
+
+def build_orso_measurement(
+    sample_filename: Filename[Sample],
+    reference_filename: Filename[Reference],
+    instrument: Optional[OrsoInstrument],
+) -> OrsoMeasurement:
+    """Assemble ORSO measurement metadata."""
+    # TODO populate timestamp
+    #      doesn't work with a local file because we need the timestamp of the original,
+    #      SciCat can provide that
+    return OrsoMeasurement(
+        data_source.Measurement(
+            instrument_settings=instrument,
+            data_files=[orso_base.File(file=os.path.basename(sample_filename))],
+            additional_files=[
+                orso_base.File(
+                    file=os.path.basename(reference_filename), comment='supermirror'
+                )
+            ],
+        )
+    )
+
+
 def build_orso_reduction(creator: Optional[OrsoCreator]) -> OrsoReduction:
-    """Construct ORSO reduction data.
+    """Construct ORSO reduction metadata.
 
     This assumes that ess.reflectometry is the primary piece of software
     used to reduce the data.
@@ -98,4 +153,11 @@ def build_orso_data_source(
     )
 
 
-providers = (build_orso_reduction, build_orso_data_source)
+providers = (
+    build_orso_reduction,
+    build_orso_data_source,
+    build_orso_measurement,
+    parse_orso_experiment,
+    parse_orso_owner,
+    parse_orso_sample,
+)
