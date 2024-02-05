@@ -102,6 +102,7 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
 
     pipeline = pipeline.copy()
 
+    wavelength_bins = pipeline.compute(WavelengthBins)
     parts = (
         CleanSummedQ[SampleRun, Numerator],
         CleanSummedQ[SampleRun, Denominator],
@@ -109,13 +110,20 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
         CleanSummedQ[BackgroundRun, Denominator],
     )
     parts = pipeline.compute(parts)
+    # Convert events to histograms to make normalization (in every iteration) cheap
+    for key in [
+        CleanSummedQ[SampleRun, Numerator],
+        CleanSummedQ[BackgroundRun, Numerator],
+    ]:
+        parts[key] = parts[key].hist(wavelength=wavelength_bins)
+
     # For now we simply strip all uncertainties, since direct beam function is
     # computed without variances anyway.
     parts = {key: sc.values(result) for key, result in parts.items()}
-    denom_sample = parts[CleanSummedQ[SampleRun, Denominator]]
-    denom_background = parts[CleanSummedQ[BackgroundRun, Denominator]]
-    for key, result in parts.items():
-        pipeline[key] = result
+    for key, part in parts.items():
+        pipeline[key] = part
+    sample0 = parts[CleanSummedQ[SampleRun, Denominator]]
+    background0 = parts[CleanSummedQ[BackgroundRun, Denominator]]
 
     results = []
 
@@ -150,10 +158,10 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
         # with the current direct beam function.
         db = resample_direct_beam(
             direct_beam=direct_beam_function,
-            wavelength_bins=pipeline.compute(WavelengthBins),
+            wavelength_bins=wavelength_bins,
         )
-        pipeline[CleanSummedQ[SampleRun, Denominator]] = denom_sample * db
-        pipeline[CleanSummedQ[BackgroundRun, Denominator]] = denom_background * db
+        pipeline[CleanSummedQ[SampleRun, Denominator]] = sample0 * db
+        pipeline[CleanSummedQ[BackgroundRun, Denominator]] = background0 * db
 
         results.append(
             {
