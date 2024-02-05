@@ -62,19 +62,15 @@ def test_pipeline_can_compute_IofQ_in_event_mode(uncertainties, target):
         atol=sc.scalar(1e-11),
     )
     if uncertainties == UncertaintyBroadcastMode.drop:
-        assert sc.allclose(
-            sc.variances(reference).data,
-            sc.variances(result.hist()).data,
-            rtol=sc.scalar(1e-14),
-            atol=sc.scalar(1e-14),
-        )
+        tol = sc.scalar(1e-14)
     else:
-        assert sc.allclose(
-            sc.variances(reference).data,
-            sc.variances(result.hist()).data,
-            rtol=sc.scalar(1e-9),
-            atol=sc.scalar(1e-9),
-        )
+        tol = sc.scalar(1e-9)
+    assert sc.allclose(
+        sc.variances(reference).data,
+        sc.variances(result.hist()).data,
+        rtol=tol,
+        atol=tol,
+    )
 
 
 def test_pipeline_can_compute_IofQ_in_wavelength_slices():
