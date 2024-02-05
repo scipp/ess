@@ -46,7 +46,7 @@ def parse_orso_sample(raw_data: RawData[Run]) -> OrsoSample[Run]:
     """Parse ORSO sample data from raw Amor NeXus data."""
     if not raw_data.get('sample'):
         return OrsoSample(data_source.Sample.empty())
-    raise NotImplementedError('Amor NsXus sample parsing is not implemented')
+    raise NotImplementedError('Amor NeXus sample parsing is not implemented')
 
 
 def build_orso_measurement(
