@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import os
-from typing import Iterable, TextIO, Union
+from typing import Iterable, TextIO, Union,Optional
 
 import numpy as np
 import scipp as sc
@@ -9,7 +9,7 @@ from orsopy.fileio.base import Column
 from orsopy.fileio.orso import Orso, OrsoDataset
 
 from .orso import OrsoDataSource, OrsoReduction
-from .types import NormalizedIofQ
+from .types import NormalizedIofQ,QResolution
 
 
 def save_ort(
@@ -44,6 +44,8 @@ def save_iofq_ort(
     iofq: NormalizedIofQ,
     data_source: OrsoDataSource,
     reduction: OrsoReduction,
+        *,
+        sigma_q: Optional[QResolution] = None,
 ) -> None:
     """Save reduced I-of-Q data to an ORSO .ort file.
 
@@ -58,6 +60,10 @@ def save_iofq_ort(
         ``iofq`` was computed from.
     reduction:
         ORSO ``Reduction`` with metadata about the reduction process.
+    sigma_q:
+        Resolution of :math:`Q`.
+        If ``None``, ``iofq`` must have a coordinate called ``'sigma_Q'``
+        that stores the resolution.
     """
     orso = Orso(
         data_source=data_source,
@@ -79,7 +85,10 @@ def save_iofq_ort(
         qz = sc.midpoints(qz)
     r = sc.values(iofq.data)
     sr = sc.stddevs(iofq.data)
-    sqz = iofq.coords['sigma_Q'].to(unit='1/angstrom', copy=False)
+    if sigma_q is not None:
+        sqz = sigma_q.to(unit='1/angstrom', copy=False)
+    else:
+        sqz = iofq.coords['sigma_Q'].to(unit='1/angstrom', copy=False)
 
     save_ort(filename=filename, data=(qz, r, sr, sqz), orso=orso)
 
