@@ -23,6 +23,7 @@ from .types import (
     IofQPart,
     MonitorType,
     NonBackgroundWavelengthRange,
+    ProcessedWavelengthBands,
     QBins,
     RunType,
     SampleRun,
@@ -131,10 +132,10 @@ def resample_direct_beam(
     return CleanDirectBeam(func(wavelength_bins, midpoints=True))
 
 
-def _process_wavelength_bands(
+def process_wavelength_bands(
     wavelength_bands: Optional[WavelengthBands],
     wavelength_bins: WavelengthBins,
-) -> Optional[WavelengthBands]:
+) -> ProcessedWavelengthBands:
     """
     Perform some checks and potential reshaping on the wavelength bands.
 
@@ -171,7 +172,7 @@ def merge_spectra(
     data: CleanQ[RunType, IofQPart],
     q_bins: QBins,
     wavelength_bins: WavelengthBins,
-    wavelength_bands: Optional[WavelengthBands],
+    wavelength_bands: ProcessedWavelengthBands,
     dims_to_keep: Optional[DimsToKeep],
 ) -> CleanSummedQ[RunType, IofQPart]:
     """
@@ -205,10 +206,6 @@ def merge_spectra(
     dims_to_reduce = set(data.dims) - {'Q'}
     if dims_to_keep is not None:
         dims_to_reduce -= set(dims_to_keep)
-
-    wavelength_bands = _process_wavelength_bands(
-        wavelength_bands=wavelength_bands, wavelength_bins=wavelength_bins
-    )
 
     if data.bins is not None:
         out = _events_merge_spectra(
@@ -291,6 +288,14 @@ def _dense_merge_spectra(
     to_flatten = [dim for dim in data_q.dims if dim in dims_to_reduce]
 
     dummy_dim = str(uuid4())
+    # Make sure that dims to flatten are contiguous, and that Q is the last dim
+    data_dims = list(stripped.dims)
+    rearranged_dims = to_flatten + ['Q']
+    for dim in rearranged_dims:
+        data_dims.remove(dim)
+    for dim in rearranged_dims:
+        data_dims.append(dim)
+    stripped = stripped.transpose(data_dims)
     flat = stripped.flatten(dims=to_flatten, to=dummy_dim)
 
     # Apply masks once, to avoid repeated work when iterating over bands
@@ -328,4 +333,5 @@ providers = (
     resample_direct_beam,
     merge_spectra,
     subtract_background,
+    process_wavelength_bands,
 )

@@ -15,10 +15,10 @@ from .types import (
     DirectBeam,
     Incident,
     Numerator,
+    ProcessedWavelengthBands,
     SampleRun,
     SolidAngle,
     TransmissionFraction,
-    WavelengthBands,
 )
 
 
@@ -97,7 +97,7 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
     """
 
     direct_beam_function = None
-    bands = pipeline.compute(WavelengthBands)
+    bands = pipeline.compute(ProcessedWavelengthBands)
     band_dim = (set(bands.dims) - {'wavelength'}).pop()
 
     full_wavelength_range = sc.concat([bands.min(), bands.max()], dim='wavelength')
@@ -106,7 +106,9 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
     # Append full wavelength range as extra band. This allows for running only a
     # single pipeline to compute both the I(Q) in bands and the I(Q) for the full
     # wavelength range.
-    pipeline[WavelengthBands] = sc.concat([bands, full_wavelength_range], dim=band_dim)
+    pipeline[ProcessedWavelengthBands] = sc.concat(
+        [bands, full_wavelength_range], dim=band_dim
+    )
 
     results = []
 

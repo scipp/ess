@@ -16,15 +16,12 @@ from esssans.types import (
     SampleRun,
     TransmissionRun,
     UncertaintyBroadcastMode,
-    WavelengthBands,
     WavelengthBins,
 )
 
 
 def make_params(
-    sample_runs: Optional[List[str]] = None,
-    background_runs: Optional[List[str]] = None,
-    n_wavelength_bands: int = 1,
+    sample_runs: Optional[List[str]] = None, background_runs: Optional[List[str]] = None
 ) -> dict:
     params = default_parameters.copy()
 
@@ -40,27 +37,9 @@ def make_params(
     params[FileList[TransmissionRun[BackgroundRun]]] = ['60392-2022-02-28_2215.nxs']
     params[FileList[EmptyBeamRun]] = ['60392-2022-02-28_2215.nxs']
 
-    # Wavelength binning parameters
-    wavelength_min = sc.scalar(1.0, unit='angstrom')
-    wavelength_max = sc.scalar(13.0, unit='angstrom')
-    n_wavelength_bins = 200
-
     params[WavelengthBins] = sc.linspace(
-        'wavelength', wavelength_min, wavelength_max, n_wavelength_bins + 1
+        'wavelength', start=1.0, stop=13.0, num=201, unit='angstrom'
     )
-
-    if n_wavelength_bands == 1:
-        sampling_width = wavelength_max - wavelength_min
-    else:
-        sampling_width = 2.0 * (wavelength_max - wavelength_min) / n_wavelength_bands
-    band_start = sc.linspace(
-        'band', wavelength_min, wavelength_max - sampling_width, n_wavelength_bands
-    )
-    band_end = band_start + sampling_width
-    params[WavelengthBands] = sc.concat(
-        [band_start, band_end], dim='wavelength'
-    ).transpose()
-
     params[BeamStopPosition] = sc.vector([-0.026, -0.022, 0.0], unit='m')
     params[BeamStopRadius] = sc.scalar(0.042, unit='m')
     params[CorrectForGravity] = True

@@ -102,6 +102,12 @@ band index and the second dimension being the wavelength. For each band, there m
 two wavelength values defining the start and end wavelength of the band.
 """
 
+ProcessedWavelengthBands = NewType('ProcessedWavelengthBands', sc.Variable)
+"""Processed wavelength bands, as a two-dimensional variable, with the first dimension
+being the band index and the second dimension being the wavelength. For each band, there
+must be two wavelength values defining the start and end wavelength of the band."""
+
+
 QBins = NewType('QBins', sc.Variable)
 """Q binning"""
 
