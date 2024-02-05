@@ -29,7 +29,8 @@
    :template: module-template.rst
    :recursive:
 
-   types
    amor
+   orso
    supermirror
+   types
 ```
