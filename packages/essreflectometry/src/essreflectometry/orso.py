@@ -11,7 +11,6 @@ from dateutil.parser import parse as parse_datetime
 from orsopy.fileio import base as orso_base
 from orsopy.fileio import data_source, reduction
 
-from . import __version__
 from .types import Filename, RawData, Reference, Run, Sample
 
 
@@ -108,6 +107,9 @@ def build_orso_reduction(creator: Optional[OrsoCreator]) -> OrsoReduction:
     This assumes that ess.reflectometry is the primary piece of software
     used to reduce the data.
     """
+    # Import here to break cycle __init__ -> io -> orso -> __init__
+    from . import __version__
+
     return OrsoReduction(
         reduction.Reduction(
             software=reduction.Software(

@@ -4,7 +4,7 @@
 # flake8: noqa: F401
 import importlib.metadata
 
-from . import calibrations, conversions, corrections, normalize
+from . import calibrations, conversions, corrections, io, normalize
 
 try:
     __version__ = importlib.metadata.version(__package__ or __name__)
