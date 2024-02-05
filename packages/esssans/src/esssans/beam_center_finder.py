@@ -22,6 +22,7 @@ from .normalization import iofq_denominator, normalize, solid_angle
 from .types import (
     BeamCenter,
     DetectorPixelShape,
+    CalibratedMaskedData,
     IofQ,
     LabFrameTransform,
     MaskedData,
@@ -158,9 +159,6 @@ def _iofq_in_quadrants(
         'north-west'.
     """
     pi = sc.constants.pi.value
-    phi = data.transform_coords(
-        'phi', graph=graph, keep_intermediate=False, keep_inputs=False
-    ).coords['phi']
     phi_bins = sc.linspace('phi', -pi, pi, 5, unit='rad')
     quadrants = ['south-west', 'south-east', 'north-east', 'north-west']
 
@@ -183,15 +181,21 @@ def _iofq_in_quadrants(
     params[ElasticCoordTransformGraph] = graph
     params[BeamCenter] = _offsets_to_vector(data=data, xy=xy, graph=graph)
 
+    pipeline = sciline.Pipeline(providers, params=params)
+    pipeline[MaskedData[SampleRun]] = data
+    calibrated = pipeline.compute(CalibratedMaskedData[SampleRun])
+    phi = calibrated.transform_coords(
+        'phi', graph=graph, keep_intermediate=False, keep_inputs=False
+    ).coords['phi']
+
     out = {}
     for i, quad in enumerate(quadrants):
         # Select pixels based on phi
         sel = (phi >= phi_bins[i]) & (phi < phi_bins[i + 1])
-        params[MaskedData[SampleRun]] = data[sel]
-        params[NormWavelengthTerm[SampleRun]] = (
+        pipeline[MaskedData[SampleRun]] = data[sel]
+        pipeline[NormWavelengthTerm[SampleRun]] = (
             norm if norm.dims == ('wavelength',) else norm[sel]
         )
-        pipeline = sciline.Pipeline(providers, params=params)
         out[quad] = pipeline.compute(IofQ[SampleRun])
     return out
 
