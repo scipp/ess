@@ -29,7 +29,7 @@ from .general import default_parameters as params
 DETECTOR_BANK_RESHAPING = {
     params[NeXusDetectorName]: lambda x: x.fold(
         dim='detector_number', sizes=dict(layer=4, tube=32, straw=7, pixel=512)
-    ).flatten(dims=['tube', 'straw'], to='straw')
+    )
 }
 
 

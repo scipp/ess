@@ -16,7 +16,7 @@ from .conversions import (
     mask_wavelength,
     to_Q,
 )
-from .i_of_q import merge_spectra
+from .i_of_q import merge_spectra, process_wavelength_bands
 from .logging import get_logger
 from .normalization import iofq_denominator, normalize, solid_angle
 from .types import (
@@ -174,6 +174,7 @@ def _iofq_in_quadrants(
         detector_to_wavelength,
         solid_angle,
         calibrate_positions,
+        process_wavelength_bands,
     ]
     params = {}
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
