@@ -83,7 +83,7 @@ def parse_orso_sample(raw_data: RawData[Run]) -> OrsoSample[Run]:
 def build_orso_measurement(
     sample_filename: Filename[Sample],
     reference_filename: Filename[Reference],
-    instrument: Optional[OrsoInstrument],
+    instrument: Optional[OrsoInstrument[Sample]],
 ) -> OrsoMeasurement:
     """Assemble ORSO measurement metadata."""
     # TODO populate timestamp
@@ -154,9 +154,9 @@ def build_orso_data_source(
 
 
 providers = (
-    build_orso_reduction,
     build_orso_data_source,
     build_orso_measurement,
+    build_orso_reduction,
     parse_orso_experiment,
     parse_orso_owner,
     parse_orso_sample,
