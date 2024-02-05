@@ -152,7 +152,7 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
             I0=I0,
         )
 
-        # Scale denominator terms that where initially computed without direct beam
+        # Scale denominator terms that were initially computed without direct beam
         # with the current direct beam function.
         db = resample_direct_beam(
             direct_beam=direct_beam_function,
