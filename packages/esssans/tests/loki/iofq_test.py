@@ -9,11 +9,16 @@ import sciline
 import scipp as sc
 
 import esssans as sans
+from esssans.conversions import ElasticCoordTransformGraph
 from esssans.types import (
     BackgroundSubtractedIofQ,
     BeamCenter,
+    CleanWavelengthMasked,
+    CorrectForGravity,
     DimsToKeep,
+    Numerator,
     ReturnEvents,
+    SampleRun,
     UncertaintyBroadcastMode,
     WavelengthBands,
     WavelengthBins,
@@ -138,3 +143,47 @@ def test_beam_center_from_center_of_mass_is_close_to_verified_result():
     center = pipeline.compute(BeamCenter)
     reference = sc.vector([-0.0309889, -0.0168854, 0], unit='m')
     assert sc.allclose(center, reference)
+
+
+def test_phi_with_gravity():
+    params = make_params()
+    pipeline = sciline.Pipeline(loki_providers(), params=params)
+    pipeline[CorrectForGravity] = False
+    data_no_grav = pipeline.compute(
+        CleanWavelengthMasked[SampleRun, Numerator]
+    ).flatten(to='pixel')
+    graph_no_grav = pipeline.compute(ElasticCoordTransformGraph)
+    pipeline[CorrectForGravity] = True
+    data_with_grav = (
+        pipeline.compute(CleanWavelengthMasked[SampleRun, Numerator])
+        .flatten(to='pixel')
+        .hist(wavelength=sc.linspace('wavelength', 1.0, 12.0, 101, unit='angstrom'))
+    )
+    graph_with_grav = pipeline.compute(ElasticCoordTransformGraph)
+
+    no_grav = data_no_grav.transform_coords(('two_theta', 'phi'), graph_no_grav)
+    two_theta_no_grav = no_grav.coords['two_theta']
+    phi_no_grav = no_grav.coords['phi']
+    with_grav = data_with_grav.transform_coords(('two_theta', 'phi'), graph_with_grav)
+    phi_with_grav = with_grav.coords['phi'].mean('wavelength')
+
+    assert not sc.identical(phi_no_grav, phi_with_grav)
+
+    # Exclude pixels near the origin, since phi will vary a lot there.
+    not_near_origin = two_theta_no_grav > sc.scalar(0.1, unit='deg').to(unit='rad')
+    assert sc.all(
+        sc.isclose(
+            phi_no_grav[not_near_origin],
+            phi_with_grav[not_near_origin],
+            atol=sc.scalar(3.0, unit='deg').to(unit='rad'),
+        )
+    )
+
+    # Phi is in [-pi, pi], measured from the X axis.
+    pos_x = sc.abs(phi_no_grav) < sc.scalar(90.0, unit='deg').to(unit='rad')
+    # Phi is larger with gravity, since it gives the position where it would have
+    # been detected without gravity. That is, with gravity all points are pulled
+    # "up" in the XY plane, so the angle is larger for positive X and smaller for
+    # negative X.
+    assert sc.all(phi_no_grav[pos_x] < phi_with_grav[pos_x])
+    assert sc.all(phi_no_grav[~pos_x] > phi_with_grav[~pos_x])
