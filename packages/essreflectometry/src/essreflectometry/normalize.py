@@ -37,11 +37,6 @@ def normalize_by_supermirror(
     #            + supermirror.attrs['orso'].value.reduction.corrections
     #        )
     #    )
-    #    normalized.attrs[
-    #        'orso'
-    #    ].value.data_source.measurement.reference = supermirror.attrs[
-    #        'orso'
-    #    ].value.data_source.measurement.data_files
     # except KeyError:
     #    orso.not_found_warning()
     return NormalizedIofQ(normalized)

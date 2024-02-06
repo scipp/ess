@@ -9,7 +9,7 @@ from typing import NewType, Optional
 import sciline
 from dateutil.parser import parse as parse_datetime
 from orsopy.fileio import base as orso_base
-from orsopy.fileio import data_source, reduction
+from orsopy.fileio import data_source, orso, reduction
 
 from .types import Filename, RawData, Reference, Run, Sample
 
@@ -40,6 +40,9 @@ class OrsoSample(sciline.Scope[Run, data_source.Sample], data_source.Sample):
 
 OrsoCreator = NewType('OrsoCreator', orso_base.Person)
 """ORSO creator, that is, the person who processed the data."""
+
+OrsoIofQDataset = NewType('OrsoIofQDataset', orso.OrsoDataset)
+"""ORSO dataset for reduced I-of-Q data."""
 
 OrsoDataSource = NewType('OrsoDataSource', data_source.DataSource)
 """ORSO data source."""
