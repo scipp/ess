@@ -20,7 +20,6 @@ from . import (
     sans2d,
 )
 from .common import transmission_from_background_run, transmission_from_sample_run
-from .conversions import ComputeQxy
 from .direct_beam import direct_beam
 from .types import BackgroundSubtractedIofQ, IofQ, ReturnEvents, SampleRun
 
@@ -43,7 +42,6 @@ to setup a complete workflow.
 del importlib
 
 __all__ = [
-    'ComputeQxy',
     'BackgroundSubtractedIofQ',
     'IofQ',
     'SampleRun',

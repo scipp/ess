@@ -23,6 +23,7 @@ from .types import (
     MonitorType,
     NonBackgroundWavelengthRange,
     QBins,
+    QxyBins,
     ReturnEvents,
     RunType,
     SampleRun,
@@ -131,7 +132,10 @@ def resample_direct_beam(
 
 
 def merge_spectra(
-    data: CleanQ[RunType, IofQPart], q_bins: QBins, dims_to_keep: Optional[DimsToKeep]
+    data: CleanQ[RunType, IofQPart],
+    q_bins: Optional[QBins],
+    qxy_bins: Optional[QxyBins],
+    dims_to_keep: Optional[DimsToKeep],
 ) -> CleanSummedQ[RunType, IofQPart]:
     """
     Merges all spectra:
@@ -158,11 +162,11 @@ def merge_spectra(
     if dims_to_keep is not None:
         dims_to_reduce -= set(dims_to_keep)
 
-    if 'Qx' in (data if data.bins is None else data.bins).coords:
+    if qxy_bins:
         # We make Qx the inner dim, such that plots naturally show Qx on the x-axis.
-        edges = {'Qy': q_bins['Qy'], 'Qx': q_bins['Qx']}
+        edges = {'Qy': qxy_bins['Qy'], 'Qx': qxy_bins['Qx']}
     else:
-        edges = {'Q': q_bins['Q']}
+        edges = {'Q': q_bins}
 
     if data.bins is not None:
         q_all_pixels = data.bins.concat(dims_to_reduce)

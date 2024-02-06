@@ -19,6 +19,7 @@ from .types import (
     MaskedData,
     MonitorType,
     Numerator,
+    QxyBins,
     RawMonitor,
     RunType,
     WavelengthMask,
@@ -241,14 +242,10 @@ def mask_wavelength(
     return CleanWavelengthMasked[RunType, IofQPart](da)
 
 
-ComputeQxy = NewType('ComputeQxy', bool)
-"""Whether to compute I(Q_x, Q_y) instead of I(Q)."""
-
-
 def compute_Q(
     data: CleanWavelengthMasked[RunType, IofQPart],
     graph: ElasticCoordTransformGraph,
-    compute_Qxy: Optional[ComputeQxy],
+    compute_Qxy: Optional[QxyBins],
 ) -> CleanQ[RunType, IofQPart]:
     """
     Convert a data array from wavelength to Q.
