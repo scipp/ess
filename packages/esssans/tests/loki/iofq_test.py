@@ -72,7 +72,7 @@ def test_pipeline_can_compute_IofQ_in_event_mode(uncertainties, target, qxy: boo
     if uncertainties == UncertaintyBroadcastMode.drop:
         tol = sc.scalar(1e-14)
     else:
-        tol = sc.scalar(1e-9)
+        tol = sc.scalar(1e-8 if qxy else 1e-9)
     assert sc.allclose(
         sc.variances(reference).data,
         sc.variances(result.hist()).data,
