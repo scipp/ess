@@ -118,7 +118,7 @@ def test_pipeline_can_compute_IofQ_in_layers(qxy: bool):
     params[DimsToKeep] = ['layer']
     pipeline = sciline.Pipeline(loki_providers(), params=params)
     result = pipeline.compute(BackgroundSubtractedIofQ)
-    assert result.dims == ('band', 'Qy', 'Qx') if qxy else ('band', 'Q')
+    assert result.dims == ('layer', 'Qy', 'Qx') if qxy else ('layer', 'Q')
     assert result.sizes['layer'] == 4
 
 

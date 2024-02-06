@@ -200,6 +200,11 @@ def merge_spectra(
         else:
             # sc.hist (or the underlying sc.bin) cannot deal with extra data dims,
             # work around by flattening and regrouping.
+            for dim in flat.dims:
+                if dim == helper_dim:
+                    continue
+                if dim not in flat.coords:
+                    flat.coords[dim] = sc.arange(dim, flat.sizes[dim])
             out = (
                 flat.flatten(to=str(uuid.uuid4()))
                 .group(*[flat.coords[dim] for dim in flat.dims if dim != helper_dim])
