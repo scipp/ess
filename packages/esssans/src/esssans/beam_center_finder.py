@@ -12,9 +12,9 @@ from scipp.core import concepts
 from .conversions import (
     ElasticCoordTransformGraph,
     calibrate_positions,
+    compute_Q,
     detector_to_wavelength,
     mask_wavelength,
-    to_Q,
 )
 from .i_of_q import merge_spectra
 from .logging import get_logger
@@ -171,7 +171,7 @@ def _iofq_in_quadrants(
     quadrants = ['south-west', 'south-east', 'north-east', 'north-west']
 
     providers = [
-        to_Q,
+        compute_Q,
         merge_spectra,
         normalize,
         iofq_denominator,

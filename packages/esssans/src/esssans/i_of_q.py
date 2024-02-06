@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
+import uuid
 from typing import Optional
 
 import scipp as sc
@@ -157,7 +158,11 @@ def merge_spectra(
     if dims_to_keep is not None:
         dims_to_reduce -= set(dims_to_keep)
 
-    edges = {'Q': q_bins} if isinstance(q_bins, int) else {q_bins.dim: q_bins}
+    use_qxy = 'Qx' in (data if data.bins is None else data.bins).coords
+    if use_qxy:
+        edges = {'Qx': q_bins.rename_dims(Q='Qx'), 'Qy': q_bins.rename_dims(Q='Qy')}
+    else:
+        edges = {'Q': q_bins} if isinstance(q_bins, int) else {q_bins.dim: q_bins}
 
     if data.bins is not None:
         q_all_pixels = data.bins.concat(dims_to_reduce)
@@ -168,7 +173,10 @@ def merge_spectra(
         # flattening more expensive.
         stripped = data.copy(deep=False)
         for name, coord in data.coords.items():
-            if name not in {'Q', 'wavelength'} and set(coord.dims) & dims_to_reduce:
+            if (
+                name not in {'Q', 'Qx', 'Qy', 'wavelength'}
+                and set(coord.dims) & dims_to_reduce
+            ):
                 del stripped.coords[name]
         to_flatten = [dim for dim in data.dims if dim in dims_to_reduce]
 
@@ -178,10 +186,20 @@ def merge_spectra(
             data_dims.remove(dim)
             data_dims.append(dim)
         stripped = stripped.transpose(data_dims)
-        # Flatten to Q such that `hist` below will turn this into the new Q dim.
-        flat = stripped.flatten(dims=to_flatten, to='Q')
+        # Flatten to dummy dim such that `hist` will turn this into the new Q dim(s).
+        dummy_dim = str(uuid.uuid4())
+        flat = stripped.flatten(dims=to_flatten, to=dummy_dim)
 
-        out = flat.hist(**edges)
+        if len(edges) == 1:
+            out = flat.hist(**edges)
+        else:
+            # sc.hist (or the underlying sc.bin) cannot deal with extra data dims,
+            # work around by flattening and regrouping.
+            out = (
+                flat.flatten(to=str(uuid.uuid4()))
+                .group(*[flat.coords[dim] for dim in flat.dims if dim != dummy_dim])
+                .hist(**edges)
+            )
     return CleanSummedQ[RunType, IofQPart](out.squeeze())
 
 

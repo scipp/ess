@@ -73,7 +73,7 @@ def two_theta(
     scattered_beam: sc.Variable,
     wavelength: sc.Variable,
     gravity: sc.Variable,
-) -> sc.Variable:
+) -> dict[str, sc.Variable]:
     """
     Compute the scattering angle from the incident and scattered beam vectors, taking
     into account the effects of gravity.
@@ -84,7 +84,6 @@ def two_theta(
     L2 = sc.norm(scattered_beam)
 
     x_term = cylindrical_x(cyl_x_unit_vector(gravity, incident_beam), scattered_beam)
-    x_term *= x_term
 
     y_term = sc.to_unit(wavelength, elem_unit(L2), copy=True)
     y_term *= y_term
@@ -98,6 +97,9 @@ def two_theta(
     else:
         y_term = drop * y_term
     y_term += cylindrical_y(cyl_y_unit_vector(gravity), scattered_beam)
+    phi = sc.atan2(y=y_term, x=x_term)
+
+    x_term *= x_term
     y_term *= y_term
 
     if set(x_term.dims).issubset(set(y_term.dims)):
@@ -107,15 +109,29 @@ def two_theta(
     out = sc.sqrt(y_term, out=y_term)
     out /= L2
     out = sc.asin(out, out=out)
-    return out
+    return {'two_theta': out, 'phi': phi}
 
 
-def phi(cylindrical_x: sc.Variable, cylindrical_y: sc.Variable) -> sc.Variable:
+def phi_no_gravity(
+    cylindrical_x: sc.Variable, cylindrical_y: sc.Variable
+) -> sc.Variable:
     """
-    Compute the cylindrial phi angle around the incident beam. Note that it is assumed
+    Compute the cylindrical phi angle around the incident beam. Note that it is assumed
     here that the incident beam is perpendicular to the gravity vector.
     """
     return sc.atan2(y=cylindrical_y, x=cylindrical_x)
+
+
+def Qxy(Q: sc.Variable, phi: sc.Variable) -> dict[str, sc.Variable]:
+    """
+    Compute the Qx and Qy components of the scattering vector from the scattering angle,
+    wavelength, and phi angle.
+    """
+    Qx = sc.cos(phi)
+    Qx *= Q
+    Qy = sc.sin(phi)
+    Qy *= Q
+    return {'Qx': Qx, 'Qy': Qy}
 
 
 ElasticCoordTransformGraph = NewType('ElasticCoordTransformGraph', dict)
@@ -157,12 +173,15 @@ def sans_elastic(gravity: Optional[CorrectForGravity]) -> ElasticCoordTransformG
     """  # noqa: E501
     graph = {**beamline.beamline(scatter=True), **tof.elastic_Q('tof')}
     if gravity:
-        graph['two_theta'] = two_theta
+        del graph['two_theta']
+        graph[('two_theta', 'phi')] = two_theta
+    else:
+        graph['phi'] = phi_no_gravity
     graph['cyl_x_unit_vector'] = cyl_x_unit_vector
     graph['cyl_y_unit_vector'] = cyl_y_unit_vector
     graph['cylindrical_x'] = cylindrical_x
     graph['cylindrical_y'] = cylindrical_y
-    graph['phi'] = phi
+    graph[('Qx', 'Qy')] = Qxy
     return ElasticCoordTransformGraph(graph)
 
 
@@ -222,7 +241,7 @@ def mask_wavelength(
     return CleanWavelengthMasked[RunType, IofQPart](da)
 
 
-def to_Q(
+def compute_Q(
     data: CleanWavelengthMasked[RunType, IofQPart], graph: ElasticCoordTransformGraph
 ) -> CleanQ[RunType, IofQPart]:
     """
@@ -234,6 +253,20 @@ def to_Q(
     )
 
 
+def compute_Qxy(
+    data: CleanWavelengthMasked[RunType, IofQPart], graph: ElasticCoordTransformGraph
+) -> CleanQ[RunType, IofQPart]:
+    """
+    Convert a data array from wavelength to Q.
+    """
+    # Keep naming of wavelength dim, subsequent steps use (Qx, Qy, wavelength) binning.
+    return CleanQ[RunType, IofQPart](
+        data.transform_coords(
+            ('Qx', 'Qy'), graph=graph, keep_intermediate=False, rename_dims=False
+        )
+    )
+
+
 providers = (
     sans_elastic,
     sans_monitor,
@@ -241,5 +274,5 @@ providers = (
     monitor_to_wavelength,
     detector_to_wavelength,
     mask_wavelength,
-    to_Q,
+    compute_Q,
 )
