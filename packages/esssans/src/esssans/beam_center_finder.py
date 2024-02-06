@@ -16,9 +16,14 @@ from .conversions import (
     mask_wavelength,
     to_Q,
 )
-from .i_of_q import merge_spectra, process_wavelength_bands
+from .i_of_q import merge_spectra
 from .logging import get_logger
-from .normalization import iofq_denominator, normalize, solid_angle
+from .normalization import (
+    iofq_denominator,
+    normalize,
+    process_wavelength_bands,
+    solid_angle,
+)
 from .types import (
     BeamCenter,
     DetectorPixelShape,

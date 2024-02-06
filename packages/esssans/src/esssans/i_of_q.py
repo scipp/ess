@@ -21,13 +21,11 @@ from .types import (
     IofQPart,
     MonitorType,
     NonBackgroundWavelengthRange,
-    ProcessedWavelengthBands,
     QBins,
     ReturnEvents,
     RunType,
     SampleRun,
     UncertaintyBroadcastMode,
-    WavelengthBands,
     WavelengthBins,
     WavelengthMonitor,
 )
@@ -131,42 +129,6 @@ def resample_direct_beam(
     return CleanDirectBeam(func(wavelength_bins, midpoints=True))
 
 
-def process_wavelength_bands(
-    wavelength_bands: Optional[WavelengthBands],
-    wavelength_bins: WavelengthBins,
-) -> ProcessedWavelengthBands:
-    """
-    Perform some checks and potential reshaping on the wavelength bands.
-
-    The wavelength bands must be either one- or two-dimensional.
-    If the wavelength bands are defined as a one-dimensional array, convert them to a
-    two-dimensional array with start and end wavelengths.
-
-    The final bands must have a size of 2 in the wavelength dimension, defining a start
-    and an end wavelength.
-    """
-    if wavelength_bands is None:
-        wavelength_bands = sc.concat(
-            [wavelength_bins.min(), wavelength_bins.max()], dim='wavelength'
-        )
-    if wavelength_bands.ndim == 1:
-        wavelength_bands = sc.concat(
-            [wavelength_bands[:-1], wavelength_bands[1:]], dim='x'
-        ).rename(x='wavelength', wavelength='band')
-    if wavelength_bands.ndim != 2:
-        raise ValueError(
-            'Wavelength_bands must be one- or two-dimensional, '
-            f'got {wavelength_bands.ndim}.'
-        )
-    if wavelength_bands.sizes['wavelength'] != 2:
-        raise ValueError(
-            'Wavelength_bands must have a size of 2 in the wavelength dimension, '
-            'defining a start and an end wavelength, '
-            f'got {wavelength_bands.sizes["wavelength"]}.'
-        )
-    return wavelength_bands
-
-
 def merge_spectra(
     data: CleanQ[RunType, IofQPart], q_bins: QBins, dims_to_keep: Optional[DimsToKeep]
 ) -> CleanSummedQ[RunType, IofQPart]:
@@ -242,5 +204,4 @@ providers = (
     resample_direct_beam,
     merge_spectra,
     subtract_background,
-    process_wavelength_bands,
 )
