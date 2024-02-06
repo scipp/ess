@@ -45,7 +45,7 @@ class _SharedFields(sc.DataGroup):
         return self['slow_axis']
 
     @property
-    def proton_charge(self) -> float:
+    def proton_charge(self) -> sc.Variable:
         """Accumulated number of protons during the measurement."""
         return self['proton_charge']
 
