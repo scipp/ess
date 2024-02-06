@@ -29,7 +29,7 @@ def _retrieve_event_list_name(keys: Iterable[str]) -> str:
     raise ValueError("Can not find event list name.")
 
 
-def retrieve_events_data(file: snx.File) -> sc.Variable:
+def _retrieve_raw_event_data(file: snx.File) -> sc.Variable:
     """Retrieve events from the nexus file."""
     bank_name = _retrieve_event_list_name(file["entry1/data"].keys())
     # ``dim_0``: event index, ``dim_1``: property index.
@@ -81,7 +81,7 @@ def load_mcstas_nexus(
     )
 
     with snx.File(file_path) as file:
-        raw_data = retrieve_events_data(file)
+        raw_data = _retrieve_raw_event_data(file)
         weights = _copy_partial_var(raw_data, idx=0, unit='counts')  # p
         id_list = _copy_partial_var(raw_data, idx=4, dtype='int64')  # id
         t_list = _copy_partial_var(raw_data, idx=5, unit='s')  # t
