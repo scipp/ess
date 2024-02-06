@@ -7,7 +7,7 @@ The domain types are used to define parameters and to request results from a Sci
 pipeline."""
 from collections.abc import Sequence
 from enum import Enum
-from typing import NewType, TypeVar
+from typing import NewType, TypeVar, Union
 
 import sciline
 import scipp as sc
@@ -111,8 +111,8 @@ being the band index and the second dimension being the wavelength. For each ban
 must be two wavelength values defining the start and end wavelength of the band."""
 
 
-QBins = NewType('QBins', sc.Variable)
-"""Q binning"""
+QBins = NewType('QBins', dict[str, Union[int, sc.Variable]])
+"""Binning, for 'Q' and/or 'Qx' and 'Qy'"""
 
 NonBackgroundWavelengthRange = NewType('NonBackgroundWavelengthRange', sc.Variable)
 """Range of wavelengths that are not considered background in the monitor"""

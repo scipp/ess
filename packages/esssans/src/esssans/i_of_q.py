@@ -158,11 +158,11 @@ def merge_spectra(
     if dims_to_keep is not None:
         dims_to_reduce -= set(dims_to_keep)
 
-    use_qxy = 'Qx' in (data if data.bins is None else data.bins).coords
-    if use_qxy:
-        edges = {'Qx': q_bins.rename_dims(Q='Qx'), 'Qy': q_bins.rename_dims(Q='Qy')}
+    if 'Qx' in (data if data.bins is None else data.bins).coords:
+        # We make Qx the inner dim, such that plots naturally show Qx on the x-axis.
+        edges = {'Qy': q_bins['Qy'], 'Qx': q_bins['Qx']}
     else:
-        edges = {'Q': q_bins} if isinstance(q_bins, int) else {q_bins.dim: q_bins}
+        edges = {'Q': q_bins['Q']}
 
     if data.bins is not None:
         q_all_pixels = data.bins.concat(dims_to_reduce)
@@ -186,9 +186,10 @@ def merge_spectra(
             data_dims.remove(dim)
             data_dims.append(dim)
         stripped = stripped.transpose(data_dims)
-        # Flatten to dummy dim such that `hist` will turn this into the new Q dim(s).
-        dummy_dim = str(uuid.uuid4())
-        flat = stripped.flatten(dims=to_flatten, to=dummy_dim)
+        # Flatten to helper dim such that `hist` will turn this into the new Q dim(s).
+        # For sc.hist this has to be named 'Q'.
+        helper_dim = 'Q'
+        flat = stripped.flatten(dims=to_flatten, to=helper_dim)
 
         if len(edges) == 1:
             out = flat.hist(**edges)
@@ -197,7 +198,7 @@ def merge_spectra(
             # work around by flattening and regrouping.
             out = (
                 flat.flatten(to=str(uuid.uuid4()))
-                .group(*[flat.coords[dim] for dim in flat.dims if dim != dummy_dim])
+                .group(*[flat.coords[dim] for dim in flat.dims if dim != helper_dim])
                 .hist(**edges)
             )
     return CleanSummedQ[RunType, IofQPart](out.squeeze())

@@ -241,28 +241,25 @@ def mask_wavelength(
     return CleanWavelengthMasked[RunType, IofQPart](da)
 
 
+ComputeQxy = NewType('ComputeQxy', bool)
+"""Whether to compute I(Q_x, Q_y) instead of I(Q)."""
+
+
 def compute_Q(
-    data: CleanWavelengthMasked[RunType, IofQPart], graph: ElasticCoordTransformGraph
+    data: CleanWavelengthMasked[RunType, IofQPart],
+    graph: ElasticCoordTransformGraph,
+    compute_Qxy: Optional[ComputeQxy],
 ) -> CleanQ[RunType, IofQPart]:
     """
     Convert a data array from wavelength to Q.
     """
-    # Keep naming of wavelength dim, subsequent steps use a (Q, wavelength) binning.
-    return CleanQ[RunType, IofQPart](
-        data.transform_coords('Q', graph=graph, rename_dims=False)
-    )
-
-
-def compute_Qxy(
-    data: CleanWavelengthMasked[RunType, IofQPart], graph: ElasticCoordTransformGraph
-) -> CleanQ[RunType, IofQPart]:
-    """
-    Convert a data array from wavelength to Q.
-    """
-    # Keep naming of wavelength dim, subsequent steps use (Qx, Qy, wavelength) binning.
+    # Keep naming of wavelength dim, subsequent steps use a (Q[xy], wavelength) binning.
     return CleanQ[RunType, IofQPart](
         data.transform_coords(
-            ('Qx', 'Qy'), graph=graph, keep_intermediate=False, rename_dims=False
+            ('Qx', 'Qy') if compute_Qxy else 'Q',
+            graph=graph,
+            keep_intermediate=False,
+            rename_dims=False,
         )
     )
 
