@@ -84,22 +84,26 @@ def parse_orso_sample(raw_data: RawData[Run]) -> OrsoSample[Run]:
 
 def build_orso_measurement(
     sample_filename: Filename[Sample],
-    reference_filename: Filename[Reference],
+    reference_filename: Optional[Filename[Reference]],
     instrument: Optional[OrsoInstrument[Sample]],
 ) -> OrsoMeasurement:
     """Assemble ORSO measurement metadata."""
     # TODO populate timestamp
     #      doesn't work with a local file because we need the timestamp of the original,
     #      SciCat can provide that
+    if reference_filename:
+        additional_files = [
+            orso_base.File(
+                file=os.path.basename(reference_filename), comment='supermirror'
+            )
+        ]
+    else:
+        additional_files = []
     return OrsoMeasurement(
         data_source.Measurement(
             instrument_settings=instrument,
             data_files=[orso_base.File(file=os.path.basename(sample_filename))],
-            additional_files=[
-                orso_base.File(
-                    file=os.path.basename(reference_filename), comment='supermirror'
-                )
-            ],
+            additional_files=additional_files,
         )
     )
 
@@ -141,8 +145,9 @@ def build_orso_data_source(
     """
     # We simply assume that the owner of the reference measurement
     # has no claim on this data.
-    if (sample_experiment.facility != reference_experiment.facility) or (
-        sample_experiment.instrument != reference_experiment.instrument
+    if (reference_experiment is not None) and (
+        (sample_experiment.facility != reference_experiment.facility)
+        or (sample_experiment.instrument != reference_experiment.instrument)
     ):
         raise ValueError(
             'The sample and reference experiments were done at different instruments'
