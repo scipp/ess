@@ -17,6 +17,8 @@ from esssans.types import (
     CorrectForGravity,
     DimsToKeep,
     Numerator,
+    QBins,
+    QxyBins,
     ReturnEvents,
     SampleRun,
     UncertaintyBroadcastMode,
@@ -49,6 +51,14 @@ def test_pipeline_can_compute_IofQ(uncertainties, qxy: bool):
     pipeline = sciline.Pipeline(loki_providers(), params=params)
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('Qy', 'Qx') if qxy else ('Q',)
+    if qxy:
+        assert sc.identical(result.coords['Qx'], params[QxyBins]['Qx'])
+        assert sc.identical(result.coords['Qy'], params[QxyBins]['Qy'])
+        assert result.sizes['Qx'] == 90
+        assert result.sizes['Qy'] == 77
+    else:
+        assert sc.identical(result.coords['Q'], params[QBins])
+        assert result.sizes['Q'] == 100
 
 
 @pytest.mark.parametrize(

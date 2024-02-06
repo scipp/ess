@@ -52,7 +52,7 @@ def make_params(
 
     if qxy:
         params[QxyBins] = {
-            'Qx': sc.linspace('Qx', -0.3, 0.3, 101, unit='1/angstrom'),
+            'Qx': sc.linspace('Qx', -0.3, 0.3, 91, unit='1/angstrom'),
             'Qy': sc.linspace('Qy', -0.2, 0.3, 78, unit='1/angstrom'),
         }
     else:
