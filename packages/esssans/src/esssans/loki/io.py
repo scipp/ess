@@ -37,6 +37,10 @@ def _patch_data(
     da: sc.DataArray, sample_position: sc.Variable, source_position: sc.Variable
 ) -> sc.DataArray:
     out = da.copy(deep=False)
+    if out.bins is not None:
+        content = out.bins.constituents['data']
+        if content.variances is None:
+            content.variances = content.values
     out.coords['sample_position'] = sample_position
     out.coords['source_position'] = source_position
     out.coords['gravity'] = gravity_vector()

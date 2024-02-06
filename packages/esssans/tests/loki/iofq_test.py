@@ -13,6 +13,7 @@ from esssans.types import (
     BackgroundSubtractedIofQ,
     BeamCenter,
     DimsToKeep,
+    ReturnEvents,
     UncertaintyBroadcastMode,
     WavelengthBands,
     WavelengthBins,
@@ -41,6 +42,39 @@ def test_pipeline_can_compute_IofQ(uncertainties):
     pipeline = sciline.Pipeline(loki_providers(), params=params)
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('Q',)
+
+
+@pytest.mark.parametrize(
+    'uncertainties',
+    [UncertaintyBroadcastMode.drop, UncertaintyBroadcastMode.upper_bound],
+)
+@pytest.mark.parametrize(
+    'target', [sans.IofQ[sans.SampleRun], sans.BackgroundSubtractedIofQ]
+)
+def test_pipeline_can_compute_IofQ_in_event_mode(uncertainties, target):
+    params = make_params()
+    params[UncertaintyBroadcastMode] = uncertainties
+    pipeline = sciline.Pipeline(loki_providers(), params=params)
+    reference = pipeline.compute(target)
+    pipeline[ReturnEvents] = True
+    result = pipeline.compute(target)
+    assert result.bins is not None
+    assert sc.allclose(
+        sc.values(reference.data),
+        sc.values(result.hist().data),
+        rtol=sc.scalar(1e-11),
+        atol=sc.scalar(1e-11),
+    )
+    if uncertainties == UncertaintyBroadcastMode.drop:
+        tol = sc.scalar(1e-14)
+    else:
+        tol = sc.scalar(1e-9)
+    assert sc.allclose(
+        sc.variances(reference).data,
+        sc.variances(result.hist()).data,
+        rtol=tol,
+        atol=tol,
+    )
 
 
 def test_pipeline_can_compute_IofQ_in_wavelength_bands():

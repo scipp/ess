@@ -134,7 +134,7 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
         # parameters, nor given by any providers, so it will be considered flat.
         # TODO: Should we have a check that DirectBeam cannot be computed from the
         # pipeline?
-        iofq = pipeline.compute(BackgroundSubtractedIofQ)
+        iofq = sc.values(pipeline.compute(BackgroundSubtractedIofQ))
         iofq_full = iofq['band', -1]
         iofq_bands = iofq['band', :-1]
 

@@ -21,6 +21,7 @@ from esssans.types import (
     NonBackgroundWavelengthRange,
     QBins,
     RawData,
+    ReturnEvents,
     SampleRun,
     SolidAngle,
     TransmissionRun,
@@ -60,6 +61,7 @@ def make_params() -> dict:
     )
     params[CorrectForGravity] = True
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
+    params[ReturnEvents] = False
     return params
 
 
@@ -136,7 +138,7 @@ def test_uncertainty_broadcast_mode_drop_yields_smaller_variances():
     )
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
     pipeline = sciline.Pipeline(sans2d_providers(), params=params)
-    drop = pipeline.compute(IofQ[SampleRun]).hist().data
+    drop = pipeline.compute(IofQ[SampleRun]).data
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
     pipeline = sciline.Pipeline(sans2d_providers(), params=params)
     upper_bound = pipeline.compute(IofQ[SampleRun]).data

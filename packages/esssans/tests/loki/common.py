@@ -13,6 +13,7 @@ from esssans.types import (
     EmptyBeamRun,
     FileList,
     QBins,
+    ReturnEvents,
     SampleRun,
     TransmissionRun,
     UncertaintyBroadcastMode,
@@ -44,6 +45,7 @@ def make_params(
     params[BeamStopRadius] = sc.scalar(0.042, unit='m')
     params[CorrectForGravity] = True
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
+    params[ReturnEvents] = False
 
     params[QBins] = sc.linspace(
         dim='Q', start=0.01, stop=0.3, num=101, unit='1/angstrom'
