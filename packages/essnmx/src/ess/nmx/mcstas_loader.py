@@ -29,6 +29,15 @@ def _retrieve_event_list_name(keys: Iterable[str]) -> str:
     raise ValueError("Can not find event list name.")
 
 
+def retrieve_events_data(file: snx.File) -> sc.Variable:
+    """Retrieve events from the nexus file."""
+    bank_name = _retrieve_event_list_name(file["entry1/data"].keys())
+    # ``dim_0``: event index, ``dim_1``: property index.
+    return file["entry1/data/" + bank_name]["events"][()].rename_dims(
+        {'dim_0': 'event'}
+    )
+
+
 def _copy_partial_var(
     var: sc.Variable, idx: int, unit: Optional[str] = None, dtype: Optional[str] = None
 ) -> sc.Variable:
@@ -72,15 +81,10 @@ def load_mcstas_nexus(
     )
 
     with snx.File(file_path) as file:
-        bank_name = _retrieve_event_list_name(file["entry1/data"].keys())
-        var: sc.Variable
-        var = file["entry1/data/" + bank_name]["events"][()].rename_dims(
-            {'dim_0': 'event'}
-        )  # ``dim_0``: event index, ``dim_1``: property index.
-
-        weights = _copy_partial_var(var, idx=0, unit='counts')  # p
-        id_list = _copy_partial_var(var, idx=4, dtype='int64')  # id
-        t_list = _copy_partial_var(var, idx=5, unit='s')  # t
+        raw_data = retrieve_events_data(file)
+        weights = _copy_partial_var(raw_data, idx=0, unit='counts')  # p
+        id_list = _copy_partial_var(raw_data, idx=4, dtype='int64')  # id
+        t_list = _copy_partial_var(raw_data, idx=5, unit='s')  # t
         crystal_rotation = _retrieve_crystal_rotation(
             file, geometry.simulation_settings.angle_unit
         )
@@ -93,7 +97,7 @@ def load_mcstas_nexus(
         coords={'t': t_list, 'id': id_list},
     )
     grouped: sc.DataArray = loaded.group(coords.pop('pixel_id'))
-    da: sc.DataArray = grouped.fold(
+    folded: sc.DataArray = grouped.fold(
         dim='id', sizes={'panel': len(geometry.detectors), 'id': -1}
     )
     # Proton charge is proportional to the number of neutrons,
@@ -103,10 +107,10 @@ def load_mcstas_nexus(
     # It is derived this way since
     # the protons are not part of McStas simulation,
     # and the number of neutrons is not included in the result.
-    proton_charge = _PROTON_CHARGE_SCALE_FACTOR * da.bins.size().sum().value
+    proton_charge = _PROTON_CHARGE_SCALE_FACTOR * weights.sum().value
     return NMXData(
         sc.DataGroup(
-            weights=da,
+            weights=folded,
             proton_charge=proton_charge,
             crystal_rotation=crystal_rotation,
             **coords,
