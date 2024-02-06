@@ -8,4 +8,5 @@ maxdepth: 2
 sans2d
 loki-direct-beam
 zoom
+beam-center-finder
 ```
