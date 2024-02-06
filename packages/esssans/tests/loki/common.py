@@ -42,7 +42,7 @@ def make_params(
     params[FileList[EmptyBeamRun]] = ['60392-2022-02-28_2215.nxs']
 
     params[WavelengthBins] = sc.linspace(
-        'wavelength', start=1.0, stop=13.0, num=201, unit='angstrom'
+        'wavelength', start=1.0, stop=13.0, num=51, unit='angstrom'
     )
     params[BeamStopPosition] = sc.vector([-0.026, -0.022, 0.0], unit='m')
     params[BeamStopRadius] = sc.scalar(0.042, unit='m')
