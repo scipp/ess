@@ -5,9 +5,15 @@ from unittest import mock
 import pytest
 
 
+class FakeGroup(dict):
+    def create_dataset(self, name, data, **_):
+        self[name] = data
+        return self[name]
+
+
 class FakeFile(dict):
     def create_group(self, name):
-        self[name] = dict()
+        self[name] = FakeGroup()
         return self[name]
 
 
