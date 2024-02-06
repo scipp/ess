@@ -34,7 +34,7 @@ def _copy_partial_var(
 ) -> sc.Variable:
     """Retrieve a property from a variable."""
     var = var['dim_1', idx].astype(dtype or var.dtype, copy=True)
-    if unit:
+    if unit is not None:
         var.unit = sc.Unit(unit)
     return var
 
@@ -67,43 +67,48 @@ def load_mcstas_nexus(
     from .mcstas_xml import read_mcstas_geometry_xml
 
     geometry = read_mcstas_geometry_xml(file_path)
-    probability = max_probability or DefaultMaximumProbability
+    maximum_probability = sc.scalar(
+        max_probability or DefaultMaximumProbability, unit='counts'
+    )
 
     with snx.File(file_path) as file:
         bank_name = _retrieve_event_list_name(file["entry1/data"].keys())
         var: sc.Variable
         var = file["entry1/data/" + bank_name]["events"][()].rename_dims(
             {'dim_0': 'event'}
-        )
+        )  # ``dim_0``: event index, ``dim_1``: property index.
 
         weights = _copy_partial_var(var, idx=0, unit='counts')  # p
         id_list = _copy_partial_var(var, idx=4, dtype='int64')  # id
         t_list = _copy_partial_var(var, idx=5, unit='s')  # t
-
-        weights = (probability / weights.max()) * weights
-
-        loaded = sc.DataArray(data=weights, coords={'t': t_list, 'id': id_list})
-        coords = geometry.to_coords()
-        grouped: sc.DataArray = loaded.group(coords.pop('pixel_id'))
-        da: sc.DataArray = grouped.fold(
-            dim='id', sizes={'panel': len(geometry.detectors), 'id': -1}
-        )
         crystal_rotation = _retrieve_crystal_rotation(
             file, geometry.simulation_settings.angle_unit
         )
-        # Proton charge is proportional to the number of neutrons,
-        # which is proportional to the number of events.
-        # The scale factor is chosen by previous results
-        # to be convenient for data manipulation in the next steps.
-        # It is derived this way since
-        # the protons are not part of McStas simulation,
-        # and the number of neutrons is not included in the result.
-        proton_charge = _PROTON_CHARGE_SCALE_FACTOR * da.bins.size().sum().value
-        return NMXData(
-            sc.DataGroup(
-                weights=da,
-                proton_charge=proton_charge,
-                crystal_rotation=crystal_rotation,
-                **coords,
-            )
+
+    coords = geometry.to_coords()
+    loaded = sc.DataArray(
+        # Scale the weights so that the weights are
+        # within the range of [0,``max_probability``].
+        data=(maximum_probability / weights.max()) * weights,
+        coords={'t': t_list, 'id': id_list},
+    )
+    grouped: sc.DataArray = loaded.group(coords.pop('pixel_id'))
+    da: sc.DataArray = grouped.fold(
+        dim='id', sizes={'panel': len(geometry.detectors), 'id': -1}
+    )
+    # Proton charge is proportional to the number of neutrons,
+    # which is proportional to the number of events.
+    # The scale factor is chosen by previous results
+    # to be convenient for data manipulation in the next steps.
+    # It is derived this way since
+    # the protons are not part of McStas simulation,
+    # and the number of neutrons is not included in the result.
+    proton_charge = _PROTON_CHARGE_SCALE_FACTOR * da.bins.size().sum().value
+    return NMXData(
+        sc.DataGroup(
+            weights=da,
+            proton_charge=proton_charge,
+            crystal_rotation=crystal_rotation,
+            **coords,
         )
+    )
