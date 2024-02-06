@@ -3,6 +3,7 @@
 """
 Plotting functions for ISIS data.
 """
+import warnings
 from typing import Any
 
 import scipp as sc
@@ -45,4 +46,7 @@ def plot_flat_detector_xy(
         )
     plot_kwargs = dict(aspect='equal')
     plot_kwargs.update(kwargs)
-    return folded.plot(**plot_kwargs)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=RuntimeWarning)
+        out = folded.plot(**plot_kwargs)
+    return out
