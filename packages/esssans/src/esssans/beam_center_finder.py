@@ -394,8 +394,8 @@ def beam_center_from_iofq(
 
     logger.info(f'Requested minimizer: {minimizer}')
     logger.info(f'Requested tolerance: {tolerance}')
-    minimizer = minimizer or 'Powell'
-    tolerance = tolerance or 0.01
+    minimizer = minimizer or 'Nedler-Mead'
+    tolerance = tolerance or 0.1
     logger.info(f'Using minimizer: {minimizer}')
     logger.info(f'Using tolerance: {tolerance}')
 
