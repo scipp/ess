@@ -27,7 +27,9 @@ def test_file_reader_mcstas() -> None:
         raw_data = file[entry_path]["events"][()]
         data_length = raw_data.sizes['dim_0']
 
-    expected_weight_max = sc.scalar(DefaultMaximumProbability, unit='1', dtype=float)
+    expected_weight_max = sc.scalar(
+        DefaultMaximumProbability, unit='counts', dtype=float
+    )
 
     assert isinstance(dg, sc.DataGroup)
     assert dg.shape == (3, 1280 * 1280)
