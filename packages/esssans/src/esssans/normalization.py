@@ -404,7 +404,7 @@ def normalize(
                 denominator = broadcast_to_events_with_upper_bound_variances(
                     denominator, events=numerator
                 )
-    else:
+    elif numerator.bins is not None:
         numerator = numerator.hist()
     if numerator.bins is not None and denominator.bins is None:
         da = numerator.bins / sc.lookup(func=denominator, dim='Q')
