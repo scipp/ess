@@ -103,7 +103,7 @@ def event_weights_from_probability(
     return grouped.fold(dim='id', sizes={'panel': num_panels, 'id': -1})
 
 
-def proton_charge_from_weights(weights: sc.DataArray) -> float:
+def proton_charge_from_weights(weights: sc.DataArray) -> sc.Variable:
     """Make up the proton charge from the weights.
 
     Proton charge is proportional to the number of neutrons,
@@ -121,9 +121,9 @@ def proton_charge_from_weights(weights: sc.DataArray) -> float:
 
     """
     # Arbitrary number to scale the proton charge
-    _proton_charge_scale_factor = 1 / 10_000
+    _proton_charge_scale_factor = sc.scalar(1 / 10_000, unit=None)
 
-    return _proton_charge_scale_factor * weights.bins.size().sum().value
+    return _proton_charge_scale_factor * weights.bins.size().sum().data
 
 
 def load_mcstas_nexus(

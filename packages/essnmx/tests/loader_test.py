@@ -7,6 +7,22 @@ import pytest
 import scipp as sc
 
 from ess.nmx.data import small_mcstas_sample
+from ess.nmx.reduction import NMXData
+
+
+def check_scalar_properties(dg: NMXData):
+    """Test helper for NMXData.
+
+    Expected numbers are hard-coded based on the sample file.
+    """
+
+    assert dg.proton_charge == sc.scalar(0.15430000000000002, unit=None)
+    assert sc.identical(dg.crystal_rotation, sc.vector([20, 0, 90], unit='deg'))
+    assert sc.identical(dg.sample_position, sc.vector(value=[0, 0, 0], unit='m'))
+    assert sc.identical(
+        dg.source_position, sc.vector(value=[-0.53123, 0.0, -157.405], unit='m')
+    )
+    assert dg.sample_name == sc.scalar("sampleMantid")
 
 
 def test_file_reader_mcstas() -> None:
@@ -20,25 +36,23 @@ def test_file_reader_mcstas() -> None:
     )
 
     file_path = InputFilepath(small_mcstas_sample())
-    dg = load_mcstas_nexus(file_path)
-
     entry_path = "entry1/data/bank01_events_dat_list_p_x_y_n_id_t"
     with snx.File(file_path) as file:
         raw_data = file[entry_path]["events"][()]
         data_length = raw_data.sizes['dim_0']
 
-    expected_weight_max = sc.scalar(
-        DefaultMaximumProbability, unit='counts', dtype=float
-    )
-
+    dg = load_mcstas_nexus(file_path)
     assert isinstance(dg, sc.DataGroup)
     assert dg.shape == (3, 1280 * 1280)
-    assert sc.identical(dg.sample_position, sc.vector(value=[0, 0, 0], unit='m'))
+    check_scalar_properties(dg)
+    # Check size and maximum value of weights.
     assert dg.weights.bins.size().sum().value == data_length
-    assert sc.identical(dg.weights.max().data, expected_weight_max)
-    # Expected coordinate values are provided by the IDS
+    assert sc.identical(
+        dg.weights.max().data,
+        sc.scalar(DefaultMaximumProbability, unit='counts', dtype=float),
+    )
+    # Expected values are provided by the IDS
     # based on the simulation settings of the sample file.
-    # The expected values are rounded to 2 decimal places.
     assert np.all(
         np.round(dg.fast_axis.values, 2)
         == sc.vectors(
