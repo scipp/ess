@@ -66,6 +66,9 @@ QResolution = NewType('QResolution', sc.Variable)
 QBins = NewType('QBins', sc.Variable)
 '''Bins for the momentum transfer histogram.'''
 
+WavelengthEdges = NewType('WavelengthEdges', sc.Variable)
+'''Include only events within the specified edges.'''
+
 
 class Filename(sciline.Scope[Run, str], str):
     """Filename of the event data nexus file."""
