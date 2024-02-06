@@ -21,8 +21,8 @@ from .logging import get_logger
 from .normalization import iofq_denominator, normalize, solid_angle
 from .types import (
     BeamCenter,
-    DetectorPixelShape,
     CalibratedMaskedData,
+    DetectorPixelShape,
     IofQ,
     LabFrameTransform,
     MaskedData,
