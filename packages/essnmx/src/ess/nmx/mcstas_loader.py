@@ -7,7 +7,6 @@ import scippnexus as snx
 
 from .reduction import NMXData
 
-_PROTON_CHARGE_SCALE_FACTOR = 1 / 10_000  # Arbitrary number to scale the proton charge
 PixelIDs = NewType("PixelIDs", sc.Variable)
 InputFilepath = NewType("InputFilepath", str)
 
@@ -57,11 +56,84 @@ def _retrieve_crystal_rotation(file: snx.File, unit: str) -> sc.Variable:
     )
 
 
+def event_weights_from_probability(
+    *,
+    probabilities: sc.Variable,
+    id_list: sc.Variable,
+    t_list: sc.Variable,
+    pixel_ids: sc.Variable,
+    max_probability: sc.Variable,
+    num_panels: int,
+) -> sc.DataArray:
+    """Create event weights by scaling probability data.
+
+    event_weights = max_probability * (probabilities / max(probabilities))
+
+    Parameters
+    ----------
+    probabilities:
+        The probabilities of the events.
+
+    id_list:
+        The pixel IDs of the events.
+
+    t_list:
+        The time of arrival of the events.
+
+    pixel_ids:
+        All possible pixel IDs of the detector.
+
+    max_probability:
+        The maximum probability to scale the weights.
+
+    num_panels:
+        The number of (detector) panels used in the experiment.
+
+    """
+    if max_probability.unit != sc.units.counts:
+        raise ValueError("max_probability must have unit counts")
+
+    weights = sc.DataArray(
+        # Scale the weights so that the weights are
+        # within the range of [0,``max_probability``].
+        data=max_probability * (probabilities / probabilities.max()),
+        coords={'t': t_list, 'id': id_list},
+    )
+    grouped: sc.DataArray = weights.group(pixel_ids)
+    return grouped.fold(dim='id', sizes={'panel': num_panels, 'id': -1})
+
+
+def proton_charge_from_weights(weights: sc.DataArray) -> float:
+    """Make up the proton charge from the weights.
+
+    Proton charge is proportional to the number of neutrons,
+    which is proportional to the number of events.
+    The scale factor is manually chosen based on previous results
+    to be convenient for data manipulation in the next steps.
+    It is derived this way since
+    the protons are not part of McStas simulation,
+    and the number of neutrons is not included in the result.
+
+    Parameters
+    ----------
+    weights:
+        The event weights binned in detector panel and pixel id dimensions.
+
+    """
+    # Arbitrary number to scale the proton charge
+    _proton_charge_scale_factor = 1 / 10_000
+
+    return _proton_charge_scale_factor * weights.bins.size().sum().value
+
+
 def load_mcstas_nexus(
     file_path: InputFilepath,
     max_probability: Optional[MaximumProbability] = None,
 ) -> NMXData:
     """Load McStas simulation result from h5(nexus) file.
+
+    See :func:`~event_weights_from_probability` and
+    :func:`~proton_charge_from_weights` for details.
 
     Parameters
     ----------
@@ -70,49 +142,36 @@ def load_mcstas_nexus(
 
     max_probability:
         The maximum probability to scale the weights.
+        If not provided, ``DefaultMaximumProbability`` is used.
 
     """
 
     from .mcstas_xml import read_mcstas_geometry_xml
 
     geometry = read_mcstas_geometry_xml(file_path)
+    coords = geometry.to_coords()
     maximum_probability = sc.scalar(
         max_probability or DefaultMaximumProbability, unit='counts'
     )
 
     with snx.File(file_path) as file:
         raw_data = _retrieve_raw_event_data(file)
-        weights = _copy_partial_var(raw_data, idx=0, unit='counts')  # p
-        id_list = _copy_partial_var(raw_data, idx=4, dtype='int64')  # id
-        t_list = _copy_partial_var(raw_data, idx=5, unit='s')  # t
+        weights = event_weights_from_probability(
+            probabilities=_copy_partial_var(raw_data, idx=0, unit='counts'),  # p
+            max_probability=maximum_probability,
+            id_list=_copy_partial_var(raw_data, idx=4, dtype='int64'),  # id
+            t_list=_copy_partial_var(raw_data, idx=5, unit='s'),  # t
+            pixel_ids=coords.pop('pixel_id'),
+            num_panels=len(geometry.detectors),
+        )
+        proton_charge = proton_charge_from_weights(weights)
         crystal_rotation = _retrieve_crystal_rotation(
             file, geometry.simulation_settings.angle_unit
         )
 
-    coords = geometry.to_coords()
-    loaded = sc.DataArray(
-        # Scale the weights so that the weights are
-        # within the range of [0,``max_probability``].
-        data=(maximum_probability / weights.max()) * weights,
-        coords={'t': t_list, 'id': id_list},
-    )
-    grouped: sc.DataArray = loaded.group(coords.pop('pixel_id'))
-    folded: sc.DataArray = grouped.fold(
-        dim='id', sizes={'panel': len(geometry.detectors), 'id': -1}
-    )
-    # Proton charge is proportional to the number of neutrons,
-    # which is proportional to the number of events.
-    # The scale factor is chosen by previous results
-    # to be convenient for data manipulation in the next steps.
-    # It is derived this way since
-    # the protons are not part of McStas simulation,
-    # and the number of neutrons is not included in the result.
-    proton_charge = _PROTON_CHARGE_SCALE_FACTOR * weights.sum().value
     return NMXData(
-        sc.DataGroup(
-            weights=folded,
-            proton_charge=proton_charge,
-            crystal_rotation=crystal_rotation,
-            **coords,
-        )
+        weights=weights,
+        proton_charge=proton_charge,
+        crystal_rotation=crystal_rotation,
+        **coords,
     )
