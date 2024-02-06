@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
-from typing import Dict, List, Optional, Union
+from typing import Optional
 
 import scipp as sc
 from scipp.scipy.interpolate import interp1d
@@ -195,65 +195,32 @@ def merge_spectra(
     if dims_to_keep is not None:
         dims_to_reduce -= set(dims_to_keep)
 
+    edges = {'Q': q_bins} if isinstance(q_bins, int) else {q_bins.dim: q_bins}
+
     if data.bins is not None:
-        out = _events_merge_spectra(
-            data_q=data, q_bins=q_bins, dims_to_reduce=dims_to_reduce
-        )
+        q_all_pixels = data.bins.concat(dims_to_reduce)
+        out = q_all_pixels.bin(**edges)
     else:
-        out = _dense_merge_spectra(
-            data_q=data, q_bins=q_bins, dims_to_reduce=dims_to_reduce
-        )
+        # We want to flatten data to make histogramming cheaper (avoiding allocation of
+        # large output before summing). We strip unnecessary content since it makes
+        # flattening more expensive.
+        stripped = data.copy(deep=False)
+        for name, coord in data.coords.items():
+            if name not in {'Q', 'wavelength'} and set(coord.dims) & dims_to_reduce:
+                del stripped.coords[name]
+        to_flatten = [dim for dim in data.dims if dim in dims_to_reduce]
+
+        # Make dims to flatten contiguous, keep wavelength as the last dim
+        data_dims = list(stripped.dims)
+        for dim in to_flatten + ['wavelength']:
+            data_dims.remove(dim)
+            data_dims.append(dim)
+        stripped = stripped.transpose(data_dims)
+        # Flatten to Q such that `hist` below will turn this into the new Q dim.
+        flat = stripped.flatten(dims=to_flatten, to='Q')
+
+        out = flat.hist(**edges)
     return CleanSummedQ[RunType, IofQPart](out.squeeze())
-
-
-def _to_q_bins(q_bins: Union[int, sc.Variable]) -> Dict[str, Union[int, sc.Variable]]:
-    """
-    If the input bins are an integer, convert them to a dictionary that can be used
-    to bin a DataArray.
-    """
-    if isinstance(q_bins, int):
-        return {'Q': q_bins}
-    return {q_bins.dim: q_bins}
-
-
-def _events_merge_spectra(
-    data_q: sc.DataArray, q_bins: Union[int, sc.Variable], dims_to_reduce: List[str]
-) -> sc.DataArray:
-    """
-    Merge spectra of event data
-    """
-    edges = _to_q_bins(q_bins)
-    q_all_pixels = data_q.bins.concat(dims_to_reduce)
-    return q_all_pixels.bin(**edges)
-
-
-def _dense_merge_spectra(
-    data_q: sc.DataArray, q_bins: Union[int, sc.Variable], dims_to_reduce: set[str]
-) -> sc.DataArray:
-    """
-    Merge spectra of dense data
-    """
-    edges = _to_q_bins(q_bins)
-
-    # We want to flatten data to make histogramming cheaper (avoiding allocation of
-    # large output before summing). We strip unnecessary content since it makes
-    # flattening more expensive.
-    stripped = data_q.copy(deep=False)
-    for name, coord in data_q.coords.items():
-        if name not in {'Q', 'wavelength'} and set(coord.dims) & dims_to_reduce:
-            del stripped.coords[name]
-    to_flatten = [dim for dim in data_q.dims if dim in dims_to_reduce]
-
-    # Make dims to flatten contiguous, keep wavelength is the last dim
-    data_dims = list(stripped.dims)
-    for dim in to_flatten + ['wavelength']:
-        data_dims.remove(dim)
-        data_dims.append(dim)
-    stripped = stripped.transpose(data_dims)
-    # Flatten to Q such that `hist` below will turn this into the new Q dim.
-    flat = stripped.flatten(dims=to_flatten, to='Q')
-
-    return flat.hist(**edges)
 
 
 def subtract_background(
