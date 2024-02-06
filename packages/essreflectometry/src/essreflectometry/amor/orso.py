@@ -19,16 +19,17 @@ def build_orso_instrument(
     """
     wavelength = events_in_wavelength.coords['wavelength']
     incident_angle = events_in_theta.coords['theta']
+    # Explicit conversions to float because orsopy does not like np.float* types.
     return OrsoInstrument(
         data_source.InstrumentSettings(
             wavelength=orso_base.ValueRange(
-                min=wavelength.min().value,
-                max=wavelength.max().value,
+                min=float(wavelength.min().value),
+                max=float(wavelength.max().value),
                 unit=_ascii_unit(wavelength.unit),
             ),
             incident_angle=orso_base.ValueRange(
-                min=incident_angle.min().value,
-                max=incident_angle.max().value,
+                min=float(incident_angle.min().value),
+                max=float(incident_angle.max().value),
                 unit=incident_angle.unit,
             ),
             polarization=None,  # TODO how can we determine this from the inputs?
