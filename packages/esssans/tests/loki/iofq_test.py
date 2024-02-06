@@ -27,8 +27,9 @@ def loki_providers() -> List[Callable]:
     return list(sans.providers + sans.loki.providers)
 
 
-def test_can_create_pipeline():
-    pipeline = sciline.Pipeline(loki_providers(), params=make_params())
+@pytest.mark.parametrize('qxy', [False, True])
+def test_can_create_pipeline(qxy: bool):
+    pipeline = sciline.Pipeline(loki_providers(), params=make_params(qxy=qxy))
     pipeline.get(BackgroundSubtractedIofQ)
 
 
@@ -36,12 +37,13 @@ def test_can_create_pipeline():
     'uncertainties',
     [UncertaintyBroadcastMode.drop, UncertaintyBroadcastMode.upper_bound],
 )
-def test_pipeline_can_compute_IofQ(uncertainties):
-    params = make_params()
+@pytest.mark.parametrize('qxy', [False, True])
+def test_pipeline_can_compute_IofQ(uncertainties, qxy: bool):
+    params = make_params(qxy=qxy)
     params[UncertaintyBroadcastMode] = uncertainties
     pipeline = sciline.Pipeline(loki_providers(), params=params)
     result = pipeline.compute(BackgroundSubtractedIofQ)
-    assert result.dims == ('Q',)
+    assert result.dims == ('Qy', 'Qx') if qxy else ('Q',)
 
 
 @pytest.mark.parametrize(
@@ -51,14 +53,16 @@ def test_pipeline_can_compute_IofQ(uncertainties):
 @pytest.mark.parametrize(
     'target', [sans.IofQ[sans.SampleRun], sans.BackgroundSubtractedIofQ]
 )
-def test_pipeline_can_compute_IofQ_in_event_mode(uncertainties, target):
-    params = make_params()
+@pytest.mark.parametrize('qxy', [False, True])
+def test_pipeline_can_compute_IofQ_in_event_mode(uncertainties, target, qxy: bool):
+    params = make_params(qxy=qxy)
     params[UncertaintyBroadcastMode] = uncertainties
     pipeline = sciline.Pipeline(loki_providers(), params=params)
     reference = pipeline.compute(target)
     pipeline[ReturnEvents] = True
     result = pipeline.compute(target)
     assert result.bins is not None
+    assert result.dims == ('Qy', 'Qx') if qxy else ('Q',)
     assert sc.allclose(
         sc.values(reference.data),
         sc.values(result.hist().data),
@@ -77,8 +81,9 @@ def test_pipeline_can_compute_IofQ_in_event_mode(uncertainties, target):
     )
 
 
-def test_pipeline_can_compute_IofQ_in_wavelength_bands():
-    params = make_params()
+@pytest.mark.parametrize('qxy', [False, True])
+def test_pipeline_can_compute_IofQ_in_wavelength_bands(qxy: bool):
+    params = make_params(qxy=qxy)
     params[WavelengthBands] = sc.linspace(
         'wavelength',
         params[WavelengthBins].min(),
@@ -87,12 +92,13 @@ def test_pipeline_can_compute_IofQ_in_wavelength_bands():
     )
     pipeline = sciline.Pipeline(loki_providers(), params=params)
     result = pipeline.compute(BackgroundSubtractedIofQ)
-    assert result.dims == ('band', 'Q')
+    assert result.dims == ('band', 'Qy', 'Qx') if qxy else ('band', 'Q')
     assert result.sizes['band'] == 10
 
 
-def test_pipeline_can_compute_IofQ_in_overlapping_wavelength_bands():
-    params = make_params()
+@pytest.mark.parametrize('qxy', [False, True])
+def test_pipeline_can_compute_IofQ_in_overlapping_wavelength_bands(qxy: bool):
+    params = make_params(qxy=qxy)
     # Bands have double the width
     edges = sc.linspace(
         'band', params[WavelengthBins].min(), params[WavelengthBins].max(), 12
@@ -102,16 +108,17 @@ def test_pipeline_can_compute_IofQ_in_overlapping_wavelength_bands():
     ).transpose()
     pipeline = sciline.Pipeline(loki_providers(), params=params)
     result = pipeline.compute(BackgroundSubtractedIofQ)
-    assert result.dims == ('band', 'Q')
+    assert result.dims == ('band', 'Qy', 'Qx') if qxy else ('band', 'Q')
     assert result.sizes['band'] == 10
 
 
-def test_pipeline_can_compute_IofQ_in_layers():
-    params = make_params()
+@pytest.mark.parametrize('qxy', [False, True])
+def test_pipeline_can_compute_IofQ_in_layers(qxy: bool):
+    params = make_params(qxy=qxy)
     params[DimsToKeep] = ['layer']
     pipeline = sciline.Pipeline(loki_providers(), params=params)
     result = pipeline.compute(BackgroundSubtractedIofQ)
-    assert result.dims == ('layer', 'Q')
+    assert result.dims == ('band', 'Qy', 'Qx') if qxy else ('band', 'Q')
     assert result.sizes['layer'] == 4
 
 
