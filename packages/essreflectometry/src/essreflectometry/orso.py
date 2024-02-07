@@ -1,57 +1,51 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-"""ORSO utilities for reflectometry."""
+"""ORSO utilities for reflectometry.
+
+The Sciline providers and types in this module largely ignore the metadata
+of reference runs and only use the metadata of the sample run.
+"""
+
 import os
 import platform
 from datetime import datetime, timezone
 from typing import NewType, Optional
 
-import sciline
 from dateutil.parser import parse as parse_datetime
 from orsopy.fileio import base as orso_base
 from orsopy.fileio import data_source, orso, reduction
 
-from .types import Filename, RawData, Reference, Run, Sample
-
-
-class OrsoExperiment(
-    sciline.Scope[Run, data_source.Experiment], data_source.Experiment
-):
-    """ORSO experiment for a run."""
-
-
-class OrsoInstrument(
-    sciline.Scope[Run, data_source.InstrumentSettings], data_source.InstrumentSettings
-):
-    """ORSO instrument settings for a run."""
-
-
-class OrsoOwner(sciline.Scope[Run, orso_base.Person], orso_base.Person):
-    """ORSO owner of a file."""
-
-
-class OrsoReduction(sciline.Scope[Run, reduction.Reduction], reduction.Reduction):
-    """ORSO measurement for a run."""
-
-
-class OrsoSample(sciline.Scope[Run, data_source.Sample], data_source.Sample):
-    """ORSO sample of a run."""
-
+from .types import Filename, RawData, Reference, Sample
 
 OrsoCreator = NewType('OrsoCreator', orso_base.Person)
 """ORSO creator, that is, the person who processed the data."""
 
-OrsoIofQDataset = NewType('OrsoIofQDataset', orso.OrsoDataset)
-"""ORSO dataset for reduced I-of-Q data."""
-
 OrsoDataSource = NewType('OrsoDataSource', data_source.DataSource)
 """ORSO data source."""
+
+OrsoExperiment = NewType('OrsoExperiment', data_source.Experiment)
+"""ORSO experiment for the sample run."""
+
+OrsoInstrument = NewType('OrsoInstrument', data_source.InstrumentSettings)
+"""ORSO instrument settings for the sample run."""
+
+OrsoIofQDataset = NewType('OrsoIofQDataset', orso.OrsoDataset)
+"""ORSO dataset for reduced I-of-Q data."""
 
 OrsoMeasurement = NewType('OrsoMeasurement', data_source.Measurement)
 """ORSO measurement."""
 
+OrsoOwner = NewType('OrsoOwner', orso_base.Person)
+"""ORSO owner of a measurement."""
 
-def parse_orso_experiment(raw_data: RawData[Run]) -> OrsoExperiment[Run]:
+OrsoReduction = NewType('OrsoReduction', reduction.Reduction)
+"""ORSO data reduction metadata."""
+
+OrsoSample = NewType('OrsoSample', data_source.Sample)
+"""ORSO sample."""
+
+
+def parse_orso_experiment(raw_data: RawData[Sample]) -> OrsoExperiment:
     """Parse ORSO experiment metadata from raw NeXus data."""
     return OrsoExperiment(
         data_source.Experiment(
@@ -64,7 +58,7 @@ def parse_orso_experiment(raw_data: RawData[Run]) -> OrsoExperiment[Run]:
     )
 
 
-def parse_orso_owner(raw_data: RawData[Run]) -> OrsoOwner[Run]:
+def parse_orso_owner(raw_data: RawData[Sample]) -> OrsoOwner:
     """Parse ORSO owner metadata from raw NeXus data."""
     return OrsoOwner(
         orso_base.Person(
@@ -75,7 +69,7 @@ def parse_orso_owner(raw_data: RawData[Run]) -> OrsoOwner[Run]:
     )
 
 
-def parse_orso_sample(raw_data: RawData[Run]) -> OrsoSample[Run]:
+def parse_orso_sample(raw_data: RawData[Sample]) -> OrsoSample:
     """Parse ORSO sample metadata from raw NeXus data."""
     if not raw_data.get('sample'):
         return OrsoSample(data_source.Sample.empty())
@@ -85,7 +79,7 @@ def parse_orso_sample(raw_data: RawData[Run]) -> OrsoSample[Run]:
 def build_orso_measurement(
     sample_filename: Filename[Sample],
     reference_filename: Optional[Filename[Reference]],
-    instrument: Optional[OrsoInstrument[Sample]],
+    instrument: Optional[OrsoInstrument],
 ) -> OrsoMeasurement:
     """Assemble ORSO measurement metadata."""
     # TODO populate timestamp
@@ -132,32 +126,17 @@ def build_orso_reduction(creator: Optional[OrsoCreator]) -> OrsoReduction:
 
 
 def build_orso_data_source(
-    owner: Optional[OrsoOwner[Sample]],
-    sample: Optional[OrsoSample[Sample]],
-    sample_experiment: Optional[OrsoExperiment[Sample]],
-    reference_experiment: Optional[OrsoExperiment[Reference]],
+    owner: Optional[OrsoOwner],
+    sample: Optional[OrsoSample],
+    experiment: Optional[OrsoExperiment],
     measurement: Optional[OrsoMeasurement],
 ) -> OrsoDataSource:
-    """Judiciously assemble an ORSO DataSource.
-
-    Makes some assumptions about how sample and reference runs should be merged,
-    giving precedence to the sample run.
-    """
-    # We simply assume that the owner of the reference measurement
-    # has no claim on this data.
-    if (reference_experiment is not None) and (
-        (sample_experiment.facility != reference_experiment.facility)
-        or (sample_experiment.instrument != reference_experiment.instrument)
-    ):
-        raise ValueError(
-            'The sample and reference experiments were done at different instruments'
-        )
-
+    """Assemble an ORSO DataSource."""
     return OrsoDataSource(
         data_source.DataSource(
             owner=owner,
             sample=sample,
-            experiment=sample_experiment,
+            experiment=experiment,
             measurement=measurement,
         )
     )

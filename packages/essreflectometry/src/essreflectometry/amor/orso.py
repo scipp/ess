@@ -10,12 +10,12 @@ from orsopy.fileio import data_source as orso_data_source
 from orsopy.fileio.orso import Column, Orso, OrsoDataset
 
 from ..orso import OrsoDataSource, OrsoInstrument, OrsoIofQDataset, OrsoReduction
-from ..types import NormalizedIofQ1D, QResolution, Run, ThetaData, WavelengthData
+from ..types import NormalizedIofQ1D, QResolution, Sample, ThetaData, WavelengthData
 
 
 def build_orso_instrument(
-    events_in_wavelength: WavelengthData[Run], events_in_theta: ThetaData[Run]
-) -> OrsoInstrument[Run]:
+    events_in_wavelength: WavelengthData[Sample], events_in_theta: ThetaData[Sample]
+) -> OrsoInstrument:
     """Build ORSO instrument metadata from intermediate reduction results for Amor.
 
     This assumes specular reflection and sets the incident angle equal to the computed
