@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 """ORSO utilities for Amor."""
+from typing import Optional
+
 import numpy as np
 import scipp as sc
 from orsopy.fileio import base as orso_base
@@ -19,20 +21,13 @@ def build_orso_instrument(
     This assumes specular reflection and sets the incident angle equal to the computed
     scattering angle.
     """
-    wavelength = events_in_wavelength.coords['wavelength']
-    incident_angle = events_in_theta.coords['theta']
-    # Explicit conversions to float because orsopy does not like np.float* types.
     return OrsoInstrument(
         orso_data_source.InstrumentSettings(
             wavelength=orso_base.ValueRange(
-                min=float(wavelength.min().value),
-                max=float(wavelength.max().value),
-                unit=_ascii_unit(wavelength.unit),
+                *_limits_of_coord(events_in_wavelength, 'wavelength')
             ),
             incident_angle=orso_base.ValueRange(
-                min=float(incident_angle.min().value),
-                max=float(incident_angle.max().value),
-                unit=_ascii_unit(incident_angle.unit),
+                *_limits_of_coord(events_in_theta, 'theta')
             ),
             polarization=None,  # TODO how can we determine this from the inputs?
         )
@@ -83,6 +78,28 @@ def _extract_values_array(var: sc.Variable) -> np.ndarray:
     if var.ndim != 1:
         raise sc.DimensionError(f"ORT columns must be one-dimensional, got {var.sizes}")
     return var.values
+
+
+def _limits_of_coord(
+    data: sc.DataArray, name: str
+) -> Optional[tuple[float, float, str]]:
+    if (coord := _get_coord(data, name)) is None:
+        return None
+    min_ = coord.min().value
+    max_ = coord.max().value
+    # Explicit conversions to float because orsopy does not like np.float* types.
+    return float(min_), float(max_), _ascii_unit(min_)
+
+
+def _get_coord(data: sc.DataArray, name: str) -> Optional[sc.Variable]:
+    try:
+        return data.coords[name]
+    except KeyError:
+        try:
+            return data.bins.coords[name]
+        except (KeyError, TypeError):
+            # KeyError if coord does not exist, TypeError if data is not binned.
+            return None
 
 
 def _ascii_unit(unit: sc.Unit) -> str:
