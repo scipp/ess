@@ -8,7 +8,11 @@ Sample = NewType('Sample', str)
 Run = TypeVar('Run', Reference, Sample)
 
 
-class RawData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
+class RawData(sciline.Scope[Run, sc.DataGroup], sc.DataGroup):
+    """Data as loaded from a NeXus file."""
+
+
+class RawEvents(sciline.Scope[Run, sc.DataArray], sc.DataArray):
     """Event time data from nexus file,
     binned by `detector_number` (pixel of the detector frame)."""
 
@@ -55,8 +59,12 @@ class IofQ(sciline.Scope[Run, sc.DataArray], sc.DataArray):
 
 
 NormalizedIofQ = NewType('NormalizedIofQ', sc.DataArray)
-'''Normalized histogram over momentrum transfer and detector number,
+'''Normalized histogram over momentum transfer and detector number,
 normalized by the calibrated reference measurement.'''
+
+NormalizedIofQ1D = NewType('NormalizedIofQ1D', sc.DataArray)
+'''Normalized histogram reduced to 1 dimension.'''
+
 QResolution = NewType('QResolution', sc.Variable)
 '''Resolution term for the momentum transfer for each bin of QBins.'''
 

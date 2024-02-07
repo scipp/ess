@@ -42,4 +42,4 @@ def calibration_factor(
     return calibration_factor
 
 
-providers = [calibration_factor]
+providers = (calibration_factor,)

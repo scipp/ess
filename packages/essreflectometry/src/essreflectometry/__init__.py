@@ -3,22 +3,20 @@
 
 # flake8: noqa: F401
 import importlib.metadata
-import itertools
 
-from . import calibrations, conversions, corrections, normalize
+from . import calibrations, conversions, corrections, normalize, reductions
 
 try:
     __version__ = importlib.metadata.version(__package__ or __name__)
 except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
-providers = list(
-    itertools.chain(
-        conversions.providers,
-        corrections.providers,
-        calibrations.providers,
-        normalize.providers,
-    )
+providers = (
+    *conversions.providers,
+    *corrections.providers,
+    *calibrations.providers,
+    *normalize.providers,
+    *reductions.providers,
 )
 """
 List of providers for setting up a Sciline pipeline.
@@ -30,4 +28,3 @@ see :py:data:`essreflectometry.amor.providers`.
 """
 
 del importlib
-del itertools
