@@ -13,6 +13,7 @@ from esssans.types import (
     EmptyBeamRun,
     FileList,
     QBins,
+    QxyBins,
     ReturnEvents,
     SampleRun,
     TransmissionRun,
@@ -22,7 +23,9 @@ from esssans.types import (
 
 
 def make_params(
-    sample_runs: Optional[List[str]] = None, background_runs: Optional[List[str]] = None
+    sample_runs: Optional[List[str]] = None,
+    background_runs: Optional[List[str]] = None,
+    qxy: bool = False,
 ) -> dict:
     params = default_parameters.copy()
 
@@ -39,7 +42,7 @@ def make_params(
     params[FileList[EmptyBeamRun]] = ['60392-2022-02-28_2215.nxs']
 
     params[WavelengthBins] = sc.linspace(
-        'wavelength', start=1.0, stop=13.0, num=201, unit='angstrom'
+        'wavelength', start=1.0, stop=13.0, num=51, unit='angstrom'
     )
     params[BeamStopPosition] = sc.vector([-0.026, -0.022, 0.0], unit='m')
     params[BeamStopRadius] = sc.scalar(0.042, unit='m')
@@ -47,8 +50,14 @@ def make_params(
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
     params[ReturnEvents] = False
 
-    params[QBins] = sc.linspace(
-        dim='Q', start=0.01, stop=0.3, num=101, unit='1/angstrom'
-    )
+    if qxy:
+        params[QxyBins] = {
+            'Qx': sc.linspace('Qx', -0.3, 0.3, 91, unit='1/angstrom'),
+            'Qy': sc.linspace('Qy', -0.2, 0.3, 78, unit='1/angstrom'),
+        }
+    else:
+        params[QBins] = sc.linspace(
+            dim='Q', start=0.01, stop=0.3, num=101, unit='1/angstrom'
+        )
 
     return params

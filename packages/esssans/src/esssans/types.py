@@ -114,6 +114,9 @@ must be two wavelength values defining the start and end wavelength of the band.
 QBins = NewType('QBins', sc.Variable)
 """Q binning"""
 
+QxyBins = NewType('QxyBins', dict[str, sc.Variable])
+"""Binning for 'Qx' and 'Qy'. If set this overrides QBins."""
+
 NonBackgroundWavelengthRange = NewType('NonBackgroundWavelengthRange', sc.Variable)
 """Range of wavelengths that are not considered background in the monitor"""
 

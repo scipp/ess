@@ -406,11 +406,7 @@ def normalize(
                 )
     elif numerator.bins is not None:
         numerator = numerator.hist()
-    if numerator.bins is not None and denominator.bins is None:
-        da = numerator.bins / sc.lookup(func=denominator, dim='Q')
-    else:
-        da = numerator / denominator
-    return IofQ[RunType](da)
+    return IofQ[RunType](numerator / denominator)
 
 
 providers = (
