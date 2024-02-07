@@ -26,6 +26,7 @@ from .normalization import (
 )
 from .types import (
     BeamCenter,
+    CalibratedMaskedData,
     DetectorPixelShape,
     IofQ,
     LabFrameTransform,
@@ -164,13 +165,6 @@ def _iofq_in_quadrants(
         'north-west'.
     """
     pi = sc.constants.pi.value
-    phi = data.transform_coords(
-        'phi', graph=graph, keep_intermediate=False, keep_inputs=False
-    ).coords['phi']
-    if phi.bins is not None or 'wavelength' in phi.dims:
-        # If gravity-correction is enabled, phi depends on wavelength (and event).
-        # We cannot handle this below, so we approximate phi by the mean value.
-        phi = phi.mean('wavelength')
     phi_bins = sc.linspace('phi', -pi, pi, 5, unit='rad')
     quadrants = ['south-west', 'south-east', 'north-east', 'north-west']
 
@@ -195,15 +189,25 @@ def _iofq_in_quadrants(
     params[ElasticCoordTransformGraph] = graph
     params[BeamCenter] = _offsets_to_vector(data=data, xy=xy, graph=graph)
 
+    pipeline = sciline.Pipeline(providers, params=params)
+    pipeline[MaskedData[SampleRun]] = data
+    calibrated = pipeline.compute(CalibratedMaskedData[SampleRun])
+    phi = calibrated.transform_coords(
+        'phi', graph=graph, keep_intermediate=False, keep_inputs=False
+    ).coords['phi']
+    if phi.bins is not None or 'wavelength' in phi.dims:
+        # If gravity-correction is enabled, phi depends on wavelength (and event).
+        # We cannot handle this below, so we approximate phi by the mean value.
+        phi = phi.mean('wavelength')
+
     out = {}
     for i, quad in enumerate(quadrants):
         # Select pixels based on phi
         sel = (phi >= phi_bins[i]) & (phi < phi_bins[i + 1])
-        params[MaskedData[SampleRun]] = data[sel]
-        params[NormWavelengthTerm[SampleRun]] = (
+        pipeline[MaskedData[SampleRun]] = data[sel]
+        pipeline[NormWavelengthTerm[SampleRun]] = (
             norm if norm.dims == ('wavelength',) else norm[sel]
         )
-        pipeline = sciline.Pipeline(providers, params=params)
         out[quad] = pipeline.compute(IofQ[SampleRun])
     return out
 
@@ -264,13 +268,15 @@ def _cost(xy: List[float], *args) -> float:
     c = (all_q - ref) ** 2
     out = (sc.sum(ref * c) / sc.sum(ref)).value
     logger = get_logger('sans')
-    logger.info(f'Beam center finder: x={xy[0]}, y={xy[1]}, cost={out}')
     if not np.isfinite(out):
-        raise ValueError(
+        out = np.inf
+        logger.info(
             'Non-finite value computed in cost. This is likely due to a division by '
-            'zero. Try restricting your Q range, or increasing the size of your Q bins '
-            'to improve statistics in the denominator.'
+            'zero. If the final results for the beam center are not satisfactory, '
+            'try restricting your Q range, or increasing the size of your Q bins to '
+            'improve statistics in the denominator.'
         )
+    logger.info(f'Beam center finder: x={xy[0]}, y={xy[1]}, cost={out}')
     return out
 
 
@@ -387,8 +393,8 @@ def beam_center_from_iofq(
     Because finding the beam center is required to compute the direct beam in the first
     place, we do not include this term in the computation of :math:`I(Q)` for finding
     the beam center. This changes the shape of the :math:`I(Q)` curve, but since it
-    changes it in the same manner for all :math:`{\\phi}` angles, this does not affect the
-    results for finding the beam center.
+    changes it in the same manner for all :math:`{\\phi}` angles, this does not affect
+    the results for finding the beam center.
 
     This is what is now implemented in this version of the algorithm.
     """  # noqa: E501
