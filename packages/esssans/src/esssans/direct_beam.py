@@ -7,18 +7,17 @@ import numpy as np
 import scipp as sc
 from sciline import Pipeline
 
+from .i_of_q import resample_direct_beam
 from .types import (
     BackgroundRun,
     BackgroundSubtractedIofQ,
-    CleanMonitor,
     CleanSummedQ,
-    DirectBeam,
-    Incident,
+    Denominator,
     Numerator,
+    ProcessedWavelengthBands,
     SampleRun,
-    SolidAngle,
-    TransmissionFraction,
     WavelengthBands,
+    WavelengthBins,
 )
 
 
@@ -97,44 +96,46 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
     """
 
     direct_beam_function = None
-    bands = pipeline.compute(WavelengthBands)
+    bands = pipeline.compute(ProcessedWavelengthBands)
     band_dim = (set(bands.dims) - {'wavelength'}).pop()
-
     full_wavelength_range = sc.concat([bands.min(), bands.max()], dim='wavelength')
 
     pipeline = pipeline.copy()
-    # Append full wavelength range as extra band. This allows for running only a
-    # single pipeline to compute both the I(Q) in bands and the I(Q) for the full
-    # wavelength range.
-    pipeline[WavelengthBands] = sc.concat([bands, full_wavelength_range], dim=band_dim)
+
+    wavelength_bins = pipeline.compute(WavelengthBins)
+    parts = (
+        CleanSummedQ[SampleRun, Numerator],
+        CleanSummedQ[SampleRun, Denominator],
+        CleanSummedQ[BackgroundRun, Numerator],
+        CleanSummedQ[BackgroundRun, Denominator],
+    )
+    parts = pipeline.compute(parts)
+    # Convert events to histograms to make normalization (in every iteration) cheap
+    for key in [
+        CleanSummedQ[SampleRun, Numerator],
+        CleanSummedQ[BackgroundRun, Numerator],
+    ]:
+        parts[key] = parts[key].hist(wavelength=wavelength_bins)
+
+    # For now we simply strip all uncertainties, since direct beam function is
+    # computed without variances anyway.
+    parts = {key: sc.values(result) for key, result in parts.items()}
+    for key, part in parts.items():
+        pipeline[key] = part
+    sample0 = parts[CleanSummedQ[SampleRun, Denominator]]
+    background0 = parts[CleanSummedQ[BackgroundRun, Denominator]]
 
     results = []
 
-    # Compute checkpoints to avoid recomputing the same things in every iteration
-    checkpoints = (
-        TransmissionFraction[SampleRun],
-        TransmissionFraction[BackgroundRun],
-        SolidAngle[SampleRun],
-        SolidAngle[BackgroundRun],
-        CleanMonitor[SampleRun, Incident],
-        CleanMonitor[BackgroundRun, Incident],
-        CleanSummedQ[SampleRun, Numerator],
-        CleanSummedQ[BackgroundRun, Numerator],
-    )
-
-    for key, result in pipeline.compute(checkpoints).items():
-        pipeline[key] = result
-
-    for it in range(niter):
-        print("Iteration", it)
-
+    for _it in range(niter):
         # The first time we compute I(Q), the direct beam function is not in the
         # parameters, nor given by any providers, so it will be considered flat.
         # TODO: Should we have a check that DirectBeam cannot be computed from the
         # pipeline?
-        iofq = pipeline.compute(BackgroundSubtractedIofQ)
-        iofq_full = iofq['band', -1]
-        iofq_bands = iofq['band', :-1]
+        pipeline[WavelengthBands] = full_wavelength_range
+        iofq_full = pipeline.compute(BackgroundSubtractedIofQ)
+        pipeline[WavelengthBands] = bands
+        iofq_bands = pipeline.compute(BackgroundSubtractedIofQ)
 
         if direct_beam_function is None:
             # Make a flat direct beam
@@ -151,8 +152,14 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
             I0=I0,
         )
 
-        # Insert new direct beam function into pipeline
-        pipeline[DirectBeam] = direct_beam_function
+        # Scale denominator terms that were initially computed without direct beam
+        # with the current direct beam function.
+        db = resample_direct_beam(
+            direct_beam=direct_beam_function,
+            wavelength_bins=wavelength_bins,
+        )
+        pipeline[CleanSummedQ[SampleRun, Denominator]] = sample0 * db
+        pipeline[CleanSummedQ[BackgroundRun, Denominator]] = background0 * db
 
         results.append(
             {

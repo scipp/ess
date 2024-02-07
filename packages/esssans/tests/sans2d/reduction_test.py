@@ -2,7 +2,6 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 from typing import Callable, List
 
-import numpy as np
 import pytest
 import sciline
 import scipp as sc
@@ -23,6 +22,7 @@ from esssans.types import (
     NonBackgroundWavelengthRange,
     QBins,
     RawData,
+    ReturnEvents,
     SampleRun,
     SolidAngle,
     TransmissionRun,
@@ -62,6 +62,7 @@ def make_params() -> dict:
     )
     params[CorrectForGravity] = True
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
+    params[ReturnEvents] = False
     return params
 
 
@@ -85,13 +86,10 @@ def test_pipeline_can_compute_background_subtracted_IofQ(uncertainties):
     assert result.dims == ('Q',)
 
 
-def test_pipeline_can_compute_background_subtracted_IofQ_in_wavelength_slices():
+def test_pipeline_can_compute_background_subtracted_IofQ_in_wavelength_bands():
     params = make_params()
-    band = np.linspace(2.0, 16.0, num=11)
-    params[WavelengthBands] = sc.array(
-        dims=['band', 'wavelength'],
-        values=np.vstack([band[:-1], band[1:]]).T,
-        unit='angstrom',
+    params[WavelengthBands] = sc.linspace(
+        'wavelength', start=2.0, stop=16.0, num=11, unit='angstrom'
     )
     pipeline = sciline.Pipeline(sans2d_providers(), params=params)
     result = pipeline.compute(BackgroundSubtractedIofQ)
@@ -141,7 +139,7 @@ def test_uncertainty_broadcast_mode_drop_yields_smaller_variances():
     )
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
     pipeline = sciline.Pipeline(sans2d_providers(), params=params)
-    drop = pipeline.compute(IofQ[SampleRun]).hist().data
+    drop = pipeline.compute(IofQ[SampleRun]).data
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
     pipeline = sciline.Pipeline(sans2d_providers(), params=params)
     upper_bound = pipeline.compute(IofQ[SampleRun]).data

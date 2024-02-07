@@ -20,14 +20,19 @@ from .types import (
     LabFrameTransform,
     NormWavelengthTerm,
     Numerator,
+    ProcessedWavelengthBands,
+    ReturnEvents,
     RunType,
     SolidAngle,
     Transmission,
     TransmissionFraction,
     TransmissionRun,
     UncertaintyBroadcastMode,
+    WavelengthBands,
+    WavelengthBins,
 )
 from .uncertainty import (
+    broadcast_to_events_with_upper_bound_variances,
     broadcast_with_upper_bound_variances,
     drop_variances_if_broadcast,
 )
@@ -295,9 +300,48 @@ def iofq_denominator(
     return CleanWavelength[RunType, Denominator](denominator)
 
 
+def process_wavelength_bands(
+    wavelength_bands: Optional[WavelengthBands],
+    wavelength_bins: WavelengthBins,
+) -> ProcessedWavelengthBands:
+    """
+    Perform some checks and potential reshaping on the wavelength bands.
+
+    The wavelength bands must be either one- or two-dimensional.
+    If the wavelength bands are defined as a one-dimensional array, convert them to a
+    two-dimensional array with start and end wavelengths.
+
+    The final bands must have a size of 2 in the wavelength dimension, defining a start
+    and an end wavelength.
+    """
+    if wavelength_bands is None:
+        wavelength_bands = sc.concat(
+            [wavelength_bins.min(), wavelength_bins.max()], dim='wavelength'
+        )
+    if wavelength_bands.ndim == 1:
+        wavelength_bands = sc.concat(
+            [wavelength_bands[:-1], wavelength_bands[1:]], dim='x'
+        ).rename(x='wavelength', wavelength='band')
+    if wavelength_bands.ndim != 2:
+        raise ValueError(
+            'Wavelength_bands must be one- or two-dimensional, '
+            f'got {wavelength_bands.ndim}.'
+        )
+    if wavelength_bands.sizes['wavelength'] != 2:
+        raise ValueError(
+            'Wavelength_bands must have a size of 2 in the wavelength dimension, '
+            'defining a start and an end wavelength, '
+            f'got {wavelength_bands.sizes["wavelength"]}.'
+        )
+    return wavelength_bands
+
+
 def normalize(
     numerator: CleanSummedQ[RunType, Numerator],
     denominator: CleanSummedQ[RunType, Denominator],
+    return_events: ReturnEvents,
+    uncertainties: UncertaintyBroadcastMode,
+    wavelength_bands: ProcessedWavelengthBands,
 ) -> IofQ[RunType]:
     """
     Perform normalization of counts as a function of Q.
@@ -312,21 +356,57 @@ def normalize(
     denominator:
         The divisor for the normalization operation. This cannot be event data, it must
         contain histogrammed data.
+    return_events:
+        Whether to return the result as event data or histogrammed data.
+    wavelength_bands:
+        Defines bands in wavelength that can be used to separate different wavelength
+        ranges that contribute to different regions in Q space. Note that this needs to
+        be defined, so if all wavelengths should be used, this should simply be a start
+        and end edges that encompass the entire wavelength range.
 
     Returns
     -------
     :
         The input data normalized by the supplied denominator.
     """
-    if denominator.variances is not None and numerator.bins is not None:
-        # Event-mode normalization is not correct of norm-term has variances.
-        # See https://doi.org/10.3233/JNR-220049 for context.
-        numerator = numerator.hist()
+    wav = 'wavelength'
+    wavelength_bounds = sc.sort(wavelength_bands.flatten(to=wav), wav)
     if numerator.bins is not None:
-        da = numerator.bins / sc.lookup(func=denominator, dim='Q')
+        # If in event mode the desired wavelength binning has not been applied, we need
+        # it for splitting by bands, or restricting the range in case of a single band.
+        numerator = numerator.bin(wavelength=wavelength_bounds)
+
+    def _reduce(da: sc.DataArray) -> sc.DataArray:
+        return da.sum(wav) if da.bins is None else da.bins.concat(wav)
+
+    num_parts = []
+    denom_parts = []
+    for wav_range in sc.collapse(wavelength_bands, keep=wav).values():
+        num_parts.append(_reduce(numerator[wav, wav_range[0] : wav_range[1]]))
+        denom_parts.append(_reduce(denominator[wav, wav_range[0] : wav_range[1]]))
+    band_dim = (set(wavelength_bands.dims) - {'wavelength'}).pop()
+    if len(num_parts) == 1:
+        numerator = num_parts[0]
+        denominator = denom_parts[0]
     else:
-        da = numerator / denominator
-    return IofQ[RunType](da)
+        numerator = sc.concat(num_parts, band_dim)
+        denominator = sc.concat(denom_parts, band_dim)
+    numerator.coords[wav] = wavelength_bands.squeeze()
+    denominator.coords[wav] = wavelength_bands.squeeze()
+
+    if return_events and numerator.bins is not None:
+        # Naive event-mode normalization is not correct if norm-term has variances.
+        # See https://doi.org/10.3233/JNR-220049 for context.
+        if denominator.variances is not None:
+            if uncertainties == UncertaintyBroadcastMode.drop:
+                denominator = sc.values(denominator)
+            else:
+                denominator = broadcast_to_events_with_upper_bound_variances(
+                    denominator, events=numerator
+                )
+    elif numerator.bins is not None:
+        numerator = numerator.hist()
+    return IofQ[RunType](numerator / denominator)
 
 
 providers = (
@@ -334,5 +414,6 @@ providers = (
     iofq_norm_wavelength_term,
     iofq_denominator,
     normalize,
+    process_wavelength_bands,
     solid_angle,
 )

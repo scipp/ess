@@ -82,6 +82,9 @@ Mode for broadcasting uncertainties.
 See https://doi.org/10.3233/JNR-220049 for context.
 """
 
+ReturnEvents = NewType('ReturnEvents', bool)
+"""Whether to return events in the output I(Q)"""
+
 WavelengthBins = NewType('WavelengthBins', sc.Variable)
 """Wavelength binning"""
 
@@ -102,8 +105,17 @@ band index and the second dimension being the wavelength. For each band, there m
 two wavelength values defining the start and end wavelength of the band.
 """
 
+ProcessedWavelengthBands = NewType('ProcessedWavelengthBands', sc.Variable)
+"""Processed wavelength bands, as a two-dimensional variable, with the first dimension
+being the band index and the second dimension being the wavelength. For each band, there
+must be two wavelength values defining the start and end wavelength of the band."""
+
+
 QBins = NewType('QBins', sc.Variable)
 """Q binning"""
+
+QxyBins = NewType('QxyBins', dict[str, sc.Variable])
+"""Binning for 'Qx' and 'Qy'. If set this overrides QBins."""
 
 NonBackgroundWavelengthRange = NewType('NonBackgroundWavelengthRange', sc.Variable)
 """Range of wavelengths that are not considered background in the monitor"""

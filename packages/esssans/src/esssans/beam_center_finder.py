@@ -12,13 +12,18 @@ from scipp.core import concepts
 from .conversions import (
     ElasticCoordTransformGraph,
     calibrate_positions,
+    compute_Q,
     detector_to_wavelength,
     mask_wavelength,
-    to_Q,
 )
 from .i_of_q import merge_spectra
 from .logging import get_logger
-from .normalization import iofq_denominator, normalize, solid_angle
+from .normalization import (
+    iofq_denominator,
+    normalize,
+    process_wavelength_bands,
+    solid_angle,
+)
 from .types import (
     BeamCenter,
     CalibratedMaskedData,
@@ -28,6 +33,7 @@ from .types import (
     MaskedData,
     NormWavelengthTerm,
     QBins,
+    ReturnEvents,
     SampleRun,
     UncertaintyBroadcastMode,
     WavelengthBins,
@@ -163,7 +169,7 @@ def _iofq_in_quadrants(
     quadrants = ['south-west', 'south-east', 'north-east', 'north-west']
 
     providers = [
-        to_Q,
+        compute_Q,
         merge_spectra,
         normalize,
         iofq_denominator,
@@ -171,9 +177,11 @@ def _iofq_in_quadrants(
         detector_to_wavelength,
         solid_angle,
         calibrate_positions,
+        process_wavelength_bands,
     ]
     params = {}
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
+    params[ReturnEvents] = False
     params[WavelengthBins] = wavelength_bins
     params[QBins] = q_bins
     params[DetectorPixelShape[SampleRun]] = pixel_shape
@@ -187,6 +195,10 @@ def _iofq_in_quadrants(
     phi = calibrated.transform_coords(
         'phi', graph=graph, keep_intermediate=False, keep_inputs=False
     ).coords['phi']
+    if phi.bins is not None or 'wavelength' in phi.dims:
+        # If gravity-correction is enabled, phi depends on wavelength (and event).
+        # We cannot handle this below, so we approximate phi by the mean value.
+        phi = phi.mean('wavelength')
 
     out = {}
     for i, quad in enumerate(quadrants):
