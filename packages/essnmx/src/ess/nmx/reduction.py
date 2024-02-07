@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+import io
 import pathlib
-from typing import NewType, Optional, Union
+from typing import NewType, Optional, Union, overload
 
 import h5py
 import scipp as sc
@@ -140,7 +141,7 @@ class NMXReducedData(_SharedFields, sc.DataGroup):
     def _create_instrument_group(self, nx_entry: h5py.Group) -> h5py.Group:
         nx_instrument = nx_entry.create_group("NXinstrument")
         nx_instrument.attrs["nr_detector"] = self.origin_position.sizes['panel']
-        nx_instrument.create_dataset("proton_charge", data=self.proton_charge)
+        nx_instrument.create_dataset("proton_charge", data=self.proton_charge.value)
 
         nx_detector_1 = nx_instrument.create_group("detector_1")
         # Detector counts
@@ -196,14 +197,33 @@ class NMXReducedData(_SharedFields, sc.DataGroup):
         nx_source["target_material"] = "W"
         return nx_source
 
-    def export_as_nexus(self, output_file_name: Union[str, pathlib.Path]) -> None:
-        import h5py
+    @overload
+    def export_as_nexus(self, output_file_base: str) -> None:
+        ...
 
-        file_name = pathlib.Path(output_file_name)
-        if file_name.suffix not in (".h5", ".nxs"):
-            raise ValueError("Output file name must end with .h5 or .nxs")
+    @overload
+    def export_as_nexus(self, output_file_base: pathlib.Path) -> None:
+        ...
 
-        with h5py.File(file_name, "w") as out_file:
+    @overload
+    def export_as_nexus(self, output_file_base: io.BytesIO) -> None:
+        ...
+
+    def export_as_nexus(
+        self, output_file_base: Union[str, pathlib.Path, io.BytesIO]
+    ) -> None:
+        """Export the reduced data to a NeXus file.
+
+        Currently exporting step is not part of the sciline pipeline.
+        """
+        if isinstance(output_file_base, (str, pathlib.Path)):
+            file_base = pathlib.Path(output_file_base)
+            if file_base.suffix not in (".h5", ".nxs"):
+                raise ValueError("Output file name must end with .h5 or .nxs")
+        else:
+            file_base = output_file_base
+
+        with h5py.File(file_base, "w") as out_file:
             out_file.attrs["default"] = "NMX_data"
             # Root Data Entry
             nx_entry = self._create_root_data_entry(out_file)
