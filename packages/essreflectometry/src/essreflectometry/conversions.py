@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+from typing import Optional
+
 import scipp as sc
 from scipp.constants import h, m_n, pi
 from scippneutron._utils import elem_dtype, elem_unit
@@ -16,6 +18,7 @@ from .types import (
     SpecularReflectionCoordTransformGraph,
     ThetaData,
     WavelengthData,
+    WavelengthEdges,
 )
 
 
@@ -118,6 +121,7 @@ def specular_reflection() -> SpecularReflectionCoordTransformGraph:
 def tof_to_wavelength(
     data_array: RawData[Run],
     graph: SpecularReflectionCoordTransformGraph,
+    wavelength_edges: Optional[WavelengthEdges],
 ) -> WavelengthData[Run]:
     """
     Use :code:`transform_coords` to convert from ToF to wavelength, cutoff high and
@@ -129,6 +133,8 @@ def tof_to_wavelength(
         Data array to convert.
     graph:
         Graph for :code:`transform_coords`.
+    wavelength_edges:
+        Bounds for wavelength values, exclude data outside of bounds.
 
     Returns
     -------
@@ -136,6 +142,8 @@ def tof_to_wavelength(
         New data array with wavelength dimension.
     """
     data_array_wav = data_array.transform_coords(["wavelength"], graph=graph)
+    if wavelength_edges is not None:
+        data_array_wav = data_array_wav.bin({wavelength_edges.dim: wavelength_edges})
     # TODO
     # try:
     #    from orsopy import fileio
