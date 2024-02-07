@@ -214,7 +214,7 @@ class NMXReducedData(_SharedFields, sc.DataGroup):
     ) -> None:
         """Export the reduced data to a NeXus file.
 
-        Currently exporting step is not part of the sciline pipeline.
+        Currently exporting step is not expected to be part of sciline pipelines.
         """
         if isinstance(output_file_base, (str, pathlib.Path)):
             file_base = pathlib.Path(output_file_base)
