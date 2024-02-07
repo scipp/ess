@@ -257,14 +257,12 @@ def _cost(xy: List[float], *args) -> float:
     out = (sc.sum(ref * c) / sc.sum(ref)).value
     logger = get_logger('sans')
     if not np.isfinite(out):
-        iofq_values = all_q.values
-        out = 1.0e6 * iofq_values[np.isfinite(iofq_values)].max()
+        out = np.inf
         logger.info(
             'Non-finite value computed in cost. This is likely due to a division by '
-            'zero. The value was artificially changed to a large finite number. '
-            'If the results are not satisfactory, try restricting your Q range, or '
-            'increasing the size of your Q bins to improve statistics in the '
-            'denominator.'
+            'zero. If the final results for the beam center are not satisfactory, '
+            'try restricting your Q range, or increasing the size of your Q bins to '
+            'improve statistics in the denominator.'
         )
     logger.info(f'Beam center finder: x={xy[0]}, y={xy[1]}, cost={out}')
     return out
