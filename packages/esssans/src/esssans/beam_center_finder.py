@@ -383,8 +383,8 @@ def beam_center_from_iofq(
     Because finding the beam center is required to compute the direct beam in the first
     place, we do not include this term in the computation of :math:`I(Q)` for finding
     the beam center. This changes the shape of the :math:`I(Q)` curve, but since it
-    changes it in the same manner for all :math:`{\\phi}` angles, this does not affect the
-    results for finding the beam center.
+    changes it in the same manner for all :math:`{\\phi}` angles, this does not affect
+    the results for finding the beam center.
 
     This is what is now implemented in this version of the algorithm.
     """  # noqa: E501
