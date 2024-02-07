@@ -56,8 +56,8 @@ def parse_orso_experiment(raw_data: RawData[Run]) -> OrsoExperiment[Run]:
     return OrsoExperiment(
         data_source.Experiment(
             title=raw_data['title'],
-            instrument=raw_data['name'],
-            facility=raw_data['facility'],
+            instrument=raw_data['instrument']['name'],
+            facility=raw_data.get('facility'),
             start_date=parse_datetime(raw_data['start_time']),
             probe='neutron',
         )
@@ -70,7 +70,7 @@ def parse_orso_owner(raw_data: RawData[Run]) -> OrsoOwner[Run]:
         orso_base.Person(
             name=raw_data['user']['name'],
             contact=raw_data['user']['email'],
-            affiliation=None,
+            affiliation=raw_data['user'].get('affiliation'),
         )
     )
 
