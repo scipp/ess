@@ -12,7 +12,11 @@ def mcstas_workflow() -> sl.Pipeline:
         DefaultMaximumProbability,
         InputFilepath,
         MaximumProbability,
+        McStasEventWeightsConverter,
+        McStasProtonChargeConverter,
+        event_weights_from_probability,
         load_mcstas_nexus,
+        proton_charge_from_event_data,
     )
     from ess.nmx.reduction import TimeBinSteps, bin_time_of_arrival
 
@@ -22,6 +26,8 @@ def mcstas_workflow() -> sl.Pipeline:
             InputFilepath: small_mcstas_sample(),
             MaximumProbability: DefaultMaximumProbability,
             TimeBinSteps: TimeBinSteps(50),
+            McStasEventWeightsConverter: event_weights_from_probability,
+            McStasProtonChargeConverter: proton_charge_from_event_data,
         },
     )
 
