@@ -252,7 +252,7 @@ def compute_Q(
     Convert a data array from wavelength to Q.
     """
     # Keep naming of wavelength dim, subsequent steps use a (Q[xy], wavelength) binning.
-    return CleanQ[RunType, IofQPart](
+    return CleanQ[ScatteringRunType, IofQPart](
         data.transform_coords(
             ('Qx', 'Qy') if compute_Qxy else 'Q',
             graph=graph,
