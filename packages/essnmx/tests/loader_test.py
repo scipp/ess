@@ -32,7 +32,9 @@ def test_file_reader_mcstas() -> None:
     from ess.nmx.mcstas_loader import (
         DefaultMaximumProbability,
         InputFilepath,
+        event_weights_from_probability,
         load_mcstas_nexus,
+        proton_charge_from_event_data,
     )
 
     file_path = InputFilepath(small_mcstas_sample())
@@ -41,7 +43,11 @@ def test_file_reader_mcstas() -> None:
         raw_data = file[entry_path]["events"][()]
         data_length = raw_data.sizes['dim_0']
 
-    dg = load_mcstas_nexus(file_path)
+    dg = load_mcstas_nexus(
+        file_path=file_path,
+        event_weights_converter=event_weights_from_probability,
+        proton_charge_converter=proton_charge_from_event_data,
+    )
     assert isinstance(dg, sc.DataGroup)
     assert dg.shape == (3, 1280 * 1280)
     check_scalar_properties(dg)
@@ -83,7 +89,12 @@ def test_file_reader_mcstas_additional_fields(tmp_mcstas_file: pathlib.Path) -> 
     """Check if additional fields names do not break the loader."""
     import h5py
 
-    from ess.nmx.mcstas_loader import InputFilepath, load_mcstas_nexus
+    from ess.nmx.mcstas_loader import (
+        InputFilepath,
+        event_weights_from_probability,
+        load_mcstas_nexus,
+        proton_charge_from_event_data,
+    )
 
     entry_path = "entry1/data/bank01_events_dat_list_p_x_y_n_id_t"
     new_entry_path = entry_path + '_L'
@@ -93,7 +104,11 @@ def test_file_reader_mcstas_additional_fields(tmp_mcstas_file: pathlib.Path) -> 
         del file[entry_path]
         file[new_entry_path] = dataset
 
-    dg = load_mcstas_nexus(InputFilepath(str(tmp_mcstas_file)))
+    dg = load_mcstas_nexus(
+        file_path=InputFilepath(str(tmp_mcstas_file)),
+        event_weights_converter=event_weights_from_probability,
+        proton_charge_converter=proton_charge_from_event_data,
+    )
 
     assert isinstance(dg, sc.DataGroup)
     assert dg.shape == (3, 1280 * 1280)
