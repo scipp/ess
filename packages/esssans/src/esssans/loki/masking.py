@@ -13,8 +13,8 @@ from ..types import (
     BeamStopRadius,
     MaskedData,
     RawData,
-    RunType,
     SampleRun,
+    ScatteringRunType,
 )
 
 DetectorLowCountsStrawMask = NewType('DetectorLowCountsStrawMask', sc.Variable)
@@ -80,11 +80,11 @@ def detector_tube_edge_mask(
 
 
 def mask_detectors(
-    da: RawData[RunType],
+    da: RawData[ScatteringRunType],
     lowcounts_straw_mask: Optional[DetectorLowCountsStrawMask],
     beam_stop_mask: Optional[DetectorBeamStopMask],
     tube_edge_mask: Optional[DetectorTubeEdgeMask],
-) -> MaskedData[RunType]:
+) -> MaskedData[ScatteringRunType]:
     """Apply pixel-specific masks to raw data.
 
     Parameters
@@ -105,7 +105,7 @@ def mask_detectors(
         da.masks['beam_stop'] = beam_stop_mask
     if tube_edge_mask is not None:
         da.masks['tube_edges'] = tube_edge_mask
-    return MaskedData[RunType](da)
+    return MaskedData[ScatteringRunType](da)
 
 
 providers = (

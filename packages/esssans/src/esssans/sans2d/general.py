@@ -19,6 +19,7 @@ from ..types import (
     RunTitle,
     RunType,
     SampleRun,
+    ScatteringRunType,
     Transmission,
 )
 
@@ -29,9 +30,9 @@ default_parameters = {
 
 
 def get_detector_data(
-    dg: LoadedFileContents[RunType],
-) -> RawData[RunType]:
-    return RawData[RunType](dg['data'])
+    dg: LoadedFileContents[ScatteringRunType],
+) -> RawData[ScatteringRunType]:
+    return RawData[ScatteringRunType](dg['data'])
 
 
 def get_monitor(
@@ -52,7 +53,7 @@ def run_title(dg: LoadedFileContents[SampleRun]) -> RunTitle:
     return RunTitle(dg['run_title'].value)
 
 
-def sans2d_tube_detector_pixel_shape() -> DetectorPixelShape[RunType]:
+def sans2d_tube_detector_pixel_shape() -> DetectorPixelShape[ScatteringRunType]:
     # Pixel radius and length
     # found here:
     # https://github.com/mantidproject/mantid/blob/main/instrument/SANS2D_Definition_Tubes.xml
@@ -79,7 +80,7 @@ def sans2d_tube_detector_pixel_shape() -> DetectorPixelShape[RunType]:
     return pixel_shape
 
 
-def lab_frame_transform() -> LabFrameTransform[RunType]:
+def lab_frame_transform() -> LabFrameTransform[ScatteringRunType]:
     # Rotate +y to -x
     return sc.spatial.rotation(value=[0, 0, 1 / 2**0.5, 1 / 2**0.5])
 

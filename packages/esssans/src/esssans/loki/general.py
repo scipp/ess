@@ -17,6 +17,7 @@ from ..types import (
     RawData,
     RawMonitor,
     RunType,
+    ScatteringRunType,
     TransformationPath,
     Transmission,
 )
@@ -35,10 +36,10 @@ default_parameters = {
 
 
 def get_detector_data(
-    dg: LoadedFileContents[RunType], detector_name: NeXusDetectorName
-) -> RawData[RunType]:
+    dg: LoadedFileContents[ScatteringRunType], detector_name: NeXusDetectorName
+) -> RawData[ScatteringRunType]:
     da = dg[NEXUS_INSTRUMENT_PATH][detector_name][f'{detector_name}_events']
-    return RawData[RunType](da)
+    return RawData[ScatteringRunType](da)
 
 
 def get_monitor_data(
@@ -51,19 +52,19 @@ def get_monitor_data(
 
 
 def detector_pixel_shape(
-    dg: LoadedFileContents[RunType], detector_name: NeXusDetectorName
-) -> DetectorPixelShape[RunType]:
-    return DetectorPixelShape[RunType](
+    dg: LoadedFileContents[ScatteringRunType], detector_name: NeXusDetectorName
+) -> DetectorPixelShape[ScatteringRunType]:
+    return DetectorPixelShape[ScatteringRunType](
         dg[NEXUS_INSTRUMENT_PATH][detector_name]['pixel_shape']
     )
 
 
 def detector_lab_frame_transform(
-    dg: LoadedFileContents[RunType],
+    dg: LoadedFileContents[ScatteringRunType],
     detector_name: NeXusDetectorName,
     transform_path: TransformationPath,
-) -> LabFrameTransform[RunType]:
-    return LabFrameTransform[RunType](
+) -> LabFrameTransform[ScatteringRunType]:
+    return LabFrameTransform[ScatteringRunType](
         dg[NEXUS_INSTRUMENT_PATH][detector_name][transform_path]
     )
 

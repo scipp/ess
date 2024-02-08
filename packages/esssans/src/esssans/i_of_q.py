@@ -27,6 +27,7 @@ from .types import (
     ReturnEvents,
     RunType,
     SampleRun,
+    ScatteringRunType,
     UncertaintyBroadcastMode,
     WavelengthBins,
     WavelengthMonitor,
@@ -132,11 +133,11 @@ def resample_direct_beam(
 
 
 def merge_spectra(
-    data: CleanQ[RunType, IofQPart],
+    data: CleanQ[ScatteringRunType, IofQPart],
     q_bins: Optional[QBins],
     qxy_bins: Optional[QxyBins],
     dims_to_keep: Optional[DimsToKeep],
-) -> CleanSummedQ[RunType, IofQPart]:
+) -> CleanSummedQ[ScatteringRunType, IofQPart]:
     """
     Merges all spectra:
 
@@ -210,7 +211,7 @@ def merge_spectra(
                 .group(*[flat.coords[dim] for dim in flat.dims if dim != helper_dim])
                 .hist(**edges)
             )
-    return CleanSummedQ[RunType, IofQPart](out.squeeze())
+    return CleanSummedQ[ScatteringRunType, IofQPart](out.squeeze())
 
 
 def subtract_background(
