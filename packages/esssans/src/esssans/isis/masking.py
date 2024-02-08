@@ -6,7 +6,7 @@ import numpy as np
 import sciline
 import scipp as sc
 
-from ..types import MaskedData, RawData, RunType, SampleRun
+from ..types import MaskedData, RawData, SampleRun, ScatteringRunType
 from .components import RawDataWithComponentUserOffsets
 from .io import MaskedDetectorIDs
 
@@ -30,9 +30,9 @@ def to_pixel_mask(data: RawData[SampleRun], masked: MaskedDetectorIDs) -> PixelM
 
 
 def apply_pixel_masks(
-    data: RawDataWithComponentUserOffsets[RunType],
+    data: RawDataWithComponentUserOffsets[ScatteringRunType],
     masks: sciline.Series[str, PixelMask],
-) -> MaskedData[RunType]:
+) -> MaskedData[ScatteringRunType]:
     """Apply pixel-specific masks to raw data.
 
     This depends on the configured raw data (which has been configured with component
@@ -49,7 +49,7 @@ def apply_pixel_masks(
     data = data.copy(deep=False)
     for name, mask in masks.items():
         data.masks[name] = mask
-    return MaskedData[RunType](data)
+    return MaskedData[ScatteringRunType](data)
 
 
 providers = (

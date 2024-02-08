@@ -22,6 +22,7 @@ from .types import (
     QxyBins,
     RawMonitor,
     RunType,
+    ScatteringRunType,
     WavelengthMask,
     WavelengthMonitor,
 )
@@ -204,8 +205,8 @@ def monitor_to_wavelength(
 
 
 def calibrate_positions(
-    detector: MaskedData[RunType], beam_center: BeamCenter
-) -> CalibratedMaskedData[RunType]:
+    detector: MaskedData[ScatteringRunType], beam_center: BeamCenter
+) -> CalibratedMaskedData[ScatteringRunType]:
     """
     Calibrate pixel positions.
 
@@ -220,17 +221,17 @@ def calibrate_positions(
 # for RawData, MaskedData, ... no reason to restrict necessarily.
 # Would we be fine with just choosing on option, or will this get in the way for users?
 def detector_to_wavelength(
-    detector: CalibratedMaskedData[RunType],
+    detector: CalibratedMaskedData[ScatteringRunType],
     graph: ElasticCoordTransformGraph,
-) -> CleanWavelength[RunType, Numerator]:
-    return CleanWavelength[RunType, Numerator](
+) -> CleanWavelength[ScatteringRunType, Numerator]:
+    return CleanWavelength[ScatteringRunType, Numerator](
         detector.transform_coords('wavelength', graph=graph)
     )
 
 
 def mask_wavelength(
-    da: CleanWavelength[RunType, IofQPart], mask: Optional[WavelengthMask]
-) -> CleanWavelengthMasked[RunType, IofQPart]:
+    da: CleanWavelength[ScatteringRunType, IofQPart], mask: Optional[WavelengthMask]
+) -> CleanWavelengthMasked[ScatteringRunType, IofQPart]:
     if mask is not None:
         # If we have binned data and the wavelength coord is multi-dimensional, we need
         # to make a single wavelength bin before we can mask the range.
@@ -239,19 +240,19 @@ def mask_wavelength(
             if (dim in da.bins.coords) and (dim in da.coords):
                 da = da.bin({dim: 1})
         da = mask_range(da, mask=mask)
-    return CleanWavelengthMasked[RunType, IofQPart](da)
+    return CleanWavelengthMasked[ScatteringRunType, IofQPart](da)
 
 
 def compute_Q(
-    data: CleanWavelengthMasked[RunType, IofQPart],
+    data: CleanWavelengthMasked[ScatteringRunType, IofQPart],
     graph: ElasticCoordTransformGraph,
     compute_Qxy: Optional[QxyBins],
-) -> CleanQ[RunType, IofQPart]:
+) -> CleanQ[ScatteringRunType, IofQPart]:
     """
     Convert a data array from wavelength to Q.
     """
     # Keep naming of wavelength dim, subsequent steps use a (Q[xy], wavelength) binning.
-    return CleanQ[RunType, IofQPart](
+    return CleanQ[ScatteringRunType, IofQPart](
         data.transform_coords(
             ('Qx', 'Qy') if compute_Qxy else 'Q',
             graph=graph,

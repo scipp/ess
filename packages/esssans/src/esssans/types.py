@@ -24,20 +24,29 @@ SampleRun = NewType('SampleRun', int)
 """Sample run: the run with the sample placed in the solvent inside the sample holder.
 """
 
+ScatteringRunType = TypeVar(
+    'ScatteringRunType',
+    SampleRun,
+    BackgroundRun,
+)
+
+
+class TransmissionRun(sciline.Scope[ScatteringRunType, int], int):
+    """Mapping between ScatteringRunType and transmission run.
+    In the case where no transmission run is provided, the transmission run should be
+    the same as the measurement (sample or background) run."""
+
+
 RunType = TypeVar(
     'RunType',
     BackgroundRun,
     EmptyBeamRun,
     SampleRun,
+    # Note that mypy does not seem to like this nesting, may need to find a workaround
+    TransmissionRun[SampleRun],
+    TransmissionRun[BackgroundRun],
 )
 """TypeVar used for specifying BackgroundRun, EmptyBeamRun or SampleRun"""
-
-
-class TransmissionRun(sciline.Scope[RunType, int], int):
-    """Mapping between RunType and transmission run.
-    In the case where no transmission run is provided, the transmission run should be
-    the same as the measurement (sample or background) run."""
-
 
 # 1.2  Monitor types
 Incident = NewType('Incident', int)
@@ -169,7 +178,9 @@ DirectBeam = NewType('DirectBeam', sc.DataArray)
 """Direct beam"""
 
 
-class TransmissionFraction(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+class TransmissionFraction(
+    sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray
+):
     """Transmission fraction"""
 
 
@@ -177,16 +188,16 @@ CleanDirectBeam = NewType('CleanDirectBeam', sc.DataArray)
 """Direct beam after resampling to required wavelength bins"""
 
 
-class DetectorPixelShape(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+class DetectorPixelShape(sciline.Scope[ScatteringRunType, sc.DataGroup], sc.DataGroup):
     """Geometry of the detector from description in nexus file."""
 
 
-class LabFrameTransform(sciline.Scope[RunType, sc.Variable], sc.Variable):
+class LabFrameTransform(sciline.Scope[ScatteringRunType, sc.Variable], sc.Variable):
     """Coordinate transformation from detector local coordinates
     to the sample frame of reference."""
 
 
-class SolidAngle(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+class SolidAngle(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Solid angle of detector pixels seen from sample position"""
 
 
@@ -194,24 +205,26 @@ class LoadedFileContents(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
     """The entire contents of a loaded file"""
 
 
-class RawData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+class RawData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Raw data"""
 
 
-class MaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+class MaskedData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Raw data with pixel-specific masks applied"""
 
 
-class CalibratedMaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+class CalibratedMaskedData(
+    sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray
+):
     """Raw data with pixel-specific masks applied and calibrated pixel positions"""
 
 
-class NormWavelengthTerm(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+class NormWavelengthTerm(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Normalization term (numerator) for IofQ before scaling with solid-angle."""
 
 
 class CleanWavelength(
-    sciline.ScopeTwoParams[RunType, IofQPart, sc.DataArray], sc.DataArray
+    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
 ):
     """
     Prerequisite for IofQ numerator or denominator.
@@ -223,22 +236,24 @@ class CleanWavelength(
 
 
 class CleanWavelengthMasked(
-    sciline.ScopeTwoParams[RunType, IofQPart, sc.DataArray], sc.DataArray
+    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
 ):
     """Result of applying wavelength masking to :py:class:`CleanWavelength`"""
 
 
-class CleanQ(sciline.ScopeTwoParams[RunType, IofQPart, sc.DataArray], sc.DataArray):
+class CleanQ(
+    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
+):
     """Result of converting :py:class:`CleanWavelengthMasked` to Q"""
 
 
 class CleanSummedQ(
-    sciline.ScopeTwoParams[RunType, IofQPart, sc.DataArray], sc.DataArray
+    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
 ):
     """Result of histogramming/binning :py:class:`CleanQ` over all pixels into Q bins"""
 
 
-class IofQ(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+class IofQ(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """I(Q)"""
 
 

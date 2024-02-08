@@ -22,7 +22,7 @@ from .types import (
     Numerator,
     ProcessedWavelengthBands,
     ReturnEvents,
-    RunType,
+    ScatteringRunType,
     SolidAngle,
     Transmission,
     TransmissionFraction,
@@ -39,10 +39,10 @@ from .uncertainty import (
 
 
 def solid_angle(
-    data: CalibratedMaskedData[RunType],
-    pixel_shape: DetectorPixelShape[RunType],
-    transform: LabFrameTransform[RunType],
-) -> SolidAngle[RunType]:
+    data: CalibratedMaskedData[ScatteringRunType],
+    pixel_shape: DetectorPixelShape[ScatteringRunType],
+    transform: LabFrameTransform[ScatteringRunType],
+) -> SolidAngle[ScatteringRunType]:
     """
     Solid angle for cylindrical pixels.
 
@@ -80,7 +80,7 @@ def solid_angle(
         radius=radius,
         length=length,
     )
-    return SolidAngle[RunType](
+    return SolidAngle[ScatteringRunType](
         concepts.rewrap_reduced_data(
             prototype=data, data=omega, dim=set(data.dims) - set(omega.dims)
         )
@@ -127,11 +127,13 @@ def _approximate_solid_angle_for_cylinder_shaped_pixel_of_detector(
 
 
 def transmission_fraction(
-    sample_incident_monitor: CleanMonitor[TransmissionRun[RunType], Incident],
-    sample_transmission_monitor: CleanMonitor[TransmissionRun[RunType], Transmission],
+    sample_incident_monitor: CleanMonitor[TransmissionRun[ScatteringRunType], Incident],
+    sample_transmission_monitor: CleanMonitor[
+        TransmissionRun[ScatteringRunType], Transmission
+    ],
     direct_incident_monitor: CleanMonitor[EmptyBeamRun, Incident],
     direct_transmission_monitor: CleanMonitor[EmptyBeamRun, Transmission],
-) -> TransmissionFraction[RunType]:
+) -> TransmissionFraction[ScatteringRunType]:
     """
     Approximation based on equations in
     `CalculateTransmission <https://docs.mantidproject.org/v4.0.0/algorithms/CalculateTransmission-v1.html>`_
@@ -160,7 +162,7 @@ def transmission_fraction(
     frac = (sample_transmission_monitor / direct_transmission_monitor) * (
         direct_incident_monitor / sample_incident_monitor
     )
-    return TransmissionFraction[RunType](frac)
+    return TransmissionFraction[ScatteringRunType](frac)
 
 
 _broadcasters = {
@@ -171,11 +173,11 @@ _broadcasters = {
 
 
 def iofq_norm_wavelength_term(
-    incident_monitor: CleanMonitor[RunType, Incident],
-    transmission_fraction: TransmissionFraction[RunType],
+    incident_monitor: CleanMonitor[ScatteringRunType, Incident],
+    transmission_fraction: TransmissionFraction[ScatteringRunType],
     direct_beam: Optional[CleanDirectBeam],
     uncertainties: UncertaintyBroadcastMode,
-) -> NormWavelengthTerm[RunType]:
+) -> NormWavelengthTerm[ScatteringRunType]:
     """
     Compute the wavelength-dependent contribution to the denominator term for the I(Q)
     normalization.
@@ -224,14 +226,14 @@ def iofq_norm_wavelength_term(
         out = direct_beam * broadcast(out, sizes=direct_beam.sizes)
     # Convert wavelength coordinate to midpoints for future histogramming
     out.coords['wavelength'] = sc.midpoints(out.coords['wavelength'])
-    return NormWavelengthTerm[RunType](out)
+    return NormWavelengthTerm[ScatteringRunType](out)
 
 
 def iofq_denominator(
-    wavelength_term: NormWavelengthTerm[RunType],
-    solid_angle: SolidAngle[RunType],
+    wavelength_term: NormWavelengthTerm[ScatteringRunType],
+    solid_angle: SolidAngle[ScatteringRunType],
     uncertainties: UncertaintyBroadcastMode,
-) -> CleanWavelength[RunType, Denominator]:
+) -> CleanWavelength[ScatteringRunType, Denominator]:
     """
     Compute the denominator term for the I(Q) normalization.
 
@@ -297,7 +299,7 @@ def iofq_denominator(
     """  # noqa: E501
     broadcast = _broadcasters[uncertainties]
     denominator = solid_angle * broadcast(wavelength_term, sizes=solid_angle.sizes)
-    return CleanWavelength[RunType, Denominator](denominator)
+    return CleanWavelength[ScatteringRunType, Denominator](denominator)
 
 
 def process_wavelength_bands(
@@ -337,12 +339,12 @@ def process_wavelength_bands(
 
 
 def normalize(
-    numerator: CleanSummedQ[RunType, Numerator],
-    denominator: CleanSummedQ[RunType, Denominator],
+    numerator: CleanSummedQ[ScatteringRunType, Numerator],
+    denominator: CleanSummedQ[ScatteringRunType, Denominator],
     return_events: ReturnEvents,
     uncertainties: UncertaintyBroadcastMode,
     wavelength_bands: ProcessedWavelengthBands,
-) -> IofQ[RunType]:
+) -> IofQ[ScatteringRunType]:
     """
     Perform normalization of counts as a function of Q.
     If the numerator contains events, we use the sc.lookup function to perform the
@@ -406,7 +408,7 @@ def normalize(
                 )
     elif numerator.bins is not None:
         numerator = numerator.hist()
-    return IofQ[RunType](numerator / denominator)
+    return IofQ[ScatteringRunType](numerator / denominator)
 
 
 providers = (

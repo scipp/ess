@@ -5,11 +5,11 @@ from typing import NewType
 import sciline
 import scipp as sc
 
-from ..types import RawData, RunType
+from ..types import RawData, ScatteringRunType
 
 
 class RawDataWithComponentUserOffsets(
-    sciline.Scope[RunType, sc.DataArray], sc.DataArray
+    sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray
 ):
     """Raw data with applied user configuration for component positions."""
 
@@ -19,10 +19,10 @@ DetectorBankOffset = NewType('DetectorBankOffset', sc.Variable)
 
 
 def apply_component_user_offsets_to_raw_data(
-    data: RawData[RunType],
+    data: RawData[ScatteringRunType],
     sample_offset: SampleOffset,
     detector_bank_offset: DetectorBankOffset,
-) -> RawDataWithComponentUserOffsets[RunType]:
+) -> RawDataWithComponentUserOffsets[ScatteringRunType]:
     """Apply user configuration to raw data.
 
     Parameters
@@ -41,4 +41,4 @@ def apply_component_user_offsets_to_raw_data(
     )
     pos = data.coords['position']
     data.coords['position'] = pos + detector_bank_offset.to(unit=pos.unit, copy=False)
-    return RawDataWithComponentUserOffsets[RunType](data)
+    return RawDataWithComponentUserOffsets[ScatteringRunType](data)
