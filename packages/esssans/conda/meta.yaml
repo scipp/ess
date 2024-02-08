@@ -12,7 +12,7 @@ requirements:
     - setuptools_scm
   run:
     - dask
-    - python>=3.9
+    - python>=3.10
     - python-graphviz
     - plopp
     - pythreejs
