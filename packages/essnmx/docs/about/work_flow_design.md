@@ -25,13 +25,13 @@ For the next five steps of the data reduction from spot finding to spot integrat
 First, we use [dials.import](https://dials.github.io/documentation/programs/dials_import.html) to convert image data files into a format compatible with dials. It the metadata and filenames of each image to establish relationships between different sets of images. Once all images are processed, the program generates an experiment object file, outlining the connections between the files. The images to be processed are designated as command-line arguments. Occasionally, there may be a restriction on the maximum number of arguments allowed on the command line, and the number of files could surpass this limit. In such cases, image filenames can be entered through stdin, as demonstrated in the examples below. 
 The Format class for NMX is at modules/dxtbx/src/dxtbx/format/FormatNMX.py where beam-line-specific parameters and file format information are stored.
 
-```consol
+```console
 dials.import *.nxs
 ```
 
 In the next step, a [search for strong pixel](https://dials.github.io/documentation/programs/dials_find_spots.html) is performed. Therefore the intensity of a pixel or pixel group is compared with its local surroundings. With the information of strong pixels, strong spots are defined. for these spots, the centroids and intensities will be calculated. the results can be visualised in the image viewer or the [browser](https://toastisme.github.io/dials_browser_experiment_viewer/)
 
-```consol
+```console
 dials.find_spots imported.expt find_spots.phil
 ```
 
@@ -39,20 +39,20 @@ In the [indexing](https://dials.github.io/documentation/programs/dials_index.htm
 
 As input parameters the imported.exp and strong.refl files are used. more parameters such as unit cell and spacegroup can be given.
 
-```consol
+```console
 dials.index imported.expt strong.refl space_group=P1 unit_cell=a,b,c,alpha,beta,gamma
 ```
 
 
 
 After indexing the instrument geometry is getting [refined](https://dials.github.io/documentation/programs/dials_refine.html).
-```consol
+```console
 dials.refine indexed.refl indexed.expt detector.panels=hierarchical
 ```
 
 The last step in DIALS is to integrate(https://dials.github.io/documentation/programs/dials_integrate.html) each reflex. Currently, in the dimension of the image, a simple summation is used and in the TOF dimension, a profile-fitting approach is used.
 
-```consol
+```console
 dev.dials.simple_tof_integrate refined.expt refined.refl
 ```
 
@@ -64,10 +64,10 @@ Currently [LSCALE](https://scripts.iucr.org/cgi-bin/paper?S0021889898015350) can
 Since LSCALE is not maintained anymore we currently develop a Python-based [alternative](https://github.com/mlund/pyscale) to LSCALE.
 
 start docker desktop
-```consol
+```console
 docker run -it -v $HOME:/mnt/host -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=host.docker.internal:0 lscale
 ```
-```consol 
+```console
 lscale < lscale.com > lscale.out
 ```
 
@@ -78,7 +78,7 @@ lscale < lscale.com > lscale.out
 
 [CTRUNCATE](https://www.ccp4.ac.uk/html/ctruncate.html) converts measured intensities into structure factors. CTRUNCATE includes corrections for weak reflections to avoid negative intensities due to background corrections. 
 
-```consol
+```console
 Start CCP4 GUI
 go to all programs
 select Aimless
