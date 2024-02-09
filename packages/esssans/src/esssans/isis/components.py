@@ -5,9 +5,14 @@ from typing import NewType, Optional
 import sciline
 import scipp as sc
 
-from ..types import RawData, ScatteringRunType
-
-from ..types import CalibratedMonitor, MonitorType, RawData, RawMonitor, RunType
+from ..types import (
+    CalibratedMonitor,
+    MonitorType,
+    RawData,
+    RawMonitor,
+    RunType,
+    ScatteringRunType,
+)
 
 
 class RawDataWithComponentUserOffsets(

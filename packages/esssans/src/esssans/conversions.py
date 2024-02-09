@@ -21,7 +21,6 @@ from .types import (
     MonitorType,
     Numerator,
     QxyBins,
-    RawMonitor,
     RunType,
     ScatteringRunType,
     WavelengthMask,

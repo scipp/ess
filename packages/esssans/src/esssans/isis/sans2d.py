@@ -33,7 +33,7 @@ def get_path(
     if folder is not None:
         return f'{folder}/{filename}'
     mapping = {
-        'DIRECT_SANS2D_REAR_34327_4m_8mm_16Feb16.dat': 'DIRECT_SANS2D_REAR_34327_4m_8mm_16Feb16.dat.h5',
+        'DIRECT_SANS2D_REAR_34327_4m_8mm_16Feb16.dat': 'DIRECT_SANS2D_REAR_34327_4m_8mm_16Feb16.dat.h5',  # noqa: E501
         'SANS2D00063091.nxs': 'SANS2D00063091.nxs.h5',
         'SANS2D00063114.nxs': 'SANS2D00063114.nxs.h5',
         'SANS2D00063159.nxs': 'SANS2D00063159.nxs.h5',
