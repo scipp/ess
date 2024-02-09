@@ -69,8 +69,13 @@ def test_mask_range_binned_data_no_prior_binning():
         },
     )
     masked = mask_range(binned, mask=mask, name='mymask')
-    assert masked.masks['mymask'].values.tolist() == [True]
-    assert sc.identical(masked.coords['x'], mask.coords['x'])
+    # This should make 3 bins that span the entire data range, and where the middle
+    # one is masked.
+    assert masked.masks['mymask'].values.tolist() == [False, True, False]
+    binned_full_range = binned.bin(x=1)
+    assert sc.identical(masked.coords['x'][0], binned_full_range.coords['x'][0])
+    assert sc.identical(masked.coords['x'][1:3], mask.coords['x'])
+    assert sc.identical(masked.coords['x'][3], binned_full_range.coords['x'][1])
 
 
 def test_mask_range_binned_data_has_prior_single_bin():
