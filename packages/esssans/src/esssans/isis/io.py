@@ -8,7 +8,7 @@ from typing import NewType, TypeVar
 import sciline
 import scipp as sc
 
-from ..types import RunType
+from ..types import DirectBeam, DirectBeamFilename, LoadedFileContents, RunType
 
 PixelMaskFilename = NewType('PixelMaskFilename', str)
 CalibrationFilename = NewType('CalibrationFilename', str)
@@ -29,10 +29,6 @@ class Filename(sciline.Scope[RunType, str], str):
 
 MaskedDetectorIDs = NewType('MaskedDetectorIDs', sc.Variable)
 """1-D variable listing all masked detector IDs."""
-
-
-def to_path(filename: FilenameType, path: DataFolder) -> FilePath[FilenameType]:
-    return f'{path}/{filename}'
 
 
 def read_xml_detector_masking(
@@ -77,4 +73,12 @@ def read_xml_detector_masking(
     )
 
 
-providers = (read_xml_detector_masking, to_path)
+def load_run(filename: FilePath[Filename[RunType]]) -> LoadedFileContents[RunType]:
+    return LoadedFileContents[RunType](sc.io.load_hdf5(filename))
+
+
+def load_direct_beam(filename: FilePath[DirectBeamFilename]) -> DirectBeam:
+    return DirectBeam(sc.io.load_hdf5(filename))
+
+
+providers = (read_xml_detector_masking, load_run, load_direct_beam)
