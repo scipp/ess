@@ -7,7 +7,7 @@ The main scientific driver is to locate the hydrogen atoms relevant to the funct
 
 ## Data reduction
 
-![work_flow][NMX_work_flow.png]
+![work_flow](NMX_work_flow.png)
 
 
 ### From single event data to binned image-like data
