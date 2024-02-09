@@ -11,7 +11,7 @@ from esssans.sans2d.data import get_path
 # See https://github.com/mantidproject/mantid/blob/main/instrument/SANS2D_Definition_Tubes.xml  # noqa: E501
 _SANS2D_PIXEL_RADIUS = 0.00405 * sc.Unit('m')
 _SANS2D_PIXEL_LENGTH = 0.002033984375 * sc.Unit('m')
-_SANS2D_SOLID_ANGLE_REFERENCE_FILE = 'SANS2D00063091.SolidAngle_from_mantid.hdf5'
+_SANS2D_SOLID_ANGLE_REFERENCE_FILE = 'SANS2D00063091.SolidAngle_from_mantid.h5'
 
 
 def _sans2d_geometry():
