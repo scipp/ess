@@ -1,16 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
-from typing import NewType, Optional
-
-import numpy as np
-import sciline
-import scipp as sc
+from typing import Optional
 
 
 from ..data import Registry
-from ..types import LoadedFileContents, MaskedData, RawData, RunType, SampleRun
-from .components import RawDataWithComponentUserOffsets
-from .io import DataFolder, FilenameType, FilePath, MaskedDetectorIDs
+from ..types import LoadedFileContents, RawData, RunType
+from .io import DataFolder, FilenameType, FilePath
 
 
 _registry = Registry(
