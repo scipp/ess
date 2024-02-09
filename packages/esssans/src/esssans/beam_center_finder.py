@@ -192,13 +192,18 @@ def _iofq_in_quadrants(
     pipeline = sciline.Pipeline(providers, params=params)
     pipeline[MaskedData[SampleRun]] = data
     calibrated = pipeline.compute(CalibratedMaskedData[SampleRun])
-    phi = calibrated.transform_coords(
+    with_phi = calibrated.transform_coords(
         'phi', graph=graph, keep_intermediate=False, keep_inputs=False
-    ).coords['phi']
-    if phi.bins is not None or 'wavelength' in phi.dims:
-        # If gravity-correction is enabled, phi depends on wavelength (and event).
-        # We cannot handle this below, so we approximate phi by the mean value.
-        phi = phi.mean('wavelength')
+    )
+    # If gravity-correction is enabled, phi depends on wavelength (and event).
+    # We cannot handle this below, so we approximate phi by the mean value.
+    if ('phi' not in with_phi.coords) and ('phi' in with_phi.bins.coords):
+        # This is the case where we have a phi event coord but no coord at the top level
+        phi = with_phi.bins.coords['phi'].bins.mean()
+    else:
+        phi = with_phi.coords['phi']
+        if phi.bins is not None or 'wavelength' in phi.dims:
+            phi = phi.mean('wavelength')
 
     out = {}
     for i, quad in enumerate(quadrants):
