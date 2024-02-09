@@ -228,7 +228,7 @@ def test_beam_center_can_get_closer_to_verified_result_with_low_counts_mask():
         sample: RawData[SampleRun],
         low_counts_threshold: sans2d.LowCountThreshold,
     ) -> sans2d.SampleHolderMask:
-        return sans2d.SampleHolderMask(sample.data.sum('tof') < low_counts_threshold)
+        return sans2d.SampleHolderMask(sample.hist().data < low_counts_threshold)
 
     params = make_params()
     params[sans2d.LowCountThreshold] = sc.scalar(80.0, unit='counts')
@@ -278,7 +278,7 @@ def test_beam_center_finder_works_with_pixel_dependent_direct_beam():
         .copy()
     )
 
-    providers = list(sans.providers + sans.sans2d.providers)
+    providers = sans2d_providers()
     providers.remove(sans.beam_center_finder.beam_center_from_center_of_mass)
     providers.append(sans.beam_center_finder.beam_center_from_iofq)
     pipeline = sciline.Pipeline(providers, params=params)
