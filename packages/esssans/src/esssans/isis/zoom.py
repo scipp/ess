@@ -2,11 +2,9 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 from typing import Optional
 
-
 from ..data import Registry
 from ..types import LoadedFileContents, RawData, RunType
 from .io import DataFolder, FilenameType, FilePath
-
 
 _registry = Registry(
     instrument='zoom',

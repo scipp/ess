@@ -2,13 +2,7 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 
 
-from . import components
-from . import general
-from . import io
-from . import masking
-from . import sans2d
-from . import zoom
-
+from . import components, general, io, masking, sans2d, zoom
 from .components import DetectorBankOffset, MonitorOffset, SampleOffset
 from .io import CalibrationFilename, DataFolder, Filename, PixelMaskFilename
 from .masking import PixelMask
