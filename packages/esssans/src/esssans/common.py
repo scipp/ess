@@ -63,17 +63,15 @@ def mask_range(
 
     lu = sc.DataArray(data=mask.data, coords={dim: edges})
     if da.bins is not None:
-        if dim in da.coords:
-            new_bins = sc.array(
-                dims=[dim],
-                values=np.union1d(edges.values, da.coords[dim].values),
-                unit=edges.unit,
-            )
-            out = da.bin({dim: new_bins})
-            out.masks[name] = sc.lookup(lu, dim)[sc.midpoints(new_bins, dim=dim)]
-        else:
-            out = da.bin({dim: edges})
-            out.masks[name] = mask.data
+        if dim not in da.coords:
+            da = da.bin({dim: 1})
+        new_bins = sc.array(
+            dims=[dim],
+            values=np.union1d(edges.values, da.coords[dim].values),
+            unit=edges.unit,
+        )
+        out = da.bin({dim: new_bins})
+        out.masks[name] = sc.lookup(lu, dim)[sc.midpoints(new_bins, dim=dim)]
     else:
         out = da.copy(deep=False)
         mask_values = sc.lookup(lu, dim)[da.coords[dim]]
