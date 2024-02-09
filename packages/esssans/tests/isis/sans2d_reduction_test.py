@@ -176,7 +176,7 @@ def as_dict(funcs: List[Callable[..., type]]) -> dict:
 def pixel_dependent_direct_beam(
     filename: DirectBeamFilename, shape: RawData[SampleRun]
 ) -> DirectBeam:
-    direct_beam = sans.sans2d.io.pooch_load_direct_beam(filename)
+    direct_beam = sans.isis.io.load_direct_beam(sans2d.get_path(filename, folder=None))
     sizes = {'spectrum': shape.sizes['spectrum'], **direct_beam.sizes}
     return DirectBeam(direct_beam.broadcast(sizes=sizes).copy())
 
