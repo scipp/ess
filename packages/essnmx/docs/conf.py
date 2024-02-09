@@ -31,6 +31,7 @@ extensions = [
 ]
 try:
     import sciline.sphinxext.domain_types  # noqa: F401
+
     extensions.append('sciline.sphinxext.domain_types')
 except ModuleNotFoundError:
     pass
