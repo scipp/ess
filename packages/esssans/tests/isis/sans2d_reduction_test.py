@@ -7,8 +7,7 @@ import sciline
 import scipp as sc
 
 import esssans as sans
-from esssans.sans2d import default_parameters
-from esssans.sans2d.masking import LowCountThreshold, SampleHolderMask
+from esssans.isis import Filename, MonitorOffset, SampleOffset, sans2d
 from esssans.types import (
     BackgroundRun,
     BackgroundSubtractedIofQ,
@@ -17,14 +16,16 @@ from esssans.types import (
     DirectBeam,
     DirectBeamFilename,
     EmptyBeamRun,
-    FileList,
+    Incident,
     IofQ,
+    NeXusMonitorName,
     NonBackgroundWavelengthRange,
     QBins,
     RawData,
     ReturnEvents,
     SampleRun,
     SolidAngle,
+    Transmission,
     TransmissionRun,
     UncertaintyBroadcastMode,
     WavelengthBands,
@@ -34,7 +35,7 @@ from esssans.types import (
 
 
 def make_params() -> dict:
-    params = default_parameters.copy()
+    params = {}
     params[WavelengthBins] = sc.linspace(
         'wavelength', start=2.0, stop=16.0, num=141, unit='angstrom'
     )
@@ -46,17 +47,23 @@ def make_params() -> dict:
             )
         },
     )
-    params[sans.sans2d.LowCountThreshold] = sc.scalar(100.0, unit='counts')
+    params[sans2d.LowCountThreshold] = sc.scalar(100.0, unit='counts')
 
     params[QBins] = sc.linspace(
         dim='Q', start=0.01, stop=0.55, num=141, unit='1/angstrom'
     )
-    params[FileList[BackgroundRun]] = ['SANS2D00063159.hdf5']
-    params[FileList[TransmissionRun[BackgroundRun]]] = params[FileList[BackgroundRun]]
-    params[FileList[SampleRun]] = ['SANS2D00063114.hdf5']
-    params[FileList[TransmissionRun[SampleRun]]] = params[FileList[SampleRun]]
-    params[FileList[EmptyBeamRun]] = ['SANS2D00063091.hdf5']
-    params[DirectBeamFilename] = 'DIRECT_SANS2D_REAR_34327_4m_8mm_16Feb16.hdf5'
+    params[DirectBeamFilename] = 'DIRECT_SANS2D_REAR_34327_4m_8mm_16Feb16.dat'
+    params[Filename[SampleRun]] = 'SANS2D00063114.nxs'
+    params[Filename[TransmissionRun[SampleRun]]] = params[Filename[SampleRun]]
+    params[Filename[BackgroundRun]] = 'SANS2D00063159.nxs'
+    params[Filename[TransmissionRun[BackgroundRun]]] = params[Filename[BackgroundRun]]
+    params[Filename[EmptyBeamRun]] = 'SANS2D00063091.nxs'
+
+    params[NeXusMonitorName[Incident]] = 'monitor2'
+    params[NeXusMonitorName[Transmission]] = 'monitor4'
+    params[SampleOffset] = sc.vector([0.0, 0.0, 0.053], unit='m')
+    params[MonitorOffset[Transmission]] = sc.vector([0.0, 0.0, -6.719], unit='m')
+
     params[NonBackgroundWavelengthRange] = sc.array(
         dims=['wavelength'], values=[0.7, 17.1], unit='angstrom'
     )
@@ -67,7 +74,9 @@ def make_params() -> dict:
 
 
 def sans2d_providers():
-    return list(sans.providers + sans.sans2d.providers)
+    return list(
+        sans.providers + sans.isis.providers + sans.isis.io.providers + sans2d.providers
+    )
 
 
 def test_can_create_pipeline():
@@ -217,12 +226,12 @@ def test_beam_center_finder_without_direct_beam_reproduces_verified_result():
 def test_beam_center_can_get_closer_to_verified_result_with_low_counts_mask():
     def low_counts_mask(
         sample: RawData[SampleRun],
-        low_counts_threshold: LowCountThreshold,
-    ) -> SampleHolderMask:
-        return SampleHolderMask(sample.data.sum('tof') < low_counts_threshold)
+        low_counts_threshold: sans2d.LowCountThreshold,
+    ) -> sans2d.SampleHolderMask:
+        return sans2d.SampleHolderMask(sample.data.sum('tof') < low_counts_threshold)
 
     params = make_params()
-    params[LowCountThreshold] = sc.scalar(80.0, unit='counts')
+    params[sans2d.LowCountThreshold] = sc.scalar(80.0, unit='counts')
     params[sans.beam_center_finder.BeamCenterFinderQBins] = sc.linspace(
         'Q', 0.02, 0.3, 71, unit='1/angstrom'
     )
