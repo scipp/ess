@@ -11,6 +11,7 @@ from .common import mask_range
 from .types import (
     BeamCenter,
     CalibratedMaskedData,
+    CalibratedMonitor,
     CleanQ,
     CleanWavelength,
     CleanWavelengthMasked,
@@ -197,7 +198,7 @@ def sans_monitor() -> MonitorCoordTransformGraph:
 
 
 def monitor_to_wavelength(
-    monitor: RawMonitor[RunType, MonitorType], graph: MonitorCoordTransformGraph
+    monitor: CalibratedMonitor[RunType, MonitorType], graph: MonitorCoordTransformGraph
 ) -> WavelengthMonitor[RunType, MonitorType]:
     return WavelengthMonitor[RunType, MonitorType](
         monitor.transform_coords('wavelength', graph=graph)
@@ -233,12 +234,6 @@ def mask_wavelength(
     da: CleanWavelength[ScatteringRunType, IofQPart], mask: Optional[WavelengthMask]
 ) -> CleanWavelengthMasked[ScatteringRunType, IofQPart]:
     if mask is not None:
-        # If we have binned data and the wavelength coord is multi-dimensional, we need
-        # to make a single wavelength bin before we can mask the range.
-        if da.bins is not None:
-            dim = mask.dim
-            if (dim in da.bins.coords) and (dim in da.coords):
-                da = da.bin({dim: 1})
         da = mask_range(da, mask=mask)
     return CleanWavelengthMasked[ScatteringRunType, IofQPart](da)
 

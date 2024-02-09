@@ -9,16 +9,7 @@ try:
 except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
-from . import (
-    beam_center_finder,
-    common,
-    conversions,
-    i_of_q,
-    io,
-    loki,
-    normalization,
-    sans2d,
-)
+from . import beam_center_finder, common, conversions, i_of_q, io, loki, normalization
 from .common import transmission_from_background_run, transmission_from_sample_run
 from .direct_beam import direct_beam
 from .types import BackgroundSubtractedIofQ, IofQ, ReturnEvents, SampleRun
@@ -55,7 +46,6 @@ __all__ = [
     'loki',
     'normalization',
     'providers',
-    'sans2d',
     'transmission_from_sample_run',
     'transmission_from_background_run',
 ]
