@@ -3,7 +3,6 @@
 from typing import Optional
 
 from ..data import Registry
-from ..types import LoadedFileContents, RawData, RunType
 from .io import DataFolder, FilenameType, FilePath
 
 _registry = Registry(
@@ -51,10 +50,4 @@ def get_path(
     return _registry.get_path(filename)
 
 
-def get_detector_data(
-    dg: LoadedFileContents[RunType],
-) -> RawData[RunType]:
-    return RawData[RunType](dg['data'])
-
-
-providers = (get_path, get_detector_data)
+providers = (get_path,)

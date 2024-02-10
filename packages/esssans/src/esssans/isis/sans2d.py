@@ -5,7 +5,7 @@ from typing import NewType, Optional
 import scipp as sc
 
 from ..data import Registry
-from ..types import LoadedFileContents, MaskedData, RawData, RunType, SampleRun
+from ..types import MaskedData, RunType, SampleRun
 from .components import RawDataWithComponentUserOffsets
 from .io import DataFolder, FilenameType, FilePath
 
@@ -40,14 +40,6 @@ def get_path(
     }
     filename = mapping.get(filename, filename)
     return _registry.get_path(filename)
-
-
-def get_detector_data(
-    dg: LoadedFileContents[RunType],
-) -> RawData[RunType]:
-    da = dg['data']
-    # Remove half of the pixels as the second detector panel is not in the beam path
-    return RawData[RunType](da['spectrum', : da.sizes['spectrum'] // 2].copy())
 
 
 DetectorEdgeMask = NewType('DetectorEdgeMask', sc.Variable)
@@ -109,10 +101,4 @@ def mask_detectors(
     return MaskedData[RunType](da)
 
 
-providers = (
-    get_path,
-    get_detector_data,
-    detector_edge_mask,
-    sample_holder_mask,
-    mask_detectors,
-)
+providers = (get_path, detector_edge_mask, sample_holder_mask, mask_detectors)

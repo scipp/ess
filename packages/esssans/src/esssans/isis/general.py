@@ -11,6 +11,7 @@ from ..types import (
     LoadedFileContents,
     MonitorType,
     NeXusMonitorName,
+    RawData,
     RawMonitor,
     RunNumber,
     RunTitle,
@@ -18,6 +19,12 @@ from ..types import (
     SampleRun,
     ScatteringRunType,
 )
+
+
+def get_detector_data(
+    dg: LoadedFileContents[RunType],
+) -> RawData[RunType]:
+    return RawData[RunType](dg['data'])
 
 
 def get_monitor_data(
@@ -71,6 +78,7 @@ def lab_frame_transform() -> LabFrameTransform[ScatteringRunType]:
 
 
 providers = (
+    get_detector_data,
     get_monitor_data,
     run_number,
     run_title,
