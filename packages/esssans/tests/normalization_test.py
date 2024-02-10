@@ -6,7 +6,7 @@ import pytest
 import scipp as sc
 
 from esssans import normalization
-from esssans.sans2d.data import get_path
+from esssans.isis.sans2d import get_path
 
 # See https://github.com/mantidproject/mantid/blob/main/instrument/SANS2D_Definition_Tubes.xml  # noqa: E501
 _SANS2D_PIXEL_RADIUS = 0.00405 * sc.Unit('m')
@@ -37,7 +37,7 @@ def _mantid_sans2d_solid_angle_data():
     simpleapi = pytest.importorskip("mantid.simpleapi")
     scippneutron = pytest.importorskip("scippneutron")
 
-    ws = simpleapi.Load(get_path('SANS2D00063091.nxs'))
+    ws = simpleapi.Load(get_path('SANS2D00063091.nxs', folder=None))
     radius = _SANS2D_PIXEL_RADIUS
     length = _SANS2D_PIXEL_LENGTH
 
@@ -75,7 +75,9 @@ def test_solid_angle_compare_to_mantid():
 
 
 def test_solid_angle_compare_to_reference_file():
-    da = sc.io.load_hdf5(filename=get_path(_SANS2D_SOLID_ANGLE_REFERENCE_FILE))
+    da = sc.io.load_hdf5(
+        filename=get_path(_SANS2D_SOLID_ANGLE_REFERENCE_FILE, folder=None)
+    )
     solid_angle = normalization.solid_angle(
         da,
         **_sans2d_geometry(),
