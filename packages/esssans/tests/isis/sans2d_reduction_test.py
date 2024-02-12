@@ -7,6 +7,7 @@ import sciline
 import scipp as sc
 
 import esssans as sans
+from esssans import isis
 from esssans.isis import Filename, MonitorOffset, SampleOffset, sans2d
 from esssans.types import (
     BackgroundRun,
@@ -18,6 +19,7 @@ from esssans.types import (
     EmptyBeamRun,
     Incident,
     IofQ,
+    MaskedData,
     NeXusMonitorName,
     NonBackgroundWavelengthRange,
     QBins,
@@ -54,9 +56,7 @@ def make_params() -> dict:
     )
     params[DirectBeamFilename] = 'DIRECT_SANS2D_REAR_34327_4m_8mm_16Feb16.dat'
     params[Filename[SampleRun]] = 'SANS2D00063114.nxs'
-    params[Filename[TransmissionRun[SampleRun]]] = params[Filename[SampleRun]]
     params[Filename[BackgroundRun]] = 'SANS2D00063159.nxs'
-    params[Filename[TransmissionRun[BackgroundRun]]] = params[Filename[BackgroundRun]]
     params[Filename[EmptyBeamRun]] = 'SANS2D00063091.nxs'
 
     params[NeXusMonitorName[Incident]] = 'monitor2'
@@ -75,7 +75,11 @@ def make_params() -> dict:
 
 def sans2d_providers():
     return list(
-        sans.providers + sans.isis.providers + sans.isis.io.providers + sans2d.providers
+        sans.providers
+        + isis.providers
+        + isis.data.providers
+        + isis.sans2d.providers
+        + (sans.transmission_from_background_run, sans.transmission_from_sample_run)
     )
 
 
@@ -176,7 +180,7 @@ def as_dict(funcs: List[Callable[..., type]]) -> dict:
 def pixel_dependent_direct_beam(
     filename: DirectBeamFilename, shape: RawData[SampleRun]
 ) -> DirectBeam:
-    direct_beam = sans.isis.io.load_direct_beam(sans2d.get_path(filename, folder=None))
+    direct_beam = isis.data.load_direct_beam(isis.data.get_path(filename))
     sizes = {'spectrum': shape.sizes['spectrum'], **direct_beam.sizes}
     return DirectBeam(direct_beam.broadcast(sizes=sizes).copy())
 
@@ -272,17 +276,19 @@ def test_beam_center_finder_works_with_pixel_dependent_direct_beam():
     pipeline = sciline.Pipeline(providers, params=params)
     center_pixel_independent_direct_beam = pipeline.compute(BeamCenter)
 
-    direct_beam = (
-        pipeline.compute(DirectBeam)
-        .broadcast(sizes={'spectrum': 61440, 'wavelength': 175})
-        .copy()
-    )
+    direct_beam = pipeline.compute(DirectBeam)
+    pixel_dependent_direct_beam = direct_beam.broadcast(
+        sizes={
+            'spectrum': pipeline.compute(MaskedData[SampleRun]).sizes['spectrum'],
+            'wavelength': direct_beam.sizes['wavelength'],
+        }
+    ).copy()
 
     providers = sans2d_providers()
     providers.remove(sans.beam_center_finder.beam_center_from_center_of_mass)
     providers.append(sans.beam_center_finder.beam_center_from_iofq)
     pipeline = sciline.Pipeline(providers, params=params)
-    pipeline[DirectBeam] = direct_beam
+    pipeline[DirectBeam] = pixel_dependent_direct_beam
 
     center = pipeline.compute(BeamCenter)
     assert sc.identical(center, center_pixel_independent_direct_beam)
