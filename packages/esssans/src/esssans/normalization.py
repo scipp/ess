@@ -410,7 +410,9 @@ def normalize(
                 )
     elif numerator.bins is not None:
         numerator = numerator.hist()
-    numerator /= denominator
+    numerator /= denominator.drop_coords(
+        [name for name in denominator.coords if name not in denominator.dims]
+    )
     return IofQ[ScatteringRunType](numerator)
 
 
