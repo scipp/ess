@@ -216,7 +216,7 @@ def merge_spectra(
             out = (
                 flat.flatten(to=str(uuid.uuid4()))
                 .group(*[flat.coords[dim] for dim in flat.dims if dim != helper_dim])
-                .drop_coords(dims_to_keep)
+                .drop_coords(dims_to_keep or ())
                 .hist(**edges)
             )
     return CleanSummedQ[ScatteringRunType, IofQPart](out.squeeze())
