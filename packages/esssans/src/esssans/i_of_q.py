@@ -174,7 +174,7 @@ def merge_spectra(
         # q_all_pixels may just have a single bin now, which currently yields
         # inferior performance when binning (no/bad multi-threading?).
         # We operate on the content buffer for better multi-threaded performance.
-        if len(q_all_pixels.masks) == 0:
+        if q_all_pixels.ndim == 0:
             content = q_all_pixels.bins.constituents['data']
             out = content.bin(**edges).assign_coords(q_all_pixels.coords)
         else:
