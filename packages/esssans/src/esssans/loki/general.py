@@ -16,7 +16,6 @@ from ..types import (
     NeXusMonitorName,
     NeXusSourceName,
     RawData,
-    RawMonitor,
     RunType,
     ScatteringRunType,
     TransformationPath,
@@ -45,21 +44,11 @@ def get_detector_data(
 
 def get_monitor_data(
     dg: LoadedFileContents[RunType], monitor_name: NeXusMonitorName[MonitorType]
-) -> RawMonitor[RunType, MonitorType]:
+) -> CalibratedMonitor[RunType, MonitorType]:
     mon_dg = dg[NEXUS_INSTRUMENT_PATH][monitor_name]
     out = mon_dg[f'{monitor_name}_events']
     out.coords['position'] = mon_dg['position']
-    return RawMonitor[RunType, MonitorType](out)
-
-
-def calibrate_monitor_position(
-    monitor: RawMonitor[RunType, MonitorType]
-) -> CalibratedMonitor[RunType, MonitorType]:
-    """Dummy provider which currently does nothing to the monitor position.
-    Other instruments (e.g. ISIS instruments) may need to calibrate the monitor
-    position.
-    """
-    return CalibratedMonitor[RunType, MonitorType](monitor)
+    return CalibratedMonitor[RunType, MonitorType](out)
 
 
 def detector_pixel_shape(
@@ -81,7 +70,6 @@ def detector_lab_frame_transform(
 
 
 providers = (
-    calibrate_monitor_position,
     detector_pixel_shape,
     detector_lab_frame_transform,
     get_detector_data,

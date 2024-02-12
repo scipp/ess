@@ -4,12 +4,7 @@ from typing import Dict
 
 
 class Registry:
-    def __init__(
-        self,
-        instrument: str,
-        files: Dict[str, str],
-        version: str,
-    ):
+    def __init__(self, instrument: str, files: Dict[str, str], version: str):
         import pooch
 
         self._registry = pooch.create(
