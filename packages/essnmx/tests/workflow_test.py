@@ -10,10 +10,10 @@ def mcstas_workflow() -> sl.Pipeline:
     from ess.nmx.data import small_mcstas_sample
     from ess.nmx.mcstas_loader import (
         DefaultMaximumProbability,
+        EventWeightsConverter,
         InputFilepath,
         MaximumProbability,
-        McStasEventWeightsConverter,
-        McStasProtonChargeConverter,
+        ProtonChargeConverter,
         event_weights_from_probability,
         load_mcstas_nexus,
         proton_charge_from_event_data,
@@ -26,8 +26,8 @@ def mcstas_workflow() -> sl.Pipeline:
             InputFilepath: small_mcstas_sample(),
             MaximumProbability: DefaultMaximumProbability,
             TimeBinSteps: TimeBinSteps(50),
-            McStasEventWeightsConverter: event_weights_from_probability,
-            McStasProtonChargeConverter: proton_charge_from_event_data,
+            EventWeightsConverter: event_weights_from_probability,
+            ProtonChargeConverter: proton_charge_from_event_data,
         },
     )
 
