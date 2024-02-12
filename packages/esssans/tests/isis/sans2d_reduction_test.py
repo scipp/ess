@@ -291,3 +291,15 @@ def test_beam_center_finder_works_with_pixel_dependent_direct_beam():
 
     center = pipeline.compute(BeamCenter)
     assert sc.identical(center, center_pixel_independent_direct_beam)
+
+
+def test_workflow_runs_without_gravity_if_beam_center_is_provided():
+    params = make_params()
+    params[CorrectForGravity] = False
+    pipeline = sciline.Pipeline(sans2d_providers(), params=params)
+    da = pipeline.compute(RawData[SampleRun])
+    del da.coords['gravity']
+    pipeline[RawData[SampleRun]] = da
+    pipeline[BeamCenter] = MANTID_BEAM_CENTER
+    result = pipeline.compute(BackgroundSubtractedIofQ)
+    assert result.dims == ('Q',)
