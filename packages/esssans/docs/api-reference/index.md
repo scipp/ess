@@ -40,7 +40,6 @@
    isis
    logging
    loki
-   sans2d
    types
    uncertainty
 ```
