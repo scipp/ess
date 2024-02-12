@@ -8,7 +8,7 @@ from typing import NewType, TypeVar
 import sciline
 import scipp as sc
 
-from ..types import DirectBeam, DirectBeamFilename, LoadedFileContents, RunType
+from ..types import RunType
 
 PixelMaskFilename = NewType('PixelMaskFilename', str)
 CalibrationFilename = NewType('CalibrationFilename', str)
