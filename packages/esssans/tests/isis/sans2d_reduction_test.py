@@ -28,7 +28,6 @@ from esssans.types import (
     SampleRun,
     SolidAngle,
     Transmission,
-    TransmissionRun,
     UncertaintyBroadcastMode,
     WavelengthBands,
     WavelengthBins,
