@@ -14,16 +14,19 @@ InputFilepath = NewType("InputFilepath", str)
 MaximumProbability = NewType("MaximumProbability", int)
 DefaultMaximumProbability = MaximumProbability(100_000)
 
-ConvertedEventWeights = NewType("ConvertedEventWeights", sc.Variable)
-McStasEventWeightsConverter = Callable[..., ConvertedEventWeights]
-# It should be ``Callable[[MaximumProbability, sc.Variable], ConvertedEventWeights]``
-# but sciline pipeline breaks if there is a list in the type arguments.
-McStasEventWeightsConverter.__name__ = "McStasEventWeightsConverter"
+McStasEventProbabilities = NewType("McStasEventProbabilities", sc.Variable)
+EventWeights = NewType("EventWeights", sc.Variable)
+EventWeightsConverter = NewType(
+    "EventWeightsConverter",
+    Callable[[MaximumProbability, McStasEventProbabilities], EventWeights],
+)
+"""A function that converts McStas probability to event weights."""
 
 ProtonCharge = NewType("ProtonCharge", sc.Variable)
-McStasProtonChargeConverter = Callable[..., ProtonCharge]
-# Should be ``Callable[[sc.DataArray], ProtonCharge]`` for the same reason as above.
-McStasProtonChargeConverter.__name__ = "McStasProtonChargeConverter"
+ProtonChargeConverter = NewType(
+    "ProtonChargeConverter", Callable[[EventWeights], ProtonCharge]
+)
+"""A function that derives arbitrary proton charge based on event weights."""
 
 
 def _retrieve_event_list_name(keys: Iterable[str]) -> str:
@@ -68,8 +71,8 @@ def _retrieve_crystal_rotation(file: snx.File, unit: str) -> sc.Variable:
 
 
 def event_weights_from_probability(
-    max_probability: MaximumProbability, probabilities: sc.Variable
-) -> ConvertedEventWeights:
+    max_probability: MaximumProbability, probabilities: McStasEventProbabilities
+) -> EventWeights:
     """Create event weights by scaling probability data.
 
     event_weights = max_probability * (probabilities / max(probabilities))
@@ -85,9 +88,7 @@ def event_weights_from_probability(
     """
     maximum_probability = sc.scalar(max_probability, unit='counts')
 
-    return ConvertedEventWeights(
-        maximum_probability * (probabilities / probabilities.max())
-    )
+    return EventWeights(maximum_probability * (probabilities / probabilities.max()))
 
 
 def _compose_event_data_array(
@@ -149,14 +150,14 @@ def proton_charge_from_event_data(event_da: sc.DataArray) -> ProtonCharge:
 
 def load_mcstas_nexus(
     file_path: InputFilepath,
-    event_weights_converter: McStasEventWeightsConverter,
-    proton_charge_converter: McStasProtonChargeConverter,
+    event_weights_converter: EventWeightsConverter = event_weights_from_probability,
+    proton_charge_converter: ProtonChargeConverter = proton_charge_from_event_data,
     max_probability: Optional[MaximumProbability] = None,
 ) -> NMXData:
     """Load McStas simulation result from h5(nexus) file.
 
     See :func:`~event_weights_from_probability` and
-    :func:`~proton_charge_from_weights` for details.
+    :func:`~proton_charge_from_event_data` for details.
 
     Parameters
     ----------
@@ -188,7 +189,9 @@ def load_mcstas_nexus(
         raw_data = _retrieve_raw_event_data(file)
         weights = event_weights_converter(
             max_probability or DefaultMaximumProbability,
-            _copy_partial_var(raw_data, idx=0, unit='counts'),  # p
+            McStasEventProbabilities(
+                _copy_partial_var(raw_data, idx=0, unit='counts')
+            ),  # p
         )
         event_da = _compose_event_data_array(
             weights=weights,
