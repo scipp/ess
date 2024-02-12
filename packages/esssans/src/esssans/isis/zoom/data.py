@@ -2,8 +2,8 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 from typing import Optional
 
-from ..data import Registry
-from .io import DataFolder, FilenameType, FilePath
+from ...data import Registry
+from ..io import DataFolder, FilenameType, FilePath
 
 _registry = Registry(
     instrument='zoom',
