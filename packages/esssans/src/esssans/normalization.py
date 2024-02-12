@@ -379,6 +379,8 @@ def normalize(
         numerator = numerator.bin(wavelength=wavelength_bounds)
 
     def _reduce(da: sc.DataArray) -> sc.DataArray:
+        if da.sizes[wav] == 1:  # Can avoid costly event-data da.bins.concat
+            return da.squeeze(wav)
         return da.sum(wav) if da.bins is None else da.bins.concat(wav)
 
     num_parts = []
@@ -408,7 +410,8 @@ def normalize(
                 )
     elif numerator.bins is not None:
         numerator = numerator.hist()
-    return IofQ[ScatteringRunType](numerator / denominator)
+    numerator /= denominator
+    return IofQ[ScatteringRunType](numerator)
 
 
 providers = (
