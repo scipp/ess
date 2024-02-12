@@ -4,7 +4,13 @@ from typing import Dict
 
 
 class Registry:
-    def __init__(self, instrument: str, files: Dict[str, str], version: str):
+    def __init__(
+        self,
+        instrument: str,
+        files: Dict[str, str],
+        version: str,
+        mapping: Dict[str, str] = None,
+    ):
         import pooch
 
         self._registry = pooch.create(
@@ -15,6 +21,22 @@ class Registry:
             version=version,
             registry=files,
         )
+        self._mapping = mapping
+
+    def __iter__(self):
+        return iter(self._registry.registry_files)
+
+    def __next__(self):
+        return next(self._registry.registry_files)
+
+    def keys(self):
+        return self._registry.registry.keys()
+
+    def values(self):
+        return self._registry.registry.values()
+
+    def items(self):
+        return self._registry.registry.items()
 
     def get_path(self, name: str, unzip: bool = False) -> str:
         """
