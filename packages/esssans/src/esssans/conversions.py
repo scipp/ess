@@ -130,9 +130,13 @@ def Qxy(Q: sc.Variable, phi: sc.Variable) -> dict[str, sc.Variable]:
     wavelength, and phi angle.
     """
     Qx = sc.cos(phi)
-    Qx *= Q
     Qy = sc.sin(phi)
-    Qy *= Q
+    if Q.bins is not None and phi.bins is not None:
+        Qx *= Q
+        Qy *= Q
+    else:
+        Qx = Qx * Q
+        Qy = Qy * Q
     return {'Qx': Qx, 'Qy': Qy}
 
 
