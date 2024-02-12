@@ -4,8 +4,8 @@ from typing import NewType, Optional
 
 import scipp as sc
 
-from ...types import MaskedData, RunType, SampleRun
-from ..components import RawDataWithComponentUserOffsets
+from ..types import MaskedData, RunType, SampleRun
+from .components import RawDataWithComponentUserOffsets
 
 
 DetectorEdgeMask = NewType('DetectorEdgeMask', sc.Variable)
