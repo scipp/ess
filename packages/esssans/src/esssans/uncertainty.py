@@ -67,27 +67,12 @@ def broadcast_to_events_with_upper_bound_variances(
     """
     if da.variances is None:
         return da
-    constituents = events.bins.constituents
-
-    if 'Q' in constituents['data'].coords:
-        Q = constituents['data'].coords['Q']
-        constituents['data'] = sc.DataArray(
-            sc.ones(sizes=Q.sizes, dtype='float32'), coords={'Q': Q}
-        )
-        edges = {'Q': da.coords['Q']}
-    else:
-        Qx = constituents['data'].coords['Qx']
-        Qy = constituents['data'].coords['Qy']
-        constituents['data'] = sc.DataArray(
-            sc.ones(sizes=Qx.sizes, dtype='float32'),
-            coords={'Qx': Qx, 'Qy': Qy},
-        )
-        edges = {'Qy': da.coords['Qy'], 'Qx': da.coords['Qx']}
-    # Combine all bins of the events that correspond to the same bin in the input data
-    to_concat = set(events.dims) - set(da.dims)
-    binned = sc.DataArray(sc.bins(**constituents).bins.concat(to_concat))
-    counts = binned.hist(**edges)
-    da = da.copy()
-    da.variances *= counts.values
+    if da.sizes != events.sizes:
+        # This is a safety check, but we should never get here.
+        raise ValueError(f"Sizes {da.sizes} do not match event sizes {events.sizes}")
+    # Given how this function is used currently (in the context of normalization
+    # with matching binning in numerator and denominator, not using scipp.lookup),
+    # we can simply count the events in the existing binning.
+    da.variances *= events.bins.size().values
     da.data = sc.bins_like(events, da.data)
     return da
