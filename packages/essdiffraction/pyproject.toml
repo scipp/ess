@@ -21,6 +21,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering",
     "Typing :: Typed",
 ]
@@ -54,13 +55,16 @@ minversion = "7.0"
 addopts = """
 --strict-config
 --strict-markers
+--import-mode=importlib
 -ra
 -v
 """
 testpaths = "tests"
 filterwarnings = [
   "error",
-  'ignore:\n            Sentinel is not a public part of the traitlets API:DeprecationWarning',
+  'ignore:\s*Sentinel is not a public part of the traitlets API:DeprecationWarning',
+  # We don't need to do anything, this will go away when we update to pandas 3:
+  'ignore:\s*Pyarrow will become a required dependency of pandas:DeprecationWarning',
 ]
 
 [tool.bandit]
