@@ -11,7 +11,9 @@
    :recursive:
 
    NMXData
+   NMXReducedData
    InputFilepath
+   TimeBinSteps
 
 ```
 
