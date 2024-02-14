@@ -13,7 +13,7 @@ body:
     attributes:
       label: Executive summary
       description: Provide a short summary of the requirement
-      placeholder: We need to correct for X when processing Y.
+      placeholder: "Example: We need to correct for X when processing Y."
     validations:
       required: true
   - type: textarea
@@ -21,14 +21,15 @@ body:
     attributes:
       label: Context and background knowledge
       description: What is the context of this requirement? What background knowledge is required to understand it?
-      placeholder: Description, links to documents, DOIs, and references.
+      placeholder: "Example: See summary on Wikipedia, or the following paper."
     validations:
       required: true
   - type: textarea
     id: inputs
     attributes:
       label: Inputs
-      description: Describe in detail all the input data and data properties that are known.
+      description: Describe in detail all the input data and data properties that are known. This is not about tests data (see below), but about general properties of data that will be used in practice.
+      placeholder: "Example: A single 1-D spectrum with a known wavelength range."
     validations:
       required: true
   - type: textarea
@@ -36,14 +37,15 @@ body:
     attributes:
       label: Methodology
       description: Describe, e.g., the computation to be performed. When linking to references, please refer to the specific section, page, or equation.
-      placeholder: Equations, algorithms, and references.
+      placeholder: "Remember you can write equations using LaTeX: $E=mc^2$, as well as other Markdown formatting."
     validations:
       required: true
   - type: textarea
     id: outputs
     attributes:
       label: Outputs
-      description: Describe in detail all the output data and data properties.
+      description: Describe in detail all the output data and data properties. This is not about tests data (see below), but about general properties of data that will be used in practice.
+      placeholder: "Example: The position of the peak in the spectrum."
     validations:
       required: true
   - type: dropdown
@@ -64,8 +66,7 @@ body:
     id: testcases
     attributes:
       label: Test cases
-      description: How can we test this requirement?
-      placeholder: Links to tests data and reference data, or other suggestions.
+      description: How can we test this requirement? Links to tests data and reference data, or other suggestions.
     validations:
       required: true
   - type: textarea
