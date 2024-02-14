@@ -76,17 +76,10 @@ body:
     validations:
       required: true
   - type: textarea
-    id: preconditions
-    attributes:
-      label: Preconditions
-      description: Does this depend on other requirements or conditions?
-      placeholder: "Example: Depends on issues #1234, blocked by #666."
-    validations:
-      required: false
-  - type: textarea
     id: comments
     attributes:
       label: Comments
       description: Do you have other comments that do not fall in the above categories?
+      placeholder: "Example: Depends on issues #1234, blocked by #666."
     validations:
       required: false
