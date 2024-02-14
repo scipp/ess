@@ -68,7 +68,7 @@ body:
         - Python module / function
         - Python script
         - Jupyter notebook
-        - Other
+        - Other (please describe in comments)
       default: 0
     validations:
       required: true
