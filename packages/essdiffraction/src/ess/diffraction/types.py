@@ -82,6 +82,10 @@ class FocussedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Intensity vs d-spacing after focussing pixels."""
 
 
+class LorentzCorrectedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Data in d-spacing with applied Lorentz correction."""
+
+
 class NormalizedByProtonCharge(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Data that has been normalized by proton charge."""
 

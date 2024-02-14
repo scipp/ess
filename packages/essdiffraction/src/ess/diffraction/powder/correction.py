@@ -3,6 +3,9 @@
 """Correction algorithms for powder diffraction."""
 
 import scipp as sc
+from scippneutron.conversion.graph.beamline import beamline
+
+from ..types import DspacingData, LorentzCorrectedData, RunType
 
 
 def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.DataArray:
@@ -92,3 +95,22 @@ def lorentz_factor(data: sc.DataArray) -> sc.DataArray:
             'two_theta': data.coords['two_theta'],
         },
     )
+
+
+def lorentz_correction(data: DspacingData[RunType]) -> LorentzCorrectedData[RunType]:
+    """Perform a Lorentz correction.
+
+    See :func:`ess.diffraction.power.correction.lorentz_factor`.
+    """
+    # The pipeline does not compute two_theta because it uses a conversion
+    # with calibration to compute dspacing.
+    data = data.transform_coords(
+        'two_theta', graph=beamline(scatter=True), quiet=True, rename_dims=False
+    )
+
+    factor = lorentz_factor(data)
+    return LorentzCorrectedData[RunType](factor * data)
+
+
+providers = (lorentz_correction,)
+"""Sciline providers for powder corrections."""

@@ -5,9 +5,9 @@ from scippneutron.conversion.graph import beamline
 
 from .types import (
     DspacingBins,
-    DspacingData,
     DspacingHistogram,
     FocussedData,
+    LorentzCorrectedData,
     NormalizedByVanadium,
     RunType,
     TwoThetaBins,
@@ -15,7 +15,7 @@ from .types import (
 
 
 def group_by_two_theta(
-    data: DspacingData[RunType], edges: TwoThetaBins
+    data: LorentzCorrectedData[RunType], edges: TwoThetaBins
 ) -> FocussedData[RunType]:
     """
     Group data into two_theta bins.
@@ -39,7 +39,7 @@ def group_by_two_theta(
     )
 
 
-def merge_all_pixels(data: DspacingData[RunType]) -> FocussedData[RunType]:
+def merge_all_pixels(data: LorentzCorrectedData[RunType]) -> FocussedData[RunType]:
     """Combine all pixels (spectra) of the detector.
 
     Parameters
