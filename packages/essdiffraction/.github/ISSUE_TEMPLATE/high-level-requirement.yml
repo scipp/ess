@@ -28,7 +28,9 @@ body:
     id: inputs
     attributes:
       label: Inputs
-      description: Describe in detail all the input data and data properties that are known. This is not about tests data (see below), but about general properties of data that will be used in practice.
+      description: |
+        Describe in detail all the input data and data properties that are known.
+        This is not about test data (see below), but about general properties of data that will be used in practice.
       placeholder: "Example: A single 1-D spectrum with a known wavelength range."
     validations:
       required: true
@@ -36,15 +38,19 @@ body:
     id: methodology
     attributes:
       label: Methodology
-      description: Describe, e.g., the computation to be performed. When linking to references, please refer to the specific section, page, or equation.
-      placeholder: "Remember you can write equations using LaTeX: $E=mc^2$, as well as other Markdown formatting."
+      description: |
+        Describe, e.g., the computation to be performed.
+        When linking to references, please refer to the specific section, page, or equation.
+      placeholder: "Remember you can write equations such as $n\\lambda = 2d\\sin(\\theta)$ using LaTeX syntax, as well as other Markdown formatting."
     validations:
       required: true
   - type: textarea
     id: outputs
     attributes:
       label: Outputs
-      description: Describe in detail all the output data and data properties. This is not about tests data (see below), but about general properties of data that will be used in practice.
+      description: |
+        Describe in detail all the output data and data properties.
+        This is not about test data (see below), but about general properties of data that will be used in practice.
       placeholder: "Example: The position of the peak in the spectrum."
     validations:
       required: true
@@ -74,7 +80,7 @@ body:
     attributes:
       label: Preconditions
       description: Does this depend on other requirements or conditions?
-      placeholder: "Depends on issues #1234, blocked by #666."
+      placeholder: "Example: Depends on issues #1234, blocked by #666."
     validations:
       required: false
   - type: textarea
