@@ -20,7 +20,11 @@ body:
     id: context
     attributes:
       label: Context and background knowledge
-      description: What is the context of this requirement? What background knowledge is required to understand it?
+      description: |
+        - What is the context of this requirement?
+        - What background knowledge is required to understand it?
+        - Does this depend on previous tasks? Provide links!
+        - Is there follow-up work?
       placeholder: "Example: See summary on Wikipedia, or the following paper."
     validations:
       required: true
