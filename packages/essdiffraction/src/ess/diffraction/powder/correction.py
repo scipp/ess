@@ -3,7 +3,6 @@
 """Correction algorithms for powder diffraction."""
 
 import scipp as sc
-from scippneutron.conversion.graph.beamline import beamline
 
 from ..types import DspacingData, LorentzCorrectedData, RunType
 
@@ -51,8 +50,8 @@ def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.Data
     return out
 
 
-def lorentz_factor(data: sc.DataArray) -> sc.DataArray:
-    """Compute the ToF powder diffraction Lorentz factor.
+def lorentz_correction(da: DspacingData[RunType]) -> LorentzCorrectedData[RunType]:
+    """Perform a Lorentz correction for ToF powder diffraction data.
 
     This function uses this definition:
 
@@ -60,7 +59,7 @@ def lorentz_factor(data: sc.DataArray) -> sc.DataArray:
 
         L = d^4 \\sin\\theta
 
-    where :math:`d` is the d-spacing, :math:`\\theta` is half the scattering angle
+    where :math:`d` is d-spacing, :math:`\\theta` is half the scattering angle
     (note the definitions in
     https://scipp.github.io/scippneutron/user-guide/coordinate-transformations.html).
 
@@ -71,45 +70,48 @@ def lorentz_factor(data: sc.DataArray) -> sc.DataArray:
 
     Parameters
     ----------
-    data:
+    da:
         Input data with coordinates ``two_theta`` and ``dspacing``.
 
     Returns
     -------
     :
-        Powder Lorentz factor.
+        ``da`` multiplied by :math:`L`.
+        has the same dtype as ``da``.
     """
+    # The implementation is optimized under the assumption that two_theta
+    # is small and dspacing and the data are large.
+    out = _shallow_copy(da)
+    dspacing = _event_or_bin_coord(da, 'dspacing')
+    two_theta = _event_or_bin_coord(da, 'two_theta')
+    theta = 0.5 * two_theta
 
-    def f(dspacing: sc.Variable, two_theta: sc.Variable) -> sc.Variable:
-        return dspacing**4 * sc.sin(two_theta / 2)
-
-    aux = data.transform_coords(
-        'lorentz_factor', {'lorentz_factor': f}, rename_dims=False, quiet=True
-    )
-    if aux.bins is not None:
-        return aux.bins.coords['lorentz_factor']
-    return sc.DataArray(
-        aux.coords['lorentz_factor'],
-        coords={
-            'dspacing': data.coords['dspacing'],
-            'two_theta': data.coords['two_theta'],
-        },
-    )
+    d4 = dspacing.broadcast(sizes=out.sizes) ** 4
+    if out.bins is None:
+        out.data = d4.to(dtype=out.dtype, copy=False)
+        out_data = out.data
+    else:
+        out.bins.data = d4.to(dtype=out.bins.dtype)
+        out_data = out.bins.data
+    out_data *= sc.sin(theta, out=theta)
+    out_data *= da.data if da.bins is None else da.bins.data
+    return LorentzCorrectedData[RunType](out)
 
 
-def lorentz_correction(data: DspacingData[RunType]) -> LorentzCorrectedData[RunType]:
-    """Perform a Lorentz correction.
+def _shallow_copy(da: sc.DataArray) -> sc.DataArray:
+    # See https://github.com/scipp/scipp/issues/2773
+    out = da.copy(deep=False)
+    if da.bins is not None:
+        out.data = sc.bins(**da.bins.constituents)
+    return out
 
-    See :func:`ess.diffraction.power.correction.lorentz_factor`.
-    """
-    # The pipeline does not compute two_theta because it uses a conversion
-    # with calibration to compute dspacing.
-    data = data.transform_coords(
-        'two_theta', graph=beamline(scatter=True), quiet=True, rename_dims=False
-    )
 
-    factor = lorentz_factor(data)
-    return LorentzCorrectedData[RunType](factor * data)
+def _event_or_bin_coord(da: sc.DataArray, name: str) -> sc.Variable:
+    try:
+        return da.bins.coords[name]
+    except (AttributeError, KeyError):
+        # Either not binned or no event coord with this name.
+        return da.coords[name]
 
 
 providers = (lorentz_correction,)
