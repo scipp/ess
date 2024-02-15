@@ -38,8 +38,6 @@ def _patch_data(
 ) -> sc.DataArray:
     out = da.copy(deep=False)
     if out.bins is not None:
-        # Currently ScippNexus adds 32 bit event weights, this may cause trouble.
-        out.bins.data = out.bins.data.to(dtype='float64', copy=False)
         content = out.bins.constituents['data']
         if content.variances is None:
             content.variances = content.values

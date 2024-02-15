@@ -81,13 +81,17 @@ def test_pipeline_can_compute_IofQ_in_event_mode(uncertainties, target, qxy: boo
     assert sc.allclose(
         sc.values(reference.data),
         sc.values(result.hist().data),
-        rtol=sc.scalar(1e-11),
-        atol=sc.scalar(1e-11),
+        # Could be 1e-11, but currently the workflow defaults to float32 data, as
+        # returned by ScippNexus.
+        rtol=sc.scalar(1e-7),
+        atol=sc.scalar(1e-7),
     )
     if uncertainties == UncertaintyBroadcastMode.drop:
-        tol = sc.scalar(1e-14)
+        # Could both be 1e-14 if using float64
+        tol = sc.scalar(1e-7 if qxy else 1e-10)
     else:
-        tol = sc.scalar(1e-8 if qxy else 1e-9)
+        # Could be 1e-8 if using float64
+        tol = sc.scalar(1e-7 if qxy else 1e-9)
     assert sc.allclose(
         sc.variances(reference).data,
         sc.variances(result.hist()).data,
