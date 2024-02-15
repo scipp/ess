@@ -4,8 +4,6 @@
 
 import scipp as sc
 
-from ..types import DspacingData, LorentzCorrectedData, RunType
-
 
 def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.DataArray:
     """
@@ -50,7 +48,7 @@ def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.Data
     return out
 
 
-def lorentz_correction(da: DspacingData[RunType]) -> LorentzCorrectedData[RunType]:
+def lorentz_correction(da: sc.DataArray) -> sc.DataArray:
     """Perform a Lorentz correction for ToF powder diffraction data.
 
     This function uses this definition:
@@ -95,7 +93,7 @@ def lorentz_correction(da: DspacingData[RunType]) -> LorentzCorrectedData[RunTyp
         out_data = out.bins.data
     out_data *= sc.sin(theta, out=theta)
     out_data *= da.data if da.bins is None else da.bins.data
-    return LorentzCorrectedData[RunType](out)
+    return out
 
 
 def _shallow_copy(da: sc.DataArray) -> sc.DataArray:
@@ -112,7 +110,3 @@ def _event_or_bin_coord(da: sc.DataArray, name: str) -> sc.Variable:
     except (AttributeError, KeyError):
         # Either not binned or no event coord with this name.
         return da.coords[name]
-
-
-providers = (lorentz_correction,)
-"""Sciline providers for powder corrections."""

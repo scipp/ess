@@ -7,7 +7,6 @@ import scipp.testing
 
 from ess.diffraction.powder import merge_calibration
 from ess.diffraction.powder.correction import lorentz_correction
-from ess.diffraction.types import DspacingData, SampleRun
 
 
 @pytest.fixture
@@ -146,7 +145,7 @@ def test_lorentz_correction_dense_1d_coords(
         },
     )
     original = da.copy(deep=True)
-    corrected = lorentz_correction(DspacingData[SampleRun](da))
+    corrected = lorentz_correction(da)
 
     assert corrected.sizes == {'detector_number': 3, 'dspacing': 4}
     assert corrected.unit == 'angstrom**4 * counts'
@@ -185,7 +184,7 @@ def test_lorentz_factor_dense_2d_coord():
         },
     )
     original = da.copy(deep=True)
-    corrected = lorentz_correction(DspacingData[SampleRun](da))
+    corrected = lorentz_correction(da)
 
     assert corrected.sizes == {'detector_number': 3, 'dspacing': 4}
     assert corrected.unit == 'angstrom**4'
