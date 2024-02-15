@@ -171,7 +171,14 @@ def merge_spectra(
 
     if data.bins is not None:
         q_all_pixels = data.bins.concat(dims_to_reduce)
-        out = q_all_pixels.bin(**edges)
+        # q_all_pixels may just have a single bin now, which currently yields
+        # inferior performance when binning (no/bad multi-threading?).
+        # We operate on the content buffer for better multi-threaded performance.
+        if q_all_pixels.ndim == 0:
+            content = q_all_pixels.bins.constituents['data']
+            out = content.bin(**edges).assign_coords(q_all_pixels.coords)
+        else:
+            out = q_all_pixels.bin(**edges)
     else:
         # We want to flatten data to make histogramming cheaper (avoiding allocation of
         # large output before summing). We strip unnecessary content since it makes
@@ -209,6 +216,7 @@ def merge_spectra(
             out = (
                 flat.flatten(to=str(uuid.uuid4()))
                 .group(*[flat.coords[dim] for dim in flat.dims if dim != helper_dim])
+                .drop_coords(dims_to_keep or ())
                 .hist(**edges)
             )
     return CleanSummedQ[ScatteringRunType, IofQPart](out.squeeze())

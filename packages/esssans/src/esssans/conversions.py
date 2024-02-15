@@ -204,7 +204,7 @@ def monitor_to_wavelength(
     monitor: CalibratedMonitor[RunType, MonitorType], graph: MonitorCoordTransformGraph
 ) -> WavelengthMonitor[RunType, MonitorType]:
     return WavelengthMonitor[RunType, MonitorType](
-        monitor.transform_coords('wavelength', graph=graph)
+        monitor.transform_coords('wavelength', graph=graph, keep_inputs=False)
     )
 
 
@@ -229,7 +229,7 @@ def detector_to_wavelength(
     graph: ElasticCoordTransformGraph,
 ) -> CleanWavelength[ScatteringRunType, Numerator]:
     return CleanWavelength[ScatteringRunType, Numerator](
-        detector.transform_coords('wavelength', graph=graph)
+        detector.transform_coords('wavelength', graph=graph, keep_inputs=False)
     )
 
 
