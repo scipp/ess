@@ -16,6 +16,9 @@ class Registry:
             registry=files,
         )
 
+    def __contains__(self, key):
+        return key in self._registry.registry
+
     def get_path(self, name: str, unzip: bool = False) -> str:
         """
         Get the path to a file in the registry.

@@ -61,19 +61,30 @@ def mask_range(
             f'Found dimensions {da.coords[dim].dims} for coordinate {dim}.'
         )
 
+    coord = (
+        da.bins.constituents['data'].coords[dim]
+        if da.bins is not None
+        else da.coords[dim]
+    )
+    edges = edges.to(unit=coord.unit)
     lu = sc.DataArray(data=mask.data, coords={dim: edges})
     if da.bins is not None:
-        if dim in da.coords:
-            new_bins = sc.array(
-                dims=[dim],
-                values=np.union1d(edges.values, da.coords[dim].values),
-                unit=edges.unit,
+        if dim not in da.coords:
+            underlying = da.bins.coords[dim]
+            new_bins = np.union1d(
+                edges.values,
+                np.array(
+                    [
+                        underlying.min().value,
+                        np.nextafter(underlying.max().value, np.inf),
+                    ]
+                ),
             )
-            out = da.bin({dim: new_bins})
-            out.masks[name] = sc.lookup(lu, dim)[sc.midpoints(new_bins, dim=dim)]
         else:
-            out = da.bin({dim: edges})
-            out.masks[name] = mask.data
+            new_bins = np.union1d(edges.values, da.coords[dim].values)
+        new_bins = sc.array(dims=[dim], values=new_bins, unit=edges.unit)
+        out = da.bin({dim: new_bins})
+        out.masks[name] = sc.lookup(lu, dim)[sc.midpoints(new_bins, dim=dim)]
     else:
         out = da.copy(deep=False)
         mask_values = sc.lookup(lu, dim)[da.coords[dim]]

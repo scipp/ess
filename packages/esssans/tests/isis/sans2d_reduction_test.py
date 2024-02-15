@@ -7,8 +7,8 @@ import sciline
 import scipp as sc
 
 import esssans as sans
-from esssans.sans2d import default_parameters
-from esssans.sans2d.masking import LowCountThreshold, SampleHolderMask
+from esssans import isis
+from esssans.isis import Filename, MonitorOffset, SampleOffset, sans2d
 from esssans.types import (
     BackgroundRun,
     BackgroundSubtractedIofQ,
@@ -17,15 +17,17 @@ from esssans.types import (
     DirectBeam,
     DirectBeamFilename,
     EmptyBeamRun,
-    FileList,
+    Incident,
     IofQ,
+    MaskedData,
+    NeXusMonitorName,
     NonBackgroundWavelengthRange,
     QBins,
     RawData,
     ReturnEvents,
     SampleRun,
     SolidAngle,
-    TransmissionRun,
+    Transmission,
     UncertaintyBroadcastMode,
     WavelengthBands,
     WavelengthBins,
@@ -34,7 +36,7 @@ from esssans.types import (
 
 
 def make_params() -> dict:
-    params = default_parameters.copy()
+    params = {}
     params[WavelengthBins] = sc.linspace(
         'wavelength', start=2.0, stop=16.0, num=141, unit='angstrom'
     )
@@ -46,17 +48,21 @@ def make_params() -> dict:
             )
         },
     )
-    params[sans.sans2d.LowCountThreshold] = sc.scalar(100.0, unit='counts')
+    params[sans2d.LowCountThreshold] = sc.scalar(100.0, unit='counts')
 
     params[QBins] = sc.linspace(
         dim='Q', start=0.01, stop=0.55, num=141, unit='1/angstrom'
     )
-    params[FileList[BackgroundRun]] = ['SANS2D00063159.hdf5']
-    params[FileList[TransmissionRun[BackgroundRun]]] = params[FileList[BackgroundRun]]
-    params[FileList[SampleRun]] = ['SANS2D00063114.hdf5']
-    params[FileList[TransmissionRun[SampleRun]]] = params[FileList[SampleRun]]
-    params[FileList[EmptyBeamRun]] = ['SANS2D00063091.hdf5']
-    params[DirectBeamFilename] = 'DIRECT_SANS2D_REAR_34327_4m_8mm_16Feb16.hdf5'
+    params[DirectBeamFilename] = 'DIRECT_SANS2D_REAR_34327_4m_8mm_16Feb16.dat'
+    params[Filename[SampleRun]] = 'SANS2D00063114.nxs'
+    params[Filename[BackgroundRun]] = 'SANS2D00063159.nxs'
+    params[Filename[EmptyBeamRun]] = 'SANS2D00063091.nxs'
+
+    params[NeXusMonitorName[Incident]] = 'monitor2'
+    params[NeXusMonitorName[Transmission]] = 'monitor4'
+    params[SampleOffset] = sc.vector([0.0, 0.0, 0.053], unit='m')
+    params[MonitorOffset[Transmission]] = sc.vector([0.0, 0.0, -6.719], unit='m')
+
     params[NonBackgroundWavelengthRange] = sc.array(
         dims=['wavelength'], values=[0.7, 17.1], unit='angstrom'
     )
@@ -67,7 +73,13 @@ def make_params() -> dict:
 
 
 def sans2d_providers():
-    return list(sans.providers + sans.sans2d.providers)
+    return list(
+        sans.providers
+        + isis.providers
+        + isis.data.providers
+        + isis.sans2d.providers
+        + (sans.transmission_from_background_run, sans.transmission_from_sample_run)
+    )
 
 
 def test_can_create_pipeline():
@@ -167,7 +179,7 @@ def as_dict(funcs: List[Callable[..., type]]) -> dict:
 def pixel_dependent_direct_beam(
     filename: DirectBeamFilename, shape: RawData[SampleRun]
 ) -> DirectBeam:
-    direct_beam = sans.sans2d.io.pooch_load_direct_beam(filename)
+    direct_beam = isis.data.load_direct_beam(isis.data.get_path(filename))
     sizes = {'spectrum': shape.sizes['spectrum'], **direct_beam.sizes}
     return DirectBeam(direct_beam.broadcast(sizes=sizes).copy())
 
@@ -217,19 +229,19 @@ def test_beam_center_finder_without_direct_beam_reproduces_verified_result():
 def test_beam_center_can_get_closer_to_verified_result_with_low_counts_mask():
     def low_counts_mask(
         sample: RawData[SampleRun],
-        low_counts_threshold: LowCountThreshold,
-    ) -> SampleHolderMask:
-        return SampleHolderMask(sample.data.sum('tof') < low_counts_threshold)
+        low_counts_threshold: sans2d.LowCountThreshold,
+    ) -> sans2d.SampleHolderMask:
+        return sans2d.SampleHolderMask(sample.hist().data < low_counts_threshold)
 
     params = make_params()
-    params[LowCountThreshold] = sc.scalar(80.0, unit='counts')
+    params[sans2d.LowCountThreshold] = sc.scalar(80.0, unit='counts')
     params[sans.beam_center_finder.BeamCenterFinderQBins] = sc.linspace(
         'Q', 0.02, 0.3, 71, unit='1/angstrom'
     )
     del params[DirectBeamFilename]
     providers = sans2d_providers()
     providers.remove(sans.beam_center_finder.beam_center_from_center_of_mass)
-    providers.remove(sans.sans2d.masking.sample_holder_mask)
+    providers.remove(sans2d.sample_holder_mask)
     providers.append(sans.beam_center_finder.beam_center_from_iofq)
     providers.append(low_counts_mask)
     pipeline = sciline.Pipeline(providers, params=params)
@@ -263,17 +275,31 @@ def test_beam_center_finder_works_with_pixel_dependent_direct_beam():
     pipeline = sciline.Pipeline(providers, params=params)
     center_pixel_independent_direct_beam = pipeline.compute(BeamCenter)
 
-    direct_beam = (
-        pipeline.compute(DirectBeam)
-        .broadcast(sizes={'spectrum': 61440, 'wavelength': 175})
-        .copy()
-    )
+    direct_beam = pipeline.compute(DirectBeam)
+    pixel_dependent_direct_beam = direct_beam.broadcast(
+        sizes={
+            'spectrum': pipeline.compute(MaskedData[SampleRun]).sizes['spectrum'],
+            'wavelength': direct_beam.sizes['wavelength'],
+        }
+    ).copy()
 
-    providers = list(sans.providers + sans.sans2d.providers)
+    providers = sans2d_providers()
     providers.remove(sans.beam_center_finder.beam_center_from_center_of_mass)
     providers.append(sans.beam_center_finder.beam_center_from_iofq)
     pipeline = sciline.Pipeline(providers, params=params)
-    pipeline[DirectBeam] = direct_beam
+    pipeline[DirectBeam] = pixel_dependent_direct_beam
 
     center = pipeline.compute(BeamCenter)
     assert sc.identical(center, center_pixel_independent_direct_beam)
+
+
+def test_workflow_runs_without_gravity_if_beam_center_is_provided():
+    params = make_params()
+    params[CorrectForGravity] = False
+    pipeline = sciline.Pipeline(sans2d_providers(), params=params)
+    da = pipeline.compute(RawData[SampleRun])
+    del da.coords['gravity']
+    pipeline[RawData[SampleRun]] = da
+    pipeline[BeamCenter] = MANTID_BEAM_CENTER
+    result = pipeline.compute(BackgroundSubtractedIofQ)
+    assert result.dims == ('Q',)

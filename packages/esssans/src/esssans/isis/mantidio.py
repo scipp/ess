@@ -3,7 +3,7 @@
 """
 File loading functions for ISIS data using Mantid.
 """
-from typing import NewType, NoReturn
+from typing import NewType, NoReturn, Optional
 
 import sciline
 import scipp as sc
@@ -49,7 +49,7 @@ def _make_detector_info(ws: MatrixWorkspace) -> sc.DataGroup:
     return sc.DataGroup(det_info.coords)
 
 
-def get_detector_ids(ws: DataWorkspace[SampleRun]) -> sc.Variable:
+def _get_detector_ids(ws: DataWorkspace[SampleRun]) -> sc.Variable:
     det_info = _make_detector_info(ws)
     dim = 'spectrum'
     da = sc.DataArray(det_info['detector'], coords={dim: det_info[dim]})
@@ -80,15 +80,23 @@ def load_direct_beam(filename: FilePath[DirectBeamFilename]) -> DirectBeam:
 
 def from_data_workspace(
     ws: DataWorkspace[RunType],
-    calibration: CalibrationWorkspace,
+    calibration: Optional[CalibrationWorkspace],
 ) -> LoadedFileContents[RunType]:
-    _mantid_simpleapi.CopyInstrumentParameters(
-        InputWorkspace=calibration, OutputWorkspace=ws, StoreInADS=False
-    )
+    if calibration is not None:
+        _mantid_simpleapi.CopyInstrumentParameters(
+            InputWorkspace=calibration, OutputWorkspace=ws, StoreInADS=False
+        )
     up = ws.getInstrument().getReferenceFrame().vecPointingUp()
     dg = scn.from_mantid(ws)
+    det_ids = _get_detector_ids(ws)
+    # In some instruments (e.g. SANS2D), some pixels are used for other purposes (e.g.
+    # live acquisition). They have no detector ids, so we exclude them from the data.
+    for dim, shape in det_ids.sizes.items():
+        dg['data'] = dg['data'][dim, :shape]
     dg['data'] = dg['data'].squeeze()
-    dg['data'].coords['detector_id'] = get_detector_ids(ws)
+    if (dg['data'].bins is not None) and ('tof' in dg['data'].coords):
+        del dg['data'].coords['tof']
+    dg['data'].coords['detector_id'] = det_ids
     dg['data'].coords['gravity'] = sc.vector(value=-up) * g
     return LoadedFileContents[RunType](dg)
 

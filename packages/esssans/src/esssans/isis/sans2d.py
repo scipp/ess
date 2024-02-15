@@ -1,12 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-"""
-"""
+# Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 from typing import NewType, Optional
 
 import scipp as sc
 
-from ..types import MaskedData, RawData, SampleRun, ScatteringRunType
+from ..types import MaskedData, RunType, SampleRun
+from .components import RawDataWithComponentUserOffsets
 
 DetectorEdgeMask = NewType('DetectorEdgeMask', sc.Variable)
 """Detector edge mask"""
@@ -19,7 +18,9 @@ SampleHolderMask = NewType('SampleHolderMask', sc.Variable)
 """Sample holder mask"""
 
 
-def detector_edge_mask(sample: RawData[SampleRun]) -> DetectorEdgeMask:
+def detector_edge_mask(
+    sample: RawDataWithComponentUserOffsets[SampleRun],
+) -> DetectorEdgeMask:
     mask_edges = (
         sc.abs(sample.coords['position'].fields.x) > sc.scalar(0.48, unit='m')
     ) | (sc.abs(sample.coords['position'].fields.y) > sc.scalar(0.45, unit='m'))
@@ -27,10 +28,10 @@ def detector_edge_mask(sample: RawData[SampleRun]) -> DetectorEdgeMask:
 
 
 def sample_holder_mask(
-    sample: RawData[SampleRun],
+    sample: RawDataWithComponentUserOffsets[SampleRun],
     low_counts_threshold: LowCountThreshold,
 ) -> SampleHolderMask:
-    summed = sample.sum('tof')
+    summed = sample.hist()
     holder_mask = (
         (summed.data < low_counts_threshold)
         & (sample.coords['position'].fields.x > sc.scalar(0, unit='m'))
@@ -42,10 +43,10 @@ def sample_holder_mask(
 
 
 def mask_detectors(
-    da: RawData[ScatteringRunType],
+    da: RawDataWithComponentUserOffsets[RunType],
     edge_mask: Optional[DetectorEdgeMask],
     holder_mask: Optional[SampleHolderMask],
-) -> MaskedData[ScatteringRunType]:
+) -> MaskedData[RunType]:
     """Apply pixel-specific masks to raw data.
 
     Parameters
@@ -62,7 +63,7 @@ def mask_detectors(
         da.masks['edges'] = edge_mask
     if holder_mask is not None:
         da.masks['holder_mask'] = holder_mask
-    return MaskedData[ScatteringRunType](da)
+    return MaskedData[RunType](da)
 
 
 providers = (detector_edge_mask, sample_holder_mask, mask_detectors)
