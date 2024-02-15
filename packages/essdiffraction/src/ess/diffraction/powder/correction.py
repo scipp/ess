@@ -63,7 +63,7 @@ def lorentz_correction(da: sc.DataArray) -> sc.DataArray:
 
     The Lorentz factor as defined here is suitable for correcting time-of-flight data
     expressed in wavelength or d-spacing.
-    It follows the definition used bty GSAS-II, see page 140 of
+    It follows the definition used by GSAS-II, see page 140 of
     https://subversion.xray.aps.anl.gov/EXPGUI/gsas/all/GSAS%20Manual.pdf
 
     Parameters
