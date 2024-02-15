@@ -6,6 +6,7 @@ Default parameters, providers and utility functions for the loki workflow.
 
 
 from ..types import (
+    CalibratedMonitor,
     DetectorPixelShape,
     Incident,
     LabFrameTransform,
@@ -15,7 +16,6 @@ from ..types import (
     NeXusMonitorName,
     NeXusSourceName,
     RawData,
-    RawMonitor,
     RunType,
     ScatteringRunType,
     TransformationPath,
@@ -44,11 +44,11 @@ def get_detector_data(
 
 def get_monitor_data(
     dg: LoadedFileContents[RunType], monitor_name: NeXusMonitorName[MonitorType]
-) -> RawMonitor[RunType, MonitorType]:
+) -> CalibratedMonitor[RunType, MonitorType]:
     mon_dg = dg[NEXUS_INSTRUMENT_PATH][monitor_name]
     out = mon_dg[f'{monitor_name}_events']
     out.coords['position'] = mon_dg['position']
-    return RawMonitor[RunType, MonitorType](out)
+    return CalibratedMonitor[RunType, MonitorType](out)
 
 
 def detector_pixel_shape(

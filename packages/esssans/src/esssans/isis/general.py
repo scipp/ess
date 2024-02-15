@@ -1,14 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 """
-Loading and masking specific to the ISIS Sans2d instrument and files stored in Scipp's
-HDF5 format.
+Providers for the ISIS instruments.
 """
 import scipp as sc
 
 from ..types import (
     DetectorPixelShape,
-    Incident,
     LabFrameTransform,
     LoadedFileContents,
     MonitorType,
@@ -20,22 +18,16 @@ from ..types import (
     RunType,
     SampleRun,
     ScatteringRunType,
-    Transmission,
 )
-
-default_parameters = {
-    NeXusMonitorName[Incident]: 'monitor2',
-    NeXusMonitorName[Transmission]: 'monitor4',
-}
 
 
 def get_detector_data(
-    dg: LoadedFileContents[ScatteringRunType],
-) -> RawData[ScatteringRunType]:
-    return RawData[ScatteringRunType](dg['data'])
+    dg: LoadedFileContents[RunType],
+) -> RawData[RunType]:
+    return RawData[RunType](dg['data'])
 
 
-def get_monitor(
+def get_monitor_data(
     dg: LoadedFileContents[RunType], nexus_name: NeXusMonitorName[MonitorType]
 ) -> RawMonitor[RunType, MonitorType]:
     # See https://github.com/scipp/sciline/issues/52 why copy needed
@@ -53,7 +45,7 @@ def run_title(dg: LoadedFileContents[SampleRun]) -> RunTitle:
     return RunTitle(dg['run_title'].value)
 
 
-def sans2d_tube_detector_pixel_shape() -> DetectorPixelShape[ScatteringRunType]:
+def helium3_tube_detector_pixel_shape() -> DetectorPixelShape[ScatteringRunType]:
     # Pixel radius and length
     # found here:
     # https://github.com/mantidproject/mantid/blob/main/instrument/SANS2D_Definition_Tubes.xml
@@ -87,9 +79,9 @@ def lab_frame_transform() -> LabFrameTransform[ScatteringRunType]:
 
 providers = (
     get_detector_data,
-    get_monitor,
+    get_monitor_data,
     run_number,
     run_title,
     lab_frame_transform,
-    sans2d_tube_detector_pixel_shape,
+    helium3_tube_detector_pixel_shape,
 )

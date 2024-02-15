@@ -267,6 +267,12 @@ class RawMonitor(
     """Raw monitor data"""
 
 
+class CalibratedMonitor(
+    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
+):
+    """Raw monitor whose position has been calibrated"""
+
+
 class WavelengthMonitor(
     sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
 ):
