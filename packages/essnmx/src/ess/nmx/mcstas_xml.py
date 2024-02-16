@@ -212,7 +212,7 @@ class DetectorDesc:
 
 def _collect_detector_descriptions(tree: _XML) -> Tuple[DetectorDesc, ...]:
     """Retrieve detector geometry descriptions from mcstas file."""
-    type_list = filter_by_tag(tree, 'type')
+    type_list = list(filter_by_tag(tree, 'type'))
     simulation_settings = SimulationSettings.from_xml(tree)
 
     def _find_type_desc(det: _XML) -> _XML:
@@ -245,7 +245,7 @@ class SampleDesc:
     name: str
     # From <location> under <component type="sampleMantid-type" ...>
     position: sc.Variable
-    rotation_matrix: sc.Variable
+    rotation_matrix: Optional[sc.Variable]
 
     @classmethod
     def from_xml(
@@ -254,14 +254,18 @@ class SampleDesc:
         """Create sample description from xml component."""
         source_xml = select_by_type_prefix(tree, 'sampleMantid-type')
         location = select_by_tag(source_xml, 'location')
+        try:
+            rotation_matrix = _rotation_matrix_from_location(
+                location, simulation_settings.angle_unit
+            )
+        except KeyError:
+            rotation_matrix = None
 
         return cls(
             component_type=source_xml.attrib['type'],
             name=source_xml.attrib['name'],
             position=_position_from_location(location, simulation_settings.length_unit),
-            rotation_matrix=_rotation_matrix_from_location(
-                location, simulation_settings.angle_unit
-            ),
+            rotation_matrix=rotation_matrix,
         )
 
     def position_from_sample(self, other: sc.Variable) -> sc.Variable:
@@ -371,24 +375,31 @@ class McStasInstrument:
             ),
         )
 
-    def to_coords(self) -> dict[str, sc.Variable]:
-        """Extract coordinates from the McStas instrument description."""
-        slow_axes = [det.slow_axis for det in self.detectors]
-        fast_axes = [det.fast_axis for det in self.detectors]
-        origins = [
-            self.sample.position_from_sample(det.position) for det in self.detectors
-        ]
+    def to_coords(self, *det_names: str) -> dict[str, sc.Variable]:
+        """Extract coordinates from the McStas instrument description.
+
+        Parameters
+        ----------
+        det_names:
+            Names of the detectors to extract coordinates for.
+
+        """
+
+        detectors = tuple(det for det in self.detectors if det.name in det_names)
+        slow_axes = [det.slow_axis for det in detectors]
+        fast_axes = [det.fast_axis for det in detectors]
+        origins = [self.sample.position_from_sample(det.position) for det in detectors]
         detector_dim = 'panel'
 
         return {
-            'pixel_id': _construct_pixel_ids(self.detectors),
+            'pixel_id': _construct_pixel_ids(detectors),
             'fast_axis': sc.concat(fast_axes, detector_dim),
             'slow_axis': sc.concat(slow_axes, detector_dim),
             'origin_position': sc.concat(origins, detector_dim),
             'sample_position': self.sample.position_from_sample(self.sample.position),
             'source_position': self.sample.position_from_sample(self.source.position),
             'sample_name': sc.scalar(self.sample.name),
-            'position': _detector_pixel_positions(self.detectors, self.sample),
+            'position': _detector_pixel_positions(detectors, self.sample),
         }
 
 

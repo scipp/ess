@@ -9,6 +9,8 @@ from .reduction import NMXData
 
 PixelIDs = NewType("PixelIDs", sc.Variable)
 InputFilepath = NewType("InputFilepath", str)
+DetectorName = NewType("DetectorName", str)
+DetectorBankName = NewType("DetectorBankName", str)
 
 # McStas Configurations
 MaximumProbability = NewType("MaximumProbability", int)
@@ -29,26 +31,33 @@ ProtonChargeConverter = NewType(
 """A function that derives arbitrary proton charge based on event weights."""
 
 
-def _retrieve_event_list_name(keys: Iterable[str]) -> str:
-    prefix = "bank01_events_dat_list"
+def _retrieve_event_list_names(keys: Iterable[str]) -> tuple[str, ...]:
+    import re
 
-    # (weight, x, y, n, pixel id, time of arrival)
     mandatory_fields = 'p_x_y_n_id_t'
+    # (weight, x, y, n, pixel id, time of arrival)
+    pattern = r"bank(\d+\d+)_events_dat_list_" + mandatory_fields
 
-    for key in keys:
-        if key.startswith(prefix) and mandatory_fields in key:
-            return key
+    def _filter_event_list_name(key: str) -> bool:
+        return re.search(pattern, key) is not None
 
-    raise ValueError("Can not find event list name.")
+    if not (matching_keys := tuple(filter(_filter_event_list_name, keys))):
+        raise ValueError("Can not find event list name.")
+
+    return matching_keys
 
 
 def _retrieve_raw_event_data(file: snx.File) -> sc.Variable:
     """Retrieve events from the nexus file."""
-    bank_name = _retrieve_event_list_name(file["entry1/data"].keys())
-    # ``dim_0``: event index, ``dim_1``: property index.
-    return file["entry1/data/" + bank_name]["events"][()].rename_dims(
-        {'dim_0': 'event'}
-    )
+    bank_names = _retrieve_event_list_names(file["entry1/data"].keys())
+
+    banks = [
+        file["entry1/data/" + bank_name]["events"][()].rename_dims({'dim_0': 'event'})
+        # ``dim_0``: event index, ``dim_1``: property index.
+        for bank_name in bank_names
+    ]
+
+    return sc.concat(banks, 'event')
 
 
 def _copy_partial_var(
@@ -164,12 +173,14 @@ def load_mcstas_nexus(
     file_path:
         File name to load.
 
-    event_weights_converter:
+    event_weights_converter: :class:`~EventWeightsConverter`, \
+        default: :func:`~event_weights_from_probability`
         A function to convert probabilities to event weights.
         The function should accept the probabilities as the first argument,
         and return the converted event weights.
 
-    proton_charge_converter:
+    proton_charge_converter: :class:`~ProtonChargeConverter`, \
+        default: :func:`~proton_charge_from_event_data`
         A function to convert the event weights to proton charge.
         The function should accept the event weights as the first argument,
         and return the proton charge.
@@ -182,8 +193,12 @@ def load_mcstas_nexus(
 
     from .mcstas_xml import read_mcstas_geometry_xml
 
+    # with snx.File(file_path) as file:
+    # mcstas_version = _retrieve_mcstas_version(file)
+
     geometry = read_mcstas_geometry_xml(file_path)
-    coords = geometry.to_coords()
+    detectors = [det.name for det in geometry.detectors]
+    coords = geometry.to_coords(*detectors)
 
     with snx.File(file_path) as file:
         raw_data = _retrieve_raw_event_data(file)
@@ -198,7 +213,7 @@ def load_mcstas_nexus(
             id_list=_copy_partial_var(raw_data, idx=4, dtype='int64'),  # id
             t_list=_copy_partial_var(raw_data, idx=5, unit='s'),  # t
             pixel_ids=coords.pop('pixel_id'),
-            num_panels=len(geometry.detectors),
+            num_panels=len(detectors),
         )
         proton_charge = proton_charge_converter(event_da)
         crystal_rotation = _retrieve_crystal_rotation(
