@@ -193,9 +193,6 @@ def load_mcstas_nexus(
 
     from .mcstas_xml import read_mcstas_geometry_xml
 
-    # with snx.File(file_path) as file:
-    # mcstas_version = _retrieve_mcstas_version(file)
-
     geometry = read_mcstas_geometry_xml(file_path)
     detectors = [det.name for det in geometry.detectors]
     coords = geometry.to_coords(*detectors)
