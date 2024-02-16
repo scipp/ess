@@ -36,7 +36,7 @@ def _retrieve_event_list_names(keys: Iterable[str]) -> tuple[str, ...]:
 
     mandatory_fields = 'p_x_y_n_id_t'
     # (weight, x, y, n, pixel id, time of arrival)
-    pattern = r"bank(\d+\d+)_events_dat_list_" + mandatory_fields
+    pattern = r"bank(\d\d+)_events_dat_list_" + mandatory_fields
 
     def _filter_event_list_name(key: str) -> bool:
         return re.search(pattern, key) is not None
