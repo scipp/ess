@@ -6,7 +6,7 @@ import scipp as sc
 import scipp.testing
 
 from ess.diffraction.powder import merge_calibration
-from ess.diffraction.powder.correction import lorentz_correction
+from ess.diffraction.powder.correction import apply_lorentz_correction
 
 
 @pytest.fixture
@@ -145,7 +145,7 @@ def test_lorentz_correction_dense_1d_coords(
         },
     )
     original = da.copy(deep=True)
-    corrected = lorentz_correction(da)
+    corrected = apply_lorentz_correction(da)
 
     assert corrected.sizes == {'detector_number': 3, 'dspacing': 4}
     assert corrected.unit == 'angstrom**4 * counts'
@@ -168,7 +168,7 @@ def test_lorentz_correction_dense_1d_coords(
         sc.testing.assert_identical(coord, original.coords[key])
 
 
-def test_lorentz_factor_dense_2d_coord():
+def test_apply_lorentz_correction_dense_2d_coord():
     da = sc.DataArray(
         sc.full(value=0.7, sizes={'detector_number': 3, 'dspacing': 4}),
         coords={
@@ -184,7 +184,7 @@ def test_lorentz_factor_dense_2d_coord():
         },
     )
     original = da.copy(deep=True)
-    corrected = lorentz_correction(da)
+    corrected = apply_lorentz_correction(da)
 
     assert corrected.sizes == {'detector_number': 3, 'dspacing': 4}
     assert corrected.unit == 'angstrom**4'
@@ -206,7 +206,9 @@ def test_lorentz_factor_dense_2d_coord():
 @pytest.mark.parametrize('data_dtype', ('float32', 'float64'))
 @pytest.mark.parametrize('dspacing_dtype', ('float32', 'float64'))
 @pytest.mark.parametrize('two_theta_dtype', ('float32', 'float64'))
-def test_lorentz_factor_event_coords(data_dtype, dspacing_dtype, two_theta_dtype):
+def test_apply_lorentz_correction_event_coords(
+    data_dtype, dspacing_dtype, two_theta_dtype
+):
     buffer = sc.DataArray(
         sc.full(value=1.5, sizes={'event': 6}, unit='counts', dtype=data_dtype),
         coords={
@@ -227,7 +229,7 @@ def test_lorentz_factor_event_coords(data_dtype, dspacing_dtype, two_theta_dtype
         dtype=two_theta_dtype,
     )
     original = da.copy(deep=True)
-    corrected = lorentz_correction(da)
+    corrected = apply_lorentz_correction(da)
 
     assert corrected.sizes == {'detector_number': 4, 'dspacing': 2}
     assert corrected.bins.unit == 'angstrom**4 * counts'
@@ -254,7 +256,7 @@ def test_lorentz_factor_event_coords(data_dtype, dspacing_dtype, two_theta_dtype
     )
 
 
-def test_lorentz_factor_needs_coords():
+def test_apply_lorentz_correction_needs_coords():
     da = sc.DataArray(
         sc.ones(sizes={'detector_number': 3, 'dspacing': 4}),
         coords={
@@ -264,4 +266,4 @@ def test_lorentz_factor_needs_coords():
         },
     )
     with pytest.raises(KeyError):
-        lorentz_correction(da)
+        apply_lorentz_correction(da)

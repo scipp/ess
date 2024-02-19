@@ -48,7 +48,7 @@ def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.Data
     return out
 
 
-def lorentz_correction(da: sc.DataArray) -> sc.DataArray:
+def apply_lorentz_correction(da: sc.DataArray) -> sc.DataArray:
     """Perform a Lorentz correction for ToF powder diffraction data.
 
     This function uses this definition:
