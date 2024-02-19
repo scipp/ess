@@ -41,8 +41,6 @@ idna==3.6
     # via requests
 importlib-metadata==7.0.1
     # via dask
-importlib-resources==6.1.1
-    # via matplotlib
 ipython==8.9.0
     # via -r base.in
 jedi==0.19.1
@@ -105,7 +103,7 @@ requests==2.31.0
     # via pooch
 sciline==24.1.0
     # via -r base.in
-scipp==23.12.0
+scipp==24.2.0
     # via
     #   -r base.in
     #   scippnexus
@@ -132,6 +130,4 @@ urllib3==2.1.0
 wcwidth==0.2.12
     # via prompt-toolkit
 zipp==3.17.0
-    # via
-    #   importlib-metadata
-    #   importlib-resources
+    # via importlib-metadata
