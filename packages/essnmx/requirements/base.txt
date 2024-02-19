@@ -9,7 +9,7 @@ asttokens==2.4.1
     # via stack-data
 backcall==0.2.0
     # via ipython
-certifi==2023.11.17
+certifi==2024.2.2
     # via requests
 charset-normalizer==3.3.2
     # via requests
@@ -21,7 +21,7 @@ contourpy==1.2.0
     # via matplotlib
 cycler==0.12.1
     # via matplotlib
-dask==2023.12.1
+dask==2024.2.0
     # via -r base.in
 decorator==5.1.1
     # via ipython
@@ -29,9 +29,9 @@ defusedxml==0.7.1
     # via -r base.in
 executing==2.0.1
     # via stack-data
-fonttools==4.47.0
+fonttools==4.49.0
     # via matplotlib
-fsspec==2023.12.2
+fsspec==2024.2.0
     # via dask
 graphviz==0.20.1
     # via -r base.in
@@ -49,11 +49,11 @@ kiwisolver==1.4.5
     # via matplotlib
 locket==1.0.0
     # via partd
-matplotlib==3.8.2
+matplotlib==3.8.3
     # via plopp
 matplotlib-inline==0.1.6
     # via ipython
-numpy==1.26.3
+numpy==1.26.4
     # via
     #   contourpy
     #   h5py
@@ -75,9 +75,9 @@ pickleshare==0.7.5
     # via ipython
 pillow==10.2.0
     # via matplotlib
-platformdirs==4.1.0
+platformdirs==4.2.0
     # via pooch
-plopp==23.11.0
+plopp==24.1.1
     # via -r base.in
 pooch==1.8.0
     # via -r base.in
@@ -101,15 +101,15 @@ pyyaml==6.0.1
     # via dask
 requests==2.31.0
     # via pooch
-sciline==24.1.0
+sciline==24.2.1
     # via -r base.in
 scipp==24.2.0
     # via
     #   -r base.in
     #   scippnexus
-scippnexus==23.12.0
+scippnexus==23.12.1
     # via -r base.in
-scipy==1.11.4
+scipy==1.12.0
     # via scippnexus
 six==1.16.0
     # via
@@ -117,7 +117,7 @@ six==1.16.0
     #   python-dateutil
 stack-data==0.6.3
     # via ipython
-toolz==0.12.0
+toolz==0.12.1
     # via
     #   dask
     #   partd
@@ -125,9 +125,9 @@ traitlets==5.14.1
     # via
     #   ipython
     #   matplotlib-inline
-urllib3==2.1.0
+urllib3==2.2.1
     # via requests
-wcwidth==0.2.12
+wcwidth==0.2.13
     # via prompt-toolkit
 zipp==3.17.0
     # via importlib-metadata
