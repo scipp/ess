@@ -3,8 +3,10 @@
 import numpy as np
 import pytest
 import scipp as sc
+import scipp.testing
 
 from ess.diffraction.powder import merge_calibration
+from ess.diffraction.powder.correction import apply_lorentz_correction
 
 
 @pytest.fixture
@@ -109,3 +111,203 @@ def test_merge_calibration_raises_if_mask_exists(calibration):
     )
     with pytest.raises(ValueError):
         merge_calibration(into=da, calibration=calibration)
+
+
+@pytest.mark.parametrize('data_dtype', ('float32', 'float64'))
+@pytest.mark.parametrize('dspacing_dtype', ('float32', 'float64'))
+@pytest.mark.parametrize('two_theta_dtype', ('float32', 'float64'))
+def test_lorentz_correction_dense_1d_coords(
+    data_dtype, dspacing_dtype, two_theta_dtype
+):
+    da = sc.DataArray(
+        sc.full(
+            value=2.1,
+            sizes={'detector_number': 3, 'dspacing': 4},
+            unit='counts',
+            dtype=data_dtype,
+        ),
+        coords={
+            'dspacing': sc.array(
+                dims=['dspacing'],
+                values=[0.1, 0.4, 0.7, 1.1],
+                unit='angstrom',
+                dtype=dspacing_dtype,
+            ),
+            'two_theta': sc.array(
+                dims=['detector_number'],
+                values=[0.8, 0.9, 1.3],
+                unit='rad',
+                dtype=two_theta_dtype,
+            ),
+            'detector_number': sc.array(
+                dims=['detector_number'], values=[0, 1, 2], unit=None
+            ),
+        },
+    )
+    original = da.copy(deep=True)
+    corrected = apply_lorentz_correction(da)
+
+    assert corrected.sizes == {'detector_number': 3, 'dspacing': 4}
+    assert corrected.unit == 'angstrom**4 * counts'
+    assert corrected.dtype == original.dtype
+    assert not corrected.variances
+    assert not corrected.bins
+
+    d = original.coords['dspacing'].broadcast(sizes=corrected.sizes).values
+    two_theta = original.coords['two_theta'].broadcast(sizes=corrected.sizes).values
+    if any(dt == 'float32' for dt in (data_dtype, dspacing_dtype, two_theta_dtype)):
+        rtol = 1e-6
+    else:
+        rtol = 1e-15
+    np.testing.assert_allclose(
+        corrected.data.values, 2.1 * d**4 * np.sin(two_theta / 2), rtol=rtol
+    )
+
+    assert set(corrected.coords.keys()) == {'two_theta', 'dspacing', 'detector_number'}
+    for key, coord in corrected.coords.items():
+        sc.testing.assert_identical(coord, original.coords[key])
+        sc.testing.assert_identical(da.coords[key], original.coords[key])
+
+
+def test_apply_lorentz_correction_dense_2d_coord():
+    da = sc.DataArray(
+        sc.full(value=0.7, sizes={'detector_number': 3, 'dspacing': 4}),
+        coords={
+            'dspacing': sc.array(
+                dims=['dspacing'], values=[0.1, 0.4, 0.7, 1.1], unit='angstrom'
+            ).broadcast(sizes={'detector_number': 3, 'dspacing': 4}),
+            'two_theta': sc.array(
+                dims=['detector_number'], values=[0.8, 0.9, 1.3], unit='rad'
+            ),
+            'detector_number': sc.array(
+                dims=['detector_number'], values=[0, 1, 2], unit=None
+            ),
+        },
+    )
+    original = da.copy(deep=True)
+    corrected = apply_lorentz_correction(da)
+
+    assert corrected.sizes == {'detector_number': 3, 'dspacing': 4}
+    assert corrected.unit == 'angstrom**4'
+    assert corrected.dtype == original.dtype
+    assert not corrected.variances
+    assert not corrected.bins
+
+    d = original.coords['dspacing'].values
+    two_theta = original.coords['two_theta'].broadcast(sizes=corrected.sizes).values
+    np.testing.assert_allclose(
+        corrected.data.values, 0.7 * d**4 * np.sin(two_theta / 2)
+    )
+
+    assert set(corrected.coords.keys()) == {'two_theta', 'dspacing', 'detector_number'}
+    for key, coord in corrected.coords.items():
+        sc.testing.assert_identical(coord, original.coords[key])
+        sc.testing.assert_identical(da.coords[key], original.coords[key])
+
+
+@pytest.mark.parametrize('data_dtype', ('float32', 'float64'))
+@pytest.mark.parametrize('dspacing_dtype', ('float32', 'float64'))
+@pytest.mark.parametrize('two_theta_dtype', ('float32', 'float64'))
+def test_apply_lorentz_correction_event_coords(
+    data_dtype, dspacing_dtype, two_theta_dtype
+):
+    buffer = sc.DataArray(
+        sc.full(value=1.5, sizes={'event': 6}, unit='counts', dtype=data_dtype),
+        coords={
+            'detector_number': sc.array(dims=['event'], values=[0, 3, 2, 2, 0, 4]),
+            'dspacing': sc.array(
+                dims=['event'],
+                values=[0.1, 0.4, 0.2, 1.0, 1.3, 0.7],
+                unit='angstrom',
+                dtype=dspacing_dtype,
+            ),
+        },
+    )
+    da = buffer.group('detector_number').bin(dspacing=2)
+    da.coords['two_theta'] = sc.array(
+        dims=['detector_number'],
+        values=[0.4, 1.2, 1.5, 1.6],
+        unit='rad',
+        dtype=two_theta_dtype,
+    )
+    original = da.copy(deep=True)
+    corrected = apply_lorentz_correction(da)
+
+    assert corrected.sizes == {'detector_number': 4, 'dspacing': 2}
+    assert corrected.bins.unit == 'angstrom**4 * counts'
+    assert corrected.bins.dtype == data_dtype
+
+    d = original.bins.coords['dspacing']
+    two_theta = sc.bins_like(original, original.coords['two_theta'])
+    expected = (1.5 * d**4 * sc.sin(two_theta / 2)).to(dtype=data_dtype)
+    if any(dt == 'float32' for dt in (data_dtype, dspacing_dtype, two_theta_dtype)):
+        rtol = 1e-6
+    else:
+        rtol = 1e-15
+    np.testing.assert_allclose(
+        corrected.bins.concat().value.values,
+        expected.bins.concat().value.values,
+        rtol=rtol,
+    )
+
+    assert set(corrected.coords.keys()) == {'detector_number', 'two_theta', 'dspacing'}
+    for key, coord in corrected.coords.items():
+        sc.testing.assert_identical(coord, original.coords[key])
+        sc.testing.assert_identical(da.coords[key], original.coords[key])
+    sc.testing.assert_identical(
+        corrected.bins.coords['dspacing'], original.bins.coords['dspacing']
+    )
+    sc.testing.assert_identical(
+        da.bins.coords['dspacing'], original.bins.coords['dspacing']
+    )
+
+
+def test_apply_lorentz_correction_favors_event_coords():
+    buffer = sc.DataArray(
+        sc.full(value=1.5, sizes={'event': 6}, unit='counts'),
+        coords={
+            'detector_number': sc.array(dims=['event'], values=[0, 3, 2, 2, 0, 4]),
+            'dspacing': sc.array(
+                dims=['event'],
+                values=[0.1, 0.4, 0.2, 1.0, 1.3, 0.7],
+                unit='angstrom',
+            ),
+        },
+    )
+    da = buffer.group('detector_number').bin(dspacing=2)
+    da.coords['two_theta'] = sc.array(
+        dims=['detector_number'],
+        values=[0.4, 1.2, 1.5, 1.6],
+        unit='rad',
+    )
+    da.coords['dspacing'][-1] = 10.0  # this should not affect the correction
+    corrected = apply_lorentz_correction(da)
+
+    d = da.bins.coords['dspacing']  # event-coord, not the modified bin-coord
+    two_theta = sc.bins_like(da, da.coords['two_theta'])
+    expected = 1.5 * d**4 * sc.sin(two_theta / 2)
+    np.testing.assert_allclose(
+        corrected.bins.concat().value.values,
+        expected.bins.concat().value.values,
+        rtol=1e-15,
+    )
+
+    for key, coord in corrected.coords.items():
+        sc.testing.assert_identical(coord, da.coords[key])
+        sc.testing.assert_identical(da.coords[key], da.coords[key])
+    sc.testing.assert_identical(
+        corrected.bins.coords['dspacing'], da.bins.coords['dspacing']
+    )
+
+
+def test_apply_lorentz_correction_needs_coords():
+    da = sc.DataArray(
+        sc.ones(sizes={'detector_number': 3, 'dspacing': 4}),
+        coords={
+            'detector_number': sc.array(
+                dims=['detector_number'], values=[0, 1, 2], unit=None
+            )
+        },
+    )
+    with pytest.raises(KeyError):
+        apply_lorentz_correction(da)
