@@ -166,6 +166,7 @@ def test_lorentz_correction_dense_1d_coords(
     assert set(corrected.coords.keys()) == {'two_theta', 'dspacing', 'detector_number'}
     for key, coord in corrected.coords.items():
         sc.testing.assert_identical(coord, original.coords[key])
+        sc.testing.assert_identical(da.coords[key], original.coords[key])
 
 
 def test_apply_lorentz_correction_dense_2d_coord():
@@ -201,6 +202,7 @@ def test_apply_lorentz_correction_dense_2d_coord():
     assert set(corrected.coords.keys()) == {'two_theta', 'dspacing', 'detector_number'}
     for key, coord in corrected.coords.items():
         sc.testing.assert_identical(coord, original.coords[key])
+        sc.testing.assert_identical(da.coords[key], original.coords[key])
 
 
 @pytest.mark.parametrize('data_dtype', ('float32', 'float64'))
@@ -250,9 +252,13 @@ def test_apply_lorentz_correction_event_coords(
 
     assert set(corrected.coords.keys()) == {'detector_number', 'two_theta', 'dspacing'}
     for key, coord in corrected.coords.items():
-        sc.testing.assert_identical(coord, da.coords[key])
+        sc.testing.assert_identical(coord, original.coords[key])
+        sc.testing.assert_identical(da.coords[key], original.coords[key])
     sc.testing.assert_identical(
-        corrected.bins.coords['dspacing'], da.bins.coords['dspacing']
+        corrected.bins.coords['dspacing'], original.bins.coords['dspacing']
+    )
+    sc.testing.assert_identical(
+        da.bins.coords['dspacing'], original.bins.coords['dspacing']
     )
 
 

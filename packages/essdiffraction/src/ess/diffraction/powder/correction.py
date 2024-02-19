@@ -89,7 +89,7 @@ def apply_lorentz_correction(da: sc.DataArray) -> sc.DataArray:
         out.data = d4.to(dtype=out.dtype, copy=False)
         out_data = out.data
     else:
-        out.bins.data = d4.to(dtype=out.bins.dtype)
+        out.bins.data = d4.to(dtype=out.bins.dtype, copy=False)
         out_data = out.bins.data
     out_data *= sc.sin(theta, out=theta)
     out_data *= da.data if da.bins is None else da.bins.data
