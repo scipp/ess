@@ -10,3 +10,4 @@ sphinx-copybutton
 sphinx-design
 pythreejs  # For instrument view.
 scippneutron
+sphinxcontrib-mermaid
