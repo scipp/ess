@@ -262,6 +262,44 @@ def test_apply_lorentz_correction_event_coords(
     )
 
 
+def test_apply_lorentz_correction_favors_event_coords():
+    buffer = sc.DataArray(
+        sc.full(value=1.5, sizes={'event': 6}, unit='counts'),
+        coords={
+            'detector_number': sc.array(dims=['event'], values=[0, 3, 2, 2, 0, 4]),
+            'dspacing': sc.array(
+                dims=['event'],
+                values=[0.1, 0.4, 0.2, 1.0, 1.3, 0.7],
+                unit='angstrom',
+            ),
+        },
+    )
+    da = buffer.group('detector_number').bin(dspacing=2)
+    da.coords['two_theta'] = sc.array(
+        dims=['detector_number'],
+        values=[0.4, 1.2, 1.5, 1.6],
+        unit='rad',
+    )
+    da.coords['dspacing'][-1] = 10.0  # this should not affect the correction
+    corrected = apply_lorentz_correction(da)
+
+    d = da.bins.coords['dspacing']  # event-coord, not the modified bin-coord
+    two_theta = sc.bins_like(da, da.coords['two_theta'])
+    expected = 1.5 * d**4 * sc.sin(two_theta / 2)
+    np.testing.assert_allclose(
+        corrected.bins.concat().value.values,
+        expected.bins.concat().value.values,
+        rtol=1e-15,
+    )
+
+    for key, coord in corrected.coords.items():
+        sc.testing.assert_identical(coord, da.coords[key])
+        sc.testing.assert_identical(da.coords[key], da.coords[key])
+    sc.testing.assert_identical(
+        corrected.bins.coords['dspacing'], da.bins.coords['dspacing']
+    )
+
+
 def test_apply_lorentz_correction_needs_coords():
     da = sc.DataArray(
         sc.ones(sizes={'detector_number': 3, 'dspacing': 4}),
