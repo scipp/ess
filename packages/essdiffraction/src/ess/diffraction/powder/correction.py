@@ -75,7 +75,7 @@ def apply_lorentz_correction(da: sc.DataArray) -> sc.DataArray:
     -------
     :
         ``da`` multiplied by :math:`L`.
-        has the same dtype as ``da``.
+        Has the same dtype as ``da``.
     """
     # The implementation is optimized under the assumption that two_theta
     # is small and dspacing and the data are large.
