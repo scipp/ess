@@ -158,6 +158,7 @@ def proton_charge_from_event_data(event_da: sc.DataArray) -> ProtonCharge:
 
 
 def load_mcstas_nexus(
+    *,
     file_path: InputFilepath,
     event_weights_converter: EventWeightsConverter = event_weights_from_probability,
     proton_charge_converter: ProtonChargeConverter = proton_charge_from_event_data,
