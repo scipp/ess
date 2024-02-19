@@ -1,6 +1,5 @@
-# Data workflow design for the NMX instrument at ESS
-
-This is a description of the data workflow for the NMX instrument at ESS.
+# Data Workflow Overview
+This is an overall description of the data workflow for the NMX instrument at ESS.
 
 The [NMX](https://europeanspallationsource.se/instruments/nmx) Macromolecular Diffractometer is a time-of-flight (TOF)
 quasi-Laue diffractometer optimised for small samples and large unit cells
@@ -10,7 +9,7 @@ The main scientific driver is to locate the hydrogen atoms relevant to the funct
 
 ## Data reduction
 
-![work_flow](NMX_work_flow.png)
+![Workflow Overview](NMX_work_flow.png)
 
 ### From single event data to binned image-like data (scipp)
 The first step in the data reduction is to reduce the data from single event data to image-like data. <br>
@@ -24,7 +23,7 @@ along with additional metadata and instrument coordinates (pixel IDs).
 
 See [workflow example](../examples/workflow_example) for more details.
 
-### Spot finding and integration (DIAL)
+### Spot finding and integration (DIALS)
 For the next five steps of the data reduction from spot finding to spot integration,
 we use a program called [DIALS](https://dials.github.io/index.html) [^1].
 [^1]: [DIAL as a toolkit](https://onlinelibrary.wiley.com/doi/10.1002/pro.4224)
