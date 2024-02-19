@@ -5,16 +5,20 @@ Loading and merging of LoKI data.
 """
 from collections.abc import Iterable
 from functools import reduce
-from typing import Optional
+from typing import NewType, Optional
 
+import sciline
 import scipp as sc
 import scippnexus as snx
 
 from ..common import gravity_vector
 from ..types import (
-    FileList,
+    Filename,
+    FilenameType,
+    FilePath,
     Incident,
     LoadedFileContents,
+    LoadedSingleFileContents,
     NeXusDetectorName,
     NeXusMonitorName,
     NeXusSampleName,
@@ -31,6 +35,8 @@ DETECTOR_BANK_RESHAPING = {
         dim='detector_number', sizes=dict(layer=4, tube=32, straw=7, pixel=512)
     )
 }
+
+DataFolder = NewType('DataFolder', str)
 
 
 def _patch_data(
@@ -69,14 +75,20 @@ def _merge_events(a, b):
     return a.bins.concatenate(b)
 
 
-def _merge_runs(data_groups: Iterable[sc.DataGroup], entries: Iterable[str]):
+def merge_runs(
+    data_groups: sciline.Series[str, LoadedSingleFileContents[RunType]],
+    detector_name: NeXusDetectorName,
+    incident_monitor_name: NeXusMonitorName[Incident],
+    transmission_monitor_name: NeXusMonitorName[Transmission],
+) -> LoadedFileContents[RunType]:
+    data_entries = (detector_name, incident_monitor_name, transmission_monitor_name)
     # TODO: we need some additional checks that the data is compatible. For example,
     # the sample and the source positions should be the same for all runs. Also, the
     # detector geometry (pixel_shapes, lab transform) should be the same for all runs.
-    out = data_groups[0].copy(deep=False)
-    for name in entries:
+    out = list(data_groups.values())[0].copy(deep=False)
+    for name in data_entries:
         data_arrays = []
-        for dg in data_groups:
+        for dg in data_groups.values():
             events = dg[NEXUS_INSTRUMENT_PATH][name][f'{name}_events']
             if 'event_time_zero' in events.dims:
                 events = events.bins.concat('event_time_zero')
@@ -84,49 +96,63 @@ def _merge_runs(data_groups: Iterable[sc.DataGroup], entries: Iterable[str]):
         out[NEXUS_INSTRUMENT_PATH][name][f'{name}_events'] = reduce(
             _merge_events, data_arrays
         )
-    return out
+    return LoadedFileContents[RunType](out)
 
 
 def load_nexus(
-    filelist: FileList[RunType],
+    filename: FilePath[Filename[RunType]],
     detector_name: NeXusDetectorName,
     incident_monitor_name: NeXusMonitorName[Incident],
     transmission_monitor_name: NeXusMonitorName[Transmission],
     transform_path: TransformationPath,
     source_name: NeXusSourceName,
     sample_name: Optional[NeXusSampleName],
-) -> LoadedFileContents[RunType]:
-    from .data import get_path
+) -> LoadedSingleFileContents[RunType]:
+    # from .data import get_path
 
     data_entries = (detector_name, incident_monitor_name, transmission_monitor_name)
 
-    data_groups = []
-    for filename in filelist:
-        with snx.File(get_path(filename)) as f:
-            dg = f['entry'][()]
-        dg = snx.compute_positions(dg, store_transform=transform_path)
+    # data_groups = []
+    # for path in pathlist:
+    with snx.File(filename) as f:
+        dg = f['entry'][()]
+    dg = snx.compute_positions(dg, store_transform=transform_path)
 
-        if sample_name is None:
-            sample_position = sc.vector(value=[0, 0, 0], unit='m')
-        else:
-            sample_position = dg[NEXUS_INSTRUMENT_PATH][sample_name]['position']
-        source_position = dg[NEXUS_INSTRUMENT_PATH][source_name]['position']
+    if sample_name is None:
+        sample_position = sc.vector(value=[0, 0, 0], unit='m')
+    else:
+        sample_position = dg[NEXUS_INSTRUMENT_PATH][sample_name]['position']
+    source_position = dg[NEXUS_INSTRUMENT_PATH][source_name]['position']
 
-        for name in data_entries:
-            data = _preprocess_data(
-                dg[NEXUS_INSTRUMENT_PATH][name][f'{name}_events'],
-                sample_position=sample_position,
-                source_position=source_position,
-            )
-            if name in DETECTOR_BANK_RESHAPING:
-                data = DETECTOR_BANK_RESHAPING[name](data)
+    for name in data_entries:
+        data = _preprocess_data(
+            dg[NEXUS_INSTRUMENT_PATH][name][f'{name}_events'],
+            sample_position=sample_position,
+            source_position=source_position,
+        )
+        if name in DETECTOR_BANK_RESHAPING:
+            data = DETECTOR_BANK_RESHAPING[name](data)
 
-            dg[NEXUS_INSTRUMENT_PATH][name][f'{name}_events'] = data
+        dg[NEXUS_INSTRUMENT_PATH][name][f'{name}_events'] = data
 
-        data_groups.append(dg)
+    # data_groups.append(dg)
 
-    out = _merge_runs(data_groups=data_groups, entries=data_entries)
-    return LoadedFileContents[RunType](out)
+    # out = _merge_runs(data_groups=data_groups, entries=data_entries)
+    return LoadedSingleFileContents[RunType](dg)
 
 
-providers = (load_nexus,)
+def to_file_contents(
+    data: LoadedSingleFileContents[RunType],
+) -> LoadedFileContents[RunType]:
+    return LoadedFileContents[RunType](data)
+
+
+# def to_path(filelist: FileList[RunType], path: DataFolder) -> PathList[RunType]:
+#     return [f'{path}/{filename}' for filename in filelist]
+
+
+def to_path(filename: FilenameType, path: DataFolder) -> FilePath[FilenameType]:
+    return f'{path}/{filename}'
+
+
+providers = (load_nexus, to_file_contents, to_path)

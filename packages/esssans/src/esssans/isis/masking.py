@@ -6,11 +6,19 @@ import numpy as np
 import sciline
 import scipp as sc
 
-from ..types import MaskedData, RawData, SampleRun, ScatteringRunType
+from ..types import (
+    MaskedData,
+    MaskedDetectorIDs,
+    PixelMask,
+    RawData,
+    SampleRun,
+    ScatteringRunType,
+)
 from .components import RawDataWithComponentUserOffsets
-from .io import MaskedDetectorIDs
 
-PixelMask = NewType('PixelMask', sc.Variable)
+# from .io import MaskedDetectorIDs
+
+# PixelMask = NewType('PixelMask', sc.Variable)
 
 
 def to_pixel_mask(data: RawData[SampleRun], masked: MaskedDetectorIDs) -> PixelMask:

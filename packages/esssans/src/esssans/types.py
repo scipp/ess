@@ -153,15 +153,31 @@ class NeXusMonitorName(sciline.Scope[MonitorType, str], str):
     """Name of Incident|Transmission monitor in NeXus file"""
 
 
-class FileList(sciline.Scope[RunType, list], list):
-    """Filenames of BackgroundRun|EmptyBeamRun|SampleRun"""
+PixelMaskFilename = NewType('PixelMaskFilename', str)
+
+FilenameType = TypeVar('FilenameType', bound=str)
 
 
-BeamStopPosition = NewType('BeamStopPosition', sc.Variable)
-"""Approximate center of the beam stop position"""
+DataFolder = NewType('DataFolder', str)
 
-BeamStopRadius = NewType('BeamStopRadius', sc.Variable)
-"""Radius of the beam stop"""
+
+class FilePath(sciline.Scope[FilenameType, str], str):
+    """Path to a file"""
+
+
+class Filename(sciline.Scope[RunType, str], str):
+    """Filename of a run"""
+
+
+MaskedDetectorIDs = NewType('MaskedDetectorIDs', sc.Variable)
+"""1-D variable listing all masked detector IDs."""
+
+
+# BeamStopPosition = NewType('BeamStopPosition', sc.Variable)
+# """Approximate center of the beam stop position"""
+
+# BeamStopRadius = NewType('BeamStopRadius', sc.Variable)
+# """Radius of the beam stop"""
 
 # 3  Workflow (intermediate) results
 
@@ -201,12 +217,19 @@ class SolidAngle(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Solid angle of detector pixels seen from sample position"""
 
 
+class LoadedSingleFileContents(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+    """The entire contents of a single loaded file"""
+
+
 class LoadedFileContents(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
-    """The entire contents of a loaded file"""
+    """The entire contents of loaded data (can be data merged from multiple files)"""
 
 
 class RawData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Raw data"""
+
+
+PixelMask = NewType('PixelMask', sc.Variable)
 
 
 class MaskedData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
