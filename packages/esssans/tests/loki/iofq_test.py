@@ -15,6 +15,7 @@ from esssans.types import (
     BackgroundRun,
     BackgroundSubtractedIofQ,
     BeamCenter,
+    CalibratedMaskedData,
     CleanWavelengthMasked,
     CorrectForGravity,
     DimsToKeep,
@@ -204,28 +205,39 @@ def test_phi_with_gravity():
     graph_with_grav = pipeline.compute(ElasticCoordTransformGraph)
 
     no_grav = data_no_grav.transform_coords(('two_theta', 'phi'), graph_no_grav)
-    two_theta_no_grav = no_grav.coords['two_theta']
     phi_no_grav = no_grav.coords['phi']
     with_grav = data_with_grav.transform_coords(('two_theta', 'phi'), graph_with_grav)
     phi_with_grav = with_grav.coords['phi'].mean('wavelength')
 
     assert not sc.identical(phi_no_grav, phi_with_grav)
 
-    # Exclude pixels near the origin, since phi will vary a lot there.
-    not_near_origin = two_theta_no_grav > sc.scalar(0.1, unit='deg').to(unit='rad')
+    # Exclude pixels near y=0, since phi with gravity could drop below y=0 and give a
+    # difference of almost 2*pi.
+    y = sc.abs(
+        pipeline.compute(CalibratedMaskedData[SampleRun])
+        .coords['position']
+        .fields.y.flatten(to='pixel')
+    )
+    not_near_origin = y > sc.scalar(0.05, unit='m')
     assert sc.all(
         sc.isclose(
             phi_no_grav[not_near_origin],
             phi_with_grav[not_near_origin],
-            atol=sc.scalar(3.0, unit='deg').to(unit='rad'),
+            atol=sc.scalar(5.0e-3, unit='rad'),
         )
     )
 
     # Phi is in [-pi, pi], measured from the X axis.
-    pos_x = sc.abs(phi_no_grav) < sc.scalar(90.0, unit='deg').to(unit='rad')
+    pos_x = sc.abs(phi_no_grav[not_near_origin]) < sc.scalar(90.0, unit='deg').to(
+        unit='rad'
+    )
     # Phi is larger with gravity, since it gives the position where it would have
     # been detected without gravity. That is, with gravity all points are pulled
     # "up" in the XY plane, so the angle is larger for positive X and smaller for
     # negative X.
-    assert sc.all(phi_no_grav[pos_x] < phi_with_grav[pos_x])
-    assert sc.all(phi_no_grav[~pos_x] > phi_with_grav[~pos_x])
+    assert sc.all(
+        phi_no_grav[not_near_origin][pos_x] < phi_with_grav[not_near_origin][pos_x]
+    )
+    assert sc.all(
+        phi_no_grav[not_near_origin][~pos_x] > phi_with_grav[not_near_origin][~pos_x]
+    )
