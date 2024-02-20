@@ -2,7 +2,6 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import sys
 from pathlib import Path
-from typing import Callable, List
 
 import pytest
 import sciline
@@ -32,16 +31,16 @@ from esssans.types import (
 )
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import make_params  # noqa: E402
+from common import make_params, loki_providers  # noqa: E402
 
 
-def loki_providers() -> List[Callable]:
-    return list(
-        sans.providers
-        + sans.loki.providers
-        + sans.loki.data.providers
-        + (isis.io.read_xml_detector_masking,)
-    )
+# def loki_providers() -> List[Callable]:
+#     return list(
+#         sans.providers
+#         + sans.loki.providers
+#         + sans.loki.data.providers
+#         + (isis.io.read_xml_detector_masking,)
+#     )
 
 
 @pytest.mark.parametrize('qxy', [False, True])

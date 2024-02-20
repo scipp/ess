@@ -1,7 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+from typing import Callable, List
+
 import scipp as sc
 
+import esssans as sans
 from esssans.loki import default_parameters
 from esssans.types import (
     BackgroundRun,
@@ -45,3 +48,14 @@ def make_params(qxy: bool = False) -> dict:
         )
 
     return params
+
+
+def loki_providers() -> List[Callable]:
+    from esssans.isis.io import read_xml_detector_masking
+
+    return list(
+        sans.providers
+        + sans.loki.providers
+        + sans.loki.data.providers
+        + (read_xml_detector_masking,)
+    )

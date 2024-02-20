@@ -8,7 +8,7 @@ import scipp as sc
 
 import esssans as sans
 from esssans import isis
-from esssans.isis import Filename, MonitorOffset, SampleOffset, sans2d
+from esssans.isis import MonitorOffset, SampleOffset, sans2d
 from esssans.types import (
     BackgroundRun,
     BackgroundSubtractedIofQ,
@@ -17,6 +17,7 @@ from esssans.types import (
     DirectBeam,
     DirectBeamFilename,
     EmptyBeamRun,
+    Filename,
     Incident,
     IofQ,
     MaskedData,

@@ -7,10 +7,12 @@ import esssans as sans
 from esssans import isis
 from esssans.types import (
     CorrectForGravity,
+    Filename,
     Incident,
     IofQ,
     NeXusMonitorName,
     NonBackgroundWavelengthRange,
+    PixelMaskFilename,
     QBins,
     QxyBins,
     SampleRun,
@@ -24,8 +26,8 @@ def make_params() -> dict:
     params = {
         sans.types.DirectBeamFilename: 'Direct_Zoom_4m_8mm_100522.txt',
         isis.CalibrationFilename: '192tubeCalibration_11-02-2019_r5_10lines.nxs',
-        isis.Filename[sans.types.SampleRun]: 'ZOOM00034786.nxs',
-        isis.Filename[sans.types.EmptyBeamRun]: 'ZOOM00034787.nxs',
+        Filename[sans.types.SampleRun]: 'ZOOM00034786.nxs',
+        Filename[sans.types.EmptyBeamRun]: 'ZOOM00034787.nxs',
         isis.SampleOffset: sc.vector([0.0, 0.0, 0.11], unit='m'),
         isis.DetectorBankOffset: sc.vector([0.0, 0.0, 0.5], unit='m'),
     }
@@ -60,7 +62,7 @@ def make_masks_table() -> sciline.ParamTable:
         'tube_1120_bottom.xml',
         'tubes_beg_18_2.xml',
     ]
-    return sciline.ParamTable(str, {isis.PixelMaskFilename: masks}, index=masks)
+    return sciline.ParamTable(str, {PixelMaskFilename: masks}, index=masks)
 
 
 def zoom_providers():
