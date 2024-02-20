@@ -173,12 +173,6 @@ MaskedDetectorIDs = NewType('MaskedDetectorIDs', sc.Variable)
 """1-D variable listing all masked detector IDs."""
 
 
-# BeamStopPosition = NewType('BeamStopPosition', sc.Variable)
-# """Approximate center of the beam stop position"""
-
-# BeamStopRadius = NewType('BeamStopRadius', sc.Variable)
-# """Radius of the beam stop"""
-
 # 3  Workflow (intermediate) results
 
 
