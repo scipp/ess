@@ -24,7 +24,7 @@
    :toctree: ../generated/functions
    :recursive:
 
-   small_mcstas_sample
+   small_mcstas_3_sample
    load_mcstas_nexus
 
 ```
