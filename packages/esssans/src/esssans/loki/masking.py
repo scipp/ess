@@ -9,8 +9,16 @@ import numpy as np
 import sciline
 import scipp as sc
 
-from ..isis.masking import PixelMask, to_pixel_mask
-from ..types import MaskedData, MaskedDetectorIDs, RawData, SampleRun, ScatteringRunType
+# from ..isis.masking import PixelMask, to_pixel_mask
+from ..types import (
+    MaskedData,
+    MaskedDetectorIDs,
+    PixelMask,
+    PixelMaskFilename,
+    RawData,
+    SampleRun,
+    ScatteringRunType,
+)
 
 
 def to_pixel_mask(data: RawData[SampleRun], masked: MaskedDetectorIDs) -> PixelMask:
@@ -31,7 +39,8 @@ def to_pixel_mask(data: RawData[SampleRun], masked: MaskedDetectorIDs) -> PixelM
 
 def apply_pixel_masks(
     data: RawData[ScatteringRunType],
-    masks: Optional[sciline.Series[str, PixelMask]],
+    masks: sciline.Series[PixelMaskFilename, PixelMask],
+    # masks: Optional[sciline.Series[PixelMaskFilename, PixelMask]],
 ) -> MaskedData[ScatteringRunType]:
     """Apply pixel-specific masks to raw data.
     The masks are based on detector IDs stored in XML files.

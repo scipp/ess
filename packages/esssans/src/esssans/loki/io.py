@@ -13,6 +13,7 @@ import scippnexus as snx
 
 from ..common import gravity_vector
 from ..types import (
+    BackgroundRun,
     Filename,
     FilenameType,
     FilePath,
@@ -24,6 +25,8 @@ from ..types import (
     NeXusSampleName,
     NeXusSourceName,
     RunType,
+    SampleRun,
+    ScatteringRunType,
     TransformationPath,
     Transmission,
 )
@@ -75,12 +78,14 @@ def _merge_events(a, b):
     return a.bins.concatenate(b)
 
 
-def merge_runs(
-    data_groups: sciline.Series[str, LoadedSingleFileContents[RunType]],
+def _merge_runs(
+    data_groups: sciline.Series[
+        Filename[ScatteringRunType], LoadedSingleFileContents[ScatteringRunType]
+    ],
     detector_name: NeXusDetectorName,
     incident_monitor_name: NeXusMonitorName[Incident],
     transmission_monitor_name: NeXusMonitorName[Transmission],
-) -> LoadedFileContents[RunType]:
+) -> LoadedFileContents[ScatteringRunType]:
     data_entries = (detector_name, incident_monitor_name, transmission_monitor_name)
     # TODO: we need some additional checks that the data is compatible. For example,
     # the sample and the source positions should be the same for all runs. Also, the
@@ -96,7 +101,43 @@ def merge_runs(
         out[NEXUS_INSTRUMENT_PATH][name][f'{name}_events'] = reduce(
             _merge_events, data_arrays
         )
-    return LoadedFileContents[RunType](out)
+    return out
+
+
+def merge_sample_runs(
+    data_groups: sciline.Series[
+        Filename[SampleRun], LoadedSingleFileContents[SampleRun]
+    ],
+    detector_name: NeXusDetectorName,
+    incident_monitor_name: NeXusMonitorName[Incident],
+    transmission_monitor_name: NeXusMonitorName[Transmission],
+) -> LoadedFileContents[SampleRun]:
+
+    out = _merge_runs(
+        data_groups=data_groups,
+        detector_name=detector_name,
+        incident_monitor_name=incident_monitor_name,
+        transmission_monitor_name=transmission_monitor_name,
+    )
+    return LoadedFileContents[SampleRun](out)
+
+
+def merge_background_runs(
+    data_groups: sciline.Series[
+        Filename[BackgroundRun], LoadedSingleFileContents[BackgroundRun]
+    ],
+    detector_name: NeXusDetectorName,
+    incident_monitor_name: NeXusMonitorName[Incident],
+    transmission_monitor_name: NeXusMonitorName[Transmission],
+) -> LoadedFileContents[BackgroundRun]:
+
+    out = _merge_runs(
+        data_groups=data_groups,
+        detector_name=detector_name,
+        incident_monitor_name=incident_monitor_name,
+        transmission_monitor_name=transmission_monitor_name,
+    )
+    return LoadedFileContents[BackgroundRun](out)
 
 
 def load_nexus(
