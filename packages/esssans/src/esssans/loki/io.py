@@ -159,7 +159,6 @@ def load_nexus(
     source_name: NeXusSourceName,
     sample_name: Optional[NeXusSampleName],
 ) -> LoadedSingleFileContents[RunType]:
-
     data_entries = (detector_name, incident_monitor_name, transmission_monitor_name)
 
     with snx.File(filename) as f:
