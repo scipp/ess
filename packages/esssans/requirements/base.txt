@@ -120,7 +120,7 @@ requests==2.31.0
     # via pooch
 sciline==24.1.1
     # via -r base.in
-scipp==23.12.0
+scipp==24.2.0
     # via
     #   -r base.in
     #   scippneutron
