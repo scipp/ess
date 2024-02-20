@@ -39,8 +39,7 @@ def to_pixel_mask(data: RawData[SampleRun], masked: MaskedDetectorIDs) -> PixelM
 
 def apply_pixel_masks(
     data: RawData[ScatteringRunType],
-    masks: sciline.Series[PixelMaskFilename, PixelMask],
-    # masks: Optional[sciline.Series[PixelMaskFilename, PixelMask]],
+    masks: Optional[sciline.Series[PixelMaskFilename, PixelMask]],
 ) -> MaskedData[ScatteringRunType]:
     """Apply pixel-specific masks to raw data.
     The masks are based on detector IDs stored in XML files.
