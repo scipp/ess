@@ -3,7 +3,6 @@
 """
 Loading and merging of LoKI data.
 """
-from collections.abc import Iterable
 from functools import reduce
 from typing import NewType, Optional
 
@@ -86,6 +85,9 @@ def _merge_runs(
     incident_monitor_name: NeXusMonitorName[Incident],
     transmission_monitor_name: NeXusMonitorName[Transmission],
 ) -> LoadedFileContents[ScatteringRunType]:
+    """
+    Merge detector and monitor events from multiple runs into a single run.
+    """
     data_entries = (detector_name, incident_monitor_name, transmission_monitor_name)
     # TODO: we need some additional checks that the data is compatible. For example,
     # the sample and the source positions should be the same for all runs. Also, the
@@ -112,6 +114,10 @@ def merge_sample_runs(
     incident_monitor_name: NeXusMonitorName[Incident],
     transmission_monitor_name: NeXusMonitorName[Transmission],
 ) -> LoadedFileContents[SampleRun]:
+    """
+    Merge detector and monitor events from multiple sample runs into a single sample
+    run.
+    """
 
     out = _merge_runs(
         data_groups=data_groups,
@@ -130,6 +136,10 @@ def merge_background_runs(
     incident_monitor_name: NeXusMonitorName[Incident],
     transmission_monitor_name: NeXusMonitorName[Transmission],
 ) -> LoadedFileContents[BackgroundRun]:
+    """
+    Merge detector and monitor events from multiple background runs into a single
+    background run.
+    """
 
     out = _merge_runs(
         data_groups=data_groups,
@@ -149,12 +159,9 @@ def load_nexus(
     source_name: NeXusSourceName,
     sample_name: Optional[NeXusSampleName],
 ) -> LoadedSingleFileContents[RunType]:
-    # from .data import get_path
 
     data_entries = (detector_name, incident_monitor_name, transmission_monitor_name)
 
-    # data_groups = []
-    # for path in pathlist:
     with snx.File(filename) as f:
         dg = f['entry'][()]
     dg = snx.compute_positions(dg, store_transform=transform_path)
@@ -176,20 +183,14 @@ def load_nexus(
 
         dg[NEXUS_INSTRUMENT_PATH][name][f'{name}_events'] = data
 
-    # data_groups.append(dg)
-
-    # out = _merge_runs(data_groups=data_groups, entries=data_entries)
     return LoadedSingleFileContents[RunType](dg)
 
 
 def to_file_contents(
     data: LoadedSingleFileContents[RunType],
 ) -> LoadedFileContents[RunType]:
+    """Dummy provider to convert single-file contents to file contents."""
     return LoadedFileContents[RunType](data)
-
-
-# def to_path(filelist: FileList[RunType], path: DataFolder) -> PathList[RunType]:
-#     return [f'{path}/{filename}' for filename in filelist]
 
 
 def to_path(filename: FilenameType, path: DataFolder) -> FilePath[FilenameType]:

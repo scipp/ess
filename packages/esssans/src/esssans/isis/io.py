@@ -3,9 +3,8 @@
 """
 File loading functions for ISIS data, NOT using Mantid.
 """
-from typing import NewType, TypeVar
+from typing import NewType
 
-import sciline
 import scipp as sc
 
 from ..types import (
@@ -16,25 +15,7 @@ from ..types import (
     PixelMaskFilename,
 )
 
-# PixelMaskFilename = NewType('PixelMaskFilename', str)
 CalibrationFilename = NewType('CalibrationFilename', str)
-
-# FilenameType = TypeVar('FilenameType', bound=str)
-
-
-# DataFolder = NewType('DataFolder', str)
-
-
-# class FilePath(sciline.Scope[FilenameType, str], str):
-#     """Path to a file"""
-
-
-# class Filename(sciline.Scope[RunType, str], str):
-#     """Filename of a run"""
-
-
-# MaskedDetectorIDs = NewType('MaskedDetectorIDs', sc.Variable)
-# """1-D variable listing all masked detector IDs."""
 
 
 def to_path(filename: FilenameType, path: DataFolder) -> FilePath[FilenameType]:

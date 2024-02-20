@@ -8,7 +8,6 @@ import sciline
 import scipp as sc
 
 import esssans as sans
-from esssans import isis
 from esssans.conversions import ElasticCoordTransformGraph
 from esssans.types import (
     BackgroundRun,
@@ -31,16 +30,7 @@ from esssans.types import (
 )
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import make_params, loki_providers  # noqa: E402
-
-
-# def loki_providers() -> List[Callable]:
-#     return list(
-#         sans.providers
-#         + sans.loki.providers
-#         + sans.loki.data.providers
-#         + (isis.io.read_xml_detector_masking,)
-#     )
+from common import loki_providers, make_params  # noqa: E402
 
 
 @pytest.mark.parametrize('qxy', [False, True])

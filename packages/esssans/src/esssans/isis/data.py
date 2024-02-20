@@ -10,11 +10,11 @@ from ..data import Registry
 from ..types import (
     DirectBeam,
     DirectBeamFilename,
-    LoadedFileContents,
-    RunType,
     Filename,
     FilenameType,
     FilePath,
+    LoadedFileContents,
+    RunType,
 )
 
 

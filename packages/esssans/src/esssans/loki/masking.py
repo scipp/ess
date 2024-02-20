@@ -9,7 +9,6 @@ import numpy as np
 import sciline
 import scipp as sc
 
-# from ..isis.masking import PixelMask, to_pixel_mask
 from ..types import (
     MaskedData,
     MaskedDetectorIDs,

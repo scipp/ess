@@ -1,7 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
-from typing import NewType
-
 import numpy as np
 import sciline
 import scipp as sc
@@ -15,10 +13,6 @@ from ..types import (
     ScatteringRunType,
 )
 from .components import RawDataWithComponentUserOffsets
-
-# from .io import MaskedDetectorIDs
-
-# PixelMask = NewType('PixelMask', sc.Variable)
 
 
 def to_pixel_mask(data: RawData[SampleRun], masked: MaskedDetectorIDs) -> PixelMask:

@@ -12,7 +12,7 @@ from esssans.loki.data import get_path
 from esssans.types import DimsToKeep, QBins, WavelengthBands, WavelengthBins
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import make_params, loki_providers  # noqa: E402
+from common import loki_providers, make_params  # noqa: E402
 
 
 def _get_I0(qbins: sc.Variable) -> sc.Variable:
