@@ -4,10 +4,22 @@ import pytest
 import sciline as sl
 import scipp as sc
 
+from ess.nmx.data import small_mcstas_2_sample, small_mcstas_3_sample
+
+
+@pytest.fixture(params=[small_mcstas_2_sample, small_mcstas_3_sample])
+def mcstas_file_path(
+    request: pytest.FixtureRequest, mcstas_2_deprecation_warning_context
+) -> str:
+    if request.param == small_mcstas_2_sample:
+        with mcstas_2_deprecation_warning_context():
+            return request.param()
+
+    return request.param()
+
 
 @pytest.fixture
-def mcstas_workflow() -> sl.Pipeline:
-    from ess.nmx.data import small_mcstas_sample
+def mcstas_workflow(mcstas_file_path: str) -> sl.Pipeline:
     from ess.nmx.mcstas_loader import (
         DefaultMaximumProbability,
         EventWeightsConverter,
@@ -23,7 +35,7 @@ def mcstas_workflow() -> sl.Pipeline:
     return sl.Pipeline(
         [load_mcstas_nexus, bin_time_of_arrival],
         params={
-            InputFilepath: small_mcstas_sample(),
+            InputFilepath: mcstas_file_path,
             MaximumProbability: DefaultMaximumProbability,
             TimeBinSteps: TimeBinSteps(50),
             EventWeightsConverter: event_weights_from_probability,
@@ -32,11 +44,10 @@ def mcstas_workflow() -> sl.Pipeline:
     )
 
 
-def test_pipeline_builder(mcstas_workflow: sl.Pipeline) -> None:
-    from ess.nmx.data import small_mcstas_sample
+def test_pipeline_builder(mcstas_workflow: sl.Pipeline, mcstas_file_path: str) -> None:
     from ess.nmx.mcstas_loader import InputFilepath
 
-    assert mcstas_workflow.get(InputFilepath).compute() == small_mcstas_sample()
+    assert mcstas_workflow.get(InputFilepath).compute() == mcstas_file_path
 
 
 def test_pipeline_mcstas_loader(mcstas_workflow: sl.Pipeline) -> None:
