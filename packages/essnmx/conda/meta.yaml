@@ -11,8 +11,6 @@ requirements:
     - setuptools
     - setuptools_scm
   run:
-<<<<<<< before updating
-    - python>=3.9
     - dask
     - python-graphviz
     - plopp
@@ -20,9 +18,7 @@ requirements:
     - scipp>=23.8.0
     - scippnexus>=23.9.0
     - pooch
-=======
     - python>=3.10
->>>>>>> after updating
 
 test:
   imports:
