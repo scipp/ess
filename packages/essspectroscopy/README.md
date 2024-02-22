@@ -7,7 +7,7 @@
 
 ## About
 
-Spectroscopy data reduction for the European Spallation Source 
+Spectroscopy data reduction for the European Spallation Source
 
 ## Installation
 
