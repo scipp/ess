@@ -33,7 +33,7 @@ build:
 about:
   home: https://github.com/scipp/essspectroscopy
   license: BSD-3-Clause
-  summary: Spectroscopy data reduction for the European Spallation Source 
-  description: Spectroscopy data reduction for the European Spallation Source 
+  summary: Spectroscopy data reduction for the European Spallation Source
+  description: Spectroscopy data reduction for the European Spallation Source
   dev_url: https://github.com/scipp/essspectroscopy
   doc_url: https://scipp.github.io/essspectroscopy
