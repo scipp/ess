@@ -9,7 +9,7 @@ import numpy as np
 import sciline
 import scipp as sc
 
-from ..types import (
+from .types import (
     MaskedData,
     MaskedDetectorIDs,
     PixelMask,
