@@ -7,7 +7,7 @@ import scipp as sc
 import scippnexus as snx
 
 from ..logging import get_logger
-from ..types import Filename, RawData, RawEvents, Run, ChopperCorrectedTofEvents
+from ..types import ChopperCorrectedTofEvents, Filename, RawData, RawEvents, Run
 from .data import get_path
 from .types import BeamlineParams
 
