@@ -17,6 +17,10 @@ class RawEvents(sciline.Scope[Run, sc.DataArray], sc.DataArray):
     binned by `detector_number` (pixel of the detector frame)."""
 
 
+class ChopperCorrectedTofEvents(sciline.Scope[Run, sc.DataArray], sc.DataArray):
+    """Event time data after correcting tof for choppers."""
+
+
 class WavelengthData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
     """Event data with wavelengths computed for every event,
     binned by `detector_number` (pixel of the detector frame)"""
