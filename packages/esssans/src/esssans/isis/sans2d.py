@@ -4,7 +4,7 @@ from typing import NewType, Optional
 
 import scipp as sc
 
-from ..types import MaskedData, RunType, SampleRun
+from ..types import MaskedData, SampleRun, ScatteringRunType
 from .components import RawDataWithComponentUserOffsets
 
 DetectorEdgeMask = NewType('DetectorEdgeMask', sc.Variable)
@@ -43,10 +43,10 @@ def sample_holder_mask(
 
 
 def mask_detectors(
-    da: RawDataWithComponentUserOffsets[RunType],
+    da: RawDataWithComponentUserOffsets[ScatteringRunType],
     edge_mask: Optional[DetectorEdgeMask],
     holder_mask: Optional[SampleHolderMask],
-) -> MaskedData[RunType]:
+) -> MaskedData[ScatteringRunType]:
     """Apply pixel-specific masks to raw data.
 
     Parameters
@@ -63,7 +63,7 @@ def mask_detectors(
         da.masks['edges'] = edge_mask
     if holder_mask is not None:
         da.masks['holder_mask'] = holder_mask
-    return MaskedData[RunType](da)
+    return MaskedData[ScatteringRunType](da)
 
 
 providers = (detector_edge_mask, sample_holder_mask, mask_detectors)
