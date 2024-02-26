@@ -7,8 +7,15 @@ from typing import Dict
 import scipp as sc
 
 from ..data import Registry
-from ..types import DirectBeam, DirectBeamFilename, LoadedFileContents, RunType
-from .io import Filename, FilenameType, FilePath
+from ..types import (
+    DirectBeam,
+    DirectBeamFilename,
+    Filename,
+    FilenameType,
+    FilePath,
+    LoadedFileContents,
+    RunType,
+)
 
 
 @dataclass

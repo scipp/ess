@@ -1,17 +1,16 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-from typing import List, Optional
+from typing import Callable, List
 
 import scipp as sc
 
+import esssans as sans
 from esssans.loki import default_parameters
 from esssans.types import (
     BackgroundRun,
-    BeamStopPosition,
-    BeamStopRadius,
     CorrectForGravity,
     EmptyBeamRun,
-    FileList,
+    Filename,
     QBins,
     QxyBins,
     ReturnEvents,
@@ -22,30 +21,18 @@ from esssans.types import (
 )
 
 
-def make_params(
-    sample_runs: Optional[List[str]] = None,
-    background_runs: Optional[List[str]] = None,
-    qxy: bool = False,
-) -> dict:
+def make_params(qxy: bool = False) -> dict:
     params = default_parameters.copy()
 
-    if sample_runs is None:
-        sample_runs = ['60339-2022-02-28_2215.nxs']
-    if background_runs is None:
-        background_runs = ['60393-2022-02-28_2215.nxs']
-
-    # List of files
-    params[FileList[SampleRun]] = sample_runs
-    params[FileList[BackgroundRun]] = background_runs
-    params[FileList[TransmissionRun[SampleRun]]] = ['60394-2022-02-28_2215.nxs']
-    params[FileList[TransmissionRun[BackgroundRun]]] = ['60392-2022-02-28_2215.nxs']
-    params[FileList[EmptyBeamRun]] = ['60392-2022-02-28_2215.nxs']
+    params[Filename[SampleRun]] = '60339-2022-02-28_2215.nxs'
+    params[Filename[BackgroundRun]] = '60393-2022-02-28_2215.nxs'
+    params[Filename[TransmissionRun[SampleRun]]] = '60394-2022-02-28_2215.nxs'
+    params[Filename[TransmissionRun[BackgroundRun]]] = '60392-2022-02-28_2215.nxs'
+    params[Filename[EmptyBeamRun]] = '60392-2022-02-28_2215.nxs'
 
     params[WavelengthBins] = sc.linspace(
         'wavelength', start=1.0, stop=13.0, num=51, unit='angstrom'
     )
-    params[BeamStopPosition] = sc.vector([-0.026, -0.022, 0.0], unit='m')
-    params[BeamStopRadius] = sc.scalar(0.042, unit='m')
     params[CorrectForGravity] = True
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
     params[ReturnEvents] = False
@@ -61,3 +48,14 @@ def make_params(
         )
 
     return params
+
+
+def loki_providers() -> List[Callable]:
+    from esssans.isis.io import read_xml_detector_masking
+
+    return list(
+        sans.providers
+        + sans.loki.providers
+        + sans.loki.data.providers
+        + (read_xml_detector_masking,)
+    )

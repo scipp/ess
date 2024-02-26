@@ -2,7 +2,6 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import sys
 from pathlib import Path
-from typing import Callable, List
 
 import pytest
 import sciline
@@ -11,12 +10,20 @@ import scipp as sc
 import esssans as sans
 from esssans.conversions import ElasticCoordTransformGraph
 from esssans.types import (
+    BackgroundRun,
     BackgroundSubtractedIofQ,
     BeamCenter,
+    CalibratedMaskedData,
+    CleanSummedQ,
     CleanWavelengthMasked,
     CorrectForGravity,
+    Denominator,
     DimsToKeep,
+    Filename,
+    FilenameType,
+    FilePath,
     Numerator,
+    PixelMaskFilename,
     QBins,
     QxyBins,
     ReturnEvents,
@@ -27,16 +34,13 @@ from esssans.types import (
 )
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import make_params  # noqa: E402
-
-
-def loki_providers() -> List[Callable]:
-    return list(sans.providers + sans.loki.providers)
+from common import loki_providers, make_params  # noqa: E402
 
 
 @pytest.mark.parametrize('qxy', [False, True])
 def test_can_create_pipeline(qxy: bool):
     pipeline = sciline.Pipeline(loki_providers(), params=make_params(qxy=qxy))
+    pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
     pipeline.get(BackgroundSubtractedIofQ)
 
 
@@ -49,6 +53,7 @@ def test_pipeline_can_compute_IofQ(uncertainties, qxy: bool):
     params = make_params(qxy=qxy)
     params[UncertaintyBroadcastMode] = uncertainties
     pipeline = sciline.Pipeline(loki_providers(), params=params)
+    pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('Qy', 'Qx') if qxy else ('Q',)
     if qxy:
@@ -73,6 +78,7 @@ def test_pipeline_can_compute_IofQ_in_event_mode(uncertainties, target, qxy: boo
     params = make_params(qxy=qxy)
     params[UncertaintyBroadcastMode] = uncertainties
     pipeline = sciline.Pipeline(loki_providers(), params=params)
+    pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
     reference = pipeline.compute(target)
     pipeline[ReturnEvents] = True
     result = pipeline.compute(target)
@@ -110,6 +116,7 @@ def test_pipeline_can_compute_IofQ_in_wavelength_bands(qxy: bool):
         11,
     )
     pipeline = sciline.Pipeline(loki_providers(), params=params)
+    pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('band', 'Qy', 'Qx') if qxy else ('band', 'Q')
     assert result.sizes['band'] == 10
@@ -126,6 +133,7 @@ def test_pipeline_can_compute_IofQ_in_overlapping_wavelength_bands(qxy: bool):
         [edges[:-2], edges[2::]], dim='wavelength'
     ).transpose()
     pipeline = sciline.Pipeline(loki_providers(), params=params)
+    pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('band', 'Qy', 'Qx') if qxy else ('band', 'Q')
     assert result.sizes['band'] == 10
@@ -136,32 +144,107 @@ def test_pipeline_can_compute_IofQ_in_layers(qxy: bool):
     params = make_params(qxy=qxy)
     params[DimsToKeep] = ['layer']
     pipeline = sciline.Pipeline(loki_providers(), params=params)
+    pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('layer', 'Qy', 'Qx') if qxy else ('layer', 'Q')
     assert result.sizes['layer'] == 4
 
 
 def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs():
-    params = make_params(
-        sample_runs=['60250-2022-02-28_2215.nxs', '60339-2022-02-28_2215.nxs'],
-        background_runs=['60248-2022-02-28_2215.nxs', '60393-2022-02-28_2215.nxs'],
-    )
+    params = make_params()
+    del params[Filename[SampleRun]]
+    del params[Filename[BackgroundRun]]
+
+    sample_runs = ['60250-2022-02-28_2215.nxs', '60339-2022-02-28_2215.nxs']
+    background_runs = ['60248-2022-02-28_2215.nxs', '60393-2022-02-28_2215.nxs']
     pipeline = sciline.Pipeline(loki_providers(), params=params)
+    pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
+
+    # Set parameter series for file names
+    pipeline.set_param_series(Filename[SampleRun], sample_runs)
+    pipeline.set_param_series(Filename[BackgroundRun], background_runs)
+    # Add event merging providers
+    pipeline.insert(sans.loki.io.merge_sample_runs)
+    pipeline.insert(sans.loki.io.merge_background_runs)
+
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('Q',)
+
+
+def test_pipeline_IofQ_merging_events_yields_consistent_results():
+    N = 3
+    params = make_params()
+    pipeline_single = sciline.Pipeline(loki_providers(), params=params)
+    pipeline_single.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
+
+    del params[Filename[SampleRun]]
+    del params[Filename[BackgroundRun]]
+    pipeline_triple = sciline.Pipeline(loki_providers(), params=params)
+    pipeline_triple.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
+
+    # `set_param_series` does not allow muttiple identical values, so we need to
+    # map the file names to different ones.
+    def get_mapped_path(filename: FilenameType) -> FilePath[FilenameType]:
+        """Mapping file paths to allow loading same run multiple times."""
+        from esssans.loki.data import get_path
+
+        mapping = {
+            'sample_0.nxs': '60339-2022-02-28_2215.nxs',
+            'sample_1.nxs': '60339-2022-02-28_2215.nxs',
+            'sample_2.nxs': '60339-2022-02-28_2215.nxs',
+            'background_0.nxs': '60393-2022-02-28_2215.nxs',
+            'background_1.nxs': '60393-2022-02-28_2215.nxs',
+            'background_2.nxs': '60393-2022-02-28_2215.nxs',
+        }
+        filename = mapping.get(filename, filename)
+        return FilePath[FilenameType](get_path(filename))
+
+    pipeline_triple.insert(get_mapped_path)
+
+    pipeline_triple.set_param_series(
+        Filename[SampleRun], [f'sample_{i}.nxs' for i in range(N)]
+    )
+    pipeline_triple.set_param_series(
+        Filename[BackgroundRun], [f'background_{i}.nxs' for i in range(N)]
+    )
+    # Add event merging providers
+    pipeline_triple.insert(sans.loki.io.merge_sample_runs)
+    pipeline_triple.insert(sans.loki.io.merge_background_runs)
+
+    iofq1 = pipeline_single.compute(BackgroundSubtractedIofQ)
+    iofq3 = pipeline_triple.compute(BackgroundSubtractedIofQ)
+    assert sc.allclose(sc.values(iofq1.data), sc.values(iofq3.data))
+    assert sc.identical(iofq1.coords['Q'], iofq3.coords['Q'])
+    assert all(sc.variances(iofq1.data) > sc.variances(iofq3.data))
+    assert sc.allclose(
+        sc.values(
+            pipeline_single.compute(CleanSummedQ[SampleRun, Numerator]).hist().data
+        )
+        * N,
+        sc.values(
+            pipeline_triple.compute(CleanSummedQ[SampleRun, Numerator]).hist().data
+        ),
+    )
+    assert sc.allclose(
+        sc.values(pipeline_single.compute(CleanSummedQ[SampleRun, Denominator]).data)
+        * N,
+        sc.values(pipeline_triple.compute(CleanSummedQ[SampleRun, Denominator]).data),
+    )
 
 
 def test_beam_center_from_center_of_mass_is_close_to_verified_result():
     params = make_params()
     pipeline = sciline.Pipeline(loki_providers(), params=params)
+    pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
     center = pipeline.compute(BeamCenter)
-    reference = sc.vector([-0.0309889, -0.0168854, 0], unit='m')
+    reference = sc.vector([-0.0291487, -0.0181614, 0], unit='m')
     assert sc.allclose(center, reference)
 
 
 def test_phi_with_gravity():
     params = make_params()
     pipeline = sciline.Pipeline(loki_providers(), params=params)
+    pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
     pipeline[CorrectForGravity] = False
     data_no_grav = pipeline.compute(
         CleanWavelengthMasked[SampleRun, Numerator]
@@ -176,21 +259,24 @@ def test_phi_with_gravity():
     graph_with_grav = pipeline.compute(ElasticCoordTransformGraph)
 
     no_grav = data_no_grav.transform_coords(('two_theta', 'phi'), graph_no_grav)
-    two_theta_no_grav = no_grav.coords['two_theta']
     phi_no_grav = no_grav.coords['phi']
     with_grav = data_with_grav.transform_coords(('two_theta', 'phi'), graph_with_grav)
     phi_with_grav = with_grav.coords['phi'].mean('wavelength')
 
     assert not sc.identical(phi_no_grav, phi_with_grav)
 
-    # Exclude pixels near the origin, since phi will vary a lot there.
-    not_near_origin = two_theta_no_grav > sc.scalar(0.1, unit='deg').to(unit='rad')
+    # Exclude pixels near y=0, since phi with gravity could drop below y=0 and give a
+    # difference of almost 2*pi.
+    y = sc.abs(
+        pipeline.compute(CalibratedMaskedData[SampleRun])
+        .coords['position']
+        .fields.y.flatten(to='pixel')
+    )
+    not_near_origin = y > sc.scalar(0.05, unit='m')
+    phi_no_grav = phi_no_grav[not_near_origin]
+    phi_with_grav = phi_with_grav[not_near_origin]
     assert sc.all(
-        sc.isclose(
-            phi_no_grav[not_near_origin],
-            phi_with_grav[not_near_origin],
-            atol=sc.scalar(3.0, unit='deg').to(unit='rad'),
-        )
+        sc.isclose(phi_no_grav, phi_with_grav, atol=sc.scalar(5.0e-3, unit='rad'))
     )
 
     # Phi is in [-pi, pi], measured from the X axis.

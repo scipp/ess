@@ -9,7 +9,16 @@ try:
 except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
-from . import beam_center_finder, common, conversions, i_of_q, io, loki, normalization
+from . import (
+    beam_center_finder,
+    common,
+    conversions,
+    i_of_q,
+    io,
+    loki,
+    masking,
+    normalization,
+)
 from .common import transmission_from_background_run, transmission_from_sample_run
 from .direct_beam import direct_beam
 from .types import BackgroundSubtractedIofQ, IofQ, ReturnEvents, SampleRun
@@ -17,6 +26,7 @@ from .types import BackgroundSubtractedIofQ, IofQ, ReturnEvents, SampleRun
 providers = (
     *conversions.providers,
     *i_of_q.providers,
+    *masking.providers,
     *normalization.providers,
     # Default to fast but potentially inaccurate beam center finder
     beam_center_finder.beam_center_from_center_of_mass,
@@ -44,6 +54,7 @@ __all__ = [
     'i_of_q',
     'io',
     'loki',
+    'masking',
     'normalization',
     'providers',
     'transmission_from_sample_run',

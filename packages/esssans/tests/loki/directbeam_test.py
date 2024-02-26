@@ -2,7 +2,6 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import sys
 from pathlib import Path
-from typing import Callable, List
 
 import sciline
 import scipp as sc
@@ -13,17 +12,13 @@ from esssans.loki.data import get_path
 from esssans.types import DimsToKeep, QBins, WavelengthBands, WavelengthBins
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import make_params  # noqa: E402
+from common import loki_providers, make_params  # noqa: E402
 
 
 def _get_I0(qbins: sc.Variable) -> sc.Variable:
     Iq_theory = sc.io.load_hdf5(get_path('PolyGauss_I0-50_Rg-60.h5'))
     f = interp1d(Iq_theory, 'Q')
     return f(sc.midpoints(qbins)).data[0]
-
-
-def loki_providers() -> List[Callable]:
-    return list(sans.providers + sans.loki.providers)
 
 
 def test_can_compute_direct_beam_for_all_pixels():

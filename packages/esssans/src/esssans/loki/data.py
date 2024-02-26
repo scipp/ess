@@ -3,6 +3,7 @@
 
 
 from ..data import Registry
+from ..types import FilenameType, FilePath
 
 _registry = Registry(
     instrument='loki',
@@ -23,11 +24,16 @@ _registry = Registry(
         '60394-2022-02-28_2215.nxs': 'md5:c40f38a62337d86957af925296c4c615',
         # Analytical model for the I(Q) of the Poly-Gauss sample
         'PolyGauss_I0-50_Rg-60.h5': 'md5:f5d60d9c2286cb197b8cd4dc82db3d7e',
+        # XML file for the pixel mask
+        'mask_new_July2022.xml': 'md5:421b6dc9db74126ffbc5d88164d017b0',
     },
     version='2',
 )
 
 
-get_path = _registry.get_path
+def get_path(filename: FilenameType) -> FilePath[FilenameType]:
+    """Translate any filename to a path to the file obtained from pooch registries."""
+    return FilePath[FilenameType](_registry.get_path(filename))
 
-__all__ = ['get_path']
+
+providers = (get_path,)
