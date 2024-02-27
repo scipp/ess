@@ -13,11 +13,12 @@ from scipp.constants import g
 from ..types import (
     DirectBeam,
     DirectBeamFilename,
+    Filename,
     LoadedFileContents,
     RunType,
     SampleRun,
 )
-from .io import CalibrationFilename, Filename, FilePath
+from .io import CalibrationFilename, FilePath
 
 try:
     import mantid.api as _mantid_api
