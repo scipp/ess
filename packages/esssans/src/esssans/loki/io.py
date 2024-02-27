@@ -4,7 +4,7 @@
 Loading and merging of LoKI data.
 """
 from functools import reduce
-from typing import NewType, Optional
+from typing import Optional
 
 import sciline
 import scipp as sc
