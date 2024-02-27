@@ -4,17 +4,20 @@
 from dataclasses import dataclass
 from typing import Dict
 
+import sciline
 import scipp as sc
 
 from ..data import Registry
 from ..types import (
+    BackgroundRun,
     DirectBeam,
     DirectBeamFilename,
     Filename,
     FilenameType,
     FilePath,
-    LoadedFileContents,
     RunType,
+    SampleRun,
+    TransmissionRun,
 )
 
 
@@ -98,12 +101,34 @@ def get_path(filename: FilenameType) -> FilePath[FilenameType]:
             return reg.registry.get_path(filename)
 
 
+class LoadedFileContents(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+    """Contents of a loaded file."""
+
+
 def load_run(filename: FilePath[Filename[RunType]]) -> LoadedFileContents[RunType]:
     return LoadedFileContents[RunType](sc.io.load_hdf5(filename))
 
 
 def load_direct_beam(filename: FilePath[DirectBeamFilename]) -> DirectBeam:
     return DirectBeam(sc.io.load_hdf5(filename))
+
+
+def transmission_from_sample_run(
+    data: LoadedFileContents[SampleRun],
+) -> LoadedFileContents[TransmissionRun[SampleRun]]:
+    """
+    Use transmission from a sample run, instead of dedicated run.
+    """
+    return LoadedFileContents[TransmissionRun[SampleRun]](data)
+
+
+def transmission_from_background_run(
+    data: LoadedFileContents[BackgroundRun],
+) -> LoadedFileContents[TransmissionRun[BackgroundRun]]:
+    """
+    Use transmission from a background run, instead of dedicated run.
+    """
+    return LoadedFileContents[TransmissionRun[BackgroundRun]](data)
 
 
 providers = (get_path, load_run, load_direct_beam)

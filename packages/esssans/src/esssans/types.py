@@ -211,12 +211,24 @@ class SolidAngle(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Solid angle of detector pixels seen from sample position"""
 
 
-class LoadedSingleFileContents(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
-    """The entire contents of a single loaded file"""
+class LoadedSingleFileDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+    """Detector events of a single loaded file"""
 
 
-class LoadedFileContents(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
-    """The entire contents of loaded data (can be data merged from multiple files)"""
+class LoadedSingleFileMonitor(
+    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataGroup], sc.DataGroup
+):
+    """A single monitor of a single loaded file"""
+
+
+class LoadedDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+    """Detector events (can be data merged from multiple files)"""
+
+
+class LoadedMonitor(
+    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataGroup], sc.DataGroup
+):
+    """Monitor data (can be data merged from multiple files)"""
 
 
 class RawData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
