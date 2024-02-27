@@ -13,6 +13,7 @@ import scippnexus as snx
 from ..common import gravity_vector
 from ..types import (
     BackgroundRun,
+    DataFolder,
     Filename,
     FilenameType,
     FilePath,
@@ -37,8 +38,6 @@ DETECTOR_BANK_RESHAPING = {
         dim='detector_number', sizes=dict(layer=4, tube=32, straw=7, pixel=512)
     )
 }
-
-DataFolder = NewType('DataFolder', str)
 
 
 def _patch_data(
