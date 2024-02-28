@@ -3,6 +3,7 @@
 """
 Loading and merging of LoKI data.
 """
+from collections.abc import Mapping
 from functools import reduce
 from typing import Optional, Union
 
@@ -80,9 +81,7 @@ def _merge_events(a, b):
 
 
 def _merge_runs(
-    data_groups: sciline.Series[
-        Filename[ScatteringRunType], LoadedSingleFileDetector[ScatteringRunType]
-    ],
+    data_groups: Mapping[Filename[ScatteringRunType], sc.DataGroup],
     name: Union[
         NeXusDetectorName, NeXusMonitorName[Incident], NeXusMonitorName[Transmission]
     ],
