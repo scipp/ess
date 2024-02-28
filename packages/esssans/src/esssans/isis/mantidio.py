@@ -23,7 +23,7 @@ except ModuleNotFoundError:
     class _MantidFallback:
         def __getattr__(self, name: str) -> NoReturn:
             raise ImportError(
-                'Mantid is required to use `sans.isis.mantidio` ' 'but is not installed'
+                'Mantid is required to use `sans.isis.mantidio` but is not installed'
             ) from None
 
     _mantid_api = _MantidFallback()

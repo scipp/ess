@@ -72,8 +72,8 @@ def zoom_providers():
         + sans.isis.masking.providers
         + sans.isis.data.providers
         + (
-            sans.transmission_from_background_run,
-            sans.transmission_from_sample_run,
+            sans.isis.data.transmission_from_background_run,
+            sans.isis.data.transmission_from_sample_run,
         )
     )
 
