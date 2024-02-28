@@ -139,7 +139,7 @@ def merge_sample_monitor_runs(
     """
     Merge monitor events from multiple sample runs into a single sample run.
     """
-    return LoadedDetector[SampleRun](
+    return LoadedMonitor[SampleRun, MonitorType](
         _merge_runs(data_groups=monitors, name=monitor_name)
     )
 
@@ -153,7 +153,7 @@ def merge_background_monitor_runs(
     """
     Merge monitor events from multiple background runs into a single sample run.
     """
-    return LoadedDetector[BackgroundRun](
+    return LoadedMonitor[BackgroundRun, MonitorType](
         _merge_runs(data_groups=monitors, name=monitor_name)
     )
 
@@ -241,9 +241,11 @@ def to_path(filename: FilenameType, path: DataFolder) -> FilePath[FilenameType]:
 
 
 providers = (load_nexus, load_nexus_monitor, to_detector, to_monitor, to_path)
+"""Providers for loading single files."""
 event_merging_providers = (
     merge_sample_runs,
     merge_background_runs,
     merge_sample_monitor_runs,
     merge_background_monitor_runs,
 )
+"""Providers to merge events from multiples files."""
