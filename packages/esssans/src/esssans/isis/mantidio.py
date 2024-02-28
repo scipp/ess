@@ -10,14 +10,8 @@ import scipp as sc
 import scippneutron as scn
 from scipp.constants import g
 
-from ..types import (
-    DirectBeam,
-    DirectBeamFilename,
-    Filename,
-    LoadedFileContents,
-    RunType,
-    SampleRun,
-)
+from ..types import DirectBeam, DirectBeamFilename, Filename, RunType, SampleRun
+from .data import LoadedFileContents
 from .io import CalibrationFilename, FilePath
 
 try:
