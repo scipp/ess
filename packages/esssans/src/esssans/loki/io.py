@@ -206,7 +206,13 @@ def load_nexus_detector(
     sample_name: Optional[NeXusSampleName],
 ) -> LoadedSingleFileDetector[RunType]:
     return LoadedSingleFileDetector[RunType](
-        _load_events(filename, detector_name, transform_path, source_name, sample_name)
+        _load_events(
+            filename=filename,
+            data_name=detector_name,
+            transform_path=transform_path,
+            source_name=source_name,
+            sample_name=sample_name,
+        )
     )
 
 
@@ -218,7 +224,13 @@ def load_nexus_monitor(
     sample_name: Optional[NeXusSampleName],
 ) -> LoadedSingleFileMonitor[RunType, MonitorType]:
     return LoadedSingleFileMonitor[RunType, MonitorType](
-        _load_events(filename, monitor_name, transform_path, source_name, sample_name)
+        _load_events(
+            filename=filename,
+            data_name=monitor_name,
+            transform_path=transform_path,
+            source_name=source_name,
+            sample_name=sample_name,
+        )
     )
 
 
