@@ -198,7 +198,7 @@ def _load_events(
     return dg
 
 
-def load_nexus(
+def load_nexus_detector(
     filename: FilePath[Filename[RunType]],
     detector_name: NeXusDetectorName,
     transform_path: TransformationPath,
@@ -240,7 +240,7 @@ def to_path(filename: FilenameType, path: DataFolder) -> FilePath[FilenameType]:
     return FilePath[FilenameType](f'{path}/{filename}')
 
 
-providers = (load_nexus, load_nexus_monitor, to_detector, to_monitor, to_path)
+providers = (load_nexus_detector, load_nexus_monitor, to_detector, to_monitor, to_path)
 """Providers for loading single files."""
 event_merging_providers = (
     merge_sample_runs,
