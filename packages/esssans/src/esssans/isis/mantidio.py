@@ -10,14 +10,9 @@ import scipp as sc
 import scippneutron as scn
 from scipp.constants import g
 
-from ..types import (
-    DirectBeam,
-    DirectBeamFilename,
-    LoadedFileContents,
-    RunType,
-    SampleRun,
-)
-from .io import CalibrationFilename, Filename, FilePath
+from ..types import DirectBeam, DirectBeamFilename, Filename, RunType, SampleRun
+from .data import LoadedFileContents
+from .io import CalibrationFilename, FilePath
 
 try:
     import mantid.api as _mantid_api
@@ -28,7 +23,7 @@ except ModuleNotFoundError:
     class _MantidFallback:
         def __getattr__(self, name: str) -> NoReturn:
             raise ImportError(
-                'Mantid is required to use `sans.isis.mantidio` ' 'but is not installed'
+                'Mantid is required to use `sans.isis.mantidio` but is not installed'
             ) from None
 
     _mantid_api = _MantidFallback()

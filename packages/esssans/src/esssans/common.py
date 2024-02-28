@@ -8,8 +8,6 @@ import numpy as np
 import scipp as sc
 from scipp.constants import g
 
-from .types import BackgroundRun, LoadedFileContents, SampleRun, TransmissionRun
-
 
 def gravity_vector() -> sc.Variable:
     """
@@ -93,21 +91,3 @@ def mask_range(
         else:
             out.masks[name] = mask_values
     return out
-
-
-def transmission_from_sample_run(
-    data: LoadedFileContents[SampleRun],
-) -> LoadedFileContents[TransmissionRun[SampleRun]]:
-    """
-    Use transmission from a sample run, instead of dedicated run.
-    """
-    return LoadedFileContents[TransmissionRun[SampleRun]](data)
-
-
-def transmission_from_background_run(
-    data: LoadedFileContents[BackgroundRun],
-) -> LoadedFileContents[TransmissionRun[BackgroundRun]]:
-    """
-    Use transmission from a background run, instead of dedicated run.
-    """
-    return LoadedFileContents[TransmissionRun[BackgroundRun]](data)

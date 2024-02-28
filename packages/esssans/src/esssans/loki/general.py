@@ -10,7 +10,8 @@ from ..types import (
     DetectorPixelShape,
     Incident,
     LabFrameTransform,
-    LoadedFileContents,
+    LoadedDetector,
+    LoadedMonitor,
     MonitorType,
     NeXusDetectorName,
     NeXusMonitorName,
@@ -36,37 +37,31 @@ default_parameters = {
 
 
 def get_detector_data(
-    dg: LoadedFileContents[ScatteringRunType], detector_name: NeXusDetectorName
+    dg: LoadedDetector[ScatteringRunType], detector_name: NeXusDetectorName
 ) -> RawData[ScatteringRunType]:
-    da = dg[NEXUS_INSTRUMENT_PATH][detector_name][f'{detector_name}_events']
-    return RawData[ScatteringRunType](da)
+    return RawData[ScatteringRunType](dg[f'{detector_name}_events'])
 
 
 def get_monitor_data(
-    dg: LoadedFileContents[RunType], monitor_name: NeXusMonitorName[MonitorType]
+    monitor: LoadedMonitor[RunType, MonitorType],
+    monitor_name: NeXusMonitorName[MonitorType],
 ) -> CalibratedMonitor[RunType, MonitorType]:
-    mon_dg = dg[NEXUS_INSTRUMENT_PATH][monitor_name]
-    out = mon_dg[f'{monitor_name}_events']
-    out.coords['position'] = mon_dg['position']
+    out = monitor[f'{monitor_name}_events'].copy(deep=False)
+    out.coords['position'] = monitor['position']
     return CalibratedMonitor[RunType, MonitorType](out)
 
 
 def detector_pixel_shape(
-    dg: LoadedFileContents[ScatteringRunType], detector_name: NeXusDetectorName
+    dg: LoadedDetector[ScatteringRunType],
 ) -> DetectorPixelShape[ScatteringRunType]:
-    return DetectorPixelShape[ScatteringRunType](
-        dg[NEXUS_INSTRUMENT_PATH][detector_name]['pixel_shape']
-    )
+    return DetectorPixelShape[ScatteringRunType](dg['pixel_shape'])
 
 
 def detector_lab_frame_transform(
-    dg: LoadedFileContents[ScatteringRunType],
-    detector_name: NeXusDetectorName,
+    detector: LoadedDetector[ScatteringRunType],
     transform_path: TransformationPath,
 ) -> LabFrameTransform[ScatteringRunType]:
-    return LabFrameTransform[ScatteringRunType](
-        dg[NEXUS_INSTRUMENT_PATH][detector_name][transform_path]
-    )
+    return LabFrameTransform[ScatteringRunType](detector[transform_path])
 
 
 providers = (

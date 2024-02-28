@@ -3,8 +3,9 @@
 """
 Loading and merging of LoKI data.
 """
+from collections.abc import Mapping
 from functools import reduce
-from typing import Optional
+from typing import Optional, Union
 
 import sciline
 import scipp as sc
@@ -18,8 +19,11 @@ from ..types import (
     FilenameType,
     FilePath,
     Incident,
-    LoadedFileContents,
-    LoadedSingleFileContents,
+    LoadedDetector,
+    LoadedMonitor,
+    LoadedSingleFileDetector,
+    LoadedSingleFileMonitor,
+    MonitorType,
     NeXusDetectorName,
     NeXusMonitorName,
     NeXusSampleName,
@@ -77,122 +81,182 @@ def _merge_events(a, b):
 
 
 def _merge_runs(
-    data_groups: sciline.Series[
-        Filename[ScatteringRunType], LoadedSingleFileContents[ScatteringRunType]
+    data_groups: Mapping[Filename[ScatteringRunType], sc.DataGroup],
+    name: Union[
+        NeXusDetectorName, NeXusMonitorName[Incident], NeXusMonitorName[Transmission]
     ],
-    detector_name: NeXusDetectorName,
-    incident_monitor_name: NeXusMonitorName[Incident],
-    transmission_monitor_name: NeXusMonitorName[Transmission],
-) -> LoadedFileContents[ScatteringRunType]:
+) -> sc.DataGroup:
     """
-    Merge detector and monitor events from multiple runs into a single run.
+    Merge events from multiple runs into a single run.
     """
-    data_entries = (detector_name, incident_monitor_name, transmission_monitor_name)
     # TODO: we need some additional checks that the data is compatible. For example,
     # the sample and the source positions should be the same for all runs. Also, the
     # detector geometry (pixel_shapes, lab transform) should be the same for all runs.
-    out = list(data_groups.values())[0].copy(deep=False)
-    for name in data_entries:
-        data_arrays = []
-        for dg in data_groups.values():
-            events = dg[NEXUS_INSTRUMENT_PATH][name][f'{name}_events']
-            if 'event_time_zero' in events.dims:
-                events = events.bins.concat('event_time_zero')
-            data_arrays.append(events)
-        out[NEXUS_INSTRUMENT_PATH][name][f'{name}_events'] = reduce(
-            _merge_events, data_arrays
-        )
+    out = next(iter(data_groups.values())).copy(deep=False)
+    data_arrays = []
+    for dg in data_groups.values():
+        events = dg[f'{name}_events']
+        if 'event_time_zero' in events.dims:
+            events = events.bins.concat('event_time_zero')
+        data_arrays.append(events)
+    out[f'{name}_events'] = reduce(_merge_events, data_arrays)
     return out
 
 
 def merge_sample_runs(
-    data_groups: sciline.Series[
-        Filename[SampleRun], LoadedSingleFileContents[SampleRun]
-    ],
+    detectors: sciline.Series[Filename[SampleRun], LoadedSingleFileDetector[SampleRun]],
     detector_name: NeXusDetectorName,
-    incident_monitor_name: NeXusMonitorName[Incident],
-    transmission_monitor_name: NeXusMonitorName[Transmission],
-) -> LoadedFileContents[SampleRun]:
+) -> LoadedDetector[SampleRun]:
     """
-    Merge detector and monitor events from multiple sample runs into a single sample
-    run.
+    Merge detector events from multiple sample runs into a single sample run.
     """
-
-    out = _merge_runs(
-        data_groups=data_groups,
-        detector_name=detector_name,
-        incident_monitor_name=incident_monitor_name,
-        transmission_monitor_name=transmission_monitor_name,
+    return LoadedDetector[SampleRun](
+        _merge_runs(data_groups=detectors, name=detector_name)
     )
-    return LoadedFileContents[SampleRun](out)
 
 
 def merge_background_runs(
-    data_groups: sciline.Series[
-        Filename[BackgroundRun], LoadedSingleFileContents[BackgroundRun]
+    detectors: sciline.Series[
+        Filename[BackgroundRun], LoadedSingleFileDetector[BackgroundRun]
     ],
     detector_name: NeXusDetectorName,
-    incident_monitor_name: NeXusMonitorName[Incident],
-    transmission_monitor_name: NeXusMonitorName[Transmission],
-) -> LoadedFileContents[BackgroundRun]:
+) -> LoadedDetector[BackgroundRun]:
     """
-    Merge detector and monitor events from multiple background runs into a single
-    background run.
+    Merge detector events from multiple background runs into a single background run.
     """
-
-    out = _merge_runs(
-        data_groups=data_groups,
-        detector_name=detector_name,
-        incident_monitor_name=incident_monitor_name,
-        transmission_monitor_name=transmission_monitor_name,
+    return LoadedDetector[BackgroundRun](
+        _merge_runs(data_groups=detectors, name=detector_name)
     )
-    return LoadedFileContents[BackgroundRun](out)
 
 
-def load_nexus(
-    filename: FilePath[Filename[RunType]],
-    detector_name: NeXusDetectorName,
-    incident_monitor_name: NeXusMonitorName[Incident],
-    transmission_monitor_name: NeXusMonitorName[Transmission],
-    transform_path: TransformationPath,
+def merge_sample_monitor_runs(
+    monitors: sciline.Series[
+        Filename[SampleRun], LoadedSingleFileMonitor[SampleRun, MonitorType]
+    ],
+    monitor_name: NeXusMonitorName[MonitorType],
+) -> LoadedMonitor[SampleRun, MonitorType]:
+    """
+    Merge monitor events from multiple sample runs into a single sample run.
+    """
+    return LoadedMonitor[SampleRun, MonitorType](
+        _merge_runs(data_groups=monitors, name=monitor_name)
+    )
+
+
+def merge_background_monitor_runs(
+    monitors: sciline.Series[
+        Filename[BackgroundRun], LoadedSingleFileMonitor[BackgroundRun, MonitorType]
+    ],
+    monitor_name: NeXusMonitorName[MonitorType],
+) -> LoadedMonitor[BackgroundRun, MonitorType]:
+    """
+    Merge monitor events from multiple background runs into a single sample run.
+    """
+    return LoadedMonitor[BackgroundRun, MonitorType](
+        _merge_runs(data_groups=monitors, name=monitor_name)
+    )
+
+
+def _load_source_and_sample_positions(
+    instrument: snx.Group,
     source_name: NeXusSourceName,
     sample_name: Optional[NeXusSampleName],
-) -> LoadedSingleFileContents[RunType]:
-    data_entries = (detector_name, incident_monitor_name, transmission_monitor_name)
-
-    with snx.File(filename) as f:
-        dg = f['entry'][()]
-    dg = snx.compute_positions(dg, store_transform=transform_path)
-
+) -> tuple[sc.Variable, sc.Variable]:
+    source_position = snx.compute_positions(instrument[source_name][()])['position']
     if sample_name is None:
         sample_position = sc.vector(value=[0, 0, 0], unit='m')
     else:
-        sample_position = dg[NEXUS_INSTRUMENT_PATH][sample_name]['position']
-    source_position = dg[NEXUS_INSTRUMENT_PATH][source_name]['position']
+        sample_position = snx.compute_positions(instrument[sample_name][()])['position']
+    return source_position, sample_position
 
-    for name in data_entries:
-        data = _preprocess_data(
-            dg[NEXUS_INSTRUMENT_PATH][name][f'{name}_events'],
-            sample_position=sample_position,
-            source_position=source_position,
+
+def _load_events(
+    filename: FilePath[Filename[RunType]],
+    data_name: Union[NeXusDetectorName, NeXusMonitorName[MonitorType]],
+    transform_path: TransformationPath,
+    source_name: NeXusSourceName,
+    sample_name: Optional[NeXusSampleName],
+) -> sc.DataGroup:
+    with snx.File(filename) as f:
+        instrument = f['entry'][NEXUS_INSTRUMENT_PATH]
+        dg = instrument[data_name][()]
+        source_position, sample_position = _load_source_and_sample_positions(
+            instrument, source_name, sample_name
         )
-        if name in DETECTOR_BANK_RESHAPING:
-            data = DETECTOR_BANK_RESHAPING[name](data)
+    dg = snx.compute_positions(dg, store_transform=transform_path)
 
-        dg[NEXUS_INSTRUMENT_PATH][name][f'{name}_events'] = data
+    events = _preprocess_data(
+        dg[f'{data_name}_events'],
+        sample_position=sample_position,
+        source_position=source_position,
+    )
+    if data_name in DETECTOR_BANK_RESHAPING:
+        events = DETECTOR_BANK_RESHAPING[data_name](events)
 
-    return LoadedSingleFileContents[RunType](dg)
+    dg[f'{data_name}_events'] = events
+    return dg
 
 
-def to_file_contents(
-    data: LoadedSingleFileContents[RunType],
-) -> LoadedFileContents[RunType]:
-    """Dummy provider to convert single-file contents to file contents."""
-    return LoadedFileContents[RunType](data)
+def load_nexus_detector(
+    filename: FilePath[Filename[RunType]],
+    detector_name: NeXusDetectorName,
+    transform_path: TransformationPath,
+    source_name: NeXusSourceName,
+    sample_name: Optional[NeXusSampleName],
+) -> LoadedSingleFileDetector[RunType]:
+    return LoadedSingleFileDetector[RunType](
+        _load_events(
+            filename=filename,
+            data_name=detector_name,
+            transform_path=transform_path,
+            source_name=source_name,
+            sample_name=sample_name,
+        )
+    )
+
+
+def load_nexus_monitor(
+    filename: FilePath[Filename[RunType]],
+    monitor_name: NeXusMonitorName[MonitorType],
+    transform_path: TransformationPath,
+    source_name: NeXusSourceName,
+    sample_name: Optional[NeXusSampleName],
+) -> LoadedSingleFileMonitor[RunType, MonitorType]:
+    return LoadedSingleFileMonitor[RunType, MonitorType](
+        _load_events(
+            filename=filename,
+            data_name=monitor_name,
+            transform_path=transform_path,
+            source_name=source_name,
+            sample_name=sample_name,
+        )
+    )
+
+
+def to_detector(
+    data: LoadedSingleFileDetector[RunType],
+) -> LoadedDetector[RunType]:
+    """Dummy provider to convert a single-file detector to a combined detector."""
+    return LoadedDetector[RunType](data)
+
+
+def to_monitor(
+    data: LoadedSingleFileMonitor[RunType, MonitorType],
+) -> LoadedMonitor[RunType, MonitorType]:
+    """Dummy provider to convert a single-file monitor to a combined monitor."""
+    return LoadedMonitor[RunType, MonitorType](data)
 
 
 def to_path(filename: FilenameType, path: DataFolder) -> FilePath[FilenameType]:
-    return f'{path}/{filename}'
+    return FilePath[FilenameType](f'{path}/{filename}')
 
 
-providers = (load_nexus, to_file_contents, to_path)
+providers = (load_nexus_detector, load_nexus_monitor, to_detector, to_monitor, to_path)
+"""Providers for loading single files."""
+event_merging_providers = (
+    merge_sample_runs,
+    merge_background_runs,
+    merge_sample_monitor_runs,
+    merge_background_monitor_runs,
+)
+"""Providers to merge events from multiples files."""

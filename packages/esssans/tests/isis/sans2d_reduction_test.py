@@ -79,7 +79,10 @@ def sans2d_providers():
         + isis.providers
         + isis.data.providers
         + isis.sans2d.providers
-        + (sans.transmission_from_background_run, sans.transmission_from_sample_run)
+        + (
+            sans.isis.data.transmission_from_background_run,
+            sans.isis.data.transmission_from_sample_run,
+        )
     )
 
 

@@ -157,15 +157,13 @@ def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs():
 
     sample_runs = ['60250-2022-02-28_2215.nxs', '60339-2022-02-28_2215.nxs']
     background_runs = ['60248-2022-02-28_2215.nxs', '60393-2022-02-28_2215.nxs']
-    pipeline = sciline.Pipeline(loki_providers(), params=params)
+    providers = (*loki_providers(), *sans.loki.io.event_merging_providers)
+    pipeline = sciline.Pipeline(providers, params=params)
     pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
 
     # Set parameter series for file names
     pipeline.set_param_series(Filename[SampleRun], sample_runs)
     pipeline.set_param_series(Filename[BackgroundRun], background_runs)
-    # Add event merging providers
-    pipeline.insert(sans.loki.io.merge_sample_runs)
-    pipeline.insert(sans.loki.io.merge_background_runs)
 
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('Q',)
@@ -208,8 +206,8 @@ def test_pipeline_IofQ_merging_events_yields_consistent_results():
         Filename[BackgroundRun], [f'background_{i}.nxs' for i in range(N)]
     )
     # Add event merging providers
-    pipeline_triple.insert(sans.loki.io.merge_sample_runs)
-    pipeline_triple.insert(sans.loki.io.merge_background_runs)
+    for provider in sans.loki.io.event_merging_providers:
+        pipeline_triple.insert(provider)
 
     iofq1 = pipeline_single.compute(BackgroundSubtractedIofQ)
     iofq3 = pipeline_triple.compute(BackgroundSubtractedIofQ)

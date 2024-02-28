@@ -8,7 +8,6 @@ import scipp as sc
 from ..types import (
     DetectorPixelShape,
     LabFrameTransform,
-    LoadedFileContents,
     MonitorType,
     NeXusMonitorName,
     RawData,
@@ -19,6 +18,7 @@ from ..types import (
     SampleRun,
     ScatteringRunType,
 )
+from .data import LoadedFileContents
 
 
 def get_detector_data(

@@ -19,7 +19,6 @@ from . import (
     masking,
     normalization,
 )
-from .common import transmission_from_background_run, transmission_from_sample_run
 from .direct_beam import direct_beam
 from .types import BackgroundSubtractedIofQ, IofQ, ReturnEvents, SampleRun
 
@@ -57,6 +56,4 @@ __all__ = [
     'masking',
     'normalization',
     'providers',
-    'transmission_from_sample_run',
-    'transmission_from_background_run',
 ]
