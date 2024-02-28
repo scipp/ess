@@ -52,7 +52,7 @@ def get_monitor_data(
 
 
 def detector_pixel_shape(
-    dg: LoadedDetector[ScatteringRunType], detector_name: NeXusDetectorName
+    dg: LoadedDetector[ScatteringRunType],
 ) -> DetectorPixelShape[ScatteringRunType]:
     return DetectorPixelShape[ScatteringRunType](dg['pixel_shape'])
 
