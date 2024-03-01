@@ -1,5 +1,13 @@
 # About
 
+```{toctree}
+---
+maxdepth: 3
+---
+
+data_workflow_overview
+```
+
 ## Development
 
 ESSnmx is an open source project by the [European Spallation Source ERIC](https://europeanspallationsource.se/) (ESS).
