@@ -72,7 +72,7 @@ dials.index imported.expt strong.refl space_group=P1 unit_cell=a,b,c,alpha,beta,
 #### 4. Refine the Diffraction Geometry
 
 The result of indexing the instrument geometry is then used to get refined diffraction geometry [^2].
-[^2]: (https://dials.github.io/documentation/programs/dials_refine)
+[^2]: https://dials.github.io/documentation/programs/dials_refine
 
 ```console
 dials.refine indexed.refl indexed.expt detector.panels=hierarchical
@@ -81,7 +81,7 @@ dials.refine indexed.refl indexed.expt detector.panels=hierarchical
 #### 5. Integrate Reflexes
 
 The last step in DIALS is to integrate each reflex.[^3]
-[^3]: (https://dials.github.io/documentation/programs/dials_integrate.html)
+[^3]: https://dials.github.io/documentation/programs/dials_integrate.html
 
 Currently, different approach is used to integrate the dimension of the image and the dimension of TOF. <br>
 In the dimension of the image, a simple summation is used
