@@ -18,6 +18,7 @@ requirements:
     - scipp>=23.8.0
     - scippnexus>=23.9.0
     - pooch
+    - defusedxml
     - python>=3.10
 
 test:
