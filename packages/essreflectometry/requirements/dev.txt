@@ -95,7 +95,7 @@ python-json-logger==2.0.7
     # via jupyter-events
 pyyaml-include==1.3.2
     # via copier
-questionary==2.0.1
+questionary==1.10.0
     # via copier
 rfc3339-validator==0.1.4
     # via
