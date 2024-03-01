@@ -1,13 +1,11 @@
-# Developer documentation
+# Development
 
 ```{include} ../../CONTRIBUTING.md
 ```
 
-## Table of contents
-
 ```{toctree}
 ---
-maxdepth: 2
+hidden:
 ---
 
 getting-started
