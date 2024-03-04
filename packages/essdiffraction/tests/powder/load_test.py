@@ -2,8 +2,8 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import pytest
 
-from ess.diffraction.external import load_calibration
-from ess.diffraction.external.powgen import data
+from ess.powder.external import load_calibration
+from ess.powder.external.powgen import data
 
 
 @pytest.mark.skip(

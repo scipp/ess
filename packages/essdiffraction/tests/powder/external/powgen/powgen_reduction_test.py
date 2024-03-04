@@ -5,7 +5,7 @@ import pytest
 import sciline
 import scipp as sc
 
-from ess.diffraction.types import (
+from ess.powder.types import (
     CalibrationFilename,
     DspacingBins,
     DspacingHistogram,
@@ -20,11 +20,10 @@ from ess.diffraction.types import (
 
 @pytest.fixture()
 def providers():
-    from ess import diffraction
-    from ess.diffraction import powder
-    from ess.diffraction.external import powgen
+    from ess import powder
+    from ess.powder.external import powgen
 
-    return [*diffraction.providers, *powder.providers, *powgen.providers]
+    return [*powder.providers, *powgen.providers]
 
 
 @pytest.fixture()
@@ -68,7 +67,7 @@ def test_pipeline_can_compute_intermediate_results(providers, params):
 
 
 def test_pipeline_group_by_two_theta(providers, params):
-    from ess.diffraction.grouping import group_by_two_theta, merge_all_pixels
+    from ess.powder.grouping import group_by_two_theta, merge_all_pixels
 
     providers.remove(merge_all_pixels)
     providers.append(group_by_two_theta)

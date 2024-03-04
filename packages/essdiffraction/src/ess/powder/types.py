@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
-"""This module defines the domain types used in ess.diffraction.
+"""This module defines the domain types used in ess.powder.
 
 The domain types are used to define parameters and to request results from a Sciline
 pipeline.

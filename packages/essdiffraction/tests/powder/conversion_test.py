@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 import scipp as sc
 
-from ess.diffraction.powder import to_dspacing_with_calibration
+from ess.powder.conversion import to_dspacing_with_calibration
 
 
 @pytest.fixture(params=['random', 'zero'])

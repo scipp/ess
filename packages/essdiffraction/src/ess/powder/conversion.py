@@ -9,9 +9,9 @@ from typing import Optional
 
 import scipp as sc
 
-from ..logging import get_logger
-from ..types import CalibrationData, DspacingData, NormalizedByProtonCharge, RunType
 from .correction import merge_calibration
+from .logging import get_logger
+from .types import CalibrationData, DspacingData, NormalizedByProtonCharge, RunType
 
 
 def _dspacing_from_diff_calibration_generic_impl(t, t0, a, c):
@@ -63,7 +63,7 @@ def dspacing_from_diff_calibration(
 
     See Also
     --------
-    ess.diffraction.conversions.to_dspacing_with_calibration
+    ess.powder.conversions.to_dspacing_with_calibration
     """
     if sc.all(difa == sc.scalar(0.0, unit=difa.unit)).value:
         return _dspacing_from_diff_calibration_a0_impl(tof, tzero, difc)
@@ -131,7 +131,7 @@ def to_dspacing_with_calibration(
 
     See Also
     --------
-    ess.diffraction.conversions.dspacing_from_diff_calibration
+    ess.powder.conversions.dspacing_from_diff_calibration
     """
     if calibration is not None:
         out = merge_calibration(into=data, calibration=calibration)
