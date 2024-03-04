@@ -37,15 +37,16 @@
 :heading-offset: 1
 :::
 
-
 ## Get in touch
 
 - If you have questions that are not answered by these documentation pages, ask on [GitHub discussions](https://github.com/scipp/esssans/discussions). Please include a self-contained reproducible example if possible.
 - Report bugs (including unclear, missing, or wrong documentation!), suggest features or view the source code [on GitHub](https://github.com/scipp/esssans).
 
+## Table of contents
+
 ```{toctree}
 ---
-hidden:
+maxdepth: 2
 ---
 
 user-guide/index
