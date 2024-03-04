@@ -3,9 +3,11 @@
 ```{include} ../../CONTRIBUTING.md
 ```
 
+## Table of contents
+
 ```{toctree}
 ---
-hidden:
+maxdepth: 2
 ---
 
 getting-started
