@@ -53,9 +53,10 @@ def test_run_pipeline(amor_pipeline: sciline.Pipeline):
 
 def test_find_corrections(amor_pipeline: sciline.Pipeline):
     graph = amor_pipeline.get(orso.OrsoIofQDataset)
-    assert sorted(orso.find_corrections(graph)) == [
+    # In topological order
+    assert orso.find_corrections(graph) == [
+        'supermirror calibration',
         'chopper ToF correction',
         'footprint correction',
-        'supermirror calibration',
         'total counts',
     ]

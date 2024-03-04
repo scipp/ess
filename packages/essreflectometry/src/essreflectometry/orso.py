@@ -6,6 +6,7 @@ The Sciline providers and types in this module largely ignore the metadata
 of reference runs and only use the metadata of the sample run.
 """
 
+import graphlib
 import os
 import platform
 from datetime import datetime, timezone
@@ -183,15 +184,19 @@ def find_corrections(task_graph: TaskGraph) -> list[str]:
     Returns
     -------
     :
-        List of corrections.
+        List of corrections in the order they are applied in.
     """
-    return sorted(
-        [
-            c
-            for key in task_graph.keys()
-            if (c := _CORRECTIONS_BY_GRAPH_KEY.get(key, None)) is not None
-        ]
+    toposort = graphlib.TopologicalSorter(
+        {
+            key: tuple(provider.arg_spec.keys())
+            for key, provider in task_graph._graph.items()
+        }
     )
+    return [
+        c
+        for key in toposort.static_order()
+        if (c := _CORRECTIONS_BY_GRAPH_KEY.get(key, None)) is not None
+    ]
 
 
 providers = (
