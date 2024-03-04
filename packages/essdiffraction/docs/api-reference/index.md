@@ -1,6 +1,6 @@
 # API Reference
 
-## Esspowder
+## ESSpowder
 
 ### Module Attributes
 ```{eval-rst}
