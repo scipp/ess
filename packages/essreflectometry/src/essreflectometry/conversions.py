@@ -7,13 +7,12 @@ from scipp.constants import h, m_n, pi
 from scippneutron._utils import elem_dtype, elem_unit
 from scippneutron.conversion.graph import beamline, tof
 
-# from . import orso
 from .types import (
+    ChopperCorrectedTofEvents,
     FootprintCorrectedData,
     HistogrammedQData,
     QBins,
     QData,
-    RawEvents,
     Run,
     SpecularReflectionCoordTransformGraph,
     ThetaData,
@@ -119,7 +118,7 @@ def specular_reflection() -> SpecularReflectionCoordTransformGraph:
 
 
 def tof_to_wavelength(
-    data_array: RawEvents[Run],
+    data_array: ChopperCorrectedTofEvents[Run],
     graph: SpecularReflectionCoordTransformGraph,
     wavelength_edges: Optional[WavelengthEdges],
 ) -> WavelengthData[Run]:
@@ -144,23 +143,6 @@ def tof_to_wavelength(
     data_array_wav = data_array.transform_coords(["wavelength"], graph=graph)
     if wavelength_edges is not None:
         data_array_wav = data_array_wav.bin({wavelength_edges.dim: wavelength_edges})
-    # TODO
-    # try:
-    #    from orsopy import fileio
-
-    #    unit = data_array_wav.coords['wavelength'].unit
-    #    # This insures that when the unit is Å it is written as
-    #    # angstrom in the ORSO object.
-    #    if unit == 'angstrom':
-    #        unit = 'angstrom'
-    #    orso_measurement = data_array_wav.attrs['orso'].value.data_source.measurement
-    #    orso_measurement.instrument_settings.wavelength = fileio.base.ValueRange(
-    #        float(data_array_wav.coords['wavelength'].min().value),
-    #        float(data_array_wav.coords['wavelength'].max().value),
-    #        unit,
-    #    )
-    # except ImportError:
-    #     orso.not_found_warning()
     return WavelengthData[Run](data_array_wav)
 
 
@@ -185,18 +167,6 @@ def wavelength_to_theta(
         New data array with theta coordinate.
     """
     data_array_theta = data_array.transform_coords(['theta'], graph=graph)
-    # TODO
-    # try:
-    #    from orsopy import fileio
-
-    #    orso_measurement = data_array_theta.attrs['orso'].value.data_source.measurement
-    #    orso_measurement.instrument_settings.incident_angle = fileio.base.ValueRange(
-    #        float(data_array_theta.coords['theta'].min().value),
-    #        float(data_array_theta.coords['theta'].max().value),
-    #        data_array_theta.bins.coords['theta'].min().unit,
-    #    )
-    #    import inspect
-
     #    # Determine if 'gravity' is in the graph and if to add the gravity correction
     #    if any(
     #        [

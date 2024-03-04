@@ -5,8 +5,6 @@ import scipp as sc
 
 from .supermirror import SupermirrorCalibrationFactor
 from .tools import fwhm_to_std
-
-# from . import orso
 from .types import (
     FootprintCorrectedData,
     HistogrammedQData,
@@ -40,12 +38,6 @@ def footprint_correction(data_array: ThetaData[Run]) -> FootprintCorrectedData[R
         fwhm_to_std(data_array.coords['sample_size'] / size_of_beam_on_sample)
     )
     data_array_fp_correction = data_array / footprint_scale.squeeze()
-    # try:
-    #    data_array_fp_correction.attrs['orso'].value.reduction.corrections += [
-    #        'footprint correction'
-    #    ]
-    # except KeyError:
-    #    orso.not_found_warning()
     return FootprintCorrectedData[Run](data_array_fp_correction)
 
 
@@ -98,11 +90,6 @@ def normalize_by_counts(
             f'regime. The maximum counts found is {data_array.values[ind]} at '
             f'index {ind}. The total number of counts is {ncounts.value}.'
         )
-    # TODO
-    # try:
-    #    norm.attrs['orso'].value.reduction.corrections += ['total counts']
-    # except KeyError:
-    #    orso.not_found_warning()
     return norm
 
 

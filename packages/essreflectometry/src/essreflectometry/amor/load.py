@@ -7,12 +7,12 @@ import scipp as sc
 import scippnexus as snx
 
 from ..logging import get_logger
-from ..types import Filename, RawData, RawEvents, Run
+from ..types import ChopperCorrectedTofEvents, Filename, RawData, RawEvents, Run
 from .data import get_path
 from .types import BeamlineParams
 
 
-def _tof_correction(data: sc.DataArray, dim: str = 'tof') -> sc.DataArray:
+def chopper_tof_correction(data: RawEvents[Run]) -> ChopperCorrectedTofEvents[Run]:
     """
     A correction for the presence of the chopper with respect to the "true" ToF.
     Also fold the two pulses.
@@ -22,17 +22,13 @@ def _tof_correction(data: sc.DataArray, dim: str = 'tof') -> sc.DataArray:
     ----------
     data:
         Input data array to correct.
-    dim:
-        Name of the time of flight dimension.
 
     Returns
     -------
     :
         ToF corrected data array.
     """
-    # TODO
-    # if 'orso' in data.attrs:
-    #    data.attrs['orso'].value.reduction.corrections += ['chopper ToF correction']
+    dim = 'tof'
     tof_unit = data.bins.coords[dim].bins.unit
     tau = sc.to_unit(
         1 / (2 * data.coords['source_chopper_2'].value['frequency'].data),
@@ -48,7 +44,15 @@ def _tof_correction(data: sc.DataArray, dim: str = 'tof') -> sc.DataArray:
     # Apply the offset on both bins
     data.bins.coords[dim] += offset
     # Rebin to exclude second (empty) pulse range
-    return data.bin({dim: sc.concat([0.0 * sc.units.us, tau], dim)})
+    data = data.bin({dim: sc.concat([0.0 * sc.units.us, tau], dim)})
+
+    # Ad-hoc correction described in
+    # https://scipp.github.io/ess/instruments/amor/amor_reduction.html
+    data.coords['position'].fields.y += data.coords['position'].fields.z * sc.tan(
+        2.0 * data.coords['sample_rotation'] - (0.955 * sc.units.deg)
+    )
+
+    return ChopperCorrectedTofEvents[Run](data)
 
 
 def _assemble_event_data(dg: sc.DataGroup) -> sc.DataArray:
@@ -141,19 +145,7 @@ def extract_events(
     for key, value in beamline.items():
         data.coords[key] = value
 
-    # if orso is not None:
-    #    populate_orso(orso=orso, data=full_data, filename=filename)
-    #    data.attrs['orso'] = sc.scalar(orso)
-
-    # Perform tof correction and fold two pulses
-    data = _tof_correction(data)
-
-    # Ad-hoc correction described in
-    # https://scipp.github.io/ess/instruments/amor/amor_reduction.html
-    data.coords['position'].fields.y += data.coords['position'].fields.z * sc.tan(
-        2.0 * data.coords['sample_rotation'] - (0.955 * sc.units.deg)
-    )
     return RawEvents[Run](data)
 
 
-providers = (extract_events, load_raw_nexus)
+providers = (extract_events, load_raw_nexus, chopper_tof_correction)

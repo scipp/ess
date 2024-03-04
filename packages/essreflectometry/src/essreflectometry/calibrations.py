@@ -3,8 +3,6 @@
 import scipp as sc
 
 from . import supermirror
-
-# from ..reflectometry import orso
 from .types import QBins
 
 
