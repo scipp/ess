@@ -7,7 +7,7 @@ from typing import Tuple
 import numpy as np
 import scipp as sc
 
-from ess.diffraction import filtering
+from ess.powder import filtering
 
 
 def make_data_with_pulse_time(rng, n_event) -> sc.DataArray:

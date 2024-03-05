@@ -5,8 +5,7 @@ import pytest
 import scipp as sc
 import scipp.testing
 
-from ess.diffraction.powder import merge_calibration
-from ess.diffraction.powder.correction import apply_lorentz_correction
+from ess.powder.correction import apply_lorentz_correction, merge_calibration
 
 
 @pytest.fixture

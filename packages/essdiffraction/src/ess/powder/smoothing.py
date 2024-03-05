@@ -70,7 +70,7 @@ def lowpass(
     Examples
     --------
 
-       >>> from ess.diffraction import lowpass
+       >>> from ess.powder.smoothing import lowpass
        >>> x = sc.linspace(dim='x', start=1.1, stop=4.0, num=1000, unit='m')
        >>> y = sc.sin(x * sc.scalar(1.0, unit='rad/m'))
        >>> y += sc.sin(x * sc.scalar(400.0, unit='rad/m'))
