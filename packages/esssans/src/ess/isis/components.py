@@ -5,7 +5,7 @@ from typing import NewType, Optional
 import sciline
 import scipp as sc
 
-from ..types import (
+from ..sans.types import (
     CalibratedMonitor,
     MonitorType,
     RawData,
