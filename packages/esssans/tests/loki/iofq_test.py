@@ -7,7 +7,6 @@ import pytest
 import sciline
 import scipp as sc
 
-from ess import sans
 from ess import loki
 from ess.sans.conversions import ElasticCoordTransformGraph
 from ess.sans.types import (
