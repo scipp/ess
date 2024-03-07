@@ -5,7 +5,7 @@ Default parameters, providers and utility functions for the loki workflow.
 """
 
 
-from ..types import (
+from ..sans.types import (
     CalibratedMonitor,
     DetectorPixelShape,
     Incident,
