@@ -3,9 +3,9 @@
 import sciline
 import scipp as sc
 
-import esssans as sans
-from esssans import isis
-from esssans.types import (
+from ess import sans
+from ess import isissans as isis
+from ess.sans.types import (
     CorrectForGravity,
     Filename,
     Incident,
@@ -68,12 +68,12 @@ def make_masks_table() -> sciline.ParamTable:
 def zoom_providers():
     return list(
         sans.providers
-        + sans.isis.providers
-        + sans.isis.masking.providers
-        + sans.isis.data.providers
+        + isis.providers
+        + isis.masking.providers
+        + isis.data.providers
         + (
-            sans.isis.data.transmission_from_background_run,
-            sans.isis.data.transmission_from_sample_run,
+            isis.data.transmission_from_background_run,
+            isis.data.transmission_from_sample_run,
         )
     )
 

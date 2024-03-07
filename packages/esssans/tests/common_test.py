@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 import scipp as sc
 
-from esssans.common import mask_range
+from ess.sans.common import mask_range
 
 
 def test_mask_range_dense_data():

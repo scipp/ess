@@ -8,8 +8,8 @@ import scipp.testing
 import scippnexus as snx
 from scippnexus.application_definitions import nxcansas
 
-from esssans.io import save_background_subtracted_iofq
-from esssans.types import BackgroundSubtractedIofQ, OutFilename, RunNumber, RunTitle
+from ess.sans.io import save_background_subtracted_iofq
+from ess.sans.types import BackgroundSubtractedIofQ, OutFilename, RunNumber, RunTitle
 
 
 @pytest.mark.parametrize('use_edges', (True, False))

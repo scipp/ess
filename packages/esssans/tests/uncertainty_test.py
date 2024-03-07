@@ -4,7 +4,7 @@
 import scipp as sc
 from scipp.testing import assert_identical
 
-from esssans.uncertainty import broadcast_with_upper_bound_variances
+from ess.sans.uncertainty import broadcast_with_upper_bound_variances
 
 
 def test_broadcast_returns_original_if_no_new_dims():

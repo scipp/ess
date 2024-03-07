@@ -4,9 +4,9 @@ from typing import Callable, List
 
 import scipp as sc
 
-import esssans as sans
-from esssans.loki import default_parameters
-from esssans.types import (
+from ess import sans
+from ess import loki
+from ess.sans.types import (
     BackgroundRun,
     CorrectForGravity,
     EmptyBeamRun,
@@ -22,7 +22,7 @@ from esssans.types import (
 
 
 def make_params(qxy: bool = False) -> dict:
-    params = default_parameters.copy()
+    params = loki.default_parameters.copy()
 
     params[Filename[SampleRun]] = '60339-2022-02-28_2215.nxs'
     params[Filename[BackgroundRun]] = '60393-2022-02-28_2215.nxs'
@@ -51,11 +51,11 @@ def make_params(qxy: bool = False) -> dict:
 
 
 def loki_providers() -> List[Callable]:
-    from esssans.isis.io import read_xml_detector_masking
+    from ess.isissans.io import read_xml_detector_masking
 
     return list(
         sans.providers
-        + sans.loki.providers
-        + sans.loki.data.providers
+        + loki.providers
+        + loki.data.providers
         + (read_xml_detector_masking,)
     )
