@@ -20,6 +20,8 @@ requirements:
     - pooch
     - defusedxml
     - python>=3.10
+    - gemmi
+    - pandas
 
 test:
   imports:
