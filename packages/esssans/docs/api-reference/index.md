@@ -3,7 +3,7 @@
 ## Classes
 
 ```{eval-rst}
-.. currentmodule:: esssans
+.. currentmodule:: ess.sans
 
 .. autosummary::
    :toctree: ../generated/classes
@@ -37,9 +37,42 @@
    direct_beam
    i_of_q
    io
-   isis
    logging
-   loki
    types
    uncertainty
+```
+
+## Loki
+
+```{eval-rst}
+.. currentmodule:: ess.loki
+
+.. autosummary::
+   :toctree: ../generated/modules
+   :template: module-template.rst
+   :recursive:
+
+   data
+   general
+   io
+```
+
+## ISIS sans
+
+```{eval-rst}
+.. currentmodule:: ess.isissans
+
+.. autosummary::
+   :toctree: ../generated/modules
+   :template: module-template.rst
+   :recursive:
+
+   components
+   data
+   general
+   io
+   mantidio
+   masking
+   sans2d
+   visualization
 ```
