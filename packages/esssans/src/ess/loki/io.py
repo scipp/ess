@@ -10,7 +10,6 @@ from typing import Optional, Union
 import sciline
 import scipp as sc
 import scippnexus as snx
-
 from ess.reduce import nexus
 
 from ..sans.common import gravity_vector
