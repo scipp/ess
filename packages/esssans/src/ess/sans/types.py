@@ -176,6 +176,14 @@ MaskedDetectorIDs = NewType('MaskedDetectorIDs', sc.Variable)
 # 3  Workflow (intermediate) results
 
 
+class RawSource(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+    """Raw source from NeXus file"""
+
+
+class RawSample(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+    """Raw sample from NeXus file"""
+
+
 class SamplePosition(sciline.Scope[RunType, sc.Variable], sc.Variable):
     """Sample position"""
 

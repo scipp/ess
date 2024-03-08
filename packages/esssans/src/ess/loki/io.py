@@ -11,6 +11,8 @@ import sciline
 import scipp as sc
 import scippnexus as snx
 
+from ess.reduce import nexus
+
 from ..sans.common import gravity_vector
 from ..sans.types import (
     BackgroundRun,
@@ -28,6 +30,8 @@ from ..sans.types import (
     NeXusMonitorName,
     NeXusSampleName,
     NeXusSourceName,
+    RawSample,
+    RawSource,
     RunType,
     SampleRun,
     ScatteringRunType,
@@ -45,14 +49,17 @@ DETECTOR_BANK_RESHAPING = {
 
 
 def _patch_data(
-    da: sc.DataArray, sample_position: sc.Variable, source_position: sc.Variable
+    da: sc.DataArray,
+    source_position: sc.Variable,
+    sample_position: Optional[sc.Variable] = None,
 ) -> sc.DataArray:
     out = da.copy(deep=False)
     if out.bins is not None:
         content = out.bins.constituents['data']
         if content.variances is None:
             content.variances = content.values
-    out.coords['sample_position'] = sample_position
+    if sample_position is not None:
+        out.coords['sample_position'] = sample_position
     out.coords['source_position'] = source_position
     out.coords['gravity'] = gravity_vector()
     return out
@@ -66,7 +73,9 @@ def _convert_to_tof(da: sc.DataArray) -> sc.DataArray:
 
 
 def _preprocess_data(
-    da: sc.DataArray, sample_position: sc.Variable, source_position: sc.Variable
+    da: sc.DataArray,
+    source_position: sc.Variable,
+    sample_position: Optional[sc.Variable] = None,
 ) -> sc.DataArray:
     out = _patch_data(
         da=da, sample_position=sample_position, source_position=source_position
@@ -197,40 +206,51 @@ def _load_events(
     return dg
 
 
-def load_nexus_detector(
-    filename: FilePath[Filename[RunType]],
-    detector_name: NeXusDetectorName,
-    transform_path: TransformationPath,
-    source_name: NeXusSourceName,
-    sample_name: Optional[NeXusSampleName],
-) -> LoadedSingleFileDetector[RunType]:
-    return LoadedSingleFileDetector[RunType](
-        _load_events(
-            filename=filename,
-            data_name=detector_name,
-            transform_path=transform_path,
-            source_name=source_name,
-            sample_name=sample_name,
-        )
+def load_nexus_sample(file_path: FilePath[Filename[RunType]]) -> RawSample[RunType]:
+    return RawSample[RunType](nexus.load_sample(file_path))
+
+
+def dummy_load_sample(file_path: FilePath[Filename[RunType]]) -> RawSample[RunType]:
+    return RawSample[RunType](
+        sc.DataGroup({'position': sc.vector(value=[0, 0, 0], unit='m')})
     )
+
+
+def load_nexus_source(file_path: FilePath[Filename[RunType]]) -> RawSource[RunType]:
+    return RawSource[RunType](nexus.load_source(file_path))
+
+
+def load_nexus_detector(
+    file_path: FilePath[Filename[RunType]],
+    detector_name: NeXusDetectorName,
+    raw_source: RawSource[RunType],
+    raw_sample: RawSample[RunType],
+) -> LoadedSingleFileDetector[RunType]:
+    out = nexus.load_detector(file_path=file_path, detector_name=detector_name)
+    # Note here we specify the name instead of using
+    # ess.reduce.nexus.extract_detector_data because we need the name to put the
+    # events back into the original data group.
+    key = f'{detector_name}_events'
+    events = _preprocess_data(
+        out[key],
+        sample_position=raw_sample['position'],
+        source_position=raw_source['position'],
+    )
+    if detector_name in DETECTOR_BANK_RESHAPING:
+        events = DETECTOR_BANK_RESHAPING[detector_name](events)
+    out[key] = events
+    return LoadedSingleFileDetector[RunType](out)
 
 
 def load_nexus_monitor(
-    filename: FilePath[Filename[RunType]],
+    file_path: FilePath[Filename[RunType]],
     monitor_name: NeXusMonitorName[MonitorType],
-    transform_path: TransformationPath,
-    source_name: NeXusSourceName,
-    sample_name: Optional[NeXusSampleName],
+    raw_source: RawSource[RunType],
 ) -> LoadedSingleFileMonitor[RunType, MonitorType]:
-    return LoadedSingleFileMonitor[RunType, MonitorType](
-        _load_events(
-            filename=filename,
-            data_name=monitor_name,
-            transform_path=transform_path,
-            source_name=source_name,
-            sample_name=sample_name,
-        )
-    )
+    out = nexus.load_monitor(file_path=file_path, monitor_name=monitor_name)
+    key = f'{monitor_name}_events'
+    out[key] = _preprocess_data(out[key], source_position=raw_source['position'])
+    return LoadedSingleFileMonitor[RunType, MonitorType](out)
 
 
 def to_detector(
@@ -251,7 +271,15 @@ def to_path(filename: FilenameType, path: DataFolder) -> FilePath[FilenameType]:
     return FilePath[FilenameType](f'{path}/{filename}')
 
 
-providers = (load_nexus_detector, load_nexus_monitor, to_detector, to_monitor, to_path)
+providers = (
+    load_nexus_detector,
+    load_nexus_monitor,
+    load_nexus_sample,
+    load_nexus_source,
+    to_detector,
+    to_monitor,
+    to_path,
+)
 """Providers for loading single files."""
 event_merging_providers = (
     merge_sample_runs,

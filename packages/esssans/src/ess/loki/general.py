@@ -32,7 +32,7 @@ default_parameters = {
     NeXusSourceName: 'source',
     # TODO: sample is not in the files, so by not adding the name here, we use the
     # default value of [0, 0, 0] when loading the sample position.
-    TransformationPath: 'esssans_loki_transformation',
+    TransformationPath: 'transformation',
 }
 
 
