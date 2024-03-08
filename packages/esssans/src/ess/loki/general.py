@@ -15,7 +15,6 @@ from ..sans.types import (
     MonitorType,
     NeXusDetectorName,
     NeXusMonitorName,
-    NeXusSourceName,
     RawData,
     RunType,
     ScatteringRunType,
@@ -23,15 +22,10 @@ from ..sans.types import (
     Transmission,
 )
 
-NEXUS_INSTRUMENT_PATH = 'instrument'
-
 default_parameters = {
     NeXusDetectorName: 'larmor_detector',
     NeXusMonitorName[Incident]: 'monitor_1',
     NeXusMonitorName[Transmission]: 'monitor_2',
-    NeXusSourceName: 'source',
-    # TODO: sample is not in the files, so by not adding the name here, we use the
-    # default value of [0, 0, 0] when loading the sample position.
     TransformationPath: 'transformation',
 }
 
