@@ -52,6 +52,7 @@ def _patch_data(
         content = out.bins.constituents['data']
         if content.variances is None:
             content.variances = content.values
+    # Sample position is not needed in the case of a monitor.
     if sample_position is not None:
         out.coords['sample_position'] = sample_position
     out.coords['source_position'] = source_position
