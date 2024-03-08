@@ -9,7 +9,6 @@ from typing import Optional, Union
 
 import sciline
 import scipp as sc
-import scippnexus as snx
 from ess.reduce import nexus
 
 from ..sans.common import gravity_vector
@@ -27,17 +26,13 @@ from ..sans.types import (
     MonitorType,
     NeXusDetectorName,
     NeXusMonitorName,
-    NeXusSampleName,
-    NeXusSourceName,
     RawSample,
     RawSource,
     RunType,
     SampleRun,
     ScatteringRunType,
-    TransformationPath,
     Transmission,
 )
-from .general import NEXUS_INSTRUMENT_PATH
 from .general import default_parameters as params
 
 DETECTOR_BANK_RESHAPING = {
@@ -163,46 +158,6 @@ def merge_background_monitor_runs(
     return LoadedMonitor[BackgroundRun, MonitorType](
         _merge_runs(data_groups=monitors, name=monitor_name)
     )
-
-
-def _load_source_and_sample_positions(
-    instrument: snx.Group,
-    source_name: NeXusSourceName,
-    sample_name: Optional[NeXusSampleName],
-) -> tuple[sc.Variable, sc.Variable]:
-    source_position = snx.compute_positions(instrument[source_name][()])['position']
-    if sample_name is None:
-        sample_position = sc.vector(value=[0, 0, 0], unit='m')
-    else:
-        sample_position = snx.compute_positions(instrument[sample_name][()])['position']
-    return source_position, sample_position
-
-
-def _load_events(
-    filename: FilePath[Filename[RunType]],
-    data_name: Union[NeXusDetectorName, NeXusMonitorName[MonitorType]],
-    transform_path: TransformationPath,
-    source_name: NeXusSourceName,
-    sample_name: Optional[NeXusSampleName],
-) -> sc.DataGroup:
-    with snx.File(filename) as f:
-        instrument = f['entry'][NEXUS_INSTRUMENT_PATH]
-        dg = instrument[data_name][()]
-        source_position, sample_position = _load_source_and_sample_positions(
-            instrument, source_name, sample_name
-        )
-    dg = snx.compute_positions(dg, store_transform=transform_path)
-
-    events = _preprocess_data(
-        dg[f'{data_name}_events'],
-        sample_position=sample_position,
-        source_position=source_position,
-    )
-    if data_name in DETECTOR_BANK_RESHAPING:
-        events = DETECTOR_BANK_RESHAPING[data_name](events)
-
-    dg[f'{data_name}_events'] = events
-    return dg
 
 
 def load_nexus_sample(file_path: FilePath[Filename[RunType]]) -> RawSample[RunType]:

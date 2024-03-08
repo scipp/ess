@@ -65,12 +65,6 @@ IofQPart = TypeVar('IofQPart', Numerator, Denominator)
 """TypeVar used for specifying Numerator or Denominator of IofQ"""
 
 # 1.4  Entry paths in NeXus files
-NeXusSampleName = NewType('NeXusSampleName', str)
-"""Name of sample entry in NeXus file"""
-
-NeXusSourceName = NewType('NeXusSourceName', str)
-"""Name of source entry in NeXus file"""
-
 NeXusDetectorName = NewType('NeXusDetectorName', str)
 """Name of detector entry in NeXus file"""
 
