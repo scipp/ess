@@ -56,5 +56,5 @@ def loki_providers() -> List[Callable]:
         sans.providers
         + loki.providers
         + loki.data.providers
-        + (read_xml_detector_masking,)
+        + (read_xml_detector_masking, loki.io.dummy_load_sample)
     )
