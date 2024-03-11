@@ -33,6 +33,17 @@
 
 ## ESSdream
 
+### Top-level functions
+
+```{eval-rst}
+.. currentmodule:: ess.dream
+
+.. autosummary::
+   :toctree: ../generated/functions
+
+   instrument_view
+```
+
 ### Submodules
 
 ```{eval-rst}
