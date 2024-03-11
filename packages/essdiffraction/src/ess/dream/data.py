@@ -9,7 +9,7 @@ def _make_pooch():
     import pooch
 
     return pooch.create(
-        path=pooch.os_cache('ess/powgen'),
+        path=pooch.os_cache('ess/dream'),
         env='ESS_DATA_DIR',
         base_url='https://public.esss.dk/groups/scipp/ess/dream/{version}/',
         version=_version,
