@@ -12,6 +12,7 @@ requirements:
     - setuptools_scm
   run:
     - dask
+    - essreduce
     - python>=3.10
     - python-graphviz
     - plopp
