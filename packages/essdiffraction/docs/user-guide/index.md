@@ -5,5 +5,5 @@
 maxdepth: 1
 ---
 
-POWGEN_data_reduction
+sns-instruments/index
 ```

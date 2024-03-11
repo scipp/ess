@@ -130,7 +130,7 @@ exclude_patterns = [
     'Thumbs.db',
     '.DS_Store',
     '**.ipynb_checkpoints',
-    'examples/preprocess_files.ipynb',
+    'user-guide/sns-instruments/preprocess_files.ipynb',
 ]
 
 # The name of the Pygments (syntax highlighting) style to use.
