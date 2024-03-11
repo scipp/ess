@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+"""Data for tests and documentation with DREAM."""
+
 _version = '1'
 
 __all__ = ['get_path']

@@ -30,3 +30,17 @@
 
    external.powgen
 ```
+
+## ESSdream
+
+### Submodules
+
+```{eval-rst}
+.. autosummary::
+   :toctree: ../generated/modules
+   :template: module-template.rst
+   :recursive:
+
+   data
+   io
+```
