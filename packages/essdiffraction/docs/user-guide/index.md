@@ -1,8 +1,8 @@
-# Examples
+# User guide
 
 ```{toctree}
 ---
-maxdepth: 2
+maxdepth: 1
 ---
 
 POWGEN_data_reduction
