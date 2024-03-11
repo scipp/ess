@@ -7,9 +7,9 @@ import pytest
 import sciline
 import scipp as sc
 
-import esssans as sans
-from esssans.conversions import ElasticCoordTransformGraph
-from esssans.types import (
+from ess import loki
+from ess.sans.conversions import ElasticCoordTransformGraph
+from ess.sans.types import (
     BackgroundRun,
     BackgroundSubtractedIofQ,
     BeamCenter,
@@ -22,6 +22,7 @@ from esssans.types import (
     Filename,
     FilenameType,
     FilePath,
+    IofQ,
     Numerator,
     PixelMaskFilename,
     QBins,
@@ -70,9 +71,7 @@ def test_pipeline_can_compute_IofQ(uncertainties, qxy: bool):
     'uncertainties',
     [UncertaintyBroadcastMode.drop, UncertaintyBroadcastMode.upper_bound],
 )
-@pytest.mark.parametrize(
-    'target', [sans.IofQ[sans.SampleRun], sans.BackgroundSubtractedIofQ]
-)
+@pytest.mark.parametrize('target', [IofQ[SampleRun], BackgroundSubtractedIofQ])
 @pytest.mark.parametrize('qxy', [False, True])
 def test_pipeline_can_compute_IofQ_in_event_mode(uncertainties, target, qxy: bool):
     params = make_params(qxy=qxy)
@@ -157,7 +156,7 @@ def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs():
 
     sample_runs = ['60250-2022-02-28_2215.nxs', '60339-2022-02-28_2215.nxs']
     background_runs = ['60248-2022-02-28_2215.nxs', '60393-2022-02-28_2215.nxs']
-    providers = (*loki_providers(), *sans.loki.io.event_merging_providers)
+    providers = (*loki_providers(), *loki.io.event_merging_providers)
     pipeline = sciline.Pipeline(providers, params=params)
     pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
 
@@ -184,7 +183,7 @@ def test_pipeline_IofQ_merging_events_yields_consistent_results():
     # map the file names to different ones.
     def get_mapped_path(filename: FilenameType) -> FilePath[FilenameType]:
         """Mapping file paths to allow loading same run multiple times."""
-        from esssans.loki.data import get_path
+        from ess.loki.data import get_path
 
         mapping = {
             'sample_0.nxs': '60339-2022-02-28_2215.nxs',
@@ -206,7 +205,7 @@ def test_pipeline_IofQ_merging_events_yields_consistent_results():
         Filename[BackgroundRun], [f'background_{i}.nxs' for i in range(N)]
     )
     # Add event merging providers
-    for provider in sans.loki.io.event_merging_providers:
+    for provider in loki.io.event_merging_providers:
         pipeline_triple.insert(provider)
 
     iofq1 = pipeline_single.compute(BackgroundSubtractedIofQ)

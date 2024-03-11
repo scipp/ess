@@ -7,8 +7,8 @@ from typing import Dict
 import sciline
 import scipp as sc
 
-from ..data import Registry
-from ..types import (
+from ..sans.data import Registry
+from ..sans.types import (
     BackgroundRun,
     DirectBeam,
     DirectBeamFilename,

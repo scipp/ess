@@ -7,7 +7,7 @@ from typing import NewType
 
 import scipp as sc
 
-from ..types import (
+from ..sans.types import (
     DataFolder,
     FilenameType,
     FilePath,

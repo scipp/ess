@@ -15,7 +15,6 @@ from . import (
     conversions,
     i_of_q,
     io,
-    loki,
     masking,
     normalization,
 )
@@ -52,7 +51,6 @@ __all__ = [
     'direct_beam',
     'i_of_q',
     'io',
-    'loki',
     'masking',
     'normalization',
     'providers',

@@ -2,8 +2,8 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 
-from ..data import Registry
-from ..types import FilenameType, FilePath
+from ..sans.data import Registry
+from ..sans.types import FilenameType, FilePath
 
 _registry = Registry(
     instrument='loki',

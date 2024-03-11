@@ -5,7 +5,7 @@ Providers for the ISIS instruments.
 """
 import scipp as sc
 
-from ..types import (
+from ..sans.types import (
     DetectorPixelShape,
     LabFrameTransform,
     MonitorType,

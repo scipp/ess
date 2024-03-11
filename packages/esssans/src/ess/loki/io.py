@@ -11,8 +11,8 @@ import sciline
 import scipp as sc
 import scippnexus as snx
 
-from ..common import gravity_vector
-from ..types import (
+from ..sans.common import gravity_vector
+from ..sans.types import (
     BackgroundRun,
     DataFolder,
     Filename,

@@ -4,7 +4,7 @@ import doctest
 import os
 import sys
 
-import esssans
+from ess import sans
 
 sys.path.insert(0, os.path.abspath('.'))
 
@@ -80,7 +80,7 @@ napoleon_type_aliases = {
 typehints_defaults = 'comma'
 typehints_use_rtype = False
 
-sciline_domain_types_prefix = 'esssans'
+sciline_domain_types_prefix = 'ess.sans'
 sciline_domain_types_aliases = {
     'scipp._scipp.core.DataArray': 'scipp.DataArray',
     'scipp._scipp.core.Dataset': 'scipp.Dataset',
@@ -108,9 +108,9 @@ master_doc = 'index'
 #
 
 # The short X.Y version.
-version = esssans.__version__
+version = sans.__version__
 # The full version, including alpha/beta/rc tags.
-release = esssans.__version__
+release = sans.__version__
 
 warning_is_error = True
 

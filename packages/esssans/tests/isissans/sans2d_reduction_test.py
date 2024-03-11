@@ -6,10 +6,10 @@ import pytest
 import sciline
 import scipp as sc
 
-import esssans as sans
-from esssans import isis
-from esssans.isis import MonitorOffset, SampleOffset, sans2d
-from esssans.types import (
+from ess import isissans as isis
+from ess import sans
+from ess.isissans import MonitorOffset, SampleOffset, sans2d
+from ess.sans.types import (
     BackgroundRun,
     BackgroundSubtractedIofQ,
     BeamCenter,
@@ -80,8 +80,8 @@ def sans2d_providers():
         + isis.data.providers
         + isis.sans2d.providers
         + (
-            sans.isis.data.transmission_from_background_run,
-            sans.isis.data.transmission_from_sample_run,
+            isis.data.transmission_from_background_run,
+            isis.data.transmission_from_sample_run,
         )
     )
 
