@@ -68,10 +68,15 @@ IofQPart = TypeVar('IofQPart', Numerator, Denominator)
 NeXusDetectorName = NewType('NeXusDetectorName', str)
 """Name of detector entry in NeXus file"""
 
+PixelShapePath = NewType('PixelShapePath', str)
+"""
+Name of the entry where the pixel shape is stored in the NeXus file
+"""
+
 TransformationPath = NewType('TransformationPath', str)
 """
-Name of the entry under which to store the transformation computed from the
-transformation chain, for the detectors and the monitors
+Name of the entry where the transformation computed from the
+transformation chain is stored, for the detectors and the monitors
 """
 
 # 2  Workflow parameters
@@ -214,7 +219,11 @@ class SolidAngle(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
 
 
 class LoadedSingleFileDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
-    """Detector events of a single loaded file"""
+    """Detector contents of a single loaded file"""
+
+
+class SingleFileDetectorData(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+    """Detector neutron events of a single loaded file"""
 
 
 class LoadedSingleFileMonitor(
@@ -223,18 +232,39 @@ class LoadedSingleFileMonitor(
     """A single monitor of a single loaded file"""
 
 
-class LoadedDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
-    """Detector events (can be data merged from multiple files)"""
-
-
-class LoadedMonitor(
+class SingleFileMonitorData(
     sciline.ScopeTwoParams[RunType, MonitorType, sc.DataGroup], sc.DataGroup
 ):
-    """Monitor data (can be data merged from multiple files)"""
+    """Neutron data from a single monitor of a single loaded file"""
+
+
+# class LoadedDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+#     """Detector events (can be data merged from multiple files)"""
+
+
+# class LoadedMonitor(
+#     sciline.ScopeTwoParams[RunType, MonitorType, sc.DataGroup], sc.DataGroup
+# ):
+#     """Monitor data (can be data merged from multiple files)"""
 
 
 class RawData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
-    """Raw data"""
+    """Raw detector data"""
+
+
+class DataWithVariancesAndCoordinates(
+    sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray
+):
+    """Raw event data where variances and necessary coordinates
+    (e.g. sample and source position) have been added"""
+
+
+class TofData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
+    """Data with a time-of-flight coordinate"""
+
+
+class LogicalDimsData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
+    """Detector data reshaped to logical dimensions"""
 
 
 PixelMask = NewType('PixelMask', sc.Variable)
@@ -296,6 +326,13 @@ class RawMonitor(
     sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
 ):
     """Raw monitor data"""
+
+
+class MonitorWithVariancesAndCoordinates(
+    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
+):
+    """Raw monitor data where variances and necessary coordinates
+    (e.g. source position) have been added"""
 
 
 class CalibratedMonitor(
