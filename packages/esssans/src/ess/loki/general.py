@@ -26,7 +26,7 @@ default_parameters = {
     NeXusDetectorName: 'larmor_detector',
     NeXusMonitorName[Incident]: 'monitor_1',
     NeXusMonitorName[Transmission]: 'monitor_2',
-    TransformationPath: 'transformation',
+    TransformationPath: 'transform',
 }
 
 
