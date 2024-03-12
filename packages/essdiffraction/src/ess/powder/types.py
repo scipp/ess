@@ -7,6 +7,7 @@ The domain types are used to define parameters and to request results from a Sci
 pipeline.
 """
 
+from pathlib import Path
 from typing import NewType, TypeVar
 
 import sciline
@@ -15,6 +16,8 @@ import scipp as sc
 # 1 TypeVars used to parametrize the generic parts of the workflow
 
 # 1.1 Run types
+EmptyCanRun = NewType('EmptyCanRun', int)
+"""Empty sample can run."""
 EmptyInstrumentRun = NewType('EmptyInstrumentRun', int)
 """Empty instrument run."""
 SampleRun = NewType('SampleRun', int)
@@ -30,12 +33,19 @@ RunType = TypeVar('RunType', EmptyInstrumentRun, SampleRun, VanadiumRun)
 CalibrationFilename = NewType('CalibrationFilename', str)
 """Filename of the instrument calibration file."""
 
+DetectorName = NewType('DetectorName', str)
+"""Name of a detector."""
+
 DspacingBins = NewType('DSpacingBins', sc.Variable)
 """Bin edges for d-spacing."""
 
 
 class Filename(sciline.Scope[RunType, str], str):
-    """Filename of a run."""
+    """Name of an input file."""
+
+
+class FilePath(sciline.Scope[RunType, Path], Path):
+    """Path to an input file on disk."""
 
 
 OutFilename = NewType('OutFilename', str)
@@ -98,6 +108,7 @@ RawCalibrationData = NewType('RawCalibrationData', sc.Dataset)
 """Calibration data as loaded from file, needs preprocessing before using."""
 
 
+# TODO remove
 class RawData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Raw data."""
 
@@ -108,6 +119,14 @@ class RawDataWithVariances(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
 
 class RawDataAndMetadata(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
     """Raw data and associated metadata."""
+
+
+class RawDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+    """Full raw data for a detector."""
+
+
+class RawDetectorData(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+    """Data (events / histogram) extracted from a RawDetector."""
 
 
 class TofCroppedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
