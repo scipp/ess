@@ -5,13 +5,21 @@ Coordinate transformations for powder diffraction.
 """
 
 import uuid
-from typing import Optional
+from typing import Any, Callable, Optional
 
 import scipp as sc
+import scippneutron as scn
 
 from .correction import merge_calibration
 from .logging import get_logger
-from .types import CalibrationData, DspacingData, NormalizedByProtonCharge, RunType
+from .types import (
+    CalibrationData,
+    DspacingData,
+    NormalizedByProtonCharge,
+    RawSample,
+    RawSource,
+    RunType,
+)
 
 
 def _dspacing_from_diff_calibration_generic_impl(t, t0, a, c):
@@ -142,13 +150,84 @@ def to_dspacing_with_calibration(
     graph = {
         'dspacing': dspacing_from_diff_calibration,
     }
+    return DspacingData[RunType](_to_dspacing_impl(out, graph))
 
-    if 'position' in out.coords:
+
+def to_dspacing_with_positions(
+    data: NormalizedByProtonCharge[RunType],
+    *,
+    sample: Optional[RawSample[RunType]] = None,
+    source: Optional[RawSource] = None,
+) -> DspacingData[RunType]:
+    """
+    Transform coordinates to d-spacing using detector positions.
+
+    Computes d-spacing from time-of-flight stored in `data`.
+
+    Attention
+    ---------
+    `data` may have a wavelength coordinate and dimension,
+    but those are discarded.
+    Only the stored time-of-flight is used, that is, any modifications to
+    the wavelength coordinate after it was computed from time-of-flight are lost.
+
+    Raises
+    ------
+    KeyError
+        If `data` does not contain a 'tof' coordinate.
+
+    Parameters
+    ----------
+    data:
+        Input data in tof or wavelength dimension.
+        Must have a tof coordinate.
+    sample:
+        Sample data with a position.
+        If not given, ``data`` must contain a 'sample_position' coordinate.
+    source:
+        Source data with a position.
+        If not given, ``data`` must contain a 'source_position' coordinate.
+
+    Returns
+    -------
+    :
+        A DataArray with the same data as the input and a 'dspacing' coordinate.
+    """
+    graph = {
+        **scn.conversion.graph.beamline.beamline(scatter=True),
+        **scn.conversion.graph.tof.elastic_dspacing('tof'),
+    }
+    if sample is not None:
+        graph['sample_position'] = lambda: sample['position']
+    if source is not None:
+        graph['source_position'] = lambda: source['position']
+
+    out = _to_dspacing_impl(data, graph)
+    # Add coords to ensure the result is the same whether sample or source are
+    # coords in the input or separate function arguments.
+    if sample is not None:
+        out.coords['sample_position'] = sample['position']
+        out.coords.set_aligned('sample_position', False)
+    if source is not None:
+        out.coords['source_position'] = source['position']
+        out.coords.set_aligned('source_position', False)
+
+    return DspacingData[RunType](out)
+
+
+def _to_dspacing_impl(
+    data: sc.DataArray, base_graph: dict[str, Callable[..., Any]]
+) -> sc.DataArray:
+    out = _restore_tof_if_in_wavelength(data)
+    graph = dict(base_graph)
+    if 'position' in out.coords or (
+        out.bins is not None and 'position' in out.bins.coords
+    ):
         graph['_tag_positions_consumed'] = _consume_positions
     else:
-        out.coords['_tag_positions_consumed'] = sc.scalar(0)
+        graph['_tag_positions_consumed'] = lambda: sc.scalar(0)
 
-    out = out.transform_coords('dspacing', graph=graph, keep_intermediate=False)
+    out = data.transform_coords('dspacing', graph=graph, keep_intermediate=False)
     out.coords.pop('_tag_positions_consumed', None)
     return DspacingData[RunType](out)
 

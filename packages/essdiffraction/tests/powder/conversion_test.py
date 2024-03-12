@@ -3,8 +3,13 @@
 import numpy as np
 import pytest
 import scipp as sc
+import scipp.testing
+import scippneutron as scn
 
-from ess.powder.conversion import to_dspacing_with_calibration
+from ess.powder.conversion import (
+    to_dspacing_with_calibration,
+    to_dspacing_with_positions,
+)
 
 
 @pytest.fixture(params=['random', 'zero'])
@@ -98,12 +103,15 @@ def test_dspacing_with_calibration_consumes_positions(calibration):
     )
     dspacing = to_dspacing_with_calibration(tof, calibration=calibration)
     assert sc.identical(dspacing.coords['position'], tof.coords['position'])
+    assert not dspacing.coords['position'].aligned
     assert sc.identical(
         dspacing.coords['sample_position'], tof.coords['sample_position']
     )
+    assert not dspacing.coords['sample_position'].aligned
     assert sc.identical(
         dspacing.coords['source_position'], tof.coords['source_position']
     )
+    assert not dspacing.coords['source_position'].aligned
 
 
 def test_dspacing_with_calibration_does_not_use_positions(calibration):
@@ -129,3 +137,33 @@ def test_dspacing_with_calibration_does_not_use_positions(calibration):
     assert sc.allclose(
         dspacing_no_pos.coords['dspacing'], dspacing_pos.coords['dspacing']
     )
+
+
+def test_dspacing_with_positions():
+    position = sc.vectors(
+        dims=['spectrum'], values=np.arange(14 * 3).reshape((14, 3)), unit='m'
+    )
+    sample_position = sc.vector([0.0, 0.0, 0.01], unit='m')
+    source_position = sc.vector([0.0, 0.0, -11.3], unit='m')
+    tof = sc.DataArray(
+        sc.ones(dims=['spectrum', 'tof'], shape=[14, 27]),
+        coords={
+            'position': position,
+            'tof': sc.linspace('tof', 1.0, 1000.0, 27, unit='us'),
+        },
+    )
+    dspacing = to_dspacing_with_positions(
+        tof,
+        sample=sc.DataGroup(position=sample_position),
+        source=sc.DataGroup(position=source_position),
+    )
+
+    graph = {
+        **scn.conversion.graph.beamline.beamline(scatter=True),
+        **scn.conversion.graph.tof.elastic_dspacing('tof'),
+    }
+    tof = tof.assign_coords(
+        {'sample_position': sample_position, 'source_position': source_position}
+    )
+    expected = tof.transform_coords('dspacing', graph=graph, keep_intermediate=False)
+    sc.testing.assert_identical(dspacing, expected)
