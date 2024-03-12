@@ -6,7 +6,7 @@
 The domain types are used to define parameters and to request results from a Sciline
 pipeline.
 """
-
+from enum import Enum
 from pathlib import Path
 from typing import NewType, TypeVar
 
@@ -58,6 +58,14 @@ This is used by an alternative focussing step that groups detector
 pixels by scattering angle into bins given by these edges.
 """
 
+UncertaintyBroadcastMode = Enum(
+    'UncertaintyBroadcastMode', ['drop', 'upper_bound', 'fail']
+)
+"""Mode for broadcasting uncertainties.
+
+See https://doi.org/10.3233/JNR-220049 for context.
+"""
+
 ValidTofRange = NewType('ValidTofRange', sc.Variable)
 """Min and max tof value of the instrument."""
 
@@ -86,6 +94,10 @@ DspacingHistogram = NewType('DspacingHistogram', sc.DataArray)
 
 class FilteredData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Raw data without invalid events."""
+
+
+class FlatDetectorData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Data (events / histogram) of a RawDetector flattened to ``detector_number``."""
 
 
 class FocussedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
@@ -125,8 +137,16 @@ class RawDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
     """Full raw data for a detector."""
 
 
-class RawDetectorData(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+class RawDetectorData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Data (events / histogram) extracted from a RawDetector."""
+
+
+class RawSample(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+    """Raw data from a loaded sample."""
+
+
+RawSource = NewType('RawSource', sc.DataGroup)
+"""Raw data from a loaded neutron source."""
 
 
 class TofCroppedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):

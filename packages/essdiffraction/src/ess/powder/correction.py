@@ -18,8 +18,10 @@ from .types import (
     NormalizedByVanadium,
     RunType,
     SampleRun,
+    UncertaintyBroadcastMode,
     VanadiumRun,
 )
+from .uncertainty import broadcast_uncertainties
 
 
 def normalize_by_monitor(
@@ -78,6 +80,7 @@ def normalize_by_vanadium(
     data: FocussedData[SampleRun],
     vanadium: FocussedData[VanadiumRun],
     edges: DspacingBins,
+    uncertainty_broadcast_mode: Optional[UncertaintyBroadcastMode] = None,
 ) -> NormalizedByVanadium:
     """
     Normalize sample data by a vanadium measurement.
@@ -90,12 +93,17 @@ def normalize_by_vanadium(
         Vanadium data.
     edges:
         `vanadium` is histogrammed into these bins before dividing the data by it.
+    uncertainty_broadcast_mode:
+        Choose how uncertainties of vanadium are broadcast to the sample data.
+        Defaults to ``UncertaintyBroadcastMode.fail``.
 
     Returns
     -------
     :
         `data` normalized by `vanadium`.
     """
+    vanadium = broadcast_uncertainties(vanadium, uncertainty_broadcast_mode)
+
     norm = sc.lookup(vanadium.hist({edges.dim: edges}), dim=edges.dim)
     # Converting to unit 'one' because the division might produce a unit
     # with a large scale if the proton charges in data and vanadium were
