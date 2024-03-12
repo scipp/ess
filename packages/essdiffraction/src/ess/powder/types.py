@@ -120,15 +120,6 @@ RawCalibrationData = NewType('RawCalibrationData', sc.Dataset)
 """Calibration data as loaded from file, needs preprocessing before using."""
 
 
-# TODO remove
-class RawData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Raw data."""
-
-
-class RawDataWithVariances(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Raw data that has variances which need special handling."""
-
-
 class RawDataAndMetadata(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
     """Raw data and associated metadata."""
 

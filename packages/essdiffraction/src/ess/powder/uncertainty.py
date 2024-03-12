@@ -6,17 +6,7 @@ from typing import Optional
 
 import scipp as sc
 
-from .types import RawData, RawDataWithVariances, UncertaintyBroadcastMode, VanadiumRun
-
-
-# TODO remove
-def drop_variances(data: RawDataWithVariances[VanadiumRun]) -> RawData[VanadiumRun]:
-    res = data.copy(deep=False)
-    if res.bins is not None:
-        res.bins.constituents['data'].variances = None
-    else:
-        res.variances = None
-    return RawData[VanadiumRun](res)
+from .types import UncertaintyBroadcastMode
 
 
 def broadcast_uncertainties(
@@ -63,7 +53,3 @@ def _without_variances(data: sc.DataArray) -> sc.DataArray:
     else:
         out.variances = None
     return out
-
-
-providers = (drop_variances,)
-"""Sciline providers for handling statistical uncertainties."""

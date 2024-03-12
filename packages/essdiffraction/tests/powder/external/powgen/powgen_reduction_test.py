@@ -13,6 +13,7 @@ from ess.powder.types import (
     NormalizedByProtonCharge,
     SampleRun,
     TwoThetaBins,
+    UncertaintyBroadcastMode,
     ValidTofRange,
     VanadiumRun,
 )
@@ -32,6 +33,7 @@ def params():
         Filename[SampleRun]: 'PG3_4844_event.zip',
         Filename[VanadiumRun]: 'PG3_4866_event.zip',
         CalibrationFilename: 'PG3_FERNS_d4832_2011_08_24.zip',
+        UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
         ValidTofRange: sc.array(dims=['tof'], values=[0.0, 16666.67], unit='us'),
         DspacingBins: sc.linspace('dspacing', 0.0, 2.3434, 200, unit='angstrom'),
     }

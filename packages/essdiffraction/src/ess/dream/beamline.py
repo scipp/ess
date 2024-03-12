@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
-"""Detector and shaping tools for DREAM."""
+"""Beamline tools for DREAM."""
 
 from ess.powder.types import FlatDetectorData, RawDetectorData, RunType
 
