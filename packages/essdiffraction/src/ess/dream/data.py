@@ -2,6 +2,8 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 """Data for tests and documentation with DREAM."""
 
+from pathlib import Path
+
 _version = '1'
 
 __all__ = ['get_path']
@@ -25,7 +27,7 @@ def _make_pooch():
 _pooch = _make_pooch()
 
 
-def get_path(name: str, unzip: bool = False) -> str:
+def get_path(name: str, unzip: bool = False) -> Path:
     """
     Return the path to a data file bundled with ess.dream.
 
@@ -34,4 +36,4 @@ def get_path(name: str, unzip: bool = False) -> str:
     """
     import pooch
 
-    return _pooch.fetch(name, processor=pooch.Unzip() if unzip else None)
+    return Path(_pooch.fetch(name, processor=pooch.Unzip() if unzip else None))
