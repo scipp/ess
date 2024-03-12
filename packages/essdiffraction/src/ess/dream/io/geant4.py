@@ -8,8 +8,15 @@ from typing import Dict, Optional, Union
 import numpy as np
 import sciline
 import scipp as sc
+from ess.reduce.nexus import extract_detector_data
 
-from ess.powder.types import DetectorName, FilePath, RawDetector, RunType
+from ess.powder.types import (
+    DetectorName,
+    FilePath,
+    RawDetector,
+    RawDetectorData,
+    RunType,
+)
 
 MANTLE_DETECTOR_ID = sc.index(7)
 HIGH_RES_DETECTOR_ID = sc.index(8)
@@ -56,6 +63,13 @@ def extract_geant4_detector(
 ) -> RawDetector[RunType]:
     """Extract a single detector from a loaded GEANT4 simulation."""
     return RawDetector[RunType](detectors['instrument'][detector_name])
+
+
+def extract_geant4_detector_data(
+    detector: RawDetector[RunType],
+) -> RawDetectorData[RunType]:
+    """Extract the histogram or event data from a loaded GEANT4 detector."""
+    return RawDetectorData[RunType](extract_detector_data(detector))
 
 
 def _load_raw_events(
@@ -140,5 +154,5 @@ def _extract_detector(
         return None
 
 
-providers = (extract_geant4_detector, load_geant4_csv)
+providers = (extract_geant4_detector, extract_geant4_detector_data, load_geant4_csv)
 """Geant4-providers for Sciline pipelines."""
