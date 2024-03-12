@@ -9,7 +9,10 @@ from ..types import (
     BeamSize,
     DetectorSpatialResolution,
     Gravity,
+    NeXusDetectorName,
+    RawDetector,
     Run,
+    SamplePosition,
     SampleSize,
     WavelengthEdges,
 )
@@ -18,7 +21,6 @@ from .beamline import instrument_view_components
 from .instrument_view import instrument_view
 from .types import (
     AngularResolution,
-    BeamlineParams,
     Chopper1Position,
     Chopper2Position,
     ChopperFrequency,
@@ -52,6 +54,8 @@ default_parameters = {
     ChopperPhase[Run]: sc.scalar(-8.0, unit='deg'),
     Chopper1Position[Run]: sc.vector(value=[0, 0, -15.5], unit='m'),
     Chopper2Position[Run]: sc.vector(value=[0, 0, -14.5], unit='m'),
+    SamplePosition[Run]: sc.vector([0, 0, 0], unit='m'),
+    NeXusDetectorName[Run]: 'multiblade_detector',
 }
 
 del sc

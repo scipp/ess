@@ -20,6 +20,7 @@ requirements:
     - sciline>=23.9.1
     - scipp>=23.8.0
     - scippneutron>=23.9.0
+    - essreduce
     - python>=3.10
 
 test:

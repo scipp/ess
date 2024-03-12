@@ -6,6 +6,7 @@ python-dateutil
 graphviz
 pythreejs
 orsopy
+essreduce
 plopp @ git+https://github.com/scipp/plopp@main
 sciline @ git+https://github.com/scipp/sciline@main
 scippneutron @ git+https://github.com/scipp/scippneutron@main

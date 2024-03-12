@@ -2,34 +2,23 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 
-from ..conversions import specular_reflection as spec_relf_graph
-from ..types import SpecularReflectionCoordTransformGraph
+from ..types import IncidentBeam, Run, SamplePosition
+from .types import Chopper1Position, Chopper2Position
 
 
 def incident_beam(
-    *,
-    source_chopper_1: sc.Variable,
-    source_chopper_2: sc.Variable,
-    sample_position: sc.Variable,
-) -> sc.Variable:
+    source_chopper_1_position: Chopper1Position[Run],
+    source_chopper_2_position: Chopper2Position[Run],
+    sample_position: SamplePosition[Run],
+) -> IncidentBeam[Run]:
     """
     Compute the incident beam vector from the source chopper position vector,
     instead of the source_position vector.
     """
     chopper_midpoint = (
-        source_chopper_1.value['position'].data
-        + source_chopper_2.value['position'].data
+        source_chopper_1_position + source_chopper_2_position
     ) * sc.scalar(0.5)
     return sample_position - chopper_midpoint
 
 
-def specular_reflection() -> SpecularReflectionCoordTransformGraph:
-    """
-    Generate a coordinate transformation graph for Amor reflectometry.
-    """
-    graph = spec_relf_graph()
-    graph['incident_beam'] = incident_beam
-    return SpecularReflectionCoordTransformGraph(graph)
-
-
-providers = (specular_reflection,)
+providers = (incident_beam,)

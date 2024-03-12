@@ -3,44 +3,29 @@
 import scipp as sc
 
 from ..tools import fwhm_to_std
-from ..types import QBins, QData, QResolution, Sample
-from .types import AngularResolution, SampleSizeResolution, WavelengthResolution
+from ..types import (
+    DetectorPosition,
+    DetectorSpatialResolution,
+    QBins,
+    QData,
+    QResolution,
+    Sample,
+    SampleSize,
+)
+from .types import (
+    AngularResolution,
+    Chopper1Position,
+    Chopper2Position,
+    SampleSizeResolution,
+    WavelengthResolution,
+)
 
 
-def wavelength_resolution(da: QData[Sample]) -> WavelengthResolution:
-    return WavelengthResolution(
-        _wavelength_resolution(
-            chopper_1_position=da.coords['source_chopper_1'].value['position'],
-            chopper_2_position=da.coords['source_chopper_2'].value['position'],
-            pixel_position=da.coords['position'],
-        )
-    )
-
-
-def angular_resolution(da: QData[Sample]) -> AngularResolution:
-    return AngularResolution(
-        _angular_resolution(
-            pixel_position=da.coords['position'],
-            theta=da.bins.coords['theta'],
-            detector_spatial_resolution=da.coords['detector_spatial_resolution'],
-        )
-    )
-
-
-def sample_size_resolution(da: QData[Sample]) -> SampleSizeResolution:
-    return SampleSizeResolution(
-        _sample_size_resolution(
-            pixel_position=da.coords['position'],
-            sample_size=da.coords['sample_size'],
-        )
-    )
-
-
-def _wavelength_resolution(
-    chopper_1_position: sc.Variable,
-    chopper_2_position: sc.Variable,
-    pixel_position: sc.Variable,
-) -> sc.Variable:
+def wavelength_resolution(
+    chopper_1_position: Chopper1Position[Sample],
+    chopper_2_position: Chopper2Position[Sample],
+    pixel_position: DetectorPosition[Sample],
+) -> WavelengthResolution:
     """
     Find the wavelength resolution contribution as described in Section 4.3.3 of the
     Amor publication (doi: 10.1016/j.nima.2016.03.007).
@@ -60,18 +45,18 @@ def _wavelength_resolution(
         The angular resolution variable, as standard deviation.
     """
     distance_between_choppers = (
-        chopper_2_position.data.fields.z - chopper_1_position.data.fields.z
+        chopper_2_position.fields.z - chopper_1_position.fields.z
     )
-    chopper_midpoint = (chopper_1_position.data + chopper_2_position.data) * sc.scalar(
-        0.5
-    )
+    chopper_midpoint = (chopper_1_position + chopper_2_position) * sc.scalar(0.5)
     chopper_detector_distance = pixel_position.fields.z - chopper_midpoint.fields.z
-    return fwhm_to_std(distance_between_choppers / chopper_detector_distance)
+    return WavelengthResolution(
+        fwhm_to_std(distance_between_choppers / chopper_detector_distance)
+    )
 
 
-def _sample_size_resolution(
-    pixel_position: sc.Variable, sample_size: sc.Variable
-) -> sc.Variable:
+def sample_size_resolution(
+    pixel_position: DetectorPosition[Sample], sample_size: SampleSize[Sample]
+) -> SampleSizeResolution:
     """
     The resolution from the projected sample size, where it may be bigger
     than the detector pixel resolution as described in Section 4.3.3 of the Amor
@@ -95,11 +80,11 @@ def _sample_size_resolution(
     )
 
 
-def _angular_resolution(
-    pixel_position: sc.Variable,
-    theta: sc.Variable,
-    detector_spatial_resolution: sc.Variable,
-) -> sc.Variable:
+def angular_resolution(
+    da: QData[Sample],
+    pixel_position: DetectorPosition[Sample],
+    detector_spatial_resolution: DetectorSpatialResolution[Sample],
+) -> AngularResolution:
     """
     Determine the angular resolution as described in Section 4.3.3 of the Amor
     publication (doi: 10.1016/j.nima.2016.03.007).
@@ -118,6 +103,7 @@ def _angular_resolution(
     :
         Angular resolution standard deviation
     """
+    theta = da.bins.coords['theta']
     theta_unit = theta.bins.unit if theta.bins is not None else theta.unit
     return (
         fwhm_to_std(

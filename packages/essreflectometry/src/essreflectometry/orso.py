@@ -16,13 +16,13 @@ from dateutil.parser import parse as parse_datetime
 from orsopy.fileio import base as orso_base
 from orsopy.fileio import data_source, orso, reduction
 
+from .load import load
 from .supermirror import SupermirrorCalibrationFactor
 from .types import (
     ChopperCorrectedTofEvents,
     FilePath,
     FootprintCorrectedData,
     IofQ,
-    RawData,
     Reference,
     Sample,
 )
@@ -61,33 +61,42 @@ OrsoSample = NewType('OrsoSample', data_source.Sample)
 """ORSO sample."""
 
 
-def parse_orso_experiment(raw_data: RawData[Sample]) -> OrsoExperiment:
+def parse_orso_experiment(filepath: FilePath[Sample]) -> OrsoExperiment:
     """Parse ORSO experiment metadata from raw NeXus data."""
+    title, instrument_name, facility, start_time = load(
+        filepath,
+        'entry/title',
+        'entry/instrument/name',
+        'entry/facility',
+        'entry/start_time',
+    )
     return OrsoExperiment(
         data_source.Experiment(
-            title=raw_data['title'],
-            instrument=raw_data['instrument']['name'],
-            facility=raw_data.get('facility'),
-            start_date=parse_datetime(raw_data['start_time']),
+            title=title,
+            instrument=instrument_name,
+            facility=facility,
+            start_date=parse_datetime(start_time),
             probe='neutron',
         )
     )
 
 
-def parse_orso_owner(raw_data: RawData[Sample]) -> OrsoOwner:
+def parse_orso_owner(filepath: FilePath[Sample]) -> OrsoOwner:
     """Parse ORSO owner metadata from raw NeXus data."""
+    (user,) = load(filepath, 'entry/user')
     return OrsoOwner(
         orso_base.Person(
-            name=raw_data['user']['name'],
-            contact=raw_data['user']['email'],
-            affiliation=raw_data['user'].get('affiliation'),
+            name=user['name'],
+            contact=user['email'],
+            affiliation=user.get('affiliation'),
         )
     )
 
 
-def parse_orso_sample(raw_data: RawData[Sample]) -> OrsoSample:
+def parse_orso_sample(filepath: FilePath[Sample]) -> OrsoSample:
     """Parse ORSO sample metadata from raw NeXus data."""
-    if not raw_data.get('sample'):
+    (sample,) = load(filepath, 'entry/sample')
+    if not sample:
         return OrsoSample(data_source.Sample.empty())
     raise NotImplementedError('NeXus sample parsing is not implemented')
 

@@ -6,17 +6,21 @@ import scipp as sc
 from .supermirror import SupermirrorCalibrationFactor
 from .tools import fwhm_to_std
 from .types import (
+    BeamSize,
     FootprintCorrectedData,
     HistogrammedQData,
     IofQ,
     Reference,
     Run,
     Sample,
+    SampleSize,
     ThetaData,
 )
 
 
-def footprint_correction(data_array: ThetaData[Run]) -> FootprintCorrectedData[Run]:
+def footprint_correction(
+    data_array: ThetaData[Run], beam_size: BeamSize[Run], sample_size: SampleSize[Run]
+) -> FootprintCorrectedData[Run]:
     """
     Perform the footprint correction on the data array that has a :code:`beam_size` and
     binned :code:`theta` values.
@@ -31,12 +35,8 @@ def footprint_correction(data_array: ThetaData[Run]) -> FootprintCorrectedData[R
     :
        Footprint corrected data array.
     """
-    size_of_beam_on_sample = beam_on_sample(
-        data_array.coords['beam_size'], data_array.bins.coords['theta']
-    )
-    footprint_scale = sc.erf(
-        fwhm_to_std(data_array.coords['sample_size'] / size_of_beam_on_sample)
-    )
+    size_of_beam_on_sample = beam_on_sample(beam_size, data_array.bins.coords['theta'])
+    footprint_scale = sc.erf(fwhm_to_std(sample_size / size_of_beam_on_sample))
     data_array_fp_correction = data_array / footprint_scale.squeeze()
     return FootprintCorrectedData[Run](data_array_fp_correction)
 
