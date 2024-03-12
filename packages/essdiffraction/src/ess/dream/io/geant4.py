@@ -78,7 +78,7 @@ def _adjust_coords(da: sc.DataArray) -> None:
     )
 
 
-def _group(detectors: Dict[str, sc.DataArray]) -> Dict[str, sc.DataArray]:
+def _group(detectors: Dict[str, sc.DataArray]) -> Dict[str, sc.DataGroup]:
     elements = ('module', 'segment', 'counter', 'wire', 'strip')
 
     def group(key: str, da: sc.DataArray) -> sc.DataArray:
@@ -89,7 +89,7 @@ def _group(detectors: Dict[str, sc.DataArray]) -> Dict[str, sc.DataArray]:
         res.bins.coords.pop('sector', None)
         return res
 
-    return {key: group(key, da) for key, da in detectors.items()}
+    return {key: sc.DataGroup(events=group(key, da)) for key, da in detectors.items()}
 
 
 def _split_detectors(
