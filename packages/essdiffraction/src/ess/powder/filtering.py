@@ -11,7 +11,14 @@ from numbers import Real
 
 import scipp as sc
 
-from .types import FilteredData, RawData, RunType, TofCroppedData, ValidTofRange
+from ._util import elem_dtype, elem_unit, event_or_outer_coord
+from .types import (
+    FilteredData,
+    FlatDetectorData,
+    RunType,
+    TofCroppedData,
+    ValidTofRange,
+)
 
 
 def _equivalent_bin_indices(a, b) -> bool:
@@ -72,7 +79,7 @@ def remove_bad_pulses(
 
 
 def crop_tof(
-    data: RawData[RunType], tof_range: ValidTofRange
+    data: FlatDetectorData[RunType], tof_range: ValidTofRange
 ) -> TofCroppedData[RunType]:
     """Remove events outside the specified TOF range.
 
@@ -90,8 +97,11 @@ def crop_tof(
     :
         Cropped data.
     """
+    tof = event_or_outer_coord(data, 'tof')
+    tof_unit = elem_unit(tof)
+    tof_dtype = elem_dtype(tof)
     return TofCroppedData[RunType](
-        data.bin(tof=tof_range.to(unit=data.coords['tof'].unit))
+        data.bin(tof=tof_range.to(unit=tof_unit, dtype=tof_dtype))
     )
 
 
