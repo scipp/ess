@@ -2,8 +2,10 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 import uuid
+from functools import reduce
 from typing import Optional
 
+import sciline
 import scipp as sc
 from scipp.scipy.interpolate import interp1d
 
@@ -18,6 +20,8 @@ from .types import (
     CleanSummedQ,
     DimsToKeep,
     DirectBeam,
+    Filename,
+    FinalSummedQ,
     IofQ,
     IofQPart,
     MonitorType,
@@ -132,14 +136,14 @@ def resample_direct_beam(
     return CleanDirectBeam(func(wavelength_bins, midpoints=True))
 
 
-def merge_spectra(
+def bin_in_q(
     data: CleanQ[ScatteringRunType, IofQPart],
     q_bins: Optional[QBins],
     qxy_bins: Optional[QxyBins],
     dims_to_keep: Optional[DimsToKeep],
 ) -> CleanSummedQ[ScatteringRunType, IofQPart]:
     """
-    Merges all spectra:
+    Merges data from all pixels into a single I(Q) spectrum:
 
     * In the case of event data, events in all bins are concatenated
     * In the case of dense data, counts in all spectra are summed
@@ -222,6 +226,29 @@ def merge_spectra(
     return CleanSummedQ[ScatteringRunType, IofQPart](out.squeeze())
 
 
+def dummy_merge_runs(
+    data: CleanSummedQ[ScatteringRunType, IofQPart]
+) -> FinalSummedQ[ScatteringRunType, IofQPart]:
+    return FinalSummedQ[ScatteringRunType, IofQPart](data)
+
+
+def _merge_events_or_histograms(a: sc.DataArray, b: sc.DataArray) -> sc.DataArray:
+    if a.bins is not None:
+        return a.bins.concatenate(b)
+    return a + b
+
+
+def merge_multiple_runs(
+    data: sciline.Series[
+        Filename[ScatteringRunType], CleanSummedQ[ScatteringRunType, IofQPart]
+    ],
+) -> FinalSummedQ[ScatteringRunType, IofQPart]:
+    """ """
+    return FinalSummedQ[ScatteringRunType, IofQPart](
+        reduce(_merge_events_or_histograms, data.values())
+    )
+
+
 def subtract_background(
     sample: IofQ[SampleRun],
     background: IofQ[BackgroundRun],
@@ -239,6 +266,7 @@ def subtract_background(
 providers = (
     preprocess_monitor_data,
     resample_direct_beam,
-    merge_spectra,
+    bin_in_q,
     subtract_background,
+    dummy_merge_runs,
 )

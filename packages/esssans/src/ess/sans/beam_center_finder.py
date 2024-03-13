@@ -16,7 +16,7 @@ from .conversions import (
     detector_to_wavelength,
     mask_wavelength,
 )
-from .i_of_q import merge_spectra
+from .i_of_q import bin_in_q
 from .logging import get_logger
 from .normalization import (
     iofq_denominator,
@@ -170,7 +170,7 @@ def _iofq_in_quadrants(
 
     providers = [
         compute_Q,
-        merge_spectra,
+        bin_in_q,
         normalize,
         iofq_denominator,
         mask_wavelength,

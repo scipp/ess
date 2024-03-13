@@ -10,19 +10,18 @@ import sciline
 import scipp as sc
 
 from .types import (
-    LogicalDimsData,
+    # LogicalDimsData,
     MaskedData,
     MaskedDetectorIDs,
     PixelMask,
     PixelMaskFilename,
     SampleRun,
     ScatteringRunType,
+    TofData,
 )
 
 
-def to_pixel_mask(
-    data: LogicalDimsData[SampleRun], masked: MaskedDetectorIDs
-) -> PixelMask:
+def to_pixel_mask(data: TofData[SampleRun], masked: MaskedDetectorIDs) -> PixelMask:
     """Convert a list of masked detector IDs to a pixel mask.
 
     Parameters
@@ -39,7 +38,7 @@ def to_pixel_mask(
 
 
 def apply_pixel_masks(
-    data: LogicalDimsData[ScatteringRunType],
+    data: TofData[ScatteringRunType],
     masks: Optional[sciline.Series[PixelMaskFilename, PixelMask]],
 ) -> MaskedData[ScatteringRunType]:
     """Apply pixel-specific masks to raw data.

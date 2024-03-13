@@ -22,10 +22,10 @@ from ..sans.types import (
     FilePath,
     # Incident,
     # LabFrameTransform,
-    # LoadedDetector,
-    # LoadedMonitor,
-    LoadedSingleFileDetector,
-    LoadedSingleFileMonitor,
+    LoadedNeXusDetector,
+    LoadedNeXusMonitor,
+    # LoadedSingleFileDetector,
+    # LoadedSingleFileMonitor,
     MonitorType,
     NeXusDetectorName,
     NeXusMonitorName,
@@ -104,8 +104,8 @@ def load_nexus_detector(
     detector_name: NeXusDetectorName,
     # raw_source: RawSource[RunType],
     # raw_sample: RawSample[RunType],
-) -> LoadedSingleFileDetector[RunType]:
-    out = nexus.load_detector(file_path=file_path, detector_name=detector_name)
+) -> LoadedNeXusDetector[RunType]:
+    # out = nexus.load_detector(file_path=file_path, detector_name=detector_name)
     # # Note here we specify the name instead of using
     # # ess.reduce.nexus.extract_detector_data because we need the name to put the
     # # events back into the original data group.
@@ -118,18 +118,22 @@ def load_nexus_detector(
     # if detector_name in DETECTOR_BANK_RESHAPING:
     #     events = DETECTOR_BANK_RESHAPING[detector_name](events)
     # out[key] = events
-    return LoadedSingleFileDetector[RunType](out)
+    return LoadedNeXusDetector[RunType](
+        nexus.load_detector(file_path=file_path, detector_name=detector_name)
+    )
 
 
 def load_nexus_monitor(
     file_path: FilePath[Filename[RunType]],
     monitor_name: NeXusMonitorName[MonitorType],
     # raw_source: RawSource[RunType],
-) -> LoadedSingleFileMonitor[RunType, MonitorType]:
-    out = nexus.load_monitor(file_path=file_path, monitor_name=monitor_name)
+) -> LoadedNeXusMonitor[RunType, MonitorType]:
+    # out = nexus.load_monitor(file_path=file_path, monitor_name=monitor_name)
     # key = f'{monitor_name}_events'
     # out[key] = _preprocess_data(out[key], source_position=raw_source['position'])
-    return LoadedSingleFileMonitor[RunType, MonitorType](out)
+    return LoadedNeXusMonitor[RunType, MonitorType](
+        nexus.load_monitor(file_path=file_path, monitor_name=monitor_name)
+    )
 
 
 # def to_detector(

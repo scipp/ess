@@ -12,17 +12,15 @@ from ess.reduce import nexus
 from ..sans.common import gravity_vector
 from ..sans.types import (
     CalibratedMonitor,
-    DataWithVariancesAndCoordinates,
+    PatchedData,
     DetectorPixelShape,
     Incident,
     LabFrameTransform,
-    # LoadedDetector,
-    # LoadedMonitor,
-    LoadedSingleFileDetector,
-    LoadedSingleFileMonitor,
-    LogicalDimsData,
+    LoadedNeXusDetector,
+    LoadedNeXusMonitor,
+    # LogicalDimsData,
     MonitorType,
-    MonitorWithVariancesAndCoordinates,
+    PatchedMonitor,
     NeXusDetectorName,
     NeXusMonitorName,
     PixelShapePath,
@@ -33,10 +31,11 @@ from ..sans.types import (
     RunType,
     SamplePosition,
     ScatteringRunType,
-    SingleFileDetectorData,
-    SingleFileMonitorData,
+    # SingleFileDetectorData,
+    # SingleFileMonitorData,
     SourcePosition,
     TofData,
+    TofMonitor,
     TransformationPath,
     Transmission,
 )
@@ -70,33 +69,35 @@ def get_sample_position(
 
 
 def get_detector_data(
-    detector: LoadedSingleFileDetector[ScatteringRunType],
-) -> SingleFileDetectorData[ScatteringRunType]:
-    return SingleFileDetectorData[ScatteringRunType](
-        nexus.extract_detector_data(detector)
-    )
-
-
-def to_detector_data(
-    data: SingleFileDetectorData[ScatteringRunType],
+    detector: LoadedNeXusDetector[ScatteringRunType],
+    detector_name: NeXusDetectorName,
 ) -> RawData[ScatteringRunType]:
-    """Dummy provider to convert a single-file detector to a combined detector."""
-    return RawData[ScatteringRunType](data)
+    da = nexus.extract_detector_data(detector)
+    if detector_name in DETECTOR_BANK_RESHAPING:
+        da = DETECTOR_BANK_RESHAPING[detector_name](da)
+    return RawData[ScatteringRunType](da)
+
+
+# def to_detector_data(
+#     data: SingleFileDetectorData[ScatteringRunType],
+# ) -> RawData[ScatteringRunType]:
+#     """Dummy provider to convert a single-file detector to a combined detector."""
+#     return RawData[ScatteringRunType](data)
 
 
 def get_monitor_data(
-    monitor: LoadedSingleFileMonitor[RunType, MonitorType],
-) -> SingleFileMonitorData[RunType, MonitorType]:
+    monitor: LoadedNeXusMonitor[RunType, MonitorType],
+) -> RawMonitor[RunType, MonitorType]:
     out = nexus.extract_monitor_data(monitor).copy(deep=False)
     out.coords['position'] = monitor['position']
-    return SingleFileMonitorData[RunType, MonitorType](out)
+    return RawMonitor[RunType, MonitorType](out)
 
 
-def to_monitor_data(
-    data: SingleFileMonitorData[RunType, MonitorType],
-) -> RawMonitor[RunType, MonitorType]:
-    """Dummy provider to convert a single-file monitor to a combined monitor."""
-    return RawMonitor[RunType, MonitorType](data)
+# def to_monitor_data(
+#     data: SingleFileMonitorData[RunType, MonitorType],
+# ) -> RawMonitor[RunType, MonitorType]:
+#     """Dummy provider to convert a single-file monitor to a combined monitor."""
+#     return RawMonitor[RunType, MonitorType](data)
 
 
 def _add_variances_and_coordinates(
@@ -121,8 +122,8 @@ def patch_detector_data(
     detector_data: RawData[ScatteringRunType],
     source_position: SourcePosition[ScatteringRunType],
     sample_position: SamplePosition[ScatteringRunType],
-) -> DataWithVariancesAndCoordinates[ScatteringRunType]:
-    return DataWithVariancesAndCoordinates[ScatteringRunType](
+) -> PatchedData[ScatteringRunType]:
+    return PatchedData[ScatteringRunType](
         _add_variances_and_coordinates(
             da=detector_data,
             source_position=source_position,
@@ -134,8 +135,8 @@ def patch_detector_data(
 def patch_monitor_data(
     monitor_data: RawMonitor[RunType, MonitorType],
     source_position: SourcePosition[RunType],
-) -> MonitorWithVariancesAndCoordinates[RunType, MonitorType]:
-    return MonitorWithVariancesAndCoordinates[RunType, MonitorType](
+) -> PatchedMonitor[RunType, MonitorType]:
+    return PatchedMonitor[RunType, MonitorType](
         _add_variances_and_coordinates(da=monitor_data, source_position=source_position)
     )
 
@@ -148,35 +149,35 @@ def _convert_to_tof(da: sc.DataArray) -> sc.DataArray:
 
 
 def data_to_tof(
-    da: DataWithVariancesAndCoordinates[ScatteringRunType],
+    da: PatchedData[ScatteringRunType],
 ) -> TofData[ScatteringRunType]:
     return TofData[ScatteringRunType](_convert_to_tof(da))
 
 
 def monitor_to_tof(
-    da: MonitorWithVariancesAndCoordinates[RunType, MonitorType],
-) -> CalibratedMonitor[RunType, MonitorType]:
-    return CalibratedMonitor[RunType, MonitorType](_convert_to_tof(da))
+    da: PatchedMonitor[RunType, MonitorType],
+) -> TofMonitor[RunType, MonitorType]:
+    return TofMonitor[RunType, MonitorType](_convert_to_tof(da))
 
 
-def to_logical_dims(
-    da: TofData[ScatteringRunType],
-    detector_name: NeXusDetectorName,
-) -> LogicalDimsData[ScatteringRunType]:
-    if detector_name in DETECTOR_BANK_RESHAPING:
-        da = DETECTOR_BANK_RESHAPING[detector_name](da)
-    return LogicalDimsData[ScatteringRunType](da)
+# def to_logical_dims(
+#     da: TofData[ScatteringRunType],
+#     detector_name: NeXusDetectorName,
+# ) -> LogicalDimsData[ScatteringRunType]:
+#     if detector_name in DETECTOR_BANK_RESHAPING:
+#         da = DETECTOR_BANK_RESHAPING[detector_name](da)
+#     return LogicalDimsData[ScatteringRunType](da)
 
 
 def detector_pixel_shape(
-    detector: LoadedSingleFileDetector[ScatteringRunType],
+    detector: LoadedNeXusDetector[ScatteringRunType],
     pixel_shape_path: PixelShapePath,
 ) -> DetectorPixelShape[ScatteringRunType]:
     return DetectorPixelShape[ScatteringRunType](detector[pixel_shape_path])
 
 
 def detector_lab_frame_transform(
-    detector: LoadedSingleFileDetector[ScatteringRunType],
+    detector: LoadedNeXusDetector[ScatteringRunType],
     transform_path: TransformationPath,
 ) -> LabFrameTransform[ScatteringRunType]:
     return LabFrameTransform[ScatteringRunType](detector[transform_path])
@@ -191,9 +192,9 @@ providers = (
     get_source_position,
     patch_detector_data,
     patch_monitor_data,
-    to_detector_data,
-    to_logical_dims,
-    to_monitor_data,
+    # to_detector_data,
+    # to_logical_dims,
+    # to_monitor_data,
     data_to_tof,
     monitor_to_tof,
 )

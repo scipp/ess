@@ -218,43 +218,43 @@ class SolidAngle(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Solid angle of detector pixels seen from sample position"""
 
 
-class LoadedSingleFileDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
-    """Detector contents of a single loaded file"""
+# class LoadedSingleFileDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+#     """Detector contents of a single loaded file"""
 
 
-class SingleFileDetectorData(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
-    """Detector neutron events of a single loaded file"""
+# class SingleFileDetectorData(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+#     """Detector neutron events of a single loaded file"""
 
 
-class LoadedSingleFileMonitor(
-    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataGroup], sc.DataGroup
-):
-    """A single monitor of a single loaded file"""
-
-
-class SingleFileMonitorData(
-    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataGroup], sc.DataGroup
-):
-    """Neutron data from a single monitor of a single loaded file"""
-
-
-# class LoadedDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
-#     """Detector events (can be data merged from multiple files)"""
-
-
-# class LoadedMonitor(
+# class LoadedSingleFileMonitor(
 #     sciline.ScopeTwoParams[RunType, MonitorType, sc.DataGroup], sc.DataGroup
 # ):
-#     """Monitor data (can be data merged from multiple files)"""
+#     """A single monitor of a single loaded file"""
+
+
+# class SingleFileMonitorData(
+#     sciline.ScopeTwoParams[RunType, MonitorType, sc.DataGroup], sc.DataGroup
+# ):
+#     """Neutron data from a single monitor of a single loaded file"""
+
+
+class LoadedNeXusDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+    """Detector data, loaded from a NeXus file, containing not only neutron events
+    but also pixel shape information, transformations, ..."""
+
+
+class LoadedNeXusMonitor(
+    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataGroup], sc.DataGroup
+):
+    """Monitor data loaded from a NeXus file, containing not only neutron events
+    but also transformations, ..."""
 
 
 class RawData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Raw detector data"""
 
 
-class DataWithVariancesAndCoordinates(
-    sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray
-):
+class PatchedData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Raw event data where variances and necessary coordinates
     (e.g. sample and source position) have been added"""
 
@@ -263,8 +263,14 @@ class TofData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Data with a time-of-flight coordinate"""
 
 
-class LogicalDimsData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
-    """Detector data reshaped to logical dimensions"""
+class TofMonitor(
+    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataGroup], sc.DataGroup
+):
+    """Monitor data with a time-of-flight coordinate"""
+
+
+# class LogicalDimsData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
+#     """Detector data reshaped to logical dimensions"""
 
 
 PixelMask = NewType('PixelMask', sc.Variable)
@@ -314,6 +320,12 @@ class CleanSummedQ(
     """Result of histogramming/binning :py:class:`CleanQ` over all pixels into Q bins"""
 
 
+class FinalSummedQ(
+    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
+):
+    """Final data into Q bins, in a state that is ready to be normalized."""
+
+
 class IofQ(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """I(Q)"""
 
@@ -328,7 +340,7 @@ class RawMonitor(
     """Raw monitor data"""
 
 
-class MonitorWithVariancesAndCoordinates(
+class PatchedMonitor(
     sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
 ):
     """Raw monitor data where variances and necessary coordinates
