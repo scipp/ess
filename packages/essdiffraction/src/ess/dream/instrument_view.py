@@ -1,12 +1,18 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+from __future__ import annotations
 
 from html import escape
-from typing import Any, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 import plopp as pp
 import scipp as sc
-from plopp.widgets import Box
+
+if TYPE_CHECKING:
+    try:
+        from plopp.widgets import Box
+    except ModuleNotFoundError:
+        Box = object
 
 
 def instrument_view(
@@ -36,6 +42,8 @@ def instrument_view(
         Additional arguments are forwarded to the scatter3d figure
         (see https://scipp.github.io/plopp/generated/plopp.scatter3d.html).
     """
+    from plopp.widgets import Box
+
     view = InstrumentView(data, dim=dim, pixel_size=pixel_size, **kwargs)
     return Box(view.children)
 
