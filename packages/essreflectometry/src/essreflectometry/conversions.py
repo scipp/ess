@@ -9,11 +9,16 @@ from scippneutron.conversion.graph import beamline, tof
 
 from .types import (
     ChopperCorrectedTofEvents,
+    DetectorPosition,
     FootprintCorrectedData,
+    Gravity,
     HistogrammedQData,
+    IncidentBeam,
     QBins,
     QData,
     Run,
+    SamplePosition,
+    SampleRotation,
     SpecularReflectionCoordTransformGraph,
     ThetaData,
     WavelengthData,
@@ -99,7 +104,13 @@ def reflectometry_q(wavelength: sc.Variable, theta: sc.Variable) -> sc.Variable:
     return c * sc.sin(theta.astype(dtype, copy=False)) / wavelength
 
 
-def specular_reflection() -> SpecularReflectionCoordTransformGraph:
+def specular_reflection(
+    incident_beam: IncidentBeam[Run],
+    sample_position: SamplePosition[Run],
+    position: DetectorPosition[Run],
+    sample_rotation: SampleRotation[Run],
+    gravity: Gravity,
+) -> SpecularReflectionCoordTransformGraph[Run]:
     """
     Generate a coordinate transformation graph for specular reflection reflectometry.
 
@@ -113,13 +124,18 @@ def specular_reflection() -> SpecularReflectionCoordTransformGraph:
         **tof.elastic_wavelength("tof"),
         "theta": theta,
         "Q": reflectometry_q,
+        "incident_beam": lambda: incident_beam,
+        "sample_position": lambda: sample_position,
+        "position": lambda: position,
+        "sample_rotation": lambda: sample_rotation,
+        "gravity": lambda: gravity,
     }
     return SpecularReflectionCoordTransformGraph(graph)
 
 
 def tof_to_wavelength(
     data_array: ChopperCorrectedTofEvents[Run],
-    graph: SpecularReflectionCoordTransformGraph,
+    graph: SpecularReflectionCoordTransformGraph[Run],
     wavelength_edges: Optional[WavelengthEdges],
 ) -> WavelengthData[Run]:
     """
@@ -148,7 +164,7 @@ def tof_to_wavelength(
 
 def wavelength_to_theta(
     data_array: WavelengthData[Run],
-    graph: SpecularReflectionCoordTransformGraph,
+    graph: SpecularReflectionCoordTransformGraph[Run],
 ) -> ThetaData[Run]:
     """
     Use :code:`transform_coords` to find the theta values for the events and
@@ -185,7 +201,7 @@ def wavelength_to_theta(
 def theta_to_q(
     data_array: FootprintCorrectedData[Run],
     q_bins: QBins,
-    graph: SpecularReflectionCoordTransformGraph,
+    graph: SpecularReflectionCoordTransformGraph[Run],
 ) -> QData[Run]:
     """
     Convert from theta to Q and if necessary bin in Q.
@@ -231,4 +247,5 @@ providers = (
     wavelength_to_theta,
     theta_to_q,
     histogram,
+    specular_reflection,
 )
