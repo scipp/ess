@@ -4,7 +4,6 @@
 Coordinate transformations for powder diffraction.
 """
 
-import uuid
 from typing import Any, Callable, Optional
 
 import scipp as sc
@@ -78,23 +77,6 @@ def dspacing_from_diff_calibration(
     return _dspacing_from_diff_calibration_generic_impl(tof, tzero, difa, difc)
 
 
-def _restore_tof_if_in_wavelength(data: sc.DataArray) -> sc.DataArray:
-    if 'wavelength' not in data.dims:
-        return data
-
-    get_logger().info("Discarding coordinate 'wavelength' in favor of 'tof'.")
-    temp_name = uuid.uuid4().hex
-    aux = data.transform_coords(
-        temp_name,
-        {temp_name: lambda wavelength, tof: tof},
-        keep_inputs=False,
-        quiet=True,
-    )
-    return aux.transform_coords(
-        'tof', {'tof': temp_name}, keep_inputs=False, quiet=True
-    )
-
-
 def _consume_positions(position, sample_position, source_position):
     _ = position
     _ = sample_position
@@ -146,7 +128,6 @@ def to_dspacing_with_calibration(
     else:
         out = data
 
-    out = _restore_tof_if_in_wavelength(out)
     graph = {
         'dspacing': dspacing_from_diff_calibration,
     }
@@ -226,10 +207,25 @@ def _to_dspacing_impl(
         graph['_tag_positions_consumed'] = _consume_positions
     else:
         graph['_tag_positions_consumed'] = lambda: sc.scalar(0)
-
-    out = data.transform_coords('dspacing', graph=graph, keep_intermediate=False)
+    out = out.transform_coords('dspacing', graph=graph, keep_intermediate=False)
     out.coords.pop('_tag_positions_consumed', None)
     return DspacingData[RunType](out)
+
+
+def _restore_tof_if_in_wavelength(data: sc.DataArray) -> sc.DataArray:
+    out = data.copy(deep=False)
+    outer = out.coords.pop('wavelength', None)
+    if out.bins is not None:
+        binned = out.bins.coords.pop('wavelength', None)
+    else:
+        binned = None
+
+    if outer is not None or binned is not None:
+        get_logger().info("Discarded coordinate 'wavelength' in favor of 'tof'.")
+
+    if 'wavelength' in out.dims:
+        out = out.rename_dims(wavelength='tof')
+    return out
 
 
 providers = (to_dspacing_with_calibration,)
