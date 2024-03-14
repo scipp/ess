@@ -3,29 +3,27 @@
 
 """Beamline tools for DREAM."""
 
-from ess.powder.types import FlatDetectorData, RawDetectorData, RunType
+from ess.powder.types import DetectorDimensions, DetectorName
 
 
-def flatten_detector_dimensions(
-    data: RawDetectorData[RunType],
-) -> FlatDetectorData[RunType]:
-    """Flatten logical detector dimensions to a single ``spectrum``.
+def dream_detector_dimensions(detector_name: DetectorName) -> DetectorDimensions:
+    """Logical dimensions used by a DREAM detector.
 
     Parameters
     ----------
-    data:
-        Raw detector data in logical dimensions.
-        Logical detector dimensions must be contiguous.
+    detector_name:
+        Name of a detector of DREAM.
 
     Returns
     -------
     :
-        Flattened detector data with a ``spectrum`` dimension.
+        Logical dimensions used by the given DREAM detector.
     """
-    logical_dims = {'module', 'segment', 'counter', 'wire', 'strip', 'sector'}
-    actual_dims = tuple(dim for dim in data.dims if dim in logical_dims)
-    return FlatDetectorData[RunType](data.flatten(dims=actual_dims, to='spectrum'))
+    base = ('module', 'segment', 'counter', 'wire', 'strip')
+    if detector_name == DetectorName.high_resolution:
+        return DetectorDimensions(base + ('sector',))
+    return DetectorDimensions(base)
 
 
-providers = (flatten_detector_dimensions,)
+providers = (dream_detector_dimensions,)
 """Sciline providers for DREAM detector handling."""

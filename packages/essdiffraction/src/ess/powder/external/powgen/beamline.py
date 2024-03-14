@@ -6,13 +6,7 @@ Beamline parameters and utilities for POWGEN.
 
 import scipp as sc
 
-from ...types import (
-    CalibrationData,
-    FlatDetectorData,
-    RawCalibrationData,
-    RawDetectorData,
-    RunType,
-)
+from ...types import CalibrationData, DetectorDimensions, RawCalibrationData
 from .types import DetectorInfo
 
 
@@ -67,26 +61,10 @@ def preprocess_calibration_data(
     return CalibrationData(map_detector_to_spectrum(data, detector_info=detector_info))
 
 
-def flatten_detector_dimensions(
-    data: RawDetectorData[RunType],
-) -> FlatDetectorData[RunType]:
-    """Flatten logical detector dimensions to a single ``spectrum``.
-
-    POWGEN is loaded with a flat spectrum dimension to begin with,
-    so this function does nothing.
-
-    Parameters
-    ----------
-    data:
-        Raw detector data in logical dimensions.
-
-    Returns
-    -------
-    :
-        Flattened detector data with a ``spectrum`` dimension.
-    """
-    return FlatDetectorData[RunType](data)
+def powgen_detector_dimensions() -> DetectorDimensions:
+    """Dimensions used by POWGEN detectors."""
+    return DetectorDimensions(('spectrum',))
 
 
-providers = (flatten_detector_dimensions, preprocess_calibration_data)
+providers = (preprocess_calibration_data, powgen_detector_dimensions)
 """Sciline providers for POWGEN beamline processing."""

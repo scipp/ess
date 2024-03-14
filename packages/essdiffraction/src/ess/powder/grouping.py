@@ -5,6 +5,7 @@
 from scippneutron.conversion.graph import beamline
 
 from .types import (
+    DetectorDimensions,
     DspacingBins,
     DspacingData,
     DspacingHistogram,
@@ -40,20 +41,25 @@ def group_by_two_theta(
     )
 
 
-def merge_all_pixels(data: DspacingData[RunType]) -> FocussedData[RunType]:
+def merge_all_pixels(
+    data: DspacingData[RunType], dims: DetectorDimensions
+) -> FocussedData[RunType]:
     """Combine all pixels (spectra) of the detector.
 
     Parameters
     ----------
     data:
-        Input data with a `'spectrum'` dimension.
+        Input data with pixel dimensions.
+    dims:
+        The dimensions to reduce over.
+        Corresponds to the pixel dimensions of the detector.
 
     Returns
     -------
     :
-        The input without a `'spectrum'` dimension.
+        The input without pixel dimensions.
     """
-    return FocussedData(data.bins.concat('spectrum'))
+    return FocussedData(data.bins.concat(dims))
 
 
 def finalize_histogram(

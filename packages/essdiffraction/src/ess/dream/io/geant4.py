@@ -62,7 +62,7 @@ def extract_geant4_detector(
     detectors: AllRawDetectors[RunType], detector_name: DetectorName
 ) -> RawDetector[RunType]:
     """Extract a single detector from a loaded GEANT4 simulation."""
-    return RawDetector[RunType](detectors['instrument'][detector_name])
+    return RawDetector[RunType](detectors['instrument'][detector_name.name])
 
 
 def extract_geant4_detector_data(

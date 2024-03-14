@@ -33,8 +33,16 @@ RunType = TypeVar('RunType', EmptyInstrumentRun, SampleRun, VanadiumRun)
 CalibrationFilename = NewType('CalibrationFilename', str)
 """Filename of the instrument calibration file."""
 
-DetectorName = NewType('DetectorName', str)
-"""Name of a detector."""
+
+# In Python 3.11, this can be replaced with a StrEnum
+class DetectorName(str, Enum):
+    """Name of a detector."""
+
+    mantle = 'mantle'
+    high_resolution = 'high_resolution'
+    endcap_backward = 'endcap_backward'
+    endcap_forward = 'endcap_forward'
+
 
 DspacingBins = NewType('DSpacingBins', sc.Variable)
 """Bin edges for d-spacing."""
@@ -80,6 +88,10 @@ CalibrationData = NewType('CalibrationData', sc.Dataset)
 """Detector calibration data."""
 
 
+class DetectorDimensions(sciline.Scope[DetectorName, tuple[str, ...]], tuple[str, ...]):
+    """Logical detector dimensions."""
+
+
 class DspacingData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Data converted to d-spacing."""
 
@@ -94,10 +106,6 @@ DspacingHistogram = NewType('DspacingHistogram', sc.DataArray)
 
 class FilteredData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Raw data without invalid events."""
-
-
-class FlatDetectorData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Data (events / histogram) of a RawDetector flattened to ``detector_number``."""
 
 
 class FocussedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
