@@ -30,3 +30,28 @@
 
    external.powgen
 ```
+
+## ESSdream
+
+### Top-level functions
+
+```{eval-rst}
+.. currentmodule:: ess.dream
+
+.. autosummary::
+   :toctree: ../generated/functions
+
+   instrument_view
+```
+
+### Submodules
+
+```{eval-rst}
+.. autosummary::
+   :toctree: ../generated/modules
+   :template: module-template.rst
+   :recursive:
+
+   data
+   io
+```

@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+"""Data for tests and documentation with DREAM."""
+
 _version = '1'
 
 __all__ = ['get_path']
@@ -9,7 +11,7 @@ def _make_pooch():
     import pooch
 
     return pooch.create(
-        path=pooch.os_cache('ess/powgen'),
+        path=pooch.os_cache('ess/dream'),
         env='ESS_DATA_DIR',
         base_url='https://public.esss.dk/groups/scipp/ess/dream/{version}/',
         version=_version,

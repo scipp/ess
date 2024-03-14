@@ -23,13 +23,13 @@ contourpy==1.2.0
     # via matplotlib
 cycler==0.12.1
     # via matplotlib
-dask==2024.2.0
+dask==2024.2.1
     # via -r base.in
 decorator==5.1.1
     # via ipython
 executing==2.0.1
     # via stack-data
-fonttools==4.48.1
+fonttools==4.49.0
     # via matplotlib
 fsspec==2024.2.0
     # via dask
@@ -41,7 +41,7 @@ h5py==3.10.0
     #   scippnexus
 idna==3.6
     # via requests
-importlib-metadata==7.0.1
+importlib-metadata==7.0.2
     # via dask
 ipydatawidgets==4.3.5
     # via pythreejs
@@ -61,7 +61,7 @@ kiwisolver==1.4.5
     # via matplotlib
 locket==1.0.0
     # via partd
-matplotlib==3.8.2
+matplotlib==3.8.3
     # via plopp
 matplotlib-inline==0.1.6
     # via ipython
@@ -75,7 +75,7 @@ numpy==1.26.4
     #   scipp
     #   scippneutron
     #   scipy
-packaging==23.2
+packaging==24.0
     # via
     #   dask
     #   matplotlib
@@ -92,9 +92,9 @@ pillow==10.2.0
     # via matplotlib
 platformdirs==4.2.0
     # via pooch
-plopp==24.1.1
+plopp==24.2.0
     # via -r base.in
-pooch==1.8.0
+pooch==1.8.1
     # via scippneutron
 prompt-toolkit==3.0.36
     # via
@@ -106,9 +106,9 @@ pure-eval==0.2.2
     # via stack-data
 pygments==2.17.2
     # via ipython
-pyparsing==3.1.1
+pyparsing==3.1.2
     # via matplotlib
-python-dateutil==2.8.2
+python-dateutil==2.9.0.post0
     # via
     #   matplotlib
     #   scippnexus
@@ -118,7 +118,7 @@ pyyaml==6.0.1
     # via dask
 requests==2.31.0
     # via pooch
-sciline==24.2.0
+sciline==24.2.1
     # via -r base.in
 scipp==24.2.0
     # via
@@ -127,7 +127,7 @@ scipp==24.2.0
     #   scippnexus
 scippneutron==24.1.0
     # via -r base.in
-scippnexus==23.12.1
+scippnexus==24.3.1
     # via
     #   -r base.in
     #   scippneutron
@@ -155,7 +155,7 @@ traitlets==5.14.1
     #   traittypes
 traittypes==0.2.1
     # via ipydatawidgets
-urllib3==2.2.0
+urllib3==2.2.1
     # via requests
 wcwidth==0.2.13
     # via prompt-toolkit
