@@ -34,6 +34,7 @@ ProtonChargeConverter = NewType(
 def _retrieve_raw_event_data(file: snx.File, bank_name: str) -> sc.Variable:
     """Retrieve events from the nexus file."""
     bank_name = f'{bank_name}_events_dat_list_p_x_y_n_id_t'
+    (bank_name,) = (name for name in file["entry1/data"].keys() if bank_name in name)
     return file["entry1/data/" + bank_name]["events"][()].rename_dims(
         {'dim_0': 'event'}
     )
@@ -173,6 +174,7 @@ def load_mcstas_nexus(
 
     geometry = read_mcstas_geometry_xml(file_path)
     detectors = [det.name for det in geometry.detectors]
+    detectors = [geometry.detectors[0].name]
     coords = geometry.to_coords(*detectors)
 
     with snx.File(file_path) as file:

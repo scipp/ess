@@ -72,6 +72,7 @@ def test_file_reader_mcstas2(mcstas_2_deprecation_warning_context) -> None:
         file_path=file_path,
         event_weights_converter=event_weights_from_probability,
         proton_charge_converter=proton_charge_from_event_data,
+        detector_bank_name='bank01',
     )
     check_scalar_properties_mcstas_2(dg)
     assert dg.weights.bins.size().sum().value == data_length
@@ -93,11 +94,10 @@ def check_scalar_properties_mcstas_3(dg: NMXData):
     assert dg.sample_name == sc.scalar("sampleMantid")
 
 
-def test_file_reader_mcstas3() -> None:
+@pytest.mark.parametrize('bank_id', ('01', '02', '03'))
+def test_file_reader_mcstas3(bank_id) -> None:
     file_path = InputFilepath(small_mcstas_3_sample())
-    entry_paths = [
-        f"entry1/data/bank0{i}_events_dat_list_p_x_y_n_id_t" for i in range(1, 4)
-    ]
+    entry_paths = [f"entry1/data/bank{bank_id}_events_dat_list_p_x_y_n_id_t"]
     with snx.File(file_path) as file:
         raw_datas = [file[entry_path]["events"][()] for entry_path in entry_paths]
         raw_data = sc.concat(raw_datas, dim='dim_0')
@@ -107,6 +107,7 @@ def test_file_reader_mcstas3() -> None:
         file_path=file_path,
         event_weights_converter=event_weights_from_probability,
         proton_charge_converter=proton_charge_from_event_data,
+        detector_bank_name=f'bank{bank_id}',
     )
     check_scalar_properties_mcstas_3(dg)
     assert dg.weights.bins.size().sum().value == data_length
@@ -150,7 +151,8 @@ def test_file_reader_mcstas_additional_fields(tmp_mcstas_file: pathlib.Path) -> 
         file_path=InputFilepath(str(tmp_mcstas_file)),
         event_weights_converter=event_weights_from_probability,
         proton_charge_converter=proton_charge_from_event_data,
+        detector_bank_name='bank01',
     )
 
     assert isinstance(dg, sc.DataGroup)
-    assert dg.shape == (3, 1280 * 1280)
+    assert dg.shape == (1, 1280 * 1280)
