@@ -22,6 +22,7 @@ def mcstas_file_path(
 def mcstas_workflow(mcstas_file_path: str) -> sl.Pipeline:
     from ess.nmx.mcstas_loader import (
         DefaultMaximumProbability,
+        DetectorBankName,
         EventWeightsConverter,
         InputFilepath,
         MaximumProbability,
@@ -40,6 +41,7 @@ def mcstas_workflow(mcstas_file_path: str) -> sl.Pipeline:
             TimeBinSteps: TimeBinSteps(50),
             EventWeightsConverter: event_weights_from_probability,
             ProtonChargeConverter: proton_charge_from_event_data,
+            DetectorBankName: 'bank01',
         },
     )
 
@@ -56,7 +58,7 @@ def test_pipeline_mcstas_loader(mcstas_workflow: sl.Pipeline) -> None:
 
     nmx_data = mcstas_workflow.compute(NMXData)
     assert isinstance(nmx_data, sc.DataGroup)
-    assert nmx_data.sizes['panel'] == 3
+    assert nmx_data.sizes['panel'] == 1
     assert nmx_data.sizes['id'] == 1280 * 1280
 
 
@@ -66,5 +68,5 @@ def test_pipeline_mcstas_reduction(mcstas_workflow: sl.Pipeline) -> None:
 
     nmx_reduced_data = mcstas_workflow.compute(NMXReducedData)
     assert isinstance(nmx_reduced_data, sc.DataGroup)
-    assert nmx_reduced_data.sizes['panel'] == 3
+    assert nmx_reduced_data.sizes['panel'] == 1
     assert nmx_reduced_data.sizes['t'] == 50
