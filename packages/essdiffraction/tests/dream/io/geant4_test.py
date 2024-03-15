@@ -132,7 +132,8 @@ def test_geant4_in_pipeline(file_path, file):
     from ess.dream.io.geant4 import providers
 
     pipeline = sciline.Pipeline(
-        providers, params={FilePath[SampleRun]: file_path, DetectorName: 'mantle'}
+        providers,
+        params={FilePath[SampleRun]: file_path, DetectorName: DetectorName('mantle')},
     )
     detector = pipeline.compute(RawDetectorData[SampleRun])
     expected = load_geant4_csv(file)['instrument']['mantle']['events']
