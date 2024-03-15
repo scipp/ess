@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-from typing import Callable, Iterable, NewType, Optional
+from typing import Callable, NewType, Optional
 
 import scipp as sc
 import scippnexus as snx
@@ -31,33 +31,12 @@ ProtonChargeConverter = NewType(
 """A function that derives arbitrary proton charge based on event weights."""
 
 
-def _retrieve_event_list_names(keys: Iterable[str]) -> tuple[str, ...]:
-    import re
-
-    mandatory_fields = 'p_x_y_n_id_t'
-    # (weight, x, y, n, pixel id, time of arrival)
-    pattern = r"bank(\d\d+)_events_dat_list_" + mandatory_fields
-
-    def _filter_event_list_name(key: str) -> bool:
-        return re.search(pattern, key) is not None
-
-    if not (matching_keys := tuple(filter(_filter_event_list_name, keys))):
-        raise ValueError("Can not find event list name.")
-
-    return matching_keys
-
-
-def _retrieve_raw_event_data(file: snx.File) -> sc.Variable:
+def _retrieve_raw_event_data(file: snx.File, bank_name: str) -> sc.Variable:
     """Retrieve events from the nexus file."""
-    bank_names = _retrieve_event_list_names(file["entry1/data"].keys())
-
-    banks = [
-        file["entry1/data/" + bank_name]["events"][()].rename_dims({'dim_0': 'event'})
-        # ``dim_0``: event index, ``dim_1``: property index.
-        for bank_name in bank_names
-    ]
-
-    return sc.concat(banks, 'event')
+    bank_name = f'{bank_name}_events_dat_list_p_x_y_n_id_t'
+    return file["entry1/data/" + bank_name]["events"][()].rename_dims(
+        {'dim_0': 'event'}
+    )
 
 
 def _copy_partial_var(
@@ -106,7 +85,6 @@ def _compose_event_data_array(
     id_list: sc.Variable,
     t_list: sc.Variable,
     pixel_ids: sc.Variable,
-    num_panels: int,
 ) -> sc.DataArray:
     """Combine data with coordinates loaded from the nexus file.
 
@@ -123,15 +101,10 @@ def _compose_event_data_array(
 
     pixel_ids:
         All possible pixel IDs of the detector.
-
-    num_panels:
-        The number of (detector) panels used in the experiment.
-
     """
 
     events = sc.DataArray(data=weights, coords={'t': t_list, 'id': id_list})
-    grouped: sc.DataArray = events.group(pixel_ids)
-    return grouped.fold(dim='id', sizes={'panel': num_panels, 'id': -1})
+    return events.group(pixel_ids).fold(dim='id', sizes={'panel': 1, 'id': -1})
 
 
 def proton_charge_from_event_data(event_da: sc.DataArray) -> ProtonCharge:
@@ -148,7 +121,7 @@ def proton_charge_from_event_data(event_da: sc.DataArray) -> ProtonCharge:
     Parameters
     ----------
     event_da:
-        The event data binned in detector panel and pixel id dimensions.
+        The event data binned in pixel id
 
     """
     # Arbitrary number to scale the proton charge
@@ -163,6 +136,7 @@ def load_mcstas_nexus(
     event_weights_converter: EventWeightsConverter = event_weights_from_probability,
     proton_charge_converter: ProtonChargeConverter = proton_charge_from_event_data,
     max_probability: Optional[MaximumProbability] = None,
+    detector_bank_name: DetectorBankName,
 ) -> NMXData:
     """Load McStas simulation result from h5(nexus) file.
 
@@ -190,6 +164,9 @@ def load_mcstas_nexus(
         The maximum probability to scale the weights.
         If not provided, ``DefaultMaximumProbability`` is used.
 
+    detector_bank_name:
+        Name of the detector bank to load events from.
+
     """
 
     from .mcstas_xml import read_mcstas_geometry_xml
@@ -199,7 +176,7 @@ def load_mcstas_nexus(
     coords = geometry.to_coords(*detectors)
 
     with snx.File(file_path) as file:
-        raw_data = _retrieve_raw_event_data(file)
+        raw_data = _retrieve_raw_event_data(file, detector_bank_name)
         weights = event_weights_converter(
             max_probability or DefaultMaximumProbability,
             McStasEventProbabilities(
@@ -211,7 +188,6 @@ def load_mcstas_nexus(
             id_list=_copy_partial_var(raw_data, idx=4, dtype='int64'),  # id
             t_list=_copy_partial_var(raw_data, idx=5, unit='s'),  # t
             pixel_ids=coords.pop('pixel_id'),
-            num_panels=len(detectors),
         )
         proton_charge = proton_charge_converter(event_da)
         crystal_rotation = _retrieve_crystal_rotation(
