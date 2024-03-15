@@ -173,9 +173,13 @@ def load_mcstas_nexus(
     from .mcstas_xml import read_mcstas_geometry_xml
 
     geometry = read_mcstas_geometry_xml(file_path)
-    detectors = [det.name for det in geometry.detectors]
-    detectors = [geometry.detectors[0].name]
-    coords = geometry.to_coords(*detectors)
+    bank_name_to_detector_name = dict(
+        zip(
+            (f'bank0{i}' for i in range(1, 4)),
+            ('nD_Mantid_0', 'nD_Mantid_1', 'nD_Mantid_2'),
+        )
+    )
+    coords = geometry.to_coords(bank_name_to_detector_name[detector_bank_name])
 
     with snx.File(file_path) as file:
         raw_data = _retrieve_raw_event_data(file, detector_bank_name)
