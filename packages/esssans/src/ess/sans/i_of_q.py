@@ -232,21 +232,15 @@ def dummy_merge_runs(
     return FinalSummedQ[ScatteringRunType, IofQPart](data)
 
 
-def _merge_events_or_histograms(a: sc.DataArray, b: sc.DataArray) -> sc.DataArray:
-    if a.bins is not None:
-        return a.bins.concatenate(b)
-    return a + b
-
-
 def merge_multiple_runs(
     data: sciline.Series[
         Filename[ScatteringRunType], CleanSummedQ[ScatteringRunType, IofQPart]
     ],
 ) -> FinalSummedQ[ScatteringRunType, IofQPart]:
     """ """
-    return FinalSummedQ[ScatteringRunType, IofQPart](
-        reduce(_merge_events_or_histograms, data.values())
-    )
+    reducer = sc.reduce(data.values())
+    out = reducer.bins.concat() if reducer.bins is not None else reducer.sum()
+    return FinalSummedQ[ScatteringRunType, IofQPart](out)
 
 
 def subtract_background(
