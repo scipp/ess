@@ -50,11 +50,11 @@ jsonschema==4.21.1
     # via nbformat
 jsonschema-specifications==2023.12.1
     # via jsonschema
-jupyter-client==8.6.0
+jupyter-client==8.6.1
     # via
     #   ipykernel
     #   nbclient
-jupyter-core==5.7.1
+jupyter-core==5.7.2
     # via
     #   ipykernel
     #   jupyter-client
@@ -79,11 +79,11 @@ mistune==3.0.2
     # via nbconvert
 myst-parser==2.0.0
     # via -r docs.in
-nbclient==0.9.0
+nbclient==0.10.0
     # via nbconvert
 nbconvert==7.16.2
     # via nbsphinx
-nbformat==5.9.2
+nbformat==5.10.3
     # via
     #   nbclient
     #   nbconvert
@@ -102,7 +102,7 @@ pyzmq==25.1.2
     # via
     #   ipykernel
     #   jupyter-client
-referencing==0.33.0
+referencing==0.34.0
     # via
     #   jsonschema
     #   jsonschema-specifications
