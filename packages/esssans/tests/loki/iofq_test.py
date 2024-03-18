@@ -14,7 +14,6 @@ from ess.sans.types import (
     BackgroundSubtractedIofQ,
     BeamCenter,
     CalibratedMaskedData,
-    FinalSummedQ,
     CleanWavelengthMasked,
     CorrectForGravity,
     Denominator,
@@ -22,6 +21,7 @@ from ess.sans.types import (
     Filename,
     FilenameType,
     FilePath,
+    FinalSummedQ,
     IofQ,
     Numerator,
     PixelMaskFilename,
@@ -37,8 +37,8 @@ from ess.sans.types import (
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from common import (  # noqa: E402
     loki_providers,
-    make_params,
     loki_providers_no_beam_center_finder,
+    make_params,
 )
 
 

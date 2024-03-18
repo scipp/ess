@@ -6,21 +6,20 @@ Default parameters, providers and utility functions for the loki workflow.
 from typing import Optional
 
 import scipp as sc
-
 from ess.reduce import nexus
 
 from ..sans.common import gravity_vector
 from ..sans.types import (
-    PatchedData,
     DetectorPixelShape,
     Incident,
     LabFrameTransform,
     LoadedNeXusDetector,
     LoadedNeXusMonitor,
     MonitorType,
-    PatchedMonitor,
     NeXusDetectorName,
     NeXusMonitorName,
+    PatchedData,
+    PatchedMonitor,
     PixelShapePath,
     RawData,
     RawMonitor,

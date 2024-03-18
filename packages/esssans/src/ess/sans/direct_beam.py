@@ -11,8 +11,8 @@ from .i_of_q import resample_direct_beam
 from .types import (
     BackgroundRun,
     BackgroundSubtractedIofQ,
-    FinalSummedQ,
     Denominator,
+    FinalSummedQ,
     Numerator,
     ProcessedWavelengthBands,
     SampleRun,
