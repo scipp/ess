@@ -237,9 +237,14 @@ def merge_multiple_runs(
         Filename[ScatteringRunType], CleanSummedQ[ScatteringRunType, IofQPart]
     ],
 ) -> FinalSummedQ[ScatteringRunType, IofQPart]:
-    """ """
-    reducer = sc.reduce(data.values())
-    out = reducer.bins.concat() if reducer.bins is not None else reducer.sum()
+    """
+    Merge the events or counts from multiple runs into a single numerator or
+    denominator, before the normalization step.
+    """
+    out = reduce(
+        lambda a, b: a.bins.concatenate(b) if a.bins is not None else a + b,
+        data.values(),
+    )
     return FinalSummedQ[ScatteringRunType, IofQPart](out)
 
 
