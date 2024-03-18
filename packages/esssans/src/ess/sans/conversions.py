@@ -11,7 +11,6 @@ from .common import mask_range
 from .types import (
     BeamCenter,
     CalibratedMaskedData,
-    CalibratedMonitor,
     CleanQ,
     CleanWavelength,
     CleanWavelengthMasked,

@@ -6,8 +6,6 @@ import scipp as sc
 
 from ..sans.types import MaskedData, SampleRun, ScatteringRunType, TofData
 
-# from .components import RawDataWithComponentUserOffsets
-
 DetectorEdgeMask = NewType('DetectorEdgeMask', sc.Variable)
 """Detector edge mask"""
 

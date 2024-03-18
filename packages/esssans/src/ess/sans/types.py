@@ -218,26 +218,6 @@ class SolidAngle(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Solid angle of detector pixels seen from sample position"""
 
 
-# class LoadedSingleFileDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
-#     """Detector contents of a single loaded file"""
-
-
-# class SingleFileDetectorData(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
-#     """Detector neutron events of a single loaded file"""
-
-
-# class LoadedSingleFileMonitor(
-#     sciline.ScopeTwoParams[RunType, MonitorType, sc.DataGroup], sc.DataGroup
-# ):
-#     """A single monitor of a single loaded file"""
-
-
-# class SingleFileMonitorData(
-#     sciline.ScopeTwoParams[RunType, MonitorType, sc.DataGroup], sc.DataGroup
-# ):
-#     """Neutron data from a single monitor of a single loaded file"""
-
-
 class LoadedNeXusDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
     """Detector data, loaded from a NeXus file, containing not only neutron events
     but also pixel shape information, transformations, ..."""
@@ -267,10 +247,6 @@ class TofMonitor(
     sciline.ScopeTwoParams[RunType, MonitorType, sc.DataGroup], sc.DataGroup
 ):
     """Monitor data with a time-of-flight coordinate"""
-
-
-# class LogicalDimsData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
-#     """Detector data reshaped to logical dimensions"""
 
 
 PixelMask = NewType('PixelMask', sc.Variable)
@@ -345,12 +321,6 @@ class PatchedMonitor(
 ):
     """Raw monitor data where variances and necessary coordinates
     (e.g. source position) have been added"""
-
-
-class CalibratedMonitor(
-    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
-):
-    """Raw monitor whose position has been calibrated"""
 
 
 class WavelengthMonitor(

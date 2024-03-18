@@ -7,7 +7,6 @@ import pytest
 import sciline
 import scipp as sc
 
-from ess import loki
 from ess import sans
 from ess.sans.conversions import ElasticCoordTransformGraph
 from ess.sans.types import (
@@ -36,11 +35,11 @@ from ess.sans.types import (
 )
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import (
+from common import (  # noqa: E402
     loki_providers,
     make_params,
     loki_providers_no_beam_center_finder,
-)  # noqa: E402
+)
 
 
 @pytest.mark.parametrize('qxy', [False, True])
@@ -168,7 +167,6 @@ def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs():
 
     sample_runs = ['60250-2022-02-28_2215.nxs', '60339-2022-02-28_2215.nxs']
     background_runs = ['60248-2022-02-28_2215.nxs', '60393-2022-02-28_2215.nxs']
-    # providers = (*loki_providers(), *loki.io.event_merging_providers)
     pipeline = sciline.Pipeline(loki_providers_no_beam_center_finder(), params=params)
     pipeline[BeamCenter] = _compute_beam_center()
     pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
@@ -225,9 +223,7 @@ def test_pipeline_IofQ_merging_events_yields_consistent_results():
     pipeline_triple.set_param_series(
         Filename[BackgroundRun], [f'background_{i}.nxs' for i in range(N)]
     )
-    # Add event merging providers
-    # for provider in loki.io.event_merging_providers:
-    #     pipeline_triple.insert(provider)
+    # Add event merging provider
     pipeline_triple.insert(sans.i_of_q.merge_multiple_runs)
 
     iofq1 = pipeline_single.compute(BackgroundSubtractedIofQ)

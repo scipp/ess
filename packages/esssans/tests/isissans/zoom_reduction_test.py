@@ -6,7 +6,6 @@ import scipp as sc
 from ess import isissans as isis
 from ess import sans
 from ess.sans.types import (
-    BeamCenter,
     CorrectForGravity,
     Filename,
     Incident,

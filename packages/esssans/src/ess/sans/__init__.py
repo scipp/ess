@@ -27,8 +27,6 @@ providers = (
     *i_of_q.providers,
     *masking.providers,
     *normalization.providers,
-    # # Default to fast but potentially inaccurate beam center finder
-    # beam_center_finder.beam_center_from_center_of_mass,
 )
 """
 List of providers for setting up a Sciline pipeline.

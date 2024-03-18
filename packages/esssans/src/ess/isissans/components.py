@@ -16,12 +16,6 @@ from ..sans.types import (
 )
 
 
-# class RawDataWithComponentUserOffsets(
-#     sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray
-# ):
-#     """Raw data with applied user offsets for component positions."""
-
-
 class MonitorOffset(sciline.Scope[MonitorType, sc.Variable], sc.Variable):
     """Offset for monitor position"""
 

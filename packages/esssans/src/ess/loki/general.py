@@ -11,14 +11,12 @@ from ess.reduce import nexus
 
 from ..sans.common import gravity_vector
 from ..sans.types import (
-    CalibratedMonitor,
     PatchedData,
     DetectorPixelShape,
     Incident,
     LabFrameTransform,
     LoadedNeXusDetector,
     LoadedNeXusMonitor,
-    # LogicalDimsData,
     MonitorType,
     PatchedMonitor,
     NeXusDetectorName,
@@ -31,8 +29,6 @@ from ..sans.types import (
     RunType,
     SamplePosition,
     ScatteringRunType,
-    # SingleFileDetectorData,
-    # SingleFileMonitorData,
     SourcePosition,
     TofData,
     TofMonitor,
@@ -78,26 +74,12 @@ def get_detector_data(
     return RawData[ScatteringRunType](da)
 
 
-# def to_detector_data(
-#     data: SingleFileDetectorData[ScatteringRunType],
-# ) -> RawData[ScatteringRunType]:
-#     """Dummy provider to convert a single-file detector to a combined detector."""
-#     return RawData[ScatteringRunType](data)
-
-
 def get_monitor_data(
     monitor: LoadedNeXusMonitor[RunType, MonitorType],
 ) -> RawMonitor[RunType, MonitorType]:
     out = nexus.extract_monitor_data(monitor).copy(deep=False)
     out.coords['position'] = monitor['position']
     return RawMonitor[RunType, MonitorType](out)
-
-
-# def to_monitor_data(
-#     data: SingleFileMonitorData[RunType, MonitorType],
-# ) -> RawMonitor[RunType, MonitorType]:
-#     """Dummy provider to convert a single-file monitor to a combined monitor."""
-#     return RawMonitor[RunType, MonitorType](data)
 
 
 def _add_variances_and_coordinates(
@@ -160,15 +142,6 @@ def monitor_to_tof(
     return TofMonitor[RunType, MonitorType](_convert_to_tof(da))
 
 
-# def to_logical_dims(
-#     da: TofData[ScatteringRunType],
-#     detector_name: NeXusDetectorName,
-# ) -> LogicalDimsData[ScatteringRunType]:
-#     if detector_name in DETECTOR_BANK_RESHAPING:
-#         da = DETECTOR_BANK_RESHAPING[detector_name](da)
-#     return LogicalDimsData[ScatteringRunType](da)
-
-
 def detector_pixel_shape(
     detector: LoadedNeXusDetector[ScatteringRunType],
     pixel_shape_path: PixelShapePath,
@@ -192,9 +165,6 @@ providers = (
     get_source_position,
     patch_detector_data,
     patch_monitor_data,
-    # to_detector_data,
-    # to_logical_dims,
-    # to_monitor_data,
     data_to_tof,
     monitor_to_tof,
 )
