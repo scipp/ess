@@ -234,9 +234,12 @@ class RawData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Raw detector data"""
 
 
-class PatchedData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
+class ConfiguredAndCompleteData(
+    sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray
+):
     """Raw event data where variances and necessary coordinates
-    (e.g. sample and source position) have been added"""
+    (e.g. sample and source position) have been added, and where optionally some
+    user configuration was applied to some of the coordinates."""
 
 
 class TofData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
@@ -316,11 +319,12 @@ class RawMonitor(
     """Raw monitor data"""
 
 
-class PatchedMonitor(
+class ConfiguredAndCompleteMonitor(
     sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
 ):
     """Raw monitor data where variances and necessary coordinates
-    (e.g. source position) have been added"""
+    (e.g. source position) have been added, and where optionally some
+    user configuration was applied to some of the coordinates."""
 
 
 class WavelengthMonitor(

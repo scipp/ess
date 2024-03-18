@@ -6,12 +6,12 @@ Providers for the ISIS instruments.
 import scipp as sc
 
 from ..sans.types import (
+    ConfiguredAndCompleteData,
+    ConfiguredAndCompleteMonitor,
     DetectorPixelShape,
     LabFrameTransform,
     MonitorType,
     NeXusMonitorName,
-    PatchedData,
-    PatchedMonitor,
     RawData,
     RawMonitor,
     RunNumber,
@@ -39,14 +39,16 @@ def get_monitor_data(
     return RawMonitor[RunType, MonitorType](mon)
 
 
-def data_to_tof(da: PatchedData[ScatteringRunType]) -> TofData[ScatteringRunType]:
+def data_to_tof(
+    da: ConfiguredAndCompleteData[ScatteringRunType],
+) -> TofData[ScatteringRunType]:
     """Dummy conversion of data to time-of-flight data.
     The data already has a time-of-flight coordinate."""
     return TofData[ScatteringRunType](da)
 
 
 def monitor_to_tof(
-    da: PatchedMonitor[RunType, MonitorType]
+    da: ConfiguredAndCompleteMonitor[RunType, MonitorType]
 ) -> TofMonitor[RunType, MonitorType]:
     """Dummy conversion of monitor data to time-of-flight data.
     The monitor data already has a time-of-flight coordinate."""
