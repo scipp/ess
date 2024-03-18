@@ -72,7 +72,6 @@
    general
    io
    mantidio
-   masking
    sans2d
    visualization
 ```
