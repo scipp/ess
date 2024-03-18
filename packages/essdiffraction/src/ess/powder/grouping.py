@@ -59,7 +59,10 @@ def merge_all_pixels(
     :
         The input without pixel dimensions.
     """
-    return FocussedData(data.bins.concat(dims))
+    # Put the dims into the same order as in the data.
+    # See https://github.com/scipp/scipp/issues/3408
+    to_concat = tuple(dim for dim in data.dims if dim in dims)
+    return FocussedData(data.bins.concat(to_concat))
 
 
 def finalize_histogram(
