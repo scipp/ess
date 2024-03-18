@@ -6,8 +6,9 @@ import sciline
 import scipp as sc
 
 from ..sans.types import (
-    CalibratedMonitor,
     MonitorType,
+    PatchedData,
+    PatchedMonitor,
     RawData,
     RawMonitor,
     RunType,
@@ -15,10 +16,10 @@ from ..sans.types import (
 )
 
 
-class RawDataWithComponentUserOffsets(
-    sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray
-):
-    """Raw data with applied user offsets for component positions."""
+# class RawDataWithComponentUserOffsets(
+#     sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray
+# ):
+#     """Raw data with applied user offsets for component positions."""
 
 
 class MonitorOffset(sciline.Scope[MonitorType, sc.Variable], sc.Variable):
@@ -33,7 +34,7 @@ def apply_component_user_offsets_to_raw_data(
     data: RawData[ScatteringRunType],
     sample_offset: Optional[SampleOffset],
     detector_bank_offset: Optional[DetectorBankOffset],
-) -> RawDataWithComponentUserOffsets[ScatteringRunType]:
+) -> PatchedData[ScatteringRunType]:
     """Apply user offsets to raw data.
 
     Parameters
@@ -56,13 +57,13 @@ def apply_component_user_offsets_to_raw_data(
         data.coords['position'] = pos + detector_bank_offset.to(
             unit=pos.unit, copy=False
         )
-    return RawDataWithComponentUserOffsets[ScatteringRunType](data)
+    return PatchedData[ScatteringRunType](data)
 
 
 def apply_component_user_offsets_to_raw_monitor(
     monitor_data: RawMonitor[RunType, MonitorType],
     monitor_offset: Optional[MonitorOffset[MonitorType]],
-) -> CalibratedMonitor[RunType, MonitorType]:
+) -> PatchedMonitor[RunType, MonitorType]:
     """Apply user offsets to raw monitor.
     Parameters
     ----------
@@ -77,7 +78,7 @@ def apply_component_user_offsets_to_raw_monitor(
         monitor_data.coords['position'] = pos + monitor_offset.to(
             unit=pos.unit, copy=False
         )
-    return CalibratedMonitor[RunType, MonitorType](monitor_data)
+    return PatchedMonitor[RunType, MonitorType](monitor_data)
 
 
 providers = (

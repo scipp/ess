@@ -117,7 +117,9 @@ def apply_pixel_masks(
     """
     if masked_ids is not None:
         data = data.copy(deep=False)
-        ids = data.coords['detector_number']
+        ids = data.coords[
+            'detector_number' if 'detector_number' in data.coords else 'detector_id'
+        ]
         for name, masked in masked_ids.items():
             mask = sc.zeros(sizes=ids.sizes, dtype='bool')
             mask.values[np.isin(ids.values, masked.values)] = True

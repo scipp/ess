@@ -2,7 +2,7 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 
 
-from . import components, data, general, io, masking, sans2d
+from . import components, data, general, io, sans2d
 from .components import DetectorBankOffset, MonitorOffset, SampleOffset
 from .io import CalibrationFilename
 from .visualization import plot_flat_detector_xy
@@ -16,7 +16,7 @@ __all__ = [
     'apply_component_user_offsets_to_raw_data',
     'data',
     'io',
-    'masking',
+    # 'masking',
     'MonitorOffset',
     'providers',
     'SampleOffset',
