@@ -35,8 +35,6 @@ from ess.sans.types import (
     WavelengthMask,
 )
 
-MANTID_BEAM_CENTER = sc.vector([0.09288, -0.08195, 0], unit='m')
-
 
 def make_params() -> dict:
     params = {}
@@ -72,7 +70,6 @@ def make_params() -> dict:
     params[CorrectForGravity] = True
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
     params[ReturnEvents] = False
-    params[BeamCenter] = MANTID_BEAM_CENTER
     return params
 
 
@@ -85,6 +82,7 @@ def sans2d_providers():
         + (
             isis.data.transmission_from_background_run,
             isis.data.transmission_from_sample_run,
+            sans.beam_center_finder.beam_center_from_center_of_mass,
         )
     )
 
@@ -205,12 +203,13 @@ def test_pixel_dependent_direct_beam_is_supported(uncertainties):
     assert result.dims == ('Q',)
 
 
+MANTID_BEAM_CENTER = sc.vector([0.09288, -0.08195, 0], unit='m')
+
+
 def test_beam_center_from_center_of_mass_is_close_to_verified_result():
     params = make_params()
-    del params[BeamCenter]
     providers = sans2d_providers()
     pipeline = sciline.Pipeline(providers, params=params)
-    pipeline.insert(sans.beam_center_from_center_of_mass)
     center = pipeline.compute(BeamCenter)
     # This is the result obtained from Mantid, using the full IofQ
     # calculation. The difference is about 3 mm in X or Y, probably due to a bias
@@ -220,12 +219,12 @@ def test_beam_center_from_center_of_mass_is_close_to_verified_result():
 
 def test_beam_center_finder_without_direct_beam_reproduces_verified_result():
     params = make_params()
-    del params[BeamCenter]
     params[sans.beam_center_finder.BeamCenterFinderQBins] = sc.linspace(
         'Q', 0.02, 0.3, 71, unit='1/angstrom'
     )
     del params[DirectBeamFilename]
     providers = sans2d_providers()
+    providers.remove(sans.beam_center_finder.beam_center_from_center_of_mass)
     providers.append(sans.beam_center_finder.beam_center_from_iofq)
     pipeline = sciline.Pipeline(providers, params=params)
     center = pipeline.compute(BeamCenter)
@@ -240,7 +239,6 @@ def test_beam_center_can_get_closer_to_verified_result_with_low_counts_mask():
         return sans2d.SampleHolderMask(sample.hist().data < low_counts_threshold)
 
     params = make_params()
-    del params[BeamCenter]
     params[sans2d.LowCountThreshold] = sc.scalar(80.0, unit='counts')
     params[sans.beam_center_finder.BeamCenterFinderQBins] = sc.linspace(
         'Q', 0.02, 0.3, 71, unit='1/angstrom'
@@ -248,6 +246,7 @@ def test_beam_center_can_get_closer_to_verified_result_with_low_counts_mask():
     del params[DirectBeamFilename]
     providers = sans2d_providers()
     providers.remove(sans2d.sample_holder_mask)
+    providers.remove(sans.beam_center_finder.beam_center_from_center_of_mass)
     providers.append(sans.beam_center_finder.beam_center_from_iofq)
     providers.append(low_counts_mask)
     pipeline = sciline.Pipeline(providers, params=params)
@@ -257,11 +256,11 @@ def test_beam_center_can_get_closer_to_verified_result_with_low_counts_mask():
 
 def test_beam_center_finder_works_with_direct_beam():
     params = make_params()
-    del params[BeamCenter]
     params[sans.beam_center_finder.BeamCenterFinderQBins] = sc.linspace(
         'Q', 0.02, 0.3, 71, unit='1/angstrom'
     )
     providers = sans2d_providers()
+    providers.remove(sans.beam_center_finder.beam_center_from_center_of_mass)
     providers.append(sans.beam_center_finder.beam_center_from_iofq)
     pipeline = sciline.Pipeline(providers, params=params)
     center_with_direct_beam = pipeline.compute(BeamCenter)
@@ -272,11 +271,11 @@ def test_beam_center_finder_works_with_direct_beam():
 
 def test_beam_center_finder_works_with_pixel_dependent_direct_beam():
     params = make_params()
-    del params[BeamCenter]
     params[sans.beam_center_finder.BeamCenterFinderQBins] = sc.linspace(
         'Q', 0.02, 0.3, 71, unit='1/angstrom'
     )
     providers = sans2d_providers()
+    providers.remove(sans.beam_center_finder.beam_center_from_center_of_mass)
     providers.append(sans.beam_center_finder.beam_center_from_iofq)
     pipeline = sciline.Pipeline(providers, params=params)
     center_pixel_independent_direct_beam = pipeline.compute(BeamCenter)

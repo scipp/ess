@@ -6,6 +6,7 @@ import scipp as sc
 from ess import isissans as isis
 from ess import sans
 from ess.sans.types import (
+    BeamCenter,
     CorrectForGravity,
     Filename,
     Incident,
@@ -62,18 +63,18 @@ def make_masks_table() -> sciline.ParamTable:
         'tube_1120_bottom.xml',
         'tubes_beg_18_2.xml',
     ]
-    return sciline.ParamTable(str, {PixelMaskFilename: masks}, index=masks)
+    return sciline.ParamTable(PixelMaskFilename, columns={}, index=masks)
 
 
 def zoom_providers():
     return list(
         sans.providers
         + isis.providers
-        + isis.masking.providers
         + isis.data.providers
         + (
             isis.data.transmission_from_background_run,
             isis.data.transmission_from_sample_run,
+            sans.beam_center_finder.beam_center_from_center_of_mass,
         )
     )
 

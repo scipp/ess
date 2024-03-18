@@ -8,13 +8,14 @@ import sciline
 import scipp as sc
 
 from ess import loki
+from ess import sans
 from ess.sans.conversions import ElasticCoordTransformGraph
 from ess.sans.types import (
     BackgroundRun,
     BackgroundSubtractedIofQ,
     BeamCenter,
     CalibratedMaskedData,
-    CleanSummedQ,
+    FinalSummedQ,
     CleanWavelengthMasked,
     CorrectForGravity,
     Denominator,
@@ -35,7 +36,11 @@ from ess.sans.types import (
 )
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import loki_providers, make_params  # noqa: E402
+from common import (
+    loki_providers,
+    make_params,
+    loki_providers_no_beam_center_finder,
+)  # noqa: E402
 
 
 @pytest.mark.parametrize('qxy', [False, True])
@@ -149,6 +154,13 @@ def test_pipeline_can_compute_IofQ_in_layers(qxy: bool):
     assert result.sizes['layer'] == 4
 
 
+def _compute_beam_center():
+    pipeline = sciline.Pipeline(loki_providers(), params=make_params())
+    pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
+    center = pipeline.compute(BeamCenter)
+    return center
+
+
 def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs():
     params = make_params()
     del params[Filename[SampleRun]]
@@ -156,14 +168,16 @@ def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs():
 
     sample_runs = ['60250-2022-02-28_2215.nxs', '60339-2022-02-28_2215.nxs']
     background_runs = ['60248-2022-02-28_2215.nxs', '60393-2022-02-28_2215.nxs']
-    providers = (*loki_providers(), *loki.io.event_merging_providers)
-    pipeline = sciline.Pipeline(providers, params=params)
+    # providers = (*loki_providers(), *loki.io.event_merging_providers)
+    pipeline = sciline.Pipeline(loki_providers_no_beam_center_finder(), params=params)
+    pipeline[BeamCenter] = _compute_beam_center()
     pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
 
     # Set parameter series for file names
     pipeline.set_param_series(Filename[SampleRun], sample_runs)
     pipeline.set_param_series(Filename[BackgroundRun], background_runs)
 
+    pipeline.insert(sans.i_of_q.merge_multiple_runs)
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('Q',)
 
@@ -171,12 +185,19 @@ def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs():
 def test_pipeline_IofQ_merging_events_yields_consistent_results():
     N = 3
     params = make_params()
-    pipeline_single = sciline.Pipeline(loki_providers(), params=params)
+    center = _compute_beam_center()
+    pipeline_single = sciline.Pipeline(
+        loki_providers_no_beam_center_finder(), params=params
+    )
+    pipeline_single[BeamCenter] = center
     pipeline_single.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
 
     del params[Filename[SampleRun]]
     del params[Filename[BackgroundRun]]
-    pipeline_triple = sciline.Pipeline(loki_providers(), params=params)
+    pipeline_triple = sciline.Pipeline(
+        loki_providers_no_beam_center_finder(), params=params
+    )
+    pipeline_triple[BeamCenter] = center
     pipeline_triple.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
 
     # `set_param_series` does not allow muttiple identical values, so we need to
@@ -205,8 +226,9 @@ def test_pipeline_IofQ_merging_events_yields_consistent_results():
         Filename[BackgroundRun], [f'background_{i}.nxs' for i in range(N)]
     )
     # Add event merging providers
-    for provider in loki.io.event_merging_providers:
-        pipeline_triple.insert(provider)
+    # for provider in loki.io.event_merging_providers:
+    #     pipeline_triple.insert(provider)
+    pipeline_triple.insert(sans.i_of_q.merge_multiple_runs)
 
     iofq1 = pipeline_single.compute(BackgroundSubtractedIofQ)
     iofq3 = pipeline_triple.compute(BackgroundSubtractedIofQ)
@@ -215,17 +237,17 @@ def test_pipeline_IofQ_merging_events_yields_consistent_results():
     assert all(sc.variances(iofq1.data) > sc.variances(iofq3.data))
     assert sc.allclose(
         sc.values(
-            pipeline_single.compute(CleanSummedQ[SampleRun, Numerator]).hist().data
+            pipeline_single.compute(FinalSummedQ[SampleRun, Numerator]).hist().data
         )
         * N,
         sc.values(
-            pipeline_triple.compute(CleanSummedQ[SampleRun, Numerator]).hist().data
+            pipeline_triple.compute(FinalSummedQ[SampleRun, Numerator]).hist().data
         ),
     )
     assert sc.allclose(
-        sc.values(pipeline_single.compute(CleanSummedQ[SampleRun, Denominator]).data)
+        sc.values(pipeline_single.compute(FinalSummedQ[SampleRun, Denominator]).data)
         * N,
-        sc.values(pipeline_triple.compute(CleanSummedQ[SampleRun, Denominator]).data),
+        sc.values(pipeline_triple.compute(FinalSummedQ[SampleRun, Denominator]).data),
     )
 
 
