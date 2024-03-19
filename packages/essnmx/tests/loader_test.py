@@ -25,7 +25,10 @@ def check_scalar_properties_mcstas_2(dg: NMXData):
     Expected numbers are hard-coded based on the sample file.
     """
 
-    assert_identical(dg.proton_charge, sc.scalar(0.15430000000000002, unit=None))
+    assert_identical(
+        dg.proton_charge,
+        sc.scalar(1e-4 * dg['weights'].bins.size().sum().data.values, unit=None),
+    )
     assert_identical(dg.crystal_rotation, sc.vector([20, 0, 90], unit='deg'))
     assert_identical(dg.sample_position, sc.vector(value=[0, 0, 0], unit='m'))
     assert_identical(
@@ -73,7 +76,10 @@ def check_scalar_properties_mcstas_3(dg: NMXData):
     Expected numbers are hard-coded based on the sample file.
     """
 
-    assert_identical(dg.proton_charge, sc.scalar(0.0167, unit=None))
+    assert_identical(
+        dg.proton_charge,
+        sc.scalar(1e-4 * dg['weights'].bins.size().sum().data.values, unit=None),
+    )
     assert_identical(dg.crystal_rotation, sc.vector([0, 0, 0], unit='deg'))
     assert_identical(dg.sample_position, sc.vector(value=[0, 0, 0], unit='m'))
     assert_identical(
