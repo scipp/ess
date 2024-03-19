@@ -6,8 +6,8 @@ import sciline
 import scipp as sc
 
 from ..sans.types import (
-    ConfiguredAndCompleteData,
-    ConfiguredAndCompleteMonitor,
+    ConfiguredReducibleDataData,
+    ConfiguredReducibleMonitor,
     MonitorType,
     RawData,
     RawMonitor,
@@ -28,7 +28,7 @@ def apply_component_user_offsets_to_raw_data(
     data: RawData[ScatteringRunType],
     sample_offset: Optional[SampleOffset],
     detector_bank_offset: Optional[DetectorBankOffset],
-) -> ConfiguredAndCompleteData[ScatteringRunType]:
+) -> ConfiguredReducibleDataData[ScatteringRunType]:
     """Apply user offsets to raw data.
 
     Parameters
@@ -51,13 +51,13 @@ def apply_component_user_offsets_to_raw_data(
         data.coords['position'] = pos + detector_bank_offset.to(
             unit=pos.unit, copy=False
         )
-    return ConfiguredAndCompleteData[ScatteringRunType](data)
+    return ConfiguredReducibleDataData[ScatteringRunType](data)
 
 
 def apply_component_user_offsets_to_raw_monitor(
     monitor_data: RawMonitor[RunType, MonitorType],
     monitor_offset: Optional[MonitorOffset[MonitorType]],
-) -> ConfiguredAndCompleteMonitor[RunType, MonitorType]:
+) -> ConfiguredReducibleMonitor[RunType, MonitorType]:
     """Apply user offsets to raw monitor.
     Parameters
     ----------
@@ -72,7 +72,7 @@ def apply_component_user_offsets_to_raw_monitor(
         monitor_data.coords['position'] = pos + monitor_offset.to(
             unit=pos.unit, copy=False
         )
-    return ConfiguredAndCompleteMonitor[RunType, MonitorType](monitor_data)
+    return ConfiguredReducibleMonitor[RunType, MonitorType](monitor_data)
 
 
 providers = (

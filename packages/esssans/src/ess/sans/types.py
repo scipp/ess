@@ -234,7 +234,7 @@ class RawData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Raw detector data"""
 
 
-class ConfiguredAndCompleteData(
+class ConfiguredReducibleDataData(
     sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray
 ):
     """Raw event data where variances and necessary coordinates
@@ -319,7 +319,7 @@ class RawMonitor(
     """Raw monitor data"""
 
 
-class ConfiguredAndCompleteMonitor(
+class ConfiguredReducibleMonitor(
     sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
 ):
     """Raw monitor data where variances and necessary coordinates

@@ -10,8 +10,8 @@ from ess.reduce import nexus
 
 from ..sans.common import gravity_vector
 from ..sans.types import (
-    ConfiguredAndCompleteData,
-    ConfiguredAndCompleteMonitor,
+    ConfiguredReducibleDataData,
+    ConfiguredReducibleMonitor,
     DetectorPixelShape,
     Incident,
     LabFrameTransform,
@@ -103,8 +103,8 @@ def patch_detector_data(
     detector_data: RawData[ScatteringRunType],
     source_position: SourcePosition[ScatteringRunType],
     sample_position: SamplePosition[ScatteringRunType],
-) -> ConfiguredAndCompleteData[ScatteringRunType]:
-    return ConfiguredAndCompleteData[ScatteringRunType](
+) -> ConfiguredReducibleDataData[ScatteringRunType]:
+    return ConfiguredReducibleDataData[ScatteringRunType](
         _add_variances_and_coordinates(
             da=detector_data,
             source_position=source_position,
@@ -116,8 +116,8 @@ def patch_detector_data(
 def patch_monitor_data(
     monitor_data: RawMonitor[RunType, MonitorType],
     source_position: SourcePosition[RunType],
-) -> ConfiguredAndCompleteMonitor[RunType, MonitorType]:
-    return ConfiguredAndCompleteMonitor[RunType, MonitorType](
+) -> ConfiguredReducibleMonitor[RunType, MonitorType]:
+    return ConfiguredReducibleMonitor[RunType, MonitorType](
         _add_variances_and_coordinates(da=monitor_data, source_position=source_position)
     )
 
@@ -130,13 +130,13 @@ def _convert_to_tof(da: sc.DataArray) -> sc.DataArray:
 
 
 def data_to_tof(
-    da: ConfiguredAndCompleteData[ScatteringRunType],
+    da: ConfiguredReducibleDataData[ScatteringRunType],
 ) -> TofData[ScatteringRunType]:
     return TofData[ScatteringRunType](_convert_to_tof(da))
 
 
 def monitor_to_tof(
-    da: ConfiguredAndCompleteMonitor[RunType, MonitorType],
+    da: ConfiguredReducibleMonitor[RunType, MonitorType],
 ) -> TofMonitor[RunType, MonitorType]:
     return TofMonitor[RunType, MonitorType](_convert_to_tof(da))
 
