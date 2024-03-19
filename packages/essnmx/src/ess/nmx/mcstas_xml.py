@@ -308,14 +308,13 @@ class SourceDesc:
         )
 
 
-def _construct_pixel_ids(detector_desc: DetectorDesc) -> sc.Variable:
-    """Pixel IDs for detector."""
-    return sc.arange(
-        'id',
-        detector_desc.id_start,
-        detector_desc.id_start + detector_desc.total_pixels,
-        unit=None,
-    )
+def _construct_pixel_ids(detector_descs: Tuple[DetectorDesc, ...]) -> sc.Variable:
+    """Pixel IDs for all detectors."""
+    intervals = [
+        (desc.id_start, desc.id_start + desc.total_pixels) for desc in detector_descs
+    ]
+    ids = [sc.arange('id', start, stop, unit=None) for start, stop in intervals]
+    return sc.concat(ids, 'id')
 
 
 def _pixel_positions(
@@ -342,12 +341,15 @@ def _pixel_positions(
 
 
 def _detector_pixel_positions(
-    detector_desc: DetectorDesc, sample: SampleDesc
+    detector_descs: Tuple[DetectorDesc, ...], sample: SampleDesc
 ) -> sc.Variable:
-    """Position of pixels of detector."""
-    return _pixel_positions(
-        detector_desc, sample.position_from_sample(detector_desc.position)
-    )
+    """Position of pixels of all detectors."""
+
+    positions = [
+        _pixel_positions(detector, sample.position_from_sample(detector.position))
+        for detector in detector_descs
+    ]
+    return sc.concat(positions, 'panel')
 
 
 @dataclass
@@ -373,7 +375,7 @@ class McStasInstrument:
             ),
         )
 
-    def to_coords(self, det_name: str) -> dict[str, sc.Variable]:
+    def to_coords(self, *det_names: str) -> dict[str, sc.Variable]:
         """Extract coordinates from the McStas instrument description.
 
         Parameters
@@ -383,21 +385,28 @@ class McStasInstrument:
 
         """
 
-        (detector,) = (det for det in self.detectors if det.name == det_name)
-        slow_axis = detector.slow_axis
-        fast_axis = detector.fast_axis
-        origin = self.sample.position_from_sample(detector.position)
+        detectors = tuple(det for det in self.detectors if det.name in det_names)
+        slow_axes = [det.slow_axis for det in detectors]
+        fast_axes = [det.fast_axis for det in detectors]
+        origins = [self.sample.position_from_sample(det.position) for det in detectors]
+        detector_dim = 'panel'
 
-        return {
-            'pixel_id': _construct_pixel_ids(detector),
-            'fast_axis': fast_axis,
-            'slow_axis': slow_axis,
-            'origin_position': origin,
+        coords = {
+            'pixel_id': _construct_pixel_ids(detectors),
+            'fast_axis': sc.concat(fast_axes, detector_dim),
+            'slow_axis': sc.concat(slow_axes, detector_dim),
+            'origin_position': sc.concat(origins, detector_dim),
             'sample_position': self.sample.position_from_sample(self.sample.position),
             'source_position': self.sample.position_from_sample(self.source.position),
             'sample_name': sc.scalar(self.sample.name),
-            'position': _detector_pixel_positions(detector, self.sample),
+            'position': _detector_pixel_positions(detectors, self.sample),
         }
+        if len(det_names) == 1:
+            coords = {
+                c: sc.squeeze(v, detector_dim) if detector_dim in v.sizes else v
+                for c, v in coords.items()
+            }
+        return coords
 
 
 def read_mcstas_geometry_xml(file_path: Union[Path, str]) -> McStasInstrument:
