@@ -2,7 +2,6 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 import uuid
-from functools import reduce
 from typing import Optional
 
 import sciline
@@ -233,7 +232,7 @@ def dummy_merge_runs(
 
 
 def merge_multiple_runs(
-    data: sciline.Series[
+    run_series: sciline.Series[
         Filename[ScatteringRunType], CleanSummedQ[ScatteringRunType, IofQPart]
     ],
 ) -> FinalSummedQ[ScatteringRunType, IofQPart]:
@@ -241,10 +240,9 @@ def merge_multiple_runs(
     Merge the events or counts from multiple runs into a single numerator or
     denominator, before the normalization step.
     """
-    out = reduce(
-        lambda a, b: a.bins.concatenate(b) if a.bins is not None else a + b,
-        data.values(),
-    )
+    run_list = list(run_series.values())
+    reducer = sc.reduce(run_list)
+    out = reducer.bins.concat() if run_list[0].bins is not None else reducer.sum()
     return FinalSummedQ[ScatteringRunType, IofQPart](out)
 
 
