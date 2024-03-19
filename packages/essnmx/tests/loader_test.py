@@ -37,23 +37,37 @@ def check_scalar_properties_mcstas_2(dg: NMXData):
     assert dg.sample_name == sc.scalar("sampleMantid")
 
 
-def check_nmxdata_properties(dg: NMXData, fast_axis, slow_axis) -> None:
+def check_nmxdata_properties(dg: NMXData, fast_axis, slow_axis, npanels=None) -> None:
     assert isinstance(dg, sc.DataGroup)
-    assert dg.shape == (1280 * 1280,)
+    assert (
+        dg.shape
+        == (
+            npanels,
+            1280 * 1280,
+        )
+        if npanels
+        else (1280 * 1280,)
+    )
     # Check maximum value of weights.
     assert_identical(
         dg.weights.max().data,
         sc.scalar(DefaultMaximumProbability, unit='counts', dtype=float),
     )
-    assert_allclose(dg.fast_axis, sc.vector(fast_axis), atol=sc.scalar(0.005))
-    assert_identical(dg.slow_axis, sc.vector(slow_axis))
+    assert_allclose(dg.fast_axis, fast_axis, atol=sc.scalar(0.005))
+    assert_identical(dg.slow_axis, slow_axis)
 
 
 def test_file_reader_mcstas2(mcstas_2_deprecation_warning_context) -> None:
     with mcstas_2_deprecation_warning_context():
         file_path = InputFilepath(small_mcstas_2_sample())
 
-    fast_axis, slow_axis = (1.0, 0.0, -0.01), (0.0, 1.0, 0.0)
+    fast_axis = sc.vectors(
+        dims=['panel'], values=((1.0, 0.0, -0.01), (-0.01, 0.0, -1.0), (0.01, 0.0, 1.0))
+    )
+    slow_axis = sc.vectors(
+        dims=['panel'], values=((0.0, 1.0, 0.0), (0.0, 1.0, 0.0), (0.0, 1.0, 0.0))
+    )
+
     entry_path = "entry1/data/bank01_events_dat_list_p_x_y_n_id_t"
     with snx.File(file_path) as file:
         raw_data = file[entry_path]["events"][()]
@@ -67,7 +81,7 @@ def test_file_reader_mcstas2(mcstas_2_deprecation_warning_context) -> None:
     )
     check_scalar_properties_mcstas_2(dg)
     assert dg.weights.bins.size().sum().value == data_length
-    check_nmxdata_properties(dg, fast_axis, slow_axis)
+    check_nmxdata_properties(dg, fast_axis, slow_axis, npanels=3)
 
 
 def check_scalar_properties_mcstas_3(dg: NMXData):
@@ -114,7 +128,7 @@ def test_file_reader_mcstas3(bank_id, fast_axis, slow_axis) -> None:
     )
     check_scalar_properties_mcstas_3(dg)
     assert dg.weights.bins.size().sum().value == data_length
-    check_nmxdata_properties(dg, fast_axis, slow_axis)
+    check_nmxdata_properties(dg, sc.vector(fast_axis), sc.vector(slow_axis))
 
 
 @pytest.fixture(params=[small_mcstas_2_sample, small_mcstas_3_sample])
@@ -158,4 +172,3 @@ def test_file_reader_mcstas_additional_fields(tmp_mcstas_file: pathlib.Path) -> 
     )
 
     assert isinstance(dg, sc.DataGroup)
-    assert dg.shape == (1280 * 1280,)

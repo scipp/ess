@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+import re
 from typing import Callable, NewType, Optional
 
 import scipp as sc
@@ -103,7 +104,6 @@ def _compose_event_data_array(
     pixel_ids:
         All possible pixel IDs of the detector.
     """
-
     events = sc.DataArray(data=weights, coords={'t': t_list, 'id': id_list})
     return events.group(pixel_ids)
 
@@ -129,6 +129,19 @@ def proton_charge_from_event_data(event_da: sc.DataArray) -> ProtonCharge:
     _proton_charge_scale_factor = sc.scalar(1 / 10_000, unit=None)
 
     return ProtonCharge(_proton_charge_scale_factor * event_da.bins.size().sum().data)
+
+
+def _bank_names_to_detector_names(file_path):
+    with snx.File(file_path) as file:
+        description = file['entry1/instrument/description'][()]
+    detector_component_regex = r'^COMPONENT (?P<detector_name>.*) = Monitor_nD\(\n(?:(?!COMPONENT)(?!filename)(?:.|\s))*(?:filename = \"(?P<bank_name>[^\"]*)\")?'  # noqa: E501
+    matches = re.finditer(detector_component_regex, description, re.MULTILINE)
+    bank_names_to_detector_names = {}
+    for m in matches:
+        bank_names_to_detector_names.setdefault(m.group('bank_name'), []).append(
+            m.group('detector_name')
+        )
+    return bank_names_to_detector_names
 
 
 def load_mcstas_nexus(
@@ -173,28 +186,33 @@ def load_mcstas_nexus(
     from .mcstas_xml import read_mcstas_geometry_xml
 
     geometry = read_mcstas_geometry_xml(file_path)
-    bank_name_to_detector_name = dict(
-        zip(
-            (f'bank0{i}' for i in range(1, 4)),
-            ('nD_Mantid_0', 'nD_Mantid_1', 'nD_Mantid_2'),
-        )
+
+    detector_names = next(
+        det_names
+        for bank_name, det_names in _bank_names_to_detector_names(file_path).items()
+        if detector_bank_name in bank_name
     )
-    coords = geometry.to_coords(bank_name_to_detector_name[detector_bank_name])
+    coords = geometry.to_coords(*detector_names)
 
     with snx.File(file_path) as file:
         raw_data = _retrieve_raw_event_data(file, detector_bank_name)
         weights = event_weights_converter(
             max_probability or DefaultMaximumProbability,
-            McStasEventProbabilities(
-                _copy_partial_var(raw_data, idx=0, unit='counts')
-            ),  # p
+            McStasEventProbabilities(_copy_partial_var(raw_data, idx=0, unit='counts')),
         )
         event_da = _compose_event_data_array(
             weights=weights,
             id_list=_copy_partial_var(raw_data, idx=4, dtype='int64'),  # id
             t_list=_copy_partial_var(raw_data, idx=5, unit='s'),  # t
-            pixel_ids=coords.pop('pixel_id'),
+            pixel_ids=coords.pop('pixel_id'),  # p
         )
+        if len(detector_names) > 1:
+            # If the events come from several detector panels, reshape to reflect that.
+            # This assumes each panel has the same number of pixels
+            # and that the pixel_ids associated with each panel consist of one interval.
+            event_da = event_da.fold(
+                dim='id', sizes={'panel': len(detector_names), 'id': -1}
+            )
         proton_charge = proton_charge_converter(event_da)
         crystal_rotation = _retrieve_crystal_rotation(
             file, geometry.simulation_settings.angle_unit
