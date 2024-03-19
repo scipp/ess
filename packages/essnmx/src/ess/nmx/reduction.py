@@ -64,7 +64,7 @@ class _SharedFields(sc.DataGroup):
 class NMXData(_SharedFields, sc.DataGroup):
     @property
     def weights(self) -> sc.DataArray:
-        """Event data grouped by pixel id and panel."""
+        """Event data grouped by pixel id."""
         return self['weights']
 
 
@@ -140,7 +140,6 @@ class NMXReducedData(_SharedFields, sc.DataGroup):
 
     def _create_instrument_group(self, nx_entry: h5py.Group) -> h5py.Group:
         nx_instrument = nx_entry.create_group("NXinstrument")
-        nx_instrument.attrs["nr_detector"] = self.origin_position.sizes['panel']
         nx_instrument.create_dataset("proton_charge", data=self.proton_charge.value)
 
         nx_detector_1 = nx_instrument.create_group("detector_1")
@@ -148,9 +147,7 @@ class NMXReducedData(_SharedFields, sc.DataGroup):
         self._create_compressed_dataset(
             root_entry=nx_detector_1,
             name="counts",
-            var=self.counts.fold(
-                'id', sizes={'panel': 1, 'id': self.counts.sizes['id']}
-            ),
+            var=self.counts.fold('id', sizes={'id': self.counts.sizes['id']}),
         )
         # Time of arrival bin edges
         self._create_dataset_from_var(
@@ -242,9 +239,7 @@ def bin_time_of_arrival(
 ) -> NMXReducedData:
     """Bin time of arrival data into ``time_bin_step`` bins."""
 
-    counts: sc.DataArray = nmx_data.weights.flatten(dims=['panel', 'id'], to='id').hist(
-        t=time_bin_step
-    )
+    counts: sc.DataArray = nmx_data.weights.hist(t=time_bin_step)
     counts.unit = 'counts'
 
     return NMXReducedData(
