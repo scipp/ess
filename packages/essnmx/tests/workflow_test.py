@@ -58,7 +58,6 @@ def test_pipeline_mcstas_loader(mcstas_workflow: sl.Pipeline) -> None:
 
     nmx_data = mcstas_workflow.compute(NMXData)
     assert isinstance(nmx_data, sc.DataGroup)
-    assert nmx_data.sizes['panel'] == 1
     assert nmx_data.sizes['id'] == 1280 * 1280
 
 
@@ -68,5 +67,4 @@ def test_pipeline_mcstas_reduction(mcstas_workflow: sl.Pipeline) -> None:
 
     nmx_reduced_data = mcstas_workflow.compute(NMXReducedData)
     assert isinstance(nmx_reduced_data, sc.DataGroup)
-    assert nmx_reduced_data.sizes['panel'] == 1
     assert nmx_reduced_data.sizes['t'] == 50

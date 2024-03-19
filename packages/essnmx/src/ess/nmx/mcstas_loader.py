@@ -105,7 +105,7 @@ def _compose_event_data_array(
     """
 
     events = sc.DataArray(data=weights, coords={'t': t_list, 'id': id_list})
-    return events.group(pixel_ids).fold(dim='id', sizes={'panel': 1, 'id': -1})
+    return events.group(pixel_ids)
 
 
 def proton_charge_from_event_data(event_da: sc.DataArray) -> ProtonCharge:
