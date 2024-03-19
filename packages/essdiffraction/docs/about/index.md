@@ -12,7 +12,7 @@ ESSdiffraction is available as open source under the [BSD-3 license](https://ope
 
 Please cite the following:
 
-[![DOI](https://zenodo.org/badge/FIXME.svg)](https://zenodo.org/doi/10.5281/zenodo.FIXME)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10369509.svg)](https://zenodo.org/doi/10.5281/zenodo.10369509)
 
 To cite a specific version of ESSdiffraction, select the desired version on Zenodo to get the corresponding DOI.
 
