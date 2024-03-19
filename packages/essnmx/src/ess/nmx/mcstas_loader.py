@@ -204,7 +204,7 @@ def load_mcstas_nexus(
             weights=weights,
             id_list=_copy_partial_var(raw_data, idx=4, dtype='int64'),  # id
             t_list=_copy_partial_var(raw_data, idx=5, unit='s'),  # t
-            pixel_ids=coords.pop('pixel_id'),  # p
+            pixel_ids=coords.pop('pixel_id'),
         )
         if len(detector_names) > 1:
             # If the events come from several detector panels, reshape to reflect that.
