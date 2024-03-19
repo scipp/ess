@@ -147,7 +147,7 @@ class NMXReducedData(_SharedFields, sc.DataGroup):
         self._create_compressed_dataset(
             root_entry=nx_detector_1,
             name="counts",
-            var=self.counts.fold('id', sizes={'id': self.counts.sizes['id']}),
+            var=self.counts,
         )
         # Time of arrival bin edges
         self._create_dataset_from_var(
