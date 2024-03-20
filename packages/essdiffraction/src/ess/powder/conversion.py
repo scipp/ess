@@ -4,7 +4,7 @@
 Coordinate transformations for powder diffraction.
 """
 
-from typing import Any, Callable, Optional
+from typing import Optional
 
 import scipp as sc
 import scippneutron as scn
@@ -52,7 +52,7 @@ def _dspacing_from_diff_calibration_a0_impl(t, t0, c):
     return out
 
 
-def dspacing_from_diff_calibration(
+def _dspacing_from_diff_calibration(
     tof: sc.Variable,
     tzero: sc.Variable,
     difa: sc.Variable,
@@ -127,11 +127,25 @@ def to_dspacing_with_calibration(
         out = merge_calibration(into=data, calibration=calibration)
     else:
         out = data
+    out = _restore_tof_if_in_wavelength(out)
 
     graph = {
-        'dspacing': dspacing_from_diff_calibration,
+        'dspacing': _dspacing_from_diff_calibration,
     }
-    return DspacingData[RunType](_to_dspacing_impl(out, graph))
+    # `_dspacing_from_diff_calibration` does not need positions but conceptually,
+    # the conversion maps from positions to d-spacing.
+    # The mechanism with `_tag_positions_consumed` is meant to ensure that,
+    # if positions are present, they are consumed (mad unaligned or dropped)
+    # by the coordinate transform similarly to `to_dspacing_with_positions`.
+    if 'position' in out.coords or (
+        out.bins is not None and 'position' in out.bins.coords
+    ):
+        graph['_tag_positions_consumed'] = _consume_positions
+    else:
+        graph['_tag_positions_consumed'] = lambda: sc.scalar(0)
+    out = out.transform_coords('dspacing', graph=graph, keep_intermediate=False)
+    out.coords.pop('_tag_positions_consumed', None)
+    return DspacingData[RunType](out)
 
 
 def to_dspacing_with_positions(
@@ -183,7 +197,8 @@ def to_dspacing_with_positions(
     if source is not None:
         graph['source_position'] = lambda: source['position']
 
-    out = _to_dspacing_impl(data, graph)
+    out = _restore_tof_if_in_wavelength(data)
+    out = out.transform_coords('dspacing', graph=graph, keep_intermediate=False)
     # Add coords to ensure the result is the same whether sample or source are
     # coords in the input or separate function arguments.
     if sample is not None:
@@ -193,22 +208,6 @@ def to_dspacing_with_positions(
         out.coords['source_position'] = source['position']
         out.coords.set_aligned('source_position', False)
 
-    return DspacingData[RunType](out)
-
-
-def _to_dspacing_impl(
-    data: sc.DataArray, base_graph: dict[str, Callable[..., Any]]
-) -> sc.DataArray:
-    out = _restore_tof_if_in_wavelength(data)
-    graph = dict(base_graph)
-    if 'position' in out.coords or (
-        out.bins is not None and 'position' in out.bins.coords
-    ):
-        graph['_tag_positions_consumed'] = _consume_positions
-    else:
-        graph['_tag_positions_consumed'] = lambda: sc.scalar(0)
-    out = out.transform_coords('dspacing', graph=graph, keep_intermediate=False)
-    out.coords.pop('_tag_positions_consumed', None)
     return DspacingData[RunType](out)
 
 
