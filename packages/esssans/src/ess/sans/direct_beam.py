@@ -158,6 +158,9 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
             direct_beam=direct_beam_function,
             wavelength_bins=wavelength_bins,
         )
+        db.coords['wavelength'] = sc.midpoints(
+            db.coords['wavelength'], dim='wavelength'
+        )
         pipeline[FinalSummedQ[SampleRun, Denominator]] = sample0 * db
         pipeline[FinalSummedQ[BackgroundRun, Denominator]] = background0 * db
 
