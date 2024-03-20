@@ -6,9 +6,10 @@
 The domain types are used to define parameters and to request results from a Sciline
 pipeline.
 """
+
 from enum import Enum
 from pathlib import Path
-from typing import NewType, TypeVar
+from typing import Any, NewType, TypeVar
 
 import sciline
 import scipp as sc
@@ -82,6 +83,11 @@ ValidTofRange = NewType('ValidTofRange', sc.Variable)
 
 class AccumulatedProtonCharge(sciline.Scope[RunType, sc.Variable], sc.Variable):
     """Total proton charge."""
+
+    # Override the docstring of super().__init__ because if contains a broken link
+    # when used by Sphinx in ESSdiffraction.
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
 
 
 CalibrationData = NewType('CalibrationData', sc.Dataset)
