@@ -134,13 +134,25 @@ def proton_charge_from_event_data(event_da: sc.DataArray) -> ProtonCharge:
 def _bank_names_to_detector_names(file_path):
     with snx.File(file_path) as file:
         description = file['entry1/instrument/description'][()]
-    detector_component_regex = r'^COMPONENT (?P<detector_name>.*) = Monitor_nD\(\n(?:(?!COMPONENT)(?!filename)(?:.|\s))*(?:filename = \"(?P<bank_name>[^\"]*)\")?'  # noqa: E501
+    detector_component_regex = (
+        # Start of the detector component definition, contains the detector name.
+        r'^COMPONENT (?P<detector_name>.*) = Monitor_nD\(\n'
+        # Some uninteresting lines, we're looking for 'filename'.
+        # Make sure no new component begins.
+        r'(?:(?!COMPONENT)(?!filename)(?:.|\s))*'
+        # The line that defines the filename of the file that stores the
+        # events associated with the detector.
+        r'(?:filename = \"(?P<bank_name>[^\"]*)\")?'
+    )
     matches = re.finditer(detector_component_regex, description, re.MULTILINE)
     bank_names_to_detector_names = {}
     for m in matches:
-        bank_names_to_detector_names.setdefault(m.group('bank_name'), []).append(
-            m.group('detector_name')
-        )
+        bank_names_to_detector_names.setdefault(
+            # If filename was not set for the detector the filename for the
+            # event data defaults to the name of the detector.
+            m.group('bank_name') or m.group('detector_name'),
+            [],
+        ).append(m.group('detector_name'))
     return bank_names_to_detector_names
 
 
