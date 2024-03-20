@@ -6,7 +6,7 @@ Beamline parameters and utilities for POWGEN.
 
 import scipp as sc
 
-from ...types import CalibrationData, RawCalibrationData
+from ...types import CalibrationData, DetectorDimensions, RawCalibrationData
 from .types import DetectorInfo
 
 
@@ -61,5 +61,10 @@ def preprocess_calibration_data(
     return CalibrationData(map_detector_to_spectrum(data, detector_info=detector_info))
 
 
-providers = (preprocess_calibration_data,)
+def powgen_detector_dimensions() -> DetectorDimensions:
+    """Dimensions used by POWGEN detectors."""
+    return DetectorDimensions(('spectrum',))
+
+
+providers = (preprocess_calibration_data, powgen_detector_dimensions)
 """Sciline providers for POWGEN beamline processing."""

@@ -20,6 +20,5 @@ providers = (
     *correction.providers,
     *filtering.providers,
     *grouping.providers,
-    *uncertainty.providers,
 )
 """Sciline providers for powder diffraction."""

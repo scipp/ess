@@ -6,6 +6,7 @@ from typing import Any, Dict, Optional
 import scipp as sc
 from scippneutron.conversion.graph import beamline, tof
 
+from ._util import event_or_outer_coord
 from .logging import get_logger
 from .smoothing import lowpass
 from .types import (
@@ -17,8 +18,10 @@ from .types import (
     NormalizedByVanadium,
     RunType,
     SampleRun,
+    UncertaintyBroadcastMode,
     VanadiumRun,
 )
+from .uncertainty import broadcast_uncertainties
 
 
 def normalize_by_monitor(
@@ -77,6 +80,7 @@ def normalize_by_vanadium(
     data: FocussedData[SampleRun],
     vanadium: FocussedData[VanadiumRun],
     edges: DspacingBins,
+    uncertainty_broadcast_mode: Optional[UncertaintyBroadcastMode] = None,
 ) -> NormalizedByVanadium:
     """
     Normalize sample data by a vanadium measurement.
@@ -89,12 +93,17 @@ def normalize_by_vanadium(
         Vanadium data.
     edges:
         `vanadium` is histogrammed into these bins before dividing the data by it.
+    uncertainty_broadcast_mode:
+        Choose how uncertainties of vanadium are broadcast to the sample data.
+        Defaults to ``UncertaintyBroadcastMode.fail``.
 
     Returns
     -------
     :
         `data` normalized by `vanadium`.
     """
+    vanadium = broadcast_uncertainties(vanadium, uncertainty_broadcast_mode)
+
     norm = sc.lookup(vanadium.hist({edges.dim: edges}), dim=edges.dim)
     # Converting to unit 'one' because the division might produce a unit
     # with a large scale if the proton charges in data and vanadium were
@@ -197,8 +206,8 @@ def apply_lorentz_correction(da: sc.DataArray) -> sc.DataArray:
     # The implementation is optimized under the assumption that two_theta
     # is small and dspacing and the data are large.
     out = _shallow_copy(da)
-    dspacing = _event_or_bin_coord(da, 'dspacing')
-    two_theta = _event_or_bin_coord(da, 'two_theta')
+    dspacing = event_or_outer_coord(da, 'dspacing')
+    two_theta = event_or_outer_coord(da, 'two_theta')
     theta = 0.5 * two_theta
 
     d4 = dspacing.broadcast(sizes=out.sizes) ** 4
@@ -219,14 +228,6 @@ def _shallow_copy(da: sc.DataArray) -> sc.DataArray:
     if da.bins is not None:
         out.data = sc.bins(**da.bins.constituents)
     return out
-
-
-def _event_or_bin_coord(da: sc.DataArray, name: str) -> sc.Variable:
-    try:
-        return da.bins.coords[name]
-    except (AttributeError, KeyError):
-        # Either not binned or no event coord with this name.
-        return da.coords[name]
 
 
 providers = (normalize_by_proton_charge, normalize_by_vanadium)

@@ -7,10 +7,12 @@ from typing import Optional, Set
 
 import numpy as np
 import pytest
+import sciline
 import scipp as sc
 import scipp.testing
 
 from ess.dream import data, load_geant4_csv
+from ess.powder.types import DetectorName, FilePath, RawDetectorData, SampleRun
 
 
 @pytest.fixture(scope='module')
@@ -59,7 +61,7 @@ def test_load_geant4_csv_loads_expected_structure(file):
     'key', ('mantle', 'high_resolution', 'endcap_forward', 'endcap_backward')
 )
 def test_load_gean4_csv_set_weights_to_one(file, key):
-    detector = load_geant4_csv(file)['instrument'][key]
+    detector = load_geant4_csv(file)['instrument'][key]['events']
     events = detector.bins.constituents['data'].data
     sc.testing.assert_identical(
         events, sc.ones(sizes=events.sizes, with_variances=True, unit='counts')
@@ -68,7 +70,7 @@ def test_load_gean4_csv_set_weights_to_one(file, key):
 
 def test_load_geant4_csv_mantle_has_expected_coords(file):
     # Only testing ranges that will not change in the future
-    mantle = load_geant4_csv(file)['instrument']['mantle']
+    mantle = load_geant4_csv(file)['instrument']['mantle']['events']
     assert_index_coord(mantle.coords['module'])
     assert_index_coord(mantle.coords['segment'])
     assert_index_coord(mantle.coords['counter'])
@@ -83,7 +85,7 @@ def test_load_geant4_csv_mantle_has_expected_coords(file):
 
 
 def test_load_geant4_csv_endcap_backward_has_expected_coords(file):
-    endcap = load_geant4_csv(file)['instrument']['endcap_backward']
+    endcap = load_geant4_csv(file)['instrument']['endcap_backward']['events']
     assert_index_coord(endcap.coords['module'])
     assert_index_coord(endcap.coords['segment'])
     assert_index_coord(endcap.coords['counter'])
@@ -98,7 +100,7 @@ def test_load_geant4_csv_endcap_backward_has_expected_coords(file):
 
 
 def test_load_geant4_csv_endcap_forward_has_expected_coords(file):
-    endcap = load_geant4_csv(file)['instrument']['endcap_forward']
+    endcap = load_geant4_csv(file)['instrument']['endcap_forward']['events']
     assert_index_coord(endcap.coords['module'])
     assert_index_coord(endcap.coords['segment'])
     assert_index_coord(endcap.coords['counter'])
@@ -113,7 +115,7 @@ def test_load_geant4_csv_endcap_forward_has_expected_coords(file):
 
 
 def test_load_geant4_csv_high_resolution_has_expected_coords(file):
-    hr = load_geant4_csv(file)['instrument']['high_resolution']
+    hr = load_geant4_csv(file)['instrument']['high_resolution']['events']
     assert_index_coord(hr.coords['module'])
     assert_index_coord(hr.coords['segment'])
     assert_index_coord(hr.coords['counter'])
@@ -124,3 +126,15 @@ def test_load_geant4_csv_high_resolution_has_expected_coords(file):
     assert 'tof' in hr.bins.coords
     assert 'wavelength' in hr.bins.coords
     assert 'position' in hr.bins.coords
+
+
+def test_geant4_in_pipeline(file_path, file):
+    from ess.dream.io.geant4 import providers
+
+    pipeline = sciline.Pipeline(
+        providers,
+        params={FilePath[SampleRun]: file_path, DetectorName: DetectorName('mantle')},
+    )
+    detector = pipeline.compute(RawDetectorData[SampleRun])
+    expected = load_geant4_csv(file)['instrument']['mantle']['events']
+    sc.testing.assert_identical(detector, expected)
