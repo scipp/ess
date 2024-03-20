@@ -23,21 +23,48 @@
    The ``ess`` python package is being split-up into technique and instrument specific packages,
    and should be considered deprecated.
    The documentation here is kept for historical reasons.
+   **Below, you will find links to the new packages.**
 
+
+.. grid:: 2
+
+    .. grid-item-card::  ESSdiffraction
+        :link: https://scipp.github.io/essdiffraction/
+
+        Diffraction data reduction
+
+    .. grid-item-card::  ESSnmx
+        :link: https://scipp.github.io/essnmx/
+
+        Data reduction for the NMX instrument
+
+.. grid:: 2
+
+    .. grid-item-card::  ESSpolarization
+        :link: https://scipp.github.io/esspolarization/
+
+        Polarization data reduction
+
+    .. grid-item-card::  ESSreflectometry
+        :link: https://scipp.github.io/essreflectometry/
+
+        Reflectometry data reduction
 
 .. grid:: 2
 
     .. grid-item-card::  ESSsans
         :link: https://scipp.github.io/esssans/
 
-        A
+        SANS data reduction
 
-    .. grid-item-card::  ESSdiffraction
-        :link: https://scipp.github.io/essdiffraction/
+    .. grid-item-card::  ESSspectroscopy
+        :link: https://scipp.github.io/essspectroscopy/
 
-        B
+        Spectroscopy data reduction
 
+.. raw:: html
 
+   <br><br><br><br>
 
 `European Spallation Source`_ (ESS) toolkit for neutron scattering data reduction powered by `scipp`_ and `scippneutron`_.
 Provides ESS facility and instrument bespoke tools.
