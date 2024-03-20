@@ -10,11 +10,11 @@ from .types import (
     CalibratedMaskedData,
     CleanDirectBeam,
     CleanMonitor,
-    CleanSummedQ,
     CleanWavelength,
     Denominator,
     DetectorPixelShape,
     EmptyBeamRun,
+    FinalSummedQ,
     Incident,
     IofQ,
     LabFrameTransform,
@@ -339,8 +339,8 @@ def process_wavelength_bands(
 
 
 def normalize(
-    numerator: CleanSummedQ[ScatteringRunType, Numerator],
-    denominator: CleanSummedQ[ScatteringRunType, Denominator],
+    numerator: FinalSummedQ[ScatteringRunType, Numerator],
+    denominator: FinalSummedQ[ScatteringRunType, Denominator],
     return_events: ReturnEvents,
     uncertainties: UncertaintyBroadcastMode,
     wavelength_bands: ProcessedWavelengthBands,

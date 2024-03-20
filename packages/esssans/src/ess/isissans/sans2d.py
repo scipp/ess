@@ -4,8 +4,7 @@ from typing import NewType, Optional
 
 import scipp as sc
 
-from ..sans.types import MaskedData, SampleRun, ScatteringRunType
-from .components import RawDataWithComponentUserOffsets
+from ..sans.types import MaskedData, SampleRun, ScatteringRunType, TofData
 
 DetectorEdgeMask = NewType('DetectorEdgeMask', sc.Variable)
 """Detector edge mask"""
@@ -19,7 +18,7 @@ SampleHolderMask = NewType('SampleHolderMask', sc.Variable)
 
 
 def detector_edge_mask(
-    sample: RawDataWithComponentUserOffsets[SampleRun],
+    sample: TofData[SampleRun],
 ) -> DetectorEdgeMask:
     mask_edges = (
         sc.abs(sample.coords['position'].fields.x) > sc.scalar(0.48, unit='m')
@@ -28,7 +27,7 @@ def detector_edge_mask(
 
 
 def sample_holder_mask(
-    sample: RawDataWithComponentUserOffsets[SampleRun],
+    sample: TofData[SampleRun],
     low_counts_threshold: LowCountThreshold,
 ) -> SampleHolderMask:
     summed = sample.hist()
@@ -43,7 +42,7 @@ def sample_holder_mask(
 
 
 def mask_detectors(
-    da: RawDataWithComponentUserOffsets[ScatteringRunType],
+    da: TofData[ScatteringRunType],
     edge_mask: Optional[DetectorEdgeMask],
     holder_mask: Optional[SampleHolderMask],
 ) -> MaskedData[ScatteringRunType]:

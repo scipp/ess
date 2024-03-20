@@ -65,19 +65,18 @@ IofQPart = TypeVar('IofQPart', Numerator, Denominator)
 """TypeVar used for specifying Numerator or Denominator of IofQ"""
 
 # 1.4  Entry paths in NeXus files
-NeXusSampleName = NewType('NeXusSampleName', str)
-"""Name of sample entry in NeXus file"""
-
-NeXusSourceName = NewType('NeXusSourceName', str)
-"""Name of source entry in NeXus file"""
-
 NeXusDetectorName = NewType('NeXusDetectorName', str)
 """Name of detector entry in NeXus file"""
 
+PixelShapePath = NewType('PixelShapePath', str)
+"""
+Name of the entry where the pixel shape is stored in the NeXus file
+"""
+
 TransformationPath = NewType('TransformationPath', str)
 """
-Name of the entry under which to store the transformation computed from the
-transformation chain, for the detectors and the monitors
+Name of the entry where the transformation computed from the
+transformation chain is stored, for the detectors and the monitors
 """
 
 # 2  Workflow parameters
@@ -176,6 +175,14 @@ MaskedDetectorIDs = NewType('MaskedDetectorIDs', sc.Variable)
 # 3  Workflow (intermediate) results
 
 
+class RawSource(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+    """Raw source from NeXus file"""
+
+
+class RawSample(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+    """Raw sample from NeXus file"""
+
+
 class SamplePosition(sciline.Scope[RunType, sc.Variable], sc.Variable):
     """Sample position"""
 
@@ -211,28 +218,38 @@ class SolidAngle(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Solid angle of detector pixels seen from sample position"""
 
 
-class LoadedSingleFileDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
-    """Detector events of a single loaded file"""
+class LoadedNeXusDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+    """Detector data, loaded from a NeXus file, containing not only neutron events
+    but also pixel shape information, transformations, ..."""
 
 
-class LoadedSingleFileMonitor(
+class LoadedNeXusMonitor(
     sciline.ScopeTwoParams[RunType, MonitorType, sc.DataGroup], sc.DataGroup
 ):
-    """A single monitor of a single loaded file"""
-
-
-class LoadedDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
-    """Detector events (can be data merged from multiple files)"""
-
-
-class LoadedMonitor(
-    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataGroup], sc.DataGroup
-):
-    """Monitor data (can be data merged from multiple files)"""
+    """Monitor data loaded from a NeXus file, containing not only neutron events
+    but also transformations, ..."""
 
 
 class RawData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
-    """Raw data"""
+    """Raw detector data"""
+
+
+class ConfiguredReducibleDataData(
+    sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray
+):
+    """Raw event data where variances and necessary coordinates
+    (e.g. sample and source position) have been added, and where optionally some
+    user configuration was applied to some of the coordinates."""
+
+
+class TofData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
+    """Data with a time-of-flight coordinate"""
+
+
+class TofMonitor(
+    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataGroup], sc.DataGroup
+):
+    """Monitor data with a time-of-flight coordinate"""
 
 
 PixelMask = NewType('PixelMask', sc.Variable)
@@ -282,6 +299,12 @@ class CleanSummedQ(
     """Result of histogramming/binning :py:class:`CleanQ` over all pixels into Q bins"""
 
 
+class FinalSummedQ(
+    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
+):
+    """Final data into Q bins, in a state that is ready to be normalized."""
+
+
 class IofQ(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """I(Q)"""
 
@@ -296,10 +319,12 @@ class RawMonitor(
     """Raw monitor data"""
 
 
-class CalibratedMonitor(
+class ConfiguredReducibleMonitor(
     sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
 ):
-    """Raw monitor whose position has been calibrated"""
+    """Raw monitor data where variances and necessary coordinates
+    (e.g. source position) have been added, and where optionally some
+    user configuration was applied to some of the coordinates."""
 
 
 class WavelengthMonitor(

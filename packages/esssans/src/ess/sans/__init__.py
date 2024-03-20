@@ -18,6 +18,7 @@ from . import (
     masking,
     normalization,
 )
+from .beam_center_finder import beam_center_from_center_of_mass
 from .direct_beam import direct_beam
 from .types import BackgroundSubtractedIofQ, IofQ, ReturnEvents, SampleRun
 
@@ -26,8 +27,6 @@ providers = (
     *i_of_q.providers,
     *masking.providers,
     *normalization.providers,
-    # Default to fast but potentially inaccurate beam center finder
-    beam_center_finder.beam_center_from_center_of_mass,
 )
 """
 List of providers for setting up a Sciline pipeline.
@@ -46,6 +45,7 @@ __all__ = [
     'SampleRun',
     'ReturnEvents',
     'beam_center_finder',
+    'beam_center_from_center_of_mass',
     'common',
     'conversions',
     'direct_beam',

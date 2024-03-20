@@ -6,6 +6,8 @@ Providers for the ISIS instruments.
 import scipp as sc
 
 from ..sans.types import (
+    ConfiguredReducibleDataData,
+    ConfiguredReducibleMonitor,
     DetectorPixelShape,
     LabFrameTransform,
     MonitorType,
@@ -17,6 +19,8 @@ from ..sans.types import (
     RunType,
     SampleRun,
     ScatteringRunType,
+    TofData,
+    TofMonitor,
 )
 from .data import LoadedFileContents
 
@@ -33,6 +37,22 @@ def get_monitor_data(
     # See https://github.com/scipp/sciline/issues/52 why copy needed
     mon = dg['monitors'][nexus_name]['data'].copy()
     return RawMonitor[RunType, MonitorType](mon)
+
+
+def data_to_tof(
+    da: ConfiguredReducibleDataData[ScatteringRunType],
+) -> TofData[ScatteringRunType]:
+    """Dummy conversion of data to time-of-flight data.
+    The data already has a time-of-flight coordinate."""
+    return TofData[ScatteringRunType](da)
+
+
+def monitor_to_tof(
+    da: ConfiguredReducibleMonitor[RunType, MonitorType]
+) -> TofMonitor[RunType, MonitorType]:
+    """Dummy conversion of monitor data to time-of-flight data.
+    The monitor data already has a time-of-flight coordinate."""
+    return TofMonitor[RunType, MonitorType](da)
 
 
 def run_number(dg: LoadedFileContents[SampleRun]) -> RunNumber:
@@ -80,6 +100,8 @@ def lab_frame_transform() -> LabFrameTransform[ScatteringRunType]:
 providers = (
     get_detector_data,
     get_monitor_data,
+    data_to_tof,
+    monitor_to_tof,
     run_number,
     run_title,
     lab_frame_transform,

@@ -82,6 +82,7 @@ def sans2d_providers():
         + (
             isis.data.transmission_from_background_run,
             isis.data.transmission_from_sample_run,
+            sans.beam_center_finder.beam_center_from_center_of_mass,
         )
     )
 
@@ -244,8 +245,8 @@ def test_beam_center_can_get_closer_to_verified_result_with_low_counts_mask():
     )
     del params[DirectBeamFilename]
     providers = sans2d_providers()
-    providers.remove(sans.beam_center_finder.beam_center_from_center_of_mass)
     providers.remove(sans2d.sample_holder_mask)
+    providers.remove(sans.beam_center_finder.beam_center_from_center_of_mass)
     providers.append(sans.beam_center_finder.beam_center_from_iofq)
     providers.append(low_counts_mask)
     pipeline = sciline.Pipeline(providers, params=params)
