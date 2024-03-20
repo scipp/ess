@@ -17,6 +17,28 @@
       </br></br>
    </div>
 
+
+.. attention::
+
+   The ``ess`` python package is being split-up into technique and instrument specific packages,
+   and should be considered deprecated.
+   The documentation here is kept for historical reasons.
+
+
+.. grid:: 2
+
+    .. grid-item-card::  ESSsans
+        :link: https://scipp.github.io/esssans/
+
+        A
+
+    .. grid-item-card::  ESSdiffraction
+        :link: https://scipp.github.io/essdiffraction/
+
+        B
+
+
+
 `European Spallation Source`_ (ESS) toolkit for neutron scattering data reduction powered by `scipp`_ and `scippneutron`_.
 Provides ESS facility and instrument bespoke tools.
 The ``ess`` module is part of the software stack for data reduction:
