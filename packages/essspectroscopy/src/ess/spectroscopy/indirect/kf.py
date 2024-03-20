@@ -1,18 +1,12 @@
-from scipp import Variable
-
-
-def _norm(vector: Variable) -> Variable:
-    from scipp import sqrt, dot, DType
-    assert vector.dtype == DType.vector3  # "Vector operations require scipp.DType.vector3 elements!"
-    return sqrt(dot(vector, vector))
+from ess.spectroscopy.types import *
 
 
 def sample_analyzer_vector(
-        sample_position: Variable,
-        analyzer_position: Variable,
-        analyzer_orientation: Variable,
-        detector_position: Variable
-) -> Variable:
+        sample_position: SamplePosition,
+        analyzer_position: AnalyzerPosition,
+        analyzer_orientation: AnalyzerOrientation,
+        detector_position: DetectorPosition
+) -> SampleAnalyzerVector:
     """Determine the sample to analyzer-reflection-point vector per detector element
 
     :parameter sample_position: scipp.DType.vector3
@@ -30,6 +24,7 @@ def sample_analyzer_vector(
     an additional dimension compared to the analyzer shapes.
     """
     from scipp import concat, vector, dot, sqrt, DType
+    from ess.spectroscopy.utils import norm
 
     yhat = analyzer_orientation * vector([0, 1, 0])
     if analyzer_orientation.dtype != DType.rotation3:
@@ -45,9 +40,9 @@ def sample_analyzer_vector(
 
     # TODO Consider requiring that dot(analyzer_position - sample_position, yhat) is zero?
 
-    sample_analyzer_center_distance = _norm(sample_analyzer_center_vector)
+    sample_analyzer_center_distance = norm(sample_analyzer_center_vector)
 
-    analyzer_detector_center_distance = _norm(analyzer_detector_center_vector)
+    analyzer_detector_center_distance = norm(analyzer_detector_center_vector)
 
     # similar-triangles give the out-of-plane analyzer reflection point distance
     sa_out_of_plane = sample_analyzer_center_distance / (sample_analyzer_center_distance + analyzer_detector_center_distance) * sd_out_of_plane
@@ -55,42 +50,65 @@ def sample_analyzer_vector(
     return sample_analyzer_center_vector + sa_out_of_plane * yhat
 
 
-def analyzer_detector_vector(sample_position: Variable, sample_analyzer_vec: Variable, detector_position: Variable) -> Variable:
+def analyzer_detector_vector(
+        sample_position: SamplePosition,
+        sample_analyzer_vec: SampleAnalyzerVector,
+        detector_position: DetectorPosition
+) -> AnalyzerDetectorVector:
     return detector_position - (sample_position + sample_analyzer_vec)
 
 
-def kf_hat(sample_analyzer_vec: Variable) -> Variable:
-    return sample_analyzer_vec / _norm(sample_analyzer_vec)
+def kf_hat(sample_analyzer_vec: SampleAnalyzerVector) -> SampleAnalyzerDirection:
+    from ess.spectroscopy.utils import norm
+    return sample_analyzer_vec / norm(sample_analyzer_vec)
 
 
-def kf_wavenumber(sample_analyzer_vec: Variable, analyzer_detector_vec: Variable, tau: Variable) -> Variable:
+def kf_wavenumber(
+        sample_analyzer_vec: SampleAnalyzerVector,
+        analyzer_detector_vec: AnalyzerDetectorVector,
+        tau: ReciprocalLatticeSpacing | ReciprocalLatticeVectorAbsolute
+) -> Wavenumber:
     from scipp import sqrt, DType
+    from ess.spectroscopy.utils import norm
     if tau.dtype == DType.vector3:
-        tau = _norm(tau)
+        tau = norm(tau)
 
     # law of Cosines gives the scattering angle based on distances:
-    l_sa = _norm(sample_analyzer_vec)
-    l_ad = _norm(analyzer_detector_vec)
-    l_diff = _norm(sample_analyzer_vec - analyzer_detector_vec)
+    l_sa = norm(sample_analyzer_vec)
+    l_ad = norm(analyzer_detector_vec)
+    l_diff = norm(sample_analyzer_vec - analyzer_detector_vec)
     cos2theta = (l_sa * l_sa + l_ad * l_ad - l_diff * l_diff) / (2 * l_sa + l_ad)
 
     # law of Cosines gives the Bragg reflected wavevector magnitude
     return tau / sqrt(2 - 2 * cos2theta)
 
 
-def kf_vector(kf_direction: Variable, kf_magnitude: Variable) -> Variable:
+def kf_vector(
+        kf_direction: SampleAnalyzerDirection,
+        kf_magnitude: Wavenumber
+) -> Wavevector:
     return kf_direction * kf_magnitude
 
 
-def secondary_flight_path_length(sample_analyzer_vec: Variable, analyzer_detector_vec: Variable) -> Variable:
-    return _norm(sample_analyzer_vec) + _norm(analyzer_detector_vec)
+def secondary_flight_path_length(
+        sample_analyzer_vec: SampleAnalyzerVector,
+        analyzer_detector_vec: AnalyzerDetectorVector
+) -> SampleDetectorPathLength:
+    from ess.spectroscopy.utils import norm
+    return norm(sample_analyzer_vec) + norm(analyzer_detector_vec)
 
 
-def secondary_flight_time(secondary_flight_distance: Variable, kf_magnitude: Variable) -> Variable:
+def secondary_flight_time(
+        secondary_flight_distance: SampleDetectorPathLength,
+        kf_magnitude: Wavenumber
+) -> SampleDetectorFlightTime:
     from scipp.constants import hbar, neutron_mass
     velocity = kf_magnitude * hbar / neutron_mass
     return secondary_flight_distance / velocity
 
 
-def sample_time(detector_time: Variable, secondary_time: Variable) -> Variable:
+def sample_time(
+        detector_time: DetectorTime,
+        secondary_time: SampleDetectorFlightTime
+) -> SampleTime:
     return detector_time - secondary_time
