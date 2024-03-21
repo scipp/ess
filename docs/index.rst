@@ -62,6 +62,13 @@
 
         Spectroscopy data reduction
 
+.. grid:: 2
+
+    .. grid-item-card::  ESSreduce
+        :link: https://scipp.github.io/essreduce/
+
+        Common tools for ESS data reduction
+
 .. raw:: html
 
    <br><br><br><br>
