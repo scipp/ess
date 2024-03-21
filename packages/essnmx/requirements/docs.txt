@@ -50,9 +50,9 @@ imagesize==1.4.1
     # via sphinx
 ipydatawidgets==4.3.5
     # via pythreejs
-ipykernel==6.29.2
+ipykernel==6.29.3
     # via -r docs.in
-ipython==8.21.0
+ipython==8.18.1
     # via
     #   -r docs.in
     #   ipykernel
@@ -110,7 +110,7 @@ myst-parser==2.0.0
     # via -r docs.in
 nbclient==0.9.0
     # via nbconvert
-nbconvert==7.16.1
+nbconvert==7.16.2
     # via nbsphinx
 nbformat==5.9.2
     # via
@@ -216,8 +216,10 @@ traitlets==5.14.1
     #   traittypes
 traittypes==0.2.1
     # via ipydatawidgets
-typing-extensions==4.9.0
-    # via pydata-sphinx-theme
+typing-extensions==4.10.0
+    # via
+    #   ipython
+    #   pydata-sphinx-theme
 wcwidth==0.2.13
     # via prompt-toolkit
 webencodings==0.5.1
