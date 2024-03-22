@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 import pathlib
+import sys
 from typing import Generator
 
 import pytest
@@ -12,11 +13,20 @@ from ess.nmx.data import small_mcstas_2_sample, small_mcstas_3_sample
 from ess.nmx.mcstas_loader import (
     DefaultMaximumProbability,
     InputFilepath,
+    bank_names_to_detector_names,
     event_weights_from_probability,
     load_mcstas_nexus,
     proton_charge_from_event_data,
 )
 from ess.nmx.reduction import NMXData
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from mcstas_description_examples import (  # noqa: E402
+    no_detectors,
+    one_detector_no_filename,
+    two_detectors_same_filename,
+    two_detectors_two_filenames,
+)
 
 
 def check_scalar_properties_mcstas_2(dg: NMXData):
@@ -77,7 +87,7 @@ def test_file_reader_mcstas2(mcstas_2_deprecation_warning_context) -> None:
         file_path=file_path,
         event_weights_converter=event_weights_from_probability,
         proton_charge_converter=proton_charge_from_event_data,
-        detector_bank_name='bank01',
+        detector_bank_prefix='bank01',
     )
     check_scalar_properties_mcstas_2(dg)
     assert dg.weights.bins.size().sum().value == data_length
@@ -124,7 +134,7 @@ def test_file_reader_mcstas3(bank_id, fast_axis, slow_axis) -> None:
         file_path=file_path,
         event_weights_converter=event_weights_from_probability,
         proton_charge_converter=proton_charge_from_event_data,
-        detector_bank_name=f'bank{bank_id}',
+        detector_bank_prefix=f'bank{bank_id}',
     )
     check_scalar_properties_mcstas_3(dg)
     assert dg.weights.bins.size().sum().value == data_length
@@ -168,7 +178,31 @@ def test_file_reader_mcstas_additional_fields(tmp_mcstas_file: pathlib.Path) -> 
         file_path=InputFilepath(str(tmp_mcstas_file)),
         event_weights_converter=event_weights_from_probability,
         proton_charge_converter=proton_charge_from_event_data,
-        detector_bank_name='bank01',
+        detector_bank_prefix='bank01',
     )
 
     assert isinstance(dg, sc.DataGroup)
+
+
+def test_bank_names_to_detector_names_two_detectors():
+    res = bank_names_to_detector_names(two_detectors_two_filenames)
+    assert len(res) == 2
+    assert all(len(v) == 1 for v in res.values())
+
+
+def test_bank_names_to_detector_names_same_filename():
+    res = bank_names_to_detector_names(two_detectors_same_filename)
+    assert len(res) == 1
+    assert all(len(v) == 2 for v in res.values())
+
+
+def test_bank_names_to_detector_names_no_detectors():
+    res = bank_names_to_detector_names(no_detectors)
+    assert len(res) == 0
+
+
+def test_bank_names_to_detector_names_no_filename():
+    res = bank_names_to_detector_names(one_detector_no_filename)
+    assert len(res) == 1
+    ((bank, (detector,)),) = res.items()
+    assert bank == detector
