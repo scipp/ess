@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import re
-from typing import Callable, NewType, Optional
+from typing import Callable, Dict, List, NewType, Optional
 
 import scipp as sc
 import scippnexus as snx
@@ -131,9 +131,17 @@ def proton_charge_from_event_data(event_da: sc.DataArray) -> ProtonCharge:
     return ProtonCharge(_proton_charge_scale_factor * event_da.bins.size().sum().data)
 
 
-def _bank_names_to_detector_names(file_path):
+def read_bank_names_to_detector_names(file_path: str) -> Dict[str, List[str]]:
     with snx.File(file_path) as file:
         description = file['entry1/instrument/description'][()]
+
+    return bank_names_to_detector_names(description)
+
+
+def bank_names_to_detector_names(description: str) -> Dict[str, List[str]]:
+    """Associates event data names with the names of the detectors
+    where the events were detected"""
+
     detector_component_regex = (
         # Start of the detector component definition, contains the detector name.
         r'^COMPONENT (?P<detector_name>.*) = Monitor_nD\(\n'
@@ -162,7 +170,7 @@ def load_mcstas_nexus(
     event_weights_converter: EventWeightsConverter = event_weights_from_probability,
     proton_charge_converter: ProtonChargeConverter = proton_charge_from_event_data,
     max_probability: Optional[MaximumProbability] = None,
-    detector_bank_name: DetectorBankName,
+    detector_bank_prefix: DetectorBankName,
 ) -> NMXData:
     """Load McStas simulation result from h5(nexus) file.
 
@@ -190,8 +198,8 @@ def load_mcstas_nexus(
         The maximum probability to scale the weights.
         If not provided, ``DefaultMaximumProbability`` is used.
 
-    detector_bank_name:
-        Name of the detector bank to load events from.
+    detector_bank_prefix:
+        Prefix of the detector bank to load events from.
 
     """
 
@@ -201,13 +209,13 @@ def load_mcstas_nexus(
 
     detector_names = next(
         det_names
-        for bank_name, det_names in _bank_names_to_detector_names(file_path).items()
-        if detector_bank_name in bank_name
+        for bank_name, det_names in read_bank_names_to_detector_names(file_path).items()
+        if detector_bank_prefix in bank_name
     )
     coords = geometry.to_coords(*detector_names)
 
     with snx.File(file_path) as file:
-        raw_data = _retrieve_raw_event_data(file, detector_bank_name)
+        raw_data = _retrieve_raw_event_data(file, detector_bank_prefix)
         weights = event_weights_converter(
             max_probability or DefaultMaximumProbability,
             McStasEventProbabilities(_copy_partial_var(raw_data, idx=0, unit='counts')),
