@@ -4,7 +4,11 @@ import pytest
 import sciline as sl
 import scipp as sc
 
+from ess.nmx import default_parameters
 from ess.nmx.data import small_mcstas_2_sample, small_mcstas_3_sample
+from ess.nmx.mcstas_loader import providers as load_providers
+from ess.nmx.reduction import TimeBinSteps, bin_time_of_arrival
+from ess.nmx.types import DetectorIndex, FilePath, RunID
 
 
 @pytest.fixture(params=[small_mcstas_2_sample, small_mcstas_3_sample])
@@ -20,36 +24,21 @@ def mcstas_file_path(
 
 @pytest.fixture
 def mcstas_workflow(mcstas_file_path: str) -> sl.Pipeline:
-    from ess.nmx.mcstas_loader import (
-        DefaultMaximumProbability,
-        DetectorBankName,
-        EventWeightsConverter,
-        InputFilepath,
-        MaximumProbability,
-        ProtonChargeConverter,
-        event_weights_from_probability,
-        load_mcstas_nexus,
-        proton_charge_from_event_data,
-    )
-    from ess.nmx.reduction import TimeBinSteps, bin_time_of_arrival
-
-    return sl.Pipeline(
-        [load_mcstas_nexus, bin_time_of_arrival],
+    pl = sl.Pipeline(
+        [*load_providers, bin_time_of_arrival],
         params={
-            InputFilepath: mcstas_file_path,
-            MaximumProbability: DefaultMaximumProbability,
-            TimeBinSteps: TimeBinSteps(50),
-            EventWeightsConverter: event_weights_from_probability,
-            ProtonChargeConverter: proton_charge_from_event_data,
-            DetectorBankName: 'bank01',
+            FilePath: mcstas_file_path,
+            TimeBinSteps: 50,
+            DetectorIndex: 0,
+            **default_parameters,
         },
     )
+    pl.set_param_table(sl.ParamTable(RunID, {DetectorIndex: range(3)}, index=range(3)))
+    return pl
 
 
 def test_pipeline_builder(mcstas_workflow: sl.Pipeline, mcstas_file_path: str) -> None:
-    from ess.nmx.mcstas_loader import InputFilepath
-
-    assert mcstas_workflow.get(InputFilepath).compute() == mcstas_file_path
+    assert mcstas_workflow.get(FilePath).compute() == mcstas_file_path
 
 
 def test_pipeline_mcstas_loader(mcstas_workflow: sl.Pipeline) -> None:

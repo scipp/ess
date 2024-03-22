@@ -1,114 +1,103 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import re
-from typing import Callable, Dict, List, NewType, Optional
+from typing import Dict, List
 
 import scipp as sc
 import scippnexus as snx
 
+from .const import PIXEL_DIM, TOF_DIM
+from .mcstas_xml import McStasInstrument, read_mcstas_geometry_xml
 from .reduction import NMXData
-
-PixelIDs = NewType("PixelIDs", sc.Variable)
-InputFilepath = NewType("InputFilepath", str)
-DetectorName = NewType("DetectorName", str)
-DetectorBankName = NewType("DetectorBankName", str)
-
-# McStas Configurations
-MaximumProbability = NewType("MaximumProbability", int)
-DefaultMaximumProbability = MaximumProbability(100_000)
-
-McStasEventProbabilities = NewType("McStasEventProbabilities", sc.Variable)
-EventWeights = NewType("EventWeights", sc.Variable)
-EventWeightsConverter = NewType(
-    "EventWeightsConverter",
-    Callable[[MaximumProbability, McStasEventProbabilities], EventWeights],
+from .types import (
+    CrystalRotation,
+    DetectorBankPrefix,
+    DetectorIndex,
+    DetectorName,
+    EventData,
+    FilePath,
+    MaximumProbability,
+    ProtonCharge,
+    RawEventData,
 )
-"""A function that converts McStas probability to event weights."""
-
-ProtonCharge = NewType("ProtonCharge", sc.Variable)
-ProtonChargeConverter = NewType(
-    "ProtonChargeConverter", Callable[[EventWeights], ProtonCharge]
-)
-"""A function that derives arbitrary proton charge based on event weights."""
 
 
-def _retrieve_raw_event_data(file: snx.File, bank_name: str) -> sc.Variable:
+def detector_name_from_index(index: DetectorIndex) -> DetectorName:
+    return f'nD_Mantid_{index}'
+
+
+def event_data_bank_name(
+    detector_name: DetectorName, file_path: FilePath
+) -> DetectorBankPrefix:
+    '''Finds the filename associated with a detector'''
+    for bank_name, det_names in read_bank_names_to_detector_names(file_path).items():
+        if detector_name in det_names:
+            return bank_name.partition('.')[0]
+
+
+def raw_event_data(
+    file_path: FilePath,
+    bank_prefix: DetectorBankPrefix,
+    detector_name: DetectorName,
+    instrument: McStasInstrument,
+) -> RawEventData:
     """Retrieve events from the nexus file."""
-    bank_name = f'{bank_name}_events_dat_list_p_x_y_n_id_t'
-    (bank_name,) = (name for name in file["entry1/data"].keys() if bank_name in name)
-    return file["entry1/data/" + bank_name]["events"][()].rename_dims(
-        {'dim_0': 'event'}
-    )
+    coords = instrument.to_coords(detector_name)
+    bank_name = f'{bank_prefix}_dat_list_p_x_y_n_id_t'
+    with snx.File(file_path, 'r') as f:
+        root = f["entry1/data"]
+        (bank_name,) = (name for name in root.keys() if bank_name in name)
+        data = root[bank_name]["events"][()].rename_dims({'dim_0': 'event'})
+        return sc.DataArray(
+            coords={
+                PIXEL_DIM: sc.array(
+                    dims=['event'],
+                    values=data['dim_1', 4].values,
+                    dtype='int64',
+                    unit=None,
+                ),
+                TOF_DIM: sc.array(
+                    dims=['event'], values=data['dim_1', 5].values, unit='s'
+                ),
+            },
+            data=sc.array(
+                dims=['event'], values=data['dim_1', 0].values, unit='counts'
+            ),
+        ).group(coords.pop('pixel_id'))
 
 
-def _copy_partial_var(
-    var: sc.Variable, idx: int, unit: Optional[str] = None, dtype: Optional[str] = None
-) -> sc.Variable:
-    """Retrieve a property from a variable."""
-    var = var['dim_1', idx].astype(dtype or var.dtype, copy=True)
-    if unit is not None:
-        var.unit = sc.Unit(unit)
-    return var
-
-
-def _retrieve_crystal_rotation(file: snx.File, unit: str) -> sc.Variable:
+def crystal_rotation(
+    file_path: FilePath, instrument: McStasInstrument
+) -> CrystalRotation:
     """Retrieve crystal rotation from the file."""
-
-    return sc.vector(
-        value=[file[f"entry1/simulation/Param/XtalPhi{key}"][...] for key in "XYZ"],
-        unit=unit,
-    )
+    with snx.File(file_path, 'r') as file:
+        return sc.vector(
+            value=[file[f"entry1/simulation/Param/XtalPhi{key}"][...] for key in "XYZ"],
+            unit=instrument.simulation_settings.angle_unit,
+        )
 
 
 def event_weights_from_probability(
-    max_probability: MaximumProbability, probabilities: McStasEventProbabilities
-) -> EventWeights:
+    da: RawEventData,
+    max_probability: MaximumProbability,
+) -> EventData:
     """Create event weights by scaling probability data.
 
     event_weights = max_probability * (probabilities / max(probabilities))
 
     Parameters
     ----------
-    probabilities:
-        The probabilities of the events.
+    da:
+        The probabilities of the events
 
     max_probability:
         The maximum probability to scale the weights.
 
     """
-    maximum_probability = sc.scalar(max_probability, unit='counts')
-
-    return EventWeights(maximum_probability * (probabilities / probabilities.max()))
+    return sc.scalar(max_probability, unit='counts') * da / da.max()
 
 
-def _compose_event_data_array(
-    *,
-    weights: sc.Variable,
-    id_list: sc.Variable,
-    t_list: sc.Variable,
-    pixel_ids: sc.Variable,
-) -> sc.DataArray:
-    """Combine data with coordinates loaded from the nexus file.
-
-    Parameters
-    ----------
-    weights:
-        The weights of the events.
-
-    id_list:
-        The pixel IDs of the events.
-
-    t_list:
-        The time of arrival of the events.
-
-    pixel_ids:
-        All possible pixel IDs of the detector.
-    """
-    events = sc.DataArray(data=weights, coords={'t': t_list, 'id': id_list})
-    return events.group(pixel_ids)
-
-
-def proton_charge_from_event_data(event_da: sc.DataArray) -> ProtonCharge:
+def proton_charge_from_event_data(da: EventData) -> ProtonCharge:
     """Make up the proton charge from the event data array.
 
     Proton charge is proportional to the number of neutrons,
@@ -122,19 +111,16 @@ def proton_charge_from_event_data(event_da: sc.DataArray) -> ProtonCharge:
     Parameters
     ----------
     event_da:
-        The event data binned in pixel id
+        The event data
 
     """
     # Arbitrary number to scale the proton charge
-    _proton_charge_scale_factor = sc.scalar(1 / 10_000, unit=None)
-
-    return ProtonCharge(_proton_charge_scale_factor * event_da.bins.size().sum().data)
+    return ProtonCharge(sc.scalar(1 / 10_000, unit=None) * da.bins.size().sum().data)
 
 
 def read_bank_names_to_detector_names(file_path: str) -> Dict[str, List[str]]:
     with snx.File(file_path) as file:
         description = file['entry1/instrument/description'][()]
-
     return bank_names_to_detector_names(description)
 
 
@@ -164,83 +150,31 @@ def bank_names_to_detector_names(description: str) -> Dict[str, List[str]]:
     return bank_names_to_detector_names
 
 
-def load_mcstas_nexus(
+def load_mcstas(
     *,
-    file_path: InputFilepath,
-    event_weights_converter: EventWeightsConverter = event_weights_from_probability,
-    proton_charge_converter: ProtonChargeConverter = proton_charge_from_event_data,
-    max_probability: Optional[MaximumProbability] = None,
-    detector_bank_prefix: DetectorBankName,
+    da: EventData,
+    proton_charge: ProtonCharge,
+    crystal_rotation: CrystalRotation,
+    detector_name: DetectorName,
+    instrument: McStasInstrument,
 ) -> NMXData:
-    """Load McStas simulation result from h5(nexus) file.
-
-    See :func:`~event_weights_from_probability` and
-    :func:`~proton_charge_from_event_data` for details.
-
-    Parameters
-    ----------
-    file_path:
-        File name to load.
-
-    event_weights_converter: :class:`~EventWeightsConverter`, \
-        default: :func:`~event_weights_from_probability`
-        A function to convert probabilities to event weights.
-        The function should accept the probabilities as the first argument,
-        and return the converted event weights.
-
-    proton_charge_converter: :class:`~ProtonChargeConverter`, \
-        default: :func:`~proton_charge_from_event_data`
-        A function to convert the event weights to proton charge.
-        The function should accept the event weights as the first argument,
-        and return the proton charge.
-
-    max_probability:
-        The maximum probability to scale the weights.
-        If not provided, ``DefaultMaximumProbability`` is used.
-
-    detector_bank_prefix:
-        Prefix of the detector bank to load events from.
-
-    """
-
-    from .mcstas_xml import read_mcstas_geometry_xml
-
-    geometry = read_mcstas_geometry_xml(file_path)
-
-    detector_names = next(
-        det_names
-        for bank_name, det_names in read_bank_names_to_detector_names(file_path).items()
-        if detector_bank_prefix in bank_name
-    )
-    coords = geometry.to_coords(*detector_names)
-
-    with snx.File(file_path) as file:
-        raw_data = _retrieve_raw_event_data(file, detector_bank_prefix)
-        weights = event_weights_converter(
-            max_probability or DefaultMaximumProbability,
-            McStasEventProbabilities(_copy_partial_var(raw_data, idx=0, unit='counts')),
-        )
-        event_da = _compose_event_data_array(
-            weights=weights,
-            id_list=_copy_partial_var(raw_data, idx=4, dtype='int64'),  # id
-            t_list=_copy_partial_var(raw_data, idx=5, unit='s'),  # t
-            pixel_ids=coords.pop('pixel_id'),
-        )
-        if len(detector_names) > 1:
-            # If the events come from several detector panels, reshape to reflect that.
-            # This assumes each panel has the same number of pixels
-            # and that the pixel_ids associated with each panel consist of one interval.
-            event_da = event_da.fold(
-                dim='id', sizes={'panel': len(detector_names), 'id': -1}
-            )
-        proton_charge = proton_charge_converter(event_da)
-        crystal_rotation = _retrieve_crystal_rotation(
-            file, geometry.simulation_settings.angle_unit
-        )
-
+    coords = instrument.to_coords(detector_name)
+    coords.pop('pixel_id')
     return NMXData(
-        weights=event_da,
+        weights=da,
         proton_charge=proton_charge,
         crystal_rotation=crystal_rotation,
         **coords,
     )
+
+
+providers = (
+    read_mcstas_geometry_xml,
+    detector_name_from_index,
+    event_data_bank_name,
+    raw_event_data,
+    event_weights_from_probability,
+    proton_charge_from_event_data,
+    crystal_rotation,
+    load_mcstas,
+)

@@ -12,14 +12,16 @@ except importlib.metadata.PackageNotFoundError:
 del importlib
 
 from .data import small_mcstas_3_sample
-from .mcstas_loader import InputFilepath, NMXData, load_mcstas_nexus
 from .reduction import NMXReducedData, TimeBinSteps
+from .types import MaximumProbability
+
+default_parameters = {MaximumProbability: 10000}
+
+del MaximumProbability
 
 __all__ = [
     "small_mcstas_3_sample",
-    "NMXData",
-    "InputFilepath",
-    "load_mcstas_nexus",
     "NMXReducedData",
     "TimeBinSteps",
+    "default_parameters",
 ]

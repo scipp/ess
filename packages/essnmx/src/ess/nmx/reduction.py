@@ -5,7 +5,12 @@ import pathlib
 from typing import NewType, Optional, Union
 
 import h5py
+import sciline
 import scipp as sc
+
+from .const import DETECTOR_DIM
+from .mcstas_xml import McStasInstrument
+from .types import DetectorName, RunID
 
 TimeBinSteps = NewType("TimeBinSteps", int)
 
@@ -140,7 +145,7 @@ class NMXReducedData(_SharedFields, sc.DataGroup):
 
     def _create_instrument_group(self, nx_entry: h5py.Group) -> h5py.Group:
         nx_instrument = nx_entry.create_group("NXinstrument")
-        nx_instrument.create_dataset("proton_charge", data=self.proton_charge.value)
+        nx_instrument.create_dataset("proton_charge", data=self.proton_charge.values)
 
         nx_detector_1 = nx_instrument.create_group("detector_1")
         # Detector counts
@@ -223,14 +228,20 @@ class NMXReducedData(_SharedFields, sc.DataGroup):
 
 
 def bin_time_of_arrival(
-    nmx_data: NMXData, time_bin_step: TimeBinSteps
+    nmx_data: sciline.Series[RunID, NMXData],
+    detector_name: sciline.Series[RunID, DetectorName],
+    instrument: McStasInstrument,
+    time_bin_step: TimeBinSteps,
 ) -> NMXReducedData:
     """Bin time of arrival data into ``time_bin_step`` bins."""
 
-    counts: sc.DataArray = nmx_data.weights.hist(t=time_bin_step)
-    counts.unit = 'counts'
+    nmx_data = list(nmx_data.values())
+    nmx_data = sc.concat(nmx_data, DETECTOR_DIM)
+    counts = nmx_data.pop('weights').hist(t=time_bin_step)
+    new_coords = instrument.to_coords(*detector_name.values())
+    new_coords.pop('pixel_id')
 
     return NMXReducedData(
         counts=counts,
-        **{key: nmx_data[key] for key in nmx_data.keys() if key != 'weights'},
+        **{**nmx_data, **new_coords},
     )
