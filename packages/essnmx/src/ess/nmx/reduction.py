@@ -2,7 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import io
 import pathlib
-from typing import NewType, Optional, Union, overload
+from typing import NewType, Optional, Union
 
 import h5py
 import scipp as sc
@@ -193,18 +193,6 @@ class NMXReducedData(_SharedFields, sc.DataGroup):
         nx_source["probe"] = "neutron"
         nx_source["target_material"] = "W"
         return nx_source
-
-    @overload
-    def export_as_nexus(self, output_file_base: str) -> None:
-        ...
-
-    @overload
-    def export_as_nexus(self, output_file_base: pathlib.Path) -> None:
-        ...
-
-    @overload
-    def export_as_nexus(self, output_file_base: io.BytesIO) -> None:
-        ...
 
     def export_as_nexus(
         self, output_file_base: Union[str, pathlib.Path, io.BytesIO]
