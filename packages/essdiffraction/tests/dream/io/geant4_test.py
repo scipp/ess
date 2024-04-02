@@ -52,13 +52,14 @@ def test_load_geant4_csv_loads_expected_structure(file):
     assert instrument.keys() == {
         'mantle',
         'high_resolution',
+        'sans',
         'endcap_forward',
         'endcap_backward',
     }
 
 
 @pytest.mark.parametrize(
-    'key', ('mantle', 'high_resolution', 'endcap_forward', 'endcap_backward')
+    'key', ('mantle', 'high_resolution', 'sans', 'endcap_forward', 'endcap_backward')
 )
 def test_load_gean4_csv_set_weights_to_one(file, key):
     detector = load_geant4_csv(file)['instrument'][key]['events']
@@ -126,6 +127,20 @@ def test_load_geant4_csv_high_resolution_has_expected_coords(file):
     assert 'tof' in hr.bins.coords
     assert 'wavelength' in hr.bins.coords
     assert 'position' in hr.bins.coords
+
+
+def test_load_geant4_csv_sans_has_expected_coords(file):
+    sans = load_geant4_csv(file)['instrument']['sans']['events']
+    assert_index_coord(sans.coords['module'])
+    assert_index_coord(sans.coords['segment'])
+    assert_index_coord(sans.coords['counter'])
+    assert_index_coord(sans.coords['wire'], values=set(range(1, 17)))
+    assert_index_coord(sans.coords['strip'], values=set(range(1, 33)))
+    assert_index_coord(sans.coords['sector'], values=set(range(1, 5)))
+
+    assert 'tof' in sans.bins.coords
+    assert 'wavelength' in sans.bins.coords
+    assert 'position' in sans.bins.coords
 
 
 def test_geant4_in_pipeline(file_path, file):
