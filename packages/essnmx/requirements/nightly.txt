@@ -79,7 +79,7 @@ requests==2.31.0
     # via pooch
 sciline @ git+https://github.com/scipp/sciline@main
     # via -r nightly.in
-scipp @ https://github.com/scipp/scipp/releases/download/nightly/scipp-nightly-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+scipp @ https://github.com/scipp/scipp/releases/download/nightly/scipp-nightly-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
     # via
     #   -r nightly.in
     #   scippnexus
