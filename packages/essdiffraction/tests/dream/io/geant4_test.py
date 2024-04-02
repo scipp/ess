@@ -134,9 +134,12 @@ def test_load_geant4_csv_sans_has_expected_coords(file):
     assert_index_coord(sans.coords['module'])
     assert_index_coord(sans.coords['segment'])
     assert_index_coord(sans.coords['counter'])
-    assert_index_coord(sans.coords['wire'], values=set(range(1, 17)))
-    assert_index_coord(sans.coords['strip'], values=set(range(1, 33)))
-    assert_index_coord(sans.coords['sector'], values=set(range(1, 5)))
+
+    # check ranges only if csv file contains events from SANS detectors
+    if len(sans.coords['module'].values) > 0:
+        assert_index_coord(sans.coords['wire'], values=set(range(1, 17)))
+        assert_index_coord(sans.coords['strip'], values=set(range(1, 33)))
+        assert_index_coord(sans.coords['sector'], values=set(range(1, 5)))
 
     assert 'tof' in sans.bins.coords
     assert 'wavelength' in sans.bins.coords
