@@ -112,7 +112,12 @@ def _split_detectors(
 ) -> Dict[str, sc.DataArray]:
     groups = data.group(
         sc.concat(
-            [MANTLE_DETECTOR_ID, HIGH_RES_DETECTOR_ID, SANS_DETECTOR_ID, *ENDCAPS_DETECTOR_IDS],
+            [
+                MANTLE_DETECTOR_ID,
+                HIGH_RES_DETECTOR_ID,
+                SANS_DETECTOR_ID,
+                *ENDCAPS_DETECTOR_IDS,
+            ],
             dim=detector_id_name,
         )
     )
@@ -126,7 +131,7 @@ def _split_detectors(
     ) is not None:
         detectors['high_resolution'] = high_res.copy()
     if (
-            sans := _extract_detector(groups, detector_id_name, SANS_DETECTOR_ID)
+        sans := _extract_detector(groups, detector_id_name, SANS_DETECTOR_ID)
     ) is not None:
         detectors['sans'] = sans.copy()
 
