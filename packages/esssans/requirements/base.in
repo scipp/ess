@@ -10,7 +10,7 @@ graphviz
 essreduce
 plopp
 pythreejs
-sciline>=24.2.0
+sciline>=24.4.0
 scipp>=23.8.0
 scippneutron>=23.9.0
 scippnexus>=23.12.1

@@ -38,7 +38,7 @@ funcy==2.0
     # via copier
 h11==0.14.0
     # via httpcore
-httpcore==1.0.4
+httpcore==1.0.5
     # via httpx
 httpx==0.27.0
     # via jupyterlab
@@ -55,7 +55,7 @@ jsonschema[format-nongpl]==4.21.1
     #   jupyter-events
     #   jupyterlab-server
     #   nbformat
-jupyter-events==0.9.1
+jupyter-events==0.10.0
     # via jupyter-server
 jupyter-lsp==2.2.4
     # via jupyterlab
@@ -85,7 +85,7 @@ plumbum==1.8.2
     # via copier
 prometheus-client==0.20.0
     # via jupyter-server
-pycparser==2.21
+pycparser==2.22
     # via cffi
 pydantic==2.6.4
     # via copier
@@ -93,7 +93,7 @@ pydantic-core==2.16.3
     # via pydantic
 python-json-logger==2.0.7
     # via jupyter-events
-pyyaml-include==1.3.2
+pyyaml-include==2.0
     # via copier
 questionary==2.0.1
     # via copier
