@@ -20,6 +20,7 @@ from . import (
 )
 from .beam_center_finder import beam_center_from_center_of_mass
 from .direct_beam import direct_beam
+from .i_of_q import merge_banks, merge_runs, no_bank_merge, no_run_merge
 from .types import BackgroundSubtractedIofQ, IofQ, ReturnEvents, SampleRun
 
 providers = (
@@ -52,6 +53,10 @@ __all__ = [
     'i_of_q',
     'io',
     'masking',
+    'merge_banks',
+    'merge_runs',
+    'no_bank_merge',
+    'no_run_merge',
     'normalization',
     'providers',
 ]
