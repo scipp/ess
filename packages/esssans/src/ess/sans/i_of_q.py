@@ -240,10 +240,6 @@ def no_run_merge(
 
 
 def _merge_contributions(data: list[sc.DataArray]) -> sc.DataArray:
-    """
-    Merge data from multiple detector bank into a single numerator or denominator,
-    before the normalization step.
-    """
     if len(data) == 1:
         return data[0]
     reducer = sc.reduce(data)
