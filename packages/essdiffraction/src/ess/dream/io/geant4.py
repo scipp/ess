@@ -158,10 +158,10 @@ def _split_detectors(
 def _extract_detector(
     detector_groups: sc.DataArray, detector_id_name: str, detector_id: sc.Variable
 ) -> Optional[sc.DataArray]:
-    try:
-        return detector_groups[detector_id_name, detector_id].value
-    except IndexError:
+    events = detector_groups[detector_id_name, detector_id].value
+    if len(events) == 0:
         return None
+    return events
 
 
 providers = (extract_geant4_detector, extract_geant4_detector_data, load_geant4_csv)
