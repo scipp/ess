@@ -17,6 +17,11 @@ from ess.powder.types import DetectorName, FilePath, RawDetectorData, SampleRun
 
 @pytest.fixture(scope='module')
 def file_path():
+    return data.get_path('data_dream0_new_hkl_Si_pwd.csv.zip')
+
+
+@pytest.fixture(scope='module')
+def file_path_without_sans():
     return data.get_path('data_dream_with_sectors.csv.zip')
 
 
@@ -27,9 +32,21 @@ def load_file(file_path):
         return archive.read(archive.namelist()[0])
 
 
+# Load file into memory only once
+@pytest.fixture(scope='module')
+def load_file_without_sans(file_path_without_sans):
+    with zipfile.ZipFile(file_path_without_sans, 'r') as archive:
+        return archive.read(archive.namelist()[0])
+
+
 @pytest.fixture(scope='function')
 def file(load_file):
     return BytesIO(load_file)
+
+
+@pytest.fixture(scope='function')
+def file_without_sans(load_file_without_sans):
+    return BytesIO(load_file_without_sans)
 
 
 def assert_index_coord(
@@ -53,6 +70,21 @@ def test_load_geant4_csv_loads_expected_structure(file):
         'mantle',
         'high_resolution',
         'sans',
+        'endcap_forward',
+        'endcap_backward',
+    }
+
+
+def test_load_geant4_csv_loads_expected_structure_without_sans(file_without_sans):
+    loaded = load_geant4_csv(file_without_sans)
+    assert isinstance(loaded, sc.DataGroup)
+    assert loaded.keys() == {'instrument'}
+
+    instrument = loaded['instrument']
+    assert isinstance(instrument, sc.DataGroup)
+    assert instrument.keys() == {
+        'mantle',
+        'high_resolution',
         'endcap_forward',
         'endcap_backward',
     }

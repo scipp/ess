@@ -19,6 +19,7 @@ def _make_pooch():
         version=_version,
         registry={
             'data_dream_with_sectors.csv.zip': 'md5:52ae6eb3705e5e54306a001bc0ae85d8',
+            'data_dream0_new_hkl_Si_pwd.csv.zip': 'md5:d0ae518dc1b943bb817b3d18c354ed01',  # noqa: E501
             'DREAM_nexus_sorted-2023-12-07.nxs': 'md5:22824e14f6eb950d24a720b2a0e2cb66',
             'DREAM_simple_pwd_workflow/data_dream_diamond_vana_container_sample_union.csv.zip': 'md5:33302d0506b36aab74003b8aed4664cc',  # noqa: E501
             'DREAM_simple_pwd_workflow/data_dream_diamond_vana_container_sample_union_run2.csv.zip': 'md5:c7758682f978d162dcb91e47c79abb83',  # noqa: E501
