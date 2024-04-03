@@ -1,0 +1,711 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Loki &#8212; ess  documentation</title>
+    
+  <link href="../../_static/css/theme.css" rel="stylesheet">
+  <link href="../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    
+      
+
+    
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-book-theme.css?digest=84ace793992934648b4de8eed757e5a2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
+    
+  <link rel="preload" as="script" href="../../_static/js/index.be7d3bbb2ef33a8344ce.js">
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/sphinx-book-theme.9d8b4a8b9bb19db25eeaddc40d639ba2.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="SANS2D: I(Q) workflow for a single run (sample)" href="sans2d_to_I_of_Q.html" />
+    <link rel="prev" title="ess.amor.load.load" href="../../generated/ess.amor.load.load.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="None">
+    
+
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<!-- Checkboxes to toggle the left sidebar -->
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle navigation sidebar">
+<label class="overlay" for="__navigation">
+    <div class="visually-hidden">Toggle navigation sidebar</div>
+</label>
+<div class="col-12 col-md-3 bd-sidebar site-navigation " id="site-navigation">
+    
+        <div class="navbar-brand-box">
+    <a class="navbar-brand text-wrap" href="../../index.html">
+      
+        <!-- `logo` is deprecated in Sphinx 4.0, so remove this when we stop supporting 3 -->
+        
+      
+      
+      <img src="../../_static/logo.png" class="logo" alt="logo">
+      
+      
+    </a>
+</div><form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item active">
+        <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Getting started
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../getting-started/installation.html">
+   Installation
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Instruments
+ </span>
+</p>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../amor/amor.html">
+   Amor
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <label for="toctree-checkbox-1">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../amor/amor_reduction.html">
+     Data reduction for Amor
+    </a>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../amor/reference.html">
+     Reference
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/>
+    <label for="toctree-checkbox-2">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../../generated/ess.amor.beamline.html">
+       ess.amor.beamline
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/>
+      <label for="toctree-checkbox-3">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.amor.beamline.instrument_view_components.html">
+         ess.amor.beamline.instrument_view_components
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.amor.beamline.make_beamline.html">
+         ess.amor.beamline.make_beamline
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../../generated/ess.amor.conversions.html">
+       ess.amor.conversions
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/>
+      <label for="toctree-checkbox-4">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.amor.conversions.incident_beam.html">
+         ess.amor.conversions.incident_beam
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.amor.conversions.specular_reflection.html">
+         ess.amor.conversions.specular_reflection
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../../generated/ess.amor.tools.html">
+       ess.amor.tools
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/>
+      <label for="toctree-checkbox-5">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.amor.tools.linlogspace.html">
+         ess.amor.tools.linlogspace
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.amor.instrument_view.instrument_view.html">
+       ess.amor.instrument_view.instrument_view
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.amor.load.load.html">
+       ess.amor.load.load
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 current active has-children">
+  <a class="current reference internal" href="#">
+   Loki
+  </a>
+  <input checked="" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/>
+  <label for="toctree-checkbox-6">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="sans2d_to_I_of_Q.html">
+     SANS2D: I(Q) workflow for a single run (sample)
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="sans2d_reduction.html">
+     SANS2D: I(Q) for sample and background
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Techniques
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../../techniques/reflectometry/reflectometry.html">
+   Reflectometry
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/>
+  <label for="toctree-checkbox-7">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../../techniques/reflectometry/reference.html">
+     Reference
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/>
+    <label for="toctree-checkbox-8">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.reflectometry.conversions.specular_reflection.html">
+       ess.reflectometry.conversions.specular_reflection
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.reflectometry.corrections.illumination_correction.html">
+       ess.reflectometry.corrections.illumination_correction
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.reflectometry.corrections.illumination_of_sample.html">
+       ess.reflectometry.corrections.illumination_of_sample
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.reflectometry.resolution.detector_resolution.html">
+       ess.reflectometry.resolution.detector_resolution
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.reflectometry.resolution.z_offset.html">
+       ess.reflectometry.resolution.z_offset
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../../techniques/sans/sans.html">
+   SANS
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" type="checkbox"/>
+  <label for="toctree-checkbox-9">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../../techniques/sans/reference.html">
+     Reference
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" type="checkbox"/>
+    <label for="toctree-checkbox-10">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../../techniques/sans/i_of_q.html">
+       I(Q) reduction workflow
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" type="checkbox"/>
+      <label for="toctree-checkbox-11">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.sans.i_of_q.to_I_of_Q.html">
+         ess.sans.i_of_q.to_I_of_Q
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.sans.i_of_q.make_coordinate_transform_graphs.html">
+         ess.sans.i_of_q.make_coordinate_transform_graphs
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.sans.i_of_q.convert_to_wavelength.html">
+         ess.sans.i_of_q.convert_to_wavelength
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.sans.i_of_q.denoise_and_rebin_monitors.html">
+         ess.sans.i_of_q.denoise_and_rebin_monitors
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.sans.i_of_q.resample_direct_beam.html">
+         ess.sans.i_of_q.resample_direct_beam
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.sans.i_of_q.convert_to_q_and_merge_spectra.html">
+         ess.sans.i_of_q.convert_to_q_and_merge_spectra
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.sans.conversions.sans_elastic.html">
+       ess.sans.conversions.sans_elastic
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.sans.conversions.sans_monitor.html">
+       ess.sans.conversions.sans_monitor
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.sans.normalization.solid_angle_of_rectangular_pixels.html">
+       ess.sans.normalization.solid_angle_of_rectangular_pixels
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.sans.normalization.transmission_fraction.html">
+       ess.sans.normalization.transmission_fraction
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.sans.normalization.compute_denominator.html">
+       ess.sans.normalization.compute_denominator
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.sans.normalization.normalize.html">
+       ess.sans.normalization.normalize
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.sans.common.gravity_vector.html">
+       ess.sans.common.gravity_vector
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../../techniques/wfm/wfm.html">
+   Wavelength frame multiplication
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" type="checkbox"/>
+  <label for="toctree-checkbox-12">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../../techniques/wfm/introduction-to-wfm.html">
+     Introduction to Wavelength Frame Multiplication
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../../techniques/wfm/reducing-wfm-data.html">
+     Reducing WFM data
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Utilities
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../../utilities/utilities.html">
+   Modules
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" type="checkbox"/>
+  <label for="toctree-checkbox-13">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../../generated/modules/ess.logging.html">
+     ess.logging
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" type="checkbox"/>
+    <label for="toctree-checkbox-14">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/modules/ess.logging.configure.html">
+       ess.logging.configure
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/modules/ess.logging.configure_workflow.html">
+       ess.logging.configure_workflow
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/modules/ess.logging.default_loggers_to_configure.html">
+       ess.logging.default_loggers_to_configure
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/modules/ess.logging.get_logger.html">
+       ess.logging.get_logger
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/modules/ess.logging.greet.html">
+       ess.logging.greet
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/modules/ess.logging.log_call.html">
+       ess.logging.log_call
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/modules/ess.logging.Formatter.html">
+       ess.logging.Formatter
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  About
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../about/release-notes.html">
+   Release Notes
+  </a>
+ </li>
+</ul>
+
+    </div>
+</nav> <!-- To handle the deprecated key -->
+
+<div class="navbar_extra_footer">
+  Theme by the <a href="https://ebp.jupyterbook.org">Executable Book Project</a>
+</div>
+
+</div>
+
+
+          
+
+
+          
+<!-- This is an invisible pixel that we watch to see if we've scrolled. -->
+<div class="sbt-scroll-pixel-helper"></div>
+<main class="col py-md-3 pl-md-4 bd-content overflow-auto" role="main">
+    
+    <div class="topbar container-xl fixed-top">
+    <div class="topbar-contents row">
+        <div class="col-12 col-md-3 bd-topbar-whitespace site-navigation show"></div>
+        <div class="col pl-md-4 topbar-main">
+            <div class="topbar-left">
+                
+                <label class="nav-toggle-button" for="__navigation">
+                    <div class="visually-hidden">Toggle navigation</div>
+                    <i class="fas fa-bars"></i>
+                </label>
+                
+            </div>
+            
+<!-- Minimally modifed from original theme to specify "download" attribute in <a> so ipynb is downloaded instead of opened by browser. -->
+<div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn" aria-label="Download this page"><i
+            class="fas fa-download"></i></button>
+
+    <div class="dropdown-buttons">
+        <!-- ipynb file if we had a myst markdown file -->
+        
+        <!-- Download raw file -->
+        <a class="dropdown-buttons" href="../../_sources/instruments/loki/loki.rst.txt" download><button type="button"
+                class="btn btn-secondary topbarbtn" title="Download source file" data-toggle="tooltip"
+                data-placement="left">.rst</button></a>
+        <!-- Download PDF via print -->
+        <button type="button" id="download-print" class="btn btn-secondary topbarbtn" title="Print to PDF"
+            onClick="window.print()" data-toggle="tooltip" data-placement="left">.pdf</button>
+    </div>
+</div>
+
+            <!-- Source interaction buttons -->
+
+<div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn"
+        aria-label="Connect with source repository"><i class="fab fa-github"></i></button>
+    <div class="dropdown-buttons sourcebuttons">
+        <a class="repository-button"
+            href="https://github.com/scipp/scipp"><button type="button" class="btn btn-secondary topbarbtn"
+                data-toggle="tooltip" data-placement="left" title="Source repository"><i
+                    class="fab fa-github"></i>repository</button></a>
+        <a class="issues-button"
+            href="https://github.com/scipp/scipp/issues/new?title=Issue%20on%20page%20%2Finstruments/loki/loki.html&body=Your%20issue%20content%20here."><button
+                type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip" data-placement="left"
+                title="Open an issue"><i class="fas fa-lightbulb"></i>open issue</button></a>
+        <a class="edit-button" href="https://github.com/scipp/scipp/edit/main/docs/instruments/loki/loki.rst"><button
+                type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip" data-placement="left"
+                title="Edit this page"><i class="fas fa-pencil-alt"></i>suggest edit</button></a>
+    </div>
+</div>
+
+            <!-- Full screen (wrap in <a> to have style consistency -->
+
+<a class="full-screen-button"><button type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip"
+        data-placement="bottom" onclick="toggleFullScreen()" aria-label="Fullscreen mode"
+        title="Fullscreen mode"><i
+            class="fas fa-expand"></i></button></a>
+
+            <!-- Here, we override the default launchbuttons.html by replacing it with our
+     version selection menu, since we do not intend to use the launchbuttons.
+     This allows us to add the version selection menu in some unused white space
+     that is always visible. -->
+<div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn" style="font-size: 1em;padding-top:0.33rem;">Version
+      <i class="fa fa-caret-down"></i>
+    </button>
+
+    <div class="dropdown-buttons" style="transform:translate(10%);">
+        <a class="dropdown-buttons"
+            href="https://scipp.github.io/ess"><button type="button"
+                class="btn btn-secondary topbarbtn">latest</button></a>
+        <a class="dropdown-buttons"
+            href="https://scipp.github.io/ess/release/0.2.0"><button type="button"
+                class="btn btn-secondary topbarbtn">v0.2</button></a>
+        <a class="dropdown-buttons"
+            href="https://scipp.github.io/ess/release/0.1.0"><button type="button"
+                class="btn btn-secondary topbarbtn">v0.1</button></a>
+    </div>
+</div>
+<div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn" style="font-size: 1em;padding-top:0.33rem;">Related projects
+      <i class="fa fa-caret-down"></i>
+    </button>
+
+    <div class="dropdown-buttons" style="transform:translate(10%);">
+        <a class="dropdown-buttons"
+            href="https://scipp.github.io"><button type="button"
+                class="btn btn-secondary topbarbtn">scipp</button></a>
+        <a class="dropdown-buttons"
+            href="https://scipp.github.io/scippneutron"><button type="button"
+                class="btn btn-secondary topbarbtn">scippneutron</button></a>
+        <a class="dropdown-buttons"
+            href="https://scipp.github.io/ess"><button type="button"
+                class="btn btn-secondary topbarbtn">ess</button></a>
+    </div>
+</div>
+        </div>
+
+        <!-- Table of contents -->
+        <div class="d-none d-md-block col-md-2 bd-toc show noprint">
+            
+        </div>
+    </div>
+</div>
+    <div id="main-content" class="row">
+        <div class="col-12 col-md-9 pl-md-3 pr-md-0">
+            <!-- Table of contents that is only displayed when printing the page -->
+            <div id="jb-print-docs-body" class="onlyprint">
+                <h1>Loki</h1>
+                <!-- Table of contents -->
+                <div id="print-main-content">
+                    <div id="jb-print-toc">
+                        
+                    </div>
+                </div>
+            </div>
+            
+              <div>
+                
+  <div class="section" id="loki">
+<h1>Loki<a class="headerlink" href="#loki" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="sans2d_to_I_of_Q.html">SANS2D: I(Q) workflow for a single run (sample)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sans2d_to_I_of_Q.html#Define-reduction-parameters">Define reduction parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sans2d_to_I_of_Q.html#Loading-data-files">Loading data files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sans2d_to_I_of_Q.html#Extract-monitors">Extract monitors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sans2d_to_I_of_Q.html#Apply-offsets-to-pixel-positions">Apply offsets to pixel positions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sans2d_to_I_of_Q.html#Masking">Masking</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sans2d_to_I_of_Q.html#Mask-bad-pixels">Mask bad pixels</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sans2d_to_I_of_Q.html#Mask-Bragg-peaks-in-time-of-flight">Mask Bragg peaks in time-of-flight</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sans2d_to_I_of_Q.html#Coordinate-transformation-graph">Coordinate transformation graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sans2d_to_I_of_Q.html#Convert-the-data-to-wavelength">Convert the data to wavelength</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sans2d_to_I_of_Q.html#Compute-normalization-term">Compute normalization term</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sans2d_to_I_of_Q.html#Transmission-fraction">Transmission fraction</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sans2d_to_I_of_Q.html#Remove-background-noise-and-rebin-monitors">Remove background noise and rebin monitors</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sans2d_to_I_of_Q.html#Direct-beam-function">Direct beam function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sans2d_to_I_of_Q.html#Solid-Angle">Solid Angle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sans2d_to_I_of_Q.html#The-denominator-term">The denominator term</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sans2d_to_I_of_Q.html#Convert-to-Q">Convert to Q</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sans2d_to_I_of_Q.html#Convert-denominator-to-Q">Convert denominator to Q</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sans2d_to_I_of_Q.html#Normalize-the-sample">Normalize the sample</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sans2d_to_I_of_Q.html#References">References</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sans2d_reduction.html">SANS2D: I(Q) for sample and background</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sans2d_reduction.html#Define-reduction-workflow-parameters">Define reduction workflow parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sans2d_reduction.html#Loading-data-files">Loading data files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sans2d_reduction.html#Apply-corrections-to-pixel-positions">Apply corrections to pixel positions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sans2d_reduction.html#Masking">Masking</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sans2d_reduction.html#Mask-bad-pixels">Mask bad pixels</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sans2d_reduction.html#Mask-Bragg-peaks-in-time-of-flight">Mask Bragg peaks in time-of-flight</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sans2d_reduction.html#Use-to_I_of_Q-workflow">Use to_I_of_Q workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sans2d_reduction.html#Wavelength-bands">Wavelength bands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sans2d_reduction.html#References">References</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+              </div>
+              
+            
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'> 
+    <a class='left-prev' id="prev-link" href="../../generated/ess.amor.load.load.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">ess.amor.load.load</p>
+        </div>
+    </a>
+    <a class='right-next' id="next-link" href="sans2d_to_I_of_Q.html" title="next page">
+    <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">SANS2D: I(Q) workflow for a single run (sample)</p>
+    </div>
+    <i class="fas fa-angle-right"></i>
+    </a>
+</div>
+            
+        </div>
+    </div>
+    <footer class="footer">
+  <p>
+    
+        &copy; Copyright scipp contributors.<br/>
+  </p>
+</footer>
+</main>
+
+
+      </div>
+    </div>
+  
+  <script src="../../_static/js/index.be7d3bbb2ef33a8344ce.js"></script>
+
+  </body>
+</html>

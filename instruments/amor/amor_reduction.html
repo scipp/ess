@@ -1,0 +1,2287 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Divergent data reduction for Amor &#8212; ess  documentation</title>
+    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" href="../../_static/styles/sphinx-book-theme.css?digest=5115cc725059bd94278eecd172e13a965bf8f5a9" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css" />
+    
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?digest=9c920249402e914e316237a7dbc6769907cce411"></script>
+    <script src="../../_static/design-tabs.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Reference" href="reference.html" />
+    <link rel="prev" title="Amor" href="amor.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="None">
+    
+
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
+<!-- Checkboxes to toggle the left sidebar -->
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle navigation sidebar">
+<label class="overlay overlay-navbar" for="__navigation">
+    <div class="visually-hidden">Toggle navigation sidebar</div>
+</label>
+<!-- Checkboxes to toggle the in-page toc -->
+<input type="checkbox" class="sidebar-toggle" name="__page-toc" id="__page-toc" aria-label="Toggle in-page Table of Contents">
+<label class="overlay overlay-pagetoc" for="__page-toc">
+    <div class="visually-hidden">Toggle in-page Table of Contents</div>
+</label>
+<!-- Headers at the top -->
+<div class="announcement header-item noprint"></div>
+<div class="header header-item noprint"></div>
+
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<!-- Sidebar -->
+<div class="bd-sidebar noprint" id="site-navigation">
+    <div class="bd-sidebar__content">
+        <div class="bd-sidebar__top"><div class="navbar-brand-box">
+    <a class="navbar-brand text-wrap" href="../../index.html">
+      
+        <!-- `logo` is deprecated in Sphinx 4.0, so remove this when we stop supporting 3 -->
+        
+      
+      
+      <img src="../../_static/logo.svg" class="logo" alt="logo">
+      
+      
+    </a>
+</div><form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item active">
+        <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Getting started
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../getting-started/installation.html">
+   Installation
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Instruments
+ </span>
+</p>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1 current active has-children">
+  <a class="reference internal" href="amor.html">
+   Amor
+  </a>
+  <input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <label for="toctree-checkbox-1">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul class="current">
+   <li class="toctree-l2 current active">
+    <a class="current reference internal" href="#">
+     Divergent data reduction for Amor
+    </a>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="reference.html">
+     Reference
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/>
+    <label for="toctree-checkbox-2">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../../generated/ess.amor.beamline.html">
+       ess.amor.beamline
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/>
+      <label for="toctree-checkbox-3">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.amor.beamline.instrument_view_components.html">
+         ess.amor.beamline.instrument_view_components
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.amor.beamline.make_beamline.html">
+         ess.amor.beamline.make_beamline
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../../generated/ess.amor.calibrations.html">
+       ess.amor.calibrations
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/>
+      <label for="toctree-checkbox-4">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.amor.calibrations.calibration_factor.html">
+         ess.amor.calibrations.calibration_factor
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.amor.calibrations.supermirror_calibration.html">
+         ess.amor.calibrations.supermirror_calibration
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../../generated/ess.amor.conversions.html">
+       ess.amor.conversions
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/>
+      <label for="toctree-checkbox-5">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.amor.conversions.incident_beam.html">
+         ess.amor.conversions.incident_beam
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.amor.conversions.specular_reflection.html">
+         ess.amor.conversions.specular_reflection
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../../generated/ess.amor.normalize.html">
+       ess.amor.normalize
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/>
+      <label for="toctree-checkbox-6">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.amor.normalize.normalize_by_supermirror.html">
+         ess.amor.normalize.normalize_by_supermirror
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../../generated/ess.amor.orso.html">
+       ess.amor.orso
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/>
+      <label for="toctree-checkbox-7">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.amor.orso.make_orso.html">
+         ess.amor.orso.make_orso
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../../generated/ess.amor.resolution.html">
+       ess.amor.resolution
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/>
+      <label for="toctree-checkbox-8">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.amor.resolution.angular_resolution.html">
+         ess.amor.resolution.angular_resolution
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.amor.resolution.sample_size_resolution.html">
+         ess.amor.resolution.sample_size_resolution
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.amor.resolution.sigma_Q.html">
+         ess.amor.resolution.sigma_Q
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.amor.resolution.wavelength_resolution.html">
+         ess.amor.resolution.wavelength_resolution
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../../generated/ess.amor.tools.html">
+       ess.amor.tools
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" type="checkbox"/>
+      <label for="toctree-checkbox-9">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.amor.tools.fwhm_to_std.html">
+         ess.amor.tools.fwhm_to_std
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.amor.tools.linlogspace.html">
+         ess.amor.tools.linlogspace
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.amor.tools.std_to_fwhm.html">
+         ess.amor.tools.std_to_fwhm
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.amor.instrument_view.instrument_view.html">
+       ess.amor.instrument_view.instrument_view
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.amor.load.load.html">
+       ess.amor.load.load
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../dream/dream.html">
+   DREAM
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" type="checkbox"/>
+  <label for="toctree-checkbox-10">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../dream/dream-instrument-view.html">
+     DREAM instrument view
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../loki/loki.html">
+   Loki
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" type="checkbox"/>
+  <label for="toctree-checkbox-11">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../loki/sans2d_to_I_of_Q.html">
+     SANS2D: I(Q) workflow for a single run (sample)
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../loki/sans2d_reduction.html">
+     SANS2D: I(Q) for sample and background
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../external/external.html">
+   External Instruments
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" type="checkbox"/>
+  <label for="toctree-checkbox-12">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../external/offspec/offspec_reduction.html">
+     Collimated data reduction for OFFSPEC
+    </a>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../external/powgen/powgen.html">
+     POWGEN
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" type="checkbox"/>
+    <label for="toctree-checkbox-13">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../external/powgen/powgen_reduction.html">
+       Data reduction for POWGEN
+      </a>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../external/powgen/reference.html">
+       Reference
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" type="checkbox"/>
+      <label for="toctree-checkbox-14">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.external.powgen.beamline.html">
+         ess.external.powgen.beamline
+        </a>
+       </li>
+      </ul>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Techniques
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../../techniques/diffraction/diffraction.html">
+   Diffraction
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" type="checkbox"/>
+  <label for="toctree-checkbox-15">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../../techniques/diffraction/reference.html">
+     Reference
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" type="checkbox"/>
+    <label for="toctree-checkbox-16">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.diffraction.normalize_by_monitor.html">
+       ess.diffraction.normalize_by_monitor
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.diffraction.normalize_by_vanadium.html">
+       ess.diffraction.normalize_by_vanadium
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.diffraction.lowpass.html">
+       ess.diffraction.lowpass
+      </a>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../../techniques/diffraction/powder.html">
+       Powder
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" type="checkbox"/>
+      <label for="toctree-checkbox-17">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.diffraction.powder.conversions.dspacing_from_diff_calibration.html">
+         ess.diffraction.powder.conversions.dspacing_from_diff_calibration
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.diffraction.powder.to_dspacing_with_calibration.html">
+         ess.diffraction.powder.to_dspacing_with_calibration
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.diffraction.powder.merge_calibration.html">
+         ess.diffraction.powder.merge_calibration
+        </a>
+       </li>
+      </ul>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../../techniques/reflectometry/reflectometry.html">
+   Reflectometry
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" type="checkbox"/>
+  <label for="toctree-checkbox-18">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../../techniques/reflectometry/reference.html">
+     Reference
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" type="checkbox"/>
+    <label for="toctree-checkbox-19">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.reflectometry.conversions.specular_reflection.html">
+       ess.reflectometry.conversions.specular_reflection
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.reflectometry.corrections.footprint_correction.html">
+       ess.reflectometry.corrections.footprint_correction
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.reflectometry.corrections.normalize_by_counts.html">
+       ess.reflectometry.corrections.normalize_by_counts
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.reflectometry.corrections.beam_on_sample.html">
+       ess.reflectometry.corrections.beam_on_sample
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.reflectometry.io.save_ort.html">
+       ess.reflectometry.io.save_ort
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../../techniques/sans/sans.html">
+   SANS
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" type="checkbox"/>
+  <label for="toctree-checkbox-20">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../../techniques/sans/sans-beam-center-finder.html">
+     Beam center finder
+    </a>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../../techniques/sans/reference.html">
+     Reference
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" type="checkbox"/>
+    <label for="toctree-checkbox-21">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../../techniques/sans/i_of_q.html">
+       I(Q) reduction workflow
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" type="checkbox"/>
+      <label for="toctree-checkbox-22">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.sans.i_of_q.to_I_of_Q.html">
+         ess.sans.i_of_q.to_I_of_Q
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.sans.i_of_q.convert_to_q_and_merge_spectra.html">
+         ess.sans.i_of_q.convert_to_q_and_merge_spectra
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.sans.i_of_q.preprocess_monitor_data.html">
+         ess.sans.i_of_q.preprocess_monitor_data
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../generated/ess.sans.i_of_q.resample_direct_beam.html">
+         ess.sans.i_of_q.resample_direct_beam
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.sans.beam_center_finder.beam_center.html">
+       ess.sans.beam_center_finder.beam_center
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.sans.beam_center_finder.center_of_mass.html">
+       ess.sans.beam_center_finder.center_of_mass
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.sans.beam_center_finder.cost.html">
+       ess.sans.beam_center_finder.cost
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.sans.beam_center_finder.iofq_in_quadrants.html">
+       ess.sans.beam_center_finder.iofq_in_quadrants
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.sans.beam_center_finder.minimize.html">
+       ess.sans.beam_center_finder.minimize
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.sans.conversions.sans_elastic.html">
+       ess.sans.conversions.sans_elastic
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.sans.conversions.sans_monitor.html">
+       ess.sans.conversions.sans_monitor
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.sans.normalization.solid_angle_of_rectangular_pixels.html">
+       ess.sans.normalization.solid_angle_of_rectangular_pixels
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.sans.normalization.transmission_fraction.html">
+       ess.sans.normalization.transmission_fraction
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.sans.normalization.iofq_denominator.html">
+       ess.sans.normalization.iofq_denominator
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.sans.normalization.normalize.html">
+       ess.sans.normalization.normalize
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.sans.common.gravity_vector.html">
+       ess.sans.common.gravity_vector
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/ess.sans.common.mask_range.html">
+       ess.sans.common.mask_range
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../../techniques/wfm/wfm.html">
+   Wavelength frame multiplication
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" type="checkbox"/>
+  <label for="toctree-checkbox-23">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../../techniques/wfm/introduction-to-wfm.html">
+     Introduction to Wavelength Frame Multiplication
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../../techniques/wfm/reducing-wfm-data.html">
+     Reducing WFM data
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Utilities
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../../utilities/utilities.html">
+   Modules
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" type="checkbox"/>
+  <label for="toctree-checkbox-24">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../../generated/modules/ess.logging.html">
+     ess.logging
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" type="checkbox"/>
+    <label for="toctree-checkbox-25">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/modules/ess.logging.configure.html">
+       ess.logging.configure
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/modules/ess.logging.configure_workflow.html">
+       ess.logging.configure_workflow
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/modules/ess.logging.default_loggers_to_configure.html">
+       ess.logging.default_loggers_to_configure
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/modules/ess.logging.get_logger.html">
+       ess.logging.get_logger
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/modules/ess.logging.greet.html">
+       ess.logging.greet
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/modules/ess.logging.log_call.html">
+       ess.logging.log_call
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/modules/ess.logging.Formatter.html">
+       ess.logging.Formatter
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../../generated/modules/ess.masking.html">
+     ess.masking
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" type="checkbox"/>
+    <label for="toctree-checkbox-26">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/modules/ess.masking.save_detector_masks.html">
+       ess.masking.save_detector_masks
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../../generated/modules/ess.uncertainty.html">
+     ess.uncertainty
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-27" name="toctree-checkbox-27" type="checkbox"/>
+    <label for="toctree-checkbox-27">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../generated/modules/ess.uncertainty.variance_normalized_signal_over_monitor.html">
+       ess.uncertainty.variance_normalized_signal_over_monitor
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Developer documentation
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../developer/style-guide.html">
+   Style guide
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../developer/getting-started.html">
+   Getting Started
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  About
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../about/release-notes.html">
+   Release Notes
+  </a>
+ </li>
+</ul>
+
+    </div>
+</nav></div>
+        <div class="bd-sidebar__bottom">
+             <!-- To handle the deprecated key -->
+            
+            <div class="navbar_extra_footer">
+            Theme by the <a href="https://ebp.jupyterbook.org">Executable Book Project</a>
+            </div>
+            
+        </div>
+    </div>
+    <div id="rtd-footer-container"></div>
+</div>
+
+
+          
+
+
+          
+<!-- A tiny helper pixel to detect if we've scrolled -->
+<div class="sbt-scroll-pixel-helper"></div>
+<!-- Main content -->
+<div class="col py-0 content-container">
+    
+    <div class="header-article row sticky-top noprint">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="col py-1 d-flex header-article-main">
+    <div class="header-article__left">
+        
+        <label for="__navigation"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="right"
+title="Toggle navigation"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-bars"></i>
+  </span>
+
+</label>
+
+        
+    </div>
+    <div class="header-article__right">
+<div class="menu-dropdown">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="None">
+<span class="headerbtn__text-container">Related projects</span>
+<i class="fa fa-caret-down"></i>
+  </button>
+<div class="menu-dropdown__content" style="transform:translateX(0%)">
+    <ul>
+      <li>
+        <a href="https://scipp.github.io"
+   class="headerbtn"
+   
+>
+  
+
+<span class="headerbtn__text-container">scipp</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://scipp.github.io/plopp"
+   class="headerbtn"
+   
+>
+  
+
+<span class="headerbtn__text-container">plopp</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://scipp.github.io/scippnexus"
+   class="headerbtn"
+   
+>
+  
+
+<span class="headerbtn__text-container">scippnexus</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://scipp.github.io/scippneutron"
+   class="headerbtn"
+   
+>
+  
+
+<span class="headerbtn__text-container">scippneutron</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://scipp.github.io/ess"
+   class="headerbtn"
+   
+>
+  
+
+<span class="headerbtn__text-container">ess</span>
+</a>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+<div class="menu-dropdown">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="None">
+<span class="headerbtn__text-container">24.1.1.dev5+g8409fb3 (latest)</span>
+<i class="fa fa-caret-down"></i>
+  </button>
+<div class="menu-dropdown__content" style="transform:translateX(0%)">
+    <ul>
+      <li>
+        <a href="https://scipp.github.io/ess"
+   class="headerbtn"
+   
+>
+  
+
+<span class="headerbtn__text-container">24.1 (latest)</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://scipp.github.io/ess/release/23.11"
+   class="headerbtn"
+   
+>
+  
+
+<span class="headerbtn__text-container">23.11</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://scipp.github.io/ess/release/23.10"
+   class="headerbtn"
+   
+>
+  
+
+<span class="headerbtn__text-container">23.10</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://scipp.github.io/ess/release/23.4"
+   class="headerbtn"
+   
+>
+  
+
+<span class="headerbtn__text-container">23.4</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://scipp.github.io/ess/release/23.1"
+   class="headerbtn"
+   
+>
+  
+
+<span class="headerbtn__text-container">23.1</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://scipp.github.io/ess/release/0.9"
+   class="headerbtn"
+   
+>
+  
+
+<span class="headerbtn__text-container">0.9</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://scipp.github.io/ess/release/0.8"
+   class="headerbtn"
+   
+>
+  
+
+<span class="headerbtn__text-container">0.8</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://scipp.github.io/ess/release/0.7"
+   class="headerbtn"
+   
+>
+  
+
+<span class="headerbtn__text-container">0.7</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://scipp.github.io/ess/release/0.6"
+   class="headerbtn"
+   
+>
+  
+
+<span class="headerbtn__text-container">0.6</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://scipp.github.io/ess/release/0.5"
+   class="headerbtn"
+   
+>
+  
+
+<span class="headerbtn__text-container">0.5</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://scipp.github.io/ess/release/0.4"
+   class="headerbtn"
+   
+>
+  
+
+<span class="headerbtn__text-container">0.4</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://scipp.github.io/ess/release/0.3"
+   class="headerbtn"
+   
+>
+  
+
+<span class="headerbtn__text-container">0.3</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://scipp.github.io/ess/release/0.2"
+   class="headerbtn"
+   
+>
+  
+
+<span class="headerbtn__text-container">0.2</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://scipp.github.io/ess/release/0.1"
+   class="headerbtn"
+   
+>
+  
+
+<span class="headerbtn__text-container">0.1</span>
+</a>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+<button onclick="toggleFullScreen()"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="bottom"
+title="Fullscreen mode"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+<div class="menu-dropdown menu-dropdown-repository-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Source repositories">
+
+<i class="fab fa-github"></i>
+  </button>
+<div class="menu-dropdown__content" >
+    <ul>
+      <li>
+        <a href="https://github.com/scipp/ess"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Source repository"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="headerbtn__text-container">repository</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://github.com/scipp/ess/issues/new?title=Issue%20on%20page%20%2Finstruments/amor/amor_reduction.html&body=Your%20issue%20content%20here."
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Open an issue"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="headerbtn__text-container">open issue</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://github.com/scipp/ess/edit/main/docs/instruments/amor/amor_reduction.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Edit this page"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="headerbtn__text-container">suggest edit</span>
+</a>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+<div class="menu-dropdown menu-dropdown-download-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Download this page">
+
+<i class="fas fa-download"></i>
+  </button>
+<div class="menu-dropdown__content" >
+    <ul>
+      <li>
+        <a href="../../_sources/instruments/amor/amor_reduction.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Download source file"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="headerbtn__text-container">.ipynb</span>
+</a>
+
+      </li>
+      
+      <li>
+        
+<button onclick="printPdf(this)"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="left"
+title="Print to PDF"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="headerbtn__text-container">.pdf</span>
+</button>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+<label for="__page-toc"
+  class="headerbtn headerbtn-page-toc"
+  
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-list"></i>
+  </span>
+
+</label>
+
+    </div>
+</div>
+
+<!-- Table of contents -->
+<div class="col-md-3 bd-toc show noprint">
+    <div class="tocsection onthispage pt-5 pb-3">
+        <i class="fas fa-list"></i> Contents
+    </div>
+    <nav id="bd-toc-nav" aria-label="Page">
+        <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#The-Amor-beamline">
+   The Amor beamline
+  </a>
+  <ul class="visible nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#The-supermirror-reference">
+     The supermirror reference
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Setting-the-experiment-metadata">
+   Setting the experiment metadata
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Loading-the-data">
+   Loading the data
+  </a>
+  <ul class="visible nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#Correcting-the-position-of-the-detector-pixels">
+     Correcting the position of the detector pixels
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Coordinate-transformation-graph">
+   Coordinate transformation graph
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Computing-the-wavelength">
+   Computing the wavelength
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Compute-the-angle-and-perform-the-footprint-correction">
+   Compute the angle and perform the footprint correction
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Resolution-function">
+   Resolution function
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Compute-the-Q-vector">
+   Compute the Q vector
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Calibration-of-the-super-mirror">
+   Calibration of the super-mirror
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Normalization-by-the-super-mirror">
+   Normalization by the super-mirror
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Writing-to-a-file">
+   Writing to a file
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Make-a-(\lambda,-\theta)-map">
+   Make a
+   <span class="math notranslate nohighlight">
+    \((\lambda, \theta)\)
+   </span>
+   map
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#References">
+   References
+  </a>
+ </li>
+</ul>
+
+    </nav>
+</div>
+    </div>
+    <div class="article row">
+        <div class="col pl-md-3 pl-lg-5 content-container">
+            <!-- Table of contents that is only displayed when printing the page -->
+            <div id="jb-print-docs-body" class="onlyprint">
+                <h1>Divergent data reduction for Amor</h1>
+                <!-- Table of contents -->
+                <div id="print-main-content">
+                    <div id="jb-print-toc">
+                        
+                        <div>
+                            <h2> Contents </h2>
+                        </div>
+                        <nav aria-label="Page">
+                            <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#The-Amor-beamline">
+   The Amor beamline
+  </a>
+  <ul class="visible nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#The-supermirror-reference">
+     The supermirror reference
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Setting-the-experiment-metadata">
+   Setting the experiment metadata
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Loading-the-data">
+   Loading the data
+  </a>
+  <ul class="visible nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#Correcting-the-position-of-the-detector-pixels">
+     Correcting the position of the detector pixels
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Coordinate-transformation-graph">
+   Coordinate transformation graph
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Computing-the-wavelength">
+   Computing the wavelength
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Compute-the-angle-and-perform-the-footprint-correction">
+   Compute the angle and perform the footprint correction
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Resolution-function">
+   Resolution function
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Compute-the-Q-vector">
+   Compute the Q vector
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Calibration-of-the-super-mirror">
+   Calibration of the super-mirror
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Normalization-by-the-super-mirror">
+   Normalization by the super-mirror
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Writing-to-a-file">
+   Writing to a file
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Make-a-(\lambda,-\theta)-map">
+   Make a
+   <span class="math notranslate nohighlight">
+    \((\lambda, \theta)\)
+   </span>
+   map
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#References">
+   References
+  </a>
+ </li>
+</ul>
+
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            <main id="main-content" role="main">
+                
+              <div>
+                
+  <section id="Divergent-data-reduction-for-Amor">
+<h1>Divergent data reduction for Amor<a class="headerlink" href="#Divergent-data-reduction-for-Amor" title="Permalink to this headline">#</a></h1>
+<p>In this notebook, we will look at the reduction workflow for reflectometry data collected from the PSI instrument <a class="reference external" href="https://www.psi.ch/en/sinq/amor">Amor</a> in <a class="reference external" href="https://www.psi.ch/en/sinq/amor/selene">divergent beam mode</a>. This is a living document and there are plans to update this as necessary with changes in the data reduction methodology and code.</p>
+<p>We will begin by importing the modules that are necessary for this notebook.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">scipp</span> <span class="k">as</span> <span class="nn">sc</span>
+<span class="kn">import</span> <span class="nn">plopp</span> <span class="k">as</span> <span class="nn">pp</span>
+<span class="kn">from</span> <span class="nn">ess</span> <span class="kn">import</span> <span class="n">amor</span><span class="p">,</span> <span class="n">reflectometry</span>
+<span class="kn">import</span> <span class="nn">ess</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">logger</span> <span class="o">=</span> <span class="n">ess</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">configure_workflow</span><span class="p">(</span><span class="s1">&#39;amor_reduction&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;amor.log&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "52ca6524a35346f4a4bfc16ef68160ce"}</script></div>
+</div>
+<section id="The-Amor-beamline">
+<h2>The Amor beamline<a class="headerlink" href="#The-Amor-beamline" title="Permalink to this headline">#</a></h2>
+<p>Before we can load the data, we need to define the parameters of the beamline and briefly discuss the measurement philosophy. We begin by defining the convention for naming angles in our set-up. We use the Fig. 5 from the paper by Stahn &amp; Glavic (2016), which is reproduced below (along with its caption).</p>
+<img alt="Figure5" src="https://ars.els-cdn.com/content/image/1-s2.0-S0168900216300250-gr5.jpg" />
+<p>The yellow area shows the incoming and reflected beam, both with the divergence <span class="math notranslate nohighlight">\(\Delta \theta\)</span>. The inclination of the sample relative to the center of the incoming beam (here identical to the instrument horizon) is called <span class="math notranslate nohighlight">\(\omega\)</span>, and the respective angle of the reflected beam relative to the same axis is <span class="math notranslate nohighlight">\(\gamma\)</span>.</p>
+<p>In general the detector center is located at <span class="math notranslate nohighlight">\(\gamma_{\rm D} = 2\omega\)</span>. These are instrument coordinates and should not be confused with the situation on the sample, where the take-off angle of an individual neutron trajectory is called <span class="math notranslate nohighlight">\(\theta\)</span>.</p>
+<section id="The-supermirror-reference">
+<h3>The supermirror reference<a class="headerlink" href="#The-supermirror-reference" title="Permalink to this headline">#</a></h3>
+<p>The normalization of data from the Amor instrument in divergent mode requires a reference measurement of a neutron supermirror. The supermirror is not a perfect supermirror, and is described with some properties, an <span class="math notranslate nohighlight">\(m\)</span>-value, a critical edge, and an <span class="math notranslate nohighlight">\(\alpha\)</span>, from which we can calibrate the supermirror. This reference measurement facilitates two normalizations on our data: - normalization of neutron count per unit time, assuming that the instrument flux is constant between the
+supermirror measurement and our sample measurement, - normalization over the detector pixels, to account for differences in pixel efficiency. It is important when this normalization is performed that the differences in count time and beam footprint are accounted for such that the measurements are commensurate.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">amor</span></code> module provides a helper function that generates the default beamline parameters. This function requires the sample rotation angle (<span class="math notranslate nohighlight">\(\omega\)</span>) as an input to fully define the beamline. In the future, all these beamline parameters (including the sample rotation) will be included in the file meta data. For now, we must define this manually, and the rotation is different for the sample and reference files.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sample_rotation</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.7989</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;deg&#39;</span><span class="p">)</span>
+<span class="n">sample_beamline</span> <span class="o">=</span> <span class="n">amor</span><span class="o">.</span><span class="n">make_beamline</span><span class="p">(</span><span class="n">sample_rotation</span><span class="o">=</span><span class="n">sample_rotation</span><span class="p">)</span>
+<span class="n">reference_rotation</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.8389</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;deg&#39;</span><span class="p">)</span>
+<span class="n">reference_beamline</span> <span class="o">=</span> <span class="n">amor</span><span class="o">.</span><span class="n">make_beamline</span><span class="p">(</span><span class="n">sample_rotation</span><span class="o">=</span><span class="n">reference_rotation</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="Setting-the-experiment-metadata">
+<h2>Setting the experiment metadata<a class="headerlink" href="#Setting-the-experiment-metadata" title="Permalink to this headline">#</a></h2>
+<p>We use the <a class="reference external" href="https://www.reflectometry.org/">Orso</a> reflectometry standard and its Python interface <a class="reference external" href="https://orsopy.readthedocs.io/en/latest/">orsopy</a> to record important metadata on the experiment. The orso object will also be used at the end of the reduction to write a standard-compliant results file.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">orsopy</span> <span class="kn">import</span> <span class="n">fileio</span>
+<span class="kn">from</span> <span class="nn">ess.amor.orso</span> <span class="kn">import</span> <span class="n">make_orso</span>
+
+<span class="n">owner</span> <span class="o">=</span> <span class="n">fileio</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">Person</span><span class="p">(</span>
+    <span class="s1">&#39;Jochen Stahn&#39;</span><span class="p">,</span> <span class="s1">&#39;Paul Scherrer Institut&#39;</span><span class="p">,</span> <span class="s1">&#39;jochen.stahn@psi.ch&#39;</span>
+<span class="p">)</span>
+<span class="n">sample</span> <span class="o">=</span> <span class="n">fileio</span><span class="o">.</span><span class="n">data_source</span><span class="o">.</span><span class="n">Sample</span><span class="p">(</span>
+    <span class="s1">&#39;Ni/Ti Multilayer&#39;</span><span class="p">,</span> <span class="s1">&#39;gas/solid&#39;</span><span class="p">,</span> <span class="s1">&#39;air | (Ni | Ti) * 5 | Si&#39;</span>
+<span class="p">)</span>
+<span class="n">creator</span> <span class="o">=</span> <span class="n">fileio</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">Person</span><span class="p">(</span>
+    <span class="s1">&#39;Andrew R. McCluskey&#39;</span><span class="p">,</span> <span class="s1">&#39;European Spallation Source&#39;</span><span class="p">,</span> <span class="s1">&#39;andrew.mccluskey@ess.eu&#39;</span>
+<span class="p">)</span>
+
+<span class="n">orso</span> <span class="o">=</span> <span class="n">make_orso</span><span class="p">(</span>
+    <span class="n">owner</span><span class="o">=</span><span class="n">owner</span><span class="p">,</span>
+    <span class="n">sample</span><span class="o">=</span><span class="n">sample</span><span class="p">,</span>
+    <span class="n">creator</span><span class="o">=</span><span class="n">creator</span><span class="p">,</span>
+    <span class="n">reduction_script</span><span class="o">=</span><span class="s1">&#39;https://github.com/scipp/ess/blob/main/docs/instruments/amor/amor_reduction.ipynb&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Loading-the-data">
+<h2>Loading the data<a class="headerlink" href="#Loading-the-data" title="Permalink to this headline">#</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">sample.nxs</span></code> file is the experimental data file of interest, while <code class="docutils literal notranslate"><span class="pre">reference.nxs</span></code> is the reference measurement of the neutron supermirror. The <code class="docutils literal notranslate"><span class="pre">amor.load</span></code> function can be used to load these files and perform some early preprocessing:</p>
+<ul class="simple">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">tof</span></code> values are converted from nanoseconds to microseconds.</p></li>
+<li><p>The raw data contains events coming from two pulses, and these get folded into a single <code class="docutils literal notranslate"><span class="pre">tof</span></code> range.</p></li>
+</ul>
+<p>We show and plot the resulting <code class="docutils literal notranslate"><span class="pre">scipp.DataArray</span></code> for just the <code class="docutils literal notranslate"><span class="pre">sample</span></code> below.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sample</span> <span class="o">=</span> <span class="n">amor</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+    <span class="n">amor</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="s2">&quot;sample.nxs&quot;</span><span class="p">),</span> <span class="n">orso</span><span class="o">=</span><span class="n">orso</span><span class="p">,</span> <span class="n">beamline</span><span class="o">=</span><span class="n">sample_beamline</span>
+<span class="p">)</span>
+<span class="n">reference</span> <span class="o">=</span> <span class="n">amor</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+    <span class="n">amor</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="s2">&quot;reference.nxs&quot;</span><span class="p">),</span> <span class="n">orso</span><span class="o">=</span><span class="n">orso</span><span class="p">,</span> <span class="n">beamline</span><span class="o">=</span><span class="n">reference_beamline</span>
+<span class="p">)</span>
+<span class="n">sample</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Downloading file &#39;sample.nxs&#39; from &#39;https://public.esss.dk/groups/scipp/ess/amor/1/sample.nxs&#39; to &#39;/home/runner/.cache/ess/amor/1&#39;.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Downloading file &#39;reference.nxs&#39; from &#39;https://public.esss.dk/groups/scipp/ess/amor/1/reference.nxs&#39; to &#39;/home/runner/.cache/ess/amor/1&#39;.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div><!-- Original source from -->
+<!-- https://github.com/jsignell/xarray/blob/1d960933ab252e0f79f7e050e6c9261d55568057/xarray/static/html/icons-svg-inline.html -->
+<svg style="position: absolute; width: 0; height: 0; overflow: hidden">
+<defs>
+<symbol id="icon-database" viewBox="0 0 32 32">
+<title>Show/Hide data repr</title>
+<path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
+<path d="M16 17c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+<path d="M16 26c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+</symbol>
+<symbol id="icon-file-text2" viewBox="0 0 32 32">
+<title>Show/Hide attributes</title>
+<path d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"></path>
+<path d="M23 26h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 22h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+</symbol>
+</defs>
+</svg><style id="scipp-style-sheet">.sc-root{--sc-background-color0:var(--jp-layout-color0,#fff);--sc-background-color1:var(--jp-layout-color1,#fcfcfc);--sc-background-color2:var(--jp-layout-color2,#efefef);--sc-inverse-background-color0:var(--jp-inverse-layout-color4,#111);--sc-font-color0:var(--jp-content-font-color0,#000);--sc-font-color1:var(--jp-content-font-color1,#555);--sc-font-color2:var(--jp-content-font-color2,#888);--sc-font-color3:var(--jp-content-font-color3,#ccc);--sc-table-data-color:#f6d028;--sc-table-coords-color:#c6e590;--sc-table-masks-color:#c8c8c8;--sc-table-attrs-color:#ff5555;--sc-table-header-font-color:#111111;}.sc-wrap{font-size:14px;min-width:300px;max-width:800px;}.sc-var-attrs .sc-wrap{padding-left:3em;}.sc-header{padding-top:6px;padding-bottom:6px;margin-bottom:4px;border-bottom:solid 1px #ddd;}.sc-header > div,.sc-header > ul{display:inline;margin-top:0;margin-bottom:0;}.sc-obj-type,.sc-array-name{margin-left:2px;margin-right:10px;}.sc-obj-type{color:var(--sc-font-color1);}.sc-underlying-size{color:var(--sc-font-color2);}.sc-sections,.reveal .sc-sections{padding-left:0 !important;display:grid;grid-template-columns:150px auto auto auto 1fr 20px 20px;}.sc-section-item{display:contents;}.sc-section-item input{display:none;}.sc-section-item input:enabled + label{cursor:pointer;color:var(--sc-font-color1);}.sc-section-item input:enabled + label:hover{color:var(--sc-font-color0);}.sc-section-summary{grid-column:1;font-weight:500;}.sc-section-summary > span{display:inline-block;padding-left:0.5em;}.sc-section-summary-in:disabled + label{color:var(--sc-font-color1);}.sc-section-summary-in + label:before{display:inline-block;content:'►';font-size:11px;width:15px;text-align:center;}.sc-section-summary-in:disabled + label:before{color:var(--sc-font-color3);}.sc-section-summary-in:checked + label:before{content:'▼';}.sc-section-summary-in:checked + label > span{display:none;}.sc-section-summary,.sc-section-inline-details{padding-top:4px;padding-bottom:4px;}.sc-section-inline-details{grid-column:2 / 6;}.sc-section-details{display:none;grid-column:1 / -1;margin-bottom:5px;}.sc-section-summary-in:checked ~ .sc-section-details{display:contents;}.sc-array-wrap{grid-column:1 / -1;display:grid;grid-template-columns:20px auto;}.sc-array-wrap > label{grid-column:1;vertical-align:top;}.sc-preview{color:var(--sc-font-color2);}.sc-array-preview,.sc-array-data{padding:0 5px !important;grid-column:2;}.sc-array-data,.sc-array-in:checked ~ .sc-array-preview{display:none;}.sc-array-in:checked ~ .sc-array-data,.sc-array-preview{display:inline-block;}.sc-dim-list{display:inline-block !important;list-style:none;padding:0 !important;margin:0;}.sc-dim-list li{display:inline-block;padding:0;margin:0!important;}.sc-dim-list:before{content:'(';}.sc-dim-list:after{content:')';}.sc-dim-list li:not(:last-child):after{content:',';padding-right:5px;}.sc-dim-list li span,.sc-standalone-var-name > span span,.sc-var-name > span span{padding:0 !important;}.sc-aligned{font-weight:bold;}.sc-var-list,.sc-var-item,.reveal .sc-var-list,.reveal .sc-var-item{display:contents;}.sc-var-item > div,.sc-var-item label,.sc-var-item > .sc-var-name span{background-color:var(--sc-background-color1);margin-bottom:0;}.sc-var-item > .sc-var-name:hover span{padding-right:5px;}.sc-var-list > li:nth-child(odd) > div,.sc-var-list > li:nth-child(odd) > label,.sc-var-list > li:nth-child(odd) > .sc-var-name span{background-color:var(--sc-background-color2);}.sc-var-name{grid-column:1;}.sc-var-dims{grid-column:2;}.sc-var-dtype{grid-column:3;text-align:right;color:var(--sc-font-color2);}.sc-var-unit{grid-column:4;text-align:left;color:var(--sc-font-color1);max-width:50pt;text-overflow:ellipsis;}.sc-value-preview{grid-column:5;}.sc-var-preview-variances{text-align:right;}.sc-sections .sc-section-item .sc-section-summary,.sc-sections .sc-section-item .sc-section-inline-details,.sc-section-item .sc-var-list .sc-var-item > div,.sc-section-item .sc-var-list .sc-var-item > label,.sc-section-details .sc-var-list .sc-var-item > div,.sc-section-details .sc-var-list .sc-var-item > label{margin-top:0;margin-bottom:0;}.sc-var-name,.sc-var-dims,.sc-var-dtype,.sc-var-unit,.sc-preview,.sc-attrs dt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:10px;}.sc-var-name:hover,.sc-var-dims:hover,.sc-var-dtype:hover,.sc-var-unit:hover,.sc-attrs dt:hover{overflow:visible;width:auto;z-index:1;}.sc-var-attrs{display:block;}.sc-var-data,.reveal .sc-var-data{display:none;}.sc-var-attrs,.sc-var-data{background-color:var(--sc-background-color0) !important;padding-bottom:5px !important;}.sc-var-attrs-in:checked ~ .sc-var-attrs{display:none;}.sc-var-data-in:checked ~ .sc-var-data{display:block;}.sc-var-data > table{float:right;}.sc-var-name span,.sc-var-data{padding-left:25px !important;}.sc-var-attrs,.sc-var-data{grid-column:1 / -1;}dl.sc-attrs{padding:0;margin:0;display:grid;grid-template-columns:125px auto;}.sc-attrs dt,dd{padding:0;margin:0;float:left;padding-right:10px;width:auto;}.sc-attrs dt{font-weight:normal;grid-column:1;}.sc-attrs dt:hover span{display:inline-block;padding-right:10px;}.sc-attrs dd{grid-column:2;white-space:pre-wrap;word-break:break-all;}.sc-icon-database,.sc-icon-file-text2{display:inline-block;vertical-align:middle;width:1em;height:1.5em !important;stroke-width:0;stroke:currentColor;fill:currentColor;}label.sc-hide-icon svg{opacity:0;}.sc-standalone-var-name{grid-column:1/3;}.sc-standalone-var-name span{padding-left:25px;padding-right:10px;}.sc-table{border-collapse:collapse;}.sc-title{font-weight:bold;font-size:1.5em;}.sc-subtitle{font-weight:normal;font-style:italic;text-align:left;font-size:1.2em;padding:1px;}.sc-table th,.sc-table td{border:1px solid var(--sc-inverse-background-color0);padding:0 5px 0 5px;}.sc-table th{text-align:center;}.sc-table tr{background-color:var(--sc-background-color1);text-align:right;}.sc-table tr:hover{background-color:var(--sc-background-color2);}.sc-table th.sc-data{background-color:var(--sc-table-data-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-coords{background-color:var(--sc-table-coords-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-masks{background-color:var(--sc-table-masks-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-attrs{background-color:var(--sc-table-attrs-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-subheader{background-color:var(--sc-background-color2);}.sc-table td.sc-padding{background-color:var(--sc-background-color1);border:0 solid var(--sc-background-color1);height:1.2em;}.sc-label{fill:var(--sc-font-color0,#444444);text-anchor:middle;}.sc-name{fill:var(--sc-font-color0,#111111);}.sc-inset-line{stroke:var(--sc-font-color1);stroke-width:0.05;stroke-dasharray:0.2,0.2;}.sc-log-wrap{height:25ex;resize:vertical;overflow-y:scroll;display:flex;flex-direction:column-reverse;border:1px solid;border-color:var(--jp-border-color2);background-color:var(--sc-background-color1);}div.sc-log{line-height:2.5ex;}table.sc-log{table-layout:auto;border-collapse:collapse;}tr.sc-log:nth-child(even){background-color:var(--sc-background-color0);}tr.sc-log > td{vertical-align:top;padding-bottom:0.5ex;}.sc-log-time-stamp{min-width:22ch;font-family:var(--jp-code-font-family);color:var(--sc-font-color2);}.sc-log-level{min-width:10ch;}tr.sc-log-debug td.sc-log-level{color:var(--jp-accent-color1);}tr.sc-log-info td.sc-log-level{color:var(--jp-info-color1);}tr.sc-log-warning td.sc-log-level{color:var(--jp-warn-color1);}tr.sc-log-error td.sc-log-level{font-weight:bold;color:var(--jp-error-color2);}tr.sc-log-critical td.sc-log-level{font-weight:bold;color:var(--sc-background-color0);background-color:var(--jp-error-color1);}.sc-log-message{white-space:pre-wrap;width:100%;}.sc-log-html-payload{white-space:normal;}.sc-log-name{padding-right:0.5em;text-align:right;white-space:pre-wrap;color:var(--sc-font-color3);}</style><div class='sc-wrap sc-root'><div class='sc-header'><div class='sc-obj-type'>scipp.DataArray (6.38 MB)</div></div><ul class='sc-sections'><li class='sc-section-item'><input id='section-b1afb05f-891c-4b82-a2cc-a342cf12d967' class='sc-section-summary-in' type='checkbox' disabled ><label for='section-b1afb05f-891c-4b82-a2cc-a342cf12d967' class='sc-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='sc-section-inline-details'><ul class='sc-dim-list'><li><span class='sc-has-index'>detector_number</span>: 9216</li><li><span class='sc-has-index'>tof</span>: 1</li></ul></div><div class='sc-section-details'></div></li><li class='sc-section-item'><input id='section-0e285d7d-ae1f-46b3-97dd-98d6ae9d0e91' class='sc-section-summary-in' type='checkbox'  checked><label for='section-0e285d7d-ae1f-46b3-97dd-98d6ae9d0e91' class='sc-section-summary' >Coordinates: <span>(13)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>beam_size</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>float64</div><div class='sc-var-unit'>mm</div><div class='sc-value-preview sc-preview'><span><div>2.0</div></span></div><input id='attrs-4bce9183-b36b-4616-9069-70bdbdd57cb3' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-4bce9183-b36b-4616-9069-70bdbdd57cb3' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-6b0f9e39-7831-462f-96fa-16ee7c4289c2' class='sc-var-data-in' type='checkbox'><label for='data-6b0f9e39-7831-462f-96fa-16ee7c4289c2' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array(2.)</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>detector_number</span></div><div class='sc-var-dims'>(detector_number)</div><div class='sc-var-dtype'>int32</div><div class='sc-var-unit'></div><div class='sc-value-preview sc-preview'><span><div>1, 2, ..., 9215, 9216</div></span></div><input id='attrs-ead1cb32-e650-480d-a902-c9e441a37278' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-ead1cb32-e650-480d-a902-c9e441a37278' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-ea5066a4-67e4-4b02-8717-46769d50c176' class='sc-var-data-in' type='checkbox'><label for='data-ea5066a4-67e4-4b02-8717-46769d50c176' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([   1,    2,    3, ..., 9214, 9215, 9216], dtype=int32)</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>detector_shape</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>PyObject</div><div class='sc-var-unit'></div><div class='sc-value-preview sc-preview'><span><div>DataGroup(sizes={&#x27;face&#x27;: 9216, &#x27;face_index|detector_number&#x27;: 2, &#x27;vertex&#x27;: 980...</div></span></div><input id='attrs-053c92b4-a756-4814-a579-f8c563b132e5' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-053c92b4-a756-4814-a579-f8c563b132e5' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-b664461f-46b1-403c-96fe-ebfbf2d69044' class='sc-var-data-in' type='checkbox'><label for='data-b664461f-46b1-403c-96fe-ebfbf2d69044' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>DataGroup(sizes={&#x27;face&#x27;: 9216, &#x27;face_index|detector_number&#x27;: 2, &#x27;vertex&#x27;: 9801, &#x27;winding_order&#x27;: 36864}, keys=[
+    detector_faces: Variable({&#x27;face&#x27;: 9216, &#x27;face_index|detector_number&#x27;: 2}),
+    faces: Variable({&#x27;face&#x27;: 9216}),
+    vertices: Variable({&#x27;vertex&#x27;: 9801}),
+    winding_order: Variable({&#x27;winding_order&#x27;: 36864}),
+])</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>detector_spatial_resolution</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>float64</div><div class='sc-var-unit'>m</div><div class='sc-value-preview sc-preview'><span><div>0.0025</div></span></div><input id='attrs-dc7a199d-ca4f-44fa-a58d-b6cda519f7af' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-dc7a199d-ca4f-44fa-a58d-b6cda519f7af' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-297475a8-470f-454c-b9a5-ef501cb9b583' class='sc-var-data-in' type='checkbox'><label for='data-297475a8-470f-454c-b9a5-ef501cb9b583' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array(0.0025)</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>gravity</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>vector3</div><div class='sc-var-unit'>m/s^2</div><div class='sc-value-preview sc-preview'><span><div>[ 0.      -9.80665  0.     ]</div></span></div><input id='attrs-5d60e3ef-a735-4b9c-bb2e-d0e86634c4fc' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-5d60e3ef-a735-4b9c-bb2e-d0e86634c4fc' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-8cb12864-8a76-4488-b5ae-c549e6b37a5b' class='sc-var-data-in' type='checkbox'><label for='data-8cb12864-8a76-4488-b5ae-c549e6b37a5b' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([ 0.     , -9.80665,  0.     ])</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>position</span></div><div class='sc-var-dims'>(detector_number)</div><div class='sc-var-dtype'>vector3</div><div class='sc-var-unit'>m</div><div class='sc-value-preview sc-preview'><span><div>[-0.064       0.09459759  4.12644383], [-0.05987097  0.09459759  4.12644383], ..., [0.05987097 0.         4.        ], [0.064 0.    4.   ]</div></span></div><input id='attrs-74fa0f36-d0e2-4c80-9fa3-578cbebf32a0' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-74fa0f36-d0e2-4c80-9fa3-578cbebf32a0' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-9795869f-5b9f-45f3-8046-389e90bf6997' class='sc-var-data-in' type='checkbox'><label for='data-9795869f-5b9f-45f3-8046-389e90bf6997' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([[-0.064     ,  0.09459759,  4.12644383],
+       [-0.05987097,  0.09459759,  4.12644383],
+       [-0.05574194,  0.09459759,  4.12644383],
+       ...,
+       [ 0.05574194,  0.        ,  4.        ],
+       [ 0.05987097,  0.        ,  4.        ],
+       [ 0.064     ,  0.        ,  4.        ]])</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>sample_position</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>vector3</div><div class='sc-var-unit'>m</div><div class='sc-value-preview sc-preview'><span><div>[0. 0. 0.]</div></span></div><input id='attrs-cc983682-a9c5-4d35-b4a6-8ec4d8f7e008' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-cc983682-a9c5-4d35-b4a6-8ec4d8f7e008' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-eaffe555-3d5c-4879-a78d-2c4b455457d2' class='sc-var-data-in' type='checkbox'><label for='data-eaffe555-3d5c-4879-a78d-2c4b455457d2' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([0., 0., 0.])</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>sample_rotation</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>float64</div><div class='sc-var-unit'>deg</div><div class='sc-value-preview sc-preview'><span><div>0.7989</div></span></div><input id='attrs-9e5869bc-3139-46f0-be8f-b041fd23c16f' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-9e5869bc-3139-46f0-be8f-b041fd23c16f' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-3890ed4a-34a5-46ed-933b-4472b56f2d7a' class='sc-var-data-in' type='checkbox'><label for='data-3890ed4a-34a5-46ed-933b-4472b56f2d7a' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array(0.7989)</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>sample_size</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>float64</div><div class='sc-var-unit'>mm</div><div class='sc-value-preview sc-preview'><span><div>10.0</div></span></div><input id='attrs-7ad089a0-b739-48f1-96b5-656877582d66' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-7ad089a0-b739-48f1-96b5-656877582d66' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-d2affccc-a162-4deb-990d-a7c2d2b094f8' class='sc-var-data-in' type='checkbox'><label for='data-d2affccc-a162-4deb-990d-a7c2d2b094f8' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array(10.)</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>source_chopper_1</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>PyObject</div><div class='sc-var-unit'></div><div class='sc-value-preview sc-preview'><span><div>DataGroup(sizes={}, keys=[&#x27;frequency&#x27;, &#x27;position&#x27;, &#x27;phase&#x27;])</div></span></div><input id='attrs-2a64b5be-7bf0-495d-a9be-7e189e87eaa9' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-2a64b5be-7bf0-495d-a9be-7e189e87eaa9' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-38738d25-eb8e-4711-bd18-e82be9468f06' class='sc-var-data-in' type='checkbox'><label for='data-38738d25-eb8e-4711-bd18-e82be9468f06' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>DataGroup(sizes={}, keys=[
+    frequency: Variable({}),
+    position: Variable({}),
+    phase: Variable({}),
+])</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>source_chopper_2</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>PyObject</div><div class='sc-var-unit'></div><div class='sc-value-preview sc-preview'><span><div>DataGroup(sizes={}, keys=[&#x27;frequency&#x27;, &#x27;position&#x27;, &#x27;phase&#x27;])</div></span></div><input id='attrs-082d3710-88d2-4e10-afb4-651c13cc6e42' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-082d3710-88d2-4e10-afb4-651c13cc6e42' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-434a7b06-a258-4a81-a39a-22c23e3864e9' class='sc-var-data-in' type='checkbox'><label for='data-434a7b06-a258-4a81-a39a-22c23e3864e9' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>DataGroup(sizes={}, keys=[
+    frequency: Variable({}),
+    position: Variable({}),
+    phase: Variable({}),
+])</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>tof</span></div><div class='sc-var-dims'>(tof [bin-edge])</div><div class='sc-var-dtype'>float64</div><div class='sc-var-unit'>µs</div><div class='sc-value-preview sc-preview'><span><div>0.0, 7.500e+04</div></span></div><input id='attrs-a042a007-81a2-4b0c-b801-5aa9c146baef' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-a042a007-81a2-4b0c-b801-5aa9c146baef' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-7a854afd-a8ee-4e8f-8832-72733d149bf1' class='sc-var-data-in' type='checkbox'><label for='data-7a854afd-a8ee-4e8f-8832-72733d149bf1' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([    0., 75000.])</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>transformations</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>PyObject</div><div class='sc-var-unit'></div><div class='sc-value-preview sc-preview'><span><div>DataGroup(sizes={}, keys=[&#x27;translation&#x27;])</div></span></div><input id='attrs-9cd81cc5-085b-478b-b126-bb65c3b897bc' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-9cd81cc5-085b-478b-b126-bb65c3b897bc' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-11777cca-4ed6-4b9b-8ca6-951aa7977309' class='sc-var-data-in' type='checkbox'><label for='data-11777cca-4ed6-4b9b-8ca6-951aa7977309' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>DataGroup(sizes={}, keys=[
+    translation: DataArray({}),
+])</pre></span></li></ul></div></li><li class='sc-section-item'><input id='section-de770654-0e07-4ccc-8b28-62b5464a4d43' class='sc-section-summary-in' type='checkbox'  checked><label for='section-de770654-0e07-4ccc-8b28-62b5464a4d43' class='sc-section-summary' >Data: <span>(1)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span></span></div><div class='sc-var-dims'>(detector_number, tof)</div><div class='sc-var-dtype'>DataArrayView</div><div class='sc-var-unit'></div><div class='sc-value-preview sc-preview'><span><div>binned data [len=0, len=0, ..., len=0, len=0]</div></span></div><input id='attrs-d74a273f-efa5-4a61-b416-f268c232e0a9' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-d74a273f-efa5-4a61-b416-f268c232e0a9' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-59160e30-2405-4979-9acb-a59624a57161' class='sc-var-data-in' type='checkbox'><label for='data-59160e30-2405-4979-9acb-a59624a57161' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>dim=&#x27;event&#x27;,
+content=DataArray(
+          dims=(event: 261790),
+          data=float32[counts],
+          coords={&#x27;event_time_zero&#x27;:datetime64[ns], &#x27;tof&#x27;:float64[µs]})</pre></li></ul></div></li><li class='sc-section-item'><input id='section-20d6057e-633e-495e-a43b-0d4d848eb88d' class='sc-section-summary-in' type='checkbox'  checked><label for='section-20d6057e-633e-495e-a43b-0d4d848eb88d' class='sc-section-summary' >Attributes: <span>(1)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span>orso</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>PyObject</div><div class='sc-var-unit'></div><div class='sc-value-preview sc-preview'><span><div>Orso(
+     data_source=DataSource(
+                            owner=Person(n...</div></span></div><input id='attrs-599840a4-1cf0-438e-a829-0748528d33f9' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-599840a4-1cf0-438e-a829-0748528d33f9' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-d6c6a89b-2347-4612-aeda-110f8053d7ed' class='sc-var-data-in' type='checkbox'><label for='data-d6c6a89b-2347-4612-aeda-110f8053d7ed' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>Orso(
+     data_source=DataSource(
+                            owner=Person(name=&#x27;Jochen Stahn&#x27;, affiliation=&#x27;Paul Scherrer Institut&#x27;, contact=&#x27;jochen.stahn@psi.ch&#x27;),
+                            experiment=Experiment(title=&#x27;commissioning&#x27;, instrument=&#x27;AMOR&#x27;, start_date=&#x27;2020-11-25&#x27;, probe=&#x27;neutrons&#x27;, facility=&#x27;Paul Scherrer Institut&#x27;),
+                            sample=Sample(name=&#x27;Ni/Ti Multilayer&#x27;, category=&#x27;gas/solid&#x27;, composition=&#x27;air | (Ni | Ti) * 5 | Si&#x27;),
+                            measurement=Measurement(
+                                                    instrument_settings=InstrumentSettings(
+                                                                                           incident_angle=Value(None),
+                                                                                           wavelength=Value(None),
+                                                                                           ),
+                                                    data_files=[&#x27;/home/runner/.cache/ess/amor/1/sample.nxs&#x27;],
+                                                    scheme=&#x27;angle- and energy-dispersive&#x27;,
+                                                    ),
+                            ),
+     reduction=Reduction(
+                         software=Software(name=&#x27;scipp-ess&#x27;, version=&#x27;24.1.1.dev5+g8409fb3&#x27;, platform=&#x27;Linux-6.5.0-1016-azure-x86_64-with-glibc2.10&#x27;),
+                         creator=Person(name=&#x27;Andrew R. McCluskey&#x27;, affiliation=&#x27;European Spallation Source&#x27;, contact=&#x27;andrew.mccluskey@ess.eu&#x27;),
+                         corrections=[&#x27;chopper ToF correction&#x27;],
+                         computer=&#x27;fv-az773-140&#x27;,
+                         script=&#x27;https://github.com/scipp/ess/blob/main/docs/instruments/amor/amor_reduction.ipynb&#x27;,
+                         ),
+     columns=[Column(name=&#x27;Qz&#x27;, unit=&#x27;1/angstrom&#x27;, dimension=&#x27;wavevector transfer&#x27;), Column(name=&#x27;R&#x27;, dimension=&#x27;reflectivity&#x27;), Column(name=&#x27;sR&#x27;, dimension=&#x27;standard deivation of reflectivity&#x27;), Column(name=&#x27;sQz&#x27;, unit=&#x27;1/angstrom&#x27;, dimension=&#x27;standard deviation of wavevector transfer resolution&#x27;)],
+     )</pre></li></ul></div></li></ul></div></div></div>
+</div>
+<p>By simply plotting the data, we get a first glimpse into the data contents.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sample</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">tof</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/instruments_amor_amor_reduction_10_0.svg" src="../../_images/instruments_amor_amor_reduction_10_0.svg" /></div>
+</div>
+<section id="Correcting-the-position-of-the-detector-pixels">
+<h3>Correcting the position of the detector pixels<a class="headerlink" href="#Correcting-the-position-of-the-detector-pixels" title="Permalink to this headline">#</a></h3>
+<p><strong>Note:</strong> once new Nexus files are produced, this step should go away.</p>
+<p>The pixel positions are wrong in the <code class="docutils literal notranslate"><span class="pre">sample.nxs</span></code> and <code class="docutils literal notranslate"><span class="pre">reference.nxs</span></code> files, and require an ad-hoc correction. We apply an arbitrary shift in the vertical (<code class="docutils literal notranslate"><span class="pre">y</span></code>) direction. We first move the pixels down by 0.955 degrees, so that the center of the beam goes through the center of the top half of the detector blades (the bottom half of the detectors was turned off). Next, we move all the pixels so that the center of the top half of the detector pixels lies at an angle of <span class="math notranslate nohighlight">\(2 \omega\)</span>, as
+described in the beamline diagram.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Correcting pixel positions in &#39;sample.nxs&#39;&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">pixel_position_correction</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">z</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span>
+        <span class="mf">2.0</span> <span class="o">*</span> <span class="n">data</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;sample_rotation&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="mf">0.955</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">deg</span><span class="p">)</span>
+    <span class="p">)</span>
+
+
+<span class="n">sample</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">y</span> <span class="o">+=</span> <span class="n">pixel_position_correction</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
+<span class="n">reference</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">y</span> <span class="o">+=</span> <span class="n">pixel_position_correction</span><span class="p">(</span><span class="n">reference</span><span class="p">)</span>
+<span class="n">sample</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;orso&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">data_source</span><span class="o">.</span><span class="n">measurement</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="s1">&#39;Pixel positions corrected&#39;</span>
+<span class="n">reference</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span>
+    <span class="s1">&#39;orso&#39;</span>
+<span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">data_source</span><span class="o">.</span><span class="n">measurement</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="s1">&#39;Pixel positions corrected&#39;</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="Coordinate-transformation-graph">
+<h2>Coordinate transformation graph<a class="headerlink" href="#Coordinate-transformation-graph" title="Permalink to this headline">#</a></h2>
+<p>To compute the wavelength <span class="math notranslate nohighlight">\(\lambda\)</span>, the scattering angle <span class="math notranslate nohighlight">\(\theta\)</span>, and the <span class="math notranslate nohighlight">\(Q\)</span> vector for our data, we construct a coordinate transformation graph.</p>
+<p>It is based on classical conversions from <code class="docutils literal notranslate"><span class="pre">tof</span></code> and pixel <code class="docutils literal notranslate"><span class="pre">position</span></code> to <span class="math notranslate nohighlight">\(\lambda\)</span> (<code class="docutils literal notranslate"><span class="pre">wavelength</span></code>), <span class="math notranslate nohighlight">\(\theta\)</span> (<code class="docutils literal notranslate"><span class="pre">theta</span></code>) and <span class="math notranslate nohighlight">\(Q\)</span> (<code class="docutils literal notranslate"><span class="pre">Q</span></code>), but comprises a number of modifications.</p>
+<p>The computation of the scattering angle <span class="math notranslate nohighlight">\(\theta\)</span> includes a correction for the Earth’s gravitational field which bends the flight path of the neutrons. The angle can be found using the following expression</p>
+<div class="math notranslate nohighlight">
+\[\theta = \sin^{-1}\left(\frac{\left\lvert y + \frac{g m_{\rm n}}{2 h^{2}} \lambda^{2} L_{2}^{2} \right\rvert }{L_{2}}\right) - \omega\]</div>
+<p>where <span class="math notranslate nohighlight">\(m_{\rm n}\)</span> is the neutron mass, <span class="math notranslate nohighlight">\(g\)</span> is the acceleration due to gravity, and <span class="math notranslate nohighlight">\(h\)</span> is Planck’s constant.</p>
+<p>For a graphical representation of the above expression, we consider once again the situation with a convergent beam onto an inclined sample.</p>
+<img alt="specular_reflection" src="../../_images/amor_specular_reflection.png" />
+<p>The detector (in green), whose center is located at an angle <span class="math notranslate nohighlight">\(\gamma_{\rm D}\)</span> from the horizontal plane, has a physical extent and is measuring counts at multiple scattering angles at the same time. We consider two possible paths for neutrons. The first path (cyan) is travelling horizontally from the source to the sample and subsequently, following specular reflection, hits the detector at <span class="math notranslate nohighlight">\(\gamma_{\rm D}\)</span> from the horizontal plane. From the symmetry of Bragg’s law, the scattering
+angle for this path is <span class="math notranslate nohighlight">\(\theta_{1} = \gamma_{\rm D} - \omega\)</span>.</p>
+<p>The second path (red) is hitting the bottom edge of the detector. Assuming that all reflections are specular, the only way the detector can record neutron events at this location is if the neutron originated from the bottom part of the convergent beam. Using the same symmetry argument as above, the scattering angle is <span class="math notranslate nohighlight">\(\theta_{2} = \gamma_{2} - \omega\)</span>.</p>
+<p>This expression differs slightly from the equation found in the computation of the <span class="math notranslate nohighlight">\(\theta\)</span> angle in other techniques such as <a class="reference external" href="https://docs.mantidproject.org/nightly/algorithms/Q1D-v2.html#q-unit-conversion">SANS</a>, in that the horizontal <span class="math notranslate nohighlight">\(x\)</span> term is absent, because we assume a planar symmetry and only consider the vertical <span class="math notranslate nohighlight">\(y\)</span> component of the displacement.</p>
+<p>The conversion graph is defined in the reflectometry module, and can be obtained via</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">graph</span> <span class="o">=</span> <span class="n">amor</span><span class="o">.</span><span class="n">conversions</span><span class="o">.</span><span class="n">specular_reflection</span><span class="p">()</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">show_graph</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">simplified</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/instruments_amor_amor_reduction_14_0.svg" src="../../_images/instruments_amor_amor_reduction_14_0.svg" /></div>
+</div>
+</section>
+<section id="Computing-the-wavelength">
+<h2>Computing the wavelength<a class="headerlink" href="#Computing-the-wavelength" title="Permalink to this headline">#</a></h2>
+<p>To compute the wavelength of the neutrons, we request the <code class="docutils literal notranslate"><span class="pre">wavelength</span></code> coordinate from the <code class="docutils literal notranslate"><span class="pre">transform_coords</span></code> method by supplying our graph defined above (see <a class="reference external" href="https://scipp.github.io/scippneutron/user-guide/coordinate-transformations.html">here</a> for more information about using <code class="docutils literal notranslate"><span class="pre">transform_coords</span></code>).</p>
+<p>We also exclude all neutrons with a wavelength lower than 2.4 Å.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">wavelength_edges</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;wavelength&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="mf">2.4</span><span class="p">,</span> <span class="mf">16.0</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+<span class="n">sample_wav</span> <span class="o">=</span> <span class="n">reflectometry</span><span class="o">.</span><span class="n">conversions</span><span class="o">.</span><span class="n">tof_to_wavelength</span><span class="p">(</span>
+    <span class="n">sample</span><span class="p">,</span> <span class="n">wavelength_edges</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sample_wav</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="s1">&#39;detector_number&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">wavelength</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/instruments_amor_amor_reduction_17_0.svg" src="../../_images/instruments_amor_amor_reduction_17_0.svg" /></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">reference_wav</span> <span class="o">=</span> <span class="n">reflectometry</span><span class="o">.</span><span class="n">conversions</span><span class="o">.</span><span class="n">tof_to_wavelength</span><span class="p">(</span>
+    <span class="n">reference</span><span class="p">,</span> <span class="n">wavelength_edges</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Compute-the-angle-and-perform-the-footprint-correction">
+<h2>Compute the angle and perform the footprint correction<a class="headerlink" href="#Compute-the-angle-and-perform-the-footprint-correction" title="Permalink to this headline">#</a></h2>
+<p>Using the same method, we can compute the angle of reflectance (<span class="math notranslate nohighlight">\(\theta\)</span>) and therefore correct for the footprint of the beam.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sample_theta</span> <span class="o">=</span> <span class="n">reflectometry</span><span class="o">.</span><span class="n">conversions</span><span class="o">.</span><span class="n">wavelength_to_theta</span><span class="p">(</span><span class="n">sample_wav</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>From the theta values, we can calculate the footprint of the beam on the sample and determine the footprint scaling factor. This footprint scale factor accounts for the fact that the illuminated area of the sample depends on the angle of incidence (which as we noted previously may be different for the sample and the reference).</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sample_theta</span> <span class="o">=</span> <span class="n">reflectometry</span><span class="o">.</span><span class="n">corrections</span><span class="o">.</span><span class="n">footprint_correction</span><span class="p">(</span><span class="n">sample_theta</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Then we repeat this process for the reference.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">reference_theta</span> <span class="o">=</span> <span class="n">reflectometry</span><span class="o">.</span><span class="n">conversions</span><span class="o">.</span><span class="n">wavelength_to_theta</span><span class="p">(</span>
+    <span class="n">reference_wav</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span>
+<span class="p">)</span>
+<span class="n">reference_theta</span> <span class="o">=</span> <span class="n">reflectometry</span><span class="o">.</span><span class="n">corrections</span><span class="o">.</span><span class="n">footprint_correction</span><span class="p">(</span><span class="n">reference_theta</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Resolution-function">
+<h2>Resolution function<a class="headerlink" href="#Resolution-function" title="Permalink to this headline">#</a></h2>
+<p>The Amor resolution function consists of three parts:</p>
+<ul class="simple">
+<li><p>wavelength resolution</p></li>
+<li><p>angular resolution</p></li>
+<li><p>sample size resolution</p></li>
+</ul>
+<p>These are discussed in section 4.3.3 of the paper by Stahn &amp; Glavic (2016). The wavelength resolution arises from the presence of the double-blind chopper, which have a non-zero distance between them. The distance between the choppers <span class="math notranslate nohighlight">\(d_{\text{CC}}\)</span> (which is 1 meter for Amor) and the distance from the chopper-system midpoint to the detector, <span class="math notranslate nohighlight">\(d_{\text{C}_{\text{mid}}\text{D}}\)</span> (15 meter for Amor) define the full width at half maximum of this resolution, which is
+converted to a standard deviation as,</p>
+<div class="math notranslate nohighlight">
+\[\frac{\sigma\lambda}{\lambda} = \frac{1}{2 \sqrt{2\ln{2}}}\frac{d_{\text{CC}}}{d_{\text{C}_{\text{mid}}\text{D}}}.\]</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sample_theta</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;wavelength_resolution&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">amor</span><span class="o">.</span><span class="n">resolution</span><span class="o">.</span><span class="n">wavelength_resolution</span><span class="p">(</span>
+    <span class="n">chopper_1_position</span><span class="o">=</span><span class="n">sample</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;source_chopper_1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">],</span>
+    <span class="n">chopper_2_position</span><span class="o">=</span><span class="n">sample</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;source_chopper_2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">],</span>
+    <span class="n">pixel_position</span><span class="o">=</span><span class="n">sample</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>The angular resolution is determined by the spatial resolution of the detector pixels, <span class="math notranslate nohighlight">\(\Delta z\)</span>, and the sample to detector pixel distance, <span class="math notranslate nohighlight">\(d_{\text{SD}}\)</span></p>
+<div class="math notranslate nohighlight">
+\[\frac{\sigma_{\gamma}}{\theta} = \frac{1}{2\sqrt{2\ln{2}}} \arctan{\frac{\Delta z}{d_{\text{SD}}}}.\]</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sample_theta</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;angular_resolution&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">amor</span><span class="o">.</span><span class="n">resolution</span><span class="o">.</span><span class="n">angular_resolution</span><span class="p">(</span>
+    <span class="n">pixel_position</span><span class="o">=</span><span class="n">sample</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">],</span>
+    <span class="n">theta</span><span class="o">=</span><span class="n">sample_theta</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;theta&#39;</span><span class="p">],</span>
+    <span class="n">detector_spatial_resolution</span><span class="o">=</span><span class="n">sample_theta</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;detector_spatial_resolution&#39;</span><span class="p">],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>At high angles, the projected footprint of the sample size, <span class="math notranslate nohighlight">\(x_{\text{s}}\)</span>, on the detector may be larger than the detector resolution, therefore we also consider the sample-size resolution.</p>
+<div class="math notranslate nohighlight">
+\[\frac{\sigma_{x}}{\theta} = \frac{1}{2\sqrt{2\ln{2}}} \frac{x_{\text{s}}}{d_{\text{SD}}}.\]</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sample_theta</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;sample_size_resolution&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">amor</span><span class="o">.</span><span class="n">resolution</span><span class="o">.</span><span class="n">sample_size_resolution</span><span class="p">(</span>
+    <span class="n">pixel_position</span><span class="o">=</span><span class="n">sample</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">],</span> <span class="n">sample_size</span><span class="o">=</span><span class="n">sample</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;sample_size&#39;</span><span class="p">]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Compute-the-Q-vector">
+<h2>Compute the Q vector<a class="headerlink" href="#Compute-the-Q-vector" title="Permalink to this headline">#</a></h2>
+<p>Once again using the same method, we can compute the <span class="math notranslate nohighlight">\(Q\)</span> vector, which now depends on both detector position (id) and wavelength</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">q_edges</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">geomspace</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mf">0.008</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="mf">0.075</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;1/angstrom&#39;</span><span class="p">)</span>
+
+<span class="n">sample_q</span> <span class="o">=</span> <span class="n">reflectometry</span><span class="o">.</span><span class="n">conversions</span><span class="o">.</span><span class="n">theta_to_q</span><span class="p">(</span>
+    <span class="n">sample_theta</span><span class="p">,</span> <span class="n">q_edges</span><span class="o">=</span><span class="n">q_edges</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span>
+<span class="p">)</span>
+<span class="n">reference_q</span> <span class="o">=</span> <span class="n">reflectometry</span><span class="o">.</span><span class="n">conversions</span><span class="o">.</span><span class="n">theta_to_q</span><span class="p">(</span>
+    <span class="n">reference_theta</span><span class="p">,</span> <span class="n">q_edges</span><span class="o">=</span><span class="n">q_edges</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span>
+<span class="p">)</span>
+
+<span class="n">pp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;sample&#39;</span><span class="p">:</span> <span class="n">sample_q</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="s1">&#39;detector_number&#39;</span><span class="p">),</span>
+        <span class="s1">&#39;uncalibrated reference&#39;</span><span class="p">:</span> <span class="n">reference_q</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="s1">&#39;detector_number&#39;</span><span class="p">),</span>
+    <span class="p">},</span>
+    <span class="n">norm</span><span class="o">=</span><span class="s2">&quot;log&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/instruments_amor_amor_reduction_32_0.svg" src="../../_images/instruments_amor_amor_reduction_32_0.svg" /></div>
+</div>
+</section>
+<section id="Calibration-of-the-super-mirror">
+<h2>Calibration of the super-mirror<a class="headerlink" href="#Calibration-of-the-super-mirror" title="Permalink to this headline">#</a></h2>
+<p>In order to normalize the data to give reflectivity data, as mentioned above, we use a measurement from a neutron super-mirror. However, first we must calibrate the super-mirror measurement. The calibration of the super-mirror depends on the properties of the super-mirror, and follows the equation below,</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}n(q) =
+ \begin{cases}
+   1, &amp; \text{where } q &lt; c_{\mathrm{sm}} \\
+   [1-\alpha(q - c_{\mathrm{sm}})]^{-1}, &amp; \text{where } c_{\mathrm{sm}} \leq q \leq mc_{\mathrm{sm}} \\
+   0, &amp; \text{where } q &gt; mc_{\mathrm{sm}},
+ \end{cases}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\alpha\)</span>, <span class="math notranslate nohighlight">\(m\)</span>, and <span class="math notranslate nohighlight">\(c_{\mathrm{sm}}\)</span> are super-mirror properties.</p>
+<p>The number of counts in each of the detector/<span class="math notranslate nohighlight">\(Q\)</span> bins are then summed and the calibration factor is found and the two are divided.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">reference_q_summed</span> <span class="o">=</span> <span class="n">reflectometry</span><span class="o">.</span><span class="n">conversions</span><span class="o">.</span><span class="n">sum_bins</span><span class="p">(</span><span class="n">reference_q</span><span class="p">)</span>
+<span class="n">reference_q_summed_cal</span> <span class="o">=</span> <span class="n">amor</span><span class="o">.</span><span class="n">calibrations</span><span class="o">.</span><span class="n">supermirror_calibration</span><span class="p">(</span><span class="n">reference_q_summed</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>The effect on the reference measurement can be seen in the plot below.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;Uncalibrated&#39;</span><span class="p">:</span> <span class="n">reference_q_summed</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="s1">&#39;detector_number&#39;</span><span class="p">),</span>
+        <span class="s1">&#39;Calibrated&#39;</span><span class="p">:</span> <span class="n">reference_q_summed_cal</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="s1">&#39;detector_number&#39;</span><span class="p">),</span>
+    <span class="p">},</span>
+    <span class="n">norm</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/instruments_amor_amor_reduction_36_0.svg" src="../../_images/instruments_amor_amor_reduction_36_0.svg" /></div>
+</div>
+</section>
+<section id="Normalization-by-the-super-mirror">
+<h2>Normalization by the super-mirror<a class="headerlink" href="#Normalization-by-the-super-mirror" title="Permalink to this headline">#</a></h2>
+<p>For each of the measurements, we should determine the number of counts in each bins and normalize this by the total number of counts in the measurement.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sample_q_summed</span> <span class="o">=</span> <span class="n">reflectometry</span><span class="o">.</span><span class="n">conversions</span><span class="o">.</span><span class="n">sum_bins</span><span class="p">(</span><span class="n">sample_q</span><span class="p">)</span>
+
+<span class="n">sample_norm</span> <span class="o">=</span> <span class="n">reflectometry</span><span class="o">.</span><span class="n">corrections</span><span class="o">.</span><span class="n">normalize_by_counts</span><span class="p">(</span><span class="n">sample_q_summed</span><span class="p">)</span>
+<span class="n">reference_norm</span> <span class="o">=</span> <span class="n">reflectometry</span><span class="o">.</span><span class="n">corrections</span><span class="o">.</span><span class="n">normalize_by_counts</span><span class="p">(</span><span class="n">reference_q_summed_cal</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Now, we should obtain the final normalized data by dividing the two datasets.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">normalized</span> <span class="o">=</span> <span class="n">amor</span><span class="o">.</span><span class="n">normalize</span><span class="o">.</span><span class="n">normalize_by_supermirror</span><span class="p">(</span><span class="n">sample_norm</span><span class="p">,</span> <span class="n">reference_norm</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>The plot below shows the reflecivity as a function of <code class="docutils literal notranslate"><span class="pre">'detector_id'</span></code> and <code class="docutils literal notranslate"><span class="pre">'Q'</span></code>. Here, we note that there are a large number of pixels, where there was no neutrons detected in the reference measurements, leading to values of <code class="docutils literal notranslate"><span class="pre">nan</span></code> and <code class="docutils literal notranslate"><span class="pre">inf</span></code> in the normalized data. Therefore, we should mask these pixels before finding the mean along the <code class="docutils literal notranslate"><span class="pre">'detector_id'</span></code> dimension.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">normalized</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">norm</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/instruments_amor_amor_reduction_42_0.svg" src="../../_images/instruments_amor_amor_reduction_42_0.svg" /></div>
+</div>
+<p>The reference is assumed to be a perfect scatterer, therefore where there is no reflectivity in the reference measurement is it taken to be a region of <code class="docutils literal notranslate"><span class="pre">'Q'</span></code> space that cannot be accessed by the instrument. This leads to the number of detectors feeding data into each <span class="math notranslate nohighlight">\(Q\)</span>-bin being variable, this is particularly noticeable at low-<span class="math notranslate nohighlight">\(Q\)</span>, there there are only a few pixels detecting neutrons. Therefore, in order to account for this variability as a function of <span class="math notranslate nohighlight">\(Q\)</span>, we mask those
+pixels (performed in <code class="docutils literal notranslate"><span class="pre">normalize_by_supermirror</span></code>) where no neutrons were detected and perform an average over the remaining <code class="docutils literal notranslate"><span class="pre">'detector_id'</span></code> to reduce the data.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">normalized</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="s1">&#39;detector_number&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">norm</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/instruments_amor_amor_reduction_44_0.svg" src="../../_images/instruments_amor_amor_reduction_44_0.svg" /></div>
+</div>
+<p>To obtain the final resolution, the three components of the resolution function are combined and multiplied by the midpoints of the <span class="math notranslate nohighlight">\(Q\)</span>-bins.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">normalized</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;sigma_Q&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">amor</span><span class="o">.</span><span class="n">resolution</span><span class="o">.</span><span class="n">sigma_Q</span><span class="p">(</span>
+    <span class="n">angular_resolution</span><span class="o">=</span><span class="n">normalized</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;angular_resolution&#39;</span><span class="p">],</span>
+    <span class="n">wavelength_resolution</span><span class="o">=</span><span class="n">normalized</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;wavelength_resolution&#39;</span><span class="p">],</span>
+    <span class="n">sample_size_resolution</span><span class="o">=</span><span class="n">normalized</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;sample_size_resolution&#39;</span><span class="p">],</span>
+    <span class="n">q_bins</span><span class="o">=</span><span class="n">normalized</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Writing-to-a-file">
+<h2>Writing to a file<a class="headerlink" href="#Writing-to-a-file" title="Permalink to this headline">#</a></h2>
+<p>Having completed the data reduction process, it is then possible to write the data to a <code class="docutils literal notranslate"><span class="pre">.ort</span></code> format file. This <a class="reference external" href="https://github.com/reflectivity/file_format/blob/master/specification.md">file format</a> has been developed for reduction reflectometry data by <a class="reference external" href="https://www.reflectometry.org">ORSO</a>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">reflectometry</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">save_ort</span><span class="p">(</span><span class="n">normalized</span><span class="p">,</span> <span class="s1">&#39;amor.ort&#39;</span><span class="p">,</span> <span class="n">dimension</span><span class="o">=</span><span class="s1">&#39;detector_number&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>This file will be rich in metadata that has been included during the reduction process.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>head<span class="w"> </span>amor.ort
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+# # ORSO reflectivity data file | 1.0 standard | YAML encoding | https://www.reflectometry.org/
+# data_source:
+#   owner:
+#     name: Jochen Stahn
+#     affiliation: Paul Scherrer Institut
+#     contact: jochen.stahn@psi.ch
+#   experiment:
+#     title: commissioning
+#     instrument: AMOR
+#     start_date: &#39;2020-11-25&#39;
+</pre></div></div>
+</div>
+</section>
+<section id="Make-a-(\lambda,-\theta)-map">
+<h2>Make a <span class="math notranslate nohighlight">\((\lambda, \theta)\)</span> map<a class="headerlink" href="#Make-a-(\lambda,-\theta)-map" title="Permalink to this headline">#</a></h2>
+<p>A good sanity check is to create a two-dimensional map of the counts in <span class="math notranslate nohighlight">\(\lambda\)</span> and <span class="math notranslate nohighlight">\(\theta\)</span> bins. To achieve this, we request two output coordinates from the <code class="docutils literal notranslate"><span class="pre">transform_coords</span></code> method.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sample_theta</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">transform_coords</span><span class="p">([</span><span class="s2">&quot;theta&quot;</span><span class="p">,</span> <span class="s2">&quot;wavelength&quot;</span><span class="p">],</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Then, we concatenate all the events in the <code class="docutils literal notranslate"><span class="pre">detector_id</span></code> dimension</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sample_theta</span> <span class="o">=</span> <span class="n">sample_theta</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="s1">&#39;detector_number&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Finally, we bin into the existing <code class="docutils literal notranslate"><span class="pre">theta</span></code> dimension, and into a new <code class="docutils literal notranslate"><span class="pre">wavelength</span></code> dimension, to create a 2D output</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nbins</span> <span class="o">=</span> <span class="mi">165</span>
+<span class="n">theta_edges</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s1">&#39;theta&#39;</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">nbins</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;deg&#39;</span><span class="p">)</span>
+<span class="n">wavelength_edges</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span>
+    <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;wavelength&#39;</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="mf">15.0</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">nbins</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span>
+<span class="p">)</span>
+<span class="n">binned</span> <span class="o">=</span> <span class="n">sample_theta</span><span class="o">.</span><span class="n">bin</span><span class="p">(</span><span class="n">theta</span><span class="o">=</span><span class="n">theta_edges</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s1">&#39;rad&#39;</span><span class="p">),</span> <span class="n">wavelength</span><span class="o">=</span><span class="n">wavelength_edges</span><span class="p">)</span>
+<span class="n">binned</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div><!-- Original source from -->
+<!-- https://github.com/jsignell/xarray/blob/1d960933ab252e0f79f7e050e6c9261d55568057/xarray/static/html/icons-svg-inline.html -->
+<svg style="position: absolute; width: 0; height: 0; overflow: hidden">
+<defs>
+<symbol id="icon-database" viewBox="0 0 32 32">
+<title>Show/Hide data repr</title>
+<path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
+<path d="M16 17c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+<path d="M16 26c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+</symbol>
+<symbol id="icon-file-text2" viewBox="0 0 32 32">
+<title>Show/Hide attributes</title>
+<path d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"></path>
+<path d="M23 26h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 22h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+</symbol>
+</defs>
+</svg><style id="scipp-style-sheet">.sc-root{--sc-background-color0:var(--jp-layout-color0,#fff);--sc-background-color1:var(--jp-layout-color1,#fcfcfc);--sc-background-color2:var(--jp-layout-color2,#efefef);--sc-inverse-background-color0:var(--jp-inverse-layout-color4,#111);--sc-font-color0:var(--jp-content-font-color0,#000);--sc-font-color1:var(--jp-content-font-color1,#555);--sc-font-color2:var(--jp-content-font-color2,#888);--sc-font-color3:var(--jp-content-font-color3,#ccc);--sc-table-data-color:#f6d028;--sc-table-coords-color:#c6e590;--sc-table-masks-color:#c8c8c8;--sc-table-attrs-color:#ff5555;--sc-table-header-font-color:#111111;}.sc-wrap{font-size:14px;min-width:300px;max-width:800px;}.sc-var-attrs .sc-wrap{padding-left:3em;}.sc-header{padding-top:6px;padding-bottom:6px;margin-bottom:4px;border-bottom:solid 1px #ddd;}.sc-header > div,.sc-header > ul{display:inline;margin-top:0;margin-bottom:0;}.sc-obj-type,.sc-array-name{margin-left:2px;margin-right:10px;}.sc-obj-type{color:var(--sc-font-color1);}.sc-underlying-size{color:var(--sc-font-color2);}.sc-sections,.reveal .sc-sections{padding-left:0 !important;display:grid;grid-template-columns:150px auto auto auto 1fr 20px 20px;}.sc-section-item{display:contents;}.sc-section-item input{display:none;}.sc-section-item input:enabled + label{cursor:pointer;color:var(--sc-font-color1);}.sc-section-item input:enabled + label:hover{color:var(--sc-font-color0);}.sc-section-summary{grid-column:1;font-weight:500;}.sc-section-summary > span{display:inline-block;padding-left:0.5em;}.sc-section-summary-in:disabled + label{color:var(--sc-font-color1);}.sc-section-summary-in + label:before{display:inline-block;content:'►';font-size:11px;width:15px;text-align:center;}.sc-section-summary-in:disabled + label:before{color:var(--sc-font-color3);}.sc-section-summary-in:checked + label:before{content:'▼';}.sc-section-summary-in:checked + label > span{display:none;}.sc-section-summary,.sc-section-inline-details{padding-top:4px;padding-bottom:4px;}.sc-section-inline-details{grid-column:2 / 6;}.sc-section-details{display:none;grid-column:1 / -1;margin-bottom:5px;}.sc-section-summary-in:checked ~ .sc-section-details{display:contents;}.sc-array-wrap{grid-column:1 / -1;display:grid;grid-template-columns:20px auto;}.sc-array-wrap > label{grid-column:1;vertical-align:top;}.sc-preview{color:var(--sc-font-color2);}.sc-array-preview,.sc-array-data{padding:0 5px !important;grid-column:2;}.sc-array-data,.sc-array-in:checked ~ .sc-array-preview{display:none;}.sc-array-in:checked ~ .sc-array-data,.sc-array-preview{display:inline-block;}.sc-dim-list{display:inline-block !important;list-style:none;padding:0 !important;margin:0;}.sc-dim-list li{display:inline-block;padding:0;margin:0!important;}.sc-dim-list:before{content:'(';}.sc-dim-list:after{content:')';}.sc-dim-list li:not(:last-child):after{content:',';padding-right:5px;}.sc-dim-list li span,.sc-standalone-var-name > span span,.sc-var-name > span span{padding:0 !important;}.sc-aligned{font-weight:bold;}.sc-var-list,.sc-var-item,.reveal .sc-var-list,.reveal .sc-var-item{display:contents;}.sc-var-item > div,.sc-var-item label,.sc-var-item > .sc-var-name span{background-color:var(--sc-background-color1);margin-bottom:0;}.sc-var-item > .sc-var-name:hover span{padding-right:5px;}.sc-var-list > li:nth-child(odd) > div,.sc-var-list > li:nth-child(odd) > label,.sc-var-list > li:nth-child(odd) > .sc-var-name span{background-color:var(--sc-background-color2);}.sc-var-name{grid-column:1;}.sc-var-dims{grid-column:2;}.sc-var-dtype{grid-column:3;text-align:right;color:var(--sc-font-color2);}.sc-var-unit{grid-column:4;text-align:left;color:var(--sc-font-color1);max-width:50pt;text-overflow:ellipsis;}.sc-value-preview{grid-column:5;}.sc-var-preview-variances{text-align:right;}.sc-sections .sc-section-item .sc-section-summary,.sc-sections .sc-section-item .sc-section-inline-details,.sc-section-item .sc-var-list .sc-var-item > div,.sc-section-item .sc-var-list .sc-var-item > label,.sc-section-details .sc-var-list .sc-var-item > div,.sc-section-details .sc-var-list .sc-var-item > label{margin-top:0;margin-bottom:0;}.sc-var-name,.sc-var-dims,.sc-var-dtype,.sc-var-unit,.sc-preview,.sc-attrs dt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:10px;}.sc-var-name:hover,.sc-var-dims:hover,.sc-var-dtype:hover,.sc-var-unit:hover,.sc-attrs dt:hover{overflow:visible;width:auto;z-index:1;}.sc-var-attrs{display:block;}.sc-var-data,.reveal .sc-var-data{display:none;}.sc-var-attrs,.sc-var-data{background-color:var(--sc-background-color0) !important;padding-bottom:5px !important;}.sc-var-attrs-in:checked ~ .sc-var-attrs{display:none;}.sc-var-data-in:checked ~ .sc-var-data{display:block;}.sc-var-data > table{float:right;}.sc-var-name span,.sc-var-data{padding-left:25px !important;}.sc-var-attrs,.sc-var-data{grid-column:1 / -1;}dl.sc-attrs{padding:0;margin:0;display:grid;grid-template-columns:125px auto;}.sc-attrs dt,dd{padding:0;margin:0;float:left;padding-right:10px;width:auto;}.sc-attrs dt{font-weight:normal;grid-column:1;}.sc-attrs dt:hover span{display:inline-block;padding-right:10px;}.sc-attrs dd{grid-column:2;white-space:pre-wrap;word-break:break-all;}.sc-icon-database,.sc-icon-file-text2{display:inline-block;vertical-align:middle;width:1em;height:1.5em !important;stroke-width:0;stroke:currentColor;fill:currentColor;}label.sc-hide-icon svg{opacity:0;}.sc-standalone-var-name{grid-column:1/3;}.sc-standalone-var-name span{padding-left:25px;padding-right:10px;}.sc-table{border-collapse:collapse;}.sc-title{font-weight:bold;font-size:1.5em;}.sc-subtitle{font-weight:normal;font-style:italic;text-align:left;font-size:1.2em;padding:1px;}.sc-table th,.sc-table td{border:1px solid var(--sc-inverse-background-color0);padding:0 5px 0 5px;}.sc-table th{text-align:center;}.sc-table tr{background-color:var(--sc-background-color1);text-align:right;}.sc-table tr:hover{background-color:var(--sc-background-color2);}.sc-table th.sc-data{background-color:var(--sc-table-data-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-coords{background-color:var(--sc-table-coords-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-masks{background-color:var(--sc-table-masks-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-attrs{background-color:var(--sc-table-attrs-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-subheader{background-color:var(--sc-background-color2);}.sc-table td.sc-padding{background-color:var(--sc-background-color1);border:0 solid var(--sc-background-color1);height:1.2em;}.sc-label{fill:var(--sc-font-color0,#444444);text-anchor:middle;}.sc-name{fill:var(--sc-font-color0,#111111);}.sc-inset-line{stroke:var(--sc-font-color1);stroke-width:0.05;stroke-dasharray:0.2,0.2;}.sc-log-wrap{height:25ex;resize:vertical;overflow-y:scroll;display:flex;flex-direction:column-reverse;border:1px solid;border-color:var(--jp-border-color2);background-color:var(--sc-background-color1);}div.sc-log{line-height:2.5ex;}table.sc-log{table-layout:auto;border-collapse:collapse;}tr.sc-log:nth-child(even){background-color:var(--sc-background-color0);}tr.sc-log > td{vertical-align:top;padding-bottom:0.5ex;}.sc-log-time-stamp{min-width:22ch;font-family:var(--jp-code-font-family);color:var(--sc-font-color2);}.sc-log-level{min-width:10ch;}tr.sc-log-debug td.sc-log-level{color:var(--jp-accent-color1);}tr.sc-log-info td.sc-log-level{color:var(--jp-info-color1);}tr.sc-log-warning td.sc-log-level{color:var(--jp-warn-color1);}tr.sc-log-error td.sc-log-level{font-weight:bold;color:var(--jp-error-color2);}tr.sc-log-critical td.sc-log-level{font-weight:bold;color:var(--sc-background-color0);background-color:var(--jp-error-color1);}.sc-log-message{white-space:pre-wrap;width:100%;}.sc-log-html-payload{white-space:normal;}.sc-log-name{padding-right:0.5em;text-align:right;white-space:pre-wrap;color:var(--sc-font-color3);}</style><div class='sc-wrap sc-root'><div class='sc-header'><div class='sc-obj-type'>scipp.DataArray (10.39 MB)</div></div><ul class='sc-sections'><li class='sc-section-item'><input id='section-634ce432-fb22-47ff-8ec9-725fd3442ff5' class='sc-section-summary-in' type='checkbox' disabled ><label for='section-634ce432-fb22-47ff-8ec9-725fd3442ff5' class='sc-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='sc-section-inline-details'><ul class='sc-dim-list'><li><span class='sc-has-index'>theta</span>: 164</li><li><span class='sc-has-index'>wavelength</span>: 164</li></ul></div><div class='sc-section-details'></div></li><li class='sc-section-item'><input id='section-03662d22-20a9-4318-bb3a-7cb712d84564' class='sc-section-summary-in' type='checkbox'  checked><label for='section-03662d22-20a9-4318-bb3a-7cb712d84564' class='sc-section-summary' >Coordinates: <span>(14)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span>L1</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>float64</div><div class='sc-var-unit'>m</div><div class='sc-value-preview sc-preview'><span><div>15.0</div></span></div><input id='attrs-4db55e32-ac25-4df3-af5e-a99b7b2c1036' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-4db55e32-ac25-4df3-af5e-a99b7b2c1036' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-1489a074-4ec1-4bb4-acb2-64257f11dc51' class='sc-var-data-in' type='checkbox'><label for='data-1489a074-4ec1-4bb4-acb2-64257f11dc51' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array(15.)</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>beam_size</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>float64</div><div class='sc-var-unit'>mm</div><div class='sc-value-preview sc-preview'><span><div>2.0</div></span></div><input id='attrs-2f63aa9a-4ca8-40bb-91a8-5b4a98a823d8' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-2f63aa9a-4ca8-40bb-91a8-5b4a98a823d8' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-528f7dc9-f453-4769-ad75-d6576785537b' class='sc-var-data-in' type='checkbox'><label for='data-528f7dc9-f453-4769-ad75-d6576785537b' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array(2.)</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>detector_shape</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>PyObject</div><div class='sc-var-unit'></div><div class='sc-value-preview sc-preview'><span><div>DataGroup(sizes={&#x27;face&#x27;: 9216, &#x27;face_index|detector_number&#x27;: 2, &#x27;vertex&#x27;: 980...</div></span></div><input id='attrs-fd244280-f831-4b39-9068-1c917cfdd70d' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-fd244280-f831-4b39-9068-1c917cfdd70d' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-53382ef3-d0ec-4a62-9780-db5f92331f4c' class='sc-var-data-in' type='checkbox'><label for='data-53382ef3-d0ec-4a62-9780-db5f92331f4c' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>DataGroup(sizes={&#x27;face&#x27;: 9216, &#x27;face_index|detector_number&#x27;: 2, &#x27;vertex&#x27;: 9801, &#x27;winding_order&#x27;: 36864}, keys=[
+    detector_faces: Variable({&#x27;face&#x27;: 9216, &#x27;face_index|detector_number&#x27;: 2}),
+    faces: Variable({&#x27;face&#x27;: 9216}),
+    vertices: Variable({&#x27;vertex&#x27;: 9801}),
+    winding_order: Variable({&#x27;winding_order&#x27;: 36864}),
+])</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>detector_spatial_resolution</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>float64</div><div class='sc-var-unit'>m</div><div class='sc-value-preview sc-preview'><span><div>0.0025</div></span></div><input id='attrs-73e89b1b-a46c-4e0c-a5f2-d75c7fa6adb1' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-73e89b1b-a46c-4e0c-a5f2-d75c7fa6adb1' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-abc92424-ed1f-42d6-884a-5906a6cc9673' class='sc-var-data-in' type='checkbox'><label for='data-abc92424-ed1f-42d6-884a-5906a6cc9673' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array(0.0025)</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span>gravity</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>vector3</div><div class='sc-var-unit'>m/s^2</div><div class='sc-value-preview sc-preview'><span><div>[ 0.      -9.80665  0.     ]</div></span></div><input id='attrs-2aa75be4-8ebe-47d0-b3d1-b1d2fd6e48c2' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-2aa75be4-8ebe-47d0-b3d1-b1d2fd6e48c2' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-5588764c-39fa-48b1-8e1f-22c20fd5f5a4' class='sc-var-data-in' type='checkbox'><label for='data-5588764c-39fa-48b1-8e1f-22c20fd5f5a4' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([ 0.     , -9.80665,  0.     ])</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span>incident_beam</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>vector3</div><div class='sc-var-unit'>m</div><div class='sc-value-preview sc-preview'><span><div>[ 0.  0. 15.]</div></span></div><input id='attrs-7af56f3b-68d3-422f-8e9a-451897103cf0' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-7af56f3b-68d3-422f-8e9a-451897103cf0' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-b5537e4c-969c-4652-a888-7903ba3940c8' class='sc-var-data-in' type='checkbox'><label for='data-b5537e4c-969c-4652-a888-7903ba3940c8' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([ 0.,  0., 15.])</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span>sample_position</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>vector3</div><div class='sc-var-unit'>m</div><div class='sc-value-preview sc-preview'><span><div>[0. 0. 0.]</div></span></div><input id='attrs-8cfef6ba-3b4e-4187-964d-105ac681aab2' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-8cfef6ba-3b4e-4187-964d-105ac681aab2' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-d53302e6-e3c9-462d-9d84-a939f52649a0' class='sc-var-data-in' type='checkbox'><label for='data-d53302e6-e3c9-462d-9d84-a939f52649a0' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([0., 0., 0.])</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span>sample_rotation</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>float64</div><div class='sc-var-unit'>deg</div><div class='sc-value-preview sc-preview'><span><div>0.7989</div></span></div><input id='attrs-79105583-5e10-420c-9dff-7440b178e4d8' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-79105583-5e10-420c-9dff-7440b178e4d8' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-63e9a3a0-9b00-45ec-b9a9-eea0086af384' class='sc-var-data-in' type='checkbox'><label for='data-63e9a3a0-9b00-45ec-b9a9-eea0086af384' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array(0.7989)</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>sample_size</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>float64</div><div class='sc-var-unit'>mm</div><div class='sc-value-preview sc-preview'><span><div>10.0</div></span></div><input id='attrs-1ba5ee4e-859b-443b-bfc9-74dc9b955bbc' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-1ba5ee4e-859b-443b-bfc9-74dc9b955bbc' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-0adf1e04-ad0c-4359-809f-c8ad0d3b4000' class='sc-var-data-in' type='checkbox'><label for='data-0adf1e04-ad0c-4359-809f-c8ad0d3b4000' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array(10.)</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span>source_chopper_1</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>PyObject</div><div class='sc-var-unit'></div><div class='sc-value-preview sc-preview'><span><div>DataGroup(sizes={}, keys=[&#x27;frequency&#x27;, &#x27;position&#x27;, &#x27;phase&#x27;])</div></span></div><input id='attrs-4ea84320-c493-4b5e-a0b2-390d6188d03b' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-4ea84320-c493-4b5e-a0b2-390d6188d03b' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-58383e96-16b4-46bd-bb0c-cf6f992a6e3e' class='sc-var-data-in' type='checkbox'><label for='data-58383e96-16b4-46bd-bb0c-cf6f992a6e3e' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>DataGroup(sizes={}, keys=[
+    frequency: Variable({}),
+    position: Variable({}),
+    phase: Variable({}),
+])</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span>source_chopper_2</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>PyObject</div><div class='sc-var-unit'></div><div class='sc-value-preview sc-preview'><span><div>DataGroup(sizes={}, keys=[&#x27;frequency&#x27;, &#x27;position&#x27;, &#x27;phase&#x27;])</div></span></div><input id='attrs-527de112-013c-4ac2-bee8-793d35950bf4' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-527de112-013c-4ac2-bee8-793d35950bf4' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-11b17dd6-696b-45d9-ada4-37cdde848c7f' class='sc-var-data-in' type='checkbox'><label for='data-11b17dd6-696b-45d9-ada4-37cdde848c7f' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>DataGroup(sizes={}, keys=[
+    frequency: Variable({}),
+    position: Variable({}),
+    phase: Variable({}),
+])</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>theta</span></div><div class='sc-var-dims'>(theta [bin-edge])</div><div class='sc-var-dtype'>float64</div><div class='sc-var-unit'>rad</div><div class='sc-value-preview sc-preview'><span><div>0.0, 0.000, ..., 0.021, 0.021</div></span></div><input id='attrs-f9131212-f7b9-43b4-b07b-1429b9bb6904' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-f9131212-f7b9-43b4-b07b-1429b9bb6904' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-6dbad383-2da4-4506-b0f5-13e4a1708aee' class='sc-var-data-in' type='checkbox'><label for='data-6dbad383-2da4-4506-b0f5-13e4a1708aee' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([0.        , 0.00012771, 0.00025541, 0.00038312, 0.00051083,
+       0.00063854, 0.00076624, 0.00089395, 0.00102166, 0.00114936,
+       0.00127707, 0.00140478, 0.00153248, 0.00166019, 0.0017879 ,
+       0.00191561, 0.00204331, 0.00217102, 0.00229873, 0.00242643,
+       0.00255414, 0.00268185, 0.00280955, 0.00293726, 0.00306497,
+       0.00319268, 0.00332038, 0.00344809, 0.0035758 , 0.0037035 ,
+       0.00383121, 0.00395892, 0.00408662, 0.00421433, 0.00434204,
+       0.00446975, 0.00459745, 0.00472516, 0.00485287, 0.00498057,
+       0.00510828, 0.00523599, 0.00536369, 0.0054914 , 0.00561911,
+       0.00574682, 0.00587452, 0.00600223, 0.00612994, 0.00625764,
+       0.00638535, 0.00651306, 0.00664076, 0.00676847, 0.00689618,
+       0.00702389, 0.00715159, 0.0072793 , 0.00740701, 0.00753471,
+       0.00766242, 0.00779013, 0.00791784, 0.00804554, 0.00817325,
+       0.00830096, 0.00842866, 0.00855637, 0.00868408, 0.00881178,
+       0.00893949, 0.0090672 , 0.00919491, 0.00932261, 0.00945032,
+       0.00957803, 0.00970573, 0.00983344, 0.00996115, 0.01008885,
+       0.01021656, 0.01034427, 0.01047198, 0.01059968, 0.01072739,
+       0.0108551 , 0.0109828 , 0.01111051, 0.01123822, 0.01136592,
+       0.01149363, 0.01162134, 0.01174905, 0.01187675, 0.01200446,
+       0.01213217, 0.01225987, 0.01238758, 0.01251529, 0.01264299,
+       0.0127707 , 0.01289841, 0.01302612, 0.01315382, 0.01328153,
+       0.01340924, 0.01353694, 0.01366465, 0.01379236, 0.01392007,
+       0.01404777, 0.01417548, 0.01430319, 0.01443089, 0.0145586 ,
+       0.01468631, 0.01481401, 0.01494172, 0.01506943, 0.01519714,
+       0.01532484, 0.01545255, 0.01558026, 0.01570796, 0.01583567,
+       0.01596338, 0.01609108, 0.01621879, 0.0163465 , 0.01647421,
+       0.01660191, 0.01672962, 0.01685733, 0.01698503, 0.01711274,
+       0.01724045, 0.01736815, 0.01749586, 0.01762357, 0.01775128,
+       0.01787898, 0.01800669, 0.0181344 , 0.0182621 , 0.01838981,
+       0.01851752, 0.01864522, 0.01877293, 0.01890064, 0.01902835,
+       0.01915605, 0.01928376, 0.01941147, 0.01953917, 0.01966688,
+       0.01979459, 0.01992229, 0.02005   , 0.02017771, 0.02030542,
+       0.02043312, 0.02056083, 0.02068854, 0.02081624, 0.02094395])</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>transformations</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>PyObject</div><div class='sc-var-unit'></div><div class='sc-value-preview sc-preview'><span><div>DataGroup(sizes={}, keys=[&#x27;translation&#x27;])</div></span></div><input id='attrs-40faaf67-1882-4c8e-9887-8d3ff6072d95' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-40faaf67-1882-4c8e-9887-8d3ff6072d95' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-64ce42cd-a71a-4c63-ae2a-bb5a35e23ddc' class='sc-var-data-in' type='checkbox'><label for='data-64ce42cd-a71a-4c63-ae2a-bb5a35e23ddc' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>DataGroup(sizes={}, keys=[
+    translation: DataArray({}),
+])</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>wavelength</span></div><div class='sc-var-dims'>(wavelength [bin-edge])</div><div class='sc-var-dtype'>float64</div><div class='sc-var-unit'>Å</div><div class='sc-value-preview sc-preview'><span><div>0.0, 0.091, ..., 14.909, 15.0</div></span></div><input id='attrs-690a0072-4164-4d60-81c3-82d3687d7856' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-690a0072-4164-4d60-81c3-82d3687d7856' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-893738dc-22ce-41b9-8aa2-223f279b912a' class='sc-var-data-in' type='checkbox'><label for='data-893738dc-22ce-41b9-8aa2-223f279b912a' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([ 0.        ,  0.09146341,  0.18292683,  0.27439024,  0.36585366,
+        0.45731707,  0.54878049,  0.6402439 ,  0.73170732,  0.82317073,
+        0.91463415,  1.00609756,  1.09756098,  1.18902439,  1.2804878 ,
+        1.37195122,  1.46341463,  1.55487805,  1.64634146,  1.73780488,
+        1.82926829,  1.92073171,  2.01219512,  2.10365854,  2.19512195,
+        2.28658537,  2.37804878,  2.4695122 ,  2.56097561,  2.65243902,
+        2.74390244,  2.83536585,  2.92682927,  3.01829268,  3.1097561 ,
+        3.20121951,  3.29268293,  3.38414634,  3.47560976,  3.56707317,
+        3.65853659,  3.75      ,  3.84146341,  3.93292683,  4.02439024,
+        4.11585366,  4.20731707,  4.29878049,  4.3902439 ,  4.48170732,
+        4.57317073,  4.66463415,  4.75609756,  4.84756098,  4.93902439,
+        5.0304878 ,  5.12195122,  5.21341463,  5.30487805,  5.39634146,
+        5.48780488,  5.57926829,  5.67073171,  5.76219512,  5.85365854,
+        5.94512195,  6.03658537,  6.12804878,  6.2195122 ,  6.31097561,
+        6.40243902,  6.49390244,  6.58536585,  6.67682927,  6.76829268,
+        6.8597561 ,  6.95121951,  7.04268293,  7.13414634,  7.22560976,
+        7.31707317,  7.40853659,  7.5       ,  7.59146341,  7.68292683,
+        7.77439024,  7.86585366,  7.95731707,  8.04878049,  8.1402439 ,
+        8.23170732,  8.32317073,  8.41463415,  8.50609756,  8.59756098,
+        8.68902439,  8.7804878 ,  8.87195122,  8.96341463,  9.05487805,
+        9.14634146,  9.23780488,  9.32926829,  9.42073171,  9.51219512,
+        9.60365854,  9.69512195,  9.78658537,  9.87804878,  9.9695122 ,
+       10.06097561, 10.15243902, 10.24390244, 10.33536585, 10.42682927,
+       10.51829268, 10.6097561 , 10.70121951, 10.79268293, 10.88414634,
+       10.97560976, 11.06707317, 11.15853659, 11.25      , 11.34146341,
+       11.43292683, 11.52439024, 11.61585366, 11.70731707, 11.79878049,
+       11.8902439 , 11.98170732, 12.07317073, 12.16463415, 12.25609756,
+       12.34756098, 12.43902439, 12.5304878 , 12.62195122, 12.71341463,
+       12.80487805, 12.89634146, 12.98780488, 13.07926829, 13.17073171,
+       13.26219512, 13.35365854, 13.44512195, 13.53658537, 13.62804878,
+       13.7195122 , 13.81097561, 13.90243902, 13.99390244, 14.08536585,
+       14.17682927, 14.26829268, 14.3597561 , 14.45121951, 14.54268293,
+       14.63414634, 14.72560976, 14.81707317, 14.90853659, 15.        ])</pre></span></li></ul></div></li><li class='sc-section-item'><input id='section-e539cf94-ea44-4799-bef1-b2b29126e130' class='sc-section-summary-in' type='checkbox'  checked><label for='section-e539cf94-ea44-4799-bef1-b2b29126e130' class='sc-section-summary' >Data: <span>(1)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span></span></div><div class='sc-var-dims'>(theta, wavelength)</div><div class='sc-var-dtype'>DataArrayView</div><div class='sc-var-unit'></div><div class='sc-value-preview sc-preview'><span><div>binned data [len=0, len=0, ..., len=0, len=0]</div></span></div><input id='attrs-d3dde657-85ea-4f8a-a00f-0bb2742e40bd' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-d3dde657-85ea-4f8a-a00f-0bb2742e40bd' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-93a8d5ec-f7f4-4bcf-80e7-2366673ce346' class='sc-var-data-in' type='checkbox'><label for='data-93a8d5ec-f7f4-4bcf-80e7-2366673ce346' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>dim=&#x27;event&#x27;,
+content=DataArray(
+          dims=(event: 261296),
+          data=float32[counts],
+          coords={&#x27;event_time_zero&#x27;:datetime64[ns], &#x27;tof&#x27;:float64[µs], &#x27;wavelength&#x27;:float64[Å],
+                  &#x27;theta&#x27;:float64[rad]})</pre></li></ul></div></li><li class='sc-section-item'><input id='section-53896342-27c2-4abb-9ace-96790f89d861' class='sc-section-summary-in' type='checkbox'  checked><label for='section-53896342-27c2-4abb-9ace-96790f89d861' class='sc-section-summary' >Attributes: <span>(1)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span>orso</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>PyObject</div><div class='sc-var-unit'></div><div class='sc-value-preview sc-preview'><span><div>Orso(
+     data_source=DataSource(
+                            owner=Person(n...</div></span></div><input id='attrs-3b87614d-a6c8-4d35-b9c4-0c206c76d5e8' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-3b87614d-a6c8-4d35-b9c4-0c206c76d5e8' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-2a5759ab-544b-454b-a25b-3650670c28a9' class='sc-var-data-in' type='checkbox'><label for='data-2a5759ab-544b-454b-a25b-3650670c28a9' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>Orso(
+     data_source=DataSource(
+                            owner=Person(name=&#x27;Jochen Stahn&#x27;, affiliation=&#x27;Paul Scherrer Institut&#x27;, contact=&#x27;jochen.stahn@psi.ch&#x27;),
+                            experiment=Experiment(title=&#x27;commissioning&#x27;, instrument=&#x27;AMOR&#x27;, start_date=&#x27;2020-11-25&#x27;, probe=&#x27;neutrons&#x27;, facility=&#x27;Paul Scherrer Institut&#x27;),
+                            sample=Sample(name=&#x27;Ni/Ti Multilayer&#x27;, category=&#x27;gas/solid&#x27;, composition=&#x27;air | (Ni | Ti) * 5 | Si&#x27;),
+                            measurement=Measurement(
+                                                    instrument_settings=InstrumentSettings(
+                                                                                           incident_angle=Value(None),
+                                                                                           wavelength=Value(None),
+                                                                                           ),
+                                                    data_files=[&#x27;/home/runner/.cache/ess/amor/1/sample.nxs&#x27;],
+                                                    scheme=&#x27;angle- and energy-dispersive&#x27;,
+                                                    comment=&#x27;Pixel positions corrected&#x27;,
+                                                    ),
+                            ),
+     reduction=Reduction(
+                         software=Software(name=&#x27;scipp-ess&#x27;, version=&#x27;24.1.1.dev5+g8409fb3&#x27;, platform=&#x27;Linux-6.5.0-1016-azure-x86_64-with-glibc2.10&#x27;),
+                         creator=Person(name=&#x27;Andrew R. McCluskey&#x27;, affiliation=&#x27;European Spallation Source&#x27;, contact=&#x27;andrew.mccluskey@ess.eu&#x27;),
+                         corrections=[&#x27;chopper ToF correction&#x27;],
+                         computer=&#x27;fv-az773-140&#x27;,
+                         script=&#x27;https://github.com/scipp/ess/blob/main/docs/instruments/amor/amor_reduction.ipynb&#x27;,
+                         ),
+     columns=[Column(name=&#x27;Qz&#x27;, unit=&#x27;1/angstrom&#x27;, dimension=&#x27;wavevector transfer&#x27;), Column(name=&#x27;R&#x27;, dimension=&#x27;reflectivity&#x27;), Column(name=&#x27;sR&#x27;, dimension=&#x27;standard deivation of reflectivity&#x27;), Column(name=&#x27;sQz&#x27;, unit=&#x27;1/angstrom&#x27;, dimension=&#x27;standard deviation of wavevector transfer resolution&#x27;)],
+     )</pre></li></ul></div></li></ul></div></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">binned</span><span class="o">.</span><span class="n">hist</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/instruments_amor_amor_reduction_57_0.svg" src="../../_images/instruments_amor_amor_reduction_57_0.svg" /></div>
+</div>
+<p>This plot can be used to check if the value of the sample rotation angle <span class="math notranslate nohighlight">\(\omega\)</span> is correct. The bright triangles should be pointing back to the origin <span class="math notranslate nohighlight">\(\lambda = \theta = 0\)</span>.</p>
+</section>
+<section id="References">
+<h2>References<a class="headerlink" href="#References" title="Permalink to this headline">#</a></h2>
+<div id="stahn2016"></div><p>Stahn J., Glavic A., <strong>2016</strong>, <em>Focusing neutron reflectometry: Implementation and experience on the TOF-reflectometer Amor</em>, <a class="reference external" href="https://doi.org/10.1016/j.nima.2016.03.007">Nuclear Instruments and Methods in Physics Research Section A: Accelerators, Spectrometers, Detectors and Associated Equipment, 821, 44-54</a></p>
+<script type="application/vnd.jupyter.widget-state+json">
+{"state": {"7dc12d631ab545299aaea2e167e9d506": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "a5af8a99576f4d0b998994e821a0a87f": {"model_name": "HTMLStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "353bd052d36249248cd5a64113d7c79e": {"model_name": "HTMLModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_7dc12d631ab545299aaea2e167e9d506", "placeholder": "\u200b", "style": "IPY_MODEL_a5af8a99576f4d0b998994e821a0a87f", "tabbable": null, "tooltip": null, "value": "<div class=\"sc-log\"><table class=\"sc-log\"><tr class=\"sc-log sc-log-info\"><td class=\"sc-log-time-stamp\">[2024-04-03T11:16:32]</td><td class=\"sc-log-level\">INFO</td><td class=\"sc-log-message\">Software Versions:\n  ess: 24.1.1.dev5+g8409fb3 (https://scipp.github.io/ess)\n  scippneutron: 23.9.0 (https://scipp.github.io/scippneutron)\n  scipp: 23.08.0 (https://scipp.github.io)</td><td class=\"sc-log-name\">&lt;scipp.ess&gt;</td></tr><tr class=\"sc-log sc-log-info\"><td class=\"sc-log-time-stamp\">[2024-04-03T11:16:32]</td><td class=\"sc-log-level\">INFO</td><td class=\"sc-log-message\">Constructing AMOR beamline from default parameters</td><td class=\"sc-log-name\">&lt;scipp.ess.amor&gt;</td></tr><tr class=\"sc-log sc-log-info\"><td class=\"sc-log-time-stamp\">[2024-04-03T11:16:32]</td><td class=\"sc-log-level\">INFO</td><td class=\"sc-log-message\">Constructing AMOR beamline from default parameters</td><td class=\"sc-log-name\">&lt;scipp.ess.amor&gt;</td></tr><tr class=\"sc-log sc-log-info\"><td class=\"sc-log-time-stamp\">[2024-04-03T11:16:32]</td><td class=\"sc-log-level\">INFO</td><td class=\"sc-log-message\">Downloading file &#x27;sample.nxs&#x27; from &#x27;https://public.esss.dk/groups/scipp/ess/amor/1/sample.nxs&#x27; to &#x27;/home/runner/.cache/ess/amor/1&#x27;.</td><td class=\"sc-log-name\">&lt;pooch&gt;</td></tr><tr class=\"sc-log sc-log-info\"><td class=\"sc-log-time-stamp\">[2024-04-03T11:16:35]</td><td class=\"sc-log-level\">INFO</td><td class=\"sc-log-message\">Loading &#x27;/home/runner/.cache/ess/amor/1/sample.nxs&#x27; as an Amor NeXus file</td><td class=\"sc-log-name\">&lt;scipp.ess.amor&gt;</td></tr><tr class=\"sc-log sc-log-info\"><td class=\"sc-log-time-stamp\">[2024-04-03T11:16:35]</td><td class=\"sc-log-level\">INFO</td><td class=\"sc-log-message\">Downloading file &#x27;reference.nxs&#x27; from &#x27;https://public.esss.dk/groups/scipp/ess/amor/1/reference.nxs&#x27; to &#x27;/home/runner/.cache/ess/amor/1&#x27;.</td><td class=\"sc-log-name\">&lt;pooch&gt;</td></tr><tr class=\"sc-log sc-log-info\"><td class=\"sc-log-time-stamp\">[2024-04-03T11:16:39]</td><td class=\"sc-log-level\">INFO</td><td class=\"sc-log-message\">Loading &#x27;/home/runner/.cache/ess/amor/1/reference.nxs&#x27; as an Amor NeXus file</td><td class=\"sc-log-name\">&lt;scipp.ess.amor&gt;</td></tr><tr class=\"sc-log sc-log-info\"><td class=\"sc-log-time-stamp\">[2024-04-03T11:16:40]</td><td class=\"sc-log-level\">INFO</td><td class=\"sc-log-message\">Correcting pixel positions in &#x27;sample.nxs&#x27;</td><td class=\"sc-log-name\">&lt;scipp.ess.amor_reduction&gt;</td></tr><tr class=\"sc-log sc-log-info\"><td class=\"sc-log-time-stamp\">[2024-04-03T11:16:40]</td><td class=\"sc-log-level\">INFO</td><td class=\"sc-log-message\">Transformed coords (position, sample_position, source_chopper_1, source_chopper_2, tof) -&gt; (wavelength)\n  Byproducts:\n    L1, L2, Ltotal, incident_beam, scattered_beam\n  Renamed dimensions:\n    wavelength &lt;- tof\n  Steps:\n    Compute (scattered_beam) = straight_scattered_beam(position, sample_position)\n    Compute (incident_beam) = incident_beam(source_chopper_1, source_chopper_2, sample_position)\n    Compute (L2) = L2(scattered_beam)\n    Compute (L1) = L1(incident_beam)\n    Compute (Ltotal) = total_beam_length(L1, L2)\n    Compute (wavelength) = wavelength_from_tof(tof, Ltotal)</td><td class=\"sc-log-name\">&lt;scipp&gt;</td></tr><tr class=\"sc-log sc-log-info\"><td class=\"sc-log-time-stamp\">[2024-04-03T11:16:41]</td><td class=\"sc-log-level\">INFO</td><td class=\"sc-log-message\">Transformed coords (position, sample_position, source_chopper_1, source_chopper_2, tof) -&gt; (wavelength)\n  Byproducts:\n    L1, L2, Ltotal, incident_beam, scattered_beam\n  Renamed dimensions:\n    wavelength &lt;- tof\n  Steps:\n    Compute (scattered_beam) = straight_scattered_beam(position, sample_position)\n    Compute (incident_beam) = incident_beam(source_chopper_1, source_chopper_2, sample_position)\n    Compute (L2) = L2(scattered_beam)\n    Compute (L1) = L1(incident_beam)\n    Compute (Ltotal) = total_beam_length(L1, L2)\n    Compute (wavelength) = wavelength_from_tof(tof, Ltotal)</td><td class=\"sc-log-name\">&lt;scipp&gt;</td></tr><tr class=\"sc-log sc-log-info\"><td class=\"sc-log-time-stamp\">[2024-04-03T11:16:41]</td><td class=\"sc-log-level\">INFO</td><td class=\"sc-log-message\">Transformed coords (gravity, incident_beam, sample_rotation, scattered_beam, wavelength) -&gt; (theta)\n  Renamed dimensions:\n    theta &lt;- wavelength\n  Steps:\n    Compute (theta) = theta(gravity, wavelength, incident_beam, scattered_beam, sample_rotation)</td><td class=\"sc-log-name\">&lt;scipp&gt;</td></tr><tr class=\"sc-log sc-log-info\"><td class=\"sc-log-time-stamp\">[2024-04-03T11:16:41]</td><td class=\"sc-log-level\">INFO</td><td class=\"sc-log-message\">Transformed coords (gravity, incident_beam, sample_rotation, scattered_beam, wavelength) -&gt; (theta)\n  Renamed dimensions:\n    theta &lt;- wavelength\n  Steps:\n    Compute (theta) = theta(gravity, wavelength, incident_beam, scattered_beam, sample_rotation)</td><td class=\"sc-log-name\">&lt;scipp&gt;</td></tr><tr class=\"sc-log sc-log-info\"><td class=\"sc-log-time-stamp\">[2024-04-03T11:16:41]</td><td class=\"sc-log-level\">INFO</td><td class=\"sc-log-message\">Transformed coords (theta, wavelength) -&gt; (Q)\n  Renamed dimensions:\n    Q &lt;- theta\n  Steps:\n    Compute (Q) = reflectometry_q(wavelength, theta)</td><td class=\"sc-log-name\">&lt;scipp&gt;</td></tr><tr class=\"sc-log sc-log-info\"><td class=\"sc-log-time-stamp\">[2024-04-03T11:16:41]</td><td class=\"sc-log-level\">INFO</td><td class=\"sc-log-message\">Transformed coords (theta, wavelength) -&gt; (Q)\n  Renamed dimensions:\n    Q &lt;- theta\n  Steps:\n    Compute (Q) = reflectometry_q(wavelength, theta)</td><td class=\"sc-log-name\">&lt;scipp&gt;</td></tr><tr class=\"sc-log sc-log-info\"><td class=\"sc-log-time-stamp\">[2024-04-03T11:16:46]</td><td class=\"sc-log-level\">INFO</td><td class=\"sc-log-message\">Transformed coords (gravity, position, sample_position, sample_rotation, source_chopper_1, source_chopper_2, tof) -&gt; (theta, wavelength)\n  Byproducts:\n    L1, L2, Ltotal, incident_beam, scattered_beam\n  Renamed dimensions:\n    theta &lt;- tof\n  Steps:\n    Compute (scattered_beam) = straight_scattered_beam(position, sample_position)\n    Compute (incident_beam) = incident_beam(source_chopper_1, source_chopper_2, sample_position)\n    Compute (L2) = L2(scattered_beam)\n    Compute (L1) = L1(incident_beam)\n    Compute (Ltotal) = total_beam_length(L1, L2)\n    Compute (wavelength) = wavelength_from_tof(tof, Ltotal)\n    Compute (theta) = theta(gravity, wavelength, incident_beam, scattered_beam, sample_rotation)</td><td class=\"sc-log-name\">&lt;scipp&gt;</td></tr></table></div>"}}, "90301f55cfa0479d9e780e54e0e6d2ca": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "90ba578ecb334da788ab0d632e28988f": {"model_name": "HTMLStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "476cdd7245ca49b1ac9cfcdb6788dfd6": {"model_name": "HTMLModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_90301f55cfa0479d9e780e54e0e6d2ca", "placeholder": "\u200b", "style": "IPY_MODEL_90ba578ecb334da788ab0d632e28988f", "tabbable": null, "tooltip": null, "value": "<style id=\"scipp-style-sheet\">.sc-root{--sc-background-color0:var(--jp-layout-color0,#fff);--sc-background-color1:var(--jp-layout-color1,#fcfcfc);--sc-background-color2:var(--jp-layout-color2,#efefef);--sc-inverse-background-color0:var(--jp-inverse-layout-color4,#111);--sc-font-color0:var(--jp-content-font-color0,#000);--sc-font-color1:var(--jp-content-font-color1,#555);--sc-font-color2:var(--jp-content-font-color2,#888);--sc-font-color3:var(--jp-content-font-color3,#ccc);--sc-table-data-color:#f6d028;--sc-table-coords-color:#c6e590;--sc-table-masks-color:#c8c8c8;--sc-table-attrs-color:#ff5555;--sc-table-header-font-color:#111111;}.sc-wrap{font-size:14px;min-width:300px;max-width:800px;}.sc-var-attrs .sc-wrap{padding-left:3em;}.sc-header{padding-top:6px;padding-bottom:6px;margin-bottom:4px;border-bottom:solid 1px #ddd;}.sc-header > div,.sc-header > ul{display:inline;margin-top:0;margin-bottom:0;}.sc-obj-type,.sc-array-name{margin-left:2px;margin-right:10px;}.sc-obj-type{color:var(--sc-font-color1);}.sc-underlying-size{color:var(--sc-font-color2);}.sc-sections,.reveal .sc-sections{padding-left:0 !important;display:grid;grid-template-columns:150px auto auto auto 1fr 20px 20px;}.sc-section-item{display:contents;}.sc-section-item input{display:none;}.sc-section-item input:enabled + label{cursor:pointer;color:var(--sc-font-color1);}.sc-section-item input:enabled + label:hover{color:var(--sc-font-color0);}.sc-section-summary{grid-column:1;font-weight:500;}.sc-section-summary > span{display:inline-block;padding-left:0.5em;}.sc-section-summary-in:disabled + label{color:var(--sc-font-color1);}.sc-section-summary-in + label:before{display:inline-block;content:'\u25ba';font-size:11px;width:15px;text-align:center;}.sc-section-summary-in:disabled + label:before{color:var(--sc-font-color3);}.sc-section-summary-in:checked + label:before{content:'\u25bc';}.sc-section-summary-in:checked + label > span{display:none;}.sc-section-summary,.sc-section-inline-details{padding-top:4px;padding-bottom:4px;}.sc-section-inline-details{grid-column:2 / 6;}.sc-section-details{display:none;grid-column:1 / -1;margin-bottom:5px;}.sc-section-summary-in:checked ~ .sc-section-details{display:contents;}.sc-array-wrap{grid-column:1 / -1;display:grid;grid-template-columns:20px auto;}.sc-array-wrap > label{grid-column:1;vertical-align:top;}.sc-preview{color:var(--sc-font-color2);}.sc-array-preview,.sc-array-data{padding:0 5px !important;grid-column:2;}.sc-array-data,.sc-array-in:checked ~ .sc-array-preview{display:none;}.sc-array-in:checked ~ .sc-array-data,.sc-array-preview{display:inline-block;}.sc-dim-list{display:inline-block !important;list-style:none;padding:0 !important;margin:0;}.sc-dim-list li{display:inline-block;padding:0;margin:0!important;}.sc-dim-list:before{content:'(';}.sc-dim-list:after{content:')';}.sc-dim-list li:not(:last-child):after{content:',';padding-right:5px;}.sc-dim-list li span,.sc-standalone-var-name > span span,.sc-var-name > span span{padding:0 !important;}.sc-aligned{font-weight:bold;}.sc-var-list,.sc-var-item,.reveal .sc-var-list,.reveal .sc-var-item{display:contents;}.sc-var-item > div,.sc-var-item label,.sc-var-item > .sc-var-name span{background-color:var(--sc-background-color1);margin-bottom:0;}.sc-var-item > .sc-var-name:hover span{padding-right:5px;}.sc-var-list > li:nth-child(odd) > div,.sc-var-list > li:nth-child(odd) > label,.sc-var-list > li:nth-child(odd) > .sc-var-name span{background-color:var(--sc-background-color2);}.sc-var-name{grid-column:1;}.sc-var-dims{grid-column:2;}.sc-var-dtype{grid-column:3;text-align:right;color:var(--sc-font-color2);}.sc-var-unit{grid-column:4;text-align:left;color:var(--sc-font-color1);max-width:50pt;text-overflow:ellipsis;}.sc-value-preview{grid-column:5;}.sc-var-preview-variances{text-align:right;}.sc-sections .sc-section-item .sc-section-summary,.sc-sections .sc-section-item .sc-section-inline-details,.sc-section-item .sc-var-list .sc-var-item > div,.sc-section-item .sc-var-list .sc-var-item > label,.sc-section-details .sc-var-list .sc-var-item > div,.sc-section-details .sc-var-list .sc-var-item > label{margin-top:0;margin-bottom:0;}.sc-var-name,.sc-var-dims,.sc-var-dtype,.sc-var-unit,.sc-preview,.sc-attrs dt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:10px;}.sc-var-name:hover,.sc-var-dims:hover,.sc-var-dtype:hover,.sc-var-unit:hover,.sc-attrs dt:hover{overflow:visible;width:auto;z-index:1;}.sc-var-attrs{display:block;}.sc-var-data,.reveal .sc-var-data{display:none;}.sc-var-attrs,.sc-var-data{background-color:var(--sc-background-color0) !important;padding-bottom:5px !important;}.sc-var-attrs-in:checked ~ .sc-var-attrs{display:none;}.sc-var-data-in:checked ~ .sc-var-data{display:block;}.sc-var-data > table{float:right;}.sc-var-name span,.sc-var-data{padding-left:25px !important;}.sc-var-attrs,.sc-var-data{grid-column:1 / -1;}dl.sc-attrs{padding:0;margin:0;display:grid;grid-template-columns:125px auto;}.sc-attrs dt,dd{padding:0;margin:0;float:left;padding-right:10px;width:auto;}.sc-attrs dt{font-weight:normal;grid-column:1;}.sc-attrs dt:hover span{display:inline-block;padding-right:10px;}.sc-attrs dd{grid-column:2;white-space:pre-wrap;word-break:break-all;}.sc-icon-database,.sc-icon-file-text2{display:inline-block;vertical-align:middle;width:1em;height:1.5em !important;stroke-width:0;stroke:currentColor;fill:currentColor;}label.sc-hide-icon svg{opacity:0;}.sc-standalone-var-name{grid-column:1/3;}.sc-standalone-var-name span{padding-left:25px;padding-right:10px;}.sc-table{border-collapse:collapse;}.sc-title{font-weight:bold;font-size:1.5em;}.sc-subtitle{font-weight:normal;font-style:italic;text-align:left;font-size:1.2em;padding:1px;}.sc-table th,.sc-table td{border:1px solid var(--sc-inverse-background-color0);padding:0 5px 0 5px;}.sc-table th{text-align:center;}.sc-table tr{background-color:var(--sc-background-color1);text-align:right;}.sc-table tr:hover{background-color:var(--sc-background-color2);}.sc-table th.sc-data{background-color:var(--sc-table-data-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-coords{background-color:var(--sc-table-coords-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-masks{background-color:var(--sc-table-masks-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-attrs{background-color:var(--sc-table-attrs-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-subheader{background-color:var(--sc-background-color2);}.sc-table td.sc-padding{background-color:var(--sc-background-color1);border:0 solid var(--sc-background-color1);height:1.2em;}.sc-label{fill:var(--sc-font-color0,#444444);text-anchor:middle;}.sc-name{fill:var(--sc-font-color0,#111111);}.sc-inset-line{stroke:var(--sc-font-color1);stroke-width:0.05;stroke-dasharray:0.2,0.2;}.sc-log-wrap{height:25ex;resize:vertical;overflow-y:scroll;display:flex;flex-direction:column-reverse;border:1px solid;border-color:var(--jp-border-color2);background-color:var(--sc-background-color1);}div.sc-log{line-height:2.5ex;}table.sc-log{table-layout:auto;border-collapse:collapse;}tr.sc-log:nth-child(even){background-color:var(--sc-background-color0);}tr.sc-log > td{vertical-align:top;padding-bottom:0.5ex;}.sc-log-time-stamp{min-width:22ch;font-family:var(--jp-code-font-family);color:var(--sc-font-color2);}.sc-log-level{min-width:10ch;}tr.sc-log-debug td.sc-log-level{color:var(--jp-accent-color1);}tr.sc-log-info td.sc-log-level{color:var(--jp-info-color1);}tr.sc-log-warning td.sc-log-level{color:var(--jp-warn-color1);}tr.sc-log-error td.sc-log-level{font-weight:bold;color:var(--jp-error-color2);}tr.sc-log-critical td.sc-log-level{font-weight:bold;color:var(--sc-background-color0);background-color:var(--jp-error-color1);}.sc-log-message{white-space:pre-wrap;width:100%;}.sc-log-html-payload{white-space:normal;}.sc-log-name{padding-right:0.5em;text-align:right;white-space:pre-wrap;color:var(--sc-font-color3);}</style>"}}, "d05cb6a49d9d40999d8ff8b0f01b733d": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "52ca6524a35346f4a4bfc16ef68160ce": {"model_name": "VBoxModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_dom_classes": ["sc-log-wrap"], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "VBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "VBoxView", "box_style": "", "children": ["IPY_MODEL_476cdd7245ca49b1ac9cfcdb6788dfd6", "IPY_MODEL_353bd052d36249248cd5a64113d7c79e"], "layout": "IPY_MODEL_d05cb6a49d9d40999d8ff8b0f01b733d", "tabbable": null, "tooltip": null}}}, "version_major": 2, "version_minor": 0}
+</script></section>
+</section>
+
+
+              </div>
+              
+            </main>
+            <footer class="footer-article noprint">
+                
+    <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+    <a class='left-prev' id="prev-link" href="amor.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">Amor</p>
+        </div>
+    </a>
+    <a class='right-next' id="next-link" href="reference.html" title="next page">
+    <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Reference</p>
+    </div>
+    <i class="fas fa-angle-right"></i>
+    </a>
+</div>
+            </footer>
+        </div>
+    </div>
+    <div class="footer-content row">
+        <footer class="col footer"><p>
+  
+    By Scipp contributors<br/>
+  
+      &copy; Copyright 2023 Scipp contributors.<br/>
+</p>
+        </footer>
+    </div>
+    
+</div>
+
+
+      </div>
+    </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+
+
+  </body>
+</html>

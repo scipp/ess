@@ -1,0 +1,504 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "9a935df3-c816-4829-99c3-2afa979b7611",
+   "metadata": {},
+   "source": [
+    "# SANS2D: I(Q) for sample and background\n",
+    "\n",
+    "In this notebook, we will be reducing a sample and a background measurements to a one-dimensional $I(Q)$.\n",
+    "\n",
+    "It assumes the detector data has been recorded in event mode, while the monitor data has been histogrammed.\n",
+    "\n",
+    "The data used in this notebook has been published in [Manasi et al. (2021)](#manasi2021),\n",
+    "and we kindly thank the authors for allowing us to use their data.\n",
+    "\n",
+    "**Outline:**\n",
+    "\n",
+    "- We will begin by loading the data files containing the sample, direct, and background measurements.\n",
+    "- We will then apply some corrections to beamline components specific to the SANS2D beamline.\n",
+    "- This will be followed by some masking of some saturated or defect detector pixels\n",
+    "- Finally, the sample and background measurement will be converted to the $Q$ dimension"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "8c7f7cf7-0582-4953-a772-a0f87d1cf0e2",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "import matplotlib.pyplot as plt\n",
+    "import scipp as sc\n",
+    "from ess import loki, sans\n",
+    "from ess.logging import configure_workflow\n",
+    "import scippneutron as scn"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "f55b66b3-d206-45a5-be17-bd51893f654b",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "logger = configure_workflow('sans2d_reduction', filename='sans2d.log')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "b5d36f11-9903-48f8-a626-86f137995681",
+   "metadata": {},
+   "source": [
+    "## Define reduction workflow parameters\n",
+    "\n",
+    "We define here whether to include the effects of gravity,\n",
+    "as well as common time-of-flight, wavelength and $Q$ bins for all the measurements.\n",
+    "\n",
+    "We also define a range of wavelengths for the monitors that are considered to not be part of the background."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "239166d6-d62f-46e9-8316-83c26f0f05ce",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Include effects of gravity?\n",
+    "gravity = True\n",
+    "\n",
+    "tof_bins = sc.linspace(dim='tof', start=0, stop=100000, num=2, unit='us')\n",
+    "\n",
+    "wavelength_bins = sc.linspace(dim='wavelength', start=2.0, stop=16.0, num=141,\n",
+    "                              unit='angstrom')\n",
+    "\n",
+    "q_bins = sc.linspace(dim='Q', start=0.01, stop=0.6, num=141, unit='1/angstrom')\n",
+    "\n",
+    "# Define the range of wavelengths for the monitors that are considered\n",
+    "# to not be part of the background\n",
+    "monitor_non_background_range = sc.array(dims=['wavelength'],\n",
+    "                                        values=[0.7, 17.1], unit='angstrom')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "bafd7ab4-d478-4c96-8196-69029fb221c4",
+   "metadata": {},
+   "source": [
+    "## Loading data files\n",
+    "\n",
+    "We load the following files:\n",
+    "\n",
+    "- The direct beam function for the main detector (gives detector efficiency as a function of wavelength)\n",
+    "- The sample measurement\n",
+    "- The direct measurement: this is the run with the empty sample holder/cuvette\n",
+    "- the background measurement: this is the run with only the solvent which the sample is placed in"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "0315d002-9cab-4ae4-8f63-c72a532f716b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ds = sc.Dataset()\n",
+    "\n",
+    "#Using only one-forth of the full spectra 245760 (reserved for first detector)\n",
+    "spectrum_size =  245760//4\n",
+    "\n",
+    "direct_beam = loki.io.load_rkh_wav(\n",
+    "    loki.data.get_path('DIRECT_SANS2D_REAR_34327_4m_8mm_16Feb16.dat'))\n",
+    "\n",
+    "ds['sample'] = loki.io.load_sans2d(filename=loki.data.get_path('SANS2D00063114.nxs'),\n",
+    "                                   spectrum_size=spectrum_size, tof_bins=tof_bins)\n",
+    "\n",
+    "ds['direct'] = loki.io.load_sans2d(filename=loki.data.get_path('SANS2D00063091.nxs'),\n",
+    "                                   spectrum_size=spectrum_size, tof_bins=tof_bins)\n",
+    "\n",
+    "ds['background'] = loki.io.load_sans2d(filename=loki.data.get_path('SANS2D00063159.nxs'),\n",
+    "                                       spectrum_size=spectrum_size, tof_bins=tof_bins)\n",
+    "ds"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e3b0b991-85c4-40fe-a903-74b43716a155",
+   "metadata": {},
+   "source": [
+    "## Apply corrections to pixel positions\n",
+    "\n",
+    "We apply some corrections to the detector pixel and monitor positions,\n",
+    "as the geometry stored in the file is inaccurate."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a6996c3e-a042-4758-a443-67bd805ec0b0",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Custom SANS2D position offsets\n",
+    "sample_pos_z_offset = 0.053 * sc.units.m\n",
+    "bench_pos_y_offset = 0.001 * sc.units.m\n",
+    "# There is some uncertainity here\n",
+    "monitor4_pos_z_offset = -6.719 * sc.units.m\n",
+    "\n",
+    "# Geometry transformation\n",
+    "x_offset = -0.09288 * sc.units.m\n",
+    "y_offset = 0.08195 * sc.units.m"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "b616d643-8504-4eda-ba7a-bb73b85e7b80",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ds.coords[\"pixel_width\"] = 0.0035 * sc.units.m\n",
+    "ds.coords[\"pixel_height\"] = 0.002033984375 * sc.units.m\n",
+    "\n",
+    "# Change sample position\n",
+    "ds.coords[\"sample_position\"].fields.z += sample_pos_z_offset\n",
+    "# Apply bench offset to pixel positions\n",
+    "ds.coords[\"position\"].fields.y += bench_pos_y_offset\n",
+    "\n",
+    "for key in ds:\n",
+    "    ds[key].attrs[\"monitor4\"].value.coords[\"position\"].fields.z += monitor4_pos_z_offset\n",
+    "\n",
+    "# Now shift pixels positions to get the correct beam center\n",
+    "ds.coords['position'].fields.x += x_offset\n",
+    "ds.coords['position'].fields.y += y_offset"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "eeb81dd1-078a-495b-8cff-49c474be65dd",
+   "metadata": {},
+   "source": [
+    "## Masking\n",
+    "\n",
+    "The next step is to mask noisy and saturated pixels,\n",
+    "as well as a time-of-flight range that contains spurious artifacts from the beamline components.\n",
+    "\n",
+    "**Note:** We use programatic masks here and not those stored in xml files.\n",
+    "\n",
+    "### Mask bad pixels\n",
+    "\n",
+    "We mask the edges of the detector, which are usually noisy.\n",
+    "We also mask the region close to the center of the beam,\n",
+    "so as to not include saturated pixels in our data reduction."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e54e6899-4842-4b91-82ab-15c5ceef5edb",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "mask_edges = (\n",
+    "    (sc.abs(ds.coords['position'].fields.x - x_offset) > sc.scalar(0.48, unit='m')) |\n",
+    "    (sc.abs(ds.coords['position'].fields.y - y_offset) > sc.scalar(0.45, unit='m')))\n",
+    "\n",
+    "mask_center = sc.sqrt(\n",
+    "    ds.coords['position'].fields.x**2 +\n",
+    "    ds.coords['position'].fields.y**2) < sc.scalar(0.04, unit='m')\n",
+    "\n",
+    "for key in ds:\n",
+    "    ds[key].masks['edges'] = mask_edges\n",
+    "    ds[key].masks['center'] = mask_center"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "fbdf4c28-1135-4946-a07c-3fe70250a0e4",
+   "metadata": {},
+   "source": [
+    "We can inspect that the coordinate corrections and masking were applied correctly by opening the instrument view."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "685b6317-3293-4cba-bef3-51cb797e6ed1",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "scn.instrument_view(ds['sample'], pixel_size=0.0075)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "eef1cb3a-d3e8-4d5c-88fa-3ea5e3cdeb01",
+   "metadata": {},
+   "source": [
+    "### Mask Bragg peaks in time-of-flight\n",
+    "\n",
+    "We will now take out the time regions with Bragg peaks from the beam stop and detector window,\n",
+    "although in reality the peaks appear only close to the beam stop,\n",
+    "and will make little difference to $I(Q)$.\n",
+    "\n",
+    "This could be implemented as masking specific time bins for a specific region in space,\n",
+    "but for now we keep it simple."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cf0c7256-3ae7-49c3-a4bf-851e0326c011",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "mask_tof_min = sc.scalar(13000.0, unit='us')\n",
+    "mask_tof_max = sc.scalar(15750.0, unit='us')\n",
+    "tof_masked_region = sc.concat([ds.coords['tof']['tof', 0],\n",
+    "                               mask_tof_min, mask_tof_max,\n",
+    "                               ds.coords['tof']['tof', -1]], dim='tof')\n",
+    "\n",
+    "binned = sc.Dataset()\n",
+    "for key in ds:\n",
+    "    binned[key] = ds[key].bin(tof=tof_masked_region)\n",
+    "    binned[key].masks['bragg_peaks'] = sc.array(dims=['tof'], values=[False, True, False])\n",
+    "binned"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "79435dc5-e3a9-4c70-b6d2-ff486c500fd2",
+   "metadata": {},
+   "source": [
+    "## Use to_I_of_Q workflow\n",
+    "\n",
+    "We now reduce the sample and the background measurements to `Q` using the `sans.to_I_of_Q` workflow.\n",
+    "\n",
+    "In that process,\n",
+    "the intensity as a function of `Q` is normalized using the direct measurement and direct beam function.\n",
+    "\n",
+    "The workflow needs monitor data from the sample, background, and direct runs to compute the normalization.\n",
+    "It accepts those in the form of a dictionaries:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cb4c64dd-7ed8-4a78-876b-2c312e9cdde2",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sample_monitors = {'incident': binned['sample'].attrs[\"monitor2\"].value,\n",
+    "                   'transmission': binned['sample'].attrs[\"monitor4\"].value}\n",
+    "\n",
+    "direct_monitors = {'incident': binned['direct'].attrs[\"monitor2\"].value,\n",
+    "                   'transmission': binned['direct'].attrs[\"monitor4\"].value}\n",
+    "\n",
+    "background_monitors = {'incident': binned['background'].attrs[\"monitor2\"].value,\n",
+    "                       'transmission': binned['background'].attrs[\"monitor4\"].value}"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "9c1879dd-adf0-4cff-a00f-187d604a21e4",
+   "metadata": {},
+   "source": [
+    "We then call the workflow on the sample and direct runs:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "652aa470-74fe-4036-90e5-4eeead429831",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sample_q = sans.to_I_of_Q(data=binned['sample'],\n",
+    "    data_monitors=sample_monitors,\n",
+    "    direct_monitors=direct_monitors,\n",
+    "    direct_beam=direct_beam,\n",
+    "    wavelength_bins=wavelength_bins,\n",
+    "    q_bins=q_bins,\n",
+    "    gravity=gravity,\n",
+    "    monitor_non_background_range=monitor_non_background_range)\n",
+    "sample_q.plot()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "dba9fe02-5c65-4142-b94b-ccca2df879e2",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "background_q = sans.to_I_of_Q(data=binned['background'],\n",
+    "    data_monitors=background_monitors,\n",
+    "    direct_monitors=direct_monitors,\n",
+    "    direct_beam=direct_beam,\n",
+    "    wavelength_bins=wavelength_bins,\n",
+    "    q_bins=q_bins,\n",
+    "    gravity=gravity,\n",
+    "    monitor_non_background_range=monitor_non_background_range)\n",
+    "background_q.plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d88ac17e-233f-42ff-bc0c-930f797af1c1",
+   "metadata": {},
+   "source": [
+    "We are now in a position to subtract the background from the sample measurement:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "f3715d62-e58b-410a-97cd-cfc16bc32a28",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "result = sample_q.bins.sum() - background_q.bins.sum()\n",
+    "result"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "4e3d8e09-465d-4470-8e1b-a3bc6ff4f374",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "fig1, ax1 = plt.subplots(1, 2, figsize=(10, 4))\n",
+    "sc.plot(result, ax=ax1[0])\n",
+    "sc.plot(result, norm='log', ax=ax1[1])\n",
+    "fig1"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "57679ad0-d04a-4c30-a2b3-78e9800f5ae0",
+   "metadata": {},
+   "source": [
+    "<div class=\"alert alert-info\">\n",
+    "\n",
+    "**Note**\n",
+    "\n",
+    "Instead of `.bins.sum()`,\n",
+    "one could use `sc.histogram()` above to define different `Q` bins compared to the ones defined at the top of the notebook.\n",
+    "This can be done in event mode, see [here](https://scipp.github.io/user-guide/binned-data/computation.html#Subtraction).\n",
+    "\n",
+    "There may be performance advantages to first use a coarse `Q` binning when the computing `I(Q)` numerator,\n",
+    "and use finer binning for the final results.\n",
+    "\n",
+    "</div>"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5c270fd9-beee-4abd-a51a-4d16ad54922e",
+   "metadata": {},
+   "source": [
+    "## Wavelength bands\n",
+    "\n",
+    "It is often useful to process the data in a small number (~10) of separate wavelength bands.\n",
+    "\n",
+    "This can be achieved by requesting 10 bands from the `to_I_of_Q` workflow via the `wavelength_bands` argument."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "ca7e75fe-29f6-44c9-88c2-43d870044b4c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "wavelength_bands = sc.linspace(dim='wavelength', start=2.0, stop=16.0, num=11,\n",
+    "                               unit='angstrom')\n",
+    "\n",
+    "sample_slices = sans.to_I_of_Q(data=binned['sample'],\n",
+    "    data_monitors=sample_monitors,\n",
+    "    direct_monitors=direct_monitors,\n",
+    "    direct_beam=direct_beam,\n",
+    "    wavelength_bins=wavelength_bins,\n",
+    "    q_bins=q_bins,\n",
+    "    gravity=gravity,\n",
+    "    wavelength_bands=wavelength_bands,\n",
+    "    monitor_non_background_range=monitor_non_background_range)\n",
+    "\n",
+    "background_slices = sans.to_I_of_Q(data=binned['background'],\n",
+    "    data_monitors=background_monitors,\n",
+    "    direct_monitors=direct_monitors,\n",
+    "    direct_beam=direct_beam,\n",
+    "    wavelength_bins=wavelength_bins,\n",
+    "    q_bins=q_bins,\n",
+    "    gravity=gravity,\n",
+    "    wavelength_bands=wavelength_bands,\n",
+    "    monitor_non_background_range=monitor_non_background_range)\n",
+    "\n",
+    "result_slices = sample_slices.bins.sum() - background_slices.bins.sum()\n",
+    "result_slices"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "60c03e8c-4533-471e-8483-3c0c555fae7d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "collapsed = sc.collapse(result_slices, keep='Q')\n",
+    "\n",
+    "fig2, ax2 = plt.subplots(1, 2, figsize=(10, 4))\n",
+    "sc.plot(collapsed, ax=ax2[0])\n",
+    "sc.plot(collapsed, norm='log', legend=False, ax=ax2[1])\n",
+    "fig2"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "50c9e31c-c174-4db8-8f1b-aa87e8f81408",
+   "metadata": {},
+   "source": [
+    "## References"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "88bd6494-80f4-4bf7-b026-f14a1849bf53",
+   "metadata": {},
+   "source": [
+    "<div id=\"manasi2021\"></div>\n",
+    "\n",
+    "Manasi I., Andalibi M. R., Atri R. S., Hooton J., King S. M., Edler K. J., **2021**,\n",
+    "*Self-assembly of ionic and non-ionic surfactants in type IV cerium nitrate and urea based deep eutectic solvent*,\n",
+    "[J. Chem. Phys. 155, 084902](https://doi.org/10.1063/5.0059238)"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

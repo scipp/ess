@@ -1,0 +1,777 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "9a935df3-c816-4829-99c3-2afa979b7611",
+   "metadata": {},
+   "source": [
+    "# SANS2D: I(Q) workflow for a single run (sample)\n",
+    "\n",
+    "This notebook describes in detail the steps that are undertaken in the `sans.to_I_of_Q` workflow.\n",
+    "\n",
+    "It assumes the detector data has been recorded in event mode, while the monitor data has been histogrammed.\n",
+    "\n",
+    "The data used in this notebook has been published in [Manasi et al. (2021)](#manasi2021),\n",
+    "and we kindly thank the authors for allowing us to use their data.\n",
+    "\n",
+    "**Note:** It uses sample run for simplicity and it is not intended to describe complete data reduction pipeline.\n",
+    "The complete pipeline is described in [SANS2D reduction](sans2d_reduction.ipynb).\n",
+    "\n",
+    "**Outline:**\n",
+    "\n",
+    "- We will begin by loading the data files containing the sample and the direct (empty sample holder) measurements.\n",
+    "- We will then apply some corrections to beamline components specific to the SANS2D beamline.\n",
+    "- This will be followed by some masking of some saturated or defect detector pixels\n",
+    "- Both sample and direct measurement, as well as their monitors, will then be converted to wavelength\n",
+    "- From the direct run, and the direct beam function, the normalization term will be computed\n",
+    "- Both sample measurement and normalization term will be converted to $Q$\n",
+    "- Finally, the sample counts (as a function of $Q$) will be divided by the normalization term (as a function of $Q$)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "8c7f7cf7-0582-4953-a772-a0f87d1cf0e2",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "import scipp as sc\n",
+    "from ess import loki, sans\n",
+    "from ess.logging import configure_workflow\n",
+    "import scippneutron as scn"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "42f0d79d-0147-4928-bd45-c0932a33fae1",
+   "metadata": {},
+   "source": [
+    "Set up the logging systems of scipp (including scippneutron and ess) and Mantid."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "760adfde-01e6-4d25-bc8d-b8bbd20c0467",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "logger = configure_workflow('sans2d_I_of_Q', filename='sans2d.log')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c21564a8-e742-4183-9edc-2c70c51d5863",
+   "metadata": {},
+   "source": [
+    "## Define reduction parameters\n",
+    "\n",
+    "We define here whether to include the effects of gravity, and the binning in wavelength and in $Q$ to be used."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "bc2fffe1-a694-43b7-9234-e31da42d6df3",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Include effects of gravity?\n",
+    "gravity = True\n",
+    "\n",
+    "# Wavelength binning\n",
+    "wavelength_bins = sc.linspace(dim='wavelength', start=2.0, stop=16.0, num=141, unit='angstrom')\n",
+    "\n",
+    "# Q binning\n",
+    "q_bins = sc.linspace(dim='Q', start=0.01, stop=0.6, num=141, unit='1/angstrom')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "bafd7ab4-d478-4c96-8196-69029fb221c4",
+   "metadata": {},
+   "source": [
+    "## Loading data files\n",
+    "\n",
+    "We load a sample measurement file (`SANS2D00063114.nxs`) and a direct measurement file (`SANS2D00063091.nxs`).\n",
+    "For both files, only the first quarter of pixels will be used, as the rest are used for monitoring."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "0315d002-9cab-4ae4-8f63-c72a532f716b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Using only one-fourth of the full spectra 245760 (reserved for first detector)\n",
+    "spectrum_size =  245760//4\n",
+    "\n",
+    "# Sample measurement\n",
+    "sample = loki.io.load_sans2d(filename=loki.data.get_path('SANS2D00063114.nxs'),\n",
+    "                             spectrum_size=spectrum_size)\n",
+    "# Direct measurement is with the empty sample holder/cuvette\n",
+    "direct = loki.io.load_sans2d(filename=loki.data.get_path('SANS2D00063091.nxs'),\n",
+    "                             spectrum_size=spectrum_size)\n",
+    "sample"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c4569a53-a19a-440e-8aa0-63df29f67d05",
+   "metadata": {},
+   "source": [
+    "## Extract monitors\n",
+    "\n",
+    "From these two runs, we extract the data from the incident and transmission monitors,\n",
+    "and place them in their own `dict`, as this will be useful further down."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "b042699e-4061-4f04-87f0-d52ff3cbf3dc",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "monitors = {\n",
+    "    'sample': {'incident': sample.attrs[\"monitor2\"].value,\n",
+    "               'transmission': sample.attrs[\"monitor4\"].value},\n",
+    "    'direct': {'incident': direct.attrs[\"monitor2\"].value,\n",
+    "               'transmission': direct.attrs[\"monitor4\"].value}\n",
+    "}"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e3b0b991-85c4-40fe-a903-74b43716a155",
+   "metadata": {},
+   "source": [
+    "## Apply offsets to pixel positions\n",
+    "\n",
+    "**Note:** for production ESS Nexus files are produced, this step should go away.\n",
+    "\n",
+    "**Note:** The corrections also include adjusting the beam center position,\n",
+    "which in the future will be determined using helpers in the `ess.sans` package.\n",
+    "\n",
+    "Various positions for the sample holder, detector pixels, and monitors are incorrect in the Nexus files.\n",
+    "The step below corrects this.\n",
+    "We also add the shape of the pixels, which is missing from the geometry information,\n",
+    "and is required to compute the solid angle for each detector pixel."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a6996c3e-a042-4758-a443-67bd805ec0b0",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Custom SANS2D position offsets\n",
+    "sample_pos_z_offset = 0.053 * sc.units.m\n",
+    "bench_pos_y_offset = 0.001 * sc.units.m\n",
+    "# There is some uncertainity here\n",
+    "monitor4_pos_z_offset = -6.719 * sc.units.m\n",
+    "\n",
+    "# Geometry transformation based on the found beam center position \n",
+    "x_offset = -0.09288 * sc.units.m\n",
+    "y_offset = 0.08195 * sc.units.m"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "0540c85f-46e5-4488-bcc1-3bda64dde6a7",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Add pixel shapes\n",
+    "sample.coords[\"pixel_width\"] = 0.0035 * sc.units.m\n",
+    "sample.coords[\"pixel_height\"] = 0.002033984375 * sc.units.m\n",
+    "\n",
+    "# Change sample position\n",
+    "sample.coords[\"sample_position\"].fields.z += sample_pos_z_offset\n",
+    "# Apply bench offset to pixel positions\n",
+    "sample.coords[\"position\"].fields.y += bench_pos_y_offset\n",
+    "# Now shift pixels positions to get the correct beam center\n",
+    "sample.coords['position'].fields.x += x_offset\n",
+    "sample.coords['position'].fields.y += y_offset\n",
+    "\n",
+    "# Change transmission monitor position\n",
+    "monitors['sample']['transmission'].coords[\"position\"].fields.z += monitor4_pos_z_offset\n",
+    "monitors['direct']['transmission'].coords[\"position\"].fields.z += monitor4_pos_z_offset"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "eeb81dd1-078a-495b-8cff-49c474be65dd",
+   "metadata": {},
+   "source": [
+    "## Masking\n",
+    "\n",
+    "The next step is to mask noisy and saturated pixels,\n",
+    "as well as a time-of-flight range that contains spurious artifacts from the beamline components.\n",
+    "\n",
+    "**Note:** We use programatic masks here and not those stored in xml files.\n",
+    "\n",
+    "### Mask bad pixels\n",
+    "\n",
+    "We mask the edges of the square-shaped detector panel with a simple distance relation.\n",
+    "We also mask the region close to the beam center, where pixels are saturated."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e54e6899-4842-4b91-82ab-15c5ceef5edb",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "mask_edges = (\n",
+    "    (sc.abs(sample.coords['position'].fields.x - x_offset) > sc.scalar(0.48, unit='m')) |\n",
+    "    (sc.abs(sample.coords['position'].fields.y - y_offset) > sc.scalar(0.45, unit='m')))\n",
+    "\n",
+    "mask_center = sc.sqrt(\n",
+    "    sample.coords['position'].fields.x**2 +\n",
+    "    sample.coords['position'].fields.y**2) < sc.scalar(0.04, unit='m')\n",
+    "\n",
+    "sample.masks['edges'] = mask_edges\n",
+    "sample.masks['center'] = mask_center"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f0a455d3-c60a-4069-bab7-5aba9a67fbdd",
+   "metadata": {},
+   "source": [
+    "A good sanity check is to view the masks on the instrument view:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "685b6317-3293-4cba-bef3-51cb797e6ed1",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "scn.instrument_view(sample, pixel_size=0.0075)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "659fd42b-03e8-4ae0-9952-d5645ee9878d",
+   "metadata": {},
+   "source": [
+    "### Mask Bragg peaks in time-of-flight\n",
+    "\n",
+    "We will now take out the time regions with Bragg peaks from the beam stop and detector window,\n",
+    "although in reality the peaks appear only close to the beam stop,\n",
+    "and will make little difference to $I(Q)$.\n",
+    "\n",
+    "This could be implemented as masking specific time bins for a specific region in space,\n",
+    "but for now we keep it simple."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "37664f8c-0004-4ecb-876b-52fc2a010c43",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "mask_tof_min = sc.scalar(13000.0, unit='us')\n",
+    "mask_tof_max = sc.scalar(15750.0, unit='us')\n",
+    "tof_masked_region = sc.concat([sample.coords['tof']['tof', 0],\n",
+    "                               mask_tof_min, mask_tof_max,\n",
+    "                               sample.coords['tof']['tof', -1]], dim='tof')\n",
+    "\n",
+    "sample = sample.bin(tof=tof_masked_region)\n",
+    "sample.masks['bragg_peaks'] = sc.array(dims=['tof'], values=[False, True, False])\n",
+    "sample"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "72b986f0-9392-40f4-873a-09dfdd62711e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sc.plot(sample)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "79435dc5-e3a9-4c70-b6d2-ff486c500fd2",
+   "metadata": {},
+   "source": [
+    "## Coordinate transformation graph\n",
+    "\n",
+    "To compute the wavelength $\\lambda$, the scattering angle $\\theta$, and the $Q$ vector for our data,\n",
+    "we construct a coordinate transformation graph.\n",
+    "\n",
+    "It is based on classical conversions from `tof` and pixel `position` to $\\lambda$ (`wavelength`),\n",
+    "$\\theta$ (`theta`) and $Q$ (`Q`),\n",
+    "but takes into account the Earth's gravitational field, which bends the flight path of the neutrons,\n",
+    "to compute the scattering angle $\\theta$.\n",
+    "\n",
+    "The angle can be found using the following expression ([Seeger & Hjelm 1991](#seeger1991))\n",
+    "\n",
+    "$$\\theta = \\frac{1}{2}\\sin^{-1}\\left(\\frac{\\sqrt{ x^{2} + \\left( y + \\frac{g m_{\\rm n}}{2 h^{2}} \\lambda^{2} L_{2}^{2} \\right)^{2} } }{L_{2}}\\right)$$\n",
+    "\n",
+    "where $x$ and $y$ are the spatial coordinates of the pixels in the horizontal and vertical directions, respectively,\n",
+    "$m_{\\rm n}$ is the neutron mass,\n",
+    "$L_{2}$ is the distance between the sample and a detector pixel,\n",
+    "$g$ is the acceleration due to gravity,\n",
+    "and $h$ is Planck's constant.\n",
+    "\n",
+    "The monitors require a slightly different conversion graph,\n",
+    "as the flight path of the neutrons hitting them does not scatter through the sample,\n",
+    "it links the source to the monitor with a straight line.\n",
+    "\n",
+    "The conversion graphs for the detectors and the monitors are defined in the `sans` module,\n",
+    "and can be obtained via"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "652aa470-74fe-4036-90e5-4eeead429831",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data_graph, monitor_graph = sans.i_of_q.make_coordinate_transform_graphs(gravity=gravity)\n",
+    "sc.show_graph(data_graph, simplified=True)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "0d796fca-d5ae-4af7-96ca-10e186a38cd4",
+   "metadata": {},
+   "source": [
+    "## Convert the data to wavelength\n",
+    "\n",
+    "To compute the wavelength of the neutrons,\n",
+    "we use Scipp's `transform_coords` method by supplying our graph defined above\n",
+    "(see [here](https://scipp.github.io/scippneutron/user-guide/coordinate-transformations.html)\n",
+    "for more information about using `transform_coords`) to a helper conversion function."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "4c2b0c90-a518-4982-8629-b2c09b4e29e0",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sample, monitors = sans.i_of_q.convert_to_wavelength(\n",
+    "    data=sample,\n",
+    "    monitors=monitors,\n",
+    "    data_graph=data_graph,\n",
+    "    monitor_graph=monitor_graph)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "165804a4-209b-4282-ac45-4fe05029d9d6",
+   "metadata": {},
+   "source": [
+    "## Compute normalization term\n",
+    "\n",
+    "In a SANS experiment, the scattering cross section $I(Q)$ is defined as ([Heenan et al. 1997](#heenan1997))\n",
+    "\n",
+    "$$ I(Q) = \\frac{\\partial\\Sigma{Q}}{\\partial\\Omega} = \\frac{A_{H} \\Sigma_{R,\\lambda\\subset Q} C(R, \\lambda)}{A_{M} t \\Sigma_{R,\\lambda\\subset Q}M(\\lambda)T(\\lambda)D(\\lambda)\\Omega(R)} $$\n",
+    "\n",
+    "where $A_{H}$ is the area of a mask (which avoids saturating the detector) placed between the monitor of area $A_{M}$ and the main detector.\n",
+    "$\\Omega$ is the detector solid angle, and $C$ is the count rate on the main detector, which depends on the position $R$ and the wavelength.\n",
+    "$t$ is the sample thickness, $M$ represents the incident monitor count rate, and $T$ is known as the transmission fraction.\n",
+    "Finally, $D$ is the 'direct beam function', and is defined as\n",
+    "\n",
+    "$$ D(\\lambda) = \\frac{\\eta(\\lambda)}{\\eta_{M}(\\lambda)} \\frac{A_{H}}{A_{M}} $$\n",
+    "\n",
+    "where $\\eta$ and $\\eta_{M}$ are the detector and monitor efficiencies, respectively.\n",
+    "\n",
+    "Hence, in order to normalize the main detector counts $C$, we need compute the transmission fraction $T(\\lambda)$,\n",
+    "the direct beam function $D(\\lambda)$ and the solid angle $\\Omega(R)$."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "b26c2f43-0867-40cc-aa38-46a06b2c5615",
+   "metadata": {},
+   "source": [
+    "### Transmission fraction\n",
+    "\n",
+    "The transmission fraction is computed from the monitor counts.\n",
+    "It essentially compares the neutron counts before the sample, and after the sample,\n",
+    "to give an absorption profile of the sample as a function of wavelength.\n",
+    "\n",
+    "It is defined as the ratio of counts between on the transmission monitor to the counts on the incident monitor for the sample run,\n",
+    "multiplied by the inverse ratio for the direct run, i.e.\n",
+    "\n",
+    "$$ T(\\lambda) = \\frac{M_{\\rm sample}^{\\rm transmission}}{M_{\\rm sample}^{\\rm incident}} \\frac{M_{\\rm direct}^{\\rm incident}}{M_{\\rm direct}^{\\rm transmission}} $$\n",
+    "\n",
+    "#### Remove background noise and rebin monitors\n",
+    "\n",
+    "To compute the ratios, the monitor counts are first cleaned of background noise counts.\n",
+    "By looking at the monitors on a plot,"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "9963bc37-f405-4a7f-b3d7-c95ec2af6fa8",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "p = sc.plot(monitors['sample'], norm='log')\n",
+    "sc.plot(monitors['direct'], norm='log', ax=p.ax, color=['C2', 'C3'])\n",
+    "p"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c7e0bf4a-3262-4bd5-82c9-bdab5fecaeac",
+   "metadata": {},
+   "source": [
+    "we define a valid wavelength range between 0.7 &#8491; and 17.1 &#8491;."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "1da15bda-c81b-4359-860e-420c7a691581",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "non_background_range = sc.array(dims=['wavelength'], values=[0.7, 17.1], unit='angstrom')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a6424dc1-f2fb-4964-a38b-06bcdf65cb36",
+   "metadata": {},
+   "source": [
+    "and we remove the mean background counts and rebin the monitors in a single step using"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a516b5f4-a452-414f-ac95-e9cf47011306",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "monitors = sans.i_of_q.denoise_and_rebin_monitors(\n",
+    "    monitors=monitors,\n",
+    "    wavelength_bins=wavelength_bins,\n",
+    "    non_background_range=non_background_range)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "94a6e0b6-c3b9-4f5b-9fa6-9efe68c1ef04",
+   "metadata": {},
+   "source": [
+    "The transmission fraction is then computed by using "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "3fd4314d-af44-41ea-b06c-b2c6dcf3c3ae",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "transmission_fraction = sans.normalization.transmission_fraction(\n",
+    "    data_monitors=monitors['sample'], direct_monitors=monitors['direct'])\n",
+    "transmission_fraction"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "65c3a796-cb82-400b-adb7-1baa1d2b98f1",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "transmission_fraction.plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "4fe0e50d-260c-480b-969f-6c1d929dd01f",
+   "metadata": {},
+   "source": [
+    "### Direct beam function\n",
+    "\n",
+    "The direct beam function is a parameter of the instrument that is well-known to the instrument scientist,\n",
+    "and does not vary much over time.\n",
+    "It is usually stored in a file, and updated a small number of times per year.\n",
+    "\n",
+    "Here, we load the direct beam function for the SANS2D instrument from file,\n",
+    "and perform an interpolation so that it spans the same wavelength range as the one requested at the top of the notebook."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "994533d8-2c49-48d7-9a1d-969368343c2c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Load direct beam function for main detector\n",
+    "direct_beam = loki.io.load_rkh_wav(loki.data.get_path('DIRECT_SANS2D_REAR_34327_4m_8mm_16Feb16.dat'))\n",
+    "\n",
+    "direct_beam = sans.i_of_q.resample_direct_beam(\n",
+    "    direct_beam=direct_beam,\n",
+    "    wavelength_bins=wavelength_bins)\n",
+    "\n",
+    "sc.plot(direct_beam)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "894e8329-8987-4565-b070-5d262af746d8",
+   "metadata": {},
+   "source": [
+    "### Solid Angle\n",
+    "\n",
+    "The `sans.normalization` module also provides a utility to compute the solid angles of rectangular detector pixels:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e126e749-3dad-4ad8-a6f9-2d446e0153e4",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "solid_angle = sans.normalization.solid_angle_of_rectangular_pixels(\n",
+    "    sample,\n",
+    "    pixel_width=sample.coords['pixel_width'],\n",
+    "    pixel_height=sample.coords['pixel_height'])\n",
+    "solid_angle"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "92b7cba6-c4aa-458f-8564-a0c265cf4332",
+   "metadata": {},
+   "source": [
+    "### The denominator term\n",
+    "\n",
+    "We combine all the terms above to compute the `denominator`.\n",
+    "We then attach to the denominator some coordinates required to perform the conversion to $Q$."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "30250d51-0d6f-4265-b372-881900a16e2a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "denominator = sans.normalization.compute_denominator(\n",
+    "        direct_beam=direct_beam,\n",
+    "        data_incident_monitor=monitors['sample']['incident'],\n",
+    "        transmission_fraction=transmission_fraction,\n",
+    "        solid_angle=solid_angle)\n",
+    "# Insert a copy of coords needed for conversion to Q.\n",
+    "# TODO: can this be avoided by copying the Q coords from the converted numerator?\n",
+    "for coord in ['position', 'sample_position', 'source_position']:\n",
+    "    denominator.coords[coord] = sample.meta[coord]\n",
+    "\n",
+    "denominator"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "2405279b-3b7a-41f1-a3b0-86c732d5d01b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sc.plot(denominator.sum('spectrum'), norm='log')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "bf70d4d7-024f-4663-952e-ec258578076d",
+   "metadata": {},
+   "source": [
+    "## Convert to Q\n",
+    "\n",
+    "Using the coordinate transformation graph as above,\n",
+    "we can compute the momentum vector $Q$, and then merge all the events in the detector pixel bins,\n",
+    "so as to obtain an intensity that depends only on $Q$.\n",
+    "\n",
+    "This is done with the `convert_to_q_and_merge_spectra` helper."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "7e01975c-6116-46cf-81f3-b6fa6eb09589",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "wavelength_bands = sc.concat(\n",
+    "            [wavelength_bins.min(), wavelength_bins.max()], dim='wavelength')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "4be0e428-ca1d-4840-a787-642e43dda383",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sample_q = sans.i_of_q.convert_to_q_and_merge_spectra(\n",
+    "    data=sample,\n",
+    "    graph=data_graph,\n",
+    "    wavelength_bands=wavelength_bands,\n",
+    "    q_bins=q_bins,\n",
+    "    gravity=gravity)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "25543ffd-82be-487b-8783-79e1d65b0dc9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sc.plot(sample_q, norm='log')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "8aa0302c-08bb-4c15-b600-744d5496ebda",
+   "metadata": {},
+   "source": [
+    "### Convert denominator to Q\n",
+    "\n",
+    "Converting the denominator to $Q$ is achieved in the same way"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "bba0fad5-73c7-45a1-913b-1d71fd7c365e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "denominator_q = sans.i_of_q.convert_to_q_and_merge_spectra(\n",
+    "    data=denominator,\n",
+    "    graph=data_graph,\n",
+    "    wavelength_bands=wavelength_bands,\n",
+    "    q_bins=q_bins,\n",
+    "    gravity=True)\n",
+    "\n",
+    "sc.plot(denominator_q, norm='log')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d5339095-3de4-4727-bcc5-6ca982f58b94",
+   "metadata": {},
+   "source": [
+    "## Normalize the sample\n",
+    "\n",
+    "Finally, we normalize the sample with the denominator as a function of $Q$."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a1f82882-8142-4cdd-9c65-b2327eb445ba",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sample_normalized = sans.normalization.normalize(\n",
+    "    numerator=sample_q,\n",
+    "    denominator=denominator_q)\n",
+    "sample_normalized"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a82c11fe-ecfc-41d2-ac4e-f127ff358b11",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sc.plot(sample_normalized)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "77f8cc16-6019-4d59-aa69-633de690accf",
+   "metadata": {},
+   "source": [
+    "## References"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "faf45578-6b6a-4046-82aa-4864a2e8bb8b",
+   "metadata": {},
+   "source": [
+    "<div id='heenan1997'></div>\n",
+    "\n",
+    "Heenan R. K., Penfold J., King S. M., **1997**,\n",
+    "*SANS at Pulsed Neutron Sources: Present and Future Prospects*,\n",
+    "[J. Appl. Cryst., 30, 1140-1147](https://doi.org/10.1107/S0021889897002173)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "4ca6948e-ed72-49de-8529-4faf1474535c",
+   "metadata": {},
+   "source": [
+    "<div id='manasi2021'></div>\n",
+    "\n",
+    "Manasi I., Andalibi M. R., Atri R. S., Hooton J., King S. M., Edler K. J., **2021**,\n",
+    "*Self-assembly of ionic and non-ionic surfactants in type IV cerium nitrate and urea based deep eutectic solvent*,\n",
+    "[J. Chem. Phys. 155, 084902](https://doi.org/10.1063/5.0059238)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "9d8de3c2-6905-4cb8-99a1-8b4fd5973287",
+   "metadata": {},
+   "source": [
+    "<div id='seeger1991'></div>\n",
+    "\n",
+    "Seeger P. A., Hjelm R. P. Jnr, **1991**,\n",
+    "*Small-angle neutron scattering at pulsed spallation sources*,\n",
+    "[J. Appl. Cryst., 24, 467-478](https://doi.org/10.1107/S0021889891004764)"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

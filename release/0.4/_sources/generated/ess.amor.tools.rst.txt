@@ -1,0 +1,30 @@
+﻿ess.amor.tools
+==============
+
+.. automodule:: ess.amor.tools
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      linlogspace
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

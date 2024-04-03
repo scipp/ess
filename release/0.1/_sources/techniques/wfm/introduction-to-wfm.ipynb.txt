@@ -1,0 +1,743 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "26960bb2",
+   "metadata": {},
+   "source": [
+    "# Introduction to Wavelength Frame Multiplication\n",
+    "\n",
+    "This notebook aims to explain the concept of wavelength frame multiplication (WFM),\n",
+    "why is it used, how it works, and what results can be expected from using WFM at a neutron beamline.\n",
+    "\n",
+    "Much of the material presented here was inspired by / copied from the paper by\n",
+    "[Schmakat et al. (2020)](https://www.sciencedirect.com/science/article/abs/pii/S0168900220308640),\n",
+    "which we highly recommend to the reader, for more details on how a WFM chopper system is designed."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "4e4505fd",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import matplotlib.pyplot as plt\n",
+    "plt.ioff() # Turn of auto-showing of figures\n",
+    "import scipp as sc\n",
+    "import scippneutron as scn\n",
+    "import ess.wfm as wfm\n",
+    "\n",
+    "# Fetch helper functions to create the figures from an external repo\n",
+    "import requests\n",
+    "remote_url = 'https://raw.githubusercontent.com/scipp/documentation-helpers/main/ess/techniques/wfm/introduction-to-wfm.py'\n",
+    "local_file = 'dochelpers.py'\n",
+    "data = requests.get(remote_url)\n",
+    "with open(local_file, 'w') as f:\n",
+    "    f.write(str(data.content.decode()))\n",
+    "from dochelpers import *"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "51753c2f",
+   "metadata": {},
+   "source": [
+    "<div class=\"alert alert-info\">\n",
+    "\n",
+    "**Note**\n",
+    "\n",
+    "The source code used to create the plotting helpers (`Figure1`, `Figure2`, ...) can be viewed using the\n",
+    "`Figure1.show_source()` function.\n",
+    "\n",
+    "The full source of the helper functions is available [here](https://github.com/scipp/documentation-helpers/blob/main/ess/techniques/wfm/introduction-to-wfm.py).\n",
+    "\n",
+    "</div>"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "ea849c6e",
+   "metadata": {},
+   "source": [
+    "## The long ESS pulse\n",
+    "\n",
+    "Instruments at a pulsed neutron source,\n",
+    "assuming an idealized rectangular source pulse in time of length $t_{P}$,\n",
+    "have a resolution given by\n",
+    "$$\\frac{\\Delta \\lambda}{\\lambda} = \\frac{t_{P}}{t} = \\frac{t_{P}}{\\alpha \\lambda z_{\\rm det}} ~, ~~~~~(1)$$\n",
+    "where $\\lambda$ is the neutron wavelength, $t$ is time,\n",
+    "$\\alpha = m_{\\rm n}/h = 2.5278 \\times 10^{-4}~{\\rm s}\\unicode{x212B}^{-1}{\\rm m}^{-1}$\n",
+    "is the ratio of the neutron mass and the Planck constant,\n",
+    "and $z_{\\rm det}$ is the distance from the source to the detector.\n",
+    "\n",
+    "A natural consequence of this is that the wavelength resolution $\\Delta \\lambda / \\lambda$\n",
+    "becomes finer with increasing wavelength.\n",
+    "\n",
+    "This also means that the resolution is poor for a long-pulsed source such as the ESS,\n",
+    "compared to that of a short-pulse facility, such as ISIS.\n",
+    "A good way to visualize this is using a time-distance diagram,\n",
+    "which can represent the paths taken by the neutrons from the source to the detector."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "d1548d0a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "Figure1"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f21a6a9e",
+   "metadata": {},
+   "source": [
+    "As illustrated in Fig. 1, with a long pulse, two neutrons with very different wavelengths\n",
+    "($\\lambda_{1} < \\lambda_{2}$) can reach the detector at the exact same time,\n",
+    "if they originated from a different part of the pulse.\n",
+    "\n",
+    "The problem cannot be resolved at the detector.\n",
+    "According to the difference between time recorded at the detector and the measured start of the source pulse,\n",
+    "both neutrons have the same wavelength.\n",
+    "The detector recording system has no way of knowing that this is not the reality or adjusting for this.\n",
+    "We instead look at the pulse generation to find ways to better measure the wavelength of our neutrons."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "6f3026e9",
+   "metadata": {},
+   "source": [
+    "## So what is WFM anyway?\n",
+    "\n",
+    "Within the concept of wavelength frame multiplication (WFM),\n",
+    "each source pulse is chopped into a number of sub pulses referred to as wavelength frames,\n",
+    "where each wavelength frame $N$ contains a subsequent part of the spectrum of the source pulse.\n",
+    "\n",
+    "The main reason for using the WFM concept is to redefine the burst time $t_{P} = \\Delta t$ as implied by Eq. (1), in order to match the required wavelength resolution of the experiment.\n",
+    "A secondary objective, or constraint of the first, is to utilise as much of the source pulse as possible."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "c68e206e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "Figure2"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "08e8d244",
+   "metadata": {},
+   "source": [
+    "## A closer look\n",
+    "\n",
+    "### The ESS pulse shape\n",
+    "\n",
+    "At a real beamline, the pulse shape is not rectangular,\n",
+    "but has rising and falling edges, as shown in Fig. 3."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "499eef44",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "Figure3"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "8e6c9c22",
+   "metadata": {},
+   "source": [
+    "Here we define several important quantities:\n",
+    "\n",
+    "- The pulse $t_0$ is defined as the point in time at which the pulse is bright enough for the purposes of the experiment.\n",
+    "- $t_{\\rm A}$ is the time when the flux has fallen down to a level below the required brightness.\n",
+    "- $t_{\\rm P} = t_{\\rm A} - t_{0}$ is the portion of the pulse that is used for the measurements, the analog of the pulse length for the ideal rectangular pulse above.\n",
+    "- $t_{\\rm B}$ marks the end of the pulse; i.e. the time when the flux is considered to be effectively zero.\n",
+    "\n",
+    "### Using a single WFM chopper\n",
+    "\n",
+    "The effective burst time $\\Delta t$ is defined by a WFM chopper (WFMC),\n",
+    "as illustrated in Fig. 3,\n",
+    "for the two limiting wavelengths $\\lambda_{\\rm min}$ and $\\lambda_{\\rm max}$ of a single wavelength frame $N$.\n",
+    "\n",
+    "The wavelength frame is re-limited in a predefined time window by at least one frame overlap chopper (FOC)\n",
+    "that inhibits the overlap of neutrons from various frames, as indicated by the dashed lines in Fig. 3.\n",
+    "Their wavelength is labeled with $\\lambda_{\\rm min}^{'}$ and $\\lambda_{\\rm max}^{'}$.\n",
+    "The FOC is also removes undesired neutrons with the wrong wavelength that arise from the rising and falling edges\n",
+    "at the beginning and at the end of the source pulse.\n",
+    "Although their intensity is small, neutrons with an undesired wavelength would lead to an increased background."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "3069f0e8",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "Figure4"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "7dcbd2b3",
+   "metadata": {},
+   "source": [
+    "The relative spectral resolution $\\Delta \\lambda / \\lambda$ at the detector position $z_{\\rm det}$\n",
+    "is defined by the burst time $\\Delta t$ and the time-of-flight $t(\\lambda)$ of the neutrons (see eq. (1)).\n",
+    "Because $\\Delta t$ is independent of the wavelength for the case of a single WFM chopper disc,\n",
+    "$\\Delta \\lambda / \\lambda$ depends on $\\lambda$,\n",
+    "on the distance $z_{\\rm WFM}$ of the WFM chopper from the source,\n",
+    "and on the detector position $z_{\\rm det}$ as depicted in Fig. 4.\n",
+    "\n",
+    "The WFM chopper acts as a virtual source,\n",
+    "reducing the effective burst time $\\Delta t$,\n",
+    "while at the same time also reducing the effective time-of-flight to the detector from\n",
+    "$t(\\lambda) = \\alpha \\lambda z_{\\rm det}$ to $t(\\lambda) = \\alpha \\lambda (z_{\\rm det} - z_{\\rm WFM})$.\n",
+    "Note that this assumes a straight line from WFM choppers to the detector.\n",
+    "In the case of scattering from a sample, the first branch of the flight path ($L_{1}$) would be modified,\n",
+    "while the secondary path ($L_{2}$) will remain unchanged.\n",
+    "\n",
+    "A resolution that depends on $\\lambda$ is not suited for some applications (such as imaging, reflectometry, ...)\n",
+    "where a constant $\\Delta \\lambda / \\lambda$ is much more desirable.\n",
+    "\n",
+    "### Using a pair of optically blind choppers\n",
+    "\n",
+    "A constant wavelength resolution $\\Delta \\lambda / \\lambda$ can be enforced by using a pair\n",
+    "of optically blind WFM chopper discs,\n",
+    "positioned at the positions $z_{\\rm WFM1}$ and $z_{\\rm WFM2} = z_{\\rm WFM1} + \\Delta z_{\\rm WFM}$,\n",
+    "as shown in Fig. 5.\n",
+    "\n",
+    "In this context, 'optically blind' indicates that the choppers have the same opening angles,\n",
+    "but the phase of the second chopper is shifted such that the second chopper opens exactly at\n",
+    "the time when the first chopper closes.\n",
+    "Such a setup introduces a wavelength dependence in the effective burst time\n",
+    "$\\Delta t(\\lambda) = \\alpha \\lambda \\Delta z_{\\rm WFM}$.\n",
+    "\n",
+    "The time-of-flight to the detector remains the same as for the single WFM disc setup\n",
+    "described above ($t(\\lambda) = \\alpha \\lambda (z_{\\rm det} - z_{\\rm WFM})$)\n",
+    "with $z_{\\rm WFM} = \\frac{1}{2} (z_{\\rm WFM1} + z_{\\rm WFM2})$\n",
+    "now representing the center position of the WFM chopper pair from the source.\n",
+    "\n",
+    "The resolution for an idealized instrument with infinitesimally small beam cross-section can again be\n",
+    "calculated using Eq. (1):\n",
+    "\n",
+    "$$\\frac{\\Delta \\lambda}{\\lambda} = \\frac{\\Delta t(\\lambda)}{t(\\lambda)} = \\frac{\\Delta z_{\\rm WFM}}{z_{\\rm det} - z_{\\rm WFM}} ~. ~~~~~(2)$$\n",
+    "\n",
+    "Because the term on the right hand side of Eq. (2) is constant,\n",
+    "the resolution becomes independent of the wavelength for an optically blind WFM chopper system."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "f740ab1f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "Figure5"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "7ae243bf",
+   "metadata": {},
+   "source": [
+    "In a real WFM chopper system,\n",
+    "more than one frame can be realized by equipping the chopper with additional windows such that the full\n",
+    "band width that fits in the time period between two subsequent source pulses at the detector position is used.\n",
+    "This is illustrated in Fig. 6.\n",
+    "\n",
+    "The frame overlap chopper defines the bandwidth of the frame $N$ in order to suppress cross-talk\n",
+    "from neighboring wavelength frames,\n",
+    "as illustrated in Fig. 6 for two subsequent wavelength frames $N = 1$ and $N = 2$.\n",
+    "They are designed such that $\\lambda_{N, {\\rm max}} = \\lambda_{N+1, {\\rm min}}$ yield a continuous spectrum\n",
+    "at the detector.\n",
+    "The concept of wavelength frame multiplication implies that no data can be recorded in the\n",
+    "time window between two subsequent wavelength frames."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "8bb5de74",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "Figure6"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "2d8754af",
+   "metadata": {},
+   "source": [
+    "An additional feature of the WFM concept is the possibility to adjust the wavelength resolution by simply\n",
+    "changing the distance $\\Delta z_{\\rm WFM}$ between the WFM chopper discs (e.g. by using a motorized linear stage).\n",
+    "According to Eq. (2),\n",
+    "reducing $\\Delta z_{\\rm WFM}$ leads to a finer wavelength resolution at the cost of\n",
+    "intensity by effectively reducing the time window in which the neutrons can pass.\n",
+    "\n",
+    "## A short example\n",
+    "\n",
+    "We now proceed to illustrate data processing at a WFM beamline in the form of a short example.\n",
+    "\n",
+    "### Create a beamline\n",
+    "\n",
+    "We first create a beamline with two WFM choppers and 6 wavelength frames,\n",
+    "using the `wfm.make_fake_beamline` helper utility.\n",
+    "The detector is placed 60 m from the source."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "23da3459",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "coords = wfm.make_fake_beamline(nframes=6)\n",
+    "ds = sc.Dataset(coords=coords)\n",
+    "wfm.plot.time_distance_diagram(ds)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "0c9a7d08",
+   "metadata": {},
+   "source": [
+    "The properties of the frames (boundaries in time and wavelength) are computed using the `wfm.get_frames` function"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "f3e049e1",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "frames = wfm.get_frames(ds)\n",
+    "frames"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "46d9de2e",
+   "metadata": {},
+   "source": [
+    "### Create some neutrons\n",
+    "\n",
+    "We create 6 neutrons with known wavelengths, one for each frame.\n",
+    "We choose the values for the wavelengths based on the limits given in the `frames` information above."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "5b2238e1",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "wavelengths = sc.array(dims=['wavelength'],\n",
+    "                       values=[1.5, 3.0, 4.5, 6.0, 7.0, 8.25],\n",
+    "                       unit='angstrom')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c601e279",
+   "metadata": {},
+   "source": [
+    "We assume that all 6 neutrons originated half-way through the source pulse,\n",
+    "and we can thus calculate the times at which they hit the detector."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "03804bef",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Neutron mass to Planck constant ratio\n",
+    "alpha = 2.5278e-4 * (sc.Unit('s') / sc.Unit('angstrom') / sc.Unit('m'))\n",
+    "# Distance between the detector pixel and the source\n",
+    "dz = sc.norm(coords['position'] - coords['source_position'])\n",
+    "# Compute arrival times, in microseconds\n",
+    "arrival_times = sc.to_unit(\n",
+    "    alpha * dz * wavelengths,\n",
+    "    'us') + coords['source_pulse_t_0'] + (0.5 * coords['source_pulse_length'])\n",
+    "arrival_times"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a94afdc5",
+   "metadata": {},
+   "source": [
+    "### Wrap the neutron counts and the beamline into a DataArray\n",
+    "\n",
+    "We make a data array that contains the beamline information and a histogram of the neutrons over the time dimension."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "721a6725",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "tmin = sc.min(arrival_times)\n",
+    "tmax = sc.max(arrival_times)\n",
+    "dt = 0.1 * (tmax - tmin)\n",
+    "coords['time'] = sc.linspace(dim='time',\n",
+    "                             start=(tmin - dt).value,\n",
+    "                             stop=(tmax + dt).value,\n",
+    "                             num=2001,\n",
+    "                             unit=dt.unit)\n",
+    "counts, _ = np.histogram(arrival_times.values, bins=coords['time'].values)\n",
+    "da = sc.DataArray(coords=coords,\n",
+    "                  data=sc.array(dims=['time'], values=counts, unit='counts'))\n",
+    "da"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "d9b5c5f8",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "da.plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3c25e1bf",
+   "metadata": {},
+   "source": [
+    "### Stitch the frames\n",
+    "\n",
+    "The `time` coordinate in our data represents the time between the source $t_{0}$\n",
+    "and the time when the neutron hits the detector.\n",
+    "However, the WFM choppers are now acting as the new source choppers.\n",
+    "This means that the neutron time-of-flight, which will be used to compute the neutron wavelengths,\n",
+    "is now defined as the time between when the neutron crossed the WFM choppers and when it hit the detector\n",
+    "(see Fig. 5).\n",
+    "\n",
+    "Because we only know the time at which the neutron arrived at the detector, not when it left the source,\n",
+    "the most sensible value to use as time the neutron passed through the WFM choppers is the mid-point (in time)\n",
+    "between the WFM chopper openings, in each frame.\n",
+    "This is represented by $t_{\\rm WFM}(N)$ in Fig. 5.\n",
+    "\n",
+    "By using the start and end detector arrival time for each frame contained in the `frames` Dataset,\n",
+    "we extract all the neutrons in a given frame $N$\n",
+    "and subtract $t_{\\rm WFM}(N)$ (also found in `frames`) from the time coordinate in that frame.\n",
+    "\n",
+    "Finally, we then merge (or rebin) the neutrons from all the frames onto a common time-of-flight axis.\n",
+    "\n",
+    "All this is performed in a single operation using the `wfm.stitch` function:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "8b620655",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "stitched = wfm.stitch(frames=frames, data=da, dim='time', bins=2001)\n",
+    "stitched.plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "ce4b8814",
+   "metadata": {},
+   "source": [
+    "The resulting coordinate is now time-of-flight (`tof`),\n",
+    "and we can use `scippneutron` to convert the time-of-flight to wavelength."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "010db680",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "wav = scn.convert(stitched, origin='tof', target='wavelength', scatter=False)\n",
+    "wav"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "15e05d03",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "wav.plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "0fa28dfd",
+   "metadata": {},
+   "source": [
+    "Zooming in on the first spike, we notice that something is not quite right: the original wavelength was 1.5 &#8491; but on the figure below is closer to 1.46 &#8491;."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "b2973d10",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "wav[\"wavelength\", (1.2*sc.units.angstrom):(1.7*sc.units.angstrom)].plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f52ff432",
+   "metadata": {},
+   "source": [
+    "Now the WFM method guarantees a constant $\\Delta\\lambda / \\lambda$,\n",
+    "and so it is not surprising to see the final reduced wavelength not exactly matching the original.\n",
+    "The question is: is the error within $\\Delta\\lambda / \\lambda$?"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "07a2a256",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Distance between WFM choppers\n",
+    "dz_wfm = sc.norm(ds.coords[\"choppers\"].value[\"WFMC2\"].position - ds.coords[\"choppers\"].value[\"WFMC1\"].position)\n",
+    "# Delta_lambda  / lambda\n",
+    "dlambda_over_lambda = dz_wfm / sc.norm(coords['position'] -\n",
+    "                                       frames['wfm_chopper_mid_point'].data)\n",
+    "(1.5*sc.units.angstrom) * dlambda_over_lambda"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "ff3d05ba",
+   "metadata": {},
+   "source": [
+    "At 1.5 &#8491;, the resolution is 0.0127 &#8491;, which is smaller than the offset we observe above.\n",
+    "In fact, we can perform a quick check using Scipp's label-based slicing, to verify that the sum of the counts\n",
+    "in a region $\\Delta\\lambda$ wide around the original wavelength should be equal to 1:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a4720739",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "for i in range(len(wavelengths)):\n",
+    "    lam = wavelengths[\"wavelength\", i]\n",
+    "    half_dlam = 0.5 * dlambda_over_lambda * lam\n",
+    "    print(\"Lambda:\", lam, \", count in range:\",\n",
+    "          sc.sum(wav['wavelength', lam - half_dlam:lam + half_dlam]).value)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "ee6f6b0f",
+   "metadata": {},
+   "source": [
+    "This reveals that the reduced wavelengths for the first two neutrons do not agree within the required precision.\n",
+    "We go back to our time-distance diagram and look at the paths taken by our 6 neutrons (plotted in red)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "3b0b37ab",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "fig6 = wfm.plot.time_distance_diagram(da)\n",
+    "ax6 = fig6.get_axes()[0]\n",
+    "\n",
+    "for i in range(len(wavelengths)):\n",
+    "    ax6.plot([(coords['source_pulse_t_0'] + (0.5 * coords['source_pulse_length'])).value,\n",
+    "              arrival_times['wavelength', i].value],\n",
+    "             [0.0, sc.norm(coords['position']).value], color='r')\n",
+    "fig6"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "2449713c",
+   "metadata": {},
+   "source": [
+    "Taking a closer look at the WFM choppers,\n",
+    "we observe that the numbers we picked for the first two neutrons actually lead to unphysical paths:\n",
+    "they do not make it through the chopper openings!"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "b5844a11",
+   "metadata": {
+    "scrolled": false
+   },
+   "outputs": [],
+   "source": [
+    "ax6.texts = ax6.texts[:3]\n",
+    "ax6.set_xlim(-1.0e3, 2.0e4)\n",
+    "ax6.set_ylim(-1.5, 10.0)\n",
+    "fig6.canvas.draw_idle()\n",
+    "fig6"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "0f22f5b6",
+   "metadata": {},
+   "source": [
+    "So we modify our values so that neutrons 1 and 2 make it through:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "fc225b66",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "wavelengths = sc.array(dims=['wavelength'],\n",
+    "                       values=[1.75, 3.2, 4.5, 6.0, 7.0, 8.25],\n",
+    "                       unit='angstrom')\n",
+    "arrival_times = sc.to_unit(\n",
+    "    alpha * dz * wavelengths,\n",
+    "    'us') + coords['source_pulse_t_0'] + (0.5 * coords['source_pulse_length'])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a0f5f80e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "fig7 = wfm.plot.time_distance_diagram(da)\n",
+    "ax7 = fig7.get_axes()[0]\n",
+    "\n",
+    "for i in range(len(wavelengths)):\n",
+    "    ax7.plot([(coords['source_pulse_t_0'] + (0.5 * coords['source_pulse_length'])).value,\n",
+    "              arrival_times['wavelength', i].value],\n",
+    "             [0.0, sc.norm(coords['position']).value], color='r')\n",
+    "ax7.texts = ax7.texts[:3]\n",
+    "ax7.set_xlim(-1.0e3, 2.0e4)\n",
+    "ax7.set_ylim(-1.5, 10.0)\n",
+    "fig7"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "296fb525",
+   "metadata": {},
+   "source": [
+    "And repeat the stitching process:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "ed021410",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "tmin = sc.min(arrival_times)\n",
+    "tmax = sc.max(arrival_times)\n",
+    "dt = 0.1 * (tmax - tmin)\n",
+    "coords['time'] = sc.linspace(dim='time',\n",
+    "                             start=(tmin - dt).value,\n",
+    "                             stop=(tmax + dt).value,\n",
+    "                             num=2001,\n",
+    "                             unit=dt.unit)\n",
+    "counts, _ = np.histogram(arrival_times.values, bins=coords['time'].values)\n",
+    "da = sc.DataArray(coords=coords,\n",
+    "                  data=sc.array(dims=['time'], values=counts, unit='counts'))\n",
+    "stitched = wfm.stitch(frames=frames, data=da, dim='time', bins=2001)\n",
+    "wav = scn.convert(stitched, origin='tof', target='wavelength', scatter=False)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "f0491b60",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "wav[\"wavelength\", (1.55*sc.units.angstrom):(1.95*sc.units.angstrom)].plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "b0900368",
+   "metadata": {},
+   "source": [
+    "This time, the peak is much closer to 1.75 &#8491;,\n",
+    "and we can make sure the sum within the $\\Delta\\lambda$ range is 1 for all 6 neutrons:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "b7d85ff4",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "for i in range(len(wavelengths)):\n",
+    "    lam = wavelengths[\"wavelength\", i]\n",
+    "    half_dlam = 0.5 * dlambda_over_lambda * lam\n",
+    "    print(\"Lambda:\", lam, \", count in range:\",\n",
+    "          sc.sum(wav['wavelength', lam - half_dlam:lam + half_dlam]).value)"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.7.10"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

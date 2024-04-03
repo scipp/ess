@@ -1,0 +1,832 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "cdf89542-fd5b-4657-8a55-0315ba4e6263",
+   "metadata": {},
+   "source": [
+    "# Divergent data reduction for Amor\n",
+    "\n",
+    "In this notebook, we will look at the reduction workflow for reflectometry data collected from the PSI instrument\n",
+    "[Amor](https://www.psi.ch/en/sinq/amor) in [divergent beam mode](https://www.psi.ch/en/sinq/amor/selene).\n",
+    "This is a living document and there are plans to update this as necessary with changes in the data reduction methodology and code.\n",
+    "\n",
+    "We will begin by importing the modules that are necessary for this notebook."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "455b7a61-5a5d-4d94-993c-02fe41c84e50",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import scipp as sc\n",
+    "from ess import amor, reflectometry\n",
+    "import ess"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "1c89f088-0663-49ce-a999-8be271f2e24a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "logger = ess.logging.configure_workflow('amor_reduction',\n",
+    "                                        filename='amor.log')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "dde6c61a-39ed-4e85-af6e-0915baf3ad1b",
+   "metadata": {},
+   "source": [
+    "## The Amor beamline\n",
+    "\n",
+    "Before we can load the data, we need to define the parameters of the beamline and briefly discuss the measurement philosophy.\n",
+    "We begin by defining the convention for naming angles in our set-up.\n",
+    "We use the Fig. 5 from the paper by [Stahn & Glavic (2016)](#stahn2016), which is reproduced below (along with its caption).\n",
+    "\n",
+    "![Figure5](https://ars.els-cdn.com/content/image/1-s2.0-S0168900216300250-gr5.jpg)\n",
+    "\n",
+    "The yellow area shows the incoming and reflected beam, both with the divergence $\\Delta \\theta$.\n",
+    "The inclination of the sample relative to the centre of the incoming beam (here identical to the instrument horizon) is called $\\omega$, and the respective angle of the reflected beam relative to the same axis is $\\gamma$.\n",
+    "\n",
+    "In general the detector centre is located at $\\gamma_{\\rm D} = 2\\omega$.\n",
+    "These are instrument coordinates and should not be confused with the situation on the sample, where the take-off angle of an individual neutron trajectory is called $\\theta$.\n",
+    "\n",
+    "### The supermirror reference\n",
+    "\n",
+    "The normalization of data from the Amor instrument in divergent mode requires a reference measurement of a neutron supermirror.\n",
+    "The supermirror is not a perfect supermirror, and is described with some properties, an $m$-value, a critical edge, and an $\\alpha$, from which we can calibrate the supermirror. \n",
+    "This reference measurement facilitates two normalizations on our data:\n",
+    "- normalization of neutron count per unit time, assuming that the instrument flux is constant between the supermirror measurement and our sample measurement,\n",
+    "- normalization over the detector pixels, to account for differences in pixel efficiency.\n",
+    "It is important when this normalization is performed that the differences in count time and beam footprint are accounted for such that the measurements are commensurate.\n",
+    "\n",
+    "The `amor` module provides a helper function that generates the default beamline parameters.\n",
+    "This function requires the sample rotation angle ($\\omega$) as an input to fully define the beamline.\n",
+    "In the future, all these beamline parameters (including the sample rotation) will be included in the file meta data.\n",
+    "For now, we must define this manually, and the rotation is different for the sample and reference files."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "f7f0a7b0-39b5-43d4-bf36-a2dada783eed",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sample_rotation = sc.scalar(0.7989, unit='deg')\n",
+    "sample_beamline = amor.make_beamline(sample_rotation=sample_rotation)\n",
+    "reference_rotation = sc.scalar(0.8389, unit='deg')\n",
+    "reference_beamline = amor.make_beamline(sample_rotation=reference_rotation)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "fdee84e5-f3c9-41f9-8bbe-d7e271c59af5",
+   "metadata": {},
+   "source": [
+    "## Setting the experiment metadata\n",
+    "\n",
+    "We use the [Orso](https://www.reflectometry.org/) reflectometry standard and its Python interface\n",
+    "[orsopy](https://orsopy.readthedocs.io/en/latest/) to record important metadata on the experiment.\n",
+    "The orso object will also be used at the end of the reduction to write a standard-compliant results file."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "bf511c93-d5a6-44fa-b349-22d18572a2a9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from orsopy import fileio\n",
+    "from ess.amor.orso import make_orso\n",
+    "\n",
+    "owner = fileio.base.Person('Jochen Stahn', 'Paul Scherrer Institut', 'jochen.stahn@psi.ch')\n",
+    "sample = fileio.data_source.Sample('Ni/Ti Multilayer', 'gas/solid', 'air | (Ni | Ti) * 5 | Si')\n",
+    "creator = fileio.base.Person('Andrew R. McCluskey', 'European Spallation Source', 'andrew.mccluskey@ess.eu')\n",
+    "\n",
+    "orso = make_orso(owner=owner,\n",
+    "                 sample=sample,\n",
+    "                 creator=creator,\n",
+    "                 reduction_script='https://github.com/scipp/ess/blob/main/docs/instruments/amor/amor_reduction.ipynb')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "4d50fbee-cc27-4347-b5bc-48850d954041",
+   "metadata": {},
+   "source": [
+    "## Loading the data\n",
+    "\n",
+    "The `sample.nxs` file is the experimental data file of interest,\n",
+    "while `reference.nxs` is the reference measurement of the neutron supermirror.\n",
+    "The `amor.load` function can be used to load these files and perform some early preprocessing:\n",
+    "\n",
+    "- The `tof` values are converted from nanoseconds to microseconds.\n",
+    "- The raw data contains events coming from two pulses, and these get folded into a single `tof` range.\n",
+    "\n",
+    "We show and plot the resulting `scipp.DataArray` for just the `sample` below. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "ff2c2c9a-ac1f-404a-bef7-559ae85b91af",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sample = amor.load(amor.data.get_path(\"sample.nxs\"),\n",
+    "                   orso=orso,\n",
+    "                   beamline=sample_beamline)\n",
+    "reference = amor.load(amor.data.get_path(\"reference.nxs\"),\n",
+    "                      orso=orso,\n",
+    "                      beamline=reference_beamline)\n",
+    "sample"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "7d30344d-fc38-483b-a2ff-872c4727dfa2",
+   "metadata": {},
+   "source": [
+    "By simply plotting the data, we get a first glimpse into the data contents."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "4d58db96-96bb-4f02-9ed4-c227b778eb8f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sc.plot(sample)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "9a43dee7-fea3-4de9-9426-d3fe9741249d",
+   "metadata": {
+    "tags": []
+   },
+   "source": [
+    "### Correcting the position of the detector pixels\n",
+    "\n",
+    "**Note:** once new Nexus files are produced, this step should go away. \n",
+    "\n",
+    "The pixel positions are wrong in the `sample.nxs` and `reference.nxs` files, and require an ad-hoc correction.\n",
+    "We apply an arbitrary shift in the vertical (`y`) direction.\n",
+    "We first move the pixels down by 0.955 degrees,\n",
+    "so that the centre of the beam goes through the centre of the top half of the detector blades\n",
+    "(the bottom half of the detectors was turned off).\n",
+    "Next, we move all the pixels so that the centre of the top half of the detector pixels lies at an angle of $2 \\omega$,\n",
+    "as described in the beamline diagram."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "77bc292a-6cd9-4f55-9479-1b5b2c6b57ac",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "logger.info(\"Correcting pixel positions in 'sample.nxs'\")\n",
+    "def pixel_position_correction(data: sc.DataArray):\n",
+    "    return data.coords['position'].fields.z * sc.tan(2.0 *\n",
+    "                                                     data.coords['sample_rotation'] -\n",
+    "                                                     (0.955 * sc.units.deg))\n",
+    "sample.coords['position'].fields.y += pixel_position_correction(sample)\n",
+    "reference.coords['position'].fields.y += pixel_position_correction(reference)\n",
+    "sample.attrs['orso'].value.data_source.measurement.comment = 'Pixel positions corrected'\n",
+    "reference.attrs['orso'].value.data_source.measurement.comment = 'Pixel positions corrected'"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5746a0e8-6e90-459b-a8cf-37af826686f9",
+   "metadata": {},
+   "source": [
+    "We now check that the detector pixels are in the correct position by showing the instrument view"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "77c70704-b45f-4131-aa84-63765a99668a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "amor.instrument_view(sample)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5844965c-2d8a-4dd8-a080-855945e47ad0",
+   "metadata": {},
+   "source": [
+    "## Coordinate transformation graph\n",
+    "\n",
+    "To compute the wavelength $\\lambda$, the scattering angle $\\theta$, and the $Q$ vector for our data,\n",
+    "we construct a coordinate transformation graph.\n",
+    "\n",
+    "It is based on classical conversions from `tof` and pixel `position` to $\\lambda$ (`wavelength`),\n",
+    "$\\theta$ (`theta`) and $Q$ (`Q`),\n",
+    "but comprises a number of modifications.\n",
+    "\n",
+    "The computation of the scattering angle $\\theta$ includes a correction for the Earth's gravitational field which bends the flight path of the neutrons.\n",
+    "The angle can be found using the following expression\n",
+    "\n",
+    "$$\\theta = \\sin^{-1}\\left(\\frac{\\left\\lvert y + \\frac{g m_{\\rm n}}{2 h^{2}} \\lambda^{2} L_{2}^{2} \\right\\rvert }{L_{2}}\\right) - \\omega$$\n",
+    "\n",
+    "where $m_{\\rm n}$ is the neutron mass,\n",
+    "$g$ is the acceleration due to gravity,\n",
+    "and $h$ is Planck's constant.\n",
+    "\n",
+    "For a graphical representation of the above expression,\n",
+    "we consider once again the situation with a convergent beam onto an inclined sample.\n",
+    "\n",
+    "![specular_reflection](amor_specular_reflection.png)\n",
+    "\n",
+    "The detector (in green), whose center is located at an angle $\\gamma_{\\rm D}$ from the horizontal plane,\n",
+    "has a physical extent and is measuring counts at multiple scattering angles at the same time.\n",
+    "We consider two possible paths for neutrons.\n",
+    "The first path (cyan) is travelling horizontally from the source to the sample and subsequently,\n",
+    "following specular reflection, hits the detector at $\\gamma_{\\rm D}$ from the horizontal plane.\n",
+    "From the symmetry of Bragg's law, the scattering angle for this path is $\\theta_{1} = \\gamma_{\\rm D} - \\omega$.\n",
+    "\n",
+    "The second path (red) is hitting the bottom edge of the detector.\n",
+    "Assuming that all reflections are specular,\n",
+    "the only way the detector can record neutron events at this location is if the neutron originated from the bottom part of the convergent beam.\n",
+    "Using the same symmetry argument as above, the scattering angle is $\\theta_{2} = \\gamma_{2} - \\omega$. \n",
+    "\n",
+    "This expression differs slightly from the equation found in the computation of the $\\theta$ angle in other techniques such as\n",
+    "[SANS](https://docs.mantidproject.org/nightly/algorithms/Q1D-v2.html#q-unit-conversion),\n",
+    "in that the horizontal $x$ term is absent,\n",
+    "because we assume a planar symmetry and only consider the vertical $y$ component of the displacement.\n",
+    "\n",
+    "The conversion graph is defined in the reflectometry module,\n",
+    "and can be obtained via"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "71b31e8c-7138-45a5-a9c1-8eb4e9727b09",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "graph = amor.conversions.specular_reflection()\n",
+    "sc.show_graph(graph, simplified=True)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e1163c27-a355-432f-b060-f45f8b8bf215",
+   "metadata": {},
+   "source": [
+    "## Computing the wavelength\n",
+    "\n",
+    "To compute the wavelength of the neutrons,\n",
+    "we request the `wavelength` coordinate from the `transform_coords` method by supplying our graph defined above\n",
+    "(see [here](https://scipp.github.io/scippneutron/user-guide/coordinate-transformations.html)\n",
+    "for more information about using `transform_coords`).\n",
+    "\n",
+    "We also exclude all neutrons with a wavelength lower than 2.4 &#8491;."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "9a8dade8-11c0-4b43-a8a4-ff431801f7b9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "wavelength_edges = sc.array(dims=['wavelength'],\n",
+    "                            values=[2.4, 16.0],\n",
+    "                            unit='angstrom')\n",
+    "sample_wav = reflectometry.conversions.tof_to_wavelength(\n",
+    "    sample, wavelength_edges, graph=graph)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "c7e4ecca-bb23-4b6c-a056-ebb9dcfa579d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sample_wav.bins.concatenate('detector_id').plot()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "0361b1c0-64e4-4b68-b290-9f64960613ee",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "reference_wav = reflectometry.conversions.tof_to_wavelength(\n",
+    "    reference, wavelength_edges, graph=graph)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a7d127db-c648-4f9b-be31-57cc5a1880b4",
+   "metadata": {
+    "tags": []
+   },
+   "source": [
+    "## Compute the angle and perform the footprint correction\n",
+    "\n",
+    "Using the same method, we can compute the angle of reflectance ($\\theta$) and therefore correct for the footprint of the beam. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "80fd2381-6b96-472e-8500-038e217bd6fe",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sample_theta = reflectometry.conversions.wavelength_to_theta(\n",
+    "    sample_wav, graph=graph)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a0acf73c-3dd1-4d5e-b929-ac61a90ee273",
+   "metadata": {},
+   "source": [
+    "From the theta values, we can calculate the footprint of the beam on the sample and determine the footprint scaling factor. \n",
+    "This footprint scale factor accounts for the fact that the illuminated area of the sample depends on the angle of incidence (which as we noted previously may be different for the sample and the reference)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "3583f74f-b439-4944-9094-55643ad5eb4e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sample_theta = reflectometry.corrections.footprint_correction(sample_theta)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a5532b22-51e0-4531-99f8-f02b4ba1b085",
+   "metadata": {},
+   "source": [
+    "Then we repeat this process for the reference."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "4e00af16-f26f-4df0-b478-d4ef0cc51b18",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "reference_theta = reflectometry.conversions.wavelength_to_theta(\n",
+    "    reference_wav, graph=graph)\n",
+    "reference_theta = reflectometry.corrections.footprint_correction(reference_theta)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "95a9365b-e133-4d50-9baa-d5fde49ff72e",
+   "metadata": {
+    "tags": []
+   },
+   "source": [
+    "## Resolution function\n",
+    "\n",
+    "The Amor resolution function consists of three parts:\n",
+    "\n",
+    "- wavelength resolution\n",
+    "- angular resolution\n",
+    "- sample size resolution\n",
+    "\n",
+    "These are discussed in section 4.3.3 of the paper by [Stahn & Glavic (2016)](#stahn2016). \n",
+    "The wavelength resolution arises from the presence of the double-blind chopper, which have a non-zero distance between them. \n",
+    "The distance between the choppers $d_{\\text{CC}}$ (which is 1 meter for Amor) and the distance from the chopper-system midpoint to the detector, $d_{\\text{C}_{\\text{mid}}\\text{D}}$ (15 meter for Amor) define the full width at half maximum of this resolution, which is converted to a standard deviation as, \n",
+    "\n",
+    "$$ \\frac{\\sigma\\lambda}{\\lambda} = \\frac{1}{2 \\sqrt{2\\ln{2}}}\\frac{d_{\\text{CC}}}{d_{\\text{C}_{\\text{mid}}\\text{D}}}.$$"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "149c05ea-b5b5-44f1-9b1b-177d79ad1b70",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sample_theta.coords['wavelength_resolution'] = amor.resolution.wavelength_resolution(\n",
+    "    chopper_1_position=sample.coords['source_chopper_1'].value['position'], \n",
+    "    chopper_2_position=sample.coords['source_chopper_2'].value['position'], \n",
+    "    pixel_position=sample.coords['position'])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3df82217-8c2b-475d-ae75-c05f83e2f1b9",
+   "metadata": {},
+   "source": [
+    "The angular resolution is determined by the spatial resolution of the detector pixels, $\\Delta z$, and the sample to detector pixel distance, $d_{\\text{SD}}$\n",
+    "\n",
+    "$$ \\frac{\\sigma_{\\gamma}}{\\theta} = \\frac{1}{2\\sqrt{2\\ln{2}}} \\arctan{\\frac{\\Delta z}{d_{\\text{SD}}}}. $$"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "7fb63c73-3507-4e87-b2f4-6882d49f43ca",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sample_theta.bins.coords['angular_resolution'] = amor.resolution.angular_resolution(\n",
+    "    pixel_position=sample.coords['position'], \n",
+    "    theta=sample_theta.bins.coords['theta'], \n",
+    "    detector_spatial_resolution=sample_theta.coords['detector_spatial_resolution'])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e4ab7835-1dbe-4cf0-b6c3-deb953ccc595",
+   "metadata": {},
+   "source": [
+    "At high angles, the projected footprint of the sample size, $x_{\\text{s}}$, on the detector may be larger than the detector resolution, therefore we also consider the sample-size resolution. \n",
+    "\n",
+    "$$ \\frac{\\sigma_{x}}{\\theta} = \\frac{1}{2\\sqrt{2\\ln{2}}} \\frac{x_{\\text{s}}}{d_{\\text{SD}}}. $$"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "87829723-a265-4a4d-ba8e-ecd903eb4197",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sample_theta.coords['sample_size_resolution'] = amor.resolution.sample_size_resolution(\n",
+    "    pixel_position=sample.coords['position'], sample_size=sample.coords['sample_size'])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "64a6b838-c594-48bc-a85f-3ba9a40088a6",
+   "metadata": {},
+   "source": [
+    "## Compute the Q vector\n",
+    "\n",
+    "Once again using the same method, we can compute the $Q$ vector,\n",
+    "which now depends on both detector position (id) and wavelength"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "55daab88-10c1-4b2e-97de-b97e8317ad8e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "q_edges = sc.geomspace(dim='Q', start=0.008, stop=0.075, num=200, unit='1/angstrom')\n",
+    "\n",
+    "sample_q = reflectometry.conversions.theta_to_q(\n",
+    "    sample_theta, q_edges=q_edges, graph=graph)\n",
+    "reference_q = reflectometry.conversions.theta_to_q(\n",
+    "    reference_theta, q_edges=q_edges, graph=graph)\n",
+    "\n",
+    "sc.plot({'sample': sample_q.sum('detector_id'),\n",
+    "         'uncalibrated reference': reference_q.sum('detector_id')},\n",
+    "        norm=\"log\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "1442495d-f78f-436b-ad00-f369a01ba9ca",
+   "metadata": {},
+   "source": [
+    "## Calibration of the super-mirror\n",
+    "\n",
+    "In order to normalize the data to give reflectivity data, as mentioned above, we use a measurement from a neutron super-mirror. \n",
+    "However, first we must calibrate the super-mirror measurement. \n",
+    "The calibration of the super-mirror depends on the properties of the super-mirror, and follows the equation below, \n",
+    "\n",
+    "$$ n(q) = \n",
+    "  \\begin{cases}\n",
+    "    1, & \\text{where } q < c_{\\mathrm{sm}} \\\\\n",
+    "    [1-\\alpha(q - c_{\\mathrm{sm}})]^{-1}, & \\text{where } c_{\\mathrm{sm}} \\leq q \\leq mc_{\\mathrm{sm}} \\\\\n",
+    "    0, & \\text{where } q > mc_{\\mathrm{sm}},\n",
+    "  \\end{cases}  \n",
+    "$$\n",
+    "\n",
+    "where $\\alpha$, $m$, and $c_{\\mathrm{sm}}$ are super-mirror properties. \n",
+    "\n",
+    "The number of counts in each of the detector/$Q$ bins are then summed and the calibration factor is found and the two are divided. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "daf577ef-55c0-4556-aeb0-685a339db05e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "reference_q_summed = reflectometry.conversions.sum_bins(reference_q)\n",
+    "reference_q_summed_cal = amor.calibrations.supermirror_calibration(\n",
+    "    reference_q_summed)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5ced652c-3536-49fb-88bc-1fc7bbfe20c7",
+   "metadata": {},
+   "source": [
+    "The effect on the reference measurement can be seen in the plot below. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a321a29b-3a6a-4ec4-ac35-fd8beb3474ea",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sc.plot({'Uncalibrated': reference_q_summed.sum('detector_id'), \n",
+    "         'Calibrated': reference_q_summed_cal.sum('detector_id')}, \n",
+    "        norm='log')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a3af2ec5-f4ec-400d-ab89-a483262daf34",
+   "metadata": {},
+   "source": [
+    "## Normalization by the super-mirror\n",
+    "\n",
+    "For each of the measurements, we should determine the number of counts in each bins and normalize this by the total number of counts in the measurement."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "6110caf5-4b88-4019-bea7-f07070413678",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sample_q_summed = reflectometry.conversions.sum_bins(sample_q)\n",
+    "\n",
+    "sample_norm = reflectometry.corrections.normalize_by_counts(sample_q_summed)\n",
+    "reference_norm = reflectometry.corrections.normalize_by_counts(reference_q_summed_cal)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f2d37d31-c1cd-433a-bacb-7c33076691b1",
+   "metadata": {},
+   "source": [
+    "Now, we should obtain the final normalized data by dividing the two datasets. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "784c11db-f6d8-4959-8777-3be98aa8ba16",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "normalized = amor.normalize.normalize_by_supermirror(sample_norm, reference_norm)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "03cc3513-a372-4d79-bcec-abf44a48cda4",
+   "metadata": {},
+   "source": [
+    "The plot below shows the reflecivity as a function of `'detector_id'` and `'Q'`.\n",
+    "Here, we note that there are a large number of pixels, where there was no neutrons detected in the reference measurements, leading to values of `nan` and `inf` in the normalized data.\n",
+    "Therefore, we should mask these pixels before finding the mean along the `'detector_id'` dimension. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "7b26b666-4a61-4e9e-b361-9089e62658f6",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sc.plot(normalized, resolution={'y': 1000, 'x': 201}, norm='log')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "27705189-b37a-4a61-ba09-f5153582c3c8",
+   "metadata": {},
+   "source": [
+    "The reference is assumed to be a perfect scatterer, therefore where there is no reflectivity in the reference measurement is it taken to be a region of `'Q'` space that cannot be accessed by the instrument. \n",
+    "This leads to the number of detectors feeding data into each $Q$-bin being variable, this is particularly noticable at low-$Q$, there there are only a few pixels detecting neutrons. \n",
+    "Therefore, in order to account for this variability as a function of $Q$, we mask those pixels (performed in `normalize_by_supermirror`) where no neutrons were detected and perform an average over the remaining `'detector_id'` to reduce the data. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "8b176b7b-e1e2-496b-8241-9a8203faac30",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sc.plot(normalized.mean('detector_id'), norm='log')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d5b8ab01-4924-451e-95fb-a04365373c54",
+   "metadata": {},
+   "source": [
+    "To obtain the final resolution, the three components of the resolution function are combined and multipled by the midpoints of the $Q$-bins. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "11772c06-8541-4298-aac6-093f77d93ed8",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "normalized.coords['sigma_Q'] = amor.resolution.sigma_Q(\n",
+    "    angular_resolution=normalized.coords['angular_resolution'],\n",
+    "    wavelength_resolution=normalized.coords['wavelength_resolution'],\n",
+    "    sample_size_resolution=normalized.coords['sample_size_resolution'],\n",
+    "    q_bins=normalized.coords['Q'])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "18bcf758-ab6c-4333-84b3-e9268e0b1318",
+   "metadata": {
+    "tags": []
+   },
+   "source": [
+    "## Writing to a file\n",
+    "\n",
+    "Having completed the data reduction process, it is then possible to write the data to a `.ort` format file. \n",
+    "This [file format](https://github.com/reflectivity/file_format/blob/master/specification.md) has been developed for reduction reflectometry data by [ORSO](https://www.reflectometry.org). "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "0dfa7962-e494-4948-bd0c-32d9603bdc2a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "reflectometry.io.save_ort(normalized, 'amor.ort')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "71042c4a-798e-4249-a75b-3ddcbc7652ca",
+   "metadata": {},
+   "source": [
+    "This file will be rich in metadata that has been included during the reduction process. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "23140806-9d56-40de-b1e2-9e4d909c6f85",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "!head amor.ort"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "0fc6d74e-e97e-415d-8d1f-6a6396c0e8eb",
+   "metadata": {
+    "tags": []
+   },
+   "source": [
+    "## Make a $(\\lambda, \\theta)$ map\n",
+    "\n",
+    "A good sanity check is to create a two-dimensional map of the counts in $\\lambda$ and $\\theta$ bins.\n",
+    "To achieve this, we request two output coordinates from the `transform_coords` method."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "30d0d9dd-b4ec-4d57-8314-2c81c9e727d9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sample_theta = sample.transform_coords([\"theta\", \"wavelength\"], graph=graph)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d6e51845-09ef-4596-b0b8-593eafddf5f2",
+   "metadata": {},
+   "source": [
+    "Then, we concatenate all the events in the `detector_id` dimension"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "69e2de29-2f6c-459e-9521-177a3c0887f5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sample_theta = sample_theta.bins.concatenate('detector_id')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "417b0c29-6f96-4a19-9828-5dbce9df6124",
+   "metadata": {},
+   "source": [
+    "Finally, we bin into the existing `theta` dimension, and into a new `wavelength` dimension,\n",
+    "to create a 2D output"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "466687c7-7603-40a5-ab8d-f3e23ecdab0a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "nbins = 165\n",
+    "theta_edges = sc.linspace(dim='theta', start=0.0, stop=1.2, num=nbins, unit='deg')\n",
+    "wavelength_edges = sc.linspace(dim='wavelength', start=0, stop=15.0,\n",
+    "                               num=nbins, unit='angstrom')\n",
+    "binned = sc.bin(sample_theta,\n",
+    "                edges=[sc.to_unit(theta_edges, 'rad'), wavelength_edges])\n",
+    "binned"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "87ba276f-d15f-4f51-aafe-748544d5c65a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "binned.bins.sum().plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "b4ccc717-7b2d-491e-b202-3f16f0a825af",
+   "metadata": {},
+   "source": [
+    "This plot can be used to check if the value of the sample rotation angle $\\omega$ is correct.\n",
+    "The bright triangles should be pointing back to the origin $\\lambda = \\theta = 0$."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "db1a9cf1-dc47-4b1f-b459-db5b701b558d",
+   "metadata": {},
+   "source": [
+    "## References"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "ac7196da-a78d-4f50-b4f5-62e9119bc2b9",
+   "metadata": {},
+   "source": [
+    "<div id='stahn2016'></div>\n",
+    "Stahn J., Glavic A., **2016**,\n",
+    "*Focusing neutron reflectometry: Implementation and experience on the TOF-reflectometer Amor*,\n",
+    "[Nuclear Instruments and Methods in Physics Research Section A: Accelerators, Spectrometers, Detectors and Associated Equipment, 821, 44-54](https://doi.org/10.1016/j.nima.2016.03.007)"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

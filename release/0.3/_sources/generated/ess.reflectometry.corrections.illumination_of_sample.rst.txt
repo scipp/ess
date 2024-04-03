@@ -1,0 +1,6 @@
+﻿ess.reflectometry.corrections.illumination\_of\_sample
+======================================================
+
+.. currentmodule:: ess.reflectometry.corrections
+
+.. autofunction:: illumination_of_sample

@@ -1,0 +1,6 @@
+﻿ess.reflectometry.resolution.detector\_resolution
+=================================================
+
+.. currentmodule:: ess.reflectometry.resolution
+
+.. autofunction:: detector_resolution

@@ -1,0 +1,415 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>ess.amor.amor_data &mdash; ess  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="ess.amor.tools" href="tools.html" />
+    <link rel="prev" title="Amor" href="../amor.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html">
+          
+
+          
+            
+            <img src="../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+    
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started/installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Instruments</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../amor.html">Amor</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">ess.amor.amor_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tools.html">ess.amor.tools</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Techniques</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../techniques/reflectometry.html">Reflectometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../techniques/wfm.html">Wavelength frame multiplication</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../about/release-notes.html">Release Notes</a></li>
+</ul>
+
+            
+          
+    <div style="height: 32px; position: fixed; bottom: 0; left: 15px;">
+      Select version:&nbsp;
+      <select onchange="location = this.value;"
+              style="height: 30px; color: #27a54b; background-color: #403d3d;
+                    border: 0px; box-shadow: none;">
+        <option value="" selected>Pick version</option>
+        <option value="https://scipp.github.io/ess">latest (unstable)</option>
+        <option value="https://scipp.github.io/release/0.1.0">v0.1</option>
+      </select>
+    </div>
+  
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">ess</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../amor.html">Amor</a> &raquo;</li>
+        
+      <li>ess.amor.amor_data</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../../_sources/instruments/amor/amor_data.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="module-ess.amor.amor_data">
+<span id="ess-amor-amor-data"></span><h1>ess.amor.amor_data<a class="headerlink" href="#module-ess.amor.amor_data" title="Permalink to this headline">¶</a></h1>
+<p>This is the class for data reduction from the Amor instrument, which is a subclass of the broader <cite>ReflData</cite> class.
+Features of this class included correcting for the time-of-flight measurement at Amor.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="ess.amor.amor_data.AmorData">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ess.amor.amor_data.</span></span><span class="sig-name descname"><span class="pre">AmorData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">data,</span> <span class="pre">reduction_creator=None,</span> <span class="pre">data_owner=None,</span> <span class="pre">experiment_id=None,</span> <span class="pre">experiment_date=None,</span> <span class="pre">sample_description=None,</span> <span class="pre">reduction_file=None,</span> <span class="pre">data_file=None,</span> <span class="pre">reduction_creator_affiliation=None,</span> <span class="pre">sample_angle_offset=&lt;scipp.Variable&gt;</span> <span class="pre">()</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">int64</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[deg]</span>&#160; <span class="pre">[0],</span> <span class="pre">gravity=True,</span> <span class="pre">beam_size=&lt;scipp.Variable&gt;</span> <span class="pre">()</span>&#160;&#160;&#160; <span class="pre">float64</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[m]</span>&#160; <span class="pre">[0.001000],</span> <span class="pre">sample_size=&lt;scipp.Variable&gt;</span> <span class="pre">()</span>&#160;&#160;&#160; <span class="pre">float64</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[m]</span>&#160; <span class="pre">[0.010000],</span> <span class="pre">detector_spatial_resolution=&lt;scipp.Variable&gt;</span> <span class="pre">()</span>&#160;&#160;&#160; <span class="pre">float64</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[m]</span>&#160; <span class="pre">[0.002500],</span> <span class="pre">chopper_sample_distance=&lt;scipp.Variable&gt;</span> <span class="pre">()</span>&#160;&#160;&#160; <span class="pre">float64</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[m]</span>&#160; <span class="pre">[15.000000],</span> <span class="pre">chopper_speed=&lt;scipp.Variable&gt;</span> <span class="pre">()</span>&#160;&#160;&#160; <span class="pre">float64</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[1/us]</span>&#160; <span class="pre">[0.000007],</span> <span class="pre">chopper_detector_distance=&lt;scipp.Variable&gt;</span> <span class="pre">()</span>&#160;&#160;&#160; <span class="pre">float64</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[Å]</span>&#160; <span class="pre">[190000000000.000000],</span> <span class="pre">chopper_chopper_distance=&lt;scipp.Variable&gt;</span> <span class="pre">()</span>&#160;&#160;&#160; <span class="pre">float64</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[m]</span>&#160; <span class="pre">[0.490000],</span> <span class="pre">chopper_phase=&lt;scipp.Variable&gt;</span> <span class="pre">()</span>&#160;&#160;&#160; <span class="pre">float64</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[deg]</span>&#160; <span class="pre">[-8.000000],</span> <span class="pre">wavelength_cut=&lt;scipp.Variable&gt;</span> <span class="pre">()</span>&#160;&#160;&#160; <span class="pre">float64</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[Å]</span>&#160; <span class="pre">[2.400000]</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ess.amor.amor_data.AmorData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../../techniques/reflectometry/data.html#ess.reflectometry.data.ReflData" title="ess.reflectometry.data.ReflData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reflectometry.data.ReflData</span></code></a></p>
+<p>Reduction of a single Amor dataset.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>data (<code class="xref py py-class docutils literal notranslate"><span class="pre">scipp._scipp.core.DataArray</span></code> or <code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>): The data to be reduced or the path to the file to be reduced.
+reduction_creator (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>, optional): The name of the creator of the reduction. Optional, default <code class="code docutils literal notranslate"><span class="pre">None</span></code>.
+data_owner (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>, optional): The name of the owner of the data. Optional, default <code class="code docutils literal notranslate"><span class="pre">None</span></code>.
+experiment_id (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>, optional): The experimental identifier. Optional, default <code class="code docutils literal notranslate"><span class="pre">None</span></code>.
+experiment_date (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>, optional): The date or date range for the experiment. Optional, default <code class="code docutils literal notranslate"><span class="pre">None</span></code>.
+sample_description (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>, optional): A short description of the sample. Optional, default <code class="code docutils literal notranslate"><span class="pre">None</span></code>.
+reduction_file (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>, optional): The name of the file used for reduction (<code class="code docutils literal notranslate"><span class="pre">.py</span></code> script or <code class="code docutils literal notranslate"><span class="pre">.ipynb</span></code> notebook). Optional, default <code class="code docutils literal notranslate"><span class="pre">None</span></code>.
+data_file (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>, optional): If a <code class="xref py py-class docutils literal notranslate"><span class="pre">scipp._scipp.core.DataArray</span></code> is given as the <code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code>, a <code class="xref py py-attr docutils literal notranslate"><span class="pre">data_file</span></code> should be defined for output in the file. Optional, default <code class="code docutils literal notranslate"><span class="pre">None</span></code>.
+reduction_creator_affiliation (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>, optional): The affiliation of the reduction owner. Optional, defaults to <code class="code docutils literal notranslate"><span class="pre">None</span></code>.
+sample_angle_offset (<code class="xref py py-class docutils literal notranslate"><span class="pre">scipp.Variable</span></code>, optional): Correction for omega or possibly misalignment of sample. Optional, default <code class="code docutils literal notranslate"><span class="pre">0</span> <span class="pre">degrees</span> <span class="pre">of</span> <span class="pre">arc</span></code>.
+gravity (<code class="xref py py-attr docutils literal notranslate"><span class="pre">bool</span></code>, optional): Should gravity be accounted for. Optional, default <cite>True</cite>.
+beam_size (<code class="xref py py-class docutils literal notranslate"><span class="pre">scipp._scipp.core.Variable</span></code>, optional): Size of the beam perpendicular to the scattering surface. Optional, default <code class="code docutils literal notranslate"><span class="pre">0.001</span> <span class="pre">m</span></code>.
+sample_size (<code class="xref py py-class docutils literal notranslate"><span class="pre">scipp._scipp.core.Variable</span></code>, optional): Size of the sample in direction of the beam. Optional, default <code class="code docutils literal notranslate"><span class="pre">0.01</span> <span class="pre">m</span></code>.
+detector_spatial_resolution (<code class="xref py py-class docutils literal notranslate"><span class="pre">scipp._scipp.core.Variable</span></code>, optional): Spatial resolution of the detector. Optional, default <code class="code docutils literal notranslate"><span class="pre">2.5</span> <span class="pre">mm</span></code>
+chopper_sample_distance (<code class="xref py py-class docutils literal notranslate"><span class="pre">scipp._scipp.core.Variable</span></code>, optional): Distance from chopper to sample. Optional, default <code class="code docutils literal notranslate"><span class="pre">15.</span> <span class="pre">m</span></code>
+chopper_speed (<code class="xref py py-class docutils literal notranslate"><span class="pre">scipp._scipp.core.Variable</span></code>, optional): Rotational velocity of the chopper. Optional, default <code class="code docutils literal notranslate"><span class="pre">6.6666...</span> <span class="pre">e-6</span> <span class="pre">µs^{-1}</span></code>.
+chopper_detector_distance (<code class="xref py py-class docutils literal notranslate"><span class="pre">scipp._scipp.core.Variable</span></code>, optional): Distance from chopper to detector. Optional, default <code class="code docutils literal notranslate"><span class="pre">19</span> <span class="pre">m</span></code>.
+chopper_chopper_distance (<code class="xref py py-class docutils literal notranslate"><span class="pre">scipp._scipp.core.Variable</span></code>, optional): The distance between the wavelength defining choppers. Optional, default <code class="code docutils literal notranslate"><span class="pre">0.49</span> <span class="pre">m</span></code>
+chopper_phase (<code class="xref py py-class docutils literal notranslate"><span class="pre">scipp._scipp.core.Variable</span></code>, optional): Phase offset between chopper pulse and ToF zero. Optional, default <code class="code docutils literal notranslate"><span class="pre">-8.</span> <span class="pre">degrees</span> <span class="pre">of</span> <span class="pre">arc</span></code>.
+wavelength_cut (<code class="xref py py-class docutils literal notranslate"><span class="pre">scipp._scipp.core.Variable</span></code>, optional): Minimum cutoff for wavelength. Optional, default <code class="code docutils literal notranslate"><span class="pre">2.4</span> <span class="pre">Å</span></code>.</p>
+</dd>
+<dt>Attributes:</dt><dd><p>tau (<code class="xref py py-class docutils literal notranslate"><span class="pre">scipp._scipp.core.Variable</span></code>): Half of the inverse of the chopper speed.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="ess.amor.amor_data.AmorData.tof_correction">
+<span class="sig-name descname"><span class="pre">tof_correction</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ess.amor.amor_data.AmorData.tof_correction" title="Permalink to this definition">¶</a></dt>
+<dd><p>A correction for the presense of the chopper with respect to the “true” ToF.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ess.amor.amor_data.AmorData.wavelength_masking">
+<span class="sig-name descname"><span class="pre">wavelength_masking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wavelength_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wavelength_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ess.amor.amor_data.AmorData.wavelength_masking" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overwriting the <a class="reference internal" href="../../techniques/reflectometry/data.html#ess.reflectometry.data.ReflData" title="ess.reflectometry.data.ReflData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reflectometry.data.ReflData</span></code></a> wavelength masking functionality.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>wavelength_min (<code class="xref py py-class docutils literal notranslate"><span class="pre">scipp._scipp.core.Variable</span></code>, optional): Minimum wavelength to be used. Optional, default to <code class="code docutils literal notranslate"><span class="pre">wavelength_cut</span></code> value.
+wavelength_max (<code class="xref py py-class docutils literal notranslate"><span class="pre">scipp._scipp.core.Variable</span></code>, optional): Maximum wavelength to be used. Optional, default to <code class="code docutils literal notranslate"><span class="pre">wavelength_min</span> <span class="pre">+</span> <span class="pre">tau</span> <span class="pre">*</span> <span class="pre">(ess.reflectometry.HDM</span> <span class="pre">/</span> <span class="pre">chopper_detector_distance)</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ess.amor.amor_data.AmorReference">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ess.amor.amor_data.</span></span><span class="sig-name descname"><span class="pre">AmorReference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">data,</span> <span class="pre">sample_angle_offset=&lt;scipp.Variable&gt;</span> <span class="pre">()</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">int64</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[deg]</span>&#160; <span class="pre">[0],</span> <span class="pre">gravity=True,</span> <span class="pre">beam_size=&lt;scipp.Variable&gt;</span> <span class="pre">()</span>&#160;&#160;&#160; <span class="pre">float64</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[m]</span>&#160; <span class="pre">[0.001000],</span> <span class="pre">sample_size=&lt;scipp.Variable&gt;</span> <span class="pre">()</span>&#160;&#160;&#160; <span class="pre">float64</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[m]</span>&#160; <span class="pre">[0.010000],</span> <span class="pre">detector_spatial_resolution=&lt;scipp.Variable&gt;</span> <span class="pre">()</span>&#160;&#160;&#160; <span class="pre">float64</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[m]</span>&#160; <span class="pre">[0.002500],</span> <span class="pre">chopper_sample_distance=&lt;scipp.Variable&gt;</span> <span class="pre">()</span>&#160;&#160;&#160; <span class="pre">float64</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[m]</span>&#160; <span class="pre">[15.000000],</span> <span class="pre">chopper_speed=&lt;scipp.Variable&gt;</span> <span class="pre">()</span>&#160;&#160;&#160; <span class="pre">float64</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[1/us]</span>&#160; <span class="pre">[0.000007],</span> <span class="pre">chopper_detector_distance=&lt;scipp.Variable&gt;</span> <span class="pre">()</span>&#160;&#160;&#160; <span class="pre">float64</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[Å]</span>&#160; <span class="pre">[190000000000.000000],</span> <span class="pre">chopper_chopper_distance=&lt;scipp.Variable&gt;</span> <span class="pre">()</span>&#160;&#160;&#160; <span class="pre">float64</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[m]</span>&#160; <span class="pre">[0.490000],</span> <span class="pre">chopper_phase=&lt;scipp.Variable&gt;</span> <span class="pre">()</span>&#160;&#160;&#160; <span class="pre">float64</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[deg]</span>&#160; <span class="pre">[-8.000000],</span> <span class="pre">wavelength_cut=&lt;scipp.Variable&gt;</span> <span class="pre">()</span>&#160;&#160;&#160; <span class="pre">float64</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[Å]</span>&#160; <span class="pre">[2.400000],</span> <span class="pre">m_value=&lt;scipp.Variable&gt;</span> <span class="pre">()</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">int64</span>&#160; <span class="pre">[dimensionless]</span>&#160; <span class="pre">[5],</span> <span class="pre">data_file=None,</span> <span class="pre">supermirror_critical_edge=&lt;scipp.Variable&gt;</span> <span class="pre">()</span>&#160;&#160;&#160; <span class="pre">float64</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[1/Å]</span>&#160; <span class="pre">[0.022000],</span> <span class="pre">supermirror_alpha=2.8409090909090913</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ess.amor.amor_data.AmorReference" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ess.amor.amor_data.AmorData" title="ess.amor.amor_data.AmorData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.amor.amor_data.AmorData</span></code></a></p>
+<p>Additional functionality over the <code class="xref py py-class docutils literal notranslate"><span class="pre">ess.amor.AmorData</span></code> class for use with reference supermirror measurements.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>data (<code class="xref py py-class docutils literal notranslate"><span class="pre">scipp._scipp.core.DataArray</span></code> or <code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>): The data to be reduced or the path to the file to be reduced.
+sample_angle_offset (<code class="xref py py-class docutils literal notranslate"><span class="pre">scipp.Variable</span></code>, optional): Correction for omega or possibly misalignment of sample. Optional, default <code class="code docutils literal notranslate"><span class="pre">0</span> <span class="pre">degrees</span> <span class="pre">of</span> <span class="pre">arc</span></code>.
+gravity (<code class="xref py py-attr docutils literal notranslate"><span class="pre">bool</span></code>, optional): Should gravity be accounted for. Optional, default <code class="code docutils literal notranslate"><span class="pre">True</span></code>.
+beam_size (<code class="xref py py-class docutils literal notranslate"><span class="pre">scipp._scipp.core.Variable</span></code>, optional): Size of the beam perpendicular to the scattering surface. Optional, default <code class="code docutils literal notranslate"><span class="pre">0.001</span> <span class="pre">m</span></code>.
+sample_size (<code class="xref py py-class docutils literal notranslate"><span class="pre">scipp._scipp.core.Variable</span></code>, optional): Size of the sample in direction of the beam. Optional, default <code class="code docutils literal notranslate"><span class="pre">0.01</span> <span class="pre">m</span></code>.
+detector_spatial_resolution (<code class="xref py py-class docutils literal notranslate"><span class="pre">scipp._scipp.core.Variable</span></code>, optional): Spatial resolution of the detector. Optional, default <code class="code docutils literal notranslate"><span class="pre">2.5</span> <span class="pre">mm</span></code>
+chopper_sample_distance (<code class="xref py py-class docutils literal notranslate"><span class="pre">scipp._scipp.core.Variable</span></code>, optional): Distance from chopper to sample. Optional, default <code class="code docutils literal notranslate"><span class="pre">15.</span> <span class="pre">m,</span></code>
+chopper_speed (<code class="xref py py-class docutils literal notranslate"><span class="pre">scipp._scipp.core.Variable</span></code>, optional): Rotational velocity of the chopper. Optional, default <code class="code docutils literal notranslate"><span class="pre">6.6666...</span> <span class="pre">e-6</span> <span class="pre">µs^{-1}</span></code>.
+chopper_detector_distance (<code class="xref py py-class docutils literal notranslate"><span class="pre">scipp._scipp.core.Variable</span></code>, optional): Distance from chopper to detector. Optional, default <code class="code docutils literal notranslate"><span class="pre">19</span> <span class="pre">m</span></code>.
+chopper_chopper_distance (<code class="xref py py-class docutils literal notranslate"><span class="pre">scipp._scipp.core.Variable</span></code>, optional): The distance between the wavelength defining choppers. Optional, default <code class="code docutils literal notranslate"><span class="pre">0.49</span> <span class="pre">m</span></code>
+chopper_phase (<code class="xref py py-class docutils literal notranslate"><span class="pre">scipp._scipp.core.Variable</span></code>, optional): Phase offset between chopper pulse and ToF zero. Optional, default <code class="code docutils literal notranslate"><span class="pre">-8.</span> <span class="pre">degrees</span> <span class="pre">of</span> <span class="pre">arc</span></code>.
+wavelength_cut (<code class="xref py py-class docutils literal notranslate"><span class="pre">scipp._scipp.core.Variable</span></code>, optional): Minimum cutoff for wavelength. Optional, default <code class="code docutils literal notranslate"><span class="pre">2.4</span> <span class="pre">Å</span></code>.
+m_value (<code class="xref py py-class docutils literal notranslate"><span class="pre">scipp._scipp.core.Variable</span></code>, optional): m-value of supermirror for reference. Optional, default <code class="code docutils literal notranslate"><span class="pre">5</span></code>.
+data_file (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>, optional): If a <code class="xref py py-class docutils literal notranslate"><span class="pre">scipp._scipp.core.DataArray</span></code> is given as the <code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code>, a <code class="xref py py-attr docutils literal notranslate"><span class="pre">data_file</span></code> should be defined for output in the file. Optional, default <code class="code docutils literal notranslate"><span class="pre">None</span></code>.
+supermirror_critical_edge (<code class="xref py py-class docutils literal notranslate"><span class="pre">scipp._scipp.core.Variable</span></code>, optional): The q-value at the critial edge for the supermirror. Optional, defaults to <code class="code docutils literal notranslate"><span class="pre">0.022</span> <span class="pre">Å`</span></code>.
+supermirror_alpha (<code class="xref py py-attr docutils literal notranslate"><span class="pre">float</span></code>): The alpha value for the supermirror. Optional, defaults to <code class="code docutils literal notranslate"><span class="pre">2.841</span> <span class="pre">Å</span></code>.</p>
+</dd>
+<dt>Attributes:</dt><dd><p>tau (<code class="xref py py-class docutils literal notranslate"><span class="pre">scipp._scipp.core.Variable</span></code>): Half of the inverse of the chopper speed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ess.amor.amor_data.Normalisation">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ess.amor.amor_data.</span></span><span class="sig-name descname"><span class="pre">Normalisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ess.amor.amor_data.Normalisation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Normalisation between a sample and a reference measurement.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>sample (<code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reflectometry.ReflData</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reflectometry.AmorData</span></code>): The sample to be normalised.
+reference (<code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reflectometry.AmorReference</span></code>): The reference measurement to normalise to.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="ess.amor.amor_data.Normalisation.q_bin">
+<span class="sig-name descname"><span class="pre">q_bin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span> <span class="pre">/</span> <span class="pre">Å</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ess.amor.amor_data.Normalisation.q_bin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform q-binned normalisation.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>bins (<code class="xref py py-attr docutils literal notranslate"><span class="pre">array_like</span></code>, optional): q-bin edges. Optional, defaults to the minimum q-range available with 100 bins.
+unit (<code class="xref py py-class docutils literal notranslate"><span class="pre">scipp._scipp.core.Unit</span></code>, optional): Unit for q. Optional, defaults to 1/Å.</p>
+</dd>
+<dt>Returns:</dt><dd><p>(<code class="xref py py-class docutils literal notranslate"><span class="pre">scipp._scipp.core.DataArray</span></code>): Normalised data array binned into qz with resolution.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ess.amor.amor_data.Normalisation.wavelength_theta_bin">
+<span class="sig-name descname"><span class="pre">wavelength_theta_bin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bins</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ess.amor.amor_data.Normalisation.wavelength_theta_bin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform wavelength/theta-binned normalisation.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>bins (<code class="xref py py-attr docutils literal notranslate"><span class="pre">tuple</span></code> of <code class="xref py py-attr docutils literal notranslate"><span class="pre">array_like</span></code>): wavelength and theta edges.</p>
+</dd>
+<dt>Returns:</dt><dd><p>(<code class="xref py py-class docutils literal notranslate"><span class="pre">scipp._scipp.core.DataArray</span></code>): Normalised data array binned into wavelength and theta.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ess.amor.amor_data.Normalisation.write_reflectometry">
+<span class="sig-name descname"><span class="pre">write_reflectometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ess.amor.amor_data.Normalisation.write_reflectometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the reflectometry intensity data to a file.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>filename (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>): The file path for the file to be saved to.
+bin_kwargs (<code class="xref py py-attr docutils literal notranslate"><span class="pre">dict</span></code>, optional): A dictionary of keyword arguments to be passed to the <a class="reference internal" href="#ess.amor.amor_data.Normalisation.q_bin" title="ess.amor.amor_data.Normalisation.q_bin"><code class="xref py py-func docutils literal notranslate"><span class="pre">q_bin()</span></code></a> class method. Optional, default is that default <a class="reference internal" href="#ess.amor.amor_data.Normalisation.q_bin" title="ess.amor.amor_data.Normalisation.q_bin"><code class="xref py py-func docutils literal notranslate"><span class="pre">q_bin()</span></code></a> keywords arguments are used.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ess.amor.amor_data.Normalisation.write_wavelength_theta">
+<span class="sig-name descname"><span class="pre">write_wavelength_theta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ess.amor.amor_data.Normalisation.write_wavelength_theta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the reflectometry intensity data as a function of wavelength-theta to a file.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>filename (<code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>): The file path for the file to be saved to.
+bins (<code class="xref py py-attr docutils literal notranslate"><span class="pre">tuple</span></code> of <code class="xref py py-attr docutils literal notranslate"><span class="pre">array_like</span></code>): wavelength and theta edges.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="tools.html" class="btn btn-neutral float-right" title="ess.amor.tools" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../amor.html" class="btn btn-neutral float-left" title="Amor" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright scipp ess contributors.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+    
+    <style>
+      .wy-nav-content { max-width: 1100px; }
+    </style>
+  
+
+</body>
+</html>
