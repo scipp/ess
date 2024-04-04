@@ -18,12 +18,7 @@ from ..reflectometry.types import (
 from . import beamline, conversions, data, load, orso, resolution
 from .beamline import instrument_view_components
 from .instrument_view import instrument_view
-from .types import (
-    Chopper1Position,
-    Chopper2Position,
-    ChopperFrequency,
-    ChopperPhase,
-)
+from .types import Chopper1Position, Chopper2Position, ChopperFrequency, ChopperPhase
 
 try:
     __version__ = importlib.metadata.version(__package__ or __name__)
