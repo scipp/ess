@@ -23,18 +23,21 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.mathjax',
     'sphinx.ext.napoleon',
+    'sphinx.ext.viewcode',
     'sphinx_autodoc_typehints',
     'sphinx_copybutton',
     'sphinx_design',
     'nbsphinx',
     'myst_parser',
 ]
+
 try:
     import sciline.sphinxext.domain_types  # noqa: F401
 
     extensions.append('sciline.sphinxext.domain_types')
 except ModuleNotFoundError:
     pass
+
 
 myst_enable_extensions = [
     "amsmath",
@@ -89,6 +92,7 @@ sciline_domain_types_aliases = {
     'scipp._scipp.core.Variable': 'scipp.Variable',
     'scipp.core.data_group.DataGroup': 'scipp.DataGroup',
 }
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
