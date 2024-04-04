@@ -8,18 +8,15 @@ import sciline
 import scipp as sc
 from orsopy import fileio
 
-from essreflectometry import orso
-from essreflectometry.amor import default_parameters
-from essreflectometry.amor import orso as amor_orso
-from essreflectometry.amor import providers
-from essreflectometry.amor.data import get_path
-from essreflectometry.types import *
+from ess.reflectometry import orso
+from ess import amor
+from ess.reflectometry.types import *
 
 
 @pytest.fixture()
 def amor_pipeline() -> sciline.Pipeline:
     params = {
-        **default_parameters,
+        **amor.default_parameters,
         QBins: sc.geomspace(
             dim='Q', start=0.008, stop=0.075, num=200, unit='1/angstrom'
         ),
@@ -39,7 +36,8 @@ def amor_pipeline() -> sciline.Pipeline:
         ),
     }
     return sciline.Pipeline(
-        (*providers, *orso.providers, *amor_orso.providers, get_path), params=params
+        (*amor.providers, *orso.providers, *amor.orso.providers, amor.data.get_path),
+        params=params,
     )
 
 
