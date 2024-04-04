@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-# flake8: noqa: F401
+import importlib.metadata
+
 import scipp as sc
 
 from ..reflectometry import providers as reflectometry_providers
@@ -10,24 +11,24 @@ from ..reflectometry.types import (
     DetectorSpatialResolution,
     Gravity,
     NeXusDetectorName,
-    RawDetector,
     Run,
     SamplePosition,
     SampleSize,
-    WavelengthEdges,
 )
 from . import beamline, conversions, data, load, orso, resolution
 from .beamline import instrument_view_components
 from .instrument_view import instrument_view
 from .types import (
-    AngularResolution,
     Chopper1Position,
     Chopper2Position,
     ChopperFrequency,
     ChopperPhase,
-    SampleSizeResolution,
-    WavelengthResolution,
 )
+
+try:
+    __version__ = importlib.metadata.version(__package__ or __name__)
+except importlib.metadata.PackageNotFoundError:
+    __version__ = "0.0.0"
 
 providers = (
     *reflectometry_providers,
@@ -59,3 +60,17 @@ default_parameters = {
 }
 
 del sc
+
+__all__ = [
+    "supermirror",
+    "beamline",
+    "conversions",
+    "data",
+    "load",
+    "orso",
+    "resolution",
+    "instrument_view",
+    "instrument_view_components",
+    "providers",
+    "default_parameters",
+]

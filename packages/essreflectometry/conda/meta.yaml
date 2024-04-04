@@ -25,7 +25,8 @@ requirements:
 
 test:
   imports:
-    - essreflectometry
+    - ess.reflectometry
+    - ess.amor
   requires:
     - pytest
   source_files:
