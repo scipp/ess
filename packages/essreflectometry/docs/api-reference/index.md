@@ -3,7 +3,7 @@
 ## Classes
 
 ```{eval-rst}
-.. currentmodule:: essreflectometry
+.. currentmodule:: ess.reflectometry
 
 .. autosummary::
    :toctree: ../generated/classes
@@ -29,8 +29,27 @@
    :template: module-template.rst
    :recursive:
 
-   amor
    orso
    supermirror
+   types
+```
+
+## Amor
+
+```{eval-rst}
+.. currentmodule:: ess.amor
+
+.. autosummary::
+   :toctree: ../generated/modules
+   :template: module-template.rst
+   :recursive:
+
+   beamline
+   conversions
+   data
+   instrument_view
+   load
+   orso
+   resolution
    types
 ```
