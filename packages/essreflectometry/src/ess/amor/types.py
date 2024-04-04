@@ -3,7 +3,7 @@ from typing import NewType
 import sciline
 import scipp as sc
 
-from ..types import Run
+from ..reflectometry.types import Run
 
 WavelengthResolution = NewType('WavelengthResolution', sc.Variable)
 AngularResolution = NewType('AngularResolution', sc.Variable)

@@ -4,7 +4,7 @@
 import pytest
 import scipp as sc
 
-from essreflectometry import tools
+from ess.reflectometry import tools
 
 
 def test_linlogspace_linear():

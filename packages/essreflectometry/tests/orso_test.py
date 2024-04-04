@@ -5,18 +5,16 @@ from datetime import datetime
 import sciline
 from orsopy import fileio
 
-import essreflectometry
-from essreflectometry import orso
-from essreflectometry.amor.data import providers as amor_data_providers
-from essreflectometry.amor.load import providers as amor_load_providers
-from essreflectometry.types import PoochFilename, Sample
+from ess import amor, reflectometry
+from ess.reflectometry import orso
+from ess.reflectometry.types import PoochFilename, Sample
 
 
 def test_build_orso_data_source():
     pipeline = sciline.Pipeline(
         (
-            *amor_data_providers,
-            *amor_load_providers,
+            *amor.data.providers,
+            *amor.load.providers,
             *orso.providers,
         ),
         params={PoochFilename[Sample]: 'sample.nxs'},
@@ -48,7 +46,7 @@ def test_build_orso_reduction_without_creator():
     pipeline = sciline.Pipeline(orso.providers)
     reduction = pipeline.compute(orso.OrsoReduction)
     assert reduction.software.name == 'ess.reflectometry'
-    assert reduction.software.version == str(essreflectometry.__version__)
+    assert reduction.software.version == str(reflectometry.__version__)
     assert reduction.creator is None
 
 
@@ -61,5 +59,5 @@ def test_build_orso_reduction_with_creator():
     )
     reduction = pipeline.compute(orso.OrsoReduction)
     assert reduction.software.name == 'ess.reflectometry'
-    assert reduction.software.version == str(essreflectometry.__version__)
+    assert reduction.software.version == str(reflectometry.__version__)
     assert reduction.creator == creator

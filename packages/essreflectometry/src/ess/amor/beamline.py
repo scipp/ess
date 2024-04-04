@@ -2,9 +2,9 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 
-from ..choppers import make_chopper
-from ..logging import log_call
-from ..types import (
+from ..reflectometry.choppers import make_chopper
+from ..reflectometry.logging import log_call
+from ..reflectometry.types import (
     BeamSize,
     DetectorSpatialResolution,
     Gravity,
