@@ -4,13 +4,13 @@ import doctest
 import os
 import sys
 
-import essreflectometry
+from ess import reflectometry
 
 sys.path.insert(0, os.path.abspath('.'))
 
 # General information about the project.
 project = u'ESSreflectometry'
-copyright = u'2023 Scipp contributors'
+copyright = u'2024 Scipp contributors'
 author = u'Scipp contributors'
 
 html_show_sourcelink = True
@@ -81,7 +81,7 @@ napoleon_type_aliases = {
 typehints_defaults = 'comma'
 typehints_use_rtype = False
 
-sciline_domain_types_prefix = 'essreflectometry'
+sciline_domain_types_prefix = 'ess.reflectometry'
 sciline_domain_types_aliases = {
     'scipp._scipp.core.DataArray': 'scipp.DataArray',
     'scipp._scipp.core.Dataset': 'scipp.Dataset',
@@ -109,9 +109,9 @@ master_doc = 'index'
 #
 
 # The short X.Y version.
-version = essreflectometry.__version__
+version = reflectometry.__version__
 # The full version, including alpha/beta/rc tags.
-release = essreflectometry.__version__
+release = reflectometry.__version__
 
 warning_is_error = True
 
