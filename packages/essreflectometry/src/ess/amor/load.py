@@ -3,7 +3,7 @@
 import scipp as sc
 from ess.reduce import nexus
 
-from ..types import (
+from ..reflectometry.types import (
     ChopperCorrectedTofEvents,
     DetectorPosition,
     FilePath,

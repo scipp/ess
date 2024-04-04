@@ -9,8 +9,19 @@ from orsopy.fileio import base as orso_base
 from orsopy.fileio import data_source as orso_data_source
 from orsopy.fileio.orso import Column, Orso, OrsoDataset
 
-from ..orso import OrsoDataSource, OrsoInstrument, OrsoIofQDataset, OrsoReduction
-from ..types import NormalizedIofQ1D, QResolution, Sample, ThetaData, WavelengthData
+from ..reflectometry.orso import (
+    OrsoDataSource,
+    OrsoInstrument,
+    OrsoIofQDataset,
+    OrsoReduction,
+)
+from ..reflectometry.types import (
+    NormalizedIofQ1D,
+    QResolution,
+    Sample,
+    ThetaData,
+    WavelengthData,
+)
 
 
 def build_orso_instrument(

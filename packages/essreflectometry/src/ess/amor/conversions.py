@@ -2,7 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 
-from ..types import IncidentBeam, Run, SamplePosition
+from ..reflectometry.types import IncidentBeam, Run, SamplePosition
 from .types import Chopper1Position, Chopper2Position
 
 

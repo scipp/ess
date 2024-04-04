@@ -2,8 +2,8 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 
-from ..tools import fwhm_to_std
-from ..types import (
+from ..reflectometry.tools import fwhm_to_std
+from ..reflectometry.types import (
     DetectorPosition,
     DetectorSpatialResolution,
     QBins,
@@ -146,9 +146,7 @@ def sigma_Q(
         Combined resolution function.
     """
     return sc.sqrt(
-        angular_resolution**2
-        + wavelength_resolution**2
-        + sample_size_resolution**2
+        angular_resolution**2 + wavelength_resolution**2 + sample_size_resolution**2
     ).max('detector_number') * sc.midpoints(q_bins)
 
 

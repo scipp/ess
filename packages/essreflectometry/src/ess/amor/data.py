@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
-from ..types import FilePath, PoochFilename, Run
+from ..reflectometry.types import FilePath, PoochFilename, Run
 
 _version = '1'
 
