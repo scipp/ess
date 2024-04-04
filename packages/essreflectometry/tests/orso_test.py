@@ -5,9 +5,8 @@ from datetime import datetime
 import sciline
 from orsopy import fileio
 
-from ess import reflectometry
+from ess import amor, reflectometry
 from ess.reflectometry import orso
-from ess import amor
 from ess.reflectometry.types import PoochFilename, Sample
 
 

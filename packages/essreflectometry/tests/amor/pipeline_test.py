@@ -8,8 +8,8 @@ import sciline
 import scipp as sc
 from orsopy import fileio
 
-from ess.reflectometry import orso
 from ess import amor
+from ess.reflectometry import orso
 from ess.reflectometry.types import *
 
 
