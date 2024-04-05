@@ -18,11 +18,11 @@ cloudpickle==3.0.0
     # via dask
 comm==0.2.2
     # via ipywidgets
-contourpy==1.2.0
+contourpy==1.2.1
     # via matplotlib
 cycler==0.12.1
     # via matplotlib
-dask==2024.3.1
+dask==2024.4.1
     # via -r nightly.in
 decorator==5.1.1
     # via ipython
@@ -32,9 +32,9 @@ executing==2.0.1
     # via stack-data
 fonttools==4.50.0
     # via matplotlib
-fsspec==2024.3.0
+fsspec==2024.3.1
     # via dask
-graphviz==0.20.2
+graphviz==0.20.3
     # via -r nightly.in
 h5py==3.10.0
     # via
@@ -42,11 +42,11 @@ h5py==3.10.0
     #   scippnexus
 idna==3.6
     # via requests
-importlib-metadata==7.0.2
+importlib-metadata==7.1.0
     # via dask
 ipydatawidgets==4.3.5
     # via pythreejs
-ipython==8.22.2
+ipython==8.23.0
     # via ipywidgets
 ipywidgets==8.1.2
     # via
@@ -60,7 +60,7 @@ kiwisolver==1.4.5
     # via matplotlib
 locket==1.0.0
     # via partd
-matplotlib==3.8.3
+matplotlib==3.8.4
     # via plopp
 matplotlib-inline==0.1.6
     # via ipython
@@ -80,7 +80,7 @@ partd==1.4.1
     # via dask
 pexpect==4.9.0
     # via ipython
-pillow==10.2.0
+pillow==10.3.0
     # via matplotlib
 platformdirs==4.2.0
     # via pooch
@@ -123,7 +123,7 @@ scippnexus @ git+https://github.com/scipp/scippnexus@main
     #   -r nightly.in
     #   essreduce
     #   scippneutron
-scipy==1.12.0
+scipy==1.13.0
     # via
     #   scippneutron
     #   scippnexus
@@ -147,6 +147,8 @@ traitlets==5.14.2
     #   traittypes
 traittypes==0.2.1
     # via ipydatawidgets
+typing-extensions==4.10.0
+    # via ipython
 urllib3==2.2.1
     # via requests
 wcwidth==0.2.13

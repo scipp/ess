@@ -299,6 +299,12 @@ class CleanSummedQ(
     """Result of histogramming/binning :py:class:`CleanQ` over all pixels into Q bins"""
 
 
+class CleanSummedQMergedBanks(
+    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
+):
+    """CleanSummedQ with merged banks"""
+
+
 class FinalSummedQ(
     sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
 ):

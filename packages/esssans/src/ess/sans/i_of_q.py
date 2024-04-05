@@ -17,6 +17,7 @@ from .types import (
     CleanMonitor,
     CleanQ,
     CleanSummedQ,
+    CleanSummedQMergedBanks,
     DimsToKeep,
     DirectBeam,
     Filename,
@@ -24,6 +25,7 @@ from .types import (
     IofQ,
     IofQPart,
     MonitorType,
+    NeXusDetectorName,
     NonBackgroundWavelengthRange,
     QBins,
     QxyBins,
@@ -225,25 +227,50 @@ def bin_in_q(
     return CleanSummedQ[ScatteringRunType, IofQPart](out.squeeze())
 
 
-def dummy_merge_runs(
+def no_bank_merge(
     data: CleanSummedQ[ScatteringRunType, IofQPart]
+) -> CleanSummedQMergedBanks[ScatteringRunType, IofQPart]:
+    return CleanSummedQMergedBanks[ScatteringRunType, IofQPart](data)
+
+
+def no_run_merge(
+    data: CleanSummedQMergedBanks[ScatteringRunType, IofQPart]
 ) -> FinalSummedQ[ScatteringRunType, IofQPart]:
     return FinalSummedQ[ScatteringRunType, IofQPart](data)
 
 
-def merge_multiple_runs(
-    run_series: sciline.Series[
-        Filename[ScatteringRunType], CleanSummedQ[ScatteringRunType, IofQPart]
+def _merge_contributions(data: list[sc.DataArray]) -> sc.DataArray:
+    if len(data) == 1:
+        return data[0]
+    reducer = sc.reduce(data)
+    return reducer.bins.concat() if data[0].bins is not None else reducer.sum()
+
+
+def merge_banks(
+    banks: sciline.Series[NeXusDetectorName, CleanSummedQ[ScatteringRunType, IofQPart]]
+) -> CleanSummedQMergedBanks[ScatteringRunType, IofQPart]:
+    """
+    Merge the events or counts from multiple detector banks into a single numerator or
+    denominator, before the normalization step.
+    """
+    return CleanSummedQMergedBanks[ScatteringRunType, IofQPart](
+        _merge_contributions(list(banks.values()))
+    )
+
+
+def merge_runs(
+    runs: sciline.Series[
+        Filename[ScatteringRunType],
+        CleanSummedQMergedBanks[ScatteringRunType, IofQPart],
     ],
 ) -> FinalSummedQ[ScatteringRunType, IofQPart]:
     """
     Merge the events or counts from multiple runs into a single numerator or
     denominator, before the normalization step.
     """
-    run_list = list(run_series.values())
-    reducer = sc.reduce(run_list)
-    out = reducer.bins.concat() if run_list[0].bins is not None else reducer.sum()
-    return FinalSummedQ[ScatteringRunType, IofQPart](out)
+    return FinalSummedQ[ScatteringRunType, IofQPart](
+        _merge_contributions(list(runs.values()))
+    )
 
 
 def subtract_background(
@@ -265,5 +292,6 @@ providers = (
     resample_direct_beam,
     bin_in_q,
     subtract_background,
-    dummy_merge_runs,
+    no_bank_merge,
+    no_run_merge,
 )

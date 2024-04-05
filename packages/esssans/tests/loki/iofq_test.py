@@ -23,6 +23,7 @@ from ess.sans.types import (
     FilePath,
     FinalSummedQ,
     IofQ,
+    NeXusDetectorName,
     Numerator,
     PixelMaskFilename,
     QBins,
@@ -175,9 +176,47 @@ def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs():
     pipeline.set_param_series(Filename[SampleRun], sample_runs)
     pipeline.set_param_series(Filename[BackgroundRun], background_runs)
 
-    pipeline.insert(sans.i_of_q.merge_multiple_runs)
+    pipeline.insert(sans.merge_runs)
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('Q',)
+
+
+def test_pipeline_can_compute_IofQ_merging_events_from_banks():
+    params = make_params()
+    del params[NeXusDetectorName]
+
+    pipeline = sciline.Pipeline(loki_providers_no_beam_center_finder(), params=params)
+    pipeline[BeamCenter] = _compute_beam_center()
+    pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
+    pipeline.set_param_series(NeXusDetectorName, ['larmor_detector'])
+
+    pipeline.insert(sans.merge_banks)
+    result = pipeline.compute(BackgroundSubtractedIofQ)
+    assert result.dims == ('Q',)
+
+
+def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs_and_banks():
+    params = make_params()
+    del params[Filename[SampleRun]]
+    del params[Filename[BackgroundRun]]
+
+    sample_runs = ['60250-2022-02-28_2215.nxs', '60339-2022-02-28_2215.nxs']
+    background_runs = ['60248-2022-02-28_2215.nxs', '60393-2022-02-28_2215.nxs']
+    pipeline = sciline.Pipeline(loki_providers_no_beam_center_finder(), params=params)
+    pipeline[BeamCenter] = _compute_beam_center()
+    pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
+
+    pipeline.insert(sans.merge_runs)
+    pipeline.set_param_series(Filename[SampleRun], sample_runs)
+    pipeline.set_param_series(Filename[BackgroundRun], background_runs)
+    reference = pipeline.compute(BackgroundSubtractedIofQ)
+
+    pipeline.insert(sans.merge_banks)
+    del params[NeXusDetectorName]
+    pipeline.set_param_series(NeXusDetectorName, ['larmor_detector'])
+    result = pipeline.compute(BackgroundSubtractedIofQ)
+
+    assert sc.identical(result, reference)
 
 
 def test_pipeline_IofQ_merging_events_yields_consistent_results():
@@ -198,7 +237,7 @@ def test_pipeline_IofQ_merging_events_yields_consistent_results():
     pipeline_triple[BeamCenter] = center
     pipeline_triple.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
 
-    # `set_param_series` does not allow muttiple identical values, so we need to
+    # `set_param_series` does not allow multiple identical values, so we need to
     # map the file names to different ones.
     def get_mapped_path(filename: FilenameType) -> FilePath[FilenameType]:
         """Mapping file paths to allow loading same run multiple times."""
@@ -224,7 +263,7 @@ def test_pipeline_IofQ_merging_events_yields_consistent_results():
         Filename[BackgroundRun], [f'background_{i}.nxs' for i in range(N)]
     )
     # Add event merging provider
-    pipeline_triple.insert(sans.i_of_q.merge_multiple_runs)
+    pipeline_triple.insert(sans.merge_runs)
 
     iofq1 = pipeline_single.compute(BackgroundSubtractedIofQ)
     iofq3 = pipeline_triple.compute(BackgroundSubtractedIofQ)

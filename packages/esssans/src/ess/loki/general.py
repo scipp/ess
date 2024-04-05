@@ -36,7 +36,6 @@ from ..sans.types import (
 )
 
 default_parameters = {
-    NeXusDetectorName: 'larmor_detector',
     NeXusMonitorName[Incident]: 'monitor_1',
     NeXusMonitorName[Transmission]: 'monitor_2',
     TransformationPath: 'transform',
@@ -45,7 +44,7 @@ default_parameters = {
 
 
 DETECTOR_BANK_RESHAPING = {
-    default_parameters[NeXusDetectorName]: lambda x: x.fold(
+    'larmor_detector': lambda x: x.fold(
         dim='detector_number', sizes=dict(layer=4, tube=32, straw=7, pixel=512)
     )
 }
