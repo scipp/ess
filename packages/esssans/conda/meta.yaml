@@ -24,7 +24,9 @@ requirements:
 
 test:
   imports:
-    - esssans
+    - ess.sans
+    - ess.isissans
+    - ess.loki
   requires:
     - pytest
   source_files:
