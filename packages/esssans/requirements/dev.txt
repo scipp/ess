@@ -28,7 +28,7 @@ async-lru==2.0.4
     # via jupyterlab
 cffi==1.16.0
     # via argon2-cffi-bindings
-copier==9.1.1
+copier==9.2.0
     # via -r dev.in
 dunamai==1.19.2
     # via copier
@@ -93,8 +93,6 @@ pydantic-core==2.16.3
     # via pydantic
 python-json-logger==2.0.7
     # via jupyter-events
-pyyaml-include==2.0
-    # via copier
 questionary==2.0.1
     # via copier
 rfc3339-validator==0.1.4

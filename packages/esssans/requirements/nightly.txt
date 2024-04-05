@@ -18,11 +18,11 @@ cloudpickle==3.0.0
     # via dask
 comm==0.2.2
     # via ipywidgets
-contourpy==1.2.0
+contourpy==1.2.1
     # via matplotlib
 cycler==0.12.1
     # via matplotlib
-dask==2024.4.0
+dask==2024.4.1
     # via -r nightly.in
 decorator==5.1.1
     # via ipython
@@ -60,7 +60,7 @@ kiwisolver==1.4.5
     # via matplotlib
 locket==1.0.0
     # via partd
-matplotlib==3.8.3
+matplotlib==3.8.4
     # via plopp
 matplotlib-inline==0.1.6
     # via ipython
@@ -123,7 +123,7 @@ scippnexus @ git+https://github.com/scipp/scippnexus@main
     #   -r nightly.in
     #   essreduce
     #   scippneutron
-scipy==1.12.0
+scipy==1.13.0
     # via
     #   scippneutron
     #   scippnexus
