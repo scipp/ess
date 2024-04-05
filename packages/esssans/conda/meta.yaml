@@ -6,21 +6,21 @@ package:
 source:
   path: ..
 
+
+{% set pyproject = load_file_data('pyproject.toml') %}
+{% set dependencies = pyproject.get('project', {}).get('dependencies', {}) %}
+
+
 requirements:
   build:
     - setuptools
     - setuptools_scm
   run:
-    - dask
-    - essreduce
     - python>=3.10
-    - python-graphviz
-    - plopp
-    - pythreejs
-    - sciline>=24.4.1
-    - scipp>=23.8.0
-    - scippneutron>=23.9.0
-    - scippnexus>=23.12.1
+  {% for package in dependencies %}
+    - {% if package == "graphviz" %}python-graphviz{% else %}{{ package }}{% endif %}
+  {% endfor %}
+
 
 test:
   imports:
