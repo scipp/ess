@@ -31,6 +31,8 @@ ProtonCharge = NewType("ProtonCharge", sc.Variable)
 CrystalRotation = NewType("CrystalRotation", sc.Variable)
 """Rotation of the crystal"""
 
-RunID = NewType("RunId", int)
-
 DetectorGeometry = NewType("DetectorGeometry", Any)
+"""Description of the geometry of the detector banks"""
+
+TimeBinSteps = NewType("TimeBinSteps", int)
+"""Number of bins in the binning of the time coordinate"""
