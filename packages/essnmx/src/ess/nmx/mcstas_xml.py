@@ -389,7 +389,7 @@ class McStasInstrument:
         fast_axes = [det.fast_axis for det in detectors]
         origins = [self.sample.position_from_sample(det.position) for det in detectors]
 
-        coords = {
+        return {
             'pixel_id': _construct_pixel_ids(detectors),
             'fast_axis': sc.concat(fast_axes, DETECTOR_DIM),
             'slow_axis': sc.concat(slow_axes, DETECTOR_DIM),
@@ -399,7 +399,6 @@ class McStasInstrument:
             'sample_name': sc.scalar(self.sample.name),
             'position': _detector_pixel_positions(detectors, self.sample),
         }
-        return coords
 
 
 def read_mcstas_geometry_xml(file_path: FilePath) -> McStasInstrument:
