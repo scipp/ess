@@ -29,7 +29,6 @@ def mcstas_workflow(mcstas_file_path: str) -> sl.Pipeline:
         params={
             FilePath: mcstas_file_path,
             TimeBinSteps: 50,
-            DetectorIndex: 0,
             **default_parameters,
         },
     )
@@ -45,6 +44,7 @@ def test_pipeline_mcstas_loader(mcstas_workflow: sl.Pipeline) -> None:
     """Test if the loader graph is complete."""
     from ess.nmx.mcstas_loader import NMXData
 
+    mcstas_workflow[DetectorIndex] = 0
     nmx_data = mcstas_workflow.compute(NMXData)
     assert isinstance(nmx_data, sc.DataGroup)
     assert nmx_data.sizes['id'] == 1280 * 1280
