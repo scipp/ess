@@ -7,8 +7,8 @@ import scipp as sc
 from ess.nmx import default_parameters
 from ess.nmx.data import small_mcstas_2_sample, small_mcstas_3_sample
 from ess.nmx.mcstas_loader import providers as load_providers
-from ess.nmx.reduction import TimeBinSteps, bin_time_of_arrival
-from ess.nmx.types import DetectorIndex, FilePath, RunID
+from ess.nmx.reduction import bin_time_of_arrival
+from ess.nmx.types import DetectorIndex, FilePath, TimeBinSteps
 
 
 @pytest.fixture(params=[small_mcstas_2_sample, small_mcstas_3_sample])
@@ -32,7 +32,7 @@ def mcstas_workflow(mcstas_file_path: str) -> sl.Pipeline:
             **default_parameters,
         },
     )
-    pl.set_param_table(sl.ParamTable(RunID, {DetectorIndex: range(3)}, index=range(3)))
+    pl.set_param_series(DetectorIndex, range(3))
     return pl
 
 

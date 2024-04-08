@@ -2,7 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import io
 import pathlib
-from typing import NewType, Optional, Union
+from typing import Optional, Union
 
 import h5py
 import sciline
@@ -10,9 +10,7 @@ import scipp as sc
 
 from .const import DETECTOR_DIM
 from .mcstas_xml import McStasInstrument
-from .types import DetectorName, RunID
-
-TimeBinSteps = NewType("TimeBinSteps", int)
+from .types import DetectorIndex, DetectorName, TimeBinSteps
 
 
 class _SharedFields(sc.DataGroup):
@@ -228,8 +226,8 @@ class NMXReducedData(_SharedFields, sc.DataGroup):
 
 
 def bin_time_of_arrival(
-    nmx_data: sciline.Series[RunID, NMXData],
-    detector_name: sciline.Series[RunID, DetectorName],
+    nmx_data: sciline.Series[DetectorIndex, NMXData],
+    detector_name: sciline.Series[DetectorIndex, DetectorName],
     instrument: McStasInstrument,
     time_bin_step: TimeBinSteps,
 ) -> NMXReducedData:

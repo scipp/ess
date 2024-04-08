@@ -12,8 +12,6 @@
 
    NMXData
    NMXReducedData
-   InputFilepath
-   TimeBinSteps
 
 ```
 
@@ -25,7 +23,6 @@
    :recursive:
 
    small_mcstas_3_sample
-   load_mcstas_nexus
 
 ```
 
@@ -39,5 +36,6 @@
 
    data
    mcstas_loader
+   types
 
 ```
