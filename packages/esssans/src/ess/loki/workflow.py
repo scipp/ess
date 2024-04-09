@@ -17,7 +17,7 @@ def live_workflow(group: JSONGroup) -> WorkflowResult:
             data=sc.zeros(dims=['Q'], shape=[100]),
             coords={
                 'Q': sc.linspace(
-                    dim='Q', start=0.01, stop=0.3, num=100, unit='1/angstrom'
+                    dim='Q', start=0.01, stop=0.3, num=101, unit='1/angstrom'
                 )
             },
         )
