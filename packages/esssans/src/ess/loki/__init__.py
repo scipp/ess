@@ -5,7 +5,6 @@ import importlib.metadata
 
 from . import data, general, io
 from .general import default_parameters
-from .workflow import live_workflow
 
 try:
     __version__ = importlib.metadata.version(__package__ or __name__)
@@ -16,4 +15,4 @@ providers = general.providers + io.providers
 
 del importlib
 
-__all__ = ['data', 'general', 'io', 'providers', 'default_parameters', 'live_workflow']
+__all__ = ['data', 'general', 'io', 'providers', 'default_parameters']

@@ -1,12 +1,9 @@
-try:
-    import numpy as np
-    import scipp as sc
-    from beamlime import WorkflowResult
-    from scippneutron.io.nexus.load_nexus import JSONGroup
-except ImportError as e:
-    raise ImportError(
-        "Please install scipp, scippneutron, and beamlime to run workflows with loki."
-    ) from e
+# This file is used by beamlime to create a workflow for the Loki instrument.
+# The function `live_workflow` is registered as the entry point for the workflow.
+import numpy as np
+import scipp as sc
+from beamlime import WorkflowResult
+from scippneutron.io.nexus.load_nexus import JSONGroup
 
 
 def live_workflow(group: JSONGroup) -> WorkflowResult:
@@ -18,7 +15,11 @@ def live_workflow(group: JSONGroup) -> WorkflowResult:
     _ = group
     return {
         'IofQ': sc.DataArray(
-            data=sc.array(dims=['Q'], values=np.zeros(10)),
-            coords={'Q': sc.array(dims=['Q'], values=np.zeros(10), unit='1/angstrom')},
+            data=sc.array(dims=['Q'], values=np.zeros(101)),
+            coords={
+                'Q': sc.linspace(
+                    dim='Q', start=0.01, stop=0.3, num=101, unit='1/angstrom'
+                )
+            },
         )
     }
