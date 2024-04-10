@@ -8,7 +8,7 @@ import h5py
 import sciline
 import scipp as sc
 
-from .const import DETECTOR_DIM
+from .const import DETECTOR_DIM, PIXEL_DIM, TOF_DIM
 from .mcstas_xml import McStasInstrument
 from .types import DetectorIndex, DetectorName, TimeBinSteps
 
@@ -155,7 +155,7 @@ class NMXReducedData(_SharedFields, sc.DataGroup):
         # Time of arrival bin edges
         self._create_dataset_from_var(
             root_entry=nx_detector_1,
-            var=self.counts.coords['t'],
+            var=self.counts.coords[TOF_DIM],
             name="t_bin",
             long_name="t_bin TOF (ms)",
         )
@@ -163,7 +163,7 @@ class NMXReducedData(_SharedFields, sc.DataGroup):
         self._create_compressed_dataset(
             root_entry=nx_detector_1,
             name="pixel_id",
-            var=self.counts.coords['id'],
+            var=self.counts.coords[PIXEL_DIM],
             long_name="pixel ID",
         )
         return nx_instrument

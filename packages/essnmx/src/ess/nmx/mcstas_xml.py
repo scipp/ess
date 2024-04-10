@@ -7,7 +7,7 @@ from typing import Iterable, Optional, Protocol, Tuple, TypeVar
 
 import scipp as sc
 
-from .const import DETECTOR_DIM
+from .const import DETECTOR_DIM, PIXEL_DIM
 from .types import FilePath
 
 T = TypeVar('T')
@@ -314,8 +314,8 @@ def _construct_pixel_ids(detector_descs: Tuple[DetectorDesc, ...]) -> sc.Variabl
     intervals = [
         (desc.id_start, desc.id_start + desc.total_pixels) for desc in detector_descs
     ]
-    ids = [sc.arange('id', start, stop, unit=None) for start, stop in intervals]
-    return sc.concat(ids, 'id')
+    ids = [sc.arange(PIXEL_DIM, start, stop, unit=None) for start, stop in intervals]
+    return sc.concat(ids, PIXEL_DIM)
 
 
 def _pixel_positions(
@@ -325,7 +325,7 @@ def _pixel_positions(
 
     Position of each pixel is relative to the position_offset.
     """
-    pixel_idx = sc.arange('id', detector.total_pixels)
+    pixel_idx = sc.arange(PIXEL_DIM, detector.total_pixels)
     n_col = sc.scalar(detector.num_fast_pixels_per_row)
 
     pixel_n_slow = pixel_idx // n_col
