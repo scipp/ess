@@ -2,11 +2,13 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # McStas instrument geometry xml description related functions.
 from dataclasses import dataclass
-from pathlib import Path
 from types import MappingProxyType
-from typing import Iterable, Optional, Protocol, Tuple, TypeVar, Union
+from typing import Iterable, Optional, Protocol, Tuple, TypeVar
 
 import scipp as sc
+
+from .const import DETECTOR_DIM
+from .types import FilePath
 
 T = TypeVar('T')
 
@@ -279,7 +281,6 @@ class SampleDesc:
             Position of the other object in 3D vector.
 
         """
-
         return other - self.position
 
 
@@ -344,12 +345,11 @@ def _detector_pixel_positions(
     detector_descs: Tuple[DetectorDesc, ...], sample: SampleDesc
 ) -> sc.Variable:
     """Position of pixels of all detectors."""
-
     positions = [
         _pixel_positions(detector, sample.position_from_sample(detector.position))
         for detector in detector_descs
     ]
-    return sc.concat(positions, 'panel')
+    return sc.concat(positions, DETECTOR_DIM)
 
 
 @dataclass
@@ -384,18 +384,16 @@ class McStasInstrument:
             Names of the detectors to extract coordinates for.
 
         """
-
         detectors = tuple(det for det in self.detectors if det.name in det_names)
         slow_axes = [det.slow_axis for det in detectors]
         fast_axes = [det.fast_axis for det in detectors]
         origins = [self.sample.position_from_sample(det.position) for det in detectors]
-        detector_dim = 'panel'
 
         return {
             'pixel_id': _construct_pixel_ids(detectors),
-            'fast_axis': sc.concat(fast_axes, detector_dim),
-            'slow_axis': sc.concat(slow_axes, detector_dim),
-            'origin_position': sc.concat(origins, detector_dim),
+            'fast_axis': sc.concat(fast_axes, DETECTOR_DIM),
+            'slow_axis': sc.concat(slow_axes, DETECTOR_DIM),
+            'origin_position': sc.concat(origins, DETECTOR_DIM),
             'sample_position': self.sample.position_from_sample(self.sample.position),
             'source_position': self.sample.position_from_sample(self.source.position),
             'sample_name': sc.scalar(self.sample.name),
@@ -403,7 +401,7 @@ class McStasInstrument:
         }
 
 
-def read_mcstas_geometry_xml(file_path: Union[Path, str]) -> McStasInstrument:
+def read_mcstas_geometry_xml(file_path: FilePath) -> McStasInstrument:
     """Retrieve geometry parameters from mcstas file"""
     import h5py
     from defusedxml.ElementTree import fromstring
