@@ -2,12 +2,15 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import io
 import pathlib
-from typing import NewType, Optional, Union, overload
+from typing import Optional, Union
 
 import h5py
+import sciline
 import scipp as sc
 
-TimeBinSteps = NewType("TimeBinSteps", int)
+from .const import DETECTOR_DIM
+from .mcstas_xml import McStasInstrument
+from .types import DetectorIndex, DetectorName, TimeBinSteps
 
 
 class _SharedFields(sc.DataGroup):
@@ -64,7 +67,7 @@ class _SharedFields(sc.DataGroup):
 class NMXData(_SharedFields, sc.DataGroup):
     @property
     def weights(self) -> sc.DataArray:
-        """Event data grouped by pixel id and panel."""
+        """Event data grouped by pixel id."""
         return self['weights']
 
 
@@ -140,17 +143,14 @@ class NMXReducedData(_SharedFields, sc.DataGroup):
 
     def _create_instrument_group(self, nx_entry: h5py.Group) -> h5py.Group:
         nx_instrument = nx_entry.create_group("NXinstrument")
-        nx_instrument.attrs["nr_detector"] = self.origin_position.sizes['panel']
-        nx_instrument.create_dataset("proton_charge", data=self.proton_charge.value)
+        nx_instrument.create_dataset("proton_charge", data=self.proton_charge.values)
 
         nx_detector_1 = nx_instrument.create_group("detector_1")
         # Detector counts
         self._create_compressed_dataset(
             root_entry=nx_detector_1,
             name="counts",
-            var=self.counts.fold(
-                'id', sizes={'panel': 1, 'id': self.counts.sizes['id']}
-            ),
+            var=self.counts,
         )
         # Time of arrival bin edges
         self._create_dataset_from_var(
@@ -197,18 +197,6 @@ class NMXReducedData(_SharedFields, sc.DataGroup):
         nx_source["target_material"] = "W"
         return nx_source
 
-    @overload
-    def export_as_nexus(self, output_file_base: str) -> None:
-        ...
-
-    @overload
-    def export_as_nexus(self, output_file_base: pathlib.Path) -> None:
-        ...
-
-    @overload
-    def export_as_nexus(self, output_file_base: io.BytesIO) -> None:
-        ...
-
     def export_as_nexus(
         self, output_file_base: Union[str, pathlib.Path, io.BytesIO]
     ) -> None:
@@ -238,16 +226,20 @@ class NMXReducedData(_SharedFields, sc.DataGroup):
 
 
 def bin_time_of_arrival(
-    nmx_data: NMXData, time_bin_step: TimeBinSteps
+    nmx_data: sciline.Series[DetectorIndex, NMXData],
+    detector_name: sciline.Series[DetectorIndex, DetectorName],
+    instrument: McStasInstrument,
+    time_bin_step: TimeBinSteps,
 ) -> NMXReducedData:
     """Bin time of arrival data into ``time_bin_step`` bins."""
 
-    counts: sc.DataArray = nmx_data.weights.flatten(dims=['panel', 'id'], to='id').hist(
-        t=time_bin_step
-    )
-    counts.unit = 'counts'
+    nmx_data = list(nmx_data.values())
+    nmx_data = sc.concat(nmx_data, DETECTOR_DIM)
+    counts = nmx_data.pop('weights').hist(t=time_bin_step)
+    new_coords = instrument.to_coords(*detector_name.values())
+    new_coords.pop('pixel_id')
 
     return NMXReducedData(
         counts=counts,
-        **{key: nmx_data[key] for key in nmx_data.keys() if key != 'weights'},
+        **{**nmx_data, **new_coords},
     )
