@@ -5,6 +5,7 @@ import sciline as sl
 import scipp as sc
 
 from ess.nmx import default_parameters
+from ess.nmx.const import DETECTOR_SHAPE, PIXEL_DIM, TOF_DIM
 from ess.nmx.data import small_mcstas_2_sample, small_mcstas_3_sample
 from ess.nmx.mcstas_loader import providers as load_providers
 from ess.nmx.reduction import bin_time_of_arrival
@@ -47,7 +48,7 @@ def test_pipeline_mcstas_loader(mcstas_workflow: sl.Pipeline) -> None:
     mcstas_workflow[DetectorIndex] = 0
     nmx_data = mcstas_workflow.compute(NMXData)
     assert isinstance(nmx_data, sc.DataGroup)
-    assert nmx_data.sizes['id'] == 1280 * 1280
+    assert nmx_data.sizes[PIXEL_DIM] == DETECTOR_SHAPE[0] * DETECTOR_SHAPE[1]
 
 
 def test_pipeline_mcstas_reduction(mcstas_workflow: sl.Pipeline) -> None:
@@ -56,4 +57,4 @@ def test_pipeline_mcstas_reduction(mcstas_workflow: sl.Pipeline) -> None:
 
     nmx_reduced_data = mcstas_workflow.compute(NMXReducedData)
     assert isinstance(nmx_reduced_data, sc.DataGroup)
-    assert nmx_reduced_data.sizes['t'] == 50
+    assert nmx_reduced_data.sizes[TOF_DIM] == 50
