@@ -6,11 +6,14 @@ import gemmi
 import numpy as np
 import pandas as pd
 
-FileName = NewType("FileName", str)
-
 MTZFilepath = NewType("MTZFilepath", str)
+"""Path to the mtz file"""
+
 RawMtz = NewType("RawMtz", gemmi.Mtz)
+"""The mtz file as a gemmi object"""
+
 MtzDataFrame = NewType("MtzDataFrame", pd.DataFrame)
+"""The mtz file as a pandas DataFrame"""
 
 
 def read_mtz_file(file_path: MTZFilepath) -> RawMtz:
