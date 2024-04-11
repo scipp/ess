@@ -1,14 +1,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+import pooch
 
 _version = '0'
 
 __all__ = ['small_mcstas_2_sample', 'small_mcstas_3_sample', 'get_path']
 
 
-def _make_pooch():
-    import pooch
-
+def _make_pooch() -> pooch.Pooch:
     return pooch.create(
         path=pooch.os_cache('essnmx'),
         env='ESSNMX_DATA_DIR',
@@ -18,6 +17,7 @@ def _make_pooch():
         registry={
             'small_mcstas_2_sample.h5': 'md5:c3affe636397f8c9eea1d9c10a2bf487',
             'small_mcstas_3_sample.h5': 'md5:2afaac205d13ee857ee5364e3f1957a7',
+            'mtz_samples.tar.gz': 'md5:bed1eaf604bbe8725c1f6a20ca79fcc0',
         },
     )
 
@@ -57,3 +57,10 @@ def get_path(name: str) -> str:
     paths to custom files.
     """
     return _pooch.fetch(name)
+
+
+def get_small_mtz_samples() -> list[str]:
+    """Return a list of path to MTZ sample files."""
+    from pooch.processors import Untar
+
+    return _pooch.fetch('mtz_samples.tar.gz', processor=Untar())
