@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
+import pathlib
 from typing import NewType, Optional
 
 import gemmi
@@ -12,10 +13,8 @@ MTZFileIndex = NewType("MTZFileIndex", int)
 """The index of the mtz file when iterating over multiple mtz files."""
 
 # User defined or configurable types
-MTZFilepath = NewType("MTZFilepath", str)
+MTZFilePath = NewType("MTZFilePath", pathlib.Path)
 """Path to the mtz file"""
-LambdaBinSize = NewType("LambdaBinSize", int)
-"""The number of bins to use for binning wavelength(lambda)."""
 SpaceGroupDesc = NewType("SpaceGroupDesc", str)
 """The space group description. e.g. 'P 21 21 21'"""
 DEFAULT_SPACE_GROUP_DESC = SpaceGroupDesc("P 21 21 21")
@@ -36,10 +35,10 @@ NMXMtzDataFrame = NewType("NMXMtzDataFrame", pd.DataFrame)
 """The reduced mtz dataframe with derived columns."""
 
 
-def read_mtz_file(file_path: MTZFilepath) -> RawMtz:
+def read_mtz_file(file_path: MTZFilePath) -> RawMtz:
     """read mtz file"""
 
-    return RawMtz(gemmi.read_mtz_file(file_path))
+    return RawMtz(gemmi.read_mtz_file(file_path.as_posix()))
 
 
 def mtz_to_pandas(mtz: gemmi.Mtz) -> pd.DataFrame:

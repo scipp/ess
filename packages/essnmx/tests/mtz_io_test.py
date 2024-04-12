@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
+import pathlib
+
 import gemmi
 import pytest
 import sciline as sl
@@ -9,7 +11,7 @@ from ess.nmx.mtz_io import DEFAULT_SPACE_GROUP_DESC  # P 21 21 21
 from ess.nmx.mtz_io import (
     MergedMtzDataFrame,
     MTZFileIndex,
-    MTZFilepath,
+    MTZFilePath,
     RawMtz,
     get_reciprocal_asu,
     get_space_group,
@@ -22,19 +24,19 @@ from ess.nmx.mtz_io import (
 
 
 @pytest.fixture(params=get_small_mtz_samples())
-def file_path(request) -> str:
+def file_path(request) -> pathlib.Path:
     return request.param
 
 
-def test_gemmi_mtz(file_path: str) -> None:
-    mtz = read_mtz_file(MTZFilepath(file_path))
+def test_gemmi_mtz(file_path: pathlib.Path) -> None:
+    mtz = read_mtz_file(MTZFilePath(file_path))
     assert mtz.spacegroup == gemmi.SpaceGroup("C 1 2 1")  # Hard-coded value
     assert len(mtz.columns[0]) == 100  # Number of samples, hard-coded value
 
 
 @pytest.fixture
-def gemmi_mtz_object(file_path: str) -> gemmi.Mtz:
-    return read_mtz_file(MTZFilepath(file_path))
+def gemmi_mtz_object(file_path: pathlib.Path) -> gemmi.Mtz:
+    return read_mtz_file(MTZFilePath(file_path))
 
 
 def test_mtz_to_pandas_dataframe(gemmi_mtz_object: gemmi.Mtz) -> None:
@@ -67,7 +69,7 @@ def mtz_series() -> sl.Series[MTZFileIndex, RawMtz]:
     return sl.Series(
         row_dim=MTZFileIndex,
         items={
-            MTZFileIndex(i_file): read_mtz_file(MTZFilepath(file_path))
+            MTZFileIndex(i_file): read_mtz_file(MTZFilePath(file_path))
             for i_file, file_path in enumerate(get_small_mtz_samples())
         },
     )
