@@ -13,6 +13,7 @@ from scipp.constants import g
 from ..sans.types import DirectBeam, DirectBeamFilename, Filename, RunType, SampleRun
 from .data import LoadedFileContents
 from .io import CalibrationFilename, FilePath
+from .types import Period
 
 try:
     import mantid.api as _mantid_api
@@ -96,7 +97,9 @@ def from_data_workspace(
     return LoadedFileContents[RunType](dg)
 
 
-def load_run(filename: FilePath[Filename[RunType]]) -> DataWorkspace[RunType]:
+def load_run(
+    filename: FilePath[Filename[RunType]], period: Optional[Period]
+) -> DataWorkspace[RunType]:
     loaded = _mantid_simpleapi.Load(
         Filename=str(filename), LoadMonitors=True, StoreInADS=False
     )
@@ -106,6 +109,16 @@ def load_run(filename: FilePath[Filename[RunType]]) -> DataWorkspace[RunType]:
     else:
         # Separate data and monitor workspaces
         data_ws = loaded.OutputWorkspace
+        if isinstance(data_ws, _mantid_api.WorkspaceGroup):
+            if period is None:
+                raise ValueError(
+                    f'Needs {Period} to be set to know what '
+                    'section of the event data to load'
+                )
+            data_ws = data_ws.getItem(period)
+            data_ws.setMonitorWorkspace(loaded.MonitorWorkspace.getItem(period))
+        else:
+            data_ws.setMonitorWorkspace(loaded.MonitorWorkspace)
     return DataWorkspace[RunType](data_ws)
 
 
