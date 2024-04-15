@@ -7,6 +7,7 @@ import gemmi
 import numpy as np
 import pandas as pd
 import sciline as sl
+import scipp as sc
 
 # Index types for param table.
 MTZFileIndex = NewType("MTZFileIndex", int)
@@ -19,6 +20,12 @@ SpaceGroupDesc = NewType("SpaceGroupDesc", str)
 """The space group description. e.g. 'P 21 21 21'"""
 DEFAULT_SPACE_GROUP_DESC = SpaceGroupDesc("P 21 21 21")
 """The default space group description to use if not found in the mtz files."""
+
+# Custom column names
+WavelengthColumnName = NewType("WavelengthColumnName", str)
+"""The name of the wavelength column in the mtz file."""
+DEFUAULT_WAVELENGTH_COLUMN_NAME = WavelengthColumnName("LAMBDA")
+
 
 # Computed types
 RawMtz = NewType("RawMtz", gemmi.Mtz)
@@ -33,6 +40,7 @@ MergedMtzDataFrame = NewType("MergedMtzDataFrame", pd.DataFrame)
 """The merged mtz dataframe with derived columns."""
 NMXMtzDataFrame = NewType("NMXMtzDataFrame", pd.DataFrame)
 """The reduced mtz dataframe with derived columns."""
+NMXMtzDataArray = NewType("NMXMtzDataArray", sc.DataArray)
 
 
 def read_mtz_file(file_path: MTZFilePath) -> RawMtz:
@@ -64,13 +72,19 @@ def mtz_to_pandas(mtz: gemmi.Mtz) -> pd.DataFrame:
     )
 
 
-def reduce_single_mtz(mtz: RawMtz) -> RawMtzDataFrame:
+def reduce_single_mtz(
+    mtz: RawMtz,
+    lambda_column_name: WavelengthColumnName = DEFUAULT_WAVELENGTH_COLUMN_NAME,
+) -> RawMtzDataFrame:
     """Select and derive columns from the original ``MtzDataFrame``.
 
     Parameters
     ----------
     mtz:
         The raw mtz dataset.
+
+    lambda_column_name:
+        The name of the wavelength column in the mtz file.
 
     Returns
     -------
@@ -101,8 +115,11 @@ def reduce_single_mtz(mtz: RawMtz) -> RawMtzDataFrame:
     mtz_df["d"] = mtz_df.apply(_calculate_d, axis=1)
     # (2d)^{-2} = \sin^2(\theta)/\lambda^2
     mtz_df["resolution"] = (1 / mtz_df["d"]) ** 2 / 4
-
     mtz_df["I_div_SIGI"] = orig_df["I"] / orig_df["SIGI"]
+    mtz_df[DEFUAULT_WAVELENGTH_COLUMN_NAME] = orig_df[lambda_column_name]
+    # Keep other columns
+    for column in [col for col in orig_df.columns if col not in mtz_df]:
+        mtz_df[column] = orig_df[column]
 
     return RawMtzDataFrame(mtz_df)
 
@@ -186,7 +203,57 @@ def reduce_merged_mtz_dataframe(
 
     merged_df["hkl_eq"] = merged_df.apply(_rapio_asu_to_asu, axis=1)
 
+    def unpack_vector(row: pd.Series, *new_names) -> pd.DataFrame:
+        return pd.DataFrame(
+            {name: [val[i] for val in row] for i, name in enumerate(new_names)}
+        )
+
+    # Unpack HKL EQ
+    merged_df[["H_EQ", "K_EQ", "L_EQ"]] = unpack_vector(
+        merged_df["hkl_eq"], "H_EQ", "K_EQ", "L_EQ"
+    )
+
     return NMXMtzDataFrame(merged_df)
+
+
+def nmx_mtz_dataframe_to_scipp_dataarray(
+    nmx_mtz_df: NMXMtzDataFrame,
+) -> NMXMtzDataArray:
+    """Converts the reduced mtz dataframe to a scipp dataarray."""
+    from scipp.compat.pandas_compat import from_pandas_dataframe, parse_bracket_header
+
+    # Add unit to the name
+    to_scipp = nmx_mtz_df.copy(deep=False)
+    to_scipp[DEFUAULT_WAVELENGTH_COLUMN_NAME + " [Å]"] = to_scipp[
+        DEFUAULT_WAVELENGTH_COLUMN_NAME
+    ]
+    # Add dummy data column
+    dummy_data_column_name = "DUMMY_DATA"
+    to_scipp[dummy_data_column_name] = np.ones(len(to_scipp))
+    # Pop the vector columns for later
+    vector_columns = ("hkl", "hkl_eq")
+    vector_coords = {col: to_scipp.pop(col) for col in vector_columns}
+    # Add units
+    to_scipp.rename(columns={"I": "I [dimensionless]"}, inplace=True)
+    to_scipp.rename(columns={"SIGI": "SIGI [dimensionless]"}, inplace=True)
+    # Convert to scipp Dataset
+    nmx_mtz_ds = from_pandas_dataframe(
+        to_scipp,
+        data_columns=dummy_data_column_name,
+        header_parser=parse_bracket_header,
+    )
+    # Add back the vector columns
+    for col, values in vector_coords.items():
+        nmx_mtz_ds.coords[col] = sc.vectors(
+            dims=nmx_mtz_ds.dims, values=[val for val in values]
+        )
+    # Add HKL EQ hash coordinate for grouping
+    nmx_mtz_ds.coords["hkl_eq_hash"] = sc.Variable(
+        dims=nmx_mtz_ds.dims,
+        values=[hash(tuple(val)) for val in nmx_mtz_ds.coords["hkl_eq"].values],
+    )
+    # Return DataArray
+    return NMXMtzDataArray(nmx_mtz_ds[dummy_data_column_name].copy(deep=False))
 
 
 mtz_io_providers = (
@@ -196,5 +263,10 @@ mtz_io_providers = (
     get_reciprocal_asu,
     merge_mtz_dataframes,
     reduce_merged_mtz_dataframe,
+    nmx_mtz_dataframe_to_scipp_dataarray,
 )
 """The providers related to the MTZ IO."""
+mtz_io_params = {
+    WavelengthColumnName: DEFUAULT_WAVELENGTH_COLUMN_NAME,
+}
+"""The parameters related to the MTZ IO."""
