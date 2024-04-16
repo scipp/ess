@@ -24,7 +24,7 @@ DEFAULT_SPACE_GROUP_DESC = SpaceGroupDesc("P 21 21 21")
 # Custom column names
 WavelengthColumnName = NewType("WavelengthColumnName", str)
 """The name of the wavelength column in the mtz file."""
-DEFUAULT_WAVELENGTH_COLUMN_NAME = WavelengthColumnName("LAMBDA")
+DEFAULT_WAVELENGTH_COLUMN_NAME = WavelengthColumnName("LAMBDA")
 
 
 # Computed types
