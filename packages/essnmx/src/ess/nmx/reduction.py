@@ -2,9 +2,10 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import io
 import pathlib
-from typing import Optional, Union
+from typing import Any, Callable, Optional, Sequence, Union
 
 import h5py
+import numpy as np
 import sciline
 import scipp as sc
 
@@ -243,3 +244,124 @@ def bin_time_of_arrival(
         counts=counts,
         **{**nmx_data, **new_coords},
     )
+
+
+def _apply_elem_wise(
+    func: Callable, var: sc.Variable, *, result_dtype: Any = None
+) -> sc.Variable:
+    """Apply a function element-wise to the variable values.
+
+    This helper is only for vector-dtype variables.
+    Use ``numpy.vectorize`` for other types.
+
+    Parameters
+    ----------
+    func:
+        The function to apply.
+    var:
+        The variable to apply the function to.
+    result_dtype:
+        The dtype of the resulting variable.
+        It is needed especially when the function returns a vector.
+
+    """
+
+    def apply_func(val: Sequence, _cur_depth: int = 0) -> list:
+        if _cur_depth == len(var.dims):
+            return func(val)
+        return [apply_func(v, _cur_depth + 1) for v in val]
+
+    if result_dtype is None:
+        return sc.Variable(
+            dims=var.dims,
+            values=apply_func(var.values),
+        )
+    return sc.Variable(
+        dims=var.dims,
+        values=apply_func(var.values),
+        dtype=result_dtype,
+    )
+
+
+def _detour_group(
+    da: sc.DataArray, group_name: str, detour_func: Callable
+) -> sc.DataArray:
+    """Group the data array by a hash of a coordinate.
+
+    It uses index of each unique hash value
+    for grouping instead of hash value itself
+    to avoid overflow issues.
+
+    """
+    from uuid import uuid4
+
+    copied = da.copy(deep=False)
+
+    # Temporary coords for grouping
+    detour_idx_coord_name = uuid4().hex + "hash_idx"
+
+    # Create a temporary detoured coordinate
+    detour_var = _apply_elem_wise(detour_func, da.coords[group_name])
+    # Create a temporary hash-index of each unique value
+    unique_hashes = np.unique(detour_var.values)
+    hash_to_idx = {hash_val: idx for idx, hash_val in enumerate(unique_hashes)}
+    copied.coords[detour_idx_coord_name] = _apply_elem_wise(
+        lambda idx: hash_to_idx[idx], detour_var
+    )
+
+    # Group by the hash-index
+    grouped = copied.group(detour_idx_coord_name)
+
+    # Restore the original values
+    idx_to_detour = {idx: hash_val for hash_val, idx in hash_to_idx.items()}
+    detour_to_var = {
+        hash_val: var
+        for var, hash_val in zip(da.coords[group_name].values, detour_var.values)
+    }
+    idx_to_var = {
+        idx: detour_to_var[hash_val] for idx, hash_val in idx_to_detour.items()
+    }
+    grouped.coords[group_name] = _apply_elem_wise(
+        lambda idx: idx_to_var[idx],
+        grouped.coords[detour_idx_coord_name],
+        result_dtype=da.coords[group_name].dtype,
+    )
+    # Rename dims back to group_name and drop the temporary hash-index coordinate
+    return grouped.rename_dims({detour_idx_coord_name: group_name}).drop_coords(
+        [detour_idx_coord_name]
+    )
+
+
+def _group(da: sc.DataArray, /, *args: str, **group_detour_func_map) -> sc.DataArray:
+    """Group the data array by the given coordinates.
+
+    Parameters
+    ----------
+    da:
+        The data array to group.
+    args:
+        The coordinates to group by.
+    group_hash_func_map:
+        The hash functions for each coordinate.
+
+    Returns
+    -------
+    sc.DataArray
+        The grouped data array.
+
+    """
+    grouped = da
+    for group_name in args:
+        if group_name in group_detour_func_map:
+            grouped = _detour_group(
+                grouped, group_name, group_detour_func_map[group_name]
+            )
+        else:
+            try:
+                grouped = sc.group(grouped, group_name)
+            except Exception:
+                grouped = _detour_group(
+                    grouped, group_name, group_detour_func_map.get(group_name, hash)
+                )
+
+    return grouped
