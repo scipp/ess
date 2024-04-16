@@ -5,6 +5,7 @@ import scipp as sc
 
 from ess.nmx.mtz_io import DEFAULT_WAVELENGTH_COLUMN_NAME
 from ess.nmx.scaling import (
+    ReferenceWavelengthBin,
     _apply_elem_wise,
     _hash_repr,
     get_reference_bin,
@@ -73,7 +74,7 @@ def nmx_data_array() -> sc.DataArray:
                     (7, 8, 9),
                     (10, 11, 12),
                     (13, 14, 15),
-                    (8, 7, 9),
+                    (7, 8, 9),
                     (9, 8, 7),
                 ],
             ),
@@ -98,5 +99,22 @@ def test_get_reference_bin_middle(nmx_data_array: sc.DataArray) -> None:
 
 
 @pytest.fixture
-def reference_bin(nmx_data_array: sc.DataArray) -> sc.DataArray:
+def reference_bin(nmx_data_array: sc.DataArray) -> ReferenceWavelengthBin:
     return get_reference_bin(nmx_data_array.bin({DEFAULT_WAVELENGTH_COLUMN_NAME: 6}))
+
+
+def test_reference_bin_scale_factor(reference_bin: ReferenceWavelengthBin) -> None:
+    """Test the scale factor for I."""
+    from ess.nmx.scaling import calculate_scale_factor_per_hkl_eq, group
+
+    scale_factor_groups = calculate_scale_factor_per_hkl_eq(reference_bin)
+    grouped = group(reference_bin, "hkl_eq", hkl_eq=_hash_repr)
+
+    for hkl_eq in grouped.coords["hkl_eq"].values:
+        calculated_gr = scale_factor_groups["hkl_eq", sc.vector(hkl_eq)]
+        reference_gr = grouped["hkl_eq", sc.vector(hkl_eq)]
+        for coord in ("I", "SIGI"):
+            assert sc.identical(
+                calculated_gr.coords[f"scale_factor_{coord}"],
+                sc.mean(1 / reference_gr.values.coords[coord]),
+            )
