@@ -100,7 +100,7 @@ def reduce_single_mtz(mtz: RawMtz) -> RawMtzDataFrame:
         return mtz.get_cell().calculate_d(row["hkl"])
 
     mtz_df["d"] = mtz_df.apply(_calculate_d, axis=1)
-    # $(2d)^{-2} = \sin^2(\theta)/\lambda^2
+    # (2d)^{-2} = \sin^2(\theta)/\lambda^2
     mtz_df["resolution"] = (1 / mtz_df["d"]) ** 2 / 4
 
     mtz_df["I_div_SIGI"] = orig_df["I"] / orig_df["SIGI"]
