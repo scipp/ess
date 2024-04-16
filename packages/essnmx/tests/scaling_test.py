@@ -40,6 +40,36 @@ def test_apply_elem_wise_vectors() -> None:
     )
 
 
+def test_detour_group_str() -> None:
+    from ess.nmx.scaling import group
+
+    da = sc.DataArray(
+        data=sc.ones(dims=["x"], shape=[3]),
+        coords={"x": sc.Variable(dims=["x"], values=["a", "b", "a"])},
+    )
+
+    grouped = group(da, "x", x=lambda x: x)
+    assert sc.identical(
+        grouped.coords["x"],
+        sc.Variable(dims=["x"], values=["a", "b"]),
+    )
+
+
+def test_detour_group_vector() -> None:
+    from ess.nmx.scaling import _hash_repr, group
+
+    da = sc.DataArray(
+        data=sc.ones(dims=["x"], shape=[10]),
+        coords={"x": sc.vectors(dims=["x"], values=[(1, 2, 3), (4, 5, 6)] * 5)},
+    )
+
+    grouped = group(da, "x", x=_hash_repr)
+    assert sc.identical(
+        grouped.coords["x"],
+        sc.vectors(dims=["x"], values=[(1, 2, 3), (4, 5, 6)]),
+    )
+
+
 def test_hash_variable_unique() -> None:
     """Different vector values should have different hashes."""
     from itertools import product
