@@ -164,7 +164,7 @@ def _detour_group(
     )
 
 
-def group(da: sc.DataArray, /, *args: str, **group_detour_func_map) -> sc.DataArray:
+def _group(da: sc.DataArray, /, *args: str, **group_detour_func_map) -> sc.DataArray:
     """Group the data array by the given coordinates.
 
     Parameters
@@ -202,7 +202,7 @@ def group(da: sc.DataArray, /, *args: str, **group_detour_func_map) -> sc.DataAr
 def calculate_scale_factor_per_hkl_eq(
     ref_bin: ReferenceWavelengthBin,
 ) -> ReferenceScaleFactor:
-    grouped = group(ref_bin, "hkl_eq", hkl_eq=str)
+    grouped = _group(ref_bin, "hkl_eq", hkl_eq=str)
 
     scale_factor_coords = ("I", "SIGI")
     for coord_name in scale_factor_coords:
