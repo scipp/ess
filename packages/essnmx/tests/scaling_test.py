@@ -4,64 +4,11 @@ import pytest
 import scipp as sc
 
 from ess.nmx.mtz_io import DEFAULT_WAVELENGTH_COLUMN_NAME
-from ess.nmx.scaling import ReferenceWavelengthBin, _apply_elem_wise, get_reference_bin
-
-
-def test_apply_elem_wise_add() -> None:
-    var = sc.Variable(dims=["x"], values=[1, 2, 3])
-
-    assert sc.identical(
-        _apply_elem_wise(lambda x: x + 1, var),
-        sc.Variable(dims=["x"], values=var.values + 1),
-    )
-
-
-def test_apply_elem_wise_str() -> None:
-    var = sc.Variable(dims=["x"], values=[1, 2, 3])
-
-    assert sc.identical(
-        _apply_elem_wise(str, var),
-        sc.Variable(dims=["x"], values=["1", "2", "3"]),
-    )
-
-
-def test_apply_elem_wise_vectors() -> None:
-    var = sc.vectors(dims=["x"], values=[(1, 2, 3), (4, 5, 6), (7, 8, 9)])
-
-    assert sc.identical(
-        _apply_elem_wise(sum, var),
-        sc.array(dims=["x"], values=[6, 15, 24], dtype=float),
-    )
-
-
-def test_detour_group_str() -> None:
-    from ess.nmx.scaling import _group
-
-    da = sc.DataArray(
-        data=sc.ones(dims=["x"], shape=[3]),
-        coords={"x": sc.Variable(dims=["x"], values=["a", "b", "a"])},
-    )
-
-    grouped = _group(da, "x", x=lambda x: x)
-    assert sc.identical(
-        grouped.coords["x"],
-        sc.Variable(dims=["x"], values=["a", "b"]),
-    )
-
-
-def test_detour_group_vector() -> None:
-    from ess.nmx.scaling import _group
-
-    da = sc.DataArray(
-        data=sc.ones(dims=["x"], shape=[10]),
-        coords={"x": sc.vectors(dims=["x"], values=[(1, 2, 3), (4, 5, 6)] * 5)},
-    )
-
-    grouped = _group(da, "x", x=str)
-    assert sc.identical(
-        grouped.coords["x"],
-        sc.vectors(dims=["x"], values=[(1, 2, 3), (4, 5, 6)]),
-    )
+from ess.nmx.scaling import (
+    ReferenceWavelengthBin,
+    calculate_scale_factor_per_hkl_eq,
+    get_reference_bin,
+)
 
 
 @pytest.fixture
@@ -111,7 +58,7 @@ def reference_bin(nmx_data_array: sc.DataArray) -> ReferenceWavelengthBin:
 
 def test_reference_bin_scale_factor(reference_bin: ReferenceWavelengthBin) -> None:
     """Test the scale factor for I."""
-    from ess.nmx.scaling import _group, calculate_scale_factor_per_hkl_eq
+    from ess.nmx.reduction import _group
 
     scale_factor_groups = calculate_scale_factor_per_hkl_eq(reference_bin)
     grouped = _group(reference_bin, "hkl_eq", hkl_eq=str)
