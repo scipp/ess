@@ -15,8 +15,6 @@ def test_apply_elem_wise_add() -> None:
 
 
 def test_apply_elem_wise_str() -> None:
-    from ess.nmx.scaling import _apply_elem_wise
-
     var = sc.Variable(dims=["x"], values=[1, 2, 3])
 
     assert sc.identical(
@@ -26,8 +24,6 @@ def test_apply_elem_wise_str() -> None:
 
 
 def test_apply_elem_wise_vectors() -> None:
-    from ess.nmx.scaling import _apply_elem_wise
-
     var = sc.vectors(dims=["x"], values=[(1, 2, 3), (4, 5, 6), (7, 8, 9)])
 
     assert sc.identical(
