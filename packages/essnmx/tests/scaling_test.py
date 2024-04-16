@@ -4,13 +4,7 @@ import pytest
 import scipp as sc
 
 from ess.nmx.mtz_io import DEFAULT_WAVELENGTH_COLUMN_NAME
-from ess.nmx.scaling import (
-    ReferenceWavelengthBin,
-    _apply_elem_wise,
-    _hash_repr,
-    get_reference_bin,
-    hash_variable,
-)
+from ess.nmx.scaling import ReferenceWavelengthBin, _apply_elem_wise, get_reference_bin
 
 
 def test_apply_elem_wise_add() -> None:
@@ -56,36 +50,18 @@ def test_detour_group_str() -> None:
 
 
 def test_detour_group_vector() -> None:
-    from ess.nmx.scaling import _hash_repr, group
+    from ess.nmx.scaling import group
 
     da = sc.DataArray(
         data=sc.ones(dims=["x"], shape=[10]),
         coords={"x": sc.vectors(dims=["x"], values=[(1, 2, 3), (4, 5, 6)] * 5)},
     )
 
-    grouped = group(da, "x", x=_hash_repr)
+    grouped = group(da, "x", x=str)
     assert sc.identical(
         grouped.coords["x"],
         sc.vectors(dims=["x"], values=[(1, 2, 3), (4, 5, 6)]),
     )
-
-
-def test_hash_variable_unique() -> None:
-    """Different vector values should have different hashes."""
-    from itertools import product
-
-    import numpy as np
-
-    var = sc.vectors(dims=["x"], values=list(product(range(20), repeat=3)))
-    hash_var = hash_variable(var, hash_func=_hash_repr)
-    assert len(hash_var.values) == len(np.unique(hash_var.values))
-
-
-def test_hash_variable_same() -> None:
-    """Same values should have the same hash."""
-    var = sc.vectors(dims=["x"], values=[(1, 2, 3), (1, 2, 3)])
-    hash_var = hash_variable(var, hash_func=_hash_repr)
-    assert hash_var.values[0] == hash_var.values[1]
 
 
 @pytest.fixture
@@ -138,7 +114,7 @@ def test_reference_bin_scale_factor(reference_bin: ReferenceWavelengthBin) -> No
     from ess.nmx.scaling import calculate_scale_factor_per_hkl_eq, group
 
     scale_factor_groups = calculate_scale_factor_per_hkl_eq(reference_bin)
-    grouped = group(reference_bin, "hkl_eq", hkl_eq=_hash_repr)
+    grouped = group(reference_bin, "hkl_eq", hkl_eq=str)
 
     for hkl_eq in grouped.coords["hkl_eq"].values:
         calculated_gr = scale_factor_groups["hkl_eq", sc.vector(hkl_eq)]
