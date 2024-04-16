@@ -74,7 +74,7 @@ def mtz_to_pandas(mtz: gemmi.Mtz) -> pd.DataFrame:
 
 def reduce_single_mtz(
     mtz: RawMtz,
-    lambda_column_name: WavelengthColumnName = DEFUAULT_WAVELENGTH_COLUMN_NAME,
+    lambda_column_name: WavelengthColumnName = DEFAULT_WAVELENGTH_COLUMN_NAME,
 ) -> RawMtzDataFrame:
     """Select and derive columns from the original ``MtzDataFrame``.
 
@@ -116,7 +116,7 @@ def reduce_single_mtz(
     # (2d)^{-2} = \sin^2(\theta)/\lambda^2
     mtz_df["resolution"] = (1 / mtz_df["d"]) ** 2 / 4
     mtz_df["I_div_SIGI"] = orig_df["I"] / orig_df["SIGI"]
-    mtz_df[DEFUAULT_WAVELENGTH_COLUMN_NAME] = orig_df[lambda_column_name]
+    mtz_df[DEFAULT_WAVELENGTH_COLUMN_NAME] = orig_df[lambda_column_name]
     # Keep other columns
     for column in [col for col in orig_df.columns if col not in mtz_df]:
         mtz_df[column] = orig_df[column]
@@ -224,8 +224,8 @@ def nmx_mtz_dataframe_to_scipp_dataarray(
 
     # Add unit to the name
     to_scipp = nmx_mtz_df.copy(deep=False)
-    to_scipp[DEFUAULT_WAVELENGTH_COLUMN_NAME + " [Å]"] = to_scipp[
-        DEFUAULT_WAVELENGTH_COLUMN_NAME
+    to_scipp[DEFAULT_WAVELENGTH_COLUMN_NAME + " [Å]"] = to_scipp[
+        DEFAULT_WAVELENGTH_COLUMN_NAME
     ]
     # Add dummy data column
     dummy_data_column_name = "DUMMY_DATA"
@@ -267,6 +267,6 @@ mtz_io_providers = (
 )
 """The providers related to the MTZ IO."""
 mtz_io_params = {
-    WavelengthColumnName: DEFUAULT_WAVELENGTH_COLUMN_NAME,
+    WavelengthColumnName: DEFAULT_WAVELENGTH_COLUMN_NAME,
 }
 """The parameters related to the MTZ IO."""

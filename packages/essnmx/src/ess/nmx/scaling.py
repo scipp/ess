@@ -4,7 +4,7 @@ from typing import NewType
 
 import scipp as sc
 
-from .mtz_io import DEFUAULT_WAVELENGTH_COLUMN_NAME, NMXMtzDataArray
+from .mtz_io import DEFAULT_WAVELENGTH_COLUMN_NAME, NMXMtzDataArray
 
 # User defined or configurable types
 WavelengthBinSize = NewType("WavelengthBinSize", int)
@@ -37,7 +37,7 @@ def get_lambda_binned(
     """
 
     return WavelengthBinned(
-        mtz_da.bin({DEFUAULT_WAVELENGTH_COLUMN_NAME: wavelength_bin_size})
+        mtz_da.bin({DEFAULT_WAVELENGTH_COLUMN_NAME: wavelength_bin_size})
     )
 
 
