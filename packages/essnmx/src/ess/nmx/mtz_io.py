@@ -203,16 +203,6 @@ def reduce_merged_mtz_dataframe(
 
     merged_df["hkl_eq"] = merged_df.apply(_rapio_asu_to_asu, axis=1)
 
-    def unpack_vector(row: pd.Series, *new_names) -> pd.DataFrame:
-        return pd.DataFrame(
-            {name: [val[i] for val in row] for i, name in enumerate(new_names)}
-        )
-
-    # Unpack HKL EQ
-    merged_df[["H_EQ", "K_EQ", "L_EQ"]] = unpack_vector(
-        merged_df["hkl_eq"], "H_EQ", "K_EQ", "L_EQ"
-    )
-
     return NMXMtzDataFrame(merged_df)
 
 
@@ -245,7 +235,7 @@ def nmx_mtz_dataframe_to_scipp_dataarray(
     # Add back the vector columns
     for col, values in vector_coords.items():
         nmx_mtz_ds.coords[col] = sc.vectors(
-            dims=nmx_mtz_ds.dims, values=[val for val in values]
+            dims=nmx_mtz_ds.dims, values=values.to_numpy(copy=False)
         )
     # Add HKL EQ hash coordinate for grouping
     nmx_mtz_ds.coords["hkl_eq_hash"] = sc.Variable(
