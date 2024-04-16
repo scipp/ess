@@ -37,5 +37,6 @@
    data
    mcstas_loader
    types
+   mtz_io
 
 ```
