@@ -35,14 +35,14 @@ def test_apply_elem_wise_vectors() -> None:
 
 
 def test_detour_group_str() -> None:
-    from ess.nmx.scaling import group
+    from ess.nmx.scaling import _group
 
     da = sc.DataArray(
         data=sc.ones(dims=["x"], shape=[3]),
         coords={"x": sc.Variable(dims=["x"], values=["a", "b", "a"])},
     )
 
-    grouped = group(da, "x", x=lambda x: x)
+    grouped = _group(da, "x", x=lambda x: x)
     assert sc.identical(
         grouped.coords["x"],
         sc.Variable(dims=["x"], values=["a", "b"]),
@@ -50,14 +50,14 @@ def test_detour_group_str() -> None:
 
 
 def test_detour_group_vector() -> None:
-    from ess.nmx.scaling import group
+    from ess.nmx.scaling import _group
 
     da = sc.DataArray(
         data=sc.ones(dims=["x"], shape=[10]),
         coords={"x": sc.vectors(dims=["x"], values=[(1, 2, 3), (4, 5, 6)] * 5)},
     )
 
-    grouped = group(da, "x", x=str)
+    grouped = _group(da, "x", x=str)
     assert sc.identical(
         grouped.coords["x"],
         sc.vectors(dims=["x"], values=[(1, 2, 3), (4, 5, 6)]),
@@ -111,10 +111,10 @@ def reference_bin(nmx_data_array: sc.DataArray) -> ReferenceWavelengthBin:
 
 def test_reference_bin_scale_factor(reference_bin: ReferenceWavelengthBin) -> None:
     """Test the scale factor for I."""
-    from ess.nmx.scaling import calculate_scale_factor_per_hkl_eq, group
+    from ess.nmx.scaling import _group, calculate_scale_factor_per_hkl_eq
 
     scale_factor_groups = calculate_scale_factor_per_hkl_eq(reference_bin)
-    grouped = group(reference_bin, "hkl_eq", hkl_eq=str)
+    grouped = _group(reference_bin, "hkl_eq", hkl_eq=str)
 
     for hkl_eq in grouped.coords["hkl_eq"].values:
         calculated_gr = scale_factor_groups["hkl_eq", sc.vector(hkl_eq)]
