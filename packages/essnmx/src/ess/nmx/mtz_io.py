@@ -80,8 +80,7 @@ def reduce_single_mtz(mtz: RawMtz) -> RawMtzDataFrame:
 
     Notes
     -----
-    :class:`pandas.DataFrame` is the data structure
-    that the rest of the steps are using,
+    :class:`pandas.DataFrame` is used from loading to merging,
     but :class:`gemmi.Mtz` has :func:`gemmi.Mtz:calculate_d`
     that can derive the ``d`` using ``HKL``.
     This part of the method must be called on each mtz file separately.
@@ -125,7 +124,7 @@ def get_space_group(
 
     spacegroup_desc:
         The space group description to use if not found in the mtz files.
-        If None, ``DEFAULT_SPACE_GROUP_DESC`` is used.
+        If None, :attr:`~DEFAULT_SPACE_GROUP_DESC` is used.
 
     Returns
     -------
