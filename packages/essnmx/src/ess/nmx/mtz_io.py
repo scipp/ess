@@ -212,30 +212,28 @@ def nmx_mtz_dataframe_to_scipp_dataarray(
     """Converts the reduced mtz dataframe to a scipp dataarray."""
     from scipp.compat.pandas_compat import from_pandas_dataframe, parse_bracket_header
 
-    # Add unit to the name
     to_scipp = nmx_mtz_df.copy(deep=False)
-    to_scipp[DEFAULT_WAVELENGTH_COLUMN_NAME + " [Å]"] = to_scipp[
-        DEFAULT_WAVELENGTH_COLUMN_NAME
-    ]
     # Add dummy data column
     dummy_data_column_name = "DUMMY_DATA"
     to_scipp[dummy_data_column_name] = np.ones(len(to_scipp))
     # Pop the vector columns for later
     vector_columns = ("hkl", "hkl_eq")
     vector_coords = {col: to_scipp.pop(col) for col in vector_columns}
-    # Add units
-    to_scipp.rename(columns={"I": "I [dimensionless]"}, inplace=True)
-    to_scipp.rename(columns={"SIGI": "SIGI [dimensionless]"}, inplace=True)
     # Convert to scipp Dataset
     nmx_mtz_ds = from_pandas_dataframe(
         to_scipp,
         data_columns=dummy_data_column_name,
         header_parser=parse_bracket_header,
     )
+
+    # Add units
+    nmx_mtz_ds.coords[DEFAULT_WAVELENGTH_COLUMN_NAME].unit = sc.units.angstrom
+    nmx_mtz_ds.coords["I"].unit = sc.units.dimensionless
+    nmx_mtz_ds.coords["SIGI"].unit = sc.units.dimensionless
     # Add back the vector columns
     for col, values in vector_coords.items():
         nmx_mtz_ds.coords[col] = sc.vectors(
-            dims=nmx_mtz_ds.dims, values=values.to_numpy(copy=False)
+            dims=nmx_mtz_ds.dims, values=[val for val in values]
         )
     # Add HKL EQ hash coordinate for grouping
     nmx_mtz_ds.coords["hkl_eq_hash"] = sc.Variable(
