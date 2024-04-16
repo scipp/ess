@@ -85,18 +85,6 @@ def _apply_elem_wise(
     )
 
 
-def _hash_repr(val: Any) -> int:
-    """Hash the string representation of the value."""
-
-    return hash(str(val))
-
-
-def hash_variable(var: sc.Variable, hash_func: Callable = hash) -> sc.Variable:
-    """Hash the coordinate values."""
-
-    return _apply_elem_wise(hash_func, var)
-
-
 def get_reference_bin(binned: WavelengthBinned) -> ReferenceWavelengthBin:
     """Find the reference group in the binned dataset.
 
@@ -214,7 +202,7 @@ def group(da: sc.DataArray, /, *args: str, **group_detour_func_map) -> sc.DataAr
 def calculate_scale_factor_per_hkl_eq(
     ref_bin: ReferenceWavelengthBin,
 ) -> ReferenceScaleFactor:
-    grouped = group(ref_bin, "hkl_eq", hkl_eq=_hash_repr)
+    grouped = group(ref_bin, "hkl_eq", hkl_eq=str)
 
     scale_factor_coords = ("I", "SIGI")
     for coord_name in scale_factor_coords:
