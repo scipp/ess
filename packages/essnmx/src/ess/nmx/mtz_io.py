@@ -235,11 +235,6 @@ def nmx_mtz_dataframe_to_scipp_dataarray(
         nmx_mtz_ds.coords[col] = sc.vectors(
             dims=nmx_mtz_ds.dims, values=[val for val in values]
         )
-    # Add HKL EQ hash coordinate for grouping
-    nmx_mtz_ds.coords["hkl_eq_hash"] = sc.Variable(
-        dims=nmx_mtz_ds.dims,
-        values=[hash(tuple(val)) for val in nmx_mtz_ds.coords["hkl_eq"].values],
-    )
     # Return DataArray
     return NMXMtzDataArray(nmx_mtz_ds[dummy_data_column_name].copy(deep=False))
 
