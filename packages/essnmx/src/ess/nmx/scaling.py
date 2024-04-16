@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
-from typing import NewType
+from typing import Any, Callable, NewType, Sequence
 
 import scipp as sc
 
@@ -45,6 +45,34 @@ def _is_bin_empty(binned: sc.DataArray, idx: int) -> bool:
     return binned[idx].values.size == 0
 
 
+def _apply_elem_wise(func: Callable, var: sc.Variable) -> sc.Variable:
+    """Apply a function element-wise to the variable values.
+
+    This helper is only for vector-dtype variables.
+    Use ``numpy.vectorize`` for other types.
+
+    """
+
+    def apply_func(val: Sequence, _cur_depth: int = 0) -> list:
+        if _cur_depth == len(var.dims):
+            return func(val)
+        return [apply_func(v, _cur_depth + 1) for v in val]
+
+    return sc.Variable(
+        dims=var.dims,
+        values=apply_func(var.values),
+    )
+
+
+def hash_variable(var: sc.Variable) -> sc.Variable:
+    """Hash the coordinate values."""
+
+    def _hash_repr(val: Any) -> int:
+        return hash(str(val))
+
+    return _apply_elem_wise(_hash_repr, var)
+
+
 def get_reference_bin(
     binned: WavelengthBinned,
 ) -> ReferenceWavelengthBin:
@@ -75,6 +103,7 @@ def get_reference_bin(
         raise ValueError("No reference group found.")
 
     ref: sc.DataArray = binned[cur_idx].values.copy(deep=False)
+    ref.coords["hkl_eq_hash"] = hash_variable(ref.coords["hkl_eq"])
     grouped: sc.DataArray = ref.group("hkl_eq_hash")
     scale_factor_coords = ("I", "SIGI")
     for coord_name in scale_factor_coords:
