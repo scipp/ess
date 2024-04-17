@@ -25,58 +25,58 @@ class _SharedFields(sc.DataGroup):
         """Position of the first pixel (lowest ID) in the detector.
 
         Relative position from the sample."""
-        return self["origin_position"]
+        return self['origin_position']
 
     @property
     def crystal_rotation(self) -> sc.Variable:
         """Rotation of the crystal."""
 
-        return self["crystal_rotation"]
+        return self['crystal_rotation']
 
     @property
     def sample_name(self) -> sc.Variable:
-        return self["sample_name"]
+        return self['sample_name']
 
     @property
     def fast_axis(self) -> sc.Variable:
         """Fast axis, along where the pixel ID increases by 1."""
-        return self["fast_axis"]
+        return self['fast_axis']
 
     @property
     def slow_axis(self) -> sc.Variable:
         """Slow axis, along where the pixel ID increases by > 1.
 
         The pixel ID increases by the number of pixels in the fast axis."""
-        return self["slow_axis"]
+        return self['slow_axis']
 
     @property
     def proton_charge(self) -> sc.Variable:
         """Accumulated number of protons during the measurement."""
-        return self["proton_charge"]
+        return self['proton_charge']
 
     @property
     def source_position(self) -> sc.Variable:
         """Relative position of the source from the sample."""
-        return self["source_position"]
+        return self['source_position']
 
     @property
     def sample_position(self) -> sc.Variable:
         """Relative position of the sample from the sample. (0, 0, 0)"""
-        return self["sample_position"]
+        return self['sample_position']
 
 
 class NMXData(_SharedFields, sc.DataGroup):
     @property
     def weights(self) -> sc.DataArray:
         """Event data grouped by pixel id."""
-        return self["weights"]
+        return self['"weights']
 
 
 class NMXReducedData(_SharedFields, sc.DataGroup):
     @property
     def counts(self) -> sc.DataArray:
         """Binned time of arrival data from flattened event data."""
-        return self["counts"]
+        return self['counts']
 
     def _create_dataset_from_var(
         self,
@@ -236,9 +236,9 @@ def bin_time_of_arrival(
 
     nmx_data = list(nmx_data.values())
     nmx_data = sc.concat(nmx_data, DETECTOR_DIM)
-    counts = nmx_data.pop("weights").hist(t=time_bin_step)
+    counts = nmx_data.pop('weights').hist(t=time_bin_step)
     new_coords = instrument.to_coords(*detector_name.values())
-    new_coords.pop("pixel_id")
+    new_coords.pop('pixel_id')
 
     return NMXReducedData(
         counts=counts,
