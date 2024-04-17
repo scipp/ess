@@ -11,6 +11,7 @@ from .types import (
     CleanSummedQ,
     Denominator,
     DetectorMasks,
+    Filename,
     NeXusDetectorName,
     Numerator,
     PixelMaskFilename,
@@ -29,37 +30,51 @@ def _merge_contributions(*data: sc.DataArray) -> sc.DataArray:
     return reducer.bins.concat() if data[0].bins is not None else reducer.sum()
 
 
-def make_workflow(
-    pipeline: sciline.Pipeline,
-    bank: str | Iterable[str],
-    masks: Iterable[str] = (),
-    sample_run: str | Iterable[str] = (),
-    background_run: str | Iterable[str] = (),
+def set_pixel_mask_filenames(
+    pipeline: sciline.Pipeline, masks: Iterable[str]
 ) -> sciline.Pipeline:
     pipeline = pipeline.copy()
-    by_mask = pipeline.map(
-        pd.DataFrame({PixelMaskFilename: masks}).rename_axis('pixel_mask')
-    )
+    by_mask = pipeline.map(pd.DataFrame({PixelMaskFilename: masks}).rename_axis('mask'))
     for run in (SampleRun, BackgroundRun):
         pipeline[DetectorMasks[run]] = by_mask[DetectorMasks[run]].reduce(func=_merge)
-    banks = pd.DataFrame(
-        {NeXusDetectorName: [bank] if isinstance(bank, str) else bank}
-    ).rename_axis('bank')
-    # sample_runs = ([sample_run] if isinstance(sample_run, str) else sample_run,)
-    # background_runs = (
-    #     [background_run] if isinstance(background_run, str) else background_run,
-    # )
-    by_bank_and_run = (
-        pipeline.map(banks)
-        # .map({Filename[SampleRun]: sample_runs})
-        # .map({Filename[BackgroundRun]: background_runs})
-    )
-    # run_dim = {SampleRun: 'sample_run', BackgroundRun: 'background_run'}
+    return pipeline
+
+
+def set_banks(pipeline: sciline.Pipeline, banks: Iterable[str]) -> sciline.Pipeline:
+    pipeline = pipeline.copy()
+    banks = pd.DataFrame({NeXusDetectorName: banks}).rename_axis('bank')
+    by_bank = pipeline.map(banks)
     for run in (SampleRun, BackgroundRun):
         for part in (Numerator, Denominator):
-            pipeline[CleanSummedQ[run, part]] = (
-                by_bank_and_run[CleanSummedQ[run, part]]
-                # .reduce(index=run_dim[run], func=_merge_contributions)
-                .reduce(index='bank', func=_merge_contributions)
+            pipeline[CleanSummedQ[run, part]] = by_bank[CleanSummedQ[run, part]].reduce(
+                index='bank', func=_merge_contributions
             )
+    return pipeline
+
+
+def set_sample_runs(
+    pipeline: sciline.Pipeline, sample_runs: Iterable[str]
+) -> sciline.Pipeline:
+    by_sample_run = pipeline.map(
+        pd.DataFrame({Filename[SampleRun]: sample_runs}).rename_axis('sample_run')
+    )
+    for part in (Numerator, Denominator):
+        pipeline[CleanSummedQ[SampleRun, part]] = by_sample_run[
+            CleanSummedQ[SampleRun, part]
+        ].reduce(index='sample_run', func=_merge_contributions)
+    return pipeline
+
+
+def set_background_runs(
+    pipeline: sciline.Pipeline, sample_runs: Iterable[str]
+) -> sciline.Pipeline:
+    by_sample_run = pipeline.map(
+        pd.DataFrame({Filename[BackgroundRun]: sample_runs}).rename_axis(
+            'background_run'
+        )
+    )
+    for part in (Numerator, Denominator):
+        pipeline[CleanSummedQ[BackgroundRun, part]] = by_sample_run[
+            CleanSummedQ[BackgroundRun, part]
+        ].reduce(index='background_run', func=_merge_contributions)
     return pipeline
