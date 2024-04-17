@@ -5,7 +5,7 @@ from typing import NewType
 import scipp as sc
 
 from .mtz_io import DEFAULT_WAVELENGTH_COLUMN_NAME, NMXMtzDataArray
-from .reduction import _group
+from .reduction import _zip_and_group
 
 # User defined or configurable types
 WavelengthBinSize = NewType("WavelengthBinSize", int)
@@ -81,16 +81,10 @@ def get_reference_bin(binned: WavelengthBinned) -> ReferenceWavelengthBin:
 def calculate_scale_factor_per_hkl_eq(
     ref_bin: ReferenceWavelengthBin,
 ) -> ReferenceScaleFactor:
-    grouped = _group(ref_bin, "hkl_eq", hkl_eq=str)
+    grouped = _zip_and_group(ref_bin, "H_EQ", "K_EQ", "L_EQ")
+    grouped = grouped.rename_dims({grouped.dim: "HKL_EQ"})
 
-    scale_factor_coords = ("I", "SIGI")
-    for coord_name in scale_factor_coords:
-        grouped.coords[f"scale_factor_{coord_name}"] = sc.concat(
-            [sc.mean(1 / gr.values.coords[coord_name]) for gr in grouped],
-            dim=grouped.dim,
-        )
-
-    return ReferenceScaleFactor(grouped)
+    return ReferenceScaleFactor((1 / grouped).bins.mean())
 
 
 # Providers and default parameters

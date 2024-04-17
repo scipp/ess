@@ -13,30 +13,21 @@ from ess.nmx.scaling import (
 
 @pytest.fixture
 def nmx_data_array() -> sc.DataArray:
-    return sc.DataArray(
-        data=sc.ones(dims=["row"], shape=[7]),
+    da = sc.DataArray(
+        data=sc.array(dims=["row"], values=[1, 2, 3, 4, 5, 3.1, 3.2]),
         coords={
             DEFAULT_WAVELENGTH_COLUMN_NAME: sc.Variable(
                 dims=["row"], values=[1, 2, 3, 4, 5, 3, 3]
             ),
-            "hkl_eq": sc.vectors(
-                dims=["row"],
-                values=[
-                    (1, 2, 3),
-                    (4, 5, 6),
-                    (7, 8, 9),
-                    (10, 11, 12),
-                    (13, 14, 15),
-                    (7, 8, 9),
-                    (9, 8, 7),
-                ],
-            ),
-            "I": sc.Variable(dims=["row"], values=[1, 2, 3, 4, 5, 3.1, 3.2]),
-            "SIGI": sc.Variable(
-                dims=["row"], values=[0.1, 0.2, 0.3, 0.4, 0.5, 0.31, 0.32]
-            ),
+            "H_EQ": sc.array(dims=["row"], values=[1, 4, 7, 10, 13, 7, 9]),
+            "K_EQ": sc.array(dims=["row"], values=[2, 5, 8, 11, 14, 8, 8]),
+            "L_EQ": sc.array(dims=["row"], values=[3, 6, 9, 12, 15, 9, 7]),
         },
     )
+    da.variances = (
+        sc.array(dims=["row"], values=[0.1, 0.2, 0.3, 0.4, 0.5, 0.31, 0.32]) ** 2
+    )
+    return da
 
 
 def test_get_reference_bin_middle(nmx_data_array: sc.DataArray) -> None:
@@ -44,11 +35,9 @@ def test_get_reference_bin_middle(nmx_data_array: sc.DataArray) -> None:
 
     ref_bin = get_reference_bin(nmx_data_array.bin({DEFAULT_WAVELENGTH_COLUMN_NAME: 6}))
     selected_idx = (2, 5, 6)
-    for coord in ("I", "SIGI"):
-        assert all(
-            ref_bin.coords[coord].values
-            == [nmx_data_array.coords[coord].values[idx] for idx in selected_idx]
-        )
+    assert all(
+        ref_bin.data.values == [nmx_data_array.data.values[idx] for idx in selected_idx]
+    )
 
 
 @pytest.fixture
@@ -58,16 +47,13 @@ def reference_bin(nmx_data_array: sc.DataArray) -> ReferenceWavelengthBin:
 
 def test_reference_bin_scale_factor(reference_bin: ReferenceWavelengthBin) -> None:
     """Test the scale factor for I."""
-    from ess.nmx.reduction import _group
+    scale_factor = calculate_scale_factor_per_hkl_eq(reference_bin)
+    expected_groups = [(7, 8, 9), (9, 8, 7)]
 
-    scale_factor_groups = calculate_scale_factor_per_hkl_eq(reference_bin)
-    grouped = _group(reference_bin, "hkl_eq", hkl_eq=str)
-
-    for hkl_eq in grouped.coords["hkl_eq"].values:
-        calculated_gr = scale_factor_groups["hkl_eq", sc.vector(hkl_eq)]
-        reference_gr = grouped["hkl_eq", sc.vector(hkl_eq)]
-        for coord in ("I", "SIGI"):
-            assert sc.identical(
-                calculated_gr.coords[f"scale_factor_{coord}"],
-                sc.mean(1 / reference_gr.values.coords[coord]),
-            )
+    assert len(scale_factor) == len(expected_groups)
+    for idx, group in enumerate(expected_groups):
+        hkl = tuple(
+            scale_factor.coords[coord][idx].value for coord in ("H_EQ", "K_EQ", "L_EQ")
+        )
+        print(hkl)
+        assert hkl == group
