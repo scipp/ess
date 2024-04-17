@@ -36,7 +36,7 @@ def to_detector_mask(
     ]
     mask = sc.zeros(sizes=ids.sizes, dtype='bool')
     mask.values[np.isin(ids.values, masked_ids.values)] = True
-    return DetectorMasks[ScatteringRunType](sc.DataGroup({name: mask}))
+    return DetectorMasks[ScatteringRunType]({name: mask})
 
 
 def apply_pixel_masks(

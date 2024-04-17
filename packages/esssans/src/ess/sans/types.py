@@ -170,7 +170,9 @@ MaskedDetectorIDs = NewType('MaskedDetectorIDs', sc.Variable)
 """1-D variable listing all masked detector IDs."""
 
 
-class DetectorMasks(sciline.Scope[ScatteringRunType, sc.DataGroup], sc.DataGroup):
+class DetectorMasks(
+    sciline.Scope[ScatteringRunType, dict[str, sc.Variable]], dict[str, sc.Variable]
+):
     """Masks for detector pixels"""
 
 
