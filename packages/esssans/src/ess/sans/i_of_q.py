@@ -2,7 +2,6 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import uuid
 
-import sciline
 import scipp as sc
 from scipp.scipy.interpolate import interp1d
 
@@ -17,19 +16,13 @@ from .types import (
     CleanQ,
     CleanQxy,
     CleanSummedQ,
-    CleanSummedQMergedBanks,
     CleanSummedQxy,
-    CleanSummedQxyMergedBanks,
     DimsToKeep,
     DirectBeam,
-    Filename,
-    FinalSummedQ,
-    FinalSummedQxy,
     IofQ,
     IofQPart,
     IofQxy,
     MonitorType,
-    NeXusDetectorName,
     NonBackgroundWavelengthRange,
     QBins,
     QxBins,
@@ -272,30 +265,6 @@ def _bin_in_q(
     return out.squeeze()
 
 
-def no_bank_merge(
-    data: CleanSummedQ[ScatteringRunType, IofQPart]
-) -> CleanSummedQMergedBanks[ScatteringRunType, IofQPart]:
-    return CleanSummedQMergedBanks[ScatteringRunType, IofQPart](data)
-
-
-def no_bank_merge_xy(
-    data: CleanSummedQxy[ScatteringRunType, IofQPart]
-) -> CleanSummedQxyMergedBanks[ScatteringRunType, IofQPart]:
-    return CleanSummedQxyMergedBanks[ScatteringRunType, IofQPart](data)
-
-
-def no_run_merge(
-    data: CleanSummedQMergedBanks[ScatteringRunType, IofQPart]
-) -> FinalSummedQ[ScatteringRunType, IofQPart]:
-    return FinalSummedQ[ScatteringRunType, IofQPart](data)
-
-
-def no_run_merge_xy(
-    data: CleanSummedQxyMergedBanks[ScatteringRunType, IofQPart]
-) -> FinalSummedQxy[ScatteringRunType, IofQPart]:
-    return FinalSummedQxy[ScatteringRunType, IofQPart](data)
-
-
 def _merge_contributions(data: list[sc.DataArray]) -> sc.DataArray:
     if len(data) == 1:
         return data[0]
@@ -304,59 +273,23 @@ def _merge_contributions(data: list[sc.DataArray]) -> sc.DataArray:
 
 
 def merge_banks(
-    banks: sciline.Series[NeXusDetectorName, CleanSummedQ[ScatteringRunType, IofQPart]]
-) -> CleanSummedQMergedBanks[ScatteringRunType, IofQPart]:
+    *banks: CleanSummedQ[ScatteringRunType, IofQPart]
+) -> CleanSummedQ[ScatteringRunType, IofQPart]:
     """
     Merge the events or counts from multiple detector banks into a single numerator or
     denominator, before the normalization step.
     """
-    return CleanSummedQMergedBanks[ScatteringRunType, IofQPart](
-        _merge_contributions(list(banks.values()))
-    )
-
-
-def merge_banks_xy(
-    banks: sciline.Series[
-        NeXusDetectorName, CleanSummedQxy[ScatteringRunType, IofQPart]
-    ]
-) -> CleanSummedQxyMergedBanks[ScatteringRunType, IofQPart]:
-    """
-    Merge the events or counts from multiple detector banks into a single numerator or
-    denominator, before the normalization step.
-    """
-    return CleanSummedQxyMergedBanks[ScatteringRunType, IofQPart](
-        _merge_contributions(list(banks.values()))
-    )
+    return CleanSummedQ[ScatteringRunType, IofQPart](_merge_contributions(list(banks)))
 
 
 def merge_runs(
-    runs: sciline.Series[
-        Filename[ScatteringRunType],
-        CleanSummedQMergedBanks[ScatteringRunType, IofQPart],
-    ],
-) -> FinalSummedQ[ScatteringRunType, IofQPart]:
+    *runs: CleanSummedQ[ScatteringRunType, IofQPart],
+) -> CleanSummedQ[ScatteringRunType, IofQPart]:
     """
     Merge the events or counts from multiple runs into a single numerator or
     denominator, before the normalization step.
     """
-    return FinalSummedQ[ScatteringRunType, IofQPart](
-        _merge_contributions(list(runs.values()))
-    )
-
-
-def merge_runs_xy(
-    runs: sciline.Series[
-        Filename[ScatteringRunType],
-        CleanSummedQxyMergedBanks[ScatteringRunType, IofQPart],
-    ],
-) -> FinalSummedQxy[ScatteringRunType, IofQPart]:
-    """
-    Merge the events or counts from multiple runs into a single numerator or
-    denominator, before the normalization step.
-    """
-    return FinalSummedQxy[ScatteringRunType, IofQPart](
-        _merge_contributions(list(runs.values()))
-    )
+    return CleanSummedQ[ScatteringRunType, IofQPart](_merge_contributions(list(runs)))
 
 
 def _subtract_background(
@@ -404,8 +337,4 @@ providers = (
     bin_in_qxy,
     subtract_background,
     subtract_background_xy,
-    no_bank_merge,
-    no_bank_merge_xy,
-    no_run_merge,
-    no_run_merge_xy,
 )

@@ -310,30 +310,6 @@ class CleanSummedQxy(
     Qy bins"""
 
 
-class CleanSummedQMergedBanks(
-    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
-):
-    """CleanSummedQ with merged banks"""
-
-
-class CleanSummedQxyMergedBanks(
-    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
-):
-    """CleanSummedQxy with merged banks"""
-
-
-class FinalSummedQ(
-    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
-):
-    """Final data into Q bins, in a state that is ready to be normalized."""
-
-
-class FinalSummedQxy(
-    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
-):
-    """Final data into Qx and Qy bins, in a state that is ready to be normalized."""
-
-
 class IofQ(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """I(Q)"""
 

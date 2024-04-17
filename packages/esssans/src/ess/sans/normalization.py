@@ -7,12 +7,12 @@ from .types import (
     CalibratedMaskedData,
     CleanDirectBeam,
     CleanMonitor,
+    CleanSummedQ,
+    CleanSummedQxy,
     CleanWavelength,
     Denominator,
     DetectorPixelShape,
     EmptyBeamRun,
-    FinalSummedQ,
-    FinalSummedQxy,
     Incident,
     IofQ,
     IofQxy,
@@ -416,8 +416,8 @@ def _normalize(
 
 
 def normalize_q(
-    numerator: FinalSummedQ[ScatteringRunType, Numerator],
-    denominator: FinalSummedQ[ScatteringRunType, Denominator],
+    numerator: CleanSummedQ[ScatteringRunType, Numerator],
+    denominator: CleanSummedQ[ScatteringRunType, Denominator],
     return_events: ReturnEvents,
     uncertainties: UncertaintyBroadcastMode,
     wavelength_bands: ProcessedWavelengthBands,
@@ -434,8 +434,8 @@ def normalize_q(
 
 
 def normalize_qxy(
-    numerator: FinalSummedQxy[ScatteringRunType, Numerator],
-    denominator: FinalSummedQxy[ScatteringRunType, Denominator],
+    numerator: CleanSummedQxy[ScatteringRunType, Numerator],
+    denominator: CleanSummedQxy[ScatteringRunType, Denominator],
     return_events: ReturnEvents,
     uncertainties: UncertaintyBroadcastMode,
     wavelength_bands: ProcessedWavelengthBands,

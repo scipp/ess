@@ -11,9 +11,9 @@ from .i_of_q import resample_direct_beam
 from .types import (
     BackgroundRun,
     BackgroundSubtractedIofQ,
+    CleanSummedQ,
     Denominator,
     DirectBeam,
-    FinalSummedQ,
     Numerator,
     ProcessedWavelengthBands,
     SampleRun,
@@ -106,16 +106,16 @@ def direct_beam(*, workflow: Pipeline, I0: sc.Variable, niter: int = 5) -> List[
 
     wavelength_bins = workflow.compute(WavelengthBins)
     parts = (
-        FinalSummedQ[SampleRun, Numerator],
-        FinalSummedQ[SampleRun, Denominator],
-        FinalSummedQ[BackgroundRun, Numerator],
-        FinalSummedQ[BackgroundRun, Denominator],
+        CleanSummedQ[SampleRun, Numerator],
+        CleanSummedQ[SampleRun, Denominator],
+        CleanSummedQ[BackgroundRun, Numerator],
+        CleanSummedQ[BackgroundRun, Denominator],
     )
     parts = workflow.compute(parts)
     # Convert events to histograms to make normalization (in every iteration) cheap
     for key in [
-        FinalSummedQ[SampleRun, Numerator],
-        FinalSummedQ[BackgroundRun, Numerator],
+        CleanSummedQ[SampleRun, Numerator],
+        CleanSummedQ[BackgroundRun, Numerator],
     ]:
         parts[key] = parts[key].hist(wavelength=wavelength_bins)
 
@@ -124,8 +124,8 @@ def direct_beam(*, workflow: Pipeline, I0: sc.Variable, niter: int = 5) -> List[
     parts = {key: sc.values(result) for key, result in parts.items()}
     for key, part in parts.items():
         workflow[key] = part
-    sample0 = parts[FinalSummedQ[SampleRun, Denominator]]
-    background0 = parts[FinalSummedQ[BackgroundRun, Denominator]]
+    sample0 = parts[CleanSummedQ[SampleRun, Denominator]]
+    background0 = parts[CleanSummedQ[BackgroundRun, Denominator]]
 
     results = []
 
@@ -161,8 +161,8 @@ def direct_beam(*, workflow: Pipeline, I0: sc.Variable, niter: int = 5) -> List[
         db.coords['wavelength'] = sc.midpoints(
             db.coords['wavelength'], dim='wavelength'
         )
-        workflow[FinalSummedQ[SampleRun, Denominator]] = sample0 * db
-        workflow[FinalSummedQ[BackgroundRun, Denominator]] = background0 * db
+        workflow[CleanSummedQ[SampleRun, Denominator]] = sample0 * db
+        workflow[CleanSummedQ[BackgroundRun, Denominator]] = background0 * db
 
         results.append(
             {
