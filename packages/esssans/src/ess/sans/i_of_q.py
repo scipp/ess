@@ -279,7 +279,7 @@ def merge_banks(
     Merge the events or counts from multiple detector banks into a single numerator or
     denominator, before the normalization step.
     """
-    return CleanSummedQ[ScatteringRunType, IofQPart](_merge_contributions(list(banks)))
+    return CleanSummedQ[ScatteringRunType, IofQPart](_merge_contributions(banks))
 
 
 def merge_runs(
@@ -289,7 +289,7 @@ def merge_runs(
     Merge the events or counts from multiple runs into a single numerator or
     denominator, before the normalization step.
     """
-    return CleanSummedQ[ScatteringRunType, IofQPart](_merge_contributions(list(runs)))
+    return CleanSummedQ[ScatteringRunType, IofQPart](_merge_contributions(runs))
 
 
 def _subtract_background(
