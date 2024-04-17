@@ -69,7 +69,7 @@ class NMXData(_SharedFields, sc.DataGroup):
     @property
     def weights(self) -> sc.DataArray:
         """Event data grouped by pixel id."""
-        return self['"weights']
+        return self['weights']
 
 
 class NMXReducedData(_SharedFields, sc.DataGroup):
