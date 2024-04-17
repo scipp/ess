@@ -25,58 +25,58 @@ class _SharedFields(sc.DataGroup):
         """Position of the first pixel (lowest ID) in the detector.
 
         Relative position from the sample."""
-        return self["origin_position"]
+        return self['origin_position']
 
     @property
     def crystal_rotation(self) -> sc.Variable:
         """Rotation of the crystal."""
 
-        return self["crystal_rotation"]
+        return self['crystal_rotation']
 
     @property
     def sample_name(self) -> sc.Variable:
-        return self["sample_name"]
+        return self['sample_name']
 
     @property
     def fast_axis(self) -> sc.Variable:
         """Fast axis, along where the pixel ID increases by 1."""
-        return self["fast_axis"]
+        return self['fast_axis']
 
     @property
     def slow_axis(self) -> sc.Variable:
         """Slow axis, along where the pixel ID increases by > 1.
 
         The pixel ID increases by the number of pixels in the fast axis."""
-        return self["slow_axis"]
+        return self['slow_axis']
 
     @property
     def proton_charge(self) -> sc.Variable:
         """Accumulated number of protons during the measurement."""
-        return self["proton_charge"]
+        return self['proton_charge']
 
     @property
     def source_position(self) -> sc.Variable:
         """Relative position of the source from the sample."""
-        return self["source_position"]
+        return self['source_position']
 
     @property
     def sample_position(self) -> sc.Variable:
         """Relative position of the sample from the sample. (0, 0, 0)"""
-        return self["sample_position"]
+        return self['sample_position']
 
 
 class NMXData(_SharedFields, sc.DataGroup):
     @property
     def weights(self) -> sc.DataArray:
         """Event data grouped by pixel id."""
-        return self["weights"]
+        return self['weights']
 
 
 class NMXReducedData(_SharedFields, sc.DataGroup):
     @property
     def counts(self) -> sc.DataArray:
         """Binned time of arrival data from flattened event data."""
-        return self["counts"]
+        return self['counts']
 
     def _create_dataset_from_var(
         self,
@@ -90,18 +90,18 @@ class NMXReducedData(_SharedFields, sc.DataGroup):
     ) -> h5py.Dataset:
         compression_options = dict()
         if compression is not None:
-            compression_options["compression"] = compression
+            compression_options['compression'] = compression
         if compression_opts is not None:
-            compression_options["compression_opts"] = compression_opts
+            compression_options['compression_opts'] = compression_opts
 
         dataset = root_entry.create_dataset(
             name,
             data=var.values,
             **compression_options,
         )
-        dataset.attrs["units"] = str(var.unit)
+        dataset.attrs['units'] = str(var.unit)
         if long_name is not None:
-            dataset.attrs["long_name"] = long_name
+            dataset.attrs['long_name'] = long_name
         return dataset
 
     def _create_compressed_dataset(
@@ -123,16 +123,16 @@ class NMXReducedData(_SharedFields, sc.DataGroup):
 
     def _create_root_data_entry(self, file_obj: h5py.File) -> h5py.Group:
         nx_entry = file_obj.create_group("NMX_data")
-        nx_entry.attrs["NX_class"] = "NXentry"
-        nx_entry.attrs["default"] = "data"
-        nx_entry.attrs["name"] = "NMX"
-        nx_entry["name"] = "NMX"
-        nx_entry["definition"] = "TOFRAW"
+        nx_entry.attrs['NX_class'] = "NXentry"
+        nx_entry.attrs['default'] = "data"
+        nx_entry.attrs['name'] = "NMX"
+        nx_entry['name'] = "NMX"
+        nx_entry['definition'] = "TOFRAW"
         return nx_entry
 
     def _create_sample_group(self, nx_entry: h5py.Group) -> h5py.Group:
         nx_sample = nx_entry.create_group("NXsample")
-        nx_sample["name"] = self.sample_name.value
+        nx_sample['name'] = self.sample_name.value
         # Crystal rotation
         self._create_dataset_from_var(
             root_entry=nx_sample,
@@ -190,12 +190,12 @@ class NMXReducedData(_SharedFields, sc.DataGroup):
 
     def _create_source_group(self, nx_entry: h5py.Group) -> h5py.Group:
         nx_source = nx_entry.create_group("NXsource")
-        nx_source["name"] = "European Spallation Source"
-        nx_source["short_name"] = "ESS"
-        nx_source["type"] = "Spallation Neutron Source"
-        nx_source["distance"] = sc.norm(self.source_position).value
-        nx_source["probe"] = "neutron"
-        nx_source["target_material"] = "W"
+        nx_source['name'] = "European Spallation Source"
+        nx_source['short_name'] = "ESS"
+        nx_source['type'] = "Spallation Neutron Source"
+        nx_source['distance'] = sc.norm(self.source_position).value
+        nx_source['probe'] = "neutron"
+        nx_source['target_material'] = "W"
         return nx_source
 
     def export_as_nexus(
@@ -213,7 +213,7 @@ class NMXReducedData(_SharedFields, sc.DataGroup):
             file_base = output_file_base
 
         with h5py.File(file_base, "w") as out_file:
-            out_file.attrs["default"] = "NMX_data"
+            out_file.attrs['default'] = "NMX_data"
             # Root Data Entry
             nx_entry = self._create_root_data_entry(out_file)
             # Sample
