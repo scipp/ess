@@ -2,59 +2,80 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 
-from ess.nmx.reduction import _apply_elem_wise, _group
+from ess.nmx.reduction import _zip_and_group
 
 
-def test_apply_elem_wise_add() -> None:
-    var = sc.Variable(dims=["x"], values=[1, 2, 3])
-
-    assert sc.identical(
-        _apply_elem_wise(lambda x: x + 1, var),
-        sc.Variable(dims=["x"], values=var.values + 1),
-    )
-
-
-def test_apply_elem_wise_str() -> None:
-    var = sc.Variable(dims=["x"], values=[1, 2, 3])
-
-    assert sc.identical(
-        _apply_elem_wise(str, var),
-        sc.Variable(dims=["x"], values=["1", "2", "3"]),
-    )
-
-
-def test_apply_elem_wise_vectors() -> None:
-    var = sc.vectors(dims=["x"], values=[(1, 2, 3), (4, 5, 6), (7, 8, 9)])
-
-    assert sc.identical(
-        _apply_elem_wise(sum, var),
-        sc.array(dims=["x"], values=[6, 15, 24], dtype=float),
-    )
-
-
-def test_detour_group_str() -> None:
-    from ess.nmx.scaling import _group
+def test_zip_and_group_str() -> None:
+    from ess.nmx.scaling import _zip_and_group
 
     da = sc.DataArray(
-        data=sc.ones(dims=["x"], shape=[3]),
-        coords={"x": sc.Variable(dims=["x"], values=["a", "b", "a"])},
+        data=sc.ones(dims=["xy"], shape=[6]),
+        coords={
+            "x": sc.array(dims=["xy"], values=[1, 1, 2, 2, 3, 3]),
+            "y": sc.array(dims=["xy"], values=[0, 1, 2, 2, 0, 3]),
+        },
     )
 
-    grouped = _group(da, "x", x=lambda x: x)
+    grouped = _zip_and_group(da, "x", "y")
     assert sc.identical(
         grouped.coords["x"],
-        sc.Variable(dims=["x"], values=["a", "b"]),
+        sc.array(dims=["xy"], values=[1, 1, 2, 3, 3]),
+    )
+    assert sc.identical(
+        grouped.coords["y"],
+        sc.array(dims=["xy"], values=[0, 1, 2, 0, 3]),
     )
 
 
-def test_detour_group_vector() -> None:
+def test_zip_and_group_variables_all_possibilities() -> None:
     da = sc.DataArray(
-        data=sc.ones(dims=["x"], shape=[10]),
-        coords={"x": sc.vectors(dims=["x"], values=[(1, 2, 3), (4, 5, 6)] * 5)},
+        data=sc.ones(dims=["xy"], shape=[6]),
+        coords={
+            "x": sc.array(dims=["xy"], values=[1, 1, 2, 2, 3, 3]),
+            "y": sc.array(dims=["xy"], values=[0, 1, 2, 2, 0, 3]),
+        },
     )
 
-    grouped = _group(da, "x", x=str)
-    assert sc.identical(
-        grouped.coords["x"],
-        sc.vectors(dims=["x"], values=[(1, 2, 3), (4, 5, 6)]),
+    var_x = sc.array(dims=["x"], values=[1, 1, 2, 3, 3])
+    var_y = sc.array(dims=["y"], values=[0, 1, 2, 0, 3])
+
+    grouped = _zip_and_group(da, var_x, var_y)
+    assert sc.identical(grouped.coords["x"], var_x.rename_dims({"x": "xy"}))
+    assert sc.identical(grouped.coords["y"], var_y.rename_dims({"y": "xy"}))
+
+
+def test_zip_and_group_variables_less_groups() -> None:
+    da = sc.DataArray(
+        data=sc.ones(dims=["xy"], shape=[6]),
+        coords={
+            "x": sc.array(dims=["xy"], values=[1, 1, 2, 2, 3, 3]),
+            "y": sc.array(dims=["xy"], values=[0, 1, 2, 2, 0, 3]),
+        },
     )
+
+    var_x = sc.array(dims=["x"], values=[1, 1, 3, 3])
+    var_y = sc.array(dims=["y"], values=[0, 2, 0, 3])
+
+    grouped = _zip_and_group(da, var_x, var_y)
+    assert sc.identical(grouped.coords["x"], var_x.rename_dims({"x": "xy"}))
+    assert sc.identical(grouped.coords["y"], var_y.rename_dims({"y": "xy"}))
+
+
+def test_zip_and_group_variables_empty_group() -> None:
+    da = sc.DataArray(
+        data=sc.ones(dims=["xy"], shape=[6]),
+        coords={
+            "x": sc.array(dims=["xy"], values=[1, 1, 2, 2, 3, 3]),
+            "y": sc.array(dims=["xy"], values=[0, 1, 2, 2, 0, 3]),
+        },
+    )
+
+    var_x = sc.array(dims=["x"], values=[1, 1, 3, 3, 4])
+    var_y = sc.array(dims=["y"], values=[0, 2, 0, 3, 4])
+
+    grouped = _zip_and_group(da, var_x, var_y)
+    assert sc.identical(grouped.coords["x"], var_x.rename_dims({"x": "xy"}))
+    assert sc.identical(grouped.coords["y"], var_y.rename_dims({"y": "xy"}))
+    assert grouped[0].values.size == 1
+    # last group should be empty
+    assert grouped[-1].values.size == 0

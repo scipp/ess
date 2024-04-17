@@ -26,6 +26,13 @@ WavelengthColumnName = NewType("WavelengthColumnName", str)
 """The name of the wavelength column in the mtz file."""
 DEFAULT_WAVELENGTH_COLUMN_NAME = WavelengthColumnName("LAMBDA")
 
+IntensityColumnName = NewType("IntensityColumnName", str)
+"""The name of the intensity column in the mtz file."""
+DEFAULT_INTENSITY_COLUMN_NAME = IntensityColumnName("I")
+
+SigmaIntensityColumnName = NewType("SigmaIntensityColumnName", str)
+"""The name of the standard uncertainty of intensity column in the mtz file."""
+DEFAULT_SIGMA_INTENSITY_COLUMN_NAME = SigmaIntensityColumnName("SIGI")
 
 # Computed types
 RawMtz = NewType("RawMtz", gemmi.Mtz)
@@ -202,6 +209,10 @@ def reduce_merged_mtz_dataframe(
         return rapio_asu.to_asu(row["hkl"], sg.operations())[0]
 
     merged_df["hkl_eq"] = merged_df.apply(_rapio_asu_to_asu, axis=1)
+    # Unpack the indices for later.
+    merged_df[["H_EQ", "K_EQ", "L_EQ"]] = pd.DataFrame(
+        merged_df['hkl_eq'].to_list(), index=merged_df.index
+    )
 
     return NMXMtzDataFrame(merged_df)
 
@@ -209,34 +220,45 @@ def reduce_merged_mtz_dataframe(
 def nmx_mtz_dataframe_to_scipp_dataarray(
     nmx_mtz_df: NMXMtzDataFrame,
 ) -> NMXMtzDataArray:
-    """Converts the reduced mtz dataframe to a scipp dataarray."""
+    """Converts the reduced mtz dataframe to a scipp dataarray.
+
+    The intensity, with column name :attr:`~DEFAULT_INTENSITY_COLUMN_NAME`
+    becomes the data and the standard uncertainty of intensity,
+    with column name :attr:`~DEFAULT_SIGMA_INTENSITY_COLUMN_NAME`
+    becomes the variances of the data.
+
+    """
     from scipp.compat.pandas_compat import from_pandas_dataframe, parse_bracket_header
 
     to_scipp = nmx_mtz_df.copy(deep=False)
-    # Add dummy data column
-    dummy_data_column_name = "DUMMY_DATA"
-    to_scipp[dummy_data_column_name] = np.ones(len(to_scipp))
-    # Pop the vector columns for later
-    vector_columns = ("hkl", "hkl_eq")
-    vector_coords = {col: to_scipp.pop(col) for col in vector_columns}
+    # Pop the indices columns.
+    # TODO: We can put them back once we support tuple[int] dtype.
+    # See https://github.com/scipp/scipp/issues/3046 for more details.
+    # As a temporary solution, we will use individual indices columns.
+    for col in ("hkl", "hkl_eq"):
+        to_scipp.pop(col)
     # Convert to scipp Dataset
     nmx_mtz_ds = from_pandas_dataframe(
         to_scipp,
-        data_columns=dummy_data_column_name,
+        data_columns=[
+            DEFAULT_INTENSITY_COLUMN_NAME,
+            DEFAULT_SIGMA_INTENSITY_COLUMN_NAME,
+        ],
         header_parser=parse_bracket_header,
     )
-
     # Add units
     nmx_mtz_ds.coords[DEFAULT_WAVELENGTH_COLUMN_NAME].unit = sc.units.angstrom
-    nmx_mtz_ds.coords["I"].unit = sc.units.dimensionless
-    nmx_mtz_ds.coords["SIGI"].unit = sc.units.dimensionless
-    # Add back the vector columns
-    for col, values in vector_coords.items():
-        nmx_mtz_ds.coords[col] = sc.vectors(
-            dims=nmx_mtz_ds.dims, values=[val for val in values]
-        )
+    for key in nmx_mtz_ds.keys():
+        nmx_mtz_ds[key].unit = sc.units.dimensionless
+    for coord in ("H", "K", "L", "H_EQ", "K_EQ", "L_EQ"):
+        nmx_mtz_ds.coords[coord].unit = sc.units.dimensionless
+
+    # Add variances
+    nmx_mtz_da = nmx_mtz_ds[DEFAULT_INTENSITY_COLUMN_NAME].copy(deep=False)
+    nmx_mtz_da.variances = nmx_mtz_ds[DEFAULT_SIGMA_INTENSITY_COLUMN_NAME].data ** 2
+
     # Return DataArray
-    return NMXMtzDataArray(nmx_mtz_ds[dummy_data_column_name].copy(deep=False))
+    return NMXMtzDataArray(nmx_mtz_da)
 
 
 mtz_io_providers = (

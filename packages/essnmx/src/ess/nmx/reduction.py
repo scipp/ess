@@ -2,7 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import io
 import pathlib
-from typing import Any, Callable, Optional, Sequence, Union
+from typing import Optional, Union
 
 import h5py
 import numpy as np
@@ -25,58 +25,58 @@ class _SharedFields(sc.DataGroup):
         """Position of the first pixel (lowest ID) in the detector.
 
         Relative position from the sample."""
-        return self['origin_position']
+        return self["origin_position"]
 
     @property
     def crystal_rotation(self) -> sc.Variable:
         """Rotation of the crystal."""
 
-        return self['crystal_rotation']
+        return self["crystal_rotation"]
 
     @property
     def sample_name(self) -> sc.Variable:
-        return self['sample_name']
+        return self["sample_name"]
 
     @property
     def fast_axis(self) -> sc.Variable:
         """Fast axis, along where the pixel ID increases by 1."""
-        return self['fast_axis']
+        return self["fast_axis"]
 
     @property
     def slow_axis(self) -> sc.Variable:
         """Slow axis, along where the pixel ID increases by > 1.
 
         The pixel ID increases by the number of pixels in the fast axis."""
-        return self['slow_axis']
+        return self["slow_axis"]
 
     @property
     def proton_charge(self) -> sc.Variable:
         """Accumulated number of protons during the measurement."""
-        return self['proton_charge']
+        return self["proton_charge"]
 
     @property
     def source_position(self) -> sc.Variable:
         """Relative position of the source from the sample."""
-        return self['source_position']
+        return self["source_position"]
 
     @property
     def sample_position(self) -> sc.Variable:
         """Relative position of the sample from the sample. (0, 0, 0)"""
-        return self['sample_position']
+        return self["sample_position"]
 
 
 class NMXData(_SharedFields, sc.DataGroup):
     @property
     def weights(self) -> sc.DataArray:
         """Event data grouped by pixel id."""
-        return self['weights']
+        return self["weights"]
 
 
 class NMXReducedData(_SharedFields, sc.DataGroup):
     @property
     def counts(self) -> sc.DataArray:
         """Binned time of arrival data from flattened event data."""
-        return self['counts']
+        return self["counts"]
 
     def _create_dataset_from_var(
         self,
@@ -137,8 +137,8 @@ class NMXReducedData(_SharedFields, sc.DataGroup):
         self._create_dataset_from_var(
             root_entry=nx_sample,
             var=self.crystal_rotation,
-            name='crystal_rotation',
-            long_name='crystal rotation in Phi (XYZ)',
+            name="crystal_rotation",
+            long_name="crystal rotation in Phi (XYZ)",
         )
         return nx_sample
 
@@ -236,9 +236,9 @@ def bin_time_of_arrival(
 
     nmx_data = list(nmx_data.values())
     nmx_data = sc.concat(nmx_data, DETECTOR_DIM)
-    counts = nmx_data.pop('weights').hist(t=time_bin_step)
+    counts = nmx_data.pop("weights").hist(t=time_bin_step)
     new_coords = instrument.to_coords(*detector_name.values())
-    new_coords.pop('pixel_id')
+    new_coords.pop("pixel_id")
 
     return NMXReducedData(
         counts=counts,
@@ -246,94 +246,46 @@ def bin_time_of_arrival(
     )
 
 
-def _apply_elem_wise(
-    func: Callable, var: sc.Variable, *, result_dtype: Any = None
-) -> sc.Variable:
-    """Apply a function element-wise to the variable values.
-
-    This helper is only for vector-dtype variables.
-    Use ``numpy.vectorize`` for other types.
-
-    Parameters
-    ----------
-    func:
-        The function to apply.
-    var:
-        The variable to apply the function to.
-    result_dtype:
-        The dtype of the resulting variable.
-        It is needed especially when the function returns a vector.
-
-    """
-
-    def apply_func(val: Sequence, _cur_depth: int = 0) -> list:
-        if _cur_depth == len(var.dims):
-            return func(val)
-        return [apply_func(v, _cur_depth + 1) for v in val]
-
-    if result_dtype is None:
-        return sc.Variable(
-            dims=var.dims,
-            values=apply_func(var.values),
-        )
-    return sc.Variable(
-        dims=var.dims,
-        values=apply_func(var.values),
-        dtype=result_dtype,
+def _join_variables(*vars: sc.Variable, splitter: str = " ") -> sc.Variable:
+    # Check if all columns are integer
+    if not all(var.dtype == int for var in vars):
+        raise ValueError("All columns must be integer type.")
+    # Check if all columns have the same dimensions
+    dims = set(var.dim for var in vars)
+    if len(dims) != 1:
+        raise ValueError("All columns must have the same dimensions.")
+    return sc.array(
+        dims=dims,
+        values=[
+            splitter.join(str(val) for val in row)
+            for row in zip(*(var.values for var in vars))
+        ],
     )
 
 
-def _detour_group(
-    da: sc.DataArray, group_name: str, detour_func: Callable
-) -> sc.DataArray:
-    """Group the data array by a hash of a coordinate.
+def _split_variable(var: sc.Variable, splitter: str = " ") -> tuple[sc.Variable, ...]:
+    if var.dtype != str:
+        raise ValueError("The variable must be string type.")
+    separated = [val.split(splitter) for val in var.values]
+    # Check if all rows have the same length
+    lengths = set(len(row) for row in separated)
+    if len(lengths) != 1:
+        raise ValueError("All rows must have the same length.")
 
-    It uses index of each unique hash value
-    for grouping instead of hash value itself
-    to avoid overflow issues.
-
-    """
-    from uuid import uuid4
-
-    copied = da.copy(deep=False)
-
-    # Temporary coords for grouping
-    detour_idx_coord_name = uuid4().hex + "hash_idx"
-
-    # Create a temporary detoured coordinate
-    detour_var = _apply_elem_wise(detour_func, da.coords[group_name])
-    # Create a temporary hash-index of each unique value
-    unique_hashes = np.unique(detour_var.values)
-    hash_to_idx = {hash_val: idx for idx, hash_val in enumerate(unique_hashes)}
-    copied.coords[detour_idx_coord_name] = _apply_elem_wise(
-        lambda idx: hash_to_idx[idx], detour_var
-    )
-
-    # Group by the hash-index
-    grouped = copied.group(detour_idx_coord_name)
-
-    # Restore the original values
-    idx_to_detour = {idx: hash_val for hash_val, idx in hash_to_idx.items()}
-    detour_to_var = {
-        hash_val: var
-        for var, hash_val in zip(da.coords[group_name].values, detour_var.values)
-    }
-    idx_to_var = {
-        idx: detour_to_var[hash_val] for idx, hash_val in idx_to_detour.items()
-    }
-    grouped.coords[group_name] = _apply_elem_wise(
-        lambda idx: idx_to_var[idx],
-        grouped.coords[detour_idx_coord_name],
-        result_dtype=da.coords[group_name].dtype,
-    )
-    # Rename dims back to group_name and drop the temporary hash-index coordinate
-    return grouped.rename_dims({detour_idx_coord_name: group_name}).drop_coords(
-        [detour_idx_coord_name]
+    return tuple(
+        sc.array(dims=var.dims, values=[int(row[i]) for row in separated], dtype=int)
+        for i in range(lengths.pop())
     )
 
 
-def _group(da: sc.DataArray, /, *args: str, **group_detour_func_map) -> sc.DataArray:
+def _zip_and_group(da: sc.DataArray, /, *args: str | sc.Variable) -> sc.DataArray:
     """Group the data array by the given coordinates.
+
+    It is a temporary solution before we fix the issue in scipp.
+    It should be replaced with the scipp group function once it's possible
+    to group by string-type coordinates or ``tuple[int]`` type of coordinates.
+    See [#3046](https://github.com/scipp/scipp/issues/3046) and
+    [#3425](https://github.com/scipp/scipp/issues/3425) for more details.
 
     Parameters
     ----------
@@ -341,8 +293,8 @@ def _group(da: sc.DataArray, /, *args: str, **group_detour_func_map) -> sc.DataA
         The data array to group.
     args:
         The coordinates to group by.
-    group_hash_func_map:
-        The hash functions for each coordinate.
+    group_detour_func_map:
+        The conversion functions.
 
     Returns
     -------
@@ -350,18 +302,33 @@ def _group(da: sc.DataArray, /, *args: str, **group_detour_func_map) -> sc.DataA
         The grouped data array.
 
     """
-    grouped = da
-    for group_name in args:
-        if group_name in group_detour_func_map:
-            grouped = _detour_group(
-                grouped, group_name, group_detour_func_map[group_name]
-            )
-        else:
-            try:
-                grouped = sc.group(grouped, group_name)
-            except Exception:
-                grouped = _detour_group(
-                    grouped, group_name, group_detour_func_map.get(group_name, hash)
-                )
+    copied = da.copy(deep=False)
+    group_coord_names = tuple(arg if isinstance(arg, str) else arg.dim for arg in args)
+    tmp_str_coord_name = "".join(group_coord_names)
+    group_coords = tuple(
+        copied.coords[name] for name in group_coord_names
+    )  # Must keep the order
 
-    return grouped
+    tmp_coord = _join_variables(*group_coords)
+    copied.coords[tmp_str_coord_name] = tmp_coord
+
+    if all(isinstance(arg, str) for arg in args):
+        group_var = sc.array(
+            dims=[tmp_str_coord_name],
+            values=np.unique(copied.coords[tmp_str_coord_name].values),
+        )
+    elif all(isinstance(arg, sc.Variable) for arg in args):
+        group_var = _join_variables(
+            *[arg.rename_dims({arg.dim: tmp_str_coord_name}) for arg in args]
+        )
+    else:
+        raise ValueError("All coordinates must be either str or sc.Variable.")
+
+    grouped = copied.group(group_var)
+    real_coords = _split_variable(grouped.coords[tmp_str_coord_name])
+    for i_coord, name in enumerate(group_coord_names):
+        grouped.coords[name] = real_coords[i_coord].rename_dims(
+            {real_coords[i_coord].dim: grouped.dim}
+        )
+
+    return grouped.drop_coords([tmp_str_coord_name])
