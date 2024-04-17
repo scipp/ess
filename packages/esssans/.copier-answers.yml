@@ -1,5 +1,5 @@
 # Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
-_commit: 7deabab
+_commit: c721391
 _src_path: gh:scipp/copier_template
 description: SANS data reduction for the European Spallation Source
 max_python: '3.12'
