@@ -247,13 +247,18 @@ def bin_time_of_arrival(
 
 
 def _join_variables(*vars: sc.Variable, splitter: str = " ") -> sc.Variable:
-    # Check if all columns are integer
+    # Check if all variables are integer
     if not all(var.dtype == int for var in vars):
-        raise ValueError("All columns must be integer type.")
-    # Check if all columns have the same dimensions
+        raise ValueError("All variables must be integer type.")
+    # Check if all variables have the same dimensions
     dims = set(var.dim for var in vars)
     if len(dims) != 1:
-        raise ValueError("All columns must have the same dimensions.")
+        raise ValueError("All variables must have the same dimensions.")
+    # Check if all variables have the same length
+    lengths = set(len(var.values) for var in vars)
+    if len(lengths) != 1:
+        raise ValueError("All variables must have the same length.")
+
     return sc.array(
         dims=dims,
         values=[
