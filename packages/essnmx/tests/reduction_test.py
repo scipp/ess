@@ -6,8 +6,6 @@ from ess.nmx.reduction import _zip_and_group
 
 
 def test_zip_and_group_str() -> None:
-    from ess.nmx.reduction import _zip_and_group
-
     da = sc.DataArray(
         data=sc.ones(dims=["xy"], shape=[6]),
         coords={
