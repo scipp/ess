@@ -7,7 +7,6 @@ from ess import isissans as isis
 from ess import sans
 from ess.sans.types import (
     CorrectForGravity,
-    DimsToKeep,
     Filename,
     Incident,
     IofQ,
@@ -18,21 +17,19 @@ from ess.sans.types import (
     SampleRun,
     Transmission,
     UncertaintyBroadcastMode,
-    WavelengthBands,
     WavelengthBins,
 )
 
 
 def make_params() -> dict:
     params = {
+        **isis.default_parameters,
         sans.types.DirectBeamFilename: 'Direct_Zoom_4m_8mm_100522.txt',
         isis.CalibrationFilename: '192tubeCalibration_11-02-2019_r5_10lines.nxs',
         Filename[sans.types.SampleRun]: 'ZOOM00034786.nxs',
         Filename[sans.types.EmptyBeamRun]: 'ZOOM00034787.nxs',
         isis.SampleOffset: sc.vector([0.0, 0.0, 0.11], unit='m'),
         isis.DetectorBankOffset: sc.vector([0.0, 0.0, 0.5], unit='m'),
-        DimsToKeep: tuple(),
-        WavelengthBands: WavelengthBands(),
     }
 
     params[NeXusMonitorName[Incident]] = 'monitor3'
@@ -46,8 +43,8 @@ def make_params() -> dict:
         sc.geomspace(dim='Q', start=0.004, stop=0.8, num=141, unit='1/angstrom')
     )
 
-    params[NonBackgroundWavelengthRange] = sc.array(
-        dims=['wavelength'], values=[0.7, 17.1], unit='angstrom'
+    params[NonBackgroundWavelengthRange] = NonBackgroundWavelengthRange(
+        sc.array(dims=['wavelength'], values=[0.7, 17.1], unit='angstrom')
     )
     params[CorrectForGravity] = True
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
