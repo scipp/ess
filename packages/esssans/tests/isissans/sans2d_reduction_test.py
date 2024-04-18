@@ -14,6 +14,7 @@ from ess.sans.types import (
     BackgroundSubtractedIofQ,
     BeamCenter,
     CorrectForGravity,
+    DimsToKeep,
     DirectBeam,
     DirectBeamFilename,
     EmptyBeamRun,
@@ -51,8 +52,8 @@ def make_params() -> dict:
     )
     params[sans2d.LowCountThreshold] = sc.scalar(100.0, unit='counts')
 
-    params[QBins] = sc.linspace(
-        dim='Q', start=0.01, stop=0.55, num=141, unit='1/angstrom'
+    params[QBins] = QBins(
+        sc.linspace(dim='Q', start=0.01, stop=0.55, num=141, unit='1/angstrom')
     )
     params[DirectBeamFilename] = 'DIRECT_SANS2D_REAR_34327_4m_8mm_16Feb16.dat'
     params[Filename[SampleRun]] = 'SANS2D00063114.nxs'
@@ -70,6 +71,8 @@ def make_params() -> dict:
     params[CorrectForGravity] = True
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
     params[ReturnEvents] = False
+    params[DimsToKeep] = tuple()
+    params[WavelengthBands] = WavelengthBands()
     return params
 
 
@@ -105,8 +108,8 @@ def test_pipeline_can_compute_background_subtracted_IofQ(uncertainties):
 
 def test_pipeline_can_compute_background_subtracted_IofQ_in_wavelength_bands():
     params = make_params()
-    params[WavelengthBands] = sc.linspace(
-        'wavelength', start=2.0, stop=16.0, num=11, unit='angstrom'
+    params[WavelengthBands] = WavelengthBands(
+        sc.linspace('wavelength', start=2.0, stop=16.0, num=11, unit='angstrom')
     )
     pipeline = sciline.Pipeline(sans2d_providers(), params=params)
     result = pipeline.compute(BackgroundSubtractedIofQ)
@@ -118,11 +121,10 @@ def test_pipeline_wavelength_bands_is_optional():
     params = make_params()
     pipeline = sciline.Pipeline(sans2d_providers(), params=params)
     noband = pipeline.compute(BackgroundSubtractedIofQ)
-    with pytest.raises(sciline.UnsatisfiedRequirement):
-        pipeline.compute(WavelengthBands)
+    assert pipeline.compute(WavelengthBands).value is None
     band = sc.linspace('wavelength', 2.0, 16.0, num=2, unit='angstrom')
-    pipeline[WavelengthBands] = band
-    assert sc.identical(band, pipeline.compute(WavelengthBands))
+    pipeline[WavelengthBands] = WavelengthBands(band)
+    assert sc.identical(band, pipeline.compute(WavelengthBands).value)
     withband = pipeline.compute(BackgroundSubtractedIofQ)
     assert sc.identical(noband, withband)
 
@@ -151,8 +153,8 @@ def test_pipeline_raisesVariancesError_if_normalization_errors_not_dropped():
 def test_uncertainty_broadcast_mode_drop_yields_smaller_variances():
     params = make_params()
     # Errors with the full range have some NaNs or infs
-    params[QBins] = sc.linspace(
-        dim='Q', start=0.01, stop=0.5, num=141, unit='1/angstrom'
+    params[QBins] = QBins(
+        sc.linspace(dim='Q', start=0.01, stop=0.5, num=141, unit='1/angstrom')
     )
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
     pipeline = sciline.Pipeline(sans2d_providers(), params=params)

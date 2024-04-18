@@ -19,7 +19,7 @@ from .types import (
     MaskedData,
     MonitorType,
     Numerator,
-    QxyBins,
+    QBins,
     RunType,
     ScatteringRunType,
     TofMonitor,
@@ -144,7 +144,7 @@ ElasticCoordTransformGraph = NewType('ElasticCoordTransformGraph', dict)
 MonitorCoordTransformGraph = NewType('MonitorCoordTransformGraph', dict)
 
 
-def sans_elastic(gravity: Optional[CorrectForGravity]) -> ElasticCoordTransformGraph:
+def sans_elastic(gravity: CorrectForGravity) -> ElasticCoordTransformGraph:
     """
     Generate a coordinate transformation graph for SANS elastic scattering.
 
@@ -244,7 +244,7 @@ def mask_wavelength(
 def compute_Q(
     data: CleanWavelengthMasked[ScatteringRunType, IofQPart],
     graph: ElasticCoordTransformGraph,
-    compute_Qxy: Optional[QxyBins],
+    qbins: QBins,
 ) -> CleanQ[ScatteringRunType, IofQPart]:
     """
     Convert a data array from wavelength to Q.
@@ -252,7 +252,7 @@ def compute_Q(
     # Keep naming of wavelength dim, subsequent steps use a (Q[xy], wavelength) binning.
     return CleanQ[ScatteringRunType, IofQPart](
         data.transform_coords(
-            ('Qx', 'Qy') if compute_Qxy else 'Q',
+            qbins.dims,
             graph=graph,
             keep_intermediate=False,
             rename_dims=False,

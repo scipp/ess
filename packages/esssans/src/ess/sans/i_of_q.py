@@ -28,7 +28,6 @@ from .types import (
     NeXusDetectorName,
     NonBackgroundWavelengthRange,
     QBins,
-    QxyBins,
     ReturnEvents,
     RunType,
     SampleRun,
@@ -139,9 +138,8 @@ def resample_direct_beam(
 
 def bin_in_q(
     data: CleanQ[ScatteringRunType, IofQPart],
-    q_bins: Optional[QBins],
-    qxy_bins: Optional[QxyBins],
-    dims_to_keep: Optional[DimsToKeep],
+    q_bins: QBins,
+    dims_to_keep: DimsToKeep,
 ) -> CleanSummedQ[ScatteringRunType, IofQPart]:
     """
     Merges data from all pixels into a single I(Q) spectrum:
@@ -164,15 +162,9 @@ def bin_in_q(
     :
         The input data converted to Q and then summed over all detector pixels.
     """
-    dims_to_reduce = set(data.dims) - {'wavelength'}
-    if dims_to_keep is not None:
-        dims_to_reduce -= set(dims_to_keep)
+    dims_to_reduce = set(data.dims) - {'wavelength'} - set(dims_to_keep)
 
-    if qxy_bins:
-        # We make Qx the inner dim, such that plots naturally show Qx on the x-axis.
-        edges = {'Qy': qxy_bins['Qy'], 'Qx': qxy_bins['Qx']}
-    else:
-        edges = {'Q': q_bins}
+    edges = q_bins.edges
 
     if data.bins is not None:
         q_all_pixels = data.bins.concat(dims_to_reduce)

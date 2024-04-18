@@ -12,7 +12,6 @@ from ess.sans.types import (
     Filename,
     NeXusDetectorName,
     QBins,
-    QxyBins,
     ReturnEvents,
     SampleRun,
     TransmissionRun,
@@ -39,13 +38,13 @@ def make_params(qxy: bool = False) -> dict:
     params[ReturnEvents] = False
 
     if qxy:
-        params[QxyBins] = {
-            'Qx': sc.linspace('Qx', -0.3, 0.3, 91, unit='1/angstrom'),
-            'Qy': sc.linspace('Qy', -0.2, 0.3, 78, unit='1/angstrom'),
-        }
+        params[QBins] = QBins(
+            Qx=sc.linspace('Qx', -0.3, 0.3, 91, unit='1/angstrom'),
+            Qy=sc.linspace('Qy', -0.2, 0.3, 78, unit='1/angstrom'),
+        )
     else:
-        params[QBins] = sc.linspace(
-            dim='Q', start=0.01, stop=0.3, num=101, unit='1/angstrom'
+        params[QBins] = QBins(
+            sc.linspace(dim='Q', start=0.01, stop=0.3, num=101, unit='1/angstrom')
         )
 
     return params

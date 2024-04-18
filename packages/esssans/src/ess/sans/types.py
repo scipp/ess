@@ -6,8 +6,9 @@ This modules defines the domain types uses in esssans.
 The domain types are used to define parameters and to request results from a Sciline
 pipeline."""
 from collections.abc import Sequence
+from dataclasses import dataclass
 from enum import Enum
-from typing import NewType, TypeVar
+from typing import NewType, Optional, TypeVar
 
 import sciline
 import scipp as sc
@@ -96,22 +97,28 @@ ReturnEvents = NewType('ReturnEvents', bool)
 WavelengthBins = NewType('WavelengthBins', sc.Variable)
 """Wavelength binning"""
 
-WavelengthBands = NewType('WavelengthBands', sc.Variable)
-"""Wavelength bands. Typically a single band, set to first and last value of
-WavelengthBins.
 
-The wavelength bands can however be used to compute the scattering cross section inside
-multiple wavelength bands. In this case, the wavelength bands must be either one- or
-two-dimensional.
+# WavelengthBands = NewType('WavelengthBands', sc.Variable)
+@dataclass
+class WavelengthBands:
+    """Wavelength bands. Typically a single band, set to first and last value of
+    WavelengthBins.
 
-In the case of a one-dimensional array, the values represent a set of non-overlapping
-bins in the wavelength dimension.
+    The wavelength bands can however be used to compute the scattering cross section
+    inside multiple wavelength bands. In this case, the wavelength bands must be either
+    one- or two-dimensional.
 
-In the case of a two-dimensional array, the values represent a set of (possibly
-overlapping or non-contiguous) wavelength bands, with the first dimension being the
-band index and the second dimension being the wavelength. For each band, there must be
-two wavelength values defining the start and end wavelength of the band.
-"""
+    In the case of a one-dimensional array, the values represent a set of
+    non-overlapping bins in the wavelength dimension.
+
+    In the case of a two-dimensional array, the values represent a set of (possibly
+    overlapping or non-contiguous) wavelength bands, with the first dimension being the
+    band index and the second dimension being the wavelength. For each band, there must
+    be two wavelength values defining the start and end wavelength of the band.
+    """
+
+    value: Optional[sc.Variable] = None
+
 
 ProcessedWavelengthBands = NewType('ProcessedWavelengthBands', sc.Variable)
 """Processed wavelength bands, as a two-dimensional variable, with the first dimension
@@ -119,11 +126,31 @@ being the band index and the second dimension being the wavelength. For each ban
 must be two wavelength values defining the start and end wavelength of the band."""
 
 
-QBins = NewType('QBins', sc.Variable)
-"""Q binning"""
+class QBins:
+    """Q binning, either 1-D (Q) or 2-D (Qx,Qy)."""
 
-QxyBins = NewType('QxyBins', dict[str, sc.Variable])
-"""Binning for 'Qx' and 'Qy'. If set this overrides QBins."""
+    def __init__(
+        self,
+        bins: sc.Variable | None = None,
+        /,
+        *,
+        Qx: sc.Variable | None = None,
+        Qy: sc.Variable | None = None,
+    ):
+        if bins is not None and (Qx is not None or Qy is not None):
+            raise ValueError("Cannot specify Q bins and Qx/Qy at the same time.")
+        if bins is not None:
+            self.edges = {'Q': bins}
+        elif Qx is not None and Qy is not None:
+            # We make Qx the inner dim, such that plots naturally show Qx on the x-axis.
+            self.edges = {'Qy': Qy, 'Qx': Qx}
+        else:
+            raise ValueError("Must specify either Q bins or Qx and Qy.")
+
+    @property
+    def dims(self) -> tuple[str, ...]:
+        return tuple(self.edges)
+
 
 NonBackgroundWavelengthRange = NewType('NonBackgroundWavelengthRange', sc.Variable)
 """Range of wavelengths that are not considered background in the monitor"""

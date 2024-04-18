@@ -12,7 +12,9 @@ from ..sans.common import gravity_vector
 from ..sans.types import (
     ConfiguredReducibleDataData,
     ConfiguredReducibleMonitor,
+    CorrectForGravity,
     DetectorPixelShape,
+    DimsToKeep,
     Incident,
     LabFrameTransform,
     LoadedNeXusDetector,
@@ -33,6 +35,7 @@ from ..sans.types import (
     TofMonitor,
     TransformationPath,
     Transmission,
+    WavelengthBands,
 )
 
 default_parameters = {
@@ -40,6 +43,9 @@ default_parameters = {
     NeXusMonitorName[Transmission]: 'monitor_2',
     TransformationPath: 'transform',
     PixelShapePath: 'pixel_shape',
+    CorrectForGravity: False,
+    WavelengthBands: WavelengthBands(),
+    DimsToKeep: tuple(),
 }
 
 

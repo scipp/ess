@@ -303,7 +303,7 @@ def iofq_denominator(
 
 
 def process_wavelength_bands(
-    wavelength_bands: Optional[WavelengthBands],
+    wavelength_bands: WavelengthBands,
     wavelength_bins: WavelengthBins,
 ) -> ProcessedWavelengthBands:
     """
@@ -316,6 +316,7 @@ def process_wavelength_bands(
     The final bands must have a size of 2 in the wavelength dimension, defining a start
     and an end wavelength.
     """
+    wavelength_bands = wavelength_bands.value
     if wavelength_bands is None:
         wavelength_bands = sc.concat(
             [wavelength_bins.min(), wavelength_bins.max()], dim='wavelength'

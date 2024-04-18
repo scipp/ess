@@ -7,6 +7,7 @@ from ess import isissans as isis
 from ess import sans
 from ess.sans.types import (
     CorrectForGravity,
+    DimsToKeep,
     Filename,
     Incident,
     IofQ,
@@ -14,10 +15,10 @@ from ess.sans.types import (
     NonBackgroundWavelengthRange,
     PixelMaskFilename,
     QBins,
-    QxyBins,
     SampleRun,
     Transmission,
     UncertaintyBroadcastMode,
+    WavelengthBands,
     WavelengthBins,
 )
 
@@ -30,6 +31,8 @@ def make_params() -> dict:
         Filename[sans.types.EmptyBeamRun]: 'ZOOM00034787.nxs',
         isis.SampleOffset: sc.vector([0.0, 0.0, 0.11], unit='m'),
         isis.DetectorBankOffset: sc.vector([0.0, 0.0, 0.5], unit='m'),
+        DimsToKeep: tuple(),
+        WavelengthBands: WavelengthBands(),
     }
 
     params[NeXusMonitorName[Incident]] = 'monitor3'
@@ -39,8 +42,8 @@ def make_params() -> dict:
         'wavelength', start=1.75, stop=16.5, num=141, unit='angstrom'
     )
 
-    params[QBins] = sc.geomspace(
-        dim='Q', start=0.004, stop=0.8, num=141, unit='1/angstrom'
+    params[QBins] = QBins(
+        sc.geomspace(dim='Q', start=0.004, stop=0.8, num=141, unit='1/angstrom')
     )
 
     params[NonBackgroundWavelengthRange] = sc.array(
@@ -94,10 +97,10 @@ def test_pipeline_can_compute_IofQ():
 def test_pipeline_can_compute_IofQxQy():
     pipeline = sciline.Pipeline(zoom_providers(), params=make_params())
     pipeline.set_param_table(make_masks_table())
-    pipeline[QxyBins] = {
-        'Qx': sc.linspace(dim='Qx', start=-0.5, stop=0.5, num=101, unit='1/angstrom'),
-        'Qy': sc.linspace(dim='Qy', start=-0.8, stop=0.8, num=101, unit='1/angstrom'),
-    }
+    pipeline[QBins] = QBins(
+        Qx=sc.linspace(dim='Qx', start=-0.5, stop=0.5, num=101, unit='1/angstrom'),
+        Qy=sc.linspace(dim='Qy', start=-0.8, stop=0.8, num=101, unit='1/angstrom'),
+    )
 
     result = pipeline.compute(IofQ[SampleRun])
     assert result.dims == ('Qy', 'Qx')
