@@ -304,7 +304,7 @@ BeamCenterFinderMinimizer = NewType('BeamCenterFinderMinimizer', str)
 
 default_beam_center_from_iofq_params = {
     BeamCenterFinderMinimizer: '',
-    BeamCenterFinderTolerance: -1,
+    BeamCenterFinderTolerance: -1.0,
 }
 
 
