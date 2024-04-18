@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
-from typing import NewType, Optional
+from typing import NewType
 
 import sciline
 import scipp as sc
@@ -26,8 +26,8 @@ DetectorBankOffset = NewType('DetectorBankOffset', sc.Variable)
 
 def apply_component_user_offsets_to_raw_data(
     data: RawData[ScatteringRunType],
-    sample_offset: Optional[SampleOffset],
-    detector_bank_offset: Optional[DetectorBankOffset],
+    sample_offset: SampleOffset,
+    detector_bank_offset: DetectorBankOffset,
 ) -> ConfiguredReducibleDataData[ScatteringRunType]:
     """Apply user offsets to raw data.
 
@@ -41,22 +41,18 @@ def apply_component_user_offsets_to_raw_data(
         Detector bank offset.
     """
     data = data.copy(deep=False)
-    if sample_offset is not None:
-        sample_pos = data.coords['sample_position']
-        data.coords['sample_position'] = sample_pos + sample_offset.to(
-            unit=sample_pos.unit, copy=False
-        )
-    if detector_bank_offset is not None:
-        pos = data.coords['position']
-        data.coords['position'] = pos + detector_bank_offset.to(
-            unit=pos.unit, copy=False
-        )
+    sample_pos = data.coords['sample_position']
+    data.coords['sample_position'] = sample_pos + sample_offset.to(
+        unit=sample_pos.unit, copy=False
+    )
+    pos = data.coords['position']
+    data.coords['position'] = pos + detector_bank_offset.to(unit=pos.unit, copy=False)
     return ConfiguredReducibleDataData[ScatteringRunType](data)
 
 
 def apply_component_user_offsets_to_raw_monitor(
     monitor_data: RawMonitor[RunType, MonitorType],
-    monitor_offset: Optional[MonitorOffset[MonitorType]],
+    monitor_offset: MonitorOffset[MonitorType],
 ) -> ConfiguredReducibleMonitor[RunType, MonitorType]:
     """Apply user offsets to raw monitor.
     Parameters
@@ -67,11 +63,8 @@ def apply_component_user_offsets_to_raw_monitor(
         Offset to apply to monitor position.
     """
     monitor_data = monitor_data.copy(deep=False)
-    if monitor_offset is not None:
-        pos = monitor_data.coords['position']
-        monitor_data.coords['position'] = pos + monitor_offset.to(
-            unit=pos.unit, copy=False
-        )
+    pos = monitor_data.coords['position']
+    monitor_data.coords['position'] = pos + monitor_offset.to(unit=pos.unit, copy=False)
     return ConfiguredReducibleMonitor[RunType, MonitorType](monitor_data)
 
 

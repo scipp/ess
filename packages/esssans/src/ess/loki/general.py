@@ -15,7 +15,6 @@ from ..sans.types import (
     CorrectForGravity,
     DetectorPixelShape,
     DimsToKeep,
-    DirectBeam,
     Incident,
     LabFrameTransform,
     LoadedNeXusDetector,
@@ -44,7 +43,6 @@ from ..sans.types import (
 default_parameters = {
     CorrectForGravity: False,
     DimsToKeep: tuple(),
-    DirectBeam: DirectBeam(),
     NeXusMonitorName[Incident]: 'monitor_1',
     NeXusMonitorName[Transmission]: 'monitor_2',
     NonBackgroundWavelengthRange: NonBackgroundWavelengthRange(),
