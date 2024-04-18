@@ -317,6 +317,8 @@ def _zip_and_group(da: sc.DataArray, /, *args: str | sc.Variable) -> sc.DataArra
     tmp_coord = _join_variables(*group_coords)
     copied.coords[tmp_str_coord_name] = tmp_coord
 
+    # Workaround for scipp issue #3425
+    # See https://github.com/scipp/scipp/issues/3425 for more details
     if all(isinstance(arg, str) for arg in args):
         group_var = sc.array(
             dims=[tmp_str_coord_name],
