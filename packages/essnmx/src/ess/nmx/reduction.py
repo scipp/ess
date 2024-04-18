@@ -268,21 +268,6 @@ def _join_variables(*vars: sc.Variable, splitter: str = " ") -> sc.Variable:
     )
 
 
-def _split_variable(var: sc.Variable, splitter: str = " ") -> tuple[sc.Variable, ...]:
-    if var.dtype != str:
-        raise ValueError("The variable must be string type.")
-    separated = [val.split(splitter) for val in var.values]
-    # Check if all rows have the same length
-    lengths = set(len(row) for row in separated)
-    if len(lengths) != 1:
-        raise ValueError("All rows must have the same length.")
-
-    return tuple(
-        sc.array(dims=var.dims, values=[int(row[i]) for row in separated], dtype=int)
-        for i in range(lengths.pop())
-    )
-
-
 def _zip_and_group(da: sc.DataArray, /, *args: str | sc.Variable) -> sc.DataArray:
     """Group the data array by the given coordinates.
 
@@ -331,11 +316,4 @@ def _zip_and_group(da: sc.DataArray, /, *args: str | sc.Variable) -> sc.DataArra
     else:
         raise ValueError("All coordinates must be either str or sc.Variable.")
 
-    grouped = copied.group(group_var)
-    real_coords = _split_variable(grouped.coords[tmp_str_coord_name])
-    for i_coord, name in enumerate(group_coord_names):
-        grouped.coords[name] = real_coords[i_coord].rename_dims(
-            {real_coords[i_coord].dim: grouped.dim}
-        )
-
-    return grouped.drop_coords([tmp_str_coord_name])
+    return copied.group(group_var)
