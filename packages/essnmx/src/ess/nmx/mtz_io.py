@@ -250,8 +250,6 @@ def nmx_mtz_dataframe_to_scipp_dataarray(
     nmx_mtz_ds.coords[DEFAULT_WAVELENGTH_COLUMN_NAME].unit = sc.units.angstrom
     for key in nmx_mtz_ds.keys():
         nmx_mtz_ds[key].unit = sc.units.dimensionless
-    for coord in ("H", "K", "L", "H_EQ", "K_EQ", "L_EQ"):
-        nmx_mtz_ds.coords[coord].unit = sc.units.dimensionless
 
     # Add variances
     nmx_mtz_da = nmx_mtz_ds[DEFAULT_INTENSITY_COLUMN_NAME].copy(deep=False)
