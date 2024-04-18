@@ -3,7 +3,7 @@
 """
 File loading functions for ISIS data using Mantid.
 """
-from typing import NewType, NoReturn, Optional
+from typing import NewType, NoReturn
 
 import sciline
 import scipp as sc
@@ -13,7 +13,6 @@ from scipp.constants import g
 from ..sans.types import DirectBeam, DirectBeamFilename, Filename, RunType, SampleRun
 from .data import LoadedFileContents
 from .io import CalibrationFilename, FilePath
-from .types import Period
 
 try:
     import mantid.api as _mantid_api
@@ -32,6 +31,8 @@ except ModuleNotFoundError:
     # Needed for type annotations
     MatrixWorkspace = object
 
+Period = NewType('Period', int)
+"""Period number of the events. Set to -1 to ignore period information."""
 
 CalibrationWorkspace = NewType('CalibrationWorkspace', MatrixWorkspace)
 
@@ -76,7 +77,7 @@ def load_direct_beam(filename: FilePath[DirectBeamFilename]) -> DirectBeam:
 
 def from_data_workspace(
     ws: DataWorkspace[RunType],
-    calibration: Optional[CalibrationWorkspace],
+    calibration: CalibrationWorkspace,
 ) -> LoadedFileContents[RunType]:
     if calibration is not None:
         _mantid_simpleapi.CopyInstrumentParameters(
@@ -98,7 +99,7 @@ def from_data_workspace(
 
 
 def load_run(
-    filename: FilePath[Filename[RunType]], period: Optional[Period]
+    filename: FilePath[Filename[RunType]], period: Period
 ) -> DataWorkspace[RunType]:
     loaded = _mantid_simpleapi.Load(
         Filename=str(filename), LoadMonitors=True, StoreInADS=False
@@ -110,7 +111,7 @@ def load_run(
         # Separate data and monitor workspaces
         data_ws = loaded.OutputWorkspace
         if isinstance(data_ws, _mantid_api.WorkspaceGroup):
-            if period is None:
+            if period == -1:
                 raise ValueError(
                     f'Needs {Period} to be set to know what '
                     'section of the event data to load'

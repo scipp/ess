@@ -31,6 +31,7 @@ from ..sans.types import (
 )
 from .components import DetectorBankOffset, MonitorOffset, SampleOffset
 from .data import LoadedFileContents
+from .mantidio import Period
 
 default_parameters = {
     CorrectForGravity: False,
@@ -42,6 +43,7 @@ default_parameters = {
     MonitorOffset[Transmission]: MonitorOffset(sc.vector([0, 0, 0], unit='m')),
     DetectorBankOffset: DetectorBankOffset(sc.vector([0, 0, 0], unit='m')),
     SampleOffset: SampleOffset(sc.vector([0, 0, 0], unit='m')),
+    Period: -1,
 }
 
 
