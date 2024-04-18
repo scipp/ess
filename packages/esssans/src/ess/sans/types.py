@@ -152,8 +152,12 @@ class QBins:
         return tuple(self.edges)
 
 
-NonBackgroundWavelengthRange = NewType('NonBackgroundWavelengthRange', sc.Variable)
-"""Range of wavelengths that are not considered background in the monitor"""
+@dataclass
+class NonBackgroundWavelengthRange:
+    """Range of wavelengths that are not considered background in the monitor"""
+
+    value: sc.Variable | None = None
+
 
 DirectBeamFilename = NewType('DirectBeamFilename', str)
 """Filename of direct beam correction"""
@@ -161,8 +165,13 @@ DirectBeamFilename = NewType('DirectBeamFilename', str)
 BeamCenter = NewType('BeamCenter', sc.Variable)
 """Beam center, may be set directly or computed using beam-center finder"""
 
-WavelengthMask = NewType('WavelengthMask', sc.DataArray)
-"""Optional wavelength mask"""
+
+@dataclass
+class WavelengthMask:
+    """Optional wavelength mask"""
+
+    value: sc.DataArray | None = None
+
 
 CorrectForGravity = NewType('CorrectForGravity', bool)
 """Whether to correct for gravity when computing wavelength and Q."""
@@ -218,8 +227,11 @@ class SourcePosition(sciline.Scope[RunType, sc.Variable], sc.Variable):
     """Source position"""
 
 
-DirectBeam = NewType('DirectBeam', sc.DataArray)
-"""Direct beam"""
+@dataclass
+class DirectBeam:
+    """Direct beam"""
+
+    value: sc.DataArray | None = None
 
 
 class TransmissionFraction(
@@ -228,8 +240,11 @@ class TransmissionFraction(
     """Transmission fraction"""
 
 
-CleanDirectBeam = NewType('CleanDirectBeam', sc.DataArray)
-"""Direct beam after resampling to required wavelength bins"""
+@dataclass
+class CleanDirectBeam:
+    """Direct beam after resampling to required wavelength bins"""
+
+    value: sc.DataArray | None = None
 
 
 class DetectorPixelShape(sciline.Scope[ScatteringRunType, sc.DataGroup], sc.DataGroup):

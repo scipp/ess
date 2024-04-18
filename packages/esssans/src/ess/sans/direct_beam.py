@@ -12,6 +12,7 @@ from .types import (
     BackgroundRun,
     BackgroundSubtractedIofQ,
     Denominator,
+    DirectBeam,
     FinalSummedQ,
     Numerator,
     ProcessedWavelengthBands,
@@ -132,9 +133,9 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
         # parameters, nor given by any providers, so it will be considered flat.
         # TODO: Should we have a check that DirectBeam cannot be computed from the
         # pipeline?
-        pipeline[WavelengthBands] = full_wavelength_range
+        pipeline[WavelengthBands] = WavelengthBands(full_wavelength_range)
         iofq_full = pipeline.compute(BackgroundSubtractedIofQ)
-        pipeline[WavelengthBands] = bands
+        pipeline[WavelengthBands] = WavelengthBands(bands)
         iofq_bands = pipeline.compute(BackgroundSubtractedIofQ)
 
         if direct_beam_function is None:
@@ -155,9 +156,9 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
         # Scale denominator terms that were initially computed without direct beam
         # with the current direct beam function.
         db = resample_direct_beam(
-            direct_beam=direct_beam_function,
+            direct_beam=DirectBeam(direct_beam_function),
             wavelength_bins=wavelength_bins,
-        )
+        ).value
         db.coords['wavelength'] = sc.midpoints(
             db.coords['wavelength'], dim='wavelength'
         )

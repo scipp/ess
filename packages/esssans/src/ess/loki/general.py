@@ -15,6 +15,7 @@ from ..sans.types import (
     CorrectForGravity,
     DetectorPixelShape,
     DimsToKeep,
+    DirectBeam,
     Incident,
     LabFrameTransform,
     LoadedNeXusDetector,
@@ -22,6 +23,7 @@ from ..sans.types import (
     MonitorType,
     NeXusDetectorName,
     NeXusMonitorName,
+    NonBackgroundWavelengthRange,
     PixelShapePath,
     RawData,
     RawMonitor,
@@ -36,16 +38,20 @@ from ..sans.types import (
     TransformationPath,
     Transmission,
     WavelengthBands,
+    WavelengthMask,
 )
 
 default_parameters = {
+    CorrectForGravity: False,
+    DimsToKeep: tuple(),
+    DirectBeam: DirectBeam(),
     NeXusMonitorName[Incident]: 'monitor_1',
     NeXusMonitorName[Transmission]: 'monitor_2',
-    TransformationPath: 'transform',
+    NonBackgroundWavelengthRange: NonBackgroundWavelengthRange(),
     PixelShapePath: 'pixel_shape',
-    CorrectForGravity: False,
+    TransformationPath: 'transform',
     WavelengthBands: WavelengthBands(),
-    DimsToKeep: tuple(),
+    WavelengthMask: WavelengthMask(),
 }
 
 
