@@ -26,10 +26,13 @@ def sample_analyzer_vector(
     from scipp import concat, vector, dot, sqrt, DType
     from ess.spectroscopy.utils import norm
 
-    yhat = analyzer_orientation * vector([0, 1, 0])
-    if analyzer_orientation.dtype != DType.rotation3:
-        # If the orientation provided is a Affine transformation we need to subtract the coordinate translation
-        yhat -= analyzer_orientation * vector([0, 0, 0])
+    # Scipp does not distinguish between coordinates and directions, so we need to do some extra legwork
+    # to ensure we can apply the orientation transformation _and_ obtain a dimensionless direction vector
+    y = vector([0, 1, 0], unit=analyzer_orientation.unit)
+
+    yhat = (analyzer_orientation * vector([0, 1, 0], unit=analyzer_orientation.unit)
+            - analyzer_orientation * vector([0, 0, 0], unit=analyzer_orientation.unit))
+    yhat /= norm(yhat)
 
     sample_analyzer_center_vector = analyzer_position - sample_position
 
@@ -77,7 +80,9 @@ def kf_wavenumber(
     l_sa = norm(sample_analyzer_vec)
     l_ad = norm(analyzer_detector_vec)
     l_diff = norm(sample_analyzer_vec - analyzer_detector_vec)
-    cos2theta = (l_sa * l_sa + l_ad * l_ad - l_diff * l_diff) / (2 * l_sa + l_ad)
+    # 2 theta is measured from the direction S-A, so the internal angle is (pi - 2 theta)
+    # and the normal law of Cosines is modified accordingly to be -cos(2 theta) instead of cos(pi - 2 theta)
+    cos2theta = (l_diff * l_diff - l_sa * l_sa - l_ad * l_ad) / (2 * l_sa * l_ad)
 
     # law of Cosines gives the Bragg reflected wavevector magnitude
     return tau / sqrt(2 - 2 * cos2theta)
