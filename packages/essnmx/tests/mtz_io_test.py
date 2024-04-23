@@ -5,6 +5,7 @@ import pathlib
 import gemmi
 import pytest
 import sciline as sl
+import scipp as sc
 
 from ess.nmx.data import get_small_mtz_samples
 from ess.nmx.mtz_io import DEFAULT_SPACE_GROUP_DESC  # P 21 21 21
@@ -13,13 +14,14 @@ from ess.nmx.mtz_io import (
     MTZFileIndex,
     MTZFilePath,
     RawMtz,
+    _join_variables,
     get_reciprocal_asu,
     get_space_group,
     merge_mtz_dataframes,
     mtz_to_pandas,
+    process_merged_mtz_dataframe,
+    process_single_mtz_to_dataframe,
     read_mtz_file,
-    reduce_merged_mtz_dataframe,
-    reduce_single_mtz,
 )
 
 
@@ -53,15 +55,15 @@ def test_mtz_to_pandas_dataframe(gemmi_mtz_object: gemmi.Mtz) -> None:
 
 
 def test_mtz_to_reduced_pandas_dataframe(gemmi_mtz_object: gemmi.Mtz) -> None:
-    df = reduce_single_mtz(RawMtz(gemmi_mtz_object))
-    for expected_colum in ["hkl", "d", "resolution", "I_div_SIGI", *"HKL"]:
+    df = process_single_mtz_to_dataframe(RawMtz(gemmi_mtz_object))
+    for expected_colum in ["hkl", "d", "resolution", *"HKL", "wavelength", "I", "SIGI"]:
         assert expected_colum in df.columns
 
     for hkl_column in "HKL":
         assert hkl_column in df.columns
         assert df[hkl_column].dtype == int
 
-    assert "hkl_eq" not in df.columns  # It should be done on merged dataframes
+    assert "hkl_asu" not in df.columns  # It should be done on merged dataframes
 
 
 @pytest.fixture
@@ -127,7 +129,10 @@ def merged_mtz_dataframe(
     """Tests if the merged data frame has the expected columns."""
     reduced_mtz_series = sl.Series(
         row_dim=MTZFileIndex,
-        items={i_file: reduce_single_mtz(mtz) for i_file, mtz in mtz_series.items()},
+        items={
+            i_file: process_single_mtz_to_dataframe(mtz)
+            for i_file, mtz in mtz_series.items()
+        },
     )
     return merge_mtz_dataframes(reduced_mtz_series)
 
@@ -139,10 +144,19 @@ def test_reduce_merged_mtz_dataframe(
     space_gr = get_space_group(mtz_series)
     rapio_asu = get_reciprocal_asu(space_gr)
 
-    nmx_df = reduce_merged_mtz_dataframe(
+    nmx_df = process_merged_mtz_dataframe(
         merged_mtz_df=merged_mtz_dataframe,
         rapio_asu=rapio_asu,
         sg=space_gr,
     )
-    assert "hkl_eq" not in merged_mtz_dataframe.columns
-    assert "hkl_eq" in nmx_df.columns
+    assert "hkl_asu" not in merged_mtz_dataframe.columns
+    assert "hkl_asu" in nmx_df.columns
+
+
+def test_join_variables() -> None:
+    var_x = sc.array(dims=["xy"], values=[1, 1, 2, 3, 3], unit=None)
+    var_y = sc.array(dims=["xy"], values=[0, 1, 2, 0, 3], unit=None)
+    var_xy = sc.array(dims=["xy"], values=["1 0", "1 1", "2 2", "3 0", "3 3"])
+
+    joined = _join_variables(var_x, var_y, splitter=" ")
+    assert sc.identical(joined, var_xy)

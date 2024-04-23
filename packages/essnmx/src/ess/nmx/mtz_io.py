@@ -25,14 +25,15 @@ DEFAULT_SPACE_GROUP_DESC = SpaceGroupDesc("P 21 21 21")
 WavelengthColumnName = NewType("WavelengthColumnName", str)
 """The name of the wavelength column in the mtz file."""
 DEFAULT_WAVELENGTH_COLUMN_NAME = WavelengthColumnName("LAMBDA")
+DEFAULT_WAVELENGTH_COORD_NAME = "wavelength"
 
 IntensityColumnName = NewType("IntensityColumnName", str)
 """The name of the intensity column in the mtz file."""
 DEFAULT_INTENSITY_COLUMN_NAME = IntensityColumnName("I")
 
-SigmaIntensityColumnName = NewType("SigmaIntensityColumnName", str)
+IntensitySigColumnName = NewType("IntensitySigColumnName", str)
 """The name of the standard uncertainty of intensity column in the mtz file."""
-DEFAULT_SIGMA_INTENSITY_COLUMN_NAME = SigmaIntensityColumnName("SIGI")
+DEFAULT_INTENSITY_SIG_COLUMN_NAME = IntensitySigColumnName("SIGI")
 
 # Computed types
 RawMtz = NewType("RawMtz", gemmi.Mtz)
@@ -60,14 +61,16 @@ def mtz_to_pandas(mtz: gemmi.Mtz) -> pd.DataFrame:
     """Converts the mtz file to a pandas dataframe.
 
     It is equivalent to the following code:
-    ```python
-    import numpy as np
-    import pandas as pd
 
-    data = np.array(mtz, copy=False)
-    columns = mtz.column_labels()
-    return pd.DataFrame(data, columns=columns)
-    ```
+    .. code-block:: python
+
+        import numpy as np
+        import pandas as pd
+
+        data = np.array(mtz, copy=False)
+        columns = mtz.column_labels()
+        return pd.DataFrame(data, columns=columns)
+
     It is recommended in the gemmi documentation.
 
     """
@@ -79,9 +82,11 @@ def mtz_to_pandas(mtz: gemmi.Mtz) -> pd.DataFrame:
     )
 
 
-def reduce_single_mtz(
+def process_single_mtz_to_dataframe(
     mtz: RawMtz,
-    lambda_column_name: WavelengthColumnName = DEFAULT_WAVELENGTH_COLUMN_NAME,
+    wavelength_column_name: WavelengthColumnName = DEFAULT_WAVELENGTH_COLUMN_NAME,
+    intensity_column_name: IntensityColumnName = DEFAULT_INTENSITY_COLUMN_NAME,
+    intensity_sig_col_name: IntensitySigColumnName = DEFAULT_INTENSITY_SIG_COLUMN_NAME,
 ) -> RawMtzDataFrame:
     """Select and derive columns from the original ``MtzDataFrame``.
 
@@ -90,14 +95,34 @@ def reduce_single_mtz(
     mtz:
         The raw mtz dataset.
 
-    lambda_column_name:
+    wavelength_column_name:
         The name of the wavelength column in the mtz file.
+
+    intensity_column_name:
+        The name of the intensity column in the mtz file.
+
+    sigma_intensity_column_name:
+        The name of the standard uncertainty of intensity column in the mtz file.
 
     Returns
     -------
     :
-        The new mtz dataframe with derived columns.
+        The new mtz dataframe with derived and renamed columns.
+
         The derived columns are:
+
+        - ``hkl``: The miller indices as a list of integers.
+        - ``d``: The d-spacing calculated from the miller indices.
+                 :math:``\\dfrac{2}{d^{2}} = \\dfrac{\\sin^2(\\theta)}{\\lambda^2}``
+        - ``resolution``: The resolution calculated from the d-spacing.
+
+        For consistent names of columns/coordinates, the following columns are renamed:
+
+        - ``wavelength_column_name`` -> ``'wavelength'``
+        - ``intensity_column_name`` -> ``'I'``
+        - ``sigma_intensity_column_name`` -> ``'SIGI'``
+
+        Other columns are kept as they are.
 
     Notes
     -----
@@ -120,10 +145,10 @@ def reduce_single_mtz(
         return mtz.get_cell().calculate_d(row["hkl"])
 
     mtz_df["d"] = mtz_df.apply(_calculate_d, axis=1)
-    # (2d)^{-2} = \sin^2(\theta)/\lambda^2
     mtz_df["resolution"] = (1 / mtz_df["d"]) ** 2 / 4
-    mtz_df["I_div_SIGI"] = orig_df["I"] / orig_df["SIGI"]
-    mtz_df[DEFAULT_WAVELENGTH_COLUMN_NAME] = orig_df[lambda_column_name]
+    mtz_df[DEFAULT_WAVELENGTH_COORD_NAME] = orig_df[wavelength_column_name]
+    mtz_df[DEFAULT_INTENSITY_COLUMN_NAME] = orig_df[intensity_column_name]
+    mtz_df[DEFAULT_INTENSITY_SIG_COLUMN_NAME] = orig_df[intensity_sig_col_name]
     # Keep other columns
     for column in [col for col in orig_df.columns if col not in mtz_df]:
         mtz_df[column] = orig_df[column]
@@ -193,7 +218,7 @@ def merge_mtz_dataframes(
     return MergedMtzDataFrame(pd.concat(mtz_dfs.values(), ignore_index=True))
 
 
-def reduce_merged_mtz_dataframe(
+def process_merged_mtz_dataframe(
     *,
     merged_mtz_df: MergedMtzDataFrame,
     rapio_asu: RapioAsu,
@@ -206,15 +231,60 @@ def reduce_merged_mtz_dataframe(
     merged_df = merged_mtz_df.copy(deep=False)
 
     def _rapio_asu_to_asu(row: pd.Series) -> list[int]:
+        """Converts miller indices(HKL) to ASU indices."""
         return rapio_asu.to_asu(row["hkl"], sg.operations())[0]
 
-    merged_df["hkl_eq"] = merged_df.apply(_rapio_asu_to_asu, axis=1)
+    merged_df["hkl_asu"] = merged_df.apply(_rapio_asu_to_asu, axis=1)
     # Unpack the indices for later.
-    merged_df[["H_EQ", "K_EQ", "L_EQ"]] = pd.DataFrame(
-        merged_df['hkl_eq'].to_list(), index=merged_df.index
+    merged_df[["H_ASU", "K_ASU", "L_ASU"]] = pd.DataFrame(
+        merged_df["hkl_asu"].to_list(), index=merged_df.index
     )
 
     return NMXMtzDataFrame(merged_df)
+
+
+def _join_variables(*vars: sc.Variable, splitter: str = " ") -> sc.Variable:
+    """Joins multiple integer dtype variables into a single string dtype variable.
+
+    Parameters
+    ----------
+    vars:
+        The integer dtype variables to join with same dimensions and length.
+
+    splitter:
+        The string to join the variables.
+
+    Returns
+    -------
+    :
+        The joined variable. It keeps the dimensions of the input variables.
+        But it drops the units since the output is a string.
+
+    Raises
+    ------
+    ValueError
+        If the input variables have different dimensions or lengths.
+
+    """
+    # Check if all variables are integer
+    if not all(var.dtype == int for var in vars):
+        raise ValueError("All variables must be integer type.")
+    # Check if all variables have the same dimensions
+    dims = set(var.dim for var in vars)
+    if len(dims) != 1:
+        raise ValueError("All variables must have the same dimensions.")
+    # Check if all variables have the same length
+    lengths = set(len(var.values) for var in vars)
+    if len(lengths) != 1:
+        raise ValueError("All variables must have the same length.")
+
+    return sc.array(
+        dims=dims,
+        values=[
+            splitter.join(str(val) for val in row)
+            for row in zip(*(var.values for var in vars))
+        ],
+    )
 
 
 def nmx_mtz_dataframe_to_scipp_dataarray(
@@ -227,33 +297,63 @@ def nmx_mtz_dataframe_to_scipp_dataarray(
     with column name :attr:`~DEFAULT_SIGMA_INTENSITY_COLUMN_NAME`
     becomes the variances of the data.
 
+    Parameters
+    ----------
+    nmx_mtz_df:
+        The merged and processed mtz dataframe.
+
+    Returns
+    -------
+    :
+        The scipp dataarray with the intensity and variances.
+        The ``I`` column becomes the data and the
+        squared ``SIGI`` column becomes the variances.
+        Therefore they are not in the coordinates.
+
+        Following coordinates are dropped from the dataframe:
+
+        - ``hkl``: The miller indices as a list of integers.
+                   There is no dtype that can represent this in scipp.
+
+        Following coordinates are modified:
+
+        - ``hkl_asu``: The miller indices as a string.
+                       This coordinate will be used to derive estimated scale factors.
+                       It is modified to have a string dtype
+                       as the same reason as why ``hkl`` coordinate is dropped.
+
     """
     from scipp.compat.pandas_compat import from_pandas_dataframe, parse_bracket_header
 
     to_scipp = nmx_mtz_df.copy(deep=False)
-    # Pop the indices columns.
-    # TODO: We can put them back once we support tuple[int] dtype.
-    # See https://github.com/scipp/scipp/issues/3046 for more details.
-    # As a temporary solution, we will use individual indices columns.
-    for col in ("hkl", "hkl_eq"):
-        to_scipp.pop(col)
     # Convert to scipp Dataset
     nmx_mtz_ds = from_pandas_dataframe(
         to_scipp,
         data_columns=[
             DEFAULT_INTENSITY_COLUMN_NAME,
-            DEFAULT_SIGMA_INTENSITY_COLUMN_NAME,
+            DEFAULT_INTENSITY_SIG_COLUMN_NAME,
         ],
         header_parser=parse_bracket_header,
     )
+    # Pop the indices columns.
+    # TODO: We can put them back once we support tuple[int] dtype.
+    # See https://github.com/scipp/scipp/issues/3046 for more details.
+    # Temporarily, we will join them into a single string.
+    # It is done on the scipp variable instead of the dataframe
+    # since columns with string dtype are converted to PyObject dtype
+    # instead of string by `from_pandas_dataframe`.
+    nmx_mtz_ds = nmx_mtz_ds.drop_coords(["hkl", "hkl_asu"])
+    nmx_mtz_ds.coords["hkl_asu"] = _join_variables(
+        *(nmx_mtz_ds.coords[f"{idx_desc}_ASU"] for idx_desc in "HKL")
+    )
     # Add units
-    nmx_mtz_ds.coords[DEFAULT_WAVELENGTH_COLUMN_NAME].unit = sc.units.angstrom
+    nmx_mtz_ds.coords[DEFAULT_WAVELENGTH_COORD_NAME].unit = sc.units.angstrom
     for key in nmx_mtz_ds.keys():
         nmx_mtz_ds[key].unit = sc.units.dimensionless
 
     # Add variances
     nmx_mtz_da = nmx_mtz_ds[DEFAULT_INTENSITY_COLUMN_NAME].copy(deep=False)
-    nmx_mtz_da.variances = nmx_mtz_ds[DEFAULT_SIGMA_INTENSITY_COLUMN_NAME].data ** 2
+    nmx_mtz_da.variances = nmx_mtz_ds[DEFAULT_INTENSITY_SIG_COLUMN_NAME].data ** 2
 
     # Return DataArray
     return NMXMtzDataArray(nmx_mtz_da)
@@ -261,15 +361,18 @@ def nmx_mtz_dataframe_to_scipp_dataarray(
 
 mtz_io_providers = (
     read_mtz_file,
-    reduce_single_mtz,
+    process_single_mtz_to_dataframe,
     get_space_group,
     get_reciprocal_asu,
     merge_mtz_dataframes,
-    reduce_merged_mtz_dataframe,
+    process_merged_mtz_dataframe,
     nmx_mtz_dataframe_to_scipp_dataarray,
 )
 """The providers related to the MTZ IO."""
+
 mtz_io_params = {
     WavelengthColumnName: DEFAULT_WAVELENGTH_COLUMN_NAME,
+    IntensityColumnName: DEFAULT_INTENSITY_COLUMN_NAME,
+    IntensitySigColumnName: DEFAULT_INTENSITY_SIG_COLUMN_NAME,
 }
 """The parameters related to the MTZ IO."""
