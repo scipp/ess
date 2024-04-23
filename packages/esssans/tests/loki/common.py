@@ -8,7 +8,6 @@ from ess import loki, sans
 from ess.sans.types import (
     BackgroundRun,
     CorrectForGravity,
-    DirectBeam,
     EmptyBeamRun,
     Filename,
     NeXusDetectorName,
@@ -37,7 +36,6 @@ def make_params(qxy: bool = False) -> dict:
     params[CorrectForGravity] = True
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
     params[ReturnEvents] = False
-    params[DirectBeam] = DirectBeam()
 
     if qxy:
         params[QBins] = QBins(

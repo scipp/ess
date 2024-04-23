@@ -12,7 +12,6 @@ from .types import (
     BackgroundRun,
     BackgroundSubtractedIofQ,
     Denominator,
-    DirectBeam,
     FinalSummedQ,
     Numerator,
     ProcessedWavelengthBands,
@@ -102,7 +101,6 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
     full_wavelength_range = sc.concat([bands.min(), bands.max()], dim='wavelength')
 
     pipeline = pipeline.copy()
-    pipeline[DirectBeam] = DirectBeam()
 
     wavelength_bins = pipeline.compute(WavelengthBins)
     parts = (
@@ -132,9 +130,11 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
     for _it in range(niter):
         # The first time we compute I(Q), the direct beam function is not in the
         # parameters, nor given by any providers, so it will be considered flat.
-        pipeline[WavelengthBands] = WavelengthBands(full_wavelength_range)
+        # TODO: Should we have a check that DirectBeam cannot be computed from the
+        # pipeline?
+        pipeline[WavelengthBands] = full_wavelength_range
         iofq_full = pipeline.compute(BackgroundSubtractedIofQ)
-        pipeline[WavelengthBands] = WavelengthBands(bands)
+        pipeline[WavelengthBands] = bands
         iofq_bands = pipeline.compute(BackgroundSubtractedIofQ)
 
         if direct_beam_function is None:
@@ -155,9 +155,9 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
         # Scale denominator terms that were initially computed without direct beam
         # with the current direct beam function.
         db = resample_direct_beam(
-            direct_beam=DirectBeam(direct_beam_function),
+            direct_beam=direct_beam_function,
             wavelength_bins=wavelength_bins,
-        ).value
+        )
         db.coords['wavelength'] = sc.midpoints(
             db.coords['wavelength'], dim='wavelength'
         )

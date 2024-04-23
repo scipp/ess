@@ -43,8 +43,8 @@ def make_params() -> dict:
         sc.geomspace(dim='Q', start=0.004, stop=0.8, num=141, unit='1/angstrom')
     )
 
-    params[NonBackgroundWavelengthRange] = NonBackgroundWavelengthRange(
-        sc.array(dims=['wavelength'], values=[0.7, 17.1], unit='angstrom')
+    params[NonBackgroundWavelengthRange] = sc.array(
+        dims=['wavelength'], values=[0.7, 17.1], unit='angstrom'
     )
     params[CorrectForGravity] = True
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound

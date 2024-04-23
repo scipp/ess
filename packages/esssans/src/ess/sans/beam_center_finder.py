@@ -2,7 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 import uuid
-from typing import Dict, List, NewType, Union
+from typing import Dict, List, NewType, Optional, Union
 
 import numpy as np
 import sciline
@@ -37,9 +37,7 @@ from .types import (
     ReturnEvents,
     SampleRun,
     UncertaintyBroadcastMode,
-    WavelengthBands,
     WavelengthBins,
-    WavelengthMask,
 )
 
 
@@ -194,8 +192,6 @@ def _iofq_in_quadrants(
     params[ElasticCoordTransformGraph] = graph
     params[BeamCenter] = _offsets_to_vector(data=data, xy=xy, graph=graph)
     params[DimsToKeep] = tuple()
-    params[WavelengthBands] = WavelengthBands()
-    params[WavelengthMask] = WavelengthMask()
 
     pipeline = sciline.Pipeline(providers, params=params)
     pipeline[MaskedData[SampleRun]] = data
@@ -302,11 +298,6 @@ BeamCenterFinderTolerance = NewType('BeamCenterFinderTolerance', float)
 BeamCenterFinderMinimizer = NewType('BeamCenterFinderMinimizer', str)
 """Minimizer used for the beam center finder"""
 
-default_beam_center_from_iofq_params = {
-    BeamCenterFinderMinimizer: '',
-    BeamCenterFinderTolerance: -1.0,
-}
-
 
 def beam_center_from_iofq(
     data: MaskedData[SampleRun],
@@ -316,8 +307,8 @@ def beam_center_from_iofq(
     q_bins: BeamCenterFinderQBins,
     transform: LabFrameTransform[SampleRun],
     pixel_shape: DetectorPixelShape[SampleRun],
-    minimizer: BeamCenterFinderMinimizer,
-    tolerance: BeamCenterFinderTolerance,
+    minimizer: Optional[BeamCenterFinderMinimizer],
+    tolerance: Optional[BeamCenterFinderTolerance],
 ) -> BeamCenter:
     """
     Find the beam center of a SANS scattering pattern using an I(Q) calculation.
@@ -423,7 +414,7 @@ def beam_center_from_iofq(
     logger.info(f'Requested minimizer: {minimizer}')
     logger.info(f'Requested tolerance: {tolerance}')
     minimizer = minimizer or 'Nelder-Mead'
-    tolerance = 0.1 if tolerance == -1 else tolerance
+    tolerance = tolerance or 0.1
     logger.info(f'Using minimizer: {minimizer}')
     logger.info(f'Using tolerance: {tolerance}')
 

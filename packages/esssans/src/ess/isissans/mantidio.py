@@ -3,7 +3,7 @@
 """
 File loading functions for ISIS data using Mantid.
 """
-from typing import NewType, NoReturn
+from typing import NewType, NoReturn, Optional
 
 import sciline
 import scipp as sc
@@ -77,7 +77,7 @@ def load_direct_beam(filename: FilePath[DirectBeamFilename]) -> DirectBeam:
 
 def from_data_workspace(
     ws: DataWorkspace[RunType],
-    calibration: CalibrationWorkspace,
+    calibration: Optional[CalibrationWorkspace],
 ) -> LoadedFileContents[RunType]:
     if calibration is not None:
         _mantid_simpleapi.CopyInstrumentParameters(
@@ -99,7 +99,7 @@ def from_data_workspace(
 
 
 def load_run(
-    filename: FilePath[Filename[RunType]], period: Period
+    filename: FilePath[Filename[RunType]], period: Optional[Period]
 ) -> DataWorkspace[RunType]:
     loaded = _mantid_simpleapi.Load(
         Filename=str(filename), LoadMonitors=True, StoreInADS=False
@@ -111,7 +111,7 @@ def load_run(
         # Separate data and monitor workspaces
         data_ws = loaded.OutputWorkspace
         if isinstance(data_ws, _mantid_api.WorkspaceGroup):
-            if period == -1:
+            if period is None:
                 raise ValueError(
                     f'Needs {Period} to be set to know what '
                     'section of the event data to load'

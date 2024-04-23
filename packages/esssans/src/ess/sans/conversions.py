@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-from typing import NewType
+from typing import NewType, Optional
 
 import scipp as sc
 from scipp.constants import h, m_n
@@ -234,10 +234,10 @@ def detector_to_wavelength(
 
 
 def mask_wavelength(
-    da: CleanWavelength[ScatteringRunType, IofQPart], mask: WavelengthMask
+    da: CleanWavelength[ScatteringRunType, IofQPart], mask: Optional[WavelengthMask]
 ) -> CleanWavelengthMasked[ScatteringRunType, IofQPart]:
-    if mask.value is not None:
-        da = mask_range(da, mask=mask.value)
+    if mask is not None:
+        da = mask_range(da, mask=mask)
     return CleanWavelengthMasked[ScatteringRunType, IofQPart](da)
 
 

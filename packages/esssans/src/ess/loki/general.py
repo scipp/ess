@@ -22,7 +22,6 @@ from ..sans.types import (
     MonitorType,
     NeXusDetectorName,
     NeXusMonitorName,
-    NonBackgroundWavelengthRange,
     PixelShapePath,
     RawData,
     RawMonitor,
@@ -36,8 +35,6 @@ from ..sans.types import (
     TofMonitor,
     TransformationPath,
     Transmission,
-    WavelengthBands,
-    WavelengthMask,
 )
 
 default_parameters = {
@@ -45,11 +42,8 @@ default_parameters = {
     DimsToKeep: tuple(),
     NeXusMonitorName[Incident]: 'monitor_1',
     NeXusMonitorName[Transmission]: 'monitor_2',
-    NonBackgroundWavelengthRange: NonBackgroundWavelengthRange(),
-    PixelShapePath: 'pixel_shape',
     TransformationPath: 'transform',
-    WavelengthBands: WavelengthBands(),
-    WavelengthMask: WavelengthMask(),
+    PixelShapePath: 'pixel_shape',
 }
 
 

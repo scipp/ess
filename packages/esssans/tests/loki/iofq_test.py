@@ -134,9 +134,9 @@ def test_pipeline_can_compute_IofQ_in_overlapping_wavelength_bands(qxy: bool):
     edges = sc.linspace(
         'band', params[WavelengthBins].min(), params[WavelengthBins].max(), 12
     )
-    params[WavelengthBands] = WavelengthBands(
-        sc.concat([edges[:-2], edges[2::]], dim='wavelength').transpose()
-    )
+    params[WavelengthBands] = sc.concat(
+        [edges[:-2], edges[2::]], dim='wavelength'
+    ).transpose()
     pipeline = sciline.Pipeline(loki_providers(), params=params)
     pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
     result = pipeline.compute(BackgroundSubtractedIofQ)

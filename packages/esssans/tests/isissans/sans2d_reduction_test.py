@@ -42,15 +42,13 @@ def make_params() -> dict:
     params[WavelengthBins] = sc.linspace(
         'wavelength', start=2.0, stop=16.0, num=141, unit='angstrom'
     )
-    params[WavelengthMask] = WavelengthMask(
-        sc.DataArray(
-            data=sc.array(dims=['wavelength'], values=[True]),
-            coords={
-                'wavelength': sc.array(
-                    dims=['wavelength'], values=[2.21, 2.59], unit='angstrom'
-                )
-            },
-        )
+    params[WavelengthMask] = sc.DataArray(
+        data=sc.array(dims=['wavelength'], values=[True]),
+        coords={
+            'wavelength': sc.array(
+                dims=['wavelength'], values=[2.21, 2.59], unit='angstrom'
+            )
+        },
     )
     params[sans2d.LowCountThreshold] = sc.scalar(100.0, unit='counts')
 
@@ -67,15 +65,13 @@ def make_params() -> dict:
     params[SampleOffset] = sc.vector([0.0, 0.0, 0.053], unit='m')
     params[MonitorOffset[Transmission]] = sc.vector([0.0, 0.0, -6.719], unit='m')
 
-    params[NonBackgroundWavelengthRange] = NonBackgroundWavelengthRange(
-        sc.array(dims=['wavelength'], values=[0.7, 17.1], unit='angstrom')
+    params[NonBackgroundWavelengthRange] = sc.array(
+        dims=['wavelength'], values=[0.7, 17.1], unit='angstrom'
     )
     params[CorrectForGravity] = True
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
     params[ReturnEvents] = False
     params[DimsToKeep] = tuple()
-    params[WavelengthBands] = WavelengthBands()
-    params.update(sans.beam_center_finder.default_beam_center_from_iofq_params)
     return params
 
 
@@ -111,8 +107,8 @@ def test_pipeline_can_compute_background_subtracted_IofQ(uncertainties):
 
 def test_pipeline_can_compute_background_subtracted_IofQ_in_wavelength_bands():
     params = make_params()
-    params[WavelengthBands] = WavelengthBands(
-        sc.linspace('wavelength', start=2.0, stop=16.0, num=11, unit='angstrom')
+    params[WavelengthBands] = sc.linspace(
+        'wavelength', start=2.0, stop=16.0, num=11, unit='angstrom'
     )
     pipeline = sciline.Pipeline(sans2d_providers(), params=params)
     result = pipeline.compute(BackgroundSubtractedIofQ)
@@ -124,10 +120,11 @@ def test_pipeline_wavelength_bands_is_optional():
     params = make_params()
     pipeline = sciline.Pipeline(sans2d_providers(), params=params)
     noband = pipeline.compute(BackgroundSubtractedIofQ)
-    assert pipeline.compute(WavelengthBands).value is None
+    with pytest.raises(sciline.UnsatisfiedRequirement):
+        pipeline.compute(WavelengthBands)
     band = sc.linspace('wavelength', 2.0, 16.0, num=2, unit='angstrom')
-    pipeline[WavelengthBands] = WavelengthBands(band)
-    assert sc.identical(band, pipeline.compute(WavelengthBands).value)
+    pipeline[WavelengthBands] = band
+    assert sc.identical(band, pipeline.compute(WavelengthBands))
     withband = pipeline.compute(BackgroundSubtractedIofQ)
     assert sc.identical(noband, withband)
 
@@ -146,9 +143,7 @@ def test_workflow_is_deterministic():
 
 def test_pipeline_raisesVariancesError_if_normalization_errors_not_dropped():
     params = make_params()
-    params[
-        NonBackgroundWavelengthRange
-    ] = NonBackgroundWavelengthRange()  # Make sure we raise in iofq_denominator
+    del params[NonBackgroundWavelengthRange]  # Make sure we raise in iofq_denominator
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.fail
     pipeline = sciline.Pipeline(sans2d_providers(), params=params)
     with pytest.raises(sc.VariancesError):
@@ -191,7 +186,7 @@ def as_dict(funcs: List[Callable[..., type]]) -> dict:
 def pixel_dependent_direct_beam(
     filename: DirectBeamFilename, shape: RawData[SampleRun]
 ) -> DirectBeam:
-    direct_beam = isis.data.load_direct_beam(isis.data.get_path(filename)).value
+    direct_beam = isis.data.load_direct_beam(isis.data.get_path(filename))
     sizes = {'spectrum': shape.sizes['spectrum'], **direct_beam.sizes}
     return DirectBeam(direct_beam.broadcast(sizes=sizes).copy())
 
@@ -229,8 +224,7 @@ def test_beam_center_finder_without_direct_beam_reproduces_verified_result():
     params[sans.beam_center_finder.BeamCenterFinderQBins] = sc.linspace(
         'Q', 0.02, 0.3, 71, unit='1/angstrom'
     )
-    del params[DirectBeamFilename]  # redundant
-    params[DirectBeam] = DirectBeam()
+    del params[DirectBeamFilename]
     providers = sans2d_providers()
     providers.remove(sans.beam_center_finder.beam_center_from_center_of_mass)
     providers.append(sans.beam_center_finder.beam_center_from_iofq)
@@ -251,7 +245,7 @@ def test_beam_center_can_get_closer_to_verified_result_with_low_counts_mask():
     params[sans.beam_center_finder.BeamCenterFinderQBins] = sc.linspace(
         'Q', 0.02, 0.3, 71, unit='1/angstrom'
     )
-    params[DirectBeam] = DirectBeam()
+    del params[DirectBeamFilename]
     providers = sans2d_providers()
     providers.remove(sans2d.sample_holder_mask)
     providers.remove(sans.beam_center_finder.beam_center_from_center_of_mass)
@@ -288,7 +282,7 @@ def test_beam_center_finder_works_with_pixel_dependent_direct_beam():
     pipeline = sciline.Pipeline(providers, params=params)
     center_pixel_independent_direct_beam = pipeline.compute(BeamCenter)
 
-    direct_beam = pipeline.compute(DirectBeam).value
+    direct_beam = pipeline.compute(DirectBeam)
     pixel_dependent_direct_beam = direct_beam.broadcast(
         sizes={
             'spectrum': pipeline.compute(MaskedData[SampleRun]).sizes['spectrum'],
@@ -300,7 +294,7 @@ def test_beam_center_finder_works_with_pixel_dependent_direct_beam():
     providers.remove(sans.beam_center_finder.beam_center_from_center_of_mass)
     providers.append(sans.beam_center_finder.beam_center_from_iofq)
     pipeline = sciline.Pipeline(providers, params=params)
-    pipeline[DirectBeam] = DirectBeam(pixel_dependent_direct_beam)
+    pipeline[DirectBeam] = pixel_dependent_direct_beam
 
     center = pipeline.compute(BeamCenter)
     assert sc.identical(center, center_pixel_independent_direct_beam)

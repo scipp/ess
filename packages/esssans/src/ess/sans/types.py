@@ -6,9 +6,8 @@ This modules defines the domain types uses in esssans.
 The domain types are used to define parameters and to request results from a Sciline
 pipeline."""
 from collections.abc import Sequence
-from dataclasses import dataclass
 from enum import Enum
-from typing import NewType, Optional, TypeVar
+from typing import NewType, TypeVar
 
 import sciline
 import scipp as sc
@@ -97,28 +96,22 @@ ReturnEvents = NewType('ReturnEvents', bool)
 WavelengthBins = NewType('WavelengthBins', sc.Variable)
 """Wavelength binning"""
 
+WavelengthBands = NewType('WavelengthBands', sc.Variable)
+"""Wavelength bands. Typically a single band, set to first and last value of
+WavelengthBins.
 
-# WavelengthBands = NewType('WavelengthBands', sc.Variable)
-@dataclass
-class WavelengthBands:
-    """Wavelength bands. Typically a single band, set to first and last value of
-    WavelengthBins.
+The wavelength bands can however be used to compute the scattering cross section inside
+multiple wavelength bands. In this case, the wavelength bands must be either one- or
+two-dimensional.
 
-    The wavelength bands can however be used to compute the scattering cross section
-    inside multiple wavelength bands. In this case, the wavelength bands must be either
-    one- or two-dimensional.
+In the case of a one-dimensional array, the values represent a set of non-overlapping
+bins in the wavelength dimension.
 
-    In the case of a one-dimensional array, the values represent a set of
-    non-overlapping bins in the wavelength dimension.
-
-    In the case of a two-dimensional array, the values represent a set of (possibly
-    overlapping or non-contiguous) wavelength bands, with the first dimension being the
-    band index and the second dimension being the wavelength. For each band, there must
-    be two wavelength values defining the start and end wavelength of the band.
-    """
-
-    value: Optional[sc.Variable] = None
-
+In the case of a two-dimensional array, the values represent a set of (possibly
+overlapping or non-contiguous) wavelength bands, with the first dimension being the
+band index and the second dimension being the wavelength. For each band, there must be
+two wavelength values defining the start and end wavelength of the band.
+"""
 
 ProcessedWavelengthBands = NewType('ProcessedWavelengthBands', sc.Variable)
 """Processed wavelength bands, as a two-dimensional variable, with the first dimension
@@ -152,12 +145,8 @@ class QBins:
         return tuple(self.edges)
 
 
-@dataclass
-class NonBackgroundWavelengthRange:
-    """Range of wavelengths that are not considered background in the monitor"""
-
-    value: sc.Variable | None = None
-
+NonBackgroundWavelengthRange = NewType('NonBackgroundWavelengthRange', sc.Variable)
+"""Range of wavelengths that are not considered background in the monitor"""
 
 DirectBeamFilename = NewType('DirectBeamFilename', str)
 """Filename of direct beam correction"""
@@ -165,13 +154,8 @@ DirectBeamFilename = NewType('DirectBeamFilename', str)
 BeamCenter = NewType('BeamCenter', sc.Variable)
 """Beam center, may be set directly or computed using beam-center finder"""
 
-
-@dataclass
-class WavelengthMask:
-    """Optional wavelength mask"""
-
-    value: sc.DataArray | None = None
-
+WavelengthMask = NewType('WavelengthMask', sc.DataArray)
+"""Optional wavelength mask"""
 
 CorrectForGravity = NewType('CorrectForGravity', bool)
 """Whether to correct for gravity when computing wavelength and Q."""
@@ -227,11 +211,8 @@ class SourcePosition(sciline.Scope[RunType, sc.Variable], sc.Variable):
     """Source position"""
 
 
-@dataclass
-class DirectBeam:
-    """Direct beam"""
-
-    value: sc.DataArray | None = None
+DirectBeam = NewType('DirectBeam', sc.DataArray)
+"""Direct beam"""
 
 
 class TransmissionFraction(
@@ -240,11 +221,8 @@ class TransmissionFraction(
     """Transmission fraction"""
 
 
-@dataclass
-class CleanDirectBeam:
-    """Direct beam after resampling to required wavelength bins"""
-
-    value: sc.DataArray | None = None
+CleanDirectBeam = NewType('CleanDirectBeam', sc.DataArray)
+"""Direct beam after resampling to required wavelength bins"""
 
 
 class DetectorPixelShape(sciline.Scope[ScatteringRunType, sc.DataGroup], sc.DataGroup):

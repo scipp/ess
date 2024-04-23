@@ -30,13 +30,11 @@ def _get_I0(qbins: sc.Variable) -> sc.Variable:
 def test_can_compute_direct_beam_for_all_pixels():
     n_wavelength_bands = 10
     params = make_params()
-    params[WavelengthBands] = WavelengthBands(
-        sc.linspace(
-            'wavelength',
-            params[WavelengthBins].min(),
-            params[WavelengthBins].max(),
-            n_wavelength_bands + 1,
-        )
+    params[WavelengthBands] = sc.linspace(
+        'wavelength',
+        params[WavelengthBins].min(),
+        params[WavelengthBins].max(),
+        n_wavelength_bands + 1,
     )
     providers = loki_providers()
     pipeline = sciline.Pipeline(providers, params=params)
@@ -64,9 +62,9 @@ def test_can_compute_direct_beam_with_overlapping_wavelength_bands():
         params[WavelengthBins].max(),
         n_wavelength_bands + 2,
     )
-    params[WavelengthBands] = WavelengthBands(
-        sc.concat([edges[:-2], edges[2::]], dim='wavelength').transpose()
-    )
+    params[WavelengthBands] = sc.concat(
+        [edges[:-2], edges[2::]], dim='wavelength'
+    ).transpose()
 
     providers = loki_providers()
     pipeline = sciline.Pipeline(providers, params=params)
@@ -87,13 +85,11 @@ def test_can_compute_direct_beam_with_overlapping_wavelength_bands():
 def test_can_compute_direct_beam_per_layer():
     n_wavelength_bands = 10
     params = make_params()
-    params[WavelengthBands] = WavelengthBands(
-        sc.linspace(
-            'wavelength',
-            params[WavelengthBins].min(),
-            params[WavelengthBins].max(),
-            n_wavelength_bands + 1,
-        )
+    params[WavelengthBands] = sc.linspace(
+        'wavelength',
+        params[WavelengthBins].min(),
+        params[WavelengthBins].max(),
+        n_wavelength_bands + 1,
     )
     params[DimsToKeep] = ['layer']
     providers = loki_providers()
@@ -117,13 +113,11 @@ def test_can_compute_direct_beam_per_layer():
 def test_can_compute_direct_beam_per_layer_and_straw():
     n_wavelength_bands = 10
     params = make_params()
-    params[WavelengthBands] = WavelengthBands(
-        sc.linspace(
-            'wavelength',
-            params[WavelengthBins].min(),
-            params[WavelengthBins].max(),
-            n_wavelength_bands + 1,
-        )
+    params[WavelengthBands] = sc.linspace(
+        'wavelength',
+        params[WavelengthBins].min(),
+        params[WavelengthBins].max(),
+        n_wavelength_bands + 1,
     )
     params[DimsToKeep] = ('layer', 'straw')
     providers = loki_providers()

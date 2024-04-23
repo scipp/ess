@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
-from typing import NewType
+from typing import NewType, Optional
 
 import scipp as sc
 
@@ -43,8 +43,8 @@ def sample_holder_mask(
 
 def mask_detectors(
     da: TofData[ScatteringRunType],
-    edge_mask: DetectorEdgeMask,
-    holder_mask: SampleHolderMask,
+    edge_mask: Optional[DetectorEdgeMask],
+    holder_mask: Optional[SampleHolderMask],
 ) -> MaskedData[ScatteringRunType]:
     """Apply pixel-specific masks to raw data.
 
@@ -58,8 +58,10 @@ def mask_detectors(
         Mask for sample holder.
     """
     da = da.copy(deep=False)
-    da.masks['edges'] = edge_mask
-    da.masks['holder_mask'] = holder_mask
+    if edge_mask is not None:
+        da.masks['edges'] = edge_mask
+    if holder_mask is not None:
+        da.masks['holder_mask'] = holder_mask
     return MaskedData[ScatteringRunType](da)
 
 

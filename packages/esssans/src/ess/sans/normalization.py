@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+from typing import Optional
+
 import scipp as sc
 from scipp.core import concepts
 
@@ -172,7 +174,7 @@ _broadcasters = {
 def iofq_norm_wavelength_term(
     incident_monitor: CleanMonitor[ScatteringRunType, Incident],
     transmission_fraction: TransmissionFraction[ScatteringRunType],
-    direct_beam: CleanDirectBeam,
+    direct_beam: Optional[CleanDirectBeam],
     uncertainties: UncertaintyBroadcastMode,
 ) -> NormWavelengthTerm[ScatteringRunType]:
     """
@@ -213,7 +215,6 @@ def iofq_norm_wavelength_term(
         Used by :py:func:`iofq_denominator`.
     """
     out = incident_monitor * transmission_fraction
-    direct_beam = direct_beam.value
     if direct_beam is not None:
         # Make wavelength the inner dim
         dims = list(direct_beam.dims)
@@ -301,7 +302,7 @@ def iofq_denominator(
 
 
 def process_wavelength_bands(
-    wavelength_bands: WavelengthBands,
+    wavelength_bands: Optional[WavelengthBands],
     wavelength_bins: WavelengthBins,
 ) -> ProcessedWavelengthBands:
     """
@@ -314,7 +315,6 @@ def process_wavelength_bands(
     The final bands must have a size of 2 in the wavelength dimension, defining a start
     and an end wavelength.
     """
-    wavelength_bands = wavelength_bands.value
     if wavelength_bands is None:
         wavelength_bands = sc.concat(
             [wavelength_bins.min(), wavelength_bins.max()], dim='wavelength'
