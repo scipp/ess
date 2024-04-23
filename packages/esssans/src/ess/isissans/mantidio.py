@@ -32,7 +32,7 @@ except ModuleNotFoundError:
     MatrixWorkspace = object
 
 Period = NewType('Period', int)
-"""Period number of the events. Set to -1 to ignore period information."""
+"""Period number of the events."""
 
 CalibrationWorkspace = NewType('CalibrationWorkspace', MatrixWorkspace)
 
