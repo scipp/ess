@@ -37,14 +37,16 @@ from ..sans.types import (
     Transmission,
 )
 
-default_parameters = {
-    CorrectForGravity: False,
-    DimsToKeep: tuple(),
-    NeXusMonitorName[Incident]: 'monitor_1',
-    NeXusMonitorName[Transmission]: 'monitor_2',
-    TransformationPath: 'transform',
-    PixelShapePath: 'pixel_shape',
-}
+
+def default_parameters() -> dict:
+    return {
+        CorrectForGravity: False,
+        DimsToKeep: tuple(),
+        NeXusMonitorName[Incident]: 'monitor_1',
+        NeXusMonitorName[Transmission]: 'monitor_2',
+        TransformationPath: 'transform',
+        PixelShapePath: 'pixel_shape',
+    }
 
 
 DETECTOR_BANK_RESHAPING = {

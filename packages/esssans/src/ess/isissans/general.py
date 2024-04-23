@@ -29,14 +29,16 @@ from ..sans.types import (
 from .components import DetectorBankOffset, MonitorOffset, SampleOffset
 from .data import LoadedFileContents
 
-default_parameters = {
-    CorrectForGravity: False,
-    DimsToKeep: tuple(),
-    MonitorOffset[Incident]: MonitorOffset(sc.vector([0, 0, 0], unit='m')),
-    MonitorOffset[Transmission]: MonitorOffset(sc.vector([0, 0, 0], unit='m')),
-    DetectorBankOffset: DetectorBankOffset(sc.vector([0, 0, 0], unit='m')),
-    SampleOffset: SampleOffset(sc.vector([0, 0, 0], unit='m')),
-}
+
+def default_parameters() -> dict:
+    return {
+        CorrectForGravity: False,
+        DimsToKeep: tuple(),
+        MonitorOffset[Incident]: MonitorOffset(sc.vector([0, 0, 0], unit='m')),
+        MonitorOffset[Transmission]: MonitorOffset(sc.vector([0, 0, 0], unit='m')),
+        DetectorBankOffset: DetectorBankOffset(sc.vector([0, 0, 0], unit='m')),
+        SampleOffset: SampleOffset(sc.vector([0, 0, 0], unit='m')),
+    }
 
 
 def get_detector_data(

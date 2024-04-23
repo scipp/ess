@@ -21,7 +21,7 @@ from ess.sans.types import (
 
 
 def make_params(qxy: bool = False) -> dict:
-    params = loki.default_parameters.copy()
+    params = loki.default_parameters()
 
     params[NeXusDetectorName] = 'larmor_detector'
     params[Filename[SampleRun]] = '60339-2022-02-28_2215.nxs'

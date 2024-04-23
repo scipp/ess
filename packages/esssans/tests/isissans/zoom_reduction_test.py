@@ -23,7 +23,7 @@ from ess.sans.types import (
 
 def make_params() -> dict:
     params = {
-        **isis.default_parameters,
+        **isis.default_parameters(),
         sans.types.DirectBeamFilename: 'Direct_Zoom_4m_8mm_100522.txt',
         isis.CalibrationFilename: '192tubeCalibration_11-02-2019_r5_10lines.nxs',
         Filename[sans.types.SampleRun]: 'ZOOM00034786.nxs',

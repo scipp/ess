@@ -38,7 +38,7 @@ from ess.sans.types import (
 
 
 def make_params() -> dict:
-    params = isis.default_parameters.copy()
+    params = isis.default_parameters()
     params[WavelengthBins] = sc.linspace(
         'wavelength', start=2.0, stop=16.0, num=141, unit='angstrom'
     )
