@@ -5,7 +5,6 @@ import pathlib
 from typing import Optional, Union
 
 import h5py
-import numpy as np
 import sciline
 import scipp as sc
 
@@ -244,76 +243,3 @@ def bin_time_of_arrival(
         counts=counts,
         **{**nmx_data, **new_coords},
     )
-
-
-def _join_variables(*vars: sc.Variable, splitter: str = " ") -> sc.Variable:
-    # Check if all variables are integer
-    if not all(var.dtype == int for var in vars):
-        raise ValueError("All variables must be integer type.")
-    # Check if all variables have the same dimensions
-    dims = set(var.dim for var in vars)
-    if len(dims) != 1:
-        raise ValueError("All variables must have the same dimensions.")
-    # Check if all variables have the same length
-    lengths = set(len(var.values) for var in vars)
-    if len(lengths) != 1:
-        raise ValueError("All variables must have the same length.")
-
-    return sc.array(
-        dims=dims,
-        values=[
-            splitter.join(str(val) for val in row)
-            for row in zip(*(var.values for var in vars))
-        ],
-    )
-
-
-def _zip_and_group(da: sc.DataArray, /, *args: str | sc.Variable) -> sc.DataArray:
-    """Group the data array by the given coordinates.
-
-    It is a temporary solution before we fix the issue in scipp.
-    It should be replaced with the scipp group function once it's possible
-    to group by string-type coordinates or ``tuple[int]`` type of coordinates.
-    See [#3046](https://github.com/scipp/scipp/issues/3046) and
-    [#3425](https://github.com/scipp/scipp/issues/3425) for more details.
-
-    Parameters
-    ----------
-    da:
-        The data array to group.
-    args:
-        The coordinates to group by.
-    group_detour_func_map:
-        The conversion functions.
-
-    Returns
-    -------
-    sc.DataArray
-        The grouped data array.
-
-    """
-    copied = da.copy(deep=False)
-    group_coord_names = tuple(arg if isinstance(arg, str) else arg.dim for arg in args)
-    tmp_str_coord_name = "".join(group_coord_names)
-    group_coords = tuple(
-        copied.coords[name] for name in group_coord_names
-    )  # Must keep the order
-
-    tmp_coord = _join_variables(*group_coords)
-    copied.coords[tmp_str_coord_name] = tmp_coord
-
-    # Workaround for scipp issue #3425
-    # See https://github.com/scipp/scipp/issues/3425 for more details
-    if all(isinstance(arg, str) for arg in args):
-        group_var = sc.array(
-            dims=[tmp_str_coord_name],
-            values=np.unique(copied.coords[tmp_str_coord_name].values),
-        )
-    elif all(isinstance(arg, sc.Variable) for arg in args):
-        group_var = _join_variables(
-            *[arg.rename_dims({arg.dim: tmp_str_coord_name}) for arg in args]
-        )
-    else:
-        raise ValueError("All coordinates must be either str or sc.Variable.")
-
-    return copied.group(group_var)
