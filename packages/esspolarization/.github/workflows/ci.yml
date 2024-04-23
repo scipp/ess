@@ -19,6 +19,7 @@ jobs:
       - name: Get Python version for other CI jobs
         id: vars
         run: |
+          cat .github/workflows/python-version-ci
           echo "min_python=$(cat .github/workflows/python-version-ci)" >> $GITHUB_OUTPUT
           echo "min_tox_env=py$(cat .github/workflows/python-version-ci | sed 's/\.//g')" >> $GITHUB_OUTPUT
       - uses: actions/setup-python@v5
