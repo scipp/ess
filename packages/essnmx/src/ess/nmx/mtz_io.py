@@ -267,17 +267,20 @@ def nmx_mtz_dataframe_to_scipp_dataarray(
         squared ``SIGI`` column becomes the variances.
         Therefore they are not in the coordinates.
 
-        Following coordinates are dropped from the dataframe:
-
-        - ``hkl``: The miller indices as a list of integers.
-                   There is no dtype that can represent this in scipp.
-
         Following coordinates are modified:
 
-        - ``hkl_asu``: The miller indices as a string.
+        - ``hkl``: The miller indices as a string.
+                   It is modified to have a string dtype
+                   since is no dtype that can represent this in scipp.
+
+        - ``hkl_asu``: The asymmetric unit of miller indices as a string.
                        This coordinate will be used to derive estimated scale factors.
                        It is modified to have a string dtype
-                       as the same reason as why ``hkl`` coordinate is dropped.
+                       as the same reason as why ``hkl`` coordinate is modified.
+
+        Zero or negative intensities are removed from the dataarray.
+        It can happen due to the post-processing of the data,
+        e.g. background subtraction.
 
     """
     from scipp.compat.pandas_compat import from_pandas_dataframe, parse_bracket_header
@@ -313,10 +316,10 @@ def nmx_mtz_dataframe_to_scipp_dataarray(
 
     # Add variances
     nmx_mtz_da = nmx_mtz_ds[DEFAULT_INTENSITY_COLUMN_NAME].copy(deep=False)
-    nmx_mtz_da.variances = nmx_mtz_ds[DEFAULT_STD_DEV_COLUMN_NAME].data ** 2
+    nmx_mtz_da.variances = (nmx_mtz_ds[DEFAULT_STD_DEV_COLUMN_NAME].data ** 2).values
 
-    # Return DataArray
-    return NMXMtzDataArray(nmx_mtz_da)
+    # Return DataArray without negative intensities
+    return NMXMtzDataArray(nmx_mtz_da[nmx_mtz_da.data > 0])
 
 
 mtz_io_providers = (

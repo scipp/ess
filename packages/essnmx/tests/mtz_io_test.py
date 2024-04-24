@@ -5,6 +5,7 @@ import pathlib
 import gemmi
 import pytest
 import sciline as sl
+import scipp as sc
 
 from ess.nmx.data import get_small_mtz_samples
 from ess.nmx.mtz_io import DEFAULT_SPACE_GROUP_DESC  # P 21 21 21
@@ -12,11 +13,14 @@ from ess.nmx.mtz_io import (
     MergedMtzDataFrame,
     MTZFileIndex,
     MTZFilePath,
+    NMXMtzDataArray,
+    NMXMtzDataFrame,
     RawMtz,
     get_reciprocal_asu,
     get_space_group,
     merge_mtz_dataframes,
     mtz_to_pandas,
+    nmx_mtz_dataframe_to_scipp_dataarray,
     process_merged_mtz_dataframe,
     process_single_mtz_to_dataframe,
     read_mtz_file,
@@ -52,7 +56,7 @@ def test_mtz_to_pandas_dataframe(gemmi_mtz_object: gemmi.Mtz) -> None:
         assert all(df[column.label] == column.array)
 
 
-def test_mtz_to_reduced_pandas_dataframe(gemmi_mtz_object: gemmi.Mtz) -> None:
+def test_mtz_to_process_pandas_dataframe(gemmi_mtz_object: gemmi.Mtz) -> None:
     df = process_single_mtz_to_dataframe(RawMtz(gemmi_mtz_object))
     for expected_colum in ["hkl", "d", "resolution", *"HKL", "wavelength", "I", "SIGI"]:
         assert expected_colum in df.columns
@@ -135,17 +139,39 @@ def merged_mtz_dataframe(
     return merge_mtz_dataframes(reduced_mtz_series)
 
 
-def test_reduce_merged_mtz_dataframe(
+@pytest.fixture
+def nmx_data_frame(
     mtz_series: sl.Series[MTZFileIndex, RawMtz],
     merged_mtz_dataframe: MergedMtzDataFrame,
-) -> None:
+) -> NMXMtzDataFrame:
     space_gr = get_space_group(mtz_series)
     reciprocal_asu = get_reciprocal_asu(space_gr)
 
-    nmx_df = process_merged_mtz_dataframe(
+    return process_merged_mtz_dataframe(
         merged_mtz_df=merged_mtz_dataframe,
         reciprocal_asu=reciprocal_asu,
         sg=space_gr,
     )
+
+
+def test_process_merged_mtz_dataframe(
+    merged_mtz_dataframe: MergedMtzDataFrame,
+    nmx_data_frame: NMXMtzDataFrame,
+) -> None:
     assert "hkl_asu" not in merged_mtz_dataframe.columns
-    assert "hkl_asu" in nmx_df.columns
+    assert "hkl_asu" in nmx_data_frame.columns
+
+
+@pytest.fixture
+def nmx_data_array(nmx_data_frame: NMXMtzDataFrame) -> NMXMtzDataArray:
+    return nmx_mtz_dataframe_to_scipp_dataarray(nmx_data_frame)
+
+
+def test_to_scipp_dataarray(
+    nmx_data_array: NMXMtzDataArray,
+) -> None:
+    # Check the intended modification
+    for indices_coord_name in ("hkl", "hkl_asu"):
+        assert nmx_data_array.coords[indices_coord_name].dtype == str
+
+    assert sc.all(nmx_data_array.data > 0)
