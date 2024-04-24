@@ -31,9 +31,9 @@ IntensityColumnName = NewType("IntensityColumnName", str)
 """The name of the intensity column in the mtz file."""
 DEFAULT_INTENSITY_COLUMN_NAME = IntensityColumnName("I")
 
-IntensitySigColumnName = NewType("IntensitySigColumnName", str)
+StdDevColumnName = NewType("StdDevColumnName", str)
 """The name of the standard uncertainty of intensity column in the mtz file."""
-DEFAULT_INTENSITY_SIG_COLUMN_NAME = IntensitySigColumnName("SIGI")
+DEFAULT_STD_DEV_COLUMN_NAME = StdDevColumnName("SIGI")
 
 # Computed types
 RawMtz = NewType("RawMtz", gemmi.Mtz)
@@ -42,12 +42,12 @@ RawMtzDataFrame = NewType("RawMtzDataFrame", pd.DataFrame)
 """The raw mtz dataframe."""
 SpaceGroup = NewType("SpaceGroup", gemmi.SpaceGroup)
 """The space group."""
-RapioAsu = NewType("RapioAsu", gemmi.ReciprocalAsu)
+ReciprocalAsymmetricUnit = NewType("ReciprocalAsymmetricUnit", gemmi.ReciprocalAsu)
 """The reciprocal asymmetric unit."""
 MergedMtzDataFrame = NewType("MergedMtzDataFrame", pd.DataFrame)
 """The merged mtz dataframe with derived columns."""
 NMXMtzDataFrame = NewType("NMXMtzDataFrame", pd.DataFrame)
-"""The reduced mtz dataframe with derived columns."""
+"""The processed mtz dataframe with derived columns."""
 NMXMtzDataArray = NewType("NMXMtzDataArray", sc.DataArray)
 
 
@@ -86,7 +86,7 @@ def process_single_mtz_to_dataframe(
     mtz: RawMtz,
     wavelength_column_name: WavelengthColumnName = DEFAULT_WAVELENGTH_COLUMN_NAME,
     intensity_column_name: IntensityColumnName = DEFAULT_INTENSITY_COLUMN_NAME,
-    intensity_sig_col_name: IntensitySigColumnName = DEFAULT_INTENSITY_SIG_COLUMN_NAME,
+    intensity_sig_col_name: StdDevColumnName = DEFAULT_STD_DEV_COLUMN_NAME,
 ) -> RawMtzDataFrame:
     """Select and derive columns from the original ``MtzDataFrame``.
 
@@ -101,7 +101,7 @@ def process_single_mtz_to_dataframe(
     intensity_column_name:
         The name of the intensity column in the mtz file.
 
-    sigma_intensity_column_name:
+    intensity_sig_col_name:
         The name of the standard uncertainty of intensity column in the mtz file.
 
     Returns
@@ -120,7 +120,7 @@ def process_single_mtz_to_dataframe(
 
         - ``wavelength_column_name`` -> ``'wavelength'``
         - ``intensity_column_name`` -> ``'I'``
-        - ``sigma_intensity_column_name`` -> ``'SIGI'``
+        - ``intensity_sig_col_name`` -> ``'SIGI'``
 
         Other columns are kept as they are.
 
@@ -148,7 +148,7 @@ def process_single_mtz_to_dataframe(
     mtz_df["resolution"] = (1 / mtz_df["d"]) ** 2 / 4
     mtz_df[DEFAULT_WAVELENGTH_COORD_NAME] = orig_df[wavelength_column_name]
     mtz_df[DEFAULT_INTENSITY_COLUMN_NAME] = orig_df[intensity_column_name]
-    mtz_df[DEFAULT_INTENSITY_SIG_COLUMN_NAME] = orig_df[intensity_sig_col_name]
+    mtz_df[DEFAULT_STD_DEV_COLUMN_NAME] = orig_df[intensity_sig_col_name]
     # Keep other columns
     for column in [col for col in orig_df.columns if col not in mtz_df]:
         mtz_df[column] = orig_df[column]
@@ -204,10 +204,10 @@ def get_space_group(
         )
 
 
-def get_reciprocal_asu(spacegroup: SpaceGroup) -> RapioAsu:
+def get_reciprocal_asu(spacegroup: SpaceGroup) -> ReciprocalAsymmetricUnit:
     """Returns the reciprocal asymmetric unit from the space group."""
 
-    return RapioAsu(gemmi.ReciprocalAsu(spacegroup))
+    return ReciprocalAsymmetricUnit(gemmi.ReciprocalAsu(spacegroup))
 
 
 def merge_mtz_dataframes(
@@ -221,20 +221,21 @@ def merge_mtz_dataframes(
 def process_merged_mtz_dataframe(
     *,
     merged_mtz_df: MergedMtzDataFrame,
-    rapio_asu: RapioAsu,
+    reciprocal_asu: ReciprocalAsymmetricUnit,
     sg: SpaceGroup,
 ) -> NMXMtzDataFrame:
-    """Reduces the shallow copy of a merged mtz dataframes.
+    """Modify/Add columns of the shallow copy of a merged mtz dataframes.
 
     This method must be called after merging multiple mtz dataframes.
     """
     merged_df = merged_mtz_df.copy(deep=False)
 
-    def _rapio_asu_to_asu(row: pd.Series) -> list[int]:
+    def _reciprocal_asu(row: pd.Series) -> list[int]:
         """Converts miller indices(HKL) to ASU indices."""
-        return rapio_asu.to_asu(row["hkl"], sg.operations())[0]
 
-    merged_df["hkl_asu"] = merged_df.apply(_rapio_asu_to_asu, axis=1)
+        return reciprocal_asu.to_asu(row["hkl"], sg.operations())[0]
+
+    merged_df["hkl_asu"] = merged_df.apply(_reciprocal_asu, axis=1)
     # Unpack the indices for later.
     merged_df[["H_ASU", "K_ASU", "L_ASU"]] = pd.DataFrame(
         merged_df["hkl_asu"].to_list(), index=merged_df.index
@@ -290,7 +291,7 @@ def _join_variables(*vars: sc.Variable, splitter: str = " ") -> sc.Variable:
 def nmx_mtz_dataframe_to_scipp_dataarray(
     nmx_mtz_df: NMXMtzDataFrame,
 ) -> NMXMtzDataArray:
-    """Converts the reduced mtz dataframe to a scipp dataarray.
+    """Converts the processed mtz dataframe to a scipp dataarray.
 
     The intensity, with column name :attr:`~DEFAULT_INTENSITY_COLUMN_NAME`
     becomes the data and the standard uncertainty of intensity,
@@ -331,7 +332,7 @@ def nmx_mtz_dataframe_to_scipp_dataarray(
         to_scipp,
         data_columns=[
             DEFAULT_INTENSITY_COLUMN_NAME,
-            DEFAULT_INTENSITY_SIG_COLUMN_NAME,
+            DEFAULT_STD_DEV_COLUMN_NAME,
         ],
         header_parser=parse_bracket_header,
     )
@@ -353,7 +354,7 @@ def nmx_mtz_dataframe_to_scipp_dataarray(
 
     # Add variances
     nmx_mtz_da = nmx_mtz_ds[DEFAULT_INTENSITY_COLUMN_NAME].copy(deep=False)
-    nmx_mtz_da.variances = nmx_mtz_ds[DEFAULT_INTENSITY_SIG_COLUMN_NAME].data ** 2
+    nmx_mtz_da.variances = nmx_mtz_ds[DEFAULT_STD_DEV_COLUMN_NAME].data ** 2
 
     # Return DataArray
     return NMXMtzDataArray(nmx_mtz_da)
@@ -373,6 +374,6 @@ mtz_io_providers = (
 mtz_io_params = {
     WavelengthColumnName: DEFAULT_WAVELENGTH_COLUMN_NAME,
     IntensityColumnName: DEFAULT_INTENSITY_COLUMN_NAME,
-    IntensitySigColumnName: DEFAULT_INTENSITY_SIG_COLUMN_NAME,
+    StdDevColumnName: DEFAULT_STD_DEV_COLUMN_NAME,
 }
 """The parameters related to the MTZ IO."""
