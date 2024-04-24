@@ -244,50 +244,6 @@ def process_merged_mtz_dataframe(
     return NMXMtzDataFrame(merged_df)
 
 
-def _join_variables(*vars: sc.Variable, splitter: str = " ") -> sc.Variable:
-    """Joins multiple integer dtype variables into a single string dtype variable.
-
-    Parameters
-    ----------
-    vars:
-        The integer dtype variables to join with same dimensions and length.
-
-    splitter:
-        The string to join the variables.
-
-    Returns
-    -------
-    :
-        The joined variable. It keeps the dimensions of the input variables.
-        But it drops the units since the output is a string.
-
-    Raises
-    ------
-    ValueError
-        If the input variables have different dimensions or lengths.
-
-    """
-    # Check if all variables are integer
-    if not all(var.dtype == int for var in vars):
-        raise ValueError("All variables must be integer type.")
-    # Check if all variables have the same dimensions
-    dims = set(var.dim for var in vars)
-    if len(dims) != 1:
-        raise ValueError("All variables must have the same dimensions.")
-    # Check if all variables have the same length
-    lengths = set(len(var.values) for var in vars)
-    if len(lengths) != 1:
-        raise ValueError("All variables must have the same length.")
-
-    return sc.array(
-        dims=dims,
-        values=[
-            splitter.join(str(val) for val in row)
-            for row in zip(*(var.values for var in vars))
-        ],
-    )
-
-
 def nmx_mtz_dataframe_to_scipp_dataarray(
     nmx_mtz_df: NMXMtzDataFrame,
 ) -> NMXMtzDataArray:
@@ -339,14 +295,17 @@ def nmx_mtz_dataframe_to_scipp_dataarray(
     # Pop the indices columns.
     # TODO: We can put them back once we support tuple[int] dtype.
     # See https://github.com/scipp/scipp/issues/3046 for more details.
-    # Temporarily, we will join them into a single string.
+    # Temporarily, we will manually convert them to a string.
     # It is done on the scipp variable instead of the dataframe
     # since columns with string dtype are converted to PyObject dtype
     # instead of string by `from_pandas_dataframe`.
-    nmx_mtz_ds = nmx_mtz_ds.drop_coords(["hkl", "hkl_asu"])
-    nmx_mtz_ds.coords["hkl_asu"] = _join_variables(
-        *(nmx_mtz_ds.coords[f"{idx_desc}_ASU"] for idx_desc in "HKL")
-    )
+    for indices_name in ("hkl", "hkl_asu"):
+        nmx_mtz_ds.coords[indices_name] = sc.array(
+            dims=nmx_mtz_ds.coords[indices_name].dims,
+            values=nmx_mtz_df[indices_name].astype(str).tolist()
+            # `astype`` is not enough to convert the dtype to string.
+            # The result of `astype` will have `PyObject` as a dtype.
+        )
     # Add units
     nmx_mtz_ds.coords[DEFAULT_WAVELENGTH_COORD_NAME].unit = sc.units.angstrom
     for key in nmx_mtz_ds.keys():

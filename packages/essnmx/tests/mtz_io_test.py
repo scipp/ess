@@ -5,7 +5,6 @@ import pathlib
 import gemmi
 import pytest
 import sciline as sl
-import scipp as sc
 
 from ess.nmx.data import get_small_mtz_samples
 from ess.nmx.mtz_io import DEFAULT_SPACE_GROUP_DESC  # P 21 21 21
@@ -14,7 +13,6 @@ from ess.nmx.mtz_io import (
     MTZFileIndex,
     MTZFilePath,
     RawMtz,
-    _join_variables,
     get_reciprocal_asu,
     get_space_group,
     merge_mtz_dataframes,
@@ -151,12 +149,3 @@ def test_reduce_merged_mtz_dataframe(
     )
     assert "hkl_asu" not in merged_mtz_dataframe.columns
     assert "hkl_asu" in nmx_df.columns
-
-
-def test_join_variables() -> None:
-    var_x = sc.array(dims=["xy"], values=[1, 1, 2, 3, 3], unit=None)
-    var_y = sc.array(dims=["xy"], values=[0, 1, 2, 0, 3], unit=None)
-    var_xy = sc.array(dims=["xy"], values=["1 0", "1 1", "2 2", "3 0", "3 3"])
-
-    joined = _join_variables(var_x, var_y, splitter=" ")
-    assert sc.identical(joined, var_xy)
