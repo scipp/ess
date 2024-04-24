@@ -142,11 +142,11 @@ def test_reduce_merged_mtz_dataframe(
     merged_mtz_dataframe: MergedMtzDataFrame,
 ) -> None:
     space_gr = get_space_group(mtz_series)
-    rapio_asu = get_reciprocal_asu(space_gr)
+    reciprocal_asu = get_reciprocal_asu(space_gr)
 
     nmx_df = process_merged_mtz_dataframe(
         merged_mtz_df=merged_mtz_dataframe,
-        rapio_asu=rapio_asu,
+        reciprocal_asu=reciprocal_asu,
         sg=space_gr,
     )
     assert "hkl_asu" not in merged_mtz_dataframe.columns
