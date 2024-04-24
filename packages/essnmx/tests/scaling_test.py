@@ -19,9 +19,18 @@ def nmx_data_array() -> sc.DataArray:
             DEFAULT_WAVELENGTH_COLUMN_NAME: sc.Variable(
                 dims=["row"], values=[1, 2, 3, 4, 5, 3, 3]
             ),
-            "H_ASU": sc.array(dims=["row"], values=[1, 4, 7, 10, 13, 7, 9]),
-            "K_ASU": sc.array(dims=["row"], values=[2, 5, 8, 11, 14, 8, 8]),
-            "L_ASU": sc.array(dims=["row"], values=[3, 6, 9, 12, 15, 9, 7]),
+            "hkl_asu": sc.array(
+                dims=["row"],
+                values=[
+                    "[1, 2, 3]",
+                    "[4, 5, 6]",
+                    "[7, 8, 9]",
+                    "[10, 11, 12]",
+                    "[13, 14, 15]",
+                    "[7, 8, 9]",
+                    "[9, 8, 7]",
+                ],
+            ),
         },
     )
     da.variances = (
@@ -52,13 +61,9 @@ def reference_bin(nmx_data_array: sc.DataArray) -> ReferenceIntensities:
 def test_reference_bin_scale_factor(reference_bin: ReferenceIntensities) -> None:
     """Test the scale factor for I."""
     scale_factor = estimate_scale_factor_per_hkl_asu_from_reference(reference_bin)
-    expected_groups = [(7, 8, 9), (9, 8, 7)]
+    expected_groups = [[7, 8, 9], [9, 8, 7]]
 
     assert len(scale_factor) == len(expected_groups)
     assert scale_factor.dim == "hkl_asu"
     for idx, group in enumerate(expected_groups):
-        hkl = tuple(
-            scale_factor.coords[coord][idx].value
-            for coord in (f"{idx}_ASU" for idx in "HKL")
-        )
-        assert hkl == group
+        assert scale_factor.coords['hkl_asu'][idx].value == str(group)
