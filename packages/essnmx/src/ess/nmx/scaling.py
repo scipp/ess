@@ -92,7 +92,7 @@ def get_reference_intensities(
         if reference_wavelength.dims:
             raise ValueError("Reference wavelength should be a scalar.")
         try:
-            return binned['wavelength', reference_wavelength].values.copy(deep=False)
+            return binned["wavelength", reference_wavelength].values.copy(deep=False)
         except IndexError:
             raise IndexError(f"{reference_wavelength} out of range.")
 
@@ -118,6 +118,9 @@ def estimate_scale_factor_per_hkl_asu_from_reference(
         = average( \\dfrac{1}{I_{(hkl)}} )
 
     Estimated scale factor is calculated per ``hkl_asu``.
+    This is part of the calculation of roughly-scaled-intensities
+    for fitting the scaling model.
+    The whole procedure is described in :func:`average_roughly_scaled_intensities`.
 
     Parameters
     ----------
@@ -146,10 +149,84 @@ def estimate_scale_factor_per_hkl_asu_from_reference(
     return EstimatedScaleFactor((1 / grouped).bins.mean())
 
 
+def average_roughly_scaled_intensities(
+    binned: WavelengthBinned,
+    scale_factor: EstimatedScaleFactor,
+) -> EstimatedScaledIntensities:
+    """Scale the intensities by the estimated scale factor.
+
+    Parameters
+    ----------
+    binned:
+        Binned data by wavelength(LAMBDA) to be grouped and scaled.
+
+    scale_factor:
+        The estimated scale factor.
+
+    Returns
+    -------
+    :
+        Average scaled intensties on ``hkl(asu)`` indices per wavelength.
+
+    Notes
+    -----
+    The average of roughly scaled intensities are calculated by the following formula:
+
+    .. math::
+
+        EstimatedScaledI_{\\lambda}
+        = \\dfrac{
+            \\sum_{k=1}^{N_{\\lambda, (hkl)}} EstimatedScaledI_{\\lambda, (hkl)}
+        }{
+            N_{\\lambda, (hkl)}
+        }
+
+    And scaled intensities on each ``hkl(asu)`` indices per wavelength
+    are calculated by the following formula:
+
+    .. math::
+        :nowrap:
+
+        \\begin{eqnarray}
+        EstimatedScaledI_{\\lambda, (hkl)} \\\\
+        = \\dfrac{
+            \\sum_{i=1}^{N_{reference, (hkl)}}
+            \\sum_{j=1}^{N_{\\lambda, (hkl)}}
+            \\dfrac{I_{j}}{I_{i}}
+        }{
+            N_{reference, (hkl)}*N_{\\lambda, (hkl)}
+        } \\\\
+        = \\dfrac{
+            \\sum_{i=1}^{N_{reference, (hkl)}} \\dfrac{1}{I_{i}}
+        }{
+            N_{reference, (hkl)}
+        } * \\dfrac{
+            \\sum_{j=1}^{N_{\\lambda, (hkl)}} I_{j}
+        }{
+            N_{\\lambda, (hkl)}
+        } \\\\
+        = average( \\dfrac{1}{I_{ref, (hkl)}} ) * average( I_{\\lambda, (hkl)} )
+        \\end{eqnarray}
+
+    Therefore the ``binned(wavelength dimension)`` should be
+    grouped along the ``hkl(asu)`` coordinate in the calculation.
+
+    """
+    # Group by HKL_EQ of the estimated scale factor from reference intensities
+    grouped = binned.group(scale_factor.coords['hkl_asu'])
+
+    # Drop variances of the scale factor
+    # Scale each group each bin by the scale factor
+    return EstimatedScaledIntensities(
+        sc.mean(grouped.bins.nanmean() * sc.values(scale_factor), dim="HKL_EQ")
+    )
+
+
 # Providers and default parameters
 scaling_providers = (
     get_wavelength_binned,
     get_reference_intensities,
     estimate_scale_factor_per_hkl_asu_from_reference,
+    average_roughly_scaled_intensities,
 )
 """Providers for scaling data."""
