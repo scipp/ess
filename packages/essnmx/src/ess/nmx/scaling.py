@@ -137,15 +137,13 @@ def estimate_scale_factor_per_hkl_asu_from_reference(
     """
     # Workaround for https://github.com/scipp/scipp/issues/3046
     # and https://github.com/scipp/scipp/issues/3425
-    # This workaround is implemented with an assumption that
-    # the size of all combinations of (H_ASU, K_ASU, L_ASU) is small enough
-    # to be handled in memory.
-    grouped = reference_intensities.group("H_ASU", "K_ASU", "L_ASU").flatten(
-        dims=["H_ASU", "K_ASU", "L_ASU"], to="hkl_asu"
-    )
-    non_empty = grouped[grouped.bins.size().data > sc.scalar(0, unit=None)]
+    import numpy as np
 
-    return EstimatedScaleFactor((1 / non_empty).bins.mean())
+    unique_hkl = np.unique(reference_intensities.coords["hkl_asu"].values)
+    group_var = sc.array(dims=["hkl_asu"], values=unique_hkl)
+    grouped = reference_intensities.group(group_var)
+
+    return EstimatedScaleFactor((1 / grouped).bins.mean())
 
 
 # Providers and default parameters
