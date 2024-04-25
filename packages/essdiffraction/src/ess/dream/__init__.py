@@ -4,6 +4,7 @@
 """
 Components for DREAM
 """
+
 import importlib.metadata
 
 from . import beamline, data

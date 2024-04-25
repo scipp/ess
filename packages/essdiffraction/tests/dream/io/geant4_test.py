@@ -10,7 +10,6 @@ import pytest
 import sciline
 import scipp as sc
 import scipp.testing
-
 from ess.dream import data, load_geant4_csv
 from ess.powder.types import DetectorName, FilePath, RawDetectorData, SampleRun
 
@@ -27,7 +26,7 @@ def load_file(file_path):
         return archive.read(archive.namelist()[0])
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def file(load_file):
     return BytesIO(load_file)
 
@@ -58,7 +57,7 @@ def test_load_geant4_csv_loads_expected_structure(file):
 
 
 @pytest.mark.parametrize(
-    'key', ('mantle', 'high_resolution', 'endcap_forward', 'endcap_backward')
+    'key', ['mantle', 'high_resolution', 'endcap_forward', 'endcap_backward']
 )
 def test_load_gean4_csv_set_weights_to_one(file, key):
     detector = load_geant4_csv(file)['instrument'][key]['events']

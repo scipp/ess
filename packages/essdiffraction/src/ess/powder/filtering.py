@@ -6,6 +6,7 @@ Prototype for event filtering.
 
 IMPORTANT Will be moved to a different place and potentially modified.
 """
+
 from contextlib import contextmanager
 from numbers import Real
 

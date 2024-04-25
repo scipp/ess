@@ -4,7 +4,6 @@
 import pytest
 import sciline
 import scipp as sc
-
 from ess.powder.types import (
     CalibrationFilename,
     DspacingBins,

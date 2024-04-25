@@ -7,6 +7,7 @@ WARNING This package will be removed in the future!
 It only serves as helpers to develop workflows until it is determined,
 which mechanisms and interfaces will be used at ESS.
 """
+
 from pathlib import Path
 from typing import Dict, Optional, Union
 

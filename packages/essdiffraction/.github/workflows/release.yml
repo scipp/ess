@@ -28,7 +28,7 @@ jobs:
             boa
       - run: conda mambabuild --channel conda-forge --channel scipp --no-anaconda-upload --override-channels --output-folder conda/package conda
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: conda-package-noarch
           path: conda/package/noarch/*.tar.bz2
@@ -42,7 +42,7 @@ jobs:
         with:
           fetch-depth: 0  # history required so setuptools_scm can determine version
 
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version-file: '.github/workflows/python-version-ci'
 
@@ -53,7 +53,7 @@ jobs:
         run: python -m build
 
       - name: Upload wheels
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist
@@ -67,7 +67,7 @@ jobs:
       id-token: write
     if: github.event_name == 'release' && github.event.action == 'published'
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
       - uses: pypa/gh-action-pypi-publish@v1.8.14
 
   upload_conda:
@@ -77,7 +77,7 @@ jobs:
     if: github.event_name == 'release' && github.event.action == 'published'
 
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
       - uses: mamba-org/setup-micromamba@v1
         with:
           environment-name: upload-env
@@ -101,7 +101,7 @@ jobs:
     permissions:
       contents: write  # This is needed so that the action can upload the asset
     steps:
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
     - name: Zip documentation
       run: |
         mv docs_html documentation-${{ github.ref_name }}
