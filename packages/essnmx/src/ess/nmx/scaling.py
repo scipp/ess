@@ -9,23 +9,40 @@ from .mtz_io import DEFAULT_WAVELENGTH_COORD_NAME, NMXMtzDataArray
 # User defined or configurable types
 WavelengthBinSize = NewType("WavelengthBinSize", int)
 """The size of the wavelength(LAMBDA) bins."""
+WavelengthRange = NewType("WavelengthRange", tuple[float, float])
+"""The range of the wavelength(LAMBDA) bins."""
+WavelengthBinCutProportion = NewType("WavelengthBinCutProportion", float)
+"""The proportion of the wavelength(LAMBDA) bins to be cut off on both sides."""
+DEFAULT_WAVELENGTH_CUT_PROPORTION = WavelengthBinCutProportion(0.25)
+"""Default proportion of the wavelength(LAMBDA) bins to be cut off from both sides."""
 ReferenceWavelength = NewType("ReferenceWavelength", sc.Variable)
 """The wavelength to select reference intensities."""
+NRoot = NewType("NRoot", int)
+"""The n-th root to be taken for the standard deviation."""
+NRootStdDevCut = NewType("NRootStdDevCut", float)
+"""The number of standard deviations to be cut from the n-th root data."""
 
 # Computed types
+"""Filtered mtz dataframe by the quad root of the sample standard deviation."""
 WavelengthBinned = NewType("WavelengthBinned", sc.DataArray)
 """Binned mtz dataframe by wavelength(LAMBDA) with derived columns."""
+FilteredWavelengthBinned = NewType("FilteredWavelengthBinned", sc.DataArray)
+"""Filtered binned data."""
 ReferenceIntensities = NewType("ReferenceIntensities", sc.DataArray)
 """Reference intensities selected by the wavelength."""
 EstimatedScaleFactor = NewType("EstimatedScaleFactor", sc.DataArray)
 """The estimated scale factor from the reference intensities per ``hkl_asu``."""
-EstimatedScaledIntensities = NewType("EstimatedScaledIntensities", float)
+EstimatedScaledIntensities = NewType("EstimatedScaledIntensities", sc.DataArray)
 """Scaled intensities by the estimated scale factor."""
+FilteredEstimatedScaledIntensities = NewType(
+    "FilteredEstimatedScaledIntensities", sc.DataArray
+)
 
 
 def get_wavelength_binned(
     mtz_da: NMXMtzDataArray,
     wavelength_bin_size: WavelengthBinSize,
+    wavelength_range: Optional[WavelengthRange] = None,
 ) -> WavelengthBinned:
     """Bin the whole dataset by wavelength(LAMBDA).
 
@@ -34,10 +51,51 @@ def get_wavelength_binned(
         Wavelength(LAMBDA) binning should always be done on the merged dataset.
 
     """
+    if wavelength_range is None:
+        binning_var = wavelength_bin_size
+    else:
+        binning_var = sc.linspace(
+            dim=DEFAULT_WAVELENGTH_COORD_NAME,
+            start=wavelength_range[0],
+            stop=wavelength_range[1],
+            num=wavelength_bin_size,
+            unit=mtz_da.coords[DEFAULT_WAVELENGTH_COORD_NAME].unit,
+        )
 
-    return WavelengthBinned(
-        mtz_da.bin({DEFAULT_WAVELENGTH_COORD_NAME: wavelength_bin_size})
-    )
+    binned = mtz_da.bin({DEFAULT_WAVELENGTH_COORD_NAME: binning_var})
+
+    return WavelengthBinned(binned)
+
+
+def filter_wavelegnth_binned(
+    binned: WavelengthBinned,
+    cut_proportion: WavelengthBinCutProportion = DEFAULT_WAVELENGTH_CUT_PROPORTION,
+) -> FilteredWavelengthBinned:
+    """Filter the binned data by cutting off the edges.
+
+    Parameters
+    ----------
+    binned:
+        The binned data by wavelength(LAMBDA).
+
+    cut_proportion:
+        The proportion of the wavelength(LAMBDA) bins to be cut off on both sides.
+        The default value is :attr:`~DEFAULT_WAVELENGTH_CUT_PROPORTION`.
+
+    Returns
+    -------
+    :
+        The filtered binned data.
+
+    """
+
+    if cut_proportion < 0 or cut_proportion >= 0.5:
+        raise ValueError(
+            "The cut proportion should be in the range of 0 < proportion < 0.5."
+        )
+
+    cut_size = int(len(binned) * cut_proportion)
+    return FilteredWavelengthBinned(binned[cut_size:-cut_size])
 
 
 def _is_bin_empty(binned: sc.DataArray, idx: int) -> bool:
@@ -45,7 +103,7 @@ def _is_bin_empty(binned: sc.DataArray, idx: int) -> bool:
     return binned[idx].values.size == 0
 
 
-def _get_middle_bin_idx(binned: WavelengthBinned) -> int:
+def _get_middle_bin_idx(binned: sc.DataArray) -> int:
     """Find the middle bin index.
 
     If the middle one is empty, the function will search for the nearest.
@@ -64,7 +122,7 @@ def _get_middle_bin_idx(binned: WavelengthBinned) -> int:
 
 
 def get_reference_intensities(
-    binned: WavelengthBinned,
+    binned: FilteredWavelengthBinned,
     reference_wavelength: Optional[ReferenceWavelength] = None,
 ) -> ReferenceIntensities:
     """Find the reference intensities by the wavelength.
@@ -150,7 +208,7 @@ def estimate_scale_factor_per_hkl_asu_from_reference(
 
 
 def average_roughly_scaled_intensities(
-    binned: WavelengthBinned,
+    binned: FilteredWavelengthBinned,
     scale_factor: EstimatedScaleFactor,
 ) -> EstimatedScaledIntensities:
     """Scale the intensities by the estimated scale factor.
@@ -213,20 +271,132 @@ def average_roughly_scaled_intensities(
 
     """
     # Group by HKL_EQ of the estimated scale factor from reference intensities
-    grouped = binned.group(scale_factor.coords['hkl_asu'])
+    grouped = binned.group(scale_factor.coords["hkl_asu"])
 
     # Drop variances of the scale factor
     # Scale each group each bin by the scale factor
     return EstimatedScaledIntensities(
-        sc.mean(grouped.bins.nanmean() * sc.values(scale_factor), dim="HKL_EQ")
+        sc.nanmean(grouped.bins.nanmean() * sc.values(scale_factor), dim="hkl_asu")
+    )
+
+
+def _calculate_sample_standard_deviation(var: sc.Variable) -> sc.Variable:
+    """Calculate the sample variation of the data.
+
+    This helper function is a temporary solution before
+    we release new scipp version with the statistics helper.
+    """
+    import numpy as np
+
+    return sc.scalar(np.nanstd(var.values))
+
+
+def cut_estimated_scaled_intensities_by_n_root_std_dev(
+    scaled_intensities: EstimatedScaledIntensities,
+    n_root: NRoot,
+    n_root_std_dev_cut: NRootStdDevCut,
+) -> FilteredEstimatedScaledIntensities:
+    """Filter the mtz data array by the quad root of the sample standard deviation.
+
+    Parameters
+    ----------
+    scaled_intensities:
+        The scaled intensities to be filtered.
+
+    n_root:
+        The n-th root to be taken for the standard deviation.
+        Higher n-th root means cutting is more effective on the right tail.
+        More explanation can be found in the notes.
+
+    n_root_std_dev_cut:
+        The number of standard deviations to be cut from the n-th root data.
+
+    Returns
+    -------
+    :
+        The filtered scaled intensities.
+
+    Notes
+    -----
+    *Reason for taking the n-th root of the intensities:*
+    The scaled intensities are expected to follow gaussian distribution
+    with the mean of 1.0 (since it is scaled by the reference intensities).
+    However, the data will have a long tail on the right side ( > 1.0).
+    Since the negative intensities are already filtered out,
+    the left tail should be preserved and the right tail should be cut off.
+
+    Therefore, the data is transformed by the n-th root to make the data
+    more symmetric and the standard deviation cut is applied to filter out.
+
+    Let :math:`m` be the minimum value of the data and :math:`M` be the maximum value.
+    The size of the left tail from the mean is :math:`1 - m, (1 > m > 0)`
+    and the size of the right tail is :math:`M - 1 ( M > 1)`.
+
+    As we take the n-th root of the data,
+    the left tail will be more stretched as
+
+    .. math::
+
+        1 - m^{1/n} > 1 - m \\\\
+        \\because m < m^{1/n} text{where } 0 < m < 1 \\text{ and } n > 1
+
+    and the right tail will be more compressed as
+
+    .. math::
+
+        M^{1/n} - 1 < M - 1 \\\\
+        \\because M > M^{1/n} \\text{where } M > 1 \\text{ and } n > 1
+
+    Comparing how much the tails are stretched or compressed,
+
+    .. math::
+
+        stretched = 1 - m^{1/n} - (1 - m) = m - m^{1/n} \\\\
+        compressed = M - 1 - (M^{1/n} - 1) = M^{1/n} - M
+
+    However, we are assuming the :math:`M >> 1` and :math:`m ~ 0`
+    in the scaled intensities.
+    The right tail will be more compressed than the left tail is stretched.
+    In this way the right tail will be cut off more effectively on the n-th root.
+
+    """
+    # Check the range of the n-th root
+    if n_root < 1:
+        raise ValueError("The n-th root should be equal to or greater than 1.")
+
+    copied = scaled_intensities.copy(deep=False)
+    # Take the midpoints of the wavelength bin coordinates
+    # to represent the average wavelength of the bin
+    # It is because the bin-edges are dropped while flattening the data
+    copied.coords[DEFAULT_WAVELENGTH_COORD_NAME] = sc.midpoints(
+        copied.coords[DEFAULT_WAVELENGTH_COORD_NAME],
+    )
+    nth_root = copied.data ** (1 / n_root)
+    # Calculate the mean
+    nth_root_mean = nth_root.mean()
+    # Calculate the sample standard deviation
+    nth_root_std_dev = _calculate_sample_standard_deviation(nth_root)
+    # Calculate the cut value
+    half_window = n_root_std_dev_cut * nth_root_std_dev
+    keep_range = (nth_root_mean - half_window, nth_root_mean + half_window)
+
+    # Filter the data
+    return FilteredEstimatedScaledIntensities(
+        copied[(nth_root > keep_range[0]) & (nth_root < keep_range[1])]
     )
 
 
 # Providers and default parameters
 scaling_providers = (
+    cut_estimated_scaled_intensities_by_n_root_std_dev,
     get_wavelength_binned,
+    filter_wavelegnth_binned,
     get_reference_intensities,
     estimate_scale_factor_per_hkl_asu_from_reference,
     average_roughly_scaled_intensities,
 )
 """Providers for scaling data."""
+
+scaling_params = {
+    WavelengthBinCutProportion: DEFAULT_WAVELENGTH_CUT_PROPORTION,
+}
