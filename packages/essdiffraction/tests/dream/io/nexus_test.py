@@ -4,7 +4,7 @@ import pytest
 from ess import dream
 
 
-@pytest.fixture
+@pytest.fixture()
 def filename():
     return dream.data.get_path('DREAM_nexus_sorted-2023-12-07.nxs')
 

@@ -25,7 +25,7 @@ def test_load_calibration_loads_required_data():
     reason='mantid.LoadDiffCal causes SEGFAULT on CI but seems to work fine elsewhere'
 )
 def test_load_calibration_requires_instrument_definition():
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='calibration'):
         load_calibration(data.calibration_file())
 
 
@@ -33,7 +33,7 @@ def test_load_calibration_requires_instrument_definition():
     reason='mantid.LoadDiffCal causes SEGFAULT on CI but seems to work fine elsewhere'
 )
 def test_load_calibration_can_only_have_1_instrument_definition():
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='instrument_name'):
         load_calibration(
             data.calibration_file(),
             instrument_name='POWGEN',
