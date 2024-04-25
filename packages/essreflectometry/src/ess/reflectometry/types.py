@@ -41,48 +41,23 @@ class ChopperCorrectedTofEvents(sciline.Scope[Run, sc.DataArray], sc.DataArray):
     """Event time data after correcting tof for choppers."""
 
 
-class WavelengthData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
-    """Event data with wavelengths computed for every event,
-    binned by `detector_number` (pixel of the detector frame)"""
-
-
-class ThetaData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
-    """Event data with wavelengths and scattering angle computed for each event,
-    binned by `detector_number` (pixel of the detector frame)"""
-
-
-class QData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
-    """Event data with wavelength, incidence angle,
-    and momentum transfer computed per event.
-    Binned by momentum transfer according to the QBins provider,
-    and by `detector_number` (pixel of the detector frame).
-    """
-
-
 class FootprintCorrectedData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
     """Event data with weight corrected for the footprint of the beam
     on the sample for the incidence angle of the event."""
 
 
-class HistogrammedQData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
-    """Histogram of event weights by momentum transfer and detector_number."""
+HistogrammedReference = NewType('HistogrammedReference', sc.DataArray)
+'''Intensity distribution of the reference measurement in (z, wavelength)'''
 
+CorrectionMatrix = NewType('CorrectionMatrix', sc.DataArray)
+'''Intensity distribution on the detector for a sample with :math`R(Q) = 1`'''
 
-class IofQ(sciline.Scope[Run, sc.DataArray], sc.DataArray):
-    """Normalization of the histogram.
-    The normalization for the sample consists of scaling
-    with the inverse of the total weight.
-    The normalization for the reference consists of
-    1. multiplication with the calibration factor from the supermirror calibration and
-    2. scaling with the inverse of the total weight."""
-
+NormalizationFactor = NewType('NormalizationFactor', sc.DataArray)
+''':code`CorrectionMatrix` with added coordinate "sample" Q'''
 
 NormalizedIofQ = NewType('NormalizedIofQ', sc.DataArray)
-'''Normalized histogram over momentum transfer and detector number,
+'''Intensity histogram over momentum transfer
 normalized by the calibrated reference measurement.'''
-
-NormalizedIofQ1D = NewType('NormalizedIofQ1D', sc.DataArray)
-'''Normalized histogram reduced to 1 dimension.'''
 
 QResolution = NewType('QResolution', sc.Variable)
 '''Resolution term for the momentum transfer for each bin of QBins.'''
@@ -93,8 +68,8 @@ QResolution = NewType('QResolution', sc.Variable)
 QBins = NewType('QBins', sc.Variable)
 '''Bins for the momentum transfer histogram.'''
 
-WavelengthEdges = NewType('WavelengthEdges', sc.Variable)
-'''Include only events within the specified edges.'''
+WBins = NewType('WBins', sc.Variable)
+'''Bins for the wavelength histogram'''
 
 
 class PoochFilename(sciline.Scope[Run, str], str):
@@ -126,3 +101,23 @@ class SampleSize(sciline.Scope[Run, sc.Variable], sc.Variable):
 Gravity = NewType('Gravity', sc.Variable)
 """This parameter determines if gravity is taken into account
 when computing the scattering angle and momentum transfer."""
+
+
+class FullData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
+    pass
+
+
+class MaskedFullData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
+    pass
+
+
+class DetectorRotation(sciline.Scope[Run, sc.Variable], sc.Variable):
+    '''The rotation of the detector relative to the horizon'''
+
+
+YIndexLimits = NewType('YIndexLimits', tuple[sc.Variable, sc.Variable])
+'''Limit of the (logical) 'y' detector pixel index'''
+
+
+ZIndexLimits = NewType('ZIndexLimits', tuple[sc.Variable, sc.Variable])
+'''Limit of the (logical) 'z' detector pixel index'''

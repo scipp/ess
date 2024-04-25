@@ -6,8 +6,8 @@ from ..reflectometry.tools import fwhm_to_std
 from ..reflectometry.types import (
     DetectorPosition,
     DetectorSpatialResolution,
+    FootprintCorrectedData,
     QBins,
-    QData,
     QResolution,
     Sample,
     SampleSize,
@@ -81,7 +81,7 @@ def sample_size_resolution(
 
 
 def angular_resolution(
-    da: QData[Sample],
+    da: FootprintCorrectedData[Sample],
     pixel_position: DetectorPosition[Sample],
     detector_spatial_resolution: DetectorSpatialResolution[Sample],
 ) -> AngularResolution:
@@ -103,8 +103,7 @@ def angular_resolution(
     :
         Angular resolution standard deviation
     """
-    theta = da.bins.coords['theta']
-    theta_unit = theta.bins.unit if theta.bins is not None else theta.unit
+    theta = da.coords['theta']
     return (
         fwhm_to_std(
             sc.to_unit(
@@ -112,7 +111,7 @@ def angular_resolution(
                     sc.to_unit(detector_spatial_resolution, 'm')
                     / sc.to_unit(pixel_position.fields.z, 'm', copy=False)
                 ),
-                theta_unit,
+                theta.unit,
                 copy=False,
             )
         )

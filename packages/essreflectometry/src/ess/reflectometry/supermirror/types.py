@@ -9,5 +9,5 @@ CriticalEdge = NewType('CriticalEdge', sc.Variable)
 '''Critical edge value of the supermirror'''
 Alpha = NewType('Alpha', sc.Variable)
 ''':math:`\\alpha` value of the supermirror'''
-SupermirrorCalibrationFactor = NewType('SupermirrorCalibrationFactor', sc.Variable)
-'''Calibration factor from the supermirror calibration'''
+SupermirrorReflectivityCorrection = NewType('SupermirrorCalibrationFactor', sc.Variable)
+'''Compensates the finite reflectivity of the supermirror'''
