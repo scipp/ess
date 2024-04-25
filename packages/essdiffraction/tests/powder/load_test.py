@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import pytest
-
 from ess.powder.external import load_calibration
 from ess.powder.external.powgen import data
 

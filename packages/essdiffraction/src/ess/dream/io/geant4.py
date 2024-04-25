@@ -8,8 +8,6 @@ from typing import Dict, Optional, Union
 import numpy as np
 import sciline
 import scipp as sc
-from ess.reduce.nexus import extract_detector_data
-
 from ess.powder.types import (
     DetectorName,
     FilePath,
@@ -17,6 +15,7 @@ from ess.powder.types import (
     RawDetectorData,
     RunType,
 )
+from ess.reduce.nexus import extract_detector_data
 
 MANTLE_DETECTOR_ID = sc.index(7)
 HIGH_RES_DETECTOR_ID = sc.index(8)
@@ -28,7 +27,7 @@ class AllRawDetectors(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
 
 
 def load_geant4_csv(
-    file_path: Union[FilePath[RunType], str, StringIO, BytesIO]
+    file_path: Union[FilePath[RunType], str, StringIO, BytesIO],
 ) -> AllRawDetectors[RunType]:
     """Load a GEANT4 CSV file for DREAM.
 
@@ -73,7 +72,7 @@ def extract_geant4_detector_data(
 
 
 def _load_raw_events(
-    file_path: Union[str, os.PathLike, StringIO, BytesIO]
+    file_path: Union[str, os.PathLike, StringIO, BytesIO],
 ) -> sc.DataArray:
     table = sc.io.load_csv(
         file_path, sep='\t', header_parser='bracket', data_columns=[]

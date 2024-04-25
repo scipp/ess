@@ -6,7 +6,6 @@ from typing import Tuple
 
 import numpy as np
 import scipp as sc
-
 from ess.powder import filtering
 
 

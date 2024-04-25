@@ -4,6 +4,7 @@
 """
 Components for powder diffraction experiments.
 """
+
 import importlib.metadata
 
 from . import conversion, correction, filtering, grouping, smoothing, uncertainty
