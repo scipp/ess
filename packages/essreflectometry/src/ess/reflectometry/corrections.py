@@ -1,25 +1,26 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-import numpy as np
 import scipp as sc
 
-from .supermirror import SupermirrorCalibrationFactor
+from .supermirror import SupermirrorReflectivityCorrection
 from .tools import fwhm_to_std
 from .types import (
     BeamSize,
+    CorrectionMatrix,
     FootprintCorrectedData,
-    HistogrammedQData,
-    IofQ,
+    HistogrammedReference,
+    MaskedFullData,
     Reference,
     Run,
-    Sample,
     SampleSize,
-    ThetaData,
+    WBins,
 )
 
 
 def footprint_correction(
-    data_array: ThetaData[Run], beam_size: BeamSize[Run], sample_size: SampleSize[Run]
+    data_array: MaskedFullData[Run],
+    beam_size: BeamSize[Run],
+    sample_size: SampleSize[Run],
 ) -> FootprintCorrectedData[Run]:
     """
     Perform the footprint correction on the data array that has a :code:`beam_size` and
@@ -29,91 +30,63 @@ def footprint_correction(
     ----------
     data_array:
         Data array to perform footprint correction on.
+    beam_size:
+        Full width half maximum of the beam.
+    sample_size:
+        Size of the sample
 
     Returns
     -------
     :
        Footprint corrected data array.
     """
-    size_of_beam_on_sample = beam_on_sample(beam_size, data_array.bins.coords['theta'])
+    size_of_beam_on_sample = beam_size / sc.sin(data_array.coords['theta'])
     footprint_scale = sc.erf(fwhm_to_std(sample_size / size_of_beam_on_sample))
-    data_array_fp_correction = data_array / footprint_scale.squeeze()
+    data_array_fp_correction = data_array / footprint_scale
     return FootprintCorrectedData[Run](data_array_fp_correction)
 
 
-def normalize_sample(
-    data_array: HistogrammedQData[Sample],
-) -> IofQ[Sample]:
-    return IofQ[Sample](normalize_by_counts(data_array))
+def compute_reference_intensity(
+    da: FootprintCorrectedData[Reference], wb: WBins
+) -> HistogrammedReference:
+    """Creates a reference intensity map over (z_index, wavelength).
+    Rationale:
+        The intensity expressed in those variables should not vary
+        with the experiment parameters (such as sample rotation).
+        Therefore it can be used to normalize sample measurements.
+    """
+    # TODO: use lower level function to histogram without binning
+    h = da.group('z_index').hist(wavelength=wb)
+    h.masks['too_few_events'] = h.data < sc.scalar(1, unit='counts')
+    h.coords['wavelength'] = sc.midpoints(h.coords['wavelength'])
+    # Add a Q coordinate to each bin, the Q is not completely unique in every bin,
+    # but it is close enough.
+    h.coords['Q'] = (
+        sc.DataArray(
+            data=da.coords['Q'],
+            coords=dict(
+                wavelength=da.coords['wavelength'], z_index=da.coords['z_index']
+            ),
+            masks=da.masks,
+        )
+        .group('z_index')
+        .bin(wavelength=wb)
+        .bins.mean()
+        .data
+    )
+    # TODO: why do we need the slice here?
+    return HistogrammedReference(h['z_index', : 14 * 32])
 
 
 def normalize_reference(
-    data_array: HistogrammedQData[Reference],
-    calibration_factor: SupermirrorCalibrationFactor,
-) -> IofQ[Reference]:
-    return IofQ[Reference](normalize_by_counts(calibration_factor * data_array))
-
-
-def normalize_by_counts(
-    data_array: sc.DataArray,
-) -> sc.DataArray:
-    """
-    Normalize the bin-summed data by the total number of counts.
-    If the data has variances, a check is performed to ensure that the counts in each
-    bin is much lower than the total counts. If this is not the case, an error is raised
-    because the normalization would introduce non-negligible correlations which are not
-    handled Scipp's basic error propagation. See Heybrock et al. (2023).
-    If the check passes, the input data is simply divided by the total number of counts,
-    ignoring the variances of the denominator.
-
-    Parameters
-    ----------
-    data_array:
-        Data array to be normalized.
-
-    Returns
-    -------
-    :
-        Normalized data array.
-    """
-    # Dividing by ncounts fails because ncounts also has variances, and this introduces
-    # correlations. According to Heybrock et al. (2023), we can however safely drop the
-    # variances of ncounts if counts_in_bin / ncounts is small everywhere.
-    ncounts = sc.values(data_array.sum())
-    norm = data_array / ncounts
-    if (data_array.variances is not None) and (norm.max().value > 0.1):
-        ind = np.argmax(data_array.values)
-        raise ValueError(
-            'One or more bins contain a number of counts of the same order as the '
-            'total number of counts. It is not safe to drop the variances of the '
-            'denominator when normalizing by the total number of counts in this '
-            f'regime. The maximum counts found is {data_array.values[ind]} at '
-            f'index {ind}. The total number of counts is {ncounts.value}.'
-        )
-    return norm
-
-
-def beam_on_sample(beam_size: sc.Variable, theta: sc.Variable) -> sc.Variable:
-    """
-    Size of the beam on the sample.
-
-    Parameters
-    ----------
-    beam_size:
-        Full width half maximum of the beam.
-    theta:
-        Angular of incidence with the sample.
-
-    Returns
-    -------
-    :
-        Size of the beam on the sample.
-    """
-    return beam_size / sc.sin(theta)
+    da: HistogrammedReference, cal: SupermirrorReflectivityCorrection
+) -> CorrectionMatrix:
+    '''Normalizes the reference intensity by the expected supermirror reflectivity'''
+    return CorrectionMatrix(da / cal)
 
 
 providers = (
     footprint_correction,
-    normalize_sample,
     normalize_reference,
+    compute_reference_intensity,
 )

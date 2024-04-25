@@ -3,7 +3,7 @@
 
 import importlib.metadata
 
-from . import calibrations, conversions, corrections, normalize, reductions
+from . import calibrations, conversions, corrections, normalize
 
 try:
     __version__ = importlib.metadata.version(__package__ or __name__)
@@ -15,7 +15,6 @@ providers = (
     *corrections.providers,
     *calibrations.providers,
     *normalize.providers,
-    *reductions.providers,
 )
 """
 List of providers for setting up a Sciline pipeline.
