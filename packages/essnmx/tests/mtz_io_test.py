@@ -5,6 +5,7 @@ import pathlib
 import gemmi
 import pytest
 import sciline as sl
+import scipp as sc
 
 from ess.nmx.data import get_small_mtz_samples
 from ess.nmx.mtz_io import DEFAULT_SPACE_GROUP_DESC  # P 21 21 21
@@ -12,14 +13,17 @@ from ess.nmx.mtz_io import (
     MergedMtzDataFrame,
     MTZFileIndex,
     MTZFilePath,
+    NMXMtzDataArray,
+    NMXMtzDataFrame,
     RawMtz,
     get_reciprocal_asu,
     get_space_group,
     merge_mtz_dataframes,
     mtz_to_pandas,
+    nmx_mtz_dataframe_to_scipp_dataarray,
+    process_merged_mtz_dataframe,
+    process_single_mtz_to_dataframe,
     read_mtz_file,
-    reduce_merged_mtz_dataframe,
-    reduce_single_mtz,
 )
 
 
@@ -52,16 +56,16 @@ def test_mtz_to_pandas_dataframe(gemmi_mtz_object: gemmi.Mtz) -> None:
         assert all(df[column.label] == column.array)
 
 
-def test_mtz_to_reduced_pandas_dataframe(gemmi_mtz_object: gemmi.Mtz) -> None:
-    df = reduce_single_mtz(RawMtz(gemmi_mtz_object))
-    for expected_colum in ["hkl", "d", "resolution", "I_div_SIGI", *"HKL"]:
+def test_mtz_to_process_pandas_dataframe(gemmi_mtz_object: gemmi.Mtz) -> None:
+    df = process_single_mtz_to_dataframe(RawMtz(gemmi_mtz_object))
+    for expected_colum in ["hkl", "d", "resolution", *"HKL", "wavelength", "I", "SIGI"]:
         assert expected_colum in df.columns
 
     for hkl_column in "HKL":
         assert hkl_column in df.columns
         assert df[hkl_column].dtype == int
 
-    assert "hkl_eq" not in df.columns  # It should be done on merged dataframes
+    assert "hkl_asu" not in df.columns  # It should be done on merged dataframes
 
 
 @pytest.fixture
@@ -127,22 +131,47 @@ def merged_mtz_dataframe(
     """Tests if the merged data frame has the expected columns."""
     reduced_mtz_series = sl.Series(
         row_dim=MTZFileIndex,
-        items={i_file: reduce_single_mtz(mtz) for i_file, mtz in mtz_series.items()},
+        items={
+            i_file: process_single_mtz_to_dataframe(mtz)
+            for i_file, mtz in mtz_series.items()
+        },
     )
     return merge_mtz_dataframes(reduced_mtz_series)
 
 
-def test_reduce_merged_mtz_dataframe(
+@pytest.fixture
+def nmx_data_frame(
     mtz_series: sl.Series[MTZFileIndex, RawMtz],
     merged_mtz_dataframe: MergedMtzDataFrame,
-) -> None:
+) -> NMXMtzDataFrame:
     space_gr = get_space_group(mtz_series)
-    rapio_asu = get_reciprocal_asu(space_gr)
+    reciprocal_asu = get_reciprocal_asu(space_gr)
 
-    nmx_df = reduce_merged_mtz_dataframe(
+    return process_merged_mtz_dataframe(
         merged_mtz_df=merged_mtz_dataframe,
-        rapio_asu=rapio_asu,
+        reciprocal_asu=reciprocal_asu,
         sg=space_gr,
     )
-    assert "hkl_eq" not in merged_mtz_dataframe.columns
-    assert "hkl_eq" in nmx_df.columns
+
+
+def test_process_merged_mtz_dataframe(
+    merged_mtz_dataframe: MergedMtzDataFrame,
+    nmx_data_frame: NMXMtzDataFrame,
+) -> None:
+    assert "hkl_asu" not in merged_mtz_dataframe.columns
+    assert "hkl_asu" in nmx_data_frame.columns
+
+
+@pytest.fixture
+def nmx_data_array(nmx_data_frame: NMXMtzDataFrame) -> NMXMtzDataArray:
+    return nmx_mtz_dataframe_to_scipp_dataarray(nmx_data_frame)
+
+
+def test_to_scipp_dataarray(
+    nmx_data_array: NMXMtzDataArray,
+) -> None:
+    # Check the intended modification
+    for indices_coord_name in ("hkl", "hkl_asu"):
+        assert nmx_data_array.coords[indices_coord_name].dtype == str
+
+    assert sc.all(nmx_data_array.data > 0)
