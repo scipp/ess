@@ -1,36 +1,34 @@
 # This file is used by beamlime to create a workflow for the Loki instrument.
 # The function `live_workflow` is registered as the entry point for the workflow.
-import scipp as sc
 import sciline
-
+import scipp as sc
 from scippneutron.io.nexus.load_nexus import JSONGroup
-from ess.loki.io import load_nexus_monitor, load_nexus_source
+
 from ess.loki.general import (
     get_monitor_data,
     get_source_position,
-    patch_monitor_data,
     monitor_to_tof,
+    patch_monitor_data,
 )
-from ess.sans.conversions import sans_monitor, monitor_to_wavelength
-from ess.sans.types import (
-    LoadedNeXusMonitor,
-    RawSource,
-    # FilePath,
-    # Filename,
-    # NeXusMonitorName,
-    SampleRun,
+from ess.loki.io import load_nexus_monitor, load_nexus_source
+from ess.sans.conversions import monitor_to_wavelength, sans_monitor
+from ess.sans.types import (  # FilePath,; Filename,; NeXusMonitorName,
     Incident,
+    LoadedNeXusMonitor,
+    MonitorType,
+    RawSource,
+    RunType,
+    SampleRun,
     Transmission,
     WavelengthBins,
     WavelengthMonitor,
-    RunType,
-    MonitorType,
 )
 
 
 class BinnedMonitor(
     sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
-): ...
+):
+    ...
 
 
 def _bin_monitor_wavelength(
@@ -88,6 +86,4 @@ def live_workflow(group: JSONGroup) -> dict[str, sc.DataArray]:
         (BinnedMonitor[SampleRun, Incident], BinnedMonitor[SampleRun, Transmission])
     )
 
-    return {
-        str(tp): result for tp, result in results.items()
-    }
+    return {str(tp): result for tp, result in results.items()}
