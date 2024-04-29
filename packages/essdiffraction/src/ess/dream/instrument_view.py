@@ -116,9 +116,9 @@ class InstrumentView:
 
         self.fig = self.scatter[0]
         self.cutting_tool = self.scatter[1]
-        self.artist_mapping = {
-            name: key for name, key in zip(self.data.keys(), self.fig.artists.keys())
-        }
+        self.artist_mapping = dict(
+            zip(self.data.keys(), self.fig.artists.keys(), strict=True)
+        )
         self.checkboxes = {
             key: ipw.Checkbox(
                 value=True,
@@ -130,8 +130,10 @@ class InstrumentView:
         }
 
         self.modules_widget = ipw.HBox(
-            [ipw.HTML(value="Modules: &nbsp;&nbsp;&nbsp;&nbsp;")]
-            + list(self.checkboxes.values())
+            [
+                ipw.HTML(value="Modules: &nbsp;&nbsp;&nbsp;&nbsp;"),
+                *self.checkboxes.values(),
+            ]
         )
         for key, ch in self.checkboxes.items():
             ch.key = key

@@ -4,11 +4,10 @@ import numpy as np
 import pytest
 import scipp as sc
 import scipp.testing
-
 from ess.powder.correction import apply_lorentz_correction, merge_calibration
 
 
-@pytest.fixture
+@pytest.fixture()
 def calibration():
     rng = np.random.default_rng(789236)
     n = 30
@@ -58,7 +57,7 @@ def test_merge_calibration_raises_if_spectrum_mismatch(calibration):
             )
         },
     )
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='spectrum of calibration and target'):
         merge_calibration(into=da, calibration=calibration)
 
 
@@ -70,7 +69,9 @@ def test_merge_calibration_raises_if_difa_exists(calibration):
             'difa': sc.ones(sizes={'spectrum': calibration.sizes['spectrum']}),
         },
     )
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match='there already is metadata with the same name'
+    ):
         merge_calibration(into=da, calibration=calibration)
 
 
@@ -82,7 +83,9 @@ def test_merge_calibration_raises_if_difc_exists(calibration):
             'difc': sc.ones(sizes={'spectrum': calibration.sizes['spectrum']}),
         },
     )
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match='there already is metadata with the same name'
+    ):
         merge_calibration(into=da, calibration=calibration)
 
 
@@ -94,7 +97,9 @@ def test_merge_calibration_raises_if_tzero_exists(calibration):
             'tzero': sc.ones(sizes={'spectrum': calibration.sizes['spectrum']}),
         },
     )
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match='there already is metadata with the same name'
+    ):
         merge_calibration(into=da, calibration=calibration)
 
 
@@ -108,13 +113,13 @@ def test_merge_calibration_raises_if_mask_exists(calibration):
             'calibration': sc.ones(sizes={'spectrum': calibration.sizes['spectrum']})
         },
     )
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='there already is a mask with the same name'):
         merge_calibration(into=da, calibration=calibration)
 
 
-@pytest.mark.parametrize('data_dtype', ('float32', 'float64'))
-@pytest.mark.parametrize('dspacing_dtype', ('float32', 'float64'))
-@pytest.mark.parametrize('two_theta_dtype', ('float32', 'float64'))
+@pytest.mark.parametrize('data_dtype', ['float32', 'float64'])
+@pytest.mark.parametrize('dspacing_dtype', ['float32', 'float64'])
+@pytest.mark.parametrize('two_theta_dtype', ['float32', 'float64'])
 def test_lorentz_correction_dense_1d_coords(
     data_dtype, dspacing_dtype, two_theta_dtype
 ):
@@ -204,9 +209,9 @@ def test_apply_lorentz_correction_dense_2d_coord():
         sc.testing.assert_identical(da.coords[key], original.coords[key])
 
 
-@pytest.mark.parametrize('data_dtype', ('float32', 'float64'))
-@pytest.mark.parametrize('dspacing_dtype', ('float32', 'float64'))
-@pytest.mark.parametrize('two_theta_dtype', ('float32', 'float64'))
+@pytest.mark.parametrize('data_dtype', ['float32', 'float64'])
+@pytest.mark.parametrize('dspacing_dtype', ['float32', 'float64'])
+@pytest.mark.parametrize('two_theta_dtype', ['float32', 'float64'])
 def test_apply_lorentz_correction_event_coords(
     data_dtype, dspacing_dtype, two_theta_dtype
 ):

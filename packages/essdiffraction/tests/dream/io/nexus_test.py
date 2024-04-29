@@ -1,11 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import pytest
-
 from ess import dream
 
 
-@pytest.fixture
+@pytest.fixture()
 def filename():
     return dream.data.get_path('DREAM_nexus_sorted-2023-12-07.nxs')
 

@@ -4,11 +4,10 @@
 import numpy as np
 import pytest
 import scipp as sc
-
 from ess.dream.instrument_view import InstrumentView
 
 
-@pytest.fixture
+@pytest.fixture()
 def fake_instrument_data(modules=('bank1', 'bank2', 'bank3', 'bank4', 'bank5')):
     rng = np.random.default_rng()
 
@@ -16,7 +15,7 @@ def fake_instrument_data(modules=('bank1', 'bank2', 'bank3', 'bank4', 'bank5')):
     npix = 300
     ntof = 100
     locations = range(len(modules))
-    for name, loc in zip(modules, locations):
+    for name, loc in zip(modules, locations, strict=True):
         position = rng.normal(loc=[0, 0, loc], scale=[0.2, 0.2, 0.05], size=[npix, 3])
         tof = sc.linspace('tof', 0, 1.0e5, ntof + 1, unit='us')
         values = rng.normal(loc=5.0e4, scale=2.0e4, size=[npix, ntof])
