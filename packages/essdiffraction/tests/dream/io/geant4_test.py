@@ -16,6 +16,11 @@ from ess.powder.types import DetectorName, FilePath, RawDetectorData, SampleRun
 
 @pytest.fixture(scope='module')
 def file_path():
+    return data.get_path('data_dream0_new_hkl_Si_pwd.csv.zip')
+
+
+@pytest.fixture(scope='module')
+def file_path_without_sans():
     return data.get_path('data_dream_with_sectors.csv.zip')
 
 
@@ -26,9 +31,21 @@ def load_file(file_path):
         return archive.read(archive.namelist()[0])
 
 
+# Load file into memory only once
+@pytest.fixture(scope='module')
+def load_file_without_sans(file_path_without_sans):
+    with zipfile.ZipFile(file_path_without_sans, 'r') as archive:
+        return archive.read(archive.namelist()[0])
+
+
 @pytest.fixture()
 def file(load_file):
     return BytesIO(load_file)
+
+
+@pytest.fixture()
+def file_without_sans(load_file_without_sans):
+    return BytesIO(load_file_without_sans)
 
 
 def assert_index_coord(
@@ -43,6 +60,22 @@ def assert_index_coord(
 
 def test_load_geant4_csv_loads_expected_structure(file):
     loaded = load_geant4_csv(file)
+    assert isinstance(loaded, sc.DataGroup)
+    assert loaded.keys() == {'instrument'}
+
+    instrument = loaded['instrument']
+    assert isinstance(instrument, sc.DataGroup)
+    assert instrument.keys() == {
+        'mantle',
+        'high_resolution',
+        'sans',
+        'endcap_forward',
+        'endcap_backward',
+    }
+
+
+def test_load_geant4_csv_loads_expected_structure_without_sans(file_without_sans):
+    loaded = load_geant4_csv(file_without_sans)
     assert isinstance(loaded, sc.DataGroup)
     assert loaded.keys() == {'instrument'}
 
@@ -125,6 +158,23 @@ def test_load_geant4_csv_high_resolution_has_expected_coords(file):
     assert 'tof' in hr.bins.coords
     assert 'wavelength' in hr.bins.coords
     assert 'position' in hr.bins.coords
+
+
+def test_load_geant4_csv_sans_has_expected_coords(file):
+    sans = load_geant4_csv(file)['instrument']['sans']['events']
+    assert_index_coord(sans.coords['module'])
+    assert_index_coord(sans.coords['segment'])
+    assert_index_coord(sans.coords['counter'])
+
+    # check ranges only if csv file contains events from SANS detectors
+    if len(sans.coords['module'].values) > 0:
+        assert_index_coord(sans.coords['wire'], values=set(range(1, 17)))
+        assert_index_coord(sans.coords['strip'], values=set(range(1, 33)))
+        assert_index_coord(sans.coords['sector'], values=set(range(1, 5)))
+
+    assert 'tof' in sans.bins.coords
+    assert 'wavelength' in sans.bins.coords
+    assert 'position' in sans.bins.coords
 
 
 def test_geant4_in_pipeline(file_path, file):

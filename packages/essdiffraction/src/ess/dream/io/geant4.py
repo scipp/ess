@@ -19,6 +19,7 @@ from ess.reduce.nexus import extract_detector_data
 
 MANTLE_DETECTOR_ID = sc.index(7)
 HIGH_RES_DETECTOR_ID = sc.index(8)
+SANS_DETECTOR_ID = sc.index(9)
 ENDCAPS_DETECTOR_IDS = tuple(map(sc.index, (3, 4, 5, 6)))
 
 
@@ -95,8 +96,8 @@ def _group(detectors: Dict[str, sc.DataArray]) -> Dict[str, sc.DataGroup]:
     elements = ('module', 'segment', 'counter', 'wire', 'strip')
 
     def group(key: str, da: sc.DataArray) -> sc.DataArray:
-        if key == 'high_resolution':
-            # Only the HR detector has sectors.
+        if key in ['high_resolution', 'sans']:
+            # Only the HR and SANS detectors have sectors.
             return da.group('sector', *elements)
         res = da.group(*elements)
         res.bins.coords.pop('sector', None)
@@ -110,7 +111,12 @@ def _split_detectors(
 ) -> Dict[str, sc.DataArray]:
     groups = data.group(
         sc.concat(
-            [MANTLE_DETECTOR_ID, HIGH_RES_DETECTOR_ID, *ENDCAPS_DETECTOR_IDS],
+            [
+                MANTLE_DETECTOR_ID,
+                HIGH_RES_DETECTOR_ID,
+                SANS_DETECTOR_ID,
+                *ENDCAPS_DETECTOR_IDS,
+            ],
             dim=detector_id_name,
         )
     )
@@ -123,6 +129,10 @@ def _split_detectors(
         high_res := _extract_detector(groups, detector_id_name, HIGH_RES_DETECTOR_ID)
     ) is not None:
         detectors['high_resolution'] = high_res.copy()
+    if (
+        sans := _extract_detector(groups, detector_id_name, SANS_DETECTOR_ID)
+    ) is not None:
+        detectors['sans'] = sans.copy()
 
     endcaps_list = [
         det
