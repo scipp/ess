@@ -8,6 +8,7 @@ from ess import loki, sans
 from ess.sans.types import (
     BackgroundRun,
     CorrectForGravity,
+    DirectBeam,
     EmptyBeamRun,
     Filename,
     NeXusDetectorName,
@@ -46,6 +47,8 @@ def make_params() -> dict:
     params[QxBins] = sc.linspace('Qx', start=-0.3, stop=0.3, num=91, unit='1/angstrom')
     params[QyBins] = sc.linspace('Qy', start=-0.2, stop=0.3, num=78, unit='1/angstrom')
     params[QBins] = sc.linspace('Q', start=0.01, stop=0.3, num=101, unit='1/angstrom')
+    # We have no direct-beam file for Loki currently
+    params[DirectBeam] = None
 
     return params
 

@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import uuid
-from typing import Optional
 
 import sciline
 import scipp as sc
@@ -49,7 +48,7 @@ from .uncertainty import broadcast_with_upper_bound_variances
 def preprocess_monitor_data(
     monitor: WavelengthMonitor[RunType, MonitorType],
     wavelength_bins: WavelengthBins,
-    non_background_range: Optional[NonBackgroundWavelengthRange],
+    non_background_range: NonBackgroundWavelengthRange,
     uncertainties: UncertaintyBroadcastMode,
 ) -> CleanMonitor[RunType, MonitorType]:
     """
@@ -126,6 +125,8 @@ def resample_direct_beam(
     :
         The direct beam function resampled to the requested resolution.
     """
+    if direct_beam is None:
+        return CleanDirectBeam(None)
     if sc.identical(direct_beam.coords['wavelength'], wavelength_bins):
         return direct_beam
     if direct_beam.variances is not None:

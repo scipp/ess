@@ -1,7 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-from typing import Optional
-
 import scipp as sc
 from scipp.core import concepts
 
@@ -176,7 +174,7 @@ _broadcasters = {
 def iofq_norm_wavelength_term(
     incident_monitor: CleanMonitor[ScatteringRunType, Incident],
     transmission_fraction: TransmissionFraction[ScatteringRunType],
-    direct_beam: Optional[CleanDirectBeam],
+    direct_beam: CleanDirectBeam,
     uncertainties: UncertaintyBroadcastMode,
 ) -> NormWavelengthTerm[ScatteringRunType]:
     """
@@ -304,7 +302,7 @@ def iofq_denominator(
 
 
 def process_wavelength_bands(
-    wavelength_bands: Optional[WavelengthBands],
+    wavelength_bands: WavelengthBands,
     wavelength_bins: WavelengthBins,
 ) -> ProcessedWavelengthBands:
     """

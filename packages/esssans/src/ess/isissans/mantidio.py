@@ -3,7 +3,7 @@
 """
 File loading functions for ISIS data using Mantid.
 """
-from typing import NewType, NoReturn, Optional
+from typing import NewType, NoReturn
 
 import sciline
 import scipp as sc
@@ -32,10 +32,10 @@ except ModuleNotFoundError:
     # Needed for type annotations
     MatrixWorkspace = object
 
-Period = NewType('Period', int)
+Period = NewType('Period', int | None)
 """Period number of the events."""
 
-CalibrationWorkspace = NewType('CalibrationWorkspace', MatrixWorkspace)
+CalibrationWorkspace = NewType('CalibrationWorkspace', MatrixWorkspace | None)
 
 
 class DataWorkspace(sciline.Scope[RunType, MatrixWorkspace], MatrixWorkspace):
@@ -77,7 +77,7 @@ def load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
 
 
 def from_data_workspace(
-    ws: DataWorkspace[RunType], calibration: Optional[CalibrationWorkspace]
+    ws: DataWorkspace[RunType], calibration: CalibrationWorkspace
 ) -> LoadedFileContents[RunType]:
     if calibration is not None:
         _mantid_simpleapi.CopyInstrumentParameters(
@@ -99,7 +99,7 @@ def from_data_workspace(
 
 
 def load_run(
-    filename: Filename[RunType], period: Optional[Period]
+    filename: FilePath[Filename[RunType]], period: Period
 ) -> DataWorkspace[RunType]:
     loaded = _mantid_simpleapi.Load(
         Filename=str(filename), LoadMonitors=True, StoreInADS=False

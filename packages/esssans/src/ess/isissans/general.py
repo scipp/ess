@@ -15,6 +15,7 @@ from ..sans.types import (
     LabFrameTransform,
     MonitorType,
     NeXusMonitorName,
+    NonBackgroundWavelengthRange,
     RawData,
     RawMonitor,
     RunNumber,
@@ -25,9 +26,12 @@ from ..sans.types import (
     TofData,
     TofMonitor,
     Transmission,
+    WavelengthBands,
+    WavelengthMask,
 )
 from .components import DetectorBankOffset, MonitorOffset, SampleOffset
 from .data import LoadedFileContents
+from .mantidio import Period
 
 
 def default_parameters() -> dict:
@@ -38,6 +42,10 @@ def default_parameters() -> dict:
         MonitorOffset[Transmission]: MonitorOffset(sc.vector([0, 0, 0], unit='m')),
         DetectorBankOffset: DetectorBankOffset(sc.vector([0, 0, 0], unit='m')),
         SampleOffset: SampleOffset(sc.vector([0, 0, 0], unit='m')),
+        NonBackgroundWavelengthRange: None,
+        WavelengthMask: None,
+        WavelengthBands: None,
+        Period: None,
     }
 
 

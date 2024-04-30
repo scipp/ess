@@ -12,6 +12,7 @@ from .types import (
     BackgroundRun,
     BackgroundSubtractedIofQ,
     Denominator,
+    DirectBeam,
     FinalSummedQ,
     Numerator,
     ProcessedWavelengthBands,
@@ -101,6 +102,7 @@ def direct_beam(*, workflow: Pipeline, I0: sc.Variable, niter: int = 5) -> List[
     full_wavelength_range = sc.concat([bands.min(), bands.max()], dim='wavelength')
 
     workflow = workflow.copy()
+    workflow[DirectBeam] = None
 
     wavelength_bins = workflow.compute(WavelengthBins)
     parts = (
@@ -130,8 +132,6 @@ def direct_beam(*, workflow: Pipeline, I0: sc.Variable, niter: int = 5) -> List[
     for _it in range(niter):
         # The first time we compute I(Q), the direct beam function is not in the
         # parameters, nor given by any providers, so it will be considered flat.
-        # TODO: Should we have a check that DirectBeam cannot be computed from the
-        # pipeline?
         workflow[WavelengthBands] = full_wavelength_range
         iofq_full = workflow.compute(BackgroundSubtractedIofQ)
         workflow[WavelengthBands] = bands
