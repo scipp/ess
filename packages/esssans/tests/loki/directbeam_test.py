@@ -9,7 +9,13 @@ from scipp.scipy.interpolate import interp1d
 
 from ess import sans
 from ess.loki.data import get_path
-from ess.sans.types import DimsToKeep, QBins, WavelengthBands, WavelengthBins
+from ess.sans.types import (
+    DimsToKeep,
+    PixelMaskFilename,
+    QBins,
+    WavelengthBands,
+    WavelengthBins,
+)
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from common import loki_providers, make_params  # noqa: E402
@@ -32,6 +38,7 @@ def test_can_compute_direct_beam_for_all_pixels():
     )
     providers = loki_providers()
     pipeline = sciline.Pipeline(providers, params=params)
+    pipeline.set_param_series(PixelMaskFilename, [])
     I0 = _get_I0(qbins=params[QBins])
 
     results = sans.direct_beam(pipeline=pipeline, I0=I0, niter=4)
@@ -61,6 +68,7 @@ def test_can_compute_direct_beam_with_overlapping_wavelength_bands():
 
     providers = loki_providers()
     pipeline = sciline.Pipeline(providers, params=params)
+    pipeline.set_param_series(PixelMaskFilename, [])
     I0 = _get_I0(qbins=params[QBins])
 
     results = sans.direct_beam(pipeline=pipeline, I0=I0, niter=4)
@@ -86,6 +94,7 @@ def test_can_compute_direct_beam_per_layer():
     params[DimsToKeep] = ['layer']
     providers = loki_providers()
     pipeline = sciline.Pipeline(providers, params=params)
+    pipeline.set_param_series(PixelMaskFilename, [])
     I0 = _get_I0(qbins=params[QBins])
 
     results = sans.direct_beam(pipeline=pipeline, I0=I0, niter=4)
@@ -110,9 +119,10 @@ def test_can_compute_direct_beam_per_layer_and_straw():
         params[WavelengthBins].max(),
         n_wavelength_bands + 1,
     )
-    params[DimsToKeep] = ['layer', 'straw']
+    params[DimsToKeep] = ('layer', 'straw')
     providers = loki_providers()
     pipeline = sciline.Pipeline(providers, params=params)
+    pipeline.set_param_series(PixelMaskFilename, [])
     I0 = _get_I0(qbins=params[QBins])
 
     results = sans.direct_beam(pipeline=pipeline, I0=I0, niter=4)

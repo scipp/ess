@@ -120,10 +120,13 @@ must be two wavelength values defining the start and end wavelength of the band.
 
 
 QBins = NewType('QBins', sc.Variable)
-"""Q binning"""
+"""Q binning used when computing IofQ"""
 
-QxyBins = NewType('QxyBins', dict[str, sc.Variable])
-"""Binning for 'Qx' and 'Qy'. If set this overrides QBins."""
+QxBins = NewType('QxBins', sc.Variable)
+"""Qx binning used when computing IofQxy"""
+
+QyBins = NewType('QyBins', sc.Variable)
+"""Qy binning used when computing IofQxy"""
 
 NonBackgroundWavelengthRange = NewType('NonBackgroundWavelengthRange', sc.Variable)
 """Range of wavelengths that are not considered background in the monitor"""
@@ -293,10 +296,23 @@ class CleanQ(
     """Result of converting :py:class:`CleanWavelengthMasked` to Q"""
 
 
+class CleanQxy(
+    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
+):
+    """Result of converting :py:class:`CleanWavelengthMasked` to Qx and Qy"""
+
+
 class CleanSummedQ(
     sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
 ):
     """Result of histogramming/binning :py:class:`CleanQ` over all pixels into Q bins"""
+
+
+class CleanSummedQxy(
+    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
+):
+    """Result of histogramming/binning :py:class:`CleanQxy` over all pixels into Qx and
+    Qy bins"""
 
 
 class CleanSummedQMergedBanks(
@@ -305,18 +321,37 @@ class CleanSummedQMergedBanks(
     """CleanSummedQ with merged banks"""
 
 
+class CleanSummedQxyMergedBanks(
+    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
+):
+    """CleanSummedQxy with merged banks"""
+
+
 class FinalSummedQ(
     sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
 ):
     """Final data into Q bins, in a state that is ready to be normalized."""
 
 
+class FinalSummedQxy(
+    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
+):
+    """Final data into Qx and Qy bins, in a state that is ready to be normalized."""
+
+
 class IofQ(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """I(Q)"""
 
 
+class IofQxy(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
+    """I(Qx, Qy)"""
+
+
 BackgroundSubtractedIofQ = NewType('BackgroundSubtractedIofQ', sc.DataArray)
 """I(Q) with background (given by I(Q) of the background run) subtracted"""
+
+BackgroundSubtractedIofQxy = NewType('BackgroundSubtractedIofQxy', sc.DataArray)
+"""I(Qx, Qy) with background (given by I(Qx, Qy) of the background run) subtracted"""
 
 
 class RawMonitor(

@@ -8,7 +8,10 @@ import scipp as sc
 from ..sans.types import (
     ConfiguredReducibleDataData,
     ConfiguredReducibleMonitor,
+    CorrectForGravity,
     DetectorPixelShape,
+    DimsToKeep,
+    Incident,
     LabFrameTransform,
     MonitorType,
     NeXusMonitorName,
@@ -21,8 +24,21 @@ from ..sans.types import (
     ScatteringRunType,
     TofData,
     TofMonitor,
+    Transmission,
 )
+from .components import DetectorBankOffset, MonitorOffset, SampleOffset
 from .data import LoadedFileContents
+
+
+def default_parameters() -> dict:
+    return {
+        CorrectForGravity: False,
+        DimsToKeep: tuple(),
+        MonitorOffset[Incident]: MonitorOffset(sc.vector([0, 0, 0], unit='m')),
+        MonitorOffset[Transmission]: MonitorOffset(sc.vector([0, 0, 0], unit='m')),
+        DetectorBankOffset: DetectorBankOffset(sc.vector([0, 0, 0], unit='m')),
+        SampleOffset: SampleOffset(sc.vector([0, 0, 0], unit='m')),
+    }
 
 
 def get_detector_data(

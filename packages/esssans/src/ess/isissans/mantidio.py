@@ -13,7 +13,6 @@ from scipp.constants import g
 from ..sans.types import DirectBeam, DirectBeamFilename, Filename, RunType, SampleRun
 from .data import LoadedFileContents
 from .io import CalibrationFilename, FilePath
-from .types import Period
 
 try:
     import mantid.api as _mantid_api
@@ -32,6 +31,8 @@ except ModuleNotFoundError:
     # Needed for type annotations
     MatrixWorkspace = object
 
+Period = NewType('Period', int)
+"""Period number of the events."""
 
 CalibrationWorkspace = NewType('CalibrationWorkspace', MatrixWorkspace)
 

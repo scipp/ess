@@ -12,7 +12,8 @@ from ess.sans.types import (
     Filename,
     NeXusDetectorName,
     QBins,
-    QxyBins,
+    QxBins,
+    QyBins,
     ReturnEvents,
     SampleRun,
     TransmissionRun,
@@ -21,8 +22,8 @@ from ess.sans.types import (
 )
 
 
-def make_params(qxy: bool = False) -> dict:
-    params = loki.default_parameters.copy()
+def make_params() -> dict:
+    params = loki.default_parameters()
 
     params[NeXusDetectorName] = 'larmor_detector'
     params[Filename[SampleRun]] = '60339-2022-02-28_2215.nxs'
@@ -38,15 +39,9 @@ def make_params(qxy: bool = False) -> dict:
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
     params[ReturnEvents] = False
 
-    if qxy:
-        params[QxyBins] = {
-            'Qx': sc.linspace('Qx', -0.3, 0.3, 91, unit='1/angstrom'),
-            'Qy': sc.linspace('Qy', -0.2, 0.3, 78, unit='1/angstrom'),
-        }
-    else:
-        params[QBins] = sc.linspace(
-            dim='Q', start=0.01, stop=0.3, num=101, unit='1/angstrom'
-        )
+    params[QxBins] = sc.linspace('Qx', start=-0.3, stop=0.3, num=91, unit='1/angstrom')
+    params[QyBins] = sc.linspace('Qy', start=-0.2, stop=0.3, num=78, unit='1/angstrom')
+    params[QBins] = sc.linspace('Q', start=0.01, stop=0.3, num=101, unit='1/angstrom')
 
     return params
 

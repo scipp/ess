@@ -14,6 +14,7 @@ from ess.sans.types import (
     BackgroundSubtractedIofQ,
     BeamCenter,
     CorrectForGravity,
+    DimsToKeep,
     DirectBeam,
     DirectBeamFilename,
     EmptyBeamRun,
@@ -37,7 +38,7 @@ from ess.sans.types import (
 
 
 def make_params() -> dict:
-    params = {}
+    params = isis.default_parameters()
     params[WavelengthBins] = sc.linspace(
         'wavelength', start=2.0, stop=16.0, num=141, unit='angstrom'
     )
@@ -70,6 +71,7 @@ def make_params() -> dict:
     params[CorrectForGravity] = True
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
     params[ReturnEvents] = False
+    params[DimsToKeep] = tuple()
     return params
 
 

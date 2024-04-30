@@ -12,7 +12,9 @@ from ..sans.common import gravity_vector
 from ..sans.types import (
     ConfiguredReducibleDataData,
     ConfiguredReducibleMonitor,
+    CorrectForGravity,
     DetectorPixelShape,
+    DimsToKeep,
     Incident,
     LabFrameTransform,
     LoadedNeXusDetector,
@@ -35,12 +37,16 @@ from ..sans.types import (
     Transmission,
 )
 
-default_parameters = {
-    NeXusMonitorName[Incident]: 'monitor_1',
-    NeXusMonitorName[Transmission]: 'monitor_2',
-    TransformationPath: 'transform',
-    PixelShapePath: 'pixel_shape',
-}
+
+def default_parameters() -> dict:
+    return {
+        CorrectForGravity: False,
+        DimsToKeep: tuple(),
+        NeXusMonitorName[Incident]: 'monitor_1',
+        NeXusMonitorName[Transmission]: 'monitor_2',
+        TransformationPath: 'transform',
+        PixelShapePath: 'pixel_shape',
+    }
 
 
 DETECTOR_BANK_RESHAPING = {

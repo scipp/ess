@@ -5,6 +5,7 @@ import importlib.metadata
 
 from . import components, data, general, io, sans2d
 from .components import DetectorBankOffset, MonitorOffset, SampleOffset
+from .general import default_parameters
 from .io import CalibrationFilename
 from .visualization import plot_flat_detector_xy
 
@@ -28,4 +29,5 @@ __all__ = [
     'SampleOffset',
     'plot_flat_detector_xy',
     'sans2d',
+    'default_parameters',
 ]

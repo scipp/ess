@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-
 from typing import Optional
 
 import scipp as sc
@@ -15,8 +14,10 @@ from .types import (
     DetectorPixelShape,
     EmptyBeamRun,
     FinalSummedQ,
+    FinalSummedQxy,
     Incident,
     IofQ,
+    IofQxy,
     LabFrameTransform,
     NormWavelengthTerm,
     Numerator,
@@ -338,13 +339,13 @@ def process_wavelength_bands(
     return wavelength_bands
 
 
-def normalize(
-    numerator: FinalSummedQ[ScatteringRunType, Numerator],
-    denominator: FinalSummedQ[ScatteringRunType, Denominator],
+def _normalize(
+    numerator: sc.DataArray,
+    denominator: sc.DataArray,
     return_events: ReturnEvents,
     uncertainties: UncertaintyBroadcastMode,
     wavelength_bands: ProcessedWavelengthBands,
-) -> IofQ[ScatteringRunType]:
+) -> sc.DataArray:
     """
     Perform normalization of counts as a function of Q.
     If the numerator contains events, we use the sc.lookup function to perform the
@@ -413,14 +414,55 @@ def normalize(
     numerator /= denominator.drop_coords(
         [name for name in denominator.coords if name not in denominator.dims]
     )
-    return IofQ[ScatteringRunType](numerator)
+    return numerator
+
+
+def normalize_q(
+    numerator: FinalSummedQ[ScatteringRunType, Numerator],
+    denominator: FinalSummedQ[ScatteringRunType, Denominator],
+    return_events: ReturnEvents,
+    uncertainties: UncertaintyBroadcastMode,
+    wavelength_bands: ProcessedWavelengthBands,
+) -> IofQ[ScatteringRunType]:
+    return IofQ[ScatteringRunType](
+        _normalize(
+            numerator=numerator,
+            denominator=denominator,
+            return_events=return_events,
+            uncertainties=uncertainties,
+            wavelength_bands=wavelength_bands,
+        )
+    )
+
+
+def normalize_qxy(
+    numerator: FinalSummedQxy[ScatteringRunType, Numerator],
+    denominator: FinalSummedQxy[ScatteringRunType, Denominator],
+    return_events: ReturnEvents,
+    uncertainties: UncertaintyBroadcastMode,
+    wavelength_bands: ProcessedWavelengthBands,
+) -> IofQxy[ScatteringRunType]:
+    return IofQxy[ScatteringRunType](
+        _normalize(
+            numerator=numerator,
+            denominator=denominator,
+            return_events=return_events,
+            uncertainties=uncertainties,
+            wavelength_bands=wavelength_bands,
+        )
+    )
+
+
+normalize_q.__doc__ = _normalize.__doc__
+normalize_qxy.__doc__ = _normalize.__doc__
 
 
 providers = (
     transmission_fraction,
     iofq_norm_wavelength_term,
     iofq_denominator,
-    normalize,
+    normalize_q,
+    normalize_qxy,
     process_wavelength_bands,
     solid_angle,
 )

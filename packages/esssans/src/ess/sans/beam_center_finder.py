@@ -20,7 +20,7 @@ from .i_of_q import bin_in_q, no_bank_merge, no_run_merge
 from .logging import get_logger
 from .normalization import (
     iofq_denominator,
-    normalize,
+    normalize_q,
     process_wavelength_bands,
     solid_angle,
 )
@@ -28,6 +28,7 @@ from .types import (
     BeamCenter,
     CalibratedMaskedData,
     DetectorPixelShape,
+    DimsToKeep,
     IofQ,
     LabFrameTransform,
     MaskedData,
@@ -173,7 +174,7 @@ def _iofq_in_quadrants(
         bin_in_q,
         no_run_merge,
         no_bank_merge,
-        normalize,
+        normalize_q,
         iofq_denominator,
         mask_wavelength,
         detector_to_wavelength,
@@ -190,6 +191,7 @@ def _iofq_in_quadrants(
     params[LabFrameTransform[SampleRun]] = transform
     params[ElasticCoordTransformGraph] = graph
     params[BeamCenter] = _offsets_to_vector(data=data, xy=xy, graph=graph)
+    params[DimsToKeep] = tuple()
 
     pipeline = sciline.Pipeline(providers, params=params)
     pipeline[MaskedData[SampleRun]] = data
