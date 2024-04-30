@@ -20,7 +20,7 @@ from .i_of_q import bin_in_q, no_bank_merge, no_run_merge
 from .logging import get_logger
 from .normalization import (
     iofq_denominator,
-    normalize,
+    normalize_q,
     process_wavelength_bands,
     solid_angle,
 )
@@ -174,7 +174,7 @@ def _iofq_in_quadrants(
         bin_in_q,
         no_run_merge,
         no_bank_merge,
-        normalize,
+        normalize_q,
         iofq_denominator,
         mask_wavelength,
         detector_to_wavelength,

@@ -12,6 +12,7 @@ from .types import (
     BeamCenter,
     CalibratedMaskedData,
     CleanQ,
+    CleanQxy,
     CleanWavelength,
     CleanWavelengthMasked,
     CorrectForGravity,
@@ -19,7 +20,6 @@ from .types import (
     MaskedData,
     MonitorType,
     Numerator,
-    QxyBins,
     RunType,
     ScatteringRunType,
     TofMonitor,
@@ -241,22 +241,41 @@ def mask_wavelength(
     return CleanWavelengthMasked[ScatteringRunType, IofQPart](da)
 
 
-def compute_Q(
-    data: CleanWavelengthMasked[ScatteringRunType, IofQPart],
-    graph: ElasticCoordTransformGraph,
-    compute_Qxy: Optional[QxyBins],
-) -> CleanQ[ScatteringRunType, IofQPart]:
-    """
-    Convert a data array from wavelength to Q.
-    """
+def _compute_Q(
+    data: sc.DataArray, graph: ElasticCoordTransformGraph, target: tuple[str, ...]
+) -> sc.DataArray:
     # Keep naming of wavelength dim, subsequent steps use a (Q[xy], wavelength) binning.
     return CleanQ[ScatteringRunType, IofQPart](
         data.transform_coords(
-            ('Qx', 'Qy') if compute_Qxy else 'Q',
+            target,
             graph=graph,
             keep_intermediate=False,
             rename_dims=False,
         )
+    )
+
+
+def compute_Q(
+    data: CleanWavelengthMasked[ScatteringRunType, IofQPart],
+    graph: ElasticCoordTransformGraph,
+) -> CleanQ[ScatteringRunType, IofQPart]:
+    """
+    Convert a data array from wavelength to Q.
+    """
+    return CleanQ[ScatteringRunType, IofQPart](
+        _compute_Q(data=data, graph=graph, target=('Q',))
+    )
+
+
+def compute_Qxy(
+    data: CleanWavelengthMasked[ScatteringRunType, IofQPart],
+    graph: ElasticCoordTransformGraph,
+) -> CleanQxy[ScatteringRunType, IofQPart]:
+    """
+    Convert a data array from wavelength to Qx and Qy.
+    """
+    return CleanQxy[ScatteringRunType, IofQPart](
+        _compute_Q(data=data, graph=graph, target=('Qx', 'Qy'))
     )
 
 
@@ -268,4 +287,5 @@ providers = (
     detector_to_wavelength,
     mask_wavelength,
     compute_Q,
+    compute_Qxy,
 )
