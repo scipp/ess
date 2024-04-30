@@ -27,6 +27,7 @@ from ess.sans.types import (
     Numerator,
     PixelMaskFilename,
     QBins,
+    QxyBins,
     ReturnEvents,
     SampleRun,
     UncertaintyBroadcastMode,
@@ -62,12 +63,12 @@ def test_pipeline_can_compute_IofQ(uncertainties, qxy: bool):
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('Qy', 'Qx') if qxy else ('Q',)
     if qxy:
-        assert sc.identical(result.coords['Qx'], params[QBins].edges['Qx'])
-        assert sc.identical(result.coords['Qy'], params[QBins].edges['Qy'])
+        assert sc.identical(result.coords['Qx'], params[QxyBins]['Qx'])
+        assert sc.identical(result.coords['Qy'], params[QxyBins]['Qy'])
         assert result.sizes['Qx'] == 90
         assert result.sizes['Qy'] == 77
     else:
-        assert sc.identical(result.coords['Q'], params[QBins].edges['Q'])
+        assert sc.identical(result.coords['Q'], params[QBins])
         assert result.sizes['Q'] == 100
 
 
@@ -112,13 +113,11 @@ def test_pipeline_can_compute_IofQ_in_event_mode(uncertainties, target, qxy: boo
 @pytest.mark.parametrize('qxy', [False, True])
 def test_pipeline_can_compute_IofQ_in_wavelength_bands(qxy: bool):
     params = make_params(qxy=qxy)
-    params[WavelengthBands] = WavelengthBands(
-        sc.linspace(
-            'wavelength',
-            params[WavelengthBins].min(),
-            params[WavelengthBins].max(),
-            11,
-        )
+    params[WavelengthBands] = sc.linspace(
+        'wavelength',
+        params[WavelengthBins].min(),
+        params[WavelengthBins].max(),
+        11,
     )
     pipeline = sciline.Pipeline(loki_providers(), params=params)
     pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])

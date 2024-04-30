@@ -119,31 +119,11 @@ being the band index and the second dimension being the wavelength. For each ban
 must be two wavelength values defining the start and end wavelength of the band."""
 
 
-class QBins:
-    """Q binning, either 1-D (Q) or 2-D (Qx,Qy)."""
+QBins = NewType('QBins', sc.Variable)
+"""Q binning"""
 
-    def __init__(
-        self,
-        bins: sc.Variable | None = None,
-        /,
-        *,
-        Qx: sc.Variable | None = None,
-        Qy: sc.Variable | None = None,
-    ):
-        if bins is not None and (Qx is not None or Qy is not None):
-            raise ValueError("Cannot specify Q bins and Qx/Qy at the same time.")
-        if bins is not None:
-            self.edges = {'Q': bins}
-        elif Qx is not None and Qy is not None:
-            # We make Qx the inner dim, such that plots naturally show Qx on the x-axis.
-            self.edges = {'Qy': Qy, 'Qx': Qx}
-        else:
-            raise ValueError("Must specify either Q bins or Qx and Qy.")
-
-    @property
-    def dims(self) -> tuple[str, ...]:
-        return tuple(self.edges)
-
+QxyBins = NewType('QxyBins', dict[str, sc.Variable])
+"""Binning for 'Qx' and 'Qy'. If set this overrides QBins."""
 
 NonBackgroundWavelengthRange = NewType('NonBackgroundWavelengthRange', sc.Variable)
 """Range of wavelengths that are not considered background in the monitor"""

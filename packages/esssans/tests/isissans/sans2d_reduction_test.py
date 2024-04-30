@@ -52,8 +52,8 @@ def make_params() -> dict:
     )
     params[sans2d.LowCountThreshold] = sc.scalar(100.0, unit='counts')
 
-    params[QBins] = QBins(
-        sc.linspace(dim='Q', start=0.01, stop=0.55, num=141, unit='1/angstrom')
+    params[QBins] = sc.linspace(
+        dim='Q', start=0.01, stop=0.55, num=141, unit='1/angstrom'
     )
     params[DirectBeamFilename] = 'DIRECT_SANS2D_REAR_34327_4m_8mm_16Feb16.dat'
     params[Filename[SampleRun]] = 'SANS2D00063114.nxs'
@@ -153,8 +153,8 @@ def test_pipeline_raisesVariancesError_if_normalization_errors_not_dropped():
 def test_uncertainty_broadcast_mode_drop_yields_smaller_variances():
     params = make_params()
     # Errors with the full range have some NaNs or infs
-    params[QBins] = QBins(
-        sc.linspace(dim='Q', start=0.01, stop=0.5, num=141, unit='1/angstrom')
+    params[QBins] = sc.linspace(
+        dim='Q', start=0.01, stop=0.5, num=141, unit='1/angstrom'
     )
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
     pipeline = sciline.Pipeline(sans2d_providers(), params=params)

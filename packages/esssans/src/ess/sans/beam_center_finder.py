@@ -186,7 +186,7 @@ def _iofq_in_quadrants(
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
     params[ReturnEvents] = False
     params[WavelengthBins] = wavelength_bins
-    params[QBins] = QBins(q_bins)
+    params[QBins] = q_bins
     params[DetectorPixelShape[SampleRun]] = pixel_shape
     params[LabFrameTransform[SampleRun]] = transform
     params[ElasticCoordTransformGraph] = graph

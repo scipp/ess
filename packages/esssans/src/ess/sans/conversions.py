@@ -19,7 +19,7 @@ from .types import (
     MaskedData,
     MonitorType,
     Numerator,
-    QBins,
+    QxyBins,
     RunType,
     ScatteringRunType,
     TofMonitor,
@@ -244,7 +244,7 @@ def mask_wavelength(
 def compute_Q(
     data: CleanWavelengthMasked[ScatteringRunType, IofQPart],
     graph: ElasticCoordTransformGraph,
-    qbins: QBins,
+    compute_Qxy: Optional[QxyBins],
 ) -> CleanQ[ScatteringRunType, IofQPart]:
     """
     Convert a data array from wavelength to Q.
@@ -252,7 +252,7 @@ def compute_Q(
     # Keep naming of wavelength dim, subsequent steps use a (Q[xy], wavelength) binning.
     return CleanQ[ScatteringRunType, IofQPart](
         data.transform_coords(
-            qbins.dims,
+            ('Qx', 'Qy') if compute_Qxy else 'Q',
             graph=graph,
             keep_intermediate=False,
             rename_dims=False,
