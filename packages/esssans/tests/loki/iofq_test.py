@@ -12,6 +12,7 @@ from ess.sans.conversions import ElasticCoordTransformGraph
 from ess.sans.types import (
     BackgroundRun,
     BackgroundSubtractedIofQ,
+    BackgroundSubtractedIofQxy,
     BeamCenter,
     CalibratedMaskedData,
     CleanWavelengthMasked,
@@ -23,11 +24,13 @@ from ess.sans.types import (
     FilePath,
     FinalSummedQ,
     IofQ,
+    IofQxy,
     NeXusDetectorName,
     Numerator,
     PixelMaskFilename,
     QBins,
-    QxyBins,
+    QxBins,
+    QyBins,
     ReturnEvents,
     SampleRun,
     UncertaintyBroadcastMode,
@@ -43,9 +46,8 @@ from common import (  # noqa: E402
 )
 
 
-@pytest.mark.parametrize('qxy', [False, True])
-def test_can_create_pipeline(qxy: bool):
-    pipeline = sciline.Pipeline(loki_providers(), params=make_params(qxy=qxy))
+def test_can_create_pipeline():
+    pipeline = sciline.Pipeline(loki_providers(), params=make_params())
     pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
     pipeline.get(BackgroundSubtractedIofQ)
 
@@ -56,18 +58,20 @@ def test_can_create_pipeline(qxy: bool):
 )
 @pytest.mark.parametrize('qxy', [False, True])
 def test_pipeline_can_compute_IofQ(uncertainties, qxy: bool):
-    params = make_params(qxy=qxy)
+    params = make_params()
     params[UncertaintyBroadcastMode] = uncertainties
     pipeline = sciline.Pipeline(loki_providers(), params=params)
     pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
-    result = pipeline.compute(BackgroundSubtractedIofQ)
-    assert result.dims == ('Qy', 'Qx') if qxy else ('Q',)
     if qxy:
-        assert sc.identical(result.coords['Qx'], params[QxyBins]['Qx'])
-        assert sc.identical(result.coords['Qy'], params[QxyBins]['Qy'])
+        result = pipeline.compute(BackgroundSubtractedIofQxy)
+        assert result.dims == ('Qy', 'Qx')
+        assert sc.identical(result.coords['Qx'], params[QxBins])
+        assert sc.identical(result.coords['Qy'], params[QyBins])
         assert result.sizes['Qx'] == 90
         assert result.sizes['Qy'] == 77
     else:
+        result = pipeline.compute(BackgroundSubtractedIofQ)
+        assert result.dims == ('Q',)
         assert sc.identical(result.coords['Q'], params[QBins])
         assert result.sizes['Q'] == 100
 
@@ -76,16 +80,24 @@ def test_pipeline_can_compute_IofQ(uncertainties, qxy: bool):
     'uncertainties',
     [UncertaintyBroadcastMode.drop, UncertaintyBroadcastMode.upper_bound],
 )
-@pytest.mark.parametrize('target', [IofQ[SampleRun], BackgroundSubtractedIofQ])
-@pytest.mark.parametrize('qxy', [False, True])
-def test_pipeline_can_compute_IofQ_in_event_mode(uncertainties, target, qxy: bool):
-    params = make_params(qxy=qxy)
+@pytest.mark.parametrize(
+    'target',
+    [
+        IofQ[SampleRun],
+        IofQxy[SampleRun],
+        BackgroundSubtractedIofQ,
+        BackgroundSubtractedIofQxy,
+    ],
+)
+def test_pipeline_can_compute_IofQ_in_event_mode(uncertainties, target):
+    params = make_params()
     params[UncertaintyBroadcastMode] = uncertainties
     pipeline = sciline.Pipeline(loki_providers(), params=params)
     pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
     reference = pipeline.compute(target)
     pipeline[ReturnEvents] = True
     result = pipeline.compute(target)
+    qxy = target in (IofQxy[SampleRun], BackgroundSubtractedIofQxy)
     assert result.bins is not None
     assert result.dims == ('Qy', 'Qx') if qxy else ('Q',)
     assert sc.allclose(
@@ -112,7 +124,7 @@ def test_pipeline_can_compute_IofQ_in_event_mode(uncertainties, target, qxy: boo
 
 @pytest.mark.parametrize('qxy', [False, True])
 def test_pipeline_can_compute_IofQ_in_wavelength_bands(qxy: bool):
-    params = make_params(qxy=qxy)
+    params = make_params()
     params[WavelengthBands] = sc.linspace(
         'wavelength',
         params[WavelengthBins].min(),
@@ -121,14 +133,16 @@ def test_pipeline_can_compute_IofQ_in_wavelength_bands(qxy: bool):
     )
     pipeline = sciline.Pipeline(loki_providers(), params=params)
     pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
-    result = pipeline.compute(BackgroundSubtractedIofQ)
+    result = pipeline.compute(
+        BackgroundSubtractedIofQxy if qxy else BackgroundSubtractedIofQ
+    )
     assert result.dims == ('band', 'Qy', 'Qx') if qxy else ('band', 'Q')
     assert result.sizes['band'] == 10
 
 
 @pytest.mark.parametrize('qxy', [False, True])
 def test_pipeline_can_compute_IofQ_in_overlapping_wavelength_bands(qxy: bool):
-    params = make_params(qxy=qxy)
+    params = make_params()
     # Bands have double the width
     edges = sc.linspace(
         'band', params[WavelengthBins].min(), params[WavelengthBins].max(), 12
@@ -138,18 +152,22 @@ def test_pipeline_can_compute_IofQ_in_overlapping_wavelength_bands(qxy: bool):
     ).transpose()
     pipeline = sciline.Pipeline(loki_providers(), params=params)
     pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
-    result = pipeline.compute(BackgroundSubtractedIofQ)
+    result = pipeline.compute(
+        BackgroundSubtractedIofQxy if qxy else BackgroundSubtractedIofQ
+    )
     assert result.dims == ('band', 'Qy', 'Qx') if qxy else ('band', 'Q')
     assert result.sizes['band'] == 10
 
 
 @pytest.mark.parametrize('qxy', [False, True])
 def test_pipeline_can_compute_IofQ_in_layers(qxy: bool):
-    params = make_params(qxy=qxy)
+    params = make_params()
     params[DimsToKeep] = ['layer']
     pipeline = sciline.Pipeline(loki_providers(), params=params)
     pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
-    result = pipeline.compute(BackgroundSubtractedIofQ)
+    result = pipeline.compute(
+        BackgroundSubtractedIofQxy if qxy else BackgroundSubtractedIofQ
+    )
     assert result.dims == ('layer', 'Qy', 'Qx') if qxy else ('layer', 'Q')
     assert result.sizes['layer'] == 4
 
