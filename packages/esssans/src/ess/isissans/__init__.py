@@ -21,7 +21,6 @@ del importlib
 __all__ = [
     'CalibrationFilename',
     'DetectorBankOffset',
-    'apply_component_user_offsets_to_raw_data',
     'data',
     'io',
     'MonitorOffset',
