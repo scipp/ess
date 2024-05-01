@@ -9,6 +9,7 @@ from ess.sans import providers as sans_providers
 from ess.sans.types import MaskedData, SampleRun, ScatteringRunType, TofData
 
 from .general import default_parameters
+from .mantidio import providers as mantid_providers
 
 DetectorEdgeMask = NewType('DetectorEdgeMask', sc.Variable)
 """Detector edge mask"""
@@ -76,5 +77,5 @@ def Sans2dWorkflow() -> sciline.Pipeline:
     from . import providers as isis_providers
 
     params = default_parameters()
-    sans2d_providers = sans_providers + isis_providers + providers
+    sans2d_providers = sans_providers + isis_providers + mantid_providers + providers
     return sciline.Pipeline(providers=sans2d_providers, params=params)

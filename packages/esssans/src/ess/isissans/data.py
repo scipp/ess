@@ -2,6 +2,7 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Dict
 
 import sciline
@@ -10,6 +11,7 @@ import scipp as sc
 from ..sans.data import Registry
 from ..sans.types import (
     BackgroundRun,
+    DataFolder,
     DirectBeam,
     DirectBeamFilename,
     Filename,
@@ -101,15 +103,29 @@ def get_path(filename: FilenameType) -> FilePath[FilenameType]:
             return reg.registry.get_path(filename)
 
 
+def get_sans2d_tutorial_data_folder() -> DataFolder:
+    """Get the path to the folder containing the SANS2D tutorial data."""
+    for filename in (
+        'DIRECT_SANS2D_REAR_34327_4m_8mm_16Feb16.dat.h5',
+        'SANS2D00063091.nxs.h5',
+        'SANS2D00063114.nxs.h5',
+        'SANS2D00063159.nxs.h5',
+    ):
+        path = get_path(filename)
+    return DataFolder(str(Path(path).parent))
+
+
 class LoadedFileContents(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
     """Contents of a loaded file."""
 
 
-def load_run(filename: FilePath[Filename[RunType]]) -> LoadedFileContents[RunType]:
+def load_tutorial_run(
+    filename: FilePath[Filename[RunType]],
+) -> LoadedFileContents[RunType]:
     return LoadedFileContents[RunType](sc.io.load_hdf5(filename))
 
 
-def load_direct_beam(filename: FilePath[DirectBeamFilename]) -> DirectBeam:
+def load_tutorial_direct_beam(filename: FilePath[DirectBeamFilename]) -> DirectBeam:
     return DirectBeam(sc.io.load_hdf5(filename))
 
 
@@ -129,6 +145,3 @@ def transmission_from_background_run(
     Use transmission from a background run, instead of dedicated run.
     """
     return LoadedFileContents[TransmissionRun[BackgroundRun]](data)
-
-
-providers = (get_path, load_run, load_direct_beam)
