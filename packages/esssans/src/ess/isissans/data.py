@@ -89,6 +89,25 @@ def get_sans2d_tutorial_data_folder() -> DataFolder:
     return DataFolder(str(Path(path).parent))
 
 
+def get_zoom_tutorial_data_folder() -> DataFolder:
+    """Get the path to the folder containing the Zoom tutorial data."""
+    for filename in (
+        'ZOOM00034786.nxs.h5.zip',
+        'ZOOM00034787.nxs.h5',
+        '192tubeCalibration_11-02-2019_r5_10lines.nxs',
+        'Direct_Zoom_4m_8mm_100522.txt.h5',
+        'andru_test.xml',
+        'left_beg_18_2.xml',
+        'right_beg_18_2.xml',
+        'small_bs_232.xml',
+        'small_BS_31032023.xml',
+        'tube_1120_bottom.xml',
+        'tubes_beg_18_2.xml',
+    ):
+        path = get_path(filename)
+    return DataFolder(str(Path(path).parent))
+
+
 class LoadedFileContents(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
     """Contents of a loaded file."""
 
