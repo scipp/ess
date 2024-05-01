@@ -2,9 +2,13 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 from typing import NewType, Optional
 
+import sciline
 import scipp as sc
 
-from ..sans.types import MaskedData, SampleRun, ScatteringRunType, TofData
+from ess.sans import providers as sans_providers
+from ess.sans.types import MaskedData, SampleRun, ScatteringRunType, TofData
+
+from .general import default_parameters
 
 DetectorEdgeMask = NewType('DetectorEdgeMask', sc.Variable)
 """Detector edge mask"""
@@ -66,3 +70,11 @@ def mask_detectors(
 
 
 providers = (detector_edge_mask, sample_holder_mask, mask_detectors)
+
+
+def Sans2dWorkflow() -> sciline.Pipeline:
+    from . import providers as isis_providers
+
+    params = default_parameters()
+    sans2d_providers = sans_providers + isis_providers + providers
+    return sciline.Pipeline(providers=sans2d_providers, params=params)
