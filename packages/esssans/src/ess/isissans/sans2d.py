@@ -75,6 +75,7 @@ providers = (detector_edge_mask, sample_holder_mask, mask_detectors)
 
 
 def Sans2dWorkflow() -> sciline.Pipeline:
+    """Create Sans2d workflow with default parameters."""
     from . import providers as isis_providers
 
     params = default_parameters()
@@ -83,6 +84,12 @@ def Sans2dWorkflow() -> sciline.Pipeline:
 
 
 def Sans2dTutorialWorkflow() -> sciline.Pipeline:
+    """
+    Create Sans2d tutorial workflow.
+
+    Equivalent to :func:`Sans2dWorkflow`, but with loaders for tutorial data instead
+    of Mantid-based loaders.
+    """
     workflow = Sans2dWorkflow()
     workflow.insert(load_tutorial_run)
     workflow.insert(load_tutorial_direct_beam)

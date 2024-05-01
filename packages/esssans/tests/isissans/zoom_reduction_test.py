@@ -7,6 +7,7 @@ from ess import isissans as isis
 from ess import sans
 from ess.sans.types import (
     CorrectForGravity,
+    DataFolder,
     Filename,
     Incident,
     IofQ,
@@ -34,6 +35,7 @@ def make_params() -> dict:
         isis.SampleOffset: sc.vector([0.0, 0.0, 0.11], unit='m'),
         isis.DetectorBankOffset: sc.vector([0.0, 0.0, 0.5], unit='m'),
     }
+    params[DataFolder] = isis.data.get_zoom_tutorial_data_folder()
 
     params[NeXusMonitorName[Incident]] = 'monitor3'
     params[NeXusMonitorName[Transmission]] = 'monitor5'
