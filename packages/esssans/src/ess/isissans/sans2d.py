@@ -8,6 +8,7 @@ import scipp as sc
 from ess.sans import providers as sans_providers
 from ess.sans.types import MaskedData, SampleRun, ScatteringRunType, TofData
 
+from .data import load_tutorial_direct_beam, load_tutorial_run
 from .general import default_parameters
 from .mantidio import providers as mantid_providers
 
@@ -79,3 +80,10 @@ def Sans2dWorkflow() -> sciline.Pipeline:
     params = default_parameters()
     sans2d_providers = sans_providers + isis_providers + mantid_providers + providers
     return sciline.Pipeline(providers=sans2d_providers, params=params)
+
+
+def Sans2dTutorialWorkflow() -> sciline.Pipeline:
+    workflow = Sans2dWorkflow()
+    workflow.insert(load_tutorial_run)
+    workflow.insert(load_tutorial_direct_beam)
+    return workflow

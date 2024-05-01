@@ -79,11 +79,12 @@ def sans2d_providers():
     return list(
         sans.providers
         + isis.providers
-        + isis.data.providers
         + isis.sans2d.providers
         + (
             isis.data.transmission_from_background_run,
             isis.data.transmission_from_sample_run,
+            isis.data.load_tutorial_direct_beam,
+            isis.data.load_tutorial_run,
             sans.beam_center_finder.beam_center_from_center_of_mass,
         )
     )
