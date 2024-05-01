@@ -28,10 +28,12 @@ from ess.sans.types import (
 def make_params() -> dict:
     params = {
         **isis.default_parameters(),
-        sans.types.DirectBeamFilename: 'Direct_Zoom_4m_8mm_100522.txt',
+        sans.types.DirectBeamFilename: 'Direct_Zoom_4m_8mm_100522.txt.h5',
         isis.CalibrationFilename: '192tubeCalibration_11-02-2019_r5_10lines.nxs',
-        Filename[sans.types.SampleRun]: 'ZOOM00034786.nxs',
-        Filename[sans.types.EmptyBeamRun]: 'ZOOM00034787.nxs',
+        Filename[
+            sans.types.SampleRun
+        ]: 'ZOOM00034786.nxs.h5.zip.unzip/ZOOM00034786.nxs.h5',
+        Filename[sans.types.EmptyBeamRun]: 'ZOOM00034787.nxs.h5',
         isis.SampleOffset: sc.vector([0.0, 0.0, 0.11], unit='m'),
         isis.DetectorBankOffset: sc.vector([0.0, 0.0, 0.5], unit='m'),
     }
@@ -74,9 +76,12 @@ def zoom_providers():
     return list(
         sans.providers
         + isis.providers
+        + isis.mantidio.providers
         + (
             isis.data.transmission_from_background_run,
             isis.data.transmission_from_sample_run,
+            isis.data.load_tutorial_direct_beam,
+            isis.data.load_tutorial_run,
             sans.beam_center_finder.beam_center_from_center_of_mass,
         )
     )
