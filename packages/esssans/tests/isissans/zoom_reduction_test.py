@@ -72,7 +72,6 @@ def zoom_providers():
     return list(
         sans.providers
         + isis.providers
-        + isis.data.providers
         + (
             isis.data.transmission_from_background_run,
             isis.data.transmission_from_sample_run,
