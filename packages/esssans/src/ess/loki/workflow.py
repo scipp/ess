@@ -1,7 +1,5 @@
 # This file is used by beamlime to create a workflow for the Loki instrument.
 # The callable `live_workflow` is registered as the entry point for the workflow.
-from typing import NewType
-
 import sciline
 import scipp as sc
 import scippnexus as snx
@@ -33,9 +31,6 @@ class MonitorHistogram(
     sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
 ):
     ...
-
-
-IofQHistogram = NewType("IofQHistogram", sc.DataArray)
 
 
 def _hist_monitor_wavelength(
