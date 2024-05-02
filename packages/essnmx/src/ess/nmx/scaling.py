@@ -28,6 +28,8 @@ WavelengthBinned = NewType("WavelengthBinned", sc.DataArray)
 """Binned mtz dataframe by wavelength(LAMBDA) with derived columns."""
 FilteredWavelengthBinned = NewType("FilteredWavelengthBinned", sc.DataArray)
 """Filtered binned data."""
+SelectedReferenceWavelength = NewType("SelectedReferenceWavelength", sc.Variable)
+"""The wavelength to select reference intensities."""
 ReferenceIntensities = NewType("ReferenceIntensities", sc.DataArray)
 """Reference intensities selected by the wavelength."""
 EstimatedScaleFactor = NewType("EstimatedScaleFactor", sc.DataArray)
@@ -94,8 +96,10 @@ def filter_wavelegnth_binned(
             "The cut proportion should be in the range of 0 < proportion < 0.5."
         )
 
-    cut_size = int(len(binned) * cut_proportion)
-    return FilteredWavelengthBinned(binned[cut_size:-cut_size])
+    cut_size = int(binned.sizes[DEFAULT_WAVELENGTH_COORD_NAME] * cut_proportion)
+    return FilteredWavelengthBinned(
+        binned[DEFAULT_WAVELENGTH_COORD_NAME, cut_size:-cut_size]
+    )
 
 
 def _is_bin_empty(binned: sc.DataArray, idx: int) -> bool:
@@ -121,9 +125,32 @@ def _get_middle_bin_idx(binned: sc.DataArray) -> int:
     return cur_idx
 
 
-def get_reference_intensities(
+def get_reference_wavelength(
     binned: FilteredWavelengthBinned,
     reference_wavelength: Optional[ReferenceWavelength] = None,
+) -> SelectedReferenceWavelength:
+    """Select the reference wavelength.
+
+    Parameters
+    ----------
+    reference_wavelength:
+        The reference wavelength to select the intensities.
+        If ``None``, the middle group is selected.
+        It should be a scalar variable as it is selecting one of bins.
+
+    """
+    if reference_wavelength is None:
+        ref_idx = _get_middle_bin_idx(binned)
+        return SelectedReferenceWavelength(
+            binned.coords[DEFAULT_WAVELENGTH_COORD_NAME][ref_idx]
+        )
+    else:
+        return SelectedReferenceWavelength(reference_wavelength)
+
+
+def get_reference_intensities(
+    binned: FilteredWavelengthBinned,
+    reference_wavelength: SelectedReferenceWavelength,
 ) -> ReferenceIntensities:
     """Find the reference intensities by the wavelength.
 
@@ -134,8 +161,6 @@ def get_reference_intensities(
 
     reference_wavelength:
         The reference wavelength to select the intensities.
-        If ``None``, the middle group is selected.
-        It should be a scalar variable as it is selecting one of bins.
 
     Raises
     ------
@@ -348,6 +373,7 @@ scaling_providers = (
     cut_estimated_scaled_intensities_by_n_root_std_dev,
     get_wavelength_binned,
     filter_wavelegnth_binned,
+    get_reference_wavelength,
     get_reference_intensities,
     estimate_scale_factor_per_hkl_asu_from_reference,
     average_roughly_scaled_intensities,
