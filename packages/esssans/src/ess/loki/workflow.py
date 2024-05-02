@@ -1,5 +1,7 @@
 # This file is used by beamlime to create a workflow for the Loki instrument.
 # The callable `live_workflow` is registered as the entry point for the workflow.
+from typing import NewType
+
 import sciline
 import scipp as sc
 import scippnexus as snx
@@ -17,12 +19,10 @@ from ess.sans.types import (
     Filename,
     FilePath,
     Incident,
-    IofQ,
     MonitorType,
     NeXusMonitorName,
     RunType,
     SampleRun,
-    ScatteringRunType,
     Transmission,
     WavelengthBins,
     WavelengthMonitor,
@@ -35,8 +35,7 @@ class MonitorHistogram(
     ...
 
 
-class IofQHistogram(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
-    ...
+IofQHistogram = NewType("IofQHistogram", sc.DataArray)
 
 
 def _hist_monitor_wavelength(
@@ -45,25 +44,43 @@ def _hist_monitor_wavelength(
     return monitor.hist(wavelength=wavelength_bin)
 
 
-def _empty_iofq(_: ScatteringRunType) -> IofQ[ScatteringRunType]:
-    return IofQ[ScatteringRunType](
-        sc.DataArray(
-            data=sc.zeros(dims=["Q"], shape=[100]),
-            coords={
-                "Q": sc.linspace(
-                    dim="Q", start=0.01, stop=0.3, num=101, unit="1/angstrom"
-                )
-            },
-        )
+def _hist_iofq() -> IofQHistogram:
+    empty_iofq = sc.DataArray(
+        data=sc.zeros(dims=["Q"], shape=[100]),
+        coords={
+            "Q": sc.linspace(dim="Q", start=0.01, stop=0.3, num=101, unit="1/angstrom")
+        },
     )
+    return IofQHistogram(empty_iofq.hist("Q"))
 
 
-def _hist_iofq(i_of_q: IofQ[ScatteringRunType]) -> IofQHistogram[ScatteringRunType]:
-    return IofQHistogram[ScatteringRunType](i_of_q.hist("Q"))
+class LoKiIofQWorkflow:
+    """LoKi I(Q) workflow for live data reduction."""
+
+    def __init__(self) -> None:
+        self.pipeline = sciline.Pipeline((_hist_iofq,))
+
+    def __call__(self, group: JSONGroup) -> dict[str, sc.DataArray]:
+        """
+
+        Returns
+        -------
+        :
+            Plottable Outputs:
+
+            - IofQHistogram[SampleRun]
+
+        """
+        # ``JsonGroup`` is turned into the ``NexusGroup`` here, not in the ``beamlime``
+        # so that the workflow can control the definition of the group.
+        self.pipeline[FilePath[Filename[SampleRun]]] = snx.Group(
+            group, definitions=snx.base_definitions()
+        )
+        return {str(IofQHistogram): self.pipeline.compute(IofQHistogram)}
 
 
-class LiveWorkflow:
-    """LoKi workflow for live data reduction."""
+class LoKiMonitorWorkflow:
+    """LoKi Monitor wavelength histogram workflow for live data reduction."""
 
     def __init__(self) -> None:
         self.pipeline = self._build_pipeline()
@@ -94,8 +111,6 @@ class LiveWorkflow:
             sans_monitor,
             monitor_to_wavelength,
             _hist_monitor_wavelength,
-            _empty_iofq,
-            _hist_iofq,
         )
 
         params = {
@@ -118,7 +133,6 @@ class LiveWorkflow:
 
             - MonitorHistogram[SampleRun, Incident]
             - MonitorHistogram[SampleRun, Transmission]
-            - IofQHistogram[SampleRun]
 
         """
         # ``JsonGroup`` is turned into the ``NexusGroup`` here, not in the ``beamlime``
@@ -136,4 +150,5 @@ class LiveWorkflow:
         return {str(tp): result for tp, result in results.items()}
 
 
-live_workflow = LiveWorkflow()
+loki_iofq_workflow = LoKiIofQWorkflow()
+loki_monitor_workflow = LoKiMonitorWorkflow()
