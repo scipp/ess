@@ -44,39 +44,23 @@ def _hist_monitor_wavelength(
     return monitor.hist(wavelength=wavelength_bin)
 
 
-def _hist_iofq() -> IofQHistogram:
-    empty_iofq = sc.DataArray(
-        data=sc.zeros(dims=["Q"], shape=[100]),
-        coords={
-            "Q": sc.linspace(dim="Q", start=0.01, stop=0.3, num=101, unit="1/angstrom")
-        },
-    )
-    return IofQHistogram(empty_iofq.hist("Q"))
+def loki_iofq_workflow(group: JSONGroup) -> dict[str, sc.DataArray]:
+    """Example live workflow function for Loki.
 
-
-class LoKiIofQWorkflow:
-    """LoKi I(Q) workflow for live data reduction."""
-
-    def __init__(self) -> None:
-        self.pipeline = sciline.Pipeline((_hist_iofq,))
-
-    def __call__(self, group: JSONGroup) -> dict[str, sc.DataArray]:
-        """
-
-        Returns
-        -------
-        :
-            Plottable Outputs:
-
-            - IofQHistogram[SampleRun]
-
-        """
-        # ``JsonGroup`` is turned into the ``NexusGroup`` here, not in the ``beamlime``
-        # so that the workflow can control the definition of the group.
-        self.pipeline[FilePath[Filename[SampleRun]]] = snx.Group(
-            group, definitions=snx.base_definitions()
+    This function is used to process data with beamlime workflows.
+    """
+    # We do not consume the incoming data right now.
+    _ = group
+    return {
+        'IofQ': sc.DataArray(
+            data=sc.zeros(dims=['Q'], shape=[100]),
+            coords={
+                'Q': sc.linspace(
+                    dim='Q', start=0.01, stop=0.3, num=101, unit='1/angstrom'
+                )
+            },
         )
-        return {str(IofQHistogram): self.pipeline.compute(IofQHistogram)}
+    }
 
 
 class LoKiMonitorWorkflow:
@@ -150,5 +134,4 @@ class LoKiMonitorWorkflow:
         return {str(tp): result for tp, result in results.items()}
 
 
-loki_iofq_workflow = LoKiIofQWorkflow()
 loki_monitor_workflow = LoKiMonitorWorkflow()
