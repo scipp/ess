@@ -316,49 +316,6 @@ def cut_estimated_scaled_intensities_by_n_root_std_dev(
     :
         The filtered scaled intensities.
 
-    Notes
-    -----
-    *Reason for taking the n-th root of the intensities:*
-    The scaled intensities are expected to follow gaussian distribution
-    with the mean of 1.0 (since it is scaled by the reference intensities).
-    However, the data will have a long tail on the right side ( > 1.0).
-    Since the negative intensities are already filtered out,
-    the left tail should be preserved and the right tail should be cut off.
-
-    Therefore, the data is transformed by the n-th root to make the data
-    more symmetric and the standard deviation cut is applied to filter out.
-
-    Let :math:`m` be the minimum value of the data and :math:`M` be the maximum value.
-    The size of the left tail from the mean is :math:`1 - m, (1 > m > 0)`
-    and the size of the right tail is :math:`M - 1 ( M > 1)`.
-
-    As we take the n-th root of the data,
-    the left tail will be more stretched as
-
-    .. math::
-
-        1 - m^{1/n} > 1 - m \\\\
-        \\because m < m^{1/n} text{where } 0 < m < 1 \\text{ and } n > 1
-
-    and the right tail will be more compressed as
-
-    .. math::
-
-        M^{1/n} - 1 < M - 1 \\\\
-        \\because M > M^{1/n} \\text{where } M > 1 \\text{ and } n > 1
-
-    Comparing how much the tails are stretched or compressed,
-
-    .. math::
-
-        stretched = 1 - m^{1/n} - (1 - m) = m - m^{1/n} \\\\
-        compressed = M - 1 - (M^{1/n} - 1) = M^{1/n} - M
-
-    However, we are assuming the :math:`M >> 1` and :math:`m ~ 0`
-    in the scaled intensities.
-    The right tail will be more compressed than the left tail is stretched.
-    In this way the right tail will be cut off more effectively on the n-th root.
-
     """
     # Check the range of the n-th root
     if n_root < 1:
