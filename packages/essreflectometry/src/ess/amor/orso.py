@@ -16,17 +16,14 @@ from ..reflectometry.orso import (
     OrsoReduction,
 )
 from ..reflectometry.types import (
-    NormalizedIofQ1D,
+    FootprintCorrectedData,
+    NormalizedIofQ,
     QResolution,
     Sample,
-    ThetaData,
-    WavelengthData,
 )
 
 
-def build_orso_instrument(
-    events_in_wavelength: WavelengthData[Sample], events_in_theta: ThetaData[Sample]
-) -> OrsoInstrument:
+def build_orso_instrument(events: FootprintCorrectedData[Sample]) -> OrsoInstrument:
     """Build ORSO instrument metadata from intermediate reduction results for Amor.
 
     This assumes specular reflection and sets the incident angle equal to the computed
@@ -34,19 +31,15 @@ def build_orso_instrument(
     """
     return OrsoInstrument(
         orso_data_source.InstrumentSettings(
-            wavelength=orso_base.ValueRange(
-                *_limits_of_coord(events_in_wavelength, 'wavelength')
-            ),
-            incident_angle=orso_base.ValueRange(
-                *_limits_of_coord(events_in_theta, 'theta')
-            ),
+            wavelength=orso_base.ValueRange(*_limits_of_coord(events, 'wavelength')),
+            incident_angle=orso_base.ValueRange(*_limits_of_coord(events, 'theta')),
             polarization=None,  # TODO how can we determine this from the inputs?
         )
     )
 
 
 def build_orso_iofq_dataset(
-    iofq: NormalizedIofQ1D,
+    iofq: NormalizedIofQ,
     sigma_q: QResolution,
     data_source: OrsoDataSource,
     reduction: OrsoReduction,
