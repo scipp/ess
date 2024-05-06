@@ -17,10 +17,10 @@ from .types import FilteredData, RawDetectorData, RunType, TofCroppedData, Valid
 
 
 def _equivalent_bin_indices(a, b) -> bool:
-    a_begin = a.bins.constituents['begin'].flatten(to='')
-    a_end = a.bins.constituents['end'].flatten(to='')
-    b_begin = b.bins.constituents['begin'].flatten(to='')
-    b_end = b.bins.constituents['end'].flatten(to='')
+    a_begin = a.bins.constituents["begin"].flatten(to="")
+    a_end = a.bins.constituents["end"].flatten(to="")
+    b_begin = b.bins.constituents["begin"].flatten(to="")
+    b_end = b.bins.constituents["end"].flatten(to="")
     non_empty = a_begin != a_end
     return (
         sc.all((a_begin == b_begin)[non_empty]).value
@@ -33,10 +33,10 @@ def _temporary_bin_coord(data: sc.DataArray, name: str, coord: sc.Variable) -> N
     if not _equivalent_bin_indices(data, coord):
         raise ValueError("data and coord do not have equivalent bin indices")
     coord = sc.bins(
-        data=coord.bins.constituents['data'],
-        begin=data.bins.coords['pulse_time'].bins.constituents['begin'],
-        end=data.bins.coords['pulse_time'].bins.constituents['end'],
-        dim=coord.bins.constituents['dim'],
+        data=coord.bins.constituents["data"],
+        begin=data.bins.coords["pulse_time"].bins.constituents["begin"],
+        end=data.bins.coords["pulse_time"].bins.constituents["end"],
+        dim=coord.bins.constituents["dim"],
     )
     data.bins.coords[name] = coord
     yield
@@ -46,7 +46,7 @@ def _temporary_bin_coord(data: sc.DataArray, name: str, coord: sc.Variable) -> N
 # TODO non-monotonic proton charge -> raise?
 def _with_pulse_time_edges(da: sc.DataArray, dim: str) -> sc.DataArray:
     pulse_time = da.coords[dim]
-    one = sc.scalar(1, dtype='int64', unit=pulse_time.unit)
+    one = sc.scalar(1, dtype="int64", unit=pulse_time.unit)
     lo = pulse_time[0] - one
     hi = pulse_time[-1] + one
     mid = sc.midpoints(pulse_time)
@@ -64,12 +64,12 @@ def remove_bad_pulses(
     good_pulse = _with_pulse_time_edges(proton_charge >= min_charge, proton_charge.dim)
     with _temporary_bin_coord(
         data,
-        'good_pulse',
+        "good_pulse",
         sc.lookup(good_pulse, good_pulse.dim)[data.bins.coords[good_pulse.dim]],
     ):
-        filtered = data.group(sc.array(dims=['good_pulse'], values=[True]))
-    filtered = filtered.squeeze('good_pulse').copy(deep=False)
-    del filtered.coords['good_pulse']
+        filtered = data.group(sc.array(dims=["good_pulse"], values=[True]))
+    filtered = filtered.squeeze("good_pulse").copy(deep=False)
+    del filtered.coords["good_pulse"]
     return filtered
 
 
@@ -92,7 +92,7 @@ def crop_tof(
     :
         Cropped data.
     """
-    tof = event_or_outer_coord(data, 'tof')
+    tof = event_or_outer_coord(data, "tof")
     tof_unit = elem_unit(tof)
     tof_dtype = elem_dtype(tof)
     return TofCroppedData[RunType](

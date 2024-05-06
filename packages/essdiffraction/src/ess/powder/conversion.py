@@ -14,10 +14,16 @@ from .logging import get_logger
 from .types import (
     CalibrationData,
     DspacingData,
+    ElasticCoordTransformGraph,
     NormalizedByProtonCharge,
+    PixelMaskedData,
     RawSample,
     RawSource,
     RunType,
+    TwoThetaData,
+    TwoThetaMaskedData,
+    WavelengthData,
+    WavelengthMaskedData,
 )
 
 
@@ -130,26 +136,67 @@ def to_dspacing_with_calibration(
     out = _restore_tof_if_in_wavelength(out)
 
     graph = {
-        'dspacing': _dspacing_from_diff_calibration,
+        "dspacing": _dspacing_from_diff_calibration,
     }
     # `_dspacing_from_diff_calibration` does not need positions but conceptually,
     # the conversion maps from positions to d-spacing.
     # The mechanism with `_tag_positions_consumed` is meant to ensure that,
     # if positions are present, they are consumed (mad unaligned or dropped)
     # by the coordinate transform similarly to `to_dspacing_with_positions`.
-    if 'position' in out.coords or (
-        out.bins is not None and 'position' in out.bins.coords
+    if "position" in out.coords or (
+        out.bins is not None and "position" in out.bins.coords
     ):
-        graph['_tag_positions_consumed'] = _consume_positions
+        graph["_tag_positions_consumed"] = _consume_positions
     else:
-        graph['_tag_positions_consumed'] = lambda: sc.scalar(0)
-    out = out.transform_coords('dspacing', graph=graph, keep_intermediate=False)
-    out.coords.pop('_tag_positions_consumed', None)
+        graph["_tag_positions_consumed"] = lambda: sc.scalar(0)
+    out = out.transform_coords("dspacing", graph=graph, keep_intermediate=False)
+    out.coords.pop("_tag_positions_consumed", None)
     return DspacingData[RunType](out)
 
 
+def powder_coordinate_transformation_graph() -> ElasticCoordTransformGraph:
+    """
+    Generate a coordinate transformation graph for powder diffraction.
+
+    Returns
+    -------
+    :
+        A dictionary with the graph for the transformation.
+    """
+    return ElasticCoordTransformGraph(
+        {
+            **scn.conversion.graph.beamline.beamline(scatter=True),
+            **scn.conversion.graph.tof.elastic("tof"),
+        }
+    )
+
+
+def to_wavelength_with_positions(
+    data: PixelMaskedData[RunType],
+    graph: ElasticCoordTransformGraph,
+) -> WavelengthData[RunType]:
+    """
+    Transform coordinates to wavelength using detector positions.
+    """
+    return WavelengthData[RunType](
+        data.transform_coords("wavelength", graph=graph, keep_intermediate=False)
+    )
+
+
+def to_twotheta_with_positions(
+    data: WavelengthMaskedData[RunType],
+    graph: ElasticCoordTransformGraph,
+) -> TwoThetaData[RunType]:
+    """
+    Transform coordinates to two-theta using detector positions.
+    """
+    return TwoThetaData[RunType](
+        data.transform_coords("two_theta", graph=graph, keep_intermediate=False)
+    )
+
+
 def to_dspacing_with_positions(
-    data: NormalizedByProtonCharge[RunType],
+    data: TwoThetaMaskedData[RunType],
     *,
     sample: Optional[RawSample[RunType]] = None,
     source: Optional[RawSource] = None,
@@ -190,42 +237,49 @@ def to_dspacing_with_positions(
     """
     graph = {
         **scn.conversion.graph.beamline.beamline(scatter=True),
-        **scn.conversion.graph.tof.elastic_dspacing('tof'),
+        **scn.conversion.graph.tof.elastic_dspacing("tof"),
     }
     if sample is not None:
-        graph['sample_position'] = lambda: sample['position']
+        graph["sample_position"] = lambda: sample["position"]
     if source is not None:
-        graph['source_position'] = lambda: source['position']
+        graph["source_position"] = lambda: source["position"]
 
     out = _restore_tof_if_in_wavelength(data)
-    out = out.transform_coords('dspacing', graph=graph, keep_intermediate=False)
+    out = out.transform_coords("dspacing", graph=graph, keep_intermediate=False)
     # Add coords to ensure the result is the same whether sample or source are
     # coords in the input or separate function arguments.
     if sample is not None:
-        out.coords['sample_position'] = sample['position']
-        out.coords.set_aligned('sample_position', False)
+        out.coords["sample_position"] = sample["position"]
+        out.coords.set_aligned("sample_position", False)
     if source is not None:
-        out.coords['source_position'] = source['position']
-        out.coords.set_aligned('source_position', False)
+        out.coords["source_position"] = source["position"]
+        out.coords.set_aligned("source_position", False)
 
     return DspacingData[RunType](out)
 
 
 def _restore_tof_if_in_wavelength(data: sc.DataArray) -> sc.DataArray:
     out = data.copy(deep=False)
-    outer = out.coords.pop('wavelength', None)
+    outer = out.coords.pop("wavelength", None)
     if out.bins is not None:
-        binned = out.bins.coords.pop('wavelength', None)
+        binned = out.bins.coords.pop("wavelength", None)
     else:
         binned = None
 
     if outer is not None or binned is not None:
         get_logger().info("Discarded coordinate 'wavelength' in favor of 'tof'.")
 
-    if 'wavelength' in out.dims:
-        out = out.rename_dims(wavelength='tof')
+    if "wavelength" in out.dims:
+        out = out.rename_dims(wavelength="tof")
     return out
 
 
-providers = (to_dspacing_with_calibration,)
+providers_with_calibration = (to_dspacing_with_calibration,)
 """Sciline providers for coordinate transformations."""
+
+providers_with_positions = (
+    powder_coordinate_transformation_graph,
+    to_wavelength_with_positions,
+    to_twotheta_with_positions,
+    to_dspacing_with_positions,
+)
