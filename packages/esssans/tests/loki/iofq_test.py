@@ -2,12 +2,13 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import sys
 from pathlib import Path
+from typing import NewType
 
 import pytest
 import sciline
 import scipp as sc
 
-from ess import sans
+from ess import loki, sans
 from ess.sans.conversions import ElasticCoordTransformGraph
 from ess.sans.types import (
     BackgroundRun,
@@ -20,8 +21,6 @@ from ess.sans.types import (
     Denominator,
     DimsToKeep,
     Filename,
-    FilenameType,
-    FilePath,
     FinalSummedQ,
     IofQ,
     IofQxy,
@@ -48,7 +47,9 @@ from common import (  # noqa: E402
 
 def test_can_create_pipeline():
     pipeline = sciline.Pipeline(loki_providers(), params=make_params())
-    pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
+    pipeline.set_param_series(
+        PixelMaskFilename, loki.data.loki_tutorial_mask_filenames()
+    )
     pipeline.get(BackgroundSubtractedIofQ)
 
 
@@ -61,7 +62,9 @@ def test_pipeline_can_compute_IofQ(uncertainties, qxy: bool):
     params = make_params()
     params[UncertaintyBroadcastMode] = uncertainties
     pipeline = sciline.Pipeline(loki_providers(), params=params)
-    pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
+    pipeline.set_param_series(
+        PixelMaskFilename, loki.data.loki_tutorial_mask_filenames()
+    )
     if qxy:
         result = pipeline.compute(BackgroundSubtractedIofQxy)
         assert result.dims == ('Qy', 'Qx')
@@ -93,7 +96,9 @@ def test_pipeline_can_compute_IofQ_in_event_mode(uncertainties, target):
     params = make_params()
     params[UncertaintyBroadcastMode] = uncertainties
     pipeline = sciline.Pipeline(loki_providers(), params=params)
-    pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
+    pipeline.set_param_series(
+        PixelMaskFilename, loki.data.loki_tutorial_mask_filenames()
+    )
     reference = pipeline.compute(target)
     pipeline[ReturnEvents] = True
     result = pipeline.compute(target)
@@ -132,7 +137,9 @@ def test_pipeline_can_compute_IofQ_in_wavelength_bands(qxy: bool):
         11,
     )
     pipeline = sciline.Pipeline(loki_providers(), params=params)
-    pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
+    pipeline.set_param_series(
+        PixelMaskFilename, loki.data.loki_tutorial_mask_filenames()
+    )
     result = pipeline.compute(
         BackgroundSubtractedIofQxy if qxy else BackgroundSubtractedIofQ
     )
@@ -151,7 +158,9 @@ def test_pipeline_can_compute_IofQ_in_overlapping_wavelength_bands(qxy: bool):
         [edges[:-2], edges[2::]], dim='wavelength'
     ).transpose()
     pipeline = sciline.Pipeline(loki_providers(), params=params)
-    pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
+    pipeline.set_param_series(
+        PixelMaskFilename, loki.data.loki_tutorial_mask_filenames()
+    )
     result = pipeline.compute(
         BackgroundSubtractedIofQxy if qxy else BackgroundSubtractedIofQ
     )
@@ -164,7 +173,9 @@ def test_pipeline_can_compute_IofQ_in_layers(qxy: bool):
     params = make_params()
     params[DimsToKeep] = ['layer']
     pipeline = sciline.Pipeline(loki_providers(), params=params)
-    pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
+    pipeline.set_param_series(
+        PixelMaskFilename, loki.data.loki_tutorial_mask_filenames()
+    )
     result = pipeline.compute(
         BackgroundSubtractedIofQxy if qxy else BackgroundSubtractedIofQ
     )
@@ -174,7 +185,9 @@ def test_pipeline_can_compute_IofQ_in_layers(qxy: bool):
 
 def _compute_beam_center():
     pipeline = sciline.Pipeline(loki_providers(), params=make_params())
-    pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
+    pipeline.set_param_series(
+        PixelMaskFilename, loki.data.loki_tutorial_mask_filenames()
+    )
     center = pipeline.compute(BeamCenter)
     return center
 
@@ -184,11 +197,19 @@ def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs():
     del params[Filename[SampleRun]]
     del params[Filename[BackgroundRun]]
 
-    sample_runs = ['60250-2022-02-28_2215.nxs', '60339-2022-02-28_2215.nxs']
-    background_runs = ['60248-2022-02-28_2215.nxs', '60393-2022-02-28_2215.nxs']
+    sample_runs = [
+        loki.data.loki_tutorial_sample_run_60250(),
+        loki.data.loki_tutorial_sample_run_60339(),
+    ]
+    background_runs = [
+        loki.data.loki_tutorial_background_run_60248(),
+        loki.data.loki_tutorial_background_run_60393(),
+    ]
     pipeline = sciline.Pipeline(loki_providers_no_beam_center_finder(), params=params)
     pipeline[BeamCenter] = _compute_beam_center()
-    pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
+    pipeline.set_param_series(
+        PixelMaskFilename, loki.data.loki_tutorial_mask_filenames()
+    )
 
     # Set parameter series for file names
     pipeline.set_param_series(Filename[SampleRun], sample_runs)
@@ -205,7 +226,9 @@ def test_pipeline_can_compute_IofQ_merging_events_from_banks():
 
     pipeline = sciline.Pipeline(loki_providers_no_beam_center_finder(), params=params)
     pipeline[BeamCenter] = _compute_beam_center()
-    pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
+    pipeline.set_param_series(
+        PixelMaskFilename, loki.data.loki_tutorial_mask_filenames()
+    )
     pipeline.set_param_series(NeXusDetectorName, ['larmor_detector'])
 
     pipeline.insert(sans.merge_banks)
@@ -218,11 +241,19 @@ def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs_and_banks()
     del params[Filename[SampleRun]]
     del params[Filename[BackgroundRun]]
 
-    sample_runs = ['60250-2022-02-28_2215.nxs', '60339-2022-02-28_2215.nxs']
-    background_runs = ['60248-2022-02-28_2215.nxs', '60393-2022-02-28_2215.nxs']
+    sample_runs = [
+        loki.data.loki_tutorial_sample_run_60250(),
+        loki.data.loki_tutorial_sample_run_60339(),
+    ]
+    background_runs = [
+        loki.data.loki_tutorial_background_run_60248(),
+        loki.data.loki_tutorial_background_run_60393(),
+    ]
     pipeline = sciline.Pipeline(loki_providers_no_beam_center_finder(), params=params)
     pipeline[BeamCenter] = _compute_beam_center()
-    pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
+    pipeline.set_param_series(
+        PixelMaskFilename, loki.data.loki_tutorial_mask_filenames()
+    )
 
     pipeline.insert(sans.merge_runs)
     pipeline.set_param_series(Filename[SampleRun], sample_runs)
@@ -245,7 +276,9 @@ def test_pipeline_IofQ_merging_events_yields_consistent_results():
         loki_providers_no_beam_center_finder(), params=params
     )
     pipeline_single[BeamCenter] = center
-    pipeline_single.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
+    pipeline_single.set_param_series(
+        PixelMaskFilename, loki.data.loki_tutorial_mask_filenames()
+    )
 
     del params[Filename[SampleRun]]
     del params[Filename[BackgroundRun]]
@@ -253,35 +286,59 @@ def test_pipeline_IofQ_merging_events_yields_consistent_results():
         loki_providers_no_beam_center_finder(), params=params
     )
     pipeline_triple[BeamCenter] = center
-    pipeline_triple.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
+    pipeline_triple.set_param_series(
+        PixelMaskFilename, loki.data.loki_tutorial_mask_filenames()
+    )
+
+    DummySampleFilename = NewType('DummySampleFilename', str)
+    DummyBackgroundFilename = NewType('DummyBackgroundFilename', str)
 
     # `set_param_series` does not allow multiple identical values, so we need to
     # map the file names to different ones.
-    def get_mapped_path(filename: FilenameType) -> FilePath[FilenameType]:
-        """Mapping file paths to allow loading same run multiple times."""
-        from ess.loki.data import get_path
 
-        mapping = {
-            'sample_0.nxs': '60339-2022-02-28_2215.nxs',
-            'sample_1.nxs': '60339-2022-02-28_2215.nxs',
-            'sample_2.nxs': '60339-2022-02-28_2215.nxs',
-            'background_0.nxs': '60393-2022-02-28_2215.nxs',
-            'background_1.nxs': '60393-2022-02-28_2215.nxs',
-            'background_2.nxs': '60393-2022-02-28_2215.nxs',
-        }
-        filename = mapping.get(filename, filename)
-        return FilePath[FilenameType](get_path(filename))
+    def get_sample_filename(_: DummySampleFilename) -> Filename[SampleRun]:
+        return loki.data.loki_tutorial_sample_run_60339()
 
-    pipeline_triple.insert(get_mapped_path)
+    def get_background_filename(_: DummyBackgroundFilename) -> Filename[BackgroundRun]:
+        return loki.data.loki_tutorial_background_run_60393()
+
+    pipeline_triple.insert(get_sample_filename)
+    pipeline_triple.insert(get_background_filename)
 
     pipeline_triple.set_param_series(
-        Filename[SampleRun], [f'sample_{i}.nxs' for i in range(N)]
+        DummySampleFilename, [f'sample_{i}.nxs' for i in range(N)]
     )
     pipeline_triple.set_param_series(
-        Filename[BackgroundRun], [f'background_{i}.nxs' for i in range(N)]
+        DummyBackgroundFilename, [f'background_{i}.nxs' for i in range(N)]
     )
+
+    # We want to use `merge` runs (defined in ess.sans.i_of_q), but its ParamSeries
+    # depends on Filename, which we cannot use due to the mapping hack above. We need
+    # to define our own wrappers. This will go away once the Sciline ParamTable support
+    # is replaced.
+    def merge_sample_runs(
+        runs: sciline.Series[
+            DummySampleFilename,
+            sans.types.CleanSummedQMergedBanks[SampleRun, sans.types.IofQPart],
+        ],
+    ) -> FinalSummedQ[SampleRun, sans.types.IofQPart]:
+        return FinalSummedQ[SampleRun, sans.types.IofQPart](
+            sans.i_of_q._merge_contributions(list(runs.values()))
+        )
+
+    def merge_background_runs(
+        runs: sciline.Series[
+            DummyBackgroundFilename,
+            sans.types.CleanSummedQMergedBanks[BackgroundRun, sans.types.IofQPart],
+        ],
+    ) -> FinalSummedQ[BackgroundRun, sans.types.IofQPart]:
+        return FinalSummedQ[BackgroundRun, sans.types.IofQPart](
+            sans.i_of_q._merge_contributions(list(runs.values()))
+        )
+
     # Add event merging provider
-    pipeline_triple.insert(sans.merge_runs)
+    pipeline_triple.insert(merge_sample_runs)
+    pipeline_triple.insert(merge_background_runs)
 
     iofq1 = pipeline_single.compute(BackgroundSubtractedIofQ)
     iofq3 = pipeline_triple.compute(BackgroundSubtractedIofQ)
@@ -307,7 +364,9 @@ def test_pipeline_IofQ_merging_events_yields_consistent_results():
 def test_beam_center_from_center_of_mass_is_close_to_verified_result():
     params = make_params()
     pipeline = sciline.Pipeline(loki_providers(), params=params)
-    pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
+    pipeline.set_param_series(
+        PixelMaskFilename, loki.data.loki_tutorial_mask_filenames()
+    )
     center = pipeline.compute(BeamCenter)
     reference = sc.vector([-0.0291487, -0.0181614, 0], unit='m')
     assert sc.allclose(center, reference)
@@ -316,7 +375,9 @@ def test_beam_center_from_center_of_mass_is_close_to_verified_result():
 def test_phi_with_gravity():
     params = make_params()
     pipeline = sciline.Pipeline(loki_providers(), params=params)
-    pipeline.set_param_series(PixelMaskFilename, ['mask_new_July2022.xml'])
+    pipeline.set_param_series(
+        PixelMaskFilename, loki.data.loki_tutorial_mask_filenames()
+    )
     pipeline[CorrectForGravity] = False
     data_no_grav = pipeline.compute(
         CleanWavelengthMasked[SampleRun, Numerator]

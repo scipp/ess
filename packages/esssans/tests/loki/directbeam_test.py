@@ -7,8 +7,7 @@ import sciline
 import scipp as sc
 from scipp.scipy.interpolate import interp1d
 
-from ess import sans
-from ess.loki.data import get_path
+from ess import loki, sans
 from ess.sans.types import (
     DimsToKeep,
     PixelMaskFilename,
@@ -22,7 +21,7 @@ from common import loki_providers, make_params  # noqa: E402
 
 
 def _get_I0(qbins: sc.Variable) -> sc.Variable:
-    Iq_theory = sc.io.load_hdf5(get_path('PolyGauss_I0-50_Rg-60.h5'))
+    Iq_theory = sc.io.load_hdf5(loki.data.loki_tutorial_poly_gauss_I0())
     f = interp1d(Iq_theory, 'Q')
     return f(sc.midpoints(qbins)).data[0]
 
@@ -41,7 +40,7 @@ def test_can_compute_direct_beam_for_all_pixels():
     pipeline.set_param_series(PixelMaskFilename, [])
     I0 = _get_I0(qbins=params[QBins])
 
-    results = sans.direct_beam(pipeline=pipeline, I0=I0, niter=4)
+    results = sans.direct_beam(workflow=pipeline, I0=I0, niter=4)
     iofq_full = results[-1]['iofq_full']
     iofq_bands = results[-1]['iofq_bands']
     direct_beam_function = results[-1]['direct_beam']
@@ -71,7 +70,7 @@ def test_can_compute_direct_beam_with_overlapping_wavelength_bands():
     pipeline.set_param_series(PixelMaskFilename, [])
     I0 = _get_I0(qbins=params[QBins])
 
-    results = sans.direct_beam(pipeline=pipeline, I0=I0, niter=4)
+    results = sans.direct_beam(workflow=pipeline, I0=I0, niter=4)
     iofq_full = results[-1]['iofq_full']
     iofq_bands = results[-1]['iofq_bands']
     direct_beam_function = results[-1]['direct_beam']
@@ -97,7 +96,7 @@ def test_can_compute_direct_beam_per_layer():
     pipeline.set_param_series(PixelMaskFilename, [])
     I0 = _get_I0(qbins=params[QBins])
 
-    results = sans.direct_beam(pipeline=pipeline, I0=I0, niter=4)
+    results = sans.direct_beam(workflow=pipeline, I0=I0, niter=4)
     iofq_full = results[-1]['iofq_full']
     iofq_bands = results[-1]['iofq_bands']
     direct_beam_function = results[-1]['direct_beam']
@@ -125,7 +124,7 @@ def test_can_compute_direct_beam_per_layer_and_straw():
     pipeline.set_param_series(PixelMaskFilename, [])
     I0 = _get_I0(qbins=params[QBins])
 
-    results = sans.direct_beam(pipeline=pipeline, I0=I0, niter=4)
+    results = sans.direct_beam(workflow=pipeline, I0=I0, niter=4)
     iofq_full = results[-1]['iofq_full']
     iofq_bands = results[-1]['iofq_bands']
     direct_beam_function = results[-1]['direct_beam']

@@ -5,8 +5,11 @@ Default parameters, providers and utility functions for the loki workflow.
 """
 from typing import Optional
 
+import sciline
 import scipp as sc
 from ess.reduce import nexus
+
+from ess.sans import providers as sans_providers
 
 from ..sans.common import gravity_vector
 from ..sans.types import (
@@ -36,6 +39,7 @@ from ..sans.types import (
     TransformationPath,
     Transmission,
 )
+from .io import dummy_load_sample
 
 
 def default_parameters() -> dict:
@@ -47,6 +51,28 @@ def default_parameters() -> dict:
         TransformationPath: 'transform',
         PixelShapePath: 'pixel_shape',
     }
+
+
+def LokiAtLarmorWorkflow() -> sciline.Pipeline:
+    """
+    Workflow with default parameters for Loki test at Larmor.
+
+    This version of the Loki workflow:
+
+    - Uses ISIS XML files to define masks.
+    - Sets a dummy sample position [0,0,0] since files do not contain this information.
+    """
+    from ess.isissans.io import read_xml_detector_masking
+
+    from . import providers as loki_providers
+
+    params = default_parameters()
+    loki_providers = sans_providers + loki_providers
+    workflow = sciline.Pipeline(providers=loki_providers, params=params)
+    workflow.insert(read_xml_detector_masking)
+    # No sample information in the Loki@Larmor files, so we use a dummy sample provider
+    workflow.insert(dummy_load_sample)
+    return workflow
 
 
 DETECTOR_BANK_RESHAPING = {

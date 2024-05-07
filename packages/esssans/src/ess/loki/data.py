@@ -1,9 +1,15 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+from pathlib import Path
 
-
-from ..sans.data import Registry
-from ..sans.types import FilenameType, FilePath
+from ess.sans.data import Registry
+from ess.sans.types import (
+    BackgroundRun,
+    Filename,
+    PixelMaskFilename,
+    SampleRun,
+    TransmissionRun,
+)
 
 _registry = Registry(
     instrument='loki',
@@ -31,9 +37,48 @@ _registry = Registry(
 )
 
 
-def get_path(filename: FilenameType) -> FilePath[FilenameType]:
-    """Translate any filename to a path to the file obtained from pooch registries."""
-    return FilePath[FilenameType](_registry.get_path(filename))
+def loki_tutorial_sample_run_60250() -> Filename[SampleRun]:
+    """Sample run with sample and sample holder/can, no transmission monitor in beam."""
+    return Filename[SampleRun](_registry.get_path('60250-2022-02-28_2215.nxs'))
 
 
-providers = (get_path,)
+def loki_tutorial_sample_run_60339() -> Filename[SampleRun]:
+    """Sample run with sample and sample holder/can, no transmission monitor in beam."""
+    return Filename[SampleRun](_registry.get_path('60339-2022-02-28_2215.nxs'))
+
+
+def loki_tutorial_background_run_60248() -> Filename[BackgroundRun]:
+    """Background run with sample holder/can only, no transmission monitor."""
+    return Filename[BackgroundRun](_registry.get_path('60248-2022-02-28_2215.nxs'))
+
+
+def loki_tutorial_background_run_60393() -> Filename[BackgroundRun]:
+    """Background run with sample holder/can only, no transmission monitor."""
+    return Filename[BackgroundRun](_registry.get_path('60393-2022-02-28_2215.nxs'))
+
+
+def loki_tutorial_sample_transmission_run() -> Filename[TransmissionRun[SampleRun]]:
+    """Sample transmission run (sample + sample holder/can + transmission monitor)."""
+    return Filename[TransmissionRun[SampleRun]](
+        _registry.get_path('60394-2022-02-28_2215.nxs')
+    )
+
+
+def loki_tutorial_run_60392() -> Filename[TransmissionRun[BackgroundRun]]:
+    """Background transmission run (sample holder/can + transmission monitor), also
+    used as empty beam run."""
+    return Filename[TransmissionRun[BackgroundRun]](
+        _registry.get_path('60392-2022-02-28_2215.nxs')
+    )
+
+
+def loki_tutorial_mask_filenames() -> list[PixelMaskFilename]:
+    """List of pixel mask filenames for the LoKI@Larmor detector test experiment."""
+    return [
+        PixelMaskFilename(_registry.get_path('mask_new_July2022.xml')),
+    ]
+
+
+def loki_tutorial_poly_gauss_I0() -> Path:
+    """Analytical model for the I(Q) of the Poly-Gauss sample."""
+    return Path(_registry.get_path('PolyGauss_I0-50_Rg-60.h5'))

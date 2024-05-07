@@ -3,7 +3,7 @@
 
 import importlib.metadata
 
-from . import components, data, general, io, sans2d
+from . import components, data, general, io, sans2d, zoom
 from .components import DetectorBankOffset, MonitorOffset, SampleOffset
 from .general import default_parameters
 from .io import CalibrationFilename
@@ -21,7 +21,6 @@ del importlib
 __all__ = [
     'CalibrationFilename',
     'DetectorBankOffset',
-    'apply_component_user_offsets_to_raw_data',
     'data',
     'io',
     'MonitorOffset',
@@ -30,4 +29,5 @@ __all__ = [
     'plot_flat_detector_xy',
     'sans2d',
     'default_parameters',
+    'zoom',
 ]

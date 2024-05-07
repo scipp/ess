@@ -2,9 +2,15 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 from typing import NewType, Optional
 
+import sciline
 import scipp as sc
 
-from ..sans.types import MaskedData, SampleRun, ScatteringRunType, TofData
+from ess.sans import providers as sans_providers
+from ess.sans.types import MaskedData, SampleRun, ScatteringRunType, TofData
+
+from .data import load_tutorial_direct_beam, load_tutorial_run
+from .general import default_parameters
+from .mantidio import providers as mantid_providers
 
 DetectorEdgeMask = NewType('DetectorEdgeMask', sc.Variable)
 """Detector edge mask"""
@@ -66,3 +72,25 @@ def mask_detectors(
 
 
 providers = (detector_edge_mask, sample_holder_mask, mask_detectors)
+
+
+def Sans2dWorkflow() -> sciline.Pipeline:
+    """Create Sans2d workflow with default parameters."""
+    from . import providers as isis_providers
+
+    params = default_parameters()
+    sans2d_providers = sans_providers + isis_providers + mantid_providers + providers
+    return sciline.Pipeline(providers=sans2d_providers, params=params)
+
+
+def Sans2dTutorialWorkflow() -> sciline.Pipeline:
+    """
+    Create Sans2d tutorial workflow.
+
+    Equivalent to :func:`Sans2dWorkflow`, but with loaders for tutorial data instead
+    of Mantid-based loaders.
+    """
+    workflow = Sans2dWorkflow()
+    workflow.insert(load_tutorial_run)
+    workflow.insert(load_tutorial_direct_beam)
+    return workflow

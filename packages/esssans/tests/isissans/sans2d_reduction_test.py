@@ -55,10 +55,10 @@ def make_params() -> dict:
     params[QBins] = sc.linspace(
         dim='Q', start=0.01, stop=0.55, num=141, unit='1/angstrom'
     )
-    params[DirectBeamFilename] = 'DIRECT_SANS2D_REAR_34327_4m_8mm_16Feb16.dat'
-    params[Filename[SampleRun]] = 'SANS2D00063114.nxs'
-    params[Filename[BackgroundRun]] = 'SANS2D00063159.nxs'
-    params[Filename[EmptyBeamRun]] = 'SANS2D00063091.nxs'
+    params[DirectBeamFilename] = isis.data.sans2d_tutorial_direct_beam()
+    params[Filename[SampleRun]] = isis.data.sans2d_tutorial_sample_run()
+    params[Filename[BackgroundRun]] = isis.data.sans2d_tutorial_background_run()
+    params[Filename[EmptyBeamRun]] = isis.data.sans2d_tutorial_empty_beam_run()
 
     params[NeXusMonitorName[Incident]] = 'monitor2'
     params[NeXusMonitorName[Transmission]] = 'monitor4'
@@ -79,11 +79,13 @@ def sans2d_providers():
     return list(
         sans.providers
         + isis.providers
-        + isis.data.providers
         + isis.sans2d.providers
+        + isis.mantidio.providers
         + (
             isis.data.transmission_from_background_run,
             isis.data.transmission_from_sample_run,
+            isis.data.load_tutorial_direct_beam,
+            isis.data.load_tutorial_run,
             sans.beam_center_finder.beam_center_from_center_of_mass,
         )
     )
@@ -186,7 +188,7 @@ def as_dict(funcs: List[Callable[..., type]]) -> dict:
 def pixel_dependent_direct_beam(
     filename: DirectBeamFilename, shape: RawData[SampleRun]
 ) -> DirectBeam:
-    direct_beam = isis.data.load_direct_beam(isis.data.get_path(filename))
+    direct_beam = isis.data.load_tutorial_direct_beam(filename)
     sizes = {'spectrum': shape.sizes['spectrum'], **direct_beam.sizes}
     return DirectBeam(direct_beam.broadcast(sizes=sizes).copy())
 

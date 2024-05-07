@@ -26,11 +26,15 @@ def make_params() -> dict:
     params = loki.default_parameters()
 
     params[NeXusDetectorName] = 'larmor_detector'
-    params[Filename[SampleRun]] = '60339-2022-02-28_2215.nxs'
-    params[Filename[BackgroundRun]] = '60393-2022-02-28_2215.nxs'
-    params[Filename[TransmissionRun[SampleRun]]] = '60394-2022-02-28_2215.nxs'
-    params[Filename[TransmissionRun[BackgroundRun]]] = '60392-2022-02-28_2215.nxs'
-    params[Filename[EmptyBeamRun]] = '60392-2022-02-28_2215.nxs'
+    params[Filename[SampleRun]] = loki.data.loki_tutorial_sample_run_60339()
+    params[Filename[BackgroundRun]] = loki.data.loki_tutorial_background_run_60393()
+    params[
+        Filename[TransmissionRun[SampleRun]]
+    ] = loki.data.loki_tutorial_sample_transmission_run()
+    params[
+        Filename[TransmissionRun[BackgroundRun]]
+    ] = loki.data.loki_tutorial_run_60392()
+    params[Filename[EmptyBeamRun]] = loki.data.loki_tutorial_run_60392()
 
     params[WavelengthBins] = sc.linspace(
         'wavelength', start=1.0, stop=13.0, num=51, unit='angstrom'
@@ -52,7 +56,6 @@ def loki_providers_no_beam_center_finder() -> List[Callable]:
     return list(
         sans.providers
         + loki.providers
-        + loki.data.providers
         + (
             read_xml_detector_masking,
             loki.io.dummy_load_sample,
