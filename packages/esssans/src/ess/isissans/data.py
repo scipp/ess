@@ -38,6 +38,11 @@ _sans2d_registry = Registry(
 )
 
 
+def sans2d_solid_angle_reference() -> str:
+    """Solid angles of the SANS2D detector pixels computed by Mantid (for tests)"""
+    return _sans2d_registry.get_path('SANS2D00063091.SolidAngle_from_mantid.h5')
+
+
 _zoom_registry = Registry(
     instrument='zoom',
     files={

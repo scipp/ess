@@ -5,13 +5,12 @@ import numpy as np
 import pytest
 import scipp as sc
 
-from ess.isissans.data import get_path
+from ess.isissans.data import sans2d_solid_angle_reference
 from ess.sans import normalization
 
 # See https://github.com/mantidproject/mantid/blob/main/instrument/SANS2D_Definition_Tubes.xml  # noqa: E501
 _SANS2D_PIXEL_RADIUS = 0.00405 * sc.Unit('m')
 _SANS2D_PIXEL_LENGTH = 0.002033984375 * sc.Unit('m')
-_SANS2D_SOLID_ANGLE_REFERENCE_FILE = 'SANS2D00063091.SolidAngle_from_mantid.h5'
 
 
 def _sans2d_geometry():
@@ -37,7 +36,7 @@ def _mantid_sans2d_solid_angle_data():
     simpleapi = pytest.importorskip("mantid.simpleapi")
     scippneutron = pytest.importorskip("scippneutron")
 
-    ws = simpleapi.Load(get_path('SANS2D00063091.nxs'))
+    ws = simpleapi.Load('SANS2D00063091.nxs')
     radius = _SANS2D_PIXEL_RADIUS
     length = _SANS2D_PIXEL_LENGTH
 
@@ -56,8 +55,8 @@ def _mantid_sans2d_solid_angle_data():
     outWs = simpleapi.SolidAngle(ws, method='HorizontalTube')
     da = scippneutron.from_mantid(outWs)['data']['spectrum', :120000:100]
     # Create new reference file:
-    # sc.io.hdf5.save_hdf5(da, _SANS2D_SOLID_ANGLE_REFERENCE_FILE)
-    # Note, also update the name, don't overwrite old reference files.
+    # sc.io.hdf5.save_hdf5(da, 'SANS2D00063091.SolidAngle_from_mantid.h5')
+    # Note, also update the registry version, don't overwrite old reference files.
     # Overwriting reference files breaks old versions of the repository.
     return da
 
@@ -75,7 +74,7 @@ def test_solid_angle_compare_to_mantid():
 
 
 def test_solid_angle_compare_to_reference_file():
-    da = sc.io.load_hdf5(filename=get_path(_SANS2D_SOLID_ANGLE_REFERENCE_FILE))
+    da = sc.io.load_hdf5(filename=sans2d_solid_angle_reference())
     solid_angle = normalization.solid_angle(
         da,
         **_sans2d_geometry(),
