@@ -89,4 +89,5 @@ show_error_codes = true
 warn_unreachable = true
 
 [project.entry-points."beamlime.stateless"]
-ess-loki = "ess.loki.workflow:live_workflow"
+ess-loki-monitor = "ess.loki.workflow:loki_monitor_workflow"
+ess-loki-iofq = "ess.loki.workflow:loki_iofq_workflow"
