@@ -102,7 +102,7 @@ def zoom_tutorial_calibration() -> Filename[CalibrationFilename]:
 
 
 def zoom_tutorial_sample_run() -> Filename[SampleRun]:
-    base = _zoom_registry.get_path('ZOOM00034786.nxs.h5.zip') + '.unzip'
+    base = _zoom_registry.get_path('ZOOM00034786.nxs.h5.zip', unzip=True) + '.unzip'
     path = str(Path(base) / 'ZOOM00034786.nxs.h5')
     return Filename[SampleRun](path)
 
