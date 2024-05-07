@@ -57,6 +57,14 @@
    io
 ```
 
+```{eval-rst}
+.. autosummary::
+   :toctree: ../generated/functions
+   :recursive:
+
+   ess.loki.LokiAtLarmorWorkflow
+```
+
 ## ISIS sans
 
 ```{eval-rst}
@@ -74,4 +82,5 @@
    mantidio
    sans2d
    visualization
+   zoom
 ```

@@ -61,6 +61,11 @@ def LokiAtLarmorWorkflow() -> sciline.Pipeline:
 
     - Uses ISIS XML files to define masks.
     - Sets a dummy sample position [0,0,0] since files do not contain this information.
+
+    Returns
+    -------
+    :
+        Loki workflow as a sciline.Pipeline
     """
     from ess.isissans.io import read_xml_detector_masking
 
