@@ -54,7 +54,7 @@ def _compute_efficiency_correction(
     return out.rename_dims({wavelength_band_dim: 'wavelength'})
 
 
-def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dict]:
+def direct_beam(*, workflow: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dict]:
     """
     Compute the direct beam function.
 
@@ -96,20 +96,20 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
     """
 
     direct_beam_function = None
-    bands = pipeline.compute(ProcessedWavelengthBands)
+    bands = workflow.compute(ProcessedWavelengthBands)
     band_dim = (set(bands.dims) - {'wavelength'}).pop()
     full_wavelength_range = sc.concat([bands.min(), bands.max()], dim='wavelength')
 
-    pipeline = pipeline.copy()
+    workflow = workflow.copy()
 
-    wavelength_bins = pipeline.compute(WavelengthBins)
+    wavelength_bins = workflow.compute(WavelengthBins)
     parts = (
         FinalSummedQ[SampleRun, Numerator],
         FinalSummedQ[SampleRun, Denominator],
         FinalSummedQ[BackgroundRun, Numerator],
         FinalSummedQ[BackgroundRun, Denominator],
     )
-    parts = pipeline.compute(parts)
+    parts = workflow.compute(parts)
     # Convert events to histograms to make normalization (in every iteration) cheap
     for key in [
         FinalSummedQ[SampleRun, Numerator],
@@ -121,7 +121,7 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
     # computed without variances anyway.
     parts = {key: sc.values(result) for key, result in parts.items()}
     for key, part in parts.items():
-        pipeline[key] = part
+        workflow[key] = part
     sample0 = parts[FinalSummedQ[SampleRun, Denominator]]
     background0 = parts[FinalSummedQ[BackgroundRun, Denominator]]
 
@@ -132,10 +132,10 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
         # parameters, nor given by any providers, so it will be considered flat.
         # TODO: Should we have a check that DirectBeam cannot be computed from the
         # pipeline?
-        pipeline[WavelengthBands] = full_wavelength_range
-        iofq_full = pipeline.compute(BackgroundSubtractedIofQ)
-        pipeline[WavelengthBands] = bands
-        iofq_bands = pipeline.compute(BackgroundSubtractedIofQ)
+        workflow[WavelengthBands] = full_wavelength_range
+        iofq_full = workflow.compute(BackgroundSubtractedIofQ)
+        workflow[WavelengthBands] = bands
+        iofq_bands = workflow.compute(BackgroundSubtractedIofQ)
 
         if direct_beam_function is None:
             # Make a flat direct beam
@@ -161,8 +161,8 @@ def direct_beam(pipeline: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dic
         db.coords['wavelength'] = sc.midpoints(
             db.coords['wavelength'], dim='wavelength'
         )
-        pipeline[FinalSummedQ[SampleRun, Denominator]] = sample0 * db
-        pipeline[FinalSummedQ[BackgroundRun, Denominator]] = background0 * db
+        workflow[FinalSummedQ[SampleRun, Denominator]] = sample0 * db
+        workflow[FinalSummedQ[BackgroundRun, Denominator]] = background0 * db
 
         results.append(
             {

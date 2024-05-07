@@ -4,7 +4,7 @@
 import importlib.metadata
 
 from . import data, general, io
-from .general import default_parameters
+from .general import LokiAtLarmorWorkflow, default_parameters
 
 try:
     __version__ = importlib.metadata.version(__package__ or __name__)
@@ -15,4 +15,11 @@ providers = general.providers + io.providers
 
 del importlib
 
-__all__ = ['data', 'general', 'io', 'providers', 'default_parameters']
+__all__ = [
+    'data',
+    'general',
+    'io',
+    'providers',
+    'default_parameters',
+    'LokiAtLarmorWorkflow',
+]
