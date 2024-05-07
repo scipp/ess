@@ -7,8 +7,7 @@ import sciline
 import scipp as sc
 from scipp.scipy.interpolate import interp1d
 
-from ess import sans
-from ess.loki.data import get_path
+from ess import loki, sans
 from ess.sans.types import (
     DimsToKeep,
     PixelMaskFilename,
@@ -22,7 +21,7 @@ from common import loki_providers, make_params  # noqa: E402
 
 
 def _get_I0(qbins: sc.Variable) -> sc.Variable:
-    Iq_theory = sc.io.load_hdf5(get_path('PolyGauss_I0-50_Rg-60.h5'))
+    Iq_theory = sc.io.load_hdf5(loki.data.loki_tutorial_poly_gauss_I0())
     f = interp1d(Iq_theory, 'Q')
     return f(sc.midpoints(qbins)).data[0]
 
