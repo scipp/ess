@@ -311,8 +311,34 @@ def test_pipeline_IofQ_merging_events_yields_consistent_results():
     pipeline_triple.set_param_series(
         DummyBackgroundFilename, [f'background_{i}.nxs' for i in range(N)]
     )
+
+    # We want to use `merge` runs (defined in ess.sans.i_of_q), but its ParamSeries
+    # depends on Filename, which we cannot use due to the mapping hack above. We need
+    # to define our own wrappers. This will go away once the Sciline ParamTable support
+    # is replaced.
+    def merge_sample_runs(
+        runs: sciline.Series[
+            DummySampleFilename,
+            sans.types.CleanSummedQMergedBanks[SampleRun, sans.types.IofQPart],
+        ],
+    ) -> FinalSummedQ[SampleRun, sans.types.IofQPart]:
+        return FinalSummedQ[SampleRun, sans.types.IofQPart](
+            sans.i_of_q._merge_contributions(list(runs.values()))
+        )
+
+    def merge_background_runs(
+        runs: sciline.Series[
+            DummyBackgroundFilename,
+            sans.types.CleanSummedQMergedBanks[BackgroundRun, sans.types.IofQPart],
+        ],
+    ) -> FinalSummedQ[BackgroundRun, sans.types.IofQPart]:
+        return FinalSummedQ[BackgroundRun, sans.types.IofQPart](
+            sans.i_of_q._merge_contributions(list(runs.values()))
+        )
+
     # Add event merging provider
-    pipeline_triple.insert(sans.merge_runs)
+    pipeline_triple.insert(merge_sample_runs)
+    pipeline_triple.insert(merge_background_runs)
 
     iofq1 = pipeline_single.compute(BackgroundSubtractedIofQ)
     iofq3 = pipeline_triple.compute(BackgroundSubtractedIofQ)
