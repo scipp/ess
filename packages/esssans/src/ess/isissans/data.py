@@ -8,16 +8,17 @@ import scipp as sc
 from ess.sans.data import Registry
 from ess.sans.types import (
     BackgroundRun,
-    DataFolder,
     DirectBeam,
     DirectBeamFilename,
+    EmptyBeamRun,
     Filename,
-    FilenameType,
-    FilePath,
+    PixelMaskFilename,
     RunType,
     SampleRun,
     TransmissionRun,
 )
+
+from .io import CalibrationFilename
 
 _sans2d_registry = Registry(
     instrument='sans2d',
@@ -65,60 +66,67 @@ _zoom_registry = Registry(
 )
 
 
-_registries = (_sans2d_registry, _zoom_registry)
+def sans2d_tutorial_direct_beam() -> DirectBeamFilename:
+    return DirectBeamFilename(
+        _sans2d_registry.get_path('DIRECT_SANS2D_REAR_34327_4m_8mm_16Feb16.dat.h5')
+    )
 
 
-def get_path(filename: FilenameType) -> FilePath[FilenameType]:
-    """Translate any filename to a path to the file obtained from pooch registries."""
-    for reg in _registries:
-        if filename in reg:
-            if filename.endswith('.zip'):
-                return reg.get_path(filename, unzip=True)[0]
-            return reg.get_path(filename)
+def sans2d_tutorial_sample_run() -> Filename[SampleRun]:
+    return Filename[SampleRun](_sans2d_registry.get_path('SANS2D00063114.nxs.h5'))
 
 
-def get_sans2d_tutorial_data_folder() -> DataFolder:
-    """Get the path to the folder containing the SANS2D tutorial data."""
-    for filename in (
-        'DIRECT_SANS2D_REAR_34327_4m_8mm_16Feb16.dat.h5',
-        'SANS2D00063091.nxs.h5',
-        'SANS2D00063114.nxs.h5',
-        'SANS2D00063159.nxs.h5',
-    ):
-        path = get_path(filename)
-    return DataFolder(str(Path(path).parent))
+def sans2d_tutorial_background_run() -> Filename[BackgroundRun]:
+    return Filename[BackgroundRun](_sans2d_registry.get_path('SANS2D00063159.nxs.h5'))
 
 
-def get_zoom_tutorial_data_folder() -> DataFolder:
-    """Get the path to the folder containing the Zoom tutorial data."""
-    for filename in (
-        'ZOOM00034786.nxs.h5.zip',
-        'ZOOM00034787.nxs.h5',
-        '192tubeCalibration_11-02-2019_r5_10lines.nxs',
-        'Direct_Zoom_4m_8mm_100522.txt.h5',
-        'andru_test.xml',
-        'left_beg_18_2.xml',
-        'right_beg_18_2.xml',
-        'small_bs_232.xml',
-        'small_BS_31032023.xml',
-        'tube_1120_bottom.xml',
-        'tubes_beg_18_2.xml',
-    ):
-        path = get_path(filename)
-    return DataFolder(str(Path(path).parent))
+def sans2d_tutorial_empty_beam_run() -> Filename[EmptyBeamRun]:
+    return Filename[EmptyBeamRun](_sans2d_registry.get_path('SANS2D00063091.nxs.h5'))
+
+
+def zoom_tutorial_direct_beam() -> DirectBeamFilename:
+    return DirectBeamFilename(
+        _zoom_registry.get_path('Direct_Zoom_4m_8mm_100522.txt.h5')
+    )
+
+
+def zoom_tutorial_calibration() -> Filename[CalibrationFilename]:
+    return Filename[CalibrationFilename](
+        _zoom_registry.get_path('192tubeCalibration_11-02-2019_r5_10lines.nxs')
+    )
+
+
+def zoom_tutorial_sample_run() -> Filename[SampleRun]:
+    base = _zoom_registry.get_path('ZOOM00034786.nxs.h5.zip') + '.unzip'
+    path = str(Path(base) / 'ZOOM00034786.nxs.h5')
+    return Filename[SampleRun](path)
+
+
+def zoom_tutorial_empty_beam_run() -> Filename[EmptyBeamRun]:
+    return Filename[EmptyBeamRun](_zoom_registry.get_path('ZOOM00034787.nxs.h5'))
+
+
+def zoom_tutorial_mask_filenames() -> list[PixelMaskFilename]:
+    return [
+        PixelMaskFilename(_zoom_registry.get_path('andru_test.xml')),
+        PixelMaskFilename(_zoom_registry.get_path('left_beg_18_2.xml')),
+        PixelMaskFilename(_zoom_registry.get_path('right_beg_18_2.xml')),
+        PixelMaskFilename(_zoom_registry.get_path('small_bs_232.xml')),
+        PixelMaskFilename(_zoom_registry.get_path('small_BS_31032023.xml')),
+        PixelMaskFilename(_zoom_registry.get_path('tube_1120_bottom.xml')),
+        PixelMaskFilename(_zoom_registry.get_path('tubes_beg_18_2.xml')),
+    ]
 
 
 class LoadedFileContents(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
     """Contents of a loaded file."""
 
 
-def load_tutorial_run(
-    filename: FilePath[Filename[RunType]],
-) -> LoadedFileContents[RunType]:
+def load_tutorial_run(filename: Filename[RunType]) -> LoadedFileContents[RunType]:
     return LoadedFileContents[RunType](sc.io.load_hdf5(filename))
 
 
-def load_tutorial_direct_beam(filename: FilePath[DirectBeamFilename]) -> DirectBeam:
+def load_tutorial_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
     return DirectBeam(sc.io.load_hdf5(filename))
 
 

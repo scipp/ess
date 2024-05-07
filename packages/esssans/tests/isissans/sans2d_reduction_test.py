@@ -14,7 +14,6 @@ from ess.sans.types import (
     BackgroundSubtractedIofQ,
     BeamCenter,
     CorrectForGravity,
-    DataFolder,
     DimsToKeep,
     DirectBeam,
     DirectBeamFilename,
@@ -40,7 +39,6 @@ from ess.sans.types import (
 
 def make_params() -> dict:
     params = isis.default_parameters()
-    params[DataFolder] = isis.data.get_sans2d_tutorial_data_folder()
     params[WavelengthBins] = sc.linspace(
         'wavelength', start=2.0, stop=16.0, num=141, unit='angstrom'
     )
@@ -57,10 +55,10 @@ def make_params() -> dict:
     params[QBins] = sc.linspace(
         dim='Q', start=0.01, stop=0.55, num=141, unit='1/angstrom'
     )
-    params[DirectBeamFilename] = 'DIRECT_SANS2D_REAR_34327_4m_8mm_16Feb16.dat.h5'
-    params[Filename[SampleRun]] = 'SANS2D00063114.nxs.h5'
-    params[Filename[BackgroundRun]] = 'SANS2D00063159.nxs.h5'
-    params[Filename[EmptyBeamRun]] = 'SANS2D00063091.nxs.h5'
+    params[DirectBeamFilename] = isis.data.sans2d_tutorial_direct_beam()
+    params[Filename[SampleRun]] = isis.data.sans2d_tutorial_sample_run()
+    params[Filename[BackgroundRun]] = isis.data.sans2d_tutorial_background_run()
+    params[Filename[EmptyBeamRun]] = isis.data.sans2d_tutorial_empty_beam_run()
 
     params[NeXusMonitorName[Incident]] = 'monitor2'
     params[NeXusMonitorName[Transmission]] = 'monitor4'
@@ -190,7 +188,7 @@ def as_dict(funcs: List[Callable[..., type]]) -> dict:
 def pixel_dependent_direct_beam(
     filename: DirectBeamFilename, shape: RawData[SampleRun]
 ) -> DirectBeam:
-    direct_beam = isis.data.load_tutorial_direct_beam(isis.data.get_path(filename))
+    direct_beam = isis.data.load_tutorial_direct_beam(filename)
     sizes = {'spectrum': shape.sizes['spectrum'], **direct_beam.sizes}
     return DirectBeam(direct_beam.broadcast(sizes=sizes).copy())
 

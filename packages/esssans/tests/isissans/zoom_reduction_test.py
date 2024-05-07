@@ -7,7 +7,6 @@ from ess import isissans as isis
 from ess import sans
 from ess.sans.types import (
     CorrectForGravity,
-    DataFolder,
     Filename,
     Incident,
     IofQ,
@@ -28,16 +27,13 @@ from ess.sans.types import (
 def make_params() -> dict:
     params = {
         **isis.default_parameters(),
-        sans.types.DirectBeamFilename: 'Direct_Zoom_4m_8mm_100522.txt.h5',
-        isis.CalibrationFilename: '192tubeCalibration_11-02-2019_r5_10lines.nxs',
-        Filename[
-            sans.types.SampleRun
-        ]: 'ZOOM00034786.nxs.h5.zip.unzip/ZOOM00034786.nxs.h5',
-        Filename[sans.types.EmptyBeamRun]: 'ZOOM00034787.nxs.h5',
+        sans.types.DirectBeamFilename: isis.data.zoom_tutorial_direct_beam(),
+        isis.CalibrationFilename: isis.data.zoom_tutorial_calibration(),
+        Filename[sans.types.SampleRun]: isis.data.zoom_tutorial_sample_run(),
+        Filename[sans.types.EmptyBeamRun]: isis.data.zoom_tutorial_empty_beam_run(),
         isis.SampleOffset: sc.vector([0.0, 0.0, 0.11], unit='m'),
         isis.DetectorBankOffset: sc.vector([0.0, 0.0, 0.5], unit='m'),
     }
-    params[DataFolder] = isis.data.get_zoom_tutorial_data_folder()
 
     params[NeXusMonitorName[Incident]] = 'monitor3'
     params[NeXusMonitorName[Transmission]] = 'monitor5'
@@ -60,15 +56,7 @@ def make_params() -> dict:
 
 
 def make_masks_table() -> sciline.ParamTable:
-    masks = [
-        'andru_test.xml',
-        'left_beg_18_2.xml',
-        'right_beg_18_2.xml',
-        'small_bs_232.xml',
-        'small_BS_31032023.xml',
-        'tube_1120_bottom.xml',
-        'tubes_beg_18_2.xml',
-    ]
+    masks = isis.data.zoom_tutorial_mask_filenames()
     return sciline.ParamTable(PixelMaskFilename, columns={}, index=masks)
 
 

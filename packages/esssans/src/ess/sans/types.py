@@ -160,13 +160,6 @@ PixelMaskFilename = NewType('PixelMaskFilename', str)
 FilenameType = TypeVar('FilenameType', bound=str)
 
 
-DataFolder = NewType('DataFolder', str)
-
-
-class FilePath(sciline.Scope[FilenameType, str], str):
-    """Path to a file"""
-
-
 class Filename(sciline.Scope[RunType, str], str):
     """Filename of a run"""
 

@@ -6,11 +6,8 @@ Loading and merging of LoKI data.
 import scipp as sc
 from ess.reduce import nexus
 
-from ..sans.types import (
-    DataFolder,
+from ess.sans.types import (
     Filename,
-    FilenameType,
-    FilePath,
     LoadedNeXusDetector,
     LoadedNeXusMonitor,
     MonitorType,
@@ -22,22 +19,22 @@ from ..sans.types import (
 )
 
 
-def load_nexus_sample(file_path: FilePath[Filename[RunType]]) -> RawSample[RunType]:
+def load_nexus_sample(file_path: Filename[RunType]) -> RawSample[RunType]:
     return RawSample[RunType](nexus.load_sample(file_path))
 
 
-def dummy_load_sample(file_path: FilePath[Filename[RunType]]) -> RawSample[RunType]:
+def dummy_load_sample(file_path: Filename[RunType]) -> RawSample[RunType]:
     return RawSample[RunType](
         sc.DataGroup({'position': sc.vector(value=[0, 0, 0], unit='m')})
     )
 
 
-def load_nexus_source(file_path: FilePath[Filename[RunType]]) -> RawSource[RunType]:
+def load_nexus_source(file_path: Filename[RunType]) -> RawSource[RunType]:
     return RawSource[RunType](nexus.load_source(file_path))
 
 
 def load_nexus_detector(
-    file_path: FilePath[Filename[RunType]], detector_name: NeXusDetectorName
+    file_path: Filename[RunType], detector_name: NeXusDetectorName
 ) -> LoadedNeXusDetector[RunType]:
     return LoadedNeXusDetector[RunType](
         nexus.load_detector(file_path=file_path, detector_name=detector_name)
@@ -45,7 +42,7 @@ def load_nexus_detector(
 
 
 def load_nexus_monitor(
-    file_path: FilePath[Filename[RunType]],
+    file_path: Filename[RunType],
     monitor_name: NeXusMonitorName[MonitorType],
 ) -> LoadedNeXusMonitor[RunType, MonitorType]:
     return LoadedNeXusMonitor[RunType, MonitorType](
@@ -53,15 +50,10 @@ def load_nexus_monitor(
     )
 
 
-def to_path(filename: FilenameType, path: DataFolder) -> FilePath[FilenameType]:
-    return FilePath[FilenameType](f'{path}/{filename}')
-
-
 providers = (
     load_nexus_detector,
     load_nexus_monitor,
     load_nexus_sample,
     load_nexus_source,
-    to_path,
 )
 """Providers for loading single files."""

@@ -7,24 +7,12 @@ from typing import NewType
 
 import scipp as sc
 
-from ..sans.types import (
-    DataFolder,
-    FilenameType,
-    FilePath,
-    MaskedDetectorIDs,
-    PixelMaskFilename,
-)
+from ess.sans.types import MaskedDetectorIDs, PixelMaskFilename
 
 CalibrationFilename = NewType('CalibrationFilename', str)
 
 
-def to_path(filename: FilenameType, path: DataFolder) -> FilePath[FilenameType]:
-    return f'{path}/{filename}'
-
-
-def read_xml_detector_masking(
-    filename: FilePath[PixelMaskFilename],
-) -> MaskedDetectorIDs:
+def read_xml_detector_masking(filename: PixelMaskFilename) -> MaskedDetectorIDs:
     """Read a pixel mask from an XML file.
 
     The format is as follows, where the detids are inclusive ranges of detector IDs:
@@ -64,4 +52,4 @@ def read_xml_detector_masking(
     )
 
 
-providers = (read_xml_detector_masking, to_path)
+providers = (read_xml_detector_masking,)
