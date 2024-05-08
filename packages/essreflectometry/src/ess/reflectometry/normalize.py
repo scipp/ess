@@ -40,47 +40,36 @@ def normalization_factor(
 
     '''
     sample_q = (
-        sc.DataArray(
-            data=da.coords['Q'],
-            coords=dict(
-                wavelength=da.coords['wavelength'],
-                z_index=da.coords['z_index'],
-            ),
-            masks=da.masks,
-        )
-        # TODO: Can this be done more efficiently?
-        .group('z_index')
+        da.bins.concat(set(da.dims) - set(da.coords['z_index'].dims))
         .bin(wavelength=wbins)
+        .bins.coords['Q']
         .bins.mean()
-        .data
     )
 
-    def Q_of_z_wavelength(z_index, wavelength, a, b, c):
-        z = sc.scalar(14 * 32) - sc.array(dims=z_index.dims, values=z_index.values)
-        return (a + b * z + c * z**2) / wavelength
+    def Q_of_z_wavelength(wavelength, a, b):
+        return a + b / wavelength
 
     p, _ = sc.curve_fit(
-        ['z_index', 'wavelength'],
+        ['wavelength'],
         Q_of_z_wavelength,
         sc.DataArray(
             data=sample_q,
-            coords=dict(
-                wavelength=corr.coords['wavelength'],
-                z_index=corr.coords['z_index'],
+            coords=dict(wavelength=corr.coords['wavelength']),
+            masks=dict(
+                corr.masks,
+                _sample_q_isnan=sc.isnan(sample_q),
             ),
-            masks=dict(corr.masks, _sample_q_isnan=sc.isnan(sample_q)),
         ),
+        p0=dict(a=sc.scalar(1, unit='1/angstrom')),
     )
     return sc.DataArray(
         data=corr.data,
         coords=dict(
             Q=Q_of_z_wavelength(
-                corr.coords['z_index'],
                 corr.coords['wavelength'],
-                p['a'].data.value,
-                p['b'].data.value,
-                p['c'].data.value,
-            ),
+                sc.values(p['a']),
+                sc.values(p['b']),
+            ).data,
         ),
         masks=corr.masks,
     )
@@ -107,7 +96,10 @@ def normalize_by_supermirror(
     :
         normalized sample.
     """
-    return NormalizedIofQ(da.bin(Q=qbins) / sc.values(n.flatten(to='Q').hist(Q=qbins)))
+    return NormalizedIofQ(
+        da.bins.concat().data.value.bin(Q=qbins)
+        / sc.values(n.flatten(to='Q').hist(Q=qbins))
+    )
 
 
 providers = (normalize_by_supermirror, normalization_factor)
