@@ -55,27 +55,14 @@ def compute_reference_intensity(
         with the experiment parameters (such as sample rotation).
         Therefore it can be used to normalize sample measurements.
     """
-    # TODO: use lower level function to histogram without binning
-    h = da.group('z_index').hist(wavelength=wb)
+    b = da.bins.concat(set(da.dims) - set(da.coords['z_index'].dims)).bin(wavelength=wb)
+    h = b.hist()
     h.masks['too_few_events'] = h.data < sc.scalar(1, unit='counts')
     h.coords['wavelength'] = sc.midpoints(h.coords['wavelength'])
     # Add a Q coordinate to each bin, the Q is not completely unique in every bin,
     # but it is close enough.
-    h.coords['Q'] = (
-        sc.DataArray(
-            data=da.coords['Q'],
-            coords=dict(
-                wavelength=da.coords['wavelength'], z_index=da.coords['z_index']
-            ),
-            masks=da.masks,
-        )
-        .group('z_index')
-        .bin(wavelength=wb)
-        .bins.mean()
-        .data
-    )
-    # TODO: why do we need the slice here?
-    return HistogrammedReference(h['z_index', : 14 * 32])
+    h.coords['Q'] = b.bins.coords['Q'].bins.mean()
+    return HistogrammedReference(h)
 
 
 def normalize_reference(
