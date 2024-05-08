@@ -128,8 +128,10 @@ def add_coords(
     graph: SpecularReflectionCoordTransformGraph[Run],
 ) -> FullData[Run]:
     da = da.transform_coords(["theta", "wavelength", "Q"], graph=graph)
-    da.coords['z_index'] = da.coords['detector_number'] // sc.scalar(64, unit=None)
-    da.coords['y_index'] = da.coords['detector_number'] % sc.scalar(64, unit=None)
+    da.coords['z_index'] = sc.arange(
+        'row', 0, da.sizes['blade'] * da.sizes['wire'], unit=None
+    ).fold('row', sizes=dict(blade=da.sizes['blade'], wire=da.sizes['wire']))
+    da.coords['y_index'] = sc.arange('stipe', 0, da.sizes['stipe'], unit=None)
     return da
 
 
@@ -139,8 +141,8 @@ def add_masks(
     da.masks['y_index_range'] = (da.coords['y_index'] < ylim[0]) | (
         da.coords['y_index'] > ylim[1]
     )
-    da.masks['wavelength_mask'] = (da.coords['wavelength'] < wb[0]) | (
-        da.coords['wavelength'] > wb[-1]
+    da.bins.masks['wavelength_mask'] = (da.bins.coords['wavelength'] < wb[0]) | (
+        da.bins.coords['wavelength'] > wb[-1]
     )
     da.masks['z_index_range'] = (da.coords['z_index'] < zlim[0]) | (
         da.coords['z_index'] > zlim[1]
