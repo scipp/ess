@@ -4,6 +4,7 @@
 import importlib.metadata
 
 from . import calibrations, conversions, corrections, normalize
+from .load import load_reference, save_reference
 
 try:
     __version__ = importlib.metadata.version(__package__ or __name__)
@@ -26,3 +27,9 @@ see :py:data:`essreflectometry.amor.providers`.
 """
 
 del importlib
+
+
+__all__ = [
+    "load_reference",
+    "save_reference",
+]

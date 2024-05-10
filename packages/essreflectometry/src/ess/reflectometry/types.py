@@ -121,3 +121,7 @@ YIndexLimits = NewType('YIndexLimits', tuple[sc.Variable, sc.Variable])
 
 ZIndexLimits = NewType('ZIndexLimits', tuple[sc.Variable, sc.Variable])
 '''Limit of the (logical) 'z' detector pixel index'''
+
+
+ReferenceFilePath = NewType('ReferenceFilePath', str)
+'''Path to the cached normalization matrix'''
