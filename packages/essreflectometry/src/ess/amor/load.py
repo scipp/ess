@@ -3,6 +3,7 @@
 import scipp as sc
 from ess.reduce import nexus
 
+from ..reflectometry.load import load_nx
 from ..reflectometry.types import (
     ChopperCorrectedTofEvents,
     DetectorRotation,
@@ -11,9 +12,16 @@ from ..reflectometry.types import (
     RawDetector,
     RawEvents,
     Run,
+    SampleRotation,
 )
 from .geometry import Detector, pixel_coordinate_in_lab_frame
-from .types import ChopperFrequency, ChopperPhase
+from .types import (
+    Chopper1Position,
+    Chopper2Position,
+    ChopperFrequency,
+    ChopperPhase,
+    RawChopper,
+)
 
 
 def load_detector(
@@ -94,4 +102,59 @@ def compute_tof(
     return ChopperCorrectedTofEvents[Run](data)
 
 
-providers = (load_detector, load_events, compute_tof)
+def amor_chopper(f: FilePath[Run]) -> RawChopper[Run]:
+    return next(load_nx(f, 'NXentry/NXinstrument/NXdisk_chopper'))
+
+
+def load_amor_chopper_1_position(ch: RawChopper[Run]) -> Chopper1Position[Run]:
+    # We know the value has unit 'mm'
+    return sc.vector([0, 0, ch['distance'] - ch['pair_separation'] / 2], unit='mm').to(
+        unit='m'
+    )
+
+
+def load_amor_chopper_2_position(ch: RawChopper[Run]) -> Chopper2Position[Run]:
+    # We know the value has unit 'mm'
+    return sc.vector([0, 0, ch['distance'] + ch['pair_separation'] / 2], unit='mm').to(
+        unit='m'
+    )
+
+
+def load_amor_ch_phase(ch: RawChopper[Run]) -> ChopperPhase[Run]:
+    p = ch['phase']['value'].coords['average_value'].value
+    if getattr(p, 'unit', None):
+        return p
+    raise ValueError('No unit was found for the chopper phase')
+
+
+def load_amor_ch_frequency(ch: RawChopper[Run]) -> ChopperFrequency[Run]:
+    f = ch['rotation_speed']['value'].coords['average_value']
+    if getattr(f, 'unit', None):
+        return f
+    raise ValueError('No unit was found for the chopper frequency')
+
+
+def load_amor_sample_rotation(fp: FilePath[Run]) -> SampleRotation[Run]:
+    (mu,) = load_nx(fp, 'NXentry/NXinstrument/master_parameters/mu')
+    mu = mu['value'].coords['average_value'].value
+    return sc.scalar(mu, unit='deg')
+
+
+def load_amor_detector_rotation(fp: FilePath[Run]) -> DetectorRotation[Run]:
+    (nu,) = load_nx(fp, 'NXentry/NXinstrument/master_parameters/nu')
+    nu = nu['value'].coords['average_value'].value
+    return sc.scalar(nu, unit='deg')
+
+
+providers = (
+    load_detector,
+    load_events,
+    compute_tof,
+    load_amor_ch_frequency,
+    load_amor_ch_phase,
+    load_amor_chopper_1_position,
+    load_amor_chopper_2_position,
+    load_amor_sample_rotation,
+    load_amor_detector_rotation,
+    amor_chopper,
+)

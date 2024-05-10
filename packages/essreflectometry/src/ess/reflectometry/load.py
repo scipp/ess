@@ -1,5 +1,9 @@
 import h5py
+import sciline
+import scipp as sc
 import scippnexus as snx
+
+from .types import CorrectionMatrix, ReferenceFilePath
 
 
 def _load(filepath, *paths: str):
@@ -41,3 +45,12 @@ def load_nx(filepath, *paths: str):
     and all other parts are assumed to be keys.
     '''
     yield from _load(filepath, *_convert_nxpaths(filepath, *paths))
+
+
+def save_reference(pl: sciline.Pipeline, fname: str):
+    pl.compute(CorrectionMatrix).save_hdf5(fname)
+    return fname
+
+
+def load_reference(fname: ReferenceFilePath) -> CorrectionMatrix:
+    return sc.io.hdf5.load_hdf5(fname)
