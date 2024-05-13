@@ -178,7 +178,8 @@ def make_IofQ(size: int = 1000) -> sc.DataArray:
     wavelength = sc.array(
         dims=['event'], values=rng.uniform(0.5, 5.0, size), unit='angstrom'
     )
-    q = sc.array(dims=['event'], values=rng.uniform(0.0, 3.0, size), unit='1/angstrom')
+    qx = sc.array(dims=['event'], values=rng.uniform(0.0, 3.0, size), unit='1/angstrom')
+    qy = sc.array(dims=['event'], values=rng.uniform(0.0, 3.0, size), unit='1/angstrom')
     weights = sc.array(dims=['event'], values=rng.uniform(0.0, 1.0, size))
     # There are different DB runs at different times, we assume in `direct_beam` this
     # has been grouped by time already.
@@ -187,7 +188,8 @@ def make_IofQ(size: int = 1000) -> sc.DataArray:
         weights,
         coords={
             'wavelength': wavelength,
-            'Q': q,
+            'Qx': qx,
+            'Qy': qy,
             'time': time,
         },
     )
