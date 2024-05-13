@@ -1,8 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import numpy as np
+import pytest
 import scipp as sc
-from scipp.testing import assert_identical
+from scipp.testing import assert_allclose, assert_identical
 
 from ess import polarization as pol
 
@@ -178,8 +179,12 @@ def make_IofQ(size: int = 1000) -> sc.DataArray:
     wavelength = sc.array(
         dims=['event'], values=rng.uniform(0.5, 5.0, size), unit='angstrom'
     )
-    qx = sc.array(dims=['event'], values=rng.uniform(0.0, 3.0, size), unit='1/angstrom')
-    qy = sc.array(dims=['event'], values=rng.uniform(0.0, 3.0, size), unit='1/angstrom')
+    qx = sc.array(
+        dims=['event'], values=rng.uniform(-3.1, 3.0, size), unit='1/angstrom'
+    )
+    qy = sc.array(
+        dims=['event'], values=rng.uniform(-2.6, 2.5, size), unit='1/angstrom'
+    )
     weights = sc.array(dims=['event'], values=rng.uniform(0.0, 1.0, size))
     # There are different DB runs at different times, we assume in `direct_beam` this
     # has been grouped by time already.
@@ -211,3 +216,76 @@ def test_direct_beam_returns_expected_dims() -> None:
     )
     assert db.bins is None
     assert db.dims == ('time', 'wavelength')
+
+
+def test_direct_beam_raises_if_q_ranges_overlap() -> None:
+    data = make_IofQ()
+    wavelength = sc.linspace(
+        dim='wavelength', start=0.5, stop=5.0, num=100, unit='angstrom'
+    )
+    q_range = sc.array(dims=['Q'], values=[0.0, 1.0], unit='1/angstrom')
+    background_q_range = sc.array(dims=['Q'], values=[0.5, 2.0], unit='1/angstrom')
+
+    with pytest.raises(
+        ValueError, match='Background range must be after direct beam range'
+    ):
+        pol.direct_beam(
+            data=data.bin(wavelength=wavelength),
+            q_range=q_range,
+            background_q_range=background_q_range,
+        )
+
+
+def test_direct_beam_raises_if_q_range_not_positive() -> None:
+    data = make_IofQ()
+    wavelength = sc.linspace(
+        dim='wavelength', start=0.5, stop=5.0, num=100, unit='angstrom'
+    )
+    q_range = sc.array(dims=['Q'], values=[-2.0, 2.0], unit='1/angstrom')
+    background_q_range = sc.array(dims=['Q'], values=[3.0, 4.0], unit='1/angstrom')
+
+    with pytest.raises(ValueError, match='Q-range must be positive'):
+        pol.direct_beam(
+            data=data.bin(wavelength=wavelength),
+            q_range=q_range,
+            background_q_range=background_q_range,
+        )
+
+
+def test_direct_beam_operates_on_normalized_data() -> None:
+    data = make_IofQ(size=int(1e6))
+    data2 = data.bins.concatenate(data)
+    wavelength = sc.linspace(
+        dim='wavelength', start=0.5, stop=5.0, num=100, unit='angstrom'
+    )
+    q_range = sc.array(dims=['Q'], values=[0.0, 1.0], unit='1/angstrom')
+    background_q_range = sc.array(dims=['Q'], values=[1.0, 2.0], unit='1/angstrom')
+
+    db = pol.direct_beam(
+        data=data.bin(wavelength=wavelength),
+        q_range=q_range,
+        background_q_range=background_q_range,
+    )
+    db2 = pol.direct_beam(
+        data=data2.bin(wavelength=wavelength),
+        q_range=q_range,
+        background_q_range=background_q_range,
+    )
+    assert_allclose(db, db2)
+
+
+def test_direct_beam_raises_if_input_is_counts() -> None:
+    data = make_IofQ()
+    wavelength = sc.linspace(
+        dim='wavelength', start=0.5, stop=5.0, num=100, unit='angstrom'
+    )
+    q_range = sc.array(dims=['Q'], values=[0.0, 1.0], unit='1/angstrom')
+    background_q_range = sc.array(dims=['Q'], values=[1.0, 2.0], unit='1/angstrom')
+
+    data.bins.unit = 'counts'
+    with pytest.raises(ValueError, match='Input data must be normalized'):
+        pol.direct_beam(
+            data=data.bin(wavelength=wavelength),
+            q_range=q_range,
+            background_q_range=background_q_range,
+        )
