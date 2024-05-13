@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 import scipp as sc
-from scipp.testing import assert_identical
+from scipp.testing import assert_allclose, assert_identical
 
 from ess import polarization as pol
 
@@ -250,3 +250,25 @@ def test_direct_beam_raises_if_q_range_not_positive() -> None:
             q_range=q_range,
             background_q_range=background_q_range,
         )
+
+
+def test_direct_beam_operates_on_normalized_data() -> None:
+    data = make_IofQ(size=int(1e6))
+    data2 = data.bins.concatenate(data)
+    wavelength = sc.linspace(
+        dim='wavelength', start=0.5, stop=5.0, num=100, unit='angstrom'
+    )
+    q_range = sc.array(dims=['Q'], values=[0.0, 1.0], unit='1/angstrom')
+    background_q_range = sc.array(dims=['Q'], values=[1.0, 2.0], unit='1/angstrom')
+
+    db = pol.direct_beam(
+        data=data.bin(wavelength=wavelength),
+        q_range=q_range,
+        background_q_range=background_q_range,
+    )
+    db2 = pol.direct_beam(
+        data=data2.bin(wavelength=wavelength),
+        q_range=q_range,
+        background_q_range=background_q_range,
+    )
+    assert_allclose(db, db2)

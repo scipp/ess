@@ -188,7 +188,11 @@ def compute_direct_beam(
     q_range: sc.Variable,
     background_q_range: sc.Variable,
 ) -> sc.DataArray:
-    """Compute background-subtracted direct beam function."""
+    """
+    Compute background-subtracted direct beam function.
+
+    The input must be normalized data, not counts.
+    """
     if q_range.max() > background_q_range.min():
         raise ValueError('Background range must be after direct beam range.')
     if q_range.min() < sc.scalar(0.0, unit='1/angstrom'):
@@ -203,10 +207,11 @@ def compute_direct_beam(
     qx = data.bins.coords['Qx']
     qy = data.bins.coords['Qy']
     data.bins.coords['Q_squared'] = qx**2 + qy**2
-    # The input is binned in time and wavelength, we simply histogram without changes.
-    direct_beam = data.bins['Q_squared', start_db:stop_db].hist()
-    background = data.bins['Q_squared', start_bg:stop_bg].hist()
-    return direct_beam - background
+    # The input is binned in time and wavelength, we simply take the per-bin mean
+    # without changes.
+    beam_region = data.bins['Q_squared', start_db:stop_db].bins.mean()
+    background = data.bins['Q_squared', start_bg:stop_bg].bins.mean()
+    return beam_region - background
 
 
 ReducedDirectBeamDataNoCell = NewType('ReducedDirectBeamDataNoCell', sc.DataArray)
