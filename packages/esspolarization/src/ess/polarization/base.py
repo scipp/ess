@@ -382,11 +382,42 @@ def he3_opacity_from_beam_data(
     return He3OpacityFunction[Cell](OpacityFunction(popt['opacity0'].data))
 
 
+def polarization_function(
+    time: sc.Variable, C: sc.Variable, T1: sc.Variable
+) -> sc.Variable:
+    return C * sc.exp(-time / T1)
+
+
+def transmission_function(
+    transmission_empty_glass: sc.Variable,
+    opacity: sc.Variable,
+    polarization: sc.Variable,
+) -> sc.Variable:
+    return transmission_empty_glass * sc.exp(-opacity) * sc.cosh(opacity * polarization)
+
+
+def direct_beam_ratio(
+    wavelength: sc.Variable,
+    time: sc.Variable,
+    C: sc.Variable,
+    T1: sc.Variable,
+    opacity_function,
+    transmission_empty_glass: sc.Variable,
+) -> sc.Variable:
+    opacity = opacity_function(wavelength)
+    polarization = polarization_function(time=time, C=C, T1=T1)
+    return transmission_function(
+        transmission_empty_glass=transmission_empty_glass,
+        opacity=opacity,
+        polarization=polarization,
+    )
+
+
 def he3_polarization(
     direct_beam_no_cell: DirectBeamNoCell,
     direct_beam_polarized: He3DirectBeam[Cell, Polarized],
-    opacity: He3OpacityFunction[Cell],
-    filling_time: He3FillingTime[Cell],
+    opacity_function: He3OpacityFunction[Cell],
+    # filling_time: He3FillingTime[Cell],
     transmission_empty_glass: He3TransmissionEmptyGlass[Cell],
 ) -> He3Polarization[Cell]:
     """
@@ -394,6 +425,15 @@ def he3_polarization(
 
     DB_pol/DB = T_E * cosh(O(lambda)*P(t))*exp(-O(lambda))
     """
+
+    popt, _ = sc.curve_fit(
+        ['wavelength', 'time'],
+        direct_beam_ratio,
+        direct_beam_no_cell / direct_beam_polarized,
+        # TODO We could use opacity0 from cell parameters as initial guess.
+        p0={'C': sc.scalar(1.0, unit=''), 'T1': sc.scalar(1000.0, unit='s')},
+    )
+
     # Each time bin corresponds to a direct beam measurement. Take the mean for each
     # but keep the time binning.
     # time_up = direct_beam_up.bins.coords['time'].bins.mean()
