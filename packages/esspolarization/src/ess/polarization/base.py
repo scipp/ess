@@ -396,23 +396,6 @@ def transmission_function(
     return transmission_empty_glass * sc.exp(-opacity) * sc.cosh(opacity * polarization)
 
 
-def direct_beam_ratio(
-    wavelength: sc.Variable,
-    time: sc.Variable,
-    C: sc.Variable,
-    T1: sc.Variable,
-    opacity_function,
-    transmission_empty_glass: sc.Variable,
-) -> sc.Variable:
-    opacity = opacity_function(wavelength)
-    polarization = polarization_function(time=time, C=C, T1=T1)
-    return transmission_function(
-        transmission_empty_glass=transmission_empty_glass,
-        opacity=opacity,
-        polarization=polarization,
-    )
-
-
 def he3_polarization(
     direct_beam_no_cell: DirectBeamNoCell,
     direct_beam_polarized: He3DirectBeam[Cell, Polarized],
@@ -425,6 +408,17 @@ def he3_polarization(
 
     DB_pol/DB = T_E * cosh(O(lambda)*P(t))*exp(-O(lambda))
     """
+
+    def direct_beam_ratio(
+        wavelength: sc.Variable, time: sc.Variable, C: sc.Variable, T1: sc.Variable
+    ) -> sc.Variable:
+        opacity = opacity_function(wavelength)
+        polarization = polarization_function(time=time, C=C, T1=T1)
+        return transmission_function(
+            transmission_empty_glass=transmission_empty_glass,
+            opacity=opacity,
+            polarization=polarization,
+        )
 
     popt, _ = sc.curve_fit(
         ['wavelength', 'time'],
@@ -439,8 +433,7 @@ def he3_polarization(
     # time_up = direct_beam_up.bins.coords['time'].bins.mean()
     # time_down = direct_beam_down.bins.coords['time'].bins.mean()
     # results dims: spin state, wavelength, time
-    raise NotImplementedError()
-    return He3Polarization[Cell](1)
+    return He3Polarization[Cell](popt)
 
 
 def he3_transmission(
