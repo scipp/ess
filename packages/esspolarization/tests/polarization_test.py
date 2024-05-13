@@ -23,7 +23,8 @@ def test_he3_polarization_reproduces_input_params_within_errors(
     C = sc.scalar(1.3)
     T1 = sc.scalar(1234.0, unit='s')
     opacity0 = sc.scalar(0.6, unit='1/angstrom')
-    polarization = pol.base.polarization_function(time=time, C=C, T1=T1)
+    polarization_function = pol.base.PolarizationFunction(C=C, T1=T1)
+    polarization = polarization_function(time=time)
     opacity_function = pol.base.OpacityFunction(opacity0)
     opacity = opacity_function(wavelength)
     transmission_empty_glass = sc.scalar(0.9)
@@ -44,8 +45,8 @@ def test_he3_polarization_reproduces_input_params_within_errors(
     )
 
     # No noise, very close or exact match.
-    assert sc.isclose(result['C'].data, C)
-    assert sc.isclose(result['T1'].data, T1)
+    assert sc.isclose(result.C, C)
+    assert sc.isclose(result.T1, T1)
 
     rng = np.random.default_rng(seed=1234)
     direct_beam_no_cell_noisy = direct_beam_no_cell.copy()
@@ -61,5 +62,5 @@ def test_he3_polarization_reproduces_input_params_within_errors(
     )
 
     # With noise, within 1% of the input values.
-    assert sc.isclose(result['C'].data, C, rtol=sc.scalar(1e-2))
-    assert sc.isclose(result['T1'].data, T1, rtol=sc.scalar(1e-2))
+    assert sc.isclose(result.C, C, rtol=sc.scalar(1e-2))
+    assert sc.isclose(result.T1, T1, rtol=sc.scalar(1e-2))
