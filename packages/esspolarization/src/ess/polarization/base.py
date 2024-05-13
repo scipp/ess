@@ -194,8 +194,8 @@ def compute_direct_beam(
     start_bg = background_q_range[0]
     stop_bg = background_q_range[-1]
     # The input is binned in time and wavelength, we simply histogram without changes.
-    direct_beam = data.bins['Q', start_db:stop_db].hist()
-    background = data.bins['Q', start_bg:stop_bg].hist()
+    direct_beam = data.bins['Qx', start_db:stop_db].bins['Qy', start_db:stop_db].hist()
+    background = data.bins['Qx', start_bg:stop_bg].bins['Qy', start_bg:stop_bg].hist()
     return direct_beam - background
 
 
