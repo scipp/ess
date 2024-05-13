@@ -43,6 +43,7 @@ def test_he3_polarization_reproduces_input_params_within_errors(
         opacity_function=opacity_function,
         transmission_empty_glass=transmission_empty_glass,
     )
+    assert isinstance(result, pol.base.PolarizationFunction)
 
     # No noise, very close or exact match.
     assert sc.isclose(result.C, C)
