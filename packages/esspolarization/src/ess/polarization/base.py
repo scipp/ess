@@ -189,17 +189,23 @@ def compute_direct_beam(
     background_q_range: sc.Variable,
 ) -> sc.DataArray:
     """Compute background-subtracted direct beam function."""
-    start_db = q_range[0]
-    stop_db = q_range[-1]
-    start_bg = background_q_range[0]
-    stop_bg = background_q_range[-1]
     if q_range.max() > background_q_range.min():
         raise ValueError('Background range must be after direct beam range.')
     if q_range.min() < sc.scalar(0.0, unit='1/angstrom'):
         raise ValueError('Q-range must be positive.')
+    q_range = q_range**2
+    background_q_range = background_q_range**2
+    start_db = q_range[0]
+    stop_db = q_range[-1]
+    start_bg = background_q_range[0]
+    stop_bg = background_q_range[-1]
+    # Simple approach for now: Assume we can treat this as rotation invariant
+    qx = data.bins.coords['Qx']
+    qy = data.bins.coords['Qy']
+    data.bins.coords['Q_squared'] = qx**2 + qy**2
     # The input is binned in time and wavelength, we simply histogram without changes.
-    direct_beam = data.bins['Qx', start_db:stop_db].bins['Qy', start_db:stop_db].hist()
-    background = data.bins['Qx', start_bg:stop_bg].bins['Qy', start_bg:stop_bg].hist()
+    direct_beam = data.bins['Q_squared', start_db:stop_db].hist()
+    background = data.bins['Q_squared', start_bg:stop_bg].hist()
     return direct_beam - background
 
 
