@@ -193,6 +193,8 @@ def compute_direct_beam(
 
     The input must be normalized data, not counts.
     """
+    if data.bins.unit != '':
+        raise ValueError(f'Input data must be normalized, got unit {data.unit}.')
     if q_range.max() > background_q_range.min():
         raise ValueError('Background range must be after direct beam range.')
     if q_range.min() < sc.scalar(0.0, unit='1/angstrom'):

@@ -272,3 +272,20 @@ def test_direct_beam_operates_on_normalized_data() -> None:
         background_q_range=background_q_range,
     )
     assert_allclose(db, db2)
+
+
+def test_direct_beam_raises_if_input_is_counts() -> None:
+    data = make_IofQ()
+    wavelength = sc.linspace(
+        dim='wavelength', start=0.5, stop=5.0, num=100, unit='angstrom'
+    )
+    q_range = sc.array(dims=['Q'], values=[0.0, 1.0], unit='1/angstrom')
+    background_q_range = sc.array(dims=['Q'], values=[1.0, 2.0], unit='1/angstrom')
+
+    data.bins.unit = 'counts'
+    with pytest.raises(ValueError, match='Input data must be normalized'):
+        pol.direct_beam(
+            data=data.bin(wavelength=wavelength),
+            q_range=q_range,
+            background_q_range=background_q_range,
+        )
