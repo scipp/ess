@@ -20,6 +20,7 @@ def _make_pooch() -> pooch.Pooch:
             "small_mcstas_2_sample.h5": "md5:c3affe636397f8c9eea1d9c10a2bf487",
             "small_mcstas_3_sample.h5": "md5:2afaac205d13ee857ee5364e3f1957a7",
             "mtz_samples.tar.gz": "md5:bed1eaf604bbe8725c1f6a20ca79fcc0",
+            "mtz_random_samples.tar.gz": "md5:c8259ae2e605560ab88959e7109613b6",
         },
     )
 
@@ -62,10 +63,29 @@ def get_path(name: str) -> str:
 
 
 def get_small_mtz_samples() -> list[pathlib.Path]:
-    """Return a list of path to MTZ sample files."""
+    """Return a list of path to MTZ sample files randomly chosen from real dataset.
+
+    This samples also contain optional columns.
+    """
     from pooch.processors import Untar
 
     return [
         pathlib.Path(file_path)
         for file_path in _pooch.fetch("mtz_samples.tar.gz", processor=Untar())
+    ]
+
+
+def get_small_random_mtz_samples() -> list[pathlib.Path]:
+    """Return a list of path to MTZ sample files filled with random values
+
+    This sample only contains mandatory columns for the workflow examples.
+    They are made for documentation, not necessarily for testing.
+    Use ``get_small_mtz_samples`` for testing since they are
+    more representative of real data.
+    """
+    from pooch.processors import Untar
+
+    return [
+        pathlib.Path(file_path)
+        for file_path in _pooch.fetch("mtz_random_samples.tar.gz", processor=Untar())
     ]
