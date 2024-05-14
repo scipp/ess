@@ -14,7 +14,7 @@
    Cell
    CellInBeamLog
    Depolarized
-   DirectBeamBackgroundRegion
+   DirectBeamBackgroundQRange
    DirectBeamNoCell
    DirectBeamQRange
    Down
@@ -22,9 +22,9 @@
    He3CellPressure
    He3DirectBeam
    He3FillingTime
-   He3Opacity
-   He3Polarization
-   He3Transmission
+   He3OpacityFunction
+   He3PolarizationFunction
+   He3TransmissionFunction
    He3TransmissionEmptyGlass
    PolarizationCorrectedSampleData
    Polarized
