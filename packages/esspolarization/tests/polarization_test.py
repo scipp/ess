@@ -26,12 +26,13 @@ def test_he3_polarization_reproduces_input_params_within_errors(
     polarization_function = pol.He3PolarizationFunction(C=C, T1=T1)
     opacity_function = pol.He3OpacityFunction(opacity0)
     transmission_empty_glass = sc.scalar(0.9)
-    transmission_function = pol.He3TransmissionFunction(
-        opacity_function=opacity_function,
-        polarization_function=polarization_function,
+    opacity = opacity_function(wavelength)
+    polarization = polarization_function(time)
+    transmission = pol.base.transmission_incoming_unpolarized(
         transmission_empty_glass=transmission_empty_glass,
+        opacity=opacity,
+        polarization=polarization,
     )
-    transmission = transmission_function(time=time, wavelength=wavelength)
     direct_beam_polarized = sc.DataArray(
         transmission, coords={'time': time, 'wavelength': wavelength}
     )

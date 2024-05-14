@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 from dataclasses import dataclass
-from typing import Generic, Mapping, NewType, TypeVar
+from typing import Generic, Literal, Mapping, NewType, TypeVar
 
 import numpy as np
 import sciline as sl
@@ -398,14 +398,29 @@ class He3TransmissionFunction(Generic[Cell]):
     polarization_function: He3PolarizationFunction[Cell]
     transmission_empty_glass: He3TransmissionEmptyGlass[Cell]
 
-    def __call__(self, time: sc.Variable, wavelength: sc.Variable) -> sc.Variable:
+    def __call__(
+        self,
+        *,
+        time: sc.Variable,
+        wavelength: sc.Variable,
+        plus_minus: Literal['plus', 'minus'],
+    ) -> sc.Variable:
         opacity = self.opacity_function(wavelength)
         polarization = self.polarization_function(time)
-        return (
-            self.transmission_empty_glass
-            * sc.exp(-opacity)
-            * sc.cosh(opacity * polarization)
-        )
+        if plus_minus == 'plus':
+            polarization -= 1.0
+        else:
+            polarization += 1.0
+        return self.transmission_empty_glass * sc.exp(opacity * polarization)
+
+
+def transmission_incoming_unpolarized(
+    *,
+    transmission_empty_glass: sc.Variable,
+    opacity: sc.Variable,
+    polarization: sc.Variable,
+) -> sc.Variable:
+    return transmission_empty_glass * sc.exp(-opacity) * sc.cosh(opacity * polarization)
 
 
 def get_he3_transmission_from_fit_to_direct_beam(
@@ -427,12 +442,14 @@ def get_he3_transmission_from_fit_to_direct_beam(
     def direct_beam_ratio(
         wavelength: sc.Variable, time: sc.Variable, C: sc.Variable, T1: sc.Variable
     ) -> sc.Variable:
+        opacity = opacity_function(wavelength)
         polarization_function = He3PolarizationFunction[Cell](C=C, T1=T1)
-        return He3TransmissionFunction[Cell](
-            opacity_function=opacity_function,
-            polarization_function=polarization_function,
+        polarization = polarization_function(time)
+        return transmission_incoming_unpolarized(
             transmission_empty_glass=transmission_empty_glass,
-        )(time, wavelength)
+            opacity=opacity,
+            polarization=polarization,
+        )
 
     popt, _ = sc.curve_fit(
         ['wavelength', 'time'],
