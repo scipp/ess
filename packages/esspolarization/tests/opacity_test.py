@@ -63,6 +63,9 @@ def test_opacity_from_beam_data() -> None:
         transmission_empty_glass=transmission_empty_glass,
         direct_beam=direct_beam,
         direct_beam_cell=direct_beam_cell,
+        pressure=sc.scalar(1.2, unit='bar'),
+        length=sc.scalar(0.01, unit='m'),
+        temperature=sc.scalar(293.15, unit='K'),
     )
     opacity = opacity_function(wavelength)
     assert_identical(2 * opacity['wavelength', 0], opacity['wavelength', 1])

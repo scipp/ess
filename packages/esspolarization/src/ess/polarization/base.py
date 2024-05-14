@@ -349,6 +349,9 @@ def he3_opacity_from_beam_data(
     transmission_empty_glass: He3TransmissionEmptyGlass[Cell],
     direct_beam: DirectBeamNoCell,
     direct_beam_cell: He3DirectBeam[Cell, Depolarized],
+    pressure: He3CellPressure[Cell],
+    length: He3CellLength[Cell],
+    temperature: He3CellTemperature[Cell],
 ) -> He3OpacityFunction[Cell]:
     """
     Opacity function for a given cell, based on direct beam data.
@@ -356,6 +359,7 @@ def he3_opacity_from_beam_data(
     Note that this can alternatively be defined via cell parameters, see
     :py:func:`he3_opacity_from_cell_params`.
     """
+    opacity0 = he3_opacity_from_cell_params(pressure, length, temperature).opacity0
 
     def intensity(wavelength: sc.Variable, opacity0: sc.Variable) -> sc.Variable:
         opacity = He3OpacityFunction[Cell](opacity0)
@@ -365,8 +369,7 @@ def he3_opacity_from_beam_data(
         ['wavelength'],
         intensity,
         direct_beam_cell / direct_beam,
-        # TODO We could use opacity0 from cell parameters as initial guess.
-        p0={'opacity0': sc.scalar(1.0, unit='1/nm')},
+        p0={'opacity0': opacity0},
     )
     return He3OpacityFunction[Cell](popt['opacity0'].data)
 
