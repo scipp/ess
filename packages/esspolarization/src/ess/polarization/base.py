@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-from typing import Mapping, NewType, TypeVar
+from typing import Generic, Mapping, NewType, TypeVar
 
 import numpy as np
 import sciline as sl
@@ -34,10 +34,6 @@ DirectBeamBackgroundQRange = NewType('DirectBeamBackgroundQRange', sc.Variable)
 """Q-range defining the direct beam background region in a direct beam measurement."""
 
 
-class He3Polarization(sl.Scope[Cell, sc.DataArray], sc.DataArray):
-    """Time-dependent polarization for a given cell."""
-
-
 class He3Transmission(sl.Scope[Cell, sc.DataArray], sc.DataArray):
     """Wavelength- and time-dependent transmission for a given cell."""
 
@@ -56,10 +52,6 @@ class He3CellTemperature(sl.Scope[Cell, sc.Variable], sc.Variable):
 
 class He3FillingTime(sl.Scope[Cell, sc.Variable], sc.Variable):
     """Filling wall-clock time for a given cell."""
-
-
-class He3OpacityFunction(sl.Scope[Cell, sc.DataArray], sc.DataArray):
-    """Wavelength-dependent opacity function for a given cell."""
 
 
 class He3TransmissionEmptyGlass(sl.Scope[Cell, sc.DataArray], sc.DataArray):
@@ -310,8 +302,8 @@ def direct_beam_with_cell(
     )
 
 
-class OpacityFunction:
-    """Wavelength-dependent opacity function."""
+class He3OpacityFunction(Generic[Cell]):
+    """Wavelength-dependent opacity function for a given cell."""
 
     def __init__(self, opacity0: sc.Variable):
         self._opacity0 = opacity0.to(unit='1/Angstrom')
@@ -353,7 +345,7 @@ def he3_opacity_from_cell_params(
         * pressure
         * length
     )
-    return He3OpacityFunction[Cell](OpacityFunction(opacity0))
+    return He3OpacityFunction[Cell](opacity0)
 
 
 def he3_opacity_from_beam_data(
@@ -369,7 +361,7 @@ def he3_opacity_from_beam_data(
     """
 
     def intensity(wavelength: sc.Variable, opacity0: sc.Variable) -> sc.Variable:
-        opacity = OpacityFunction(opacity0)
+        opacity = He3OpacityFunction[Cell](opacity0)
         return transmission_empty_glass * sc.exp(-opacity(wavelength))
 
     popt, _ = sc.curve_fit(
@@ -379,11 +371,11 @@ def he3_opacity_from_beam_data(
         # TODO We could use opacity0 from cell parameters as initial guess.
         p0={'opacity0': sc.scalar(1.0, unit='1/nm')},
     )
-    return He3OpacityFunction[Cell](OpacityFunction(popt['opacity0'].data))
+    return He3OpacityFunction[Cell](popt['opacity0'].data)
 
 
-class PolarizationFunction:
-    """Time-dependent polarization function."""
+class He3PolarizationFunction(Generic[Cell]):
+    """Time-dependent polarization function for a given cell."""
 
     def __init__(self, C: sc.Variable, T1: sc.Variable):
         self._C = C
@@ -414,7 +406,7 @@ def he3_polarization(
     direct_beam_polarized: He3DirectBeam[Cell, Polarized],
     opacity_function: He3OpacityFunction[Cell],
     transmission_empty_glass: He3TransmissionEmptyGlass[Cell],
-) -> He3Polarization[Cell]:
+) -> He3PolarizationFunction[Cell]:
     """
     Fit time- and wavelength-dependent equation and return the fit param P(t).
 
@@ -426,7 +418,7 @@ def he3_polarization(
         wavelength: sc.Variable, time: sc.Variable, C: sc.Variable, T1: sc.Variable
     ) -> sc.Variable:
         opacity = opacity_function(wavelength)
-        polarization_function = PolarizationFunction(C=C, T1=T1)
+        polarization_function = He3PolarizationFunction[Cell](C=C, T1=T1)
         polarization = polarization_function(time=time)
         return transmission_function(
             transmission_empty_glass=transmission_empty_glass,
@@ -440,14 +432,12 @@ def he3_polarization(
         direct_beam_no_cell / direct_beam_polarized,
         p0={'C': sc.scalar(1.0, unit=''), 'T1': sc.scalar(1000.0, unit='s')},
     )
-    return He3Polarization[Cell](
-        PolarizationFunction(C=popt['C'].data, T1=popt['T1'].data)
-    )
+    return He3PolarizationFunction[Cell](C=popt['C'].data, T1=popt['T1'].data)
 
 
 def he3_transmission(
     opacity: He3OpacityFunction[Cell],
-    polarization: He3Polarization[Cell],
+    polarization_function: He3PolarizationFunction[Cell],
     transmission_empty_glass: He3TransmissionEmptyGlass[Cell],
 ) -> He3Transmission[Cell]:
     """

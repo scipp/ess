@@ -23,9 +23,9 @@ def test_he3_polarization_reproduces_input_params_within_errors(
     C = sc.scalar(1.3)
     T1 = sc.scalar(1234.0, unit='s')
     opacity0 = sc.scalar(0.6, unit='1/angstrom')
-    polarization_function = pol.base.PolarizationFunction(C=C, T1=T1)
+    polarization_function = pol.He3PolarizationFunction(C=C, T1=T1)
     polarization = polarization_function(time=time)
-    opacity_function = pol.base.OpacityFunction(opacity0)
+    opacity_function = pol.He3OpacityFunction(opacity0)
     opacity = opacity_function(wavelength)
     transmission_empty_glass = sc.scalar(0.9)
     transmission = pol.base.transmission_function(
@@ -43,7 +43,7 @@ def test_he3_polarization_reproduces_input_params_within_errors(
         opacity_function=opacity_function,
         transmission_empty_glass=transmission_empty_glass,
     )
-    assert isinstance(result, pol.base.PolarizationFunction)
+    assert isinstance(result, pol.He3PolarizationFunction)
 
     # No noise, very close or exact match.
     assert sc.isclose(result.C, C)
