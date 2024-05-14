@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
-from typing import NewType, Optional
+from typing import NewType, Optional, TypeVar
 
 import scipp as sc
 
@@ -9,25 +9,21 @@ from .mtz_io import DEFAULT_WAVELENGTH_COORD_NAME, NMXMtzDataArray
 # User defined or configurable types
 WavelengthBinSize = NewType("WavelengthBinSize", int)
 """The size of the wavelength(LAMBDA) bins."""
-WavelengthRange = NewType("WavelengthRange", tuple[float, float])
-"""The range of the wavelength(LAMBDA) bins."""
-WavelengthBinCutProportion = NewType("WavelengthBinCutProportion", float)
-"""The proportion of the wavelength(LAMBDA) bins to be cut off on both sides."""
-DEFAULT_WAVELENGTH_CUT_PROPORTION = WavelengthBinCutProportion(0.25)
-"""Default proportion of the wavelength(LAMBDA) bins to be cut off from both sides."""
+MinWavelengthBinEdge = NewType("MinWavelengthBinEdge", sc.Variable)
+"""The minimum edge of the wavelength(LAMBDA) bins."""
+DEFAULT_MIN_WAVELENGTH_BIN_EDGE = MinWavelengthBinEdge(sc.scalar(2.6, unit="angstrom"))
+"""Default minimum edge of the wavelength(LAMBDA) bins."""
+MaxWavelengthBinEdge = NewType("MaxWavelengthBinEdge", sc.Variable)
+"""The maximum edge of the wavelength(LAMBDA) bins."""
+DEFAULT_MAX_WAVELENGTH_BIN_EDGE = MaxWavelengthBinEdge(sc.scalar(3.6, unit="angstrom"))
+"""Default maximum edge of the wavelength(LAMBDA) bins."""
 ReferenceWavelength = NewType("ReferenceWavelength", sc.Variable)
 """The wavelength to select reference intensities."""
-NRoot = NewType("NRoot", int)
-"""The n-th root to be taken for the standard deviation."""
-NRootStdDevCut = NewType("NRootStdDevCut", float)
-"""The number of standard deviations to be cut from the n-th root data."""
 
 # Computed types
 """Filtered mtz dataframe by the quad root of the sample standard deviation."""
 WavelengthBinned = NewType("WavelengthBinned", sc.DataArray)
 """Binned mtz dataframe by wavelength(LAMBDA) with derived columns."""
-FilteredWavelengthBinned = NewType("FilteredWavelengthBinned", sc.DataArray)
-"""Filtered binned data."""
 SelectedReferenceWavelength = NewType("SelectedReferenceWavelength", sc.Variable)
 """The wavelength to select reference intensities."""
 ReferenceIntensities = NewType("ReferenceIntensities", sc.DataArray)
@@ -40,66 +36,55 @@ FilteredEstimatedScaledIntensities = NewType(
     "FilteredEstimatedScaledIntensities", sc.DataArray
 )
 
+T = TypeVar("T")
+
+
+def _if_not_none_else(x: T | None, default: T) -> T:
+    """Ternary operation helper for optional arguments."""
+    return x if x is not None else default
+
 
 def get_wavelength_binned(
     mtz_da: NMXMtzDataArray,
     wavelength_bin_size: WavelengthBinSize,
-    wavelength_range: Optional[WavelengthRange] = None,
+    min_wavelength_bin_edge: Optional[MinWavelengthBinEdge] = None,
+    max_wavelength_bin_edge: Optional[MaxWavelengthBinEdge] = None,
 ) -> WavelengthBinned:
     """Bin the whole dataset by wavelength(LAMBDA).
+
+    Parameters
+    ----------
+    mtz_da:
+        The merged dataset.
+
+    wavelength_bin_size:
+        The size of the wavelength(LAMBDA) bins.
+
+    min_wavelength_bin_edge:
+        The minimum edge of the wavelength(LAMBDA) bins.
+        Minimum value of the wavelength(LAMBDA) coordinate will be used if ``None``.
+
+    max_wavelength_bin_edge:
+        The maximum edge of the wavelength(LAMBDA) bins.
+        Maximum value of the wavelength(LAMBDA) coordinate will be used if ``None``.
 
     Notes
     -----
         Wavelength(LAMBDA) binning should always be done on the merged dataset.
 
     """
-    if wavelength_range is None:
-        binning_var = wavelength_bin_size
-    else:
-        binning_var = sc.linspace(
-            dim=DEFAULT_WAVELENGTH_COORD_NAME,
-            start=wavelength_range[0],
-            stop=wavelength_range[1],
-            num=wavelength_bin_size,
-            unit=mtz_da.coords[DEFAULT_WAVELENGTH_COORD_NAME].unit,
-        )
-
-    binned = mtz_da.bin({DEFAULT_WAVELENGTH_COORD_NAME: binning_var})
-
-    return WavelengthBinned(binned)
-
-
-def filter_wavelegnth_binned(
-    binned: WavelengthBinned,
-    cut_proportion: WavelengthBinCutProportion = DEFAULT_WAVELENGTH_CUT_PROPORTION,
-) -> FilteredWavelengthBinned:
-    """Filter the binned data by cutting off the edges.
-
-    Parameters
-    ----------
-    binned:
-        The binned data by wavelength(LAMBDA).
-
-    cut_proportion:
-        The proportion of the wavelength(LAMBDA) bins to be cut off on both sides.
-        The default value is :attr:`~DEFAULT_WAVELENGTH_CUT_PROPORTION`.
-
-    Returns
-    -------
-    :
-        The filtered binned data.
-
-    """
-
-    if cut_proportion < 0 or cut_proportion >= 0.5:
-        raise ValueError(
-            "The cut proportion should be in the range of 0 < proportion < 0.5."
-        )
-
-    cut_size = int(binned.sizes[DEFAULT_WAVELENGTH_COORD_NAME] * cut_proportion)
-    return FilteredWavelengthBinned(
-        binned[DEFAULT_WAVELENGTH_COORD_NAME, cut_size:-cut_size]
+    wavelength_coord = mtz_da.coords[DEFAULT_WAVELENGTH_COORD_NAME]
+    start = _if_not_none_else(min_wavelength_bin_edge, wavelength_coord.min())
+    stop = _if_not_none_else(max_wavelength_bin_edge, wavelength_coord.max())
+    binning_var = sc.linspace(
+        dim=DEFAULT_WAVELENGTH_COORD_NAME,
+        start=start,
+        stop=stop,
+        num=wavelength_bin_size,
+        unit=wavelength_coord.unit,
     )
+
+    return WavelengthBinned(mtz_da.bin({DEFAULT_WAVELENGTH_COORD_NAME: binning_var}))
 
 
 def _is_bin_empty(binned: sc.DataArray, idx: int) -> bool:
@@ -126,13 +111,16 @@ def _get_middle_bin_idx(binned: sc.DataArray) -> int:
 
 
 def get_reference_wavelength(
-    binned: FilteredWavelengthBinned,
+    binned: WavelengthBinned,
     reference_wavelength: Optional[ReferenceWavelength] = None,
 ) -> SelectedReferenceWavelength:
     """Select the reference wavelength.
 
     Parameters
     ----------
+    binned:
+        The wavelength binned data.
+
     reference_wavelength:
         The reference wavelength to select the intensities.
         If ``None``, the middle group is selected.
@@ -149,7 +137,7 @@ def get_reference_wavelength(
 
 
 def get_reference_intensities(
-    binned: FilteredWavelengthBinned,
+    binned: WavelengthBinned,
     reference_wavelength: SelectedReferenceWavelength,
 ) -> ReferenceIntensities:
     """Find the reference intensities by the wavelength.
@@ -233,7 +221,7 @@ def estimate_scale_factor_per_hkl_asu_from_reference(
 
 
 def average_roughly_scaled_intensities(
-    binned: FilteredWavelengthBinned,
+    binned: WavelengthBinned,
     scale_factor: EstimatedScaleFactor,
 ) -> EstimatedScaledIntensities:
     """Scale the intensities by the estimated scale factor.
@@ -241,7 +229,7 @@ def average_roughly_scaled_intensities(
     Parameters
     ----------
     binned:
-        Binned data by wavelength(LAMBDA) to be grouped and scaled.
+        The wavelength binned data.
 
     scale_factor:
         The estimated scale factor.
@@ -300,79 +288,65 @@ def average_roughly_scaled_intensities(
 
     # Drop variances of the scale factor
     # Scale each group each bin by the scale factor
-    return EstimatedScaledIntensities(
-        sc.nanmean(grouped.bins.nanmean() * sc.values(scale_factor), dim="hkl_asu")
+    intensities = sc.nanmean(
+        grouped.bins.nanmean() * sc.values(scale_factor), dim="hkl_asu"
     )
+    # Take the midpoints of the wavelength bin coordinates
+    # to represent the average wavelength of the bin
+    # It is because the bin-edges are dropped while flattening the data
+    # and the data is expected to be filtered after this step.
+    intensities.coords[DEFAULT_WAVELENGTH_COORD_NAME] = sc.midpoints(
+        intensities.coords[DEFAULT_WAVELENGTH_COORD_NAME],
+    )
+    return EstimatedScaledIntensities(intensities)
 
 
-def _calculate_sample_standard_deviation(var: sc.Variable) -> sc.Variable:
-    """Calculate the sample variation of the data.
+ScaledIntensityLeftTailThreshold = NewType(
+    "ScaledIntensityLeftTailThreshold", sc.Variable
+)
+DEFAULT_LEFT_TAIL_THRESHOLD = ScaledIntensityLeftTailThreshold(sc.scalar(0.1))
+ScaledIntensityRightTailThreshold = NewType(
+    "ScaledIntensityRightTailThreshold", sc.Variable
+)
+DEFAULT_RIGHT_TAIL_THRESHOLD = ScaledIntensityRightTailThreshold(sc.scalar(2.0))
 
-    This helper function is a temporary solution before
-    we release new scipp version with the statistics helper.
-    """
-    import numpy as np
 
-    return sc.scalar(np.nanstd(var.values))
-
-
-def cut_estimated_scaled_intensities_by_n_root_std_dev(
+def cut_tails(
     scaled_intensities: EstimatedScaledIntensities,
-    n_root: NRoot,
-    n_root_std_dev_cut: NRootStdDevCut,
+    left_threashold: ScaledIntensityLeftTailThreshold = DEFAULT_LEFT_TAIL_THRESHOLD,
+    right_threshold: ScaledIntensityRightTailThreshold = DEFAULT_RIGHT_TAIL_THRESHOLD,
 ) -> FilteredEstimatedScaledIntensities:
-    """Filter the mtz data array by the quad root of the sample standard deviation.
+    """Cut the right tail of the estimated scaled intensities by the threshold.
 
     Parameters
     ----------
     scaled_intensities:
         The scaled intensities to be filtered.
 
-    n_root:
-        The n-th root to be taken for the standard deviation.
-        Higher n-th root means cutting is more effective on the right tail.
-        More explanation can be found in the notes.
+    left_threashold:
+        The threshold to be cut from the left tail.
 
-    n_root_std_dev_cut:
-        The number of standard deviations to be cut from the n-th root data.
+    right_threshold:
+        The threshold to be cut from the right tail.
 
     Returns
     -------
     :
-        The filtered scaled intensities.
+        The filtered scaled intensities with the tails cut.
 
     """
-    # Check the range of the n-th root
-    if n_root < 1:
-        raise ValueError("The n-th root should be equal to or greater than 1.")
-
-    copied = scaled_intensities.copy(deep=False)
-    # Take the midpoints of the wavelength bin coordinates
-    # to represent the average wavelength of the bin
-    # It is because the bin-edges are dropped while flattening the data
-    copied.coords[DEFAULT_WAVELENGTH_COORD_NAME] = sc.midpoints(
-        copied.coords[DEFAULT_WAVELENGTH_COORD_NAME],
-    )
-    nth_root = copied.data ** (1 / n_root)
-    # Calculate the mean
-    nth_root_mean = nth_root.mean()
-    # Calculate the sample standard deviation
-    nth_root_std_dev = _calculate_sample_standard_deviation(nth_root)
-    # Calculate the cut value
-    half_window = n_root_std_dev_cut * nth_root_std_dev
-    keep_range = (nth_root_mean - half_window, nth_root_mean + half_window)
-
-    # Filter the data
     return FilteredEstimatedScaledIntensities(
-        copied[(nth_root > keep_range[0]) & (nth_root < keep_range[1])]
+        scaled_intensities[
+            (scaled_intensities.data > left_threashold)
+            & (scaled_intensities.data < right_threshold)
+        ].copy(deep=False)
     )
 
 
 # Providers and default parameters
 scaling_providers = (
-    cut_estimated_scaled_intensities_by_n_root_std_dev,
+    cut_tails,
     get_wavelength_binned,
-    filter_wavelegnth_binned,
     get_reference_wavelength,
     get_reference_intensities,
     estimate_scale_factor_per_hkl_asu_from_reference,
@@ -381,5 +355,9 @@ scaling_providers = (
 """Providers for scaling data."""
 
 scaling_params = {
-    WavelengthBinCutProportion: DEFAULT_WAVELENGTH_CUT_PROPORTION,
+    MinWavelengthBinEdge: DEFAULT_MIN_WAVELENGTH_BIN_EDGE,
+    MaxWavelengthBinEdge: DEFAULT_MAX_WAVELENGTH_BIN_EDGE,
+    ScaledIntensityLeftTailThreshold: DEFAULT_LEFT_TAIL_THRESHOLD,
+    ScaledIntensityRightTailThreshold: DEFAULT_RIGHT_TAIL_THRESHOLD,
 }
+"""Default parameters for scaling data."""
