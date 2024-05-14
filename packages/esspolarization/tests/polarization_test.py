@@ -32,35 +32,37 @@ def test_he3_polarization_reproduces_input_params_within_errors(
         transmission_empty_glass=transmission_empty_glass,
     )
     transmission = transmission_function(time=time, wavelength=wavelength)
-    direct_beam_no_cell = sc.DataArray(
+    direct_beam_polarized = sc.DataArray(
         transmission, coords={'time': time, 'wavelength': wavelength}
     )
 
-    result = pol.he3_polarization(
-        direct_beam_no_cell=direct_beam_no_cell * split_ratio,
-        direct_beam_polarized=sc.ones_like(direct_beam_no_cell) * split_ratio,
+    result = pol.get_he3_transmission_from_fit_to_direct_beam(
+        direct_beam_no_cell=sc.ones_like(direct_beam_polarized) * split_ratio,
+        direct_beam_polarized=direct_beam_polarized * split_ratio,
         opacity_function=opacity_function,
         transmission_empty_glass=transmission_empty_glass,
     )
-    assert isinstance(result, pol.He3PolarizationFunction)
+    polarization_function = result.polarization_function
+    assert isinstance(polarization_function, pol.He3PolarizationFunction)
 
     # No noise, very close or exact match.
-    assert sc.isclose(result.C, C)
-    assert sc.isclose(result.T1, T1)
+    assert sc.isclose(polarization_function.C, C)
+    assert sc.isclose(polarization_function.T1, T1)
 
     rng = np.random.default_rng(seed=1234)
-    direct_beam_no_cell_noisy = direct_beam_no_cell.copy()
-    direct_beam_no_cell_noisy.values += rng.normal(
-        0.0, 0.01, direct_beam_no_cell_noisy.shape
+    direct_beam_polarized_noisy = direct_beam_polarized.copy()
+    direct_beam_polarized_noisy.values += rng.normal(
+        0.0, 0.01, direct_beam_polarized_noisy.shape
     )
 
-    result = pol.he3_polarization(
-        direct_beam_no_cell=direct_beam_no_cell_noisy * split_ratio,
-        direct_beam_polarized=sc.ones_like(direct_beam_no_cell) * split_ratio,
+    result = pol.get_he3_transmission_from_fit_to_direct_beam(
+        direct_beam_no_cell=sc.ones_like(direct_beam_polarized_noisy) * split_ratio,
+        direct_beam_polarized=direct_beam_polarized * split_ratio,
         opacity_function=opacity_function,
         transmission_empty_glass=transmission_empty_glass,
     )
+    polarization_function = result.polarization_function
 
     # With noise, within 1% of the input values.
-    assert sc.isclose(result.C, C, rtol=sc.scalar(1e-2))
-    assert sc.isclose(result.T1, T1, rtol=sc.scalar(1e-2))
+    assert sc.isclose(polarization_function.C, C, rtol=sc.scalar(1e-2))
+    assert sc.isclose(polarization_function.T1, T1, rtol=sc.scalar(1e-2))

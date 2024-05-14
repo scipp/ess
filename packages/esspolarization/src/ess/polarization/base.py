@@ -408,14 +408,18 @@ class He3TransmissionFunction(Generic[Cell]):
         )
 
 
-def he3_polarization(
+def get_he3_transmission_from_fit_to_direct_beam(
     direct_beam_no_cell: DirectBeamNoCell,
     direct_beam_polarized: He3DirectBeam[Cell, Polarized],
     opacity_function: He3OpacityFunction[Cell],
     transmission_empty_glass: He3TransmissionEmptyGlass[Cell],
-) -> He3PolarizationFunction[Cell]:
+) -> He3TransmissionFunction[Cell]:
     """
-    Fit time- and wavelength-dependent equation and return the fitted P(t).
+    Return the transmission function for a given cell.
+
+    This is composed from the opacity-function and the polarization-function.
+    The implementation fits a time- and wavelength-dependent equation and returns
+    the fitted T(t, lambda).
 
     DB_pol/DB = T_E * cosh(O(lambda)*P(t))*exp(-O(lambda))
     """
@@ -433,22 +437,12 @@ def he3_polarization(
     popt, _ = sc.curve_fit(
         ['wavelength', 'time'],
         direct_beam_ratio,
-        direct_beam_no_cell / direct_beam_polarized,
+        direct_beam_polarized / direct_beam_no_cell,
         p0={'C': sc.scalar(1.0, unit=''), 'T1': sc.scalar(1000.0, unit='s')},
     )
-    return He3PolarizationFunction[Cell](C=popt['C'].data, T1=popt['T1'].data)
-
-
-def he3_transmission(
-    opacity_function: He3OpacityFunction[Cell],
-    polarization_function: He3PolarizationFunction[Cell],
-    transmission_empty_glass: He3TransmissionEmptyGlass[Cell],
-) -> He3TransmissionFunction[Cell]:
-    """
-    Return the transmission function for a given cell.
-
-    This is composed from the opacity-function and the polarization-function.
-    """
+    polarization_function = He3PolarizationFunction[Cell](
+        C=popt['C'].data, T1=popt['T1'].data
+    )
     return He3TransmissionFunction[Cell](
         opacity_function=opacity_function,
         polarization_function=polarization_function,
@@ -552,8 +546,7 @@ providers = [
     extract_sample_data_down_up,
     extract_sample_data_up_down,
     extract_sample_data_up_up,
-    he3_transmission,
     he3_opacity_from_beam_data,
-    he3_polarization,
+    get_he3_transmission_from_fit_to_direct_beam,
     correct_sample_data_for_polarization,
 ]
