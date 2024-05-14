@@ -408,10 +408,9 @@ def he3_polarization(
     transmission_empty_glass: He3TransmissionEmptyGlass[Cell],
 ) -> He3PolarizationFunction[Cell]:
     """
-    Fit time- and wavelength-dependent equation and return the fit param P(t).
+    Fit time- and wavelength-dependent equation and return the fitted P(t).
 
     DB_pol/DB = T_E * cosh(O(lambda)*P(t))*exp(-O(lambda))
-
     """
 
     def direct_beam_ratio(
