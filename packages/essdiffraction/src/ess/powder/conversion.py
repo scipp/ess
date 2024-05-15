@@ -13,6 +13,7 @@ from .correction import merge_calibration
 from .logging import get_logger
 from .types import (
     CalibrationData,
+    DataWithScatteringCoordinates,
     DspacingData,
     ElasticCoordTransformGraph,
     NormalizedByProtonCharge,
@@ -274,12 +275,22 @@ def _restore_tof_if_in_wavelength(data: sc.DataArray) -> sc.DataArray:
     return out
 
 
+def add_scattering_coordinates(
+    data: PixelMaskedData[RunType], graph: ElasticCoordTransformGraph
+) -> DataWithScatteringCoordinates[RunType]:
+    out = data.transform_coords(
+        ["two_theta", "wavelength", "dspacing"], graph=graph, keep_intermediate=False
+    )
+    return DataWithScatteringCoordinates[RunType](out)
+
+
 providers_with_calibration = (to_dspacing_with_calibration,)
 """Sciline providers for coordinate transformations."""
 
 providers_with_positions = (
     powder_coordinate_transformation_graph,
-    to_wavelength_with_positions,
-    to_twotheta_with_positions,
-    to_dspacing_with_positions,
+    add_scattering_coordinates,
+    # to_wavelength_with_positions,
+    # to_twotheta_with_positions,
+    # to_dspacing_with_positions,
 )

@@ -9,7 +9,7 @@ pipeline.
 
 from enum import Enum
 from pathlib import Path
-from typing import Any, NewType, TypeVar
+from typing import Any, Callable, NewType, TypeVar
 
 import sciline
 import scipp as sc
@@ -27,8 +27,6 @@ VanadiumRun = NewType("VanadiumRun", int)
 """Vanadium run."""
 RunType = TypeVar("RunType", EmptyInstrumentRun, SampleRun, VanadiumRun)
 """TypeVar used for specifying the run."""
-
-FilenameType = TypeVar("FilenameType", bound=str)
 
 
 # 2 Workflow parameters
@@ -53,10 +51,6 @@ DspacingBins = NewType("DSpacingBins", sc.Variable)
 
 class Filename(sciline.Scope[RunType, str], str):
     """Name of an input file."""
-
-
-class FilePath(sciline.Scope[FilenameType, Path], Path):
-    """Path to an input file on disk."""
 
 
 OutFilename = NewType("OutFilename", str)
@@ -96,6 +90,11 @@ CalibrationData = NewType("CalibrationData", sc.Dataset)
 """Detector calibration data."""
 
 DataFolder = NewType("DataFolder", str)
+
+
+class DataWithScatteringCoordinates(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Data with scattering coordinates computed for all events: wavelength, 2theta,
+    d-spacing."""
 
 
 class DetectorDimensions(sciline.Scope[DetectorName, tuple[str, ...]], tuple[str, ...]):
@@ -172,6 +171,13 @@ class RawSample(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
 RawSource = NewType("RawSource", sc.DataGroup)
 """Raw data from a loaded neutron source."""
 
+TofMask = NewType("TofMask", Callable)
+""""""
+
+
+class TofMaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Data with masked TOF values."""
+
 
 class TofCroppedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Raw data cropped to the valid TOF range."""
@@ -181,12 +187,8 @@ class TwoThetaData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Data converted to 2theta."""
 
 
-TwoThetaMask = NewType("TwoThetaMask", sc.DataArray)
-"""A data array defining a mask to be applied in 2theta.
-Only one-dimensional masks are supported.
-The data array should contain a bin-edge coordinate which represents
-the edges of the ranges to be masked. The values of the data array represent the
-mask values (``True`` or ``False``) inside each range defined by the coordinate."""
+TwoThetaMask = NewType("TwoThetaMask", Callable)
+""""""
 
 
 class TwoThetaMaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
@@ -197,12 +199,8 @@ class WavelengthData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Data converted to wavelength."""
 
 
-WavelengthMask = NewType("WavelengthMask", sc.DataArray)
-"""A data array defining a mask to be applied in wavelength.
-Only one-dimensional masks are supported.
-The data array should contain a bin-edge coordinate which represents
-the edges of the ranges to be masked. The values of the data array represent the
-mask values (``True`` or ``False``) inside each range defined by the coordinate."""
+WavelengthMask = NewType("WavelengthMask", Callable)
+""""""
 
 
 class WavelengthMaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):

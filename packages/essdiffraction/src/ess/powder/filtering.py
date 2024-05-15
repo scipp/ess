@@ -100,7 +100,8 @@ def crop_tof(
     )
 
 
-def filter_events(data: TofCroppedData[RunType]) -> FilteredData[RunType]:
+# def filter_events(data: TofCroppedData[RunType]) -> FilteredData[RunType]:
+def filter_events(data: RawDetectorData[RunType]) -> FilteredData[RunType]:
     """Remove bad events.
 
     Attention

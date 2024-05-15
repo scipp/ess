@@ -9,8 +9,6 @@ from ...types import (
     AccumulatedProtonCharge,
     CalibrationFilename,
     Filename,
-    FilenameType,
-    FilePath,
     ProtonCharge,
     RawCalibrationData,
     RawDataAndMetadata,
@@ -21,8 +19,6 @@ from ...types import (
 from .types import DetectorInfo
 
 _version = "1"
-
-__all__ = ["_get_path"]
 
 
 def _make_pooch():
@@ -50,7 +46,7 @@ def _make_pooch():
 _pooch = _make_pooch()
 
 
-def _get_path(name: str, unzip: bool = False) -> str:
+def _get_path(name: str) -> str:
     """
     Return the path to a data file bundled with scippneutron.
 
@@ -59,54 +55,42 @@ def _get_path(name: str, unzip: bool = False) -> str:
     """
     import pooch
 
-    return _pooch.fetch(name, processor=pooch.Unzip() if unzip else None)
+    if name.endswith(".zip"):
+        (path,) = _pooch.fetch(name, processor=pooch.Unzip())
+    else:
+        path = _pooch.fetch(name)
+    return path
 
 
-def mantid_sample_file() -> str:
+def powgen_tutorial_mantid_sample_file() -> str:
     return _get_path("PG3_4844_event.nxs")
 
 
-def mantid_vanadium_file() -> str:
+def powgen_tutorial_mantid_vanadium_file() -> str:
     return _get_path("PG3_4866_event.nxs")
 
 
-def mantid_empty_instrument_file() -> str:
+def powgen_tutorial_mantid_empty_instrument_file() -> str:
     return _get_path("PG3_5226_event.nxs")
 
 
-def mantid_calibration_file() -> str:
+def powgen_tutorial_mantid_calibration_file() -> str:
     return _get_path("PG3_FERNS_d4832_2011_08_24.cal")
 
 
-def sample_file() -> str:
-    (path,) = _get_path("PG3_4844_event.zip", unzip=True)
-    return path
+def powgen_tutorial_sample_file() -> str:
+    return _get_path("PG3_4844_event.zip")
 
 
-def vanadium_file() -> str:
-    (path,) = _get_path("PG3_4866_event.zip", unzip=True)
-    return path
+def powgen_tutorial_vanadium_file() -> str:
+    return _get_path("PG3_4866_event.zip")
 
 
-def calibration_file() -> str:
-    (path,) = _get_path("PG3_FERNS_d4832_2011_08_24.zip", unzip=True)
-    return path
+def powgen_tutorial_calibration_file() -> str:
+    return _get_path("PG3_FERNS_d4832_2011_08_24.zip")
 
 
-def get_path(filename: FilenameType) -> FilePath[FilenameType]:
-    """Translate any filename to a path to the file obtained from pooch registry."""
-    if filename.endswith(".zip"):
-        (path,) = _get_path(filename, unzip=True)
-    else:
-        path = _get_path(filename)
-    return FilePath[FilenameType](path)
-
-
-def _load_hdf5(filename: str) -> sc.DataArray:
-    return sc.io.load_hdf5(filename)
-
-
-def pooch_load(filename: FilePath[Filename[RunType]]) -> RawDataAndMetadata[RunType]:
+def pooch_load(filename: Filename[RunType]) -> RawDataAndMetadata[RunType]:
     """Load a file with pooch.
 
     If the file is a zip archive, it is extracted and a path to the contained
@@ -114,23 +98,24 @@ def pooch_load(filename: FilePath[Filename[RunType]]) -> RawDataAndMetadata[RunT
 
     The loaded data holds both the events and any metadata from the file.
     """
-    return RawDataAndMetadata[RunType](_load_hdf5(filename))
+    return RawDataAndMetadata[RunType](sc.io.load_hdf5(filename))
 
 
-def pooch_load_calibration(
-    filename: FilePath[CalibrationFilename],
-) -> RawCalibrationData:
+def pooch_load_calibration(filename: CalibrationFilename) -> RawCalibrationData:
     """Load the calibration data for the POWGEN test data."""
-    # if filename.endswith(".zip"):
-    #     (path,) = _get_path(filename, unzip=True)
-    # else:
-    #     path = _get_path(filename)
-    return RawCalibrationData(_load_hdf5(filename))
+    return RawCalibrationData(sc.io.load_hdf5(filename))
 
 
 def extract_raw_data(dg: RawDataAndMetadata[RunType]) -> RawDetectorData[RunType]:
     """Return the events from a loaded data group."""
-    return RawDetectorData[RunType](dg["data"])
+    out = dg["data"].squeeze()
+    del out.coords["tof"]
+    out.bins.coords["position"] = sc.bins_like(out, out.coords["position"])
+    out.bins.coords["spectrum"] = sc.bins_like(out, out.coords["spectrum"])
+    raw_events = out.bins.constituents["data"].copy()
+    for c in ("gd_prtn_chrg", "sample_position", "source_position"):
+        raw_events.coords[c] = out.coords[c]
+    return RawDetectorData[RunType](raw_events)
 
 
 def extract_detector_info(dg: RawDataAndMetadata[SampleRun]) -> DetectorInfo:
@@ -151,7 +136,6 @@ def extract_accumulated_proton_charge(
 
 
 providers = (
-    get_path,
     pooch_load,
     pooch_load_calibration,
     extract_accumulated_proton_charge,

@@ -3,6 +3,8 @@
 """
 Masking functions for the powder workflow.
 """
+from typing import Union, Optional
+
 import numpy as np
 import sciline
 import scipp as sc
@@ -10,12 +12,14 @@ import scipp as sc
 from ess.reduce.masking import mask_range
 
 from .types import (
-    FilePath,
+    DataWithScatteringCoordinates,
     MaskedDetectorIDs,
     NormalizedByProtonCharge,
     PixelMaskedData,
     PixelMaskFilename,
     RunType,
+    TofMask,
+    TofMaskedData,
     TwoThetaData,
     TwoThetaMask,
     TwoThetaMaskedData,
@@ -26,7 +30,7 @@ from .types import (
 
 
 def read_pixel_masks(
-    filename: FilePath[PixelMaskFilename],
+    filename: PixelMaskFilename,
 ) -> MaskedDetectorIDs:
     """Read a pixel mask from a Scipp hdf5 file.
 
@@ -66,23 +70,48 @@ def apply_pixel_masks(
     return PixelMaskedData[RunType](data)
 
 
-def apply_wavelength_masks(
-    da: WavelengthData[RunType], mask: WavelengthMask
+# def apply_wavelength_masks(
+#     da: WavelengthData[RunType], mask: WavelengthMask
+# ) -> WavelengthMaskedData[RunType]:
+#     if "wavelength" in da.coords and da.coords["wavelength"].ndim > 1:
+#         da = da.bin(wavelength=1)
+#     return WavelengthMaskedData[RunType](mask_range(da, mask=mask))
+
+
+# def apply_twotheta_masks(
+#     da: TwoThetaData[RunType], mask: TwoThetaMask
+# ) -> TwoThetaMaskedData[RunType]:
+#     return TwoThetaMaskedData[RunType](mask_range(da, mask=mask))
+
+
+def apply_tof_masking(
+    da: DataWithScatteringCoordinates[RunType], mask_func: TofMask
+) -> TofMaskedData[RunType]:
+    out = da.copy(deep=False)
+    out.masks["tof"] = mask_func(da.coords["tof"])
+    return TofMaskedData[RunType](out)
+
+
+def apply_wavelength_masking(
+    da: TofMaskedData[RunType], mask_func: WavelengthMask
 ) -> WavelengthMaskedData[RunType]:
-    if "wavelength" in da.coords and da.coords["wavelength"].ndim > 1:
-        da = da.bin(wavelength=1)
-    return WavelengthMaskedData[RunType](mask_range(da, mask=mask))
+    out = da.copy(deep=False)
+    out.masks["wavelength"] = mask_func(da.coords["wavelength"])
+    return WavelengthMaskedData[RunType](out)
 
 
-def apply_twotheta_masks(
-    da: TwoThetaData[RunType], mask: TwoThetaMask
+def apply_twotheta_masking(
+    da: WavelengthMaskedData[RunType], mask_func: TwoThetaMask
 ) -> TwoThetaMaskedData[RunType]:
-    return TwoThetaMaskedData[RunType](mask_range(da, mask=mask))
+    out = da.copy(deep=False)
+    out.masks["two_theta"] = mask_func(da.coords["two_theta"])
+    return TwoThetaMaskedData[RunType](out)
 
 
 providers = (
     read_pixel_masks,
     apply_pixel_masks,
-    apply_wavelength_masks,
-    apply_twotheta_masks,
+    apply_tof_masking,
+    apply_twotheta_masking,
+    apply_wavelength_masking,
 )
