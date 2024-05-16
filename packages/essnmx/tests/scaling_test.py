@@ -3,11 +3,12 @@
 import pytest
 import scipp as sc
 
-from ess.nmx.mtz_io import DEFAULT_WAVELENGTH_COLUMN_NAME
+from ess.nmx.mtz_io import DEFAULT_WAVELENGTH_COORD_NAME
 from ess.nmx.scaling import (
     ReferenceIntensities,
     estimate_scale_factor_per_hkl_asu_from_reference,
     get_reference_intensities,
+    get_reference_wavelength,
 )
 
 
@@ -16,7 +17,7 @@ def nmx_data_array() -> sc.DataArray:
     da = sc.DataArray(
         data=sc.array(dims=["row"], values=[1, 2, 3, 4, 5, 3.1, 3.2]),
         coords={
-            DEFAULT_WAVELENGTH_COLUMN_NAME: sc.Variable(
+            DEFAULT_WAVELENGTH_COORD_NAME: sc.Variable(
                 dims=["row"], values=[1, 2, 3, 4, 5, 3, 3]
             ),
             "hkl_asu": sc.array(
@@ -42,8 +43,12 @@ def nmx_data_array() -> sc.DataArray:
 def test_get_reference_bin_middle(nmx_data_array: sc.DataArray) -> None:
     """Test the middle bin."""
 
+    binned = nmx_data_array.bin({DEFAULT_WAVELENGTH_COORD_NAME: 6})
+    reference_wavelength = get_reference_wavelength(binned)
+
     ref_bin = get_reference_intensities(
-        nmx_data_array.bin({DEFAULT_WAVELENGTH_COLUMN_NAME: 6})
+        nmx_data_array.bin({DEFAULT_WAVELENGTH_COORD_NAME: 6}),
+        reference_wavelength,
     )
     selected_idx = (2, 5, 6)
     assert all(
@@ -53,8 +58,12 @@ def test_get_reference_bin_middle(nmx_data_array: sc.DataArray) -> None:
 
 @pytest.fixture
 def reference_bin(nmx_data_array: sc.DataArray) -> ReferenceIntensities:
+    binned = nmx_data_array.bin({DEFAULT_WAVELENGTH_COORD_NAME: 6})
+    reference_wavelength = get_reference_wavelength(binned)
+
     return get_reference_intensities(
-        nmx_data_array.bin({DEFAULT_WAVELENGTH_COLUMN_NAME: 6})
+        binned,
+        reference_wavelength,
     )
 
 
