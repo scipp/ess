@@ -65,15 +65,16 @@ def compute_reference_intensity(
     return HistogrammedReference(h)
 
 
-def normalize_reference(
+def calibrate_reference(
     da: HistogrammedReference, cal: SupermirrorReflectivityCorrection
 ) -> CorrectionMatrix:
-    '''Normalizes the reference intensity by the expected supermirror reflectivity'''
+    '''Calibrates the reference intensity by the
+    inverse of the supermirror reflectivity'''
     return CorrectionMatrix(da * cal)
 
 
 providers = (
     footprint_correction,
-    normalize_reference,
+    calibrate_reference,
     compute_reference_intensity,
 )
