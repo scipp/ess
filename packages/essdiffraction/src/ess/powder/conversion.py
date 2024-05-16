@@ -276,7 +276,7 @@ def _restore_tof_if_in_wavelength(data: sc.DataArray) -> sc.DataArray:
 
 
 def add_scattering_coordinates(
-    data: PixelMaskedData[RunType], graph: ElasticCoordTransformGraph
+    data: NormalizedByProtonCharge[RunType], graph: ElasticCoordTransformGraph
 ) -> DataWithScatteringCoordinates[RunType]:
     out = data.transform_coords(
         ["two_theta", "wavelength", "dspacing"], graph=graph, keep_intermediate=False

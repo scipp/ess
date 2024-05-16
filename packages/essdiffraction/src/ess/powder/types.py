@@ -124,6 +124,11 @@ class FocussedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Intensity vs d-spacing after focussing pixels."""
 
 
+class MaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Data with masked pixels, tof regions, wavelength regions, 2theta regions, or
+    dspacing regions."""
+
+
 MaskedDetectorIDs = NewType("MaskedDetectorIDs", sc.Variable)
 """1-D variable listing all masked detector IDs."""
 

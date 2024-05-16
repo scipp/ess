@@ -110,12 +110,14 @@ def extract_raw_data(dg: RawDataAndMetadata[RunType]) -> RawDetectorData[RunType
     """Return the events from a loaded data group."""
     out = dg["data"].squeeze()
     del out.coords["tof"]
-    out.bins.coords["position"] = sc.bins_like(out, out.coords["position"])
-    out.bins.coords["spectrum"] = sc.bins_like(out, out.coords["spectrum"])
-    raw_events = out.bins.constituents["data"].copy()
-    for c in ("gd_prtn_chrg", "sample_position", "source_position"):
-        raw_events.coords[c] = out.coords[c]
-    return RawDetectorData[RunType](raw_events)
+    # out = out.fold(dim="spectrum", sizes={"column": 154, "row": 7, "bank": 23})
+    out = out.fold(dim="spectrum", sizes={"bank": 23, "column": 154, "row": 7})
+    # out.bins.coords["position"] = sc.bins_like(out, out.coords["position"])
+    # out.bins.coords["spectrum"] = sc.bins_like(out, out.coords["spectrum"])
+    # raw_events = out.bins.constituents["data"].copy()
+    # for c in ("gd_prtn_chrg", "sample_position", "source_position"):
+    #     raw_events.coords[c] = out.coords[c]
+    return RawDetectorData[RunType](out)
 
 
 def extract_detector_info(dg: RawDataAndMetadata[SampleRun]) -> DetectorInfo:
