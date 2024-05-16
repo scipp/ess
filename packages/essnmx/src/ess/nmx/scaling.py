@@ -39,11 +39,6 @@ FilteredEstimatedScaledIntensities = NewType(
 T = TypeVar("T")
 
 
-def _if_not_none_else(x: T | None, default: T) -> T:
-    """Ternary operation helper for optional arguments."""
-    return x if x is not None else default
-
-
 def get_wavelength_binned(
     mtz_da: NMXMtzDataArray,
     wavelength_bin_size: WavelengthBinSize,
@@ -74,8 +69,16 @@ def get_wavelength_binned(
 
     """
     wavelength_coord = mtz_da.coords[DEFAULT_WAVELENGTH_COORD_NAME]
-    start = _if_not_none_else(min_wavelength_bin_edge, wavelength_coord.min())
-    stop = _if_not_none_else(max_wavelength_bin_edge, wavelength_coord.max())
+    start = (
+        min_wavelength_bin_edge
+        if min_wavelength_bin_edge is not None
+        else wavelength_coord.min()
+    )
+    stop = (
+        max_wavelength_bin_edge
+        if max_wavelength_bin_edge is not None
+        else wavelength_coord.max()
+    )
     binning_var = sc.linspace(
         dim=DEFAULT_WAVELENGTH_COORD_NAME,
         start=start,
