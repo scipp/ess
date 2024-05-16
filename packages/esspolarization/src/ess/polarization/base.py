@@ -410,11 +410,9 @@ class He3TransmissionFunction(Generic[Cell]):
     ) -> sc.Variable:
         opacity = self.opacity_function(wavelength)
         polarization = self.polarization_function(time)
-        if plus_minus == 'plus':
-            polarization -= 1.0
-        else:
-            polarization += 1.0
-        return self.transmission_empty_glass * sc.exp(opacity * polarization)
+        if plus_minus == 'minus':
+            polarization *= -1.0
+        return self.transmission_empty_glass * sc.exp(-opacity * (1.0 + polarization))
 
 
 def transmission_incoming_unpolarized(
