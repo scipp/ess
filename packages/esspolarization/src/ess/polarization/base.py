@@ -449,7 +449,7 @@ def get_he3_transmission_from_fit_to_direct_beam(
     DB_pol/DB = T_E * cosh(O(lambda)*P(t))*exp(-O(lambda))
     """
 
-    def direct_beam_ratio(
+    def expected_transmission(
         wavelength: sc.Variable, time: sc.Variable, C: sc.Variable, T1: sc.Variable
     ) -> sc.Variable:
         opacity = opacity_function(wavelength)
@@ -463,7 +463,7 @@ def get_he3_transmission_from_fit_to_direct_beam(
 
     popt, _ = sc.curve_fit(
         ['wavelength', 'time'],
-        direct_beam_ratio,
+        expected_transmission,
         direct_beam_polarized / direct_beam_no_cell,
         p0={'C': sc.scalar(1.0, unit=''), 'T1': sc.scalar(1000.0, unit='s')},
     )
