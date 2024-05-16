@@ -69,7 +69,7 @@ def normalize_reference(
     da: HistogrammedReference, cal: SupermirrorReflectivityCorrection
 ) -> CorrectionMatrix:
     '''Normalizes the reference intensity by the expected supermirror reflectivity'''
-    return CorrectionMatrix(da / cal)
+    return CorrectionMatrix(da * cal)
 
 
 providers = (
