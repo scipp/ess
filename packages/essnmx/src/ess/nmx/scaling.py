@@ -229,15 +229,23 @@ def average_roughly_scaled_intensities(
     Parameters
     ----------
     binned:
-        The wavelength binned data.
+        Intensities binned in the wavelength dimension.
+        It will be grouped by reflection (hkl) in the process.
 
     scale_factor:
-        The estimated scale factor.
+        The estimated scale factor per reflection(hkl) of the reference wavelength bin.
+        See :func:`estimate_scale_factor_per_hkl_asu_from_reference`
+        for the calculation of the estimated scale factor.
+
+        .. math::
+
+            EstimatedScaleFactor_{(hkl)} =
+            average( \\dfrac{1}{I_{\\lambda=reference, (hkl)}} )
 
     Returns
     -------
     :
-        Average scaled intensties on ``hkl(asu)`` indices per wavelength.
+        Average scaled intensities on ``hkl(asu)`` indices per wavelength.
 
     Notes
     -----
@@ -247,7 +255,8 @@ def average_roughly_scaled_intensities(
 
         EstimatedScaledI_{\\lambda}
         = \\dfrac{
-            \\sum_{i=1}^{N_{\\lambda, (hkl)}} EstimatedScaledI_{\\lambda, (hkl)}
+            \\sum_{i=1}^{N_{\\lambda, (hkl)}}
+            EstimatedScaledI_{\\lambda, (hkl)}
         }{
             N_{\\lambda, (hkl)}
         }
@@ -261,22 +270,23 @@ def average_roughly_scaled_intensities(
         \\begin{eqnarray}
         EstimatedScaledI_{\\lambda, (hkl)} \\\\
         = \\dfrac{
-            \\sum_{i=1}^{N_{reference, (hkl)}}
+            \\sum_{i=1}^{N_{\\lambda=reference, (hkl)}}
             \\sum_{j=1}^{N_{\\lambda, (hkl)}}
             \\dfrac{I_{j}}{I_{i}}
         }{
-            N_{reference, (hkl)}*N_{\\lambda, (hkl)}
+            N_{\\lambda=reference, (hkl)}*N_{\\lambda, (hkl)}
         } \\\\
         = \\dfrac{
-            \\sum_{i=1}^{N_{reference, (hkl)}} \\dfrac{1}{I_{i}}
+            \\sum_{i=1}^{N_{\\lambda=reference, (hkl)}} \\dfrac{1}{I_{i}}
         }{
-            N_{reference, (hkl)}
+            N_{\\lambda=reference, (hkl)}
         } * \\dfrac{
             \\sum_{j=1}^{N_{\\lambda, (hkl)}} I_{j}
         }{
             N_{\\lambda, (hkl)}
         } \\\\
-        = average( \\dfrac{1}{I_{ref, (hkl)}} ) * average( I_{\\lambda, (hkl)} )
+        = average( \\dfrac{1}{I_{\\lambda=reference, (hkl)}} )
+        * average( I_{\\lambda, (hkl)} )
         \\end{eqnarray}
 
     Therefore the ``binned(wavelength dimension)`` should be
