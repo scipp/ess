@@ -304,10 +304,12 @@ def average_roughly_scaled_intensities(
 ScaledIntensityLeftTailThreshold = NewType(
     "ScaledIntensityLeftTailThreshold", sc.Variable
 )
+"""The threshold to cut the left tail of the estimated scaled intensities."""
 DEFAULT_LEFT_TAIL_THRESHOLD = ScaledIntensityLeftTailThreshold(sc.scalar(0.1))
 ScaledIntensityRightTailThreshold = NewType(
     "ScaledIntensityRightTailThreshold", sc.Variable
 )
+"""The threshold to cut the right tail of the estimated scaled intensities."""
 DEFAULT_RIGHT_TAIL_THRESHOLD = ScaledIntensityRightTailThreshold(sc.scalar(2.0))
 
 
