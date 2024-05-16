@@ -299,6 +299,10 @@ def direct_beam_with_cell(
     )
 
 
+class He3Opacity0(sl.Scope[Cell, sc.Variable], sc.Variable):
+    """Opacity at 1 Angstrom for a given cell."""
+
+
 class He3OpacityFunction(Generic[Cell]):
     """Wavelength-dependent opacity function for a given cell."""
 
@@ -320,13 +324,8 @@ def he3_opacity_from_cell_params(
     pressure: He3CellPressure[Cell],
     length: He3CellLength[Cell],
     temperature: He3CellTemperature[Cell],
-) -> He3OpacityFunction[Cell]:
-    """
-    Opacity function for a given cell, based on pressure and cell length.
-
-    Note that this can alternatively be defined via neutron beam data, see
-    :py:func:`he3_opacity_from_beam_data`.
-    """
+) -> He3Opacity0[Cell]:
+    """Opacity 0 for a given cell, estimated from pressure and cell length."""
     from scipp.constants import Boltzmann as k_B
 
     he3_neutron_absorption_cross_section_at_1_angstrom = 2966.0e-24 * sc.Unit(
@@ -342,24 +341,34 @@ def he3_opacity_from_cell_params(
         * pressure
         * length
     )
+    return He3Opacity0[Cell](opacity0)
+
+
+def he3_opacity_function_from_cell_opacity(
+    opacity0: He3Opacity0[Cell],
+) -> He3OpacityFunction[Cell]:
+    """
+    Opacity function for a given cell, based on pressure and cell length.
+
+    Note that this can alternatively be defined via neutron beam data, see
+    :py:func:`he3_opacity_from_beam_data`.
+    """
     return He3OpacityFunction[Cell](opacity0)
 
 
-def he3_opacity_from_beam_data(
+def he3_opacity_function_from_beam_data(
     transmission_empty_glass: He3TransmissionEmptyGlass[Cell],
     direct_beam: DirectBeamNoCell,
     direct_beam_cell: He3DirectBeam[Cell, Depolarized],
-    pressure: He3CellPressure[Cell],
-    length: He3CellLength[Cell],
-    temperature: He3CellTemperature[Cell],
+    opacity0_initial_guess: He3Opacity0[Cell],
 ) -> He3OpacityFunction[Cell]:
     """
     Opacity function for a given cell, based on direct beam data.
 
     Note that this can alternatively be defined via cell parameters, see
-    :py:func:`he3_opacity_from_cell_params`.
+    :py:func:`he3_opacity_function_from_cell_opacity`. The cell opacity is used as an
+    initial guess for the fit.
     """
-    opacity0 = he3_opacity_from_cell_params(pressure, length, temperature).opacity0
 
     def intensity(wavelength: sc.Variable, opacity0: sc.Variable) -> sc.Variable:
         opacity = He3OpacityFunction[Cell](opacity0)
@@ -369,7 +378,7 @@ def he3_opacity_from_beam_data(
         ['wavelength'],
         intensity,
         direct_beam_cell / direct_beam,
-        p0={'opacity0': opacity0},
+        p0={'opacity0': opacity0_initial_guess},
     )
     return He3OpacityFunction[Cell](popt['opacity0'].data)
 
@@ -564,7 +573,8 @@ providers = [
     extract_sample_data_down_up,
     extract_sample_data_up_down,
     extract_sample_data_up_up,
-    he3_opacity_from_beam_data,
+    he3_opacity_from_cell_params,
+    he3_opacity_function_from_beam_data,
     get_he3_transmission_from_fit_to_direct_beam,
     correct_sample_data_for_polarization,
 ]

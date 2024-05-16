@@ -14,9 +14,10 @@ def test_opacity_from_cell_params() -> None:
     length = sc.array(dims=['cell_length'], values=[1.0, 2.0], unit='m')
     temperature = sc.array(dims=['temperature'], values=[200.0, 400.0], unit='K')
     wavelength = sc.array(dims=['wavelength'], values=[1.0, 2.0], unit='nm')
-    opacity_function = pol.he3_opacity_from_cell_params(
+    opacity0 = pol.he3_opacity_from_cell_params(
         pressure=pressure, length=length, temperature=temperature
     )
+    opacity_function = pol.he3_opacity_function_from_cell_opacity(opacity0)
     opacity = opacity_function(wavelength)
     assert_identical(2 * opacity['pressure', 0], opacity['pressure', 1])
     assert_identical(2 * opacity['cell_length', 0], opacity['cell_length', 1])
@@ -33,9 +34,10 @@ def test_opacity_from_cell_params_reproduces_literature_value() -> None:
     length = sc.scalar(0.01, unit='m')
     temperature = sc.scalar(293.15, unit='K')
     wavelength = sc.scalar(1.0, unit='angstrom')
-    opacity_function = pol.he3_opacity_from_cell_params(
+    opacity0 = pol.he3_opacity_from_cell_params(
         pressure=pressure, length=length, temperature=temperature
     )
+    opacity_function = pol.he3_opacity_function_from_cell_opacity(opacity0)
     opacity = opacity_function(wavelength)
     assert sc.isclose(opacity, sc.scalar(0.0733, unit=''), rtol=sc.scalar(1e-3))
 
@@ -59,13 +61,11 @@ def test_opacity_from_beam_data() -> None:
     opacity0 = sc.scalar(0.3, unit='1/nm')
     ratio = transmission_empty_glass * sc.exp(-opacity0 * wavelength)
     direct_beam_cell = ratio * direct_beam
-    opacity_function = pol.he3_opacity_from_beam_data(
+    opacity_function = pol.he3_opacity_function_from_beam_data(
         transmission_empty_glass=transmission_empty_glass,
         direct_beam=direct_beam,
         direct_beam_cell=direct_beam_cell,
-        pressure=sc.scalar(1.2, unit='bar'),
-        length=sc.scalar(0.01, unit='m'),
-        temperature=sc.scalar(293.15, unit='K'),
+        opacity0_initial_guess=opacity0 * 1.23,  # starting guess imperfect
     )
     opacity = opacity_function(wavelength)
     assert_identical(2 * opacity['wavelength', 0], opacity['wavelength', 1])
