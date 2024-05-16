@@ -59,6 +59,7 @@ def build_orso_iofq_dataset(
             ),
         ],
     )
+    iofq = iofq.hist()
 
     qz = iofq.coords['Q'].to(unit='1/angstrom', copy=False)
     if iofq.coords.is_edges('Q'):
