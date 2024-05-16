@@ -247,7 +247,7 @@ def average_roughly_scaled_intensities(
 
         EstimatedScaledI_{\\lambda}
         = \\dfrac{
-            \\sum_{k=1}^{N_{\\lambda, (hkl)}} EstimatedScaledI_{\\lambda, (hkl)}
+            \\sum_{i=1}^{N_{\\lambda, (hkl)}} EstimatedScaledI_{\\lambda, (hkl)}
         }{
             N_{\\lambda, (hkl)}
         }
