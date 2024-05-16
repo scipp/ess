@@ -103,7 +103,7 @@ def angular_resolution(
     :
         Angular resolution standard deviation
     """
-    theta = da.coords['theta']
+    theta = da.bins.coords['theta']
     return (
         fwhm_to_std(
             sc.to_unit(
@@ -111,7 +111,7 @@ def angular_resolution(
                     sc.to_unit(detector_spatial_resolution, 'm')
                     / sc.to_unit(da.coords['position'].fields.z, 'm', copy=False)
                 ),
-                theta.unit,
+                theta.bins.unit,
                 copy=False,
             )
         )
@@ -148,7 +148,7 @@ def sigma_Q(
         angular_resolution**2
         + wavelength_resolution**2
         + sample_size_resolution**2
-    ).max('detector_number') * sc.midpoints(q_bins)
+    ).flatten(to='detector_number').max('detector_number') * sc.midpoints(q_bins)
 
 
 providers = (sigma_Q, angular_resolution, wavelength_resolution, sample_size_resolution)
