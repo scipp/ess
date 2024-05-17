@@ -36,7 +36,6 @@ dependencies = [
   "sciline>=23.9.1",
   "scipp>=23.8.0",
   "scippnexus>=23.11.1",
-  "platformdirs<4",  # temporary to make pip-compile-multi happy
 ]
 
 dynamic = ["version"]
