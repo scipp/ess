@@ -13,7 +13,12 @@ from ess.powder.types import (
     Filename,
     RawDetector,
     RawDetectorData,
+    RawSample,
+    RawSource,
+    ReducibleDetectorData,
     RunType,
+    SamplePosition,
+    SourcePosition,
 )
 from ess.reduce.nexus import extract_detector_data
 
@@ -83,6 +88,7 @@ def _load_raw_events(file_path: str) -> sc.DataArray:
 
 def _adjust_coords(da: sc.DataArray) -> None:
     da.coords["wavelength"] = da.coords.pop("lambda")
+    da.coords["wavelength"].unit = "angstrom"
     da.coords["position"] = sc.spatial.as_vectors(
         da.coords.pop("x_pos"), da.coords.pop("y_pos"), da.coords.pop("z_pos")
     )
@@ -159,5 +165,35 @@ def _extract_detector(
     return events
 
 
-providers = (extract_geant4_detector, extract_geant4_detector_data, load_geant4_csv)
+def get_source_position(
+    raw_source: RawSource[RunType],
+) -> SourcePosition[RunType]:
+    return SourcePosition[RunType](raw_source["position"])
+
+
+def get_sample_position(
+    raw_sample: RawSample[RunType],
+) -> SamplePosition[RunType]:
+    return SamplePosition[RunType](raw_sample["position"])
+
+
+def patch_detector_data(
+    detector_data: RawDetectorData[RunType],
+    source_position: SourcePosition[RunType],
+    sample_position: SamplePosition[RunType],
+) -> ReducibleDetectorData[RunType]:
+    out = detector_data.copy(deep=False)
+    out.coords["source_position"] = source_position
+    out.coords["sample_position"] = sample_position
+    return ReducibleDetectorData[RunType](out)
+
+
+providers = (
+    extract_geant4_detector,
+    extract_geant4_detector_data,
+    load_geant4_csv,
+    get_sample_position,
+    get_source_position,
+    patch_detector_data,
+)
 """Geant4-providers for Sciline pipelines."""

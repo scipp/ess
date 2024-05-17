@@ -52,7 +52,6 @@ def apply_masks(
 ) -> MaskedData[RunType]:
     """ """
     out = data.copy(deep=False)
-    masked_pixel_ids = {"pix_mask": sc.arange("spectrum", 1, 101)}
     if len(masked_pixel_ids) > 0:
         key = (
             set(out.coords.keys()) & {"detector_number", "detector_id", "spectrum"}

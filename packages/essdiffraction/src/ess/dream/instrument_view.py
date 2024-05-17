@@ -50,7 +50,7 @@ def instrument_view(
 
 def _to_data_group(data: Union[sc.DataArray, sc.DataGroup, dict]) -> sc.DataGroup:
     if isinstance(data, sc.DataArray):
-        data = sc.DataGroup({data.name or 'data': data})
+        data = sc.DataGroup({data.name or "data": data})
     elif isinstance(data, dict):
         data = sc.DataGroup(data)
     return data
@@ -61,8 +61,8 @@ def _pre_process(da: sc.DataArray, dim: str) -> sc.DataArray:
     dims = list(da.dims)
     if dim is not None:
         dims.remove(dim)
-    out = da.flatten(dims=dims, to='pixel')
-    sel = sc.isfinite(out.coords['position'])
+    out = da.flatten(dims=dims, to="pixel")
+    sel = sc.isfinite(out.coords["position"])
     return out[sel]
 
 
@@ -87,7 +87,7 @@ class InstrumentView:
 
         if dim is not None:
             self.slider = SliceWidget(next(iter(self.data.values())), dims=[dim])
-            self.slider.controls[dim]['slider'].layout = {'width': '600px'}
+            self.slider.controls[dim]["slider"].layout = {"width": "600px"}
             self.slider_node = pp.widget_node(self.slider)
             self.slice_nodes = {
                 key: slice_dims(n, self.slider_node)
@@ -101,8 +101,8 @@ class InstrumentView:
 
         self.scatter = pp.scatter3d(
             to_scatter,
-            pos='position',
-            pixel_size=1.0 * sc.Unit('cm') if pixel_size is None else pixel_size,
+            pos="position",
+            pixel_size=1.0 * sc.Unit("cm") if pixel_size is None else pixel_size,
             **kwargs,
         )
 
@@ -114,10 +114,10 @@ class InstrumentView:
     def _add_module_control(self):
         import ipywidgets as ipw
 
-        self.fig = self.scatter[0]
-        self.cutting_tool = self.scatter[1]
+        # self.fig = self.scatter[0]
+        self.cutting_tool = self.scatter.bottom_bar[0]
         self.artist_mapping = dict(
-            zip(self.data.keys(), self.fig.artists.keys(), strict=True)
+            zip(self.data.keys(), self.scatter.artists.keys(), strict=True)
         )
         self.checkboxes = {
             key: ipw.Checkbox(
@@ -137,10 +137,10 @@ class InstrumentView:
         )
         for key, ch in self.checkboxes.items():
             ch.key = key
-            ch.observe(self._check_visibility, names='value')
-        self.cutting_tool.cut_x.button.observe(self._check_visibility, names="value")
-        self.cutting_tool.cut_y.button.observe(self._check_visibility, names="value")
-        self.cutting_tool.cut_z.button.observe(self._check_visibility, names="value")
+            ch.observe(self._check_visibility, names="value")
+        # self.cutting_tool.cut_x.button.observe(self._check_visibility, names="value")
+        # self.cutting_tool.cut_y.button.observe(self._check_visibility, names="value")
+        # self.cutting_tool.cut_z.button.observe(self._check_visibility, names="value")
         self.children.insert(0, self.modules_widget)
 
     def _check_visibility(self, _):
@@ -151,8 +151,8 @@ class InstrumentView:
         for name, ch in self.checkboxes.items():
             key = self.artist_mapping[name]
             val = ch.value
-            self.fig.artists[key].points.visible = val
+            self.scatter.artists[key].points.visible = val
             for c in "xyz":
-                cut_nodes = getattr(self.cutting_tool, f'cut_{c}').select_nodes
+                cut_nodes = getattr(self.cutting_tool, f"cut_{c}").select_nodes
                 if key in cut_nodes:
-                    self.fig.artists[cut_nodes[key].id].points.visible = val
+                    self.scatter.artists[cut_nodes[key].id].points.visible = val

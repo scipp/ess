@@ -13,7 +13,14 @@ from numbers import Real
 import scipp as sc
 
 from ._util import elem_dtype, elem_unit, event_or_outer_coord
-from .types import FilteredData, RawDetectorData, RunType, TofCroppedData, ValidTofRange
+from .types import (
+    FilteredData,
+    RawDetectorData,
+    ReducibleDetectorData,
+    RunType,
+    TofCroppedData,
+    ValidTofRange,
+)
 
 
 def _equivalent_bin_indices(a, b) -> bool:
@@ -101,7 +108,7 @@ def crop_tof(
 
 
 # def filter_events(data: TofCroppedData[RunType]) -> FilteredData[RunType]:
-def filter_events(data: RawDetectorData[RunType]) -> FilteredData[RunType]:
+def filter_events(data: ReducibleDetectorData[RunType]) -> FilteredData[RunType]:
     """Remove bad events.
 
     Attention

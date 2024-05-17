@@ -29,7 +29,7 @@ def focus_data(
         bins["two_theta"] = twotheta_bins
     bins[dspacing_bins.dim] = dspacing_bins
 
-    if twotheta_bins is None:
+    if (twotheta_bins is None) or ("two_theta" in data.bins.coords):
         # In this case merge data from all pixels
         # Put the dims into the same order as in the data.
         # See https://github.com/scipp/scipp/issues/3408

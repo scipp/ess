@@ -176,8 +176,21 @@ class RawSample(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
     """Raw data from a loaded sample."""
 
 
-RawSource = NewType("RawSource", sc.DataGroup)
-"""Raw data from a loaded neutron source."""
+class RawSource(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+    """Raw data from a loaded neutron source."""
+
+
+class ReducibleDetectorData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Data that is in a state ready for reduction."""
+
+
+class SamplePosition(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """Sample position"""
+
+
+class SourcePosition(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """Source position"""
+
 
 TofMask = NewType("TofMask", Callable)
 """"""
