@@ -24,7 +24,7 @@ except importlib.metadata.PackageNotFoundError:
 del importlib
 
 providers = (
-    *conversion.providers_with_calibration,
+    *conversion.providers_with_positions,
     *correction.providers,
     *filtering.providers,
     *grouping.providers,

@@ -29,24 +29,24 @@ def map_detector_to_spectrum(
         `data` with 'detector' coord and dim replaced by 'spectrum'.
     """
     if not sc.identical(
-        data.coords['detector'].to(
-            dtype=detector_info.coords['detector'].dtype, copy=False
+        data.coords["detector"].to(
+            dtype=detector_info.coords["detector"].dtype, copy=False
         ),
-        detector_info.coords['detector'],
+        detector_info.coords["detector"],
     ):
         raise sc.CoordError(
             "The 'detector' coords of `data` and `detector_info` do not match."
         )
 
     out = data.copy(deep=False)
-    del out.coords['detector']
+    del out.coords["detector"]
     # Add 1 because spectrum numbers in the data start at 1 but
     # detector_info contains spectrum indices which start at 0.
-    out.coords['spectrum'] = detector_info.coords['spectrum'] + sc.index(
-        1, dtype=detector_info.coords['spectrum'].dtype
+    out.coords["spectrum"] = detector_info.coords["spectrum"] + sc.index(
+        1, dtype=detector_info.coords["spectrum"].dtype
     )
 
-    return out.rename_dims({'detector': 'spectrum'})
+    return out.rename_dims({"detector": "spectrum"})
 
 
 def preprocess_calibration_data(
@@ -63,7 +63,7 @@ def preprocess_calibration_data(
 
 def powgen_detector_dimensions() -> DetectorDimensions:
     """Dimensions used by POWGEN detectors."""
-    return DetectorDimensions(('spectrum',))
+    return DetectorDimensions({"bank": 23, "column": 154, "row": 7})
 
 
 providers = (preprocess_calibration_data, powgen_detector_dimensions)

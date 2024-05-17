@@ -9,7 +9,7 @@ pipeline.
 
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, NewType, TypeVar
+from typing import Any, Callable, Dict, NewType, TypeVar
 
 import sciline
 import scipp as sc
@@ -97,8 +97,11 @@ class DataWithScatteringCoordinates(sciline.Scope[RunType, sc.DataArray], sc.Dat
     d-spacing."""
 
 
-class DetectorDimensions(sciline.Scope[DetectorName, tuple[str, ...]], tuple[str, ...]):
-    """Logical detector dimensions."""
+# class DetectorDimensions(sciline.Scope[DetectorName, tuple[str, ...]], tuple[str, ...]):
+#     """Logical detector dimensions."""
+
+DetectorDimensions = NewType("DetectorDimensions", Dict[str, int])
+"""Logical detector dimensions."""
 
 
 class DspacingData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):

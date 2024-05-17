@@ -8,6 +8,7 @@ import scipp as sc
 from ...types import (
     AccumulatedProtonCharge,
     CalibrationFilename,
+    DetectorDimensions,
     Filename,
     ProtonCharge,
     RawCalibrationData,
@@ -106,12 +107,14 @@ def pooch_load_calibration(filename: CalibrationFilename) -> RawCalibrationData:
     return RawCalibrationData(sc.io.load_hdf5(filename))
 
 
-def extract_raw_data(dg: RawDataAndMetadata[RunType]) -> RawDetectorData[RunType]:
+def extract_raw_data(
+    dg: RawDataAndMetadata[RunType], sizes: DetectorDimensions
+) -> RawDetectorData[RunType]:
     """Return the events from a loaded data group."""
     out = dg["data"].squeeze()
     del out.coords["tof"]
     # out = out.fold(dim="spectrum", sizes={"column": 154, "row": 7, "bank": 23})
-    out = out.fold(dim="spectrum", sizes={"bank": 23, "column": 154, "row": 7})
+    out = out.fold(dim="spectrum", sizes=sizes)
     # out.bins.coords["position"] = sc.bins_like(out, out.coords["position"])
     # out.bins.coords["spectrum"] = sc.bins_like(out, out.coords["spectrum"])
     # raw_events = out.bins.constituents["data"].copy()
