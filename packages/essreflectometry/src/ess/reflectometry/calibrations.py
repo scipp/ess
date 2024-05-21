@@ -3,11 +3,11 @@
 import scipp as sc
 
 from . import supermirror
-from .types import HistogrammedReference
+from .types import ReferenceIntensity
 
 
 def calibration_factor(
-    da: HistogrammedReference,
+    da: ReferenceIntensity,
     m_value: supermirror.MValue,
     critical_edge: supermirror.CriticalEdge,
     alpha: supermirror.Alpha,
