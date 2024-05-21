@@ -9,11 +9,12 @@ from ess.powder.types import (
     DspacingBins,
     DspacingHistogram,
     Filename,
+    NeXusDetectorName,
     NormalizedByProtonCharge,
     SampleRun,
+    TofMask,
     TwoThetaBins,
     UncertaintyBroadcastMode,
-    ValidTofRange,
     VanadiumRun,
 )
 
@@ -28,13 +29,17 @@ def providers():
 
 @pytest.fixture()
 def params():
+    from ess.powder.external import powgen
+
     return {
-        Filename[SampleRun]: 'PG3_4844_event.zip',
-        Filename[VanadiumRun]: 'PG3_4866_event.zip',
-        CalibrationFilename: 'PG3_FERNS_d4832_2011_08_24.zip',
+        NeXusDetectorName: "powgen_detector",
+        Filename[SampleRun]: powgen.data.powgen_tutorial_sample_file(),
+        Filename[VanadiumRun]: powgen.data.powgen_tutorial_vanadium_file(),
+        CalibrationFilename: powgen.data.powgen_tutorial_calibration_file(),
         UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
-        ValidTofRange: sc.array(dims=['tof'], values=[0.0, 16666.67], unit='us'),
         DspacingBins: sc.linspace('dspacing', 0.0, 2.3434, 200, unit='angstrom'),
+        TofMask: lambda x: (x < sc.scalar(0.0, unit="us"))
+        | (x > sc.scalar(16666.67, unit="us")),
     }
 
 
@@ -64,17 +69,13 @@ def test_workflow_is_deterministic(providers, params):
 def test_pipeline_can_compute_intermediate_results(providers, params):
     pipeline = sciline.Pipeline(providers, params=params)
     result = pipeline.compute(NormalizedByProtonCharge[SampleRun])
-    assert set(result.dims) == {'spectrum', 'tof'}
+    assert set(result.dims) == {'bank', 'column', 'row'}
 
 
 def test_pipeline_group_by_two_theta(providers, params):
-    from ess.powder.grouping import group_by_two_theta, merge_all_pixels
-
-    providers.remove(merge_all_pixels)
-    providers.append(group_by_two_theta)
     params[TwoThetaBins] = sc.linspace(
         dim='two_theta', unit='deg', start=25.0, stop=90.0, num=16
-    )
+    ).to(unit='rad')
     pipeline = sciline.Pipeline(providers, params=params)
     result = pipeline.compute(DspacingHistogram)
     assert result.sizes == {
@@ -82,4 +83,4 @@ def test_pipeline_group_by_two_theta(providers, params):
         'dspacing': len(params[DspacingBins]) - 1,
     }
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
-    assert sc.allclose(result.coords['two_theta'].to(unit='deg'), params[TwoThetaBins])
+    assert sc.allclose(result.coords['two_theta'], params[TwoThetaBins])

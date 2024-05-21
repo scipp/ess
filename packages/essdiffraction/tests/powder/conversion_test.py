@@ -6,8 +6,8 @@ import scipp as sc
 import scipp.testing
 import scippneutron as scn
 from ess.powder.conversion import (
+    add_scattering_coordinates_from_positions,
     to_dspacing_with_calibration,
-    to_dspacing_with_positions,
 )
 
 
@@ -138,7 +138,7 @@ def test_dspacing_with_calibration_does_not_use_positions(calibration):
     )
 
 
-def test_dspacing_with_positions():
+def test_add_scattering_coordinates_from_positions():
     position = sc.vectors(
         dims=['spectrum'], values=np.arange(14 * 3).reshape((14, 3)), unit='m'
     )
@@ -149,20 +149,17 @@ def test_dspacing_with_positions():
         coords={
             'position': position,
             'tof': sc.linspace('tof', 1.0, 1000.0, 27, unit='us'),
+            'sample_position': sample_position,
+            'source_position': source_position,
         },
     )
-    dspacing = to_dspacing_with_positions(
-        tof,
-        sample=sc.DataGroup(position=sample_position),
-        source=sc.DataGroup(position=source_position),
-    )
-
     graph = {
         **scn.conversion.graph.beamline.beamline(scatter=True),
-        **scn.conversion.graph.tof.elastic_dspacing('tof'),
+        **scn.conversion.graph.tof.elastic('tof'),
     }
-    tof = tof.assign_coords(
-        {'sample_position': sample_position, 'source_position': source_position}
-    )
-    expected = tof.transform_coords('dspacing', graph=graph, keep_intermediate=False)
-    sc.testing.assert_identical(dspacing, expected)
+
+    result = add_scattering_coordinates_from_positions(tof, graph)
+
+    assert 'wavelength' in result.coords
+    assert 'two_theta' in result.coords
+    assert 'dspacing' in result.coords
