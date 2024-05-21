@@ -115,7 +115,7 @@ def he3_opacity_function_from_cell_opacity(
 
 def he3_opacity_function_from_beam_data(
     transmission_empty_glass: He3TransmissionEmptyGlass[Cell],
-    direct_beam: DirectBeamNoCell,
+    direct_beam_no_cell: DirectBeamNoCell,
     direct_beam_cell: He3DirectBeam[Cell, Depolarized],
     opacity0_initial_guess: He3Opacity0[Cell],
 ) -> He3OpacityFunction[Cell]:
@@ -134,7 +134,7 @@ def he3_opacity_function_from_beam_data(
     popt, _ = sc.curve_fit(
         ['wavelength'],
         intensity,
-        direct_beam_cell / direct_beam,
+        direct_beam_cell / direct_beam_no_cell,
         p0={'opacity0': opacity0_initial_guess},
     )
     return He3OpacityFunction[Cell](popt['opacity0'].data)

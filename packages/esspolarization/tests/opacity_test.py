@@ -63,7 +63,7 @@ def test_opacity_from_beam_data() -> None:
     direct_beam_cell = ratio * direct_beam
     opacity_function = pol.he3_opacity_function_from_beam_data(
         transmission_empty_glass=transmission_empty_glass,
-        direct_beam=direct_beam,
+        direct_beam_no_cell=direct_beam,
         direct_beam_cell=direct_beam_cell,
         opacity0_initial_guess=opacity0 * 1.23,  # starting guess imperfect
     )
