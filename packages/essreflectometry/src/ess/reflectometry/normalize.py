@@ -9,7 +9,7 @@ from .types import (
     NormalizedIofQ,
     QBins,
     Sample,
-    WBins,
+    WavelengthBins,
 )
 
 
@@ -17,7 +17,7 @@ def normalization_factor(
     da: FootprintCorrectedData[Sample],
     corr: CorrectionMatrix,
     qbins: QBins,
-    wbins: WBins,
+    wbins: WavelengthBins,
 ) -> NormalizationFactor:
     '''The correction matrix gives us the expected intensity at each
     (z_index, wavelength) bin assuming the reflectivity is one.
