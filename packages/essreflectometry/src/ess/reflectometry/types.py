@@ -41,8 +41,17 @@ class ChopperCorrectedTofEvents(sciline.Scope[Run, sc.DataArray], sc.DataArray):
     """Event time data after correcting tof for choppers."""
 
 
+class FullData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
+    """Event data with added coordinates such as incident angle (theta),
+    wavelength, and momentum transfer (Q)"""
+
+
+class MaskedFullData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
+    """Event data that has been masked in wavelength and logical detector coordinates"""
+
+
 class FootprintCorrectedData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
-    """Event data with weight corrected for the footprint of the beam
+    """Event data with weights corrected for the footprint of the beam
     on the sample for the incidence angle of the event."""
 
 
@@ -69,7 +78,7 @@ QBins = NewType('QBins', sc.Variable)
 '''Bins for the momentum transfer histogram.'''
 
 WavelengthBins = NewType('WavelengthBins', sc.Variable)
-'''Bins for the wavelength histogram'''
+'''Bins for the wavelength histogram, also used to filter the event data.'''
 
 
 class PoochFilename(sciline.Scope[Run, str], str):
@@ -82,6 +91,10 @@ class FilePath(sciline.Scope[Run, str], str):
 
 class SampleRotation(sciline.Scope[Run, sc.Variable], sc.Variable):
     """The rotation of the sample relative to the center of the incoming beam."""
+
+
+class DetectorRotation(sciline.Scope[Run, sc.Variable], sc.Variable):
+    '''The rotation of the detector relative to the horizon'''
 
 
 class BeamSize(sciline.Scope[Run, sc.Variable], sc.Variable):
@@ -101,18 +114,6 @@ class SampleSize(sciline.Scope[Run, sc.Variable], sc.Variable):
 Gravity = NewType('Gravity', sc.Variable)
 """This parameter determines if gravity is taken into account
 when computing the scattering angle and momentum transfer."""
-
-
-class FullData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
-    pass
-
-
-class MaskedFullData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
-    pass
-
-
-class DetectorRotation(sciline.Scope[Run, sc.Variable], sc.Variable):
-    '''The rotation of the detector relative to the horizon'''
 
 
 YIndexLimits = NewType('YIndexLimits', tuple[sc.Variable, sc.Variable])
