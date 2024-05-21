@@ -7,10 +7,10 @@ from scippneutron.conversion.graph import beamline, tof
 
 from .types import (
     ChopperCorrectedTofEvents,
-    FullData,
+    EventData,
     Gravity,
     IncidentBeam,
-    MaskedFullData,
+    MaskedEventData,
     Run,
     SamplePosition,
     SampleRotation,
@@ -126,7 +126,7 @@ def specular_reflection(
 def add_coords(
     da: ChopperCorrectedTofEvents[Run],
     graph: SpecularReflectionCoordTransformGraph[Run],
-) -> FullData[Run]:
+) -> EventData[Run]:
     da = da.transform_coords(["theta", "wavelength", "Q"], graph=graph)
     da.coords['z_index'] = sc.arange(
         'row', 0, da.sizes['blade'] * da.sizes['wire'], unit=None
@@ -136,8 +136,8 @@ def add_coords(
 
 
 def add_masks(
-    da: FullData[Run], ylim: YIndexLimits, wb: WavelengthBins, zlim: ZIndexLimits
-) -> MaskedFullData[Run]:
+    da: EventData[Run], ylim: YIndexLimits, wb: WavelengthBins, zlim: ZIndexLimits
+) -> MaskedEventData[Run]:
     da.masks['y_index_range'] = (da.coords['y_index'] < ylim[0]) | (
         da.coords['y_index'] > ylim[1]
     )

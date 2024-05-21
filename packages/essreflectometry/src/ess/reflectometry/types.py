@@ -41,12 +41,12 @@ class ChopperCorrectedTofEvents(sciline.Scope[Run, sc.DataArray], sc.DataArray):
     """Event time data after correcting tof for choppers."""
 
 
-class FullData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
+class EventData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
     """Event data with added coordinates such as incident angle (theta),
     wavelength, and momentum transfer (Q)"""
 
 
-class MaskedFullData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
+class MaskedEventData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
     """Event data that has been masked in wavelength and logical detector coordinates"""
 
 
