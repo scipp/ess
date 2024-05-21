@@ -30,9 +30,9 @@ from .base import (
     extract_sample_data_down_up,
     extract_sample_data_up_down,
     extract_sample_data_up_up,
-    providers,
-    run_reduction_workflow,
 )
+from .base import providers as base_providers
+from .base import run_reduction_workflow
 from .he3 import (
     Analyzer,
     Cell,
@@ -57,6 +57,9 @@ from .he3 import (
     he3_opacity_function_from_beam_data,
     he3_opacity_function_from_cell_opacity,
 )
+from .he3 import providers as he3_providers
+
+providers = base_providers + he3_providers
 
 __all__ = [
     "Analyzer",
