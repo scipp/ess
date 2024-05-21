@@ -14,7 +14,6 @@ from ...types import (
 )
 from .types import DetectorInfo
 
-
 DETECTOR_BANK_SHAPES = {"powgen_detector": {"bank": 23, "column": 154, "row": 7}}
 
 

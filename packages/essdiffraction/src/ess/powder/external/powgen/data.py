@@ -14,7 +14,6 @@ from ...types import (
     ProtonCharge,
     RawCalibrationData,
     RawDataAndMetadata,
-    RawDetectorData,
     ReducibleDetectorData,
     RunType,
     SampleRun,

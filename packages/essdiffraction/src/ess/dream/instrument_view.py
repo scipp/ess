@@ -114,10 +114,10 @@ class InstrumentView:
     def _add_module_control(self):
         import ipywidgets as ipw
 
-        # self.fig = self.scatter[0]
+        self.fig = self.scatter[0]
         self.cutting_tool = self.scatter.bottom_bar[0]
         self.artist_mapping = dict(
-            zip(self.data.keys(), self.scatter.artists.keys(), strict=True)
+            zip(self.data.keys(), self.fig.artists.keys(), strict=True)
         )
         self.checkboxes = {
             key: ipw.Checkbox(
@@ -138,9 +138,9 @@ class InstrumentView:
         for key, ch in self.checkboxes.items():
             ch.key = key
             ch.observe(self._check_visibility, names="value")
-        # self.cutting_tool.cut_x.button.observe(self._check_visibility, names="value")
-        # self.cutting_tool.cut_y.button.observe(self._check_visibility, names="value")
-        # self.cutting_tool.cut_z.button.observe(self._check_visibility, names="value")
+        self.cutting_tool.cut_x.button.observe(self._check_visibility, names="value")
+        self.cutting_tool.cut_y.button.observe(self._check_visibility, names="value")
+        self.cutting_tool.cut_z.button.observe(self._check_visibility, names="value")
         self.children.insert(0, self.modules_widget)
 
     def _check_visibility(self, _):
@@ -151,8 +151,8 @@ class InstrumentView:
         for name, ch in self.checkboxes.items():
             key = self.artist_mapping[name]
             val = ch.value
-            self.scatter.artists[key].points.visible = val
+            self.fig.artists[key].points.visible = val
             for c in "xyz":
                 cut_nodes = getattr(self.cutting_tool, f"cut_{c}").select_nodes
                 if key in cut_nodes:
-                    self.scatter.artists[cut_nodes[key].id].points.visible = val
+                    self.fig.artists[cut_nodes[key].id].points.visible = val

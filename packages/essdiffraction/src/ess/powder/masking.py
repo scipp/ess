@@ -3,6 +3,7 @@
 """
 Masking functions for the powder workflow.
 """
+
 from typing import Optional
 
 import numpy as np

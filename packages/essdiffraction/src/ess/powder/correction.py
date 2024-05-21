@@ -12,7 +12,6 @@ from .logging import get_logger
 from .smoothing import lowpass
 from .types import (
     AccumulatedProtonCharge,
-    DspacingBins,
     FilteredData,
     FocussedData,
     NormalizedByProtonCharge,

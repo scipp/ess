@@ -1,9 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
-import os
-from io import BytesIO, StringIO
-from typing import Dict, Optional, Union
+from typing import Dict, Optional
 
 import numpy as np
 import sciline
@@ -193,6 +191,8 @@ def patch_detector_data(
 def geant4_detector_dimensions(
     data: RawDetectorData[SampleRun],
 ) -> NeXusDetectorDimensions[NeXusDetectorName]:
+    # Fir geant4 data, we group by detector identifier, so the data already has
+    # logical dimensions, so we simply return the dimensions of the detector.
     return NeXusDetectorDimensions[NeXusDetectorName](data.sizes)
 
 

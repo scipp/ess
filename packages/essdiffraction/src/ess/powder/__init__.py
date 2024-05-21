@@ -31,3 +31,14 @@ providers = (
     *masking.providers,
 )
 """Sciline providers for powder diffraction."""
+
+__all__ = [
+    "conversion",
+    "correction",
+    "filtering",
+    "grouping",
+    "masking",
+    "providers",
+    "smoothing",
+    "uncertainty",
+]

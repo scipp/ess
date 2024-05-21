@@ -8,7 +8,6 @@ pipeline.
 """
 
 from enum import Enum
-from pathlib import Path
 from typing import Any, Callable, Dict, NewType, TypeVar
 
 import sciline
@@ -34,15 +33,6 @@ RunType = TypeVar("RunType", EmptyInstrumentRun, SampleRun, VanadiumRun)
 CalibrationFilename = NewType("CalibrationFilename", str)
 """Filename of the instrument calibration file."""
 
-
-# # In Python 3.11, this can be replaced with a StrEnum
-# class DetectorName(str, Enum):
-#     """Name of a detector."""
-
-#     mantle = "mantle"
-#     high_resolution = "high_resolution"
-#     endcap_backward = "endcap_backward"
-#     endcap_forward = "endcap_forward"
 
 NeXusDetectorName = NewType("NeXusDetectorName", str)
 """Name of detector entry in NeXus file"""
@@ -103,10 +93,6 @@ class NeXusDetectorDimensions(
     sciline.Scope[NeXusDetectorName, Dict[str, int]], Dict[str, int]
 ):
     """Logical detector dimensions."""
-
-
-# DetectorDimensions = NewType("DetectorDimensions", Dict[str, int])
-# """Logical detector dimensions."""
 
 
 class DspacingData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
