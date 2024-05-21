@@ -136,13 +136,21 @@ def load_amor_ch_frequency(ch: RawChopper[Run]) -> ChopperFrequency[Run]:
 
 def load_amor_sample_rotation(fp: FilePath[Run]) -> SampleRotation[Run]:
     (mu,) = load_nx(fp, 'NXentry/NXinstrument/master_parameters/mu')
-    mu = mu['value'].coords['average_value'].value
+    # For some reason this is length 1 and not scalar sometimes
+    if mu['value'].coords['average_value'].dims != ():
+        mu = mu['value'].coords['average_value'].values[0]
+    else:
+        mu = mu['value'].coords['average_value'].value
     return sc.scalar(mu, unit='deg')
 
 
 def load_amor_detector_rotation(fp: FilePath[Run]) -> DetectorRotation[Run]:
     (nu,) = load_nx(fp, 'NXentry/NXinstrument/master_parameters/nu')
-    nu = nu['value'].coords['average_value'].value
+    # For some reason this is length 1 and not scalar sometimes
+    if nu['value'].coords['average_value'].dims != ():
+        nu = nu['value'].coords['average_value'].values[0]
+    else:
+        nu = nu['value'].coords['average_value'].value
     return sc.scalar(nu, unit='deg')
 
 
