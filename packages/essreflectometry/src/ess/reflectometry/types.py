@@ -95,7 +95,7 @@ class DetectorSpatialResolution(sciline.Scope[Run, sc.Variable], sc.Variable):
 
 class SampleSize(sciline.Scope[Run, sc.Variable], sc.Variable):
     # TODO is this radius or total length?
-    """Size of the sample."""
+    """Size of the sample. If None it is assumed to be the same as the reference."""
 
 
 Gravity = NewType('Gravity', sc.Variable)
