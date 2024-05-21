@@ -28,7 +28,7 @@ def test_he3_polarization_reproduces_input_params_within_errors(
     transmission_empty_glass = sc.scalar(0.9)
     opacity = opacity_function(wavelength)
     polarization = polarization_function(time)
-    transmission = pol.base.transmission_incoming_unpolarized(
+    transmission = pol.he3.transmission_incoming_unpolarized(
         transmission_empty_glass=transmission_empty_glass,
         opacity=opacity,
         polarization=polarization,
