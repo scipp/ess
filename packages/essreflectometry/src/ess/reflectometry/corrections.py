@@ -11,7 +11,7 @@ from .types import (
     CorrectionMatrix,
     FootprintCorrectedData,
     HistogrammedReference,
-    MaskedFullData,
+    MaskedEventData,
     Reference,
     Run,
     SampleSize,
@@ -20,7 +20,7 @@ from .types import (
 
 
 def footprint_correction(
-    data_array: MaskedFullData[Run],
+    data_array: MaskedEventData[Run],
     beam_size: BeamSize[Run],
     sample_size: Optional[SampleSize[Run]],
 ) -> FootprintCorrectedData[Run]:
