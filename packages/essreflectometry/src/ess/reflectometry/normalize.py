@@ -3,8 +3,8 @@
 import scipp as sc
 
 from .types import (
-    CorrectionMatrix,
     FootprintCorrectedData,
+    IdealReferenceIntensity,
     NormalizationFactor,
     NormalizedIofQ,
     QBins,
@@ -15,7 +15,7 @@ from .types import (
 
 def normalization_factor(
     da: FootprintCorrectedData[Sample],
-    corr: CorrectionMatrix,
+    corr: IdealReferenceIntensity,
     qbins: QBins,
     wbins: WavelengthBins,
 ) -> NormalizationFactor:
@@ -46,12 +46,12 @@ def normalization_factor(
         .bins.mean()
     )
 
-    def Q_of_z_wavelength(wavelength, a, b):
+    def q_of_z_wavelength(wavelength, a, b):
         return a + b / wavelength
 
     p, _ = sc.curve_fit(
         ['wavelength'],
-        Q_of_z_wavelength,
+        q_of_z_wavelength,
         sc.DataArray(
             data=sample_q,
             coords=dict(wavelength=corr.coords['wavelength']),
@@ -65,7 +65,7 @@ def normalization_factor(
     return sc.DataArray(
         data=corr.data,
         coords=dict(
-            Q=Q_of_z_wavelength(
+            Q=q_of_z_wavelength(
                 corr.coords['wavelength'],
                 sc.values(p['a']),
                 sc.values(p['b']),

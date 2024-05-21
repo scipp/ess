@@ -55,14 +55,14 @@ class FootprintCorrectedData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
     on the sample for the incidence angle of the event."""
 
 
-HistogrammedReference = NewType('HistogrammedReference', sc.DataArray)
+ReferenceIntensity = NewType('ReferenceIntensity', sc.DataArray)
 '''Intensity distribution of the reference measurement in (z, wavelength)'''
 
-CorrectionMatrix = NewType('CorrectionMatrix', sc.DataArray)
+IdealReferenceIntensity = NewType('IdealReferenceIntensity', sc.DataArray)
 '''Intensity distribution on the detector for a sample with :math`R(Q) = 1`'''
 
 NormalizationFactor = NewType('NormalizationFactor', sc.DataArray)
-''':code`CorrectionMatrix` with added coordinate "sample" Q'''
+''':code`IdealReferenceIntensity` with added coordinate "sample"-Q'''
 
 NormalizedIofQ = NewType('NormalizedIofQ', sc.DataArray)
 '''Intensity histogram over momentum transfer

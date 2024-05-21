@@ -8,11 +8,11 @@ from .supermirror import SupermirrorReflectivityCorrection
 from .tools import fwhm_to_std
 from .types import (
     BeamSize,
-    CorrectionMatrix,
     FootprintCorrectedData,
-    HistogrammedReference,
+    IdealReferenceIntensity,
     MaskedEventData,
     Reference,
+    ReferenceIntensity,
     Run,
     SampleSize,
     WavelengthBins,
@@ -52,7 +52,7 @@ def footprint_correction(
 
 def compute_reference_intensity(
     da: FootprintCorrectedData[Reference], wb: WavelengthBins
-) -> HistogrammedReference:
+) -> ReferenceIntensity:
     """Creates a reference intensity map over (z_index, wavelength).
     Rationale:
         The intensity expressed in those variables should not vary
@@ -66,15 +66,15 @@ def compute_reference_intensity(
     # Add a Q coordinate to each bin, the Q is not completely unique in every bin,
     # but it is close enough.
     h.coords['Q'] = b.bins.coords['Q'].bins.mean()
-    return HistogrammedReference(h)
+    return ReferenceIntensity(h)
 
 
 def calibrate_reference(
-    da: HistogrammedReference, cal: SupermirrorReflectivityCorrection
-) -> CorrectionMatrix:
+    da: ReferenceIntensity, cal: SupermirrorReflectivityCorrection
+) -> IdealReferenceIntensity:
     '''Calibrates the reference intensity by the
     inverse of the supermirror reflectivity'''
-    return CorrectionMatrix(da * cal)
+    return IdealReferenceIntensity(da * cal)
 
 
 providers = (

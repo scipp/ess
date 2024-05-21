@@ -3,7 +3,7 @@ import sciline
 import scipp as sc
 import scippnexus as snx
 
-from .types import CorrectionMatrix, ReferenceFilePath
+from .types import IdealReferenceIntensity, ReferenceFilePath
 
 
 def _load(filepath, *paths: str):
@@ -48,9 +48,9 @@ def load_nx(filepath, *paths: str):
 
 
 def save_reference(pl: sciline.Pipeline, fname: str):
-    pl.compute(CorrectionMatrix).save_hdf5(fname)
+    pl.compute(IdealReferenceIntensity).save_hdf5(fname)
     return fname
 
 
-def load_reference(fname: ReferenceFilePath) -> CorrectionMatrix:
+def load_reference(fname: ReferenceFilePath) -> IdealReferenceIntensity:
     return sc.io.hdf5.load_hdf5(fname)
