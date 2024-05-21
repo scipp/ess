@@ -15,33 +15,44 @@ from ess.reflectometry.types import *
 
 @pytest.fixture()
 def amor_pipeline() -> sciline.Pipeline:
-    params = {
-        **amor.default_parameters,
-        QBins: sc.geomspace(
-            dim='Q', start=0.008, stop=0.075, num=200, unit='1/angstrom'
-        ),
-        SampleRotation[Sample]: sc.scalar(0.7989, unit='deg'),
-        PoochFilename[Sample]: "sample.nxs",
-        SampleRotation[Reference]: sc.scalar(0.8389, unit='deg'),
-        PoochFilename[Reference]: "reference.nxs",
-        WavelengthEdges: sc.array(
-            dims=['wavelength'], values=[2.4, 16.0], unit='angstrom'
-        ),
-        orso.OrsoCreator: orso.OrsoCreator(
-            fileio.base.Person(
-                name='Max Mustermann',
-                affiliation='European Spallation Source ERIC',
-                contact='max.mustermann@ess.eu',
-            )
-        ),
-    }
-    return sciline.Pipeline(
-        (*amor.providers, *orso.providers, *amor.orso.providers, amor.data.get_path),
-        params=params,
+    pl = sciline.Pipeline(
+        (*amor.providers, *amor.data.providers),
+        params=amor.default_parameters,
+    )
+    pl[SampleSize[Sample]] = sc.scalar(10.0, unit='mm')
+    pl[SampleSize[Reference]] = sc.scalar(10.0, unit='mm')
+
+    pl[WavelengthBins] = sc.geomspace('wavelength', 2.8, 12, 300, unit='angstrom')
+    pl[YIndexLimits] = sc.scalar(11, unit=None), sc.scalar(41, unit=None)
+    pl[ZIndexLimits] = sc.scalar(80, unit=None), sc.scalar(370, unit=None)
+
+    # The sample rotation value in the file is slightly off, so we set it manually
+    pl[SampleRotation[Reference]] = sc.scalar(0.65, unit='deg')
+    pl[PoochFilename[Reference]] = "amor2023n000614.hdf"
+
+    pl[orso.OrsoCreator] = orso.OrsoCreator(
+        fileio.base.Person(
+            name='Max Mustermann',
+            affiliation='European Spallation Source ERIC',
+            contact='max.mustermann@ess.eu',
+        )
     )
 
+    # The sample rotation value in the file is slightly off, so we set it manually
+    pl[SampleRotation[Sample]] = sc.scalar(0.85, unit='deg')
+    pl[PoochFilename[Sample]] = "amor2023n000608.hdf"
+    pl[QBins] = sc.geomspace(
+        dim='Q', start=0.005, stop=0.115, num=391, unit='1/angstrom'
+    )
+    return pl
 
-def test_run_pipeline(amor_pipeline: sciline.Pipeline):
+
+def test_run_data_pipeline(amor_pipeline: sciline.Pipeline):
+    res = amor_pipeline.compute(NormalizedIofQ)
+    assert 'Q' in res.coords
+
+
+def test_run_full_pipeline(amor_pipeline: sciline.Pipeline):
     res = amor_pipeline.compute(orso.OrsoIofQDataset)
     assert res.info.data_source.experiment.instrument == 'AMOR'
     assert res.info.reduction.software.name == 'ess.reflectometry'
