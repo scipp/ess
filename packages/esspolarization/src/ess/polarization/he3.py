@@ -6,6 +6,12 @@ from typing import Generic, Literal, NewType, TypeVar
 import sciline as sl
 import scipp as sc
 
+from .types import (
+    Down,
+    PolarizationCorrectedSampleData,
+    ReducedSampleDataBySpinChannel,
+    Up,
+)
 from .uncertainty import broadcast_with_upper_bound_variances
 
 Depolarized = NewType('Depolarized', int)
@@ -318,10 +324,39 @@ def direct_beam_with_cell(
     )
 
 
+def correct_sample_data_for_polarization(
+    upup: ReducedSampleDataBySpinChannel[Up, Up],
+    updown: ReducedSampleDataBySpinChannel[Up, Down],
+    downup: ReducedSampleDataBySpinChannel[Down, Up],
+    downdown: ReducedSampleDataBySpinChannel[Down, Down],
+    transmission_polarizer: He3TransmissionFunction[Polarizer],
+    transmission_analyzer: He3TransmissionFunction[Analyzer],
+) -> PolarizationCorrectedSampleData:
+    """
+    Apply polarization correction for the case of He3 polarizers and analyzers.
+
+    There will be a different version of this function for handling the supermirror
+    case, since transmission is not time-dependent but spin-flippers need to be
+    accounted for.
+    """
+    # 1. Apply polarization correction (matrix inverse)
+    # 2. Compute weighted mean over time and wavelength, bin into Q-bins
+
+    # Pseudo code:
+    # result = [0,0,0,0]
+    # for j in range(4):
+    #     for i, channel in enumerate((upup, updown, downup, downdown)):
+    #         da = PA_inv[j, i] * channel
+    #         da *= weights  # weights from error bars or event counts?
+    #         result[j] += da.bins.concat('time', 'wavelength').hist(Qx=100, Qy=100)
+    raise NotImplementedError()
+
+
 providers = (
     he3_opacity_from_cell_params,
     he3_opacity_function_from_beam_data,
     get_he3_transmission_from_fit_to_direct_beam,
     direct_beam,
     direct_beam_with_cell,
+    correct_sample_data_for_polarization,
 )

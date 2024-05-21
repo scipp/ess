@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-from typing import Mapping, NewType, TypeVar
+from typing import Mapping, NewType
 
 import numpy as np
 import sciline as sl
@@ -9,28 +9,17 @@ import scipp as sc
 from .he3 import (
     Analyzer,
     Cell,
-    He3TransmissionFunction,
     Polarized,
     Polarizer,
     ReducedDirectBeamData,
     ReducedDirectBeamDataNoCell,
 )
+from .types import Down, ReducedSampleDataBySpinChannel, Up
 
 spin_up = sc.scalar(1, dtype='int64', unit=None)
 spin_down = sc.scalar(-1, dtype='int64', unit=None)
 
-Up = NewType('Up', int)
-Down = NewType('Down', int)
-PolarizerSpin = TypeVar('PolarizerSpin', Up, Down)
-AnalyzerSpin = TypeVar('AnalyzerSpin', Up, Down)
-
 WavelengthBins = NewType('WavelengthBins', sc.Variable)
-
-
-PolarizationCorrectedSampleData = NewType(
-    'PolarizationCorrectedSampleData', sc.DataArray
-)
-"""Polarization-corrected sample data."""
 
 
 SampleInBeamLog = NewType('SampleInBeamLog', sc.DataArray)
@@ -175,12 +164,6 @@ def extract_analyzer_direct_beam_polarized(
     return ReducedDirectBeamData[Analyzer, Polarized](data[select])
 
 
-class ReducedSampleDataBySpinChannel(
-    sl.ScopeTwoParams[PolarizerSpin, AnalyzerSpin, sc.DataArray], sc.DataArray
-):
-    """Sample data for a given spin channel."""
-
-
 def is_sample_channel(
     coords: Mapping[str, sc.Variable],
     polarizer_spin: sc.Variable,
@@ -231,34 +214,6 @@ def extract_sample_data_down_down(
     )
 
 
-def correct_sample_data_for_polarization(
-    upup: ReducedSampleDataBySpinChannel[Up, Up],
-    updown: ReducedSampleDataBySpinChannel[Up, Down],
-    downup: ReducedSampleDataBySpinChannel[Down, Up],
-    downdown: ReducedSampleDataBySpinChannel[Down, Down],
-    transmission_polarizer: He3TransmissionFunction[Polarizer],
-    transmission_analyzer: He3TransmissionFunction[Analyzer],
-) -> PolarizationCorrectedSampleData:
-    """
-    Apply polarization correction for the case of He3 polarizers and analyzers.
-
-    There will be a different version of this function for handling the supermirror
-    case, since transmission is not time-dependent but spin-flippers need to be
-    accounted for.
-    """
-    # 1. Apply polarization correction (matrix inverse)
-    # 2. Compute weighted mean over time and wavelength, bin into Q-bins
-
-    # Pseudo code:
-    # result = [0,0,0,0]
-    # for j in range(4):
-    #     for i, channel in enumerate((upup, updown, downup, downdown)):
-    #         da = PA_inv[j, i] * channel
-    #         da *= weights  # weights from error bars or event counts?
-    #         result[j] += da.bins.concat('time', 'wavelength').hist(Qx=100, Qy=100)
-    raise NotImplementedError()
-
-
 providers = (
     determine_run_section,
     run_reduction_workflow,
@@ -269,5 +224,4 @@ providers = (
     extract_sample_data_down_up,
     extract_sample_data_up_down,
     extract_sample_data_up_up,
-    correct_sample_data_for_polarization,
 )

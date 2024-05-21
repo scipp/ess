@@ -15,13 +15,9 @@ del importlib
 from .base import (
     CellInBeamLog,
     CellSpinLog,
-    Down,
-    PolarizationCorrectedSampleData,
     RunSectionLog,
     SampleInBeamLog,
-    Up,
     WavelengthBins,
-    correct_sample_data_for_polarization,
     determine_run_section,
     extract_analyzer_direct_beam_polarized,
     extract_direct_beam,
@@ -42,6 +38,7 @@ from .he3 import (
     DirectBeamQRange,
     He3CellLength,
     He3CellPressure,
+    He3DirectBeam,
     He3FillingTime,
     He3Opacity0,
     He3OpacityFunction,
@@ -50,6 +47,7 @@ from .he3 import (
     He3TransmissionFunction,
     Polarized,
     Polarizer,
+    correct_sample_data_for_polarization,
     direct_beam,
     direct_beam_with_cell,
     get_he3_transmission_from_fit_to_direct_beam,
@@ -58,6 +56,12 @@ from .he3 import (
     he3_opacity_function_from_cell_opacity,
 )
 from .he3 import providers as he3_providers
+from .types import (
+    Down,
+    PolarizationCorrectedSampleData,
+    ReducedSampleDataBySpinChannel,
+    Up,
+)
 
 providers = base_providers + he3_providers
 
@@ -68,7 +72,6 @@ __all__ = [
     "CellSpinLog",
     "correct_sample_data_for_polarization",
     "Depolarized",
-    "detect_run_section",
     "determine_run_section",
     "direct_beam",
     "DirectBeamBackgroundQRange",
@@ -101,6 +104,7 @@ __all__ = [
     "Polarizer",
     "providers",
     "run_reduction_workflow",
+    "ReducedSampleDataBySpinChannel",
     "RunSectionLog",
     "SampleInBeamLog",
     "Up",
