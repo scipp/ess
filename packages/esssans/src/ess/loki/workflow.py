@@ -15,7 +15,6 @@ from ess.loki.io import load_nexus_monitor, load_nexus_source
 from ess.sans.conversions import monitor_to_wavelength, sans_monitor
 from ess.sans.types import (
     Filename,
-    FilePath,
     Incident,
     MonitorType,
     NeXusMonitorName,
@@ -116,7 +115,7 @@ class LoKiMonitorWorkflow:
         """
         # ``JsonGroup`` is turned into the ``NexusGroup`` here, not in the ``beamlime``
         # so that the workflow can control the definition of the group.
-        self.pipeline[FilePath[Filename[SampleRun]]] = snx.Group(
+        self.pipeline[Filename[SampleRun]] = snx.Group(
             group, definitions=snx.base_definitions()
         )
         results = self.pipeline.compute(
