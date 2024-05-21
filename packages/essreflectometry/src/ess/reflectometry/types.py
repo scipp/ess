@@ -68,7 +68,7 @@ QResolution = NewType('QResolution', sc.Variable)
 QBins = NewType('QBins', sc.Variable)
 '''Bins for the momentum transfer histogram.'''
 
-WBins = NewType('WBins', sc.Variable)
+WavelengthBins = NewType('WavelengthBins', sc.Variable)
 '''Bins for the wavelength histogram'''
 
 

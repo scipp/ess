@@ -15,7 +15,7 @@ from .types import (
     Reference,
     Run,
     SampleSize,
-    WBins,
+    WavelengthBins,
 )
 
 
@@ -51,7 +51,7 @@ def footprint_correction(
 
 
 def compute_reference_intensity(
-    da: FootprintCorrectedData[Reference], wb: WBins
+    da: FootprintCorrectedData[Reference], wb: WavelengthBins
 ) -> HistogrammedReference:
     """Creates a reference intensity map over (z_index, wavelength).
     Rationale:

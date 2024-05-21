@@ -15,7 +15,7 @@ from .types import (
     SamplePosition,
     SampleRotation,
     SpecularReflectionCoordTransformGraph,
-    WBins,
+    WavelengthBins,
     YIndexLimits,
     ZIndexLimits,
 )
@@ -136,7 +136,7 @@ def add_coords(
 
 
 def add_masks(
-    da: FullData[Run], ylim: YIndexLimits, wb: WBins, zlim: ZIndexLimits
+    da: FullData[Run], ylim: YIndexLimits, wb: WavelengthBins, zlim: ZIndexLimits
 ) -> MaskedFullData[Run]:
     da.masks['y_index_range'] = (da.coords['y_index'] < ylim[0]) | (
         da.coords['y_index'] > ylim[1]
