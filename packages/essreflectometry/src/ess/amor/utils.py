@@ -12,6 +12,9 @@ class ThetaBins(sciline.Scope[Run, sc.Variable], sc.Variable):
 
 
 def theta_grid(nu: DetectorRotation[Run], mu: SampleRotation[Run]) -> ThetaBins[Run]:
+    '''Special grid used to create intensity maps over (theta, wavelength).
+    The grid avoids aliasing artifacts that occur if the
+    theta bins overlap the blade edges.'''
     # angular offset of two blades:
     bladeAngle = 2.0 * sc.asin(0.5 * Detector.bladeZ / Detector.distance)
     # associate an angle with each z-coordinate on one blade
@@ -41,7 +44,7 @@ def theta_grid(nu: DetectorRotation[Run], mu: SampleRotation[Run]) -> ThetaBins[
     delta_grid = sc.concat((delta_grid, blade_grid), 'theta')
 
     # add angular position of the detector
-    theta_grid = (
+    grid = (
         nu.to(unit='rad')
         - mu.to(unit='rad')
         - sc.array(
@@ -53,4 +56,4 @@ def theta_grid(nu: DetectorRotation[Run], mu: SampleRotation[Run]) -> ThetaBins[
     # some filtering
     # theta_grid = theta_grid[theta_grid>=thetaMin]
     # theta_grid = theta_grid[theta_grid<=thetaMax]
-    return theta_grid
+    return grid
