@@ -12,15 +12,7 @@ from numbers import Real
 
 import scipp as sc
 
-from ._util import elem_dtype, elem_unit, event_or_outer_coord
-from .types import (
-    FilteredData,
-    RawDetectorData,
-    ReducibleDetectorData,
-    RunType,
-    TofCroppedData,
-    ValidTofRange,
-)
+from .types import FilteredData, ReducibleDetectorData, RunType
 
 
 def _equivalent_bin_indices(a, b) -> bool:
@@ -80,34 +72,6 @@ def remove_bad_pulses(
     return filtered
 
 
-def crop_tof(
-    data: RawDetectorData[RunType], tof_range: ValidTofRange
-) -> TofCroppedData[RunType]:
-    """Remove events outside the specified TOF range.
-
-    Parameters
-    ----------
-    data:
-        Data to be cropped.
-        Expected to have a coordinate called `'tof'`.
-    tof_range:
-        1d, len-2 variable containing the lower and upper bounds for
-        time-of-flight.
-
-    Returns
-    -------
-    :
-        Cropped data.
-    """
-    tof = event_or_outer_coord(data, "tof")
-    tof_unit = elem_unit(tof)
-    tof_dtype = elem_dtype(tof)
-    return TofCroppedData[RunType](
-        data.bin(tof=tof_range.to(unit=tof_unit, dtype=tof_dtype))
-    )
-
-
-# def filter_events(data: TofCroppedData[RunType]) -> FilteredData[RunType]:
 def filter_events(data: ReducibleDetectorData[RunType]) -> FilteredData[RunType]:
     """Remove bad events.
 
@@ -132,8 +96,5 @@ def filter_events(data: ReducibleDetectorData[RunType]) -> FilteredData[RunType]
     return FilteredData[RunType](data)
 
 
-providers = (
-    crop_tof,
-    filter_events,
-)
+providers = (filter_events,)
 """Sciline providers for event filtering."""

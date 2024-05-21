@@ -3,48 +3,34 @@
 
 """Beamline tools for DREAM."""
 
-from ess.powder.types import DetectorDimensions, RawDetectorData, SampleRun
+from ess.powder.types import NeXusDetectorDimensions, NeXusDetectorName
+
+DETECTOR_BANK_SHAPES_DAY1 = {
+    "endcap_backward": {
+        "strip": 16,
+        "wire": 16,
+        "module": 11,
+        "segment": 28,
+        "counter": 2,
+    },
+    "endcap_forward": {
+        "strip": 16,
+        "wire": 16,
+        "module": 5,
+        "segment": 28,
+        "counter": 2,
+    },
+    "mantle": {"wire": 32, "module": 5, "segment": 6, "strip": 256, "counter": 2},
+    # TODO: missing "high_resolution" and "sans" detectors
+}
 
 
-def dream_detector_dimensions(data: RawDetectorData[SampleRun]) -> DetectorDimensions:
-    """Logical dimensions used by a DREAM detector.
-
-    The dimensions differ between simulated data loaded from GEANT4 CSV files
-    and measured data loaded from NeXus files.
-    The dimensions returned by this function match the dimensions found
-    in the ``data`` argument.
-
-    Parameters
-    ----------
-    data:
-        Dimensions are deduced based on this data.
-
-    Returns
-    -------
-    :
-        Logical dimensions used by the given DREAM detector.
-    """
-    geant4_dims = {
-        'module',
-        'segment',
-        'counter',
-        'wire',
-        'strip',
-        'sector',
-    }
-    nexus_dims = {
-        'wire',
-        'mounting_unit',
-        'cassette',
-        'counter',
-        'strip',
-        'sector',
-        'sumo_cass_ctr',
-        'other',
-    }
-    dims = (geant4_dims | nexus_dims) & set(data.dims)
-    return DetectorDimensions(tuple(dims))
+def dream_detector_dimensions_day1(
+    detector_name: NeXusDetectorName,
+) -> NeXusDetectorDimensions[NeXusDetectorName]:
+    """Logical dimensions of a NeXus DREAM detector for the day 1 configuration."""
+    return NeXusDetectorDimensions(DETECTOR_BANK_SHAPES_DAY1[detector_name])
 
 
-providers = (dream_detector_dimensions,)
+providers = (dream_detector_dimensions_day1,)
 """Sciline providers for DREAM detector handling."""

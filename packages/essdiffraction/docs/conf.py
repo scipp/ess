@@ -5,35 +5,35 @@ import os
 import sys
 from importlib.metadata import version as get_version
 
-sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath("."))
 
 # General information about the project.
-project = 'ESSdiffraction'
-copyright = '2024 Scipp contributors'
-author = 'Scipp contributors'
+project = "ESSdiffraction"
+copyright = "2024 Scipp contributors"
+author = "Scipp contributors"
 
 html_show_sourcelink = True
 
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.doctest',
-    'sphinx.ext.githubpages',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.mathjax',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.viewcode',
-    'sphinx_autodoc_typehints',
-    'sphinx_copybutton',
-    'sphinx_design',
-    'nbsphinx',
-    'myst_parser',
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.doctest",
+    "sphinx.ext.githubpages",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.viewcode",
+    "sphinx_autodoc_typehints",
+    "sphinx_copybutton",
+    "sphinx_design",
+    "nbsphinx",
+    "myst_parser",
 ]
 
 try:
     import sciline.sphinxext.domain_types  # noqa: F401
 
-    extensions.append('sciline.sphinxext.domain_types')
+    extensions.append("sciline.sphinxext.domain_types")
 except ModuleNotFoundError:
     pass
 
@@ -56,13 +56,13 @@ myst_enable_extensions = [
 myst_heading_anchors = 3
 
 autodoc_type_aliases = {
-    'array_like': 'array_like',
+    "array_like": "array_like",
 }
 
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/3', None),
-    'numpy': ('https://numpy.org/doc/stable/', None),
-    'scipp': ('https://scipp.github.io/', None),
+    "python": ("https://docs.python.org/3", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "scipp": ("https://scipp.github.io/", None),
 }
 
 # autodocs includes everything, even irrelevant API internals. autosummary
@@ -79,32 +79,32 @@ napoleon_type_aliases = {
     # objects without namespace: numpy
     "ndarray": "~numpy.ndarray",
 }
-typehints_defaults = 'comma'
+typehints_defaults = "comma"
 typehints_use_rtype = False
 
 
-sciline_domain_types_prefix = 'ess.diffraction'
+sciline_domain_types_prefix = "ess.diffraction"
 sciline_domain_types_aliases = {
-    'scipp._scipp.core.DataArray': 'scipp.DataArray',
-    'scipp._scipp.core.Dataset': 'scipp.Dataset',
-    'scipp._scipp.core.DType': 'scipp.DType',
-    'scipp._scipp.core.Unit': 'scipp.Unit',
-    'scipp._scipp.core.Variable': 'scipp.Variable',
-    'scipp.core.data_group.DataGroup': 'scipp.DataGroup',
+    "scipp._scipp.core.DataArray": "scipp.DataArray",
+    "scipp._scipp.core.Dataset": "scipp.Dataset",
+    "scipp._scipp.core.DType": "scipp.DType",
+    "scipp._scipp.core.Unit": "scipp.Unit",
+    "scipp._scipp.core.Variable": "scipp.Variable",
+    "scipp.core.data_group.DataGroup": "scipp.DataGroup",
 }
 
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-source_suffix = ['.rst', '.md']
-html_sourcelink_suffix = ''  # Avoid .ipynb.txt extensions in sources
+source_suffix = [".rst", ".md"]
+html_sourcelink_suffix = ""  # Avoid .ipynb.txt extensions in sources
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = "index"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -112,7 +112,7 @@ master_doc = 'index'
 #
 
 release = get_version("essdiffraction")
-version = ".".join(release.split('.')[:3])  # CalVer
+version = ".".join(release.split(".")[:3])  # CalVer
 
 warning_is_error = True
 
@@ -127,15 +127,15 @@ language = "en"
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
 exclude_patterns = [
-    '_build',
-    'Thumbs.db',
-    '.DS_Store',
-    '**.ipynb_checkpoints',
-    'user-guide/sns-instruments/preprocess_files.ipynb',
+    "_build",
+    "Thumbs.db",
+    ".DS_Store",
+    "**.ipynb_checkpoints",
+    "user-guide/sns-instruments/preprocess_files.ipynb",
 ]
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = "sphinx"
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
@@ -200,14 +200,14 @@ html_favicon = "_static/favicon.svg"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ["_static"]
 html_css_files = []
 html_js_files = ["anaconda-icon.js"]
 
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'essdiffractiondoc'
+htmlhelp_basename = "essdiffractiondoc"
 
 # -- Options for Matplotlib in notebooks ----------------------------------
 
@@ -223,7 +223,7 @@ nbsphinx_execute_arguments = [
 # In addition, there is no need to make plots in doctest as the documentation
 # build already tests if those plots can be made.
 # So we simply disable plots in doctests.
-doctest_global_setup = '''
+doctest_global_setup = """
 import numpy as np
 
 try:
@@ -240,7 +240,7 @@ try:
 except ImportError:
     # Scipp is not needed by docs if it is not installed.
     pass
-'''
+"""
 
 # Using normalize whitespace because many __str__ functions in scipp produce
 # extraneous empty lines and it would look strange to include them in the docs.
@@ -255,5 +255,5 @@ doctest_default_flags = (
 
 linkcheck_ignore = [
     # Specific lines in Github blobs cannot be found by linkcheck.
-    r'https?://github\.com/.*?/blob/[a-f0-9]+/.+?#',
+    r"https?://github\.com/.*?/blob/[a-f0-9]+/.+?#",
 ]

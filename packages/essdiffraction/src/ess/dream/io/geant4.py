@@ -9,8 +9,9 @@ import numpy as np
 import sciline
 import scipp as sc
 from ess.powder.types import (
-    DetectorName,
     Filename,
+    NeXusDetectorDimensions,
+    NeXusDetectorName,
     RawDetector,
     RawDetectorData,
     RawSample,
@@ -18,6 +19,7 @@ from ess.powder.types import (
     ReducibleDetectorData,
     RunType,
     SamplePosition,
+    SampleRun,
     SourcePosition,
 )
 from ess.reduce.nexus import extract_detector_data
@@ -62,10 +64,10 @@ def load_geant4_csv(file_path: Filename[RunType]) -> AllRawDetectors[RunType]:
 
 
 def extract_geant4_detector(
-    detectors: AllRawDetectors[RunType], detector_name: DetectorName
+    detectors: AllRawDetectors[RunType], detector_name: NeXusDetectorName
 ) -> RawDetector[RunType]:
     """Extract a single detector from a loaded GEANT4 simulation."""
-    return RawDetector[RunType](detectors["instrument"][detector_name.name])
+    return RawDetector[RunType](detectors["instrument"][detector_name])
 
 
 def extract_geant4_detector_data(
@@ -188,6 +190,12 @@ def patch_detector_data(
     return ReducibleDetectorData[RunType](out)
 
 
+def geant4_detector_dimensions(
+    data: RawDetectorData[SampleRun],
+) -> NeXusDetectorDimensions[NeXusDetectorName]:
+    return NeXusDetectorDimensions[NeXusDetectorName](data.sizes)
+
+
 providers = (
     extract_geant4_detector,
     extract_geant4_detector_data,
@@ -195,5 +203,6 @@ providers = (
     get_sample_position,
     get_source_position,
     patch_detector_data,
+    geant4_detector_dimensions,
 )
 """Geant4-providers for Sciline pipelines."""

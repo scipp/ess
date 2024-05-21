@@ -17,14 +17,7 @@ from .types import (
     DspacingData,
     ElasticCoordTransformGraph,
     NormalizedByProtonCharge,
-    PixelMaskedData,
-    RawSample,
-    RawSource,
     RunType,
-    TwoThetaData,
-    TwoThetaMaskedData,
-    WavelengthData,
-    WavelengthMaskedData,
 )
 
 
@@ -254,6 +247,19 @@ def _restore_tof_if_in_wavelength(data: sc.DataArray) -> sc.DataArray:
 def add_scattering_coordinates(
     data: NormalizedByProtonCharge[RunType], graph: ElasticCoordTransformGraph
 ) -> DataWithScatteringCoordinates[RunType]:
+    """
+    Add ``wavelength``, ``two_theta``, and ``dspacing`` coordinates to the data.
+    The input ``data`` must have a ``tof`` coordinate, as well as the necessary
+    positions of the beamline components (source, sample, detectors) to compute
+    the scattering coordinates.
+
+    Parameters
+    ----------
+    data:
+        Input data with a ``tof`` coordinate.
+    graph:
+        Coordinate transformation graph.
+    """
     out = data.transform_coords(
         ["two_theta", "wavelength", "dspacing"], graph=graph, keep_intermediate=False
     )

@@ -3,15 +3,13 @@
 """Grouping and merging of pixels / voxels."""
 from typing import Optional
 
-from scippneutron.conversion.graph import beamline
-
 from .types import (
-    DetectorDimensions,
     DspacingBins,
-    DspacingData,
     DspacingHistogram,
     FocussedData,
     MaskedData,
+    NeXusDetectorDimensions,
+    NeXusDetectorName,
     NormalizedByVanadium,
     RunType,
     TwoThetaBins,
@@ -20,7 +18,7 @@ from .types import (
 
 def focus_data(
     data: MaskedData[RunType],
-    detector_dims: DetectorDimensions,
+    detector_dims: NeXusDetectorDimensions[NeXusDetectorName],
     dspacing_bins: DspacingBins,
     twotheta_bins: Optional[TwoThetaBins] = None,
 ) -> FocussedData[RunType]:

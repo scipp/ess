@@ -35,15 +35,17 @@ CalibrationFilename = NewType("CalibrationFilename", str)
 """Filename of the instrument calibration file."""
 
 
-# In Python 3.11, this can be replaced with a StrEnum
-class DetectorName(str, Enum):
-    """Name of a detector."""
+# # In Python 3.11, this can be replaced with a StrEnum
+# class DetectorName(str, Enum):
+#     """Name of a detector."""
 
-    mantle = "mantle"
-    high_resolution = "high_resolution"
-    endcap_backward = "endcap_backward"
-    endcap_forward = "endcap_forward"
+#     mantle = "mantle"
+#     high_resolution = "high_resolution"
+#     endcap_backward = "endcap_backward"
+#     endcap_forward = "endcap_forward"
 
+NeXusDetectorName = NewType("NeXusDetectorName", str)
+"""Name of detector entry in NeXus file"""
 
 DspacingBins = NewType("DSpacingBins", sc.Variable)
 """Bin edges for d-spacing."""
@@ -97,11 +99,14 @@ class DataWithScatteringCoordinates(sciline.Scope[RunType, sc.DataArray], sc.Dat
     d-spacing."""
 
 
-# class DetectorDimensions(sciline.Scope[DetectorName, tuple[str, ...]], tuple[str, ...]):
-#     """Logical detector dimensions."""
+class NeXusDetectorDimensions(
+    sciline.Scope[NeXusDetectorName, Dict[str, int]], Dict[str, int]
+):
+    """Logical detector dimensions."""
 
-DetectorDimensions = NewType("DetectorDimensions", Dict[str, int])
-"""Logical detector dimensions."""
+
+# DetectorDimensions = NewType("DetectorDimensions", Dict[str, int])
+# """Logical detector dimensions."""
 
 
 class DspacingData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
@@ -132,7 +137,7 @@ class MaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     dspacing regions."""
 
 
-MaskedDetectorIDs = NewType("MaskedDetectorIDs", sc.Variable)
+MaskedDetectorIDs = NewType("MaskedDetectorIDs", Dict[str, sc.Variable])
 """1-D variable listing all masked detector IDs."""
 
 
@@ -142,10 +147,6 @@ class NormalizedByProtonCharge(sciline.Scope[RunType, sc.DataArray], sc.DataArra
 
 NormalizedByVanadium = NewType("NormalizedByVanadium", sc.DataArray)
 """Data that has been normalized by a vanadium run."""
-
-
-class PixelMaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Data with masked pixels."""
 
 
 PixelMaskFilename = NewType("PixelMaskFilename", str)
@@ -193,39 +194,15 @@ class SourcePosition(sciline.Scope[RunType, sc.Variable], sc.Variable):
 
 
 TofMask = NewType("TofMask", Callable)
-""""""
-
-
-class TofMaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Data with masked TOF values."""
-
-
-class TofCroppedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Raw data cropped to the valid TOF range."""
-
-
-class TwoThetaData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Data converted to 2theta."""
+"""TofMask is a callable that returns a mask for a given TofData."""
 
 
 TwoThetaMask = NewType("TwoThetaMask", Callable)
-""""""
-
-
-class TwoThetaMaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Data with masks in 2theta."""
-
-
-class WavelengthData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Data converted to wavelength."""
+"""TwoThetaMask is a callable that returns a mask for a given TwoThetaData."""
 
 
 WavelengthMask = NewType("WavelengthMask", Callable)
-""""""
-
-
-class WavelengthMaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Data with masks in wavelength."""
+"""WavelengthMask is a callable that returns a mask for a given WavelengthData."""
 
 
 del sc, sciline, NewType, TypeVar

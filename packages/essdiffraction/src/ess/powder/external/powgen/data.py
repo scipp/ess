@@ -8,8 +8,9 @@ import scipp as sc
 from ...types import (
     AccumulatedProtonCharge,
     CalibrationFilename,
-    DetectorDimensions,
     Filename,
+    NeXusDetectorDimensions,
+    NeXusDetectorName,
     ProtonCharge,
     RawCalibrationData,
     RawDataAndMetadata,
@@ -109,7 +110,7 @@ def pooch_load_calibration(filename: CalibrationFilename) -> RawCalibrationData:
 
 
 def extract_raw_data(
-    dg: RawDataAndMetadata[RunType], sizes: DetectorDimensions
+    dg: RawDataAndMetadata[RunType], sizes: NeXusDetectorDimensions[NeXusDetectorName]
 ) -> ReducibleDetectorData[RunType]:
     """Return the events from a loaded data group."""
     # Remove the tof binning and dimension, as it is not needed and it gets in the way
@@ -131,7 +132,7 @@ def extract_proton_charge(dg: RawDataAndMetadata[RunType]) -> ProtonCharge[RunTy
 
 
 def extract_accumulated_proton_charge(
-    data: RawDetectorData[RunType],
+    data: ReducibleDetectorData[RunType],
 ) -> AccumulatedProtonCharge[RunType]:
     """Return the stored accumulated proton charge from a loaded data group."""
     return AccumulatedProtonCharge[RunType](data.coords["gd_prtn_chrg"])
