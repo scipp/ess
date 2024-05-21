@@ -4,7 +4,7 @@ import pytest
 import scipp as sc
 from scipp.testing import assert_identical
 
-from ess import polarization as pol
+from ess.polarization import he3
 
 
 def test_opacity_from_cell_params() -> None:
@@ -14,10 +14,10 @@ def test_opacity_from_cell_params() -> None:
     length = sc.array(dims=['cell_length'], values=[1.0, 2.0], unit='m')
     temperature = sc.array(dims=['temperature'], values=[200.0, 400.0], unit='K')
     wavelength = sc.array(dims=['wavelength'], values=[1.0, 2.0], unit='nm')
-    opacity0 = pol.he3_opacity_from_cell_params(
+    opacity0 = he3.he3_opacity_from_cell_params(
         pressure=pressure, length=length, temperature=temperature
     )
-    opacity_function = pol.he3_opacity_function_from_cell_opacity(opacity0)
+    opacity_function = he3.he3_opacity_function_from_cell_opacity(opacity0)
     opacity = opacity_function(wavelength)
     assert_identical(2 * opacity['pressure', 0], opacity['pressure', 1])
     assert_identical(2 * opacity['cell_length', 0], opacity['cell_length', 1])
@@ -34,10 +34,10 @@ def test_opacity_from_cell_params_reproduces_literature_value() -> None:
     length = sc.scalar(0.01, unit='m')
     temperature = sc.scalar(293.15, unit='K')
     wavelength = sc.scalar(1.0, unit='angstrom')
-    opacity0 = pol.he3_opacity_from_cell_params(
+    opacity0 = he3.he3_opacity_from_cell_params(
         pressure=pressure, length=length, temperature=temperature
     )
-    opacity_function = pol.he3_opacity_function_from_cell_opacity(opacity0)
+    opacity_function = he3.he3_opacity_function_from_cell_opacity(opacity0)
     opacity = opacity_function(wavelength)
     assert sc.isclose(opacity, sc.scalar(0.0733, unit=''), rtol=sc.scalar(1e-3))
 
@@ -47,7 +47,7 @@ def test_opacity_from_cell_params_raises_with_temperature_in_degree_celsius() ->
     length = sc.scalar(1.0, unit='m')
     temperature = sc.scalar(200.0, unit='degC')
     with pytest.raises(sc.UnitError):
-        pol.he3_opacity_from_cell_params(
+        he3.he3_opacity_from_cell_params(
             pressure=pressure, length=length, temperature=temperature
         )
 
@@ -61,7 +61,7 @@ def test_opacity_from_beam_data() -> None:
     opacity0 = sc.scalar(0.3, unit='1/nm')
     ratio = transmission_empty_glass * sc.exp(-opacity0 * wavelength)
     direct_beam_cell = ratio * direct_beam
-    opacity_function = pol.he3_opacity_function_from_beam_data(
+    opacity_function = he3.he3_opacity_function_from_beam_data(
         transmission_empty_glass=transmission_empty_glass,
         direct_beam_no_cell=direct_beam,
         direct_beam_cell=direct_beam_cell,
