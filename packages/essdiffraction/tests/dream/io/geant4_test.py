@@ -11,7 +11,7 @@ import sciline
 import scipp as sc
 import scipp.testing
 from ess.dream import data, load_geant4_csv
-from ess.powder.types import NeXusDetectorName, Filename, RawDetectorData, SampleRun
+from ess.powder.types import Filename, NeXusDetectorName, RawDetectorData, SampleRun
 
 
 @pytest.fixture(scope="module")
