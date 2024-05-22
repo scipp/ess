@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 import scipp as sc
 
-from ess import polarization as pol
+from ess.polarization import he3
 
 
 @pytest.mark.parametrize(
@@ -23,12 +23,12 @@ def test_he3_polarization_reproduces_input_params_within_errors(
     C = sc.scalar(1.3)
     T1 = sc.scalar(1234.0, unit='s')
     opacity0 = sc.scalar(0.6, unit='1/angstrom')
-    polarization_function = pol.He3PolarizationFunction(C=C, T1=T1)
-    opacity_function = pol.He3OpacityFunction(opacity0)
+    polarization_function = he3.He3PolarizationFunction(C=C, T1=T1)
+    opacity_function = he3.He3OpacityFunction(opacity0)
     transmission_empty_glass = sc.scalar(0.9)
     opacity = opacity_function(wavelength)
     polarization = polarization_function(time)
-    transmission = pol.base.transmission_incoming_unpolarized(
+    transmission = he3.transmission_incoming_unpolarized(
         transmission_empty_glass=transmission_empty_glass,
         opacity=opacity,
         polarization=polarization,
@@ -37,14 +37,14 @@ def test_he3_polarization_reproduces_input_params_within_errors(
         transmission, coords={'time': time, 'wavelength': wavelength}
     )
 
-    result = pol.get_he3_transmission_from_fit_to_direct_beam(
+    result = he3.get_he3_transmission_from_fit_to_direct_beam(
         direct_beam_no_cell=sc.ones_like(direct_beam_polarized) * split_ratio,
         direct_beam_polarized=direct_beam_polarized * split_ratio,
         opacity_function=opacity_function,
         transmission_empty_glass=transmission_empty_glass,
     )
     polarization_function = result.polarization_function
-    assert isinstance(polarization_function, pol.He3PolarizationFunction)
+    assert isinstance(polarization_function, he3.He3PolarizationFunction)
 
     # No noise, very close or exact match.
     assert sc.isclose(polarization_function.C, C)
@@ -56,7 +56,7 @@ def test_he3_polarization_reproduces_input_params_within_errors(
         0.0, 0.01, direct_beam_polarized_noisy.shape
     )
 
-    result = pol.get_he3_transmission_from_fit_to_direct_beam(
+    result = he3.get_he3_transmission_from_fit_to_direct_beam(
         direct_beam_no_cell=sc.ones_like(direct_beam_polarized_noisy) * split_ratio,
         direct_beam_polarized=direct_beam_polarized * split_ratio,
         opacity_function=opacity_function,
