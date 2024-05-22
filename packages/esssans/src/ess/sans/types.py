@@ -230,7 +230,7 @@ class RawData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Raw detector data"""
 
 
-class ConfiguredReducibleDataData(
+class ConfiguredReducibleData(
     sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray
 ):
     """Raw event data where variances and necessary coordinates

@@ -13,7 +13,7 @@ from ess.sans import providers as sans_providers
 
 from ..sans.common import gravity_vector
 from ..sans.types import (
-    ConfiguredReducibleDataData,
+    ConfiguredReducibleData,
     ConfiguredReducibleMonitor,
     CorrectForGravity,
     DetectorPixelShape,
@@ -139,8 +139,8 @@ def patch_detector_data(
     detector_data: RawData[ScatteringRunType],
     source_position: SourcePosition[ScatteringRunType],
     sample_position: SamplePosition[ScatteringRunType],
-) -> ConfiguredReducibleDataData[ScatteringRunType]:
-    return ConfiguredReducibleDataData[ScatteringRunType](
+) -> ConfiguredReducibleData[ScatteringRunType]:
+    return ConfiguredReducibleData[ScatteringRunType](
         _add_variances_and_coordinates(
             da=detector_data,
             source_position=source_position,
@@ -166,7 +166,7 @@ def _convert_to_tof(da: sc.DataArray) -> sc.DataArray:
 
 
 def data_to_tof(
-    da: ConfiguredReducibleDataData[ScatteringRunType],
+    da: ConfiguredReducibleData[ScatteringRunType],
 ) -> TofData[ScatteringRunType]:
     return TofData[ScatteringRunType](_convert_to_tof(da))
 
