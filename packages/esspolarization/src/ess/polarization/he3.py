@@ -108,7 +108,7 @@ def he3_opacity_function_from_cell_opacity(
     Opacity function for a given cell, based on pressure and cell length.
 
     Note that this can alternatively be defined via neutron beam data, see
-    :py:func:`he3_opacity_from_beam_data`.
+    :py:func:`he3_opacity_function_from_beam_data`.
     """
     return He3OpacityFunction[Cell](opacity0)
 
@@ -360,3 +360,29 @@ providers = (
     direct_beam_with_cell,
     correct_sample_data_for_polarization,
 )
+
+
+def He3CellWorkflow(in_situ: bool = True) -> sl.Pipeline:
+    """
+    Workflow performing polarization correction for beam lines with two He3 cells.
+
+    Parameters
+    ----------
+    in_situ : bool
+        Whether to use an in-situ definition of the cell opacity based on cell
+        parameters, or an ex-situ definition based on direct beam data. The latter
+        requires a direct-beam measurement with depolarized cells.
+    """
+    steps = (
+        he3_opacity_from_cell_params,
+        get_he3_transmission_from_fit_to_direct_beam,
+        direct_beam,
+        direct_beam_with_cell,
+        correct_sample_data_for_polarization,
+    )
+    workflow = sl.Pipeline(providers=steps)
+    if in_situ:
+        workflow.insert(he3_opacity_function_from_cell_opacity)
+    else:
+        workflow.insert(he3_opacity_function_from_beam_data)
+    return workflow
