@@ -13,7 +13,6 @@ and the ICD DREAM interface specification for details.
     but it is not possible to reshape the data into all the logical dimensions.
 """
 
-
 from ess.powder.types import (
     Filename,
     LoadedNeXusDetector,
