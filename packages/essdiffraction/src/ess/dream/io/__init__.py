@@ -3,7 +3,7 @@
 
 """Input/output for DREAM."""
 
+from . import nexus
 from .geant4 import load_geant4_csv
-from .nexus import fold_nexus_detectors, load_nexus
 
-__all__ = ["fold_nexus_detectors", "load_geant4_csv", "load_nexus"]
+__all__ = ["nexus", "load_geant4_csv"]

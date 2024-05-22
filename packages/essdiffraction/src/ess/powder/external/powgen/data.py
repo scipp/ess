@@ -115,7 +115,7 @@ def extract_raw_data(
     # Remove the tof binning and dimension, as it is not needed and it gets in the way
     # of masking.
     out = dg["data"].squeeze()
-    del out.coords["tof"]
+    out.coords.pop("tof", None)
     out = out.fold(dim="spectrum", sizes=sizes)
     return ReducibleDetectorData[RunType](out)
 

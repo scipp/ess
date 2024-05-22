@@ -7,9 +7,9 @@ Components for DREAM
 
 import importlib.metadata
 
-from . import beamline, data
+from . import data
 from .instrument_view import instrument_view
-from .io import fold_nexus_detectors, load_geant4_csv, load_nexus
+from .io import load_geant4_csv, nexus
 
 try:
     __version__ = importlib.metadata.version(__package__ or __name__)
@@ -18,13 +18,12 @@ except importlib.metadata.PackageNotFoundError:
 
 del importlib
 
-providers = (*beamline.providers,)
+providers = (*nexus.providers,)
 
 __all__ = [
     'data',
     'beamline',
-    'fold_nexus_detectors',
     'instrument_view',
     'load_geant4_csv',
-    'load_nexus',
+    'nexus',
 ]
