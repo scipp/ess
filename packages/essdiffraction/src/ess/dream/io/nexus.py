@@ -131,6 +131,7 @@ def patch_detector_data(
     out.coords["source_position"] = source_position
     return ReducibleDetectorData[RunType](out)
 
+
 providers = (
     load_nexus_sample,
     load_nexus_source,
