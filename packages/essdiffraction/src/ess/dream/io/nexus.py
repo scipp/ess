@@ -13,6 +13,7 @@ and the ICD DREAM interface specification for details.
     but it is not possible to reshape the data into all the logical dimensions.
 """
 
+import scipp as sc
 from ess.powder.types import (
     Filename,
     LoadedNeXusDetector,
@@ -79,6 +80,15 @@ def load_nexus_sample(file_path: Filename[RunType]) -> RawSample[RunType]:
     return RawSample[RunType](nexus.load_sample(file_path))
 
 
+def dummy_load_sample(file_path: Filename[RunType]) -> RawSample[RunType]:
+    """
+    In test files there is not always a sample, so we need a dummy.
+    """
+    return RawSample[RunType](
+        sc.DataGroup({'position': sc.vector(value=[0, 0, 0], unit='m')})
+    )
+
+
 def load_nexus_source(file_path: Filename[RunType]) -> RawSource[RunType]:
     return RawSource[RunType](nexus.load_source(file_path))
 
@@ -86,9 +96,9 @@ def load_nexus_source(file_path: Filename[RunType]) -> RawSource[RunType]:
 def load_nexus_detector(
     file_path: Filename[RunType], detector_name: NeXusDetectorName
 ) -> LoadedNeXusDetector[RunType]:
-    return LoadedNeXusDetector[RunType](
-        nexus.load_detector(file_path=file_path, detector_name=detector_name)
-    )
+    out = nexus.load_detector(file_path=file_path, detector_name=detector_name)
+    out.pop("pixel_shape", None)
+    return LoadedNeXusDetector[RunType](out)
 
 
 def get_source_position(
@@ -130,6 +140,7 @@ def patch_detector_data(
     out.coords["sample_position"] = sample_position
     out.coords["source_position"] = source_position
     return ReducibleDetectorData[RunType](out)
+
 
 providers = (
     load_nexus_sample,
