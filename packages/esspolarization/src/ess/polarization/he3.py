@@ -216,7 +216,8 @@ def compute_transmission_fraction_from_direct_beam(
     Note that this is possible only if the main detector is used to measure direct
     beam data. If direct beam is computed from monitors then, e.g., the SANS
     transmission fraction (as computed by a regular SANS workflow) should be used
-    directly.
+    directly. Note that the regular SANS workflow also normalized to an empty beam
+    run, make sure to not perform the division twice.
     """
     return He3CellTransmissionFraction[Cell, PolarizationState](
         direct_beam_polarized / direct_beam_no_cell
