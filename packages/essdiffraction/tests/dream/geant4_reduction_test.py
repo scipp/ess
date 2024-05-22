@@ -5,13 +5,16 @@ import pytest
 import sciline
 import scipp as sc
 from ess.powder.types import (
-    CalibrationFilename,
+    AccumulatedProtonCharge,
     DspacingBins,
     DspacingHistogram,
+    EmptyCanRun,
     Filename,
     MaskedData,
     NeXusDetectorName,
     NormalizedByProtonCharge,
+    RawSample,
+    RawSource,
     SampleRun,
     TofMask,
     TwoThetaBins,
@@ -25,24 +28,35 @@ from ess.powder.types import (
 @pytest.fixture()
 def providers():
     from ess import powder
-    from ess.powder.external import powgen
+    from ess.dream.io.geant4 import providers as geant4_providers
 
-    return [*powder.providers, *powgen.providers]
+    return [*powder.providers, *geant4_providers]
 
 
-@pytest.fixture()
-def params():
-    from ess.powder.external import powgen
+@pytest.fixture(params=["mantle", "endcap_backward", "endcap_forward"])
+def params(request):
+    from ess import dream
+
+    # Not available in simulated data
+    sample = sc.DataGroup(position=sc.vector([0.0, 0.0, 0.0], unit='mm'))
+    source = sc.DataGroup(position=sc.vector([-3.478, 0.0, -76550], unit='mm'))
+    charge = sc.scalar(1.0, unit='µAh')
 
     return {
-        NeXusDetectorName: "powgen_detector",
-        Filename[SampleRun]: powgen.data.powgen_tutorial_sample_file(),
-        Filename[VanadiumRun]: powgen.data.powgen_tutorial_vanadium_file(),
-        CalibrationFilename: powgen.data.powgen_tutorial_calibration_file(),
+        NeXusDetectorName: request.param,
+        Filename[SampleRun]: dream.data.simulated_diamond_sample(),
+        Filename[VanadiumRun]: dream.data.simulated_vanadium_sample(),
+        Filename[EmptyCanRun]: dream.data.simulated_empty_can(),
         UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
-        DspacingBins: sc.linspace('dspacing', 0.0, 2.3434, 200, unit='angstrom'),
-        TofMask: lambda x: (x < sc.scalar(0.0, unit="us"))
-        | (x > sc.scalar(16666.67, unit="us")),
+        DspacingBins: sc.linspace('dspacing', 0.0, 2.3434, 201, unit='angstrom'),
+        TofMask: lambda x: (x < sc.scalar(0.0, unit='ns'))
+        | (x > sc.scalar(86e6, unit='ns')),
+        RawSample[SampleRun]: sample,
+        RawSample[VanadiumRun]: sample,
+        RawSource[SampleRun]: source,
+        RawSource[VanadiumRun]: source,
+        AccumulatedProtonCharge[SampleRun]: charge,
+        AccumulatedProtonCharge[VanadiumRun]: charge,
     }
 
 
@@ -72,17 +86,17 @@ def test_workflow_is_deterministic(providers, params):
 def test_pipeline_can_compute_intermediate_results(providers, params):
     pipeline = sciline.Pipeline(providers, params=params)
     result = pipeline.compute(NormalizedByProtonCharge[SampleRun])
-    assert set(result.dims) == {'bank', 'column', 'row'}
+    assert set(result.dims) == {'segment', 'wire', 'counter', 'strip', 'module'}
 
 
 def test_pipeline_group_by_two_theta(providers, params):
     params[TwoThetaBins] = sc.linspace(
-        dim='two_theta', unit='deg', start=25.0, stop=90.0, num=16
-    ).to(unit='rad')
+        dim='two_theta', unit='rad', start=0.8, stop=2.4, num=17
+    )
     pipeline = sciline.Pipeline(providers, params=params)
     result = pipeline.compute(DspacingHistogram)
     assert result.sizes == {
-        'two_theta': 15,
+        'two_theta': 16,
         'dspacing': len(params[DspacingBins]) - 1,
     }
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
@@ -108,17 +122,14 @@ def test_pipeline_wavelength_masking(providers, params):
 
 
 def test_pipeline_two_theta_masking(providers, params):
-    tmin = sc.scalar(0.8, unit="rad")
-    tmax = sc.scalar(1.0, unit="rad")
+    tmin = sc.scalar(1.0, unit="rad")
+    tmax = sc.scalar(1.2, unit="rad")
     params[TwoThetaMask] = lambda x: (x > tmin) & (x < tmax)
     pipeline = sciline.Pipeline(providers, params=params)
     masked_sample = pipeline.compute(MaskedData[SampleRun])
-    assert 'two_theta' in masked_sample.masks
+    assert 'two_theta' in masked_sample.bins.masks
     sum_in_masked_region = (
-        masked_sample.flatten(to='pixel')
-        .hist(two_theta=sc.concat([tmin, tmax], dim='two_theta'))
-        .sum()
-        .data
+        masked_sample.bin(two_theta=sc.concat([tmin, tmax], dim='two_theta')).sum().data
     )
     assert sc.allclose(
         sum_in_masked_region,

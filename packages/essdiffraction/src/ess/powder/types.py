@@ -118,6 +118,11 @@ class FocussedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Intensity vs d-spacing after focussing pixels."""
 
 
+class LoadedNeXusDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+    """Detector data, loaded from a NeXus file, containing not only neutron events
+    but also pixel shape information, transformations, ..."""
+
+
 class MaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Data with masked pixels, tof regions, wavelength regions, 2theta regions, or
     dspacing regions."""

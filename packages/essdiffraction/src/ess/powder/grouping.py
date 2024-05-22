@@ -9,8 +9,6 @@ from .types import (
     DspacingHistogram,
     FocussedData,
     MaskedData,
-    NeXusDetectorDimensions,
-    NeXusDetectorName,
     NormalizedByVanadium,
     RunType,
     TwoThetaBins,
@@ -19,7 +17,6 @@ from .types import (
 
 def focus_data(
     data: MaskedData[RunType],
-    detector_dims: NeXusDetectorDimensions[NeXusDetectorName],
     dspacing_bins: DspacingBins,
     twotheta_bins: Optional[TwoThetaBins] = None,
 ) -> FocussedData[RunType]:
@@ -29,11 +26,7 @@ def focus_data(
     bins[dspacing_bins.dim] = dspacing_bins
 
     if (twotheta_bins is None) or ("two_theta" in data.bins.coords):
-        # In this case merge data from all pixels
-        # Put the dims into the same order as in the data.
-        # See https://github.com/scipp/scipp/issues/3408
-        to_concat = tuple(dim for dim in data.dims if dim in detector_dims)
-        data = data.bins.concat(to_concat)
+        data = data.bins.concat()
 
     return FocussedData[RunType](data.bin(**bins))
 
