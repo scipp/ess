@@ -273,6 +273,53 @@ def get_he3_transmission_from_fit_to_direct_beam(
     )
 
 
+def get_he3_transmission_from_fit_to_direct_beam_from_polarized_incoming_beam(
+    transmission_fraction: He3CellTransmissionFraction[Cell, Polarized],
+    opacity_function: He3OpacityFunction[Cell],
+    transmission_empty_glass: He3TransmissionEmptyGlass[Cell],
+) -> He3TransmissionFunction[Cell]:
+    """
+    Return the transmission function for a given cell.
+
+    This is composed from the opacity-function and the polarization-function.
+    The implementation fits a time- and wavelength-dependent equation and returns
+    the fitted T(t, lambda).
+
+    DB_pol/DB = T_E * cosh(O(lambda)*P(t))*exp(-O(lambda))
+    """
+
+    def expected_transmission(
+        wavelength: sc.Variable, time: sc.Variable, C: sc.Variable, T1: sc.Variable
+    ) -> sc.Variable:
+        polarization_function = He3PolarizationFunction[Cell](C=C, T1=T1)
+        return He3TransmissionFunction(
+            opacity_function=opacity_function,
+            polarization_function=polarization_function,
+            transmission_empty_glass=transmission_empty_glass,
+        )(time=time, wavelength=wavelength, plus_minus='plus')
+
+    transmission_fraction = transmission_fraction.copy(deep=False)
+    transmission_fraction.coords['wavelength'] = sc.midpoints(
+        transmission_fraction.coords['wavelength']
+    )
+
+    popt, _ = sc.curve_fit(
+        ['wavelength', 'time'],
+        expected_transmission,
+        transmission_fraction,
+        p0={'C': sc.scalar(0.8, unit=''), 'T1': sc.scalar(400000.0, unit='s')},
+    )
+    # TODO Consider including variances from fit
+    polarization_function = He3PolarizationFunction[Cell](
+        C=sc.values(popt['C']).data, T1=sc.values(popt['T1']).data
+    )
+    return He3TransmissionFunction[Cell](
+        opacity_function=opacity_function,
+        polarization_function=polarization_function,
+        transmission_empty_glass=transmission_empty_glass,
+    )
+
+
 def compute_direct_beam(
     data: sc.DataArray,
     q_range: sc.Variable,
