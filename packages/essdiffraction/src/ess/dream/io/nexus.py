@@ -1,18 +1,27 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 
-"""NeXus input/output for DREAM."""
+"""NeXus input/output for DREAM.
 
-import os
-from typing import Any, Dict, Union
+Notes on the detector dimensions (2024-05-22):
 
-import scipp as sc
+See https://confluence.esss.lu.se/pages/viewpage.action?pageId=462000005
+and the ICD DREAM interface specification for details.
+
+  - The high-resolution and SANS detectors have a very odd numbering scheme.
+    The scheme attempts to follows some sort of physical ordering in space (x,y,z),
+    but it is not possible to reshape the data into all the logical dimensions.
+"""
+
+
 from ess.powder.types import (
     Filename,
     LoadedNeXusDetector,
     NeXusDetectorName,
+    RawDetectorData,
     RawSample,
     RawSource,
+    ReducibleDetectorData,
     RunType,
     SamplePosition,
     SourcePosition,
@@ -20,8 +29,8 @@ from ess.powder.types import (
 from ess.reduce import nexus
 
 DETECTOR_BANK_RESHAPING = {
-    'endcap_backward_detector': lambda x: x.fold(
-        dim='detector_number',
+    "endcap_backward_detector": lambda x: x.fold(
+        dim="detector_number",
         sizes={
             "strip": 16,
             "wire": 16,
@@ -30,8 +39,8 @@ DETECTOR_BANK_RESHAPING = {
             "counter": 2,
         },
     ),
-    'endcap_forward_detector': lambda x: x.fold(
-        dim='detector_number',
+    "endcap_forward_detector": lambda x: x.fold(
+        dim="detector_number",
         sizes={
             "strip": 16,
             "wire": 16,
@@ -40,8 +49,8 @@ DETECTOR_BANK_RESHAPING = {
             "counter": 2,
         },
     ),
-    'mantle_detector': lambda x: x.fold(
-        dim='detector_number',
+    "mantle_detector": lambda x: x.fold(
+        dim="detector_number",
         sizes={
             "wire": 32,
             "module": 5,
@@ -50,15 +59,15 @@ DETECTOR_BANK_RESHAPING = {
             "counter": 2,
         },
     ),
-    'high_resolution_detector': lambda x: x.fold(
-        dim='detector_number',
+    "high_resolution_detector": lambda x: x.fold(
+        dim="detector_number",
         sizes={
             "strip": 32,
             "other": -1,
         },
     ),
-    'sans_detector': lambda x: x.fold(
-        dim='detector_number',
+    "sans_detector": lambda x: x.fold(
+        dim="detector_number",
         sizes={
             "strip": 32,
             "other": -1,
@@ -69,12 +78,6 @@ DETECTOR_BANK_RESHAPING = {
 
 def load_nexus_sample(file_path: Filename[RunType]) -> RawSample[RunType]:
     return RawSample[RunType](nexus.load_sample(file_path))
-
-
-def dummy_load_sample(file_path: Filename[RunType]) -> RawSample[RunType]:
-    return RawSample[RunType](
-        sc.DataGroup({'position': sc.vector(value=[0, 0, 0], unit='m')})
-    )
 
 
 def load_nexus_source(file_path: Filename[RunType]) -> RawSource[RunType]:
@@ -92,37 +95,42 @@ def load_nexus_detector(
 def get_source_position(
     raw_source: RawSource[RunType],
 ) -> SourcePosition[RunType]:
-    return SourcePosition[RunType](raw_source['position'])
+    return SourcePosition[RunType](raw_source["position"])
 
 
 def get_sample_position(
     raw_sample: RawSample[RunType],
 ) -> SamplePosition[RunType]:
-    return SamplePosition[RunType](raw_sample['position'])
+    return SamplePosition[RunType](raw_sample["position"])
 
 
 def get_detector_data(
     detector: LoadedNeXusDetector[RunType],
     detector_name: NeXusDetectorName,
-) -> RawData[RunType]:
+) -> RawDetectorData[RunType]:
     da = nexus.extract_detector_data(detector)
     if detector_name in DETECTOR_BANK_RESHAPING:
         da = DETECTOR_BANK_RESHAPING[detector_name](da)
-    return RawData[RunType](da)
+    return RawDetectorData[RunType](da)
 
 
 def patch_detector_data(
-    detector_data: RawData[ScatteringRunType],
-    source_position: SourcePosition[ScatteringRunType],
-    sample_position: SamplePosition[ScatteringRunType],
-) -> ConfiguredReducibleDataData[ScatteringRunType]:
-    return ConfiguredReducibleDataData[ScatteringRunType](
-        _add_variances_and_coordinates(
-            da=detector_data,
-            source_position=source_position,
-            sample_position=sample_position,
-        )
-    )
+    detector_data: RawDetectorData[RunType],
+    source_position: SourcePosition[RunType],
+    sample_position: SamplePosition[RunType],
+) -> ReducibleDetectorData[RunType]:
+    """
+    Patch a detector data object with source and sample positions.
+    Also adds variances to the event data if they are missing.
+    """
+    out = detector_data.copy(deep=False)
+    if out.bins is not None:
+        content = out.bins.constituents["data"]
+        if content.variances is None:
+            content.variances = content.values
+    out.coords["sample_position"] = sample_position
+    out.coords["source_position"] = source_position
+    return ReducibleDetectorData[RunType](out)
 
 
 # def load_nexus(
