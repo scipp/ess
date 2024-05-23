@@ -27,6 +27,7 @@ def test_he3_polarization_reproduces_input_params_within_errors() -> None:
         transmission_fraction=transmission,
         opacity_function=opacity_function,
         transmission_empty_glass=transmission_empty_glass,
+        incoming_polarized=False,
     )
     polarization_function = result.polarization_function
     assert isinstance(polarization_function, he3.He3PolarizationFunction)
@@ -43,6 +44,7 @@ def test_he3_polarization_reproduces_input_params_within_errors() -> None:
         transmission_fraction=transmission_noisy,
         opacity_function=opacity_function,
         transmission_empty_glass=transmission_empty_glass,
+        incoming_polarized=False,
     )
     polarization_function = result.polarization_function
 
