@@ -66,11 +66,12 @@ def _get_time(dg: sc.DataGroup) -> sc.Variable:
 
 
 def _get_time_dependent_monitor(
-    runs: list[sc.DataGroup], monitor_index: int
+    runs: list[sc.DataGroup], monitor_spectrum: int
 ) -> sc.DataArray:
     monitors = []
     for run in runs:
-        monitor = run['data']['spectrum', monitor_index].copy()
+        # Note we index with a scipp.Variable, i.e., by the spectrum number used at ISIS
+        monitor = run['data']['spectrum', sc.index(monitor_spectrum)].copy()
         monitor.coords['datetime'] = _get_time(run)
         monitors.append(monitor)
     monitors = sc.concat(monitors, 'time')
@@ -89,7 +90,7 @@ def get_time_dependent_incident(
 ) -> RawMonitor[sample_run_type, Incident]:
     """Extract incident monitor from ZOOM direct-beam run"""
     return RawMonitor[sample_run_type, Incident](
-        _get_time_dependent_monitor(list(runs.values()), 2)
+        _get_time_dependent_monitor(list(runs.values()), monitor_spectrum=3)
     )
 
 
@@ -100,7 +101,7 @@ def get_time_dependent_transmission(
 ) -> RawMonitor[sample_run_type, Transmission]:
     """Extract transmission monitor from ZOOM direct-beam run"""
     return RawMonitor[sample_run_type, Transmission](
-        _get_time_dependent_monitor(list(runs.values()), 4)
+        _get_time_dependent_monitor(list(runs.values()), monitor_spectrum=5)
     )
 
 
@@ -116,7 +117,18 @@ def get_monitor_data(
 
 def ZoomTransmissionFractionWorkflow() -> sl.Pipeline:
     """
-    Workflow computing SANS transmission fraction from ZOOM data.
+    Workflow computing time-dependent SANS transmission fraction from ZOOM data.
+
+    The time-dependence is obtained by using a series of runs. This should be set as
+    a parameter series:
+
+    .. code-block:: python
+
+        workflow = ZoomTransmissionFractionWorkflow()
+        workflow.set_param_series(Filename[TransmissionRun[SampleRun]], cell_runs)
+
+    Note that in this case the "sample" (of which the transmission is to be computed)
+    is the He3 analyzer cell.
     """
     workflow = isis.zoom.ZoomWorkflow()
     workflow.insert(get_monitor_data)
