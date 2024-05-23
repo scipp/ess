@@ -6,7 +6,7 @@ Providers for the ISIS instruments.
 import scipp as sc
 
 from ..sans.types import (
-    ConfiguredReducibleDataData,
+    ConfiguredReducibleData,
     ConfiguredReducibleMonitor,
     CorrectForGravity,
     DetectorPixelShape,
@@ -56,7 +56,7 @@ def get_monitor_data(
 
 
 def data_to_tof(
-    da: ConfiguredReducibleDataData[ScatteringRunType],
+    da: ConfiguredReducibleData[ScatteringRunType],
 ) -> TofData[ScatteringRunType]:
     """Dummy conversion of data to time-of-flight data.
     The data already has a time-of-flight coordinate."""
