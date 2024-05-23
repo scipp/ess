@@ -6,17 +6,24 @@ import ess.isissans as isis
 import mantid.api as _mantid_api
 import sciline as sl
 import scipp as sc
+from ess.isissans.data import LoadedFileContents
 from ess.isissans.mantidio import DataWorkspace, Period
 from ess.sans.types import (
     Filename,
     Incident,
+    MonitorType,
+    NeXusMonitorName,
     RawMonitor,
+    RunType,
     SampleRun,
     Transmission,
     TransmissionRun,
+    UncertaintyBroadcastMode,
 )
 from mantid import simpleapi as _mantid_simpleapi
 
+# In this case the "sample" is the analyzer cell, of which we want to measure
+# the transmission fraction.
 sample_run_type = TransmissionRun[SampleRun]
 
 
@@ -51,13 +58,6 @@ def load_histogrammed_run(
     return DataWorkspace[sample_run_type](data_ws)
 
 
-def get_incident(
-    dg: isis.data.LoadedFileContents[sample_run_type],
-) -> RawMonitor[sample_run_type, Incident]:
-    """Extract indcident monitor from ZOOM direct-beam run"""
-    return RawMonitor[sample_run_type, Incident](dg['data']['spectrum', 2].copy())
-
-
 def _get_time(dg: sc.DataGroup) -> sc.Variable:
     start = sc.datetime(dg['run_start'].value)
     end = sc.datetime(dg['run_end'].value)
@@ -65,19 +65,66 @@ def _get_time(dg: sc.DataGroup) -> sc.Variable:
     return start + delta // 2
 
 
-def get_transmission(
-    dg: isis.data.LoadedFileContents[sample_run_type],
+def _get_time_dependent_monitor(
+    runs: list[sc.DataGroup], monitor_index: int
+) -> sc.DataArray:
+    monitors = []
+    for run in runs:
+        monitor = run['data']['spectrum', monitor_index].copy()
+        monitor.coords['datetime'] = _get_time(run)
+        monitors.append(monitor)
+    monitors = sc.concat(monitors, 'time')
+    datetime = monitors.coords['datetime']
+    monitors.coords['time'] = datetime - datetime.min()
+    del monitors.coords['spectrum']
+    del monitors.coords['detector_id']
+    monitors.variances = None
+    return monitors
+
+
+def get_time_dependent_incident(
+    runs: sl.Series[
+        Filename[sample_run_type], isis.data.LoadedFileContents[sample_run_type]
+    ],
+) -> RawMonitor[sample_run_type, Incident]:
+    """Extract incident monitor from ZOOM direct-beam run"""
+    return RawMonitor[sample_run_type, Incident](
+        _get_time_dependent_monitor(list(runs.values()), 2)
+    )
+
+
+def get_time_dependent_transmission(
+    runs: sl.Series[
+        Filename[sample_run_type], isis.data.LoadedFileContents[sample_run_type]
+    ],
 ) -> RawMonitor[sample_run_type, Transmission]:
     """Extract transmission monitor from ZOOM direct-beam run"""
-    monitor = dg['data']['spectrum', 4].copy()
-    monitor.coords['datetime'] = _get_time(dg)
-    return RawMonitor[sample_run_type, Transmission](monitor)
+    return RawMonitor[sample_run_type, Transmission](
+        _get_time_dependent_monitor(list(runs.values()), 4)
+    )
+
+
+def get_monitor_data(
+    dg: LoadedFileContents[RunType], nexus_name: NeXusMonitorName[MonitorType]
+) -> RawMonitor[RunType, MonitorType]:
+    # See https://github.com/scipp/sciline/issues/52 why copy needed
+    mon = dg['monitors'][nexus_name]['data'].copy()
+    # TODO This is a hack to work around broadcasting issues of variances when
+    # computing the transmission fraction.
+    return RawMonitor[RunType, MonitorType](sc.values(mon))
 
 
 def ZoomTransmissionFractionWorkflow() -> sl.Pipeline:
     """
     Workflow computing SANS transmission fraction from ZOOM data.
     """
-    steps = ()
-    workflow = sl.Pipeline(providers=steps)
+    workflow = isis.zoom.ZoomWorkflow()
+    workflow.insert(get_monitor_data)
+    workflow.insert(load_histogrammed_run)
+    workflow.insert(get_time_dependent_incident)
+    workflow.insert(get_time_dependent_transmission)
+    workflow[NeXusMonitorName[Incident]] = 'monitor3'
+    workflow[NeXusMonitorName[Transmission]] = 'monitor5'
+    workflow[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
+
     return workflow
