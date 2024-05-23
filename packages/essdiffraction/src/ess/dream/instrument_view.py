@@ -115,7 +115,7 @@ class InstrumentView:
         import ipywidgets as ipw
 
         self.fig = self.scatter[0]
-        self.cutting_tool = self.scatter.bottom_bar[0]
+        self.cutting_tool = self.scatter[1]
         self.artist_mapping = dict(
             zip(self.data.keys(), self.fig.artists.keys(), strict=True)
         )
