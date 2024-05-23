@@ -135,14 +135,16 @@ def he3_opacity_function_from_beam_data(
     initial guess for the fit.
     """
 
+    # TODO Fit the exponent, since too much weight on low wavelengths?
     def intensity(wavelength: sc.Variable, opacity0: sc.Variable) -> sc.Variable:
         opacity = He3OpacityFunction[Cell](opacity0)
         return transmission_empty_glass * sc.exp(-opacity(wavelength))
 
-    transmission_fraction = transmission_fraction.copy(deep=False)
-    transmission_fraction.coords['wavelength'] = sc.midpoints(
-        transmission_fraction.coords['wavelength']
-    )
+    if transmission_fraction.coords.is_edges('wavelength'):
+        transmission_fraction = transmission_fraction.copy(deep=False)
+        transmission_fraction.coords['wavelength'] = sc.midpoints(
+            transmission_fraction.coords['wavelength']
+        )
 
     popt, _ = sc.curve_fit(
         ['wavelength'],
@@ -251,10 +253,11 @@ def get_he3_transmission_from_fit_to_direct_beam(
             polarization=polarization,
         )
 
-    transmission_fraction = transmission_fraction.copy(deep=False)
-    transmission_fraction.coords['wavelength'] = sc.midpoints(
-        transmission_fraction.coords['wavelength']
-    )
+    if transmission_fraction.coords.is_edges('wavelength'):
+        transmission_fraction = transmission_fraction.copy(deep=False)
+        transmission_fraction.coords['wavelength'] = sc.midpoints(
+            transmission_fraction.coords['wavelength']
+        )
 
     popt, _ = sc.curve_fit(
         ['wavelength', 'time'],
@@ -298,10 +301,11 @@ def get_he3_transmission_from_fit_to_direct_beam_from_polarized_incoming_beam(
             transmission_empty_glass=transmission_empty_glass,
         )(time=time, wavelength=wavelength, plus_minus='plus')
 
-    transmission_fraction = transmission_fraction.copy(deep=False)
-    transmission_fraction.coords['wavelength'] = sc.midpoints(
-        transmission_fraction.coords['wavelength']
-    )
+    if transmission_fraction.coords.is_edges('wavelength'):
+        transmission_fraction = transmission_fraction.copy(deep=False)
+        transmission_fraction.coords['wavelength'] = sc.midpoints(
+            transmission_fraction.coords['wavelength']
+        )
 
     popt, _ = sc.curve_fit(
         ['wavelength', 'time'],
