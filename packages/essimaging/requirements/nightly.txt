@@ -14,7 +14,7 @@ contourpy==1.2.1
     # via matplotlib
 cycler==0.12.1
     # via matplotlib
-dask==2024.5.0
+dask==2024.5.1
     # via -r nightly.in
 fonttools==4.51.0
     # via matplotlib
@@ -61,7 +61,7 @@ scipp @ https://github.com/scipp/scipp/releases/download/nightly/scipp-nightly-c
     #   scippnexus
 scippnexus @ git+https://github.com/scipp/scippnexus@main
     # via -r nightly.in
-scipy==1.13.0
+scipy==1.13.1
     # via scippnexus
 six==1.16.0
     # via python-dateutil
