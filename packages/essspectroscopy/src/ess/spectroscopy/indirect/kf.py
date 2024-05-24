@@ -70,7 +70,7 @@ def kf_wavenumber(
         sample_analyzer_vec: SampleAnalyzerVector,
         analyzer_detector_vec: AnalyzerDetectorVector,
         tau: ReciprocalLatticeSpacing | ReciprocalLatticeVectorAbsolute
-) -> Wavenumber:
+) -> FinalWavenumber:
     from scipp import sqrt, DType
     from ess.spectroscopy.utils import norm
     if tau.dtype == DType.vector3:
@@ -90,8 +90,8 @@ def kf_wavenumber(
 
 def kf_vector(
         kf_direction: SampleAnalyzerDirection,
-        kf_magnitude: Wavenumber
-) -> Wavevector:
+        kf_magnitude: FinalWavenumber
+) -> FinalWavevector:
     return kf_direction * kf_magnitude
 
 
@@ -105,7 +105,7 @@ def secondary_flight_path_length(
 
 def secondary_flight_time(
         secondary_flight_distance: SampleDetectorPathLength,
-        kf_magnitude: Wavenumber
+        kf_magnitude: FinalWavenumber
 ) -> SampleDetectorFlightTime:
     from scipp.constants import hbar, neutron_mass
     velocity = kf_magnitude * hbar / neutron_mass
