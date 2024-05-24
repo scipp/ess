@@ -1,12 +1,14 @@
-from typing import Type
+from typing import Type, NewType
 from scipp import Variable
 
 
 def variable_type(named: str) -> Type[Variable]:
-    from typing import NewType
     return NewType(named, Variable)
 
 
+NeXusFileName = NewType('NeXusFileName', str)
+
+SourcePosition = variable_type('SourcePosition')
 SamplePosition = variable_type('SamplePosition')
 AnalyzerPosition = variable_type('AnalyzerPosition')
 DetectorPosition = variable_type('DetectorPosition')
@@ -16,9 +18,14 @@ AnalyzerDetectorVector = variable_type('AnalyzerDetectorVector')
 SampleAnalyzerDirection = variable_type('SampleAnalyzerDirection')
 ReciprocalLatticeVectorAbsolute = variable_type('ReciprocalLatticeVectorAbsolute')
 ReciprocalLatticeSpacing = variable_type('ReciprocalLatticeSpacing')
-WavevectorDirection = variable_type('WavevectorDirection')
-Wavenumber = variable_type('Wavenumber')
-Wavevector = variable_type('Wavevector')
+IncidentWavevectorDirection = variable_type('IncidentWavevectorDirection')
+IncidentWavenumber = variable_type('IncidentWavenumber')
+IncidentWavevector = variable_type('IncidentWavevector')
+FinalWavevectorDirection = variable_type('FinalWavevectorDirection')
+FinalWavenumber = variable_type('FinalWavenumber')
+FinalWavevector = variable_type('FinalWavevector')
+SourceSamplePathLength = variable_type('SourceSamplePathLength')
+SourceSampleFlightTime = variable_type('SourceSampleFlightTime')
 SampleDetectorPathLength = variable_type('SampleDetectorPathLength')
 SampleDetectorFlightTime = variable_type('SampleDetectorFlightTime')
 SampleTime = variable_type('SampleTime')
