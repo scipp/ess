@@ -1,7 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
+from collections.abc import Callable, Mapping, Sequence
+from dataclasses import dataclass
 from typing import NewType, Optional, TypeVar
 
+import numpy as np
 import scipp as sc
 
 from .mtz_io import DEFAULT_WAVELENGTH_COORD_NAME, NMXMtzDataArray
@@ -358,6 +361,93 @@ def cut_tails(
     )
 
 
+FittingInputX = NewType("FittingInputX", sc.Variable)
+FittingOutputY = NewType("FittingOutputY", Sequence)
+FittingFunc = Callable[..., FittingOutputY]
+
+
+def chepyshev_polynomial(
+    wavelength: FittingInputX,
+    param1,
+    param2,
+    param3,
+    param4,
+    param5,
+    param6,
+    param7,
+) -> FittingOutputY:
+    return np.polynomial.chebyshev.Chebyshev(
+        (param1, param2, param3, param4, param5, param6, param7)
+    )(wavelength)
+
+
+FittingParams = NewType("FittingParams", Mapping)
+"""Parameters of the fitting function."""
+FittingParamsCovariances = NewType("FittingParamsCovariances", Mapping)
+"""Covariance of the :attr:`~FittingParams`."""
+InitialGuess = NewType("InitialGuess", np.ndarray)
+"""Initial guess of the parameters for :attr:`~FittingFunc`."""
+
+
+@dataclass
+class FittingResult:
+    """Result of the fitting process."""
+
+    fitting_func: FittingFunc
+    params: FittingParams
+    covariance: FittingParamsCovariances
+    fit_output: sc.DataArray
+
+
+def fit_scale_factor_curve(
+    estimated_intensities: FilteredEstimatedScaledIntensities,
+    *,
+    initial_guess: InitialGuess,
+    fitting_func: FittingFunc = chepyshev_polynomial,
+) -> FittingResult:
+    from scipy.optimize import curve_fit
+
+    params, cov = curve_fit(
+        f=fitting_func,
+        xdata=estimated_intensities.coords["wavelength"].values,
+        ydata=estimated_intensities.data.values,
+        p0=initial_guess,
+    )
+    return FittingResult(
+        fitting_func=fitting_func,
+        params=FittingParams(params),
+        covariance=FittingParamsCovariances(cov),
+        fit_output=sc.DataArray(
+            data=sc.array(
+                dims=["wavelength"],
+                values=fitting_func(
+                    estimated_intensities.coords["wavelength"].values, *params
+                ),
+            ),
+            coords={"wavelength": estimated_intensities.coords["wavelength"]},
+        ),
+    )
+
+
+WavelengthScaleFactors = NewType("WavelengthScaleFactors", sc.DataArray)
+"""The scale factors of :attr:`~DEFAULT_WAVELENGTH_COORD_NAME`."""
+
+
+def calculate_wavelength_scale_factor(
+    fitting_result: FittingResult,
+    reference_wavelength: SelectedReferenceWavelength,
+) -> WavelengthScaleFactors:
+    """Calculate the scale factors of the :attr:`~DEFAULT_WAVELENGTH_COORD_NAME`."""
+
+    scaled_reference = sc.scalar(
+        fitting_result.fitting_func(reference_wavelength.value, *fitting_result.params),
+        unit=reference_wavelength.unit,
+        dtype=reference_wavelength.dtype,
+    )
+    scale_factor = fitting_result.fit_output / scaled_reference
+    return WavelengthScaleFactors(scale_factor)
+
+
 # Providers and default parameters
 scaling_providers = (
     cut_tails,
@@ -366,6 +456,8 @@ scaling_providers = (
     get_reference_intensities,
     estimate_scale_factor_per_hkl_asu_from_reference,
     average_roughly_scaled_intensities,
+    fit_scale_factor_curve,
+    calculate_wavelength_scale_factor,
 )
 """Providers for scaling data."""
 
@@ -374,5 +466,6 @@ scaling_params = {
     MaxWavelengthBinEdge: DEFAULT_MAX_WAVELENGTH_BIN_EDGE,
     ScaledIntensityLeftTailThreshold: DEFAULT_LEFT_TAIL_THRESHOLD,
     ScaledIntensityRightTailThreshold: DEFAULT_RIGHT_TAIL_THRESHOLD,
+    FittingFunc: chepyshev_polynomial,
 }
 """Default parameters for scaling data."""
