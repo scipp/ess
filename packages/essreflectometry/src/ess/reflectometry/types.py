@@ -68,6 +68,10 @@ NormalizedIofQ = NewType('NormalizedIofQ', sc.DataArray)
 '''Intensity histogram over momentum transfer
 normalized by the calibrated reference measurement.'''
 
+ReflectivityData = NewType('ReflectivityData', sc.DataArray)
+'''Reflectivity "per event". Event data weighted by the expected
+intensity at the coordinates of the event.'''
+
 QResolution = NewType('QResolution', sc.Variable)
 '''Resolution term for the momentum transfer for each bin of QBins.'''
 

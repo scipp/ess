@@ -1,4 +1,4 @@
-from typing import NewType
+from typing import Any, NewType
 
 import sciline
 import scipp as sc
@@ -28,3 +28,14 @@ class Chopper2Position(sciline.Scope[Run, sc.Variable], sc.Variable):
 
 class RawChopper(sciline.Scope[Run, sc.DataGroup], sc.DataGroup):
     """Chopper data loaded from nexus file"""
+
+
+class ThetaBins(sciline.Scope[Run, sc.Variable], sc.Variable):
+    '''Binning in theta that takes into consideration that some
+    detector pixels have the same theta value'''
+
+
+WavelengthThetaFigure = NewType('WavelengthThetaFigure', Any)
+WavelengthZIndexFigure = NewType('WavelengthZIndexFigure', Any)
+QThetaFigure = NewType('QThetaFigure', Any)
+ReflectivityDiagnosticsView = NewType('ReflectivityDiagnosticsView', Any)

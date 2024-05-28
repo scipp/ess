@@ -4,9 +4,7 @@ import importlib.metadata
 
 import scipp as sc
 
-from ..reflectometry import providers as reflectometry_providers
-from ..reflectometry import supermirror
-from ..reflectometry.types import (
+from ..reflectometry import (
     BeamSize,
     DetectorSpatialResolution,
     Gravity,
@@ -15,8 +13,23 @@ from ..reflectometry.types import (
     SamplePosition,
     SampleSize,
 )
-from . import conversions, data, load, orso, resolution
-from .types import Chopper1Position, Chopper2Position, ChopperFrequency, ChopperPhase
+from ..reflectometry import providers as reflectometry_providers
+from ..reflectometry import supermirror
+from . import conversions, data, load, orso, resolution, utils
+from .types import (
+    AngularResolution,
+    Chopper1Position,
+    Chopper2Position,
+    ChopperFrequency,
+    ChopperPhase,
+    QThetaFigure,
+    ReflectivityDiagnosticsView,
+    SampleSizeResolution,
+    ThetaBins,
+    WavelengthResolution,
+    WavelengthThetaFigure,
+    WavelengthZIndexFigure,
+)
 
 try:
     __version__ = importlib.metadata.version(__package__ or __name__)
@@ -28,6 +41,7 @@ providers = (
     *load.providers,
     *conversions.providers,
     *resolution.providers,
+    *utils.providers,
 )
 """
 List of providers for setting up a Sciline pipeline.
@@ -62,8 +76,16 @@ __all__ = [
     "instrument_view",
     "providers",
     "default_parameters",
-    "Chopper1Position",
-    "Chopper2Position",
+    "WavelengthResolution",
+    "AngularResolution",
+    "SampleSizeResolution",
     "ChopperFrequency",
     "ChopperPhase",
+    "Chopper1Position",
+    "Chopper2Position",
+    "ThetaBins",
+    "WavelengthThetaFigure",
+    "WavelengthZIndexFigure",
+    "QThetaFigure",
+    "ReflectivityDiagnosticsView",
 ]
