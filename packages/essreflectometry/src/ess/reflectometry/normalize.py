@@ -8,6 +8,7 @@ from .types import (
     NormalizationFactor,
     NormalizedIofQ,
     QBins,
+    ReflectivityData,
     Sample,
     WavelengthBins,
 )
@@ -46,6 +47,8 @@ def normalization_factor(
         .bins.mean()
     )
 
+    wm = sc.midpoints(corr.coords['wavelength'])
+
     def q_of_z_wavelength(wavelength, a, b):
         return a + b / wavelength
 
@@ -54,7 +57,7 @@ def normalization_factor(
         q_of_z_wavelength,
         sc.DataArray(
             data=sample_q,
-            coords=dict(wavelength=corr.coords['wavelength']),
+            coords=dict(wavelength=wm),
             masks=dict(
                 corr.masks,
                 _sample_q_isnan=sc.isnan(sample_q),
@@ -66,7 +69,7 @@ def normalization_factor(
         data=corr.data,
         coords=dict(
             Q=q_of_z_wavelength(
-                corr.coords['wavelength'],
+                wm,
                 sc.values(p['a']),
                 sc.values(p['b']),
             ).data,
@@ -75,7 +78,7 @@ def normalization_factor(
     )
 
 
-def normalize_by_supermirror(
+def reflectivity_over_q(
     da: FootprintCorrectedData[Sample],
     n: NormalizationFactor,
     qbins: QBins,
@@ -86,20 +89,32 @@ def normalize_by_supermirror(
     Parameters
     ----------
     sample:
-        Sample measurement with coords of 'Q' and 'detector_id'.
+        Sample measurement with coord 'Q'
     supermirror:
-        Supermirror measurement with coords of 'Q' and 'detector_id', ideally
-        calibrated.
+        Supermirror measurement with coord of 'Q' representing the sample 'Q'
 
     Returns
     -------
     :
-        normalized sample.
+        Reflectivity as a function of Q
     """
     return NormalizedIofQ(
-        da.bins.concat().data.value.bin(Q=qbins)
-        / sc.values(n.flatten(to='Q').hist(Q=qbins))
+        da.bins.concat().hist(Q=qbins) / sc.values(n.flatten(to='Q').hist(Q=qbins))
     )
 
 
-providers = (normalize_by_supermirror, normalization_factor)
+def reflectivity_per_event(
+    da: FootprintCorrectedData[Sample],
+    n: IdealReferenceIntensity,
+    wbins: WavelengthBins,
+) -> ReflectivityData:
+    """
+    Weight the sample measurement by the (ideally calibrated) supermirror.
+
+    Returns:
+        reflectivity "per event"
+    """
+    return da.bin(wavelength=wbins) / sc.values(n)
+
+
+providers = (reflectivity_over_q, normalization_factor, reflectivity_per_event)

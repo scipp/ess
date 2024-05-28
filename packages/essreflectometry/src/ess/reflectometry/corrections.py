@@ -62,7 +62,6 @@ def compute_reference_intensity(
     b = da.bins.concat(set(da.dims) - set(da.coords['z_index'].dims)).bin(wavelength=wb)
     h = b.hist()
     h.masks['too_few_events'] = h.data < sc.scalar(1, unit='counts')
-    h.coords['wavelength'] = sc.midpoints(h.coords['wavelength'])
     # Add a Q coordinate to each bin, the Q is not completely unique in every bin,
     # but it is close enough.
     h.coords['Q'] = b.bins.coords['Q'].bins.mean()
