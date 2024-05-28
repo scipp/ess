@@ -366,19 +366,8 @@ FittingOutputY = NewType("FittingOutputY", Sequence)
 FittingFunc = Callable[..., FittingOutputY]
 
 
-def chepyshev_polynomial(
-    wavelength: FittingInputX,
-    param1,
-    param2,
-    param3,
-    param4,
-    param5,
-    param6,
-    param7,
-) -> FittingOutputY:
-    return np.polynomial.chebyshev.Chebyshev(
-        (param1, param2, param3, param4, param5, param6, param7)
-    )(wavelength)
+def chepyshev_polynomial(wavelength: FittingInputX, *params) -> FittingOutputY:
+    return np.polynomial.chebyshev.Chebyshev(params)(wavelength)
 
 
 FittingParams = NewType("FittingParams", Mapping)
