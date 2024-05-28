@@ -1,10 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from typing import NewType, Optional, TypeVar
 
-import numpy as np
 import scipp as sc
 
 from .mtz_io import DEFAULT_WAVELENGTH_COORD_NAME, NMXMtzDataArray
@@ -362,19 +361,36 @@ def cut_tails(
 
 
 FittingInputX = NewType("FittingInputX", sc.Variable)
-FittingOutputY = NewType("FittingOutputY", Sequence)
+FittingOutputY = NewType("FittingOutputY", sc.Variable)
 FittingFunc = Callable[..., FittingOutputY]
 
 
-def chepyshev_polynomial(wavelength: FittingInputX, *params) -> FittingOutputY:
-    return np.polynomial.chebyshev.Chebyshev(params)(wavelength)
+def polynomial_7(
+    wavelength: FittingInputX,
+    param1: sc.Variable,
+    param2: sc.Variable,
+    param3: sc.Variable,
+    param4: sc.Variable,
+    param5: sc.Variable,
+    param6: sc.Variable,
+    param7: sc.Variable,
+) -> FittingOutputY:
+    return FittingOutputY(
+        (wavelength**6) * sc.values(param7)
+        + (wavelength**5) * sc.values(param6)
+        + (wavelength**4) * sc.values(param5)
+        + (wavelength**3) * sc.values(param4)
+        + (wavelength**2) * sc.values(param3)
+        + (wavelength**1) * sc.values(param2)
+        + sc.values(param1)
+    )
 
 
 FittingParams = NewType("FittingParams", Mapping)
 """Parameters of the fitting function."""
 FittingParamsCovariances = NewType("FittingParamsCovariances", Mapping)
 """Covariance of the :attr:`~FittingParams`."""
-InitialGuess = NewType("InitialGuess", np.ndarray)
+InitialGuess = NewType("InitialGuess", dict)
 """Initial guess of the parameters for :attr:`~FittingFunc`."""
 
 
@@ -392,27 +408,21 @@ def fit_scale_factor_curve(
     estimated_intensities: FilteredEstimatedScaledIntensities,
     *,
     initial_guess: InitialGuess,
-    fitting_func: FittingFunc = chepyshev_polynomial,
+    fitting_func: FittingFunc = polynomial_7,
 ) -> FittingResult:
-    from scipy.optimize import curve_fit
-
-    params, cov = curve_fit(
+    p_result, cov_result = sc.curve_fit(
+        coords=["wavelength"],
         f=fitting_func,
-        xdata=estimated_intensities.coords["wavelength"].values,
-        ydata=estimated_intensities.data.values,
+        da=estimated_intensities,
         p0=initial_guess,
     )
+    data = fitting_func(estimated_intensities.coords["wavelength"], **p_result)
     return FittingResult(
         fitting_func=fitting_func,
-        params=FittingParams(params),
-        covariance=FittingParamsCovariances(cov),
+        params=FittingParams(p_result),
+        covariance=FittingParamsCovariances(cov_result),
         fit_output=sc.DataArray(
-            data=sc.array(
-                dims=["wavelength"],
-                values=fitting_func(
-                    estimated_intensities.coords["wavelength"].values, *params
-                ),
-            ),
+            data=data.data if isinstance(data, sc.DataArray) else data,
             coords={"wavelength": estimated_intensities.coords["wavelength"]},
         ),
     )
@@ -428,10 +438,8 @@ def calculate_wavelength_scale_factor(
 ) -> WavelengthScaleFactors:
     """Calculate the scale factors of the :attr:`~DEFAULT_WAVELENGTH_COORD_NAME`."""
 
-    scaled_reference = sc.scalar(
-        fitting_result.fitting_func(reference_wavelength.value, *fitting_result.params),
-        unit=reference_wavelength.unit,
-        dtype=reference_wavelength.dtype,
+    scaled_reference = fitting_result.fitting_func(
+        reference_wavelength, **fitting_result.params
     )
     scale_factor = fitting_result.fit_output / scaled_reference
     return WavelengthScaleFactors(scale_factor)
@@ -455,6 +463,6 @@ scaling_params = {
     MaxWavelengthBinEdge: DEFAULT_MAX_WAVELENGTH_BIN_EDGE,
     ScaledIntensityLeftTailThreshold: DEFAULT_LEFT_TAIL_THRESHOLD,
     ScaledIntensityRightTailThreshold: DEFAULT_RIGHT_TAIL_THRESHOLD,
-    FittingFunc: chepyshev_polynomial,
+    FittingFunc: polynomial_7,
 }
 """Default parameters for scaling data."""
