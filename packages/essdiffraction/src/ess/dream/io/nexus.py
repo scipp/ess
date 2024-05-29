@@ -8,9 +8,9 @@ Notes on the detector dimensions (2024-05-22):
 See https://confluence.esss.lu.se/pages/viewpage.action?pageId=462000005
 and the ICD DREAM interface specification for details.
 
-  - The high-resolution and SANS detectors have a very odd numbering scheme.
-    The scheme attempts to follows some sort of physical ordering in space (x,y,z),
-    but it is not possible to reshape the data into all the logical dimensions.
+- The high-resolution and SANS detectors have a very odd numbering scheme.
+  The scheme attempts to follows some sort of physical ordering in space (x,y,z),
+  but it is not possible to reshape the data into all the logical dimensions.
 """
 
 import scipp as sc
