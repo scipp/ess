@@ -3,7 +3,7 @@
 
 import importlib.metadata
 
-from . import calibrations, conversions, corrections, normalize
+from . import calibrations, conversions, corrections, normalize, orso
 from .load import load_reference, save_reference
 
 try:
@@ -16,6 +16,7 @@ providers = (
     *corrections.providers,
     *calibrations.providers,
     *normalize.providers,
+    *orso.providers,
 )
 """
 List of providers for setting up a Sciline pipeline.
