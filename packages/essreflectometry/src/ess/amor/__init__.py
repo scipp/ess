@@ -42,6 +42,7 @@ providers = (
     *conversions.providers,
     *resolution.providers,
     *utils.providers,
+    *orso.providers,
 )
 """
 List of providers for setting up a Sciline pipeline.
