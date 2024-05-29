@@ -97,7 +97,14 @@ def parse_orso_sample(filepath: FilePath[Sample]) -> OrsoSample:
     (sample,) = load_nx(filepath, 'NXentry/NXsample')
     if not sample:
         return OrsoSample(data_source.Sample.empty())
-    raise NotImplementedError('NeXus sample parsing is not implemented')
+    return OrsoSample(
+        data_source.Sample(
+            name=sample['name'],
+            model=data_source.SampleModel(
+                stack=sample['model'],
+            ),
+        )
+    )
 
 
 def build_orso_measurement(
