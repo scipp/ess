@@ -112,7 +112,7 @@ def diagnostic_view(
     qth: QThetaFigure,
     ioq: NormalizedIofQ,
 ) -> ReflectivityDiagnosticsView:
-    ioq = ioq.plot(norm='log')
+    ioq = ioq.hist().plot(norm='log')
     return (ioq + laz) / (lath + qth)
 
 
