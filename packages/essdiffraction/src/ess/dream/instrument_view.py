@@ -99,14 +99,14 @@ class InstrumentView:
             self.slice_nodes = self.pre_process_nodes
             to_scatter = self.pre_process_nodes
 
-        self.scatter = pp.scatter3d(
+        self.fig = pp.scatter3d(
             to_scatter,
             pos='position',
             pixel_size=1.0 * sc.Unit('cm') if pixel_size is None else pixel_size,
             **kwargs,
         )
 
-        self.children.insert(0, self.scatter)
+        self.children.insert(0, self.fig)
 
         if len(self.data) > 1:
             self._add_module_control()
@@ -114,8 +114,8 @@ class InstrumentView:
     def _add_module_control(self):
         import ipywidgets as ipw
 
-        self.fig = self.scatter[0]
-        self.cutting_tool = self.scatter[1]
+        self.cutting_tool = self.fig.bottom_bar[0]
+        self._node_backup = list(self.cutting_tool._original_nodes)
         self.artist_mapping = dict(
             zip(self.data.keys(), self.fig.artists.keys(), strict=True)
         )
@@ -138,21 +138,17 @@ class InstrumentView:
         for key, ch in self.checkboxes.items():
             ch.key = key
             ch.observe(self._check_visibility, names='value')
-        self.cutting_tool.cut_x.button.observe(self._check_visibility, names="value")
-        self.cutting_tool.cut_y.button.observe(self._check_visibility, names="value")
-        self.cutting_tool.cut_z.button.observe(self._check_visibility, names="value")
         self.children.insert(0, self.modules_widget)
 
     def _check_visibility(self, _):
-        # Note that this brute force method of looping over all artists is not optimal
-        # but it is non-invasive in the sense that it does not require changes to the
-        # plopp code. If performance becomes an issue, we will consider a different
-        # approach.
-        for name, ch in self.checkboxes.items():
-            key = self.artist_mapping[name]
-            val = ch.value
-            self.fig.artists[key].points.visible = val
-            for c in "xyz":
-                cut_nodes = getattr(self.cutting_tool, f'cut_{c}').select_nodes
-                if key in cut_nodes:
-                    self.fig.artists[cut_nodes[key].id].points.visible = val
+        active_nodes = [
+            node_id
+            for key, node_id in self.artist_mapping.items()
+            if self.checkboxes[key].value
+        ]
+        for n in self._node_backup:
+            self.fig.artists[n.id].points.visible = n.id in active_nodes
+        self.cutting_tool._original_nodes = [
+            n for n in self._node_backup if n.id in active_nodes
+        ]
+        self.cutting_tool.update_state()
