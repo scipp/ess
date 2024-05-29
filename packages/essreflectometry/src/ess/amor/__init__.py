@@ -4,7 +4,9 @@ import importlib.metadata
 
 import scipp as sc
 
-from ..reflectometry import (
+from ..reflectometry import providers as reflectometry_providers
+from ..reflectometry import supermirror
+from ..reflectometry.types import (
     BeamSize,
     DetectorSpatialResolution,
     Gravity,
@@ -13,8 +15,6 @@ from ..reflectometry import (
     SamplePosition,
     SampleSize,
 )
-from ..reflectometry import providers as reflectometry_providers
-from ..reflectometry import supermirror
 from . import conversions, data, load, orso, resolution, utils
 from .types import (
     AngularResolution,
