@@ -104,7 +104,7 @@ psutil==5.9.8
     # via ipykernel
 pyarrow==16.1.0
     # via -r docs.in
-pydata-sphinx-theme==0.15.2
+pydata-sphinx-theme==0.15.3
     # via -r docs.in
 pytz==2024.1
     # via pandas
