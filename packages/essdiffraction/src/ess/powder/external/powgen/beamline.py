@@ -14,7 +14,7 @@ from ...types import (
 )
 from .types import DetectorInfo
 
-DETECTOR_BANK_SHAPES = {"powgen_detector": {"bank": 23, "column": 154, "row": 7}}
+DETECTOR_BANK_SIZES = {"powgen_detector": {"bank": 23, "column": 154, "row": 7}}
 
 
 def map_detector_to_spectrum(
@@ -73,7 +73,7 @@ def powgen_detector_dimensions(
 ) -> NeXusDetectorDimensions[NeXusDetectorName]:
     """Dimensions used by POWGEN detectors."""
     return NeXusDetectorDimensions[NeXusDetectorName](
-        DETECTOR_BANK_SHAPES[detector_name]
+        DETECTOR_BANK_SIZES[detector_name]
     )
 
 
