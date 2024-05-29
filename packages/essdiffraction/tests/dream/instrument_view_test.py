@@ -36,28 +36,28 @@ def fake_instrument_data(modules=('bank1', 'bank2', 'bank3', 'bank4', 'bank5')):
 def test_instrument_view_all_modules(fake_instrument_data):
     view = InstrumentView(fake_instrument_data, dim='tof')
     assert hasattr(view, 'checkboxes')
-    assert hasattr(view, 'scatter')
+    assert hasattr(view, 'fig')
     assert hasattr(view, 'slider')
 
 
 def test_instrument_view_one_module(fake_instrument_data):
     view = InstrumentView(fake_instrument_data['bank1'], dim='tof')
     assert not hasattr(view, 'checkboxes')
-    assert hasattr(view, 'scatter')
+    assert hasattr(view, 'fig')
     assert hasattr(view, 'slider')
 
 
 def test_instrument_view_no_tof_slider(fake_instrument_data):
     view = InstrumentView(fake_instrument_data.sum('tof'))
     assert hasattr(view, 'checkboxes')
-    assert hasattr(view, 'scatter')
+    assert hasattr(view, 'fig')
     assert not hasattr(view, 'slider')
 
 
 def test_instrument_view_one_module_no_tof_slider(fake_instrument_data):
     view = InstrumentView(fake_instrument_data['bank3'].sum('tof'))
     assert not hasattr(view, 'checkboxes')
-    assert hasattr(view, 'scatter')
+    assert hasattr(view, 'fig')
     assert not hasattr(view, 'slider')
 
 
