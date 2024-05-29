@@ -16,16 +16,6 @@ requirements:
     - setuptools
     - setuptools_scm
   run:
-    - dask
-    - essreduce
-    - python>=3.8
-    - python-graphviz
-    - plopp
-    - pythreejs
-    - sciline>=23.9.1
-    - scipp>=23.8.0
-    - scippneutron>=23.11.0
-    - scippnexus>=23.12.0
     - python>=3.10
 
   {% for package in dependencies %}
