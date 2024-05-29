@@ -114,8 +114,19 @@ class FilteredData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Raw data without invalid events."""
 
 
-class FocussedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+class FocussedDataDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Intensity vs d-spacing after focussing pixels."""
+
+
+class FocussedDataDspacingTwoTheta(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Intensity vs (d-spacing, 2theta) after focussing pixels."""
+
+
+IofDspacing = NewType("IofDspacing", sc.DataArray)
+"""Data that has been normalized by a vanadium run."""
+
+IofDspacingTwoTheta = NewType("IofDspacingTwoTheta", sc.DataArray)
+"""Data that has been normalized by a vanadium run, and grouped into 2theta bins."""
 
 
 class LoadedNeXusDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
@@ -134,10 +145,6 @@ MaskedDetectorIDs = NewType("MaskedDetectorIDs", Dict[str, sc.Variable])
 
 class NormalizedByProtonCharge(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Data that has been normalized by proton charge."""
-
-
-NormalizedByVanadium = NewType("NormalizedByVanadium", sc.DataArray)
-"""Data that has been normalized by a vanadium run."""
 
 
 PixelMaskFilename = NewType("PixelMaskFilename", str)

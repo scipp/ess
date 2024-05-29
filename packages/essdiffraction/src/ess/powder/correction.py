@@ -13,9 +13,11 @@ from .smoothing import lowpass
 from .types import (
     AccumulatedProtonCharge,
     FilteredData,
-    FocussedData,
+    FocussedDataDspacing,
+    FocussedDataDspacingTwoTheta,
+    IofDspacing,
+    IofDspacingTwoTheta,
     NormalizedByProtonCharge,
-    NormalizedByVanadium,
     RunType,
     SampleRun,
     UncertaintyBroadcastMode,
@@ -76,13 +78,26 @@ def normalize_by_monitor(
     return data.bins / sc.lookup(func=monitor, dim="wavelength")
 
 
-def normalize_by_vanadium(
-    data: FocussedData[SampleRun],
-    vanadium: FocussedData[VanadiumRun],
+def _normalize_by_vanadium(
+    data: sc.DataArray,
+    vanadium: sc.DataArray,
+    uncertainty_broadcast_mode: UncertaintyBroadcastMode,
+) -> sc.DataArray:
+    vanadium = broadcast_uncertainties(vanadium, uncertainty_broadcast_mode)
+    norm = vanadium.hist()
+    # Converting to unit 'one' because the division might produce a unit
+    # with a large scale if the proton charges in data and vanadium were
+    # measured with different units.
+    return (data / norm).to(unit="one", copy=False)
+
+
+def normalize_by_vanadium_dspacing(
+    data: FocussedDataDspacing[SampleRun],
+    vanadium: FocussedDataDspacing[VanadiumRun],
     uncertainty_broadcast_mode: Optional[UncertaintyBroadcastMode] = None,
-) -> NormalizedByVanadium:
+) -> IofDspacing:
     """
-    Normalize sample data by a vanadium measurement.
+    Normalize sample data by a vanadium measurement and return intensity vs d-spacing.
 
     Parameters
     ----------
@@ -94,13 +109,33 @@ def normalize_by_vanadium(
         Choose how uncertainties of vanadium are broadcast to the sample data.
         Defaults to ``UncertaintyBroadcastMode.fail``.
     """
-    vanadium = broadcast_uncertainties(vanadium, uncertainty_broadcast_mode)
+    return IofDspacing(
+        _normalize_by_vanadium(data, vanadium, uncertainty_broadcast_mode)
+    )
 
-    norm = vanadium.hist()
-    # Converting to unit 'one' because the division might produce a unit
-    # with a large scale if the proton charges in data and vanadium were
-    # measured with different units.
-    return NormalizedByVanadium((data / norm).to(unit="one", copy=False))
+
+def normalize_by_vanadium_dspacing_and_two_theta(
+    data: FocussedDataDspacingTwoTheta[SampleRun],
+    vanadium: FocussedDataDspacingTwoTheta[VanadiumRun],
+    uncertainty_broadcast_mode: Optional[UncertaintyBroadcastMode] = None,
+) -> IofDspacingTwoTheta:
+    """
+    Normalize sample data by a vanadium measurement and return intensity vs
+    (d-spacing, 2theta).
+
+    Parameters
+    ----------
+    data:
+        Sample data.
+    vanadium:
+        Vanadium data.
+    uncertainty_broadcast_mode:
+        Choose how uncertainties of vanadium are broadcast to the sample data.
+        Defaults to ``UncertaintyBroadcastMode.fail``.
+    """
+    return IofDspacingTwoTheta(
+        _normalize_by_vanadium(data, vanadium, uncertainty_broadcast_mode)
+    )
 
 
 def normalize_by_proton_charge(
@@ -222,5 +257,9 @@ def _shallow_copy(da: sc.DataArray) -> sc.DataArray:
     return out
 
 
-providers = (normalize_by_proton_charge, normalize_by_vanadium)
+providers = (
+    normalize_by_proton_charge,
+    normalize_by_vanadium_dspacing,
+    normalize_by_vanadium_dspacing_and_two_theta,
+)
 """Sciline providers for powder diffraction corrections."""

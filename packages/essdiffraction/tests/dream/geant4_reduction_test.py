@@ -7,9 +7,10 @@ import scipp as sc
 from ess.powder.types import (
     AccumulatedProtonCharge,
     DspacingBins,
-    DspacingHistogram,
     EmptyCanRun,
     Filename,
+    IofDspacing,
+    IofDspacingTwoTheta,
     MaskedData,
     NeXusDetectorName,
     NormalizedByProtonCharge,
@@ -64,9 +65,9 @@ def test_can_create_pipeline(providers, params):
     sciline.Pipeline(providers, params=params)
 
 
-def test_pipeline_can_compute_dspacing_histogram(providers, params):
+def test_pipeline_can_compute_dspacing_result(providers, params):
     pipeline = sciline.Pipeline(providers, params=params)
-    result = pipeline.compute(DspacingHistogram)
+    result = pipeline.compute(IofDspacing)
     assert result.sizes == {
         'dspacing': len(params[DspacingBins]) - 1,
     }
@@ -77,7 +78,7 @@ def test_workflow_is_deterministic(providers, params):
     pipeline = sciline.Pipeline(providers, params=params)
     # This is Sciline's default scheduler, but we want to be explicit here
     scheduler = sciline.scheduler.DaskScheduler()
-    graph = pipeline.get(DspacingHistogram, scheduler=scheduler)
+    graph = pipeline.get(IofDspacing, scheduler=scheduler)
     reference = graph.compute().data
     result = graph.compute().data
     assert sc.identical(sc.values(result), sc.values(reference))
@@ -94,7 +95,7 @@ def test_pipeline_group_by_two_theta(providers, params):
         dim='two_theta', unit='rad', start=0.8, stop=2.4, num=17
     )
     pipeline = sciline.Pipeline(providers, params=params)
-    result = pipeline.compute(DspacingHistogram)
+    result = pipeline.compute(IofDspacingTwoTheta)
     assert result.sizes == {
         'two_theta': 16,
         'dspacing': len(params[DspacingBins]) - 1,

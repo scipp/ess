@@ -2,56 +2,34 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 """Grouping and merging of pixels / voxels."""
 
-from typing import Optional
-
 from .types import (
     DspacingBins,
-    DspacingHistogram,
-    FocussedData,
+    FocussedDataDspacing,
+    FocussedDataDspacingTwoTheta,
     MaskedData,
-    NormalizedByVanadium,
     RunType,
     TwoThetaBins,
 )
 
 
-def focus_data(
+def focus_data_dspacing(
     data: MaskedData[RunType],
     dspacing_bins: DspacingBins,
-    twotheta_bins: Optional[TwoThetaBins] = None,
-) -> FocussedData[RunType]:
-    bins = {}
-    if twotheta_bins is not None:
-        bins["two_theta"] = twotheta_bins
-    bins[dspacing_bins.dim] = dspacing_bins
+) -> FocussedDataDspacing[RunType]:
+    out = data.bins.concat().bin({dspacing_bins.dim: dspacing_bins})
+    return FocussedDataDspacing[RunType](out)
 
-    if (twotheta_bins is None) or ("two_theta" in data.bins.coords):
+
+def focus_data_dspacing_and_two_theta(
+    data: MaskedData[RunType],
+    dspacing_bins: DspacingBins,
+    twotheta_bins: TwoThetaBins,
+) -> FocussedDataDspacingTwoTheta[RunType]:
+    bins = {twotheta_bins.dim: twotheta_bins, dspacing_bins.dim: dspacing_bins}
+    if "two_theta" in data.bins.coords:
         data = data.bins.concat()
-
-    return FocussedData[RunType](data.bin(**bins))
-
-
-def finalize_histogram(
-    data: NormalizedByVanadium, edges: DspacingBins
-) -> DspacingHistogram:
-    """Finalize the d-spacing histogram.
-
-    Histograms the input data into the given d-spacing bins.
-
-    Parameters
-    ----------
-    data:
-        Data to be histogrammed.
-    edges:
-        Bin edges in d-spacing.
-
-    Returns
-    -------
-    :
-        Histogrammed data.
-    """
-    return DspacingHistogram(data.hist(dspacing=edges))
+    return FocussedDataDspacingTwoTheta[RunType](data.bin(**bins))
 
 
-providers = (finalize_histogram, focus_data)
+providers = (focus_data_dspacing, focus_data_dspacing_and_two_theta)
 """Sciline providers for grouping pixels."""
