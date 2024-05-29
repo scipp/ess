@@ -99,7 +99,7 @@ def reflectivity_over_q(
         Reflectivity as a function of Q
     """
     return NormalizedIofQ(
-        da.bins.concat().hist(Q=qbins) / sc.values(n.flatten(to='Q').hist(Q=qbins))
+        da.bins.concat().bin(Q=qbins) / sc.values(n.flatten(to='Q').hist(Q=qbins))
     )
 
 
