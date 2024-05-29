@@ -59,28 +59,27 @@ def load_events(
         data.bins.constituents['data'].data.variances = data.bins.constituents[
             'data'
         ].data.values
-    data.coords['position'] = sc.spatial.as_vectors(
-        *pixel_coordinate_in_lab_frame(
-            data.coords['event_id'],
-            detector_rotation,
-        )
-    ).to(unit='m')
+    x, y, z, angle_from_center_of_beam = pixel_coordinate_in_lab_frame(
+        data.coords['event_id'],
+        detector_rotation,
+    )
+    data.coords['position'] = sc.spatial.as_vectors(x, y, z).to(unit='m')
+    data.coords['angle_from_center_of_beam'] = angle_from_center_of_beam
     return RawEvents[Run](data)
 
 
 def compute_tof(
     data: RawEvents[Run], phase: ChopperPhase[Run], frequency: ChopperFrequency[Run]
 ) -> ChopperCorrectedTofEvents[Run]:
-    dim = 'tof'
-    data.bins.coords[dim] = data.bins.coords.pop('event_time_offset').to(
+    data.bins.coords['tof'] = data.bins.coords.pop('event_time_offset').to(
         unit='ns', dtype='float64', copy=False
     )
 
-    tof_unit = data.bins.coords[dim].bins.unit
+    tof_unit = data.bins.coords['tof'].bins.unit
     tau = sc.to_unit(1 / (2 * frequency), tof_unit)
     tof_offset = tau * phase / (180.0 * sc.units.deg)
 
-    event_time_offset = data.bins.coords[dim]
+    event_time_offset = data.bins.coords['tof']
 
     minimum = -tof_offset
     frame_bound = tau - tof_offset
@@ -98,7 +97,10 @@ def compute_tof(
     data.bins.masks['outside_of_pulse'] = (minimum > event_time_offset) | (
         event_time_offset > maximum
     )
-    data.bins.coords[dim] += offset
+    data.bins.coords['tof'] += offset
+    data.bins.coords['tof'] -= (
+        data.coords['angle_from_center_of_beam'] / (180.0 * sc.units.deg)
+    ) * tau
     return ChopperCorrectedTofEvents[Run](data)
 
 

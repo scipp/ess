@@ -61,4 +61,4 @@ def pixel_coordinate_in_lab_frame(pixelID, nu):
     global_X = sc.zeros(dims=pixelID.dims, shape=pixelID.shape, unit='mm')
     global_Y = distance_to_pixel * sc.sin(angle_to_horizon)
     global_Z = distance_to_pixel * sc.cos(angle_to_horizon)
-    return global_X, global_Y, global_Z
+    return global_X, global_Y, global_Z, delta
