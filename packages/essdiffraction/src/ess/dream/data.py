@@ -2,30 +2,28 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 """Data for tests and documentation with DREAM."""
 
-from pathlib import Path
+_version = "1"
 
-_version = '1'
-
-__all__ = ['get_path']
+__all__ = ["get_path"]
 
 
 def _make_pooch():
     import pooch
 
     return pooch.create(
-        path=pooch.os_cache('ess/dream'),
-        env='ESS_DATA_DIR',
-        base_url='https://public.esss.dk/groups/scipp/ess/dream/{version}/',
+        path=pooch.os_cache("ess/dream"),
+        env="ESS_DATA_DIR",
+        base_url="https://public.esss.dk/groups/scipp/ess/dream/{version}/",
         version=_version,
         registry={
-            'data_dream_with_sectors.csv.zip': 'md5:52ae6eb3705e5e54306a001bc0ae85d8',
-            'data_dream0_new_hkl_Si_pwd.csv.zip': 'md5:d0ae518dc1b943bb817b3d18c354ed01',  # noqa: E501
-            'DREAM_nexus_sorted-2023-12-07.nxs': 'md5:22824e14f6eb950d24a720b2a0e2cb66',
-            'DREAM_simple_pwd_workflow/data_dream_diamond_vana_container_sample_union.csv.zip': 'md5:33302d0506b36aab74003b8aed4664cc',  # noqa: E501
-            'DREAM_simple_pwd_workflow/data_dream_diamond_vana_container_sample_union_run2.csv.zip': 'md5:c7758682f978d162dcb91e47c79abb83',  # noqa: E501
-            'DREAM_simple_pwd_workflow/data_dream_vana_container_sample_union.csv.zip': 'md5:1e22917b2bb68b5cacfb506b72700a4d',  # noqa: E501
-            'DREAM_simple_pwd_workflow/data_dream_vanadium.csv.zip': 'md5:e5addfc06768140c76533946433fa2ec',  # noqa: E501
-            'DREAM_simple_pwd_workflow/data_dream_vanadium_inc_coh.csv.zip': 'md5:39d1a44e248b12966b26f7c2f6c602a2',  # noqa: E501
+            "data_dream_with_sectors.csv.zip": "md5:52ae6eb3705e5e54306a001bc0ae85d8",
+            "data_dream0_new_hkl_Si_pwd.csv.zip": "md5:d0ae518dc1b943bb817b3d18c354ed01",  # noqa: E501
+            "DREAM_nexus_sorted-2023-12-07.nxs": "md5:22824e14f6eb950d24a720b2a0e2cb66",
+            "DREAM_simple_pwd_workflow/data_dream_diamond_vana_container_sample_union.csv.zip": "md5:33302d0506b36aab74003b8aed4664cc",  # noqa: E501
+            "DREAM_simple_pwd_workflow/data_dream_diamond_vana_container_sample_union_run2.csv.zip": "md5:c7758682f978d162dcb91e47c79abb83",  # noqa: E501
+            "DREAM_simple_pwd_workflow/data_dream_vana_container_sample_union.csv.zip": "md5:1e22917b2bb68b5cacfb506b72700a4d",  # noqa: E501
+            "DREAM_simple_pwd_workflow/data_dream_vanadium.csv.zip": "md5:e5addfc06768140c76533946433fa2ec",  # noqa: E501
+            "DREAM_simple_pwd_workflow/data_dream_vanadium_inc_coh.csv.zip": "md5:39d1a44e248b12966b26f7c2f6c602a2",  # noqa: E501
         },
     )
 
@@ -33,7 +31,7 @@ def _make_pooch():
 _pooch = _make_pooch()
 
 
-def get_path(name: str, unzip: bool = False) -> Path:
+def get_path(name: str, unzip: bool = False) -> str:
     """
     Return the path to a data file bundled with ess.dream.
 
@@ -42,10 +40,10 @@ def get_path(name: str, unzip: bool = False) -> Path:
     """
     import pooch
 
-    return Path(_pooch.fetch(name, processor=pooch.Unzip() if unzip else None))
+    return _pooch.fetch(name, processor=pooch.Unzip() if unzip else None)
 
 
-def simulated_diamond_sample() -> Path:
+def simulated_diamond_sample() -> str:
     """Path to a GEANT4 CSV file for a diamond sample.
 
     **Sample**:
@@ -70,12 +68,12 @@ def simulated_diamond_sample() -> Path:
         absorption of 36.73 1/m
     """
     return get_path(
-        'DREAM_simple_pwd_workflow/'
-        'data_dream_diamond_vana_container_sample_union.csv.zip'
+        "DREAM_simple_pwd_workflow/"
+        "data_dream_diamond_vana_container_sample_union.csv.zip"
     )
 
 
-def simulated_vanadium_sample() -> Path:
+def simulated_vanadium_sample() -> str:
     """Path to a GEANT4 CSV file for a vanadium sample.
 
     Contains both coherent and incoherent scattering.
@@ -90,10 +88,10 @@ def simulated_vanadium_sample() -> Path:
         unit cell volume=27.66 angstrom^3
         absorption of 36.73 1/m
     """
-    return get_path('DREAM_simple_pwd_workflow/data_dream_vanadium.csv.zip')
+    return get_path("DREAM_simple_pwd_workflow/data_dream_vanadium.csv.zip")
 
 
-def simulated_vanadium_sample_incoherent() -> Path:
+def simulated_vanadium_sample_incoherent() -> str:
     """Path to a GEANT4 CSV file for a vanadium sample with only incoherent scattering.
 
     **Sample**:
@@ -102,10 +100,10 @@ def simulated_vanadium_sample_incoherent() -> Path:
     - vertical dimension of sample (along y)=0.01 m
     - packing factor=1
     """
-    return get_path('DREAM_simple_pwd_workflow/data_dream_vanadium.csv.zip')
+    return get_path("DREAM_simple_pwd_workflow/data_dream_vanadium.csv.zip")
 
 
-def simulated_empty_can() -> Path:
+def simulated_empty_can() -> str:
     """Path to a GEANT4 CSV file for an empty can measurement.
 
     **Container**:
@@ -119,5 +117,5 @@ def simulated_empty_can() -> Path:
         absorption of 36.73 1/m
     """
     return get_path(
-        'DREAM_simple_pwd_workflow/data_dream_vana_container_sample_union.csv.zip'
+        "DREAM_simple_pwd_workflow/data_dream_vana_container_sample_union.csv.zip"
     )

@@ -12,11 +12,12 @@ from .logging import get_logger
 from .smoothing import lowpass
 from .types import (
     AccumulatedProtonCharge,
-    DspacingBins,
     FilteredData,
-    FocussedData,
+    FocussedDataDspacing,
+    FocussedDataDspacingTwoTheta,
+    IofDspacing,
+    IofDspacingTwoTheta,
     NormalizedByProtonCharge,
-    NormalizedByVanadium,
     RunType,
     SampleRun,
     UncertaintyBroadcastMode,
@@ -56,9 +57,9 @@ def normalize_by_monitor(
     :
         `data` normalized by a monitor.
     """
-    if 'wavelength' not in monitor.coords:
+    if "wavelength" not in monitor.coords:
         monitor = monitor.transform_coords(
-            'wavelength',
+            "wavelength",
             graph={**beamline.beamline(scatter=False), **tof.elastic("tof")},
             keep_inputs=False,
             keep_intermediate=False,
@@ -73,18 +74,30 @@ def normalize_by_monitor(
             "ess.powder.smoothing.lowpass with %s.",
             smooth_args,
         )
-        monitor = lowpass(monitor, dim='wavelength', **smooth_args)
-    return data.bins / sc.lookup(func=monitor, dim='wavelength')
+        monitor = lowpass(monitor, dim="wavelength", **smooth_args)
+    return data.bins / sc.lookup(func=monitor, dim="wavelength")
 
 
-def normalize_by_vanadium(
-    data: FocussedData[SampleRun],
-    vanadium: FocussedData[VanadiumRun],
-    edges: DspacingBins,
+def _normalize_by_vanadium(
+    data: sc.DataArray,
+    vanadium: sc.DataArray,
+    uncertainty_broadcast_mode: UncertaintyBroadcastMode,
+) -> sc.DataArray:
+    vanadium = broadcast_uncertainties(vanadium, uncertainty_broadcast_mode)
+    norm = vanadium.hist()
+    # Converting to unit 'one' because the division might produce a unit
+    # with a large scale if the proton charges in data and vanadium were
+    # measured with different units.
+    return (data / norm).to(unit="one", copy=False)
+
+
+def normalize_by_vanadium_dspacing(
+    data: FocussedDataDspacing[SampleRun],
+    vanadium: FocussedDataDspacing[VanadiumRun],
     uncertainty_broadcast_mode: Optional[UncertaintyBroadcastMode] = None,
-) -> NormalizedByVanadium:
+) -> IofDspacing:
     """
-    Normalize sample data by a vanadium measurement.
+    Normalize sample data by a vanadium measurement and return intensity vs d-spacing.
 
     Parameters
     ----------
@@ -92,24 +105,37 @@ def normalize_by_vanadium(
         Sample data.
     vanadium:
         Vanadium data.
-    edges:
-        `vanadium` is histogrammed into these bins before dividing the data by it.
     uncertainty_broadcast_mode:
         Choose how uncertainties of vanadium are broadcast to the sample data.
         Defaults to ``UncertaintyBroadcastMode.fail``.
-
-    Returns
-    -------
-    :
-        `data` normalized by `vanadium`.
     """
-    vanadium = broadcast_uncertainties(vanadium, uncertainty_broadcast_mode)
+    return IofDspacing(
+        _normalize_by_vanadium(data, vanadium, uncertainty_broadcast_mode)
+    )
 
-    norm = sc.lookup(vanadium.hist({edges.dim: edges}), dim=edges.dim)
-    # Converting to unit 'one' because the division might produce a unit
-    # with a large scale if the proton charges in data and vanadium were
-    # measured with different units.
-    return (data.bins / norm).to(unit='one', copy=False)
+
+def normalize_by_vanadium_dspacing_and_two_theta(
+    data: FocussedDataDspacingTwoTheta[SampleRun],
+    vanadium: FocussedDataDspacingTwoTheta[VanadiumRun],
+    uncertainty_broadcast_mode: Optional[UncertaintyBroadcastMode] = None,
+) -> IofDspacingTwoTheta:
+    """
+    Normalize sample data by a vanadium measurement and return intensity vs
+    (d-spacing, 2theta).
+
+    Parameters
+    ----------
+    data:
+        Sample data.
+    vanadium:
+        Vanadium data.
+    uncertainty_broadcast_mode:
+        Choose how uncertainties of vanadium are broadcast to the sample data.
+        Defaults to ``UncertaintyBroadcastMode.fail``.
+    """
+    return IofDspacingTwoTheta(
+        _normalize_by_vanadium(data, vanadium, uncertainty_broadcast_mode)
+    )
 
 
 def normalize_by_proton_charge(
@@ -156,22 +182,22 @@ def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.Data
     dim = calibration.dim
     if not sc.identical(into.coords[dim], calibration.coords[dim]):
         raise ValueError(
-            f'Coordinate {dim} of calibration and target dataset do not agree.'
+            f"Coordinate {dim} of calibration and target dataset do not agree."
         )
     out = into.copy(deep=False)
-    for name in ('difa', 'difc', 'tzero'):
+    for name in ("difa", "difc", "tzero"):
         if name in out.coords:
             raise ValueError(
                 f"Cannot add calibration parameter '{name}' to data, "
                 "there already is metadata with the same name."
             )
         out.coords[name] = calibration[name].data
-    if 'calibration' in out.masks:
+    if "calibration" in out.masks:
         raise ValueError(
             "Cannot add calibration mask 'calibration' tp data, "
             "there already is a mask with the same name."
         )
-    out.masks['calibration'] = calibration['mask'].data
+    out.masks["calibration"] = calibration["mask"].data
     return out
 
 
@@ -207,8 +233,8 @@ def apply_lorentz_correction(da: sc.DataArray) -> sc.DataArray:
     # The implementation is optimized under the assumption that two_theta
     # is small and dspacing and the data are large.
     out = _shallow_copy(da)
-    dspacing = event_or_outer_coord(da, 'dspacing')
-    two_theta = event_or_outer_coord(da, 'two_theta')
+    dspacing = event_or_outer_coord(da, "dspacing")
+    two_theta = event_or_outer_coord(da, "two_theta")
     theta = 0.5 * two_theta
 
     d4 = dspacing.broadcast(sizes=out.sizes) ** 4
@@ -231,5 +257,9 @@ def _shallow_copy(da: sc.DataArray) -> sc.DataArray:
     return out
 
 
-providers = (normalize_by_proton_charge, normalize_by_vanadium)
+providers = (
+    normalize_by_proton_charge,
+    normalize_by_vanadium_dspacing,
+    normalize_by_vanadium_dspacing_and_two_theta,
+)
 """Sciline providers for powder diffraction corrections."""

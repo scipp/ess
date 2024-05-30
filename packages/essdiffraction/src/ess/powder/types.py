@@ -8,8 +8,7 @@ pipeline.
 """
 
 from enum import Enum
-from pathlib import Path
-from typing import Any, NewType, TypeVar
+from typing import Any, Callable, Dict, NewType, TypeVar
 
 import sciline
 import scipp as sc
@@ -17,35 +16,28 @@ import scipp as sc
 # 1 TypeVars used to parametrize the generic parts of the workflow
 
 # 1.1 Run types
-EmptyCanRun = NewType('EmptyCanRun', int)
+EmptyCanRun = NewType("EmptyCanRun", int)
 """Empty sample can run."""
-EmptyInstrumentRun = NewType('EmptyInstrumentRun', int)
+EmptyInstrumentRun = NewType("EmptyInstrumentRun", int)
 """Empty instrument run."""
-SampleRun = NewType('SampleRun', int)
+SampleRun = NewType("SampleRun", int)
 """Sample run."""
-VanadiumRun = NewType('VanadiumRun', int)
+VanadiumRun = NewType("VanadiumRun", int)
 """Vanadium run."""
-RunType = TypeVar('RunType', EmptyInstrumentRun, SampleRun, VanadiumRun)
+RunType = TypeVar("RunType", EmptyInstrumentRun, SampleRun, VanadiumRun)
 """TypeVar used for specifying the run."""
 
 
 # 2 Workflow parameters
 
-CalibrationFilename = NewType('CalibrationFilename', str)
+CalibrationFilename = NewType("CalibrationFilename", str)
 """Filename of the instrument calibration file."""
 
 
-# In Python 3.11, this can be replaced with a StrEnum
-class DetectorName(str, Enum):
-    """Name of a detector."""
+NeXusDetectorName = NewType("NeXusDetectorName", str)
+"""Name of detector entry in NeXus file"""
 
-    mantle = 'mantle'
-    high_resolution = 'high_resolution'
-    endcap_backward = 'endcap_backward'
-    endcap_forward = 'endcap_forward'
-
-
-DspacingBins = NewType('DSpacingBins', sc.Variable)
+DspacingBins = NewType("DSpacingBins", sc.Variable)
 """Bin edges for d-spacing."""
 
 
@@ -53,14 +45,10 @@ class Filename(sciline.Scope[RunType, str], str):
     """Name of an input file."""
 
 
-class FilePath(sciline.Scope[RunType, Path], Path):
-    """Path to an input file on disk."""
-
-
-OutFilename = NewType('OutFilename', str)
+OutFilename = NewType("OutFilename", str)
 """Filename of the output."""
 
-TwoThetaBins = NewType('TwoThetaBins', sc.Variable)
+TwoThetaBins = NewType("TwoThetaBins", sc.Variable)
 """Bin edges for grouping in 2theta.
 
 This is used by an alternative focussing step that groups detector
@@ -68,14 +56,14 @@ pixels by scattering angle into bins given by these edges.
 """
 
 UncertaintyBroadcastMode = Enum(
-    'UncertaintyBroadcastMode', ['drop', 'upper_bound', 'fail']
+    "UncertaintyBroadcastMode", ["drop", "upper_bound", "fail"]
 )
 """Mode for broadcasting uncertainties.
 
 See https://doi.org/10.3233/JNR-220049 for context.
 """
 
-ValidTofRange = NewType('ValidTofRange', sc.Variable)
+ValidTofRange = NewType("ValidTofRange", sc.Variable)
 """Min and max tof value of the instrument."""
 
 # 3 Workflow (intermediate) results
@@ -90,11 +78,20 @@ class AccumulatedProtonCharge(sciline.Scope[RunType, sc.Variable], sc.Variable):
         super().__init__(*args, **kwargs)
 
 
-CalibrationData = NewType('CalibrationData', sc.Dataset)
+CalibrationData = NewType("CalibrationData", sc.Dataset)
 """Detector calibration data."""
 
+DataFolder = NewType("DataFolder", str)
 
-class DetectorDimensions(sciline.Scope[DetectorName, tuple[str, ...]], tuple[str, ...]):
+
+class DataWithScatteringCoordinates(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Data with scattering coordinates computed for all events: wavelength, 2theta,
+    d-spacing."""
+
+
+class NeXusDetectorDimensions(
+    sciline.Scope[NeXusDetectorName, Dict[str, int]], Dict[str, int]
+):
     """Logical detector dimensions."""
 
 
@@ -106,31 +103,59 @@ class DspacingDataWithoutVariances(sciline.Scope[RunType, sc.DataArray], sc.Data
     """Data converted to d-spacing where variances where removed."""
 
 
-DspacingHistogram = NewType('DspacingHistogram', sc.DataArray)
+DspacingHistogram = NewType("DspacingHistogram", sc.DataArray)
 """Histogrammed intensity vs d-spacing."""
+
+ElasticCoordTransformGraph = NewType("ElasticCoordTransformGraph", dict)
+"""Graph for transforming coordinates in elastic scattering."""
 
 
 class FilteredData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Raw data without invalid events."""
 
 
-class FocussedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+class FocussedDataDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Intensity vs d-spacing after focussing pixels."""
+
+
+class FocussedDataDspacingTwoTheta(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Intensity vs (d-spacing, 2theta) after focussing pixels."""
+
+
+IofDspacing = NewType("IofDspacing", sc.DataArray)
+"""Data that has been normalized by a vanadium run."""
+
+IofDspacingTwoTheta = NewType("IofDspacingTwoTheta", sc.DataArray)
+"""Data that has been normalized by a vanadium run, and grouped into 2theta bins."""
+
+
+class LoadedNeXusDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+    """Detector data, loaded from a NeXus file, containing not only neutron events
+    but also pixel shape information, transformations, ..."""
+
+
+class MaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Data with masked pixels, tof regions, wavelength regions, 2theta regions, or
+    dspacing regions."""
+
+
+MaskedDetectorIDs = NewType("MaskedDetectorIDs", Dict[str, sc.Variable])
+"""1-D variable listing all masked detector IDs."""
 
 
 class NormalizedByProtonCharge(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Data that has been normalized by proton charge."""
 
 
-NormalizedByVanadium = NewType('NormalizedByVanadium', sc.DataArray)
-"""Data that has been normalized by a vanadium run."""
+PixelMaskFilename = NewType("PixelMaskFilename", str)
+"""Filename of a pixel mask."""
 
 
 class ProtonCharge(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Time-dependent proton charge."""
 
 
-RawCalibrationData = NewType('RawCalibrationData', sc.Dataset)
+RawCalibrationData = NewType("RawCalibrationData", sc.Dataset)
 """Calibration data as loaded from file, needs preprocessing before using."""
 
 
@@ -150,12 +175,32 @@ class RawSample(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
     """Raw data from a loaded sample."""
 
 
-RawSource = NewType('RawSource', sc.DataGroup)
-"""Raw data from a loaded neutron source."""
+class RawSource(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+    """Raw data from a loaded neutron source."""
 
 
-class TofCroppedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Raw data cropped to the valid TOF range."""
+class ReducibleDetectorData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Data that is in a state ready for reduction."""
+
+
+class SamplePosition(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """Sample position"""
+
+
+class SourcePosition(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """Source position"""
+
+
+TofMask = NewType("TofMask", Callable)
+"""TofMask is a callable that returns a mask for a given TofData."""
+
+
+TwoThetaMask = NewType("TwoThetaMask", Callable)
+"""TwoThetaMask is a callable that returns a mask for a given TwoThetaData."""
+
+
+WavelengthMask = NewType("WavelengthMask", Callable)
+"""WavelengthMask is a callable that returns a mask for a given WavelengthData."""
 
 
 del sc, sciline, NewType, TypeVar

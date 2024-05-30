@@ -50,7 +50,7 @@ def instrument_view(
 
 def _to_data_group(data: Union[sc.DataArray, sc.DataGroup, dict]) -> sc.DataGroup:
     if isinstance(data, sc.DataArray):
-        data = sc.DataGroup({data.name or 'data': data})
+        data = sc.DataGroup({data.name or "data": data})
     elif isinstance(data, dict):
         data = sc.DataGroup(data)
     return data
@@ -61,8 +61,8 @@ def _pre_process(da: sc.DataArray, dim: str) -> sc.DataArray:
     dims = list(da.dims)
     if dim is not None:
         dims.remove(dim)
-    out = da.flatten(dims=dims, to='pixel')
-    sel = sc.isfinite(out.coords['position'])
+    out = da.flatten(dims=dims, to="pixel")
+    sel = sc.isfinite(out.coords["position"])
     return out[sel]
 
 
@@ -87,7 +87,7 @@ class InstrumentView:
 
         if dim is not None:
             self.slider = SliceWidget(next(iter(self.data.values())), dims=[dim])
-            self.slider.controls[dim]['slider'].layout = {'width': '600px'}
+            self.slider.controls[dim]["slider"].layout = {"width": "600px"}
             self.slider_node = pp.widget_node(self.slider)
             self.slice_nodes = {
                 key: slice_dims(n, self.slider_node)
@@ -101,8 +101,8 @@ class InstrumentView:
 
         self.fig = pp.scatter3d(
             to_scatter,
-            pos='position',
-            pixel_size=1.0 * sc.Unit('cm') if pixel_size is None else pixel_size,
+            pos="position",
+            pixel_size=1.0 * sc.Unit("cm") if pixel_size is None else pixel_size,
             **kwargs,
         )
 
@@ -137,7 +137,7 @@ class InstrumentView:
         )
         for key, ch in self.checkboxes.items():
             ch.key = key
-            ch.observe(self._check_visibility, names='value')
+            ch.observe(self._check_visibility, names="value")
         self.children.insert(0, self.modules_widget)
 
     def _check_visibility(self, _):
