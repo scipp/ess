@@ -131,7 +131,7 @@ def add_coords(
     da.coords['z_index'] = sc.arange(
         'row', 0, da.sizes['blade'] * da.sizes['wire'], unit=None
     ).fold('row', sizes=dict(blade=da.sizes['blade'], wire=da.sizes['wire']))
-    da.coords['y_index'] = sc.arange('stipe', 0, da.sizes['stipe'], unit=None)
+    da.coords['y_index'] = sc.arange('stripe', 0, da.sizes['stripe'], unit=None)
     return da
 
 
