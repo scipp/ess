@@ -99,7 +99,7 @@ def wavelength_z_diagnostic_figure(
     da: ReflectivityData,
 ) -> WavelengthZIndexFigure:
     return (
-        da.bins.concat('stipe')
+        da.bins.concat('stripe')
         .flatten(('blade', 'wire'), to='z_index')
         .hist()
         .plot(norm='log', grid=True)

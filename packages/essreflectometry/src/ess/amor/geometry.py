@@ -7,7 +7,7 @@ class Detector:
     nBlades = sc.scalar(14)
     # number of wires per blade
     nWires = sc.scalar(32)
-    # number of stipes per blade
+    # number of stripes per blade
     nStripes = sc.scalar(64)
     # angle of incidence of the beam on the blades (def: 5.1)
     angle = sc.scalar(5.1, unit='degree').to(unit='rad')

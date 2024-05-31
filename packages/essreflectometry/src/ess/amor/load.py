@@ -49,7 +49,7 @@ def load_events(
             sizes={
                 'blade': Detector.nBlades,
                 'wire': Detector.nWires,
-                'stipe': Detector.nStripes,
+                'stripe': Detector.nStripes,
             },
         )
     )
