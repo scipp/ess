@@ -27,8 +27,6 @@ decorator==5.1.1
     # via ipython
 essreduce==24.3.11
     # via -r base.in
-exceptiongroup==1.2.1
-    # via ipython
 executing==2.0.1
     # via stack-data
 fonttools==4.52.4
@@ -43,8 +41,6 @@ h5py==3.11.0
     #   scippnexus
 idna==3.7
     # via requests
-importlib-metadata==7.1.0
-    # via dask
 ipydatawidgets==4.3.5
     # via pythreejs
 ipython==8.24.0
@@ -118,7 +114,7 @@ requests==2.32.2
     # via pooch
 sciline==24.4.1
     # via -r base.in
-scipp==24.5.0
+scipp==24.5.1
     # via
     #   -r base.in
     #   essreduce
@@ -155,13 +151,9 @@ traitlets==5.14.3
     #   traittypes
 traittypes==0.2.1
     # via ipydatawidgets
-typing-extensions==4.12.0
-    # via ipython
 urllib3==2.2.1
     # via requests
 wcwidth==0.2.13
     # via prompt-toolkit
 widgetsnbextension==4.0.11
     # via ipywidgets
-zipp==3.19.0
-    # via importlib-metadata
