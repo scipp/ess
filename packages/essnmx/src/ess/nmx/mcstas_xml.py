@@ -7,7 +7,6 @@ from typing import Iterable, Optional, Protocol, Tuple, TypeVar
 
 import scipp as sc
 
-from .const import DETECTOR_DIM, PIXEL_DIM
 from .types import FilePath
 
 T = TypeVar('T')
@@ -314,8 +313,8 @@ def _construct_pixel_ids(detector_descs: Tuple[DetectorDesc, ...]) -> sc.Variabl
     intervals = [
         (desc.id_start, desc.id_start + desc.total_pixels) for desc in detector_descs
     ]
-    ids = [sc.arange(PIXEL_DIM, start, stop, unit=None) for start, stop in intervals]
-    return sc.concat(ids, PIXEL_DIM)
+    ids = [sc.arange('id', start, stop, unit=None) for start, stop in intervals]
+    return sc.concat(ids, 'id')
 
 
 def _pixel_positions(
@@ -325,7 +324,7 @@ def _pixel_positions(
 
     Position of each pixel is relative to the position_offset.
     """
-    pixel_idx = sc.arange(PIXEL_DIM, detector.total_pixels)
+    pixel_idx = sc.arange('id', detector.total_pixels)
     n_col = sc.scalar(detector.num_fast_pixels_per_row)
 
     pixel_n_slow = pixel_idx // n_col
@@ -349,7 +348,7 @@ def _detector_pixel_positions(
         _pixel_positions(detector, sample.position_from_sample(detector.position))
         for detector in detector_descs
     ]
-    return sc.concat(positions, DETECTOR_DIM)
+    return sc.concat(positions, 'panel')
 
 
 @dataclass
@@ -391,9 +390,9 @@ class McStasInstrument:
 
         return {
             'pixel_id': _construct_pixel_ids(detectors),
-            'fast_axis': sc.concat(fast_axes, DETECTOR_DIM),
-            'slow_axis': sc.concat(slow_axes, DETECTOR_DIM),
-            'origin_position': sc.concat(origins, DETECTOR_DIM),
+            'fast_axis': sc.concat(fast_axes, 'panel'),
+            'slow_axis': sc.concat(slow_axes, 'panel'),
+            'origin_position': sc.concat(origins, 'panel'),
             'sample_position': self.sample.position_from_sample(self.sample.position),
             'source_position': self.sample.position_from_sample(self.source.position),
             'sample_name': sc.scalar(self.sample.name),

@@ -1,5 +1,0 @@
-DETECTOR_DIM = 'panel'
-DETECTOR_SHAPE = (1280, 1280)
-PIXEL_DIM = 'id'
-TOF_DIM = 't'
-DETECTOR_DIM = 'panel'
