@@ -98,9 +98,7 @@ def from_data_workspace(
     return LoadedFileContents[RunType](dg)
 
 
-def load_run(
-    filename: FilePath[Filename[RunType]], period: Period
-) -> DataWorkspace[RunType]:
+def load_run(filename: Filename[RunType], period: Period) -> DataWorkspace[RunType]:
     loaded = _mantid_simpleapi.Load(
         Filename=str(filename), LoadMonitors=True, StoreInADS=False
     )

@@ -7,20 +7,31 @@ import numpy as np
 import scipp as sc
 
 from .types import (
+    DetectorIDs,
     DetectorMasks,
     MaskedData,
     MaskedDetectorIDs,
     PixelMaskFilename,
+    SampleRun,
     ScatteringRunType,
     TofData,
 )
 
 
+def get_detector_ids_from_sample_run(data: TofData[SampleRun]) -> DetectorIDs:
+    """Extract detector IDs from sample run."""
+    return DetectorIDs(
+        data.coords[
+            'detector_number' if 'detector_number' in data.coords else 'detector_id'
+        ]
+    )
+
+
 def to_detector_mask(
-    data: TofData[ScatteringRunType],
+    ids: DetectorIDs,
     name: PixelMaskFilename,
     masked_ids: MaskedDetectorIDs,
-) -> DetectorMasks[ScatteringRunType]:
+) -> DetectorMasks:
     """Create a detector mask from a list of masked detector IDs.
     The masks are based on detector IDs stored in XML files.
 
@@ -31,17 +42,14 @@ def to_detector_mask(
     masked_ids:
         Detector IDs to mask.
     """
-    ids = data.coords[
-        'detector_number' if 'detector_number' in data.coords else 'detector_id'
-    ]
     mask = sc.zeros(sizes=ids.sizes, dtype='bool')
     mask.values[np.isin(ids.values, masked_ids.values)] = True
-    return DetectorMasks[ScatteringRunType]({name: mask})
+    return DetectorMasks({name: mask})
 
 
 def apply_pixel_masks(
     data: TofData[ScatteringRunType],
-    masks: DetectorMasks[ScatteringRunType],
+    masks: DetectorMasks,
 ) -> MaskedData[ScatteringRunType]:
     """Apply pixel-specific masks to raw data.
 
@@ -56,6 +64,7 @@ def apply_pixel_masks(
 
 
 providers = (
+    get_detector_ids_from_sample_run,
     to_detector_mask,
     apply_pixel_masks,
 )

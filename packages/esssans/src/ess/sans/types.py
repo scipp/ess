@@ -166,14 +166,15 @@ class Filename(sciline.Scope[RunType, str], str):
     """Filename of a run"""
 
 
+DetectorIDs = NewType('DetectorIDs', sc.Variable)
+"""1-D variable listing all detector IDs."""
+
 MaskedDetectorIDs = NewType('MaskedDetectorIDs', sc.Variable)
 """1-D variable listing all masked detector IDs."""
 
 
-class DetectorMasks(
-    sciline.Scope[ScatteringRunType, dict[str, sc.Variable]], dict[str, sc.Variable]
-):
-    """Masks for detector pixels"""
+DetectorMasks = NewType('DetectorMasks', dict[str, sc.Variable])
+"""Masks for detector pixels"""
 
 
 # 3  Workflow (intermediate) results
