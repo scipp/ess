@@ -322,7 +322,7 @@ def nmx_mtz_dataframe_to_scipp_dataarray(
     return NMXMtzDataArray(nmx_mtz_da[nmx_mtz_da.data > 0])
 
 
-mtz_io_providers = (
+providers = (
     read_mtz_file,
     process_single_mtz_to_dataframe,
     get_space_group,
@@ -333,7 +333,7 @@ mtz_io_providers = (
 )
 """The providers related to the MTZ IO."""
 
-mtz_io_params = {
+default_parameters = {
     WavelengthColumnName: DEFAULT_WAVELENGTH_COLUMN_NAME,
     IntensityColumnName: DEFAULT_INTENSITY_COLUMN_NAME,
     StdDevColumnName: DEFAULT_STD_DEV_COLUMN_NAME,
