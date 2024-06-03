@@ -6,7 +6,6 @@ from typing import Dict, List
 import scipp as sc
 import scippnexus as snx
 
-from .const import PIXEL_DIM, TOF_DIM
 from .mcstas_xml import McStasInstrument, read_mcstas_geometry_xml
 from .reduction import NMXData
 from .types import (
@@ -50,15 +49,13 @@ def raw_event_data(
         data = root[bank_name]["events"][()].rename_dims({'dim_0': 'event'})
         return sc.DataArray(
             coords={
-                PIXEL_DIM: sc.array(
+                'id': sc.array(
                     dims=['event'],
                     values=data['dim_1', 4].values,
                     dtype='int64',
                     unit=None,
                 ),
-                TOF_DIM: sc.array(
-                    dims=['event'], values=data['dim_1', 5].values, unit='s'
-                ),
+                't': sc.array(dims=['event'], values=data['dim_1', 5].values, unit='s'),
             },
             data=sc.array(
                 dims=['event'], values=data['dim_1', 0].values, unit='counts'
