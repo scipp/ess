@@ -16,6 +16,7 @@ from ..reflectometry.types import (
     SampleSize,
 )
 from . import conversions, data, load, orso, resolution, utils
+from .instrument_view import instrument_view
 from .types import (
     AngularResolution,
     Chopper1Position,
@@ -52,16 +53,16 @@ This provides a default Amor workflow including providers for loadings files.
 
 default_parameters = {
     supermirror.MValue: sc.scalar(5, unit=sc.units.dimensionless),
-    supermirror.CriticalEdge: 0.022 * sc.Unit('1/angstrom'),
+    supermirror.CriticalEdge: 0.022 * sc.Unit("1/angstrom"),
     supermirror.Alpha: sc.scalar(0.25 / 0.088, unit=sc.units.angstrom),
     BeamSize[Run]: 2.0 * sc.units.mm,
     SampleSize[Run]: 10.0 * sc.units.mm,
     DetectorSpatialResolution[Run]: 0.0025 * sc.units.m,
     Gravity: sc.vector(value=[0, -1, 0]) * sc.constants.g,
-    SamplePosition[Run]: sc.vector([0, 0, 0], unit='m'),
-    NeXusDetectorName[Run]: 'detector',
-    ChopperPhase[Run]: sc.scalar(-5.0, unit='deg'),
-    ChopperFrequency[Run]: sc.scalar(8.333, unit='Hz'),
+    SamplePosition[Run]: sc.vector([0, 0, 0], unit="m"),
+    NeXusDetectorName[Run]: "detector",
+    ChopperPhase[Run]: sc.scalar(-5.0, unit="deg"),
+    ChopperFrequency[Run]: sc.scalar(8.333, unit="Hz"),
 }
 
 del sc
