@@ -24,12 +24,12 @@ class Detector:
     distance = sc.scalar(4000, unit="mm")
 
 
-def pixel_coordinate_in_detector_system(pixelID):
-    """determine spatial coordinates and angles from pixel number"""
+def _pixel_coordinate_in_detector_system(pixelID: sc.Variable):
+    """Determines detector coordinates and divergence angle from pixel number"""
+    old_pixelID_unit = pixelID.unit
     pixelID.unit = ""
-    (bladeNr, bPixel) = (
-        pixelID // (Detector.nWires * Detector.nStripes),
-        pixelID % (Detector.nWires * Detector.nStripes),
+    (bladeNr, bPixel) = pixelID // (Detector.nWires * Detector.nStripes), pixelID % (
+        Detector.nWires * Detector.nStripes
     )
     # z index on blade, y index on detector
     (bZi, detYi) = (
@@ -49,14 +49,16 @@ def pixel_coordinate_in_detector_system(pixelID):
     delta = (Detector.nBlades / 2.0 - bladeNr) * bladeAngle - (
         sc.atan(bZi * Detector.dZ / (Detector.distance + bZi * Detector.dX))
     ).to(unit="degree")
+    pixelID.unit = old_pixelID_unit
 
     # z is in the direction of the center of the beam, y is the direction 'up'
-    pixelID.unit = None
     return detYi, detZi, detX, delta
 
 
-def pixel_coordinate_in_lab_frame(pixelID, nu):
-    _, _, detX, delta = pixel_coordinate_in_detector_system(pixelID)
+def pixel_coordinate_in_lab_frame(pixelID: sc.Variable, nu: sc.Variable):
+    """Computes spatial coordinates (lab reference frame), and the beam divergence
+    angle for the detector pixel associated with `pixelID`"""
+    _, _, detX, delta = _pixel_coordinate_in_detector_system(pixelID)
 
     angle_to_horizon = (nu + delta).to(unit="rad")
     distance_to_pixel = detX + Detector.distance
