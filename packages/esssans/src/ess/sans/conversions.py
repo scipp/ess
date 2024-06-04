@@ -90,7 +90,7 @@ ElasticCoordTransformGraph = NewType('ElasticCoordTransformGraph', dict)
 MonitorCoordTransformGraph = NewType('MonitorCoordTransformGraph', dict)
 
 
-def sans_elastic(gravity: CorrectForGravity) -> ElasticCoordTransformGraph:
+def sans_elastic(correct_for_gravity: CorrectForGravity) -> ElasticCoordTransformGraph:
     """
     Generate a coordinate transformation graph for SANS elastic scattering.
 
@@ -119,12 +119,12 @@ def sans_elastic(gravity: CorrectForGravity) -> ElasticCoordTransformGraph:
 
     Parameters
     ----------
-    gravity:
+    correct_for_gravity:
         Take into account the bending of the neutron flight paths from the
         Earth's gravitational field if ``True``.
     """  # noqa: E501
     graph = {**beamline.beamline(scatter=True), **tof.elastic_Q('tof')}
-    if gravity:
+    if correct_for_gravity:
         del graph['two_theta']
         graph[('two_theta', 'phi')] = scattering_angles_with_gravity
     else:
