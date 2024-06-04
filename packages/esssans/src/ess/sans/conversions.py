@@ -3,8 +3,10 @@
 from typing import NewType
 
 import scipp as sc
-from scipp.constants import h, m_n
-from scippneutron._utils import elem_unit
+from scippneutron.conversion.beamline import (
+    beam_aligned_unit_vectors,
+    scattering_angles_with_gravity,
+)
 from scippneutron.conversion.graph import beamline, tof
 
 from .common import mask_range
@@ -28,24 +30,12 @@ from .types import (
 )
 
 
-def cyl_x_unit_vector(gravity: sc.Variable, incident_beam: sc.Variable) -> sc.Variable:
-    """
-    Compute the horizontal unit vector in the plane normal to the incident beam
-    direction. Note that it is assumed here that the incident beam is perpendicular to
-    the gravity vector.
-    """
-    v_x = sc.cross(incident_beam, gravity)
-    return v_x / sc.norm(v_x)
-
-
-def cyl_y_unit_vector(gravity: sc.Variable) -> sc.Variable:
-    """
-    Compute the vertical unit vector in the plane normal to the incident beam
-    direction. Note that it is assumed here that the incident beam is perpendicular to
-    the gravity vector.
-    """
-    v_y = -gravity
-    return v_y / sc.norm(v_y)
+def cyl_unit_vectors(incident_beam: sc.Variable, gravity: sc.Variable):
+    vectors = beam_aligned_unit_vectors(incident_beam=incident_beam, gravity=gravity)
+    return {
+        'cyl_x_unit_vector': vectors['beam_aligned_unit_x'],
+        'cyl_y_unit_vector': vectors['beam_aligned_unit_y'],
+    }
 
 
 def cylindrical_x(
@@ -68,50 +58,6 @@ def cylindrical_y(
     vector.
     """
     return sc.dot(scattered_beam, cyl_y_unit_vector)
-
-
-def two_theta(
-    incident_beam: sc.Variable,
-    scattered_beam: sc.Variable,
-    wavelength: sc.Variable,
-    gravity: sc.Variable,
-) -> dict[str, sc.Variable]:
-    """
-    Compute the scattering angle from the incident and scattered beam vectors, taking
-    into account the effects of gravity.
-    Note that it is assumed here that the incident beam is perpendicular to the gravity
-    vector.
-    """
-    grav = sc.norm(gravity)
-    L2 = sc.norm(scattered_beam)
-
-    x_term = cylindrical_x(cyl_x_unit_vector(gravity, incident_beam), scattered_beam)
-
-    y_term = sc.to_unit(wavelength, elem_unit(L2), copy=True)
-    y_term *= y_term
-    drop = L2**2
-    drop *= grav * (m_n**2 / (2 * h**2))
-    # Optimization when handling either the dense or the event coord of binned data:
-    # - For the event coord, both operands have same dims, and we can multiply in place
-    # - For the dense coord, we need to broadcast using non in-place operation
-    if set(drop.dims).issubset(set(y_term.dims)):
-        y_term *= drop
-    else:
-        y_term = drop * y_term
-    y_term += cylindrical_y(cyl_y_unit_vector(gravity), scattered_beam)
-    phi = sc.atan2(y=y_term, x=x_term)
-
-    x_term *= x_term
-    y_term *= y_term
-
-    if set(x_term.dims).issubset(set(y_term.dims)):
-        y_term += x_term
-    else:
-        y_term = y_term + x_term
-    out = sc.sqrt(y_term, out=y_term)
-    out /= L2
-    out = sc.asin(out, out=out)
-    return {'two_theta': out, 'phi': phi}
 
 
 def phi_no_gravity(
@@ -180,11 +126,10 @@ def sans_elastic(gravity: CorrectForGravity) -> ElasticCoordTransformGraph:
     graph = {**beamline.beamline(scatter=True), **tof.elastic_Q('tof')}
     if gravity:
         del graph['two_theta']
-        graph[('two_theta', 'phi')] = two_theta
+        graph[('two_theta', 'phi')] = scattering_angles_with_gravity
     else:
         graph['phi'] = phi_no_gravity
-    graph['cyl_x_unit_vector'] = cyl_x_unit_vector
-    graph['cyl_y_unit_vector'] = cyl_y_unit_vector
+    graph[('cyl_x_unit_vector', 'cyl_y_unit_vector')] = cyl_unit_vectors
     graph['cylindrical_x'] = cylindrical_x
     graph['cylindrical_y'] = cylindrical_y
     graph[('Qx', 'Qy')] = Qxy
