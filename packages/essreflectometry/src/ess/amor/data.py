@@ -1,20 +1,20 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
-from ..reflectometry.types import FilePath, PoochFilename, Run
+from ..reflectometry.types import FilePath, TutorialFilename, Run
 
-_version = '1'
+_version = "1"
 
-__all__ = ['get_path']
+__all__ = ["get_path"]
 
 
 def _make_pooch():
     import pooch
 
     return pooch.create(
-        path=pooch.os_cache('ess/amor'),
-        env='ESS_AMOR_DATA_DIR',
-        base_url='https://public.esss.dk/groups/scipp/ess/amor/{version}/',
+        path=pooch.os_cache("ess/amor"),
+        env="ESS_AMOR_DATA_DIR",
+        base_url="https://public.esss.dk/groups/scipp/ess/amor/{version}/",
         version=_version,
         registry={
             "reference.nxs": "md5:56d493c8051e1c5c86fb7a95f8ec643b",
@@ -59,7 +59,7 @@ def _make_pooch():
 _pooch = _make_pooch()
 
 
-def get_path(filename: PoochFilename[Run]) -> FilePath[Run]:
+def get_path(filename: TutorialFilename[Run]) -> FilePath[Run]:
     """
     Return the path to a data file bundled with scippneutron.
 

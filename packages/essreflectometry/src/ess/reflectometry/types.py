@@ -3,9 +3,9 @@ from typing import NewType, TypeVar
 import sciline
 import scipp as sc
 
-Reference = NewType('Reference', str)
-Sample = NewType('Sample', str)
-Run = TypeVar('Run', Reference, Sample)
+Reference = NewType("Reference", str)
+Sample = NewType("Sample", str)
+Run = TypeVar("Run", Reference, Sample)
 
 
 class NeXusDetectorName(sciline.Scope[Run, str], str):
@@ -55,38 +55,38 @@ class FootprintCorrectedData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
     on the sample for the incidence angle of the event."""
 
 
-ReferenceIntensity = NewType('ReferenceIntensity', sc.DataArray)
-'''Intensity distribution of the reference measurement in (z, wavelength)'''
+ReferenceIntensity = NewType("ReferenceIntensity", sc.DataArray)
+"""Intensity distribution of the reference measurement in (z, wavelength)"""
 
-IdealReferenceIntensity = NewType('IdealReferenceIntensity', sc.DataArray)
-'''Intensity distribution on the detector for a sample with :math`R(Q) = 1`'''
+IdealReferenceIntensity = NewType("IdealReferenceIntensity", sc.DataArray)
+"""Intensity distribution on the detector for a sample with :math`R(Q) = 1`"""
 
-NormalizationFactor = NewType('NormalizationFactor', sc.DataArray)
-''':code`IdealReferenceIntensity` with added coordinate "sample"-Q'''
+NormalizationFactor = NewType("NormalizationFactor", sc.DataArray)
+""":code`IdealReferenceIntensity` with added coordinate "sample"-Q"""
 
-NormalizedIofQ = NewType('NormalizedIofQ', sc.DataArray)
-'''Intensity histogram over momentum transfer
-normalized by the calibrated reference measurement.'''
+NormalizedIofQ = NewType("NormalizedIofQ", sc.DataArray)
+"""Intensity histogram over momentum transfer
+normalized by the calibrated reference measurement."""
 
-ReflectivityData = NewType('ReflectivityData', sc.DataArray)
-'''Reflectivity "per event". Event data weighted by the expected
-intensity at the coordinates of the event.'''
+ReflectivityData = NewType("ReflectivityData", sc.DataArray)
+"""Reflectivity "per event". Event data weighted by the expected
+intensity at the coordinates of the event."""
 
-QResolution = NewType('QResolution', sc.Variable)
-'''Resolution term for the momentum transfer for each bin of QBins.'''
-
-
-''' Parameters for the workflow '''
-
-QBins = NewType('QBins', sc.Variable)
-'''Bins for the momentum transfer histogram.'''
-
-WavelengthBins = NewType('WavelengthBins', sc.Variable)
-'''Bins for the wavelength histogram, also used to filter the event data.'''
+QResolution = NewType("QResolution", sc.Variable)
+"""Resolution term for the momentum transfer for each bin of QBins."""
 
 
-class PoochFilename(sciline.Scope[Run, str], str):
-    """Name of an event data nexus file in the pooch data repository."""
+""" Parameters for the workflow """
+
+QBins = NewType("QBins", sc.Variable)
+"""Bins for the momentum transfer histogram."""
+
+WavelengthBins = NewType("WavelengthBins", sc.Variable)
+"""Bins for the wavelength histogram, also used to filter the event data."""
+
+
+class TutorialFilename(sciline.Scope[Run, str], str):
+    """Name of an event data nexus file in the tutorial data repository."""
 
 
 class FilePath(sciline.Scope[Run, str], str):
@@ -98,7 +98,7 @@ class SampleRotation(sciline.Scope[Run, sc.Variable], sc.Variable):
 
 
 class DetectorRotation(sciline.Scope[Run, sc.Variable], sc.Variable):
-    '''The rotation of the detector relative to the horizon'''
+    """The rotation of the detector relative to the horizon"""
 
 
 class BeamSize(sciline.Scope[Run, sc.Variable], sc.Variable):
@@ -115,18 +115,18 @@ class SampleSize(sciline.Scope[Run, sc.Variable], sc.Variable):
     """Size of the sample. If None it is assumed to be the same as the reference."""
 
 
-Gravity = NewType('Gravity', sc.Variable)
+Gravity = NewType("Gravity", sc.Variable)
 """This parameter determines if gravity is taken into account
 when computing the scattering angle and momentum transfer."""
 
 
-YIndexLimits = NewType('YIndexLimits', tuple[sc.Variable, sc.Variable])
-'''Limit of the (logical) 'y' detector pixel index'''
+YIndexLimits = NewType("YIndexLimits", tuple[sc.Variable, sc.Variable])
+"""Limit of the (logical) 'y' detector pixel index"""
 
 
-ZIndexLimits = NewType('ZIndexLimits', tuple[sc.Variable, sc.Variable])
-'''Limit of the (logical) 'z' detector pixel index'''
+ZIndexLimits = NewType("ZIndexLimits", tuple[sc.Variable, sc.Variable])
+"""Limit of the (logical) 'z' detector pixel index"""
 
 
-ReferenceFilePath = NewType('ReferenceFilePath', str)
-'''Path to the cached normalization matrix'''
+ReferenceFilePath = NewType("ReferenceFilePath", str)
+"""Path to the cached normalization matrix"""
