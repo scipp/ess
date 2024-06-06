@@ -6,7 +6,7 @@
 #    pip-compile-multi
 #
 -r base.txt
-accessible-pygments==0.0.4
+accessible-pygments==0.0.5
     # via pydata-sphinx-theme
 alabaster==0.7.16
     # via sphinx
@@ -14,7 +14,7 @@ attrs==23.2.0
     # via
     #   jsonschema
     #   referencing
-babel==2.14.0
+babel==2.15.0
     # via
     #   pydata-sphinx-theme
     #   sphinx
@@ -28,7 +28,7 @@ debugpy==1.8.1
     # via ipykernel
 defusedxml==0.7.1
     # via nbconvert
-docutils==0.20.1
+docutils==0.21.2
     # via
     #   myst-parser
     #   nbsphinx
@@ -40,17 +40,17 @@ imagesize==1.4.1
     # via sphinx
 ipykernel==6.29.4
     # via -r docs.in
-jinja2==3.1.3
+jinja2==3.1.4
     # via
     #   myst-parser
     #   nbconvert
     #   nbsphinx
     #   sphinx
-jsonschema==4.21.1
+jsonschema==4.22.0
     # via nbformat
 jsonschema-specifications==2023.12.1
     # via jsonschema
-jupyter-client==8.6.1
+jupyter-client==8.6.2
     # via
     #   ipykernel
     #   nbclient
@@ -71,24 +71,24 @@ markupsafe==2.1.5
     # via
     #   jinja2
     #   nbconvert
-mdit-py-plugins==0.4.0
+mdit-py-plugins==0.4.1
     # via myst-parser
 mdurl==0.1.2
     # via markdown-it-py
 mistune==3.0.2
     # via nbconvert
-myst-parser==2.0.0
+myst-parser==3.0.1
     # via -r docs.in
 nbclient==0.10.0
     # via nbconvert
-nbconvert==7.16.3
+nbconvert==7.16.4
     # via nbsphinx
 nbformat==5.10.4
     # via
     #   nbclient
     #   nbconvert
     #   nbsphinx
-nbsphinx==0.9.3
+nbsphinx==0.9.4
     # via -r docs.in
 nest-asyncio==1.6.0
     # via ipykernel
@@ -96,17 +96,17 @@ pandocfilters==1.5.1
     # via nbconvert
 psutil==5.9.8
     # via ipykernel
-pydata-sphinx-theme==0.15.2
+pydata-sphinx-theme==0.15.3
     # via -r docs.in
-pyzmq==25.1.2
+pyzmq==26.0.3
     # via
     #   ipykernel
     #   jupyter-client
-referencing==0.34.0
+referencing==0.35.1
     # via
     #   jsonschema
     #   jsonschema-specifications
-rpds-py==0.18.0
+rpds-py==0.18.1
     # via
     #   jsonschema
     #   referencing
@@ -114,7 +114,7 @@ snowballstemmer==2.2.0
     # via sphinx
 soupsieve==2.5
     # via beautifulsoup4
-sphinx==7.2.6
+sphinx==7.3.7
     # via
     #   -r docs.in
     #   myst-parser
@@ -123,11 +123,11 @@ sphinx==7.2.6
     #   sphinx-autodoc-typehints
     #   sphinx-copybutton
     #   sphinx-design
-sphinx-autodoc-typehints==2.0.0
+sphinx-autodoc-typehints==2.1.1
     # via -r docs.in
 sphinx-copybutton==0.5.2
     # via -r docs.in
-sphinx-design==0.5.0
+sphinx-design==0.6.0
     # via -r docs.in
 sphinxcontrib-applehelp==1.0.8
     # via sphinx
@@ -141,14 +141,14 @@ sphinxcontrib-qthelp==1.0.7
     # via sphinx
 sphinxcontrib-serializinghtml==1.1.10
     # via sphinx
-tinycss2==1.2.1
+tinycss2==1.3.0
     # via nbconvert
+tomli==2.0.1
+    # via sphinx
 tornado==6.4
     # via
     #   ipykernel
     #   jupyter-client
-typing-extensions==4.10.0
-    # via pydata-sphinx-theme
 webencodings==0.5.1
     # via
     #   bleach
