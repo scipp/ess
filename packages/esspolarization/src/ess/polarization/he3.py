@@ -400,6 +400,7 @@ def correct_for_he3_cell(
     """
     denom = Tplus**2 - Tminus**2
     mat = [[Tplus, -Tminus], [-Tminus, Tplus]]
+    # TODO Can we make this generic to also handle suppermirror matrices?
     """
     t_plus_up = transmission_function.apply(up, 'plus')
     t_minus_up = -transmission_function.apply(up, 'minus')
@@ -453,6 +454,10 @@ def correct_sample_data_for_polarization(
     #         da = PA_inv[j, i] * channel
     #         da *= weights  # weights from error bars or event counts?
     #         result[j] += da.bins.concat('time', 'wavelength').hist(Qx=100, Qy=100)
+    upup, updown = correct_for_he3_cell(upup, updown, transmission_analyzer)
+    downup, downdown = correct_for_he3_cell(downup, downdown, transmission_analyzer)
+    upup, downup = correct_for_he3_cell(upup, downup, transmission_polarizer)
+    updown, downdown = correct_for_he3_cell(updown, downdown, transmission_polarizer)
     raise NotImplementedError()
 
 
