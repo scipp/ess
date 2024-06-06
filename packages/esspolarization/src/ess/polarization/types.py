@@ -23,8 +23,8 @@ class ReducedSampleDataBySpinChannel(
 class AnalyzerCorrectedData(Generic[PolarizerSpin]):
     """Sample data with analyzer correction, prior to polarizer correction."""
 
-    up: sc.DataArray
-    down: sc.DataArray
+    analyzer_up: sc.DataArray
+    analyzer_down: sc.DataArray
 
 
 @dataclass

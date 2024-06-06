@@ -21,7 +21,8 @@ def correct_for_polarizing_element(
     up: sc.DataArray,
     down: sc.DataArray,
     transmission_function: TransmissionFunction[PolarizingElement],
-) -> tuple[sc.DataArray, sc.DataArray]:
+    prefix: str = '',
+) -> tuple[sc.Dataset, sc.Dataset]:
     """
     denom = Tplus**2 - Tminus**2
     mat = [[Tplus, -Tminus], [-Tminus, Tplus]]
@@ -32,35 +33,50 @@ def correct_for_polarizing_element(
     t_minus_down = -transmission_function.apply(down, 'minus')
     up = up / (t_plus_up**2 - t_minus_up**2)
     down = down / (t_plus_down**2 - t_minus_down**2)
+    # TODO This inplace op might not work since we need additional coords from RHS,
+    # such as Q
     t_plus_up *= up
     t_minus_up *= up
     t_plus_down *= down
     t_minus_down *= down
-    # TODO Note that this also concatenates all the coordinates, twice. We should share
-    # the coordinates between the two arrays.
-    out_up = sc.concat([t_plus_up, t_minus_down], up.dim)
-    out_down = sc.concat([t_minus_up, t_plus_down], down.dim)
-    return out_up, out_down
+    # We combine into Datasets so we can share coordinates when concatenating later
+    # TODO I think Scipp does not actually does this, it has a naive impl.
+    # Also, keep in mind that we are in general Q-binned, i.e., concat bins!
+    return (
+        sc.Dataset({f'{prefix}up': t_plus_up, f'{prefix}down': t_minus_up}),
+        sc.Dataset({f'{prefix}up': t_minus_down, f'{prefix}down': t_plus_down}),
+    )
 
 
 def correct_for_analyzer(
-    up: ReducedSampleDataBySpinChannel[PolarizerSpin, Up],
-    down: ReducedSampleDataBySpinChannel[PolarizerSpin, Down],
+    analyzer_up: ReducedSampleDataBySpinChannel[PolarizerSpin, Up],
+    analyzer_down: ReducedSampleDataBySpinChannel[PolarizerSpin, Down],
     transmission: TransmissionFunction[Analyzer],
 ) -> AnalyzerCorrectedData[PolarizerSpin]:
-    up, down = correct_for_polarizing_element(up, down, transmission)
-    return AnalyzerCorrectedData(up=up, down=down)
+    part1, part2 = correct_for_polarizing_element(
+        analyzer_up, analyzer_down, transmission
+    )
+    return AnalyzerCorrectedData(**sc.concat([part1, part2], analyzer_up.dim))
 
 
 def correct_for_polarizer(
-    up: AnalyzerCorrectedData[Up],
-    down: AnalyzerCorrectedData[Down],
+    polarizer_up: AnalyzerCorrectedData[Up],
+    polarizer_down: AnalyzerCorrectedData[Down],
     transmission: TransmissionFunction[Polarizer],
 ) -> PolarizationCorrectedData:
-    upup, downup = correct_for_polarizing_element(up.up, down.up, transmission)
-    updown, downdown = correct_for_polarizing_element(up.down, down.down, transmission)
+    up_part1, up_part2 = correct_for_polarizing_element(
+        polarizer_up.analyzer_up, polarizer_down.analyzer_up, transmission, prefix='up'
+    )
+    down_part1, down_part2 = correct_for_polarizing_element(
+        polarizer_up.analyzer_down,
+        polarizer_down.analyzer_down,
+        transmission,
+        prefix='down',
+    )
+    part1 = sc.Dataset(**up_part1, **down_part1)
+    part2 = sc.Dataset(**up_part2, **down_part2)
     return PolarizationCorrectedData(
-        upup=upup, updown=updown, downup=downup, downdown=downdown
+        **sc.concat([part1, part2], polarizer_up.analyzer_up.dim)
     )
 
 

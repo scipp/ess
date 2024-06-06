@@ -3,7 +3,7 @@
 import scipp as sc
 from scipp.testing import assert_allclose
 
-from ess.polarization.correction import correct_for_polarizing_element
+from ess.polarization.correction import correct_for_analyzer
 
 
 class TransmissionFunction:
@@ -21,7 +21,7 @@ class TransmissionFunction:
         return self(time, wavelength, plus_minus)
 
 
-def test_correct_for_he3_cell() -> None:
+def test_correct_for_analyzer() -> None:
     time = sc.linspace('event', 1, 10, 10, unit='')
     wavelength = sc.linspace('event', 0.1, 1, 10, unit='')
     events = sc.DataArray(
@@ -30,9 +30,11 @@ def test_correct_for_he3_cell() -> None:
     )
     transmission = TransmissionFunction()
 
-    up, down = correct_for_polarizing_element(
-        up=events[:6], down=events[6:], transmission_function=transmission
+    result = correct_for_analyzer(
+        analyzer_up=events[:6], analyzer_down=events[6:], transmission=transmission
     )
+    up = result.analyzer_up
+    down = result.analyzer_down
     assert up.sizes == {'event': 10}
     assert down.sizes == {'event': 10}
     transmission_plus = transmission(time, wavelength, 'plus')
