@@ -9,7 +9,7 @@ essreduce
 pandas
 plopp
 pythreejs
-sciline>=24.4.1
+sciline @ git+https://github.com/scipp/sciline@main
 scipp>=23.8.0
 scippneutron>=23.9.0
 scippnexus>=23.12.1
