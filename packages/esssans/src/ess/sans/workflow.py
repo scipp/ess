@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-from typing import Iterable
+from typing import Iterable, Hashable
 
 import pandas as pd
 import sciline
@@ -52,29 +52,87 @@ def set_banks(pipeline: sciline.Pipeline, banks: Iterable[str]) -> sciline.Pipel
     return pipeline
 
 
-def set_sample_runs(
-    pipeline: sciline.Pipeline, sample_runs: Iterable[str]
+def _maybe_mapped(
+    pipeline: sciline.Pipeline, data: Iterable[str] | None, key: Hashable, dim: str
 ) -> sciline.Pipeline:
-    by_sample_run = pipeline.map(
-        pd.DataFrame({Filename[SampleRun]: sample_runs}).rename_axis('sample_run')
-    )
-    for part in (Numerator, Denominator):
-        pipeline[CleanSummedQ[SampleRun, part]] = by_sample_run[
-            CleanSummedQ[SampleRun, part]
-        ].reduce(index='sample_run', func=_merge_contributions)
+    if data is not None:
+        return pipeline.map(pd.DataFrame({key: data}).rename_axis(dim))
     return pipeline
+
+
+def set_sample_runsx(
+    pipeline: sciline.Pipeline,
+    sample_runs: Iterable[str] | None = None,
+    background_runs: Iterable[str] | None = None,
+    banks: Iterable[str] | None = None,
+) -> sciline.Pipeline:
+    result = pipeline.copy()
+    pipeline = _maybe_mapped(pipeline, banks, NeXusDetectorName, 'bank')
+    pipeline = _maybe_mapped(pipeline, sample_runs, Filename[SampleRun], 'sample_run')
+    pipeline = _maybe_mapped(
+        pipeline, background_runs, Filename[BackgroundRun], 'background_run'
+    )
+
+    # are we happy with how this works in cyclebane?
+    # TODO keep cyclebane magic key replacement or not?
+
+    # Filename
+    #  / \
+    # N   D
+
+    # Filename(run,bank)
+    #   /         \
+    # N(run,bank)  D(run,bank)
+    #  |           |
+    # N(bank)    D(bank)
+    #  |           |
+    #  N           D
+
+    # Options:
+    # 1) fix logic to allow merging graphs with identical mapped values (here: Filename)
+    # 2) get branches after mapping with explicit MappedNode name (more complicated than 1)
+    # 3) support reduce on multiple sink nodes (here: Numerator, Denominator)
+
+    # fixing 1) and removing key magic appears to be conceptually most consistent
+    for part in (Numerator, Denominator):
+        sample = pipeline[CleanSummedQ[SampleRun, part]]
+        background = pipeline[CleanSummedQ[BackgroundRun, part]]
+
+        if sample_runs is not None:
+            sample = sample.reduce(index='sample_run', func=_merge_contributions)
+        if background_runs is not None:
+            background = background.reduce(
+                index='background_run', func=_merge_contributions
+            )
+        if banks is not None:
+            sample = sample.reduce(index='bank', func=_merge_contributions)
+            background = background.reduce(index='bank', func=_merge_contributions)
+        result[CleanSummedQ[SampleRun, part]] = sample
+        result[CleanSummedQ[BackgroundRun, part]] = background
+    return result
+
+
+def _set_runs(
+    pipeline: sciline.Pipeline, runs: Iterable[str], key: Hashable, axis_name: str
+) -> sciline.Pipeline:
+    pipeline = pipeline.copy()
+    runs = pd.DataFrame({Filename[key]: runs}).rename_axis(axis_name)
+    for part in (Numerator, Denominator):
+        pipeline[CleanSummedQ[key, part]] = (
+            pipeline[CleanSummedQ[key, part]]
+            .map(runs)
+            .reduce(index=axis_name, func=_merge_contributions)
+        )
+    return pipeline
+
+
+def set_sample_runs(
+    pipeline: sciline.Pipeline, runs: Iterable[str]
+) -> sciline.Pipeline:
+    return _set_runs(pipeline, runs, SampleRun, 'sample_run')
 
 
 def set_background_runs(
-    pipeline: sciline.Pipeline, sample_runs: Iterable[str]
+    pipeline: sciline.Pipeline, runs: Iterable[str]
 ) -> sciline.Pipeline:
-    by_sample_run = pipeline.map(
-        pd.DataFrame({Filename[BackgroundRun]: sample_runs}).rename_axis(
-            'background_run'
-        )
-    )
-    for part in (Numerator, Denominator):
-        pipeline[CleanSummedQ[BackgroundRun, part]] = by_sample_run[
-            CleanSummedQ[BackgroundRun, part]
-        ].reduce(index='background_run', func=_merge_contributions)
-    return pipeline
+    return _set_runs(pipeline, runs, BackgroundRun, 'background_run')
