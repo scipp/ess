@@ -3,7 +3,7 @@
 import scipp as sc
 from scipp.testing import assert_allclose
 
-from ess.polarization import he3
+from ess.polarization.correction import correct_for_polarizing_element
 
 
 class TransmissionFunction:
@@ -30,7 +30,7 @@ def test_correct_for_he3_cell() -> None:
     )
     transmission = TransmissionFunction()
 
-    up, down = he3.correct_for_he3_cell(
+    up, down = correct_for_polarizing_element(
         up=events[:6], down=events[6:], transmission_function=transmission
     )
     assert up.sizes == {'event': 10}

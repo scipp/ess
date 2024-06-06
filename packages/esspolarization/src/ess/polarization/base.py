@@ -6,15 +6,15 @@ import numpy as np
 import sciline as sl
 import scipp as sc
 
-from .he3 import (
+from .he3 import Polarized, ReducedDirectBeamData, ReducedDirectBeamDataNoCell
+from .types import (
     Analyzer,
-    Cell,
-    Polarized,
+    Down,
     Polarizer,
-    ReducedDirectBeamData,
-    ReducedDirectBeamDataNoCell,
+    PolarizingElement,
+    ReducedSampleDataBySpinChannel,
+    Up,
 )
-from .types import Down, ReducedSampleDataBySpinChannel, Up
 
 spin_up = sc.scalar(1, dtype='int64', unit=None)
 spin_down = sc.scalar(-1, dtype='int64', unit=None)
@@ -26,11 +26,11 @@ SampleInBeamLog = NewType('SampleInBeamLog', sc.DataArray)
 """Whether the sample is in the beam as a time series."""
 
 
-class CellInBeamLog(sl.Scope[Cell, sc.DataArray], sc.DataArray):
+class CellInBeamLog(sl.Scope[PolarizingElement, sc.DataArray], sc.DataArray):
     """Whether a given cell is in the beam as a time series."""
 
 
-class CellSpinLog(sl.Scope[Cell, sc.DataArray], sc.DataArray):
+class CellSpinLog(sl.Scope[PolarizingElement, sc.DataArray], sc.DataArray):
     """Spin state of a given cell, as a time series."""
 
 

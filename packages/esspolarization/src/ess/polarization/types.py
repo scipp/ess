@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-from typing import NewType, TypeVar
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from typing import Generic, Literal, NewType, TypeVar
 
 import sciline as sl
 import scipp as sc
@@ -11,13 +13,40 @@ PolarizerSpin = TypeVar('PolarizerSpin', Up, Down)
 AnalyzerSpin = TypeVar('AnalyzerSpin', Up, Down)
 
 
-PolarizationCorrectedSampleData = NewType(
-    'PolarizationCorrectedSampleData', sc.DataArray
-)
-"""Polarization-corrected sample data."""
-
-
 class ReducedSampleDataBySpinChannel(
     sl.ScopeTwoParams[PolarizerSpin, AnalyzerSpin, sc.DataArray], sc.DataArray
 ):
     """Sample data for a given spin channel."""
+
+
+@dataclass
+class AnalyzerCorrectedData(Generic[PolarizerSpin]):
+    """Sample data with analyzer correction, prior to polarizer correction."""
+
+    up: sc.DataArray
+    down: sc.DataArray
+
+
+@dataclass
+class PolarizationCorrectedData:
+    """Polarization-corrected sample data."""
+
+    upup: sc.DataArray
+    updown: sc.DataArray
+    downup: sc.DataArray
+    downdown: sc.DataArray
+
+
+Analyzer = NewType('Analyzer', str)
+Polarizer = NewType('Polarizer', str)
+PolarizingElement = TypeVar('PolarizingElement', Analyzer, Polarizer)
+
+
+class TransmissionFunction(Generic[PolarizingElement], ABC):
+    """Wavelength- and time-dependent transmission for a given cell."""
+
+    @abstractmethod
+    def apply(
+        self, data: sc.DataArray, plus_minus: Literal['plus', 'minus']
+    ) -> sc.DataArray:
+        ...
