@@ -36,6 +36,8 @@ def correct_for_polarizing_element(
     t_minus_up *= up
     t_plus_down *= down
     t_minus_down *= down
+    # TODO Note that this also concatenates all the coordinates, twice. We should share
+    # the coordinates between the two arrays.
     out_up = sc.concat([t_plus_up, t_minus_down], up.dim)
     out_down = sc.concat([t_minus_up, t_plus_down], down.dim)
     return out_up, out_down
