@@ -55,9 +55,9 @@ def make_params() -> dict:
     return params
 
 
-def make_masks_table() -> sciline.ParamTable:
+def make_masks_table() -> dict[type, list[str]]:
     masks = isis.data.zoom_tutorial_mask_filenames()
-    return sciline.ParamTable(PixelMaskFilename, columns={}, index=masks)
+    return {PixelMaskFilename: masks}
 
 
 def zoom_providers():

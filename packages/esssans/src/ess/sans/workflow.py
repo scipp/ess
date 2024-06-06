@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-from typing import Iterable, Hashable
+from typing import Hashable, Iterable
 
 import pandas as pd
 import sciline
@@ -43,73 +43,14 @@ def set_pixel_mask_filenames(
 def set_banks(pipeline: sciline.Pipeline, banks: Iterable[str]) -> sciline.Pipeline:
     pipeline = pipeline.copy()
     banks = pd.DataFrame({NeXusDetectorName: banks}).rename_axis('bank')
-    by_bank = pipeline.map(banks)
     for run in (SampleRun, BackgroundRun):
         for part in (Numerator, Denominator):
-            pipeline[CleanSummedQ[run, part]] = by_bank[CleanSummedQ[run, part]].reduce(
-                index='bank', func=_merge_contributions
+            pipeline[CleanSummedQ[run, part]] = (
+                pipeline[CleanSummedQ[run, part]]
+                .map(banks)
+                .reduce(index='bank', func=_merge_contributions)
             )
     return pipeline
-
-
-def _maybe_mapped(
-    pipeline: sciline.Pipeline, data: Iterable[str] | None, key: Hashable, dim: str
-) -> sciline.Pipeline:
-    if data is not None:
-        return pipeline.map(pd.DataFrame({key: data}).rename_axis(dim))
-    return pipeline
-
-
-def set_sample_runsx(
-    pipeline: sciline.Pipeline,
-    sample_runs: Iterable[str] | None = None,
-    background_runs: Iterable[str] | None = None,
-    banks: Iterable[str] | None = None,
-) -> sciline.Pipeline:
-    result = pipeline.copy()
-    pipeline = _maybe_mapped(pipeline, banks, NeXusDetectorName, 'bank')
-    pipeline = _maybe_mapped(pipeline, sample_runs, Filename[SampleRun], 'sample_run')
-    pipeline = _maybe_mapped(
-        pipeline, background_runs, Filename[BackgroundRun], 'background_run'
-    )
-
-    # are we happy with how this works in cyclebane?
-    # TODO keep cyclebane magic key replacement or not?
-
-    # Filename
-    #  / \
-    # N   D
-
-    # Filename(run,bank)
-    #   /         \
-    # N(run,bank)  D(run,bank)
-    #  |           |
-    # N(bank)    D(bank)
-    #  |           |
-    #  N           D
-
-    # Options:
-    # 1) fix logic to allow merging graphs with identical mapped values (here: Filename)
-    # 2) get branches after mapping with explicit MappedNode name (more complicated than 1)
-    # 3) support reduce on multiple sink nodes (here: Numerator, Denominator)
-
-    # fixing 1) and removing key magic appears to be conceptually most consistent
-    for part in (Numerator, Denominator):
-        sample = pipeline[CleanSummedQ[SampleRun, part]]
-        background = pipeline[CleanSummedQ[BackgroundRun, part]]
-
-        if sample_runs is not None:
-            sample = sample.reduce(index='sample_run', func=_merge_contributions)
-        if background_runs is not None:
-            background = background.reduce(
-                index='background_run', func=_merge_contributions
-            )
-        if banks is not None:
-            sample = sample.reduce(index='bank', func=_merge_contributions)
-            background = background.reduce(index='bank', func=_merge_contributions)
-        result[CleanSummedQ[SampleRun, part]] = sample
-        result[CleanSummedQ[BackgroundRun, part]] = background
-    return result
 
 
 def _set_runs(

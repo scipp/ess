@@ -15,6 +15,12 @@ from . import (
 from .beam_center_finder import beam_center_from_center_of_mass
 from .direct_beam import direct_beam
 from .types import BackgroundSubtractedIofQ, IofQ, ReturnEvents, SampleRun
+from .workflow import (
+    set_background_runs,
+    set_banks,
+    set_pixel_mask_filenames,
+    set_sample_runs,
+)
 
 try:
     __version__ = importlib.metadata.version(__package__ or __name__)
@@ -53,4 +59,8 @@ __all__ = [
     'masking',
     'normalization',
     'providers',
+    'set_background_runs',
+    'set_banks',
+    'set_pixel_mask_filenames',
+    'set_sample_runs',
 ]
