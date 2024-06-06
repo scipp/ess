@@ -201,6 +201,17 @@ class He3TransmissionFunction(Generic[Cell]):
             polarization *= -1.0
         return self.transmission_empty_glass * sc.exp(-opacity * (1.0 + polarization))
 
+    def apply(
+        self,
+        data: sc.DataArray,
+        plus_minus: Literal['plus', 'minus'],
+    ) -> sc.DataArray:
+        return self(
+            time=data.coords['time'],
+            wavelength=data.coords['wavelength'],
+            plus_minus=plus_minus,
+        )
+
 
 def transmission_incoming_unpolarized(
     *,
@@ -379,6 +390,42 @@ def direct_beam_with_cell(
             background_q_range=background_q_range,
         )
     )
+
+
+def correct_for_he3_cell(
+    up: sc.DataArray,
+    down: sc.DataArray,
+    transmission_function: He3TransmissionFunction[Cell],
+) -> tuple[sc.DataArray, sc.DataArray]:
+    """
+    denom = Tplus**2 - Tminus**2
+    mat = [[Tplus, -Tminus], [-Tminus, Tplus]]
+    """
+    t_plus_up = transmission_function.apply(up, 'plus')
+    t_minus_up = -transmission_function.apply(up, 'minus')
+    t_plus_down = transmission_function.apply(down, 'plus')
+    t_minus_down = -transmission_function.apply(down, 'minus')
+    up = up / (t_plus_up**2 - t_minus_up**2)
+    down = down / (t_plus_down**2 - t_minus_down**2)
+    t_plus_up *= up
+    t_minus_up *= up
+    t_plus_down *= down
+    t_minus_down *= down
+    out_up = sc.concat([t_plus_up, t_minus_down], up.dim)
+    out_down = sc.concat([t_minus_up, t_plus_down], down.dim)
+    return out_up, out_down
+
+
+def correct_for_he3_analyzer(
+    upup: ReducedSampleDataBySpinChannel[Up, Up],
+    updown: ReducedSampleDataBySpinChannel[Up, Down],
+    downup: ReducedSampleDataBySpinChannel[Down, Up],
+    downdown: ReducedSampleDataBySpinChannel[Down, Down],
+    transmission_analyzer: He3TransmissionFunction[Analyzer],
+) -> PolarizationCorrectedSampleData:
+    upup, updown = correct_for_he3_cell(upup, updown, transmission_analyzer)
+    downup, downdown = correct_for_he3_cell(downup, downdown, transmission_analyzer)
+    # TODO
 
 
 def correct_sample_data_for_polarization(

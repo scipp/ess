@@ -1,0 +1,44 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
+import scipp as sc
+from scipp.testing import assert_allclose
+
+from ess.polarization import he3
+
+
+class TransmissionFunction:
+    def __call__(
+        self, time: sc.Variable, wavelength: sc.Variable, plus_minus: str
+    ) -> sc.Variable:
+        if plus_minus == 'plus':
+            return 10 * time * (2 + wavelength)
+        else:
+            return 10 * time * (2 - wavelength)
+
+    def apply(self, da: sc.DataArray, plus_minus: str) -> float:
+        time = da.coords['time']
+        wavelength = da.coords['wavelength']
+        return self(time, wavelength, plus_minus)
+
+
+def test_correct_for_he3_cell() -> None:
+    time = sc.linspace('event', 1, 10, 10, unit='')
+    wavelength = sc.linspace('event', 0.1, 1, 10, unit='')
+    events = sc.DataArray(
+        sc.arange('event', 10),
+        coords={'time': time, 'wavelength': wavelength},
+    )
+    transmission = TransmissionFunction()
+
+    up, down = he3.correct_for_he3_cell(
+        up=events[:6], down=events[6:], transmission_function=transmission
+    )
+    assert up.sizes == {'event': 10}
+    assert down.sizes == {'event': 10}
+    transmission_plus = transmission(time, wavelength, 'plus')
+    transmission_minus = transmission(time, wavelength, 'minus')
+    denom = transmission_plus**2 - transmission_minus**2
+    assert_allclose(up[:6], events[:6] * transmission_plus[:6] / denom[:6])
+    assert_allclose(up[6:], -events[6:] * transmission_minus[6:] / denom[6:])
+    assert_allclose(down[:6], -events[:6] * transmission_minus[:6] / denom[:6])
+    assert_allclose(down[6:], events[6:] * transmission_plus[6:] / denom[6:])
