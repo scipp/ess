@@ -23,7 +23,7 @@ def _merge(*dicts: dict) -> dict:
     return {key: value for d in dicts for key, value in d.items()}
 
 
-def _merge_contributions(*data: sc.DataArray) -> sc.DataArray:
+def merge_contributions(*data: sc.DataArray) -> sc.DataArray:
     if len(data) == 1:
         return data[0]
     reducer = sc.reduce(data)
@@ -31,28 +31,48 @@ def _merge_contributions(*data: sc.DataArray) -> sc.DataArray:
 
 
 def set_pixel_mask_filenames(
-    pipeline: sciline.Pipeline, masks: Iterable[str]
+    workflow: sciline.Pipeline, masks: Iterable[str]
 ) -> sciline.Pipeline:
-    pipeline = pipeline.copy()
-    pipeline[DetectorMasks] = (
-        pipeline[DetectorMasks]
+    """
+    Return modified workflow with pixel mask filenames set.
+
+    Parameters
+    ----------
+    workflow:
+        Workflow to modify.
+    masks:
+        List or tuple of pixel mask filenames to set.
+    """
+    workflow = workflow.copy()
+    workflow[DetectorMasks] = (
+        workflow[DetectorMasks]
         .map(pd.DataFrame({PixelMaskFilename: masks}).rename_axis('mask'))
         .reduce(index='mask', func=_merge)
     )
-    return pipeline
+    return workflow
 
 
-def set_banks(pipeline: sciline.Pipeline, banks: Iterable[str]) -> sciline.Pipeline:
-    pipeline = pipeline.copy()
+def set_banks(workflow: sciline.Pipeline, banks: Iterable[str]) -> sciline.Pipeline:
+    """
+    Return modified workflow with bank names set.
+
+    Parameters
+    ----------
+    workflow:
+        Workflow to modify.
+    banks:
+        List or tuple of bank names to set.
+    """
+    workflow = workflow.copy()
     banks = pd.DataFrame({NeXusDetectorName: banks}).rename_axis('bank')
     for run in (SampleRun, BackgroundRun):
         for part in (Numerator, Denominator):
-            pipeline[CleanSummedQ[run, part]] = (
-                pipeline[CleanSummedQ[run, part]]
+            workflow[CleanSummedQ[run, part]] = (
+                workflow[CleanSummedQ[run, part]]
                 .map(banks)
-                .reduce(index='bank', func=_merge_contributions)
+                .reduce(index='bank', func=merge_contributions)
             )
-    return pipeline
+    return workflow
 
 
 def _set_runs(
@@ -64,18 +84,38 @@ def _set_runs(
         pipeline[CleanSummedQ[key, part]] = (
             pipeline[CleanSummedQ[key, part]]
             .map(runs)
-            .reduce(index=axis_name, func=_merge_contributions)
+            .reduce(index=axis_name, func=merge_contributions)
         )
     return pipeline
 
 
 def set_sample_runs(
-    pipeline: sciline.Pipeline, runs: Iterable[str]
+    workflow: sciline.Pipeline, runs: Iterable[str]
 ) -> sciline.Pipeline:
-    return _set_runs(pipeline, runs, SampleRun, 'sample_run')
+    """
+    Return modified workflow with sample run filenames set.
+
+    Parameters
+    ----------
+    workflow:
+        Workflow to modify.
+    runs:
+        List or tuple of sample run filenames to set.
+    """
+    return _set_runs(workflow, runs, SampleRun, 'sample_run')
 
 
 def set_background_runs(
-    pipeline: sciline.Pipeline, runs: Iterable[str]
+    workflow: sciline.Pipeline, runs: Iterable[str]
 ) -> sciline.Pipeline:
-    return _set_runs(pipeline, runs, BackgroundRun, 'background_run')
+    """
+    Return modified workflow with background run filenames set.
+
+    Parameters
+    ----------
+    workflow:
+        Workflow to modify.
+    runs:
+        List or tuple of background run filenames to set.
+    """
+    return _set_runs(workflow, runs, BackgroundRun, 'background_run')

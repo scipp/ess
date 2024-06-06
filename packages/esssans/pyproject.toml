@@ -33,6 +33,7 @@ dependencies = [
   "dask",
   "graphviz",
   "essreduce",
+  "pandas",
   "plopp",
   "pythreejs",
   "sciline>=24.4.1",

@@ -13,7 +13,6 @@ from ess.sans.types import (
     IofQxy,
     NeXusMonitorName,
     NonBackgroundWavelengthRange,
-    PixelMaskFilename,
     QBins,
     QxBins,
     QyBins,
@@ -55,21 +54,16 @@ def make_params() -> dict:
     return params
 
 
-def make_masks_table() -> dict[type, list[str]]:
-    masks = isis.data.zoom_tutorial_mask_filenames()
-    return {PixelMaskFilename: masks}
-
-
 def zoom_providers():
     return list(
         sans.providers
         + isis.providers
         + isis.mantidio.providers
         + (
-            isis.data.transmission_from_background_run,
-            isis.data.transmission_from_sample_run,
             isis.data.load_tutorial_direct_beam,
             isis.data.load_tutorial_run,
+            isis.data.transmission_from_background_run,
+            isis.data.transmission_from_sample_run,
             sans.beam_center_finder.beam_center_from_center_of_mass,
         )
     )
@@ -77,20 +71,26 @@ def zoom_providers():
 
 def test_can_create_pipeline():
     pipeline = sciline.Pipeline(zoom_providers(), params=make_params())
-    pipeline.set_param_table(make_masks_table())
+    pipeline = sans.set_pixel_mask_filenames(
+        pipeline, isis.data.zoom_tutorial_mask_filenames()
+    )
     pipeline.get(IofQ[SampleRun])
 
 
 def test_pipeline_can_compute_IofQ():
     pipeline = sciline.Pipeline(zoom_providers(), params=make_params())
-    pipeline.set_param_table(make_masks_table())
+    pipeline = sans.set_pixel_mask_filenames(
+        pipeline, isis.data.zoom_tutorial_mask_filenames()
+    )
     result = pipeline.compute(IofQ[SampleRun])
     assert result.dims == ('Q',)
 
 
 def test_pipeline_can_compute_IofQxQy():
     pipeline = sciline.Pipeline(zoom_providers(), params=make_params())
-    pipeline.set_param_table(make_masks_table())
+    pipeline = sans.set_pixel_mask_filenames(
+        pipeline, isis.data.zoom_tutorial_mask_filenames()
+    )
     pipeline[QxBins] = sc.linspace(
         dim='Qx', start=-0.5, stop=0.5, num=101, unit='1/angstrom'
     )
