@@ -48,7 +48,7 @@ def test_can_create_pipeline():
 
 
 def test_can_create_pipeline_with_pixel_masks():
-    pipeline = sciline.Pipeline(loki_providers(), params=make_params())
+    pipeline = sciline.Pipeline(loki_providers(), params=make_params(no_masks=False))
     pipeline = sans.set_pixel_mask_filenames(
         pipeline, loki.data.loki_tutorial_mask_filenames()
     )
@@ -271,8 +271,11 @@ def test_pipeline_IofQ_merging_events_yields_consistent_results():
 
 
 def test_beam_center_from_center_of_mass_is_close_to_verified_result():
-    params = make_params()
+    params = make_params(no_masks=False)
     pipeline = sciline.Pipeline(loki_providers(), params=params)
+    pipeline = sans.set_pixel_mask_filenames(
+        pipeline, loki.data.loki_tutorial_mask_filenames()
+    )
     center = pipeline.compute(BeamCenter)
     reference = sc.vector([-0.0291487, -0.0181614, 0], unit='m')
     assert sc.allclose(center, reference)

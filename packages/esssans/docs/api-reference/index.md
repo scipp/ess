@@ -19,6 +19,10 @@
    :recursive:
 
    providers
+   set_background_runs
+   set_banks
+   set_pixel_mask_filenames
+   set_sample_runs
 ```
 
 ## Submodules

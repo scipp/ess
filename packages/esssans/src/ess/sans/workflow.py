@@ -34,9 +34,11 @@ def set_pixel_mask_filenames(
     pipeline: sciline.Pipeline, masks: Iterable[str]
 ) -> sciline.Pipeline:
     pipeline = pipeline.copy()
-    pipeline[DetectorMasks] = pipeline.map(
-        pd.DataFrame({PixelMaskFilename: masks}).rename_axis('mask')
-    )[DetectorMasks].reduce(func=_merge)
+    pipeline[DetectorMasks] = (
+        pipeline[DetectorMasks]
+        .map(pd.DataFrame({PixelMaskFilename: masks}).rename_axis('mask'))
+        .reduce(index='mask', func=_merge)
+    )
     return pipeline
 
 

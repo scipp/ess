@@ -83,10 +83,10 @@ def sans2d_providers():
         + isis.sans2d.providers
         + isis.mantidio.providers
         + (
-            isis.data.transmission_from_background_run,
-            isis.data.transmission_from_sample_run,
             isis.data.load_tutorial_direct_beam,
             isis.data.load_tutorial_run,
+            isis.data.transmission_from_background_run,
+            isis.data.transmission_from_sample_run,
             sans.beam_center_finder.beam_center_from_center_of_mass,
         )
     )
