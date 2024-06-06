@@ -43,6 +43,7 @@ class He3CellTransmissionFraction(
     """Transmission fraction for a given cell"""
 
 
+# TODO rename and change to Up | Down | Unpolarized
 He3CellTransmissionFractionHasPolarizedIncomingBeam = NewType(
     'He3CellTransmissionFractionHasPolarizedIncomingBeam', bool
 )
