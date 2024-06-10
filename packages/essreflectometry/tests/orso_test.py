@@ -7,7 +7,7 @@ from orsopy import fileio
 
 from ess import amor, reflectometry
 from ess.reflectometry import orso
-from ess.reflectometry.types import TutorialFilename, Sample
+from ess.reflectometry.types import Sample, TutorialFilename
 
 
 def test_build_orso_data_source():
