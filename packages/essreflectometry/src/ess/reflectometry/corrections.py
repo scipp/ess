@@ -24,8 +24,8 @@ def footprint_correction(
     sample_size: SampleSize[Run],
 ) -> FootprintCorrectedData[Run]:
     """
-    Perform the footprint correction on the data array that has a :code:`beam_size` and
-    binned :code:`theta` values.
+    Corrects the event weights by the fraction of the beam hitting the sample.
+    Depends on :math:`\\theta`.
 
     Parameters
     ----------
