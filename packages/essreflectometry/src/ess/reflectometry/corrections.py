@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-from typing import Optional
 
 import scipp as sc
 
@@ -22,7 +21,7 @@ from .types import (
 def footprint_correction(
     data_array: MaskedEventData[Run],
     beam_size: BeamSize[Run],
-    sample_size: Optional[SampleSize[Run]],
+    sample_size: SampleSize[Run],
 ) -> FootprintCorrectedData[Run]:
     """
     Perform the footprint correction on the data array that has a :code:`beam_size` and
@@ -35,16 +34,15 @@ def footprint_correction(
     beam_size:
         Full width half maximum of the beam.
     sample_size:
-        Size of the sample
+        Size of the sample.
+        TODO: check what sample size actually means. Is it the sample diameter? etc.
 
     Returns
     -------
     :
        Footprint corrected data array.
     """
-    if sample_size is None:
-        return FootprintCorrectedData[Run](data_array)
-    size_of_beam_on_sample = beam_size / sc.sin(data_array.bins.coords['theta'])
+    size_of_beam_on_sample = beam_size / sc.sin(data_array.bins.coords["theta"])
     footprint_scale = sc.erf(fwhm_to_std(sample_size / size_of_beam_on_sample))
     data_array_fp_correction = data_array / footprint_scale
     return FootprintCorrectedData[Run](data_array_fp_correction)
@@ -59,20 +57,20 @@ def compute_reference_intensity(
         with the experiment parameters (such as sample rotation).
         Therefore it can be used to normalize sample measurements.
     """
-    b = da.bins.concat(set(da.dims) - set(da.coords['z_index'].dims)).bin(wavelength=wb)
+    b = da.bins.concat(set(da.dims) - set(da.coords["z_index"].dims)).bin(wavelength=wb)
     h = b.hist()
-    h.masks['too_few_events'] = h.data < sc.scalar(1, unit='counts')
+    h.masks["too_few_events"] = h.data < sc.scalar(1, unit="counts")
     # Add a Q coordinate to each bin, the Q is not completely unique in every bin,
     # but it is close enough.
-    h.coords['Q'] = b.bins.coords['Q'].bins.mean()
+    h.coords["Q"] = b.bins.coords["Q"].bins.mean()
     return ReferenceIntensity(h)
 
 
 def calibrate_reference(
     da: ReferenceIntensity, cal: SupermirrorReflectivityCorrection
 ) -> IdealReferenceIntensity:
-    '''Calibrates the reference intensity by the
-    inverse of the supermirror reflectivity'''
+    """Calibrates the reference intensity by the
+    inverse of the supermirror reflectivity"""
     return IdealReferenceIntensity(da * cal)
 
 
