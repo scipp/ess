@@ -16,10 +16,7 @@ from ..reflectometry.orso import (
     OrsoIofQDataset,
     OrsoReduction,
 )
-from ..reflectometry.types import (
-    NormalizedIofQ,
-    QResolution,
-)
+from ..reflectometry.types import NormalizedIofQ, QResolution
 
 
 def build_orso_instrument(events: NormalizedIofQ) -> OrsoInstrument:
