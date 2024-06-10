@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
+from collections.abc import Callable, Mapping
+from dataclasses import dataclass
 from typing import NewType, Optional, TypeVar
 
 import scipp as sc
@@ -358,6 +360,123 @@ def cut_tails(
     )
 
 
+@dataclass
+class FittingResult:
+    """Result of the fitting process."""
+
+    fitting_func: Callable[..., sc.DataArray]
+    """The fitting function to be used for fitting."""
+    params: Mapping
+    """Parameters of the fitting function."""
+    covariance: Mapping
+    """Covariance of the :attr:`~FittingParams`."""
+    fit_output: sc.DataArray
+    """The final output of the fitting function."""
+
+
+def polyval_wavelength(
+    wavelength: sc.Variable, *, out_unit: str, **kwargs
+) -> sc.DataArray:
+    """Polynomial helper for fitting.
+
+    The coefficients are adjusted to make the fitting result
+    have ``out_unit`` as unit.
+
+    Parameters
+    ----------
+    wavelength:
+        The wavelength coordinate.
+    out_unit:
+        The unit of the output.
+    **kwargs:
+        The polynomial coefficients.
+
+    Returns
+    -------
+    :
+        The polynomial calculated at the wavelength.
+
+
+    """
+    out = sc.zeros_like(wavelength)
+    out.unit = out_unit
+    xk = sc.ones_like(wavelength)
+    for _, arg_value in enumerate(kwargs.values()):
+        out += sc.values(arg_value) * xk * sc.scalar(1.0, unit=out.unit / xk.unit)
+        xk *= wavelength
+    return out
+
+
+WavelengthFittingPolynomialDegree = NewType("WavelengthFittingPolynomialDegree", int)
+DEFAULT_WAVELENGTH_FITTING_POLYNOMIAL_DEGREE = WavelengthFittingPolynomialDegree(7)
+
+
+def fit_wavelength_scale_factor_polynomial(
+    estimated_intensities: FilteredEstimatedScaledIntensities,
+    *,
+    n_degree: WavelengthFittingPolynomialDegree,
+) -> FittingResult:
+    """Fit the wavelength scale factor polynomial.
+
+    It uses :func:`polyval_wavelength` as the fitting function
+    and :func:`scipp.optimize.curve_fit` for the fitting process.
+    The initial guess for the polynomial coefficients is set to 1
+    for all degrees.
+    The unit of the coefficients is adjusted to make the fitting result
+    dimensionless.
+
+    Parameters
+    ----------
+    estimated_intensities:
+        The estimated scaled intensities to be fitted.
+    n_degree:
+        The degree of the polynomial to be fitted.
+
+    Returns
+    -------
+    :
+        The fitting result.
+
+    """
+
+    from functools import partial
+
+    fitting_func = partial(polyval_wavelength, out_unit="dimensionless")
+    p_result, cov_result = sc.curve_fit(
+        coords=["wavelength"],
+        f=fitting_func,
+        da=estimated_intensities,
+        p0={f"arg{i}": sc.scalar(1) for i in range(n_degree)},
+    )
+    data = fitting_func(estimated_intensities.coords["wavelength"], **p_result)
+    return FittingResult(
+        fitting_func=fitting_func,
+        params=p_result,
+        covariance=cov_result,
+        fit_output=sc.DataArray(
+            data=data.data,
+            coords={"wavelength": estimated_intensities.coords["wavelength"]},
+        ),
+    )
+
+
+WavelengthScaleFactors = NewType("WavelengthScaleFactors", sc.DataArray)
+"""The scale factors of :attr:`~DEFAULT_WAVELENGTH_COORD_NAME`."""
+
+
+def calculate_wavelength_scale_factor(
+    fitting_result: FittingResult,
+    reference_wavelength: SelectedReferenceWavelength,
+) -> WavelengthScaleFactors:
+    """Calculate the scale factors along the :attr:`~DEFAULT_WAVELENGTH_COORD_NAME`."""
+
+    scaled_reference = fitting_result.fitting_func(
+        reference_wavelength, **fitting_result.params
+    )
+    scale_factor = fitting_result.fit_output / scaled_reference
+    return WavelengthScaleFactors(scale_factor)
+
+
 # Providers and default parameters
 scaling_providers = (
     cut_tails,
@@ -366,6 +485,8 @@ scaling_providers = (
     get_reference_intensities,
     estimate_scale_factor_per_hkl_asu_from_reference,
     average_roughly_scaled_intensities,
+    fit_wavelength_scale_factor_polynomial,
+    calculate_wavelength_scale_factor,
 )
 """Providers for scaling data."""
 
@@ -374,5 +495,6 @@ scaling_params = {
     MaxWavelengthBinEdge: DEFAULT_MAX_WAVELENGTH_BIN_EDGE,
     ScaledIntensityLeftTailThreshold: DEFAULT_LEFT_TAIL_THRESHOLD,
     ScaledIntensityRightTailThreshold: DEFAULT_RIGHT_TAIL_THRESHOLD,
+    WavelengthFittingPolynomialDegree: WavelengthFittingPolynomialDegree(7),
 }
 """Default parameters for scaling data."""
