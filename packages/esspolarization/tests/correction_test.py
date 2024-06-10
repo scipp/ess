@@ -44,3 +44,21 @@ def test_correct_for_analyzer() -> None:
     assert_allclose(up[6:], -events[6:] * transmission_minus[6:] / denom[6:])
     assert_allclose(down[:6], -events[:6] * transmission_minus[:6] / denom[:6])
     assert_allclose(down[6:], events[6:] * transmission_plus[6:] / denom[6:])
+
+
+def test_correction_preserves_coords() -> None:
+    time = sc.linspace('event', 1, 10, 10, unit='')
+    wavelength = sc.linspace('event', 0.1, 1, 10, unit='')
+    events = sc.DataArray(
+        sc.arange('event', 10),
+        coords={'time': time, 'wavelength': wavelength},
+    )
+    events.coords['other'] = sc.linspace('event', 0, 1, 10, unit='')
+    transmission = TransmissionFunction()
+
+    result = correct_for_analyzer(
+        analyzer_up=events[:6], analyzer_down=events[6:], transmission=transmission
+    )
+    for coord in ['time', 'wavelength', 'other']:
+        assert coord in result.analyzer_up.coords
+        assert coord in result.analyzer_down.coords

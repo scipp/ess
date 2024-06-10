@@ -33,8 +33,6 @@ def correct_for_polarizing_element(
     t_minus_down = -transmission_function.apply(down, 'minus')
     up = up / (t_plus_up**2 - t_minus_up**2)
     down = down / (t_plus_down**2 - t_minus_down**2)
-    # TODO This inplace op might not work since we need additional coords from RHS,
-    # such as Q
     t_plus_up *= up
     t_minus_up *= up
     t_plus_down *= down
@@ -54,9 +52,11 @@ def correct_for_analyzer(
     transmission: TransmissionFunction[Analyzer],
 ) -> AnalyzerCorrectedData[PolarizerSpin]:
     part1, part2 = correct_for_polarizing_element(
-        analyzer_up, analyzer_down, transmission
+        analyzer_up, analyzer_down, transmission, prefix='analyzer_'
     )
-    return AnalyzerCorrectedData(**sc.concat([part1, part2], analyzer_up.dim))
+    return AnalyzerCorrectedData[PolarizerSpin](
+        **sc.concat([part1, part2], analyzer_up.dim)
+    )
 
 
 def correct_for_polarizer(
