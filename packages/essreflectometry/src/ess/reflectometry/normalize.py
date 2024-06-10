@@ -17,10 +17,9 @@ from .types import (
 def normalization_factor(
     da: FootprintCorrectedData[Sample],
     corr: IdealReferenceIntensity,
-    qbins: QBins,
     wbins: WavelengthBins,
 ) -> NormalizationFactor:
-    '''The correction matrix gives us the expected intensity at each
+    """The correction matrix gives us the expected intensity at each
     (z_index, wavelength) bin assuming the reflectivity is one.
     To normalize the sample measurement we need to integrate the total
     expected intensity in every Q-bin.
@@ -39,21 +38,21 @@ def normalization_factor(
         Compute 'sample-q' in all bins using the fit.
         Return the reference intensity with the 'sample-q' as a coordinate.
 
-    '''
+    """
     sample_q = (
-        da.bins.concat(set(da.dims) - set(da.coords['z_index'].dims))
+        da.bins.concat(set(da.dims) - set(da.coords["z_index"].dims))
         .bin(wavelength=wbins)
-        .bins.coords['Q']
+        .bins.coords["Q"]
         .bins.mean()
     )
 
-    wm = sc.midpoints(corr.coords['wavelength'])
+    wm = sc.midpoints(corr.coords["wavelength"])
 
     def q_of_z_wavelength(wavelength, a, b):
         return a + b / wavelength
 
     p, _ = sc.curve_fit(
-        ['wavelength'],
+        ["wavelength"],
         q_of_z_wavelength,
         sc.DataArray(
             data=sample_q,
@@ -63,15 +62,15 @@ def normalization_factor(
                 _sample_q_isnan=sc.isnan(sample_q),
             ),
         ),
-        p0=dict(a=sc.scalar(1, unit='1/angstrom')),
+        p0=dict(a=sc.scalar(1, unit="1/angstrom")),
     )
     return sc.DataArray(
         data=corr.data,
         coords=dict(
             Q=q_of_z_wavelength(
                 wm,
-                sc.values(p['a']),
-                sc.values(p['b']),
+                sc.values(p["a"]),
+                sc.values(p["b"]),
             ).data,
         ),
         masks=corr.masks,
@@ -99,7 +98,7 @@ def reflectivity_over_q(
         Reflectivity as a function of Q
     """
     return NormalizedIofQ(
-        da.bins.concat().bin(Q=qbins) / sc.values(n.flatten(to='Q').hist(Q=qbins))
+        da.bins.concat().bin(Q=qbins) / sc.values(n.flatten(to="Q").hist(Q=qbins))
     )
 
 

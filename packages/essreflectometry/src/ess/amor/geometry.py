@@ -56,7 +56,7 @@ def pixel_coordinate_in_detector_system(pixelID):
 
 
 def pixel_coordinate_in_lab_frame(pixelID, nu):
-    _, detZi, detX, delta = pixel_coordinate_in_detector_system(pixelID)
+    _, _, detX, delta = pixel_coordinate_in_detector_system(pixelID)
 
     angle_to_horizon = (nu + delta).to(unit="rad")
     distance_to_pixel = detX + Detector.distance

@@ -13,7 +13,6 @@ from ..reflectometry.types import (
     NeXusDetectorName,
     Run,
     SamplePosition,
-    SampleSize,
 )
 from . import conversions, data, load, orso, resolution, utils
 from .instrument_view import instrument_view
