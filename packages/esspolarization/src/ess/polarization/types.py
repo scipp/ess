@@ -19,24 +19,6 @@ class ReducedSampleDataBySpinChannel(
     """Sample data for a given spin channel."""
 
 
-@dataclass
-class AnalyzerCorrectedData(Generic[PolarizerSpin]):
-    """Sample data with analyzer correction, prior to polarizer correction."""
-
-    analyzer_up: sc.DataArray
-    analyzer_down: sc.DataArray
-
-
-@dataclass
-class PolarizationCorrectedData:
-    """Polarization-corrected sample data."""
-
-    upup: sc.DataArray
-    updown: sc.DataArray
-    downup: sc.DataArray
-    downdown: sc.DataArray
-
-
 Analyzer = NewType('Analyzer', str)
 Polarizer = NewType('Polarizer', str)
 PolarizingElement = TypeVar('PolarizingElement', Analyzer, Polarizer)
@@ -52,10 +34,38 @@ class TransmissionFunction(Generic[PolarizingElement], ABC):
         ...
 
 
+@dataclass
 class PolarizingElementCorrection(
     Generic[PolarizerSpin, AnalyzerSpin, PolarizingElement]
 ):
-    """Correction factors for polarizing element."""
+    """Correction factors for polarizer or analyzer."""
 
     diag: sc.DataArray
     off_diag: sc.DataArray
+
+
+@dataclass
+class PolarizationCorrection(Generic[PolarizerSpin, AnalyzerSpin]):
+    """Combined correction factors for polarizer and analyzer."""
+
+    upup: sc.DataArray
+    updown: sc.DataArray
+    downup: sc.DataArray
+    downdown: sc.DataArray
+
+
+@dataclass
+class PolarizationCorrectedData(Generic[PolarizerSpin, AnalyzerSpin]):
+    """
+    Polarization-corrected sample data.
+
+    The PolarizerSpin and AnalyzerSpin type parameters refer to the measurement. The
+    fields in this class give the resulting data after applying the corrections. For a
+    given measurement with polarizer spin `PolarizerSpin` and analyzer spin
+    `AnalyzerSpin`, there will be resulting intensity in all four output fields.
+    """
+
+    upup: sc.DataArray
+    updown: sc.DataArray
+    downup: sc.DataArray
+    downdown: sc.DataArray

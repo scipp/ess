@@ -3,7 +3,7 @@
 import scipp as sc
 from scipp.testing import assert_allclose
 
-from ess.polarization.correction import correct_for_analyzer
+from ess.polarization.correction import compute_polarizing_element_correction
 
 
 class TransmissionFunction:
@@ -21,7 +21,7 @@ class TransmissionFunction:
         return self(time, wavelength, plus_minus)
 
 
-def test_correct_for_analyzer() -> None:
+def test_compute_polarizing_element_correction() -> None:
     time = sc.linspace('event', 1, 10, 10, unit='')
     wavelength = sc.linspace('event', 0.1, 1, 10, unit='')
     events = sc.DataArray(
@@ -30,35 +30,15 @@ def test_correct_for_analyzer() -> None:
     )
     transmission = TransmissionFunction()
 
-    result = correct_for_analyzer(
-        analyzer_up=events[:6], analyzer_down=events[6:], transmission=transmission
+    result = compute_polarizing_element_correction(
+        channel=events, transmission=transmission
     )
-    up = result.analyzer_up
-    down = result.analyzer_down
-    assert up.sizes == {'event': 10}
-    assert down.sizes == {'event': 10}
+    diag = result.diag
+    off_diag = result.off_diag
+    assert diag.sizes == {'event': 10}
+    assert off_diag.sizes == {'event': 10}
     transmission_plus = transmission(time, wavelength, 'plus')
     transmission_minus = transmission(time, wavelength, 'minus')
     denom = transmission_plus**2 - transmission_minus**2
-    assert_allclose(up[:6], events[:6] * transmission_plus[:6] / denom[:6])
-    assert_allclose(up[6:], -events[6:] * transmission_minus[6:] / denom[6:])
-    assert_allclose(down[:6], -events[:6] * transmission_minus[:6] / denom[:6])
-    assert_allclose(down[6:], events[6:] * transmission_plus[6:] / denom[6:])
-
-
-def test_correction_preserves_coords() -> None:
-    time = sc.linspace('event', 1, 10, 10, unit='')
-    wavelength = sc.linspace('event', 0.1, 1, 10, unit='')
-    events = sc.DataArray(
-        sc.arange('event', 10),
-        coords={'time': time, 'wavelength': wavelength},
-    )
-    events.coords['other'] = sc.linspace('event', 0, 1, 10, unit='')
-    transmission = TransmissionFunction()
-
-    result = correct_for_analyzer(
-        analyzer_up=events[:6], analyzer_down=events[6:], transmission=transmission
-    )
-    for coord in ['time', 'wavelength', 'other']:
-        assert coord in result.analyzer_up.coords
-        assert coord in result.analyzer_down.coords
+    assert_allclose(diag, transmission_plus / denom)
+    assert_allclose(off_diag, -transmission_minus / denom)
