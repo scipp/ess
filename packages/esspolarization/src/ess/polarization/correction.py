@@ -22,8 +22,28 @@ def compute_polarizing_element_correction(
     transmission: TransmissionFunction[PolarizingElement],
 ) -> PolarizingElementCorrection[PolarizerSpin, AnalyzerSpin, PolarizingElement]:
     """
-    denom = Tplus**2 - Tminus**2
-    mat = [[Tplus, -Tminus], [-Tminus, Tplus]]
+    Compute matrix coefficients for the correction of a polarizing element.
+
+    The coefficients stem from the inverse of a symmetric matrix of the form
+    [[Tplus, Tminus], [Tminus, Tplus]]. The inverse is given by a matrix
+        mat = 1/denom * [[Tplus, -Tminus], [-Tminus, Tplus]],
+    with
+        denom = Tplus**2 - Tminus**2.
+    As there are only two unique elements in the matrix, we return them as a dataclass
+    with diagonal and off-diagonal elements.
+
+    Parameters
+    ----------
+    channel :
+        Data including wavelength (and time) for a given spin channel.
+    transmission :
+        Transmission function for the polarizing element.
+
+    Returns
+    -------
+    :
+        Correction matrix coefficients.
+
     """
     t_plus = transmission.apply(channel, 'plus')
     t_minus = transmission.apply(channel, 'minus')
@@ -41,6 +61,23 @@ def compute_polarization_correction(
     analyzer: PolarizingElementCorrection[PolarizerSpin, AnalyzerSpin, Analyzer],
     polarizer: PolarizingElementCorrection[PolarizerSpin, AnalyzerSpin, Polarizer],
 ) -> PolarizationCorrection[PolarizerSpin, AnalyzerSpin]:
+    """
+    Compute combined correction coefficients for polarizer and analyzer.
+
+    This is effectively a column resulting from a sparse matrix-matrix product.
+
+    Parameters
+    ----------
+    analyzer :
+        Correction coefficients for the analyzer.
+    polarizer :
+        Correction coefficients for the polarizer.
+
+    Returns
+    -------
+    :
+        Combined correction coefficients.
+    """
     return PolarizationCorrection[PolarizerSpin, AnalyzerSpin](
         upup=polarizer.diag * analyzer.diag,
         updown=polarizer.diag * analyzer.off_diag,
