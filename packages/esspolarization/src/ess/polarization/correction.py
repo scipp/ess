@@ -59,6 +59,45 @@ def compute_polarizing_element_correction(
     )
 
 
+def _compute_pol_corr(
+    *,
+    analyzer: PolarizingElementCorrection[PolarizerSpin, AnalyzerSpin, Analyzer],
+    polarizer: PolarizingElementCorrection[PolarizerSpin, AnalyzerSpin, Polarizer],
+    analyzer_up: bool,
+    polarizer_up: bool,
+) -> PolarizationCorrection[PolarizerSpin, AnalyzerSpin]:
+    """
+    Compute a column of the combined correction coefficients for polarizer and analyzer.
+
+    This is effectively a column resulting from a sparse matrix-matrix product.
+
+    Parameters
+    ----------
+    analyzer :
+        Correction coefficients for the analyzer.
+    polarizer :
+        Correction coefficients for the polarizer.
+    analyzer_up :
+        Whether the analyzer is in the up position.
+    polarizer_up :
+        Whether the polarizer is in the up position.
+
+    Returns
+    -------
+    :
+        Combined correction coefficients.
+    """
+
+    a_up, a_down = analyzer.get(up=analyzer_up)
+    p_up, p_down = polarizer.get(up=polarizer_up)
+    return PolarizationCorrection[PolarizerSpin, AnalyzerSpin](
+        upup=p_up * a_up,
+        updown=p_up * a_down,
+        downup=p_down * a_up,
+        downdown=p_down * a_down,
+    )
+
+
 def compute_polarization_correction_upup(
     analyzer: PolarizingElementCorrection[Up, Up, Analyzer],
     polarizer: PolarizingElementCorrection[Up, Up, Polarizer],
@@ -82,11 +121,8 @@ def compute_polarization_correction_upup(
     :
         Combined correction coefficients.
     """
-    return PolarizationCorrection[Up, Up](
-        upup=polarizer.diag * analyzer.diag,
-        updown=polarizer.diag * analyzer.off_diag,
-        downup=polarizer.off_diag * analyzer.diag,
-        downdown=polarizer.off_diag * analyzer.off_diag,
+    return _compute_pol_corr(
+        analyzer=analyzer, polarizer=polarizer, analyzer_up=True, polarizer_up=True
     )
 
 
@@ -99,11 +135,8 @@ def compute_polarization_correction_updown(
 
     See :py:func:`compute_polarization_correction_upup` for more details.
     """
-    return PolarizationCorrection[Up, Down](
-        upup=polarizer.diag * analyzer.off_diag,
-        updown=polarizer.diag * analyzer.diag,
-        downup=polarizer.off_diag * analyzer.off_diag,
-        downdown=polarizer.off_diag * analyzer.diag,
+    return _compute_pol_corr(
+        analyzer=analyzer, polarizer=polarizer, analyzer_up=False, polarizer_up=True
     )
 
 
@@ -116,11 +149,8 @@ def compute_polarization_correction_downup(
 
     See :py:func:`compute_polarization_correction_upup` for more details.
     """
-    return PolarizationCorrection[Down, Up](
-        upup=polarizer.off_diag * analyzer.diag,
-        updown=polarizer.off_diag * analyzer.off_diag,
-        downup=polarizer.diag * analyzer.diag,
-        downdown=polarizer.diag * analyzer.off_diag,
+    return _compute_pol_corr(
+        analyzer=analyzer, polarizer=polarizer, analyzer_up=True, polarizer_up=False
     )
 
 
@@ -133,11 +163,8 @@ def compute_polarization_correction_downdown(
 
     See :py:func:`compute_polarization_correction_upup` for more details.
     """
-    return PolarizationCorrection[Down, Down](
-        upup=polarizer.off_diag * analyzer.off_diag,
-        updown=polarizer.off_diag * analyzer.diag,
-        downup=polarizer.diag * analyzer.off_diag,
-        downdown=polarizer.diag * analyzer.diag,
+    return _compute_pol_corr(
+        analyzer=analyzer, polarizer=polarizer, analyzer_up=False, polarizer_up=False
     )
 
 

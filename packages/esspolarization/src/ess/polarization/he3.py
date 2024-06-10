@@ -256,7 +256,8 @@ def get_he3_transmission_from_fit_to_direct_beam(
     ) -> sc.Variable:
         polarization_function = He3PolarizationFunction[PolarizingElement](C=C, T1=T1)
         if incoming_polarized:
-            # TODO Why is this 'plus'? Does it depend on the supermirror?
+            # TODO Why is this 'plus'? Does it depend on the supermirror and spin
+            # flipper?
             return He3TransmissionFunction(
                 opacity_function=opacity_function,
                 polarization_function=polarization_function,

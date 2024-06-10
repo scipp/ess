@@ -43,6 +43,12 @@ class PolarizingElementCorrection(
     diag: sc.DataArray
     off_diag: sc.DataArray
 
+    def get(self, *, up: bool) -> tuple[sc.DataArray, sc.DataArray]:
+        """Get the correction factors for up or down spin."""
+        if up:
+            return self.diag, self.off_diag
+        return self.off_diag, self.diag
+
 
 @dataclass
 class PolarizationCorrection(Generic[PolarizerSpin, AnalyzerSpin]):
