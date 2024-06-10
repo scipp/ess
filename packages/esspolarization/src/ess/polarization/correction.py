@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+from dataclasses import dataclass
+
 import sciline
 import scipp as sc
 
@@ -17,6 +19,24 @@ from .types import (
 )
 
 
+@dataclass
+class CorrectionComponents:
+    diag: sc.DataArray
+    off_diag: sc.DataArray
+
+
+def compute_correction_from_component(
+    channel: sc.DataArray,
+    transmission: TransmissionFunction[PolarizingElement],
+) -> CorrectionComponents:
+    t_plus = transmission.apply(channel, 'plus')
+    t_minus = -transmission.apply(channel, 'minus')
+    base = channel / (t_plus**2 - t_minus**2)
+    t_plus *= base
+    t_minus *= base
+    return CorrectionComponents(diag=t_plus, off_diag=t_minus)
+
+
 def correct_for_polarizing_element(
     up: sc.DataArray,
     down: sc.DataArray,
@@ -27,16 +47,12 @@ def correct_for_polarizing_element(
     denom = Tplus**2 - Tminus**2
     mat = [[Tplus, -Tminus], [-Tminus, Tplus]]
     """
-    t_plus_up = transmission_function.apply(up, 'plus')
-    t_minus_up = -transmission_function.apply(up, 'minus')
-    t_plus_down = transmission_function.apply(down, 'plus')
-    t_minus_down = -transmission_function.apply(down, 'minus')
-    up = up / (t_plus_up**2 - t_minus_up**2)
-    down = down / (t_plus_down**2 - t_minus_down**2)
-    t_plus_up *= up
-    t_minus_up *= up
-    t_plus_down *= down
-    t_minus_down *= down
+    components = compute_correction_from_component(up, transmission_function)
+    t_plus_up = components.diag
+    t_minus_up = components.off_diag
+    components = compute_correction_from_component(down, transmission_function)
+    t_plus_down = components.diag
+    t_minus_down = components.off_diag
     # We combine into Datasets so we can share coordinates when concatenating later
     # TODO I think Scipp does not actually does this, it has a naive impl.
     # Also, keep in mind that we are in general Q-binned, i.e., concat bins!
