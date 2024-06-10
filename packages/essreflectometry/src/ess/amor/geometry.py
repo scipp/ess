@@ -28,8 +28,9 @@ def _pixel_coordinate_in_detector_system(pixelID: sc.Variable):
     """Determines detector coordinates and divergence angle from pixel number"""
     old_pixelID_unit = pixelID.unit
     pixelID.unit = ""
-    (bladeNr, bPixel) = pixelID // (Detector.nWires * Detector.nStripes), pixelID % (
-        Detector.nWires * Detector.nStripes
+    (bladeNr, bPixel) = (
+        pixelID // (Detector.nWires * Detector.nStripes),
+        pixelID % (Detector.nWires * Detector.nStripes),
     )
     # z index on blade, y index on detector
     (bZi, detYi) = (
