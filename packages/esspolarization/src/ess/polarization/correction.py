@@ -145,9 +145,6 @@ def compute_polarization_corrected_data(
     channel: ReducedSampleDataBySpinChannel[PolarizerSpin, AnalyzerSpin],
     polarization_correction: PolarizationCorrection[PolarizerSpin, AnalyzerSpin],
 ) -> PolarizationCorrectedData[PolarizerSpin, AnalyzerSpin]:
-    # We combine into Datasets so we can share coordinates when concatenating later
-    # TODO I think Scipp does not actually does this, it has a naive impl.
-    # Also, keep in mind that we are in general Q-binned, i.e., concat bins!
     # TODO Would like to use inplace ops, but modifying input is dodgy. Maybe combine
     # into a single function?
     return PolarizationCorrectedData(

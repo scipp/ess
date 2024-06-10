@@ -69,7 +69,6 @@ __all__ = [
     "PolarizingElement",
     "CellInBeamLog",
     "CellSpinLog",
-    "correct_sample_data_for_polarization",
     "Depolarized",
     "determine_run_section",
     "direct_beam",
