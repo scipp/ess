@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+from typing import Callable, Generic
+
 import sciline
 import scipp as sc
 
@@ -59,12 +61,45 @@ def compute_polarizing_element_correction(
     )
 
 
+class AnalyzerFlipper(Generic[AnalyzerSpin]):
+    """Flipper for the analyzer."""
+
+    def __call__(
+        self, up: sc.Variable, down: sc.Variable
+    ) -> tuple[sc.Variable, sc.Variable]:
+        """Flip the analyzer."""
+        raise NotImplementedError
+
+
+class PolarizerFlipper(Generic[PolarizerSpin]):
+    """Flipper for the polarizer."""
+
+    def __call__(
+        self, up: sc.Variable, down: sc.Variable
+    ) -> tuple[sc.Variable, sc.Variable]:
+        """Flip the polarizer."""
+        raise NotImplementedError
+
+
+def no_flipper(up: sc.Variable, down: sc.Variable) -> tuple[sc.Variable, sc.Variable]:
+    return up, down
+
+
+def flip(up: sc.Variable, down: sc.Variable) -> tuple[sc.Variable, sc.Variable]:
+    return down, up
+
+
+Flipper = Callable[[sc.Variable, sc.Variable], tuple[sc.Variable, sc.Variable]]
+
+
 def _compute_pol_corr(
     *,
     analyzer: PolarizingElementCorrection[PolarizerSpin, AnalyzerSpin, Analyzer],
     polarizer: PolarizingElementCorrection[PolarizerSpin, AnalyzerSpin, Polarizer],
     analyzer_up: bool,
     polarizer_up: bool,
+    analyzer_flipper: Flipper = no_flipper,
+    polarizer_flipper: Flipper = no_flipper,
 ) -> PolarizationCorrection[PolarizerSpin, AnalyzerSpin]:
     """
     Compute a column of the combined correction coefficients for polarizer and analyzer.
@@ -88,8 +123,18 @@ def _compute_pol_corr(
         Combined correction coefficients.
     """
 
-    a_up, a_down = analyzer.get(up=analyzer_up)
+    # Can the swap performed by the `get` method be handled using a fake flipper?
+    a_up, a_down = analyzer_flipper(*analyzer.get(up=analyzer_up))
     p_up, p_down = polarizer.get(up=polarizer_up)
+    # upup = p_up * a_up
+    # updown = p_up * a_down
+    # downup = p_down * a_up
+    # downdown = p_down * a_down
+
+    # for polarizer-up, polarized flipper scales second with (1-1/f)
+    # upup, downup = polarizer_flipper(upup, downup)
+    # updown, downdown = polarizer_flipper(updown, downdown)
+
     return PolarizationCorrection[PolarizerSpin, AnalyzerSpin](
         upup=p_up * a_up,
         updown=p_up * a_down,
@@ -98,6 +143,32 @@ def _compute_pol_corr(
     )
 
 
+def compute_polarization_correction(
+    *,
+    analyzer: PolarizingElementCorrection[PolarizerSpin, AnalyzerSpin, Analyzer],
+    polarizer: PolarizingElementCorrection[PolarizerSpin, AnalyzerSpin, Polarizer],
+    analyzer_flipper: AnalyzerFlipper[AnalyzerSpin],
+    polarizer_flipper: PolarizerFlipper[PolarizerSpin],
+) -> PolarizationCorrection[PolarizerSpin, AnalyzerSpin]:
+    a_up, a_down = analyzer_flipper(analyzer.diag, analyzer.off_diag)
+    p_up, p_down = polarizer.diag, polarizer.off_diag
+    upup = p_up * a_up
+    updown = p_up * a_down
+    downup = p_down * a_up
+    downdown = p_down * a_down
+
+    # for polarizer-up, polarized flipper scales second with (1-1/f)
+    upup, downup = polarizer_flipper(upup, downup)
+    updown, downdown = polarizer_flipper(updown, downdown)
+    return PolarizationCorrection[PolarizerSpin, AnalyzerSpin](
+        upup=upup,
+        updown=updown,
+        downup=downup,
+        downdown=downdown,
+    )
+
+
+# TODO remove this
 def compute_polarization_correction_upup(
     analyzer: PolarizingElementCorrection[Up, Up, Analyzer],
     polarizer: PolarizingElementCorrection[Up, Up, Polarizer],
@@ -183,13 +254,20 @@ def compute_polarization_corrected_data(
 
 
 def CorrectionWorkflow() -> sciline.Pipeline:
-    return sciline.Pipeline(
+    workflow = sciline.Pipeline(
         (
             compute_polarizing_element_correction,
-            compute_polarization_correction_upup,
-            compute_polarization_correction_updown,
-            compute_polarization_correction_downup,
-            compute_polarization_correction_downdown,
+            compute_polarization_correction,
+            # compute_polarization_correction_upup,
+            # compute_polarization_correction_updown,
+            # compute_polarization_correction_downup,
+            # compute_polarization_correction_downdown,
             compute_polarization_corrected_data,
         )
     )
+    # This "flipper" setup represents the matrix structure, no actual flippers
+    workflow[AnalyzerFlipper[Up]] = no_flipper
+    workflow[AnalyzerFlipper[Down]] = flip
+    workflow[PolarizerFlipper[Up]] = no_flipper
+    workflow[PolarizerFlipper[Down]] = flip
+    return workflow
