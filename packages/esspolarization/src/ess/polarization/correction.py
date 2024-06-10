@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import sciline
+import scipp as sc
 
 from .types import (
     Analyzer,
@@ -48,12 +49,11 @@ def compute_polarizing_element_correction(
     """
     t_plus = transmission.apply(channel, 'plus')
     t_minus = transmission.apply(channel, 'minus')
-    print(f'{t_plus=} {t_minus=}')
     t_minus *= -1
     denom = t_plus**2 - t_minus**2
-    print(f'{denom=}')
-    t_plus /= denom
-    t_minus /= denom
+    sc.reciprocal(denom, out=denom)
+    t_plus *= denom
+    t_minus *= denom
     return PolarizingElementCorrection[PolarizerSpin, AnalyzerSpin, PolarizingElement](
         diag=t_plus, off_diag=t_minus
     )

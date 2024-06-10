@@ -63,9 +63,9 @@ class FakeTransmissionFunction:
 
     def apply(self, _: sc.DataArray, plus_minus: str) -> float:
         if plus_minus == 'plus':
-            return float(self.coeffs[0][0])
+            return sc.scalar(self.coeffs[0][0])
         else:
-            return float(self.coeffs[0][1])
+            return sc.scalar(self.coeffs[0][1])
 
 
 def test_correction_workflow_computes_and_applies_matrix_inverse() -> None:
@@ -87,5 +87,9 @@ def test_correction_workflow_computes_and_applies_matrix_inverse() -> None:
     for pol in [Up, Down]:
         for ana in [Up, Down]:
             contrib = workflow.compute(PolarizationCorrectedData[pol, ana])
-            result += [contrib.upup, contrib.updown, contrib.downup, contrib.downdown]
+            contrib = sc.concat(
+                [contrib.upup, contrib.updown, contrib.downup, contrib.downdown],
+                'dummy',
+            )
+            result += contrib.values
     np.testing.assert_allclose(result, ground_truth)
