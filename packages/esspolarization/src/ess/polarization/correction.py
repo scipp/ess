@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import sciline
-import scipp as sc
 
 from .types import (
     Analyzer,
     AnalyzerSpin,
+    Down,
     PolarizationCorrectedData,
     PolarizationCorrection,
     Polarizer,
@@ -14,6 +14,7 @@ from .types import (
     PolarizingElementCorrection,
     ReducedSampleDataBySpinChannel,
     TransmissionFunction,
+    Up,
 )
 
 
@@ -47,24 +48,27 @@ def compute_polarizing_element_correction(
     """
     t_plus = transmission.apply(channel, 'plus')
     t_minus = transmission.apply(channel, 'minus')
+    print(f'{t_plus=} {t_minus=}')
     t_minus *= -1
     denom = t_plus**2 - t_minus**2
-    denom = sc.reciprocal(denom, out=denom)
-    t_plus *= denom
-    t_minus *= denom
+    print(f'{denom=}')
+    t_plus /= denom
+    t_minus /= denom
     return PolarizingElementCorrection[PolarizerSpin, AnalyzerSpin, PolarizingElement](
         diag=t_plus, off_diag=t_minus
     )
 
 
-def compute_polarization_correction(
-    analyzer: PolarizingElementCorrection[PolarizerSpin, AnalyzerSpin, Analyzer],
-    polarizer: PolarizingElementCorrection[PolarizerSpin, AnalyzerSpin, Polarizer],
-) -> PolarizationCorrection[PolarizerSpin, AnalyzerSpin]:
+def compute_polarization_correction_upup(
+    analyzer: PolarizingElementCorrection[Up, Up, Analyzer],
+    polarizer: PolarizingElementCorrection[Up, Up, Polarizer],
+) -> PolarizationCorrection[Up, Up]:
     """
-    Compute combined correction coefficients for polarizer and analyzer.
+    Up-up column of combined correction coefficients for polarizer and analyzer.
 
     This is effectively a column resulting from a sparse matrix-matrix product.
+
+    This function returns the up-up column.
 
     Parameters
     ----------
@@ -78,11 +82,62 @@ def compute_polarization_correction(
     :
         Combined correction coefficients.
     """
-    return PolarizationCorrection[PolarizerSpin, AnalyzerSpin](
+    return PolarizationCorrection[Up, Up](
         upup=polarizer.diag * analyzer.diag,
         updown=polarizer.diag * analyzer.off_diag,
         downup=polarizer.off_diag * analyzer.diag,
         downdown=polarizer.off_diag * analyzer.off_diag,
+    )
+
+
+def compute_polarization_correction_updown(
+    analyzer: PolarizingElementCorrection[Up, Down, Analyzer],
+    polarizer: PolarizingElementCorrection[Up, Down, Polarizer],
+) -> PolarizationCorrection[Up, Down]:
+    """
+    Up-down column of combined correction coefficients for polarizer and analyzer.
+
+    See :py:func:`compute_polarization_correction_upup` for more details.
+    """
+    return PolarizationCorrection[Up, Down](
+        upup=polarizer.diag * analyzer.off_diag,
+        updown=polarizer.diag * analyzer.diag,
+        downup=polarizer.off_diag * analyzer.off_diag,
+        downdown=polarizer.off_diag * analyzer.diag,
+    )
+
+
+def compute_polarization_correction_downup(
+    analyzer: PolarizingElementCorrection[Down, Up, Analyzer],
+    polarizer: PolarizingElementCorrection[Down, Up, Polarizer],
+) -> PolarizationCorrection[Down, Up]:
+    """
+    Down-up column of combined correction coefficients for polarizer and analyzer.
+
+    See :py:func:`compute_polarization_correction_upup` for more details.
+    """
+    return PolarizationCorrection[Down, Up](
+        upup=polarizer.off_diag * analyzer.diag,
+        updown=polarizer.off_diag * analyzer.off_diag,
+        downup=polarizer.diag * analyzer.diag,
+        downdown=polarizer.diag * analyzer.off_diag,
+    )
+
+
+def compute_polarization_correction_downdown(
+    analyzer: PolarizingElementCorrection[Down, Down, Analyzer],
+    polarizer: PolarizingElementCorrection[Down, Down, Polarizer],
+) -> PolarizationCorrection[Down, Down]:
+    """
+    Down-down column of combined correction coefficients for polarizer and analyzer.
+
+    See :py:func:`compute_polarization_correction_upup` for more details.
+    """
+    return PolarizationCorrection[Down, Down](
+        upup=polarizer.off_diag * analyzer.off_diag,
+        updown=polarizer.off_diag * analyzer.diag,
+        downup=polarizer.diag * analyzer.off_diag,
+        downdown=polarizer.diag * analyzer.diag,
     )
 
 
@@ -107,7 +162,10 @@ def CorrectionWorkflow() -> sciline.Pipeline:
     return sciline.Pipeline(
         (
             compute_polarizing_element_correction,
-            compute_polarization_correction,
+            compute_polarization_correction_upup,
+            compute_polarization_correction_updown,
+            compute_polarization_correction_downup,
+            compute_polarization_correction_downdown,
             compute_polarization_corrected_data,
         )
     )
