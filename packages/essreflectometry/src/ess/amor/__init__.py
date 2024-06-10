@@ -56,7 +56,6 @@ default_parameters = {
     supermirror.CriticalEdge: 0.022 * sc.Unit("1/angstrom"),
     supermirror.Alpha: sc.scalar(0.25 / 0.088, unit=sc.units.angstrom),
     BeamSize[Run]: 2.0 * sc.units.mm,
-    SampleSize[Run]: 10.0 * sc.units.mm,
     DetectorSpatialResolution[Run]: 0.0025 * sc.units.m,
     Gravity: sc.vector(value=[0, -1, 0]) * sc.constants.g,
     SamplePosition[Run]: sc.vector([0, 0, 0], unit="m"),
