@@ -50,3 +50,12 @@ class TransmissionFunction(Generic[PolarizingElement], ABC):
         self, data: sc.DataArray, plus_minus: Literal['plus', 'minus']
     ) -> sc.DataArray:
         ...
+
+
+class PolarizingElementCorrection(
+    Generic[PolarizerSpin, AnalyzerSpin, PolarizingElement]
+):
+    """Correction factors for polarizing element."""
+
+    diag: sc.DataArray
+    off_diag: sc.DataArray

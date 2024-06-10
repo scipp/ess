@@ -8,11 +8,13 @@ import scipp as sc
 from .types import (
     Analyzer,
     AnalyzerCorrectedData,
+    AnalyzerSpin,
     Down,
     PolarizationCorrectedData,
     Polarizer,
     PolarizerSpin,
     PolarizingElement,
+    PolarizingElementCorrection,
     ReducedSampleDataBySpinChannel,
     TransmissionFunction,
     Up,
@@ -93,6 +95,22 @@ def correct_for_polarizer(
     part2 = sc.Dataset(**up_part2, **down_part2)
     return PolarizationCorrectedData(
         **sc.concat([part1, part2], polarizer_up.analyzer_up.dim)
+    )
+
+
+def compute_polarizing_element_correction(
+    channel: ReducedSampleDataBySpinChannel[PolarizerSpin, AnalyzerSpin],
+    transmission: TransmissionFunction[PolarizingElement],
+) -> PolarizingElementCorrection[PolarizerSpin, AnalyzerSpin, PolarizingElement]:
+    t_plus = transmission.apply(channel, 'plus')
+    t_minus = transmission.apply(channel, 'minus')
+    t_minus *= -1
+    denom = t_plus**2 - t_minus**2
+    denom = sc.reciprocal(denom, out=denom)
+    t_plus *= denom
+    t_minus *= denom
+    return PolarizingElementCorrection[PolarizerSpin, AnalyzerSpin, PolarizingElement](
+        diag=t_plus, off_diag=t_minus
     )
 
 
