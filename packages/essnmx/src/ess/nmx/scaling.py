@@ -6,7 +6,7 @@ from typing import NewType, Optional, TypeVar
 
 import scipp as sc
 
-from .mtz_io import DEFAULT_WAVELENGTH_COORD_NAME, NMXMtzDataArray
+from .mtz_io import NMXMtzDataArray
 
 # User defined or configurable types
 WavelengthBinSize = NewType("WavelengthBinSize", int)
@@ -70,7 +70,7 @@ def get_wavelength_binned(
         Wavelength(LAMBDA) binning should always be done on the merged dataset.
 
     """
-    wavelength_coord = mtz_da.coords[DEFAULT_WAVELENGTH_COORD_NAME]
+    wavelength_coord = mtz_da.coords["wavelength"]
     start = (
         min_wavelength_bin_edge
         if min_wavelength_bin_edge is not None
@@ -82,14 +82,14 @@ def get_wavelength_binned(
         else wavelength_coord.max()
     )
     binning_var = sc.linspace(
-        dim=DEFAULT_WAVELENGTH_COORD_NAME,
+        dim="wavelength",
         start=start,
         stop=stop,
         num=wavelength_bin_size,
         unit=wavelength_coord.unit,
     )
 
-    return WavelengthBinned(mtz_da.bin({DEFAULT_WAVELENGTH_COORD_NAME: binning_var}))
+    return WavelengthBinned(mtz_da.bin({"wavelength": binning_var}))
 
 
 def _is_bin_empty(binned: sc.DataArray, idx: int) -> bool:
@@ -134,9 +134,7 @@ def get_reference_wavelength(
     """
     if reference_wavelength is None:
         ref_idx = _get_middle_bin_idx(binned)
-        return SelectedReferenceWavelength(
-            binned.coords[DEFAULT_WAVELENGTH_COORD_NAME][ref_idx]
-        )
+        return SelectedReferenceWavelength(binned.coords["wavelength"][ref_idx])
     else:
         return SelectedReferenceWavelength(reference_wavelength)
 
@@ -310,8 +308,8 @@ def average_roughly_scaled_intensities(
     # to represent the average wavelength of the bin
     # It is because the bin-edges are dropped while flattening the data
     # and the data is expected to be filtered after this step.
-    intensities.coords[DEFAULT_WAVELENGTH_COORD_NAME] = sc.midpoints(
-        intensities.coords[DEFAULT_WAVELENGTH_COORD_NAME],
+    intensities.coords["wavelength"] = sc.midpoints(
+        intensities.coords["wavelength"],
     )
     return EstimatedScaledIntensities(intensities)
 
@@ -461,14 +459,14 @@ def fit_wavelength_scale_factor_polynomial(
 
 
 WavelengthScaleFactors = NewType("WavelengthScaleFactors", sc.DataArray)
-"""The scale factors of :attr:`~DEFAULT_WAVELENGTH_COORD_NAME`."""
+"""The scale factors of `"wavelength"`."""
 
 
 def calculate_wavelength_scale_factor(
     fitting_result: FittingResult,
     reference_wavelength: SelectedReferenceWavelength,
 ) -> WavelengthScaleFactors:
-    """Calculate the scale factors along the :attr:`~DEFAULT_WAVELENGTH_COORD_NAME`."""
+    """Calculate the scale factors along the `"wavelength"`."""
 
     scaled_reference = fitting_result.fitting_func(
         reference_wavelength, **fitting_result.params

@@ -25,7 +25,6 @@ DEFAULT_SPACE_GROUP_DESC = SpaceGroupDesc("P 21 21 21")
 WavelengthColumnName = NewType("WavelengthColumnName", str)
 """The name of the wavelength column in the mtz file."""
 DEFAULT_WAVELENGTH_COLUMN_NAME = WavelengthColumnName("LAMBDA")
-DEFAULT_WAVELENGTH_COORD_NAME = "wavelength"
 
 IntensityColumnName = NewType("IntensityColumnName", str)
 """The name of the intensity column in the mtz file."""
@@ -146,7 +145,7 @@ def process_single_mtz_to_dataframe(
 
     mtz_df["d"] = mtz_df.apply(_calculate_d, axis=1)
     mtz_df["resolution"] = (1 / mtz_df["d"]) ** 2 / 4
-    mtz_df[DEFAULT_WAVELENGTH_COORD_NAME] = orig_df[wavelength_column_name]
+    mtz_df["wavelength"] = orig_df[wavelength_column_name]
     mtz_df[DEFAULT_INTENSITY_COLUMN_NAME] = orig_df[intensity_column_name]
     mtz_df[DEFAULT_STD_DEV_COLUMN_NAME] = orig_df[intensity_sig_col_name]
     # Keep other columns
@@ -310,7 +309,7 @@ def nmx_mtz_dataframe_to_scipp_dataarray(
             # The result of `astype` will have `PyObject` as a dtype.
         )
     # Add units
-    nmx_mtz_ds.coords[DEFAULT_WAVELENGTH_COORD_NAME].unit = sc.units.angstrom
+    nmx_mtz_ds.coords["wavelength"].unit = sc.units.angstrom
     for key in nmx_mtz_ds.keys():
         nmx_mtz_ds[key].unit = sc.units.dimensionless
 
