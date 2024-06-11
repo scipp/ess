@@ -1,5 +1,20 @@
 # API Reference
 
+## Workflows
+
+```{eval-rst}
+.. currentmodule:: ess.polarization
+
+.. autosummary::
+   :toctree: ../generated/classes
+   :template: class-template.rst
+   :recursive:
+
+   CorrectionWorkflow
+   He3CellWorkflow
+   PolarizationAnalysisWorkflow
+   SupermirrorWorkflow
+
 ## Classes
 
 ```{eval-rst}
