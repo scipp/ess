@@ -80,6 +80,7 @@ def test_pipeline_can_compute_dspacing_result(providers, params):
 
 def test_workflow_is_deterministic(providers, params):
     pipeline = sciline.Pipeline(providers, params=params)
+    pipeline = powder.set_pixel_mask_filenames(pipeline, [])
     # This is Sciline's default scheduler, but we want to be explicit here
     scheduler = sciline.scheduler.DaskScheduler()
     graph = pipeline.get(IofDspacing, scheduler=scheduler)
@@ -90,6 +91,7 @@ def test_workflow_is_deterministic(providers, params):
 
 def test_pipeline_can_compute_intermediate_results(providers, params):
     pipeline = sciline.Pipeline(providers, params=params)
+    pipeline = powder.set_pixel_mask_filenames(pipeline, [])
     result = pipeline.compute(NormalizedByProtonCharge[SampleRun])
     assert set(result.dims) == {'segment', 'wire', 'counter', 'strip', 'module'}
 
@@ -99,6 +101,7 @@ def test_pipeline_group_by_two_theta(providers, params):
         dim='two_theta', unit='rad', start=0.8, stop=2.4, num=17
     )
     pipeline = sciline.Pipeline(providers, params=params)
+    pipeline = powder.set_pixel_mask_filenames(pipeline, [])
     result = pipeline.compute(IofDspacingTwoTheta)
     assert result.sizes == {
         'two_theta': 16,
@@ -113,6 +116,7 @@ def test_pipeline_wavelength_masking(providers, params):
     wmax = sc.scalar(0.21, unit="angstrom")
     params[WavelengthMask] = lambda x: (x > wmin) & (x < wmax)
     pipeline = sciline.Pipeline(providers, params=params)
+    pipeline = powder.set_pixel_mask_filenames(pipeline, [])
     masked_sample = pipeline.compute(MaskedData[SampleRun])
     assert 'wavelength' in masked_sample.bins.masks
     sum_in_masked_region = (
@@ -131,6 +135,7 @@ def test_pipeline_two_theta_masking(providers, params):
     tmax = sc.scalar(1.2, unit="rad")
     params[TwoThetaMask] = lambda x: (x > tmin) & (x < tmax)
     pipeline = sciline.Pipeline(providers, params=params)
+    pipeline = powder.set_pixel_mask_filenames(pipeline, [])
     masked_sample = pipeline.compute(MaskedData[SampleRun])
     assert 'two_theta' in masked_sample.bins.masks
     sum_in_masked_region = (
