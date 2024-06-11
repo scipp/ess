@@ -2,11 +2,17 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 import numpy as np
 import pytest
+import sciline
 import scipp as sc
 from scipp.testing import assert_allclose
 
-from ess.polarization.correction import (
+from ess.polarization import (
     CorrectionWorkflow,
+    He3CellWorkflow,
+    PolarizationAnalysisWorkflow,
+    SupermirrorWorkflow,
+)
+from ess.polarization.correction import (
     FlipperEfficiency,
     compute_polarizing_element_correction,
 )
@@ -211,3 +217,17 @@ def test_workflow_with_two_flipper_computes_and_applies_matrix_inverse(
             )
             result += contrib.values
     np.testing.assert_allclose(result, ground_truth)
+
+
+_polarizing_element_workflows = [He3CellWorkflow(), SupermirrorWorkflow()]
+
+
+@pytest.mark.parametrize("polarizer_workflow", _polarizing_element_workflows)
+@pytest.mark.parametrize("analyzer_workflow", _polarizing_element_workflows)
+def test_polarization_analysis_workflow_creation(
+    polarizer_workflow: sciline.Pipeline, analyzer_workflow: sciline.Pipeline
+) -> None:
+    _ = PolarizationAnalysisWorkflow(
+        polarizer_workflow=polarizer_workflow, analyzer_workflow=analyzer_workflow
+    )
+    # TODO How to check the workflow graph, without having any of the required inputs?

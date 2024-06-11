@@ -6,8 +6,6 @@ from typing import Generic, NewType, TypeVar
 import sciline as sl
 import scipp as sc
 
-# from .correction import correct_for_analyzer, correct_for_polarizer
-from .correction import CorrectionWorkflow
 from .types import (
     Analyzer,
     PlusMinus,
@@ -399,7 +397,6 @@ def he3_polarizer(
 
 providers = (
     he3_opacity_from_cell_params,
-    he3_opacity_function_from_beam_data,
     get_he3_transmission_from_fit_to_direct_beam,
     direct_beam,
     direct_beam_with_cell,
@@ -430,9 +427,7 @@ def He3CellWorkflow(
         he3_analyzer,
         he3_polarizer,
     )
-    workflow = CorrectionWorkflow()
-    for step in steps:
-        workflow.insert(step)
+    workflow = sl.Pipeline(steps)
     if in_situ:
         workflow.insert(he3_opacity_function_from_cell_opacity)
     else:

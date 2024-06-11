@@ -4,6 +4,7 @@
 from dataclasses import dataclass
 from typing import Generic
 
+import sciline
 import scipp as sc
 
 from .types import (
@@ -69,9 +70,11 @@ def supermirror_polarizer(
     return func
 
 
-providers = (
+supermirror_providers = (
     get_supermirror_efficiency_function,
     get_supermirror_transmission_function,
-    supermirror_analyzer,
-    supermirror_polarizer,
 )
+
+
+def SupermirrorWorkflow() -> sciline.Pipeline:
+    return sciline.Pipeline(supermirror_providers)

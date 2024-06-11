@@ -29,6 +29,7 @@ from .base import (
 )
 from .base import providers as base_providers
 from .base import run_reduction_workflow
+from .correction import CorrectionWorkflow, PolarizationAnalysisWorkflow
 from .he3 import (
     Depolarized,
     DirectBeamBackgroundQRange,
@@ -36,6 +37,7 @@ from .he3 import (
     DirectBeamQRange,
     He3CellLength,
     He3CellPressure,
+    He3CellWorkflow,
     He3DirectBeam,
     He3FillingTime,
     He3Opacity0,
@@ -51,7 +53,8 @@ from .he3 import (
     he3_opacity_function_from_beam_data,
     he3_opacity_function_from_cell_opacity,
 )
-from .he3 import providers as he3_providers
+from .he3 import providers as providers
+from .supermirror import SupermirrorWorkflow
 from .types import (
     Analyzer,
     Down,
@@ -62,7 +65,7 @@ from .types import (
     Up,
 )
 
-providers = base_providers + he3_providers
+providers = base_providers + providers
 
 __all__ = [
     "Analyzer",

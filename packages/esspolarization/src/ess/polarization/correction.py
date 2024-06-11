@@ -3,9 +3,12 @@
 from dataclasses import dataclass
 from typing import Generic
 
+import networkx as nx
 import sciline
 import scipp as sc
 
+from .he3 import he3_analyzer, he3_polarizer
+from .supermirror import supermirror_analyzer, supermirror_polarizer
 from .types import (
     Analyzer,
     AnalyzerSpin,
@@ -177,4 +180,52 @@ def CorrectionWorkflow() -> sciline.Pipeline:
     workflow[FlipperEfficiency[PolarizingElement]] = FlipperEfficiency[
         PolarizingElement
     ](value=1.0)
+    return workflow
+
+
+def _is_he3(workflow: sciline.Pipeline) -> bool:
+    from .he3 import He3TransmissionFunction
+
+    try:
+        workflow.get(He3TransmissionFunction[Polarizer])
+        return True
+    except sciline.UnsatisfiedRequirement:
+        return False
+
+
+def PolarizationAnalysisWorkflow(
+    *,
+    polarizer_workflow: sciline.Pipeline,
+    analyzer_workflow: sciline.Pipeline,
+) -> sciline.Pipeline:
+    """
+    Create a polarization analysis workflow.
+
+    Parameters
+    ----------
+    polarizer_workflow :
+        Workflow for the polarizer, e.g., a He3CellWorkflow or SupermirrorWorkflow.
+    analyzer_workflow :
+        Workflow for the analyzer, e.g., a He3CellWorkflow or SupermirrorWorkflow.
+
+    Returns
+    -------
+    :
+        Full workflow for polarization analysis.
+    """
+
+    workflow = CorrectionWorkflow()
+    # TODO Hack to merge the workflows, Sciline currently lacks this feature.
+    graph = nx.compose(
+        polarizer_workflow._cbgraph.graph,
+        analyzer_workflow._cbgraph.graph,
+    )
+    workflow._cbgraph.graph = nx.compose(workflow._cbgraph.graph, graph)
+
+    workflow.insert(
+        he3_analyzer if _is_he3(analyzer_workflow) else supermirror_analyzer
+    )
+    workflow.insert(
+        he3_polarizer if _is_he3(polarizer_workflow) else supermirror_polarizer
+    )
     return workflow
