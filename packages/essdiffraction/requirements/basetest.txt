@@ -11,13 +11,13 @@ iniconfig==2.0.0
     # via pytest
 numpy==1.26.4
     # via pandas
-packaging==24.0
+packaging==24.1
     # via pytest
 pandas==2.2.2
     # via -r basetest.in
 pluggy==1.5.0
     # via pytest
-pytest==8.2.1
+pytest==8.2.2
     # via -r basetest.in
 python-dateutil==2.9.0.post0
     # via pandas
