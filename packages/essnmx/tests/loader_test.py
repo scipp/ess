@@ -11,7 +11,6 @@ import scippnexus as snx
 from scipp.testing import assert_allclose, assert_identical
 
 from ess.nmx import default_parameters
-from ess.nmx.const import DETECTOR_DIM, DETECTOR_SHAPE
 from ess.nmx.data import small_mcstas_2_sample, small_mcstas_3_sample
 from ess.nmx.mcstas_loader import bank_names_to_detector_names
 from ess.nmx.mcstas_loader import providers as loader_providers
@@ -51,7 +50,7 @@ def check_scalar_properties_mcstas_2(dg: NMXData):
 
 def check_nmxdata_properties(dg: NMXData, fast_axis, slow_axis) -> None:
     assert isinstance(dg, sc.DataGroup)
-    assert dg.shape == (DETECTOR_SHAPE[0] * DETECTOR_SHAPE[1], 1)
+    assert dg.shape == ((1280, 1280)[0] * (1280, 1280)[1], 1)
     # Check maximum value of weights.
     assert_allclose(
         dg.weights.max().data,
@@ -59,10 +58,8 @@ def check_nmxdata_properties(dg: NMXData, fast_axis, slow_axis) -> None:
         atol=sc.scalar(1e-10, unit='counts'),
         rtol=sc.scalar(1e-8),
     )
-    assert_allclose(
-        sc.squeeze(dg.fast_axis, DETECTOR_DIM), fast_axis, atol=sc.scalar(0.005)
-    )
-    assert_identical(sc.squeeze(dg.slow_axis, DETECTOR_DIM), slow_axis)
+    assert_allclose(sc.squeeze(dg.fast_axis, 'panel'), fast_axis, atol=sc.scalar(0.005))
+    assert_identical(sc.squeeze(dg.slow_axis, 'panel'), slow_axis)
 
 
 @pytest.mark.parametrize(
