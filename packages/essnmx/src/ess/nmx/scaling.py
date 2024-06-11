@@ -9,16 +9,8 @@ import scipp as sc
 from .mtz_io import NMXMtzDataArray
 
 # User defined or configurable types
-WavelengthBinSize = NewType("WavelengthBinSize", int)
-"""The size of the wavelength(LAMBDA) bins."""
-MinWavelengthBinEdge = NewType("MinWavelengthBinEdge", sc.Variable)
-"""The minimum edge of the wavelength(LAMBDA) bins."""
-DEFAULT_MIN_WAVELENGTH_BIN_EDGE = MinWavelengthBinEdge(sc.scalar(2.6, unit="angstrom"))
-"""Default minimum edge of the wavelength(LAMBDA) bins."""
-MaxWavelengthBinEdge = NewType("MaxWavelengthBinEdge", sc.Variable)
-"""The maximum edge of the wavelength(LAMBDA) bins."""
-DEFAULT_MAX_WAVELENGTH_BIN_EDGE = MaxWavelengthBinEdge(sc.scalar(3.6, unit="angstrom"))
-"""Default maximum edge of the wavelength(LAMBDA) bins."""
+WavelengthBins = NewType("WavelengthBins", sc.Variable)
+"""User configurable wavelength binning"""
 ReferenceWavelength = NewType("ReferenceWavelength", sc.Variable)
 """The wavelength to select reference intensities."""
 
@@ -43,9 +35,7 @@ T = TypeVar("T")
 
 def get_wavelength_binned(
     mtz_da: NMXMtzDataArray,
-    wavelength_bin_size: WavelengthBinSize,
-    min_wavelength_bin_edge: Optional[MinWavelengthBinEdge] = None,
-    max_wavelength_bin_edge: Optional[MaxWavelengthBinEdge] = None,
+    wavelength_bins: WavelengthBins,
 ) -> WavelengthBinned:
     """Bin the whole dataset by wavelength(LAMBDA).
 
@@ -54,42 +44,15 @@ def get_wavelength_binned(
     mtz_da:
         The merged dataset.
 
-    wavelength_bin_size:
-        The size of the wavelength(LAMBDA) bins.
-
-    min_wavelength_bin_edge:
-        The minimum edge of the wavelength(LAMBDA) bins.
-        Minimum value of the wavelength(LAMBDA) coordinate will be used if ``None``.
-
-    max_wavelength_bin_edge:
-        The maximum edge of the wavelength(LAMBDA) bins.
-        Maximum value of the wavelength(LAMBDA) coordinate will be used if ``None``.
+    wavelength_bins:
+        The wavelength(LAMBDA) bins.
 
     Notes
     -----
         Wavelength(LAMBDA) binning should always be done on the merged dataset.
 
     """
-    wavelength_coord = mtz_da.coords["wavelength"]
-    start = (
-        min_wavelength_bin_edge
-        if min_wavelength_bin_edge is not None
-        else wavelength_coord.min()
-    )
-    stop = (
-        max_wavelength_bin_edge
-        if max_wavelength_bin_edge is not None
-        else wavelength_coord.max()
-    )
-    binning_var = sc.linspace(
-        dim="wavelength",
-        start=start,
-        stop=stop,
-        num=wavelength_bin_size,
-        unit=wavelength_coord.unit,
-    )
-
-    return WavelengthBinned(mtz_da.bin({"wavelength": binning_var}))
+    return WavelengthBinned(mtz_da.bin({"wavelength": wavelength_bins}))
 
 
 def _is_bin_empty(binned: sc.DataArray, idx: int) -> bool:
@@ -489,8 +452,7 @@ scaling_providers = (
 """Providers for scaling data."""
 
 scaling_params = {
-    MinWavelengthBinEdge: DEFAULT_MIN_WAVELENGTH_BIN_EDGE,
-    MaxWavelengthBinEdge: DEFAULT_MAX_WAVELENGTH_BIN_EDGE,
+    WavelengthBins: sc.linspace("wavelength", 2.6, 3.6, 250, unit="angstrom"),
     ScaledIntensityLeftTailThreshold: DEFAULT_LEFT_TAIL_THRESHOLD,
     ScaledIntensityRightTailThreshold: DEFAULT_RIGHT_TAIL_THRESHOLD,
     WavelengthFittingPolynomialDegree: WavelengthFittingPolynomialDegree(7),
