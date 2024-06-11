@@ -4,9 +4,10 @@
 Masking functions for the powder workflow.
 """
 
-from typing import Optional
+from typing import Iterable
 
 import numpy as np
+import sciline
 import scipp as sc
 
 from .types import (
@@ -21,9 +22,7 @@ from .types import (
 )
 
 
-def read_pixel_masks(
-    filename: Optional[PixelMaskFilename] = None,
-) -> MaskedDetectorIDs:
+def read_pixel_masks(filename: PixelMaskFilename) -> MaskedDetectorIDs:
     """Read a pixel mask from a Scipp hdf5 file.
 
     Parameters
@@ -31,18 +30,15 @@ def read_pixel_masks(
     filename:
         Path to the hdf5 file.
     """
-    masked_ids = {}
-    if filename is not None:
-        masked_ids = {filename: sc.io.load_hdf5(filename)}
-    return MaskedDetectorIDs(masked_ids)
+    return MaskedDetectorIDs({filename: sc.io.load_hdf5(filename)})
 
 
 def apply_masks(
     data: DataWithScatteringCoordinates[RunType],
     masked_pixel_ids: MaskedDetectorIDs,
-    tof_mask_func: Optional[TofMask] = None,
-    wavelength_mask_func: Optional[WavelengthMask] = None,
-    two_theta_mask_func: Optional[TwoThetaMask] = None,
+    tof_mask_func: TofMask,
+    wavelength_mask_func: WavelengthMask,
+    two_theta_mask_func: TwoThetaMask,
 ) -> MaskedData[RunType]:
     """ """
     out = data.copy(deep=False)
@@ -71,3 +67,31 @@ def apply_masks(
 
 
 providers = (read_pixel_masks, apply_masks)
+
+
+def _merge(*dicts: dict) -> dict:
+    return {key: value for d in dicts for key, value in d.items()}
+
+
+def set_pixel_mask_filenames(
+    workflow: sciline.Pipeline, masks: Iterable[str]
+) -> sciline.Pipeline:
+    """
+    Return modified workflow with pixel mask filenames set.
+
+    Parameters
+    ----------
+    workflow:
+        Workflow to modify.
+    masks:
+        List or tuple of pixel mask filenames to set.
+    """
+    workflow = workflow.copy()
+    # Workaround bug in Cyclebane, which does not allow empty maps
+    if len(masks) == 0:
+        workflow[MaskedDetectorIDs] = MaskedDetectorIDs({})
+        return workflow
+    workflow[MaskedDetectorIDs] = (
+        workflow[MaskedDetectorIDs].map({PixelMaskFilename: masks}).reduce(func=_merge)
+    )
+    return workflow

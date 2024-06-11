@@ -94,7 +94,7 @@ def _normalize_by_vanadium(
 def normalize_by_vanadium_dspacing(
     data: FocussedDataDspacing[SampleRun],
     vanadium: FocussedDataDspacing[VanadiumRun],
-    uncertainty_broadcast_mode: Optional[UncertaintyBroadcastMode] = None,
+    uncertainty_broadcast_mode: UncertaintyBroadcastMode,
 ) -> IofDspacing:
     """
     Normalize sample data by a vanadium measurement and return intensity vs d-spacing.
@@ -117,7 +117,7 @@ def normalize_by_vanadium_dspacing(
 def normalize_by_vanadium_dspacing_and_two_theta(
     data: FocussedDataDspacingTwoTheta[SampleRun],
     vanadium: FocussedDataDspacingTwoTheta[VanadiumRun],
-    uncertainty_broadcast_mode: Optional[UncertaintyBroadcastMode] = None,
+    uncertainty_broadcast_mode: UncertaintyBroadcastMode,
 ) -> IofDspacingTwoTheta:
     """
     Normalize sample data by a vanadium measurement and return intensity vs

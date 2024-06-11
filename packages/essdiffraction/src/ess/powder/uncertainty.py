@@ -2,15 +2,13 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 """Tools for handling statistical uncertainties."""
 
-from typing import Optional
-
 import scipp as sc
 
 from .types import UncertaintyBroadcastMode
 
 
 def broadcast_uncertainties(
-    data: sc.DataArray, uncertainty_broadcast_mode: Optional[UncertaintyBroadcastMode]
+    data: sc.DataArray, uncertainty_broadcast_mode: UncertaintyBroadcastMode
 ) -> sc.DataArray:
     """Broadcast uncertainties using the specified mode.
 
@@ -28,7 +26,6 @@ def broadcast_uncertainties(
     """
     if (
         not _has_variances(data)
-        or uncertainty_broadcast_mode is None
         or uncertainty_broadcast_mode == UncertaintyBroadcastMode.fail
     ):
         return data

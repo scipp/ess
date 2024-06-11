@@ -4,6 +4,7 @@
 import pytest
 import sciline
 import scipp as sc
+from ess import powder
 from ess.powder.types import (
     AccumulatedProtonCharge,
     DspacingBins,
@@ -58,6 +59,8 @@ def params(request):
         RawSource[VanadiumRun]: source,
         AccumulatedProtonCharge[SampleRun]: charge,
         AccumulatedProtonCharge[VanadiumRun]: charge,
+        TwoThetaMask: None,
+        WavelengthMask: None,
     }
 
 
@@ -67,6 +70,7 @@ def test_can_create_pipeline(providers, params):
 
 def test_pipeline_can_compute_dspacing_result(providers, params):
     pipeline = sciline.Pipeline(providers, params=params)
+    pipeline = powder.set_pixel_mask_filenames(pipeline, [])
     result = pipeline.compute(IofDspacing)
     assert result.sizes == {
         'dspacing': len(params[DspacingBins]) - 1,
