@@ -5,9 +5,12 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import Iterable, Optional, Protocol, Tuple, TypeVar
 
+import h5py
 import scipp as sc
+from defusedxml.ElementTree import fromstring
 
-from .types import FilePath
+from ..rotation import axis_angle_to_quaternion, quaternion_to_matrix
+from ..types import FilePath
 
 T = TypeVar('T')
 
@@ -120,7 +123,6 @@ def _rotation_matrix_from_location(
     location: _XML, angle_unit: str = 'degree'
 ) -> sc.Variable:
     """Retrieve rotation matrix from location."""
-    from .rotation import axis_angle_to_quaternion, quaternion_to_matrix
 
     attribs = find_attributes(location, 'axis-x', 'axis-y', 'axis-z', 'rot')
     x, y, z, w = axis_angle_to_quaternion(
@@ -387,7 +389,6 @@ class McStasInstrument:
         slow_axes = [det.slow_axis for det in detectors]
         fast_axes = [det.fast_axis for det in detectors]
         origins = [self.sample.position_from_sample(det.position) for det in detectors]
-
         return {
             'pixel_id': _construct_pixel_ids(detectors),
             'fast_axis': sc.concat(fast_axes, 'panel'),
@@ -402,9 +403,6 @@ class McStasInstrument:
 
 def read_mcstas_geometry_xml(file_path: FilePath) -> McStasInstrument:
     """Retrieve geometry parameters from mcstas file"""
-    import h5py
-    from defusedxml.ElementTree import fromstring
-
     instrument_xml_path = 'entry1/instrument/instrument_xml/data'
     with h5py.File(file_path) as file:
         tree = fromstring(file[instrument_xml_path][...][0])
