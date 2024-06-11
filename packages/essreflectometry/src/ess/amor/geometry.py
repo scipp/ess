@@ -64,8 +64,12 @@ def pixel_coordinate_in_lab_frame(pixelID: sc.Variable, nu: sc.Variable):
     angle_to_horizon = (nu + delta).to(unit="rad")
     distance_to_pixel = detX + Detector.distance
 
-    # TODO: put the correct value here
-    global_X = sc.zeros(dims=pixelID.dims, shape=pixelID.shape, unit="mm")
     global_Y = distance_to_pixel * sc.sin(angle_to_horizon)
     global_Z = distance_to_pixel * sc.cos(angle_to_horizon)
+    # TODO: the values for global_X are right now just an estimate. We should check with
+    # the instrument scientist what the actual values are. The X positions are ignored
+    # in the coordinate transformation, so this is not critical.
+    global_X = sc.zeros_like(global_Z) + sc.linspace(
+        "stripe", -0.1, 0.1, global_Z.sizes["stripe"], unit="m"
+    ).to(unit=global_Z.unit)
     return global_X, global_Y, global_Z, delta
