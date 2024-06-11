@@ -4,6 +4,7 @@
 import pytest
 import sciline
 import scipp as sc
+from ess import powder
 from ess.powder.types import (
     CalibrationFilename,
     DspacingBins,
@@ -44,6 +45,8 @@ def params():
         DspacingBins: sc.linspace('dspacing', 0.0, 2.3434, 200, unit='angstrom'),
         TofMask: lambda x: (x < sc.scalar(0.0, unit="us"))
         | (x > sc.scalar(16666.67, unit="us")),
+        TwoThetaMask: None,
+        WavelengthMask: None,
     }
 
 
@@ -53,6 +56,7 @@ def test_can_create_pipeline(providers, params):
 
 def test_pipeline_can_compute_dspacing_result(providers, params):
     pipeline = sciline.Pipeline(providers, params=params)
+    pipeline = powder.set_pixel_mask_filenames(pipeline, [])
     result = pipeline.compute(IofDspacing)
     assert result.sizes == {
         'dspacing': len(params[DspacingBins]) - 1,
@@ -62,6 +66,7 @@ def test_pipeline_can_compute_dspacing_result(providers, params):
 
 def test_workflow_is_deterministic(providers, params):
     pipeline = sciline.Pipeline(providers, params=params)
+    pipeline = powder.set_pixel_mask_filenames(pipeline, [])
     # This is Sciline's default scheduler, but we want to be explicit here
     scheduler = sciline.scheduler.DaskScheduler()
     graph = pipeline.get(IofDspacing, scheduler=scheduler)
@@ -72,6 +77,7 @@ def test_workflow_is_deterministic(providers, params):
 
 def test_pipeline_can_compute_intermediate_results(providers, params):
     pipeline = sciline.Pipeline(providers, params=params)
+    pipeline = powder.set_pixel_mask_filenames(pipeline, [])
     result = pipeline.compute(NormalizedByProtonCharge[SampleRun])
     assert set(result.dims) == {'bank', 'column', 'row'}
 
@@ -81,6 +87,7 @@ def test_pipeline_group_by_two_theta(providers, params):
         dim='two_theta', unit='deg', start=25.0, stop=90.0, num=16
     ).to(unit='rad')
     pipeline = sciline.Pipeline(providers, params=params)
+    pipeline = powder.set_pixel_mask_filenames(pipeline, [])
     result = pipeline.compute(IofDspacingTwoTheta)
     assert result.sizes == {
         'two_theta': 15,
@@ -95,6 +102,7 @@ def test_pipeline_wavelength_masking(providers, params):
     wmax = sc.scalar(0.21, unit="angstrom")
     params[WavelengthMask] = lambda x: (x > wmin) & (x < wmax)
     pipeline = sciline.Pipeline(providers, params=params)
+    pipeline = powder.set_pixel_mask_filenames(pipeline, [])
     masked_sample = pipeline.compute(MaskedData[SampleRun])
     assert 'wavelength' in masked_sample.bins.masks
     sum_in_masked_region = (
@@ -113,6 +121,7 @@ def test_pipeline_two_theta_masking(providers, params):
     tmax = sc.scalar(1.0, unit="rad")
     params[TwoThetaMask] = lambda x: (x > tmin) & (x < tmax)
     pipeline = sciline.Pipeline(providers, params=params)
+    pipeline = powder.set_pixel_mask_filenames(pipeline, [])
     masked_sample = pipeline.compute(MaskedData[SampleRun])
     assert 'two_theta' in masked_sample.masks
     sum_in_masked_region = (
