@@ -2,18 +2,11 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 from dataclasses import dataclass
-from typing import Generic, Literal
+from typing import Literal
 
 import scipp as sc
 
-from .types import (
-    Analyzer,
-    AnalyzerSpin,
-    Polarizer,
-    PolarizerSpin,
-    PolarizingElement,
-    TransmissionFunction,
-)
+from .types import Analyzer, Polarizer, PolarizingElement, TransmissionFunction
 
 
 class SupermirrorEfficiencyFunction:
@@ -52,17 +45,3 @@ def supermirror_polarizer(
     func: SupermirrorTransmissionFunction[Polarizer],
 ) -> TransmissionFunction[Polarizer]:
     return func
-
-
-@dataclass
-class PolarizerSpinFlipper(Generic[PolarizerSpin]):
-    """Also known as F1"""
-
-    value: float
-
-
-@dataclass
-class AnalyzerSpinFlipper(Generic[AnalyzerSpin]):
-    """Also known as F2"""
-
-    value: float
