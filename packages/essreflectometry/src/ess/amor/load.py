@@ -61,10 +61,10 @@ def load_events(
         ].data.values
 
     pixel_inds = sc.array(dims=data.dims, values=data.coords["event_id"].values - 1)
-    x, y, z, angle_from_center_of_beam = pixel_coordinate_in_lab_frame(
+    position, angle_from_center_of_beam = pixel_coordinate_in_lab_frame(
         pixelID=pixel_inds, nu=detector_rotation
     )
-    data.coords["position"] = sc.spatial.as_vectors(x, y, z).to(unit="m")
+    data.coords["position"] = position.to(unit="m", copy=False)
     data.coords["angle_from_center_of_beam"] = angle_from_center_of_beam
     return RawEvents[Run](data)
 
@@ -100,7 +100,7 @@ def compute_tof(
     )
     data.bins.coords["tof"] += offset
     data.bins.coords["tof"] -= (
-        data.coords["angle_from_center_of_beam"] / (180.0 * sc.units.deg)
+        data.coords["angle_from_center_of_beam"].to(unit="deg") / (180.0 * sc.units.deg)
     ) * tau
     return ChopperCorrectedTofEvents[Run](data)
 

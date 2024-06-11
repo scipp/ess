@@ -65,4 +65,4 @@ def pixel_coordinate_in_lab_frame(pixelID: sc.Variable, nu: sc.Variable):
     global_X = sc.zeros_like(global_Z) + sc.linspace(
         "stripe", -0.1, 0.1, global_Z.sizes["stripe"], unit="m"
     ).to(unit=global_Z.unit)
-    return global_X, global_Y, global_Z, divergence_angle
+    return sc.spatial.as_vectors(global_X, global_Y, global_Z), divergence_angle
