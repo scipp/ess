@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
+from typing import Tuple
+
 import scipp as sc
 
 
@@ -24,7 +28,9 @@ class Detector:
     distance = sc.scalar(4000, unit="mm")
 
 
-def _pixel_coordinate_in_detector_system(pixelID: sc.Variable):
+def _pixel_coordinate_in_detector_system(
+    pixelID: sc.Variable,
+) -> Tuple[sc.Variable, sc.Variable]:
     """Determines beam travel distance inside the detector
     and the beam divergence angle from the detector number."""
     (bladeNr, bPixel) = (
@@ -47,7 +53,9 @@ def _pixel_coordinate_in_detector_system(pixelID: sc.Variable):
     return distance_inside_detector, beam_divergence_angle
 
 
-def pixel_coordinate_in_lab_frame(pixelID: sc.Variable, nu: sc.Variable):
+def pixel_coordinate_in_lab_frame(
+    pixelID: sc.Variable, nu: sc.Variable
+) -> Tuple[sc.Variable, sc.Variable]:
     """Computes spatial coordinates (lab reference frame), and the beam divergence
     angle for the detector pixel associated with `pixelID`"""
     distance_in_detector, divergence_angle = _pixel_coordinate_in_detector_system(
