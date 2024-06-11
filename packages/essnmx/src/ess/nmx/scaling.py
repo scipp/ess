@@ -2,14 +2,14 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
-from typing import NewType, TypeVar
+from typing import NewType, TypeVar, Union
 
 import scipp as sc
 
 from .mtz_io import NMXMtzDataArray
 
 # User defined or configurable types
-WavelengthBins = NewType("WavelengthBins", sc.Variable)
+WavelengthBins = NewType("WavelengthBins", Union[sc.Variable, int])
 """User configurable wavelength binning"""
 ReferenceWavelength = NewType("ReferenceWavelength", sc.Variable | None)
 """The wavelength to select reference intensities."""
@@ -438,8 +438,7 @@ def calculate_wavelength_scale_factor(
     return WavelengthScaleFactors(scale_factor)
 
 
-# Providers and default parameters
-scaling_providers = (
+providers = (
     cut_tails,
     get_wavelength_binned,
     get_reference_wavelength,
@@ -451,7 +450,7 @@ scaling_providers = (
 )
 """Providers for scaling data."""
 
-scaling_params = {
+default_parameters = {
     WavelengthBins: sc.linspace("wavelength", 2.6, 3.6, 250, unit="angstrom"),
     ScaledIntensityLeftTailThreshold: DEFAULT_LEFT_TAIL_THRESHOLD,
     ScaledIntensityRightTailThreshold: DEFAULT_RIGHT_TAIL_THRESHOLD,
