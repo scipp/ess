@@ -4,10 +4,9 @@ import scipp as sc
 
 from ..reflectometry.tools import fwhm_to_std
 from ..reflectometry.types import (
-    DetectorPosition,
     DetectorSpatialResolution,
+    FootprintCorrectedData,
     QBins,
-    QData,
     QResolution,
     Sample,
     SampleSize,
@@ -22,9 +21,9 @@ from .types import (
 
 
 def wavelength_resolution(
+    da: FootprintCorrectedData[Sample],
     chopper_1_position: Chopper1Position[Sample],
     chopper_2_position: Chopper2Position[Sample],
-    pixel_position: DetectorPosition[Sample],
 ) -> WavelengthResolution:
     """
     Find the wavelength resolution contribution as described in Section 4.3.3 of the
@@ -44,6 +43,7 @@ def wavelength_resolution(
     :
         The angular resolution variable, as standard deviation.
     """
+    pixel_position = da.coords['position']
     distance_between_choppers = (
         chopper_2_position.fields.z - chopper_1_position.fields.z
     )
@@ -55,7 +55,8 @@ def wavelength_resolution(
 
 
 def sample_size_resolution(
-    pixel_position: DetectorPosition[Sample], sample_size: SampleSize[Sample]
+    da: FootprintCorrectedData[Sample],
+    sample_size: SampleSize[Sample],
 ) -> SampleSizeResolution:
     """
     The resolution from the projected sample size, where it may be bigger
@@ -76,13 +77,12 @@ def sample_size_resolution(
     """
     return fwhm_to_std(
         sc.to_unit(sample_size, 'm')
-        / sc.to_unit(pixel_position.fields.z, 'm', copy=False)
+        / sc.to_unit(da.coords['position'].fields.z, 'm', copy=False)
     )
 
 
 def angular_resolution(
-    da: QData[Sample],
-    pixel_position: DetectorPosition[Sample],
+    da: FootprintCorrectedData[Sample],
     detector_spatial_resolution: DetectorSpatialResolution[Sample],
 ) -> AngularResolution:
     """
@@ -104,15 +104,14 @@ def angular_resolution(
         Angular resolution standard deviation
     """
     theta = da.bins.coords['theta']
-    theta_unit = theta.bins.unit if theta.bins is not None else theta.unit
     return (
         fwhm_to_std(
             sc.to_unit(
                 sc.atan(
                     sc.to_unit(detector_spatial_resolution, 'm')
-                    / sc.to_unit(pixel_position.fields.z, 'm', copy=False)
+                    / sc.to_unit(da.coords['position'].fields.z, 'm', copy=False)
                 ),
-                theta_unit,
+                theta.bins.unit,
                 copy=False,
             )
         )
@@ -149,7 +148,7 @@ def sigma_Q(
         angular_resolution**2
         + wavelength_resolution**2
         + sample_size_resolution**2
-    ).max('detector_number') * sc.midpoints(q_bins)
+    ).flatten(to='detector_number').max('detector_number') * sc.midpoints(q_bins)
 
 
 providers = (sigma_Q, angular_resolution, wavelength_resolution, sample_size_resolution)

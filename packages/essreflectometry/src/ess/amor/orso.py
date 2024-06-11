@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 """ORSO utilities for Amor."""
+
 from typing import Optional
 
 import numpy as np
@@ -15,18 +16,10 @@ from ..reflectometry.orso import (
     OrsoIofQDataset,
     OrsoReduction,
 )
-from ..reflectometry.types import (
-    NormalizedIofQ1D,
-    QResolution,
-    Sample,
-    ThetaData,
-    WavelengthData,
-)
+from ..reflectometry.types import NormalizedIofQ, QResolution
 
 
-def build_orso_instrument(
-    events_in_wavelength: WavelengthData[Sample], events_in_theta: ThetaData[Sample]
-) -> OrsoInstrument:
+def build_orso_instrument(events: NormalizedIofQ) -> OrsoInstrument:
     """Build ORSO instrument metadata from intermediate reduction results for Amor.
 
     This assumes specular reflection and sets the incident angle equal to the computed
@@ -34,19 +27,15 @@ def build_orso_instrument(
     """
     return OrsoInstrument(
         orso_data_source.InstrumentSettings(
-            wavelength=orso_base.ValueRange(
-                *_limits_of_coord(events_in_wavelength, 'wavelength')
-            ),
-            incident_angle=orso_base.ValueRange(
-                *_limits_of_coord(events_in_theta, 'theta')
-            ),
+            wavelength=orso_base.ValueRange(*_limits_of_coord(events, "wavelength")),
+            incident_angle=orso_base.ValueRange(*_limits_of_coord(events, "theta")),
             polarization=None,  # TODO how can we determine this from the inputs?
         )
     )
 
 
 def build_orso_iofq_dataset(
-    iofq: NormalizedIofQ1D,
+    iofq: NormalizedIofQ,
     sigma_q: QResolution,
     data_source: OrsoDataSource,
     reduction: OrsoReduction,
@@ -56,23 +45,24 @@ def build_orso_iofq_dataset(
         data_source=data_source,
         reduction=reduction,
         columns=[
-            Column('Qz', '1/angstrom', 'wavevector transfer'),
-            Column('R', None, 'reflectivity'),
-            Column('sR', None, 'standard deviation of reflectivity'),
+            Column("Qz", "1/angstrom", "wavevector transfer"),
+            Column("R", None, "reflectivity"),
+            Column("sR", None, "standard deviation of reflectivity"),
             Column(
-                'sQz',
-                '1/angstrom',
-                'standard deviation of wavevector transfer resolution',
+                "sQz",
+                "1/angstrom",
+                "standard deviation of wavevector transfer resolution",
             ),
         ],
     )
+    iofq = iofq.hist()
 
-    qz = iofq.coords['Q'].to(unit='1/angstrom', copy=False)
-    if iofq.coords.is_edges('Q'):
+    qz = iofq.coords["Q"].to(unit="1/angstrom", copy=False)
+    if iofq.coords.is_edges("Q"):
         qz = sc.midpoints(qz)
     r = sc.values(iofq.data)
     sr = sc.stddevs(iofq.data)
-    sqz = sigma_q.to(unit='1/angstrom', copy=False)
+    sqz = sigma_q.to(unit="1/angstrom", copy=False)
     data = (qz, r, sr, sqz)
 
     return OrsoIofQDataset(
@@ -99,24 +89,23 @@ def _limits_of_coord(
     min_ = coord.min().value
     max_ = coord.max().value
     # Explicit conversions to float because orsopy does not like np.float* types.
-    return float(min_), float(max_), _ascii_unit(min_)
+    return float(min_), float(max_), _ascii_unit(coord.unit)
 
 
 def _get_coord(data: sc.DataArray, name: str) -> Optional[sc.Variable]:
-    try:
-        return data.coords[name]
-    except KeyError:
-        try:
-            return data.bins.coords[name]
-        except (KeyError, TypeError):
-            # KeyError if coord does not exist, TypeError if data is not binned.
-            return None
+    if name in data.coords:
+        return sc.DataArray(data=data.coords[name], masks=data.masks)
+    if (data.bins is not None) and (name in data.bins.coords):
+        # Note that .bins.concat() applies the top-level masks
+        events = data.bins.concat().value
+        return sc.DataArray(data=events.coords[name], masks=events.masks)
+    return None
 
 
 def _ascii_unit(unit: sc.Unit) -> str:
     unit = str(unit)
-    if unit == 'Å':
-        return 'angstrom'
+    if unit == "Å":
+        return "angstrom"
     return unit
 
 

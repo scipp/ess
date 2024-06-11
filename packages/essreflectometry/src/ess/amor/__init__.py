@@ -13,12 +13,23 @@ from ..reflectometry.types import (
     NeXusDetectorName,
     Run,
     SamplePosition,
-    SampleSize,
 )
-from . import beamline, conversions, data, load, orso, resolution
-from .beamline import instrument_view_components
+from . import conversions, data, load, orso, resolution, utils
 from .instrument_view import instrument_view
-from .types import Chopper1Position, Chopper2Position, ChopperFrequency, ChopperPhase
+from .types import (
+    AngularResolution,
+    Chopper1Position,
+    Chopper2Position,
+    ChopperFrequency,
+    ChopperPhase,
+    QThetaFigure,
+    ReflectivityDiagnosticsView,
+    SampleSizeResolution,
+    ThetaBins,
+    WavelengthResolution,
+    WavelengthThetaFigure,
+    WavelengthZIndexFigure,
+)
 
 try:
     __version__ = importlib.metadata.version(__package__ or __name__)
@@ -30,7 +41,8 @@ providers = (
     *load.providers,
     *conversions.providers,
     *resolution.providers,
-    *beamline.providers,
+    *utils.providers,
+    *orso.providers,
 )
 """
 List of providers for setting up a Sciline pipeline.
@@ -40,18 +52,15 @@ This provides a default Amor workflow including providers for loadings files.
 
 default_parameters = {
     supermirror.MValue: sc.scalar(5, unit=sc.units.dimensionless),
-    supermirror.CriticalEdge: 0.022 * sc.Unit('1/angstrom'),
+    supermirror.CriticalEdge: 0.022 * sc.Unit("1/angstrom"),
     supermirror.Alpha: sc.scalar(0.25 / 0.088, unit=sc.units.angstrom),
     BeamSize[Run]: 2.0 * sc.units.mm,
-    SampleSize[Run]: 10.0 * sc.units.mm,
     DetectorSpatialResolution[Run]: 0.0025 * sc.units.m,
     Gravity: sc.vector(value=[0, -1, 0]) * sc.constants.g,
-    ChopperFrequency[Run]: sc.scalar(20 / 3, unit='Hz'),
-    ChopperPhase[Run]: sc.scalar(-8.0, unit='deg'),
-    Chopper1Position[Run]: sc.vector(value=[0, 0, -15.5], unit='m'),
-    Chopper2Position[Run]: sc.vector(value=[0, 0, -14.5], unit='m'),
-    SamplePosition[Run]: sc.vector([0, 0, 0], unit='m'),
-    NeXusDetectorName[Run]: 'multiblade_detector',
+    SamplePosition[Run]: sc.vector([0, 0, 0], unit="m"),
+    NeXusDetectorName[Run]: "detector",
+    ChopperPhase[Run]: sc.scalar(-5.0, unit="deg"),
+    ChopperFrequency[Run]: sc.scalar(8.333, unit="Hz"),
 }
 
 del sc
@@ -65,7 +74,18 @@ __all__ = [
     "orso",
     "resolution",
     "instrument_view",
-    "instrument_view_components",
     "providers",
     "default_parameters",
+    "WavelengthResolution",
+    "AngularResolution",
+    "SampleSizeResolution",
+    "ChopperFrequency",
+    "ChopperPhase",
+    "Chopper1Position",
+    "Chopper2Position",
+    "ThetaBins",
+    "WavelengthThetaFigure",
+    "WavelengthZIndexFigure",
+    "QThetaFigure",
+    "ReflectivityDiagnosticsView",
 ]

@@ -16,13 +16,12 @@ from dateutil.parser import parse as parse_datetime
 from orsopy.fileio import base as orso_base
 from orsopy.fileio import data_source, orso, reduction
 
-from .load import load
-from .supermirror import SupermirrorCalibrationFactor
+from .load import load_nx
+from .supermirror import SupermirrorReflectivityCorrection
 from .types import (
     ChopperCorrectedTofEvents,
     FilePath,
     FootprintCorrectedData,
-    IofQ,
     Reference,
     Sample,
 )
@@ -63,12 +62,12 @@ OrsoSample = NewType('OrsoSample', data_source.Sample)
 
 def parse_orso_experiment(filepath: FilePath[Sample]) -> OrsoExperiment:
     """Parse ORSO experiment metadata from raw NeXus data."""
-    title, instrument_name, facility, start_time = load(
+    title, instrument_name, facility, start_time = load_nx(
         filepath,
-        'entry/title',
-        'entry/instrument/name',
-        'entry/facility',
-        'entry/start_time',
+        'NXentry/title',
+        'NXentry/NXinstrument/name',
+        'NXentry/facility',
+        'NXentry/start_time',
     )
     return OrsoExperiment(
         data_source.Experiment(
@@ -83,7 +82,7 @@ def parse_orso_experiment(filepath: FilePath[Sample]) -> OrsoExperiment:
 
 def parse_orso_owner(filepath: FilePath[Sample]) -> OrsoOwner:
     """Parse ORSO owner metadata from raw NeXus data."""
-    (user,) = load(filepath, 'entry/user')
+    (user,) = load_nx(filepath, 'NXentry/NXuser')
     return OrsoOwner(
         orso_base.Person(
             name=user['name'],
@@ -95,10 +94,17 @@ def parse_orso_owner(filepath: FilePath[Sample]) -> OrsoOwner:
 
 def parse_orso_sample(filepath: FilePath[Sample]) -> OrsoSample:
     """Parse ORSO sample metadata from raw NeXus data."""
-    (sample,) = load(filepath, 'entry/sample')
+    (sample,) = load_nx(filepath, 'NXentry/NXsample')
     if not sample:
         return OrsoSample(data_source.Sample.empty())
-    raise NotImplementedError('NeXus sample parsing is not implemented')
+    return OrsoSample(
+        data_source.Sample(
+            name=sample['name'],
+            model=data_source.SampleModel(
+                stack=sample['model'],
+            ),
+        )
+    )
 
 
 def build_orso_measurement(
@@ -170,8 +176,7 @@ def build_orso_data_source(
 _CORRECTIONS_BY_GRAPH_KEY = {
     ChopperCorrectedTofEvents[Sample]: 'chopper ToF correction',
     FootprintCorrectedData[Sample]: 'footprint correction',
-    IofQ[Sample]: 'total counts',
-    SupermirrorCalibrationFactor: 'supermirror calibration',
+    SupermirrorReflectivityCorrection: 'supermirror calibration',
 }
 
 

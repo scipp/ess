@@ -3,9 +3,9 @@ from typing import NewType, TypeVar
 import sciline
 import scipp as sc
 
-Reference = NewType('Reference', str)
-Sample = NewType('Sample', str)
-Run = TypeVar('Run', Reference, Sample)
+Reference = NewType("Reference", str)
+Sample = NewType("Sample", str)
+Run = TypeVar("Run", Reference, Sample)
 
 
 class NeXusDetectorName(sciline.Scope[Run, str], str):
@@ -41,64 +41,52 @@ class ChopperCorrectedTofEvents(sciline.Scope[Run, sc.DataArray], sc.DataArray):
     """Event time data after correcting tof for choppers."""
 
 
-class WavelengthData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
-    """Event data with wavelengths computed for every event,
-    binned by `detector_number` (pixel of the detector frame)"""
+class EventData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
+    """Event data with added coordinates such as incident angle (theta),
+    wavelength, and momentum transfer (Q)"""
 
 
-class ThetaData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
-    """Event data with wavelengths and scattering angle computed for each event,
-    binned by `detector_number` (pixel of the detector frame)"""
-
-
-class QData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
-    """Event data with wavelength, incidence angle,
-    and momentum transfer computed per event.
-    Binned by momentum transfer according to the QBins provider,
-    and by `detector_number` (pixel of the detector frame).
-    """
+class MaskedEventData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
+    """Event data that has been masked in wavelength and logical detector coordinates"""
 
 
 class FootprintCorrectedData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
-    """Event data with weight corrected for the footprint of the beam
+    """Event data with weights corrected for the footprint of the beam
     on the sample for the incidence angle of the event."""
 
 
-class HistogrammedQData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
-    """Histogram of event weights by momentum transfer and detector_number."""
+ReferenceIntensity = NewType("ReferenceIntensity", sc.DataArray)
+"""Intensity distribution of the reference measurement in (z, wavelength)"""
+
+IdealReferenceIntensity = NewType("IdealReferenceIntensity", sc.DataArray)
+"""Intensity distribution on the detector for a sample with :math`R(Q) = 1`"""
+
+NormalizationFactor = NewType("NormalizationFactor", sc.DataArray)
+""":code`IdealReferenceIntensity` with added coordinate "sample"-Q"""
+
+NormalizedIofQ = NewType("NormalizedIofQ", sc.DataArray)
+"""Intensity histogram over momentum transfer
+normalized by the calibrated reference measurement."""
+
+ReflectivityData = NewType("ReflectivityData", sc.DataArray)
+"""Reflectivity "per event". Event data weighted by the expected
+intensity at the coordinates of the event."""
+
+QResolution = NewType("QResolution", sc.Variable)
+"""Resolution term for the momentum transfer for each bin of QBins."""
 
 
-class IofQ(sciline.Scope[Run, sc.DataArray], sc.DataArray):
-    """Normalization of the histogram.
-    The normalization for the sample consists of scaling
-    with the inverse of the total weight.
-    The normalization for the reference consists of
-    1. multiplication with the calibration factor from the supermirror calibration and
-    2. scaling with the inverse of the total weight."""
+""" Parameters for the workflow """
+
+QBins = NewType("QBins", sc.Variable)
+"""Bins for the momentum transfer histogram."""
+
+WavelengthBins = NewType("WavelengthBins", sc.Variable)
+"""Bins for the wavelength histogram, also used to filter the event data."""
 
 
-NormalizedIofQ = NewType('NormalizedIofQ', sc.DataArray)
-'''Normalized histogram over momentum transfer and detector number,
-normalized by the calibrated reference measurement.'''
-
-NormalizedIofQ1D = NewType('NormalizedIofQ1D', sc.DataArray)
-'''Normalized histogram reduced to 1 dimension.'''
-
-QResolution = NewType('QResolution', sc.Variable)
-'''Resolution term for the momentum transfer for each bin of QBins.'''
-
-
-''' Parameters for the workflow '''
-
-QBins = NewType('QBins', sc.Variable)
-'''Bins for the momentum transfer histogram.'''
-
-WavelengthEdges = NewType('WavelengthEdges', sc.Variable)
-'''Include only events within the specified edges.'''
-
-
-class PoochFilename(sciline.Scope[Run, str], str):
-    """Name of an event data nexus file in the pooch data repository."""
+class TutorialFilename(sciline.Scope[Run, str], str):
+    """Name of an event data nexus file in the tutorial data repository."""
 
 
 class FilePath(sciline.Scope[Run, str], str):
@@ -107,6 +95,10 @@ class FilePath(sciline.Scope[Run, str], str):
 
 class SampleRotation(sciline.Scope[Run, sc.Variable], sc.Variable):
     """The rotation of the sample relative to the center of the incoming beam."""
+
+
+class DetectorRotation(sciline.Scope[Run, sc.Variable], sc.Variable):
+    """The rotation of the detector relative to the horizon"""
 
 
 class BeamSize(sciline.Scope[Run, sc.Variable], sc.Variable):
@@ -120,9 +112,21 @@ class DetectorSpatialResolution(sciline.Scope[Run, sc.Variable], sc.Variable):
 
 class SampleSize(sciline.Scope[Run, sc.Variable], sc.Variable):
     # TODO is this radius or total length?
-    """Size of the sample."""
+    """Size of the sample. If None it is assumed to be the same as the reference."""
 
 
-Gravity = NewType('Gravity', sc.Variable)
+Gravity = NewType("Gravity", sc.Variable)
 """This parameter determines if gravity is taken into account
 when computing the scattering angle and momentum transfer."""
+
+
+YIndexLimits = NewType("YIndexLimits", tuple[sc.Variable, sc.Variable])
+"""Limit of the (logical) 'y' detector pixel index"""
+
+
+ZIndexLimits = NewType("ZIndexLimits", tuple[sc.Variable, sc.Variable])
+"""Limit of the (logical) 'z' detector pixel index"""
+
+
+ReferenceFilePath = NewType("ReferenceFilePath", str)
+"""Path to the cached normalization matrix"""

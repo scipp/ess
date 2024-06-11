@@ -7,7 +7,7 @@ from orsopy import fileio
 
 from ess import amor, reflectometry
 from ess.reflectometry import orso
-from ess.reflectometry.types import PoochFilename, Sample
+from ess.reflectometry.types import Sample, TutorialFilename
 
 
 def test_build_orso_data_source():
@@ -17,23 +17,23 @@ def test_build_orso_data_source():
             *amor.load.providers,
             *orso.providers,
         ),
-        params={PoochFilename[Sample]: 'sample.nxs'},
+        params={TutorialFilename[Sample]: "sample.nxs"},
     )
     data_source = pipeline.compute(orso.OrsoDataSource)
     expected = fileio.data_source.DataSource(
         owner=fileio.base.Person(
-            name='J. Stahn', contact='jochen.stahn@psi.ch', affiliation=None
+            name="J. Stahn", contact="jochen.stahn@psi.ch", affiliation=None
         ),
         sample=fileio.data_source.Sample.empty(),
         experiment=fileio.data_source.Experiment(
-            title='commissioning',
-            instrument='AMOR',
+            title="commissioning",
+            instrument="AMOR",
             start_date=datetime(2020, 11, 25, 16, 3, 10),
-            probe='neutron',
-            facility='SINQ',
+            probe="neutron",
+            facility="SINQ",
         ),
         measurement=fileio.data_source.Measurement(
-            data_files=[fileio.base.File(file='sample.nxs')],
+            data_files=[fileio.base.File(file="sample.nxs")],
             # We would need the full pipeline to determine this:
             additional_files=[],
             instrument_settings=None,
@@ -45,19 +45,19 @@ def test_build_orso_data_source():
 def test_build_orso_reduction_without_creator():
     pipeline = sciline.Pipeline(orso.providers)
     reduction = pipeline.compute(orso.OrsoReduction)
-    assert reduction.software.name == 'ess.reflectometry'
+    assert reduction.software.name == "ess.reflectometry"
     assert reduction.software.version == str(reflectometry.__version__)
     assert reduction.creator is None
 
 
 def test_build_orso_reduction_with_creator():
     creator = fileio.base.Person(
-        name='Erika Mustermann', affiliation='ESS', contact='erika.mustermann@ess.eu'
+        name="Erika Mustermann", affiliation="ESS", contact="erika.mustermann@ess.eu"
     )
     pipeline = sciline.Pipeline(
         orso.providers, params={orso.OrsoCreator: orso.OrsoCreator(creator)}
     )
     reduction = pipeline.compute(orso.OrsoReduction)
-    assert reduction.software.name == 'ess.reflectometry'
+    assert reduction.software.name == "ess.reflectometry"
     assert reduction.software.version == str(reflectometry.__version__)
     assert reduction.creator == creator

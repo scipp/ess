@@ -3,7 +3,8 @@
 
 import importlib.metadata
 
-from . import calibrations, conversions, corrections, normalize, reductions
+from . import calibrations, conversions, corrections, normalize, orso
+from .load import load_reference, save_reference
 
 try:
     __version__ = importlib.metadata.version(__package__ or __name__)
@@ -15,7 +16,7 @@ providers = (
     *corrections.providers,
     *calibrations.providers,
     *normalize.providers,
-    *reductions.providers,
+    *orso.providers,
 )
 """
 List of providers for setting up a Sciline pipeline.
@@ -27,3 +28,9 @@ see :py:data:`essreflectometry.amor.providers`.
 """
 
 del importlib
+
+
+__all__ = [
+    "load_reference",
+    "save_reference",
+]
