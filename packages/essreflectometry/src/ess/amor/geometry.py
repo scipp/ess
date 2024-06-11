@@ -25,7 +25,8 @@ class Detector:
 
 
 def _pixel_coordinate_in_detector_system(pixelID: sc.Variable):
-    """Determines detector coordinates and divergence angle from pixel number"""
+    """Determines beam travel distance inside the detector
+    and the beam divergence angle from the detector number."""
     old_pixelID_unit = pixelID.unit
     pixelID.unit = ""
     (bladeNr, bPixel) = (
@@ -33,36 +34,31 @@ def _pixel_coordinate_in_detector_system(pixelID: sc.Variable):
         pixelID % (Detector.nWires * Detector.nStripes),
     )
     # z index on blade, y index on detector
-    (bZi, detYi) = (
-        bPixel // Detector.nStripes,
-        bPixel % Detector.nStripes,
-    )
-    # z index on detector
-    detZi = bladeNr * Detector.nWires + bZi
+    bZi = bPixel // Detector.nStripes
     # x position in detector
     # TODO: check with Jochen if this is correct, as old code was:
     # detX = bZi * Detector.dX
-    detX = (Detector.nWires - 1 - bZi) * Detector.dX
+    distance_inside_detector = (Detector.nWires - 1 - bZi) * Detector.dX
 
     bladeAngle = (2.0 * sc.asin(0.5 * Detector.bladeZ / Detector.distance)).to(
         unit="degree"
     )
-    delta = (Detector.nBlades / 2.0 - bladeNr) * bladeAngle - (
+    beam_divergence_angle = (Detector.nBlades / 2.0 - bladeNr) * bladeAngle - (
         sc.atan(bZi * Detector.dZ / (Detector.distance + bZi * Detector.dX))
     ).to(unit="degree")
     pixelID.unit = old_pixelID_unit
-
-    # z is in the direction of the center of the beam, y is the direction 'up'
-    return detYi, detZi, detX, delta
+    return distance_inside_detector, beam_divergence_angle
 
 
 def pixel_coordinate_in_lab_frame(pixelID: sc.Variable, nu: sc.Variable):
     """Computes spatial coordinates (lab reference frame), and the beam divergence
     angle for the detector pixel associated with `pixelID`"""
-    _, _, detX, delta = _pixel_coordinate_in_detector_system(pixelID)
+    distance_in_detector, divergence_angle = _pixel_coordinate_in_detector_system(
+        pixelID
+    )
 
-    angle_to_horizon = (nu + delta).to(unit="rad")
-    distance_to_pixel = detX + Detector.distance
+    angle_to_horizon = (nu + divergence_angle).to(unit="rad")
+    distance_to_pixel = distance_in_detector + Detector.distance
 
     global_Y = distance_to_pixel * sc.sin(angle_to_horizon)
     global_Z = distance_to_pixel * sc.cos(angle_to_horizon)
@@ -72,4 +68,4 @@ def pixel_coordinate_in_lab_frame(pixelID: sc.Variable, nu: sc.Variable):
     global_X = sc.zeros_like(global_Z) + sc.linspace(
         "stripe", -0.1, 0.1, global_Z.sizes["stripe"], unit="m"
     ).to(unit=global_Z.unit)
-    return global_X, global_Y, global_Z, delta
+    return global_X, global_Y, global_Z, divergence_angle
