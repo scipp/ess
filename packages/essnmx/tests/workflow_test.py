@@ -6,8 +6,8 @@ import scipp as sc
 
 from ess.nmx import default_parameters
 from ess.nmx.data import small_mcstas_2_sample, small_mcstas_3_sample
-from ess.nmx.mcstas_loader import providers as load_providers
-from ess.nmx.reduction import bin_time_of_arrival
+from ess.nmx.mcstas.load import providers as load_providers
+from ess.nmx.reduction import NMXData, NMXReducedData, bin_time_of_arrival
 from ess.nmx.types import DetectorIndex, FilePath, TimeBinSteps
 
 
@@ -42,8 +42,6 @@ def test_pipeline_builder(mcstas_workflow: sl.Pipeline, mcstas_file_path: str) -
 
 def test_pipeline_mcstas_loader(mcstas_workflow: sl.Pipeline) -> None:
     """Test if the loader graph is complete."""
-    from ess.nmx.mcstas_loader import NMXData
-
     mcstas_workflow[DetectorIndex] = 0
     nmx_data = mcstas_workflow.compute(NMXData)
     assert isinstance(nmx_data, sc.DataGroup)
@@ -52,8 +50,6 @@ def test_pipeline_mcstas_loader(mcstas_workflow: sl.Pipeline) -> None:
 
 def test_pipeline_mcstas_reduction(mcstas_workflow: sl.Pipeline) -> None:
     """Test if the loader graph is complete."""
-    from ess.nmx.reduction import NMXReducedData
-
     nmx_reduced_data = mcstas_workflow.compute(NMXReducedData)
     assert isinstance(nmx_reduced_data, sc.DataGroup)
     assert nmx_reduced_data.sizes['t'] == 50

@@ -6,9 +6,8 @@ from typing import Dict, List
 import scipp as sc
 import scippnexus as snx
 
-from .mcstas_xml import McStasInstrument, read_mcstas_geometry_xml
-from .reduction import NMXData
-from .types import (
+from ..reduction import NMXData
+from ..types import (
     CrystalRotation,
     DetectorBankPrefix,
     DetectorIndex,
@@ -19,6 +18,7 @@ from .types import (
     ProtonCharge,
     RawEventData,
 )
+from .xml import McStasInstrument, read_mcstas_geometry_xml
 
 
 def detector_name_from_index(index: DetectorIndex) -> DetectorName:
@@ -154,10 +154,14 @@ def load_mcstas(
     coords = instrument.to_coords(detector_name)
     coords.pop('pixel_id')
     return NMXData(
-        weights=da,
-        proton_charge=proton_charge,
-        crystal_rotation=crystal_rotation,
-        **coords,
+        sc.DataGroup(
+            dict(
+                weights=da,
+                proton_charge=proton_charge,
+                crystal_rotation=crystal_rotation,
+                **coords,
+            )
+        )
     )
 
 
