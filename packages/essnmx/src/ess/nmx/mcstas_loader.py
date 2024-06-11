@@ -6,7 +6,6 @@ from typing import Dict, List
 import scipp as sc
 import scippnexus as snx
 
-from .const import PIXEL_DIM, TOF_DIM
 from .mcstas_xml import McStasInstrument, read_mcstas_geometry_xml
 from .reduction import NMXData
 from .types import (
@@ -26,16 +25,18 @@ def detector_name_from_index(index: DetectorIndex) -> DetectorName:
     return f'nD_Mantid_{index}'
 
 
-def event_data_bank_name(
+def load_event_data_bank_name(
     detector_name: DetectorName, file_path: FilePath
 ) -> DetectorBankPrefix:
     '''Finds the filename associated with a detector'''
-    for bank_name, det_names in read_bank_names_to_detector_names(file_path).items():
-        if detector_name in det_names:
-            return bank_name.partition('.')[0]
+    with snx.File(file_path) as file:
+        description = file['entry1/instrument/description'][()]
+        for bank_name, det_names in bank_names_to_detector_names(description).items():
+            if detector_name in det_names:
+                return bank_name.partition('.')[0]
 
 
-def raw_event_data(
+def load_raw_event_data(
     file_path: FilePath,
     bank_prefix: DetectorBankPrefix,
     detector_name: DetectorName,
@@ -50,15 +51,13 @@ def raw_event_data(
         data = root[bank_name]["events"][()].rename_dims({'dim_0': 'event'})
         return sc.DataArray(
             coords={
-                PIXEL_DIM: sc.array(
+                'id': sc.array(
                     dims=['event'],
                     values=data['dim_1', 4].values,
                     dtype='int64',
                     unit=None,
                 ),
-                TOF_DIM: sc.array(
-                    dims=['event'], values=data['dim_1', 5].values, unit='s'
-                ),
+                't': sc.array(dims=['event'], values=data['dim_1', 5].values, unit='s'),
             },
             data=sc.array(
                 dims=['event'], values=data['dim_1', 0].values, unit='counts'
@@ -66,7 +65,7 @@ def raw_event_data(
         ).group(coords.pop('pixel_id'))
 
 
-def crystal_rotation(
+def load_crystal_rotation(
     file_path: FilePath, instrument: McStasInstrument
 ) -> CrystalRotation:
     """Retrieve crystal rotation from the file."""
@@ -118,12 +117,6 @@ def proton_charge_from_event_data(da: EventData) -> ProtonCharge:
     return ProtonCharge(sc.scalar(1 / 10_000, unit=None) * da.bins.size().sum().data)
 
 
-def read_bank_names_to_detector_names(file_path: str) -> Dict[str, List[str]]:
-    with snx.File(file_path) as file:
-        description = file['entry1/instrument/description'][()]
-    return bank_names_to_detector_names(description)
-
-
 def bank_names_to_detector_names(description: str) -> Dict[str, List[str]]:
     """Associates event data names with the names of the detectors
     where the events were detected"""
@@ -171,10 +164,10 @@ def load_mcstas(
 providers = (
     read_mcstas_geometry_xml,
     detector_name_from_index,
-    event_data_bank_name,
-    raw_event_data,
+    load_event_data_bank_name,
+    load_raw_event_data,
     event_weights_from_probability,
     proton_charge_from_event_data,
-    crystal_rotation,
+    load_crystal_rotation,
     load_mcstas,
 )
