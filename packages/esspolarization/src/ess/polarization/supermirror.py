@@ -51,7 +51,7 @@ def get_supermirror_efficiency_function() -> (
 
 
 def get_supermirror_transmission_function(
-    efficiency_function: SupermirrorEfficiencyFunction,
+    efficiency_function: SupermirrorEfficiencyFunction[PolarizingElement],
 ) -> SupermirrorTransmissionFunction[PolarizingElement]:
     return SupermirrorTransmissionFunction[PolarizingElement](
         efficiency_function=efficiency_function

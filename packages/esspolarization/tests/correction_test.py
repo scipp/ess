@@ -6,6 +6,7 @@ import sciline
 import scipp as sc
 from scipp.testing import assert_allclose
 
+import ess.polarization as pol
 from ess.polarization import (
     CorrectionWorkflow,
     He3CellWorkflow,
@@ -94,9 +95,9 @@ def test_correction_workflow_computes_and_applies_matrix_inverse() -> None:
     workflow[ReducedSampleDataBySpinChannel[Down, Down]] = intensity[3]
 
     result = np.zeros(4)
-    for pol in [Up, Down]:
+    for pola in [Up, Down]:
         for ana in [Up, Down]:
-            contrib = workflow.compute(PolarizationCorrectedData[pol, ana])
+            contrib = workflow.compute(PolarizationCorrectedData[pola, ana])
             contrib = sc.concat(
                 [contrib.upup, contrib.updown, contrib.downup, contrib.downdown],
                 'dummy',
@@ -131,9 +132,9 @@ def test_workflow_with_analyzer_flipper_computes_and_applies_matrix_inverse(
     workflow[FlipperEfficiency[Analyzer]] = FlipperEfficiency(f)
 
     result = np.zeros(4)
-    for pol in [Up, Down]:
+    for pola in [Up, Down]:
         for ana in [Up, Down]:
-            contrib = workflow.compute(PolarizationCorrectedData[pol, ana])
+            contrib = workflow.compute(PolarizationCorrectedData[pola, ana])
             contrib = sc.concat(
                 [contrib.upup, contrib.updown, contrib.downup, contrib.downdown],
                 'dummy',
@@ -168,9 +169,9 @@ def test_workflow_with_polarizer_flipper_computes_and_applies_matrix_inverse(
     workflow[FlipperEfficiency[Polarizer]] = FlipperEfficiency(f)
 
     result = np.zeros(4)
-    for pol in [Up, Down]:
+    for pola in [Up, Down]:
         for ana in [Up, Down]:
-            contrib = workflow.compute(PolarizationCorrectedData[pol, ana])
+            contrib = workflow.compute(PolarizationCorrectedData[pola, ana])
             contrib = sc.concat(
                 [contrib.upup, contrib.updown, contrib.downup, contrib.downdown],
                 'dummy',
@@ -208,9 +209,9 @@ def test_workflow_with_two_flipper_computes_and_applies_matrix_inverse(
     workflow[FlipperEfficiency[Analyzer]] = FlipperEfficiency(f2)
 
     result = np.zeros(4)
-    for pol in [Up, Down]:
+    for pola in [Up, Down]:
         for ana in [Up, Down]:
-            contrib = workflow.compute(PolarizationCorrectedData[pol, ana])
+            contrib = workflow.compute(PolarizationCorrectedData[pola, ana])
             contrib = sc.concat(
                 [contrib.upup, contrib.updown, contrib.downup, contrib.downdown],
                 'dummy',
@@ -219,7 +220,9 @@ def test_workflow_with_two_flipper_computes_and_applies_matrix_inverse(
     np.testing.assert_allclose(result, ground_truth)
 
 
-_polarizing_element_workflows = [He3CellWorkflow(), SupermirrorWorkflow()]
+_he3_workflow = He3CellWorkflow()
+_supermirror_workflow = SupermirrorWorkflow()
+_polarizing_element_workflows = [_he3_workflow, _supermirror_workflow]
 
 
 @pytest.mark.parametrize("polarizer_workflow", _polarizing_element_workflows)
@@ -227,7 +230,13 @@ _polarizing_element_workflows = [He3CellWorkflow(), SupermirrorWorkflow()]
 def test_polarization_analysis_workflow_creation(
     polarizer_workflow: sciline.Pipeline, analyzer_workflow: sciline.Pipeline
 ) -> None:
-    _ = PolarizationAnalysisWorkflow(
+    workflow = PolarizationAnalysisWorkflow(
         polarizer_workflow=polarizer_workflow, analyzer_workflow=analyzer_workflow
     )
-    # TODO How to check the workflow graph, without having any of the required inputs?
+    handler = sciline.HandleAsComputeTimeException()
+    for elem, wf in zip((Polarizer, Analyzer), (polarizer_workflow, analyzer_workflow)):
+        graph = workflow.get(TransmissionFunction[elem], handler=handler)
+        assert (
+            pol.supermirror.SupermirrorEfficiencyFunction[elem] in graph.keys()
+        ) == (wf is _supermirror_workflow)
+        assert (pol.he3.He3CellPressure[elem] in graph.keys()) == (wf is _he3_workflow)

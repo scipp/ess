@@ -7,7 +7,7 @@ import networkx as nx
 import sciline
 import scipp as sc
 
-from .he3 import he3_analyzer, he3_polarizer
+from .he3 import He3TransmissionFunction, he3_analyzer, he3_polarizer
 from .supermirror import supermirror_analyzer, supermirror_polarizer
 from .types import (
     Analyzer,
@@ -184,13 +184,8 @@ def CorrectionWorkflow() -> sciline.Pipeline:
 
 
 def _is_he3(workflow: sciline.Pipeline) -> bool:
-    from .he3 import He3TransmissionFunction
-
-    try:
-        workflow.get(He3TransmissionFunction[Polarizer])
-        return True
-    except sciline.UnsatisfiedRequirement:
-        return False
+    # TODO Working around missing __contains__ in sciline.Pipeline
+    return He3TransmissionFunction[Polarizer] in workflow._graph
 
 
 def PolarizationAnalysisWorkflow(
