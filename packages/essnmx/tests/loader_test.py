@@ -12,8 +12,8 @@ from scipp.testing import assert_allclose, assert_identical
 
 from ess.nmx import default_parameters
 from ess.nmx.data import small_mcstas_2_sample, small_mcstas_3_sample
-from ess.nmx.mcstas_loader import bank_names_to_detector_names
-from ess.nmx.mcstas_loader import providers as loader_providers
+from ess.nmx.mcstas.load import bank_names_to_detector_names
+from ess.nmx.mcstas.load import providers as loader_providers
 from ess.nmx.reduction import NMXData
 from ess.nmx.types import (
     DetectorBankPrefix,
@@ -37,15 +37,15 @@ def check_scalar_properties_mcstas_2(dg: NMXData):
     Expected numbers are hard-coded based on the sample file.
     """
     assert_identical(
-        dg.proton_charge,
+        dg['proton_charge'],
         sc.scalar(1e-4 * dg['weights'].bins.size().sum().data.values, unit=None),
     )
-    assert_identical(dg.crystal_rotation, sc.vector([20, 0, 90], unit='deg'))
-    assert_identical(dg.sample_position, sc.vector(value=[0, 0, 0], unit='m'))
+    assert_identical(dg['crystal_rotation'], sc.vector([20, 0, 90], unit='deg'))
+    assert_identical(dg['sample_position'], sc.vector(value=[0, 0, 0], unit='m'))
     assert_identical(
-        dg.source_position, sc.vector(value=[-0.53123, 0.0, -157.405], unit='m')
+        dg['source_position'], sc.vector(value=[-0.53123, 0.0, -157.405], unit='m')
     )
-    assert dg.sample_name == sc.scalar("sampleMantid")
+    assert dg['sample_name'] == sc.scalar("sampleMantid")
 
 
 def check_nmxdata_properties(dg: NMXData, fast_axis, slow_axis) -> None:
@@ -53,13 +53,15 @@ def check_nmxdata_properties(dg: NMXData, fast_axis, slow_axis) -> None:
     assert dg.shape == ((1280, 1280)[0] * (1280, 1280)[1], 1)
     # Check maximum value of weights.
     assert_allclose(
-        dg.weights.max().data,
+        dg['weights'].max().data,
         sc.scalar(default_parameters[MaximumProbability], unit='counts', dtype=float),
         atol=sc.scalar(1e-10, unit='counts'),
         rtol=sc.scalar(1e-8),
     )
-    assert_allclose(sc.squeeze(dg.fast_axis, 'panel'), fast_axis, atol=sc.scalar(0.005))
-    assert_identical(sc.squeeze(dg.slow_axis, 'panel'), slow_axis)
+    assert_allclose(
+        sc.squeeze(dg['fast_axis'], 'panel'), fast_axis, atol=sc.scalar(0.005)
+    )
+    assert_identical(sc.squeeze(dg['slow_axis'], 'panel'), slow_axis)
 
 
 @pytest.mark.parametrize(
@@ -101,15 +103,15 @@ def check_scalar_properties_mcstas_3(dg: NMXData):
     Expected numbers are hard-coded based on the sample file.
     """
     assert_identical(
-        dg.proton_charge,
+        dg['proton_charge'],
         sc.scalar(1e-4 * dg['weights'].bins.size().sum().data.values, unit=None),
     )
-    assert_identical(dg.crystal_rotation, sc.vector([0, 0, 0], unit='deg'))
-    assert_identical(dg.sample_position, sc.vector(value=[0, 0, 0], unit='m'))
+    assert_identical(dg['crystal_rotation'], sc.vector([0, 0, 0], unit='deg'))
+    assert_identical(dg['sample_position'], sc.vector(value=[0, 0, 0], unit='m'))
     assert_identical(
-        dg.source_position, sc.vector(value=[-0.53123, 0.0, -157.405], unit='m')
+        dg['source_position'], sc.vector(value=[-0.53123, 0.0, -157.405], unit='m')
     )
-    assert dg.sample_name == sc.scalar("sampleMantid")
+    assert dg['sample_name'] == sc.scalar("sampleMantid")
 
 
 @pytest.mark.parametrize(
@@ -141,7 +143,7 @@ def test_file_reader_mcstas3(detector_index, fast_axis, slow_axis) -> None:
         data_length = raw_data.sizes['dim_0']
 
     check_scalar_properties_mcstas_3(dg)
-    assert dg.weights.bins.size().sum().value == data_length
+    assert dg['weights'].bins.size().sum().value == data_length
     check_nmxdata_properties(dg, sc.vector(fast_axis), sc.vector(slow_axis))
 
 
