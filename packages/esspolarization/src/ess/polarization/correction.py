@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-from typing import Callable, Generic
+from typing import Protocol
 
 import sciline
 import scipp as sc
@@ -47,7 +47,6 @@ def compute_polarizing_element_correction(
     -------
     :
         Correction matrix coefficients.
-
     """
     t_plus = transmission.apply(channel, 'plus')
     t_minus = transmission.apply(channel, 'minus')
@@ -61,35 +60,25 @@ def compute_polarizing_element_correction(
     )
 
 
-class AnalyzerFlipper(Generic[AnalyzerSpin]):
-    """Flipper for the analyzer."""
-
-    def __call__(
-        self, up: sc.Variable, down: sc.Variable
-    ) -> tuple[sc.Variable, sc.Variable]:
-        """Flip the analyzer."""
-        raise NotImplementedError
+Components = tuple[sc.Variable, sc.Variable]
 
 
-class PolarizerFlipper(Generic[PolarizerSpin]):
-    """Flipper for the polarizer."""
-
-    def __call__(
-        self, up: sc.Variable, down: sc.Variable
-    ) -> tuple[sc.Variable, sc.Variable]:
-        """Flip the polarizer."""
-        raise NotImplementedError
+class AnalyzerFlipper(Protocol[AnalyzerSpin]):
+    def __call__(self, up: sc.Variable, down: sc.Variable) -> Components:
+        ...
 
 
-def no_flipper(up: sc.Variable, down: sc.Variable) -> tuple[sc.Variable, sc.Variable]:
+class PolarizerFlipper(Protocol[PolarizerSpin]):
+    def __call__(self, up: sc.Variable, down: sc.Variable) -> Components:
+        ...
+
+
+def no_flipper(up: sc.Variable, down: sc.Variable) -> Components:
     return up, down
 
 
-def flip(up: sc.Variable, down: sc.Variable) -> tuple[sc.Variable, sc.Variable]:
+def flip(up: sc.Variable, down: sc.Variable) -> Components:
     return down, up
-
-
-Flipper = Callable[[sc.Variable, sc.Variable], tuple[sc.Variable, sc.Variable]]
 
 
 def compute_polarization_correction(
