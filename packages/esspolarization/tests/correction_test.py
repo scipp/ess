@@ -1,11 +1,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 import numpy as np
+import pytest
 import scipp as sc
 from scipp.testing import assert_allclose
 
 from ess.polarization.correction import (
     CorrectionWorkflow,
+    FlipperEfficiency,
     compute_polarizing_element_correction,
 )
 from ess.polarization.types import (
@@ -73,15 +75,131 @@ def test_correction_workflow_computes_and_applies_matrix_inverse() -> None:
     analyzer = np.array([[1.3, 0.9], [0.9, 1.3]])
     polarizer = np.array([[1.1, 0.7], [0.7, 1.1]])
     identity = np.array([[1.0, 0.0], [0.0, 1.0]])
-    input = np.kron(identity, analyzer) @ np.kron(polarizer, identity) @ ground_truth
+    intensity = (
+        np.kron(identity, analyzer) @ np.kron(polarizer, identity) @ ground_truth
+    )
 
     workflow = CorrectionWorkflow()
     workflow[TransmissionFunction[Analyzer]] = FakeTransmissionFunction(analyzer)
     workflow[TransmissionFunction[Polarizer]] = FakeTransmissionFunction(polarizer)
-    workflow[ReducedSampleDataBySpinChannel[Up, Up]] = input[0]
-    workflow[ReducedSampleDataBySpinChannel[Up, Down]] = input[1]
-    workflow[ReducedSampleDataBySpinChannel[Down, Up]] = input[2]
-    workflow[ReducedSampleDataBySpinChannel[Down, Down]] = input[3]
+    workflow[ReducedSampleDataBySpinChannel[Up, Up]] = intensity[0]
+    workflow[ReducedSampleDataBySpinChannel[Up, Down]] = intensity[1]
+    workflow[ReducedSampleDataBySpinChannel[Down, Up]] = intensity[2]
+    workflow[ReducedSampleDataBySpinChannel[Down, Down]] = intensity[3]
+
+    result = np.zeros(4)
+    for pol in [Up, Down]:
+        for ana in [Up, Down]:
+            contrib = workflow.compute(PolarizationCorrectedData[pol, ana])
+            contrib = sc.concat(
+                [contrib.upup, contrib.updown, contrib.downup, contrib.downdown],
+                'dummy',
+            )
+            result += contrib.values
+    np.testing.assert_allclose(result, ground_truth)
+
+
+@pytest.mark.parametrize('f', [0.1, 0.5, 0.9, 0.99, 1.0])
+def test_workflow_with_analyzer_flipper_computes_and_applies_matrix_inverse(
+    f: float,
+) -> None:
+    ground_truth = np.array([7.0, 11.0, 13.0, 17.0])
+    analyzer = np.array([[1.3, 0.9], [0.9, 1.3]])
+    polarizer = np.array([[1.1, 0.7], [0.7, 1.1]])
+    identity = np.array([[1.0, 0.0], [0.0, 1.0]])
+
+    flipper = np.array([[1.0, 0.0], [1 - f, f]])
+    intensity = (
+        np.kron(identity, analyzer @ flipper)
+        @ np.kron(polarizer, identity)
+        @ ground_truth
+    )
+
+    workflow = CorrectionWorkflow()
+    workflow[TransmissionFunction[Analyzer]] = FakeTransmissionFunction(analyzer)
+    workflow[TransmissionFunction[Polarizer]] = FakeTransmissionFunction(polarizer)
+    workflow[ReducedSampleDataBySpinChannel[Up, Up]] = intensity[0]
+    workflow[ReducedSampleDataBySpinChannel[Up, Down]] = intensity[1]
+    workflow[ReducedSampleDataBySpinChannel[Down, Up]] = intensity[2]
+    workflow[ReducedSampleDataBySpinChannel[Down, Down]] = intensity[3]
+    workflow[FlipperEfficiency[Analyzer]] = FlipperEfficiency(f)
+
+    result = np.zeros(4)
+    for pol in [Up, Down]:
+        for ana in [Up, Down]:
+            contrib = workflow.compute(PolarizationCorrectedData[pol, ana])
+            contrib = sc.concat(
+                [contrib.upup, contrib.updown, contrib.downup, contrib.downdown],
+                'dummy',
+            )
+            result += contrib.values
+    np.testing.assert_allclose(result, ground_truth)
+
+
+@pytest.mark.parametrize('f', [0.1, 0.5, 0.9, 0.99, 1.0])
+def test_workflow_with_polarizer_flipper_computes_and_applies_matrix_inverse(
+    f: float,
+) -> None:
+    ground_truth = np.array([7.0, 11.0, 13.0, 17.0])
+    analyzer = np.array([[1.3, 0.9], [0.9, 1.3]])
+    polarizer = np.array([[1.1, 0.7], [0.7, 1.1]])
+    identity = np.array([[1.0, 0.0], [0.0, 1.0]])
+
+    flipper = np.array([[1.0, 0.0], [1 - f, f]])
+    intensity = (
+        np.kron(identity, analyzer)
+        @ np.kron(flipper @ polarizer, identity)
+        @ ground_truth
+    )
+
+    workflow = CorrectionWorkflow()
+    workflow[TransmissionFunction[Analyzer]] = FakeTransmissionFunction(analyzer)
+    workflow[TransmissionFunction[Polarizer]] = FakeTransmissionFunction(polarizer)
+    workflow[ReducedSampleDataBySpinChannel[Up, Up]] = intensity[0]
+    workflow[ReducedSampleDataBySpinChannel[Up, Down]] = intensity[1]
+    workflow[ReducedSampleDataBySpinChannel[Down, Up]] = intensity[2]
+    workflow[ReducedSampleDataBySpinChannel[Down, Down]] = intensity[3]
+    workflow[FlipperEfficiency[Polarizer]] = FlipperEfficiency(f)
+
+    result = np.zeros(4)
+    for pol in [Up, Down]:
+        for ana in [Up, Down]:
+            contrib = workflow.compute(PolarizationCorrectedData[pol, ana])
+            contrib = sc.concat(
+                [contrib.upup, contrib.updown, contrib.downup, contrib.downdown],
+                'dummy',
+            )
+            result += contrib.values
+    np.testing.assert_allclose(result, ground_truth)
+
+
+@pytest.mark.parametrize('f1', [0.1, 0.5, 0.9, 0.99, 1.0])
+@pytest.mark.parametrize('f2', [0.1, 0.5, 0.9, 0.99, 1.0])
+def test_workflow_with_two_flipper_computes_and_applies_matrix_inverse(
+    f1: float, f2: float
+) -> None:
+    ground_truth = np.array([7.0, 11.0, 13.0, 17.0])
+    analyzer = np.array([[1.3, 0.9], [0.9, 1.3]])
+    polarizer = np.array([[1.1, 0.7], [0.7, 1.1]])
+    identity = np.array([[1.0, 0.0], [0.0, 1.0]])
+
+    flipper1 = np.array([[1.0, 0.0], [1 - f1, f1]])
+    flipper2 = np.array([[1.0, 0.0], [1 - f2, f2]])
+    intensity = (
+        np.kron(identity, analyzer @ flipper2)
+        @ np.kron(flipper1 @ polarizer, identity)
+        @ ground_truth
+    )
+
+    workflow = CorrectionWorkflow()
+    workflow[TransmissionFunction[Analyzer]] = FakeTransmissionFunction(analyzer)
+    workflow[TransmissionFunction[Polarizer]] = FakeTransmissionFunction(polarizer)
+    workflow[ReducedSampleDataBySpinChannel[Up, Up]] = intensity[0]
+    workflow[ReducedSampleDataBySpinChannel[Up, Down]] = intensity[1]
+    workflow[ReducedSampleDataBySpinChannel[Down, Up]] = intensity[2]
+    workflow[ReducedSampleDataBySpinChannel[Down, Down]] = intensity[3]
+    workflow[FlipperEfficiency[Polarizer]] = FlipperEfficiency(f1)
+    workflow[FlipperEfficiency[Analyzer]] = FlipperEfficiency(f2)
 
     result = np.zeros(4)
     for pol in [Up, Down]:

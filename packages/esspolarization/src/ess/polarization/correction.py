@@ -10,6 +10,7 @@ from .types import (
     Analyzer,
     AnalyzerSpin,
     Down,
+    FlipperEfficiency,
     PolarizationCorrectedData,
     PolarizationCorrection,
     Polarizer,
@@ -23,31 +24,40 @@ from .types import (
 
 
 @dataclass
-class FlipperEfficiency(Generic[PolarizingElement]):
-    """Efficiency of a flipper"""
-
-    value: float
-
-
-@dataclass
 class InverseFlipperMatrix(Generic[PolarizerSpin, PolarizingElement]):
     """Flipper matrix, combined with component flip for down component"""
 
     efficiency: FlipperEfficiency[PolarizingElement]
     swap: bool
 
-    def __call__(
+    def from_left(
         self, up: sc.Variable, down: sc.Variable
     ) -> tuple[sc.Variable, sc.Variable]:
-        """Return the flipped components"""
-        f = 1 / self.efficiency.value
+        """Apply inverse flipper matrix from the left (for analyzer)"""
         if self.swap:
             up, down = down, up
+        f = 1 / self.efficiency.value
+        if f == 1:
+            return up, down
         return up, (1 - f) * up + f * down
+
+    def from_right(
+        self, up: sc.Variable, down: sc.Variable
+    ) -> tuple[sc.Variable, sc.Variable]:
+        """Apply inverse flipper matrix from the right (for polarizer)"""
+        f = 1 / self.efficiency.value
+        if f == 1:
+            return (down, up) if self.swap else (up, down)
+        if self.swap:
+            return f * down, f * up
+        else:
+            return up + (1 - f) * down, down + (1 - f) * up
 
 
 @dataclass
 class SwapComponent(Generic[PolarizerSpin]):
+    """Helper to implement component swap in flipper matrix"""
+
     value: bool
 
 
@@ -99,9 +109,6 @@ def compute_polarizing_element_correction(
     )
 
 
-Components = tuple[sc.Variable, sc.Variable]
-
-
 def compute_polarization_correction(
     *,
     analyzer: PolarizingElementCorrection[PolarizerSpin, AnalyzerSpin, Analyzer],
@@ -120,27 +127,23 @@ def compute_polarization_correction(
         Correction coefficients for the analyzer.
     polarizer :
         Correction coefficients for the polarizer.
+    analyzer_flipper :
+        Flipper matrix for the analyzer.
+    polarizer_flipper :
+        Flipper matrix for the polarizer.
 
     Returns
     -------
     :
         Combined correction coefficients.
     """
-    a_up, a_down = analyzer_flipper(analyzer.diag, analyzer.off_diag)
-    p_up, p_down = polarizer.diag, polarizer.off_diag
-    upup = p_up * a_up
-    updown = p_up * a_down
-    downup = p_down * a_up
-    downdown = p_down * a_down
-
-    # for polarizer-up, polarized flipper scales second with (1-1/f)
-    upup, downup = polarizer_flipper(upup, downup)
-    updown, downdown = polarizer_flipper(updown, downdown)
+    a_up, a_down = analyzer_flipper.from_left(analyzer.diag, analyzer.off_diag)
+    p_up, p_down = polarizer_flipper.from_right(polarizer.diag, polarizer.off_diag)
     return PolarizationCorrection[PolarizerSpin, AnalyzerSpin](
-        upup=upup,
-        updown=updown,
-        downup=downup,
-        downdown=downdown,
+        upup=p_up * a_up,
+        updown=p_up * a_down,
+        downup=p_down * a_up,
+        downdown=p_down * a_down,
     )
 
 
@@ -169,6 +172,8 @@ def CorrectionWorkflow() -> sciline.Pipeline:
     )
     workflow[SwapComponent[Up]] = SwapComponent[Up](value=False)
     workflow[SwapComponent[Down]] = SwapComponent[Down](value=True)
+    # If there is no flipper, setting an efficiency of 1.0 is equivalent to not using
+    # a flipper.
     workflow[FlipperEfficiency[PolarizingElement]] = FlipperEfficiency[
         PolarizingElement
     ](value=1.0)

@@ -75,3 +75,10 @@ class PolarizationCorrectedData(Generic[PolarizerSpin, AnalyzerSpin]):
     updown: sc.DataArray
     downup: sc.DataArray
     downdown: sc.DataArray
+
+
+@dataclass
+class FlipperEfficiency(Generic[PolarizingElement]):
+    """Efficiency of a flipper"""
+
+    value: float
