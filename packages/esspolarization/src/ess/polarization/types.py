@@ -23,14 +23,14 @@ Analyzer = NewType('Analyzer', str)
 Polarizer = NewType('Polarizer', str)
 PolarizingElement = TypeVar('PolarizingElement', Analyzer, Polarizer)
 
+PlusMinus = Literal['plus', 'minus']
+
 
 class TransmissionFunction(Generic[PolarizingElement], ABC):
     """Wavelength- and time-dependent transmission for a given cell."""
 
     @abstractmethod
-    def apply(
-        self, data: sc.DataArray, plus_minus: Literal['plus', 'minus']
-    ) -> sc.DataArray:
+    def apply(self, data: sc.DataArray, plus_minus: PlusMinus) -> sc.DataArray:
         ...
 
 

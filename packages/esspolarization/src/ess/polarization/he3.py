@@ -1,14 +1,20 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 from dataclasses import dataclass
-from typing import Generic, Literal, NewType, TypeVar
+from typing import Generic, NewType, TypeVar
 
 import sciline as sl
 import scipp as sc
 
 # from .correction import correct_for_analyzer, correct_for_polarizer
 from .correction import CorrectionWorkflow
-from .types import Analyzer, Polarizer, PolarizingElement, TransmissionFunction
+from .types import (
+    Analyzer,
+    PlusMinus,
+    Polarizer,
+    PolarizingElement,
+    TransmissionFunction,
+)
 from .uncertainty import broadcast_with_upper_bound_variances
 
 Depolarized = NewType('Depolarized', int)
@@ -183,11 +189,7 @@ class He3TransmissionFunction(TransmissionFunction[PolarizingElement]):
     transmission_empty_glass: He3TransmissionEmptyGlass[PolarizingElement]
 
     def __call__(
-        self,
-        *,
-        time: sc.Variable,
-        wavelength: sc.Variable,
-        plus_minus: Literal['plus', 'minus'],
+        self, *, time: sc.Variable, wavelength: sc.Variable, plus_minus: PlusMinus
     ) -> sc.Variable:
         opacity = self.opacity_function(wavelength)
         polarization = self.polarization_function(time)
@@ -195,9 +197,7 @@ class He3TransmissionFunction(TransmissionFunction[PolarizingElement]):
             polarization *= -1.0
         return self.transmission_empty_glass * sc.exp(-opacity * (1.0 + polarization))
 
-    def apply(
-        self, data: sc.DataArray, plus_minus: Literal['plus', 'minus']
-    ) -> sc.DataArray:
+    def apply(self, data: sc.DataArray, plus_minus: PlusMinus) -> sc.DataArray:
         return self(
             time=data.coords['time'],
             wavelength=data.coords['wavelength'],
