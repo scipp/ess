@@ -3,12 +3,9 @@
 from dataclasses import dataclass
 from typing import Generic
 
-import networkx as nx
 import sciline
 import scipp as sc
 
-from .he3 import He3TransmissionFunction, he3_analyzer, he3_polarizer
-from .supermirror import supermirror_analyzer, supermirror_polarizer
 from .types import (
     Analyzer,
     AnalyzerSpin,
@@ -183,11 +180,6 @@ def CorrectionWorkflow() -> sciline.Pipeline:
     return workflow
 
 
-def _is_he3(workflow: sciline.Pipeline) -> bool:
-    # TODO Working around missing __contains__ in sciline.Pipeline
-    return He3TransmissionFunction[Polarizer] in workflow._graph
-
-
 def PolarizationAnalysisWorkflow(
     *,
     polarizer_workflow: sciline.Pipeline,
@@ -210,17 +202,10 @@ def PolarizationAnalysisWorkflow(
     """
 
     workflow = CorrectionWorkflow()
-    # TODO Hack to merge the workflows, Sciline currently lacks this feature.
-    graph = nx.compose(
-        polarizer_workflow._cbgraph.graph,
-        analyzer_workflow._cbgraph.graph,
-    )
-    workflow._cbgraph.graph = nx.compose(workflow._cbgraph.graph, graph)
-
-    workflow.insert(
-        he3_analyzer if _is_he3(analyzer_workflow) else supermirror_analyzer
-    )
-    workflow.insert(
-        he3_polarizer if _is_he3(polarizer_workflow) else supermirror_polarizer
-    )
+    workflow[TransmissionFunction[Polarizer]] = polarizer_workflow[
+        TransmissionFunction[Polarizer]
+    ]
+    workflow[TransmissionFunction[Analyzer]] = analyzer_workflow[
+        TransmissionFunction[Analyzer]
+    ]
     return workflow

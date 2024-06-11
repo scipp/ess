@@ -7,13 +7,7 @@ from typing import Generic
 import sciline
 import scipp as sc
 
-from .types import (
-    Analyzer,
-    PlusMinus,
-    Polarizer,
-    PolarizingElement,
-    TransmissionFunction,
-)
+from .types import PlusMinus, PolarizingElement, TransmissionFunction
 
 
 class SupermirrorEfficiencyFunction(Generic[PolarizingElement]):
@@ -52,22 +46,10 @@ def get_supermirror_efficiency_function() -> (
 
 def get_supermirror_transmission_function(
     efficiency_function: SupermirrorEfficiencyFunction[PolarizingElement],
-) -> SupermirrorTransmissionFunction[PolarizingElement]:
+) -> TransmissionFunction[PolarizingElement]:
     return SupermirrorTransmissionFunction[PolarizingElement](
         efficiency_function=efficiency_function
     )
-
-
-def supermirror_analyzer(
-    func: SupermirrorTransmissionFunction[Analyzer],
-) -> TransmissionFunction[Analyzer]:
-    return func
-
-
-def supermirror_polarizer(
-    func: SupermirrorTransmissionFunction[Polarizer],
-) -> TransmissionFunction[Polarizer]:
-    return func
 
 
 supermirror_providers = (

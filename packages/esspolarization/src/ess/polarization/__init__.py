@@ -38,6 +38,7 @@ from .types import (
     Polarizer,
     PolarizingElement,
     ReducedSampleDataBySpinChannel,
+    TransmissionFunction,
     Up,
 )
 
@@ -65,5 +66,6 @@ __all__ = [
     "PolarizingElement",
     "ReducedSampleDataBySpinChannel",
     "SupermirrorWorkflow",
+    "TransmissionFunction",
     "Up",
 ]

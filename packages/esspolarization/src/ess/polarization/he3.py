@@ -6,13 +6,7 @@ from typing import Generic, NewType, TypeVar
 import sciline as sl
 import scipp as sc
 
-from .types import (
-    Analyzer,
-    PlusMinus,
-    Polarizer,
-    PolarizingElement,
-    TransmissionFunction,
-)
+from .types import PlusMinus, PolarizingElement, TransmissionFunction
 from .uncertainty import broadcast_with_upper_bound_variances
 
 Depolarized = NewType('Depolarized', int)
@@ -238,7 +232,7 @@ def get_he3_transmission_from_fit_to_direct_beam(
     opacity_function: He3OpacityFunction[PolarizingElement],
     transmission_empty_glass: He3TransmissionEmptyGlass[PolarizingElement],
     incoming_polarized: He3CellTransmissionFractionHasPolarizedIncomingBeam,
-) -> He3TransmissionFunction[PolarizingElement]:
+) -> TransmissionFunction[PolarizingElement]:
     """
     Return the transmission function for a given cell.
 
@@ -383,18 +377,6 @@ def direct_beam_with_cell(
     )
 
 
-def he3_analyzer(
-    func: He3TransmissionFunction[Analyzer],
-) -> TransmissionFunction[Analyzer]:
-    return func
-
-
-def he3_polarizer(
-    func: He3TransmissionFunction[Polarizer],
-) -> TransmissionFunction[Polarizer]:
-    return func
-
-
 providers = (
     he3_opacity_from_cell_params,
     get_he3_transmission_from_fit_to_direct_beam,
@@ -419,15 +401,7 @@ def He3CellWorkflow(
         Whether the incoming beam for computing the cell transmission is polarized.
         This is the case in beamlines with a supermirror polarizer.
     """
-    steps = (
-        he3_opacity_from_cell_params,
-        get_he3_transmission_from_fit_to_direct_beam,
-        direct_beam,
-        direct_beam_with_cell,
-        he3_analyzer,
-        he3_polarizer,
-    )
-    workflow = sl.Pipeline(steps)
+    workflow = sl.Pipeline(providers)
     if in_situ:
         workflow.insert(he3_opacity_function_from_cell_opacity)
     else:
