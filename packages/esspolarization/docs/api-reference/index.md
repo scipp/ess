@@ -26,8 +26,6 @@
    :recursive:
 
    Analyzer
-   Cell
-   CellInBeamLog
    Depolarized
    DirectBeamBackgroundQRange
    DirectBeamNoCell
@@ -41,13 +39,10 @@
    He3PolarizationFunction
    He3TransmissionFunction
    He3TransmissionEmptyGlass
-   PolarizationCorrectedSampleData
+   PolarizationCorrectedData
    Polarized
    Polarizer
-   RunSectionLog
-   SampleInBeamLog
    Up
-   WavelengthBins
 ```
 
 ## Top-level functions
