@@ -27,8 +27,6 @@ class Detector:
 def _pixel_coordinate_in_detector_system(pixelID: sc.Variable):
     """Determines beam travel distance inside the detector
     and the beam divergence angle from the detector number."""
-    old_pixelID_unit = pixelID.unit
-    pixelID.unit = ""
     (bladeNr, bPixel) = (
         pixelID // (Detector.nWires * Detector.nStripes),
         pixelID % (Detector.nWires * Detector.nStripes),
@@ -46,7 +44,6 @@ def _pixel_coordinate_in_detector_system(pixelID: sc.Variable):
     beam_divergence_angle = (Detector.nBlades / 2.0 - bladeNr) * bladeAngle - (
         sc.atan(bZi * Detector.dZ / (Detector.distance + bZi * Detector.dX))
     ).to(unit="degree")
-    pixelID.unit = old_pixelID_unit
     return distance_inside_detector, beam_divergence_angle
 
 

@@ -59,9 +59,10 @@ def load_events(
         data.bins.constituents["data"].data.variances = data.bins.constituents[
             "data"
         ].data.values
+
+    pixel_inds = sc.array(dims=data.dims, values=data.coords["event_id"].values - 1)
     x, y, z, angle_from_center_of_beam = pixel_coordinate_in_lab_frame(
-        data.coords["event_id"] - sc.scalar(1, unit=None),
-        detector_rotation,
+        pixelID=pixel_inds, nu=detector_rotation
     )
     data.coords["position"] = sc.spatial.as_vectors(x, y, z).to(unit="m")
     data.coords["angle_from_center_of_beam"] = angle_from_center_of_beam
