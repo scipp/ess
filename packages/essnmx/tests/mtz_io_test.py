@@ -6,18 +6,17 @@ import gemmi
 import pytest
 import scipp as sc
 
+from ess.nmx import mtz_io
 from ess.nmx.data import get_small_mtz_samples
 from ess.nmx.mtz_io import DEFAULT_SPACE_GROUP_DESC  # P 21 21 21
 from ess.nmx.mtz_io import (
-    MergedMtzDataFrame,
+    MtzDataFrame,
     MTZFileIndex,
     MTZFilePath,
     NMXMtzDataArray,
     NMXMtzDataFrame,
     RawMtz,
     get_reciprocal_asu,
-    get_space_group,
-    merge_mtz_dataframes,
     mtz_to_pandas,
     nmx_mtz_dataframe_to_scipp_dataarray,
     process_mtz_dataframe,
@@ -74,16 +73,11 @@ def mtz_list() -> list[RawMtz]:
     ]
 
 
-def test_get_space_group(mtz_list: list[RawMtz]) -> None:
+def test_get_space_group_with_spacegroup_desc() -> None:
     assert (
-        get_space_group(mtz_list).short_name() == "C2"
-    )  # Expected value in test files
-
-
-def test_get_space_group_with_spacegroup_desc(
-    mtz_list: list[RawMtz],
-) -> None:
-    assert get_space_group(mtz_list, DEFAULT_SPACE_GROUP_DESC).short_name() == "P212121"
+        mtz_io.get_space_group_from_description(DEFAULT_SPACE_GROUP_DESC).short_name()
+        == "P212121"
+    )
 
 
 @pytest.fixture
@@ -100,36 +94,31 @@ def conflicting_mtz_series(
     return mtz_list
 
 
-def test_get_space_group_conflict_raises(
+def test_get_unique_space_group_raises_on_conflict(
     conflicting_mtz_series: list[RawMtz],
 ) -> None:
     reg = r"Multiple space groups found:.+P 21 21 21.+C 1 2 1"
+    space_groups = [
+        mtz_io.get_space_group_from_mtz(mtz) for mtz in conflicting_mtz_series
+    ]
     with pytest.raises(ValueError, match=reg):
-        get_space_group(conflicting_mtz_series)
-
-
-def test_get_space_conflict_but_desc_provided(
-    conflicting_mtz_series: list[RawMtz],
-) -> None:
-    assert (
-        get_space_group(conflicting_mtz_series, DEFAULT_SPACE_GROUP_DESC).short_name()
-        == "P212121"
-    )
+        mtz_io.get_unique_space_group(*space_groups)
 
 
 @pytest.fixture
-def merged_mtz_dataframe(mtz_list: list[RawMtz]) -> MergedMtzDataFrame:
+def merged_mtz_dataframe(mtz_list: list[RawMtz]) -> MtzDataFrame:
     """Tests if the merged data frame has the expected columns."""
     reduced_mtz = [process_single_mtz_to_dataframe(mtz) for mtz in mtz_list]
-    return merge_mtz_dataframes(*reduced_mtz)
+    return mtz_io.merge_mtz_dataframes(*reduced_mtz)
 
 
 @pytest.fixture
 def nmx_data_frame(
     mtz_list: list[RawMtz],
-    merged_mtz_dataframe: MergedMtzDataFrame,
+    merged_mtz_dataframe: MtzDataFrame,
 ) -> NMXMtzDataFrame:
-    space_gr = get_space_group(mtz_list)
+    space_grs = [mtz_io.get_space_group_from_mtz(mtz) for mtz in mtz_list]
+    space_gr = mtz_io.get_unique_space_group(*space_grs)
     reciprocal_asu = get_reciprocal_asu(space_gr)
 
     return process_mtz_dataframe(
@@ -140,7 +129,7 @@ def nmx_data_frame(
 
 
 def test_process_merged_mtz_dataframe(
-    merged_mtz_dataframe: MergedMtzDataFrame,
+    merged_mtz_dataframe: MtzDataFrame,
     nmx_data_frame: NMXMtzDataFrame,
 ) -> None:
     assert "hkl_asu" not in merged_mtz_dataframe.columns
