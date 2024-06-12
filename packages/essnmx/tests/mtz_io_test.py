@@ -4,7 +4,6 @@ import pathlib
 
 import gemmi
 import pytest
-import sciline as sl
 import scipp as sc
 
 from ess.nmx.data import get_small_mtz_samples
@@ -69,46 +68,40 @@ def test_mtz_to_process_pandas_dataframe(gemmi_mtz_object: gemmi.Mtz) -> None:
 
 
 @pytest.fixture
-def mtz_series() -> sl.Series[MTZFileIndex, RawMtz]:
-    return sl.Series(
-        row_dim=MTZFileIndex,
-        items={
-            MTZFileIndex(i_file): read_mtz_file(MTZFilePath(file_path))
-            for i_file, file_path in enumerate(get_small_mtz_samples())
-        },
-    )
+def mtz_list() -> list[RawMtz]:
+    return [
+        read_mtz_file(MTZFilePath(file_path)) for file_path in get_small_mtz_samples()
+    ]
 
 
-def test_get_space_group(mtz_series: sl.Series[MTZFileIndex, RawMtz]) -> None:
+def test_get_space_group(mtz_list: list[RawMtz]) -> None:
     assert (
-        get_space_group(mtz_series).short_name() == "C2"
+        get_space_group(mtz_list).short_name() == "C2"
     )  # Expected value in test files
 
 
 def test_get_space_group_with_spacegroup_desc(
-    mtz_series: sl.Series[MTZFileIndex, RawMtz],
+    mtz_list: list[RawMtz],
 ) -> None:
-    assert (
-        get_space_group(mtz_series, DEFAULT_SPACE_GROUP_DESC).short_name() == "P212121"
-    )
+    assert get_space_group(mtz_list, DEFAULT_SPACE_GROUP_DESC).short_name() == "P212121"
 
 
 @pytest.fixture
 def conflicting_mtz_series(
-    mtz_series: sl.Series[MTZFileIndex, RawMtz],
-) -> sl.Series[MTZFileIndex, RawMtz]:
-    mtz_series[MTZFileIndex(0)].spacegroup = gemmi.SpaceGroup(DEFAULT_SPACE_GROUP_DESC)
+    mtz_list: list[RawMtz],
+) -> list[RawMtz]:
+    mtz_list[MTZFileIndex(0)].spacegroup = gemmi.SpaceGroup(DEFAULT_SPACE_GROUP_DESC)
     # Make sure the space groups are different
     assert (
-        mtz_series[MTZFileIndex(0)].spacegroup.short_name()
-        != mtz_series[MTZFileIndex(1)].spacegroup.short_name()
+        mtz_list[MTZFileIndex(0)].spacegroup.short_name()
+        != mtz_list[MTZFileIndex(1)].spacegroup.short_name()
     )
 
-    return mtz_series
+    return mtz_list
 
 
 def test_get_space_group_conflict_raises(
-    conflicting_mtz_series: sl.Series[MTZFileIndex, RawMtz],
+    conflicting_mtz_series: list[RawMtz],
 ) -> None:
     reg = r"Multiple space groups found:.+P 21 21 21.+C 1 2 1"
     with pytest.raises(ValueError, match=reg):
@@ -116,7 +109,7 @@ def test_get_space_group_conflict_raises(
 
 
 def test_get_space_conflict_but_desc_provided(
-    conflicting_mtz_series: sl.Series[MTZFileIndex, RawMtz],
+    conflicting_mtz_series: list[RawMtz],
 ) -> None:
     assert (
         get_space_group(conflicting_mtz_series, DEFAULT_SPACE_GROUP_DESC).short_name()
@@ -125,26 +118,18 @@ def test_get_space_conflict_but_desc_provided(
 
 
 @pytest.fixture
-def merged_mtz_dataframe(
-    mtz_series: sl.Series[MTZFileIndex, RawMtz],
-) -> MergedMtzDataFrame:
+def merged_mtz_dataframe(mtz_list: list[RawMtz]) -> MergedMtzDataFrame:
     """Tests if the merged data frame has the expected columns."""
-    reduced_mtz_series = sl.Series(
-        row_dim=MTZFileIndex,
-        items={
-            i_file: process_single_mtz_to_dataframe(mtz)
-            for i_file, mtz in mtz_series.items()
-        },
-    )
-    return merge_mtz_dataframes(reduced_mtz_series)
+    reduced_mtz = [process_single_mtz_to_dataframe(mtz) for mtz in mtz_list]
+    return merge_mtz_dataframes(*reduced_mtz)
 
 
 @pytest.fixture
 def nmx_data_frame(
-    mtz_series: sl.Series[MTZFileIndex, RawMtz],
+    mtz_list: list[RawMtz],
     merged_mtz_dataframe: MergedMtzDataFrame,
 ) -> NMXMtzDataFrame:
-    space_gr = get_space_group(mtz_series)
+    space_gr = get_space_group(mtz_list)
     reciprocal_asu = get_reciprocal_asu(space_gr)
 
     return process_merged_mtz_dataframe(
