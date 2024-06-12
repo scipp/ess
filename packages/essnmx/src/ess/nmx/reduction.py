@@ -30,6 +30,10 @@ def _concat_or_same(
     obj: list[sc.Variable | sc.DataArray], dim: str
 ) -> sc.Variable | sc.DataArray:
     first = obj[0]
+    # instrument.to_coords in bin_time_of_arrival adds a panel coord to some fields,
+    # even if it has only length 1. If this is the case we concat, even if identical.
+    # Maybe McStasInstrument.to_coords should be changed to only handle a single
+    # panel, and not perform concatenation?
     if all(dim not in o.dims and sc.identical(first, o) for o in obj):
         return first
     return sc.concat(obj, dim)
