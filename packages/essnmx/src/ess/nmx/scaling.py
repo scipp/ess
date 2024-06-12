@@ -2,7 +2,7 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
-from typing import NewType, Optional, TypeVar
+from typing import NewType, TypeVar
 
 import scipp as sc
 
@@ -11,7 +11,7 @@ from .mtz_io import NMXMtzDataArray
 # User defined or configurable types
 WavelengthBins = NewType("WavelengthBins", sc.Variable)
 """User configurable wavelength binning"""
-ReferenceWavelength = NewType("ReferenceWavelength", sc.Variable)
+ReferenceWavelength = NewType("ReferenceWavelength", sc.Variable | None)
 """The wavelength to select reference intensities."""
 
 # Computed types
@@ -80,7 +80,7 @@ def _get_middle_bin_idx(binned: sc.DataArray) -> int:
 
 def get_reference_wavelength(
     binned: WavelengthBinned,
-    reference_wavelength: Optional[ReferenceWavelength] = None,
+    reference_wavelength: ReferenceWavelength,
 ) -> SelectedReferenceWavelength:
     """Select the reference wavelength.
 
