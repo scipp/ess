@@ -80,7 +80,7 @@ def _get_middle_bin_idx(binned: sc.DataArray) -> int:
 
 def get_reference_wavelength(
     binned: WavelengthBinned,
-    reference_wavelength: ReferenceWavelength = None,
+    reference_wavelength: ReferenceWavelength,
 ) -> SelectedReferenceWavelength:
     """Select the reference wavelength.
 
