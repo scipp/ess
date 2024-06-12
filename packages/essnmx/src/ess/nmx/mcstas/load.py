@@ -155,12 +155,10 @@ def load_mcstas(
     coords.pop('pixel_id')
     return NMXData(
         sc.DataGroup(
-            dict(
-                weights=da,
-                proton_charge=proton_charge,
-                crystal_rotation=crystal_rotation,
-                **coords,
-            )
+            weights=da,
+            proton_charge=proton_charge,
+            crystal_rotation=crystal_rotation,
+            **coords,
         )
     )
 

@@ -23,11 +23,8 @@ def bin_time_of_arrival(
     new_coords = instrument.to_coords(detector_name)
     new_coords.pop('pixel_id')
 
-    return NMXReducedData(
-        sc.DataGroup(
-            dict(
-                counts=counts,
-                **{**nmx_data, **new_coords},
-            )
-        )
-    )
+    return NMXReducedData(sc.DataGroup(counts=counts, **{**nmx_data, **new_coords}))
+
+
+def merge_panels(*panel: NMXReducedData) -> NMXReducedData:
+    return NMXReducedData(sc.concat(panel, 'panel'))
