@@ -6,7 +6,6 @@ from typing import NewType, Optional
 import gemmi
 import numpy as np
 import pandas as pd
-import sciline as sl
 import scipp as sc
 
 # Index types for param table.
@@ -156,7 +155,7 @@ def process_single_mtz_to_dataframe(
 
 
 def get_space_group(
-    mtzs: sl.Series[MTZFileIndex, RawMtz],
+    mtzs: list[RawMtz],
     spacegroup_desc: Optional[SpaceGroupDesc] = None,
 ) -> SpaceGroup:
     """Retrieves spacegroup from file or uses parameter.
@@ -168,7 +167,7 @@ def get_space_group(
     Parameters
     ----------
     mtzs:
-        A series of raw mtz datasets.
+        A list of raw mtz datasets.
 
     spacegroup_desc:
         The space group description to use if not found in the mtz files.
@@ -187,9 +186,7 @@ def get_space_group(
 
     """
     space_groups = {
-        sgrp.short_name(): sgrp
-        for mtz in mtzs.values()
-        if (sgrp := mtz.spacegroup) is not None
+        sgrp.short_name(): sgrp for mtz in mtzs if (sgrp := mtz.spacegroup) is not None
     }
     if spacegroup_desc is not None:  # Use the provided space group description
         return SpaceGroup(gemmi.SpaceGroup(spacegroup_desc))
@@ -209,12 +206,10 @@ def get_reciprocal_asu(spacegroup: SpaceGroup) -> ReciprocalAsymmetricUnit:
     return ReciprocalAsymmetricUnit(gemmi.ReciprocalAsu(spacegroup))
 
 
-def merge_mtz_dataframes(
-    mtz_dfs: sl.Series[MTZFileIndex, RawMtzDataFrame],
-) -> MergedMtzDataFrame:
+def merge_mtz_dataframes(*mtz_dfs: RawMtzDataFrame) -> MergedMtzDataFrame:
     """Merge multiple mtz dataframes into one."""
 
-    return MergedMtzDataFrame(pd.concat(mtz_dfs.values(), ignore_index=True))
+    return MergedMtzDataFrame(pd.concat(mtz_dfs, ignore_index=True))
 
 
 def process_merged_mtz_dataframe(
