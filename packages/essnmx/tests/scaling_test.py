@@ -41,7 +41,7 @@ def test_get_reference_bin_middle(nmx_data_array: sc.DataArray) -> None:
     """Test the middle bin."""
 
     binned = nmx_data_array.bin({"wavelength": 6})
-    reference_wavelength = get_reference_wavelength(binned)
+    reference_wavelength = get_reference_wavelength(binned, reference_wavelength=None)
 
     ref_bin = get_reference_intensities(
         nmx_data_array.bin({"wavelength": 6}),
@@ -56,7 +56,7 @@ def test_get_reference_bin_middle(nmx_data_array: sc.DataArray) -> None:
 @pytest.fixture
 def reference_bin(nmx_data_array: sc.DataArray) -> ReferenceIntensities:
     binned = nmx_data_array.bin({"wavelength": 6})
-    reference_wavelength = get_reference_wavelength(binned)
+    reference_wavelength = get_reference_wavelength(binned, reference_wavelength=None)
 
     return get_reference_intensities(
         binned,
