@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+import os
 import sys
 from pathlib import Path
 
@@ -61,9 +62,12 @@ def test_can_create_pipeline_with_pixel_masks():
 )
 @pytest.mark.parametrize('qxy', [False, True])
 def test_pipeline_can_compute_IofQ(uncertainties, qxy: bool):
-    params = make_params()
+    params = make_params(no_masks=False)
     params[UncertaintyBroadcastMode] = uncertainties
     pipeline = sciline.Pipeline(loki_providers(), params=params)
+    pipeline = sans.set_pixel_mask_filenames(
+        pipeline, loki.data.loki_tutorial_mask_filenames()
+    )
     if qxy:
         result = pipeline.compute(BackgroundSubtractedIofQxy)
         assert result.dims == ('Qy', 'Qx')
@@ -76,6 +80,11 @@ def test_pipeline_can_compute_IofQ(uncertainties, qxy: bool):
         assert result.dims == ('Q',)
         assert sc.identical(result.coords['Q'], params[QBins])
         assert result.sizes['Q'] == 100
+    if uncertainties == UncertaintyBroadcastMode.drop:
+        test_dir = os.path.dirname(os.path.abspath(__file__))
+        name = Path(f'reference_IofQ{"xy" if qxy else ""}_{uncertainties}.hdf5')
+        reference = sc.io.load_hdf5(test_dir / name)
+        assert_identical(result, reference)
 
 
 @pytest.mark.parametrize(
