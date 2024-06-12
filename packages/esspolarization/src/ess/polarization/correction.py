@@ -54,19 +54,19 @@ class InverseFlipperMatrix(Generic[PolarizerSpin, PolarizingElement]):
             return up + (1 - f) * down, down + (1 - f) * up
 
 
-@dataclass
-class SwapComponent(Generic[PolarizerSpin]):
-    """Helper to implement component swap in flipper matrix"""
-
-    value: bool
-
-
-def make_spin_flipping_matrix(
+def make_spin_flipping_matrix_up(
     efficiency: FlipperEfficiency[PolarizingElement],
-    swap_component: SwapComponent[PolarizerSpin],
-) -> InverseFlipperMatrix[PolarizerSpin, PolarizingElement]:
-    return InverseFlipperMatrix[PolarizerSpin, PolarizingElement](
-        efficiency=efficiency, swap=swap_component.value
+) -> InverseFlipperMatrix[Up, PolarizingElement]:
+    return InverseFlipperMatrix[Up, PolarizingElement](
+        efficiency=efficiency, swap=False
+    )
+
+
+def make_spin_flipping_matrix_down(
+    efficiency: FlipperEfficiency[PolarizingElement],
+) -> InverseFlipperMatrix[Down, PolarizingElement]:
+    return InverseFlipperMatrix[Down, PolarizingElement](
+        efficiency=efficiency, swap=True
     )
 
 
@@ -164,14 +164,13 @@ def compute_polarization_corrected_data(
 def CorrectionWorkflow() -> sciline.Pipeline:
     workflow = sciline.Pipeline(
         (
-            make_spin_flipping_matrix,
+            make_spin_flipping_matrix_up,
+            make_spin_flipping_matrix_down,
             compute_polarizing_element_correction,
             compute_polarization_correction,
             compute_polarization_corrected_data,
         )
     )
-    workflow[SwapComponent[Up]] = SwapComponent[Up](value=False)
-    workflow[SwapComponent[Down]] = SwapComponent[Down](value=True)
     # If there is no flipper, setting an efficiency of 1.0 is equivalent to not using
     # a flipper.
     workflow[FlipperEfficiency[PolarizingElement]] = FlipperEfficiency[
