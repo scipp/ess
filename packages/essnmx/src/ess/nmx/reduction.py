@@ -27,4 +27,5 @@ def bin_time_of_arrival(
 
 
 def merge_panels(*panel: NMXReducedData) -> NMXReducedData:
+    # TODO Is this the correct kind of reduce?
     return NMXReducedData(sc.concat(panel, 'panel'))
