@@ -26,6 +26,20 @@ def bin_time_of_arrival(
     return NMXReducedData(sc.DataGroup(counts=counts, **{**nmx_data, **new_coords}))
 
 
+def _concat_or_same(
+    obj: list[sc.Variable | sc.DataArray], dim: str
+) -> sc.Variable | sc.DataArray:
+    first = obj[0]
+    if all(sc.identical(first, o) for o in obj):
+        return first
+    return sc.concat(obj, dim)
+
+
 def merge_panels(*panel: NMXReducedData) -> NMXReducedData:
     # TODO Is this the correct kind of reduce?
-    return NMXReducedData(sc.concat(panel, 'panel'))
+    keys = panel[0].keys()
+    if not all(p.keys() == keys for p in panel):
+        raise ValueError("All panels must have the same keys.")
+    return NMXReducedData(
+        {key: _concat_or_same([p[key] for p in panel], 'panel') for key in keys}
+    )
