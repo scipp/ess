@@ -15,7 +15,6 @@ from ess.nmx.mtz_io import (
     MTZFilePath,
     NMXMtzDataArray,
     NMXMtzDataFrame,
-    RawMtz,
     get_reciprocal_asu,
     mtz_to_pandas,
     nmx_mtz_dataframe_to_scipp_dataarray,
@@ -55,7 +54,7 @@ def test_mtz_to_pandas_dataframe(gemmi_mtz_object: gemmi.Mtz) -> None:
 
 
 def test_mtz_to_process_pandas_dataframe(gemmi_mtz_object: gemmi.Mtz) -> None:
-    df = process_single_mtz_to_dataframe(RawMtz(gemmi_mtz_object))
+    df = process_single_mtz_to_dataframe(gemmi_mtz_object)
     for expected_colum in ["hkl", "d", "resolution", *"HKL", "wavelength", "I", "SIGI"]:
         assert expected_colum in df.columns
 
@@ -67,7 +66,7 @@ def test_mtz_to_process_pandas_dataframe(gemmi_mtz_object: gemmi.Mtz) -> None:
 
 
 @pytest.fixture
-def mtz_list() -> list[RawMtz]:
+def mtz_list() -> list[gemmi.Mtz]:
     return [
         read_mtz_file(MTZFilePath(file_path)) for file_path in get_small_mtz_samples()
     ]
@@ -82,8 +81,8 @@ def test_get_space_group_with_spacegroup_desc() -> None:
 
 @pytest.fixture
 def conflicting_mtz_series(
-    mtz_list: list[RawMtz],
-) -> list[RawMtz]:
+    mtz_list: list[gemmi.Mtz],
+) -> list[gemmi.Mtz]:
     mtz_list[MTZFileIndex(0)].spacegroup = gemmi.SpaceGroup(DEFAULT_SPACE_GROUP_DESC)
     # Make sure the space groups are different
     assert (
@@ -95,7 +94,7 @@ def conflicting_mtz_series(
 
 
 def test_get_unique_space_group_raises_on_conflict(
-    conflicting_mtz_series: list[RawMtz],
+    conflicting_mtz_series: list[gemmi.Mtz],
 ) -> None:
     reg = r"Multiple space groups found:.+P 21 21 21.+C 1 2 1"
     space_groups = [
@@ -106,7 +105,7 @@ def test_get_unique_space_group_raises_on_conflict(
 
 
 @pytest.fixture
-def merged_mtz_dataframe(mtz_list: list[RawMtz]) -> MtzDataFrame:
+def merged_mtz_dataframe(mtz_list: list[gemmi.Mtz]) -> MtzDataFrame:
     """Tests if the merged data frame has the expected columns."""
     reduced_mtz = [process_single_mtz_to_dataframe(mtz) for mtz in mtz_list]
     return mtz_io.merge_mtz_dataframes(*reduced_mtz)
@@ -114,7 +113,7 @@ def merged_mtz_dataframe(mtz_list: list[RawMtz]) -> MtzDataFrame:
 
 @pytest.fixture
 def nmx_data_frame(
-    mtz_list: list[RawMtz],
+    mtz_list: list[gemmi.Mtz],
     merged_mtz_dataframe: MtzDataFrame,
 ) -> NMXMtzDataFrame:
     space_grs = [mtz_io.get_space_group_from_mtz(mtz) for mtz in mtz_list]

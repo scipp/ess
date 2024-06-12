@@ -35,23 +35,17 @@ StdDevColumnName = NewType("StdDevColumnName", str)
 DEFAULT_STD_DEV_COLUMN_NAME = StdDevColumnName("SIGI")
 
 # Computed types
-RawMtz = NewType("RawMtz", gemmi.Mtz)
-"""The mtz file as a gemmi object"""
 MtzDataFrame = NewType("MtzDataFrame", pd.DataFrame)
 """The raw mtz dataframe."""
-SpaceGroup = NewType("SpaceGroup", gemmi.SpaceGroup)
-"""The space group."""
-ReciprocalAsymmetricUnit = NewType("ReciprocalAsymmetricUnit", gemmi.ReciprocalAsu)
-"""The reciprocal asymmetric unit."""
 NMXMtzDataFrame = NewType("NMXMtzDataFrame", pd.DataFrame)
 """The processed mtz dataframe with derived columns."""
 NMXMtzDataArray = NewType("NMXMtzDataArray", sc.DataArray)
 
 
-def read_mtz_file(file_path: MTZFilePath) -> RawMtz:
+def read_mtz_file(file_path: MTZFilePath) -> gemmi.Mtz:
     """read mtz file"""
 
-    return RawMtz(gemmi.read_mtz_file(file_path.as_posix()))
+    return gemmi.read_mtz_file(file_path.as_posix())
 
 
 def mtz_to_pandas(mtz: gemmi.Mtz) -> pd.DataFrame:
@@ -78,7 +72,7 @@ def mtz_to_pandas(mtz: gemmi.Mtz) -> pd.DataFrame:
 
 
 def process_single_mtz_to_dataframe(
-    mtz: RawMtz,
+    mtz: gemmi.Mtz,
     wavelength_column_name: WavelengthColumnName = DEFAULT_WAVELENGTH_COLUMN_NAME,
     intensity_column_name: IntensityColumnName = DEFAULT_INTENSITY_COLUMN_NAME,
     intensity_sig_col_name: StdDevColumnName = DEFAULT_STD_DEV_COLUMN_NAME,
@@ -151,7 +145,7 @@ def process_single_mtz_to_dataframe(
     return MtzDataFrame(mtz_df)
 
 
-def get_space_group_from_description(desc: SpaceGroupDesc) -> SpaceGroup:
+def get_space_group_from_description(desc: SpaceGroupDesc) -> gemmi.SpaceGroup:
     """Retrieves spacegroup from parameter.
 
     Parameters
@@ -164,10 +158,10 @@ def get_space_group_from_description(desc: SpaceGroupDesc) -> SpaceGroup:
     :
         The space group.
     """
-    return SpaceGroup(gemmi.SpaceGroup(desc))
+    return gemmi.SpaceGroup(desc)
 
 
-def get_space_group_from_mtz(mtz: RawMtz) -> SpaceGroup | None:
+def get_space_group_from_mtz(mtz: gemmi.Mtz) -> gemmi.SpaceGroup | None:
     """Retrieves spacegroup from file.
 
     Spacegroup is always expected in any MTZ files, but it may be missing.
@@ -182,11 +176,10 @@ def get_space_group_from_mtz(mtz: RawMtz) -> SpaceGroup | None:
     :
         The space group, or None if not found.
     """
-    if (sgrp := mtz.spacegroup) is not None:
-        return SpaceGroup(sgrp)
+    return mtz.spacegroup
 
 
-def get_unique_space_group(*spacegroups: SpaceGroup | None) -> SpaceGroup:
+def get_unique_space_group(*spacegroups: gemmi.SpaceGroup | None) -> gemmi.SpaceGroup:
     """Retrieves the unique space group from multiple space groups.
 
     Parameters
@@ -213,10 +206,10 @@ def get_unique_space_group(*spacegroups: SpaceGroup | None) -> SpaceGroup:
     raise ValueError(f"Multiple space groups found: {spacegroups}")
 
 
-def get_reciprocal_asu(spacegroup: SpaceGroup) -> ReciprocalAsymmetricUnit:
+def get_reciprocal_asu(spacegroup: gemmi.SpaceGroup) -> gemmi.ReciprocalAsu:
     """Returns the reciprocal asymmetric unit from the space group."""
 
-    return ReciprocalAsymmetricUnit(gemmi.ReciprocalAsu(spacegroup))
+    return gemmi.ReciprocalAsu(spacegroup)
 
 
 def merge_mtz_dataframes(*mtz_dfs: MtzDataFrame) -> MtzDataFrame:
@@ -228,8 +221,8 @@ def merge_mtz_dataframes(*mtz_dfs: MtzDataFrame) -> MtzDataFrame:
 def process_mtz_dataframe(
     *,
     mtz_df: MtzDataFrame,
-    reciprocal_asu: ReciprocalAsymmetricUnit,
-    sg: SpaceGroup,
+    reciprocal_asu: gemmi.ReciprocalAsu,
+    sg: gemmi.SpaceGroup,
 ) -> NMXMtzDataFrame:
     """Modify/Add columns of the shallow copy of a mtz dataframe.
 
@@ -312,7 +305,7 @@ def nmx_mtz_dataframe_to_scipp_dataarray(
     for indices_name in ("hkl", "hkl_asu"):
         nmx_mtz_ds.coords[indices_name] = sc.array(
             dims=nmx_mtz_ds.coords[indices_name].dims,
-            values=nmx_mtz_df[indices_name].astype(str).tolist()
+            values=nmx_mtz_df[indices_name].astype(str).tolist(),
             # `astype`` is not enough to convert the dtype to string.
             # The result of `astype` will have `PyObject` as a dtype.
         )
