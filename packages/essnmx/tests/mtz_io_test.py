@@ -20,7 +20,7 @@ from ess.nmx.mtz_io import (
     merge_mtz_dataframes,
     mtz_to_pandas,
     nmx_mtz_dataframe_to_scipp_dataarray,
-    process_merged_mtz_dataframe,
+    process_mtz_dataframe,
     process_single_mtz_to_dataframe,
     read_mtz_file,
 )
@@ -132,8 +132,8 @@ def nmx_data_frame(
     space_gr = get_space_group(mtz_list)
     reciprocal_asu = get_reciprocal_asu(space_gr)
 
-    return process_merged_mtz_dataframe(
-        merged_mtz_df=merged_mtz_dataframe,
+    return process_mtz_dataframe(
+        mtz_df=merged_mtz_dataframe,
         reciprocal_asu=reciprocal_asu,
         sg=space_gr,
     )

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 import pathlib
-from typing import NewType, Optional
+from typing import NewType
 
 import gemmi
 import numpy as np
@@ -17,6 +17,7 @@ MTZFilePath = NewType("MTZFilePath", pathlib.Path)
 """Path to the mtz file"""
 SpaceGroupDesc = NewType("SpaceGroupDesc", str)
 """The space group description. e.g. 'P 21 21 21'"""
+# TODO unused, set as workflow default?
 DEFAULT_SPACE_GROUP_DESC = SpaceGroupDesc("P 21 21 21")
 """The default space group description to use if not found in the mtz files."""
 
@@ -36,14 +37,12 @@ DEFAULT_STD_DEV_COLUMN_NAME = StdDevColumnName("SIGI")
 # Computed types
 RawMtz = NewType("RawMtz", gemmi.Mtz)
 """The mtz file as a gemmi object"""
-RawMtzDataFrame = NewType("RawMtzDataFrame", pd.DataFrame)
+MtzDataFrame = NewType("MtzDataFrame", pd.DataFrame)
 """The raw mtz dataframe."""
 SpaceGroup = NewType("SpaceGroup", gemmi.SpaceGroup)
 """The space group."""
 ReciprocalAsymmetricUnit = NewType("ReciprocalAsymmetricUnit", gemmi.ReciprocalAsu)
 """The reciprocal asymmetric unit."""
-MergedMtzDataFrame = NewType("MergedMtzDataFrame", pd.DataFrame)
-"""The merged mtz dataframe with derived columns."""
 NMXMtzDataFrame = NewType("NMXMtzDataFrame", pd.DataFrame)
 """The processed mtz dataframe with derived columns."""
 NMXMtzDataArray = NewType("NMXMtzDataArray", sc.DataArray)
@@ -73,10 +72,8 @@ def mtz_to_pandas(mtz: gemmi.Mtz) -> pd.DataFrame:
 
     """
 
-    return RawMtzDataFrame(
-        pd.DataFrame(  # Recommended in the gemmi documentation.
-            data=np.array(mtz, copy=False), columns=mtz.column_labels()
-        )
+    return pd.DataFrame(  # Recommended in the gemmi documentation.
+        data=np.array(mtz, copy=False), columns=mtz.column_labels()
     )
 
 
@@ -85,7 +82,7 @@ def process_single_mtz_to_dataframe(
     wavelength_column_name: WavelengthColumnName = DEFAULT_WAVELENGTH_COLUMN_NAME,
     intensity_column_name: IntensityColumnName = DEFAULT_INTENSITY_COLUMN_NAME,
     intensity_sig_col_name: StdDevColumnName = DEFAULT_STD_DEV_COLUMN_NAME,
-) -> RawMtzDataFrame:
+) -> MtzDataFrame:
     """Select and derive columns from the original ``MtzDataFrame``.
 
     Parameters
@@ -151,53 +148,69 @@ def process_single_mtz_to_dataframe(
     for column in [col for col in orig_df.columns if col not in mtz_df]:
         mtz_df[column] = orig_df[column]
 
-    return RawMtzDataFrame(mtz_df)
+    return MtzDataFrame(mtz_df)
 
 
-def get_space_group(
-    mtzs: list[RawMtz],
-    spacegroup_desc: Optional[SpaceGroupDesc] = None,
-) -> SpaceGroup:
-    """Retrieves spacegroup from file or uses parameter.
+def get_space_group_from_description(desc: SpaceGroupDesc) -> SpaceGroup:
+    """Retrieves spacegroup from parameter.
 
-    Manually provided space group description is prioritized over
-    space group descriptions found in the mtz files.
+    Parameters
+    ----------
+    desc:
+        The space group description to use if not found in the mtz files.
+
+    Returns
+    -------
+    :
+        The space group.
+    """
+    return SpaceGroup(gemmi.SpaceGroup(desc))
+
+
+def get_space_group_from_mtz(mtz: RawMtz) -> SpaceGroup | None:
+    """Retrieves spacegroup from file.
+
     Spacegroup is always expected in any MTZ files, but it may be missing.
 
     Parameters
     ----------
-    mtzs:
-        A list of raw mtz datasets.
-
-    spacegroup_desc:
-        The space group description to use if not found in the mtz files.
-        If None, :attr:`~DEFAULT_SPACE_GROUP_DESC` is used.
+    mtz:
+        Raw mtz dataset.
 
     Returns
     -------
-    SpaceGroup
-        The space group.
+    :
+        The space group, or None if not found.
+    """
+    if (sgrp := mtz.spacegroup) is not None:
+        return SpaceGroup(sgrp)
+
+
+def get_unique_space_group(*spacegroups: SpaceGroup | None) -> SpaceGroup:
+    """Retrieves the unique space group from multiple space groups.
+
+    Parameters
+    ----------
+    spacegroups:
+        The space groups to check.
+
+    Returns
+    -------
+    :
+        The unique space group.
 
     Raises
     ------
-    ValueError
-        If multiple or no space groups are found
-        but space group description is not provided.
-
+    ValueError:
+        If there are multiple space groups.
     """
-    space_groups = {
-        sgrp.short_name(): sgrp for mtz in mtzs if (sgrp := mtz.spacegroup) is not None
-    }
-    if spacegroup_desc is not None:  # Use the provided space group description
-        return SpaceGroup(gemmi.SpaceGroup(spacegroup_desc))
-    elif len(space_groups) > 1:
-        raise ValueError(f"Multiple space groups found: {space_groups}")
-    elif len(space_groups) == 1:
-        return SpaceGroup(space_groups.popitem()[1])
-    else:
-        raise ValueError(
-            "No space group found and no space group description provided."
-        )
+    spacegroups = [sgrp for sgrp in spacegroups if sgrp is not None]
+    if len(spacegroups) == 0:
+        raise ValueError("No space group found.")
+    first = spacegroups[0]
+    if all(sgrp == first for sgrp in spacegroups):
+        return first
+    raise ValueError(f"Multiple space groups found: {spacegroups}")
 
 
 def get_reciprocal_asu(spacegroup: SpaceGroup) -> ReciprocalAsymmetricUnit:
@@ -206,36 +219,36 @@ def get_reciprocal_asu(spacegroup: SpaceGroup) -> ReciprocalAsymmetricUnit:
     return ReciprocalAsymmetricUnit(gemmi.ReciprocalAsu(spacegroup))
 
 
-def merge_mtz_dataframes(*mtz_dfs: RawMtzDataFrame) -> MergedMtzDataFrame:
+def merge_mtz_dataframes(*mtz_dfs: MtzDataFrame) -> MtzDataFrame:
     """Merge multiple mtz dataframes into one."""
 
-    return MergedMtzDataFrame(pd.concat(mtz_dfs, ignore_index=True))
+    return MtzDataFrame(pd.concat(mtz_dfs, ignore_index=True))
 
 
-def process_merged_mtz_dataframe(
+def process_mtz_dataframe(
     *,
-    merged_mtz_df: MergedMtzDataFrame,
+    mtz_df: MtzDataFrame,
     reciprocal_asu: ReciprocalAsymmetricUnit,
     sg: SpaceGroup,
 ) -> NMXMtzDataFrame:
-    """Modify/Add columns of the shallow copy of a merged mtz dataframes.
+    """Modify/Add columns of the shallow copy of a mtz dataframe.
 
-    This method must be called after merging multiple mtz dataframes.
+    This method must be called after merging multiple mtz dataframe.
     """
-    merged_df = merged_mtz_df.copy(deep=False)
+    df = mtz_df.copy(deep=False)
 
     def _reciprocal_asu(row: pd.Series) -> list[int]:
         """Converts miller indices(HKL) to ASU indices."""
 
         return reciprocal_asu.to_asu(row["hkl"], sg.operations())[0]
 
-    merged_df["hkl_asu"] = merged_df.apply(_reciprocal_asu, axis=1)
+    df["hkl_asu"] = df.apply(_reciprocal_asu, axis=1)
     # Unpack the indices for later.
-    merged_df[["H_ASU", "K_ASU", "L_ASU"]] = pd.DataFrame(
-        merged_df["hkl_asu"].to_list(), index=merged_df.index
+    df[["H_ASU", "K_ASU", "L_ASU"]] = pd.DataFrame(
+        df["hkl_asu"].to_list(), index=df.index
     )
 
-    return NMXMtzDataFrame(merged_df)
+    return NMXMtzDataFrame(df)
 
 
 def nmx_mtz_dataframe_to_scipp_dataarray(
@@ -319,10 +332,10 @@ def nmx_mtz_dataframe_to_scipp_dataarray(
 providers = (
     read_mtz_file,
     process_single_mtz_to_dataframe,
-    get_space_group,
+    # get_space_group_from_description,
+    get_space_group_from_mtz,
     get_reciprocal_asu,
-    merge_mtz_dataframes,
-    process_merged_mtz_dataframe,
+    process_mtz_dataframe,
     nmx_mtz_dataframe_to_scipp_dataarray,
 )
 """The providers related to the MTZ IO."""
