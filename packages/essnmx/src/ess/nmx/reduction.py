@@ -40,6 +40,7 @@ def _concat_or_same(
 
 
 def merge_panels(*panel: NMXReducedData) -> NMXReducedData:
+    """Merge a list of panels by concatenating along the 'panel' dimension."""
     keys = panel[0].keys()
     if not all(p.keys() == keys for p in panel):
         raise ValueError("All panels must have the same keys.")
