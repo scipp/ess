@@ -6,12 +6,9 @@ from typing import Generic, Literal, NewType, TypeVar
 import sciline as sl
 import scipp as sc
 
-from .types import (
-    Down,
-    PolarizationCorrectedSampleData,
-    ReducedSampleDataBySpinChannel,
-    Up,
-)
+# from .correction import correct_for_analyzer, correct_for_polarizer
+from .correction import CorrectionWorkflow
+from .types import Analyzer, Polarizer, PolarizingElement, TransmissionFunction
 from .uncertainty import broadcast_with_upper_bound_variances
 
 Depolarized = NewType('Depolarized', int)
@@ -20,32 +17,28 @@ Polarized = NewType('Polarized', int)
 PolarizationState = TypeVar('PolarizationState', Polarized, Depolarized)
 
 
-Analyzer = NewType('Analyzer', str)
-Polarizer = NewType('Polarizer', str)
-Cell = TypeVar('Cell', Analyzer, Polarizer)
-
 DirectBeamNoCell = NewType('DirectBeamNoCell', sc.DataArray)
 """Direct beam without cells and sample as a function of wavelength."""
 
 
-class He3CellPressure(sl.Scope[Cell, sc.Variable], sc.Variable):
+class He3CellPressure(sl.Scope[PolarizingElement, sc.Variable], sc.Variable):
     """Pressure for a given cell."""
 
 
-class He3CellLength(sl.Scope[Cell, sc.Variable], sc.Variable):
+class He3CellLength(sl.Scope[PolarizingElement, sc.Variable], sc.Variable):
     """Length for a given cell."""
 
 
-class He3CellTemperature(sl.Scope[Cell, sc.Variable], sc.Variable):
+class He3CellTemperature(sl.Scope[PolarizingElement, sc.Variable], sc.Variable):
     """Temperature for a given cell."""
 
 
-class He3FillingTime(sl.Scope[Cell, sc.Variable], sc.Variable):
+class He3FillingTime(sl.Scope[PolarizingElement, sc.Variable], sc.Variable):
     """Filling wall-clock time for a given cell."""
 
 
 class He3CellTransmissionFraction(
-    sl.ScopeTwoParams[Cell, PolarizationState, sc.DataArray], sc.DataArray
+    sl.ScopeTwoParams[PolarizingElement, PolarizationState, sc.DataArray], sc.DataArray
 ):
     """Transmission fraction for a given cell"""
 
@@ -56,23 +49,23 @@ He3CellTransmissionFractionHasPolarizedIncomingBeam = NewType(
 """Whether the transmission fraction is for a polarized incoming beam."""
 
 
-class He3TransmissionEmptyGlass(sl.Scope[Cell, sc.Variable], sc.Variable):
+class He3TransmissionEmptyGlass(sl.Scope[PolarizingElement, sc.Variable], sc.Variable):
     """Transmission of the empty glass for a given cell."""
 
 
 class He3DirectBeam(
-    sl.ScopeTwoParams[Cell, PolarizationState, sc.DataArray], sc.DataArray
+    sl.ScopeTwoParams[PolarizingElement, PolarizationState, sc.DataArray], sc.DataArray
 ):
     """
     Direct beam data for a given cell and spin state as a function of wavelength.
     """
 
 
-class He3Opacity0(sl.Scope[Cell, sc.Variable], sc.Variable):
+class He3Opacity0(sl.Scope[PolarizingElement, sc.Variable], sc.Variable):
     """Opacity at 1 Angstrom for a given cell."""
 
 
-class He3OpacityFunction(Generic[Cell]):
+class He3OpacityFunction(Generic[PolarizingElement]):
     """Wavelength-dependent opacity function for a given cell."""
 
     def __init__(self, opacity0: sc.Variable):
@@ -93,10 +86,10 @@ class He3OpacityFunction(Generic[Cell]):
 
 
 def he3_opacity_from_cell_params(
-    pressure: He3CellPressure[Cell],
-    length: He3CellLength[Cell],
-    temperature: He3CellTemperature[Cell],
-) -> He3Opacity0[Cell]:
+    pressure: He3CellPressure[PolarizingElement],
+    length: He3CellLength[PolarizingElement],
+    temperature: He3CellTemperature[PolarizingElement],
+) -> He3Opacity0[PolarizingElement]:
     """Opacity 0 for a given cell, estimated from pressure and cell length."""
     from scipp.constants import Boltzmann as k_B
 
@@ -113,26 +106,26 @@ def he3_opacity_from_cell_params(
         * pressure
         * length
     )
-    return He3Opacity0[Cell](opacity0)
+    return He3Opacity0[PolarizingElement](opacity0)
 
 
 def he3_opacity_function_from_cell_opacity(
-    opacity0: He3Opacity0[Cell],
-) -> He3OpacityFunction[Cell]:
+    opacity0: He3Opacity0[PolarizingElement],
+) -> He3OpacityFunction[PolarizingElement]:
     """
     Opacity function for a given cell, based on pressure and cell length.
 
     Note that this can alternatively be defined via neutron beam data, see
     :py:func:`he3_opacity_function_from_beam_data`.
     """
-    return He3OpacityFunction[Cell](opacity0)
+    return He3OpacityFunction[PolarizingElement](opacity0)
 
 
 def he3_opacity_function_from_beam_data(
-    transmission_empty_glass: He3TransmissionEmptyGlass[Cell],
-    transmission_fraction: He3CellTransmissionFraction[Cell, Depolarized],
-    opacity0_initial_guess: He3Opacity0[Cell],
-) -> He3OpacityFunction[Cell]:
+    transmission_empty_glass: He3TransmissionEmptyGlass[PolarizingElement],
+    transmission_fraction: He3CellTransmissionFraction[PolarizingElement, Depolarized],
+    opacity0_initial_guess: He3Opacity0[PolarizingElement],
+) -> He3OpacityFunction[PolarizingElement]:
     """
     Opacity function for a given cell, based on direct beam data.
 
@@ -143,7 +136,7 @@ def he3_opacity_function_from_beam_data(
 
     # TODO Fit the exponent, since too much weight on low wavelengths?
     def intensity(wavelength: sc.Variable, opacity0: sc.Variable) -> sc.Variable:
-        opacity = He3OpacityFunction[Cell](opacity0)
+        opacity = He3OpacityFunction[PolarizingElement](opacity0)
         return transmission_empty_glass * sc.exp(-opacity(wavelength))
 
     if transmission_fraction.coords.is_edges('wavelength'):
@@ -158,10 +151,10 @@ def he3_opacity_function_from_beam_data(
         transmission_fraction,
         p0={'opacity0': opacity0_initial_guess},
     )
-    return He3OpacityFunction[Cell](sc.values(popt['opacity0']).data)
+    return He3OpacityFunction[PolarizingElement](sc.values(popt['opacity0']).data)
 
 
-class He3PolarizationFunction(Generic[Cell]):
+class He3PolarizationFunction(Generic[PolarizingElement]):
     """Time-dependent polarization function for a given cell."""
 
     def __init__(self, C: sc.Variable, T1: sc.Variable):
@@ -181,12 +174,12 @@ class He3PolarizationFunction(Generic[Cell]):
 
 
 @dataclass
-class He3TransmissionFunction(Generic[Cell]):
+class He3TransmissionFunction(TransmissionFunction[PolarizingElement]):
     """Wavelength- and time-dependent transmission for a given cell."""
 
-    opacity_function: He3OpacityFunction[Cell]
-    polarization_function: He3PolarizationFunction[Cell]
-    transmission_empty_glass: He3TransmissionEmptyGlass[Cell]
+    opacity_function: He3OpacityFunction[PolarizingElement]
+    polarization_function: He3PolarizationFunction[PolarizingElement]
+    transmission_empty_glass: He3TransmissionEmptyGlass[PolarizingElement]
 
     def __call__(
         self,
@@ -201,6 +194,15 @@ class He3TransmissionFunction(Generic[Cell]):
             polarization *= -1.0
         return self.transmission_empty_glass * sc.exp(-opacity * (1.0 + polarization))
 
+    def apply(
+        self, data: sc.DataArray, plus_minus: Literal['plus', 'minus']
+    ) -> sc.DataArray:
+        return self(
+            time=data.coords['time'],
+            wavelength=data.coords['wavelength'],
+            plus_minus=plus_minus,
+        )
+
 
 def transmission_incoming_unpolarized(
     *,
@@ -213,8 +215,8 @@ def transmission_incoming_unpolarized(
 
 def compute_transmission_fraction_from_direct_beam(
     direct_beam_no_cell: DirectBeamNoCell,
-    direct_beam_polarized: He3DirectBeam[Cell, PolarizationState],
-) -> He3CellTransmissionFraction[Cell, PolarizationState]:
+    direct_beam_polarized: He3DirectBeam[PolarizingElement, PolarizationState],
+) -> He3CellTransmissionFraction[PolarizingElement, PolarizationState]:
     """
     Compute the transmission fraction for a given cell and polarization state.
 
@@ -227,17 +229,17 @@ def compute_transmission_fraction_from_direct_beam(
     directly. Note that the regular SANS workflow also normalized to an empty beam
     run, make sure to not perform the division twice.
     """
-    return He3CellTransmissionFraction[Cell, PolarizationState](
+    return He3CellTransmissionFraction[PolarizingElement, PolarizationState](
         direct_beam_polarized / direct_beam_no_cell
     )
 
 
 def get_he3_transmission_from_fit_to_direct_beam(
-    transmission_fraction: He3CellTransmissionFraction[Cell, Polarized],
-    opacity_function: He3OpacityFunction[Cell],
-    transmission_empty_glass: He3TransmissionEmptyGlass[Cell],
+    transmission_fraction: He3CellTransmissionFraction[PolarizingElement, Polarized],
+    opacity_function: He3OpacityFunction[PolarizingElement],
+    transmission_empty_glass: He3TransmissionEmptyGlass[PolarizingElement],
     incoming_polarized: He3CellTransmissionFractionHasPolarizedIncomingBeam,
-) -> He3TransmissionFunction[Cell]:
+) -> He3TransmissionFunction[PolarizingElement]:
     """
     Return the transmission function for a given cell.
 
@@ -251,7 +253,7 @@ def get_he3_transmission_from_fit_to_direct_beam(
     def expected_transmission(
         wavelength: sc.Variable, time: sc.Variable, C: sc.Variable, T1: sc.Variable
     ) -> sc.Variable:
-        polarization_function = He3PolarizationFunction[Cell](C=C, T1=T1)
+        polarization_function = He3PolarizationFunction[PolarizingElement](C=C, T1=T1)
         if incoming_polarized:
             # TODO Why is this 'plus'? Does it depend on the supermirror?
             return He3TransmissionFunction(
@@ -281,10 +283,10 @@ def get_he3_transmission_from_fit_to_direct_beam(
         p0={'C': sc.scalar(0.8, unit=''), 'T1': sc.scalar(400000.0, unit='s')},
     )
     # TODO Consider including variances from fit
-    polarization_function = He3PolarizationFunction[Cell](
+    polarization_function = He3PolarizationFunction[PolarizingElement](
         C=sc.values(popt['C']).data, T1=sc.values(popt['T1']).data
     )
-    return He3TransmissionFunction[Cell](
+    return He3TransmissionFunction[PolarizingElement](
         opacity_function=opacity_function,
         polarization_function=polarization_function,
         transmission_empty_glass=transmission_empty_glass,
@@ -334,7 +336,7 @@ ReducedDirectBeamDataNoCell = NewType('ReducedDirectBeamDataNoCell', sc.DataArra
 
 
 class ReducedDirectBeamData(
-    sl.ScopeTwoParams[Cell, PolarizationState, sc.DataArray], sc.DataArray
+    sl.ScopeTwoParams[PolarizingElement, PolarizationState, sc.DataArray], sc.DataArray
 ):
     """Direct beam data for a given cell, as a function of wavelength and time."""
 
@@ -361,10 +363,10 @@ def direct_beam(
 
 
 def direct_beam_with_cell(
-    data: ReducedDirectBeamData[Cell, PolarizationState],
+    data: ReducedDirectBeamData[PolarizingElement, PolarizationState],
     q_range: DirectBeamQRange,
     background_q_range: DirectBeamBackgroundQRange,
-) -> He3DirectBeam[Cell, PolarizationState]:
+) -> He3DirectBeam[PolarizingElement, PolarizationState]:
     """
     Returns the direct beam function for a given cell.
 
@@ -372,7 +374,7 @@ def direct_beam_with_cell(
     wall-clock time. The time dependence is coarse, i.e., due to different time
     intervals at which the direct beam is measured.
     """
-    return He3DirectBeam[Cell, PolarizationState](
+    return He3DirectBeam[PolarizingElement, PolarizationState](
         compute_direct_beam(
             data=data,
             q_range=q_range,
@@ -381,32 +383,16 @@ def direct_beam_with_cell(
     )
 
 
-def correct_sample_data_for_polarization(
-    upup: ReducedSampleDataBySpinChannel[Up, Up],
-    updown: ReducedSampleDataBySpinChannel[Up, Down],
-    downup: ReducedSampleDataBySpinChannel[Down, Up],
-    downdown: ReducedSampleDataBySpinChannel[Down, Down],
-    transmission_polarizer: He3TransmissionFunction[Polarizer],
-    transmission_analyzer: He3TransmissionFunction[Analyzer],
-) -> PolarizationCorrectedSampleData:
-    """
-    Apply polarization correction for the case of He3 polarizers and analyzers.
+def he3_analyzer(
+    func: He3TransmissionFunction[Analyzer],
+) -> TransmissionFunction[Analyzer]:
+    return func
 
-    There will be a different version of this function for handling the supermirror
-    case, since transmission is not time-dependent but spin-flippers need to be
-    accounted for.
-    """
-    # 1. Apply polarization correction (matrix inverse)
-    # 2. Compute weighted mean over time and wavelength, bin into Q-bins
 
-    # Pseudo code:
-    # result = [0,0,0,0]
-    # for j in range(4):
-    #     for i, channel in enumerate((upup, updown, downup, downdown)):
-    #         da = PA_inv[j, i] * channel
-    #         da *= weights  # weights from error bars or event counts?
-    #         result[j] += da.bins.concat('time', 'wavelength').hist(Qx=100, Qy=100)
-    raise NotImplementedError()
+def he3_polarizer(
+    func: He3TransmissionFunction[Polarizer],
+) -> TransmissionFunction[Polarizer]:
+    return func
 
 
 providers = (
@@ -415,7 +401,6 @@ providers = (
     get_he3_transmission_from_fit_to_direct_beam,
     direct_beam,
     direct_beam_with_cell,
-    correct_sample_data_for_polarization,
 )
 
 
@@ -440,9 +425,12 @@ def He3CellWorkflow(
         get_he3_transmission_from_fit_to_direct_beam,
         direct_beam,
         direct_beam_with_cell,
-        correct_sample_data_for_polarization,
+        he3_analyzer,
+        he3_polarizer,
     )
-    workflow = sl.Pipeline(providers=steps)
+    workflow = CorrectionWorkflow()
+    for step in steps:
+        workflow.insert(step)
     if in_situ:
         workflow.insert(he3_opacity_function_from_cell_opacity)
     else:

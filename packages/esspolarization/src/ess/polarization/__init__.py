@@ -30,8 +30,6 @@ from .base import (
 from .base import providers as base_providers
 from .base import run_reduction_workflow
 from .he3 import (
-    Analyzer,
-    Cell,
     Depolarized,
     DirectBeamBackgroundQRange,
     DirectBeamNoCell,
@@ -46,8 +44,6 @@ from .he3 import (
     He3TransmissionEmptyGlass,
     He3TransmissionFunction,
     Polarized,
-    Polarizer,
-    correct_sample_data_for_polarization,
     direct_beam,
     direct_beam_with_cell,
     get_he3_transmission_from_fit_to_direct_beam,
@@ -57,8 +53,11 @@ from .he3 import (
 )
 from .he3 import providers as he3_providers
 from .types import (
+    Analyzer,
     Down,
-    PolarizationCorrectedSampleData,
+    PolarizationCorrectedData,
+    Polarizer,
+    PolarizingElement,
     ReducedSampleDataBySpinChannel,
     Up,
 )
@@ -67,10 +66,9 @@ providers = base_providers + he3_providers
 
 __all__ = [
     "Analyzer",
-    "Cell",
+    "PolarizingElement",
     "CellInBeamLog",
     "CellSpinLog",
-    "correct_sample_data_for_polarization",
     "Depolarized",
     "determine_run_section",
     "direct_beam",
@@ -99,7 +97,7 @@ __all__ = [
     "He3PolarizationFunction",
     "He3TransmissionEmptyGlass",
     "He3TransmissionFunction",
-    "PolarizationCorrectedSampleData",
+    "PolarizationCorrectedData",
     "Polarized",
     "Polarizer",
     "providers",
