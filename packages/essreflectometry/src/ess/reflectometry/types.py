@@ -3,54 +3,54 @@ from typing import NewType, TypeVar
 import sciline
 import scipp as sc
 
-Reference = NewType("Reference", str)
-Sample = NewType("Sample", str)
-Run = TypeVar("Run", Reference, Sample)
+ReferenceRun = NewType("ReferenceRun", str)
+SampleRun = NewType("SampleRun", str)
+RunType = TypeVar("RunType", ReferenceRun, SampleRun)
 
 
-class NeXusDetectorName(sciline.Scope[Run, str], str):
-    """Name of the detector in the nexus file containing the events of the run"""
+class NeXusDetectorName(sciline.Scope[RunType, str], str):
+    """Name of the detector in the nexus file containing the events of the RunType"""
 
 
-class DetectorPosition(sciline.Scope[Run, sc.Variable], sc.Variable):
+class DetectorPosition(sciline.Scope[RunType, sc.Variable], sc.Variable):
     """Positions of the detector pixels, relative to the source(?), as a 3d-vector"""
 
 
-class SamplePosition(sciline.Scope[Run, sc.Variable], sc.Variable):
+class SamplePosition(sciline.Scope[RunType, sc.Variable], sc.Variable):
     """The position of the sample relative to the source(?)."""
 
 
-class IncidentBeam(sciline.Scope[Run, sc.Variable], sc.Variable):
+class IncidentBeam(sciline.Scope[RunType, sc.Variable], sc.Variable):
     """Incident beam vector."""
 
 
-class SpecularReflectionCoordTransformGraph(sciline.Scope[Run, dict], dict):
+class SpecularReflectionCoordTransformGraph(sciline.Scope[RunType, dict], dict):
     """Coordinate transformation graph for specular reflection"""
 
 
-class RawEvents(sciline.Scope[Run, sc.DataArray], sc.DataArray):
+class RawEvents(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Event time data from nexus file,
     binned by `detector_number` (pixel of the detector frame)."""
 
 
-class RawDetector(sciline.Scope[Run, sc.DataGroup], sc.DataGroup):
+class RawDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
     """NXdetector loaded from file"""
 
 
-class ChopperCorrectedTofEvents(sciline.Scope[Run, sc.DataArray], sc.DataArray):
+class ChopperCorrectedTofEvents(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Event time data after correcting tof for choppers."""
 
 
-class EventData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
+class EventData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Event data with added coordinates such as incident angle (theta),
     wavelength, and momentum transfer (Q)"""
 
 
-class MaskedEventData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
+class MaskedEventData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Event data that has been masked in wavelength and logical detector coordinates"""
 
 
-class FootprintCorrectedData(sciline.Scope[Run, sc.DataArray], sc.DataArray):
+class FootprintCorrectedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Event data with weights corrected for the footprint of the beam
     on the sample for the incidence angle of the event."""
 
@@ -85,32 +85,32 @@ WavelengthBins = NewType("WavelengthBins", sc.Variable)
 """Bins for the wavelength histogram, also used to filter the event data."""
 
 
-class TutorialFilename(sciline.Scope[Run, str], str):
+class TutorialFilename(sciline.Scope[RunType, str], str):
     """Name of an event data nexus file in the tutorial data repository."""
 
 
-class FilePath(sciline.Scope[Run, str], str):
-    """File path of an event data nexus file."""
+class Filename(sciline.Scope[RunType, str], str):
+    """Filename of an event data nexus file."""
 
 
-class SampleRotation(sciline.Scope[Run, sc.Variable], sc.Variable):
+class SampleRotation(sciline.Scope[RunType, sc.Variable], sc.Variable):
     """The rotation of the sample relative to the center of the incoming beam."""
 
 
-class DetectorRotation(sciline.Scope[Run, sc.Variable], sc.Variable):
+class DetectorRotation(sciline.Scope[RunType, sc.Variable], sc.Variable):
     """The rotation of the detector relative to the horizon"""
 
 
-class BeamSize(sciline.Scope[Run, sc.Variable], sc.Variable):
+class BeamSize(sciline.Scope[RunType, sc.Variable], sc.Variable):
     """Full-Width-Half-maximum of the incoming beam."""
 
 
-class DetectorSpatialResolution(sciline.Scope[Run, sc.Variable], sc.Variable):
+class DetectorSpatialResolution(sciline.Scope[RunType, sc.Variable], sc.Variable):
     # TODO what is the definition of this?
     """Spatial resolution of the detector."""
 
 
-class SampleSize(sciline.Scope[Run, sc.Variable], sc.Variable):
+class SampleSize(sciline.Scope[RunType, sc.Variable], sc.Variable):
     # TODO is this radius or total length?
     """Size of the sample. If None it is assumed to be the same as the reference."""
 

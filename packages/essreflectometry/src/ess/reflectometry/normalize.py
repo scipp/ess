@@ -9,13 +9,13 @@ from .types import (
     NormalizedIofQ,
     QBins,
     ReflectivityData,
-    Sample,
+    SampleRun,
     WavelengthBins,
 )
 
 
 def normalization_factor(
-    da: FootprintCorrectedData[Sample],
+    da: FootprintCorrectedData[SampleRun],
     corr: IdealReferenceIntensity,
     wbins: WavelengthBins,
 ) -> NormalizationFactor:
@@ -78,7 +78,7 @@ def normalization_factor(
 
 
 def reflectivity_over_q(
-    da: FootprintCorrectedData[Sample],
+    da: FootprintCorrectedData[SampleRun],
     n: NormalizationFactor,
     qbins: QBins,
 ) -> NormalizedIofQ:
@@ -103,7 +103,7 @@ def reflectivity_over_q(
 
 
 def reflectivity_per_event(
-    da: FootprintCorrectedData[Sample],
+    da: FootprintCorrectedData[SampleRun],
     n: IdealReferenceIntensity,
     wbins: WavelengthBins,
 ) -> ReflectivityData:

@@ -11,7 +11,7 @@ from .types import (
     Gravity,
     IncidentBeam,
     MaskedEventData,
-    Run,
+    RunType,
     SamplePosition,
     SampleRotation,
     SpecularReflectionCoordTransformGraph,
@@ -68,7 +68,7 @@ def theta(
     out = sc.abs(y_correction, out=y_correction)
     out /= L2
     out = sc.asin(out, out=out)
-    out -= sc.to_unit(sample_rotation, 'rad')
+    out -= sc.to_unit(sample_rotation, "rad")
     return out
 
 
@@ -97,11 +97,11 @@ def reflectometry_q(wavelength: sc.Variable, theta: sc.Variable) -> sc.Variable:
 
 
 def specular_reflection(
-    incident_beam: IncidentBeam[Run],
-    sample_position: SamplePosition[Run],
-    sample_rotation: SampleRotation[Run],
+    incident_beam: IncidentBeam[RunType],
+    sample_position: SamplePosition[RunType],
+    sample_rotation: SampleRotation[RunType],
     gravity: Gravity,
-) -> SpecularReflectionCoordTransformGraph[Run]:
+) -> SpecularReflectionCoordTransformGraph[RunType]:
     """
     Generate a coordinate transformation graph for specular reflection reflectometry.
 
@@ -124,28 +124,28 @@ def specular_reflection(
 
 
 def add_coords(
-    da: ChopperCorrectedTofEvents[Run],
-    graph: SpecularReflectionCoordTransformGraph[Run],
-) -> EventData[Run]:
+    da: ChopperCorrectedTofEvents[RunType],
+    graph: SpecularReflectionCoordTransformGraph[RunType],
+) -> EventData[RunType]:
     da = da.transform_coords(["theta", "wavelength", "Q"], graph=graph)
-    da.coords['z_index'] = sc.arange(
-        'row', 0, da.sizes['blade'] * da.sizes['wire'], unit=None
-    ).fold('row', sizes=dict(blade=da.sizes['blade'], wire=da.sizes['wire']))
-    da.coords['y_index'] = sc.arange('stripe', 0, da.sizes['stripe'], unit=None)
+    da.coords["z_index"] = sc.arange(
+        "row", 0, da.sizes["blade"] * da.sizes["wire"], unit=None
+    ).fold("row", sizes=dict(blade=da.sizes["blade"], wire=da.sizes["wire"]))
+    da.coords["y_index"] = sc.arange("stripe", 0, da.sizes["stripe"], unit=None)
     return da
 
 
 def add_masks(
-    da: EventData[Run], ylim: YIndexLimits, wb: WavelengthBins, zlim: ZIndexLimits
-) -> MaskedEventData[Run]:
-    da.masks['y_index_range'] = (da.coords['y_index'] < ylim[0]) | (
-        da.coords['y_index'] > ylim[1]
+    da: EventData[RunType], ylim: YIndexLimits, wb: WavelengthBins, zlim: ZIndexLimits
+) -> MaskedEventData[RunType]:
+    da.masks["y_index_range"] = (da.coords["y_index"] < ylim[0]) | (
+        da.coords["y_index"] > ylim[1]
     )
-    da.bins.masks['wavelength_mask'] = (da.bins.coords['wavelength'] < wb[0]) | (
-        da.bins.coords['wavelength'] > wb[-1]
+    da.bins.masks["wavelength_mask"] = (da.bins.coords["wavelength"] < wb[0]) | (
+        da.bins.coords["wavelength"] > wb[-1]
     )
-    da.masks['z_index_range'] = (da.coords['z_index'] < zlim[0]) | (
-        da.coords['z_index'] > zlim[1]
+    da.masks["z_index_range"] = (da.coords["z_index"] < zlim[0]) | (
+        da.coords["z_index"] > zlim[1]
     )
     return da
 

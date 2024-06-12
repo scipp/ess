@@ -2,15 +2,15 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 
-from ..reflectometry.types import IncidentBeam, Run, SamplePosition
+from ..reflectometry.types import IncidentBeam, RunType, SamplePosition
 from .types import Chopper1Position, Chopper2Position
 
 
 def incident_beam(
-    source_chopper_1_position: Chopper1Position[Run],
-    source_chopper_2_position: Chopper2Position[Run],
-    sample_position: SamplePosition[Run],
-) -> IncidentBeam[Run]:
+    source_chopper_1_position: Chopper1Position[RunType],
+    source_chopper_2_position: Chopper2Position[RunType],
+    sample_position: SamplePosition[RunType],
+) -> IncidentBeam[RunType]:
     """
     Compute the incident beam vector from the source chopper position vector,
     instead of the source_position vector.

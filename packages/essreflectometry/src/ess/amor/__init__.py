@@ -2,6 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import importlib.metadata
 
+import sciline
 import scipp as sc
 
 from ..reflectometry import providers as reflectometry_providers
@@ -11,7 +12,7 @@ from ..reflectometry.types import (
     DetectorSpatialResolution,
     Gravity,
     NeXusDetectorName,
-    Run,
+    RunType,
     SamplePosition,
 )
 from . import conversions, data, load, orso, resolution, utils
@@ -50,20 +51,28 @@ List of providers for setting up a Sciline pipeline.
 This provides a default Amor workflow including providers for loadings files.
 """
 
-default_parameters = {
-    supermirror.MValue: sc.scalar(5, unit=sc.units.dimensionless),
-    supermirror.CriticalEdge: 0.022 * sc.Unit("1/angstrom"),
-    supermirror.Alpha: sc.scalar(0.25 / 0.088, unit=sc.units.angstrom),
-    BeamSize[Run]: 2.0 * sc.units.mm,
-    DetectorSpatialResolution[Run]: 0.0025 * sc.units.m,
-    Gravity: sc.vector(value=[0, -1, 0]) * sc.constants.g,
-    SamplePosition[Run]: sc.vector([0, 0, 0], unit="m"),
-    NeXusDetectorName[Run]: "detector",
-    ChopperPhase[Run]: sc.scalar(-5.0, unit="deg"),
-    ChopperFrequency[Run]: sc.scalar(8.333, unit="Hz"),
-}
 
-del sc
+def default_parameters() -> dict:
+    return {
+        supermirror.MValue: sc.scalar(5, unit=sc.units.dimensionless),
+        supermirror.CriticalEdge: 0.022 * sc.Unit("1/angstrom"),
+        supermirror.Alpha: sc.scalar(0.25 / 0.088, unit=sc.units.angstrom),
+        BeamSize[RunType]: 2.0 * sc.units.mm,
+        DetectorSpatialResolution[RunType]: 0.0025 * sc.units.m,
+        Gravity: sc.vector(value=[0, -1, 0]) * sc.constants.g,
+        SamplePosition[RunType]: sc.vector([0, 0, 0], unit="m"),
+        NeXusDetectorName[RunType]: "detector",
+        ChopperPhase[RunType]: sc.scalar(-5.0, unit="deg"),
+        ChopperFrequency[RunType]: sc.scalar(8.333, unit="Hz"),
+    }
+
+
+def AmorWorkflow() -> sciline.Pipeline:
+    """
+    Workflow with default parameters for the Amor PSI instrument.
+    """
+    return sciline.Pipeline(providers=providers, params=default_parameters())
+
 
 __all__ = [
     "supermirror",
@@ -88,4 +97,5 @@ __all__ = [
     "WavelengthZIndexFigure",
     "QThetaFigure",
     "ReflectivityDiagnosticsView",
+    "AmorWorkflow",
 ]
