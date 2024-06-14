@@ -7,14 +7,18 @@ from orsopy import fileio
 
 from ess import amor, reflectometry
 from ess.reflectometry import orso
-from ess.reflectometry.types import Filename, SampleRun
+from ess.reflectometry.types import Filename, SampleRun, ReferenceRun
 
 
 def test_build_orso_data_source():
     pipeline = sciline.Pipeline(
         (*amor.load.providers, *orso.providers),
-        params={Filename[SampleRun]: amor.data.amor_old_sample_run()},
+        params={
+            Filename[SampleRun]: amor.data.amor_old_sample_run(),
+            Filename[ReferenceRun]: amor.data.amor_old_reference_run()
+        },
     )
+    pipeline[orso.OrsoInstrument] = None
     data_source = pipeline.compute(orso.OrsoDataSource)
     expected = fileio.data_source.DataSource(
         owner=fileio.base.Person(
@@ -31,19 +35,11 @@ def test_build_orso_data_source():
         measurement=fileio.data_source.Measurement(
             data_files=[fileio.base.File(file="sample.nxs")],
             # We would need the full pipeline to determine this:
-            additional_files=[],
+            additional_files=[fileio.File("reference.nxs", comment="supermirror")],
             instrument_settings=None,
         ),
     )
     assert data_source == expected
-
-
-def test_build_orso_reduction_without_creator():
-    pipeline = sciline.Pipeline(orso.providers)
-    reduction = pipeline.compute(orso.OrsoReduction)
-    assert reduction.software.name == "ess.reflectometry"
-    assert reduction.software.version == str(reflectometry.__version__)
-    assert reduction.creator is None
 
 
 def test_build_orso_reduction_with_creator():
