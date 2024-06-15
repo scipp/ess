@@ -85,10 +85,6 @@ WavelengthBins = NewType("WavelengthBins", sc.Variable)
 """Bins for the wavelength histogram, also used to filter the event data."""
 
 
-class TutorialFilename(sciline.Scope[RunType, str], str):
-    """Name of an event data nexus file in the tutorial data repository."""
-
-
 class Filename(sciline.Scope[RunType, str], str):
     """Filename of an event data nexus file."""
 

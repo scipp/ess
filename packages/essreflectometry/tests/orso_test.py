@@ -7,17 +7,13 @@ from orsopy import fileio
 
 from ess import amor, reflectometry
 from ess.reflectometry import orso
-from ess.reflectometry.types import Sample, TutorialFilename
+from ess.reflectometry.types import SampleRun, Filename
 
 
 def test_build_orso_data_source():
     pipeline = sciline.Pipeline(
-        (
-            *amor.data.providers,
-            *amor.load.providers,
-            *orso.providers,
-        ),
-        params={TutorialFilename[Sample]: "sample.nxs"},
+        (*amor.load.providers, *orso.providers),
+        params={Filename[SampleRun]: "sample.nxs"},
     )
     data_source = pipeline.compute(orso.OrsoDataSource)
     expected = fileio.data_source.DataSource(

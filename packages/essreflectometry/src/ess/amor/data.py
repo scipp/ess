@@ -5,8 +5,6 @@ from ..reflectometry.types import Filename, ReferenceRun, SampleRun
 
 _version = "1"
 
-__all__ = ["get_path"]
-
 
 def _make_pooch():
     import pooch
@@ -69,3 +67,10 @@ def amor_sample_run(number: int) -> Filename[SampleRun]:
 
 def amor_psi_software_result(number: int) -> Filename[SampleRun]:
     return Filename[SampleRun](_pooch.fetch(f"{number:03d}.Rqz.ort"))
+
+
+__all__ = [
+    "amor_reference_run",
+    "amor_sample_run",
+    "amor_psi_software_result",
+]
