@@ -41,12 +41,12 @@ class ReducibleDetectorData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Event time data after correcting tof, ready for reduction"""
 
 
-class EventData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+class DataWithScatteringCoordinates(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Event data with added coordinates such as incident angle (theta),
     wavelength, and momentum transfer (Q)"""
 
 
-class MaskedEventData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+class MaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Event data that has been masked in wavelength and logical detector coordinates"""
 
 

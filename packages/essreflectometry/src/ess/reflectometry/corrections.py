@@ -9,7 +9,7 @@ from .types import (
     BeamSize,
     FootprintCorrectedData,
     IdealReferenceIntensity,
-    MaskedEventData,
+    MaskedData,
     ReferenceRun,
     ReferenceIntensity,
     RunType,
@@ -19,7 +19,7 @@ from .types import (
 
 
 def footprint_correction(
-    data_array: MaskedEventData[RunType],
+    data_array: MaskedData[RunType],
     beam_size: BeamSize[RunType],
     sample_size: SampleSize[RunType],
 ) -> FootprintCorrectedData[RunType]:
