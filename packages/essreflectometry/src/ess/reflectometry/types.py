@@ -28,17 +28,17 @@ class SpecularReflectionCoordTransformGraph(sciline.Scope[RunType, dict], dict):
     """Coordinate transformation graph for specular reflection"""
 
 
-class RawEvents(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+class RawDetectorData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Event time data from nexus file,
     binned by `detector_number` (pixel of the detector frame)."""
 
 
-class RawDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+class LoadedNeXusDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
     """NXdetector loaded from file"""
 
 
-class ChopperCorrectedTofEvents(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Event time data after correcting tof for choppers."""
+class ReducibleDetectorData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Event time data after correcting tof, ready for reduction"""
 
 
 class EventData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):

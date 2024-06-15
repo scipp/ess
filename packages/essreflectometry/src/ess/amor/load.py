@@ -5,12 +5,12 @@ from ess.reduce import nexus
 
 from ..reflectometry.load import load_nx
 from ..reflectometry.types import (
-    ChopperCorrectedTofEvents,
+    ReducibleDetectorData,
     DetectorRotation,
     Filename,
     NeXusDetectorName,
-    RawDetector,
-    RawEvents,
+    LoadedNeXusDetector,
+    RawDetectorData,
     RunType,
     SampleRotation,
 )
@@ -26,13 +26,13 @@ from .types import (
 
 def load_detector(
     file_path: Filename[RunType], detector_name: NeXusDetectorName[RunType]
-) -> RawDetector[RunType]:
+) -> LoadedNeXusDetector[RunType]:
     return nexus.load_detector(file_path=file_path, detector_name=detector_name)
 
 
 def load_events(
-    detector: RawDetector[RunType], detector_rotation: DetectorRotation[RunType]
-) -> RawEvents[RunType]:
+    detector: LoadedNeXusDetector[RunType], detector_rotation: DetectorRotation[RunType]
+) -> RawDetectorData[RunType]:
     detector_numbers = sc.arange(
         "event_id",
         start=1,
@@ -66,14 +66,14 @@ def load_events(
     )
     data.coords["position"] = position.to(unit="m", copy=False)
     data.coords["angle_from_center_of_beam"] = angle_from_center_of_beam
-    return RawEvents[RunType](data)
+    return RawDetectorData[RunType](data)
 
 
 def compute_tof(
-    data: RawEvents[RunType],
+    data: RawDetectorData[RunType],
     phase: ChopperPhase[RunType],
     frequency: ChopperFrequency[RunType],
-) -> ChopperCorrectedTofEvents[RunType]:
+) -> ReducibleDetectorData[RunType]:
     data.bins.coords["tof"] = data.bins.coords.pop("event_time_offset").to(
         unit="ns", dtype="float64", copy=False
     )
@@ -104,7 +104,7 @@ def compute_tof(
     data.bins.coords["tof"] -= (
         data.coords["angle_from_center_of_beam"].to(unit="deg") / (180.0 * sc.units.deg)
     ) * tau
-    return ChopperCorrectedTofEvents[RunType](data)
+    return ReducibleDetectorData[RunType](data)
 
 
 def amor_chopper(f: Filename[RunType]) -> RawChopper[RunType]:

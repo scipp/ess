@@ -19,7 +19,7 @@ from orsopy.fileio import data_source, orso, reduction
 from .load import load_nx
 from .supermirror import SupermirrorReflectivityCorrection
 from .types import (
-    ChopperCorrectedTofEvents,
+    ReducibleDetectorData,
     Filename,
     FootprintCorrectedData,
     ReferenceRun,
@@ -174,7 +174,7 @@ def build_orso_data_source(
 
 
 _CORRECTIONS_BY_GRAPH_KEY = {
-    ChopperCorrectedTofEvents[SampleRun]: "chopper ToF correction",
+    ReducibleDetectorData[SampleRun]: "chopper ToF correction",
     FootprintCorrectedData[SampleRun]: "footprint correction",
     SupermirrorReflectivityCorrection: "supermirror calibration",
 }

@@ -6,7 +6,7 @@ from scippneutron._utils import elem_dtype, elem_unit
 from scippneutron.conversion.graph import beamline, tof
 
 from .types import (
-    ChopperCorrectedTofEvents,
+    ReducibleDetectorData,
     EventData,
     Gravity,
     IncidentBeam,
@@ -124,7 +124,7 @@ def specular_reflection(
 
 
 def add_coords(
-    da: ChopperCorrectedTofEvents[RunType],
+    da: ReducibleDetectorData[RunType],
     graph: SpecularReflectionCoordTransformGraph[RunType],
 ) -> EventData[RunType]:
     da = da.transform_coords(["theta", "wavelength", "Q"], graph=graph)
