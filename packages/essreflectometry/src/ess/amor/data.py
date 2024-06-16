@@ -69,12 +69,12 @@ def amor_reference_run() -> Filename[ReferenceRun]:
     return Filename[ReferenceRun](_pooch.fetch("amor2023n000614.hdf"))
 
 
-def amor_sample_run(number: int) -> Filename[SampleRun]:
-    return Filename[SampleRun](_pooch.fetch(f"amor2023n{number:06d}.hdf"))
+def amor_sample_run(number: int | str) -> Filename[SampleRun]:
+    return Filename[SampleRun](_pooch.fetch(f"amor2023n{int(number):06d}.hdf"))
 
 
-def amor_psi_software_result(number: int) -> Filename[SampleRun]:
-    return Filename[SampleRun](_pooch.fetch(f"{number:03d}.Rqz.ort"))
+def amor_psi_software_result(number: int | str) -> Filename[SampleRun]:
+    return Filename[SampleRun](_pooch.fetch(f"{int(number):03d}.Rqz.ort"))
 
 
 __all__ = [
