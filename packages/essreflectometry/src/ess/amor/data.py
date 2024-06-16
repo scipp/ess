@@ -57,6 +57,14 @@ def _make_pooch():
 _pooch = _make_pooch()
 
 
+def amor_old_sample_run() -> Filename[SampleRun]:
+    return Filename[SampleRun](_pooch.fetch("sample.nxs"))
+
+
+def amor_old_reference_run() -> Filename[ReferenceRun]:
+    return Filename[ReferenceRun](_pooch.fetch("reference.nxs"))
+
+
 def amor_reference_run() -> Filename[ReferenceRun]:
     return Filename[ReferenceRun](_pooch.fetch("amor2023n000614.hdf"))
 
