@@ -6,8 +6,8 @@ from ess.reflectometry.types import (
     QBins,
     ReflectivityData,
     RunType,
-    SampleRun,
     SampleRotation,
+    SampleRun,
 )
 
 from .geometry import Detector

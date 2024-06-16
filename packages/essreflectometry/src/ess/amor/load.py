@@ -5,12 +5,12 @@ from ess.reduce import nexus
 
 from ..reflectometry.load import load_nx
 from ..reflectometry.types import (
-    ReducibleDetectorData,
     DetectorRotation,
     Filename,
-    NeXusDetectorName,
     LoadedNeXusDetector,
+    NeXusDetectorName,
     RawDetectorData,
+    ReducibleDetectorData,
     RunType,
     SampleRotation,
 )

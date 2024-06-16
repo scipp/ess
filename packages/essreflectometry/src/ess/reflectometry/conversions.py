@@ -6,11 +6,11 @@ from scippneutron._utils import elem_dtype, elem_unit
 from scippneutron.conversion.graph import beamline, tof
 
 from .types import (
-    ReducibleDetectorData,
     DataWithScatteringCoordinates,
     Gravity,
     IncidentBeam,
     MaskedData,
+    ReducibleDetectorData,
     RunType,
     SamplePosition,
     SampleRotation,

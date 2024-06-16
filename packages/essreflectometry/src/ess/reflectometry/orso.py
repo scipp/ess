@@ -19,9 +19,9 @@ from orsopy.fileio import data_source, orso, reduction
 from .load import load_nx
 from .supermirror import SupermirrorReflectivityCorrection
 from .types import (
-    ReducibleDetectorData,
     Filename,
     FootprintCorrectedData,
+    ReducibleDetectorData,
     ReferenceRun,
     SampleRun,
 )
