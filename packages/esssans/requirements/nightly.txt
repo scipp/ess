@@ -24,7 +24,7 @@ cyclebane==24.6.0
     # via sciline
 cycler==0.12.1
     # via matplotlib
-dask==2024.5.2
+dask==2024.6.0
     # via -r nightly.in
 decorator==5.1.1
     # via ipython
@@ -63,17 +63,22 @@ kiwisolver==1.4.5
 locket==1.0.0
     # via partd
 matplotlib==3.9.0
-    # via plopp
+    # via
+    #   mpltoolbox
+    #   plopp
 matplotlib-inline==0.1.7
     # via ipython
+mpltoolbox==24.5.1
+    # via scippneutron
 networkx==3.3
     # via cyclebane
-numpy==1.26.4
+numpy==2.0.0
     # via
     #   contourpy
     #   h5py
     #   ipydatawidgets
     #   matplotlib
+    #   mpltoolbox
     #   pandas
     #   pythreejs
     #   scipp
