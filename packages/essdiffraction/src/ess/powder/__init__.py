@@ -15,7 +15,7 @@ from . import (
     smoothing,
     uncertainty,
 )
-from .masking import set_pixel_mask_filenames
+from .masking import with_pixel_mask_filenames
 
 try:
     __version__ = importlib.metadata.version(__package__ or __name__)
@@ -43,5 +43,5 @@ __all__ = [
     "providers",
     "smoothing",
     "uncertainty",
-    "set_pixel_mask_filenames",
+    "with_pixel_mask_filenames",
 ]

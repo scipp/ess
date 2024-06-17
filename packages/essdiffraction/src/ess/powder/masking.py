@@ -73,7 +73,7 @@ def _merge(*dicts: dict) -> dict:
     return {key: value for d in dicts for key, value in d.items()}
 
 
-def set_pixel_mask_filenames(
+def with_pixel_mask_filenames(
     workflow: sciline.Pipeline, masks: Iterable[str]
 ) -> sciline.Pipeline:
     """
