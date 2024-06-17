@@ -15,6 +15,7 @@ from . import (
     smoothing,
     uncertainty,
 )
+from .masking import with_pixel_mask_filenames
 
 try:
     __version__ = importlib.metadata.version(__package__ or __name__)
@@ -30,6 +31,7 @@ providers = (
     *grouping.providers,
     *masking.providers,
 )
+
 """Sciline providers for powder diffraction."""
 
 __all__ = [
@@ -41,4 +43,5 @@ __all__ = [
     "providers",
     "smoothing",
     "uncertainty",
+    "with_pixel_mask_filenames",
 ]

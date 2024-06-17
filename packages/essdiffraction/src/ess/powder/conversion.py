@@ -4,8 +4,6 @@
 Coordinate transformations for powder diffraction.
 """
 
-from typing import Optional
-
 import scipp as sc
 import scippneutron as scn
 
@@ -86,7 +84,7 @@ def _consume_positions(position, sample_position, source_position):
 
 def to_dspacing_with_calibration(
     data: NormalizedByProtonCharge[RunType],
-    calibration: Optional[CalibrationData] = None,
+    calibration: CalibrationData,
 ) -> DspacingData[RunType]:
     """
     Transform coordinates to d-spacing from calibration parameters.
@@ -111,8 +109,7 @@ def to_dspacing_with_calibration(
         Input data in tof or wavelength dimension.
         Must have a tof coordinate.
     calibration:
-        Calibration data. If given, use it for the conversion.
-        Otherwise, the calibration data must be stored in `data`.
+        Calibration data.
 
     Returns
     -------
@@ -123,15 +120,10 @@ def to_dspacing_with_calibration(
     --------
     ess.powder.conversions.dspacing_from_diff_calibration
     """
-    if calibration is not None:
-        out = merge_calibration(into=data, calibration=calibration)
-    else:
-        out = data
+    out = merge_calibration(into=data, calibration=calibration)
     out = _restore_tof_if_in_wavelength(out)
 
-    graph = {
-        "dspacing": _dspacing_from_diff_calibration,
-    }
+    graph = {"dspacing": _dspacing_from_diff_calibration}
     # `_dspacing_from_diff_calibration` does not need positions but conceptually,
     # the conversion maps from positions to d-spacing.
     # The mechanism with `_tag_positions_consumed` is meant to ensure that,

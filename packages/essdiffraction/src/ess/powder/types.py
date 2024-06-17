@@ -191,15 +191,15 @@ class SourcePosition(sciline.Scope[RunType, sc.Variable], sc.Variable):
     """Source position"""
 
 
-TofMask = NewType("TofMask", Callable)
+TofMask = NewType("TofMask", Callable | None)
 """TofMask is a callable that returns a mask for a given TofData."""
 
 
-TwoThetaMask = NewType("TwoThetaMask", Callable)
+TwoThetaMask = NewType("TwoThetaMask", Callable | None)
 """TwoThetaMask is a callable that returns a mask for a given TwoThetaData."""
 
 
-WavelengthMask = NewType("WavelengthMask", Callable)
+WavelengthMask = NewType("WavelengthMask", Callable | None)
 """WavelengthMask is a callable that returns a mask for a given WavelengthData."""
 
 

@@ -10,6 +10,7 @@
    :toctree: ../generated/attributes
 
    providers
+   with_pixel_mask_filenames
 ```
 
 ### Submodules
