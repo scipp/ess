@@ -33,7 +33,7 @@ dependencies = [
   "dask",
   "essreduce",
   "graphviz",
-  "numpy<2.0.0",
+  "numpy",
   "plopp",
   "pythreejs",
   "sciline>=24.06.0",
