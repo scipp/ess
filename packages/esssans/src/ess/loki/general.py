@@ -25,6 +25,7 @@ from ..sans.types import (
     MonitorType,
     NeXusDetectorName,
     NeXusMonitorName,
+    NonBackgroundWavelengthRange,
     PixelShapePath,
     RawData,
     RawMonitor,
@@ -38,6 +39,8 @@ from ..sans.types import (
     TofMonitor,
     TransformationPath,
     Transmission,
+    WavelengthBands,
+    WavelengthMask,
 )
 from .io import dummy_load_sample
 
@@ -50,6 +53,9 @@ def default_parameters() -> dict:
         NeXusMonitorName[Transmission]: 'monitor_2',
         TransformationPath: 'transform',
         PixelShapePath: 'pixel_shape',
+        NonBackgroundWavelengthRange: None,
+        WavelengthMask: None,
+        WavelengthBands: None,
     }
 
 

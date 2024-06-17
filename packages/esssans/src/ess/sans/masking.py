@@ -4,24 +4,54 @@
 Masking functions for the loki workflow.
 """
 import numpy as np
-import sciline
 import scipp as sc
 
 from .types import (
+    DetectorIDs,
+    DetectorMasks,
     MaskedData,
     MaskedDetectorIDs,
     PixelMaskFilename,
+    SampleRun,
     ScatteringRunType,
     TofData,
 )
 
 
+def get_detector_ids_from_sample_run(data: TofData[SampleRun]) -> DetectorIDs:
+    """Extract detector IDs from sample run."""
+    return DetectorIDs(
+        data.coords[
+            'detector_number' if 'detector_number' in data.coords else 'detector_id'
+        ]
+    )
+
+
+def to_detector_mask(
+    ids: DetectorIDs,
+    name: PixelMaskFilename,
+    masked_ids: MaskedDetectorIDs,
+) -> DetectorMasks:
+    """Create a detector mask from a list of masked detector IDs.
+    The masks are based on detector IDs stored in XML files.
+
+    Parameters
+    ----------
+    data:
+        Raw data with configured component positions.
+    masked_ids:
+        Detector IDs to mask.
+    """
+    mask = sc.zeros(sizes=ids.sizes, dtype='bool')
+    mask.values[np.isin(ids.values, masked_ids.values)] = True
+    return DetectorMasks({name: mask})
+
+
 def apply_pixel_masks(
     data: TofData[ScatteringRunType],
-    masked_ids: sciline.Series[PixelMaskFilename, MaskedDetectorIDs],
+    masks: DetectorMasks,
 ) -> MaskedData[ScatteringRunType]:
     """Apply pixel-specific masks to raw data.
-    The masks are based on detector IDs stored in XML files.
 
     Parameters
     ----------
@@ -30,16 +60,11 @@ def apply_pixel_masks(
     masks:
         A series of masks.
     """
-    if masked_ids is not None:
-        data = data.copy(deep=False)
-        ids = data.coords[
-            'detector_number' if 'detector_number' in data.coords else 'detector_id'
-        ]
-        for name, masked in masked_ids.items():
-            mask = sc.zeros(sizes=ids.sizes, dtype='bool')
-            mask.values[np.isin(ids.values, masked.values)] = True
-            data.masks[name] = mask
-    return MaskedData[ScatteringRunType](data)
+    return MaskedData[ScatteringRunType](data.assign_masks(masks))
 
 
-providers = (apply_pixel_masks,)
+providers = (
+    get_detector_ids_from_sample_run,
+    to_detector_mask,
+    apply_pixel_masks,
+)

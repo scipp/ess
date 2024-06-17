@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
-from typing import NewType, Optional
+from typing import NewType
 
 import sciline
 import scipp as sc
@@ -12,20 +12,18 @@ from .data import load_tutorial_direct_beam, load_tutorial_run
 from .general import default_parameters
 from .mantidio import providers as mantid_providers
 
-DetectorEdgeMask = NewType('DetectorEdgeMask', sc.Variable)
+DetectorEdgeMask = NewType('DetectorEdgeMask', sc.Variable | None)
 """Detector edge mask"""
 
 LowCountThreshold = NewType('LowCountThreshold', sc.Variable)
 """Threshold below which detector pixels should be masked
 (low-counts on the edges of the detector panel, and the beam stop)"""
 
-SampleHolderMask = NewType('SampleHolderMask', sc.Variable)
+SampleHolderMask = NewType('SampleHolderMask', sc.Variable | None)
 """Sample holder mask"""
 
 
-def detector_edge_mask(
-    sample: TofData[SampleRun],
-) -> DetectorEdgeMask:
+def detector_edge_mask(sample: TofData[SampleRun]) -> DetectorEdgeMask:
     mask_edges = (
         sc.abs(sample.coords['position'].fields.x) > sc.scalar(0.48, unit='m')
     ) | (sc.abs(sample.coords['position'].fields.y) > sc.scalar(0.45, unit='m'))
@@ -33,8 +31,7 @@ def detector_edge_mask(
 
 
 def sample_holder_mask(
-    sample: TofData[SampleRun],
-    low_counts_threshold: LowCountThreshold,
+    sample: TofData[SampleRun], low_counts_threshold: LowCountThreshold
 ) -> SampleHolderMask:
     summed = sample.hist()
     holder_mask = (
@@ -49,8 +46,8 @@ def sample_holder_mask(
 
 def mask_detectors(
     da: TofData[ScatteringRunType],
-    edge_mask: Optional[DetectorEdgeMask],
-    holder_mask: Optional[SampleHolderMask],
+    edge_mask: DetectorEdgeMask,
+    holder_mask: SampleHolderMask,
 ) -> MaskedData[ScatteringRunType]:
     """Apply pixel-specific masks to raw data.
 

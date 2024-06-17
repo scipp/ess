@@ -33,9 +33,11 @@ dependencies = [
   "dask",
   "graphviz",
   "essreduce",
+  "numpy<2.0.0",
+  "pandas",
   "plopp",
   "pythreejs",
-  "sciline>=24.4.1",
+  "sciline>=24.06.0",
   "scipp>=23.8.0",
   "scippneutron>=23.9.0",
   "scippnexus>=23.12.1",  # 23.12.0 and below deadlock in threaded use

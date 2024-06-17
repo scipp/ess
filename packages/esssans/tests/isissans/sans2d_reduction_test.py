@@ -72,6 +72,7 @@ def make_params() -> dict:
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
     params[ReturnEvents] = False
     params[DimsToKeep] = tuple()
+
     return params
 
 
@@ -82,10 +83,10 @@ def sans2d_providers():
         + isis.sans2d.providers
         + isis.mantidio.providers
         + (
-            isis.data.transmission_from_background_run,
-            isis.data.transmission_from_sample_run,
             isis.data.load_tutorial_direct_beam,
             isis.data.load_tutorial_run,
+            isis.data.transmission_from_background_run,
+            isis.data.transmission_from_sample_run,
             sans.beam_center_finder.beam_center_from_center_of_mass,
         )
     )
@@ -122,8 +123,7 @@ def test_pipeline_wavelength_bands_is_optional():
     params = make_params()
     pipeline = sciline.Pipeline(sans2d_providers(), params=params)
     noband = pipeline.compute(BackgroundSubtractedIofQ)
-    with pytest.raises(sciline.UnsatisfiedRequirement):
-        pipeline.compute(WavelengthBands)
+    assert pipeline.compute(WavelengthBands) is None
     band = sc.linspace('wavelength', 2.0, 16.0, num=2, unit='angstrom')
     pipeline[WavelengthBands] = band
     assert sc.identical(band, pipeline.compute(WavelengthBands))
@@ -143,9 +143,11 @@ def test_workflow_is_deterministic():
     assert sc.identical(sc.values(result), sc.values(reference))
 
 
-def test_pipeline_raisesVariancesError_if_normalization_errors_not_dropped():
+def test_pipeline_raises_VariancesError_if_normalization_errors_not_dropped():
     params = make_params()
-    del params[NonBackgroundWavelengthRange]  # Make sure we raise in iofq_denominator
+    params[
+        NonBackgroundWavelengthRange
+    ] = None  # Make sure we raise in iofq_denominator
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.fail
     pipeline = sciline.Pipeline(sans2d_providers(), params=params)
     with pytest.raises(sc.VariancesError):
@@ -231,6 +233,9 @@ def test_beam_center_finder_without_direct_beam_reproduces_verified_result():
     providers.remove(sans.beam_center_finder.beam_center_from_center_of_mass)
     providers.append(sans.beam_center_finder.beam_center_from_iofq)
     pipeline = sciline.Pipeline(providers, params=params)
+    pipeline[sans.beam_center_finder.BeamCenterFinderMinimizer] = None
+    pipeline[sans.beam_center_finder.BeamCenterFinderTolerance] = None
+    pipeline[DirectBeam] = None
     center = pipeline.compute(BeamCenter)
     assert sc.allclose(center, MANTID_BEAM_CENTER, atol=sc.scalar(2e-3, unit='m'))
 
@@ -254,6 +259,9 @@ def test_beam_center_can_get_closer_to_verified_result_with_low_counts_mask():
     providers.append(sans.beam_center_finder.beam_center_from_iofq)
     providers.append(low_counts_mask)
     pipeline = sciline.Pipeline(providers, params=params)
+    pipeline[sans.beam_center_finder.BeamCenterFinderMinimizer] = None
+    pipeline[sans.beam_center_finder.BeamCenterFinderTolerance] = None
+    pipeline[DirectBeam] = None
     center = pipeline.compute(BeamCenter)
     assert sc.allclose(center, MANTID_BEAM_CENTER, atol=sc.scalar(5e-4, unit='m'))
 
@@ -267,6 +275,8 @@ def test_beam_center_finder_works_with_direct_beam():
     providers.remove(sans.beam_center_finder.beam_center_from_center_of_mass)
     providers.append(sans.beam_center_finder.beam_center_from_iofq)
     pipeline = sciline.Pipeline(providers, params=params)
+    pipeline[sans.beam_center_finder.BeamCenterFinderMinimizer] = None
+    pipeline[sans.beam_center_finder.BeamCenterFinderTolerance] = None
     center_with_direct_beam = pipeline.compute(BeamCenter)
     assert sc.allclose(
         center_with_direct_beam, MANTID_BEAM_CENTER, atol=sc.scalar(2e-3, unit='m')
@@ -282,6 +292,8 @@ def test_beam_center_finder_works_with_pixel_dependent_direct_beam():
     providers.remove(sans.beam_center_finder.beam_center_from_center_of_mass)
     providers.append(sans.beam_center_finder.beam_center_from_iofq)
     pipeline = sciline.Pipeline(providers, params=params)
+    pipeline[sans.beam_center_finder.BeamCenterFinderMinimizer] = None
+    pipeline[sans.beam_center_finder.BeamCenterFinderTolerance] = None
     center_pixel_independent_direct_beam = pipeline.compute(BeamCenter)
 
     direct_beam = pipeline.compute(DirectBeam)
@@ -296,6 +308,8 @@ def test_beam_center_finder_works_with_pixel_dependent_direct_beam():
     providers.remove(sans.beam_center_finder.beam_center_from_center_of_mass)
     providers.append(sans.beam_center_finder.beam_center_from_iofq)
     pipeline = sciline.Pipeline(providers, params=params)
+    pipeline[sans.beam_center_finder.BeamCenterFinderMinimizer] = None
+    pipeline[sans.beam_center_finder.BeamCenterFinderTolerance] = None
     pipeline[DirectBeam] = pixel_dependent_direct_beam
 
     center = pipeline.compute(BeamCenter)

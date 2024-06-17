@@ -1,9 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import uuid
-from typing import Optional
 
-import sciline
 import scipp as sc
 from scipp.scipy.interpolate import interp1d
 
@@ -18,19 +16,13 @@ from .types import (
     CleanQ,
     CleanQxy,
     CleanSummedQ,
-    CleanSummedQMergedBanks,
     CleanSummedQxy,
-    CleanSummedQxyMergedBanks,
     DimsToKeep,
     DirectBeam,
-    Filename,
-    FinalSummedQ,
-    FinalSummedQxy,
     IofQ,
     IofQPart,
     IofQxy,
     MonitorType,
-    NeXusDetectorName,
     NonBackgroundWavelengthRange,
     QBins,
     QxBins,
@@ -49,7 +41,7 @@ from .uncertainty import broadcast_with_upper_bound_variances
 def preprocess_monitor_data(
     monitor: WavelengthMonitor[RunType, MonitorType],
     wavelength_bins: WavelengthBins,
-    non_background_range: Optional[NonBackgroundWavelengthRange],
+    non_background_range: NonBackgroundWavelengthRange,
     uncertainties: UncertaintyBroadcastMode,
 ) -> CleanMonitor[RunType, MonitorType]:
     """
@@ -126,6 +118,8 @@ def resample_direct_beam(
     :
         The direct beam function resampled to the requested resolution.
     """
+    if direct_beam is None:
+        return CleanDirectBeam(None)
     if sc.identical(direct_beam.coords['wavelength'], wavelength_bins):
         return direct_beam
     if direct_beam.variances is not None:
@@ -271,93 +265,6 @@ def _bin_in_q(
     return out.squeeze()
 
 
-def no_bank_merge(
-    data: CleanSummedQ[ScatteringRunType, IofQPart]
-) -> CleanSummedQMergedBanks[ScatteringRunType, IofQPart]:
-    return CleanSummedQMergedBanks[ScatteringRunType, IofQPart](data)
-
-
-def no_bank_merge_xy(
-    data: CleanSummedQxy[ScatteringRunType, IofQPart]
-) -> CleanSummedQxyMergedBanks[ScatteringRunType, IofQPart]:
-    return CleanSummedQxyMergedBanks[ScatteringRunType, IofQPart](data)
-
-
-def no_run_merge(
-    data: CleanSummedQMergedBanks[ScatteringRunType, IofQPart]
-) -> FinalSummedQ[ScatteringRunType, IofQPart]:
-    return FinalSummedQ[ScatteringRunType, IofQPart](data)
-
-
-def no_run_merge_xy(
-    data: CleanSummedQxyMergedBanks[ScatteringRunType, IofQPart]
-) -> FinalSummedQxy[ScatteringRunType, IofQPart]:
-    return FinalSummedQxy[ScatteringRunType, IofQPart](data)
-
-
-def _merge_contributions(data: list[sc.DataArray]) -> sc.DataArray:
-    if len(data) == 1:
-        return data[0]
-    reducer = sc.reduce(data)
-    return reducer.bins.concat() if data[0].bins is not None else reducer.sum()
-
-
-def merge_banks(
-    banks: sciline.Series[NeXusDetectorName, CleanSummedQ[ScatteringRunType, IofQPart]]
-) -> CleanSummedQMergedBanks[ScatteringRunType, IofQPart]:
-    """
-    Merge the events or counts from multiple detector banks into a single numerator or
-    denominator, before the normalization step.
-    """
-    return CleanSummedQMergedBanks[ScatteringRunType, IofQPart](
-        _merge_contributions(list(banks.values()))
-    )
-
-
-def merge_banks_xy(
-    banks: sciline.Series[
-        NeXusDetectorName, CleanSummedQxy[ScatteringRunType, IofQPart]
-    ]
-) -> CleanSummedQxyMergedBanks[ScatteringRunType, IofQPart]:
-    """
-    Merge the events or counts from multiple detector banks into a single numerator or
-    denominator, before the normalization step.
-    """
-    return CleanSummedQxyMergedBanks[ScatteringRunType, IofQPart](
-        _merge_contributions(list(banks.values()))
-    )
-
-
-def merge_runs(
-    runs: sciline.Series[
-        Filename[ScatteringRunType],
-        CleanSummedQMergedBanks[ScatteringRunType, IofQPart],
-    ],
-) -> FinalSummedQ[ScatteringRunType, IofQPart]:
-    """
-    Merge the events or counts from multiple runs into a single numerator or
-    denominator, before the normalization step.
-    """
-    return FinalSummedQ[ScatteringRunType, IofQPart](
-        _merge_contributions(list(runs.values()))
-    )
-
-
-def merge_runs_xy(
-    runs: sciline.Series[
-        Filename[ScatteringRunType],
-        CleanSummedQxyMergedBanks[ScatteringRunType, IofQPart],
-    ],
-) -> FinalSummedQxy[ScatteringRunType, IofQPart]:
-    """
-    Merge the events or counts from multiple runs into a single numerator or
-    denominator, before the normalization step.
-    """
-    return FinalSummedQxy[ScatteringRunType, IofQPart](
-        _merge_contributions(list(runs.values()))
-    )
-
-
 def _subtract_background(
     sample: sc.DataArray,
     background: sc.DataArray,
@@ -403,8 +310,4 @@ providers = (
     bin_in_qxy,
     subtract_background,
     subtract_background_xy,
-    no_bank_merge,
-    no_bank_merge_xy,
-    no_run_merge,
-    no_run_merge_xy,
 )

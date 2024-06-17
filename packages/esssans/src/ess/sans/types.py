@@ -96,7 +96,7 @@ ReturnEvents = NewType('ReturnEvents', bool)
 WavelengthBins = NewType('WavelengthBins', sc.Variable)
 """Wavelength binning"""
 
-WavelengthBands = NewType('WavelengthBands', sc.Variable)
+WavelengthBands = NewType('WavelengthBands', sc.Variable | None)
 """Wavelength bands. Typically a single band, set to first and last value of
 WavelengthBins.
 
@@ -128,7 +128,9 @@ QxBins = NewType('QxBins', sc.Variable)
 QyBins = NewType('QyBins', sc.Variable)
 """Qy binning used when computing IofQxy"""
 
-NonBackgroundWavelengthRange = NewType('NonBackgroundWavelengthRange', sc.Variable)
+NonBackgroundWavelengthRange = NewType(
+    'NonBackgroundWavelengthRange', sc.Variable | None
+)
 """Range of wavelengths that are not considered background in the monitor"""
 
 DirectBeamFilename = NewType('DirectBeamFilename', str)
@@ -137,7 +139,7 @@ DirectBeamFilename = NewType('DirectBeamFilename', str)
 BeamCenter = NewType('BeamCenter', sc.Variable)
 """Beam center, may be set directly or computed using beam-center finder"""
 
-WavelengthMask = NewType('WavelengthMask', sc.DataArray)
+WavelengthMask = NewType('WavelengthMask', sc.DataArray | None)
 """Optional wavelength mask"""
 
 CorrectForGravity = NewType('CorrectForGravity', bool)
@@ -164,8 +166,15 @@ class Filename(sciline.Scope[RunType, str], str):
     """Filename of a run"""
 
 
+DetectorIDs = NewType('DetectorIDs', sc.Variable)
+"""1-D variable listing all detector IDs."""
+
 MaskedDetectorIDs = NewType('MaskedDetectorIDs', sc.Variable)
 """1-D variable listing all masked detector IDs."""
+
+
+DetectorMasks = NewType('DetectorMasks', dict[str, sc.Variable])
+"""Masks for detector pixels"""
 
 
 # 3  Workflow (intermediate) results
@@ -187,7 +196,7 @@ class SourcePosition(sciline.Scope[RunType, sc.Variable], sc.Variable):
     """Source position"""
 
 
-DirectBeam = NewType('DirectBeam', sc.DataArray)
+DirectBeam = NewType('DirectBeam', sc.DataArray | None)
 """Direct beam"""
 
 
@@ -197,7 +206,7 @@ class TransmissionFraction(
     """Transmission fraction"""
 
 
-CleanDirectBeam = NewType('CleanDirectBeam', sc.DataArray)
+CleanDirectBeam = NewType('CleanDirectBeam', sc.DataArray | None)
 """Direct beam after resampling to required wavelength bins"""
 
 
@@ -306,30 +315,6 @@ class CleanSummedQxy(
 ):
     """Result of histogramming/binning :py:class:`CleanQxy` over all pixels into Qx and
     Qy bins"""
-
-
-class CleanSummedQMergedBanks(
-    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
-):
-    """CleanSummedQ with merged banks"""
-
-
-class CleanSummedQxyMergedBanks(
-    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
-):
-    """CleanSummedQxy with merged banks"""
-
-
-class FinalSummedQ(
-    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
-):
-    """Final data into Q bins, in a state that is ready to be normalized."""
-
-
-class FinalSummedQxy(
-    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
-):
-    """Final data into Qx and Qy bins, in a state that is ready to be normalized."""
 
 
 class IofQ(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):

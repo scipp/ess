@@ -4,6 +4,8 @@
 dask
 graphviz
 essreduce
+numpy<2.0.0
+pandas
 pythreejs
 plopp @ git+https://github.com/scipp/plopp@main
 sciline @ git+https://github.com/scipp/sciline@main
