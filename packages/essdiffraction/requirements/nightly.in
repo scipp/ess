@@ -4,6 +4,7 @@
 dask
 essreduce
 graphviz
+numpy<2.0.0
 pythreejs
 https://github.com/scipp/scipp/releases/download/nightly/scipp-nightly-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
 scippnexus @ git+https://github.com/scipp/scippnexus@main
