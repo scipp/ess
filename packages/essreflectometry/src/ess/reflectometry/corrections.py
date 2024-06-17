@@ -9,20 +9,20 @@ from .types import (
     BeamSize,
     FootprintCorrectedData,
     IdealReferenceIntensity,
-    MaskedEventData,
-    Reference,
+    MaskedData,
     ReferenceIntensity,
-    Run,
+    ReferenceRun,
+    RunType,
     SampleSize,
     WavelengthBins,
 )
 
 
 def footprint_correction(
-    data_array: MaskedEventData[Run],
-    beam_size: BeamSize[Run],
-    sample_size: SampleSize[Run],
-) -> FootprintCorrectedData[Run]:
+    data_array: MaskedData[RunType],
+    beam_size: BeamSize[RunType],
+    sample_size: SampleSize[RunType],
+) -> FootprintCorrectedData[RunType]:
     """
     Corrects the event weights by the fraction of the beam hitting the sample.
     Depends on :math:`\\theta`.
@@ -45,11 +45,11 @@ def footprint_correction(
     size_of_beam_on_sample = beam_size / sc.sin(data_array.bins.coords["theta"])
     footprint_scale = sc.erf(fwhm_to_std(sample_size / size_of_beam_on_sample))
     data_array_fp_correction = data_array / footprint_scale
-    return FootprintCorrectedData[Run](data_array_fp_correction)
+    return FootprintCorrectedData[RunType](data_array_fp_correction)
 
 
 def compute_reference_intensity(
-    da: FootprintCorrectedData[Reference], wb: WavelengthBins
+    da: FootprintCorrectedData[ReferenceRun], wb: WavelengthBins
 ) -> ReferenceIntensity:
     """Creates a reference intensity map over (z_index, wavelength).
     Rationale:

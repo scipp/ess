@@ -19,11 +19,11 @@ from orsopy.fileio import data_source, orso, reduction
 from .load import load_nx
 from .supermirror import SupermirrorReflectivityCorrection
 from .types import (
-    ChopperCorrectedTofEvents,
-    FilePath,
+    Filename,
     FootprintCorrectedData,
-    Reference,
-    Sample,
+    ReducibleDetectorData,
+    ReferenceRun,
+    SampleRun,
 )
 
 try:
@@ -32,42 +32,42 @@ except ModuleNotFoundError:
     TaskGraph = Any
 
 
-OrsoCreator = NewType('OrsoCreator', orso_base.Person)
+OrsoCreator = NewType("OrsoCreator", orso_base.Person)
 """ORSO creator, that is, the person who processed the data."""
 
-OrsoDataSource = NewType('OrsoDataSource', data_source.DataSource)
+OrsoDataSource = NewType("OrsoDataSource", data_source.DataSource)
 """ORSO data source."""
 
-OrsoExperiment = NewType('OrsoExperiment', data_source.Experiment)
+OrsoExperiment = NewType("OrsoExperiment", data_source.Experiment)
 """ORSO experiment for the sample run."""
 
-OrsoInstrument = NewType('OrsoInstrument', data_source.InstrumentSettings)
+OrsoInstrument = NewType("OrsoInstrument", data_source.InstrumentSettings)
 """ORSO instrument settings for the sample run."""
 
-OrsoIofQDataset = NewType('OrsoIofQDataset', orso.OrsoDataset)
+OrsoIofQDataset = NewType("OrsoIofQDataset", orso.OrsoDataset)
 """ORSO dataset for reduced I-of-Q data."""
 
-OrsoMeasurement = NewType('OrsoMeasurement', data_source.Measurement)
+OrsoMeasurement = NewType("OrsoMeasurement", data_source.Measurement)
 """ORSO measurement."""
 
-OrsoOwner = NewType('OrsoOwner', orso_base.Person)
+OrsoOwner = NewType("OrsoOwner", orso_base.Person)
 """ORSO owner of a measurement."""
 
-OrsoReduction = NewType('OrsoReduction', reduction.Reduction)
+OrsoReduction = NewType("OrsoReduction", reduction.Reduction)
 """ORSO data reduction metadata."""
 
-OrsoSample = NewType('OrsoSample', data_source.Sample)
+OrsoSample = NewType("OrsoSample", data_source.Sample)
 """ORSO sample."""
 
 
-def parse_orso_experiment(filepath: FilePath[Sample]) -> OrsoExperiment:
+def parse_orso_experiment(filename: Filename[SampleRun]) -> OrsoExperiment:
     """Parse ORSO experiment metadata from raw NeXus data."""
     title, instrument_name, facility, start_time = load_nx(
-        filepath,
-        'NXentry/title',
-        'NXentry/NXinstrument/name',
-        'NXentry/facility',
-        'NXentry/start_time',
+        filename,
+        "NXentry/title",
+        "NXentry/NXinstrument/name",
+        "NXentry/facility",
+        "NXentry/start_time",
     )
     return OrsoExperiment(
         data_source.Experiment(
@@ -75,51 +75,51 @@ def parse_orso_experiment(filepath: FilePath[Sample]) -> OrsoExperiment:
             instrument=instrument_name,
             facility=facility,
             start_date=parse_datetime(start_time),
-            probe='neutron',
+            probe="neutron",
         )
     )
 
 
-def parse_orso_owner(filepath: FilePath[Sample]) -> OrsoOwner:
+def parse_orso_owner(filename: Filename[SampleRun]) -> OrsoOwner:
     """Parse ORSO owner metadata from raw NeXus data."""
-    (user,) = load_nx(filepath, 'NXentry/NXuser')
+    (user,) = load_nx(filename, "NXentry/NXuser")
     return OrsoOwner(
         orso_base.Person(
-            name=user['name'],
-            contact=user['email'],
-            affiliation=user.get('affiliation'),
+            name=user["name"],
+            contact=user["email"],
+            affiliation=user.get("affiliation"),
         )
     )
 
 
-def parse_orso_sample(filepath: FilePath[Sample]) -> OrsoSample:
+def parse_orso_sample(filename: Filename[SampleRun]) -> OrsoSample:
     """Parse ORSO sample metadata from raw NeXus data."""
-    (sample,) = load_nx(filepath, 'NXentry/NXsample')
+    (sample,) = load_nx(filename, "NXentry/NXsample")
     if not sample:
         return OrsoSample(data_source.Sample.empty())
     return OrsoSample(
         data_source.Sample(
-            name=sample['name'],
+            name=sample["name"],
             model=data_source.SampleModel(
-                stack=sample['model'],
+                stack=sample["model"],
             ),
         )
     )
 
 
 def build_orso_measurement(
-    sample_filepath: FilePath[Sample],
-    reference_filepath: Optional[FilePath[Reference]],
+    sample_filename: Filename[SampleRun],
+    reference_filename: Optional[Filename[ReferenceRun]],
     instrument: Optional[OrsoInstrument],
 ) -> OrsoMeasurement:
     """Assemble ORSO measurement metadata."""
     # TODO populate timestamp
     #      doesn't work with a local file because we need the timestamp of the original,
     #      SciCat can provide that
-    if reference_filepath:
+    if reference_filename:
         additional_files = [
             orso_base.File(
-                file=os.path.basename(reference_filepath), comment='supermirror'
+                file=os.path.basename(reference_filename), comment="supermirror"
             )
         ]
     else:
@@ -127,7 +127,7 @@ def build_orso_measurement(
     return OrsoMeasurement(
         data_source.Measurement(
             instrument_settings=instrument,
-            data_files=[orso_base.File(file=os.path.basename(sample_filepath))],
+            data_files=[orso_base.File(file=os.path.basename(sample_filename))],
             additional_files=additional_files,
         )
     )
@@ -145,7 +145,7 @@ def build_orso_reduction(creator: Optional[OrsoCreator]) -> OrsoReduction:
     return OrsoReduction(
         reduction.Reduction(
             software=reduction.Software(
-                name='ess.reflectometry',
+                name="ess.reflectometry",
                 version=str(__version__),
                 platform=platform.system(),
             ),
@@ -174,9 +174,9 @@ def build_orso_data_source(
 
 
 _CORRECTIONS_BY_GRAPH_KEY = {
-    ChopperCorrectedTofEvents[Sample]: 'chopper ToF correction',
-    FootprintCorrectedData[Sample]: 'footprint correction',
-    SupermirrorReflectivityCorrection: 'supermirror calibration',
+    ReducibleDetectorData[SampleRun]: "chopper ToF correction",
+    FootprintCorrectedData[SampleRun]: "footprint correction",
+    SupermirrorReflectivityCorrection: "supermirror calibration",
 }
 
 

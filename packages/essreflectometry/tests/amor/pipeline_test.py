@@ -10,25 +10,33 @@ from orsopy import fileio
 
 from ess import amor
 from ess.reflectometry import orso
-from ess.reflectometry.types import *
+from ess.reflectometry.types import (
+    Filename,
+    NormalizedIofQ,
+    QBins,
+    ReferenceRun,
+    SampleRotation,
+    SampleRun,
+    SampleSize,
+    WavelengthBins,
+    YIndexLimits,
+    ZIndexLimits,
+)
 
 
 @pytest.fixture()
 def amor_pipeline() -> sciline.Pipeline:
-    pl = sciline.Pipeline(
-        (*amor.providers, *amor.data.providers),
-        params=amor.default_parameters,
-    )
-    pl[SampleSize[Sample]] = sc.scalar(10.0, unit="mm")
-    pl[SampleSize[Reference]] = sc.scalar(10.0, unit="mm")
+    pl = sciline.Pipeline(providers=amor.providers, params=amor.default_parameters())
+    pl[SampleSize[SampleRun]] = sc.scalar(10.0, unit="mm")
+    pl[SampleSize[ReferenceRun]] = sc.scalar(10.0, unit="mm")
 
     pl[WavelengthBins] = sc.geomspace("wavelength", 2.8, 12, 300, unit="angstrom")
     pl[YIndexLimits] = sc.scalar(11, unit=None), sc.scalar(41, unit=None)
     pl[ZIndexLimits] = sc.scalar(80, unit=None), sc.scalar(370, unit=None)
 
     # The sample rotation value in the file is slightly off, so we set it manually
-    pl[SampleRotation[Reference]] = sc.scalar(0.65, unit="deg")
-    pl[TutorialFilename[Reference]] = "amor2023n000614.hdf"
+    pl[SampleRotation[ReferenceRun]] = sc.scalar(0.65, unit="deg")
+    pl[Filename[ReferenceRun]] = amor.data.amor_reference_run()
 
     pl[orso.OrsoCreator] = orso.OrsoCreator(
         fileio.base.Person(
@@ -39,8 +47,8 @@ def amor_pipeline() -> sciline.Pipeline:
     )
 
     # The sample rotation value in the file is slightly off, so we set it manually
-    pl[SampleRotation[Sample]] = sc.scalar(0.85, unit="deg")
-    pl[TutorialFilename[Sample]] = "amor2023n000608.hdf"
+    pl[SampleRotation[SampleRun]] = sc.scalar(0.85, unit="deg")
+    pl[Filename[SampleRun]] = amor.data.amor_sample_run(608)
     pl[QBins] = sc.geomspace(
         dim="Q", start=0.005, stop=0.115, num=391, unit="1/angstrom"
     )

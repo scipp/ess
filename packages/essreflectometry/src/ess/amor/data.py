@@ -1,11 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
-from ..reflectometry.types import FilePath, Run, TutorialFilename
+from ..reflectometry.types import Filename, ReferenceRun, SampleRun
 
 _version = "1"
-
-__all__ = ["get_path"]
 
 
 def _make_pooch():
@@ -59,14 +57,28 @@ def _make_pooch():
 _pooch = _make_pooch()
 
 
-def get_path(filename: TutorialFilename[Run]) -> FilePath[Run]:
-    """
-    Return the path to a data file bundled with scippneutron.
-
-    This function only works with example data and cannot handle
-    paths to custom files.
-    """
-    return FilePath[Run](_pooch.fetch(filename))
+def amor_old_sample_run() -> Filename[SampleRun]:
+    return Filename[SampleRun](_pooch.fetch("sample.nxs"))
 
 
-providers = (get_path,)
+def amor_old_reference_run() -> Filename[ReferenceRun]:
+    return Filename[ReferenceRun](_pooch.fetch("reference.nxs"))
+
+
+def amor_reference_run() -> Filename[ReferenceRun]:
+    return Filename[ReferenceRun](_pooch.fetch("amor2023n000614.hdf"))
+
+
+def amor_sample_run(number: int | str) -> Filename[SampleRun]:
+    return Filename[SampleRun](_pooch.fetch(f"amor2023n{int(number):06d}.hdf"))
+
+
+def amor_psi_software_result(number: int | str) -> Filename[SampleRun]:
+    return Filename[SampleRun](_pooch.fetch(f"{int(number):03d}.Rqz.ort"))
+
+
+__all__ = [
+    "amor_reference_run",
+    "amor_sample_run",
+    "amor_psi_software_result",
+]

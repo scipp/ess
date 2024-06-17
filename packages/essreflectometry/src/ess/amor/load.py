@@ -5,13 +5,13 @@ from ess.reduce import nexus
 
 from ..reflectometry.load import load_nx
 from ..reflectometry.types import (
-    ChopperCorrectedTofEvents,
     DetectorRotation,
-    FilePath,
+    Filename,
+    LoadedNeXusDetector,
     NeXusDetectorName,
-    RawDetector,
-    RawEvents,
-    Run,
+    RawDetectorData,
+    ReducibleDetectorData,
+    RunType,
     SampleRotation,
 )
 from .geometry import Detector, pixel_coordinate_in_lab_frame
@@ -25,14 +25,14 @@ from .types import (
 
 
 def load_detector(
-    file_path: FilePath[Run], detector_name: NeXusDetectorName[Run]
-) -> RawDetector[Run]:
+    file_path: Filename[RunType], detector_name: NeXusDetectorName[RunType]
+) -> LoadedNeXusDetector[RunType]:
     return nexus.load_detector(file_path=file_path, detector_name=detector_name)
 
 
 def load_events(
-    detector: RawDetector[Run], detector_rotation: DetectorRotation[Run]
-) -> RawEvents[Run]:
+    detector: LoadedNeXusDetector[RunType], detector_rotation: DetectorRotation[RunType]
+) -> RawDetectorData[RunType]:
     detector_numbers = sc.arange(
         "event_id",
         start=1,
@@ -66,12 +66,14 @@ def load_events(
     )
     data.coords["position"] = position.to(unit="m", copy=False)
     data.coords["angle_from_center_of_beam"] = angle_from_center_of_beam
-    return RawEvents[Run](data)
+    return RawDetectorData[RunType](data)
 
 
 def compute_tof(
-    data: RawEvents[Run], phase: ChopperPhase[Run], frequency: ChopperFrequency[Run]
-) -> ChopperCorrectedTofEvents[Run]:
+    data: RawDetectorData[RunType],
+    phase: ChopperPhase[RunType],
+    frequency: ChopperFrequency[RunType],
+) -> ReducibleDetectorData[RunType]:
     data.bins.coords["tof"] = data.bins.coords.pop("event_time_offset").to(
         unit="ns", dtype="float64", copy=False
     )
@@ -102,42 +104,42 @@ def compute_tof(
     data.bins.coords["tof"] -= (
         data.coords["angle_from_center_of_beam"].to(unit="deg") / (180.0 * sc.units.deg)
     ) * tau
-    return ChopperCorrectedTofEvents[Run](data)
+    return ReducibleDetectorData[RunType](data)
 
 
-def amor_chopper(f: FilePath[Run]) -> RawChopper[Run]:
+def amor_chopper(f: Filename[RunType]) -> RawChopper[RunType]:
     return next(load_nx(f, "NXentry/NXinstrument/NXdisk_chopper"))
 
 
-def load_amor_chopper_1_position(ch: RawChopper[Run]) -> Chopper1Position[Run]:
+def load_amor_chopper_1_position(ch: RawChopper[RunType]) -> Chopper1Position[RunType]:
     # We know the value has unit 'mm'
     return sc.vector([0, 0, ch["distance"] - ch["pair_separation"] / 2], unit="mm").to(
         unit="m"
     )
 
 
-def load_amor_chopper_2_position(ch: RawChopper[Run]) -> Chopper2Position[Run]:
+def load_amor_chopper_2_position(ch: RawChopper[RunType]) -> Chopper2Position[RunType]:
     # We know the value has unit 'mm'
     return sc.vector([0, 0, ch["distance"] + ch["pair_separation"] / 2], unit="mm").to(
         unit="m"
     )
 
 
-def load_amor_ch_phase(ch: RawChopper[Run]) -> ChopperPhase[Run]:
+def load_amor_ch_phase(ch: RawChopper[RunType]) -> ChopperPhase[RunType]:
     p = ch["phase"]["value"].coords["average_value"].value
     if getattr(p, "unit", None):
         return p
     raise ValueError("No unit was found for the chopper phase")
 
 
-def load_amor_ch_frequency(ch: RawChopper[Run]) -> ChopperFrequency[Run]:
+def load_amor_ch_frequency(ch: RawChopper[RunType]) -> ChopperFrequency[RunType]:
     f = ch["rotation_speed"]["value"].coords["average_value"]
     if getattr(f, "unit", None):
         return f
     raise ValueError("No unit was found for the chopper frequency")
 
 
-def load_amor_sample_rotation(fp: FilePath[Run]) -> SampleRotation[Run]:
+def load_amor_sample_rotation(fp: Filename[RunType]) -> SampleRotation[RunType]:
     (mu,) = load_nx(fp, "NXentry/NXinstrument/master_parameters/mu")
     # For some reason this is length 1 and not scalar sometimes
     if mu["value"].coords["average_value"].dims != ():
@@ -147,7 +149,7 @@ def load_amor_sample_rotation(fp: FilePath[Run]) -> SampleRotation[Run]:
     return sc.scalar(mu, unit="deg")
 
 
-def load_amor_detector_rotation(fp: FilePath[Run]) -> DetectorRotation[Run]:
+def load_amor_detector_rotation(fp: Filename[RunType]) -> DetectorRotation[RunType]:
     (nu,) = load_nx(fp, "NXentry/NXinstrument/master_parameters/nu")
     # For some reason this is length 1 and not scalar sometimes
     if nu["value"].coords["average_value"].dims != ():

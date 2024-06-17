@@ -1,11 +1,9 @@
-# Examples
+# Amor
 
 ```{toctree}
 ---
-maxdepth: 2
+maxdepth: 1
 ---
-
-amor
+amor-reduction
 compare-to-eos
 ```
-

@@ -17,7 +17,7 @@ See the [Amor data reduction](examples/amor) example for a quick start.
 maxdepth: 2
 ---
 
-examples/index
+user-guide/index
 api-reference/index
 developer/index
 about/index
