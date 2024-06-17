@@ -71,7 +71,7 @@ def zoom_providers():
 
 def test_can_create_pipeline():
     pipeline = sciline.Pipeline(zoom_providers(), params=make_params())
-    pipeline = sans.set_pixel_mask_filenames(
+    pipeline = sans.with_pixel_mask_filenames(
         pipeline, isis.data.zoom_tutorial_mask_filenames()
     )
     pipeline.get(IofQ[SampleRun])
@@ -79,7 +79,7 @@ def test_can_create_pipeline():
 
 def test_pipeline_can_compute_IofQ():
     pipeline = sciline.Pipeline(zoom_providers(), params=make_params())
-    pipeline = sans.set_pixel_mask_filenames(
+    pipeline = sans.with_pixel_mask_filenames(
         pipeline, isis.data.zoom_tutorial_mask_filenames()
     )
     result = pipeline.compute(IofQ[SampleRun])
@@ -88,7 +88,7 @@ def test_pipeline_can_compute_IofQ():
 
 def test_pipeline_can_compute_IofQxQy():
     pipeline = sciline.Pipeline(zoom_providers(), params=make_params())
-    pipeline = sans.set_pixel_mask_filenames(
+    pipeline = sans.with_pixel_mask_filenames(
         pipeline, isis.data.zoom_tutorial_mask_filenames()
     )
     pipeline[QxBins] = sc.linspace(

@@ -30,7 +30,7 @@ def merge_contributions(*data: sc.DataArray) -> sc.DataArray:
     return reducer.bins.concat() if data[0].bins is not None else reducer.sum()
 
 
-def set_pixel_mask_filenames(
+def with_pixel_mask_filenames(
     workflow: sciline.Pipeline, masks: Iterable[str]
 ) -> sciline.Pipeline:
     """
@@ -52,7 +52,7 @@ def set_pixel_mask_filenames(
     return workflow
 
 
-def set_banks(workflow: sciline.Pipeline, banks: Iterable[str]) -> sciline.Pipeline:
+def with_banks(workflow: sciline.Pipeline, banks: Iterable[str]) -> sciline.Pipeline:
     """
     Return modified workflow with bank names set.
 
@@ -89,7 +89,7 @@ def _set_runs(
     return pipeline
 
 
-def set_sample_runs(
+def with_sample_runs(
     workflow: sciline.Pipeline, runs: Iterable[str]
 ) -> sciline.Pipeline:
     """
@@ -105,7 +105,7 @@ def set_sample_runs(
     return _set_runs(workflow, runs, SampleRun, 'sample_run')
 
 
-def set_background_runs(
+def with_background_runs(
     workflow: sciline.Pipeline, runs: Iterable[str]
 ) -> sciline.Pipeline:
     """

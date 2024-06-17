@@ -50,7 +50,7 @@ def test_can_create_pipeline():
 
 def test_can_create_pipeline_with_pixel_masks():
     pipeline = sciline.Pipeline(loki_providers(), params=make_params(no_masks=False))
-    pipeline = sans.set_pixel_mask_filenames(
+    pipeline = sans.with_pixel_mask_filenames(
         pipeline, loki.data.loki_tutorial_mask_filenames()
     )
     pipeline.get(BackgroundSubtractedIofQ)
@@ -65,7 +65,7 @@ def test_pipeline_can_compute_IofQ(uncertainties, qxy: bool):
     params = make_params(no_masks=False)
     params[UncertaintyBroadcastMode] = uncertainties
     pipeline = sciline.Pipeline(loki_providers(), params=params)
-    pipeline = sans.set_pixel_mask_filenames(
+    pipeline = sans.with_pixel_mask_filenames(
         pipeline, loki.data.loki_tutorial_mask_filenames()
     )
     if qxy:
@@ -199,8 +199,8 @@ def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs():
     pipeline = sciline.Pipeline(loki_providers_no_beam_center_finder(), params=params)
     pipeline[BeamCenter] = _compute_beam_center()
 
-    pipeline = sans.set_sample_runs(pipeline, runs=sample_runs)
-    pipeline = sans.set_background_runs(pipeline, runs=background_runs)
+    pipeline = sans.with_sample_runs(pipeline, runs=sample_runs)
+    pipeline = sans.with_background_runs(pipeline, runs=background_runs)
 
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('Q',)
@@ -212,7 +212,7 @@ def test_pipeline_can_compute_IofQ_merging_events_from_banks():
 
     pipeline = sciline.Pipeline(loki_providers_no_beam_center_finder(), params=params)
     pipeline[BeamCenter] = _compute_beam_center()
-    pipeline = sans.set_banks(pipeline, banks=['larmor_detector'])
+    pipeline = sans.with_banks(pipeline, banks=['larmor_detector'])
 
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('Q',)
@@ -231,12 +231,12 @@ def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs_and_banks()
     pipeline = sciline.Pipeline(loki_providers_no_beam_center_finder(), params=params)
     pipeline[BeamCenter] = _compute_beam_center()
 
-    pipeline = sans.set_sample_runs(pipeline, runs=sample_runs)
-    pipeline = sans.set_background_runs(pipeline, runs=background_runs)
+    pipeline = sans.with_sample_runs(pipeline, runs=sample_runs)
+    pipeline = sans.with_background_runs(pipeline, runs=background_runs)
     key = BackgroundSubtractedIofQ
     reference = pipeline.compute(key)
 
-    pipeline = sans.set_banks(pipeline, banks=['larmor_detector', 'larmor_detector'])
+    pipeline = sans.with_banks(pipeline, banks=['larmor_detector', 'larmor_detector'])
     result = pipeline.compute(key)
 
     # Note that the variances are not the same for the bank-merged data since we use
@@ -255,8 +255,8 @@ def test_pipeline_IofQ_merging_events_yields_consistent_results():
 
     sample_runs = [loki.data.loki_tutorial_sample_run_60339()] * N
     background_runs = [loki.data.loki_tutorial_background_run_60393()] * N
-    pipeline_triple = sans.set_sample_runs(pipeline_single, runs=sample_runs)
-    pipeline_triple = sans.set_background_runs(pipeline_triple, runs=background_runs)
+    pipeline_triple = sans.with_sample_runs(pipeline_single, runs=sample_runs)
+    pipeline_triple = sans.with_background_runs(pipeline_triple, runs=background_runs)
 
     iofq1 = pipeline_single.compute(BackgroundSubtractedIofQ)
     iofq3 = pipeline_triple.compute(BackgroundSubtractedIofQ)
@@ -282,7 +282,7 @@ def test_pipeline_IofQ_merging_events_yields_consistent_results():
 def test_beam_center_from_center_of_mass_is_close_to_verified_result():
     params = make_params(no_masks=False)
     pipeline = sciline.Pipeline(loki_providers(), params=params)
-    pipeline = sans.set_pixel_mask_filenames(
+    pipeline = sans.with_pixel_mask_filenames(
         pipeline, loki.data.loki_tutorial_mask_filenames()
     )
     center = pipeline.compute(BeamCenter)
