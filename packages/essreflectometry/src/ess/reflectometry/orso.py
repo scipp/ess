@@ -60,10 +60,10 @@ OrsoSample = NewType("OrsoSample", data_source.Sample)
 """ORSO sample."""
 
 
-def parse_orso_experiment(Filename: Filename[SampleRun]) -> OrsoExperiment:
+def parse_orso_experiment(filename: Filename[SampleRun]) -> OrsoExperiment:
     """Parse ORSO experiment metadata from raw NeXus data."""
     title, instrument_name, facility, start_time = load_nx(
-        Filename,
+        filename,
         "NXentry/title",
         "NXentry/NXinstrument/name",
         "NXentry/facility",
@@ -80,9 +80,9 @@ def parse_orso_experiment(Filename: Filename[SampleRun]) -> OrsoExperiment:
     )
 
 
-def parse_orso_owner(Filename: Filename[SampleRun]) -> OrsoOwner:
+def parse_orso_owner(filename: Filename[SampleRun]) -> OrsoOwner:
     """Parse ORSO owner metadata from raw NeXus data."""
-    (user,) = load_nx(Filename, "NXentry/NXuser")
+    (user,) = load_nx(filename, "NXentry/NXuser")
     return OrsoOwner(
         orso_base.Person(
             name=user["name"],
@@ -92,9 +92,9 @@ def parse_orso_owner(Filename: Filename[SampleRun]) -> OrsoOwner:
     )
 
 
-def parse_orso_sample(Filename: Filename[SampleRun]) -> OrsoSample:
+def parse_orso_sample(filename: Filename[SampleRun]) -> OrsoSample:
     """Parse ORSO sample metadata from raw NeXus data."""
-    (sample,) = load_nx(Filename, "NXentry/NXsample")
+    (sample,) = load_nx(filename, "NXentry/NXsample")
     if not sample:
         return OrsoSample(data_source.Sample.empty())
     return OrsoSample(
@@ -108,18 +108,18 @@ def parse_orso_sample(Filename: Filename[SampleRun]) -> OrsoSample:
 
 
 def build_orso_measurement(
-    sample_Filename: Filename[SampleRun],
-    reference_Filename: Optional[Filename[ReferenceRun]],
+    sample_filename: Filename[SampleRun],
+    reference_filename: Optional[Filename[ReferenceRun]],
     instrument: Optional[OrsoInstrument],
 ) -> OrsoMeasurement:
     """Assemble ORSO measurement metadata."""
     # TODO populate timestamp
     #      doesn't work with a local file because we need the timestamp of the original,
     #      SciCat can provide that
-    if reference_Filename:
+    if reference_filename:
         additional_files = [
             orso_base.File(
-                file=os.path.basename(reference_Filename), comment="supermirror"
+                file=os.path.basename(reference_filename), comment="supermirror"
             )
         ]
     else:
@@ -127,7 +127,7 @@ def build_orso_measurement(
     return OrsoMeasurement(
         data_source.Measurement(
             instrument_settings=instrument,
-            data_files=[orso_base.File(file=os.path.basename(sample_Filename))],
+            data_files=[orso_base.File(file=os.path.basename(sample_filename))],
             additional_files=additional_files,
         )
     )
