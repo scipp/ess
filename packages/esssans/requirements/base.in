@@ -5,6 +5,7 @@
 dask
 graphviz
 essreduce
+numpy<2.0.0
 pandas
 plopp
 pythreejs
