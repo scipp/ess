@@ -7,7 +7,7 @@ from orsopy import fileio
 
 from ess import amor, reflectometry
 from ess.reflectometry import orso
-from ess.reflectometry.types import Filename, SampleRun, ReferenceRun
+from ess.reflectometry.types import Filename, ReferenceRun, SampleRun
 
 
 def test_build_orso_data_source():
@@ -15,7 +15,7 @@ def test_build_orso_data_source():
         (*amor.load.providers, *orso.providers),
         params={
             Filename[SampleRun]: amor.data.amor_old_sample_run(),
-            Filename[ReferenceRun]: amor.data.amor_old_reference_run()
+            Filename[ReferenceRun]: amor.data.amor_old_reference_run(),
         },
     )
     pipeline[orso.OrsoInstrument] = None
