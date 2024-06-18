@@ -11,6 +11,8 @@ Up = NewType('Up', int)
 Down = NewType('Down', int)
 PolarizerSpin = TypeVar('PolarizerSpin', Up, Down)
 AnalyzerSpin = TypeVar('AnalyzerSpin', Up, Down)
+NoAnalyzer = Up
+"""Indicates that element is not in use, e.g., analyzer in half-polarized case."""
 
 
 class ReducedSampleDataBySpinChannel(

@@ -20,6 +20,7 @@ from ess.polarization.correction import (
 from ess.polarization.types import (
     Analyzer,
     Down,
+    HalfPolarizedCorrectedData,
     PolarizationCorrectedData,
     Polarizer,
     ReducedSampleDataBySpinChannel,
@@ -240,3 +241,26 @@ def test_polarization_analysis_workflow_creation(
             pol.supermirror.SupermirrorEfficiencyFunction[elem] in graph.keys()
         ) == (wf is _supermirror_workflow)
         assert (pol.he3.He3CellPressure[elem] in graph.keys()) == (wf is _he3_workflow)
+
+
+@pytest.mark.parametrize('f', [0.1, 0.5, 0.9, 0.99, 1.0])
+def test_half_polarized_with_flipper_computes_and_applies_matrix_inverse(
+    f: float,
+) -> None:
+    ground_truth = np.array([7.0, 11.0])
+    polarizer = np.array([[1.1, 0.7], [0.7, 1.1]])
+    flipper = np.array([[1.0, 0.0], [1 - f, f]])
+    intensity = flipper @ polarizer @ ground_truth
+
+    workflow = CorrectionWorkflow(half_polarized=True)
+    workflow[TransmissionFunction[Polarizer]] = FakeTransmissionFunction(polarizer)
+    workflow[ReducedSampleDataBySpinChannel[Up, pol.NoAnalyzer]] = intensity[0]
+    workflow[ReducedSampleDataBySpinChannel[Down, pol.NoAnalyzer]] = intensity[1]
+    workflow[FlipperEfficiency[Polarizer]] = FlipperEfficiency(f)
+
+    result = np.zeros(2)
+    for pola in [Up, Down]:
+        contrib = workflow.compute(HalfPolarizedCorrectedData[pola])
+        contrib = sc.concat([contrib.up, contrib.down], 'dummy')
+        result += contrib.values
+    np.testing.assert_allclose(result, ground_truth)

@@ -38,6 +38,8 @@ from .supermirror import SupermirrorWorkflow
 from .types import (
     Analyzer,
     Down,
+    HalfPolarizedCorrectedData,
+    NoAnalyzer,
     PolarizationCorrectedData,
     Polarizer,
     PolarizingElement,
@@ -55,6 +57,7 @@ __all__ = [
     "DirectBeamQRange",
     "Down",
     "HalfPolarizedAnalysisWorkflow",
+    "HalfPolarizedCorrectedData",
     "He3CellLength",
     "He3CellPressure",
     "He3CellWorkflow",
@@ -72,5 +75,6 @@ __all__ = [
     "ReducedSampleDataBySpinChannel",
     "SupermirrorWorkflow",
     "TransmissionFunction",
+    "NoAnalyzer",
     "Up",
 ]

@@ -13,6 +13,7 @@ from .types import (
     FlipperEfficiency,
     HalfPolarizedCorrectedData,
     HalfPolarizedCorrection,
+    NoAnalyzer,
     PolarizationCorrectedData,
     PolarizationCorrection,
     Polarizer,
@@ -165,15 +166,15 @@ def compute_polarization_corrected_data(
 
 def compute_half_polarized_correction(
     *,
-    polarizer: PolarizingElementCorrection[PolarizerSpin, None, Polarizer],
+    polarizer: PolarizingElementCorrection[PolarizerSpin, NoAnalyzer, Polarizer],
     polarizer_flipper: InverseFlipperMatrix[PolarizerSpin, Polarizer],
-) -> PolarizationCorrection[PolarizerSpin, None]:
+) -> HalfPolarizedCorrection[PolarizerSpin]:
     p_up, p_down = polarizer_flipper.from_right(polarizer.diag, polarizer.off_diag)
     return HalfPolarizedCorrection[PolarizerSpin](up=p_up, down=p_down)
 
 
 def compute_half_polarized_corrected_data(
-    channel: ReducedSampleDataBySpinChannel[PolarizerSpin, None],
+    channel: ReducedSampleDataBySpinChannel[PolarizerSpin, NoAnalyzer],
     polarization_correction: HalfPolarizedCorrection[PolarizerSpin],
 ) -> HalfPolarizedCorrectedData[PolarizerSpin]:
     return HalfPolarizedCorrectedData(
