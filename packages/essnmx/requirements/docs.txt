@@ -129,7 +129,7 @@ pexpect==4.9.0
     # via ipython
 prompt-toolkit==3.0.47
     # via ipython
-psutil==5.9.8
+psutil==6.0.0
     # via ipykernel
 ptyprocess==0.7.0
     # via pexpect
@@ -173,7 +173,7 @@ sphinx==7.3.7
     #   sphinx-autodoc-typehints
     #   sphinx-copybutton
     #   sphinx-design
-sphinx-autodoc-typehints==2.1.1
+sphinx-autodoc-typehints==2.2.2
     # via -r docs.in
 sphinx-copybutton==0.5.2
     # via -r docs.in
