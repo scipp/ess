@@ -22,7 +22,7 @@ from .xml import McStasInstrument, read_mcstas_geometry_xml
 
 
 def detector_name_from_index(index: DetectorIndex) -> DetectorName:
-    return f'nD_Mantid_{index}'
+    return f'nD_Mantid_{getattr(index, "value", index)}'
 
 
 def load_event_data_bank_name(
