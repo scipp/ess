@@ -108,8 +108,8 @@ def parse_orso_sample(filename: Filename[SampleRun]) -> OrsoSample:
 
 
 def build_orso_measurement(
-    sample_filename: Filename[Sample],
-    reference_filename: Filename[Reference],
+    sample_filename: Filename[SampleRun],
+    reference_filename: Filename[ReferenceRun],
     instrument: OrsoInstrument,
 ) -> OrsoMeasurement:
     """Assemble ORSO measurement metadata."""
