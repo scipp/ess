@@ -34,7 +34,7 @@ docutils==0.21.2
     #   nbsphinx
     #   pydata-sphinx-theme
     #   sphinx
-fastjsonschema==2.19.1
+fastjsonschema==2.20.0
     # via nbformat
 imagesize==1.4.1
     # via sphinx

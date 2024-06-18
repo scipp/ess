@@ -10,7 +10,7 @@ import graphlib
 import os
 import platform
 from datetime import datetime, timezone
-from typing import Any, NewType, Optional
+from typing import Any, NewType
 
 from dateutil.parser import parse as parse_datetime
 from orsopy.fileio import base as orso_base
@@ -109,8 +109,8 @@ def parse_orso_sample(filename: Filename[SampleRun]) -> OrsoSample:
 
 def build_orso_measurement(
     sample_filename: Filename[SampleRun],
-    reference_filename: Optional[Filename[ReferenceRun]],
-    instrument: Optional[OrsoInstrument],
+    reference_filename: Filename[ReferenceRun],
+    instrument: OrsoInstrument,
 ) -> OrsoMeasurement:
     """Assemble ORSO measurement metadata."""
     # TODO populate timestamp
@@ -133,7 +133,7 @@ def build_orso_measurement(
     )
 
 
-def build_orso_reduction(creator: Optional[OrsoCreator]) -> OrsoReduction:
+def build_orso_reduction(creator: OrsoCreator) -> OrsoReduction:
     """Construct ORSO reduction metadata.
 
     This assumes that ess.reflectometry is the primary piece of software
@@ -157,10 +157,10 @@ def build_orso_reduction(creator: Optional[OrsoCreator]) -> OrsoReduction:
 
 
 def build_orso_data_source(
-    owner: Optional[OrsoOwner],
-    sample: Optional[OrsoSample],
-    experiment: Optional[OrsoExperiment],
-    measurement: Optional[OrsoMeasurement],
+    owner: OrsoOwner,
+    sample: OrsoSample,
+    experiment: OrsoExperiment,
+    measurement: OrsoMeasurement,
 ) -> OrsoDataSource:
     """Assemble an ORSO DataSource."""
     return OrsoDataSource(

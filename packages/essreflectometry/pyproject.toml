@@ -36,7 +36,7 @@ dependencies = [
   "plopp",
   "pythreejs",
   "orsopy",
-  "sciline>=23.9.1",
+  "sciline>=24.6.0",
   "scipp>=23.8.0",
   "scippneutron>=23.9.0",
   "essreduce",
