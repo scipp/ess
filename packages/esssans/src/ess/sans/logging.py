@@ -19,16 +19,17 @@ import functools
 import inspect
 import logging
 import logging.config
+from collections.abc import Callable, Sequence
 from copy import copy
 from os import PathLike
-from typing import Any, Callable, List, Optional, Sequence, Union
+from typing import Any
 
 import scipp as sc
 import scippneutron as scn
 from scipp.utils import running_in_jupyter
 
 
-def get_logger(subname: Optional[str] = None) -> logging.Logger:
+def get_logger(subname: str | None = None) -> logging.Logger:
     """Return one of ess's loggers.
 
     Parameters
@@ -49,7 +50,7 @@ def get_logger(subname: Optional[str] = None) -> logging.Logger:
 
 
 def log_call(
-    *, instrument: str, message: str = None, level: Union[int, str] = logging.INFO
+    *, instrument: str, message: str | None = None, level: int | str = logging.INFO
 ):
     """
     Decorator that logs a message every time the function is called.
@@ -109,7 +110,7 @@ class Formatter(logging.Formatter):
         return super().format(record)
 
 
-def default_loggers_to_configure() -> List[logging.Logger]:
+def default_loggers_to_configure() -> list[logging.Logger]:
     """
     Return a list of all loggers that get configured by ess by default.
     """
@@ -124,13 +125,13 @@ def default_loggers_to_configure() -> List[logging.Logger]:
 
 def configure(
     *,
-    filename: Optional[Union[str, PathLike]] = 'scipp.ess.log',
-    file_level: Union[str, int] = logging.INFO,
-    stream_level: Union[str, int] = logging.WARNING,
-    widget_level: Union[str, int] = logging.INFO,
+    filename: str | PathLike | None = 'scipp.ess.log',
+    file_level: str | int = logging.INFO,
+    stream_level: str | int = logging.WARNING,
+    widget_level: str | int = logging.INFO,
     show_thread: bool = False,
     show_process: bool = False,
-    loggers: Optional[Sequence[Union[str, logging.Logger]]] = None,
+    loggers: Sequence[str | logging.Logger] | None = None,
 ):
     """Set up logging for the ess package.
 
@@ -200,7 +201,7 @@ configure.is_configured = False
 
 
 def configure_workflow(
-    workflow_name: Optional[str] = None, *, display: Optional[bool] = None, **kwargs
+    workflow_name: str | None = None, *, display: bool | None = None, **kwargs
 ) -> logging.Logger:
     """Configure logging for a reduction workflow.
 
@@ -272,7 +273,7 @@ _INSTRUMENTS = [
 ]
 
 
-def _deduce_instrument_name(f: Any) -> Optional[str]:
+def _deduce_instrument_name(f: Any) -> str | None:
     # Assumes package name: ess.<instrument>[.subpackage]
     package = inspect.getmodule(f).__package__
     components = package.split('.', 2)
@@ -293,7 +294,7 @@ def _function_name(f: Callable) -> str:
 
 
 def _make_stream_handler(
-    level: Union[str, int], show_thread: bool, show_process: bool
+    level: str | int, show_thread: bool, show_process: bool
 ) -> logging.StreamHandler:
     handler = logging.StreamHandler()
     handler.setLevel(level)
@@ -302,8 +303,8 @@ def _make_stream_handler(
 
 
 def _make_file_handler(
-    filename: Union[str, PathLike],
-    level: Union[str, int],
+    filename: str | PathLike,
+    level: str | int,
     show_thread: bool,
     show_process: bool,
 ) -> logging.FileHandler:
@@ -314,13 +315,13 @@ def _make_file_handler(
 
 
 def _make_handlers(
-    filename: Optional[Union[str, PathLike]],
-    file_level: Union[str, int],
-    stream_level: Union[str, int],
-    widget_level: Union[str, int],
+    filename: str | PathLike | None,
+    file_level: str | int,
+    stream_level: str | int,
+    widget_level: str | int,
     show_thread: bool,
     show_process: bool,
-) -> List[logging.Handler]:
+) -> list[logging.Handler]:
     handlers = [_make_stream_handler(stream_level, show_thread, show_process)]
     if filename is not None:
         handlers.append(
@@ -332,7 +333,7 @@ def _make_handlers(
 
 
 def _configure_logger(
-    logger: logging.Logger, handlers: List[logging.Handler], level: Union[str, int]
+    logger: logging.Logger, handlers: list[logging.Handler], level: str | int
 ):
     for handler in handlers:
         logger.addHandler(handler)
@@ -348,16 +349,14 @@ def _configure_mantid_logging(level: str):
         pass
 
 
-def _base_level(levels: List[Union[str, int]]) -> int:
+def _base_level(levels: list[str | int]) -> int:
     return min(
-        (
-            logging.getLevelName(level) if isinstance(level, str) else level
-            for level in levels
-        )
+        logging.getLevelName(level) if isinstance(level, str) else level
+        for level in levels
     )
 
 
-def _mantid_version() -> Optional[str]:
+def _mantid_version() -> str | None:
     try:
         import mantid
 

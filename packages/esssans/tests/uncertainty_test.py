@@ -2,9 +2,8 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 import scipp as sc
-from scipp.testing import assert_identical
-
 from ess.sans.uncertainty import broadcast_with_upper_bound_variances
+from scipp.testing import assert_identical
 
 
 def test_broadcast_returns_original_if_no_new_dims():

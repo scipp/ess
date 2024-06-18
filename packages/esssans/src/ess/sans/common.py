@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-
 import uuid
-from typing import Optional
 
 import numpy as np
 import scipp as sc
@@ -18,7 +16,7 @@ def gravity_vector() -> sc.Variable:
 
 
 def mask_range(
-    da: sc.DataArray, mask: sc.DataArray, name: Optional[str] = None
+    da: sc.DataArray, mask: sc.DataArray, name: str | None = None
 ) -> sc.DataArray:
     """
     Mask a range on a data array.

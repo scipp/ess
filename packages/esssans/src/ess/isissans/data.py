@@ -2,7 +2,6 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 import sciline
 import scipp as sc
-
 from ess.sans.data import Registry
 from ess.sans.types import (
     BackgroundRun,

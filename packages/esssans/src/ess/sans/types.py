@@ -5,6 +5,7 @@ This modules defines the domain types uses in esssans.
 
 The domain types are used to define parameters and to request results from a Sciline
 pipeline."""
+
 from collections.abc import Sequence
 from enum import Enum
 from typing import NewType, TypeVar

@@ -1,11 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-from typing import Callable, List
+from collections.abc import Callable
 
 import pytest
 import sciline
 import scipp as sc
-
 from ess import isissans as isis
 from ess import sans
 from ess.isissans import MonitorOffset, SampleOffset, sans2d
@@ -71,7 +70,7 @@ def make_params() -> dict:
     params[CorrectForGravity] = True
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
     params[ReturnEvents] = False
-    params[DimsToKeep] = tuple()
+    params[DimsToKeep] = ()
 
     return params
 
@@ -145,9 +144,9 @@ def test_workflow_is_deterministic():
 
 def test_pipeline_raises_VariancesError_if_normalization_errors_not_dropped():
     params = make_params()
-    params[
-        NonBackgroundWavelengthRange
-    ] = None  # Make sure we raise in iofq_denominator
+    params[NonBackgroundWavelengthRange] = (
+        None  # Make sure we raise in iofq_denominator
+    )
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.fail
     pipeline = sciline.Pipeline(sans2d_providers(), params=params)
     with pytest.raises(sc.VariancesError):
@@ -181,10 +180,12 @@ def test_pipeline_can_compute_intermediate_results():
 
 
 # TODO See scipp/sciline#57 for plans on a builtin way to do this
-def as_dict(funcs: List[Callable[..., type]]) -> dict:
+def as_dict(funcs: list[Callable[..., type]]) -> dict:
     from typing import get_type_hints
 
-    return dict(zip([get_type_hints(func)['return'] for func in funcs], funcs))
+    return dict(
+        zip([get_type_hints(func)['return'] for func in funcs], funcs, strict=True)
+    )
 
 
 def pixel_dependent_direct_beam(

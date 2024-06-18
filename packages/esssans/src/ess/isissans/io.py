@@ -3,10 +3,10 @@
 """
 File loading functions for ISIS data, NOT using Mantid.
 """
+
 from typing import NewType
 
 import scipp as sc
-
 from ess.sans.types import MaskedDetectorIDs, PixelMaskFilename
 
 CalibrationFilename = NewType('CalibrationFilename', str)
@@ -33,7 +33,7 @@ def read_xml_detector_masking(filename: PixelMaskFilename) -> MaskedDetectorIDs:
     """
     import xml.etree.ElementTree as ET  # nosec
 
-    tree = ET.parse(filename)  # nosec
+    tree = ET.parse(filename)  # noqa: S314
     root = tree.getroot()
 
     masked_detids = []

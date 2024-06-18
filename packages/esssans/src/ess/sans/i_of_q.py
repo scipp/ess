@@ -237,7 +237,7 @@ def _bin_in_q(
 
         # Make dims to flatten contiguous, keep wavelength as the last dim
         data_dims = list(stripped.dims)
-        for dim in to_flatten + ['wavelength']:
+        for dim in [*to_flatten, 'wavelength']:
             data_dims.remove(dim)
             data_dims.append(dim)
         stripped = stripped.transpose(data_dims)
