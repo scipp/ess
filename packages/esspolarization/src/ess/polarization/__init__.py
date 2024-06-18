@@ -12,7 +12,11 @@ except importlib.metadata.PackageNotFoundError:
 del importlib
 
 
-from .correction import CorrectionWorkflow, PolarizationAnalysisWorkflow
+from .correction import (
+    CorrectionWorkflow,
+    HalfPolarizedAnalysisWorkflow,
+    PolarizationAnalysisWorkflow,
+)
 from .he3 import (
     Depolarized,
     DirectBeamBackgroundQRange,
@@ -50,6 +54,7 @@ __all__ = [
     "DirectBeamNoCell",
     "DirectBeamQRange",
     "Down",
+    "HalfPolarizedAnalysisWorkflow",
     "He3CellLength",
     "He3CellPressure",
     "He3CellWorkflow",

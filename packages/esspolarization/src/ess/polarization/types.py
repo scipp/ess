@@ -61,6 +61,14 @@ class PolarizationCorrection(Generic[PolarizerSpin, AnalyzerSpin]):
 
 
 @dataclass
+class HalfPolarizedCorrection(Generic[PolarizerSpin]):
+    """Combined correction factors for half-polarized case."""
+
+    up: sc.DataArray
+    down: sc.DataArray
+
+
+@dataclass
 class PolarizationCorrectedData(Generic[PolarizerSpin, AnalyzerSpin]):
     """
     Polarization-corrected sample data.
@@ -75,6 +83,21 @@ class PolarizationCorrectedData(Generic[PolarizerSpin, AnalyzerSpin]):
     updown: sc.DataArray
     downup: sc.DataArray
     downdown: sc.DataArray
+
+
+@dataclass
+class HalfPolarizedCorrectedData(Generic[PolarizerSpin]):
+    """
+    Polarization-corrected sample data for half-polarized case.
+
+    The PolarizerSpin type parameter refers to the measurement. The fields in this class
+    give the resulting data after applying the corrections. For a given measurement with
+    polarizer spin `PolarizerSpin`, there will be resulting intensity in both output
+    fields.
+    """
+
+    up: sc.DataArray
+    down: sc.DataArray
 
 
 @dataclass

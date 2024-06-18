@@ -11,6 +11,8 @@ from .types import (
     AnalyzerSpin,
     Down,
     FlipperEfficiency,
+    HalfPolarizedCorrectedData,
+    HalfPolarizedCorrection,
     PolarizationCorrectedData,
     PolarizationCorrection,
     Polarizer,
@@ -161,16 +163,39 @@ def compute_polarization_corrected_data(
     )
 
 
-def CorrectionWorkflow() -> sciline.Pipeline:
+def compute_half_polarized_correction(
+    *,
+    polarizer: PolarizingElementCorrection[PolarizerSpin, None, Polarizer],
+    polarizer_flipper: InverseFlipperMatrix[PolarizerSpin, Polarizer],
+) -> PolarizationCorrection[PolarizerSpin, None]:
+    p_up, p_down = polarizer_flipper.from_right(polarizer.diag, polarizer.off_diag)
+    return HalfPolarizedCorrection[PolarizerSpin](up=p_up, down=p_down)
+
+
+def compute_half_polarized_corrected_data(
+    channel: ReducedSampleDataBySpinChannel[PolarizerSpin, None],
+    polarization_correction: HalfPolarizedCorrection[PolarizerSpin],
+) -> HalfPolarizedCorrectedData[PolarizerSpin]:
+    return HalfPolarizedCorrectedData(
+        up=channel * polarization_correction.up,
+        down=channel * polarization_correction.down,
+    )
+
+
+def CorrectionWorkflow(half_polarized: bool = False) -> sciline.Pipeline:
     workflow = sciline.Pipeline(
         (
             make_spin_flipping_matrix_up,
             make_spin_flipping_matrix_down,
             compute_polarizing_element_correction,
-            compute_polarization_correction,
-            compute_polarization_corrected_data,
         )
     )
+    if half_polarized:
+        workflow.insert(compute_half_polarized_correction)
+        workflow.insert(compute_half_polarized_corrected_data)
+    else:
+        workflow.insert(compute_polarization_correction)
+        workflow.insert(compute_polarization_corrected_data)
     # If there is no flipper, setting an efficiency of 1.0 is equivalent to not using
     # a flipper.
     workflow[FlipperEfficiency[PolarizingElement]] = FlipperEfficiency[
@@ -206,5 +231,29 @@ def PolarizationAnalysisWorkflow(
     ]
     workflow[TransmissionFunction[Analyzer]] = analyzer_workflow[
         TransmissionFunction[Analyzer]
+    ]
+    return workflow
+
+
+def HalfPolarizedAnalysisWorkflow(
+    *,
+    polarizer_workflow: sciline.Pipeline,
+) -> sciline.Pipeline:
+    """
+    Create a half-polarized analysis workflow, i.e, with a polarizer but no analyzer.
+
+    Parameters
+    ----------
+    polarizer_workflow :
+        Workflow for the polarizer, e.g., a He3CellWorkflow or SupermirrorWorkflow.
+
+    Returns
+    -------
+    :
+        Full workflow for half-polarized analysis.
+    """
+    workflow = CorrectionWorkflow(half_polarized=True)
+    workflow[TransmissionFunction[Polarizer]] = polarizer_workflow[
+        TransmissionFunction[Polarizer]
     ]
     return workflow
