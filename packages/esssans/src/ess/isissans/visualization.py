@@ -3,6 +3,7 @@
 """
 Plotting functions for ISIS data.
 """
+
 import warnings
 from typing import Any
 
@@ -44,7 +45,7 @@ def plot_flat_detector_xy(
             'Cannot plot 2-D instrument view of data array with non-constant '
             'y coordinate along tubes. Use scippneutron.instrument_view instead.'
         )
-    plot_kwargs = dict(aspect='equal')
+    plot_kwargs = {'aspect': 'equal'}
     plot_kwargs.update(kwargs)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=RuntimeWarning)

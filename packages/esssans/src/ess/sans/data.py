@@ -1,10 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-from typing import Dict
 
 
 class Registry:
-    def __init__(self, instrument: str, files: Dict[str, str], version: str):
+    def __init__(self, instrument: str, files: dict[str, str], version: str):
         import pooch
 
         self._registry = pooch.create(

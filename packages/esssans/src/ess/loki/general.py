@@ -3,12 +3,10 @@
 """
 Default parameters, providers and utility functions for the loki workflow.
 """
-from typing import Optional
 
 import sciline
 import scipp as sc
 from ess.reduce import nexus
-
 from ess.sans import providers as sans_providers
 
 from ..sans.common import gravity_vector
@@ -48,7 +46,7 @@ from .io import dummy_load_sample
 def default_parameters() -> dict:
     return {
         CorrectForGravity: False,
-        DimsToKeep: tuple(),
+        DimsToKeep: (),
         NeXusMonitorName[Incident]: 'monitor_1',
         NeXusMonitorName[Transmission]: 'monitor_2',
         TransformationPath: 'transform',
@@ -88,7 +86,7 @@ def LokiAtLarmorWorkflow() -> sciline.Pipeline:
 
 DETECTOR_BANK_RESHAPING = {
     'larmor_detector': lambda x: x.fold(
-        dim='detector_number', sizes=dict(layer=4, tube=32, straw=7, pixel=512)
+        dim='detector_number', sizes={'layer': 4, 'tube': 32, 'straw': 7, 'pixel': 512}
     )
 }
 
@@ -126,7 +124,7 @@ def get_monitor_data(
 def _add_variances_and_coordinates(
     da: sc.DataArray,
     source_position: sc.Variable,
-    sample_position: Optional[sc.Variable] = None,
+    sample_position: sc.Variable | None = None,
 ) -> sc.DataArray:
     out = da.copy(deep=False)
     if out.bins is not None:

@@ -3,8 +3,6 @@
 import sciline
 import scipp as sc
 import scippnexus as snx
-from scippneutron.io.nexus.load_nexus import JSONGroup
-
 from ess.loki.general import (
     get_monitor_data,
     get_source_position,
@@ -24,12 +22,12 @@ from ess.sans.types import (
     WavelengthBins,
     WavelengthMonitor,
 )
+from scippneutron.io.nexus.load_nexus import JSONGroup
 
 
 class MonitorHistogram(
     sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
-):
-    ...
+): ...
 
 
 def _hist_monitor_wavelength(

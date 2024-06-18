@@ -3,6 +3,7 @@
 """
 Masking functions for the loki workflow.
 """
+
 import numpy as np
 import scipp as sc
 

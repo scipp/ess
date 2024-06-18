@@ -4,7 +4,6 @@
 import numpy as np
 import pytest
 import scipp as sc
-
 from ess.isissans.data import sans2d_solid_angle_reference
 from ess.sans import normalization
 
@@ -29,7 +28,7 @@ def _sans2d_geometry():
     }
     # Rotate +y to -x
     transform = sc.spatial.rotation(value=[0, 0, 1 / 2**0.5, 1 / 2**0.5])
-    return dict(pixel_shape=pixel_shape, transform=transform)
+    return {'pixel_shape': pixel_shape, 'transform': transform}
 
 
 def _mantid_sans2d_solid_angle_data():

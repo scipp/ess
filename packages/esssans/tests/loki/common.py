@@ -1,9 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-from typing import Callable, List
+from collections.abc import Callable
 
 import scipp as sc
-
 from ess import loki, sans
 from ess.sans.types import (
     BackgroundRun,
@@ -30,12 +29,12 @@ def make_params(no_masks: bool = True) -> dict:
     params[NeXusDetectorName] = 'larmor_detector'
     params[Filename[SampleRun]] = loki.data.loki_tutorial_sample_run_60339()
     params[Filename[BackgroundRun]] = loki.data.loki_tutorial_background_run_60393()
-    params[
-        Filename[TransmissionRun[SampleRun]]
-    ] = loki.data.loki_tutorial_sample_transmission_run()
-    params[
-        Filename[TransmissionRun[BackgroundRun]]
-    ] = loki.data.loki_tutorial_run_60392()
+    params[Filename[TransmissionRun[SampleRun]]] = (
+        loki.data.loki_tutorial_sample_transmission_run()
+    )
+    params[Filename[TransmissionRun[BackgroundRun]]] = (
+        loki.data.loki_tutorial_run_60392()
+    )
     params[Filename[EmptyBeamRun]] = loki.data.loki_tutorial_run_60392()
 
     params[WavelengthBins] = sc.linspace(
@@ -56,7 +55,7 @@ def make_params(no_masks: bool = True) -> dict:
     return params
 
 
-def loki_providers_no_beam_center_finder() -> List[Callable]:
+def loki_providers_no_beam_center_finder() -> list[Callable]:
     from ess.isissans.io import read_xml_detector_masking
 
     return list(
@@ -69,7 +68,8 @@ def loki_providers_no_beam_center_finder() -> List[Callable]:
     )
 
 
-def loki_providers() -> List[Callable]:
-    return loki_providers_no_beam_center_finder() + [
-        sans.beam_center_finder.beam_center_from_center_of_mass
+def loki_providers() -> list[Callable]:
+    return [
+        *loki_providers_no_beam_center_finder(),
+        sans.beam_center_finder.beam_center_from_center_of_mass,
     ]

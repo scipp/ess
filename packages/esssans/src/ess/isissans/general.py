@@ -3,6 +3,7 @@
 """
 Providers for the ISIS instruments.
 """
+
 import scipp as sc
 
 from ..sans.types import (
@@ -37,7 +38,7 @@ from .mantidio import Period
 def default_parameters() -> dict:
     return {
         CorrectForGravity: False,
-        DimsToKeep: tuple(),
+        DimsToKeep: (),
         MonitorOffset[Incident]: MonitorOffset(sc.vector([0, 0, 0], unit='m')),
         MonitorOffset[Transmission]: MonitorOffset(sc.vector([0, 0, 0], unit='m')),
         DetectorBankOffset: DetectorBankOffset(sc.vector([0, 0, 0], unit='m')),
@@ -72,7 +73,7 @@ def data_to_tof(
 
 
 def monitor_to_tof(
-    da: ConfiguredReducibleMonitor[RunType, MonitorType]
+    da: ConfiguredReducibleMonitor[RunType, MonitorType],
 ) -> TofMonitor[RunType, MonitorType]:
     """Dummy conversion of monitor data to time-of-flight data.
     The monitor data already has a time-of-flight coordinate."""

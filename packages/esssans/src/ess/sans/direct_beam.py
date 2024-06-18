@@ -1,8 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-
-from typing import List
-
 import numpy as np
 import scipp as sc
 from sciline import Pipeline
@@ -55,7 +52,7 @@ def _compute_efficiency_correction(
     return out.rename_dims({wavelength_band_dim: 'wavelength'})
 
 
-def direct_beam(*, workflow: Pipeline, I0: sc.Variable, niter: int = 5) -> List[dict]:
+def direct_beam(*, workflow: Pipeline, I0: sc.Variable, niter: int = 5) -> list[dict]:
     """
     Compute the direct beam function.
 

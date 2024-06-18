@@ -4,7 +4,6 @@ from typing import NewType
 
 import sciline
 import scipp as sc
-
 from ess.sans import providers as sans_providers
 from ess.sans.types import MaskedData, SampleRun, ScatteringRunType, TofData
 
