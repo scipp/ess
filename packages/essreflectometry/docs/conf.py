@@ -1,17 +1,19 @@
-# -*- coding: utf-8 -*-
-
 import doctest
 import os
 import sys
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as get_version
 
-from ess import reflectometry
+from sphinx.util import logging
 
 sys.path.insert(0, os.path.abspath('.'))
 
+logger = logging.getLogger(__name__)
+
 # General information about the project.
-project = u'ESSreflectometry'
-copyright = u'2024 Scipp contributors'
-author = u'Scipp contributors'
+project = 'ESSreflectometry'
+copyright = '2024 Scipp contributors'
+author = 'Scipp contributors'
 
 html_show_sourcelink = True
 
@@ -35,6 +37,8 @@ try:
     import sciline.sphinxext.domain_types  # noqa: F401
 
     extensions.append('sciline.sphinxext.domain_types')
+    # See https://github.com/tox-dev/sphinx-autodoc-typehints/issues/457
+    suppress_warnings = ["config.cache"]
 except ModuleNotFoundError:
     pass
 
@@ -111,10 +115,15 @@ master_doc = 'index'
 # built documents.
 #
 
-# The short X.Y version.
-version = reflectometry.__version__
-# The full version, including alpha/beta/rc tags.
-release = reflectometry.__version__
+try:
+    release = get_version("essreflectometry")
+    version = ".".join(release.split('.')[:3])  # CalVer
+except PackageNotFoundError:
+    logger.info(
+        "Warning: determining version from package metadata failed, falling back to "
+        "a dummy version number."
+    )
+    release = version = "0.0.0-dev"
 
 warning_is_error = True
 
