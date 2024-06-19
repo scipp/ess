@@ -5,7 +5,7 @@ import scipp as sc
 FilePath = NewType("FilePath", str)
 """File name of a file containing the results of a McStas run"""
 
-DetectorIndex = NewType("DetectorIndex", int)
+DetectorIndex = NewType("DetectorIndex", int | sc.Variable | sc.DataArray)
 """Index of the detector to load. Index ordered by the id:s of the pixels"""
 
 DetectorName = NewType("DetectorName", str)
