@@ -145,9 +145,7 @@ def sigma_Q(
         Combined resolution function.
     """
     return sc.sqrt(
-        angular_resolution**2
-        + wavelength_resolution**2
-        + sample_size_resolution**2
+        angular_resolution**2 + wavelength_resolution**2 + sample_size_resolution**2
     ).flatten(to="detector_number").max("detector_number") * sc.midpoints(q_bins)
 
 

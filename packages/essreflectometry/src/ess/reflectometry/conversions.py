@@ -130,7 +130,7 @@ def add_coords(
     da = da.transform_coords(["theta", "wavelength", "Q"], graph=graph)
     da.coords["z_index"] = sc.arange(
         "row", 0, da.sizes["blade"] * da.sizes["wire"], unit=None
-    ).fold("row", sizes=dict(blade=da.sizes["blade"], wire=da.sizes["wire"]))
+    ).fold("row", sizes={dim: da.sizes[dim] for dim in ("blade", "wire")})
     da.coords["y_index"] = sc.arange("stripe", 0, da.sizes["stripe"], unit=None)
     return da
 

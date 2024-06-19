@@ -1,19 +1,18 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
+from ess.reflectometry import corrections
 from scipp import constants as cst
 from scipp.testing import assert_allclose
-
-from ess.reflectometry import corrections
 
 
 def test_footprint_correction():
     data = sc.DataArray(
         data=sc.array(dims=['row'], values=[1.0], unit='counts'),
-        coords=dict(
-            theta=sc.array(dims=['row'], values=[cst.pi.value / 6], unit='rad'),
-            px=sc.array(dims=['row'], values=[1], unit=None),
-        ),
+        coords={
+            "theta": sc.array(dims=['row'], values=[cst.pi.value / 6], unit='rad'),
+            "px": sc.array(dims=['row'], values=[1], unit=None),
+        },
     ).group('px')
     out = corrections.footprint_correction(
         data,

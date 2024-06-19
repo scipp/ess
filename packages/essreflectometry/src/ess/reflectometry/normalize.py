@@ -56,23 +56,23 @@ def normalization_factor(
         q_of_z_wavelength,
         sc.DataArray(
             data=sample_q,
-            coords=dict(wavelength=wm),
-            masks=dict(
-                corr.masks,
-                _sample_q_isnan=sc.isnan(sample_q),
-            ),
+            coords={"wavelength": wm},
+            masks={
+                **corr.masks,
+                "_sample_q_isnan": sc.isnan(sample_q),
+            },
         ),
-        p0=dict(a=sc.scalar(1, unit="1/angstrom")),
+        p0={"a": sc.scalar(1, unit="1/angstrom")},
     )
     return sc.DataArray(
         data=corr.data,
-        coords=dict(
-            Q=q_of_z_wavelength(
+        coords={
+            "Q": q_of_z_wavelength(
                 wm,
                 sc.values(p["a"]),
                 sc.values(p["b"]),
             ).data,
-        ),
+        },
         masks=corr.masks,
     )
 
