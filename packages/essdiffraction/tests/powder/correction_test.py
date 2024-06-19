@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 import scipp as sc
 import scipp.testing
+
 from ess.powder.correction import apply_lorentz_correction, merge_calibration
 
 

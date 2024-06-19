@@ -5,6 +5,8 @@ import pytest
 import sciline
 import scipp as sc
 from ess import powder
+from ess.snspowder import powgen
+
 from ess.powder.types import (
     CalibrationFilename,
     DspacingBins,
@@ -22,7 +24,6 @@ from ess.powder.types import (
     VanadiumRun,
     WavelengthMask,
 )
-from ess.snspowder import powgen
 
 
 @pytest.fixture()

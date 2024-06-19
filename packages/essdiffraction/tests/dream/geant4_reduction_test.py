@@ -5,6 +5,7 @@ import pytest
 import sciline
 import scipp as sc
 from ess import dream, powder
+
 from ess.powder.types import (
     AccumulatedProtonCharge,
     CalibrationFilename,

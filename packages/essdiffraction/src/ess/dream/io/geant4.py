@@ -6,6 +6,8 @@ from typing import Dict, Optional
 import numpy as np
 import sciline
 import scipp as sc
+from ess.reduce.nexus import extract_detector_data
+
 from ess.powder.types import (
     CalibrationData,
     CalibrationFilename,
@@ -22,7 +24,6 @@ from ess.powder.types import (
     SampleRun,
     SourcePosition,
 )
-from ess.reduce.nexus import extract_detector_data
 
 MANTLE_DETECTOR_ID = sc.index(7)
 HIGH_RES_DETECTOR_ID = sc.index(8)

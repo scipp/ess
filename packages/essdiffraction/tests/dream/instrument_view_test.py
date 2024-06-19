@@ -4,6 +4,7 @@
 import numpy as np
 import pytest
 import scipp as sc
+
 from ess.dream.instrument_view import InstrumentView
 
 
