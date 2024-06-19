@@ -3,11 +3,10 @@
 from datetime import datetime
 
 import sciline
-from orsopy import fileio
-
 from ess import amor, reflectometry
 from ess.reflectometry import orso
 from ess.reflectometry.types import Filename, ReferenceRun, SampleRun
+from orsopy import fileio
 
 
 def test_build_orso_data_source():
@@ -28,7 +27,7 @@ def test_build_orso_data_source():
         experiment=fileio.data_source.Experiment(
             title="commissioning",
             instrument="AMOR",
-            start_date=datetime(2020, 11, 25, 16, 3, 10),
+            start_date=datetime(2020, 11, 25, 16, 3, 10),  # noqa: DTZ001
             probe="neutron",
             facility="SINQ",
         ),

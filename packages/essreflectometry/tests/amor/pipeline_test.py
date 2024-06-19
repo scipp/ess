@@ -6,8 +6,6 @@ import numpy as np
 import pytest
 import sciline
 import scipp as sc
-from orsopy import fileio
-
 from ess import amor
 from ess.reflectometry import orso
 from ess.reflectometry.types import (
@@ -22,6 +20,7 @@ from ess.reflectometry.types import (
     YIndexLimits,
     ZIndexLimits,
 )
+from orsopy import fileio
 
 
 @pytest.fixture()

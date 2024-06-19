@@ -1,4 +1,5 @@
-from typing import Type, Union
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 
 import sciline
 import scipp as sc
@@ -7,7 +8,7 @@ import scippnexus as snx
 from .types import IdealReferenceIntensity, ReferenceFilePath
 
 
-def load_nx(group: Union[snx.Group, str], *paths: str):
+def load_nx(group: snx.Group | str, *paths: str):
     if isinstance(group, str):
         with snx.File(group) as group:
             yield from load_nx(group, *paths)
@@ -26,7 +27,7 @@ def load_nx(group: Union[snx.Group, str], *paths: str):
 # Remove when this function is exposed in essreduce
 def _unique_child_group(
     group: snx.Group,
-    nx_class: Type[snx.NXobject],
+    nx_class: type[snx.NXobject],
 ) -> snx.Group:
     children = group[nx_class]
     if len(children) == 0:

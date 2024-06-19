@@ -1,7 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-from typing import Union
-
 import numpy as np
 import scipp as sc
 
@@ -48,10 +46,10 @@ def std_to_fwhm(std: sc.Variable) -> sc.Variable:
 
 def linlogspace(
     dim: str,
-    edges: Union[list, np.ndarray],
-    scale: Union[list, str],
-    num: Union[list, int],
-    unit: str = None,
+    edges: list | np.ndarray,
+    scale: list | str,
+    num: list | int,
+    unit: str | None = None,
 ) -> sc.Variable:
     """
     Generate a 1d array of bin edges with a mixture of linear and/or logarithmic

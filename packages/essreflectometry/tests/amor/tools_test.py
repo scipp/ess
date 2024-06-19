@@ -3,7 +3,6 @@
 # @author Andrew R. McCluskey (arm61)
 import pytest
 import scipp as sc
-
 from ess.reflectometry import tools
 
 
@@ -75,7 +74,7 @@ def test_linlogspace_linear_log_linear():
 
 
 def test_linlogspace_bad_input():
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Sizes do not match"):
         _ = tools.linlogspace(
             dim='qz',
             edges=[0.008, 0.03, 0.08, 0.12],

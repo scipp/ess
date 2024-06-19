@@ -2,8 +2,6 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 """ORSO utilities for Amor."""
 
-from typing import Optional
-
 import numpy as np
 import scipp as sc
 from orsopy.fileio import base as orso_base
@@ -81,9 +79,7 @@ def _extract_values_array(var: sc.Variable) -> np.ndarray:
     return var.values
 
 
-def _limits_of_coord(
-    data: sc.DataArray, name: str
-) -> Optional[tuple[float, float, str]]:
+def _limits_of_coord(data: sc.DataArray, name: str) -> tuple[float, float, str] | None:
     if (coord := _get_coord(data, name)) is None:
         return None
     min_ = coord.min().value
@@ -92,7 +88,7 @@ def _limits_of_coord(
     return float(min_), float(max_), _ascii_unit(coord.unit)
 
 
-def _get_coord(data: sc.DataArray, name: str) -> Optional[sc.Variable]:
+def _get_coord(data: sc.DataArray, name: str) -> sc.Variable | None:
     if name in data.coords:
         return sc.DataArray(data=data.coords[name], masks=data.masks)
     if (data.bins is not None) and (name in data.bins.coords):
