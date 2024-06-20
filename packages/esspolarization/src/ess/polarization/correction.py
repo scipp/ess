@@ -1,5 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+from dataclasses import dataclass
+from typing import Generic
+
 import sciline
 import scipp as sc
 
@@ -7,6 +10,7 @@ from .types import (
     Analyzer,
     AnalyzerSpin,
     Down,
+    FlipperEfficiency,
     PolarizationCorrectedData,
     PolarizationCorrection,
     Polarizer,
@@ -17,6 +21,53 @@ from .types import (
     TransmissionFunction,
     Up,
 )
+
+
+@dataclass
+class InverseFlipperMatrix(Generic[PolarizerSpin, PolarizingElement]):
+    """Flipper matrix, combined with component flip for down component"""
+
+    efficiency: FlipperEfficiency[PolarizingElement]
+    swap: bool
+
+    def from_left(
+        self, up: sc.Variable, down: sc.Variable
+    ) -> tuple[sc.Variable, sc.Variable]:
+        """Apply inverse flipper matrix from the left (for analyzer)"""
+        if self.swap:
+            up, down = down, up
+        f = 1 / self.efficiency.value
+        if f == 1:
+            return up, down
+        return up, (1 - f) * up + f * down
+
+    def from_right(
+        self, up: sc.Variable, down: sc.Variable
+    ) -> tuple[sc.Variable, sc.Variable]:
+        """Apply inverse flipper matrix from the right (for polarizer)"""
+        f = 1 / self.efficiency.value
+        if f == 1:
+            return (down, up) if self.swap else (up, down)
+        if self.swap:
+            return f * down, f * up
+        else:
+            return up + (1 - f) * down, down + (1 - f) * up
+
+
+def make_spin_flipping_matrix_up(
+    efficiency: FlipperEfficiency[PolarizingElement],
+) -> InverseFlipperMatrix[Up, PolarizingElement]:
+    return InverseFlipperMatrix[Up, PolarizingElement](
+        efficiency=efficiency, swap=False
+    )
+
+
+def make_spin_flipping_matrix_down(
+    efficiency: FlipperEfficiency[PolarizingElement],
+) -> InverseFlipperMatrix[Down, PolarizingElement]:
+    return InverseFlipperMatrix[Down, PolarizingElement](
+        efficiency=efficiency, swap=True
+    )
 
 
 def compute_polarizing_element_correction(
@@ -45,7 +96,6 @@ def compute_polarizing_element_correction(
     -------
     :
         Correction matrix coefficients.
-
     """
     t_plus = transmission.apply(channel, 'plus')
     t_minus = transmission.apply(channel, 'minus')
@@ -59,16 +109,17 @@ def compute_polarizing_element_correction(
     )
 
 
-def compute_polarization_correction_upup(
-    analyzer: PolarizingElementCorrection[Up, Up, Analyzer],
-    polarizer: PolarizingElementCorrection[Up, Up, Polarizer],
-) -> PolarizationCorrection[Up, Up]:
+def compute_polarization_correction(
+    *,
+    analyzer: PolarizingElementCorrection[PolarizerSpin, AnalyzerSpin, Analyzer],
+    polarizer: PolarizingElementCorrection[PolarizerSpin, AnalyzerSpin, Polarizer],
+    analyzer_flipper: InverseFlipperMatrix[AnalyzerSpin, Analyzer],
+    polarizer_flipper: InverseFlipperMatrix[PolarizerSpin, Polarizer],
+) -> PolarizationCorrection[PolarizerSpin, AnalyzerSpin]:
     """
-    Up-up column of combined correction coefficients for polarizer and analyzer.
+    Compute columns of combined correction coefficients for polarizer and analyzer.
 
     This is effectively a column resulting from a sparse matrix-matrix product.
-
-    This function returns the up-up column.
 
     Parameters
     ----------
@@ -76,68 +127,23 @@ def compute_polarization_correction_upup(
         Correction coefficients for the analyzer.
     polarizer :
         Correction coefficients for the polarizer.
+    analyzer_flipper :
+        Flipper matrix for the analyzer.
+    polarizer_flipper :
+        Flipper matrix for the polarizer.
 
     Returns
     -------
     :
         Combined correction coefficients.
     """
-    return PolarizationCorrection[Up, Up](
-        upup=polarizer.diag * analyzer.diag,
-        updown=polarizer.diag * analyzer.off_diag,
-        downup=polarizer.off_diag * analyzer.diag,
-        downdown=polarizer.off_diag * analyzer.off_diag,
-    )
-
-
-def compute_polarization_correction_updown(
-    analyzer: PolarizingElementCorrection[Up, Down, Analyzer],
-    polarizer: PolarizingElementCorrection[Up, Down, Polarizer],
-) -> PolarizationCorrection[Up, Down]:
-    """
-    Up-down column of combined correction coefficients for polarizer and analyzer.
-
-    See :py:func:`compute_polarization_correction_upup` for more details.
-    """
-    return PolarizationCorrection[Up, Down](
-        upup=polarizer.diag * analyzer.off_diag,
-        updown=polarizer.diag * analyzer.diag,
-        downup=polarizer.off_diag * analyzer.off_diag,
-        downdown=polarizer.off_diag * analyzer.diag,
-    )
-
-
-def compute_polarization_correction_downup(
-    analyzer: PolarizingElementCorrection[Down, Up, Analyzer],
-    polarizer: PolarizingElementCorrection[Down, Up, Polarizer],
-) -> PolarizationCorrection[Down, Up]:
-    """
-    Down-up column of combined correction coefficients for polarizer and analyzer.
-
-    See :py:func:`compute_polarization_correction_upup` for more details.
-    """
-    return PolarizationCorrection[Down, Up](
-        upup=polarizer.off_diag * analyzer.diag,
-        updown=polarizer.off_diag * analyzer.off_diag,
-        downup=polarizer.diag * analyzer.diag,
-        downdown=polarizer.diag * analyzer.off_diag,
-    )
-
-
-def compute_polarization_correction_downdown(
-    analyzer: PolarizingElementCorrection[Down, Down, Analyzer],
-    polarizer: PolarizingElementCorrection[Down, Down, Polarizer],
-) -> PolarizationCorrection[Down, Down]:
-    """
-    Down-down column of combined correction coefficients for polarizer and analyzer.
-
-    See :py:func:`compute_polarization_correction_upup` for more details.
-    """
-    return PolarizationCorrection[Down, Down](
-        upup=polarizer.off_diag * analyzer.off_diag,
-        updown=polarizer.off_diag * analyzer.diag,
-        downup=polarizer.diag * analyzer.off_diag,
-        downdown=polarizer.diag * analyzer.diag,
+    a_up, a_down = analyzer_flipper.from_left(analyzer.diag, analyzer.off_diag)
+    p_up, p_down = polarizer_flipper.from_right(polarizer.diag, polarizer.off_diag)
+    return PolarizationCorrection[PolarizerSpin, AnalyzerSpin](
+        upup=p_up * a_up,
+        updown=p_up * a_down,
+        downup=p_down * a_up,
+        downdown=p_down * a_down,
     )
 
 
@@ -156,13 +162,49 @@ def compute_polarization_corrected_data(
 
 
 def CorrectionWorkflow() -> sciline.Pipeline:
-    return sciline.Pipeline(
+    workflow = sciline.Pipeline(
         (
+            make_spin_flipping_matrix_up,
+            make_spin_flipping_matrix_down,
             compute_polarizing_element_correction,
-            compute_polarization_correction_upup,
-            compute_polarization_correction_updown,
-            compute_polarization_correction_downup,
-            compute_polarization_correction_downdown,
+            compute_polarization_correction,
             compute_polarization_corrected_data,
         )
     )
+    # If there is no flipper, setting an efficiency of 1.0 is equivalent to not using
+    # a flipper.
+    workflow[FlipperEfficiency[PolarizingElement]] = FlipperEfficiency[
+        PolarizingElement
+    ](value=1.0)
+    return workflow
+
+
+def PolarizationAnalysisWorkflow(
+    *,
+    polarizer_workflow: sciline.Pipeline,
+    analyzer_workflow: sciline.Pipeline,
+) -> sciline.Pipeline:
+    """
+    Create a polarization analysis workflow.
+
+    Parameters
+    ----------
+    polarizer_workflow :
+        Workflow for the polarizer, e.g., a He3CellWorkflow or SupermirrorWorkflow.
+    analyzer_workflow :
+        Workflow for the analyzer, e.g., a He3CellWorkflow or SupermirrorWorkflow.
+
+    Returns
+    -------
+    :
+        Full workflow for polarization analysis.
+    """
+
+    workflow = CorrectionWorkflow()
+    workflow[TransmissionFunction[Polarizer]] = polarizer_workflow[
+        TransmissionFunction[Polarizer]
+    ]
+    workflow[TransmissionFunction[Analyzer]] = analyzer_workflow[
+        TransmissionFunction[Analyzer]
+    ]
+    return workflow

@@ -1,5 +1,20 @@
 # API Reference
 
+## Workflows
+
+```{eval-rst}
+.. currentmodule:: ess.polarization
+
+.. autosummary::
+   :toctree: ../generated/classes
+   :template: class-template.rst
+   :recursive:
+
+   CorrectionWorkflow
+   He3CellWorkflow
+   PolarizationAnalysisWorkflow
+   SupermirrorWorkflow
+
 ## Classes
 
 ```{eval-rst}
@@ -11,8 +26,6 @@
    :recursive:
 
    Analyzer
-   Cell
-   CellInBeamLog
    Depolarized
    DirectBeamBackgroundQRange
    DirectBeamNoCell
@@ -26,13 +39,10 @@
    He3PolarizationFunction
    He3TransmissionFunction
    He3TransmissionEmptyGlass
-   PolarizationCorrectedSampleData
+   PolarizationCorrectedData
    Polarized
    Polarizer
-   RunSectionLog
-   SampleInBeamLog
    Up
-   WavelengthBins
 ```
 
 ## Top-level functions

@@ -1,14 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 from dataclasses import dataclass
-from typing import Generic, Literal, NewType, TypeVar
+from typing import Generic, NewType, TypeVar
 
 import sciline as sl
 import scipp as sc
 
-# from .correction import correct_for_analyzer, correct_for_polarizer
-from .correction import CorrectionWorkflow
-from .types import Analyzer, Polarizer, PolarizingElement, TransmissionFunction
+from .types import PlusMinus, PolarizingElement, TransmissionFunction
 from .uncertainty import broadcast_with_upper_bound_variances
 
 Depolarized = NewType('Depolarized', int)
@@ -43,6 +41,7 @@ class He3CellTransmissionFraction(
     """Transmission fraction for a given cell"""
 
 
+# TODO rename and change to Up | Down | Unpolarized
 He3CellTransmissionFractionHasPolarizedIncomingBeam = NewType(
     'He3CellTransmissionFractionHasPolarizedIncomingBeam', bool
 )
@@ -182,11 +181,7 @@ class He3TransmissionFunction(TransmissionFunction[PolarizingElement]):
     transmission_empty_glass: He3TransmissionEmptyGlass[PolarizingElement]
 
     def __call__(
-        self,
-        *,
-        time: sc.Variable,
-        wavelength: sc.Variable,
-        plus_minus: Literal['plus', 'minus'],
+        self, *, time: sc.Variable, wavelength: sc.Variable, plus_minus: PlusMinus
     ) -> sc.Variable:
         opacity = self.opacity_function(wavelength)
         polarization = self.polarization_function(time)
@@ -194,9 +189,7 @@ class He3TransmissionFunction(TransmissionFunction[PolarizingElement]):
             polarization *= -1.0
         return self.transmission_empty_glass * sc.exp(-opacity * (1.0 + polarization))
 
-    def apply(
-        self, data: sc.DataArray, plus_minus: Literal['plus', 'minus']
-    ) -> sc.DataArray:
+    def apply(self, data: sc.DataArray, plus_minus: PlusMinus) -> sc.DataArray:
         return self(
             time=data.coords['time'],
             wavelength=data.coords['wavelength'],
@@ -239,7 +232,7 @@ def get_he3_transmission_from_fit_to_direct_beam(
     opacity_function: He3OpacityFunction[PolarizingElement],
     transmission_empty_glass: He3TransmissionEmptyGlass[PolarizingElement],
     incoming_polarized: He3CellTransmissionFractionHasPolarizedIncomingBeam,
-) -> He3TransmissionFunction[PolarizingElement]:
+) -> TransmissionFunction[PolarizingElement]:
     """
     Return the transmission function for a given cell.
 
@@ -255,7 +248,8 @@ def get_he3_transmission_from_fit_to_direct_beam(
     ) -> sc.Variable:
         polarization_function = He3PolarizationFunction[PolarizingElement](C=C, T1=T1)
         if incoming_polarized:
-            # TODO Why is this 'plus'? Does it depend on the supermirror?
+            # TODO Why is this 'plus'? Does it depend on the supermirror and spin
+            # flipper?
             return He3TransmissionFunction(
                 opacity_function=opacity_function,
                 polarization_function=polarization_function,
@@ -383,21 +377,8 @@ def direct_beam_with_cell(
     )
 
 
-def he3_analyzer(
-    func: He3TransmissionFunction[Analyzer],
-) -> TransmissionFunction[Analyzer]:
-    return func
-
-
-def he3_polarizer(
-    func: He3TransmissionFunction[Polarizer],
-) -> TransmissionFunction[Polarizer]:
-    return func
-
-
 providers = (
     he3_opacity_from_cell_params,
-    he3_opacity_function_from_beam_data,
     get_he3_transmission_from_fit_to_direct_beam,
     direct_beam,
     direct_beam_with_cell,
@@ -420,17 +401,7 @@ def He3CellWorkflow(
         Whether the incoming beam for computing the cell transmission is polarized.
         This is the case in beamlines with a supermirror polarizer.
     """
-    steps = (
-        he3_opacity_from_cell_params,
-        get_he3_transmission_from_fit_to_direct_beam,
-        direct_beam,
-        direct_beam_with_cell,
-        he3_analyzer,
-        he3_polarizer,
-    )
-    workflow = CorrectionWorkflow()
-    for step in steps:
-        workflow.insert(step)
+    workflow = sl.Pipeline(providers)
     if in_situ:
         workflow.insert(he3_opacity_function_from_cell_opacity)
     else:

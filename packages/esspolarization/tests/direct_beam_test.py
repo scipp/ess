@@ -6,6 +6,7 @@ import scipp as sc
 from scipp.testing import assert_allclose, assert_identical
 
 from ess import polarization as pol
+from ess.polarization import base
 
 # Setup logs for four sections of length 250:
 # - 10 s direct beam no cell (only in beginning)
@@ -23,7 +24,7 @@ def _offset_time(da: sc.DataArray, offset: sc.Variable) -> sc.DataArray:
     return da
 
 
-def dummy_analyzer_spin() -> pol.CellSpinLog[pol.Analyzer]:
+def dummy_analyzer_spin() -> base.CellSpinLog[pol.Analyzer]:
     time = sc.array(dims=['time'], values=[0.0, 150], unit='s')
     spin = sc.array(dims=['time'], values=[1, -1], unit=None)
     da = sc.DataArray(spin, coords={'time': time})
@@ -37,10 +38,10 @@ def dummy_analyzer_spin() -> pol.CellSpinLog[pol.Analyzer]:
         'time',
     )
     da.coords['time'][0] = no_cell_start
-    return pol.CellSpinLog[pol.Analyzer](da)
+    return base.CellSpinLog[pol.Analyzer](da)
 
 
-def dummy_polarizer_spin() -> pol.CellSpinLog[pol.Polarizer]:
+def dummy_polarizer_spin() -> base.CellSpinLog[pol.Polarizer]:
     time = sc.array(dims=['time'], values=[100.0, 200], unit='s')
     spin = sc.array(dims=['time'], values=[-1, 1], unit=None)
     da = sc.DataArray(spin, coords={'time': time})
@@ -56,10 +57,10 @@ def dummy_polarizer_spin() -> pol.CellSpinLog[pol.Polarizer]:
         ],
         'time',
     )
-    return pol.CellSpinLog[pol.Polarizer](da)
+    return base.CellSpinLog[pol.Polarizer](da)
 
 
-def dummy_sample_in_beam() -> pol.SampleInBeamLog:
+def dummy_sample_in_beam() -> base.SampleInBeamLog:
     time = sc.array(
         dims=['time'],
         values=[no_cell_start.value, 50, 250, 300, 500, 550, 750, 800],
@@ -68,10 +69,10 @@ def dummy_sample_in_beam() -> pol.SampleInBeamLog:
     in_beam = sc.array(
         dims=['time'], values=[False, True, False, True, False, True, False, True]
     )
-    return pol.SampleInBeamLog(sc.DataArray(in_beam, coords={'time': time}))
+    return base.SampleInBeamLog(sc.DataArray(in_beam, coords={'time': time}))
 
 
-def dummy_polarizer_in_beam() -> pol.CellInBeamLog[pol.Polarizer]:
+def dummy_polarizer_in_beam() -> base.CellInBeamLog[pol.Polarizer]:
     time = sc.array(dims=['time'], values=[25.0, 50], unit='s')
     time = sc.concat(
         [
@@ -86,12 +87,12 @@ def dummy_polarizer_in_beam() -> pol.CellInBeamLog[pol.Polarizer]:
     )
     in_beam = sc.array(dims=['time'], values=[False, True], unit=None)
     in_beam = sc.concat([in_beam] * 5, 'time')
-    return pol.CellInBeamLog[pol.Polarizer](
+    return base.CellInBeamLog[pol.Polarizer](
         sc.DataArray(in_beam, coords={'time': time})
     )
 
 
-def dummy_analyzer_in_beam() -> pol.CellInBeamLog[pol.Analyzer]:
+def dummy_analyzer_in_beam() -> base.CellInBeamLog[pol.Analyzer]:
     time = sc.array(dims=['time'], values=[0.0, 25], unit='s')
     time = sc.concat(
         [
@@ -105,7 +106,9 @@ def dummy_analyzer_in_beam() -> pol.CellInBeamLog[pol.Analyzer]:
     time[0] = no_cell_start
     in_beam = sc.array(dims=['time'], values=[False, True], unit=None)
     in_beam = sc.concat([in_beam] * 4, 'time')
-    return pol.CellInBeamLog[pol.Analyzer](sc.DataArray(in_beam, coords={'time': time}))
+    return base.CellInBeamLog[pol.Analyzer](
+        sc.DataArray(in_beam, coords={'time': time})
+    )
 
 
 def make_events(size: int = 1000) -> sc.DataArray:
@@ -121,7 +124,7 @@ def test_determine_run_section() -> None:
     sample_in_beam = dummy_sample_in_beam()
     analyzer_in_beam = dummy_analyzer_in_beam()
     polarizer_in_beam = dummy_polarizer_in_beam()
-    result = pol.determine_run_section(
+    result = base.determine_run_section(
         sample_in_beam=sample_in_beam,
         analyzer_in_beam=analyzer_in_beam,
         polarizer_in_beam=polarizer_in_beam,
@@ -209,7 +212,7 @@ def test_direct_beam_returns_expected_dims() -> None:
     q_range = sc.array(dims=['Q'], values=[0.0, 1.0], unit='1/angstrom')
     background_q_range = sc.array(dims=['Q'], values=[1.0, 2.0], unit='1/angstrom')
 
-    db = pol.direct_beam(
+    db = pol.he3.direct_beam(
         data=data.bin(wavelength=wavelength),
         q_range=q_range,
         background_q_range=background_q_range,
@@ -229,7 +232,7 @@ def test_direct_beam_raises_if_q_ranges_overlap() -> None:
     with pytest.raises(
         ValueError, match='Background range must be after direct beam range'
     ):
-        pol.direct_beam(
+        pol.he3.direct_beam(
             data=data.bin(wavelength=wavelength),
             q_range=q_range,
             background_q_range=background_q_range,
@@ -245,7 +248,7 @@ def test_direct_beam_raises_if_q_range_not_positive() -> None:
     background_q_range = sc.array(dims=['Q'], values=[3.0, 4.0], unit='1/angstrom')
 
     with pytest.raises(ValueError, match='Q-range must be positive'):
-        pol.direct_beam(
+        pol.he3.direct_beam(
             data=data.bin(wavelength=wavelength),
             q_range=q_range,
             background_q_range=background_q_range,
@@ -261,12 +264,12 @@ def test_direct_beam_operates_on_normalized_data() -> None:
     q_range = sc.array(dims=['Q'], values=[0.0, 1.0], unit='1/angstrom')
     background_q_range = sc.array(dims=['Q'], values=[1.0, 2.0], unit='1/angstrom')
 
-    db = pol.direct_beam(
+    db = pol.he3.direct_beam(
         data=data.bin(wavelength=wavelength),
         q_range=q_range,
         background_q_range=background_q_range,
     )
-    db2 = pol.direct_beam(
+    db2 = pol.he3.direct_beam(
         data=data2.bin(wavelength=wavelength),
         q_range=q_range,
         background_q_range=background_q_range,
@@ -284,7 +287,7 @@ def test_direct_beam_raises_if_input_is_counts() -> None:
 
     data.bins.unit = 'counts'
     with pytest.raises(ValueError, match='Input data must be normalized'):
-        pol.direct_beam(
+        pol.he3.direct_beam(
             data=data.bin(wavelength=wavelength),
             q_range=q_range,
             background_q_range=background_q_range,

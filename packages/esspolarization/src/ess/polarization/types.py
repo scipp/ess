@@ -23,14 +23,14 @@ Analyzer = NewType('Analyzer', str)
 Polarizer = NewType('Polarizer', str)
 PolarizingElement = TypeVar('PolarizingElement', Analyzer, Polarizer)
 
+PlusMinus = Literal['plus', 'minus']
+
 
 class TransmissionFunction(Generic[PolarizingElement], ABC):
     """Wavelength- and time-dependent transmission for a given cell."""
 
     @abstractmethod
-    def apply(
-        self, data: sc.DataArray, plus_minus: Literal['plus', 'minus']
-    ) -> sc.DataArray:
+    def apply(self, data: sc.DataArray, plus_minus: PlusMinus) -> sc.DataArray:
         ...
 
 
@@ -42,6 +42,12 @@ class PolarizingElementCorrection(
 
     diag: sc.DataArray
     off_diag: sc.DataArray
+
+    def get(self, *, up: bool) -> tuple[sc.DataArray, sc.DataArray]:
+        """Get the correction factors for up or down spin."""
+        if up:
+            return self.diag, self.off_diag
+        return self.off_diag, self.diag
 
 
 @dataclass
@@ -69,3 +75,10 @@ class PolarizationCorrectedData(Generic[PolarizerSpin, AnalyzerSpin]):
     updown: sc.DataArray
     downup: sc.DataArray
     downdown: sc.DataArray
+
+
+@dataclass
+class FlipperEfficiency(Generic[PolarizingElement]):
+    """Efficiency of a flipper"""
+
+    value: float
