@@ -7,18 +7,16 @@ import scipp as sc
 
 from ...types import (
     AccumulatedProtonCharge,
+    CalibrationData,
     CalibrationFilename,
     Filename,
     NeXusDetectorDimensions,
     NeXusDetectorName,
     ProtonCharge,
-    RawCalibrationData,
     RawDataAndMetadata,
     ReducibleDetectorData,
     RunType,
-    SampleRun,
 )
-from .types import DetectorInfo
 
 _version = "1"
 
@@ -41,6 +39,7 @@ def _make_pooch():
             "PG3_4844_event.zip": "md5:a644c74f5e740385469b67431b690a3e",
             "PG3_4866_event.zip": "md5:5bc49def987f0faeb212a406b92b548e",
             "PG3_FERNS_d4832_2011_08_24.zip": "md5:0fef4ed5f61465eaaa3f87a18f5bb80d",
+            "PG3_FERNS_d4832_2011_08_24_spectrum.h5": "md5:7aee0b40deee22d57e21558baa7a6a1a",  # noqa: E501
         },
     )
 
@@ -89,7 +88,7 @@ def powgen_tutorial_vanadium_file() -> str:
 
 
 def powgen_tutorial_calibration_file() -> str:
-    return _get_path("PG3_FERNS_d4832_2011_08_24.zip")
+    return _get_path("PG3_FERNS_d4832_2011_08_24_spectrum.h5")
 
 
 def pooch_load(filename: Filename[RunType]) -> RawDataAndMetadata[RunType]:
@@ -103,9 +102,11 @@ def pooch_load(filename: Filename[RunType]) -> RawDataAndMetadata[RunType]:
     return RawDataAndMetadata[RunType](sc.io.load_hdf5(filename))
 
 
-def pooch_load_calibration(filename: CalibrationFilename) -> RawCalibrationData:
+def pooch_load_calibration(filename: CalibrationFilename) -> CalibrationData:
     """Load the calibration data for the POWGEN test data."""
-    return RawCalibrationData(sc.io.load_hdf5(filename))
+    if filename is None:
+        return None
+    return CalibrationData(sc.io.load_hdf5(filename))
 
 
 def extract_raw_data(
@@ -118,11 +119,6 @@ def extract_raw_data(
     out.coords.pop("tof", None)
     out = out.fold(dim="spectrum", sizes=sizes)
     return ReducibleDetectorData[RunType](out)
-
-
-def extract_detector_info(dg: RawDataAndMetadata[SampleRun]) -> DetectorInfo:
-    """Return the detector info from a loaded data group."""
-    return DetectorInfo(dg["detector_info"])
 
 
 def extract_proton_charge(dg: RawDataAndMetadata[RunType]) -> ProtonCharge[RunType]:
@@ -141,7 +137,6 @@ providers = (
     pooch_load,
     pooch_load_calibration,
     extract_accumulated_proton_charge,
-    extract_detector_info,
     extract_proton_charge,
     extract_raw_data,
 )

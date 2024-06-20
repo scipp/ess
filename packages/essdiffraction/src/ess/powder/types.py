@@ -155,10 +155,6 @@ class ProtonCharge(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Time-dependent proton charge."""
 
 
-RawCalibrationData = NewType("RawCalibrationData", sc.Dataset)
-"""Calibration data as loaded from file, needs preprocessing before using."""
-
-
 class RawDataAndMetadata(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
     """Raw data and associated metadata."""
 
