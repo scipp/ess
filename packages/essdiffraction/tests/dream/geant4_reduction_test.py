@@ -7,6 +7,7 @@ import scipp as sc
 from ess import powder
 from ess.powder.types import (
     AccumulatedProtonCharge,
+    CalibrationFilename,
     DspacingBins,
     EmptyCanRun,
     Filename,
@@ -49,6 +50,7 @@ def params(request):
         Filename[SampleRun]: dream.data.simulated_diamond_sample(),
         Filename[VanadiumRun]: dream.data.simulated_vanadium_sample(),
         Filename[EmptyCanRun]: dream.data.simulated_empty_can(),
+        CalibrationFilename: None,
         UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
         DspacingBins: sc.linspace('dspacing', 0.0, 2.3434, 201, unit='angstrom'),
         TofMask: lambda x: (x < sc.scalar(0.0, unit='ns'))

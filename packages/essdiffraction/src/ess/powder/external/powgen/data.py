@@ -102,11 +102,21 @@ def pooch_load(filename: Filename[RunType]) -> RawDataAndMetadata[RunType]:
     return RawDataAndMetadata[RunType](sc.io.load_hdf5(filename))
 
 
-def pooch_load_calibration(filename: CalibrationFilename) -> CalibrationData:
+def pooch_load_calibration(
+    filename: CalibrationFilename,
+    detector_dimensions: NeXusDetectorDimensions[NeXusDetectorName],
+) -> CalibrationData:
     """Load the calibration data for the POWGEN test data."""
     if filename is None:
-        return None
-    return CalibrationData(sc.io.load_hdf5(filename))
+        return CalibrationFilename(None)
+    ds = sc.io.load_hdf5(filename)
+    ds = sc.Dataset(
+        {
+            key: da.fold(dim='spectrum', sizes=detector_dimensions)
+            for key, da in ds.items()
+        }
+    )
+    return CalibrationData(ds)
 
 
 def extract_raw_data(

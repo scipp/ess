@@ -179,11 +179,11 @@ def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.Data
     --------
     ess.powder.load_calibration
     """
-    dim = calibration.dim
-    if not sc.identical(into.coords[dim], calibration.coords[dim]):
-        raise ValueError(
-            f"Coordinate {dim} of calibration and target dataset do not agree."
-        )
+    for name, coord in calibration.coords.items():
+        if not sc.identical(into.coords[name], coord):
+            raise ValueError(
+                f"Coordinate {name} of calibration and target dataset do not agree."
+            )
     out = into.copy(deep=False)
     for name in ("difa", "difc", "tzero"):
         if name in out.coords:
