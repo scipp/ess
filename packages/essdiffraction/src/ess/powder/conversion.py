@@ -14,6 +14,7 @@ from .types import (
     DataWithScatteringCoordinates,
     DspacingData,
     ElasticCoordTransformGraph,
+    MaskedData,
     NormalizedByProtonCharge,
     RunType,
 )
@@ -190,9 +191,20 @@ def add_scattering_coordinates_from_positions(
         Coordinate transformation graph.
     """
     out = data.transform_coords(
-        ["two_theta", "wavelength", "dspacing"], graph=graph, keep_intermediate=False
+        ["two_theta", "wavelength"], graph=graph, keep_intermediate=False
     )
     return DataWithScatteringCoordinates[RunType](out)
+
+
+def convert_to_dspacing(
+    data: MaskedData[RunType],
+    graph: ElasticCoordTransformGraph,
+    calibration: CalibrationData,
+) -> DspacingData[RunType]:
+    if calibration is None:
+        out = data.transform_coords(["dspacing"], graph=graph, keep_intermediate=False)
+        return DspacingData[RunType](out)
+    raise NotImplementedError()
 
 
 providers_with_calibration = (to_dspacing_with_calibration,)
@@ -201,4 +213,5 @@ providers_with_calibration = (to_dspacing_with_calibration,)
 providers_with_positions = (
     powder_coordinate_transformation_graph,
     add_scattering_coordinates_from_positions,
+    convert_to_dspacing,
 )
