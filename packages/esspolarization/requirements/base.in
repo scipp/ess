@@ -7,3 +7,4 @@ graphviz
 numpy<2.0
 sciline>=24.06.0
 scipp>=23.8.0
+scipy

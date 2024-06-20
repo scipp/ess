@@ -221,10 +221,6 @@ scippnexus==24.6.0
     #   essreduce
     #   esssans
     #   scippneutron
-scipy==1.13.1
-    # via
-    #   scippneutron
-    #   scippnexus
 six==1.16.0
     # via
     #   asttokens
