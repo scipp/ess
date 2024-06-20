@@ -64,6 +64,33 @@ def test_pipeline_can_compute_dspacing_result(providers, params):
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
 
+def test_pipeline_can_compute_dspacing_result_without_calibration(providers, params):
+    params[CalibrationFilename] = None
+    pipeline = sciline.Pipeline(providers, params=params)
+    pipeline = powder.with_pixel_mask_filenames(pipeline, [])
+    result = pipeline.compute(IofDspacing)
+    assert result.sizes == {
+        'dspacing': len(params[DspacingBins]) - 1,
+    }
+    assert sc.identical(result.coords['dspacing'], params[DspacingBins])
+
+
+def test_pipeline_compare_with_and_without_calibration(providers, params):
+    pipeline = sciline.Pipeline(providers, params=params)
+    pipeline = powder.with_pixel_mask_filenames(pipeline, [])
+    result_w_cal = pipeline.compute(IofDspacing)
+
+    params[CalibrationFilename] = None
+    pipeline = sciline.Pipeline(providers, params=params)
+    pipeline = powder.with_pixel_mask_filenames(pipeline, [])
+    result_wo_cal = pipeline.compute(IofDspacing)
+
+    assert sc.identical(
+        result_w_cal.coords['dspacing'], result_wo_cal.coords['dspacing']
+    )
+    assert not sc.allclose(result_w_cal.hist().data, result_wo_cal.hist().data)
+
+
 def test_workflow_is_deterministic(providers, params):
     pipeline = sciline.Pipeline(providers, params=params)
     pipeline = powder.with_pixel_mask_filenames(pipeline, [])
