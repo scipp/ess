@@ -17,8 +17,6 @@ fsspec==2024.6.0
     # via dask
 graphviz==0.20.3
     # via -r base.in
-importlib-metadata==7.1.0
-    # via dask
 locket==1.0.0
     # via partd
 networkx==3.3
@@ -36,7 +34,7 @@ pyyaml==6.0.1
     # via dask
 sciline==24.6.0
     # via -r base.in
-scipp==24.5.1
+scipp==24.6.0
     # via -r base.in
 scipy==1.13.1
     # via -r base.in
@@ -44,5 +42,3 @@ toolz==0.12.1
     # via
     #   dask
     #   partd
-zipp==3.19.2
-    # via importlib-metadata
