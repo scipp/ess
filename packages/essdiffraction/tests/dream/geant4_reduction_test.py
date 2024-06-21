@@ -4,7 +4,7 @@
 import pytest
 import sciline
 import scipp as sc
-from ess import powder
+from ess import dream, powder
 from ess.powder.types import (
     AccumulatedProtonCharge,
     CalibrationFilename,
@@ -30,7 +30,6 @@ from ess.powder.types import (
 
 @pytest.fixture()
 def providers():
-    from ess import powder
     from ess.dream.io.geant4 import providers as geant4_providers
 
     return [*powder.providers, *geant4_providers]
@@ -38,8 +37,6 @@ def providers():
 
 @pytest.fixture(params=["mantle", "endcap_backward", "endcap_forward"])
 def params(request):
-    from ess import dream
-
     # Not available in simulated data
     sample = sc.DataGroup(position=sc.vector([0.0, 0.0, 0.0], unit='mm'))
     source = sc.DataGroup(position=sc.vector([-3.478, 0.0, -76550], unit='mm'))
@@ -147,3 +144,15 @@ def test_pipeline_two_theta_masking(providers, params):
         sum_in_masked_region,
         sc.scalar(0.0, unit=sum_in_masked_region.unit),
     )
+
+
+def test_use_workflow_helper(params):
+    workflow = dream.DreamGeant4Workflow()
+    for key, value in params.items():
+        workflow[key] = value
+    workflow = powder.with_pixel_mask_filenames(workflow, [])
+    result = workflow.compute(IofDspacing)
+    assert result.sizes == {
+        'dspacing': len(params[DspacingBins]) - 1,
+    }
+    assert sc.identical(result.coords['dspacing'], params[DspacingBins])
