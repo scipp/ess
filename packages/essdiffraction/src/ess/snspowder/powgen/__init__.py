@@ -12,6 +12,7 @@ import sciline
 from ess.powder import providers as powder_providers
 from ess.powder.types import NeXusDetectorName
 from . import beamline, data
+from .calibration import load_calibration
 from .instrument_view import instrument_view
 
 providers = (
@@ -40,4 +41,5 @@ __all__ = [
     'data',
     'default_parameters',
     'instrument_view',
+    'load_calibration',
 ]
