@@ -4,16 +4,16 @@
 
 from .types import (
     DspacingBins,
+    DspacingData,
     FocussedDataDspacing,
     FocussedDataDspacingTwoTheta,
-    MaskedData,
     RunType,
     TwoThetaBins,
 )
 
 
 def focus_data_dspacing(
-    data: MaskedData[RunType],
+    data: DspacingData[RunType],
     dspacing_bins: DspacingBins,
 ) -> FocussedDataDspacing[RunType]:
     out = data.bins.concat().bin({dspacing_bins.dim: dspacing_bins})
@@ -21,7 +21,7 @@ def focus_data_dspacing(
 
 
 def focus_data_dspacing_and_two_theta(
-    data: MaskedData[RunType],
+    data: DspacingData[RunType],
     dspacing_bins: DspacingBins,
     twotheta_bins: TwoThetaBins,
 ) -> FocussedDataDspacingTwoTheta[RunType]:

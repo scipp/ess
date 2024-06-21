@@ -7,6 +7,8 @@ import numpy as np
 import sciline
 import scipp as sc
 from ess.powder.types import (
+    CalibrationData,
+    CalibrationFilename,
     Filename,
     NeXusDetectorDimensions,
     NeXusDetectorName,
@@ -196,6 +198,17 @@ def geant4_detector_dimensions(
     return NeXusDetectorDimensions[NeXusDetectorName](data.sizes)
 
 
+def geant4_load_calibration(
+    filename: CalibrationFilename,
+) -> CalibrationData:
+    if filename is not None:
+        # Needed to build a complete pipeline.
+        raise NotImplementedError(
+            "Calibration data loading is not implemented for DREAM GEANT4 data."
+        )
+    return CalibrationFilename(None)
+
+
 providers = (
     extract_geant4_detector,
     extract_geant4_detector_data,
@@ -204,5 +217,6 @@ providers = (
     get_source_position,
     patch_detector_data,
     geant4_detector_dimensions,
+    geant4_load_calibration,
 )
 """Geant4-providers for Sciline pipelines."""

@@ -30,7 +30,7 @@ RunType = TypeVar("RunType", EmptyInstrumentRun, SampleRun, VanadiumRun)
 
 # 2 Workflow parameters
 
-CalibrationFilename = NewType("CalibrationFilename", str)
+CalibrationFilename = NewType("CalibrationFilename", str | None)
 """Filename of the instrument calibration file."""
 
 
@@ -78,7 +78,7 @@ class AccumulatedProtonCharge(sciline.Scope[RunType, sc.Variable], sc.Variable):
         super().__init__(*args, **kwargs)
 
 
-CalibrationData = NewType("CalibrationData", sc.Dataset)
+CalibrationData = NewType("CalibrationData", sc.Dataset | None)
 """Detector calibration data."""
 
 DataFolder = NewType("DataFolder", str)
@@ -153,10 +153,6 @@ PixelMaskFilename = NewType("PixelMaskFilename", str)
 
 class ProtonCharge(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Time-dependent proton charge."""
-
-
-RawCalibrationData = NewType("RawCalibrationData", sc.Dataset)
-"""Calibration data as loaded from file, needs preprocessing before using."""
 
 
 class RawDataAndMetadata(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):

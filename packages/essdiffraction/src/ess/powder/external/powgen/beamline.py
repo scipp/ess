@@ -7,12 +7,9 @@ Beamline parameters and utilities for POWGEN.
 import scipp as sc
 
 from ...types import (
-    CalibrationData,
     NeXusDetectorDimensions,
     NeXusDetectorName,
-    RawCalibrationData,
 )
-from .types import DetectorInfo
 
 DETECTOR_BANK_SIZES = {"powgen_detector": {"bank": 23, "column": 154, "row": 7}}
 
@@ -56,18 +53,6 @@ def map_detector_to_spectrum(
     return out.rename_dims({"detector": "spectrum"})
 
 
-def preprocess_calibration_data(
-    data: RawCalibrationData, detector_info: DetectorInfo
-) -> CalibrationData:
-    """Convert calibration data to a format that can be used by Scipp.
-
-    The raw calibration data is encoded in terms of a `'detector'` coordinate.
-    This needs to be converted to a `'spectrum'` coordinate to align
-    if with sample data.
-    """
-    return CalibrationData(map_detector_to_spectrum(data, detector_info=detector_info))
-
-
 def powgen_detector_dimensions(
     detector_name: NeXusDetectorName,
 ) -> NeXusDetectorDimensions[NeXusDetectorName]:
@@ -77,5 +62,5 @@ def powgen_detector_dimensions(
     )
 
 
-providers = (preprocess_calibration_data, powgen_detector_dimensions)
+providers = (powgen_detector_dimensions,)
 """Sciline providers for POWGEN beamline processing."""

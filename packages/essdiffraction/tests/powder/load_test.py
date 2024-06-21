@@ -10,7 +10,8 @@ from ess.powder.external.powgen import data
 )
 def test_load_calibration_loads_required_data():
     loaded = load_calibration(
-        data.calibration_file(), instrument_filename='POWGEN_Definition_2011-02-25.xml'
+        data.powgen_tutorial_mantid_calibration_file(),
+        instrument_filename='POWGEN_Definition_2011-02-25.xml',
     )
 
     assert 'difa' in loaded
@@ -26,7 +27,7 @@ def test_load_calibration_loads_required_data():
 )
 def test_load_calibration_requires_instrument_definition():
     with pytest.raises(ValueError, match='calibration'):
-        load_calibration(data.calibration_file())
+        load_calibration(data.powgen_tutorial_mantid_calibration_file())
 
 
 @pytest.mark.skip(
@@ -35,7 +36,7 @@ def test_load_calibration_requires_instrument_definition():
 def test_load_calibration_can_only_have_1_instrument_definition():
     with pytest.raises(ValueError, match='instrument_name'):
         load_calibration(
-            data.calibration_file(),
+            data.powgen_tutorial_mantid_calibration_file(),
             instrument_name='POWGEN',
             instrument_filename='POWGEN_Definition_2011-02-25.xml',
         )

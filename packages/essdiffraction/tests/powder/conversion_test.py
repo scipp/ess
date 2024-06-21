@@ -162,4 +162,3 @@ def test_add_scattering_coordinates_from_positions():
 
     assert 'wavelength' in result.coords
     assert 'two_theta' in result.coords
-    assert 'dspacing' in result.coords

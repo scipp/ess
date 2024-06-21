@@ -14,6 +14,7 @@ from .types import (
     DataWithScatteringCoordinates,
     DspacingData,
     ElasticCoordTransformGraph,
+    MaskedData,
     NormalizedByProtonCharge,
     RunType,
 )
@@ -83,9 +84,9 @@ def _consume_positions(position, sample_position, source_position):
 
 
 def to_dspacing_with_calibration(
-    data: NormalizedByProtonCharge[RunType],
-    calibration: CalibrationData,
-) -> DspacingData[RunType]:
+    data: sc.DataArray,
+    calibration: sc.Dataset,
+) -> sc.DataArray:
     """
     Transform coordinates to d-spacing from calibration parameters.
 
@@ -177,7 +178,7 @@ def add_scattering_coordinates_from_positions(
     data: NormalizedByProtonCharge[RunType], graph: ElasticCoordTransformGraph
 ) -> DataWithScatteringCoordinates[RunType]:
     """
-    Add ``wavelength``, ``two_theta``, and ``dspacing`` coordinates to the data.
+    Add ``wavelength`` and ``two_theta`` coordinates to the data.
     The input ``data`` must have a ``tof`` coordinate, as well as the necessary
     positions of the beamline components (source, sample, detectors) to compute
     the scattering coordinates.
@@ -190,15 +191,28 @@ def add_scattering_coordinates_from_positions(
         Coordinate transformation graph.
     """
     out = data.transform_coords(
-        ["two_theta", "wavelength", "dspacing"], graph=graph, keep_intermediate=False
+        ["two_theta", "wavelength"], graph=graph, keep_intermediate=False
     )
     return DataWithScatteringCoordinates[RunType](out)
 
 
-providers_with_calibration = (to_dspacing_with_calibration,)
-"""Sciline providers for coordinate transformations."""
+def convert_to_dspacing(
+    data: MaskedData[RunType],
+    graph: ElasticCoordTransformGraph,
+    calibration: CalibrationData,
+) -> DspacingData[RunType]:
+    if calibration is None:
+        out = data.transform_coords(["dspacing"], graph=graph, keep_intermediate=False)
+        return DspacingData[RunType](out)
+    out = to_dspacing_with_calibration(data, calibration=calibration)
+    for key in ('wavelength', 'two_theta'):
+        if key in out.coords.keys():
+            out.coords.set_aligned(key, False)
+    return DspacingData[RunType](out)
 
-providers_with_positions = (
+
+providers = (
     powder_coordinate_transformation_graph,
     add_scattering_coordinates_from_positions,
+    convert_to_dspacing,
 )
