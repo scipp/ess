@@ -28,8 +28,6 @@
    smoothing
    types
    uncertainty
-
-   external.powgen
 ```
 
 ## ESSdream
@@ -55,4 +53,17 @@
 
    data
    io
+```
+
+## SNS powder
+
+```{eval-rst}
+.. currentmodule:: ess.snspowder
+
+.. autosummary::
+   :toctree: ../generated/modules
+   :template: module-template.rst
+   :recursive:
+
+   powgen
 ```
