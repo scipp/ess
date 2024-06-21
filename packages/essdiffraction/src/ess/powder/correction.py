@@ -177,7 +177,7 @@ def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.Data
 
     See Also
     --------
-    ess.powder.load_calibration
+    ess.snspowder.powgen.calibration.load_calibration
     """
     for name, coord in calibration.coords.items():
         if not sc.identical(into.coords[name], coord):
