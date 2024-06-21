@@ -35,8 +35,6 @@ h5py==3.11.0
     # via scippnexus
 idna==3.7
     # via requests
-importlib-metadata==7.1.0
-    # via dask
 kiwisolver==1.4.5
     # via matplotlib
 locket==1.0.0
@@ -86,7 +84,7 @@ requests==2.32.3
     # via pooch
 sciline==24.6.0
     # via -r base.in
-scipp==24.5.1
+scipp==24.6.0
     # via
     #   -r base.in
     #   scippnexus
@@ -104,5 +102,3 @@ tzdata==2024.1
     # via pandas
 urllib3==2.2.1
     # via requests
-zipp==3.19.2
-    # via importlib-metadata
