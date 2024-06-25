@@ -32,7 +32,7 @@ def default_parameters() -> dict:
 
 def DreamGeant4Workflow() -> sciline.Pipeline:
     """
-    Workflow with default parameters for the Powgen SNS instrument.
+    Workflow with default parameters for the Dream Geant4 simulation.
     """
     return sciline.Pipeline(
         providers=powder_providers + geant4_providers, params=default_parameters()
