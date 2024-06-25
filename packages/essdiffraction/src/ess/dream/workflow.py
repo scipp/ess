@@ -3,6 +3,7 @@
 
 import sciline
 import scipp as sc
+
 from ess.powder import providers as powder_providers
 from ess.powder.types import (
     AccumulatedProtonCharge,

@@ -2,6 +2,7 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 
 import sciline
+
 from ess.powder import providers as powder_providers
 from ess.powder.types import NeXusDetectorName
 
