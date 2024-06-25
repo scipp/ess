@@ -6,7 +6,7 @@ Beamline parameters and utilities for POWGEN.
 
 import scipp as sc
 
-from ...types import (
+from ...powder.types import (
     NeXusDetectorDimensions,
     NeXusDetectorName,
 )

@@ -15,7 +15,7 @@ import numpy as np
 import scipp as sc
 import scippneutron as scn
 
-from ..logging import get_logger
+from ...powder.logging import get_logger
 
 
 def _as_boolean_mask(var: sc.Variable) -> sc.Variable:

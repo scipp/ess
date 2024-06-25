@@ -28,8 +28,6 @@
    smoothing
    types
    uncertainty
-
-   external.powgen
 ```
 
 ## ESSdream
@@ -43,6 +41,7 @@
    :toctree: ../generated/functions
 
    instrument_view
+   DreamGeant4Workflow
 ```
 
 ### Submodules
@@ -55,4 +54,17 @@
 
    data
    io
+```
+
+## SNS powder
+
+```{eval-rst}
+.. currentmodule:: ess.snspowder
+
+.. autosummary::
+   :toctree: ../generated/modules
+   :template: module-template.rst
+   :recursive:
+
+   powgen
 ```

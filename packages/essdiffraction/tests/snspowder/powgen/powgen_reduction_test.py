@@ -22,20 +22,18 @@ from ess.powder.types import (
     VanadiumRun,
     WavelengthMask,
 )
+from ess.snspowder import powgen
 
 
 @pytest.fixture()
 def providers():
     from ess import powder
-    from ess.powder.external import powgen
 
     return [*powder.providers, *powgen.providers]
 
 
 @pytest.fixture()
 def params():
-    from ess.powder.external import powgen
-
     return {
         NeXusDetectorName: "powgen_detector",
         Filename[SampleRun]: powgen.data.powgen_tutorial_sample_file(),
@@ -161,3 +159,15 @@ def test_pipeline_two_theta_masking(providers, params):
         sum_in_masked_region,
         sc.scalar(0.0, unit=sum_in_masked_region.unit),
     )
+
+
+def test_use_workflow_helper(params):
+    workflow = powgen.PowgenWorkflow()
+    for key, value in params.items():
+        workflow[key] = value
+    workflow = powder.with_pixel_mask_filenames(workflow, [])
+    result = workflow.compute(IofDspacing)
+    assert result.sizes == {
+        'dspacing': len(params[DspacingBins]) - 1,
+    }
+    assert sc.identical(result.coords['dspacing'], params[DspacingBins])

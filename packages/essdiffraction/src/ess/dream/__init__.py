@@ -10,6 +10,7 @@ import importlib.metadata
 from . import data
 from .instrument_view import instrument_view
 from .io import load_geant4_csv, nexus
+from .workflow import DreamGeant4Workflow, default_parameters
 
 try:
     __version__ = importlib.metadata.version(__package__ or __name__)
@@ -20,10 +21,14 @@ del importlib
 
 providers = (*nexus.providers,)
 
+
 __all__ = [
+    'DreamGeant4Workflow',
     'data',
+    'default_parameters',
     'beamline',
     'instrument_view',
     'load_geant4_csv',
     'nexus',
+    'providers',
 ]

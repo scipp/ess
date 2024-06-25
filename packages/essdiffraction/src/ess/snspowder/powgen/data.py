@@ -5,7 +5,7 @@
 
 import scipp as sc
 
-from ...types import (
+from ...powder.types import (
     AccumulatedProtonCharge,
     CalibrationData,
     CalibrationFilename,
