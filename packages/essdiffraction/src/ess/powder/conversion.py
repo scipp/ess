@@ -203,11 +203,13 @@ def convert_to_dspacing(
 ) -> DspacingData[RunType]:
     if calibration is None:
         out = data.transform_coords(["dspacing"], graph=graph, keep_intermediate=False)
-        return DspacingData[RunType](out)
-    out = to_dspacing_with_calibration(data, calibration=calibration)
-    for key in ('wavelength', 'two_theta'):
-        if key in out.coords.keys():
-            out.coords.set_aligned(key, False)
+    else:
+        out = to_dspacing_with_calibration(data, calibration=calibration)
+        for key in ('wavelength', 'two_theta'):
+            if key in out.coords.keys():
+                out.coords.set_aligned(key, False)
+    out.bins.coords.pop('tof', None)
+    out.bins.coords.pop('wavelength', None)
     return DspacingData[RunType](out)
 
 
