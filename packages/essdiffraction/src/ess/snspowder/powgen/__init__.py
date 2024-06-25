@@ -10,6 +10,7 @@ the ``dream`` module when that is available.
 from . import beamline, data
 from .calibration import load_calibration
 from .instrument_view import instrument_view
+from .workflow import PowgenWorkflow, default_parameters
 
 providers = (
     *beamline.providers,
@@ -18,4 +19,12 @@ providers = (
 """Sciline Providers for POWGEN-specific functionality."""
 
 
-__all__ = ['beamline', 'data', 'instrument_view', 'load_calibration', 'providers']
+__all__ = [
+    'PowgenWorkflow',
+    'beamline',
+    'data',
+    'default_parameters',
+    'instrument_view',
+    'load_calibration',
+    'providers',
+]

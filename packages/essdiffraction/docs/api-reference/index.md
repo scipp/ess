@@ -41,6 +41,7 @@
    :toctree: ../generated/functions
 
    instrument_view
+   DreamGeant4Workflow
 ```
 
 ### Submodules
