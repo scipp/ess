@@ -236,7 +236,7 @@ def compute_transmission_fraction_from_direct_beam(
     )
 
 
-def get_he3_transmission_from_fit_to_direct_beam(
+def get_he3_transmission_incoming_unpolarized_from_fit_to_direct_beam(
     transmission_fraction: He3CellTransmissionFraction[PolarizingElement, Polarized],
     opacity_function: He3OpacityFunction[PolarizingElement],
     transmission_empty_glass: He3TransmissionEmptyGlass[PolarizingElement],
@@ -283,7 +283,7 @@ def get_he3_transmission_from_fit_to_direct_beam(
 def get_he3_transmission_incoming_polarized_from_fit_to_direct_beam(
     transmission_fraction_up: He3AnalyzerTransmissionFraction[Up, Polarized],
     transmission_fraction_down: He3AnalyzerTransmissionFraction[Down, Polarized],
-    opacity_function: He3OpacityFunction[PolarizingElement],
+    opacity_function: He3OpacityFunction[Analyzer],
     transmission_empty_glass: He3TransmissionEmptyGlass[Analyzer],
 ) -> TransmissionFunction[Analyzer]:
     """
@@ -430,7 +430,9 @@ def He3CellWorkflow(
     *, in_situ: bool = True, incoming_polarized: bool = False
 ) -> sl.Pipeline:
     """
-    Workflow performing polarization correction for beam lines with two He3 cells.
+    Workflow for computing transmission functions for He3 cells.
+
+    This can handle polarizers as well as analyzers.
 
     Parameters
     ----------
@@ -439,20 +441,20 @@ def He3CellWorkflow(
         parameters, or an ex-situ definition based on direct beam data. The latter
         requires a direct-beam measurement with depolarized cells.
     incoming_polarized :
-        Whether the incoming beam for computing the cell transmission is polarized.
-        This is the case in beamlines with a supermirror polarizer.
+        Whether the incoming beam for computing the analyzer transmission is polarized.
+        This is the case in beamlines with a supermirror polarizer, but also if the
+        polarizer is not removed from the beam during the analyzer transmission
+        measurement.
     """
     workflow = sl.Pipeline(providers)
     if in_situ:
         workflow.insert(he3_opacity_function_from_cell_opacity)
     else:
         workflow.insert(he3_opacity_function_from_beam_data)
-    # TODO It is error-prone to rely on setting the correct workflow parameter here.
-    # Can PolarizationAnalysisWorkflow do this automatically if the polarizer workflow
-    # is a supermirror workflow? Or are there cases whether the polarizer is a He3 cell
-    # but the incoming beam is nevertheless polarized?
+    # Note that the incoming-unpolarized function is inserted even if
+    # incoming_polarized=True, since the incoming-unpolarized function is still
+    # required for computing the *polarizer* transmission calculation.
+    workflow.insert(get_he3_transmission_incoming_unpolarized_from_fit_to_direct_beam)
     if incoming_polarized:
         workflow.insert(get_he3_transmission_incoming_polarized_from_fit_to_direct_beam)
-    else:
-        workflow.insert(get_he3_transmission_from_fit_to_direct_beam)
     return workflow

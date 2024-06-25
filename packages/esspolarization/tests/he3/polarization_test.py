@@ -23,7 +23,7 @@ def test_incoming_unpolarized_reproduces_input_params_within_errors() -> None:
         polarization=polarization,
     )
 
-    result = he3.get_he3_transmission_from_fit_to_direct_beam(
+    result = he3.get_he3_transmission_incoming_unpolarized_from_fit_to_direct_beam(
         transmission_fraction=transmission,
         opacity_function=opacity_function,
         transmission_empty_glass=transmission_empty_glass,
@@ -39,7 +39,7 @@ def test_incoming_unpolarized_reproduces_input_params_within_errors() -> None:
     transmission_noisy = transmission.copy()
     transmission_noisy.values += rng.normal(0.0, 0.01, transmission_noisy.shape)
 
-    result = he3.get_he3_transmission_from_fit_to_direct_beam(
+    result = he3.get_he3_transmission_incoming_unpolarized_from_fit_to_direct_beam(
         transmission_fraction=transmission_noisy,
         opacity_function=opacity_function,
         transmission_empty_glass=transmission_empty_glass,
