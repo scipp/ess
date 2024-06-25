@@ -33,10 +33,10 @@
 
         Diffraction data reduction
 
-    .. grid-item-card::  ESSnmx
-        :link: https://scipp.github.io/essnmx/
+    .. grid-item-card::  ESSimaging
+        :link: https://scipp.github.io/essimaging/
 
-        Data reduction for the NMX instrument
+        Imaging data reduction
 
 .. grid:: 2
 
@@ -63,6 +63,11 @@
         Spectroscopy data reduction
 
 .. grid:: 2
+
+    .. grid-item-card::  ESSnmx
+        :link: https://scipp.github.io/essnmx/
+
+        Data reduction for the NMX instrument
 
     .. grid-item-card::  ESSreduce
         :link: https://scipp.github.io/essreduce/
