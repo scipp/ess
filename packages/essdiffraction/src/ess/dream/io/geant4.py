@@ -102,8 +102,10 @@ def _group(detectors: Dict[str, sc.DataArray]) -> Dict[str, sc.DataGroup]:
     def group(key: str, da: sc.DataArray) -> sc.DataArray:
         if key in ["high_resolution", "sans"]:
             # Only the HR and SANS detectors have sectors.
-            return da.group("sector", *elements)
-        res = da.group(*elements)
+            res = da.group("sector", *elements)
+        else:
+            res = da.group(*elements)
+        res.coords['position'] = res.bins.coords.pop('position').bins.mean()
         res.bins.coords.pop("sector", None)
         return res
 
