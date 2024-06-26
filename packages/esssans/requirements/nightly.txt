@@ -24,11 +24,11 @@ cyclebane==24.6.0
     # via sciline
 cycler==0.12.1
     # via matplotlib
-dask==2024.6.0
+dask==2024.6.2
     # via -r nightly.in
 decorator==5.1.1
     # via ipython
-essreduce==24.3.11
+essreduce==24.6.0
     # via -r nightly.in
 executing==2.0.1
     # via stack-data
@@ -44,7 +44,7 @@ h5py==3.11.0
     #   scippnexus
 idna==3.7
     # via requests
-importlib-metadata==7.1.0
+importlib-metadata==8.0.0
     # via dask
 ipydatawidgets==4.3.5
     # via pythreejs
@@ -141,7 +141,7 @@ scippnexus @ git+https://github.com/scipp/scippnexus@main
     #   -r nightly.in
     #   essreduce
     #   scippneutron
-scipy==1.13.1
+scipy==1.14.0
     # via
     #   scippneutron
     #   scippnexus
