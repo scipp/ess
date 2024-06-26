@@ -14,6 +14,8 @@ and the ICD DREAM interface specification for details.
 """
 
 import scipp as sc
+from ess.reduce import nexus
+
 from ess.powder.types import (
     Filename,
     LoadedNeXusDetector,
@@ -26,7 +28,6 @@ from ess.powder.types import (
     SamplePosition,
     SourcePosition,
 )
-from ess.reduce import nexus
 
 DETECTOR_BANK_SIZES = {
     "endcap_backward_detector": {

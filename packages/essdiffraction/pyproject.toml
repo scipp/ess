@@ -38,7 +38,7 @@ dependencies = [
   "pythreejs",
   "sciline>=24.06.0",
   "scipp>=23.8.0",
-  "scippneutron>=23.9.0",
+  "scippneutron>=24.5.0",
   "scippnexus>=23.12.0",
 ]
 
@@ -84,7 +84,7 @@ ignore = [
     "COM812", "COM819", "D206", "D300", "E111", "E114", "E117", "ISC001", "ISC002", "Q000", "Q001", "Q002", "Q003", "W191",
 ]
 fixable = ["I001", "B010"]
-isort.known-first-party = ["essdiffraction"]
+isort.known-first-party = ["ess.diffraction", "ess.dream", "ess.powder"]
 pydocstyle.convention = "numpy"
 
 [tool.ruff.lint.per-file-ignores]

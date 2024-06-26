@@ -5,6 +5,7 @@ import pytest
 import scipp as sc
 import scipp.testing
 import scippneutron as scn
+
 from ess.powder.conversion import (
     add_scattering_coordinates_from_positions,
     to_dspacing_with_calibration,

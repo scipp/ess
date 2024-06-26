@@ -9,4 +9,5 @@ maxdepth: 1
 ---
 
 POWGEN_data_reduction
+vanadium_processing
 ```

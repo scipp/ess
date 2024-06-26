@@ -26,6 +26,7 @@ extensions = [
     "sphinx_autodoc_typehints",
     "sphinx_copybutton",
     "sphinx_design",
+    "sphinxcontrib.bibtex",
     "nbsphinx",
     "myst_parser",
 ]
@@ -257,3 +258,7 @@ linkcheck_ignore = [
     # Specific lines in Github blobs cannot be found by linkcheck.
     r"https?://github\.com/.*?/blob/[a-f0-9]+/.+?#",
 ]
+
+# -- Options for bibtex ---------------------------------------------------
+bibtex_bibfiles = ["bibliography.bib"]
+bibtex_reference_style = "label"
