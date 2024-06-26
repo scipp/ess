@@ -22,9 +22,8 @@ def _drop_grouping_and_bin(
     # inferior performance when binning (no/bad multi-threading?).
     # We operate on the content buffer for better multi-threaded performance.
     if all_pixels.ndim == 0:
-        content = all_pixels.bins.constituents['data']
         return (
-            content.bin(**edges)
+            all_pixels.value.bin(**edges)
             .assign_coords(all_pixels.coords)
             .assign_masks(all_pixels.masks)
         )
