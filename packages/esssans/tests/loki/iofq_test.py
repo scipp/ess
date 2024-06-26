@@ -205,7 +205,7 @@ def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs():
     assert result.dims == ('Q',)
 
 
-def test_pipeline_can_compute_IofQ_merging_events_from_banks():
+def test_pipeline_can_compute_IofQ_by_bank():
     params = make_params()
     del params[NeXusDetectorName]
 
@@ -213,11 +213,11 @@ def test_pipeline_can_compute_IofQ_merging_events_from_banks():
     pipeline[BeamCenter] = _compute_beam_center()
     pipeline = sans.with_banks(pipeline, banks=['larmor_detector'])
 
-    result = pipeline.compute(BackgroundSubtractedIofQ)
-    assert result.dims == ('Q',)
+    results = sciline.compute_mapped(pipeline, BackgroundSubtractedIofQ)
+    assert results['larmor_detector'].dims == ('Q',)
 
 
-def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs_and_banks():
+def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs_by_bank():
     params = make_params()
     sample_runs = [
         loki.data.loki_tutorial_sample_run_60250(),
@@ -235,12 +235,13 @@ def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs_and_banks()
     key = BackgroundSubtractedIofQ
     reference = pipeline.compute(key)
 
-    pipeline = sans.with_banks(pipeline, banks=['larmor_detector', 'larmor_detector'])
-    result = pipeline.compute(key)
+    pipeline = sans.with_banks(
+        pipeline, banks=['larmor_detector', 'larmor_detector'], index=['bank0', 'bank1']
+    )
+    results = sciline.compute_mapped(pipeline, key)
 
-    # Note that the variances are not the same for the bank-merged data since we use
-    # the same detector twice.
-    assert_identical(sc.values(result), sc.values(reference))
+    assert_identical(sc.values(results['bank0']), sc.values(reference))
+    assert_identical(sc.values(results['bank1']), sc.values(reference))
 
 
 def test_pipeline_IofQ_merging_events_yields_consistent_results():

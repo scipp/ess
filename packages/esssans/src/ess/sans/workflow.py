@@ -52,9 +52,17 @@ def with_pixel_mask_filenames(
     return workflow
 
 
-def with_banks(workflow: sciline.Pipeline, banks: Iterable[str]) -> sciline.Pipeline:
+def with_banks(
+    workflow: sciline.Pipeline,
+    banks: Iterable[str],
+    index: Iterable[Hashable] | None = None,
+) -> sciline.Pipeline:
     """
     Return modified workflow with bank names set.
+
+    Since banks typically have different Q-resolution the I(Q) of banks are not merged.
+    That is, the resulting workflow will have separate outputs for each bank. Use
+    :py:func:`sciline.compute_mapped` to compute results for all banks.
 
     Parameters
     ----------
@@ -62,17 +70,13 @@ def with_banks(workflow: sciline.Pipeline, banks: Iterable[str]) -> sciline.Pipe
         Workflow to modify.
     banks:
         List or tuple of bank names to set.
+    index:
+        Index to use for the DataFrame. If not provided, the bank names are used.
     """
-    workflow = workflow.copy()
-    banks = pd.DataFrame({NeXusDetectorName: banks}).rename_axis('bank')
-    for run in (SampleRun, BackgroundRun):
-        for part in (Numerator, Denominator):
-            workflow[CleanSummedQ[run, part]] = (
-                workflow[CleanSummedQ[run, part]]
-                .map(banks)
-                .reduce(index='bank', func=merge_contributions)
-            )
-    return workflow
+    index = index or banks
+    return workflow.map(
+        pd.DataFrame({NeXusDetectorName: banks}, index=index).rename_axis('bank')
+    )
 
 
 def _set_runs(

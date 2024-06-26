@@ -24,7 +24,7 @@ beautifulsoup4==4.12.3
     #   pydata-sphinx-theme
 bleach==6.1.0
     # via nbconvert
-debugpy==1.8.1
+debugpy==1.8.2
     # via ipykernel
 defusedxml==0.7.1
     # via nbconvert
@@ -94,9 +94,9 @@ nest-asyncio==1.6.0
     # via ipykernel
 pandocfilters==1.5.1
     # via nbconvert
-psutil==5.9.8
+psutil==6.0.0
     # via ipykernel
-pydata-sphinx-theme==0.15.3
+pydata-sphinx-theme==0.15.4
     # via -r docs.in
 pyzmq==26.0.3
     # via
@@ -123,7 +123,7 @@ sphinx==7.3.7
     #   sphinx-autodoc-typehints
     #   sphinx-copybutton
     #   sphinx-design
-sphinx-autodoc-typehints==2.1.1
+sphinx-autodoc-typehints==2.2.2
     # via -r docs.in
 sphinx-copybutton==0.5.2
     # via -r docs.in
