@@ -1,8 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
-from scipp.constants import h, m_n, pi
+from scipp.constants import pi
 from scippneutron._utils import elem_dtype, elem_unit
+from scippneutron.conversion.beamline import scattering_angle_in_yz_plane
 from scippneutron.conversion.graph import beamline, tof
 
 from .types import (
@@ -22,54 +23,61 @@ from .types import (
 
 
 def theta(
-    gravity: sc.Variable,
-    wavelength: sc.Variable,
+    incident_beam: sc.Variable,
     scattered_beam: sc.Variable,
+    wavelength: sc.Variable,
+    gravity: sc.Variable,
     sample_rotation: sc.Variable,
 ) -> sc.Variable:
-    """
-    Compute the theta angle, including gravity correction,
-    This is similar to the theta calculation in SANS (see
-    https://docs.mantidproject.org/nightly/algorithms/Q1D-v2.html#q-unit-conversion),
-    but we ignore the horizontal `x` component.
-    See the schematic in Fig 5 of doi: 10.1016/j.nima.2016.03.007.
+    r"""Compute the scattering angle w.r.t. the sample plane.
+
+    This function uses the definition given in
+    :func:`scippneutron.conversion.beamline.scattering_angle_in_yz_plane`
+    and includes the sample rotation :math:`\omega`:
+
+    .. math::
+
+        \mathsf{tan}(\gamma) &= \frac{|y_d^{\prime}|}{z_d} \\
+        \theta = \gamma - \omega
+
+    with
+
+    .. math::
+
+        y'_d = y_d + \frac{|g| m_n^2}{2 h^2} L_2^{\prime\, 2} \lambda^2
+
+    Attention
+    ---------
+        The above equation for :math:`y'_d` approximates :math:`L_2 \approx L'_2`.
+        See :func:`scippneutron.conversion.beamline.scattering_angle_in_yz_plane`
+        for more information.
 
     Parameters
     ----------
-    gravity:
-        The three-dimensional vector describing gravity.
+    incident_beam:
+        Beam from source to sample. Expects ``dtype=vector3``.
+    scattered_beam:
+        Beam from sample to detector. Expects ``dtype=vector3``.
     wavelength:
-        Wavelength values for the events.
-    scatter_beam:
-        Vector for scattered beam.
+        Wavelength of neutrons.
+    gravity:
+        Gravity vector.
     sample_rotation:
-        Rotation of sample wrt to incoming beam.
+        The sample rotation angle :math:`\omega`.
 
     Returns
     -------
     :
-        Theta values, accounting for gravity.
+        The polar scattering angle :math:`\theta`.
     """
-    grav = sc.norm(gravity)
-    L2 = sc.norm(scattered_beam)
-    y = sc.dot(scattered_beam, gravity) / grav
-    y_correction = sc.to_unit(wavelength, elem_unit(L2), copy=True)
-    y_correction *= y_correction
-    drop = L2**2
-    drop *= grav * (m_n**2 / (2 * h**2))
-    # Optimization when handling either the dense or the event coord of binned data:
-    # - For the event coord, both operands have same dims, and we can multiply in place
-    # - For the dense coord, we need to broadcast using non in-place operation
-    if set(drop.dims).issubset(set(y_correction.dims)):
-        y_correction *= drop
-    else:
-        y_correction = y_correction * drop
-    y_correction += y
-    out = sc.abs(y_correction, out=y_correction)
-    out /= L2
-    out = sc.asin(out, out=out)
-    out -= sc.to_unit(sample_rotation, "rad")
-    return out
+    angle = scattering_angle_in_yz_plane(
+        incident_beam=incident_beam,
+        scattered_beam=scattered_beam,
+        wavelength=wavelength,
+        gravity=gravity,
+    )
+    angle -= sample_rotation.to(unit=elem_unit(angle))
+    return angle
 
 
 def reflectometry_q(wavelength: sc.Variable, theta: sc.Variable) -> sc.Variable:
