@@ -103,8 +103,10 @@ def _group(detectors: Dict[str, sc.DataArray]) -> Dict[str, sc.DataGroup]:
     def group(key: str, da: sc.DataArray) -> sc.DataArray:
         if key in ["high_resolution", "sans"]:
             # Only the HR and SANS detectors have sectors.
-            return da.group("sector", *elements)
-        res = da.group(*elements)
+            res = da.group("sector", *elements)
+        else:
+            res = da.group(*elements)
+        res.coords['position'] = res.bins.coords.pop('position').bins.mean()
         res.bins.coords.pop("sector", None)
         return res
 
@@ -168,15 +170,11 @@ def _extract_detector(
     return events
 
 
-def get_source_position(
-    raw_source: RawSource[RunType],
-) -> SourcePosition[RunType]:
+def get_source_position(raw_source: RawSource[RunType]) -> SourcePosition[RunType]:
     return SourcePosition[RunType](raw_source["position"])
 
 
-def get_sample_position(
-    raw_sample: RawSample[RunType],
-) -> SamplePosition[RunType]:
+def get_sample_position(raw_sample: RawSample[RunType]) -> SamplePosition[RunType]:
     return SamplePosition[RunType](raw_sample["position"])
 
 
@@ -185,10 +183,11 @@ def patch_detector_data(
     source_position: SourcePosition[RunType],
     sample_position: SamplePosition[RunType],
 ) -> ReducibleDetectorData[RunType]:
-    out = detector_data.copy(deep=False)
-    out.coords["source_position"] = source_position
-    out.coords["sample_position"] = sample_position
-    return ReducibleDetectorData[RunType](out)
+    return ReducibleDetectorData[RunType](
+        detector_data.assign_coords(
+            source_position=source_position, sample_position=sample_position
+        )
+    )
 
 
 def geant4_detector_dimensions(

@@ -137,7 +137,7 @@ def test_pipeline_two_theta_masking(providers, params):
     pipeline = sciline.Pipeline(providers, params=params)
     pipeline = powder.with_pixel_mask_filenames(pipeline, [])
     masked_sample = pipeline.compute(MaskedData[SampleRun])
-    assert 'two_theta' in masked_sample.bins.masks
+    assert 'two_theta' in masked_sample.masks
     sum_in_masked_region = (
         masked_sample.bin(two_theta=sc.concat([tmin, tmax], dim='two_theta')).sum().data
     )
