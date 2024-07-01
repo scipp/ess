@@ -113,7 +113,6 @@ def test_load_geant4_csv_mantle_has_expected_coords(file):
 
     assert "sector" not in mantle.bins.coords
     assert "tof" in mantle.bins.coords
-    assert "wavelength" in mantle.bins.coords
     assert "position" in mantle.coords
 
 
@@ -128,7 +127,6 @@ def test_load_geant4_csv_endcap_backward_has_expected_coords(file):
 
     assert "sector" not in endcap.bins.coords
     assert "tof" in endcap.bins.coords
-    assert "wavelength" in endcap.bins.coords
     assert "position" in endcap.coords
 
 
@@ -143,7 +141,6 @@ def test_load_geant4_csv_endcap_forward_has_expected_coords(file):
 
     assert "sector" not in endcap.bins.coords
     assert "tof" in endcap.bins.coords
-    assert "wavelength" in endcap.bins.coords
     assert "position" in endcap.coords
 
 
@@ -157,7 +154,6 @@ def test_load_geant4_csv_high_resolution_has_expected_coords(file):
     assert_index_coord(hr.coords["sector"], values=set(range(1, 5)))
 
     assert "tof" in hr.bins.coords
-    assert "wavelength" in hr.bins.coords
     assert "position" in hr.coords
 
 
@@ -174,7 +170,6 @@ def test_load_geant4_csv_sans_has_expected_coords(file):
         assert_index_coord(sans.coords["sector"], values=set(range(1, 5)))
 
     assert "tof" in sans.bins.coords
-    assert "wavelength" in sans.bins.coords
     assert "position" in sans.coords
 
 

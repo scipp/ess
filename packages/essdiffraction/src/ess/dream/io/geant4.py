@@ -83,6 +83,7 @@ def _load_raw_events(file_path: str) -> sc.DataArray:
         file_path, sep="\t", header_parser="bracket", data_columns=[]
     )
     table = table.rename_dims(row="event")
+    table.coords.pop("lambda")
     return sc.DataArray(
         sc.ones(sizes=table.sizes, with_variances=True, unit="counts"),
         coords=table.coords,
@@ -90,8 +91,6 @@ def _load_raw_events(file_path: str) -> sc.DataArray:
 
 
 def _adjust_coords(da: sc.DataArray) -> None:
-    da.coords["wavelength"] = da.coords.pop("lambda")
-    da.coords["wavelength"].unit = "angstrom"
     da.coords["position"] = sc.spatial.as_vectors(
         da.coords.pop("x_pos"), da.coords.pop("y_pos"), da.coords.pop("z_pos")
     )
