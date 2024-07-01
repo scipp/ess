@@ -236,12 +236,12 @@ def PolarizationAnalysisWorkflow(
     return workflow
 
 
-def HalfPolarizedAnalysisWorkflow(
+def HalfPolarizedWorkflow(
     *,
     polarizer_workflow: sciline.Pipeline,
 ) -> sciline.Pipeline:
     """
-    Create a half-polarized analysis workflow, i.e, with a polarizer but no analyzer.
+    Create a half-polarized workflow, i.e, with a polarizer but no analyzer.
 
     Parameters
     ----------
@@ -251,7 +251,7 @@ def HalfPolarizedAnalysisWorkflow(
     Returns
     -------
     :
-        Full workflow for half-polarized analysis.
+        Half-polarized workflow.
     """
     workflow = CorrectionWorkflow(half_polarized=True)
     workflow[TransmissionFunction[Polarizer]] = polarizer_workflow[

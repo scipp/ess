@@ -14,7 +14,7 @@ del importlib
 
 from .correction import (
     CorrectionWorkflow,
-    HalfPolarizedAnalysisWorkflow,
+    HalfPolarizedWorkflow,
     PolarizationAnalysisWorkflow,
 )
 from .he3 import (
@@ -56,7 +56,7 @@ __all__ = [
     "DirectBeamNoCell",
     "DirectBeamQRange",
     "Down",
-    "HalfPolarizedAnalysisWorkflow",
+    "HalfPolarizedWorkflow",
     "HalfPolarizedCorrectedData",
     "He3CellLength",
     "He3CellPressure",

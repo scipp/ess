@@ -12,7 +12,7 @@
 
    CorrectionWorkflow
    He3CellWorkflow
-   HalfPolarizedAnalysisWorkflow
+   HalfPolarizedWorkflow
    PolarizationAnalysisWorkflow
    SupermirrorWorkflow
 
