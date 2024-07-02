@@ -292,8 +292,6 @@ def get_he3_transmission_incoming_polarized_from_fit_to_direct_beam(
     This is composed from the opacity-function and the polarization-function.
     The implementation fits a time- and wavelength-dependent equation and returns
     the fitted T(t, lambda).
-
-    DB_pol/DB = T_E * cosh(O(lambda)*P(t))*exp(-O(lambda))
     """
     # The two transmission fractions do not share a common time coordinate. Therefore,
     # we cannot concat along a third dimension for the fit, but concat along time,
