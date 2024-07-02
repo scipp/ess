@@ -43,13 +43,13 @@ class He3FillingTime(sl.Scope[PolarizingElement, sc.Variable], sc.Variable):
     """Filling wall-clock time for a given cell."""
 
 
-class He3CellTransmissionFraction(
+class He3CellTransmissionFractionIncomingUnpolarized(
     sl.ScopeTwoParams[PolarizingElement, PolarizationState, sc.DataArray], sc.DataArray
 ):
     """Transmission fraction for a given cell"""
 
 
-class He3AnalyzerTransmissionFraction(
+class He3AnalyzerTransmissionFractionIncomingPolarized(
     sl.ScopeTwoParams[PolarizerSpin, PolarizationState, sc.DataArray], sc.DataArray
 ):
     """Transmission fraction of the analyzer with polarized incoming beam"""
@@ -135,7 +135,9 @@ def _with_midpoints(data: sc.DataArray, dim: str) -> sc.DataArray:
 
 def he3_opacity_function_from_beam_data(
     transmission_empty_glass: He3TransmissionEmptyGlass[PolarizingElement],
-    transmission_fraction: He3CellTransmissionFraction[PolarizingElement, Depolarized],
+    transmission_fraction: He3CellTransmissionFractionIncomingUnpolarized[
+        PolarizingElement, Depolarized
+    ],
     opacity0_initial_guess: He3Opacity0[PolarizingElement],
 ) -> He3OpacityFunction[PolarizingElement]:
     """
@@ -218,7 +220,9 @@ def transmission_incoming_unpolarized(
 def compute_transmission_fraction_from_direct_beam(
     direct_beam_no_cell: DirectBeamNoCell,
     direct_beam_polarized: He3DirectBeam[PolarizingElement, PolarizationState],
-) -> He3CellTransmissionFraction[PolarizingElement, PolarizationState]:
+) -> He3CellTransmissionFractionIncomingUnpolarized[
+    PolarizingElement, PolarizationState
+]:
     """
     Compute the transmission fraction for a given cell and polarization state.
 
@@ -231,13 +235,15 @@ def compute_transmission_fraction_from_direct_beam(
     directly. Note that the regular SANS workflow also normalized to an empty beam
     run, make sure to not perform the division twice.
     """
-    return He3CellTransmissionFraction[PolarizingElement, PolarizationState](
-        direct_beam_polarized / direct_beam_no_cell
-    )
+    return He3CellTransmissionFractionIncomingUnpolarized[
+        PolarizingElement, PolarizationState
+    ](direct_beam_polarized / direct_beam_no_cell)
 
 
 def get_he3_transmission_incoming_unpolarized_from_fit_to_direct_beam(
-    transmission_fraction: He3CellTransmissionFraction[PolarizingElement, Polarized],
+    transmission_fraction: He3CellTransmissionFractionIncomingUnpolarized[
+        PolarizingElement, Polarized
+    ],
     opacity_function: He3OpacityFunction[PolarizingElement],
     transmission_empty_glass: He3TransmissionEmptyGlass[PolarizingElement],
 ) -> TransmissionFunction[PolarizingElement]:
@@ -281,8 +287,12 @@ def get_he3_transmission_incoming_unpolarized_from_fit_to_direct_beam(
 
 
 def get_he3_transmission_incoming_polarized_from_fit_to_direct_beam(
-    transmission_fraction_up: He3AnalyzerTransmissionFraction[Up, Polarized],
-    transmission_fraction_down: He3AnalyzerTransmissionFraction[Down, Polarized],
+    transmission_fraction_up: He3AnalyzerTransmissionFractionIncomingPolarized[
+        Up, Polarized
+    ],
+    transmission_fraction_down: He3AnalyzerTransmissionFractionIncomingPolarized[
+        Down, Polarized
+    ],
     opacity_function: He3OpacityFunction[Analyzer],
     transmission_empty_glass: He3TransmissionEmptyGlass[Analyzer],
 ) -> TransmissionFunction[Analyzer]:
