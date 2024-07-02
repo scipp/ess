@@ -8,6 +8,7 @@ import scipp as sc
 
 from .types import (
     Analyzer,
+    AnalyzerSpin,
     Down,
     PlusMinus,
     PolarizerSpin,
@@ -50,7 +51,7 @@ class He3CellTransmissionFractionIncomingUnpolarized(
 
 
 class He3AnalyzerTransmissionFractionIncomingPolarized(
-    sl.ScopeTwoParams[PolarizerSpin, PolarizationState, sc.DataArray], sc.DataArray
+    sl.ScopeTwoParams[PolarizerSpin, AnalyzerSpin, sc.DataArray], sc.DataArray
 ):
     """Transmission fraction of the analyzer with polarized incoming beam"""
 
@@ -287,12 +288,10 @@ def get_he3_transmission_incoming_unpolarized_from_fit_to_direct_beam(
 
 
 def get_he3_transmission_incoming_polarized_from_fit_to_direct_beam(
-    transmission_fraction_up: He3AnalyzerTransmissionFractionIncomingPolarized[
-        Up, Polarized
-    ],
-    transmission_fraction_down: He3AnalyzerTransmissionFractionIncomingPolarized[
-        Down, Polarized
-    ],
+    upup: He3AnalyzerTransmissionFractionIncomingPolarized[Up, Up],
+    updown: He3AnalyzerTransmissionFractionIncomingPolarized[Up, Down],
+    downup: He3AnalyzerTransmissionFractionIncomingPolarized[Down, Up],
+    downdown: He3AnalyzerTransmissionFractionIncomingPolarized[Down, Down],
     opacity_function: He3OpacityFunction[Analyzer],
     transmission_empty_glass: He3TransmissionEmptyGlass[Analyzer],
 ) -> TransmissionFunction[Analyzer]:
@@ -303,12 +302,17 @@ def get_he3_transmission_incoming_polarized_from_fit_to_direct_beam(
     The implementation fits a time- and wavelength-dependent equation and returns
     the fitted T(t, lambda).
     """
-    # The two transmission fractions do not share a common time coordinate. Therefore,
+    # The four transmission fractions do not share a common time coordinate. Therefore,
     # we cannot concat along a third dimension for the fit, but concat along time,
-    # with an additional coordinate for the incoming polarization.
-    up = transmission_fraction_up.assign_coords(incoming_polarization=sc.scalar(1))
-    down = transmission_fraction_down.assign_coords(incoming_polarization=sc.scalar(-1))
-    transmission_fraction = sc.concat([up, down], 'time')
+    # with an additional coordinate for whether polarizations are parallel or
+    # antiparallel.
+    plus = sc.concat([upup, downdown], 'time').assign_coords(
+        incoming_polarization=sc.scalar(1)
+    )
+    minus = sc.concat([updown, downup], 'time').assign_coords(
+        incoming_polarization=sc.scalar(-1)
+    )
+    transmission_fraction = sc.concat([plus, minus], 'time')
 
     def expected_transmission(
         wavelength: sc.Variable,

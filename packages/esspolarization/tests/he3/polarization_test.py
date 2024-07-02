@@ -60,24 +60,24 @@ def test_incoming_polarized_reproduces_input_params_within_errors() -> None:
     polarization_function = he3.He3PolarizationFunction(C=C, T1=T1)
     opacity_function = he3.He3OpacityFunction(opacity0)
     transmission_empty_glass = sc.scalar(0.9)
-    # opacity = opacity_function(wavelength)
-    # polarization = polarization_function(time)
     transmission_function = he3.He3TransmissionFunction(
         transmission_empty_glass=transmission_empty_glass,
         opacity_function=opacity_function,
         polarization_function=polarization_function,
     )
-    # State switch of incoming polarization at 456th time point.
-    transmission_up = transmission_function(
+    # State switch at 456th time point, cut further below into 4 channels total.
+    plus = transmission_function(
         time=time[:456], wavelength=wavelength, plus_minus='plus'
     )
-    transmission_down = transmission_function(
+    minus = transmission_function(
         time=time[456:], wavelength=wavelength, plus_minus='minus'
     )
 
     result = he3.get_he3_transmission_incoming_polarized_from_fit_to_direct_beam(
-        transmission_fraction_up=transmission_up,
-        transmission_fraction_down=transmission_down,
+        upup=plus['time', :100],
+        updown=minus['time', :200],
+        downup=minus['time', 200:],
+        downdown=plus['time', 100:],
         opacity_function=opacity_function,
         transmission_empty_glass=transmission_empty_glass,
     )
@@ -89,18 +89,16 @@ def test_incoming_polarized_reproduces_input_params_within_errors() -> None:
     assert sc.isclose(polarization_function.T1, T1)
 
     rng = np.random.default_rng(seed=1234)
-    transmission_plus_noisy = transmission_up.copy()
-    transmission_minus_noisy = transmission_down.copy()
-    transmission_plus_noisy.values += rng.normal(
-        0.0, 0.01, transmission_plus_noisy.shape
-    )
-    transmission_minus_noisy.values += rng.normal(
-        0.0, 0.01, transmission_minus_noisy.shape
-    )
+    plus_noisy = plus.copy()
+    minus_noisy = minus.copy()
+    plus_noisy.values += rng.normal(0.0, 0.01, plus_noisy.shape)
+    minus_noisy.values += rng.normal(0.0, 0.01, minus_noisy.shape)
 
     result = he3.get_he3_transmission_incoming_polarized_from_fit_to_direct_beam(
-        transmission_fraction_up=transmission_plus_noisy,
-        transmission_fraction_down=transmission_minus_noisy,
+        upup=plus_noisy['time', :100],
+        updown=minus_noisy['time', :200],
+        downup=minus_noisy['time', 200:],
+        downdown=plus_noisy['time', 100:],
         opacity_function=opacity_function,
         transmission_empty_glass=transmission_empty_glass,
     )
