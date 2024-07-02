@@ -12,6 +12,7 @@
 
    CorrectionWorkflow
    He3CellWorkflow
+   HalfPolarizedWorkflow
    PolarizationAnalysisWorkflow
    SupermirrorWorkflow
 
@@ -31,6 +32,7 @@
    DirectBeamNoCell
    DirectBeamQRange
    Down
+   HalfPolarizedCorrectedData
    He3CellLength
    He3CellPressure
    He3DirectBeam
