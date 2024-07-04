@@ -2,7 +2,6 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 import pytest
 import scipp as sc
-
 from ess.nmx.scaling import (
     ReferenceIntensities,
     estimate_scale_factor_per_hkl_asu_from_reference,

@@ -5,11 +5,10 @@ import pathlib
 import gemmi
 import pytest
 import scipp as sc
-
 from ess.nmx import mtz_io
 from ess.nmx.data import get_small_mtz_samples
-from ess.nmx.mtz_io import DEFAULT_SPACE_GROUP_DESC  # P 21 21 21
 from ess.nmx.mtz_io import (
+    DEFAULT_SPACE_GROUP_DESC,  # P 21 21 21
     MtzDataFrame,
     MTZFileIndex,
     MTZFilePath,

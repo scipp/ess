@@ -4,7 +4,6 @@ import pandas as pd
 import pytest
 import sciline as sl
 import scipp as sc
-
 from ess.nmx import default_parameters
 from ess.nmx.data import small_mcstas_2_sample, small_mcstas_3_sample
 from ess.nmx.mcstas.load import providers as load_providers
