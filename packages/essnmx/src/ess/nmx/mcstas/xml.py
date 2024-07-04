@@ -1,9 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # McStas instrument geometry xml description related functions.
+from collections.abc import Iterable
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import Iterable, Optional, Protocol, Tuple, TypeVar
+from typing import Protocol, TypeVar
 
 import h5py
 import scipp as sc
@@ -33,7 +34,7 @@ class _XML(Protocol):
     tag: str
     attrib: dict[str, str]
 
-    def find(self, name: str) -> Optional['_XML']: ...
+    def find(self, name: str) -> '_XML | None': ...
 
     def __iter__(self) -> '_XML': ...
 
@@ -210,7 +211,7 @@ class DetectorDesc:
         return self.num_x if self.fast_axis_name == 'x' else self.num_y
 
 
-def _collect_detector_descriptions(tree: _XML) -> Tuple[DetectorDesc, ...]:
+def _collect_detector_descriptions(tree: _XML) -> tuple[DetectorDesc, ...]:
     """Retrieve detector geometry descriptions from mcstas file."""
     type_list = list(filter_by_tag(tree, 'type'))
     simulation_settings = SimulationSettings.from_xml(tree)
@@ -245,7 +246,7 @@ class SampleDesc:
     name: str
     # From <location> under <component type="sampleMantid-type" ...>
     position: sc.Variable
-    rotation_matrix: Optional[sc.Variable]
+    rotation_matrix: sc.Variable | None
 
     @classmethod
     def from_xml(
@@ -307,7 +308,7 @@ class SourceDesc:
         )
 
 
-def _construct_pixel_ids(detector_descs: Tuple[DetectorDesc, ...]) -> sc.Variable:
+def _construct_pixel_ids(detector_descs: tuple[DetectorDesc, ...]) -> sc.Variable:
     """Pixel IDs for all detectors."""
     intervals = [
         (desc.id_start, desc.id_start + desc.total_pixels) for desc in detector_descs
@@ -340,7 +341,7 @@ def _pixel_positions(
 
 
 def _detector_pixel_positions(
-    detector_descs: Tuple[DetectorDesc, ...], sample: SampleDesc
+    detector_descs: tuple[DetectorDesc, ...], sample: SampleDesc
 ) -> sc.Variable:
     """Position of pixels of all detectors."""
     positions = [
@@ -353,7 +354,7 @@ def _detector_pixel_positions(
 @dataclass
 class McStasInstrument:
     simulation_settings: SimulationSettings
-    detectors: Tuple[DetectorDesc, ...]
+    detectors: tuple[DetectorDesc, ...]
     source: SourceDesc
     sample: SampleDesc
 
