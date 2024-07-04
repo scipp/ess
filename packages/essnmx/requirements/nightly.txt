@@ -6,7 +6,7 @@
 #    pip-compile-multi
 #
 -r basetest.txt
-certifi==2024.6.2
+certifi==2024.7.4
     # via requests
 charset-normalizer==3.3.2
     # via requests
@@ -26,7 +26,7 @@ defusedxml==0.7.1
     # via -r nightly.in
 fonttools==4.53.0
     # via matplotlib
-fsspec==2024.6.0
+fsspec==2024.6.1
     # via dask
 gemmi==0.6.6
     # via -r nightly.in
@@ -36,13 +36,13 @@ h5py==3.11.0
     # via scippnexus
 idna==3.7
     # via requests
-importlib-metadata==7.2.1
+importlib-metadata==8.0.0
     # via dask
 kiwisolver==1.4.5
     # via matplotlib
 locket==1.0.0
     # via partd
-matplotlib==3.9.0
+matplotlib==3.9.1
     # via plopp
 networkx==3.3
     # via cyclebane
@@ -58,7 +58,7 @@ pandas==2.2.2
     # via -r nightly.in
 partd==1.4.2
     # via dask
-pillow==10.3.0
+pillow==10.4.0
     # via matplotlib
 platformdirs==4.2.2
     # via pooch
@@ -87,7 +87,7 @@ scipp @ https://github.com/scipp/scipp/releases/download/nightly/scipp-nightly-c
     #   scippnexus
 scippnexus @ git+https://github.com/scipp/scippnexus@main
     # via -r nightly.in
-scipy==1.13.1
+scipy==1.14.0
     # via scippnexus
 six==1.16.0
     # via python-dateutil
