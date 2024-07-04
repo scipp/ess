@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-from typing import Optional
+from dataclasses import dataclass
+from typing import Generic, Sequence
 
 import ess.isissans as isis
 import mantid.api as _mantid_api
@@ -28,7 +29,7 @@ sample_run_type = TransmissionRun[SampleRun]
 
 
 def load_histogrammed_run(
-    filename: Filename[sample_run_type], period: Optional[Period]
+    filename: Filename[sample_run_type], period: Period
 ) -> DataWorkspace[sample_run_type]:
     """Load a non-event-data ISIS file"""
     loaded = _mantid_simpleapi.Load(Filename=str(filename), StoreInADS=False)
@@ -65,78 +66,90 @@ def _get_time(dg: sc.DataGroup) -> sc.Variable:
     return start + delta // 2
 
 
-def _get_time_dependent_monitor(
-    runs: list[sc.DataGroup], monitor_spectrum: int
-) -> sc.DataArray:
-    monitors = []
-    for run in runs:
-        # Note we index with a scipp.Variable, i.e., by the spectrum number used at ISIS
-        monitor = run['data']['spectrum', sc.index(monitor_spectrum)].copy()
-        monitor.coords['datetime'] = _get_time(run)
-        monitors.append(monitor)
+def _get_time_dependent_monitor(*monitors: sc.DataArray) -> sc.DataArray:
     monitors = sc.concat(monitors, 'time')
     datetime = monitors.coords['datetime']
     monitors.coords['time'] = datetime - datetime.min()
     del monitors.coords['spectrum']
     del monitors.coords['detector_id']
-    monitors.variances = None
     return monitors
 
 
-def get_time_dependent_incident(
-    runs: sl.Series[
-        Filename[sample_run_type], isis.data.LoadedFileContents[sample_run_type]
-    ],
-) -> RawMonitor[sample_run_type, Incident]:
-    """Extract incident monitor from ZOOM direct-beam run"""
-    return RawMonitor[sample_run_type, Incident](
-        _get_time_dependent_monitor(list(runs.values()), monitor_spectrum=3)
-    )
-
-
-def get_time_dependent_transmission(
-    runs: sl.Series[
-        Filename[sample_run_type], isis.data.LoadedFileContents[sample_run_type]
-    ],
-) -> RawMonitor[sample_run_type, Transmission]:
-    """Extract transmission monitor from ZOOM direct-beam run"""
-    return RawMonitor[sample_run_type, Transmission](
-        _get_time_dependent_monitor(list(runs.values()), monitor_spectrum=5)
-    )
+@dataclass
+class MonitorSpectrumNumber(Generic[MonitorType]):
+    value: int
 
 
 def get_monitor_data(
     dg: LoadedFileContents[RunType], nexus_name: NeXusMonitorName[MonitorType]
 ) -> RawMonitor[RunType, MonitorType]:
+    """
+    Same as :py:func:`ess.isissans.get_monitor_data` but dropping variances.
+
+    Dropping variances is a workaround required since ESSsans does not handle
+    variance broadcasting when combining monitors. In our case some of the monitors
+    are time-dependent, so this is required for now.
+    """
     # See https://github.com/scipp/sciline/issues/52 why copy needed
     mon = dg['monitors'][nexus_name]['data'].copy()
-    # TODO This is a hack to work around broadcasting issues of variances when
-    # computing the transmission fraction.
     return RawMonitor[RunType, MonitorType](sc.values(mon))
 
 
-def ZoomTransmissionFractionWorkflow() -> sl.Pipeline:
+def get_monitor_data_from_transmission_run(
+    dg: LoadedFileContents[TransmissionRun[RunType]],
+    spectrum_number: MonitorSpectrumNumber[MonitorType],
+) -> RawMonitor[TransmissionRun[RunType], MonitorType]:
+    """
+    Extract incident or transmission monitor from ZOOM direct-beam run
+
+    The files in this case do not contain detector data, only monitor data. Mantid
+    stores this as a Workspace2D, where each spectrum corresponds to a monitor.
+    """
+    # Note we index with a scipp.Variable, i.e., by the spectrum number used at ISIS
+    monitor = dg['data']['spectrum', sc.index(spectrum_number.value)].copy()
+    monitor.coords['datetime'] = _get_time(dg)
+    return monitor
+
+
+def ZoomTransmissionFractionWorkflow(runs: Sequence[str]) -> sl.Pipeline:
     """
     Workflow computing time-dependent SANS transmission fraction from ZOOM data.
 
-    The time-dependence is obtained by using a series of runs. This should be set as
-    a parameter series:
+    The time-dependence is obtained by using a sequence of runs.
 
     .. code-block:: python
 
-        workflow = ZoomTransmissionFractionWorkflow()
-        workflow.set_param_series(Filename[TransmissionRun[SampleRun]], cell_runs)
+        workflow = ZoomTransmissionFractionWorkflow(cell_runs)
 
     Note that in this case the "sample" (of which the transmission is to be computed)
     is the He3 analyzer cell.
+
+    Parameters
+    ----------
+    runs:
+        List of filenames of the runs to use for the transmission fraction.
     """
     workflow = isis.zoom.ZoomWorkflow()
     workflow.insert(get_monitor_data)
+    workflow.insert(get_monitor_data_from_transmission_run)
     workflow.insert(load_histogrammed_run)
-    workflow.insert(get_time_dependent_incident)
-    workflow.insert(get_time_dependent_transmission)
-    workflow[NeXusMonitorName[Incident]] = 'monitor3'
-    workflow[NeXusMonitorName[Transmission]] = 'monitor5'
+
+    mapped = workflow.map({Filename[TransmissionRun[SampleRun]]: runs})
+    for mon_type in (Incident, Transmission):
+        workflow[RawMonitor[TransmissionRun[SampleRun], mon_type]] = mapped[
+            RawMonitor[TransmissionRun[SampleRun], mon_type]
+        ].reduce(func=_get_time_dependent_monitor)
+
+    # We are dealing with two different types of files, and monitors are identified
+    # differently in each case, so there is some duplication here.
+    workflow[MonitorSpectrumNumber[Incident]] = MonitorSpectrumNumber[Incident](3)
+    workflow[MonitorSpectrumNumber[Transmission]] = MonitorSpectrumNumber[Transmission](
+        5
+    )
+    workflow[NeXusMonitorName[Incident]] = NeXusMonitorName[Incident]('monitor3')
+    workflow[NeXusMonitorName[Transmission]] = NeXusMonitorName[Transmission](
+        'monitor5'
+    )
     workflow[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
 
     return workflow

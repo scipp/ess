@@ -26,6 +26,7 @@ extensions = [
     'sphinx_autodoc_typehints',
     'sphinx_copybutton',
     'sphinx_design',
+    'sphinxcontrib.mermaid',
     'nbsphinx',
     'myst_parser',
 ]

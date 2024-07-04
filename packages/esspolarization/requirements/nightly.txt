@@ -12,15 +12,15 @@ cloudpickle==3.0.0
     # via dask
 cyclebane==24.6.0
     # via sciline
-dask==2024.6.1
+dask==2024.6.2
     # via -r nightly.in
-fsspec==2024.6.0
+fsspec==2024.6.1
     # via dask
 graphviz==0.20.3
     # via -r nightly.in
 h5py==3.11.0
     # via scippnexus
-importlib-metadata==7.1.0
+importlib-metadata==8.0.0
     # via dask
 locket==1.0.0
     # via partd
@@ -46,7 +46,7 @@ scipp @ https://github.com/scipp/scipp/releases/download/nightly/scipp-nightly-c
     #   scippnexus
 scippnexus @ git+https://github.com/scipp/scippnexus@main
     # via -r nightly.in
-scipy==1.13.1
+scipy==1.14.0
     # via
     #   -r nightly.in
     #   scippnexus
