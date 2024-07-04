@@ -8,8 +8,6 @@ import pytest
 import sciline as sl
 import scipp as sc
 import scippnexus as snx
-from scipp.testing import assert_allclose, assert_identical
-
 from ess.nmx import default_parameters
 from ess.nmx.data import small_mcstas_2_sample, small_mcstas_3_sample
 from ess.nmx.mcstas.load import bank_names_to_detector_names
@@ -21,6 +19,7 @@ from ess.nmx.types import (
     FilePath,
     MaximumProbability,
 )
+from scipp.testing import assert_allclose, assert_identical
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from mcstas_description_examples import (  # noqa: E402

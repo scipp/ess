@@ -5,7 +5,6 @@ import io
 import numpy as np
 import pytest
 import scipp as sc
-
 from ess.nmx.nexus import export_as_nexus
 from ess.nmx.reduction import NMXReducedData
 
