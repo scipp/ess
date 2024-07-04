@@ -8,6 +8,6 @@ from functools import partial
 import pytest
 
 
-@pytest.fixture()()
+@pytest.fixture()
 def mcstas_2_deprecation_warning_context() -> partial[AbstractContextManager]:
     return partial(pytest.warns, DeprecationWarning, match="McStas")
