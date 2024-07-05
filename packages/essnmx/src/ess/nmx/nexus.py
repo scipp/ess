@@ -3,7 +3,6 @@
 import io
 import pathlib
 from functools import partial
-from typing import Optional, Union
 
 import h5py
 import scipp as sc
@@ -14,11 +13,11 @@ def _create_dataset_from_var(
     root_entry: h5py.Group,
     var: sc.Variable,
     name: str,
-    long_name: Optional[str] = None,
-    compression: Optional[str] = None,
-    compression_opts: Optional[int] = None,
+    long_name: str | None = None,
+    compression: str | None = None,
+    compression_opts: int | None = None,
 ) -> h5py.Dataset:
-    compression_options = dict()
+    compression_options = {}
     if compression is not None:
         compression_options["compression"] = compression
     if compression_opts is not None:
@@ -124,7 +123,7 @@ def _create_source_group(data: sc.DataGroup, nx_entry: h5py.Group) -> h5py.Group
 
 
 def export_as_nexus(
-    data: sc.DataGroup, output_file: Union[str, pathlib.Path, io.BytesIO]
+    data: sc.DataGroup, output_file: str | pathlib.Path | io.BytesIO
 ) -> None:
     """Export the reduced data to a NeXus file.
 
