@@ -4,7 +4,6 @@ import pandas as pd
 import pytest
 import sciline as sl
 import scipp as sc
-
 from ess.nmx import default_parameters
 from ess.nmx.data import small_mcstas_2_sample, small_mcstas_3_sample
 from ess.nmx.mcstas.load import providers as load_providers
@@ -23,7 +22,7 @@ def mcstas_file_path(
     return request.param()
 
 
-@pytest.fixture
+@pytest.fixture()
 def mcstas_workflow(mcstas_file_path: str) -> sl.Pipeline:
     return sl.Pipeline(
         [*load_providers, bin_time_of_arrival],
@@ -35,7 +34,7 @@ def mcstas_workflow(mcstas_file_path: str) -> sl.Pipeline:
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def multi_bank_mcstas_workflow(mcstas_workflow: sl.Pipeline) -> sl.Pipeline:
     pl = mcstas_workflow.copy()
     pl[NMXReducedData] = (

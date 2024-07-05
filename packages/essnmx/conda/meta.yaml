@@ -6,6 +6,11 @@ package:
 source:
   path: ..
 
+
+{% set pyproject = load_file_data('pyproject.toml') %}
+{% set dependencies = pyproject.get('project', {}).get('dependencies', {}) %}
+
+
 requirements:
   build:
     - setuptools
@@ -22,6 +27,12 @@ requirements:
     - python>=3.10
     - gemmi
     - pandas
+
+  {# Conda does not allow spaces between package name and version, so remove them #}
+  {% for package in dependencies %}
+    - {% if package == "graphviz" %}python-graphviz{% else %}{{ package|replace(" ", "") }}{% endif %}
+  {% endfor %}
+
 
 test:
   imports:

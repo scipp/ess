@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import re
-from typing import Dict, List
 
 import scipp as sc
 import scippnexus as snx
@@ -117,7 +116,7 @@ def proton_charge_from_event_data(da: EventData) -> ProtonCharge:
     return ProtonCharge(sc.scalar(1 / 10_000, unit=None) * da.bins.size().sum().data)
 
 
-def bank_names_to_detector_names(description: str) -> Dict[str, List[str]]:
+def bank_names_to_detector_names(description: str) -> dict[str, list[str]]:
     """Associates event data names with the names of the detectors
     where the events were detected"""
 
