@@ -22,7 +22,7 @@ def mcstas_file_path(
     return request.param()
 
 
-@pytest.fixture
+@pytest.fixture()
 def mcstas_workflow(mcstas_file_path: str) -> sl.Pipeline:
     return sl.Pipeline(
         [*load_providers, bin_time_of_arrival],
@@ -34,7 +34,7 @@ def mcstas_workflow(mcstas_file_path: str) -> sl.Pipeline:
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def multi_bank_mcstas_workflow(mcstas_workflow: sl.Pipeline) -> sl.Pipeline:
     pl = mcstas_workflow.copy()
     pl[NMXReducedData] = (
