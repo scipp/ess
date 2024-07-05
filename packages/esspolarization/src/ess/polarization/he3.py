@@ -56,6 +56,18 @@ class He3AnalyzerTransmissionFractionIncomingPolarized(
     """Transmission fraction of the analyzer with polarized incoming beam"""
 
 
+He3AnalyzerTransmissionFractionPlus = NewType(
+    'He3AnalyzerTransmissionFractionPlus', sc.DataArray
+)
+"""Transmission fraction of analyzer with parallel polarized incoming beam"""
+
+
+He3AnalyzerTransmissionFractionMinus = NewType(
+    'He3AnalyzerTransmissionFractionMinus', sc.DataArray
+)
+"""Transmission fraction of analyzer with anti-parallel polarized incoming beam"""
+
+
 class He3TransmissionEmptyGlass(sl.Scope[PolarizingElement, sc.Variable], sc.Variable):
     """Transmission of the empty glass for a given cell."""
 
@@ -287,11 +299,45 @@ def get_he3_transmission_incoming_unpolarized_from_fit_to_direct_beam(
     )
 
 
-def get_he3_transmission_incoming_polarized_from_fit_to_direct_beam(
+def transmission_fraction_analyzer_parallel(
     upup: He3AnalyzerTransmissionFractionIncomingPolarized[Up, Up],
+    downdown: He3AnalyzerTransmissionFractionIncomingPolarized[Down, Down],
+) -> He3AnalyzerTransmissionFractionPlus:
+    """
+    Analyzer Transmission fraction with polarization parallel to incoming beam.
+
+    It may not always we desirable to use both up-up and down-down transmission,
+    fractions. If that is the case, set He3AnalyzerTransmissionFractionPlus directly
+    instead of using this helper.
+    """
+    # The transmission fractions do not share a common time coordinate. Therefore,
+    # we cannot concat along a third dimension for the fit, but concat along time,
+    # with an additional coordinate for whether polarizations are parallel or
+    # antiparallel.
+    return sc.concat([upup, downdown], 'time').assign_coords(plus_minus=sc.scalar(1))
+
+
+def transmission_fraction_analyzer_antiparallel(
     updown: He3AnalyzerTransmissionFractionIncomingPolarized[Up, Down],
     downup: He3AnalyzerTransmissionFractionIncomingPolarized[Down, Up],
-    downdown: He3AnalyzerTransmissionFractionIncomingPolarized[Down, Down],
+) -> He3AnalyzerTransmissionFractionPlus:
+    """
+    Analyzer transmission fraction with polarization anti-parallel to incoming beam.
+
+    It may not always we desirable to use both up-down and down-up transmission,
+    fractions. If that is the case, set He3AnalyzerTransmissionFractionMinus directly
+    instead of using this helper.
+    """
+    # The transmission fractions do not share a common time coordinate. Therefore,
+    # we cannot concat along a third dimension for the fit, but concat along time,
+    # with an additional coordinate for whether polarizations are parallel or
+    # antiparallel.
+    return sc.concat([updown, downup], 'time').assign_coords(plus_minus=sc.scalar(-1))
+
+
+def get_he3_transmission_incoming_polarized_from_fit_to_direct_beam(
+    plus: He3AnalyzerTransmissionFractionPlus,
+    minus: He3AnalyzerTransmissionFractionMinus,
     opacity_function: He3OpacityFunction[Analyzer],
     transmission_empty_glass: He3TransmissionEmptyGlass[Analyzer],
 ) -> TransmissionFunction[Analyzer]:
@@ -302,22 +348,25 @@ def get_he3_transmission_incoming_polarized_from_fit_to_direct_beam(
     The implementation fits a time- and wavelength-dependent equation and returns
     the fitted T(t, lambda).
     """
-    # The four transmission fractions do not share a common time coordinate. Therefore,
-    # we cannot concat along a third dimension for the fit, but concat along time,
-    # with an additional coordinate for whether polarizations are parallel or
-    # antiparallel.
-    plus = sc.concat([upup, downdown], 'time').assign_coords(
-        incoming_polarization=sc.scalar(1)
-    )
-    minus = sc.concat([updown, downup], 'time').assign_coords(
-        incoming_polarization=sc.scalar(-1)
-    )
+    if (plus_minus := plus.coords.get('plus_minus')) is not None:
+        if not sc.all(plus_minus == sc.scalar(1)):
+            raise ValueError('Expected plus-minus coordinate of plus channel to be +1.')
+    else:
+        plus = plus.assign_coords(plus_minus=sc.scalar(1))
+    if (plus_minus := minus.coords.get('plus_minus')) is not None:
+        if not sc.all(plus_minus == sc.scalar(-1)):
+            raise ValueError(
+                'Expected plus-minus coordinate of minus channel to be -1.'
+            )
+    else:
+        minus = minus.assign_coords(plus_minus=sc.scalar(-1))
+
     transmission_fraction = sc.concat([plus, minus], 'time')
 
     def expected_transmission(
         wavelength: sc.Variable,
         time: sc.Variable,
-        incoming_polarization: sc.Variable,
+        plus_minus: sc.Variable,
         C: sc.Variable,
         T1: sc.Variable,
     ) -> sc.Variable:
@@ -326,10 +375,10 @@ def get_he3_transmission_incoming_polarized_from_fit_to_direct_beam(
             opacity_function=opacity_function,
             polarization_function=polarization_function,
             transmission_empty_glass=transmission_empty_glass,
-        )(time=time, wavelength=wavelength, plus_minus=incoming_polarization)
+        )(time=time, wavelength=wavelength, plus_minus=plus_minus)
 
     popt, _ = sc.curve_fit(
-        ['wavelength', 'time', 'incoming_polarization'],
+        ['wavelength', 'time', 'plus_minus'],
         expected_transmission,
         _with_midpoints(transmission_fraction, 'wavelength'),
         p0={'C': sc.scalar(0.8, unit=''), 'T1': sc.scalar(400000.0, unit='s')},
@@ -468,5 +517,7 @@ def He3CellWorkflow(
     # required for computing the *polarizer* transmission calculation.
     workflow.insert(get_he3_transmission_incoming_unpolarized_from_fit_to_direct_beam)
     if incoming_polarized:
+        workflow.insert(transmission_fraction_analyzer_parallel)
+        workflow.insert(transmission_fraction_analyzer_antiparallel)
         workflow.insert(get_he3_transmission_incoming_polarized_from_fit_to_direct_beam)
     return workflow
