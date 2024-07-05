@@ -59,4 +59,7 @@ supermirror_providers = (
 
 
 def SupermirrorWorkflow() -> sciline.Pipeline:
+    """
+    Workflow for computing transmission functions for supermirror polarizing elements.
+    """
     return sciline.Pipeline(supermirror_providers)
