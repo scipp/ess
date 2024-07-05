@@ -56,14 +56,14 @@ class He3AnalyzerTransmissionFractionIncomingPolarized(
     """Transmission fraction of the analyzer with polarized incoming beam"""
 
 
-He3AnalyzerTransmissionFractionPlus = NewType(
-    'He3AnalyzerTransmissionFractionPlus', sc.DataArray
+He3AnalyzerTransmissionFractionParallel = NewType(
+    'He3AnalyzerTransmissionFractionParallel', sc.DataArray
 )
 """Transmission fraction of analyzer with parallel polarized incoming beam"""
 
 
-He3AnalyzerTransmissionFractionMinus = NewType(
-    'He3AnalyzerTransmissionFractionMinus', sc.DataArray
+He3AnalyzerTransmissionFractionAntiParallel = NewType(
+    'He3AnalyzerTransmissionFractionAntiParallel', sc.DataArray
 )
 """Transmission fraction of analyzer with anti-parallel polarized incoming beam"""
 
@@ -302,7 +302,7 @@ def get_he3_transmission_incoming_unpolarized_from_fit_to_direct_beam(
 def transmission_fraction_analyzer_parallel(
     upup: He3AnalyzerTransmissionFractionIncomingPolarized[Up, Up],
     downdown: He3AnalyzerTransmissionFractionIncomingPolarized[Down, Down],
-) -> He3AnalyzerTransmissionFractionPlus:
+) -> He3AnalyzerTransmissionFractionParallel:
     """
     Analyzer Transmission fraction with polarization parallel to incoming beam.
 
@@ -320,7 +320,7 @@ def transmission_fraction_analyzer_parallel(
 def transmission_fraction_analyzer_antiparallel(
     updown: He3AnalyzerTransmissionFractionIncomingPolarized[Up, Down],
     downup: He3AnalyzerTransmissionFractionIncomingPolarized[Down, Up],
-) -> He3AnalyzerTransmissionFractionPlus:
+) -> He3AnalyzerTransmissionFractionParallel:
     """
     Analyzer transmission fraction with polarization anti-parallel to incoming beam.
 
@@ -336,8 +336,8 @@ def transmission_fraction_analyzer_antiparallel(
 
 
 def get_he3_transmission_incoming_polarized_from_fit_to_direct_beam(
-    plus: He3AnalyzerTransmissionFractionPlus,
-    minus: He3AnalyzerTransmissionFractionMinus,
+    plus: He3AnalyzerTransmissionFractionParallel,
+    minus: He3AnalyzerTransmissionFractionAntiParallel,
     opacity_function: He3OpacityFunction[Analyzer],
     transmission_empty_glass: He3TransmissionEmptyGlass[Analyzer],
 ) -> TransmissionFunction[Analyzer]:
