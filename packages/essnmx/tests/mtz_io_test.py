@@ -5,11 +5,10 @@ import pathlib
 import gemmi
 import pytest
 import scipp as sc
-
 from ess.nmx import mtz_io
 from ess.nmx.data import get_small_mtz_samples
-from ess.nmx.mtz_io import DEFAULT_SPACE_GROUP_DESC  # P 21 21 21
 from ess.nmx.mtz_io import (
+    DEFAULT_SPACE_GROUP_DESC,  # P 21 21 21
     MtzDataFrame,
     MTZFileIndex,
     MTZFilePath,
@@ -35,7 +34,7 @@ def test_gemmi_mtz(file_path: pathlib.Path) -> None:
     assert len(mtz.columns[0]) == 100  # Number of samples, hard-coded value
 
 
-@pytest.fixture
+@pytest.fixture()
 def gemmi_mtz_object(file_path: pathlib.Path) -> gemmi.Mtz:
     return read_mtz_file(MTZFilePath(file_path))
 
@@ -65,7 +64,7 @@ def test_mtz_to_process_pandas_dataframe(gemmi_mtz_object: gemmi.Mtz) -> None:
     assert "hkl_asu" not in df.columns  # It should be done on merged dataframes
 
 
-@pytest.fixture
+@pytest.fixture()
 def mtz_list() -> list[gemmi.Mtz]:
     return [
         read_mtz_file(MTZFilePath(file_path)) for file_path in get_small_mtz_samples()
@@ -79,7 +78,7 @@ def test_get_space_group_with_spacegroup_desc() -> None:
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def conflicting_mtz_series(
     mtz_list: list[gemmi.Mtz],
 ) -> list[gemmi.Mtz]:
@@ -104,14 +103,14 @@ def test_get_unique_space_group_raises_on_conflict(
         mtz_io.get_unique_space_group(*space_groups)
 
 
-@pytest.fixture
+@pytest.fixture()
 def merged_mtz_dataframe(mtz_list: list[gemmi.Mtz]) -> MtzDataFrame:
     """Tests if the merged data frame has the expected columns."""
     reduced_mtz = [process_single_mtz_to_dataframe(mtz) for mtz in mtz_list]
     return mtz_io.merge_mtz_dataframes(*reduced_mtz)
 
 
-@pytest.fixture
+@pytest.fixture()
 def nmx_data_frame(
     mtz_list: list[gemmi.Mtz],
     merged_mtz_dataframe: MtzDataFrame,
@@ -135,7 +134,7 @@ def test_process_merged_mtz_dataframe(
     assert "hkl_asu" in nmx_data_frame.columns
 
 
-@pytest.fixture
+@pytest.fixture()
 def nmx_data_array(nmx_data_frame: NMXMtzDataFrame) -> NMXMtzDataArray:
     return nmx_mtz_dataframe_to_scipp_dataarray(nmx_data_frame)
 

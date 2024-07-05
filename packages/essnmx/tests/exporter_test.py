@@ -5,12 +5,11 @@ import io
 import numpy as np
 import pytest
 import scipp as sc
-
 from ess.nmx.nexus import export_as_nexus
 from ess.nmx.reduction import NMXReducedData
 
 
-@pytest.fixture
+@pytest.fixture()
 def reduced_data() -> NMXReducedData:
     rng = np.random.default_rng(42)
     id_list = sc.array(dims=['event'], values=rng.integers(0, 12, size=100))
@@ -26,7 +25,7 @@ def reduced_data() -> NMXReducedData:
 
     return NMXReducedData(
         sc.DataGroup(
-            dict(
+            dict(  # noqa: C408
                 counts=counts,
                 proton_charge=sc.scalar(1.0, unit='counts'),
                 crystal_rotation=sc.vector(value=[0.0, 20.0, 0.0], unit='deg'),

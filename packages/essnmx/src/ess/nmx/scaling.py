@@ -2,14 +2,14 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
-from typing import NewType, TypeVar, Union
+from typing import NewType, TypeVar
 
 import scipp as sc
 
 from .mtz_io import NMXMtzDataArray
 
 # User defined or configurable types
-WavelengthBins = NewType("WavelengthBins", Union[sc.Variable, int])
+WavelengthBins = NewType("WavelengthBins", sc.Variable | int)
 """User configurable wavelength binning"""
 ReferenceWavelength = NewType("ReferenceWavelength", sc.Variable | None)
 """The wavelength to select reference intensities."""
@@ -130,8 +130,8 @@ def get_reference_intensities(
             raise ValueError("Reference wavelength should be a scalar.")
         try:
             return binned["wavelength", reference_wavelength].values.copy(deep=False)
-        except IndexError:
-            raise IndexError(f"{reference_wavelength} out of range.")
+        except IndexError as err:
+            raise IndexError(f"{reference_wavelength} out of range.") from err
 
 
 def estimate_scale_factor_per_hkl_asu_from_reference(

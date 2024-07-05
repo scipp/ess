@@ -2,7 +2,6 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 import pytest
 import scipp as sc
-
 from ess.nmx.scaling import (
     ReferenceIntensities,
     estimate_scale_factor_per_hkl_asu_from_reference,
@@ -11,7 +10,7 @@ from ess.nmx.scaling import (
 )
 
 
-@pytest.fixture
+@pytest.fixture()
 def nmx_data_array() -> sc.DataArray:
     da = sc.DataArray(
         data=sc.array(dims=["row"], values=[1, 2, 3, 4, 5, 3.1, 3.2]),
@@ -53,7 +52,7 @@ def test_get_reference_bin_middle(nmx_data_array: sc.DataArray) -> None:
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def reference_bin(nmx_data_array: sc.DataArray) -> ReferenceIntensities:
     binned = nmx_data_array.bin({"wavelength": 6})
     reference_wavelength = get_reference_wavelength(binned, reference_wavelength=None)

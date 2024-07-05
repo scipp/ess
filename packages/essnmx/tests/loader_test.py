@@ -2,14 +2,12 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 import pathlib
 import sys
-from typing import Generator
+from collections.abc import Generator
 
 import pytest
 import sciline as sl
 import scipp as sc
 import scippnexus as snx
-from scipp.testing import assert_allclose, assert_identical
-
 from ess.nmx import default_parameters
 from ess.nmx.data import small_mcstas_2_sample, small_mcstas_3_sample
 from ess.nmx.mcstas.load import bank_names_to_detector_names
@@ -21,9 +19,10 @@ from ess.nmx.types import (
     FilePath,
     MaximumProbability,
 )
+from scipp.testing import assert_allclose, assert_identical
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-from mcstas_description_examples import (  # noqa: E402
+from mcstas_description_examples import (
     no_detectors,
     one_detector_no_filename,
     two_detectors_same_filename,
@@ -65,14 +64,14 @@ def check_nmxdata_properties(dg: NMXData, fast_axis, slow_axis) -> None:
 
 
 @pytest.mark.parametrize(
-    'detector_index, fast_axis, slow_axis',
-    (
+    ('detector_index', 'fast_axis', 'slow_axis'),
+    [
         # Expected values are provided by the IDS
         # based on the simulation settings of the sample file.
         (0, (1.0, 0.0, -0.01), (0.0, 1.0, 0.0)),
         (1, (-0.01, 0.0, -1.0), (0.0, 1.0, 0.0)),
         (2, (0.01, 0.0, 1.0), (0.0, 1.0, 0.0)),
-    ),
+    ],
 )
 def test_file_reader_mcstas2(
     detector_index, fast_axis, slow_axis, mcstas_2_deprecation_warning_context
@@ -115,14 +114,14 @@ def check_scalar_properties_mcstas_3(dg: NMXData):
 
 
 @pytest.mark.parametrize(
-    'detector_index, fast_axis, slow_axis',
-    (
+    ('detector_index', 'fast_axis', 'slow_axis'),
+    [
         # Expected values are provided by the IDS
         # based on the simulation settings of the sample file.
         (0, (1.0, 0.0, -0.01), (0.0, 1.0, 0.0)),
         (1, (-0.01, 0.0, -1.0), (0.0, 1.0, 0.0)),
         (2, (0.01, 0.0, 1.0), (0.0, 1.0, 0.0)),
-    ),
+    ],
 )
 def test_file_reader_mcstas3(detector_index, fast_axis, slow_axis) -> None:
     file_path = small_mcstas_3_sample()
