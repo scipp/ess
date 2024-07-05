@@ -320,7 +320,7 @@ def transmission_fraction_analyzer_parallel(
 def transmission_fraction_analyzer_antiparallel(
     updown: He3AnalyzerTransmissionFractionIncomingPolarized[Up, Down],
     downup: He3AnalyzerTransmissionFractionIncomingPolarized[Down, Up],
-) -> He3AnalyzerTransmissionFractionParallel:
+) -> He3AnalyzerTransmissionFractionAntiParallel:
     """
     Analyzer transmission fraction with polarization anti-parallel to incoming beam.
 
