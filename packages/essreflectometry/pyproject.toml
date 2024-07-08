@@ -38,7 +38,7 @@ dependencies = [
   "orsopy",
   "sciline>=24.6.0",
   "scipp>=23.8.0",
-  "scippneutron>=23.9.0",
+  "scippneutron>=24.7.0",
   "essreduce",
 ]
 
