@@ -1,6 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+import warnings
+
 import scipp as sc
+from scipy.optimize import OptimizeWarning
 
 from .types import (
     FootprintCorrectedData,
@@ -51,19 +54,30 @@ def normalization_factor(
     def q_of_z_wavelength(wavelength, a, b):
         return a + b / wavelength
 
-    p, _ = sc.curve_fit(
-        ["wavelength"],
-        q_of_z_wavelength,
-        sc.DataArray(
-            data=sample_q,
-            coords={"wavelength": wm},
-            masks={
-                **corr.masks,
-                "_sample_q_isnan": sc.isnan(sample_q),
-            },
-        ),
-        p0={"a": sc.scalar(1, unit="1/angstrom")},
-    )
+    with warnings.catch_warnings():
+        # `curve_fit` raises a warning if it fails to estimate variances.
+        # We don't care here because we only need the parameter values and anyway
+        # assume that the fit worked.
+        # The warning can be caused by there being too few points to estimate
+        # uncertainties because of masks.
+        warnings.filterwarnings(
+            "ignore",
+            message="Covariance of the parameters could not be estimated",
+            category=OptimizeWarning,
+        )
+        p, _ = sc.curve_fit(
+            ["wavelength"],
+            q_of_z_wavelength,
+            sc.DataArray(
+                data=sample_q,
+                coords={"wavelength": wm},
+                masks={
+                    **corr.masks,
+                    "_sample_q_isnan": sc.isnan(sample_q),
+                },
+            ),
+            p0={"a": sc.scalar(-1e-3, unit="1/angstrom")},
+        )
     return sc.DataArray(
         data=corr.data,
         coords={
