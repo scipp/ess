@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-from typing import Optional
 
 import scipp as sc
 import scippneutron as scn
@@ -9,8 +8,8 @@ import scippneutron as scn
 def instrument_view(
     da: sc.DataArray,
     positions: str = "position",
-    pixel_size: Optional[float] = None,
-    components: Optional[dict] = None,
+    pixel_size: float | None = None,
+    components: dict | None = None,
     **kwargs,
 ):
     """

@@ -2,8 +2,6 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Jan-Lukas Wynen
 
-from typing import Tuple
-
 import numpy as np
 import scipp as sc
 
@@ -58,7 +56,7 @@ def test_make_data_with_pulse_time():
 
 def make_data_with_pulse_time_and_proton_charge(
     rng, n_event, n_proton_charge, bad_charge, bad_charge_indices
-) -> Tuple[sc.DataArray, sc.DataArray]:
+) -> tuple[sc.DataArray, sc.DataArray]:
     data = make_data_with_pulse_time(rng, n_event)
 
     start_time = data.bins.coords['pulse_time'].min()

@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
-from typing import Dict, Optional
-
 import numpy as np
 import sciline
 import scipp as sc
@@ -96,7 +94,7 @@ def _adjust_coords(da: sc.DataArray) -> None:
     )
 
 
-def _group(detectors: Dict[str, sc.DataArray]) -> Dict[str, sc.DataGroup]:
+def _group(detectors: dict[str, sc.DataArray]) -> dict[str, sc.DataGroup]:
     elements = ("module", "segment", "counter", "wire", "strip")
 
     def group(key: str, da: sc.DataArray) -> sc.DataArray:
@@ -114,7 +112,7 @@ def _group(detectors: Dict[str, sc.DataArray]) -> Dict[str, sc.DataGroup]:
 
 def _split_detectors(
     data: sc.DataArray, detector_id_name: str = "det ID"
-) -> Dict[str, sc.DataArray]:
+) -> dict[str, sc.DataArray]:
     groups = data.group(
         sc.concat(
             [
@@ -162,7 +160,7 @@ def _split_detectors(
 
 def _extract_detector(
     detector_groups: sc.DataArray, detector_id_name: str, detector_id: sc.Variable
-) -> Optional[sc.DataArray]:
+) -> sc.DataArray | None:
     events = detector_groups[detector_id_name, detector_id].value
     if len(events) == 0:
         return None

@@ -7,8 +7,9 @@ The domain types are used to define parameters and to request results from a Sci
 pipeline.
 """
 
+from collections.abc import Callable
 from enum import Enum
-from typing import Any, Callable, Dict, NewType, TypeVar
+from typing import Any, NewType, TypeVar
 
 import sciline
 import scipp as sc
@@ -90,7 +91,7 @@ class DataWithScatteringCoordinates(sciline.Scope[RunType, sc.DataArray], sc.Dat
 
 
 class NeXusDetectorDimensions(
-    sciline.Scope[NeXusDetectorName, Dict[str, int]], Dict[str, int]
+    sciline.Scope[NeXusDetectorName, dict[str, int]], dict[str, int]
 ):
     """Logical detector dimensions."""
 
@@ -139,7 +140,7 @@ class MaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     dspacing regions."""
 
 
-MaskedDetectorIDs = NewType("MaskedDetectorIDs", Dict[str, sc.Variable])
+MaskedDetectorIDs = NewType("MaskedDetectorIDs", dict[str, sc.Variable])
 """1-D variable listing all masked detector IDs."""
 
 

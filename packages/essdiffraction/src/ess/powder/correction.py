@@ -2,7 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 """Correction algorithms for powder diffraction."""
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 import scipp as sc
 from scippneutron.conversion.graph import beamline, tof
@@ -30,8 +30,8 @@ def normalize_by_monitor(
     data: sc.DataArray,
     *,
     monitor: sc.DataArray,
-    wavelength_edges: Optional[sc.Variable] = None,
-    smooth_args: Optional[Dict[str, Any]] = None,
+    wavelength_edges: sc.Variable | None = None,
+    smooth_args: dict[str, Any] | None = None,
 ) -> sc.DataArray:
     """
     Normalize event data by a monitor.

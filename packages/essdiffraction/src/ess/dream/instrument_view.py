@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from html import escape
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any
 
 import plopp as pp
 import scipp as sc
@@ -16,9 +16,9 @@ if TYPE_CHECKING:
 
 
 def instrument_view(
-    data: Union[sc.DataArray, sc.DataGroup, dict],
-    dim: Optional[str] = None,
-    pixel_size: Optional[Union[float, sc.Variable]] = None,
+    data: sc.DataArray | sc.DataGroup | dict,
+    dim: str | None = None,
+    pixel_size: float | sc.Variable | None = None,
     **kwargs: Any,
 ) -> Box:
     """
@@ -48,7 +48,7 @@ def instrument_view(
     return Box(view.children)
 
 
-def _to_data_group(data: Union[sc.DataArray, sc.DataGroup, dict]) -> sc.DataGroup:
+def _to_data_group(data: sc.DataArray | sc.DataGroup | dict) -> sc.DataGroup:
     if isinstance(data, sc.DataArray):
         data = sc.DataGroup({data.name or "data": data})
     elif isinstance(data, dict):
@@ -71,9 +71,9 @@ class InstrumentView:
 
     def __init__(
         self,
-        data: Union[sc.DataArray, sc.DataGroup, dict],
-        dim: Optional[str] = None,
-        pixel_size: Optional[Union[float, sc.Variable]] = None,
+        data: sc.DataArray | sc.DataGroup | dict,
+        dim: str | None = None,
+        pixel_size: float | sc.Variable | None = None,
         **kwargs,
     ):
         from plopp.widgets import SliceWidget, slice_dims
