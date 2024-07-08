@@ -3,7 +3,6 @@
 
 import zipfile
 from io import BytesIO
-from typing import Optional, Set
 
 import numpy as np
 import pytest
@@ -49,9 +48,7 @@ def file_without_sans(load_file_without_sans):
     return BytesIO(load_file_without_sans)
 
 
-def assert_index_coord(
-    coord: sc.Variable, *, values: Optional[Set[int]] = None
-) -> None:
+def assert_index_coord(coord: sc.Variable, *, values: set[int] | None = None) -> None:
     assert coord.ndim == 1
     assert coord.unit is None
     assert coord.dtype == "int64"

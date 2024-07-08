@@ -4,8 +4,6 @@
 Smoothing arrays data.
 """
 
-from typing import Optional
-
 import scipp as sc
 from scipp.scipy.signal import butter
 
@@ -29,7 +27,7 @@ def _ensure_no_variances(var: sc.DataArray) -> sc.DataArray:
 
 
 def lowpass(
-    da: sc.DataArray, *, dim: str, N: int, Wn: sc.Variable, coord: Optional[str] = None
+    da: sc.DataArray, *, dim: str, N: int, Wn: sc.Variable, coord: str | None = None
 ) -> sc.DataArray:
     """
     Smooth data using a lowpass frequency filter.

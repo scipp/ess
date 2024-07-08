@@ -9,7 +9,6 @@ which mechanisms and interfaces will be used at ESS.
 """
 
 from pathlib import Path
-from typing import Dict, Optional, Union
 
 import numpy as np
 import scipp as sc
@@ -28,11 +27,11 @@ def _as_boolean_mask(var: sc.Variable) -> sc.Variable:
 
 
 def _parse_calibration_instrument_args(
-    filename: Union[str, Path],
+    filename: str | Path,
     *,
-    instrument_filename: Optional[str] = None,
-    instrument_name: Optional[str] = None,
-) -> Dict[str, str]:
+    instrument_filename: str | None = None,
+    instrument_name: str | None = None,
+) -> dict[str, str]:
     if instrument_filename is not None:
         if instrument_name is not None:
             raise ValueError(
@@ -57,11 +56,11 @@ def _parse_calibration_instrument_args(
 
 
 def load_calibration(
-    filename: Union[str, Path],
+    filename: str | Path,
     *,
-    instrument_filename: Optional[str] = None,
-    instrument_name: Optional[str] = None,
-    mantid_args: Optional[dict] = None,
+    instrument_filename: str | None = None,
+    instrument_name: str | None = None,
+    mantid_args: dict | None = None,
 ) -> sc.Dataset:
     """
     Load and return calibration data.

@@ -1,6 +1,6 @@
 ---
-name: blank
-about: A blank issue template
+name: Blank
+about: General issue that does not fit another category
 title: ''
 labels: ''
 assignees: ''
