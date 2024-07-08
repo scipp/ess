@@ -45,7 +45,7 @@
    PolarizationCorrectedData
    Polarized
    Polarizer
-   SecondOrderPolynomialEfficiency
+   SecondDegreePolynomialEfficiency
    SupermirrorEfficiencyFunction
    Up
 ```

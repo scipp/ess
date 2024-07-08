@@ -20,9 +20,11 @@ class SupermirrorEfficiencyFunction(Generic[PolarizingElement], ABC):
 
 
 @dataclass
-class SecondOrderPolynomialEfficiency(SupermirrorEfficiencyFunction[PolarizingElement]):
+class SecondDegreePolynomialEfficiency(
+    SupermirrorEfficiencyFunction[PolarizingElement]
+):
     """
-    Efficiency of a supermirror as a second-order polynomial
+    Efficiency of a supermirror as a second-degree polynomial
 
     The efficiency is given by a * wavelength^2 + b * wavelength + c
 

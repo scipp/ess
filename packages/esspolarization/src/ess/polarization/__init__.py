@@ -35,7 +35,7 @@ from .he3 import (
     Polarized,
 )
 from .supermirror import (
-    SecondOrderPolynomialEfficiency,
+    SecondDegreePolynomialEfficiency,
     SupermirrorEfficiencyFunction,
     SupermirrorWorkflow,
 )
@@ -77,7 +77,7 @@ __all__ = [
     "Polarizer",
     "PolarizingElement",
     "ReducedSampleDataBySpinChannel",
-    "SecondOrderPolynomialEfficiency",
+    "SecondDegreePolynomialEfficiency",
     "SupermirrorEfficiencyFunction",
     "SupermirrorWorkflow",
     "TransmissionFunction",
