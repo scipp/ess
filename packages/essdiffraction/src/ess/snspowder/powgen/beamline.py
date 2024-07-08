@@ -55,11 +55,9 @@ def map_detector_to_spectrum(
 
 def powgen_detector_dimensions(
     detector_name: NeXusDetectorName,
-) -> NeXusDetectorDimensions[NeXusDetectorName]:
+) -> NeXusDetectorDimensions:
     """Dimensions used by POWGEN detectors."""
-    return NeXusDetectorDimensions[NeXusDetectorName](
-        DETECTOR_BANK_SIZES[detector_name]
-    )
+    return NeXusDetectorDimensions(DETECTOR_BANK_SIZES[detector_name])
 
 
 providers = (powgen_detector_dimensions,)

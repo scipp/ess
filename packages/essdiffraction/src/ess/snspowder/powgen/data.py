@@ -11,7 +11,6 @@ from ...powder.types import (
     CalibrationFilename,
     Filename,
     NeXusDetectorDimensions,
-    NeXusDetectorName,
     ProtonCharge,
     RawDataAndMetadata,
     ReducibleDetectorData,
@@ -104,7 +103,7 @@ def pooch_load(filename: Filename[RunType]) -> RawDataAndMetadata[RunType]:
 
 def pooch_load_calibration(
     filename: CalibrationFilename,
-    detector_dimensions: NeXusDetectorDimensions[NeXusDetectorName],
+    detector_dimensions: NeXusDetectorDimensions,
 ) -> CalibrationData:
     """Load the calibration data for the POWGEN test data."""
     if filename is None:
@@ -120,7 +119,7 @@ def pooch_load_calibration(
 
 
 def extract_raw_data(
-    dg: RawDataAndMetadata[RunType], sizes: NeXusDetectorDimensions[NeXusDetectorName]
+    dg: RawDataAndMetadata[RunType], sizes: NeXusDetectorDimensions
 ) -> ReducibleDetectorData[RunType]:
     """Return the events from a loaded data group."""
     # Remove the tof binning and dimension, as it is not needed and it gets in the way

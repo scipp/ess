@@ -189,10 +189,10 @@ def patch_detector_data(
 
 def geant4_detector_dimensions(
     data: RawDetectorData[SampleRun],
-) -> NeXusDetectorDimensions[NeXusDetectorName]:
+) -> NeXusDetectorDimensions:
     # For geant4 data, we group by detector identifier, so the data already has
     # logical dimensions, so we simply return the dimensions of the detector.
-    return NeXusDetectorDimensions[NeXusDetectorName](data.sizes)
+    return NeXusDetectorDimensions(data.sizes)
 
 
 def geant4_load_calibration(

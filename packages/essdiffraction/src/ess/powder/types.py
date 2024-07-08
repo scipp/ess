@@ -90,10 +90,8 @@ class DataWithScatteringCoordinates(sciline.Scope[RunType, sc.DataArray], sc.Dat
     d-spacing."""
 
 
-class NeXusDetectorDimensions(
-    sciline.Scope[NeXusDetectorName, dict[str, int]], dict[str, int]
-):
-    """Logical detector dimensions."""
+NeXusDetectorDimensions = NewType("NeXusDetectorDimensions", dict[str, int])
+"""Logical detector dimensions."""
 
 
 class DspacingData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
