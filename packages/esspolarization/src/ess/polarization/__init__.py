@@ -34,7 +34,11 @@ from .he3 import (
     He3TransmissionFunction,
     Polarized,
 )
-from .supermirror import SupermirrorWorkflow
+from .supermirror import (
+    SecondDegreePolynomialEfficiency,
+    SupermirrorEfficiencyFunction,
+    SupermirrorWorkflow,
+)
 from .types import (
     Analyzer,
     Down,
@@ -73,6 +77,8 @@ __all__ = [
     "Polarizer",
     "PolarizingElement",
     "ReducedSampleDataBySpinChannel",
+    "SecondDegreePolynomialEfficiency",
+    "SupermirrorEfficiencyFunction",
     "SupermirrorWorkflow",
     "TransmissionFunction",
     "NoAnalyzer",

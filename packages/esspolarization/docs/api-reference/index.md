@@ -15,6 +15,7 @@
    HalfPolarizedWorkflow
    PolarizationAnalysisWorkflow
    SupermirrorWorkflow
+```
 
 ## Classes
 
@@ -44,6 +45,8 @@
    PolarizationCorrectedData
    Polarized
    Polarizer
+   SecondDegreePolynomialEfficiency
+   SupermirrorEfficiencyFunction
    Up
 ```
 
