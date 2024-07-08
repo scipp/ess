@@ -42,19 +42,13 @@ class SecondDegreePolynomialEfficiency(
     b: sc.Variable
     c: sc.Variable
 
-    def __post_init__(self):
-        if self.a.unit != sc.Unit('1/angstrom**2'):
-            raise sc.UnitError("a must have unit of 1/angstrom^2")
-        if self.b.unit != sc.Unit('1/angstrom'):
-            raise sc.UnitError("b must have unit of 1/angstrom")
-        if self.c.unit != sc.units.one:
-            raise sc.UnitError("c must be dimensionless")
-
     def __call__(self, *, wavelength: sc.Variable) -> sc.DataArray:
         """Return the efficiency of a supermirror for a given wavelength"""
-        if wavelength.unit != sc.Unit('angstrom'):
-            raise sc.UnitError("wavelength must have unit of angstrom")
-        return self.a * wavelength**2 + self.b * wavelength + self.c
+        return (
+            (self.a * wavelength**2).to(unit='', copy=False)
+            + (self.b * wavelength).to(unit='', copy=False)
+            + self.c.to(unit='', copy=False)
+        )
 
 
 @dataclass
