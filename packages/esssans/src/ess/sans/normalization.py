@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
+from ess.reduce.uncertainty import UncertaintyBroadcastMode, broadcast_uncertainties
 from scipp.core import concepts
 
 from .types import (
@@ -26,14 +27,8 @@ from .types import (
     Transmission,
     TransmissionFraction,
     TransmissionRun,
-    UncertaintyBroadcastMode,
     WavelengthBands,
     WavelengthBins,
-)
-from .uncertainty import (
-    broadcast_to_events_with_upper_bound_variances,
-    broadcast_with_upper_bound_variances,
-    drop_variances_if_broadcast,
 )
 
 
@@ -164,13 +159,6 @@ def transmission_fraction(
     return TransmissionFraction[ScatteringRunType](frac)
 
 
-_broadcasters = {
-    UncertaintyBroadcastMode.drop: drop_variances_if_broadcast,
-    UncertaintyBroadcastMode.upper_bound: broadcast_with_upper_bound_variances,
-    UncertaintyBroadcastMode.fail: lambda x, sizes: x,
-}
-
-
 def iofq_norm_wavelength_term(
     incident_monitor: CleanMonitor[ScatteringRunType, Incident],
     transmission_fraction: TransmissionFraction[ScatteringRunType],
@@ -204,7 +192,7 @@ def iofq_norm_wavelength_term(
         The direct beam function (depends on wavelength).
     uncertainties:
         The mode for broadcasting uncertainties. See
-        :py:class:`UncertaintyBroadcastMode` for details.
+        :py:class:`ess.reduce.uncertainty.UncertaintyBroadcastMode` for details.
 
     Returns
     -------
@@ -221,8 +209,9 @@ def iofq_norm_wavelength_term(
         dims.remove('wavelength')
         dims.append('wavelength')
         direct_beam = direct_beam.transpose(dims)
-        broadcast = _broadcasters[uncertainties]
-        out = direct_beam * broadcast(out, sizes=direct_beam.sizes)
+        out = direct_beam * broadcast_uncertainties(
+            out, prototype=direct_beam, mode=uncertainties
+        )
     # Convert wavelength coordinate to midpoints for future histogramming
     out.coords['wavelength'] = sc.midpoints(out.coords['wavelength'])
     return NormWavelengthTerm[ScatteringRunType](out)
@@ -289,15 +278,16 @@ def iofq_denominator(
         The solid angle of the detector pixels, as viewed from the sample position.
     uncertainties:
         The mode for broadcasting uncertainties. See
-        :py:class:`UncertaintyBroadcastMode` for details.
+        :py:class:`ess.reduce.uncertainty.UncertaintyBroadcastMode` for details.
 
     Returns
     -------
     :
         The denominator for the SANS I(Q) normalization.
     """  # noqa: E501
-    broadcast = _broadcasters[uncertainties]
-    denominator = solid_angle * broadcast(wavelength_term, sizes=solid_angle.sizes)
+    denominator = solid_angle * broadcast_uncertainties(
+        wavelength_term, prototype=solid_angle, mode=uncertainties
+    )
     return CleanWavelength[ScatteringRunType, Denominator](denominator)
 
 
@@ -364,6 +354,9 @@ def _normalize(
         ranges that contribute to different regions in Q space. Note that this needs to
         be defined, so if all wavelengths should be used, this should simply be a start
         and end edges that encompass the entire wavelength range.
+    uncertainties:
+        The mode for broadcasting uncertainties. See
+        :py:class:`ess.reduce.uncertainty.UncertaintyBroadcastMode` for details.
 
     Returns
     -------
@@ -400,13 +393,9 @@ def _normalize(
     if return_events and numerator.bins is not None:
         # Naive event-mode normalization is not correct if norm-term has variances.
         # See https://doi.org/10.3233/JNR-220049 for context.
-        if denominator.variances is not None:
-            if uncertainties == UncertaintyBroadcastMode.drop:
-                denominator = sc.values(denominator)
-            else:
-                denominator = broadcast_to_events_with_upper_bound_variances(
-                    denominator, events=numerator
-                )
+        denominator = broadcast_uncertainties(
+            denominator, prototype=numerator, mode=uncertainties
+        )
     elif numerator.bins is not None:
         numerator = numerator.hist()
     numerator /= denominator.drop_coords(

@@ -3,6 +3,7 @@
 import uuid
 
 import scipp as sc
+from ess.reduce.uncertainty import UncertaintyBroadcastMode, broadcast_uncertainties
 from scipp.scipy.interpolate import interp1d
 
 from .common import mask_range
@@ -31,11 +32,9 @@ from .types import (
     RunType,
     SampleRun,
     ScatteringRunType,
-    UncertaintyBroadcastMode,
     WavelengthBins,
     WavelengthMonitor,
 )
-from .uncertainty import broadcast_with_upper_bound_variances
 
 
 def preprocess_monitor_data(
@@ -65,7 +64,7 @@ def preprocess_monitor_data(
         background. Everything outside this range is treated as background counts.
     uncertainties:
         The mode for broadcasting uncertainties. See
-        :py:class:`UncertaintyBroadcastMode` for details.
+        :py:class:`ess.reduce.uncertainty.UncertaintyBroadcastMode` for details.
 
     Returns
     -------
@@ -87,14 +86,9 @@ def preprocess_monitor_data(
         monitor = monitor.rebin(wavelength=wavelength_bins)
 
     if background is not None:
-        if uncertainties == UncertaintyBroadcastMode.drop:
-            monitor -= sc.values(background)
-        elif uncertainties == UncertaintyBroadcastMode.upper_bound:
-            monitor -= broadcast_with_upper_bound_variances(
-                background, sizes=monitor.sizes
-            )
-        else:
-            monitor -= background
+        monitor -= broadcast_uncertainties(
+            background, prototype=monitor, mode=uncertainties
+        )
     return CleanMonitor(monitor)
 
 
