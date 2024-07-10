@@ -24,7 +24,7 @@ beautifulsoup4==4.12.3
     #   pydata-sphinx-theme
 bleach==6.1.0
     # via nbconvert
-debugpy==1.8.1
+debugpy==1.8.2
     # via ipykernel
 defusedxml==0.7.1
     # via nbconvert
@@ -40,7 +40,7 @@ fastjsonschema==2.20.0
     # via nbformat
 imagesize==1.4.1
     # via sphinx
-ipykernel==6.29.4
+ipykernel==6.29.5
     # via -r docs.in
 ipympl==0.9.4
     # via -r docs.in
@@ -52,7 +52,7 @@ jinja2==3.1.4
     #   nbconvert
     #   nbsphinx
     #   sphinx
-jsonschema==4.22.0
+jsonschema==4.23.0
     # via nbformat
 jsonschema-specifications==2023.12.1
     # via jsonschema
@@ -114,7 +114,7 @@ pybtex==0.24.0
     #   sphinxcontrib-bibtex
 pybtex-docutils==1.0.3
     # via sphinxcontrib-bibtex
-pydata-sphinx-theme==0.15.3
+pydata-sphinx-theme==0.15.4
     # via -r docs.in
 pytz==2024.1
     # via pandas
@@ -126,7 +126,7 @@ referencing==0.35.1
     # via
     #   jsonschema
     #   jsonschema-specifications
-rpds-py==0.18.1
+rpds-py==0.19.0
     # via
     #   jsonschema
     #   referencing
@@ -144,7 +144,7 @@ sphinx==7.3.7
     #   sphinx-copybutton
     #   sphinx-design
     #   sphinxcontrib-bibtex
-sphinx-autodoc-typehints==2.1.1
+sphinx-autodoc-typehints==2.2.2
     # via -r docs.in
 sphinx-copybutton==0.5.2
     # via -r docs.in
