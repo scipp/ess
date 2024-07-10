@@ -7,6 +7,7 @@ from typing import NewType
 import numpy as np
 import sciline
 import scipp as sc
+from ess.reduce.uncertainty import UncertaintyBroadcastMode
 from scipp.core import concepts
 
 from .conversions import (
@@ -36,7 +37,6 @@ from .types import (
     QBins,
     ReturnEvents,
     SampleRun,
-    UncertaintyBroadcastMode,
     WavelengthBands,
     WavelengthBins,
     WavelengthMask,

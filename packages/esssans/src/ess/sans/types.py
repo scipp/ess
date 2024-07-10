@@ -7,11 +7,13 @@ The domain types are used to define parameters and to request results from a Sci
 pipeline."""
 
 from collections.abc import Sequence
-from enum import Enum
 from typing import NewType, TypeVar
 
 import sciline
 import scipp as sc
+from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
+
+UncertaintyBroadcastMode = _UncertaintyBroadcastMode
 
 # 1  TypeVars used to parametrize the generic parts of the workflow
 
@@ -81,15 +83,6 @@ transformation chain is stored, for the detectors and the monitors
 """
 
 # 2  Workflow parameters
-
-UncertaintyBroadcastMode = Enum(
-    'UncertaintyBroadcastMode', ['drop', 'upper_bound', 'fail']
-)
-"""
-Mode for broadcasting uncertainties.
-
-See https://doi.org/10.3233/JNR-220049 for context.
-"""
 
 ReturnEvents = NewType('ReturnEvents', bool)
 """Whether to return events in the output I(Q)"""
