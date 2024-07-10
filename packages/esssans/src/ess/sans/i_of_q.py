@@ -3,6 +3,7 @@
 import uuid
 
 import scipp as sc
+from ess.reduce.uncertainty import broadcast_with_upper_bound_variances
 from scipp.scipy.interpolate import interp1d
 
 from .common import mask_range
@@ -35,7 +36,6 @@ from .types import (
     WavelengthBins,
     WavelengthMonitor,
 )
-from .uncertainty import broadcast_with_upper_bound_variances
 
 
 def preprocess_monitor_data(
@@ -91,7 +91,7 @@ def preprocess_monitor_data(
             monitor -= sc.values(background)
         elif uncertainties == UncertaintyBroadcastMode.upper_bound:
             monitor -= broadcast_with_upper_bound_variances(
-                background, sizes=monitor.sizes
+                background, prototype=monitor
             )
         else:
             monitor -= background

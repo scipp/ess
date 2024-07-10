@@ -1,6 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
+from ess.reduce.uncertainty import (
+    broadcast_with_upper_bound_variances,
+    drop_variances_if_broadcast,
+)
 from scipp.core import concepts
 
 from .types import (
@@ -29,11 +33,6 @@ from .types import (
     UncertaintyBroadcastMode,
     WavelengthBands,
     WavelengthBins,
-)
-from .uncertainty import (
-    broadcast_to_events_with_upper_bound_variances,
-    broadcast_with_upper_bound_variances,
-    drop_variances_if_broadcast,
 )
 
 
@@ -167,7 +166,7 @@ def transmission_fraction(
 _broadcasters = {
     UncertaintyBroadcastMode.drop: drop_variances_if_broadcast,
     UncertaintyBroadcastMode.upper_bound: broadcast_with_upper_bound_variances,
-    UncertaintyBroadcastMode.fail: lambda x, sizes: x,
+    UncertaintyBroadcastMode.fail: lambda x, prototype: x,
 }
 
 
@@ -222,7 +221,7 @@ def iofq_norm_wavelength_term(
         dims.append('wavelength')
         direct_beam = direct_beam.transpose(dims)
         broadcast = _broadcasters[uncertainties]
-        out = direct_beam * broadcast(out, sizes=direct_beam.sizes)
+        out = direct_beam * broadcast(out, prototype=direct_beam)
     # Convert wavelength coordinate to midpoints for future histogramming
     out.coords['wavelength'] = sc.midpoints(out.coords['wavelength'])
     return NormWavelengthTerm[ScatteringRunType](out)
@@ -297,7 +296,7 @@ def iofq_denominator(
         The denominator for the SANS I(Q) normalization.
     """  # noqa: E501
     broadcast = _broadcasters[uncertainties]
-    denominator = solid_angle * broadcast(wavelength_term, sizes=solid_angle.sizes)
+    denominator = solid_angle * broadcast(wavelength_term, prototype=solid_angle)
     return CleanWavelength[ScatteringRunType, Denominator](denominator)
 
 
@@ -404,8 +403,8 @@ def _normalize(
             if uncertainties == UncertaintyBroadcastMode.drop:
                 denominator = sc.values(denominator)
             else:
-                denominator = broadcast_to_events_with_upper_bound_variances(
-                    denominator, events=numerator
+                denominator = broadcast_with_upper_bound_variances(
+                    denominator, prototype=numerator
                 )
     elif numerator.bins is not None:
         numerator = numerator.hist()
