@@ -8,11 +8,11 @@ pipeline.
 """
 
 from collections.abc import Callable
-from enum import Enum
 from typing import Any, NewType, TypeVar
 
 import sciline
 import scipp as sc
+from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
 
 # 1 TypeVars used to parametrize the generic parts of the workflow
 
@@ -56,9 +56,7 @@ This is used by an alternative focussing step that groups detector
 pixels by scattering angle into bins given by these edges.
 """
 
-UncertaintyBroadcastMode = Enum(
-    "UncertaintyBroadcastMode", ["drop", "upper_bound", "fail"]
-)
+UncertaintyBroadcastMode = _UncertaintyBroadcastMode
 """Mode for broadcasting uncertainties.
 
 See https://doi.org/10.3233/JNR-220049 for context.

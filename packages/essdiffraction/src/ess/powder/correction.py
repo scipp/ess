@@ -5,6 +5,7 @@
 from typing import Any
 
 import scipp as sc
+from ess.reduce.uncertainty import broadcast_uncertainties
 from scippneutron.conversion.graph import beamline, tof
 
 from ._util import event_or_outer_coord
@@ -23,7 +24,6 @@ from .types import (
     UncertaintyBroadcastMode,
     VanadiumRun,
 )
-from .uncertainty import broadcast_uncertainties
 
 
 def normalize_by_monitor(
@@ -83,8 +83,10 @@ def _normalize_by_vanadium(
     vanadium: sc.DataArray,
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
 ) -> sc.DataArray:
-    vanadium = broadcast_uncertainties(vanadium, uncertainty_broadcast_mode)
     norm = vanadium.hist()
+    norm = broadcast_uncertainties(
+        norm, prototype=data, mode=uncertainty_broadcast_mode
+    )
     # Converting to unit 'one' because the division might produce a unit
     # with a large scale if the proton charges in data and vanadium were
     # measured with different units.

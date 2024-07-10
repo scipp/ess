@@ -13,7 +13,6 @@ from . import (
     grouping,
     masking,
     smoothing,
-    uncertainty,
 )
 from .masking import with_pixel_mask_filenames
 
@@ -42,6 +41,5 @@ __all__ = [
     "masking",
     "providers",
     "smoothing",
-    "uncertainty",
     "with_pixel_mask_filenames",
 ]
