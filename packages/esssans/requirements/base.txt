@@ -23,13 +23,13 @@ cyclebane==24.6.0
     # via sciline
 cycler==0.12.1
     # via matplotlib
-dask==2024.7.0
+dask==2024.7.1
     # via -r base.in
 decorator==5.1.1
     # via ipython
 essreduce==24.7.1
     # via -r base.in
-exceptiongroup==1.2.1
+exceptiongroup==1.2.2
     # via ipython
 executing==2.0.1
     # via stack-data
@@ -73,7 +73,7 @@ mpltoolbox==24.5.1
     # via scippneutron
 networkx==3.3
     # via cyclebane
-numpy==2.0.0
+numpy==2.0.1
     # via
     #   -r base.in
     #   contourpy
@@ -113,7 +113,7 @@ prompt-toolkit==3.0.47
     # via ipython
 ptyprocess==0.7.0
     # via pexpect
-pure-eval==0.2.2
+pure-eval==0.2.3
     # via stack-data
 pygments==2.18.0
     # via ipython
