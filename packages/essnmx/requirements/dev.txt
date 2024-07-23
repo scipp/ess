@@ -28,7 +28,7 @@ async-lru==2.0.4
     # via jupyterlab
 cffi==1.16.0
     # via argon2-cffi-bindings
-copier==9.3.0
+copier==9.3.1
     # via -r dev.in
 dunamai==1.21.2
     # via copier
@@ -50,7 +50,7 @@ json5==0.9.25
     # via jupyterlab-server
 jsonpointer==3.0.0
     # via jsonschema
-jsonschema[format-nongpl]==4.22.0
+jsonschema[format-nongpl]==4.23.0
     # via
     #   jupyter-events
     #   jupyterlab-server
@@ -59,7 +59,7 @@ jupyter-events==0.10.0
     # via jupyter-server
 jupyter-lsp==2.2.5
     # via jupyterlab
-jupyter-server==2.14.1
+jupyter-server==2.14.2
     # via
     #   jupyter-lsp
     #   jupyterlab
@@ -67,9 +67,9 @@ jupyter-server==2.14.1
     #   notebook-shim
 jupyter-server-terminals==0.5.3
     # via jupyter-server
-jupyterlab==4.2.3
+jupyterlab==4.2.4
     # via -r dev.in
-jupyterlab-server==2.27.2
+jupyterlab-server==2.27.3
     # via jupyterlab
 notebook-shim==0.2.4
     # via jupyterlab
