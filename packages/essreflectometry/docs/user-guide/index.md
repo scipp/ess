@@ -8,4 +8,5 @@ installation
 amor/index
 estia/index
 offspec/index
+data-reduction
 ```
