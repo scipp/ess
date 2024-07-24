@@ -9,11 +9,11 @@ from ess.reduce import nexus
 from ess.sans.types import (
     DetectorEventData,
     Filename,
-    LoadedNeXusDetector,
-    LoadedNeXusMonitor,
     MonitorEventData,
     MonitorType,
+    NeXusDetector,
     NeXusDetectorName,
+    NeXusMonitor,
     NeXusMonitorName,
     RawSample,
     RawSource,
@@ -37,7 +37,7 @@ def load_nexus_source(file_path: Filename[RunType]) -> RawSource[RunType]:
 
 def load_nexus_detector(
     file_path: Filename[RunType], detector_name: NeXusDetectorName
-) -> LoadedNeXusDetector[RunType]:
+) -> NeXusDetector[RunType]:
     # Events will be loaded later. Should we set something else as data instead, or
     # use different NeXus definitions to completely bypass the (empty) event load?
     dg = nexus.load_detector(
@@ -47,14 +47,14 @@ def load_nexus_detector(
     )
     # The name is required later, e.g., for determining logical detector shape
     dg['detector_name'] = detector_name
-    return LoadedNeXusDetector[RunType](dg)
+    return NeXusDetector[RunType](dg)
 
 
 def load_nexus_monitor(
     file_path: Filename[RunType],
     monitor_name: NeXusMonitorName[MonitorType],
-) -> LoadedNeXusMonitor[RunType, MonitorType]:
-    return LoadedNeXusMonitor[RunType, MonitorType](
+) -> NeXusMonitor[RunType, MonitorType]:
+    return NeXusMonitor[RunType, MonitorType](
         nexus.load_monitor(
             file_path=file_path,
             monitor_name=monitor_name,

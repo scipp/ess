@@ -4,10 +4,10 @@ import sciline
 import scipp as sc
 import scippnexus as snx
 from ess.loki.general import (
+    assemble_monitor_data,
     get_monitor_data,
     get_source_position,
     monitor_to_tof,
-    patch_monitor_data,
 )
 from ess.loki.io import load_nexus_monitor, load_nexus_source
 from ess.reduce.nexus.json_nexus import JSONGroup
@@ -82,7 +82,7 @@ class LoKiMonitorWorkflow:
             load_nexus_source,
             get_source_position,
             get_monitor_data,
-            patch_monitor_data,
+            assemble_monitor_data,
             monitor_to_tof,
             sans_monitor,
             monitor_to_wavelength,

@@ -24,7 +24,7 @@ from ess.sans.types import (
     NeXusMonitorName,
     NonBackgroundWavelengthRange,
     QBins,
-    RawData,
+    RawDetector,
     ReturnEvents,
     SampleRun,
     SolidAngle,
@@ -189,7 +189,7 @@ def as_dict(funcs: list[Callable[..., type]]) -> dict:
 
 
 def pixel_dependent_direct_beam(
-    filename: DirectBeamFilename, shape: RawData[SampleRun]
+    filename: DirectBeamFilename, shape: RawDetector[SampleRun]
 ) -> DirectBeam:
     direct_beam = isis.data.load_tutorial_direct_beam(filename)
     sizes = {'spectrum': shape.sizes['spectrum'], **direct_beam.sizes}
@@ -243,7 +243,7 @@ def test_beam_center_finder_without_direct_beam_reproduces_verified_result():
 
 def test_beam_center_can_get_closer_to_verified_result_with_low_counts_mask():
     def low_counts_mask(
-        sample: RawData[SampleRun],
+        sample: RawDetector[SampleRun],
         low_counts_threshold: sans2d.LowCountThreshold,
     ) -> sans2d.SampleHolderMask:
         return sans2d.SampleHolderMask(sample.hist().data < low_counts_threshold)
@@ -321,9 +321,9 @@ def test_workflow_runs_without_gravity_if_beam_center_is_provided():
     params = make_params()
     params[CorrectForGravity] = False
     pipeline = sciline.Pipeline(sans2d_providers(), params=params)
-    da = pipeline.compute(RawData[SampleRun])
+    da = pipeline.compute(RawDetector[SampleRun])
     del da.coords['gravity']
-    pipeline[RawData[SampleRun]] = da
+    pipeline[RawDetector[SampleRun]] = da
     pipeline[BeamCenter] = MANTID_BEAM_CENTER
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('Q',)

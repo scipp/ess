@@ -217,12 +217,12 @@ class SolidAngle(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Solid angle of detector pixels seen from sample position"""
 
 
-class LoadedNeXusDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+class NeXusDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
     """Detector data, loaded from a NeXus file, containing not only neutron events
     but also pixel shape information, transformations, ..."""
 
 
-class LoadedNeXusMonitor(
+class NeXusMonitor(
     sciline.ScopeTwoParams[RunType, MonitorType, sc.DataGroup], sc.DataGroup
 ):
     """Monitor data loaded from a NeXus file, containing not only neutron events
@@ -239,13 +239,11 @@ class MonitorEventData(
     """Event data loaded from a monitor in a NeXus file"""
 
 
-class RawData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
-    """Raw detector data"""
+class RawDetector(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
+    """Raw detector data component extracted from :py:class:`NeXusDetector`"""
 
 
-class ConfiguredReducibleData(
-    sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray
-):
+class RawDetectorData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Raw event data where variances and necessary coordinates
     (e.g. sample and source position) have been added, and where optionally some
     user configuration was applied to some of the coordinates."""
@@ -342,7 +340,7 @@ class RawMonitor(
     """Raw monitor data"""
 
 
-class ConfiguredReducibleMonitor(
+class RawMonitorData(
     sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
 ):
     """Raw monitor data where variances and necessary coordinates

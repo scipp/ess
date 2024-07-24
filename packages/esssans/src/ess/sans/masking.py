@@ -13,14 +13,14 @@ from .types import (
     MaskedData,
     MaskedDetectorIDs,
     PixelMaskFilename,
-    RawData,
+    RawDetector,
     SampleRun,
     ScatteringRunType,
     TofData,
 )
 
 
-def get_detector_ids_from_detector(data: RawData[SampleRun]) -> DetectorIDs:
+def get_detector_ids_from_detector(data: RawDetector[SampleRun]) -> DetectorIDs:
     """Extract detector IDs from a detector."""
     return DetectorIDs(
         data.coords[

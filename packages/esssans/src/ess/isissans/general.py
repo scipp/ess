@@ -7,8 +7,6 @@ Providers for the ISIS instruments.
 import scipp as sc
 
 from ..sans.types import (
-    ConfiguredReducibleData,
-    ConfiguredReducibleMonitor,
     CorrectForGravity,
     DetectorIDs,
     DetectorPixelShape,
@@ -18,8 +16,10 @@ from ..sans.types import (
     MonitorType,
     NeXusMonitorName,
     NonBackgroundWavelengthRange,
-    RawData,
+    RawDetector,
+    RawDetectorData,
     RawMonitor,
+    RawMonitorData,
     RunNumber,
     RunTitle,
     RunType,
@@ -53,8 +53,8 @@ def default_parameters() -> dict:
 
 def get_detector_data(
     dg: LoadedFileContents[RunType],
-) -> RawData[RunType]:
-    return RawData[RunType](dg['data'])
+) -> RawDetector[RunType]:
+    return RawDetector[RunType](dg['data'])
 
 
 def get_monitor_data(
@@ -66,7 +66,7 @@ def get_monitor_data(
 
 
 def data_to_tof(
-    da: ConfiguredReducibleData[ScatteringRunType],
+    da: RawDetectorData[ScatteringRunType],
 ) -> TofData[ScatteringRunType]:
     """Dummy conversion of data to time-of-flight data.
     The data already has a time-of-flight coordinate."""
@@ -74,7 +74,7 @@ def data_to_tof(
 
 
 def monitor_to_tof(
-    da: ConfiguredReducibleMonitor[RunType, MonitorType],
+    da: RawMonitorData[RunType, MonitorType],
 ) -> TofMonitor[RunType, MonitorType]:
     """Dummy conversion of monitor data to time-of-flight data.
     The monitor data already has a time-of-flight coordinate."""
