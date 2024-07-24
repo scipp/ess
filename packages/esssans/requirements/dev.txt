@@ -59,7 +59,7 @@ jupyter-events==0.10.0
     # via jupyter-server
 jupyter-lsp==2.2.5
     # via jupyterlab
-jupyter-server==2.14.1
+jupyter-server==2.14.2
     # via
     #   jupyter-lsp
     #   jupyterlab
@@ -67,9 +67,9 @@ jupyter-server==2.14.1
     #   notebook-shim
 jupyter-server-terminals==0.5.3
     # via jupyter-server
-jupyterlab==4.2.3
+jupyterlab==4.2.4
     # via -r dev.in
-jupyterlab-server==2.27.2
+jupyterlab-server==2.27.3
     # via jupyterlab
 notebook-shim==0.2.4
     # via jupyterlab
