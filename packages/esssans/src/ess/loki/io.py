@@ -40,9 +40,10 @@ def load_nexus_detector(
 ) -> LoadedNeXusDetector[RunType]:
     # Events will be loaded later. Should we set something else as data instead, or
     # use different NeXus definitions to completely bypass the (empty) event load?
-    sel = {'event_time_zero': slice(0, 0)}
     dg = nexus.load_detector(
-        file_path=file_path, detector_name=detector_name, selection=sel
+        file_path=file_path,
+        detector_name=detector_name,
+        selection={'event_time_zero': slice(0, 0)},
     )
     # The name is required later, e.g., for determining logical detector shape
     dg['detector_name'] = detector_name
@@ -54,7 +55,11 @@ def load_nexus_monitor(
     monitor_name: NeXusMonitorName[MonitorType],
 ) -> LoadedNeXusMonitor[RunType, MonitorType]:
     return LoadedNeXusMonitor[RunType, MonitorType](
-        nexus.load_monitor(file_path=file_path, monitor_name=monitor_name)
+        nexus.load_monitor(
+            file_path=file_path,
+            monitor_name=monitor_name,
+            selection={'event_time_zero': slice(0, 0)},
+        )
     )
 
 
