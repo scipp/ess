@@ -14,14 +14,15 @@ from ..sans.types import (
     ConfiguredReducibleData,
     ConfiguredReducibleMonitor,
     CorrectForGravity,
+    DetectorEventData,
     DetectorPixelShape,
     DimsToKeep,
     Incident,
     LabFrameTransform,
     LoadedNeXusDetector,
     LoadedNeXusMonitor,
+    MonitorEventData,
     MonitorType,
-    NeXusDetectorName,
     NeXusMonitorName,
     NonBackgroundWavelengthRange,
     PixelShapePath,
@@ -105,11 +106,10 @@ def get_sample_position(
 
 def get_detector_data(
     detector: LoadedNeXusDetector[ScatteringRunType],
-    detector_name: NeXusDetectorName,
 ) -> RawData[ScatteringRunType]:
     da = nexus.extract_detector_data(detector)
-    if detector_name in DETECTOR_BANK_RESHAPING:
-        da = DETECTOR_BANK_RESHAPING[detector_name](da)
+    if (reshape := DETECTOR_BANK_RESHAPING.get(detector['detector_name'])) is not None:
+        da = reshape(da)
     return RawData[ScatteringRunType](da)
 
 
@@ -141,9 +141,14 @@ def _add_variances_and_coordinates(
 
 def patch_detector_data(
     detector_data: RawData[ScatteringRunType],
+    event_data: DetectorEventData[ScatteringRunType],
     source_position: SourcePosition[ScatteringRunType],
     sample_position: SamplePosition[ScatteringRunType],
 ) -> ConfiguredReducibleData[ScatteringRunType]:
+    grouped = nexus.group_event_data(
+        event_data=event_data, detector_number=detector_data.coords['detector_number']
+    )
+    detector_data.data = grouped.data
     return ConfiguredReducibleData[ScatteringRunType](
         _add_variances_and_coordinates(
             da=detector_data,
@@ -155,8 +160,10 @@ def patch_detector_data(
 
 def patch_monitor_data(
     monitor_data: RawMonitor[RunType, MonitorType],
+    event_data: MonitorEventData[RunType, MonitorType],
     source_position: SourcePosition[RunType],
 ) -> ConfiguredReducibleMonitor[RunType, MonitorType]:
+    monitor_data.data = event_data.data
     return ConfiguredReducibleMonitor[RunType, MonitorType](
         _add_variances_and_coordinates(da=monitor_data, source_position=source_position)
     )

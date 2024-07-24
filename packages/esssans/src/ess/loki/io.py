@@ -7,9 +7,11 @@ Loading and merging of LoKI data.
 import scipp as sc
 from ess.reduce import nexus
 from ess.sans.types import (
+    DetectorEventData,
     Filename,
     LoadedNeXusDetector,
     LoadedNeXusMonitor,
+    MonitorEventData,
     MonitorType,
     NeXusDetectorName,
     NeXusMonitorName,
@@ -36,9 +38,15 @@ def load_nexus_source(file_path: Filename[RunType]) -> RawSource[RunType]:
 def load_nexus_detector(
     file_path: Filename[RunType], detector_name: NeXusDetectorName
 ) -> LoadedNeXusDetector[RunType]:
-    return LoadedNeXusDetector[RunType](
-        nexus.load_detector(file_path=file_path, detector_name=detector_name)
+    # Events will be loaded later. Should we set something else as data instead, or
+    # use different NeXus definitions to completely bypass the (empty) event load?
+    sel = {'event_time_zero': slice(0, 0)}
+    dg = nexus.load_detector(
+        file_path=file_path, detector_name=detector_name, selection=sel
     )
+    # The name is required later, e.g., for determining logical detector shape
+    dg['detector_name'] = detector_name
+    return LoadedNeXusDetector[RunType](dg)
 
 
 def load_nexus_monitor(
@@ -50,10 +58,27 @@ def load_nexus_monitor(
     )
 
 
+def load_detector_event_data(
+    file_path: Filename[RunType], detector_name: NeXusDetectorName
+) -> DetectorEventData[RunType]:
+    da = nexus.load_event_data(file_path=file_path, component_name=detector_name)
+    return DetectorEventData[RunType](da)
+
+
+def load_monitor_event_data(
+    file_path: Filename[RunType],
+    monitor_name: NeXusMonitorName[MonitorType],
+) -> MonitorEventData[RunType, MonitorType]:
+    da = nexus.load_event_data(file_path=file_path, component_name=monitor_name)
+    return MonitorEventData[RunType, MonitorType](da)
+
+
 providers = (
     load_nexus_detector,
     load_nexus_monitor,
     load_nexus_sample,
     load_nexus_source,
+    load_detector_event_data,
+    load_monitor_event_data,
 )
 """Providers for loading single files."""

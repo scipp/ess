@@ -10,6 +10,7 @@ from ..sans.types import (
     ConfiguredReducibleData,
     ConfiguredReducibleMonitor,
     CorrectForGravity,
+    DetectorIDs,
     DetectorPixelShape,
     DimsToKeep,
     Incident,
@@ -122,8 +123,23 @@ def lab_frame_transform() -> LabFrameTransform[ScatteringRunType]:
     return sc.spatial.rotation(value=[0, 0, 1 / 2**0.5, 1 / 2**0.5])
 
 
+def get_detector_ids_from_sample_run(data: TofData[SampleRun]) -> DetectorIDs:
+    """Extract detector IDs from sample run.
+
+    This overrides the function in the masking module which gets the detector IDs from
+    the detector before loading event data. In this ISIS case files are loaded using
+    Mantid which does not load event separately, so we get IDs from the data.
+    """
+    return DetectorIDs(
+        data.coords[
+            'detector_number' if 'detector_number' in data.coords else 'detector_id'
+        ]
+    )
+
+
 providers = (
     get_detector_data,
+    get_detector_ids_from_sample_run,
     get_monitor_data,
     data_to_tof,
     monitor_to_tof,

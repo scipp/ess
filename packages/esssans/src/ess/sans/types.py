@@ -229,6 +229,16 @@ class LoadedNeXusMonitor(
     but also transformations, ..."""
 
 
+class DetectorEventData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Event data loaded from a detector in a NeXus file"""
+
+
+class MonitorEventData(
+    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
+):
+    """Event data loaded from a monitor in a NeXus file"""
+
+
 class RawData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Raw detector data"""
 
