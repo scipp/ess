@@ -16,9 +16,9 @@ from .types import (
     DimsToKeep,
     IofQ,
     MaskedData,
-    MaskedSolidAngle,
     NormWavelengthTerm,
     QBins,
+    RawDetector,
     ReturnEvents,
     SampleRun,
     WavelengthBands,
@@ -118,10 +118,8 @@ def _offsets_to_vector(data: sc.DataArray, xy: list[float], graph: dict) -> sc.V
 def _iofq_in_quadrants(
     xy: list[float],
     pipeline: sciline.Pipeline,
-    data: sc.DataArray,
-    solid_angle: sc.DataArray,
+    detector: sc.DataArray,
     norm: sc.DataArray,
-    q_bins: int | sc.Variable,
 ) -> dict[str, sc.DataArray]:
     """
     Compute the intensity as a function of Q inside 4 quadrants in Phi.
@@ -130,16 +128,10 @@ def _iofq_in_quadrants(
     ----------
     xy:
         The x,y offsets in the plane normal to the beam.
-    data:
-        The sample data.
+    detector:
+        The raw detector.
     norm:
         The denominator data for normalization.
-    graph:
-        Coordinate transformation graph.
-    q_bins:
-        Bin edges for Q.
-    wavelength_bins:
-        The binning in wavelength to use for computing the intensity as a function of Q.
 
     Returns
     -------
@@ -153,19 +145,10 @@ def _iofq_in_quadrants(
     quadrants = ['south-west', 'south-east', 'north-east', 'north-west']
 
     graph = pipeline.compute(ElasticCoordTransformGraph)
-    old_beam_center = data.coords.get('beam_center', pipeline.compute(BeamCenter))
-    beam_center = _offsets_to_vector(data=data, xy=xy, graph=graph)
-    data.coords['position'] = data.coords['position'] + old_beam_center - beam_center
-    solid_angle.coords['position'] = data.coords['position']
-    data.coords['beam_center'] = beam_center
     pipeline = pipeline.copy()
-    pipeline[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
-    pipeline[ReturnEvents] = False
-    pipeline[DimsToKeep] = ()
-    pipeline[WavelengthMask] = None
-    pipeline[WavelengthBands] = None
-    pipeline[QBins] = q_bins
-    with_phi = data.transform_coords(
+    pipeline[BeamCenter] = _offsets_to_vector(data=detector, xy=xy, graph=graph)
+    calibrated = pipeline.compute(MaskedData[SampleRun])
+    with_phi = calibrated.transform_coords(
         'phi', graph=graph, keep_intermediate=False, keep_inputs=False
     )
     # If gravity-correction is enabled, phi depends on wavelength (and event).
@@ -182,8 +165,9 @@ def _iofq_in_quadrants(
     for i, quad in enumerate(quadrants):
         # Select pixels based on phi
         sel = (phi >= phi_bins[i]) & (phi < phi_bins[i + 1])
-        pipeline[MaskedData[SampleRun]] = data[sel]
-        pipeline[MaskedSolidAngle[SampleRun]] = solid_angle[sel]
+        pipeline[RawDetector[SampleRun]] = detector[sel]
+        # MaskedData would be computed automatically, but we did it above already
+        pipeline[MaskedData[SampleRun]] = calibrated[sel]
         pipeline[NormWavelengthTerm[SampleRun]] = (
             norm if norm.dims == ('wavelength',) else norm[sel]
         )
@@ -260,8 +244,8 @@ def _cost(xy: list[float], *args) -> float:
 
 
 def beam_center_from_iofq(
-    workflow: sciline.Pipeline,
     *,
+    workflow: sciline.Pipeline,
     q_bins: int | sc.Variable,
     minimizer: str | None = None,
     tolerance: float | None = None,
@@ -281,12 +265,8 @@ def beam_center_from_iofq(
 
     Parameters
     ----------
-    data:
-        The DataArray containing the detector data.
-    graph:
-        Coordinate transformation graph for elastic SANS.
-    wavelength_bins:
-        The binning in the wavelength dimension to be used.
+    workflow:
+        The reduction workflow to compute I(Q).
     q_bins:
         The binning in the Q dimension to be used.
     minimizer:
@@ -375,34 +355,39 @@ def beam_center_from_iofq(
     logger.info('Using tolerance: %s', tolerance)
 
     keys = (
+        RawDetector[SampleRun],
         MaskedData[SampleRun],
         NormWavelengthTerm[SampleRun],
         ElasticCoordTransformGraph,
     )
     results = workflow.compute(keys)
+    detector = results[RawDetector[SampleRun]]
     data = results[MaskedData[SampleRun]]
     norm = results[NormWavelengthTerm[SampleRun]]
     graph = results[ElasticCoordTransformGraph]
 
     # Flatten positions dim which is required during the iterations for slicing with a
     # boolean mask
-    pos_dims = data.coords['position'].dims
+    pos_dims = detector.coords['position'].dims
     new_dim = uuid.uuid4().hex
-    data = data.flatten(dims=pos_dims, to=new_dim)
+    detector = detector.flatten(dims=pos_dims, to=new_dim)
     dims_to_flatten = [dim for dim in norm.dims if dim in pos_dims]
     if dims_to_flatten:
         norm = norm.flatten(dims=dims_to_flatten, to=new_dim)
 
+    workflow = workflow.copy()
+    # Avoid reloading the detector
+    workflow[RawDetector[SampleRun]] = detector
+    workflow[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
+    workflow[ReturnEvents] = False
+    workflow[DimsToKeep] = ()
+    workflow[WavelengthMask] = None
+    workflow[WavelengthBands] = None
+    workflow[QBins] = q_bins
+
     # Use center of mass to get initial guess for beam center
     com_shift = beam_center_from_center_of_mass(data, graph)
     logger.info('Initial guess for beam center: %s', com_shift)
-
-    # We compute the solid angle after setting the initial guess, for extra precision
-    # Would be better to compute every time?
-    tmp = workflow.copy()
-    tmp[BeamCenter] = com_shift
-    solid_angle = tmp.compute(MaskedSolidAngle[SampleRun])
-    solid_angle = solid_angle.flatten(dims=pos_dims, to=new_dim)
 
     coords = data.transform_coords(
         ['cylindrical_x', 'cylindrical_y'], graph=graph
@@ -416,7 +401,7 @@ def beam_center_from_iofq(
     res = minimize(
         _cost,
         x0=[com_shift.fields.x.value, com_shift.fields.y.value],
-        args=(workflow, data, solid_angle, norm, q_bins),
+        args=(workflow, detector, norm),
         bounds=bounds,
         method=minimizer,
         tol=tolerance,
