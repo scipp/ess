@@ -228,18 +228,13 @@ def test_beam_center_from_center_of_mass_is_close_to_verified_result():
 
 def test_beam_center_finder_without_direct_beam_reproduces_verified_result():
     params = make_params()
-    params[sans.beam_center_finder.BeamCenterFinderQBins] = sc.linspace(
-        'Q', 0.02, 0.3, 71, unit='1/angstrom'
-    )
     del params[DirectBeamFilename]
     providers = sans2d_providers()
-    providers.remove(sans.beam_center_finder.beam_center_from_center_of_mass)
-    providers.append(sans.beam_center_finder.beam_center_from_iofq)
     pipeline = sciline.Pipeline(providers, params=params)
-    pipeline[sans.beam_center_finder.BeamCenterFinderMinimizer] = None
-    pipeline[sans.beam_center_finder.BeamCenterFinderTolerance] = None
     pipeline[DirectBeam] = None
-    center = pipeline.compute(BeamCenter)
+    center = sans.beam_center_finder.beam_center_from_iofq(
+        workflow=pipeline, q_bins=sc.linspace('Q', 0.02, 0.3, 71, unit='1/angstrom')
+    )
     assert sc.allclose(center, MANTID_BEAM_CENTER, atol=sc.scalar(2e-3, unit='m'))
 
 
