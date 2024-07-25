@@ -6,7 +6,13 @@ from pathlib import Path
 import sciline
 import scipp as sc
 from ess import loki, sans
-from ess.sans.types import DimsToKeep, QBins, WavelengthBands, WavelengthBins
+from ess.sans.types import (
+    BeamCenter,
+    DimsToKeep,
+    QBins,
+    WavelengthBands,
+    WavelengthBins,
+)
 from scipp.scipy.interpolate import interp1d
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -30,6 +36,7 @@ def test_can_compute_direct_beam_for_all_pixels():
     )
     providers = loki_providers()
     pipeline = sciline.Pipeline(providers, params=params)
+    pipeline[BeamCenter] = sc.vector([0, 0, 0], unit='m')
     I0 = _get_I0(qbins=params[QBins])
 
     results = sans.direct_beam(workflow=pipeline, I0=I0, niter=4)
@@ -59,6 +66,7 @@ def test_can_compute_direct_beam_with_overlapping_wavelength_bands():
 
     providers = loki_providers()
     pipeline = sciline.Pipeline(providers, params=params)
+    pipeline[BeamCenter] = sc.vector([0, 0, 0], unit='m')
     I0 = _get_I0(qbins=params[QBins])
 
     results = sans.direct_beam(workflow=pipeline, I0=I0, niter=4)
@@ -84,6 +92,7 @@ def test_can_compute_direct_beam_per_layer():
     params[DimsToKeep] = ['layer']
     providers = loki_providers()
     pipeline = sciline.Pipeline(providers, params=params)
+    pipeline[BeamCenter] = sc.vector([0, 0, 0], unit='m')
     I0 = _get_I0(qbins=params[QBins])
 
     results = sans.direct_beam(workflow=pipeline, I0=I0, niter=4)
@@ -111,6 +120,7 @@ def test_can_compute_direct_beam_per_layer_and_straw():
     params[DimsToKeep] = ('layer', 'straw')
     providers = loki_providers()
     pipeline = sciline.Pipeline(providers, params=params)
+    pipeline[BeamCenter] = sc.vector([0, 0, 0], unit='m')
     I0 = _get_I0(qbins=params[QBins])
 
     results = sans.direct_beam(workflow=pipeline, I0=I0, niter=4)
