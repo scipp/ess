@@ -165,7 +165,6 @@ def _iofq_in_quadrants(
     pipeline[WavelengthMask] = None
     pipeline[WavelengthBands] = None
     pipeline[QBins] = q_bins
-    pipeline[MaskedData[SampleRun]] = data
     with_phi = data.transform_coords(
         'phi', graph=graph, keep_intermediate=False, keep_inputs=False
     )
@@ -377,13 +376,11 @@ def beam_center_from_iofq(
 
     keys = (
         MaskedData[SampleRun],
-        MaskedSolidAngle[SampleRun],
         NormWavelengthTerm[SampleRun],
         ElasticCoordTransformGraph,
     )
     results = workflow.compute(keys)
     data = results[MaskedData[SampleRun]]
-    solid_angle = results[MaskedSolidAngle[SampleRun]]
     norm = results[NormWavelengthTerm[SampleRun]]
     graph = results[ElasticCoordTransformGraph]
 
@@ -392,7 +389,6 @@ def beam_center_from_iofq(
     pos_dims = data.coords['position'].dims
     new_dim = uuid.uuid4().hex
     data = data.flatten(dims=pos_dims, to=new_dim)
-    solid_angle = solid_angle.flatten(dims=pos_dims, to=new_dim)
     dims_to_flatten = [dim for dim in norm.dims if dim in pos_dims]
     if dims_to_flatten:
         norm = norm.flatten(dims=dims_to_flatten, to=new_dim)
@@ -400,6 +396,13 @@ def beam_center_from_iofq(
     # Use center of mass to get initial guess for beam center
     com_shift = beam_center_from_center_of_mass(data, graph)
     logger.info('Initial guess for beam center: %s', com_shift)
+
+    # We compute the solid angle after setting the initial guess, for extra precision
+    # Would be better to compute every time?
+    tmp = workflow.copy()
+    tmp[BeamCenter] = com_shift
+    solid_angle = tmp.compute(MaskedSolidAngle[SampleRun])
+    solid_angle = solid_angle.flatten(dims=pos_dims, to=new_dim)
 
     coords = data.transform_coords(
         ['cylindrical_x', 'cylindrical_y'], graph=graph
