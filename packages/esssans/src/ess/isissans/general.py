@@ -54,8 +54,28 @@ def default_parameters() -> dict:
 
 def get_detector_data(
     dg: LoadedFileContents[RunType],
+    sample_offset: SampleOffset,
+    detector_bank_offset: DetectorBankOffset,
 ) -> RawDetector[RunType]:
-    return RawDetector[RunType](dg['data'])
+    """Get detector data and apply user offsets to raw data.
+
+    Parameters
+    ----------
+    dg:
+        Data loaded with Mantid and converted to Scipp.
+    sample_offset:
+        Sample offset.
+    detector_bank_offset:
+        Detector bank offset.
+    """
+    data = dg['data']
+    sample_pos = data.coords['sample_position']
+    sample_pos = sample_pos + sample_offset.to(unit=sample_pos.unit, copy=False)
+    pos = data.coords['position']
+    pos = pos + detector_bank_offset.to(unit=pos.unit, copy=False)
+    return RawDetector[RunType](
+        dg['data'].assign_coords(position=pos, sample_position=sample_pos)
+    )
 
 
 def assemble_detector_data(
