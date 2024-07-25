@@ -11,8 +11,6 @@ from scippneutron.conversion.graph import beamline, tof
 
 from .common import mask_range
 from .types import (
-    BeamCenter,
-    CalibratedMaskedData,
     CleanQ,
     CleanQxy,
     CleanWavelength,
@@ -153,24 +151,11 @@ def monitor_to_wavelength(
     )
 
 
-def calibrate_positions(
-    detector: MaskedData[ScatteringRunType], beam_center: BeamCenter
-) -> CalibratedMaskedData[ScatteringRunType]:
-    """
-    Calibrate pixel positions.
-
-    Currently the only applied calibration is the beam-center offset.
-    """
-    detector = detector.copy(deep=False)
-    detector.coords['position'] = detector.coords['position'] - beam_center
-    return detector
-
-
 # TODO This demonstrates a problem: Transforming to wavelength should be possible
 # for RawData, MaskedData, ... no reason to restrict necessarily.
 # Would we be fine with just choosing on option, or will this get in the way for users?
 def detector_to_wavelength(
-    detector: CalibratedMaskedData[ScatteringRunType],
+    detector: MaskedData[ScatteringRunType],
     graph: ElasticCoordTransformGraph,
 ) -> CleanWavelength[ScatteringRunType, Numerator]:
     return CleanWavelength[ScatteringRunType, Numerator](
@@ -227,7 +212,6 @@ def compute_Qxy(
 providers = (
     sans_elastic,
     sans_monitor,
-    calibrate_positions,
     monitor_to_wavelength,
     detector_to_wavelength,
     mask_wavelength,

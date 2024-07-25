@@ -11,6 +11,7 @@ from ess.sans import providers as sans_providers
 
 from ..sans.common import gravity_vector
 from ..sans.types import (
+    BeamCenter,
     CorrectForGravity,
     DetectorEventData,
     DetectorPixelShape,
@@ -106,68 +107,61 @@ def get_sample_position(
 
 def get_detector_data(
     detector: NeXusDetector[ScatteringRunType],
+    beam_center: BeamCenter,
+    source_position: SourcePosition[ScatteringRunType],
+    sample_position: SamplePosition[ScatteringRunType],
 ) -> RawDetector[ScatteringRunType]:
     da = nexus.extract_detector_data(detector)
+    da.coords['position'] = da.coords['position'] - beam_center
     if (reshape := DETECTOR_BANK_RESHAPING.get(detector['detector_name'])) is not None:
         da = reshape(da)
-    return RawDetector[ScatteringRunType](da)
+    return RawDetector[ScatteringRunType](
+        da.assign_coords(
+            source_position=source_position,
+            sample_position=sample_position,
+            gravity=gravity_vector(),
+        )
+    )
 
 
 def get_monitor_data(
     monitor: NeXusMonitor[RunType, MonitorType],
+    source_position: SourcePosition[RunType],
 ) -> RawMonitor[RunType, MonitorType]:
     return RawMonitor[RunType, MonitorType](
-        nexus.extract_monitor_data(monitor).assign_coords(position=monitor['position'])
+        nexus.extract_monitor_data(monitor).assign_coords(
+            position=monitor['position'], source_position=source_position
+        )
     )
 
 
-def _add_variances_and_coordinates(
-    da: sc.DataArray,
-    source_position: sc.Variable,
-    sample_position: sc.Variable | None = None,
-) -> sc.DataArray:
+def _add_variances(da: sc.DataArray) -> sc.DataArray:
     out = da.copy(deep=False)
     if out.bins is not None:
         content = out.bins.constituents['data']
         if content.variances is None:
             content.variances = content.values
-    # Sample position is not needed in the case of a monitor.
-    if sample_position is not None:
-        out.coords['sample_position'] = sample_position
-    out.coords['source_position'] = source_position
-    out.coords['gravity'] = gravity_vector()
     return out
 
 
 def assemble_detector_data(
     detector_data: RawDetector[ScatteringRunType],
     event_data: DetectorEventData[ScatteringRunType],
-    source_position: SourcePosition[ScatteringRunType],
-    sample_position: SamplePosition[ScatteringRunType],
 ) -> RawDetectorData[ScatteringRunType]:
     grouped = nexus.group_event_data(
         event_data=event_data, detector_number=detector_data.coords['detector_number']
     )
     detector_data.data = grouped.data
-    return RawDetectorData[ScatteringRunType](
-        _add_variances_and_coordinates(
-            da=detector_data,
-            source_position=source_position,
-            sample_position=sample_position,
-        )
-    )
+    return RawDetectorData[ScatteringRunType](_add_variances(da=detector_data))
 
 
 def assemble_monitor_data(
     monitor_data: RawMonitor[RunType, MonitorType],
     event_data: MonitorEventData[RunType, MonitorType],
-    source_position: SourcePosition[RunType],
 ) -> RawMonitorData[RunType, MonitorType]:
     meta = monitor_data.drop_coords('event_time_zero')
     da = event_data.assign_coords(meta.coords).assign_masks(meta.masks)
-    return RawMonitorData[RunType, MonitorType](
-        _add_variances_and_coordinates(da=da, source_position=source_position)
-    )
+    return RawMonitorData[RunType, MonitorType](_add_variances(da=da))
 
 
 def _convert_to_tof(da: sc.DataArray) -> sc.DataArray:

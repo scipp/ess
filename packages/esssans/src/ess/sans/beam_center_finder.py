@@ -12,7 +12,6 @@ from scipp.core import concepts
 
 from .conversions import (
     ElasticCoordTransformGraph,
-    calibrate_positions,
     compute_Q,
     detector_to_wavelength,
     mask_wavelength,
@@ -27,7 +26,6 @@ from .normalization import (
 )
 from .types import (
     BeamCenter,
-    CalibratedMaskedData,
     DetectorPixelShape,
     DimsToKeep,
     IofQ,
@@ -197,7 +195,9 @@ def _iofq_in_quadrants(
 
     pipeline = sciline.Pipeline(providers, params=params)
     pipeline[MaskedData[SampleRun]] = data
-    calibrated = pipeline.compute(CalibratedMaskedData[SampleRun])
+    calibrated = pipeline.compute(MaskedData[SampleRun])
+    assert False
+    # calibrated = pipeline.compute(CalibratedMaskedData[SampleRun])
     with_phi = calibrated.transform_coords(
         'phi', graph=graph, keep_intermediate=False, keep_inputs=False
     )

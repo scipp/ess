@@ -217,6 +217,10 @@ class SolidAngle(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Solid angle of detector pixels seen from sample position"""
 
 
+class MaskedSolidAngle(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
+    """Same as :py:class:`SolidAngle`, but with pixel masks applied"""
+
+
 class NeXusDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
     """Detector data, loaded from a NeXus file, containing not only neutron events
     but also pixel shape information, transformations, ..."""
@@ -264,12 +268,6 @@ PixelMask = NewType('PixelMask', sc.Variable)
 
 class MaskedData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Raw data with pixel-specific masks applied"""
-
-
-class CalibratedMaskedData(
-    sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray
-):
-    """Raw data with pixel-specific masks applied and calibrated pixel positions"""
 
 
 class NormWavelengthTerm(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
