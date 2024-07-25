@@ -244,13 +244,15 @@ class MonitorEventData(
 
 
 class RawDetector(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
-    """Raw detector data component extracted from :py:class:`NeXusDetector`"""
+    """Raw detector component extracted from :py:class:`NeXusDetector`"""
 
 
-class RawDetectorData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
-    """Raw event data where variances and necessary coordinates
-    (e.g. sample and source position) have been added, and where optionally some
-    user configuration was applied to some of the coordinates."""
+class CalibratedDetector(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
+    """Calibrated version of raw detector"""
+
+
+class DetectorData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
+    """Calibrated detector with added raw event data"""
 
 
 class TofData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):

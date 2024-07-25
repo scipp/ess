@@ -12,7 +12,9 @@ from ess.sans import providers as sans_providers
 from ..sans.common import gravity_vector
 from ..sans.types import (
     BeamCenter,
+    CalibratedDetector,
     CorrectForGravity,
+    DetectorData,
     DetectorEventData,
     DetectorPixelShape,
     DimsToKeep,
@@ -26,7 +28,6 @@ from ..sans.types import (
     NonBackgroundWavelengthRange,
     PixelShapePath,
     RawDetector,
-    RawDetectorData,
     RawMonitor,
     RawMonitorData,
     RawSample,
@@ -107,16 +108,22 @@ def get_sample_position(
 
 def get_detector_data(
     detector: NeXusDetector[ScatteringRunType],
+) -> RawDetector[ScatteringRunType]:
+    da = nexus.extract_detector_data(detector)
+    if (reshape := DETECTOR_BANK_RESHAPING.get(detector['detector_name'])) is not None:
+        da = reshape(da)
+    return RawDetector[ScatteringRunType](da)
+
+
+def calibrate_detector(
+    detector: RawDetector[ScatteringRunType],
     beam_center: BeamCenter,
     source_position: SourcePosition[ScatteringRunType],
     sample_position: SamplePosition[ScatteringRunType],
-) -> RawDetector[ScatteringRunType]:
-    da = nexus.extract_detector_data(detector)
-    da.coords['position'] = da.coords['position'] - beam_center
-    if (reshape := DETECTOR_BANK_RESHAPING.get(detector['detector_name'])) is not None:
-        da = reshape(da)
-    return RawDetector[ScatteringRunType](
-        da.assign_coords(
+) -> CalibratedDetector[ScatteringRunType]:
+    return CalibratedDetector[ScatteringRunType](
+        detector.assign_coords(
+            position=detector.coords['position'] - beam_center,
             source_position=source_position,
             sample_position=sample_position,
             gravity=gravity_vector(),
@@ -145,14 +152,14 @@ def _add_variances(da: sc.DataArray) -> sc.DataArray:
 
 
 def assemble_detector_data(
-    detector_data: RawDetector[ScatteringRunType],
+    detector: CalibratedDetector[ScatteringRunType],
     event_data: DetectorEventData[ScatteringRunType],
-) -> RawDetectorData[ScatteringRunType]:
+) -> DetectorData[ScatteringRunType]:
     grouped = nexus.group_event_data(
-        event_data=event_data, detector_number=detector_data.coords['detector_number']
+        event_data=event_data, detector_number=detector.coords['detector_number']
     )
-    detector_data.data = grouped.data
-    return RawDetectorData[ScatteringRunType](_add_variances(da=detector_data))
+    detector.data = grouped.data
+    return DetectorData[ScatteringRunType](_add_variances(da=detector))
 
 
 def assemble_monitor_data(
@@ -172,7 +179,7 @@ def _convert_to_tof(da: sc.DataArray) -> sc.DataArray:
 
 
 def data_to_tof(
-    da: RawDetectorData[ScatteringRunType],
+    da: DetectorData[ScatteringRunType],
 ) -> TofData[ScatteringRunType]:
     return TofData[ScatteringRunType](_convert_to_tof(da))
 
@@ -200,6 +207,7 @@ def detector_lab_frame_transform(
 providers = (
     detector_pixel_shape,
     detector_lab_frame_transform,
+    calibrate_detector,
     get_detector_data,
     get_monitor_data,
     get_sample_position,

@@ -5,6 +5,7 @@ from ess.reduce.uncertainty import UncertaintyBroadcastMode, broadcast_uncertain
 from scipp.core import concepts
 
 from .types import (
+    CalibratedDetector,
     CleanDirectBeam,
     CleanMonitor,
     CleanSummedQ,
@@ -22,7 +23,6 @@ from .types import (
     NormWavelengthTerm,
     Numerator,
     ProcessedWavelengthBands,
-    RawDetector,
     ReturnEvents,
     ScatteringRunType,
     SolidAngle,
@@ -35,7 +35,7 @@ from .types import (
 
 
 def solid_angle(
-    data: RawDetector[ScatteringRunType],
+    data: CalibratedDetector[ScatteringRunType],
     pixel_shape: DetectorPixelShape[ScatteringRunType],
     transform: LabFrameTransform[ScatteringRunType],
 ) -> SolidAngle[ScatteringRunType]:
