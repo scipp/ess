@@ -117,7 +117,7 @@ def _offsets_to_vector(data: sc.DataArray, xy: list[float], graph: dict) -> sc.V
 
 def _iofq_in_quadrants(
     xy: list[float],
-    pipeline: sciline.Pipeline,
+    workflow: sciline.Pipeline,
     detector: sc.DataArray,
     norm: sc.DataArray,
 ) -> dict[str, sc.DataArray]:
@@ -144,10 +144,10 @@ def _iofq_in_quadrants(
     phi_bins = sc.linspace('phi', -pi, pi, 5, unit='rad')
     quadrants = ['south-west', 'south-east', 'north-east', 'north-west']
 
-    graph = pipeline.compute(ElasticCoordTransformGraph)
-    pipeline = pipeline.copy()
-    pipeline[BeamCenter] = _offsets_to_vector(data=detector, xy=xy, graph=graph)
-    calibrated = pipeline.compute(MaskedData[SampleRun])
+    graph = workflow.compute(ElasticCoordTransformGraph)
+    workflow = workflow.copy()
+    workflow[BeamCenter] = _offsets_to_vector(data=detector, xy=xy, graph=graph)
+    calibrated = workflow.compute(MaskedData[SampleRun])
     with_phi = calibrated.transform_coords(
         'phi', graph=graph, keep_intermediate=False, keep_inputs=False
     )
@@ -165,13 +165,13 @@ def _iofq_in_quadrants(
     for i, quad in enumerate(quadrants):
         # Select pixels based on phi
         sel = (phi >= phi_bins[i]) & (phi < phi_bins[i + 1])
-        pipeline[RawDetector[SampleRun]] = detector[sel]
+        workflow[RawDetector[SampleRun]] = detector[sel]
         # MaskedData would be computed automatically, but we did it above already
-        pipeline[MaskedData[SampleRun]] = calibrated[sel]
-        pipeline[NormWavelengthTerm[SampleRun]] = (
+        workflow[MaskedData[SampleRun]] = calibrated[sel]
+        workflow[NormWavelengthTerm[SampleRun]] = (
             norm if norm.dims == ('wavelength',) else norm[sel]
         )
-        out[quad] = pipeline.compute(IofQ[SampleRun])
+        out[quad] = workflow.compute(IofQ[SampleRun])
     return out
 
 
