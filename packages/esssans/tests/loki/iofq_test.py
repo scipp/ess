@@ -68,8 +68,7 @@ def test_pipeline_can_compute_IofQ(uncertainties, qxy: bool):
     pipeline = sans.with_pixel_mask_filenames(
         pipeline, loki.data.loki_tutorial_mask_filenames()
     )
-    pipeline[BeamCenter] = sc.vector([0.0, 0.0, 0.0], unit='m')
-    pipeline[BeamCenter] = pipeline.bind_and_call(sans.beam_center_from_center_of_mass)
+    pipeline[BeamCenter] = sans.beam_center_from_center_of_mass(pipeline)
     if qxy:
         result = pipeline.compute(BackgroundSubtractedIofQxy)
         assert result.dims == ('Qy', 'Qx')
@@ -106,8 +105,7 @@ def test_pipeline_can_compute_IofQ_in_event_mode(uncertainties, target):
     params = make_params()
     params[UncertaintyBroadcastMode] = uncertainties
     pipeline = sciline.Pipeline(loki_providers(), params=params)
-    pipeline[BeamCenter] = sc.vector([0.0, 0.0, 0.0], unit='m')
-    pipeline[BeamCenter] = pipeline.bind_and_call(sans.beam_center_from_center_of_mass)
+    pipeline[BeamCenter] = sans.beam_center_from_center_of_mass(pipeline)
     reference = pipeline.compute(target)
     pipeline[ReturnEvents] = True
     result = pipeline.compute(target)
@@ -188,8 +186,7 @@ def test_pipeline_can_compute_IofQ_in_layers(qxy: bool):
 
 def _compute_beam_center():
     pipeline = sciline.Pipeline(loki_providers(), params=make_params())
-    pipeline[BeamCenter] = sc.vector([0, 0, 0], unit='m')
-    return pipeline.bind_and_call(sans.beam_center_from_center_of_mass)
+    return sans.beam_center_from_center_of_mass(pipeline)
 
 
 def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs():
@@ -291,8 +288,7 @@ def test_beam_center_from_center_of_mass_is_close_to_verified_result():
     pipeline = sans.with_pixel_mask_filenames(
         pipeline, loki.data.loki_tutorial_mask_filenames()
     )
-    pipeline[BeamCenter] = sc.vector([0.0, 0.0, 0.0], unit='m')
-    center = pipeline.bind_and_call(sans.beam_center_from_center_of_mass)
+    center = sans.beam_center_from_center_of_mass(pipeline)
     reference = sc.vector([-0.0291487, -0.0181614, 0], unit='m')
     assert sc.allclose(center, reference)
 

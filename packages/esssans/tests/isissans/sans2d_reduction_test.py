@@ -119,7 +119,7 @@ def test_pipeline_can_compute_background_subtracted_IofQ_in_wavelength_bands():
 def test_pipeline_wavelength_bands_is_optional():
     params = make_params()
     pipeline = sciline.Pipeline(sans2d_providers(), params=params)
-    pipeline[BeamCenter] = pipeline.bind_and_call(sans.beam_center_from_center_of_mass)
+    pipeline[BeamCenter] = sans.beam_center_from_center_of_mass(pipeline)
     noband = pipeline.compute(BackgroundSubtractedIofQ)
     assert pipeline.compute(WavelengthBands) is None
     band = sc.linspace('wavelength', 2.0, 16.0, num=2, unit='angstrom')
@@ -133,7 +133,7 @@ def test_workflow_is_deterministic():
     params = make_params()
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
     pipeline = sciline.Pipeline(sans2d_providers(), params=params)
-    pipeline[BeamCenter] = pipeline.bind_and_call(sans.beam_center_from_center_of_mass)
+    pipeline[BeamCenter] = sans.beam_center_from_center_of_mass(pipeline)
     # This is Sciline's default scheduler, but we want to be explicit here
     scheduler = sciline.scheduler.DaskScheduler()
     graph = pipeline.get(IofQ[SampleRun], scheduler=scheduler)
@@ -208,7 +208,7 @@ def test_beam_center_from_center_of_mass_is_close_to_verified_result():
     params = make_params()
     providers = sans2d_providers()
     pipeline = sciline.Pipeline(providers, params=params)
-    center = pipeline.bind_and_call(sans.beam_center_from_center_of_mass)
+    center = sans.beam_center_from_center_of_mass(pipeline)
     # This is the result obtained from Mantid, using the full IofQ
     # calculation. The difference is about 3 mm in X or Y, probably due to a bias
     # introduced by the sample holder, which the center-of-mass approach cannot ignore.
@@ -220,7 +220,7 @@ def test_beam_center_from_center_of_mass_independent_of_set_beam_center():
     providers = sans2d_providers()
     pipeline = sciline.Pipeline(providers, params=params)
     pipeline[BeamCenter] = sc.vector([0.1, -0.1, 0], unit='m')
-    center = pipeline.bind_and_call(sans.beam_center_from_center_of_mass)
+    center = sans.beam_center_from_center_of_mass(pipeline)
     assert sc.allclose(center, MANTID_BEAM_CENTER, atol=sc.scalar(3e-3, unit='m'))
 
 

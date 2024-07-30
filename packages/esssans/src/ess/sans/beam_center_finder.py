@@ -34,11 +34,7 @@ def _xy_extrema(pos: sc.Variable) -> sc.Variable:
     return sc.concat([x_min, x_max, y_min, y_max], dim='extremes')
 
 
-def beam_center_from_center_of_mass(
-    data: MaskedData[SampleRun],
-    graph: ElasticCoordTransformGraph,
-    beam_center: BeamCenter,
-) -> BeamCenter:
+def beam_center_from_center_of_mass(workflow: sciline.Pipeline) -> BeamCenter:
     """
     Estimate the beam center via the center-of-mass of the data counts.
 
@@ -51,16 +47,22 @@ def beam_center_from_center_of_mass(
 
     Parameters
     ----------
-    data:
-        The data to find the beam center of.
-    graph:
-        Coordinate transformation graph for elastic SANS.
+    workflow:
+        The reduction workflow to compute MaskedData[SampleRun].
 
     Returns
     -------
     :
         The beam center position as a vector.
     """
+    try:
+        beam_center = workflow.compute(BeamCenter)
+    except sciline.UnsatisfiedRequirement:
+        beam_center = sc.vector([0.0, 0.0, 0.0], unit='m')
+        workflow = workflow.copy()
+        workflow[BeamCenter] = beam_center
+    data = workflow.compute(MaskedData[SampleRun])
+    graph = workflow.compute(ElasticCoordTransformGraph)
 
     dims_to_sum = set(data.dims) - set(data.coords['position'].dims)
     if dims_to_sum:
@@ -356,7 +358,6 @@ def beam_center_from_iofq(
     logger.info('Using tolerance: %s', tolerance)
 
     keys = (
-        BeamCenter,
         RawDetector[SampleRun],
         MaskedData[SampleRun],
         NormWavelengthTerm[SampleRun],
@@ -367,7 +368,6 @@ def beam_center_from_iofq(
     data = results[MaskedData[SampleRun]]
     norm = results[NormWavelengthTerm[SampleRun]]
     graph = results[ElasticCoordTransformGraph]
-    orig_beam_center = results[BeamCenter]
 
     # Flatten positions dim which is required during the iterations for slicing with a
     # boolean mask
@@ -389,9 +389,7 @@ def beam_center_from_iofq(
     workflow[QBins] = q_bins
 
     # Use center of mass to get initial guess for beam center
-    com_shift = beam_center_from_center_of_mass(
-        data, beam_center=orig_beam_center, graph=graph
-    )
+    com_shift = beam_center_from_center_of_mass(workflow)
     logger.info('Initial guess for beam center: %s', com_shift)
 
     coords = data.transform_coords(
