@@ -37,6 +37,7 @@ def _xy_extrema(pos: sc.Variable) -> sc.Variable:
 def beam_center_from_center_of_mass(
     data: MaskedData[SampleRun],
     graph: ElasticCoordTransformGraph,
+    beam_center: BeamCenter,
 ) -> BeamCenter:
     """
     Estimate the beam center via the center-of-mass of the data counts.
@@ -97,7 +98,7 @@ def beam_center_from_center_of_mass(
     n_beam = incident_beam / sc.norm(incident_beam)
     com_shift = com - sc.dot(com, n_beam) * n_beam
     xy = [com_shift.fields.x.value, com_shift.fields.y.value]
-    return _offsets_to_vector(data=summed, xy=xy, graph=graph)
+    return beam_center + _offsets_to_vector(data=summed, xy=xy, graph=graph)
 
 
 def _offsets_to_vector(data: sc.DataArray, xy: list[float], graph: dict) -> sc.Variable:
@@ -355,6 +356,7 @@ def beam_center_from_iofq(
     logger.info('Using tolerance: %s', tolerance)
 
     keys = (
+        BeamCenter,
         RawDetector[SampleRun],
         MaskedData[SampleRun],
         NormWavelengthTerm[SampleRun],
@@ -365,6 +367,7 @@ def beam_center_from_iofq(
     data = results[MaskedData[SampleRun]]
     norm = results[NormWavelengthTerm[SampleRun]]
     graph = results[ElasticCoordTransformGraph]
+    orig_beam_center = results[BeamCenter]
 
     # Flatten positions dim which is required during the iterations for slicing with a
     # boolean mask
@@ -386,7 +389,9 @@ def beam_center_from_iofq(
     workflow[QBins] = q_bins
 
     # Use center of mass to get initial guess for beam center
-    com_shift = beam_center_from_center_of_mass(data, graph)
+    com_shift = beam_center_from_center_of_mass(
+        data, beam_center=orig_beam_center, graph=graph
+    )
     logger.info('Initial guess for beam center: %s', com_shift)
 
     coords = data.transform_coords(
