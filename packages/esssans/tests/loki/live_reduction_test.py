@@ -4,7 +4,7 @@ import sciline as sl
 from ess.loki.workflow import LoKiMonitorWorkflow
 
 
-def loki_monitor_workflow_test() -> None:
+def test_loki_monitor_workflow() -> None:
     # Test building the sciline pipeline.
     workflow = LoKiMonitorWorkflow()
-    assert isinstance(workflow.pipeline, sl.pipeline)
+    assert isinstance(workflow.pipeline, sl.Pipeline)
