@@ -123,7 +123,7 @@ webcolors==24.6.0
     # via jsonschema
 websocket-client==1.8.0
     # via jupyter-server
-wheel==0.43.0
+wheel==0.44.0
     # via pip-tools
 
 # The following packages are considered to be unsafe in a requirements file:

@@ -10,6 +10,7 @@ from ess.loki.general import (
     patch_monitor_data,
 )
 from ess.loki.io import load_nexus_monitor, load_nexus_source
+from ess.reduce.nexus.json_nexus import JSONGroup
 from ess.sans.conversions import monitor_to_wavelength, sans_monitor
 from ess.sans.types import (
     Filename,
@@ -22,7 +23,6 @@ from ess.sans.types import (
     WavelengthBins,
     WavelengthMonitor,
 )
-from scippneutron.io.nexus.load_nexus import JSONGroup
 
 
 class MonitorHistogram(
