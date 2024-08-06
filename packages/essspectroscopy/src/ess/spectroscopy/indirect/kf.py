@@ -149,15 +149,18 @@ def kf_hat(sample_analyzer_vec: SampleAnalyzerVector) -> SampleAnalyzerDirection
     return sample_analyzer_vec / norm(sample_analyzer_vec)
 
 
+def reciprocal_lattice_spacing(tau_vector: ReciprocalLatticeVectorAbsolute):
+    from ess.spectroscopy.utils import norm
+    return norm(tau_vector)
+
+
 def kf_wavenumber(
         sample_analyzer_vec: SampleAnalyzerVector,
         analyzer_detector_vec: AnalyzerDetectorVector,
-        tau: ReciprocalLatticeSpacing | ReciprocalLatticeVectorAbsolute
+        tau: ReciprocalLatticeSpacing
 ) -> FinalWavenumber:
-    from scipp import sqrt, DType
+    from scipp import sqrt
     from ess.spectroscopy.utils import norm
-    if tau.dtype == DType.vector3:
-        tau = norm(tau)
 
     # law of Cosines gives the scattering angle based on distances:
     l_sa = norm(sample_analyzer_vec)
