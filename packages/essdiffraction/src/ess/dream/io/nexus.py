@@ -13,14 +13,25 @@ and the ICD DREAM interface specification for details.
   but it is not possible to reshape the data into all the logical dimensions.
 """
 
+import warnings
+from typing import Any
+
 import scipp as sc
+import scippnexus as snx
 from ess.reduce import nexus
 
 from ess.powder.types import (
+    DetectorEventData,
     Filename,
-    LoadedNeXusDetector,
+    MonitorEventData,
+    MonitorType,
+    NeXusDetector,
     NeXusDetectorName,
-    RawDetectorData,
+    NeXusMonitor,
+    NeXusMonitorName,
+    RawDetector,
+    RawMonitor,
+    RawMonitorData,
     RawSample,
     RawSource,
     ReducibleDetectorData,
@@ -84,10 +95,62 @@ def load_nexus_source(file_path: Filename[RunType]) -> RawSource[RunType]:
 
 def load_nexus_detector(
     file_path: Filename[RunType], detector_name: NeXusDetectorName
-) -> LoadedNeXusDetector[RunType]:
-    out = nexus.load_detector(file_path=file_path, detector_name=detector_name)
-    out.pop("pixel_shape", None)
-    return LoadedNeXusDetector[RunType](out)
+) -> NeXusDetector[RunType]:
+    definitions = snx.base_definitions()
+    definitions["NXdetector"] = FilteredDetector
+    # Events will be loaded later. Should we set something else as data instead, or
+    # use different NeXus definitions to completely bypass the (empty) event load?
+    dg = nexus.load_detector(
+        file_path=file_path,
+        detector_name=detector_name,
+        selection={'event_time_zero': slice(0, 0)},
+        definitions=definitions,
+    )
+    # The name is required later, e.g., for determining logical detector shape
+    dg['detector_name'] = detector_name
+    return NeXusDetector[RunType](dg)
+
+
+def load_nexus_monitor(
+    file_path: Filename[RunType], monitor_name: NeXusMonitorName[MonitorType]
+) -> NeXusMonitor[RunType, MonitorType]:
+    # It would be simpler to use something like
+    #    selection={'event_time_zero': slice(0, 0)},
+    # to avoid loading events, but currently we have files with empty NXevent_data
+    # groups so that does not work. Instead, skip event loading and create empty dummy.
+    definitions = snx.base_definitions()
+    definitions["NXmonitor"] = NXmonitor_no_events
+    # TODO There is a another problem with the DREAM files:
+    # Transformaiton chains depend on transformations outside the current group, so
+    # loading a monitor in an isolated manner is not possible
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore",
+            category=UserWarning,
+            message="Failed to load",
+        )
+        monitor = nexus.load_monitor(
+            file_path=file_path,
+            monitor_name=monitor_name,
+            definitions=definitions,
+        )
+    empty_events = sc.DataArray(
+        sc.empty(dims=['event'], shape=[0], dtype='float32', unit='counts'),
+        coords={'event_time_offset': sc.array(dims=['event'], values=[], unit='ns')},
+    )
+    monitor[f'{monitor_name}_events'] = sc.DataArray(
+        sc.bins(
+            dim='event',
+            data=empty_events,
+            begin=sc.empty(dims=['event_time_zero'], shape=[0], unit=None),
+        ),
+        coords={
+            'event_time_zero': sc.datetimes(
+                dims=['event_time_zero'], values=[], unit='ns'
+            )
+        },
+    )
+    return NeXusMonitor[RunType, MonitorType](monitor)
 
 
 def get_source_position(
@@ -103,42 +166,121 @@ def get_sample_position(
 
 
 def get_detector_data(
-    detector: LoadedNeXusDetector[RunType],
-    detector_name: NeXusDetectorName,
-) -> RawDetectorData[RunType]:
+    detector: NeXusDetector[RunType],
+) -> RawDetector[RunType]:
     da = nexus.extract_detector_data(detector)
-    if detector_name in DETECTOR_BANK_SIZES:
-        da = da.fold(dim="detector_number", sizes=DETECTOR_BANK_SIZES[detector_name])
-    return RawDetectorData[RunType](da)
+    if (sizes := DETECTOR_BANK_SIZES.get(detector['detector_name'])) is not None:
+        da = da.fold(dim="detector_number", sizes=sizes)
+    return RawDetector[RunType](da)
 
 
-def patch_detector_data(
-    detector_data: RawDetectorData[RunType],
+def get_monitor_data(
+    monitor: NeXusMonitor[RunType, MonitorType],
+    source_position: SourcePosition[RunType],
+) -> RawMonitor[RunType, MonitorType]:
+    return RawMonitor[RunType, MonitorType](
+        nexus.extract_monitor_data(monitor).assign_coords(
+            position=monitor['position'], source_position=source_position
+        )
+    )
+
+
+def assemble_detector_data(
+    detector: RawDetector[RunType],
+    event_data: DetectorEventData[RunType],
     source_position: SourcePosition[RunType],
     sample_position: SamplePosition[RunType],
 ) -> ReducibleDetectorData[RunType]:
     """
-    Patch a detector data object with source and sample positions.
+    Assemble a detector data object with source and sample positions and event data.
     Also adds variances to the event data if they are missing.
     """
-    out = detector_data.copy(deep=False)
+    grouped = nexus.group_event_data(
+        event_data=event_data, detector_number=detector.coords['detector_number']
+    )
+    detector.data = grouped.data
+    return ReducibleDetectorData[RunType](
+        _add_variances(da=detector).assign_coords(
+            source_position=source_position, sample_position=sample_position
+        )
+    )
+
+
+def assemble_monitor_data(
+    monitor_data: RawMonitor[RunType, MonitorType],
+    event_data: MonitorEventData[RunType, MonitorType],
+) -> RawMonitorData[RunType, MonitorType]:
+    meta = monitor_data.drop_coords('event_time_zero')
+    da = event_data.assign_coords(meta.coords).assign_masks(meta.masks)
+    return RawMonitorData[RunType, MonitorType](_add_variances(da=da))
+
+
+def _skip(
+    _: str, obj: snx.Field | snx.Group, classes: tuple[snx.NXobject, ...]
+) -> bool:
+    return isinstance(obj, snx.Group) and (obj.nx_class in classes)
+
+
+class FilteredDetector(snx.NXdetector):
+    def __init__(
+        self, attrs: dict[str, Any], children: dict[str, snx.Field | snx.Group]
+    ):
+        children = {
+            name: child
+            for name, child in children.items()
+            if not _skip(name, child, classes=(snx.NXoff_geometry,))
+        }
+        super().__init__(attrs=attrs, children=children)
+
+
+class NXmonitor_no_events(snx.NXmonitor):
+    def __init__(
+        self, attrs: dict[str, Any], children: dict[str, snx.Field | snx.Group]
+    ):
+        children = {
+            name: child
+            for name, child in children.items()
+            if not _skip(name, child, classes=(snx.NXevent_data,))
+        }
+        super().__init__(attrs=attrs, children=children)
+
+
+def load_detector_event_data(
+    file_path: Filename[RunType], detector_name: NeXusDetectorName
+) -> DetectorEventData[RunType]:
+    da = nexus.load_event_data(file_path=file_path, component_name=detector_name)
+    return DetectorEventData[RunType](da)
+
+
+def load_monitor_event_data(
+    file_path: Filename[RunType], monitor_name: NeXusMonitorName[MonitorType]
+) -> MonitorEventData[RunType, MonitorType]:
+    da = nexus.load_event_data(file_path=file_path, component_name=monitor_name)
+    return MonitorEventData[RunType, MonitorType](da)
+
+
+def _add_variances(da: sc.DataArray) -> sc.DataArray:
+    out = da.copy(deep=False)
     if out.bins is not None:
-        content = out.bins.constituents["data"]
+        content = out.bins.constituents['data']
         if content.variances is None:
             content.variances = content.values
-    out.coords["sample_position"] = sample_position
-    out.coords["source_position"] = source_position
-    return ReducibleDetectorData[RunType](out)
+    return out
 
 
 providers = (
+    assemble_detector_data,
+    assemble_monitor_data,
+    get_detector_data,
+    get_monitor_data,
+    get_sample_position,
+    get_source_position,
+    load_detector_event_data,
+    load_monitor_event_data,
+    load_nexus_detector,
+    load_nexus_monitor,
     load_nexus_sample,
     load_nexus_source,
-    load_nexus_detector,
-    get_source_position,
-    get_sample_position,
-    get_detector_data,
-    patch_detector_data,
 )
 """
 Providers for loading and processing DREAM NeXus data.

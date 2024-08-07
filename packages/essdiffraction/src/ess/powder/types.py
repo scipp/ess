@@ -28,6 +28,13 @@ VanadiumRun = NewType("VanadiumRun", int)
 RunType = TypeVar("RunType", EmptyInstrumentRun, SampleRun, VanadiumRun)
 """TypeVar used for specifying the run."""
 
+# 1.2  Monitor types
+Monitor1 = NewType('Monitor1', int)
+"""Placeholder for monitor 1."""
+Monitor2 = NewType('Monitor2', int)
+"""Placeholder for monitor 2."""
+MonitorType = TypeVar('MonitorType', Monitor1, Monitor2)
+"""TypeVar used for identifying a monitor"""
 
 # 2 Workflow parameters
 
@@ -37,6 +44,11 @@ CalibrationFilename = NewType("CalibrationFilename", str | None)
 
 NeXusDetectorName = NewType("NeXusDetectorName", str)
 """Name of detector entry in NeXus file"""
+
+
+class NeXusMonitorName(sciline.Scope[MonitorType, str], str):
+    """Name of Incident|Transmission monitor in NeXus file"""
+
 
 DspacingBins = NewType("DSpacingBins", sc.Variable)
 """Bin edges for d-spacing."""
@@ -126,9 +138,46 @@ IofDspacingTwoTheta = NewType("IofDspacingTwoTheta", sc.DataArray)
 """Data that has been normalized by a vanadium run, and grouped into 2theta bins."""
 
 
-class LoadedNeXusDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
-    """Detector data, loaded from a NeXus file, containing not only neutron events
-    but also pixel shape information, transformations, ..."""
+class NeXusDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+    """
+    Detector loaded from a NeXus file, without event data.
+
+    Contains detector numbers, pixel shape information, transformations, ...
+    """
+
+
+class NeXusMonitor(
+    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataGroup], sc.DataGroup
+):
+    """
+    Monitor loaded from a NeXus file, without event data.
+
+    Contains detector numbers, pixel shape information, transformations, ...
+    """
+
+
+class DetectorEventData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Event data loaded from a detector in a NeXus file"""
+
+
+class MonitorEventData(
+    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
+):
+    """Event data loaded from a monitor in a NeXus file"""
+
+
+class RawMonitor(
+    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
+):
+    """Raw monitor data"""
+
+
+class RawMonitorData(
+    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
+):
+    """Raw monitor data where variances and necessary coordinates
+    (e.g. source position) have been added, and where optionally some
+    user configuration was applied to some of the coordinates."""
 
 
 class MaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
@@ -156,11 +205,7 @@ class RawDataAndMetadata(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
     """Raw data and associated metadata."""
 
 
-class RawDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
-    """Full raw data for a detector."""
-
-
-class RawDetectorData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+class RawDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Data (events / histogram) extracted from a RawDetector."""
 
 
