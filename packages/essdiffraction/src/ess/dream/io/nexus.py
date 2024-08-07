@@ -120,9 +120,6 @@ def load_nexus_monitor(
     # groups so that does not work. Instead, skip event loading and create empty dummy.
     definitions = snx.base_definitions()
     definitions["NXmonitor"] = NXmonitor_no_events
-    # TODO There is a another problem with the DREAM files:
-    # Transformaiton chains depend on transformations outside the current group, so
-    # loading a monitor in an isolated manner is not possible
     with warnings.catch_warnings():
         warnings.filterwarnings(
             "ignore",
