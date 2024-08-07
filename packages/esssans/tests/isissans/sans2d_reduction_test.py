@@ -1,7 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-from collections.abc import Callable
-
 import pytest
 import sciline
 import scipp as sc
@@ -24,7 +22,7 @@ from ess.sans.types import (
     NeXusMonitorName,
     NonBackgroundWavelengthRange,
     QBins,
-    RawData,
+    RawDetector,
     ReturnEvents,
     SampleRun,
     SolidAngle,
@@ -71,6 +69,7 @@ def make_params() -> dict:
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
     params[ReturnEvents] = False
     params[DimsToKeep] = ()
+    params[BeamCenter] = sc.vector([0, 0, 0], unit='m')
 
     return params
 
@@ -86,7 +85,6 @@ def sans2d_providers():
             isis.data.load_tutorial_run,
             isis.data.transmission_from_background_run,
             isis.data.transmission_from_sample_run,
-            sans.beam_center_finder.beam_center_from_center_of_mass,
         )
     )
 
@@ -121,6 +119,7 @@ def test_pipeline_can_compute_background_subtracted_IofQ_in_wavelength_bands():
 def test_pipeline_wavelength_bands_is_optional():
     params = make_params()
     pipeline = sciline.Pipeline(sans2d_providers(), params=params)
+    pipeline[BeamCenter] = sans.beam_center_from_center_of_mass(pipeline)
     noband = pipeline.compute(BackgroundSubtractedIofQ)
     assert pipeline.compute(WavelengthBands) is None
     band = sc.linspace('wavelength', 2.0, 16.0, num=2, unit='angstrom')
@@ -134,6 +133,7 @@ def test_workflow_is_deterministic():
     params = make_params()
     params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
     pipeline = sciline.Pipeline(sans2d_providers(), params=params)
+    pipeline[BeamCenter] = sans.beam_center_from_center_of_mass(pipeline)
     # This is Sciline's default scheduler, but we want to be explicit here
     scheduler = sciline.scheduler.DaskScheduler()
     graph = pipeline.get(IofQ[SampleRun], scheduler=scheduler)
@@ -179,17 +179,8 @@ def test_pipeline_can_compute_intermediate_results():
     assert result.dims == ('spectrum',)
 
 
-# TODO See scipp/sciline#57 for plans on a builtin way to do this
-def as_dict(funcs: list[Callable[..., type]]) -> dict:
-    from typing import get_type_hints
-
-    return dict(
-        zip([get_type_hints(func)['return'] for func in funcs], funcs, strict=True)
-    )
-
-
 def pixel_dependent_direct_beam(
-    filename: DirectBeamFilename, shape: RawData[SampleRun]
+    filename: DirectBeamFilename, shape: RawDetector[SampleRun]
 ) -> DirectBeam:
     direct_beam = isis.data.load_tutorial_direct_beam(filename)
     sizes = {'spectrum': shape.sizes['spectrum'], **direct_beam.sizes}
@@ -203,9 +194,9 @@ def pixel_dependent_direct_beam(
 def test_pixel_dependent_direct_beam_is_supported(uncertainties):
     params = make_params()
     params[UncertaintyBroadcastMode] = uncertainties
-    providers = as_dict(sans2d_providers())
-    providers[DirectBeam] = pixel_dependent_direct_beam
-    pipeline = sciline.Pipeline(providers.values(), params=params)
+    pipeline = sciline.Pipeline(sans2d_providers(), params=params)
+    pipeline.insert(pixel_dependent_direct_beam)
+    pipeline[BeamCenter] = sc.vector([0, 0, 0], unit='m')
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('Q',)
 
@@ -217,85 +208,91 @@ def test_beam_center_from_center_of_mass_is_close_to_verified_result():
     params = make_params()
     providers = sans2d_providers()
     pipeline = sciline.Pipeline(providers, params=params)
-    center = pipeline.compute(BeamCenter)
+    center = sans.beam_center_from_center_of_mass(pipeline)
     # This is the result obtained from Mantid, using the full IofQ
     # calculation. The difference is about 3 mm in X or Y, probably due to a bias
     # introduced by the sample holder, which the center-of-mass approach cannot ignore.
     assert sc.allclose(center, MANTID_BEAM_CENTER, atol=sc.scalar(3e-3, unit='m'))
 
 
+def test_beam_center_from_center_of_mass_independent_of_set_beam_center():
+    params = make_params()
+    providers = sans2d_providers()
+    pipeline = sciline.Pipeline(providers, params=params)
+    pipeline[BeamCenter] = sc.vector([0.1, -0.1, 0], unit='m')
+    center = sans.beam_center_from_center_of_mass(pipeline)
+    assert sc.allclose(center, MANTID_BEAM_CENTER, atol=sc.scalar(3e-3, unit='m'))
+
+
 def test_beam_center_finder_without_direct_beam_reproduces_verified_result():
     params = make_params()
-    params[sans.beam_center_finder.BeamCenterFinderQBins] = sc.linspace(
-        'Q', 0.02, 0.3, 71, unit='1/angstrom'
-    )
     del params[DirectBeamFilename]
     providers = sans2d_providers()
-    providers.remove(sans.beam_center_finder.beam_center_from_center_of_mass)
-    providers.append(sans.beam_center_finder.beam_center_from_iofq)
     pipeline = sciline.Pipeline(providers, params=params)
-    pipeline[sans.beam_center_finder.BeamCenterFinderMinimizer] = None
-    pipeline[sans.beam_center_finder.BeamCenterFinderTolerance] = None
     pipeline[DirectBeam] = None
-    center = pipeline.compute(BeamCenter)
+    center = sans.beam_center_finder.beam_center_from_iofq(
+        workflow=pipeline, q_bins=sc.linspace('Q', 0.02, 0.3, 71, unit='1/angstrom')
+    )
     assert sc.allclose(center, MANTID_BEAM_CENTER, atol=sc.scalar(2e-3, unit='m'))
 
 
 def test_beam_center_can_get_closer_to_verified_result_with_low_counts_mask():
     def low_counts_mask(
-        sample: RawData[SampleRun],
+        sample: RawDetector[SampleRun],
         low_counts_threshold: sans2d.LowCountThreshold,
     ) -> sans2d.SampleHolderMask:
         return sans2d.SampleHolderMask(sample.hist().data < low_counts_threshold)
 
     params = make_params()
     params[sans2d.LowCountThreshold] = sc.scalar(80.0, unit='counts')
-    params[sans.beam_center_finder.BeamCenterFinderQBins] = sc.linspace(
-        'Q', 0.02, 0.3, 71, unit='1/angstrom'
-    )
     del params[DirectBeamFilename]
     providers = sans2d_providers()
     providers.remove(sans2d.sample_holder_mask)
-    providers.remove(sans.beam_center_finder.beam_center_from_center_of_mass)
-    providers.append(sans.beam_center_finder.beam_center_from_iofq)
     providers.append(low_counts_mask)
     pipeline = sciline.Pipeline(providers, params=params)
-    pipeline[sans.beam_center_finder.BeamCenterFinderMinimizer] = None
-    pipeline[sans.beam_center_finder.BeamCenterFinderTolerance] = None
     pipeline[DirectBeam] = None
-    center = pipeline.compute(BeamCenter)
+    q_bins = sc.linspace('Q', 0.02, 0.3, 71, unit='1/angstrom')
+    center = sans.beam_center_finder.beam_center_from_iofq(
+        workflow=pipeline, q_bins=q_bins
+    )
     assert sc.allclose(center, MANTID_BEAM_CENTER, atol=sc.scalar(5e-4, unit='m'))
 
 
 def test_beam_center_finder_works_with_direct_beam():
     params = make_params()
-    params[sans.beam_center_finder.BeamCenterFinderQBins] = sc.linspace(
-        'Q', 0.02, 0.3, 71, unit='1/angstrom'
-    )
     providers = sans2d_providers()
-    providers.remove(sans.beam_center_finder.beam_center_from_center_of_mass)
-    providers.append(sans.beam_center_finder.beam_center_from_iofq)
     pipeline = sciline.Pipeline(providers, params=params)
-    pipeline[sans.beam_center_finder.BeamCenterFinderMinimizer] = None
-    pipeline[sans.beam_center_finder.BeamCenterFinderTolerance] = None
-    center_with_direct_beam = pipeline.compute(BeamCenter)
+    q_bins = sc.linspace('Q', 0.02, 0.3, 71, unit='1/angstrom')
+    center_with_direct_beam = sans.beam_center_finder.beam_center_from_iofq(
+        workflow=pipeline, q_bins=q_bins
+    )
+    assert sc.allclose(
+        center_with_direct_beam, MANTID_BEAM_CENTER, atol=sc.scalar(2e-3, unit='m')
+    )
+
+
+def test_beam_center_finder_independent_of_set_beam_center():
+    params = make_params()
+    providers = sans2d_providers()
+    pipeline = sciline.Pipeline(providers, params=params)
+    pipeline[BeamCenter] = sc.vector([0.1, -0.1, 0], unit='m')
+    q_bins = sc.linspace('Q', 0.02, 0.3, 71, unit='1/angstrom')
+    center_with_direct_beam = sans.beam_center_finder.beam_center_from_iofq(
+        workflow=pipeline, q_bins=q_bins
+    )
     assert sc.allclose(
         center_with_direct_beam, MANTID_BEAM_CENTER, atol=sc.scalar(2e-3, unit='m')
     )
 
 
 def test_beam_center_finder_works_with_pixel_dependent_direct_beam():
+    q_bins = sc.linspace('Q', 0.02, 0.3, 71, unit='1/angstrom')
     params = make_params()
-    params[sans.beam_center_finder.BeamCenterFinderQBins] = sc.linspace(
-        'Q', 0.02, 0.3, 71, unit='1/angstrom'
-    )
     providers = sans2d_providers()
-    providers.remove(sans.beam_center_finder.beam_center_from_center_of_mass)
-    providers.append(sans.beam_center_finder.beam_center_from_iofq)
     pipeline = sciline.Pipeline(providers, params=params)
-    pipeline[sans.beam_center_finder.BeamCenterFinderMinimizer] = None
-    pipeline[sans.beam_center_finder.BeamCenterFinderTolerance] = None
-    center_pixel_independent_direct_beam = pipeline.compute(BeamCenter)
+    center_pixel_independent_direct_beam = (
+        sans.beam_center_finder.beam_center_from_iofq(workflow=pipeline, q_bins=q_bins)
+    )
 
     direct_beam = pipeline.compute(DirectBeam)
     pixel_dependent_direct_beam = direct_beam.broadcast(
@@ -306,14 +303,12 @@ def test_beam_center_finder_works_with_pixel_dependent_direct_beam():
     ).copy()
 
     providers = sans2d_providers()
-    providers.remove(sans.beam_center_finder.beam_center_from_center_of_mass)
-    providers.append(sans.beam_center_finder.beam_center_from_iofq)
     pipeline = sciline.Pipeline(providers, params=params)
-    pipeline[sans.beam_center_finder.BeamCenterFinderMinimizer] = None
-    pipeline[sans.beam_center_finder.BeamCenterFinderTolerance] = None
     pipeline[DirectBeam] = pixel_dependent_direct_beam
 
-    center = pipeline.compute(BeamCenter)
+    center = sans.beam_center_finder.beam_center_from_iofq(
+        workflow=pipeline, q_bins=q_bins
+    )
     assert sc.identical(center, center_pixel_independent_direct_beam)
 
 
@@ -321,9 +316,9 @@ def test_workflow_runs_without_gravity_if_beam_center_is_provided():
     params = make_params()
     params[CorrectForGravity] = False
     pipeline = sciline.Pipeline(sans2d_providers(), params=params)
-    da = pipeline.compute(RawData[SampleRun])
+    da = pipeline.compute(RawDetector[SampleRun])
     del da.coords['gravity']
-    pipeline[RawData[SampleRun]] = da
+    pipeline[RawDetector[SampleRun]] = da
     pipeline[BeamCenter] = MANTID_BEAM_CENTER
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('Q',)

@@ -11,22 +11,25 @@ from ess.sans import providers as sans_providers
 
 from ..sans.common import gravity_vector
 from ..sans.types import (
-    ConfiguredReducibleData,
-    ConfiguredReducibleMonitor,
+    BeamCenter,
+    CalibratedDetector,
     CorrectForGravity,
+    DetectorData,
+    DetectorEventData,
     DetectorPixelShape,
     DimsToKeep,
     Incident,
     LabFrameTransform,
-    LoadedNeXusDetector,
-    LoadedNeXusMonitor,
+    MonitorEventData,
     MonitorType,
-    NeXusDetectorName,
+    NeXusDetector,
+    NeXusMonitor,
     NeXusMonitorName,
     NonBackgroundWavelengthRange,
     PixelShapePath,
-    RawData,
+    RawDetector,
     RawMonitor,
+    RawMonitorData,
     RawSample,
     RawSource,
     RunType,
@@ -104,62 +107,68 @@ def get_sample_position(
 
 
 def get_detector_data(
-    detector: LoadedNeXusDetector[ScatteringRunType],
-    detector_name: NeXusDetectorName,
-) -> RawData[ScatteringRunType]:
+    detector: NeXusDetector[ScatteringRunType],
+) -> RawDetector[ScatteringRunType]:
     da = nexus.extract_detector_data(detector)
-    if detector_name in DETECTOR_BANK_RESHAPING:
-        da = DETECTOR_BANK_RESHAPING[detector_name](da)
-    return RawData[ScatteringRunType](da)
+    if (reshape := DETECTOR_BANK_RESHAPING.get(detector['detector_name'])) is not None:
+        da = reshape(da)
+    return RawDetector[ScatteringRunType](da)
+
+
+def calibrate_detector(
+    detector: RawDetector[ScatteringRunType],
+    beam_center: BeamCenter,
+    source_position: SourcePosition[ScatteringRunType],
+    sample_position: SamplePosition[ScatteringRunType],
+) -> CalibratedDetector[ScatteringRunType]:
+    return CalibratedDetector[ScatteringRunType](
+        detector.assign_coords(
+            position=detector.coords['position'] - beam_center,
+            source_position=source_position,
+            sample_position=sample_position,
+            gravity=gravity_vector(),
+        )
+    )
 
 
 def get_monitor_data(
-    monitor: LoadedNeXusMonitor[RunType, MonitorType],
+    monitor: NeXusMonitor[RunType, MonitorType],
+    source_position: SourcePosition[RunType],
 ) -> RawMonitor[RunType, MonitorType]:
-    out = nexus.extract_monitor_data(monitor).copy(deep=False)
-    out.coords['position'] = monitor['position']
-    return RawMonitor[RunType, MonitorType](out)
+    return RawMonitor[RunType, MonitorType](
+        nexus.extract_monitor_data(monitor).assign_coords(
+            position=monitor['position'], source_position=source_position
+        )
+    )
 
 
-def _add_variances_and_coordinates(
-    da: sc.DataArray,
-    source_position: sc.Variable,
-    sample_position: sc.Variable | None = None,
-) -> sc.DataArray:
+def _add_variances(da: sc.DataArray) -> sc.DataArray:
     out = da.copy(deep=False)
     if out.bins is not None:
         content = out.bins.constituents['data']
         if content.variances is None:
             content.variances = content.values
-    # Sample position is not needed in the case of a monitor.
-    if sample_position is not None:
-        out.coords['sample_position'] = sample_position
-    out.coords['source_position'] = source_position
-    out.coords['gravity'] = gravity_vector()
     return out
 
 
-def patch_detector_data(
-    detector_data: RawData[ScatteringRunType],
-    source_position: SourcePosition[ScatteringRunType],
-    sample_position: SamplePosition[ScatteringRunType],
-) -> ConfiguredReducibleData[ScatteringRunType]:
-    return ConfiguredReducibleData[ScatteringRunType](
-        _add_variances_and_coordinates(
-            da=detector_data,
-            source_position=source_position,
-            sample_position=sample_position,
-        )
+def assemble_detector_data(
+    detector: CalibratedDetector[ScatteringRunType],
+    event_data: DetectorEventData[ScatteringRunType],
+) -> DetectorData[ScatteringRunType]:
+    grouped = nexus.group_event_data(
+        event_data=event_data, detector_number=detector.coords['detector_number']
     )
+    detector.data = grouped.data
+    return DetectorData[ScatteringRunType](_add_variances(da=detector))
 
 
-def patch_monitor_data(
+def assemble_monitor_data(
     monitor_data: RawMonitor[RunType, MonitorType],
-    source_position: SourcePosition[RunType],
-) -> ConfiguredReducibleMonitor[RunType, MonitorType]:
-    return ConfiguredReducibleMonitor[RunType, MonitorType](
-        _add_variances_and_coordinates(da=monitor_data, source_position=source_position)
-    )
+    event_data: MonitorEventData[RunType, MonitorType],
+) -> RawMonitorData[RunType, MonitorType]:
+    meta = monitor_data.drop_coords('event_time_zero')
+    da = event_data.assign_coords(meta.coords).assign_masks(meta.masks)
+    return RawMonitorData[RunType, MonitorType](_add_variances(da=da))
 
 
 def _convert_to_tof(da: sc.DataArray) -> sc.DataArray:
@@ -170,26 +179,26 @@ def _convert_to_tof(da: sc.DataArray) -> sc.DataArray:
 
 
 def data_to_tof(
-    da: ConfiguredReducibleData[ScatteringRunType],
+    da: DetectorData[ScatteringRunType],
 ) -> TofData[ScatteringRunType]:
     return TofData[ScatteringRunType](_convert_to_tof(da))
 
 
 def monitor_to_tof(
-    da: ConfiguredReducibleMonitor[RunType, MonitorType],
+    da: RawMonitorData[RunType, MonitorType],
 ) -> TofMonitor[RunType, MonitorType]:
     return TofMonitor[RunType, MonitorType](_convert_to_tof(da))
 
 
 def detector_pixel_shape(
-    detector: LoadedNeXusDetector[ScatteringRunType],
+    detector: NeXusDetector[ScatteringRunType],
     pixel_shape_path: PixelShapePath,
 ) -> DetectorPixelShape[ScatteringRunType]:
     return DetectorPixelShape[ScatteringRunType](detector[pixel_shape_path])
 
 
 def detector_lab_frame_transform(
-    detector: LoadedNeXusDetector[ScatteringRunType],
+    detector: NeXusDetector[ScatteringRunType],
     transform_path: TransformationPath,
 ) -> LabFrameTransform[ScatteringRunType]:
     return LabFrameTransform[ScatteringRunType](detector[transform_path])
@@ -198,12 +207,13 @@ def detector_lab_frame_transform(
 providers = (
     detector_pixel_shape,
     detector_lab_frame_transform,
+    calibrate_detector,
     get_detector_data,
     get_monitor_data,
     get_sample_position,
     get_source_position,
-    patch_detector_data,
-    patch_monitor_data,
+    assemble_detector_data,
+    assemble_monitor_data,
     data_to_tof,
     monitor_to_tof,
 )

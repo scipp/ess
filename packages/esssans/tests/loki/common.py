@@ -55,7 +55,7 @@ def make_params(no_masks: bool = True) -> dict:
     return params
 
 
-def loki_providers_no_beam_center_finder() -> list[Callable]:
+def loki_providers() -> list[Callable]:
     from ess.isissans.io import read_xml_detector_masking
 
     return list(
@@ -66,10 +66,3 @@ def loki_providers_no_beam_center_finder() -> list[Callable]:
             loki.io.dummy_load_sample,
         )
     )
-
-
-def loki_providers() -> list[Callable]:
-    return [
-        *loki_providers_no_beam_center_finder(),
-        sans.beam_center_finder.beam_center_from_center_of_mass,
-    ]

@@ -13,14 +13,15 @@ from .types import (
     MaskedData,
     MaskedDetectorIDs,
     PixelMaskFilename,
+    RawDetector,
     SampleRun,
     ScatteringRunType,
     TofData,
 )
 
 
-def get_detector_ids_from_sample_run(data: TofData[SampleRun]) -> DetectorIDs:
-    """Extract detector IDs from sample run."""
+def get_detector_ids_from_detector(data: RawDetector[SampleRun]) -> DetectorIDs:
+    """Extract detector IDs from a detector."""
     return DetectorIDs(
         data.coords[
             'detector_number' if 'detector_number' in data.coords else 'detector_id'
@@ -65,7 +66,7 @@ def apply_pixel_masks(
 
 
 providers = (
-    get_detector_ids_from_sample_run,
+    get_detector_ids_from_detector,
     to_detector_mask,
     apply_pixel_masks,
 )

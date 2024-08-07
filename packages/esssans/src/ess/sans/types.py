@@ -217,28 +217,42 @@ class SolidAngle(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Solid angle of detector pixels seen from sample position"""
 
 
-class LoadedNeXusDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+class MaskedSolidAngle(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
+    """Same as :py:class:`SolidAngle`, but with pixel masks applied"""
+
+
+class NeXusDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
     """Detector data, loaded from a NeXus file, containing not only neutron events
     but also pixel shape information, transformations, ..."""
 
 
-class LoadedNeXusMonitor(
+class NeXusMonitor(
     sciline.ScopeTwoParams[RunType, MonitorType, sc.DataGroup], sc.DataGroup
 ):
     """Monitor data loaded from a NeXus file, containing not only neutron events
     but also transformations, ..."""
 
 
-class RawData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
-    """Raw detector data"""
+class DetectorEventData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Event data loaded from a detector in a NeXus file"""
 
 
-class ConfiguredReducibleData(
-    sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray
+class MonitorEventData(
+    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
 ):
-    """Raw event data where variances and necessary coordinates
-    (e.g. sample and source position) have been added, and where optionally some
-    user configuration was applied to some of the coordinates."""
+    """Event data loaded from a monitor in a NeXus file"""
+
+
+class RawDetector(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
+    """Raw detector component extracted from :py:class:`NeXusDetector`"""
+
+
+class CalibratedDetector(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
+    """Calibrated version of raw detector"""
+
+
+class DetectorData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
+    """Calibrated detector with added raw event data"""
 
 
 class TofData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
@@ -256,12 +270,6 @@ PixelMask = NewType('PixelMask', sc.Variable)
 
 class MaskedData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Raw data with pixel-specific masks applied"""
-
-
-class CalibratedMaskedData(
-    sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray
-):
-    """Raw data with pixel-specific masks applied and calibrated pixel positions"""
 
 
 class NormWavelengthTerm(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
@@ -332,7 +340,7 @@ class RawMonitor(
     """Raw monitor data"""
 
 
-class ConfiguredReducibleMonitor(
+class RawMonitorData(
     sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
 ):
     """Raw monitor data where variances and necessary coordinates

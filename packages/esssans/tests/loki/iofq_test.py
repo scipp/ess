@@ -13,7 +13,6 @@ from ess.sans.types import (
     BackgroundSubtractedIofQ,
     BackgroundSubtractedIofQxy,
     BeamCenter,
-    CalibratedMaskedData,
     CleanSummedQ,
     CleanWavelengthMasked,
     CorrectForGravity,
@@ -21,6 +20,7 @@ from ess.sans.types import (
     DimsToKeep,
     IofQ,
     IofQxy,
+    MaskedData,
     NeXusDetectorName,
     Numerator,
     QBins,
@@ -37,13 +37,13 @@ from scipp.testing import assert_identical
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from common import (
     loki_providers,
-    loki_providers_no_beam_center_finder,
     make_params,
 )
 
 
 def test_can_create_pipeline():
     pipeline = sciline.Pipeline(loki_providers(), params=make_params())
+    pipeline[BeamCenter] = sc.vector([0, 0, 0], unit='m')
     pipeline.get(BackgroundSubtractedIofQ)
 
 
@@ -52,6 +52,7 @@ def test_can_create_pipeline_with_pixel_masks():
     pipeline = sans.with_pixel_mask_filenames(
         pipeline, loki.data.loki_tutorial_mask_filenames()
     )
+    pipeline[BeamCenter] = sc.vector([0, 0, 0], unit='m')
     pipeline.get(BackgroundSubtractedIofQ)
 
 
@@ -67,6 +68,7 @@ def test_pipeline_can_compute_IofQ(uncertainties, qxy: bool):
     pipeline = sans.with_pixel_mask_filenames(
         pipeline, loki.data.loki_tutorial_mask_filenames()
     )
+    pipeline[BeamCenter] = sans.beam_center_from_center_of_mass(pipeline)
     if qxy:
         result = pipeline.compute(BackgroundSubtractedIofQxy)
         assert result.dims == ('Qy', 'Qx')
@@ -103,6 +105,7 @@ def test_pipeline_can_compute_IofQ_in_event_mode(uncertainties, target):
     params = make_params()
     params[UncertaintyBroadcastMode] = uncertainties
     pipeline = sciline.Pipeline(loki_providers(), params=params)
+    pipeline[BeamCenter] = sans.beam_center_from_center_of_mass(pipeline)
     reference = pipeline.compute(target)
     pipeline[ReturnEvents] = True
     result = pipeline.compute(target)
@@ -141,6 +144,7 @@ def test_pipeline_can_compute_IofQ_in_wavelength_bands(qxy: bool):
         11,
     )
     pipeline = sciline.Pipeline(loki_providers(), params=params)
+    pipeline[BeamCenter] = _compute_beam_center()
     result = pipeline.compute(
         BackgroundSubtractedIofQxy if qxy else BackgroundSubtractedIofQ
     )
@@ -159,6 +163,7 @@ def test_pipeline_can_compute_IofQ_in_overlapping_wavelength_bands(qxy: bool):
         [edges[:-2], edges[2::]], dim='wavelength'
     ).transpose()
     pipeline = sciline.Pipeline(loki_providers(), params=params)
+    pipeline[BeamCenter] = _compute_beam_center()
     result = pipeline.compute(
         BackgroundSubtractedIofQxy if qxy else BackgroundSubtractedIofQ
     )
@@ -171,6 +176,7 @@ def test_pipeline_can_compute_IofQ_in_layers(qxy: bool):
     params = make_params()
     params[DimsToKeep] = ['layer']
     pipeline = sciline.Pipeline(loki_providers(), params=params)
+    pipeline[BeamCenter] = _compute_beam_center()
     result = pipeline.compute(
         BackgroundSubtractedIofQxy if qxy else BackgroundSubtractedIofQ
     )
@@ -180,8 +186,7 @@ def test_pipeline_can_compute_IofQ_in_layers(qxy: bool):
 
 def _compute_beam_center():
     pipeline = sciline.Pipeline(loki_providers(), params=make_params())
-    center = pipeline.compute(BeamCenter)
-    return center
+    return sans.beam_center_from_center_of_mass(pipeline)
 
 
 def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs():
@@ -195,7 +200,7 @@ def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs():
         loki.data.loki_tutorial_background_run_60248(),
         loki.data.loki_tutorial_background_run_60393(),
     ]
-    pipeline = sciline.Pipeline(loki_providers_no_beam_center_finder(), params=params)
+    pipeline = sciline.Pipeline(loki_providers(), params=params)
     pipeline[BeamCenter] = _compute_beam_center()
 
     pipeline = sans.with_sample_runs(pipeline, runs=sample_runs)
@@ -209,7 +214,7 @@ def test_pipeline_can_compute_IofQ_by_bank():
     params = make_params()
     del params[NeXusDetectorName]
 
-    pipeline = sciline.Pipeline(loki_providers_no_beam_center_finder(), params=params)
+    pipeline = sciline.Pipeline(loki_providers(), params=params)
     pipeline[BeamCenter] = _compute_beam_center()
     pipeline = sans.with_banks(pipeline, banks=['larmor_detector'])
 
@@ -227,7 +232,7 @@ def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs_by_bank():
         loki.data.loki_tutorial_background_run_60248(),
         loki.data.loki_tutorial_background_run_60393(),
     ]
-    pipeline = sciline.Pipeline(loki_providers_no_beam_center_finder(), params=params)
+    pipeline = sciline.Pipeline(loki_providers(), params=params)
     pipeline[BeamCenter] = _compute_beam_center()
 
     pipeline = sans.with_sample_runs(pipeline, runs=sample_runs)
@@ -248,9 +253,7 @@ def test_pipeline_IofQ_merging_events_yields_consistent_results():
     N = 3
     params = make_params()
     center = _compute_beam_center()
-    pipeline_single = sciline.Pipeline(
-        loki_providers_no_beam_center_finder(), params=params
-    )
+    pipeline_single = sciline.Pipeline(loki_providers(), params=params)
     pipeline_single[BeamCenter] = center
 
     sample_runs = [loki.data.loki_tutorial_sample_run_60339()] * N
@@ -285,7 +288,7 @@ def test_beam_center_from_center_of_mass_is_close_to_verified_result():
     pipeline = sans.with_pixel_mask_filenames(
         pipeline, loki.data.loki_tutorial_mask_filenames()
     )
-    center = pipeline.compute(BeamCenter)
+    center = sans.beam_center_from_center_of_mass(pipeline)
     reference = sc.vector([-0.0291487, -0.0181614, 0], unit='m')
     assert sc.allclose(center, reference)
 
@@ -293,6 +296,7 @@ def test_beam_center_from_center_of_mass_is_close_to_verified_result():
 def test_phi_with_gravity():
     params = make_params()
     pipeline = sciline.Pipeline(loki_providers(), params=params)
+    pipeline[BeamCenter] = _compute_beam_center()
     pipeline[CorrectForGravity] = False
     data_no_grav = pipeline.compute(
         CleanWavelengthMasked[SampleRun, Numerator]
@@ -316,7 +320,7 @@ def test_phi_with_gravity():
     # Exclude pixels near y=0, since phi with gravity could drop below y=0 and give a
     # difference of almost 2*pi.
     y = sc.abs(
-        pipeline.compute(CalibratedMaskedData[SampleRun])
+        pipeline.compute(MaskedData[SampleRun])
         .coords['position']
         .fields.y.flatten(to='pixel')
     )

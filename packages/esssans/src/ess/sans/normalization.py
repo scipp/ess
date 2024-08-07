@@ -5,19 +5,21 @@ from ess.reduce.uncertainty import UncertaintyBroadcastMode, broadcast_uncertain
 from scipp.core import concepts
 
 from .types import (
-    CalibratedMaskedData,
+    CalibratedDetector,
     CleanDirectBeam,
     CleanMonitor,
     CleanSummedQ,
     CleanSummedQxy,
     CleanWavelength,
     Denominator,
+    DetectorMasks,
     DetectorPixelShape,
     EmptyBeamRun,
     Incident,
     IofQ,
     IofQxy,
     LabFrameTransform,
+    MaskedSolidAngle,
     NormWavelengthTerm,
     Numerator,
     ProcessedWavelengthBands,
@@ -33,7 +35,7 @@ from .types import (
 
 
 def solid_angle(
-    data: CalibratedMaskedData[ScatteringRunType],
+    data: CalibratedDetector[ScatteringRunType],
     pixel_shape: DetectorPixelShape[ScatteringRunType],
     transform: LabFrameTransform[ScatteringRunType],
 ) -> SolidAngle[ScatteringRunType]:
@@ -79,6 +81,13 @@ def solid_angle(
             prototype=data, data=omega, dim=set(data.dims) - set(omega.dims)
         )
     )
+
+
+def mask_solid_angle(
+    solid_angle: SolidAngle[ScatteringRunType],
+    masks: DetectorMasks,
+) -> MaskedSolidAngle[ScatteringRunType]:
+    return MaskedSolidAngle[ScatteringRunType](solid_angle.assign_masks(masks))
 
 
 def _approximate_solid_angle_for_cylinder_shaped_pixel_of_detector(
@@ -219,7 +228,7 @@ def iofq_norm_wavelength_term(
 
 def iofq_denominator(
     wavelength_term: NormWavelengthTerm[ScatteringRunType],
-    solid_angle: SolidAngle[ScatteringRunType],
+    solid_angle: MaskedSolidAngle[ScatteringRunType],
     uncertainties: UncertaintyBroadcastMode,
 ) -> CleanWavelength[ScatteringRunType, Denominator]:
     """
@@ -452,4 +461,5 @@ providers = (
     normalize_qxy,
     process_wavelength_bands,
     solid_angle,
+    mask_solid_angle,
 )

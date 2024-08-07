@@ -7,9 +7,10 @@ Providers for the ISIS instruments.
 import scipp as sc
 
 from ..sans.types import (
-    ConfiguredReducibleData,
-    ConfiguredReducibleMonitor,
+    CalibratedDetector,
     CorrectForGravity,
+    DetectorData,
+    DetectorIDs,
     DetectorPixelShape,
     DimsToKeep,
     Incident,
@@ -17,8 +18,9 @@ from ..sans.types import (
     MonitorType,
     NeXusMonitorName,
     NonBackgroundWavelengthRange,
-    RawData,
+    RawDetector,
     RawMonitor,
+    RawMonitorData,
     RunNumber,
     RunTitle,
     RunType,
@@ -52,8 +54,35 @@ def default_parameters() -> dict:
 
 def get_detector_data(
     dg: LoadedFileContents[RunType],
-) -> RawData[RunType]:
-    return RawData[RunType](dg['data'])
+    sample_offset: SampleOffset,
+    detector_bank_offset: DetectorBankOffset,
+) -> RawDetector[RunType]:
+    """Get detector data and apply user offsets to raw data.
+
+    Parameters
+    ----------
+    dg:
+        Data loaded with Mantid and converted to Scipp.
+    sample_offset:
+        Sample offset.
+    detector_bank_offset:
+        Detector bank offset.
+    """
+    data = dg['data']
+    sample_pos = data.coords['sample_position']
+    sample_pos = sample_pos + sample_offset.to(unit=sample_pos.unit, copy=False)
+    pos = data.coords['position']
+    pos = pos + detector_bank_offset.to(unit=pos.unit, copy=False)
+    return RawDetector[RunType](
+        dg['data'].assign_coords(position=pos, sample_position=sample_pos)
+    )
+
+
+def assemble_detector_data(
+    detector: CalibratedDetector[RunType],
+) -> DetectorData[RunType]:
+    """Dummy assembly of detector data, detector already contains neutron data."""
+    return DetectorData[RunType](detector)
 
 
 def get_monitor_data(
@@ -65,7 +94,7 @@ def get_monitor_data(
 
 
 def data_to_tof(
-    da: ConfiguredReducibleData[ScatteringRunType],
+    da: DetectorData[ScatteringRunType],
 ) -> TofData[ScatteringRunType]:
     """Dummy conversion of data to time-of-flight data.
     The data already has a time-of-flight coordinate."""
@@ -73,7 +102,7 @@ def data_to_tof(
 
 
 def monitor_to_tof(
-    da: ConfiguredReducibleMonitor[RunType, MonitorType],
+    da: RawMonitorData[RunType, MonitorType],
 ) -> TofMonitor[RunType, MonitorType]:
     """Dummy conversion of monitor data to time-of-flight data.
     The monitor data already has a time-of-flight coordinate."""
@@ -122,8 +151,24 @@ def lab_frame_transform() -> LabFrameTransform[ScatteringRunType]:
     return sc.spatial.rotation(value=[0, 0, 1 / 2**0.5, 1 / 2**0.5])
 
 
+def get_detector_ids_from_sample_run(data: TofData[SampleRun]) -> DetectorIDs:
+    """Extract detector IDs from sample run.
+
+    This overrides the function in the masking module which gets the detector IDs from
+    the detector before loading event data. In this ISIS case files are loaded using
+    Mantid which does not load event separately, so we get IDs from the data.
+    """
+    return DetectorIDs(
+        data.coords[
+            'detector_number' if 'detector_number' in data.coords else 'detector_id'
+        ]
+    )
+
+
 providers = (
+    assemble_detector_data,
     get_detector_data,
+    get_detector_ids_from_sample_run,
     get_monitor_data,
     data_to_tof,
     monitor_to_tof,
