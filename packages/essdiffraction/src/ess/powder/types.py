@@ -38,6 +38,8 @@ MonitorType = TypeVar('MonitorType', Monitor1, Monitor2)
 
 # 2 Workflow parameters
 
+DetectorBankSizes = NewType("DetectorBankSizes", dict[str, dict[str, int | Any]])
+
 CalibrationFilename = NewType("CalibrationFilename", str | None)
 """Filename of the instrument calibration file."""
 
