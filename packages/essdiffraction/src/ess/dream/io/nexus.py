@@ -37,16 +37,10 @@ DETECTOR_BANK_SIZES = {
         "strip": 256,
         "counter": 2,
     },
-    "high_resolution_detector": {
-        "strip": 32,
-        "other": -1,
-    },
+    "high_resolution_detector": {"strip": 32, "other": -1},
     "sans_detector": lambda x: x.fold(
         dim="detector_number",
-        sizes={
-            "strip": 32,
-            "other": -1,
-        },
+        sizes={"strip": 32, "other": -1},
     ),
 }
 
