@@ -5,7 +5,7 @@ from typing import NewType
 import sciline
 import scipp as sc
 from ess.sans import providers as sans_providers
-from ess.sans.types import MaskedData, SampleRun, ScatteringRunType, TofData
+from ess.sans.types import DetectorMasks, RawDetector, SampleRun
 
 from .data import load_tutorial_direct_beam, load_tutorial_run
 from .general import default_parameters
@@ -22,15 +22,19 @@ SampleHolderMask = NewType('SampleHolderMask', sc.Variable | None)
 """Sample holder mask"""
 
 
-def detector_edge_mask(sample: TofData[SampleRun]) -> DetectorEdgeMask:
+# It may make more sense to depend on CalibratedDetector here, but the current
+# x and y limits are before setting the beam center, so we use RawDetector
+def detector_edge_mask(sample: RawDetector[SampleRun]) -> DetectorEdgeMask:
     mask_edges = (
         sc.abs(sample.coords['position'].fields.x) > sc.scalar(0.48, unit='m')
     ) | (sc.abs(sample.coords['position'].fields.y) > sc.scalar(0.45, unit='m'))
     return DetectorEdgeMask(mask_edges)
 
 
+# It may make more sense to depend on CalibratedDetector here, but the current
+# x and y limits are before setting the beam center, so we use RawDetector
 def sample_holder_mask(
-    sample: TofData[SampleRun], low_counts_threshold: LowCountThreshold
+    sample: RawDetector[SampleRun], low_counts_threshold: LowCountThreshold
 ) -> SampleHolderMask:
     summed = sample.hist()
     holder_mask = (
@@ -43,31 +47,31 @@ def sample_holder_mask(
     return SampleHolderMask(holder_mask)
 
 
-def mask_detectors(
-    da: TofData[ScatteringRunType],
-    edge_mask: DetectorEdgeMask,
-    holder_mask: SampleHolderMask,
-) -> MaskedData[ScatteringRunType]:
-    """Apply pixel-specific masks to raw data.
+def to_detector_masks(
+    edge_mask: DetectorEdgeMask, holder_mask: SampleHolderMask
+) -> DetectorMasks:
+    """Gather detector masks.
+
+    Unlike :py:func:`ess.sans.masking.to_detector_mask`, this function does not rely on
+    mapping using a table of mask filenames. Instead it directly returns a dictionary
+    if multiple masks.
 
     Parameters
     ----------
-    da:
-        Raw data.
     edge_mask:
         Mask for detector edges.
     holder_mask:
         Mask for sample holder.
     """
-    da = da.copy(deep=False)
+    masks = {}
     if edge_mask is not None:
-        da.masks['edges'] = edge_mask
+        masks['edges'] = edge_mask
     if holder_mask is not None:
-        da.masks['holder_mask'] = holder_mask
-    return MaskedData[ScatteringRunType](da)
+        masks['holder_mask'] = holder_mask
+    return DetectorMasks(masks)
 
 
-providers = (detector_edge_mask, sample_holder_mask, mask_detectors)
+providers = (detector_edge_mask, sample_holder_mask, to_detector_masks)
 
 
 def Sans2dWorkflow() -> sciline.Pipeline:

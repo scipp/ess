@@ -7,7 +7,9 @@ Providers for the ISIS instruments.
 import scipp as sc
 
 from ..sans.types import (
+    CalibratedDetector,
     CorrectForGravity,
+    DetectorData,
     DetectorIDs,
     DetectorPixelShape,
     DimsToKeep,
@@ -17,7 +19,6 @@ from ..sans.types import (
     NeXusMonitorName,
     NonBackgroundWavelengthRange,
     RawDetector,
-    RawDetectorData,
     RawMonitor,
     RawMonitorData,
     RunNumber,
@@ -53,8 +54,35 @@ def default_parameters() -> dict:
 
 def get_detector_data(
     dg: LoadedFileContents[RunType],
+    sample_offset: SampleOffset,
+    detector_bank_offset: DetectorBankOffset,
 ) -> RawDetector[RunType]:
-    return RawDetector[RunType](dg['data'])
+    """Get detector data and apply user offsets to raw data.
+
+    Parameters
+    ----------
+    dg:
+        Data loaded with Mantid and converted to Scipp.
+    sample_offset:
+        Sample offset.
+    detector_bank_offset:
+        Detector bank offset.
+    """
+    data = dg['data']
+    sample_pos = data.coords['sample_position']
+    sample_pos = sample_pos + sample_offset.to(unit=sample_pos.unit, copy=False)
+    pos = data.coords['position']
+    pos = pos + detector_bank_offset.to(unit=pos.unit, copy=False)
+    return RawDetector[RunType](
+        dg['data'].assign_coords(position=pos, sample_position=sample_pos)
+    )
+
+
+def assemble_detector_data(
+    detector: CalibratedDetector[RunType],
+) -> DetectorData[RunType]:
+    """Dummy assembly of detector data, detector already contains neutron data."""
+    return DetectorData[RunType](detector)
 
 
 def get_monitor_data(
@@ -66,7 +94,7 @@ def get_monitor_data(
 
 
 def data_to_tof(
-    da: RawDetectorData[ScatteringRunType],
+    da: DetectorData[ScatteringRunType],
 ) -> TofData[ScatteringRunType]:
     """Dummy conversion of data to time-of-flight data.
     The data already has a time-of-flight coordinate."""
@@ -138,6 +166,7 @@ def get_detector_ids_from_sample_run(data: TofData[SampleRun]) -> DetectorIDs:
 
 
 providers = (
+    assemble_detector_data,
     get_detector_data,
     get_detector_ids_from_sample_run,
     get_monitor_data,

@@ -5,6 +5,7 @@ import scipp as sc
 from ess import isissans as isis
 from ess import sans
 from ess.sans.types import (
+    BeamCenter,
     CorrectForGravity,
     Filename,
     Incident,
@@ -63,13 +64,13 @@ def zoom_providers():
             isis.data.load_tutorial_run,
             isis.data.transmission_from_background_run,
             isis.data.transmission_from_sample_run,
-            sans.beam_center_finder.beam_center_from_center_of_mass,
         )
     )
 
 
 def test_can_create_pipeline():
     pipeline = sciline.Pipeline(zoom_providers(), params=make_params())
+    pipeline[BeamCenter] = sc.vector([0, 0, 0], unit='m')
     pipeline = sans.with_pixel_mask_filenames(
         pipeline, isis.data.zoom_tutorial_mask_filenames()
     )
@@ -78,6 +79,7 @@ def test_can_create_pipeline():
 
 def test_pipeline_can_compute_IofQ():
     pipeline = sciline.Pipeline(zoom_providers(), params=make_params())
+    pipeline[BeamCenter] = sc.vector([0, 0, 0], unit='m')
     pipeline = sans.with_pixel_mask_filenames(
         pipeline, isis.data.zoom_tutorial_mask_filenames()
     )
@@ -87,6 +89,7 @@ def test_pipeline_can_compute_IofQ():
 
 def test_pipeline_can_compute_IofQxQy():
     pipeline = sciline.Pipeline(zoom_providers(), params=make_params())
+    pipeline[BeamCenter] = sc.vector([0, 0, 0], unit='m')
     pipeline = sans.with_pixel_mask_filenames(
         pipeline, isis.data.zoom_tutorial_mask_filenames()
     )

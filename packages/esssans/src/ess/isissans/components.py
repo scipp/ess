@@ -6,9 +6,10 @@ import sciline
 import scipp as sc
 
 from ..sans.types import (
+    BeamCenter,
+    CalibratedDetector,
     MonitorType,
     RawDetector,
-    RawDetectorData,
     RawMonitor,
     RawMonitorData,
     RunType,
@@ -24,11 +25,9 @@ SampleOffset = NewType('SampleOffset', sc.Variable)
 DetectorBankOffset = NewType('DetectorBankOffset', sc.Variable)
 
 
-def apply_component_user_offsets_to_raw_data(
-    data: RawDetector[ScatteringRunType],
-    sample_offset: SampleOffset,
-    detector_bank_offset: DetectorBankOffset,
-) -> RawDetectorData[ScatteringRunType]:
+def apply_beam_center(
+    data: RawDetector[ScatteringRunType], beam_center: BeamCenter
+) -> CalibratedDetector[ScatteringRunType]:
     """Apply user offsets to raw data.
 
     Parameters
@@ -40,14 +39,9 @@ def apply_component_user_offsets_to_raw_data(
     detector_bank_offset:
         Detector bank offset.
     """
-    data = data.copy(deep=False)
-    sample_pos = data.coords['sample_position']
-    data.coords['sample_position'] = sample_pos + sample_offset.to(
-        unit=sample_pos.unit, copy=False
+    return CalibratedDetector[ScatteringRunType](
+        data.assign_coords(position=data.coords['position'] - beam_center)
     )
-    pos = data.coords['position']
-    data.coords['position'] = pos + detector_bank_offset.to(unit=pos.unit, copy=False)
-    return RawDetectorData[ScatteringRunType](data)
 
 
 def apply_component_user_offsets_to_raw_monitor(
@@ -69,6 +63,6 @@ def apply_component_user_offsets_to_raw_monitor(
 
 
 providers = (
-    apply_component_user_offsets_to_raw_data,
+    apply_beam_center,
     apply_component_user_offsets_to_raw_monitor,
 )

@@ -51,8 +51,7 @@ def load_nexus_detector(
 
 
 def load_nexus_monitor(
-    file_path: Filename[RunType],
-    monitor_name: NeXusMonitorName[MonitorType],
+    file_path: Filename[RunType], monitor_name: NeXusMonitorName[MonitorType]
 ) -> NeXusMonitor[RunType, MonitorType]:
     return NeXusMonitor[RunType, MonitorType](
         nexus.load_monitor(
@@ -71,8 +70,7 @@ def load_detector_event_data(
 
 
 def load_monitor_event_data(
-    file_path: Filename[RunType],
-    monitor_name: NeXusMonitorName[MonitorType],
+    file_path: Filename[RunType], monitor_name: NeXusMonitorName[MonitorType]
 ) -> MonitorEventData[RunType, MonitorType]:
     da = nexus.load_event_data(file_path=file_path, component_name=monitor_name)
     return MonitorEventData[RunType, MonitorType](da)
