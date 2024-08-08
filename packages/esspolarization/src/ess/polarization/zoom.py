@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Generic, Sequence
+from typing import Generic
 
 import ess.isissans as isis
 import mantid.api as _mantid_api
