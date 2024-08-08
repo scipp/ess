@@ -8,33 +8,36 @@ import ess.polarization as pol
 
 def test_SecondDegreePolynomialEfficiency_raises_if_units_incompatible():
     wav = sc.scalar(1.0, unit='m')
+    eff = pol.SecondDegreePolynomialEfficiency(
+        a=sc.scalar(1.0, unit='1/angstrom'),
+        b=sc.scalar(1.0, unit='1/angstrom'),
+        c=sc.scalar(1.0),
+    )
     with pytest.raises(sc.UnitError, match=" to `dimensionless` is not valid"):
-        eff = pol.SecondDegreePolynomialEfficiency(
-            a=sc.scalar(1.0, unit='1/angstrom'),
-            b=sc.scalar(1.0, unit='1/angstrom'),
-            c=sc.scalar(1.0),
-        )
         eff(wavelength=wav)
+
+    eff = pol.SecondDegreePolynomialEfficiency(
+        a=sc.scalar(1.0, unit='1/angstrom**2'),
+        b=sc.scalar(1.0, unit='1/angstrom**2'),
+        c=sc.scalar(1.0),
+    )
     with pytest.raises(sc.UnitError, match=" to `dimensionless` is not valid"):
-        eff = pol.SecondDegreePolynomialEfficiency(
-            a=sc.scalar(1.0, unit='1/angstrom**2'),
-            b=sc.scalar(1.0, unit='1/angstrom**2'),
-            c=sc.scalar(1.0),
-        )
         eff(wavelength=wav)
+
+    eff = pol.SecondDegreePolynomialEfficiency(
+        a=sc.scalar(1.0, unit='1/angstrom**2'),
+        b=sc.scalar(1.0, unit='1/angstrom'),
+        c=sc.scalar(1.0, unit='1/angstrom'),
+    )
     with pytest.raises(sc.UnitError, match=" to `dimensionless` is not valid"):
-        eff = pol.SecondDegreePolynomialEfficiency(
-            a=sc.scalar(1.0, unit='1/angstrom**2'),
-            b=sc.scalar(1.0, unit='1/angstrom'),
-            c=sc.scalar(1.0, unit='1/angstrom'),
-        )
         eff(wavelength=wav)
+
+    eff = pol.SecondDegreePolynomialEfficiency(
+        a=sc.scalar(1.0, unit='1/angstrom**2'),
+        b=sc.scalar(1.0, unit='1/angstrom'),
+        c=sc.scalar(1.0),
+    )
     with pytest.raises(sc.UnitError, match=" to `dimensionless` is not valid"):
-        eff = pol.SecondDegreePolynomialEfficiency(
-            a=sc.scalar(1.0, unit='1/angstrom**2'),
-            b=sc.scalar(1.0, unit='1/angstrom'),
-            c=sc.scalar(1.0),
-        )
         eff(wavelength=wav / sc.scalar(1.0, unit='s'))
 
 

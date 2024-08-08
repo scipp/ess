@@ -5,6 +5,7 @@ from typing import Generic, NewType, TypeVar
 
 import sciline as sl
 import scipp as sc
+from ess.reduce.uncertainty import broadcast_with_upper_bound_variances
 
 from .types import (
     Analyzer,
@@ -16,7 +17,6 @@ from .types import (
     TransmissionFunction,
     Up,
 )
-from .uncertainty import broadcast_with_upper_bound_variances
 
 Depolarized = NewType('Depolarized', int)
 Polarized = NewType('Polarized', int)
@@ -96,7 +96,7 @@ class He3OpacityFunction(Generic[PolarizingElement]):
 
     def __call__(self, wavelength: sc.Variable) -> sc.Variable:
         scale = broadcast_with_upper_bound_variances(
-            self.opacity0, sizes=wavelength.sizes
+            self.opacity0, prototype=wavelength
         )
         return sc.DataArray(
             (scale * wavelength).to(unit='', copy=False),

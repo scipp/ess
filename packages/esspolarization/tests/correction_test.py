@@ -235,7 +235,9 @@ def test_polarization_analysis_workflow_creation(
         polarizer_workflow=polarizer_workflow, analyzer_workflow=analyzer_workflow
     )
     handler = sciline.HandleAsComputeTimeException()
-    for elem, wf in zip((Polarizer, Analyzer), (polarizer_workflow, analyzer_workflow)):
+    for elem, wf in zip(
+        (Polarizer, Analyzer), (polarizer_workflow, analyzer_workflow), strict=True
+    ):
         graph = workflow.get(TransmissionFunction[elem], handler=handler)
         assert (
             pol.supermirror.SupermirrorEfficiencyFunction[elem] in graph.keys()
