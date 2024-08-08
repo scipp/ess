@@ -13,7 +13,6 @@ and the ICD DREAM interface specification for details.
   but it is not possible to reshape the data into all the logical dimensions.
 """
 
-import warnings
 from typing import Any
 
 import scipp as sc
@@ -62,14 +61,31 @@ def load_nexus_source(file_path: Filename[RunType]) -> RawSource[RunType]:
 def load_nexus_detector(
     file_path: Filename[RunType], detector_name: NeXusDetectorName
 ) -> NeXusDetector[RunType]:
+    """
+    Load detector from NeXus, but with event data replaced by placeholders.
+
+    Currently the placeholder is the detector number, but this may change in the future.
+
+    The returned object is a scipp.DataGroup, as it may contain additional information
+    about the detector that cannot be represented as a single scipp.DataArray. Most
+    downstream code will only be interested in the contained scipp.DataArray so this
+    needs to be extracted. However, other processing steps may require the additional
+    information, so it is kept in the DataGroup.
+
+    Loading thus proceeds in three steps:
+
+    1. This function loads the detector, but replaces the event data with placeholders.
+    2. :py:func:`get_detector_data` drops the additional information, returning only
+       the contained scipp.DataArray, reshaped to the logical detector shape.
+       This will generally contain coordinates as well as pixel masks.
+    3. :py:func:`assemble_detector_data` replaces placeholder data values with the
+       event data, and adds source and sample positions.
+    """
     definitions = snx.base_definitions()
     definitions["NXdetector"] = FilteredDetector
-    # Events will be loaded later. Should we set something else as data instead, or
-    # use different NeXus definitions to completely bypass the (empty) event load?
     dg = nexus.load_detector(
         file_path=file_path,
         detector_name=detector_name,
-        selection={'event_time_zero': slice(0, 0)},
         definitions=definitions,
     )
     # The name is required later, e.g., for determining logical detector shape
@@ -86,32 +102,8 @@ def load_nexus_monitor(
     # groups so that does not work. Instead, skip event loading and create empty dummy.
     definitions = snx.base_definitions()
     definitions["NXmonitor"] = NXmonitor_no_events
-    with warnings.catch_warnings():
-        warnings.filterwarnings(
-            "ignore",
-            category=UserWarning,
-            message="Failed to load",
-        )
-        monitor = nexus.load_monitor(
-            file_path=file_path,
-            monitor_name=monitor_name,
-            definitions=definitions,
-        )
-    empty_events = sc.DataArray(
-        sc.empty(dims=['event'], shape=[0], dtype='float32', unit='counts'),
-        coords={'event_time_offset': sc.array(dims=['event'], values=[], unit='ns')},
-    )
-    monitor[f'{monitor_name}_events'] = sc.DataArray(
-        sc.bins(
-            dim='event',
-            data=empty_events,
-            begin=sc.empty(dims=['event_time_zero'], shape=[0], unit=None),
-        ),
-        coords={
-            'event_time_zero': sc.datetimes(
-                dims=['event_time_zero'], values=[], unit='ns'
-            )
-        },
+    monitor = nexus.load_monitor(
+        file_path=file_path, monitor_name=monitor_name, definitions=definitions
     )
     return NeXusMonitor[RunType, MonitorType](monitor)
 
@@ -192,8 +184,9 @@ class FilteredDetector(snx.NXdetector):
         children = {
             name: child
             for name, child in children.items()
-            if not _skip(name, child, classes=(snx.NXoff_geometry,))
+            if not _skip(name, child, classes=(snx.NXoff_geometry, snx.NXevent_data))
         }
+        children['data'] = children['detector_number']
         super().__init__(attrs=attrs, children=children)
 
 
@@ -206,6 +199,18 @@ class NXmonitor_no_events(snx.NXmonitor):
             for name, child in children.items()
             if not _skip(name, child, classes=(snx.NXevent_data,))
         }
+
+        class DummyField:
+            def __init__(self):
+                self.attrs = {}
+                self.sizes = {'event_time_zero': 0}
+                self.dims = ('event_time_zero',)
+                self.shape = (0,)
+
+            def __getitem__(self, key: Any) -> sc.Variable:
+                return sc.empty(dims=self.dims, shape=self.shape, unit=None)
+
+        children['data'] = DummyField()
         super().__init__(attrs=attrs, children=children)
 
 
