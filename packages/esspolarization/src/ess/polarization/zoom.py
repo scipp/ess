@@ -11,6 +11,7 @@ import scipp as sc
 from ess.isissans.data import LoadedFileContents
 from ess.isissans.mantidio import DataWorkspace, Period
 from ess.sans.types import (
+    EmptyBeamRun,
     Filename,
     Incident,
     MonitorType,
@@ -26,7 +27,7 @@ from mantid import simpleapi as _mantid_simpleapi
 
 # In this case the "sample" is the analyzer cell, of which we want to measure
 # the transmission fraction.
-sample_run_type = TransmissionRun[SampleRun]
+sample_run_type = RunType
 
 
 def load_histogrammed_run(
@@ -96,6 +97,20 @@ def get_monitor_data(
     return RawMonitor[RunType, MonitorType](sc.values(mon))
 
 
+def get_monitor_data_from_empty_beam_run(
+    dg: LoadedFileContents[EmptyBeamRun],
+    spectrum_number: MonitorSpectrumNumber[MonitorType],
+) -> RawMonitor[EmptyBeamRun, MonitorType]:
+    """
+    Extract incident or transmission monitor from ZOOM empty beam run
+
+    The files in this case do not contain detector data, only monitor data. Mantid
+    stores this as a Workspace2D, where each spectrum corresponds to a monitor.
+    """
+    # Note we index with a scipp.Variable, i.e., by the spectrum number used at ISIS
+    return sc.values(dg["data"]["spectrum", sc.index(spectrum_number.value)]).copy()
+
+
 def get_monitor_data_from_transmission_run(
     dg: LoadedFileContents[TransmissionRun[RunType]],
     spectrum_number: MonitorSpectrumNumber[MonitorType],
@@ -132,6 +147,7 @@ def ZoomTransmissionFractionWorkflow(runs: Sequence[str]) -> sl.Pipeline:
     """
     workflow = isis.zoom.ZoomWorkflow()
     workflow.insert(get_monitor_data)
+    workflow.insert(get_monitor_data_from_empty_beam_run)
     workflow.insert(get_monitor_data_from_transmission_run)
     workflow.insert(load_histogrammed_run)
 
@@ -145,11 +161,11 @@ def ZoomTransmissionFractionWorkflow(runs: Sequence[str]) -> sl.Pipeline:
     # differently in each case, so there is some duplication here.
     workflow[MonitorSpectrumNumber[Incident]] = MonitorSpectrumNumber[Incident](3)
     workflow[MonitorSpectrumNumber[Transmission]] = MonitorSpectrumNumber[Transmission](
-        5
+        4
     )
-    workflow[NeXusMonitorName[Incident]] = NeXusMonitorName[Incident]('monitor3')
+    workflow[NeXusMonitorName[Incident]] = NeXusMonitorName[Incident]("monitor3")
     workflow[NeXusMonitorName[Transmission]] = NeXusMonitorName[Transmission](
-        'monitor5'
+        "monitor4"
     )
     workflow[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
 
