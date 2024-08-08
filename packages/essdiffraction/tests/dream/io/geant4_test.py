@@ -11,7 +11,7 @@ import scipp as sc
 import scipp.testing
 
 from ess.dream import data, load_geant4_csv
-from ess.powder.types import Filename, NeXusDetectorName, RawDetectorData, SampleRun
+from ess.powder.types import Filename, NeXusDetectorName, RawDetector, SampleRun
 
 
 @pytest.fixture(scope="module")
@@ -180,6 +180,6 @@ def test_geant4_in_pipeline(file_path, file):
             NeXusDetectorName: NeXusDetectorName("mantle"),
         },
     )
-    detector = pipeline.compute(RawDetectorData[SampleRun])
+    detector = pipeline.compute(RawDetector[SampleRun])
     expected = load_geant4_csv(file)["instrument"]["mantle"]["events"]
     sc.testing.assert_identical(detector, expected)

@@ -10,10 +10,10 @@ from ess.powder.types import (
     CalibrationData,
     CalibrationFilename,
     Filename,
+    NeXusDetector,
     NeXusDetectorDimensions,
     NeXusDetectorName,
     RawDetector,
-    RawDetectorData,
     RawSample,
     RawSource,
     ReducibleDetectorData,
@@ -64,16 +64,16 @@ def load_geant4_csv(file_path: Filename[RunType]) -> AllRawDetectors[RunType]:
 
 def extract_geant4_detector(
     detectors: AllRawDetectors[RunType], detector_name: NeXusDetectorName
-) -> RawDetector[RunType]:
+) -> NeXusDetector[RunType]:
     """Extract a single detector from a loaded GEANT4 simulation."""
-    return RawDetector[RunType](detectors["instrument"][detector_name])
+    return NeXusDetector[RunType](detectors["instrument"][detector_name])
 
 
 def extract_geant4_detector_data(
-    detector: RawDetector[RunType],
-) -> RawDetectorData[RunType]:
+    detector: NeXusDetector[RunType],
+) -> RawDetector[RunType]:
     """Extract the histogram or event data from a loaded GEANT4 detector."""
-    return RawDetectorData[RunType](extract_detector_data(detector))
+    return RawDetector[RunType](extract_detector_data(detector))
 
 
 def _load_raw_events(file_path: str) -> sc.DataArray:
@@ -176,7 +176,7 @@ def get_sample_position(raw_sample: RawSample[RunType]) -> SamplePosition[RunTyp
 
 
 def patch_detector_data(
-    detector_data: RawDetectorData[RunType],
+    detector_data: RawDetector[RunType],
     source_position: SourcePosition[RunType],
     sample_position: SamplePosition[RunType],
 ) -> ReducibleDetectorData[RunType]:
@@ -188,7 +188,7 @@ def patch_detector_data(
 
 
 def geant4_detector_dimensions(
-    data: RawDetectorData[SampleRun],
+    data: RawDetector[SampleRun],
 ) -> NeXusDetectorDimensions:
     # For geant4 data, we group by detector identifier, so the data already has
     # logical dimensions, so we simply return the dimensions of the detector.
