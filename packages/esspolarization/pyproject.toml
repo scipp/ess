@@ -36,6 +36,7 @@ dependencies = [
   "sciline>=24.06.0",
   "scipp>=23.8.0",
   "scipy",
+  "essreduce>=24.07.1",
 ]
 
 dynamic = ["version"]
