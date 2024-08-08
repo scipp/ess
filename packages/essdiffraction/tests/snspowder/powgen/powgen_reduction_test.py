@@ -6,6 +6,7 @@ import sciline
 import scipp as sc
 from ess import powder
 from ess.snspowder import powgen
+from ess.snspowder.powgen import data  # noqa: F401
 
 from ess.powder.types import (
     CalibrationFilename,
@@ -30,7 +31,7 @@ from ess.powder.types import (
 def providers():
     from ess import powder
 
-    return [*powder.providers, *powgen.providers]
+    return [*powder.providers, *powgen.providers, *powgen.data.providers]
 
 
 @pytest.fixture()

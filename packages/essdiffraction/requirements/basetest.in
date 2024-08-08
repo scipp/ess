@@ -3,4 +3,5 @@
 
 numpy
 pandas
+pooch
 pytest
