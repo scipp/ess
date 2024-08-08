@@ -198,8 +198,8 @@ def secondary_flight_time(
     return secondary_flight_distance / velocity
 
 
-def sample_time(
-        detector_time: DetectorTime,
+def sample_frame_time(
+        detector_time: DetectorFrameTime,
         secondary_time: SampleDetectorFlightTime
-) -> SampleTime:
+) -> SampleFrameTime:
     return detector_time - secondary_time
