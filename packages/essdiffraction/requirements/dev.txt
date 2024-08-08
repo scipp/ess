@@ -26,11 +26,11 @@ arrow==1.3.0
     # via isoduration
 async-lru==2.0.4
     # via jupyterlab
-cffi==1.16.0
+cffi==1.17.0
     # via argon2-cffi-bindings
 copier==9.3.1
     # via -r dev.in
-dunamai==1.21.2
+dunamai==1.22.0
     # via copier
 fqdn==1.5.1
     # via jsonschema
@@ -59,7 +59,7 @@ jupyter-events==0.10.0
     # via jupyter-server
 jupyter-lsp==2.2.5
     # via jupyterlab
-jupyter-server==2.14.1
+jupyter-server==2.14.2
     # via
     #   jupyter-lsp
     #   jupyterlab
@@ -67,9 +67,9 @@ jupyter-server==2.14.1
     #   notebook-shim
 jupyter-server-terminals==0.5.3
     # via jupyter-server
-jupyterlab==4.2.3
+jupyterlab==4.2.4
     # via -r dev.in
-jupyterlab-server==2.27.2
+jupyterlab-server==2.27.3
     # via jupyterlab
 notebook-shim==0.2.4
     # via jupyterlab
@@ -123,7 +123,7 @@ webcolors==24.6.0
     # via jsonschema
 websocket-client==1.8.0
     # via jupyter-server
-wheel==0.43.0
+wheel==0.44.0
     # via pip-tools
 
 # The following packages are considered to be unsafe in a requirements file:
