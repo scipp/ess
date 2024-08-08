@@ -4,7 +4,8 @@ import pytest
 import sciline
 from ess import dream
 
-from ess.dream import data, nexus  # noqa: F401
+import ess.dream.data  # noqa: F401
+from ess.dream import nexus
 from ess.powder.types import (
     Filename,
     NeXusDetectorName,

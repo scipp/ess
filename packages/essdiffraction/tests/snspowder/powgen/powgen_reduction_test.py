@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
+import ess.snspowder.powgen.data  # noqa: F401
 import pytest
 import sciline
 import scipp as sc
 from ess import powder
 from ess.snspowder import powgen
-from ess.snspowder.powgen import data  # noqa: F401
 
 from ess.powder.types import (
     CalibrationFilename,
