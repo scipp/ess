@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+import threading
 from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Generic
@@ -33,7 +34,12 @@ def load_histogrammed_run(
     filename: Filename[sample_run_type], period: Period
 ) -> DataWorkspace[sample_run_type]:
     """Load a non-event-data ISIS file"""
-    loaded = _mantid_simpleapi.Load(Filename=str(filename), StoreInADS=False)
+    # Loading many small files with Mantid is, for some reason, very slow when using
+    # the default number of threads in the Dask threaded scheduler (1 thread worked
+    # best, 2 is a bit slower but still fast). We can either limit that thread count,
+    # or add a lock here, which is more specific.
+    with load_histogrammed_run.lock:
+        loaded = _mantid_simpleapi.Load(Filename=str(filename), StoreInADS=False)
     if isinstance(loaded, _mantid_api.Workspace):
         # A single workspace
         data_ws = loaded
@@ -58,6 +64,9 @@ def load_histogrammed_run(
         else:
             data_ws.setMonitorWorkspace(loaded.MonitorWorkspace)
     return DataWorkspace[sample_run_type](data_ws)
+
+
+load_histogrammed_run.lock = threading.Lock()
 
 
 def _get_time(dg: sc.DataGroup) -> sc.Variable:
