@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
+import ess.snspowder.powgen.data  # noqa: F401
 import pytest
 import sciline
 import scipp as sc
@@ -30,7 +31,7 @@ from ess.powder.types import (
 def providers():
     from ess import powder
 
-    return [*powder.providers, *powgen.providers]
+    return [*powder.providers, *powgen.providers, *powgen.data.providers]
 
 
 @pytest.fixture()

@@ -2,13 +2,18 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import pytest
 import sciline
-from ess import dream
+import scipp as sc
+from ess import dream, powder
 
+import ess.dream.data  # noqa: F401
 from ess.dream import nexus
 from ess.powder.types import (
     Filename,
+    Monitor1,
     NeXusDetectorName,
-    RawDetectorData,
+    NeXusMonitorName,
+    RawDetector,
+    RawMonitor,
     ReducibleDetectorData,
     SampleRun,
 )
@@ -19,15 +24,7 @@ hr_sans_dims = {'strip', 'other'}
 
 @pytest.fixture()
 def providers():
-    return (
-        nexus.dummy_load_sample,
-        nexus.load_nexus_source,
-        nexus.load_nexus_detector,
-        nexus.get_sample_position,
-        nexus.get_source_position,
-        nexus.get_detector_data,
-        nexus.patch_detector_data,
-    )
+    return (*nexus.providers, powder.nexus.dummy_load_sample)
 
 
 @pytest.fixture(
@@ -49,7 +46,7 @@ def params(request):
 
 def test_can_load_nexus_detector_data(providers, params):
     pipeline = sciline.Pipeline(params=params, providers=providers)
-    result = pipeline.compute(RawDetectorData[SampleRun])
+    result = pipeline.compute(RawDetector[SampleRun])
     assert (
         set(result.dims) == hr_sans_dims
         if params[NeXusDetectorName]
@@ -60,6 +57,18 @@ def test_can_load_nexus_detector_data(providers, params):
         else bank_dims
     )
 
+    assert sc.identical(result.data, result.coords['detector_number'])
+
+
+def test_can_load_nexus_monitor_data(providers):
+    pipeline = sciline.Pipeline(providers=providers)
+    pipeline[Filename[SampleRun]] = dream.data.get_path(
+        'DREAM_nexus_sorted-2023-12-07.nxs'
+    )
+    pipeline[NeXusMonitorName[Monitor1]] = 'monitor_cave'
+    result = pipeline.compute(RawMonitor[SampleRun, Monitor1])
+    assert result.sizes == {'event_time_zero': 0}
+
 
 def test_load_fails_with_bad_detector_name(providers):
     params = {
@@ -68,10 +77,10 @@ def test_load_fails_with_bad_detector_name(providers):
     }
     pipeline = sciline.Pipeline(params=params, providers=providers)
     with pytest.raises(KeyError, match='bad_detector'):
-        pipeline.compute(RawDetectorData[SampleRun])
+        pipeline.compute(RawDetector[SampleRun])
 
 
-def test_patch_nexus_detector_data(providers, params):
+def test_assemble_nexus_detector_data(providers, params):
     pipeline = sciline.Pipeline(params=params, providers=providers)
     result = pipeline.compute(ReducibleDetectorData[SampleRun])
     assert (

@@ -15,6 +15,7 @@ from . import (
     smoothing,
 )
 from .masking import with_pixel_mask_filenames
+from . import nexus
 
 try:
     __version__ = importlib.metadata.version(__package__ or __name__)
@@ -39,6 +40,7 @@ __all__ = [
     "filtering",
     "grouping",
     "masking",
+    "nexus",
     "providers",
     "smoothing",
     "with_pixel_mask_filenames",
