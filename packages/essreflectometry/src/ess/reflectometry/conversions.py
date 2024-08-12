@@ -149,6 +149,9 @@ def add_masks(
     wb: WavelengthBins,
     zlim: ZIndexLimits,
 ) -> MaskedData[RunType]:
+    da.masks["beam_divergence_too_large"] = sc.abs(
+        da.coords["angle_from_center_of_beam"]
+    ) > sc.scalar(0.7, unit='deg')
     da.masks["y_index_range"] = (da.coords["y_index"] < ylim[0]) | (
         da.coords["y_index"] > ylim[1]
     )
