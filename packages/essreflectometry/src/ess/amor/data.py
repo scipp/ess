@@ -3,7 +3,7 @@
 
 from ..reflectometry.types import Filename, ReferenceRun, SampleRun
 
-_version = "1"
+_version = "2"
 
 
 def _make_pooch():
@@ -42,14 +42,14 @@ def _make_pooch():
             "amor2023n000614.hdf": "md5:18e8a755d6fd671758fe726de058e707",
             # Reflectivity curves obtained by applying Jochens Amor
             # software @ https://github.com/jochenstahn/amor.git
-            # (repo commit hash e05fc9e1e124965919647f1856dbb9eb04221f1e).
+            # (repo commit hash 05e35ca4e05436d7c69ff6e19f32bc1915cbb5d0).
             # to the above files.
-            "608.Rqz.ort": "md5:60d8467796800f19c3aa1b6af5ad7b3d",
-            "609.Rqz.ort": "md5:99af745e025423af64bc5a124a011826",
-            "610.Rqz.ort": "md5:fa703dc9c5eed49d35e7a3d76a5746b9",
-            "611.Rqz.ort": "md5:d6ea74d0525308a6a42938c106b62919",
-            "612.Rqz.ort": "md5:f0b0eb269614645b4c6bbe24e29a6e10",
-            "613.Rqz.ort": "md5:fff003552908c6a4a94b6213cfa08ac3",
+            "608.Rqz.ort": "md5:e7e7d63a1ac1e727e9b2f12dc78a77ce",
+            "609.Rqz.ort": "md5:3cb3fd11a743594f52a10f71b122b71a",
+            "610.Rqz.ort": "md5:66d43993e76801655a1d629cb976abde",
+            "611.Rqz.ort": "md5:0c51e8ac5c00041434417673be186151",
+            "612.Rqz.ort": "md5:d785d27151e7f1edc05e86d35bef6a63",
+            "613.Rqz.ort": "md5:e999c85f7a47665c4ddd1538b19d402d",
         },
     )
 

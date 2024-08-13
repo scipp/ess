@@ -7,6 +7,7 @@ from scippneutron.conversion.beamline import scattering_angle_in_yz_plane
 from scippneutron.conversion.graph import beamline, tof
 
 from .types import (
+    BeamDivergenceLimits,
     DataWithScatteringCoordinates,
     Gravity,
     IncidentBeam,
@@ -148,7 +149,11 @@ def add_masks(
     ylim: YIndexLimits,
     wb: WavelengthBins,
     zlim: ZIndexLimits,
+    bdlim: BeamDivergenceLimits,
 ) -> MaskedData[RunType]:
+    da.masks["beam_divergence_too_large"] = (
+        da.coords["angle_from_center_of_beam"] < bdlim[0]
+    ) | (da.coords["angle_from_center_of_beam"] > bdlim[1])
     da.masks["y_index_range"] = (da.coords["y_index"] < ylim[0]) | (
         da.coords["y_index"] > ylim[1]
     )

@@ -14,6 +14,7 @@ from ..reflectometry.types import (
     NeXusDetectorName,
     RunType,
     SamplePosition,
+    BeamDivergenceLimits,
 )
 from . import conversions, data, load, orso, resolution, utils
 from .instrument_view import instrument_view
@@ -64,6 +65,7 @@ def default_parameters() -> dict:
         NeXusDetectorName[RunType]: "detector",
         ChopperPhase[RunType]: sc.scalar(-5.0, unit="deg"),
         ChopperFrequency[RunType]: sc.scalar(8.333, unit="Hz"),
+        BeamDivergenceLimits: (sc.scalar(-0.7, unit='deg'), sc.scalar(0.7, unit='deg')),
     }
 
 

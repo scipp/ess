@@ -124,5 +124,9 @@ ZIndexLimits = NewType("ZIndexLimits", tuple[sc.Variable, sc.Variable])
 """Limit of the (logical) 'z' detector pixel index"""
 
 
+BeamDivergenceLimits = NewType("BeamDivergenceLimits", tuple[sc.Variable, sc.Variable])
+"""Limit of the beam divergence"""
+
+
 ReferenceFilePath = NewType("ReferenceFilePath", str)
 """Path to the cached normalization matrix"""
