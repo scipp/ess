@@ -7,10 +7,6 @@
 #
 asttokens==2.4.1
     # via stack-data
-certifi==2024.7.4
-    # via requests
-charset-normalizer==3.3.2
-    # via requests
 click==8.1.7
     # via dask
 cloudpickle==3.0.0
@@ -23,11 +19,11 @@ cyclebane==24.6.0
     # via sciline
 cycler==0.12.1
     # via matplotlib
-dask==2024.7.1
+dask==2024.8.0
     # via -r base.in
 decorator==5.1.1
     # via ipython
-essreduce==24.7.1
+essreduce==24.8.0
     # via -r base.in
 exceptiongroup==1.2.2
     # via ipython
@@ -43,9 +39,7 @@ h5py==3.11.0
     # via
     #   scippneutron
     #   scippnexus
-idna==3.7
-    # via requests
-importlib-metadata==8.0.0
+importlib-metadata==8.2.0
     # via dask
 ipydatawidgets==4.3.5
     # via pythreejs
@@ -63,7 +57,7 @@ kiwisolver==1.4.5
     # via matplotlib
 locket==1.0.0
     # via partd
-matplotlib==3.9.1
+matplotlib==3.9.2
     # via
     #   mpltoolbox
     #   plopp
@@ -90,7 +84,6 @@ packaging==24.1
     # via
     #   dask
     #   matplotlib
-    #   pooch
 parso==0.8.4
     # via jedi
 partd==1.4.2
@@ -99,14 +92,10 @@ pexpect==4.9.0
     # via ipython
 pillow==10.4.0
     # via matplotlib
-platformdirs==4.2.2
-    # via pooch
 plopp==24.6.0
     # via
     #   -r base.in
     #   scippneutron
-pooch==1.8.2
-    # via scippneutron
 prompt-toolkit==3.0.47
     # via ipython
 ptyprocess==0.7.0
@@ -124,12 +113,10 @@ python-dateutil==2.9.0.post0
     #   scippnexus
 pythreejs==2.4.2
     # via -r base.in
-pyyaml==6.0.1
+pyyaml==6.0.2
     # via
     #   dask
     #   orsopy
-requests==2.32.3
-    # via pooch
 sciline==24.6.2
     # via -r base.in
 scipp==24.6.0
@@ -138,9 +125,9 @@ scipp==24.6.0
     #   essreduce
     #   scippneutron
     #   scippnexus
-scippneutron==24.7.0
+scippneutron==24.8.0
     # via -r base.in
-scippnexus==24.6.0
+scippnexus==24.8.1
     # via
     #   essreduce
     #   scippneutron
@@ -170,11 +157,9 @@ traittypes==0.2.1
     # via ipydatawidgets
 typing-extensions==4.12.2
     # via ipython
-urllib3==2.2.2
-    # via requests
 wcwidth==0.2.13
     # via prompt-toolkit
 widgetsnbextension==4.0.11
     # via ipywidgets
-zipp==3.19.2
+zipp==3.20.0
     # via importlib-metadata
