@@ -30,6 +30,7 @@ test:
     - ess.amor
   requires:
     - pytest
+    - pooch
   source_files:
     - pyproject.toml
     - tests/
