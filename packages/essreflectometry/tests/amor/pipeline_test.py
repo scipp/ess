@@ -7,6 +7,7 @@ import pytest
 import sciline
 import scipp as sc
 from ess import amor
+from ess.amor import data  # noqa: F401
 from ess.reflectometry import orso
 from ess.reflectometry.types import (
     Filename,

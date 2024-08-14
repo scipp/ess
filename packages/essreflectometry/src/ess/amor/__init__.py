@@ -16,7 +16,7 @@ from ..reflectometry.types import (
     SamplePosition,
     BeamDivergenceLimits,
 )
-from . import conversions, data, load, orso, resolution, utils
+from . import conversions, load, orso, resolution, utils
 from .instrument_view import instrument_view
 from .types import (
     AngularResolution,
@@ -80,7 +80,6 @@ __all__ = [
     "supermirror",
     "beamline",
     "conversions",
-    "data",
     "load",
     "orso",
     "resolution",

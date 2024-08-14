@@ -8,3 +8,5 @@ sphinx
 sphinx-autodoc-typehints
 sphinx-copybutton
 sphinx-design
+pooch
+matplotlib<=3.7.1
