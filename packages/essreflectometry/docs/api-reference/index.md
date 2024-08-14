@@ -44,7 +44,6 @@
    :template: module-template.rst
    :recursive:
 
-   beamline
    conversions
    data
    instrument_view

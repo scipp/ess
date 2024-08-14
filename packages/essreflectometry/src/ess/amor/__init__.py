@@ -78,7 +78,6 @@ def AmorWorkflow() -> sciline.Pipeline:
 
 __all__ = [
     "supermirror",
-    "beamline",
     "conversions",
     "load",
     "orso",
