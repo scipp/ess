@@ -33,7 +33,7 @@ from ..sans.types import (
     WavelengthMask,
 )
 from .components import DetectorBankOffset, MonitorOffset, SampleOffset
-from .data import LoadedFileContents
+from .io import LoadedFileContents
 from .mantidio import Period
 
 

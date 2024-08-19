@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+import ess.isissans.data  # noqa: F401
 import pytest
 import sciline
 import scipp as sc
@@ -81,10 +82,10 @@ def sans2d_providers():
         + isis.sans2d.providers
         + isis.mantidio.providers
         + (
-            isis.data.load_tutorial_direct_beam,
-            isis.data.load_tutorial_run,
-            isis.data.transmission_from_background_run,
-            isis.data.transmission_from_sample_run,
+            isis.io.load_tutorial_direct_beam,
+            isis.io.load_tutorial_run,
+            isis.io.transmission_from_background_run,
+            isis.io.transmission_from_sample_run,
         )
     )
 
@@ -182,7 +183,7 @@ def test_pipeline_can_compute_intermediate_results():
 def pixel_dependent_direct_beam(
     filename: DirectBeamFilename, shape: RawDetector[SampleRun]
 ) -> DirectBeam:
-    direct_beam = isis.data.load_tutorial_direct_beam(filename)
+    direct_beam = isis.io.load_tutorial_direct_beam(filename)
     sizes = {'spectrum': shape.sizes['spectrum'], **direct_beam.sizes}
     return DirectBeam(direct_beam.broadcast(sizes=sizes).copy())
 

@@ -3,7 +3,7 @@
 
 import importlib.metadata
 
-from . import data, general, io
+from . import general, io
 from .general import LokiAtLarmorWorkflow, default_parameters
 
 try:
@@ -16,7 +16,6 @@ providers = general.providers + io.providers
 del importlib
 
 __all__ = [
-    'data',
     'general',
     'io',
     'providers',

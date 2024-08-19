@@ -60,10 +60,10 @@ def zoom_providers():
         + isis.providers
         + isis.mantidio.providers
         + (
-            isis.data.load_tutorial_direct_beam,
-            isis.data.load_tutorial_run,
-            isis.data.transmission_from_background_run,
-            isis.data.transmission_from_sample_run,
+            isis.io.load_tutorial_direct_beam,
+            isis.io.load_tutorial_run,
+            isis.io.transmission_from_background_run,
+            isis.io.transmission_from_sample_run,
         )
     )
 
