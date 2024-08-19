@@ -3,7 +3,7 @@
 
 import importlib.metadata
 
-from . import general, io
+from . import general
 from .general import LokiAtLarmorWorkflow, default_parameters
 
 try:
@@ -11,14 +11,10 @@ try:
 except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
-providers = general.providers + io.providers
-
 del importlib
 
 __all__ = [
     'general',
-    'io',
-    'providers',
     'default_parameters',
     'LokiAtLarmorWorkflow',
 ]

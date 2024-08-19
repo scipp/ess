@@ -13,12 +13,12 @@ from .conversions import ElasticCoordTransformGraph
 from .logging import get_logger
 from .types import (
     BeamCenter,
+    DetectorData,
     DimsToKeep,
     IofQ,
     MaskedData,
     NormWavelengthTerm,
     QBins,
-    RawDetector,
     ReturnEvents,
     SampleRun,
     WavelengthBands,
@@ -168,7 +168,7 @@ def _iofq_in_quadrants(
     for i, quad in enumerate(quadrants):
         # Select pixels based on phi
         sel = (phi >= phi_bins[i]) & (phi < phi_bins[i + 1])
-        workflow[RawDetector[SampleRun]] = detector[sel]
+        workflow[DetectorData[SampleRun]] = detector[sel]
         # MaskedData would be computed automatically, but we did it above already
         workflow[MaskedData[SampleRun]] = calibrated[sel]
         workflow[NormWavelengthTerm[SampleRun]] = (
@@ -358,13 +358,13 @@ def beam_center_from_iofq(
     logger.info('Using tolerance: %s', tolerance)
 
     keys = (
-        RawDetector[SampleRun],
+        DetectorData[SampleRun],
         MaskedData[SampleRun],
         NormWavelengthTerm[SampleRun],
         ElasticCoordTransformGraph,
     )
     results = workflow.compute(keys)
-    detector = results[RawDetector[SampleRun]]
+    detector = results[DetectorData[SampleRun]]
     data = results[MaskedData[SampleRun]]
     norm = results[NormWavelengthTerm[SampleRun]]
     graph = results[ElasticCoordTransformGraph]
@@ -380,7 +380,7 @@ def beam_center_from_iofq(
 
     workflow = workflow.copy()
     # Avoid reloading the detector
-    workflow[RawDetector[SampleRun]] = detector
+    workflow[DetectorData[SampleRun]] = detector
     workflow[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
     workflow[ReturnEvents] = False
     workflow[DimsToKeep] = ()

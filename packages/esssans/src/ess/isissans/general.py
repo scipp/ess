@@ -18,7 +18,6 @@ from ..sans.types import (
     MonitorType,
     NeXusMonitorName,
     NonBackgroundWavelengthRange,
-    RawDetector,
     RawMonitor,
     RawMonitorData,
     RunNumber,
@@ -32,7 +31,6 @@ from ..sans.types import (
     WavelengthBands,
     WavelengthMask,
 )
-from .components import DetectorBankOffset, MonitorOffset, SampleOffset
 from .io import LoadedFileContents
 from .mantidio import Period
 
@@ -41,10 +39,14 @@ def default_parameters() -> dict:
     return {
         CorrectForGravity: False,
         DimsToKeep: (),
-        MonitorOffset[Incident]: MonitorOffset(sc.vector([0, 0, 0], unit='m')),
-        MonitorOffset[Transmission]: MonitorOffset(sc.vector([0, 0, 0], unit='m')),
-        DetectorBankOffset: DetectorBankOffset(sc.vector([0, 0, 0], unit='m')),
-        SampleOffset: SampleOffset(sc.vector([0, 0, 0], unit='m')),
+        MonitorPositionOffset[Incident]: MonitorPositionOffset(
+            sc.vector([0, 0, 0], unit='m')
+        ),
+        MonitorPositionOffset[Transmission]: MonitorPositionOffset(
+            sc.vector([0, 0, 0], unit='m')
+        ),
+        DetectorPositionOffset: DetectorPositionOffset(sc.vector([0, 0, 0], unit='m')),
+        SamplePositionOffset: SamplePositionOffset(sc.vector([0, 0, 0], unit='m')),
         NonBackgroundWavelengthRange: None,
         WavelengthMask: None,
         WavelengthBands: None,
@@ -56,7 +58,7 @@ def get_detector_data(
     dg: LoadedFileContents[RunType],
     sample_offset: SampleOffset,
     detector_bank_offset: DetectorBankOffset,
-) -> RawDetector[RunType]:
+) -> DetectorData[RunType]:
     """Get detector data and apply user offsets to raw data.
 
     Parameters
@@ -73,7 +75,7 @@ def get_detector_data(
     sample_pos = sample_pos + sample_offset.to(unit=sample_pos.unit, copy=False)
     pos = data.coords['position']
     pos = pos + detector_bank_offset.to(unit=pos.unit, copy=False)
-    return RawDetector[RunType](
+    return DetectorData[RunType](
         dg['data'].assign_coords(position=pos, sample_position=sample_pos)
     )
 
