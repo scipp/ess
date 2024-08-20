@@ -7,8 +7,8 @@ import scipp as sc
 from ess.sans import providers as sans_providers
 from ess.sans.types import DetectorMasks, RawDetector, SampleRun
 
-from .data import load_tutorial_direct_beam, load_tutorial_run
 from .general import default_parameters
+from .io import load_tutorial_direct_beam, load_tutorial_run
 from .mantidio import providers as mantid_providers
 
 DetectorEdgeMask = NewType('DetectorEdgeMask', sc.Variable | None)

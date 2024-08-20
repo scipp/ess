@@ -3,7 +3,7 @@
 
 import importlib.metadata
 
-from . import components, data, general, io, sans2d, zoom
+from . import components, general, io, sans2d, zoom
 from .components import DetectorBankOffset, MonitorOffset, SampleOffset
 from .general import default_parameters
 from .io import CalibrationFilename
@@ -21,7 +21,6 @@ del importlib
 __all__ = [
     'CalibrationFilename',
     'DetectorBankOffset',
-    'data',
     'io',
     'MonitorOffset',
     'providers',

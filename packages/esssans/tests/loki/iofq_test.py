@@ -4,6 +4,7 @@ import os
 import sys
 from pathlib import Path
 
+import ess.loki.data  # noqa: F401
 import pytest
 import sciline
 import scipp as sc

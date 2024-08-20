@@ -20,7 +20,7 @@ cyclebane==24.6.0
     # via sciline
 cycler==0.12.1
     # via matplotlib
-dask==2024.7.1
+dask==2024.8.1
     # via -r nightly.in
 decorator==5.1.1
     # via ipython
@@ -56,7 +56,7 @@ kiwisolver==1.4.5
     # via matplotlib
 locket==1.0.0
     # via partd
-matplotlib==3.9.0
+matplotlib==3.9.2
     # via
     #   mpltoolbox
     #   plopp
@@ -66,7 +66,7 @@ mpltoolbox==24.5.1
     # via scippneutron
 networkx==3.3
     # via cyclebane
-numpy==2.0.1
+numpy==2.1.0
     # via
     #   -r nightly.in
     #   contourpy
@@ -112,7 +112,7 @@ pythreejs==2.4.2
     # via -r nightly.in
 pytz==2024.1
     # via pandas
-pyyaml==6.0.1
+pyyaml==6.0.2
     # via dask
 sciline @ git+https://github.com/scipp/sciline@main
     # via -r nightly.in
@@ -161,5 +161,5 @@ wcwidth==0.2.13
     # via prompt-toolkit
 widgetsnbextension==4.0.11
     # via ipywidgets
-zipp==3.19.2
+zipp==3.20.0
     # via importlib-metadata

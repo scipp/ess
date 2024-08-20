@@ -12,8 +12,7 @@ import scippneutron as scn
 from ess.sans.types import DirectBeam, DirectBeamFilename, Filename, RunType, SampleRun
 from scipp.constants import g
 
-from .data import LoadedFileContents
-from .io import CalibrationFilename
+from .io import CalibrationFilename, LoadedFileContents
 
 try:
     import mantid.api as _mantid_api
