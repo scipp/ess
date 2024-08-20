@@ -34,6 +34,8 @@ SampleRun = reduce_gt.SampleRun
 ScatteringRunType = reduce_gt.ScatteringRunType
 Transmission = reduce_gt.Transmission
 TransmissionRun = reduce_gt.TransmissionRun
+SamplePosition = reduce_gt.SamplePosition
+SourcePosition = reduce_gt.SourcePosition
 
 DetectorBankSizes = reduce_t.DetectorBankSizes
 NeXusDetectorName = reduce_t.NeXusDetectorName

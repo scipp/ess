@@ -4,9 +4,9 @@ from typing import NewType
 
 import sciline
 import scipp as sc
-
+from ess.reduce.nexus.generic_workflow import GenericNeXusWorkflow
 from ess.sans import providers as sans_providers
-from ess.sans.types import DetectorMasks, RawDetector, SampleRun
+from ess.sans.types import CalibratedDetector, DetectorMasks, SampleRun
 
 from .general import default_parameters
 from .io import load_tutorial_direct_beam, load_tutorial_run
@@ -23,27 +23,29 @@ SampleHolderMask = NewType('SampleHolderMask', sc.Variable | None)
 """Sample holder mask"""
 
 
-# It may make more sense to depend on CalibratedDetector here, but the current
-# x and y limits are before setting the beam center, so we use RawDetector
-def detector_edge_mask(sample: RawDetector[SampleRun]) -> DetectorEdgeMask:
-    mask_edges = (
-        sc.abs(sample.coords['position'].fields.x) > sc.scalar(0.48, unit='m')
-    ) | (sc.abs(sample.coords['position'].fields.y) > sc.scalar(0.45, unit='m'))
+_beam_center = sc.vector([0.09011603, -0.08263932, 0.0], unit='m')
+_beam_center = sc.vector([0.09015947, -0.08242624, 0.0], unit='m')
+
+
+def detector_edge_mask(sample: CalibratedDetector[SampleRun]) -> DetectorEdgeMask:
+    raw_pos = sample.coords['position'] + _beam_center
+    mask_edges = (sc.abs(raw_pos.fields.x) > sc.scalar(0.48, unit='m')) | (
+        sc.abs(raw_pos.fields.y) > sc.scalar(0.45, unit='m')
+    )
     return DetectorEdgeMask(mask_edges)
 
 
-# It may make more sense to depend on CalibratedDetector here, but the current
-# x and y limits are before setting the beam center, so we use RawDetector
 def sample_holder_mask(
-    sample: RawDetector[SampleRun], low_counts_threshold: LowCountThreshold
+    sample: CalibratedDetector[SampleRun], low_counts_threshold: LowCountThreshold
 ) -> SampleHolderMask:
+    raw_pos = sample.coords['position'] + _beam_center
     summed = sample.hist()
     holder_mask = (
         (summed.data < low_counts_threshold)
-        & (sample.coords['position'].fields.x > sc.scalar(0, unit='m'))
-        & (sample.coords['position'].fields.x < sc.scalar(0.42, unit='m'))
-        & (sample.coords['position'].fields.y < sc.scalar(0.05, unit='m'))
-        & (sample.coords['position'].fields.y > sc.scalar(-0.15, unit='m'))
+        & (raw_pos.fields.x > sc.scalar(0, unit='m'))
+        & (raw_pos.fields.x < sc.scalar(0.42, unit='m'))
+        & (raw_pos.fields.y < sc.scalar(0.05, unit='m'))
+        & (raw_pos.fields.y > sc.scalar(-0.15, unit='m'))
     )
     return SampleHolderMask(holder_mask)
 
@@ -79,9 +81,12 @@ def Sans2dWorkflow() -> sciline.Pipeline:
     """Create Sans2d workflow with default parameters."""
     from . import providers as isis_providers
 
-    params = default_parameters()
-    sans2d_providers = sans_providers + isis_providers + mantid_providers + providers
-    return sciline.Pipeline(providers=sans2d_providers, params=params)
+    workflow = GenericNeXusWorkflow()
+    for provider in sans_providers + isis_providers + mantid_providers + providers:
+        workflow.insert(provider)
+    for key, param in default_parameters().items():
+        workflow[key] = param
+    return workflow
 
 
 def Sans2dTutorialWorkflow() -> sciline.Pipeline:

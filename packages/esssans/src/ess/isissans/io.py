@@ -50,6 +50,3 @@ def transmission_from_background_run(
     Use transmission from a background run, instead of dedicated run.
     """
     return LoadedFileContents[TransmissionRun[BackgroundRun]](data)
-
-
-providers = (read_xml_detector_masking,)

@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-import sciline
+import ess.isissans.data  # noqa: F401
+import pytest
 import scipp as sc
 from ess import isissans as isis
 from ess import sans
@@ -8,6 +9,7 @@ from ess import sans
 from ess.sans.types import (
     BeamCenter,
     CorrectForGravity,
+    DetectorPositionOffset,
     Filename,
     Incident,
     IofQ,
@@ -31,8 +33,8 @@ def make_params() -> dict:
         isis.CalibrationFilename: isis.data.zoom_tutorial_calibration(),
         Filename[sans.types.SampleRun]: isis.data.zoom_tutorial_sample_run(),
         Filename[sans.types.EmptyBeamRun]: isis.data.zoom_tutorial_empty_beam_run(),
-        isis.SampleOffset: sc.vector([0.0, 0.0, 0.11], unit='m'),
-        isis.DetectorBankOffset: sc.vector([0.0, 0.0, 0.5], unit='m'),
+        isis.general.SampleOffset: sc.vector([0.0, 0.0, 0.11], unit='m'),
+        DetectorPositionOffset[SampleRun]: sc.vector([0.0, 0.0, 0.5], unit='m'),
     }
 
     params[NeXusMonitorName[Incident]] = 'monitor3'
@@ -55,22 +57,17 @@ def make_params() -> dict:
     return params
 
 
-def zoom_providers():
-    return list(
-        sans.providers
-        + isis.providers
-        + isis.mantidio.providers
-        + (
-            isis.io.load_tutorial_direct_beam,
-            isis.io.load_tutorial_run,
-            isis.io.transmission_from_background_run,
-            isis.io.transmission_from_sample_run,
-        )
-    )
+@pytest.fixture()
+def pipeline():
+    wf = isis.zoom.ZoomTutorialWorkflow()
+    wf.insert(isis.io.transmission_from_background_run)
+    wf.insert(isis.io.transmission_from_sample_run)
+    for key, param in make_params().items():
+        wf[key] = param
+    return wf
 
 
-def test_can_create_pipeline():
-    pipeline = sciline.Pipeline(zoom_providers(), params=make_params())
+def test_can_create_pipeline(pipeline):
     pipeline[BeamCenter] = sc.vector([0, 0, 0], unit='m')
     pipeline = sans.with_pixel_mask_filenames(
         pipeline, isis.data.zoom_tutorial_mask_filenames()
@@ -78,8 +75,7 @@ def test_can_create_pipeline():
     pipeline.get(IofQ[SampleRun])
 
 
-def test_pipeline_can_compute_IofQ():
-    pipeline = sciline.Pipeline(zoom_providers(), params=make_params())
+def test_pipeline_can_compute_IofQ(pipeline):
     pipeline[BeamCenter] = sc.vector([0, 0, 0], unit='m')
     pipeline = sans.with_pixel_mask_filenames(
         pipeline, isis.data.zoom_tutorial_mask_filenames()
@@ -88,8 +84,7 @@ def test_pipeline_can_compute_IofQ():
     assert result.dims == ('Q',)
 
 
-def test_pipeline_can_compute_IofQxQy():
-    pipeline = sciline.Pipeline(zoom_providers(), params=make_params())
+def test_pipeline_can_compute_IofQxQy(pipeline):
     pipeline[BeamCenter] = sc.vector([0, 0, 0], unit='m')
     pipeline = sans.with_pixel_mask_filenames(
         pipeline, isis.data.zoom_tutorial_mask_filenames()

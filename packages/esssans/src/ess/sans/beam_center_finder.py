@@ -13,6 +13,7 @@ from .conversions import ElasticCoordTransformGraph
 from .logging import get_logger
 from .types import (
     BeamCenter,
+    DetectorBankSizes,
     DetectorData,
     DimsToKeep,
     IofQ,
@@ -363,6 +364,8 @@ def beam_center_from_iofq(
         NormWavelengthTerm[SampleRun],
         ElasticCoordTransformGraph,
     )
+    workflow = workflow.copy()
+    workflow[DetectorBankSizes] = {}
     results = workflow.compute(keys)
     detector = results[DetectorData[SampleRun]]
     data = results[MaskedData[SampleRun]]
@@ -371,14 +374,15 @@ def beam_center_from_iofq(
 
     # Flatten positions dim which is required during the iterations for slicing with a
     # boolean mask
-    pos_dims = detector.coords['position'].dims
-    new_dim = uuid.uuid4().hex
-    detector = detector.flatten(dims=pos_dims, to=new_dim)
-    dims_to_flatten = [dim for dim in norm.dims if dim in pos_dims]
-    if dims_to_flatten:
-        norm = norm.flatten(dims=dims_to_flatten, to=new_dim)
+    # TODO do this to NeXusDetector instead!
+    # pos_dims = detector.coords['position'].dims
+    # new_dim = uuid.uuid4().hex
+    # print(f'{pos_dims=} {new_dim=}')
+    # detector = detector.flatten(dims=pos_dims, to=new_dim)
+    # dims_to_flatten = [dim for dim in norm.dims if dim in pos_dims]
+    # if dims_to_flatten:
+    #    norm = norm.flatten(dims=dims_to_flatten, to=new_dim)
 
-    workflow = workflow.copy()
     # Avoid reloading the detector
     workflow[DetectorData[SampleRun]] = detector
     workflow[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
