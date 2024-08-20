@@ -33,7 +33,7 @@ providers = (
     *i_of_q.providers,
     *masking.providers,
     *normalization.providers,
-    common.beam_center_to_detector_offset,
+    common.beam_center_to_detector_position_offset,
 )
 """
 List of providers for setting up a Sciline pipeline.

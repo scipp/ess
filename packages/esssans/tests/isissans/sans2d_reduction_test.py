@@ -6,7 +6,7 @@ import sciline
 import scipp as sc
 from ess import isissans as isis
 from ess import sans
-from ess.isissans import SampleOffset, sans2d
+from ess.isissans import MonitorOffset, SampleOffset, sans2d
 from ess.sans.types import (
     BackgroundRun,
     BackgroundSubtractedIofQ,
@@ -62,7 +62,7 @@ def make_params() -> dict:
     params[NeXusMonitorName[Incident]] = 'monitor2'
     params[NeXusMonitorName[Transmission]] = 'monitor4'
     params[SampleOffset] = sc.vector([0.0, 0.0, 0.053], unit='m')
-    params[isis.MonitorOffset[Transmission]] = sc.vector([0.0, 0.0, -6.719], unit='m')
+    params[MonitorOffset[Transmission]] = sc.vector([0.0, 0.0, -6.719], unit='m')
 
     params[NonBackgroundWavelengthRange] = sc.array(
         dims=['wavelength'], values=[0.7, 17.1], unit='angstrom'

@@ -9,6 +9,7 @@ from typing import NewType
 import sciline
 import scipp as sc
 from ess.sans.types import (
+    BeamCenter,
     CalibratedDetector,
     CalibratedMonitor,
     CorrectForGravity,
@@ -64,6 +65,7 @@ def default_parameters() -> dict:
         MonitorOffset[Transmission]: MonitorOffset[Transmission](
             sc.vector([0, 0, 0], unit='m')
         ),
+        DetectorBankOffset: DetectorBankOffset(sc.vector([0, 0, 0], unit='m')),
         SampleOffset: SampleOffset(sc.vector([0, 0, 0], unit='m')),
         NonBackgroundWavelengthRange: None,
         WavelengthMask: None,
@@ -73,9 +75,9 @@ def default_parameters() -> dict:
 
 
 def to_detector_position_offset(
-    global_offset: DetectorBankOffset,
-) -> DetectorPositionOffset:
-    return DetectorPositionOffset(global_offset)
+    global_offset: DetectorBankOffset, beam_center: BeamCenter
+) -> DetectorPositionOffset[RunType]:
+    return DetectorPositionOffset[RunType](global_offset - beam_center)
 
 
 def to_monitor_position_offset(
