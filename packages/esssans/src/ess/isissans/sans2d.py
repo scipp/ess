@@ -85,6 +85,8 @@ def Sans2dWorkflow() -> sciline.Pipeline:
     """Create Sans2d workflow with default parameters."""
     from . import providers as isis_providers
 
+    # Note that the actual NeXus loading in this workflow will not be used for the
+    # ISIS files, the providers inserted below will replace those steps.
     workflow = GenericNeXusWorkflow()
     for provider in sans_providers + isis_providers + mantid_providers + providers:
         workflow.insert(provider)

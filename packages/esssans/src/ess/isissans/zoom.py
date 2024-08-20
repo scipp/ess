@@ -26,6 +26,8 @@ def ZoomWorkflow() -> sciline.Pipeline:
 
     set_mantid_log_level()
 
+    # Note that the actual NeXus loading in this workflow will not be used for the
+    # ISIS files, the providers inserted below will replace those steps.
     workflow = GenericNeXusWorkflow()
     for provider in sans_providers + isis_providers + mantid_providers:
         workflow.insert(provider)

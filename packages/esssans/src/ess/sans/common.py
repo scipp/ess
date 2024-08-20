@@ -96,5 +96,5 @@ def mask_range(
 def beam_center_to_detector_position_offset(
     beam_center: BeamCenter,
 ) -> DetectorPositionOffset[RunType]:
-    # TODO This is a source of bugs!
+    """Convert beam center to detector position offset for all runs."""
     return DetectorPositionOffset[RunType](-beam_center)

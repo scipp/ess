@@ -367,6 +367,7 @@ def beam_center_from_iofq(
         ElasticCoordTransformGraph,
     )
     workflow = workflow.copy()
+    # Avoid reshape of detector, which would break boolean-indexing by cost function
     workflow[DetectorBankSizes] = {}
     results = workflow.compute(keys)
     detector = results[NeXusDetector[SampleRun]]['data']
