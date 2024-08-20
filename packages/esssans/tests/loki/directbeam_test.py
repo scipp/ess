@@ -3,7 +3,6 @@
 import sys
 from pathlib import Path
 
-import sciline
 import scipp as sc
 from ess import loki, sans
 from scipp.scipy.interpolate import interp1d
@@ -17,7 +16,7 @@ from ess.sans.types import (
 )
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import loki_providers, make_params
+from common import make_workflow
 
 
 def _get_I0(qbins: sc.Variable) -> sc.Variable:
@@ -28,17 +27,13 @@ def _get_I0(qbins: sc.Variable) -> sc.Variable:
 
 def test_can_compute_direct_beam_for_all_pixels():
     n_wavelength_bands = 10
-    params = make_params()
-    params[WavelengthBands] = sc.linspace(
-        'wavelength',
-        params[WavelengthBins].min(),
-        params[WavelengthBins].max(),
-        n_wavelength_bands + 1,
+    pipeline = make_workflow()
+    edges = pipeline.compute(WavelengthBins)
+    pipeline[WavelengthBands] = sc.linspace(
+        'wavelength', edges.min(), edges.max(), n_wavelength_bands + 1
     )
-    providers = loki_providers()
-    pipeline = sciline.Pipeline(providers, params=params)
     pipeline[BeamCenter] = sc.vector([0, 0, 0], unit='m')
-    I0 = _get_I0(qbins=params[QBins])
+    I0 = _get_I0(qbins=pipeline.compute(QBins))
 
     results = sans.direct_beam(workflow=pipeline, I0=I0, niter=4)
     iofq_full = results[-1]['iofq_full']
@@ -53,22 +48,16 @@ def test_can_compute_direct_beam_for_all_pixels():
 
 def test_can_compute_direct_beam_with_overlapping_wavelength_bands():
     n_wavelength_bands = 10
-    params = make_params()
     # Bands have double the width
-    edges = sc.linspace(
-        'band',
-        params[WavelengthBins].min(),
-        params[WavelengthBins].max(),
-        n_wavelength_bands + 2,
-    )
-    params[WavelengthBands] = sc.concat(
+    pipeline = make_workflow()
+    edges = pipeline.compute(WavelengthBins)
+    edges = sc.linspace('band', edges.min(), edges.max(), n_wavelength_bands + 2)
+    pipeline[WavelengthBands] = sc.concat(
         [edges[:-2], edges[2::]], dim='wavelength'
     ).transpose()
 
-    providers = loki_providers()
-    pipeline = sciline.Pipeline(providers, params=params)
     pipeline[BeamCenter] = sc.vector([0, 0, 0], unit='m')
-    I0 = _get_I0(qbins=params[QBins])
+    I0 = _get_I0(qbins=pipeline.compute(QBins))
 
     results = sans.direct_beam(workflow=pipeline, I0=I0, niter=4)
     iofq_full = results[-1]['iofq_full']
@@ -83,18 +72,14 @@ def test_can_compute_direct_beam_with_overlapping_wavelength_bands():
 
 def test_can_compute_direct_beam_per_layer():
     n_wavelength_bands = 10
-    params = make_params()
-    params[WavelengthBands] = sc.linspace(
-        'wavelength',
-        params[WavelengthBins].min(),
-        params[WavelengthBins].max(),
-        n_wavelength_bands + 1,
+    pipeline = make_workflow()
+    edges = pipeline.compute(WavelengthBins)
+    pipeline[WavelengthBands] = sc.linspace(
+        'wavelength', edges.min(), edges.max(), n_wavelength_bands + 1
     )
-    params[DimsToKeep] = ['layer']
-    providers = loki_providers()
-    pipeline = sciline.Pipeline(providers, params=params)
+    pipeline[DimsToKeep] = ['layer']
     pipeline[BeamCenter] = sc.vector([0, 0, 0], unit='m')
-    I0 = _get_I0(qbins=params[QBins])
+    I0 = _get_I0(qbins=pipeline.compute(QBins))
 
     results = sans.direct_beam(workflow=pipeline, I0=I0, niter=4)
     iofq_full = results[-1]['iofq_full']
@@ -111,18 +96,14 @@ def test_can_compute_direct_beam_per_layer():
 
 def test_can_compute_direct_beam_per_layer_and_straw():
     n_wavelength_bands = 10
-    params = make_params()
-    params[WavelengthBands] = sc.linspace(
-        'wavelength',
-        params[WavelengthBins].min(),
-        params[WavelengthBins].max(),
-        n_wavelength_bands + 1,
+    pipeline = make_workflow()
+    edges = pipeline.compute(WavelengthBins)
+    pipeline[WavelengthBands] = sc.linspace(
+        'wavelength', edges.min(), edges.max(), n_wavelength_bands + 1
     )
-    params[DimsToKeep] = ('layer', 'straw')
-    providers = loki_providers()
-    pipeline = sciline.Pipeline(providers, params=params)
+    pipeline[DimsToKeep] = ('layer', 'straw')
     pipeline[BeamCenter] = sc.vector([0, 0, 0], unit='m')
-    I0 = _get_I0(qbins=params[QBins])
+    I0 = _get_I0(qbins=pipeline.compute(QBins))
 
     results = sans.direct_beam(workflow=pipeline, I0=I0, niter=4)
     iofq_full = results[-1]['iofq_full']

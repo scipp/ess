@@ -108,7 +108,7 @@ def get_detector_data(dg: LoadedFileContents[RunType]) -> NeXusDetector[RunType]
     dg:
         Data loaded with Mantid and converted to Scipp.
     """
-    # The generic NeXus workflow will try to extra 'data' from this, which is exactly
+    # The generic NeXus workflow will try to extract 'data' from this, which is exactly
     # what we also have in the Mantid data. We use the generic workflow since it also
     # applies offsets, etc.
     return NeXusDetector(dg)
@@ -117,7 +117,7 @@ def get_detector_data(dg: LoadedFileContents[RunType]) -> NeXusDetector[RunType]
 def get_monitor_data(
     dg: LoadedFileContents[RunType], nexus_name: NeXusMonitorName[MonitorType]
 ) -> NeXusMonitor[RunType, MonitorType]:
-    # The generic NeXus workflow will try to extra 'data' from this, which is exactly
+    # The generic NeXus workflow will try to extract 'data' from this, which is exactly
     # what we also have in the Mantid data. We use the generic workflow since it also
     # applies offsets, etc.
     monitor = dg['monitors'][nexus_name]['data']

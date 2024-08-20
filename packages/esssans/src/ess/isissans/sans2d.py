@@ -6,7 +6,7 @@ import sciline
 import scipp as sc
 from ess.reduce.nexus.generic_workflow import GenericNeXusWorkflow
 from ess.sans import providers as sans_providers
-from ess.sans.types import CalibratedDetector, DetectorMasks, SampleRun
+from ess.sans.types import BeamCenter, CalibratedDetector, DetectorMasks, SampleRun
 
 from .general import default_parameters
 from .io import load_tutorial_direct_beam, load_tutorial_run
@@ -23,11 +23,12 @@ SampleHolderMask = NewType('SampleHolderMask', sc.Variable | None)
 """Sample holder mask"""
 
 
-_beam_center = sc.vector([0.09015947, -0.08242624, 0.0], unit='m')
-
-
-def detector_edge_mask(sample: CalibratedDetector[SampleRun]) -> DetectorEdgeMask:
-    raw_pos = sample.coords['position'] + _beam_center
+def detector_edge_mask(
+    beam_center: BeamCenter, sample: CalibratedDetector[SampleRun]
+) -> DetectorEdgeMask:
+    # These values were determined by hand before the beam center was available.
+    # We therefore undo the shift introduced by the beam center.
+    raw_pos = sample.coords['position'] + beam_center
     mask_edges = (sc.abs(raw_pos.fields.x) > sc.scalar(0.48, unit='m')) | (
         sc.abs(raw_pos.fields.y) > sc.scalar(0.45, unit='m')
     )
@@ -35,9 +36,13 @@ def detector_edge_mask(sample: CalibratedDetector[SampleRun]) -> DetectorEdgeMas
 
 
 def sample_holder_mask(
-    sample: CalibratedDetector[SampleRun], low_counts_threshold: LowCountThreshold
+    beam_center: BeamCenter,
+    sample: CalibratedDetector[SampleRun],
+    low_counts_threshold: LowCountThreshold,
 ) -> SampleHolderMask:
-    raw_pos = sample.coords['position'] + _beam_center
+    # These values were determined by hand before the beam center was available.
+    # We therefore undo the shift introduced by the beam center.
+    raw_pos = sample.coords['position'] + beam_center
     summed = sample.hist()
     holder_mask = (
         (summed.data < low_counts_threshold)
