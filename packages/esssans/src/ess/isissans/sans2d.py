@@ -23,7 +23,6 @@ SampleHolderMask = NewType('SampleHolderMask', sc.Variable | None)
 """Sample holder mask"""
 
 
-_beam_center = sc.vector([0.09011603, -0.08263932, 0.0], unit='m')
 _beam_center = sc.vector([0.09015947, -0.08242624, 0.0], unit='m')
 
 

@@ -15,6 +15,7 @@ from ess.sans.types import (
     DetectorData,
     DetectorIDs,
     DetectorPixelShape,
+    DetectorPositionOffset,
     DimsToKeep,
     Incident,
     LabFrameTransform,
@@ -49,6 +50,7 @@ class MonitorOffset(sciline.Scope[MonitorType, sc.Variable], sc.Variable):
     """
 
 
+DetectorBankOffset = NewType('DetectorBankOffset', sc.Variable)
 SampleOffset = NewType('SampleOffset', sc.Variable)
 
 
@@ -68,6 +70,12 @@ def default_parameters() -> dict:
         WavelengthBands: None,
         Period: None,
     }
+
+
+def to_detector_position_offset(
+    global_offset: DetectorBankOffset,
+) -> DetectorPositionOffset:
+    return DetectorPositionOffset(global_offset)
 
 
 def to_monitor_position_offset(
@@ -203,6 +211,7 @@ def get_detector_ids_from_sample_run(data: TofData[SampleRun]) -> DetectorIDs:
 providers = (
     dummy_assemble_detector_data,
     dummy_assemble_monitor_data,
+    to_detector_position_offset,
     to_monitor_position_offset,
     get_source_position,
     get_sample_position,
