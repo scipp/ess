@@ -80,8 +80,8 @@ def _load_raw_events(file_path: str) -> sc.DataArray:
     table = sc.io.load_csv(
         file_path, sep="\t", header_parser="bracket", data_columns=[]
     )
+    table.coords.pop("lambda", None)
     table = table.rename_dims(row="event")
-    table.coords.pop("lambda")
     return sc.DataArray(
         sc.ones(sizes=table.sizes, with_variances=True, unit="counts"),
         coords=table.coords,
