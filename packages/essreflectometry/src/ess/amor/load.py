@@ -141,22 +141,18 @@ def load_amor_ch_frequency(ch: RawChopper[RunType]) -> ChopperFrequency[RunType]
 
 def load_amor_sample_rotation(fp: Filename[RunType]) -> SampleRotation[RunType]:
     (mu,) = load_nx(fp, "NXentry/NXinstrument/master_parameters/mu")
-    # For some reason this is length 1 and not scalar sometimes
-    if mu["value"].coords["average_value"].dims != ():
-        mu = mu["value"].coords["average_value"].values[0]
-    else:
-        mu = mu["value"].coords["average_value"].value
-    return sc.scalar(mu, unit="deg")
+    # Jochens Amor code reads the first value of this log
+    # see https://github.com/jochenstahn/amor/blob/140e3192ddb7e7f28acee87e2acaee65ce1332aa/libeos/file_reader.py#L272  # noqa: E501
+    # might have to change if this field ever becomes truly time-dependent
+    return sc.scalar(mu['value'].data['dim_1', 0]['time', 0].value, unit='deg')
 
 
 def load_amor_detector_rotation(fp: Filename[RunType]) -> DetectorRotation[RunType]:
     (nu,) = load_nx(fp, "NXentry/NXinstrument/master_parameters/nu")
-    # For some reason this is length 1 and not scalar sometimes
-    if nu["value"].coords["average_value"].dims != ():
-        nu = nu["value"].coords["average_value"].values[0]
-    else:
-        nu = nu["value"].coords["average_value"].value
-    return sc.scalar(nu, unit="deg")
+    # Jochens Amor code reads the first value of this log
+    # see https://github.com/jochenstahn/amor/blob/140e3192ddb7e7f28acee87e2acaee65ce1332aa/libeos/file_reader.py#L272  # noqa: E501
+    # might have to change if this field ever becomes truly time-dependent
+    return sc.scalar(nu['value'].data['dim_1', 0]['time', 0].value, unit='deg')
 
 
 providers = (
