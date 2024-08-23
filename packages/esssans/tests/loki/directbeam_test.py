@@ -6,6 +6,8 @@ from pathlib import Path
 import sciline
 import scipp as sc
 from ess import loki, sans
+from scipp.scipy.interpolate import interp1d
+
 from ess.sans.types import (
     BeamCenter,
     DimsToKeep,
@@ -13,7 +15,6 @@ from ess.sans.types import (
     WavelengthBands,
     WavelengthBins,
 )
-from scipp.scipy.interpolate import interp1d
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from common import loki_providers, make_params

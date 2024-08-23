@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 import scipp as sc
 from ess.isissans.data import sans2d_solid_angle_reference
+
 from ess.sans import normalization
 
 # See https://github.com/mantidproject/mantid/blob/main/instrument/SANS2D_Definition_Tubes.xml  # noqa: E501

@@ -7,6 +7,7 @@ Default parameters, providers and utility functions for the loki workflow.
 import sciline
 import scipp as sc
 from ess.reduce import nexus
+
 from ess.sans import providers as sans_providers
 
 from ..sans.common import gravity_vector

@@ -9,8 +9,9 @@ from typing import NewType, NoReturn
 import sciline
 import scipp as sc
 import scippneutron as scn
-from ess.sans.types import DirectBeam, DirectBeamFilename, Filename, RunType, SampleRun
 from scipp.constants import g
+
+from ess.sans.types import DirectBeam, DirectBeamFilename, Filename, RunType, SampleRun
 
 from .io import CalibrationFilename, LoadedFileContents
 
