@@ -6,6 +6,7 @@ Loading and merging of LoKI data.
 
 import scipp as sc
 from ess.reduce import nexus
+
 from ess.sans.types import (
     DetectorEventData,
     Filename,

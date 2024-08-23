@@ -45,6 +45,11 @@ dependencies = [
 
 dynamic = ["version"]
 
+[project.optional-dependencies]
+test = [
+    "pytest",
+]
+
 [project.urls]
 "Bug Tracker" = "https://github.com/scipp/esssans/issues"
 "Documentation" = "https://scipp.github.io/esssans"
@@ -83,7 +88,7 @@ ignore = [
     "COM812", "COM819", "D206", "D300", "E111", "E114", "E117", "ISC001", "ISC002", "Q000", "Q001", "Q002", "Q003", "W191",
 ]
 fixable = ["I001", "B010"]
-isort.known-first-party = ["esssans"]
+isort.known-first-party = ["ess.sans"]
 pydocstyle.convention = "numpy"
 
 [tool.ruff.lint.per-file-ignores]

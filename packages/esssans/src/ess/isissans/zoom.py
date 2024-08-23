@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 import sciline
+
 from ess.sans import providers as sans_providers
 
 from .general import default_parameters

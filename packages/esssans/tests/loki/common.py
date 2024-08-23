@@ -4,6 +4,7 @@ from collections.abc import Callable
 
 import scipp as sc
 from ess import loki, sans
+
 from ess.sans.types import (
     BackgroundRun,
     CorrectForGravity,
