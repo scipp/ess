@@ -14,7 +14,7 @@ attrs==24.2.0
     # via
     #   jsonschema
     #   referencing
-babel==2.15.0
+babel==2.16.0
     # via
     #   pydata-sphinx-theme
     #   sphinx
@@ -42,7 +42,7 @@ docutils==0.21.2
     #   sphinxcontrib-bibtex
 fastjsonschema==2.20.0
     # via nbformat
-idna==3.7
+idna==3.8
     # via requests
 imagesize==1.4.1
     # via sphinx
@@ -102,7 +102,7 @@ nbformat==5.10.4
     #   nbclient
     #   nbconvert
     #   nbsphinx
-nbsphinx==0.9.4
+nbsphinx==0.9.5
     # via -r docs.in
 nest-asyncio==1.6.0
     # via ipykernel
@@ -130,7 +130,7 @@ pydata-sphinx-theme==0.15.4
     # via -r docs.in
 pytz==2024.1
     # via pandas
-pyzmq==26.1.0
+pyzmq==26.2.0
     # via
     #   ipykernel
     #   jupyter-client
@@ -148,7 +148,7 @@ rpds-py==0.20.0
     #   referencing
 snowballstemmer==2.2.0
     # via sphinx
-soupsieve==2.5
+soupsieve==2.6
     # via beautifulsoup4
 sphinx==8.0.2
     # via
