@@ -12,52 +12,49 @@ from typing import Any, NewType, TypeVar
 
 import sciline
 import scipp as sc
+from ess.reduce.nexus import generic_types as reduce_gt
+from ess.reduce.nexus import types as reduce_t
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
 
 # 1 TypeVars used to parametrize the generic parts of the workflow
 
-# 1.1 Run types
-EmptyCanRun = NewType("EmptyCanRun", int)
-"""Empty sample can run."""
-EmptyInstrumentRun = NewType("EmptyInstrumentRun", int)
-"""Empty instrument run."""
-SampleRun = NewType("SampleRun", int)
-"""Sample run."""
-VanadiumRun = NewType("VanadiumRun", int)
-"""Vanadium run."""
-RunType = TypeVar("RunType", EmptyInstrumentRun, SampleRun, VanadiumRun)
-"""TypeVar used for specifying the run."""
+BackgroundRun = reduce_gt.BackgroundRun
+CalibratedDetector = reduce_gt.CalibratedDetector
+CalibratedMonitor = reduce_gt.CalibratedMonitor
+DetectorData = reduce_gt.DetectorData
+DetectorPositionOffset = reduce_gt.DetectorPositionOffset
+EmptyBeamRun = reduce_gt.EmptyBeamRun
+Filename = reduce_gt.Filename
+Incident = reduce_gt.Incident
+MonitorData = reduce_gt.MonitorData
+MonitorPositionOffset = reduce_gt.MonitorPositionOffset
+MonitorType = reduce_gt.MonitorType
+NeXusMonitorName = reduce_gt.NeXusMonitorName
+NeXusDetector = reduce_gt.NeXusDetector
+NeXusMonitor = reduce_gt.NeXusMonitor
+NeXusSample = reduce_gt.NeXusSample
+NeXusSource = reduce_gt.NeXusSource
+RunType = reduce_gt.RunType
+SampleRun = reduce_gt.SampleRun
+ScatteringRunType = reduce_gt.ScatteringRunType
+Transmission = reduce_gt.Transmission
+TransmissionRun = reduce_gt.TransmissionRun
+SamplePosition = reduce_gt.SamplePosition
+SourcePosition = reduce_gt.SourcePosition
+VanadiumRun = reduce_gt.VanadiumRun
 
-# 1.2  Monitor types
-Monitor1 = NewType('Monitor1', int)
-"""Placeholder for monitor 1."""
-Monitor2 = NewType('Monitor2', int)
-"""Placeholder for monitor 2."""
-MonitorType = TypeVar('MonitorType', Monitor1, Monitor2)
-"""TypeVar used for identifying a monitor"""
+DetectorBankSizes = reduce_t.DetectorBankSizes
+NeXusDetectorName = reduce_t.NeXusDetectorName
+
 
 # 2 Workflow parameters
-
-DetectorBankSizes = NewType("DetectorBankSizes", dict[str, dict[str, int | Any]])
 
 CalibrationFilename = NewType("CalibrationFilename", str | None)
 """Filename of the instrument calibration file."""
 
 
-NeXusDetectorName = NewType("NeXusDetectorName", str)
-"""Name of detector entry in NeXus file"""
-
-
-class NeXusMonitorName(sciline.Scope[MonitorType, str], str):
-    """Name of Incident|Transmission monitor in NeXus file"""
-
-
 DspacingBins = NewType("DSpacingBins", sc.Variable)
 """Bin edges for d-spacing."""
-
-
-class Filename(sciline.Scope[RunType, str], str):
-    """Name of an input file."""
 
 
 OutFilename = NewType("OutFilename", str)
@@ -93,8 +90,6 @@ class AccumulatedProtonCharge(sciline.Scope[RunType, sc.Variable], sc.Variable):
 
 CalibrationData = NewType("CalibrationData", sc.Dataset | None)
 """Detector calibration data."""
-
-DataFolder = NewType("DataFolder", str)
 
 
 class DataWithScatteringCoordinates(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
@@ -140,48 +135,6 @@ IofDspacingTwoTheta = NewType("IofDspacingTwoTheta", sc.DataArray)
 """Data that has been normalized by a vanadium run, and grouped into 2theta bins."""
 
 
-class NeXusDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
-    """
-    Detector loaded from a NeXus file, without event data.
-
-    Contains detector numbers, pixel shape information, transformations, ...
-    """
-
-
-class NeXusMonitor(
-    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataGroup], sc.DataGroup
-):
-    """
-    Monitor loaded from a NeXus file, without event data.
-
-    Contains detector numbers, pixel shape information, transformations, ...
-    """
-
-
-class DetectorEventData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Event data loaded from a detector in a NeXus file"""
-
-
-class MonitorEventData(
-    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
-):
-    """Event data loaded from a monitor in a NeXus file"""
-
-
-class RawMonitor(
-    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
-):
-    """Raw monitor data"""
-
-
-class RawMonitorData(
-    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
-):
-    """Raw monitor data where variances and necessary coordinates
-    (e.g. source position) have been added, and where optionally some
-    user configuration was applied to some of the coordinates."""
-
-
 class MaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Data with masked pixels, tof regions, wavelength regions, 2theta regions, or
     dspacing regions."""
@@ -205,30 +158,6 @@ class ProtonCharge(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
 
 class RawDataAndMetadata(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
     """Raw data and associated metadata."""
-
-
-class RawDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Data (events / histogram) extracted from a RawDetector."""
-
-
-class RawSample(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
-    """Raw data from a loaded sample."""
-
-
-class RawSource(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
-    """Raw data from a loaded neutron source."""
-
-
-class ReducibleDetectorData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Data that is in a state ready for reduction."""
-
-
-class SamplePosition(sciline.Scope[RunType, sc.Variable], sc.Variable):
-    """Sample position"""
-
-
-class SourcePosition(sciline.Scope[RunType, sc.Variable], sc.Variable):
-    """Source position"""
 
 
 TofMask = NewType("TofMask", Callable | None)

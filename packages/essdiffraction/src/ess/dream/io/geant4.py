@@ -4,23 +4,19 @@
 import numpy as np
 import sciline
 import scipp as sc
-from ess.reduce.nexus import extract_detector_data
+from ess.reduce.nexus.generic_workflow import GenericNeXusWorkflow
 
 from ess.powder.types import (
+    CalibratedDetector,
     CalibrationData,
     CalibrationFilename,
+    DetectorData,
     Filename,
     NeXusDetector,
-    NeXusDetectorDimensions,
     NeXusDetectorName,
-    RawDetector,
-    RawSample,
-    RawSource,
-    ReducibleDetectorData,
+    NeXusSample,
+    NeXusSource,
     RunType,
-    SamplePosition,
-    SampleRun,
-    SourcePosition,
 )
 
 MANTLE_DETECTOR_ID = sc.index(7)
@@ -67,13 +63,6 @@ def extract_geant4_detector(
 ) -> NeXusDetector[RunType]:
     """Extract a single detector from a loaded GEANT4 simulation."""
     return NeXusDetector[RunType](detectors["instrument"][detector_name])
-
-
-def extract_geant4_detector_data(
-    detector: NeXusDetector[RunType],
-) -> RawDetector[RunType]:
-    """Extract the histogram or event data from a loaded GEANT4 detector."""
-    return RawDetector[RunType](extract_detector_data(detector))
 
 
 def _load_raw_events(file_path: str) -> sc.DataArray:
@@ -167,53 +156,43 @@ def _extract_detector(
     return events
 
 
-def get_source_position(raw_source: RawSource[RunType]) -> SourcePosition[RunType]:
-    return SourcePosition[RunType](raw_source["position"])
-
-
-def get_sample_position(raw_sample: RawSample[RunType]) -> SamplePosition[RunType]:
-    return SamplePosition[RunType](raw_sample["position"])
-
-
-def patch_detector_data(
-    detector_data: RawDetector[RunType],
-    source_position: SourcePosition[RunType],
-    sample_position: SamplePosition[RunType],
-) -> ReducibleDetectorData[RunType]:
-    return ReducibleDetectorData[RunType](
-        detector_data.assign_coords(
-            source_position=source_position, sample_position=sample_position
-        )
-    )
-
-
-def geant4_detector_dimensions(
-    data: RawDetector[SampleRun],
-) -> NeXusDetectorDimensions:
-    # For geant4 data, we group by detector identifier, so the data already has
-    # logical dimensions, so we simply return the dimensions of the detector.
-    return NeXusDetectorDimensions(data.sizes)
-
-
-def geant4_load_calibration(
-    filename: CalibrationFilename,
-) -> CalibrationData:
+def geant4_load_calibration(filename: CalibrationFilename) -> CalibrationData:
     if filename is not None:
         # Needed to build a complete pipeline.
         raise NotImplementedError(
             "Calibration data loading is not implemented for DREAM GEANT4 data."
         )
-    return CalibrationFilename(None)
+    return CalibrationData(None)
 
 
-providers = (
-    extract_geant4_detector,
-    extract_geant4_detector_data,
-    load_geant4_csv,
-    get_sample_position,
-    get_source_position,
-    patch_detector_data,
-    geant4_detector_dimensions,
-    geant4_load_calibration,
-)
-"""Geant4-providers for Sciline pipelines."""
+def dummy_assemble_detector_data(
+    detector: CalibratedDetector[RunType],
+) -> DetectorData[RunType]:
+    """Dummy assembly of detector data, detector already contains neutron data."""
+    return DetectorData[RunType](detector)
+
+
+def dummy_source() -> NeXusSource[RunType]:
+    return NeXusSource[RunType](
+        sc.DataGroup(position=sc.vector([np.nan, np.nan, np.nan], unit="mm"))
+    )
+
+
+def dummy_sample() -> NeXusSample[RunType]:
+    return NeXusSample[RunType](
+        sc.DataGroup(position=sc.vector([np.nan, np.nan, np.nan], unit="mm"))
+    )
+
+
+def LoadGeant4Workflow() -> sciline.Pipeline:
+    """
+    Workflow for loading NeXus data.
+    """
+    wf = GenericNeXusWorkflow()
+    wf.insert(extract_geant4_detector)
+    wf.insert(load_geant4_csv)
+    wf.insert(geant4_load_calibration)
+    wf.insert(dummy_assemble_detector_data)
+    wf.insert(dummy_source)
+    wf.insert(dummy_sample)
+    return wf

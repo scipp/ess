@@ -16,7 +16,6 @@ from . import (
     transform,
 )
 from .masking import with_pixel_mask_filenames
-from . import nexus
 
 try:
     __version__ = importlib.metadata.version(__package__ or __name__)

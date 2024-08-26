@@ -18,9 +18,6 @@ except importlib.metadata.PackageNotFoundError:
 
 del importlib
 
-providers = (*nexus.providers,)
-
-
 __all__ = [
     'DreamGeant4Workflow',
     'default_parameters',

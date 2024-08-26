@@ -11,11 +11,11 @@ charset-normalizer==3.3.2
     # via requests
 exceptiongroup==1.2.2
     # via pytest
-idna==3.7
+idna==3.8
     # via requests
 iniconfig==2.0.0
     # via pytest
-numpy==2.0.1
+numpy==2.1.0
     # via
     #   -r basetest.in
     #   pandas

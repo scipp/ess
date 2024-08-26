@@ -3,28 +3,27 @@
 import pytest
 import sciline
 import scipp as sc
-from ess import dream, powder
-
-import ess.dream.data  # noqa: F401
-from ess.dream import nexus
-from ess.powder.types import (
+from ess import dream
+from ess.reduce.nexus.generic_types import (
+    CalibratedDetector,
+    CalibratedMonitor,
+    DetectorData,
     Filename,
     Monitor1,
-    NeXusDetectorName,
     NeXusMonitorName,
-    RawDetector,
-    RawMonitor,
-    ReducibleDetectorData,
     SampleRun,
 )
+from ess.reduce.nexus.types import NeXusDetectorName
+
+import ess.dream.data  # noqa: F401
 
 bank_dims = {'wire', 'module', 'segment', 'strip', 'counter'}
 hr_sans_dims = {'strip', 'other'}
 
 
 @pytest.fixture()
-def providers():
-    return (*nexus.providers, powder.nexus.dummy_load_sample)
+def nexus_workflow() -> sciline.Pipeline:
+    return dream.io.nexus.LoadNeXusWorkflow()
 
 
 @pytest.fixture(
@@ -44,9 +43,10 @@ def params(request):
     return params
 
 
-def test_can_load_nexus_detector_data(providers, params):
-    pipeline = sciline.Pipeline(params=params, providers=providers)
-    result = pipeline.compute(RawDetector[SampleRun])
+def test_can_load_nexus_detector_data(nexus_workflow, params):
+    for key, value in params.items():
+        nexus_workflow[key] = value
+    result = nexus_workflow.compute(CalibratedDetector[SampleRun])
     assert (
         set(result.dims) == hr_sans_dims
         if params[NeXusDetectorName]
@@ -60,29 +60,19 @@ def test_can_load_nexus_detector_data(providers, params):
     assert sc.identical(result.data, result.coords['detector_number'])
 
 
-def test_can_load_nexus_monitor_data(providers):
-    pipeline = sciline.Pipeline(providers=providers)
-    pipeline[Filename[SampleRun]] = dream.data.get_path(
+def test_can_load_nexus_monitor_data(nexus_workflow):
+    nexus_workflow[Filename[SampleRun]] = dream.data.get_path(
         'DREAM_nexus_sorted-2023-12-07.nxs'
     )
-    pipeline[NeXusMonitorName[Monitor1]] = 'monitor_cave'
-    result = pipeline.compute(RawMonitor[SampleRun, Monitor1])
+    nexus_workflow[NeXusMonitorName[Monitor1]] = 'monitor_cave'
+    result = nexus_workflow.compute(CalibratedMonitor[SampleRun, Monitor1])
     assert result.sizes == {'event_time_zero': 0}
 
 
-def test_load_fails_with_bad_detector_name(providers):
-    params = {
-        Filename[SampleRun]: dream.data.get_path('DREAM_nexus_sorted-2023-12-07.nxs'),
-        NeXusDetectorName: 'bad_detector',
-    }
-    pipeline = sciline.Pipeline(params=params, providers=providers)
-    with pytest.raises(KeyError, match='bad_detector'):
-        pipeline.compute(RawDetector[SampleRun])
-
-
-def test_assemble_nexus_detector_data(providers, params):
-    pipeline = sciline.Pipeline(params=params, providers=providers)
-    result = pipeline.compute(ReducibleDetectorData[SampleRun])
+def test_assemble_nexus_detector_data(nexus_workflow, params):
+    for key, value in params.items():
+        nexus_workflow[key] = value
+    result = nexus_workflow.compute(DetectorData[SampleRun])
     assert (
         set(result.dims) == hr_sans_dims
         if params[NeXusDetectorName]

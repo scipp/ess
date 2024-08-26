@@ -13,7 +13,9 @@ and the ICD DREAM interface specification for details.
   but it is not possible to reshape the data into all the logical dimensions.
 """
 
-from ess import powder
+import sciline
+from ess.reduce.nexus.generic_workflow import GenericNeXusWorkflow
+from ess.reduce.nexus.types import DetectorBankSizes
 
 DETECTOR_BANK_SIZES = {
     "endcap_backward_detector": {
@@ -38,18 +40,14 @@ DETECTOR_BANK_SIZES = {
         "counter": 2,
     },
     "high_resolution_detector": {"strip": 32, "other": -1},
-    "sans_detector": lambda x: x.fold(
-        dim="detector_number",
-        sizes={"strip": 32, "other": -1},
-    ),
+    "sans_detector": {"strip": 32, "other": -1},
 }
 
 
-def dream_detector_bank_sizes() -> powder.types.DetectorBankSizes | None:
-    return powder.types.DetectorBankSizes(DETECTOR_BANK_SIZES)
-
-
-providers = (*powder.nexus.providers, dream_detector_bank_sizes)
-"""
-Providers for loading and processing NeXus data.
-"""
+def LoadNeXusWorkflow() -> sciline.Pipeline:
+    """
+    Workflow for loading NeXus data.
+    """
+    wf = GenericNeXusWorkflow()
+    wf[DetectorBankSizes] = DETECTOR_BANK_SIZES
+    return wf
