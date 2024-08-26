@@ -6,12 +6,19 @@ from io import BytesIO
 
 import numpy as np
 import pytest
-import sciline
 import scipp as sc
 import scipp.testing
 
 from ess.dream import data, load_geant4_csv
-from ess.powder.types import Filename, NeXusDetectorName, RawDetector, SampleRun
+from ess.dream.io.geant4 import LoadGeant4Workflow
+from ess.powder.types import (
+    Filename,
+    NeXusDetector,
+    NeXusDetectorName,
+    NeXusSample,
+    NeXusSource,
+    SampleRun,
+)
 
 
 @pytest.fixture(scope="module")
@@ -171,15 +178,16 @@ def test_load_geant4_csv_sans_has_expected_coords(file):
 
 
 def test_geant4_in_pipeline(file_path, file):
-    from ess.dream.io.geant4 import providers
-
-    pipeline = sciline.Pipeline(
-        providers,
-        params={
-            Filename[SampleRun]: file_path,
-            NeXusDetectorName: NeXusDetectorName("mantle"),
-        },
+    pipeline = LoadGeant4Workflow()
+    pipeline[Filename[SampleRun]] = file_path
+    pipeline[NeXusDetectorName] = NeXusDetectorName("mantle")
+    pipeline[NeXusSample[SampleRun]] = sc.DataGroup(
+        position=sc.vector([0.0, 0.0, 0.0], unit="mm")
     )
-    detector = pipeline.compute(RawDetector[SampleRun])
+    pipeline[NeXusSource[SampleRun]] = sc.DataGroup(
+        position=sc.vector([-3.478, 0.0, -76550], unit="mm")
+    )
+
+    detector = pipeline.compute(NeXusDetector[SampleRun])['events']
     expected = load_geant4_csv(file)["instrument"]["mantle"]["events"]
     sc.testing.assert_identical(detector, expected)

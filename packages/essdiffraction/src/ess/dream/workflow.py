@@ -7,13 +7,13 @@ import scipp as sc
 from ess.powder import providers as powder_providers
 from ess.powder.types import (
     AccumulatedProtonCharge,
-    RawSample,
-    RawSource,
+    NeXusSample,
+    NeXusSource,
     SampleRun,
     VanadiumRun,
 )
 
-from .io.geant4 import providers as geant4_providers
+from .io.geant4 import LoadGeant4Workflow
 
 
 def default_parameters() -> dict:
@@ -22,10 +22,10 @@ def default_parameters() -> dict:
     source = sc.DataGroup(position=sc.vector([-3.478, 0.0, -76550], unit="mm"))
     charge = sc.scalar(1.0, unit="µAh")
     return {
-        RawSample[SampleRun]: sample,
-        RawSample[VanadiumRun]: sample,
-        RawSource[SampleRun]: source,
-        RawSource[VanadiumRun]: source,
+        NeXusSample[SampleRun]: sample,
+        NeXusSample[VanadiumRun]: sample,
+        NeXusSource[SampleRun]: source,
+        NeXusSource[VanadiumRun]: source,
         AccumulatedProtonCharge[SampleRun]: charge,
         AccumulatedProtonCharge[VanadiumRun]: charge,
     }
@@ -35,9 +35,12 @@ def DreamGeant4Workflow() -> sciline.Pipeline:
     """
     Workflow with default parameters for the Dream Geant4 simulation.
     """
-    return sciline.Pipeline(
-        providers=powder_providers + geant4_providers, params=default_parameters()
-    )
+    wf = LoadGeant4Workflow()
+    for provider in powder_providers:
+        wf.insert(provider)
+    for key, value in default_parameters().items():
+        wf[key] = value
+    return wf
 
 
 __all__ = ['DreamGeant4Workflow', 'default_parameters']
