@@ -162,7 +162,7 @@ def geant4_load_calibration(filename: CalibrationFilename) -> CalibrationData:
         raise NotImplementedError(
             "Calibration data loading is not implemented for DREAM GEANT4 data."
         )
-    return CalibrationFilename(None)
+    return CalibrationData(None)
 
 
 def dummy_assemble_detector_data(
