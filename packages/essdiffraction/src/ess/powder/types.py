@@ -12,20 +12,48 @@ from typing import Any, NewType, TypeVar
 
 import sciline
 import scipp as sc
+from ess.reduce.nexus import generic_types as reduce_gt
+from ess.reduce.nexus import types as reduce_t
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
+
+BackgroundRun = reduce_gt.BackgroundRun
+CalibratedDetector = reduce_gt.CalibratedDetector
+CalibratedMonitor = reduce_gt.CalibratedMonitor
+DetectorData = reduce_gt.DetectorData
+DetectorPositionOffset = reduce_gt.DetectorPositionOffset
+EmptyBeamRun = reduce_gt.EmptyBeamRun
+Filename = reduce_gt.Filename
+Incident = reduce_gt.Incident
+MonitorData = reduce_gt.MonitorData
+MonitorPositionOffset = reduce_gt.MonitorPositionOffset
+MonitorType = reduce_gt.MonitorType
+NeXusMonitorName = reduce_gt.NeXusMonitorName
+NeXusDetector = reduce_gt.NeXusDetector
+NeXusMonitor = reduce_gt.NeXusMonitor
+RunType = reduce_gt.RunType
+SampleRun = reduce_gt.SampleRun
+ScatteringRunType = reduce_gt.ScatteringRunType
+Transmission = reduce_gt.Transmission
+TransmissionRun = reduce_gt.TransmissionRun
+SamplePosition = reduce_gt.SamplePosition
+SourcePosition = reduce_gt.SourcePosition
+
+DetectorBankSizes = reduce_t.DetectorBankSizes
+NeXusDetectorName = reduce_t.NeXusDetectorName
+
 
 # 1 TypeVars used to parametrize the generic parts of the workflow
 
 # 1.1 Run types
-EmptyCanRun = NewType("EmptyCanRun", int)
+BackgroundRun = NewType("BackgroundRun", int)
 """Empty sample can run."""
-EmptyInstrumentRun = NewType("EmptyInstrumentRun", int)
+EmptyBeamRun = NewType("EmptyBeamRun", int)
 """Empty instrument run."""
 SampleRun = NewType("SampleRun", int)
 """Sample run."""
 VanadiumRun = NewType("VanadiumRun", int)
 """Vanadium run."""
-RunType = TypeVar("RunType", EmptyInstrumentRun, SampleRun, VanadiumRun)
+RunType = TypeVar("RunType", EmptyBeamRun, SampleRun, VanadiumRun)
 """TypeVar used for specifying the run."""
 
 # 1.2  Monitor types

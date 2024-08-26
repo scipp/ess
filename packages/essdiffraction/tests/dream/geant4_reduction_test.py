@@ -8,9 +8,9 @@ from ess import dream, powder
 
 from ess.powder.types import (
     AccumulatedProtonCharge,
+    BackgroundRun,
     CalibrationFilename,
     DspacingBins,
-    EmptyCanRun,
     Filename,
     IofDspacing,
     IofDspacingTwoTheta,
@@ -47,7 +47,7 @@ def params(request):
         NeXusDetectorName: request.param,
         Filename[SampleRun]: dream.data.simulated_diamond_sample(),
         Filename[VanadiumRun]: dream.data.simulated_vanadium_sample(),
-        Filename[EmptyCanRun]: dream.data.simulated_empty_can(),
+        Filename[BackgroundRun]: dream.data.simulated_empty_can(),
         CalibrationFilename: None,
         UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
         DspacingBins: sc.linspace('dspacing', 0.0, 2.3434, 201, unit='angstrom'),
