@@ -5,6 +5,7 @@ import scipp as sc
 import scippnexus as snx
 from ess import loki
 from ess.reduce.nexus.json_nexus import JSONGroup
+
 from ess.sans.types import (
     Filename,
     Incident,

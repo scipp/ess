@@ -3,6 +3,7 @@
 import sciline
 import scipp as sc
 from ess import loki
+
 from ess.sans.types import (
     BackgroundRun,
     CorrectForGravity,
