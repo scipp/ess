@@ -7,7 +7,7 @@ Beamline parameters and utilities for POWGEN.
 import scipp as sc
 
 from ...powder.types import (
-    NeXusDetectorDimensions,
+    DetectorBankSizes,
     NeXusDetectorName,
 )
 
@@ -55,9 +55,9 @@ def map_detector_to_spectrum(
 
 def powgen_detector_dimensions(
     detector_name: NeXusDetectorName,
-) -> NeXusDetectorDimensions:
+) -> DetectorBankSizes:
     """Dimensions used by POWGEN detectors."""
-    return NeXusDetectorDimensions(DETECTOR_BANK_SIZES[detector_name])
+    return DetectorBankSizes(DETECTOR_BANK_SIZES[detector_name])
 
 
 providers = (powgen_detector_dimensions,)

@@ -97,16 +97,8 @@ class DataWithScatteringCoordinates(sciline.Scope[RunType, sc.DataArray], sc.Dat
     d-spacing."""
 
 
-NeXusDetectorDimensions = NewType("NeXusDetectorDimensions", dict[str, int])
-"""Logical detector dimensions."""
-
-
 class DspacingData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Data converted to d-spacing."""
-
-
-class DspacingDataWithoutVariances(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Data converted to d-spacing where variances where removed."""
 
 
 DspacingHistogram = NewType("DspacingHistogram", sc.DataArray)
