@@ -11,6 +11,7 @@ from ess.reduce import nexus
 
 from ess.powder.types import (
     DetectorBankSizes,
+    DetectorData,
     DetectorEventData,
     Filename,
     MonitorEventData,
@@ -24,7 +25,6 @@ from ess.powder.types import (
     RawMonitorData,
     RawSample,
     RawSource,
-    ReducibleDetectorData,
     RunType,
     SamplePosition,
     SourcePosition,
@@ -166,7 +166,7 @@ def assemble_detector_data(
     event_data: DetectorEventData[RunType],
     source_position: SourcePosition[RunType],
     sample_position: SamplePosition[RunType],
-) -> ReducibleDetectorData[RunType]:
+) -> DetectorData[RunType]:
     """
     Assemble a detector data array with event data and source- and sample-position.
 
@@ -175,7 +175,7 @@ def assemble_detector_data(
     grouped = nexus.group_event_data(
         event_data=event_data, detector_number=detector.coords['detector_number']
     )
-    return ReducibleDetectorData[RunType](
+    return DetectorData[RunType](
         _add_variances(grouped)
         .assign_coords(source_position=source_position, sample_position=sample_position)
         .assign_coords(detector.coords)

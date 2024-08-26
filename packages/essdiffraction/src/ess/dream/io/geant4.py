@@ -9,6 +9,7 @@ from ess.reduce.nexus import extract_detector_data
 from ess.powder.types import (
     CalibrationData,
     CalibrationFilename,
+    DetectorData,
     Filename,
     NeXusDetector,
     NeXusDetectorDimensions,
@@ -16,7 +17,6 @@ from ess.powder.types import (
     RawDetector,
     RawSample,
     RawSource,
-    ReducibleDetectorData,
     RunType,
     SamplePosition,
     SampleRun,
@@ -179,8 +179,8 @@ def patch_detector_data(
     detector_data: RawDetector[RunType],
     source_position: SourcePosition[RunType],
     sample_position: SamplePosition[RunType],
-) -> ReducibleDetectorData[RunType]:
-    return ReducibleDetectorData[RunType](
+) -> DetectorData[RunType]:
+    return DetectorData[RunType](
         detector_data.assign_coords(
             source_position=source_position, sample_position=sample_position
         )
