@@ -165,13 +165,18 @@ def kf_wavenumber(
     # law of Cosines gives the scattering angle based on distances:
     l_sa = norm(sample_analyzer_vec)
     l_ad = norm(analyzer_detector_vec)
-    l_diff = norm(sample_analyzer_vec - analyzer_detector_vec)
+    l_diff = norm(sample_analyzer_vec + analyzer_detector_vec)
     # 2 theta is measured from the direction S-A, so the internal angle is (pi - 2 theta)
     # and the normal law of Cosines is modified accordingly to be -cos(2 theta) instead of cos(pi - 2 theta)
     cos2theta = (l_diff * l_diff - l_sa * l_sa - l_ad * l_ad) / (2 * l_sa * l_ad)
 
     # law of Cosines gives the Bragg reflected wavevector magnitude
     return tau / sqrt(2 - 2 * cos2theta)
+
+
+def ef(kf: FinalWavenumber) -> FinalEnergy:
+    from scipp.constants import hbar, neutron_mass
+    return ((hbar * hbar / 2 / neutron_mass) * kf * kf).to(unit='meV')
 
 
 def kf_vector(
@@ -203,3 +208,16 @@ def sample_frame_time(
         secondary_time: SampleDetectorFlightTime
 ) -> SampleFrameTime:
     return detector_time - secondary_time
+
+
+providers = [
+    sample_analyzer_vector,
+    analyzer_detector_vector,
+    kf_hat,
+    kf_wavenumber,
+    kf_vector,
+    secondary_flight_path_length,
+    secondary_flight_time,
+    sample_frame_time,
+    ef
+]
