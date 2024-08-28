@@ -1,13 +1,18 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 
+from collections.abc import Callable, Iterable
+from enum import Enum
 from itertools import pairwise
+from pathlib import Path
 from typing import NewType
 
-import numpy as np
+import jax.numpy as np
 import scipp as sc
+from h5py import File
+from tifffile import imwrite
+
 from ess.reduce.nexus.types import FilePath
-from h5py import File, Group
 
 from .types import (
     DEFAULT_HISTOGRAM_PATH,
@@ -28,21 +33,12 @@ RotationAngleCoord = NewType("RotationAngleCoord", sc.Variable)
 """Rotation angle coordinate."""
 
 
-def _data_with_timestamp(gr: Group, data_unit: str = 'dimensionless') -> sc.DataArray:
-    return sc.DataArray(
-        data=sc.array(
-            dims=["time"],
-            values=gr['value'][()].astype(int, copy=False),
-            unit=data_unit,
-        ),
-        coords={
-            "time": sc.datetimes(
-                dims=["time"],
-                values=gr["time"][()].astype(int, copy=False),
-                unit='ns',
-            )
-        },
-    )
+class ImageKey(Enum):
+    """Image key values."""
+
+    SAMPLE = 0
+    DARK_CURRENT = 1
+    OPEN_BEAM = 2
 
 
 def load_nexus_histogram_mode_detector_data(
@@ -61,9 +57,7 @@ def load_nexus_histogram_mode_detector_data(
                 sc.DataArray(
                     data=sc.array(
                         dims=["time", "x", "y"],
-                        values=detector_dataset['value'][()].astype(
-                            np.int32, copy=False, casting='safe'
-                        ),
+                        values=np.astype(detector_dataset['value'][()], np.int32),
                         unit='counts',
                     ),
                     coords={
@@ -79,42 +73,19 @@ def load_nexus_histogram_mode_detector_data(
                 'time',
             )
         )
-        # det = detector_dataset['value'][()]
-        # return HistogramModeDetectorData(
-        #     sc.sort(
-        #         sc.DataArray(
-        #             data=sc.array(
-        #                 dims=["time"],  # , "x", "y"],
-        #                 values=list(range(det.shape[0])),
-        #                 unit='counts',
-        #                 # dtype=object,
-        #             ),
-        #             coords={
-        #                 "time": sc.datetimes(
-        #                     dims=["time"],
-        #                   values=detector_dataset["time"][()].astype(int, copy=False),
-        #                     unit='ns',
-        #                 ),
-        #                 # "x": sc.arange(dim="x", start=0, stop=x_length),
-        #                 # "y": sc.arange(dim="y", start=0, stop=y_length),
-        #             },
-        #         ),
-        #         'time',
-        #     )
-        # )
 
 
 def load_image_key_logs(
     *,
     file_path: FilePath,
-    image_detector_name: ImageDetectorName,
+    detector_name: ImageDetectorName,
     histogram_mode_detectors_path: HistogramModeDetectorsPath = DEFAULT_HISTOGRAM_PATH,
 ) -> ImageKeyLogs:
     with File(file_path, mode="r") as f:
-        detector_image_keys = f[
-            f"{histogram_mode_detectors_path}/{image_detector_name}/image_key"
-        ]
-        return ImageKeyLogs(_data_with_timestamp(detector_image_keys))
+        image_keys = f[f"{histogram_mode_detectors_path}/{detector_name}/image_key"]
+        keys = sc.array(dims=["time"], values=image_keys['value'][()])
+        times = sc.datetimes(dims=["time"], values=image_keys["time"][()], unit='ns')
+        return ImageKeyLogs(sc.DataArray(data=keys, coords={"time": times}))
 
 
 def load_nexus_rotation_logs(
@@ -123,22 +94,9 @@ def load_nexus_rotation_logs(
 ) -> RotationLogs:
     with File(file_path, mode="r") as f:
         rotations = f[f"entry/instrument/{motion_sensor_name}/rotation_stage_readback"]
-        return RotationLogs(
-            sc.DataArray(
-                data=sc.array(
-                    dims=["time"],
-                    values=rotations['value'][()],
-                    unit='degrees',
-                ),
-                coords={
-                    "time": sc.datetimes(
-                        dims=["time"],
-                        values=rotations["time"][()].astype(int, copy=False),
-                        unit='ns',
-                    )
-                },
-            )
-        )
+        angles = sc.array(dims=["time"], values=rotations['value'][()], unit='degrees')
+        times = sc.datetimes(dims=["time"], values=rotations["time"][()], unit='ns')
+        return RotationLogs(sc.DataArray(data=angles, coords={"time": times}))
 
 
 def derive_log_coord_by_range(
@@ -172,7 +130,9 @@ def derive_image_key_coord(
     histograms: HistogramModeDetectorData, image_keys: ImageKeyLogs
 ) -> ImageKeyCoord:
     return ImageKeyCoord(
-        derive_log_coord_by_range(histograms, image_keys, sc.scalar(-1))
+        derive_log_coord_by_range(
+            histograms, image_keys, sc.scalar(-1, dtype=image_keys.data.dtype)
+        )
     )
 
 
@@ -181,7 +141,11 @@ def derive_rotation_angle_coord(
 ) -> RotationAngleCoord:
     return RotationAngleCoord(
         derive_log_coord_by_range(
-            histograms, rotation_angles, sc.scalar(-1.0, unit=rotation_angles.data.unit)
+            histograms,
+            rotation_angles,
+            sc.scalar(
+                -1.0, unit=rotation_angles.data.unit, dtype=rotation_angles.data.dtype
+            ),
         )
     )
 
@@ -195,3 +159,107 @@ def apply_logs_as_coords(
     copied.coords['image_key'] = image_keys
     copied.coords['rotation_angle'] = rotation_angles
     return ImageStacks(copied)
+
+
+DEFAULT_IMAGE_NAME_PREFIX_MAP = {
+    ImageKey.SAMPLE.value: "sample",
+    ImageKey.DARK_CURRENT.value: "dc",
+    ImageKey.OPEN_BEAM.value: "ob",
+}
+
+
+def dummy_progress_wrapper(core_iterator: Iterable) -> Iterable:
+    yield from core_iterator
+
+
+def _save_merged_images(
+    *, image_stacks: ImageStacks, image_prefix: str, output_dir: Path
+) -> None:
+    image_path = output_dir / Path(
+        f"{image_prefix}_0000_{image_stacks.sizes['time']:04d}.tiff"
+    )
+    imwrite(image_path, image_stacks.values)
+
+
+def _save_individual_images(
+    *,
+    image_stacks: ImageStacks,
+    image_prefix: str,
+    output_dir: Path,
+    progress_wrapper: Callable[[Iterable], Iterable] = dummy_progress_wrapper,
+) -> None:
+    for i_image in progress_wrapper(range(image_stacks.sizes['time'])):
+        cur_image = image_stacks['time', i_image]
+        image_path = output_dir / Path(f"{image_prefix}_{i_image:04d}.tiff")
+        imwrite(image_path, cur_image.values)
+
+
+def _validate_output_dir(output_dir: str | Path) -> None:
+    output_dir = Path(output_dir)
+    if not output_dir.exists():
+        # make sure the output directory exists
+        output_dir.mkdir(parents=True, exist_ok=False)
+    elif not output_dir.is_dir():
+        raise ValueError(f"Output directory {output_dir} is not a directory.")
+    elif len(list(output_dir.iterdir())) > 0:
+        raise RuntimeError(f"Output directory {output_dir} is not empty.")
+
+
+def export_image_stacks_as_tiff(
+    *,
+    output_dir: str | Path,
+    image_stacks: ImageStacks,
+    merge_image_by_key: bool,
+    overwrite: bool,
+    progress_wrapper: Callable[[Iterable], Iterable] = dummy_progress_wrapper,
+    image_prefix_map: dict[int, str] = DEFAULT_IMAGE_NAME_PREFIX_MAP,
+) -> None:
+    """Save images into disk.
+
+    Parameters
+    ----------
+    output_dir:
+        Output directory to save images.
+
+    image_stacks:
+        Image stacks to save.
+
+    merge_image_by_key:
+        Flag to merge images into one file.
+
+    overwrite:
+        Flag to overwrite existing files.
+        If True, it will clear the output directory before saving images.
+
+    image_prefix_map:
+        Map of image name prefixes to their corresponding image key.
+
+    """
+    # Remove existing files if overwrite is True
+    if (
+        overwrite
+        and (output_path := Path(output_dir)).exists()
+        and output_path.is_dir()
+    ):
+        for file in output_path.iterdir():
+            file.unlink()
+
+    _validate_output_dir(output_path)
+
+    for image_key in progress_wrapper(set(image_stacks.coords['image_key'].values)):
+        cur_images = image_stacks[
+            image_stacks.coords['image_key'] == sc.scalar(image_key)
+        ]
+        if merge_image_by_key:
+            _save_merged_images(
+                image_stacks=ImageStacks(cur_images),
+                image_prefix=image_prefix_map[image_key],
+                output_dir=output_path,
+            )
+        else:
+            _save_individual_images(
+                image_stacks=ImageStacks(cur_images),
+                image_prefix=image_prefix_map[image_key],
+                output_dir=output_path,
+                progress_wrapper=progress_wrapper,
+            )
