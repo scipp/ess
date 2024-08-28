@@ -21,7 +21,7 @@ from .types import (
     IofQxy,
     LabFrameTransform,
     MaskedSolidAngle,
-    NormWavelengthTerm,
+    MonitorTerm,
     Numerator,
     ProcessedWavelengthBands,
     ReducedQ,
@@ -174,9 +174,7 @@ def transmission_fraction(
 def iofq_norm_wavelength_term(
     incident_monitor: CleanMonitor[ScatteringRunType, Incident],
     transmission_fraction: TransmissionFraction[ScatteringRunType],
-    direct_beam: CleanDirectBeam,
-    uncertainties: UncertaintyBroadcastMode,
-) -> NormWavelengthTerm[ScatteringRunType]:
+) -> MonitorTerm[ScatteringRunType]:
     """
     Compute the wavelength-dependent contribution to the denominator term for the I(Q)
     normalization.
@@ -215,32 +213,31 @@ def iofq_norm_wavelength_term(
         Used by :py:func:`iofq_denominator`.
     """
     out = incident_monitor * transmission_fraction
-    if direct_beam is not None:
-        # Make wavelength the inner dim
-        dims = list(direct_beam.dims)
-        dims.remove('wavelength')
-        dims.append('wavelength')
-        direct_beam = direct_beam.transpose(dims)
-        out = direct_beam * broadcast_uncertainties(
-            out, prototype=direct_beam, mode=uncertainties
-        )
     # Convert wavelength coordinate to midpoints for future histogramming
     out.coords['wavelength'] = sc.midpoints(out.coords['wavelength'])
-    return NormWavelengthTerm[ScatteringRunType](out)
+    return MonitorTerm[ScatteringRunType](out)
 
 
 def geometry_term(
     solid_angle: MaskedSolidAngle[ScatteringRunType],
-    wavelength_bins: WavelengthBins,
+    direct_beam: CleanDirectBeam,
+    uncertainties: UncertaintyBroadcastMode,
 ) -> CleanWavelength[ScatteringRunType, Denominator]:
-    wavelength = sc.midpoints(wavelength_bins)
-    return solid_angle.broadcast(
-        sizes={**solid_angle.sizes, 'wavelength': wavelength.sizes['wavelength']}
-    ).assign_coords(wavelength=wavelength)
+    # Make wavelength the inner dim
+    dims = list(direct_beam.dims)
+    dims.remove('wavelength')
+    dims.append('wavelength')
+    direct_beam = direct_beam.transpose(dims)
+    out = solid_angle * broadcast_uncertainties(
+        direct_beam, prototype=solid_angle, mode=uncertainties
+    )
+    # Convert wavelength coordinate to midpoints for future histogramming
+    out.coords['wavelength'] = sc.midpoints(out.coords['wavelength'])
+    return out
 
 
 def iofq_denominator(
-    wavelength_term: NormWavelengthTerm[ScatteringRunType],
+    wavelength_term: MonitorTerm[ScatteringRunType],
     solid_angle: MaskedSolidAngle[ScatteringRunType],
     uncertainties: UncertaintyBroadcastMode,
 ) -> CleanWavelength[ScatteringRunType, Denominator]:
@@ -441,7 +438,7 @@ def reduce_q(
 
 def reduce_norm_q(
     geometry_term: CleanSummedQ[ScatteringRunType, Denominator],
-    wavelength_term: NormWavelengthTerm[ScatteringRunType],
+    wavelength_term: MonitorTerm[ScatteringRunType],
     uncertainties: UncertaintyBroadcastMode,
     bands: ProcessedWavelengthBands,
 ) -> ReducedQ[ScatteringRunType, Denominator]:
@@ -461,7 +458,7 @@ def reduce_qxy(
 
 def reduce_norm_qxy(
     geometry_term: CleanSummedQxy[ScatteringRunType, Denominator],
-    wavelength_term: NormWavelengthTerm[ScatteringRunType],
+    wavelength_term: MonitorTerm[ScatteringRunType],
     uncertainties: UncertaintyBroadcastMode,
     bands: ProcessedWavelengthBands,
 ) -> ReducedQxy[ScatteringRunType, Denominator]:

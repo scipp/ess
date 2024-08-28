@@ -153,8 +153,8 @@ class TransmissionFraction(
     """Transmission fraction"""
 
 
-CleanDirectBeam = NewType('CleanDirectBeam', sc.DataArray | None)
-"""Direct beam after resampling to required wavelength bins"""
+CleanDirectBeam = NewType('CleanDirectBeam', sc.DataArray)
+"""Direct beam after resampling to required wavelength bins, else and array of ones."""
 
 
 class DetectorPixelShape(sciline.Scope[ScatteringRunType, sc.DataGroup], sc.DataGroup):
@@ -191,8 +191,8 @@ class MaskedData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Raw data with pixel-specific masks applied"""
 
 
-class NormWavelengthTerm(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
-    """Normalization term (numerator) for IofQ before scaling with solid-angle."""
+class MonitorTerm(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
+    """Monitor-dependent factor of the Normalization term (numerator) for IofQ."""
 
 
 class CleanWavelength(
