@@ -5,7 +5,10 @@ from typing import NewType
 import sciline
 import scipp as sc
 from ess.reduce.nexus.generic_workflow import GenericNeXusWorkflow
+from ess.reduce.workflow import register_workflow
+
 from ess.sans import providers as sans_providers
+from ess.sans.parameters import typical_outputs
 from ess.sans.types import BeamCenter, CalibratedDetector, DetectorMasks, SampleRun
 
 from .general import default_parameters
@@ -81,6 +84,7 @@ def to_detector_masks(
 providers = (detector_edge_mask, sample_holder_mask, to_detector_masks)
 
 
+@register_workflow
 def Sans2dWorkflow() -> sciline.Pipeline:
     """Create Sans2d workflow with default parameters."""
     from . import providers as isis_providers
@@ -92,9 +96,11 @@ def Sans2dWorkflow() -> sciline.Pipeline:
         workflow.insert(provider)
     for key, param in default_parameters().items():
         workflow[key] = param
+    workflow.typical_outputs = typical_outputs
     return workflow
 
 
+@register_workflow
 def Sans2dTutorialWorkflow() -> sciline.Pipeline:
     """
     Create Sans2d tutorial workflow.

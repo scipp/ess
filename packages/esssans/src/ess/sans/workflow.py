@@ -5,6 +5,7 @@ from collections.abc import Hashable, Iterable
 import pandas as pd
 import sciline
 import scipp as sc
+from ess.reduce.parameter import parameter_mappers
 
 from .types import (
     BackgroundRun,
@@ -123,3 +124,9 @@ def with_background_runs(
         List or tuple of background run filenames to set.
     """
     return _set_runs(workflow, runs, BackgroundRun, 'background_run')
+
+
+parameter_mappers[PixelMaskFilename] = with_pixel_mask_filenames
+parameter_mappers[NeXusDetectorName] = with_banks
+parameter_mappers[Filename[SampleRun]] = with_sample_runs
+parameter_mappers[Filename[BackgroundRun]] = with_background_runs

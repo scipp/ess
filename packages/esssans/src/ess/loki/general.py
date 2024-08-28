@@ -6,9 +6,13 @@ Default parameters, providers and utility functions for the loki workflow.
 
 import sciline
 import scipp as sc
+from ess import sans
 from ess.reduce.nexus.generic_workflow import GenericNeXusWorkflow
+from ess.reduce.workflow import register_workflow
+
 from ess.sans import providers as sans_providers
 from ess.sans.io import read_xml_detector_masking
+from ess.sans.parameters import typical_outputs
 
 from ..sans.types import (
     CorrectForGravity,
@@ -95,6 +99,7 @@ loki_providers = (
 )
 
 
+@register_workflow
 def LokiAtLarmorWorkflow() -> sciline.Pipeline:
     """
     Workflow with default parameters for Loki test at Larmor.
@@ -115,4 +120,38 @@ def LokiAtLarmorWorkflow() -> sciline.Pipeline:
     for key, param in default_parameters().items():
         workflow[key] = param
     workflow.insert(read_xml_detector_masking)
+    workflow[sans.types.NeXusDetectorName] = 'larmor_detector'
+    workflow.typical_outputs = typical_outputs
+    return workflow
+
+
+@register_workflow
+def LokiAtLarmorTutorialWorkflow() -> sciline.Pipeline:
+    from ess.loki import data
+
+    workflow = LokiAtLarmorWorkflow()
+    workflow[sans.types.Filename[sans.types.SampleRun]] = (
+        data.loki_tutorial_sample_run_60339()
+    )
+    # TODO This does not work with multiple
+    workflow[sans.types.PixelMaskFilename] = data.loki_tutorial_mask_filenames()[0]
+
+    workflow[sans.types.Filename[sans.types.SampleRun]] = (
+        data.loki_tutorial_sample_run_60339()
+    )
+    workflow[sans.types.Filename[sans.types.BackgroundRun]] = (
+        data.loki_tutorial_background_run_60393()
+    )
+    workflow[sans.types.Filename[sans.types.TransmissionRun[sans.types.SampleRun]]] = (
+        data.loki_tutorial_sample_transmission_run()
+    )
+    workflow[
+        sans.types.Filename[sans.types.TransmissionRun[sans.types.BackgroundRun]]
+    ] = data.loki_tutorial_run_60392()
+    workflow[sans.types.Filename[sans.types.EmptyBeamRun]] = (
+        data.loki_tutorial_run_60392()
+    )
+    workflow[sans.types.BeamCenter] = sc.vector(
+        value=[-0.02914868, -0.01816138, 0.0], unit='m'
+    )
     return workflow
