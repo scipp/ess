@@ -238,6 +238,18 @@ class CleanSummedQxy(
     Qy bins"""
 
 
+class ReducedQ(
+    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
+):
+    """Result of reducing :py:class:`CleanSummedQ` over the wavelength dimensions"""
+
+
+class ReducedQxy(
+    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
+):
+    """Result of reducing :py:class:`CleanSummedQxy` over the wavelength dimensions"""
+
+
 class IofQ(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """I(Q)"""
 

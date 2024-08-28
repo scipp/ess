@@ -17,12 +17,15 @@ from .types import (
     EmptyBeamRun,
     Incident,
     IofQ,
+    IofQPart,
     IofQxy,
     LabFrameTransform,
     MaskedSolidAngle,
     NormWavelengthTerm,
     Numerator,
     ProcessedWavelengthBands,
+    ReducedQ,
+    ReducedQxy,
     ReturnEvents,
     ScatteringRunType,
     SolidAngle,
@@ -341,7 +344,6 @@ def _normalize(
     denominator: sc.DataArray,
     return_events: ReturnEvents,
     uncertainties: UncertaintyBroadcastMode,
-    wavelength_bands: ProcessedWavelengthBands,
 ) -> sc.DataArray:
     """
     Perform normalization of counts as a function of Q.
@@ -358,11 +360,6 @@ def _normalize(
         contain histogrammed data.
     return_events:
         Whether to return the result as event data or histogrammed data.
-    wavelength_bands:
-        Defines bands in wavelength that can be used to separate different wavelength
-        ranges that contribute to different regions in Q space. Note that this needs to
-        be defined, so if all wavelengths should be used, this should simply be a start
-        and end edges that encompass the entire wavelength range.
     uncertainties:
         The mode for broadcasting uncertainties. See
         :py:class:`ess.reduce.uncertainty.UncertaintyBroadcastMode` for details.
@@ -372,9 +369,6 @@ def _normalize(
     :
         The input data normalized by the supplied denominator.
     """
-    numerator = _reduce_part(numerator, wavelength_bands)
-    denominator = _reduce_part(denominator, wavelength_bands)
-
     if return_events and numerator.bins is not None:
         # Naive event-mode normalization is not correct if norm-term has variances.
         # See https://doi.org/10.3233/JNR-220049 for context.
@@ -389,36 +383,63 @@ def _normalize(
     return numerator
 
 
-def _reduce(da: sc.DataArray) -> sc.DataArray:
+def _do_reduce(da: sc.DataArray) -> sc.DataArray:
     wav = 'wavelength'
     if da.sizes[wav] == 1:  # Can avoid costly event-data da.bins.concat
         return da.squeeze(wav)
     return da.sum(wav) if da.bins is None else da.bins.concat(wav)
 
 
-def _reduce_part(
-    part: sc.DataArray, wavelength_bands: ProcessedWavelengthBands
-) -> sc.DataArray:
+def _reduce(part: sc.DataArray, /, *, bands: ProcessedWavelengthBands) -> sc.DataArray:
+    """
+    Reduce data by summing or concatenating along the wavelength dimension.
+
+    Parameters
+    ----------
+    data:
+        Numerator or denominator data to be reduced.
+    wavelength_bands:
+        Defines bands in wavelength that can be used to separate different wavelength
+        ranges that contribute to different regions in Q space. Note that this needs to
+        be defined, so if all wavelengths should be used, this should simply be a start
+        and end edges that encompass the entire wavelength range.
+
+    Returns
+    -------
+    :
+        Q-dependent data, ready for normalization.
+    """
     wav = 'wavelength'
     if part.bins is not None:
         # If in event mode the desired wavelength binning has not been applied, we need
         # it for splitting by bands, or restricting the range in case of a single band.
-        part = part.bin(wavelength=sc.sort(wavelength_bands.flatten(to=wav), wav))
+        part = part.bin(wavelength=sc.sort(bands.flatten(to=wav), wav))
     parts = [
-        _reduce(part[wav, wav_range[0] : wav_range[1]])
-        for wav_range in sc.collapse(wavelength_bands, keep=wav).values()
+        _do_reduce(part[wav, wav_range[0] : wav_range[1]])
+        for wav_range in sc.collapse(bands, keep=wav).values()
     ]
-    band_dim = (set(wavelength_bands.dims) - {'wavelength'}).pop()
+    band_dim = (set(bands.dims) - {'wavelength'}).pop()
     reduced = parts[0] if len(parts) == 1 else sc.concat(parts, band_dim)
-    return reduced.assign_coords(wavelength=wavelength_bands.squeeze())
+    return reduced.assign_coords(wavelength=bands.squeeze())
+
+
+def reduce_q(
+    data: CleanSummedQ[ScatteringRunType, IofQPart], bands: ProcessedWavelengthBands
+) -> ReducedQ[ScatteringRunType, IofQPart]:
+    return ReducedQ[ScatteringRunType, IofQPart](_reduce(data, bands=bands))
+
+
+def reduce_qxy(
+    data: CleanSummedQxy[ScatteringRunType, IofQPart], bands: ProcessedWavelengthBands
+) -> ReducedQxy[ScatteringRunType, IofQPart]:
+    return ReducedQxy[ScatteringRunType, IofQPart](_reduce(data, bands=bands))
 
 
 def normalize_q(
-    numerator: CleanSummedQ[ScatteringRunType, Numerator],
-    denominator: CleanSummedQ[ScatteringRunType, Denominator],
+    numerator: ReducedQ[ScatteringRunType, Numerator],
+    denominator: ReducedQ[ScatteringRunType, Denominator],
     return_events: ReturnEvents,
     uncertainties: UncertaintyBroadcastMode,
-    wavelength_bands: ProcessedWavelengthBands,
 ) -> IofQ[ScatteringRunType]:
     return IofQ[ScatteringRunType](
         _normalize(
@@ -426,17 +447,15 @@ def normalize_q(
             denominator=denominator,
             return_events=return_events,
             uncertainties=uncertainties,
-            wavelength_bands=wavelength_bands,
         )
     )
 
 
 def normalize_qxy(
-    numerator: CleanSummedQxy[ScatteringRunType, Numerator],
-    denominator: CleanSummedQxy[ScatteringRunType, Denominator],
+    numerator: ReducedQxy[ScatteringRunType, Numerator],
+    denominator: ReducedQxy[ScatteringRunType, Denominator],
     return_events: ReturnEvents,
     uncertainties: UncertaintyBroadcastMode,
-    wavelength_bands: ProcessedWavelengthBands,
 ) -> IofQxy[ScatteringRunType]:
     return IofQxy[ScatteringRunType](
         _normalize(
@@ -444,11 +463,12 @@ def normalize_qxy(
             denominator=denominator,
             return_events=return_events,
             uncertainties=uncertainties,
-            wavelength_bands=wavelength_bands,
         )
     )
 
 
+reduce_q.__doc__ = _reduce.__doc__
+reduce_qxy.__doc__ = _reduce.__doc__
 normalize_q.__doc__ = _normalize.__doc__
 normalize_qxy.__doc__ = _normalize.__doc__
 
@@ -457,6 +477,8 @@ providers = (
     transmission_fraction,
     iofq_norm_wavelength_term,
     iofq_denominator,
+    reduce_q,
+    reduce_qxy,
     normalize_q,
     normalize_qxy,
     process_wavelength_bands,
