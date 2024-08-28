@@ -372,32 +372,8 @@ def _normalize(
     :
         The input data normalized by the supplied denominator.
     """
-    wav = 'wavelength'
-    wavelength_bounds = sc.sort(wavelength_bands.flatten(to=wav), wav)
-    if numerator.bins is not None:
-        # If in event mode the desired wavelength binning has not been applied, we need
-        # it for splitting by bands, or restricting the range in case of a single band.
-        numerator = numerator.bin(wavelength=wavelength_bounds)
-
-    def _reduce(da: sc.DataArray) -> sc.DataArray:
-        if da.sizes[wav] == 1:  # Can avoid costly event-data da.bins.concat
-            return da.squeeze(wav)
-        return da.sum(wav) if da.bins is None else da.bins.concat(wav)
-
-    num_parts = []
-    denom_parts = []
-    for wav_range in sc.collapse(wavelength_bands, keep=wav).values():
-        num_parts.append(_reduce(numerator[wav, wav_range[0] : wav_range[1]]))
-        denom_parts.append(_reduce(denominator[wav, wav_range[0] : wav_range[1]]))
-    band_dim = (set(wavelength_bands.dims) - {'wavelength'}).pop()
-    if len(num_parts) == 1:
-        numerator = num_parts[0]
-        denominator = denom_parts[0]
-    else:
-        numerator = sc.concat(num_parts, band_dim)
-        denominator = sc.concat(denom_parts, band_dim)
-    numerator.coords[wav] = wavelength_bands.squeeze()
-    denominator.coords[wav] = wavelength_bands.squeeze()
+    numerator = _reduce_part(numerator, wavelength_bands)
+    denominator = _reduce_part(denominator, wavelength_bands)
 
     if return_events and numerator.bins is not None:
         # Naive event-mode normalization is not correct if norm-term has variances.
@@ -411,6 +387,30 @@ def _normalize(
         [name for name in denominator.coords if name not in denominator.dims]
     )
     return numerator
+
+
+def _reduce(da: sc.DataArray) -> sc.DataArray:
+    wav = 'wavelength'
+    if da.sizes[wav] == 1:  # Can avoid costly event-data da.bins.concat
+        return da.squeeze(wav)
+    return da.sum(wav) if da.bins is None else da.bins.concat(wav)
+
+
+def _reduce_part(
+    part: sc.DataArray, wavelength_bands: ProcessedWavelengthBands
+) -> sc.DataArray:
+    wav = 'wavelength'
+    if part.bins is not None:
+        # If in event mode the desired wavelength binning has not been applied, we need
+        # it for splitting by bands, or restricting the range in case of a single band.
+        part = part.bin(wavelength=sc.sort(wavelength_bands.flatten(to=wav), wav))
+    parts = [
+        _reduce(part[wav, wav_range[0] : wav_range[1]])
+        for wav_range in sc.collapse(wavelength_bands, keep=wav).values()
+    ]
+    band_dim = (set(wavelength_bands.dims) - {'wavelength'}).pop()
+    reduced = parts[0] if len(parts) == 1 else sc.concat(parts, band_dim)
+    return reduced.assign_coords(wavelength=wavelength_bands.squeeze())
 
 
 def normalize_q(
