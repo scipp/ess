@@ -229,6 +229,16 @@ def iofq_norm_wavelength_term(
     return NormWavelengthTerm[ScatteringRunType](out)
 
 
+def geometry_term(
+    solid_angle: MaskedSolidAngle[ScatteringRunType],
+    wavelength_bins: WavelengthBins,
+) -> CleanWavelength[ScatteringRunType, Denominator]:
+    wavelength = sc.midpoints(wavelength_bins)
+    return solid_angle.broadcast(
+        sizes={**solid_angle.sizes, 'wavelength': wavelength.sizes['wavelength']}
+    ).assign_coords(wavelength=wavelength)
+
+
 def iofq_denominator(
     wavelength_term: NormWavelengthTerm[ScatteringRunType],
     solid_angle: MaskedSolidAngle[ScatteringRunType],
@@ -424,15 +434,43 @@ def _reduce(part: sc.DataArray, /, *, bands: ProcessedWavelengthBands) -> sc.Dat
 
 
 def reduce_q(
-    data: CleanSummedQ[ScatteringRunType, IofQPart], bands: ProcessedWavelengthBands
-) -> ReducedQ[ScatteringRunType, IofQPart]:
-    return ReducedQ[ScatteringRunType, IofQPart](_reduce(data, bands=bands))
+    data: CleanSummedQ[ScatteringRunType, Numerator], bands: ProcessedWavelengthBands
+) -> ReducedQ[ScatteringRunType, Numerator]:
+    return ReducedQ[ScatteringRunType, Numerator](_reduce(data, bands=bands))
+
+
+def reduce_norm_q(
+    geometry_term: CleanSummedQ[ScatteringRunType, Denominator],
+    wavelength_term: NormWavelengthTerm[ScatteringRunType],
+    uncertainties: UncertaintyBroadcastMode,
+    bands: ProcessedWavelengthBands,
+) -> ReducedQ[ScatteringRunType, Denominator]:
+    data = iofq_denominator(
+        wavelength_term=wavelength_term,
+        solid_angle=geometry_term,
+        uncertainties=uncertainties,
+    )
+    return ReducedQ[ScatteringRunType, Denominator](_reduce(data, bands=bands))
 
 
 def reduce_qxy(
     data: CleanSummedQxy[ScatteringRunType, IofQPart], bands: ProcessedWavelengthBands
 ) -> ReducedQxy[ScatteringRunType, IofQPart]:
     return ReducedQxy[ScatteringRunType, IofQPart](_reduce(data, bands=bands))
+
+
+def reduce_norm_qxy(
+    geometry_term: CleanSummedQxy[ScatteringRunType, Denominator],
+    wavelength_term: NormWavelengthTerm[ScatteringRunType],
+    uncertainties: UncertaintyBroadcastMode,
+    bands: ProcessedWavelengthBands,
+) -> ReducedQxy[ScatteringRunType, Denominator]:
+    data = iofq_denominator(
+        wavelength_term=wavelength_term,
+        solid_angle=geometry_term,
+        uncertainties=uncertainties,
+    )
+    return ReducedQxy[ScatteringRunType, Denominator](_reduce(data, bands=bands))
 
 
 def normalize_q(
@@ -476,9 +514,11 @@ normalize_qxy.__doc__ = _normalize.__doc__
 providers = (
     transmission_fraction,
     iofq_norm_wavelength_term,
-    iofq_denominator,
+    geometry_term,
     reduce_q,
+    reduce_norm_q,
     reduce_qxy,
+    reduce_norm_qxy,
     normalize_q,
     normalize_qxy,
     process_wavelength_bands,
