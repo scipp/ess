@@ -94,7 +94,9 @@ def zoom_tutorial_calibration() -> Filename[CalibrationFilename]:
 
 
 def zoom_tutorial_sample_run() -> Filename[SampleRun]:
-    return _zoom_registry.get_path('ZOOM00034786.nxs.h5.zip', unzip=True)[0]
+    return Filename[SampleRun](
+        _zoom_registry.get_path('ZOOM00034786.nxs.h5.zip', unzip=True)[0]
+    )
 
 
 def zoom_tutorial_empty_beam_run() -> Filename[EmptyBeamRun]:

@@ -1,11 +1,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 import sciline
+from ess.reduce.nexus.generic_workflow import GenericNeXusWorkflow
 
 from ess.sans import providers as sans_providers
+from ess.sans.io import read_xml_detector_masking
 
 from .general import default_parameters
-from .io import load_tutorial_direct_beam, load_tutorial_run, read_xml_detector_masking
+from .io import load_tutorial_direct_beam, load_tutorial_run
 from .mantidio import providers as mantid_providers
 
 
@@ -25,9 +27,13 @@ def ZoomWorkflow() -> sciline.Pipeline:
 
     set_mantid_log_level()
 
-    params = default_parameters()
-    zoom_providers = sans_providers + isis_providers + mantid_providers
-    workflow = sciline.Pipeline(providers=zoom_providers, params=params)
+    # Note that the actual NeXus loading in this workflow will not be used for the
+    # ISIS files, the providers inserted below will replace those steps.
+    workflow = GenericNeXusWorkflow()
+    for provider in sans_providers + isis_providers + mantid_providers:
+        workflow.insert(provider)
+    for key, param in default_parameters().items():
+        workflow[key] = param
     workflow.insert(read_xml_detector_masking)
     return workflow
 

@@ -12,7 +12,9 @@ from ess.sans.types import (
     BackgroundRun,
     BackgroundSubtractedIofQ,
     BeamCenter,
+    CalibratedDetector,
     CorrectForGravity,
+    DetectorData,
     DimsToKeep,
     DirectBeam,
     DirectBeamFilename,
@@ -24,7 +26,6 @@ from ess.sans.types import (
     NeXusMonitorName,
     NonBackgroundWavelengthRange,
     QBins,
-    RawDetector,
     ReturnEvents,
     SampleRun,
     SolidAngle,
@@ -76,51 +77,40 @@ def make_params() -> dict:
     return params
 
 
-def sans2d_providers():
-    return list(
-        sans.providers
-        + isis.providers
-        + isis.sans2d.providers
-        + isis.mantidio.providers
-        + (
-            isis.io.load_tutorial_direct_beam,
-            isis.io.load_tutorial_run,
-            isis.io.transmission_from_background_run,
-            isis.io.transmission_from_sample_run,
-        )
-    )
+@pytest.fixture()
+def pipeline():
+    wf = isis.sans2d.Sans2dTutorialWorkflow()
+    wf.insert(isis.io.transmission_from_background_run)
+    wf.insert(isis.io.transmission_from_sample_run)
+    for key, param in make_params().items():
+        wf[key] = param
+    return wf
 
 
-def test_can_create_pipeline():
-    sciline.Pipeline(sans2d_providers(), params=make_params())
+def test_can_create_pipeline(pipeline):
+    pipeline.get(IofQ[SampleRun])
 
 
 @pytest.mark.parametrize(
     'uncertainties',
     [UncertaintyBroadcastMode.drop, UncertaintyBroadcastMode.upper_bound],
 )
-def test_pipeline_can_compute_background_subtracted_IofQ(uncertainties):
-    params = make_params()
-    params[UncertaintyBroadcastMode] = uncertainties
-    pipeline = sciline.Pipeline(sans2d_providers(), params=params)
+def test_pipeline_can_compute_background_subtracted_IofQ(pipeline, uncertainties):
+    pipeline[UncertaintyBroadcastMode] = uncertainties
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('Q',)
 
 
-def test_pipeline_can_compute_background_subtracted_IofQ_in_wavelength_bands():
-    params = make_params()
-    params[WavelengthBands] = sc.linspace(
+def test_pipeline_can_compute_background_subtracted_IofQ_in_wavelength_bands(pipeline):
+    pipeline[WavelengthBands] = sc.linspace(
         'wavelength', start=2.0, stop=16.0, num=11, unit='angstrom'
     )
-    pipeline = sciline.Pipeline(sans2d_providers(), params=params)
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('band', 'Q')
     assert result.sizes['band'] == 10
 
 
-def test_pipeline_wavelength_bands_is_optional():
-    params = make_params()
-    pipeline = sciline.Pipeline(sans2d_providers(), params=params)
+def test_pipeline_wavelength_bands_is_optional(pipeline):
     pipeline[BeamCenter] = sans.beam_center_from_center_of_mass(pipeline)
     noband = pipeline.compute(BackgroundSubtractedIofQ)
     assert pipeline.compute(WavelengthBands) is None
@@ -131,10 +121,8 @@ def test_pipeline_wavelength_bands_is_optional():
     assert sc.identical(noband, withband)
 
 
-def test_workflow_is_deterministic():
-    params = make_params()
-    params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
-    pipeline = sciline.Pipeline(sans2d_providers(), params=params)
+def test_workflow_is_deterministic(pipeline):
+    pipeline[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
     pipeline[BeamCenter] = sans.beam_center_from_center_of_mass(pipeline)
     # This is Sciline's default scheduler, but we want to be explicit here
     scheduler = sciline.scheduler.DaskScheduler()
@@ -144,45 +132,38 @@ def test_workflow_is_deterministic():
     assert sc.identical(sc.values(result), sc.values(reference))
 
 
-def test_pipeline_raises_VariancesError_if_normalization_errors_not_dropped():
-    params = make_params()
-    params[NonBackgroundWavelengthRange] = (
+def test_pipeline_raises_VariancesError_if_normalization_errors_not_dropped(pipeline):
+    pipeline[NonBackgroundWavelengthRange] = (
         None  # Make sure we raise in iofq_denominator
     )
-    params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.fail
-    pipeline = sciline.Pipeline(sans2d_providers(), params=params)
+    pipeline[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.fail
     with pytest.raises(sc.VariancesError):
         pipeline.compute(BackgroundSubtractedIofQ)
 
 
-def test_uncertainty_broadcast_mode_drop_yields_smaller_variances():
-    params = make_params()
+def test_uncertainty_broadcast_mode_drop_yields_smaller_variances(pipeline):
     # Errors with the full range have some NaNs or infs
-    params[QBins] = sc.linspace(
+    pipeline[QBins] = sc.linspace(
         dim='Q', start=0.01, stop=0.5, num=141, unit='1/angstrom'
     )
-    params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
-    pipeline = sciline.Pipeline(sans2d_providers(), params=params)
+    pipeline[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
     drop = pipeline.compute(IofQ[SampleRun]).data
-    params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
-    pipeline = sciline.Pipeline(sans2d_providers(), params=params)
+    pipeline[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
     upper_bound = pipeline.compute(IofQ[SampleRun]).data
     assert sc.all(sc.variances(drop) < sc.variances(upper_bound)).value
 
 
-def test_pipeline_can_visualize_background_subtracted_IofQ():
-    pipeline = sciline.Pipeline(sans2d_providers(), params=make_params())
+def test_pipeline_can_visualize_background_subtracted_IofQ(pipeline):
     pipeline.visualize(BackgroundSubtractedIofQ)
 
 
-def test_pipeline_can_compute_intermediate_results():
-    pipeline = sciline.Pipeline(sans2d_providers(), params=make_params())
+def test_pipeline_can_compute_intermediate_results(pipeline):
     result = pipeline.compute(SolidAngle[SampleRun])
     assert result.dims == ('spectrum',)
 
 
 def pixel_dependent_direct_beam(
-    filename: DirectBeamFilename, shape: RawDetector[SampleRun]
+    filename: DirectBeamFilename, shape: CalibratedDetector[SampleRun]
 ) -> DirectBeam:
     direct_beam = isis.io.load_tutorial_direct_beam(filename)
     sizes = {'spectrum': shape.sizes['spectrum'], **direct_beam.sizes}
@@ -193,10 +174,8 @@ def pixel_dependent_direct_beam(
     'uncertainties',
     [UncertaintyBroadcastMode.drop, UncertaintyBroadcastMode.upper_bound],
 )
-def test_pixel_dependent_direct_beam_is_supported(uncertainties):
-    params = make_params()
-    params[UncertaintyBroadcastMode] = uncertainties
-    pipeline = sciline.Pipeline(sans2d_providers(), params=params)
+def test_pixel_dependent_direct_beam_is_supported(pipeline, uncertainties):
+    pipeline[UncertaintyBroadcastMode] = uncertainties
     pipeline.insert(pixel_dependent_direct_beam)
     pipeline[BeamCenter] = sc.vector([0, 0, 0], unit='m')
     result = pipeline.compute(BackgroundSubtractedIofQ)
@@ -206,10 +185,7 @@ def test_pixel_dependent_direct_beam_is_supported(uncertainties):
 MANTID_BEAM_CENTER = sc.vector([0.09288, -0.08195, 0], unit='m')
 
 
-def test_beam_center_from_center_of_mass_is_close_to_verified_result():
-    params = make_params()
-    providers = sans2d_providers()
-    pipeline = sciline.Pipeline(providers, params=params)
+def test_beam_center_from_center_of_mass_is_close_to_verified_result(pipeline):
     center = sans.beam_center_from_center_of_mass(pipeline)
     # This is the result obtained from Mantid, using the full IofQ
     # calculation. The difference is about 3 mm in X or Y, probably due to a bias
@@ -217,20 +193,13 @@ def test_beam_center_from_center_of_mass_is_close_to_verified_result():
     assert sc.allclose(center, MANTID_BEAM_CENTER, atol=sc.scalar(3e-3, unit='m'))
 
 
-def test_beam_center_from_center_of_mass_independent_of_set_beam_center():
-    params = make_params()
-    providers = sans2d_providers()
-    pipeline = sciline.Pipeline(providers, params=params)
+def test_beam_center_from_center_of_mass_independent_of_set_beam_center(pipeline):
     pipeline[BeamCenter] = sc.vector([0.1, -0.1, 0], unit='m')
     center = sans.beam_center_from_center_of_mass(pipeline)
     assert sc.allclose(center, MANTID_BEAM_CENTER, atol=sc.scalar(3e-3, unit='m'))
 
 
-def test_beam_center_finder_without_direct_beam_reproduces_verified_result():
-    params = make_params()
-    del params[DirectBeamFilename]
-    providers = sans2d_providers()
-    pipeline = sciline.Pipeline(providers, params=params)
+def test_beam_center_finder_without_direct_beam_reproduces_verified_result(pipeline):
     pipeline[DirectBeam] = None
     center = sans.beam_center_finder.beam_center_from_iofq(
         workflow=pipeline, q_bins=sc.linspace('Q', 0.02, 0.3, 71, unit='1/angstrom')
@@ -238,20 +207,15 @@ def test_beam_center_finder_without_direct_beam_reproduces_verified_result():
     assert sc.allclose(center, MANTID_BEAM_CENTER, atol=sc.scalar(2e-3, unit='m'))
 
 
-def test_beam_center_can_get_closer_to_verified_result_with_low_counts_mask():
+def test_beam_center_can_get_closer_to_verified_result_with_low_counts_mask(pipeline):
     def low_counts_mask(
-        sample: RawDetector[SampleRun],
+        sample: DetectorData[SampleRun],
         low_counts_threshold: sans2d.LowCountThreshold,
     ) -> sans2d.SampleHolderMask:
         return sans2d.SampleHolderMask(sample.hist().data < low_counts_threshold)
 
-    params = make_params()
-    params[sans2d.LowCountThreshold] = sc.scalar(80.0, unit='counts')
-    del params[DirectBeamFilename]
-    providers = sans2d_providers()
-    providers.remove(sans2d.sample_holder_mask)
-    providers.append(low_counts_mask)
-    pipeline = sciline.Pipeline(providers, params=params)
+    pipeline[sans2d.LowCountThreshold] = sc.scalar(80.0, unit='counts')
+    pipeline.insert(low_counts_mask)  # replaces sans2d.sample_holder_mask
     pipeline[DirectBeam] = None
     q_bins = sc.linspace('Q', 0.02, 0.3, 71, unit='1/angstrom')
     center = sans.beam_center_finder.beam_center_from_iofq(
@@ -260,10 +224,7 @@ def test_beam_center_can_get_closer_to_verified_result_with_low_counts_mask():
     assert sc.allclose(center, MANTID_BEAM_CENTER, atol=sc.scalar(5e-4, unit='m'))
 
 
-def test_beam_center_finder_works_with_direct_beam():
-    params = make_params()
-    providers = sans2d_providers()
-    pipeline = sciline.Pipeline(providers, params=params)
+def test_beam_center_finder_works_with_direct_beam(pipeline):
     q_bins = sc.linspace('Q', 0.02, 0.3, 71, unit='1/angstrom')
     center_with_direct_beam = sans.beam_center_finder.beam_center_from_iofq(
         workflow=pipeline, q_bins=q_bins
@@ -273,10 +234,7 @@ def test_beam_center_finder_works_with_direct_beam():
     )
 
 
-def test_beam_center_finder_independent_of_set_beam_center():
-    params = make_params()
-    providers = sans2d_providers()
-    pipeline = sciline.Pipeline(providers, params=params)
+def test_beam_center_finder_independent_of_set_beam_center(pipeline):
     pipeline[BeamCenter] = sc.vector([0.1, -0.1, 0], unit='m')
     q_bins = sc.linspace('Q', 0.02, 0.3, 71, unit='1/angstrom')
     center_with_direct_beam = sans.beam_center_finder.beam_center_from_iofq(
@@ -287,11 +245,8 @@ def test_beam_center_finder_independent_of_set_beam_center():
     )
 
 
-def test_beam_center_finder_works_with_pixel_dependent_direct_beam():
+def test_beam_center_finder_works_with_pixel_dependent_direct_beam(pipeline):
     q_bins = sc.linspace('Q', 0.02, 0.3, 71, unit='1/angstrom')
-    params = make_params()
-    providers = sans2d_providers()
-    pipeline = sciline.Pipeline(providers, params=params)
     center_pixel_independent_direct_beam = (
         sans.beam_center_finder.beam_center_from_iofq(workflow=pipeline, q_bins=q_bins)
     )
@@ -304,8 +259,6 @@ def test_beam_center_finder_works_with_pixel_dependent_direct_beam():
         }
     ).copy()
 
-    providers = sans2d_providers()
-    pipeline = sciline.Pipeline(providers, params=params)
     pipeline[DirectBeam] = pixel_dependent_direct_beam
 
     center = sans.beam_center_finder.beam_center_from_iofq(
@@ -314,13 +267,11 @@ def test_beam_center_finder_works_with_pixel_dependent_direct_beam():
     assert sc.identical(center, center_pixel_independent_direct_beam)
 
 
-def test_workflow_runs_without_gravity_if_beam_center_is_provided():
-    params = make_params()
-    params[CorrectForGravity] = False
-    pipeline = sciline.Pipeline(sans2d_providers(), params=params)
-    da = pipeline.compute(RawDetector[SampleRun])
+def test_workflow_runs_without_gravity_if_beam_center_is_provided(pipeline):
+    pipeline[CorrectForGravity] = False
+    da = pipeline.compute(DetectorData[SampleRun])
     del da.coords['gravity']
-    pipeline[RawDetector[SampleRun]] = da
+    pipeline[DetectorData[SampleRun]] = da
     pipeline[BeamCenter] = MANTID_BEAM_CENTER
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('Q',)

@@ -24,7 +24,6 @@ from ess.sans.types import (
     IofQ,
     IofQxy,
     MaskedData,
-    NeXusDetectorName,
     Numerator,
     QBins,
     QxBins,
@@ -37,20 +36,17 @@ from ess.sans.types import (
 )
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import (
-    loki_providers,
-    make_params,
-)
+from common import make_workflow
 
 
 def test_can_create_pipeline():
-    pipeline = sciline.Pipeline(loki_providers(), params=make_params())
+    pipeline = make_workflow()
     pipeline[BeamCenter] = sc.vector([0, 0, 0], unit='m')
     pipeline.get(BackgroundSubtractedIofQ)
 
 
 def test_can_create_pipeline_with_pixel_masks():
-    pipeline = sciline.Pipeline(loki_providers(), params=make_params(no_masks=False))
+    pipeline = make_workflow(no_masks=False)
     pipeline = sans.with_pixel_mask_filenames(
         pipeline, loki.data.loki_tutorial_mask_filenames()
     )
@@ -64,9 +60,8 @@ def test_can_create_pipeline_with_pixel_masks():
 )
 @pytest.mark.parametrize('qxy', [False, True])
 def test_pipeline_can_compute_IofQ(uncertainties, qxy: bool):
-    params = make_params(no_masks=False)
-    params[UncertaintyBroadcastMode] = uncertainties
-    pipeline = sciline.Pipeline(loki_providers(), params=params)
+    pipeline = make_workflow(no_masks=False)
+    pipeline[UncertaintyBroadcastMode] = uncertainties
     pipeline = sans.with_pixel_mask_filenames(
         pipeline, loki.data.loki_tutorial_mask_filenames()
     )
@@ -74,14 +69,14 @@ def test_pipeline_can_compute_IofQ(uncertainties, qxy: bool):
     if qxy:
         result = pipeline.compute(BackgroundSubtractedIofQxy)
         assert result.dims == ('Qy', 'Qx')
-        assert sc.identical(result.coords['Qx'], params[QxBins])
-        assert sc.identical(result.coords['Qy'], params[QyBins])
+        assert sc.identical(result.coords['Qx'], pipeline.compute(QxBins))
+        assert sc.identical(result.coords['Qy'], pipeline.compute(QyBins))
         assert result.sizes['Qx'] == 90
         assert result.sizes['Qy'] == 77
     else:
         result = pipeline.compute(BackgroundSubtractedIofQ)
         assert result.dims == ('Q',)
-        assert sc.identical(result.coords['Q'], params[QBins])
+        assert sc.identical(result.coords['Q'], pipeline.compute(QBins))
         assert result.sizes['Q'] == 100
     if uncertainties == UncertaintyBroadcastMode.drop:
         test_dir = os.path.dirname(os.path.abspath(__file__))
@@ -104,9 +99,8 @@ def test_pipeline_can_compute_IofQ(uncertainties, qxy: bool):
     ],
 )
 def test_pipeline_can_compute_IofQ_in_event_mode(uncertainties, target):
-    params = make_params()
-    params[UncertaintyBroadcastMode] = uncertainties
-    pipeline = sciline.Pipeline(loki_providers(), params=params)
+    pipeline = make_workflow()
+    pipeline[UncertaintyBroadcastMode] = uncertainties
     pipeline[BeamCenter] = sans.beam_center_from_center_of_mass(pipeline)
     reference = pipeline.compute(target)
     pipeline[ReturnEvents] = True
@@ -138,14 +132,13 @@ def test_pipeline_can_compute_IofQ_in_event_mode(uncertainties, target):
 
 @pytest.mark.parametrize('qxy', [False, True])
 def test_pipeline_can_compute_IofQ_in_wavelength_bands(qxy: bool):
-    params = make_params()
-    params[WavelengthBands] = sc.linspace(
+    pipeline = make_workflow()
+    pipeline[WavelengthBands] = sc.linspace(
         'wavelength',
-        params[WavelengthBins].min(),
-        params[WavelengthBins].max(),
+        pipeline.compute(WavelengthBins).min(),
+        pipeline.compute(WavelengthBins).max(),
         11,
     )
-    pipeline = sciline.Pipeline(loki_providers(), params=params)
     pipeline[BeamCenter] = _compute_beam_center()
     result = pipeline.compute(
         BackgroundSubtractedIofQxy if qxy else BackgroundSubtractedIofQ
@@ -156,15 +149,13 @@ def test_pipeline_can_compute_IofQ_in_wavelength_bands(qxy: bool):
 
 @pytest.mark.parametrize('qxy', [False, True])
 def test_pipeline_can_compute_IofQ_in_overlapping_wavelength_bands(qxy: bool):
-    params = make_params()
+    pipeline = make_workflow()
     # Bands have double the width
-    edges = sc.linspace(
-        'band', params[WavelengthBins].min(), params[WavelengthBins].max(), 12
-    )
-    params[WavelengthBands] = sc.concat(
+    edges = pipeline.compute(WavelengthBins)
+    edges = sc.linspace('band', edges.min(), edges.max(), 12)
+    pipeline[WavelengthBands] = sc.concat(
         [edges[:-2], edges[2::]], dim='wavelength'
     ).transpose()
-    pipeline = sciline.Pipeline(loki_providers(), params=params)
     pipeline[BeamCenter] = _compute_beam_center()
     result = pipeline.compute(
         BackgroundSubtractedIofQxy if qxy else BackgroundSubtractedIofQ
@@ -175,9 +166,8 @@ def test_pipeline_can_compute_IofQ_in_overlapping_wavelength_bands(qxy: bool):
 
 @pytest.mark.parametrize('qxy', [False, True])
 def test_pipeline_can_compute_IofQ_in_layers(qxy: bool):
-    params = make_params()
-    params[DimsToKeep] = ['layer']
-    pipeline = sciline.Pipeline(loki_providers(), params=params)
+    pipeline = make_workflow()
+    pipeline[DimsToKeep] = ['layer']
     pipeline[BeamCenter] = _compute_beam_center()
     result = pipeline.compute(
         BackgroundSubtractedIofQxy if qxy else BackgroundSubtractedIofQ
@@ -187,13 +177,10 @@ def test_pipeline_can_compute_IofQ_in_layers(qxy: bool):
 
 
 def _compute_beam_center():
-    pipeline = sciline.Pipeline(loki_providers(), params=make_params())
-    return sans.beam_center_from_center_of_mass(pipeline)
+    return sans.beam_center_from_center_of_mass(make_workflow())
 
 
 def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs():
-    params = make_params()
-
     sample_runs = [
         loki.data.loki_tutorial_sample_run_60250(),
         loki.data.loki_tutorial_sample_run_60339(),
@@ -202,7 +189,7 @@ def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs():
         loki.data.loki_tutorial_background_run_60248(),
         loki.data.loki_tutorial_background_run_60393(),
     ]
-    pipeline = sciline.Pipeline(loki_providers(), params=params)
+    pipeline = make_workflow()
     pipeline[BeamCenter] = _compute_beam_center()
 
     pipeline = sans.with_sample_runs(pipeline, runs=sample_runs)
@@ -213,10 +200,7 @@ def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs():
 
 
 def test_pipeline_can_compute_IofQ_by_bank():
-    params = make_params()
-    del params[NeXusDetectorName]
-
-    pipeline = sciline.Pipeline(loki_providers(), params=params)
+    pipeline = make_workflow()
     pipeline[BeamCenter] = _compute_beam_center()
     pipeline = sans.with_banks(pipeline, banks=['larmor_detector'])
 
@@ -225,7 +209,6 @@ def test_pipeline_can_compute_IofQ_by_bank():
 
 
 def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs_by_bank():
-    params = make_params()
     sample_runs = [
         loki.data.loki_tutorial_sample_run_60250(),
         loki.data.loki_tutorial_sample_run_60339(),
@@ -234,7 +217,7 @@ def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs_by_bank():
         loki.data.loki_tutorial_background_run_60248(),
         loki.data.loki_tutorial_background_run_60393(),
     ]
-    pipeline = sciline.Pipeline(loki_providers(), params=params)
+    pipeline = make_workflow()
     pipeline[BeamCenter] = _compute_beam_center()
 
     pipeline = sans.with_sample_runs(pipeline, runs=sample_runs)
@@ -253,9 +236,8 @@ def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs_by_bank():
 
 def test_pipeline_IofQ_merging_events_yields_consistent_results():
     N = 3
-    params = make_params()
     center = _compute_beam_center()
-    pipeline_single = sciline.Pipeline(loki_providers(), params=params)
+    pipeline_single = make_workflow()
     pipeline_single[BeamCenter] = center
 
     sample_runs = [loki.data.loki_tutorial_sample_run_60339()] * N
@@ -285,8 +267,7 @@ def test_pipeline_IofQ_merging_events_yields_consistent_results():
 
 
 def test_beam_center_from_center_of_mass_is_close_to_verified_result():
-    params = make_params(no_masks=False)
-    pipeline = sciline.Pipeline(loki_providers(), params=params)
+    pipeline = make_workflow(no_masks=False)
     pipeline = sans.with_pixel_mask_filenames(
         pipeline, loki.data.loki_tutorial_mask_filenames()
     )
@@ -296,8 +277,7 @@ def test_beam_center_from_center_of_mass_is_close_to_verified_result():
 
 
 def test_phi_with_gravity():
-    params = make_params()
-    pipeline = sciline.Pipeline(loki_providers(), params=params)
+    pipeline = make_workflow()
     pipeline[BeamCenter] = _compute_beam_center()
     pipeline[CorrectForGravity] = False
     data_no_grav = pipeline.compute(

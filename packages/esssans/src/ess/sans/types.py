@@ -11,53 +11,36 @@ from typing import NewType, TypeVar
 
 import sciline
 import scipp as sc
+from ess.reduce.nexus import generic_types as reduce_gt
+from ess.reduce.nexus import types as reduce_t
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
 
+BackgroundRun = reduce_gt.BackgroundRun
+CalibratedDetector = reduce_gt.CalibratedDetector
+CalibratedMonitor = reduce_gt.CalibratedMonitor
+DetectorData = reduce_gt.DetectorData
+DetectorPositionOffset = reduce_gt.DetectorPositionOffset
+EmptyBeamRun = reduce_gt.EmptyBeamRun
+Filename = reduce_gt.Filename
+Incident = reduce_gt.Incident
+MonitorData = reduce_gt.MonitorData
+MonitorPositionOffset = reduce_gt.MonitorPositionOffset
+MonitorType = reduce_gt.MonitorType
+NeXusMonitorName = reduce_gt.NeXusMonitorName
+NeXusDetector = reduce_gt.NeXusDetector
+NeXusMonitor = reduce_gt.NeXusMonitor
+RunType = reduce_gt.RunType
+SampleRun = reduce_gt.SampleRun
+ScatteringRunType = reduce_gt.ScatteringRunType
+Transmission = reduce_gt.Transmission
+TransmissionRun = reduce_gt.TransmissionRun
+SamplePosition = reduce_gt.SamplePosition
+SourcePosition = reduce_gt.SourcePosition
+
+DetectorBankSizes = reduce_t.DetectorBankSizes
+NeXusDetectorName = reduce_t.NeXusDetectorName
+
 UncertaintyBroadcastMode = _UncertaintyBroadcastMode
-
-# 1  TypeVars used to parametrize the generic parts of the workflow
-
-# 1.1  Run types
-BackgroundRun = NewType('BackgroundRun', int)
-"""Background run: the run with only the solvent which the sample is placed in."""
-EmptyBeamRun = NewType('EmptyBeamRun', int)
-"""Run (sometimes called 'direct run') where the sample holder was empty.
-It is used for reading the data from the transmission monitor."""
-SampleRun = NewType('SampleRun', int)
-"""Sample run: the run with the sample placed in the solvent inside the sample holder.
-"""
-
-ScatteringRunType = TypeVar(
-    'ScatteringRunType',
-    SampleRun,
-    BackgroundRun,
-)
-
-
-class TransmissionRun(sciline.Scope[ScatteringRunType, int], int):
-    """Mapping between ScatteringRunType and transmission run.
-    In the case where no transmission run is provided, the transmission run should be
-    the same as the measurement (sample or background) run."""
-
-
-RunType = TypeVar(
-    'RunType',
-    BackgroundRun,
-    EmptyBeamRun,
-    SampleRun,
-    # Note that mypy does not seem to like this nesting, may need to find a workaround
-    TransmissionRun[SampleRun],
-    TransmissionRun[BackgroundRun],
-)
-"""TypeVar used for specifying BackgroundRun, EmptyBeamRun or SampleRun"""
-
-# 1.2  Monitor types
-Incident = NewType('Incident', int)
-"""Incident monitor"""
-Transmission = NewType('Transmission', int)
-"""Transmission monitor"""
-MonitorType = TypeVar('MonitorType', Incident, Transmission)
-"""TypeVar used for specifying Incident or Transmission monitor type"""
 
 # 1.3  Numerator and denominator of IofQ
 Numerator = NewType('Numerator', sc.DataArray)
@@ -68,9 +51,6 @@ IofQPart = TypeVar('IofQPart', Numerator, Denominator)
 """TypeVar used for specifying Numerator or Denominator of IofQ"""
 
 # 1.4  Entry paths in NeXus files
-NeXusDetectorName = NewType('NeXusDetectorName', str)
-"""Name of detector entry in NeXus file"""
-
 PixelShapePath = NewType('PixelShapePath', str)
 """
 Name of the entry where the pixel shape is stored in the NeXus file
@@ -147,18 +127,7 @@ OutFilename = NewType('OutFilename', str)
 """Filename of the output"""
 
 
-class NeXusMonitorName(sciline.Scope[MonitorType, str], str):
-    """Name of Incident|Transmission monitor in NeXus file"""
-
-
 PixelMaskFilename = NewType('PixelMaskFilename', str)
-
-FilenameType = TypeVar('FilenameType', bound=str)
-
-
-class Filename(sciline.Scope[RunType, str], str):
-    """Filename of a run"""
-
 
 DetectorIDs = NewType('DetectorIDs', sc.Variable)
 """1-D variable listing all detector IDs."""
@@ -172,22 +141,6 @@ DetectorMasks = NewType('DetectorMasks', dict[str, sc.Variable])
 
 
 # 3  Workflow (intermediate) results
-
-
-class RawSource(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
-    """Raw source from NeXus file"""
-
-
-class RawSample(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
-    """Raw sample from NeXus file"""
-
-
-class SamplePosition(sciline.Scope[RunType, sc.Variable], sc.Variable):
-    """Sample position"""
-
-
-class SourcePosition(sciline.Scope[RunType, sc.Variable], sc.Variable):
-    """Source position"""
 
 
 DirectBeam = NewType('DirectBeam', sc.DataArray | None)
@@ -219,40 +172,6 @@ class SolidAngle(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
 
 class MaskedSolidAngle(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Same as :py:class:`SolidAngle`, but with pixel masks applied"""
-
-
-class NeXusDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
-    """Detector data, loaded from a NeXus file, containing not only neutron events
-    but also pixel shape information, transformations, ..."""
-
-
-class NeXusMonitor(
-    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataGroup], sc.DataGroup
-):
-    """Monitor data loaded from a NeXus file, containing not only neutron events
-    but also transformations, ..."""
-
-
-class DetectorEventData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Event data loaded from a detector in a NeXus file"""
-
-
-class MonitorEventData(
-    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
-):
-    """Event data loaded from a monitor in a NeXus file"""
-
-
-class RawDetector(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
-    """Raw detector component extracted from :py:class:`NeXusDetector`"""
-
-
-class CalibratedDetector(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
-    """Calibrated version of raw detector"""
-
-
-class DetectorData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
-    """Calibrated detector with added raw event data"""
 
 
 class TofData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
@@ -332,20 +251,6 @@ BackgroundSubtractedIofQ = NewType('BackgroundSubtractedIofQ', sc.DataArray)
 
 BackgroundSubtractedIofQxy = NewType('BackgroundSubtractedIofQxy', sc.DataArray)
 """I(Qx, Qy) with background (given by I(Qx, Qy) of the background run) subtracted"""
-
-
-class RawMonitor(
-    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
-):
-    """Raw monitor data"""
-
-
-class RawMonitorData(
-    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
-):
-    """Raw monitor data where variances and necessary coordinates
-    (e.g. source position) have been added, and where optionally some
-    user configuration was applied to some of the coordinates."""
 
 
 class WavelengthMonitor(

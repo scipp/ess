@@ -8,19 +8,19 @@ import numpy as np
 import scipp as sc
 
 from .types import (
+    CalibratedDetector,
     DetectorIDs,
     DetectorMasks,
     MaskedData,
     MaskedDetectorIDs,
     PixelMaskFilename,
-    RawDetector,
     SampleRun,
     ScatteringRunType,
     TofData,
 )
 
 
-def get_detector_ids_from_detector(data: RawDetector[SampleRun]) -> DetectorIDs:
+def get_detector_ids_from_detector(data: CalibratedDetector[SampleRun]) -> DetectorIDs:
     """Extract detector IDs from a detector."""
     return DetectorIDs(
         data.coords[

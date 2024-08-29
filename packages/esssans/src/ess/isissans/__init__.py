@@ -3,9 +3,8 @@
 
 import importlib.metadata
 
-from . import components, general, io, sans2d, zoom
-from .components import DetectorBankOffset, MonitorOffset, SampleOffset
-from .general import default_parameters
+from . import general, io, sans2d, zoom
+from .general import default_parameters, SampleOffset, MonitorOffset, DetectorBankOffset
 from .io import CalibrationFilename
 from .visualization import plot_flat_detector_xy
 
@@ -14,17 +13,17 @@ try:
 except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
-providers = components.providers + general.providers + io.providers
+providers = general.providers
 
 del importlib
 
 __all__ = [
     'CalibrationFilename',
     'DetectorBankOffset',
-    'io',
     'MonitorOffset',
-    'providers',
     'SampleOffset',
+    'io',
+    'providers',
     'plot_flat_detector_xy',
     'sans2d',
     'default_parameters',

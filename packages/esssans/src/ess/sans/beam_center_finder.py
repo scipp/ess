@@ -13,12 +13,13 @@ from .conversions import ElasticCoordTransformGraph
 from .logging import get_logger
 from .types import (
     BeamCenter,
+    DetectorBankSizes,
     DimsToKeep,
     IofQ,
     MaskedData,
+    NeXusDetector,
     NormWavelengthTerm,
     QBins,
-    RawDetector,
     ReturnEvents,
     SampleRun,
     WavelengthBands,
@@ -168,7 +169,9 @@ def _iofq_in_quadrants(
     for i, quad in enumerate(quadrants):
         # Select pixels based on phi
         sel = (phi >= phi_bins[i]) & (phi < phi_bins[i + 1])
-        workflow[RawDetector[SampleRun]] = detector[sel]
+        # The beam center is applied when computing CalibratedDetector, set quadrant
+        # *before* that step.
+        workflow[NeXusDetector[SampleRun]] = sc.DataGroup(data=detector[sel])
         # MaskedData would be computed automatically, but we did it above already
         workflow[MaskedData[SampleRun]] = calibrated[sel]
         workflow[NormWavelengthTerm[SampleRun]] = (
@@ -358,29 +361,22 @@ def beam_center_from_iofq(
     logger.info('Using tolerance: %s', tolerance)
 
     keys = (
-        RawDetector[SampleRun],
+        NeXusDetector[SampleRun],
         MaskedData[SampleRun],
         NormWavelengthTerm[SampleRun],
         ElasticCoordTransformGraph,
     )
+    workflow = workflow.copy()
+    # Avoid reshape of detector, which would break boolean-indexing by cost function
+    workflow[DetectorBankSizes] = {}
     results = workflow.compute(keys)
-    detector = results[RawDetector[SampleRun]]
+    detector = results[NeXusDetector[SampleRun]]['data']
     data = results[MaskedData[SampleRun]]
     norm = results[NormWavelengthTerm[SampleRun]]
     graph = results[ElasticCoordTransformGraph]
 
-    # Flatten positions dim which is required during the iterations for slicing with a
-    # boolean mask
-    pos_dims = detector.coords['position'].dims
-    new_dim = uuid.uuid4().hex
-    detector = detector.flatten(dims=pos_dims, to=new_dim)
-    dims_to_flatten = [dim for dim in norm.dims if dim in pos_dims]
-    if dims_to_flatten:
-        norm = norm.flatten(dims=dims_to_flatten, to=new_dim)
-
-    workflow = workflow.copy()
     # Avoid reloading the detector
-    workflow[RawDetector[SampleRun]] = detector
+    workflow[NeXusDetector[SampleRun]] = sc.DataGroup(data=detector)
     workflow[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
     workflow[ReturnEvents] = False
     workflow[DimsToKeep] = ()
