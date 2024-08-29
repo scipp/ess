@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+import ess.loki.data  # noqa: F401
 import sciline
 import scipp as sc
 from ess import loki

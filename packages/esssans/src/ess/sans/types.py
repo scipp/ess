@@ -207,10 +207,16 @@ class CleanWavelength(
     """
 
 
-class CleanWavelengthMasked(
+class WavelengthScaledQ(
     sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
 ):
-    """Result of applying wavelength masking to :py:class:`CleanWavelength`"""
+    """Result of applying wavelength scaling/masking to :py:class:`CleanSummedQ`"""
+
+
+class WavelengthScaledQxy(
+    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
+):
+    """Result of applying wavelength scaling/masking to :py:class:`CleanSummedQxy`"""
 
 
 class CleanQ(

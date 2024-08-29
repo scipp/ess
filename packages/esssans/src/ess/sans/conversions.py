@@ -3,6 +3,7 @@
 from typing import NewType
 
 import scipp as sc
+from ess.reduce.uncertainty import broadcast_uncertainties
 from scippneutron.conversion.beamline import (
     beam_aligned_unit_vectors,
     scattering_angles_with_gravity,
@@ -13,18 +14,24 @@ from .common import mask_range
 from .types import (
     CleanQ,
     CleanQxy,
+    CleanSummedQ,
+    CleanSummedQxy,
     CleanWavelength,
-    CleanWavelengthMasked,
     CorrectForGravity,
+    Denominator,
     IofQPart,
     MaskedData,
+    MonitorTerm,
     MonitorType,
     Numerator,
     RunType,
     ScatteringRunType,
     TofMonitor,
+    UncertaintyBroadcastMode,
     WavelengthMask,
     WavelengthMonitor,
+    WavelengthScaledQ,
+    WavelengthScaledQxy,
 )
 
 
@@ -163,12 +170,44 @@ def detector_to_wavelength(
     )
 
 
-def mask_wavelength(
-    da: CleanWavelength[ScatteringRunType, IofQPart], mask: WavelengthMask
-) -> CleanWavelengthMasked[ScatteringRunType, IofQPart]:
+def mask_wavelength_q(
+    da: CleanSummedQ[ScatteringRunType, Numerator], mask: WavelengthMask
+) -> WavelengthScaledQ[ScatteringRunType, Numerator]:
     if mask is not None:
         da = mask_range(da, mask=mask)
-    return CleanWavelengthMasked[ScatteringRunType, IofQPart](da)
+    return CleanSummedQ[ScatteringRunType, Numerator](da)
+
+
+def mask_wavelength_qxy(
+    da: CleanSummedQxy[ScatteringRunType, Numerator], mask: WavelengthMask
+) -> WavelengthScaledQxy[ScatteringRunType, Numerator]:
+    if mask is not None:
+        da = mask_range(da, mask=mask)
+    return CleanSummedQxy[ScatteringRunType, Numerator](da)
+
+
+def mask_and_scale_wavelength_q(
+    da: CleanSummedQ[ScatteringRunType, Denominator],
+    mask: WavelengthMask,
+    wavelength_term: MonitorTerm[ScatteringRunType],
+    uncertainties: UncertaintyBroadcastMode,
+) -> WavelengthScaledQ[ScatteringRunType, Denominator]:
+    da = da * broadcast_uncertainties(wavelength_term, prototype=da, mode=uncertainties)
+    if mask is not None:
+        da = mask_range(da, mask=mask)
+    return WavelengthScaledQ[ScatteringRunType, Denominator](da)
+
+
+def mask_and_scale_wavelength_qxy(
+    da: CleanSummedQxy[ScatteringRunType, Denominator],
+    mask: WavelengthMask,
+    wavelength_term: MonitorTerm[ScatteringRunType],
+    uncertainties: UncertaintyBroadcastMode,
+) -> WavelengthScaledQxy[ScatteringRunType, Denominator]:
+    da = da * broadcast_uncertainties(wavelength_term, prototype=da, mode=uncertainties)
+    if mask is not None:
+        da = mask_range(da, mask=mask)
+    return WavelengthScaledQxy[ScatteringRunType, Denominator](da)
 
 
 def _compute_Q(
@@ -186,7 +225,7 @@ def _compute_Q(
 
 
 def compute_Q(
-    data: CleanWavelengthMasked[ScatteringRunType, IofQPart],
+    data: CleanWavelength[ScatteringRunType, IofQPart],
     graph: ElasticCoordTransformGraph,
 ) -> CleanQ[ScatteringRunType, IofQPart]:
     """
@@ -198,7 +237,7 @@ def compute_Q(
 
 
 def compute_Qxy(
-    data: CleanWavelengthMasked[ScatteringRunType, IofQPart],
+    data: CleanWavelength[ScatteringRunType, IofQPart],
     graph: ElasticCoordTransformGraph,
 ) -> CleanQxy[ScatteringRunType, IofQPart]:
     """
@@ -214,7 +253,10 @@ providers = (
     sans_monitor,
     monitor_to_wavelength,
     detector_to_wavelength,
-    mask_wavelength,
+    mask_wavelength_q,
+    mask_wavelength_qxy,
+    mask_and_scale_wavelength_q,
+    mask_and_scale_wavelength_qxy,
     compute_Q,
     compute_Qxy,
 )
