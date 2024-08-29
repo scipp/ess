@@ -46,6 +46,11 @@ SourceVelocities = variable_type('SourceVelocities')
 
 PrimarySpectrometerObject = NewType('PrimarySpectrometerObject', PrimarySpectrometer)
 
+FocusComponentName = NewType('FocusComponentName', str)
+FocusComponentNames = NewType('FocusComponentNames', list[FocusComponentName])
+PrimaryFocusDistance = variable_type('PrimaryFocusDistance')
+PrimaryFocusTime = variable_type('PrimaryFocusTime')
+
 LabMomentumTransfer = variable_type('MonmentumTransfer')
 LabMomentumTransferX = variable_type("LabMomentumTransferX")
 LabMomentumTransferY = variable_type("LabMomentumTransferY")
