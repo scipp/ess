@@ -35,7 +35,7 @@ from ..sans.types import (
     WavelengthMask,
 )
 
-DETECTOR_BANK_RESHAPING = {
+DETECTOR_BANK_SIZES = {
     'larmor_detector': {'layer': 4, 'tube': 32, 'straw': 7, 'pixel': 512}
 }
 
@@ -43,7 +43,7 @@ DETECTOR_BANK_RESHAPING = {
 def default_parameters() -> dict:
     return {
         CorrectForGravity: False,
-        DetectorBankSizes: DETECTOR_BANK_RESHAPING,
+        DetectorBankSizes: DETECTOR_BANK_SIZES,
         DimsToKeep: (),
         NeXusMonitorName[Incident]: 'monitor_1',
         NeXusMonitorName[Transmission]: 'monitor_2',
