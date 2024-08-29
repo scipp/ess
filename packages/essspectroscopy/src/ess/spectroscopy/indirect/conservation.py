@@ -27,8 +27,12 @@ def lab_momentum_z(q: LabMomentumTransfer) -> LabMomentumTransferZ:
     return dot(Z, q)
 
 
-def energy(ei: IncidentEnergy, ef: FinalEnergy) -> EnergyTransfer:
-    return ei - ef
+# def energy(ei: IncidentEnergy, ef: FinalEnergy) -> EnergyTransfer:
+#     return ei - ef
+
+def energy(ki: IncidentWavenumber, kf: FinalWavenumber) -> EnergyTransfer:
+    from scipp.constants import hbar, neutron_mass
+    return hbar * hbar * (ki * ki - kf * kf) / 2 / neutron_mass
 
 
 

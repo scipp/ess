@@ -21,6 +21,7 @@ def guess_source_name(file: NeXusFileName) -> SourceName:
         instrument = data['entry/instrument']
         return determine_name_with_type(instrument, name, [NXsource, NXmoderator], 'source')
 
+
 def guess_sample_name(file: NeXusFileName) -> SampleName:
     from scippnexus import NXsample, File
     with File(file) as data:
@@ -28,18 +29,66 @@ def guess_sample_name(file: NeXusFileName) -> SampleName:
         return determine_name_with_type(instrument, name, [NXsample], 'sample')
 
 
+def guess_focus_component_names(file: NeXusFileName) -> FocusComponentNames:
+    """Guess the names of the components which define the focus distance of a Primary Spectrometer
+
+    Note
+    ----
+    The order of components in the NeXus file must be consistent with the order of components along the beamline.
+    This assumes that only NXdisk_chopper are used to define a focus distance, and that the first chopper
+    or choppers along the beamline, within a fixed small distance, can define the focus distance.
+    The component type, primacy, and allowed distance range could be user configurable inputs
+    """
+    from scipp import scalar
+    from scippnexus import NXdisk_chopper, File, compute_positions
+    from ..utils import norm
+    allowance = scalar(0.5, unit='m')
+
+    with File(file) as data:
+        instrument = data['entry/instrument']
+        choppers = {k: compute_positions(v[...])['position'] for k, v in  instrument[NXdisk_chopper].items()}
+
+    names = list(choppers.keys())
+    focus_names = [FocusComponentName(names[0])]
+    last = choppers[names[0]]['position']
+    distance = 0 * allowance
+    for name in names[1:]:
+        x = choppers[name]['position']
+        distance += norm(x - last)
+        last = x
+        if distance <= allowance:
+            focus_names.append(FocusComponentName(name))
+        else:
+            break
+    return FocusComponentNames(focus_names)
+
+
 def source_position(file: NeXusFileName, source: SourceName) -> SourcePosition:
     from scippnexus import compute_positions, File
     with File(file) as data:
-        source = data['entry/instrument'][source][...]
-    return compute_positions(source)['position']
+        return compute_positions(data['entry/instrument'][source][...])['position']
 
 
 def sample_position(file: NeXusFileName, sample: SampleName) -> SamplePosition:
     from scippnexus import compute_positions, File
     with File(file) as data:
-        sample = data['entry/instrument'][sample][...]
-    return compute_positions(sample)['position']
+        return compute_positions(data['entry/instrument'][sample][...])['position']
+
+
+def focus_distance(file: NeXusFileName, origin: SourcePosition ,names: FocusComponentNames) -> PrimaryFocusDistance:
+    from scippnexus import compute_positions, File
+    from ..utils import norm
+    pos = 0 * origin
+    with File(file) as data:
+        for name in names:
+            pos += compute_positions(data['entry/instrument'][name][...])['position']
+    pos /= len(names)
+    return norm(pos - origin)
+
+
+def focus_time(primary: PrimarySpectrometerObject, distance: PrimaryFocusDistance) -> PrimaryFocusTime:
+    from choppera.nexus import primary_focus_time
+    return primary_focus_time(primary, distance)
 
 
 def primary_path_length(file: NeXusFileName, source: SourcePosition, sample: SamplePosition) -> SourceSamplePathLength:
@@ -85,9 +134,13 @@ def unwrap_sample_time(times: SampleFrameTime, frequency: SourceFrequency, least
     return choppera_unwrap(times, frequency, least)
 
 
-def ki_wavenumber(length: SourceSamplePathLength, time: SampleTime) -> IncidentWavenumber:
+def ki_wavenumber(length: SourceSamplePathLength, time: SampleTime,
+                  focus_distance: PrimaryFocusDistance, focus_time: PrimaryFocusTime) -> IncidentWavenumber:
     from scipp.constants import neutron_mass, hbar
-    velocity = length / time
+    from ..utils import in_same_unit
+    # when different wavelengths were likely to have left the source could be wavelength dependent
+    tof = time - in_same_unit(focus_time, to=time)
+    velocity = (length - focus_distance) / tof
     k = neutron_mass * velocity / hbar
     return k.to(unit='1/angstrom')
 
@@ -104,12 +157,15 @@ def ei(ki: IncidentWavenumber) -> IncidentEnergy:
 
 
 providers = [
-    primary_pivot_time,
-    primary_path_length,
     sample_position,
     source_position,
     guess_sample_name,
     guess_source_name,
-    unwrap_sample_time,
+    primary_path_length,
     primary_spectrometer,
+    primary_pivot_time,
+    unwrap_sample_time,
+    ki_wavenumber,
+    ki_wavevector,
+    ei,
 ]
