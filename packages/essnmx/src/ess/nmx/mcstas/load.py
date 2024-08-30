@@ -81,13 +81,12 @@ def load_crystal_rotation(
             raise KeyError(
                 f"Crystal rotations [{', '.join(param_keys)}] not found in file."
             )
-
-    return CrystalRotation(
-        sc.vector(
-            value=[file[param_key][...] for param_key in param_keys],
-            unit=instrument.simulation_settings.angle_unit,
+        return CrystalRotation(
+            sc.vector(
+                value=[file[param_key][...] for param_key in param_keys],
+                unit=instrument.simulation_settings.angle_unit,
+            )
         )
-    )
 
 
 def event_weights_from_probability(
