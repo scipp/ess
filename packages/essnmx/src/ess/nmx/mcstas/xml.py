@@ -175,14 +175,16 @@ class DetectorDesc:
 
         length_unit = simulation_settings.length_unit
 
+        # Type casting from str to float and then int to allow *e* notation
+        # For example, '1e4' -> 10000.0 -> 10_000
         return cls(
             component_type=type_desc.attrib['name'],
             name=component.attrib['name'],
-            id_start=int(component.attrib['idstart']),
+            id_start=int(float(component.attrib['idstart'])),
             fast_axis_name=fast_axis_name,
             slow_axis_name=slow_axis_name,
-            num_x=int(type_desc.attrib['xpixels']),
-            num_y=int(type_desc.attrib['ypixels']),
+            num_x=int(float(type_desc.attrib['xpixels'])),
+            num_y=int(float(type_desc.attrib['ypixels'])),
             step_x=sc.scalar(float(type_desc.attrib['xstep']), unit=length_unit),
             step_y=sc.scalar(float(type_desc.attrib['ystep']), unit=length_unit),
             start_x=float(type_desc.attrib['xstart']),
