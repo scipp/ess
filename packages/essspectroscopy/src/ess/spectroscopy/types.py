@@ -1,10 +1,14 @@
 from typing import Type, NewType
-from scipp import Variable
+from scipp import Variable, DataArray
 from choppera.primary import PrimarySpectrometer
 
+def make_scipp_named_typer(scipp_type):
+    def typer(named: str) -> Type[scipp_type]:
+        return NewType(named, scipp_type)
+    return typer
 
-def variable_type(named: str) -> Type[Variable]:
-    return NewType(named, Variable)
+variable_type = make_scipp_named_typer(Variable)
+data_array_type = make_scipp_named_typer(DataArray)
 
 
 NeXusFileName = NewType('NeXusFileName', str)
@@ -19,11 +23,15 @@ AnalyzerDetectorVector = variable_type('AnalyzerDetectorVector')
 SampleAnalyzerDirection = variable_type('SampleAnalyzerDirection')
 ReciprocalLatticeVectorAbsolute = variable_type('ReciprocalLatticeVectorAbsolute')
 ReciprocalLatticeSpacing = variable_type('ReciprocalLatticeSpacing')
-IncidentWavevectorDirection = variable_type('IncidentWavevectorDirection')
+IncidentDirection = variable_type('IncidentDirection')
+IncidentSlowness = variable_type('IncidentSlowness')
+IncidentWavelength = variable_type('IncidentWavelength')
 IncidentWavenumber = variable_type('IncidentWavenumber')
 IncidentWavevector = variable_type('IncidentWavevector')
 IncidentEnergy = variable_type('IncidentEnergy')
-FinalWavevectorDirection = variable_type('FinalWavevectorDirection')
+FinalDirection = variable_type('FinalDirection')
+FinalSlowness = variable_type('FinalSlowness')
+FinalWavelength = variable_type('FinalWavelength')
 FinalWavenumber = variable_type('FinalWavenumber')
 FinalWavevector = variable_type('FinalWavevector')
 FinalEnergy = variable_type('FinalEnergy')
@@ -51,7 +59,15 @@ FocusComponentNames = NewType('FocusComponentNames', list[FocusComponentName])
 PrimaryFocusDistance = variable_type('PrimaryFocusDistance')
 PrimaryFocusTime = variable_type('PrimaryFocusTime')
 
-LabMomentumTransfer = variable_type('MonmentumTransfer')
+SourceMonitorPathLength = variable_type('SourceMonitorPathLength')
+SourceMonitorFlightTime = variable_type('SourceMonitorFlightTime')
+FrameTimeMonitor = data_array_type('FrameTimeMonitor')
+WallTimeMonitor = data_array_type('WallTimeMonitor')
+SlownessMonitor = data_array_type('SlownessMonitor')
+
+MonitorNormalisation = variable_type('MonitorNormalisation')
+
+LabMomentumTransfer = variable_type('LabMomentumTransfer')
 LabMomentumTransferX = variable_type("LabMomentumTransferX")
 LabMomentumTransferY = variable_type("LabMomentumTransferY")
 LabMomentumTransferZ = variable_type("LabMomentumTransferZ")
