@@ -134,24 +134,34 @@ def unwrap_sample_time(times: SampleFrameTime, frequency: SourceFrequency, least
     return choppera_unwrap(times, frequency, least)
 
 
-def ki_wavenumber(length: SourceSamplePathLength, time: SampleTime,
-                  focus_distance: PrimaryFocusDistance, focus_time: PrimaryFocusTime) -> IncidentWavenumber:
-    from scipp.constants import neutron_mass, hbar
+def incident_slowness(length: SourceSamplePathLength, time: SampleTime,
+                      distance: PrimaryFocusDistance, focus: PrimaryFocusTime) -> IncidentSlowness:
     from ..utils import in_same_unit
-    # when different wavelengths were likely to have left the source could be wavelength dependent
-    tof = time - in_same_unit(focus_time, to=time)
-    velocity = (length - focus_distance) / tof
-    k = neutron_mass * velocity / hbar
-    return k.to(unit='1/angstrom')
+    tof = time - in_same_unit(focus, to=time)
+    slowness = tof / (length - distance)  # slowness _is_ inverse velocity
+    return slowness
 
 
-def ki_wavevector(ki_magnitude: IncidentWavenumber) -> IncidentWavevector:
+def incident_wavelength(slowness: IncidentSlowness) -> IncidentWavelength:
+    from scipp.constants import neutron_mass, Planck
+    return (slowness * Planck / neutron_mass).to(unit='angstrom')
+
+
+def incident_wavenumber(slowness: IncidentSlowness) -> IncidentWavenumber:
+    from scipp.constants import neutron_mass, hbar
+    return (neutron_mass / hbar / slowness).to(unit='1/angstrom')
+
+
+def incident_direction() -> IncidentDirection:
     from scipp import vector
-    z = vector([0, 0, 1.])
-    return ki_magnitude * z
+    return vector([0, 0, 1.])
 
 
-def ei(ki: IncidentWavenumber) -> IncidentEnergy:
+def incident_wavevector(ki_magnitude: IncidentWavenumber, direction: IncidentDirection) -> IncidentWavevector:
+    return ki_magnitude * direction
+
+
+def incident_energy(ki: IncidentWavenumber) -> IncidentEnergy:
     from scipp.constants import hbar, neutron_mass
     return ((hbar * hbar / 2 / neutron_mass) * ki * ki).to(unit='meV')
 
@@ -161,11 +171,17 @@ providers = [
     source_position,
     guess_sample_name,
     guess_source_name,
+    guess_focus_component_names,
+    focus_distance,
+    focus_time,
     primary_path_length,
     primary_spectrometer,
     primary_pivot_time,
     unwrap_sample_time,
-    ki_wavenumber,
-    ki_wavevector,
-    ei,
+    incident_direction,
+    incident_slowness,
+    incident_wavelength,
+    incident_wavenumber,
+    incident_wavevector,
+    incident_energy,
 ]
