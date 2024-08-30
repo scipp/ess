@@ -67,12 +67,27 @@ def load_raw_event_data(
 def load_crystal_rotation(
     file_path: FilePath, instrument: McStasInstrument
 ) -> CrystalRotation:
-    """Retrieve crystal rotation from the file."""
+    """Retrieve crystal rotation from the file.
+
+    Raises
+    ------
+    KeyError
+        If the crystal rotation is not found in the file.
+
+    """
     with snx.File(file_path, 'r') as file:
-        return sc.vector(
-            value=[file[f"entry1/simulation/Param/XtalPhi{key}"][...] for key in "XYZ"],
+        param_keys = tuple(f"entry1/simulation/Param/XtalPhi{key}" for key in "XYZ")
+        if not all(key in file for key in param_keys):
+            raise KeyError(
+                f"Crystal rotations [{', '.join(param_keys)}] not found in file."
+            )
+
+    return CrystalRotation(
+        sc.vector(
+            value=[file[param_key][...] for param_key in param_keys],
             unit=instrument.simulation_settings.angle_unit,
         )
+    )
 
 
 def event_weights_from_probability(
