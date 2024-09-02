@@ -1,6 +1,4 @@
 from __future__ import annotations
-
-from .ki import incident_energy
 from ..types import *
 
 
@@ -123,6 +121,7 @@ def get_unwrapped_events(filename, source_name, sample_name, sample_events, focu
         SourceDelay: ess_source_delay(),
         SourceDuration: ess_source_duration(),
         SourceFrequency: ess_source_frequency(),
+        SourceVelocities: ess_source_velocities(),
         SampleFrameTime: sample_events.data.bins.coords['frame_time'],
         FocusComponentNames: focus_components
     }
@@ -130,7 +129,7 @@ def get_unwrapped_events(filename, source_name, sample_name, sample_events, focu
     primary = pipeline.get(PrimarySpectrometerObject).compute()
 
     events = sample_events.copy()
-    events.bins.coords['frame_time'] = primary.get(SampleTime).compute()
+    events.bins.coords['frame_time'] = pipeline.get(SampleTime).compute()
     return params, events, primary
 
 
@@ -204,4 +203,9 @@ def bifrost(filename: NeXusFileName,
 
     ei, en, ef = get_energy_axes(ki_params, kf_params)
 
-    return triplet_events, sample_events, unwrapped_events, norm_monitor, ei, en, ef
+    energy_events = sample_events.copy()
+    energy_events.bins.coords['energy_transfer'] = en.to(unit='meV')
+    energy_events.bins.coords['incident_energy'] = ei
+    energy_events.coords['final_energy'] = ef
+
+    return triplet_events, sample_events, unwrapped_events, norm_monitor, energy_events
