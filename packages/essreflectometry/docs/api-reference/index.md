@@ -32,6 +32,7 @@
    orso
    supermirror
    types
+   tools
 ```
 
 ## Amor
