@@ -154,7 +154,7 @@ def reciprocal_lattice_spacing(tau_vector: ReciprocalLatticeVectorAbsolute):
     return norm(tau_vector)
 
 
-def kf_wavenumber(
+def final_wavenumber(
         sample_analyzer_vec: SampleAnalyzerVector,
         analyzer_detector_vec: AnalyzerDetectorVector,
         tau: ReciprocalLatticeSpacing
@@ -174,12 +174,12 @@ def kf_wavenumber(
     return tau / sqrt(2 - 2 * cos2theta)
 
 
-def ef(kf: FinalWavenumber) -> FinalEnergy:
+def final_energy(kf: FinalWavenumber) -> FinalEnergy:
     from scipp.constants import hbar, neutron_mass
     return ((hbar * hbar / 2 / neutron_mass) * kf * kf).to(unit='meV')
 
 
-def kf_vector(
+def final_wavevector(
         kf_direction: SampleAnalyzerDirection,
         kf_magnitude: FinalWavenumber
 ) -> FinalWavevector:
@@ -214,10 +214,10 @@ providers = [
     sample_analyzer_vector,
     analyzer_detector_vector,
     kf_hat,
-    kf_wavenumber,
-    kf_vector,
+    final_wavenumber,
+    final_wavevector,
     secondary_flight_path_length,
     secondary_flight_time,
     sample_frame_time,
-    ef
+    final_energy
 ]
