@@ -20,13 +20,13 @@ cyclebane==24.6.0
     # via sciline
 cycler==0.12.1
     # via matplotlib
-dask==2024.8.1
+dask==2024.8.2
     # via -r nightly.in
 decorator==5.1.1
     # via ipython
 essreduce @ git+https://github.com/scipp/essreduce@main
     # via -r nightly.in
-executing==2.0.1
+executing==2.1.0
     # via stack-data
 fonttools==4.53.1
     # via matplotlib
