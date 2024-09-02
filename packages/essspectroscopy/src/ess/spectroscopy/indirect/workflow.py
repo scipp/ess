@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+from .conservation import energy
 from ..types import *
 
 
@@ -70,7 +72,7 @@ def combine_analyzers(analyzers, triplets):
     return data
 
 def combine_detectors(triplets):
-    from scipp import Dataset, concat
+    from scipp import Dataset, concat, sort
     def extract(obj):
         pixels = obj['data'].coords['detector_number']
         midpoints = obj['data'].coords['position']
@@ -78,7 +80,7 @@ def combine_detectors(triplets):
 
     data = concat([extract(v) for v in triplets.values()], dim='arm')
     data = Dataset({k: v.flatten(to='event_id') for k, v in data.items()})
-    return data
+    return sort(data, data['event_id'].data)
 
 
 def find_sample_detector_flight_time(sample, analyzers, detectors):
@@ -208,4 +210,14 @@ def bifrost(filename: NeXusFileName,
     energy_events.bins.coords['incident_energy'] = ei
     energy_events.coords['final_energy'] = ef
 
-    return triplet_events, sample_events, unwrapped_events, norm_monitor, energy_events
+    #return triplet_events, sample_events, unwrapped_events, norm_monitor, energy_events, sample_detector_flight_time, analyzers, detectors
+    return {
+        'triplet_events': triplet_events,
+        'sample_events': sample_events,
+        'unwrapped_events': unwrapped_events,
+        'norm_monitor': norm_monitor,
+        'energy_events': energy_events,
+        'sample_detector_flight_time': sample_detector_flight_time,
+        'analyzers': analyzers,
+        'detectors': detectors,
+    }
