@@ -1,4 +1,6 @@
 """Utilities for the primary spectrometer of an indirect geometry time-of-flight spectrometer"""
+from __future__ import annotations
+
 #TODO move elsewhere since possibly (probably) too specific to BIFROST.
 
 from ess.spectroscopy.types import *
@@ -7,7 +9,7 @@ from scippnexus import Group
 def determine_name_with_type(instrument: Group, name: str | None, options: list, type_name: str) -> str:
     if name is not None and name in instrument:
         return name
-    foud = {x for x in instrument if type_name in x.lower()}
+    found = {x for x in instrument if type_name in x.lower()}
     for option in options:
         found.update(set(instrument[option]))
     if len(found) != 1:
@@ -19,14 +21,16 @@ def guess_source_name(file: NeXusFileName) -> SourceName:
     from scippnexus import NXsource, NXmoderator, File
     with File(file) as data:
         instrument = data['entry/instrument']
-        return determine_name_with_type(instrument, name, [NXsource, NXmoderator], 'source')
+        name = determine_name_with_type(instrument, None, [NXsource, NXmoderator], 'source')
+        return SourceName(name)
 
 
 def guess_sample_name(file: NeXusFileName) -> SampleName:
     from scippnexus import NXsample, File
     with File(file) as data:
         instrument = data['entry/instrument']
-        return determine_name_with_type(instrument, name, [NXsample], 'sample')
+        name = determine_name_with_type(instrument, None, [NXsample], 'sample')
+        return SampleName(name)
 
 
 def guess_focus_component_names(file: NeXusFileName) -> FocusComponentNames:
