@@ -27,8 +27,6 @@ graphviz==0.20.3
     # via -r base.in
 h5py==3.11.0
     # via scippnexus
-importlib-metadata==8.4.0
-    # via dask
 kiwisolver==1.4.5
     # via matplotlib
 locket==1.0.0
@@ -66,7 +64,7 @@ sciline==24.6.3
     # via
     #   -r base.in
     #   essreduce
-scipp==24.8.0
+scipp==24.9.1
     # via
     #   -r base.in
     #   essreduce
@@ -83,5 +81,3 @@ toolz==0.12.1
     # via
     #   dask
     #   partd
-zipp==3.20.1
-    # via importlib-metadata
