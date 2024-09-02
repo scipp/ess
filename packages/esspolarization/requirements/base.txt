@@ -21,8 +21,6 @@ graphviz==0.20.3
     # via -r base.in
 h5py==3.11.0
     # via scippnexus
-importlib-metadata==8.2.0
-    # via dask
 locket==1.0.0
     # via partd
 networkx==3.3
@@ -43,7 +41,7 @@ pyyaml==6.0.2
     # via dask
 sciline==24.6.2
     # via -r base.in
-scipp==24.6.0
+scipp==24.9.1
     # via
     #   -r base.in
     #   essreduce
@@ -60,5 +58,3 @@ toolz==0.12.1
     # via
     #   dask
     #   partd
-zipp==3.19.2
-    # via importlib-metadata
