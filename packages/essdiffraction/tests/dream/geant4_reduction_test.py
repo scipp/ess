@@ -29,14 +29,6 @@ from ess.powder.types import (
     WavelengthMask,
 )
 
-
-@pytest.fixture
-def providers():
-    from ess.dream.io.geant4 import providers as geant4_providers
-
-    return [*powder.providers, *geant4_providers]
-
-
 sample = sc.DataGroup(position=sc.vector([0.0, 0.0, 0.0], unit='mm'))
 source = sc.DataGroup(position=sc.vector([-3.478, 0.0, -76550], unit='mm'))
 charge = sc.scalar(1.0, unit='µAh')
