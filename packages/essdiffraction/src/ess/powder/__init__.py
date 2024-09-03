@@ -35,12 +35,12 @@ providers = (
 """Sciline providers for powder diffraction."""
 
 __all__ = [
+    "__version__",
     "conversion",
     "correction",
     "filtering",
     "grouping",
     "masking",
-    "nexus",
     "transform",
     "providers",
     "smoothing",
