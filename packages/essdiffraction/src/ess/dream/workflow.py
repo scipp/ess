@@ -13,6 +13,7 @@ from ess.powder.types import (
     VanadiumRun,
 )
 
+from .io.cif import CIFAuthors
 from .io.geant4 import LoadGeant4Workflow
 
 
@@ -28,6 +29,7 @@ def default_parameters() -> dict:
         NeXusSource[VanadiumRun]: source,
         AccumulatedProtonCharge[SampleRun]: charge,
         AccumulatedProtonCharge[VanadiumRun]: charge,
+        CIFAuthors: CIFAuthors([]),
     }
 
 
