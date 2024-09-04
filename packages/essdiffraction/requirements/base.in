@@ -9,6 +9,6 @@ numpy
 plopp
 pythreejs
 sciline>=24.06.0
-scipp>=23.8.0
+scipp>=24.09.1
 scippneutron>=24.5.0
 scippnexus>=23.12.0
