@@ -43,8 +43,7 @@ def normalization_factor(
 
     """
     sample_q = (
-        da.bins.concat(set(da.dims) - set(da.coords["z_index"].dims))
-        .bin(wavelength=wbins)
+        da.bin(wavelength=wbins, dim=set(da.dims) - set(da.coords["z_index"].dims))
         .bins.coords["Q"]
         .bins.mean()
     )
@@ -112,7 +111,7 @@ def reflectivity_over_q(
         Reflectivity as a function of Q
     """
     return NormalizedIofQ(
-        da.bins.concat().bin(Q=qbins) / sc.values(n.flatten(to="Q").hist(Q=qbins))
+        da.bin(Q=qbins, dim=da.dims) / sc.values(n.hist(Q=qbins, dim=n.dims))
     )
 
 

@@ -37,7 +37,7 @@ dependencies = [
   "pythreejs",
   "orsopy",
   "sciline>=24.6.0",
-  "scipp>=23.8.0",
+  "scipp>=24.09.1",  # Fixed new hist/bin API
   "scippneutron>=24.7.0",
   "essreduce",
 ]

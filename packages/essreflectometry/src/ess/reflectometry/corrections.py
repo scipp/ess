@@ -57,7 +57,7 @@ def compute_reference_intensity(
         with the experiment parameters (such as sample rotation).
         Therefore it can be used to normalize sample measurements.
     """
-    b = da.bins.concat(set(da.dims) - set(da.coords["z_index"].dims)).bin(wavelength=wb)
+    b = da.bin(wavelength=wb, dim=set(da.dims) - set(da.coords["z_index"].dims))
     h = b.hist()
     h.masks["too_few_events"] = h.data < sc.scalar(1, unit="counts")
     # Add a Q coordinate to each bin, the Q is not completely unique in every bin,
