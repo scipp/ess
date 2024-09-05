@@ -38,8 +38,8 @@ class ImageKey(Enum):
     """Image key values."""
 
     SAMPLE = 0
-    DARK_CURRENT = 1
-    OPEN_BEAM = 2
+    OPEN_BEAM = 1
+    DARK_CURRENT = 2
 
 
 def load_nexus_histogram_mode_detector_data(
