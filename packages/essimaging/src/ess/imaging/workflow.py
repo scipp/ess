@@ -6,9 +6,10 @@ from .io import (
     apply_logs_as_coords,
     derive_image_key_coord,
     derive_rotation_angle_coord,
-    load_image_key_logs,
-    load_nexus_histogram_mode_detector_data,
+    load_nexus_histogram_mode_detector,
     load_nexus_rotation_logs,
+    separate_detector_images,
+    separate_image_key_logs,
 )
 from .types import (
     DEFAULT_HISTOGRAM_PATH,
@@ -24,9 +25,10 @@ def YmirWorkflow() -> sl.Pipeline:
             apply_logs_as_coords,
             derive_image_key_coord,
             derive_rotation_angle_coord,
-            load_image_key_logs,
-            load_nexus_histogram_mode_detector_data,
             load_nexus_rotation_logs,
+            load_nexus_histogram_mode_detector,
+            separate_detector_images,
+            separate_image_key_logs,
         ),
         params={
             HistogramModeDetectorsPath: DEFAULT_HISTOGRAM_PATH,
