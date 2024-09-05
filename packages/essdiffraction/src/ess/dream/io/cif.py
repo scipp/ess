@@ -32,9 +32,15 @@ class CIFAuthors:
 def save_reduced_dspacing(
     da: IofDspacing, *, filename: OutFilename, authors: CIFAuthors
 ) -> IofDspacing:
-    to_save = da if da.bins is None else da.hist()
+    to_save = _prepare_data(da)
     cif.save_cif(filename, _make_dspacing_block(to_save, authors=authors))
     return da
+
+
+def _prepare_data(da: sc.DataArray) -> sc.DataArray:
+    hist = da.copy(deep=False) if da.bins is None else da.hist()
+    hist.coords[hist.dim] = sc.midpoints(hist.coords[hist.dim])
+    return hist
 
 
 def _make_dspacing_block(da: sc.DataArray, authors: CIFAuthors) -> cif.Block:
@@ -44,21 +50,10 @@ def _make_dspacing_block(da: sc.DataArray, authors: CIFAuthors) -> cif.Block:
             _make_audit_chunk(),
             _make_source_chunk(),
             *_make_author_chunks(authors),
-            _make_dspacing_loop(da),
         ],
     )
+    block.add_reduced_powder_data(da)
     return block
-
-
-def _make_dspacing_loop(da: sc.DataArray) -> cif.Loop:
-    return cif.Loop(
-        {
-            'pd_proc.d_spacing': sc.midpoints(da.coords['dspacing']),
-            'pd_proc.intensity_net': sc.values(da.data),
-            'pd_proc.intensity_su': sc.stddevs(da.data),
-        },
-        schema=cif.PD_SCHEMA,
-    )
 
 
 def _make_source_chunk() -> cif.Chunk:
