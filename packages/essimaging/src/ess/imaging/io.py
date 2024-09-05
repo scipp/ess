@@ -7,8 +7,6 @@ from itertools import pairwise
 from pathlib import Path
 from typing import NewType
 
-import h5py
-import numpy as np
 import scipp as sc
 import scippnexus as snx
 from tifffile import imwrite
@@ -24,6 +22,8 @@ from .types import (
     RotationMotionSensorName,
 )
 
+HistogramModeDetector = NewType("HistogramModeDetector", sc.DataGroup)
+"""Histogram mode detector data group."""
 HistogramModeDetectorData = NewType("HistogramModeDetectorData", sc.DataArray)
 """Histogram mode detector data."""
 ImageKeyCoord = NewType("ImageKeyCoord", sc.Variable)
@@ -42,72 +42,33 @@ class ImageKey(Enum):
     DARK_CURRENT = 2
 
 
-def load_nexus_histogram_mode_detector_data(
+def load_nexus_histogram_mode_detector(
     *,
     file_path: FilePath,
     image_detector_name: ImageDetectorName,
     histogram_mode_detectors_path: HistogramModeDetectorsPath = DEFAULT_HISTOGRAM_PATH,
-) -> HistogramModeDetectorData:
-    with h5py.File(file_path, mode="r") as f:
-        detector_dataset = f[
-            f"{histogram_mode_detectors_path}/{image_detector_name}/data"
-        ]
-        x_length, y_length = detector_dataset["value"].shape[1:]
-        return HistogramModeDetectorData(
-            sc.sort(
-                sc.DataArray(
-                    data=sc.array(
-                        dims=["time", "x", "y"],
-                        values=detector_dataset['value'][()].astype(np.int32),
-                        unit='counts',
-                    ),
-                    coords={
-                        "time": sc.datetimes(
-                            dims=["time"],
-                            values=detector_dataset["time"][()],
-                            unit='ns',
-                        ),
-                        "x": sc.arange(dim="x", start=0, stop=x_length),
-                        "y": sc.arange(dim="y", start=0, stop=y_length),
-                    },
-                ),
-                'time',
-            )
-        )
-
-
-def _load_log_as_data_array(*, file_path: FilePath, log_path: str) -> sc.DataArray:
+) -> HistogramModeDetector:
     with snx.File(file_path, mode="r") as f:
-        logs: sc.DataArray = f[log_path][()]['value']
-
-    unnecessary_coords = [key for key in logs.coords if key != 'time']
-    return ImageKeyLogs(logs.drop_coords(unnecessary_coords))
-
-
-def load_image_key_logs(
-    *,
-    file_path: FilePath,
-    detector_name: ImageDetectorName,
-    histogram_mode_detectors_path: HistogramModeDetectorsPath = DEFAULT_HISTOGRAM_PATH,
-) -> ImageKeyLogs:
-    return ImageKeyLogs(
-        _load_log_as_data_array(
-            file_path=file_path,
-            log_path=f"{histogram_mode_detectors_path}/{detector_name}/image_key",
+        return HistogramModeDetector(
+            f[f"{histogram_mode_detectors_path}/{image_detector_name}"][()]
         )
-    )
+
+
+def separate_detector_images(dg: HistogramModeDetector) -> HistogramModeDetectorData:
+    return HistogramModeDetectorData(sc.sort(dg['data'], 'time'))
+
+
+def separate_image_key_logs(*, dg: HistogramModeDetector) -> ImageKeyLogs:
+    return ImageKeyLogs(dg['image_key']['value'])
 
 
 def load_nexus_rotation_logs(
     file_path: FilePath,
     motion_sensor_name: RotationMotionSensorName,
 ) -> RotationLogs:
-    return RotationLogs(
-        _load_log_as_data_array(
-            file_path=file_path,
-            log_path=f"entry/instrument/{motion_sensor_name}/rotation_stage_readback",
-        )
-    )
+    log_path = f"entry/instrument/{motion_sensor_name}/rotation_stage_readback"
+    with snx.File(file_path, mode="r") as f:
+        return RotationLogs(f[log_path][()]['value'])
 
 
 def derive_log_coord_by_range(
