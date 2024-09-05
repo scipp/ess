@@ -256,10 +256,10 @@ def export_image_stacks_as_tiff(
 
     _validate_output_dir(output_path)
 
-    for image_key in progress_wrapper(set(image_stacks.coords['image_key'].values)):
-        cur_images = image_stacks[
-            image_stacks.coords['image_key'] == sc.scalar(image_key)
-        ]
+    image_keys = image_stacks.coords['image_key']
+    for image_key in progress_wrapper(set(image_keys.values)):
+        cur_key = sc.scalar(image_key, unit=image_keys.unit, dtype=image_keys.dtype)
+        cur_images = image_stacks[image_stacks.coords['image_key'] == cur_key]
         if merge_image_by_key:
             _save_merged_images(
                 image_stacks=ImageStacks(cur_images),
