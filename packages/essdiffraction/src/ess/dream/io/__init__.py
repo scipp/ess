@@ -5,6 +5,8 @@
 
 from . import nexus
 from .geant4 import load_geant4_csv
-from .cif import save_reduced_dspacing
+from .cif import prepare_reduced_dspacing_cif
 
-__all__ = ["nexus", "load_geant4_csv", "save_reduced_dspacing"]
+providers = (prepare_reduced_dspacing_cif,)
+
+__all__ = ["nexus", "load_geant4_csv", "prepare_reduced_dspacing_cif", "providers"]

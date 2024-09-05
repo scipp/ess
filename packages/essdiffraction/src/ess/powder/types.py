@@ -16,6 +16,7 @@ import scipp as sc
 from ess.reduce.nexus import generic_types as reduce_gt
 from ess.reduce.nexus import types as reduce_t
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
+from scippneutron.io import cif
 
 # 1 TypeVars used to parametrize the generic parts of the workflow
 
@@ -164,5 +165,11 @@ TwoThetaMask = NewType("TwoThetaMask", Callable | None)
 WavelengthMask = NewType("WavelengthMask", Callable | None)
 """WavelengthMask is a callable that returns a mask for a given WavelengthData."""
 
+
+CIFAuthors = NewType('CIFAuthors', list[cif.Author])
+"""List of authors to save to output CIF files."""
+
+ReducedDspacingCIF = NewType('ReducedDspacingCIF', cif.CIF)
+"""Reduced data in d-spacing, ready to be saved to a CIF file."""
 
 del sc, sciline, NewType, TypeVar

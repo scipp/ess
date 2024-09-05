@@ -2,17 +2,14 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 import io
-import re
-from typing import Any
 
 import pytest
 import scipp as sc
+from scippneutron.io import cif
 
 import ess.dream.io.cif
-from ess.dream.io.cif import CIFAuthor, CIFAuthors
+from ess.dream.io.cif import CIFAuthors
 from ess.powder.types import IofDspacing
-
-# TODO many more
 
 
 @pytest.fixture()
@@ -25,107 +22,29 @@ def iofd() -> IofDspacing:
     )
 
 
-def save_reduced_dspacing_to_str(*args: Any, **kwargs: Any) -> str:
+def save_reduced_dspacing_to_str(cif_: cif.CIF) -> str:
     buffer = io.StringIO()
-    ess.dream.io.cif.save_reduced_dspacing(*args, filename=buffer, **kwargs)
+    cif_.save(buffer)
     buffer.seek(0)
     return buffer.read()
 
 
-def test_save_reduced_dspacing_writes_contact_author(iofd: IofDspacing) -> None:
-    authors = CIFAuthors(
-        [
-            CIFAuthor(
-                name='Jane Doe',
-                email='jane.doe@ess.eu',
-                address='Partikelgatan, Lund',
-                id_orcid='https://orcid.org/0000-0000-0000-0001',
-            )
-        ]
-    )
-    result = save_reduced_dspacing_to_str(iofd, authors=authors)
-    assert "_audit_contact_author.name 'Jane Doe'" in result
-    assert '_audit_contact_author.email jane.doe@ess.eu' in result
-    assert "_audit_contact_author.address 'Partikelgatan, Lund'" in result
-    assert (
-        '_audit_contact_author.id_orcid https://orcid.org/0000-0000-0000-0001' in result
-    )
+def test_save_reduced_dspacing(iofd: IofDspacing) -> None:
+    from ess.dream import __version__
 
-
-def test_save_reduced_dspacing_writes_regular_author(iofd: IofDspacing) -> None:
-    authors = CIFAuthors(
-        [
-            CIFAuthor(
-                name='Jane Doe',
-                email='jane.doe@ess.eu',
-                address='Partikelgatan, Lund',
-                id_orcid='https://orcid.org/0000-0000-0000-0001',
-                is_contact=False,
-            )
-        ]
+    author = cif.Author(name='John Doe')
+    cif_ = ess.dream.io.cif.prepare_reduced_dspacing_cif(
+        iofd, authors=CIFAuthors([author])
     )
-    result = save_reduced_dspacing_to_str(iofd, authors=authors)
-    assert "_audit_author.name 'Jane Doe'" in result
-    assert '_audit_author.email jane.doe@ess.eu' in result
-    assert "_audit_author.address 'Partikelgatan, Lund'" in result
-    assert '_audit_author.id_orcid https://orcid.org/0000-0000-0000-0001' in result
+    result = save_reduced_dspacing_to_str(cif_)
 
+    assert "_audit_contact_author.name 'John Doe'" in result
+    assert f"_computing.diffrn_reduction 'ess.dream v{__version__}'" in result
+    assert '_diffrn_source.beamline DREAM' in result
 
-def test_save_reduced_dspacing_writes_multiple_regular_authors(
-    iofd: IofDspacing,
-) -> None:
-    authors = CIFAuthors(
-        [
-            CIFAuthor(
-                name='Jane Doe',
-                email='jane.doe@ess.eu',
-                address='Partikelgatan, Lund',
-                id_orcid='https://orcid.org/0000-0000-0000-0001',
-                is_contact=False,
-            ),
-            CIFAuthor(
-                name='Max Mustermann',
-                email='mm@scipp.eu',
-                id_orcid='https://orcid.org/0000-0000-0000-0002',
-                is_contact=False,
-            ),
-        ]
-    )
-    result = save_reduced_dspacing_to_str(iofd, authors=authors)
-    # The missing address for Max is currently broken because of
-    # https://github.com/scipp/scippneutron/issues/547
-    expected = """loop_
-_audit_author.name
-_audit_author.email
-_audit_author.address
-_audit_author.id_orcid
-'Jane Doe' jane.doe@ess.eu 'Partikelgatan, Lund' https://orcid.org/0000-0000-0000-0001
-'Max Mustermann' mm@scipp.eu  https://orcid.org/0000-0000-0000-0002
+    loop_header = """loop_
+_pd_proc.d_spacing
+_pd_proc.intensity_net
+_pd_proc.intensity_net_su
 """
-    assert expected in result
-
-
-def test_save_reduced_dspacing_writes_regular_author_role(iofd: IofDspacing) -> None:
-    authors = CIFAuthors(
-        [
-            CIFAuthor(
-                name='Jane Doe',
-                role='measurement',
-                is_contact=False,
-            )
-        ]
-    )
-    result = save_reduced_dspacing_to_str(iofd, authors=authors)
-
-    author_pattern = r"""_audit_author.name 'Jane Doe'
-_audit_author.id ([0-9a-f]+)"""
-    author_match = re.search(author_pattern, result)
-    assert author_match is not None
-    author_id = author_match.group(1)
-
-    expected = rf"""loop_
-_audit_author_role.id
-_audit_author_role.role
-{author_id} measurement"""
-
-    assert expected in result
+    assert loop_header in result

@@ -3,139 +3,46 @@
 
 """CIF writer for DREAM."""
 
-import uuid
-from collections.abc import Sequence
-from dataclasses import dataclass, field
-from datetime import datetime, timezone
-
 import scipp as sc
 from scippneutron.io import cif
 
-from ess.powder.types import IofDspacing, OutFilename
+from ess.powder.types import CIFAuthors, IofDspacing, ReducedDspacingCIF
 
 
-@dataclass(kw_only=True)
-class CIFAuthor:
-    name: str
-    address: str | None = None
-    email: str | None = None
-    id_orcid: str | None = None
-    is_contact: bool = True
-    role: str | None = None
+def prepare_reduced_dspacing_cif(
+    da: IofDspacing, *, authors: CIFAuthors
+) -> ReducedDspacingCIF:
+    """Construct a CIF builder with reduced data in d-spacing.
 
+    The object contains the d-spacing coordinate, intensities,
+    and a number of metadata.
 
-@dataclass()
-class CIFAuthors:
-    authors: Sequence[CIFAuthor] = field(default_factory=list)
+    Parameters
+    ----------
+    da:
+        Reduced 1d data with a `'dspacing'` dimension and coordinate.
+    authors:
+        List of authors to write to the file.
 
+    Returns
+    -------
+    :
+        An object that contains the reduced data and metadata.
+        Us its ``save`` method to write the CIF file.
+    """
+    from .. import __version__
 
-def save_reduced_dspacing(
-    da: IofDspacing, *, filename: OutFilename, authors: CIFAuthors
-) -> IofDspacing:
     to_save = _prepare_data(da)
-    cif.save_cif(filename, _make_dspacing_block(to_save, authors=authors))
-    return da
+    return (
+        cif.CIF('reduced_dspacing')
+        .with_reducers(f'ess.dream v{__version__}')
+        .with_authors(*authors)
+        .with_beamline(beamline='DREAM', facility='ESS')
+        .with_reduced_powder_data(to_save)
+    )
 
 
 def _prepare_data(da: sc.DataArray) -> sc.DataArray:
     hist = da.copy(deep=False) if da.bins is None else da.hist()
     hist.coords[hist.dim] = sc.midpoints(hist.coords[hist.dim])
     return hist
-
-
-def _make_dspacing_block(da: sc.DataArray, authors: CIFAuthors) -> cif.Block:
-    block = cif.Block(
-        'reduced_dspacing',
-        [
-            _make_audit_chunk(),
-            _make_source_chunk(),
-            *_make_author_chunks(authors),
-        ],
-    )
-    block.add_reduced_powder_data(da)
-    return block
-
-
-def _make_source_chunk() -> cif.Chunk:
-    return cif.Chunk(
-        {
-            # TODO diffrn_source.current once we have it
-            # TODO diffrn_source.power: can we deduce it?
-            'diffrn_radiation.probe': 'neutron',
-            'diffrn_source.beamline': 'DREAM',
-            'diffrn_source.device': 'spallation',
-            'diffrn_source.facility': 'ESS',
-        },
-        schema=cif.CORE_SCHEMA,
-    )
-
-
-def _make_audit_chunk() -> cif.Chunk:
-    from ess.dream import __version__
-
-    return cif.Chunk(
-        {
-            'audit.creation_date': datetime.now(timezone.utc).isoformat(
-                timespec='seconds'
-            ),
-            'audit.creation_method': f'Written by ess.dream v{__version__}',
-        },
-        schema=cif.CORE_SCHEMA,
-    )
-
-
-def _make_author_chunks(authors: CIFAuthors) -> list[cif.Chunk | cif.Loop]:
-    contact = [author for author in authors.authors if author.is_contact]
-    regular = [author for author in authors.authors if not author.is_contact]
-
-    results = []
-    roles = {}
-    for aut, cat in zip(
-        (contact, regular), ('audit_contact_author', 'audit_author'), strict=True
-    ):
-        if not aut:
-            continue
-        data, rols = _serialize_authors(aut, cat)
-        results.append(data)
-        roles.update(rols)
-    if roles:
-        results.append(_serialize_roles(roles))
-
-    return results
-
-
-def _serialize_authors(
-    authors: list[CIFAuthor], category: str
-) -> tuple[cif.Chunk | cif.Loop, dict[str, str]]:
-    fields = {
-        f'{category}.{key}': f
-        for key in ('name', 'email', 'address', 'id_orcid')
-        if any(f := [getattr(a, key) or '' for a in authors])
-    }
-
-    roles = {uuid.uuid4().hex: a.role for a in authors}
-    if any(roles.values()):
-        fields[f'{category}.id'] = list(roles.keys())
-    roles = {key: val for key, val in roles.items() if val}
-
-    if len(authors) == 1:
-        return cif.Chunk(
-            {key: val[0] for key, val in fields.items()},
-            schema=cif.CORE_SCHEMA,
-        ), roles
-    return cif.Loop(
-        {key: sc.array(dims=['author'], values=val) for key, val in fields.items()},
-        schema=cif.CORE_SCHEMA,
-    ), roles
-
-
-def _serialize_roles(roles: dict[str, str]) -> cif.Loop:
-    return cif.Loop(
-        {
-            'audit_author_role.id': sc.array(dims=['role'], values=list(roles)),
-            'audit_author_role.role': sc.array(
-                dims=['role'], values=list(roles.values())
-            ),
-        },
-        schema=cif.CORE_SCHEMA,
-    )
