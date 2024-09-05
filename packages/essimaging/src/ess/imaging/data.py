@@ -15,8 +15,8 @@ def _make_pooch():
         base_url='https://public.esss.dk/groups/scipp/ess/imaging/',
         version=_version,
         registry={
-            'small_ymir_images.hdf': 'md5:f2f8766e200da061ef60c933ce2b4cd8',
-            'README.md': 'md5:22fc1ff8291eda4ca45cef8aa0016d7a',
+            'small_ymir_images.hdf': 'md5:50489ee86793c4de23072fe52878619f',
+            'README.md': 'md5:51339b8a7a29458b2ab38daf4071dc8d',
         },
     )
 
