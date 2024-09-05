@@ -10,7 +10,7 @@ import scipp as sc
 import scippnexus as snx
 from ess.nmx import default_parameters
 from ess.nmx.data import small_mcstas_2_sample, small_mcstas_3_sample
-from ess.nmx.mcstas.load import bank_names_to_detector_names
+from ess.nmx.mcstas.load import bank_names_to_detector_names, load_crystal_rotation
 from ess.nmx.mcstas.load import providers as loader_providers
 from ess.nmx.reduction import NMXData
 from ess.nmx.types import (
@@ -190,6 +190,26 @@ def test_file_reader_mcstas_additional_fields(tmp_mcstas_file: pathlib.Path) -> 
     dg = pl.compute(NMXData)
 
     assert isinstance(dg, sc.DataGroup)
+
+
+@pytest.fixture()
+def rotation_mission_tmp_file(tmp_mcstas_file: pathlib.Path) -> pathlib.Path:
+    import h5py
+
+    param_keys = tuple(f"entry1/simulation/Param/XtalPhi{key}" for key in "XYZ")
+
+    # Remove the rotation parameters from the file.
+    with h5py.File(tmp_mcstas_file, 'a') as file:
+        for key in param_keys:
+            del file[key]
+
+    return tmp_mcstas_file
+
+
+def test_missing_rotation(rotation_mission_tmp_file: FilePath) -> None:
+    with pytest.raises(KeyError, match="XtalPhiX"):
+        load_crystal_rotation(rotation_mission_tmp_file, None)
+        # McStasInstrument is not used due to error in the file.
 
 
 def test_bank_names_to_detector_names_two_detectors():
