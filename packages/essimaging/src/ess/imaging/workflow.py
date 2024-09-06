@@ -17,6 +17,16 @@ from .io import (
     separate_image_by_keys,
     separate_image_key_logs,
 )
+from .normalize import (
+    average_non_sample_images,
+    calculate_d,
+    calculate_d0,
+    calculate_d_factor,
+    calculate_white_beam_background,
+    cleanse_sample_images,
+    grouped_images_by_rotation_angle,
+    normalize_sample_images,
+)
 from .types import (
     DEFAULT_HISTOGRAM_PATH,
     HistogramModeDetectorsPath,
@@ -35,11 +45,21 @@ _IO_PROVIDERS = (
     separate_image_by_keys,
     separate_image_key_logs,
 )
+_NORMALIZATION_PROVIDERS = (
+    average_non_sample_images,
+    calculate_d,
+    calculate_d0,
+    calculate_d_factor,
+    calculate_white_beam_background,
+    cleanse_sample_images,
+    grouped_images_by_rotation_angle,
+    normalize_sample_images,
+)
 
 
 def YmirWorkflow() -> sl.Pipeline:
     return sl.Pipeline(
-        _IO_PROVIDERS,
+        (*_IO_PROVIDERS, *_NORMALIZATION_PROVIDERS),
         params={
             MinDim1: MinDim1(None),
             MaxDim1: MaxDim1(None),

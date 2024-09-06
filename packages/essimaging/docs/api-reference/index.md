@@ -26,4 +26,8 @@
    :toctree: ../generated/modules
    :template: module-template.rst
    :recursive:
+
+   normalize
+   io
+   workflow
 ```
