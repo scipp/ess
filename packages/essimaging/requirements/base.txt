@@ -15,19 +15,21 @@ cyclebane==24.6.0
     # via sciline
 cycler==0.12.1
     # via matplotlib
-dask==2024.8.1
-    # via -r base.in
-essreduce==24.8.2
-    # via -r base.in
+dask==2024.8.2
+    # via -r requirements/base.in
+essreduce==24.9.1
+    # via -r requirements/base.in
 fonttools==4.53.1
     # via matplotlib
-fsspec==2024.6.1
+fsspec==2024.9.0
     # via dask
 graphviz==0.20.3
-    # via -r base.in
+    # via -r requirements/base.in
 h5py==3.11.0
     # via scippnexus
-kiwisolver==1.4.5
+importlib-metadata==8.4.0
+    # via dask
+kiwisolver==1.4.7
     # via matplotlib
 locket==1.0.0
     # via partd
@@ -35,9 +37,8 @@ matplotlib==3.9.2
     # via plopp
 networkx==3.3
     # via cyclebane
-numpy==2.1.0
+numpy==2.1.1
     # via
-    #   contourpy
     #   h5py
     #   matplotlib
     #   scipp
@@ -51,7 +52,7 @@ partd==1.4.2
 pillow==10.4.0
     # via matplotlib
 plopp==24.6.0
-    # via -r base.in
+    # via -r requirements/base.in
 pyparsing==3.1.4
     # via matplotlib
 python-dateutil==2.9.0.post0
@@ -62,16 +63,16 @@ pyyaml==6.0.2
     # via dask
 sciline==24.6.3
     # via
-    #   -r base.in
+    #   -r requirements/base.in
     #   essreduce
 scipp==24.9.1
     # via
-    #   -r base.in
+    #   -r requirements/base.in
     #   essreduce
     #   scippnexus
 scippnexus==24.8.1
     # via
-    #   -r base.in
+    #   -r requirements/base.in
     #   essreduce
 scipy==1.14.1
     # via scippnexus
@@ -81,3 +82,5 @@ toolz==0.12.1
     # via
     #   dask
     #   partd
+zipp==3.20.1
+    # via importlib-metadata
