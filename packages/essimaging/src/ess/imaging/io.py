@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
-
+import warnings
 from collections.abc import Callable, Iterable
 from enum import Enum
 from itertools import pairwise
@@ -49,9 +49,20 @@ def load_nexus_histogram_mode_detector(
     histogram_mode_detectors_path: HistogramModeDetectorsPath = DEFAULT_HISTOGRAM_PATH,
 ) -> HistogramModeDetector:
     with snx.File(file_path, mode="r") as f:
-        return HistogramModeDetector(
-            f[f"{histogram_mode_detectors_path}/{image_detector_name}"][()]
+        img_path = f"{histogram_mode_detectors_path}/{image_detector_name}"
+        dg: sc.DataGroup = f[img_path][()]
+
+    # Manually assign unit to the histogram detector mode data
+    img: sc.DataArray = dg['data']
+    if (original_unit := img.unit) != 'counts':
+        img.unit = 'counts'
+        warnings.warn(
+            f"The unit of the histogram detector data is [{original_unit}]. "
+            f"It is expected to be [{img.unit}]. "
+            f"The loader manually assigned the unit to be [{img.unit}].",
+            stacklevel=0,
         )
+    return HistogramModeDetector(dg)
 
 
 def separate_detector_images(dg: HistogramModeDetector) -> HistogramModeDetectorData:
