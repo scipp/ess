@@ -141,12 +141,17 @@ def _slice_da_by_keys(
     da: sc.DataArray, image_keys: ImageKeyLogs, image_key: ImageKey
 ) -> Generator[sc.DataArray, None, None]:
     matching_value = image_key.as_index(image_key, image_keys)
-    for i in range(image_keys.sizes[TIME_COORD_NAME]):
-        if image_keys.data[TIME_COORD_NAME, i] == matching_value:
-            if i == image_keys.sizes[TIME_COORD_NAME] - 1:
-                yield da[TIME_COORD_NAME, i:]
+    time_coord = image_keys.coords[TIME_COORD_NAME]
+    time_intervals = image_keys.sizes[TIME_COORD_NAME]
+    for i_time, (cur_time, image_key) in enumerate(
+        zip(time_coord, image_keys.data, strict=True)
+    ):
+        if image_key == matching_value:
+            if i_time == time_intervals - 1:
+                yield da[TIME_COORD_NAME, cur_time:]
             else:
-                yield da[TIME_COORD_NAME, i : i + 1]
+                next_time = time_coord[i_time + 1]
+                yield da[TIME_COORD_NAME, cur_time:next_time]
 
 
 def _retrieve_image_stacks_by_key(
