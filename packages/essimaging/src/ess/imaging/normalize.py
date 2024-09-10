@@ -6,22 +6,19 @@ from typing import NewType
 import scipp as sc
 
 from .io import (
-    IMAGE_KEY_COORD_NAME,
-    ROTATION_ANGLE_COORD_NAME,
     TIME_COORD_NAME,
-    ImageKey,
-    ImageStacks,
+    DarkCurrentImageStacks,
+    OpenBeamImageStacks,
+    SampleImageStacks,
 )
 
-D0 = NewType("D0", sc.Variable)
+AverageBackgroundPixelCounts = NewType("AverageBackgroundPixelCounts", sc.Variable)
 """~math:`D0 = mean(background)`."""
-D = NewType("D", sc.Variable)
+AverageSamplePixelCounts = NewType("AverageSamplePixelCounts", sc.Variable)
 """~math:`D = mean(sample)`."""
-DFactor = NewType("DFactor", sc.Variable)
-"""~math:`D factor = D0 / D`."""
+ScaleFactor = NewType("ScaleFactor", sc.Variable)
+"""~math:`ScaleFactor = AverageBackgroundPixelCounts / AverageSamplePixelCounts`."""
 
-AveragedImages = NewType("AveragedImages", sc.DataArray)
-"""Averaged images by image key."""
 OpenBeamImage = NewType("OpenBeamImage", sc.DataArray)
 """Open beam image. ~math:`average(open_beam)`."""
 DarkCurrentImage = NewType("DarkCurrentImage", sc.DataArray)
@@ -41,35 +38,32 @@ GroupedSampleImages = NewType("GroupedSampleImages", sc.DataArray)
 """Grouped sample image stack by rotation angle."""
 
 
-def _select_images_by_key(
-    image_stacks: sc.DataArray, key: ImageKey, *keys: ImageKey
-) -> sc.DataArray:
-    coord = image_stacks.coords[IMAGE_KEY_COORD_NAME]
-    indices = [ImageKey.as_index(_key, image_stacks) for _key in (key, *keys)]
-    selections = coord == indices.pop(0)
-    for idx in indices:
-        selections |= coord == idx
-    return image_stacks[selections]
+def average_open_beam_images(open_beam: OpenBeamImageStacks) -> OpenBeamImage:
+    """Average the open beam image stack.
+
+    .. math::
+
+        OpenBeam = mean(open_beam, 'time')
+
+    """
+    return OpenBeamImage(sc.mean(open_beam, dim=TIME_COORD_NAME))
 
 
-def average_non_sample_images(image_stacks: ImageStacks) -> AveragedNonSampleImages:
-    bg_images = _select_images_by_key(
-        image_stacks, ImageKey.OPEN_BEAM, ImageKey.DARK_CURRENT
-    )
-    return AveragedNonSampleImages(
-        bg_images.groupby(IMAGE_KEY_COORD_NAME).mean(dim=TIME_COORD_NAME)
-    )
+def average_dark_current_images(
+    dark_current: DarkCurrentImageStacks,
+) -> DarkCurrentImage:
+    """Average the dark current image stack.
 
+    .. math::
 
-def _select_image_by_key(image_stacks: sc.DataArray, key: ImageKey) -> sc.DataArray:
-    return image_stacks[
-        IMAGE_KEY_COORD_NAME,
-        ImageKey.as_index(key, image_stacks),
-    ]
+        DarkCurrent = mean(dark_current, 'time')
+
+    """
+    return DarkCurrentImage(sc.mean(dark_current, dim=TIME_COORD_NAME))
 
 
 def calculate_white_beam_background(
-    averaged: AveragedNonSampleImages,
+    open_beam: OpenBeamImage, dark_current: DarkCurrentImage
 ) -> BackgroundImage:
     """Calculate the background image stack.
 
@@ -78,16 +72,14 @@ def calculate_white_beam_background(
 
     .. math::
 
-        Background = mean(OpenBeam) - mean(DarkCurrent)
+        Background = mean(OpenBeam, 'time') - mean(DarkCurrent, 'time')
 
     """
-    open_beam = _select_image_by_key(averaged, ImageKey.OPEN_BEAM)
-    dark_current = _select_image_by_key(averaged, ImageKey.DARK_CURRENT)
     return BackgroundImage(open_beam - dark_current)
 
 
 def cleanse_sample_images(
-    image_stacks: ImageStacks, bg_images: AveragedNonSampleImages
+    sample_images: SampleImageStacks, dark_current: DarkCurrentImage
 ) -> CleansedSampleImages:
     """Cleanse the sample image stack.
 
@@ -100,39 +92,44 @@ def cleanse_sample_images(
         \\text{where } i \\text{ is an index of an image.}
 
     """
-    sample_images = _select_images_by_key(image_stacks, ImageKey.SAMPLE)
-    dark_current = _select_image_by_key(bg_images, ImageKey.DARK_CURRENT)
     return CleansedSampleImages(sample_images - dark_current)
 
 
-def calculate_d0(background: BackgroundImage) -> D0:
-    """Calculate the D0 value from background image stack.
+def average_background_pixel_counts(
+    background: BackgroundImage,
+) -> AverageBackgroundPixelCounts:
+    """Calculate the average background pixel counts."""
+    return AverageBackgroundPixelCounts(background.data.mean())
 
-    :math:`D0 = mean(background counts of all pixels)`
+
+def average_sample_pixel_counts(
+    samples: CleansedSampleImages,
+) -> AverageSamplePixelCounts:
+    """Calculate the average sample pixel counts."""
+    return AverageSamplePixelCounts(samples.data.mean())
+
+
+def calculate_d_factor(
+    average_bg: AverageBackgroundPixelCounts, average_sample: AverageSamplePixelCounts
+) -> ScaleFactor:
+    """Calculate the scale factor from average background and sample pixel counts.
+
+    .. math::
+
+            ScaleFactor = AverageBackgroundPixelCounts / AverageSamplePixelCounts
+
     """
-    return D0(sc.mean(background))
-
-
-def calculate_d(samples: CleansedSampleImages) -> D:
-    """Calculate the D value from the sample image stack.
-
-    :math:`D = mean(sample counts of all pixels)`
-    """
-    return D(samples.data.mean())
-
-
-def calculate_d_factor(d0: D0, d: D) -> DFactor:
-    """Calculate the D factor from D0 and D.
-
-    :math:`DFactor = D0 / D`
-    """
-    return DFactor(d0 / d)
+    return ScaleFactor(average_bg / average_sample)
 
 
 def normalize_sample_images(
-    samples: CleansedSampleImages, d_factor: DFactor, background: BackgroundImage
+    samples: CleansedSampleImages, factor: ScaleFactor, background: BackgroundImage
 ) -> NormalizedSampleImages:
     """Normalize the sample image stack.
+
+
+    Default Normalization Formula
+    -----------------------------
 
     .. math::
 
@@ -141,27 +138,14 @@ def normalize_sample_images(
 
     .. math::
 
-        DFactor = D0 / D
-
-        D0 = mean(Background)  \\text{  *of all pixels}
-
-        D = mean(Sample)  \\text{  *of all pixels}
+        ScaleFactor = AverageBackgroundPixelCounts / AverageSamplePixelCounts
 
 
     .. math::
 
-        CleansedSample_{i} = Sample_{i} - mean(DarkCurrent, dim=\\text{'time'})
+        CleansedSample_{i} = Sample_{i} - mean(DarkCurrent, dim=\\text{\\'time\\'})
 
         \\text{where } i \\text{ is an index of an image.}
 
     """
-    return NormalizedSampleImages((samples / background) * d_factor)
-
-
-def grouped_images_by_rotation_angle(
-    normalized_samples: NormalizedSampleImages,
-) -> GroupedSampleImages:
-    """Group the normalized sample images by rotation angle."""
-    return GroupedSampleImages(
-        normalized_samples.groupby(ROTATION_ANGLE_COORD_NAME).mean(dim=TIME_COORD_NAME)
-    )
+    return NormalizedSampleImages((samples / background) * factor)

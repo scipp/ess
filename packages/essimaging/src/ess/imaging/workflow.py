@@ -18,13 +18,13 @@ from .io import (
     separate_image_key_logs,
 )
 from .normalize import (
-    average_non_sample_images,
-    calculate_d,
-    calculate_d0,
+    average_background_pixel_counts,
+    average_dark_current_images,
+    average_open_beam_images,
+    average_sample_pixel_counts,
     calculate_d_factor,
     calculate_white_beam_background,
     cleanse_sample_images,
-    grouped_images_by_rotation_angle,
     normalize_sample_images,
 )
 from .types import (
@@ -46,13 +46,13 @@ _IO_PROVIDERS = (
     separate_image_key_logs,
 )
 _NORMALIZATION_PROVIDERS = (
-    average_non_sample_images,
-    calculate_d,
-    calculate_d0,
+    average_background_pixel_counts,
+    average_dark_current_images,
+    average_open_beam_images,
+    average_sample_pixel_counts,
     calculate_d_factor,
     calculate_white_beam_background,
     cleanse_sample_images,
-    grouped_images_by_rotation_angle,
     normalize_sample_images,
 )
 
