@@ -148,4 +148,4 @@ def normalize_sample_images(
         \\text{where } i \\text{ is an index of an image.}
 
     """
-    return NormalizedSampleImages((samples / background) * factor)
+    return NormalizedSampleImages(samples / (background * factor))
