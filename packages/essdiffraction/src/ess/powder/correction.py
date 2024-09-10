@@ -2,16 +2,15 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 """Correction algorithms for powder diffraction."""
 
-from typing import Any
+import enum
 
+import sciline
 import scipp as sc
 from scippneutron.conversion.graph import beamline, tof
 
 from ess.reduce.uncertainty import broadcast_uncertainties
 
 from ._util import event_or_outer_coord
-from .logging import get_logger
-from .smoothing import lowpass
 from .types import (
     AccumulatedProtonCharge,
     FilteredData,
@@ -19,7 +18,9 @@ from .types import (
     FocussedDataDspacingTwoTheta,
     IofDspacing,
     IofDspacingTwoTheta,
-    NormalizedByProtonCharge,
+    Monitor,
+    MonitorData,
+    NormalizedRunData,
     RunType,
     SampleRun,
     UncertaintyBroadcastMode,
@@ -27,56 +28,26 @@ from .types import (
 )
 
 
-def normalize_by_monitor(
-    data: sc.DataArray,
+def normalize_by_monitor_histogram(
+    detector: FilteredData[RunType],
     *,
-    monitor: sc.DataArray,
-    wavelength_edges: sc.Variable | None = None,
-    smooth_args: dict[str, Any] | None = None,
-) -> sc.DataArray:
-    """
-    Normalize event data by a monitor.
-
-    The input is converted to wavelength if it does not already contain wavelengths.
+    monitor: MonitorData[RunType, Monitor],
+) -> NormalizedRunData[RunType]:
+    """Normalize detector data by a histogrammed monitor.
 
     Parameters
     ----------
-    data:
-        Input event data.
+    detector:
+        Input event data in wavelength.
     monitor:
-        A histogrammed monitor.
-    wavelength_edges:
-        If given, rebin the monitor with these edges.
-    smooth_args:
-        If given, the monitor histogram is smoothed with
-        :func:`ess.powder.lowpass` before dividing into `data`.
-        `smooth_args` is passed as keyword arguments to
-        :func:`ess.powder.lowpass`. If ``None``, the monitor is not smoothed.
+        A histogrammed monitor in wavelength.
 
     Returns
     -------
     :
-        `data` normalized by a monitor.
+        `detector` normalized by a monitor.
     """
-    if "wavelength" not in monitor.coords:
-        monitor = monitor.transform_coords(
-            "wavelength",
-            graph={**beamline.beamline(scatter=False), **tof.elastic("tof")},
-            keep_inputs=False,
-            keep_intermediate=False,
-            keep_aliases=False,
-        )
-
-    if wavelength_edges is not None:
-        monitor = monitor.rebin(wavelength=wavelength_edges)
-    if smooth_args is not None:
-        get_logger().info(
-            "Smoothing monitor for normalization using "
-            "ess.powder.smoothing.lowpass with %s.",
-            smooth_args,
-        )
-        monitor = lowpass(monitor, dim="wavelength", **smooth_args)
-    return data.bins / sc.lookup(func=monitor, dim="wavelength")
+    return detector.bins / sc.lookup(monitor, dim="wavelength")
 
 
 def _normalize_by_vanadium(
@@ -143,7 +114,7 @@ def normalize_by_vanadium_dspacing_and_two_theta(
 
 def normalize_by_proton_charge(
     data: FilteredData[RunType], proton_charge: AccumulatedProtonCharge[RunType]
-) -> NormalizedByProtonCharge[RunType]:
+) -> NormalizedRunData[RunType]:
     """Normalize data by an accumulated proton charge.
 
     Parameters
@@ -158,7 +129,7 @@ def normalize_by_proton_charge(
     :
         ``data / proton_charge``
     """
-    return NormalizedByProtonCharge[RunType](data / proton_charge)
+    return NormalizedRunData[RunType](data / proton_charge)
 
 
 def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.DataArray:
@@ -258,6 +229,26 @@ def _shallow_copy(da: sc.DataArray) -> sc.DataArray:
     if da.bins is not None:
         out.data = sc.bins(**da.bins.constituents)
     return out
+
+
+class RunNormalization(enum.Enum):
+    """Type of normalization applied to each run."""
+
+    monitor_histogram = enum.auto()
+    monitor_integrated = enum.auto()
+    proton_charge = enum.auto()
+
+    def insert(self, workflow: sciline.Pipeline) -> None:
+        """Insert providers for this normalization into a workflow."""
+        match self:
+            case RunNormalization.monitor_histogram:
+                workflow.insert(normalize_by_monitor_histogram)
+            case RunNormalization.monitor_integrated:
+                raise NotImplementedError(
+                    "Normalization by monitor integrated not implemented"
+                )
+            case RunNormalization.proton_charge:
+                workflow.insert(normalize_by_proton_charge)
 
 
 providers = (

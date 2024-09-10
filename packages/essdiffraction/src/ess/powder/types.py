@@ -26,6 +26,7 @@ DetectorData = reduce_t.DetectorData
 DetectorPositionOffset = reduce_t.DetectorPositionOffset
 EmptyBeamRun = reduce_t.EmptyBeamRun
 Filename = reduce_t.Filename
+Monitor = reduce_gt.Monitor1
 MonitorData = reduce_t.MonitorData
 MonitorPositionOffset = reduce_t.MonitorPositionOffset
 MonitorType = reduce_t.MonitorType
@@ -130,7 +131,7 @@ MaskedDetectorIDs = NewType("MaskedDetectorIDs", dict[str, sc.Variable])
 """1-D variable listing all masked detector IDs."""
 
 
-class NormalizedByProtonCharge(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+class NormalizedRunData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Data that has been normalized by proton charge."""
 
 

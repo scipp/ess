@@ -15,7 +15,7 @@ from .types import (
     DspacingData,
     ElasticCoordTransformGraph,
     MaskedData,
-    NormalizedByProtonCharge,
+    NormalizedRunData,
     RunType,
 )
 
@@ -175,7 +175,7 @@ def _restore_tof_if_in_wavelength(data: sc.DataArray) -> sc.DataArray:
 
 
 def add_scattering_coordinates_from_positions(
-    data: NormalizedByProtonCharge[RunType], graph: ElasticCoordTransformGraph
+    data: NormalizedRunData[RunType], graph: ElasticCoordTransformGraph
 ) -> DataWithScatteringCoordinates[RunType]:
     """
     Add ``wavelength`` and ``two_theta`` coordinates to the data.
