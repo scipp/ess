@@ -56,7 +56,6 @@ _NORMALIZATION_PROVIDERS = (
     normalize_sample_images,
 )
 
-
 def YmirWorkflow() -> sl.Pipeline:
     return sl.Pipeline(
         (*_IO_PROVIDERS, *_NORMALIZATION_PROVIDERS),
