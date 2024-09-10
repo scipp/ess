@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 import warnings
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Generator, Iterable
 from enum import Enum
 from itertools import pairwise
 from pathlib import Path
@@ -28,10 +28,25 @@ HistogramModeDetectorData = NewType("HistogramModeDetectorData", sc.DataArray)
 """Histogram mode detector data."""
 ImageKeyCoord = NewType("ImageKeyCoord", sc.Variable)
 """Image key coordinate."""
-ImageStacks = NewType("ImageStacks", sc.DataArray)
+SampleImageStacks = NewType("SampleImageStacks", sc.DataArray)
 """Image stacks separated by ImageKey values via timestamp."""
 RotationAngleCoord = NewType("RotationAngleCoord", sc.Variable)
 """Rotation angle coordinate."""
+
+RawSampleImageStacks = NewType("RawSampleImageStacks", sc.DataArray)
+"""Sample image stacks."""
+OpenBeamImageStacks = NewType("OpenBeamImageStacks", sc.DataArray)
+"""Open beam image stacks."""
+DarkCurrentImageStacks = NewType("DarkCurrentImageStacks", sc.DataArray)
+"""Dark current image stacks."""
+
+
+IMAGE_KEY_COORD_NAME = "image_key"
+"""Image key coordinate name."""
+TIME_COORD_NAME = "time"
+"""Time coordinate name."""
+ROTATION_ANGLE_COORD_NAME = "rotation_angle"
+"""Rotation angle coordinate name."""
 
 
 class ImageKey(Enum):
@@ -40,6 +55,19 @@ class ImageKey(Enum):
     SAMPLE = 0
     OPEN_BEAM = 1
     DARK_CURRENT = 2
+
+    @classmethod
+    def as_index(cls, key: "ImageKey", target_da: sc.DataArray | None) -> sc.Variable:
+        if target_da is None:
+            return sc.scalar(cls(key).value, unit=None)
+        elif IMAGE_KEY_COORD_NAME in target_da.coords:
+            return sc.scalar(
+                cls(key).value,
+                unit=target_da.coords[IMAGE_KEY_COORD_NAME].unit,
+                dtype=target_da.coords[IMAGE_KEY_COORD_NAME].dtype,
+            )
+        else:
+            return sc.scalar(cls(key).value, unit=target_da.unit, dtype=target_da.dtype)
 
 
 def load_nexus_histogram_mode_detector(
@@ -70,7 +98,7 @@ def separate_detector_images(dg: HistogramModeDetector) -> HistogramModeDetector
 
 
 def separate_image_key_logs(*, dg: HistogramModeDetector) -> ImageKeyLogs:
-    return ImageKeyLogs(dg['image_key']['value'])
+    return ImageKeyLogs(sc.sort(dg['image_key']['value'], key='time'))
 
 
 def load_nexus_rotation_logs(
@@ -109,21 +137,75 @@ def derive_log_coord_by_range(
     )
 
 
-def derive_image_key_coord(
-    histograms: HistogramModeDetectorData, image_keys: ImageKeyLogs
-) -> ImageKeyCoord:
-    out_of_range = sc.scalar(-1, dtype=image_keys.data.dtype, unit=image_keys.data.unit)
-    return ImageKeyCoord(
-        derive_log_coord_by_range(histograms, image_keys, out_of_range)
+def _slice_da_by_keys(
+    da: sc.DataArray, image_keys: ImageKeyLogs, image_key: ImageKey
+) -> Generator[sc.DataArray, None, None]:
+    matching_value = image_key.as_index(image_key, image_keys)
+    for i in range(image_keys.sizes[TIME_COORD_NAME]):
+        if image_keys.data[TIME_COORD_NAME, i] == matching_value:
+            if i == image_keys.sizes[TIME_COORD_NAME] - 1:
+                yield da[TIME_COORD_NAME, i:]
+            else:
+                yield da[TIME_COORD_NAME, i : i + 1]
+
+
+def _retrieve_image_stacks_by_key(
+    da: HistogramModeDetectorData, image_keys: ImageKeyLogs, image_key: ImageKey
+) -> sc.DataArray:
+    images = [
+        sliced_da
+        for sliced_da in _slice_da_by_keys(da, image_keys, image_key)
+        if da.sizes[TIME_COORD_NAME] > 0
+    ]
+    if len(images) == 0:
+        raise ValueError(f"No images found for {image_key}.")
+    elif len(images) == 1:
+        return images[0]
+    return sc.concat(images, 'time')
+
+
+AllImageStacks = NewType("AllImageStacks", dict[ImageKey, sc.DataArray])
+
+
+def separate_image_by_keys(
+    da: HistogramModeDetectorData,
+    image_keys: ImageKeyLogs,
+) -> AllImageStacks:
+    return AllImageStacks(
+        {key: _retrieve_image_stacks_by_key(da, image_keys, key) for key in ImageKey}
+    )
+
+
+def retrieve_open_beam_images(
+    da: HistogramModeDetectorData, image_keys: ImageKeyLogs
+) -> OpenBeamImageStacks:
+    return OpenBeamImageStacks(
+        _retrieve_image_stacks_by_key(da, image_keys, ImageKey.OPEN_BEAM)
+    )
+
+
+def retrieve_dark_current_images(
+    da: HistogramModeDetectorData, image_keys: ImageKeyLogs
+) -> DarkCurrentImageStacks:
+    return DarkCurrentImageStacks(
+        _retrieve_image_stacks_by_key(da, image_keys, ImageKey.DARK_CURRENT)
+    )
+
+
+def retrieve_sample_images(
+    da: HistogramModeDetectorData, image_keys: ImageKeyLogs
+) -> RawSampleImageStacks:
+    return RawSampleImageStacks(
+        _retrieve_image_stacks_by_key(da, image_keys, ImageKey.SAMPLE)
     )
 
 
 def derive_rotation_angle_coord(
-    histograms: HistogramModeDetectorData, rotation_angles: RotationLogs
+    samples: RawSampleImageStacks, rotation_angles: RotationLogs
 ) -> RotationAngleCoord:
     return RotationAngleCoord(
         derive_log_coord_by_range(
-            histograms,
+            samples,
             rotation_angles,
             sc.scalar(
                 -1.0, unit=rotation_angles.data.unit, dtype=rotation_angles.data.dtype
@@ -133,20 +215,17 @@ def derive_rotation_angle_coord(
 
 
 def apply_logs_as_coords(
-    histograms: HistogramModeDetectorData,
-    rotation_angles: RotationAngleCoord,
-    image_keys: ImageKeyCoord,
-) -> ImageStacks:
-    copied = histograms.copy(deep=False)
-    copied.coords['image_key'] = image_keys
+    samples: RawSampleImageStacks, rotation_angles: RotationAngleCoord
+) -> SampleImageStacks:
+    copied = samples.copy(deep=False)
     copied.coords['rotation_angle'] = rotation_angles
-    return ImageStacks(copied)
+    return SampleImageStacks(copied)
 
 
 DEFAULT_IMAGE_NAME_PREFIX_MAP = {
-    ImageKey.SAMPLE.value: "sample",
-    ImageKey.DARK_CURRENT.value: "dc",
-    ImageKey.OPEN_BEAM.value: "ob",
+    ImageKey.SAMPLE: "sample",
+    ImageKey.DARK_CURRENT: "dc",
+    ImageKey.OPEN_BEAM: "ob",
 }
 
 
@@ -155,7 +234,7 @@ def dummy_progress_wrapper(core_iterator: Iterable) -> Iterable:
 
 
 def _save_merged_images(
-    *, image_stacks: ImageStacks, image_prefix: str, output_dir: Path
+    *, image_stacks: SampleImageStacks, image_prefix: str, output_dir: Path
 ) -> None:
     image_path = output_dir / Path(
         f"{image_prefix}_0000_{image_stacks.sizes['time']:04d}.tiff"
@@ -165,7 +244,7 @@ def _save_merged_images(
 
 def _save_individual_images(
     *,
-    image_stacks: ImageStacks,
+    image_stacks: SampleImageStacks,
     image_prefix: str,
     output_dir: Path,
     progress_wrapper: Callable[[Iterable], Iterable] = dummy_progress_wrapper,
@@ -190,11 +269,11 @@ def _validate_output_dir(output_dir: str | Path) -> None:
 def export_image_stacks_as_tiff(
     *,
     output_dir: str | Path,
-    image_stacks: ImageStacks,
+    image_stacks: AllImageStacks,
     merge_image_by_key: bool,
     overwrite: bool,
     progress_wrapper: Callable[[Iterable], Iterable] = dummy_progress_wrapper,
-    image_prefix_map: dict[int, str] = DEFAULT_IMAGE_NAME_PREFIX_MAP,
+    image_prefix_map: dict[ImageKey, str] = DEFAULT_IMAGE_NAME_PREFIX_MAP,
 ) -> None:
     """Save images into disk.
 
@@ -228,19 +307,16 @@ def export_image_stacks_as_tiff(
 
     _validate_output_dir(output_path)
 
-    image_keys = image_stacks.coords['image_key']
-    for image_key in progress_wrapper(set(image_keys.values)):
-        cur_key = sc.scalar(image_key, unit=image_keys.unit, dtype=image_keys.dtype)
-        cur_images = image_stacks[image_stacks.coords['image_key'] == cur_key]
+    for image_key, cur_images in progress_wrapper(image_stacks.items()):
         if merge_image_by_key:
             _save_merged_images(
-                image_stacks=ImageStacks(cur_images),
+                image_stacks=SampleImageStacks(cur_images),
                 image_prefix=image_prefix_map[image_key],
                 output_dir=output_path,
             )
         else:
             _save_individual_images(
-                image_stacks=ImageStacks(cur_images),
+                image_stacks=SampleImageStacks(cur_images),
                 image_prefix=image_prefix_map[image_key],
                 output_dir=output_path,
                 progress_wrapper=progress_wrapper,

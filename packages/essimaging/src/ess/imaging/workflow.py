@@ -4,11 +4,14 @@ import sciline as sl
 
 from .io import (
     apply_logs_as_coords,
-    derive_image_key_coord,
     derive_rotation_angle_coord,
     load_nexus_histogram_mode_detector,
     load_nexus_rotation_logs,
+    retrieve_dark_current_images,
+    retrieve_open_beam_images,
+    retrieve_sample_images,
     separate_detector_images,
+    separate_image_by_keys,
     separate_image_key_logs,
 )
 from .types import (
@@ -18,18 +21,23 @@ from .types import (
     RotationMotionSensorName,
 )
 
+_IO_PROVIDERS = (
+    apply_logs_as_coords,
+    derive_rotation_angle_coord,
+    load_nexus_histogram_mode_detector,
+    load_nexus_rotation_logs,
+    retrieve_dark_current_images,
+    retrieve_open_beam_images,
+    retrieve_sample_images,
+    separate_detector_images,
+    separate_image_by_keys,
+    separate_image_key_logs,
+)
+
 
 def YmirWorkflow() -> sl.Pipeline:
     return sl.Pipeline(
-        (
-            apply_logs_as_coords,
-            derive_image_key_coord,
-            derive_rotation_angle_coord,
-            load_nexus_rotation_logs,
-            load_nexus_histogram_mode_detector,
-            separate_detector_images,
-            separate_image_key_logs,
-        ),
+        _IO_PROVIDERS,
         params={
             HistogramModeDetectorsPath: DEFAULT_HISTOGRAM_PATH,
             ImageDetectorName: ImageDetectorName('orca'),
