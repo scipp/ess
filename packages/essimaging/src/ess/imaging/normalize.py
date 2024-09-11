@@ -96,7 +96,7 @@ def calculate_white_beam_background(
         Open beam image stack.
 
     dark_current:
-        Dark current image stack.
+        Dark current image.
 
     background_threshold:
         Threshold for the background pixel values.
@@ -113,8 +113,16 @@ def calculate_white_beam_background(
     return BackgroundImage(diff)
 
 
+SamplePixelThreshold = NewType("SamplePixelThreshold", sc.Variable)
+"""Threshold for the sample pixel values."""
+
+DEFAULT_SAMPLE_THRESHOLD = SamplePixelThreshold(sc.scalar(0.0, unit="counts"))
+
+
 def cleanse_sample_images(
-    sample_images: SampleImageStacks, dark_current: DarkCurrentImage
+    sample_images: SampleImageStacks,
+    dark_current: DarkCurrentImage,
+    sample_threshold: SamplePixelThreshold = DEFAULT_SAMPLE_THRESHOLD,
 ) -> CleansedSampleImages:
     """Cleanse the sample image stack.
 
@@ -126,8 +134,22 @@ def cleanse_sample_images(
 
         \\text{where } i \\text{ is an index of an image.}
 
+    Params
+    ------
+    sample_images:
+        Sample image stack.
+    dark_current:
+        Dark current image.
+    sample_threshold:
+        Threshold for the sample pixel values.
+        Any pixel values less than ``sample_threshold``
+        are replaced with ``sample_threshold``.
+        Default is 0.0[counts].
+
     """
-    return CleansedSampleImages(sample_images - dark_current)
+    diff = sample_images - dark_current
+    diff.data = sc.where(diff.data < sample_threshold, sample_threshold, diff.data)
+    return CleansedSampleImages(diff)
 
 
 def average_background_pixel_counts(

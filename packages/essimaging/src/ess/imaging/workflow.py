@@ -19,7 +19,9 @@ from .io import (
 )
 from .normalize import (
     DEFAULT_BACKGROUND_THRESHOLD,
+    DEFAULT_SAMPLE_THRESHOLD,
     BackgroundPixelThreshold,
+    SamplePixelThreshold,
     average_background_pixel_counts,
     average_dark_current_images,
     average_open_beam_images,
@@ -71,5 +73,6 @@ def YmirWorkflow() -> sl.Pipeline:
             ImageDetectorName: ImageDetectorName('orca'),
             RotationMotionSensorName: RotationMotionSensorName('motion_cabinet_2'),
             BackgroundPixelThreshold: DEFAULT_BACKGROUND_THRESHOLD,
+            SamplePixelThreshold: DEFAULT_SAMPLE_THRESHOLD,
         },
     )
