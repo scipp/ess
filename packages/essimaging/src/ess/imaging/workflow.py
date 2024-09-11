@@ -18,6 +18,8 @@ from .io import (
     separate_image_key_logs,
 )
 from .normalize import (
+    DEFAULT_BACKGROUND_THRESHOLD,
+    BackgroundPixelThreshold,
     average_background_pixel_counts,
     average_dark_current_images,
     average_open_beam_images,
@@ -56,6 +58,7 @@ _NORMALIZATION_PROVIDERS = (
     normalize_sample_images,
 )
 
+
 def YmirWorkflow() -> sl.Pipeline:
     return sl.Pipeline(
         (*_IO_PROVIDERS, *_NORMALIZATION_PROVIDERS),
@@ -67,5 +70,6 @@ def YmirWorkflow() -> sl.Pipeline:
             HistogramModeDetectorsPath: DEFAULT_HISTOGRAM_PATH,
             ImageDetectorName: ImageDetectorName('orca'),
             RotationMotionSensorName: RotationMotionSensorName('motion_cabinet_2'),
+            BackgroundPixelThreshold: DEFAULT_BACKGROUND_THRESHOLD,
         },
     )
