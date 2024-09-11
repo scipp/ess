@@ -3,6 +3,12 @@
 import sciline as sl
 
 from .io import (
+    Dim1AxisCoord,
+    Dim2AxisCoord,
+    MaxDim1,
+    MaxDim2,
+    MinDim1,
+    MinDim2,
     apply_logs_as_coords,
     derive_rotation_angle_coord,
     load_nexus_histogram_mode_detector,
@@ -39,6 +45,12 @@ def YmirWorkflow() -> sl.Pipeline:
     return sl.Pipeline(
         _IO_PROVIDERS,
         params={
+            MinDim1: MinDim1(None),
+            MaxDim1: MaxDim1(None),
+            MinDim2: MinDim2(None),
+            MaxDim2: MaxDim2(None),
+            Dim1AxisCoord: Dim1AxisCoord(None),
+            Dim2AxisCoord: Dim2AxisCoord(None),
             HistogramModeDetectorsPath: DEFAULT_HISTOGRAM_PATH,
             ImageDetectorName: ImageDetectorName('orca'),
             RotationMotionSensorName: RotationMotionSensorName('motion_cabinet_2'),

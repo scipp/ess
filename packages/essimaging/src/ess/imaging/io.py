@@ -47,6 +47,10 @@ TIME_COORD_NAME = "time"
 """Time coordinate name."""
 ROTATION_ANGLE_COORD_NAME = "rotation_angle"
 """Rotation angle coordinate name."""
+DIM1_COORD_NAME = "dim_1"
+"""Dimension 1 coordinate name."""
+DIM2_COORD_NAME = "dim_2"
+"""Dimension 2 coordinate name."""
 
 
 class ImageKey(Enum):
@@ -93,8 +97,62 @@ def load_nexus_histogram_mode_detector(
     return HistogramModeDetector(dg)
 
 
-def separate_detector_images(dg: HistogramModeDetector) -> HistogramModeDetectorData:
-    return HistogramModeDetectorData(sc.sort(dg['data'], 'time'))
+Dim1AxisCoord = NewType("Dim1AxisCoord", sc.Variable | None)
+"""Dim1 axis coordinate."""
+Dim2AxisCoord = NewType("Dim2AxisCoord", sc.Variable | None)
+"""Dim2 axis coordinate."""
+
+
+MinDim1 = NewType("MinDim1", sc.Variable | None)
+"""Minimum value of the first dimension."""
+MaxDim1 = NewType("MaxDim1", sc.Variable | None)
+"""Maximum value of the first dimension."""
+MinDim2 = NewType("MinDim2", sc.Variable | None)
+"""Minimum value of the second dimension."""
+MaxDim2 = NewType("MaxDim2", sc.Variable | None)
+
+
+def _assign_coord_or_make_one(
+    da: sc.DataArray, coord_name: str, coord: sc.Variable | None
+) -> None:
+    da.coords[coord_name] = coord or sc.arange(
+        dim=coord_name, start=0, stop=da.sizes[coord_name]
+    )
+
+
+def _crop_da_by_coord(
+    da: sc.DataArray,
+    dim: str,
+    min_coord: sc.Variable | None,
+    max_coord: sc.Variable | None,
+) -> sc.DataArray:
+    if min_coord is not None and max_coord is not None:
+        return da[dim, min_coord:max_coord]
+    elif min_coord is not None and max_coord is None:
+        return da[dim, min_coord:]
+    elif min_coord is None and max_coord is not None:
+        return da[dim, :max_coord]
+    else:
+        return da
+
+
+def separate_detector_images(
+    dg: HistogramModeDetector,
+    dim_1_coord: Dim1AxisCoord,
+    dim_2_coord: Dim2AxisCoord,
+    min_dim_1: MinDim1,
+    max_dim_1: MaxDim1,
+    min_dim_2: MinDim2,
+    max_dim_2: MaxDim2,
+) -> HistogramModeDetectorData:
+    da: sc.DataArray = sc.sort(dg['data'], 'time')
+    # Assign position coordinates to the detector data
+    _assign_coord_or_make_one(da, DIM1_COORD_NAME, dim_1_coord)
+    _assign_coord_or_make_one(da, DIM2_COORD_NAME, dim_2_coord)
+    # Crop the detector data by the given coordinates
+    da = _crop_da_by_coord(da, DIM1_COORD_NAME, min_dim_1, max_dim_1)
+    da = _crop_da_by_coord(da, DIM2_COORD_NAME, min_dim_2, max_dim_2)
+    return HistogramModeDetectorData(da)
 
 
 def separate_image_key_logs(*, dg: HistogramModeDetector) -> ImageKeyLogs:
