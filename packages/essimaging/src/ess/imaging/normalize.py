@@ -69,24 +69,47 @@ def average_dark_current_images(
     return DarkCurrentImage(sc.mean(dark_current, dim=TIME_COORD_NAME))
 
 
+BackgroundPixelThreshold = NewType("BackgroundPixelThreshold", sc.Variable)
+"""Threshold for the background pixel values."""
+
+DEFAULT_BACKGROUND_THRESHOLD = BackgroundPixelThreshold(sc.scalar(1.0, unit="counts"))
+
+
 def calculate_white_beam_background(
-    open_beam: OpenBeamImage, dark_current: DarkCurrentImage
+    open_beam: OpenBeamImage,
+    dark_current: DarkCurrentImage,
+    background_threshold: BackgroundPixelThreshold = DEFAULT_BACKGROUND_THRESHOLD,
 ) -> BackgroundImage:
     """Calculate the background image stack.
 
     We average the open beam and dark current image stack
     to create the single background image.
 
-    Any value less than 1 is replaced with 1.
-
     .. math::
 
         Background = mean(OpenBeam, 'time') - mean(DarkCurrent, 'time')
 
+
+    Params
+    ------
+    oepn_beam:
+        Open beam image stack.
+
+    dark_current:
+        Dark current image stack.
+
+    background_threshold:
+        Threshold for the background pixel values.
+        Any pixel values less than ``background_threshold``
+        are replaced with ``background_threshold``.
+        Default is 1.0[counts].
+
+
     """
     diff = open_beam - dark_current
-    threshold = sc.scalar(1.0, unit=diff.unit)
-    diff.data = sc.where(diff.data < threshold, threshold, diff.data)
+    diff.data = sc.where(
+        diff.data < background_threshold, background_threshold, diff.data
+    )
     return BackgroundImage(diff)
 
 
