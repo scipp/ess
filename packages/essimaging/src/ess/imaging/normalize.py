@@ -102,11 +102,33 @@ def average_background_pixel_counts(
     return AverageBackgroundPixelCounts(background.data.mean())
 
 
+def _mean_all_dims(data: sc.Variable) -> sc.Variable:
+    if data.shape == ():  # scalar
+        return data
+    return _mean_all_dims(data.mean(dim=data.dims[0]))
+
+
 def average_sample_pixel_counts(
-    samples: CleansedSampleImages,
+    sample_images: CleansedSampleImages, dark_current: DarkCurrentImage
 ) -> AverageSamplePixelCounts:
-    """Calculate the average sample pixel counts."""
-    return AverageSamplePixelCounts(samples.data.mean())
+    """Calculate the average sample pixel counts.
+
+    Note that we calculate the mean of sample images and dark current images
+    first and subtract them afterwards,
+    instead of using the subtracted image stack directly.
+    This is for performance reasons, as the integer operation is faster than
+    the floating point operation.
+
+    Also, we don't calculate ``mean(sample_images)`` at once
+    since it is a large array and it may cause memory issues.
+
+    There was an example of 361 images of 2048x2048 pixels with 32-bit integer data
+    exceeded the limit of the maximum integer so the average calculation failed
+    and returned negative values.
+    """
+    return AverageSamplePixelCounts(
+        _mean_all_dims(sample_images.data) - dark_current.data.mean()
+    )
 
 
 def calculate_d_factor(
