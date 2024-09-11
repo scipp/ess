@@ -14,9 +14,12 @@ from .types import (
     DataWithScatteringCoordinates,
     DspacingData,
     ElasticCoordTransformGraph,
+    FilteredData,
     MaskedData,
-    NormalizedRunData,
+    MonitorData,
+    MonitorType,
     RunType,
+    WavelengthMonitor,
 )
 
 
@@ -175,7 +178,7 @@ def _restore_tof_if_in_wavelength(data: sc.DataArray) -> sc.DataArray:
 
 
 def add_scattering_coordinates_from_positions(
-    data: NormalizedRunData[RunType], graph: ElasticCoordTransformGraph
+    data: FilteredData[RunType], graph: ElasticCoordTransformGraph
 ) -> DataWithScatteringCoordinates[RunType]:
     """
     Add ``wavelength`` and ``two_theta`` coordinates to the data.
@@ -213,8 +216,21 @@ def convert_to_dspacing(
     return DspacingData[RunType](out)
 
 
+def convert_monitor_do_wavelength(
+    monitor: MonitorData[RunType, MonitorType],
+) -> WavelengthMonitor[RunType, MonitorType]:
+    graph = {
+        **scn.conversion.graph.beamline.beamline(scatter=False),
+        **scn.conversion.graph.tof.elastic("tof"),
+    }
+    return WavelengthMonitor[RunType, MonitorType](
+        monitor.transform_coords("wavelength", graph=graph, keep_intermediate=False)
+    )
+
+
 providers = (
     powder_coordinate_transformation_graph,
     add_scattering_coordinates_from_positions,
     convert_to_dspacing,
+    convert_monitor_do_wavelength,
 )

@@ -13,25 +13,25 @@ from ess.reduce.uncertainty import broadcast_uncertainties
 from ._util import event_or_outer_coord
 from .types import (
     AccumulatedProtonCharge,
-    FilteredData,
+    CaveMonitor,
+    DataWithScatteringCoordinates,
     FocussedDataDspacing,
     FocussedDataDspacingTwoTheta,
     IofDspacing,
     IofDspacingTwoTheta,
-    Monitor,
-    MonitorData,
     NormalizedRunData,
     RunType,
     SampleRun,
     UncertaintyBroadcastMode,
     VanadiumRun,
+    WavelengthMonitor,
 )
 
 
 def normalize_by_monitor_histogram(
-    detector: FilteredData[RunType],
+    detector: DataWithScatteringCoordinates[RunType],
     *,
-    monitor: MonitorData[RunType, Monitor],
+    monitor: WavelengthMonitor[RunType, CaveMonitor],
 ) -> NormalizedRunData[RunType]:
     """Normalize detector data by a histogrammed monitor.
 
@@ -113,7 +113,8 @@ def normalize_by_vanadium_dspacing_and_two_theta(
 
 
 def normalize_by_proton_charge(
-    data: FilteredData[RunType], proton_charge: AccumulatedProtonCharge[RunType]
+    data: DataWithScatteringCoordinates[RunType],
+    proton_charge: AccumulatedProtonCharge[RunType],
 ) -> NormalizedRunData[RunType]:
     """Normalize data by an accumulated proton charge.
 

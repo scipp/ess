@@ -8,12 +8,19 @@ import scippnexus as snx
 
 from ess.powder.types import (
     CalibratedDetector,
+    CalibratedMonitor,
     CalibrationData,
     CalibrationFilename,
+    CaveMonitor,
+    CaveMonitorPosition,
     DetectorData,
     Filename,
+    MonitorData,
+    MonitorFilename,
+    MonitorType,
     NeXusComponent,
     NeXusDetectorName,
+    NeXusMonitor,
     Position,
     RunType,
 )
@@ -176,6 +183,56 @@ def _extract_detector(
     return events
 
 
+def _to_edges(centers: sc.Variable) -> sc.Variable:
+    interior_edges = sc.midpoints(centers)
+    return sc.concat(
+        [
+            2 * centers[0] - interior_edges[0],
+            interior_edges,
+            2 * centers[-1] - interior_edges[-1],
+        ],
+        dim=centers.dim,
+    )
+
+
+def load_mcstas_monitor(
+    file_path: MonitorFilename[RunType],
+    position: CaveMonitorPosition,
+) -> NeXusMonitor[RunType, CaveMonitor]:
+    """Load a monitor from a McStas file.
+
+    Parameters
+    ----------
+    file_path:
+        Indicates where to load data from.
+    position:
+        The position of the monitor.
+
+        Note that the files contain the position. But we don't know what coordinate
+        system they are define din. So we cannot reliably use them.
+
+    Returns
+    -------
+    :
+        A :class:`scipp.DataArray` containing the loaded histogram.
+    """
+
+    tof, counts, err = np.loadtxt(file_path, usecols=(0, 1, 2), unpack=True)
+
+    tof = _to_edges(sc.array(dims=["tof"], values=tof, unit="us"))
+    return NeXusMonitor[RunType, CaveMonitor](
+        sc.DataGroup(
+            data=sc.DataArray(
+                sc.array(dims=["tof"], values=counts, variances=err**2, unit="counts"),
+                coords={
+                    "tof": tof,
+                },
+            ),
+            position=position,
+        )
+    )
+
+
 def geant4_load_calibration(filename: CalibrationFilename) -> CalibrationData:
     if filename is not None:
         # Needed to build a complete pipeline.
@@ -190,6 +247,13 @@ def dummy_assemble_detector_data(
 ) -> DetectorData[RunType]:
     """Dummy assembly of detector data, detector already contains neutron data."""
     return DetectorData[RunType](detector)
+
+
+def dummy_assemble_monitor_data(
+    monitor: CalibratedMonitor[RunType, MonitorType],
+) -> MonitorData[RunType, MonitorType]:
+    """Dummy assembly of monitor data, monitor already contains neutron data."""
+    return MonitorData[RunType, MonitorType](monitor)
 
 
 def dummy_source_position() -> Position[snx.NXsource, RunType]:
@@ -211,9 +275,11 @@ def LoadGeant4Workflow() -> sciline.Pipeline:
     wf = GenericNeXusWorkflow()
     wf.insert(extract_geant4_detector)
     wf.insert(load_geant4_csv)
+    wf.insert(load_mcstas_monitor)
     wf.insert(geant4_load_calibration)
     wf.insert(get_calibrated_geant4_detector)
     wf.insert(dummy_assemble_detector_data)
+    wf.insert(dummy_assemble_monitor_data)
     wf.insert(dummy_source_position)
     wf.insert(dummy_sample_position)
     return wf
