@@ -169,5 +169,16 @@ def normalize_sample_images(
 
         \\text{where } i \\text{ is an index of an image.}
 
+
+    Raises
+    ------
+    ValueError
+        If the scale factor is negative.
+        It is for the safety of the calculation on short data type.
+        Depending on how you calculate the scale factor,
+        the operation might fail and return negative values.
+
     """
+    if factor < 0:
+        raise ValueError(f"Scale factor must be positive, but got {factor}.")
     return NormalizedSampleImages(samples / (background * factor))
