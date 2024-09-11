@@ -38,6 +38,13 @@ GroupedSampleImages = NewType("GroupedSampleImages", sc.DataArray)
 """Grouped sample image stack by rotation angle."""
 
 
+def _mean_all_dims(data: sc.Variable) -> sc.Variable:
+    """Calculate the mean of all dimensions one by one to avoid overflow."""
+    if data.shape == ():  # scalar
+        return data
+    return _mean_all_dims(data.mean(dim=data.dims[0]))
+
+
 def average_open_beam_images(open_beam: OpenBeamImageStacks) -> OpenBeamImage:
     """Average the open beam image stack.
 
@@ -70,12 +77,17 @@ def calculate_white_beam_background(
     We average the open beam and dark current image stack
     to create the single background image.
 
+    Any value less than 1 is replaced with 1.
+
     .. math::
 
         Background = mean(OpenBeam, 'time') - mean(DarkCurrent, 'time')
 
     """
-    return BackgroundImage(open_beam - dark_current)
+    diff = open_beam - dark_current
+    threshold = sc.scalar(1.0, unit=diff.unit)
+    diff.data = sc.where(diff.data < threshold, threshold, diff.data)
+    return BackgroundImage(diff)
 
 
 def cleanse_sample_images(
@@ -100,12 +112,6 @@ def average_background_pixel_counts(
 ) -> AverageBackgroundPixelCounts:
     """Calculate the average background pixel counts."""
     return AverageBackgroundPixelCounts(background.data.mean())
-
-
-def _mean_all_dims(data: sc.Variable) -> sc.Variable:
-    if data.shape == ():  # scalar
-        return data
-    return _mean_all_dims(data.mean(dim=data.dims[0]))
 
 
 def average_sample_pixel_counts(
