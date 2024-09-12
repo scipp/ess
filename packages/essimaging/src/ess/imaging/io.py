@@ -97,12 +97,6 @@ def load_nexus_histogram_mode_detector(
     return HistogramModeDetector(dg)
 
 
-Dim1AxisCoord = NewType("Dim1AxisCoord", sc.Variable | None)
-"""Dim1 axis coordinate."""
-Dim2AxisCoord = NewType("Dim2AxisCoord", sc.Variable | None)
-"""Dim2 axis coordinate."""
-
-
 MinDim1 = NewType("MinDim1", sc.Variable | None)
 """Minimum value of the first dimension."""
 MaxDim1 = NewType("MaxDim1", sc.Variable | None)
@@ -112,23 +106,13 @@ MinDim2 = NewType("MinDim2", sc.Variable | None)
 MaxDim2 = NewType("MaxDim2", sc.Variable | None)
 
 
-def _assign_coord_or_make_one(
-    da: sc.DataArray, dim: str, coord: sc.Variable | None
-) -> None:
-    if (dim in da.coords.keys()) and (coord is not None):
-        da.coords[dim] = coord
-    elif (dim not in da.coords.keys()) and (coord is None):
+def _make_coord_if_needed(da: sc.DataArray, dim: str) -> None:
+    if dim not in da.coords.keys():
         da.coords[dim] = sc.arange(dim=dim, start=0, stop=da.sizes[dim])
-    else:
-        raise RuntimeError(
-            f"Cannot make a new coordinate for {dim}. It already exists."
-        )
 
 
 def separate_detector_images(
     dg: HistogramModeDetector,
-    dim_1_coord: Dim1AxisCoord,
-    dim_2_coord: Dim2AxisCoord,
     min_dim_1: MinDim1,
     max_dim_1: MaxDim1,
     min_dim_2: MinDim2,
@@ -136,8 +120,8 @@ def separate_detector_images(
 ) -> HistogramModeDetectorData:
     da: sc.DataArray = sc.sort(dg['data'], 'time')
     # Assign position coordinates to the detector data
-    _assign_coord_or_make_one(da, DIM1_COORD_NAME, dim_1_coord)
-    _assign_coord_or_make_one(da, DIM2_COORD_NAME, dim_2_coord)
+    _make_coord_if_needed(da, DIM1_COORD_NAME)
+    _make_coord_if_needed(da, DIM2_COORD_NAME)
     # Crop the detector data by the given coordinates
     da = da[DIM1_COORD_NAME, min_dim_1:max_dim_1][DIM2_COORD_NAME, min_dim_2:max_dim_2]
     return HistogramModeDetectorData(da)
