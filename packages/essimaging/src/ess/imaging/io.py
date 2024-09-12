@@ -113,27 +113,16 @@ MaxDim2 = NewType("MaxDim2", sc.Variable | None)
 
 
 def _assign_coord_or_make_one(
-    da: sc.DataArray, coord_name: str, coord: sc.Variable | None
+    da: sc.DataArray, dim: str, coord: sc.Variable | None
 ) -> None:
-    da.coords[coord_name] = coord or sc.arange(
-        dim=coord_name, start=0, stop=da.sizes[coord_name]
-    )
-
-
-def _crop_da_by_coord(
-    da: sc.DataArray,
-    dim: str,
-    min_coord: sc.Variable | None,
-    max_coord: sc.Variable | None,
-) -> sc.DataArray:
-    if min_coord is not None and max_coord is not None:
-        return da[dim, min_coord:max_coord]
-    elif min_coord is not None and max_coord is None:
-        return da[dim, min_coord:]
-    elif min_coord is None and max_coord is not None:
-        return da[dim, :max_coord]
+    if (dim in da.coords.keys()) and (coord is not None):
+        da.coords[dim] = coord
+    elif (dim not in da.coords.keys()) and (coord is None):
+        da.coords[dim] = sc.arange(dim=dim, start=0, stop=da.sizes[dim])
     else:
-        return da
+        raise RuntimeError(
+            f"Cannot make a new coordinate for {dim}. It already exists."
+        )
 
 
 def separate_detector_images(
@@ -150,8 +139,7 @@ def separate_detector_images(
     _assign_coord_or_make_one(da, DIM1_COORD_NAME, dim_1_coord)
     _assign_coord_or_make_one(da, DIM2_COORD_NAME, dim_2_coord)
     # Crop the detector data by the given coordinates
-    da = _crop_da_by_coord(da, DIM1_COORD_NAME, min_dim_1, max_dim_1)
-    da = _crop_da_by_coord(da, DIM2_COORD_NAME, min_dim_2, max_dim_2)
+    da = da[DIM1_COORD_NAME, min_dim_1:max_dim_1][DIM2_COORD_NAME, min_dim_2:max_dim_2]
     return HistogramModeDetectorData(da)
 
 
