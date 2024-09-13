@@ -8,7 +8,6 @@ from .io import (
     MinDim1,
     MinDim2,
     apply_logs_as_coords,
-    derive_rotation_angle_coord,
     load_nexus_histogram_mode_detector,
     load_nexus_rotation_logs,
     retrieve_dark_current_images,
@@ -27,7 +26,6 @@ from .types import (
 
 _IO_PROVIDERS = (
     apply_logs_as_coords,
-    derive_rotation_angle_coord,
     load_nexus_histogram_mode_detector,
     load_nexus_rotation_logs,
     retrieve_dark_current_images,

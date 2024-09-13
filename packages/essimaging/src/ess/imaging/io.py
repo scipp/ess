@@ -228,18 +228,19 @@ def retrieve_sample_images(
     )
 
 
-def derive_rotation_angle_coord(
-    samples: RawSampleImageStacks, rotation_angles: RotationLogs
-) -> RotationAngleCoord:
-    return RotationAngleCoord(derive_log_coord_by_range(samples, rotation_angles))
-
-
 def apply_logs_as_coords(
-    samples: RawSampleImageStacks, rotation_angles: RotationAngleCoord
+    samples: RawSampleImageStacks, rotation_angles: RotationLogs
 ) -> SampleImageStacks:
     # Make sure the data has the same range as the rotation angle coordinate
-    sliced = samples[TIME_COORD_NAME, rotation_angles.min(TIME_COORD_NAME) :]
-    sliced.coords['rotation_angle'] = rotation_angles
+    min_log_time = rotation_angles.coords[TIME_COORD_NAME].min(TIME_COORD_NAME)
+    sliced = samples[TIME_COORD_NAME, min_log_time:]
+    if sliced.sizes != samples.sizes:
+        warnings.warn(
+            "The sample data has been sliced to match the rotation angle coordinate.",
+            stacklevel=0,
+        )
+    rotation_angle_coord = derive_log_coord_by_range(samples, rotation_angles)
+    sliced.coords['rotation_angle'] = rotation_angle_coord
     return SampleImageStacks(sliced)
 
 
