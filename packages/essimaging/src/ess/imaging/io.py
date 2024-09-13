@@ -140,30 +140,23 @@ def load_nexus_rotation_logs(
         return RotationLogs(f[log_path][()]['value'])
 
 
-def derive_log_coord_by_range(
-    da: sc.DataArray, log: sc.DataArray, out_of_range_value: sc.Variable
-) -> sc.Variable:
+def derive_log_coord_by_range(da: sc.DataArray, log: sc.DataArray) -> sc.Variable:
     """Sort the logs by time and decide which log entry corresponds to each time bin.
 
     It assumes a log value is valid until the next log entry.
     """
-    sorted_logs = sc.sort(log, 'time')
-    min_time = sc.datetime(da.coords['time'].min().value - 1, unit='ns')
-    max_time = sc.datetime(da.coords['time'].max().value + 1, unit='ns')
-    time_edges = sc.concat((min_time, sorted_logs.coords['time'], max_time), 'time')
-    sorted_keys = sc.concat((out_of_range_value, sorted_logs.data), 'time')
+    log = sc.sort(log, TIME_COORD_NAME)
+    indices = [*log.coords[TIME_COORD_NAME], None]
     return sc.concat(
         [
             sc.broadcast(
-                cur_key,
-                dims=['time'],
-                shape=da['time', start:end].coords['time'].shape,
+                log.data[TIME_COORD_NAME, i_time],
+                dims=[TIME_COORD_NAME],
+                shape=(da[TIME_COORD_NAME, start:end].sizes[TIME_COORD_NAME],),
             )
-            for (start, end), cur_key in zip(
-                pairwise(time_edges), sorted_keys, strict=True
-            )
+            for i_time, (start, end) in enumerate(pairwise(indices))
         ],
-        'time',
+        TIME_COORD_NAME,
     )
 
 
@@ -238,23 +231,16 @@ def retrieve_sample_images(
 def derive_rotation_angle_coord(
     samples: RawSampleImageStacks, rotation_angles: RotationLogs
 ) -> RotationAngleCoord:
-    return RotationAngleCoord(
-        derive_log_coord_by_range(
-            samples,
-            rotation_angles,
-            sc.scalar(
-                -1.0, unit=rotation_angles.data.unit, dtype=rotation_angles.data.dtype
-            ),
-        )
-    )
+    return RotationAngleCoord(derive_log_coord_by_range(samples, rotation_angles))
 
 
 def apply_logs_as_coords(
     samples: RawSampleImageStacks, rotation_angles: RotationAngleCoord
 ) -> SampleImageStacks:
-    copied = samples.copy(deep=False)
-    copied.coords['rotation_angle'] = rotation_angles
-    return SampleImageStacks(copied)
+    # Make sure the data has the same range as the rotation angle coordinate
+    sliced = samples[TIME_COORD_NAME, rotation_angles.min(TIME_COORD_NAME) :]
+    sliced.coords['rotation_angle'] = rotation_angles
+    return SampleImageStacks(sliced)
 
 
 DEFAULT_IMAGE_NAME_PREFIX_MAP = {
