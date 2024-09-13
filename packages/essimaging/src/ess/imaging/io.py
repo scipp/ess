@@ -284,7 +284,7 @@ def _validate_output_dir(output_dir: str | Path) -> None:
         output_dir.mkdir(parents=True, exist_ok=False)
     elif not output_dir.is_dir():
         raise ValueError(f"Output directory {output_dir} is not a directory.")
-    elif next(output_dir.iterdir(), None) is None:
+    elif next(output_dir.iterdir(), None) is not None:
         raise RuntimeError(f"Output directory {output_dir} is not empty.")
 
 
