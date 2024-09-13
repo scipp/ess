@@ -233,7 +233,7 @@ def apply_logs_as_coords(
 ) -> SampleImageStacks:
     # Make sure the data has the same range as the rotation angle coordinate
     min_log_time = rotation_angles.coords[TIME_COORD_NAME].min(TIME_COORD_NAME)
-    sliced = samples[TIME_COORD_NAME, min_log_time:]
+    sliced = samples[TIME_COORD_NAME, min_log_time:].copy(deep=False)
     if sliced.sizes != samples.sizes:
         warnings.warn(
             "The sample data has been sliced to match the rotation angle coordinate.",
