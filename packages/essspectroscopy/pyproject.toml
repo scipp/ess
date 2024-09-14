@@ -34,7 +34,9 @@ dependencies = [
   "scipp>=24.01",
   "scippneutron>=24.01",
   "scippnexus>=23.12",
-  "choppera>=0.1.3",
+  "choppera>=0.1.4",
+  "loguru",
+  "tqdm",
 ]
 
 dynamic = ["version"]
