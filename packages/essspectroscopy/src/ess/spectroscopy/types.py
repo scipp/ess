@@ -72,4 +72,18 @@ LabMomentumTransferX = variable_type("LabMomentumTransferX")
 LabMomentumTransferY = variable_type("LabMomentumTransferY")
 LabMomentumTransferZ = variable_type("LabMomentumTransferZ")
 
+SampleTableAngle = variable_type("SampleTableAngle")
+TableMomentumTransfer = variable_type('TableMomentumTransfer')
+TableMomentumTransferX = variable_type("TableMomentumTransferX")
+TableMomentumTransferY = variable_type("TableMomentumTransferY")
+TableMomentumTransferZ = variable_type("TableMomentumTransferZ")
+
+SampleMomentumTransfer = variable_type('SampleMomentumTransfer')
+SampleMomentumTransferX = variable_type("SampleMomentumTransferX")
+SampleMomentumTransferY = variable_type("SampleMomentumTransferY")
+SampleMomentumTransferZ = variable_type("SampleMomentumTransferZ")
+
 EnergyTransfer = variable_type('EnergyTransfer')
+
+# Debugging types, likely to be removed
+DetectorGeometricA4 = variable_type("DetectorGeometricA4")

@@ -23,7 +23,7 @@ def sample_analyzer_vector(
     There is expected to be multiple detector element positions per analyzer which can be represented as
     an additional dimension compared to the analyzer shapes.
     """
-    from scipp import concat, vector, dot, sqrt, DType
+    from scipp import vector, dot
     from ess.spectroscopy.utils import norm
 
     # Scipp does not distinguish between coordinates and directions, so we need to do some extra legwork
@@ -50,6 +50,13 @@ def sample_analyzer_vector(
     sa_out_of_plane = sample_analyzer_center_distance / (sample_analyzer_center_distance + analyzer_detector_center_distance) * sd_out_of_plane
 
     return sample_analyzer_center_vector + sa_out_of_plane * yhat
+
+
+def detector_geometric_a4(vec: SampleAnalyzerVector) -> DetectorGeometricA4:
+    from scipp import vector, dot, atan2
+    lab_x = vector([1, 0, 0])  # perpendicular to the incident beam, in the horizontal plane
+    lab_z = vector([0, 0, 1])  # along the incident beam direction
+    return atan2(y=dot(lab_x, vec), x=dot(lab_z, vec)).to(unit='deg')
 
 
 def fixed_tau_hat_sample_analyzer_vector(
@@ -219,5 +226,6 @@ providers = [
     secondary_flight_path_length,
     secondary_flight_time,
     sample_frame_time,
-    final_energy
+    final_energy,
+    detector_geometric_a4,
 ]
