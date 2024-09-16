@@ -32,7 +32,7 @@ requires-python = ">=3.10"
 dependencies = [
   "dask",
   "graphviz",
-  "plopp",
+  "plopp[all]",
   "sciline>=23.9.1",
   "scipp>=23.8.0",
   "scippnexus>=23.11.1",
@@ -45,6 +45,7 @@ dynamic = ["version"]
 [project.optional-dependencies]
 test = [
     "pytest",
+    "pooch",
 ]
 
 [project.urls]
