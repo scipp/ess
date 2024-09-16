@@ -27,7 +27,7 @@ jobs:
       - uses: pre-commit/action@v3.0.1
         with:
           extra_args: --all-files
-      - uses: pre-commit-ci/lite-action@v1.0.2
+      - uses: pre-commit-ci/lite-action@v1.0.3
         if: always()
         with:
           msg: Apply automatic formatting
@@ -46,6 +46,7 @@ jobs:
       os-variant: ${{ matrix.os }}
       python-version: ${{ matrix.python.version }}
       tox-env: ${{ matrix.python.tox-env }}
+    secrets: inherit
 
   docs:
     needs: tests
@@ -54,3 +55,4 @@ jobs:
       publish: false
       linkcheck: ${{ contains(matrix.variant.os, 'ubuntu') && github.ref == 'refs/heads/main' }}
       branch: ${{ github.head_ref == '' && github.ref_name || github.head_ref }}
+    secrets: inherit

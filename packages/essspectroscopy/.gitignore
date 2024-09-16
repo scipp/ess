@@ -9,6 +9,7 @@ html
 
 # Environments
 venv
+.venv
 
 # Caches
 .clangd/
@@ -20,6 +21,7 @@ __pycache__/
 .pytest_cache
 .mypy_cache
 docs/generated/
+.ruff_cache
 
 # Editor settings
 .idea/
@@ -38,3 +40,4 @@ docs/generated/
 *.cif
 *.rcif
 *.ort
+*.zip
