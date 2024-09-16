@@ -32,6 +32,7 @@ def normalize_by_monitor_histogram(
     detector: DataWithScatteringCoordinates[RunType],
     *,
     monitor: WavelengthMonitor[RunType, CaveMonitor],
+    uncertainty_broadcast_mode: UncertaintyBroadcastMode,
 ) -> NormalizedRunData[RunType]:
     """Normalize detector data by a histogrammed monitor.
 
@@ -41,13 +42,18 @@ def normalize_by_monitor_histogram(
         Input event data in wavelength.
     monitor:
         A histogrammed monitor in wavelength.
+    uncertainty_broadcast_mode:
+        Choose how uncertainties of the monitor are broadcast to the sample data.
 
     Returns
     -------
     :
         `detector` normalized by a monitor.
     """
-    return detector.bins / sc.lookup(monitor, dim="wavelength")
+    norm = broadcast_uncertainties(
+        monitor, prototype=detector, mode=uncertainty_broadcast_mode
+    )
+    return detector.bins / sc.lookup(norm, dim="wavelength")
 
 
 def _normalize_by_vanadium(
