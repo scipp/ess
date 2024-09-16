@@ -7,4 +7,5 @@ maxdepth: 1
 
 dream-data-reduction
 dream-instrument-view
+cream-detector-diagnostics
 ```
