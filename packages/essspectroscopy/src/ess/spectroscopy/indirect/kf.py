@@ -29,9 +29,10 @@ def sample_analyzer_vector(
 
     Note
     ----
-    The shapes of the analyzer position and orientation should be self-consistent and will likely be 1:1.
-    There is expected to be multiple detector element positions per analyzer which can be represented as
-    an additional dimension compared to the analyzer shapes.
+    The shapes of the analyzer position and orientation should be self-consistent
+    and will likely be 1:1. There is expected to be multiple detector element positions
+    per analyzer which can be represented as an additional dimension compared to
+    the analyzer shapes.
 
     Parameters
     ----------
@@ -47,13 +48,15 @@ def sample_analyzer_vector(
     Returns
     -------
     :
-        The vector from the sample position to the interaction point on the analyzer for each detector element
+        The vector from the sample position to the interaction point on the analyzer
+        for each detector element
     """
     from ess.spectroscopy.utils import norm
     from scipp import dot, vector
 
-    # Scipp does not distinguish between coordinates and directions, so we need to do some extra legwork
-    # to ensure we can apply the orientation transformation _and_ obtain a dimensionless direction vector
+    # Scipp does not distinguish between coordinates and directions, so we need to do
+    # some extra legwork to ensure we can apply the orientation transformation
+    # _and_ obtain a dimensionless direction vector
     o = vector([0, 0, 0], unit=analyzer_orientation.unit)
     y = vector(
         [0, 1, 0], unit=analyzer_orientation.unit
@@ -65,12 +68,13 @@ def sample_analyzer_vector(
 
     sample_detector_vector = detector_position - sample_position
     sd_out_of_plane = dot(sample_detector_vector, yhat)
-    # the sample-detector vector is the sum of sample-analyzer, analyzer-detector-center, the out-of-plane vector
+    # the sample-detector vector is the sum of sample-analyzer,
+    # analyzer-detector-center, the out-of-plane vector
     analyzer_detector_center_vector = (
         sample_detector_vector - sample_analyzer_center_vector - sd_out_of_plane * yhat
     )
 
-    # TODO Consider requiring that dot(analyzer_position - sample_position, yhat) is zero?
+    # TODO Consider requiring that dot(analyzer_position-sample_position, yhat) is zero?
 
     sample_analyzer_center_distance = norm(sample_analyzer_center_vector)
 
@@ -92,7 +96,8 @@ def detector_geometric_a4(vec: SampleAnalyzerVector) -> DetectorGeometricA4:
     Parameters
     ----------
     vec : scipp.DType.vector3
-        The per detector element analyzer interaction position, as determined by `sample_analyzer_vector`
+        The per detector element analyzer interaction position, as determined
+        by `sample_analyzer_vector`
 
     Returns
     -------
@@ -113,12 +118,12 @@ def analyzer_detector_vector(
     sample_analyzer_vec: SampleAnalyzerVector,
     detector_position: DetectorPosition,
 ) -> AnalyzerDetectorVector:
-    """Given the sample, analyzer-interaction, and detector element positions, calculate the analyzer-detector vector"""
+    """Calculate the analyzer-detector vector"""
     return detector_position - (sample_position + sample_analyzer_vec)
 
 
 def kf_hat(sample_analyzer_vec: SampleAnalyzerVector) -> SampleAnalyzerDirection:
-    """Calculate the direction of the neutrons for each detector-element, relative to the sample position"""
+    """Calculate the direction of the neutrons for each detector-element"""
     from ess.spectroscopy.utils import norm
 
     return sample_analyzer_vec / norm(sample_analyzer_vec)
@@ -144,11 +149,14 @@ def final_wavenumber(
     Parameters
     ----------
     sample_analyzer_vec : scipp.DType.vector3
-        The vector from the sample to the analyzer interaction point for each detector element
+        The vector from the sample to the analyzer interaction point for each
+         detector element
     analyzer_detector_vec: scipp.DType.vector3
-        The vector from the analyzer interaction point to its detector element, for each detector element
+        The vector from the analyzer interaction point to its detector element,
+        for each detector element
     tau: float-like
-        The reciprocal lattice plane spacing of the analyzer crystal, likely in inverse angstrom
+        The reciprocal lattice plane spacing of the analyzer crystal,
+        likely in inverse angstrom
 
     Returns
     -------
@@ -162,8 +170,9 @@ def final_wavenumber(
     l_sa = norm(sample_analyzer_vec)
     l_ad = norm(analyzer_detector_vec)
     l_diff = norm(sample_analyzer_vec + analyzer_detector_vec)
-    # 2 theta is measured from the direction S-A, so the internal angle is (pi - 2 theta)
-    # and the normal law of Cosines is modified accordingly to be -cos(2 theta) instead of cos(pi - 2 theta)
+    # 2 theta is measured from the direction S-A, so the internal angle is
+    # (pi - 2 theta) and the normal law of Cosines is modified accordingly to be
+    # -cos(2 theta) instead of cos(pi - 2 theta)
     cos2theta = (l_diff * l_diff - l_sa * l_sa - l_ad * l_ad) / (2 * l_sa * l_ad)
 
     # law of Cosines gives the Bragg reflected wavevector magnitude
@@ -188,7 +197,7 @@ def secondary_flight_path_length(
     sample_analyzer_vec: SampleAnalyzerVector,
     analyzer_detector_vec: AnalyzerDetectorVector,
 ) -> SampleDetectorPathLength:
-    """Returns the distance between the sample and each detector element that a neutron is most likely to travel"""
+    """Returns the path-length-distance between the sample and each detector element"""
     from ess.spectroscopy.utils import norm
 
     return norm(sample_analyzer_vec) + norm(analyzer_detector_vec)
@@ -197,7 +206,7 @@ def secondary_flight_path_length(
 def secondary_flight_time(
     secondary_flight_distance: SampleDetectorPathLength, kf_magnitude: FinalWavenumber
 ) -> SampleDetectorFlightTime:
-    """Calculates the most-likely time-of-flight between the sample and each detector element"""
+    """Calculates the most-likely time-of-flight between the sample and each pixel"""
     from scipp.constants import hbar, neutron_mass
 
     velocity = kf_magnitude * hbar / neutron_mass
@@ -207,7 +216,7 @@ def secondary_flight_time(
 def sample_frame_time(
     detector_time: DetectorFrameTime, secondary_time: SampleDetectorFlightTime
 ) -> SampleFrameTime:
-    """For times measured at the detector elements, returns the time each neutron likely interacted with the sample"""
+    """Return the time each neutron likely interacted with the sample"""
     return detector_time - secondary_time
 
 

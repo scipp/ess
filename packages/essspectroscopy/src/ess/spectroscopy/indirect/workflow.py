@@ -12,45 +12,48 @@ def _load_all(group, obj_type):
 
 
 def _load_named(group, obj_type, names):
-    """Helper to find and load all subgroups of a specific scippnexus type with group name in an allowed set"""
+    """Helper to find and load all subgroups of a specific scippnexus type with
+    group name in an allowed set"""
     return {name: obj[...] for name, obj in group[obj_type].items() if name in names}
 
 
 def ess_source_frequency():
-    """Helper to create an input for a sciline workflow, returns the ESS source frequency of 14 Hz"""
+    """Input for a sciline workflow, returns the ESS source frequency of 14 Hz"""
     from scipp import scalar
 
     return scalar(14.0, unit='Hz')
 
 
 def ess_source_period():
-    """Helper to create an input for a sciline workflow, returns the ESS source period of 1/(14 Hz)"""
+    """Input for a sciline workflow, returns the ESS source period of 1/(14 Hz)"""
     return (1 / ess_source_frequency()).to(unit='ns')
 
 
 def ess_source_delay():
-    """Helper to create an input for a sciline workflow, returns per-wavelength source delays of 0 s"""
+    """Input for a sciline workflow, returns per-wavelength source delays of 0 s"""
     from scipp import array
 
     return array(values=[0, 0.0], dims=['wavelength'], unit='sec', dtype='float64')
 
 
 def ess_source_duration():
-    """Helper to create an input for a sciline workflow, returns source pulse duration of 3 msec"""
+    """Input for a sciline workflow, returns source pulse duration of 3 msec"""
     from scipp import scalar
 
     return scalar(3.0, unit='msec').to(unit='sec')
 
 
 def ess_source_velocities():
-    """Helper to create an input for a sciline workflow, returns per-wavelength source velocity limits
+    """Input for a sciline workflow, returns per-wavelength source velocity limits
 
     Notes
     -----
-    The chosen limits are not based on any properties of the source, but rather entirely on the equivalent
-    energy range, which is chosen to be ~53 micro electron volts to 530 milli electron volts.
-    This energy range should be sufficient for all intended incident energies of the ESS spectrometer suite,
-    but may not be sufficient to capture spurious energies that pass through the real instruments.
+    The chosen limits are not based on any properties of the source, but rather
+    entirely on the equivalent energy range, which is chosen to be
+    ~53 micro electron volts to 530 milli electron volts. This energy range should
+    be sufficient for all intended incident energies of the ESS spectrometer suite,
+    but may not be sufficient to capture spurious energies that pass through
+    the real instruments.
 
     Returns
     -------
@@ -65,21 +68,25 @@ def ess_source_velocities():
 def convert_simulated_time_to_frame_time(data):
     """Helper to make McStas simulated event data look more like real data
 
-    McStas has the ability to track the time-of-flight from source to detector for every probabilistic neutron ray.
-    This is very helpful, but unfortunately real instrument at ESS are not able to record the same information
-    due to how the timing and data collection systems work.
+    McStas has the ability to track the time-of-flight from source to detector for
+    every probabilistic neutron ray. This is very helpful, but unfortunately real
+    instrument at ESS are not able to record the same information due to how the
+    timing and data collection systems work.
 
-    Real neutron events will record their event_time_zero most-recent-pulse reference time, and their
-    event_time_offset detection time relative to that reference time. These two values added together give
-    a real wall time; and information about the primary spectrometer is necessary to find any time-of-flight
+    Real neutron events will record their event_time_zero most-recent-pulse reference
+    time, and their event_time_offset detection time relative to that reference time.
+    These two values added together give a real wall time; and information about the
+    primary spectrometer is necessary to find any time-of-flight
 
-    This function takes event data with per-event coordinate event_time_offset (actually McStas time-of-flight)
-    and creates a new coordinate frame_time that is the time-of-flight modulo the source repetition period.
+    This function takes event data with per-event coordinate event_time_offset
+    (actually McStas time-of-flight) and creates a new coordinate frame_time that is
+    the time-of-flight modulo the source repetition period.
 
     Notes
     -----
-    If the input data has realistic event_time_offset values, this function should produce frame_time data
-    which is identical, and will therefore only increase the amount of data stored per event.
+    If the input data has realistic event_time_offset values, this function should
+    produce frame_time data which is identical, and will therefore only increase
+    the amount of data stored per event.
 
     Returns
     -------
@@ -100,15 +107,16 @@ def analyzer_per_detector(analyzers: list[str], triplets: list[str]) -> dict[str
     Notes
     -----
     Depends heavily on the names of components being preceded by an in-instrument index,
-    and the analyzer and detector components being separated in index by 2. If either condition changes
-    this function will need to be modified.
+    and the analyzer and detector components being separated in index by 2.
+    If either condition changes this function will need to be modified.
 
     Parameters
     ----------
     analyzers: list[str]
         The names of analyzer components, typically generated from the keys of a dict
     triplets: dict
-        The names of triplet detector components, typically generated from the keys of a dict
+        The names of triplet detector components, typically generated from the
+        keys of a dict
 
     Returns
     -------
@@ -116,13 +124,13 @@ def analyzer_per_detector(analyzers: list[str], triplets: list[str]) -> dict[str
         A dictionary with detector name keys and their associated analyzer name values
     """
 
-    # TODO Update this function if the NeXus group naming changes, or components are added/removed.
+    # TODO Update this function if the NeXus structure changes.
     def correct_index(d, a):
         detector_index = int(d.split('_', 1)[0])
         analyzer_index = detector_index - 2
         return a.startswith(str(analyzer_index))
 
-    return {d: [x for x in analyzers if correct_index(d, x)][0] for d in triplets}
+    return {d: next(x for x in analyzers if correct_index(d, x)) for d in triplets}
 
 
 def detector_per_pixel(triplets: dict) -> dict[int, str]:
@@ -131,8 +139,8 @@ def detector_per_pixel(triplets: dict) -> dict[int, str]:
     Parameters
     ----------
     triplets: dict[str, scipp.DataGroup]
-        A mapping of detector component name to a loaded scippnexus.NXdetector group, with 'data' group member
-        that has a 'detector_number' coordinate
+        A mapping of detector component name to a loaded scippnexus.NXdetector group,
+        with 'data' group member that has a 'detector_number' coordinate
 
     Returns
     -------
@@ -147,21 +155,23 @@ def detector_per_pixel(triplets: dict) -> dict[int, str]:
 
 
 def combine_analyzers(analyzers: dict, triplets: dict):
-    """Combine needed analyzer properties into a single array, duplicating information, to have per-pixel data
+    """Combine needed analyzer properties into a single array, duplicating information,
+    to have per-pixel data
 
-    BIFROST has 45 analyzers and 45 triplet detectors, each with some number of pixels, N.
-    Calculations for the properties of neutrons which make it to each detector pixel need per-pixel data about
-    the analyzer associated with that pixel. This function collects the required data and combines it into a
-    single array.
+    BIFROST has 45 analyzers and 45 triplet detectors, each with some number of pixels,
+    N. Calculations for the properties of neutrons which make it to each detector pixel
+    need per-pixel data about the analyzer associated with that pixel. This function
+    collects the required data and combines it into a single array.
 
-    Analyzer information required to determine the secondary-spectrometer neutron properties are the center-of-mass
-    position of the analyzer, the orientation of the analyzer, and the lattice spacing separating crystal planes
-    in the analyzer.
+    Analyzer information required to determine the secondary-spectrometer neutron
+    properties are the center-of-mass position of the analyzer, the orientation of
+    the analyzer, and the lattice spacing separating crystal planes in the analyzer.
 
     Notes
     -----
-    Since there are N pixels per detector, the returned array is strictly N-times larger than necessary,
-    but the optimization to use only minimal information is left for the future
+    Since there are N pixels per detector, the returned array is strictly N-times
+    larger than necessary, but the optimization to use only minimal information is
+    left for the future
 
     Parameters
     ----------
@@ -173,7 +183,8 @@ def combine_analyzers(analyzers: dict, triplets: dict):
     Returns
     -------
     :
-        A single array with 'event_id' pixel dimension and the per-pixel analyzer information
+        A single array with 'event_id' pixel dimension and the
+        per-pixel analyzer information
     """
     from scipp import Dataset, array, concat
     from scippnexus import compute_positions
@@ -196,12 +207,13 @@ def combine_analyzers(analyzers: dict, triplets: dict):
 def combine_detectors(triplets: dict):
     """Combine needed detector properties into a single array
 
-    BIFROST has 45 analyzers and 45 triplet detectors, each with some number of pixels, N.
-    Calculations for the properties of neutrons which make it to each detector pixel need per-pixel data.
-    This function collects the required data and combines it into a single array.
+    BIFROST has 45 analyzers and 45 triplet detectors, each with some number of pixels,
+    N. Calculations for the properties of neutrons which make it to each detector pixel
+    need per-pixel data. This function collects the required data and combines it into
+    a single array.
 
-    Detector information required to determine the secondary-spectrometer neutron properties are the center-of-mass
-    position of each pixel.
+    Detector information required to determine the secondary-spectrometer neutron
+    properties are the center-of-mass position of each pixel.
 
     Parameters
     ----------
@@ -211,7 +223,8 @@ def combine_detectors(triplets: dict):
     Returns
     -------
     :
-        A single array with 'event_id' pixel dimension and the per-pixel center of mass position
+        A single array with 'event_id' pixel dimension and the
+        per-pixel center of mass position
     """
     from scipp import Dataset, concat, sort
 
@@ -258,9 +271,10 @@ def get_triplet_events(triplets):
     Parameters
     ----------
     triplets:
-        An iterable container of loaded NXdetector groups, each with a 'data' member which contains the
-        pixel data -- possibly multiple detector-specific (but consistent) dimensions -- with a coordinate
-        identifying the 'detector_number'
+        An iterable container of loaded NXdetector groups, each with a 'data' member
+        which contains the pixel data -- possibly multiple detector-specific
+        (but consistent) dimensions -- with a coordinate identifying the
+        'detector_number'
 
     Returns
     -------
@@ -275,7 +289,7 @@ def get_triplet_events(triplets):
 
 
 def get_sample_events(triplet_events, sample_detector_flight_times):
-    """Copy the triplet events structure and offset its frame_time event coordinate to give frame_time at the sample"""
+    """Return the events with the frame_time coordinate offset to time at the sample"""
     events = triplet_events.copy()
     for coord in ('position', 'x_pixel_offset', 'y_pixel_offset'):
         del events.coords[coord]
@@ -287,7 +301,7 @@ def get_sample_events(triplet_events, sample_detector_flight_times):
 def get_unwrapped_events(
     filename, source_name, sample_name, sample_events, focus_components
 ):
-    """Use a sciline pipeline to shift frame_time at sample events to time-since-producing-pulse events at sample"""
+    """Shift frame_time at sample events to time-since-pulse events at sample"""
     from sciline import Pipeline
 
     from ..types import (
@@ -325,26 +339,31 @@ def get_unwrapped_events(
 
 
 def get_normalization_monitor(monitors, monitor_component, collapse: bool = False):
-    """Get the data of the named monitor component, converting frame_time to nanoseconds to match event_time_offset
+    """Get the data of the named monitor component, converting frame_time to nanoseconds
+    to match event_time_offset
 
     Parameters
     ----------
     monitors:
-        A dictionary mapping monitor component name to loaded scippneutron.NXmonitor groups
+        A dictionary mapping monitor component name to loaded scippneutron.NXmonitor
+        groups
     monitor_component:
         The name of the monitor component to access
     collapse: bool
-        For some simulated experiments, a parameter was scanned which should not be treated as separate
-        time points. When provied True, these points are integrated over the 'time' dimension.
+        For some simulated experiments, a parameter was scanned which should not be
+        treated as separate time points. When provided True, these points are integrated
+        over the 'time' dimension.
 
     Returns
     -------
     :
-        Monitor data with frame_time converted to nanoseconds to match the timescale used for events
+        Monitor data with frame_time converted to nanoseconds to match the timescale
+        used for events
     """
     normalization = monitors[monitor_component]['data']
     if collapse:
-        # This is very specialized to how the simulated scans are done, it needs to be generalized
+        # This is very specialized to how the simulated scans are done,
+        # it needs to be generalized?
         normalization = normalization.sum(dim='time')
     # rescale the frame_time axis. Why does it need to be done this way?
     return normalization.transform_coords(
@@ -353,7 +372,7 @@ def get_normalization_monitor(monitors, monitor_component, collapse: bool = Fals
 
 
 def get_energy_axes(ki_params, kf_params):
-    """Use a sciline pipeline to extract incident_energy, final_energy, and energy_transfer
+    """Extract incident_energy, final_energy, and energy_transfer
 
     Parameters
     ----------
@@ -395,7 +414,7 @@ def get_energy_axes(ki_params, kf_params):
 
 
 def add_momentum_axes(ki_params, kf_params, events, a3: Variable):
-    """Use a sciline pipeline to extract momentum transfer in the lab and sample-table coordinate systems
+    """Extract momentum transfer in the lab and sample-table coordinate systems
 
     Parameters
     ----------
@@ -411,9 +430,11 @@ def add_momentum_axes(ki_params, kf_params, events, a3: Variable):
     Returns
     -------
     :
-        The event data with the two horizontal plane components of the momentum transfer added in the
-        laboratory coordinate system (independent of a3) and the sample-table coordinate system (rotated by a3 around y)
-        These new coordinates are named 'lab_momentum_x', 'lab_momentum_z', 'table_momentum_x' and 'table_momentum_z'
+        The event data with the two horizontal plane components of the
+        momentum transfer added in the laboratory coordinate system (independent of a3)
+        and the sample-table coordinate system (rotated by a3 around y).
+        These new coordinates are named 'lab_momentum_x', 'lab_momentum_z',
+        'table_momentum_x' and 'table_momentum_z'
     """
     from sciline import Pipeline
 
@@ -441,14 +462,12 @@ def add_momentum_axes(ki_params, kf_params, events, a3: Variable):
     pipeline[LabMomentumTransfer] = pipeline.get(LabMomentumTransfer).compute()
 
     events.bins.coords['lab_momentum_x'] = pipeline.get(LabMomentumTransferX).compute()
-    # events.bins.coords['lab_momentum_y'] = pipeline.get(LabMomentumTransferY).compute()
     events.bins.coords['lab_momentum_z'] = pipeline.get(LabMomentumTransferZ).compute()
 
     pipeline[TableMomentumTransfer] = pipeline.get(TableMomentumTransfer).compute()
     events.bins.coords['table_momentum_x'] = (
         pipeline.get(TableMomentumTransferX).compute().transpose(events.dims)
     )
-    # events.bins.coords['table_momentum_y'] = pipeline.get(TableMomentumTransferY).compute().transpose(events.dims)
     events.bins.coords['table_momentum_z'] = (
         pipeline.get(TableMomentumTransferZ).compute().transpose(events.dims)
     )
@@ -463,24 +482,28 @@ def split(
     a3_name: str | None = None,
     a4_name: str | None = None,
 ):
-    """Use the (a3, a4) logged value pairs to split triplet, analyzer, and monitor data into single-setting sets
+    """Use the (a3, a4) logged value pairs to split triplet, analyzer, and monitor data
+    into single-setting sets
 
     Parameters
     ----------
     triplets: DataArray
-        The triplet positions _should_ change with a4 (if simulated, this is certainly not implemented correctly yet)
-        The event data they contain depends on (a3, a4) [plus any other time-dependent parameter] so must be split.
-    analyzers: Dataset?
-        The analyzer position _should_ change with a4 (if simulated, this is certainly not implemented correctly yet)
+        The triplet positions _should_ change with a4 (if simulated, this is certainly
+        not implemented correctly yet). The event data they contain depends on
+        (a3, a4) [plus any other time-dependent parameter] so must be split.
+    analyzers:
+        The analyzer position _should_ change with a4
+        (if simulated, this is certainly not implemented correctly yet)
     monitors: DataArray
-        The histogram (simulated, or real current beam monitor) or event (real fission monitor, etc.?) data is
-        time-dependent and used to normalize the detector data. It must therefore be split into (a3, a4) sets
+        The histogram (simulated, or real current beam monitor) or event
+        (real fission monitor, etc.?) data is time-dependent and used to normalize
+        the detector data. It must therefore be split into (a3, a4) sets
     logs: DataGroup
         Entries built from NXlogs in the real or simulated instrument
     a3_name: str
-        The name of the sample table angle log entry in `logs` -- 'a3' for simulated data
+        The name of the sample table angle log entry in `logs`, 'a3' for simulated data
     a4_name: str
-        The name of the detector tank angle log entry in `logs` -- 'a4' for simulated data
+        The name of the detector tank angle log entry in `logs`, 'a4' for simulated data
 
     Returns
     -------
@@ -489,7 +512,7 @@ def split(
     """
     from scipp import lookup
 
-    from ..utils import is_in_coords, split_setting
+    from ..utils import is_in_coords
 
     if a3_name is None:
         a3_name = 'a3'
@@ -534,7 +557,8 @@ def split(
 
     n_time = [v.sizes['time'] for v in vals if 'time' in v.dims]
     if len(n_time):
-        assert all(n == n_time[0] for n in n_time)
+        if not all(n == n_time[0] for n in n_time):
+            raise ValueError("Not all values have the same 'time' dimension")
         n_time = n_time[0]
         vals = [
             [v['time', i] if 'time' in v.dims else v for v in vals]
@@ -552,9 +576,11 @@ def load_everything(filename: NeXusFileName, named_components: dict[str, str]):
     Parameters
     ----------
     filename:
-        The name of the file to load data from, must have both and 'instrument' and 'parameters' group under 'entry'
+        The name of the file to load data from, must have both and 'instrument'
+        and 'parameters' group under 'entry'
     named_components:
-        The file-specific names of (at least) the source and sample group names under 'entry/instrument'
+        The file-specific names of (at least) the source and sample group names
+        under 'entry/instrument'
 
     Returns
     -------
@@ -579,12 +605,10 @@ def load_everything(filename: NeXusFileName, named_components: dict[str, str]):
         group = data['entry/instrument']
         if source_component not in group:
             raise ValueError(
-                f'Missing source component {source_component} for path-length calculations'
+                f'Missing {source_component=} for path-length calculations'
             )
         if sample_component not in group:
-            raise ValueError(
-                f'Missing sample component {sample_component} for origin identification'
-            )
+            raise ValueError(f'Missing {sample_component=} for origin identification')
         sample = snx.compute_positions(
             group[sample_component][...], store_transform='transform'
         )
@@ -620,7 +644,8 @@ def one_setting(
     energy_events.coords['final_energy'] = ef
 
     if 'a3' in triplet_events.coords:
-        # this _should_ be one (a3, a4) setting, with a single a3 value on triple_events (and norm_monitor)
+        # this _should_ be one (a3, a4) setting,
+        # with a single a3 value on triple_events (and norm_monitor)
         a3 = triplet_events.coords['a3']
     else:
         from scipp import scalar
@@ -658,24 +683,27 @@ def load_precompute(
     filename:
         The file which contains the data to load
     named_components:
-        The file-specific names of (at least) the source, sample and normalization monitor group names
-        under 'entry/instrument'
+        The file-specific names of (at least) the source, sample and normalization
+        monitor group names under 'entry/instrument'
     is_simulated:
-        A flag to indicate if the file comes from a McStas simulation, such that the event_time_offset
-        needs to be modified to look like real data.
+        A flag to indicate if the file comes from a McStas simulation, such that
+        the event_time_offset needs to be modified to look like real data.
 
     Returns
     -------
     sample:
         The sample group loaded from the NeXus file
     analyzers:
-        A single array with all analyzer information needed to calculate secondary-spectrometer parameters
+        A single array with all analyzer information needed to calculate
+        secondary-spectrometer parameters
     triplet_events:
-        A single array with the events and detector-pixel information needed to calculate parameters
+        A single array with the events and detector-pixel information needed
+        to calculate parameters
     norm_monitor:
         The normalization monitor data with frame_time converted to nanoseconds
     logs:
-        A dictionary of the 'a3' and 'a4' logs from the 'entry/parameter' group in the NeXus file
+        A dictionary of the 'a3' and 'a4' logs from the 'entry/parameter' group
+        in the NeXus file
     """
     import scippnexus as snx
 
@@ -714,16 +742,20 @@ def component_names(
     Parameters
     ----------
     source_component: str
-        The user-provided source component name, should exist at 'entry/instrument/{source_component}' in the datafile
+        The user-provided source component name, should exist at
+        'entry/instrument/{source_component}' in the datafile
     sample_component: str
-        The user-provided sample component name, should exist at 'entry/instrument/{sample_component}' in the datafile
+        The user-provided sample component name, should exist at
+        'entry/instrument/{sample_component}' in the datafile
     focus_components: list[str]
-        The user-provided set of component names defining the time-focus position, each should exist under
-        'entry/instrument' in the datafile
+        The user-provided set of component names defining the time-focus position,
+        each should exist under 'entry/instrument' in the datafile
     monitor_component: str
-        The user-provided normalization monitor component name, should exist at 'entry/instrument/{monitor_component}'
+        The user-provided normalization monitor component name, should exist at
+        'entry/instrument/{monitor_component}'
     is_simulated: bool
-        If true, user-provided names will be augmented with the McStas component names for the specific types.
+        If true, user-provided names will be augmented with the McStas component
+        names for the specific types.
 
     Returns
     -------
@@ -762,29 +794,36 @@ def bifrost(
     monitor_component: str | None = None,
     is_simulated: bool = False,
 ):
-    """Load a BIFROST data file and convert to S(Q,E) in the sample-table coordinate system
+    """Load a BIFROST data file and convert to S(Q,E)
+    in the sample-table coordinate system
 
     Parameters
     ----------
     filename:
         The name of the NeXus file to load
     source_component:
-        The group name under 'entry/instrument' in the NeXus file containing source information
+        The group name under 'entry/instrument' in the NeXus file containing
+        source information
     sample_component:
-        The group name under 'entry/instrument' in the NeXus file containing sample information
+        The group name under 'entry/instrument' in the NeXus file containing
+        sample information
     focus_components:
-        The group name or group names under 'entry/instrument' in the NeXus file which define the focus-time
+        The group name or group names under 'entry/instrument' in the NeXus file
+        which define the focus-time
     monitor_component:
-        The group name under 'entry/instrument' in the NeXus file containing normalization monitor information
+        The group name under 'entry/instrument' in the NeXus file containing
+        normalization monitor information
     is_simulated:
-        Whether the NeXus file comes from a McStas simulation, in which case default component names are set
-        if not provided and the data is modified to look like real data
+        Whether the NeXus file comes from a McStas simulation, in which case default
+        component names are set if not provided and the data is modified to
+        look like real data
 
     Returns
     -------
-    A dictionary of data from the workflow, concatenated along a 'setting' dimension corresponding to separate
-    (a3, a4) grouped data. The entries in the dictionary may not all be useful, and are subject to pruning as
-    experience is gained with the workflow.
+    A dictionary of data from the workflow, concatenated along a 'setting' dimension
+    corresponding to separate (a3, a4) grouped data. The entries in the dictionary
+    may not all be useful, and are subject to pruning as experience is gained with
+    the workflow.
     """
     import scipp as sc
     from tqdm import tqdm
@@ -825,30 +864,37 @@ def bifrost_single(
     is_simulated: bool = False,
     extras: bool = False,
 ):
-    """Load a BIFROST data file and convert to S(Q,E) in the laboratory coordinate system
+    """Load a BIFROST data file and convert to S(Q,E)
+    in the laboratory coordinate system
 
     Parameters
     ----------
     filename:
         The name of the NeXus file to load
     source_component:
-        The group name under 'entry/instrument' in the NeXus file containing source information
+        The group name under 'entry/instrument' in the NeXus file containing
+        source information
     sample_component:
-        The group name under 'entry/instrument' in the NeXus file containing sample information
+        The group name under 'entry/instrument' in the NeXus file containing
+        sample information
     focus_components:
-        The group name or group names under 'entry/instrument' in the NeXus file which define the focus-time
+        The group name or group names under 'entry/instrument' in the NeXus file
+        which define the focus-time
     monitor_component:
-        The group name under 'entry/instrument' in the NeXus file containing normalization monitor information
+        The group name under 'entry/instrument' in the NeXus file containing
+        normalization monitor information
     is_simulated:
-        Whether the NeXus file comes from a McStas simulation, in which case default component names are set
-        if not provided and the data is modified to look like real data
+        Whether the NeXus file comes from a McStas simulation, in which case default
+        component names are set if not provided and the data is modified to look like
+        real data
     extras:
-        If true, the loaded sample group and 'a3' and 'a4' logs will be returned in the dictionary
+        If true, the loaded sample group and 'a3' and 'a4' logs will be returned in
+        the dictionary
 
     Returns
     -------
-    A dictionary of data from the workflow. The entries in the dictionary may not all be useful,
-    and are subject to pruning as experience is gained with the workflow.
+    A dictionary of data from the workflow. The entries in the dictionary may not
+    all be useful, and are subject to pruning as experience is gained with the workflow.
     """
     named_components = component_names(
         source_component,

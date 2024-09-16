@@ -1,18 +1,4 @@
 from ess.spectroscopy.indirect import kf as secondary
-from ess.spectroscopy.indirect import ki as primary
-from ess.spectroscopy.types import (
-    AnalyzerDetectorVector,
-    DetectorPosition,
-    FinalWavenumber,
-    FinalWavevector,
-    ReciprocalLatticeSpacing,
-    ReciprocalLatticeVectorAbsolute,
-    SampleAnalyzerDirection,
-    SampleAnalyzerVector,
-    SampleDetectorFlightTime,
-    SampleDetectorPathLength,
-    SamplePosition,
-)
 from ess.spectroscopy.utils import norm
 from scipp import array, scalar, sqrt, vector
 from scipp.spatial import rotations_from_rotvecs
@@ -40,7 +26,7 @@ def all_vectors_close(a, b, tol=None):
     if len(a.shape) and len(b.shape):
         if a.shape != b.shape:
             return False
-        for x, y in zip(a, b):
+        for x, y in zip(a, b, strict=True):
             if not vectors_close(x, y, tol):
                 return False
     elif len(a.shape):
@@ -69,12 +55,14 @@ def test_back_scattering_sample_analyzer_vector():
     sample_analyzer_vec = scalar(1.0, unit='m') * z
     analyzer_position = sample_analyzer_vec + sample_position
 
-    # analyzer orientation of 90 degrees -> scattering angle of 180 degrees: back scattering
+    # analyzer orientation of 90 degrees ->
+    # scattering angle of 180 degrees: back scattering
     analyzer_orientation = rotations_from_rotvecs(scalar(90.0, unit='degree') * y)
 
     detector_y = analyzer_orientation * analyzer_orientation * y
     assert vectors_close(detector_y, y)
-    # The detector positions are defined in the coordinate system, then rotated around the analyzer position
+    # The detector positions are defined in the coordinate system,
+    # then rotated around the analyzer position
     tubes = array(values=[-0.1, 0.0, 0.1], unit='m', dims=['tube']) * x
     detector_positions = scalar(1.0, unit='m') * z + tubes
     detector_positions = (
@@ -85,12 +73,14 @@ def test_back_scattering_sample_analyzer_vector():
         sample_position, analyzer_position, analyzer_orientation, detector_positions
     )
 
-    # This would be 'right' for fixed tau direction, but we utilize the mosaic and insist on scattering from
-    # the center line of the analyzer
-    # offset = sample_analyzer_vec - tubes / 2.0  # minus because the detector has been rotated 180 degrees
+    # This would be 'right' for fixed tau direction, but we utilize the mosaic and
+    # insist on scattering from the center line of the analyzer
+    # offset = sample_analyzer_vec - tubes / 2.0
+    # (minus because the detector has been rotated 180 degrees)
     assert all_vectors_close(calculated, sample_analyzer_vec)
 
-    # Offsetting along the analyzer scattering plane normal moves the analyzer intersection point by half
+    # Offsetting along the analyzer scattering plane normal moves the analyzer
+    # intersection point by half
     wires = array(values=[-0.1, 0.0, 0.1], unit='m', dims=['wire']) * y
     detector_positions = scalar(1.0, unit='m') * z + wires
     detector_positions = (
@@ -133,17 +123,17 @@ def test_sample_analyzer_vector():
     y = analyzer_transform * vector([0.0, 1.0, 0.0], unit='1')
     z = analyzer_transform * vector([0.0, 0.0, 1.0], unit='1')
     # sample-analyzer-vector must be along the local z axis
-    sample_analyzer_vec = scalar(0.5 + random(), unit='m') * z
+    sample_analyzer_vec = scalar(0.5 + random(), unit='m') * z  # noqa: S311
     sample_analyzer_vec /= norm(sample_analyzer_vec).value
     analyzer_position = sample_analyzer_vec + sample_position
 
     # Avoid sin(theta) values near 0 or 1
-    # analyzer_orientation = rotations_from_rotvecs(scalar(random() * 70.0 + 5.0, unit='degree') * y)
     analyzer_orientation = rotations_from_rotvecs(scalar(45.0, unit='degree') * y)
 
     detector_y = analyzer_orientation * analyzer_orientation * y
     assert vectors_close(detector_y, y)
-    # The detector positions are defined in the coordinate system, then rotated around the analyzer position
+    # The detector positions are defined in the coordinate system,
+    # then rotated around the analyzer position
     tubes = array(values=[-0.1, 0.0, 0.1], unit='m', dims=['tube']) * x
     detector_positions = scalar(1.0, unit='m') * z + tubes
     detector_positions = (
@@ -156,7 +146,8 @@ def test_sample_analyzer_vector():
     offset = calculated - sample_analyzer_vec
     assert all_vectors_close(offset, 0 * tubes)
 
-    # Offsetting along the analyzer scattering plane normal moves the analyzer intersection point by half
+    # Offsetting along the analyzer scattering plane normal moves
+    # the analyzer intersection point by half
     wires = array(values=[-0.1, 0.0, 0.1], unit='m', dims=['wire']) * y
     detector_positions = scalar(1.0, unit='m') * z + wires
     detector_positions = (

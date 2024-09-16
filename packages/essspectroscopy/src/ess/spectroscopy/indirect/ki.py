@@ -1,4 +1,6 @@
-"""Utilities for the primary spectrometer of an indirect geometry time-of-flight spectrometer"""
+"""Utilities for the primary spectrometer of an
+indirect geometry time-of-flight spectrometer
+"""
 
 from __future__ import annotations
 
@@ -65,7 +67,7 @@ def determine_name_with_type(
         found.update(set(instrument[option]))
     if len(found) != 1:
         raise ValueError(f"Could not determine {type_name} name: {found}")
-    return list(found)[0]
+    return next(iter(found))
 
 
 def guess_source_name(file: NeXusFileName) -> SourceName:
@@ -91,25 +93,27 @@ def guess_sample_name(file: NeXusFileName) -> SampleName:
 
 
 def guess_focus_component_names(file: NeXusFileName) -> FocusComponentNames:
-    """Guess the names of the components which define the focus distance of a Primary Spectrometer
+    """Guess the component names which define the focus of a Primary Spectrometer
 
     Note
     ----
-    The order of components in the NeXus file must be consistent with the order of components along the beamline.
-    This assumes that only NXdisk_chopper are used to define a focus distance, and that the first chopper
-    or choppers along the beamline, within a fixed small distance, can define the focus distance.
-    The component type, primacy, and allowed distance range could be user configurable inputs.
+    The order of components in the NeXus file must be consistent with the order of
+    components along the beamline. This assumes that only NXdisk_chopper are used to
+    define a focus distance, and that the first chopper or choppers along the beamline,
+    within a fixed small distance, can define the focus distance. The component type,
+    primacy, and allowed distance range could be user configurable inputs.
 
     Parameters
     ----------
     file: NeXusFileName
-        The (HDF5) NeXus file name that contains an 'entry/instrument' group with one or more
-        `scippnexus.NXdisk_chopper` groups inside
+        The (HDF5) NeXus file name that contains an 'entry/instrument' group with
+        one or more `scippnexus.NXdisk_chopper` groups inside
 
     Returns
     -------
     :
-        The name or names of the time-focus-defining choppers, given the restrictions noted above
+        The name or names of the time-focus-defining choppers, given the restrictions
+        noted above
     """
     from scipp import scalar
     from scippnexus import File, NXdisk_chopper, compute_positions
@@ -159,18 +163,21 @@ def sample_position(file: NeXusFileName, sample: SampleName) -> SamplePosition:
 def focus_distance(
     file: NeXusFileName, origin: SourcePosition, names: FocusComponentNames
 ) -> PrimaryFocusDistance:
-    """Extract the average distance from the provided source position to the named components
+    """Find the average distance from the source position to the named components
 
     Warnings
     --------
-    This distance is straight-line distance which may not precisely match the path-length that the neutrons take
-    due to curved guides or other reflecting components. Care should be taken if the primary spectrometer includes
-    any such components to ensure that the difference in flight path and straight-line path is not important
+    This distance is straight-line distance which may not precisely match the
+    path-length that the neutrons take due to curved guides or other reflecting
+    components. Care should be taken if the primary spectrometer includes any such
+    components to ensure that the difference in flight path and straight-line path
+    is not important
 
     Parameters
     ----------
     file: NeXusFileName
-        The name of the HDF5 NeXus file containing the 'entry/instrument' group with the named components
+        The name of the HDF5 NeXus file containing the 'entry/instrument' group
+        with the named components
     origin:
         The position of the source, likely obtained from the same NeXus file
     names: list
@@ -179,7 +186,8 @@ def focus_distance(
     Returns
     -------
     :
-        The average straight-line distance from the source position to the named component(s)
+        The average straight-line distance from the source position to the named
+        component(s)
     """
     from scippnexus import File, compute_positions
 
@@ -196,7 +204,7 @@ def focus_distance(
 def focus_time(
     primary: PrimarySpectrometerObject, distance: PrimaryFocusDistance
 ) -> PrimaryFocusTime:
-    """Return the time, relative to the pulse time, that neutrons pass the focus position in a primary spectrometer"""
+    """Return the time relative to the pulse time that neutrons pass the focus"""
     from choppera.nexus import primary_focus_time
 
     return primary_focus_time(primary, distance)
@@ -208,8 +216,9 @@ def primary_path_length(
     """Compute the primary spectrometer path length from source to sample positions
 
     Note:
-        This *requires* that the instrument group *is sorted* along the beam path. HDF5 group entries are sorted
-        alphabetically, so you should ensure that the NeXus file was constructed with this in mind.
+        This *requires* that the instrument group *is sorted* along the beam path.
+        HDF5 group entries are sorted alphabetically, so you should ensure that
+        the NeXus file was constructed with this in mind.
     """
     from scipp import concat, dot, sqrt, sum
     from scippnexus import File, NXguide, compute_positions
@@ -239,7 +248,8 @@ def primary_spectrometer(
     Parameters
     ----------
     file:
-        The HDF5 NeXus file with information about the primary spectrometer under 'entry/instrument'
+        The HDF5 NeXus file with information about the primary spectrometer
+        under 'entry/instrument'
     source:
         The name of the source component in the NeXus instrument group
     sample:
@@ -247,14 +257,18 @@ def primary_spectrometer(
     frequency:
         The frequency of the source, e.g., scipp.scalar(14.0, unit='Hz') for ESS
     duration:
-        The source pulse duration, e.g., approximately scipp.scalar(3.0, unit='msec') for ESS
+        The source pulse duration, e.g., approximately scipp.scalar(3.0, unit='msec')
+        for ESS
     delay:
-        The velocity dependent time delay between source pulse time and neutrons exiting the moderator,
-        should be 1-D (with dim='wavelength') and have values corresponding to the provided `velocities`
+        The velocity dependent time delay between source pulse time and neutrons
+        exiting the moderator, should be 1-D (with dim='wavelength') and have values
+        corresponding to the provided `velocities`
     velocities:
-        The velocities of neutrons produced by the source; must be 1-D (with dim='wavelength') with at least two
-        values. The velocities and delay times should be the same length, with a 1:1 correspondence.
-        These values are then used to define the time-slowness phase space polygon produced by each source pulse.
+        The velocities of neutrons produced by the source; must be 1-D
+        (with dim='wavelength') with at least two values. The velocities and delay
+        times should be the same length, with a 1:1 correspondence. These values are
+        then used to define the time-slowness phase space polygon produced by
+        each source pulse.
 
     Returns
     -------
@@ -266,25 +280,24 @@ def primary_spectrometer(
 
     with File(file) as data:
         instrument = data['entry/instrument']
-        assert (
-            source in instrument
-        ), f"The source '{source}' is not in the instrument group"
-        assert (
-            sample in instrument
-        ), f"The sample '{sample}' is not in the instrument group"
+        if source not in instrument:
+            raise KeyError(f"The source '{source}' is not in the instrument group")
+        if sample not in instrument:
+            raise KeyError(f"The sample '{sample}' is not in the instrument group")
         return primary_spectrometer(
             instrument, source, sample, frequency, duration, delay, velocities
         )
 
 
 def primary_pivot_time(primary: PrimarySpectrometerObject) -> SourceSampleFlightTime:
-    """Return a time, relative to the source pulse time, between neutron-arrival-time periods
+    """Return a time, relative to the source pulse time, between neutron-arrival-periods
 
     Notes
     -----
-    The determined pivot time is be before the earliest arrival time of neutrons produced in a source pulse
-    that then are transmitted through the primary spectrometer, while also being after the latest arrival time
-    from the preceding pulse.
+    The determined pivot time is be before the earliest arrival time of neutrons
+    produced in a source pulse that then are transmitted through the primary
+    spectrometer, while also being after the latest arrival time from the preceding
+    pulse.
 
     Parameters
     ----------
@@ -304,7 +317,8 @@ def primary_pivot_time(primary: PrimarySpectrometerObject) -> SourceSampleFlight
 def unwrap_sample_time(
     times: SampleFrameTime, frequency: SourceFrequency, least: SourceSampleFlightTime
 ) -> SampleTime:
-    """Use the pivot time to shift neutron event time offsets, recovering 'real' time after source pulse per event"""
+    """Use the pivot time to shift neutron event time offsets, recovering 'real'
+    time after source pulse per event"""
     from choppera.nexus import unwrap as choppera_unwrap
 
     return choppera_unwrap(times, frequency, least)
@@ -323,16 +337,20 @@ def incident_slowness(
     length:
         The path length travelled by neutrons which go through the primary spectrometer
     time:
-        The unwrapped 'wall' time for each event, relative to their producing source pulse
+        The unwrapped 'wall' time for each event, relative to their producing source
+        pulse
     distance:
-        How far along the primary spectrometer the neutrons travelled before reaching the time-focus point
+        How far along the primary spectrometer the neutrons travelled before
+        reaching the time-focus point
     focus:
-        The 'wall' time relative to a source pulse time at which all neutrons must have passed the time-focus point
+        The 'wall' time relative to a source pulse time at which all neutrons must
+        have passed the time-focus point
 
     Returns
     -------
     :
-        The inverse of the velocity for each neutron, that is its 'slowness', which is proportional to wavelength
+        The inverse of the velocity for each neutron, that is its 'slowness', which
+        is proportional to wavelength
     """
     from ..utils import in_same_unit
 
@@ -356,7 +374,7 @@ def incident_wavenumber(slowness: IncidentSlowness) -> IncidentWavenumber:
 
 
 def incident_direction() -> IncidentDirection:
-    """Return the incident neutron direction in the laboratory frame, which is defined to be [001]"""
+    """Return the incident neutron direction in the laboratory frame"""
     from scipp import vector
 
     return vector([0, 0, 1.0])

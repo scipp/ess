@@ -18,7 +18,7 @@ from ..types import (
 def incident_monitor_normalization(
     slowness: IncidentSlowness, monitor: SlownessMonitor
 ) -> MonitorNormalisation:
-    """For the incident slowness of each event, return the corresponding monitor intensity"""
+    """For each event, return the corresponding monitor intensity"""
     from scipp import lookup
 
     coords = list(monitor.coords)
@@ -30,7 +30,7 @@ def incident_monitor_normalization(
 def monitor_pivot_time(
     primary: PrimarySpectrometerObject, length: SourceMonitorPathLength
 ) -> SourceMonitorFlightTime:
-    """Find the pivot time between single-source-pulse arrival times at the monitor position"""
+    """Find the pivot time between source-pulse arrival times at the monitor position"""
     from choppera.nexus import primary_pivot_time_at
 
     return primary_pivot_time_at(primary, length)
@@ -41,12 +41,14 @@ def monitor_wall_time(
     frequency: SourceFrequency,
     least: SourceMonitorFlightTime,
 ) -> WallTimeMonitor:
-    """Convert the independent 'frame_time' coordinate of a histogram DataArray to the equivalent unwrapped 'wall_time'
+    """Convert the independent 'frame_time' coordinate of a histogram DataArray to
+    the equivalent unwrapped 'wall_time'
 
     Parameters
     ----------
     monitor:
-        A histogram beam monitor which has with recorded 'frame time' relative to the most-recent source pulse
+        A histogram beam monitor which has with recorded 'frame time' relative to
+        the most-recent source pulse
     frequency:
         The source repetition frequency
     least:
@@ -54,7 +56,9 @@ def monitor_wall_time(
 
     Returns
     -------
-    The same intensities with independent axis converted to the likely time since neutron-producing proton pulse
+    :
+        The same intensities with independent axis converted to the likely time since
+        neutron-producing proton pulse
     """
     from choppera.nexus import unwrap
 
@@ -76,7 +80,8 @@ def monitor_slowness(
     distance: PrimaryFocusDistance,
     focus: PrimaryFocusTime,
 ) -> SlownessMonitor:
-    """Convert the independent 'wall_time' coordinate of a histogram DataArray to the equivalent slowness
+    """Convert the independent 'wall_time' coordinate of a histogram DataArray to
+    the equivalent slowness
 
     Parameters
     ----------
@@ -88,12 +93,14 @@ def monitor_slowness(
     distance:
         The distance from the source to the time-of-flight defining (chopper) position
     focus:
-        The (mean) time from proton pulse to when all neutrons passed the tof defining point
+        The (mean) time from proton pulse to when all neutrons passed the tof
+        defining point
 
     Returns
     -------
-    The same intensities with independent axis converted to the inverse velocity of the neutrons, which scales
-    linearly with wall time
+    :
+        The same intensities with independent axis converted to the inverse velocity
+        of the neutrons, which scales linearly with wall time
     """
     coords = list(monitor.coords)
     if len(coords) != 1:
