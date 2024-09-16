@@ -3,11 +3,30 @@
 from __future__ import annotations
 
 from ess.spectroscopy.types import (
-    NeXusFileName, SourceName, SampleName, FocusComponentNames, FocusComponentName, SourcePosition, SamplePosition,
-    PrimaryFocusDistance, PrimarySpectrometerObject, PrimaryFocusTime, SourceSamplePathLength, SourceFrequency,
-    SourceDuration, SourceDelay, SourceVelocities, SourceSampleFlightTime, SampleFrameTime, SampleTime,
-    IncidentSlowness, IncidentWavenumber, IncidentDirection, IncidentWavelength, IncidentWavevector, IncidentEnergy
-
+    FocusComponentName,
+    FocusComponentNames,
+    IncidentDirection,
+    IncidentEnergy,
+    IncidentSlowness,
+    IncidentWavelength,
+    IncidentWavenumber,
+    IncidentWavevector,
+    NeXusFileName,
+    PrimaryFocusDistance,
+    PrimaryFocusTime,
+    PrimarySpectrometerObject,
+    SampleFrameTime,
+    SampleName,
+    SamplePosition,
+    SampleTime,
+    SourceDelay,
+    SourceDuration,
+    SourceFrequency,
+    SourceName,
+    SourcePosition,
+    SourceSampleFlightTime,
+    SourceSamplePathLength,
+    SourceVelocities,
 )
 from scippnexus import Group
 

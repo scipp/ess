@@ -1,8 +1,21 @@
 from ess.spectroscopy.types import (
-    SamplePosition, AnalyzerPosition, AnalyzerOrientation, DetectorPosition, SampleAnalyzerVector,
-    DetectorGeometricA4, AnalyzerDetectorVector, SampleAnalyzerDirection, ReciprocalLatticeVectorAbsolute,
-    ReciprocalLatticeSpacing, FinalWavenumber, FinalEnergy, FinalWavevector, SampleDetectorPathLength,
-    SampleDetectorFlightTime, DetectorFrameTime, SampleFrameTime,
+    AnalyzerDetectorVector,
+    AnalyzerOrientation,
+    AnalyzerPosition,
+    DetectorFrameTime,
+    DetectorGeometricA4,
+    DetectorPosition,
+    FinalEnergy,
+    FinalWavenumber,
+    FinalWavevector,
+    ReciprocalLatticeSpacing,
+    ReciprocalLatticeVectorAbsolute,
+    SampleAnalyzerDirection,
+    SampleAnalyzerVector,
+    SampleDetectorFlightTime,
+    SampleDetectorPathLength,
+    SampleFrameTime,
+    SamplePosition,
 )
 
 
@@ -93,7 +106,6 @@ def detector_geometric_a4(vec: SampleAnalyzerVector) -> DetectorGeometricA4:
     )  # perpendicular to the incident beam, in the horizontal plane
     lab_z = vector([0, 0, 1])  # along the incident beam direction
     return atan2(y=dot(lab_x, vec), x=dot(lab_z, vec)).to(unit='deg')
-
 
 
 def analyzer_detector_vector(

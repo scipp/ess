@@ -1,9 +1,19 @@
 from scipp import DataArray
 
 from ..types import (
-    IncidentSlowness, SlownessMonitor, MonitorNormalisation, PrimarySpectrometerObject, SourceMonitorPathLength,
-    SourceMonitorFlightTime, FrameTimeMonitor, SourceFrequency, WallTimeMonitor, PrimaryFocusDistance, PrimaryFocusTime
+    FrameTimeMonitor,
+    IncidentSlowness,
+    MonitorNormalisation,
+    PrimaryFocusDistance,
+    PrimaryFocusTime,
+    PrimarySpectrometerObject,
+    SlownessMonitor,
+    SourceFrequency,
+    SourceMonitorFlightTime,
+    SourceMonitorPathLength,
+    WallTimeMonitor,
 )
+
 
 def incident_monitor_normalization(
     slowness: IncidentSlowness, monitor: SlownessMonitor

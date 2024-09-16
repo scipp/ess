@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from loguru import logger
 from scipp import Variable
 
@@ -230,8 +231,12 @@ def find_sample_detector_flight_time(sample, analyzers, detector_positions):
     from sciline import Pipeline
 
     from ..types import (
-        SamplePosition, AnalyzerPosition, AnalyzerOrientation, DetectorPosition, ReciprocalLatticeSpacing,
-        SampleDetectorFlightTime
+        AnalyzerOrientation,
+        AnalyzerPosition,
+        DetectorPosition,
+        ReciprocalLatticeSpacing,
+        SampleDetectorFlightTime,
+        SamplePosition,
     )
     from .kf import providers as kf_providers
 
@@ -264,9 +269,7 @@ def get_triplet_events(triplets):
     """
     from scipp import concat, sort
 
-    events = concat([x['data'] for x in triplets], dim='arm').flatten(
-        to='event_id'
-    )
+    events = concat([x['data'] for x in triplets], dim='arm').flatten(to='event_id')
     events = sort(events, events.coords['detector_number'])
     return events
 
@@ -288,8 +291,17 @@ def get_unwrapped_events(
     from sciline import Pipeline
 
     from ..types import (
-        NeXusFileName, SampleName, SampleFrameTime, SourceName, SourceDelay, SourceDuration, SourceFrequency,
-        SourceVelocities, FocusComponentNames, PrimarySpectrometerObject, SampleTime
+        FocusComponentNames,
+        NeXusFileName,
+        PrimarySpectrometerObject,
+        SampleFrameTime,
+        SampleName,
+        SampleTime,
+        SourceDelay,
+        SourceDuration,
+        SourceFrequency,
+        SourceName,
+        SourceVelocities,
     )
     from .ki import providers as ki_providers
 
@@ -361,7 +373,13 @@ def get_energy_axes(ki_params, kf_params):
     """
     from sciline import Pipeline
 
-    from ..types import IncidentEnergy, IncidentWavenumber, FinalEnergy, FinalWavenumber, EnergyTransfer
+    from ..types import (
+        EnergyTransfer,
+        FinalEnergy,
+        FinalWavenumber,
+        IncidentEnergy,
+        IncidentWavenumber,
+    )
     from .conservation import providers
 
     params = {}
@@ -400,8 +418,13 @@ def add_momentum_axes(ki_params, kf_params, events, a3: Variable):
     from sciline import Pipeline
 
     from ..types import (
-        SampleTableAngle, LabMomentumTransfer, LabMomentumTransferX, LabMomentumTransferZ,
-        TableMomentumTransfer, TableMomentumTransferX, TableMomentumTransferZ
+        LabMomentumTransfer,
+        LabMomentumTransferX,
+        LabMomentumTransferZ,
+        SampleTableAngle,
+        TableMomentumTransfer,
+        TableMomentumTransferX,
+        TableMomentumTransferZ,
     )
     from .conservation import providers
 
@@ -624,7 +647,9 @@ def one_setting(
 
 
 def load_precompute(
-    filename: NeXusFileName, named_components: dict[str, str], is_simulated: bool = False
+    filename: NeXusFileName,
+    named_components: dict[str, str],
+    is_simulated: bool = False,
 ):
     """Load data from a NeXus file and perform (a3, a4) independent calculations
 
@@ -706,6 +731,7 @@ def component_names(
         A dictionary mapping component type name to group name
     """
     from ..types import FocusComponentName
+
     names = {
         'source': source_component,
         'sample': sample_component,
@@ -801,29 +827,29 @@ def bifrost_single(
 ):
     """Load a BIFROST data file and convert to S(Q,E) in the laboratory coordinate system
 
-        Parameters
-        ----------
-        filename:
-            The name of the NeXus file to load
-        source_component:
-            The group name under 'entry/instrument' in the NeXus file containing source information
-        sample_component:
-            The group name under 'entry/instrument' in the NeXus file containing sample information
-        focus_components:
-            The group name or group names under 'entry/instrument' in the NeXus file which define the focus-time
-        monitor_component:
-            The group name under 'entry/instrument' in the NeXus file containing normalization monitor information
-        is_simulated:
-            Whether the NeXus file comes from a McStas simulation, in which case default component names are set
-            if not provided and the data is modified to look like real data
-        extras:
-            If true, the loaded sample group and 'a3' and 'a4' logs will be returned in the dictionary
+    Parameters
+    ----------
+    filename:
+        The name of the NeXus file to load
+    source_component:
+        The group name under 'entry/instrument' in the NeXus file containing source information
+    sample_component:
+        The group name under 'entry/instrument' in the NeXus file containing sample information
+    focus_components:
+        The group name or group names under 'entry/instrument' in the NeXus file which define the focus-time
+    monitor_component:
+        The group name under 'entry/instrument' in the NeXus file containing normalization monitor information
+    is_simulated:
+        Whether the NeXus file comes from a McStas simulation, in which case default component names are set
+        if not provided and the data is modified to look like real data
+    extras:
+        If true, the loaded sample group and 'a3' and 'a4' logs will be returned in the dictionary
 
-        Returns
-        -------
-        A dictionary of data from the workflow. The entries in the dictionary may not all be useful,
-        and are subject to pruning as experience is gained with the workflow.
-        """
+    Returns
+    -------
+    A dictionary of data from the workflow. The entries in the dictionary may not all be useful,
+    and are subject to pruning as experience is gained with the workflow.
+    """
     named_components = component_names(
         source_component,
         sample_component,
