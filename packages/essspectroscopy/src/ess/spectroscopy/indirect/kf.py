@@ -51,8 +51,9 @@ def sample_analyzer_vector(
         The vector from the sample position to the interaction point on the analyzer
         for each detector element
     """
-    from ess.spectroscopy.utils import norm
     from scipp import dot, vector
+
+    from ess.spectroscopy.utils import norm
 
     # Scipp does not distinguish between coordinates and directions, so we need to do
     # some extra legwork to ensure we can apply the orientation transformation
@@ -163,8 +164,9 @@ def final_wavenumber(
     :
         The magnitude of the reflected neutron wave vector for each detector element
     """
-    from ess.spectroscopy.utils import norm
     from scipp import sqrt
+
+    from ess.spectroscopy.utils import norm
 
     # law of Cosines gives the scattering angle based on distances:
     l_sa = norm(sample_analyzer_vec)

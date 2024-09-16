@@ -4,6 +4,8 @@ indirect geometry time-of-flight spectrometer
 
 from __future__ import annotations
 
+from scippnexus import Group
+
 from ess.spectroscopy.types import (
     FocusComponentName,
     FocusComponentNames,
@@ -30,7 +32,6 @@ from ess.spectroscopy.types import (
     SourceSamplePathLength,
     SourceVelocities,
 )
-from scippnexus import Group
 
 
 def determine_name_with_type(
