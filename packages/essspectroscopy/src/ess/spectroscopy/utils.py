@@ -1,9 +1,12 @@
-from scipp import Variable, DataArray
+from scipp import DataArray, Variable
 
 
 def norm(vector: Variable) -> Variable:
-    from scipp import sqrt, dot, DType
-    assert vector.dtype == DType.vector3  # "Vector operations require scipp.DType.vector3 elements!"
+    from scipp import DType, dot, sqrt
+
+    assert (
+        vector.dtype == DType.vector3
+    )  # "Vector operations require scipp.DType.vector3 elements!"
     return sqrt(dot(vector, vector))
 
 
@@ -31,9 +34,7 @@ def is_in_coords(x: DataArray, name: str):
     return name in x.coords or (x.bins is not None and name in x.bins.coords)
 
 
-def split_setting(*args,
-                  arg_coord: str | list[str] | None = None,
-                  **kwargs):
+def split_setting(*args, arg_coord: str | list[str] | None = None, **kwargs):
     """For each of the DataArrays in args, find their segments according to the provided kwargs lookup tables
 
     Parameters
@@ -50,8 +51,8 @@ def split_setting(*args,
 
     >>> split_setting(triplets, monitor['first'], arg_coord=['event_time_zero', 'time'], a3=table(a3_log['value'], 'time'))
     """
-    from itertools import product
     from collections import namedtuple
+    from itertools import product
 
     if arg_coord is None:
         raise ValueError("The argument lookup coordinate name(s) must be provided")
@@ -67,11 +68,15 @@ def split_setting(*args,
     def dim_size(k, v):
         size = 0
         for argument, coordinate in zip(args, arg_coord):
-            a = argument.transform_coords(k, graph={k: lambda x: v[x], 'x': coordinate}, keep_aliases=False)
+            a = argument.transform_coords(
+                k, graph={k: lambda x: v[x], 'x': coordinate}, keep_aliases=False
+            )
             if a.bins is not None:
                 a = a.group(k)
             if size and a.sizes[k] and size != a.sizes[k]:
-                raise ValueError(f"Earlier-found {k} size, {size}, not consistent with current {a.sizes[k]}")
+                raise ValueError(
+                    f"Earlier-found {k} size, {size}, not consistent with current {a.sizes[k]}"
+                )
             elif size == 0:
                 size = a.sizes[k]
         return size
@@ -80,7 +85,9 @@ def split_setting(*args,
     key = namedtuple('key', dims.keys())
     keys = list(dims.keys())
     ranges = [range(x) for x in dims.values()]
-    entries = [key(**{k: v for k, v in zip(keys, values)}) for values in product(*ranges)]
+    entries = [
+        key(**{k: v for k, v in zip(keys, values)}) for values in product(*ranges)
+    ]
 
     graph = {k: lambda x: v[x] for k, v in kwargs.items()}
     targets = tuple(graph.keys())
@@ -89,7 +96,9 @@ def split_setting(*args,
     new_args = [a for a in args]
     for i, coord in enumerate(arg_coord):
         graph['x'] = coord
-        new_args[i] = new_args[i].transform_coords(targets, graph=graph, keep_aliases=False)
+        new_args[i] = new_args[i].transform_coords(
+            targets, graph=graph, keep_aliases=False
+        )
         if new_args[i].bins is not None:
             new_args[i] = new_args[i].group(*targets)
 
