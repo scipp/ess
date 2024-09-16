@@ -1,4 +1,9 @@
-from ess.spectroscopy.types import *
+from ess.spectroscopy.types import (
+    SamplePosition, AnalyzerPosition, AnalyzerOrientation, DetectorPosition, SampleAnalyzerVector,
+    DetectorGeometricA4, AnalyzerDetectorVector, SampleAnalyzerDirection, ReciprocalLatticeVectorAbsolute,
+    ReciprocalLatticeSpacing, FinalWavenumber, FinalEnergy, FinalWavevector, SampleDetectorPathLength,
+    SampleDetectorFlightTime, DetectorFrameTime, SampleFrameTime,
+)
 
 
 def sample_analyzer_vector(
@@ -9,19 +14,27 @@ def sample_analyzer_vector(
 ) -> SampleAnalyzerVector:
     """Determine the sample to analyzer-reflection-point vector per detector element
 
-    :parameter sample_position: scipp.DType.vector3
-        The (probably singular) sample position, typically (0, 0, 0)
-    :parameter analyzer_position: scipp.DType.vector3
-        The nominal center of the central analyzer blade *surface*
-    :parameter analyzer_orientation: scipp.DType.rotate3
-        The orienting quaternion of the analyzer, used to identify the crystal y-axis
-    :parameter detector_position: scipp.DType.vector3
-        The position of the detector element
-
-    :Note:
+    Note
+    ----
     The shapes of the analyzer position and orientation should be self-consistent and will likely be 1:1.
     There is expected to be multiple detector element positions per analyzer which can be represented as
     an additional dimension compared to the analyzer shapes.
+
+    Parameters
+    ----------
+    sample_position: scipp.DType.vector3
+        The (probably singular) sample position, typically (0, 0, 0)
+    analyzer_position: scipp.DType.vector3
+        The nominal center of the central analyzer blade *surface*
+    analyzer_orientation: scipp.DType.rotate3
+        The orienting quaternion of the analyzer, used to identify the crystal y-axis
+    detector_position: scipp.DType.vector3
+        The position of the detector element
+
+    Returns
+    -------
+    :
+        The vector from the sample position to the interaction point on the analyzer for each detector element
     """
     from ess.spectroscopy.utils import norm
     from scipp import dot, vector
@@ -61,6 +74,18 @@ def sample_analyzer_vector(
 
 
 def detector_geometric_a4(vec: SampleAnalyzerVector) -> DetectorGeometricA4:
+    """Calculate the scattering angle from the incident beam to each detector element
+
+    Parameters
+    ----------
+    vec : scipp.DType.vector3
+        The per detector element analyzer interaction position, as determined by `sample_analyzer_vector`
+
+    Returns
+    -------
+    :
+        The per detector element scattering angle, a4, in degrees.
+    """
     from scipp import atan2, dot, vector
 
     lab_x = vector(
@@ -70,138 +95,25 @@ def detector_geometric_a4(vec: SampleAnalyzerVector) -> DetectorGeometricA4:
     return atan2(y=dot(lab_x, vec), x=dot(lab_z, vec)).to(unit='deg')
 
 
-def fixed_tau_hat_sample_analyzer_vector(
-    sample_position: SamplePosition,
-    analyzer_position: AnalyzerPosition,
-    analyzer_orientation: AnalyzerOrientation,
-    detector_position: DetectorPosition,
-) -> SampleAnalyzerVector:
-    """Determine the sample to analyzer-reflection-point vector per detector element as the intersection of three planes
-
-    :parameter sample_position: scipp.DType.vector3
-        The (probably singular) sample position, typically (0, 0, 0)
-    :parameter analyzer_position: scipp.DType.vector3
-        Any point on the central analyzer blade reflecting plane
-    :parameter analyzer_orientation: scipp.DType.rotate3
-        The orienting quaternion of the analyzer, used to identify the crystal tau and y-axis
-    :parameter detector_position: scipp.DType.vector3
-        The position of the detector element
-
-    :Note:
-    The shapes of the analyzer position and orientation should be self-consistent and will likely be 1:1.
-    There is expected to be multiple detector element positions per analyzer which can be represented as
-    an additional dimension compared to the analyzer shapes.
-
-    :Warning:
-    This function makes the incorrect assumption that the _direction_ of tau is known, but this breaks the
-    prismatic analyzer model for BIFROST. In reality, we rely on the finite mosaic spread of the analyzer to
-    scatter slightly different energies to the different detectors, so this method can not work.
-    """
-    from uuid import uuid4
-
-    from ess.spectroscopy.utils import norm
-    from numpy.linalg import lstsq as linalg_least_sqr
-    from numpy.linalg import matrix_rank
-    from numpy.linalg import solve as linalg_solve
-    from scipp import any as sc_any
-    from scipp import concat, cross, dot, scalar, vector, vectors
-
-    # Scipp does not distinguish between coordinates and directions, so we need to do some extra legwork
-    # to ensure we can apply the orientation transformation _and_ obtain a dimensionless direction vector
-    o = vector([0, 0, 0], unit=analyzer_orientation.unit)
-    x = vector(
-        [1, 0, 0], unit=analyzer_orientation.unit
-    )  # McStas defines x parallel to Bragg plane tau
-    y = vector(
-        [0, 1, 0], unit=analyzer_orientation.unit
-    )  # and y perpendicular to the scattering plane
-    # z is in the Bragg plane and in the scattering plane
-
-    tau, yhat = [
-        v / norm(v)
-        for v in [
-            (analyzer_orientation * ei - analyzer_orientation * o) for ei in (x, y)
-        ]
-    ]
-
-    v_d = detector_position - sample_position
-    n_v_d = norm(v_d)
-    if sc_any(n_v_d == scalar(0.0, unit=sample_position.unit)):
-        bad = n_v_d == scalar(0.0, unit=sample_position.unit)
-        n_v_d.values[bad.values] = 1.0
-        print(f"Some detector(s) are located at the detector?")
-    v_d /= n_v_d
-
-    # collect the normal directions for the three planes
-    n_1, n_2, n_3 = cross(v_d, tau), tau, v_d  # each (N_det, 3), or (3,)
-    # and collect the right-hand side of the three plane equations
-    b_1 = dot(sample_position, n_1).to(
-        unit=sample_position.unit
-    )  # (N_sample, N_det) or (N_det,)
-    b_2 = dot(analyzer_position, n_2).to(unit=sample_position.unit)  # (N_analyzer,)
-    b_3 = dot(0.5 * sample_position + 0.5 * detector_position, n_3).to(
-        unit=sample_position.unit
-    )
-
-    if (
-        n_1.ndim > 0
-        or n_2.ndim > 0
-        or n_3.ndim > 0
-        or b_1.ndim > 0
-        or b_2.ndim > 0
-        or b_3.ndim > 0
-    ):
-        blob = 0 * (n_1 + n_2 + n_3)  # broadcast to a common shape
-        n_1, n_2, n_3 = [x + blob for x in (n_1, n_2, n_3)]
-        blob = 0 * (b_1 + b_2 + b_3)  # broadcast to a common shape
-        b_1, b_2, b_3 = [x + blob for x in (b_1, b_2, b_3)]
-
-    new_dim = str(uuid4())
-    a = (
-        concat([n_1, n_2, n_3], dim=new_dim)
-        .transpose(dims=n_1.dims + (new_dim,))
-        .values
-    )  # (..., 3, 3)
-    b = (
-        concat([b_1, b_2, b_3], dim=new_dim)
-        .transpose(dims=n_1.dims + (new_dim,))
-        .values
-    )  # (..., 3)
-
-    # as of numpy 2.0, b must be (..., 3, 1) for broadcasting to work
-    # https://numpy.org/doc/stable/reference/generated/numpy.linalg.solve.html
-    b = b[..., :, None]
-    # and we need to strip off this dimension after solving
-    x = linalg_solve(a, b).squeeze(-1)
-
-    # if any of the n_1, n_2, or n_3 are zero (or, equivalently, a linear relationship exists between any two),
-    # numpy.linalg.solve will not have worked, and probably returned garbage.
-    if any((mr := matrix_rank(a)) < 3):
-        from numpy import ndenumerate
-
-        for i, m in ndenumerate(mr):
-            if m < 3:
-                x[i] = linalg_least_sqr(a[i], b[i][:, 0])[0]
-
-    analyzer_point = vectors(values=x, dims=n_1.dims, unit=sample_position.unit)
-    return analyzer_point - sample_position
-
 
 def analyzer_detector_vector(
     sample_position: SamplePosition,
     sample_analyzer_vec: SampleAnalyzerVector,
     detector_position: DetectorPosition,
 ) -> AnalyzerDetectorVector:
+    """Given the sample, analyzer-interaction, and detector element positions, calculate the analyzer-detector vector"""
     return detector_position - (sample_position + sample_analyzer_vec)
 
 
 def kf_hat(sample_analyzer_vec: SampleAnalyzerVector) -> SampleAnalyzerDirection:
+    """Calculate the direction of the neutrons for each detector-element, relative to the sample position"""
     from ess.spectroscopy.utils import norm
 
     return sample_analyzer_vec / norm(sample_analyzer_vec)
 
 
 def reciprocal_lattice_spacing(tau_vector: ReciprocalLatticeVectorAbsolute):
+    """Calculate the distance between lattice planes in, e.g., the analyzer"""
     from ess.spectroscopy.utils import norm
 
     return norm(tau_vector)
@@ -212,6 +124,25 @@ def final_wavenumber(
     analyzer_detector_vec: AnalyzerDetectorVector,
     tau: ReciprocalLatticeSpacing,
 ) -> FinalWavenumber:
+    """Find the wave number of the neutrons reflected to each detector-element
+
+    The wave number and wavelength are inversely proportional with
+        wavelength = 2 * pi / wavenumber
+
+    Parameters
+    ----------
+    sample_analyzer_vec : scipp.DType.vector3
+        The vector from the sample to the analyzer interaction point for each detector element
+    analyzer_detector_vec: scipp.DType.vector3
+        The vector from the analyzer interaction point to its detector element, for each detector element
+    tau: float-like
+        The reciprocal lattice plane spacing of the analyzer crystal, likely in inverse angstrom
+
+    Returns
+    -------
+    :
+        The magnitude of the reflected neutron wave vector for each detector element
+    """
     from ess.spectroscopy.utils import norm
     from scipp import sqrt
 
@@ -228,6 +159,7 @@ def final_wavenumber(
 
 
 def final_energy(kf: FinalWavenumber) -> FinalEnergy:
+    """Converts (final) wave number to (final) energy"""
     from scipp.constants import hbar, neutron_mass
 
     return ((hbar * hbar / 2 / neutron_mass) * kf * kf).to(unit='meV')
@@ -236,6 +168,7 @@ def final_energy(kf: FinalWavenumber) -> FinalEnergy:
 def final_wavevector(
     kf_direction: SampleAnalyzerDirection, kf_magnitude: FinalWavenumber
 ) -> FinalWavevector:
+    """Constructs the final wave vector form its direction and magnitude"""
     return kf_direction * kf_magnitude
 
 
@@ -243,6 +176,7 @@ def secondary_flight_path_length(
     sample_analyzer_vec: SampleAnalyzerVector,
     analyzer_detector_vec: AnalyzerDetectorVector,
 ) -> SampleDetectorPathLength:
+    """Returns the distance between the sample and each detector element that a neutron is most likely to travel"""
     from ess.spectroscopy.utils import norm
 
     return norm(sample_analyzer_vec) + norm(analyzer_detector_vec)
@@ -251,6 +185,7 @@ def secondary_flight_path_length(
 def secondary_flight_time(
     secondary_flight_distance: SampleDetectorPathLength, kf_magnitude: FinalWavenumber
 ) -> SampleDetectorFlightTime:
+    """Calculates the most-likely time-of-flight between the sample and each detector element"""
     from scipp.constants import hbar, neutron_mass
 
     velocity = kf_magnitude * hbar / neutron_mass
@@ -260,10 +195,11 @@ def secondary_flight_time(
 def sample_frame_time(
     detector_time: DetectorFrameTime, secondary_time: SampleDetectorFlightTime
 ) -> SampleFrameTime:
+    """For times measured at the detector elements, returns the time each neutron likely interacted with the sample"""
     return detector_time - secondary_time
 
 
-providers = [
+providers = (
     sample_analyzer_vector,
     analyzer_detector_vector,
     kf_hat,
@@ -274,4 +210,4 @@ providers = [
     sample_frame_time,
     final_energy,
     detector_geometric_a4,
-]
+)
