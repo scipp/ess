@@ -13,13 +13,13 @@ jobs:
   # build_conda:
   #   name: Conda build
   #   runs-on: 'ubuntu-22.04'
-  # 
+  #
   #   steps:
   #     - uses: actions/checkout@v4
   #       with:
   #         submodules: true
   #         fetch-depth: 0  # history required so setuptools_scm can determine version
-  # 
+  #
   #     - uses: mamba-org/setup-micromamba@v1
   #       with:
   #         environment-name: build-env
@@ -27,7 +27,7 @@ jobs:
   #           conda-build
   #           boa
   #     - run: conda mambabuild --channel conda-forge --channel scipp --no-anaconda-upload --override-channels --output-folder conda/package conda
-  # 
+  #
   #     - uses: actions/upload-artifact@v4
   #       with:
   #         name: conda-package-noarch
@@ -75,7 +75,7 @@ jobs:
   #   needs: [build_wheels, build_conda]
   #   runs-on: 'ubuntu-22.04'
   #   if: github.event_name == 'release' && github.event.action == 'published'
-  # 
+  #
   #   steps:
   #     - uses: actions/download-artifact@v4
   #     - uses: mamba-org/setup-micromamba@v1
