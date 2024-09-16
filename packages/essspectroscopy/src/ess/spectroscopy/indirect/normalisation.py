@@ -1,5 +1,9 @@
-from ess.spectroscopy.types import *
+from scipp import DataArray
 
+from ..types import (
+    IncidentSlowness, SlownessMonitor, MonitorNormalisation, PrimarySpectrometerObject, SourceMonitorPathLength,
+    SourceMonitorFlightTime, FrameTimeMonitor, SourceFrequency, WallTimeMonitor, PrimaryFocusDistance, PrimaryFocusTime
+)
 
 def incident_monitor_normalization(
     slowness: IncidentSlowness, monitor: SlownessMonitor
@@ -16,6 +20,7 @@ def incident_monitor_normalization(
 def monitor_pivot_time(
     primary: PrimarySpectrometerObject, length: SourceMonitorPathLength
 ) -> SourceMonitorFlightTime:
+    """Find the pivot time between single-source-pulse arrival times at the monitor position"""
     from choppera.nexus import primary_pivot_time_at
 
     return primary_pivot_time_at(primary, length)
@@ -30,9 +35,12 @@ def monitor_wall_time(
 
     Parameters
     ----------
-    monitor: A histogram beam monitor which has with recorded 'frame time' relative to the most-recent source pulse
-    frequency: The source repetition frequency
-    least: The minimum wall time between source pulse and arrival at the monitor position
+    monitor:
+        A histogram beam monitor which has with recorded 'frame time' relative to the most-recent source pulse
+    frequency:
+        The source repetition frequency
+    least:
+        The minimum wall time between source pulse and arrival at the monitor position
 
     Returns
     -------
@@ -62,10 +70,15 @@ def monitor_slowness(
 
     Parameters
     ----------
-    monitor: A histogram beam monitor which has been converted from recorded 'frame time' to time since producing proton pulse
-    length: The path length from the source to the monitor
-    distance: The distance from the source to the time-of-flight defining (chopper) position
-    focus: The (mean) time from proton pulse to when all neutrons passed the tof defining point
+    monitor:
+        A histogram beam monitor which has been converted from recorded 'frame time' to
+        time since producing proton pulse
+    length:
+        The path length from the source to the monitor
+    distance:
+        The distance from the source to the time-of-flight defining (chopper) position
+    focus:
+        The (mean) time from proton pulse to when all neutrons passed the tof defining point
 
     Returns
     -------
@@ -86,9 +99,9 @@ def monitor_slowness(
     return DataArray(monitor.data.rename(names), coords={slow: slowness})
 
 
-providers = [
+providers = (
     incident_monitor_normalization,
     monitor_pivot_time,
     monitor_wall_time,
     monitor_slowness,
-]
+)
