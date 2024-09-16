@@ -1,11 +1,15 @@
-from typing import Type, NewType
-from scipp import Variable, DataArray
+from typing import NewType, Type
+
 from choppera.primary import PrimarySpectrometer
+from scipp import DataArray, Variable
+
 
 def make_scipp_named_typer(scipp_type):
     def typer(named: str) -> Type[scipp_type]:
         return NewType(named, scipp_type)
+
     return typer
+
 
 variable_type = make_scipp_named_typer(Variable)
 data_array_type = make_scipp_named_typer(DataArray)

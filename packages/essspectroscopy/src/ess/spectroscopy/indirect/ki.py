@@ -1,12 +1,15 @@
 """Utilities for the primary spectrometer of an indirect geometry time-of-flight spectrometer"""
+
 from __future__ import annotations
 
-#TODO move elsewhere since possibly (probably) too specific to BIFROST.
-
+# TODO move elsewhere since possibly (probably) too specific to BIFROST.
 from ess.spectroscopy.types import *
 from scippnexus import Group
 
-def determine_name_with_type(instrument: Group, name: str | None, options: list, type_name: str) -> str:
+
+def determine_name_with_type(
+    instrument: Group, name: str | None, options: list, type_name: str
+) -> str:
     if name is not None and name in instrument:
         return name
     found = {x for x in instrument if type_name in x.lower()}
@@ -18,15 +21,19 @@ def determine_name_with_type(instrument: Group, name: str | None, options: list,
 
 
 def guess_source_name(file: NeXusFileName) -> SourceName:
-    from scippnexus import NXsource, NXmoderator, File
+    from scippnexus import File, NXmoderator, NXsource
+
     with File(file) as data:
         instrument = data['entry/instrument']
-        name = determine_name_with_type(instrument, None, [NXsource, NXmoderator], 'source')
+        name = determine_name_with_type(
+            instrument, None, [NXsource, NXmoderator], 'source'
+        )
         return SourceName(name)
 
 
 def guess_sample_name(file: NeXusFileName) -> SampleName:
-    from scippnexus import NXsample, File
+    from scippnexus import File, NXsample
+
     with File(file) as data:
         instrument = data['entry/instrument']
         name = determine_name_with_type(instrument, None, [NXsample], 'sample')
@@ -44,13 +51,18 @@ def guess_focus_component_names(file: NeXusFileName) -> FocusComponentNames:
     The component type, primacy, and allowed distance range could be user configurable inputs
     """
     from scipp import scalar
-    from scippnexus import NXdisk_chopper, File, compute_positions
+    from scippnexus import File, NXdisk_chopper, compute_positions
+
     from ..utils import norm
+
     allowance = scalar(0.5, unit='m')
 
     with File(file) as data:
         instrument = data['entry/instrument']
-        choppers = {k: compute_positions(v[...])['position'] for k, v in  instrument[NXdisk_chopper].items()}
+        choppers = {
+            k: compute_positions(v[...])['position']
+            for k, v in instrument[NXdisk_chopper].items()
+        }
 
     names = list(choppers.keys())
     focus_names = [FocusComponentName(names[0])]
@@ -68,20 +80,26 @@ def guess_focus_component_names(file: NeXusFileName) -> FocusComponentNames:
 
 
 def source_position(file: NeXusFileName, source: SourceName) -> SourcePosition:
-    from scippnexus import compute_positions, File
+    from scippnexus import File, compute_positions
+
     with File(file) as data:
         return compute_positions(data['entry/instrument'][source][...])['position']
 
 
 def sample_position(file: NeXusFileName, sample: SampleName) -> SamplePosition:
-    from scippnexus import compute_positions, File
+    from scippnexus import File, compute_positions
+
     with File(file) as data:
         return compute_positions(data['entry/instrument'][sample][...])['position']
 
 
-def focus_distance(file: NeXusFileName, origin: SourcePosition ,names: FocusComponentNames) -> PrimaryFocusDistance:
-    from scippnexus import compute_positions, File
+def focus_distance(
+    file: NeXusFileName, origin: SourcePosition, names: FocusComponentNames
+) -> PrimaryFocusDistance:
+    from scippnexus import File, compute_positions
+
     from ..utils import norm
+
     pos = 0 * origin
     with File(file) as data:
         for name in names:
@@ -90,83 +108,116 @@ def focus_distance(file: NeXusFileName, origin: SourcePosition ,names: FocusComp
     return norm(pos - origin)
 
 
-def focus_time(primary: PrimarySpectrometerObject, distance: PrimaryFocusDistance) -> PrimaryFocusTime:
+def focus_time(
+    primary: PrimarySpectrometerObject, distance: PrimaryFocusDistance
+) -> PrimaryFocusTime:
     from choppera.nexus import primary_focus_time
+
     return primary_focus_time(primary, distance)
 
 
-def primary_path_length(file: NeXusFileName, source: SourcePosition, sample: SamplePosition) -> SourceSamplePathLength:
+def primary_path_length(
+    file: NeXusFileName, source: SourcePosition, sample: SamplePosition
+) -> SourceSamplePathLength:
     """Compute the primary spectrometer path length
 
     Note:
         This *requires* that the instrument group *is sorted* along the beam path. HDF5 group entries are sorted
         alphabetically, so you should ensure that the NeXus file was constructed with this in mind.
     """
-    from scippnexus import compute_positions, NXguide, File
-    from scipp import dot, sqrt, sum, concat
+    from scipp import concat, dot, sqrt, sum
+    from scippnexus import File, NXguide, compute_positions
+
     with File(file) as data:
-        positions = [compute_positions(v[...])['position'] for v in data['entry/instrument'][NXguide].values()]
+        positions = [
+            compute_positions(v[...])['position']
+            for v in data['entry/instrument'][NXguide].values()
+        ]
 
     positions = concat((source, *positions, sample), dim='path')
     diff = positions['path', 1:] - positions['path', :-1]
     return sum(sqrt(dot(diff, diff)))
 
 
-def primary_spectrometer(file: NeXusFileName,
-                          source: SourceName,
-                          sample: SampleName,
-                          frequency: SourceFrequency,
-                          duration: SourceDuration,
-                          delay: SourceDelay,
-                          velocities: SourceVelocities) -> PrimarySpectrometerObject:
-    from scippnexus import File
+def primary_spectrometer(
+    file: NeXusFileName,
+    source: SourceName,
+    sample: SampleName,
+    frequency: SourceFrequency,
+    duration: SourceDuration,
+    delay: SourceDelay,
+    velocities: SourceVelocities,
+) -> PrimarySpectrometerObject:
     from choppera.nexus import primary_spectrometer
+    from scippnexus import File
+
     with File(file) as data:
         instrument = data['entry/instrument']
-        assert source in instrument, f"The source '{source}' is not in the instrument group"
-        assert sample in instrument, f"The sample '{sample}' is not in the instrument group"
-        return primary_spectrometer(instrument, source, sample, frequency, duration, delay, velocities)
+        assert (
+            source in instrument
+        ), f"The source '{source}' is not in the instrument group"
+        assert (
+            sample in instrument
+        ), f"The sample '{sample}' is not in the instrument group"
+        return primary_spectrometer(
+            instrument, source, sample, frequency, duration, delay, velocities
+        )
 
 
 def primary_pivot_time(primary: PrimarySpectrometerObject) -> SourceSampleFlightTime:
     from choppera.nexus import primary_pivot_time as primary_time
+
     return primary_time(primary)
 
 
-def unwrap_sample_time(times: SampleFrameTime, frequency: SourceFrequency, least: SourceSampleFlightTime) -> SampleTime:
+def unwrap_sample_time(
+    times: SampleFrameTime, frequency: SourceFrequency, least: SourceSampleFlightTime
+) -> SampleTime:
     from choppera.nexus import unwrap as choppera_unwrap
+
     return choppera_unwrap(times, frequency, least)
 
 
-def incident_slowness(length: SourceSamplePathLength, time: SampleTime,
-                      distance: PrimaryFocusDistance, focus: PrimaryFocusTime) -> IncidentSlowness:
+def incident_slowness(
+    length: SourceSamplePathLength,
+    time: SampleTime,
+    distance: PrimaryFocusDistance,
+    focus: PrimaryFocusTime,
+) -> IncidentSlowness:
     from ..utils import in_same_unit
+
     tof = time - in_same_unit(focus, to=time)
     slowness = tof / (length - distance)  # slowness _is_ inverse velocity
     return slowness
 
 
 def incident_wavelength(slowness: IncidentSlowness) -> IncidentWavelength:
-    from scipp.constants import neutron_mass, Planck
+    from scipp.constants import Planck, neutron_mass
+
     return (slowness * Planck / neutron_mass).to(unit='angstrom')
 
 
 def incident_wavenumber(slowness: IncidentSlowness) -> IncidentWavenumber:
-    from scipp.constants import neutron_mass, hbar
+    from scipp.constants import hbar, neutron_mass
+
     return (neutron_mass / hbar / slowness).to(unit='1/angstrom')
 
 
 def incident_direction() -> IncidentDirection:
     from scipp import vector
-    return vector([0, 0, 1.])
+
+    return vector([0, 0, 1.0])
 
 
-def incident_wavevector(ki_magnitude: IncidentWavenumber, direction: IncidentDirection) -> IncidentWavevector:
+def incident_wavevector(
+    ki_magnitude: IncidentWavenumber, direction: IncidentDirection
+) -> IncidentWavevector:
     return ki_magnitude * direction
 
 
 def incident_energy(ki: IncidentWavenumber) -> IncidentEnergy:
     from scipp.constants import hbar, neutron_mass
+
     return ((hbar * hbar / 2 / neutron_mass) * ki * ki).to(unit='meV')
 
 

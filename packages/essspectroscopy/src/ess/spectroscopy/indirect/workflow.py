@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from loguru import logger
 import sys
+
+from loguru import logger
 
 logger_format = (
     "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
@@ -26,6 +27,7 @@ def load_named(group, obj_type, names):
 
 def ess_source_frequency():
     from scipp import scalar
+
     return scalar(14.0, unit='Hz')
 
 
@@ -35,44 +37,62 @@ def ess_source_period():
 
 def ess_source_delay():
     from scipp import array
-    return array(values=[0, 0.], dims=['wavelength'], unit='sec', dtype='float64')
+
+    return array(values=[0, 0.0], dims=['wavelength'], unit='sec', dtype='float64')
 
 
 def ess_source_duration():
     from scipp import scalar
+
     return scalar(3.0, unit='msec').to(unit='sec')
 
 
 def ess_source_velocities():
     from scipp import array
-    return array(values=[100, 1e4], dims=['wavelength'], unit='m/s')  # ~53 ueV to 530 meV
+
+    return array(
+        values=[100, 1e4], dims=['wavelength'], unit='m/s'
+    )  # ~53 ueV to 530 meV
 
 
 def convert_simulated_time_to_frame_time(data):
-    graph = {'frame_time': lambda event_time_offset: event_time_offset % ess_source_period()}
-    return data.transform_coords('frame_time', graph=graph, rename_dims=False, keep_intermediate=False)
+    graph = {
+        'frame_time': lambda event_time_offset: event_time_offset % ess_source_period()
+    }
+    return data.transform_coords(
+        'frame_time', graph=graph, rename_dims=False, keep_intermediate=False
+    )
 
 
 def analyzer_per_detector(analyzers, triplets):
     """Find the right analyzer name for each detector"""
+
     # TODO Update this function if the NeXus group naming changes, or components are added/removed.
     def correct_index(d, a):
         detector_index = int(d.split('_', 1)[0])
         analyzer_index = detector_index - 2
         return a.startswith(str(analyzer_index))
 
-    return {d: [x for x in analyzers.keys() if correct_index(d, x)][0] for d in list(triplets.keys())}
+    return {
+        d: [x for x in analyzers.keys() if correct_index(d, x)][0]
+        for d in list(triplets.keys())
+    }
 
 
 def detector_per_pixel(triplets):
     """Find the right detector name for every pixel index"""
-    return {i: name for name, det in triplets.items() for i in det['data'].coords['detector_number'].values.flatten()}
+    return {
+        i: name
+        for name, det in triplets.items()
+        for i in det['data'].coords['detector_number'].values.flatten()
+    }
 
 
 def combine_analyzers(analyzers, triplets):
     """Combine needed analyzer properties into a single array, duplicating information, to have per-pixel data"""
+    from scipp import Dataset, array, concat
     from scippnexus import compute_positions
-    from scipp import Dataset, concat, array
+
     def analyzer_extract(obj):
         obj = compute_positions(obj, store_transform='transform')
         return Dataset(data={k: obj[k] for k in ('position', 'transform', 'd_spacing')})
@@ -87,12 +107,14 @@ def combine_analyzers(analyzers, triplets):
     data['event_id'] = array(values=pixels, dims=['event_id'], unit=None)
     return data
 
+
 def combine_detectors(triplets):
     from scipp import Dataset, concat, sort
+
     def extract(obj):
         pixels = obj['data'].coords['detector_number']
         midpoints = obj['data'].coords['position']
-        return Dataset(data={'event_id':  pixels, 'position': midpoints})
+        return Dataset(data={'event_id': pixels, 'position': midpoints})
 
     data = concat([extract(v) for v in triplets.values()], dim='arm')
     data = Dataset({k: v.flatten(to='event_id') for k, v in data.items()})
@@ -100,9 +122,11 @@ def combine_detectors(triplets):
 
 
 def find_sample_detector_flight_time(sample, analyzers, detector_positions):
-    from sciline import Pipeline
     import numpy as np
+    from sciline import Pipeline
+
     from .kf import providers as kf_providers
+
     params = {
         SamplePosition: sample['position'],
         AnalyzerPosition: analyzers['position'].data,
@@ -110,12 +134,17 @@ def find_sample_detector_flight_time(sample, analyzers, detector_positions):
         AnalyzerOrientation: analyzers['transform'].data,
         ReciprocalLatticeSpacing: 2 * np.pi / analyzers['d_spacing'].data,
     }
-    return params, Pipeline(kf_providers, params=params).get(SampleDetectorFlightTime).compute().to(unit='ms')
+    return params, Pipeline(kf_providers, params=params).get(
+        SampleDetectorFlightTime
+    ).compute().to(unit='ms')
 
 
 def get_triplet_events(triplets):
     from scipp import concat, sort
-    events = concat([x['data'] for x in triplets.values()], dim='arm').flatten(to='event_id')
+
+    events = concat([x['data'] for x in triplets.values()], dim='arm').flatten(
+        to='event_id'
+    )
     events = sort(events, events.coords['detector_number'])
     return events
 
@@ -129,9 +158,13 @@ def get_sample_events(triplet_events, sample_detector_flight_times):
     return events
 
 
-def get_unwrapped_events(filename, source_name, sample_name, sample_events, focus_components):
+def get_unwrapped_events(
+    filename, source_name, sample_name, sample_events, focus_components
+):
     from sciline import Pipeline
+
     from .ki import providers as ki_providers
+
     params = {
         NeXusFileName: filename,
         SampleName: sample_name,
@@ -141,7 +174,7 @@ def get_unwrapped_events(filename, source_name, sample_name, sample_events, focu
         SourceFrequency: ess_source_frequency(),
         SourceVelocities: ess_source_velocities(),
         SampleFrameTime: sample_events.data.bins.coords['frame_time'],
-        FocusComponentNames: focus_components
+        FocusComponentNames: focus_components,
     }
     pipeline = Pipeline(ki_providers, params=params)
     primary = pipeline.get(PrimarySpectrometerObject).compute()
@@ -157,12 +190,16 @@ def get_normalization_monitor(monitors, monitor_component, collapse: bool = Fals
         # This is very specialized to how the simulated scans are done, it needs to be generalized
         normalization = normalization.sum(dim='time')
     # rescale the frame_time axis. Why does it need to be done this way?
-    return normalization.transform_coords(['frame_time'], graph={'frame_time': lambda t: t.to(unit='nanosecond')})
+    return normalization.transform_coords(
+        ['frame_time'], graph={'frame_time': lambda t: t.to(unit='nanosecond')}
+    )
 
 
 def get_energy_axes(ki_params, kf_params):
     from sciline import Pipeline
+
     from .conservation import providers
+
     params = {}
     params.update(ki_params)
     params.update(kf_params)
@@ -177,7 +214,9 @@ def get_energy_axes(ki_params, kf_params):
 
 def add_momentum_axes(ki_params, kf_params, events, a3: Variable):
     from sciline import Pipeline
+
     from .conservation import providers
+
     if a3.size != 1:
         raise ValueError(f'Expected a3 to have 1-entry, not {a3.size}')
 
@@ -195,13 +234,24 @@ def add_momentum_axes(ki_params, kf_params, events, a3: Variable):
     events.bins.coords['lab_momentum_z'] = pipeline.get(LabMomentumTransferZ).compute()
 
     pipeline[TableMomentumTransfer] = pipeline.get(TableMomentumTransfer).compute()
-    events.bins.coords['table_momentum_x'] = pipeline.get(TableMomentumTransferX).compute().transpose(events.dims)
+    events.bins.coords['table_momentum_x'] = (
+        pipeline.get(TableMomentumTransferX).compute().transpose(events.dims)
+    )
     # events.bins.coords['table_momentum_y'] = pipeline.get(TableMomentumTransferY).compute().transpose(events.dims)
-    events.bins.coords['table_momentum_z'] = pipeline.get(TableMomentumTransferZ).compute().transpose(events.dims)
+    events.bins.coords['table_momentum_z'] = (
+        pipeline.get(TableMomentumTransferZ).compute().transpose(events.dims)
+    )
     return events
 
 
-def split(triplets, analyzers, monitors, logs, a3_name: str | None = None, a4_name: str | None = None):
+def split(
+    triplets,
+    analyzers,
+    monitors,
+    logs,
+    a3_name: str | None = None,
+    a4_name: str | None = None,
+):
     """Use the (a3, a4) logged value pairs to split triplet, analyzer, and monitor data into single-setting sets
 
     Parameters
@@ -226,7 +276,9 @@ def split(triplets, analyzers, monitors, logs, a3_name: str | None = None, a4_na
     A list[[triplet, analyzer, monitor]] of individual (a3, a4) setting(s)
     """
     from scipp import lookup
+
     from ..utils import is_in_coords, split_setting
+
     if a3_name is None:
         a3_name = 'a3'
     if a4_name is None:
@@ -239,7 +291,10 @@ def split(triplets, analyzers, monitors, logs, a3_name: str | None = None, a4_na
     a3 = lookup(logs[a3_name]['value'], 'time')
     a4 = lookup(logs[a4_name]['value'], 'time')
 
-    event_graph = {'a3': lambda event_time_zero: a3[event_time_zero], 'a4': lambda event_time_zero: a4[event_time_zero]}
+    event_graph = {
+        'a3': lambda event_time_zero: a3[event_time_zero],
+        'a4': lambda event_time_zero: a4[event_time_zero],
+    }
     histogram_graph = {'a3': lambda time: a3[time], 'a4': lambda time: a4[time]}
 
     def do_split(x, time_name):
@@ -250,16 +305,29 @@ def split(triplets, analyzers, monitors, logs, a3_name: str | None = None, a4_na
                 x = x.group('a3', 'a4')
         return x
 
-    vals = [do_split(x, t) for x, t in ((triplets, 'event_time_zero'), (analyzers, 'time'), (monitors, 'time'))]
+    vals = [
+        do_split(x, t)
+        for x, t in (
+            (triplets, 'event_time_zero'),
+            (analyzers, 'time'),
+            (monitors, 'time'),
+        )
+    ]
 
     # FIXME this only works because v.sizes['a4'] is always 1 at the moment
-    vals = [v.flatten(['a3', 'a4'], to='time') if 'a3' in v.dims and 'a4' in v.dims else v for v in vals]
+    vals = [
+        v.flatten(['a3', 'a4'], to='time') if 'a3' in v.dims and 'a4' in v.dims else v
+        for v in vals
+    ]
 
     n_time = [v.sizes['time'] for v in vals if 'time' in v.dims]
     if len(n_time):
         assert all(n == n_time[0] for n in n_time)
         n_time = n_time[0]
-        vals = [[v['time', i] if 'time' in v.dims else v for v in vals] for i in range(n_time)]
+        vals = [
+            [v['time', i] if 'time' in v.dims else v for v in vals]
+            for i in range(n_time)
+        ]
     else:
         vals = [vals]
 
@@ -268,15 +336,22 @@ def split(triplets, analyzers, monitors, logs, a3_name: str | None = None, a4_na
 
 def load_everything(filename, named_components):
     import scippnexus as snx
+
     source_component = named_components['source']
     sample_component = named_components['sample']
     with snx.File(filename) as data:
         group = data['entry/instrument']
         if source_component not in group:
-            raise ValueError(f'Missing source component {source_component} for path-length calculations')
+            raise ValueError(
+                f'Missing source component {source_component} for path-length calculations'
+            )
         if sample_component not in group:
-            raise ValueError(f'Missing sample component {sample_component} for origin identification')
-        sample = snx.compute_positions(group[sample_component][...], store_transform='transform')
+            raise ValueError(
+                f'Missing sample component {sample_component} for origin identification'
+            )
+        sample = snx.compute_positions(
+            group[sample_component][...], store_transform='transform'
+        )
         triplets = load_all(group, snx.NXdetector)
         analyzers = load_all(group, snx.NXcrystal)
         choppers = load_all(group, snx.NXdisk_chopper)
@@ -289,12 +364,19 @@ def load_everything(filename, named_components):
     return sample, triplets, analyzers, choppers, monitors, logs
 
 
-def one_setting(sample, triplet_events, analyzers, norm_monitor, filename, names, warn_about_a3=True):
-
-    detector_positions = triplet_events.coords['position']  # this is the same as detectors['position'].data!
-    kf_params, sample_detector_flight_time = find_sample_detector_flight_time(sample, analyzers, detector_positions)
+def one_setting(
+    sample, triplet_events, analyzers, norm_monitor, filename, names, warn_about_a3=True
+):
+    detector_positions = triplet_events.coords[
+        'position'
+    ]  # this is the same as detectors['position'].data!
+    kf_params, sample_detector_flight_time = find_sample_detector_flight_time(
+        sample, analyzers, detector_positions
+    )
     sample_events = get_sample_events(triplet_events, sample_detector_flight_time)
-    ki_params, unwrapped_events, primary = get_unwrapped_events(filename, names['source'], names['sample'], sample_events, names['focus'])
+    ki_params, unwrapped_events, primary = get_unwrapped_events(
+        filename, names['source'], names['sample'], sample_events, names['focus']
+    )
     ei, en, ef = get_energy_axes(ki_params, kf_params)
 
     energy_events = sample_events.copy()
@@ -307,6 +389,7 @@ def one_setting(sample, triplet_events, analyzers, norm_monitor, filename, names
         a3 = triplet_events.coords['a3']
     else:
         from scipp import scalar
+
         if warn_about_a3:
             logger.warning("No a3 present in setting, assuming 0 a3")
         a3 = scalar(0, unit='deg')
@@ -327,16 +410,26 @@ def one_setting(sample, triplet_events, analyzers, norm_monitor, filename, names
         # 'triplets': triplets,
     }
 
-def load_precompute(filename: NeXusFileName, named_components, is_simulated: bool=False):
+
+def load_precompute(
+    filename: NeXusFileName, named_components, is_simulated: bool = False
+):
     import scippnexus as snx
-    sample, triplets, analyzers, choppers, monitors, logs = load_everything(filename, named_components)
+
+    sample, triplets, analyzers, choppers, monitors, logs = load_everything(
+        filename, named_components
+    )
 
     if is_simulated:
         for name in triplets:
-            triplets[name]['data'] = convert_simulated_time_to_frame_time(triplets[name]['data'])
+            triplets[name]['data'] = convert_simulated_time_to_frame_time(
+                triplets[name]['data']
+            )
 
     for name in triplets:
-        triplets[name] = snx.compute_positions(triplets[name], store_transform='transform')
+        triplets[name] = snx.compute_positions(
+            triplets[name], store_transform='transform'
+        )
 
     analyzers = combine_analyzers(analyzers, triplets)
     # detectors = combine_detectors(triplets)
@@ -345,9 +438,14 @@ def load_precompute(filename: NeXusFileName, named_components, is_simulated: boo
     norm_monitor = get_normalization_monitor(monitors, named_components['monitor'])
     return sample, analyzers, triplet_events, norm_monitor, logs
 
-def component_names(source_component: str | None = None, sample_component: str | None = None,
-                   focus_components: list[str] | None = None, monitor_component: str | None = None,
-                   is_simulated: bool=False):
+
+def component_names(
+    source_component: str | None = None,
+    sample_component: str | None = None,
+    focus_components: list[str] | None = None,
+    monitor_component: str | None = None,
+    is_simulated: bool = False,
+):
     names = {
         'source': source_component,
         'sample': sample_component,
@@ -359,28 +457,52 @@ def component_names(source_component: str | None = None, sample_component: str |
             'source': '001_ESS_source',
             'sample': '114_sample_stack',
             'monitor': '110_frame_3',
-            'focus': [FocusComponentName('005_PulseShapingChopper'), FocusComponentName('006_PulseShapingChopper2')],
+            'focus': [
+                FocusComponentName('005_PulseShapingChopper'),
+                FocusComponentName('006_PulseShapingChopper2'),
+            ],
         }
         for k, v in sim_components.items():
             if names[k] is None:
                 names[k] = v
     return names
 
-def bifrost(filename: NeXusFileName,
-            source_component: str | None = None,
-            sample_component: str | None = None,
-            focus_components: list[str] | None = None,
-            monitor_component: str | None = None,
-            is_simulated: bool=False):
+
+def bifrost(
+    filename: NeXusFileName,
+    source_component: str | None = None,
+    sample_component: str | None = None,
+    focus_components: list[str] | None = None,
+    monitor_component: str | None = None,
+    is_simulated: bool = False,
+):
     import scipp as sc
     from tqdm import tqdm
+
     named_components = component_names(
-        source_component, sample_component, focus_components, monitor_component, is_simulated
+        source_component,
+        sample_component,
+        focus_components,
+        monitor_component,
+        is_simulated,
     )
-    sample, analyzers, triplet_events, norm_monitor, logs = load_precompute(filename, named_components, is_simulated)
+    sample, analyzers, triplet_events, norm_monitor, logs = load_precompute(
+        filename, named_components, is_simulated
+    )
     settings = split(triplet_events, analyzers, norm_monitor, logs)
-    data = [one_setting(sample, one_triplet_events, one_analyzers, one_monitor, filename, named_components)
-            for one_triplet_events, one_analyzers, one_monitor in tqdm(settings, desc='(a3, a4) settings')]
+    data = [
+        one_setting(
+            sample,
+            one_triplet_events,
+            one_analyzers,
+            one_monitor,
+            filename,
+            named_components,
+        )
+        for one_triplet_events, one_analyzers, one_monitor in tqdm(
+            settings, desc='(a3, a4) settings'
+        )
+    ]
     return {k: sc.concat([d[k] for d in data], 'setting') for k in data[0]}
 
 
@@ -416,23 +538,38 @@ def bifrost(filename: NeXusFileName,
 #         return {k: v for k, v in zip(keys, dask.compute(*futures))}
 
 
-def bifrost_single(filename: NeXusFileName,
-            source_component: str | None = None,
-            sample_component: str | None = None,
-            focus_components: list[str] | None = None,
-            monitor_component: str | None = None,
-            is_simulated: bool = False,
-            extras: bool = False):
+def bifrost_single(
+    filename: NeXusFileName,
+    source_component: str | None = None,
+    sample_component: str | None = None,
+    focus_components: list[str] | None = None,
+    monitor_component: str | None = None,
+    is_simulated: bool = False,
+    extras: bool = False,
+):
     named_components = component_names(
-        source_component, sample_component, focus_components, monitor_component, is_simulated
+        source_component,
+        sample_component,
+        focus_components,
+        monitor_component,
+        is_simulated,
     )
-    sample, analyzers, triplet_events, norm_monitor, logs = load_precompute(filename, named_components, is_simulated)
+    sample, analyzers, triplet_events, norm_monitor, logs = load_precompute(
+        filename, named_components, is_simulated
+    )
 
-    data = one_setting(sample, triplet_events, analyzers, norm_monitor, filename, named_components, warn_about_a3=False)
+    data = one_setting(
+        sample,
+        triplet_events,
+        analyzers,
+        norm_monitor,
+        filename,
+        named_components,
+        warn_about_a3=False,
+    )
 
     if extras:
         data['sample'] = sample
         data['logs'] = logs
 
     return data
-

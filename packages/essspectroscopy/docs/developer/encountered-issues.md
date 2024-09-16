@@ -6,14 +6,14 @@ Comparing the event times when unwrapped and propagated to the sample with the n
 it appeared that too much time had been removed from the recorded frame-times before unwrapping.
 ![Screenshot from 2024-08-27 08-24-50.png](Screenshot%20from%202024-08-27%2008-24-50.png)
 
-The calculated time of flight from sample to detector had only been checked relative 
+The calculated time of flight from sample to detector had only been checked relative
 to an order of magnitude estimate, which was not accurate enough.
 A more careful estimate shows that neutrons hitting the central pixel of each central tube in the symmetric
 geometry case should take around 3.3 &mu;sec from sample to detector.
 ![Screenshot from 2024-08-27 08-20-49.png](Screenshot%20from%202024-08-27%2008-20-49.png)
 
 ### Cause
-The sample-to-detector time-of-flight depends on the square root of the energy of the neutron, 
+The sample-to-detector time-of-flight depends on the square root of the energy of the neutron,
 which was calculated incorrectly due to a mistake finding the vector from the sample to the detector pixel.
 
 If the sample is at 0, the analyzer at A and the detector at A + D,
@@ -26,7 +26,7 @@ This then produced the wrong scattering angle, the wrong wavevector magnitude, a
 Correcting the calculation also corrected the per detector pixel energies
 ![Screenshot from 2024-08-27 10-54-08.png](Screenshot%20from%202024-08-27%2010-54-08.png)
 
-The calculated sample-to-detector time-of-flights are consistent with the limited hand calculated values 
+The calculated sample-to-detector time-of-flights are consistent with the limited hand calculated values
 ![Screenshot from 2024-08-27 10-55-10.png](Screenshot%20from%202024-08-27%2010-55-10.png)
 
 And the unwrapped time-at-sample seems more consistent with the monitor histogram.
