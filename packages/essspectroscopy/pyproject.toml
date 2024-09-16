@@ -30,10 +30,13 @@ requires-python = ">=3.10"
 # Run 'tox -e deps' after making changes here. This will update requirement files.
 # Make sure to list one dependency per line.
 dependencies = [
-  "sciline>=24.02",
-  "scipp>=24.01",
-  "scippneutron>=24.01",
-  "scippnexus>=23.12",
+  "sciline>=24.6.3",
+  "scipp>=24.9.1",
+  "scippneutron>=24.8.0",
+  "scippnexus>=24.9.0",
+  "choppera>=0.1.4",
+  "loguru",
+  "tqdm",
 ]
 
 dynamic = ["version"]
