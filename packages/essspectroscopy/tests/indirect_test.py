@@ -1,7 +1,8 @@
-from ess.spectroscopy.indirect import kf as secondary
-from ess.spectroscopy.utils import norm
 from scipp import array, scalar, sqrt, vector
 from scipp.spatial import rotations_from_rotvecs
+
+from ess.spectroscopy.indirect import kf as secondary
+from ess.spectroscopy.utils import norm
 
 
 def vectors_close(a, b, tol=None):

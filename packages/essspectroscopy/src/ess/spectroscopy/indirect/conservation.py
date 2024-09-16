@@ -20,7 +20,7 @@ from .kf import providers as kf_providers
 from .ki import providers as ki_providers
 
 # Directions relative to the incident beam coordinate system
-PERP, VERT, PARALLEL = [vector(v) for v in ([1, 0, 0], [0, 1, 0], [0, 0, 1])]
+PERP, VERT, PARALLEL = (vector(v) for v in ([1, 0, 0], [0, 1, 0], [0, 0, 1]))
 
 
 def lab_momentum_vector(
