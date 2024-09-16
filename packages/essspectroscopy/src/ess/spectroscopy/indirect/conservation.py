@@ -1,14 +1,23 @@
 from scipp import vector
 
 from ..types import (
-    IncidentWavevector, IncidentWavenumber, FinalWavenumber, FinalWavevector, EnergyTransfer, SampleTableAngle,
-    LabMomentumTransfer, LabMomentumTransferX, LabMomentumTransferY, LabMomentumTransferZ,
-    TableMomentumTransfer, TableMomentumTransferX, TableMomentumTransferY, TableMomentumTransferZ,
-
+    EnergyTransfer,
+    FinalWavenumber,
+    FinalWavevector,
+    IncidentWavenumber,
+    IncidentWavevector,
+    LabMomentumTransfer,
+    LabMomentumTransferX,
+    LabMomentumTransferY,
+    LabMomentumTransferZ,
+    SampleTableAngle,
+    TableMomentumTransfer,
+    TableMomentumTransferX,
+    TableMomentumTransferY,
+    TableMomentumTransferZ,
 )
 from .kf import providers as kf_providers
 from .ki import providers as ki_providers
-
 
 # Directions relative to the incident beam coordinate system
 PERP, VERT, PARALLEL = [vector(v) for v in ([1, 0, 0], [0, 1, 0], [0, 0, 1])]
