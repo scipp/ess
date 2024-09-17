@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 """Detector diagnostics for DREAM."""
 
 import math
@@ -96,7 +96,6 @@ class _DimensionSelector(ipw.VBox):
     def set_dims(self, new_dims: tuple[str, ...]) -> None:
         self._horizontal_buttons.unobserve_all(name='value')
         self._vertical_buttons.unobserve_all(name='value')
-        # self._forward_messages = False
 
         old_h = self._horizontal_buttons.value
         old_v = self._vertical_buttons.value
@@ -144,7 +143,6 @@ class _DimensionSelector(ipw.VBox):
 def _flat_voxel_figure(
     data: sc.DataArray, horizontal_dim: str, vertical_dim: str
 ) -> FigureLike:
-    # flat, h_coord, v_coord = _flatten_voxel_dims(data, horizontal_dim, vertical_dim)
     kept_dims = {horizontal_dim, vertical_dim}
 
     to_flatten = [dim for dim in data.dims if dim not in kept_dims]
@@ -179,8 +177,8 @@ def _flat_voxel_figure(
 
     fig.ax.xaxis.set_ticks(ticks=h_ticks, labels=h_labels)
     fig.ax.yaxis.set_ticks(ticks=v_ticks, labels=v_labels)
-    fig.ax.set_xlabel(horizontal_dim.capitalize())
-    fig.ax.set_ylabel(vertical_dim.capitalize())
+    fig.canvas.xlabel = horizontal_dim.capitalize()
+    fig.canvas.ylabel = vertical_dim.capitalize()
 
     unwrap_indices = unwrap_flat_indices_2d(
         {dim: reordered.sizes[dim] for dim in flatten_to_h},
