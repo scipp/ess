@@ -16,7 +16,7 @@ _STARTING_DIMS = ('segment', 'wire', 'strip', 'module', 'counter', 'sector')
 
 
 class FlatVoxelViewer(ipw.VBox):
-    def __init__(self, data: sc.DataGroup) -> None:
+    def __init__(self, data: sc.DataGroup, *, rasterized: bool = True) -> None:
         self._data = self._prepare_data(data)
         self._bank_selector = _make_bank_selector(data.keys())
         self._bank = self._data[self._bank_selector.value]
@@ -24,6 +24,7 @@ class FlatVoxelViewer(ipw.VBox):
         self._dim_selector = _DimensionSelector(self._bank.dims)
         self._dim_selector.observe(self._update_view, names='value')
 
+        self._fig_kwargs = {'rasterized': rasterized}
         self._figure_box = ipw.HBox([self._make_figure()])
         self._bank_selector.observe(self._select_bank, names='value')
 
@@ -45,7 +46,9 @@ class FlatVoxelViewer(ipw.VBox):
 
     def _make_figure(self) -> FigureLike:
         sel = self._dim_selector.value
-        fig = _flat_voxel_figure(self._bank, sel['horizontal'], sel['vertical'])
+        fig = _flat_voxel_figure(
+            self._bank, sel['horizontal'], sel['vertical'], **self._fig_kwargs
+        )
         return fig
 
     @staticmethod
@@ -141,7 +144,11 @@ class _DimensionSelector(ipw.VBox):
 
 
 def _flat_voxel_figure(
-    data: sc.DataArray, horizontal_dim: str, vertical_dim: str
+    data: sc.DataArray,
+    horizontal_dim: str,
+    vertical_dim: str,
+    *,
+    rasterized: bool = True,
 ) -> FigureLike:
     kept_dims = {horizontal_dim, vertical_dim}
 
@@ -173,7 +180,7 @@ def _flat_voxel_figure(
     h_labels = [str(value) for value in h_coord.values]
     v_labels = [str(value) for value in v_coord.values]
 
-    fig = flat.plot(rasterized=True)
+    fig = flat.plot(rasterized=rasterized)
 
     fig.ax.xaxis.set_ticks(ticks=h_ticks, labels=h_labels)
     fig.ax.yaxis.set_ticks(ticks=v_ticks, labels=v_labels)
