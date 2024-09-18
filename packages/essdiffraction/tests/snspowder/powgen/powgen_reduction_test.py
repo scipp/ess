@@ -1,12 +1,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
+import ess.snspowder.powgen.data  # noqa: F401
 import pytest
 import sciline
 import scipp as sc
-
-import ess.snspowder.powgen.data  # noqa: F401
 from ess import powder
+from ess.snspowder import powgen
+
 from ess.powder.types import (
     CalibrationFilename,
     DspacingBins,
@@ -24,7 +25,6 @@ from ess.powder.types import (
     VanadiumRun,
     WavelengthMask,
 )
-from ess.snspowder import powgen
 
 
 @pytest.fixture
