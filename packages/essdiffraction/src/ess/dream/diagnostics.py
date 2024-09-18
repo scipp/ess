@@ -82,8 +82,9 @@ class _DimensionSelector(ipw.VBox):
         self, dims: tuple[str, ...], h_dim: str, v_dim: str
     ) -> tuple[ipw.ToggleButtons, ipw.ToggleButtons]:
         style = {'button_width': '10em'}
-        h_buttons = ipw.ToggleButtons(options=dims, value=h_dim, style=style)
-        v_buttons = ipw.ToggleButtons(options=dims, value=v_dim, style=style)
+        options = {dim.capitalize(): dim for dim in dims}
+        h_buttons = ipw.ToggleButtons(options=options, value=h_dim, style=style)
+        v_buttons = ipw.ToggleButtons(options=options, value=v_dim, style=style)
         h_buttons.observe(self._observe_values, names='value')
         v_buttons.observe(self._observe_values, names='value')
         return h_buttons, v_buttons
