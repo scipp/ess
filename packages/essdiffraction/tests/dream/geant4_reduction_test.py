@@ -10,18 +10,21 @@ import scipp.testing
 import scippnexus as snx
 from scippneutron.io.cif import Author
 
-import ess.dream.data  # noqa: F401
 from ess import dream, powder
+
+import ess.dream.data  # noqa: F401
 from ess.powder.types import (
     AccumulatedProtonCharge,
     BackgroundRun,
     CalibrationFilename,
+    CaveMonitorPosition,
     CIFAuthors,
     DspacingBins,
     Filename,
     IofDspacing,
     IofDspacingTwoTheta,
     MaskedData,
+    MonitorFilename,
     NeXusDetectorName,
     NeXusSample,
     NeXusSource,
@@ -45,6 +48,9 @@ params = {
     Filename[SampleRun]: dream.data.simulated_diamond_sample(),
     Filename[VanadiumRun]: dream.data.simulated_vanadium_sample(),
     Filename[BackgroundRun]: dream.data.simulated_empty_can(),
+    MonitorFilename[SampleRun]: dream.data.simulated_monitor_diamond_sample(),
+    MonitorFilename[VanadiumRun]: dream.data.simulated_monitor_vanadium_sample(),
+    MonitorFilename[BackgroundRun]: dream.data.simulated_monitor_empty_can(),
     CalibrationFilename: None,
     UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
     DspacingBins: sc.linspace('dspacing', 0.0, 2.3434, 201, unit='angstrom'),
@@ -58,6 +64,7 @@ params = {
     AccumulatedProtonCharge[VanadiumRun]: charge,
     TwoThetaMask: None,
     WavelengthMask: None,
+    CaveMonitorPosition: sc.vector([0.0, 0.0, -4220.0], unit='mm'),
     CIFAuthors: CIFAuthors(
         [
             Author(
@@ -76,13 +83,39 @@ def params_for_det(request):
 
 @pytest.fixture
 def workflow(params_for_det):
-    wf = dream.DreamGeant4Workflow()
+    return make_workflow(params_for_det, run_norm=powder.RunNormalization.proton_charge)
+
+
+def make_workflow(params_for_det, *, run_norm):
+    wf = dream.DreamGeant4Workflow(run_norm=run_norm)
     for key, value in params_for_det.items():
         wf[key] = value
     return wf
 
 
 def test_pipeline_can_compute_dspacing_result(workflow):
+    workflow = powder.with_pixel_mask_filenames(workflow, [])
+    result = workflow.compute(IofDspacing)
+    assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
+    assert sc.identical(result.coords['dspacing'], params[DspacingBins])
+
+
+def test_pipeline_can_compute_dspacing_result_with_hist_monitor_norm(params_for_det):
+    workflow = make_workflow(
+        params_for_det, run_norm=powder.RunNormalization.monitor_histogram
+    )
+    workflow = powder.with_pixel_mask_filenames(workflow, [])
+    result = workflow.compute(IofDspacing)
+    assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
+    assert sc.identical(result.coords['dspacing'], params[DspacingBins])
+
+
+def test_pipeline_can_compute_dspacing_result_with_integrated_monitor_norm(
+    params_for_det,
+):
+    workflow = make_workflow(
+        params_for_det, run_norm=powder.RunNormalization.monitor_integrated
+    )
     workflow = powder.with_pixel_mask_filenames(workflow, [])
     result = workflow.compute(IofDspacing)
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}

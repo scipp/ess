@@ -4,6 +4,7 @@
 
 import enum
 
+import numpy as np
 import sciline
 import scipp as sc
 from scippneutron.conversion.graph import beamline, tof
@@ -54,6 +55,61 @@ def normalize_by_monitor_histogram(
         monitor, prototype=detector, mode=uncertainty_broadcast_mode
     )
     return detector.bins / sc.lookup(norm, dim="wavelength")
+
+
+def normalize_by_monitor_integrated(
+    detector: DataWithScatteringCoordinates[RunType],
+    *,
+    monitor: WavelengthMonitor[RunType, CaveMonitor],
+    uncertainty_broadcast_mode: UncertaintyBroadcastMode,
+) -> NormalizedRunData[RunType]:
+    """Normalize detector data by an integrated monitor.
+
+    The monitor is integrated according to
+
+    .. math::
+
+        M = \\sum_{i=0}^{N-1}\\, m_i (x_{i+1} - x_i) I(x_i, x_{i+1}),
+
+    where :math:`m_i` is the monitor intensity in bin :math:`i`,
+    :math:`x_i` is the lower bin edge of bin :math:`i`, and
+    :math:`I(x_i, x_{i+1})` selects bins that are within the range of the detector.
+
+    Parameters
+    ----------
+    detector:
+        Input event data in wavelength.
+    monitor:
+        A histogrammed monitor in wavelength.
+    uncertainty_broadcast_mode:
+        Choose how uncertainties of the monitor are broadcast to the sample data.
+
+    Returns
+    -------
+    :
+        `detector` normalized by a monitor.
+    """
+    dim = monitor.dim
+    if not monitor.coords.is_edges(dim):
+        raise sc.CoordError(
+            f"Monitor coordinate '{dim}' must be bin-edges to integrate the monitor."
+        )
+
+    # Clip `monitor` to the range of `detector`.
+    det_coord = (
+        detector.coords[dim] if dim in detector.coords else detector.bins.coords[dim]
+    )
+    lo = det_coord.min()
+    hi = det_coord.max()
+    hi.value = np.nextafter(hi.value, np.inf)
+    monitor = monitor[dim, lo:hi]
+
+    coord = monitor.coords[dim]
+    norm = sc.sum(monitor.data * (coord[1:] - coord[:-1]))
+    norm = broadcast_uncertainties(
+        norm, prototype=detector, mode=uncertainty_broadcast_mode
+    )
+    return NormalizedRunData[RunType](detector / norm)
 
 
 def _normalize_by_vanadium(
@@ -251,9 +307,7 @@ class RunNormalization(enum.Enum):
             case RunNormalization.monitor_histogram:
                 workflow.insert(normalize_by_monitor_histogram)
             case RunNormalization.monitor_integrated:
-                raise NotImplementedError(
-                    "Normalization by monitor integrated not implemented"
-                )
+                workflow.insert(normalize_by_monitor_integrated)
             case RunNormalization.proton_charge:
                 workflow.insert(normalize_by_proton_charge)
 
