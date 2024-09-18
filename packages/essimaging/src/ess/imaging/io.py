@@ -24,7 +24,7 @@ from .types import (
 
 FileLock = NewType("FileLock", bool)
 """File lock mode for reading nexus file."""
-DEFAULT_FILE_LOCK = FileLock(False)
+DEFAULT_FILE_LOCK = FileLock(True)
 
 HistogramModeDetector = NewType("HistogramModeDetector", sc.DataGroup)
 """Histogram mode detector data group."""
