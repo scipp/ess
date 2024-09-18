@@ -42,7 +42,7 @@ docutils==0.21.2
     #   sphinxcontrib-bibtex
 fastjsonschema==2.20.0
     # via nbformat
-idna==3.8
+idna==3.10
     # via requests
 imagesize==1.4.1
     # via sphinx
@@ -62,7 +62,7 @@ jsonschema==4.23.0
     # via nbformat
 jsonschema-specifications==2023.12.1
     # via jsonschema
-jupyter-client==8.6.2
+jupyter-client==8.6.3
     # via
     #   ipykernel
     #   nbclient
@@ -85,7 +85,7 @@ markupsafe==2.1.5
     # via
     #   jinja2
     #   nbconvert
-mdit-py-plugins==0.4.1
+mdit-py-plugins==0.4.2
     # via myst-parser
 mdurl==0.1.2
     # via markdown-it-py
@@ -110,7 +110,7 @@ pandas==2.2.2
     # via -r docs.in
 pandocfilters==1.5.1
     # via nbconvert
-platformdirs==4.2.2
+platformdirs==4.3.6
     # via
     #   jupyter-core
     #   pooch
@@ -128,7 +128,7 @@ pybtex-docutils==1.0.3
     # via sphinxcontrib-bibtex
 pydata-sphinx-theme==0.15.4
     # via -r docs.in
-pytz==2024.1
+pytz==2024.2
     # via pandas
 pyzmq==26.2.0
     # via
@@ -160,7 +160,7 @@ sphinx==8.0.2
     #   sphinx-copybutton
     #   sphinx-design
     #   sphinxcontrib-bibtex
-sphinx-autodoc-typehints==2.3.0
+sphinx-autodoc-typehints==2.4.3
     # via -r docs.in
 sphinx-copybutton==0.5.2
     # via -r docs.in
@@ -168,7 +168,7 @@ sphinx-design==0.6.1
     # via -r docs.in
 sphinxcontrib-applehelp==2.0.0
     # via sphinx
-sphinxcontrib-bibtex==2.6.2
+sphinxcontrib-bibtex==2.6.3
     # via -r docs.in
 sphinxcontrib-devhelp==2.0.0
     # via sphinx
@@ -190,7 +190,7 @@ tornado==6.4.1
     #   jupyter-client
 tzdata==2024.1
     # via pandas
-urllib3==2.2.2
+urllib3==2.2.3
     # via requests
 webencodings==0.5.1
     # via
