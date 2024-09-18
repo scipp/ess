@@ -45,12 +45,12 @@ def load_file_without_sans(file_path_without_sans):
         return archive.read(archive.namelist()[0])
 
 
-@pytest.fixture()
+@pytest.fixture
 def file(load_file):
     return BytesIO(load_file)
 
 
-@pytest.fixture()
+@pytest.fixture
 def file_without_sans(load_file_without_sans):
     return BytesIO(load_file_without_sans)
 

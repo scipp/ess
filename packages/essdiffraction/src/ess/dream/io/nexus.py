@@ -14,6 +14,7 @@ and the ICD DREAM interface specification for details.
 """
 
 import sciline
+
 from ess.reduce.nexus.generic_workflow import GenericNeXusWorkflow
 from ess.reduce.nexus.types import DetectorBankSizes
 

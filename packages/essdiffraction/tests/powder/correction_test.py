@@ -8,7 +8,7 @@ import scipp.testing
 from ess.powder.correction import apply_lorentz_correction, merge_calibration
 
 
-@pytest.fixture()
+@pytest.fixture
 def calibration():
     rng = np.random.default_rng(789236)
     n = 30
