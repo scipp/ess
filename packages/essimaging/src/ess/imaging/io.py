@@ -22,6 +22,10 @@ from .types import (
     RotationMotionSensorName,
 )
 
+FileLock = NewType("FileLock", bool)
+"""File lock mode for reading nexus file."""
+DEFAULT_FILE_LOCK = FileLock(False)
+
 HistogramModeDetector = NewType("HistogramModeDetector", sc.DataGroup)
 """Histogram mode detector data group."""
 HistogramModeDetectorData = NewType("HistogramModeDetectorData", sc.DataArray)
@@ -79,10 +83,20 @@ def load_nexus_histogram_mode_detector(
     file_path: FilePath,
     image_detector_name: ImageDetectorName,
     histogram_mode_detectors_path: HistogramModeDetectorsPath = DEFAULT_HISTOGRAM_PATH,
+    file_lock: FileLock = DEFAULT_FILE_LOCK,
 ) -> HistogramModeDetector:
-    with snx.File(file_path, mode="r") as f:
-        img_path = f"{histogram_mode_detectors_path}/{image_detector_name}"
-        dg: sc.DataGroup = f[img_path][()]
+    try:
+        with snx.File(file_path, mode="r", locking=file_lock) as f:
+            img_path = f"{histogram_mode_detectors_path}/{image_detector_name}"
+            dg: sc.DataGroup = f[img_path][()]
+    except PermissionError as e:
+        raise PermissionError(
+            f"Permission denied to read the nexus file [{file_path}]. "
+            "Please check the permission of the file or the directory. "
+            "Consider using the `file_lock` parameter to avoid file locking "
+            "if the file system is mounted on a network file system. "
+            "and it is safe to read the file without locking."
+        ) from e
 
     # Manually assign unit to the histogram detector mode data
     img: sc.DataArray = dg['data']

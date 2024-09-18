@@ -3,6 +3,8 @@
 import sciline as sl
 
 from .io import (
+    DEFAULT_FILE_LOCK,
+    FileLock,
     MaxDim1,
     MaxDim2,
     MinDim1,
@@ -74,5 +76,6 @@ def YmirWorkflow() -> sl.Pipeline:
             RotationMotionSensorName: RotationMotionSensorName('motion_cabinet_2'),
             BackgroundPixelThreshold: DEFAULT_BACKGROUND_THRESHOLD,
             SamplePixelThreshold: DEFAULT_SAMPLE_THRESHOLD,
+            FileLock: DEFAULT_FILE_LOCK,
         },
     )
