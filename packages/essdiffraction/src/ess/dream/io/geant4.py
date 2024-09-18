@@ -69,6 +69,7 @@ def _load_raw_events(file_path: str) -> sc.DataArray:
     table = sc.io.load_csv(
         file_path, sep="\t", header_parser="bracket", data_columns=[]
     )
+    table.coords['sumo'] = table.coords['det ID']
     table.coords.pop("lambda", None)
     table = table.rename_dims(row="event")
     return sc.DataArray(
@@ -90,10 +91,14 @@ def _group(detectors: dict[str, sc.DataArray]) -> dict[str, sc.DataGroup]:
         if key in ["high_resolution", "sans"]:
             # Only the HR and SANS detectors have sectors.
             res = da.group("sector", *elements)
+        elif key in ["endcap_backward", "endcap_forward"]:
+            # Other banks only have a single SUMO.
+            res = da.group("sumo", *elements)
         else:
             res = da.group(*elements)
         res.coords['position'] = res.bins.coords.pop('position').bins.mean()
         res.bins.coords.pop("sector", None)
+        res.bins.coords.pop("sumo", None)
         return res
 
     return {key: sc.DataGroup(events=group(key, da)) for key, da in detectors.items()}
