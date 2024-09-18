@@ -83,10 +83,10 @@ def load_nexus_histogram_mode_detector(
     file_path: FilePath,
     image_detector_name: ImageDetectorName,
     histogram_mode_detectors_path: HistogramModeDetectorsPath = DEFAULT_HISTOGRAM_PATH,
-    file_lock: FileLock = DEFAULT_FILE_LOCK,
+    locking: FileLock = DEFAULT_FILE_LOCK,
 ) -> HistogramModeDetector:
     try:
-        with snx.File(file_path, mode="r", locking=file_lock) as f:
+        with snx.File(file_path, mode="r", locking=locking) as f:
             img_path = f"{histogram_mode_detectors_path}/{image_detector_name}"
             dg: sc.DataGroup = f[img_path][()]
     except PermissionError as e:
