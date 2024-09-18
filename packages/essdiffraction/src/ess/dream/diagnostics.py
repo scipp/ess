@@ -3,7 +3,7 @@
 """Detector diagnostics for DREAM."""
 
 import math
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Mapping
 from functools import reduce
 
 import ipywidgets as ipw
@@ -16,7 +16,26 @@ _STARTING_DIMS = ('segment', 'wire', 'strip', 'module', 'counter', 'sector')
 
 
 class FlatVoxelViewer(ipw.VBox):
-    def __init__(self, data: sc.DataGroup, *, rasterized: bool = True) -> None:
+    """Interactive 2D plot of all detector voxels.
+
+    See `DREAM Detector Diagnostics
+    <../../user-guide/dream/dream-detector-diagnostics.rst>`_ for explanations
+    and an example.
+    """
+
+    def __init__(
+        self, data: Mapping[str, sc.DataArray], *, rasterized: bool = True
+    ) -> None:
+        """Create a new viewer.
+
+        Parameters
+        ----------
+        data:
+            Histogrammed data, one entry per bank.
+        rasterized:
+            If ``True``, the figure is rasterized which improves rendering
+            speed but reduces resolution.
+        """
         self._data = self._prepare_data(data)
         self._bank_selector = _make_bank_selector(data.keys())
         self._bank = self._data[self._bank_selector.value]
