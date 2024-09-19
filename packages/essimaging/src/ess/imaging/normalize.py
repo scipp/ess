@@ -104,7 +104,7 @@ def calculate_white_beam_background(
 
     Params
     ------
-    oepn_beam:
+    open_beam:
         Open beam image stack.
 
     dark_current:
