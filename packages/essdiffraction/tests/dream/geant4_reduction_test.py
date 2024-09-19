@@ -1,9 +1,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
+import io
+
 import pytest
 import sciline
 import scipp as sc
+import scipp.testing
+from scippneutron.io.cif import Author
 
 import ess.dream.data  # noqa: F401
 from ess import dream, powder
@@ -11,6 +15,7 @@ from ess.powder.types import (
     AccumulatedProtonCharge,
     BackgroundRun,
     CalibrationFilename,
+    CIFAuthors,
     DspacingBins,
     Filename,
     IofDspacing,
@@ -20,6 +25,7 @@ from ess.powder.types import (
     NeXusSample,
     NeXusSource,
     NormalizedByProtonCharge,
+    ReducedDspacingCIF,
     SampleRun,
     TofMask,
     TwoThetaBins,
@@ -28,14 +34,6 @@ from ess.powder.types import (
     VanadiumRun,
     WavelengthMask,
 )
-
-
-@pytest.fixture
-def providers():
-    from ess.dream.io.geant4 import providers as geant4_providers
-
-    return [*powder.providers, *geant4_providers]
-
 
 sample = sc.DataGroup(position=sc.vector([0.0, 0.0, 0.0], unit='mm'))
 source = sc.DataGroup(position=sc.vector([-3.478, 0.0, -76550], unit='mm'))
@@ -58,6 +56,13 @@ params = {
     AccumulatedProtonCharge[VanadiumRun]: charge,
     TwoThetaMask: None,
     WavelengthMask: None,
+    CIFAuthors: CIFAuthors(
+        [
+            Author(
+                name="Jane Doe", email="jane.doe@ess.eu", orcid="0000-0000-0000-0001"
+            ),
+        ]
+    ),
 }
 
 
@@ -159,3 +164,40 @@ def test_use_workflow_helper(workflow):
     result = workflow.compute(IofDspacing)
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
+
+
+def test_pipeline_can_save_data(workflow):
+    workflow = powder.with_pixel_mask_filenames(workflow, [])
+    result = workflow.compute(ReducedDspacingCIF)
+
+    buffer = io.StringIO()
+    result.save(buffer)
+    buffer.seek(0)
+    content = buffer.read()
+
+    assert content.startswith(r'#\#CIF_1.1')
+    _assert_contains_source_info(content)
+    _assert_contains_author_info(content)
+    _assert_contains_beamline_info(content)
+    _assert_contains_dspacing_data(content)
+
+
+def _assert_contains_source_info(cif_content: str) -> None:
+    assert 'diffrn_source.beamline DREAM' in cif_content
+
+
+def _assert_contains_author_info(cif_content: str) -> None:
+    assert "audit_contact_author.name 'Jane Doe'" in cif_content
+    assert 'audit_contact_author.email jane.doe@ess.eu' in cif_content
+    assert 'audit_contact_author.id_orcid 0000-0000-0000-0001' in cif_content
+
+
+def _assert_contains_beamline_info(cif_content: str) -> None:
+    assert 'diffrn_source.beamline DREAM' in cif_content
+    assert 'diffrn_source.facility ESS' in cif_content
+
+
+def _assert_contains_dspacing_data(cif_content: str) -> None:
+    assert 'pd_proc.d_spacing' in cif_content
+    assert 'pd_proc.intensity_net' in cif_content
+    assert 'pd_proc.intensity_net_su' in cif_content
