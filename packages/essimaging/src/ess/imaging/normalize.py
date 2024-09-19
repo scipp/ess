@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 
+import warnings
 from typing import NewType
 
 import scipp as sc
@@ -53,6 +54,10 @@ def average_open_beam_images(open_beam: OpenBeamImageStacks) -> OpenBeamImage:
         OpenBeam = mean(open_beam, 'time')
 
     """
+    warnings.warn(
+        "Calculating average open beam image assuming constant exposure time.",
+        stacklevel=0,
+    )
     return OpenBeamImage(sc.mean(open_beam, dim=TIME_COORD_NAME))
 
 
@@ -66,6 +71,10 @@ def average_dark_current_images(
         DarkCurrent = mean(dark_current, 'time')
 
     """
+    warnings.warn(
+        "Calculating average dark current image assuming constant exposure time.",
+        stacklevel=0,
+    )
     return DarkCurrentImage(sc.mean(dark_current, dim=TIME_COORD_NAME))
 
 
@@ -163,6 +172,10 @@ def average_background_pixel_counts(
     background: BackgroundImage,
 ) -> AverageBackgroundPixelCounts:
     """Calculate the average background pixel counts."""
+    warnings.warn(
+        "Calculating average background pixel counts assuming constant exposure time.",
+        stacklevel=1,
+    )
     return AverageBackgroundPixelCounts(background.data.mean())
 
 
@@ -184,6 +197,10 @@ def average_sample_pixel_counts(
     exceeded the limit of the maximum integer so the average calculation failed
     and returned negative values.
     """
+    warnings.warn(
+        "Calculating average sample pixel counts assuming constant exposure time.",
+        stacklevel=0,
+    )
     return AverageSamplePixelCounts(
         _mean_all_dims(sample_images.data) - dark_current.data.mean()
     )
@@ -237,6 +254,9 @@ def normalize_sample_images(
         the operation might fail and return negative values.
 
     """
+    warnings.warn(
+        "Normalizing sample images assuming constant exposure time.", stacklevel=0
+    )
     if factor < 0:
         raise ValueError(f"Scale factor must be positive, but got {factor}.")
     return NormalizedSampleImages(samples / (background * factor))
