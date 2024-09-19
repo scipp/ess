@@ -8,8 +8,7 @@ import scipp as sc
 from scippneutron.io import cif
 
 import ess.dream.io.cif
-from ess.dream.io.cif import CIFAuthors
-from ess.powder.types import IofDspacing
+from ess.powder.types import CIFAuthors, IofDspacing
 
 
 @pytest.fixture
