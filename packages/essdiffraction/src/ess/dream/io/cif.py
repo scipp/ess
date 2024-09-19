@@ -15,7 +15,7 @@ def prepare_reduced_dspacing_cif(
     """Construct a CIF builder with reduced data in d-spacing.
 
     The object contains the d-spacing coordinate, intensities,
-    and a number of metadata.
+    and some metadata.
 
     Parameters
     ----------
@@ -33,7 +33,7 @@ def prepare_reduced_dspacing_cif(
     from .. import __version__
 
     to_save = _prepare_data(da)
-    return (
+    return ReducedDspacingCIF(
         cif.CIF('reduced_dspacing')
         .with_reducers(f'ess.dream v{__version__}')
         .with_authors(*authors)
