@@ -200,7 +200,7 @@ def _flat_voxel_figure(
     h_labels = [str(value) for value in h_coord.values]
     v_labels = [str(value) for value in v_coord.values]
 
-    fig = flat.plot(rasterized=rasterized)
+    fig = flat.plot(rasterized=rasterized, cbar=True)
 
     fig.ax.xaxis.set_ticks(ticks=h_ticks, labels=h_labels)
     fig.ax.yaxis.set_ticks(ticks=v_ticks, labels=v_labels)
