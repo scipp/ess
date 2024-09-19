@@ -150,7 +150,7 @@ def cleanse_sample_images(
 
         \\text{ are replaced with sample_threshold}.
 
-    Params
+    Parameters
     ------
     sample_images:
         Sample image stack.
