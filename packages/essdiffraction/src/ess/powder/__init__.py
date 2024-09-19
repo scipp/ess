@@ -18,7 +18,7 @@ from . import (
 from .masking import with_pixel_mask_filenames
 
 try:
-    __version__ = importlib.metadata.version(__package__ or __name__)
+    __version__ = importlib.metadata.version("essdiffraction")
 except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
