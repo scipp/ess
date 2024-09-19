@@ -36,6 +36,7 @@ def instrument_view(
     #                                   unit=da.coords[positions].unit)
     #         }
     #     }
+    kwargs.setdefault('cbar', True)
     return scn.instrument_view(
         da, positions=positions, components=components, pixel_size=pixel_size, **kwargs
     )

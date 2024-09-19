@@ -8,7 +8,7 @@ import scipp as sc
 from ess.dream.instrument_view import InstrumentView
 
 
-@pytest.fixture()
+@pytest.fixture
 def fake_instrument_data(modules=('bank1', 'bank2', 'bank3', 'bank4', 'bank5')):
     rng = np.random.default_rng()
 

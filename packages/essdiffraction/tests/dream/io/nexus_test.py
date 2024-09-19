@@ -3,6 +3,8 @@
 import pytest
 import sciline
 import scipp as sc
+
+import ess.dream.data  # noqa: F401
 from ess import dream
 from ess.reduce.nexus.generic_types import (
     CalibratedDetector,
@@ -15,13 +17,11 @@ from ess.reduce.nexus.generic_types import (
 )
 from ess.reduce.nexus.types import NeXusDetectorName
 
-import ess.dream.data  # noqa: F401
-
 bank_dims = {'wire', 'module', 'segment', 'strip', 'counter'}
 hr_sans_dims = {'strip', 'other'}
 
 
-@pytest.fixture()
+@pytest.fixture
 def nexus_workflow() -> sciline.Pipeline:
     return dream.io.nexus.LoadNeXusWorkflow()
 

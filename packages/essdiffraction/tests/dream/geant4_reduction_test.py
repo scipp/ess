@@ -4,9 +4,9 @@
 import pytest
 import sciline
 import scipp as sc
-from ess import dream, powder
 
 import ess.dream.data  # noqa: F401
+from ess import dream, powder
 from ess.powder.types import (
     AccumulatedProtonCharge,
     BackgroundRun,
@@ -30,7 +30,7 @@ from ess.powder.types import (
 )
 
 
-@pytest.fixture()
+@pytest.fixture
 def providers():
     from ess.dream.io.geant4 import providers as geant4_providers
 
@@ -67,7 +67,7 @@ def params_for_det(request):
     return {**params, NeXusDetectorName: request.param}
 
 
-@pytest.fixture()
+@pytest.fixture
 def workflow(params_for_det):
     wf = dream.DreamGeant4Workflow()
     for key, value in params_for_det.items():

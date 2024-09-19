@@ -99,6 +99,7 @@ class InstrumentView:
             self.slice_nodes = self.pre_process_nodes
             to_scatter = self.pre_process_nodes
 
+        kwargs.setdefault('cbar', True)
         self.fig = pp.scatter3d(
             to_scatter,
             pos="position",

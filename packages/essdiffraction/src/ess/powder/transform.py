@@ -3,6 +3,7 @@
 """Signal transformation algorithms for powder diffraction."""
 
 import scipp as sc
+
 from ess.reduce.uncertainty import UncertaintyBroadcastMode, broadcast_uncertainties
 
 

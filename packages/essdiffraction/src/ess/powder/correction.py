@@ -5,8 +5,9 @@
 from typing import Any
 
 import scipp as sc
-from ess.reduce.uncertainty import broadcast_uncertainties
 from scippneutron.conversion.graph import beamline, tof
+
+from ess.reduce.uncertainty import broadcast_uncertainties
 
 from ._util import event_or_outer_coord
 from .logging import get_logger

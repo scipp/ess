@@ -27,7 +27,6 @@
    grouping
    smoothing
    types
-   uncertainty
 ```
 
 ## ESSdream

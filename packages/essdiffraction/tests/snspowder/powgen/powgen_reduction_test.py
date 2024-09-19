@@ -1,13 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
-import ess.snspowder.powgen.data  # noqa: F401
 import pytest
 import sciline
 import scipp as sc
-from ess import powder
-from ess.snspowder import powgen
 
+import ess.snspowder.powgen.data  # noqa: F401
+from ess import powder
 from ess.powder.types import (
     CalibrationFilename,
     DspacingBins,
@@ -25,16 +24,17 @@ from ess.powder.types import (
     VanadiumRun,
     WavelengthMask,
 )
+from ess.snspowder import powgen
 
 
-@pytest.fixture()
+@pytest.fixture
 def providers():
     from ess import powder
 
     return [*powder.providers, *powgen.providers, *powgen.data.providers]
 
 
-@pytest.fixture()
+@pytest.fixture
 def params():
     return {
         NeXusDetectorName: "powgen_detector",

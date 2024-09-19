@@ -4,7 +4,6 @@
 import numpy as np
 import sciline
 import scipp as sc
-from ess.reduce.nexus.generic_workflow import GenericNeXusWorkflow
 
 from ess.powder.types import (
     CalibratedDetector,
@@ -18,6 +17,7 @@ from ess.powder.types import (
     NeXusSource,
     RunType,
 )
+from ess.reduce.nexus.generic_workflow import GenericNeXusWorkflow
 
 MANTLE_DETECTOR_ID = sc.index(7)
 HIGH_RES_DETECTOR_ID = sc.index(8)
