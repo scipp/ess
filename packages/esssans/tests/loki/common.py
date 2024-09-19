@@ -2,8 +2,8 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import sciline
 import scipp as sc
-from ess import loki
 
+from ess import loki
 from ess.sans.types import (
     BackgroundRun,
     CorrectForGravity,

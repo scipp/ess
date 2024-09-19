@@ -1,8 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
-from ess.reduce.uncertainty import UncertaintyBroadcastMode, broadcast_uncertainties
 from scipp.scipy.interpolate import interp1d
+
+from ess.reduce.uncertainty import UncertaintyBroadcastMode, broadcast_uncertainties
 
 from .common import mask_range
 from .logging import get_logger
