@@ -89,6 +89,9 @@ def calculate_white_beam_background(
 
         Background = mean(OpenBeam, 'time') - mean(DarkCurrent, 'time')
 
+        \\text{Pixel values less than } \\text{background_threshold}
+
+        \\text{ are replaced with } \\text{background_threshold}.
 
     Params
     ------
@@ -133,6 +136,10 @@ def cleanse_sample_images(
         CleansedSample_{i} = Sample_{i} - mean(DarkCurrent, dim='time')
 
         \\text{where } i \\text{ is an index of an image.}
+
+        \\text{Pixel values less than sample_threshold}
+
+        \\text{ are replaced with sample_threshold}.
 
     Params
     ------
