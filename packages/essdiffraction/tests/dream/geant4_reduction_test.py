@@ -94,8 +94,15 @@ def test_workflow_is_deterministic(workflow):
 
 def test_pipeline_can_compute_intermediate_results(workflow):
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    result = workflow.compute(NormalizedByProtonCharge[SampleRun])
-    assert set(result.dims) == {'segment', 'wire', 'counter', 'strip', 'module'}
+    results = workflow.compute((NormalizedByProtonCharge[SampleRun], NeXusDetectorName))
+    result = results[NormalizedByProtonCharge[SampleRun]]
+
+    detector_name = results[NeXusDetectorName]
+    expected_dims = {'segment', 'wire', 'counter', 'strip', 'module'}
+    if detector_name in ('endcap_backward', 'endcap_forward'):
+        expected_dims.add('sumo')
+
+    assert set(result.dims) == expected_dims
 
 
 def test_pipeline_group_by_two_theta(workflow):
