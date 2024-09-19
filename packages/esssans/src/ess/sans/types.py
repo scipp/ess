@@ -11,6 +11,7 @@ from typing import NewType, TypeVar
 
 import sciline
 import scipp as sc
+
 from ess.reduce.nexus import generic_types as reduce_gt
 from ess.reduce.nexus import types as reduce_t
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
