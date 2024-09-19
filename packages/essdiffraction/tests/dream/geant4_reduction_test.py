@@ -182,6 +182,7 @@ def _assert_contains_source_info(cif_content: str) -> None:
 def _assert_contains_author_info(cif_content: str) -> None:
     assert "audit_contact_author.name 'Jane Doe'" in cif_content
     assert 'audit_contact_author.email jane.doe@ess.eu' in cif_content
+    assert 'audit_contact_author.id_orcid 0000-0000-0000-0001' in cif_content
 
 
 def _assert_contains_beamline_info(cif_content: str) -> None:
