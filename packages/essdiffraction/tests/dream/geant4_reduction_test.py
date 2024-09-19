@@ -7,9 +7,9 @@ import pytest
 import sciline
 import scipp as sc
 import scipp.testing
-from ess import dream, powder
 
 import ess.dream.data  # noqa: F401
+from ess import dream, powder
 from ess.dream.io.cif import CIFAuthor, CIFAuthors
 from ess.powder.types import (
     AccumulatedProtonCharge,

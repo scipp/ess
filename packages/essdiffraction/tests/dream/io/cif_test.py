@@ -12,7 +12,7 @@ from ess.dream.io.cif import CIFAuthors
 from ess.powder.types import IofDspacing
 
 
-@pytest.fixture()
+@pytest.fixture
 def iofd() -> IofDspacing:
     return IofDspacing(
         sc.DataArray(

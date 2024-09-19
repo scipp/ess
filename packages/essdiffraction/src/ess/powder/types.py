@@ -12,11 +12,11 @@ from typing import Any, NewType, TypeVar
 
 import sciline
 import scipp as sc
+from scippneutron.io import cif
 
 from ess.reduce.nexus import generic_types as reduce_gt
 from ess.reduce.nexus import types as reduce_t
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
-from scippneutron.io import cif
 
 # 1 TypeVars used to parametrize the generic parts of the workflow
 
