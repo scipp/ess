@@ -148,9 +148,10 @@ def separate_image_key_logs(*, dg: HistogramModeDetector) -> ImageKeyLogs:
 def load_nexus_rotation_logs(
     file_path: FilePath,
     motion_sensor_name: RotationMotionSensorName,
+    locking: FileLock = DEFAULT_FILE_LOCK,
 ) -> RotationLogs:
     log_path = f"entry/instrument/{motion_sensor_name}/rotation_stage_readback"
-    with snx.File(file_path, mode="r") as f:
+    with snx.File(file_path, mode="r", locking=locking) as f:
         return RotationLogs(f[log_path][()]['value'])
 
 
