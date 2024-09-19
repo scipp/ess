@@ -102,8 +102,8 @@ def calculate_white_beam_background(
 
         \\text{ are replaced with } \\text{background_threshold}.
 
-    Params
-    ------
+    Parameters
+    ----------
     open_beam:
         Open beam image stack.
 
