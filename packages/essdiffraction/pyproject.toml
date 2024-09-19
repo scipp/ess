@@ -37,8 +37,8 @@ dependencies = [
   "plopp",
   "pythreejs",
   "sciline>=24.06.0",
-  "scipp>=24.09.1",  # Fixed new hist/bin API
-  "scippneutron>=24.5.0",
+  "scipp>=24.09.1",
+  "scippneutron>=24.9.0",
   "scippnexus>=23.12.0",
 ]
 

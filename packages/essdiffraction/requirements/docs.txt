@@ -160,7 +160,7 @@ sphinx==8.0.2
     #   sphinx-copybutton
     #   sphinx-design
     #   sphinxcontrib-bibtex
-sphinx-autodoc-typehints==2.4.3
+sphinx-autodoc-typehints==2.4.4
     # via -r docs.in
 sphinx-copybutton==0.5.2
     # via -r docs.in
