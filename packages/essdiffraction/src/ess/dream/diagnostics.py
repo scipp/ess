@@ -12,7 +12,7 @@ import scipp as sc
 from plopp.core.typing import FigureLike
 
 # This leads to y-axis: segment, x-axis: module
-_STARTING_DIMS = ('segment', 'wire', 'strip', 'module', 'counter', 'sector')
+_STARTING_DIMS = ('segment', 'wire', 'strip', 'module', 'counter', 'sumo', 'sector')
 
 
 class FlatVoxelViewer(ipw.VBox):
