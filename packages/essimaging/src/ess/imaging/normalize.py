@@ -180,17 +180,26 @@ def average_background_pixel_counts(
 
 
 def average_sample_pixel_counts(
-    sample_images: CleansedSampleImages, dark_current: DarkCurrentImage
+    cleansed_sample_images: CleansedSampleImages,
 ) -> AverageSamplePixelCounts:
     """Calculate the average sample pixel counts.
 
-    Note that we calculate the mean of sample images and dark current images
+    Notes
+    -----
+    For performance reason, we tried calculating
+    the mean of sample images and dark current images
     first and subtract them afterwards,
     instead of using the subtracted image stack directly.
-    This is for performance reasons, as the integer operation is faster than
+    It was to utilize that the integer operation is faster than
     the floating point operation.
 
-    Also, we don't calculate ``mean(sample_images)`` at once
+    However, we are ceiling negative values to zero
+    after cleansing the sample images with dark current images.
+
+    Therefore we need to calculate the mean of the cleansed sample images
+    to avoid negative values in the average calculation.
+
+    We don't calculate ``mean(cleansed_sample_images)`` at once
     since it is a large array and it may cause memory issues.
 
     There was an example of 361 images of 2048x2048 pixels with 32-bit integer data
@@ -201,9 +210,7 @@ def average_sample_pixel_counts(
         "Calculating average sample pixel counts assuming constant exposure time.",
         stacklevel=0,
     )
-    return AverageSamplePixelCounts(
-        _mean_all_dims(sample_images.data) - dark_current.data.mean()
-    )
+    return AverageSamplePixelCounts(_mean_all_dims(cleansed_sample_images.data))
 
 
 def calculate_scale_factor(
