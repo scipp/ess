@@ -206,7 +206,7 @@ def average_sample_pixel_counts(
     )
 
 
-def calculate_d_factor(
+def calculate_scale_factor(
     average_bg: AverageBackgroundPixelCounts, average_sample: AverageSamplePixelCounts
 ) -> ScaleFactor:
     """Calculate the scale factor from average background and sample pixel counts.
@@ -230,7 +230,7 @@ def normalize_sample_images(
 
     .. math::
 
-        NormalizedSample_{i} = CleansedSample_{i} / Background * DFactor
+        NormalizedSample_{i} = CleansedSample_{i} / Background * ScaleFactor
 
 
     .. math::
