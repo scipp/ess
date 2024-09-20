@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
+
 from scipp import array, scalar, sqrt, vector
 from scipp.spatial import rotations_from_rotvecs
 
