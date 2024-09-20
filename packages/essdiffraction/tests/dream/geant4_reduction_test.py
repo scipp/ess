@@ -10,9 +10,8 @@ import scipp.testing
 import scippnexus as snx
 from scippneutron.io.cif import Author
 
-from ess import dream, powder
-
 import ess.dream.data  # noqa: F401
+from ess import dream, powder
 from ess.powder.types import (
     AccumulatedProtonCharge,
     BackgroundRun,
@@ -134,7 +133,7 @@ def test_workflow_is_deterministic(workflow):
 
 def test_pipeline_can_compute_intermediate_results(workflow):
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    results = workflow.compute((NormalizedByProtonCharge[SampleRun], NeXusDetectorName))
+    results = workflow.compute((NormalizedRunData[SampleRun], NeXusDetectorName))
     result = results[NormalizedRunData[SampleRun]]
 
     detector_name = results[NeXusDetectorName]

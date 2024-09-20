@@ -7,7 +7,6 @@ import enum
 import numpy as np
 import sciline
 import scipp as sc
-from scippneutron.conversion.graph import beamline, tof
 
 from ess.reduce.uncertainty import broadcast_uncertainties
 
