@@ -4,15 +4,6 @@
 from scipp import DataArray, Variable
 
 
-def norm(vector: Variable) -> Variable:
-    from scipp import DType, dot, sqrt
-
-    if vector.dtype != DType.vector3:
-        raise ValueError("Vector operations require scipp.DType.vector3 elements")
-
-    return sqrt(dot(vector, vector))
-
-
 def in_same_unit(b: Variable, to: Variable | None = None) -> Variable:
     def unit(x):
         if x.bins is not None:

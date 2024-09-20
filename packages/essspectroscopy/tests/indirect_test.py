@@ -1,20 +1,21 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 
+import scipp as sc
+
 from scipp import array, scalar, sqrt, vector
 from scipp.spatial import rotations_from_rotvecs
 
 from ess.spectroscopy.indirect import kf as secondary
-from ess.spectroscopy.utils import norm
 
 
 def vectors_close(a, b, tol=None):
-    from scipp import dot, scalar, sqrt
+    from scipp import scalar
 
     if tol is None:
         tol = scalar(1e-8, unit=a.unit)
     difference = a - b
-    return sqrt(dot(difference, difference)) < tol
+    return sc.norm(difference) < tol
 
 
 def all_vectors_close(a, b, tol=None):
@@ -106,7 +107,7 @@ def test_back_scattering_sample_analyzer_vector():
         sample_position, analyzer_position, analyzer_orientation, detector_positions
     )
     # as the x displacement increases, the y displacement should decrease
-    frac = wires / (1.0 + sqrt(1.0 + (norm(tubes) / scalar(1.0, unit='m')) ** 2))
+    frac = wires / (1.0 + sqrt(1.0 + (sc.norm(tubes) / scalar(1.0, unit='m')) ** 2))
     assert all_vectors_close(calculated, sample_analyzer_vec + frac)
 
 
@@ -128,7 +129,7 @@ def test_sample_analyzer_vector():
     z = analyzer_transform * vector([0.0, 0.0, 1.0], unit='1')
     # sample-analyzer-vector must be along the local z axis
     sample_analyzer_vec = scalar(0.5 + random(), unit='m') * z  # noqa: S311
-    sample_analyzer_vec /= norm(sample_analyzer_vec).value
+    sample_analyzer_vec /= sc.norm(sample_analyzer_vec).value
     analyzer_position = sample_analyzer_vec + sample_position
 
     # Avoid sin(theta) values near 0 or 1
@@ -173,5 +174,5 @@ def test_sample_analyzer_vector():
         sample_position, analyzer_position, analyzer_orientation, detector_positions
     )
     # as the x displacement increases, the y displacement should decrease
-    frac = wires / (1.0 + sqrt(1.0 + (norm(tubes) / scalar(1.0, unit='m')) ** 2))
+    frac = wires / (1.0 + sqrt(1.0 + (sc.norm(tubes) / scalar(1.0, unit='m')) ** 2))
     assert all_vectors_close(calculated, sample_analyzer_vec + frac)
