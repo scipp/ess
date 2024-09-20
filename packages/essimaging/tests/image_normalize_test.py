@@ -7,7 +7,8 @@ from scipp.testing.assertions import assert_allclose, assert_identical
 from ess.imaging.io import (
     DarkCurrentImageStacks,
     OpenBeamImageStacks,
-    SampleImageStacks,
+    RawSampleImageStacks,
+    SampleImageStacksWithLogs,
 )
 from ess.imaging.normalize import (
     BackgroundImage,
@@ -15,6 +16,7 @@ from ess.imaging.normalize import (
     NormalizedSampleImages,
     OpenBeamImage,
     ScaleFactor,
+    apply_threshold_to_sample_images,
     average_dark_current_images,
     average_open_beam_images,
     cleanse_sample_images,
@@ -56,8 +58,8 @@ def dark_current_images() -> DarkCurrentImageStacks:
 
 
 @pytest.fixture
-def sample_images() -> SampleImageStacks:
-    return SampleImageStacks(
+def sample_images() -> RawSampleImageStacks:
+    return RawSampleImageStacks(
         sc.DataArray(
             data=sc.array(
                 dims=["time", "dim_1", "dim_2"],
@@ -130,34 +132,33 @@ def test_average_dark_current_images(
         )
 
 
-def test_calculate_white_beam_background(
+def test_cleanse_open_beam_image(
     open_beam_image: OpenBeamImage, dark_current_image: DarkCurrentImage
 ) -> None:
-    from ess.imaging.normalize import calculate_white_beam_background
+    from ess.imaging.normalize import cleanse_open_beam_image
 
     expected_background_image = sc.DataArray(
         data=sc.array(
             dims=["dim_1", "dim_2"],
-            values=[[3.0, 3.0], [3.0, 1.0]],
-            # last pixel value will be replaced with 1.0
+            values=[[3.0, 3.0], [3.0, -1.0]],
             unit="counts",
         ),
         coords={},
     )
 
     assert_identical(
-        calculate_white_beam_background(open_beam_image, dark_current_image),
+        cleanse_open_beam_image(open_beam_image, dark_current_image),
         expected_background_image,
     )
 
 
 def test_cleanse_sample_images(
-    sample_images: SampleImageStacks, dark_current_image: DarkCurrentImage
+    sample_images: SampleImageStacksWithLogs, dark_current_image: DarkCurrentImage
 ) -> None:
     expected_cleansed_sample_image = sc.DataArray(
         data=sc.array(
             dims=["time", "dim_1", "dim_2"],
-            values=[[[1.0, 1.0], [1.0, 0.0]], [[3.0, 3.0], [3.0, 0.0]]],
+            values=[[[1.0, 1.0], [1.0, -1.0]], [[3.0, 3.0], [3.0, -1.0]]],
             unit="counts",
         ),
         coords={
@@ -171,20 +172,23 @@ def test_cleanse_sample_images(
 
 
 def test_normalize_negative_scale_factor_raises(
-    sample_images: SampleImageStacks,
+    sample_images: SampleImageStacksWithLogs,
     dark_current_image: DarkCurrentImage,
 ) -> None:
-    cleansed_sample_image = cleanse_sample_images(sample_images, dark_current_image)
+    cleansed_sample_image = apply_threshold_to_sample_images(
+        cleanse_sample_images(sample_images, dark_current_image)
+    )
+
     with pytest.raises(ValueError, match="Scale factor must be positive,"):
         normalize_sample_images(
-            cleansed_sample_image,
-            ScaleFactor(sc.scalar(-1.0, unit="dimensionless")),
-            BackgroundImage(dark_current_image),
+            samples=cleansed_sample_image,
+            background=BackgroundImage(dark_current_image),
+            factor=ScaleFactor(sc.scalar(-1.0, unit="dimensionless")),
         )
 
 
 def test_normalize_workflow(
-    sample_images: SampleImageStacks,
+    sample_images: RawSampleImageStacks,
     open_beam_images: OpenBeamImageStacks,
     dark_current_images: DarkCurrentImageStacks,
 ) -> None:
@@ -192,8 +196,8 @@ def test_normalize_workflow(
         data=sc.array(
             dims=["time", "dim_1", "dim_2"],
             values=[
-                [[1 / (3 * 5 / 3), 1 / (3 * 5 / 3)], [1 / (3 * 5 / 3), 0.0]],
-                [[3 / (3 * 5 / 3), 3 / (3 * 5 / 3)], [3 / (3 * 5 / 3), 0.0]],
+                [[1 / 3 * (5 / 3), 1 / 3 * (5 / 3)], [1 / 3 * (5 / 3), 0.0]],
+                [[3 / 3 * (5 / 3), 3 / 3 * (5 / 3)], [3 / 3 * (5 / 3), 0.0]],
             ],
             unit="counts",
         ),
@@ -203,7 +207,7 @@ def test_normalize_workflow(
     )
 
     wf = YmirWorkflow()
-    wf[SampleImageStacks] = sample_images
+    wf[SampleImageStacksWithLogs] = sample_images
     wf[OpenBeamImageStacks] = open_beam_images
     wf[DarkCurrentImageStacks] = dark_current_images
     mean_ob_warning_msg = (
@@ -231,4 +235,5 @@ def test_normalize_workflow(
         normalized = wf.compute(NormalizedSampleImages)
         assert isinstance(normalized, sc.DataArray)
         assert normalized.sizes['time'] == 2
+        assert normalized.unit == "dimensionless"
         assert_allclose(normalized, expected_normalized_sample_images)

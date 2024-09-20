@@ -10,7 +10,7 @@ from .io import (
     TIME_COORD_NAME,
     DarkCurrentImageStacks,
     OpenBeamImageStacks,
-    SampleImageStacks,
+    SampleImageStacksWithLogs,
 )
 
 AverageBackgroundPixelCounts = NewType("AverageBackgroundPixelCounts", sc.Variable)
@@ -26,10 +26,14 @@ DarkCurrentImage = NewType("DarkCurrentImage", sc.DataArray)
 """Dark current image ~math:`average(dark_current)`."""
 AveragedNonSampleImages = NewType("AveragedNonSampleImages", sc.DataArray)
 """Averaged open beam and dark current images."""
-BackgroundImage = NewType("BackgroundImage", sc.DataArray)
-"""Background image stack. ~math:`background = open_beam - dark_current`."""
+CleansedOpenBeamImage = NewType("CleansedOpenBeamImage", sc.DataArray)
+"""Oopen beam - dark current."""
 CleansedSampleImages = NewType("CleansedSampleImages", sc.DataArray)
 """Sample image stack - dark current."""
+SampleImageStacks = NewType("SampleImageStacks", sc.DataArray)
+"""Sample image stack ready to be used for normalization."""
+BackgroundImage = NewType("BackgroundImage", sc.DataArray)
+"""Background image ready to be used for normalization."""
 NormalizedSampleImages = NewType("NormalizedSampleImages", sc.DataArray)
 """Normalized sample image stack.
 
@@ -84,11 +88,9 @@ BackgroundPixelThreshold = NewType("BackgroundPixelThreshold", sc.Variable)
 DEFAULT_BACKGROUND_THRESHOLD = BackgroundPixelThreshold(sc.scalar(1.0, unit="counts"))
 
 
-def calculate_white_beam_background(
-    open_beam: OpenBeamImage,
-    dark_current: DarkCurrentImage,
-    background_threshold: BackgroundPixelThreshold = DEFAULT_BACKGROUND_THRESHOLD,
-) -> BackgroundImage:
+def cleanse_open_beam_image(
+    open_beam: OpenBeamImage, dark_current: DarkCurrentImage
+) -> CleansedOpenBeamImage:
     """Calculate the background image stack.
 
     We average the open beam and dark current image stack
@@ -98,10 +100,6 @@ def calculate_white_beam_background(
 
         Background = mean(OpenBeam, 'time') - mean(DarkCurrent, 'time')
 
-        \\text{Pixel values less than } \\text{background_threshold}
-
-        \\text{ are replaced with } \\text{background_threshold}.
-
     Parameters
     ----------
     open_beam:
@@ -110,19 +108,8 @@ def calculate_white_beam_background(
     dark_current:
         Dark current image.
 
-    background_threshold:
-        Threshold for the background pixel values.
-        Any pixel values less than ``background_threshold``
-        are replaced with ``background_threshold``.
-        Default is 1.0[counts].
-
-
     """
-    diff = open_beam - dark_current
-    diff.data = sc.where(
-        diff.data < background_threshold, background_threshold, diff.data
-    )
-    return BackgroundImage(diff)
+    return CleansedOpenBeamImage(open_beam - dark_current)
 
 
 SamplePixelThreshold = NewType("SamplePixelThreshold", sc.Variable)
@@ -132,9 +119,7 @@ DEFAULT_SAMPLE_THRESHOLD = SamplePixelThreshold(sc.scalar(0.0, unit="counts"))
 
 
 def cleanse_sample_images(
-    sample_images: SampleImageStacks,
-    dark_current: DarkCurrentImage,
-    sample_threshold: SamplePixelThreshold = DEFAULT_SAMPLE_THRESHOLD,
+    sample_images: SampleImageStacksWithLogs, dark_current: DarkCurrentImage
 ) -> CleansedSampleImages:
     """Cleanse the sample image stack.
 
@@ -146,26 +131,15 @@ def cleanse_sample_images(
 
         \\text{where } i \\text{ is an index of an image.}
 
-        \\text{Pixel values less than sample_threshold}
-
-        \\text{ are replaced with sample_threshold}.
-
     Parameters
     ------
     sample_images:
         Sample image stack.
     dark_current:
         Dark current image.
-    sample_threshold:
-        Threshold for the sample pixel values.
-        Any pixel values less than ``sample_threshold``
-        are replaced with ``sample_threshold``.
-        Default is 0.0[counts].
 
     """
-    diff = sample_images - dark_current
-    diff.data = sc.where(diff.data < sample_threshold, sample_threshold, diff.data)
-    return CleansedSampleImages(diff)
+    return CleansedSampleImages(sample_images - dark_current)
 
 
 def average_background_pixel_counts(
@@ -180,7 +154,7 @@ def average_background_pixel_counts(
 
 
 def average_sample_pixel_counts(
-    cleansed_sample_images: CleansedSampleImages,
+    sample_images: SampleImageStacks,
 ) -> AverageSamplePixelCounts:
     """Calculate the average sample pixel counts.
 
@@ -210,7 +184,7 @@ def average_sample_pixel_counts(
         "Calculating average sample pixel counts assuming constant exposure time.",
         stacklevel=0,
     )
-    return AverageSamplePixelCounts(_mean_all_dims(cleansed_sample_images.data))
+    return AverageSamplePixelCounts(_mean_all_dims(sample_images.data))
 
 
 def calculate_scale_factor(
@@ -226,10 +200,57 @@ def calculate_scale_factor(
     return ScaleFactor(average_bg / average_sample)
 
 
+def apply_threshold_to_sample_images(
+    samples: CleansedSampleImages,
+    sample_threshold: SamplePixelThreshold = DEFAULT_SAMPLE_THRESHOLD,
+) -> SampleImageStacks:
+    """Apply the threshold to the sample image stack.
+
+    Parameters
+    ----------
+    sample_threshold:
+        Threshold for the sample pixel values.
+        Any pixel values less than ``sample_threshold``
+        are replaced with ``sample_threshold``.
+        Default is 0.0[counts].
+
+    """
+    samples = CleansedSampleImages(samples.copy(deep=False))
+    samples.data = sc.where(
+        samples.data < sample_threshold, sample_threshold, samples.data
+    )
+    return SampleImageStacks(samples)
+
+
+def apply_threshold_to_background_image(
+    background: CleansedOpenBeamImage,
+    background_threshold: BackgroundPixelThreshold = DEFAULT_BACKGROUND_THRESHOLD,
+) -> BackgroundImage:
+    """Apply the threshold to the background image.
+
+    Parameters
+    ----------
+    background_threshold:
+        Threshold for the background pixel values.
+        Any pixel values less than ``background_threshold``
+        are replaced with ``background_threshold``.
+        Default is 1.0[counts].
+
+    """
+    background = CleansedOpenBeamImage(background.copy(deep=False))
+    background.data = sc.where(
+        background.data < background_threshold, background_threshold, background.data
+    )
+    return BackgroundImage(background)
+
+
 def normalize_sample_images(
-    samples: CleansedSampleImages, factor: ScaleFactor, background: BackgroundImage
+    *, samples: SampleImageStacks, background: BackgroundImage, factor: ScaleFactor
 ) -> NormalizedSampleImages:
     """Normalize the sample image stack.
+
+    Parameters
+    ----------
 
 
     Default Normalization Formula
@@ -237,7 +258,7 @@ def normalize_sample_images(
 
     .. math::
 
-        NormalizedSample_{i} = CleansedSample_{i} / Background * ScaleFactor
+        NormalizedSample_{i} = SampleImageStacks_{i} / BackgroundImage * ScaleFactor
 
 
     .. math::
@@ -247,9 +268,22 @@ def normalize_sample_images(
 
     .. math::
 
-        CleansedSample_{i} = Sample_{i} - mean(DarkCurrent, dim=\\text{\\'time\\'})
+        SampleImageStacks_{i} = Sample_{i} - mean(DarkCurrent, dim=\\text{\\'time\\'})
 
         \\text{where } i \\text{ is an index of an image.}
+
+        \\text{Pixel values less than sample_threshold}
+
+        \\text{ are replaced with sample_threshold}.
+
+    .. math::
+
+        BackgroundImage = mean(OpenBeam, dim=\\text{\\'time\\'})
+        - mean(DarkCurrent, dim=\\text{\\'time\\'})
+
+        \\text{Pixel values less than } \\text{background_threshold}
+
+        \\text{ are replaced with } \\text{background_threshold}.
 
 
     Raises
@@ -266,4 +300,5 @@ def normalize_sample_images(
     warnings.warn(
         "Normalizing sample images assuming constant exposure time.", stacklevel=0
     )
-    return NormalizedSampleImages(samples / (background * factor))
+    # For performance reason, background / factor is calculated first.
+    return NormalizedSampleImages(samples / (background / factor))

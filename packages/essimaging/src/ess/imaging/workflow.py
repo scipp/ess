@@ -24,12 +24,14 @@ from .normalize import (
     DEFAULT_SAMPLE_THRESHOLD,
     BackgroundPixelThreshold,
     SamplePixelThreshold,
+    apply_threshold_to_background_image,
+    apply_threshold_to_sample_images,
     average_background_pixel_counts,
     average_dark_current_images,
     average_open_beam_images,
     average_sample_pixel_counts,
     calculate_scale_factor,
-    calculate_white_beam_background,
+    cleanse_open_beam_image,
     cleanse_sample_images,
     normalize_sample_images,
 )
@@ -52,12 +54,14 @@ _IO_PROVIDERS = (
     separate_image_key_logs,
 )
 _NORMALIZATION_PROVIDERS = (
+    apply_threshold_to_background_image,
+    apply_threshold_to_sample_images,
     average_background_pixel_counts,
     average_dark_current_images,
     average_open_beam_images,
     average_sample_pixel_counts,
     calculate_scale_factor,
-    calculate_white_beam_background,
+    cleanse_open_beam_image,
     cleanse_sample_images,
     normalize_sample_images,
 )
