@@ -254,9 +254,9 @@ def normalize_sample_images(
         the operation might fail and return negative values.
 
     """
+    if factor < 0:
+        raise ValueError(f"Scale factor must be positive, but got {factor}.")
     warnings.warn(
         "Normalizing sample images assuming constant exposure time.", stacklevel=0
     )
-    if factor < 0:
-        raise ValueError(f"Scale factor must be positive, but got {factor}.")
     return NormalizedSampleImages(samples / (background * factor))
