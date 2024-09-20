@@ -1,3 +1,5 @@
+import scipp as sc
+
 from ess.spectroscopy.types import (
     AnalyzerDetectorVector,
     AnalyzerOrientation,
@@ -53,8 +55,6 @@ def sample_analyzer_vector(
     """
     from scipp import dot, vector
 
-    from ess.spectroscopy.utils import norm
-
     # Scipp does not distinguish between coordinates and directions, so we need to do
     # some extra legwork to ensure we can apply the orientation transformation
     # _and_ obtain a dimensionless direction vector
@@ -63,7 +63,7 @@ def sample_analyzer_vector(
         [0, 1, 0], unit=analyzer_orientation.unit
     )  # and y perpendicular to the scattering plane
     yhat = analyzer_orientation * y - analyzer_orientation * o
-    yhat /= norm(yhat)
+    yhat /= sc.norm(yhat)
 
     sample_analyzer_center_vector = analyzer_position - sample_position
 
@@ -77,9 +77,9 @@ def sample_analyzer_vector(
 
     # TODO Consider requiring that dot(analyzer_position-sample_position, yhat) is zero?
 
-    sample_analyzer_center_distance = norm(sample_analyzer_center_vector)
+    sample_analyzer_center_distance = sc.norm(sample_analyzer_center_vector)
 
-    analyzer_detector_center_distance = norm(analyzer_detector_center_vector)
+    analyzer_detector_center_distance = sc.norm(analyzer_detector_center_vector)
 
     # similar-triangles give the out-of-plane analyzer reflection point distance
     sa_out_of_plane = (
@@ -125,16 +125,12 @@ def analyzer_detector_vector(
 
 def kf_hat(sample_analyzer_vec: SampleAnalyzerVector) -> SampleAnalyzerDirection:
     """Calculate the direction of the neutrons for each detector-element"""
-    from ess.spectroscopy.utils import norm
-
-    return sample_analyzer_vec / norm(sample_analyzer_vec)
+    return sample_analyzer_vec / sc.norm(sample_analyzer_vec)
 
 
 def reciprocal_lattice_spacing(tau_vector: ReciprocalLatticeVectorAbsolute):
     """Calculate the distance between lattice planes in, e.g., the analyzer"""
-    from ess.spectroscopy.utils import norm
-
-    return norm(tau_vector)
+    return sc.norm(tau_vector)
 
 
 def final_wavenumber(
@@ -166,12 +162,10 @@ def final_wavenumber(
     """
     from scipp import sqrt
 
-    from ess.spectroscopy.utils import norm
-
     # law of Cosines gives the scattering angle based on distances:
-    l_sa = norm(sample_analyzer_vec)
-    l_ad = norm(analyzer_detector_vec)
-    l_diff = norm(sample_analyzer_vec + analyzer_detector_vec)
+    l_sa = sc.norm(sample_analyzer_vec)
+    l_ad = sc.norm(analyzer_detector_vec)
+    l_diff = sc.norm(sample_analyzer_vec + analyzer_detector_vec)
     # 2 theta is measured from the direction S-A, so the internal angle is
     # (pi - 2 theta) and the normal law of Cosines is modified accordingly to be
     # -cos(2 theta) instead of cos(pi - 2 theta)
@@ -200,9 +194,7 @@ def secondary_flight_path_length(
     analyzer_detector_vec: AnalyzerDetectorVector,
 ) -> SampleDetectorPathLength:
     """Returns the path-length-distance between the sample and each detector element"""
-    from ess.spectroscopy.utils import norm
-
-    return norm(sample_analyzer_vec) + norm(analyzer_detector_vec)
+    return sc.norm(sample_analyzer_vec) + sc.norm(analyzer_detector_vec)
 
 
 def secondary_flight_time(
