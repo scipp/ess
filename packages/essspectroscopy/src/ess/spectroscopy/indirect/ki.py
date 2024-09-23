@@ -7,6 +7,7 @@ indirect geometry time-of-flight spectrometer
 
 from __future__ import annotations
 
+import scipp as sc
 from scippnexus import Group
 
 from ess.spectroscopy.types import (
@@ -138,7 +139,7 @@ def guess_focus_component_names(file: NeXusFileName) -> FocusComponentNames:
     distance = 0 * allowance
     for name in names[1:]:
         x = choppers[name]['position']
-        distance += norm(x - last)
+        distance += sc.norm(x - last)
         last = x
         if distance <= allowance:
             focus_names.append(FocusComponentName(name))
@@ -200,7 +201,7 @@ def focus_distance(
         for name in names:
             pos += compute_positions(data['entry/instrument'][name][...])['position']
     pos /= len(names)
-    return norm(pos - origin)
+    return sc.norm(pos - origin)
 
 
 def focus_time(
