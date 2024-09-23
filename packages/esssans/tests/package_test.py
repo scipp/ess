@@ -2,6 +2,12 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 from ess import isissans, loki, sans
 
+"""Tests of package integrity.
+
+Note that additional imports need to be added for repositories that
+contain multiple packages.
+"""
+
 
 def test_has_version():
     assert hasattr(isissans, '__version__')
