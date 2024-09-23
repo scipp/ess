@@ -1,5 +1,14 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
+# ruff: noqa: E402, F401
+
+"""Components for BIFROST."""
+
 import importlib.metadata
 
+from . import data
+from .io import nexus
+from .workflow import BifrostSimulationWorkflow
 from .detector import providers
 
 try:
@@ -9,5 +18,4 @@ except importlib.metadata.PackageNotFoundError:
 
 del importlib
 
-
-__all__ = ['providers']
+__all__ = ['BifrostSimulationWorkflow', 'data', 'nexus', 'providers']
