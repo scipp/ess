@@ -106,7 +106,10 @@ def normalize_by_monitor_integrated(
     )
     lo = det_coord.min()
     hi = det_coord.max()
-    hi.value = np.nextafter(hi.value, np.inf)
+    # hi is shifted towards MINUS infinity because label-based indexing with bin-edges
+    # in inclusive for the upper edge. But we don't want the literal upper edge
+    # of the detector to be included.
+    hi.value = np.nextafter(hi.value, -np.inf)
     monitor = monitor[dim, lo:hi]
 
     coord = monitor.coords[dim]
