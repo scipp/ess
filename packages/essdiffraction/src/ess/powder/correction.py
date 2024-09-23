@@ -300,15 +300,18 @@ class RunNormalization(enum.Enum):
     monitor_integrated = enum.auto()
     proton_charge = enum.auto()
 
-    def insert(self, workflow: sciline.Pipeline) -> None:
-        """Insert providers for this normalization into a workflow."""
-        match self:
-            case RunNormalization.monitor_histogram:
-                workflow.insert(normalize_by_monitor_histogram)
-            case RunNormalization.monitor_integrated:
-                workflow.insert(normalize_by_monitor_integrated)
-            case RunNormalization.proton_charge:
-                workflow.insert(normalize_by_proton_charge)
+
+def insert_run_normalization(
+    workflow: sciline.Pipeline, run_norm: RunNormalization
+) -> None:
+    """Insert providers for a specific normalization into a workflow."""
+    match run_norm:
+        case RunNormalization.monitor_histogram:
+            workflow.insert(normalize_by_monitor_histogram)
+        case RunNormalization.monitor_integrated:
+            workflow.insert(normalize_by_monitor_integrated)
+        case RunNormalization.proton_charge:
+            workflow.insert(normalize_by_proton_charge)
 
 
 providers = (

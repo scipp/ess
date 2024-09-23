@@ -10,7 +10,10 @@ import scipp as sc
 import scippnexus as snx
 
 from ess.powder import providers as powder_providers
-from ess.powder.correction import RunNormalization
+from ess.powder.correction import (
+    RunNormalization,
+    insert_run_normalization,
+)
 from ess.powder.types import (
     AccumulatedProtonCharge,
     Position,
@@ -47,7 +50,7 @@ def DreamGeant4Workflow(*, run_norm: RunNormalization) -> sciline.Pipeline:
     wf = LoadGeant4Workflow()
     for provider in itertools.chain(powder_providers, _dream_providers):
         wf.insert(provider)
-    run_norm.insert(wf)
+    insert_run_normalization(wf, run_norm)
     for key, value in default_parameters().items():
         wf[key] = value
     return wf
