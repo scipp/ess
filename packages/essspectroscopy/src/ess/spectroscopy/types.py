@@ -6,6 +6,9 @@ from typing import NewType
 from choppera.primary import PrimarySpectrometer
 from scipp import DataArray, Variable
 
+from ess.reduce.nexus import generic_types as reduce_gt
+from ess.reduce.nexus import types as reduce_t
+
 
 def make_scipp_named_typer(scipp_type):
     def typer(named: str) -> type[scipp_type]:
@@ -17,11 +20,27 @@ def make_scipp_named_typer(scipp_type):
 variable_type = make_scipp_named_typer(Variable)
 data_array_type = make_scipp_named_typer(DataArray)
 
+CalibratedDetector = reduce_gt.CalibratedDetector
+DetectorPositionOffset = reduce_gt.DetectorPositionOffset
+DetectorData = reduce_gt.DetectorData
+GravityVector = reduce_t.GravityVector
+Filename = reduce_gt.Filename
+MonitorData = reduce_gt.MonitorData
+NeXusComponentLocationSpec = reduce_gt.NeXusComponentLocationSpec
+NeXusDetector = reduce_gt.NeXusDetector
+NeXusDetectorName = reduce_t.NeXusDetectorName
+NeXusMonitor = reduce_gt.NeXusMonitor
+NeXusMonitorName = reduce_gt.NeXusMonitorName
+NeXusSource = reduce_gt.NeXusSource
+RunType = reduce_gt.RunType
+SamplePosition = reduce_gt.SamplePosition
+SampleRun = reduce_gt.SampleRun
+SourcePosition = reduce_gt.SourcePosition
 
-NeXusFileName = NewType('NeXusFileName', str)
+# See https://github.com/scipp/essreduce/issues/105 about monitor names
+Monitor3 = reduce_gt.Monitor3
+MonitorType = reduce_gt.MonitorType
 
-SourcePosition = variable_type('SourcePosition')
-SamplePosition = variable_type('SamplePosition')
 AnalyzerPosition = variable_type('AnalyzerPosition')
 DetectorPosition = variable_type('DetectorPosition')
 AnalyzerOrientation = variable_type('AnalyzerOrientation')
@@ -53,8 +72,8 @@ DetectorFrameTime = variable_type('DetectorFrameTime')
 DetectorTime = variable_type('DetectorTime')
 SourceTime = variable_type('SourceTime')
 
-SourceName = NewType('SourceName', str)
 SampleName = NewType('SampleName', str)
+SourceName = NewType('SourceName', str)
 SourceFrequency = variable_type('SourceFrequency')
 SourceDuration = variable_type('SourceDuration')
 SourceDelay = variable_type('SourceDelay')

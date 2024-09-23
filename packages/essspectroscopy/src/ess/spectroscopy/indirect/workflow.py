@@ -6,7 +6,7 @@ from __future__ import annotations
 from loguru import logger
 from scipp import Variable
 
-from ..types import NeXusFileName, NormWavelengthEvents, NXspeFileName
+from ..types import Filename, NeXusFileName, NormWavelengthEvents, NXspeFileName
 
 PIXEL_NAME = 'detector_number'
 
@@ -308,8 +308,8 @@ def get_unwrapped_events(
     from sciline import Pipeline
 
     from ..types import (
+        Filename,
         FocusComponentNames,
-        NeXusFileName,
         PrimarySpectrometerObject,
         SampleFrameTime,
         SampleName,
@@ -323,7 +323,7 @@ def get_unwrapped_events(
     from .ki import providers as ki_providers
 
     params = {
-        NeXusFileName: filename,
+        Filename: filename,
         SampleName: sample_name,
         SourceName: source_name,
         SourceDelay: ess_source_delay(),
@@ -660,7 +660,7 @@ def split(
     return vals
 
 
-def load_everything(filename: NeXusFileName, named_components: dict[str, str]):
+def load_everything(filename: Filename, named_components: dict[str, str]):
     """Load all needed information from the named NeXus HDF5 file
 
     Parameters
@@ -767,7 +767,7 @@ def one_setting(
 
 
 def load_precompute(
-    filename: NeXusFileName,
+    filename: Filename,
     named_components: dict[str, str],
     is_simulated: bool = False,
 ):
@@ -882,7 +882,7 @@ def component_names(
 
 
 def bifrost(
-    filename: NeXusFileName,
+    filename: Filename,
     source_component: str | None = None,
     sample_component: str | None = None,
     focus_components: list[str] | None = None,
@@ -951,7 +951,7 @@ def bifrost(
 
 
 def bifrost_single(
-    filename: NeXusFileName,
+    filename: Filename,
     source_component: str | None = None,
     sample_component: str | None = None,
     focus_components: list[str] | None = None,
