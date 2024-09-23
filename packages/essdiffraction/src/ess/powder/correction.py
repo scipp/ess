@@ -50,6 +50,9 @@ def normalize_by_monitor_histogram(
     :
         `detector` normalized by a monitor.
     """
+    _expect_monitor_covers_range_of_detector(
+        detector=detector, monitor=monitor, dim="wavelength"
+    )
     norm = broadcast_uncertainties(
         monitor, prototype=detector, mode=uncertainty_broadcast_mode
     )
@@ -93,6 +96,9 @@ def normalize_by_monitor_integrated(
         raise sc.CoordError(
             f"Monitor coordinate '{dim}' must be bin-edges to integrate the monitor."
         )
+    _expect_monitor_covers_range_of_detector(
+        detector=detector, monitor=monitor, dim=dim
+    )
 
     # Clip `monitor` to the range of `detector`.
     det_coord = (
@@ -109,6 +115,22 @@ def normalize_by_monitor_integrated(
         norm, prototype=detector, mode=uncertainty_broadcast_mode
     )
     return NormalizedRunData[RunType](detector / norm)
+
+
+def _expect_monitor_covers_range_of_detector(
+    *, detector: sc.DataArray, monitor: sc.DataArray, dim: str
+) -> None:
+    det_coord = (
+        detector.coords[dim] if detector.bins is None else detector.bins.coords[dim]
+    )
+    if (
+        monitor.coords[dim].min() > det_coord.min()
+        or monitor.coords[dim].max() < det_coord.max()
+    ):
+        raise ValueError(
+            "Cannot normalize by monitor: The wavelength range of the monitor is "
+            "smaller than the range of the detector."
+        )
 
 
 def _normalize_by_vanadium(
