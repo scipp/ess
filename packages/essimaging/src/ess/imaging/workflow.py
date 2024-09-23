@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 import sciline as sl
+import scipp as sc
 
 from .io import (
     DEFAULT_FILE_LOCK,
@@ -20,8 +21,6 @@ from .io import (
     separate_image_key_logs,
 )
 from .normalize import (
-    DEFAULT_BACKGROUND_THRESHOLD,
-    DEFAULT_SAMPLE_THRESHOLD,
     BackgroundPixelThreshold,
     SamplePixelThreshold,
     apply_threshold_to_background_image,
@@ -65,9 +64,46 @@ _NORMALIZATION_PROVIDERS = (
     cleanse_sample_images,
     normalize_sample_images,
 )
+_DEFAULT_BACKGROUND_THRESHOLD = BackgroundPixelThreshold(sc.scalar(1.0, unit="counts"))
+_DEFAULT_SAMPLE_THRESHOLD = SamplePixelThreshold(sc.scalar(0.0, unit="counts"))
 
 
-def YmirWorkflow() -> sl.Pipeline:
+def YmirImageNormalizationWorkflow() -> sl.Pipeline:
+    """
+    Ymir histogram mode imaging normalization workflow.
+
+    Default Normalization Formula
+    -----------------------------
+
+    .. math::
+
+        NormalizedSample_{i} = SampleImageStacks_{i} / BackgroundImage * ScaleFactor
+
+
+    .. math::
+
+        ScaleFactor = AverageBackgroundPixelCounts / AverageSamplePixelCounts
+
+
+    .. math::
+
+        SampleImageStacks_{i} = Sample_{i} - mean(DarkCurrent, dim=\\text{'time'})
+
+        \\text{where } i \\text{ is an index of an image.}
+
+        \\text{Pixel values less than sample_threshold}
+
+        \\text{ are replaced with sample_threshold}.
+
+    .. math::
+
+        BackgroundImage = mean(OpenBeam, dim=\\text{'time'})
+        - mean(DarkCurrent, dim=\\text{'time'})
+
+        \\text{Pixel values less than } \\text{background_threshold}
+
+        \\text{ are replaced with } \\text{background_threshold}.
+    """
     return sl.Pipeline(
         (*_IO_PROVIDERS, *_NORMALIZATION_PROVIDERS),
         params={
@@ -78,8 +114,8 @@ def YmirWorkflow() -> sl.Pipeline:
             HistogramModeDetectorsPath: DEFAULT_HISTOGRAM_PATH,
             ImageDetectorName: ImageDetectorName('orca'),
             RotationMotionSensorName: RotationMotionSensorName('motion_cabinet_2'),
-            BackgroundPixelThreshold: DEFAULT_BACKGROUND_THRESHOLD,
-            SamplePixelThreshold: DEFAULT_SAMPLE_THRESHOLD,
+            BackgroundPixelThreshold: _DEFAULT_BACKGROUND_THRESHOLD,
+            SamplePixelThreshold: _DEFAULT_SAMPLE_THRESHOLD,
             FileLock: DEFAULT_FILE_LOCK,
         },
     )

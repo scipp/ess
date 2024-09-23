@@ -22,7 +22,7 @@ from ess.imaging.normalize import (
     cleanse_sample_images,
     normalize_sample_images,
 )
-from ess.imaging.workflow import YmirWorkflow
+from ess.imaging.workflow import YmirImageNormalizationWorkflow
 
 
 @pytest.fixture
@@ -77,7 +77,7 @@ def sample_images() -> RawSampleImageStacks:
 def open_beam_image(open_beam_images: OpenBeamImageStacks) -> sc.DataArray:
     with pytest.warns(
         expected_warning=UserWarning,
-        match="Calculating average open beam image assuming constant exposure time.",
+        match="Computing average open beam image assuming constant exposure time.",
     ):
         return average_open_beam_images(open_beam_images)
 
@@ -86,7 +86,7 @@ def open_beam_image(open_beam_images: OpenBeamImageStacks) -> sc.DataArray:
 def dark_current_image(dark_current_images: DarkCurrentImageStacks) -> DarkCurrentImage:
     with pytest.warns(
         expected_warning=UserWarning,
-        match="Calculating average dark current image assuming constant exposure time.",
+        match="Computing average dark current image assuming constant exposure time.",
     ):
         return average_dark_current_images(dark_current_images)
 
@@ -103,7 +103,7 @@ def test_average_open_beam_images(open_beam_images: OpenBeamImageStacks) -> None
 
     with pytest.warns(
         expected_warning=UserWarning,
-        match="Calculating average open beam image assuming constant exposure time.",
+        match="Computing average open beam image assuming constant exposure time.",
     ):
         assert_identical(
             average_open_beam_images(open_beam_images), expected_average_open_beam_image
@@ -124,7 +124,7 @@ def test_average_dark_current_images(
 
     with pytest.warns(
         expected_warning=UserWarning,
-        match="Calculating average dark current image assuming constant exposure time.",
+        match="Computing average dark current image assuming constant exposure time.",
     ):
         assert_identical(
             average_dark_current_images(dark_current_images),
@@ -175,8 +175,11 @@ def test_normalize_negative_scale_factor_raises(
     sample_images: SampleImageStacksWithLogs,
     dark_current_image: DarkCurrentImage,
 ) -> None:
+    from ess.imaging.normalize import SamplePixelThreshold
+
     cleansed_sample_image = apply_threshold_to_sample_images(
-        cleanse_sample_images(sample_images, dark_current_image)
+        cleanse_sample_images(sample_images, dark_current_image),
+        SamplePixelThreshold(sc.scalar(0.0, unit="counts")),
     )
 
     with pytest.raises(ValueError, match="Scale factor must be positive,"):
@@ -206,23 +209,25 @@ def test_normalize_workflow(
         },
     )
 
-    wf = YmirWorkflow()
+    wf = YmirImageNormalizationWorkflow()
     wf[SampleImageStacksWithLogs] = sample_images
     wf[OpenBeamImageStacks] = open_beam_images
     wf[DarkCurrentImageStacks] = dark_current_images
     mean_ob_warning_msg = (
-        "Calculating average open beam image assuming constant exposure time."
+        "Computing average open beam image assuming constant exposure time."
     )
     mean_dc_warning_msg = (
-        "Calculating average dark current image assuming constant exposure time."
+        "Computing average dark current image assuming constant exposure time."
     )
     mean_sample_warning_msg = (
-        "Calculating average sample pixel counts assuming constant exposure time."
+        "Computing average sample pixel counts assuming constant exposure time."
     )
     bg_image_warning_msg = (
-        "Calculating average background pixel counts assuming constant exposure time."
+        "Computing average background pixel counts assuming constant exposure time."
     )
-    normalize_warning_msg = "Normalizing sample images assuming constant exposure time."
+    normalize_warning_msg = (
+        "Computing normalized sample image stack assuming constant exposure time."
+    )
     with (
         # Following warnings are expected to be raise
         # until we use the correct exposure time in the data files
