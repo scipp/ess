@@ -2,8 +2,6 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 from pathlib import Path
 
-import scipp as sc
-
 from ess.sans.data import Registry
 from ess.sans.types import (
     BackgroundRun,
