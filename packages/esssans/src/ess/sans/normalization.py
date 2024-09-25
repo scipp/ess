@@ -330,11 +330,7 @@ def _normalize(
     :math:`D(\\lambda)` and the solid angle :math:`\\Omega(R)`.
 
     The denominator is then simply:
-    :math:`M_{\\lambda} T_{\\lambda} D_{\\lambda} \\Omega_{R}`,
-    which is equivalent to ``wavelength_term * solid_angle``.
-    The ``wavelength_term`` includes all but the ``solid_angle`` and is computed by
-    :py:func:`iofq_norm_wavelength_term_sample` or
-    :py:func:`iofq_norm_wavelength_term_background`.
+    :math:`M_{\\lambda} T_{\\lambda} D_{\\lambda} \\Omega_{R}`.
 
     Parameters
     ----------
