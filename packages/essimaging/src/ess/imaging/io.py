@@ -22,14 +22,18 @@ from .types import (
     RotationMotionSensorName,
 )
 
+FileLock = NewType("FileLock", bool)
+"""File lock mode for reading nexus file."""
+DEFAULT_FILE_LOCK = FileLock(True)
+
 HistogramModeDetector = NewType("HistogramModeDetector", sc.DataGroup)
 """Histogram mode detector data group."""
 HistogramModeDetectorData = NewType("HistogramModeDetectorData", sc.DataArray)
 """Histogram mode detector data."""
 ImageKeyCoord = NewType("ImageKeyCoord", sc.Variable)
 """Image key coordinate."""
-SampleImageStacks = NewType("SampleImageStacks", sc.DataArray)
-"""Image stacks separated by ImageKey values via timestamp."""
+SampleImageStacksWithLogs = NewType("SampleImageStacksWithLogs", sc.DataArray)
+"""Raw image stacks separated by ImageKey values via timestamp."""
 RotationAngleCoord = NewType("RotationAngleCoord", sc.Variable)
 """Rotation angle coordinate."""
 
@@ -79,10 +83,20 @@ def load_nexus_histogram_mode_detector(
     file_path: FilePath,
     image_detector_name: ImageDetectorName,
     histogram_mode_detectors_path: HistogramModeDetectorsPath = DEFAULT_HISTOGRAM_PATH,
+    locking: FileLock = DEFAULT_FILE_LOCK,
 ) -> HistogramModeDetector:
-    with snx.File(file_path, mode="r") as f:
-        img_path = f"{histogram_mode_detectors_path}/{image_detector_name}"
-        dg: sc.DataGroup = f[img_path][()]
+    try:
+        with snx.File(file_path, mode="r", locking=locking) as f:
+            img_path = f"{histogram_mode_detectors_path}/{image_detector_name}"
+            dg: sc.DataGroup = f[img_path][()]
+    except PermissionError as e:
+        raise PermissionError(
+            f"Permission denied to read the nexus file [{file_path}]. "
+            "Please check the permission of the file or the directory. "
+            "Consider using the `file_lock` parameter to avoid file locking "
+            "if the file system is mounted on a network file system. "
+            "and it is safe to read the file without locking."
+        ) from e
 
     # Manually assign unit to the histogram detector mode data
     img: sc.DataArray = dg['data']
@@ -134,9 +148,10 @@ def separate_image_key_logs(*, dg: HistogramModeDetector) -> ImageKeyLogs:
 def load_nexus_rotation_logs(
     file_path: FilePath,
     motion_sensor_name: RotationMotionSensorName,
+    locking: FileLock = DEFAULT_FILE_LOCK,
 ) -> RotationLogs:
     log_path = f"entry/instrument/{motion_sensor_name}/rotation_stage_readback"
-    with snx.File(file_path, mode="r") as f:
+    with snx.File(file_path, mode="r", locking=locking) as f:
         return RotationLogs(f[log_path][()]['value'])
 
 
@@ -230,7 +245,7 @@ def retrieve_sample_images(
 
 def apply_logs_as_coords(
     samples: RawSampleImageStacks, rotation_angles: RotationLogs
-) -> SampleImageStacks:
+) -> SampleImageStacksWithLogs:
     # Make sure the data has the same range as the rotation angle coordinate
     min_log_time = rotation_angles.coords[TIME_COORD_NAME].min(TIME_COORD_NAME)
     sliced = samples[TIME_COORD_NAME, min_log_time:].copy(deep=False)
@@ -241,7 +256,7 @@ def apply_logs_as_coords(
         )
     rotation_angle_coord = derive_log_coord_by_range(samples, rotation_angles)
     sliced.coords['rotation_angle'] = rotation_angle_coord
-    return SampleImageStacks(sliced)
+    return SampleImageStacksWithLogs(sliced)
 
 
 DEFAULT_IMAGE_NAME_PREFIX_MAP = {
@@ -256,7 +271,7 @@ def dummy_progress_wrapper(core_iterator: Iterable) -> Iterable:
 
 
 def _save_merged_images(
-    *, image_stacks: SampleImageStacks, image_prefix: str, output_dir: Path
+    *, image_stacks: SampleImageStacksWithLogs, image_prefix: str, output_dir: Path
 ) -> None:
     image_path = output_dir / Path(
         f"{image_prefix}_0000_{image_stacks.sizes['time']:04d}.tiff"
@@ -266,7 +281,7 @@ def _save_merged_images(
 
 def _save_individual_images(
     *,
-    image_stacks: SampleImageStacks,
+    image_stacks: SampleImageStacksWithLogs,
     image_prefix: str,
     output_dir: Path,
     progress_wrapper: Callable[[Iterable], Iterable] = dummy_progress_wrapper,
@@ -332,13 +347,13 @@ def export_image_stacks_as_tiff(
     for image_key, cur_images in progress_wrapper(image_stacks.items()):
         if merge_image_by_key:
             _save_merged_images(
-                image_stacks=SampleImageStacks(cur_images),
+                image_stacks=SampleImageStacksWithLogs(cur_images),
                 image_prefix=image_prefix_map[image_key],
                 output_dir=output_path,
             )
         else:
             _save_individual_images(
-                image_stacks=SampleImageStacks(cur_images),
+                image_stacks=SampleImageStacksWithLogs(cur_images),
                 image_prefix=image_prefix_map[image_key],
                 output_dir=output_path,
                 progress_wrapper=progress_wrapper,
