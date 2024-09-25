@@ -14,12 +14,12 @@ from .conversions import ElasticCoordTransformGraph
 from .logging import get_logger
 from .types import (
     BeamCenter,
+    CleanDirectBeam,
     DetectorBankSizes,
     DimsToKeep,
     IofQ,
     MaskedData,
     NeXusDetector,
-    NormWavelengthTerm,
     QBins,
     ReturnEvents,
     SampleRun,
@@ -175,9 +175,7 @@ def _iofq_in_quadrants(
         workflow[NeXusDetector[SampleRun]] = sc.DataGroup(data=detector[sel])
         # MaskedData would be computed automatically, but we did it above already
         workflow[MaskedData[SampleRun]] = calibrated[sel]
-        workflow[NormWavelengthTerm[SampleRun]] = (
-            norm if norm.dims == ('wavelength',) else norm[sel]
-        )
+        workflow[CleanDirectBeam] = norm if norm.dims == ('wavelength',) else norm[sel]
         out[quad] = workflow.compute(IofQ[SampleRun])
     return out
 
@@ -364,7 +362,7 @@ def beam_center_from_iofq(
     keys = (
         NeXusDetector[SampleRun],
         MaskedData[SampleRun],
-        NormWavelengthTerm[SampleRun],
+        CleanDirectBeam,
         ElasticCoordTransformGraph,
     )
     workflow = workflow.copy()
@@ -373,7 +371,7 @@ def beam_center_from_iofq(
     results = workflow.compute(keys)
     detector = results[NeXusDetector[SampleRun]]['data']
     data = results[MaskedData[SampleRun]]
-    norm = results[NormWavelengthTerm[SampleRun]]
+    norm = results[CleanDirectBeam]
     graph = results[ElasticCoordTransformGraph]
 
     # Avoid reloading the detector
