@@ -229,7 +229,7 @@ def test_normalize_workflow(
         "Computing normalized sample image stack assuming constant exposure time."
     )
     with (
-        # Following warnings are expected to be raise
+        # Following warnings are expected to be raised
         # until we use the correct exposure time in the data files
         pytest.warns(expected_warning=UserWarning, match=mean_ob_warning_msg),
         pytest.warns(expected_warning=UserWarning, match=mean_dc_warning_msg),
