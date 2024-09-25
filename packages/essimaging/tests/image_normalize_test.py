@@ -12,10 +12,15 @@ from ess.imaging.io import (
 )
 from ess.imaging.normalize import (
     BackgroundImage,
+    BackgroundPixelThreshold,
+    CleansedOpenBeamImage,
+    CleansedSampleImages,
     DarkCurrentImage,
     NormalizedSampleImages,
     OpenBeamImage,
+    SamplePixelThreshold,
     ScaleFactor,
+    apply_threshold_to_background_image,
     apply_threshold_to_sample_images,
     average_dark_current_images,
     average_open_beam_images,
@@ -171,12 +176,50 @@ def test_cleanse_sample_images(
     )
 
 
+def test_apply_threshold_to_sample_images() -> None:
+    sample_images_with_negative_values = sc.DataArray(
+        data=sc.array(
+            dims=["time", "dim_1", "dim_2"],
+            values=[[[2.0, 2.0], [2.0, -1.0]], [[4.0, 4.0], [4.0, -1.0]]],
+            unit="counts",
+        ),
+        coords={
+            "time": sc.array(dims=["time"], values=[1, 2], unit="s"),
+        },
+    )
+    threshold = sc.scalar(1.0, unit="counts")
+    thresholded_sample_images = apply_threshold_to_sample_images(
+        CleansedSampleImages(sample_images_with_negative_values),
+        SamplePixelThreshold(threshold),
+    )
+    with pytest.raises(AssertionError, match="Arrays are not equal"):
+        assert_identical(sample_images_with_negative_values.data.min(), threshold)
+    assert_identical(thresholded_sample_images.data.min(), threshold)
+
+
+def test_apply_threshold_to_background_image() -> None:
+    background_image_with_negative_values = sc.DataArray(
+        data=sc.array(
+            dims=["dim_1", "dim_2"],
+            values=[[3.0, 3.0], [3.0, -1.0]],
+            unit="counts",
+        ),
+        coords={},
+    )
+    threshold = sc.scalar(1.0, unit="counts")
+    thresholded_background_image = apply_threshold_to_background_image(
+        CleansedOpenBeamImage(background_image_with_negative_values),
+        BackgroundPixelThreshold(threshold),
+    )
+    with pytest.raises(AssertionError, match="Arrays are not equal"):
+        assert_identical(background_image_with_negative_values.data.min(), threshold)
+    assert_identical(thresholded_background_image.data.min(), threshold)
+
+
 def test_normalize_negative_scale_factor_raises(
     sample_images: SampleImageStacksWithLogs,
     dark_current_image: DarkCurrentImage,
 ) -> None:
-    from ess.imaging.normalize import SamplePixelThreshold
-
     cleansed_sample_image = apply_threshold_to_sample_images(
         cleanse_sample_images(sample_images, dark_current_image),
         SamplePixelThreshold(sc.scalar(0.0, unit="counts")),
