@@ -175,7 +175,7 @@ def mask_wavelength_q(
 ) -> WavelengthScaledQ[ScatteringRunType, Numerator]:
     if mask is not None:
         da = mask_range(da, mask=mask)
-    return CleanSummedQ[ScatteringRunType, Numerator](da)
+    return WavelengthScaledQ[ScatteringRunType, Numerator](da)
 
 
 def mask_wavelength_qxy(
@@ -183,7 +183,7 @@ def mask_wavelength_qxy(
 ) -> WavelengthScaledQxy[ScatteringRunType, Numerator]:
     if mask is not None:
         da = mask_range(da, mask=mask)
-    return CleanSummedQxy[ScatteringRunType, Numerator](da)
+    return WavelengthScaledQxy[ScatteringRunType, Numerator](da)
 
 
 def mask_and_scale_wavelength_q(

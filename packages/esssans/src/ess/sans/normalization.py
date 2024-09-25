@@ -180,7 +180,7 @@ def norm_monitor_term(
 
     This is basically ``incident_monitor * transmission_fraction``.
 
-    Keeping the monitor term separate from the detector term allows us to compute the
+    Keeping the monitor term separate from the detector term allows us to compute
     the latter only once when repeatedly processing chunks of events in streamed data
     processing, e.g., for live data reduction.
 
