@@ -154,8 +154,8 @@ class TransmissionFraction(
     """Transmission fraction"""
 
 
-CleanDirectBeam = NewType('CleanDirectBeam', sc.DataArray | None)
-"""Direct beam after resampling to required wavelength bins"""
+CleanDirectBeam = NewType('CleanDirectBeam', sc.DataArray)
+"""Direct beam after resampling to required wavelength bins, else and array of ones."""
 
 
 class DetectorPixelShape(sciline.Scope[ScatteringRunType, sc.DataGroup], sc.DataGroup):
@@ -192,8 +192,8 @@ class MaskedData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Raw data with pixel-specific masks applied"""
 
 
-class NormWavelengthTerm(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
-    """Normalization term (numerator) for IofQ before scaling with solid-angle."""
+class MonitorTerm(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
+    """Monitor-dependent factor of the Normalization term (numerator) for IofQ."""
 
 
 class CleanWavelength(
@@ -208,10 +208,16 @@ class CleanWavelength(
     """
 
 
-class CleanWavelengthMasked(
+class WavelengthScaledQ(
     sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
 ):
-    """Result of applying wavelength masking to :py:class:`CleanWavelength`"""
+    """Result of applying wavelength scaling/masking to :py:class:`CleanSummedQ`"""
+
+
+class WavelengthScaledQxy(
+    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
+):
+    """Result of applying wavelength scaling/masking to :py:class:`CleanSummedQxy`"""
 
 
 class CleanQ(
@@ -237,6 +243,18 @@ class CleanSummedQxy(
 ):
     """Result of histogramming/binning :py:class:`CleanQxy` over all pixels into Qx and
     Qy bins"""
+
+
+class ReducedQ(
+    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
+):
+    """Result of reducing :py:class:`CleanSummedQ` over the wavelength dimensions"""
+
+
+class ReducedQxy(
+    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
+):
+    """Result of reducing :py:class:`CleanSummedQxy` over the wavelength dimensions"""
 
 
 class IofQ(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):

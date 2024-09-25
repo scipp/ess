@@ -112,7 +112,12 @@ def resample_direct_beam(
         The direct beam function resampled to the requested resolution.
     """
     if direct_beam is None:
-        return CleanDirectBeam(None)
+        return CleanDirectBeam(
+            sc.DataArray(
+                sc.ones(dims=wavelength_bins.dims, shape=[len(wavelength_bins) - 1]),
+                coords={'wavelength': wavelength_bins},
+            )
+        )
     if sc.identical(direct_beam.coords['wavelength'], wavelength_bins):
         return direct_beam
     if direct_beam.variances is not None:
