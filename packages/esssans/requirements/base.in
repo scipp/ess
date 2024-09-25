@@ -10,6 +10,6 @@ pandas
 plopp
 pythreejs
 sciline>=24.06.2
-scipp>=24.9.1
+scipp>=24.09.1
 scippneutron>=24.06.0
 scippnexus>=23.12.1

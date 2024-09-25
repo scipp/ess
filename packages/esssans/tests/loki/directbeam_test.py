@@ -4,9 +4,9 @@ import sys
 from pathlib import Path
 
 import scipp as sc
-from ess import loki, sans
 from scipp.scipy.interpolate import interp1d
 
+from ess import loki, sans
 from ess.sans.types import (
     BeamCenter,
     DimsToKeep,

@@ -1,8 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
-from ess.reduce.uncertainty import UncertaintyBroadcastMode, broadcast_uncertainties
 from scipp.core import concepts
+
+from ess.reduce.uncertainty import UncertaintyBroadcastMode, broadcast_uncertainties
 
 from .types import (
     CalibratedDetector,

@@ -4,13 +4,13 @@ import os
 import sys
 from pathlib import Path
 
-import ess.loki.data  # noqa: F401
 import pytest
 import sciline
 import scipp as sc
-from ess import loki, sans
 from scipp.testing import assert_identical
 
+import ess.loki.data  # noqa: F401
+from ess import loki, sans
 from ess.sans.conversions import ElasticCoordTransformGraph
 from ess.sans.types import (
     BackgroundSubtractedIofQ,
