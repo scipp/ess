@@ -17,6 +17,8 @@ from ..sans.types import (
     DetectorData,
     DetectorPixelShape,
     DimsToKeep,
+    DirectBeam,
+    DirectBeamFilename,
     Incident,
     LabFrameTransform,
     MonitorData,
@@ -88,10 +90,16 @@ def detector_lab_frame_transform(
     return LabFrameTransform[ScatteringRunType](detector[transform_path])
 
 
+def load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
+    """Load direct beam from file."""
+    return DirectBeam(sc.io.load_hdf5(filename))
+
+
 loki_providers = (
     detector_pixel_shape,
     detector_lab_frame_transform,
     data_to_tof,
+    load_direct_beam,
     monitor_to_tof,
 )
 
