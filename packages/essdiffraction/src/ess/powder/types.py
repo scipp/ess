@@ -37,7 +37,6 @@ NeXusSample = reduce_gt.NeXusSample
 NeXusSource = reduce_gt.NeXusSource
 RunType = reduce_gt.RunType
 SampleRun = reduce_gt.SampleRun
-ScatteringRunType = reduce_gt.ScatteringRunType
 SamplePosition = reduce_gt.SamplePosition
 SourcePosition = reduce_gt.SourcePosition
 VanadiumRun = reduce_gt.VanadiumRun
