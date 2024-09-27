@@ -44,11 +44,9 @@ def wavelength_resolution(
         The angular resolution variable, as standard deviation.
     """
     pixel_position = da.coords["position"]
-    distance_between_choppers = (
-        chopper_2_position.fields.z - chopper_1_position.fields.z
-    )
     chopper_midpoint = (chopper_1_position + chopper_2_position) * sc.scalar(0.5)
-    chopper_detector_distance = pixel_position.fields.z - chopper_midpoint.fields.z
+    distance_between_choppers = sc.norm(chopper_2_position - chopper_1_position)
+    chopper_detector_distance = sc.norm(pixel_position - chopper_midpoint)
     return WavelengthResolution(
         fwhm_to_std(distance_between_choppers / chopper_detector_distance)
     )
@@ -77,7 +75,11 @@ def sample_size_resolution(
     """
     return fwhm_to_std(
         sc.to_unit(sample_size, "m")
-        / sc.to_unit(da.coords["position"].fields.z, "m", copy=False)
+        / sc.to_unit(
+            sc.norm(da.coords["position"] - da.coords["sample_position"]),
+            "m",
+            copy=False,
+        )
     )
 
 
@@ -109,7 +111,11 @@ def angular_resolution(
             sc.to_unit(
                 sc.atan(
                     sc.to_unit(detector_spatial_resolution, "m")
-                    / sc.to_unit(da.coords["position"].fields.z, "m", copy=False)
+                    / sc.to_unit(
+                        sc.norm(da.coords["position"] - da.coords["sample_position"]),
+                        "m",
+                        copy=False,
+                    )
                 ),
                 theta.bins.unit,
                 copy=False,
@@ -120,10 +126,11 @@ def angular_resolution(
 
 
 def sigma_Q(
+    da: FootprintCorrectedData[SampleRun],
     angular_resolution: AngularResolution,
     wavelength_resolution: WavelengthResolution,
     sample_size_resolution: SampleSizeResolution,
-    q_bins: QBins,
+    qbins: QBins,
 ) -> QResolution:
     """
     Combine all of the components of the resolution and add Q contribution.
@@ -144,9 +151,21 @@ def sigma_Q(
     :
         Combined resolution function.
     """
-    return sc.sqrt(
-        angular_resolution**2 + wavelength_resolution**2 + sample_size_resolution**2
-    ).flatten(to="detector_number").max("detector_number") * sc.midpoints(q_bins)
+    h = da.bins.concat().hist(Q=qbins)
+    s = (
+        (
+            da
+            * (
+                angular_resolution**2
+                + wavelength_resolution**2
+                + sample_size_resolution**2
+            )
+            * da.bins.coords['Q'] ** 2
+        )
+        .bins.concat()
+        .hist(Q=qbins)
+    )
+    return sc.sqrt(sc.values(s / h))
 
 
 providers = (sigma_Q, angular_resolution, wavelength_resolution, sample_size_resolution)
