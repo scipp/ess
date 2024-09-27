@@ -7,6 +7,7 @@ Default parameters, providers and utility functions for the loki workflow.
 from __future__ import annotations
 
 import scipp as sc
+
 from ess.reduce.parameter import (
     BinEdgesParameter,
     BooleanParameter,
@@ -91,11 +92,17 @@ parameter_registry[Filename[EmptyBeamRun]] = FilenameParameter.from_type(
     Filename[EmptyBeamRun]
 )
 parameter_registry[WavelengthBins] = BinEdgesParameter(
-    WavelengthBins, dim='wavelength', unit='angstrom'
+    WavelengthBins, dim='wavelength', start=1.0, stop=12.0, nbins=300, log=False
 )
-parameter_registry[QBins] = BinEdgesParameter(QBins, dim='Q', unit='1/angstrom')
-parameter_registry[QxBins] = BinEdgesParameter(QxBins, dim='Qx', unit='1/angstrom')
-parameter_registry[QyBins] = BinEdgesParameter(QyBins, dim='Qy', unit='1/angstrom')
+parameter_registry[QBins] = BinEdgesParameter(
+    QBins, dim='Q', start=0.01, stop=0.5, nbins=100, log=False
+)
+parameter_registry[QxBins] = BinEdgesParameter(
+    QxBins, dim='Qx', start=-0.5, stop=0.5, nbins=100
+)
+parameter_registry[QyBins] = BinEdgesParameter(
+    QyBins, dim='Qy', start=-0.5, stop=0.5, nbins=100
+)
 parameter_registry[DirectBeam] = StringParameter.from_type(
     DirectBeam, switchable=True, optional=True, default=None
 )
