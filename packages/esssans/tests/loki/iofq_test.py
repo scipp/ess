@@ -4,20 +4,20 @@ import os
 import sys
 from pathlib import Path
 
-import ess.loki.data  # noqa: F401
 import pytest
 import sciline
 import scipp as sc
-from ess import loki, sans
 from scipp.testing import assert_identical
 
+import ess.loki.data  # noqa: F401
+from ess import loki, sans
 from ess.sans.conversions import ElasticCoordTransformGraph
 from ess.sans.types import (
     BackgroundSubtractedIofQ,
     BackgroundSubtractedIofQxy,
     BeamCenter,
     CleanSummedQ,
-    CleanWavelengthMasked,
+    CleanWavelength,
     CorrectForGravity,
     Denominator,
     DimsToKeep,
@@ -280,13 +280,13 @@ def test_phi_with_gravity():
     pipeline = make_workflow()
     pipeline[BeamCenter] = _compute_beam_center()
     pipeline[CorrectForGravity] = False
-    data_no_grav = pipeline.compute(
-        CleanWavelengthMasked[SampleRun, Numerator]
-    ).flatten(to='pixel')
+    data_no_grav = pipeline.compute(CleanWavelength[SampleRun, Numerator]).flatten(
+        to='pixel'
+    )
     graph_no_grav = pipeline.compute(ElasticCoordTransformGraph)
     pipeline[CorrectForGravity] = True
     data_with_grav = (
-        pipeline.compute(CleanWavelengthMasked[SampleRun, Numerator])
+        pipeline.compute(CleanWavelength[SampleRun, Numerator])
         .flatten(to='pixel')
         .hist(wavelength=sc.linspace('wavelength', 1.0, 12.0, 101, unit='angstrom'))
     )

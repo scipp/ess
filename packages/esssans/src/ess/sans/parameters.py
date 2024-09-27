@@ -92,7 +92,7 @@ parameter_registry[Filename[EmptyBeamRun]] = FilenameParameter.from_type(
     Filename[EmptyBeamRun]
 )
 parameter_registry[WavelengthBins] = BinEdgesParameter(
-    WavelengthBins, dim='wavelength', start=1.0, stop=12.0, nbins=300, log=False
+    WavelengthBins, dim='wavelength', start=0.01, stop=12.0, nbins=300, log=True
 )
 parameter_registry[QBins] = BinEdgesParameter(
     QBins, dim='Q', start=0.01, stop=0.5, nbins=100, log=False

@@ -5,13 +5,13 @@
 #
 #    pip-compile-multi
 #
-certifi==2024.7.4
+certifi==2024.8.30
     # via requests
 charset-normalizer==3.3.2
     # via requests
 exceptiongroup==1.2.2
     # via pytest
-idna==3.8
+idna==3.10
     # via requests
 iniconfig==2.0.0
     # via pytest
@@ -19,17 +19,17 @@ packaging==24.1
     # via
     #   pooch
     #   pytest
-platformdirs==4.2.2
+platformdirs==4.3.6
     # via pooch
 pluggy==1.5.0
     # via pytest
 pooch==1.8.2
     # via -r basetest.in
-pytest==8.3.2
+pytest==8.3.3
     # via -r basetest.in
 requests==2.32.3
     # via pooch
 tomli==2.0.1
     # via pytest
-urllib3==2.2.2
+urllib3==2.2.3
     # via requests

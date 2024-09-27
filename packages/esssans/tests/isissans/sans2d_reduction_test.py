@@ -1,9 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-import ess.isissans.data  # noqa: F401
+from functools import lru_cache
+
 import pytest
 import sciline
 import scipp as sc
+
+import ess.isissans.data  # noqa: F401
 from ess import isissans as isis
 from ess import sans
 from ess.isissans import MonitorOffset, SampleOffset, sans2d
@@ -76,11 +79,24 @@ def make_params() -> dict:
     return params
 
 
-@pytest.fixture()
+# Especially the I(Q) beam-cetner finder calls this many times, so we cache it for
+# faster test runtime.
+cached_load = lru_cache(maxsize=None)(isis.io.load_tutorial_run)
+
+
+# Wrapper adding type-hints back to the cached function
+def cached_load_tutorial_run(
+    filename: Filename[SampleRun],
+) -> isis.io.LoadedFileContents[SampleRun]:
+    return cached_load(filename)
+
+
+@pytest.fixture
 def pipeline():
     wf = isis.sans2d.Sans2dTutorialWorkflow()
     wf.insert(isis.io.transmission_from_background_run)
     wf.insert(isis.io.transmission_from_sample_run)
+    wf.insert(cached_load_tutorial_run)
     for key, param in make_params().items():
         wf[key] = param
     return wf

@@ -7,12 +7,12 @@ Default parameters, providers and utility functions for the loki workflow.
 import sciline
 import scipp as sc
 from ess import sans
-from ess.reduce.nexus.generic_workflow import GenericNeXusWorkflow
-from ess.reduce.workflow import register_workflow
-
 from ess.sans import providers as sans_providers
 from ess.sans.io import read_xml_detector_masking
 from ess.sans.parameters import typical_outputs
+
+from ess.reduce.nexus.generic_workflow import GenericNeXusWorkflow
+from ess.reduce.workflow import register_workflow
 
 from ..sans.types import (
     CorrectForGravity,
@@ -20,6 +20,8 @@ from ..sans.types import (
     DetectorData,
     DetectorPixelShape,
     DimsToKeep,
+    DirectBeam,
+    DirectBeamFilename,
     Incident,
     LabFrameTransform,
     MonitorData,
@@ -38,7 +40,7 @@ from ..sans.types import (
     WavelengthMask,
 )
 
-DETECTOR_BANK_RESHAPING = {
+DETECTOR_BANK_SIZES = {
     'larmor_detector': {'layer': 4, 'tube': 32, 'straw': 7, 'pixel': 512}
 }
 
@@ -46,7 +48,7 @@ DETECTOR_BANK_RESHAPING = {
 def default_parameters() -> dict:
     return {
         CorrectForGravity: False,
-        DetectorBankSizes: DETECTOR_BANK_RESHAPING,
+        DetectorBankSizes: DETECTOR_BANK_SIZES,
         DimsToKeep: (),
         NeXusMonitorName[Incident]: 'monitor_1',
         NeXusMonitorName[Transmission]: 'monitor_2',
@@ -91,10 +93,16 @@ def detector_lab_frame_transform(
     return LabFrameTransform[ScatteringRunType](detector[transform_path])
 
 
+def load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
+    """Load direct beam from file."""
+    return DirectBeam(sc.io.load_hdf5(filename))
+
+
 loki_providers = (
     detector_pixel_shape,
     detector_lab_frame_transform,
     data_to_tof,
+    load_direct_beam,
     monitor_to_tof,
 )
 

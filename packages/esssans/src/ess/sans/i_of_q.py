@@ -1,10 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-import uuid
-
 import scipp as sc
-from ess.reduce.uncertainty import UncertaintyBroadcastMode, broadcast_uncertainties
 from scipp.scipy.interpolate import interp1d
+
+from ess.reduce.uncertainty import UncertaintyBroadcastMode, broadcast_uncertainties
 
 from .common import mask_range
 from .logging import get_logger
@@ -113,7 +112,12 @@ def resample_direct_beam(
         The direct beam function resampled to the requested resolution.
     """
     if direct_beam is None:
-        return CleanDirectBeam(None)
+        return CleanDirectBeam(
+            sc.DataArray(
+                sc.ones(dims=wavelength_bins.dims, shape=[len(wavelength_bins) - 1]),
+                coords={'wavelength': wavelength_bins},
+            )
+        )
     if sc.identical(direct_beam.coords['wavelength'], wavelength_bins):
         return direct_beam
     if direct_beam.variances is not None:
@@ -202,61 +206,8 @@ def bin_in_qxy(
 def _bin_in_q(
     data: sc.DataArray, edges: dict[str, sc.Variable], dims_to_keep: tuple[str, ...]
 ) -> sc.DataArray:
-    dims_to_reduce = set(data.dims) - {'wavelength'}
-    if dims_to_keep is not None:
-        dims_to_reduce -= set(dims_to_keep)
-
-    if data.bins is not None:
-        q_all_pixels = data.bins.concat(dims_to_reduce)
-        # q_all_pixels may just have a single bin now, which currently yields
-        # inferior performance when binning (no/bad multi-threading?).
-        # We operate on the content buffer for better multi-threaded performance.
-        if q_all_pixels.ndim == 0:
-            content = q_all_pixels.bins.constituents['data']
-            out = content.bin(**edges).assign_coords(q_all_pixels.coords)
-        else:
-            out = q_all_pixels.bin(**edges)
-    else:
-        # We want to flatten data to make histogramming cheaper (avoiding allocation of
-        # large output before summing). We strip unnecessary content since it makes
-        # flattening more expensive.
-        stripped = data.copy(deep=False)
-        for name, coord in data.coords.items():
-            if (
-                name not in {'Q', 'Qx', 'Qy', 'wavelength'}
-                and set(coord.dims) & dims_to_reduce
-            ):
-                del stripped.coords[name]
-        to_flatten = [dim for dim in data.dims if dim in dims_to_reduce]
-
-        # Make dims to flatten contiguous, keep wavelength as the last dim
-        data_dims = list(stripped.dims)
-        for dim in [*to_flatten, 'wavelength']:
-            data_dims.remove(dim)
-            data_dims.append(dim)
-        stripped = stripped.transpose(data_dims)
-        # Flatten to helper dim such that `hist` will turn this into the new Q dim(s).
-        # For sc.hist this has to be named 'Q'.
-        helper_dim = 'Q'
-        flat = stripped.flatten(dims=to_flatten, to=helper_dim)
-
-        if len(edges) == 1:
-            out = flat.hist(**edges)
-        else:
-            # sc.hist (or the underlying sc.bin) cannot deal with extra data dims,
-            # work around by flattening and regrouping.
-            for dim in flat.dims:
-                if dim == helper_dim:
-                    continue
-                if dim not in flat.coords:
-                    flat.coords[dim] = sc.arange(dim, flat.sizes[dim])
-            out = (
-                flat.flatten(to=str(uuid.uuid4()))
-                .group(*[flat.coords[dim] for dim in flat.dims if dim != helper_dim])
-                .drop_coords(dims_to_keep or ())
-                .hist(**edges)
-            )
-    return out.squeeze()
+    dims_to_reduce = set(data.dims) - {'wavelength'} - set(dims_to_keep or ())
+    return (data.hist if data.bins is None else data.bin)(**edges, dim=dims_to_reduce)
 
 
 def _subtract_background(

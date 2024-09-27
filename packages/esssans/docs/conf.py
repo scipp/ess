@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
+
 import doctest
 import os
 import sys
@@ -162,6 +165,7 @@ html_theme_options = {
         "image_dark": "_static/logo-dark.svg",
     },
     "external_links": [
+        {"name": "ESSreduce", "url": "https://scipp.github.io/essreduce"},
         {"name": "Plopp", "url": "https://scipp.github.io/plopp"},
         {"name": "Sciline", "url": "https://scipp.github.io/sciline"},
         {"name": "Scipp", "url": "https://scipp.github.io"},

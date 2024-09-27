@@ -8,6 +8,7 @@ from typing import NewType
 
 import sciline
 import scipp as sc
+
 from ess.sans.types import (
     BeamCenter,
     CalibratedDetector,
@@ -111,7 +112,7 @@ def get_detector_data(dg: LoadedFileContents[RunType]) -> NeXusDetector[RunType]
     # The generic NeXus workflow will try to extract 'data' from this, which is exactly
     # what we also have in the Mantid data. We use the generic workflow since it also
     # applies offsets, etc.
-    return NeXusDetector(dg)
+    return NeXusDetector[RunType](dg)
 
 
 def get_monitor_data(
@@ -121,7 +122,9 @@ def get_monitor_data(
     # what we also have in the Mantid data. We use the generic workflow since it also
     # applies offsets, etc.
     monitor = dg['monitors'][nexus_name]['data']
-    return NeXusMonitor(sc.DataGroup(data=monitor, position=monitor.coords['position']))
+    return NeXusMonitor[RunType, MonitorType](
+        sc.DataGroup(data=monitor, position=monitor.coords['position'])
+    )
 
 
 def dummy_assemble_detector_data(

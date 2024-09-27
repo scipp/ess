@@ -24,7 +24,7 @@ from .workflow import (
 )
 
 try:
-    __version__ = importlib.metadata.version(__package__ or __name__)
+    __version__ = importlib.metadata.version("esssans")
 except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 

@@ -4,6 +4,7 @@ from typing import NewType
 
 import sciline
 import scipp as sc
+
 from ess.reduce.nexus.generic_workflow import GenericNeXusWorkflow
 from ess.reduce.workflow import register_workflow
 
