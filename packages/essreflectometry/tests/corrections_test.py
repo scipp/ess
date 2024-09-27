@@ -1,9 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
-from ess.reflectometry import corrections
 from scipp import constants as cst
 from scipp.testing import assert_allclose
+
+from ess.reflectometry import corrections
 
 
 def test_footprint_correction():

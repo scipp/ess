@@ -6,6 +6,8 @@ import numpy as np
 import pytest
 import sciline
 import scipp as sc
+from orsopy import fileio
+
 from ess import amor
 from ess.amor import data  # noqa: F401
 from ess.reflectometry import orso
@@ -21,10 +23,9 @@ from ess.reflectometry.types import (
     YIndexLimits,
     ZIndexLimits,
 )
-from orsopy import fileio
 
 
-@pytest.fixture()
+@pytest.fixture
 def amor_pipeline() -> sciline.Pipeline:
     pl = sciline.Pipeline(providers=amor.providers, params=amor.default_parameters())
     pl[SampleSize[SampleRun]] = sc.scalar(10.0, unit="mm")

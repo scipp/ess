@@ -3,11 +3,12 @@
 from datetime import datetime
 
 import sciline
+from orsopy import fileio
+
 from ess import amor, reflectometry
 from ess.amor import data  # noqa: F401
 from ess.reflectometry import orso
 from ess.reflectometry.types import Filename, ReferenceRun, SampleRun
-from orsopy import fileio
 
 
 def test_build_orso_data_source():

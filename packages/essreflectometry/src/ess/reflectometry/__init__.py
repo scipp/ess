@@ -8,7 +8,7 @@ from . import calibrations, conversions, corrections, normalize, orso
 from .load import load_reference, save_reference
 
 try:
-    __version__ = importlib.metadata.version(__package__ or __name__)
+    __version__ = importlib.metadata.version("essreflectometry")
 except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 

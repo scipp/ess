@@ -3,6 +3,7 @@
 # @author Andrew R. McCluskey (arm61)
 import pytest
 import scipp as sc
+
 from ess.reflectometry import tools
 
 

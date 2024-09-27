@@ -1,8 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
-from ess.reflectometry.tools import combine_curves, scale_reflectivity_curves_to_overlap
 from scipp.testing import assert_allclose
+
+from ess.reflectometry.tools import combine_curves, scale_reflectivity_curves_to_overlap
 
 
 def curve(d, qmin, qmax):

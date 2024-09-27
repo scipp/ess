@@ -1,4 +1,5 @@
 import scipp as sc
+
 from ess.reflectometry.types import (
     DetectorRotation,
     NormalizedIofQ,
