@@ -6,13 +6,13 @@ Default parameters, providers and utility functions for the loki workflow.
 
 import sciline
 import scipp as sc
+
 from ess import sans
+from ess.reduce.nexus.generic_workflow import GenericNeXusWorkflow
+from ess.reduce.workflow import register_workflow
 from ess.sans import providers as sans_providers
 from ess.sans.io import read_xml_detector_masking
 from ess.sans.parameters import typical_outputs
-
-from ess.reduce.nexus.generic_workflow import GenericNeXusWorkflow
-from ess.reduce.workflow import register_workflow
 
 from ..sans.types import (
     CorrectForGravity,

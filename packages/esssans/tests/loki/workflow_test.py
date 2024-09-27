@@ -5,14 +5,15 @@ import sys
 from pathlib import Path
 
 import scipp as sc
+
 from ess import loki
 from ess.loki import LokiAtLarmorWorkflow
 from ess.reduce import workflow
-
 from ess.sans.types import (
     BackgroundRun,
     BackgroundSubtractedIofQ,
     BeamCenter,
+    DirectBeam,
     Filename,
     IofQ,
     PixelMaskFilename,
@@ -71,3 +72,34 @@ def test_loki_workflow_compute_with_single_pixel_mask():
     assert result.dims == ('Q',)
     assert sc.identical(result.coords['Q'], params[QBins])
     assert result.sizes['Q'] == 100
+
+
+def test_loki_workflow_widget():
+    from ess.reduce import ui
+
+    results = {}
+    widget = ui.workflow_widget(result_registry=results)
+    # Select tutorial workflow
+    select = widget.children[0].children[0]
+    keys, values = zip(*select.options, strict=True)
+    ind = keys.index('LokiAtLarmorTutorialWorkflow')
+    select.value = values[ind]
+    # Select IofQ[SampleRun] output
+    wfw = widget.children[1].children[0]
+    outputs = wfw.output_selection_box.typical_outputs_widget
+    keys, values = zip(*outputs.options, strict=True)
+    ind = keys.index('IofQ[SampleRun]')
+    outputs.value = (values[ind],)
+    # Refresh parameters
+    pbox = wfw.parameter_box
+    pbox.parameter_refresh_button.click()
+    # Enable DirectBeam input
+    pbox._input_widgets[DirectBeam].children[0].enabled = True
+    pbox._input_widgets[DirectBeam].children[0].wrapped._option_box.value = None
+    # Run the workflow
+    rbox = wfw.result_box
+    rbox.run_button.click()
+    # Inspect results
+    (da,) = results.values()
+    assert da.dims == ('Q',)
+    assert da.sizes['Q'] == pbox._input_widgets[QBins].children[0].fields['nbins'].value

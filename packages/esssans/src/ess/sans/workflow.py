@@ -5,6 +5,7 @@ from collections.abc import Hashable, Iterable
 import pandas as pd
 import sciline
 import scipp as sc
+
 from ess.reduce.parameter import parameter_mappers
 
 from .types import (

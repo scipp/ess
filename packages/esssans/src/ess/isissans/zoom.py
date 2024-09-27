@@ -4,7 +4,6 @@ import sciline
 
 from ess.reduce.nexus.generic_workflow import GenericNeXusWorkflow
 from ess.reduce.workflow import register_workflow
-
 from ess.sans import providers as sans_providers
 from ess.sans.io import read_xml_detector_masking
 from ess.sans.parameters import typical_outputs
