@@ -338,8 +338,11 @@ def _pixel_positions(
     return (
         (pixel_n_slow * slow_axis_steps)
         + (pixel_n_fast * fast_axis_steps)
-        + position_offset
-    )
+        + detector.rotation_matrix
+        * sc.vector(
+            [detector.start_x, detector.start_y, 0.0], unit=position_offset.unit
+        )  # Detector pixel offset should also be rotated first.
+    ) + position_offset
 
 
 def _detector_pixel_positions(
