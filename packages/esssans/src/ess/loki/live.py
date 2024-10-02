@@ -1,16 +1,20 @@
 # This file is used by beamlime to create a workflow for the Loki instrument.
 # The callable `live_workflow` is registered as the entry point for the workflow.
+from pathlib import Path
+from typing import NewType
+
 import sciline
 import scipp as sc
 import scippnexus as snx
 
 from ess import loki
+from ess.reduce import streaming
+from ess.reduce.nexus import types as nexus_types
 from ess.reduce.nexus.json_nexus import JSONGroup
 from ess.sans.types import (
     Filename,
     Incident,
     MonitorType,
-    NeXusMonitorName,
     RunType,
     SampleRun,
     Transmission,
@@ -30,32 +34,41 @@ def _hist_monitor_wavelength(
     return monitor.hist(wavelength=wavelength_bin)
 
 
-def loki_iofq_workflow(group: JSONGroup) -> dict[str, sc.DataArray]:
-    """Example live workflow function for Loki.
+JSONEventData = NewType('JSONEventData', dict[str, JSONGroup])
 
-    This function is used to process data with beamlime workflows.
-    """
-    # We do not consume the incoming data right now.
-    _ = group
-    return {
-        'IofQ': sc.DataArray(
-            data=sc.zeros(dims=['Q'], shape=[100]),
-            coords={
-                'Q': sc.linspace(
-                    dim='Q', start=0.01, stop=0.3, num=101, unit='1/angstrom'
-                )
-            },
-        )
-    }
+
+def load_json_incident_monitor_data(
+    nxevent_data: JSONEventData,
+) -> nexus_types.NeXusMonitorData[SampleRun, Incident]:
+    json = nxevent_data['monitor_1']
+    group = snx.Group(json, definitions=snx.base_definitions())
+    return nexus_types.NeXusMonitorData[SampleRun, Incident](group[()])
+
+
+def load_json_transmission_monitor_data(
+    nxevent_data: JSONEventData,
+) -> nexus_types.NeXusMonitorData[SampleRun, Incident]:
+    json = nxevent_data['monitor_2']
+    group = snx.Group(json, definitions=snx.base_definitions())
+    return nexus_types.NeXusMonitorData[SampleRun, Incident](group[()])
 
 
 class LoKiMonitorWorkflow:
     """LoKi Monitor wavelength histogram workflow for live data reduction."""
 
-    def __init__(self) -> None:
-        self.pipeline = self._build_pipeline()
+    def __init__(self, nexus_filename: Path) -> None:
+        self._workflow = self._build_pipeline(nexus_filename=nexus_filename)
+        self._streamed = streaming.StreamProcessor(
+            base_workflow=self._workflow,
+            dynamic_keys=(JSONEventData,),
+            target_keys=(
+                MonitorHistogram[SampleRun, Incident],
+                MonitorHistogram[SampleRun, Transmission],
+            ),
+            accumulators=(),
+        )
 
-    def _build_pipeline(self) -> sciline.Pipeline:
+    def _build_pipeline(self, nexus_filename: Path) -> sciline.Pipeline:
         """Build a workflow pipeline for live data reduction.
 
         Returns
@@ -66,15 +79,17 @@ class LoKiMonitorWorkflow:
             It should be set before calling the pipeline.
 
         """
-        # Wavelength binning parameters
         workflow = loki.LokiAtLarmorWorkflow()
         workflow.insert(_hist_monitor_wavelength)
-        workflow[NeXusMonitorName[Incident]] = "monitor_1"
-        workflow[NeXusMonitorName[Transmission]] = "monitor_2"
+        workflow.insert(load_json_incident_monitor_data)
+        workflow.insert(load_json_transmission_monitor_data)
+        workflow[Filename[SampleRun]] = nexus_filename
         workflow[WavelengthBins] = sc.linspace("wavelength", 1.0, 13.0, 50 + 1)
         return workflow
 
-    def __call__(self, group: JSONGroup) -> dict[str, sc.DataArray]:
+    def __call__(
+        self, nxevent_data: dict[str, JSONGroup], nxlog: dict[str, JSONGroup]
+    ) -> dict[str, sc.DataArray]:
         """
 
         Returns
@@ -86,19 +101,5 @@ class LoKiMonitorWorkflow:
             - MonitorHistogram[SampleRun, Transmission]
 
         """
-        # ``JsonGroup`` is turned into the ``NexusGroup`` here, not in the ``beamlime``
-        # so that the workflow can control the definition of the group.
-        self.pipeline[Filename[SampleRun]] = snx.Group(
-            group, definitions=snx.base_definitions()
-        )
-        results = self.pipeline.compute(
-            (
-                MonitorHistogram[SampleRun, Incident],
-                MonitorHistogram[SampleRun, Transmission],
-            )
-        )
-
+        results = self._streamed.add_chunk({JSONEventData: nxevent_data})
         return {str(tp): result for tp, result in results.items()}
-
-
-loki_monitor_workflow = LoKiMonitorWorkflow()
