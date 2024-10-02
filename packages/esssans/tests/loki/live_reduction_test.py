@@ -2,7 +2,7 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 import sciline as sl
 
-from ess.loki.workflow import LoKiMonitorWorkflow
+from ess.loki.live import LoKiMonitorWorkflow
 
 
 def test_loki_monitor_workflow() -> None:
