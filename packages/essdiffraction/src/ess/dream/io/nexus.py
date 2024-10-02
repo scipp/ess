@@ -15,8 +15,8 @@ and the ICD DREAM interface specification for details.
 
 import sciline
 
-from ess.reduce.nexus.generic_workflow import GenericNeXusWorkflow
 from ess.reduce.nexus.types import DetectorBankSizes
+from ess.reduce.nexus.workflow import GenericNeXusWorkflow
 
 DETECTOR_BANK_SIZES = {
     "endcap_backward_detector": {

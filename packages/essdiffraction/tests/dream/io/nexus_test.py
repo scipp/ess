@@ -6,16 +6,16 @@ import scipp as sc
 
 import ess.dream.data  # noqa: F401
 from ess import dream
-from ess.reduce.nexus.generic_types import (
+from ess.reduce.nexus.types import (
     CalibratedDetector,
     CalibratedMonitor,
     DetectorData,
     Filename,
     Monitor1,
+    NeXusDetectorName,
     NeXusMonitorName,
     SampleRun,
 )
-from ess.reduce.nexus.types import NeXusDetectorName
 
 bank_dims = {'wire', 'module', 'segment', 'strip', 'counter'}
 hr_sans_dims = {'strip', 'other'}
