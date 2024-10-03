@@ -32,7 +32,7 @@ requires-python = ">=3.10"
 dependencies = [
   "dask",
   "graphviz",
-  "essreduce>=24.08.1",
+  "essreduce>=24.10.0",
   "numpy",
   "pandas",
   "plopp",
@@ -56,9 +56,8 @@ test = [
 "Documentation" = "https://scipp.github.io/esssans"
 "Source" = "https://github.com/scipp/esssans"
 
-[project.entry-points."beamlime.stateless"]
-ess-loki-monitor = "ess.loki.workflow:loki_monitor_workflow"
-ess-loki-iofq = "ess.loki.workflow:loki_iofq_workflow"
+[project.entry-points."beamlime.workflow_plugin"]
+ess-loki-monitor = "ess.loki.live:LokiMonitorWorkflow"
 
 [tool.setuptools_scm]
 
