@@ -14,32 +14,31 @@ import sciline
 import scipp as sc
 from scippneutron.io import cif
 
-from ess.reduce.nexus import generic_types as reduce_gt
 from ess.reduce.nexus import types as reduce_t
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
 
 # 1 TypeVars used to parametrize the generic parts of the workflow
 
-BackgroundRun = reduce_gt.BackgroundRun
-CalibratedDetector = reduce_gt.CalibratedDetector
-CalibratedMonitor = reduce_gt.CalibratedMonitor
-DetectorData = reduce_gt.DetectorData
-DetectorPositionOffset = reduce_gt.DetectorPositionOffset
-EmptyBeamRun = reduce_gt.EmptyBeamRun
-Filename = reduce_gt.Filename
-MonitorData = reduce_gt.MonitorData
-MonitorPositionOffset = reduce_gt.MonitorPositionOffset
-MonitorType = reduce_gt.MonitorType
-NeXusMonitorName = reduce_gt.NeXusMonitorName
-NeXusDetector = reduce_gt.NeXusDetector
-NeXusMonitor = reduce_gt.NeXusMonitor
-NeXusSample = reduce_gt.NeXusSample
-NeXusSource = reduce_gt.NeXusSource
-RunType = reduce_gt.RunType
-SampleRun = reduce_gt.SampleRun
-SamplePosition = reduce_gt.SamplePosition
-SourcePosition = reduce_gt.SourcePosition
-VanadiumRun = reduce_gt.VanadiumRun
+BackgroundRun = reduce_t.BackgroundRun
+CalibratedDetector = reduce_t.CalibratedDetector
+CalibratedMonitor = reduce_t.CalibratedMonitor
+DetectorData = reduce_t.DetectorData
+DetectorPositionOffset = reduce_t.DetectorPositionOffset
+EmptyBeamRun = reduce_t.EmptyBeamRun
+Filename = reduce_t.Filename
+MonitorData = reduce_t.MonitorData
+MonitorPositionOffset = reduce_t.MonitorPositionOffset
+MonitorType = reduce_t.MonitorType
+NeXusMonitorName = reduce_t.NeXusMonitorName
+NeXusDetector = reduce_t.NeXusDetector
+NeXusMonitor = reduce_t.NeXusMonitor
+NeXusSample = reduce_t.NeXusSample
+NeXusSource = reduce_t.NeXusSource
+RunType = reduce_t.RunType
+SampleRun = reduce_t.SampleRun
+SamplePosition = reduce_t.SamplePosition
+SourcePosition = reduce_t.SourcePosition
+VanadiumRun = reduce_t.VanadiumRun
 
 DetectorBankSizes = reduce_t.DetectorBankSizes
 NeXusDetectorName = reduce_t.NeXusDetectorName
