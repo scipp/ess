@@ -60,3 +60,20 @@ def test_workflow_raises_if_event_data_missing() -> None:
 
     with pytest.raises(ValueError, match="Expected"):
         _call_workflow(wf, monitor_2=next(generator2))
+
+
+def test_workflow_ignores_extra_event_data() -> None:
+    filename = data.loki_tutorial_sample_run_60250()
+    mon1 = snx.load(filename, root='entry/instrument/monitor_1/monitor_1_events')
+    mon2 = snx.load(filename, root='entry/instrument/monitor_2/monitor_2_events')
+    generator1 = event_data_generator(mon1)
+    generator2 = event_data_generator(mon2)
+    wf = LoKiMonitorWorkflow(filename)
+
+    result = _call_workflow(
+        wf,
+        monitor_1=next(generator1),
+        monitor_2=next(generator2),
+        monitor_3=next(generator1),
+    )
+    assert list(result) == ['Incident Monitor', 'Transmission Monitor']

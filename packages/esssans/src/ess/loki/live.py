@@ -115,7 +115,7 @@ class LoKiMonitorWorkflow:
             self._workflow.compute(NeXusMonitorName[Incident]),
             self._workflow.compute(NeXusMonitorName[Transmission]),
         }
-        if not set(nxevent_data) == required_keys:
+        if not required_keys.issubset(nxevent_data):
             raise ValueError(f"Expected {required_keys}, got {set(nxevent_data)}")
         results = self._streamed.add_chunk({JSONEventData: nxevent_data})
         return {
