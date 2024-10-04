@@ -24,7 +24,7 @@ from ess.sans.types import (
 )
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import make_params
+from common import make_workflow
 
 
 def test_sans_workflow_registers_subclasses():
@@ -59,18 +59,15 @@ def test_loki_workflow_parameters_with_param_returns_param():
 
 
 def test_loki_workflow_compute_with_single_pixel_mask():
-    params = make_params(no_masks=False)
-    params[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
-    wf = LokiAtLarmorWorkflow()
-    for key, val in params.items():
-        wf[key] = val
+    wf = make_workflow(no_masks=False)
+    wf[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
     wf[PixelMaskFilename] = loki.data.loki_tutorial_mask_filenames()[0]
     # For simplicity, insert a fake beam center instead of computing it.
     wf[BeamCenter] = sc.vector([0.0, 0.0, 0.0], unit='m')
 
     result = wf.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('Q',)
-    assert sc.identical(result.coords['Q'], params[QBins])
+    assert sc.identical(result.coords['Q'], wf.compute(QBins))
     assert result.sizes['Q'] == 100
 
 
