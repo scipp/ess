@@ -56,7 +56,7 @@ def load_json_transmission_monitor_data(
     return nexus_types.NeXusMonitorData[SampleRun, Incident](group[()])
 
 
-class LoKiMonitorWorkflow:
+class LokiMonitorWorkflow:
     """LoKi Monitor wavelength histogram workflow for live data reduction."""
 
     def __init__(self, nexus_filename: Path) -> None:
