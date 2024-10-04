@@ -106,6 +106,11 @@ class LoKiMonitorWorkflow:
             - MonitorHistogram[SampleRun, Transmission]
 
         """
+        # I think we will be getting the full path, but the workflow only needs the
+        # name of the monitor or detector group.
+        nxevent_data = {
+            key.lstrip('/').split('/')[2]: value for key, value in nxevent_data.items()
+        }
         required_keys = {
             self._workflow.compute(NeXusMonitorName[Incident]),
             self._workflow.compute(NeXusMonitorName[Transmission]),

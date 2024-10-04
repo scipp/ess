@@ -16,6 +16,13 @@ def test_can_create_loki_monitor_workflow() -> None:
     _ = LoKiMonitorWorkflow(filename)
 
 
+def _call_workflow(wf: LoKiMonitorWorkflow, **kwargs: dict) -> sc.DataGroup:
+    nxevent_data = {
+        f'/entry/instrument/{k}/{k}_events': JSONGroup(v) for k, v in kwargs.items()
+    }
+    return sc.DataGroup(wf(nxevent_data, {}))
+
+
 def test_workflow_processes_monitor_event_data_chunks() -> None:
     filename = data.loki_tutorial_sample_run_60250()
     mon1 = snx.load(filename, root='entry/instrument/monitor_1/monitor_1_events')
@@ -24,19 +31,19 @@ def test_workflow_processes_monitor_event_data_chunks() -> None:
     generator2 = event_data_generator(mon2)
     wf = LoKiMonitorWorkflow(filename)
 
-    group1 = JSONGroup(next(generator1))
-    group2 = JSONGroup(next(generator2))
-    result = sc.DataGroup(wf({'monitor_1': group1, 'monitor_2': group2}, {}))
+    group1 = next(generator1)
+    group2 = next(generator2)
+    result = _call_workflow(wf, monitor_1=group1, monitor_2=group2)
     assert list(result) == ['Incident Monitor', 'Transmission Monitor']
 
     # If we pass the same data again, we should get the same result, there is no
     # accumulation in this workflow.
-    same = sc.DataGroup(wf({'monitor_1': group1, 'monitor_2': group2}, {}))
+    same = _call_workflow(wf, monitor_1=group1, monitor_2=group2)
     assert sc.identical(same, result)
 
-    group1 = JSONGroup(next(generator1))
-    group2 = JSONGroup(next(generator2))
-    different = sc.DataGroup(wf({'monitor_1': group1, 'monitor_2': group2}, {}))
+    group1 = next(generator1)
+    group2 = next(generator2)
+    different = _call_workflow(wf, monitor_1=group1, monitor_2=group2)
     assert not sc.identical(different, result)
 
 
@@ -48,12 +55,8 @@ def test_workflow_raises_if_event_data_missing() -> None:
     generator2 = event_data_generator(mon2)
     wf = LoKiMonitorWorkflow(filename)
 
-    group1 = JSONGroup(next(generator1))
-    group2 = JSONGroup(next(generator2))
-    result = sc.DataGroup(wf({'monitor_1': group1, 'monitor_2': group2}, {}))
+    result = _call_workflow(wf, monitor_1=next(generator1), monitor_2=next(generator2))
     assert list(result) == ['Incident Monitor', 'Transmission Monitor']
 
-    group1 = JSONGroup(next(generator1))
-    group2 = JSONGroup(next(generator2))
     with pytest.raises(ValueError, match="Expected"):
-        wf({'monitor_2': group2}, {})
+        _call_workflow(wf, monitor_2=next(generator2))
