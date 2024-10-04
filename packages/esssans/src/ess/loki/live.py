@@ -84,7 +84,9 @@ class LoKiMonitorWorkflow:
         workflow.insert(load_json_incident_monitor_data)
         workflow.insert(load_json_transmission_monitor_data)
         workflow[Filename[SampleRun]] = nexus_filename
-        workflow[WavelengthBins] = sc.linspace("wavelength", 1.0, 13.0, 50 + 1)
+        workflow[WavelengthBins] = sc.linspace(
+            "wavelength", 1.0, 13.0, 50 + 1, unit='angstrom'
+        )
         return workflow
 
     def __call__(
@@ -101,5 +103,11 @@ class LoKiMonitorWorkflow:
             - MonitorHistogram[SampleRun, Transmission]
 
         """
+        required_keys = {'monitor_1', 'monitor_2'}
+        if not set(nxevent_data) == required_keys:
+            raise ValueError(f"Expected {required_keys}, got {set(nxevent_data)}")
         results = self._streamed.add_chunk({JSONEventData: nxevent_data})
-        return {str(tp): result for tp, result in results.items()}
+        return {
+            'Incident Monitor': results[MonitorHistogram[SampleRun, Incident]],
+            'Transmission Monitor': results[MonitorHistogram[SampleRun, Transmission]],
+        }
