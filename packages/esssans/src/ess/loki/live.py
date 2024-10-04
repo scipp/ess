@@ -15,6 +15,7 @@ from ess.sans.types import (
     Filename,
     Incident,
     MonitorType,
+    NeXusMonitorName,
     RunType,
     SampleRun,
     Transmission,
@@ -38,17 +39,19 @@ JSONEventData = NewType('JSONEventData', dict[str, JSONGroup])
 
 
 def load_json_incident_monitor_data(
+    name: NeXusMonitorName[Incident],
     nxevent_data: JSONEventData,
 ) -> nexus_types.NeXusMonitorData[SampleRun, Incident]:
-    json = nxevent_data['monitor_1']
+    json = nxevent_data[name]
     group = snx.Group(json, definitions=snx.base_definitions())
     return nexus_types.NeXusMonitorData[SampleRun, Incident](group[()])
 
 
 def load_json_transmission_monitor_data(
+    name: NeXusMonitorName[Transmission],
     nxevent_data: JSONEventData,
 ) -> nexus_types.NeXusMonitorData[SampleRun, Incident]:
-    json = nxevent_data['monitor_2']
+    json = nxevent_data[name]
     group = snx.Group(json, definitions=snx.base_definitions())
     return nexus_types.NeXusMonitorData[SampleRun, Incident](group[()])
 
@@ -103,7 +106,10 @@ class LoKiMonitorWorkflow:
             - MonitorHistogram[SampleRun, Transmission]
 
         """
-        required_keys = {'monitor_1', 'monitor_2'}
+        required_keys = {
+            self._workflow.compute(NeXusMonitorName[Incident]),
+            self._workflow.compute(NeXusMonitorName[Transmission]),
+        }
         if not set(nxevent_data) == required_keys:
             raise ValueError(f"Expected {required_keys}, got {set(nxevent_data)}")
         results = self._streamed.add_chunk({JSONEventData: nxevent_data})
