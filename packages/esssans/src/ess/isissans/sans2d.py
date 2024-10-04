@@ -5,7 +5,7 @@ from typing import NewType
 import sciline
 import scipp as sc
 
-from ess.reduce.nexus.generic_workflow import GenericNeXusWorkflow
+from ess.reduce.nexus.workflow import GenericNeXusWorkflow
 from ess.reduce.workflow import register_workflow
 from ess.sans import providers as sans_providers
 from ess.sans.parameters import typical_outputs
