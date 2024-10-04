@@ -8,17 +8,24 @@ import scipp as sc
 import scippnexus as snx
 
 from ess.powder import providers as powder_providers
+from ess.powder import with_pixel_mask_filenames
 from ess.powder.types import (
     AccumulatedProtonCharge,
     Position,
+    PixelMaskFilename,
     SampleRun,
     VanadiumRun,
 )
+from ess.reduce.parameter import parameter_mappers
+from ess.reduce.workflow import register_workflow
 
 from .io.cif import CIFAuthors, prepare_reduced_dspacing_cif
 from .io.geant4 import LoadGeant4Workflow
+from .parameters import typical_outputs
 
 _dream_providers = (prepare_reduced_dspacing_cif,)
+
+parameter_mappers[PixelMaskFilename] = with_pixel_mask_filenames
 
 
 def default_parameters() -> dict:
@@ -37,6 +44,7 @@ def default_parameters() -> dict:
     }
 
 
+@register_workflow
 def DreamGeant4Workflow() -> sciline.Pipeline:
     """
     Workflow with default parameters for the Dream Geant4 simulation.
@@ -46,6 +54,7 @@ def DreamGeant4Workflow() -> sciline.Pipeline:
         wf.insert(provider)
     for key, value in default_parameters().items():
         wf[key] = value
+    wf.typical_outputs = typical_outputs
     return wf
 
 
