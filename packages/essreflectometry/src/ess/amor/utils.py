@@ -1,3 +1,6 @@
+from collections.abc import Sequence
+
+import numpy as np
 import scipp as sc
 
 from ess.reflectometry.types import (
@@ -70,22 +73,49 @@ def theta_grid(
     return grid
 
 
-def wavelength_theta_diagnostic_figure(
-    da: ReflectivityData,
-    thbins: ThetaBins[SampleRun],
-) -> WavelengthThetaFigure:
-    da = da.bins.concat(set(da.dims) - {"wavelength"}).hist(theta=thbins).transpose()
-    p = da.plot(norm="log")
-    for a in sc.linspace("_", 0.1, 3, 10):
+def wavelength_theta_figure(
+    da: sc.DataArray,
+    wavelength_bins: sc.Variable | None = None,
+    theta_bins: sc.Variable | None = None,
+    mu: sc.Variable | None = None,
+    nu: sc.Variable | None = None,
+    q_edges_to_display: Sequence[sc.Variable] = (),
+):
+    da = da.bins.concat(set(da.dims) - {"wavelength", "theta"})
+
+    bins = {}
+    if mu is not None and nu is not None:
+        bins['theta'] = theta_grid(nu=nu, mu=mu)
+    if theta_bins is not None:
+        bins['theta'] = theta_bins
+    if wavelength_bins is not None:
+        bins['wavelength'] = wavelength_bins
+
+    if 'theta' not in da.dims and 'theta' not in bins:
+        raise ValueError('No theta binning provided')
+
+    if 'wavelength' not in da.dims and 'wavelength' not in bins:
+        raise ValueError('No wavelength binning provided')
+
+    h = da.hist(**bins).transpose(('theta', 'wavelength'))
+    p = h.plot(norm="log")
+    for q in q_edges_to_display:
         p.ax.plot(
-            [sc.scalar(0.0), da.coords["wavelength"].max().value],
-            [sc.scalar(0.0), a * da.coords["theta"].max().value],
+            [0.0, 4 * np.pi * (sc.sin(h.coords["theta"].max()) / q).value],
+            [0.0, h.coords["theta"].max().value],
             linestyle="solid",
             linewidth=0.5,
             color="black",
             marker=None,
         )
     return p
+
+
+def wavelength_theta_diagnostic_figure(
+    da: ReflectivityData,
+    thbins: ThetaBins[SampleRun],
+) -> WavelengthThetaFigure:
+    return wavelength_theta_figure(da, theta_bins=thbins)
 
 
 def q_theta_diagnostic_figure(
