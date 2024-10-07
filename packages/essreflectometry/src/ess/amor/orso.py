@@ -14,10 +14,10 @@ from ..reflectometry.orso import (
     OrsoIofQDataset,
     OrsoReduction,
 )
-from ..reflectometry.types import NormalizedIofQ, QResolution
+from ..reflectometry.types import QResolution, ReflectivityOverQ
 
 
-def build_orso_instrument(events: NormalizedIofQ) -> OrsoInstrument:
+def build_orso_instrument(events: ReflectivityOverQ) -> OrsoInstrument:
     """Build ORSO instrument metadata from intermediate reduction results for Amor.
 
     This assumes specular reflection and sets the incident angle equal to the computed
@@ -33,7 +33,7 @@ def build_orso_instrument(events: NormalizedIofQ) -> OrsoInstrument:
 
 
 def build_orso_iofq_dataset(
-    iofq: NormalizedIofQ,
+    iofq: ReflectivityOverQ,
     sigma_q: QResolution,
     data_source: OrsoDataSource,
     reduction: OrsoReduction,

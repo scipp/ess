@@ -2,9 +2,9 @@ import scipp as sc
 
 from ess.reflectometry.types import (
     DetectorRotation,
-    NormalizedIofQ,
     QBins,
     ReflectivityData,
+    ReflectivityOverQ,
     RunType,
     SampleRotation,
     SampleRun,
@@ -112,7 +112,7 @@ def diagnostic_view(
     lath: WavelengthThetaFigure,
     laz: WavelengthZIndexFigure,
     qth: QThetaFigure,
-    ioq: NormalizedIofQ,
+    ioq: ReflectivityOverQ,
 ) -> ReflectivityDiagnosticsView:
     ioq = ioq.hist().plot(norm="log")
     return (ioq + laz) / (lath + qth)

@@ -64,7 +64,7 @@ IdealReferenceIntensity = NewType("IdealReferenceIntensity", sc.DataArray)
 NormalizationFactor = NewType("NormalizationFactor", sc.DataArray)
 """:code`IdealReferenceIntensity` with added coordinate "sample"-Q"""
 
-NormalizedIofQ = NewType("NormalizedIofQ", sc.DataArray)
+ReflectivityOverQ = NewType("ReflectivityOverQ", sc.DataArray)
 """Intensity histogram over momentum transfer
 normalized by the calibrated reference measurement."""
 
