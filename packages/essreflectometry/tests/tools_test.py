@@ -146,6 +146,29 @@ def test_combined_curves():
     )
 
 
+@pytest.mark.filterwarnings("ignore:invalid value encountered in divide")
+def test_combined_curves_resolution():
+    qgrid = sc.linspace('Q', 0, 1, 26)
+    data = sc.concat(
+        (
+            sc.ones(dims=['Q'], shape=[10], with_variances=True),
+            0.5 * sc.ones(dims=['Q'], shape=[15], with_variances=True),
+        ),
+        dim='Q',
+    )
+    data.variances[:] = 0.1
+    curves = (
+        curve(data, 0, 0.3),
+        curve(0.5 * data, 0.2, 0.7),
+        curve(0.25 * data, 0.6, 1.0),
+    )
+    curves[0].coords['Q_resolution'] = sc.midpoints(curves[0].coords['Q']) / 5
+    combined = combine_curves(curves, qgrid)
+    assert 'Q_resolution' in combined.coords
+    assert combined.coords['Q_resolution'][0] == curves[0].coords['Q_resolution'][1]
+    assert sc.isnan(combined.coords['Q_resolution'][-1])
+
+
 def test_linlogspace_linear():
     q_lin = linlogspace(
         dim='qz', edges=[0.008, 0.08], scale='linear', num=50, unit='1/angstrom'
