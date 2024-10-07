@@ -3,8 +3,10 @@
 import sciline
 
 from ess.reduce.nexus.workflow import GenericNeXusWorkflow
+from ess.reduce.workflow import register_workflow
 from ess.sans import providers as sans_providers
 from ess.sans.io import read_xml_detector_masking
+from ess.sans.parameters import typical_outputs
 
 from .general import default_parameters
 from .io import load_tutorial_direct_beam, load_tutorial_run
@@ -21,6 +23,7 @@ def set_mantid_log_level(level: int = 3):
         pass
 
 
+@register_workflow
 def ZoomWorkflow() -> sciline.Pipeline:
     """Create Zoom workflow with default parameters."""
     from . import providers as isis_providers
@@ -35,9 +38,11 @@ def ZoomWorkflow() -> sciline.Pipeline:
     for key, param in default_parameters().items():
         workflow[key] = param
     workflow.insert(read_xml_detector_masking)
+    workflow.typical_outputs = typical_outputs
     return workflow
 
 
+@register_workflow
 def ZoomTutorialWorkflow() -> sciline.Pipeline:
     """
     Create Zoom tutorial workflow.
