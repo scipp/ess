@@ -50,10 +50,10 @@ def load_json_incident_monitor_data(
 def load_json_transmission_monitor_data(
     name: NeXusMonitorName[Transmission],
     nxevent_data: JSONEventData,
-) -> nexus_types.NeXusMonitorData[SampleRun, Incident]:
+) -> nexus_types.NeXusMonitorData[SampleRun, Transmission]:
     json = nxevent_data[name]
     group = snx.Group(json, definitions=snx.base_definitions())
-    return nexus_types.NeXusMonitorData[SampleRun, Incident](group[()])
+    return nexus_types.NeXusMonitorData[SampleRun, Transmission](group[()])
 
 
 class LokiMonitorWorkflow:
