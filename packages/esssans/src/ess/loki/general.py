@@ -6,6 +6,7 @@ Default parameters, providers and utility functions for the loki workflow.
 
 import sciline
 import scipp as sc
+import scippnexus as snx
 
 from ess import sans
 from ess.reduce.nexus.workflow import GenericNeXusWorkflow
@@ -23,10 +24,9 @@ from ..sans.types import (
     DirectBeam,
     DirectBeamFilename,
     Incident,
-    LabFrameTransform,
     MonitorData,
     MonitorType,
-    NeXusDetector,
+    NeXusComponent,
     NeXusMonitorName,
     NonBackgroundWavelengthRange,
     PixelShapePath,
@@ -80,17 +80,10 @@ def monitor_to_tof(
 
 
 def detector_pixel_shape(
-    detector: NeXusDetector[ScatteringRunType],
+    detector: NeXusComponent[snx.NXdetector, ScatteringRunType],
     pixel_shape_path: PixelShapePath,
 ) -> DetectorPixelShape[ScatteringRunType]:
     return DetectorPixelShape[ScatteringRunType](detector[pixel_shape_path])
-
-
-def detector_lab_frame_transform(
-    detector: NeXusDetector[ScatteringRunType],
-    transform_path: TransformationPath,
-) -> LabFrameTransform[ScatteringRunType]:
-    return LabFrameTransform[ScatteringRunType](detector[transform_path])
 
 
 def load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
@@ -98,13 +91,7 @@ def load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
     return DirectBeam(sc.io.load_hdf5(filename))
 
 
-loki_providers = (
-    detector_pixel_shape,
-    detector_lab_frame_transform,
-    data_to_tof,
-    load_direct_beam,
-    monitor_to_tof,
-)
+loki_providers = (detector_pixel_shape, data_to_tof, load_direct_beam, monitor_to_tof)
 
 
 @register_workflow

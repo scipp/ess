@@ -8,7 +8,9 @@ from typing import NewType
 
 import sciline
 import scipp as sc
+import scippnexus as snx
 
+from ess.reduce.nexus.types import NeXusTransformation
 from ess.sans.types import (
     BeamCenter,
     CalibratedDetector,
@@ -20,7 +22,6 @@ from ess.sans.types import (
     DetectorPositionOffset,
     DimsToKeep,
     Incident,
-    LabFrameTransform,
     MonitorData,
     MonitorPositionOffset,
     MonitorType,
@@ -194,9 +195,11 @@ def helium3_tube_detector_pixel_shape() -> DetectorPixelShape[ScatteringRunType]
     return pixel_shape
 
 
-def lab_frame_transform() -> LabFrameTransform[ScatteringRunType]:
+def lab_frame_transform() -> NeXusTransformation[snx.NXdetector, ScatteringRunType]:
     # Rotate +y to -x
-    return sc.spatial.rotation(value=[0, 0, 1 / 2**0.5, 1 / 2**0.5])
+    return NeXusTransformation[snx.NXdetector, ScatteringRunType](
+        sc.spatial.rotation(value=[0, 0, 1 / 2**0.5, 1 / 2**0.5])
+    )
 
 
 def get_detector_ids_from_sample_run(data: TofData[SampleRun]) -> DetectorIDs:

@@ -1,12 +1,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
+import scippnexus as snx
 from scipp.core import concepts
 
+from ess.reduce.nexus.types import CalibratedBeamline, NeXusTransformation
 from ess.reduce.uncertainty import UncertaintyBroadcastMode, broadcast_uncertainties
 
 from .types import (
-    CalibratedDetector,
     CleanDirectBeam,
     CleanMonitor,
     CleanWavelength,
@@ -18,7 +19,6 @@ from .types import (
     IofQ,
     IofQPart,
     IofQxy,
-    LabFrameTransform,
     MaskedSolidAngle,
     MonitorTerm,
     Numerator,
@@ -39,9 +39,9 @@ from .types import (
 
 
 def solid_angle(
-    data: CalibratedDetector[ScatteringRunType],
+    data: CalibratedBeamline[ScatteringRunType],
     pixel_shape: DetectorPixelShape[ScatteringRunType],
-    transform: LabFrameTransform[ScatteringRunType],
+    transform: NeXusTransformation[snx.NXdetector, ScatteringRunType],
 ) -> SolidAngle[ScatteringRunType]:
     """
     Solid angle for cylindrical pixels.
@@ -70,7 +70,7 @@ def solid_angle(
     face_1_center, face_1_edge, face_2_center = (
         pixel_shape['vertices']['vertex', i] for i in range(3)
     )
-    cylinder_axis = transform * face_2_center - transform * face_1_center
+    cylinder_axis = transform.value * face_2_center - transform.value * face_1_center
     radius = sc.norm(face_1_center - face_1_edge)
     length = sc.norm(cylinder_axis)
 
