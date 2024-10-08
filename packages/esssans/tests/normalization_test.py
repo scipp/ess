@@ -4,8 +4,10 @@
 import numpy as np
 import pytest
 import scipp as sc
+import scippnexus as snx
 
 from ess.isissans.data import sans2d_solid_angle_reference
+from ess.reduce.nexus.types import NeXusTransformation, SampleRun
 from ess.sans import normalization
 
 # See https://github.com/mantidproject/mantid/blob/main/instrument/SANS2D_Definition_Tubes.xml  # noqa: E501
@@ -28,7 +30,9 @@ def _sans2d_geometry():
         )
     }
     # Rotate +y to -x
-    transform = sc.spatial.rotation(value=[0, 0, 1 / 2**0.5, 1 / 2**0.5])
+    transform = NeXusTransformation[snx.NXdetector, SampleRun](
+        sc.spatial.rotation(value=[0, 0, 1 / 2**0.5, 1 / 2**0.5])
+    )
     return {'pixel_shape': pixel_shape, 'transform': transform}
 
 
