@@ -15,6 +15,7 @@ from ess.sans.types import (
     Filename,
     Incident,
     MonitorType,
+    NeXusMonitorName,
     RunType,
     SampleRun,
     Transmission,
@@ -38,22 +39,24 @@ JSONEventData = NewType('JSONEventData', dict[str, JSONGroup])
 
 
 def load_json_incident_monitor_data(
+    name: NeXusMonitorName[Incident],
     nxevent_data: JSONEventData,
 ) -> nexus_types.NeXusMonitorData[SampleRun, Incident]:
-    json = nxevent_data['monitor_1']
+    json = nxevent_data[name]
     group = snx.Group(json, definitions=snx.base_definitions())
     return nexus_types.NeXusMonitorData[SampleRun, Incident](group[()])
 
 
 def load_json_transmission_monitor_data(
+    name: NeXusMonitorName[Transmission],
     nxevent_data: JSONEventData,
-) -> nexus_types.NeXusMonitorData[SampleRun, Incident]:
-    json = nxevent_data['monitor_2']
+) -> nexus_types.NeXusMonitorData[SampleRun, Transmission]:
+    json = nxevent_data[name]
     group = snx.Group(json, definitions=snx.base_definitions())
-    return nexus_types.NeXusMonitorData[SampleRun, Incident](group[()])
+    return nexus_types.NeXusMonitorData[SampleRun, Transmission](group[()])
 
 
-class LoKiMonitorWorkflow:
+class LokiMonitorWorkflow:
     """LoKi Monitor wavelength histogram workflow for live data reduction."""
 
     def __init__(self, nexus_filename: Path) -> None:
@@ -84,7 +87,9 @@ class LoKiMonitorWorkflow:
         workflow.insert(load_json_incident_monitor_data)
         workflow.insert(load_json_transmission_monitor_data)
         workflow[Filename[SampleRun]] = nexus_filename
-        workflow[WavelengthBins] = sc.linspace("wavelength", 1.0, 13.0, 50 + 1)
+        workflow[WavelengthBins] = sc.linspace(
+            "wavelength", 1.0, 13.0, 50 + 1, unit='angstrom'
+        )
         return workflow
 
     def __call__(
@@ -101,5 +106,19 @@ class LoKiMonitorWorkflow:
             - MonitorHistogram[SampleRun, Transmission]
 
         """
+        # I think we will be getting the full path, but the workflow only needs the
+        # name of the monitor or detector group.
+        nxevent_data = {
+            key.lstrip('/').split('/')[2]: value for key, value in nxevent_data.items()
+        }
+        required_keys = {
+            self._workflow.compute(NeXusMonitorName[Incident]),
+            self._workflow.compute(NeXusMonitorName[Transmission]),
+        }
+        if not required_keys.issubset(nxevent_data):
+            raise ValueError(f"Expected {required_keys}, got {set(nxevent_data)}")
         results = self._streamed.add_chunk({JSONEventData: nxevent_data})
-        return {str(tp): result for tp, result in results.items()}
+        return {
+            'Incident Monitor': results[MonitorHistogram[SampleRun, Incident]],
+            'Transmission Monitor': results[MonitorHistogram[SampleRun, Transmission]],
+        }
