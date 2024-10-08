@@ -134,7 +134,9 @@ def reflectivity_per_event(
     Returns:
         reflectivity "per event"
     """
-    reflectivity = da.bin(wavelength=wbins) / sc.values(n)
+    reflectivity = da.bin(wavelength=wbins, dim=set(da.dims) - set(n.dims)) / sc.values(
+        n
+    )
     for coord, value in da.coords.items():
         if (
             not isinstance(value, sc.Variable)
