@@ -58,6 +58,8 @@ test = [
 
 [project.entry-points."beamlime.workflow_plugin"]
 ess-loki-monitor = "ess.loki.live:LokiMonitorWorkflow"
+ess-loki-transmission-run = "ess.loki.live:LokiTransmissionRunWorkflow"
+ess-loki = "ess.loki.live:LokiAtLarmorAgBehWorkflow"
 
 [tool.setuptools_scm]
 

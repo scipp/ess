@@ -18,6 +18,7 @@ from ess.sans.types import (
     BeamCenter,
     CorrectForGravity,
     Denominator,
+    DetectorData,
     DirectBeamFilename,
     EmptyBeamRun,
     Filename,
@@ -34,6 +35,7 @@ from ess.sans.types import (
     RunType,
     SampleRun,
     Transmission,
+    TransmissionFraction,
     TransmissionRun,
     UncertaintyBroadcastMode,
     WavelengthBins,
@@ -50,6 +52,24 @@ def _hist_monitor_wavelength(
     wavelength_bin: WavelengthBins, monitor: WavelengthMonitor[RunType, MonitorType]
 ) -> MonitorHistogram[RunType, MonitorType]:
     return monitor.hist(wavelength=wavelength_bin)
+
+
+def sample_run_is_transmission_run(
+    da: WavelengthMonitor[SampleRun, MonitorType],
+) -> WavelengthMonitor[TransmissionRun[SampleRun], MonitorType]:
+    return da
+
+
+RawDetectorView = NewType('RawDetectorView', sc.DataArray)
+
+
+def _raw_detector_view(data: DetectorData[SampleRun]) -> RawDetectorView:
+    da = data.hist()
+    da.coords['x'] = da.coords['position'].fields.x.copy()
+    da.coords['y'] = da.coords['position'].fields.y.copy()
+    return da.hist(y=50, x=100)
+    return data.hist().sum(('straw', 'layer'))
+    return data['layer', 0].hist().sum('straw')
 
 
 JSONEventData = NewType('JSONEventData', dict[str, JSONGroup])
@@ -129,6 +149,51 @@ def LokiMonitorWorkflow(nexus_filename: Path) -> LiveWorkflow:
     )
 
 
+_wavelength = sc.linspace("wavelength", 1.0, 13.0, 200 + 1, unit='angstrom')
+
+
+def _hist_wavelength(
+    da: sc.DataArray, wavelength: sc.Variable = _wavelength
+) -> sc.DataArray:
+    return da.hist(wavelength=wavelength)
+
+
+def _gather_monitors(
+    incident: WavelengthMonitor[TransmissionRun[SampleRun], Incident],
+    transmission: WavelengthMonitor[TransmissionRun[SampleRun], Transmission],
+) -> sc.DataGroup:
+    return sc.DataGroup(
+        {'Incident Monitor': incident, 'Transmission Monitor': transmission}
+    )
+
+
+def LokiTransmissionRunWorkflow(nexus_filename: Path) -> LiveWorkflow:
+    """Loki transmission run workflow for live data reduction."""
+    workflow = loki.LokiAtLarmorWorkflow()
+    workflow.insert(_hist_monitor_wavelength)
+    workflow.insert(sample_run_is_transmission_run)
+    workflow.insert(_gather_monitors)
+    workflow[WavelengthBins] = _wavelength
+    workflow[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
+    workflow[Filename[EmptyBeamRun]] = loki.data.loki_tutorial_run_60392()
+    return LiveWorkflow.from_workflow(
+        workflow=workflow,
+        accumulators={
+            WavelengthMonitor[
+                TransmissionRun[SampleRun], Incident
+            ]: streaming.EternalAccumulator(preprocess=_hist_wavelength),
+            WavelengthMonitor[
+                TransmissionRun[SampleRun], Transmission
+            ]: streaming.EternalAccumulator(preprocess=_hist_wavelength),
+        },
+        outputs={
+            'Monitors (cumulative)': sc.DataGroup,
+            'Transmission Fraction': TransmissionFraction[SampleRun],
+        },
+        nexus_filename=nexus_filename,
+    )
+
+
 def LokiAtLarmorAgBehWorkflow(nexus_filename: Path) -> LiveWorkflow:
     """Loki workflow for live data reduction."""
     workflow = loki.LokiAtLarmorWorkflow()
@@ -136,6 +201,9 @@ def LokiAtLarmorAgBehWorkflow(nexus_filename: Path) -> LiveWorkflow:
         workflow, masks=loki.data.loki_tutorial_mask_filenames()
     )
     workflow.insert(_hist_monitor_wavelength)
+    workflow.insert(_raw_detector_view)
+    # No, not enough signal?
+    # workflow.insert(sample_run_is_transmission_run)
 
     workflow[CorrectForGravity] = True
     workflow[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
@@ -175,10 +243,14 @@ def LokiAtLarmorAgBehWorkflow(nexus_filename: Path) -> LiveWorkflow:
         accumulators={
             ReducedQ[SampleRun, Numerator]: streaming.RollingAccumulator(window=20),
             ReducedQ[SampleRun, Denominator]: streaming.RollingAccumulator(window=20),
+            RawDetectorView: streaming.RollingAccumulator(window=20),
         },
         outputs={
             'Incident Monitor': MonitorHistogram[SampleRun, Incident],
             'Transmission Monitor': MonitorHistogram[SampleRun, Transmission],
+            # TODO This is not updating since we have separate transmission run!
+            'Transmission Fraction': TransmissionFraction[SampleRun],
+            'Raw Detector': RawDetectorView,
             'I(Q)': IofQ[SampleRun],
             'I(Q_x, Q_y)': IofQxy[SampleRun],
         },
