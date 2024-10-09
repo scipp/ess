@@ -107,6 +107,10 @@ def wavelength_theta_figure(
     ):
         if da.bins:
             da = da.bins.concat(set(da.dims) - {"wavelength", "theta"})
+        all_coords = {*da.coords, *(da.bins or da).coords}
+        if 'wavelength' not in all_coords or 'theta' not in all_coords:
+            raise ValueError('Data must have wavelength and theta coord')
+        if da.bins or set(da.dims) != {"wavelength", "theta"}:
             bins = {}
             if 'sample_rotation' in da.coords and 'detector_rotation' in da.coords:
                 bins['theta'] = theta_grid(
@@ -165,6 +169,11 @@ def q_theta_figure(
     for da, q_bins, theta_bins in zip(da, q_bins, theta_bins, strict=True):  # noqa: B020
         if da.bins:
             da = da.bins.concat(set(da.dims) - {'theta', 'Q'})
+
+        all_coords = {*da.coords, *(da.bins or da).coords}
+        if 'theta' not in all_coords or 'Q' not in all_coords:
+            raise ValueError('Data must have theta and Q coord')
+        if da.bins or set(da.dims) != {"theta", "Q"}:
             bins = {}
             if theta_bins is not None:
                 bins['theta'] = theta_bins
@@ -206,7 +215,6 @@ def wavelength_z_figure(
     for da, wavelength_bins in zip(da, wavelength_bins, strict=True):  # noqa: B020
         if da.bins:
             da = da.bins.concat(set(da.dims) - {'blade', 'wire', 'wavelength'})
-
             bins = {}
             if wavelength_bins is not None:
                 bins['wavelength'] = wavelength_bins
