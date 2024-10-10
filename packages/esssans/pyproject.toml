@@ -57,9 +57,9 @@ test = [
 "Source" = "https://github.com/scipp/esssans"
 
 [project.entry-points."beamlime.workflow_plugin"]
-ess-loki-monitor = "ess.loki.live:LokiMonitorWorkflow"
-ess-loki-transmission-run = "ess.loki.live:LokiTransmissionRunWorkflow"
-ess-loki = "ess.loki.live:LokiAtLarmorAgBehWorkflow"
+ess-loki-monitor = "ess.loki.live:LokiMonitorTestWorkflow"
+ess-loki-transmission-run = "ess.loki.live:LokiTransmissionRunTestWorkflow"
+ess-loki = "ess.loki.live:LokiAtLarmorAgBehTestWorkflow"
 
 [tool.setuptools_scm]
 

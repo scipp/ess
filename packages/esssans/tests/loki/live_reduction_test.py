@@ -6,17 +6,17 @@ import scipp as sc
 import scippnexus as snx
 
 from ess.loki import data
-from ess.loki.live import LokiMonitorWorkflow
+from ess.loki.live import LokiMonitorTestWorkflow
 from ess.reduce.nexus.json_generator import event_data_generator
 from ess.reduce.nexus.json_nexus import JSONGroup
 
 
 def test_can_create_loki_monitor_workflow() -> None:
     filename = data.loki_tutorial_sample_run_60250()
-    _ = LokiMonitorWorkflow(filename)
+    _ = LokiMonitorTestWorkflow(filename)
 
 
-def _call_workflow(wf: LokiMonitorWorkflow, **kwargs: dict) -> sc.DataGroup:
+def _call_workflow(wf: LokiMonitorTestWorkflow, **kwargs: dict) -> sc.DataGroup:
     nxevent_data = {
         f'/entry/instrument/{k}/{k}_events': JSONGroup(v) for k, v in kwargs.items()
     }
@@ -29,7 +29,7 @@ def test_workflow_processes_monitor_event_data_chunks() -> None:
     mon2 = snx.load(filename, root='entry/instrument/monitor_2/monitor_2_events')
     generator1 = event_data_generator(mon1)
     generator2 = event_data_generator(mon2)
-    wf = LokiMonitorWorkflow(filename)
+    wf = LokiMonitorTestWorkflow(filename)
 
     group1 = next(generator1)
     group2 = next(generator2)
@@ -53,7 +53,7 @@ def test_workflow_raises_if_event_data_missing() -> None:
     mon2 = snx.load(filename, root='entry/instrument/monitor_2/monitor_2_events')
     generator1 = event_data_generator(mon1)
     generator2 = event_data_generator(mon2)
-    wf = LokiMonitorWorkflow(filename)
+    wf = LokiMonitorTestWorkflow(filename)
 
     result = _call_workflow(wf, monitor_1=next(generator1), monitor_2=next(generator2))
     assert list(result) == ['Incident Monitor', 'Transmission Monitor']
@@ -68,7 +68,7 @@ def test_workflow_raises_if_event_data_not_updated() -> None:
     mon2 = snx.load(filename, root='entry/instrument/monitor_2/monitor_2_events')
     generator1 = event_data_generator(mon1)
     generator2 = event_data_generator(mon2)
-    wf = LokiMonitorWorkflow(filename)
+    wf = LokiMonitorTestWorkflow(filename)
 
     result = _call_workflow(wf, monitor_1=next(generator1), monitor_2=next(generator2))
     assert list(result) == ['Incident Monitor', 'Transmission Monitor']
@@ -87,7 +87,7 @@ def test_workflow_ignores_extra_event_data() -> None:
     mon2 = snx.load(filename, root='entry/instrument/monitor_2/monitor_2_events')
     generator1 = event_data_generator(mon1)
     generator2 = event_data_generator(mon2)
-    wf = LokiMonitorWorkflow(filename)
+    wf = LokiMonitorTestWorkflow(filename)
 
     result = _call_workflow(
         wf,
