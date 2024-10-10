@@ -59,6 +59,7 @@ def amor_pipeline() -> sciline.Pipeline:
 def test_run_data_pipeline(amor_pipeline: sciline.Pipeline):
     res = amor_pipeline.compute(ReflectivityOverQ)
     assert "Q" in res.coords
+    assert "Q_resolution" in res.coords
 
 
 def test_run_full_pipeline(amor_pipeline: sciline.Pipeline):
