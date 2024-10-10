@@ -131,7 +131,7 @@ class AccumulatorFactories:
 def make_monitor_workflow(
     nexus_filename: Path, workflow: sciline.Pipeline
 ) -> LiveWorkflow:
-    """Loki monitor wavelength histogram workflow for live data reduction."""
+    """Live workflow for wavelength monitors."""
     # By adding accumulators we obtain automatic histogramming of our outputs.
     factories = AccumulatorFactories(accum=streaming.RollingAccumulator, window=1)
     factory = factories.with_wavelength_hist
@@ -153,7 +153,7 @@ def make_monitor_workflow(
 def make_transmission_run_workflow(
     nexus_filename: Path, workflow: sciline.Pipeline
 ) -> LiveWorkflow:
-    """Loki transmission run workflow for live data reduction."""
+    """Live workflow for a transmission run."""
     workflow.insert(_gather_monitors)
     factories = AccumulatorFactories(accum=streaming.EternalAccumulator)
     factory = factories.with_wavelength_hist
@@ -172,10 +172,10 @@ def make_transmission_run_workflow(
     )
 
 
-def make_loki_workflow(
+def make_sample_run_workflow(
     nexus_filename: Path, workflow: sciline.Pipeline
 ) -> LiveWorkflow:
-    """Loki workflow for live data reduction."""
+    """Live workflow for a sample run."""
     workflow.insert(_raw_detector_view)
     outputs = {'Raw Detector': RawDetectorView}
     try:
@@ -203,7 +203,7 @@ def make_loki_workflow(
 
 
 def LokiMonitorTestWorkflow(nexus_filename: Path) -> LiveWorkflow:
-    """Fully preconfigured monitor workflow for, testing with Beamlime."""
+    """Fully preconfigured monitor workflow, for testing with Beamlime."""
     return make_monitor_workflow(nexus_filename, _configured_Larmor_workflow())
 
 
@@ -214,4 +214,4 @@ def LokiTransmissionRunTestWorkflow(nexus_filename: Path) -> LiveWorkflow:
 
 def LokiAtLarmorAgBehTestWorkflow(nexus_filename: Path) -> LiveWorkflow:
     """Fully preconfigured I(Q) workflow for AgBeh, for testing with Beamlime."""
-    return make_loki_workflow(nexus_filename, _configured_Larmor_AgBeh_workflow())
+    return make_sample_run_workflow(nexus_filename, _configured_Larmor_AgBeh_workflow())
