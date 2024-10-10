@@ -4,6 +4,7 @@
 import numpy as np
 import sciline
 import scipp as sc
+import scippnexus as snx
 
 from ess.powder.types import (
     CalibratedDetector,
@@ -11,12 +12,12 @@ from ess.powder.types import (
     CalibrationFilename,
     DetectorData,
     Filename,
-    NeXusDetector,
+    NeXusComponent,
     NeXusDetectorName,
-    NeXusSample,
-    NeXusSource,
+    Position,
     RunType,
 )
+from ess.reduce.nexus.types import CalibratedBeamline
 from ess.reduce.nexus.workflow import GenericNeXusWorkflow
 
 MANTLE_DETECTOR_ID = sc.index(7)
@@ -60,9 +61,23 @@ def load_geant4_csv(file_path: Filename[RunType]) -> AllRawDetectors[RunType]:
 
 def extract_geant4_detector(
     detectors: AllRawDetectors[RunType], detector_name: NeXusDetectorName
-) -> NeXusDetector[RunType]:
+) -> NeXusComponent[snx.NXdetector, RunType]:
     """Extract a single detector from a loaded GEANT4 simulation."""
-    return NeXusDetector[RunType](detectors["instrument"][detector_name])
+    return NeXusComponent[snx.NXdetector, RunType](
+        detectors["instrument"][detector_name]
+    )
+
+
+def get_calibrated_geant4_detector(
+    detector: NeXusComponent[snx.NXdetector, RunType],
+) -> CalibratedDetector[RunType]:
+    """
+    Replacement for :py:func:`ess.reduce.nexus.workflow.get_calibrated_detector`.
+
+    Since the Geant4 detectors already have computed positions as well as logical shape,
+    this just extracts the relevant event data.
+    """
+    return detector['events'].copy(deep=False)
 
 
 def _load_raw_events(file_path: str) -> sc.DataArray:
@@ -171,21 +186,21 @@ def geant4_load_calibration(filename: CalibrationFilename) -> CalibrationData:
 
 
 def dummy_assemble_detector_data(
-    detector: CalibratedDetector[RunType],
+    detector: CalibratedBeamline[RunType],
 ) -> DetectorData[RunType]:
     """Dummy assembly of detector data, detector already contains neutron data."""
     return DetectorData[RunType](detector)
 
 
-def dummy_source() -> NeXusSource[RunType]:
-    return NeXusSource[RunType](
-        sc.DataGroup(position=sc.vector([np.nan, np.nan, np.nan], unit="mm"))
+def dummy_source_position() -> Position[snx.NXsource, RunType]:
+    return Position[snx.NXsource, RunType](
+        sc.vector([np.nan, np.nan, np.nan], unit="mm")
     )
 
 
-def dummy_sample() -> NeXusSample[RunType]:
-    return NeXusSample[RunType](
-        sc.DataGroup(position=sc.vector([np.nan, np.nan, np.nan], unit="mm"))
+def dummy_sample_position() -> Position[snx.NXsample, RunType]:
+    return Position[snx.NXsample, RunType](
+        sc.vector([np.nan, np.nan, np.nan], unit="mm")
     )
 
 
@@ -197,7 +212,8 @@ def LoadGeant4Workflow() -> sciline.Pipeline:
     wf.insert(extract_geant4_detector)
     wf.insert(load_geant4_csv)
     wf.insert(geant4_load_calibration)
+    wf.insert(get_calibrated_geant4_detector)
     wf.insert(dummy_assemble_detector_data)
-    wf.insert(dummy_source)
-    wf.insert(dummy_sample)
+    wf.insert(dummy_source_position)
+    wf.insert(dummy_sample_position)
     return wf

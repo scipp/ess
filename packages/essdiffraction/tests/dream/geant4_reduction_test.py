@@ -7,6 +7,7 @@ import pytest
 import sciline
 import scipp as sc
 import scipp.testing
+import scippnexus as snx
 from scippneutron.io.cif import Author
 
 import ess.dream.data  # noqa: F401
@@ -22,9 +23,8 @@ from ess.powder.types import (
     IofDspacingTwoTheta,
     MaskedData,
     NeXusDetectorName,
-    NeXusSample,
-    NeXusSource,
     NormalizedByProtonCharge,
+    Position,
     ReducedDspacingCIF,
     SampleRun,
     TofMask,
@@ -35,8 +35,8 @@ from ess.powder.types import (
     WavelengthMask,
 )
 
-sample = sc.DataGroup(position=sc.vector([0.0, 0.0, 0.0], unit='mm'))
-source = sc.DataGroup(position=sc.vector([-3.478, 0.0, -76550], unit='mm'))
+sample = sc.vector([0.0, 0.0, 0.0], unit='mm')
+source = sc.vector([-3.478, 0.0, -76550], unit='mm')
 charge = sc.scalar(1.0, unit='µAh')
 
 params = {
@@ -48,10 +48,10 @@ params = {
     DspacingBins: sc.linspace('dspacing', 0.0, 2.3434, 201, unit='angstrom'),
     TofMask: lambda x: (x < sc.scalar(0.0, unit='ns'))
     | (x > sc.scalar(86e6, unit='ns')),
-    NeXusSample[SampleRun]: sample,
-    NeXusSample[VanadiumRun]: sample,
-    NeXusSource[SampleRun]: source,
-    NeXusSource[VanadiumRun]: source,
+    Position[snx.NXsample, SampleRun]: sample,
+    Position[snx.NXsample, VanadiumRun]: sample,
+    Position[snx.NXsource, SampleRun]: source,
+    Position[snx.NXsource, VanadiumRun]: source,
     AccumulatedProtonCharge[SampleRun]: charge,
     AccumulatedProtonCharge[VanadiumRun]: charge,
     TwoThetaMask: None,
