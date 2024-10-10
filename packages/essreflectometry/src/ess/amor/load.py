@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+import warnings
+
 import scipp as sc
 
 from ess.reduce import nexus
@@ -23,6 +25,8 @@ from .types import (
     ChopperPhase,
     RawChopper,
 )
+
+warnings.filterwarnings('ignore', message=r'Failed to convert .* into a transformation')
 
 
 def load_detector(
