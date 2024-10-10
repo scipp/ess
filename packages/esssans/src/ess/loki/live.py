@@ -29,7 +29,6 @@ from ess.sans.types import (
     Incident,
     IofQ,
     IofQxy,
-    MonitorType,
     Numerator,
     QBins,
     QxBins,
@@ -47,18 +46,6 @@ from ess.sans.types import (
     WavelengthMonitor,
 )
 
-
-class MonitorHistogram(
-    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
-): ...
-
-
-def _hist_monitor_wavelength(
-    wavelength_bin: WavelengthBins, monitor: WavelengthMonitor[RunType, MonitorType]
-) -> MonitorHistogram[RunType, MonitorType]:
-    return monitor.hist(wavelength=wavelength_bin)
-
-
 RawDetectorView = NewType('RawDetectorView', sc.DataArray)
 
 
@@ -72,12 +59,6 @@ def _raw_detector_view(data: DetectorData[SampleRun]) -> RawDetectorView:
 
 
 _wavelength = sc.linspace("wavelength", 1.0, 13.0, 200 + 1, unit='angstrom')
-
-
-def _hist_wavelength(
-    da: sc.DataArray, wavelength: sc.Variable = _wavelength
-) -> sc.DataArray:
-    return da.hist(wavelength=wavelength)
 
 
 class GatheredMonitors(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup): ...
@@ -119,25 +100,40 @@ def _configured_Larmor_AgBeh_workflow() -> sciline.Pipeline:
     return wf
 
 
+class AccumulatorFactoryCreator:
+    def __init__(self, accum: type[streaming.Accumulator], **kwargs) -> None:
+        self._accum = accum
+        self._kwargs = kwargs
+
+    def make(self) -> streaming.Accumulator:
+        return self._accum(**self._kwargs)
+
+    def with_hist(self) -> streaming.Accumulator:
+        return self._accum(**self._kwargs, preprocess=streaming.maybe_hist)
+
+    def with_wavelength_hist(self, wav: WavelengthBins) -> streaming.Accumulator:
+        return self._accum(**self._kwargs, preprocess=lambda x: x.hist(wavelength=wav))
+
+
 def LokiMonitorWorkflow(nexus_filename: Path) -> LiveWorkflow:
     """Loki monitor wavelength histogram workflow for live data reduction."""
     workflow = loki.LokiAtLarmorWorkflow()
-    workflow.insert(_hist_monitor_wavelength)
     workflow[WavelengthBins] = _wavelength
+    creator = AccumulatorFactoryCreator(accum=streaming.RollingAccumulator, window=1)
+    factory = creator.with_wavelength_hist
     return LiveWorkflow.from_workflow(
         workflow=workflow,
-        accumulators={},
+        accumulators={
+            WavelengthMonitor[SampleRun, Incident]: factory,
+            WavelengthMonitor[SampleRun, Transmission]: factory,
+        },
         outputs={
-            'Incident Monitor': MonitorHistogram[SampleRun, Incident],
-            'Transmission Monitor': MonitorHistogram[SampleRun, Transmission],
+            'Incident Monitor': WavelengthMonitor[SampleRun, Incident],
+            'Transmission Monitor': WavelengthMonitor[SampleRun, Transmission],
         },
         run_type=SampleRun,
         nexus_filename=nexus_filename,
     )
-
-
-def _eternal_wav_hist(wav: WavelengthBins) -> streaming.Accumulator:
-    return streaming.EternalAccumulator(preprocess=lambda x: x.hist(wavelength=wav))
 
 
 def LokiTransmissionRunWorkflow(nexus_filename: Path) -> LiveWorkflow:
@@ -147,13 +143,13 @@ def LokiTransmissionRunWorkflow(nexus_filename: Path) -> LiveWorkflow:
     workflow[WavelengthBins] = _wavelength
     workflow[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
     workflow[Filename[EmptyBeamRun]] = loki.data.loki_tutorial_run_60392()
+    creator = AccumulatorFactoryCreator(accum=streaming.EternalAccumulator)
+    factory = creator.with_wavelength_hist
     return LiveWorkflow.from_workflow(
         workflow=workflow,
         accumulators={
-            WavelengthMonitor[TransmissionRun[SampleRun], Incident]: _eternal_wav_hist,
-            WavelengthMonitor[
-                TransmissionRun[SampleRun], Transmission
-            ]: _eternal_wav_hist,
+            WavelengthMonitor[TransmissionRun[SampleRun], Incident]: factory,
+            WavelengthMonitor[TransmissionRun[SampleRun], Transmission]: factory,
         },
         outputs={
             'Monitors (cumulative)': GatheredMonitors[TransmissionRun[SampleRun]],
@@ -167,7 +163,6 @@ def LokiTransmissionRunWorkflow(nexus_filename: Path) -> LiveWorkflow:
 def LokiAtLarmorAgBehWorkflow(nexus_filename: Path) -> LiveWorkflow:
     """Loki workflow for live data reduction."""
     workflow = _configured_Larmor_AgBeh_workflow()
-    workflow.insert(_hist_monitor_wavelength)
     workflow.insert(_raw_detector_view)
     outputs = {'Raw Detector': RawDetectorView}
     try:
@@ -177,15 +172,16 @@ def LokiAtLarmorAgBehWorkflow(nexus_filename: Path) -> LiveWorkflow:
     else:
         iofq_keys = (BackgroundSubtractedIofQ, BackgroundSubtractedIofQxy)
     outputs.update(dict(zip(('I(Q)', '$I(Q_x, Q_y)$'), iofq_keys, strict=True)))
+    factory = AccumulatorFactoryCreator(accum=streaming.RollingAccumulator, window=20)
 
     return LiveWorkflow.from_workflow(
         workflow=workflow,
         accumulators={
-            ReducedQ[SampleRun, Numerator]: streaming.RollingAccumulator(window=20),
-            ReducedQ[SampleRun, Denominator]: streaming.RollingAccumulator(window=20),
-            ReducedQxy[SampleRun, Numerator]: streaming.RollingAccumulator(window=20),
-            ReducedQxy[SampleRun, Denominator]: streaming.RollingAccumulator(window=20),
-            RawDetectorView: streaming.RollingAccumulator(window=20),
+            ReducedQ[SampleRun, Numerator]: factory.with_hist,
+            ReducedQ[SampleRun, Denominator]: factory.with_hist,
+            ReducedQxy[SampleRun, Numerator]: factory.with_hist,
+            ReducedQxy[SampleRun, Denominator]: factory.with_hist,
+            RawDetectorView: factory.make,
         },
         outputs=outputs,
         run_type=SampleRun,
