@@ -16,7 +16,7 @@ comm==0.2.2
     # via ipywidgets
 contourpy==1.3.0
     # via matplotlib
-cyclebane==24.6.0
+cyclebane==24.10.0
     # via sciline
 cycler==0.12.1
     # via matplotlib
@@ -42,7 +42,7 @@ importlib-metadata==8.5.0
     # via dask
 ipydatawidgets==4.3.5
     # via pythreejs
-ipython==8.27.0
+ipython==8.28.0
     # via ipywidgets
 ipywidgets==8.1.5
     # via
@@ -64,7 +64,7 @@ matplotlib-inline==0.1.7
     # via ipython
 mpltoolbox==24.5.1
     # via scippneutron
-networkx==3.3
+networkx==3.4
     # via cyclebane
 parso==0.8.4
     # via jedi
@@ -115,7 +115,7 @@ scipy==1.14.1
     #   scippnexus
 stack-data==0.6.3
     # via ipython
-toolz==0.12.1
+toolz==1.0.0
     # via
     #   dask
     #   partd

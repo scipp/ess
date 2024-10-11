@@ -7,7 +7,7 @@
 #
 certifi==2024.8.30
     # via requests
-charset-normalizer==3.3.2
+charset-normalizer==3.4.0
     # via requests
 exceptiongroup==1.2.2
     # via pytest
@@ -15,7 +15,7 @@ idna==3.10
     # via requests
 iniconfig==2.0.0
     # via pytest
-numpy==2.1.1
+numpy==2.1.2
     # via pandas
 packaging==24.1
     # via
@@ -39,7 +39,7 @@ requests==2.32.3
     # via pooch
 six==1.16.0
     # via python-dateutil
-tomli==2.0.1
+tomli==2.0.2
     # via pytest
 tzdata==2024.2
     # via pandas

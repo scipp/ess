@@ -5,12 +5,12 @@ import itertools
 
 import sciline
 import scipp as sc
+import scippnexus as snx
 
 from ess.powder import providers as powder_providers
 from ess.powder.types import (
     AccumulatedProtonCharge,
-    NeXusSample,
-    NeXusSource,
+    Position,
     SampleRun,
     VanadiumRun,
 )
@@ -23,14 +23,14 @@ _dream_providers = (prepare_reduced_dspacing_cif,)
 
 def default_parameters() -> dict:
     # Quantities not available in the simulated data
-    sample = sc.DataGroup(position=sc.vector([0.0, 0.0, 0.0], unit="mm"))
-    source = sc.DataGroup(position=sc.vector([-3.478, 0.0, -76550], unit="mm"))
+    sample_position = sc.vector([0.0, 0.0, 0.0], unit="mm")
+    source_position = sc.vector([-3.478, 0.0, -76550], unit="mm")
     charge = sc.scalar(1.0, unit="µAh")
     return {
-        NeXusSample[SampleRun]: sample,
-        NeXusSample[VanadiumRun]: sample,
-        NeXusSource[SampleRun]: source,
-        NeXusSource[VanadiumRun]: source,
+        Position[snx.NXsample, SampleRun]: sample_position,
+        Position[snx.NXsample, VanadiumRun]: sample_position,
+        Position[snx.NXsource, SampleRun]: source_position,
+        Position[snx.NXsource, VanadiumRun]: source_position,
         AccumulatedProtonCharge[SampleRun]: charge,
         AccumulatedProtonCharge[VanadiumRun]: charge,
         CIFAuthors: CIFAuthors([]),

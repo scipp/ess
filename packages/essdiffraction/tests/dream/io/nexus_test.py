@@ -13,9 +13,9 @@ from ess.reduce.nexus.types import (
     Filename,
     Monitor1,
     NeXusDetectorName,
-    NeXusMonitorName,
     SampleRun,
 )
+from ess.reduce.nexus.types import NeXusName as NeXusMonitorName
 
 bank_dims = {'wire', 'module', 'segment', 'strip', 'counter'}
 hr_sans_dims = {'strip', 'other'}
