@@ -80,6 +80,11 @@ def test_wavelength_figure_multiple_datasets(da, wavelength_bins, theta_bins):
             da.hist(wavelength=10, theta=10),
         ),
     )
+
+
+def test_wavelength_figure_multiple_datasets_some_with_and_some_without_implicit_bins(
+    da, wavelength_bins, theta_bins
+):
     assert wavelength_theta_figure(
         (
             da,
@@ -89,12 +94,21 @@ def test_wavelength_figure_multiple_datasets(da, wavelength_bins, theta_bins):
         wavelength_bins=wavelength_bins,
         theta_bins=theta_bins,
     )
+
+
+def test_wavelength_figure_multiple_datasets_different_binnings(
+    da, wavelength_bins, theta_bins
+):
     assert wavelength_theta_figure(
         (da, da),
         wavelength_bins=(wavelength_bins, wavelength_bins),
         theta_bins=theta_bins,
     )
 
+
+def test_wavelength_figure_multiple_datasets_fails_if_length_of_ds_and_bins_differ(
+    da, wavelength_bins, theta_bins
+):
     with pytest.raises(ValueError, match=r'zip\(\) argument .*'):
         assert wavelength_theta_figure(
             (da, da),
@@ -103,12 +117,19 @@ def test_wavelength_figure_multiple_datasets(da, wavelength_bins, theta_bins):
             theta_bins=theta_bins,
         )
 
+
+def test_wavelength_figure_takes_q_edges_argument(da, wavelength_bins, theta_bins):
     assert wavelength_theta_figure(
         da,
         theta_bins=theta_bins,
         wavelength_bins=wavelength_bins,
         q_edges_to_display=(sc.scalar(1.0, unit='1/angstrom'),),
     )
+
+
+def test_wavelength_figure_accepts_additional_plot_kwargs(
+    da, wavelength_bins, theta_bins
+):
     assert wavelength_theta_figure(
         da,
         theta_bins=theta_bins,
@@ -160,6 +181,9 @@ def test_q_figure_multiple_datasets(da, q_bins, theta_bins):
             da.hist(Q=10, theta=10),
         ),
     )
+
+
+def test_q_figure_multiple_datasets_with_same_binnings(da, q_bins, theta_bins):
     assert q_theta_figure(
         (
             da,
@@ -169,12 +193,19 @@ def test_q_figure_multiple_datasets(da, q_bins, theta_bins):
         q_bins=q_bins,
         theta_bins=theta_bins,
     )
+
+
+def test_q_figure_multiple_datasets_with_different_binnings(da, q_bins, theta_bins):
     assert q_theta_figure(
         (da, da),
         q_bins=(q_bins, q_bins),
         theta_bins=theta_bins,
     )
 
+
+def test_q_figure_multiple_datasets_fails_if_length_of_ds_and_binnings_differ(
+    da, q_bins, theta_bins
+):
     with pytest.raises(ValueError, match=r'zip\(\) argument .*'):
         assert q_theta_figure(
             (da, da),
@@ -183,6 +214,8 @@ def test_q_figure_multiple_datasets(da, q_bins, theta_bins):
             theta_bins=theta_bins,
         )
 
+
+def test_q_figure_can_pass_additional_plot_kwargs(da, q_bins, theta_bins):
     assert q_theta_figure(
         da,
         theta_bins=theta_bins,
@@ -215,6 +248,11 @@ def test_z_figure_multiple_datasets(da, wavelength_bins):
             da.hist(wavelength=3),
         ),
     )
+
+
+def test_z_figure_multiple_datasets_with_binning(da, wavelength_bins):
+    da = da.group('z_index').fold('z_index', dims=('blade', 'wire'), shape=(2, 5))
+
     assert wavelength_z_figure(
         (
             da,
@@ -223,6 +261,11 @@ def test_z_figure_multiple_datasets(da, wavelength_bins):
         ),
         wavelength_bins=wavelength_bins,
     )
+
+
+def test_z_figure_multiple_datasets_with_different_binnings(da, wavelength_bins):
+    da = da.group('z_index').fold('z_index', dims=('blade', 'wire'), shape=(2, 5))
+
     assert wavelength_z_figure(
         (
             da.bin(wavelength=3),
@@ -230,6 +273,12 @@ def test_z_figure_multiple_datasets(da, wavelength_bins):
         ),
         wavelength_bins=(wavelength_bins, wavelength_bins),
     )
+
+
+def test_z_figure_multiple_datasets_fails_if_length_of_ds_and_binnings_differ(
+    da, wavelength_bins
+):
+    da = da.group('z_index').fold('z_index', dims=('blade', 'wire'), shape=(2, 5))
     with pytest.raises(ValueError, match=r'zip\(\) argument .*'):
         assert wavelength_z_figure(
             (
@@ -240,6 +289,9 @@ def test_z_figure_multiple_datasets(da, wavelength_bins):
             wavelength_bins=(wavelength_bins,),
         )
 
+
+def test_z_figure_takes_additional_plot_kwargs(da, wavelength_bins):
+    da = da.group('z_index').fold('z_index', dims=('blade', 'wire'), shape=(2, 5))
     assert wavelength_z_figure(
         da,
         wavelength_bins=wavelength_bins,
