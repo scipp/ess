@@ -22,20 +22,17 @@ DetectorData = reduce_t.DetectorData
 DetectorPositionOffset = reduce_t.DetectorPositionOffset
 EmptyBeamRun = reduce_t.EmptyBeamRun
 Filename = reduce_t.Filename
-Incident = reduce_t.Incident
+Incident = reduce_t.IncidentMonitor
 MonitorData = reduce_t.MonitorData
 MonitorPositionOffset = reduce_t.MonitorPositionOffset
 MonitorType = reduce_t.MonitorType
-NeXusMonitorName = reduce_t.NeXusMonitorName
-NeXusDetector = reduce_t.NeXusDetector
-NeXusMonitor = reduce_t.NeXusMonitor
+NeXusMonitorName = reduce_t.NeXusName
+NeXusComponent = reduce_t.NeXusComponent
 RunType = reduce_t.RunType
 SampleRun = reduce_t.SampleRun
 ScatteringRunType = reduce_t.ScatteringRunType
-Transmission = reduce_t.Transmission
+Transmission = reduce_t.TransmissionMonitor
 TransmissionRun = reduce_t.TransmissionRun
-SamplePosition = reduce_t.SamplePosition
-SourcePosition = reduce_t.SourcePosition
 
 DetectorBankSizes = reduce_t.DetectorBankSizes
 NeXusDetectorName = reduce_t.NeXusDetectorName
@@ -159,11 +156,6 @@ CleanDirectBeam = NewType('CleanDirectBeam', sc.DataArray)
 
 class DetectorPixelShape(sciline.Scope[ScatteringRunType, sc.DataGroup], sc.DataGroup):
     """Geometry of the detector from description in nexus file."""
-
-
-class LabFrameTransform(sciline.Scope[ScatteringRunType, sc.Variable], sc.Variable):
-    """Coordinate transformation from detector local coordinates
-    to the sample frame of reference."""
 
 
 class SolidAngle(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):

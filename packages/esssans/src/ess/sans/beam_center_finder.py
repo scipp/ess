@@ -6,6 +6,7 @@ import uuid
 import numpy as np
 import sciline
 import scipp as sc
+import scippnexus as snx
 from scipp.core import concepts
 
 from ess.reduce.uncertainty import UncertaintyBroadcastMode
@@ -19,7 +20,7 @@ from .types import (
     DimsToKeep,
     IofQ,
     MaskedData,
-    NeXusDetector,
+    NeXusComponent,
     QBins,
     ReturnEvents,
     SampleRun,
@@ -172,7 +173,9 @@ def _iofq_in_quadrants(
         sel = (phi >= phi_bins[i]) & (phi < phi_bins[i + 1])
         # The beam center is applied when computing CalibratedDetector, set quadrant
         # *before* that step.
-        workflow[NeXusDetector[SampleRun]] = sc.DataGroup(data=detector[sel])
+        workflow[NeXusComponent[snx.NXdetector, SampleRun]] = sc.DataGroup(
+            data=detector[sel]
+        )
         # MaskedData would be computed automatically, but we did it above already
         workflow[MaskedData[SampleRun]] = calibrated[sel]
         workflow[CleanDirectBeam] = norm if norm.dims == ('wavelength',) else norm[sel]
@@ -360,7 +363,7 @@ def beam_center_from_iofq(
     logger.info('Using tolerance: %s', tolerance)
 
     keys = (
-        NeXusDetector[SampleRun],
+        NeXusComponent[snx.NXdetector, SampleRun],
         MaskedData[SampleRun],
         CleanDirectBeam,
         ElasticCoordTransformGraph,
@@ -369,13 +372,13 @@ def beam_center_from_iofq(
     # Avoid reshape of detector, which would break boolean-indexing by cost function
     workflow[DetectorBankSizes] = {}
     results = workflow.compute(keys)
-    detector = results[NeXusDetector[SampleRun]]['data']
+    detector = results[NeXusComponent[snx.NXdetector, SampleRun]]['data']
     data = results[MaskedData[SampleRun]]
     norm = results[CleanDirectBeam]
     graph = results[ElasticCoordTransformGraph]
 
     # Avoid reloading the detector
-    workflow[NeXusDetector[SampleRun]] = sc.DataGroup(data=detector)
+    workflow[NeXusComponent[snx.NXdetector, SampleRun]] = sc.DataGroup(data=detector)
     workflow[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
     workflow[ReturnEvents] = False
     workflow[DimsToKeep] = ()

@@ -8,7 +8,9 @@ from typing import NewType
 
 import sciline
 import scipp as sc
+import scippnexus as snx
 
+from ess.reduce.nexus.types import NeXusTransformation, Position
 from ess.sans.types import (
     BeamCenter,
     CalibratedDetector,
@@ -20,21 +22,17 @@ from ess.sans.types import (
     DetectorPositionOffset,
     DimsToKeep,
     Incident,
-    LabFrameTransform,
     MonitorData,
     MonitorPositionOffset,
     MonitorType,
-    NeXusDetector,
-    NeXusMonitor,
+    NeXusComponent,
     NeXusMonitorName,
     NonBackgroundWavelengthRange,
     RunNumber,
     RunTitle,
     RunType,
-    SamplePosition,
     SampleRun,
     ScatteringRunType,
-    SourcePosition,
     TofData,
     TofMonitor,
     Transmission,
@@ -87,21 +85,25 @@ def to_monitor_position_offset(
     return MonitorPositionOffset[RunType, MonitorType](global_offset)
 
 
-def get_source_position(dg: LoadedFileContents[RunType]) -> SourcePosition[RunType]:
+def get_source_position(
+    dg: LoadedFileContents[RunType],
+) -> Position[snx.NXsource, RunType]:
     """Get source position from raw data."""
-    return SourcePosition[RunType](dg['data'].coords['source_position'])
+    return Position[snx.NXsource, RunType](dg['data'].coords['source_position'])
 
 
 def get_sample_position(
     dg: LoadedFileContents[RunType], offset: SampleOffset
-) -> SamplePosition[RunType]:
+) -> Position[snx.NXsample, RunType]:
     """Get sample position from raw data and apply user offset."""
-    return SamplePosition[RunType](
+    return Position[snx.NXsample, RunType](
         dg['data'].coords['sample_position'] + offset.to(unit='m')
     )
 
 
-def get_detector_data(dg: LoadedFileContents[RunType]) -> NeXusDetector[RunType]:
+def get_detector_data(
+    dg: LoadedFileContents[RunType],
+) -> NeXusComponent[snx.NXdetector, RunType]:
     """Get detector data and apply user offsets to raw data.
 
     Parameters
@@ -112,17 +114,40 @@ def get_detector_data(dg: LoadedFileContents[RunType]) -> NeXusDetector[RunType]
     # The generic NeXus workflow will try to extract 'data' from this, which is exactly
     # what we also have in the Mantid data. We use the generic workflow since it also
     # applies offsets, etc.
-    return NeXusDetector[RunType](dg)
+    return NeXusComponent[snx.NXdetector, RunType](dg)
+
+
+def get_calibrated_isis_detector(
+    detector: NeXusComponent[snx.NXdetector, RunType],
+    *,
+    offset: DetectorPositionOffset[RunType],
+) -> CalibratedDetector[RunType]:
+    """
+    Replacement for :py:func:`ess.reduce.nexus.workflow.get_calibrated_detector`.
+
+    Differences:
+
+    - The detector position is already pre-computed.
+    - The detector is not reshaped.
+
+    The reason for the partial duplication is to avoid having to put ISIS/Mantid
+    specific code in the generic workflow.
+    """
+    da = detector['data']
+    position = detector['data'].coords['position']
+    return CalibratedDetector[RunType](
+        da.assign_coords(position=position + offset.to(unit=position.unit))
+    )
 
 
 def get_monitor_data(
     dg: LoadedFileContents[RunType], nexus_name: NeXusMonitorName[MonitorType]
-) -> NeXusMonitor[RunType, MonitorType]:
+) -> NeXusComponent[MonitorType, RunType]:
     # The generic NeXus workflow will try to extract 'data' from this, which is exactly
     # what we also have in the Mantid data. We use the generic workflow since it also
     # applies offsets, etc.
     monitor = dg['monitors'][nexus_name]['data']
-    return NeXusMonitor[RunType, MonitorType](
+    return NeXusComponent[MonitorType, RunType](
         sc.DataGroup(data=monitor, position=monitor.coords['position'])
     )
 
@@ -194,9 +219,11 @@ def helium3_tube_detector_pixel_shape() -> DetectorPixelShape[ScatteringRunType]
     return pixel_shape
 
 
-def lab_frame_transform() -> LabFrameTransform[ScatteringRunType]:
+def lab_frame_transform() -> NeXusTransformation[snx.NXdetector, ScatteringRunType]:
     # Rotate +y to -x
-    return sc.spatial.rotation(value=[0, 0, 1 / 2**0.5, 1 / 2**0.5])
+    return NeXusTransformation[snx.NXdetector, ScatteringRunType](
+        sc.spatial.rotation(value=[0, 0, 1 / 2**0.5, 1 / 2**0.5])
+    )
 
 
 def get_detector_ids_from_sample_run(data: TofData[SampleRun]) -> DetectorIDs:
@@ -221,6 +248,7 @@ providers = (
     get_source_position,
     get_sample_position,
     get_detector_data,
+    get_calibrated_isis_detector,
     get_detector_ids_from_sample_run,
     get_monitor_data,
     data_to_tof,
