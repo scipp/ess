@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import warnings
+from functools import wraps
 
 import scipp as sc
 
@@ -26,15 +27,34 @@ from .types import (
     RawChopper,
 )
 
-warnings.filterwarnings('ignore', message=r'Failed to convert .* into a transformation')
+
+def ignore_amor_warnings(func):
+    @wraps(func)
+    def wrapped(*args, **kwargs):
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                'ignore',
+                category=UserWarning,
+                message=r'Failed to convert .* into a transformation',
+            )
+            warnings.filterwarnings(
+                'ignore',
+                category=UserWarning,
+                message='Invalid transformation, missing attribute',
+            )
+            return func(*args, **kwargs)
+
+    return wrapped
 
 
+@ignore_amor_warnings
 def load_detector(
     file_path: Filename[RunType], detector_name: NeXusDetectorName[RunType]
 ) -> LoadedNeXusDetector[RunType]:
     return nexus.load_detector(file_path=file_path, detector_name=detector_name)
 
 
+@ignore_amor_warnings
 def load_events(
     detector: LoadedNeXusDetector[RunType], detector_rotation: DetectorRotation[RunType]
 ) -> RawDetectorData[RunType]:
@@ -112,6 +132,7 @@ def compute_tof(
     return ReducibleDetectorData[RunType](data)
 
 
+@ignore_amor_warnings
 def amor_chopper(f: Filename[RunType]) -> RawChopper[RunType]:
     return next(load_nx(f, "NXentry/NXinstrument/NXdisk_chopper"))
 
@@ -144,6 +165,7 @@ def load_amor_ch_frequency(ch: RawChopper[RunType]) -> ChopperFrequency[RunType]
     raise ValueError("No unit was found for the chopper frequency")
 
 
+@ignore_amor_warnings
 def load_amor_sample_rotation(fp: Filename[RunType]) -> SampleRotation[RunType]:
     (mu,) = load_nx(fp, "NXentry/NXinstrument/master_parameters/mu")
     # Jochens Amor code reads the first value of this log
@@ -152,6 +174,7 @@ def load_amor_sample_rotation(fp: Filename[RunType]) -> SampleRotation[RunType]:
     return sc.scalar(mu['value'].data['dim_1', 0]['time', 0].value, unit='deg')
 
 
+@ignore_amor_warnings
 def load_amor_detector_rotation(fp: Filename[RunType]) -> DetectorRotation[RunType]:
     (nu,) = load_nx(fp, "NXentry/NXinstrument/master_parameters/nu")
     # Jochens Amor code reads the first value of this log
