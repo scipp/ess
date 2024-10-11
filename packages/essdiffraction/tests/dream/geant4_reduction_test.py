@@ -12,12 +12,14 @@ from scippneutron.io.cif import Author
 
 import ess.dream.data  # noqa: F401
 from ess import dream, powder
+from ess.dream import DreamGeant4Workflow
 from ess.powder.types import (
     AccumulatedProtonCharge,
     BackgroundRun,
     CalibrationFilename,
     CIFAuthors,
     DspacingBins,
+    DspacingData,
     Filename,
     IofDspacing,
     IofDspacingTwoTheta,
@@ -34,6 +36,7 @@ from ess.powder.types import (
     VanadiumRun,
     WavelengthMask,
 )
+from ess.reduce import workflow as reduce_workflow
 
 sample = sc.vector([0.0, 0.0, 0.0], unit='mm')
 source = sc.vector([-3.478, 0.0, -76550], unit='mm')
@@ -201,3 +204,22 @@ def _assert_contains_dspacing_data(cif_content: str) -> None:
     assert 'pd_proc.d_spacing' in cif_content
     assert 'pd_proc.intensity_net' in cif_content
     assert 'pd_proc.intensity_net_su' in cif_content
+
+
+def test_sans_workflow_registers_subclasses():
+    # Because it was imported
+    assert DreamGeant4Workflow in reduce_workflow.workflow_registry
+    count = len(reduce_workflow.workflow_registry)
+
+    @reduce_workflow.register_workflow
+    class MyWorkflow: ...
+
+    assert MyWorkflow in reduce_workflow.workflow_registry
+    assert len(reduce_workflow.workflow_registry) == count + 1
+
+
+def test_dream_workflow_parameters_returns_filtered_params():
+    wf = DreamGeant4Workflow()
+    parameters = reduce_workflow.get_parameters(wf, (DspacingData[SampleRun],))
+    assert Filename[SampleRun] in parameters
+    assert Filename[BackgroundRun] not in parameters

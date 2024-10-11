@@ -11,8 +11,8 @@ from ess.powder import providers as powder_providers
 from ess.powder import with_pixel_mask_filenames
 from ess.powder.types import (
     AccumulatedProtonCharge,
-    Position,
     PixelMaskFilename,
+    Position,
     SampleRun,
     VanadiumRun,
 )
