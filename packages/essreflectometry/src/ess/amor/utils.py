@@ -102,31 +102,31 @@ def wavelength_theta_figure(
     )
 
     hs = []
-    for da, wavelength_bins, theta_bins in zip(  # noqa: B020
+    for d, wavelength_bin, theta_bin in zip(
         da, wavelength_bins, theta_bins, strict=True
     ):
-        if da.bins:
-            da = da.bins.concat(set(da.dims) - {"wavelength", "theta"})
-        all_coords = {*da.coords, *(da.bins or da).coords}
+        if d.bins:
+            d = d.bins.concat(set(d.dims) - {"wavelength", "theta"})
+        all_coords = {*d.coords, *(d.bins or d).coords}
         if 'wavelength' not in all_coords or 'theta' not in all_coords:
             raise ValueError('Data must have wavelength and theta coord')
-        if da.bins or set(da.dims) != {"wavelength", "theta"}:
+        if d.bins or set(d.dims) != {"wavelength", "theta"}:
             bins = {}
-            if 'sample_rotation' in da.coords and 'detector_rotation' in da.coords:
+            if 'sample_rotation' in d.coords and 'detector_rotation' in d.coords:
                 bins['theta'] = theta_grid(
-                    nu=da.coords['detector_rotation'], mu=da.coords['sample_rotation']
+                    nu=d.coords['detector_rotation'], mu=d.coords['sample_rotation']
                 )
-            if theta_bins is not None:
-                bins['theta'] = theta_bins
-            if wavelength_bins is not None:
-                bins['wavelength'] = wavelength_bins
-            if 'theta' not in da.dims and 'theta' not in bins:
+            if theta_bin is not None:
+                bins['theta'] = theta_bin
+            if wavelength_bin is not None:
+                bins['wavelength'] = wavelength_bin
+            if 'theta' not in d.dims and 'theta' not in bins:
                 raise ValueError('No theta binning provided')
-            if 'wavelength' not in da.dims and 'wavelength' not in bins:
+            if 'wavelength' not in d.dims and 'wavelength' not in bins:
                 raise ValueError('No wavelength binning provided')
-            da = da.hist(**bins)
+            d = d.hist(**bins)
 
-        hs.append(da.transpose(('theta', 'wavelength')))
+        hs.append(d.transpose(('theta', 'wavelength')))
 
     kwargs.setdefault('cbar', True)
     kwargs.setdefault('norm', 'log')
@@ -166,26 +166,26 @@ def q_theta_figure(
     )
 
     hs = []
-    for da, q_bins, theta_bins in zip(da, q_bins, theta_bins, strict=True):  # noqa: B020
-        if da.bins:
-            da = da.bins.concat(set(da.dims) - {'theta', 'Q'})
+    for d, q_bin, theta_bin in zip(da, q_bins, theta_bins, strict=True):
+        if d.bins:
+            d = d.bins.concat(set(d.dims) - {'theta', 'Q'})
 
-        all_coords = {*da.coords, *(da.bins or da).coords}
+        all_coords = {*d.coords, *(d.bins or d).coords}
         if 'theta' not in all_coords or 'Q' not in all_coords:
             raise ValueError('Data must have theta and Q coord')
-        if da.bins or set(da.dims) != {"theta", "Q"}:
+        if d.bins or set(d.dims) != {"theta", "Q"}:
             bins = {}
-            if theta_bins is not None:
-                bins['theta'] = theta_bins
-            if q_bins is not None:
-                bins['Q'] = q_bins
-            if 'theta' not in da.dims and 'theta' not in bins:
+            if theta_bin is not None:
+                bins['theta'] = theta_bin
+            if q_bin is not None:
+                bins['Q'] = q_bin
+            if 'theta' not in d.dims and 'theta' not in bins:
                 raise ValueError('No theta binning provided')
-            if 'Q' not in da.dims and 'Q' not in bins:
+            if 'Q' not in d.dims and 'Q' not in bins:
                 raise ValueError('No Q binning provided')
-            da = da.hist(**bins)
+            d = d.hist(**bins)
 
-        hs.append(da.transpose(('theta', 'Q')))
+        hs.append(d.transpose(('theta', 'Q')))
 
     kwargs.setdefault('cbar', True)
     kwargs.setdefault('norm', 'log')
@@ -212,18 +212,18 @@ def wavelength_z_figure(
     )
 
     hs = []
-    for da, wavelength_bins in zip(da, wavelength_bins, strict=True):  # noqa: B020
-        if da.bins:
-            da = da.bins.concat(set(da.dims) - {'blade', 'wire', 'wavelength'})
+    for d, wavelength_bin in zip(da, wavelength_bins, strict=True):
+        if d.bins:
+            d = d.bins.concat(set(d.dims) - {'blade', 'wire', 'wavelength'})
             bins = {}
-            if wavelength_bins is not None:
-                bins['wavelength'] = wavelength_bins
-            if 'wavelength' not in da.dims and 'wavelength' not in bins:
+            if wavelength_bin is not None:
+                bins['wavelength'] = wavelength_bin
+            if 'wavelength' not in d.dims and 'wavelength' not in bins:
                 raise ValueError('No wavelength binning provided')
-            da = da.hist(**bins)
+            d = d.hist(**bins)
 
-        da = da.flatten(("blade", "wire"), to="z_index")
-        hs.append(da.transpose(('z_index', 'wavelength')))
+        d = d.flatten(("blade", "wire"), to="z_index")
+        hs.append(d.transpose(('z_index', 'wavelength')))
 
     kwargs.setdefault('cbar', True)
     kwargs.setdefault('norm', 'log')
