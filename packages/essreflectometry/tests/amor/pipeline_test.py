@@ -13,9 +13,9 @@ from ess.amor import data  # noqa: F401
 from ess.reflectometry import orso
 from ess.reflectometry.types import (
     Filename,
-    NormalizedIofQ,
     QBins,
     ReferenceRun,
+    ReflectivityOverQ,
     SampleRotation,
     SampleRun,
     SampleSize,
@@ -57,8 +57,9 @@ def amor_pipeline() -> sciline.Pipeline:
 
 
 def test_run_data_pipeline(amor_pipeline: sciline.Pipeline):
-    res = amor_pipeline.compute(NormalizedIofQ)
+    res = amor_pipeline.compute(ReflectivityOverQ)
     assert "Q" in res.coords
+    assert "Q_resolution" in res.coords
 
 
 def test_run_full_pipeline(amor_pipeline: sciline.Pipeline):
