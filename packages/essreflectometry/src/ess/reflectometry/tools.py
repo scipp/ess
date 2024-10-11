@@ -11,7 +11,7 @@ import scipy.optimize as opt
 from orsopy.fileio.orso import OrsoDataset
 
 from ess.reflectometry import orso
-from ess.reflectometry.types import NormalizedIofQ
+from ess.reflectometry.types import ReflectivityOverQ
 
 _STD_TO_FWHM = sc.scalar(2.0) * sc.sqrt(sc.scalar(2.0) * sc.log(sc.scalar(2.0)))
 
@@ -311,7 +311,7 @@ def orso_datasets_from_measurements(
     Parameters
     -----------
     workflow:
-        The sciline workflow used to compute `NormalizedIofQ` for each of the runs.
+        The sciline workflow used to compute `ReflectivityOverQ` for each of the runs.
 
     runs:
         The sciline parameters to be used for each run
@@ -330,7 +330,7 @@ def orso_datasets_from_measurements(
         wf = workflow.copy()
         for name, value in parameters.items():
             wf[name] = value
-        reflectivity_curves.append(wf.compute(NormalizedIofQ))
+        reflectivity_curves.append(wf.compute(ReflectivityOverQ))
 
     scale_factors = (
         scale_reflectivity_curves_to_overlap(
@@ -347,7 +347,7 @@ def orso_datasets_from_measurements(
         wf = workflow.copy()
         for name, value in parameters.items():
             wf[name] = value
-        wf[NormalizedIofQ] = scale_factor * curve
+        wf[ReflectivityOverQ] = scale_factor * curve
         dataset = wf.compute(orso.OrsoIofQDataset)
         dataset.info.reduction.corrections = orso.find_corrections(
             wf.get(orso.OrsoIofQDataset)
