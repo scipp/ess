@@ -24,7 +24,6 @@ from ess.reduce.parameter import (
     MultiFilenameParameter,
     ParamWithOptions,
     StringParameter,
-    parameter_mappers,
     parameter_registry,
 )
 
@@ -40,8 +39,8 @@ parameter_registry[Filename[BackgroundRun]] = FilenameParameter.from_type(
 parameter_registry[CalibrationFilename] = FilenameParameter.from_type(
     CalibrationFilename
 )
-parameter_mappers[PixelMaskFilename] = MultiFilenameParameter.from_type(
-    PixelMaskFilename, default=['']
+parameter_registry[PixelMaskFilename] = MultiFilenameParameter.from_type(
+    PixelMaskFilename,
 )
 parameter_registry[NeXusDetectorName] = StringParameter.from_type(
     NeXusDetectorName, default="mantle"
