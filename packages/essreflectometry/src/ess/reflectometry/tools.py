@@ -171,6 +171,7 @@ def _interpolate_on_qgrid(curves, grid):
 def scale_reflectivity_curves_to_overlap(
     curves: Sequence[sc.DataArray],
     return_scaling_factors=False,
+    critical_edge_interval=None,
 ) -> list[sc.DataArray] | list[sc.scalar]:
     '''Make the curves overlap by scaling all except the first by a factor.
     The scaling factors are determined by a maximum likelihood estimate
@@ -192,6 +193,20 @@ def scale_reflectivity_curves_to_overlap(
     :
         A list of scaled reflectivity curves or a list of scaling factors.
     '''
+    if critical_edge_interval is not None:
+        q = next(iter(curves)).coords['Q']
+        N = (
+            ((q > critical_edge_interval[0]) & (q < critical_edge_interval[1]))
+            .sum()
+            .value
+        )
+        edge = sc.DataArray(
+            data=sc.ones(dims=('Q',), shape=(N,), with_variances=True),
+            coords={'Q': sc.linspace('Q', *critical_edge_interval, N + 1)},
+        )
+        return scale_reflectivity_curves_to_overlap(
+            [edge, *curves], return_scaling_factors=return_scaling_factors
+        )[1:]
     if len({c.data.unit for c in curves}) != 1:
         raise ValueError('The reflectivity curves must have the same unit')
     if len({c.coords['Q'].unit for c in curves}) != 1:
