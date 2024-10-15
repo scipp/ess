@@ -74,6 +74,37 @@ def theta_grid(
     return grid
 
 
+def _reshape_array_to_expected_shape(da, dims, **bins):
+    if da.bins:
+        da = da.bins.concat(set(da.dims) - set(dims))
+    elif set(da.dims) > set(dims):
+        raise ValueError(
+            f'Histogram must have exactly the dimensions'
+            f' {set(dims)} but got {set(da.dims)}'
+        )
+
+    if not set(da.dims).union(set(bins)) >= set(dims):
+        raise ValueError(
+            f'Could not find bins for dimensions:'
+            f' {set(dims) - set(da.dims).union(set(bins))}'
+        )
+
+    if da.bins or not set(da.dims) == set(dims):
+        da = da.hist(**bins)
+
+    return da.transpose(dims)
+
+
+def _repeat_variable_argument(n, arg):
+    return (
+        (None,) * n
+        if arg is None
+        else (arg,) * n
+        if isinstance(arg, sc.Variable)
+        else arg
+    )
+
+
 def wavelength_theta_figure(
     da: sc.DataArray | Sequence[sc.DataArray],
     *,
@@ -93,40 +124,29 @@ def wavelength_theta_figure(
         )
 
     wavelength_bins, theta_bins = (
-        (None,) * len(da)
-        if v is None
-        else (v,) * len(da)
-        if isinstance(v, sc.Variable)
-        else v
-        for v in (wavelength_bins, theta_bins)
+        _repeat_variable_argument(len(da), arg) for arg in (wavelength_bins, theta_bins)
     )
 
     hs = []
     for d, wavelength_bin, theta_bin in zip(
         da, wavelength_bins, theta_bins, strict=True
     ):
-        if d.bins:
-            d = d.bins.concat(set(d.dims) - {"wavelength", "theta"})
-        all_coords = {*d.coords, *(d.bins or d).coords}
-        if 'wavelength' not in all_coords or 'theta' not in all_coords:
-            raise ValueError('Data must have wavelength and theta coord')
-        if d.bins or set(d.dims) != {"wavelength", "theta"}:
-            bins = {}
-            if 'sample_rotation' in d.coords and 'detector_rotation' in d.coords:
+        bins = {}
+        if wavelength_bin is not None:
+            bins['wavelength'] = wavelength_bin
+
+        if theta_bin is not None:
+            bins['theta'] = theta_bin
+        else:
+            if (
+                'theta' not in d.dims
+                and 'sample_rotation' in d.coords
+                and 'detector_rotation' in d.coords
+            ):
                 bins['theta'] = theta_grid(
                     nu=d.coords['detector_rotation'], mu=d.coords['sample_rotation']
                 )
-            if theta_bin is not None:
-                bins['theta'] = theta_bin
-            if wavelength_bin is not None:
-                bins['wavelength'] = wavelength_bin
-            if 'theta' not in d.dims and 'theta' not in bins:
-                raise ValueError('No theta binning provided')
-            if 'wavelength' not in d.dims and 'wavelength' not in bins:
-                raise ValueError('No wavelength binning provided')
-            d = d.hist(**bins)
-
-        hs.append(d.transpose(('theta', 'wavelength')))
+        hs.append(_reshape_array_to_expected_shape(d, ('theta', 'wavelength'), **bins))
 
     kwargs.setdefault('cbar', True)
     kwargs.setdefault('norm', 'log')
@@ -157,35 +177,27 @@ def q_theta_figure(
         )
 
     q_bins, theta_bins = (
-        (None,) * len(da)
-        if v is None
-        else (v,) * len(da)
-        if isinstance(v, sc.Variable)
-        else v
-        for v in (q_bins, theta_bins)
+        _repeat_variable_argument(len(da), arg) for arg in (q_bins, theta_bins)
     )
 
     hs = []
     for d, q_bin, theta_bin in zip(da, q_bins, theta_bins, strict=True):
-        if d.bins:
-            d = d.bins.concat(set(d.dims) - {'theta', 'Q'})
+        bins = {}
+        if q_bin is not None:
+            bins['Q'] = q_bin
 
-        all_coords = {*d.coords, *(d.bins or d).coords}
-        if 'theta' not in all_coords or 'Q' not in all_coords:
-            raise ValueError('Data must have theta and Q coord')
-        if d.bins or set(d.dims) != {"theta", "Q"}:
-            bins = {}
-            if theta_bin is not None:
-                bins['theta'] = theta_bin
-            if q_bin is not None:
-                bins['Q'] = q_bin
-            if 'theta' not in d.dims and 'theta' not in bins:
-                raise ValueError('No theta binning provided')
-            if 'Q' not in d.dims and 'Q' not in bins:
-                raise ValueError('No Q binning provided')
-            d = d.hist(**bins)
-
-        hs.append(d.transpose(('theta', 'Q')))
+        if theta_bin is not None:
+            bins['theta'] = theta_bin
+        else:
+            if (
+                'theta' not in d.dims
+                and 'sample_rotation' in d.coords
+                and 'detector_rotation' in d.coords
+            ):
+                bins['theta'] = theta_grid(
+                    nu=d.coords['detector_rotation'], mu=d.coords['sample_rotation']
+                )
+        hs.append(_reshape_array_to_expected_shape(d, ('theta', 'Q'), **bins))
 
     kwargs.setdefault('cbar', True)
     kwargs.setdefault('norm', 'log')
@@ -202,28 +214,17 @@ def wavelength_z_figure(
     if isinstance(da, sc.DataArray):
         return wavelength_z_figure((da,), wavelength_bins=(wavelength_bins,), **kwargs)
 
-    (wavelength_bins,) = (
-        (None,) * len(da)
-        if v is None
-        else (v,) * len(da)
-        if isinstance(v, sc.Variable)
-        else v
-        for v in (wavelength_bins,)
-    )
+    wavelength_bins = _repeat_variable_argument(len(da), wavelength_bins)
 
     hs = []
     for d, wavelength_bin in zip(da, wavelength_bins, strict=True):
-        if d.bins:
-            d = d.bins.concat(set(d.dims) - {'blade', 'wire', 'wavelength'})
-            bins = {}
-            if wavelength_bin is not None:
-                bins['wavelength'] = wavelength_bin
-            if 'wavelength' not in d.dims and 'wavelength' not in bins:
-                raise ValueError('No wavelength binning provided')
-            d = d.hist(**bins)
+        bins = {}
+        if wavelength_bin is not None:
+            bins['wavelength'] = wavelength_bin
 
+        d = _reshape_array_to_expected_shape(d, ("blade", "wire", "wavelength"), **bins)
         d = d.flatten(("blade", "wire"), to="z_index")
-        hs.append(d.transpose(('z_index', 'wavelength')))
+        hs.append(d)
 
     kwargs.setdefault('cbar', True)
     kwargs.setdefault('norm', 'log')
