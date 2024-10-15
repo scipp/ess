@@ -63,7 +63,7 @@ def default_parameters() -> dict:
         Gravity: sc.vector(value=[0, -1, 0]) * sc.constants.g,
         SamplePosition[RunType]: sc.vector([0, 0, 0], unit="m"),
         NeXusDetectorName[RunType]: "detector",
-        ChopperPhase[RunType]: sc.scalar(-5.0, unit="deg"),
+        ChopperPhase[RunType]: sc.scalar(7.0, unit="deg"),
         ChopperFrequency[RunType]: sc.scalar(8.333, unit="Hz"),
         BeamDivergenceLimits: (sc.scalar(-0.7, unit='deg'), sc.scalar(0.7, unit='deg')),
     }
