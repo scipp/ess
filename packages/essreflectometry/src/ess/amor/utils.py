@@ -114,6 +114,43 @@ def wavelength_theta_figure(
     linewidth: float = 1.0,
     **kwargs,
 ):
+    '''
+    Creates a figure displaying a histogram over :math:`\\theta` and :math:`\\lambda`.
+
+    The input can either be a single data array containing the data to display, or
+    a sequence of data arrays.
+
+    The inputs must either have coordinates called "theta" and "wavelength",
+    or they must be histograms with dimensions "theta" and "wavelength".
+
+    If :code:`wavelength_bins` or :code:`theta_bins` are provided, they are used
+    to construct the histogram. If not provided, the function uses the
+    bin edges that already exist on the data arrays.
+
+    If :code:`q_edges_to_display` is provided, lines will be drawn in the figure
+    corresponding to :math:`Q` equal to the values in :code:`q_edges_to_display`.
+
+    Parameters
+    ----------
+    da : array or sequence of arrays
+        Data arrays to display.
+    wavelength_bins : array-like, optional
+        Bins used to histogram the data in wavelength.
+    theta_bins : array-like, optional
+        Bins used to histogram the data in theta.
+    q_edges_to_display : sequence of float, optional
+        Values of :math:`Q` to be displayed as straight lines in the figure.
+    linewidth : float, optional
+        Thickness of the displayed :math:`Q` lines.
+    **kwargs : keyword arguments, optional
+        Additional parameters passed to the histogram plot function,
+        used to customize colors, etc.
+
+    Returns
+    -------
+        A Plopp figure displaying the histogram.
+    '''
+
     if isinstance(da, sc.DataArray):
         return wavelength_theta_figure(
             (da,),
@@ -137,15 +174,14 @@ def wavelength_theta_figure(
 
         if theta_bin is not None:
             bins['theta'] = theta_bin
-        else:
-            if (
-                'theta' not in d.dims
-                and 'sample_rotation' in d.coords
-                and 'detector_rotation' in d.coords
-            ):
-                bins['theta'] = theta_grid(
-                    nu=d.coords['detector_rotation'], mu=d.coords['sample_rotation']
-                )
+        elif (
+            'theta' not in d.dims
+            and 'sample_rotation' in d.coords
+            and 'detector_rotation' in d.coords
+        ):
+            bins['theta'] = theta_grid(
+                nu=d.coords['detector_rotation'], mu=d.coords['sample_rotation']
+            )
         hs.append(_reshape_array_to_expected_shape(d, ('theta', 'wavelength'), **bins))
 
     kwargs.setdefault('cbar', True)
