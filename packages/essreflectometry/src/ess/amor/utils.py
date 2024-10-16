@@ -207,6 +207,33 @@ def q_theta_figure(
     theta_bins: (sc.Variable | None) | Sequence[sc.Variable | None] = None,
     **kwargs,
 ):
+    '''
+    Creates a figure displaying a histogram over :math:`\\theta` and :math:`Q`.
+
+    The input can either be a single data array containing the data to display, or
+    a sequence of data arrays.
+
+    The inputs must either have coordinates called "theta" and "Q",
+    or they must be histograms with dimensions "theta" and "Q".
+
+    If :code:`theta_bins` or :code:`q_bins` are provided, they are used
+    to construct the histogram. If not provided, the function uses the
+    bin edges that already exist on the data arrays.
+
+    Parameters
+    ----------
+    da : array or sequence of arrays
+        Data arrays to display.
+    q_bins : array-like, optional
+        Bins used to histogram the data in Q.
+    theta_bins : array-like, optional
+        Bins used to histogram the data in theta.
+
+    Returns
+    -------
+        A Plopp figure displaying the histogram.
+    '''
+
     if isinstance(da, sc.DataArray):
         return q_theta_figure(
             (da,), q_bins=(q_bins,), theta_bins=(theta_bins,), **kwargs
@@ -247,6 +274,33 @@ def wavelength_z_figure(
     wavelength_bins: (sc.Variable | None) | Sequence[sc.Variable | None] = None,
     **kwargs,
 ):
+    '''
+    Creates a figure displaying a histogram over the detector "Z"-direction,
+    corresponding to the combination of the logical detector coordinates
+    :code:`blade` and :code:`wire`.
+
+    The input can either be a single data array containing the data to display, or
+    a sequence of data arrays.
+
+    The inputs must either have coordinates called "blade" and "wire" and "wavelength",
+    or they must be histograms with dimensions "blade", "wire" and "wavelength".
+
+    If :code:`wavelength_bins` is provided, it is used
+    to construct the histogram. If not provided, the function uses the
+    bin edges that already exist on the data arrays.
+
+    Parameters
+    ----------
+    da : array or sequence of arrays
+        Data arrays to display.
+    wavelength_bins : array-like, optional
+        Bins used to histogram the data in wavelength.
+
+    Returns
+    -------
+        A Plopp figure displaying the histogram.
+    '''
+
     if isinstance(da, sc.DataArray):
         return wavelength_z_figure((da,), wavelength_bins=(wavelength_bins,), **kwargs)
 
