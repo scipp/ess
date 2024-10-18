@@ -105,6 +105,18 @@ def _repeat_variable_argument(n, arg):
     )
 
 
+def _try_to_create_theta_grid_if_missing(bins, da):
+    if (
+        'theta' not in bins
+        and 'theta' not in da.dims
+        and 'sample_rotation' in da.coords
+        and 'detector_rotation' in da.coords
+    ):
+        bins['theta'] = theta_grid(
+            nu=da.coords['detector_rotation'], mu=da.coords['sample_rotation']
+        )
+
+
 def wavelength_theta_figure(
     da: sc.DataArray | Sequence[sc.DataArray],
     *,
@@ -169,19 +181,15 @@ def wavelength_theta_figure(
         da, wavelength_bins, theta_bins, strict=True
     ):
         bins = {}
+
         if wavelength_bin is not None:
             bins['wavelength'] = wavelength_bin
 
         if theta_bin is not None:
             bins['theta'] = theta_bin
-        elif (
-            'theta' not in d.dims
-            and 'sample_rotation' in d.coords
-            and 'detector_rotation' in d.coords
-        ):
-            bins['theta'] = theta_grid(
-                nu=d.coords['detector_rotation'], mu=d.coords['sample_rotation']
-            )
+
+        _try_to_create_theta_grid_if_missing(bins, d)
+
         hs.append(_reshape_array_to_expected_shape(d, ('theta', 'wavelength'), **bins))
 
     kwargs.setdefault('cbar', True)
@@ -246,20 +254,15 @@ def q_theta_figure(
     hs = []
     for d, q_bin, theta_bin in zip(da, q_bins, theta_bins, strict=True):
         bins = {}
+
         if q_bin is not None:
             bins['Q'] = q_bin
 
         if theta_bin is not None:
             bins['theta'] = theta_bin
-        else:
-            if (
-                'theta' not in d.dims
-                and 'sample_rotation' in d.coords
-                and 'detector_rotation' in d.coords
-            ):
-                bins['theta'] = theta_grid(
-                    nu=d.coords['detector_rotation'], mu=d.coords['sample_rotation']
-                )
+
+        _try_to_create_theta_grid_if_missing(bins, d)
+
         hs.append(_reshape_array_to_expected_shape(d, ('theta', 'Q'), **bins))
 
     kwargs.setdefault('cbar', True)
