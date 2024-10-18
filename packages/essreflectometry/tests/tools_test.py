@@ -29,6 +29,30 @@ def test_reflectivity_curve_scaling():
     assert_allclose(curves[2].data, 0.25 * data, rtol=sc.scalar(1e-5))
 
 
+def test_reflectivity_curve_scaling_with_critical_edge():
+    data = sc.concat(
+        (
+            sc.ones(dims=['Q'], shape=[10], with_variances=True),
+            0.5 * sc.ones(dims=['Q'], shape=[15], with_variances=True),
+        ),
+        dim='Q',
+    )
+    data.variances[:] = 0.1
+
+    curves = scale_reflectivity_curves_to_overlap(
+        (
+            2 * curve(data, 0, 0.3),
+            curve(0.8 * data, 0.2, 0.7),
+            curve(0.1 * data, 0.6, 1.0),
+        ),
+        critical_edge_interval=(sc.scalar(0.01), sc.scalar(0.05)),
+    )
+
+    assert_allclose(curves[0].data, data, rtol=sc.scalar(1e-5))
+    assert_allclose(curves[1].data, 0.5 * data, rtol=sc.scalar(1e-5))
+    assert_allclose(curves[2].data, 0.25 * data, rtol=sc.scalar(1e-5))
+
+
 def test_reflectivity_curve_scaling_return_factors():
     data = sc.concat(
         (
