@@ -170,12 +170,13 @@ def _interpolate_on_qgrid(curves, grid):
 
 def scale_reflectivity_curves_to_overlap(
     curves: Sequence[sc.DataArray],
-    return_scaling_factors=False,
-    critical_edge_interval=None,
-) -> list[sc.DataArray] | list[sc.scalar]:
+    critical_edge_interval: tuple[sc.Variable, sc.Variable] | None = None,
+) -> tuple[list[sc.DataArray], list[sc.scalar]]:
     '''Make the curves overlap by scaling all except the first by a factor.
     The scaling factors are determined by a maximum likelihood estimate
     (assuming the errors are normal distributed).
+
+    If :code:`critical_edge_interval` is provided then all curves are scaled.
 
     All curves must be have the same unit for data and the Q-coordinate.
 
@@ -183,15 +184,15 @@ def scale_reflectivity_curves_to_overlap(
     ---------
     curves:
         the reflectivity curves that should be scaled together
-    return_scaling_factor:
-        If True the return value of the function
-        is a list of the scaling factors that should be applied.
-        If False (default) the function returns the scaled curves.
+    critical_edge_interval: optional,
+        a tuple denoting an interval that is known to belong
+        to the critical edge, i.e. where the reflectivity is
+        known to be 1.
 
     Returns
     ---------
     :
-        A list of scaled reflectivity curves or a list of scaling factors.
+        A list of scaled reflectivity curves and a list of the scaling factors.
     '''
     if critical_edge_interval is not None:
         q = next(iter(curves)).coords['Q']
@@ -204,9 +205,8 @@ def scale_reflectivity_curves_to_overlap(
             data=sc.ones(dims=('Q',), shape=(N,), with_variances=True),
             coords={'Q': sc.linspace('Q', *critical_edge_interval, N + 1)},
         )
-        return scale_reflectivity_curves_to_overlap(
-            [edge, *curves], return_scaling_factors=return_scaling_factors
-        )[1:]
+        curves, factors = scale_reflectivity_curves_to_overlap([edge, *curves])
+        return curves[1:], factors[1:]
     if len({c.data.unit for c in curves}) != 1:
         raise ValueError('The reflectivity curves must have the same unit')
     if len({c.coords['Q'].unit for c in curves}) != 1:
@@ -229,13 +229,11 @@ def scale_reflectivity_curves_to_overlap(
         return np.nansum((r_scaled - r_avg) ** 2 * inv_v_scaled)
 
     sol = opt.minimize(cost, [1.0] * (len(curves) - 1))
-    scaling_factors = (1.0, *sol.x)
-    if return_scaling_factors:
-        return [sc.scalar(x) for x in scaling_factors]
+    scaling_factors = (1.0, *map(float, sol.x))
     return [
         scaling_factor * curve
         for scaling_factor, curve in zip(scaling_factors, curves, strict=True)
-    ]
+    ], scaling_factors
 
 
 def combine_curves(
