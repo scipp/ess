@@ -537,7 +537,6 @@ def normalise_wavelength_events(ki_params, kf_params, events, monitor):
     from sciline import Pipeline
 
     from ..types import (
-        NormWavelengthEvents,
         WavelengthBins,
         WavelengthEvents,
         WavelengthMonitor,
