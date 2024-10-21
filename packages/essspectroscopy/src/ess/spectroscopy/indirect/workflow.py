@@ -6,7 +6,10 @@ from __future__ import annotations
 from loguru import logger
 from scipp import Variable
 
-from ..types import NeXusFileName, NormWavelengthEvents
+from ..types import NeXusFileName, NormWavelengthEvents, NXspeFileName
+
+# PIXEL_NAME = 'event_id'
+PIXEL_NAME = 'detector_number'
 
 
 def _load_all(group, obj_type):
@@ -158,8 +161,8 @@ def detector_per_pixel(triplets: dict) -> dict[int, str]:
 
 
 def combine_analyzers(analyzers: dict, triplets: dict):
-    """Combine needed analyzer properties into a single array, duplicating information,
-    to have per-pixel data
+    """Combine needed analyzer properties into a single array,
+    duplicating information, to have per-pixel data
 
     BIFROST has 45 analyzers and 45 triplet detectors, each with some number of pixels,
     N. Calculations for the properties of neutrons which make it to each detector pixel
@@ -186,8 +189,7 @@ def combine_analyzers(analyzers: dict, triplets: dict):
     Returns
     -------
     :
-        A single array with 'event_id' pixel dimension and the
-        per-pixel analyzer information
+        A single array with pixel dimension and the per-pixel analyzer information
     """
     from scipp import Dataset, array, concat
     from scippnexus import compute_positions
@@ -202,8 +204,8 @@ def combine_analyzers(analyzers: dict, triplets: dict):
 
     p2a = {k: extracted[d2a[v]] for k, v in p2d.items()}
     pixels = sorted(p2a)
-    data = concat([p2a[p] for p in pixels], dim='event_id')
-    data['event_id'] = array(values=pixels, dims=['event_id'], unit=None)
+    data = concat([p2a[p] for p in pixels], dim=PIXEL_NAME)
+    data[PIXEL_NAME] = array(values=pixels, dims=[PIXEL_NAME], unit=None)
     return data
 
 
@@ -226,19 +228,18 @@ def combine_detectors(triplets: dict):
     Returns
     -------
     :
-        A single array with 'event_id' pixel dimension and the
-        per-pixel center of mass position
+        A single array with pixel dimension and the per-pixel center of mass position
     """
     from scipp import Dataset, concat, sort
 
     def extract(obj):
         pixels = obj['data'].coords['detector_number']
         midpoints = obj['data'].coords['position']
-        return Dataset(data={'event_id': pixels, 'position': midpoints})
+        return Dataset(data={PIXEL_NAME: pixels, 'position': midpoints})
 
     data = concat([extract(v) for v in triplets.values()], dim='arm')
-    data = Dataset({k: v.flatten(to='event_id') for k, v in data.items()})
-    return sort(data, data['event_id'].data)
+    data = Dataset({k: v.flatten(to=PIXEL_NAME) for k, v in data.items()})
+    return sort(data, data[PIXEL_NAME].data)
 
 
 def find_sample_detector_flight_time(sample, analyzers, detector_positions):
@@ -286,7 +287,7 @@ def get_triplet_events(triplets):
     """
     from scipp import concat, sort
 
-    events = concat([x['data'] for x in triplets], dim='arm').flatten(to='event_id')
+    events = concat([x['data'] for x in triplets], dim='arm').flatten(to=PIXEL_NAME)
     events = sort(events, events.coords['detector_number'])
     return events
 
@@ -531,6 +532,17 @@ def add_wavelength_axes(ki_params, kf_params, events, monitor, monitor_name):
     return events, wavelength_monitor
 
 
+def get_geometric_a4(kf_params):
+    from sciline import Pipeline
+
+    from ..types import DetectorGeometricA4
+    from .kf import providers
+
+    pipeline = Pipeline(providers, params=kf_params)
+    geometric_a4 = pipeline.compute(DetectorGeometricA4)
+    return geometric_a4
+
+
 def normalise_wavelength_events(ki_params, kf_params, events, monitor):
     from sciline import Pipeline
 
@@ -720,6 +732,8 @@ def one_setting(
     events.bins.coords['energy_transfer'] = en.to(unit='meV')
     events.bins.coords['incident_energy'] = ei
     events.coords['final_energy'] = ef
+
+    events.coords['theta'] = get_geometric_a4(kf_params)
 
     if 'a3' in triplet_events.coords:
         # this _should_ be one (a3, a4) setting,
@@ -1006,3 +1020,31 @@ def bifrost_single(
         data['logs'] = logs
 
     return data
+
+
+def bifrost_to_nxspe(
+    *,
+    output: NXspeFileName,
+    filename: NeXusFileName | None = None,
+    events: NormWavelengthEvents | None = None,
+    **kwargs,
+):
+    from sciline import Pipeline
+
+    from ..types import NXspeFileNames
+    from .io import providers as io_providers
+
+    if filename is None and events is None:
+        raise ValueError("Provide events, or filename to read and reduce file")
+    if events is None:
+        reduced = bifrost(filename, **kwargs)
+        events = reduced['norm_events']
+
+    pipeline = Pipeline(
+        providers=io_providers,
+        params={
+            NXspeFileName: output,
+            NormWavelengthEvents: events,
+        },
+    )
+    return pipeline.compute(NXspeFileNames)
