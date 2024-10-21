@@ -526,8 +526,6 @@ def add_wavelength_axes(ki_params, kf_params, events, monitor, monitor_name):
     params.update(ki_params)
     params.update(kf_params)
     pipeline = Pipeline(monitor_providers + ki_providers + kf_providers, params=params)
-    # slowness = pipeline.compute(SlownessMonitor)
-    # pipeline[SlownessMonitor] = slowness
     wavelength_monitor = pipeline.compute(WavelengthMonitor)
     events.bins.coords['incident_wavelength'] = pipeline.compute(IncidentWavelength)
     return events, wavelength_monitor
@@ -719,7 +717,6 @@ def one_setting(
     )
     ei, en, ef = get_energy_axes(ki_params, kf_params)
 
-    # energy_events = sample_events.copy()
     events.bins.coords['energy_transfer'] = en.to(unit='meV')
     events.bins.coords['incident_energy'] = ei
     events.coords['final_energy'] = ef

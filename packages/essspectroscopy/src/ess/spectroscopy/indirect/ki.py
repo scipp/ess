@@ -364,13 +364,13 @@ def incident_slowness(
 def incident_sloth(
     primary: PrimarySpectrometerObject, slowness: IncidentSlowness
 ) -> IncidentSloth:
+    import scipp as sc
     from choppera.nexus import primary_slowness
-    from scipp import max, min
 
-    from ..utils import in_same_unit
+    from ..utils import range_normalized
 
-    min_max = in_same_unit(primary_slowness(primary), to=slowness)
-    return (slowness - min(min_max)) / (max(min_max) - min(min_max))
+    min_max = primary_slowness(primary)
+    return range_normalized(slowness, sc.min(min_max), sc.max(min_max))
 
 
 def incident_wavelength(slowness: IncidentSlowness) -> IncidentWavelength:
