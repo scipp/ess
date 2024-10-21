@@ -57,7 +57,7 @@ def source_monitor_path_length(
         HDF5 group entries are sorted alphabetically, so you should ensure that
         the NeXus file was constructed with this in mind.
     """
-    from scipp import concat, dot, sqrt, sum
+    import scipp as sc
     from scippnexus import File, NXguide, compute_positions
 
     with File(file) as data:
@@ -66,22 +66,19 @@ def source_monitor_path_length(
             for v in data['entry/instrument'][NXguide].values()
         ]
 
-    def vector_length(vector):
-        return sqrt(dot(vector, vector))
-
     # Find the closest guide to the monitor position, ignoring the possibility that
     # a guide could be _beyond_ the monitor _and_ closest :(
     closest = 0
-    distance = vector_length(source - monitor)
+    distance = sc.norm(source - monitor)
     for i, position in enumerate(positions):
-        d = vector_length(position - monitor)
+        d = sc.norm(position - monitor)
         if d < distance:
             distance = d
             closest = i
 
-    positions = concat((source, *positions[:closest], monitor), dim='path')
+    positions = sc.concat((source, *positions[:closest], monitor), dim='path')
     diff = positions['path', 1:] - positions['path', :-1]
-    return sum(vector_length(diff))
+    return sc.sum(sc.norm(diff))
 
 
 def monitor_pivot_time(
@@ -124,7 +121,7 @@ def monitor_wall_time(
         raise RuntimeError(f'A FrameTimeMonitor must have coordinate "{frame}"')
     wall = 'wall_time'
     names = {frame: wall}
-    if monitor.sizes[frame] + 1 == monitor.coords[frame].size:
+    if monitor.coords.is_edges(frame, dim=frame):
         coord, values = unwrap_histogram(
             monitor.coords[frame], monitor.data, frequency, least
         )
@@ -228,21 +225,19 @@ def monitor_sloth(
         The same intensities with independent axis converted to the sloth,
         which is the normalised slowness, inverse velocity, and incident wavelength
     """
+    import scipp as sc
     from choppera.nexus import primary_slowness
-    from scipp import max, min
 
-    from ..utils import in_same_unit
+    from ..utils import range_normalized
 
     slow = 'slowness'
     if slow not in monitor.coords:
         raise RuntimeError(f'A SlownessMonitor must have the coordinate "{slow}"')
     sloth = 'sloth'
     names = {slow: sloth}
-    min_max = in_same_unit(primary_slowness(primary), to=monitor.coords[slow])
-    normed = (
-        (monitor.coords[slow] - min(min_max)) / (max(min_max) - min(min_max))
-    ).rename(names)
-    return DataArray(monitor.data.rename(names), coords={sloth: normed})
+    min_max = primary_slowness(primary)
+    normed = range_normalized(monitor.coords[slow], sc.min(min_max), sc.max(min_max))
+    return DataArray(monitor.data.rename(names), coords={sloth: normed.rename(names)})
 
 
 def normalise(
