@@ -16,7 +16,7 @@ from ..reflectometry.types import (
     SamplePosition,
     BeamDivergenceLimits,
 )
-from . import conversions, load, orso, resolution, utils
+from . import conversions, load, orso, resolution, utils, figures
 from .instrument_view import instrument_view
 from .types import (
     AngularResolution,
@@ -44,6 +44,7 @@ providers = (
     *conversions.providers,
     *resolution.providers,
     *utils.providers,
+    *figures.providers,
     *orso.providers,
 )
 """

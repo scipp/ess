@@ -5,7 +5,11 @@
 import pytest
 import scipp as sc
 
-from ess.amor.utils import q_theta_figure, wavelength_theta_figure, wavelength_z_figure
+from ess.amor.figures import (
+    q_theta_figure,
+    wavelength_theta_figure,
+    wavelength_z_figure,
+)
 
 
 @pytest.fixture
