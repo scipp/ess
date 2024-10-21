@@ -40,8 +40,7 @@ class FlatVoxelViewer(ipw.VBox):
         self._bank_selector = _make_bank_selector(data.keys())
         self._bank = self._data[self._bank_selector.value]
 
-        self._dim_selector = _DimensionSelector(self._bank.dims)
-        self._dim_selector.observe(self._update_view, names='value')
+        self._dim_selector = _DimensionSelector(self._bank.dims, self._update_view)
 
         self._fig_kwargs = {'rasterized': rasterized}
         self._figure_box = ipw.HBox([self._make_figure()])
@@ -83,17 +82,18 @@ class FlatVoxelViewer(ipw.VBox):
 
 
 class _DimensionSelector(ipw.VBox):
-    def __init__(self, dims: tuple[str, ...]) -> None:
-        self._value_observers = []
+    def __init__(self, dims: tuple[str, ...], callback: Callable[[dict], None]) -> None:
+        self._lock = False
+        self._callback = callback
 
-        h_buttons, v_buttons = self._make_buttons(dims, *self._default_dims(dims))
+        self._horizontal_buttons, self._vertical_buttons = self._make_buttons(
+            dims, *self._default_dims(dims)
+        )
 
-        self._horizontal_selector_box = ipw.HBox([h_buttons])
-        self._vertical_selector_box = ipw.HBox([v_buttons])
         super().__init__(
             [
-                ipw.HBox([ipw.Label('X'), self._horizontal_selector_box]),
-                ipw.HBox([ipw.Label('Y'), self._vertical_selector_box]),
+                ipw.HBox([ipw.Label('X'), self._horizontal_buttons]),
+                ipw.HBox([ipw.Label('Y'), self._vertical_buttons]),
             ]
         )
 
@@ -104,31 +104,19 @@ class _DimensionSelector(ipw.VBox):
         options = {dim.capitalize(): dim for dim in dims}
         h_buttons = ipw.ToggleButtons(options=options, value=h_dim, style=style)
         v_buttons = ipw.ToggleButtons(options=options, value=v_dim, style=style)
-        h_buttons.observe(self._observe_values, names='value')
-        v_buttons.observe(self._observe_values, names='value')
+        h_buttons.observe(self.update, names='value')
+        v_buttons.observe(self.update, names='value')
         return h_buttons, v_buttons
 
-    @property
-    def _horizontal_buttons(self) -> ipw.ToggleButtons:
-        return self._horizontal_selector_box.children[0]
-
-    @property
-    def _vertical_buttons(self) -> ipw.ToggleButtons:
-        return self._vertical_selector_box.children[0]
-
     def set_dims(self, new_dims: tuple[str, ...]) -> None:
-        self._horizontal_buttons.unobserve_all(name='value')
-        self._vertical_buttons.unobserve_all(name='value')
-
-        old_h = self._horizontal_buttons.value
-        old_v = self._vertical_buttons.value
         default_h, default_v = self._default_dims(new_dims)
-        new_h = old_h if old_h in new_dims else default_h
-        new_v = old_v if old_v in new_dims else default_v
-
-        h_buttons, v_buttons = self._make_buttons(new_dims, new_h, new_v)
-        self._horizontal_selector_box.children = [h_buttons]
-        self._vertical_selector_box.children = [v_buttons]
+        options = {dim.capitalize(): dim for dim in new_dims}
+        self._lock = True
+        self._horizontal_buttons.options = options
+        self._vertical_buttons.options = options
+        self._horizontal_buttons.value = default_h
+        self._vertical_buttons.value = default_v
+        self._lock = False
 
     @staticmethod
     def _default_dims(dims: tuple[str, ...]) -> tuple[str, str]:
@@ -141,13 +129,9 @@ class _DimensionSelector(ipw.VBox):
             'vertical': self._vertical_buttons.value,
         }
 
-    def observe(self, handler, names: str | list[str], *args, **kwargs):
-        if names != 'value':
-            super().observe(handler, names, *args, **kwargs)
-        else:
-            self._value_observers.append(handler)
-
-    def _observe_values(self, change: dict) -> None:
+    def update(self, change: dict) -> None:
+        if self._lock:
+            return
         clicked = change['owner']
         other = (
             self._vertical_buttons
@@ -155,12 +139,10 @@ class _DimensionSelector(ipw.VBox):
             else self._horizontal_buttons
         )
         if other.value == clicked.value:
+            self._lock = True  # suppress update from `other`
             other.value = change['old']
-        else:
-            # Only when dims are different to avoid unnecessary redraws
-            # and drawing with invalid dims.
-            for observer in self._value_observers:
-                observer(change)
+            self._lock = False
+        self._callback(change)
 
 
 def _flat_voxel_figure(
