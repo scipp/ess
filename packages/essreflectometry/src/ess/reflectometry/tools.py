@@ -197,7 +197,7 @@ def scale_reflectivity_curves_to_overlap(
     if critical_edge_interval is not None:
         q = next(iter(curves)).coords['Q']
         N = (
-            ((q > critical_edge_interval[0]) & (q < critical_edge_interval[1]))
+            ((q >= critical_edge_interval[0]) & (q < critical_edge_interval[1]))
             .sum()
             .value
         )
