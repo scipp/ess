@@ -171,7 +171,7 @@ def _interpolate_on_qgrid(curves, grid):
 def scale_reflectivity_curves_to_overlap(
     curves: Sequence[sc.DataArray],
     critical_edge_interval: tuple[sc.Variable, sc.Variable] | None = None,
-) -> tuple[list[sc.DataArray], list[sc.scalar]]:
+) -> tuple[list[sc.DataArray], list[sc.Variable]]:
     '''Make the curves overlap by scaling all except the first by a factor.
     The scaling factors are determined by a maximum likelihood estimate
     (assuming the errors are normal distributed).
