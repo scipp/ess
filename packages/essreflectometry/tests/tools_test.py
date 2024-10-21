@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
+from numpy.testing import assert_allclose as np_assert_allclose
 from scipp.testing import assert_allclose
 
 from ess.reflectometry.tools import combine_curves, scale_reflectivity_curves_to_overlap
@@ -20,16 +21,17 @@ def test_reflectivity_curve_scaling():
     )
     data.variances[:] = 0.1
 
-    curves = scale_reflectivity_curves_to_overlap(
+    curves, factors = scale_reflectivity_curves_to_overlap(
         (curve(data, 0, 0.3), curve(0.8 * data, 0.2, 0.7), curve(0.1 * data, 0.6, 1.0)),
     )
 
     assert_allclose(curves[0].data, data, rtol=sc.scalar(1e-5))
     assert_allclose(curves[1].data, 0.5 * data, rtol=sc.scalar(1e-5))
     assert_allclose(curves[2].data, 0.25 * data, rtol=sc.scalar(1e-5))
+    np_assert_allclose((1, 0.5 / 0.8, 0.25 / 0.1), factors, 1e-4)
 
 
-def test_reflectivity_curve_scaling_return_factors():
+def test_reflectivity_curve_scaling_with_critical_edge():
     data = sc.concat(
         (
             sc.ones(dims=['Q'], shape=[10], with_variances=True),
@@ -39,14 +41,19 @@ def test_reflectivity_curve_scaling_return_factors():
     )
     data.variances[:] = 0.1
 
-    factors = scale_reflectivity_curves_to_overlap(
-        (curve(data, 0, 0.3), curve(0.8 * data, 0.2, 0.7), curve(0.1 * data, 0.6, 1.0)),
-        return_scaling_factors=True,
+    curves, factors = scale_reflectivity_curves_to_overlap(
+        (
+            2 * curve(data, 0, 0.3),
+            curve(0.8 * data, 0.2, 0.7),
+            curve(0.1 * data, 0.6, 1.0),
+        ),
+        critical_edge_interval=(sc.scalar(0.01), sc.scalar(0.05)),
     )
 
-    assert_allclose(factors[0], sc.scalar(1.0), rtol=sc.scalar(1e-5))
-    assert_allclose(factors[1], sc.scalar(0.5 / 0.8), rtol=sc.scalar(1e-5))
-    assert_allclose(factors[2], sc.scalar(0.25 / 0.1), rtol=sc.scalar(1e-5))
+    assert_allclose(curves[0].data, data, rtol=sc.scalar(1e-5))
+    assert_allclose(curves[1].data, 0.5 * data, rtol=sc.scalar(1e-5))
+    assert_allclose(curves[2].data, 0.25 * data, rtol=sc.scalar(1e-5))
+    np_assert_allclose((0.5, 0.5 / 0.8, 0.25 / 0.1), factors, 1e-4)
 
 
 def test_combined_curves():
