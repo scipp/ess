@@ -184,7 +184,7 @@ def scale_reflectivity_curves_to_overlap(
     ---------
     curves:
         the reflectivity curves that should be scaled together
-    critical_edge_interval: optional,
+    critical_edge_interval:
         a tuple denoting an interval that is known to belong
         to the critical edge, i.e. where the reflectivity is
         known to be 1.
