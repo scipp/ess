@@ -2,22 +2,12 @@ import scipp as sc
 
 from ess.reflectometry.types import (
     DetectorRotation,
-    QBins,
-    ReflectivityData,
-    ReflectivityOverQ,
     RunType,
     SampleRotation,
-    SampleRun,
 )
 
 from .geometry import Detector
-from .types import (
-    QThetaFigure,
-    ReflectivityDiagnosticsView,
-    ThetaBins,
-    WavelengthThetaFigure,
-    WavelengthZIndexFigure,
-)
+from .types import ThetaBins
 
 
 def theta_grid(
@@ -70,58 +60,4 @@ def theta_grid(
     return grid
 
 
-def wavelength_theta_diagnostic_figure(
-    da: ReflectivityData,
-    thbins: ThetaBins[SampleRun],
-) -> WavelengthThetaFigure:
-    da = da.bins.concat(set(da.dims) - {"wavelength"}).hist(theta=thbins).transpose()
-    p = da.plot(norm="log")
-    for a in sc.linspace("_", 0.1, 3, 10):
-        p.ax.plot(
-            [sc.scalar(0.0), da.coords["wavelength"].max().value],
-            [sc.scalar(0.0), a * da.coords["theta"].max().value],
-            linestyle="solid",
-            linewidth=0.5,
-            color="black",
-            marker=None,
-        )
-    return p
-
-
-def q_theta_diagnostic_figure(
-    da: ReflectivityData,
-    thbins: ThetaBins[SampleRun],
-    qbins: QBins,
-) -> QThetaFigure:
-    da = da.bins.concat().hist(theta=thbins, Q=qbins)
-    return da.plot(grid=True, norm="log")
-
-
-def wavelength_z_diagnostic_figure(
-    da: ReflectivityData,
-) -> WavelengthZIndexFigure:
-    return (
-        da.bins.concat("stripe")
-        .flatten(("blade", "wire"), to="z_index")
-        .hist()
-        .plot(norm="log", grid=True)
-    )
-
-
-def diagnostic_view(
-    lath: WavelengthThetaFigure,
-    laz: WavelengthZIndexFigure,
-    qth: QThetaFigure,
-    ioq: ReflectivityOverQ,
-) -> ReflectivityDiagnosticsView:
-    ioq = ioq.hist().plot(norm="log")
-    return (ioq + laz) / (lath + qth)
-
-
-providers = (
-    theta_grid,
-    wavelength_z_diagnostic_figure,
-    wavelength_theta_diagnostic_figure,
-    q_theta_diagnostic_figure,
-    diagnostic_view,
-)
+providers = (theta_grid,)

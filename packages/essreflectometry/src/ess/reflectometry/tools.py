@@ -238,15 +238,18 @@ def scale_reflectivity_curves_to_overlap(
 
 def combine_curves(
     curves: Sequence[sc.DataArray],
-    qgrid: sc.Variable | None = None,
+    q_bin_edges: sc.Variable | None = None,
 ) -> sc.DataArray:
     '''Combines the given curves by interpolating them
-    on a grid and merging them by the requested method.
-    The default method is a weighted mean where the weights
+    on a 1d grid defined by :code:`q_bin_edges` and averaging
+    over the provided reflectivity curves.
+
+    The averaging is done using a weighted mean where the weights
     are proportional to the variances.
 
     Unless the curves are already scaled correctly they might
-    need to be scaled using :func:`scale_reflectivity_curves_to_overlap`.
+    need to be scaled using :func:`scale_reflectivity_curves_to_overlap`
+    before calling this function.
 
     All curves must be have the same unit for data and the Q-coordinate.
 
@@ -254,8 +257,8 @@ def combine_curves(
     ----------
     curves:
         the reflectivity curves that should be combined
-    qgrid:
-        the Q-grid of the resulting combined reflectivity curve
+    q_bin_edges:
+        the Q bin edges of the resulting combined reflectivity curve
 
     Returns
     ---------
@@ -267,8 +270,8 @@ def combine_curves(
     if len({c.coords['Q'].unit for c in curves}) != 1:
         raise ValueError('The Q-coordinates must have the same unit for each curve')
 
-    r = _interpolate_on_qgrid(map(sc.values, curves), qgrid).values
-    v = _interpolate_on_qgrid(map(sc.variances, curves), qgrid).values
+    r = _interpolate_on_qgrid(map(sc.values, curves), q_bin_edges).values
+    v = _interpolate_on_qgrid(map(sc.variances, curves), q_bin_edges).values
 
     v[v == 0] = np.nan
     inv_v = 1.0 / v
@@ -281,5 +284,5 @@ def combine_curves(
             variances=v_avg,
             unit=next(iter(curves)).data.unit,
         ),
-        coords={'Q': qgrid},
+        coords={'Q': q_bin_edges},
     )

@@ -52,4 +52,6 @@
    orso
    resolution
    types
+   utils
+   figures
 ```
