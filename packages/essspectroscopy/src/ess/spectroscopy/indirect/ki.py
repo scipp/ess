@@ -14,6 +14,7 @@ from ess.spectroscopy.types import (
     FocusComponentNames,
     IncidentDirection,
     IncidentEnergy,
+    IncidentSloth,
     IncidentSlowness,
     IncidentWavelength,
     IncidentWavenumber,
@@ -119,10 +120,8 @@ def guess_focus_component_names(file: NeXusFileName) -> FocusComponentNames:
         The name or names of the time-focus-defining choppers, given the restrictions
         noted above
     """
-    from scipp import scalar
+    from scipp import norm, scalar
     from scippnexus import File, NXdisk_chopper, compute_positions
-
-    from ..utils import norm
 
     allowance = scalar(0.5, unit='m')
 
@@ -193,9 +192,8 @@ def focus_distance(
         The average straight-line distance from the source position to the named
         component(s)
     """
+    from scipp import norm
     from scippnexus import File, compute_positions
-
-    from ..utils import norm
 
     pos = 0 * origin
     with File(file) as data:
@@ -363,6 +361,18 @@ def incident_slowness(
     return slowness
 
 
+def incident_sloth(
+    primary: PrimarySpectrometerObject, slowness: IncidentSlowness
+) -> IncidentSloth:
+    import scipp as sc
+    from choppera.nexus import primary_slowness
+
+    from ..utils import range_normalized
+
+    min_max = primary_slowness(primary)
+    return range_normalized(slowness, sc.min(min_max), sc.max(min_max))
+
+
 def incident_wavelength(slowness: IncidentSlowness) -> IncidentWavelength:
     """Calculate the incident wavelength from the incident slowness for each neutron"""
     from scipp.constants import Planck, neutron_mass
@@ -412,6 +422,7 @@ providers = (
     unwrap_sample_time,
     incident_direction,
     incident_slowness,
+    incident_sloth,
     incident_wavelength,
     incident_wavenumber,
     incident_wavevector,

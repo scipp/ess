@@ -32,6 +32,7 @@ ReciprocalLatticeVectorAbsolute = variable_type('ReciprocalLatticeVectorAbsolute
 ReciprocalLatticeSpacing = variable_type('ReciprocalLatticeSpacing')
 IncidentDirection = variable_type('IncidentDirection')
 IncidentSlowness = variable_type('IncidentSlowness')
+IncidentSloth = variable_type('IncidentSloth')
 IncidentWavelength = variable_type('IncidentWavelength')
 IncidentWavenumber = variable_type('IncidentWavenumber')
 IncidentWavevector = variable_type('IncidentWavevector')
@@ -66,11 +67,15 @@ FocusComponentNames = NewType('FocusComponentNames', list[FocusComponentName])
 PrimaryFocusDistance = variable_type('PrimaryFocusDistance')
 PrimaryFocusTime = variable_type('PrimaryFocusTime')
 
+MonitorName = NewType('MonitorName', str)
+MonitorPosition = variable_type('MonitorPosition')
 SourceMonitorPathLength = variable_type('SourceMonitorPathLength')
 SourceMonitorFlightTime = variable_type('SourceMonitorFlightTime')
 FrameTimeMonitor = data_array_type('FrameTimeMonitor')
 WallTimeMonitor = data_array_type('WallTimeMonitor')
 SlownessMonitor = data_array_type('SlownessMonitor')
+WavelengthMonitor = data_array_type('WavelengthMonitor')
+SlothMonitor = data_array_type('SlothMonitor')
 
 MonitorNormalisation = variable_type('MonitorNormalisation')
 
@@ -92,5 +97,15 @@ SampleMomentumTransferZ = variable_type("SampleMomentumTransferZ")
 
 EnergyTransfer = variable_type('EnergyTransfer')
 
-# Debugging types, likely to be removed
 DetectorGeometricA4 = variable_type("DetectorGeometricA4")
+
+SlothEvents = data_array_type('SlothEvents')
+SlothBins = variable_type('SlothBins')
+NormSlothEvents = data_array_type('NormSlothEvents')
+
+WavelengthEvents = data_array_type('WavelengthEvents')
+WavelengthBins = variable_type('WavelengthBins')
+NormWavelengthEvents = data_array_type('NormWavelengthEvents')
+
+NXspeFileName = NewType('NXspeFileName', str)
+NXspeFileNames = NewType('NXspeFileNames', list[NXspeFileName])
