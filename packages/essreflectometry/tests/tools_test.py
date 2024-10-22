@@ -1,12 +1,21 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+import numpy as np
 import pytest
+import sciline as sl
 import scipp as sc
 from numpy.testing import assert_allclose as np_assert_allclose
+from orsopy.fileio import Orso, OrsoDataset
 from scipp.testing import assert_allclose
 
-from ess.reflectometry import tools
-from ess.reflectometry.tools import combine_curves, scale_reflectivity_curves_to_overlap
+from ess.reflectometry.orso import OrsoIofQDataset
+from ess.reflectometry.tools import (
+    combine_curves,
+    linlogspace,
+    orso_datasets_from_measurements,
+    scale_reflectivity_curves_to_overlap,
+)
+from ess.reflectometry.types import Filename, ReflectivityOverQ, SampleRun
 
 
 def curve(d, qmin, qmax):
@@ -138,7 +147,7 @@ def test_combined_curves():
 
 
 def test_linlogspace_linear():
-    q_lin = tools.linlogspace(
+    q_lin = linlogspace(
         dim='qz', edges=[0.008, 0.08], scale='linear', num=50, unit='1/angstrom'
     )
     expected = sc.linspace(dim='qz', start=0.008, stop=0.08, num=50, unit='1/angstrom')
@@ -146,7 +155,7 @@ def test_linlogspace_linear():
 
 
 def test_linlogspace_linear_list_input():
-    q_lin = tools.linlogspace(
+    q_lin = linlogspace(
         dim='qz', edges=[0.008, 0.08], unit='1/angstrom', scale=['linear'], num=[50]
     )
     expected = sc.linspace(dim='qz', start=0.008, stop=0.08, num=50, unit='1/angstrom')
@@ -154,7 +163,7 @@ def test_linlogspace_linear_list_input():
 
 
 def test_linlogspace_log():
-    q_log = tools.linlogspace(
+    q_log = linlogspace(
         dim='qz', edges=[0.008, 0.08], unit='1/angstrom', scale='log', num=50
     )
     expected = sc.geomspace(dim='qz', start=0.008, stop=0.08, num=50, unit='1/angstrom')
@@ -162,7 +171,7 @@ def test_linlogspace_log():
 
 
 def test_linlogspace_linear_log():
-    q_linlog = tools.linlogspace(
+    q_linlog = linlogspace(
         dim='qz',
         edges=[0.008, 0.03, 0.08],
         unit='1/angstrom',
@@ -176,7 +185,7 @@ def test_linlogspace_linear_log():
 
 
 def test_linlogspace_log_linear():
-    q_loglin = tools.linlogspace(
+    q_loglin = linlogspace(
         dim='qz',
         edges=[0.008, 0.03, 0.08],
         unit='1/angstrom',
@@ -190,7 +199,7 @@ def test_linlogspace_log_linear():
 
 
 def test_linlogspace_linear_log_linear():
-    q_linloglin = tools.linlogspace(
+    q_linloglin = linlogspace(
         dim='qz',
         edges=[0.008, 0.03, 0.08, 0.12],
         unit='1/angstrom',
@@ -206,10 +215,35 @@ def test_linlogspace_linear_log_linear():
 
 def test_linlogspace_bad_input():
     with pytest.raises(ValueError, match="Sizes do not match"):
-        _ = tools.linlogspace(
+        _ = linlogspace(
             dim='qz',
             edges=[0.008, 0.03, 0.08, 0.12],
             unit='1/angstrom',
             scale=['linear', 'log'],
             num=[16, 20],
         )
+
+
+@pytest.mark.filterwarnings("ignore:No suitable")
+def test_orso_datasets_tool():
+    def normalized_ioq(filename: Filename[SampleRun]) -> ReflectivityOverQ:
+        return filename
+
+    def orso_dataset(filename: Filename[SampleRun]) -> OrsoIofQDataset:
+        class Reduction:
+            corrections = []  # noqa: RUF012
+
+        return OrsoDataset(
+            Orso({}, Reduction, [], name=f'{filename}.orso'), np.ones((0, 0))
+        )
+
+    workflow = sl.Pipeline(
+        [normalized_ioq, orso_dataset], params={Filename[SampleRun]: 'default'}
+    )
+    datasets = orso_datasets_from_measurements(
+        workflow,
+        [{}, {Filename[SampleRun]: 'special'}],
+        scale_to_overlap=False,
+    )
+    assert len(datasets) == 2
+    assert tuple(d.info.name for d in datasets) == ('default.orso', 'special.orso')
