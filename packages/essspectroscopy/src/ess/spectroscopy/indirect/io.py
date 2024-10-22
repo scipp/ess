@@ -124,9 +124,9 @@ def _to_one_nxspe(events: DataArray, filename: str, progress):
 
     psi = observations.coords['a3']
     polar = observations.coords['theta']
-    azimuthal = 0 * polar  # all detectors are in the horizontal plane
-    azimuthal_width = azimuthal + sc.scalar(2.0, unit='degree')
-    polar_width = azimuthal + sc.scalar(0.1, unit='degree')
+    azimuthal = sc.zeros(sizes=polar.sizes, unit='deg', dtype=polar.dtype)
+    azimuthal_width = sc.full(sizes=polar.sizes, unit='deg', value=2.0)
+    polar_width = sc.full(sizes=polar.sizes, unit='deg', value=0.1)
     distance = sc.full(sizes=polar.sizes, unit='m', value=3.0, dtype=polar.dtype)
     data = observations.data
     error = 0 * observations.data.values
