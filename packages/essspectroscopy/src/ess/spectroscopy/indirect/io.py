@@ -129,9 +129,10 @@ def _to_one_nxspe(events: DataArray, filename: str, progress):
     polar_width = sc.full(sizes=polar.sizes, unit='deg', value=0.1)
     distance = sc.full(sizes=polar.sizes, unit='m', value=3.0, dtype=polar.dtype)
     data = observations.data
-    error = 0 * observations.data.values
     if observations.data.variances is not None:
         error = numpy.sqrt(observations.data.variances)
+    else:
+        error = 0 * observations.data.values
     energy_transfer = observations.coords['energy_transfer']
     incident_energy = observations.coords['incident_energy']
     final_energy = observations.coords['final_energy']
