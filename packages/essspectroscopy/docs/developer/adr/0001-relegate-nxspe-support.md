@@ -1,7 +1,7 @@
 # ADR 0001: Relagate NXspe support
 
-- Status:
-- Deciders:
+- Status: accepted
+- Deciders: Greg, Jan-Lukas
 - Date: 2024-10
 
 ## Context
