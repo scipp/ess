@@ -69,7 +69,7 @@ def _ei_ef_to_en(incident_energy, final_energy):
 
 def _to_one_nxspe(events: DataArray, filename: str, progress):
     """Use scippnexus to create the NXspe file"""
-    from scipp import full, scalar, sqrt
+    import scipp as sc
     from scippnexus import (
         NXcollection,
         NXdata,
@@ -81,7 +81,7 @@ def _to_one_nxspe(events: DataArray, filename: str, progress):
 
     observations = events.copy()
     ef = events.coords['final_energy']
-    observations *= sqrt(events.bins.coords['incident_energy'] / ef)
+    observations *= sc.sqrt(events.bins.coords['incident_energy'] / ef)
 
     # Adding null events requires replicating all coordinates of real events.
     # We don't necessarily use all present event coordinates, so remove any we won't use
@@ -115,8 +115,6 @@ def _to_one_nxspe(events: DataArray, filename: str, progress):
     if observations.variances is None:
         observations.variances = observations.values  # correct for counting statistics
         observations.variances[observations.values == 0] = 1
-    if observations.data.variances is not None:
-        observations.data.variances[observations.data.variances == 0] = 1
     # the transform_coords above renamed the 'incident_wavelength' dimension
     # to 'energy_transfer' ... so we need to do the same to normalize_by or else
     # scipp tries to broadcast when it doesn't need to.
@@ -127,9 +125,9 @@ def _to_one_nxspe(events: DataArray, filename: str, progress):
     psi = observations.coords['a3']
     polar = observations.coords['theta']
     azimuthal = 0 * polar  # all detectors are in the horizontal plane
-    azimuthal_width = azimuthal + scalar(2.0, unit='degree')
-    polar_width = azimuthal + scalar(0.1, unit='degree')
-    distance = full(sizes=polar.sizes, unit='m', value=3.0, dtype=polar.dtype)
+    azimuthal_width = azimuthal + sc.scalar(2.0, unit='degree')
+    polar_width = azimuthal + sc.scalar(0.1, unit='degree')
+    distance = sc.full(sizes=polar.sizes, unit='m', value=3.0, dtype=polar.dtype)
     data = observations.data
     error = 0 * observations.data.values
     if observations.data.variances is not None:
@@ -145,9 +143,9 @@ def _to_one_nxspe(events: DataArray, filename: str, progress):
         # with two fields and five subgroups required
         entry = root.create_class('entry', NXentry)
         # the name of  the author program
-        entry.create_field('program_name', scalar('essspectroscopy'))
+        entry.create_field('program_name', sc.scalar('essspectroscopy'))
         # and the NXDL schema information -- currently version 3.1
-        definition = entry.create_field('definition', scalar('NXSPE'))
+        definition = entry.create_field('definition', sc.scalar('NXSPE'))
         definition.attrs['version'] = '3.1'
 
         # the entry group also contains five subgroups
@@ -155,7 +153,7 @@ def _to_one_nxspe(events: DataArray, filename: str, progress):
         # the NXcollection group must contain three fields
         nxinfo = entry.create_class('NXSPE_info', NXcollection)
         nxinfo.create_field('fixed_energy', final_energy)
-        nxinfo.create_field('ki_over_kf_scaling', scalar(True))
+        nxinfo.create_field('ki_over_kf_scaling', sc.scalar(True))
         nxinfo.create_field('psi', psi)
 
         # the NXdata group has 8 required fields
@@ -174,15 +172,15 @@ def _to_one_nxspe(events: DataArray, filename: str, progress):
 
         # the NXinstrument group has one required field and one required group
         instrument = entry.create_class('instrument', NXinstrument)
-        instrument.create_field('name', scalar('SIMBIFROST'))
+        instrument.create_field('name', sc.scalar('SIMBIFROST'))
         fermi = instrument.create_class('fermi_chopper', NXfermi_chopper)
-        fermi.create_field('energy', scalar(numpy.nan, unit='meV'))
+        fermi.create_field('energy', sc.scalar(numpy.nan, unit='meV'))
 
         # and the NXsample group has three required fields
         sample = entry.create_class('sample', NXsample)
         sample.create_field('rotation_angle', psi)
-        sample.create_field('seblock', scalar(""))
-        sample.create_field('temperature', scalar(numpy.nan, unit='K'))
+        sample.create_field('seblock', sc.scalar(""))
+        sample.create_field('temperature', sc.scalar(numpy.nan, unit='K'))
 
 
 providers = (to_nxspe,)
