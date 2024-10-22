@@ -107,11 +107,8 @@ def _to_one_nxspe(events: DataArray, filename: str, progress):
     # combine the per bin intensities and normalize by monitor counts
     # Note, applying this normalization to the _events_ would require splitting
     # the bin monitor counts between the bin events.
-    normalize_by = events.coords['monitor']  # .broadcast(sizes=observations.sizes)
-    if normalize_by.variances is not None:
-        # we need to ignore the monitor uncertainty for the time being
-        normalize_by = normalize_by.copy()
-        normalize_by.variances = None
+    # we need to ignore the monitor uncertainty for the time being
+    normalize_by = sc.values(events.coords['monitor'])
 
     observations = observations.hist().transform_coords(targets, graph=graph)
 
