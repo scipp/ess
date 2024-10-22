@@ -56,12 +56,16 @@ def amor_pipeline() -> sciline.Pipeline:
     return pl
 
 
+@pytest.mark.filterwarnings("ignore:Failed to convert .* into a transformation")
+@pytest.mark.filterwarnings("ignore:Invalid transformation, missing attribute")
 def test_run_data_pipeline(amor_pipeline: sciline.Pipeline):
     res = amor_pipeline.compute(ReflectivityOverQ)
     assert "Q" in res.coords
     assert "Q_resolution" in res.coords
 
 
+@pytest.mark.filterwarnings("ignore:Failed to convert .* into a transformation")
+@pytest.mark.filterwarnings("ignore:Invalid transformation, missing attribute")
 def test_run_full_pipeline(amor_pipeline: sciline.Pipeline):
     res = amor_pipeline.compute(orso.OrsoIofQDataset)
     assert res.info.data_source.experiment.instrument == "Amor"
