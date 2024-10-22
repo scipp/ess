@@ -33,23 +33,19 @@ def to_nxspe(events: NormWavelengthEvents, base: NXspeFileName) -> NXspeFileName
     """
     from pathlib import Path
 
-    from tqdm import tqdm
-
     dim = 'setting'
     length = len(str(events.sizes[dim] + 1))
     files = []
-    if not isinstance(base, Path):
-        base = Path(base)
+    base = Path(base)
     parent = base.parent
     if not parent.exists():
         parent.mkdir(parents=True)
 
-    progress = tqdm(range(events.sizes[dim]))
-    for i in progress:
+    for i in range(events.sizes[dim]):
         ev = events[dim, i]
         fn = str(base) + '_' + f'{i+1}'.rjust(length, '0') + '.nxspe'
         files.append(NXspeFileName(fn))
-        _to_one_nxspe(ev, fn, progress)
+        _to_one_nxspe(ev, fn)
     return NXspeFileNames(files)
 
 
@@ -63,11 +59,7 @@ def _lambda_to_ei(incident_wavelength):
     return ((Planck / incident_wavelength) ** 2 / neutron_mass / 2).to(unit='meV')
 
 
-def _ei_ef_to_en(incident_energy, final_energy):
-    return incident_energy - final_energy
-
-
-def _to_one_nxspe(events: DataArray, filename: str, progress):
+def _to_one_nxspe(events: DataArray, filename: str):
     """Use scippnexus to create the NXspe file"""
     import scipp as sc
     from scippnexus import (
@@ -78,6 +70,8 @@ def _to_one_nxspe(events: DataArray, filename: str, progress):
         NXinstrument,
         NXsample,
     )
+
+    from .conservation import energy_transfer
 
     observations = events.copy()
     ef = events.coords['final_energy']
@@ -97,7 +91,7 @@ def _to_one_nxspe(events: DataArray, filename: str, progress):
     # we are sure incident_wavelength is a bin coordinate already, so can skip it.
     graph = {
         'incident_energy': _lambda_to_ei,
-        'energy_transfer': _ei_ef_to_en,
+        'energy_transfer': energy_transfer,
     }
     # # Adding zero-weight observations, i.e., null events, works now, but involves
     # # a memory-copy of the data array and its bin structure. Since it isn't strictly
