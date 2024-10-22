@@ -4,7 +4,6 @@ import numpy as np
 import pytest
 import sciline as sl
 import scipp as sc
-
 from numpy.testing import assert_allclose as np_assert_allclose
 from orsopy.fileio import Orso, OrsoDataset
 from scipp.testing import assert_allclose
@@ -12,9 +11,9 @@ from scipp.testing import assert_allclose
 from ess.reflectometry.orso import OrsoIofQDataset
 from ess.reflectometry.tools import (
     combine_curves,
+    linlogspace,
     orso_datasets_from_measurements,
     scale_reflectivity_curves_to_overlap,
-    linlogspace,
 )
 from ess.reflectometry.types import Filename, ReflectivityOverQ, SampleRun
 
@@ -147,7 +146,6 @@ def test_combined_curves():
     )
 
 
-<<<<<<< HEAD
 def test_linlogspace_linear():
     q_lin = linlogspace(
         dim='qz', edges=[0.008, 0.08], scale='linear', num=50, unit='1/angstrom'

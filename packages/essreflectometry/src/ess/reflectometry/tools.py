@@ -333,9 +333,7 @@ def orso_datasets_from_measurements(
         reflectivity_curves.append(wf.compute(ReflectivityOverQ))
 
     scale_factors = (
-        scale_reflectivity_curves_to_overlap(
-            [r.hist() for r in reflectivity_curves], return_scaling_factors=True
-        )
+        scale_reflectivity_curves_to_overlap([r.hist() for r in reflectivity_curves])[1]
         if scale_to_overlap
         else (1,) * len(runs)
     )
