@@ -1,5 +1,5 @@
-from ..spectroscopy.typing import FinalEnergy
-from .typing import ArcNumber
+from ..spectroscopy.types import FinalEnergy
+from .types import ArcNumber
 
 
 def arc_number(final_energy: FinalEnergy) -> ArcNumber:
