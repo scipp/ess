@@ -5,8 +5,10 @@ from scipp import vector
 
 from ..types import (
     EnergyTransfer,
+    FinalEnergy,
     FinalWavenumber,
     FinalWavevector,
+    IncidentEnergy,
     IncidentWavenumber,
     IncidentWavevector,
     LabMomentumTransfer,
@@ -123,6 +125,12 @@ def energy(ki: IncidentWavenumber, kf: FinalWavenumber) -> EnergyTransfer:
     return hbar * hbar * (ki * ki - kf * kf) / 2 / neutron_mass
 
 
+def energy_transfer(
+    incident_energy: IncidentEnergy, final_energy: FinalEnergy
+) -> EnergyTransfer:
+    return incident_energy - final_energy
+
+
 providers = (
     *ki_providers,
     *kf_providers,
@@ -135,4 +143,5 @@ providers = (
     sample_table_momentum_y,
     sample_table_momentum_z,
     energy,
+    energy_transfer,
 )
