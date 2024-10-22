@@ -13,3 +13,4 @@ scipp>=24.09.1
 scippneutron>=24.7.0
 scippnexus>=24.9.1
 essreduce
+pandas

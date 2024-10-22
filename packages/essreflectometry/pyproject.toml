@@ -41,6 +41,7 @@ dependencies = [
   "scippneutron>=24.7.0",
   "scippnexus>=24.9.1",
   "essreduce",
+  "pandas",
 ]
 
 dynamic = ["version"]
