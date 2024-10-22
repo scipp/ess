@@ -8,7 +8,6 @@ from scipp import Variable
 
 from ..types import NeXusFileName, NormWavelengthEvents, NXspeFileName
 
-# PIXEL_NAME = 'event_id'
 PIXEL_NAME = 'detector_number'
 
 
