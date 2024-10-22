@@ -5,8 +5,6 @@ from functools import wraps
 
 import scipp as sc
 
-from ess.reduce import nexus
-
 from ..reflectometry.load import load_nx
 from ..reflectometry.types import (
     DetectorRotation,
@@ -51,7 +49,7 @@ def ignore_amor_warnings(func):
 def load_detector(
     file_path: Filename[RunType], detector_name: NeXusDetectorName[RunType]
 ) -> LoadedNeXusDetector[RunType]:
-    return nexus.load_detector(file_path=file_path, detector_name=detector_name)
+    return next(load_nx(file_path, f"NXentry/NXinstrument/{detector_name}"))
 
 
 @ignore_amor_warnings
@@ -66,7 +64,7 @@ def load_events(
         dtype="int32",
     )
     data = (
-        nexus.extract_detector_data(detector)
+        detector['data']
         .bins.constituents["data"]
         .group(detector_numbers)
         .fold(
