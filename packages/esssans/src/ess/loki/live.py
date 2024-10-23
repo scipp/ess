@@ -1,124 +1,217 @@
 # This file is used by beamlime to create a workflow for the Loki instrument.
 # The callable `live_workflow` is registered as the entry point for the workflow.
+"""
+Live data reduction workflows for LoKI.
+"""
+
 from pathlib import Path
 from typing import NewType
 
 import sciline
 import scipp as sc
-import scippnexus as snx
 
+import ess.loki.data  # noqa: F401
 from ess import loki
 from ess.reduce import streaming
-from ess.reduce.nexus import types as nexus_types
-from ess.reduce.nexus.json_nexus import JSONGroup
+from ess.reduce.live import LiveWorkflow
+from ess.sans import with_pixel_mask_filenames
 from ess.sans.types import (
+    BackgroundRun,
+    BackgroundSubtractedIofQ,
+    BackgroundSubtractedIofQxy,
+    BeamCenter,
+    CorrectForGravity,
+    Denominator,
+    DetectorData,
+    DirectBeamFilename,
+    EmptyBeamRun,
     Filename,
     Incident,
-    MonitorType,
-    NeXusMonitorName,
+    IofQ,
+    IofQxy,
+    Numerator,
+    QBins,
+    QxBins,
+    QyBins,
+    ReducedQ,
+    ReducedQxy,
+    ReturnEvents,
     RunType,
     SampleRun,
     Transmission,
+    TransmissionFraction,
+    TransmissionRun,
+    UncertaintyBroadcastMode,
     WavelengthBins,
     WavelengthMonitor,
 )
 
-
-class MonitorHistogram(
-    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
-): ...
+RawDetectorView = NewType('RawDetectorView', sc.DataArray)
 
 
-def _hist_monitor_wavelength(
-    wavelength_bin: WavelengthBins, monitor: WavelengthMonitor[RunType, MonitorType]
-) -> MonitorHistogram[RunType, MonitorType]:
-    return monitor.hist(wavelength=wavelength_bin)
+def _raw_detector_view(data: DetectorData[SampleRun]) -> RawDetectorView:
+    """Very simple raw detector view for initial testing."""
+    # Instead of histogramming concrete x and y (which leads to artifacts), another
+    # quick option is to slice/sum some dimensions. But it will not give true positions:
+    # Option 1:
+    # return data.hist().sum(('straw', 'layer'))
+    # Option 2:
+    # return data['layer', 0].hist().sum('straw')
+    da = data.hist()
+    da.coords['x'] = da.coords['position'].fields.x.copy()
+    da.coords['y'] = da.coords['position'].fields.y.copy()
+    return da.hist(y=50, x=100)
 
 
-JSONEventData = NewType('JSONEventData', dict[str, JSONGroup])
+class GatheredMonitors(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup): ...
 
 
-def load_json_incident_monitor_data(
-    name: NeXusMonitorName[Incident],
-    nxevent_data: JSONEventData,
-) -> nexus_types.NeXusData[Incident, SampleRun]:
-    json = nxevent_data[name]
-    group = snx.Group(json, definitions=snx.base_definitions())
-    return nexus_types.NeXusData[Incident, SampleRun](group[()])
+def _gather_monitors(
+    incident: WavelengthMonitor[RunType, Incident],
+    transmission: WavelengthMonitor[RunType, Transmission],
+) -> GatheredMonitors[RunType]:
+    """
+    Helper to allow for plotting multiple monitors in a single plot.
 
-
-def load_json_transmission_monitor_data(
-    name: NeXusMonitorName[Transmission],
-    nxevent_data: JSONEventData,
-) -> nexus_types.NeXusData[Transmission, SampleRun]:
-    json = nxevent_data[name]
-    group = snx.Group(json, definitions=snx.base_definitions())
-    return nexus_types.NeXusData[Transmission, SampleRun](group[()])
-
-
-class LokiMonitorWorkflow:
-    """LoKi Monitor wavelength histogram workflow for live data reduction."""
-
-    def __init__(self, nexus_filename: Path) -> None:
-        self._workflow = self._build_pipeline(nexus_filename=nexus_filename)
-        self._streamed = streaming.StreamProcessor(
-            base_workflow=self._workflow,
-            dynamic_keys=(JSONEventData,),
-            target_keys=(
-                MonitorHistogram[SampleRun, Incident],
-                MonitorHistogram[SampleRun, Transmission],
-            ),
-            accumulators=(),
+    Might be better to handle this via a nested output spec in LiveWorkflow?
+    """
+    return GatheredMonitors[RunType](
+        sc.DataGroup(
+            {'Incident Monitor': incident, 'Transmission Monitor': transmission}
         )
+    )
 
-    def _build_pipeline(self, nexus_filename: Path) -> sciline.Pipeline:
-        """Build a workflow pipeline for live data reduction.
 
-        Returns
-        -------
-        :
-            A pipeline for live data reduction.
-            The initial pipeline will be missing the input data.
-            It should be set before calling the pipeline.
+def _configured_Larmor_workflow() -> sciline.Pipeline:
+    wf = loki.LokiAtLarmorWorkflow()
+    wf = with_pixel_mask_filenames(wf, masks=loki.data.loki_tutorial_mask_filenames())
+    wf[CorrectForGravity] = True
+    wf[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
+    wf[ReturnEvents] = False
 
-        """
-        workflow = loki.LokiAtLarmorWorkflow()
-        workflow.insert(_hist_monitor_wavelength)
-        workflow.insert(load_json_incident_monitor_data)
-        workflow.insert(load_json_transmission_monitor_data)
-        workflow[Filename[SampleRun]] = nexus_filename
-        workflow[WavelengthBins] = sc.linspace(
-            "wavelength", 1.0, 13.0, 50 + 1, unit='angstrom'
-        )
-        return workflow
+    wf[WavelengthBins] = sc.linspace('wavelength', 1.0, 13.0, 201, unit='angstrom')
+    wf[QBins] = sc.linspace(dim='Q', start=0.01, stop=0.3, num=101, unit='1/angstrom')
+    wf[QxBins] = sc.linspace(dim='Qx', start=-0.3, stop=0.3, num=61, unit='1/angstrom')
+    wf[QyBins] = sc.linspace(dim='Qy', start=-0.3, stop=0.3, num=61, unit='1/angstrom')
 
-    def __call__(
-        self, nxevent_data: dict[str, JSONGroup], nxlog: dict[str, JSONGroup]
-    ) -> dict[str, sc.DataArray]:
-        """
+    wf[Filename[EmptyBeamRun]] = loki.data.loki_tutorial_run_60392()
+    return wf
 
-        Returns
-        -------
-        :
-            Plottable Outputs:
 
-            - MonitorHistogram[SampleRun, Incident]
-            - MonitorHistogram[SampleRun, Transmission]
+def _configured_Larmor_AgBeh_workflow() -> sciline.Pipeline:
+    wf = _configured_Larmor_workflow()
 
-        """
-        # I think we will be getting the full path, but the workflow only needs the
-        # name of the monitor or detector group.
-        nxevent_data = {
-            key.lstrip('/').split('/')[2]: value for key, value in nxevent_data.items()
-        }
-        required_keys = {
-            self._workflow.compute(NeXusMonitorName[Incident]),
-            self._workflow.compute(NeXusMonitorName[Transmission]),
-        }
-        if not required_keys.issubset(nxevent_data):
-            raise ValueError(f"Expected {required_keys}, got {set(nxevent_data)}")
-        results = self._streamed.add_chunk({JSONEventData: nxevent_data})
-        return {
-            'Incident Monitor': results[MonitorHistogram[SampleRun, Incident]],
-            'Transmission Monitor': results[MonitorHistogram[SampleRun, Transmission]],
-        }
+    # AgBeh
+    wf[BeamCenter] = sc.vector(value=[-0.0295995, -0.02203635, 0.0], unit='m')
+    wf[DirectBeamFilename] = loki.data.loki_tutorial_direct_beam_all_pixels()
+    wf[Filename[EmptyBeamRun]] = loki.data.loki_tutorial_run_60392()
+    wf[Filename[TransmissionRun[BackgroundRun]]] = loki.data.loki_tutorial_run_60392()
+    wf[Filename[BackgroundRun]] = loki.data.loki_tutorial_background_run_60393()
+    wf[Filename[TransmissionRun[SampleRun]]] = (
+        loki.data.loki_tutorial_agbeh_transmission_run()
+    )
+    wf[Filename[SampleRun]] = loki.data.loki_tutorial_agbeh_sample_run()
+    return wf
+
+
+class AccumulatorFactories:
+    """Helper to create accumulator factories with different preprocessors."""
+
+    def __init__(self, accum: type[streaming.Accumulator], **kwargs) -> None:
+        self._accum = accum
+        self._kwargs = kwargs
+
+    def with_hist(self) -> streaming.Accumulator:
+        return self._accum(**self._kwargs, preprocess=streaming.maybe_hist)
+
+    def with_wavelength_hist(self, wav: WavelengthBins) -> streaming.Accumulator:
+        return self._accum(**self._kwargs, preprocess=lambda x: x.hist(wavelength=wav))
+
+
+def make_monitor_workflow(
+    nexus_filename: Path, workflow: sciline.Pipeline
+) -> LiveWorkflow:
+    """Live workflow for wavelength monitors."""
+    # By adding accumulators we obtain automatic histogramming of our outputs.
+    factories = AccumulatorFactories(accum=streaming.RollingAccumulator, window=1)
+    factory = factories.with_wavelength_hist
+    return LiveWorkflow.from_workflow(
+        workflow=workflow,
+        accumulators={
+            WavelengthMonitor[SampleRun, Incident]: factory,
+            WavelengthMonitor[SampleRun, Transmission]: factory,
+        },
+        outputs={
+            'Incident Monitor': WavelengthMonitor[SampleRun, Incident],
+            'Transmission Monitor': WavelengthMonitor[SampleRun, Transmission],
+        },
+        run_type=SampleRun,
+        nexus_filename=nexus_filename,
+    )
+
+
+def make_transmission_run_workflow(
+    nexus_filename: Path, workflow: sciline.Pipeline
+) -> LiveWorkflow:
+    """Live workflow for a transmission run."""
+    workflow.insert(_gather_monitors)
+    factories = AccumulatorFactories(accum=streaming.EternalAccumulator)
+    factory = factories.with_wavelength_hist
+    return LiveWorkflow.from_workflow(
+        workflow=workflow,
+        accumulators={
+            WavelengthMonitor[TransmissionRun[SampleRun], Incident]: factory,
+            WavelengthMonitor[TransmissionRun[SampleRun], Transmission]: factory,
+        },
+        outputs={
+            'Monitors (cumulative)': GatheredMonitors[TransmissionRun[SampleRun]],
+            'Transmission Fraction': TransmissionFraction[SampleRun],
+        },
+        run_type=TransmissionRun[SampleRun],
+        nexus_filename=nexus_filename,
+    )
+
+
+def make_sample_run_workflow(
+    nexus_filename: Path, workflow: sciline.Pipeline
+) -> LiveWorkflow:
+    """Live workflow for a sample run."""
+    workflow.insert(_raw_detector_view)
+    outputs = {'Raw Detector': RawDetectorView}
+    try:
+        workflow.compute(Filename[BackgroundRun])
+    except sciline.UnsatisfiedRequirement:
+        iofq_keys = (IofQ[SampleRun], IofQxy[SampleRun])
+    else:
+        iofq_keys = (BackgroundSubtractedIofQ, BackgroundSubtractedIofQxy)
+    outputs.update(dict(zip(('I(Q)', '$I(Q_x, Q_y)$'), iofq_keys, strict=True)))
+    factories = AccumulatorFactories(accum=streaming.RollingAccumulator, window=20)
+
+    return LiveWorkflow.from_workflow(
+        workflow=workflow,
+        accumulators={
+            ReducedQ[SampleRun, Numerator]: factories.with_hist,
+            ReducedQ[SampleRun, Denominator]: factories.with_hist,
+            ReducedQxy[SampleRun, Numerator]: factories.with_hist,
+            ReducedQxy[SampleRun, Denominator]: factories.with_hist,
+            RawDetectorView: factories.with_hist,
+        },
+        outputs=outputs,
+        run_type=SampleRun,
+        nexus_filename=nexus_filename,
+    )
+
+
+def LokiMonitorTestWorkflow(nexus_filename: Path) -> LiveWorkflow:
+    """Fully preconfigured monitor workflow, for testing with Beamlime."""
+    return make_monitor_workflow(nexus_filename, _configured_Larmor_workflow())
+
+
+def LokiTransmissionRunTestWorkflow(nexus_filename: Path) -> LiveWorkflow:
+    """Fully preconfigured transmission run workflow, for testing with Beamlime."""
+    return make_transmission_run_workflow(nexus_filename, _configured_Larmor_workflow())
+
+
+def LokiAtLarmorAgBehTestWorkflow(nexus_filename: Path) -> LiveWorkflow:
+    """Fully preconfigured I(Q) workflow for AgBeh, for testing with Beamlime."""
+    return make_sample_run_workflow(nexus_filename, _configured_Larmor_AgBeh_workflow())
