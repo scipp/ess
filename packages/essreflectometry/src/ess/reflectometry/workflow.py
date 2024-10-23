@@ -45,6 +45,23 @@ def _concatenate_lists(*x):
 def with_filenames(
     workflow, runtype: Hashable, runs: Sequence[Filename[RunType]]
 ) -> sciline.Pipeline:
+    '''Sets a number of :code:`Filename[runtype]` simultaneously.
+    The events from all listed files are concatenated in the workflow.
+
+    Arguments
+    ----------
+    workflow:
+        the workflow to copy and add the filenames to
+    runtype:
+        the kind of runtype to add the files as.
+        Example: :code:`SampleRun` or :code:`ReferenceRun`.
+    runs:
+        the list of filenames to map over
+
+    Returns
+    ---------
+        A copy of the original workflow mapping over the provided files.
+    '''
     axis_name = f'{str(runtype).lower()}_runs'
     df = pd.DataFrame({Filename[runtype]: runs}).rename_axis(axis_name)
     wf = workflow.copy()
