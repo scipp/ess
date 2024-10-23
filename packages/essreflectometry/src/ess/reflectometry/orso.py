@@ -59,6 +59,9 @@ OrsoReduction = NewType("OrsoReduction", reduction.Reduction)
 OrsoSample = NewType("OrsoSample", data_source.Sample)
 """ORSO sample."""
 
+OrsoSampleFilenames = NewType("OrsoSampleFilenames", list[orso_base.File])
+"""Collection of filenames used to create the ORSO file"""
+
 
 def parse_orso_experiment(filename: Filename[SampleRun]) -> OrsoExperiment:
     """Parse ORSO experiment metadata from raw NeXus data."""
@@ -107,8 +110,13 @@ def parse_orso_sample(filename: Filename[SampleRun]) -> OrsoSample:
     )
 
 
+def orso_data_files(filename: Filename[SampleRun]) -> OrsoSampleFilenames:
+    '''Collects names of files used in the experiment'''
+    return [orso_base.File(file=os.path.basename(filename))]
+
+
 def build_orso_measurement(
-    sample_filename: Filename[SampleRun],
+    sample_filenames: OrsoSampleFilenames,
     reference_filename: Filename[ReferenceRun],
     instrument: OrsoInstrument,
 ) -> OrsoMeasurement:
@@ -127,7 +135,7 @@ def build_orso_measurement(
     return OrsoMeasurement(
         data_source.Measurement(
             instrument_settings=instrument,
-            data_files=[orso_base.File(file=os.path.basename(sample_filename))],
+            data_files=sample_filenames,
             additional_files=additional_files,
         )
     )
@@ -220,4 +228,5 @@ providers = (
     parse_orso_experiment,
     parse_orso_owner,
     parse_orso_sample,
+    orso_data_files,
 )

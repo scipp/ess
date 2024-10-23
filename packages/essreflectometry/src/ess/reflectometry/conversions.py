@@ -9,6 +9,7 @@ from scippneutron.conversion.graph import beamline, tof
 from .types import (
     BeamDivergenceLimits,
     DataWithScatteringCoordinates,
+    DetectorRotation,
     Gravity,
     IncidentBeam,
     MaskedData,
@@ -109,6 +110,7 @@ def specular_reflection(
     incident_beam: IncidentBeam[RunType],
     sample_position: SamplePosition[RunType],
     sample_rotation: SampleRotation[RunType],
+    detector_rotation: DetectorRotation[RunType],
     gravity: Gravity,
 ) -> SpecularReflectionCoordTransformGraph[RunType]:
     """
@@ -127,6 +129,7 @@ def specular_reflection(
         "incident_beam": lambda: incident_beam,
         "sample_position": lambda: sample_position,
         "sample_rotation": lambda: sample_rotation,
+        "detector_rotation": lambda: detector_rotation,
         "gravity": lambda: gravity,
     }
     return SpecularReflectionCoordTransformGraph(graph)
@@ -136,7 +139,10 @@ def add_coords(
     da: ReducibleDetectorData[RunType],
     graph: SpecularReflectionCoordTransformGraph[RunType],
 ) -> DataWithScatteringCoordinates[RunType]:
-    da = da.transform_coords(["theta", "wavelength", "Q"], graph=graph)
+    da = da.transform_coords(
+        ["theta", "wavelength", "Q", "detector_rotation"], graph=graph
+    )
+    da.coords.set_aligned('detector_rotation', False)
     da.coords["z_index"] = sc.arange(
         "row", 0, da.sizes["blade"] * da.sizes["wire"], unit=None
     ).fold("row", sizes={dim: da.sizes[dim] for dim in ("blade", "wire")})
