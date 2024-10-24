@@ -69,6 +69,11 @@ def test_run_data_pipeline(amor_pipeline: sciline.Pipeline):
 @pytest.mark.filterwarnings("ignore:Invalid transformation, missing attribute")
 def test_run_full_pipeline(amor_pipeline: sciline.Pipeline):
     amor_pipeline[SampleRotation[SampleRun]] = sc.scalar(0.85, unit="deg")
+    # Make the Q range cover a larger interval than the experiment is sensitive to.
+    # This let's us test the non-covered regions are filtered from the ORSO data.
+    amor_pipeline[QBins] = sc.geomspace(
+        dim="Q", start=0.005, stop=0.15, num=391, unit="1/angstrom"
+    )
     amor_pipeline[Filename[SampleRun]] = amor.data.amor_sample_run(608)
     res = amor_pipeline.compute(orso.OrsoIofQDataset)
     assert res.info.data_source.experiment.instrument == "Amor"
@@ -76,6 +81,7 @@ def test_run_full_pipeline(amor_pipeline: sciline.Pipeline):
     assert res.data.ndim == 2
     assert res.data.shape[1] == 4
     assert np.all(res.data[:, 1] >= 0)
+    assert np.isfinite(res.data).all()
 
 
 @pytest.mark.filterwarnings("ignore:Failed to convert .* into a transformation")
