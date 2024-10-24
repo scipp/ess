@@ -61,11 +61,10 @@ def build_orso_iofq_dataset(
     r = sc.values(iofq.data)
     sr = sc.stddevs(iofq.data)
     sqz = sigma_q.to(unit="1/angstrom", copy=False)
-    data = (qz, r, sr, sqz)
 
-    return OrsoIofQDataset(
-        OrsoDataset(header, np.column_stack([_extract_values_array(d) for d in data]))
-    )
+    data = np.column_stack(tuple(map(_extract_values_array, (qz, r, sr, sqz))))
+    data = data[np.isfinite(data).all(axis=-1)]
+    return OrsoIofQDataset(OrsoDataset(header, data))
 
 
 def _extract_values_array(var: sc.Variable) -> np.ndarray:
