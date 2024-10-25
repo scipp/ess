@@ -52,6 +52,7 @@
    :recursive:
 
    data
+   diagnostics
    io
 ```
 
