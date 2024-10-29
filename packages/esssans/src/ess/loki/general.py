@@ -125,9 +125,6 @@ def LokiAtLarmorTutorialWorkflow() -> sciline.Pipeline:
     from ess.loki import data
 
     workflow = LokiAtLarmorWorkflow()
-    workflow[sans.types.Filename[sans.types.SampleRun]] = (
-        data.loki_tutorial_sample_run_60339()
-    )
     # TODO This does not work with multiple
     workflow[sans.types.PixelMaskFilename] = data.loki_tutorial_mask_filenames()[0]
 
