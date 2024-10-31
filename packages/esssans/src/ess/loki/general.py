@@ -61,7 +61,9 @@ def default_parameters() -> dict:
 
 
 def _convert_to_tof(da: sc.DataArray) -> sc.DataArray:
-    da.bins.coords['tof'] = da.bins.coords.pop('event_time_offset')
+    event_time_offset = da.bins.coords['event_time_offset']
+    da = da.bins.drop_coords('event_time_offset')
+    da.bins.coords['tof'] = event_time_offset
     if 'event_time_zero' in da.dims:
         da = da.bins.concat('event_time_zero')
     return da
