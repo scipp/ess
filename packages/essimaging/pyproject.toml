@@ -35,6 +35,7 @@ dependencies = [
   "plopp[all]",
   "sciline>=23.9.1",
   "scipp>=23.8.0",
+  "scippneutron",
   "scippnexus>=23.11.1",
   "essreduce",
   "tifffile",

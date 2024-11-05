@@ -15,6 +15,15 @@ Ymir - Histogram Mode Detector
 
 ```
 
+````{card}
+
+```{button-ref} user-guide/odin_simulation
+:class: stretched-link
+
+ODIN McStas Simulation - Timepix Simulation with Choppers
+
+```
+
 ````
 
 ```{toctree}

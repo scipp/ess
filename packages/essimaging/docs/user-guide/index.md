@@ -7,4 +7,5 @@ maxdepth: 1
 ---
 installation
 histogram_mode_detectors
+odin_simulation
 ```
