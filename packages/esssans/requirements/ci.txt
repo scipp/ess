@@ -48,11 +48,11 @@ tomli==2.0.2
     # via
     #   pyproject-api
     #   tox
-tox==4.23.0
+tox==4.23.2
     # via -r ci.in
 typing-extensions==4.12.2
     # via tox
 urllib3==2.2.3
     # via requests
-virtualenv==20.27.0
+virtualenv==20.27.1
     # via tox
