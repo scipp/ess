@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 """
-Default parameters, providers and utility functions for the loki workflow.
+Default parameters, providers and utility functions for the Loki workflow.
 """
 
 import sciline
@@ -9,18 +9,14 @@ import scipp as sc
 import scippnexus as snx
 
 from ess import sans
-from ess.reduce.nexus.workflow import GenericNeXusWorkflow
 from ess.reduce.workflow import register_workflow
-from ess.sans import providers as sans_providers
 from ess.sans.io import read_xml_detector_masking
 from ess.sans.parameters import typical_outputs
 
 from ..sans.types import (
-    CorrectForGravity,
     DetectorBankSizes,
     DetectorData,
     DetectorPixelShape,
-    DimsToKeep,
     DirectBeam,
     DirectBeamFilename,
     Incident,
@@ -34,10 +30,7 @@ from ..sans.types import (
     ScatteringRunType,
     TofData,
     TofMonitor,
-    TransformationPath,
     Transmission,
-    WavelengthBands,
-    WavelengthMask,
 )
 
 DETECTOR_BANK_SIZES = {
@@ -47,16 +40,11 @@ DETECTOR_BANK_SIZES = {
 
 def default_parameters() -> dict:
     return {
-        CorrectForGravity: False,
         DetectorBankSizes: DETECTOR_BANK_SIZES,
-        DimsToKeep: (),
         NeXusMonitorName[Incident]: 'monitor_1',
         NeXusMonitorName[Transmission]: 'monitor_2',
-        TransformationPath: 'transform',
         PixelShapePath: 'pixel_shape',
         NonBackgroundWavelengthRange: None,
-        WavelengthMask: None,
-        WavelengthBands: None,
     }
 
 
@@ -111,8 +99,8 @@ def LokiAtLarmorWorkflow() -> sciline.Pipeline:
     :
         Loki workflow as a sciline.Pipeline
     """
-    workflow = GenericNeXusWorkflow()
-    for provider in sans_providers + loki_providers:
+    workflow = sans.SansWorkflow()
+    for provider in loki_providers:
         workflow.insert(provider)
     for key, param in default_parameters().items():
         workflow[key] = param

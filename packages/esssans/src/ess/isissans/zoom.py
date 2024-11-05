@@ -2,9 +2,8 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 import sciline
 
-from ess.reduce.nexus.workflow import GenericNeXusWorkflow
 from ess.reduce.workflow import register_workflow
-from ess.sans import providers as sans_providers
+from ess.sans import SansWorkflow
 from ess.sans.io import read_xml_detector_masking
 from ess.sans.parameters import typical_outputs
 
@@ -32,8 +31,8 @@ def ZoomWorkflow() -> sciline.Pipeline:
 
     # Note that the actual NeXus loading in this workflow will not be used for the
     # ISIS files, the providers inserted below will replace those steps.
-    workflow = GenericNeXusWorkflow()
-    for provider in sans_providers + isis_providers + mantid_providers:
+    workflow = SansWorkflow()
+    for provider in isis_providers + mantid_providers:
         workflow.insert(provider)
     for key, param in default_parameters().items():
         workflow[key] = param

@@ -15,12 +15,10 @@ from ess.sans.types import (
     BeamCenter,
     CalibratedDetector,
     CalibratedMonitor,
-    CorrectForGravity,
     DetectorData,
     DetectorIDs,
     DetectorPixelShape,
     DetectorPositionOffset,
-    DimsToKeep,
     Incident,
     MonitorData,
     MonitorPositionOffset,
@@ -36,8 +34,6 @@ from ess.sans.types import (
     TofData,
     TofMonitor,
     Transmission,
-    WavelengthBands,
-    WavelengthMask,
 )
 
 from .io import LoadedFileContents
@@ -56,8 +52,6 @@ SampleOffset = NewType('SampleOffset', sc.Variable)
 
 def default_parameters() -> dict:
     return {
-        CorrectForGravity: False,
-        DimsToKeep: (),
         MonitorOffset[Incident]: MonitorOffset[Incident](
             sc.vector([0, 0, 0], unit='m')
         ),
@@ -67,8 +61,6 @@ def default_parameters() -> dict:
         DetectorBankOffset: DetectorBankOffset(sc.vector([0, 0, 0], unit='m')),
         SampleOffset: SampleOffset(sc.vector([0, 0, 0], unit='m')),
         NonBackgroundWavelengthRange: None,
-        WavelengthMask: None,
-        WavelengthBands: None,
         Period: None,
     }
 
