@@ -14,7 +14,10 @@ from ess.powder.types import (
     PixelMaskFilename,
     Position,
     SampleRun,
+    TofMask,
+    TwoThetaMask,
     VanadiumRun,
+    WavelengthMask,
 )
 from ess.reduce.parameter import parameter_mappers
 from ess.reduce.workflow import register_workflow
@@ -41,6 +44,9 @@ def default_parameters() -> dict:
         AccumulatedProtonCharge[SampleRun]: charge,
         AccumulatedProtonCharge[VanadiumRun]: charge,
         CIFAuthors: CIFAuthors([]),
+        TofMask: None,
+        WavelengthMask: None,
+        TwoThetaMask: None,
     }
 
 
