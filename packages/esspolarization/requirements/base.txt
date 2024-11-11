@@ -41,7 +41,7 @@ pyyaml==6.0.2
     # via dask
 sciline==24.6.2
     # via -r base.in
-scipp==24.9.1
+scipp==24.11.0
     # via
     #   -r base.in
     #   essreduce
