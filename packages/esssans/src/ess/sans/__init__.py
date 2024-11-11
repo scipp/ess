@@ -17,32 +17,18 @@ from .beam_center_finder import beam_center_from_center_of_mass
 from .direct_beam import direct_beam
 from .types import BackgroundSubtractedIofQ, IofQ, ReturnEvents, SampleRun
 from .workflow import (
+    providers,
     with_background_runs,
     with_banks,
     with_pixel_mask_filenames,
     with_sample_runs,
+    SansWorkflow,
 )
 
 try:
     __version__ = importlib.metadata.version("esssans")
 except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
-
-providers = (
-    *conversions.providers,
-    *i_of_q.providers,
-    *masking.providers,
-    *normalization.providers,
-    common.beam_center_to_detector_position_offset,
-)
-"""
-List of providers for setting up a Sciline pipeline.
-
-This provides a default workflow, including a beam-center estimation based on a
-center-of-mass approach. Providers for loadings files are not included. Combine with
-the providers for a specific instrument, such as :py:data:`esssans.sans2d.providers`
-to setup a complete workflow.
-"""
 
 del importlib
 
@@ -65,4 +51,5 @@ __all__ = [
     'with_banks',
     'with_pixel_mask_filenames',
     'with_sample_runs',
+    'SansWorkflow',
 ]

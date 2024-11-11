@@ -5,9 +5,8 @@ from typing import NewType
 import sciline
 import scipp as sc
 
-from ess.reduce.nexus.workflow import GenericNeXusWorkflow
 from ess.reduce.workflow import register_workflow
-from ess.sans import providers as sans_providers
+from ess.sans import SansWorkflow
 from ess.sans.parameters import typical_outputs
 from ess.sans.types import BeamCenter, CalibratedDetector, DetectorMasks, SampleRun
 
@@ -91,8 +90,8 @@ def Sans2dWorkflow() -> sciline.Pipeline:
 
     # Note that the actual NeXus loading in this workflow will not be used for the
     # ISIS files, the providers inserted below will replace those steps.
-    workflow = GenericNeXusWorkflow()
-    for provider in sans_providers + isis_providers + mantid_providers + providers:
+    workflow = SansWorkflow()
+    for provider in isis_providers + mantid_providers + providers:
         workflow.insert(provider)
     for key, param in default_parameters().items():
         workflow[key] = param

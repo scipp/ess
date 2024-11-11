@@ -1,23 +1,35 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 from collections.abc import Hashable, Iterable
 
 import pandas as pd
 import sciline
 import scipp as sc
 
+from ess.reduce.nexus.workflow import GenericNeXusWorkflow
 from ess.reduce.parameter import parameter_mappers
 
+from . import common, conversions, i_of_q, masking, normalization
 from .types import (
     BackgroundRun,
     CleanSummedQ,
+    CorrectForGravity,
     Denominator,
+    DetectorBankSizes,
     DetectorMasks,
+    DimsToKeep,
+    EmptyBeamRun,
     Filename,
+    Incident,
     NeXusDetectorName,
     Numerator,
     PixelMaskFilename,
     SampleRun,
+    TransformationPath,
+    Transmission,
+    TransmissionRun,
+    WavelengthBands,
+    WavelengthMask,
 )
 
 
@@ -131,3 +143,50 @@ parameter_mappers[PixelMaskFilename] = with_pixel_mask_filenames
 parameter_mappers[NeXusDetectorName] = with_banks
 parameter_mappers[Filename[SampleRun]] = with_sample_runs
 parameter_mappers[Filename[BackgroundRun]] = with_background_runs
+
+
+providers = (
+    *conversions.providers,
+    *i_of_q.providers,
+    *masking.providers,
+    *normalization.providers,
+    common.beam_center_to_detector_position_offset,
+)
+"""
+List of providers for setting up a Sciline pipeline.
+
+This provides a default workflow, including a beam-center estimation based on a
+center-of-mass approach. Providers for loadings files are not included. Combine with
+the providers for a specific instrument, such as :py:data:`esssans.sans2d.providers`
+to setup a complete workflow.
+"""
+
+
+def SansWorkflow() -> sciline.Pipeline:
+    """
+    Common base for SANS workflows.
+
+    Returns
+    -------
+    :
+        SANS workflow as a sciline.Pipeline
+    """
+    workflow = GenericNeXusWorkflow(
+        run_types=(
+            SampleRun,
+            EmptyBeamRun,
+            BackgroundRun,
+            TransmissionRun[SampleRun],
+            TransmissionRun[BackgroundRun],
+        ),
+        monitor_types=(Incident, Transmission),
+    )
+    for provider in providers:
+        workflow.insert(provider)
+    workflow[CorrectForGravity] = CorrectForGravity(False)
+    workflow[DetectorBankSizes] = DetectorBankSizes({})
+    workflow[DimsToKeep] = DimsToKeep(())
+    workflow[TransformationPath] = TransformationPath('transform')
+    workflow[WavelengthBands] = WavelengthBands(None)
+    workflow[WavelengthMask] = WavelengthMask(None)
+    return workflow
