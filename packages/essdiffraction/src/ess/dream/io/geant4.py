@@ -20,7 +20,6 @@ from ess.powder.types import (
     MonitorType,
     NeXusComponent,
     NeXusDetectorName,
-    NeXusMonitor,
     Position,
     RunType,
 )
@@ -198,7 +197,7 @@ def _to_edges(centers: sc.Variable) -> sc.Variable:
 def load_mcstas_monitor(
     file_path: MonitorFilename[RunType],
     position: CaveMonitorPosition,
-) -> NeXusMonitor[RunType, CaveMonitor]:
+) -> NeXusComponent[CaveMonitor, RunType]:
     """Load a monitor from a McStas file.
 
     Parameters
@@ -220,7 +219,7 @@ def load_mcstas_monitor(
     tof, counts, err = np.loadtxt(file_path, usecols=(0, 1, 2), unpack=True)
 
     tof = _to_edges(sc.array(dims=["tof"], values=tof, unit="us"))
-    return NeXusMonitor[RunType, CaveMonitor](
+    return NeXusComponent[CaveMonitor, RunType](
         sc.DataGroup(
             data=sc.DataArray(
                 sc.array(dims=["tof"], values=counts, variances=err**2, unit="counts"),

@@ -25,8 +25,6 @@ from ess.powder.types import (
     MaskedData,
     MonitorFilename,
     NeXusDetectorName,
-    NeXusSample,
-    NeXusSource,
     NormalizedRunData,
     Position,
     ReducedDspacingCIF,
