@@ -2,81 +2,137 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 """Correction algorithms for powder diffraction."""
 
-from typing import Any
+import enum
 
+import sciline
 import scipp as sc
-from scippneutron.conversion.graph import beamline, tof
 
 from ess.reduce.uncertainty import broadcast_uncertainties
 
 from ._util import event_or_outer_coord
-from .logging import get_logger
-from .smoothing import lowpass
 from .types import (
     AccumulatedProtonCharge,
-    FilteredData,
+    CaveMonitor,
+    DataWithScatteringCoordinates,
     FocussedDataDspacing,
     FocussedDataDspacingTwoTheta,
     IofDspacing,
     IofDspacingTwoTheta,
-    NormalizedByProtonCharge,
+    NormalizedRunData,
     RunType,
     SampleRun,
     UncertaintyBroadcastMode,
     VanadiumRun,
+    WavelengthMonitor,
 )
 
 
-def normalize_by_monitor(
-    data: sc.DataArray,
+def normalize_by_monitor_histogram(
+    detector: DataWithScatteringCoordinates[RunType],
     *,
-    monitor: sc.DataArray,
-    wavelength_edges: sc.Variable | None = None,
-    smooth_args: dict[str, Any] | None = None,
-) -> sc.DataArray:
-    """
-    Normalize event data by a monitor.
-
-    The input is converted to wavelength if it does not already contain wavelengths.
+    monitor: WavelengthMonitor[RunType, CaveMonitor],
+    uncertainty_broadcast_mode: UncertaintyBroadcastMode,
+) -> NormalizedRunData[RunType]:
+    """Normalize detector data by a histogrammed monitor.
 
     Parameters
     ----------
-    data:
-        Input event data.
+    detector:
+        Input event data in wavelength.
     monitor:
-        A histogrammed monitor.
-    wavelength_edges:
-        If given, rebin the monitor with these edges.
-    smooth_args:
-        If given, the monitor histogram is smoothed with
-        :func:`ess.powder.lowpass` before dividing into `data`.
-        `smooth_args` is passed as keyword arguments to
-        :func:`ess.powder.lowpass`. If ``None``, the monitor is not smoothed.
+        A histogrammed monitor in wavelength.
+    uncertainty_broadcast_mode:
+        Choose how uncertainties of the monitor are broadcast to the sample data.
 
     Returns
     -------
     :
-        `data` normalized by a monitor.
+        `detector` normalized by a monitor.
     """
-    if "wavelength" not in monitor.coords:
-        monitor = monitor.transform_coords(
-            "wavelength",
-            graph={**beamline.beamline(scatter=False), **tof.elastic("tof")},
-            keep_inputs=False,
-            keep_intermediate=False,
-            keep_aliases=False,
-        )
+    _expect_monitor_covers_range_of_detector(
+        detector=detector, monitor=monitor, dim="wavelength"
+    )
+    norm = broadcast_uncertainties(
+        monitor, prototype=detector, mode=uncertainty_broadcast_mode
+    )
+    return detector.bins / sc.lookup(norm, dim="wavelength")
 
-    if wavelength_edges is not None:
-        monitor = monitor.rebin(wavelength=wavelength_edges)
-    if smooth_args is not None:
-        get_logger().info(
-            "Smoothing monitor for normalization using "
-            "ess.powder.smoothing.lowpass with %s.",
-            smooth_args,
+
+def normalize_by_monitor_integrated(
+    detector: DataWithScatteringCoordinates[RunType],
+    *,
+    monitor: WavelengthMonitor[RunType, CaveMonitor],
+    uncertainty_broadcast_mode: UncertaintyBroadcastMode,
+) -> NormalizedRunData[RunType]:
+    """Normalize detector data by an integrated monitor.
+
+    The monitor is integrated according to
+
+    .. math::
+
+        M = \\sum_{i=0}^{N-1}\\, m_i (x_{i+1} - x_i) I(x_i, x_{i+1}),
+
+    where :math:`m_i` is the monitor intensity in bin :math:`i`,
+    :math:`x_i` is the lower bin edge of bin :math:`i`, and
+    :math:`I(x_i, x_{i+1})` selects bins that are within the range of the detector.
+
+    Parameters
+    ----------
+    detector:
+        Input event data in wavelength.
+    monitor:
+        A histogrammed monitor in wavelength.
+    uncertainty_broadcast_mode:
+        Choose how uncertainties of the monitor are broadcast to the sample data.
+
+    Returns
+    -------
+    :
+        `detector` normalized by a monitor.
+    """
+    dim = monitor.dim
+    if not monitor.coords.is_edges(dim):
+        raise sc.CoordError(
+            f"Monitor coordinate '{dim}' must be bin-edges to integrate the monitor."
         )
-        monitor = lowpass(monitor, dim="wavelength", **smooth_args)
-    return data.bins / sc.lookup(func=monitor, dim="wavelength")
+    _expect_monitor_covers_range_of_detector(
+        detector=detector, monitor=monitor, dim=dim
+    )
+
+    # Clip `monitor` to the range of `detector`, where the bins at the boundary
+    # may extend past the detector range (how label-based indexing works).
+    det_coord = (
+        detector.coords[dim] if dim in detector.coords else detector.bins.coords[dim]
+    )
+    lo = det_coord.min()
+    hi = det_coord.max()
+    monitor = monitor[dim, lo:hi]
+    # Strictly limit `monitor` to the range of `detector`.
+    edges = sc.concat([lo, monitor.coords[dim][1:-1], hi], dim=dim)
+    monitor = sc.rebin(monitor, {dim: edges})
+
+    coord = monitor.coords[dim]
+    norm = sc.sum(monitor.data * (coord[1:] - coord[:-1]))
+    norm = broadcast_uncertainties(
+        norm, prototype=detector, mode=uncertainty_broadcast_mode
+    )
+    return NormalizedRunData[RunType](detector / norm)
+
+
+def _expect_monitor_covers_range_of_detector(
+    *, detector: sc.DataArray, monitor: sc.DataArray, dim: str
+) -> None:
+    det_coord = (
+        detector.coords[dim] if detector.bins is None else detector.bins.coords[dim]
+    )
+    if (
+        monitor.coords[dim].min() > det_coord.min()
+        or monitor.coords[dim].max() < det_coord.max()
+    ):
+        raise ValueError(
+            "Cannot normalize by monitor: The wavelength range of the monitor is "
+            "smaller than the range of the detector."
+        )
 
 
 def _normalize_by_vanadium(
@@ -142,8 +198,9 @@ def normalize_by_vanadium_dspacing_and_two_theta(
 
 
 def normalize_by_proton_charge(
-    data: FilteredData[RunType], proton_charge: AccumulatedProtonCharge[RunType]
-) -> NormalizedByProtonCharge[RunType]:
+    data: DataWithScatteringCoordinates[RunType],
+    proton_charge: AccumulatedProtonCharge[RunType],
+) -> NormalizedRunData[RunType]:
     """Normalize data by an accumulated proton charge.
 
     Parameters
@@ -158,7 +215,7 @@ def normalize_by_proton_charge(
     :
         ``data / proton_charge``
     """
-    return NormalizedByProtonCharge[RunType](data / proton_charge)
+    return NormalizedRunData[RunType](data / proton_charge)
 
 
 def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.DataArray:
@@ -258,6 +315,27 @@ def _shallow_copy(da: sc.DataArray) -> sc.DataArray:
     if da.bins is not None:
         out.data = sc.bins(**da.bins.constituents)
     return out
+
+
+class RunNormalization(enum.Enum):
+    """Type of normalization applied to each run."""
+
+    monitor_histogram = enum.auto()
+    monitor_integrated = enum.auto()
+    proton_charge = enum.auto()
+
+
+def insert_run_normalization(
+    workflow: sciline.Pipeline, run_norm: RunNormalization
+) -> None:
+    """Insert providers for a specific normalization into a workflow."""
+    match run_norm:
+        case RunNormalization.monitor_histogram:
+            workflow.insert(normalize_by_monitor_histogram)
+        case RunNormalization.monitor_integrated:
+            workflow.insert(normalize_by_monitor_integrated)
+        case RunNormalization.proton_charge:
+            workflow.insert(normalize_by_proton_charge)
 
 
 providers = (

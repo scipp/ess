@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 
+from __future__ import annotations
+
 import itertools
 
 import sciline
@@ -8,6 +10,10 @@ import scipp as sc
 import scippnexus as snx
 
 from ess.powder import providers as powder_providers
+from ess.powder.correction import (
+    RunNormalization,
+    insert_run_normalization,
+)
 from ess.powder.types import (
     AccumulatedProtonCharge,
     Position,
@@ -37,13 +43,14 @@ def default_parameters() -> dict:
     }
 
 
-def DreamGeant4Workflow() -> sciline.Pipeline:
+def DreamGeant4Workflow(*, run_norm: RunNormalization) -> sciline.Pipeline:
     """
     Workflow with default parameters for the Dream Geant4 simulation.
     """
     wf = LoadGeant4Workflow()
     for provider in itertools.chain(powder_providers, _dream_providers):
         wf.insert(provider)
+    insert_run_normalization(wf, run_norm)
     for key, value in default_parameters().items():
         wf[key] = value
     return wf
