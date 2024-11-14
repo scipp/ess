@@ -4,7 +4,6 @@
 
 import enum
 
-import numpy as np
 import sciline
 import scipp as sc
 
@@ -100,17 +99,17 @@ def normalize_by_monitor_integrated(
         detector=detector, monitor=monitor, dim=dim
     )
 
-    # Clip `monitor` to the range of `detector`.
+    # Clip `monitor` to the range of `detector`, where the bins at the boundary
+    # may extend past the detector range (how label-based indexing works).
     det_coord = (
         detector.coords[dim] if dim in detector.coords else detector.bins.coords[dim]
     )
     lo = det_coord.min()
     hi = det_coord.max()
-    # hi is shifted towards MINUS infinity because label-based indexing with bin-edges
-    # in inclusive for the upper edge. But we don't want the literal upper edge
-    # of the detector to be included.
-    hi.value = np.nextafter(hi.value, -np.inf)
     monitor = monitor[dim, lo:hi]
+    # Strictly limit `monitor` t the range of `detector`.
+    edges = sc.concat([lo, monitor.coords[dim][1:-1], hi], dim=dim)
+    monitor = sc.rebin(monitor, {dim: edges})
 
     coord = monitor.coords[dim]
     norm = sc.sum(monitor.data * (coord[1:] - coord[:-1]))

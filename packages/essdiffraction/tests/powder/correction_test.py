@@ -396,9 +396,11 @@ def test_normalize_by_monitor_integrated_expected_results():
         coords={'wavelength': sc.arange('wavelength', 3.0, unit='Å')},
     ).bin(wavelength=sc.array(dims=['wavelength'], values=[0.0, 2, 3], unit='Å'))
     monitor = sc.DataArray(
-        sc.array(dims=['wavelength'], values=[5.0, 6.0], unit='counts'),
+        sc.array(dims=['wavelength'], values=[4.0, 5.0, 6.0], unit='counts'),
         coords={
-            'wavelength': sc.array(dims=['wavelength'], values=[0.0, 2, 3], unit='Å')
+            'wavelength': sc.array(
+                dims=['wavelength'], values=[0.0, 0.5, 2, 3], unit='Å'
+            )
         },
     )
     normalized = normalize_by_monitor_integrated(
@@ -407,7 +409,7 @@ def test_normalize_by_monitor_integrated_expected_results():
         uncertainty_broadcast_mode=UncertaintyBroadcastMode.fail,
     )
     expected = NormalizedRunData[SampleRun](
-        detector / sc.scalar(5 * 2 + 6 * 1, unit='counts * Å')
+        detector / sc.scalar(4 * 0.5 + 5 * 1.5 + 6 * 1, unit='counts * Å')
     )
     sc.testing.assert_identical(normalized, expected)
 
@@ -430,6 +432,28 @@ def test_normalize_by_monitor_integrated_ignores_monitor_values_out_of_range():
     )
     expected = NormalizedRunData[SampleRun](
         detector / sc.scalar(4.0 * 3, unit='counts')
+    )
+    sc.testing.assert_identical(normalized, expected)
+
+
+def test_normalize_by_monitor_integrated_uses_monitor_values_at_boundary():
+    detector = sc.DataArray(
+        sc.arange('wavelength', 3, unit='counts'),
+        coords={'wavelength': sc.arange('wavelength', 3.0, unit='Å')},
+    ).bin(wavelength=sc.array(dims=['wavelength'], values=[0.0, 2, 3], unit='Å'))
+    monitor = sc.DataArray(
+        sc.array(dims=['wavelength'], values=[4.0, 10.0], unit='counts'),
+        coords={
+            'wavelength': sc.array(dims=['wavelength'], values=[0.0, 2, 4], unit='Å')
+        },
+    )
+    normalized = normalize_by_monitor_integrated(
+        DataWithScatteringCoordinates[SampleRun](detector),
+        monitor=WavelengthMonitor[SampleRun, CaveMonitor](monitor),
+        uncertainty_broadcast_mode=UncertaintyBroadcastMode.fail,
+    )
+    expected = NormalizedRunData[SampleRun](
+        detector / sc.scalar(4.0 * 2 + 10.0 * 1 / 2, unit='counts')
     )
     sc.testing.assert_identical(normalized, expected)
 
