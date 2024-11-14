@@ -21,10 +21,10 @@ from ess.powder.types import (
     VanadiumRun,
 )
 
-from .io.cif import CIFAuthors, prepare_reduced_dspacing_cif
+from .io.cif import CIFAuthors, prepare_reduced_tof_cif
 from .io.geant4 import LoadGeant4Workflow
 
-_dream_providers = (prepare_reduced_dspacing_cif,)
+_dream_providers = (prepare_reduced_tof_cif,)
 
 
 def default_parameters() -> dict:

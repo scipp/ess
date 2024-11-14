@@ -5,6 +5,7 @@ Coordinate transformations for powder diffraction.
 """
 
 import scipp as sc
+import scipp.constants
 import scippneutron as scn
 
 from .correction import merge_calibration
@@ -14,11 +15,15 @@ from .types import (
     DataWithScatteringCoordinates,
     DspacingData,
     ElasticCoordTransformGraph,
+    IofDspacing,
+    IofTof,
     FilteredData,
     MaskedData,
+    OutputCalibrationData,
     MonitorData,
     MonitorType,
     RunType,
+    SampleRun,
     WavelengthMonitor,
 )
 
@@ -194,7 +199,9 @@ def add_scattering_coordinates_from_positions(
         Coordinate transformation graph.
     """
     out = data.transform_coords(
-        ["two_theta", "wavelength"], graph=graph, keep_intermediate=False
+        ["two_theta", "wavelength", "Ltotal"],
+        graph=graph,
+        keep_intermediate=False,
     )
     return DataWithScatteringCoordinates[RunType](out)
 
@@ -211,10 +218,42 @@ def convert_to_dspacing(
         for key in ('wavelength', 'two_theta'):
             if key in out.coords.keys():
                 out.coords.set_aligned(key, False)
-    out.bins.coords.pop('tof', None)
+    # out.bins.coords.pop('tof', None)
     out.bins.coords.pop('wavelength', None)
     return DspacingData[RunType](out)
 
+
+def assemble_output_calibration(
+    data: DspacingData[SampleRun],
+) -> OutputCalibrationData:
+    # Use nanmean because pixels without events have position=NaN.
+    average_l = sc.nanmean(data.coords["Ltotal"])
+    average_two_theta = sc.nanmean(data.coords["two_theta"])
+    difc = sc.to_unit(
+        2
+        * sc.constants.m_n
+        / sc.constants.h
+        * average_l
+        * sc.sin(0.5 * average_two_theta),
+        unit='us / angstrom',
+    ).value
+    return OutputCalibrationData(
+        sc.DataArray(
+            sc.array(dims=['calibration'], values=[difc]),
+            coords={'power': sc.array(dims=['calibration'], values=[1])},
+        )
+    )
+
+
+def convert_to_calibrated_tof(
+    data: IofDspacing, calibration: OutputCalibrationData
+) -> IofTof:
+    difc = calibration['power', sc.scalar(1)].data
+    difc.unit = 'us / angstrom'
+    res = data.drop_coords('dspacing').bins.drop_coords('dspacing')
+    res.coords['tof'] = sc.to_unit(difc * data.coords['dspacing'], unit='us')
+    res.bins.coords['tof'] = sc.to_unit(difc * data.bins.coords['dspacing'], unit='us')
+    return IofTof(res.rename_dims(dspacing='tof'))
 
 def convert_monitor_do_wavelength(
     monitor: MonitorData[RunType, MonitorType],
@@ -229,8 +268,10 @@ def convert_monitor_do_wavelength(
 
 
 providers = (
+    assemble_output_calibration,
     powder_coordinate_transformation_graph,
     add_scattering_coordinates_from_positions,
     convert_to_dspacing,
+    convert_to_calibrated_tof,
     convert_monitor_do_wavelength,
 )

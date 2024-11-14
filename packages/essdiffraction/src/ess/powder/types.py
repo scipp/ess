@@ -86,6 +86,12 @@ class AccumulatedProtonCharge(sciline.Scope[RunType, sc.Variable], sc.Variable):
 CalibrationData = NewType("CalibrationData", sc.Dataset | None)
 """Detector calibration data."""
 
+OutputCalibrationData = NewType("OutputCalibrationData", sc.DataArray)
+"""Calibration data for output ToF data.
+
+See :meth:`scippneutron.io.cif.CIF.with_powder_calibration`.
+"""
+
 
 class DataWithScatteringCoordinates(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Data with scattering coordinates computed for all events: wavelength, 2theta,
@@ -117,6 +123,9 @@ class FocussedDataDspacingTwoTheta(sciline.Scope[RunType, sc.DataArray], sc.Data
 
 IofDspacing = NewType("IofDspacing", sc.DataArray)
 """Data that has been normalized by a vanadium run."""
+
+IofTof = NewType("IofTof", sc.DataArray)
+"""Data that has been normalized by a vanadium run and converted to ToF."""
 
 IofDspacingTwoTheta = NewType("IofDspacingTwoTheta", sc.DataArray)
 """Data that has been normalized by a vanadium run, and grouped into 2theta bins."""
@@ -179,7 +188,7 @@ WavelengthMask = NewType("WavelengthMask", Callable | None)
 CIFAuthors = NewType('CIFAuthors', list[cif.Author])
 """List of authors to save to output CIF files."""
 
-ReducedDspacingCIF = NewType('ReducedDspacingCIF', cif.CIF)
-"""Reduced data in d-spacing, ready to be saved to a CIF file."""
+ReducedTofCIF = NewType('ReducedTofCIF', cif.CIF)
+"""Reduced data in time-of-flight, ready to be saved to a CIF file."""
 
 del sc, sciline, NewType, TypeVar
