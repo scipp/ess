@@ -107,7 +107,7 @@ def normalize_by_monitor_integrated(
     lo = det_coord.min()
     hi = det_coord.max()
     monitor = monitor[dim, lo:hi]
-    # Strictly limit `monitor` t the range of `detector`.
+    # Strictly limit `monitor` to the range of `detector`.
     edges = sc.concat([lo, monitor.coords[dim][1:-1], hi], dim=dim)
     monitor = sc.rebin(monitor, {dim: edges})
 
