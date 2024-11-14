@@ -15,13 +15,13 @@ from .types import (
     DataWithScatteringCoordinates,
     DspacingData,
     ElasticCoordTransformGraph,
+    FilteredData,
     IofDspacing,
     IofTof,
-    FilteredData,
     MaskedData,
-    OutputCalibrationData,
     MonitorData,
     MonitorType,
+    OutputCalibrationData,
     RunType,
     SampleRun,
     WavelengthMonitor,
@@ -254,6 +254,7 @@ def convert_to_calibrated_tof(
     res.coords['tof'] = sc.to_unit(difc * data.coords['dspacing'], unit='us')
     res.bins.coords['tof'] = sc.to_unit(difc * data.bins.coords['dspacing'], unit='us')
     return IofTof(res.rename_dims(dspacing='tof'))
+
 
 def convert_monitor_do_wavelength(
     monitor: MonitorData[RunType, MonitorType],
