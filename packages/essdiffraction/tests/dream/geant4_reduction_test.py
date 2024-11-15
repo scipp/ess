@@ -22,12 +22,13 @@ from ess.powder.types import (
     Filename,
     IofDspacing,
     IofDspacingTwoTheta,
+    IofTof,
     MaskedData,
     MonitorFilename,
     NeXusDetectorName,
     NormalizedRunData,
     Position,
-    ReducedDspacingCIF,
+    ReducedTofCIF,
     SampleRun,
     TofMask,
     TwoThetaBins,
@@ -123,7 +124,7 @@ def test_workflow_is_deterministic(workflow):
     workflow = powder.with_pixel_mask_filenames(workflow, [])
     # This is Sciline's default scheduler, but we want to be explicit here
     scheduler = sciline.scheduler.DaskScheduler()
-    graph = workflow.get(IofDspacing, scheduler=scheduler)
+    graph = workflow.get(IofTof, scheduler=scheduler)
     reference = graph.compute().data
     result = graph.compute().data
     assert sc.identical(sc.values(result), sc.values(reference))
@@ -200,7 +201,7 @@ def test_use_workflow_helper(workflow):
 
 def test_pipeline_can_save_data(workflow):
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    result = workflow.compute(ReducedDspacingCIF)
+    result = workflow.compute(ReducedTofCIF)
 
     buffer = io.StringIO()
     result.save(buffer)
@@ -211,7 +212,7 @@ def test_pipeline_can_save_data(workflow):
     _assert_contains_source_info(content)
     _assert_contains_author_info(content)
     _assert_contains_beamline_info(content)
-    _assert_contains_dspacing_data(content)
+    _assert_contains_tof_data(content)
 
 
 def _assert_contains_source_info(cif_content: str) -> None:
@@ -229,7 +230,7 @@ def _assert_contains_beamline_info(cif_content: str) -> None:
     assert 'diffrn_source.facility ESS' in cif_content
 
 
-def _assert_contains_dspacing_data(cif_content: str) -> None:
-    assert 'pd_proc.d_spacing' in cif_content
-    assert 'pd_proc.intensity_net' in cif_content
-    assert 'pd_proc.intensity_net_su' in cif_content
+def _assert_contains_tof_data(cif_content: str) -> None:
+    assert 'pd_meas.time_of_flight' in cif_content
+    assert 'pd_proc.intensity_norm' in cif_content
+    assert 'pd_proc.intensity_norm_su' in cif_content

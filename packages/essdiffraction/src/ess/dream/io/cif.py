@@ -6,12 +6,13 @@
 import scipp as sc
 from scippneutron.io import cif
 
-from ess.powder.types import CIFAuthors, IofDspacing, ReducedDspacingCIF
+from ess.powder.calibration import OutputCalibrationData
+from ess.powder.types import CIFAuthors, IofTof, ReducedTofCIF
 
 
-def prepare_reduced_dspacing_cif(
-    da: IofDspacing, *, authors: CIFAuthors
-) -> ReducedDspacingCIF:
+def prepare_reduced_tof_cif(
+    da: IofTof, *, authors: CIFAuthors, calibration: OutputCalibrationData
+) -> ReducedTofCIF:
     """Construct a CIF builder with reduced data in d-spacing.
 
     The object contains the d-spacing coordinate, intensities,
@@ -20,9 +21,12 @@ def prepare_reduced_dspacing_cif(
     Parameters
     ----------
     da:
-        Reduced 1d data with a `'dspacing'` dimension and coordinate.
+        Reduced 1d data with a ``'tof'`` dimension and coordinate.
     authors:
         List of authors to write to the file.
+    calibration:
+        Coefficients for conversion between d-spacing and final ToF.
+        See :meth:`scippneutron.io.cif.CIF.with_powder_calibration`.
 
     Returns
     -------
@@ -33,11 +37,12 @@ def prepare_reduced_dspacing_cif(
     from .. import __version__
 
     to_save = _prepare_data(da)
-    return ReducedDspacingCIF(
-        cif.CIF('reduced_dspacing')
+    return ReducedTofCIF(
+        cif.CIF('reduced_tof')
         .with_reducers(f'ess.dream v{__version__}')
         .with_authors(*authors)
         .with_beamline(beamline='DREAM', facility='ESS')
+        .with_powder_calibration(calibration.to_cif_format())
         .with_reduced_powder_data(to_save)
     )
 
