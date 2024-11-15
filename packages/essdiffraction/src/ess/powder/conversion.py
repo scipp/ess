@@ -245,7 +245,7 @@ def assemble_output_calibration(
     )
 
 
-def convert_to_calibrated_tof(
+def convert_redued_to_tof(
     data: IofDspacing, calibration: OutputCalibrationData
 ) -> IofTof:
     difc = calibration['power', sc.scalar(1)].data
@@ -273,6 +273,6 @@ providers = (
     powder_coordinate_transformation_graph,
     add_scattering_coordinates_from_positions,
     convert_to_dspacing,
-    convert_to_calibrated_tof,
+    convert_redued_to_tof,
     convert_monitor_do_wavelength,
 )
