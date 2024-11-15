@@ -8,7 +8,8 @@ import scipp as sc
 from scippneutron.io import cif
 
 import ess.dream.io.cif
-from ess.powder.types import CIFAuthors, IofTof, OutputCalibrationData
+from ess.powder.calibration import OutputCalibrationData, ScalarCalibrationData
+from ess.powder.types import CIFAuthors, IofTof
 
 
 @pytest.fixture
@@ -24,9 +25,12 @@ def ioftof() -> IofTof:
 @pytest.fixture
 def cal() -> OutputCalibrationData:
     return OutputCalibrationData(
-        sc.DataArray(
-            sc.array(dims=['cal'], values=[1.2]),
-            coords={'power': sc.array(dims=['cal'], values=[1])},
+        ScalarCalibrationData(
+            {
+                0: sc.scalar(0.2, unit='us'),
+                1: sc.scalar(1.2, unit='us/angstrom'),
+                2: sc.scalar(-1.4, unit='us/angstrom^2'),
+            }
         )
     )
 
@@ -50,7 +54,9 @@ def test_save_reduced_tof(ioftof: IofTof, cal: OutputCalibrationData) -> None:
     assert "_audit_contact_author.name 'John Doe'" in result
     assert f"_computing.diffrn_reduction 'ess.dream v{__version__}'" in result
     assert '_diffrn_source.beamline DREAM' in result
-    assert 'DIFC 1 ' in result
+    assert 'ZERO 0 0.2' in result
+    assert 'DIFC 1 1.2' in result
+    assert 'DIFA 2 -1.4' in result
 
     loop_header = """loop_
 _pd_data.point_id

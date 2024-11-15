@@ -7,6 +7,7 @@ Components for powder diffraction experiments.
 import importlib.metadata
 
 from . import (
+    calibration,
     conversion,
     correction,
     filtering,
@@ -26,6 +27,7 @@ except importlib.metadata.PackageNotFoundError:
 del importlib
 
 providers = (
+    *calibration.providers,
     *conversion.providers,
     *correction.providers,
     *filtering.providers,

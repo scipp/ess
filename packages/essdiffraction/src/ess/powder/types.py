@@ -86,12 +86,6 @@ class AccumulatedProtonCharge(sciline.Scope[RunType, sc.Variable], sc.Variable):
 CalibrationData = NewType("CalibrationData", sc.Dataset | None)
 """Detector calibration data."""
 
-OutputCalibrationData = NewType("OutputCalibrationData", sc.DataArray)
-"""Calibration data for output ToF data.
-
-See :meth:`scippneutron.io.cif.CIF.with_powder_calibration`.
-"""
-
 
 class DataWithScatteringCoordinates(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Data with scattering coordinates computed for all events: wavelength, 2theta,

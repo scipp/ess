@@ -6,7 +6,8 @@
 import scipp as sc
 from scippneutron.io import cif
 
-from ess.powder.types import CIFAuthors, IofTof, OutputCalibrationData, ReducedTofCIF
+from ess.powder.calibration import OutputCalibrationData
+from ess.powder.types import CIFAuthors, IofTof, ReducedTofCIF
 
 
 def prepare_reduced_tof_cif(
@@ -41,7 +42,7 @@ def prepare_reduced_tof_cif(
         .with_reducers(f'ess.dream v{__version__}')
         .with_authors(*authors)
         .with_beamline(beamline='DREAM', facility='ESS')
-        .with_powder_calibration(calibration)
+        .with_powder_calibration(calibration.to_cif_format())
         .with_reduced_powder_data(to_save)
     )
 
