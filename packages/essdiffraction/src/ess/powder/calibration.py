@@ -5,7 +5,6 @@
 from __future__ import annotations
 
 from collections.abc import Callable, ItemsView, Iterable, Iterator, KeysView, Mapping
-from typing import NewType
 
 import scipp as sc
 import scipp.constants
@@ -13,10 +12,10 @@ import scipp.constants
 from .types import DspacingData, SampleRun
 
 
-class ScalarCalibrationData(Mapping[int, sc.Variable]):
+class OutputCalibrationData(Mapping[int, sc.Variable]):
     r"""Calibration data for output ToF data.
 
-    Only of value is stored per coefficient.
+    Only one value is stored per coefficient.
     This means that individual detector pixels are *not* resolved but merged
     into average quantities.
 
@@ -70,14 +69,14 @@ class ScalarCalibrationData(Mapping[int, sc.Variable]):
 
         return d_to_tof
 
-    def to_cif_units(self) -> ScalarCalibrationData:
+    def to_cif_units(self) -> OutputCalibrationData:
         """Convert to the units used in CIF pd_calib_d_to_tof."""
 
         def unit(p: int) -> sc.Unit:
             base = sc.Unit(f'us / (angstrom^{abs(p)})')
             return sc.reciprocal(base) if p < 0 else base
 
-        return ScalarCalibrationData({p: c.to(unit=unit(p)) for p, c in self.items()})
+        return OutputCalibrationData({p: c.to(unit=unit(p)) for p, c in self.items()})
 
     def to_cif_format(self) -> sc.DataArray:
         """Convert to a data array that can be saved to CIF.
@@ -92,9 +91,6 @@ class ScalarCalibrationData(Mapping[int, sc.Variable]):
             ),
             coords={'power': sc.array(dims=['calibration'], values=list(cal.keys()))},
         )
-
-
-OutputCalibrationData = NewType('OutputCalibrationData', ScalarCalibrationData)
 
 
 def assemble_output_calibration(
@@ -112,7 +108,7 @@ def assemble_output_calibration(
         * sc.sin(0.5 * average_two_theta),
         unit='us / angstrom',
     )
-    return OutputCalibrationData(ScalarCalibrationData({1: difc}))
+    return OutputCalibrationData({1: difc})
 
 
 providers = (assemble_output_calibration,)

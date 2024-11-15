@@ -8,7 +8,7 @@ import scipp as sc
 from scippneutron.io import cif
 
 import ess.dream.io.cif
-from ess.powder.calibration import OutputCalibrationData, ScalarCalibrationData
+from ess.powder.calibration import OutputCalibrationData
 from ess.powder.types import CIFAuthors, IofTof
 
 
@@ -25,13 +25,11 @@ def ioftof() -> IofTof:
 @pytest.fixture
 def cal() -> OutputCalibrationData:
     return OutputCalibrationData(
-        ScalarCalibrationData(
-            {
-                0: sc.scalar(0.2, unit='us'),
-                1: sc.scalar(1.2, unit='us/angstrom'),
-                2: sc.scalar(-1.4, unit='us/angstrom^2'),
-            }
-        )
+        {
+            0: sc.scalar(0.2, unit='us'),
+            1: sc.scalar(1.2, unit='us/angstrom'),
+            2: sc.scalar(-1.4, unit='us/angstrom^2'),
+        }
     )
 
 
