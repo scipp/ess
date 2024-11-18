@@ -13,5 +13,3 @@ pyproject-hooks==1.2.0
     # via build
 tomli==2.1.0
     # via build
-tomli==2.0.1
-    # via build
