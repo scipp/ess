@@ -17,7 +17,7 @@ def _make_pooch():
         base_url="https://public.esss.dk/groups/scipp/ess/bifrost/{version}/",
         version=_version,
         registry={
-            "BIFROST_20240914T053723.h5": "md5:0f2fa5c9a851f8e3a4fa61defaa3752e",  # noqa: E501
+            "BIFROST_20240914T053723.h5": "md5:0f2fa5c9a851f8e3a4fa61defaa3752e",
         },
     )
 

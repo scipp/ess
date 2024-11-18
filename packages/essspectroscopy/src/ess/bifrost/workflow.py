@@ -9,37 +9,21 @@ import scippnexus as snx
 from ess.spectroscopy.types import (
     CalibratedDetector,
     DetectorPositionOffset,
-    GravityVector,
     Monitor3,
-    NeXusComponentLocationSpec,
-    NeXusDetector,
+    NeXusComponent,
     NeXusMonitorName,
-    NeXusSource,
+    NeXusTransformation,
     RunType,
-    SamplePosition,
-    SourcePosition,
 )
 
 from .io import nexus
 
 
-# See https://github.com/scipp/essreduce/issues/98
-def load_nexus_source_from_moderator(
-    location: NeXusComponentLocationSpec[snx.NXsource, RunType],
-) -> NeXusSource[RunType]:
-    """Load a NeXus moderator as a source."""
-    from ess.reduce.nexus import load_component
-
-    return NeXusSource[RunType](load_component(location, nx_class=snx.NXmoderator))
-
-
 def get_calibrated_detector_bifrost(
-    detector: NeXusDetector[RunType],
+    detector: NeXusComponent[snx.NXdetector, RunType],
     *,
+    transform: NeXusTransformation[snx.NXdetector, RunType],
     offset: DetectorPositionOffset[RunType],
-    source_position: SourcePosition[RunType],
-    sample_position: SamplePosition[RunType],
-    gravity: GravityVector,
 ) -> CalibratedDetector[RunType]:
     """Extract the data array corresponding to a detector's signal field.
 
@@ -50,15 +34,11 @@ def get_calibrated_detector_bifrost(
     Parameters
     ----------
     detector:
-        NeXus detector group.
+        Loaded NeXus detector.
+    transform:
+        Transformation that determines the detector position.
     offset:
         Offset to add to the detector position.
-    source_position:
-        Position of the neutron source.
-    sample_position:
-        Position of the sample.
-    gravity:
-        Gravity vector.
 
     Returns
     -------
@@ -71,10 +51,8 @@ def get_calibrated_detector_bifrost(
 
     da = get_calibrated_detector(
         detector=detector,
+        transform=transform,
         offset=offset,
-        source_position=source_position,
-        sample_position=sample_position,
-        gravity=gravity,
         # The detectors are folded in the file, no need to do that here.
         bank_sizes=DetectorBankSizes({}),
     )
@@ -91,7 +69,6 @@ def default_parameters() -> dict[type, Any]:
 def BifrostSimulationWorkflow() -> sciline.Pipeline:
     """Data reduction workflow for simulated BIFROST data."""
     workflow = nexus.LoadNeXusWorkflow()
-    workflow.insert(load_nexus_source_from_moderator)
     workflow.insert(get_calibrated_detector_bifrost)
     for key, val in default_parameters().items():
         workflow[key] = val

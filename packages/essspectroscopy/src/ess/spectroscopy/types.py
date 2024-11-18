@@ -3,10 +3,9 @@
 
 from typing import NewType
 
+import scipp as sc
 from choppera.primary import PrimarySpectrometer
-from scipp import DataArray, Variable
 
-from ess.reduce.nexus import generic_types as reduce_gt
 from ess.reduce.nexus import types as reduce_t
 
 
@@ -17,32 +16,36 @@ def make_scipp_named_typer(scipp_type):
     return typer
 
 
-variable_type = make_scipp_named_typer(Variable)
-data_array_type = make_scipp_named_typer(DataArray)
+variable_type = make_scipp_named_typer(sc.Variable)
+data_array_type = make_scipp_named_typer(sc.DataArray)
 
-CalibratedDetector = reduce_gt.CalibratedDetector
-DetectorPositionOffset = reduce_gt.DetectorPositionOffset
-DetectorData = reduce_gt.DetectorData
+Analyzers = reduce_t.Analyzers
+CalibratedDetector = reduce_t.CalibratedDetector
+Choppers = reduce_t.Choppers
+DetectorData = reduce_t.DetectorData
+DetectorPositionOffset = reduce_t.DetectorPositionOffset
 GravityVector = reduce_t.GravityVector
-Filename = reduce_gt.Filename
-MonitorData = reduce_gt.MonitorData
-NeXusComponentLocationSpec = reduce_gt.NeXusComponentLocationSpec
-NeXusDetector = reduce_gt.NeXusDetector
+Filename = reduce_t.Filename
+MonitorData = reduce_t.MonitorData
+NeXusComponentLocationSpec = reduce_t.NeXusComponentLocationSpec
+NeXusComponent = reduce_t.NeXusComponent
+AllNeXusComponents = reduce_t.AllNeXusComponents
 NeXusDetectorName = reduce_t.NeXusDetectorName
-NeXusMonitor = reduce_gt.NeXusMonitor
-NeXusMonitorName = reduce_gt.NeXusMonitorName
-NeXusSource = reduce_gt.NeXusSource
-RunType = reduce_gt.RunType
-SamplePosition = reduce_gt.SamplePosition
-SampleRun = reduce_gt.SampleRun
-SourcePosition = reduce_gt.SourcePosition
+NeXusFileSpec = reduce_t.NeXusFileSpec
+NeXusMonitorName = reduce_t.NeXusName
+NeXusTransformation = reduce_t.NeXusTransformation
+Position = reduce_t.Position
+RunType = reduce_t.RunType
+SampleRun = reduce_t.SampleRun
 
 # See https://github.com/scipp/essreduce/issues/105 about monitor names
-Monitor3 = reduce_gt.Monitor3
-MonitorType = reduce_gt.MonitorType
+Monitor3 = reduce_t.Monitor3
+MonitorType = reduce_t.MonitorType
+
 
 AnalyzerPosition = variable_type('AnalyzerPosition')
 DetectorPosition = variable_type('DetectorPosition')
+SamplePosition = variable_type('SamplePosition')
 AnalyzerOrientation = variable_type('AnalyzerOrientation')
 SampleAnalyzerVector = variable_type('SampleAnalyzerVector')
 AnalyzerDetectorVector = variable_type('AnalyzerDetectorVector')
