@@ -21,6 +21,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering",
     "Typing :: Typed",
 ]
@@ -43,6 +44,11 @@ dependencies = [
 ]
 
 dynamic = ["version"]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+]
 
 [project.urls]
 "Bug Tracker" = "https://github.com/scipp/essnmx/issues"
@@ -80,8 +86,8 @@ ignore = [
     # https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
     "COM812", "COM819", "D206", "D300", "E111", "E114", "E117", "ISC001", "ISC002", "Q000", "Q001", "Q002", "Q003", "W191",
 ]
-fixable = ["I001", "B010"]
-isort.known-first-party = ["essnmx"]
+fixable = ["B010", "I001", "PT001"]
+isort.known-first-party = ["ess.nmx"]
 pydocstyle.convention = "numpy"
 
 [tool.ruff.lint.per-file-ignores]
@@ -112,3 +118,11 @@ enable_error_code = [
     "truthy-bool",
 ]
 warn_unreachable = true
+
+[tool.codespell]
+ignore-words-list = [
+    # Codespell wants "socioeconomic" which seems to be the standard spelling.
+    # But we use the word in our code of conduct which is the contributor covenant.
+    # Let's not modify it if we don't have to.
+    "socio-economic",
+]
