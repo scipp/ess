@@ -266,4 +266,6 @@ doctest_default_flags = (
 linkcheck_ignore = [
     # Specific lines in Github blobs cannot be found by linkcheck.
     r'https?://github\.com/.*?/blob/[a-f0-9]+/.+?#',
+    # ESS Jira is not publicly accessible.
+    r'https?://jira\.ess\.eu',
 ]
