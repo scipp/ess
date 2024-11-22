@@ -22,6 +22,7 @@ from ..types import (
     NormWavelengthEvents,
     NXspeFileName,
     Position,
+    PreopenNeXusFile,
     SampleRun,
 )
 
@@ -677,13 +678,12 @@ def split(
     return vals
 
 
-# TODO preopen
 def _get_detector_names(filename: Filename) -> list[str]:
     with snx.File(filename) as f:
         return list(f['entry/instrument'][snx.NXdetector])
 
 
-def load_everything(filename: Filename, named_components: dict[str, str]):
+def load_everything(filename: Filename):
     """Load all needed information from the named NeXus HDF5 file
 
     Parameters
@@ -691,9 +691,6 @@ def load_everything(filename: Filename, named_components: dict[str, str]):
     filename:
         The name of the file to load data from, must have both and 'instrument'
         and 'parameters' group under 'entry'
-    named_components:
-        The file-specific names of (at least) the source and sample group names
-        under 'entry/instrument'
 
     Returns
     -------
@@ -733,6 +730,7 @@ def load_everything(filename: Filename, named_components: dict[str, str]):
     workflow = BifrostSimulationWorkflow()
     # Use [SampleRun] for now until we process multiple runs together.
     workflow[Filename[SampleRun]] = filename
+    workflow[PreopenNeXusFile] = PreopenNeXusFile(True)
     workflow[DetectorData[SampleRun]] = (
         workflow[DetectorData[SampleRun]]
         .map({NeXusDetectorName: detector_names})
@@ -853,9 +851,7 @@ def load_precompute(
         A dictionary of the 'a3' and 'a4' logs from the 'entry/parameter' group
         in the NeXus file
     """
-    sample, triplets, analyzers, choppers, monitors, logs = load_everything(
-        filename, named_components
-    )
+    sample, triplets, analyzers, choppers, monitors, logs = load_everything(filename)
 
     if is_simulated:
         for name in triplets:

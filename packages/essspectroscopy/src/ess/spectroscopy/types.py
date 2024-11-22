@@ -19,6 +19,7 @@ def make_scipp_named_typer(scipp_type):
 variable_type = make_scipp_named_typer(sc.Variable)
 data_array_type = make_scipp_named_typer(sc.DataArray)
 
+AllNeXusComponents = reduce_t.AllNeXusComponents
 Analyzers = reduce_t.Analyzers
 CalibratedDetector = reduce_t.CalibratedDetector
 Choppers = reduce_t.Choppers
@@ -29,12 +30,12 @@ Filename = reduce_t.Filename
 MonitorData = reduce_t.MonitorData
 NeXusComponentLocationSpec = reduce_t.NeXusComponentLocationSpec
 NeXusComponent = reduce_t.NeXusComponent
-AllNeXusComponents = reduce_t.AllNeXusComponents
 NeXusDetectorName = reduce_t.NeXusDetectorName
 NeXusFileSpec = reduce_t.NeXusFileSpec
 NeXusMonitorName = reduce_t.NeXusName
 NeXusTransformation = reduce_t.NeXusTransformation
 Position = reduce_t.Position
+PreopenNeXusFile = reduce_t.PreopenNeXusFile
 RunType = reduce_t.RunType
 SampleRun = reduce_t.SampleRun
 
