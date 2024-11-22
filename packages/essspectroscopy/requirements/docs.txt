@@ -32,7 +32,7 @@ charset-normalizer==3.4.0
     # via requests
 comm==0.2.2
     # via ipykernel
-debugpy==1.8.8
+debugpy==1.8.9
     # via ipykernel
 decorator==5.1.1
     # via ipython
@@ -196,7 +196,7 @@ tinycss2==1.4.0
     # via nbconvert
 tomli==2.1.0
     # via sphinx
-tornado==6.4.1
+tornado==6.4.2
     # via
     #   ipykernel
     #   jupyter-client
