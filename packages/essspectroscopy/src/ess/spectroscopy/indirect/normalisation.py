@@ -4,12 +4,12 @@
 from scipp import DataArray
 
 from ..types import (
+    Filename,
     FrameTimeMonitor,
     IncidentSlowness,
     MonitorName,
     MonitorNormalisation,
     MonitorPosition,
-    NeXusFileName,
     NormWavelengthEvents,
     PrimaryFocusDistance,
     PrimaryFocusTime,
@@ -39,7 +39,7 @@ def incident_monitor_normalization(
     return lookup(monitor, dim=coords[0])[slowness]
 
 
-def monitor_position(file: NeXusFileName, monitor: MonitorName) -> MonitorPosition:
+def monitor_position(file: Filename, monitor: MonitorName) -> MonitorPosition:
     """Extract the position of the named monitor from a NeXus file"""
     from scippnexus import File, compute_positions
 
@@ -48,7 +48,7 @@ def monitor_position(file: NeXusFileName, monitor: MonitorName) -> MonitorPositi
 
 
 def source_monitor_path_length(
-    file: NeXusFileName, source: SourcePosition, monitor: MonitorPosition
+    file: Filename, source: SourcePosition, monitor: MonitorPosition
 ) -> SourceMonitorPathLength:
     """Compute the primary spectrometer path length from source to monitor positions
 

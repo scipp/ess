@@ -6,7 +6,7 @@ from __future__ import annotations
 from loguru import logger
 from scipp import Variable
 
-from ..types import Filename, NeXusFileName, NormWavelengthEvents, NXspeFileName
+from ..types import Filename, NormWavelengthEvents, NXspeFileName, SampleRun
 
 PIXEL_NAME = 'detector_number'
 
@@ -1024,7 +1024,7 @@ def bifrost_single(
 def bifrost_to_nxspe(
     *,
     output: NXspeFileName,
-    filename: NeXusFileName | None = None,
+    filename: Filename[SampleRun] | None = None,
     events: NormWavelengthEvents | None = None,
     **kwargs,
 ):
