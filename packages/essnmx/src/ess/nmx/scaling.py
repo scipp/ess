@@ -139,7 +139,7 @@ def estimate_scale_factor_per_hkl_asu_from_reference(
 ) -> EstimatedScaleFactor:
     """Calculate the estimated scale factor per ``hkl_asu``.
 
-    The estimated scale factor is calculatd as the average
+    The estimated scale factor is calculated as the average
     of the inverse of the non-empty reference intensities.
 
     It is part of the calculation of estimated scaled intensities
