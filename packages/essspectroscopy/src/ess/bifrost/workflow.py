@@ -9,7 +9,6 @@ import scippnexus as snx
 from ess.spectroscopy.types import (
     CalibratedDetector,
     DetectorPositionOffset,
-    Monitor3,
     NeXusComponent,
     NeXusMonitorName,
     NeXusTransformation,
@@ -17,6 +16,14 @@ from ess.spectroscopy.types import (
 )
 
 from .io import nexus
+from .types import (
+    FrameMonitor0,
+    FrameMonitor1,
+    FrameMonitor2,
+    FrameMonitor3,
+    PsdMonitor0,
+    PsdMonitor1,
+)
 
 
 def get_calibrated_detector_bifrost(
@@ -62,7 +69,12 @@ def get_calibrated_detector_bifrost(
 
 def default_parameters() -> dict[type, Any]:
     return {
-        NeXusMonitorName[Monitor3]: '110_frame_3',
+        NeXusMonitorName[FrameMonitor0]: '007_frame_0',
+        NeXusMonitorName[FrameMonitor1]: '090_frame_1',
+        NeXusMonitorName[FrameMonitor2]: '097_frame_2',
+        NeXusMonitorName[FrameMonitor3]: '110_frame_3',
+        NeXusMonitorName[PsdMonitor0]: '111_psd0',
+        NeXusMonitorName[PsdMonitor1]: '113_psd1',
     }
 
 

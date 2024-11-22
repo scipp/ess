@@ -3,10 +3,27 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
+
+import scipp as sc
+import scippnexus as snx
 from loguru import logger
 from scipp import Variable
 
-from ..types import Filename, NormWavelengthEvents, NXspeFileName, SampleRun
+from ..types import (
+    Analyzers,
+    Choppers,
+    DetectorData,
+    Filename,
+    GoniometerAngles,
+    MonitorData,
+    NeXusDetectorName,
+    NeXusMonitorName,
+    NormWavelengthEvents,
+    NXspeFileName,
+    Position,
+    SampleRun,
+)
 
 PIXEL_NAME = 'detector_number'
 
@@ -155,11 +172,11 @@ def detector_per_pixel(triplets: dict) -> dict[int, str]:
     return {
         i: name
         for name, det in triplets.items()
-        for i in det['data'].coords['detector_number'].values.flatten()
+        for i in det.coords['detector_number'].values.flatten()
     }
 
 
-def combine_analyzers(analyzers: dict, triplets: dict):
+def combine_analyzers(analyzers: dict, triplets: sc.DataGroup[sc.DataArray]):
     """Combine needed analyzer properties into a single array,
     duplicating information, to have per-pixel data
 
@@ -208,7 +225,7 @@ def combine_analyzers(analyzers: dict, triplets: dict):
     return data
 
 
-def combine_detectors(triplets: dict):
+def combine_detectors(triplets: sc.DataGroup[sc.DataArray]):
     """Combine needed detector properties into a single array
 
     BIFROST has 45 analyzers and 45 triplet detectors, each with some number of pixels,
@@ -232,8 +249,8 @@ def combine_detectors(triplets: dict):
     from scipp import Dataset, concat, sort
 
     def extract(obj):
-        pixels = obj['data'].coords['detector_number']
-        midpoints = obj['data'].coords['position']
+        pixels = obj.coords['detector_number']
+        midpoints = obj.coords['position']
         return Dataset(data={PIXEL_NAME: pixels, 'position': midpoints})
 
     data = concat([extract(v) for v in triplets.values()], dim='arm')
@@ -268,7 +285,7 @@ def find_sample_detector_flight_time(sample, analyzers, detector_positions):
     ).compute().to(unit='ms')
 
 
-def get_triplet_events(triplets):
+def get_triplet_events(triplets: Iterable[sc.DataArray]):
     """Extract and combine the events from loaded scippneutron.NXdetector groups
 
     Parameters
@@ -286,7 +303,7 @@ def get_triplet_events(triplets):
     """
     from scipp import concat, sort
 
-    events = concat([x['data'] for x in triplets], dim='arm').flatten(to=PIXEL_NAME)
+    events = concat(list(triplets), dim='arm').flatten(to=PIXEL_NAME)
     events = sort(events, events.coords['detector_number'])
     return events
 
@@ -365,7 +382,7 @@ def get_normalization_monitor(monitors, monitor_component, collapse: bool = Fals
         Monitor data with frame_time converted to nanoseconds to match the timescale
         used for events
     """
-    normalization = monitors[monitor_component]['data']
+    normalization = monitors[monitor_component]
     if collapse:
         # This is very specialized to how the simulated scans are done,
         # it needs to be generalized?
@@ -613,8 +630,8 @@ def split(
         logger.warning('Missing a3 or a4, so split performed')
         return [[triplets, analyzers, monitors]]
 
-    a3 = lookup(logs[a3_name]['value'], 'time')
-    a4 = lookup(logs[a4_name]['value'], 'time')
+    a3 = lookup(logs[a3_name], 'time')
+    a4 = lookup(logs[a4_name], 'time')
 
     event_graph = {
         'a3': lambda event_time_zero: a3[event_time_zero],
@@ -660,6 +677,12 @@ def split(
     return vals
 
 
+# TODO preopen
+def _get_detector_names(filename: Filename) -> list[str]:
+    with snx.File(filename) as f:
+        return list(f['entry/instrument'][snx.NXdetector])
+
+
 def load_everything(filename: Filename, named_components: dict[str, str]):
     """Load all needed information from the named NeXus HDF5 file
 
@@ -687,31 +710,61 @@ def load_everything(filename: Filename, named_components: dict[str, str]):
     logs:
         The scippnexus.NXlog groups named 'a3' and 'a4' under 'entry/parameters'
     """
-    import scippnexus as snx
+    from ess.bifrost.types import (
+        FrameMonitor0,
+        FrameMonitor1,
+        FrameMonitor2,
+        FrameMonitor3,
+        PsdMonitor0,
+        PsdMonitor1,
+    )
+    from ess.bifrost.workflow import BifrostSimulationWorkflow
 
-    source_component = named_components['source']
-    sample_component = named_components['sample']
-    with snx.File(filename) as data:
-        group = data['entry/instrument']
-        if source_component not in group:
-            raise ValueError(
-                f'Missing {source_component=} for path-length calculations'
-            )
-        if sample_component not in group:
-            raise ValueError(f'Missing {sample_component=} for origin identification')
-        sample = snx.compute_positions(
-            group[sample_component][...], store_transform='transform'
-        )
-        triplets = _load_all(group, snx.NXdetector)
-        analyzers = _load_all(group, snx.NXcrystal)
-        choppers = _load_all(group, snx.NXdisk_chopper)
-        monitors = _load_all(group, snx.NXmonitor)
+    monitor_keys = (
+        FrameMonitor0,
+        FrameMonitor1,
+        FrameMonitor2,
+        FrameMonitor3,
+        PsdMonitor0,
+        PsdMonitor1,
+    )
+    detector_names = _get_detector_names(filename)
 
-        # this is very BIFROST simulation specific -- can it be less so?
-        # TODO use the _sample_ orientation itself to define a3 (and goniometer angles?)
-        logs = _load_named(data['entry/parameters'], snx.NXlog, ('a3', 'a4'))
+    workflow = BifrostSimulationWorkflow()
+    # Use [SampleRun] for now until we process multiple runs together.
+    workflow[Filename[SampleRun]] = filename
+    workflow[DetectorData[SampleRun]] = (
+        workflow[DetectorData[SampleRun]]
+        .map({NeXusDetectorName: detector_names})
+        .reduce(func=lambda *x: x)
+    )
 
-    return sample, triplets, analyzers, choppers, monitors, logs
+    loaded = workflow.compute(
+        [
+            DetectorData[SampleRun],
+            Position[snx.NXsample, SampleRun],
+            Analyzers[SampleRun],
+            Choppers[SampleRun],
+            GoniometerAngles[SampleRun],
+            *(MonitorData[SampleRun, key] for key in monitor_keys),
+            *(NeXusMonitorName[key] for key in monitor_keys),
+        ]
+    )
+    sample = sc.DataGroup(position=loaded[Position[snx.NXsample, SampleRun]])
+    analyzers = loaded[Analyzers[SampleRun]]
+    choppers = loaded[Choppers[SampleRun]]
+    monitors = sc.DataGroup(
+        {
+            loaded[NeXusMonitorName[key]]: loaded[MonitorData[SampleRun, key]]
+            for key in monitor_keys
+        }
+    )
+    triplets = sc.DataGroup(
+        zip(detector_names, loaded[DetectorData[SampleRun]], strict=True)
+    )
+    goniometer_angles = loaded[GoniometerAngles[SampleRun]]
+
+    return sample, triplets, analyzers, choppers, monitors, goniometer_angles
 
 
 def one_setting(
@@ -800,22 +853,13 @@ def load_precompute(
         A dictionary of the 'a3' and 'a4' logs from the 'entry/parameter' group
         in the NeXus file
     """
-    import scippnexus as snx
-
     sample, triplets, analyzers, choppers, monitors, logs = load_everything(
         filename, named_components
     )
 
     if is_simulated:
         for name in triplets:
-            triplets[name]['data'] = convert_simulated_time_to_frame_time(
-                triplets[name]['data']
-            )
-
-    for name in triplets:
-        triplets[name] = snx.compute_positions(
-            triplets[name], store_transform='transform'
-        )
+            triplets[name] = convert_simulated_time_to_frame_time(triplets[name])
 
     analyzers = combine_analyzers(analyzers, triplets)
     # detectors = combine_detectors(triplets)

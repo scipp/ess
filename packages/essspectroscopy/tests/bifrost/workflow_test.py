@@ -2,12 +2,12 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 
 from ess import bifrost
+from ess.bifrost.types import FrameMonitor3
 from ess.spectroscopy.types import (
     Analyzers,
     Choppers,
     DetectorData,
     Filename,
-    Monitor3,
     MonitorData,
     NeXusDetectorName,
     SampleRun,
@@ -35,7 +35,7 @@ def test_simulation_workflow_can_load_monitor() -> None:
     workflow[Filename[SampleRun]] = (
         bifrost.data.simulated_elastic_incoherent_with_phonon()
     )
-    result = workflow.compute(MonitorData[SampleRun, Monitor3])
+    result = workflow.compute(MonitorData[SampleRun, FrameMonitor3])
 
     assert result.bins is None
     assert 'position' in result.coords

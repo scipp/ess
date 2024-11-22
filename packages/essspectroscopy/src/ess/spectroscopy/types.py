@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
-
 from typing import NewType
 
+import sciline
 import scipp as sc
 from choppera.primary import PrimarySpectrometer
 
@@ -38,9 +38,11 @@ Position = reduce_t.Position
 RunType = reduce_t.RunType
 SampleRun = reduce_t.SampleRun
 
-# See https://github.com/scipp/essreduce/issues/105 about monitor names
-Monitor3 = reduce_t.Monitor3
-MonitorType = reduce_t.MonitorType
+
+class GoniometerAngles(
+    sciline.Scope[RunType, sc.DataGroup[sc.DataArray]], sc.DataGroup[sc.DataArray]
+):
+    """Sample goniometer angles as a function of time."""
 
 
 AnalyzerPosition = variable_type('AnalyzerPosition')
