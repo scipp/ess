@@ -5,17 +5,17 @@
 #
 #    pip-compile-multi
 #
-choppera==0.1.4
+choppera==0.1.5
     # via -r base.in
-contourpy==1.3.0
+contourpy==1.3.1
     # via matplotlib
-cyclebane==24.6.0
+cyclebane==24.10.0
     # via sciline
 cycler==0.12.1
     # via matplotlib
-fonttools==4.53.1
+fonttools==4.55.0
     # via matplotlib
-h5py==3.11.0
+h5py==3.12.1
     # via
     #   scippneutron
     #   scippnexus
@@ -29,9 +29,9 @@ matplotlib==3.9.2
     #   plopp
 mpltoolbox==24.5.1
     # via scippneutron
-networkx==3.3
+networkx==3.4.2
     # via cyclebane
-numpy==2.1.1
+numpy==2.1.3
     # via
     #   choppera
     #   contourpy
@@ -42,22 +42,22 @@ numpy==2.1.1
     #   scipp
     #   scippneutron
     #   scipy
-packaging==24.1
+packaging==24.2
     # via matplotlib
-pillow==10.4.0
+pillow==11.0.0
     # via matplotlib
-plopp==24.9.1
+plopp==24.10.0
     # via scippneutron
-polystar==0.4.4
+polystar==0.4.5
     # via choppera
-pyparsing==3.1.4
+pyparsing==3.2.0
     # via matplotlib
 python-dateutil==2.9.0.post0
     # via
     #   matplotlib
     #   scippnexus
     #   strictyaml
-sciline==24.6.3
+sciline==24.10.0
     # via -r base.in
 scipp==24.11.1
     # via
@@ -65,9 +65,9 @@ scipp==24.11.1
     #   choppera
     #   scippneutron
     #   scippnexus
-scippneutron==24.8.0
+scippneutron==24.11.0
     # via -r base.in
-scippnexus==24.9.0
+scippnexus==24.11.0
     # via
     #   -r base.in
     #   choppera
@@ -81,5 +81,5 @@ six==1.16.0
     # via python-dateutil
 strictyaml==1.7.3
     # via choppera
-tqdm==4.66.5
+tqdm==4.67.0
     # via -r base.in
