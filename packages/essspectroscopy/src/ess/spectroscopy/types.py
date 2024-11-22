@@ -28,6 +28,7 @@ DetectorPositionOffset = reduce_t.DetectorPositionOffset
 GravityVector = reduce_t.GravityVector
 Filename = reduce_t.Filename
 MonitorData = reduce_t.MonitorData
+NeXusClass = reduce_t.NeXusClass
 NeXusComponentLocationSpec = reduce_t.NeXusComponentLocationSpec
 NeXusComponent = reduce_t.NeXusComponent
 NeXusDetectorName = reduce_t.NeXusDetectorName
