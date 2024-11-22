@@ -166,6 +166,7 @@ html_theme_options = {
         "image_dark": "_static/logo-dark.svg",
     },
     "external_links": [
+        {"name": "ESSreduce", "url": "https://scipp.github.io/essreduce"},
         {"name": "Plopp", "url": "https://scipp.github.io/plopp"},
         {"name": "Sciline", "url": "https://scipp.github.io/sciline"},
         {"name": "Scipp", "url": "https://scipp.github.io"},
