@@ -121,7 +121,7 @@ def guess_focus_component_names(file: Filename) -> FocusComponentNames:
         The name or names of the time-focus-defining choppers, given the restrictions
         noted above
     """
-    from scipp import norm, scalar
+    from scipp import scalar
     from scippnexus import File, NXdisk_chopper, compute_positions
 
     allowance = scalar(0.5, unit='m')
@@ -193,7 +193,6 @@ def focus_distance(
         The average straight-line distance from the source position to the named
         component(s)
     """
-    from scipp import norm
     from scippnexus import File, compute_positions
 
     pos = 0 * origin
