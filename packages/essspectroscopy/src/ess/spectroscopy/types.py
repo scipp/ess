@@ -46,6 +46,7 @@ MonitorType = reduce_t.MonitorType
 AnalyzerPosition = variable_type('AnalyzerPosition')
 DetectorPosition = variable_type('DetectorPosition')
 SamplePosition = variable_type('SamplePosition')
+SourcePosition = variable_type('SourcePosition')
 AnalyzerOrientation = variable_type('AnalyzerOrientation')
 SampleAnalyzerVector = variable_type('SampleAnalyzerVector')
 AnalyzerDetectorVector = variable_type('AnalyzerDetectorVector')
