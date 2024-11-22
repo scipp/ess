@@ -5,11 +5,12 @@ import io
 import numpy as np
 import pytest
 import scipp as sc
+
 from ess.nmx.nexus import export_as_nexus
 from ess.nmx.reduction import NMXReducedData
 
 
-@pytest.fixture()
+@pytest.fixture
 def reduced_data() -> NMXReducedData:
     rng = np.random.default_rng(42)
     id_list = sc.array(dims=['event'], values=rng.integers(0, 12, size=100))
