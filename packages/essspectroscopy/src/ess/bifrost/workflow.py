@@ -38,6 +38,11 @@ def get_calibrated_detector_bifrost(
     signal values array, but not additional information about the detector.
     The data array is reshaped to the logical detector shape.
 
+    This function is specific to BIFROST and differs from the generic
+    :func:`ess.reduce.nexus.workflow.get_calibrated_detector` in that it does not
+    fold the detectors into logical dimensions because the files already contain
+    the detectors in the correct shape.
+
     Parameters
     ----------
     detector:
