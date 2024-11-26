@@ -10,3 +10,4 @@ sphinx-copybutton
 sphinx-design
 pooch
 tqdm
+tof  # For WFM stitching documentation.
