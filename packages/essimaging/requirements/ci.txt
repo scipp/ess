@@ -11,11 +11,11 @@ certifi==2024.8.30
     # via requests
 chardet==5.2.0
     # via tox
-charset-normalizer==3.3.2
+charset-normalizer==3.4.0
     # via requests
 colorama==0.4.6
     # via tox
-distlib==0.3.8
+distlib==0.3.9
     # via virtualenv
 filelock==3.16.1
     # via
@@ -24,12 +24,12 @@ filelock==3.16.1
 gitdb==4.0.11
     # via gitpython
 gitpython==3.1.43
-    # via -r ci.in
+    # via -r requirements/ci.in
 idna==3.10
     # via requests
-packaging==24.1
+packaging==24.2
     # via
-    #   -r ci.in
+    #   -r requirements/ci.in
     #   pyproject-api
     #   tox
 platformdirs==4.3.6
@@ -41,16 +41,18 @@ pluggy==1.5.0
 pyproject-api==1.8.0
     # via tox
 requests==2.32.3
-    # via -r ci.in
+    # via -r requirements/ci.in
 smmap==5.0.1
     # via gitdb
-tomli==2.0.1
+tomli==2.1.0
     # via
     #   pyproject-api
     #   tox
-tox==4.20.0
-    # via -r ci.in
+tox==4.23.2
+    # via -r requirements/ci.in
+typing-extensions==4.12.2
+    # via tox
 urllib3==2.2.3
     # via requests
-virtualenv==20.26.5
+virtualenv==20.28.0
     # via tox
