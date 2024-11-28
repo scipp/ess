@@ -41,10 +41,10 @@ RunType = reduce_t.RunType
 SampleRun = reduce_t.SampleRun
 
 
-class GoniometerAngles(
+class InstrumentAngles(
     sciline.Scope[RunType, sc.DataGroup[sc.DataArray]], sc.DataGroup[sc.DataArray]
 ):
-    """Sample goniometer angles as a function of time."""
+    """Instrument angles for the sample orientation as a function of time."""
 
 
 AnalyzerPosition = variable_type('AnalyzerPosition')

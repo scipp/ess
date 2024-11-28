@@ -9,7 +9,7 @@ import scippnexus as snx
 
 from ess.reduce.nexus.workflow import GenericNeXusWorkflow
 from ess.spectroscopy.types import (
-    GoniometerAngles,
+    InstrumentAngles,
     NeXusClass,
     NeXusFileSpec,
     RunType,
@@ -22,9 +22,9 @@ def moderator_class_for_source() -> NeXusClass[snx.NXsource]:
     return NeXusClass[snx.NXsource](snx.NXmoderator)
 
 
-def load_goniometer_angles(
+def load_instrument_angles(
     file_spec: NeXusFileSpec[RunType],
-) -> GoniometerAngles[RunType]:
+) -> InstrumentAngles[RunType]:
     # TODO need mechanism in ESSreduce to load specific components of non-unique
     #  class by name
     from ess.reduce.nexus._nexus_loader import _open_nexus_file, _unique_child_group
@@ -35,8 +35,10 @@ def load_goniometer_angles(
             snx.NXparameters,
             name=None,
         )
-        return GoniometerAngles[RunType](
-            sc.DataGroup({name: parameters[name][()]['value'] for name in ('a3', 'a4')})
+        return InstrumentAngles[RunType](
+            sc.DataGroup[sc.DataArray](
+                {name: parameters[name][()]['value'] for name in ('a3', 'a4')}
+            )
         )
 
 
@@ -44,5 +46,5 @@ def LoadNeXusWorkflow() -> sciline.Pipeline:
     """Workflow for loading BIFROST NeXus files."""
     workflow = GenericNeXusWorkflow()
     workflow.insert(moderator_class_for_source)
-    workflow.insert(load_goniometer_angles)
+    workflow.insert(load_instrument_angles)
     return workflow
