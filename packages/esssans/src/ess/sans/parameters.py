@@ -54,6 +54,7 @@ parameter_registry[CorrectForGravity] = BooleanParameter.from_type(
     CorrectForGravity, default=False
 )
 parameter_registry[NeXusDetectorName] = StringParameter.from_type(NeXusDetectorName)
+
 parameter_registry[NeXusMonitorName[Incident]] = StringParameter.from_type(
     NeXusMonitorName[Incident], default=''
 )
@@ -76,10 +77,10 @@ parameter_registry[ReturnEvents] = BooleanParameter.from_type(
 parameter_registry[UncertaintyBroadcastMode] = ParamWithOptions.from_enum(
     UncertaintyBroadcastMode, default=UncertaintyBroadcastMode.upper_bound
 )
-parameter_registry[Filename[SampleRun]] = FilenameParameter.from_type(
+parameter_registry[Filename[SampleRun]] = MultiFilenameParameter.from_type(
     Filename[SampleRun]
 )
-parameter_registry[Filename[BackgroundRun]] = FilenameParameter.from_type(
+parameter_registry[Filename[BackgroundRun]] = MultiFilenameParameter.from_type(
     Filename[BackgroundRun]
 )
 parameter_registry[Filename[TransmissionRun[SampleRun]]] = FilenameParameter.from_type(
@@ -91,6 +92,7 @@ parameter_registry[Filename[TransmissionRun[BackgroundRun]]] = (
 parameter_registry[Filename[EmptyBeamRun]] = FilenameParameter.from_type(
     Filename[EmptyBeamRun]
 )
+
 parameter_registry[WavelengthBins] = BinEdgesParameter(
     WavelengthBins, dim='wavelength', start=2, stop=12.0, nbins=300, log=False
 )
