@@ -7,6 +7,7 @@ Coordinate transformations for powder diffraction.
 import scipp as sc
 import scippneutron as scn
 
+from .calibration import OutputCalibrationData
 from .correction import merge_calibration
 from .logging import get_logger
 from .types import (
@@ -14,9 +15,14 @@ from .types import (
     DataWithScatteringCoordinates,
     DspacingData,
     ElasticCoordTransformGraph,
+    FilteredData,
+    IofDspacing,
+    IofTof,
     MaskedData,
-    NormalizedByProtonCharge,
+    MonitorData,
+    MonitorType,
     RunType,
+    WavelengthMonitor,
 )
 
 
@@ -175,7 +181,7 @@ def _restore_tof_if_in_wavelength(data: sc.DataArray) -> sc.DataArray:
 
 
 def add_scattering_coordinates_from_positions(
-    data: NormalizedByProtonCharge[RunType], graph: ElasticCoordTransformGraph
+    data: FilteredData[RunType], graph: ElasticCoordTransformGraph
 ) -> DataWithScatteringCoordinates[RunType]:
     """
     Add ``wavelength`` and ``two_theta`` coordinates to the data.
@@ -191,7 +197,9 @@ def add_scattering_coordinates_from_positions(
         Coordinate transformation graph.
     """
     out = data.transform_coords(
-        ["two_theta", "wavelength"], graph=graph, keep_intermediate=False
+        ["two_theta", "wavelength", "Ltotal"],
+        graph=graph,
+        keep_intermediate=False,
     )
     return DataWithScatteringCoordinates[RunType](out)
 
@@ -213,8 +221,30 @@ def convert_to_dspacing(
     return DspacingData[RunType](out)
 
 
+def convert_reduced_to_tof(
+    data: IofDspacing, calibration: OutputCalibrationData
+) -> IofTof:
+    return IofTof(
+        data.transform_coords(tof=calibration.d_to_tof_transformer(), keep_inputs=False)
+    )
+
+
+def convert_monitor_do_wavelength(
+    monitor: MonitorData[RunType, MonitorType],
+) -> WavelengthMonitor[RunType, MonitorType]:
+    graph = {
+        **scn.conversion.graph.beamline.beamline(scatter=False),
+        **scn.conversion.graph.tof.elastic("tof"),
+    }
+    return WavelengthMonitor[RunType, MonitorType](
+        monitor.transform_coords("wavelength", graph=graph, keep_intermediate=False)
+    )
+
+
 providers = (
     powder_coordinate_transformation_graph,
     add_scattering_coordinates_from_positions,
     convert_to_dspacing,
+    convert_reduced_to_tof,
+    convert_monitor_do_wavelength,
 )

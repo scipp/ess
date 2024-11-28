@@ -8,6 +8,7 @@ pipeline.
 """
 
 from collections.abc import Callable
+from pathlib import Path
 from typing import Any, NewType, TypeVar
 
 import sciline
@@ -26,6 +27,7 @@ DetectorData = reduce_t.DetectorData
 DetectorPositionOffset = reduce_t.DetectorPositionOffset
 EmptyBeamRun = reduce_t.EmptyBeamRun
 Filename = reduce_t.Filename
+CaveMonitor = reduce_t.Monitor1
 MonitorData = reduce_t.MonitorData
 MonitorPositionOffset = reduce_t.MonitorPositionOffset
 MonitorType = reduce_t.MonitorType
@@ -38,7 +40,6 @@ Position = reduce_t.Position
 VanadiumRun = reduce_t.VanadiumRun
 
 DetectorBankSizes = reduce_t.DetectorBankSizes
-NeXusDetectorName = reduce_t.NeXusDetectorName
 
 
 # 2 Workflow parameters
@@ -117,6 +118,9 @@ class FocussedDataDspacingTwoTheta(sciline.Scope[RunType, sc.DataArray], sc.Data
 IofDspacing = NewType("IofDspacing", sc.DataArray)
 """Data that has been normalized by a vanadium run."""
 
+IofTof = NewType("IofTof", sc.DataArray)
+"""Data that has been normalized by a vanadium run and converted to ToF."""
+
 IofDspacingTwoTheta = NewType("IofDspacingTwoTheta", sc.DataArray)
 """Data that has been normalized by a vanadium run, and grouped into 2theta bins."""
 
@@ -129,8 +133,25 @@ class MaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
 MaskedDetectorIDs = NewType("MaskedDetectorIDs", dict[str, sc.Variable])
 """1-D variable listing all masked detector IDs."""
 
+CaveMonitorPosition = NewType("CaveMonitorPosition", sc.Variable)
+"""Position of DREAM's cave monitor."""
 
-class NormalizedByProtonCharge(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+
+class MonitorFilename(sciline.Scope[RunType, Path], Path):
+    """Filename for monitor data.
+
+    Usually, monitors should be stored in the same file as detector data.
+    But McStas simulations may output monitors and detectors as separate files.
+    """
+
+
+class WavelengthMonitor(
+    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
+):
+    """Monitor histogram in wavelength."""
+
+
+class NormalizedRunData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Data that has been normalized by proton charge."""
 
 
@@ -161,7 +182,7 @@ WavelengthMask = NewType("WavelengthMask", Callable | None)
 CIFAuthors = NewType('CIFAuthors', list[cif.Author])
 """List of authors to save to output CIF files."""
 
-ReducedDspacingCIF = NewType('ReducedDspacingCIF', cif.CIF)
-"""Reduced data in d-spacing, ready to be saved to a CIF file."""
+ReducedTofCIF = NewType('ReducedTofCIF', cif.CIF)
+"""Reduced data in time-of-flight, ready to be saved to a CIF file."""
 
 del sc, sciline, NewType, TypeVar

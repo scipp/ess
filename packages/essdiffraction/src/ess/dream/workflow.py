@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 
+from __future__ import annotations
+
 import itertools
 
 import sciline
@@ -9,6 +11,10 @@ import scippnexus as snx
 
 from ess.powder import providers as powder_providers
 from ess.powder import with_pixel_mask_filenames
+from ess.powder.correction import (
+    RunNormalization,
+    insert_run_normalization,
+)
 from ess.powder.types import (
     AccumulatedProtonCharge,
     PixelMaskFilename,
@@ -22,11 +28,11 @@ from ess.powder.types import (
 from ess.reduce.parameter import parameter_mappers
 from ess.reduce.workflow import register_workflow
 
-from .io.cif import CIFAuthors, prepare_reduced_dspacing_cif
+from .io.cif import CIFAuthors, prepare_reduced_tof_cif
 from .io.geant4 import LoadGeant4Workflow
 from .parameters import typical_outputs
 
-_dream_providers = (prepare_reduced_dspacing_cif,)
+_dream_providers = (prepare_reduced_tof_cif,)
 
 parameter_mappers[PixelMaskFilename] = with_pixel_mask_filenames
 
@@ -51,13 +57,14 @@ def default_parameters() -> dict:
 
 
 @register_workflow
-def DreamGeant4Workflow() -> sciline.Pipeline:
+def DreamGeant4Workflow(*, run_norm: RunNormalization) -> sciline.Pipeline:
     """
     Workflow with default parameters for the Dream Geant4 simulation.
     """
     wf = LoadGeant4Workflow()
     for provider in itertools.chain(powder_providers, _dream_providers):
         wf.insert(provider)
+    insert_run_normalization(wf, run_norm)
     for key, value in default_parameters().items():
         wf[key] = value
     wf.typical_outputs = typical_outputs

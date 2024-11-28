@@ -7,6 +7,7 @@ Components for powder diffraction experiments.
 import importlib.metadata
 
 from . import (
+    calibration,
     conversion,
     correction,
     filtering,
@@ -16,6 +17,7 @@ from . import (
     transform,
 )
 from .masking import with_pixel_mask_filenames
+from .correction import RunNormalization
 
 try:
     __version__ = importlib.metadata.version("essdiffraction")
@@ -25,6 +27,7 @@ except importlib.metadata.PackageNotFoundError:
 del importlib
 
 providers = (
+    *calibration.providers,
     *conversion.providers,
     *correction.providers,
     *filtering.providers,
@@ -36,6 +39,7 @@ providers = (
 
 __all__ = [
     "__version__",
+    "RunNormalization",
     "conversion",
     "correction",
     "filtering",

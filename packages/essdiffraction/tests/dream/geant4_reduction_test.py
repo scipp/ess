@@ -17,17 +17,20 @@ from ess.powder.types import (
     AccumulatedProtonCharge,
     BackgroundRun,
     CalibrationFilename,
+    CaveMonitorPosition,
     CIFAuthors,
     DspacingBins,
     DspacingData,
     Filename,
     IofDspacing,
     IofDspacingTwoTheta,
+    IofTof,
     MaskedData,
+    MonitorFilename,
     NeXusDetectorName,
-    NormalizedByProtonCharge,
+    NormalizedRunData,
     Position,
-    ReducedDspacingCIF,
+    ReducedTofCIF,
     SampleRun,
     TofMask,
     TwoThetaBins,
@@ -46,6 +49,9 @@ params = {
     Filename[SampleRun]: dream.data.simulated_diamond_sample(),
     Filename[VanadiumRun]: dream.data.simulated_vanadium_sample(),
     Filename[BackgroundRun]: dream.data.simulated_empty_can(),
+    MonitorFilename[SampleRun]: dream.data.simulated_monitor_diamond_sample(),
+    MonitorFilename[VanadiumRun]: dream.data.simulated_monitor_vanadium_sample(),
+    MonitorFilename[BackgroundRun]: dream.data.simulated_monitor_empty_can(),
     CalibrationFilename: None,
     UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
     DspacingBins: sc.linspace('dspacing', 0.0, 2.3434, 201, unit='angstrom'),
@@ -59,6 +65,7 @@ params = {
     AccumulatedProtonCharge[VanadiumRun]: charge,
     TwoThetaMask: None,
     WavelengthMask: None,
+    CaveMonitorPosition: sc.vector([0.0, 0.0, -4220.0], unit='mm'),
     CIFAuthors: CIFAuthors(
         [
             Author(
@@ -77,7 +84,11 @@ def params_for_det(request):
 
 @pytest.fixture
 def workflow(params_for_det):
-    wf = dream.DreamGeant4Workflow()
+    return make_workflow(params_for_det, run_norm=powder.RunNormalization.proton_charge)
+
+
+def make_workflow(params_for_det, *, run_norm):
+    wf = dream.DreamGeant4Workflow(run_norm=run_norm)
     for key, value in params_for_det.items():
         wf[key] = value
     return wf
@@ -90,11 +101,33 @@ def test_pipeline_can_compute_dspacing_result(workflow):
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
 
+def test_pipeline_can_compute_dspacing_result_with_hist_monitor_norm(params_for_det):
+    workflow = make_workflow(
+        params_for_det, run_norm=powder.RunNormalization.monitor_histogram
+    )
+    workflow = powder.with_pixel_mask_filenames(workflow, [])
+    result = workflow.compute(IofDspacing)
+    assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
+    assert sc.identical(result.coords['dspacing'], params[DspacingBins])
+
+
+def test_pipeline_can_compute_dspacing_result_with_integrated_monitor_norm(
+    params_for_det,
+):
+    workflow = make_workflow(
+        params_for_det, run_norm=powder.RunNormalization.monitor_integrated
+    )
+    workflow = powder.with_pixel_mask_filenames(workflow, [])
+    result = workflow.compute(IofDspacing)
+    assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
+    assert sc.identical(result.coords['dspacing'], params[DspacingBins])
+
+
 def test_workflow_is_deterministic(workflow):
     workflow = powder.with_pixel_mask_filenames(workflow, [])
     # This is Sciline's default scheduler, but we want to be explicit here
     scheduler = sciline.scheduler.DaskScheduler()
-    graph = workflow.get(IofDspacing, scheduler=scheduler)
+    graph = workflow.get(IofTof, scheduler=scheduler)
     reference = graph.compute().data
     result = graph.compute().data
     assert sc.identical(sc.values(result), sc.values(reference))
@@ -102,8 +135,8 @@ def test_workflow_is_deterministic(workflow):
 
 def test_pipeline_can_compute_intermediate_results(workflow):
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    results = workflow.compute((NormalizedByProtonCharge[SampleRun], NeXusDetectorName))
-    result = results[NormalizedByProtonCharge[SampleRun]]
+    results = workflow.compute((NormalizedRunData[SampleRun], NeXusDetectorName))
+    result = results[NormalizedRunData[SampleRun]]
 
     detector_name = results[NeXusDetectorName]
     expected_dims = {'segment', 'wire', 'counter', 'strip', 'module'}
@@ -171,7 +204,7 @@ def test_use_workflow_helper(workflow):
 
 def test_pipeline_can_save_data(workflow):
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    result = workflow.compute(ReducedDspacingCIF)
+    result = workflow.compute(ReducedTofCIF)
 
     buffer = io.StringIO()
     result.save(buffer)
@@ -182,7 +215,7 @@ def test_pipeline_can_save_data(workflow):
     _assert_contains_source_info(content)
     _assert_contains_author_info(content)
     _assert_contains_beamline_info(content)
-    _assert_contains_dspacing_data(content)
+    _assert_contains_tof_data(content)
 
 
 def _assert_contains_source_info(cif_content: str) -> None:
@@ -200,10 +233,10 @@ def _assert_contains_beamline_info(cif_content: str) -> None:
     assert 'diffrn_source.facility ESS' in cif_content
 
 
-def _assert_contains_dspacing_data(cif_content: str) -> None:
-    assert 'pd_proc.d_spacing' in cif_content
-    assert 'pd_proc.intensity_net' in cif_content
-    assert 'pd_proc.intensity_net_su' in cif_content
+def _assert_contains_tof_data(cif_content: str) -> None:
+    assert 'pd_meas.time_of_flight' in cif_content
+    assert 'pd_proc.intensity_norm' in cif_content
+    assert 'pd_proc.intensity_norm_su' in cif_content
 
 
 def test_sans_workflow_registers_subclasses():

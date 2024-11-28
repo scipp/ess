@@ -9,21 +9,21 @@ asttokens==2.4.1
     # via stack-data
 click==8.1.7
     # via dask
-cloudpickle==3.0.0
+cloudpickle==3.1.0
     # via dask
 comm==0.2.2
     # via ipywidgets
-contourpy==1.3.0
+contourpy==1.3.1
     # via matplotlib
 cyclebane==24.10.0
     # via sciline
 cycler==0.12.1
     # via matplotlib
-dask==2024.9.1
+dask==2024.11.2
     # via -r base.in
 decorator==5.1.1
     # via ipython
-essreduce==24.10.2
+essreduce==24.11.1
     # via -r base.in
 exceptiongroup==1.2.2
     # via ipython
@@ -31,7 +31,7 @@ executing==2.1.0
     # via stack-data
 fonttools==4.54.1
     # via matplotlib
-fsspec==2024.9.0
+fsspec==2024.10.0
     # via dask
 graphviz==0.20.3
     # via -r base.in
@@ -43,13 +43,13 @@ importlib-metadata==8.5.0
     # via dask
 ipydatawidgets==4.3.5
     # via pythreejs
-ipython==8.28.0
+ipython==8.29.0
     # via ipywidgets
 ipywidgets==8.1.5
     # via
     #   ipydatawidgets
     #   pythreejs
-jedi==0.19.1
+jedi==0.19.2
     # via ipython
 jupyterlab-widgets==3.0.13
     # via ipywidgets
@@ -65,9 +65,9 @@ matplotlib-inline==0.1.7
     # via ipython
 mpltoolbox==24.5.1
     # via scippneutron
-networkx==3.4
+networkx==3.4.2
     # via cyclebane
-numpy==2.1.2
+numpy==2.1.3
     # via
     #   -r base.in
     #   contourpy
@@ -79,7 +79,7 @@ numpy==2.1.2
     #   scipp
     #   scippneutron
     #   scipy
-packaging==24.1
+packaging==24.2
     # via
     #   dask
     #   matplotlib
@@ -89,9 +89,9 @@ partd==1.4.2
     # via dask
 pexpect==4.9.0
     # via ipython
-pillow==10.4.0
+pillow==11.0.0
     # via matplotlib
-plopp==24.9.3
+plopp==24.10.0
     # via
     #   -r base.in
     #   scippneutron
@@ -103,7 +103,7 @@ pure-eval==0.2.3
     # via stack-data
 pygments==2.18.0
     # via ipython
-pyparsing==3.1.4
+pyparsing==3.2.0
     # via matplotlib
 python-dateutil==2.9.0.post0
     # via
@@ -113,19 +113,19 @@ pythreejs==2.4.2
     # via -r base.in
 pyyaml==6.0.2
     # via dask
-sciline==24.6.3
+sciline==24.10.0
     # via
     #   -r base.in
     #   essreduce
-scipp==24.9.1
+scipp==24.11.1
     # via
     #   -r base.in
     #   essreduce
     #   scippneutron
     #   scippnexus
-scippneutron==24.9.0
+scippneutron==24.11.0
     # via -r base.in
-scippnexus==24.10.0
+scippnexus==24.11.0
     # via
     #   -r base.in
     #   essreduce
@@ -160,5 +160,5 @@ wcwidth==0.2.13
     # via prompt-toolkit
 widgetsnbextension==4.0.13
     # via ipywidgets
-zipp==3.20.2
+zipp==3.21.0
     # via importlib-metadata
