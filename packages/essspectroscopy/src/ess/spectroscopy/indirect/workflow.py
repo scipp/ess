@@ -15,7 +15,7 @@ from ..types import (
     Choppers,
     DetectorData,
     Filename,
-    GoniometerAngles,
+    InstrumentAngles,
     MonitorData,
     NeXusDetectorName,
     NeXusMonitorName,
@@ -743,7 +743,7 @@ def load_everything(filename: Filename):
             Position[snx.NXsample, SampleRun],
             Analyzers[SampleRun],
             Choppers[SampleRun],
-            GoniometerAngles[SampleRun],
+            InstrumentAngles[SampleRun],
             *(MonitorData[SampleRun, key] for key in monitor_keys),
             *(NeXusMonitorName[key] for key in monitor_keys),
         ]
@@ -760,9 +760,9 @@ def load_everything(filename: Filename):
     triplets = sc.DataGroup(
         zip(detector_names, loaded[DetectorData[SampleRun]], strict=True)
     )
-    goniometer_angles = loaded[GoniometerAngles[SampleRun]]
+    instrument_angles = loaded[InstrumentAngles[SampleRun]]
 
-    return sample, triplets, analyzers, choppers, monitors, goniometer_angles
+    return sample, triplets, analyzers, choppers, monitors, instrument_angles
 
 
 def one_setting(
