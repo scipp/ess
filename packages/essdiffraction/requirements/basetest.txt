@@ -39,7 +39,7 @@ requests==2.32.3
     # via pooch
 six==1.16.0
     # via python-dateutil
-tomli==2.1.0
+tomli==2.2.1
     # via pytest
 tzdata==2024.2
     # via pandas
