@@ -27,7 +27,7 @@ _pooch = _make_pooch()
 
 def get_path(name: str) -> str:
     """
-    Return the path to a data file bundled with ess.biofrost.
+    Return the path to a data file bundled with ess.bifrost.
 
     This function only works with example data and cannot handle
     paths to custom files.
