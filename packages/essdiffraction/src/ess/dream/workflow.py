@@ -17,6 +17,7 @@ from ess.powder.correction import (
 )
 from ess.powder.types import (
     AccumulatedProtonCharge,
+    CaveMonitorPosition,  # Should this be a DREAM-only parameter?
     PixelMaskFilename,
     Position,
     SampleRun,
@@ -41,6 +42,7 @@ def default_parameters() -> dict:
     # Quantities not available in the simulated data
     sample_position = sc.vector([0.0, 0.0, 0.0], unit="mm")
     source_position = sc.vector([-3.478, 0.0, -76550], unit="mm")
+    cave_monitor_position = sc.vector([0.0, 0.0, -4220.0], unit='mm')
     charge = sc.scalar(1.0, unit="µAh")
     return {
         Position[snx.NXsample, SampleRun]: sample_position,
@@ -53,10 +55,10 @@ def default_parameters() -> dict:
         TofMask: None,
         WavelengthMask: None,
         TwoThetaMask: None,
+        CaveMonitorPosition: cave_monitor_position,
     }
 
 
-@register_workflow
 def DreamGeant4Workflow(*, run_norm: RunNormalization) -> sciline.Pipeline:
     """
     Workflow with default parameters for the Dream Geant4 simulation.
@@ -71,4 +73,37 @@ def DreamGeant4Workflow(*, run_norm: RunNormalization) -> sciline.Pipeline:
     return wf
 
 
-__all__ = ['DreamGeant4Workflow', 'default_parameters']
+@register_workflow
+def DreamGeant4MonitorHistogramWorkflow() -> sciline.Pipeline:
+    """
+    Workflow with default parameters for the Dream Geant4 simulation, using a
+    histogrammed monitor for the normalization.
+    """
+    return DreamGeant4Workflow(run_norm=RunNormalization.monitor_histogram)
+
+
+@register_workflow
+def DreamGeant4MonitorIntegratedWorkflow() -> sciline.Pipeline:
+    """
+    Workflow with default parameters for the Dream Geant4 simulation, using
+    integrated counts of the monitor for the normalization.
+    """
+    return DreamGeant4Workflow(run_norm=RunNormalization.monitor_integrated)
+
+
+@register_workflow
+def DreamGeant4ProtonChargeWorkflow() -> sciline.Pipeline:
+    """
+    Workflow with default parameters for the Dream Geant4 simulation, using
+    proton charge for the normalization.
+    """
+    return DreamGeant4Workflow(run_norm=RunNormalization.proton_charge)
+
+
+__all__ = [
+    'DreamGeant4MonitorHistogramWorkflow',
+    'DreamGeant4MonitorIntegratedWorkflow',
+    'DreamGeant4ProtonChargeWorkflow',
+    'DreamGeant4Workflow',
+    'default_parameters',
+]

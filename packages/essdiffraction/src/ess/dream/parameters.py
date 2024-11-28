@@ -9,11 +9,12 @@ from ess.powder.types import (
     CalibrationFilename,
     DspacingBins,
     Filename,
-    IofDspacing,
     IofDspacingTwoTheta,
+    IofTof,
+    MonitorFilename,
     NeXusDetectorName,
     PixelMaskFilename,
-    ReducedDspacingCIF,
+    ReducedTofCIF,
     SampleRun,
     UncertaintyBroadcastMode,
     VanadiumRun,
@@ -39,6 +40,12 @@ parameter_registry[Filename[BackgroundRun]] = FilenameParameter.from_type(
 parameter_registry[CalibrationFilename] = FilenameParameter.from_type(
     CalibrationFilename
 )
+parameter_registry[MonitorFilename[SampleRun]] = FilenameParameter.from_type(
+    MonitorFilename[SampleRun]
+)
+parameter_registry[MonitorFilename[VanadiumRun]] = FilenameParameter.from_type(
+    MonitorFilename[VanadiumRun]
+)
 parameter_registry[PixelMaskFilename] = MultiFilenameParameter.from_type(
     PixelMaskFilename,
 )
@@ -52,4 +59,4 @@ parameter_registry[UncertaintyBroadcastMode] = ParamWithOptions.from_enum(
     UncertaintyBroadcastMode, default=UncertaintyBroadcastMode.upper_bound
 )
 
-typical_outputs = (IofDspacing, IofDspacingTwoTheta, ReducedDspacingCIF)
+typical_outputs = (IofTof, IofDspacingTwoTheta, ReducedTofCIF)
