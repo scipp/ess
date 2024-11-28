@@ -12,7 +12,11 @@ from scippneutron.io.cif import Author
 
 import ess.dream.data  # noqa: F401
 from ess import dream, powder
-from ess.dream import DreamGeant4Workflow
+from ess.dream.workflow import (
+    DreamGeant4MonitorHistogramWorkflow,
+    DreamGeant4MonitorIntegratedWorkflow,
+    DreamGeant4ProtonChargeWorkflow,
+)
 from ess.powder.types import (
     AccumulatedProtonCharge,
     BackgroundRun,
@@ -239,9 +243,14 @@ def _assert_contains_tof_data(cif_content: str) -> None:
     assert 'pd_proc.intensity_norm_su' in cif_content
 
 
-def test_sans_workflow_registers_subclasses():
+def test_dream_workflow_registers_subclasses():
     # Because it was imported
-    assert DreamGeant4Workflow in reduce_workflow.workflow_registry
+    for wf in (
+        DreamGeant4MonitorHistogramWorkflow,
+        DreamGeant4MonitorIntegratedWorkflow,
+        DreamGeant4ProtonChargeWorkflow,
+    ):
+        assert wf in reduce_workflow.workflow_registry
     count = len(reduce_workflow.workflow_registry)
 
     @reduce_workflow.register_workflow
@@ -252,7 +261,7 @@ def test_sans_workflow_registers_subclasses():
 
 
 def test_dream_workflow_parameters_returns_filtered_params():
-    wf = DreamGeant4Workflow()
+    wf = DreamGeant4ProtonChargeWorkflow()
     parameters = reduce_workflow.get_parameters(wf, (DspacingData[SampleRun],))
     assert Filename[SampleRun] in parameters
     assert Filename[BackgroundRun] not in parameters
