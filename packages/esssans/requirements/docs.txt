@@ -28,7 +28,7 @@ certifi==2024.8.30
     # via requests
 charset-normalizer==3.4.0
     # via requests
-debugpy==1.8.7
+debugpy==1.8.9
     # via ipykernel
 defusedxml==0.7.1
     # via nbconvert
@@ -38,7 +38,7 @@ docutils==0.21.2
     #   nbsphinx
     #   pydata-sphinx-theme
     #   sphinx
-fastjsonschema==2.20.0
+fastjsonschema==2.21.0
     # via nbformat
 idna==3.10
     # via requests
@@ -122,7 +122,7 @@ requests==2.32.3
     # via
     #   pooch
     #   sphinx
-rpds-py==0.20.1
+rpds-py==0.21.0
     # via
     #   jsonschema
     #   referencing
@@ -159,9 +159,9 @@ sphinxcontrib-serializinghtml==2.0.0
     # via sphinx
 tinycss2==1.4.0
     # via nbconvert
-tomli==2.0.2
+tomli==2.2.1
     # via sphinx
-tornado==6.4.1
+tornado==6.4.2
     # via
     #   ipykernel
     #   jupyter-client

@@ -32,7 +32,7 @@ requires-python = ">=3.10"
 dependencies = [
   "dask",
   "graphviz",
-  "essreduce>=24.10.2",
+  "essreduce>=24.11.3",
   "numpy",
   "pandas",
   "plopp",

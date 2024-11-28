@@ -15,7 +15,7 @@ idna==3.10
     # via requests
 iniconfig==2.0.0
     # via pytest
-packaging==24.1
+packaging==24.2
     # via
     #   pooch
     #   pytest
@@ -29,7 +29,7 @@ pytest==8.3.3
     # via -r basetest.in
 requests==2.32.3
     # via pooch
-tomli==2.0.2
+tomli==2.2.1
     # via pytest
 urllib3==2.2.3
     # via requests
