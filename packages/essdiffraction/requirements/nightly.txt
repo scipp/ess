@@ -28,7 +28,7 @@ essreduce @ git+https://github.com/scipp/essreduce@main
     # via -r nightly.in
 executing==2.1.0
     # via stack-data
-fonttools==4.54.1
+fonttools==4.55.0
     # via matplotlib
 fsspec==2024.10.0
     # via dask
@@ -103,7 +103,9 @@ scipp @ https://github.com/scipp/scipp/releases/download/nightly/scipp-nightly-c
     #   scippneutron
     #   scippnexus
 scippneutron @ git+https://github.com/scipp/scippneutron@main
-    # via -r nightly.in
+    # via
+    #   -r nightly.in
+    #   essreduce
 scippnexus @ git+https://github.com/scipp/scippnexus@main
     # via
     #   -r nightly.in
