@@ -21,8 +21,6 @@ from .types import (
     FrameMonitor1,
     FrameMonitor2,
     FrameMonitor3,
-    PsdMonitor0,
-    PsdMonitor1,
 )
 
 
@@ -78,8 +76,6 @@ def default_parameters() -> dict[type, Any]:
         NeXusMonitorName[FrameMonitor1]: '090_frame_1',
         NeXusMonitorName[FrameMonitor2]: '097_frame_2',
         NeXusMonitorName[FrameMonitor3]: '110_frame_3',
-        NeXusMonitorName[PsdMonitor0]: '111_psd0',
-        NeXusMonitorName[PsdMonitor1]: '113_psd1',
     }
 
 

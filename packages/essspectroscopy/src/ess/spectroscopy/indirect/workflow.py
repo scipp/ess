@@ -712,8 +712,6 @@ def load_everything(filename: Filename):
         FrameMonitor1,
         FrameMonitor2,
         FrameMonitor3,
-        PsdMonitor0,
-        PsdMonitor1,
     )
     from ess.bifrost.workflow import BifrostSimulationWorkflow
 
@@ -722,8 +720,6 @@ def load_everything(filename: Filename):
         FrameMonitor1,
         FrameMonitor2,
         FrameMonitor3,
-        PsdMonitor0,
-        PsdMonitor1,
     )
     detector_names = _get_detector_names(filename)
 

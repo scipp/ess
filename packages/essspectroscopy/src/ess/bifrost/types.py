@@ -11,6 +11,4 @@ FrameMonitor0 = reduce_t.Monitor1
 FrameMonitor1 = reduce_t.Monitor2
 FrameMonitor2 = reduce_t.Monitor3
 FrameMonitor3 = reduce_t.Monitor4
-PsdMonitor0 = reduce_t.Monitor5
-PsdMonitor1 = reduce_t.Monitor6
 MonitorType = reduce_t.MonitorType
