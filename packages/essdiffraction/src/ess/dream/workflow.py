@@ -42,7 +42,6 @@ def default_parameters() -> dict:
     # Quantities not available in the simulated data
     sample_position = sc.vector([0.0, 0.0, 0.0], unit="mm")
     source_position = sc.vector([-3.478, 0.0, -76550], unit="mm")
-    cave_monitor_position = sc.vector([0.0, 0.0, -4220.0], unit='mm')
     charge = sc.scalar(1.0, unit="µAh")
     return {
         Position[snx.NXsample, SampleRun]: sample_position,
@@ -55,7 +54,7 @@ def default_parameters() -> dict:
         TofMask: None,
         WavelengthMask: None,
         TwoThetaMask: None,
-        CaveMonitorPosition: cave_monitor_position,
+        CaveMonitorPosition: sc.vector([0.0, 0.0, -4220.0], unit='mm'),
     }
 
 
