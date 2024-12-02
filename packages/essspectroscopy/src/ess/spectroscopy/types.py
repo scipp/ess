@@ -1,10 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
-
 from typing import NewType
 
+import sciline
+import scipp as sc
 from choppera.primary import PrimarySpectrometer
-from scipp import DataArray, Variable
+
+from ess.reduce.nexus import types as reduce_t
 
 
 def make_scipp_named_typer(scipp_type):
@@ -14,16 +16,41 @@ def make_scipp_named_typer(scipp_type):
     return typer
 
 
-variable_type = make_scipp_named_typer(Variable)
-data_array_type = make_scipp_named_typer(DataArray)
+variable_type = make_scipp_named_typer(sc.Variable)
+data_array_type = make_scipp_named_typer(sc.DataArray)
+
+AllNeXusComponents = reduce_t.AllNeXusComponents
+Analyzers = reduce_t.Analyzers
+CalibratedDetector = reduce_t.CalibratedDetector
+Choppers = reduce_t.Choppers
+DetectorData = reduce_t.DetectorData
+DetectorPositionOffset = reduce_t.DetectorPositionOffset
+GravityVector = reduce_t.GravityVector
+Filename = reduce_t.Filename
+MonitorData = reduce_t.MonitorData
+NeXusClass = reduce_t.NeXusClass
+NeXusComponentLocationSpec = reduce_t.NeXusComponentLocationSpec
+NeXusComponent = reduce_t.NeXusComponent
+NeXusDetectorName = reduce_t.NeXusDetectorName
+NeXusFileSpec = reduce_t.NeXusFileSpec
+NeXusMonitorName = reduce_t.NeXusName
+NeXusTransformation = reduce_t.NeXusTransformation
+Position = reduce_t.Position
+PreopenNeXusFile = reduce_t.PreopenNeXusFile
+RunType = reduce_t.RunType
+SampleRun = reduce_t.SampleRun
 
 
-NeXusFileName = NewType('NeXusFileName', str)
+class InstrumentAngles(
+    sciline.Scope[RunType, sc.DataGroup[sc.DataArray]], sc.DataGroup[sc.DataArray]
+):
+    """Instrument angles for the sample orientation as a function of time."""
 
-SourcePosition = variable_type('SourcePosition')
-SamplePosition = variable_type('SamplePosition')
+
 AnalyzerPosition = variable_type('AnalyzerPosition')
 DetectorPosition = variable_type('DetectorPosition')
+SamplePosition = variable_type('SamplePosition')
+SourcePosition = variable_type('SourcePosition')
 AnalyzerOrientation = variable_type('AnalyzerOrientation')
 SampleAnalyzerVector = variable_type('SampleAnalyzerVector')
 AnalyzerDetectorVector = variable_type('AnalyzerDetectorVector')
@@ -53,8 +80,8 @@ DetectorFrameTime = variable_type('DetectorFrameTime')
 DetectorTime = variable_type('DetectorTime')
 SourceTime = variable_type('SourceTime')
 
-SourceName = NewType('SourceName', str)
 SampleName = NewType('SampleName', str)
+SourceName = NewType('SourceName', str)
 SourceFrequency = variable_type('SourceFrequency')
 SourceDuration = variable_type('SourceDuration')
 SourceDelay = variable_type('SourceDelay')
