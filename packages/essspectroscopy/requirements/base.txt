@@ -59,7 +59,7 @@ python-dateutil==2.9.0.post0
     #   strictyaml
 sciline==24.10.0
     # via -r base.in
-scipp==24.11.1
+scipp==24.11.2
     # via
     #   -r base.in
     #   choppera
