@@ -60,10 +60,8 @@ python-dateutil==2.9.0.post0
     #   scippnexus
     #   strictyaml
 sciline==24.10.0
-    # via
-    #   -r base.in
-    #   essreduce
-scipp==24.11.1
+    # via -r base.in
+scipp==24.11.2
     # via
     #   -r base.in
     #   choppera
