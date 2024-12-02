@@ -31,12 +31,13 @@ requires-python = ">=3.10"
 # Run 'tox -e deps' after making changes here. This will update requirement files.
 # Make sure to list one dependency per line.
 dependencies = [
+  "choppera>=0.1.4",
+  "essreduce>=24.11.2",
+  "loguru",
   "sciline>=24.6.3",
   "scipp>=24.9.1",
   "scippneutron>=24.8.0",
   "scippnexus>=24.9.0",
-  "choppera>=0.1.4",
-  "loguru",
   "tqdm",
 ]
 
@@ -44,6 +45,7 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 test = [
+    "pooch",
     "pytest",
 ]
 
@@ -66,6 +68,8 @@ addopts = """
 testpaths = "tests"
 filterwarnings = [
   "error",
+  # Plotting related warnings.
+  'ignore:\n            Sentinel is not a public part of the traitlets API:DeprecationWarning',
 ]
 
 [tool.ruff]

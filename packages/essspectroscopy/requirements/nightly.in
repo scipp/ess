@@ -4,6 +4,7 @@
 choppera>=0.1.4
 loguru
 tqdm
+pooch
 pytest
 scipp @ https://github.com/scipp/scipp/releases/download/nightly/scipp-nightly-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
 scippneutron @ git+https://github.com/scipp/scippneutron@main
