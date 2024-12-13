@@ -18,7 +18,7 @@ nodeenv==1.9.1
 platformdirs==4.3.6
     # via virtualenv
 pre-commit==4.0.1
-    # via -r requirements/static.in
+    # via -r static.in
 pyyaml==6.0.2
     # via pre-commit
 virtualenv==20.28.0
