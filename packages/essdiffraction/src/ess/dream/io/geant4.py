@@ -22,6 +22,8 @@ from ess.powder.types import (
     NeXusDetectorName,
     Position,
     RunType,
+    SampleRun,
+    VanadiumRun,
 )
 from ess.reduce.nexus.types import CalibratedBeamline
 from ess.reduce.nexus.workflow import GenericNeXusWorkflow
@@ -271,7 +273,9 @@ def LoadGeant4Workflow() -> sciline.Pipeline:
     """
     Workflow for loading NeXus data.
     """
-    wf = GenericNeXusWorkflow()
+    wf = GenericNeXusWorkflow(
+        run_types=[SampleRun, VanadiumRun], monitor_types=[CaveMonitor]
+    )
     wf.insert(extract_geant4_detector)
     wf.insert(load_geant4_csv)
     wf.insert(load_mcstas_monitor)
