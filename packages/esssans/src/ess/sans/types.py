@@ -36,7 +36,14 @@ DetectorBankSizes = reduce_t.DetectorBankSizes
 NeXusDetectorName = reduce_t.NeXusDetectorName
 
 MonitorType = TypeVar('MonitorType', Incident, Transmission)
-RunType = TypeVar('RunType', SampleRun, BackgroundRun, EmptyBeamRun, TransmissionRun[SampleRun], TransmissionRun[BackgroundRun])
+RunType = TypeVar(
+    'RunType',
+    SampleRun,
+    BackgroundRun,
+    EmptyBeamRun,
+    TransmissionRun[SampleRun],
+    TransmissionRun[BackgroundRun],
+)
 
 UncertaintyBroadcastMode = _UncertaintyBroadcastMode
 
