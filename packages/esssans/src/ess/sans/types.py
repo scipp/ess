@@ -25,10 +25,8 @@ Filename = reduce_t.Filename
 Incident = reduce_t.IncidentMonitor
 MonitorData = reduce_t.MonitorData
 MonitorPositionOffset = reduce_t.MonitorPositionOffset
-MonitorType = reduce_t.MonitorType
 NeXusMonitorName = reduce_t.NeXusName
 NeXusComponent = reduce_t.NeXusComponent
-RunType = reduce_t.RunType
 SampleRun = reduce_t.SampleRun
 ScatteringRunType = reduce_t.ScatteringRunType
 Transmission = reduce_t.TransmissionMonitor
@@ -36,6 +34,16 @@ TransmissionRun = reduce_t.TransmissionRun
 
 DetectorBankSizes = reduce_t.DetectorBankSizes
 NeXusDetectorName = reduce_t.NeXusDetectorName
+
+MonitorType = TypeVar('MonitorType', Incident, Transmission)
+RunType = TypeVar(
+    'RunType',
+    SampleRun,
+    BackgroundRun,
+    EmptyBeamRun,
+    TransmissionRun[SampleRun],
+    TransmissionRun[BackgroundRun],
+)
 
 UncertaintyBroadcastMode = _UncertaintyBroadcastMode
 
