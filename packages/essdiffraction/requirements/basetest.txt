@@ -5,7 +5,7 @@
 #
 #    pip-compile-multi
 #
-certifi==2024.8.30
+certifi==2024.12.14
     # via requests
 charset-normalizer==3.4.0
     # via requests
@@ -15,7 +15,7 @@ idna==3.10
     # via requests
 iniconfig==2.0.0
     # via pytest
-numpy==2.1.3
+numpy==2.2.0
     # via pandas
 packaging==24.2
     # via
@@ -29,7 +29,7 @@ pluggy==1.5.0
     # via pytest
 pooch==1.8.2
     # via -r basetest.in
-pytest==8.3.3
+pytest==8.3.4
     # via -r basetest.in
 python-dateutil==2.9.0.post0
     # via pandas
@@ -37,7 +37,7 @@ pytz==2024.2
     # via pandas
 requests==2.32.3
     # via pooch
-six==1.16.0
+six==1.17.0
     # via python-dateutil
 tomli==2.2.1
     # via pytest
