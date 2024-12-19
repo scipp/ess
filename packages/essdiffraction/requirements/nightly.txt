@@ -6,7 +6,7 @@
 #    pip-compile-multi
 #
 -r basetest.txt
-asttokens==2.4.1
+asttokens==3.0.0
     # via stack-data
 click==8.1.7
     # via dask
@@ -20,7 +20,7 @@ cyclebane==24.10.0
     # via sciline
 cycler==0.12.1
     # via matplotlib
-dask==2024.11.2
+dask==2024.12.1
     # via -r nightly.in
 decorator==5.1.1
     # via ipython
@@ -28,7 +28,7 @@ essreduce @ git+https://github.com/scipp/essreduce@main
     # via -r nightly.in
 executing==2.1.0
     # via stack-data
-fonttools==4.55.0
+fonttools==4.55.3
     # via matplotlib
 fsspec==2024.10.0
     # via dask
@@ -42,7 +42,7 @@ importlib-metadata==8.5.0
     # via dask
 ipydatawidgets==4.3.5
     # via pythreejs
-ipython==8.29.0
+ipython==8.30.0
     # via ipywidgets
 ipywidgets==8.1.5
     # via
@@ -56,7 +56,7 @@ kiwisolver==1.4.7
     # via matplotlib
 locket==1.0.0
     # via partd
-matplotlib==3.9.2
+matplotlib==3.10.0
     # via
     #   mpltoolbox
     #   plopp
