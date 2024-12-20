@@ -10,7 +10,7 @@ accessible-pygments==0.0.5
     # via pydata-sphinx-theme
 alabaster==1.0.0
     # via sphinx
-attrs==24.2.0
+attrs==24.3.0
     # via
     #   jsonschema
     #   referencing
@@ -24,11 +24,11 @@ beautifulsoup4==4.12.3
     #   pydata-sphinx-theme
 bleach==6.2.0
     # via nbconvert
-certifi==2024.8.30
+certifi==2024.12.14
     # via requests
 charset-normalizer==3.4.0
     # via requests
-debugpy==1.8.9
+debugpy==1.8.11
     # via ipykernel
 defusedxml==0.7.1
     # via nbconvert
@@ -40,7 +40,7 @@ docutils==0.21.2
     #   pydata-sphinx-theme
     #   sphinx
     #   sphinxcontrib-bibtex
-fastjsonschema==2.21.0
+fastjsonschema==2.21.1
     # via nbformat
 idna==3.10
     # via requests
@@ -48,10 +48,8 @@ imagesize==1.4.1
     # via sphinx
 ipykernel==6.29.5
     # via -r docs.in
-ipympl==0.9.4
+ipympl==0.9.5
     # via -r docs.in
-ipython-genutils==0.2.0
-    # via ipympl
 jinja2==3.1.4
     # via
     #   myst-parser
@@ -93,7 +91,7 @@ mistune==3.0.2
     # via nbconvert
 myst-parser==4.0.0
     # via -r docs.in
-nbclient==0.10.0
+nbclient==0.10.2
     # via nbconvert
 nbconvert==7.16.4
     # via nbsphinx
@@ -126,7 +124,7 @@ pybtex==0.24.0
     #   sphinxcontrib-bibtex
 pybtex-docutils==1.0.3
     # via sphinxcontrib-bibtex
-pydata-sphinx-theme==0.16.0
+pydata-sphinx-theme==0.16.1
     # via -r docs.in
 pytz==2024.2
     # via pandas
@@ -142,7 +140,7 @@ requests==2.32.3
     # via
     #   pooch
     #   sphinx
-rpds-py==0.21.0
+rpds-py==0.22.3
     # via
     #   jsonschema
     #   referencing
