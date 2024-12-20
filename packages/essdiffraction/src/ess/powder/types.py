@@ -30,16 +30,19 @@ Filename = reduce_t.Filename
 CaveMonitor = reduce_t.Monitor1
 MonitorData = reduce_t.MonitorData
 MonitorPositionOffset = reduce_t.MonitorPositionOffset
-MonitorType = reduce_t.MonitorType
 NeXusDetectorName = reduce_t.NeXusDetectorName
 NeXusMonitorName = reduce_t.NeXusName
 NeXusComponent = reduce_t.NeXusComponent
-RunType = reduce_t.RunType
 SampleRun = reduce_t.SampleRun
 Position = reduce_t.Position
 VanadiumRun = reduce_t.VanadiumRun
 
 DetectorBankSizes = reduce_t.DetectorBankSizes
+
+RunType = TypeVar("RunType", SampleRun, VanadiumRun)
+# Include Monitor2 because a single constraint is not allowed.
+# We will eventually have more than one...
+MonitorType = TypeVar("MonitorType", CaveMonitor, reduce_t.Monitor2)
 
 
 # 2 Workflow parameters
