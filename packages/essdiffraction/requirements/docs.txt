@@ -91,7 +91,7 @@ mistune==3.0.2
     # via nbconvert
 myst-parser==4.0.0
     # via -r docs.in
-nbclient==0.10.1
+nbclient==0.10.2
     # via nbconvert
 nbconvert==7.16.4
     # via nbsphinx
