@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
-from typing import NewType
+from typing import NewType, TypeVar
 
 import sciline
 import scipp as sc
@@ -37,8 +37,19 @@ NeXusMonitorName = reduce_t.NeXusName
 NeXusTransformation = reduce_t.NeXusTransformation
 Position = reduce_t.Position
 PreopenNeXusFile = reduce_t.PreopenNeXusFile
-RunType = reduce_t.RunType
 SampleRun = reduce_t.SampleRun
+
+# Include BackgroundRun because a single constraint is not allowed.
+# We will eventually have more than one...
+RunType = TypeVar("RunType", SampleRun, reduce_t.BackgroundRun)
+# Monitor types include all monitors used by instrument packages.
+MonitorType = TypeVar(
+    "MonitorType",
+    reduce_t.Monitor1,
+    reduce_t.Monitor2,
+    reduce_t.Monitor3,
+    reduce_t.Monitor4,
+)
 
 
 class InstrumentAngles(

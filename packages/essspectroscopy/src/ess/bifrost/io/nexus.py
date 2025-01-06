@@ -13,6 +13,14 @@ from ess.spectroscopy.types import (
     NeXusClass,
     NeXusFileSpec,
     RunType,
+    SampleRun,
+)
+
+from ..types import (
+    FrameMonitor0,
+    FrameMonitor1,
+    FrameMonitor2,
+    FrameMonitor3,
 )
 
 
@@ -44,7 +52,15 @@ def load_instrument_angles(
 
 def LoadNeXusWorkflow() -> sciline.Pipeline:
     """Workflow for loading BIFROST NeXus files."""
-    workflow = GenericNeXusWorkflow()
+    workflow = GenericNeXusWorkflow(
+        run_types=(SampleRun,),
+        monitor_types=(
+            FrameMonitor0,
+            FrameMonitor1,
+            FrameMonitor2,
+            FrameMonitor3,
+        ),
+    )
     workflow.insert(moderator_class_for_source)
     workflow.insert(load_instrument_angles)
     return workflow
