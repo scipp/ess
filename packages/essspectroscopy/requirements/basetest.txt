@@ -5,9 +5,9 @@
 #
 #    pip-compile-multi
 #
-certifi==2024.8.30
+certifi==2024.12.14
     # via requests
-charset-normalizer==3.4.0
+charset-normalizer==3.4.1
     # via requests
 exceptiongroup==1.2.2
     # via pytest
@@ -25,11 +25,11 @@ pluggy==1.5.0
     # via pytest
 pooch==1.8.2
     # via -r basetest.in
-pytest==8.3.3
+pytest==8.3.4
     # via -r basetest.in
 requests==2.32.3
     # via pooch
-tomli==2.1.0
+tomli==2.2.1
     # via pytest
-urllib3==2.2.3
+urllib3==2.3.0
     # via requests
