@@ -48,6 +48,10 @@ def load_raw_event_data(
         root = f["entry1/data"]
         (bank_name,) = (name for name in root.keys() if bank_name in name)
         data = root[bank_name]["events"][()].rename_dims({'dim_0': 'event'})
+        if (data.values[0] == 0).all():
+            # McStas can add an extra event line containing 0,0,0,0,0,0
+            # This line should not be included so we skip it.
+            data = data["event", 1:]
         return sc.DataArray(
             coords={
                 'id': sc.array(
