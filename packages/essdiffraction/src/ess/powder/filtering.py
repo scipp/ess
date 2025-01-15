@@ -12,7 +12,7 @@ from numbers import Real
 
 import scipp as sc
 
-from .types import DetectorData, FilteredData, RunType
+from .types import FilteredData, RunType, TofData
 
 
 def _equivalent_bin_indices(a, b) -> bool:
@@ -72,7 +72,7 @@ def remove_bad_pulses(
     return filtered
 
 
-def filter_events(data: DetectorData[RunType]) -> FilteredData[RunType]:
+def filter_events(data: TofData[RunType]) -> FilteredData[RunType]:
     """Remove bad events.
 
     Attention

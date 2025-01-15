@@ -17,6 +17,7 @@ from scippneutron.io import cif
 
 from ess.reduce.nexus import types as reduce_t
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
+from ess.reduce.unwrap import TofData as _TofData
 
 # 1 TypeVars used to parametrize the generic parts of the workflow
 
@@ -88,6 +89,9 @@ class AccumulatedProtonCharge(sciline.Scope[RunType, sc.Variable], sc.Variable):
 
 CalibrationData = NewType("CalibrationData", sc.Dataset | None)
 """Detector calibration data."""
+
+TofData = _TofData
+"""Data with time-of-flight coordinate."""
 
 
 class DataWithScatteringCoordinates(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
@@ -182,10 +186,10 @@ WavelengthMask = NewType("WavelengthMask", Callable | None)
 """WavelengthMask is a callable that returns a mask for a given WavelengthData."""
 
 
-CIFAuthors = NewType('CIFAuthors', list[cif.Author])
+CIFAuthors = NewType("CIFAuthors", list[cif.Author])
 """List of authors to save to output CIF files."""
 
-ReducedTofCIF = NewType('ReducedTofCIF', cif.CIF)
+ReducedTofCIF = NewType("ReducedTofCIF", cif.CIF)
 """Reduced data in time-of-flight, ready to be saved to a CIF file."""
 
 del sc, sciline, NewType, TypeVar
