@@ -20,10 +20,6 @@ class SamplePosition(sciline.Scope[RunType, sc.Variable], sc.Variable):
     """The position of the sample relative to the source(?)."""
 
 
-class IncidentBeam(sciline.Scope[RunType, sc.Variable], sc.Variable):
-    """Incident beam vector."""
-
-
 class SpecularReflectionCoordTransformGraph(sciline.Scope[RunType, dict], dict):
     """Coordinate transformation graph for specular reflection"""
 
@@ -37,40 +33,26 @@ class LoadedNeXusDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
     """NXdetector loaded from file"""
 
 
-class ReducibleDetectorData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Event time data after correcting tof, ready for reduction"""
+class ReducibleData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Event data with common coordinates added"""
 
 
-class DataWithScatteringCoordinates(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Event data with added coordinates such as incident angle (theta),
-    wavelength, and momentum transfer (Q)"""
-
-
-class MaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Event data that has been masked in wavelength and logical detector coordinates"""
-
-
-class FootprintCorrectedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Event data with weights corrected for the footprint of the beam
-    on the sample for the incidence angle of the event."""
-
-
-ReferenceIntensity = NewType("ReferenceIntensity", sc.DataArray)
-"""Intensity distribution of the reference measurement in (z, wavelength)"""
-
-IdealReferenceIntensity = NewType("IdealReferenceIntensity", sc.DataArray)
+ReducedReference = NewType("ReducedReference", sc.DataArray)
 """Intensity distribution on the detector for a sample with :math`R(Q) = 1`"""
 
-NormalizationFactor = NewType("NormalizationFactor", sc.DataArray)
-""":code`IdealReferenceIntensity` with added coordinate "sample"-Q"""
+Reference = NewType("Reference", sc.DataArray)
+""":code`ReducedReference` histogrammed in sample ``Q``"""
+
+Sample = NewType("Sample", sc.DataArray)
+""":code`Sample` measurement prepared for reduction"""
 
 ReflectivityOverQ = NewType("ReflectivityOverQ", sc.DataArray)
 """Intensity histogram over momentum transfer
 normalized by the calibrated reference measurement."""
 
-ReflectivityData = NewType("ReflectivityData", sc.DataArray)
-"""Reflectivity "per event". Event data weighted by the expected
-intensity at the coordinates of the event."""
+ReflectivityOverZW = NewType("ReflectivityOverZW", sc.DataArray)
+"""Intensity histogram over z- and wavelength- grid.
+normalized by the calibrated reference measurement."""
 
 QResolution = NewType("QResolution", sc.Variable)
 """Resolution term for the momentum transfer for each bin of QBins."""
@@ -109,11 +91,6 @@ class DetectorSpatialResolution(sciline.Scope[RunType, sc.Variable], sc.Variable
 class SampleSize(sciline.Scope[RunType, sc.Variable], sc.Variable):
     # TODO is this radius or total length?
     """Size of the sample. If None it is assumed to be the same as the reference."""
-
-
-Gravity = NewType("Gravity", sc.Variable)
-"""This parameter determines if gravity is taken into account
-when computing the scattering angle and momentum transfer."""
 
 
 YIndexLimits = NewType("YIndexLimits", tuple[sc.Variable, sc.Variable])

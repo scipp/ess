@@ -35,25 +35,6 @@ def fwhm_to_std(fwhm: sc.Variable) -> sc.Variable:
     return fwhm / _STD_TO_FWHM
 
 
-def std_to_fwhm(std: sc.Variable) -> sc.Variable:
-    """
-    Convert from standard deviation to full-width half maximum.
-
-    Parameters
-    ----------
-    std:
-        Standard deviation.
-
-    Returns
-    -------
-    :
-        Full-width half maximum.
-    """
-    # Enables the conversion from full width half
-    # maximum to standard deviation
-    return std * _STD_TO_FWHM
-
-
 def linlogspace(
     dim: str,
     edges: list | np.ndarray,
@@ -168,9 +149,14 @@ def _create_qgrid_where_overlapping(qgrids):
     return sc.concat(pieces, dim='Q')
 
 
+def _same_dtype(arrays):
+    return [arr.to(dtype='float64') for arr in arrays]
+
+
 def _interpolate_on_qgrid(curves, grid):
     return sc.concat(
-        [sc.lookup(c, grid.dim)[sc.midpoints(grid)] for c in curves], dim='curves'
+        _same_dtype([sc.lookup(c, grid.dim)[sc.midpoints(grid)] for c in curves]),
+        dim='curves',
     )
 
 
@@ -347,8 +333,5 @@ def orso_datasets_from_measurements(
             wf[name] = value
         wf[ReflectivityOverQ] = scale_factor * curve
         dataset = wf.compute(orso.OrsoIofQDataset)
-        dataset.info.reduction.corrections = orso.find_corrections(
-            wf.get(orso.OrsoIofQDataset)
-        )
         datasets.append(dataset)
     return datasets

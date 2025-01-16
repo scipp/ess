@@ -13,7 +13,8 @@ from .types import ThetaBins
 def theta_grid(
     nu: DetectorRotation[RunType], mu: SampleRotation[RunType]
 ) -> ThetaBins[RunType]:
-    """Special grid used to create intensity maps over (theta, wavelength).
+    """Special grid used to create intensity maps over
+    (theta, wavelength).
     The grid avoids aliasing artifacts that occur if the
     theta bins overlap the blade edges."""
     # angular offset of two blades:
@@ -30,7 +31,10 @@ def theta_grid(
     blade_grid = blade_grid - 0.2 * stepWidth
 
     delta_grid = sc.array(
-        dims=["theta"], values=[], unit=blade_grid.unit, dtype=blade_grid.dtype
+        dims=["theta"],
+        values=[],
+        unit=blade_grid.unit,
+        dtype=blade_grid.dtype,
     )
     # loop over all blades but one:
     for _ in range(Detector.nBlades.value - 1):
@@ -53,10 +57,6 @@ def theta_grid(
         ).to(unit="rad")
         + 0.5 * Detector.nBlades * bladeAngle.to(unit="rad")
     )
-    # TODO: If theta filtering is added, use it here
-    # some filtering
-    # theta_grid = theta_grid[theta_grid>=thetaMin]
-    # theta_grid = theta_grid[theta_grid<=thetaMax]
     return grid
 
 

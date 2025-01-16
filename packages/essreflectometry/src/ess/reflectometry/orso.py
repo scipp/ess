@@ -6,31 +6,21 @@ The Sciline providers and types in this module largely ignore the metadata
 of reference runs and only use the metadata of the sample run.
 """
 
-import graphlib
 import os
 import platform
 from datetime import datetime, timezone
-from typing import Any, NewType
+from typing import NewType
 
 from dateutil.parser import parse as parse_datetime
 from orsopy.fileio import base as orso_base
 from orsopy.fileio import data_source, orso, reduction
 
 from .load import load_nx
-from .supermirror import SupermirrorReflectivityCorrection
 from .types import (
     Filename,
-    FootprintCorrectedData,
-    ReducibleDetectorData,
     ReferenceRun,
     SampleRun,
 )
-
-try:
-    from sciline.task_graph import TaskGraph
-except ModuleNotFoundError:
-    TaskGraph = Any
-
 
 OrsoCreator = NewType("OrsoCreator", orso_base.Person)
 """ORSO creator, that is, the person who processed the data."""
@@ -179,46 +169,6 @@ def build_orso_data_source(
             measurement=measurement,
         )
     )
-
-
-_CORRECTIONS_BY_GRAPH_KEY = {
-    ReducibleDetectorData[SampleRun]: "chopper ToF correction",
-    FootprintCorrectedData[SampleRun]: "footprint correction",
-    SupermirrorReflectivityCorrection: "supermirror calibration",
-}
-
-
-def find_corrections(task_graph: TaskGraph) -> list[str]:
-    """Determine the list of corrections for ORSO from a task graph.
-
-    Checks for known keys in the graph that correspond to corrections
-    that should be tracked in an ORSO output dataset.
-    Bear in mind that this exclusively checks the types used as keys in a task graph,
-    it cannot detect other corrections that are performed within providers
-    or outside the graph.
-
-    Parameters
-    ----------
-    :
-        task_graph:
-            The task graph used to produce output data.
-
-    Returns
-    -------
-    :
-        List of corrections in the order they are applied in.
-    """
-    toposort = graphlib.TopologicalSorter(
-        {
-            key: tuple(provider.arg_spec.keys())
-            for key, provider in task_graph._graph.items()
-        }
-    )
-    return [
-        c
-        for key in toposort.static_order()
-        if (c := _CORRECTIONS_BY_GRAPH_KEY.get(key, None)) is not None
-    ]
 
 
 providers = (

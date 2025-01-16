@@ -4,21 +4,23 @@ import scipp as sc
 
 from ..reflectometry.load import load_nx
 from ..reflectometry.types import (
+    BeamSize,
     DetectorRotation,
     Filename,
     LoadedNeXusDetector,
     NeXusDetectorName,
     RawDetectorData,
-    ReducibleDetectorData,
     RunType,
     SampleRotation,
+    SampleSize,
 )
-from .geometry import Detector, pixel_coordinate_in_lab_frame
+from .geometry import pixel_coordinates_in_detector_system
 from .types import (
-    Chopper1Position,
-    Chopper2Position,
+    AngleCenterOfIncomingToHorizon,
+    ChopperDistance,
     ChopperFrequency,
     ChopperPhase,
+    ChopperSeparation,
     RawChopper,
 )
 
@@ -30,98 +32,55 @@ def load_detector(
 
 
 def load_events(
-    detector: LoadedNeXusDetector[RunType], detector_rotation: DetectorRotation[RunType]
+    detector: LoadedNeXusDetector[RunType],
+    detector_rotation: DetectorRotation[RunType],
+    sample_rotation: SampleRotation[RunType],
+    chopper_phase: ChopperPhase[RunType],
+    chopper_frequency: ChopperFrequency[RunType],
+    chopper_distance: ChopperDistance[RunType],
+    chopper_separation: ChopperSeparation[RunType],
+    sample_size: SampleSize[RunType],
+    beam_size: BeamSize[RunType],
+    angle_to_center_of_beam: AngleCenterOfIncomingToHorizon[RunType],
 ) -> RawDetectorData[RunType]:
-    detector_numbers = sc.arange(
-        "event_id",
-        start=1,
-        stop=(Detector.nBlades * Detector.nWires * Detector.nStripes).value + 1,
-        unit=None,
-        dtype="int32",
-    )
+    detector_numbers = pixel_coordinates_in_detector_system()
     data = (
-        detector['data']
+        detector["data"]
         .bins.constituents["data"]
-        .group(detector_numbers)
-        .fold(
-            "event_id",
-            sizes={
-                "blade": Detector.nBlades,
-                "wire": Detector.nWires,
-                "stripe": Detector.nStripes,
-            },
-        )
+        .group(detector_numbers.data.flatten(to='event_id'))
+        .fold("event_id", sizes=detector_numbers.sizes)
     )
-    # Recent versions of scippnexus no longer add variances for events by default, so
-    # we add them here if they are missing.
+    data.coords.update(detector_numbers.coords)
+
     if data.bins.constituents["data"].data.variances is None:
         data.bins.constituents["data"].data.variances = data.bins.constituents[
             "data"
         ].data.values
 
-    pixel_inds = sc.array(dims=data.dims, values=data.coords["event_id"].values - 1)
-    position, angle_from_center_of_beam = pixel_coordinate_in_lab_frame(
-        pixelID=pixel_inds, nu=detector_rotation
-    )
-    data.coords["position"] = position.to(unit="m", copy=False)
-    data.coords["angle_from_center_of_beam"] = angle_from_center_of_beam
+    data.coords["sample_rotation"] = sample_rotation.to(unit='rad')
+    data.coords["detector_rotation"] = detector_rotation.to(unit='rad')
+    data.coords["chopper_phase"] = chopper_phase
+    data.coords["chopper_frequency"] = chopper_frequency
+    data.coords["chopper_separation"] = chopper_separation
+    data.coords["chopper_distance"] = chopper_distance
+    data.coords["sample_size"] = sample_size
+    data.coords["beam_size"] = beam_size
+    data.coords["angle_to_center_of_beam"] = angle_to_center_of_beam.to(unit='rad')
     return RawDetectorData[RunType](data)
-
-
-def compute_tof(
-    data: RawDetectorData[RunType],
-    phase: ChopperPhase[RunType],
-    frequency: ChopperFrequency[RunType],
-) -> ReducibleDetectorData[RunType]:
-    data.bins.coords["tof"] = data.bins.coords.pop("event_time_offset").to(
-        unit="ns", dtype="float64", copy=False
-    )
-
-    tof_unit = data.bins.coords["tof"].bins.unit
-    tau = sc.to_unit(1 / (2 * frequency), tof_unit)
-    tof_offset = tau * phase / (180.0 * sc.units.deg)
-
-    event_time_offset = data.bins.coords["tof"]
-
-    minimum = -tof_offset
-    frame_bound = tau - tof_offset
-    maximum = 2 * tau - tof_offset
-
-    offset = sc.where(
-        (minimum < event_time_offset) & (event_time_offset < frame_bound),
-        tof_offset,
-        sc.where(
-            (frame_bound < event_time_offset) & (event_time_offset < maximum),
-            tof_offset - tau,
-            0.0 * tof_unit,
-        ),
-    )
-    data.bins.masks["outside_of_pulse"] = (minimum > event_time_offset) | (
-        event_time_offset > maximum
-    )
-    data.bins.coords["tof"] += offset
-    data.bins.coords["tof"] -= (
-        data.coords["angle_from_center_of_beam"].to(unit="deg") / (180.0 * sc.units.deg)
-    ) * tau
-    return ReducibleDetectorData[RunType](data)
 
 
 def amor_chopper(f: Filename[RunType]) -> RawChopper[RunType]:
     return next(load_nx(f, "NXentry/NXinstrument/NXdisk_chopper"))
 
 
-def load_amor_chopper_1_position(ch: RawChopper[RunType]) -> Chopper1Position[RunType]:
+def load_amor_chopper_distance(ch: RawChopper[RunType]) -> ChopperDistance[RunType]:
     # We know the value has unit 'mm'
-    return sc.vector([0, 0, ch["distance"] - ch["pair_separation"] / 2], unit="mm").to(
-        unit="m"
-    )
+    return sc.scalar(ch["distance"], unit="mm")
 
 
-def load_amor_chopper_2_position(ch: RawChopper[RunType]) -> Chopper2Position[RunType]:
+def load_amor_chopper_separation(ch: RawChopper[RunType]) -> ChopperSeparation[RunType]:
     # We know the value has unit 'mm'
-    return sc.vector([0, 0, ch["distance"] + ch["pair_separation"] / 2], unit="mm").to(
-        unit="m"
-    )
+    return sc.scalar(ch["pair_separation"], unit="mm")
 
 
 def load_amor_ch_phase(ch: RawChopper[RunType]) -> ChopperPhase[RunType]:
@@ -154,15 +113,28 @@ def load_amor_detector_rotation(fp: Filename[RunType]) -> DetectorRotation[RunTy
     return sc.scalar(nu['value'].data['dim_1', 0]['time', 0].value, unit='deg')
 
 
+def load_amor_angle_from_horizon_to_center_of_incident_beam(
+    fp: Filename[RunType],
+) -> AngleCenterOfIncomingToHorizon[RunType]:
+    (kad,) = load_nx(fp, "NXentry/NXinstrument/master_parameters/kad")
+    natural_incident_angle = sc.scalar(0.245, unit='deg')
+    # This value should not change during the run.
+    # If it does we assume the change was too small to be relevant.
+    # Therefore only the first value is read from the log.
+    return natural_incident_angle + sc.scalar(
+        kad['value'].data['dim_1', 0]['time', 0].value, unit='deg'
+    )
+
+
 providers = (
     load_detector,
     load_events,
-    compute_tof,
     load_amor_ch_frequency,
     load_amor_ch_phase,
-    load_amor_chopper_1_position,
-    load_amor_chopper_2_position,
+    load_amor_chopper_distance,
+    load_amor_chopper_separation,
     load_amor_sample_rotation,
     load_amor_detector_rotation,
+    load_amor_angle_from_horizon_to_center_of_incident_beam,
     amor_chopper,
 )

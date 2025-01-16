@@ -26,49 +26,47 @@ class Detector:
     distance = sc.scalar(4000, unit="mm")
 
 
-def _pixel_coordinate_in_detector_system(
-    pixelID: sc.Variable,
-) -> tuple[sc.Variable, sc.Variable]:
+def pixel_coordinates_in_detector_system() -> tuple[sc.Variable, sc.Variable]:
     """Determines beam travel distance inside the detector
     and the beam divergence angle from the detector number."""
-    (bladeNr, bPixel) = (
-        pixelID // (Detector.nWires * Detector.nStripes),
-        pixelID % (Detector.nWires * Detector.nStripes),
+    pixels = sc.DataArray(
+        sc.arange(
+            'row',
+            1,
+            (
+                Detector.nBlades * Detector.nWires * Detector.nStripes + sc.scalar(1)
+            ).values,
+            unit=None,
+        ).fold(
+            'row',
+            sizes={
+                'blade': Detector.nBlades,
+                'wire': Detector.nWires,
+                'stripe': Detector.nStripes,
+            },
+        ),
+        coords={
+            'blade': sc.arange('blade', sc.scalar(0), Detector.nBlades),
+            'wire': sc.arange('wire', sc.scalar(0), Detector.nWires),
+            'stripe': sc.arange('stripe', sc.scalar(0), Detector.nStripes),
+        },
     )
-    # z index on blade, y index on detector
-    bZi = bPixel // Detector.nStripes
     # x position in detector
     # TODO: check with Jochen if this is correct, as old code was:
     # detX = bZi * Detector.dX
-    distance_inside_detector = (Detector.nWires - 1 - bZi) * Detector.dX
-
-    bladeAngle = (2.0 * sc.asin(0.5 * Detector.bladeZ / Detector.distance)).to(
-        unit="degree"
+    pixels.coords['distance_in_detector'] = (
+        Detector.nWires - 1 - pixels.coords['wire']
+    ) * Detector.dX
+    bladeAngle = 2.0 * sc.asin(0.5 * Detector.bladeZ / Detector.distance)
+    pixels.coords['pixel_divergence_angle'] = (
+        (Detector.nBlades / 2.0 - pixels.coords['blade']) * bladeAngle
+        - sc.atan(
+            pixels.coords['wire']
+            * Detector.dZ
+            / (Detector.distance + pixels.coords['wire'] * Detector.dX)
+        )
+    ).to(unit='rad')
+    pixels.coords['z_index'] = (
+        Detector.nWires * pixels.coords['blade'] + pixels.coords['wire']
     )
-    beam_divergence_angle = (Detector.nBlades / 2.0 - bladeNr) * bladeAngle - (
-        sc.atan(bZi * Detector.dZ / (Detector.distance + bZi * Detector.dX))
-    ).to(unit="degree")
-    return distance_inside_detector, beam_divergence_angle
-
-
-def pixel_coordinate_in_lab_frame(
-    pixelID: sc.Variable, nu: sc.Variable
-) -> tuple[sc.Variable, sc.Variable]:
-    """Computes spatial coordinates (lab reference frame), and the beam divergence
-    angle for the detector pixel associated with `pixelID`"""
-    distance_in_detector, divergence_angle = _pixel_coordinate_in_detector_system(
-        pixelID
-    )
-
-    angle_to_horizon = (nu + divergence_angle).to(unit="rad")
-    distance_to_pixel = distance_in_detector + Detector.distance
-
-    global_Y = distance_to_pixel * sc.sin(angle_to_horizon)
-    global_Z = distance_to_pixel * sc.cos(angle_to_horizon)
-    # TODO: the values for global_X are right now just an estimate. We should check with
-    # the instrument scientist what the actual values are. The X positions are ignored
-    # in the coordinate transformation, so this is not critical.
-    global_X = sc.zeros_like(global_Z) + sc.linspace(
-        "stripe", -0.1, 0.1, global_Z.sizes["stripe"], unit="m"
-    ).to(unit=global_Z.unit)
-    return sc.spatial.as_vectors(global_X, global_Y, global_Z), divergence_angle
+    return pixels

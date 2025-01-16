@@ -4,20 +4,19 @@
 
 import importlib.metadata
 
-from . import calibrations, conversions, corrections, normalize, orso
-from .load import load_reference, save_reference
-
 try:
     __version__ = importlib.metadata.version("essreflectometry")
 except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
+
+from . import conversions, orso, normalization
+from .load import load_reference, save_reference
+
 providers = (
     *conversions.providers,
-    *corrections.providers,
-    *calibrations.providers,
-    *normalize.providers,
     *orso.providers,
+    *normalization.providers,
 )
 """
 List of providers for setting up a Sciline pipeline.

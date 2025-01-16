@@ -5,7 +5,7 @@ import sciline
 import scipp as sc
 import scippnexus as snx
 
-from .types import IdealReferenceIntensity, ReferenceFilePath
+from .types import ReducedReference, ReferenceFilePath
 
 
 def load_nx(group: snx.Group | str, *paths: str):
@@ -38,9 +38,9 @@ def _unique_child_group(
 
 
 def save_reference(pl: sciline.Pipeline, fname: str):
-    pl.compute(IdealReferenceIntensity).save_hdf5(fname)
+    pl.compute(ReducedReference).save_hdf5(fname)
     return fname
 
 
-def load_reference(fname: ReferenceFilePath) -> IdealReferenceIntensity:
+def load_reference(fname: ReferenceFilePath) -> ReducedReference:
     return sc.io.hdf5.load_hdf5(fname)

@@ -6,8 +6,8 @@ import scipp as sc
 
 from ess.reflectometry.types import (
     QBins,
-    ReflectivityData,
     ReflectivityOverQ,
+    ReflectivityOverZW,
     SampleRun,
 )
 
@@ -74,16 +74,18 @@ def wavelength_theta_figure(
     **kwargs,
 ):
     '''
-    Creates a figure displaying a histogram over :math:`\\theta` and :math:`\\lambda`.
+    Creates a figure displaying a histogram over :math:`\\theta`
+    and :math:`\\lambda`.
 
     The input can either be a single data array containing the data to display, or
     a sequence of data arrays.
 
-    The inputs must either have coordinates called "theta" and "wavelength",
-    or they must be histograms with dimensions "theta" and "wavelength".
+    The inputs must either have coordinates called "theta"
+    and "wavelength", or they must be histograms with dimensions
+    "theta" and "wavelength".
 
-    If :code:`wavelength_bins` or :code:`theta_bins` are provided, they are used
-    to construct the histogram. If not provided, the function uses the
+    If :code:`wavelength_bins` or :code:`theta_bins` are provided,
+    they are used to construct the histogram. If not provided, the function uses the
     bin edges that already exist on the data arrays.
 
     If :code:`q_edges_to_display` is provided, lines will be drawn in the figure
@@ -163,7 +165,8 @@ def q_theta_figure(
     **kwargs,
 ):
     '''
-    Creates a figure displaying a histogram over :math:`\\theta` and :math:`Q`.
+    Creates a figure displaying a histogram over :math:`\\theta`
+    and :math:`Q`.
 
     The input can either be a single data array containing the data to display, or
     a sequence of data arrays.
@@ -191,7 +194,10 @@ def q_theta_figure(
 
     if isinstance(da, sc.DataArray):
         return q_theta_figure(
-            (da,), q_bins=(q_bins,), theta_bins=(theta_bins,), **kwargs
+            (da,),
+            q_bins=(q_bins,),
+            theta_bins=(theta_bins,),
+            **kwargs,
         )
 
     q_bins, theta_bins = (
@@ -273,14 +279,14 @@ def wavelength_z_figure(
 
 
 def wavelength_theta_diagnostic_figure(
-    da: ReflectivityData,
+    da: ReflectivityOverZW,
     thbins: ThetaBins[SampleRun],
 ) -> WavelengthThetaFigure:
     return wavelength_theta_figure(da, theta_bins=thbins)
 
 
 def q_theta_diagnostic_figure(
-    da: ReflectivityData,
+    da: ReflectivityOverZW,
     thbins: ThetaBins[SampleRun],
     qbins: QBins,
 ) -> QThetaFigure:
@@ -288,7 +294,7 @@ def q_theta_diagnostic_figure(
 
 
 def wavelength_z_diagnostic_figure(
-    da: ReflectivityData,
+    da: ReflectivityOverZW,
 ) -> WavelengthZIndexFigure:
     return wavelength_z_figure(da)
 
