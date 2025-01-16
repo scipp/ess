@@ -7,7 +7,6 @@ import scipp as sc
 import scippneutron as scn
 import scippnexus as snx
 
-
 from ess.powder.types import (
     CalibratedDetector,
     CalibratedMonitor,
@@ -27,6 +26,7 @@ from ess.powder.types import (
     SampleRun,
     VanadiumRun,
 )
+from ess.reduce import time_of_flight
 from ess.reduce.nexus.types import CalibratedBeamline
 from ess.reduce.nexus.workflow import GenericNeXusWorkflow
 
@@ -321,4 +321,8 @@ def LoadGeant4Workflow() -> sciline.Pipeline:
     wf.insert(dummy_assemble_monitor_data)
     wf.insert(dummy_source_position)
     wf.insert(dummy_sample_position)
+    for provider in time_of_flight.standard_providers():
+        wf.insert(provider)
+    for key, param in time_of_flight.params().items():
+        wf[key] = param
     return wf

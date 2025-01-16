@@ -16,8 +16,8 @@ import scipp as sc
 from scippneutron.io import cif
 
 from ess.reduce.nexus import types as reduce_t
+from ess.reduce.time_of_flight import TofData as _TofData
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
-from ess.reduce.unwrap import TofData as _TofData
 
 # 1 TypeVars used to parametrize the generic parts of the workflow
 

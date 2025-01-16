@@ -7,6 +7,8 @@ Coordinate transformations for powder diffraction.
 import scipp as sc
 import scippneutron as scn
 
+from ess.reduce import time_of_flight
+
 from .calibration import OutputCalibrationData
 from .correction import merge_calibration
 from .logging import get_logger
@@ -239,6 +241,23 @@ def convert_monitor_do_wavelength(
     return WavelengthMonitor[RunType, MonitorType](
         monitor.transform_coords("wavelength", graph=graph, keep_intermediate=False)
     )
+
+
+def compute_detector_time_of_flight(
+    choppers: time_of_flight.Choppers,
+    detector_data: DetectorData[RunType],
+    distance_resolution: time_of_flight.DistanceResolution,
+    number_of_neutrons: time_of_flight.NumberOfNeutrons,
+    lookup_table_variance_threshold: time_of_flight.LookupTableVarianceThreshold,
+) -> TofData[RunType]:
+    wf = time_of_flight.TofWorkflow()
+    wf[time_of_flight.Choppers] = choppers
+    wf[DetectorData[RunType]] = detector_data
+    wf[time_of_flight.DistanceResolution] = distance_resolution
+    wf[time_of_flight.NumberOfNeutrons] = number_of_neutrons
+    wf[time_of_flight.LookupTableVarianceThreshold] = lookup_table_variance_threshold
+
+    return TofData[RunType](wf.compute(time_of_flight.TofData[RunType]))
 
 
 providers = (
