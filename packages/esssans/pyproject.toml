@@ -49,6 +49,7 @@ dynamic = ["version"]
 test = [
     "pytest",
     "pooch",
+    "scipy>=1.15.0",
 ]
 
 [project.urls]
