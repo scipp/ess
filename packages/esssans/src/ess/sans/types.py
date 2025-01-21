@@ -285,8 +285,5 @@ class CleanMonitor(
 
 # 4  Metadata
 
-RunTitle = NewType('RunTitle', str)
-"""Title of the run."""
-
-RunNumber = NewType('RunNumber', int)
-"""Run number."""
+Beamline = reduce_t.Beamline
+Measurement = reduce_t.Measurement
