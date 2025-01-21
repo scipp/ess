@@ -38,7 +38,7 @@ h5py==3.12.1
     # via
     #   scippneutron
     #   scippnexus
-importlib-metadata==8.5.0
+importlib-metadata==8.6.1
     # via dask
 ipydatawidgets==4.3.5
     # via pythreejs
@@ -80,7 +80,7 @@ plopp @ git+https://github.com/scipp/plopp@main
     # via
     #   -r nightly.in
     #   scippneutron
-prompt-toolkit==3.0.48
+prompt-toolkit==3.0.50
     # via ipython
 ptyprocess==0.7.0
     # via pexpect
