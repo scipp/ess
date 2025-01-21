@@ -32,7 +32,7 @@ requires-python = ">=3.10"
 dependencies = [
   "dask",
   "graphviz",
-  "essreduce>=24.10.2",
+  "essreduce>=24.10.2, <24.11.0",
   "numpy",
   "pandas",
   "plopp",
@@ -49,6 +49,7 @@ dynamic = ["version"]
 test = [
     "pytest",
     "pooch",
+    "scipy>=1.15.0",
 ]
 
 [project.urls]
