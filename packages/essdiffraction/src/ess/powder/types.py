@@ -14,6 +14,7 @@ from typing import Any, NewType, TypeVar
 import sciline
 import scipp as sc
 from scippneutron.io import cif
+from scippneutron.metadata import Person, Software
 
 from ess.reduce.nexus import types as reduce_t
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
@@ -180,8 +181,16 @@ TwoThetaMask = NewType("TwoThetaMask", Callable | None)
 WavelengthMask = NewType("WavelengthMask", Callable | None)
 """WavelengthMask is a callable that returns a mask for a given WavelengthData."""
 
+Beamline = reduce_t.Beamline
+"""Beamline metadata."""
 
-CIFAuthors = NewType('CIFAuthors', list[cif.Author])
+ReducerSoftwares = NewType('ReducerSoftware', list[Software])
+"""Pieces of software used to reduce the data."""
+
+Source = reduce_t.Source
+"""Neutron source metadata."""
+
+CIFAuthors = NewType('CIFAuthors', list[Person])
 """List of authors to save to output CIF files."""
 
 ReducedTofCIF = NewType('ReducedTofCIF', cif.CIF)
