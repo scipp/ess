@@ -140,7 +140,10 @@ def with_background_runs(
 
 
 parameter_mappers[PixelMaskFilename] = with_pixel_mask_filenames
-parameter_mappers[NeXusDetectorName] = with_banks
+# TODO: for now, we leave the mapping over detector banks out, because we do not have a
+# method to merge the I(Q) of different banks, and we thus cannot compute a single
+# result from the workflow. So only a single detector bank can be processed at a time.
+# parameter_mappers[NeXusDetectorName] = with_banks
 parameter_mappers[Filename[SampleRun]] = with_sample_runs
 parameter_mappers[Filename[BackgroundRun]] = with_background_runs
 

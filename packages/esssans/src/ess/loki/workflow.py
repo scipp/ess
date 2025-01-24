@@ -14,23 +14,31 @@ from ess.sans.io import read_xml_detector_masking
 from ess.sans.parameters import typical_outputs
 
 from ..sans.types import (
+    BackgroundRun,
+    BeamCenter,
     DetectorBankSizes,
     DetectorData,
     DetectorPixelShape,
     DirectBeam,
     DirectBeamFilename,
+    EmptyBeamRun,
+    Filename,
     Incident,
     MonitorData,
     MonitorType,
     NeXusComponent,
+    NeXusDetectorName,
     NeXusMonitorName,
     NonBackgroundWavelengthRange,
+    PixelMaskFilename,
     PixelShapePath,
     RunType,
+    SampleRun,
     ScatteringRunType,
     TofData,
     TofMonitor,
     Transmission,
+    TransmissionRun,
 )
 
 DETECTOR_BANK_SIZES = {
@@ -105,7 +113,7 @@ def LokiAtLarmorWorkflow() -> sciline.Pipeline:
     for key, param in default_parameters().items():
         workflow[key] = param
     workflow.insert(read_xml_detector_masking)
-    workflow[sans.types.NeXusDetectorName] = 'larmor_detector'
+    workflow[NeXusDetectorName] = 'larmor_detector'
     workflow.typical_outputs = typical_outputs
     return workflow
 
@@ -115,25 +123,14 @@ def LokiAtLarmorTutorialWorkflow() -> sciline.Pipeline:
     from ess.loki import data
 
     workflow = LokiAtLarmorWorkflow()
-    # TODO This does not work with multiple
-    workflow[sans.types.PixelMaskFilename] = data.loki_tutorial_mask_filenames()[0]
 
-    workflow[sans.types.Filename[sans.types.SampleRun]] = (
-        data.loki_tutorial_sample_run_60339()
-    )
-    workflow[sans.types.Filename[sans.types.BackgroundRun]] = (
-        data.loki_tutorial_background_run_60393()
-    )
-    workflow[sans.types.Filename[sans.types.TransmissionRun[sans.types.SampleRun]]] = (
+    workflow[PixelMaskFilename] = data.loki_tutorial_mask_filenames()
+    workflow[Filename[SampleRun]] = data.loki_tutorial_sample_run_60339()
+    workflow[Filename[BackgroundRun]] = data.loki_tutorial_background_run_60393()
+    workflow[Filename[TransmissionRun[SampleRun]]] = (
         data.loki_tutorial_sample_transmission_run()
     )
-    workflow[
-        sans.types.Filename[sans.types.TransmissionRun[sans.types.BackgroundRun]]
-    ] = data.loki_tutorial_run_60392()
-    workflow[sans.types.Filename[sans.types.EmptyBeamRun]] = (
-        data.loki_tutorial_run_60392()
-    )
-    workflow[sans.types.BeamCenter] = sc.vector(
-        value=[-0.02914868, -0.01816138, 0.0], unit='m'
-    )
+    workflow[Filename[TransmissionRun[BackgroundRun]]] = data.loki_tutorial_run_60392()
+    workflow[Filename[EmptyBeamRun]] = data.loki_tutorial_run_60392()
+    workflow[BeamCenter] = sc.vector(value=[-0.02914868, -0.01816138, 0.0], unit='m')
     return workflow
