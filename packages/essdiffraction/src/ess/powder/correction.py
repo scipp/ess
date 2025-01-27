@@ -55,7 +55,7 @@ def normalize_by_monitor_histogram(
     norm = broadcast_uncertainties(
         monitor, prototype=detector, mode=uncertainty_broadcast_mode
     )
-    return detector.bins / sc.lookup(norm, dim="wavelength")
+    return NormalizedRunData[RunType](detector.bins / sc.lookup(norm, dim="wavelength"))
 
 
 def normalize_by_monitor_integrated(

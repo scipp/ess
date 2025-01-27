@@ -15,6 +15,7 @@ from .logging import get_logger
 from .types import (
     CalibrationData,
     DataWithScatteringCoordinates,
+    DetectorData,
     DspacingData,
     ElasticCoordTransformGraph,
     FilteredData,
@@ -24,6 +25,9 @@ from .types import (
     MonitorData,
     MonitorType,
     RunType,
+    TofData,
+    TofMonitorData,
+    TofWorkflow,
     WavelengthMonitor,
 )
 
@@ -231,8 +235,27 @@ def convert_reduced_to_tof(
     )
 
 
-def convert_monitor_do_wavelength(
-    monitor: MonitorData[RunType, MonitorType],
+def compute_detector_time_of_flight(
+    detector_data: DetectorData[RunType], tof_workflow: TofWorkflow
+) -> TofData[RunType]:
+    wf = tof_workflow.pipeline.copy()
+    wf[time_of_flight.RawData] = detector_data
+    return TofData[RunType](wf.compute(time_of_flight.TofData))
+
+
+def compute_monitor_time_of_flight(
+    monitor: MonitorData[RunType, MonitorType], tof_workflow: TofWorkflow
+) -> TofMonitorData[RunType, MonitorType]:
+    wf = tof_workflow.pipeline.copy()
+    wf.insert(time_of_flight.resample_tof_data)
+    wf[time_of_flight.RawData] = monitor
+    out = wf.compute(time_of_flight.ResampledTofData)
+    out.masks['zero_counts'] = out.data == sc.scalar(0.0, unit=out.unit)
+    return TofMonitorData[RunType, MonitorType](out)
+
+
+def convert_monitor_to_wavelength(
+    monitor: TofMonitorData[RunType, MonitorType],
 ) -> WavelengthMonitor[RunType, MonitorType]:
     graph = {
         **scn.conversion.graph.beamline.beamline(scatter=False),
@@ -243,27 +266,12 @@ def convert_monitor_do_wavelength(
     )
 
 
-def compute_detector_time_of_flight(
-    choppers: time_of_flight.Choppers,
-    detector_data: DetectorData[RunType],
-    distance_resolution: time_of_flight.DistanceResolution,
-    number_of_neutrons: time_of_flight.NumberOfNeutrons,
-    lookup_table_variance_threshold: time_of_flight.LookupTableVarianceThreshold,
-) -> TofData[RunType]:
-    wf = time_of_flight.TofWorkflow()
-    wf[time_of_flight.Choppers] = choppers
-    wf[DetectorData[RunType]] = detector_data
-    wf[time_of_flight.DistanceResolution] = distance_resolution
-    wf[time_of_flight.NumberOfNeutrons] = number_of_neutrons
-    wf[time_of_flight.LookupTableVarianceThreshold] = lookup_table_variance_threshold
-
-    return TofData[RunType](wf.compute(time_of_flight.TofData[RunType]))
-
-
 providers = (
     powder_coordinate_transformation_graph,
     add_scattering_coordinates_from_positions,
     convert_to_dspacing,
     convert_reduced_to_tof,
-    convert_monitor_do_wavelength,
+    convert_monitor_to_wavelength,
+    compute_detector_time_of_flight,
+    compute_monitor_time_of_flight,
 )

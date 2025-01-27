@@ -8,6 +8,7 @@ pipeline.
 """
 
 from collections.abc import Callable
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, NewType, TypeVar
 
@@ -16,7 +17,6 @@ import scipp as sc
 from scippneutron.io import cif
 
 from ess.reduce.nexus import types as reduce_t
-from ess.reduce.time_of_flight import TofData as _TofData
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
 
 # 1 TypeVars used to parametrize the generic parts of the workflow
@@ -90,8 +90,9 @@ class AccumulatedProtonCharge(sciline.Scope[RunType, sc.Variable], sc.Variable):
 CalibrationData = NewType("CalibrationData", sc.Dataset | None)
 """Detector calibration data."""
 
-TofData = _TofData
-"""Data with time-of-flight coordinate."""
+
+class TofData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Data with time-of-flight coordinate."""
 
 
 class DataWithScatteringCoordinates(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
@@ -191,5 +192,19 @@ CIFAuthors = NewType("CIFAuthors", list[cif.Author])
 
 ReducedTofCIF = NewType("ReducedTofCIF", cif.CIF)
 """Reduced data in time-of-flight, ready to be saved to a CIF file."""
+
+
+@dataclass
+class TofWorkflow:
+    """Workflow for computing time-of-flight data."""
+
+    pipeline: sciline.Pipeline
+
+
+class TofMonitorData(
+    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
+):
+    """Monitor data with time-of-flight coordinate."""
+
 
 del sc, sciline, NewType, TypeVar
