@@ -238,14 +238,14 @@ def test_workflow_is_deterministic(workflow, tof_workflow):
     assert sc.identical(sc.values(result), sc.values(reference))
 
 
-def test_pipeline_can_compute_intermediate_results(workflow):
+def test_pipeline_can_compute_intermediate_results(workflow, tof_workflow):
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    # workflow[TofWorkflow] = tof_workflow
+    workflow[TofWorkflow] = tof_workflow
     results = workflow.compute((NormalizedRunData[SampleRun], NeXusDetectorName))
     result = results[NormalizedRunData[SampleRun]]
 
     detector_name = results[NeXusDetectorName]
-    expected_dims = {'segment', 'wire', 'counter', 'strip', 'module'}
+    expected_dims = {'segment', 'wire', 'counter', 'strip', 'module', 'event_time_zero'}
     if detector_name in ('endcap_backward', 'endcap_forward'):
         expected_dims.add('sumo')
 
