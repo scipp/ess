@@ -5,24 +5,31 @@ import scipp as sc
 from ..reflectometry.conversions import reflectometry_q
 from ..reflectometry.types import (
     BeamDivergenceLimits,
-    BeamSize,
-    RawDetectorData,
-    ReducibleData,
-    RunType,
+    CoordTransformationGraph,
     WavelengthBins,
     YIndexLimits,
     ZIndexLimits,
 )
 
 
-def theta(divergence_angle, sample_rotation, detector_rotation):
+def theta(detector_position_relative_sample, sample_rotation):
     '''
     Angle of reflection.
 
     Computes the angle between the scattering direction of
     the neutron and the sample surface.
+
+    Assumes that the sample is oriented almost parallel to yz plane
+    but rotated around the y-axis by :code:`sample_rotation`.
     '''
-    return divergence_angle + detector_rotation - sample_rotation
+    p = detector_position_relative_sample
+    # Normal of yz plane.
+    n = sc.vector([1.0, 0, 0], unit='dimensionless')
+    np = sc.norm(p)
+    pp = p - sc.dot(p, n) * n
+    npp = sc.norm(pp)
+    angle_to_zy_plane = sc.acos(sc.dot(p, pp) / (np * npp))
+    return angle_to_zy_plane - sample_rotation.to(unit='rad')
 
 
 def angle_of_divergence(
@@ -35,12 +42,7 @@ def angle_of_divergence(
     This is always in the interval [-0.75 deg, 0.75 deg],
     but the divergence of the incident beam can also be reduced.
     """
-    return (
-        theta
-        - sample_rotation
-        - angle_to_center_of_beam
-        - natural_incidence_angle.to(unit='rad')
-    )
+    return theta - sample_rotation - angle_to_center_of_beam.to(unit='rad')
 
 
 def wavelength(
@@ -52,31 +54,52 @@ def wavelength(
     pass
 
 
+def coordinate_transformation_graph() -> CoordTransformationGraph:
+    return {
+        "detector_position_relative_sample": (
+            lambda detector, sample: detector.position - sample.position
+        ),
+        "wavelength": wavelength,
+        "theta": theta,
+        "angle_of_divergence": angle_of_divergence,
+        "Q": reflectometry_q,
+        "L1": lambda source, sample: sample.position - source.position,
+        "L2": lambda detector_position_relative_sample: sc.norm(
+            detector_position_relative_sample
+        ),
+    }
+
+
+def add_coords(
+    da: sc.DataArray,
+    graph: dict,
+) -> sc.DataArray:
+    "Adds scattering coordinates to the raw detector data."
+    return da.transform_coords(
+        ("wavelength", "theta", "angle_of_divergence", "Q", "L1", "L2"),
+        graph,
+        rename_dims=False,
+        keep_intermediate=False,
+        keep_aliases=False,
+    )
+
+
 def _not_between(v, a, b):
     return (v < a) | (v > b)
 
 
-def add_common_coords_and_masks(
-    da: RawDetectorData[RunType],
+def add_masks(
+    da: sc.DataArray,
     ylim: YIndexLimits,
     zlims: ZIndexLimits,
     bdlim: BeamDivergenceLimits,
     wbins: WavelengthBins,
-    beam_size: BeamSize[RunType],
-) -> ReducibleData[RunType]:
-    "Adds coords and masks that are useful for both reference and sample measurements."
-    da = da.transform_coords(
-        ("wavelength", "theta", "angle_of_divergence", "Q"),
-        {
-            "divergence_angle": "pixel_divergence_angle",
-            "wavelength": wavelength,
-            "theta": theta,
-            "angle_of_divergence": angle_of_divergence,
-            "Q": reflectometry_q,
-        },
-        rename_dims=False,
-        keep_intermediate=False,
-    )
+):
+    """
+    Masks the data by ranges in the detector
+    coordinates ``z`` and ``y``, and by the divergence of the beam,
+    and by wavelength.
+    """
     da.masks["stripe_range"] = _not_between(da.coords["stripe"], *ylim)
     da.masks['z_range'] = _not_between(da.coords["z_index"], *zlims)
     da.bins.masks["divergence_too_large"] = _not_between(
@@ -89,9 +112,7 @@ def add_common_coords_and_masks(
         wbins[0],
         wbins[-1],
     )
-    # Correct for illumination of virtual source
-    da /= sc.sin(da.bins.coords['theta'])
     return da
 
 
-providers = (add_common_coords_and_masks,)
+providers = (coordinate_transformation_graph,)
