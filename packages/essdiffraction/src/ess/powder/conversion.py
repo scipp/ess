@@ -4,6 +4,7 @@
 Coordinate transformations for powder diffraction.
 """
 
+import numpy as np
 import scipp as sc
 import scippneutron as scn
 
@@ -27,6 +28,7 @@ from .types import (
     RunType,
     TofData,
     TofMonitorData,
+    TofMonitorDataZerosToNan,
     TofWorkflow,
     WavelengthMonitor,
 )
@@ -249,13 +251,25 @@ def compute_monitor_time_of_flight(
     wf = tof_workflow.pipeline.copy()
     wf.insert(time_of_flight.resample_tof_data)
     wf[time_of_flight.RawData] = monitor
-    out = wf.compute(time_of_flight.ResampledTofData)
-    out.masks['zero_counts'] = out.data == sc.scalar(0.0, unit=out.unit)
-    return TofMonitorData[RunType, MonitorType](out)
+    # out = wf.compute(time_of_flight.ResampledTofData)
+    # out.masks['zero_counts'] = out.data == sc.scalar(0.0, unit=out.unit)
+    return TofMonitorData[RunType, MonitorType](
+        wf.compute(time_of_flight.ResampledTofData)
+    )
+
+
+def set_monitor_zeros_to_nan(
+    monitor: TofMonitorData[RunType, MonitorType],
+) -> TofMonitorDataZerosToNan[RunType, MonitorType]:
+    unit = monitor.unit
+    monitor.data[monitor.data == sc.scalar(0.0, unit=unit)] = sc.full(
+        np.nan, sizes=monitor.sizes, unit=unit
+    )
+    return TofMonitorDataZerosToNan[RunType, MonitorType](monitor)
 
 
 def convert_monitor_to_wavelength(
-    monitor: TofMonitorData[RunType, MonitorType],
+    monitor: TofMonitorDataZerosToNan[RunType, MonitorType],
 ) -> WavelengthMonitor[RunType, MonitorType]:
     graph = {
         **scn.conversion.graph.beamline.beamline(scatter=False),
@@ -274,4 +288,5 @@ providers = (
     convert_monitor_to_wavelength,
     compute_detector_time_of_flight,
     compute_monitor_time_of_flight,
+    set_monitor_zeros_to_nan,
 )

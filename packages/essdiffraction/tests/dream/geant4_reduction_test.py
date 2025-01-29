@@ -62,8 +62,8 @@ params = {
     CalibrationFilename: None,
     UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
     DspacingBins: sc.linspace('dspacing', 0.0, 2.3434, 201, unit='angstrom'),
-    TofMask: lambda x: (x < sc.scalar(0.0, unit='ns'))
-    | (x > sc.scalar(86e6, unit='ns')),
+    TofMask: lambda x: (x < sc.scalar(0.0, unit='us'))
+    | (x > sc.scalar(86e3, unit='us')),
     Position[snx.NXsample, SampleRun]: sample,
     Position[snx.NXsample, VanadiumRun]: sample,
     Position[snx.NXsource, SampleRun]: source,
@@ -161,7 +161,7 @@ def dream_choppers():
 
 @pytest.fixture(scope="module")
 def tof_workflow():
-    tof_wf = time_of_flight.tof_workflow(
+    tof_wf = time_of_flight.TofWorkflow(
         simulated_neutrons=time_of_flight.simulate_beamline(
             choppers=dream_choppers(),
             neutrons=500_000,
@@ -170,9 +170,9 @@ def tof_workflow():
         ltotal_range=(sc.scalar(70.0, unit='m'), sc.scalar(80.0, unit='m')),
         error_threshold=1.0,
     )
-
     # Save expensive steps from being re-computed many times
-    return time_of_flight.cache_results(tof_wf)
+    tof_wf.cache_results()
+    return tof_wf
 
 
 @pytest.fixture(params=["mantle", "endcap_backward", "endcap_forward"])
@@ -195,36 +195,41 @@ def make_workflow(params_for_det, *, run_norm):
 
 def test_pipeline_can_compute_dspacing_result(workflow, tof_workflow):
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    workflow[TofWorkflow] = TofWorkflow(tof_workflow)
+    workflow[TofWorkflow] = tof_workflow
     result = workflow.compute(IofDspacing)
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
 
-def test_pipeline_can_compute_dspacing_result_with_hist_monitor_norm(params_for_det):
+def test_pipeline_can_compute_dspacing_result_with_hist_monitor_norm(
+    params_for_det, tof_workflow
+):
     workflow = make_workflow(
         params_for_det, run_norm=powder.RunNormalization.monitor_histogram
     )
     workflow = powder.with_pixel_mask_filenames(workflow, [])
+    workflow[TofWorkflow] = tof_workflow
     result = workflow.compute(IofDspacing)
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
 
 def test_pipeline_can_compute_dspacing_result_with_integrated_monitor_norm(
-    params_for_det,
+    params_for_det, tof_workflow
 ):
     workflow = make_workflow(
         params_for_det, run_norm=powder.RunNormalization.monitor_integrated
     )
     workflow = powder.with_pixel_mask_filenames(workflow, [])
+    workflow[TofWorkflow] = tof_workflow
     result = workflow.compute(IofDspacing)
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
 
-def test_workflow_is_deterministic(workflow):
+def test_workflow_is_deterministic(workflow, tof_workflow):
     workflow = powder.with_pixel_mask_filenames(workflow, [])
+    workflow[TofWorkflow] = tof_workflow
     # This is Sciline's default scheduler, but we want to be explicit here
     scheduler = sciline.scheduler.DaskScheduler()
     graph = workflow.get(IofTof, scheduler=scheduler)
@@ -235,6 +240,7 @@ def test_workflow_is_deterministic(workflow):
 
 def test_pipeline_can_compute_intermediate_results(workflow):
     workflow = powder.with_pixel_mask_filenames(workflow, [])
+    # workflow[TofWorkflow] = tof_workflow
     results = workflow.compute((NormalizedRunData[SampleRun], NeXusDetectorName))
     result = results[NormalizedRunData[SampleRun]]
 

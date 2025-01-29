@@ -17,6 +17,7 @@ import scipp as sc
 from scippneutron.io import cif
 
 from ess.reduce.nexus import types as reduce_t
+from ess.reduce.time_of_flight import TofWorkflow as _TofWorkflow
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
 
 # 1 TypeVars used to parametrize the generic parts of the workflow
@@ -194,17 +195,26 @@ ReducedTofCIF = NewType("ReducedTofCIF", cif.CIF)
 """Reduced data in time-of-flight, ready to be saved to a CIF file."""
 
 
-@dataclass
-class TofWorkflow:
-    """Workflow for computing time-of-flight data."""
+# @dataclass
+# class TofWorkflow:
+#     """Workflow for computing time-of-flight data."""
 
-    pipeline: sciline.Pipeline
+#     pipeline: sciline.Pipeline
+
+TofWorkflow = _TofWorkflow
+"""Workflow for computing time-of-flight data."""
 
 
 class TofMonitorData(
     sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
 ):
     """Monitor data with time-of-flight coordinate."""
+
+
+class TofMonitorDataZerosToNan(
+    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
+):
+    """Monitor data with time-of-flight coordinate and zero counts replaced by NaN."""
 
 
 del sc, sciline, NewType, TypeVar
