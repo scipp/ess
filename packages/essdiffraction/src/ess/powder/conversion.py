@@ -221,11 +221,11 @@ def convert_to_dspacing(
         out = data.transform_coords(["dspacing"], graph=graph, keep_intermediate=False)
     else:
         out = to_dspacing_with_calibration(data, calibration=calibration)
-        for key in ('wavelength', 'two_theta'):
+        for key in ("wavelength", "two_theta"):
             if key in out.coords.keys():
                 out.coords.set_aligned(key, False)
-    out.bins.coords.pop('tof', None)
-    out.bins.coords.pop('wavelength', None)
+    out.bins.coords.pop("tof", None)
+    out.bins.coords.pop("wavelength", None)
     return DspacingData[RunType](out)
 
 
@@ -251,8 +251,6 @@ def compute_monitor_time_of_flight(
     wf = tof_workflow.pipeline.copy()
     wf.insert(time_of_flight.resample_tof_data)
     wf[time_of_flight.RawData] = monitor
-    # out = wf.compute(time_of_flight.ResampledTofData)
-    # out.masks['zero_counts'] = out.data == sc.scalar(0.0, unit=out.unit)
     return TofMonitorData[RunType, MonitorType](
         wf.compute(time_of_flight.ResampledTofData)
     )
@@ -261,10 +259,8 @@ def compute_monitor_time_of_flight(
 def set_monitor_zeros_to_nan(
     monitor: TofMonitorData[RunType, MonitorType],
 ) -> TofMonitorDataZerosToNan[RunType, MonitorType]:
-    unit = monitor.unit
-    monitor.data[monitor.data == sc.scalar(0.0, unit=unit)] = sc.full(
-        np.nan, sizes=monitor.sizes, unit=unit
-    )
+    inds = monitor.values == 0.0
+    monitor.values[inds] = np.nan
     return TofMonitorDataZerosToNan[RunType, MonitorType](monitor)
 
 
