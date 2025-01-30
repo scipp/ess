@@ -49,8 +49,10 @@ def get_path(name: str, unzip: bool = False) -> str:
 def simulated_diamond_sample() -> str:
     """Path to a GEANT4 CSV file for a diamond sample.
 
-    SciCat: 20.500.12269/d17b7169-b963-4b23-9455-d7332b992184
-    Url: https://staging.scicat.ess.eu
+    SciCat:
+
+    - PID: ``20.500.12269/d17b7169-b963-4b23-9455-d7332b992184``
+    - URL: https://staging.scicat.ess.eu/datasets/20.500.12269%2Fd17b7169-b963-4b23-9455-d7332b992184
 
     **Sample**:
 
@@ -83,7 +85,9 @@ def simulated_vanadium_sample() -> str:
     """Path to a GEANT4 CSV file for a vanadium sample.
 
     SciCat:
-    Url: https://staging.scicat.ess.eu
+
+    - PID: ``20.500.12269/9e43a311-dc17-4f0e-a4d4-2341186b5512``
+    - URL: https://staging.scicat.ess.eu/datasets/20.500.12269%2F9e43a311-dc17-4f0e-a4d4-2341186b5512
 
     Contains both coherent and incoherent scattering.
 
@@ -103,8 +107,10 @@ def simulated_vanadium_sample() -> str:
 def simulated_vanadium_sample_incoherent() -> str:
     """Path to a GEANT4 CSV file for a vanadium sample with only incoherent scattering.
 
-    SciCat: 20.500.12269/b170848e-455e-4c43-8666-68e20f922326
-    Url: https://staging.scicat.ess.eu
+    SciCat:
+
+    - PID: ``20.500.12269/b170848e-455e-4c43-8666-68e20f922326``
+    - URL: https://staging.scicat.ess.eu/datasets/20.500.12269%2Fb170848e-455e-4c43-8666-68e20f922326
 
     **Sample**:
 
@@ -118,8 +124,10 @@ def simulated_vanadium_sample_incoherent() -> str:
 def simulated_empty_can() -> str:
     """Path to a GEANT4 CSV file for an empty can measurement.
 
-    SciCat: 20.500.12269/1a280698-aa5a-4cfb-bc4f-68fcd40462cc
-    Url: https://staging.scicat.ess.eu
+    SciCat:
+
+    - PID: ``20.500.12269/1a280698-aa5a-4cfb-bc4f-68fcd40462cc``
+    - URL: https://staging.scicat.ess.eu/datasets/20.500.12269%2F1a280698-aa5a-4cfb-bc4f-68fcd40462cc
 
     **Container**:
 
@@ -139,8 +147,10 @@ def simulated_empty_can() -> str:
 def simulated_monitor_diamond_sample() -> str:
     """Path to a Mcstas file for a monitor for the diamond measurement.
 
-    SciCat: 20.500.12269/d17b7169-b963-4b23-9455-d7332b992184
-    Url: https://staging.scicat.ess.eu
+    SciCat:
+
+    - PID: ``20.500.12269/d17b7169-b963-4b23-9455-d7332b992184``
+    - URL: https://staging.scicat.ess.eu/datasets/20.500.12269%2Fd17b7169-b963-4b23-9455-d7332b992184
 
     This is the DREAM cave monitor for ``simulated_diamond_sample``.
     """
@@ -150,8 +160,10 @@ def simulated_monitor_diamond_sample() -> str:
 def simulated_monitor_vanadium_sample() -> str:
     """Path to a Mcstas file for a monitor for the vanadium measurement.
 
-    SciCat: 20.500.12269/b170848e-455e-4c43-8666-68e20f922326
-    Url: https://staging.scicat.ess.eu
+    SciCat:
+
+    - PID: ``20.500.12269/b170848e-455e-4c43-8666-68e20f922326``
+    - URL: https://staging.scicat.ess.eu/datasets/20.500.12269%2Fb170848e-455e-4c43-8666-68e20f922326
 
     This is the DREAM cave monitor for ``simulated_vanadium_sample``.
     """
@@ -161,8 +173,10 @@ def simulated_monitor_vanadium_sample() -> str:
 def simulated_monitor_empty_can() -> str:
     """Path to a Mcstas file for a monitor for the empty can measurement.
 
-    SciCat: 20.500.12269/1a280698-aa5a-4cfb-bc4f-68fcd40462cc
-    Url: https://staging.scicat.ess.eu
+    SciCat:
+
+    - PID: ``20.500.12269/1a280698-aa5a-4cfb-bc4f-68fcd40462cc``
+    - URL: https://staging.scicat.ess.eu/datasets/20.500.12269%2F1a280698-aa5a-4cfb-bc4f-68fcd40462cc
 
     This is the DREAM cave monitor for ``simulated_empty_can``.
     """
