@@ -29,6 +29,9 @@ def dummy_compute_detector_time_of_flight(
     return TofData[RunType](detector_data)
 
 
+providers = (dummy_compute_detector_time_of_flight,)
+
+
 def PowgenWorkflow() -> sciline.Pipeline:
     """
     Workflow with default parameters for the Powgen SNS instrument.
@@ -37,12 +40,10 @@ def PowgenWorkflow() -> sciline.Pipeline:
     # data. Delay import until workflow is actually used.
     from . import data
 
-    pipeline = sciline.Pipeline(
-        providers=powder_providers + beamline.providers + data.providers,
+    return sciline.Pipeline(
+        providers=powder_providers + beamline.providers + data.providers + providers,
         params=default_parameters(),
     )
-    pipeline.insert(dummy_compute_detector_time_of_flight)
-    return pipeline
 
 
-__all__ = ['PowgenWorkflow', 'default_parameters']
+__all__ = ['PowgenWorkflow', 'default_parameters', 'providers']
