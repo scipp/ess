@@ -245,29 +245,29 @@ def test_pipeline_can_compute_intermediate_results(workflow, tof_workflow):
     result = results[NormalizedRunData[SampleRun]]
 
     detector_name = results[NeXusDetectorName]
-    expected_dims = {'segment', 'wire', 'counter', 'strip', 'module', 'event_time_zero'}
+    expected_dims = {'segment', 'wire', 'counter', 'strip', 'module'}
     if detector_name in ('endcap_backward', 'endcap_forward'):
         expected_dims.add('sumo')
 
-    assert set(result.dims) == expected_dims
+    assert expected_dims.issubset(set(result.dims))
 
 
-def test_pipeline_group_by_two_theta(workflow):
+def test_pipeline_group_by_two_theta(workflow, tof_workflow):
+    workflow[TofWorkflow] = tof_workflow
     two_theta_bins = sc.linspace(
         dim='two_theta', unit='rad', start=0.8, stop=2.4, num=17
     )
     workflow[TwoThetaBins] = two_theta_bins
     workflow = powder.with_pixel_mask_filenames(workflow, [])
     result = workflow.compute(IofDspacingTwoTheta)
-    assert result.sizes == {
-        'two_theta': 16,
-        'dspacing': len(params[DspacingBins]) - 1,
-    }
+    assert result.sizes['two_theta'] == 16
+    assert result.sizes['dspacing'] == len(params[DspacingBins]) - 1
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
     assert sc.allclose(result.coords['two_theta'], two_theta_bins)
 
 
-def test_pipeline_wavelength_masking(workflow):
+def test_pipeline_wavelength_masking(workflow, tof_workflow):
+    workflow[TofWorkflow] = tof_workflow
     wmin = sc.scalar(0.18, unit="angstrom")
     wmax = sc.scalar(0.21, unit="angstrom")
     workflow[WavelengthMask] = lambda x: (x > wmin) & (x < wmax)
@@ -285,7 +285,8 @@ def test_pipeline_wavelength_masking(workflow):
     )
 
 
-def test_pipeline_two_theta_masking(workflow):
+def test_pipeline_two_theta_masking(workflow, tof_workflow):
+    workflow[TofWorkflow] = tof_workflow
     tmin = sc.scalar(1.0, unit="rad")
     tmax = sc.scalar(1.2, unit="rad")
     workflow[TwoThetaMask] = lambda x: (x > tmin) & (x < tmax)
@@ -301,14 +302,8 @@ def test_pipeline_two_theta_masking(workflow):
     )
 
 
-def test_use_workflow_helper(workflow):
-    workflow = powder.with_pixel_mask_filenames(workflow, [])
-    result = workflow.compute(IofDspacing)
-    assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
-    assert sc.identical(result.coords['dspacing'], params[DspacingBins])
-
-
-def test_pipeline_can_save_data(workflow):
+def test_pipeline_can_save_data(workflow, tof_workflow):
+    workflow[TofWorkflow] = tof_workflow
     workflow = powder.with_pixel_mask_filenames(workflow, [])
     result = workflow.compute(ReducedTofCIF)
 

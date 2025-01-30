@@ -8,7 +8,6 @@ pipeline.
 """
 
 from collections.abc import Callable
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, NewType, TypeVar
 
@@ -194,12 +193,6 @@ CIFAuthors = NewType("CIFAuthors", list[cif.Author])
 ReducedTofCIF = NewType("ReducedTofCIF", cif.CIF)
 """Reduced data in time-of-flight, ready to be saved to a CIF file."""
 
-
-# @dataclass
-# class TofWorkflow:
-#     """Workflow for computing time-of-flight data."""
-
-#     pipeline: sciline.Pipeline
 
 TofWorkflow = _TofWorkflow
 """Workflow for computing time-of-flight data."""
