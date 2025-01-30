@@ -10,3 +10,4 @@
 pandas
 pooch
 pytest
+tof>=25.01.2
