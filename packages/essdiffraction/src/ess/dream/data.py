@@ -49,6 +49,9 @@ def get_path(name: str, unzip: bool = False) -> str:
 def simulated_diamond_sample() -> str:
     """Path to a GEANT4 CSV file for a diamond sample.
 
+    SciCat: 20.500.12269/d17b7169-b963-4b23-9455-d7332b992184
+    Url: https://staging.scicat.ess.eu
+
     **Sample**:
 
     - Diamond powder
@@ -79,6 +82,9 @@ def simulated_diamond_sample() -> str:
 def simulated_vanadium_sample() -> str:
     """Path to a GEANT4 CSV file for a vanadium sample.
 
+    SciCat:
+    Url: https://staging.scicat.ess.eu
+
     Contains both coherent and incoherent scattering.
 
     **Sample**:
@@ -97,6 +103,9 @@ def simulated_vanadium_sample() -> str:
 def simulated_vanadium_sample_incoherent() -> str:
     """Path to a GEANT4 CSV file for a vanadium sample with only incoherent scattering.
 
+    SciCat: 20.500.12269/b170848e-455e-4c43-8666-68e20f922326
+    Url: https://staging.scicat.ess.eu
+
     **Sample**:
 
     - outer radius of sample in (x,z) plane=0.006 m
@@ -108,6 +117,9 @@ def simulated_vanadium_sample_incoherent() -> str:
 
 def simulated_empty_can() -> str:
     """Path to a GEANT4 CSV file for an empty can measurement.
+
+    SciCat: 20.500.12269/1a280698-aa5a-4cfb-bc4f-68fcd40462cc
+    Url: https://staging.scicat.ess.eu
 
     **Container**:
 
@@ -127,6 +139,9 @@ def simulated_empty_can() -> str:
 def simulated_monitor_diamond_sample() -> str:
     """Path to a Mcstas file for a monitor for the diamond measurement.
 
+    SciCat: 20.500.12269/d17b7169-b963-4b23-9455-d7332b992184
+    Url: https://staging.scicat.ess.eu
+
     This is the DREAM cave monitor for ``simulated_diamond_sample``.
     """
     return get_path("DREAM_simple_pwd_workflow/Cave_TOF_Monitor_diam_in_can.dat")
@@ -135,6 +150,9 @@ def simulated_monitor_diamond_sample() -> str:
 def simulated_monitor_vanadium_sample() -> str:
     """Path to a Mcstas file for a monitor for the vanadium measurement.
 
+    SciCat: 20.500.12269/b170848e-455e-4c43-8666-68e20f922326
+    Url: https://staging.scicat.ess.eu
+
     This is the DREAM cave monitor for ``simulated_vanadium_sample``.
     """
     return get_path("DREAM_simple_pwd_workflow/Cave_TOF_Monitor_vana_inc_coh.dat")
@@ -142,6 +160,9 @@ def simulated_monitor_vanadium_sample() -> str:
 
 def simulated_monitor_empty_can() -> str:
     """Path to a Mcstas file for a monitor for the empty can measurement.
+
+    SciCat: 20.500.12269/1a280698-aa5a-4cfb-bc4f-68fcd40462cc
+    Url: https://staging.scicat.ess.eu
 
     This is the DREAM cave monitor for ``simulated_empty_can``.
     """
