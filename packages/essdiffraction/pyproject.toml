@@ -31,7 +31,7 @@ requires-python = ">=3.10"
 # Make sure to list one dependency per line.
 dependencies = [
   "dask",
-  "essreduce>=24.12.0",
+  "essreduce>=25.01.1",
   "graphviz",
   "numpy",
   "plopp",
@@ -49,6 +49,7 @@ test = [
     "pandas",
     "pooch",
     "pytest",
+    "tof>=25.01.2",
 ]
 
 [project.urls]
