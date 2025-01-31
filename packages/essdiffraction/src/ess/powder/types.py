@@ -204,10 +204,4 @@ class TofMonitorData(
     """Monitor data with time-of-flight coordinate."""
 
 
-class TofMonitorDataZerosToNan(
-    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
-):
-    """Monitor data with time-of-flight coordinate and zero counts replaced by NaN."""
-
-
 del sc, sciline, NewType, TypeVar

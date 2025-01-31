@@ -45,8 +45,8 @@ __all__ = [
     "filtering",
     "grouping",
     "masking",
-    "transform",
     "providers",
     "smoothing",
+    "transform",
     "with_pixel_mask_filenames",
 ]

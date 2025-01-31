@@ -251,21 +251,14 @@ def compute_monitor_time_of_flight(
     wf = tof_workflow.pipeline.copy()
     wf.insert(time_of_flight.resample_tof_data)
     wf[time_of_flight.RawData] = monitor
-    return TofMonitorData[RunType, MonitorType](
-        wf.compute(time_of_flight.ResampledTofData)
-    )
-
-
-def set_monitor_zeros_to_nan(
-    monitor: TofMonitorData[RunType, MonitorType],
-) -> TofMonitorDataZerosToNan[RunType, MonitorType]:
-    inds = monitor.values == 0.0
-    monitor.values[inds] = np.nan
-    return TofMonitorDataZerosToNan[RunType, MonitorType](monitor)
+    out = wf.compute(time_of_flight.ResampledTofData)
+    inds = out.values == 0.0
+    out.values[inds] = np.nan
+    return TofMonitorData[RunType, MonitorType](out)
 
 
 def convert_monitor_to_wavelength(
-    monitor: TofMonitorDataZerosToNan[RunType, MonitorType],
+    monitor: TofMonitorData[RunType, MonitorType],
 ) -> WavelengthMonitor[RunType, MonitorType]:
     graph = {
         **scn.conversion.graph.beamline.beamline(scatter=False),
@@ -284,5 +277,4 @@ providers = (
     convert_monitor_to_wavelength,
     compute_detector_time_of_flight,
     compute_monitor_time_of_flight,
-    set_monitor_zeros_to_nan,
 )
