@@ -28,7 +28,6 @@ from .types import (
     RunType,
     TofData,
     TofMonitorData,
-    TofMonitorDataZerosToNan,
     TofWorkflow,
     WavelengthMonitor,
 )

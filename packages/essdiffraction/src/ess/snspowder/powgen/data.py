@@ -10,7 +10,6 @@ from ess.powder.types import (
     CalibrationData,
     CalibrationFilename,
     DetectorBankSizes,
-    DetectorData,
     Filename,
     ProtonCharge,
     RawDataAndMetadata,
@@ -137,7 +136,7 @@ def extract_proton_charge(dg: RawDataAndMetadata[RunType]) -> ProtonCharge[RunTy
 
 
 def extract_accumulated_proton_charge(
-    data: DetectorData[RunType],
+    data: TofData[RunType],
 ) -> AccumulatedProtonCharge[RunType]:
     """Return the stored accumulated proton charge from a loaded data group."""
     return AccumulatedProtonCharge[RunType](data.coords["gd_prtn_chrg"])
