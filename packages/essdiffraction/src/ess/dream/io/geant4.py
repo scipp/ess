@@ -262,13 +262,16 @@ def assemble_detector_data(
     da.bins.coords["tof"] = da.bins.coords["tof"].to(unit="us")
 
     period = (1.0 / sc.scalar(14.0, unit="Hz")).to(unit="us")
-    # Bin the data into bins with a 71ms period
-    da = da.bin(tof=sc.arange("tof", 3) * period)
+    # Bin the data into bins with a 71ms period.
+    npulses = int((da.bins.coords["tof"].max() / period).value)
+    da = da.bin(tof=sc.arange("tof", npulses + 1) * period)
     # Add a event_time_zero coord for each bin, but not as bin edges,
     # as all events in the same pulse have the same event_time_zero, hence the `[:2]`
+    # We need to pick a start time. The actual value does not matter. We chose the
+    # random date of Friday, November 1, 2024 8:40:34.078
     da.coords["event_time_zero"] = (
         sc.scalar(1730450434078980000, unit="ns").to(unit="us") + da.coords["tof"]
-    )[:2]
+    )[:npulses]
     # Remove the meaningless tof coord at the top level
     del da.coords["tof"]
     da = da.rename_dims(tof="event_time_zero")
