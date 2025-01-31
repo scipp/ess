@@ -10,13 +10,9 @@ the ``dream`` module when that is available.
 from . import beamline, peaks
 from .calibration import load_calibration
 from .instrument_view import instrument_view
-from .workflow import (
-    PowgenWorkflow,
-    default_parameters,
-    providers as workflow_providers,
-)
+from .workflow import PowgenWorkflow, default_parameters
 
-providers = (*beamline.providers, *workflow_providers)
+providers = (*beamline.providers,)
 """Sciline Providers for POWGEN-specific functionality."""
 
 
