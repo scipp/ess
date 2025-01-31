@@ -40,6 +40,7 @@ dependencies = [
   "scipp>=24.09.1",
   "scippneutron>=24.11.0",
   "scippnexus>=23.12.0",
+  "tof>=25.01.2",
 ]
 
 dynamic = ["version"]
@@ -49,7 +50,6 @@ test = [
     "pandas",
     "pooch",
     "pytest",
-    "tof>=25.01.2",
 ]
 
 [project.urls]

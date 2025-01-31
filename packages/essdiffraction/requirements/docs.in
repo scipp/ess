@@ -12,7 +12,6 @@ sphinx-autodoc-typehints
 sphinx-copybutton
 sphinx-design
 sphinxcontrib-bibtex
-tof
 
 # needed by pandas < 3.0
 pyarrow

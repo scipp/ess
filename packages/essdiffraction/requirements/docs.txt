@@ -24,7 +24,7 @@ beautifulsoup4==4.12.3
     #   pydata-sphinx-theme
 bleach[css]==6.2.0
     # via nbconvert
-certifi==2024.12.14
+certifi==2025.1.31
     # via requests
 charset-normalizer==3.4.1
     # via requests
@@ -126,7 +126,7 @@ pybtex-docutils==1.0.3
     # via sphinxcontrib-bibtex
 pydata-sphinx-theme==0.16.1
     # via -r docs.in
-pytz==2024.2
+pytz==2025.1
     # via pandas
 pyzmq==26.2.1
     # via
