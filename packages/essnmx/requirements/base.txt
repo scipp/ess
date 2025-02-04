@@ -85,7 +85,7 @@ requests==2.32.3
     # via pooch
 sciline==24.10.0
     # via -r base.in
-scipp==25.1.0
+scipp==25.2.0
     # via
     #   -r base.in
     #   scippnexus
