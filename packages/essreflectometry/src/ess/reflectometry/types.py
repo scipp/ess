@@ -93,6 +93,10 @@ class SampleSize(sciline.Scope[RunType, sc.Variable], sc.Variable):
     """Size of the sample. If None it is assumed to be the same as the reference."""
 
 
+class ProtonCurrent(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Proton current log from file"""
+
+
 YIndexLimits = NewType("YIndexLimits", tuple[sc.Variable, sc.Variable])
 """Limit of the (logical) 'y' detector pixel index"""
 

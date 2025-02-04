@@ -149,23 +149,27 @@ def add_masks(
     zlims: ZIndexLimits,
     bdlim: BeamDivergenceLimits,
     wbins: WavelengthBins,
-):
+) -> sc.DataArray:
     """
     Masks the data by ranges in the detector
     coordinates ``z`` and ``y``, and by the divergence of the beam,
     and by wavelength.
     """
-    da.masks["stripe_range"] = _not_between(da.coords["stripe"], *ylim)
-    da.masks['z_range'] = _not_between(da.coords["z_index"], *zlims)
-    da.bins.masks["divergence_too_large"] = _not_between(
-        da.bins.coords["angle_of_divergence"],
-        bdlim[0].to(unit=da.bins.coords["angle_of_divergence"].bins.unit),
-        bdlim[1].to(unit=da.bins.coords["angle_of_divergence"].bins.unit),
+    da = da.assign_masks(
+        stripe_range=_not_between(da.coords["stripe"], *ylim),
+        z_range=_not_between(da.coords["z_index"], *zlims),
     )
-    da.bins.masks['wavelength'] = _not_between(
-        da.bins.coords['wavelength'],
-        wbins[0],
-        wbins[-1],
+    da = da.bins.assign_masks(
+        divergence_too_large=_not_between(
+            da.bins.coords["angle_of_divergence"],
+            bdlim[0].to(unit=da.bins.coords["angle_of_divergence"].bins.unit),
+            bdlim[1].to(unit=da.bins.coords["angle_of_divergence"].bins.unit),
+        ),
+        wavelength=_not_between(
+            da.bins.coords['wavelength'],
+            wbins[0],
+            wbins[-1],
+        ),
     )
     return da
 

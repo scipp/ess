@@ -9,6 +9,7 @@ from ..reflectometry.types import (
     Filename,
     LoadedNeXusDetector,
     NeXusDetectorName,
+    ProtonCurrent,
     RawDetectorData,
     RunType,
     SampleRotation,
@@ -43,10 +44,15 @@ def load_events(
     beam_size: BeamSize[RunType],
     angle_to_center_of_beam: AngleCenterOfIncomingToHorizon[RunType],
 ) -> RawDetectorData[RunType]:
+    event_data = detector["data"]
+    if 'event_time_zero' in event_data.coords:
+        event_data.bins.coords['event_time_zero'] = sc.bins_like(
+            event_data, fill_value=event_data.coords['event_time_zero']
+        )
+
     detector_numbers = pixel_coordinates_in_detector_system()
     data = (
-        detector["data"]
-        .bins.constituents["data"]
+        event_data.bins.constituents["data"]
         .group(detector_numbers.data.flatten(to='event_id'))
         .fold("event_id", sizes=detector_numbers.sizes)
     )
@@ -126,6 +132,15 @@ def load_amor_angle_from_horizon_to_center_of_incident_beam(
     )
 
 
+def load_amor_proton_current(
+    fp: Filename[RunType],
+) -> ProtonCurrent[RunType]:
+    (pc,) = load_nx(fp, 'NXentry/NXinstrument/NXdetector/proton_current')
+    pc = pc['value']['dim_1', 0]
+    pc.data.unit = 'mA/s'
+    return pc
+
+
 providers = (
     load_detector,
     load_events,
@@ -136,5 +151,6 @@ providers = (
     load_amor_sample_rotation,
     load_amor_detector_rotation,
     load_amor_angle_from_horizon_to_center_of_incident_beam,
+    load_amor_proton_current,
     amor_chopper,
 )

@@ -30,10 +30,15 @@ def footprint_on_sample(
     return sc.erf(fwhm_to_std(sample_size / size_of_beam_on_sample))
 
 
-def correct_by_footprint(da: sc.DataArray) -> None:
+def correct_by_footprint(da: sc.DataArray) -> sc.DataArray:
     "Corrects the data by the size of the footprint on the sample."
-    da /= footprint_on_sample(
+    return da / footprint_on_sample(
         da.bins.coords['theta'],
         da.coords['beam_size'],
         da.coords['sample_size'],
     )
+
+
+def correct_by_proton_current(da: sc.DataArray) -> sc.DataArray:
+    "Corrects the data by the proton current during the time of data collection"
+    return da / da.bins.coords['proton_current']
