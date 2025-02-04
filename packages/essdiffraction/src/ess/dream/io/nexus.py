@@ -15,7 +15,8 @@ and the ICD DREAM interface specification for details.
 
 import sciline
 
-from ess.reduce.nexus.types import DetectorBankSizes
+from ess.powder.types import BunkerMonitor, CaveMonitor
+from ess.reduce.nexus.types import DetectorBankSizes, NeXusName
 from ess.reduce.nexus.workflow import GenericNeXusWorkflow
 
 DETECTOR_BANK_SIZES = {
@@ -51,4 +52,6 @@ def LoadNeXusWorkflow() -> sciline.Pipeline:
     """
     wf = GenericNeXusWorkflow()
     wf[DetectorBankSizes] = DETECTOR_BANK_SIZES
+    wf[NeXusName[BunkerMonitor]] = "monitor_bunker"
+    wf[NeXusName[CaveMonitor]] = "monitor_cave"
     return wf
