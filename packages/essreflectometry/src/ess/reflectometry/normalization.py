@@ -37,8 +37,8 @@ def reduce_reference(
         m=mvalue,
         alpha=alpha,
     )
-    reference.bins.masks['invalid'] = sc.isnan(R)
-    reference /= R
+    reference = reference.bins.assign_masks(invalid=sc.isnan(R))
+    reference = reference / R
     return reference.bins.concat(('stripe',)).hist(wavelength=wavelength_bins)
 
 
