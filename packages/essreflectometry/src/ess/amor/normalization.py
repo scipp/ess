@@ -9,7 +9,6 @@ from ..reflectometry.supermirror import (
 )
 from ..reflectometry.types import (
     DetectorSpatialResolution,
-    QBins,
     ReducedReference,
     ReducibleData,
     Reference,
@@ -64,14 +63,13 @@ def mask_events_where_supermirror_does_not_cover(
         m=mvalue,
         alpha=alpha,
     )
-    sam.bins.masks["supermirror_does_not_cover"] = sc.isnan(R)
+    sam = sam.bins.assign_masks(supermirror_does_not_cover=sc.isnan(R))
     return sam
 
 
 def evaluate_reference_at_sample_coords(
     reference: ReducedReference,
     sample: ReducibleData[SampleRun],
-    qbins: QBins,
     detector_spatial_resolution: DetectorSpatialResolution[SampleRun],
     graph: CoordTransformationGraph,
 ) -> Reference:
@@ -103,6 +101,8 @@ def evaluate_reference_at_sample_coords(
             "Q_resolution": q_resolution,
         },
         rename_dims=False,
+        keep_intermediate=False,
+        keep_aliases=False,
     )
     return sc.values(ref)
 
