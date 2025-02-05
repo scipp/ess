@@ -9,24 +9,19 @@ from ..reflectometry.supermirror import (
 )
 from ..reflectometry.types import (
     DetectorSpatialResolution,
-    QBins,
     ReducedReference,
     ReducibleData,
     Reference,
-    ReferenceRun,
-    ReflectivityOverQ,
-    ReflectivityOverZW,
     Sample,
     SampleRun,
-    WavelengthBins,
 )
 from .conversions import theta
 from .resolution import (
     angular_resolution,
     q_resolution,
     sample_size_resolution,
-    wavelength_resolution,
 )
+from .types import CoordTransformationGraph
 
 
 def mask_events_where_supermirror_does_not_cover(
@@ -56,7 +51,7 @@ def mask_events_where_supermirror_does_not_cover(
         reflectometry_q(
             sam.bins.coords["wavelength"],
             theta(
-                sam.coords["pixel_divergence_angle"],
+                sam.coords["divergence_angle"],
                 ref.coords["sample_rotation"],
                 ref.coords["detector_rotation"],
             ),
@@ -65,79 +60,13 @@ def mask_events_where_supermirror_does_not_cover(
         m=mvalue,
         alpha=alpha,
     )
-    sam.bins.masks["supermirror_does_not_cover"] = sc.isnan(R)
-    return sam
-
-
-def reduce_reference(
-    reference: ReducibleData[ReferenceRun],
-    wavelength_bins: WavelengthBins,
-    critical_edge: CriticalEdge,
-    mvalue: MValue,
-    alpha: Alpha,
-) -> ReducedReference:
-    """
-    Reduces the reference measurement to estimate the
-    intensity distribution in the detector for
-    an ideal sample with reflectivity :math:`R = 1`.
-    """
-    R = supermirror_reflectivity(
-        reference.bins.coords['Q'],
-        c=critical_edge,
-        m=mvalue,
-        alpha=alpha,
-    )
-    reference.bins.masks['invalid'] = sc.isnan(R)
-    reference /= R
-    return reference.bins.concat(('stripe',)).hist(wavelength=wavelength_bins)
-
-
-def reduce_sample_over_q(
-    sample: Sample,
-    reference: Reference,
-    qbins: QBins,
-) -> ReflectivityOverQ:
-    """
-    Computes reflectivity as ratio of
-    sample intensity and intensity from a sample
-    with ideal reflectivity.
-
-    Returns reflectivity as a function of :math:`Q`.
-    """
-    h = reference.flatten(to='Q').hist(Q=qbins)
-    R = sample.bins.concat().bin(Q=qbins) / h.data
-    R.coords['Q_resolution'] = sc.sqrt(
-        (
-            (reference * reference.coords['Q_resolution'] ** 2)
-            .flatten(to='Q')
-            .hist(Q=qbins)
-        )
-        / h
-    ).data
-    return R
-
-
-def reduce_sample_over_zw(
-    sample: Sample,
-    reference: Reference,
-    wbins: WavelengthBins,
-) -> ReflectivityOverZW:
-    """
-    Computes reflectivity as ratio of
-    sample intensity and intensity from a sample
-    with ideal reflectivity.
-
-    Returns reflectivity as a function of ``blade``, ``wire`` and :math:`\\wavelength`.
-    """
-    R = sample.bins.concat(('stripe',)).bin(wavelength=wbins) / reference.data
-    R.masks["too_few_events"] = reference.data < sc.scalar(1, unit="counts")
-    return R
+    return sam.bins.assign_masks(supermirror_does_not_cover=sc.isnan(R))
 
 
 def evaluate_reference(
     reference: ReducedReference,
     sample: ReducibleData[SampleRun],
-    qbins: QBins,
+    graph: CoordTransformationGraph,
     detector_spatial_resolution: DetectorSpatialResolution[SampleRun],
 ) -> Reference:
     """
@@ -152,32 +81,32 @@ def evaluate_reference(
     ref.coords["sample_size"] = sample.coords["sample_size"]
     ref.coords["detector_spatial_resolution"] = detector_spatial_resolution
     ref.coords["wavelength"] = sc.midpoints(ref.coords["wavelength"])
+    ref.coords.pop("theta")
     ref = ref.transform_coords(
         (
             "Q",
+            "theta",
+            "divergence_angle",
             "wavelength_resolution",
             "sample_size_resolution",
             "angular_resolution",
             "Q_resolution",
         ),
         {
-            "divergence_angle": "pixel_divergence_angle",
-            "theta": theta,
-            "Q": reflectometry_q,
-            "wavelength_resolution": wavelength_resolution,
+            **graph,
+            "wavelength_resolution": lambda: sc.scalar(1.0, unit='angstrom'),
             "sample_size_resolution": sample_size_resolution,
             "angular_resolution": angular_resolution,
             "Q_resolution": q_resolution,
         },
         rename_dims=False,
+        keep_intermediate=False,
+        keep_aliases=False,
     )
     return sc.values(ref)
 
 
 providers = (
-    reduce_reference,
-    reduce_sample_over_q,
-    reduce_sample_over_zw,
     evaluate_reference,
     mask_events_where_supermirror_does_not_cover,
 )

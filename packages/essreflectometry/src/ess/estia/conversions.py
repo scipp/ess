@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
+from scipp.constants import pi
 
 from ..reflectometry.conversions import reflectometry_q
 from ..reflectometry.types import (
@@ -12,37 +13,36 @@ from ..reflectometry.types import (
 )
 
 
-def theta(detector_position_relative_sample, sample_rotation):
+def theta(divergence_angle, sample_rotation, detector_rotation):
     '''
     Angle of reflection.
 
     Computes the angle between the scattering direction of
     the neutron and the sample surface.
-
-    Assumes that the sample is oriented almost parallel to yz plane
-    but rotated around the y-axis by :code:`sample_rotation`.
     '''
-    p = detector_position_relative_sample
-    # Normal of yz plane.
-    n = sc.vector([1.0, 0, 0], unit='dimensionless')
-    np = sc.norm(p)
-    pp = p - sc.dot(p, n) * n
-    npp = sc.norm(pp)
-    angle_to_zy_plane = sc.acos(sc.dot(p, pp) / (np * npp))
-    return angle_to_zy_plane - sample_rotation.to(unit='rad')
+    return (
+        divergence_angle
+        + detector_rotation.to(unit='rad')
+        - sample_rotation.to(unit='rad')
+    )
 
 
 def angle_of_divergence(
-    theta, sample_rotation, angle_to_center_of_beam, natural_incidence_angle
+    position,
+    sample_position,
+    detector_rotation,
 ):
     """
-    Difference between the incident angle and the center of the incident beam.
-    Useful for filtering parts of the beam that have too high divergence.
-
-    This is always in the interval [-0.75 deg, 0.75 deg],
-    but the divergence of the incident beam can also be reduced.
+    Angle between the scattering direction and
+    the ray from the sample to the center of the detector.
     """
-    return theta - sample_rotation - angle_to_center_of_beam.to(unit='rad')
+    p = position - sample_position.to(unit=position.unit)
+    # Normal to plane of zero sample rotation.
+    n = sc.vector([1.0, 0, 0], unit='dimensionless')
+    angle_to_yz_plane = pi / 2 * sc.scalar(1, unit='rad') - sc.acos(
+        sc.dot(p, n) / sc.norm(p)
+    )
+    return angle_to_yz_plane - detector_rotation
 
 
 def wavelength(
@@ -56,17 +56,14 @@ def wavelength(
 
 def coordinate_transformation_graph() -> CoordTransformationGraph:
     return {
-        "detector_position_relative_sample": (
-            lambda detector, sample: detector.position - sample.position
-        ),
         "wavelength": wavelength,
         "theta": theta,
         "angle_of_divergence": angle_of_divergence,
         "Q": reflectometry_q,
-        "L1": lambda source, sample: sample.position - source.position,
-        "L2": lambda detector_position_relative_sample: sc.norm(
-            detector_position_relative_sample
-        ),
+        "L1": lambda source_position, sample_position: sc.norm(
+            sample_position - source_position
+        ),  # + extra correction for guides?
+        "L2": lambda position, sample_position: sc.norm(position - sample_position),
     }
 
 

@@ -5,3 +5,5 @@ import scipp as sc
 WavelengthResolution = NewType("WavelengthResolution", sc.Variable)
 AngularResolution = NewType("AngularResolution", sc.Variable)
 SampleSizeResolution = NewType("SampleSizeResolution", sc.Variable)
+
+CoordTransformationGraph = NewType("CoordTransformationGraph", dict)
