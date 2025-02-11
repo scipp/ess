@@ -35,7 +35,7 @@ def add_proton_current_coord(
     """Find the proton current value for each event and
     adds it as a coord to the data array."""
     pc_lookup = sc.lookup(
-        pc,
+        pc.assign_coords(time=pc.coords['time'].to(unit='ns')),
         dim='time',
         mode='previous',
         fill_value=sc.scalar(float('nan'), unit=pc.unit),

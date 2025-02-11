@@ -39,7 +39,11 @@ def reduce_reference(
     )
     reference = reference.bins.assign_masks(invalid=sc.isnan(R))
     reference = reference / R
-    return reference.bins.concat(('stripe',)).hist(wavelength=wavelength_bins)
+    out = reference.bins.concat(('stripe',)).hist(wavelength=wavelength_bins)
+
+    if 'position' in reference.coords:
+        out.coords['position'] = reference.coords['position'].mean('stripe')
+    return out
 
 
 def reduce_sample_over_q(
