@@ -43,6 +43,9 @@ dependencies = [
   "scippnexus>=24.9.1",
   "essreduce",
   "pandas",
+  "ipywidgets",
+  "ipydatagrid",
+  "ipytree",
 ]
 
 dynamic = ["version"]
