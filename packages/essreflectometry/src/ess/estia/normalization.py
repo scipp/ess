@@ -51,9 +51,10 @@ def mask_events_where_supermirror_does_not_cover(
         reflectometry_q(
             sam.bins.coords["wavelength"],
             theta(
-                sam.coords["divergence_angle"],
-                ref.coords["sample_rotation"],
-                ref.coords["detector_rotation"],
+                sam.coords["position"],
+                sam.coords["sample_position"],
+                2 * sam.coords["sample_rotation"] - ref.coords['sample_rotation'],
+                sc.scalar(1.7, unit='deg').to(unit='rad'),
             ),
         ),
         c=critical_edge,
@@ -76,17 +77,21 @@ def evaluate_reference(
     and ``detector_rotation`` parameters from the sample measurement.
     """
     ref = reference.copy()
-    ref.coords["sample_rotation"] = sample.coords["sample_rotation"]
+    ref.coords["sample_rotation"] = (
+        2 * ref.coords["sample_rotation"] - sample.coords['sample_rotation']
+    )
     ref.coords["detector_rotation"] = sample.coords["detector_rotation"]
     ref.coords["sample_size"] = sample.coords["sample_size"]
     ref.coords["detector_spatial_resolution"] = detector_spatial_resolution
     ref.coords["wavelength"] = sc.midpoints(ref.coords["wavelength"])
-    ref.coords.pop("theta")
+
+    if "theta" in ref.coords:
+        ref.coords.pop("theta")
+
     ref = ref.transform_coords(
         (
             "Q",
             "theta",
-            "divergence_angle",
             "wavelength_resolution",
             "sample_size_resolution",
             "angular_resolution",
@@ -94,7 +99,7 @@ def evaluate_reference(
         ),
         {
             **graph,
-            "wavelength_resolution": lambda: sc.scalar(1.0, unit='angstrom'),
+            "wavelength_resolution": lambda: sc.scalar(1.0),
             "sample_size_resolution": sample_size_resolution,
             "angular_resolution": angular_resolution,
             "Q_resolution": q_resolution,

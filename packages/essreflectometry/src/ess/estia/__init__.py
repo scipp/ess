@@ -15,8 +15,7 @@ from ..reflectometry.types import (
     SamplePosition,
     BeamDivergenceLimits,
 )
-from . import conversions, load, orso, resolution, utils, figures
-from .instrument_view import instrument_view
+from . import conversions, load, resolution, workflow, normalization
 from .types import (
     AngularResolution,
     SampleSizeResolution,
@@ -32,12 +31,10 @@ except importlib.metadata.PackageNotFoundError:
 
 providers = (
     *reflectometry_providers,
-    *load.providers,
+    # *load.providers,
     *conversions.providers,
-    *resolution.providers,
-    *utils.providers,
-    *figures.providers,
-    *orso.providers,
+    *workflow.providers,
+    *normalization.providers,
 )
 """
 List of providers for setting up a Sciline pipeline.
@@ -73,9 +70,7 @@ __all__ = [
     "supermirror",
     "conversions",
     "load",
-    "orso",
     "resolution",
-    "instrument_view",
     "providers",
     "default_parameters",
     "WavelengthResolution",

@@ -1,0 +1,62 @@
+import scipp as sc
+
+from ..reflectometry.types import (
+    Filename,
+    RawDetectorData,
+    RunType,
+)
+from .mcstas import parse_events_ascii
+
+
+def load_mcstas_events(
+    filename: Filename[RunType],
+) -> RawDetectorData[RunType]:
+    with open(filename) as f:
+        da = parse_events_ascii(f)
+
+    da.coords['sample_rotation'] = sc.scalar(
+        float(da.coords['omegaa'].value), unit='deg'
+    )
+    da.coords['detector_rotation'] = 2 * da.coords['sample_rotation']
+    xbins = sc.linspace('x', -0.25, 0.25, 14 * 32 + 1)
+    ybins = sc.linspace('y', -0.25, 0.25, 65)
+    da = da.bin(x=xbins, y=ybins).rename_dims({'y': 'stripe'})
+    da.coords['stripe'] = sc.arange('stripe', 0, 64)
+    da.coords['z_index'] = sc.arange('x', 0, 14 * 32)
+
+    da.coords['detector_position'] = sc.vector(
+        tuple(map(float, da.coords['position'].value.split(' '))), unit='m'
+    )
+    da.coords['sample_position'] = sc.vector([0.264298, -0.427595, 35.0512], unit='m')
+    da.coords['source_position'] = sc.vector([0, 0, 0.0], unit='m')
+
+    position = sc.spatial.as_vectors(
+        x=sc.midpoints(da.coords['x']) * sc.scalar(1.0, unit='m'),
+        y=sc.midpoints(da.coords['y']) * sc.scalar(1.0, unit='m'),
+        z=sc.scalar(0.0, unit='m'),
+    )
+    rotation_by_detector_rotation = sc.spatial.rotation(
+        value=[
+            sc.scalar(0.0),
+            sc.sin(da.coords['detector_rotation'].to(unit='rad')),
+            sc.scalar(0.0),
+            sc.cos(da.coords['detector_rotation'].to(unit='rad')),
+        ]
+    )
+    da.coords['position'] = (
+        da.coords['detector_position'] + rotation_by_detector_rotation * position
+    )
+
+    da.bins.coords['event_time_zero'] = (
+        sc.scalar(0, unit='s') * da.bins.coords['t']
+    ).to(unit='ns')
+    da.bins.coords['event_time_offset'] = (
+        sc.scalar(1, unit='s') * da.bins.coords['t']
+    ).to(unit='ns')
+    da.bins.coords['wavelength'] = sc.scalar(1, unit='angstrom') * da.bins.coords['L']
+
+    da.coords["sample_size"] = sc.scalar(1.0, unit='m') * float(
+        da.coords['sample_length'].value
+    )
+    da.coords["beam_size"] = sc.scalar(2.0, unit='mm')
+    return RawDetectorData[RunType](da)
