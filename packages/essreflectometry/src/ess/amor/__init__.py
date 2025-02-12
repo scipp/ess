@@ -5,25 +5,24 @@ import importlib.metadata
 import sciline
 import scipp as sc
 
-
 from ..reflectometry import providers as reflectometry_providers
 from ..reflectometry import supermirror
 from ..reflectometry.types import (
+    BeamDivergenceLimits,
     BeamSize,
     DetectorSpatialResolution,
     NeXusDetectorName,
     RunType,
     SamplePosition,
-    BeamDivergenceLimits,
 )
 from . import (
     conversions,
+    figures,
     load,
+    normalization,
     orso,
     resolution,
     utils,
-    figures,
-    normalization,
     workflow,
 )
 from .instrument_view import instrument_view
@@ -88,25 +87,25 @@ def AmorWorkflow() -> sciline.Pipeline:
 
 
 __all__ = [
-    "supermirror",
-    "conversions",
-    "load",
-    "orso",
-    "resolution",
-    "instrument_view",
-    "providers",
-    "default_parameters",
-    "WavelengthResolution",
+    "AmorWorkflow",
     "AngularResolution",
-    "SampleSizeResolution",
-    "ChopperFrequency",
-    "ChopperPhase",
     "Chopper1Position",
     "Chopper2Position",
-    "ThetaBins",
-    "WavelengthThetaFigure",
-    "WavelengthZIndexFigure",
+    "ChopperFrequency",
+    "ChopperPhase",
     "QThetaFigure",
     "ReflectivityDiagnosticsView",
-    "AmorWorkflow",
+    "SampleSizeResolution",
+    "ThetaBins",
+    "WavelengthResolution",
+    "WavelengthThetaFigure",
+    "WavelengthZIndexFigure",
+    "conversions",
+    "default_parameters",
+    "instrument_view",
+    "load",
+    "orso",
+    "providers",
+    "resolution",
+    "supermirror",
 ]
