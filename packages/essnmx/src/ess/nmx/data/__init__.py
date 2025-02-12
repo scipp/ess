@@ -6,7 +6,7 @@ import pooch
 
 _version = "0"
 
-__all__ = ["small_mcstas_2_sample", "small_mcstas_3_sample", "get_path"]
+__all__ = ["get_path", "small_mcstas_2_sample", "small_mcstas_3_sample"]
 
 
 def _make_pooch() -> pooch.Pooch:
