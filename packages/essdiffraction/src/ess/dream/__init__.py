@@ -19,8 +19,8 @@ except importlib.metadata.PackageNotFoundError:
 del importlib
 
 __all__ = [
-    '__version__',
     'DreamGeant4Workflow',
+    '__version__',
     'default_parameters',
     'instrument_view',
     'load_geant4_csv',

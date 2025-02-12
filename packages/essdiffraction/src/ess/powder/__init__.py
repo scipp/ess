@@ -16,8 +16,8 @@ from . import (
     smoothing,
     transform,
 )
-from .masking import with_pixel_mask_filenames
 from .correction import RunNormalization
+from .masking import with_pixel_mask_filenames
 
 try:
     __version__ = importlib.metadata.version("essdiffraction")
@@ -38,15 +38,15 @@ providers = (
 """Sciline providers for powder diffraction."""
 
 __all__ = [
-    "__version__",
     "RunNormalization",
+    "__version__",
     "conversion",
     "correction",
     "filtering",
     "grouping",
     "masking",
-    "transform",
     "providers",
     "smoothing",
+    "transform",
     "with_pixel_mask_filenames",
 ]
