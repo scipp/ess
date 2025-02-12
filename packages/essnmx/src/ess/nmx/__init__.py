@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
-# ruff: noqa: E402, F401
+# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+# ruff: noqa: E402, F401, I
 
 import importlib.metadata
 
@@ -20,8 +20,8 @@ default_parameters = {MaximumProbability: 10000}
 del MaximumProbability
 
 __all__ = [
-    "small_mcstas_3_sample",
-    "NMXReducedData",
     "NMXData",
+    "NMXReducedData",
     "default_parameters",
+    "small_mcstas_3_sample",
 ]
