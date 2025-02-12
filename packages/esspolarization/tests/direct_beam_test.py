@@ -3,9 +3,9 @@
 import numpy as np
 import pytest
 import scipp as sc
-from ess import polarization as pol
 from scipp.testing import assert_allclose, assert_identical
 
+from ess import polarization as pol
 from ess.polarization import base
 
 # Setup logs for four sections of length 250:

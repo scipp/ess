@@ -5,10 +5,12 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Generic
 
-import ess.isissans as isis
 import mantid.api as _mantid_api
 import sciline as sl
 import scipp as sc
+from mantid import simpleapi as _mantid_simpleapi
+
+import ess.isissans as isis
 from ess.isissans.data import LoadedFileContents
 from ess.isissans.mantidio import DataWorkspace, Period
 from ess.sans.types import (
@@ -24,7 +26,6 @@ from ess.sans.types import (
     TransmissionRun,
     UncertaintyBroadcastMode,
 )
-from mantid import simpleapi as _mantid_simpleapi
 
 # In this case the "sample" is the analyzer cell, of which we want to measure
 # the transmission fraction.

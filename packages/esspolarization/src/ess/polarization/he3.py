@@ -5,6 +5,7 @@ from typing import Generic, NewType, TypeVar
 
 import sciline as sl
 import scipp as sc
+
 from ess.reduce.uncertainty import broadcast_with_upper_bound_variances
 
 from .types import (
