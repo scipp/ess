@@ -4,7 +4,7 @@
 import importlib.metadata
 
 from . import general, io, sans2d, zoom
-from .general import default_parameters, SampleOffset, MonitorOffset, DetectorBankOffset
+from .general import DetectorBankOffset, MonitorOffset, SampleOffset, default_parameters
 from .io import CalibrationFilename
 from .visualization import plot_flat_detector_xy
 
@@ -22,10 +22,10 @@ __all__ = [
     'DetectorBankOffset',
     'MonitorOffset',
     'SampleOffset',
-    'io',
-    'providers',
-    'plot_flat_detector_xy',
-    'sans2d',
     'default_parameters',
+    'io',
+    'plot_flat_detector_xy',
+    'providers',
+    'sans2d',
     'zoom',
 ]

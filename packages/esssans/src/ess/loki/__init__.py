@@ -14,7 +14,7 @@ except importlib.metadata.PackageNotFoundError:
 del importlib
 
 __all__ = [
-    'workflow',
-    'default_parameters',
     'LokiAtLarmorWorkflow',
+    'default_parameters',
+    'workflow',
 ]
