@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
-# ruff: noqa: E402, F401
+# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+# ruff: noqa: E402, F401, I
 
 import importlib.metadata
 
 try:
-    __version__ = importlib.metadata.version(__package__ or __name__)
+    __version__ = importlib.metadata.version("esspolarization")
 except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
@@ -60,8 +60,8 @@ __all__ = [
     "DirectBeamNoCell",
     "DirectBeamQRange",
     "Down",
-    "HalfPolarizedWorkflow",
     "HalfPolarizedCorrectedData",
+    "HalfPolarizedWorkflow",
     "He3CellLength",
     "He3CellPressure",
     "He3CellWorkflow",
@@ -72,6 +72,7 @@ __all__ = [
     "He3PolarizationFunction",
     "He3TransmissionEmptyGlass",
     "He3TransmissionFunction",
+    "NoAnalyzer",
     "PolarizationAnalysisWorkflow",
     "PolarizationCorrectedData",
     "Polarizer",
@@ -81,6 +82,5 @@ __all__ = [
     "SupermirrorEfficiencyFunction",
     "SupermirrorWorkflow",
     "TransmissionFunction",
-    "NoAnalyzer",
     "Up",
 ]
