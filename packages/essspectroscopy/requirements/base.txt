@@ -5,7 +5,7 @@
 #
 #    pip-compile-multi
 #
-choppera==0.1.5
+choppera==0.1.6
     # via -r base.in
 contourpy==1.3.1
     # via matplotlib
@@ -13,9 +13,9 @@ cyclebane==24.10.0
     # via sciline
 cycler==0.12.1
     # via matplotlib
-essreduce==24.12.0
+essreduce==25.2.0
     # via -r base.in
-fonttools==4.55.3
+fonttools==4.56.0
     # via matplotlib
 h5py==3.12.1
     # via
@@ -33,7 +33,7 @@ mpltoolbox==24.5.1
     # via scippneutron
 networkx==3.4.2
     # via cyclebane
-numpy==2.2.1
+numpy==2.2.2
     # via
     #   choppera
     #   contourpy
@@ -63,14 +63,14 @@ sciline==24.10.0
     # via
     #   -r base.in
     #   essreduce
-scipp==24.11.2
+scipp==25.2.0
     # via
     #   -r base.in
     #   choppera
     #   essreduce
     #   scippneutron
     #   scippnexus
-scippneutron==24.12.0
+scippneutron==25.1.0
     # via
     #   -r base.in
     #   essreduce
@@ -80,7 +80,7 @@ scippnexus==24.11.1
     #   choppera
     #   essreduce
     #   scippneutron
-scipy==1.15.0
+scipy==1.15.1
     # via
     #   choppera
     #   scippneutron

@@ -6,9 +6,9 @@
 
 import importlib.metadata
 
+from .detector import providers
 from .io import nexus
 from .workflow import BifrostSimulationWorkflow
-from .detector import providers
 
 try:
     __version__ = importlib.metadata.version("essspectroscopy")
