@@ -78,7 +78,7 @@ def amor_psi_software_result(number: int | str) -> Filename[SampleRun]:
 
 
 __all__ = [
+    "amor_psi_software_result",
     "amor_reference_run",
     "amor_sample_run",
-    "amor_psi_software_result",
 ]
