@@ -5,6 +5,7 @@ Coordinate transformations for powder diffraction.
 """
 
 import numpy as np
+import sciline as sl
 import scipp as sc
 import scippneutron as scn
 
@@ -17,18 +18,25 @@ from .types import (
     CalibrationData,
     DataWithScatteringCoordinates,
     DetectorData,
+    DistanceResolution,
     DspacingData,
     ElasticCoordTransformGraph,
     FilteredData,
     IofDspacing,
     IofTof,
+    LookupTableRelativeErrorThreshold,
+    Ltotal,
     MaskedData,
     MonitorData,
     MonitorType,
+    PulsePeriod,
+    PulseStride,
+    PulseStrideOffset,
     RunType,
+    TimeOfFlightLookupTable,
+    TimeResolution,
     TofData,
     TofMonitorData,
-    TofWorkflow,
     WavelengthMonitor,
 )
 
@@ -236,20 +244,64 @@ def convert_reduced_to_tof(
     )
 
 
+def build_tof_lookup_table(
+    pulse_period: PulsePeriod,
+    pulse_stride: PulseStride,
+    pulse_stride_offset: PulseStrideOffset,
+    distance_resolution: DistanceResolution,
+    time_resolution: TimeResolution,
+    error_threshold: LookupTableRelativeErrorThreshold,
+) -> TimeOfFlightLookupTable:
+    wf = sl.Pipeline(
+        time_of_flight.providers(), params=time_of_flight.default_parameters()
+    )
+    wf[time_of_flight.PulsePeriod] = pulse_period
+    wf[time_of_flight.PulseStride] = pulse_stride
+    wf[time_of_flight.PulseStrideOffset] = pulse_stride_offset
+    wf[time_of_flight.DistanceResolution] = distance_resolution
+    wf[time_of_flight.TimeResolution] = time_resolution
+    wf[time_of_flight.LookupTableRelativeErrorThreshold] = error_threshold
+    return wf.compute(time_of_flight.TimeOfFlightLookupTable)
+
+
 def compute_detector_time_of_flight(
-    detector_data: DetectorData[RunType], tof_workflow: TofWorkflow
+    detector_data: DetectorData[RunType],
+    lookup: TimeOfFlightLookupTable,
+    ltotal: Ltotal,
+    pulse_period: PulsePeriod,
+    pulse_stride: PulseStride,
+    pulse_stride_offset: PulseStrideOffset,
 ) -> TofData[RunType]:
-    wf = tof_workflow.pipeline.copy()
+    wf = sl.Pipeline(
+        time_of_flight.providers(), params=time_of_flight.default_parameters()
+    )
     wf[time_of_flight.RawData] = detector_data
+    wf[time_of_flight.TimeOfFlightLookupTable] = lookup
+    wf[time_of_flight.Ltotal] = ltotal
+    wf[time_of_flight.PulsePeriod] = pulse_period
+    wf[time_of_flight.PulseStride] = pulse_stride
+    wf[time_of_flight.PulseStrideOffset] = pulse_stride_offset
     return TofData[RunType](wf.compute(time_of_flight.TofData))
 
 
 def compute_monitor_time_of_flight(
-    monitor: MonitorData[RunType, MonitorType], tof_workflow: TofWorkflow
+    monitor: MonitorData[RunType, MonitorType],
+    lookup: TimeOfFlightLookupTable,
+    ltotal: Ltotal,
+    pulse_period: PulsePeriod,
+    pulse_stride: PulseStride,
+    pulse_stride_offset: PulseStrideOffset,
 ) -> TofMonitorData[RunType, MonitorType]:
-    wf = tof_workflow.pipeline.copy()
+    wf = sl.Pipeline(
+        time_of_flight.providers(), params=time_of_flight.default_parameters()
+    )
     wf.insert(time_of_flight.resample_tof_data)
     wf[time_of_flight.RawData] = monitor
+    wf[time_of_flight.TimeOfFlightLookupTable] = lookup
+    wf[time_of_flight.Ltotal] = ltotal
+    wf[time_of_flight.PulsePeriod] = pulse_period
+    wf[time_of_flight.PulseStride] = pulse_stride
+    wf[time_of_flight.PulseStrideOffset] = pulse_stride_offset
     out = wf.compute(time_of_flight.ResampledTofData)
     inds = out.values == 0.0
     out.values[inds] = np.nan
@@ -276,4 +328,5 @@ providers = (
     convert_monitor_to_wavelength,
     compute_detector_time_of_flight,
     compute_monitor_time_of_flight,
+    build_tof_lookup_table,
 )

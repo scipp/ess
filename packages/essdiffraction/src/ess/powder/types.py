@@ -16,7 +16,9 @@ import scipp as sc
 from scippneutron.io import cif
 
 from ess.reduce.nexus import types as reduce_t
-from ess.reduce.time_of_flight import TofWorkflow as _TofWorkflow
+from ess.reduce.time_of_flight import types as tof_t
+
+# from ess.reduce.time_of_flight import TofWorkflow as _TofWorkflow
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
 
 # 1 TypeVars used to parametrize the generic parts of the workflow
@@ -39,6 +41,15 @@ Position = reduce_t.Position
 VanadiumRun = reduce_t.VanadiumRun
 
 DetectorBankSizes = reduce_t.DetectorBankSizes
+
+PulsePeriod = tof_t.PulsePeriod
+PulseStride = tof_t.PulseStride
+PulseStrideOffset = tof_t.PulseStrideOffset
+DistanceResolution = tof_t.DistanceResolution
+TimeResolution = tof_t.TimeResolution
+LookupTableRelativeErrorThreshold = tof_t.LookupTableRelativeErrorThreshold
+TimeOfFlightLookupTable = tof_t.TimeOfFlightLookupTable
+Ltotal = tof_t.Ltotal
 
 RunType = TypeVar("RunType", SampleRun, VanadiumRun)
 # Include Monitor2 because a single constraint is not allowed.
@@ -194,8 +205,8 @@ ReducedTofCIF = NewType("ReducedTofCIF", cif.CIF)
 """Reduced data in time-of-flight, ready to be saved to a CIF file."""
 
 
-TofWorkflow = _TofWorkflow
-"""Workflow for computing time-of-flight data."""
+# TofWorkflow = _TofWorkflow
+# """Workflow for computing time-of-flight data."""
 
 
 class TofMonitorData(

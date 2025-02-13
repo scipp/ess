@@ -16,6 +16,7 @@ from ess.powder.types import (
     CaveMonitorPosition,
     DetectorData,
     Filename,
+    Ltotal,
     MonitorData,
     MonitorFilename,
     MonitorType,
@@ -263,8 +264,11 @@ def assemble_detector_data(
 
     period = (1.0 / sc.scalar(14.0, unit="Hz")).to(unit="us")
     # Bin the data into bins with a 71ms period.
-    npulses = int((da.bins.coords["tof"].max() / period).value)
+    npulses = int((da.bins.coords["tof"].max() / period).ceil().value)
     da = da.bin(tof=sc.arange("tof", npulses + 1) * period)
+    # npulses = int((da.bins.coords["tof"].max() / period).value) + 1
+    # print('npulses', npulses)
+    # da = da.bin(tof=sc.arange("tof", npulses) * period)
     # Add a event_time_zero coord for each bin, but not as bin edges,
     # as all events in the same pulse have the same event_time_zero, hence the `[:2]`
     # We need to pick a start time. The actual value does not matter. We chose the
@@ -279,6 +283,11 @@ def assemble_detector_data(
     da.bins.coords["event_time_offset"] = (da.bins.coords.pop("tof") % period).to(
         unit="us"
     )
+    # Add a event_time_zero coord for each event
+    da.bins.coords["event_time_zero"] = sc.bins_like(
+        da.bins.coords["event_time_offset"], da.coords["event_time_zero"]
+    )
+    da = da.bins.concat('event_time_zero')
     # Add a useful Ltotal coordinate
     graph = scn.conversion.graph.beamline.beamline(scatter=True)
     da = da.transform_coords("Ltotal", graph=graph)
@@ -315,6 +324,16 @@ def dummy_sample_position() -> Position[snx.NXsample, RunType]:
     )
 
 
+def extract_ltotal(detector: DetectorData[RunType]) -> Ltotal:
+    """
+    Extract Ltotal from the detector data.
+    TODO: This is a temporary implementation. We should instead read the positions
+    separately from the event data, so we don't need to re-load the positions every time
+    new events come in while streaming live data.
+    """
+    return Ltotal(detector.coords["Ltotal"])
+
+
 def LoadGeant4Workflow() -> sciline.Pipeline:
     """
     Workflow for loading NeXus data.
@@ -331,4 +350,5 @@ def LoadGeant4Workflow() -> sciline.Pipeline:
     wf.insert(assemble_monitor_data)
     wf.insert(dummy_source_position)
     wf.insert(dummy_sample_position)
+    wf.insert(extract_ltotal)
     return wf
