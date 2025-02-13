@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
-# ruff: noqa: E402, F401
+# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+# ruff: noqa: E402, F401, I
 
 import importlib.metadata
 
@@ -17,12 +17,12 @@ from .beam_center_finder import beam_center_from_center_of_mass
 from .direct_beam import direct_beam
 from .types import BackgroundSubtractedIofQ, IofQ, ReturnEvents, SampleRun
 from .workflow import (
+    SansWorkflow,
     providers,
     with_background_runs,
     with_banks,
     with_pixel_mask_filenames,
     with_sample_runs,
-    SansWorkflow,
 )
 
 try:
@@ -35,8 +35,9 @@ del importlib
 __all__ = [
     'BackgroundSubtractedIofQ',
     'IofQ',
-    'SampleRun',
     'ReturnEvents',
+    'SampleRun',
+    'SansWorkflow',
     'beam_center_finder',
     'beam_center_from_center_of_mass',
     'common',
@@ -51,5 +52,4 @@ __all__ = [
     'with_banks',
     'with_pixel_mask_filenames',
     'with_sample_runs',
-    'SansWorkflow',
 ]
