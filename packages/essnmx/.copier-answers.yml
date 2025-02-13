@@ -1,5 +1,5 @@
 # Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
-_commit: aa5dc5e
+_commit: 5c4fd02
 _src_path: gh:scipp/copier_template
 description: Data reduction for NMX at the European Spallation Source.
 max_python: '3.13'
@@ -10,4 +10,4 @@ orgname: scipp
 prettyname: ESSnmx
 projectname: essnmx
 related_projects: Scipp,Sciline,Plopp,ScippNexus
-year: 2024
+year: 2025
