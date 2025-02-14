@@ -15,10 +15,11 @@ from ess.powder.types import (
     CaveMonitor,
     CaveMonitorPosition,
     DetectorData,
+    DetectorLtotal,
     Filename,
-    Ltotal,
     MonitorData,
     MonitorFilename,
+    MonitorLtotal,
     MonitorType,
     NeXusComponent,
     NeXusDetectorName,
@@ -324,14 +325,26 @@ def dummy_sample_position() -> Position[snx.NXsample, RunType]:
     )
 
 
-def extract_ltotal(detector: DetectorData[RunType]) -> Ltotal:
+def extract_detector_ltotal(detector: DetectorData[RunType]) -> DetectorLtotal[RunType]:
     """
     Extract Ltotal from the detector data.
     TODO: This is a temporary implementation. We should instead read the positions
     separately from the event data, so we don't need to re-load the positions every time
     new events come in while streaming live data.
     """
-    return Ltotal(detector.coords["Ltotal"])
+    return DetectorLtotal[RunType](detector.coords["Ltotal"])
+
+
+def extract_monitor_ltotal(
+    monitor: MonitorData[RunType, MonitorType],
+) -> MonitorLtotal[RunType, MonitorType]:
+    """
+    Extract Ltotal from the monitor data.
+    TODO: This is a temporary implementation. We should instead read the positions
+    separately from the event data, so we don't need to re-load the positions every time
+    new events come in while streaming live data.
+    """
+    return MonitorLtotal[RunType, MonitorType](monitor.coords["Ltotal"])
 
 
 def LoadGeant4Workflow() -> sciline.Pipeline:
@@ -350,5 +363,6 @@ def LoadGeant4Workflow() -> sciline.Pipeline:
     wf.insert(assemble_monitor_data)
     wf.insert(dummy_source_position)
     wf.insert(dummy_sample_position)
-    wf.insert(extract_ltotal)
+    wf.insert(extract_detector_ltotal)
+    wf.insert(extract_monitor_ltotal)
     return wf

@@ -49,7 +49,6 @@ DistanceResolution = tof_t.DistanceResolution
 TimeResolution = tof_t.TimeResolution
 LookupTableRelativeErrorThreshold = tof_t.LookupTableRelativeErrorThreshold
 TimeOfFlightLookupTable = tof_t.TimeOfFlightLookupTable
-Ltotal = tof_t.Ltotal
 
 RunType = TypeVar("RunType", SampleRun, VanadiumRun)
 # Include Monitor2 because a single constraint is not allowed.
@@ -205,8 +204,14 @@ ReducedTofCIF = NewType("ReducedTofCIF", cif.CIF)
 """Reduced data in time-of-flight, ready to be saved to a CIF file."""
 
 
-# TofWorkflow = _TofWorkflow
-# """Workflow for computing time-of-flight data."""
+class DetectorLtotal(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """Total path length of neutrons from source to detector (L1 + L2)."""
+
+
+class MonitorLtotal(
+    sciline.ScopeTwoParams[RunType, MonitorType, sc.Variable], sc.Variable
+):
+    """Total path length of neutrons from source to monitor."""
 
 
 class TofMonitorData(

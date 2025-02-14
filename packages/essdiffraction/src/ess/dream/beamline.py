@@ -107,7 +107,9 @@ def choppers(configuration: InstrumentConfiguration) -> dict[str, DiskChopper]:
                 "bcc": DiskChopper(
                     frequency=sc.scalar(112.0, unit="Hz"),
                     beam_position=sc.scalar(0.0, unit="deg"),
-                    phase=sc.scalar(240 - 180, unit="deg"),
+                    phase=sc.scalar(215 - 180, unit="deg"),
+                    # Use 240 to reduce overlap between frames
+                    # phase=sc.scalar(240 - 180, unit="deg"),
                     axle_position=sc.vector(value=[0, 0, 9.78], unit="m"),
                     slit_begin=sc.array(
                         dims=["cutout"], values=[-36.875, 143.125], unit="deg"
