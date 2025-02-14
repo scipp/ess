@@ -27,6 +27,7 @@ def _make_pooch():
             "DREAM_simple_pwd_workflow/Cave_TOF_Monitor_diam_in_can.dat": "md5:ef24f4a4186c628574046e6629e31611",  # noqa: E501
             "DREAM_simple_pwd_workflow/Cave_TOF_Monitor_van_can.dat": "md5:e63456c347fb36a362a0b5ae2556b3cf",  # noqa: E501
             "DREAM_simple_pwd_workflow/Cave_TOF_Monitor_vana_inc_coh.dat": "md5:701d66792f20eb283a4ce76bae0c8f8f",  # noqa: E501
+            "DREAM-high-flux-tof-lookup-table.h5": "md5:404145a970ed1188e524cba10194610e",  # noqa: E501
         },
     )
 
@@ -146,3 +147,8 @@ def simulated_monitor_empty_can() -> str:
     This is the DREAM cave monitor for ``simulated_empty_can``.
     """
     return get_path("DREAM_simple_pwd_workflow/Cave_TOF_Monitor_van_can.dat")
+
+
+def tof_lookup_table_high_flux() -> str:
+    """Path to a HDF5 file containing a lookup table for high-flux ToF."""
+    return get_path("DREAM-high-flux-tof-lookup-table.h5")

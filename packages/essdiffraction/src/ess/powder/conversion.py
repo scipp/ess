@@ -35,6 +35,7 @@ from .types import (
     PulseStrideOffset,
     RunType,
     TimeOfFlightLookupTable,
+    TimeOfFlightLookupTableFilename,
     TimeResolution,
     TofData,
     TofMonitorData,
@@ -265,6 +266,12 @@ def build_tof_lookup_table(
     return wf.compute(time_of_flight.TimeOfFlightLookupTable)
 
 
+def load_tof_lookup_table(
+    filename: TimeOfFlightLookupTableFilename,
+) -> TimeOfFlightLookupTable:
+    return TimeOfFlightLookupTable(sc.io.load_hdf5(filename))
+
+
 def compute_detector_time_of_flight(
     detector_data: DetectorData[RunType],
     lookup: TimeOfFlightLookupTable,
@@ -329,5 +336,5 @@ providers = (
     convert_monitor_to_wavelength,
     compute_detector_time_of_flight,
     compute_monitor_time_of_flight,
-    build_tof_lookup_table,
+    load_tof_lookup_table,
 )

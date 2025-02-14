@@ -220,4 +220,8 @@ class TofMonitorData(
     """Monitor data with time-of-flight coordinate."""
 
 
+TimeOfFlightLookupTableFilename = NewType("TimeOfFlightLookupTableFilename", str)
+"""Filename of the time-of-flight lookup table."""
+
+
 del sc, sciline, NewType, TypeVar
