@@ -47,8 +47,10 @@ PulseStride = tof_t.PulseStride
 PulseStrideOffset = tof_t.PulseStrideOffset
 DistanceResolution = tof_t.DistanceResolution
 TimeResolution = tof_t.TimeResolution
+LtotalRange = tof_t.LtotalRange
 LookupTableRelativeErrorThreshold = tof_t.LookupTableRelativeErrorThreshold
 TimeOfFlightLookupTable = tof_t.TimeOfFlightLookupTable
+SimulationResults = tof_t.SimulationResults
 
 RunType = TypeVar("RunType", SampleRun, VanadiumRun)
 # Include Monitor2 because a single constraint is not allowed.

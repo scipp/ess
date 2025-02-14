@@ -8,7 +8,6 @@ import sciline
 import scipp as sc
 import scipp.testing
 import scippnexus as snx
-from scippneutron.chopper import DiskChopper
 from scippneutron.io.cif import Author
 
 import ess.dream.data  # noqa: F401
@@ -24,12 +23,15 @@ from ess.powder.types import (
     CalibrationFilename,
     CaveMonitorPosition,
     CIFAuthors,
+    DistanceResolution,
     DspacingBins,
     DspacingData,
     Filename,
     IofDspacing,
     IofDspacingTwoTheta,
     IofTof,
+    LookupTableRelativeErrorThreshold,
+    LtotalRange,
     MaskedData,
     MonitorFilename,
     NeXusDetectorName,
@@ -37,8 +39,10 @@ from ess.powder.types import (
     Position,
     ReducedTofCIF,
     SampleRun,
+    SimulationResults,
+    TimeOfFlightLookupTableFilename,
+    TimeResolution,
     TofMask,
-    TofWorkflow,
     TwoThetaBins,
     TwoThetaMask,
     UncertaintyBroadcastMode,
@@ -59,6 +63,7 @@ params = {
     MonitorFilename[SampleRun]: dream.data.simulated_monitor_diamond_sample(),
     MonitorFilename[VanadiumRun]: dream.data.simulated_monitor_vanadium_sample(),
     MonitorFilename[BackgroundRun]: dream.data.simulated_monitor_empty_can(),
+    TimeOfFlightLookupTableFilename: dream.data.tof_lookup_table_high_flux(),
     CalibrationFilename: None,
     UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
     DspacingBins: sc.linspace('dspacing', 0.0, 2.3434, 201, unit='angstrom'),
@@ -83,98 +88,6 @@ params = {
 }
 
 
-def dream_choppers():
-    psc1 = DiskChopper(
-        frequency=sc.scalar(14.0, unit="Hz"),
-        beam_position=sc.scalar(0.0, unit="deg"),
-        phase=sc.scalar(286 - 180, unit="deg"),
-        axle_position=sc.vector(value=[0, 0, 6.145], unit="m"),
-        slit_begin=sc.array(
-            dims=["cutout"],
-            values=[-1.23, 70.49, 84.765, 113.565, 170.29, 271.635, 286.035, 301.17],
-            unit="deg",
-        ),
-        slit_end=sc.array(
-            dims=["cutout"],
-            values=[1.23, 73.51, 88.035, 116.835, 175.31, 275.565, 289.965, 303.63],
-            unit="deg",
-        ),
-        slit_height=sc.scalar(10.0, unit="cm"),
-        radius=sc.scalar(30.0, unit="cm"),
-    )
-
-    psc2 = DiskChopper(
-        frequency=sc.scalar(-14.0, unit="Hz"),
-        beam_position=sc.scalar(0.0, unit="deg"),
-        phase=sc.scalar(-236, unit="deg"),
-        axle_position=sc.vector(value=[0, 0, 6.155], unit="m"),
-        slit_begin=sc.array(
-            dims=["cutout"],
-            values=[-1.23, 27.0, 55.8, 142.385, 156.765, 214.115, 257.23, 315.49],
-            unit="deg",
-        ),
-        slit_end=sc.array(
-            dims=["cutout"],
-            values=[1.23, 30.6, 59.4, 145.615, 160.035, 217.885, 261.17, 318.11],
-            unit="deg",
-        ),
-        slit_height=sc.scalar(10.0, unit="cm"),
-        radius=sc.scalar(30.0, unit="cm"),
-    )
-
-    oc = DiskChopper(
-        frequency=sc.scalar(14.0, unit="Hz"),
-        beam_position=sc.scalar(0.0, unit="deg"),
-        phase=sc.scalar(297 - 180 - 90, unit="deg"),
-        axle_position=sc.vector(value=[0, 0, 6.174], unit="m"),
-        slit_begin=sc.array(dims=["cutout"], values=[-27.6 * 0.5], unit="deg"),
-        slit_end=sc.array(dims=["cutout"], values=[27.6 * 0.5], unit="deg"),
-        slit_height=sc.scalar(10.0, unit="cm"),
-        radius=sc.scalar(30.0, unit="cm"),
-    )
-
-    bcc = DiskChopper(
-        frequency=sc.scalar(112.0, unit="Hz"),
-        beam_position=sc.scalar(0.0, unit="deg"),
-        phase=sc.scalar(215 - 180, unit="deg"),
-        # phase=sc.scalar(240 - 180, unit="deg"),
-        axle_position=sc.vector(value=[0, 0, 9.78], unit="m"),
-        slit_begin=sc.array(dims=["cutout"], values=[-36.875, 143.125], unit="deg"),
-        slit_end=sc.array(dims=["cutout"], values=[36.875, 216.875], unit="deg"),
-        slit_height=sc.scalar(10.0, unit="cm"),
-        radius=sc.scalar(30.0, unit="cm"),
-    )
-
-    t0 = DiskChopper(
-        frequency=sc.scalar(28.0, unit="Hz"),
-        beam_position=sc.scalar(0.0, unit="deg"),
-        phase=sc.scalar(280 - 180, unit="deg"),
-        axle_position=sc.vector(value=[0, 0, 13.05], unit="m"),
-        slit_begin=sc.array(dims=["cutout"], values=[-314.9 * 0.5], unit="deg"),
-        slit_end=sc.array(dims=["cutout"], values=[314.9 * 0.5], unit="deg"),
-        slit_height=sc.scalar(10.0, unit="cm"),
-        radius=sc.scalar(30.0, unit="cm"),
-    )
-
-    return {"psc1": psc1, "psc2": psc2, "oc": oc, "bcc": bcc, "t0": t0}
-
-
-@pytest.fixture(scope="module")
-def tof_workflow():
-    tof_wf = time_of_flight.TofWorkflow(
-        simulated_neutrons=time_of_flight.simulate_beamline(
-            choppers=dream_choppers(),
-            neutrons=500_000,
-            seed=123,
-        ),
-        ltotal_range=(sc.scalar(70.0, unit='m'), sc.scalar(80.0, unit='m')),
-        error_threshold=1.0,
-    )
-    # Save expensive steps from being re-computed many times
-    tof_wf.cache_results()
-    return tof_wf
-
-
 @pytest.fixture(params=["mantle", "endcap_backward", "endcap_forward"])
 def params_for_det(request):
     # Not available in simulated data
@@ -193,43 +106,55 @@ def make_workflow(params_for_det, *, run_norm):
     return wf
 
 
-def test_pipeline_can_compute_dspacing_result(workflow, tof_workflow):
+def test_pipeline_can_compute_dspacing_result(workflow):
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    workflow[TofWorkflow] = tof_workflow
     result = workflow.compute(IofDspacing)
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
 
-def test_pipeline_can_compute_dspacing_result_with_hist_monitor_norm(
-    params_for_det, tof_workflow
-):
+def test_pipeline_can_compute_dspacing_result_using_custom_built_tof_lookup(workflow):
+    workflow.insert(powder.conversion.build_tof_lookup_table)
+    workflow = powder.with_pixel_mask_filenames(workflow, [])
+    workflow[SimulationResults] = time_of_flight.simulate_beamline(
+        choppers=dream.beamline.choppers(
+            dream.beamline.InstrumentConfiguration.high_flux
+        ),
+        neutrons=2_000_000,
+    )
+    workflow[LtotalRange] = sc.scalar(60.0, unit="m"), sc.scalar(80.0, unit="m")
+    workflow[DistanceResolution] = sc.scalar(0.1, unit="m")
+    workflow[TimeResolution] = sc.scalar(250.0, unit='us')
+    workflow[LookupTableRelativeErrorThreshold] = 0.02
+    result = workflow.compute(IofDspacing)
+    assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
+    assert sc.identical(result.coords['dspacing'], params[DspacingBins])
+
+
+def test_pipeline_can_compute_dspacing_result_with_hist_monitor_norm(params_for_det):
     workflow = make_workflow(
         params_for_det, run_norm=powder.RunNormalization.monitor_histogram
     )
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    workflow[TofWorkflow] = tof_workflow
     result = workflow.compute(IofDspacing)
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
 
 def test_pipeline_can_compute_dspacing_result_with_integrated_monitor_norm(
-    params_for_det, tof_workflow
+    params_for_det,
 ):
     workflow = make_workflow(
         params_for_det, run_norm=powder.RunNormalization.monitor_integrated
     )
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    workflow[TofWorkflow] = tof_workflow
     result = workflow.compute(IofDspacing)
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
 
-def test_workflow_is_deterministic(workflow, tof_workflow):
+def test_workflow_is_deterministic(workflow):
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    workflow[TofWorkflow] = tof_workflow
     # This is Sciline's default scheduler, but we want to be explicit here
     scheduler = sciline.scheduler.DaskScheduler()
     graph = workflow.get(IofTof, scheduler=scheduler)
@@ -238,9 +163,8 @@ def test_workflow_is_deterministic(workflow, tof_workflow):
     assert sc.identical(sc.values(result), sc.values(reference))
 
 
-def test_pipeline_can_compute_intermediate_results(workflow, tof_workflow):
+def test_pipeline_can_compute_intermediate_results(workflow):
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    workflow[TofWorkflow] = tof_workflow
     results = workflow.compute((NormalizedRunData[SampleRun], NeXusDetectorName))
     result = results[NormalizedRunData[SampleRun]]
 
@@ -252,8 +176,7 @@ def test_pipeline_can_compute_intermediate_results(workflow, tof_workflow):
     assert expected_dims.issubset(set(result.dims))
 
 
-def test_pipeline_group_by_two_theta(workflow, tof_workflow):
-    workflow[TofWorkflow] = tof_workflow
+def test_pipeline_group_by_two_theta(workflow):
     two_theta_bins = sc.linspace(
         dim='two_theta', unit='rad', start=0.8, stop=2.4, num=17
     )
@@ -266,8 +189,7 @@ def test_pipeline_group_by_two_theta(workflow, tof_workflow):
     assert sc.allclose(result.coords['two_theta'], two_theta_bins)
 
 
-def test_pipeline_wavelength_masking(workflow, tof_workflow):
-    workflow[TofWorkflow] = tof_workflow
+def test_pipeline_wavelength_masking(workflow):
     wmin = sc.scalar(0.18, unit="angstrom")
     wmax = sc.scalar(0.21, unit="angstrom")
     workflow[WavelengthMask] = lambda x: (x > wmin) & (x < wmax)
@@ -285,8 +207,7 @@ def test_pipeline_wavelength_masking(workflow, tof_workflow):
     )
 
 
-def test_pipeline_two_theta_masking(workflow, tof_workflow):
-    workflow[TofWorkflow] = tof_workflow
+def test_pipeline_two_theta_masking(workflow):
     tmin = sc.scalar(1.0, unit="rad")
     tmax = sc.scalar(1.2, unit="rad")
     workflow[TwoThetaMask] = lambda x: (x > tmin) & (x < tmax)
@@ -302,8 +223,7 @@ def test_pipeline_two_theta_masking(workflow, tof_workflow):
     )
 
 
-def test_pipeline_can_save_data(workflow, tof_workflow):
-    workflow[TofWorkflow] = tof_workflow
+def test_pipeline_can_save_data(workflow):
     workflow = powder.with_pixel_mask_filenames(workflow, [])
     result = workflow.compute(ReducedTofCIF)
 

@@ -26,6 +26,7 @@ from .types import (
     IofDspacing,
     IofTof,
     LookupTableRelativeErrorThreshold,
+    LtotalRange,
     MaskedData,
     MonitorData,
     MonitorLtotal,
@@ -34,6 +35,7 @@ from .types import (
     PulseStride,
     PulseStrideOffset,
     RunType,
+    SimulationResults,
     TimeOfFlightLookupTable,
     TimeOfFlightLookupTableFilename,
     TimeResolution,
@@ -247,6 +249,8 @@ def convert_reduced_to_tof(
 
 
 def build_tof_lookup_table(
+    simulation: SimulationResults,
+    ltotal_range: LtotalRange,
     pulse_period: PulsePeriod,
     pulse_stride: PulseStride,
     pulse_stride_offset: PulseStrideOffset,
@@ -257,6 +261,8 @@ def build_tof_lookup_table(
     wf = sl.Pipeline(
         time_of_flight.providers(), params=time_of_flight.default_parameters()
     )
+    wf[time_of_flight.SimulationResults] = simulation
+    wf[time_of_flight.LtotalRange] = ltotal_range
     wf[time_of_flight.PulsePeriod] = pulse_period
     wf[time_of_flight.PulseStride] = pulse_stride
     wf[time_of_flight.PulseStrideOffset] = pulse_stride_offset
