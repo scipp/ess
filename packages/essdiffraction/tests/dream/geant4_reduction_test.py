@@ -8,7 +8,7 @@ import sciline
 import scipp as sc
 import scipp.testing
 import scippnexus as snx
-from scippneutron.io.cif import Author
+from scippneutron import metadata
 
 import ess.dream.data  # noqa: F401
 from ess import dream, powder
@@ -72,8 +72,11 @@ params = {
     CaveMonitorPosition: sc.vector([0.0, 0.0, -4220.0], unit='mm'),
     CIFAuthors: CIFAuthors(
         [
-            Author(
-                name="Jane Doe", email="jane.doe@ess.eu", orcid="0000-0000-0000-0001"
+            metadata.Person(
+                name="Jane Doe",
+                email="jane.doe@ess.eu",
+                orcid_id="0000-0000-0000-0001",
+                corresponding=True,
             ),
         ]
     ),
@@ -229,7 +232,10 @@ def _assert_contains_source_info(cif_content: str) -> None:
 def _assert_contains_author_info(cif_content: str) -> None:
     assert "audit_contact_author.name 'Jane Doe'" in cif_content
     assert 'audit_contact_author.email jane.doe@ess.eu' in cif_content
-    assert 'audit_contact_author.id_orcid 0000-0000-0000-0001' in cif_content
+    assert (
+        'audit_contact_author.id_orcid https://orcid.org/0000-0000-0000-0001'
+        in cif_content
+    )
 
 
 def _assert_contains_beamline_info(cif_content: str) -> None:
