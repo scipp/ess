@@ -12,30 +12,32 @@ from ..reflectometry.types import (
 from .types import CoordTransformationGraph
 
 
-def theta(position, sample_position, sample_rotation, incident_angle_of_center_of_beam):
+def theta(
+    divergence_angle,
+    sample_rotation,
+):
     '''
     Angle of reflection.
 
     Computes the angle between the scattering direction of
     the neutron and the sample surface.
     '''
-    p = position - sample_position.to(unit=position.unit)
-    return (
-        sc.atan2(y=p.fields.x, x=p.fields.z)
-        - sample_rotation.to(unit='rad')
-        - incident_angle_of_center_of_beam.to(unit='rad')
-    )
+    return divergence_angle + sample_rotation.to(unit=divergence_angle.unit)
 
 
 def divergence_angle(
-    theta,
-    sample_rotation,
+    position, sample_position, detector_rotation, incident_angle_of_center_of_beam
 ):
     """
     Angle between the scattering direction and
     the ray from the sample to the center of the detector.
     """
-    return theta - sample_rotation.to(unit=theta.unit)
+    p = position - sample_position.to(unit=position.unit)
+    return (
+        sc.atan2(y=p.fields.x, x=p.fields.z)
+        - detector_rotation.to(unit='rad')
+        - incident_angle_of_center_of_beam.to(unit='rad')
+    )
 
 
 def wavelength(
