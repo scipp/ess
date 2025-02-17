@@ -5,17 +5,15 @@
 #
 #    pip-compile-multi
 #
-certifi==2024.12.14
+certifi==2025.1.31
     # via requests
-charset-normalizer==3.4.0
+charset-normalizer==3.4.1
     # via requests
-exceptiongroup==1.2.2
-    # via pytest
 idna==3.10
     # via requests
 iniconfig==2.0.0
     # via pytest
-numpy==2.2.0
+numpy==2.2.3
     # via pandas
 packaging==24.2
     # via
@@ -33,15 +31,13 @@ pytest==8.3.4
     # via -r basetest.in
 python-dateutil==2.9.0.post0
     # via pandas
-pytz==2024.2
+pytz==2025.1
     # via pandas
 requests==2.32.3
     # via pooch
 six==1.17.0
     # via python-dateutil
-tomli==2.2.1
-    # via pytest
-tzdata==2024.2
+tzdata==2025.1
     # via pandas
-urllib3==2.2.3
+urllib3==2.3.0
     # via requests
