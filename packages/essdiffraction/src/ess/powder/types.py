@@ -24,6 +24,7 @@ from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroad
 # 1 TypeVars used to parametrize the generic parts of the workflow
 
 BackgroundRun = reduce_t.BackgroundRun
+BunkerMonitor = reduce_t.Monitor2
 CalibratedDetector = reduce_t.CalibratedDetector
 CalibratedMonitor = reduce_t.CalibratedMonitor
 DetectorData = reduce_t.DetectorData
@@ -53,9 +54,7 @@ TimeOfFlightLookupTable = tof_t.TimeOfFlightLookupTable
 SimulationResults = tof_t.SimulationResults
 
 RunType = TypeVar("RunType", SampleRun, VanadiumRun)
-# Include Monitor2 because a single constraint is not allowed.
-# We will eventually have more than one...
-MonitorType = TypeVar("MonitorType", CaveMonitor, reduce_t.Monitor2)
+MonitorType = TypeVar("MonitorType", CaveMonitor, BunkerMonitor)
 
 
 # 2 Workflow parameters

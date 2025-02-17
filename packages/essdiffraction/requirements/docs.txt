@@ -14,11 +14,11 @@ attrs==25.1.0
     # via
     #   jsonschema
     #   referencing
-babel==2.16.0
+babel==2.17.0
     # via
     #   pydata-sphinx-theme
     #   sphinx
-beautifulsoup4==4.12.3
+beautifulsoup4==4.13.3
     # via
     #   nbconvert
     #   pydata-sphinx-theme
@@ -42,8 +42,6 @@ docutils==0.21.2
     #   sphinxcontrib-bibtex
 fastjsonschema==2.21.1
     # via nbformat
-idna==3.10
-    # via requests
 imagesize==1.4.1
     # via sphinx
 ipykernel==6.29.5
@@ -89,7 +87,7 @@ mdurl==0.1.2
     # via markdown-it-py
 mistune==3.1.1
     # via nbconvert
-myst-parser==4.0.0
+myst-parser==4.0.1
     # via -r docs.in
 nbclient==0.10.2
     # via nbconvert
@@ -114,7 +112,7 @@ platformdirs==4.3.6
     #   pooch
 pooch==1.8.2
     # via -r docs.in
-psutil==6.1.1
+psutil==7.0.0
     # via ipykernel
 pyarrow==19.0.0
     # via -r docs.in
@@ -180,8 +178,6 @@ sphinxcontrib-serializinghtml==2.0.0
     # via sphinx
 tinycss2==1.4.0
     # via bleach
-tomli==2.2.1
-    # via sphinx
 tornado==6.4.2
     # via
     #   ipykernel
@@ -194,3 +190,6 @@ webencodings==0.5.1
     # via
     #   bleach
     #   tinycss2
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools
