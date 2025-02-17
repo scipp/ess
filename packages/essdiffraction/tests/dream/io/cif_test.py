@@ -5,6 +5,7 @@ import io
 
 import pytest
 import scipp as sc
+from scippneutron import metadata
 from scippneutron.io import cif
 
 import ess.dream.io.cif
@@ -43,7 +44,7 @@ def save_reduced_tof_to_str(cif_: cif.CIF) -> str:
 def test_save_reduced_tof(ioftof: IofTof, cal: OutputCalibrationData) -> None:
     from ess.dream import __version__
 
-    author = cif.Author(name='John Doe')
+    author = metadata.Person(name='John Doe', corresponding=True)
     cif_ = ess.dream.io.cif.prepare_reduced_tof_cif(
         ioftof, authors=CIFAuthors([author]), calibration=cal
     )

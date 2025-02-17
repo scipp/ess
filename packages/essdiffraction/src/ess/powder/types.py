@@ -13,6 +13,7 @@ from typing import Any, NewType, TypeVar
 
 import sciline
 import scipp as sc
+from scippneutron import metadata
 from scippneutron.io import cif
 
 from ess.reduce.nexus import types as reduce_t
@@ -198,7 +199,7 @@ WavelengthMask = NewType("WavelengthMask", Callable | None)
 """WavelengthMask is a callable that returns a mask for a given WavelengthData."""
 
 
-CIFAuthors = NewType("CIFAuthors", list[cif.Author])
+CIFAuthors = NewType("CIFAuthors", list[metadata.Person])
 """List of authors to save to output CIF files."""
 
 ReducedTofCIF = NewType("ReducedTofCIF", cif.CIF)

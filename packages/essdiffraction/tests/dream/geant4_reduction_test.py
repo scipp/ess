@@ -8,7 +8,7 @@ import sciline
 import scipp as sc
 import scipp.testing
 import scippnexus as snx
-from scippneutron.io.cif import Author
+from scippneutron import metadata
 
 import ess.dream.data  # noqa: F401
 from ess import dream, powder
@@ -80,8 +80,11 @@ params = {
     CaveMonitorPosition: sc.vector([0.0, 0.0, -4220.0], unit='mm'),
     CIFAuthors: CIFAuthors(
         [
-            Author(
-                name="Jane Doe", email="jane.doe@ess.eu", orcid="0000-0000-0000-0001"
+            metadata.Person(
+                name="Jane Doe",
+                email="jane.doe@ess.eu",
+                orcid_id="0000-0000-0000-0001",
+                corresponding=True,
             ),
         ]
     ),

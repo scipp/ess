@@ -4,6 +4,7 @@
 """CIF writer for DREAM."""
 
 import scipp as sc
+from scippneutron import metadata
 from scippneutron.io import cif
 
 from ess.powder.calibration import OutputCalibrationData
@@ -41,7 +42,7 @@ def prepare_reduced_tof_cif(
         cif.CIF('reduced_tof')
         .with_reducers(f'ess.dream v{__version__}')
         .with_authors(*authors)
-        .with_beamline(beamline='DREAM', facility='ESS')
+        .with_beamline(beamline=metadata.Beamline(name='DREAM', facility='ESS'))
         .with_powder_calibration(calibration.to_cif_format())
         .with_reduced_powder_data(to_save)
     )
