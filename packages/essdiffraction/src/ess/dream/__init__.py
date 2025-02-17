@@ -21,11 +21,8 @@ del importlib
 
 __all__ = [
     'DreamGeant4Workflow',
-<<<<<<< HEAD
-    'beamline',
-=======
     '__version__',
->>>>>>> main
+    'beamline',
     'default_parameters',
     'instrument_view',
     'load_geant4_csv',
