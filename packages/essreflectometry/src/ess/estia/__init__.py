@@ -8,20 +8,19 @@ import scipp as sc
 from ..reflectometry import providers as reflectometry_providers
 from ..reflectometry import supermirror
 from ..reflectometry.types import (
+    BeamDivergenceLimits,
     BeamSize,
     DetectorSpatialResolution,
     NeXusDetectorName,
     RunType,
     SamplePosition,
-    BeamDivergenceLimits,
 )
-from . import conversions, load, resolution, workflow, normalization
+from . import conversions, load, normalization, resolution, workflow
 from .types import (
     AngularResolution,
     SampleSizeResolution,
     WavelengthResolution,
 )
-
 
 try:
     __version__ = importlib.metadata.version(__package__ or __name__)
@@ -67,14 +66,14 @@ def EstiaWorkflow() -> sciline.Pipeline:
 
 
 __all__ = [
-    "supermirror",
-    "conversions",
-    "load",
-    "resolution",
-    "providers",
-    "default_parameters",
-    "WavelengthResolution",
     "AngularResolution",
-    "SampleSizeResolution",
     "EstiaWorkflow",
+    "SampleSizeResolution",
+    "WavelengthResolution",
+    "conversions",
+    "default_parameters",
+    "load",
+    "providers",
+    "resolution",
+    "supermirror",
 ]
