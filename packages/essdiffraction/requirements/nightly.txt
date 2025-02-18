@@ -28,7 +28,7 @@ cyclebane==24.10.0
     # via sciline
 cycler==0.12.1
     # via matplotlib
-dask==2025.1.0
+dask==2025.2.0
     # via -r nightly.in
 decorator==5.1.1
     # via ipython
@@ -38,10 +38,6 @@ email-validator==2.2.0
     # via scippneutron
 essreduce @ git+https://github.com/scipp/essreduce@main
     # via -r nightly.in
-exceptiongroup==1.2.2
-    # via
-    #   ipython
-    #   pytest
 executing==2.2.0
     # via stack-data
 fonttools==4.56.0
@@ -58,8 +54,6 @@ idna==3.10
     # via
     #   email-validator
     #   requests
-importlib-metadata==8.6.1
-    # via dask
 iniconfig==2.0.0
     # via pytest
 ipydatawidgets==4.3.5
@@ -92,7 +86,7 @@ mpltoolbox==24.5.1
     # via scippneutron
 networkx==3.4.2
     # via cyclebane
-numpy==2.2.2
+numpy==2.2.3
     # via
     #   -r nightly.in
     #   contourpy
@@ -181,7 +175,7 @@ scippnexus @ git+https://github.com/scipp/scippnexus@main
     #   -r nightly.in
     #   essreduce
     #   scippneutron
-scipy==1.15.1
+scipy==1.15.2
     # via
     #   scippneutron
     #   scippnexus
@@ -189,8 +183,6 @@ six==1.17.0
     # via python-dateutil
 stack-data==0.6.3
     # via ipython
-tomli==2.2.1
-    # via pytest
 toolz==1.0.0
     # via
     #   dask
@@ -207,7 +199,6 @@ traittypes==0.2.1
     # via ipydatawidgets
 typing-extensions==4.12.2
     # via
-    #   ipython
     #   pydantic
     #   pydantic-core
 tzdata==2025.1
@@ -218,5 +209,3 @@ wcwidth==0.2.13
     # via prompt-toolkit
 widgetsnbextension==4.0.13
     # via ipywidgets
-zipp==3.21.0
-    # via importlib-metadata

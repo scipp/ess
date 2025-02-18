@@ -7,11 +7,24 @@ import scipp as sc
 from scippneutron.io import cif
 
 from ess.powder.calibration import OutputCalibrationData
-from ess.powder.types import CIFAuthors, IofTof, ReducedTofCIF
+from ess.powder.types import (
+    Beamline,
+    CIFAuthors,
+    IofTof,
+    ReducedTofCIF,
+    ReducerSoftwares,
+    Source,
+)
 
 
 def prepare_reduced_tof_cif(
-    da: IofTof, *, authors: CIFAuthors, calibration: OutputCalibrationData
+    da: IofTof,
+    *,
+    authors: CIFAuthors,
+    beamline: Beamline,
+    source: Source,
+    reducers: ReducerSoftwares,
+    calibration: OutputCalibrationData,
 ) -> ReducedTofCIF:
     """Construct a CIF builder with reduced data in d-spacing.
 
@@ -24,6 +37,12 @@ def prepare_reduced_tof_cif(
         Reduced 1d data with a ``'tof'`` dimension and coordinate.
     authors:
         List of authors to write to the file.
+    beamline:
+        Information about the beamline that the data was produced at.
+    source:
+        Information about the neutron source.
+    reducers:
+        List of software pieces used to reduce the data.
     calibration:
         Coefficients for conversion between d-spacing and final ToF.
         See :meth:`scippneutron.io.cif.CIF.with_powder_calibration`.
@@ -34,14 +53,12 @@ def prepare_reduced_tof_cif(
         An object that contains the reduced data and metadata.
         Us its ``save`` method to write the CIF file.
     """
-    from .. import __version__
-
     to_save = _prepare_data(da)
     return ReducedTofCIF(
         cif.CIF('reduced_tof')
-        .with_reducers(f'ess.dream v{__version__}')
+        .with_reducers(*(reducer.compact_repr for reducer in reducers))
         .with_authors(*authors)
-        .with_beamline(beamline='DREAM', facility='ESS')
+        .with_beamline(beamline, source)
         .with_powder_calibration(calibration.to_cif_format())
         .with_reduced_powder_data(to_save)
     )
