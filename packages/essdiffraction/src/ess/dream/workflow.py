@@ -8,6 +8,7 @@ import itertools
 import sciline
 import scipp as sc
 import scippnexus as snx
+from scippneutron.metadata import Software
 
 from ess.powder import providers as powder_providers
 from ess.powder import with_pixel_mask_filenames
@@ -20,6 +21,7 @@ from ess.powder.types import (
     CaveMonitorPosition,  # Should this be a DREAM-only parameter?
     PixelMaskFilename,
     Position,
+    ReducerSoftwares,
     SampleRun,
     TofMask,
     TwoThetaMask,
@@ -51,12 +53,25 @@ def default_parameters() -> dict:
         Position[snx.NXsource, VanadiumRun]: source_position,
         AccumulatedProtonCharge[SampleRun]: charge,
         AccumulatedProtonCharge[VanadiumRun]: charge,
-        CIFAuthors: CIFAuthors([]),
         TofMask: None,
         WavelengthMask: None,
         TwoThetaMask: None,
         CaveMonitorPosition: sc.vector([0.0, 0.0, -4220.0], unit='mm'),
+        CIFAuthors: CIFAuthors([]),
+        ReducerSoftwares: _collect_reducer_software(),
     }
+
+
+def _collect_reducer_software() -> ReducerSoftwares:
+    return ReducerSoftwares(
+        [
+            Software.from_package_metadata('ess.diffraction'),
+            Software.from_package_metadata('ess.dream'),
+            Software.from_package_metadata('ess.powder'),
+            Software.from_package_metadata('scippneutron'),
+            Software.from_package_metadata('scipp'),
+        ]
+    )
 
 
 def DreamGeant4Workflow(*, run_norm: RunNormalization) -> sciline.Pipeline:

@@ -54,8 +54,11 @@ idna==3.10
     # via
     #   email-validator
     #   requests
+<<<<<<< HEAD
 importlib-resources==6.5.2
     # via tof
+=======
+>>>>>>> main
 iniconfig==2.0.0
     # via pytest
 ipydatawidgets==4.3.5
@@ -188,8 +191,11 @@ six==1.17.0
     # via python-dateutil
 stack-data==0.6.3
     # via ipython
+<<<<<<< HEAD
 tof @ git+https://github.com/scipp/tof@main
     # via -r nightly.in
+=======
+>>>>>>> main
 toolz==1.0.0
     # via
     #   dask

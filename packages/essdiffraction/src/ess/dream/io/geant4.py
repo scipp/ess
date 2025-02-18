@@ -6,8 +6,10 @@ import sciline
 import scipp as sc
 import scippneutron as scn
 import scippnexus as snx
+from scippneutron.metadata import ESS_SOURCE
 
 from ess.powder.types import (
+    Beamline,
     CalibratedDetector,
     CalibratedMonitor,
     CalibrationData,
@@ -26,6 +28,7 @@ from ess.powder.types import (
     Position,
     RunType,
     SampleRun,
+    Source,
     VanadiumRun,
 )
 from ess.reduce.nexus.types import CalibratedBeamline
@@ -347,6 +350,18 @@ def extract_monitor_ltotal(
     return MonitorLtotal[RunType, MonitorType](monitor.coords["Ltotal"])
 
 
+def dream_beamline() -> Beamline:
+    return Beamline(
+        name="DREAM",
+        facility="ESS",
+        site="ESS",
+    )
+
+
+def ess_source() -> Source:
+    return ESS_SOURCE
+
+
 def LoadGeant4Workflow() -> sciline.Pipeline:
     """
     Workflow for loading NeXus data.
@@ -365,4 +380,6 @@ def LoadGeant4Workflow() -> sciline.Pipeline:
     wf.insert(dummy_sample_position)
     wf.insert(extract_detector_ltotal)
     wf.insert(extract_monitor_ltotal)
+    wf.insert(dream_beamline)
+    wf.insert(ess_source)
     return wf
