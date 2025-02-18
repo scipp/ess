@@ -47,3 +47,15 @@ def parse_events_ascii(lines):
                 da.coords[k] = sc.scalar(v)
             return da
     raise ValueError('Could not parse the file as a list of events.')
+
+
+def parse_events_h5(f):
+    pass
+
+
+'''
+def parse_events_h5(f):
+    f['entry1/data']
+    events = load_nx(f, 'NXentry/NXdetector/NXdata')
+    parameters = load_nx(f, 'NXentry/simulation/Param')
+'''

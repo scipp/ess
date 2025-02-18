@@ -1,3 +1,4 @@
+import h5py
 import scipp as sc
 
 from ..reflectometry.types import (
@@ -5,14 +6,18 @@ from ..reflectometry.types import (
     RawDetectorData,
     RunType,
 )
-from .mcstas import parse_events_ascii
+from .mcstas import parse_events_ascii, parse_events_h5
 
 
 def load_mcstas_events(
     filename: Filename[RunType],
 ) -> RawDetectorData[RunType]:
-    with open(filename) as f:
-        da = parse_events_ascii(f)
+    if h5py.is_hdf5(filename):
+        with h5py.File(filename) as f:
+            da = parse_events_h5(f)
+    else:
+        with open(filename) as f:
+            da = parse_events_ascii(f)
 
     da.coords['sample_rotation'] = sc.scalar(
         float(da.coords['omegaa'].value), unit='deg'
