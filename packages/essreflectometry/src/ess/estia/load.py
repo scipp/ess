@@ -29,17 +29,12 @@ def load_mcstas_events(
     da.coords['stripe'] = sc.arange('stripe', 0, 64)
     da.coords['z_index'] = sc.arange('x', 0, 14 * 32)
 
+    # Information is not available in the mcstas output files, therefore it's hardcoded
+    da.coords['sample_position'] = sc.vector([0.264298, -0.427595, 35.0512], unit='m')
     da.coords['detector_position'] = sc.vector(
         tuple(map(float, da.coords['position'].value.split(' '))), unit='m'
     )
-    da.coords['sample_position'] = sc.vector([0.264298, -0.427595, 35.0512], unit='m')
-    da.coords['source_position'] = sc.vector([0, 0, 0.0], unit='m')
 
-    position = sc.spatial.as_vectors(
-        x=sc.midpoints(da.coords['x']) * sc.scalar(1.0, unit='m'),
-        y=sc.midpoints(da.coords['y']) * sc.scalar(1.0, unit='m'),
-        z=sc.scalar(0.0, unit='m'),
-    )
     rotation_by_detector_rotation = sc.spatial.rotation(
         value=[
             sc.scalar(0.0),
@@ -47,6 +42,12 @@ def load_mcstas_events(
             sc.scalar(0.0),
             sc.cos(da.coords['detector_rotation'].to(unit='rad')),
         ]
+    )
+
+    position = sc.spatial.as_vectors(
+        x=sc.midpoints(da.coords['x']) * sc.scalar(1.0, unit='m'),
+        y=sc.midpoints(da.coords['y']) * sc.scalar(1.0, unit='m'),
+        z=sc.scalar(0.0, unit='m'),
     )
     da.coords['position'] = (
         da.coords['detector_position'] + rotation_by_detector_rotation * position
