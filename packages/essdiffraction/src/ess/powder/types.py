@@ -13,7 +13,6 @@ from typing import Any, NewType, TypeVar
 
 import sciline
 import scipp as sc
-from scippneutron import metadata
 from scippneutron.io import cif
 from scippneutron.metadata import Person, Software
 
