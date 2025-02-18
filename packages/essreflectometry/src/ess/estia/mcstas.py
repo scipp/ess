@@ -1,5 +1,8 @@
+import h5py
 import numpy as np
 import scipp as sc
+
+from ess.reflectometry.load import load_h5
 
 
 def parse_metadata_ascii(lines):
@@ -50,12 +53,26 @@ def parse_events_ascii(lines):
 
 
 def parse_events_h5(f):
-    pass
+    if isinstance(f, str):
+        with h5py.File(f) as ff:
+            return parse_events_h5(ff)
 
-
-'''
-def parse_events_h5(f):
-    f['entry1/data']
-    events = load_nx(f, 'NXentry/NXdetector/NXdata')
-    parameters = load_nx(f, 'NXentry/simulation/Param')
-'''
+    data, events, params = load_h5(
+        f,
+        'NXentry/NXdetector/NXdata',
+        'NXentry/NXdetector/NXdata/events',
+        'NXentry/simulation/Param',
+    )
+    da = sc.DataArray(
+        sc.array(dims=['events'], values=events[:, 0], variances=events[:, 0] ** 2),
+    )
+    for i, label in enumerate(data.attrs["ylabel"].decode().strip().split(' ')):
+        if label == 'p':
+            continue
+        da.coords[label] = sc.array(dims=['events'], values=events[:, i])
+    for k, v in params.items():
+        v = v[0]
+        if isinstance(v, bytes):
+            v = v.decode()
+        da.coords[k] = sc.scalar(v)
+    return da
