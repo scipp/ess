@@ -26,6 +26,7 @@
    filtering
    grouping
    smoothing
+   transform
    types
 ```
 
