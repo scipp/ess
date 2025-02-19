@@ -27,10 +27,11 @@ def load_mcstas_events(
     ybins = sc.linspace('y', -0.25, 0.25, 65)
     da = da.bin(x=xbins, y=ybins).rename_dims({'y': 'stripe'})
     da.coords['stripe'] = sc.arange('stripe', 0, 64)
-    da.coords['z_index'] = sc.arange('x', 0, 14 * 32)
+    da.coords['z_index'] = sc.arange('x', 14 * 32 - 1, -1, -1)
 
     # Information is not available in the mcstas output files, therefore it's hardcoded
     da.coords['sample_position'] = sc.vector([0.264298, -0.427595, 35.0512], unit='m')
+    da.coords['source_position'] = sc.vector([0, 0, 0.0], unit='m')
     da.coords['detector_position'] = sc.vector(
         tuple(map(float, da.coords['position'].value.split(' '))), unit='m'
     )
@@ -65,4 +66,6 @@ def load_mcstas_events(
         da.coords['sample_length'].value
     )
     da.coords["beam_size"] = sc.scalar(2.0, unit='mm')
+
+    da = da.fold('x', sizes={'blade': 14, 'wire': 32})
     return RawDetectorData[RunType](da)
