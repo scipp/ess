@@ -18,7 +18,6 @@ from scippneutron.metadata import Person, Software
 
 from ess.reduce.nexus import types as reduce_t
 from ess.reduce.time_of_flight import types as tof_t
-
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
 
 # 1 TypeVars used to parametrize the generic parts of the workflow
