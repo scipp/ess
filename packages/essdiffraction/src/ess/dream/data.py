@@ -185,5 +185,15 @@ def simulated_monitor_empty_can() -> str:
 
 
 def tof_lookup_table_high_flux() -> str:
-    """Path to a HDF5 file containing a lookup table for high-flux ToF."""
+    """Path to a HDF5 file containing a lookup table for high-flux ToF.
+
+    The table was created using the ``tof`` package and the chopper settings for the
+    DREAM instrument in high-resolution mode.
+    Note that the phase of the band-control chopper (BCC) was set to 240 degrees to
+    match that of the simulated data (this has since been found to be non-optimal as it
+    leads to time overlap between the two frames).
+
+    The notebook that was used to create the table can be found at
+    https://github.com/scipp/essdiffraction/blob/main/tools/dream-make-tof-lookup-table.ipynb
+    """
     return get_path("DREAM-high-flux-tof-lookup-table.h5")
