@@ -7,6 +7,7 @@ Components for DREAM
 
 import importlib.metadata
 
+from . import beamline
 from .instrument_view import instrument_view
 from .io import load_geant4_csv, nexus
 from .workflow import DreamGeant4Workflow, default_parameters
@@ -21,6 +22,7 @@ del importlib
 __all__ = [
     'DreamGeant4Workflow',
     '__version__',
+    'beamline',
     'default_parameters',
     'instrument_view',
     'load_geant4_csv',

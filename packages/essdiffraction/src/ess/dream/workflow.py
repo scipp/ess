@@ -28,6 +28,7 @@ from ess.powder.types import (
     VanadiumRun,
     WavelengthMask,
 )
+from ess.reduce import time_of_flight
 from ess.reduce.parameter import parameter_mappers
 from ess.reduce.workflow import register_workflow
 
@@ -81,7 +82,9 @@ def DreamGeant4Workflow(*, run_norm: RunNormalization) -> sciline.Pipeline:
     for provider in itertools.chain(powder_providers, _dream_providers):
         wf.insert(provider)
     insert_run_normalization(wf, run_norm)
-    for key, value in default_parameters().items():
+    for key, value in itertools.chain(
+        default_parameters().items(), time_of_flight.default_parameters().items()
+    ):
         wf[key] = value
     wf.typical_outputs = typical_outputs
     return wf

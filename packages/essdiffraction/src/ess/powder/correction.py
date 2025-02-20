@@ -55,7 +55,7 @@ def normalize_by_monitor_histogram(
     norm = broadcast_uncertainties(
         monitor, prototype=detector, mode=uncertainty_broadcast_mode
     )
-    return detector.bins / sc.lookup(norm, dim="wavelength")
+    return NormalizedRunData[RunType](detector.bins / sc.lookup(norm, dim="wavelength"))
 
 
 def normalize_by_monitor_integrated(
@@ -104,8 +104,8 @@ def normalize_by_monitor_integrated(
     det_coord = (
         detector.coords[dim] if dim in detector.coords else detector.bins.coords[dim]
     )
-    lo = det_coord.min()
-    hi = det_coord.max()
+    lo = det_coord.nanmin()
+    hi = det_coord.nanmax()
     monitor = monitor[dim, lo:hi]
     # Strictly limit `monitor` to the range of `detector`.
     edges = sc.concat([lo, monitor.coords[dim][1:-1], hi], dim=dim)

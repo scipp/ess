@@ -16,6 +16,7 @@ from ess.powder.types import (
     PixelMaskFilename,
     ReducedTofCIF,
     SampleRun,
+    TimeOfFlightLookupTableFilename,
     UncertaintyBroadcastMode,
     VanadiumRun,
 )
@@ -39,6 +40,9 @@ parameter_registry[Filename[BackgroundRun]] = FilenameParameter.from_type(
 )
 parameter_registry[CalibrationFilename] = FilenameParameter.from_type(
     CalibrationFilename
+)
+parameter_registry[TimeOfFlightLookupTableFilename] = FilenameParameter.from_type(
+    TimeOfFlightLookupTableFilename
 )
 parameter_registry[MonitorFilename[SampleRun]] = FilenameParameter.from_type(
     MonitorFilename[SampleRun]

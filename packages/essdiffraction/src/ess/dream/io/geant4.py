@@ -4,6 +4,7 @@
 import numpy as np
 import sciline
 import scipp as sc
+import scippneutron as scn
 import scippnexus as snx
 from scippneutron.metadata import ESS_SOURCE
 
@@ -16,9 +17,11 @@ from ess.powder.types import (
     CaveMonitor,
     CaveMonitorPosition,
     DetectorData,
+    DetectorLtotal,
     Filename,
     MonitorData,
     MonitorFilename,
+    MonitorLtotal,
     MonitorType,
     NeXusComponent,
     NeXusDetectorName,
@@ -88,14 +91,14 @@ def get_calibrated_geant4_detector(
     Since the Geant4 detectors already have computed positions as well as logical shape,
     this just extracts the relevant event data.
     """
-    return detector['events'].copy(deep=False)
+    return detector["events"].copy(deep=False)
 
 
 def _load_raw_events(file_path: str) -> sc.DataArray:
     table = sc.io.load_csv(
         file_path, sep="\t", header_parser="bracket", data_columns=[]
     )
-    table.coords['sumo'] = table.coords['det ID']
+    table.coords["sumo"] = table.coords["det ID"]
     table.coords.pop("lambda", None)
     table = table.rename_dims(row="event")
     return sc.DataArray(
@@ -122,7 +125,7 @@ def _group(detectors: dict[str, sc.DataArray]) -> dict[str, sc.DataGroup]:
             res = da.group("sumo", *elements)
         else:
             res = da.group(*elements)
-        res.coords['position'] = res.bins.coords.pop('position').bins.mean()
+        res.coords["position"] = res.bins.coords.pop("position").bins.mean()
         res.bins.coords.pop("sector", None)
         res.bins.coords.pop("sumo", None)
         return res
@@ -246,18 +249,68 @@ def geant4_load_calibration(filename: CalibrationFilename) -> CalibrationData:
     return CalibrationData(None)
 
 
-def dummy_assemble_detector_data(
+def assemble_detector_data(
     detector: CalibratedBeamline[RunType],
 ) -> DetectorData[RunType]:
-    """Dummy assembly of detector data, detector already contains neutron data."""
-    return DetectorData[RunType](detector)
+    """
+    In the raw data, the tofs extend beyond 71ms, this is thus not an event_time_offset.
+    We convert the detector data to data which resembles NeXus data, with
+    event_time_zero and event_time_offset coordinates.
+
+    Parameters
+    ----------
+    detector:
+        The calibrated detector data.
+    """
+
+    da = detector.copy(deep=False)
+    da.bins.coords["tof"] = da.bins.coords["tof"].to(unit="us")
+
+    period = (1.0 / sc.scalar(14.0, unit="Hz")).to(unit="us")
+    # Bin the data into bins with a 71ms period.
+    npulses = int((da.bins.coords["tof"].max() / period).ceil().value)
+    da = da.bin(tof=sc.arange("tof", npulses + 1) * period)
+    # Add a event_time_zero coord for each bin, but not as bin edges,
+    # as all events in the same pulse have the same event_time_zero, hence the `[:2]`
+    # We need to pick a start time. The actual value does not matter. We chose the
+    # random date of Friday, November 1, 2024 8:40:34.078
+    da.coords["event_time_zero"] = (
+        sc.scalar(1730450434078980000, unit="ns").to(unit="us") + da.coords["tof"]
+    )[:npulses]
+    # Remove the meaningless tof coord at the top level
+    del da.coords["tof"]
+    da = da.rename_dims(tof="event_time_zero")
+    # Compute a event_time_offset as tof % period
+    da.bins.coords["event_time_offset"] = (da.bins.coords.pop("tof") % period).to(
+        unit="us"
+    )
+    # Add a event_time_zero coord for each event
+    da.bins.coords["event_time_zero"] = sc.bins_like(
+        da.bins.coords["event_time_offset"], da.coords["event_time_zero"]
+    )
+    da = da.bins.concat('event_time_zero')
+    # Add a useful Ltotal coordinate
+    graph = scn.conversion.graph.beamline.beamline(scatter=True)
+    da = da.transform_coords("Ltotal", graph=graph)
+    return DetectorData[RunType](da)
 
 
-def dummy_assemble_monitor_data(
+def assemble_monitor_data(
     monitor: CalibratedMonitor[RunType, MonitorType],
 ) -> MonitorData[RunType, MonitorType]:
-    """Dummy assembly of monitor data, monitor already contains neutron data."""
-    return MonitorData[RunType, MonitorType](monitor)
+    """
+    Dummy assembly of monitor data, monitor already contains neutron data.
+    We simply add a Ltotal coordinate necessary to calculate the time-of-flight.
+
+    Parameters
+    ----------
+    monitor:
+        The calibrated monitor data.
+    """
+    graph = scn.conversion.graph.beamline.beamline(scatter=False)
+    return MonitorData[RunType, MonitorType](
+        monitor.transform_coords("Ltotal", graph=graph)
+    )
 
 
 def dummy_source_position() -> Position[snx.NXsource, RunType]:
@@ -270,6 +323,28 @@ def dummy_sample_position() -> Position[snx.NXsample, RunType]:
     return Position[snx.NXsample, RunType](
         sc.vector([np.nan, np.nan, np.nan], unit="mm")
     )
+
+
+def extract_detector_ltotal(detector: DetectorData[RunType]) -> DetectorLtotal[RunType]:
+    """
+    Extract Ltotal from the detector data.
+    TODO: This is a temporary implementation. We should instead read the positions
+    separately from the event data, so we don't need to re-load the positions every time
+    new events come in while streaming live data.
+    """
+    return DetectorLtotal[RunType](detector.coords["Ltotal"])
+
+
+def extract_monitor_ltotal(
+    monitor: MonitorData[RunType, MonitorType],
+) -> MonitorLtotal[RunType, MonitorType]:
+    """
+    Extract Ltotal from the monitor data.
+    TODO: This is a temporary implementation. We should instead read the positions
+    separately from the event data, so we don't need to re-load the positions every time
+    new events come in while streaming live data.
+    """
+    return MonitorLtotal[RunType, MonitorType](monitor.coords["Ltotal"])
 
 
 def dream_beamline() -> Beamline:
@@ -296,10 +371,12 @@ def LoadGeant4Workflow() -> sciline.Pipeline:
     wf.insert(load_mcstas_monitor)
     wf.insert(geant4_load_calibration)
     wf.insert(get_calibrated_geant4_detector)
-    wf.insert(dummy_assemble_detector_data)
-    wf.insert(dummy_assemble_monitor_data)
+    wf.insert(assemble_detector_data)
+    wf.insert(assemble_monitor_data)
     wf.insert(dummy_source_position)
     wf.insert(dummy_sample_position)
+    wf.insert(extract_detector_ltotal)
+    wf.insert(extract_monitor_ltotal)
     wf.insert(dream_beamline)
     wf.insert(ess_source)
     return wf

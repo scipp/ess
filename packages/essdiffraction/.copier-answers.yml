@@ -5,7 +5,7 @@ description: Diffraction data reduction for the European Spallation Source
 max_python: '3.13'
 min_python: '3.10'
 namespace_package: ess
-nightly_deps: scipp,scippnexus,sciline,plopp,scippneutron,essreduce
+nightly_deps: scipp,scippnexus,sciline,plopp,scippneutron,essreduce,tof
 orgname: scipp
 prettyname: ESSdiffraction
 projectname: essdiffraction
