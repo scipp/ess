@@ -122,8 +122,6 @@ requests==2.32.3
     # via
     #   pooch
     #   sphinx
-roman-numerals-py==3.0.0
-    # via sphinx
 rpds-py==0.22.3
     # via
     #   jsonschema
@@ -132,7 +130,7 @@ snowballstemmer==2.2.0
     # via sphinx
 soupsieve==2.6
     # via beautifulsoup4
-sphinx==8.2.0
+sphinx==8.1.3
     # via
     #   -r docs.in
     #   myst-parser
@@ -141,7 +139,7 @@ sphinx==8.2.0
     #   sphinx-autodoc-typehints
     #   sphinx-copybutton
     #   sphinx-design
-sphinx-autodoc-typehints==3.1.0
+sphinx-autodoc-typehints==3.0.1
     # via -r docs.in
 sphinx-copybutton==0.5.2
     # via -r docs.in
@@ -163,6 +161,8 @@ tinycss2==1.4.0
     # via bleach
 tof==25.2.0
     # via -r docs.in
+tomli==2.2.1
+    # via sphinx
 tornado==6.4.2
     # via
     #   ipykernel
