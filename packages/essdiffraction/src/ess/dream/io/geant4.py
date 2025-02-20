@@ -270,9 +270,6 @@ def assemble_detector_data(
     # Bin the data into bins with a 71ms period.
     npulses = int((da.bins.coords["tof"].max() / period).ceil().value)
     da = da.bin(tof=sc.arange("tof", npulses + 1) * period)
-    # npulses = int((da.bins.coords["tof"].max() / period).value) + 1
-    # print('npulses', npulses)
-    # da = da.bin(tof=sc.arange("tof", npulses) * period)
     # Add a event_time_zero coord for each bin, but not as bin edges,
     # as all events in the same pulse have the same event_time_zero, hence the `[:2]`
     # We need to pick a start time. The actual value does not matter. We chose the
