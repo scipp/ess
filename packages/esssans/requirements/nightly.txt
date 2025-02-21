@@ -28,7 +28,7 @@ cyclebane==24.10.0
     # via sciline
 cycler==0.12.1
     # via matplotlib
-dask==2025.1.0
+dask==2025.2.0
     # via -r nightly.in
 decorator==5.1.1
     # via ipython
@@ -50,7 +50,7 @@ fsspec==2025.2.0
     # via dask
 graphviz==0.20.3
     # via -r nightly.in
-h5py==3.12.1
+h5py==3.13.0
     # via
     #   scippneutron
     #   scippnexus
@@ -92,7 +92,7 @@ mpltoolbox==24.5.1
     # via scippneutron
 networkx==3.4.2
     # via cyclebane
-numpy==2.2.2
+numpy==2.2.3
     # via
     #   -r nightly.in
     #   contourpy
@@ -181,7 +181,7 @@ scippnexus @ git+https://github.com/scipp/scippnexus@main
     #   -r nightly.in
     #   essreduce
     #   scippneutron
-scipy==1.15.1
+scipy==1.15.2
     # via
     #   -r nightly.in
     #   scippneutron

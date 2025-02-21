@@ -9,7 +9,7 @@ import scippnexus as snx
 from scippnexus.application_definitions import nxcansas
 
 from ess.sans.io import save_background_subtracted_iofq
-from ess.sans.types import BackgroundSubtractedIofQ, OutFilename, RunNumber, RunTitle
+from ess.sans.types import BackgroundSubtractedIofQ, Measurement, OutFilename
 
 
 @pytest.mark.parametrize('use_edges', [True, False])
@@ -26,15 +26,15 @@ def test_save_background_subtracted_iofq(use_edges, tmp_path):
             )
         )
 
-    def run_number() -> RunNumber:
-        return RunNumber(7419)
-
-    def run_title() -> RunTitle:
-        return RunTitle('Test-title')
+    def experiment_metadata() -> Measurement:
+        return Measurement(
+            title='Test-title',
+            run_number='7419',
+        )
 
     out_filename = tmp_path / 'test.nxs'
 
-    providers = (background_subtracted_iofq, run_number, run_title)
+    providers = (background_subtracted_iofq, experiment_metadata)
     params = {OutFilename: str(out_filename)}
     pipeline = sciline.Pipeline(providers=providers, params=params)
     pipeline.bind_and_call(save_background_subtracted_iofq)

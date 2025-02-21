@@ -20,14 +20,13 @@ from ess.sans.types import (
     DetectorPixelShape,
     DetectorPositionOffset,
     Incident,
+    Measurement,
     MonitorData,
     MonitorPositionOffset,
     MonitorType,
     NeXusComponent,
     NeXusMonitorName,
     NonBackgroundWavelengthRange,
-    RunNumber,
-    RunTitle,
     RunType,
     SampleRun,
     ScatteringRunType,
@@ -174,14 +173,12 @@ def monitor_to_tof(
     return TofMonitor[RunType, MonitorType](da)
 
 
-def run_number(dg: LoadedFileContents[SampleRun]) -> RunNumber:
-    """Get the run number from the raw sample data."""
-    return RunNumber(int(dg['run_number']))
-
-
-def run_title(dg: LoadedFileContents[SampleRun]) -> RunTitle:
-    """Get the run title from the raw sample data."""
-    return RunTitle(dg['run_title'].value)
+def experiment_metadata(dg: LoadedFileContents[SampleRun]) -> Measurement:
+    """Get experiment metadata from the raw sample data."""
+    return Measurement(
+        title=dg['run_title'].value,
+        run_number=dg['run_number'],
+    )
 
 
 def helium3_tube_detector_pixel_shape() -> DetectorPixelShape[ScatteringRunType]:
@@ -235,6 +232,7 @@ def get_detector_ids_from_sample_run(data: TofData[SampleRun]) -> DetectorIDs:
 providers = (
     dummy_assemble_detector_data,
     dummy_assemble_monitor_data,
+    experiment_metadata,
     to_detector_position_offset,
     to_monitor_position_offset,
     get_source_position,
@@ -245,8 +243,6 @@ providers = (
     get_monitor_data,
     data_to_tof,
     monitor_to_tof,
-    run_number,
-    run_title,
     lab_frame_transform,
     helium3_tube_detector_pixel_shape,
 )

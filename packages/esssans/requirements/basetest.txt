@@ -15,7 +15,7 @@ idna==3.10
     # via requests
 iniconfig==2.0.0
     # via pytest
-numpy==2.2.2
+numpy==2.2.3
     # via scipy
 packaging==24.2
     # via
@@ -31,7 +31,7 @@ pytest==8.3.4
     # via -r basetest.in
 requests==2.32.3
     # via pooch
-scipy==1.15.1
+scipy==1.15.2
     # via -r basetest.in
 tomli==2.2.1
     # via pytest
