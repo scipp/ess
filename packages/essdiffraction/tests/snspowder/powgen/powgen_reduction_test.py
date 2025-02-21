@@ -4,6 +4,7 @@
 import pytest
 import sciline
 import scipp as sc
+from scippneutron._utils import elem_unit
 
 import ess.snspowder.powgen.data  # noqa: F401
 from ess import powder
@@ -43,8 +44,8 @@ def params():
         CalibrationFilename: powgen.data.powgen_tutorial_calibration_file(),
         UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
         DspacingBins: sc.linspace('dspacing', 0.0, 2.3434, 200, unit='angstrom'),
-        TofMask: lambda x: (x < sc.scalar(0.0, unit="us"))
-        | (x > sc.scalar(16666.67, unit="us")),
+        TofMask: lambda x: (x < sc.scalar(0.0, unit="us").to(unit=elem_unit(x)))
+        | (x > sc.scalar(16666.67, unit="us").to(unit=elem_unit(x))),
         TwoThetaMask: None,
         WavelengthMask: None,
     }

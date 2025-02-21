@@ -9,6 +9,7 @@ import scipp as sc
 import scipp.testing
 import scippnexus as snx
 from scippneutron import metadata
+from scippneutron._utils import elem_unit
 
 import ess.dream.data  # noqa: F401
 from ess import dream, powder
@@ -67,8 +68,8 @@ params = {
     CalibrationFilename: None,
     UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
     DspacingBins: sc.linspace('dspacing', 0.0, 2.3434, 201, unit='angstrom'),
-    TofMask: lambda x: (x < sc.scalar(0.0, unit='us'))
-    | (x > sc.scalar(86e3, unit='us')),
+    TofMask: lambda x: (x < sc.scalar(0.0, unit='us').to(unit=elem_unit(x)))
+    | (x > sc.scalar(86e3, unit='us').to(unit=elem_unit(x))),
     Position[snx.NXsample, SampleRun]: sample,
     Position[snx.NXsample, VanadiumRun]: sample,
     Position[snx.NXsource, SampleRun]: source,
