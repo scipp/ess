@@ -11,5 +11,5 @@ plopp
 pythreejs
 sciline>=24.06.2
 scipp>=24.09.1
-scippneutron>=25.02.0
+scippneutron>=25.02.1
 scippnexus>=23.12.1
