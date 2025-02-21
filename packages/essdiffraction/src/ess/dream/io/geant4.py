@@ -263,36 +263,25 @@ def assemble_detector_data(
         The calibrated detector data.
     """
 
-    da = detector.copy(deep=False)
-    da.bins.coords["tof"] = da.bins.coords["tof"].to(unit="us")
-
-    period = (1.0 / sc.scalar(14.0, unit="Hz")).to(unit="us")
-    # Bin the data into bins with a 71ms period.
-    npulses = int((da.bins.coords["tof"].max() / period).ceil().value)
-    da = da.bin(tof=sc.arange("tof", npulses + 1) * period)
-    # Add a event_time_zero coord for each bin, but not as bin edges,
-    # as all events in the same pulse have the same event_time_zero, hence the `[:2]`
-    # We need to pick a start time. The actual value does not matter. We chose the
-    # random date of Friday, November 1, 2024 8:40:34.078
-    da.coords["event_time_zero"] = (
-        sc.scalar(1730450434078980000, unit="ns").to(unit="us") + da.coords["tof"]
-    )[:npulses]
-    # Remove the meaningless tof coord at the top level
-    del da.coords["tof"]
-    da = da.rename_dims(tof="event_time_zero")
-    # Compute a event_time_offset as tof % period
-    da.bins.coords["event_time_offset"] = (da.bins.coords.pop("tof") % period).to(
-        unit="us"
+    out = detector.copy(deep=False)
+    unit = 'ns'
+    period = (1.0 / sc.scalar(14.0, unit='Hz')).to(unit=unit)
+    # Add a event_time_zero coord for each event. We need to pick a start time.
+    # The actual value does not matter. We chose the random date of
+    # November 3rd, 2024 12:48:00.
+    start = sc.datetime("2024-11-03T12:48:00.000000000")
+    out.bins.coords['event_time_zero'] = (
+        period * (detector.bins.coords['tof'].to(unit='ns', copy=False) // period)
+    ).to(dtype=int) + start
+    out.bins.coords['event_time_offset'] = out.bins.coords['tof'] % period.to(
+        unit=detector.bins.coords['tof'].bins.unit
     )
-    # Add a event_time_zero coord for each event
-    da.bins.coords["event_time_zero"] = sc.bins_like(
-        da.bins.coords["event_time_offset"], da.coords["event_time_zero"]
-    )
-    da = da.bins.concat('event_time_zero')
-    # Add a useful Ltotal coordinate
     graph = scn.conversion.graph.beamline.beamline(scatter=True)
-    da = da.transform_coords("Ltotal", graph=graph)
-    return DetectorData[RunType](da)
+    return DetectorData[RunType](
+        out.bins.drop_coords('tof').transform_coords(
+            "Ltotal", graph=graph, keep_intermediate=True
+        )
+    )
 
 
 def assemble_monitor_data(
