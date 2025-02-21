@@ -58,9 +58,9 @@ source = sc.vector([-3.478, 0.0, -76550], unit='mm')
 charge = sc.scalar(1.0, unit='µAh')
 
 params = {
-    Filename[SampleRun]: dream.data.simulated_diamond_sample(),
-    Filename[VanadiumRun]: dream.data.simulated_vanadium_sample(),
-    Filename[BackgroundRun]: dream.data.simulated_empty_can(),
+    Filename[SampleRun]: dream.data.simulated_diamond_sample(small=True),
+    Filename[VanadiumRun]: dream.data.simulated_vanadium_sample(small=True),
+    Filename[BackgroundRun]: dream.data.simulated_empty_can(small=True),
     MonitorFilename[SampleRun]: dream.data.simulated_monitor_diamond_sample(),
     MonitorFilename[VanadiumRun]: dream.data.simulated_monitor_vanadium_sample(),
     MonitorFilename[BackgroundRun]: dream.data.simulated_monitor_empty_can(),

@@ -28,6 +28,10 @@ def _make_pooch():
             "DREAM_simple_pwd_workflow/Cave_TOF_Monitor_van_can.dat": "md5:e63456c347fb36a362a0b5ae2556b3cf",  # noqa: E501
             "DREAM_simple_pwd_workflow/Cave_TOF_Monitor_vana_inc_coh.dat": "md5:701d66792f20eb283a4ce76bae0c8f8f",  # noqa: E501
             "DREAM-high-flux-tof-lookup-table.h5": "md5:404145a970ed1188e524cba10194610e",  # noqa: E501
+            # Smaller files for unit tests
+            "DREAM_simple_pwd_workflow/TEST_data_dream_diamond_vana_container_sample_union.csv.zip": "md5:019aa16ef6fbbf65d98a294b6187a0a0",  # noqa: E501
+            "DREAM_simple_pwd_workflow/TEST_data_dream_vana_container_sample_union.csv.zip": "md5:de58b2483d7f8c6fbc4bb7a49c98f592",  # noqa: E501
+            "DREAM_simple_pwd_workflow/TEST_data_dream_vanadium.csv.zip": "md5:53c7c0b8e77b73c20dd9dca12f72afa0",  # noqa: E501
         },
     )
 
@@ -47,7 +51,7 @@ def get_path(name: str, unzip: bool = False) -> str:
     return _pooch.fetch(name, processor=pooch.Unzip() if unzip else None)
 
 
-def simulated_diamond_sample() -> str:
+def simulated_diamond_sample(small: bool = False) -> str:
     """Path to a GEANT4 CSV file for a diamond sample.
 
     SciCat:
@@ -75,14 +79,21 @@ def simulated_diamond_sample() -> str:
         incoherent process with sigma=4.935 barns, packing factor=1,
         unit cell volume=27.66 angstrom^3
         absorption of 36.73 1/m
+
+    Parameters
+    ----------
+    small:
+        If True, return a smaller version of the data file, with randomly selected rows.
+
     """
+    string = "TEST_" if small else ""
     return get_path(
         "DREAM_simple_pwd_workflow/"
-        "data_dream_diamond_vana_container_sample_union.csv.zip"
+        f"{string}data_dream_diamond_vana_container_sample_union.csv.zip"
     )
 
 
-def simulated_vanadium_sample() -> str:
+def simulated_vanadium_sample(small: bool = False) -> str:
     """Path to a GEANT4 CSV file for a vanadium sample.
 
     SciCat:
@@ -101,11 +112,17 @@ def simulated_vanadium_sample() -> str:
         incoherent process with sigma=4.935 barns, packing factor=1,
         unit cell volume=27.66 angstrom^3
         absorption of 36.73 1/m
+
+    Parameters
+    ----------
+    small:
+        If True, return a smaller version of the data file, with randomly selected rows.
     """
-    return get_path("DREAM_simple_pwd_workflow/data_dream_vanadium.csv.zip")
+    string = "TEST_" if small else ""
+    return get_path(f"DREAM_simple_pwd_workflow/{string}data_dream_vanadium.csv.zip")
 
 
-def simulated_vanadium_sample_incoherent() -> str:
+def simulated_vanadium_sample_incoherent(small: bool = False) -> str:
     """Path to a GEANT4 CSV file for a vanadium sample with only incoherent scattering.
 
     SciCat:
@@ -118,11 +135,17 @@ def simulated_vanadium_sample_incoherent() -> str:
     - outer radius of sample in (x,z) plane=0.006 m
     - vertical dimension of sample (along y)=0.01 m
     - packing factor=1
+
+    Parameters
+    ----------
+    small:
+        If True, return a smaller version of the data file, with randomly selected rows.
     """
-    return get_path("DREAM_simple_pwd_workflow/data_dream_vanadium.csv.zip")
+    string = "TEST_" if small else ""
+    return get_path(f"DREAM_simple_pwd_workflow/{string}data_dream_vanadium.csv.zip")
 
 
-def simulated_empty_can() -> str:
+def simulated_empty_can(small: bool = False) -> str:
     """Path to a GEANT4 CSV file for an empty can measurement.
 
     SciCat:
@@ -139,9 +162,16 @@ def simulated_empty_can() -> str:
         incoherent process with sigma=4.935 barns, packing factor=1,
         unit cell volume=27.66 angstrom^3
         absorption of 36.73 1/m
+
+    Parameters
+    ----------
+    small:
+        If True, return a smaller version of the data file, with randomly selected rows.
     """
+    string = "TEST_" if small else ""
     return get_path(
-        "DREAM_simple_pwd_workflow/data_dream_vana_container_sample_union.csv.zip"
+        "DREAM_simple_pwd_workflow/"
+        f"{string}data_dream_vana_container_sample_union.csv.zip"
     )
 
 
