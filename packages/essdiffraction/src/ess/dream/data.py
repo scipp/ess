@@ -29,9 +29,9 @@ def _make_pooch():
             "DREAM_simple_pwd_workflow/Cave_TOF_Monitor_vana_inc_coh.dat": "md5:701d66792f20eb283a4ce76bae0c8f8f",  # noqa: E501
             "DREAM-high-flux-tof-lookup-table.h5": "md5:404145a970ed1188e524cba10194610e",  # noqa: E501
             # Smaller files for unit tests
-            "DREAM_simple_pwd_workflow/TEST_data_dream_diamond_vana_container_sample_union.csv.zip": "md5:019aa16ef6fbbf65d98a294b6187a0a0",  # noqa: E501
-            "DREAM_simple_pwd_workflow/TEST_data_dream_vana_container_sample_union.csv.zip": "md5:de58b2483d7f8c6fbc4bb7a49c98f592",  # noqa: E501
-            "DREAM_simple_pwd_workflow/TEST_data_dream_vanadium.csv.zip": "md5:53c7c0b8e77b73c20dd9dca12f72afa0",  # noqa: E501
+            "DREAM_simple_pwd_workflow/TEST_data_dream_diamond_vana_container_sample_union.csv.zip": "md5:018a87e0934c1dd0f07a708e9d497891",  # noqa: E501
+            "DREAM_simple_pwd_workflow/TEST_data_dream_vana_container_sample_union.csv.zip": "md5:6b4b6c3a7358cdb1dc5a36b56291ab1b",  # noqa: E501
+            "DREAM_simple_pwd_workflow/TEST_data_dream_vanadium.csv.zip": "md5:178f9bea9f35dbdef693e38ff893c258",  # noqa: E501
         },
     )
 
@@ -92,7 +92,7 @@ def simulated_diamond_sample(small: bool = False) -> str:
 
         fname = dream.data.simulated_diamond_sample()
         df = pd.read_csv(fname, sep='\t')
-        inds = np.sort(np.random.choice(len(df), 50_000, replace=False))
+        inds = np.sort(np.random.choice(len(df), 10_000, replace=False))
         df.iloc[inds].to_csv('TEST_' + fname.split('/')[-1], sep='\t', index=False)
         ```
 
@@ -136,7 +136,7 @@ def simulated_vanadium_sample(small: bool = False) -> str:
 
         fname = dream.data.simulated_vanadium_sample()
         df = pd.read_csv(fname, sep='\t')
-        inds = np.sort(np.random.choice(len(df), 50_000, replace=False))
+        inds = np.sort(np.random.choice(len(df), 10_000, replace=False))
         df.iloc[inds].to_csv('TEST_' + fname.split('/')[-1], sep='\t', index=False)
         ```
     """
@@ -170,7 +170,7 @@ def simulated_vanadium_sample_incoherent(small: bool = False) -> str:
 
         fname = dream.data.simulated_vanadium_sample_incoherent()
         df = pd.read_csv(fname, sep='\t')
-        inds = np.sort(np.random.choice(len(df), 50_000, replace=False))
+        inds = np.sort(np.random.choice(len(df), 10_000, replace=False))
         df.iloc[inds].to_csv('TEST_' + fname.split('/')[-1], sep='\t', index=False)
         ```
     """
@@ -208,7 +208,7 @@ def simulated_empty_can(small: bool = False) -> str:
 
         fname = dream.data.simulated_empty_can()
         df = pd.read_csv(fname, sep='\t')
-        inds = np.sort(np.random.choice(len(df), 50_000, replace=False))
+        inds = np.sort(np.random.choice(len(df), 10_000, replace=False))
         df.iloc[inds].to_csv('TEST_' + fname.split('/')[-1], sep='\t', index=False)
         ```
     """
