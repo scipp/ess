@@ -100,10 +100,10 @@ def simulated_diamond_sample(small: bool = False) -> str:
         ```
 
     """
-    string = "TEST_" if small else ""
+    prefix = "TEST_" if small else ""
     return get_path(
         "DREAM_simple_pwd_workflow/"
-        f"{string}data_dream_diamond_vana_container_sample_union.csv.zip"
+        f"{prefix}data_dream_diamond_vana_container_sample_union.csv.zip"
     )
 
 
@@ -143,8 +143,8 @@ def simulated_vanadium_sample(small: bool = False) -> str:
         df.iloc[inds].to_csv('TEST_' + fname.split('/')[-1], sep='\t', index=False)
         ```
     """
-    string = "TEST_" if small else ""
-    return get_path(f"DREAM_simple_pwd_workflow/{string}data_dream_vanadium.csv.zip")
+    prefix = "TEST_" if small else ""
+    return get_path(f"DREAM_simple_pwd_workflow/{prefix}data_dream_vanadium.csv.zip")
 
 
 def simulated_vanadium_sample_incoherent(small: bool = False) -> str:
@@ -177,8 +177,8 @@ def simulated_vanadium_sample_incoherent(small: bool = False) -> str:
         df.iloc[inds].to_csv('TEST_' + fname.split('/')[-1], sep='\t', index=False)
         ```
     """
-    string = "TEST_" if small else ""
-    return get_path(f"DREAM_simple_pwd_workflow/{string}data_dream_vanadium.csv.zip")
+    prefix = "TEST_" if small else ""
+    return get_path(f"DREAM_simple_pwd_workflow/{prefix}data_dream_vanadium.csv.zip")
 
 
 def simulated_empty_can(small: bool = False) -> str:
@@ -215,10 +215,10 @@ def simulated_empty_can(small: bool = False) -> str:
         df.iloc[inds].to_csv('TEST_' + fname.split('/')[-1], sep='\t', index=False)
         ```
     """
-    string = "TEST_" if small else ""
+    prefix = "TEST_" if small else ""
     return get_path(
         "DREAM_simple_pwd_workflow/"
-        f"{string}data_dream_vana_container_sample_union.csv.zip"
+        f"{prefix}data_dream_vana_container_sample_union.csv.zip"
     )
 
 

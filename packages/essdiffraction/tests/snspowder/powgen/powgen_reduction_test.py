@@ -39,8 +39,8 @@ def providers():
 def params():
     return {
         NeXusDetectorName: "powgen_detector",
-        Filename[SampleRun]: powgen.data.powgen_tutorial_sample_file(),
-        Filename[VanadiumRun]: powgen.data.powgen_tutorial_vanadium_file(),
+        Filename[SampleRun]: powgen.data.powgen_tutorial_sample_file(small=True),
+        Filename[VanadiumRun]: powgen.data.powgen_tutorial_vanadium_file(small=True),
         CalibrationFilename: powgen.data.powgen_tutorial_calibration_file(),
         UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
         DspacingBins: sc.linspace('dspacing', 0.0, 2.3434, 200, unit='angstrom'),
