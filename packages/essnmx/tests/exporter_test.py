@@ -70,7 +70,10 @@ def test_mcstas_reduction_export_to_bytestream(reduced_data: NMXReducedData) -> 
     ]
 
     with io.BytesIO() as bio:
-        export_as_nexus(reduced_data, bio)
+        with pytest.warns(
+            DeprecationWarning, match='Please use ``export_as_nxlauetof`` instead.'
+        ):
+            export_as_nexus(reduced_data, bio)
         with h5py.File(bio, 'r') as f:
             assert 'NMX_data' in f
             nmx_data: h5py.Group = f.require_group('NMX_data')
