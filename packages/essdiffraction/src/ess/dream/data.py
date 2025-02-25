@@ -34,6 +34,7 @@ def _make_pooch():
             "DREAM_simple_pwd_workflow/TEST_data_dream_vanadium.csv.zip": "md5:178f9bea9f35dbdef693e38ff893c258",  # noqa: E501
             "TEST_data_dream0_new_hkl_Si_pwd.csv.zip": "md5:df6c41f4b7b21e129915808f625828f6",  # noqa: E501
             "TEST_data_dream_with_sectors.csv.zip": "md5:2a6b5e40e6b67f6c71b25373bf4b11a1",  # noqa: E501
+            "TEST_DREAM_nexus_sorted-2023-12-07.nxs": "md5:599b426a93c46a7b4b09a874bf288c53",  # noqa: E501
         },
     )
 

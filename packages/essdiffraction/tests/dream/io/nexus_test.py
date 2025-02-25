@@ -9,6 +9,7 @@ from ess import dream
 from ess.reduce.nexus.types import (
     CalibratedDetector,
     CalibratedMonitor,
+    DetectorBankSizes,
     DetectorData,
     Filename,
     Monitor1,
@@ -19,6 +20,33 @@ from ess.reduce.nexus.types import NeXusName as NeXusMonitorName
 
 bank_dims = {'wire', 'module', 'segment', 'strip', 'counter'}
 hr_sans_dims = {'strip', 'other'}
+
+
+TEST_DETECTOR_BANK_SIZES = {
+    "endcap_backward_detector": {
+        "strip": 1,
+        "wire": 16,
+        "module": 11,
+        "segment": 28,
+        "counter": 2,
+    },
+    "endcap_forward_detector": {
+        "strip": 1,
+        "wire": 16,
+        "module": 5,
+        "segment": 28,
+        "counter": 2,
+    },
+    "mantle_detector": {
+        "wire": 2,
+        "module": 5,
+        "segment": 6,
+        "strip": 256,
+        "counter": 2,
+    },
+    "high_resolution_detector": {"strip": 2, "other": -1},
+    "sans_detector": {"strip": 32, "other": -1},
+}
 
 
 @pytest.fixture
@@ -37,8 +65,11 @@ def nexus_workflow() -> sciline.Pipeline:
 )
 def params(request):
     params = {
-        Filename[SampleRun]: dream.data.get_path('DREAM_nexus_sorted-2023-12-07.nxs'),
+        Filename[SampleRun]: dream.data.get_path(
+            'TEST_DREAM_nexus_sorted-2023-12-07.nxs'
+        ),
         NeXusDetectorName: request.param,
+        DetectorBankSizes: TEST_DETECTOR_BANK_SIZES,
     }
     return params
 
@@ -62,7 +93,7 @@ def test_can_load_nexus_detector_data(nexus_workflow, params):
 
 def test_can_load_nexus_monitor_data(nexus_workflow):
     nexus_workflow[Filename[SampleRun]] = dream.data.get_path(
-        'DREAM_nexus_sorted-2023-12-07.nxs'
+        'TEST_DREAM_nexus_sorted-2023-12-07.nxs'
     )
     nexus_workflow[NeXusMonitorName[Monitor1]] = 'monitor_cave'
     result = nexus_workflow.compute(CalibratedMonitor[SampleRun, Monitor1])
