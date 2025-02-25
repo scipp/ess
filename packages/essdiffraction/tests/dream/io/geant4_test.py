@@ -17,12 +17,12 @@ from ess.powder.types import Filename, NeXusComponent, NeXusDetectorName, Sample
 
 @pytest.fixture(scope="module")
 def file_path():
-    return data.get_path("data_dream0_new_hkl_Si_pwd.csv.zip")
+    return data.get_path("TEST_data_dream0_new_hkl_Si_pwd.csv.zip")
 
 
 @pytest.fixture(scope="module")
 def file_path_without_sans():
-    return data.get_path("data_dream_with_sectors.csv.zip")
+    return data.get_path("TEST_data_dream_with_sectors.csv.zip")
 
 
 # Load file into memory only once
@@ -54,7 +54,7 @@ def assert_index_coord(coord: sc.Variable, *, values: set[int] | None = None) ->
     assert coord.unit is None
     assert coord.dtype == "int64"
     if values is not None:
-        assert set(np.unique(coord.values)) == values
+        assert set(np.unique(coord.values)).issubset(values)
 
 
 def test_load_geant4_csv_loads_expected_structure(file):
