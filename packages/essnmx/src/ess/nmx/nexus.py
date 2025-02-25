@@ -136,7 +136,7 @@ def export_as_nexus(
             "Exporting to custom NeXus format will be deprecated in the near future."
             "Please use ``export_as_nxlauetof`` instead."
         ),
-        stacklevel=1,
+        stacklevel=2,
     )
     with h5py.File(output_file, "w") as f:
         f.attrs["default"] = "NMX_data"
