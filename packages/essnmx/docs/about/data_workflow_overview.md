@@ -26,7 +26,7 @@ See [workflow example](../examples/workflow) for more details.
 ### Spot finding and integration (DIALS)
 For the next five steps of the data reduction from spot finding to spot integration,
 we use a program called [DIALS](https://dials.github.io/index.html) [^1].
-[^1]: [DIAL as a toolkit](https://onlinelibrary.wiley.com/doi/10.1002/pro.4224)
+[^1]: DIAL as a toolkit, DOI: 10.1002/pro.4224
 
 #### 1. Import Image-like Files
 
