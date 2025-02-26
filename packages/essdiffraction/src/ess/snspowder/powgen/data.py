@@ -114,7 +114,8 @@ def powgen_tutorial_sample_file(small: bool = False) -> str:
         ```
     """
     prefix = "TEST_" if small else ""
-    return _get_path(f"{prefix}PG3_4844_event.h5")
+    ext = ".h5" if small else ".zip"
+    return _get_path(f"{prefix}PG3_4844_event{ext}")
 
 
 def powgen_tutorial_vanadium_file(small: bool = False) -> str:
@@ -147,7 +148,8 @@ def powgen_tutorial_vanadium_file(small: bool = False) -> str:
         ```
     """
     prefix = "TEST_" if small else ""
-    return _get_path(f"{prefix}PG3_4866_event.h5")
+    ext = ".h5" if small else ".zip"
+    return _get_path(f"{prefix}PG3_4866_event{ext}")
 
 
 def powgen_tutorial_calibration_file(small: bool = False) -> str:
