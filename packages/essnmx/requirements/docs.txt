@@ -34,7 +34,7 @@ comm==0.2.2
     #   ipywidgets
 debugpy==1.8.12
     # via ipykernel
-decorator==5.1.1
+decorator==5.2.1
     # via ipython
 docutils==0.21.2
     # via
@@ -106,10 +106,8 @@ mdit-py-plugins==0.4.2
     # via myst-parser
 mdurl==0.1.2
     # via markdown-it-py
-mistune==3.1.1
+mistune==3.1.2
     # via nbconvert
-mpltoolbox==24.5.1
-    # via scippneutron
 myst-parser==4.0.1
     # via -r docs.in
 nbclient==0.10.2
@@ -133,7 +131,7 @@ pexpect==4.9.0
     # via ipython
 prompt-toolkit==3.0.50
     # via ipython
-psutil==6.1.1
+psutil==7.0.0
     # via ipykernel
 ptyprocess==0.7.0
     # via pexpect
@@ -158,12 +156,10 @@ referencing==0.36.2
     # via
     #   jsonschema
     #   jsonschema-specifications
-rpds-py==0.22.3
+rpds-py==0.23.1
     # via
     #   jsonschema
     #   referencing
-scippneutron==25.1.0
-    # via -r docs.in
 snowballstemmer==2.2.0
     # via sphinx
 soupsieve==2.6
@@ -222,13 +218,6 @@ traitlets==5.14.3
     #   traittypes
 traittypes==0.2.1
     # via ipydatawidgets
-typing-extensions==4.12.2
-    # via
-    #   beautifulsoup4
-    #   ipython
-    #   mistune
-    #   pydata-sphinx-theme
-    #   referencing
 wcwidth==0.2.13
     # via prompt-toolkit
 webencodings==0.5.1
