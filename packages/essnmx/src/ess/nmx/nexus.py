@@ -129,6 +129,15 @@ def export_as_nexus(
 
     Currently exporting step is not expected to be part of sciline pipelines.
     """
+    import warnings
+
+    warnings.warn(
+        DeprecationWarning(
+            "Exporting to custom NeXus format will be deprecated in the near future."
+            "Please use ``export_as_nxlauetof`` instead."
+        ),
+        stacklevel=2,
+    )
     with h5py.File(output_file, "w") as f:
         f.attrs["default"] = "NMX_data"
         nx_entry = _create_root_data_entry(f)
