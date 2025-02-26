@@ -10,8 +10,8 @@
    :template: class-template.rst
    :recursive:
 
-   NMXData
-   NMXReducedData
+   NMXRawEventCountsDataGroup
+   NMXReducedDataGroup
 
 ```
 
@@ -35,7 +35,10 @@
    :recursive:
 
    data
-   mcstas_loader
+   mcstas
+   reduction
+   nexus
+   streaming
    types
    mtz_io
    scaling
