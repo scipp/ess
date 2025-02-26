@@ -13,11 +13,11 @@ del importlib
 
 from .data import small_mcstas_3_sample
 from .reduction import NMXData, NMXReducedData
-from .types import MaximumProbability
+from .types import MaximumCounts
 
-default_parameters = {MaximumProbability: 10000}
+default_parameters = {MaximumCounts: 10000}
 
-del MaximumProbability
+del MaximumCounts
 
 __all__ = [
     "NMXData",
