@@ -7,11 +7,11 @@ import pytest
 import scipp as sc
 
 from ess.nmx.nexus import export_as_nexus
-from ess.nmx.reduction import NMXReducedData
+from ess.nmx.reduction import NMXReducedDataGroup
 
 
 @pytest.fixture
-def reduced_data() -> NMXReducedData:
+def reduced_data() -> NMXReducedDataGroup:
     rng = np.random.default_rng(42)
     id_list = sc.array(dims=['event'], values=rng.integers(0, 12, size=100))
     t_list = sc.array(dims=['event'], values=rng.random(size=100, dtype=float))
@@ -24,7 +24,7 @@ def reduced_data() -> NMXReducedData:
         .hist(t=10)
     )
 
-    return NMXReducedData(
+    return NMXReducedDataGroup(
         sc.DataGroup(
             dict(  # noqa: C408
                 counts=counts,
@@ -54,7 +54,9 @@ def reduced_data() -> NMXReducedData:
     )
 
 
-def test_mcstas_reduction_export_to_bytestream(reduced_data: NMXReducedData) -> None:
+def test_mcstas_reduction_export_to_bytestream(
+    reduced_data: NMXReducedDataGroup,
+) -> None:
     """Test export method."""
     import h5py
     import numpy as np

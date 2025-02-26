@@ -379,6 +379,10 @@ class McStasInstrument:
             ),
         )
 
+    def pixel_ids(self, *det_names: str) -> sc.Variable:
+        detectors = tuple(det for det in self.detectors if det.name in det_names)
+        return _construct_pixel_ids(detectors)
+
     def to_coords(self, *det_names: str) -> dict[str, sc.Variable]:
         """Extract coordinates from the McStas instrument description.
 
@@ -393,7 +397,6 @@ class McStasInstrument:
         fast_axes = [det.fast_axis for det in detectors]
         origins = [self.sample.position_from_sample(det.position) for det in detectors]
         return {
-            'pixel_id': _construct_pixel_ids(detectors),
             'fast_axis': sc.concat(fast_axes, 'panel'),
             'slow_axis': sc.concat(slow_axes, 'panel'),
             'origin_position': sc.concat(origins, 'panel'),
