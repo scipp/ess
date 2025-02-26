@@ -83,16 +83,102 @@ def powgen_tutorial_mantid_calibration_file() -> str:
 
 
 def powgen_tutorial_sample_file(small: bool = False) -> str:
+    """
+    Return the path to the POWGEN sample file.
+
+    Parameters
+    ----------
+    small:
+        If True, return a smaller file for unit tests.
+        The small version of the file was created using the following code:
+
+        ```python
+        import scipp as sc
+
+        fname = 'PG3_4844_event.h5'
+        dg = sc.io.load_hdf5(fname)
+
+        sizes = {"bank": 23, "column": 154, "row": 7}
+
+        def foldme(x, dim):
+            return x.fold(dim=dim, sizes=sizes)['column', ::22].flatten(
+                dims=list(sizes.keys()), to=dim)
+
+        small = sc.DataGroup({
+            'data': foldme(dg['data'], 'spectrum'),
+            'detector_info': sc.Dataset(
+                coords={key: foldme(c, 'detector')
+                for key, c in dg['detector_info'].coords.items()})
+        })
+        sc.io.save_hdf5(small, 'TEST_PG3_4844_event.h5')
+        ```
+    """
     prefix = "TEST_" if small else ""
     return _get_path(f"{prefix}PG3_4844_event.h5")
 
 
 def powgen_tutorial_vanadium_file(small: bool = False) -> str:
+    """
+    Return the path to the POWGEN vanadium file.
+
+    Parameters
+    ----------
+    small:
+        If True, return a smaller file for unit tests.
+        The small version of the file was created using the following code:
+
+        ```python
+        import scipp as sc
+
+        fname = 'PG3_4866_event.h5'
+        dg = sc.io.load_hdf5(fname)
+
+        sizes = {"bank": 23, "column": 154, "row": 7}
+
+        def foldme(x, dim):
+            return x.fold(dim=dim, sizes=sizes)['column', ::22].flatten(
+                dims=list(sizes.keys()), to=dim)
+
+        small = sc.DataGroup({
+            'data': foldme(dg['data'], 'spectrum'),
+            'proton_charge': dg['proton_charge']['pulse_time', ::10]
+        })
+        sc.io.save_hdf5(small, 'TEST_PG3_4866_event.h5')
+        ```
+    """
     prefix = "TEST_" if small else ""
     return _get_path(f"{prefix}PG3_4866_event.h5")
 
 
 def powgen_tutorial_calibration_file(small: bool = False) -> str:
+    """
+    Return the path to the POWGEN calibration file.
+
+    Parameters
+    ----------
+    small:
+        If True, return a smaller file for unit tests.
+        The small version of the file was created using the following code:
+
+        ```python
+        import scipp as sc
+
+        fname = 'PG3_FERNS_d4832_2011_08_24_spectrum.h5'
+        dg = sc.io.load_hdf5(fname)
+
+        sizes = {"bank": 23, "column": 154, "row": 7}
+
+        def foldme(x, dim):
+            return x.fold(dim=dim, sizes=sizes)['column', ::22].flatten(
+                dims=list(sizes.keys()), to=dim)
+
+        small = sc.Dataset(
+            data={k: foldme(a, 'spectrum') for k, a in ds.items()},
+            coords={k: foldme(c, 'spectrum') for k, c in ds.coords.items()}
+        )
+        sc.io.save_hdf5(small, 'TEST_PG3_FERNS_d4832_2011_08_24_spectrum.h5')
+        ```
+    """
     prefix = "TEST_" if small else ""
     return _get_path(f"{prefix}PG3_FERNS_d4832_2011_08_24_spectrum.h5")
 

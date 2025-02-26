@@ -21,7 +21,7 @@ from ess.reduce.nexus.types import NeXusName as NeXusMonitorName
 bank_dims = {'wire', 'module', 'segment', 'strip', 'counter'}
 hr_sans_dims = {'strip', 'other'}
 
-
+# Smaller bank sizes for unit testing (apart from sans_detector)
 TEST_DETECTOR_BANK_SIZES = {
     "endcap_backward_detector": {
         "strip": 1,

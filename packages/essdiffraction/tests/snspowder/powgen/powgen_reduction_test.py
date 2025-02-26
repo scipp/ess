@@ -49,6 +49,7 @@ def params():
         | (x > sc.scalar(16666.67, unit="us").to(unit=elem_unit(x))),
         TwoThetaMask: None,
         WavelengthMask: None,
+        # Use bank sizes for small files
         DetectorBankSizes: {"bank": 23, "column": 7, "row": 7},
     }
 
