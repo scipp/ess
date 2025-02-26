@@ -28,6 +28,16 @@ def _make_pooch():
             "DREAM_simple_pwd_workflow/Cave_TOF_Monitor_van_can.dat": "md5:e63456c347fb36a362a0b5ae2556b3cf",  # noqa: E501
             "DREAM_simple_pwd_workflow/Cave_TOF_Monitor_vana_inc_coh.dat": "md5:701d66792f20eb283a4ce76bae0c8f8f",  # noqa: E501
             "DREAM-high-flux-tof-lookup-table.h5": "md5:404145a970ed1188e524cba10194610e",  # noqa: E501
+            # Smaller files for unit tests
+            "DREAM_simple_pwd_workflow/TEST_data_dream_diamond_vana_container_sample_union.csv.zip": "md5:018a87e0934c1dd0f07a708e9d497891",  # noqa: E501
+            "DREAM_simple_pwd_workflow/TEST_data_dream_vana_container_sample_union.csv.zip": "md5:6b4b6c3a7358cdb1dc5a36b56291ab1b",  # noqa: E501
+            "DREAM_simple_pwd_workflow/TEST_data_dream_vanadium.csv.zip": "md5:178f9bea9f35dbdef693e38ff893c258",  # noqa: E501
+            "TEST_data_dream0_new_hkl_Si_pwd.csv.zip": "md5:df6c41f4b7b21e129915808f625828f6",  # noqa: E501
+            "TEST_data_dream_with_sectors.csv.zip": "md5:2a6b5e40e6b67f6c71b25373bf4b11a1",  # noqa: E501
+            # The TEST_DREAM_nexus_sorted-2023-12-07.nxs file was created using the
+            # `shrink_nexus.py` script in the `tools` folder at the top level of the
+            # `essdiffraction` repository.
+            "TEST_DREAM_nexus_sorted-2023-12-07.nxs": "md5:599b426a93c46a7b4b09a874bf288c53",  # noqa: E501
         },
     )
 
@@ -47,7 +57,7 @@ def get_path(name: str, unzip: bool = False) -> str:
     return _pooch.fetch(name, processor=pooch.Unzip() if unzip else None)
 
 
-def simulated_diamond_sample() -> str:
+def simulated_diamond_sample(*, small: bool = False) -> str:
     """Path to a GEANT4 CSV file for a diamond sample.
 
     SciCat:
@@ -75,14 +85,32 @@ def simulated_diamond_sample() -> str:
         incoherent process with sigma=4.935 barns, packing factor=1,
         unit cell volume=27.66 angstrom^3
         absorption of 36.73 1/m
+
+    Parameters
+    ----------
+    small:
+        If True, return a smaller version of the data file, with randomly selected rows.
+        The small version of the file was created using the following code:
+
+        ```python
+        import numpy as np
+        import pandas as pd
+
+        fname = dream.data.simulated_diamond_sample()
+        df = pd.read_csv(fname, sep='\t')
+        inds = np.sort(np.random.choice(len(df), 10_000, replace=False))
+        df.iloc[inds].to_csv('TEST_' + fname.split('/')[-1], sep='\t', index=False)
+        ```
+
     """
+    prefix = "TEST_" if small else ""
     return get_path(
         "DREAM_simple_pwd_workflow/"
-        "data_dream_diamond_vana_container_sample_union.csv.zip"
+        f"{prefix}data_dream_diamond_vana_container_sample_union.csv.zip"
     )
 
 
-def simulated_vanadium_sample() -> str:
+def simulated_vanadium_sample(*, small: bool = False) -> str:
     """Path to a GEANT4 CSV file for a vanadium sample.
 
     SciCat:
@@ -101,11 +129,28 @@ def simulated_vanadium_sample() -> str:
         incoherent process with sigma=4.935 barns, packing factor=1,
         unit cell volume=27.66 angstrom^3
         absorption of 36.73 1/m
+
+    Parameters
+    ----------
+    small:
+        If True, return a smaller version of the data file, with randomly selected rows.
+        The small version of the file was created using the following code:
+
+        ```python
+        import numpy as np
+        import pandas as pd
+
+        fname = dream.data.simulated_vanadium_sample()
+        df = pd.read_csv(fname, sep='\t')
+        inds = np.sort(np.random.choice(len(df), 10_000, replace=False))
+        df.iloc[inds].to_csv('TEST_' + fname.split('/')[-1], sep='\t', index=False)
+        ```
     """
-    return get_path("DREAM_simple_pwd_workflow/data_dream_vanadium.csv.zip")
+    prefix = "TEST_" if small else ""
+    return get_path(f"DREAM_simple_pwd_workflow/{prefix}data_dream_vanadium.csv.zip")
 
 
-def simulated_vanadium_sample_incoherent() -> str:
+def simulated_vanadium_sample_incoherent(*, small: bool = False) -> str:
     """Path to a GEANT4 CSV file for a vanadium sample with only incoherent scattering.
 
     SciCat:
@@ -118,11 +163,28 @@ def simulated_vanadium_sample_incoherent() -> str:
     - outer radius of sample in (x,z) plane=0.006 m
     - vertical dimension of sample (along y)=0.01 m
     - packing factor=1
+
+    Parameters
+    ----------
+    small:
+        If True, return a smaller version of the data file, with randomly selected rows.
+        The small version of the file was created using the following code:
+
+        ```python
+        import numpy as np
+        import pandas as pd
+
+        fname = dream.data.simulated_vanadium_sample_incoherent()
+        df = pd.read_csv(fname, sep='\t')
+        inds = np.sort(np.random.choice(len(df), 10_000, replace=False))
+        df.iloc[inds].to_csv('TEST_' + fname.split('/')[-1], sep='\t', index=False)
+        ```
     """
-    return get_path("DREAM_simple_pwd_workflow/data_dream_vanadium.csv.zip")
+    prefix = "TEST_" if small else ""
+    return get_path(f"DREAM_simple_pwd_workflow/{prefix}data_dream_vanadium.csv.zip")
 
 
-def simulated_empty_can() -> str:
+def simulated_empty_can(*, small: bool = False) -> str:
     """Path to a GEANT4 CSV file for an empty can measurement.
 
     SciCat:
@@ -139,9 +201,27 @@ def simulated_empty_can() -> str:
         incoherent process with sigma=4.935 barns, packing factor=1,
         unit cell volume=27.66 angstrom^3
         absorption of 36.73 1/m
+
+    Parameters
+    ----------
+    small:
+        If True, return a smaller version of the data file, with randomly selected rows.
+        The small version of the file was created using the following code:
+
+        ```python
+        import numpy as np
+        import pandas as pd
+
+        fname = dream.data.simulated_empty_can()
+        df = pd.read_csv(fname, sep='\t')
+        inds = np.sort(np.random.choice(len(df), 10_000, replace=False))
+        df.iloc[inds].to_csv('TEST_' + fname.split('/')[-1], sep='\t', index=False)
+        ```
     """
+    prefix = "TEST_" if small else ""
     return get_path(
-        "DREAM_simple_pwd_workflow/data_dream_vana_container_sample_union.csv.zip"
+        "DREAM_simple_pwd_workflow/"
+        f"{prefix}data_dream_vana_container_sample_union.csv.zip"
     )
 
 

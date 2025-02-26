@@ -39,6 +39,10 @@ def _make_pooch():
             "PG3_4866_event.zip": "md5:5bc49def987f0faeb212a406b92b548e",
             "PG3_FERNS_d4832_2011_08_24.zip": "md5:0fef4ed5f61465eaaa3f87a18f5bb80d",
             "PG3_FERNS_d4832_2011_08_24_spectrum.h5": "md5:7aee0b40deee22d57e21558baa7a6a1a",  # noqa: E501
+            # Smaller files for unit tests
+            "TEST_PG3_4844_event.h5": "md5:03ea1018c825b0d90a67b4fc7932ea3d",
+            "TEST_PG3_4866_event.h5": "md5:4a8df454871cec7de9ac624ebdc97095",
+            "TEST_PG3_FERNS_d4832_2011_08_24_spectrum.h5": "md5:b577a054e9aa7b372df79bf4489947d0",  # noqa: E501
         },
     )
 
@@ -78,16 +82,110 @@ def powgen_tutorial_mantid_calibration_file() -> str:
     return _get_path("PG3_FERNS_d4832_2011_08_24.cal")
 
 
-def powgen_tutorial_sample_file() -> str:
-    return _get_path("PG3_4844_event.zip")
+def powgen_tutorial_sample_file(*, small: bool = False) -> str:
+    """
+    Return the path to the POWGEN sample file.
+
+    Parameters
+    ----------
+    small:
+        If True, return a smaller file for unit tests.
+        The small version of the file was created using the following code, which keeps
+        only 7 columns out of 154 (154 / 7 = 22):
+
+        ```python
+        import scipp as sc
+
+        fname = 'PG3_4844_event.h5'
+        dg = sc.io.load_hdf5(fname)
+
+        sizes = {"bank": 23, "column": 154, "row": 7}
+
+        def foldme(x, dim):
+            return x.fold(dim=dim, sizes=sizes)['column', ::22].flatten(
+                dims=list(sizes.keys()), to=dim)
+
+        small = sc.DataGroup({
+            'data': foldme(dg['data'], 'spectrum'),
+            'detector_info': sc.Dataset(
+                coords={key: foldme(c, 'detector')
+                for key, c in dg['detector_info'].coords.items()})
+        })
+        sc.io.save_hdf5(small, 'TEST_PG3_4844_event.h5')
+        ```
+    """
+    prefix = "TEST_" if small else ""
+    ext = ".h5" if small else ".zip"
+    return _get_path(f"{prefix}PG3_4844_event{ext}")
 
 
-def powgen_tutorial_vanadium_file() -> str:
-    return _get_path("PG3_4866_event.zip")
+def powgen_tutorial_vanadium_file(*, small: bool = False) -> str:
+    """
+    Return the path to the POWGEN vanadium file.
+
+    Parameters
+    ----------
+    small:
+        If True, return a smaller file for unit tests.
+        The small version of the file was created using the following code, which keeps
+        only 7 columns out of 154 (154 / 7 = 22):
+
+        ```python
+        import scipp as sc
+
+        fname = 'PG3_4866_event.h5'
+        dg = sc.io.load_hdf5(fname)
+
+        sizes = {"bank": 23, "column": 154, "row": 7}
+
+        def foldme(x, dim):
+            return x.fold(dim=dim, sizes=sizes)['column', ::22].flatten(
+                dims=list(sizes.keys()), to=dim)
+
+        small = sc.DataGroup({
+            'data': foldme(dg['data'], 'spectrum'),
+            'proton_charge': dg['proton_charge']['pulse_time', ::10]
+        })
+        sc.io.save_hdf5(small, 'TEST_PG3_4866_event.h5')
+        ```
+    """
+    prefix = "TEST_" if small else ""
+    ext = ".h5" if small else ".zip"
+    return _get_path(f"{prefix}PG3_4866_event{ext}")
 
 
-def powgen_tutorial_calibration_file() -> str:
-    return _get_path("PG3_FERNS_d4832_2011_08_24_spectrum.h5")
+def powgen_tutorial_calibration_file(*, small: bool = False) -> str:
+    """
+    Return the path to the POWGEN calibration file.
+
+    Parameters
+    ----------
+    small:
+        If True, return a smaller file for unit tests.
+        The small version of the file was created using the following code, which keeps
+        only 7 columns out of 154 (154 / 7 = 22):
+
+        ```python
+        import scipp as sc
+
+        fname = 'PG3_FERNS_d4832_2011_08_24_spectrum.h5'
+        dg = sc.io.load_hdf5(fname)
+
+        sizes = {"bank": 23, "column": 154, "row": 7}
+
+        def foldme(x, dim):
+            return x.fold(dim=dim, sizes=sizes)['column', ::22].flatten(
+                dims=list(sizes.keys()), to=dim)
+
+        small = sc.Dataset(
+            data={k: foldme(a, 'spectrum') for k, a in ds.items()},
+            coords={k: foldme(c, 'spectrum') for k, c in ds.coords.items()}
+        )
+        sc.io.save_hdf5(small, 'TEST_PG3_FERNS_d4832_2011_08_24_spectrum.h5')
+        ```
+    """
+    prefix = "TEST_" if small else ""
+    return _get_path(f"{prefix}PG3_FERNS_d4832_2011_08_24_spectrum.h5")
 
 
 def pooch_load(filename: Filename[RunType]) -> RawDataAndMetadata[RunType]:

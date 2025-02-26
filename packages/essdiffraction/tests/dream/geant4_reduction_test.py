@@ -58,9 +58,9 @@ source = sc.vector([-3.478, 0.0, -76550], unit='mm')
 charge = sc.scalar(1.0, unit='µAh')
 
 params = {
-    Filename[SampleRun]: dream.data.simulated_diamond_sample(),
-    Filename[VanadiumRun]: dream.data.simulated_vanadium_sample(),
-    Filename[BackgroundRun]: dream.data.simulated_empty_can(),
+    Filename[SampleRun]: dream.data.simulated_diamond_sample(small=True),
+    Filename[VanadiumRun]: dream.data.simulated_vanadium_sample(small=True),
+    Filename[BackgroundRun]: dream.data.simulated_empty_can(small=True),
     MonitorFilename[SampleRun]: dream.data.simulated_monitor_diamond_sample(),
     MonitorFilename[VanadiumRun]: dream.data.simulated_monitor_vanadium_sample(),
     MonitorFilename[BackgroundRun]: dream.data.simulated_monitor_empty_can(),
@@ -117,15 +117,22 @@ def test_pipeline_can_compute_dspacing_result(workflow):
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
 
-def test_pipeline_can_compute_dspacing_result_using_custom_built_tof_lookup(workflow):
-    workflow.insert(powder.conversion.build_tof_lookup_table)
-    workflow = powder.with_pixel_mask_filenames(workflow, [])
-    workflow[SimulationResults] = time_of_flight.simulate_beamline(
+@pytest.fixture(scope="module")
+def simulation_dream_choppers():
+    return time_of_flight.simulate_beamline(
         choppers=dream.beamline.choppers(
             dream.beamline.InstrumentConfiguration.high_flux
         ),
-        neutrons=2_000_000,
+        neutrons=500_000,
     )
+
+
+def test_pipeline_can_compute_dspacing_result_using_custom_built_tof_lookup(
+    workflow, simulation_dream_choppers
+):
+    workflow.insert(powder.conversion.build_tof_lookup_table)
+    workflow = powder.with_pixel_mask_filenames(workflow, [])
+    workflow[SimulationResults] = simulation_dream_choppers
     workflow[LtotalRange] = sc.scalar(60.0, unit="m"), sc.scalar(80.0, unit="m")
     workflow[DistanceResolution] = sc.scalar(0.1, unit="m")
     workflow[TimeResolution] = sc.scalar(250.0, unit='us')
