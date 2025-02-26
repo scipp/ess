@@ -13,7 +13,9 @@ from ..types import (
     DetectorName,
     EventData,
     FilePath,
+    MaximumCounts,
     MaximumProbability,
+    McStasWeight2CountScaleFactor,
     ProtonCharge,
     RawEventData,
 )
@@ -93,24 +95,49 @@ def load_crystal_rotation(
         )
 
 
+def maximum_probability(da: RawEventData) -> MaximumProbability:
+    """Find the maximum probability in the data."""
+    return MaximumProbability(da.data.max())
+
+
+def mcstas_weight_to_probability_scalefactor(
+    max_counts: MaximumCounts, max_probability: MaximumProbability
+) -> McStasWeight2CountScaleFactor:
+    """Calculate the scale factor to convert McStas weights to counts.
+
+    max_counts * (probabilities / max_probability)
+
+    Parameters
+    ----------
+    max_counts:
+        The maximum number of counts after scaling the event counts.
+
+    max_probability:
+        The maximum probability to scale the weights.
+
+    """
+    return McStasWeight2CountScaleFactor(
+        sc.scalar(max_counts, unit="counts") / max_probability
+    )
+
+
 def event_weights_from_probability(
-    da: RawEventData,
-    max_probability: MaximumProbability,
+    da: RawEventData, scale_factor: McStasWeight2CountScaleFactor
 ) -> EventData:
     """Create event weights by scaling probability data.
 
-    event_weights = max_probability * (probabilities / max(probabilities))
+    event_weights = max_counts * (probabilities / max_probability)
 
     Parameters
     ----------
     da:
         The probabilities of the events
 
-    max_probability:
-        The maximum probability to scale the weights.
+    scale_factor:
+        The scale factor to convert McStas weights to counts
 
     """
-    return sc.scalar(max_probability, unit='counts') * da / da.max()
+    return EventData(da * scale_factor)
 
 
 def proton_charge_from_event_data(da: EventData) -> ProtonCharge:
@@ -185,6 +212,8 @@ providers = (
     detector_name_from_index,
     load_event_data_bank_name,
     load_raw_event_data,
+    maximum_probability,
+    mcstas_weight_to_probability_scalefactor,
     event_weights_from_probability,
     proton_charge_from_event_data,
     load_crystal_rotation,

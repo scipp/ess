@@ -15,8 +15,14 @@ DetectorBankPrefix = NewType("DetectorBankPrefix", str)
 """Prefix identifying the event data array containing
 the events from the selected detector"""
 
-MaximumProbability = NewType("MaximumProbability", int)
+MaximumCounts = NewType("MaximumCounts", int)
 """Maximum number of counts after scaling the event counts"""
+
+MaximumProbability = NewType("MaximumProbability", sc.Variable)
+"""Maximum probability to scale the McStas event counts"""
+
+McStasWeight2CountScaleFactor = NewType("McStasWeight2CountScaleFactor", sc.Variable)
+"""Scale factor to convert McStas weights to counts"""
 
 RawEventData = NewType("RawEventData", sc.DataArray)
 """DataArray containing the event counts read from the McStas file,

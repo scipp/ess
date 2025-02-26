@@ -15,12 +15,7 @@ from ess.nmx.data import small_mcstas_2_sample, small_mcstas_3_sample
 from ess.nmx.mcstas.load import bank_names_to_detector_names, load_crystal_rotation
 from ess.nmx.mcstas.load import providers as loader_providers
 from ess.nmx.reduction import NMXData
-from ess.nmx.types import (
-    DetectorBankPrefix,
-    DetectorIndex,
-    FilePath,
-    MaximumProbability,
-)
+from ess.nmx.types import DetectorBankPrefix, DetectorIndex, FilePath, MaximumCounts
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from mcstas_description_examples import (
@@ -54,7 +49,7 @@ def check_nmxdata_properties(dg: NMXData, fast_axis, slow_axis) -> None:
     # Check maximum value of weights.
     assert_allclose(
         dg['weights'].max().data,
-        sc.scalar(default_parameters[MaximumProbability], unit='counts', dtype=float),
+        sc.scalar(default_parameters[MaximumCounts], unit='counts', dtype=float),
         atol=sc.scalar(1e-10, unit='counts'),
         rtol=sc.scalar(1e-8),
     )
