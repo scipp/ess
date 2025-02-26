@@ -24,12 +24,13 @@ MaximumProbability = NewType("MaximumProbability", sc.Variable)
 McStasWeight2CountScaleFactor = NewType("McStasWeight2CountScaleFactor", sc.Variable)
 """Scale factor to convert McStas weights to counts"""
 
-RawEventData = NewType("RawEventData", sc.DataArray)
-"""DataArray containing the event counts read from the McStas file,
+
+RawEventProbability = NewType("RawEventProbability", sc.DataArray)
+"""DataArray containing the event probabilities read from the McStas file,
 has coordinates 'id' and 't' """
 
-EventData = NewType("EventData", sc.DataArray)
-"""The scaled RawEventData"""
+NMXRawEventCountsDataGroup = NewType("NMXRawEventCountsDataGroup", sc.DataGroup)
+"""DataGroup containing the RawEventData and other metadata"""
 
 ProtonCharge = NewType("ProtonCharge", sc.Variable)
 """The proton charge signal"""
@@ -42,3 +43,15 @@ DetectorGeometry = NewType("DetectorGeometry", Any)
 
 TimeBinSteps = NewType("TimeBinSteps", int)
 """Number of bins in the binning of the time coordinate"""
+
+PixelIds = NewType("PixelIds", sc.Variable)
+"""The pixel ids of the detector"""
+
+NMXReducedProbability = NewType("NMXReducedProbability", sc.DataArray)
+"""Histogram of time-of-arrival and pixel-id."""
+
+NMXReducedCounts = NewType("NMXReducedCounts", sc.DataArray)
+"""Histogram of time-of-arrival and pixel-id."""
+
+NMXReducedDataGroup = NewType("NMXReducedDataGroup", sc.DataGroup)
+"""Histogram of time-of-arrival and pixel-id, with additional metadata."""

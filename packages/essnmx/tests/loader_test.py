@@ -14,8 +14,12 @@ from ess.nmx import default_parameters
 from ess.nmx.data import small_mcstas_2_sample, small_mcstas_3_sample
 from ess.nmx.mcstas.load import bank_names_to_detector_names, load_crystal_rotation
 from ess.nmx.mcstas.load import providers as loader_providers
-from ess.nmx.reduction import NMXData
-from ess.nmx.types import DetectorBankPrefix, DetectorIndex, FilePath, MaximumCounts
+from ess.nmx.types import (
+    DetectorBankPrefix,
+    DetectorIndex,
+    FilePath,
+    NMXRawEventCountsDataGroup,
+)
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from mcstas_description_examples import (
@@ -26,15 +30,11 @@ from mcstas_description_examples import (
 )
 
 
-def check_scalar_properties_mcstas_2(dg: NMXData):
+def check_scalar_properties_mcstas_2(dg: NMXRawEventCountsDataGroup):
     """Test helper for NMXData loaded from McStas 2.
 
     Expected numbers are hard-coded based on the sample file.
     """
-    assert_identical(
-        dg['proton_charge'],
-        sc.scalar(1e-4 * dg['weights'].bins.size().sum().data.values, unit=None),
-    )
     assert_identical(dg['crystal_rotation'], sc.vector([20, 0, 90], unit='deg'))
     assert_identical(dg['sample_position'], sc.vector(value=[0, 0, 0], unit='m'))
     assert_identical(
@@ -43,16 +43,10 @@ def check_scalar_properties_mcstas_2(dg: NMXData):
     assert dg['sample_name'] == sc.scalar("sampleMantid")
 
 
-def check_nmxdata_properties(dg: NMXData, fast_axis, slow_axis) -> None:
+def check_nmxdata_properties(
+    dg: NMXRawEventCountsDataGroup, fast_axis, slow_axis
+) -> None:
     assert isinstance(dg, sc.DataGroup)
-    assert dg.shape == ((1280, 1280)[0] * (1280, 1280)[1], 1)
-    # Check maximum value of weights.
-    assert_allclose(
-        dg['weights'].max().data,
-        sc.scalar(default_parameters[MaximumCounts], unit='counts', dtype=float),
-        atol=sc.scalar(1e-10, unit='counts'),
-        rtol=sc.scalar(1e-8),
-    )
     assert_allclose(
         sc.squeeze(dg['fast_axis'], 'panel'), fast_axis, atol=sc.scalar(0.005)
     )
@@ -86,21 +80,17 @@ def test_file_reader_mcstas2(
             **default_parameters,
         },
     )
-    dg = pl.compute(NMXData)
+    dg = pl.compute(NMXRawEventCountsDataGroup)
 
     check_scalar_properties_mcstas_2(dg)
     check_nmxdata_properties(dg, fast_axis, slow_axis)
 
 
-def check_scalar_properties_mcstas_3(dg: NMXData):
+def check_scalar_properties_mcstas_3(dg: NMXRawEventCountsDataGroup):
     """Test helper for NMXData loaded from McStas 3.
 
     Expected numbers are hard-coded based on the sample file.
     """
-    assert_identical(
-        dg['proton_charge'],
-        sc.scalar(1e-4 * dg['weights'].bins.size().sum().data.values, unit=None),
-    )
     assert_identical(dg['crystal_rotation'], sc.vector([0, 0, 0], unit='deg'))
     assert_identical(dg['sample_position'], sc.vector(value=[0, 0, 0], unit='m'))
     assert_identical(
@@ -130,7 +120,7 @@ def test_file_reader_mcstas3(detector_index, fast_axis, slow_axis) -> None:
             **default_parameters,
         },
     )
-    dg, bank = pl.compute((NMXData, DetectorBankPrefix)).values()
+    dg, bank = pl.compute((NMXRawEventCountsDataGroup, DetectorBankPrefix)).values()
 
     entry_path = f"entry1/data/{bank}_dat_list_p_x_y_n_id_t"
     with snx.File(file_path) as file:
@@ -138,7 +128,7 @@ def test_file_reader_mcstas3(detector_index, fast_axis, slow_axis) -> None:
         data_length = raw_data.sizes['dim_0']
 
     check_scalar_properties_mcstas_3(dg)
-    assert dg['weights'].bins.size().sum().value == data_length
+    assert dg['weights'].sizes['event'] == data_length
     check_nmxdata_properties(dg, sc.vector(fast_axis), sc.vector(slow_axis))
 
 
@@ -183,7 +173,7 @@ def test_file_reader_mcstas_additional_fields(tmp_mcstas_file: pathlib.Path) -> 
             **default_parameters,
         },
     )
-    dg = pl.compute(NMXData)
+    dg = pl.compute(NMXRawEventCountsDataGroup)
 
     assert isinstance(dg, sc.DataGroup)
 

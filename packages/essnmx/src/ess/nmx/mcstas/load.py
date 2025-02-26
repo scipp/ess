@@ -1,23 +1,23 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import re
+from collections.abc import Generator
 
 import scipp as sc
 import scippnexus as snx
 
-from ..reduction import NMXData
 from ..types import (
     CrystalRotation,
     DetectorBankPrefix,
     DetectorIndex,
     DetectorName,
-    EventData,
     FilePath,
     MaximumCounts,
     MaximumProbability,
     McStasWeight2CountScaleFactor,
-    ProtonCharge,
-    RawEventData,
+    NMXRawEventCountsDataGroup,
+    PixelIds,
+    RawEventProbability,
 )
 from .xml import McStasInstrument, read_mcstas_geometry_xml
 
@@ -34,40 +34,114 @@ def load_event_data_bank_name(
         description = file['entry1/instrument/description'][()]
         for bank_name, det_names in bank_names_to_detector_names(description).items():
             if detector_name in det_names:
-                return bank_name.partition('.')[0]
+                return DetectorBankPrefix(bank_name.partition('.')[0])
+    raise KeyError(
+        f"{DetectorBankPrefix.__name__} cannot be found for "
+        f"{DetectorName.__name__} from the file {FilePath.__name__}"
+    )
+
+
+def _exclude_zero_events(data: sc.Variable) -> sc.Variable:
+    """Exclude events with zero counts from the data.
+
+    McStas can add an extra event line containing 0,0,0,0,0,0
+    This line should not be included so we skip it.
+    """
+    if (data.values[0] == 0).all():
+        data = data["event", 1:]
+    else:
+        data = data
+    return data
+
+
+def _wrap_raw_event_data(data: sc.Variable) -> RawEventProbability:
+    data = data.rename_dims({'dim_0': 'event'})
+    data = _exclude_zero_events(data)
+    event_da = sc.DataArray(
+        coords={
+            'id': sc.array(
+                dims=['event'],
+                values=data['dim_1', 4].values,
+                dtype='int64',
+                unit=None,
+            ),
+            't': sc.array(dims=['event'], values=data['dim_1', 5].values, unit='s'),
+        },
+        data=sc.array(dims=['event'], values=data['dim_1', 0].values, unit='counts'),
+    )
+    return RawEventProbability(event_da)
 
 
 def load_raw_event_data(
-    file_path: FilePath,
-    bank_prefix: DetectorBankPrefix,
-    detector_name: DetectorName,
-    instrument: McStasInstrument,
-) -> RawEventData:
-    """Retrieve events from the nexus file."""
-    coords = instrument.to_coords(detector_name)
+    file_path: FilePath, *, detector_name: DetectorName, bank_prefix: DetectorBankPrefix
+) -> RawEventProbability:
+    """Retrieve events from the nexus file.
+
+    Parameters
+    ----------
+    file_path:
+        Path to the nexus file
+    detector_name:
+        Name of the detector to load
+    bank_prefix:
+        Prefix identifying the event data array containing the events of the detector
+        If None, the bank name is determined automatically from the detector name.
+
+    """
+    if bank_prefix is None:
+        bank_prefix = load_event_data_bank_name(detector_name, file_path)
     bank_name = f'{bank_prefix}_dat_list_p_x_y_n_id_t'
     with snx.File(file_path, 'r') as f:
         root = f["entry1/data"]
         (bank_name,) = (name for name in root.keys() if bank_name in name)
-        data = root[bank_name]["events"][()].rename_dims({'dim_0': 'event'})
-        if (data.values[0] == 0).all():
-            # McStas can add an extra event line containing 0,0,0,0,0,0
-            # This line should not be included so we skip it.
-            data = data["event", 1:]
-        return sc.DataArray(
-            coords={
-                'id': sc.array(
-                    dims=['event'],
-                    values=data['dim_1', 4].values,
-                    dtype='int64',
-                    unit=None,
-                ),
-                't': sc.array(dims=['event'], values=data['dim_1', 5].values, unit='s'),
-            },
-            data=sc.array(
-                dims=['event'], values=data['dim_1', 0].values, unit='counts'
-            ),
-        ).group(coords.pop('pixel_id'))
+        data = root[bank_name]["events"][()]
+        return _wrap_raw_event_data(data)
+
+
+def raw_event_data_chunk_generator(
+    file_path: FilePath,
+    *,
+    detector_name: DetectorName,
+    bank_prefix: DetectorBankPrefix | None = None,
+    chunk_size: int = 0,  # Number of rows to read at a time
+) -> Generator[RawEventProbability, None, None]:
+    """Chunk events from the nexus file.
+
+    Parameters
+    ----------
+    file_path:
+        Path to the nexus file
+    detector_name:
+        Name of the detector to load
+    pixel_ids:
+        Pixel ids to generate the data array with the events
+    chunk_size:
+        Number of rows to read at a time.
+        If 0, chunk slice is determined automatically by the ``iter_chunks``.
+        Note that it only works if the dataset is already chunked.
+
+    """
+    # Find the data bank name associated with the detector
+    bank_prefix = load_event_data_bank_name(
+        detector_name=detector_name, file_path=file_path
+    )
+    bank_name = f'{bank_prefix}_dat_list_p_x_y_n_id_t'
+    with snx.File(file_path, 'r') as f:
+        root = f["entry1/data"]
+        (bank_name,) = (name for name in root.keys() if bank_name in name)
+
+    with snx.File(file_path, 'r') as f:
+        root = f["entry1/data"]
+        dset = root[bank_name]["events"]
+        if chunk_size == 0:
+            for data_slice in dset.dataset.iter_chunks():
+                dim_0_slice, _ = data_slice  # dim_0_slice, dim_1_slice
+                yield _wrap_raw_event_data(dset["dim_0", dim_0_slice])
+        else:
+            num_events = dset.shape[0]
+            for start in range(0, num_events, chunk_size):
+                data = dset["dim_0", start : start + chunk_size]
+                yield _wrap_raw_event_data(data)
 
 
 def load_crystal_rotation(
@@ -95,7 +169,7 @@ def load_crystal_rotation(
         )
 
 
-def maximum_probability(da: RawEventData) -> MaximumProbability:
+def maximum_probability(da: RawEventProbability) -> MaximumProbability:
     """Find the maximum probability in the data."""
     return MaximumProbability(da.data.max())
 
@@ -112,53 +186,14 @@ def mcstas_weight_to_probability_scalefactor(
     max_counts:
         The maximum number of counts after scaling the event counts.
 
-    max_probability:
-        The maximum probability to scale the weights.
-
-    """
-    return McStasWeight2CountScaleFactor(
-        sc.scalar(max_counts, unit="counts") / max_probability
-    )
-
-
-def event_weights_from_probability(
-    da: RawEventData, scale_factor: McStasWeight2CountScaleFactor
-) -> EventData:
-    """Create event weights by scaling probability data.
-
-    event_weights = max_counts * (probabilities / max_probability)
-
-    Parameters
-    ----------
-    da:
-        The probabilities of the events
-
     scale_factor:
         The scale factor to convert McStas weights to counts
 
     """
-    return EventData(da * scale_factor)
 
-
-def proton_charge_from_event_data(da: EventData) -> ProtonCharge:
-    """Make up the proton charge from the event data array.
-
-    Proton charge is proportional to the number of neutrons,
-    which is proportional to the number of events.
-    The scale factor is manually chosen based on previous results
-    to be convenient for data manipulation in the next steps.
-    It is derived this way since
-    the protons are not part of McStas simulation,
-    and the number of neutrons is not included in the result.
-
-    Parameters
-    ----------
-    event_da:
-        The event data
-
-    """
-    # Arbitrary number to scale the proton charge
-    return ProtonCharge(sc.scalar(1 / 10_000, unit=None) * da.bins.size().sum().data)
+    return McStasWeight2CountScaleFactor(
+        sc.scalar(max_counts, unit="counts") / max_probability
+    )
 
 
 def bank_names_to_detector_names(description: str) -> dict[str, list[str]]:
@@ -189,22 +224,28 @@ def bank_names_to_detector_names(description: str) -> dict[str, list[str]]:
 
 def load_mcstas(
     *,
-    da: EventData,
-    proton_charge: ProtonCharge,
+    da: RawEventProbability,
     crystal_rotation: CrystalRotation,
     detector_name: DetectorName,
     instrument: McStasInstrument,
-) -> NMXData:
+) -> NMXRawEventCountsDataGroup:
     coords = instrument.to_coords(detector_name)
-    coords.pop('pixel_id')
-    return NMXData(
+    return NMXRawEventCountsDataGroup(
         sc.DataGroup(
             weights=da,
-            proton_charge=proton_charge,
             crystal_rotation=crystal_rotation,
+            name=sc.scalar(detector_name),
+            pixel_id=instrument.pixel_ids(detector_name),
             **coords,
         )
     )
+
+
+def retrieve_pixel_ids(
+    instrument: McStasInstrument, detector_name: DetectorName
+) -> PixelIds:
+    """Retrieve the pixel IDs for a given detector."""
+    return PixelIds(instrument.pixel_ids(detector_name))
 
 
 providers = (
@@ -214,8 +255,7 @@ providers = (
     load_raw_event_data,
     maximum_probability,
     mcstas_weight_to_probability_scalefactor,
-    event_weights_from_probability,
-    proton_charge_from_event_data,
+    retrieve_pixel_ids,
     load_crystal_rotation,
     load_mcstas,
 )
