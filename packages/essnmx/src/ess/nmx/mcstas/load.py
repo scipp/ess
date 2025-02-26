@@ -121,6 +121,17 @@ def raw_event_data_chunk_generator(
         Note that it only works if the dataset is already chunked.
 
     """
+    if 0 < chunk_size < 10_000_000:
+        import warnings
+
+        warnings.warn(
+            "The chunk size may be too small < 10_000_000.\n"
+            "Consider increasing the chunk size for better performance.\n"
+            "Hint: NMX typically expect ~10^8 bins as reduced data.",
+            UserWarning,
+            stacklevel=2,
+        )
+
     # Find the data bank name associated with the detector
     bank_prefix = load_event_data_bank_name(
         detector_name=detector_name, file_path=file_path
@@ -136,7 +147,19 @@ def raw_event_data_chunk_generator(
         if chunk_size == 0:
             for data_slice in dset.dataset.iter_chunks():
                 dim_0_slice, _ = data_slice  # dim_0_slice, dim_1_slice
-                yield _wrap_raw_event_data(dset["dim_0", dim_0_slice])
+                da = _wrap_raw_event_data(dset["dim_0", dim_0_slice])
+                if da.sizes['event'] < 10_000_000:
+                    import warnings
+
+                    warnings.warn(
+                        "The chunk size may be too small < 10_000_000.\n"
+                        "Consider increasing the chunk size for better performance.\n"
+                        "Hint: NMX typically expect ~10^8 bins as reduced data.",
+                        UserWarning,
+                        stacklevel=2,
+                    )
+                yield da
+
         else:
             num_events = dset.shape[0]
             for start in range(0, num_events, chunk_size):
