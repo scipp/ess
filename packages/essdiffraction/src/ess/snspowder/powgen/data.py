@@ -90,7 +90,8 @@ def powgen_tutorial_sample_file(*, small: bool = False) -> str:
     ----------
     small:
         If True, return a smaller file for unit tests.
-        The small version of the file was created using the following code:
+        The small version of the file was created using the following code, which keeps
+        only 7 columns out of 154 (154 / 7 = 22):
 
         ```python
         import scipp as sc
@@ -126,7 +127,8 @@ def powgen_tutorial_vanadium_file(*, small: bool = False) -> str:
     ----------
     small:
         If True, return a smaller file for unit tests.
-        The small version of the file was created using the following code:
+        The small version of the file was created using the following code, which keeps
+        only 7 columns out of 154 (154 / 7 = 22):
 
         ```python
         import scipp as sc
@@ -160,7 +162,8 @@ def powgen_tutorial_calibration_file(*, small: bool = False) -> str:
     ----------
     small:
         If True, return a smaller file for unit tests.
-        The small version of the file was created using the following code:
+        The small version of the file was created using the following code, which keeps
+        only 7 columns out of 154 (154 / 7 = 22):
 
         ```python
         import scipp as sc
