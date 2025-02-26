@@ -40,8 +40,9 @@ def _make_pooch():
             "PG3_FERNS_d4832_2011_08_24.zip": "md5:0fef4ed5f61465eaaa3f87a18f5bb80d",
             "PG3_FERNS_d4832_2011_08_24_spectrum.h5": "md5:7aee0b40deee22d57e21558baa7a6a1a",  # noqa: E501
             # Smaller files for unit tests
-            "TEST_PG3_4844_event.h5": "md5:6f0c4d84887d51ab03c3a1a5d4a17854",
-            "TEST_PG3_4866_event.h5": "md5:45f8eedec3a978968594d15243da84cf",
+            "TEST_PG3_4844_event.h5": "md5:03ea1018c825b0d90a67b4fc7932ea3d",
+            "TEST_PG3_4866_event.h5": "md5:4a8df454871cec7de9ac624ebdc97095",
+            "TEST_PG3_FERNS_d4832_2011_08_24_spectrum.h5": "md5:b577a054e9aa7b372df79bf4489947d0",  # noqa: E501
         },
     )
 
@@ -91,8 +92,9 @@ def powgen_tutorial_vanadium_file(small: bool = False) -> str:
     return _get_path(f"{prefix}PG3_4866_event.h5")
 
 
-def powgen_tutorial_calibration_file() -> str:
-    return _get_path("PG3_FERNS_d4832_2011_08_24_spectrum.h5")
+def powgen_tutorial_calibration_file(small: bool = False) -> str:
+    prefix = "TEST_" if small else ""
+    return _get_path(f"{prefix}PG3_FERNS_d4832_2011_08_24_spectrum.h5")
 
 
 def pooch_load(filename: Filename[RunType]) -> RawDataAndMetadata[RunType]:

@@ -10,6 +10,7 @@ import ess.snspowder.powgen.data  # noqa: F401
 from ess import powder
 from ess.powder.types import (
     CalibrationFilename,
+    DetectorBankSizes,
     DspacingBins,
     Filename,
     IofDspacing,
@@ -41,13 +42,14 @@ def params():
         NeXusDetectorName: "powgen_detector",
         Filename[SampleRun]: powgen.data.powgen_tutorial_sample_file(small=True),
         Filename[VanadiumRun]: powgen.data.powgen_tutorial_vanadium_file(small=True),
-        CalibrationFilename: powgen.data.powgen_tutorial_calibration_file(),
+        CalibrationFilename: powgen.data.powgen_tutorial_calibration_file(small=True),
         UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
         DspacingBins: sc.linspace('dspacing', 0.0, 2.3434, 200, unit='angstrom'),
         TofMask: lambda x: (x < sc.scalar(0.0, unit="us").to(unit=elem_unit(x)))
         | (x > sc.scalar(16666.67, unit="us").to(unit=elem_unit(x))),
         TwoThetaMask: None,
         WavelengthMask: None,
+        DetectorBankSizes: {"bank": 23, "column": 7, "row": 7},
     }
 
 
