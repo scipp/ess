@@ -57,7 +57,7 @@ def get_path(name: str, unzip: bool = False) -> str:
     return _pooch.fetch(name, processor=pooch.Unzip() if unzip else None)
 
 
-def simulated_diamond_sample(small: bool = False) -> str:
+def simulated_diamond_sample(*, small: bool = False) -> str:
     """Path to a GEANT4 CSV file for a diamond sample.
 
     SciCat:
@@ -110,7 +110,7 @@ def simulated_diamond_sample(small: bool = False) -> str:
     )
 
 
-def simulated_vanadium_sample(small: bool = False) -> str:
+def simulated_vanadium_sample(*, small: bool = False) -> str:
     """Path to a GEANT4 CSV file for a vanadium sample.
 
     SciCat:
@@ -150,7 +150,7 @@ def simulated_vanadium_sample(small: bool = False) -> str:
     return get_path(f"DREAM_simple_pwd_workflow/{prefix}data_dream_vanadium.csv.zip")
 
 
-def simulated_vanadium_sample_incoherent(small: bool = False) -> str:
+def simulated_vanadium_sample_incoherent(*, small: bool = False) -> str:
     """Path to a GEANT4 CSV file for a vanadium sample with only incoherent scattering.
 
     SciCat:
@@ -184,7 +184,7 @@ def simulated_vanadium_sample_incoherent(small: bool = False) -> str:
     return get_path(f"DREAM_simple_pwd_workflow/{prefix}data_dream_vanadium.csv.zip")
 
 
-def simulated_empty_can(small: bool = False) -> str:
+def simulated_empty_can(*, small: bool = False) -> str:
     """Path to a GEANT4 CSV file for an empty can measurement.
 
     SciCat:

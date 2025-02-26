@@ -82,7 +82,7 @@ def powgen_tutorial_mantid_calibration_file() -> str:
     return _get_path("PG3_FERNS_d4832_2011_08_24.cal")
 
 
-def powgen_tutorial_sample_file(small: bool = False) -> str:
+def powgen_tutorial_sample_file(*, small: bool = False) -> str:
     """
     Return the path to the POWGEN sample file.
 
@@ -118,7 +118,7 @@ def powgen_tutorial_sample_file(small: bool = False) -> str:
     return _get_path(f"{prefix}PG3_4844_event{ext}")
 
 
-def powgen_tutorial_vanadium_file(small: bool = False) -> str:
+def powgen_tutorial_vanadium_file(*, small: bool = False) -> str:
     """
     Return the path to the POWGEN vanadium file.
 
@@ -152,7 +152,7 @@ def powgen_tutorial_vanadium_file(small: bool = False) -> str:
     return _get_path(f"{prefix}PG3_4866_event{ext}")
 
 
-def powgen_tutorial_calibration_file(small: bool = False) -> str:
+def powgen_tutorial_calibration_file(*, small: bool = False) -> str:
     """
     Return the path to the POWGEN calibration file.
 
