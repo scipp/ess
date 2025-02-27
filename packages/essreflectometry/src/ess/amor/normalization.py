@@ -63,8 +63,7 @@ def mask_events_where_supermirror_does_not_cover(
         m=mvalue,
         alpha=alpha,
     )
-    sam = sam.bins.assign_masks(supermirror_does_not_cover=sc.isnan(R))
-    return sam
+    return sam.bins.assign_masks(supermirror_does_not_cover=sc.isnan(R))
 
 
 def evaluate_reference_at_sample_coords(
