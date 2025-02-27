@@ -5,11 +5,11 @@ import scipp as sc
 from ..reflectometry.conversions import reflectometry_q
 from ..reflectometry.types import (
     BeamDivergenceLimits,
+    CoordTransformationGraph,
     WavelengthBins,
     YIndexLimits,
     ZIndexLimits,
 )
-from .types import CoordTransformationGraph
 
 
 def theta(
@@ -63,20 +63,6 @@ def coordinate_transformation_graph() -> CoordTransformationGraph:
             unit='rad'
         ),
     }
-
-
-def add_coords(
-    da: sc.DataArray,
-    graph: dict,
-) -> sc.DataArray:
-    "Adds scattering coordinates to the raw detector data."
-    return da.transform_coords(
-        ("wavelength", "theta", "divergence_angle", "Q", "L1", "L2"),
-        graph,
-        rename_dims=False,
-        keep_intermediate=False,
-        keep_aliases=False,
-    )
 
 
 def _not_between(v, a, b):

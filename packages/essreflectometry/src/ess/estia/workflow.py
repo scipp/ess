@@ -1,10 +1,12 @@
 from ..reflectometry.conversions import (
+    add_coords,
     add_proton_current_coord,
     add_proton_current_mask,
 )
 from ..reflectometry.corrections import correct_by_proton_current
 from ..reflectometry.types import (
     BeamDivergenceLimits,
+    CoordTransformationGraph,
     ProtonCurrent,
     RawDetectorData,
     ReducibleData,
@@ -13,9 +15,8 @@ from ..reflectometry.types import (
     YIndexLimits,
     ZIndexLimits,
 )
-from .conversions import add_coords, add_masks
+from .conversions import add_masks
 from .corrections import correct_by_footprint
-from .types import CoordTransformationGraph
 
 
 def add_coords_masks_and_apply_corrections(

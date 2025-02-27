@@ -8,6 +8,7 @@ from ..reflectometry.supermirror import (
     supermirror_reflectivity,
 )
 from ..reflectometry.types import (
+    CoordTransformationGraph,
     DetectorSpatialResolution,
     ReducedReference,
     ReducibleData,
@@ -21,7 +22,6 @@ from .resolution import (
     q_resolution,
     sample_size_resolution,
 )
-from .types import CoordTransformationGraph
 
 
 def mask_events_where_supermirror_does_not_cover(

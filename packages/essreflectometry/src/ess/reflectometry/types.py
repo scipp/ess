@@ -7,6 +7,8 @@ ReferenceRun = NewType("ReferenceRun", str)
 SampleRun = NewType("SampleRun", str)
 RunType = TypeVar("RunType", ReferenceRun, SampleRun)
 
+CoordTransformationGraph = NewType("CoordTransformationGraph", dict)
+
 
 class NeXusDetectorName(sciline.Scope[RunType, str], str):
     """Name of the detector in the nexus file containing the events of the RunType"""

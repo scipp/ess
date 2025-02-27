@@ -4,7 +4,10 @@ import scipp as sc
 from scipp.constants import pi
 from scippneutron._utils import elem_dtype
 
-from .types import ProtonCurrent, RunType
+from .types import (
+    ProtonCurrent,
+    RunType,
+)
 
 
 def reflectometry_q(wavelength: sc.Variable, theta: sc.Variable) -> sc.Variable:
@@ -59,6 +62,20 @@ def add_proton_current_mask(da: sc.DataArray) -> sc.DataArray:
         )
     )
     return da
+
+
+def add_coords(
+    da: sc.DataArray,
+    graph: dict,
+) -> sc.DataArray:
+    "Adds scattering coordinates to the raw detector data."
+    return da.transform_coords(
+        ("wavelength", "theta", "divergence_angle", "Q", "L1", "L2"),
+        graph,
+        rename_dims=False,
+        keep_intermediate=False,
+        keep_aliases=False,
+    )
 
 
 providers = ()

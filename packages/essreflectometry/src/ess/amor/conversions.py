@@ -6,15 +6,16 @@ import scipp as sc
 from ..reflectometry.conversions import reflectometry_q
 from ..reflectometry.types import (
     BeamDivergenceLimits,
+    CoordTransformationGraph,
     WavelengthBins,
     YIndexLimits,
     ZIndexLimits,
 )
 from .geometry import Detector
-from .types import CoordTransformationGraph, GravityToggle
+from .types import GravityToggle
 
 
-def theta(wavelength, divergence_angle, L2, sample_rotation, detector_rotation):
+def theta(wavelength, pixel_divergence_angle, L2, sample_rotation, detector_rotation):
     '''
     Angle of reflection.
 
@@ -61,7 +62,8 @@ def theta(wavelength, divergence_angle, L2, sample_rotation, detector_rotation):
     '''
     c = sc.constants.g * sc.constants.m_n**2 / sc.constants.h**2
     out = (c * L2 * wavelength**2).to(unit='dimensionless') + sc.sin(
-        divergence_angle.to(unit='rad', copy=False) + detector_rotation.to(unit='rad')
+        pixel_divergence_angle.to(unit='rad', copy=False)
+        + detector_rotation.to(unit='rad')
     )
     out = sc.asin(out, out=out)
     out -= sample_rotation.to(unit='rad')
@@ -86,7 +88,7 @@ def theta_no_gravity(wavelength, divergence_angle, sample_rotation, detector_rot
     return theta
 
 
-def angle_of_divergence(theta, sample_rotation, angle_to_center_of_beam):
+def divergence_angle(theta, sample_rotation, angle_to_center_of_beam):
     """
     Difference between the incident angle and the center of the incident beam.
     Useful for filtering parts of the beam that have too high divergence.
@@ -102,7 +104,7 @@ def angle_of_divergence(theta, sample_rotation, angle_to_center_of_beam):
 
 
 def wavelength(
-    event_time_offset, divergence_angle, L1, L2, chopper_phase, chopper_frequency
+    event_time_offset, pixel_divergence_angle, L1, L2, chopper_phase, chopper_frequency
 ):
     "Converts event_time_offset to wavelength using the chopper settings."
     out = event_time_offset.to(unit="ns", dtype="float64", copy=True)
@@ -126,35 +128,20 @@ def wavelength(
     )
     # Correction for path length through guides being different
     # depending on incident angle.
-    out -= (divergence_angle.to(unit="rad") / (np.pi * sc.units.rad)) * tau
+    out -= (pixel_divergence_angle.to(unit="rad") / (np.pi * sc.units.rad)) * tau
     out *= (sc.constants.h / sc.constants.m_n) / (L1 + L2)
     return out.to(unit='angstrom', copy=False)
 
 
 def coordinate_transformation_graph(gravity: GravityToggle) -> CoordTransformationGraph:
     return {
-        "divergence_angle": "pixel_divergence_angle",
         "wavelength": wavelength,
         "theta": theta if gravity else theta_no_gravity,
-        "angle_of_divergence": angle_of_divergence,
+        "divergence_angle": divergence_angle,
         "Q": reflectometry_q,
         "L1": lambda chopper_distance: sc.abs(chopper_distance),
         "L2": lambda distance_in_detector: distance_in_detector + Detector.distance,
     }
-
-
-def add_coords(
-    da: sc.DataArray,
-    graph: dict,
-) -> sc.DataArray:
-    "Adds scattering coordinates to the raw detector data."
-    return da.transform_coords(
-        ("wavelength", "theta", "angle_of_divergence", "Q", "L1", "L2"),
-        graph,
-        rename_dims=False,
-        keep_intermediate=False,
-        keep_aliases=False,
-    )
 
 
 def _not_between(v, a, b):
@@ -179,9 +166,9 @@ def add_masks(
     )
     da = da.bins.assign_masks(
         divergence_too_large=_not_between(
-            da.bins.coords["angle_of_divergence"],
-            bdlim[0].to(unit=da.bins.coords["angle_of_divergence"].bins.unit),
-            bdlim[1].to(unit=da.bins.coords["angle_of_divergence"].bins.unit),
+            da.bins.coords["divergence_angle"],
+            bdlim[0].to(unit=da.bins.coords["divergence_angle"].bins.unit),
+            bdlim[1].to(unit=da.bins.coords["divergence_angle"].bins.unit),
         ),
         wavelength=_not_between(
             da.bins.coords['wavelength'],
