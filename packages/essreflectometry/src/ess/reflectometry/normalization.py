@@ -20,6 +20,18 @@ from .types import (
 )
 
 
+def reduce_from_events_to_q(da, qbins):
+    return da.bins.concat().bin(Q=qbins)
+
+
+def reduce_from_events_to_lz(da, wbins):
+    return da.bins.concat(('stripe',)).bin(wavelength=wbins)
+
+
+def reduce_from_lz_to_q(da, qbins):
+    return da.flatten(to='Q').hist(Q=qbins)
+
+
 def reduce_reference(
     reference: ReducibleData[ReferenceRun],
     wavelength_bins: WavelengthBins,
@@ -40,7 +52,7 @@ def reduce_reference(
     )
     reference = reference.bins.assign_masks(invalid=sc.isnan(R))
     reference = reference / R
-    out = reference.bins.concat(('stripe',)).hist(wavelength=wavelength_bins)
+    out = reduce_from_events_to_lz(reference, wavelength_bins).hist()
 
     if 'position' in reference.coords:
         out.coords['position'] = reference.coords['position'].mean('stripe')
@@ -59,8 +71,8 @@ def reduce_sample_over_q(
 
     Returns reflectivity as a function of :math:`Q`.
     """
-    s = sample.bins.concat().bin(Q=qbins)
-    h = sc.values(reference.hist(Q=s.coords['Q']))
+    s = reduce_from_events_to_q(sample, qbins)
+    h = sc.values(reduce_from_lz_to_q(reference, s.coords['Q']))
     R = s / h.data
     R.coords['Q_resolution'] = sc.sqrt(
         (
@@ -85,9 +97,7 @@ def reduce_sample_over_zw(
 
     Returns reflectivity as a function of ``blade``, ``wire`` and :math:`\\wavelength`.
     """
-    return sample.bins.concat(('stripe',)).bin(wavelength=wbins) / sc.values(
-        reference.data
-    )
+    return reduce_from_events_to_lz(sample, wbins) / sc.values(reference.data)
 
 
 providers = (
