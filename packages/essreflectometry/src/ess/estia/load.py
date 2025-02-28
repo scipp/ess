@@ -59,7 +59,7 @@ def load_mcstas_events(
     ).to(unit='ns')
     da.bins.coords['event_time_offset'] = (
         sc.scalar(1, unit='s') * da.bins.coords['t']
-    ).to(unit='ns')
+    ).to(unit='ns') % sc.scalar(1 / 14, unit='s').to(unit='ns')
     da.bins.coords['wavelength'] = sc.scalar(1, unit='angstrom') * da.bins.coords['L']
 
     da.coords["sample_size"] = sc.scalar(1.0, unit='m') * float(
@@ -68,6 +68,8 @@ def load_mcstas_events(
     da.coords["beam_size"] = sc.scalar(2.0, unit='mm')
 
     da = da.fold('x', sizes={'blade': 14, 'wire': 32})
+    da.bins.coords.pop('L')
+    da.bins.coords.pop('t')
     return RawDetectorData[RunType](da)
 
 
