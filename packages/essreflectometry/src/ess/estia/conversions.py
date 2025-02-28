@@ -21,6 +21,17 @@ def theta(
 
     Computes the angle between the scattering direction of
     the neutron and the sample surface.
+
+    Parameters
+    ------------
+        divergence_angle:
+            Divergence angle of the scattered beam.
+        sample_rotation:
+            Rotation of the sample from to its zero position.
+
+    Returns
+    -----------
+    The reflection angle of the neutron.
     '''
     return divergence_angle + sample_rotation.to(unit=divergence_angle.unit)
 
@@ -32,8 +43,25 @@ def divergence_angle(
     incident_angle_of_center_of_beam: sc.Variable,
 ):
     """
-    Angle between the scattering direction and
-    the ray from the sample to the center of the detector.
+    Angle between the scattering ray and
+    the ray that travels parallel to the sample surface
+    when the sample rotation is zero.
+
+    Parameters
+    ------------
+        position:
+            Detector position where the neutron was detected.
+        sample_position:
+            Position of the sample.
+        detector_rotation:
+            Rotation of the detector from its zero position.
+        incident_angle_of_center_of_beam:
+            Angle between the normal of the sample surface
+            and the x-axis of the coordinate system
+            when the sample rotation is zero.
+    Returns
+    ----------
+    The divergence angle of the scattered beam.
     """
     p = position - sample_position.to(unit=position.unit)
     return (
