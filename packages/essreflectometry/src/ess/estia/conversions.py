@@ -13,8 +13,8 @@ from ..reflectometry.types import (
 
 
 def theta(
-    divergence_angle,
-    sample_rotation,
+    divergence_angle: sc.Variable,
+    sample_rotation: sc.Variable,
 ):
     '''
     Angle of reflection.
@@ -26,7 +26,10 @@ def theta(
 
 
 def divergence_angle(
-    position, sample_position, detector_rotation, incident_angle_of_center_of_beam
+    position: sc.Variable,
+    sample_position: sc.Variable,
+    detector_rotation: sc.Variable,
+    incident_angle_of_center_of_beam: sc.Variable,
 ):
     """
     Angle between the scattering direction and
@@ -46,7 +49,7 @@ def wavelength(
 ):
     "Converts event_time_offset to wavelength"
     # Use frame unwrapping from scippneutron
-    pass
+    raise NotImplementedError()
 
 
 def coordinate_transformation_graph() -> CoordTransformationGraph:
