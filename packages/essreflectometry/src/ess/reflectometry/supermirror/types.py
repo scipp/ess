@@ -1,3 +1,4 @@
+# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 from typing import NewType
 
 import scipp as sc

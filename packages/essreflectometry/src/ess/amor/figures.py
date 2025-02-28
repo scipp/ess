@@ -1,3 +1,4 @@
+# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 from collections.abc import Sequence
 
 import numpy as np

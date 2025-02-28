@@ -1,3 +1,4 @@
+# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import h5py
 import numpy as np
 import scipp as sc

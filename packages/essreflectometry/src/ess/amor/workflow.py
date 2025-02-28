@@ -1,3 +1,4 @@
+# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 from ..reflectometry.conversions import (
     add_coords,
     add_proton_current_coord,
