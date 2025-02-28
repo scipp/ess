@@ -69,3 +69,6 @@ def load_mcstas_events(
 
     da = da.fold('x', sizes={'blade': 14, 'wire': 32})
     return RawDetectorData[RunType](da)
+
+
+providers = ()

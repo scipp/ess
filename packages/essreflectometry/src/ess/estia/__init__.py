@@ -30,7 +30,7 @@ except importlib.metadata.PackageNotFoundError:
 
 providers = (
     *reflectometry_providers,
-    # *load.providers,
+    *load.providers,
     *conversions.providers,
     *workflow.providers,
     *normalization.providers,
