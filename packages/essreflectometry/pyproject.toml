@@ -75,6 +75,7 @@ filterwarnings = [
   'ignore:\n.*Sentinel is not a public part of the traitlets API.*:DeprecationWarning',
   "ignore:.*metadata to be logged in the data array, it is necessary to install the orsopy package.:UserWarning",
   "ignore:.*A transformation needs a vector attribute. Falling back to returning underlying value.:UserWarning",
+  "ignore:Invalid transformation.*'vector':UserWarning",
 ]
 
 [tool.ruff]
