@@ -32,15 +32,11 @@ jobs:
         python:
           - version: '${{needs.setup.outputs.min_python}}'
             tox-env: 'nightly'
+    uses: ./.github/workflows/test.yml
+    with:
+      os-variant: ${{ matrix.os }}
+      python-version: ${{ matrix.python.version }}
+      tox-env: ${{ matrix.python.tox-env }}
+      checkout_ref: ${{ needs.setup.outputs.release_tag }}
+      test-artifacts-name: 'essreflectometry-test-artifacts-stable'
     secrets: inherit
-    steps:
-      - uses: ./.github/workflows/test.yml
-        with:
-          os-variant: ${{ matrix.os }}
-          python-version: ${{ matrix.python.version }}
-          tox-env: ${{ matrix.python.tox-env }}
-          checkout_ref: ${{ needs.setup.outputs.release_tag }}
-      - uses: actions/upload-artifact@v4
-        with:
-          name: amor_reduced_iofq_stable.ort
-          path: amor_reduced_iofq.ort

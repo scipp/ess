@@ -26,14 +26,10 @@ jobs:
         python:
           - version: '${{needs.setup.outputs.min_python}}'
             tox-env: 'nightly'
-    steps:
-      - uses: ./.github/workflows/test.yml
-        with:
-          os-variant: ${{ matrix.os }}
-          python-version: ${{ matrix.python.version }}
-          tox-env: ${{ matrix.python.tox-env }}
-          secrets: inherit
-      - uses: actions/upload-artifact@v4
-        with:
-          name: amor_reduced_iofq_latest.ort
-          path: amor_reduced_iofq.ort
+    uses: ./.github/workflows/test.yml
+    with:
+      os-variant: ${{ matrix.os }}
+      python-version: ${{ matrix.python.version }}
+      tox-env: ${{ matrix.python.tox-env }}
+      test-artifacts-name: 'essreflectometry-test-artifacts-latest'
+    secrets: inherit

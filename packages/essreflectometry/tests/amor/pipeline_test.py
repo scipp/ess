@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
-# flake8: noqa: F403, F405
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -27,6 +27,10 @@ from ess.reflectometry.types import (
     ZIndexLimits,
 )
 from ess.reflectometry.workflow import with_filenames
+
+pytestmark = pytest.mark.filterwarnings(
+    "ignore:.*Invalid transformation, .*missing attribute 'vector':UserWarning",
+)
 
 
 @pytest.fixture
@@ -88,13 +92,15 @@ def test_orso_pipeline(amor_pipeline: sciline.Pipeline):
 
 @pytest.mark.filterwarnings("ignore:Failed to convert .* into a transformation")
 @pytest.mark.filterwarnings("ignore:Invalid transformation, missing attribute")
-def test_publish_reduced_orso_file(amor_pipeline: sciline.Pipeline):
+def test_publish_reduced_orso_file(
+    amor_pipeline: sciline.Pipeline, output_folder: Path
+):
     from orsopy import fileio
 
     amor_pipeline[SampleRotation[SampleRun]] = sc.scalar(0.85, unit="deg")
     amor_pipeline[Filename[SampleRun]] = amor.data.amor_sample_run(608)
     res = amor_pipeline.compute(orso.OrsoIofQDataset)
-    fileio.orso.save_orso(datasets=[res], fname='amor_reduced_iofq.ort')
+    fileio.orso.save_orso(datasets=[res], fname=output_folder / 'amor_reduced_iofq.ort')
 
 
 @pytest.mark.filterwarnings("ignore:Failed to convert .* into a transformation")
