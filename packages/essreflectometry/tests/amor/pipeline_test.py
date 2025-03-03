@@ -88,6 +88,17 @@ def test_orso_pipeline(amor_pipeline: sciline.Pipeline):
 
 @pytest.mark.filterwarnings("ignore:Failed to convert .* into a transformation")
 @pytest.mark.filterwarnings("ignore:Invalid transformation, missing attribute")
+def test_publish_reduced_orso_file(amor_pipeline: sciline.Pipeline):
+    from orsopy import fileio
+
+    amor_pipeline[SampleRotation[SampleRun]] = sc.scalar(0.85, unit="deg")
+    amor_pipeline[Filename[SampleRun]] = amor.data.amor_sample_run(608)
+    res = amor_pipeline.compute(orso.OrsoIofQDataset)
+    fileio.orso.save_orso(datasets=[res], fname='amor_reduced_iofq.ort')
+
+
+@pytest.mark.filterwarnings("ignore:Failed to convert .* into a transformation")
+@pytest.mark.filterwarnings("ignore:Invalid transformation, missing attribute")
 def test_pipeline_can_compute_reflectivity_merging_events_from_multiple_runs(
     amor_pipeline: sciline.Pipeline,
 ):
