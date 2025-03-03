@@ -29,8 +29,8 @@ def wavelength_resolution(
 
 
 def sample_size_resolution(
-    L2,
-    sample_size,
+    L2: sc.Variable,
+    sample_size: sc.Variable,
 ):
     """
     The resolution from the projected sample size, where it may be bigger
@@ -53,9 +53,9 @@ def sample_size_resolution(
 
 
 def angular_resolution(
-    theta,
-    L2,
-    detector_spatial_resolution,
+    theta: sc.Variable,
+    L2: sc.Variable,
+    detector_spatial_resolution: sc.Variable,
 ):
     """
     Determine the angular resolution of the ESTIA instrument.
@@ -86,10 +86,10 @@ def angular_resolution(
 
 
 def q_resolution(
-    Q,
-    angular_resolution,
-    wavelength_resolution,
-    sample_size_resolution,
+    Q: sc.Variable,
+    angular_resolution: sc.Variable,
+    wavelength_resolution: sc.Variable,
+    sample_size_resolution: sc.Variable,
 ):
     """
     Compute resolution in Q.
