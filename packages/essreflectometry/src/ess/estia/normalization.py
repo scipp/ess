@@ -95,7 +95,9 @@ def evaluate_reference(
         ),
         {
             **graph,
-            "wavelength_resolution": lambda: sc.scalar(1.0),
+            # The wavelength resolution of Estia is not implemented yet
+            # when it is this will be replaced by the correct value.
+            "wavelength_resolution": lambda: sc.scalar(0.05),
             "sample_size_resolution": sample_size_resolution,
             "angular_resolution": angular_resolution,
             "Q_resolution": q_resolution,
