@@ -28,10 +28,6 @@ from ess.reflectometry.types import (
 )
 from ess.reflectometry.workflow import with_filenames
 
-pytestmark = pytest.mark.filterwarnings(
-    "ignore:.*Invalid transformation, .*missing attribute 'vector':UserWarning",
-)
-
 
 @pytest.fixture
 def amor_pipeline() -> sciline.Pipeline:
