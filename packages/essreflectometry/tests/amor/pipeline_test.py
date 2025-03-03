@@ -92,9 +92,7 @@ def test_orso_pipeline(amor_pipeline: sciline.Pipeline):
 
 @pytest.mark.filterwarnings("ignore:Failed to convert .* into a transformation")
 @pytest.mark.filterwarnings("ignore:Invalid transformation, missing attribute")
-def test_publish_reduced_orso_file(
-    amor_pipeline: sciline.Pipeline, output_folder: Path
-):
+def test_save_reduced_orso_file(amor_pipeline: sciline.Pipeline, output_folder: Path):
     from orsopy import fileio
 
     amor_pipeline[SampleRotation[SampleRun]] = sc.scalar(0.85, unit="deg")
