@@ -13,6 +13,11 @@ from .mcstas import parse_events_ascii, parse_events_h5
 def load_mcstas_events(
     filename: Filename[RunType],
 ) -> RawDetectorData[RunType]:
+    """
+    Load event data from a McStas run and reshape it
+    to look like what we would expect if
+    we loaded data from a real experiment file.
+    """
     if h5py.is_hdf5(filename):
         with h5py.File(filename) as f:
             da = parse_events_h5(f)
