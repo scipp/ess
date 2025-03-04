@@ -77,9 +77,7 @@ jobs:
           python-version: ${{ inputs.python-version }}
       - run: python -m pip install --upgrade pip
       - run: python -m pip install -r ${{ inputs.pip-recipe }}
-      - run: tox -e ${{ inputs.tox-env }} -- --file-output=".tests_outputs"
-      - run: ls -l
-      - run: ls -l .tests_outputs/
+      - run: tox -e ${{ inputs.tox-env }} -- --file-output="tests_outputs"
       - uses: actions/upload-artifact@v4
         if: ${{ inputs.coverage-report }}
         with:
@@ -89,4 +87,4 @@ jobs:
         if: ${{ inputs.test-artifacts-name != '' }}
         with:
           name: ${{ inputs.test-artifacts-name }}
-          path: .tests_outputs/
+          path: tests_outputs/
