@@ -212,6 +212,11 @@ class DetectorDesc:
         """Number of pixels in each row of the detector along the fast axis."""
         return self.num_x if self.fast_axis_name == 'x' else self.num_y
 
+    @property
+    def detector_shape(self) -> tuple:
+        """Shape of the detector panel. (num_x, num_y)"""
+        return (self.num_x, self.num_y)
+
 
 def _collect_detector_descriptions(tree: _XML) -> tuple[DetectorDesc, ...]:
     """Retrieve detector geometry descriptions from mcstas file."""
@@ -310,12 +315,18 @@ class SourceDesc:
         )
 
 
+def _construct_pixel_id(detector_desc: DetectorDesc) -> sc.Variable:
+    """Pixel IDs for single detector."""
+    start, stop = (
+        detector_desc.id_start,
+        detector_desc.id_start + detector_desc.total_pixels,
+    )
+    return sc.arange('id', start, stop, unit=None)
+
+
 def _construct_pixel_ids(detector_descs: tuple[DetectorDesc, ...]) -> sc.Variable:
     """Pixel IDs for all detectors."""
-    intervals = [
-        (desc.id_start, desc.id_start + desc.total_pixels) for desc in detector_descs
-    ]
-    ids = [sc.arange('id', start, stop, unit=None) for start, stop in intervals]
+    ids = [_construct_pixel_id(det) for det in detector_descs]
     return sc.concat(ids, 'id')
 
 
@@ -345,17 +356,6 @@ def _pixel_positions(
     ) + position_offset
 
 
-def _detector_pixel_positions(
-    detector_descs: tuple[DetectorDesc, ...], sample: SampleDesc
-) -> sc.Variable:
-    """Position of pixels of all detectors."""
-    positions = [
-        _pixel_positions(detector, sample.position_from_sample(detector.position))
-        for detector in detector_descs
-    ]
-    return sc.concat(positions, 'panel')
-
-
 @dataclass
 class McStasInstrument:
     simulation_settings: SimulationSettings
@@ -380,30 +380,72 @@ class McStasInstrument:
         )
 
     def pixel_ids(self, *det_names: str) -> sc.Variable:
-        detectors = tuple(det for det in self.detectors if det.name in det_names)
-        return _construct_pixel_ids(detectors)
+        """Pixel IDs for the detectors.
 
-    def to_coords(self, *det_names: str) -> dict[str, sc.Variable]:
-        """Extract coordinates from the McStas instrument description.
+        If multiple detectors are requested, all pixel IDs will be concatenated along
+        the 'id' dimension.
 
         Parameters
         ----------
         det_names:
-            Names of the detectors to extract coordinates for.
+            Names of the detectors to extract pixel IDs for.
 
         """
         detectors = tuple(det for det in self.detectors if det.name in det_names)
-        slow_axes = [det.slow_axis for det in detectors]
-        fast_axes = [det.fast_axis for det in detectors]
-        origins = [self.sample.position_from_sample(det.position) for det in detectors]
+        return _construct_pixel_ids(detectors)
+
+    def experiment_metadata(self) -> dict[str, sc.Variable]:
+        """Extract experiment metadata from the McStas instrument description."""
         return {
-            'fast_axis': sc.concat(fast_axes, 'panel'),
-            'slow_axis': sc.concat(slow_axes, 'panel'),
-            'origin_position': sc.concat(origins, 'panel'),
             'sample_position': self.sample.position_from_sample(self.sample.position),
             'source_position': self.sample.position_from_sample(self.source.position),
             'sample_name': sc.scalar(self.sample.name),
-            'position': _detector_pixel_positions(detectors, self.sample),
+        }
+
+    def _detector_metadata(self, det_name: str) -> dict[str, sc.Variable]:
+        try:
+            detector = next(det for det in self.detectors if det.name == det_name)
+        except StopIteration as e:
+            raise KeyError(f"Detector {det_name} not found.") from e
+        return {
+            'fast_axis': detector.fast_axis,
+            'slow_axis': detector.slow_axis,
+            'origin_position': self.sample.position_from_sample(detector.position),
+            'position': _pixel_positions(
+                detector, self.sample.position_from_sample(detector.position)
+            ),
+            'detector_shape': sc.scalar(detector.detector_shape),
+            'x_pixel_size': detector.step_x,
+            'y_pixel_size': detector.step_y,
+            'detector_name': sc.scalar(detector.name),
+        }
+
+    def detector_metadata(self, *det_names: str) -> dict[str, sc.Variable]:
+        """Extract detector metadata from the McStas instrument description.
+
+        If multiple detector is requested, all metadata will be concatenated along the
+        'panel' dimension.
+
+        Parameters
+        ----------
+        det_names:
+            Names of the detectors to extract metadata for.
+
+        """
+        if len(det_names) == 1:
+            return self._detector_metadata(det_names[0])
+        detector_metadatas = {
+            det_name: self._detector_metadata(det_name) for det_name in det_names
+        }
+        # Concat all metadata into panel dimension
+        metadata_keys: set[str] = set().union(
+            set(detector_metadatas[det_name].keys()) for det_name in det_names
+        )
+        return {
+            key: sc.concat(
+                [metadata[key] for metadata in detector_metadatas.values()], 'panel'
+            )
+            for key in metadata_keys
         }
 
 
