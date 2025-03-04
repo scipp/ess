@@ -50,10 +50,6 @@ def divergence_angle(
             Position of the sample.
         detector_rotation:
             Rotation of the detector from its zero position.
-        incident_angle_of_center_of_beam:
-            Angle between the normal of the sample surface
-            and the x-axis of the coordinate system
-            when the sample rotation is zero.
     Returns
     ----------
     The divergence angle of the scattered beam.
