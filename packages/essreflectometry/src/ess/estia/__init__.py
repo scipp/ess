@@ -15,7 +15,7 @@ from ..reflectometry.types import (
     RunType,
     SamplePosition,
 )
-from . import conversions, load, normalization, resolution, workflow
+from . import conversions, load, maskings, normalization, resolution, workflow
 from .types import (
     AngularResolution,
     SampleSizeResolution,
@@ -32,6 +32,7 @@ providers = (
     *reflectometry_providers,
     *load.providers,
     *conversions.providers,
+    *maskings.providers,
     *workflow.providers,
     *normalization.providers,
 )

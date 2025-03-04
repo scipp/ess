@@ -16,8 +16,8 @@ from ..reflectometry.types import (
     YIndexLimits,
     ZIndexLimits,
 )
-from .conversions import add_masks
 from .corrections import correct_by_footprint
+from .maskings import add_masks
 
 
 def add_coords_masks_and_apply_corrections(
