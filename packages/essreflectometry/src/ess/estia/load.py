@@ -28,7 +28,10 @@ def load_mcstas_events(
     da.coords['sample_rotation'] = sc.scalar(
         float(da.coords['omegaa'].value), unit='deg'
     )
-    da.coords['detector_rotation'] = 2 * da.coords['sample_rotation']
+    da.coords['detector_rotation'] = 2 * da.coords['sample_rotation'] + sc.scalar(
+        1.7, unit='deg'
+    )
+
     xbins = sc.linspace('x', -0.25, 0.25, 14 * 32 + 1)
     ybins = sc.linspace('y', -0.25, 0.25, 65)
     da = da.bin(x=xbins, y=ybins).rename_dims({'y': 'stripe'})

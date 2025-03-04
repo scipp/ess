@@ -40,7 +40,6 @@ def divergence_angle(
     position: sc.Variable,
     sample_position: sc.Variable,
     detector_rotation: sc.Variable,
-    incident_angle_of_center_of_beam: sc.Variable,
 ):
     """
     Angle between the scattering ray and
@@ -64,11 +63,7 @@ def divergence_angle(
     The divergence angle of the scattered beam.
     """
     p = position - sample_position.to(unit=position.unit)
-    return (
-        sc.atan2(y=p.fields.x, x=p.fields.z)
-        - detector_rotation.to(unit='rad')
-        - incident_angle_of_center_of_beam.to(unit='rad')
-    )
+    return sc.atan2(y=p.fields.x, x=p.fields.z) - detector_rotation.to(unit='rad')
 
 
 def wavelength(
@@ -90,9 +85,6 @@ def coordinate_transformation_graph() -> CoordTransformationGraph:
             sample_position - source_position
         ),  # + extra correction for guides?
         "L2": lambda position, sample_position: sc.norm(position - sample_position),
-        "incident_angle_of_center_of_beam": lambda: sc.scalar(1.7, unit='deg').to(
-            unit='rad'
-        ),
     }
 
 
