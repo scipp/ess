@@ -47,10 +47,8 @@ def check_nmxdata_properties(
     dg: NMXRawEventCountsDataGroup, fast_axis, slow_axis
 ) -> None:
     assert isinstance(dg, sc.DataGroup)
-    assert_allclose(
-        sc.squeeze(dg['fast_axis'], 'panel'), fast_axis, atol=sc.scalar(0.005)
-    )
-    assert_identical(sc.squeeze(dg['slow_axis'], 'panel'), slow_axis)
+    assert_allclose(dg['fast_axis'], fast_axis, atol=sc.scalar(0.005))
+    assert_identical(dg['slow_axis'], slow_axis)
 
 
 @pytest.mark.parametrize(

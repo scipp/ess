@@ -2,11 +2,12 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 
-from .mcstas.xml import McStasInstrument
 from .types import (
-    CrystalRotation,
-    DetectorName,
+    MaximumTimeOfArrival,
     McStasWeight2CountScaleFactor,
+    MinimumTimeOfArrival,
+    NMXDetectorMetadata,
+    NMXExperimentMetadata,
     NMXReducedCounts,
     NMXReducedDataGroup,
     NMXReducedProbability,
@@ -15,6 +16,16 @@ from .types import (
     RawEventProbability,
     TimeBinSteps,
 )
+
+
+def calculate_minimum_toa(da: RawEventProbability) -> MinimumTimeOfArrival:
+    """Calculate the minimum time of arrival from the data."""
+    return MinimumTimeOfArrival(da.coords['t'].min())
+
+
+def calculate_maximum_toa(da: RawEventProbability) -> MaximumTimeOfArrival:
+    """Calculate the maximum time of arrival from the data."""
+    return MaximumTimeOfArrival(da.coords['t'].max())
 
 
 def proton_charge_from_event_counts(da: NMXReducedCounts) -> ProtonCharge:
@@ -53,20 +64,18 @@ def raw_event_probability_to_counts(
 
 def format_nmx_reduced_data(
     da: NMXReducedCounts,
-    detector_name: DetectorName,
-    instrument: McStasInstrument,
     proton_charge: ProtonCharge,
-    crystal_rotation: CrystalRotation,
+    experiment_metadata: NMXExperimentMetadata,
+    detector_metadata: NMXDetectorMetadata,
 ) -> NMXReducedDataGroup:
     """Bin time of arrival data into ``time_bin_step`` bins."""
-    new_coords = instrument.to_coords(detector_name)
 
     return NMXReducedDataGroup(
         sc.DataGroup(
             counts=da,
             proton_charge=proton_charge,
-            crystal_rotation=crystal_rotation,
-            **new_coords,
+            **experiment_metadata,
+            **detector_metadata,
         )
     )
 
