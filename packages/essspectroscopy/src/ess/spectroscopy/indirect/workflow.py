@@ -5,10 +5,13 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 
+import numpy as np
 import scipp as sc
 import scippnexus as snx
 from loguru import logger
 from scipp import Variable
+
+from ess.reduce import time_of_flight
 
 from ..types import (
     Analyzers,
@@ -23,7 +26,11 @@ from ..types import (
     NXspeFileName,
     Position,
     PreopenNeXusFile,
+    SampleEvents,
     SampleRun,
+    SourceSamplePathLength,
+    TimeOfFlightLookupTable,
+    TofSampleEvents,
 )
 
 PIXEL_NAME = 'detector_number'
@@ -88,7 +95,7 @@ def ess_source_velocities():
     return array(values=[100, 1e4], dims=['wavelength'], unit='m/s')
 
 
-def convert_simulated_time_to_frame_time(data):
+def convert_simulated_time_to_event_time_offset(data):
     """Helper to make McStas simulated event data look more like real data
 
     McStas has the ability to track the time-of-flight from source to detector for
@@ -102,26 +109,26 @@ def convert_simulated_time_to_frame_time(data):
     primary spectrometer is necessary to find any time-of-flight
 
     This function takes event data with per-event coordinate event_time_offset
-    (actually McStas time-of-flight) and creates a new coordinate frame_time that is
+    (actually McStas time-of-flight) and converts the coordinate to be
     the time-of-flight modulo the source repetition period.
 
     Notes
     -----
     If the input data has realistic event_time_offset values, this function should
-    produce frame_time data which is identical, and will therefore only increase
-    the amount of data stored per event.
+    be a noop.
 
     Returns
     -------
     :
-        A copy of the data with extra per-event coordinate frame_time
+        A copy of the data with realistic per-event coordinate event_time_offset.
     """
-    graph = {
-        'frame_time': lambda event_time_offset: event_time_offset % ess_source_period()
-    }
-    return data.transform_coords(
-        'frame_time', graph=graph, rename_dims=False, keep_intermediate=False
+    res = data.transform_coords(
+        frame_time=lambda event_time_offset: event_time_offset % ess_source_period(),
+        rename_dims=False,
+        keep_intermediate=False,
+        keep_inputs=False,
     )
+    return res.transform_coords(event_time_offset='frame_time', keep_inputs=False)
 
 
 def analyzer_per_detector(analyzers: list[str], triplets: list[str]) -> dict[str, str]:
@@ -309,18 +316,25 @@ def get_triplet_events(triplets: Iterable[sc.DataArray]):
     return events
 
 
-def get_sample_events(triplet_events, sample_detector_flight_times):
+def get_sample_events(triplet_events: sc.DataArray, sample_detector_flight_times):
     """Return the events with the frame_time coordinate offset to time at the sample"""
-    events = triplet_events.copy()
-    for coord in ('position', 'x_pixel_offset', 'y_pixel_offset'):
-        del events.coords[coord]
-    events.bins.coords['frame_time'] -= sample_detector_flight_times.to(unit='ns')
-    events.bins.coords['frame_time'] %= ess_source_period()
+    events = triplet_events.drop_coords(
+        ('position', 'x_pixel_offset', 'y_pixel_offset')
+    )
+    events.bins.coords['event_time_offset'] -= sample_detector_flight_times.to(
+        unit='ns'
+    )
+    events.bins.coords['event_time_offset'] %= ess_source_period()
     return events
 
 
-def get_unwrapped_events(
-    filename, source_name, sample_name, sample_events, focus_components
+def get_unwrapped_sample_events(
+    filename,
+    source_name,
+    sample_name,
+    sample_events,
+    focus_components,
+    tof_lookup_table,
 ):
     """Shift frame_time at sample events to time-since-pulse events at sample"""
     from sciline import Pipeline
@@ -329,9 +343,7 @@ def get_unwrapped_events(
         Filename,
         FocusComponentNames,
         PrimarySpectrometerObject,
-        SampleFrameTime,
         SampleName,
-        SampleTime,
         SourceDelay,
         SourceDuration,
         SourceFrequency,
@@ -348,17 +360,19 @@ def get_unwrapped_events(
         SourceDuration: ess_source_duration(),
         SourceFrequency: ess_source_frequency(),
         SourceVelocities: ess_source_velocities(),
-        SampleFrameTime: sample_events.data.bins.coords['frame_time'],
+        SampleEvents: sample_events,
         FocusComponentNames: focus_components,
+        TimeOfFlightLookupTable: tof_lookup_table,
     }
     pipeline = Pipeline(ki_providers, params=params)
-    primary = pipeline.get(PrimarySpectrometerObject).compute()
-    pipeline[PrimarySpectrometerObject] = primary
-    params[PrimarySpectrometerObject] = primary
+    # TODO remove?
+    # primary = pipeline.get(PrimarySpectrometerObject).compute()
+    # pipeline[PrimarySpectrometerObject] = primary
+    # params[PrimarySpectrometerObject] = primary
 
-    events = sample_events.copy()
-    events.bins.coords['frame_time'] = pipeline.get(SampleTime).compute()
-    return params, events, primary
+    events = pipeline.compute(TofSampleEvents)
+    events = events.bins.drop_coords(('event_time_zero', 'event_time_offset'))
+    return params, events, None  # primary
 
 
 def get_normalization_monitor(monitors, monitor_component, collapse: bool = False):
@@ -394,11 +408,13 @@ def get_normalization_monitor(monitors, monitor_component, collapse: bool = Fals
     )
 
 
-def get_energy_axes(ki_params, kf_params):
+def add_energy_coordinates(sample_events, ki_params, kf_params):
     """Extract incident_energy, final_energy, and energy_transfer
 
     Parameters
     ----------
+    sample_events:
+        Events with time of flight to the sample.
     ki_params:
         A dictionary of parameters needed by the incident-spectrometer sciline pipeline
     kf_params:
@@ -406,21 +422,18 @@ def get_energy_axes(ki_params, kf_params):
 
     Returns
     -------
-    ei:
-        The incident energy
-    en:
-        The energy transfer
-    ef:
-        The final energy
+    :
+        ``sample_events`` with added 'incident_energy', 'final_energy', and
+        'energy_transfer' coordinates.
     """
     from sciline import Pipeline
+    from scippneutron.conversion.tof import energy_from_tof
 
     from ..types import (
         EnergyTransfer,
         FinalEnergy,
         FinalWavenumber,
         IncidentEnergy,
-        IncidentWavenumber,
     )
     from .conservation import providers
 
@@ -428,12 +441,28 @@ def get_energy_axes(ki_params, kf_params):
     params.update(ki_params)
     params.update(kf_params)
     pipeline = Pipeline(providers, params=params)
-    pipeline[IncidentWavenumber] = pipeline.get(IncidentWavenumber).compute()
     pipeline[FinalWavenumber] = pipeline.get(FinalWavenumber).compute()
-    ei = pipeline.get(IncidentEnergy).compute()
-    en = pipeline.get(EnergyTransfer).compute()
-    ef = pipeline.get(FinalEnergy).compute()
-    return ei, en, ef
+
+    incident_graph = {
+        'incident_energy': lambda sample_tof, L1: energy_from_tof(
+            tof=sample_tof, Ltotal=L1
+        ),
+        # TODO remove once L1 is precomputed
+        'L1': lambda: pipeline.compute(SourceSamplePathLength),
+    }
+    events_with_energy_axes = sample_events.transform_coords(
+        'incident_energy',
+        graph=incident_graph,
+        keep_inputs=False,
+        keep_intermediate=False,
+    )
+    pipeline[IncidentEnergy] = events_with_energy_axes.bins.coords['incident_energy']
+    energies = pipeline.compute((EnergyTransfer, FinalEnergy))
+    events_with_energy_axes.bins.coords['energy_transfer'] = energies[
+        EnergyTransfer
+    ].to(unit='meV')
+    events_with_energy_axes.coords['final_energy'] = energies[FinalEnergy]
+    return events_with_energy_axes
 
 
 def add_momentum_axes(ki_params, kf_params, events, a3: Variable):
@@ -762,24 +791,33 @@ def load_everything(filename: Filename):
 
 
 def one_setting(
-    sample, triplet_events, analyzers, norm_monitor, filename, names, warn_about_a3=True
+    sample,
+    triplet_events,
+    analyzers,
+    norm_monitor,
+    filename,
+    names,
+    tof_lookup_table,
+    warn_about_a3=True,
 ):
     """Calculate the event properties for a single (a3, a4) setting"""
     detector_positions = triplet_events.coords['position']
     kf_params, sample_detector_flight_time = find_sample_detector_flight_time(
         sample, analyzers, detector_positions
     )
-    events = get_sample_events(triplet_events, sample_detector_flight_time)
-    ki_params, unwrapped_events, primary = get_unwrapped_events(
-        filename, names['source'], names['sample'], events, names['focus']
+    sample_events = get_sample_events(triplet_events, sample_detector_flight_time)
+    ki_params, unwrapped_sample_events, primary = get_unwrapped_sample_events(
+        filename,
+        names['source'],
+        names['sample'],
+        sample_events,
+        names['focus'],
+        tof_lookup_table,
     )
-    ei, en, ef = get_energy_axes(ki_params, kf_params)
-
-    events.bins.coords['energy_transfer'] = en.to(unit='meV')
-    events.bins.coords['incident_energy'] = ei
-    events.coords['final_energy'] = ef
-
-    events.coords['theta'] = get_geometric_a4(kf_params)
+    unwrapped_sample_events = add_energy_coordinates(
+        unwrapped_sample_events, ki_params, kf_params
+    )
+    unwrapped_sample_events.coords['theta'] = get_geometric_a4(kf_params)
 
     if 'a3' in triplet_events.coords:
         # this _should_ be one (a3, a4) setting,
@@ -792,19 +830,27 @@ def one_setting(
             logger.warning("No a3 present in setting, assuming 0 a3")
         a3 = scalar(0, unit='deg')
 
-    events = add_momentum_axes(ki_params, kf_params, events, a3)
-
-    # Set up the normalisation by adding a 'incident_wavelength' coordinate to
-    # the individual events and the normalisation monitor
-    events, monitor = add_wavelength_axes(
-        ki_params, kf_params, events, norm_monitor, names['monitor']
+    # events = add_momentum_axes(ki_params, kf_params, events, a3)
+    #
+    # # Set up the normalisation by adding a 'incident_wavelength' coordinate to
+    # # the individual events and the normalisation monitor
+    # events, monitor = add_wavelength_axes(
+    #     ki_params, kf_params, events, norm_monitor, names['monitor']
+    # )
+    a4 = triplet_events.coords['a4']
+    unwrapped_sample_events.save_hdf5(
+        f"data/new/events.a3_{a3.value:.1f}.a4_{a4.value:.1f}.h5"
     )
+    # events.save_hdf5(f"data/reference/events.a3_{a3.value:.1f}.a4_{a4.value:.1f}.h5")
+    raise RuntimeError("abort")
 
-    norm_events = normalise_wavelength_events(ki_params, kf_params, events, monitor)
+    norm_events = normalise_wavelength_events(
+        ki_params, kf_params, sample_events, monitor
+    )
 
     return {
         'triplet_events': triplet_events,
-        'events': events,
+        'events': sample_events,
         'norm_monitor': norm_monitor,
         'sample_detector_flight_time': sample_detector_flight_time,
         'analyzers': analyzers,
@@ -851,7 +897,7 @@ def load_precompute(
 
     if is_simulated:
         for name in triplets:
-            triplets[name] = convert_simulated_time_to_frame_time(triplets[name])
+            triplets[name] = convert_simulated_time_to_event_time_offset(triplets[name])
 
     analyzers = combine_analyzers(analyzers, triplets)
     # detectors = combine_detectors(triplets)
@@ -919,6 +965,7 @@ def component_names(
 
 def bifrost(
     filename: Filename,
+    tof_lookup_table: TimeOfFlightLookupTable,
     source_component: str | None = None,
     sample_component: str | None = None,
     focus_components: list[str] | None = None,
@@ -978,6 +1025,7 @@ def bifrost(
             one_monitor,
             filename,
             named_components,
+            tof_lookup_table=tof_lookup_table,
         )
         for one_triplet_events, one_analyzers, one_monitor in tqdm(
             settings, desc='(a3, a4) settings'
@@ -988,6 +1036,7 @@ def bifrost(
 
 def bifrost_single(
     filename: Filename,
+    tof_lookup_table: TimeOfFlightLookupTable,
     source_component: str | None = None,
     sample_component: str | None = None,
     focus_components: list[str] | None = None,
@@ -1047,6 +1096,7 @@ def bifrost_single(
         norm_monitor,
         filename,
         named_components,
+        tof_lookup_table=tof_lookup_table,
         warn_about_a3=False,
     )
 

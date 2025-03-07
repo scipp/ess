@@ -6,6 +6,7 @@ import sciline
 import scipp as sc
 from choppera.primary import PrimarySpectrometer
 
+from ess.reduce import time_of_flight
 from ess.reduce.nexus import types as reduce_t
 
 
@@ -147,3 +148,7 @@ NormWavelengthEvents = data_array_type('NormWavelengthEvents')
 
 NXspeFileName = NewType('NXspeFileName', str)
 NXspeFileNames = NewType('NXspeFileNames', list[NXspeFileName])
+
+SampleEvents = NewType('Sampleevents', sc.DataArray)
+TimeOfFlightLookupTable = time_of_flight.TimeOfFlightLookupTable
+TofSampleEvents = NewType('TofSampleEvents', sc.DataArray)
