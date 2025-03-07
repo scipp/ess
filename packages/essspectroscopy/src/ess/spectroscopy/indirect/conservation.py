@@ -118,13 +118,6 @@ def sample_table_momentum_z(q: TableMomentumTransfer) -> TableMomentumTransferZ:
     return dot(PARALLEL, q)
 
 
-def energy(ki: IncidentWavenumber, kf: FinalWavenumber) -> EnergyTransfer:
-    """Calculate the energy transferred to the sample by a neutron"""
-    from scipp.constants import hbar, neutron_mass
-
-    return hbar * hbar * (ki * ki - kf * kf) / 2 / neutron_mass
-
-
 def energy_transfer(
     incident_energy: IncidentEnergy, final_energy: FinalEnergy
 ) -> EnergyTransfer:
@@ -142,6 +135,5 @@ providers = (
     sample_table_momentum_x,
     sample_table_momentum_y,
     sample_table_momentum_z,
-    energy,
     energy_transfer,
 )

@@ -7,9 +7,11 @@ indirect geometry time-of-flight spectrometer
 
 from __future__ import annotations
 
+import sciline
 import scipp as sc
 from scippnexus import Group
 
+from ess.reduce import time_of_flight
 from ess.spectroscopy.types import (
     Filename,
     FocusComponentName,
@@ -24,7 +26,7 @@ from ess.spectroscopy.types import (
     PrimaryFocusDistance,
     PrimaryFocusTime,
     PrimarySpectrometerObject,
-    SampleFrameTime,
+    SampleEvents,
     SampleName,
     SamplePosition,
     SampleTime,
@@ -36,6 +38,8 @@ from ess.spectroscopy.types import (
     SourceSampleFlightTime,
     SourceSamplePathLength,
     SourceVelocities,
+    TimeOfFlightLookupTable,
+    TofSampleEvents,
 )
 
 
@@ -212,6 +216,7 @@ def focus_time(
     return primary_focus_time(primary, distance)
 
 
+# TODO insert this as l1 into the events to make sure to use the correct length
 def primary_path_length(
     file: Filename, source: SourcePosition, sample: SamplePosition
 ) -> SourceSamplePathLength:
@@ -317,15 +322,29 @@ def primary_pivot_time(primary: PrimarySpectrometerObject) -> SourceSampleFlight
 
 
 def unwrap_sample_time(
-    times: SampleFrameTime, frequency: SourceFrequency, least: SourceSampleFlightTime
-) -> SampleTime:
+    sample_events: SampleEvents,
+    table: TimeOfFlightLookupTable,
+    l1: SourceSamplePathLength,
+) -> TofSampleEvents:
     """Use the pivot time to shift neutron event time offsets, recovering 'real'
     time after source pulse per event"""
-    from choppera.nexus import unwrap as choppera_unwrap
 
-    return choppera_unwrap(times, frequency, least)
+    pipeline = sciline.Pipeline(
+        time_of_flight.providers(),
+        params={
+            **time_of_flight.default_parameters(),
+            time_of_flight.TimeOfFlightLookupTable: table,
+            time_of_flight.Ltotal: l1,
+            time_of_flight.RawData: sample_events,
+        },
+    )
+    result = pipeline.compute(time_of_flight.TofData)
+    # This is time-of-flight at the sample.
+    result.bins.coords['sample_tof'] = result.bins.coords.pop('tof')
+    return TofSampleEvents(result)
 
 
+# TODO remove
 def incident_slowness(
     length: SourceSamplePathLength,
     time: SampleTime,
@@ -361,6 +380,7 @@ def incident_slowness(
     return slowness
 
 
+# TODO remove
 def incident_sloth(
     primary: PrimarySpectrometerObject, slowness: IncidentSlowness
 ) -> IncidentSloth:
@@ -373,6 +393,7 @@ def incident_sloth(
     return range_normalized(slowness, sc.min(min_max), sc.max(min_max))
 
 
+# TODO remove
 def incident_wavelength(slowness: IncidentSlowness) -> IncidentWavelength:
     """Calculate the incident wavelength from the incident slowness for each neutron"""
     from scipp.constants import Planck, neutron_mass
@@ -380,6 +401,7 @@ def incident_wavelength(slowness: IncidentSlowness) -> IncidentWavelength:
     return (slowness * Planck / neutron_mass).to(unit='angstrom')
 
 
+# TODO remove
 def incident_wavenumber(slowness: IncidentSlowness) -> IncidentWavenumber:
     """Calculate the incident wave number from the incident slowness for each neutron"""
     from scipp.constants import hbar, neutron_mass
@@ -387,6 +409,7 @@ def incident_wavenumber(slowness: IncidentSlowness) -> IncidentWavenumber:
     return (neutron_mass / hbar / slowness).to(unit='1/angstrom')
 
 
+# TODO remove
 def incident_direction() -> IncidentDirection:
     """Return the incident neutron direction in the laboratory frame"""
     from scipp import vector
@@ -394,6 +417,7 @@ def incident_direction() -> IncidentDirection:
     return vector([0, 0, 1.0])
 
 
+# TODO remove
 def incident_wavevector(
     ki_magnitude: IncidentWavenumber, direction: IncidentDirection
 ) -> IncidentWavevector:
@@ -421,10 +445,10 @@ providers = (
     primary_pivot_time,
     unwrap_sample_time,
     incident_direction,
-    incident_slowness,
-    incident_sloth,
-    incident_wavelength,
-    incident_wavenumber,
-    incident_wavevector,
-    incident_energy,
+    # incident_slowness, # TODO
+    # incident_sloth,
+    # incident_wavelength,
+    # incident_wavenumber,
+    # incident_wavevector,
+    # incident_energy,
 )
