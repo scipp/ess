@@ -393,7 +393,6 @@ def incident_sloth(
     return range_normalized(slowness, sc.min(min_max), sc.max(min_max))
 
 
-# TODO remove
 def incident_wavelength(slowness: IncidentSlowness) -> IncidentWavelength:
     """Calculate the incident wavelength from the incident slowness for each neutron"""
     from scipp.constants import Planck, neutron_mass
@@ -447,7 +446,7 @@ providers = (
     incident_direction,
     # incident_slowness, # TODO
     # incident_sloth,
-    # incident_wavelength,
+    incident_wavelength,
     # incident_wavenumber,
     # incident_wavevector,
     # incident_energy,

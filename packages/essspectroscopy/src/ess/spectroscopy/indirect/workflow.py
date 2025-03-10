@@ -453,7 +453,6 @@ def add_energy_coordinates(sample_events, ki_params, kf_params):
     events_with_energy_axes = sample_events.transform_coords(
         'incident_energy',
         graph=incident_graph,
-        keep_inputs=False,
         keep_intermediate=False,
     )
     pipeline[IncidentEnergy] = events_with_energy_axes.bins.coords['incident_energy']
@@ -465,7 +464,7 @@ def add_energy_coordinates(sample_events, ki_params, kf_params):
     return events_with_energy_axes
 
 
-def add_momentum_axes(ki_params, kf_params, events, a3: Variable):
+def add_momentum_coordinates(ki_params, kf_params, events, a3: Variable):
     """Extract momentum transfer in the lab and sample-table coordinate systems
 
     Parameters
@@ -526,7 +525,7 @@ def add_momentum_axes(ki_params, kf_params, events, a3: Variable):
     return events
 
 
-def add_wavelength_axes(ki_params, kf_params, events, monitor, monitor_name):
+def add_wavelength_coordinate(ki_params, kf_params, events, monitor, monitor_name):
     """Convert to incident wavelength per event and independent monitor axis
 
     Parameters
@@ -554,6 +553,8 @@ def add_wavelength_axes(ki_params, kf_params, events, monitor, monitor_name):
         And the monitor with 'incident_wavelength' coordinate.
     """
     from sciline import Pipeline
+    from scippneutron.conversion.graph import beamline
+    from scippneutron.conversion.tof import wavelength_from_tof
 
     from ..types import (
         FrameTimeMonitor,
@@ -566,16 +567,36 @@ def add_wavelength_axes(ki_params, kf_params, events, monitor, monitor_name):
     from .ki import providers as ki_providers
     from .normalisation import providers as monitor_providers
 
-    params = {
-        MonitorName: monitor_name,
-        FrameTimeMonitor: monitor,
+    # TODO unwrap tof for monitor using LUT and remove existing WavelengthMonitor computation
+    pipeline = Pipeline(ki_providers, params=ki_params)
+
+    incident_graph = {
+        'incident_wavelength': wavelength_from_tof,
+        # TODO remove once L1 is precomputed
+        'L1': lambda: pipeline.compute(SourceSamplePathLength),
+        'Ltotal': 'L1',  # using sample times
+        'tof': 'sample_tof',
     }
-    params.update(ki_params)
-    params.update(kf_params)
-    pipeline = Pipeline(monitor_providers + ki_providers + kf_providers, params=params)
-    wavelength_monitor = pipeline.compute(WavelengthMonitor)
-    events.bins.coords['incident_wavelength'] = pipeline.compute(IncidentWavelength)
-    return events, wavelength_monitor
+    events_with_wavelength = events.transform_coords(
+        'incident_wavelength',
+        graph=incident_graph,
+        keep_inputs=False,
+        keep_intermediate=False,
+        keep_aliases=False,
+    )
+
+    monitor_graph = {
+        **beamline.beamline(scatter=False),
+        'incident_wavelength': wavelength_from_tof,
+    }
+    wavelength_monitor = monitor.transform_coords(
+        'incident_wavelength',
+        graph=monitor_graph,
+        keep_intermediate=False,
+        keep_aliases=False,
+    )
+
+    return events_with_wavelength, wavelength_monitor
 
 
 def get_geometric_a4(kf_params):
@@ -830,18 +851,19 @@ def one_setting(
             logger.warning("No a3 present in setting, assuming 0 a3")
         a3 = scalar(0, unit='deg')
 
-    # events = add_momentum_axes(ki_params, kf_params, events, a3)
-    #
-    # # Set up the normalisation by adding a 'incident_wavelength' coordinate to
-    # # the individual events and the normalisation monitor
-    # events, monitor = add_wavelength_axes(
-    #     ki_params, kf_params, events, norm_monitor, names['monitor']
+    # unwrapped_sample_events = add_momentum_coordinates(
+    #     ki_params, kf_params, unwrapped_sample_events, a3
     # )
+
+    # Set up the normalisation by adding an 'incident_wavelength' coordinate to
+    # the individual events and the normalisation monitor
+    unwrapped_sample_events, monitor = add_wavelength_coordinate(
+        ki_params, kf_params, unwrapped_sample_events, norm_monitor, names['monitor']
+    )
     a4 = triplet_events.coords['a4']
     unwrapped_sample_events.save_hdf5(
         f"data/new/events.a3_{a3.value:.1f}.a4_{a4.value:.1f}.h5"
     )
-    # events.save_hdf5(f"data/reference/events.a3_{a3.value:.1f}.a4_{a4.value:.1f}.h5")
     raise RuntimeError("abort")
 
     norm_events = normalise_wavelength_events(
