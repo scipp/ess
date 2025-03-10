@@ -65,6 +65,10 @@ def parse_events_h5(f):
         'NXentry/simulation/Param',
     )
     da = sc.DataArray(
+        # The squares on the variances is the correct way to load weighted event data.
+        # Consult the McStas documentation
+        # (section 2.2.1) https://www.mcstas.org/documentation/manual/
+        # for more information.
         sc.array(dims=['events'], values=events[:, 0], variances=events[:, 0] ** 2),
     )
     for i, label in enumerate(data.attrs["ylabel"].decode().strip().split(' ')):
