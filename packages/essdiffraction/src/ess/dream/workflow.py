@@ -23,6 +23,7 @@ from ess.powder.types import (
     Position,
     ReducerSoftwares,
     SampleRun,
+    TimeOfFlightLookupTableFilename,
     TofMask,
     TwoThetaMask,
     VanadiumRun,
@@ -32,11 +33,30 @@ from ess.reduce import time_of_flight
 from ess.reduce.parameter import parameter_mappers
 from ess.reduce.workflow import register_workflow
 
+from .beamline import InstrumentConfiguration
 from .io.cif import CIFAuthors, prepare_reduced_tof_cif
 from .io.geant4 import LoadGeant4Workflow
 from .parameters import typical_outputs
 
-_dream_providers = (prepare_reduced_tof_cif,)
+
+def _get_lookup_table_filename_from_configuration(
+    configuration: InstrumentConfiguration,
+) -> TimeOfFlightLookupTableFilename:
+    from .data import tof_lookup_table_high_flux
+
+    match configuration:
+        case InstrumentConfiguration.high_flux:
+            out = tof_lookup_table_high_flux()
+        case InstrumentConfiguration.high_resolution:
+            raise NotImplementedError("High resolution configuration not yet supported")
+
+    return TimeOfFlightLookupTableFilename(out)
+
+
+_dream_providers = (
+    prepare_reduced_tof_cif,
+    _get_lookup_table_filename_from_configuration,
+)
 
 parameter_mappers[PixelMaskFilename] = with_pixel_mask_filenames
 
