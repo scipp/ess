@@ -16,7 +16,6 @@ from ess.powder.types import (
     PixelMaskFilename,
     ReducedTofCIF,
     SampleRun,
-    TimeOfFlightLookupTableFilename,
     UncertaintyBroadcastMode,
     VanadiumRun,
 )
@@ -28,6 +27,8 @@ from ess.reduce.parameter import (
     StringParameter,
     parameter_registry,
 )
+
+from .beamline import InstrumentConfiguration
 
 parameter_registry[Filename[SampleRun]] = FilenameParameter.from_type(
     Filename[SampleRun]
@@ -41,8 +42,8 @@ parameter_registry[Filename[BackgroundRun]] = FilenameParameter.from_type(
 parameter_registry[CalibrationFilename] = FilenameParameter.from_type(
     CalibrationFilename
 )
-parameter_registry[TimeOfFlightLookupTableFilename] = FilenameParameter.from_type(
-    TimeOfFlightLookupTableFilename
+parameter_registry[InstrumentConfiguration] = ParamWithOptions.from_enum(
+    InstrumentConfiguration, default=InstrumentConfiguration.high_flux
 )
 parameter_registry[MonitorFilename[SampleRun]] = FilenameParameter.from_type(
     MonitorFilename[SampleRun]
