@@ -1,7 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 
+import sciline
 from scipp import DataArray
+
+from ess.reduce import time_of_flight
 
 from ..types import (
     Filename,
@@ -20,6 +23,8 @@ from ..types import (
     SourceMonitorFlightTime,
     SourceMonitorPathLength,
     SourcePosition,
+    TimeOfFlightLookupTable,
+    TofMonitor,
     WallTimeMonitor,
     WavelengthBins,
     WavelengthEvents,
@@ -285,7 +290,26 @@ def normalise(
     return binned
 
 
+def unwrap_monitor(
+    monitor: FrameTimeMonitor,
+    table: TimeOfFlightLookupTable,
+    length: SourceMonitorPathLength,
+) -> TofMonitor:
+    tof_wf = sciline.Pipeline(
+        (*time_of_flight.providers(), time_of_flight.resample_tof_data),
+        params={
+            **time_of_flight.default_parameters(),
+            time_of_flight.TimeOfFlightLookupTable: table,
+            time_of_flight.Ltotal: length,
+            time_of_flight.RawData: monitor.rename(frame_time='tof'),
+        },
+    )
+    unwrapped = tof_wf.compute(time_of_flight.ResampledTofData)
+    return TofMonitor(unwrapped)
+
+
 providers = (
+    # TODO remove monitor-related functions
     incident_monitor_normalization,
     monitor_pivot_time,
     monitor_wall_time,
@@ -295,4 +319,5 @@ providers = (
     monitor_position,
     source_monitor_path_length,
     normalise,
+    unwrap_monitor,
 )
