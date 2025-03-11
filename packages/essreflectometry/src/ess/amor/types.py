@@ -36,12 +36,6 @@ class ThetaBins(sciline.Scope[RunType, sc.Variable], sc.Variable):
     detector pixels have the same theta value."""
 
 
-class AngleCenterOfIncomingToHorizon(
-    sciline.Scope[RunType, sc.DataGroup], sc.DataGroup
-):
-    """Angle from the center of the incoming beam to the horizon."""
-
-
 WavelengthThetaFigure = NewType("WavelengthThetaFigure", Any)
 WavelengthZIndexFigure = NewType("WavelengthZIndexFigure", Any)
 QThetaFigure = NewType("QThetaFigure", Any)

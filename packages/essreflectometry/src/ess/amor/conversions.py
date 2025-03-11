@@ -70,7 +70,9 @@ def theta(wavelength, pixel_divergence_angle, L2, sample_rotation, detector_rota
     return out
 
 
-def theta_no_gravity(wavelength, divergence_angle, sample_rotation, detector_rotation):
+def theta_no_gravity(
+    wavelength, pixel_divergence_angle, sample_rotation, detector_rotation
+):
     '''
     Angle of reflection.
 
@@ -79,7 +81,7 @@ def theta_no_gravity(wavelength, divergence_angle, sample_rotation, detector_rot
     effect of gravity.
     '''
     theta = (
-        divergence_angle.to(unit='rad', copy=False)
+        pixel_divergence_angle.to(unit='rad', copy=False)
         + detector_rotation.to(unit='rad')
         - sample_rotation.to(unit='rad')
     )
@@ -88,7 +90,7 @@ def theta_no_gravity(wavelength, divergence_angle, sample_rotation, detector_rot
     return theta
 
 
-def divergence_angle(theta, sample_rotation, angle_to_center_of_beam):
+def divergence_angle(theta, sample_rotation, detector_rotation):
     """
     Difference between the incident angle and the center of the incident beam.
     Useful for filtering parts of the beam that have too high divergence.
@@ -98,8 +100,8 @@ def divergence_angle(theta, sample_rotation, angle_to_center_of_beam):
     """
     return (
         theta.to(unit='rad', copy=False)
-        - sample_rotation.to(unit='rad')
-        - angle_to_center_of_beam.to(unit='rad', copy=False)
+        - detector_rotation.to(unit='rad')
+        + sample_rotation.to(unit='rad')
     )
 
 
