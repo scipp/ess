@@ -152,3 +152,5 @@ NXspeFileNames = NewType('NXspeFileNames', list[NXspeFileName])
 SampleEvents = NewType('Sampleevents', sc.DataArray)
 TimeOfFlightLookupTable = time_of_flight.TimeOfFlightLookupTable
 TofSampleEvents = NewType('TofSampleEvents', sc.DataArray)
+
+TofMonitor = NewType('TofMonitor', sc.DataArray)

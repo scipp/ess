@@ -375,6 +375,40 @@ def get_unwrapped_sample_events(
     return params, events, None  # primary
 
 
+def get_unwrapped_monitor(
+    filename, monitor: sc.DataArray, source_name, tof_lookup_table
+) -> sc.DataArray:
+    from sciline import Pipeline
+
+    from ..types import (
+        Filename,
+        FrameTimeMonitor,
+        MonitorPosition,
+        SourceDelay,
+        SourceDuration,
+        SourceFrequency,
+        SourceName,
+        SourceVelocities,
+        TofMonitor,
+    )
+    from .ki import source_position
+    from .normalisation import providers
+
+    params = {
+        Filename: filename,
+        FrameTimeMonitor: monitor,
+        MonitorPosition: monitor.coords['position'],
+        SourceName: source_name,
+        SourceDelay: ess_source_delay(),
+        SourceDuration: ess_source_duration(),
+        SourceFrequency: ess_source_frequency(),
+        SourceVelocities: ess_source_velocities(),
+        TimeOfFlightLookupTable: tof_lookup_table,
+    }
+    pipeline = Pipeline((*providers, source_position), params=params)
+    return pipeline.compute(TofMonitor)
+
+
 def get_normalization_monitor(monitors, monitor_component, collapse: bool = False):
     """Get the data of the named monitor component, converting frame_time to nanoseconds
     to match event_time_offset
@@ -835,6 +869,14 @@ def one_setting(
         names['focus'],
         tof_lookup_table,
     )
+
+    unwrapped_norm_monitor = get_unwrapped_monitor(
+        filename,
+        norm_monitor,
+        names['source'],
+        tof_lookup_table,
+    )
+
     unwrapped_sample_events = add_energy_coordinates(
         unwrapped_sample_events, ki_params, kf_params
     )
@@ -858,7 +900,11 @@ def one_setting(
     # Set up the normalisation by adding an 'incident_wavelength' coordinate to
     # the individual events and the normalisation monitor
     unwrapped_sample_events, monitor = add_wavelength_coordinate(
-        ki_params, kf_params, unwrapped_sample_events, norm_monitor, names['monitor']
+        ki_params,
+        kf_params,
+        unwrapped_sample_events,
+        unwrapped_norm_monitor,
+        names['monitor'],
     )
     a4 = triplet_events.coords['a4']
     unwrapped_sample_events.save_hdf5(
