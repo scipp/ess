@@ -275,7 +275,9 @@ def wavelength_z_figure(
     kwargs.setdefault('cbar', True)
     kwargs.setdefault('norm', 'log')
     kwargs.setdefault('grid', True)
-    return pp.imagefigure(*(pp.Node(h) for h in hs), **kwargs)
+    p = pp.imagefigure(*(pp.Node(h) for h in hs), **kwargs)
+    p.ax.invert_yaxis()
+    return p
 
 
 def wavelength_theta_diagnostic_figure(
