@@ -30,6 +30,7 @@ from .types import (
     AngularResolution,
     ChopperFrequency,
     ChopperPhase,
+    GravityToggle,
     QThetaFigure,
     ReflectivityDiagnosticsView,
     SampleSizeResolution,
@@ -76,6 +77,7 @@ def default_parameters() -> dict:
             sc.scalar(-0.75, unit='deg'),
             sc.scalar(0.75, unit='deg'),
         ),
+        GravityToggle: True,
     }
 
 

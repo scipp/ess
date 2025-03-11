@@ -38,4 +38,5 @@ jobs:
       python-version: ${{ matrix.python.version }}
       tox-env: ${{ matrix.python.tox-env }}
       checkout_ref: ${{ needs.setup.outputs.release_tag }}
+      test-artifacts-name: 'essreflectometry-test-artifacts-stable'
     secrets: inherit

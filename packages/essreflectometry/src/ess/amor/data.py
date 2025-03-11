@@ -12,7 +12,7 @@ def _make_pooch():
     return pooch.create(
         path=pooch.os_cache("ess/amor"),
         env="ESS_AMOR_DATA_DIR",
-        base_url="https://fileserver-cache.johanneskasimir.workers.dev/groups/scipp/ess/amor/{version}/",
+        base_url="https://public.esss.dk/groups/scipp/ess/amor/{version}/",
         version=_version,
         registry={
             "reference.nxs": "md5:56d493c8051e1c5c86fb7a95f8ec643b",
