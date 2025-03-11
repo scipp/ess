@@ -11,7 +11,7 @@ from ..reflectometry.types import (
     ZIndexLimits,
 )
 from .geometry import Detector
-from .types import CoordTransformationGraph
+from .types import CoordTransformationGraph, GravityToggle
 
 
 def theta(wavelength, divergence_angle, L2, sample_rotation, detector_rotation):
@@ -68,6 +68,24 @@ def theta(wavelength, divergence_angle, L2, sample_rotation, detector_rotation):
     return out
 
 
+def theta_no_gravity(wavelength, divergence_angle, sample_rotation, detector_rotation):
+    '''
+    Angle of reflection.
+
+    Computes the angle between the scattering direction of
+    the neutron and the sample surface while disregarding the
+    effect of gravity.
+    '''
+    theta = (
+        divergence_angle.to(unit='rad', copy=False)
+        + detector_rotation.to(unit='rad')
+        - sample_rotation.to(unit='rad')
+    )
+    if wavelength.bins:
+        return sc.bins_like(wavelength, theta)
+    return theta
+
+
 def angle_of_divergence(theta, sample_rotation, angle_to_center_of_beam):
     """
     Difference between the incident angle and the center of the incident beam.
@@ -113,11 +131,11 @@ def wavelength(
     return out.to(unit='angstrom', copy=False)
 
 
-def coordinate_transformation_graph() -> CoordTransformationGraph:
+def coordinate_transformation_graph(gravity: GravityToggle) -> CoordTransformationGraph:
     return {
         "divergence_angle": "pixel_divergence_angle",
         "wavelength": wavelength,
-        "theta": theta,
+        "theta": theta if gravity else theta_no_gravity,
         "angle_of_divergence": angle_of_divergence,
         "Q": reflectometry_q,
         "L1": lambda chopper_distance: sc.abs(chopper_distance),
