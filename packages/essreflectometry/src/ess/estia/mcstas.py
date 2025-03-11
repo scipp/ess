@@ -41,6 +41,11 @@ def parse_events_ascii(lines):
         labels = meta['ylabel'].strip().split(' ')
         if labels[0] == 'p':
             da = sc.DataArray(
+                # The squares on the variances is the correct way
+                # to load weighted event data.
+                # Consult the McStas documentation
+                # (section 2.2.1) https://www.mcstas.org/documentation/manual/
+                # for more information.
                 sc.array(dims=['events'], values=data[:, 0], variances=data[:, 0] ** 2),
                 coords={
                     label: sc.array(dims=['events'], values=values)
