@@ -59,13 +59,14 @@ def reduce_sample_over_q(
 
     Returns reflectivity as a function of :math:`Q`.
     """
-    h = reference.flatten(to='Q').hist(Q=qbins)
-    R = sample.bins.concat().bin(Q=qbins) / h.data
+    s = sample.bins.concat().bin(Q=qbins)
+    h = reference.flatten(to='Q').hist(Q=s.coords['Q'])
+    R = s / h.data
     R.coords['Q_resolution'] = sc.sqrt(
         (
             (reference * reference.coords['Q_resolution'] ** 2)
             .flatten(to='Q')
-            .hist(Q=qbins)
+            .hist(Q=s.coords['Q'])
         )
         / h
     ).data
