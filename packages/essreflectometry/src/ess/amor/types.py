@@ -47,3 +47,5 @@ WavelengthThetaFigure = NewType("WavelengthThetaFigure", Any)
 WavelengthZIndexFigure = NewType("WavelengthZIndexFigure", Any)
 QThetaFigure = NewType("QThetaFigure", Any)
 ReflectivityDiagnosticsView = NewType("ReflectivityDiagnosticsView", Any)
+
+GravityToggle = NewType("GravityToggle", bool)

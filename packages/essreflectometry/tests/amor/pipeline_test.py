@@ -73,6 +73,18 @@ def test_has_expected_coordinates(amor_pipeline: sciline.Pipeline):
 
 @pytest.mark.filterwarnings("ignore:Failed to convert .* into a transformation")
 @pytest.mark.filterwarnings("ignore:Invalid transformation, missing attribute")
+def test_pipeline_no_gravity_correction(amor_pipeline: sciline.Pipeline):
+    # The sample rotation value in the file is slightly off, so we set it manually
+    amor_pipeline[SampleRotation[SampleRun]] = sc.scalar(0.85, unit="deg")
+    amor_pipeline[Filename[SampleRun]] = amor.data.amor_sample_run(608)
+    amor_pipeline[amor.types.GravityToggle] = False
+    reflectivity_over_q = amor_pipeline.compute(ReflectivityOverQ)
+    assert "Q" in reflectivity_over_q.coords
+    assert "Q_resolution" in reflectivity_over_q.coords
+
+
+@pytest.mark.filterwarnings("ignore:Failed to convert .* into a transformation")
+@pytest.mark.filterwarnings("ignore:Invalid transformation, missing attribute")
 def test_orso_pipeline(amor_pipeline: sciline.Pipeline):
     # The sample rotation value in the file is slightly off, so we set it manually
     amor_pipeline[SampleRotation[SampleRun]] = sc.scalar(0.85, unit="deg")
