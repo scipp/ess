@@ -54,7 +54,7 @@ ipydatawidgets==4.3.5
     # via pythreejs
 ipykernel==6.29.5
     # via -r docs.in
-ipython==8.32.0
+ipython==8.33.0
     # via
     #   -r docs.in
     #   ipykernel
