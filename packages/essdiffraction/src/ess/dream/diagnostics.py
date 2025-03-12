@@ -24,7 +24,11 @@ class FlatVoxelViewer(ipw.VBox):
     """
 
     def __init__(
-        self, data: Mapping[str, sc.DataArray], *, rasterized: bool = True
+        self,
+        data: Mapping[str, sc.DataArray],
+        *,
+        rasterized: bool = True,
+        **kwargs: object,
     ) -> None:
         """Create a new viewer.
 
@@ -35,6 +39,8 @@ class FlatVoxelViewer(ipw.VBox):
         rasterized:
             If ``True``, the figure is rasterized which improves rendering
             speed but reduces resolution.
+        **kwargs:
+            Additional arguments passed to the plotting function.
         """
         self._data = self._prepare_data(data)
         self._bank_selector = _make_bank_selector(data.keys())
@@ -42,7 +48,7 @@ class FlatVoxelViewer(ipw.VBox):
 
         self._dim_selector = _DimensionSelector(self._bank.dims, self._update_view)
 
-        self._fig_kwargs = {'rasterized': rasterized}
+        self._fig_kwargs = {'rasterized': rasterized} | kwargs
         self._figure_box = ipw.HBox([self._make_figure()])
         self._bank_selector.observe(self._select_bank, names='value')
 
@@ -149,8 +155,7 @@ def _flat_voxel_figure(
     data: sc.DataArray,
     horizontal_dim: str,
     vertical_dim: str,
-    *,
-    rasterized: bool = True,
+    **kwargs: object,
 ) -> FigureLike:
     kept_dims = {horizontal_dim, vertical_dim}
 
@@ -182,7 +187,7 @@ def _flat_voxel_figure(
     h_labels = [str(value) for value in h_coord.values]
     v_labels = [str(value) for value in v_coord.values]
 
-    fig = flat.plot(rasterized=rasterized, cbar=True)
+    fig = flat.plot(**kwargs)
 
     fig.ax.xaxis.set_ticks(ticks=h_ticks, labels=h_labels)
     fig.ax.yaxis.set_ticks(ticks=v_ticks, labels=v_labels)
