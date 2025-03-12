@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 
 from __future__ import annotations
 
@@ -330,7 +330,6 @@ def get_unwrapped_sample_events(
     source_name,
     sample_name,
     sample_events,
-    focus_components,
     tof_lookup_table,
 ):
     """Shift frame_time at sample events to time-since-pulse events at sample"""
@@ -338,13 +337,8 @@ def get_unwrapped_sample_events(
 
     from ..types import (
         Filename,
-        FocusComponentNames,
         SampleName,
-        SourceDelay,
-        SourceDuration,
-        SourceFrequency,
         SourceName,
-        SourceVelocities,
     )
     from .ki import providers as ki_providers
 
@@ -352,19 +346,10 @@ def get_unwrapped_sample_events(
         Filename: filename,
         SampleName: sample_name,
         SourceName: source_name,
-        SourceDelay: ess_source_delay(),
-        SourceDuration: ess_source_duration(),
-        SourceFrequency: ess_source_frequency(),
-        SourceVelocities: ess_source_velocities(),
         SampleEvents: sample_events,
-        FocusComponentNames: focus_components,
         TimeOfFlightLookupTable: tof_lookup_table,
     }
     pipeline = Pipeline(ki_providers, params=params)
-    # TODO remove?
-    # primary = pipeline.get(PrimarySpectrometerObject).compute()
-    # pipeline[PrimarySpectrometerObject] = primary
-    # params[PrimarySpectrometerObject] = primary
 
     events = pipeline.compute(TofSampleEvents)
     events = events.bins.drop_coords(('event_time_zero', 'event_time_offset'))
@@ -380,11 +365,7 @@ def get_unwrapped_monitor(
         Filename,
         FrameTimeMonitor,
         MonitorPosition,
-        SourceDelay,
-        SourceDuration,
-        SourceFrequency,
         SourceName,
-        SourceVelocities,
         TofMonitor,
     )
     from .ki import source_position
@@ -395,10 +376,6 @@ def get_unwrapped_monitor(
         FrameTimeMonitor: monitor,
         MonitorPosition: monitor.coords['position'],
         SourceName: source_name,
-        SourceDelay: ess_source_delay(),
-        SourceDuration: ess_source_duration(),
-        SourceFrequency: ess_source_frequency(),
-        SourceVelocities: ess_source_velocities(),
         TimeOfFlightLookupTable: tof_lookup_table,
     }
     pipeline = Pipeline((*providers, source_position), params=params)
@@ -865,7 +842,6 @@ def one_setting(
         names['source'],
         names['sample'],
         sample_events,
-        names['focus'],
         tof_lookup_table,
     )
 
@@ -969,7 +945,6 @@ def load_precompute(
 def component_names(
     source_component: str | None = None,
     sample_component: str | None = None,
-    focus_components: list[str] | None = None,
     monitor_component: str | None = None,
     is_simulated: bool = False,
 ):
@@ -983,9 +958,6 @@ def component_names(
     sample_component: str
         The user-provided sample component name, should exist at
         'entry/instrument/{sample_component}' in the datafile
-    focus_components: list[str]
-        The user-provided set of component names defining the time-focus position,
-        each should exist under 'entry/instrument' in the datafile
     monitor_component: str
         The user-provided normalization monitor component name, should exist at
         'entry/instrument/{monitor_component}'
@@ -998,12 +970,9 @@ def component_names(
     :
         A dictionary mapping component type name to group name
     """
-    from ..types import FocusComponentName
-
     names = {
         'source': source_component,
         'sample': sample_component,
-        'focus': focus_components,
         'monitor': monitor_component,
     }
     if is_simulated:
@@ -1011,10 +980,6 @@ def component_names(
             'source': '001_ESS_source',
             'sample': '114_sample_stack',
             'monitor': '110_frame_3',
-            'focus': [
-                FocusComponentName('005_PulseShapingChopper'),
-                FocusComponentName('006_PulseShapingChopper2'),
-            ],
         }
         for k, v in sim_components.items():
             if names[k] is None:
@@ -1027,7 +992,6 @@ def bifrost(
     tof_lookup_table: TimeOfFlightLookupTable,
     source_component: str | None = None,
     sample_component: str | None = None,
-    focus_components: list[str] | None = None,
     monitor_component: str | None = None,
     is_simulated: bool = False,
 ):
@@ -1047,9 +1011,6 @@ def bifrost(
     sample_component:
         The group name under 'entry/instrument' in the NeXus file containing
         sample information
-    focus_components:
-        The group name or group names under 'entry/instrument' in the NeXus file
-        which define the focus-time
     monitor_component:
         The group name under 'entry/instrument' in the NeXus file containing
         normalization monitor information
@@ -1071,7 +1032,6 @@ def bifrost(
     named_components = component_names(
         source_component,
         sample_component,
-        focus_components,
         monitor_component,
         is_simulated,
     )
@@ -1101,7 +1061,6 @@ def bifrost_single(
     tof_lookup_table: TimeOfFlightLookupTable,
     source_component: str | None = None,
     sample_component: str | None = None,
-    focus_components: list[str] | None = None,
     monitor_component: str | None = None,
     is_simulated: bool = False,
     extras: bool = False,
@@ -1122,9 +1081,6 @@ def bifrost_single(
     sample_component:
         The group name under 'entry/instrument' in the NeXus file containing
         sample information
-    focus_components:
-        The group name or group names under 'entry/instrument' in the NeXus file
-        which define the focus-time
     monitor_component:
         The group name under 'entry/instrument' in the NeXus file containing
         normalization monitor information
@@ -1144,7 +1100,6 @@ def bifrost_single(
     named_components = component_names(
         source_component,
         sample_component,
-        focus_components,
         monitor_component,
         is_simulated,
     )
