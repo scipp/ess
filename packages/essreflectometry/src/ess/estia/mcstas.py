@@ -76,6 +76,9 @@ def parse_events_h5(f):
         # for more information.
         sc.array(dims=['events'], values=events[:, 0], variances=events[:, 0] ** 2),
     )
+    for name, value in data.attrs.items():
+        da.coords[name] = sc.scalar(value.decode())
+
     for i, label in enumerate(data.attrs["ylabel"].decode().strip().split(' ')):
         if label == 'p':
             continue
