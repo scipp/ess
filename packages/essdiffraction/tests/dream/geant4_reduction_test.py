@@ -64,7 +64,7 @@ params = {
     MonitorFilename[SampleRun]: dream.data.simulated_monitor_diamond_sample(),
     MonitorFilename[VanadiumRun]: dream.data.simulated_monitor_vanadium_sample(),
     MonitorFilename[BackgroundRun]: dream.data.simulated_monitor_empty_can(),
-    TimeOfFlightLookupTableFilename: dream.data.tof_lookup_table_high_flux(),
+    dream.InstrumentConfiguration: dream.beamline.InstrumentConfiguration.high_flux,
     CalibrationFilename: None,
     UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
     DspacingBins: sc.linspace('dspacing', 0.0, 2.3434, 201, unit='angstrom'),
@@ -112,6 +112,14 @@ def make_workflow(params_for_det, *, run_norm):
 
 def test_pipeline_can_compute_dspacing_result(workflow):
     workflow = powder.with_pixel_mask_filenames(workflow, [])
+    result = workflow.compute(IofDspacing)
+    assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
+    assert sc.identical(result.coords['dspacing'], params[DspacingBins])
+
+
+def test_pipeline_can_compute_dspacing_result_using_lookup_table_filename(workflow):
+    workflow = powder.with_pixel_mask_filenames(workflow, [])
+    workflow[TimeOfFlightLookupTableFilename] = dream.data.tof_lookup_table_high_flux()
     result = workflow.compute(IofDspacing)
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
