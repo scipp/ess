@@ -11,8 +11,6 @@ import scippnexus as snx
 from loguru import logger
 from scipp import Variable
 
-from ess.reduce import time_of_flight
-
 from ..types import (
     Analyzers,
     Choppers,
@@ -268,7 +266,6 @@ def combine_detectors(triplets: sc.DataGroup[sc.DataArray]):
 
 def find_sample_detector_flight_time(sample, analyzers, detector_positions):
     """Use sciline to find the sample to detector flight time per detector pixel"""
-    import numpy as np
     from sciline import Pipeline
 
     from ..types import (
@@ -342,7 +339,6 @@ def get_unwrapped_sample_events(
     from ..types import (
         Filename,
         FocusComponentNames,
-        PrimarySpectrometerObject,
         SampleName,
         SourceDelay,
         SourceDuration,
@@ -560,7 +556,7 @@ def add_momentum_coordinates(ki_params, kf_params, events, a3: Variable):
         'lab_momentum_z': lambda lab_momentum_transfer: sc.dot(
             PARALLEL, lab_momentum_transfer
         ),
-        'table_momentum_transfer': lambda lab_momentum_transfer: sample_table_momentum_vector(
+        'table_momentum_transfer': lambda lab_momentum_transfer: sample_table_momentum_vector(  # noqa: E501
             a3, lab_momentum_transfer
         ),
         'table_momentum_x': lambda table_momentum_transfer: sc.dot(
@@ -577,15 +573,13 @@ def add_momentum_coordinates(ki_params, kf_params, events, a3: Variable):
     )
 
 
-def add_wavelength_coordinate(ki_params, kf_params, events, monitor, monitor_name):
+def add_wavelength_coordinate(ki_params, events, monitor):
     """Convert to incident wavelength per event and independent monitor axis
 
     Parameters
     ----------
     ki_params:
         A dictionary of parameters needed by the incident-spectrometer sciline pipeline
-    kf_params:
-        A dictionary of parameters needed by the secondary-spectrometer sciline pipeline
     events:
         Event data, presumably with per-event incident energy (or wavelength, or
         inverse velocity == slowness) already calculated; the basis for the returned
@@ -594,9 +588,6 @@ def add_wavelength_coordinate(ki_params, kf_params, events, monitor, monitor_nam
         A beam monitor with one independent axis (time since last pulse as measured).
         The monitor intensity is expected to be a histogram along the one independent
         axis, but event monitor data should work as well.
-    monitor_name:
-        The name of the provided beam monitor, used to get its position in the
-        primary spectrometer
 
     Returns
     -------
@@ -905,10 +896,8 @@ def one_setting(
     # the individual events and the normalisation monitor
     unwrapped_sample_events, monitor = add_wavelength_coordinate(
         ki_params,
-        kf_params,
         unwrapped_sample_events,
         unwrapped_norm_monitor,
-        names['monitor'],
     )
     unwrapped_sample_events = add_momentum_coordinates(
         ki_params, kf_params, unwrapped_sample_events, a3
@@ -1049,6 +1038,9 @@ def bifrost(
     ----------
     filename:
         The name of the NeXus file to load
+    tof_lookup_table:
+        Time-of-flight lookup table as produced by
+        `ESSreduce <https://scipp.github.io/essreduce/user-guide/tof/frame-unwrapping.html>`_.
     source_component:
         The group name under 'entry/instrument' in the NeXus file containing
         source information
@@ -1121,6 +1113,9 @@ def bifrost_single(
     ----------
     filename:
         The name of the NeXus file to load
+    tof_lookup_table:
+        Time-of-flight lookup table as produced by
+        `ESSreduce <https://scipp.github.io/essreduce/user-guide/tof/frame-unwrapping.html>`_.
     source_component:
         The group name under 'entry/instrument' in the NeXus file containing
         source information

@@ -6,10 +6,8 @@ from scipp import vector
 from ..types import (
     EnergyTransfer,
     FinalEnergy,
-    FinalWavenumber,
     FinalWavevector,
     IncidentEnergy,
-    IncidentWavenumber,
     IncidentWavevector,
     LabMomentumTransfer,
     LabMomentumTransferX,
