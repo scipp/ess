@@ -28,7 +28,7 @@ certifi==2025.1.31
     # via requests
 charset-normalizer==3.4.1
     # via requests
-debugpy==1.8.12
+debugpy==1.8.13
     # via ipykernel
 defusedxml==0.7.1
     # via nbconvert
@@ -46,9 +46,9 @@ imagesize==1.4.1
     # via sphinx
 ipykernel==6.29.5
     # via -r docs.in
-ipympl==0.9.6
+ipympl==0.9.7
     # via -r docs.in
-jinja2==3.1.5
+jinja2==3.1.6
     # via
     #   myst-parser
     #   nbconvert
@@ -85,7 +85,7 @@ mdit-py-plugins==0.4.2
     # via myst-parser
 mdurl==0.1.2
     # via markdown-it-py
-mistune==3.1.1
+mistune==3.1.2
     # via nbconvert
 myst-parser==4.0.1
     # via -r docs.in
@@ -98,7 +98,7 @@ nbformat==5.10.4
     #   nbclient
     #   nbconvert
     #   nbsphinx
-nbsphinx==0.9.6
+nbsphinx==0.9.7
     # via -r docs.in
 nest-asyncio==1.6.0
     # via ipykernel
@@ -114,7 +114,7 @@ pooch==1.8.2
     # via -r docs.in
 psutil==7.0.0
     # via ipykernel
-pyarrow==19.0.0
+pyarrow==19.0.1
     # via -r docs.in
 pybtex==0.24.0
     # via
@@ -126,7 +126,7 @@ pydata-sphinx-theme==0.16.1
     # via -r docs.in
 pytz==2025.1
     # via pandas
-pyzmq==26.2.1
+pyzmq==26.3.0
     # via
     #   ipykernel
     #   jupyter-client
@@ -138,7 +138,7 @@ requests==2.32.3
     # via
     #   pooch
     #   sphinx
-rpds-py==0.22.3
+rpds-py==0.23.1
     # via
     #   jsonschema
     #   referencing
@@ -178,6 +178,8 @@ sphinxcontrib-serializinghtml==2.0.0
     # via sphinx
 tinycss2==1.4.0
     # via bleach
+tomli==2.2.1
+    # via sphinx
 tornado==6.4.2
     # via
     #   ipykernel
@@ -190,6 +192,3 @@ webencodings==0.5.1
     # via
     #   bleach
     #   tinycss2
-
-# The following packages are considered to be unsafe in a requirements file:
-# setuptools
