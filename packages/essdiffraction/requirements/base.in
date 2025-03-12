@@ -6,7 +6,7 @@ dask
 essreduce>=25.02.4
 graphviz
 numpy
-plopp
+plopp>=25.03.0
 pythreejs
 sciline>=24.06.0
 scipp>=24.09.1
