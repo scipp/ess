@@ -85,9 +85,7 @@ def reduce_sample_over_zw(
 
     Returns reflectivity as a function of ``blade``, ``wire`` and :math:`\\wavelength`.
     """
-    R = sample.bins.concat(('stripe',)).bin(wavelength=wbins) / reference.data
-    R.masks["too_few_events"] = reference.data < sc.scalar(1, unit="counts")
-    return R
+    return sample.bins.concat(('stripe',)).bin(wavelength=wbins) / reference.data
 
 
 providers = (
