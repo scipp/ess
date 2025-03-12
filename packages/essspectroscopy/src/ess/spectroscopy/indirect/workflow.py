@@ -918,11 +918,6 @@ def one_setting(
         ki_params, kf_params, unwrapped_sample_events, monitor
     )
 
-    a4 = triplet_events.coords['a4']
-    unwrapped_sample_events.save_hdf5(
-        f"data/new/events.a3_{a3.value:.1f}.a4_{a4.value:.1f}.h5"
-    )
-
     return {
         'triplet_events': triplet_events,
         'events': unwrapped_sample_events,
