@@ -524,15 +524,16 @@ def add_momentum_coordinates(ki_params, kf_params, events, a3: Variable):
     from sciline import Pipeline
 
     from ..types import (
-        LabMomentumTransfer,
-        LabMomentumTransferX,
-        LabMomentumTransferZ,
+        FinalWavevector,
+        IncidentDirection,
         SampleTableAngle,
-        TableMomentumTransfer,
-        TableMomentumTransferX,
-        TableMomentumTransferZ,
     )
-    from .conservation import providers
+    from .conservation import (
+        PARALLEL,
+        PERP,
+        providers,
+        sample_table_momentum_vector,
+    )
 
     if a3.size != 1:
         raise ValueError(f'Expected a3 to have 1-entry, not {a3.size}')
@@ -544,19 +545,36 @@ def add_momentum_coordinates(ki_params, kf_params, events, a3: Variable):
     params[SampleTableAngle] = a3
 
     pipeline = Pipeline(providers, params=params)
-    pipeline[LabMomentumTransfer] = pipeline.get(LabMomentumTransfer).compute()
+    intermediates = pipeline.compute((IncidentDirection, FinalWavevector))
+    incident_direction = intermediates[IncidentDirection]
+    final_wavevector = intermediates[FinalWavevector]
 
-    events.bins.coords['lab_momentum_x'] = pipeline.get(LabMomentumTransferX).compute()
-    events.bins.coords['lab_momentum_z'] = pipeline.get(LabMomentumTransferZ).compute()
+    def compute_lab_momentum_transfer(incident_wavelength: sc.Variable) -> sc.Variable:
+        return final_wavevector - 2 * np.pi * incident_direction / incident_wavelength
 
-    pipeline[TableMomentumTransfer] = pipeline.get(TableMomentumTransfer).compute()
-    events.bins.coords['table_momentum_x'] = (
-        pipeline.get(TableMomentumTransferX).compute().transpose(events.dims)
+    graph = {
+        'lab_momentum_transfer': compute_lab_momentum_transfer,
+        'lab_momentum_x': lambda lab_momentum_transfer: sc.dot(
+            PERP, lab_momentum_transfer
+        ),
+        'lab_momentum_z': lambda lab_momentum_transfer: sc.dot(
+            PARALLEL, lab_momentum_transfer
+        ),
+        'table_momentum_transfer': lambda lab_momentum_transfer: sample_table_momentum_vector(
+            a3, lab_momentum_transfer
+        ),
+        'table_momentum_x': lambda table_momentum_transfer: sc.dot(
+            PERP, table_momentum_transfer
+        ),
+        'table_momentum_z': lambda table_momentum_transfer: sc.dot(
+            PARALLEL, table_momentum_transfer
+        ),
+    }
+    return events.transform_coords(
+        ('lab_momentum_x', 'lab_momentum_z', 'table_momentum_x', 'table_momentum_z'),
+        graph=graph,
+        keep_intermediate=False,
     )
-    events.bins.coords['table_momentum_z'] = (
-        pipeline.get(TableMomentumTransferZ).compute().transpose(events.dims)
-    )
-    return events
 
 
 def add_wavelength_coordinate(ki_params, kf_params, events, monitor, monitor_name):
@@ -590,18 +608,8 @@ def add_wavelength_coordinate(ki_params, kf_params, events, monitor, monitor_nam
     from scippneutron.conversion.graph import beamline
     from scippneutron.conversion.tof import wavelength_from_tof
 
-    from ..types import (
-        FrameTimeMonitor,
-        # SlownessMonitor,
-        IncidentWavelength,
-        MonitorName,
-        WavelengthMonitor,
-    )
-    from .kf import providers as kf_providers
     from .ki import providers as ki_providers
-    from .normalisation import providers as monitor_providers
 
-    # TODO unwrap tof for monitor using LUT and remove existing WavelengthMonitor computation
     pipeline = Pipeline(ki_providers, params=ki_params)
 
     incident_graph = {
@@ -893,10 +901,6 @@ def one_setting(
             logger.warning("No a3 present in setting, assuming 0 a3")
         a3 = scalar(0, unit='deg')
 
-    # unwrapped_sample_events = add_momentum_coordinates(
-    #     ki_params, kf_params, unwrapped_sample_events, a3
-    # )
-
     # Set up the normalisation by adding an 'incident_wavelength' coordinate to
     # the individual events and the normalisation monitor
     unwrapped_sample_events, monitor = add_wavelength_coordinate(
@@ -906,6 +910,10 @@ def one_setting(
         unwrapped_norm_monitor,
         names['monitor'],
     )
+    unwrapped_sample_events = add_momentum_coordinates(
+        ki_params, kf_params, unwrapped_sample_events, a3
+    )
+
     a4 = triplet_events.coords['a4']
     unwrapped_sample_events.save_hdf5(
         f"data/new/events.a3_{a3.value:.1f}.a4_{a4.value:.1f}.h5"
