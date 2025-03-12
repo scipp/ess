@@ -19,7 +19,6 @@ from .types import (
     WavelengthThetaFigure,
     WavelengthZIndexFigure,
 )
-from .utils import theta_grid
 
 
 def _reshape_array_to_expected_shape(da, dims, **bins):
@@ -51,18 +50,6 @@ def _repeat_variable_argument(n, arg):
         if isinstance(arg, sc.Variable)
         else arg
     )
-
-
-def _try_to_create_theta_grid_if_missing(bins, da):
-    if (
-        'theta' not in bins
-        and 'theta' not in da.dims
-        and 'sample_rotation' in da.coords
-        and 'detector_rotation' in da.coords
-    ):
-        bins['theta'] = theta_grid(
-            nu=da.coords['detector_rotation'], mu=da.coords['sample_rotation']
-        )
 
 
 def wavelength_theta_figure(
@@ -138,8 +125,6 @@ def wavelength_theta_figure(
         if theta_bin is not None:
             bins['theta'] = theta_bin
 
-        _try_to_create_theta_grid_if_missing(bins, d)
-
         hs.append(_reshape_array_to_expected_shape(d, ('theta', 'wavelength'), **bins))
 
     kwargs.setdefault('cbar', True)
@@ -214,8 +199,6 @@ def q_theta_figure(
 
         if theta_bin is not None:
             bins['theta'] = theta_bin
-
-        _try_to_create_theta_grid_if_missing(bins, d)
 
         hs.append(_reshape_array_to_expected_shape(d, ('theta', 'Q'), **bins))
 

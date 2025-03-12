@@ -17,7 +17,6 @@ from ..reflectometry.types import (
 )
 from . import (
     conversions,
-    figures,
     load,
     normalization,
     orso,
@@ -31,13 +30,8 @@ from .types import (
     ChopperFrequency,
     ChopperPhase,
     GravityToggle,
-    QThetaFigure,
-    ReflectivityDiagnosticsView,
     SampleSizeResolution,
-    ThetaBins,
     WavelengthResolution,
-    WavelengthThetaFigure,
-    WavelengthZIndexFigure,
 )
 
 try:
@@ -51,7 +45,6 @@ providers = (
     *conversions.providers,
     *normalization.providers,
     *utils.providers,
-    *figures.providers,
     *orso.providers,
     *workflow.providers,
 )
@@ -91,17 +84,10 @@ def AmorWorkflow() -> sciline.Pipeline:
 __all__ = [
     "AmorWorkflow",
     "AngularResolution",
-    "Chopper1Position",
-    "Chopper2Position",
     "ChopperFrequency",
     "ChopperPhase",
-    "QThetaFigure",
-    "ReflectivityDiagnosticsView",
     "SampleSizeResolution",
-    "ThetaBins",
     "WavelengthResolution",
-    "WavelengthThetaFigure",
-    "WavelengthZIndexFigure",
     "conversions",
     "default_parameters",
     "instrument_view",

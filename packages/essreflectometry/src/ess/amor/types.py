@@ -1,5 +1,5 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
-from typing import Any, NewType
+from typing import NewType
 
 import sciline
 import scipp as sc
@@ -30,15 +30,5 @@ class ChopperSeparation(sciline.Scope[RunType, sc.Variable], sc.Variable):
 class RawChopper(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
     """Chopper data loaded from nexus file."""
 
-
-class ThetaBins(sciline.Scope[RunType, sc.Variable], sc.Variable):
-    """Binning in theta that takes into consideration that some
-    detector pixels have the same theta value."""
-
-
-WavelengthThetaFigure = NewType("WavelengthThetaFigure", Any)
-WavelengthZIndexFigure = NewType("WavelengthZIndexFigure", Any)
-QThetaFigure = NewType("QThetaFigure", Any)
-ReflectivityDiagnosticsView = NewType("ReflectivityDiagnosticsView", Any)
 
 GravityToggle = NewType("GravityToggle", bool)
