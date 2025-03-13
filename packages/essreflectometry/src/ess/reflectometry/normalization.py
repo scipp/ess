@@ -60,7 +60,7 @@ def reduce_sample_over_q(
     Returns reflectivity as a function of :math:`Q`.
     """
     s = sample.bins.concat().bin(Q=qbins)
-    h = reference.flatten(to='Q').hist(Q=s.coords['Q'])
+    h = sc.values(reference.hist(Q=s.coords['Q']))
     R = s / h.data
     R.coords['Q_resolution'] = sc.sqrt(
         (
@@ -85,7 +85,9 @@ def reduce_sample_over_zw(
 
     Returns reflectivity as a function of ``blade``, ``wire`` and :math:`\\wavelength`.
     """
-    return sample.bins.concat(('stripe',)).bin(wavelength=wbins) / reference.data
+    return sample.bins.concat(('stripe',)).bin(wavelength=wbins) / sc.values(
+        reference.data
+    )
 
 
 providers = (

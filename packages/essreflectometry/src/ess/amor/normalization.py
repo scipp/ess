@@ -104,7 +104,7 @@ def evaluate_reference_at_sample_coords(
         keep_intermediate=False,
         keep_aliases=False,
     )
-    return sc.values(ref)
+    return ref
 
 
 providers = (
