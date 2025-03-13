@@ -64,7 +64,7 @@ def reduce_sample_over_q(
     R = s / h.data
     R.coords['Q_resolution'] = sc.sqrt(
         (
-            (reference * reference.coords['Q_resolution'] ** 2)
+            (sc.values(reference) * reference.coords['Q_resolution'] ** 2)
             .flatten(to='Q')
             .hist(Q=s.coords['Q'])
         )
