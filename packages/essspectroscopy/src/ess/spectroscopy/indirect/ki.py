@@ -130,8 +130,24 @@ def unwrap_sample_time(
     table: TimeOfFlightLookupTable,
     l1: SourceSamplePathLength,
 ) -> TofSampleEvents:
-    """Use the pivot time to shift neutron event time offsets, recovering 'real'
-    time after source pulse per event"""
+    """Compute time-of-flight at the sample using a lookup table.
+
+    Parameters
+    ----------
+    sample_events:
+        Binned data with 'event_time_offset' and 'event_time_zero' coordinates
+        describing the time-of-arrival at the sample.
+    table:
+        A time-of-flight lookup table.
+    l1:
+        Distance from the source to the sample.
+
+    Returns
+    -------
+    :
+        A copy of `sample_events` with a 'sample_tof' coordinate containing
+        the time-of-flight at the sample.
+    """
 
     pipeline = sciline.Pipeline(
         time_of_flight.providers(),

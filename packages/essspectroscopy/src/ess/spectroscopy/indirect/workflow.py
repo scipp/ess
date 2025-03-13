@@ -107,8 +107,8 @@ def convert_simulated_time_to_event_time_offset(data):
     primary spectrometer is necessary to find any time-of-flight
 
     This function takes event data with per-event coordinate event_time_offset
-    (actually McStas time-of-flight) and converts the coordinate to be
-    the time-of-flight modulo the source repetition period.
+    (actually McStas time-of-arrival) and converts the coordinate to be
+    the time-of-arrival modulo the source repetition period.
 
     Notes
     -----
