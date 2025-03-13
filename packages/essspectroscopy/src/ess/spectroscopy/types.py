@@ -118,7 +118,7 @@ NormWavelengthEvents = data_array_type('NormWavelengthEvents')
 NXspeFileName = NewType('NXspeFileName', str)
 NXspeFileNames = NewType('NXspeFileNames', list[NXspeFileName])
 
-SampleEvents = NewType('Sampleevents', sc.DataArray)
+SampleEvents = NewType('SampleEvents', sc.DataArray)
 TimeOfFlightLookupTable = time_of_flight.TimeOfFlightLookupTable
 TofSampleEvents = NewType('TofSampleEvents', sc.DataArray)
 
