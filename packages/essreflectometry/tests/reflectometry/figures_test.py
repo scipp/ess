@@ -66,6 +66,11 @@ def test_wavelength_figure_binned(da, wavelength_bins, theta_bins):
     assert wavelength_theta_figure(da.bin(wavelength=3), theta_bins=theta_bins)
     assert wavelength_theta_figure(da.bin(theta=3), wavelength_bins=wavelength_bins)
 
+    _da = da.group('z_index')
+    _da.coords['theta'] = _da.bins.coords['theta'].bins.mean()
+    _da.bins.coords.pop('theta')
+    assert wavelength_theta_figure(_da, wavelength_bins=wavelength_bins)
+
 
 def test_wavelength_figure_hist(da, wavelength_bins):
     with pytest.raises(ValueError, match='Could not find bins'):
@@ -97,6 +102,15 @@ def test_wavelength_figure_multiple_datasets_some_with_and_some_without_implicit
         ),
         wavelength_bins=wavelength_bins,
         theta_bins=theta_bins,
+    )
+    assert wavelength_theta_figure(
+        (
+            da,
+            da.bin(wavelength=10, theta=10),
+            da.hist(wavelength=10, theta=10),
+        ),
+        wavelength_bins=4,
+        theta_bins=5,
     )
 
 
@@ -166,6 +180,11 @@ def test_q_figure_binned(da, q_bins, theta_bins):
     assert q_theta_figure(da.bin(Q=3, theta=3))
     assert q_theta_figure(da.bin(Q=3), theta_bins=theta_bins)
     assert q_theta_figure(da.bin(theta=3), q_bins=q_bins)
+
+    _da = da.group('z_index')
+    _da.coords['theta'] = _da.bins.coords['theta'].bins.mean()
+    _da.bins.coords.pop('theta')
+    assert q_theta_figure(_da, q_bins=q_bins)
 
 
 def test_q_figure_hist(da):

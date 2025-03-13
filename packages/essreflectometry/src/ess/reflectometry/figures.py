@@ -22,6 +22,15 @@ from .types import (
 
 
 def _reshape_array_to_expected_shape(da, dims, **bins):
+    for d in dims:
+        if d in da.coords:
+            shares_dimension_with_other_coord_in_dims = any(
+                set(da.coords[d].dims).intersection(da.coords[b].dims)
+                for b in dims
+                if d != b and b in da.coords
+            )
+            if not shares_dimension_with_other_coord_in_dims:
+                da = da.flatten(da.coords[d].dims, to=d)
     if da.bins:
         da = da.bins.concat(set(da.dims) - set(dims))
     elif set(da.dims) > set(dims):
@@ -43,13 +52,7 @@ def _reshape_array_to_expected_shape(da, dims, **bins):
 
 
 def _repeat_variable_argument(n, arg):
-    return (
-        (None,) * n
-        if arg is None
-        else (arg,) * n
-        if isinstance(arg, sc.Variable)
-        else arg
-    )
+    return (arg,) * n if arg is None or isinstance(arg, sc.Variable | int) else arg
 
 
 def wavelength_theta_figure(
