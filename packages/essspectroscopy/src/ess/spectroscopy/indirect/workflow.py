@@ -838,18 +838,18 @@ def one_setting(
     )
     sample_events = get_sample_events(triplet_events, sample_detector_flight_time)
     ki_params, unwrapped_sample_events, primary = get_unwrapped_sample_events(
-        filename,
-        names['source'],
-        names['sample'],
-        sample_events,
-        tof_lookup_table,
+        filename=filename,
+        source_name=names['source'],
+        sample_name=names['sample'],
+        sample_events=sample_events,
+        tof_lookup_table=tof_lookup_table,
     )
 
     unwrapped_norm_monitor = get_unwrapped_monitor(
-        filename,
-        norm_monitor,
-        names['source'],
-        tof_lookup_table,
+        filename=filename,
+        monitor=norm_monitor,
+        source_name=names['source'],
+        tof_lookup_table=tof_lookup_table,
     )
 
     unwrapped_sample_events = add_energy_coordinates(
