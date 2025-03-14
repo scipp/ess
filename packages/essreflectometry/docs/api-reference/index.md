@@ -34,6 +34,7 @@
    types
    tools
    workflow
+   figures
 ```
 
 ## Amor
@@ -54,5 +55,28 @@
    resolution
    types
    utils
-   figures
+   normalization
+   workflow
+```
+
+## Estia
+
+```{eval-rst}
+.. currentmodule:: ess.estia
+
+.. autosummary::
+   :toctree: ../generated/modules
+   :template: module-template.rst
+   :recursive:
+
+   conversions
+   maskings
+   corrections
+   data
+   mcstas
+   load
+   resolution
+   types
+   normalization
+   workflow
 ```
