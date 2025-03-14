@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
-from typing import NewType, TypeVar
+from typing import Any, NewType, TypeVar
 
 import sciline
 import scipp as sc
@@ -62,6 +62,9 @@ class InstrumentAngles(
     sciline.Scope[RunType, sc.DataGroup[sc.DataArray]], sc.DataGroup[sc.DataArray]
 ):
     """Instrument angles for the sample orientation as a function of time."""
+
+
+class Analyzer(sciline.Scope[RunType, sc.DataGroup[Any]], sc.DataGroup[Any]): ...
 
 
 AnalyzerPosition = variable_type('AnalyzerPosition')
