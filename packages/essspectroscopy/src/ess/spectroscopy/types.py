@@ -21,6 +21,7 @@ data_array_type = make_scipp_named_typer(sc.DataArray)
 
 AllNeXusComponents = reduce_t.AllNeXusComponents
 Analyzers = reduce_t.Analyzers
+CalibratedBeamline = reduce_t.CalibratedBeamline
 CalibratedDetector = reduce_t.CalibratedDetector
 Choppers = reduce_t.Choppers
 DetectorData = reduce_t.DetectorData
@@ -31,6 +32,7 @@ MonitorData = reduce_t.MonitorData
 NeXusClass = reduce_t.NeXusClass
 NeXusComponentLocationSpec = reduce_t.NeXusComponentLocationSpec
 NeXusComponent = reduce_t.NeXusComponent
+NeXusData = reduce_t.NeXusData
 NeXusDetectorName = reduce_t.NeXusDetectorName
 NeXusFileSpec = reduce_t.NeXusFileSpec
 NeXusMonitorName = reduce_t.NeXusName
@@ -50,6 +52,10 @@ MonitorType = TypeVar(
     reduce_t.Monitor3,
     reduce_t.Monitor4,
 )
+
+PulseStride = time_of_flight.PulseStride
+PulsePeriod = time_of_flight.PulsePeriod
+TimeOfFlightLookupTable = time_of_flight.TimeOfFlightLookupTable
 
 
 class InstrumentAngles(
@@ -119,7 +125,6 @@ NXspeFileName = NewType('NXspeFileName', str)
 NXspeFileNames = NewType('NXspeFileNames', list[NXspeFileName])
 
 SampleEvents = NewType('SampleEvents', sc.DataArray)
-TimeOfFlightLookupTable = time_of_flight.TimeOfFlightLookupTable
 TofSampleEvents = NewType('TofSampleEvents', sc.DataArray)
 
 TofMonitor = NewType('TofMonitor', sc.DataArray)
