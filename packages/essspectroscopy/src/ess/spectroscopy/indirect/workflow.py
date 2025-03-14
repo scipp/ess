@@ -1,10 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 
 from __future__ import annotations
 
 from collections.abc import Iterable
 
+import numpy as np
 import scipp as sc
 import scippnexus as snx
 from loguru import logger
@@ -23,7 +24,11 @@ from ..types import (
     NXspeFileName,
     Position,
     PreopenNeXusFile,
+    SampleEvents,
     SampleRun,
+    SourceSamplePathLength,
+    TimeOfFlightLookupTable,
+    TofSampleEvents,
 )
 
 PIXEL_NAME = 'detector_number'
@@ -88,7 +93,7 @@ def ess_source_velocities():
     return array(values=[100, 1e4], dims=['wavelength'], unit='m/s')
 
 
-def convert_simulated_time_to_frame_time(data):
+def convert_simulated_time_to_event_time_offset(data):
     """Helper to make McStas simulated event data look more like real data
 
     McStas has the ability to track the time-of-flight from source to detector for
@@ -102,26 +107,26 @@ def convert_simulated_time_to_frame_time(data):
     primary spectrometer is necessary to find any time-of-flight
 
     This function takes event data with per-event coordinate event_time_offset
-    (actually McStas time-of-flight) and creates a new coordinate frame_time that is
-    the time-of-flight modulo the source repetition period.
+    (actually McStas time-of-arrival) and converts the coordinate to be
+    the time-of-arrival modulo the source repetition period.
 
     Notes
     -----
     If the input data has realistic event_time_offset values, this function should
-    produce frame_time data which is identical, and will therefore only increase
-    the amount of data stored per event.
+    be a noop.
 
     Returns
     -------
     :
-        A copy of the data with extra per-event coordinate frame_time
+        A copy of the data with realistic per-event coordinate event_time_offset.
     """
-    graph = {
-        'frame_time': lambda event_time_offset: event_time_offset % ess_source_period()
-    }
-    return data.transform_coords(
-        'frame_time', graph=graph, rename_dims=False, keep_intermediate=False
+    res = data.transform_coords(
+        frame_time=lambda event_time_offset: event_time_offset % ess_source_period(),
+        rename_dims=False,
+        keep_intermediate=False,
+        keep_inputs=False,
     )
+    return res.transform_coords(event_time_offset='frame_time', keep_inputs=False)
 
 
 def analyzer_per_detector(analyzers: list[str], triplets: list[str]) -> dict[str, str]:
@@ -261,7 +266,6 @@ def combine_detectors(triplets: sc.DataGroup[sc.DataArray]):
 
 def find_sample_detector_flight_time(sample, analyzers, detector_positions):
     """Use sciline to find the sample to detector flight time per detector pixel"""
-    import numpy as np
     from sciline import Pipeline
 
     from ..types import (
@@ -309,34 +313,32 @@ def get_triplet_events(triplets: Iterable[sc.DataArray]):
     return events
 
 
-def get_sample_events(triplet_events, sample_detector_flight_times):
+def get_sample_events(triplet_events: sc.DataArray, sample_detector_flight_times):
     """Return the events with the frame_time coordinate offset to time at the sample"""
-    events = triplet_events.copy()
-    for coord in ('position', 'x_pixel_offset', 'y_pixel_offset'):
-        del events.coords[coord]
-    events.bins.coords['frame_time'] -= sample_detector_flight_times.to(unit='ns')
-    events.bins.coords['frame_time'] %= ess_source_period()
+    events = triplet_events.drop_coords(
+        ('position', 'x_pixel_offset', 'y_pixel_offset')
+    )
+    events.bins.coords['event_time_offset'] -= sample_detector_flight_times.to(
+        unit='ns'
+    )
+    events.bins.coords['event_time_offset'] %= ess_source_period()
     return events
 
 
-def get_unwrapped_events(
-    filename, source_name, sample_name, sample_events, focus_components
+def get_unwrapped_sample_events(
+    filename,
+    source_name,
+    sample_name,
+    sample_events,
+    tof_lookup_table,
 ):
     """Shift frame_time at sample events to time-since-pulse events at sample"""
     from sciline import Pipeline
 
     from ..types import (
         Filename,
-        FocusComponentNames,
-        PrimarySpectrometerObject,
-        SampleFrameTime,
         SampleName,
-        SampleTime,
-        SourceDelay,
-        SourceDuration,
-        SourceFrequency,
         SourceName,
-        SourceVelocities,
     )
     from .ki import providers as ki_providers
 
@@ -344,21 +346,40 @@ def get_unwrapped_events(
         Filename: filename,
         SampleName: sample_name,
         SourceName: source_name,
-        SourceDelay: ess_source_delay(),
-        SourceDuration: ess_source_duration(),
-        SourceFrequency: ess_source_frequency(),
-        SourceVelocities: ess_source_velocities(),
-        SampleFrameTime: sample_events.data.bins.coords['frame_time'],
-        FocusComponentNames: focus_components,
+        SampleEvents: sample_events,
+        TimeOfFlightLookupTable: tof_lookup_table,
     }
     pipeline = Pipeline(ki_providers, params=params)
-    primary = pipeline.get(PrimarySpectrometerObject).compute()
-    pipeline[PrimarySpectrometerObject] = primary
-    params[PrimarySpectrometerObject] = primary
 
-    events = sample_events.copy()
-    events.bins.coords['frame_time'] = pipeline.get(SampleTime).compute()
-    return params, events, primary
+    events = pipeline.compute(TofSampleEvents)
+    events = events.bins.drop_coords(('event_time_zero', 'event_time_offset'))
+    return params, events, None  # primary
+
+
+def get_unwrapped_monitor(
+    filename, monitor: sc.DataArray, source_name, tof_lookup_table
+) -> sc.DataArray:
+    from sciline import Pipeline
+
+    from ..types import (
+        Filename,
+        FrameTimeMonitor,
+        MonitorPosition,
+        SourceName,
+        TofMonitor,
+    )
+    from .ki import source_position
+    from .normalisation import providers
+
+    params = {
+        Filename: filename,
+        FrameTimeMonitor: monitor,
+        MonitorPosition: monitor.coords['position'],
+        SourceName: source_name,
+        TimeOfFlightLookupTable: tof_lookup_table,
+    }
+    pipeline = Pipeline((*providers, source_position), params=params)
+    return pipeline.compute(TofMonitor)
 
 
 def get_normalization_monitor(monitors, monitor_component, collapse: bool = False):
@@ -394,11 +415,13 @@ def get_normalization_monitor(monitors, monitor_component, collapse: bool = Fals
     )
 
 
-def get_energy_axes(ki_params, kf_params):
+def add_energy_coordinates(sample_events, ki_params, kf_params):
     """Extract incident_energy, final_energy, and energy_transfer
 
     Parameters
     ----------
+    sample_events:
+        Events with time of flight to the sample.
     ki_params:
         A dictionary of parameters needed by the incident-spectrometer sciline pipeline
     kf_params:
@@ -406,21 +429,18 @@ def get_energy_axes(ki_params, kf_params):
 
     Returns
     -------
-    ei:
-        The incident energy
-    en:
-        The energy transfer
-    ef:
-        The final energy
+    :
+        ``sample_events`` with added 'incident_energy', 'final_energy', and
+        'energy_transfer' coordinates.
     """
     from sciline import Pipeline
+    from scippneutron.conversion.tof import energy_from_tof
 
     from ..types import (
         EnergyTransfer,
         FinalEnergy,
         FinalWavenumber,
         IncidentEnergy,
-        IncidentWavenumber,
     )
     from .conservation import providers
 
@@ -428,15 +448,30 @@ def get_energy_axes(ki_params, kf_params):
     params.update(ki_params)
     params.update(kf_params)
     pipeline = Pipeline(providers, params=params)
-    pipeline[IncidentWavenumber] = pipeline.get(IncidentWavenumber).compute()
     pipeline[FinalWavenumber] = pipeline.get(FinalWavenumber).compute()
-    ei = pipeline.get(IncidentEnergy).compute()
-    en = pipeline.get(EnergyTransfer).compute()
-    ef = pipeline.get(FinalEnergy).compute()
-    return ei, en, ef
+
+    incident_graph = {
+        'incident_energy': lambda sample_tof, L1: energy_from_tof(
+            tof=sample_tof, Ltotal=L1
+        ),
+        # TODO remove once L1 is precomputed
+        'L1': lambda: pipeline.compute(SourceSamplePathLength),
+    }
+    events_with_energy_axes = sample_events.transform_coords(
+        'incident_energy',
+        graph=incident_graph,
+        keep_intermediate=False,
+    )
+    pipeline[IncidentEnergy] = events_with_energy_axes.bins.coords['incident_energy']
+    energies = pipeline.compute((EnergyTransfer, FinalEnergy))
+    events_with_energy_axes.bins.coords['energy_transfer'] = energies[
+        EnergyTransfer
+    ].to(unit='meV')
+    events_with_energy_axes.coords['final_energy'] = energies[FinalEnergy]
+    return events_with_energy_axes
 
 
-def add_momentum_axes(ki_params, kf_params, events, a3: Variable):
+def add_momentum_coordinates(ki_params, kf_params, events, a3: Variable):
     """Extract momentum transfer in the lab and sample-table coordinate systems
 
     Parameters
@@ -462,15 +497,16 @@ def add_momentum_axes(ki_params, kf_params, events, a3: Variable):
     from sciline import Pipeline
 
     from ..types import (
-        LabMomentumTransfer,
-        LabMomentumTransferX,
-        LabMomentumTransferZ,
+        FinalWavevector,
+        IncidentDirection,
         SampleTableAngle,
-        TableMomentumTransfer,
-        TableMomentumTransferX,
-        TableMomentumTransferZ,
     )
-    from .conservation import providers
+    from .conservation import (
+        PARALLEL,
+        PERP,
+        providers,
+        sample_table_momentum_vector,
+    )
 
     if a3.size != 1:
         raise ValueError(f'Expected a3 to have 1-entry, not {a3.size}')
@@ -482,30 +518,45 @@ def add_momentum_axes(ki_params, kf_params, events, a3: Variable):
     params[SampleTableAngle] = a3
 
     pipeline = Pipeline(providers, params=params)
-    pipeline[LabMomentumTransfer] = pipeline.get(LabMomentumTransfer).compute()
+    intermediates = pipeline.compute((IncidentDirection, FinalWavevector))
+    incident_direction = intermediates[IncidentDirection]
+    final_wavevector = intermediates[FinalWavevector]
 
-    events.bins.coords['lab_momentum_x'] = pipeline.get(LabMomentumTransferX).compute()
-    events.bins.coords['lab_momentum_z'] = pipeline.get(LabMomentumTransferZ).compute()
+    def compute_lab_momentum_transfer(incident_wavelength: sc.Variable) -> sc.Variable:
+        return final_wavevector - 2 * np.pi * incident_direction / incident_wavelength
 
-    pipeline[TableMomentumTransfer] = pipeline.get(TableMomentumTransfer).compute()
-    events.bins.coords['table_momentum_x'] = (
-        pipeline.get(TableMomentumTransferX).compute().transpose(events.dims)
+    graph = {
+        'lab_momentum_transfer': compute_lab_momentum_transfer,
+        'lab_momentum_x': lambda lab_momentum_transfer: sc.dot(
+            PERP, lab_momentum_transfer
+        ),
+        'lab_momentum_z': lambda lab_momentum_transfer: sc.dot(
+            PARALLEL, lab_momentum_transfer
+        ),
+        'table_momentum_transfer': lambda lab_momentum_transfer: sample_table_momentum_vector(  # noqa: E501
+            a3, lab_momentum_transfer
+        ),
+        'table_momentum_x': lambda table_momentum_transfer: sc.dot(
+            PERP, table_momentum_transfer
+        ),
+        'table_momentum_z': lambda table_momentum_transfer: sc.dot(
+            PARALLEL, table_momentum_transfer
+        ),
+    }
+    return events.transform_coords(
+        ('lab_momentum_x', 'lab_momentum_z', 'table_momentum_x', 'table_momentum_z'),
+        graph=graph,
+        keep_intermediate=False,
     )
-    events.bins.coords['table_momentum_z'] = (
-        pipeline.get(TableMomentumTransferZ).compute().transpose(events.dims)
-    )
-    return events
 
 
-def add_wavelength_axes(ki_params, kf_params, events, monitor, monitor_name):
+def add_wavelength_coordinate(ki_params, events, monitor):
     """Convert to incident wavelength per event and independent monitor axis
 
     Parameters
     ----------
     ki_params:
         A dictionary of parameters needed by the incident-spectrometer sciline pipeline
-    kf_params:
-        A dictionary of parameters needed by the secondary-spectrometer sciline pipeline
     events:
         Event data, presumably with per-event incident energy (or wavelength, or
         inverse velocity == slowness) already calculated; the basis for the returned
@@ -514,9 +565,6 @@ def add_wavelength_axes(ki_params, kf_params, events, monitor, monitor_name):
         A beam monitor with one independent axis (time since last pulse as measured).
         The monitor intensity is expected to be a histogram along the one independent
         axis, but event monitor data should work as well.
-    monitor_name:
-        The name of the provided beam monitor, used to get its position in the
-        primary spectrometer
 
     Returns
     -------
@@ -525,28 +573,40 @@ def add_wavelength_axes(ki_params, kf_params, events, monitor, monitor_name):
         And the monitor with 'incident_wavelength' coordinate.
     """
     from sciline import Pipeline
+    from scippneutron.conversion.graph import beamline
+    from scippneutron.conversion.tof import wavelength_from_tof
 
-    from ..types import (
-        FrameTimeMonitor,
-        # SlownessMonitor,
-        IncidentWavelength,
-        MonitorName,
-        WavelengthMonitor,
-    )
-    from .kf import providers as kf_providers
     from .ki import providers as ki_providers
-    from .normalisation import providers as monitor_providers
 
-    params = {
-        MonitorName: monitor_name,
-        FrameTimeMonitor: monitor,
+    pipeline = Pipeline(ki_providers, params=ki_params)
+
+    incident_graph = {
+        'incident_wavelength': wavelength_from_tof,
+        # TODO remove once L1 is precomputed
+        'L1': lambda: pipeline.compute(SourceSamplePathLength),
+        'Ltotal': 'L1',  # using sample times
+        'tof': 'sample_tof',
     }
-    params.update(ki_params)
-    params.update(kf_params)
-    pipeline = Pipeline(monitor_providers + ki_providers + kf_providers, params=params)
-    wavelength_monitor = pipeline.compute(WavelengthMonitor)
-    events.bins.coords['incident_wavelength'] = pipeline.compute(IncidentWavelength)
-    return events, wavelength_monitor
+    events_with_wavelength = events.transform_coords(
+        'incident_wavelength',
+        graph=incident_graph,
+        keep_inputs=False,
+        keep_intermediate=False,
+        keep_aliases=False,
+    )
+
+    monitor_graph = {
+        **beamline.beamline(scatter=False),
+        'incident_wavelength': wavelength_from_tof,
+    }
+    wavelength_monitor = monitor.transform_coords(
+        'incident_wavelength',
+        graph=monitor_graph,
+        keep_intermediate=False,
+        keep_aliases=False,
+    )
+
+    return events_with_wavelength, wavelength_monitor
 
 
 def get_geometric_a4(kf_params):
@@ -762,24 +822,40 @@ def load_everything(filename: Filename):
 
 
 def one_setting(
-    sample, triplet_events, analyzers, norm_monitor, filename, names, warn_about_a3=True
+    sample,
+    triplet_events,
+    analyzers,
+    norm_monitor,
+    filename,
+    names,
+    tof_lookup_table,
+    warn_about_a3=True,
 ):
     """Calculate the event properties for a single (a3, a4) setting"""
     detector_positions = triplet_events.coords['position']
     kf_params, sample_detector_flight_time = find_sample_detector_flight_time(
         sample, analyzers, detector_positions
     )
-    events = get_sample_events(triplet_events, sample_detector_flight_time)
-    ki_params, unwrapped_events, primary = get_unwrapped_events(
-        filename, names['source'], names['sample'], events, names['focus']
+    sample_events = get_sample_events(triplet_events, sample_detector_flight_time)
+    ki_params, unwrapped_sample_events, primary = get_unwrapped_sample_events(
+        filename=filename,
+        source_name=names['source'],
+        sample_name=names['sample'],
+        sample_events=sample_events,
+        tof_lookup_table=tof_lookup_table,
     )
-    ei, en, ef = get_energy_axes(ki_params, kf_params)
 
-    events.bins.coords['energy_transfer'] = en.to(unit='meV')
-    events.bins.coords['incident_energy'] = ei
-    events.coords['final_energy'] = ef
+    unwrapped_norm_monitor = get_unwrapped_monitor(
+        filename=filename,
+        monitor=norm_monitor,
+        source_name=names['source'],
+        tof_lookup_table=tof_lookup_table,
+    )
 
-    events.coords['theta'] = get_geometric_a4(kf_params)
+    unwrapped_sample_events = add_energy_coordinates(
+        unwrapped_sample_events, ki_params, kf_params
+    )
+    unwrapped_sample_events.coords['theta'] = get_geometric_a4(kf_params)
 
     if 'a3' in triplet_events.coords:
         # this _should_ be one (a3, a4) setting,
@@ -792,19 +868,24 @@ def one_setting(
             logger.warning("No a3 present in setting, assuming 0 a3")
         a3 = scalar(0, unit='deg')
 
-    events = add_momentum_axes(ki_params, kf_params, events, a3)
-
-    # Set up the normalisation by adding a 'incident_wavelength' coordinate to
+    # Set up the normalisation by adding an 'incident_wavelength' coordinate to
     # the individual events and the normalisation monitor
-    events, monitor = add_wavelength_axes(
-        ki_params, kf_params, events, norm_monitor, names['monitor']
+    unwrapped_sample_events, monitor = add_wavelength_coordinate(
+        ki_params,
+        unwrapped_sample_events,
+        unwrapped_norm_monitor,
+    )
+    unwrapped_sample_events = add_momentum_coordinates(
+        ki_params, kf_params, unwrapped_sample_events, a3
     )
 
-    norm_events = normalise_wavelength_events(ki_params, kf_params, events, monitor)
+    norm_events = normalise_wavelength_events(
+        ki_params, kf_params, unwrapped_sample_events, monitor
+    )
 
     return {
         'triplet_events': triplet_events,
-        'events': events,
+        'events': unwrapped_sample_events,
         'norm_monitor': norm_monitor,
         'sample_detector_flight_time': sample_detector_flight_time,
         'analyzers': analyzers,
@@ -851,7 +932,7 @@ def load_precompute(
 
     if is_simulated:
         for name in triplets:
-            triplets[name] = convert_simulated_time_to_frame_time(triplets[name])
+            triplets[name] = convert_simulated_time_to_event_time_offset(triplets[name])
 
     analyzers = combine_analyzers(analyzers, triplets)
     # detectors = combine_detectors(triplets)
@@ -864,7 +945,6 @@ def load_precompute(
 def component_names(
     source_component: str | None = None,
     sample_component: str | None = None,
-    focus_components: list[str] | None = None,
     monitor_component: str | None = None,
     is_simulated: bool = False,
 ):
@@ -878,9 +958,6 @@ def component_names(
     sample_component: str
         The user-provided sample component name, should exist at
         'entry/instrument/{sample_component}' in the datafile
-    focus_components: list[str]
-        The user-provided set of component names defining the time-focus position,
-        each should exist under 'entry/instrument' in the datafile
     monitor_component: str
         The user-provided normalization monitor component name, should exist at
         'entry/instrument/{monitor_component}'
@@ -893,12 +970,9 @@ def component_names(
     :
         A dictionary mapping component type name to group name
     """
-    from ..types import FocusComponentName
-
     names = {
         'source': source_component,
         'sample': sample_component,
-        'focus': focus_components,
         'monitor': monitor_component,
     }
     if is_simulated:
@@ -906,10 +980,6 @@ def component_names(
             'source': '001_ESS_source',
             'sample': '114_sample_stack',
             'monitor': '110_frame_3',
-            'focus': [
-                FocusComponentName('005_PulseShapingChopper'),
-                FocusComponentName('006_PulseShapingChopper2'),
-            ],
         }
         for k, v in sim_components.items():
             if names[k] is None:
@@ -919,9 +989,9 @@ def component_names(
 
 def bifrost(
     filename: Filename,
+    tof_lookup_table: TimeOfFlightLookupTable,
     source_component: str | None = None,
     sample_component: str | None = None,
-    focus_components: list[str] | None = None,
     monitor_component: str | None = None,
     is_simulated: bool = False,
 ):
@@ -932,15 +1002,15 @@ def bifrost(
     ----------
     filename:
         The name of the NeXus file to load
+    tof_lookup_table:
+        Time-of-flight lookup table as produced by
+        `ESSreduce <https://scipp.github.io/essreduce/user-guide/tof/frame-unwrapping.html>`_.
     source_component:
         The group name under 'entry/instrument' in the NeXus file containing
         source information
     sample_component:
         The group name under 'entry/instrument' in the NeXus file containing
         sample information
-    focus_components:
-        The group name or group names under 'entry/instrument' in the NeXus file
-        which define the focus-time
     monitor_component:
         The group name under 'entry/instrument' in the NeXus file containing
         normalization monitor information
@@ -962,7 +1032,6 @@ def bifrost(
     named_components = component_names(
         source_component,
         sample_component,
-        focus_components,
         monitor_component,
         is_simulated,
     )
@@ -978,6 +1047,7 @@ def bifrost(
             one_monitor,
             filename,
             named_components,
+            tof_lookup_table=tof_lookup_table,
         )
         for one_triplet_events, one_analyzers, one_monitor in tqdm(
             settings, desc='(a3, a4) settings'
@@ -988,9 +1058,9 @@ def bifrost(
 
 def bifrost_single(
     filename: Filename,
+    tof_lookup_table: TimeOfFlightLookupTable,
     source_component: str | None = None,
     sample_component: str | None = None,
-    focus_components: list[str] | None = None,
     monitor_component: str | None = None,
     is_simulated: bool = False,
     extras: bool = False,
@@ -1002,15 +1072,15 @@ def bifrost_single(
     ----------
     filename:
         The name of the NeXus file to load
+    tof_lookup_table:
+        Time-of-flight lookup table as produced by
+        `ESSreduce <https://scipp.github.io/essreduce/user-guide/tof/frame-unwrapping.html>`_.
     source_component:
         The group name under 'entry/instrument' in the NeXus file containing
         source information
     sample_component:
         The group name under 'entry/instrument' in the NeXus file containing
         sample information
-    focus_components:
-        The group name or group names under 'entry/instrument' in the NeXus file
-        which define the focus-time
     monitor_component:
         The group name under 'entry/instrument' in the NeXus file containing
         normalization monitor information
@@ -1030,7 +1100,6 @@ def bifrost_single(
     named_components = component_names(
         source_component,
         sample_component,
-        focus_components,
         monitor_component,
         is_simulated,
     )
@@ -1047,6 +1116,7 @@ def bifrost_single(
         norm_monitor,
         filename,
         named_components,
+        tof_lookup_table=tof_lookup_table,
         warn_about_a3=False,
     )
 

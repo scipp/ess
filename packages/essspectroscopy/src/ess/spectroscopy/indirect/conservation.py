@@ -1,74 +1,21 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 
 from scipp import vector
 
 from ..types import (
     EnergyTransfer,
     FinalEnergy,
-    FinalWavenumber,
-    FinalWavevector,
     IncidentEnergy,
-    IncidentWavenumber,
-    IncidentWavevector,
     LabMomentumTransfer,
-    LabMomentumTransferX,
-    LabMomentumTransferY,
-    LabMomentumTransferZ,
     SampleTableAngle,
     TableMomentumTransfer,
-    TableMomentumTransferX,
-    TableMomentumTransferY,
-    TableMomentumTransferZ,
 )
 from .kf import providers as kf_providers
 from .ki import providers as ki_providers
 
 # Directions relative to the incident beam coordinate system
 PERP, VERT, PARALLEL = (vector(v) for v in ([1, 0, 0], [0, 1, 0], [0, 0, 1]))
-
-
-def lab_momentum_vector(
-    ki: IncidentWavevector, kf: FinalWavevector
-) -> LabMomentumTransfer:
-    """Return the momentum transferred to the sample in the laboratory coordinate system
-
-    The laboratory coordinate system is independent of sample angle
-
-    Parameters
-    ----------
-    ki:
-        incident wavevector of the neutron
-    kf:
-        final wavevector of the neutron
-
-    Returns
-    -------
-    :
-        The difference kf - ki
-    """
-    return kf - ki
-
-
-def lab_momentum_x(q: LabMomentumTransfer) -> LabMomentumTransferX:
-    """Return the X coordinate of the momentum transfer in the lab coordinate system"""
-    from scipp import dot
-
-    return dot(PERP, q)
-
-
-def lab_momentum_y(q: LabMomentumTransfer) -> LabMomentumTransferY:
-    """Return the Y coordinate of the momentum transfer in the lab coordinate system"""
-    from scipp import dot
-
-    return dot(VERT, q)
-
-
-def lab_momentum_z(q: LabMomentumTransfer) -> LabMomentumTransferZ:
-    """Return the Z coordinate of the momentum transfer in the lab coordinate system"""
-    from scipp import dot
-
-    return dot(PARALLEL, q)
 
 
 def sample_table_momentum_vector(
@@ -97,34 +44,6 @@ def sample_table_momentum_vector(
     return rotations_from_rotvecs(-a3 * VERT) * q
 
 
-def sample_table_momentum_x(q: TableMomentumTransfer) -> TableMomentumTransferX:
-    """Return the X coordinate of the momentum transfer in the sample-table system"""
-    from scipp import dot
-
-    return dot(PERP, q)
-
-
-def sample_table_momentum_y(q: TableMomentumTransfer) -> TableMomentumTransferY:
-    """Return the Y coordinate of the momentum transfer in the sample-table system"""
-    from scipp import dot
-
-    return dot(VERT, q)
-
-
-def sample_table_momentum_z(q: TableMomentumTransfer) -> TableMomentumTransferZ:
-    """Return the Z coordinate of the momentum transfer in the sample-table system"""
-    from scipp import dot
-
-    return dot(PARALLEL, q)
-
-
-def energy(ki: IncidentWavenumber, kf: FinalWavenumber) -> EnergyTransfer:
-    """Calculate the energy transferred to the sample by a neutron"""
-    from scipp.constants import hbar, neutron_mass
-
-    return hbar * hbar * (ki * ki - kf * kf) / 2 / neutron_mass
-
-
 def energy_transfer(
     incident_energy: IncidentEnergy, final_energy: FinalEnergy
 ) -> EnergyTransfer:
@@ -134,14 +53,6 @@ def energy_transfer(
 providers = (
     *ki_providers,
     *kf_providers,
-    lab_momentum_vector,
-    lab_momentum_x,
-    lab_momentum_y,
-    lab_momentum_z,
     sample_table_momentum_vector,
-    sample_table_momentum_x,
-    sample_table_momentum_y,
-    sample_table_momentum_z,
-    energy,
     energy_transfer,
 )

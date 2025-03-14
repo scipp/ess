@@ -1,42 +1,24 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 
-from scipp import DataArray
+import sciline
+
+from ess.reduce import time_of_flight
 
 from ..types import (
     Filename,
     FrameTimeMonitor,
-    IncidentSlowness,
     MonitorName,
-    MonitorNormalisation,
     MonitorPosition,
     NormWavelengthEvents,
-    PrimaryFocusDistance,
-    PrimaryFocusTime,
-    PrimarySpectrometerObject,
-    SlothMonitor,
-    SlownessMonitor,
-    SourceFrequency,
-    SourceMonitorFlightTime,
     SourceMonitorPathLength,
     SourcePosition,
-    WallTimeMonitor,
+    TimeOfFlightLookupTable,
+    TofMonitor,
     WavelengthBins,
     WavelengthEvents,
     WavelengthMonitor,
 )
-
-
-def incident_monitor_normalization(
-    slowness: IncidentSlowness, monitor: SlownessMonitor
-) -> MonitorNormalisation:
-    """For each event, return the corresponding monitor intensity"""
-    from scipp import lookup
-
-    coords = list(monitor.coords)
-    if len(coords) != 1:
-        raise ValueError(f'Monitor expected to have exactly 1 coordinate, has {coords}')
-    return lookup(monitor, dim=coords[0])[slowness]
 
 
 def monitor_position(file: Filename, monitor: MonitorName) -> MonitorPosition:
@@ -79,165 +61,6 @@ def source_monitor_path_length(
     positions = sc.concat((source, *positions[:closest], monitor), dim='path')
     diff = positions['path', 1:] - positions['path', :-1]
     return sc.sum(sc.norm(diff))
-
-
-def monitor_pivot_time(
-    primary: PrimarySpectrometerObject, length: SourceMonitorPathLength
-) -> SourceMonitorFlightTime:
-    """Find the pivot time between source-pulse arrival times at the monitor position"""
-    from choppera.nexus import primary_pivot_time_at
-
-    return primary_pivot_time_at(primary, length)
-
-
-def monitor_wall_time(
-    monitor: FrameTimeMonitor,
-    frequency: SourceFrequency,
-    least: SourceMonitorFlightTime,
-) -> WallTimeMonitor:
-    """Convert the independent 'frame_time' coordinate of a histogram DataArray to
-    the equivalent unwrapped 'wall_time'
-
-    Parameters
-    ----------
-    monitor:
-        A histogram beam monitor which has with recorded 'frame time' relative to
-        the most-recent source pulse
-    frequency:
-        The source repetition frequency
-    least:
-        The minimum wall time between source pulse and arrival at the monitor position
-
-    Returns
-    -------
-    :
-        The same intensities with independent axis converted to the likely time since
-        neutron-producing proton pulse
-    """
-    from choppera.nexus import unwrap, unwrap_histogram
-
-    frame = 'frame_time'
-    if frame not in monitor.coords:
-        raise RuntimeError(f'A FrameTimeMonitor must have coordinate "{frame}"')
-    wall = 'wall_time'
-    names = {frame: wall}
-    if monitor.coords.is_edges(frame, dim=frame):
-        coord, values = unwrap_histogram(
-            monitor.coords[frame], monitor.data, frequency, least
-        )
-    else:
-        values = monitor.data
-        coord = unwrap(monitor.coord[frame], frequency, least)
-
-    return DataArray(values.rename(names), coords={wall: coord.rename(names)})
-
-
-def monitor_slowness(
-    monitor: WallTimeMonitor,
-    length: SourceMonitorPathLength,
-    distance: PrimaryFocusDistance,
-    focus: PrimaryFocusTime,
-) -> SlownessMonitor:
-    """Convert the independent 'wall_time' coordinate of a histogram DataArray to
-    the equivalent slowness
-
-    Parameters
-    ----------
-    monitor:
-        A histogram beam monitor which has been converted from recorded 'frame time' to
-        time since producing proton pulse
-    length:
-        The path length from the source to the monitor
-    distance:
-        The distance from the source to the time-of-flight defining (chopper) position
-    focus:
-        The (mean) time from proton pulse to when all neutrons passed the tof
-        defining point
-
-    Returns
-    -------
-    :
-        The same intensities with independent axis converted to the inverse velocity
-        of the neutrons, which scales linearly with wall time
-    """
-    from ..utils import in_same_unit
-
-    wall = 'wall_time'
-    if wall not in monitor.coords:
-        raise RuntimeError(f'A WallTimeMonitor must have coordinate "{wall}"')
-    slow = 'slowness'
-    names = {wall: slow}
-    wall_time = monitor.coords[wall]
-    duration = wall_time - in_same_unit(focus, to=wall_time)
-    slowness = (duration / (length - distance)).rename(names).to(unit='s/m')
-    return DataArray(monitor.data.rename(names), coords={slow: slowness})
-
-
-def monitor_wavelength(monitor: SlownessMonitor) -> WavelengthMonitor:
-    """Convert the independent 'slowness' coordinate of a histogram DataArray to the
-    equivalent wavelength
-
-    Parameters
-    ----------
-    monitor:
-        A histogram beam monitor which has been converted from recorded 'frame time'
-        to inverse neutron velocity
-
-    Returns
-    -------
-    :
-        The same intensities with independent axis converted to wavelength
-    """
-    from scipp.constants import Planck, neutron_mass
-
-    c = Planck / neutron_mass
-    slow = 'slowness'
-    # wavelength = 'incident_wavelength'
-    if slow not in monitor.coords:
-        raise RuntimeError(f'A SlownessMonitor must have the coordinate "{slow}"')
-
-    def converter(slowness):
-        return (c * slowness).to(unit='angstrom')
-
-    # names = {slow: wavelength}
-    converted = monitor.transform_coords(incident_wavelength=converter)
-    return converted
-
-
-def monitor_sloth(
-    primary: PrimarySpectrometerObject, monitor: SlownessMonitor
-) -> SlothMonitor:
-    """Convert the independent 'slowness' coordinate of a histogram DataArray to the
-    equivalent sloth, which is -- equivalently -- normalised slowness, normalised
-    inverse velocity, or normalised (incident) wavelength
-
-    Parameters
-    ----------
-    primary:
-        The primary spectrometer object describing the choppers and guide setting(s)
-    monitor:
-        A histogram beam monitor which has been converted from recorded 'frame time' to
-        inverse neutron velocity
-
-    Returns
-    -------
-    :
-        The same intensities with independent axis converted to the sloth,
-        which is the normalised slowness, inverse velocity, and incident wavelength
-    """
-    import scipp as sc
-    from choppera.nexus import primary_slowness
-
-    from ..utils import range_normalized
-
-    slow = 'slowness'
-    if slow not in monitor.coords:
-        raise RuntimeError(f'A SlownessMonitor must have the coordinate "{slow}"')
-    sloth = 'sloth'
-    names = {slow: sloth}
-    min_max = primary_slowness(primary)
-    normed = range_normalized(monitor.coords[slow], sc.min(min_max), sc.max(min_max))
-    return DataArray(monitor.data.rename(names), coords={sloth: normed.rename(names)})
 
 
 def normalise(
@@ -285,14 +108,27 @@ def normalise(
     return binned
 
 
+def unwrap_monitor(
+    monitor: FrameTimeMonitor,
+    table: TimeOfFlightLookupTable,
+    length: SourceMonitorPathLength,
+) -> TofMonitor:
+    tof_wf = sciline.Pipeline(
+        (*time_of_flight.providers(), time_of_flight.resample_tof_data),
+        params={
+            **time_of_flight.default_parameters(),
+            time_of_flight.TimeOfFlightLookupTable: table,
+            time_of_flight.Ltotal: length,
+            time_of_flight.RawData: monitor.rename(frame_time='tof'),
+        },
+    )
+    unwrapped = tof_wf.compute(time_of_flight.ResampledTofData)
+    return TofMonitor(unwrapped)
+
+
 providers = (
-    incident_monitor_normalization,
-    monitor_pivot_time,
-    monitor_wall_time,
-    monitor_slowness,
-    monitor_wavelength,
-    monitor_sloth,
     monitor_position,
     source_monitor_path_length,
     normalise,
+    unwrap_monitor,
 )
