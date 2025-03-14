@@ -93,42 +93,6 @@ def ess_source_velocities():
     return array(values=[100, 1e4], dims=['wavelength'], unit='m/s')
 
 
-def convert_simulated_time_to_event_time_offset(data):
-    """Helper to make McStas simulated event data look more like real data
-
-    McStas has the ability to track the time-of-flight from source to detector for
-    every probabilistic neutron ray. This is very helpful, but unfortunately real
-    instrument at ESS are not able to record the same information due to how the
-    timing and data collection systems work.
-
-    Real neutron events will record their event_time_zero most-recent-pulse reference
-    time, and their event_time_offset detection time relative to that reference time.
-    These two values added together give a real wall time; and information about the
-    primary spectrometer is necessary to find any time-of-flight
-
-    This function takes event data with per-event coordinate event_time_offset
-    (actually McStas time-of-arrival) and converts the coordinate to be
-    the time-of-arrival modulo the source repetition period.
-
-    Notes
-    -----
-    If the input data has realistic event_time_offset values, this function should
-    be a noop.
-
-    Returns
-    -------
-    :
-        A copy of the data with realistic per-event coordinate event_time_offset.
-    """
-    res = data.transform_coords(
-        frame_time=lambda event_time_offset: event_time_offset % ess_source_period(),
-        rename_dims=False,
-        keep_intermediate=False,
-        keep_inputs=False,
-    )
-    return res.transform_coords(event_time_offset='frame_time', keep_inputs=False)
-
-
 def analyzer_per_detector(analyzers: list[str], triplets: list[str]) -> dict[str, str]:
     """Find the right analyzer name for each detector
 
@@ -897,7 +861,6 @@ def one_setting(
 def load_precompute(
     filename: Filename,
     named_components: dict[str, str],
-    is_simulated: bool = False,
 ):
     """Load data from a NeXus file and perform (a3, a4) independent calculations
 
@@ -929,10 +892,6 @@ def load_precompute(
         in the NeXus file
     """
     sample, triplets, analyzers, choppers, monitors, logs = load_everything(filename)
-
-    if is_simulated:
-        for name in triplets:
-            triplets[name] = convert_simulated_time_to_event_time_offset(triplets[name])
 
     analyzers = combine_analyzers(analyzers, triplets)
     # detectors = combine_detectors(triplets)
@@ -1036,7 +995,7 @@ def bifrost(
         is_simulated,
     )
     sample, analyzers, triplet_events, norm_monitor, logs = load_precompute(
-        filename, named_components, is_simulated
+        filename, named_components
     )
     settings = split(triplet_events, analyzers, norm_monitor, logs)
     data = [
@@ -1104,7 +1063,7 @@ def bifrost_single(
         is_simulated,
     )
     sample, analyzers, triplet_events, norm_monitor, logs = load_precompute(
-        filename, named_components, is_simulated
+        filename, named_components
     )
     if 'time' in norm_monitor.sizes:
         norm_monitor = norm_monitor.sum('time')

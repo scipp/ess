@@ -1,21 +1,23 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 
 from typing import Any
 
 import sciline
 import scippnexus as snx
 
+from ess.reduce import time_of_flight
 from ess.spectroscopy.types import (
     CalibratedDetector,
     DetectorPositionOffset,
     NeXusComponent,
     NeXusMonitorName,
     NeXusTransformation,
+    PulsePeriod,
     RunType,
 )
 
-from .io import nexus
+from .io import mcstas, nexus
 from .types import (
     FrameMonitor0,
     FrameMonitor1,
@@ -71,18 +73,27 @@ def get_calibrated_detector_bifrost(
 
 
 def default_parameters() -> dict[type, Any]:
+    tof_params = time_of_flight.default_parameters()
     return {
         NeXusMonitorName[FrameMonitor0]: '007_frame_0',
         NeXusMonitorName[FrameMonitor1]: '090_frame_1',
         NeXusMonitorName[FrameMonitor2]: '097_frame_2',
         NeXusMonitorName[FrameMonitor3]: '110_frame_3',
+        PulsePeriod: tof_params[PulsePeriod],
     }
+
+
+_SIMULATION_PROVIDERS = (
+    get_calibrated_detector_bifrost,
+    *mcstas.providers,
+)
 
 
 def BifrostSimulationWorkflow() -> sciline.Pipeline:
     """Data reduction workflow for simulated BIFROST data."""
     workflow = nexus.LoadNeXusWorkflow()
-    workflow.insert(get_calibrated_detector_bifrost)
+    for provider in _SIMULATION_PROVIDERS:
+        workflow.insert(provider)
     for key, val in default_parameters().items():
         workflow[key] = val
     return workflow
