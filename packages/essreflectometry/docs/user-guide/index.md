@@ -5,5 +5,6 @@
 maxdepth: 1
 ---
 amor/index
+estia/index
 ```
 
