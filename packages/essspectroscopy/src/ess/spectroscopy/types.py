@@ -76,7 +76,7 @@ SampleAnalyzerVector = variable_type('SampleAnalyzerVector')
 AnalyzerDetectorVector = variable_type('AnalyzerDetectorVector')
 SampleAnalyzerDirection = variable_type('SampleAnalyzerDirection')
 ReciprocalLatticeVectorAbsolute = variable_type('ReciprocalLatticeVectorAbsolute')
-ReciprocalLatticeSpacing = variable_type('ReciprocalLatticeSpacing')
+AnalyzerDspacing = variable_type('Dspacing')
 IncidentDirection = variable_type('IncidentDirection')
 IncidentEnergy = variable_type('IncidentEnergy')
 FinalDirection = variable_type('FinalDirection')
@@ -131,3 +131,11 @@ SampleEvents = NewType('SampleEvents', sc.DataArray)
 TofSampleEvents = NewType('TofSampleEvents', sc.DataArray)
 
 TofMonitor = NewType('TofMonitor', sc.DataArray)
+
+
+class SecondarySpecCoordTransformGraph(sciline.Scope[RunType, dict], dict): ...
+
+
+class BeamlineWithSecondarSpecCoords(
+    sciline.Scope[RunType, sc.DataArray], sc.DataArray
+): ...

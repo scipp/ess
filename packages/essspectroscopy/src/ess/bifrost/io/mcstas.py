@@ -7,7 +7,7 @@ import scipp as sc
 import scippnexus as snx
 
 from ess.spectroscopy.types import (
-    CalibratedBeamline,
+    BeamlineWithSecondarSpecCoords,
     DetectorData,
     NeXusData,
     PulsePeriod,
@@ -18,7 +18,7 @@ from ..types import McStasDetectorData
 
 
 def assemble_detector_data(
-    detector: CalibratedBeamline[RunType],
+    detector: BeamlineWithSecondarSpecCoords[RunType],
     event_data: NeXusData[snx.NXdetector, RunType],
 ) -> McStasDetectorData[RunType]:
     """Custom assemble function that returns McStasDetectorData."""
