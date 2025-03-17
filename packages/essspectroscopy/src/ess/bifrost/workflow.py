@@ -4,20 +4,19 @@
 from typing import Any
 
 import sciline
-import scippnexus as snx
 
 from ess.reduce import time_of_flight
 from ess.spectroscopy.indirect import kf
 from ess.spectroscopy.types import (
-    CalibratedDetector,
-    DetectorPositionOffset,
-    NeXusComponent,
+    DetectorData,
+    NeXusDetectorName,
     NeXusMonitorName,
-    NeXusTransformation,
     PulsePeriod,
-    RunType,
+    SampleRun,
 )
 
+from .detector import merge_triplets
+from .detector import providers as detector_providers
 from .io import mcstas, nexus
 from .types import (
     FrameMonitor0,
@@ -25,52 +24,6 @@ from .types import (
     FrameMonitor2,
     FrameMonitor3,
 )
-
-
-def get_calibrated_detector_bifrost(
-    detector: NeXusComponent[snx.NXdetector, RunType],
-    *,
-    transform: NeXusTransformation[snx.NXdetector, RunType],
-    offset: DetectorPositionOffset[RunType],
-) -> CalibratedDetector[RunType]:
-    """Extract the data array corresponding to a detector's signal field.
-
-    The returned data array includes coords and masks pertaining directly to the
-    signal values array, but not additional information about the detector.
-    The data array is reshaped to the logical detector shape.
-
-    This function is specific to BIFROST and differs from the generic
-    :func:`ess.reduce.nexus.workflow.get_calibrated_detector` in that it does not
-    fold the detectors into logical dimensions because the files already contain
-    the detectors in the correct shape.
-
-    Parameters
-    ----------
-    detector:
-        Loaded NeXus detector.
-    transform:
-        Transformation that determines the detector position.
-    offset:
-        Offset to add to the detector position.
-
-    Returns
-    -------
-    :
-        Detector data.
-    """
-
-    from ess.reduce.nexus.types import DetectorBankSizes
-    from ess.reduce.nexus.workflow import get_calibrated_detector
-
-    da = get_calibrated_detector(
-        detector=detector,
-        transform=transform,
-        offset=offset,
-        # The detectors are folded in the file, no need to do that here.
-        bank_sizes=DetectorBankSizes({}),
-    )
-    da = da.rename(dim_0='tube', dim_1='length')
-    return CalibratedDetector[RunType](da)
 
 
 def default_parameters() -> dict[type, Any]:
@@ -85,18 +38,25 @@ def default_parameters() -> dict[type, Any]:
 
 
 _SIMULATION_PROVIDERS = (
-    get_calibrated_detector_bifrost,
     *mcstas.providers,
+    *detector_providers,
     kf.secondary_spectrometer_coordinate_transformation_graph,
     kf.add_secondary_spectrometer_coords,
 )
 
 
-def BifrostSimulationWorkflow() -> sciline.Pipeline:
+def BifrostSimulationWorkflow(detector_names: NeXusDetectorName) -> sciline.Pipeline:
     """Data reduction workflow for simulated BIFROST data."""
     workflow = nexus.LoadNeXusWorkflow()
     for provider in _SIMULATION_PROVIDERS:
         workflow.insert(provider)
     for key, val in default_parameters().items():
         workflow[key] = val
+
+    workflow[DetectorData[SampleRun]] = (
+        workflow[DetectorData[SampleRun]]
+        .map({NeXusDetectorName: detector_names})
+        .reduce(func=merge_triplets)
+    )
+
     return workflow
