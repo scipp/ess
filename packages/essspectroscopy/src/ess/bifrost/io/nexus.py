@@ -100,7 +100,9 @@ def load_analyzer_for_detector(
         )
     return Analyzer[RunType](
         sc.DataGroup(
-            {name: analyzer[name] for name in ('d_spacing', 'position', 'transform')}
+            dspacing=analyzer['d_spacing'],
+            position=analyzer['position'],
+            transform=analyzer['transform'],
         )
     )
 

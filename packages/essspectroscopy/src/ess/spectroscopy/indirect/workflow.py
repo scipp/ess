@@ -233,10 +233,10 @@ def find_sample_detector_flight_time(sample, analyzers, detector_positions):
     from sciline import Pipeline
 
     from ..types import (
+        AnalyzerDspacing,
         AnalyzerOrientation,
         AnalyzerPosition,
         DetectorPosition,
-        ReciprocalLatticeSpacing,
         SampleDetectorFlightTime,
         SamplePosition,
     )
@@ -247,7 +247,7 @@ def find_sample_detector_flight_time(sample, analyzers, detector_positions):
         AnalyzerPosition: analyzers['position'].data,
         DetectorPosition: detector_positions,  # detectors['position'].data,
         AnalyzerOrientation: analyzers['transform'].data,
-        ReciprocalLatticeSpacing: 2 * np.pi / analyzers['d_spacing'].data,
+        AnalyzerDspacing: analyzers['spacing'].data,
     }
     return params, Pipeline(kf_providers, params=params).get(
         SampleDetectorFlightTime

@@ -7,6 +7,7 @@ import sciline
 import scippnexus as snx
 
 from ess.reduce import time_of_flight
+from ess.spectroscopy.indirect import kf
 from ess.spectroscopy.types import (
     CalibratedDetector,
     DetectorPositionOffset,
@@ -86,6 +87,8 @@ def default_parameters() -> dict[type, Any]:
 _SIMULATION_PROVIDERS = (
     get_calibrated_detector_bifrost,
     *mcstas.providers,
+    kf.secondary_spectrometer_coordinate_transformation_graph,
+    kf.add_secondary_spectrometer_coords,
 )
 
 

@@ -1,32 +1,38 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+import numpy as np
 import scipp as sc
 
 from ess.spectroscopy.types import (
+    Analyzer,
     AnalyzerDetectorVector,
+    AnalyzerDspacing,
     AnalyzerOrientation,
     AnalyzerPosition,
+    BeamlineWithSecondarSpecCoords,
+    CalibratedBeamline,
     DetectorFrameTime,
     DetectorGeometricA4,
     DetectorPosition,
     FinalEnergy,
     FinalWavenumber,
     FinalWavevector,
-    ReciprocalLatticeSpacing,
     ReciprocalLatticeVectorAbsolute,
+    RunType,
     SampleAnalyzerDirection,
     SampleAnalyzerVector,
     SampleDetectorFlightTime,
     SampleDetectorPathLength,
     SampleFrameTime,
     SamplePosition,
+    SecondarySpecCoordTransformGraph,
 )
 
 
 def sample_analyzer_vector(
     sample_position: SamplePosition,
     analyzer_position: AnalyzerPosition,
-    analyzer_orientation: AnalyzerOrientation,
+    analyzer_transform: AnalyzerOrientation,
     detector_position: DetectorPosition,
 ) -> SampleAnalyzerVector:
     """Determine the sample to analyzer-reflection-point vector per detector element
@@ -44,7 +50,7 @@ def sample_analyzer_vector(
         The (probably singular) sample position, typically (0, 0, 0)
     analyzer_position: scipp.DType.vector3
         The nominal center of the central analyzer blade *surface*
-    analyzer_orientation: scipp.DType.rotate3
+    analyzer_transform: scipp.DType.rotate3
         The orienting quaternion of the analyzer, used to identify the crystal y-axis
     detector_position: scipp.DType.vector3
         The position of the detector element
@@ -60,11 +66,11 @@ def sample_analyzer_vector(
     # Scipp does not distinguish between coordinates and directions, so we need to do
     # some extra legwork to ensure we can apply the orientation transformation
     # _and_ obtain a dimensionless direction vector
-    o = vector([0, 0, 0], unit=analyzer_orientation.unit)
+    o = vector([0, 0, 0], unit=analyzer_transform.unit)
     y = vector(
-        [0, 1, 0], unit=analyzer_orientation.unit
+        [0, 1, 0], unit=analyzer_transform.unit
     )  # and y perpendicular to the scattering plane
-    yhat = analyzer_orientation * y - analyzer_orientation * o
+    yhat = analyzer_transform * y - analyzer_transform * o
     yhat /= sc.norm(yhat)
 
     sample_analyzer_center_vector = analyzer_position - sample_position
@@ -118,11 +124,11 @@ def detector_geometric_a4(vec: SampleAnalyzerVector) -> DetectorGeometricA4:
 
 def analyzer_detector_vector(
     sample_position: SamplePosition,
-    sample_analyzer_vec: SampleAnalyzerVector,
+    sample_analyzer_vector: SampleAnalyzerVector,
     detector_position: DetectorPosition,
 ) -> AnalyzerDetectorVector:
     """Calculate the analyzer-detector vector"""
-    return detector_position - (sample_position + sample_analyzer_vec)
+    return detector_position - (sample_position + sample_analyzer_vector)
 
 
 def kf_hat(sample_analyzer_vec: SampleAnalyzerVector) -> SampleAnalyzerDirection:
@@ -136,9 +142,9 @@ def reciprocal_lattice_spacing(tau_vector: ReciprocalLatticeVectorAbsolute):
 
 
 def final_wavenumber(
-    sample_analyzer_vec: SampleAnalyzerVector,
-    analyzer_detector_vec: AnalyzerDetectorVector,
-    tau: ReciprocalLatticeSpacing,
+    sample_analyzer_vector: SampleAnalyzerVector,
+    analyzer_detector_vector: AnalyzerDetectorVector,
+    analyzer_dspacing: AnalyzerDspacing,
 ) -> FinalWavenumber:
     """Find the wave number of the neutrons reflected to each detector-element
 
@@ -147,15 +153,14 @@ def final_wavenumber(
 
     Parameters
     ----------
-    sample_analyzer_vec : scipp.DType.vector3
+    sample_analyzer_vector : scipp.DType.vector3
         The vector from the sample to the analyzer interaction point for each
          detector element
-    analyzer_detector_vec: scipp.DType.vector3
+    analyzer_detector_vector: scipp.DType.vector3
         The vector from the analyzer interaction point to its detector element,
         for each detector element
-    tau: float-like
-        The reciprocal lattice plane spacing of the analyzer crystal,
-        likely in inverse angstrom
+    analyzer_dspacing: float-like
+        The lattice plane spacing of the analyzer crystal.
 
     Returns
     -------
@@ -165,23 +170,25 @@ def final_wavenumber(
     from scipp import sqrt
 
     # law of Cosines gives the scattering angle based on distances:
-    l_sa = sc.norm(sample_analyzer_vec)
-    l_ad = sc.norm(analyzer_detector_vec)
-    l_diff = sc.norm(sample_analyzer_vec + analyzer_detector_vec)
+    l_sa = sc.norm(sample_analyzer_vector)
+    l_ad = sc.norm(analyzer_detector_vector)
+    l_diff = sc.norm(sample_analyzer_vector + analyzer_detector_vector)
     # 2 theta is measured from the direction S-A, so the internal angle is
     # (pi - 2 theta) and the normal law of Cosines is modified accordingly to be
     # -cos(2 theta) instead of cos(pi - 2 theta)
     cos2theta = (l_diff * l_diff - l_sa * l_sa - l_ad * l_ad) / (2 * l_sa * l_ad)
 
     # law of Cosines gives the Bragg reflected wavevector magnitude
-    return tau / sqrt(2 - 2 * cos2theta)
+    return 2 * np.pi / analyzer_dspacing / sqrt(2 - 2 * cos2theta)
 
 
-def final_energy(kf: FinalWavenumber) -> FinalEnergy:
+def final_energy(final_wavenumber: FinalWavenumber) -> FinalEnergy:
     """Converts (final) wave number to (final) energy"""
     from scipp.constants import hbar, neutron_mass
 
-    return ((hbar * hbar / 2 / neutron_mass) * kf * kf).to(unit='meV')
+    return ((hbar * hbar / 2 / neutron_mass) * final_wavenumber * final_wavenumber).to(
+        unit='meV'
+    )
 
 
 def final_wavevector(
@@ -192,21 +199,21 @@ def final_wavevector(
 
 
 def secondary_flight_path_length(
-    sample_analyzer_vec: SampleAnalyzerVector,
-    analyzer_detector_vec: AnalyzerDetectorVector,
+    sample_analyzer_vector: SampleAnalyzerVector,
+    analyzer_detector_vector: AnalyzerDetectorVector,
 ) -> SampleDetectorPathLength:
     """Returns the path-length-distance between the sample and each detector element"""
-    return sc.norm(sample_analyzer_vec) + sc.norm(analyzer_detector_vec)
+    return sc.norm(sample_analyzer_vector) + sc.norm(analyzer_detector_vector)
 
 
 def secondary_flight_time(
-    secondary_flight_distance: SampleDetectorPathLength, kf_magnitude: FinalWavenumber
+    L2: SampleDetectorPathLength, final_wavenumber: FinalWavenumber
 ) -> SampleDetectorFlightTime:
     """Calculates the most-likely time-of-flight between the sample and each pixel"""
     from scipp.constants import hbar, neutron_mass
 
-    velocity = kf_magnitude * hbar / neutron_mass
-    return secondary_flight_distance / velocity
+    velocity = final_wavenumber * (hbar / neutron_mass)
+    return sc.to_unit(L2 / velocity, 'ms', copy=False)
 
 
 def sample_frame_time(
@@ -214,6 +221,68 @@ def sample_frame_time(
 ) -> SampleFrameTime:
     """Return the time each neutron likely interacted with the sample"""
     return detector_time - secondary_time
+
+
+def secondary_spectrometer_coordinate_transformation_graph(
+    analyzer: Analyzer[RunType],
+) -> SecondarySpecCoordTransformGraph[RunType]:
+    """Return a coordinate transformation graph for the secondary spectrometer.
+
+    Parameters
+    ----------
+    analyzer:
+        Data group with analyzer parameters.
+
+    Returns
+    -------
+    :
+        Coordinate transformation graph for the secondary spectrometer.
+        The graph captures the relevant parameters of ``analyzer``.
+    """
+    return SecondarySpecCoordTransformGraph[RunType](
+        {
+            "analyzer_dspacing": lambda: analyzer["dspacing"],
+            "analyzer_position": lambda: analyzer["position"],
+            "analyzer_transform": lambda: analyzer["transform"],
+            "detector_position": "position",
+            "sample_analyzer_vector": sample_analyzer_vector,
+            "analyzer_detector_vector": analyzer_detector_vector,
+            "final_energy": final_energy,
+            "final_wavenumber": final_wavenumber,
+            "L2": secondary_flight_path_length,
+            "secondary_flight_time": secondary_flight_time,
+        }
+    )
+
+
+def add_secondary_spectrometer_coords(
+    data: CalibratedBeamline[RunType], graph: SecondarySpecCoordTransformGraph[RunType]
+) -> BeamlineWithSecondarSpecCoords[RunType]:
+    """Compute and add coordinates for the secondary spectrometer.
+
+    Parameters
+    ----------
+    data:
+        Data array with beamline coordinates "position", "source_position", and
+        "sample_position".
+        Does not need to contain events or flight times.
+    graph:
+        Coordinate transformation graph for the secondary spectrometer.
+        Must be a closure over analyzer parameters.
+        And those parameters must have a compatible shape with ``data``.
+
+    Returns
+    -------
+    :
+        Input data with added "final_energy" and "secondary_flight_time" coordinates.
+    """
+    return data.transform_coords(
+        ("final_energy", "secondary_flight_time"),
+        graph=graph,
+        keep_intermediate=False,
+        keep_aliases=False,
+        rename_dims=False,
+    )
 
 
 providers = (
