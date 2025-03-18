@@ -3,7 +3,7 @@ import pytest
 import scipp as sc
 from scipp.testing import assert_allclose
 
-from ess.estia.calibration import solve_for_calibration_parameters
+from ess.estia.calibration import linsolve, solve_for_calibration_parameters
 
 
 def generate_valid_calibration_parameters():
@@ -67,3 +67,15 @@ def test_calibration_solve_recovers_input(seed):
             (I0, Pp, Pa, Ap, Aa, Rspp, Rsaa),
         )
     )
+
+
+@pytest.mark.parametrize(('dims', 'shape'), [('x', (5,)), ('xy', (2, 3))])
+def test_stacking_in_linsolve(dims, shape):
+    A = [
+        [sc.array(dims=dims, values=np.random.randn(*shape)) for _ in range(4)]
+        for _ in range(4)
+    ]
+    x = [sc.array(dims=dims, values=np.random.randn(*shape)) for _ in range(4)]
+    b = [sum(xi * ai for xi, ai in zip(x, a, strict=True)) for a in A]
+    for u, v in zip(linsolve(A, b), x, strict=True):
+        assert_allclose(u, v, atol=sc.scalar(1e-9))
