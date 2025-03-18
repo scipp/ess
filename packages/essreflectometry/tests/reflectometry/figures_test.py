@@ -5,7 +5,7 @@
 import pytest
 import scipp as sc
 
-from ess.amor.figures import (
+from ess.reflectometry.figures import (
     q_theta_figure,
     wavelength_theta_figure,
     wavelength_z_figure,
@@ -66,8 +66,13 @@ def test_wavelength_figure_binned(da, wavelength_bins, theta_bins):
     assert wavelength_theta_figure(da.bin(wavelength=3), theta_bins=theta_bins)
     assert wavelength_theta_figure(da.bin(theta=3), wavelength_bins=wavelength_bins)
 
+    _da = da.group('z_index')
+    _da.coords['theta'] = _da.bins.coords['theta'].bins.mean()
+    _da.bins.coords.pop('theta')
+    assert wavelength_theta_figure(_da, wavelength_bins=wavelength_bins)
 
-def test_wavelength_figure_hist(da, wavelength_bins, theta_bins):
+
+def test_wavelength_figure_hist(da, wavelength_bins):
     with pytest.raises(ValueError, match='Could not find bins'):
         wavelength_theta_figure(da.hist(wavelength=3))
 
@@ -77,7 +82,7 @@ def test_wavelength_figure_hist(da, wavelength_bins, theta_bins):
     assert wavelength_theta_figure(da.hist(wavelength=3, theta=3))
 
 
-def test_wavelength_figure_multiple_datasets(da, wavelength_bins, theta_bins):
+def test_wavelength_figure_multiple_datasets(da, wavelength_bins):
     assert wavelength_theta_figure(
         (
             da.bin(wavelength=10, theta=10),
@@ -97,6 +102,15 @@ def test_wavelength_figure_multiple_datasets_some_with_and_some_without_implicit
         ),
         wavelength_bins=wavelength_bins,
         theta_bins=theta_bins,
+    )
+    assert wavelength_theta_figure(
+        (
+            da,
+            da.bin(wavelength=10, theta=10),
+            da.hist(wavelength=10, theta=10),
+        ),
+        wavelength_bins=4,
+        theta_bins=5,
     )
 
 
@@ -167,8 +181,13 @@ def test_q_figure_binned(da, q_bins, theta_bins):
     assert q_theta_figure(da.bin(Q=3), theta_bins=theta_bins)
     assert q_theta_figure(da.bin(theta=3), q_bins=q_bins)
 
+    _da = da.group('z_index')
+    _da.coords['theta'] = _da.bins.coords['theta'].bins.mean()
+    _da.bins.coords.pop('theta')
+    assert q_theta_figure(_da, q_bins=q_bins)
 
-def test_q_figure_hist(da, q_bins, theta_bins):
+
+def test_q_figure_hist(da):
     with pytest.raises(ValueError, match='Could not find bins'):
         q_theta_figure(da.hist(Q=3))
 
@@ -178,7 +197,7 @@ def test_q_figure_hist(da, q_bins, theta_bins):
     assert q_theta_figure(da.hist(Q=3, theta=3))
 
 
-def test_q_figure_multiple_datasets(da, q_bins, theta_bins):
+def test_q_figure_multiple_datasets(da):
     assert q_theta_figure(
         (
             da.bin(Q=10, theta=10),
@@ -239,12 +258,12 @@ def test_z_figure_binned(da, wavelength_bins):
     assert wavelength_z_figure(da, wavelength_bins=wavelength_bins)
 
 
-def test_z_figure_hist(da, wavelength_bins):
+def test_z_figure_hist(da):
     da = da.group('z_index').fold('z_index', dims=('blade', 'wire'), shape=(2, 5))
     assert wavelength_z_figure(da.hist(wavelength=3))
 
 
-def test_z_figure_multiple_datasets(da, wavelength_bins):
+def test_z_figure_multiple_datasets(da):
     da = da.group('z_index').fold('z_index', dims=('blade', 'wire'), shape=(2, 5))
     assert wavelength_z_figure(
         (

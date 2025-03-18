@@ -1,9 +1,8 @@
-# User guide
+# Estia
 
 ```{toctree}
 ---
 maxdepth: 1
 ---
-amor/index
-estia/index
+estia-mcstas-reduction
 ```

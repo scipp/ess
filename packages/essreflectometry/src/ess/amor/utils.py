@@ -1,13 +1,8 @@
+# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 
-from ess.reflectometry.types import (
-    DetectorRotation,
-    RunType,
-    SampleRotation,
-)
-
+from ..reflectometry.types import DetectorRotation, RunType, SampleRotation, ThetaBins
 from .geometry import Detector
-from .types import ThetaBins
 
 
 def theta_grid(

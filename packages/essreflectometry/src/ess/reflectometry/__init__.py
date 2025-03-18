@@ -10,13 +10,14 @@ except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
 
-from . import conversions, normalization, orso
+from . import conversions, figures, normalization, orso
 from .load import load_reference, save_reference
 
 providers = (
     *conversions.providers,
     *orso.providers,
     *normalization.providers,
+    *figures.providers,
 )
 """
 List of providers for setting up a Sciline pipeline.
@@ -31,6 +32,7 @@ del importlib
 
 
 __all__ = [
+    "figures",
     "load_reference",
     "save_reference",
 ]

@@ -15,21 +15,9 @@ from ..reflectometry.types import (
     RunType,
     SamplePosition,
 )
-from . import (
-    conversions,
-    load,
-    normalization,
-    orso,
-    resolution,
-    utils,
-    workflow,
-)
-from .instrument_view import instrument_view
+from . import conversions, load, maskings, normalization, resolution, workflow
 from .types import (
     AngularResolution,
-    ChopperFrequency,
-    ChopperPhase,
-    GravityToggle,
     SampleSizeResolution,
     WavelengthResolution,
 )
@@ -39,19 +27,19 @@ try:
 except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
+
 providers = (
     *reflectometry_providers,
     *load.providers,
     *conversions.providers,
-    *normalization.providers,
-    *utils.providers,
-    *orso.providers,
+    *maskings.providers,
     *workflow.providers,
+    *normalization.providers,
 )
 """
 List of providers for setting up a Sciline pipeline.
 
-This provides a default Amor workflow including providers for loadings files.
+This provides a default Estia workflow including providers for loadings files.
 """
 
 
@@ -64,35 +52,28 @@ def default_parameters() -> dict:
         DetectorSpatialResolution[RunType]: 0.0025 * sc.units.m,
         SamplePosition[RunType]: sc.vector([0, 0, 0], unit="m"),
         NeXusDetectorName[RunType]: "detector",
-        ChopperPhase[RunType]: sc.scalar(7.0, unit="deg"),
-        ChopperFrequency[RunType]: sc.scalar(8.333, unit="Hz"),
         BeamDivergenceLimits: (
             sc.scalar(-0.75, unit='deg'),
             sc.scalar(0.75, unit='deg'),
         ),
-        GravityToggle: True,
     }
 
 
-def AmorWorkflow() -> sciline.Pipeline:
+def EstiaWorkflow() -> sciline.Pipeline:
     """
-    Workflow with default parameters for the Amor PSI instrument.
+    Workflow with default parameters for the Estia instrument.
     """
     return sciline.Pipeline(providers=providers, params=default_parameters())
 
 
 __all__ = [
-    "AmorWorkflow",
     "AngularResolution",
-    "ChopperFrequency",
-    "ChopperPhase",
+    "EstiaWorkflow",
     "SampleSizeResolution",
     "WavelengthResolution",
     "conversions",
     "default_parameters",
-    "instrument_view",
     "load",
-    "orso",
     "providers",
     "resolution",
     "supermirror",

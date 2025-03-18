@@ -1,3 +1,4 @@
+# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 
 from .supermirror import (
@@ -37,9 +38,13 @@ def reduce_reference(
         m=mvalue,
         alpha=alpha,
     )
-    reference.bins.masks['invalid'] = sc.isnan(R)
-    reference /= R
-    return reference.bins.concat(('stripe',)).hist(wavelength=wavelength_bins)
+    reference = reference.bins.assign_masks(invalid=sc.isnan(R))
+    reference = reference / R
+    out = reference.bins.concat(('stripe',)).hist(wavelength=wavelength_bins)
+
+    if 'position' in reference.coords:
+        out.coords['position'] = reference.coords['position'].mean('stripe')
+    return out
 
 
 def reduce_sample_over_q(
@@ -54,13 +59,14 @@ def reduce_sample_over_q(
 
     Returns reflectivity as a function of :math:`Q`.
     """
-    h = reference.flatten(to='Q').hist(Q=qbins)
-    R = sample.bins.concat().bin(Q=qbins) / h.data
+    s = sample.bins.concat().bin(Q=qbins)
+    h = sc.values(reference.hist(Q=s.coords['Q']))
+    R = s / h.data
     R.coords['Q_resolution'] = sc.sqrt(
         (
-            (reference * reference.coords['Q_resolution'] ** 2)
+            (sc.values(reference) * reference.coords['Q_resolution'] ** 2)
             .flatten(to='Q')
-            .hist(Q=qbins)
+            .hist(Q=s.coords['Q'])
         )
         / h
     ).data
@@ -79,7 +85,9 @@ def reduce_sample_over_zw(
 
     Returns reflectivity as a function of ``blade``, ``wire`` and :math:`\\wavelength`.
     """
-    return sample.bins.concat(('stripe',)).bin(wavelength=wbins) / reference.data
+    return sample.bins.concat(('stripe',)).bin(wavelength=wbins) / sc.values(
+        reference.data
+    )
 
 
 providers = (

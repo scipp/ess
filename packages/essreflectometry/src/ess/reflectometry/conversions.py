@@ -1,10 +1,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 from scipp.constants import pi
 from scippneutron._utils import elem_dtype
 
-from .types import ProtonCurrent, RunType
+from .types import (
+    ProtonCurrent,
+    RunType,
+)
 
 
 def reflectometry_q(wavelength: sc.Variable, theta: sc.Variable) -> sc.Variable:
@@ -35,7 +38,7 @@ def add_proton_current_coord(
     """Find the proton current value for each event and
     adds it as a coord to the data array."""
     pc_lookup = sc.lookup(
-        pc,
+        pc.assign_coords(time=pc.coords['time'].to(unit='ns')),
         dim='time',
         mode='previous',
         fill_value=sc.scalar(float('nan'), unit=pc.unit),
@@ -59,6 +62,20 @@ def add_proton_current_mask(da: sc.DataArray) -> sc.DataArray:
         )
     )
     return da
+
+
+def add_coords(
+    da: sc.DataArray,
+    graph: dict,
+) -> sc.DataArray:
+    "Adds scattering coordinates to the raw detector data."
+    return da.transform_coords(
+        ("wavelength", "theta", "divergence_angle", "Q", "L1", "L2"),
+        graph,
+        rename_dims=False,
+        keep_intermediate=False,
+        keep_aliases=False,
+    )
 
 
 providers = ()

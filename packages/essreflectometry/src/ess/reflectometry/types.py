@@ -1,4 +1,5 @@
-from typing import NewType, TypeVar
+# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+from typing import Any, NewType, TypeVar
 
 import sciline
 import scipp as sc
@@ -6,6 +7,8 @@ import scipp as sc
 ReferenceRun = NewType("ReferenceRun", str)
 SampleRun = NewType("SampleRun", str)
 RunType = TypeVar("RunType", ReferenceRun, SampleRun)
+
+CoordTransformationGraph = NewType("CoordTransformationGraph", dict)
 
 
 class NeXusDetectorName(sciline.Scope[RunType, str], str):
@@ -67,6 +70,11 @@ WavelengthBins = NewType("WavelengthBins", sc.Variable)
 """Bins for the wavelength histogram, also used to filter the event data."""
 
 
+class ThetaBins(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """Binning in theta that takes into consideration that some
+    detector pixels have the same theta value."""
+
+
 class Filename(sciline.Scope[RunType, str], str):
     """Filename of an event data nexus file."""
 
@@ -89,8 +97,7 @@ class DetectorSpatialResolution(sciline.Scope[RunType, sc.Variable], sc.Variable
 
 
 class SampleSize(sciline.Scope[RunType, sc.Variable], sc.Variable):
-    # TODO is this radius or total length?
-    """Size of the sample. If None it is assumed to be the same as the reference."""
+    """Diameter of the sample. If None it is assumed to be the same as the reference."""
 
 
 class ProtonCurrent(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
@@ -111,3 +118,9 @@ BeamDivergenceLimits = NewType("BeamDivergenceLimits", tuple[sc.Variable, sc.Var
 
 ReferenceFilePath = NewType("ReferenceFilePath", str)
 """Path to the cached normalization matrix"""
+
+
+WavelengthThetaFigure = NewType("WavelengthThetaFigure", Any)
+WavelengthZIndexFigure = NewType("WavelengthZIndexFigure", Any)
+QThetaFigure = NewType("QThetaFigure", Any)
+ReflectivityDiagnosticsView = NewType("ReflectivityDiagnosticsView", Any)

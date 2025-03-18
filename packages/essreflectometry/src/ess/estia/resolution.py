@@ -6,13 +6,10 @@ from ..reflectometry.tools import fwhm_to_std
 
 
 def wavelength_resolution(
-    L1,
-    L2,
-    chopper_separation,
+    # What parameters are needed?
 ):
     """
-    Find the wavelength resolution contribution as described in Section 4.3.3 of the
-    Amor publication (doi: 10.1016/j.nima.2016.03.007).
+    Find the wavelength resolution contribution of the ESTIA instrument.
 
     Parameters
     ----------
@@ -21,20 +18,19 @@ def wavelength_resolution(
         Distance from midpoint between choppers to sample.
     L2:
         Distance from sample to detector.
-    chopper_separation:
-        Distance between choppers.
 
     Returns
     -------
     :
         The wavelength resolution variable, as standard deviation.
     """
-    return fwhm_to_std(sc.abs(chopper_separation) / (L1 + L2))
+    # Don't yet know how to do this
+    raise NotImplementedError()
 
 
 def sample_size_resolution(
-    L2,
-    sample_size,
+    L2: sc.Variable,
+    sample_size: sc.Variable,
 ):
     """
     The resolution from the projected sample size, where it may be bigger
@@ -57,13 +53,12 @@ def sample_size_resolution(
 
 
 def angular_resolution(
-    theta,
-    L2,
-    detector_spatial_resolution,
+    theta: sc.Variable,
+    L2: sc.Variable,
+    detector_spatial_resolution: sc.Variable,
 ):
     """
-    Determine the angular resolution as described in Section 4.3.3 of the Amor
-    publication (doi: 10.1016/j.nima.2016.03.007).
+    Determine the angular resolution of the ESTIA instrument.
 
     Parameters
     ----------
@@ -91,10 +86,10 @@ def angular_resolution(
 
 
 def q_resolution(
-    Q,
-    angular_resolution,
-    wavelength_resolution,
-    sample_size_resolution,
+    Q: sc.Variable,
+    angular_resolution: sc.Variable,
+    wavelength_resolution: sc.Variable,
+    sample_size_resolution: sc.Variable,
 ):
     """
     Compute resolution in Q.
