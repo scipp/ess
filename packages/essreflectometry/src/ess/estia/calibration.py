@@ -6,6 +6,18 @@ from ..reflectometry.normalization import (
     reduce_from_events_to_q,
     reduce_from_lz_to_q,
 )
+from ..reflectometry.types import QBins, WavelengthBins
+from .types import (
+    Intensity,
+    MagneticReference,
+    MagneticSample,
+    NonMagneticReference,
+    OffOff,
+    OffOn,
+    OnOff,
+    OnOn,
+    PolarizedReflectivityOverQ,
+)
 
 
 def solve_for_calibration_parameters(Io, Is):
@@ -157,3 +169,30 @@ def compute_reflectivity_calibrate_on_lz(
     sample = [reduce_from_lz_to_q(s, qbins) for s in sample]
     I0 = reduce_from_lz_to_q(I0, qbins)
     return [i / I0 for i in sample]
+
+
+def reflectivity_provider(
+    i000: Intensity[NonMagneticReference, OffOff],
+    i001: Intensity[NonMagneticReference, OffOn],
+    i010: Intensity[NonMagneticReference, OnOff],
+    i011: Intensity[NonMagneticReference, OnOn],
+    im00: Intensity[MagneticReference, OffOff],
+    im01: Intensity[MagneticReference, OffOn],
+    im10: Intensity[MagneticReference, OnOff],
+    im11: Intensity[MagneticReference, OnOn],
+    is00: Intensity[MagneticSample, OffOff],
+    is01: Intensity[MagneticSample, OffOn],
+    is10: Intensity[MagneticSample, OnOff],
+    is11: Intensity[MagneticSample, OnOn],
+    wbins: WavelengthBins,
+    qbins: QBins,
+) -> PolarizedReflectivityOverQ:
+    return compute_reflectivity_calibrate_on_q(
+        [i000, i001, i010, i011],
+        [im00, im01, im10, im11],
+        [is00, is01, is10, is11],
+        qbins,
+    )
+
+
+providers = (reflectivity_provider,)
