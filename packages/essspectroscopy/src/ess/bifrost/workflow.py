@@ -6,7 +6,7 @@ from typing import Any
 import sciline
 
 from ess.reduce import time_of_flight
-from ess.spectroscopy.indirect import kf
+from ess.spectroscopy.indirect import kf, ki
 from ess.spectroscopy.types import (
     DetectorData,
     NeXusDetectorName,
@@ -40,8 +40,12 @@ def default_parameters() -> dict[type, Any]:
 _SIMULATION_PROVIDERS = (
     *mcstas.providers,
     *detector_providers,
+    # TODO use ki.providers
+    ki.primary_spectrometer_coordinate_transformation_graph,
+    ki.unwrap_sample_time,
+    # TODO use kf.providers
     kf.secondary_spectrometer_coordinate_transformation_graph,
-    kf.add_secondary_spectrometer_coords,
+    kf.move_time_to_sample,
 )
 
 

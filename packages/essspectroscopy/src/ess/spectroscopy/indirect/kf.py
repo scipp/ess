@@ -9,14 +9,15 @@ from ess.spectroscopy.types import (
     AnalyzerDspacing,
     AnalyzerOrientation,
     AnalyzerPosition,
-    BeamlineWithSecondarSpecCoords,
-    CalibratedBeamline,
+    DataAtSample,
+    DetectorData,
     DetectorFrameTime,
     DetectorGeometricA4,
     DetectorPosition,
     FinalEnergy,
     FinalWavenumber,
     FinalWavevector,
+    PulsePeriod,
     ReciprocalLatticeVectorAbsolute,
     RunType,
     SampleAnalyzerDirection,
@@ -27,6 +28,8 @@ from ess.spectroscopy.types import (
     SamplePosition,
     SecondarySpecCoordTransformGraph,
 )
+
+from ..utils import in_same_unit
 
 
 def sample_analyzer_vector(
@@ -255,33 +258,35 @@ def secondary_spectrometer_coordinate_transformation_graph(
     )
 
 
-def add_secondary_spectrometer_coords(
-    data: CalibratedBeamline[RunType], graph: SecondarySpecCoordTransformGraph[RunType]
-) -> BeamlineWithSecondarSpecCoords[RunType]:
-    """Compute and add coordinates for the secondary spectrometer.
+def move_time_to_sample(
+    data: DetectorData[RunType], pulse_period: PulsePeriod
+) -> DataAtSample[RunType]:
+    """Return the events with the event_time_offset coordinate offset to time at sample.
 
     Parameters
     ----------
     data:
-        Data array with beamline coordinates "position", "source_position", and
-        "sample_position".
-        Does not need to contain events or flight times.
-    graph:
-        Coordinate transformation graph for the secondary spectrometer.
-        Must be a closure over analyzer parameters.
-        And those parameters must have a compatible shape with ``data``.
+        Data array with "event_time_offset" and "secondary_flight_time" coordinates.
+    pulse_period:
+        Duration of a neutron pulse.
 
     Returns
     -------
     :
-        Input data with added "final_energy" and "secondary_flight_time" coordinates.
+        A shallow copy of ``data`` where the "event_time_offset" coordinate has been
+        shifted to the time at the sample.
     """
-    return data.transform_coords(
-        ("final_energy", "secondary_flight_time"),
-        graph=graph,
-        keep_intermediate=False,
-        keep_aliases=False,
-        rename_dims=False,
+    offset = in_same_unit(
+        data.coords['secondary_flight_time'], data.bins.coords['event_time_offset']
+    )
+    time = data.bins.coords['event_time_offset'] - offset
+    time %= in_same_unit(pulse_period, time)
+    return DataAtSample[RunType](
+        data
+        # These are the detector positions and they no longer match the time:
+        .drop_coords(('position', 'x_pixel_offset', 'y_pixel_offset'))
+        # Use bins.assign_coords to avoid modifying the original data:
+        .bins.assign_coords(event_time_offset=time)
     )
 
 

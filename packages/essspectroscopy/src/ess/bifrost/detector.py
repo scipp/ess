@@ -2,13 +2,17 @@ import scipp as sc
 import scippnexus as snx
 
 from ess.spectroscopy.types import (
+    BeamlineWithSpectrometerCoords,
+    CalibratedBeamline,
     CalibratedDetector,
     DetectorData,
     DetectorPositionOffset,
     FinalEnergy,
     NeXusComponent,
     NeXusTransformation,
+    PrimarySpecCoordTransformGraph,
     RunType,
+    SecondarySpecCoordTransformGraph,
 )
 
 from .types import ArcNumber
@@ -87,6 +91,41 @@ def get_calibrated_detector_bifrost(
     return CalibratedDetector[RunType](da)
 
 
+def add_spectrometer_coords(
+    data: CalibratedBeamline[RunType],
+    primary_graph: PrimarySpecCoordTransformGraph[RunType],
+    secondary_graph: SecondarySpecCoordTransformGraph[RunType],
+) -> BeamlineWithSpectrometerCoords[RunType]:
+    """Compute and add coordinates for the spectrometer.
+
+    Parameters
+    ----------
+    data:
+        Data array with beamline coordinates "position", "source_position", and
+        "sample_position".
+        Does not need to contain events or flight times.
+    primary_graph:
+        Coordinate transformation graph for the primary spectrometer.
+    secondary_graph:
+        Coordinate transformation graph for the secondary spectrometer.
+        Must be a closure over analyzer parameters.
+        And those parameters must have a compatible shape with ``data``.
+
+    Returns
+    -------
+    :
+        Input data with added spectrometer coordinates.
+        This includes "final_energy", "secondary_flight_time", and "L1".
+    """
+    return data.transform_coords(
+        ("final_energy", "L1", "secondary_flight_time"),
+        graph={**primary_graph, **secondary_graph},
+        keep_intermediate=False,
+        keep_aliases=False,
+        rename_dims=False,
+    )
+
+
 def merge_triplets(*triplets: DetectorData[RunType]) -> DetectorData[RunType]:
     """Merge BIFROST detector triplets into a single data array.
 
@@ -103,4 +142,4 @@ def merge_triplets(*triplets: DetectorData[RunType]) -> DetectorData[RunType]:
     return DetectorData[RunType](sc.concat(triplets, dim="triplet"))
 
 
-providers = (arc_number, get_calibrated_detector_bifrost)
+providers = (add_spectrometer_coords, arc_number, get_calibrated_detector_bifrost)
