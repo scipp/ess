@@ -7,4 +7,5 @@ maxdepth: 1
 
 dream/index
 sns-instruments/index
+common/index
 ```
