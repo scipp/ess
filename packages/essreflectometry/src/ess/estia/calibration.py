@@ -9,6 +9,12 @@ from ..reflectometry.normalization import (
 
 
 def solve_for_calibration_parameters(Io, Is):
+    """
+    Solves for the calibration parameters given the reference
+    measurements.
+
+    See https://doi.org/10.1016/S0921-4526(00)00823-1.
+    """
     Iopp, Iopa, Ioap, Ioaa = Io
     Ipp, Ipa, Iap, Iaa = Is
 
@@ -53,51 +59,11 @@ def solve_for_calibration_parameters(Io, Is):
     return I0 / 4, Pp, Pa, Ap, Aa, Rspp, Rsaa
 
 
-def generate_valid_calibration_parameters():
-    I0 = np.random.random()
-    Pp = np.random.random()
-    Pa = -np.random.random()
-    Ap = np.random.random()
-    Aa = -np.random.random()
-    Rspp = np.random.random()
-    Rsaa = Rspp * np.random.random()
-    return tuple(map(sc.scalar, (I0, Pp, Pa, Ap, Aa, Rspp, Rsaa)))
-
-
-def intensity_from_parameters(I0, Pp, Pa, Ap, Aa, Rpp, Rpa, Rap, Raa):
-    return (
-        I0
-        * (
-            Rpp * (1 + Ap) * (1 + Pp)
-            + Rpa * (1 - Ap) * (1 + Pp)
-            + Rap * (1 + Ap) * (1 - Pp)
-            + Raa * (1 - Ap) * (1 - Pp)
-        ),
-        I0
-        * (
-            Rpp * (1 + Aa) * (1 + Pp)
-            + Rpa * (1 - Aa) * (1 + Pp)
-            + Rap * (1 + Aa) * (1 - Pp)
-            + Raa * (1 - Aa) * (1 - Pp)
-        ),
-        I0
-        * (
-            Rpp * (1 + Ap) * (1 + Pa)
-            + Rpa * (1 - Ap) * (1 + Pa)
-            + Rap * (1 + Ap) * (1 - Pa)
-            + Raa * (1 - Ap) * (1 - Pa)
-        ),
-        I0
-        * (
-            Rpp * (1 + Aa) * (1 + Pa)
-            + Rpa * (1 - Aa) * (1 + Pa)
-            + Rap * (1 + Aa) * (1 - Pa)
-            + Raa * (1 - Aa) * (1 - Pa)
-        ),
-    )
-
-
 def correction_matrix(Pp, Pa, Ap, Aa):
+    """
+    Defines the linear relationship between measured intensity
+    and reflectivity.
+    """
     return [
         [
             (1 + Pp) * (1 + Ap),
@@ -126,48 +92,68 @@ def correction_matrix(Pp, Pa, Ap, Aa):
     ]
 
 
-def compute_calibration_factors(Io, Is):
+def calibration_factors_from_reference_measurements(Io, Is):
+    """
+    Computes the polarization instrument parameters from
+    the calibration measurements on the non-magnetic reference
+    and the calibration measurements on the magnetic reference.
+    """
     I0, Pp, Pa, Ap, Aa, _, _ = solve_for_calibration_parameters(Io, Is)
     return I0, correction_matrix(Pp, Pa, Ap, Aa)
 
 
+def _linsolve(A, b):
+    x = np.linalg.solve(
+        np.stack([np.stack(row, -1) for row in A], -2),
+        np.stack(b, -1)[..., None],
+    )[..., 0]
+    return np.moveaxis(x, -1, 0)
+
+
 def linsolve(A, b):
-    return np.linalg.solve(
-        np.stack([[a.values for a in row] for row in A]),
-        np.stack([bi.values for bi in b], axis=-1),
+    x = _linsolve(
+        [[a.values for a in row] for row in A],
+        [bi.values for bi in b],
     )
+    return [sc.array(dims=b[0].dims, values=xi) for xi in x]
 
 
-def computer_reflectivity_calibrate_on_q(
+def compute_reflectivity_calibrate_on_q(
     reference_supermirror,
     reference_polarized_supermirror,
     sample,
     qbins,
 ):
+    """Reduces reference and sample to Q before applying
+    the polarization correction and normalization."""
     reference_supermirror = [
         reduce_from_lz_to_q(i, qbins) for i in reference_supermirror
     ]
     reference_polarized_supermirror = [
         reduce_from_lz_to_q(i, qbins) for i in reference_polarized_supermirror
     ]
-    sample = [reduce_from_events_to_q(i, qbins) for i in sample]
-    I0, C = compute_calibration_factors(
+    I0, C = calibration_factors_from_reference_measurements(
         reference_supermirror, reference_polarized_supermirror
     )
-    return [i / I0 for i in linsolve(C, sample)]
+    sample = [reduce_from_events_to_q(i, qbins) for i in sample]
+    sample = linsolve(C, sample)
+    return [i / I0 for i in sample]
 
 
-def computer_reflectivity_calibrate_on_lz(
+def compute_reflectivity_calibrate_on_lz(
     reference_supermirror,
     reference_polarized_supermirror,
     sample,
     wbins,
     qbins,
 ):
-    sample = reduce_from_events_to_lz(sample, wbins)
-    I0, C = compute_calibration_factors(
+    """Applied the polarization correction on the wavelength-z grid
+    then reduces to Q to apply the normalization."""
+    sample = [reduce_from_events_to_lz(s, wbins) for s in sample]
+    I0, C = calibration_factors_from_reference_measurements(
         reference_supermirror, reference_polarized_supermirror
     )
     sample = linsolve(C, sample)
+    sample = [reduce_from_lz_to_q(s, qbins) for s in sample]
     I0 = reduce_from_lz_to_q(I0, qbins)
-    return [i / I0 for i in reduce_from_lz_to_q(sample, qbins)]
+    return [i / I0 for i in sample]
