@@ -12,16 +12,17 @@ from scippnexus import Group
 
 from ess.reduce import time_of_flight
 from ess.spectroscopy.types import (
+    DataAtSample,
     Filename,
     IncidentDirection,
-    SampleEvents,
+    PrimarySpecCoordTransformGraph,
+    RunType,
     SampleName,
     SamplePosition,
     SourceName,
     SourcePosition,
-    SourceSamplePathLength,
     TimeOfFlightLookupTable,
-    TofSampleEvents,
+    TofData,
 )
 
 
@@ -100,52 +101,52 @@ def sample_position(file: Filename, sample: SampleName) -> SamplePosition:
         return compute_positions(data['entry/instrument'][sample][...])['position']
 
 
-# TODO insert this as l1 into the events to make sure to use the correct length
-def primary_path_length(
-    file: Filename, source: SourcePosition, sample: SamplePosition
-) -> SourceSamplePathLength:
-    """Compute the primary spectrometer path length from source to sample positions
-
-    Note:
-        This *requires* that the instrument group *is sorted* along the beam path.
-        HDF5 group entries are sorted alphabetically, so you should ensure that
-        the NeXus file was constructed with this in mind.
-    """
-    from scipp import concat, dot, sqrt, sum
-    from scippnexus import File, NXguide, compute_positions
-
-    with File(file) as data:
-        positions = [
-            compute_positions(v[...])['position']
-            for v in data['entry/instrument'][NXguide].values()
-        ]
-
-    positions = concat((source, *positions, sample), dim='path')
-    diff = positions['path', 1:] - positions['path', :-1]
-    return sum(sqrt(dot(diff, diff)))
-
-
-def unwrap_sample_time(
-    sample_events: SampleEvents,
-    table: TimeOfFlightLookupTable,
-    l1: SourceSamplePathLength,
-) -> TofSampleEvents:
-    """Compute time-of-flight at the sample using a lookup table.
-
-    Parameters
-    ----------
-    sample_events:
-        Binned data with 'event_time_offset' and 'event_time_zero' coordinates
-        describing the time-of-arrival at the sample.
-    table:
-        A time-of-flight lookup table.
-    l1:
-        Distance from the source to the sample.
+def primary_spectrometer_coordinate_transformation_graph() -> (
+    PrimarySpecCoordTransformGraph[RunType]
+):
+    """Return a coordinate transformation graph for the primary spectrometer.
 
     Returns
     -------
     :
-        A copy of `sample_events` with a 'sample_tof' coordinate containing
+        Coordinate transformation graph for the primary spectrometer.
+    """
+    # For the incident beam, the original implementation here used the guides to
+    # determine a more accurate estimate of the path length.
+    # See function `primary_path_length` in
+    # commit 929ef7f97e00a1e26c254fd5f08c8a3346255970
+    # The result differs by <1mm from the straight line distance.
+    # This should be well below the measurement accuracy.
+    # So we use the simpler straight line distance here.
+
+    from scippneutron.conversion.beamline import L1, straight_incident_beam
+
+    return PrimarySpecCoordTransformGraph[RunType](
+        {
+            "incident_beam": straight_incident_beam,
+            "L1": L1,
+        }
+    )
+
+
+def unwrap_sample_time(
+    sample_data: DataAtSample[RunType],
+    table: TimeOfFlightLookupTable,
+) -> TofData[RunType]:
+    """Compute time-of-flight at the sample using a lookup table.
+
+    Parameters
+    ----------
+    sample_data:
+        Data with 'event_time_offset' and 'event_time_zero' coordinates
+        describing the time-of-arrival at the sample.
+    table:
+        A time-of-flight lookup table.
+
+    Returns
+    -------
+    :
+        A copy of ``sample_data`` with a "sample_tof" coordinate containing
         the time-of-flight at the sample.
     """
 
@@ -154,14 +155,14 @@ def unwrap_sample_time(
         params={
             **time_of_flight.default_parameters(),
             time_of_flight.TimeOfFlightLookupTable: table,
-            time_of_flight.Ltotal: l1,
-            time_of_flight.RawData: sample_events,
+            time_of_flight.Ltotal: sample_data.coords['L1'],
+            time_of_flight.RawData: sample_data,
         },
     )
     result = pipeline.compute(time_of_flight.TofData)
     # This is time-of-flight at the sample.
     result.bins.coords['sample_tof'] = result.bins.coords.pop('tof')
-    return TofSampleEvents(result)
+    return TofData(result)
 
 
 def incident_direction() -> IncidentDirection:
@@ -176,7 +177,6 @@ providers = (
     source_position,
     guess_sample_name,
     guess_source_name,
-    primary_path_length,
     unwrap_sample_time,
     incident_direction,
 )

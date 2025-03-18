@@ -14,6 +14,7 @@ from scipp import Variable
 from ..types import (
     Analyzers,
     Choppers,
+    DataAtSample,
     DetectorData,
     Filename,
     InstrumentAngles,
@@ -24,11 +25,10 @@ from ..types import (
     NXspeFileName,
     Position,
     PreopenNeXusFile,
-    SampleEvents,
     SampleRun,
     SourceSamplePathLength,
     TimeOfFlightLookupTable,
-    TofSampleEvents,
+    TofData,
 )
 
 PIXEL_NAME = 'detector_number'
@@ -310,12 +310,12 @@ def get_unwrapped_sample_events(
         Filename: filename,
         SampleName: sample_name,
         SourceName: source_name,
-        SampleEvents: sample_events,
+        DataAtSample: sample_events,
         TimeOfFlightLookupTable: tof_lookup_table,
     }
     pipeline = Pipeline(ki_providers, params=params)
 
-    events = pipeline.compute(TofSampleEvents)
+    events = pipeline.compute(TofData)
     events = events.bins.drop_coords(('event_time_zero', 'event_time_offset'))
     return params, events, None  # primary
 
@@ -842,6 +842,12 @@ def one_setting(
     unwrapped_sample_events = add_momentum_coordinates(
         ki_params, kf_params, unwrapped_sample_events, a3
     )
+
+    a4 = triplet_events.coords['a4']
+    unwrapped_sample_events.save_hdf5(
+        f'data/combined-workflow/events.a3_{a3.value:.1f}.a4_{a4.value:.1f}.h5'
+    )
+    raise RuntimeError("abort")
 
     norm_events = normalise_wavelength_events(
         ki_params, kf_params, unwrapped_sample_events, monitor

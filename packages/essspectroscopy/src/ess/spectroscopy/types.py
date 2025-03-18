@@ -127,15 +127,22 @@ NormWavelengthEvents = data_array_type('NormWavelengthEvents')
 NXspeFileName = NewType('NXspeFileName', str)
 NXspeFileNames = NewType('NXspeFileNames', list[NXspeFileName])
 
-SampleEvents = NewType('SampleEvents', sc.DataArray)
-TofSampleEvents = NewType('TofSampleEvents', sc.DataArray)
 
 TofMonitor = NewType('TofMonitor', sc.DataArray)
+
+
+class TofData(sciline.Scope[RunType, sc.DataArray], sc.DataArray): ...
 
 
 class SecondarySpecCoordTransformGraph(sciline.Scope[RunType, dict], dict): ...
 
 
-class BeamlineWithSecondarSpecCoords(
+class PrimarySpecCoordTransformGraph(sciline.Scope[RunType, dict], dict): ...
+
+
+class BeamlineWithSpectrometerCoords(
     sciline.Scope[RunType, sc.DataArray], sc.DataArray
 ): ...
+
+
+class DataAtSample(sciline.Scope[RunType, sc.DataArray], sc.DataArray): ...
