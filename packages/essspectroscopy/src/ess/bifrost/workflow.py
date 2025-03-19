@@ -6,7 +6,7 @@ from typing import Any
 import sciline
 
 from ess.reduce import time_of_flight
-from ess.spectroscopy.indirect import kf, ki
+from ess.spectroscopy.indirect import kf, ki, normalisation
 from ess.spectroscopy.types import (
     DetectorData,
     NeXusDetectorName,
@@ -46,6 +46,9 @@ _SIMULATION_PROVIDERS = (
     # TODO use kf.providers
     kf.secondary_spectrometer_coordinate_transformation_graph,
     kf.move_time_to_sample,
+    # TODO use imported `providers`
+    normalisation.unwrap_monitor,
+    normalisation.monitor_coordinate_transformation_graph,
 )
 
 
