@@ -272,6 +272,12 @@ doctest_default_flags = (
 linkcheck_ignore = [
     # Specific lines in Github blobs cannot be found by linkcheck.
     r"https?://github\.com/.*?/blob/[a-f0-9]+/.+?#",
+    # Confluence requires login
+    r"https?://confluence.ess.eu",
+    # This returns '403 Forbidden' but the link works in a browser.
+    "https://doi.org/10.3233/JNR-220049",
+    # This returns '403 Forbidden' but the link works in a browser.
+    "https://www.sciencedirect.com/science/article/pii/S2773183922000374",
 ]
 
 # -- Options for bibtex ---------------------------------------------------
