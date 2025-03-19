@@ -8,7 +8,7 @@ import sciline
 from ess.reduce import time_of_flight
 from ess.spectroscopy.indirect import kf, ki, normalisation
 from ess.spectroscopy.types import (
-    DetectorData,
+    DataGroupedByRotation,
     NeXusDetectorName,
     NeXusMonitorName,
     PulsePeriod,
@@ -18,6 +18,7 @@ from ess.spectroscopy.types import (
 from .detector import merge_triplets
 from .detector import providers as detector_providers
 from .io import mcstas, nexus
+from .slicing import providers as slicing_providers
 from .types import (
     FrameMonitor0,
     FrameMonitor1,
@@ -38,8 +39,9 @@ def default_parameters() -> dict[type, Any]:
 
 
 _SIMULATION_PROVIDERS = (
-    *mcstas.providers,
     *detector_providers,
+    *mcstas.providers,
+    *slicing_providers,
     # TODO use ki.providers
     ki.primary_spectrometer_coordinate_transformation_graph,
     ki.unwrap_sample_time,
@@ -60,8 +62,8 @@ def BifrostSimulationWorkflow(detector_names: NeXusDetectorName) -> sciline.Pipe
     for key, val in default_parameters().items():
         workflow[key] = val
 
-    workflow[DetectorData[SampleRun]] = (
-        workflow[DetectorData[SampleRun]]
+    workflow[DataGroupedByRotation[SampleRun]] = (
+        workflow[DataGroupedByRotation[SampleRun]]
         .map({NeXusDetectorName: detector_names})
         .reduce(func=merge_triplets)
     )
