@@ -5,7 +5,6 @@ from ess.spectroscopy.types import (
     BeamlineWithSpectrometerCoords,
     CalibratedBeamline,
     CalibratedDetector,
-    DetectorData,
     DetectorPositionOffset,
     FinalEnergy,
     NeXusComponent,
@@ -126,7 +125,9 @@ def add_spectrometer_coords(
     )
 
 
-def merge_triplets(*triplets: DetectorData[RunType]) -> DetectorData[RunType]:
+def merge_triplets(
+    *triplets: sc.DataArray,
+) -> sc.DataArray:
     """Merge BIFROST detector triplets into a single data array.
 
     Parameters
@@ -139,7 +140,7 @@ def merge_triplets(*triplets: DetectorData[RunType]) -> DetectorData[RunType]:
     :
         Input data arrays stacked along the "triplet" dimension.
     """
-    return DetectorData[RunType](sc.concat(triplets, dim="triplet"))
+    return sc.concat(triplets, dim="triplet")
 
 
 providers = (add_spectrometer_coords, arc_number, get_calibrated_detector_bifrost)

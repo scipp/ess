@@ -150,3 +150,6 @@ class BeamlineWithSpectrometerCoords(
 
 
 class DataAtSample(sciline.Scope[RunType, sc.DataArray], sc.DataArray): ...
+
+
+class DataGroupedByRotation(sciline.Scope[RunType, sc.DataArray], sc.DataArray): ...

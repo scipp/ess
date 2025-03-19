@@ -10,7 +10,7 @@ from ess.spectroscopy.types import (
     AnalyzerOrientation,
     AnalyzerPosition,
     DataAtSample,
-    DetectorData,
+    DataGroupedByRotation,
     DetectorFrameTime,
     DetectorGeometricA4,
     DetectorPosition,
@@ -259,7 +259,7 @@ def secondary_spectrometer_coordinate_transformation_graph(
 
 
 def move_time_to_sample(
-    data: DetectorData[RunType], pulse_period: PulsePeriod
+    data: DataGroupedByRotation[RunType], pulse_period: PulsePeriod
 ) -> DataAtSample[RunType]:
     """Return the events with the event_time_offset coordinate offset to time at sample.
 
