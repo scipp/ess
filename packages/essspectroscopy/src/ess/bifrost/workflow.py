@@ -7,6 +7,7 @@ import sciline
 
 from ess.reduce import time_of_flight
 from ess.spectroscopy.indirect import kf, ki, normalisation
+from ess.spectroscopy.indirect.conversion import providers as conversion_providers
 from ess.spectroscopy.types import (
     DataGroupedByRotation,
     NeXusDetectorName,
@@ -39,6 +40,7 @@ def default_parameters() -> dict[type, Any]:
 
 
 _SIMULATION_PROVIDERS = (
+    *conversion_providers,
     *detector_providers,
     *mcstas.providers,
     *slicing_providers,

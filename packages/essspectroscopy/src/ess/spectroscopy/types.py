@@ -135,12 +135,16 @@ class TofMonitor(
 class TofData(sciline.Scope[RunType, sc.DataArray], sc.DataArray): ...
 
 
+class EnergyData(sciline.Scope[RunType, sc.DataArray], sc.DataArray): ...
+
+
 class SecondarySpecCoordTransformGraph(sciline.Scope[RunType, dict], dict): ...
 
 
 class PrimarySpecCoordTransformGraph(sciline.Scope[RunType, dict], dict): ...
 
 
+InelasticCoordTransformGraph = NewType('InelasticCoordTransformGraph', dict)
 MonitorCoordTransformGraph = NewType('MonitorCoordTransformGraph', dict)
 
 

@@ -162,6 +162,8 @@ def unwrap_sample_time(
     result = pipeline.compute(time_of_flight.TofData)
     # This is time-of-flight at the sample.
     result.bins.coords['sample_tof'] = result.bins.coords.pop('tof')
+    del result.bins.coords['event_time_offset']
+    del result.bins.coords['event_time_zero']
     return TofData(result)
 
 
