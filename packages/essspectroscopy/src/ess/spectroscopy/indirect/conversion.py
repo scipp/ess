@@ -11,10 +11,14 @@ from ..types import (
     EnergyData,
     GravityVector,
     InelasticCoordTransformGraph,
+    MonitorCoordTransformGraph,
+    MonitorType,
     PrimarySpecCoordTransformGraph,
     RunType,
     SecondarySpecCoordTransformGraph,
     TofData,
+    TofMonitor,
+    WavelengthMonitor,
 )
 from ..utils import in_same_unit
 
@@ -104,11 +108,15 @@ def add_inelastic_coordinates(
             'incident_energy',
             'lab_momentum_transfer',
             'sample_table_momentum_transfer',
+            # These are inputs but we want to preserve them
+            'a3',
+            'a4',
         ],
         graph=graph,
         keep_aliases=False,
         keep_inputs=False,
         keep_intermediate=False,
+        rename_dims=False,
     )
     return EnergyData[RunType](transformed)
 
@@ -141,11 +149,11 @@ def add_spectrometer_coords(
     """
     return data.transform_coords(
         (
-            "final_energy",
-            "final_wavevector",
-            "incident_beam",
-            "L1",
-            "secondary_flight_time",
+            'final_energy',
+            'final_wavevector',
+            'incident_beam',
+            'L1',
+            'secondary_flight_time',
         ),
         graph={**primary_graph, **secondary_graph},
         keep_intermediate=False,
@@ -154,8 +162,31 @@ def add_spectrometer_coords(
     )
 
 
+def monitor_coordinate_transformation_graph() -> MonitorCoordTransformGraph:
+    from scippneutron.conversion.graph import beamline, tof
+
+    return MonitorCoordTransformGraph(
+        {
+            **beamline.beamline(scatter=False),
+            **tof.elastic_wavelength(start='tof'),
+        }
+    )
+
+
+def add_monitor_wavelength_coords(
+    monitor: TofMonitor[RunType, MonitorType], graph: MonitorCoordTransformGraph
+) -> WavelengthMonitor[RunType, MonitorType]:
+    return WavelengthMonitor[RunType, MonitorType](
+        monitor.transform_coords(
+            'wavelength', graph=graph, keep_intermediate=False, keep_aliases=False
+        )
+    )
+
+
 providers = (
     add_inelastic_coordinates,
+    add_monitor_wavelength_coords,
     add_spectrometer_coords,
     inelastic_coordinate_transformation_graph_at_sample,
+    monitor_coordinate_transformation_graph,
 )

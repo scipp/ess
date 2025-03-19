@@ -52,7 +52,6 @@ _SIMULATION_PROVIDERS = (
     kf.move_time_to_sample,
     # TODO use imported `providers`
     normalisation.unwrap_monitor,
-    normalisation.monitor_coordinate_transformation_graph,
 )
 
 
