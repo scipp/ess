@@ -6,7 +6,7 @@ from ..reflectometry.normalization import (
     reduce_from_events_to_q,
     reduce_from_lz_to_q,
 )
-from ..reflectometry.types import QBins, WavelengthBins
+from ..reflectometry.types import CoordTransformationGraph, QBins, WavelengthBins
 from .types import (
     Intensity,
     MagneticReference,
@@ -147,7 +147,7 @@ def compute_reflectivity_calibrate_on_q(
     I0, C = calibration_factors_from_reference_measurements(
         reference_supermirror, reference_polarized_supermirror
     )
-    sample = [reduce_from_events_to_q(i, qbins) for i in sample]
+    sample = [reduce_from_events_to_q(i, qbins).hist() for i in sample]
     sample = linsolve(C, sample)
     return [i / I0 for i in sample]
 
@@ -158,17 +158,34 @@ def compute_reflectivity_calibrate_on_lz(
     sample,
     wbins,
     qbins,
+    graph,
 ):
     """Applied the polarization correction on the wavelength-z grid
     then reduces to Q to apply the normalization."""
-    sample = [reduce_from_events_to_lz(s, wbins) for s in sample]
+    sample = [reduce_from_events_to_lz(s, wbins).hist() for s in sample]
     I0, C = calibration_factors_from_reference_measurements(
         reference_supermirror, reference_polarized_supermirror
     )
-    sample = linsolve(C, sample)
-    sample = [reduce_from_lz_to_q(s, qbins) for s in sample]
-    I0 = reduce_from_lz_to_q(I0, qbins)
-    return [i / I0 for i in sample]
+    for i, s in enumerate(linsolve(C, sample)):
+        sample[i].data = s
+        sample[i] = sample[i].transform_coords(
+            ("Q",),
+            graph,
+            rename_dims=False,
+            keep_intermediate=False,
+            keep_aliases=False,
+        )
+        sample[i].coords['Q'] = sc.midpoints(sample[i].coords['Q'], 'wavelength')
+
+    masks = [sc.isnan(I0.data) | sc.isnan(s.data) for s in sample]
+    sample = [
+        reduce_from_lz_to_q(s.assign_masks(isnan=m), qbins)
+        for s, m in zip(sample, masks, strict=True)
+    ]
+    return [
+        s / reduce_from_lz_to_q(I0.assign_masks(isnan=m), qbins).data
+        for s, m in zip(sample, masks, strict=True)
+    ]
 
 
 def reflectivity_provider(
@@ -192,6 +209,33 @@ def reflectivity_provider(
         [im00, im01, im10, im11],
         [is00, is01, is10, is11],
         qbins,
+    )
+
+
+def reflectivity_provider_calibrate_on_lz(
+    i000: Intensity[NonMagneticReference, OffOff],
+    i001: Intensity[NonMagneticReference, OffOn],
+    i010: Intensity[NonMagneticReference, OnOff],
+    i011: Intensity[NonMagneticReference, OnOn],
+    im00: Intensity[MagneticReference, OffOff],
+    im01: Intensity[MagneticReference, OffOn],
+    im10: Intensity[MagneticReference, OnOff],
+    im11: Intensity[MagneticReference, OnOn],
+    is00: Intensity[MagneticSample, OffOff],
+    is01: Intensity[MagneticSample, OffOn],
+    is10: Intensity[MagneticSample, OnOff],
+    is11: Intensity[MagneticSample, OnOn],
+    wbins: WavelengthBins,
+    qbins: QBins,
+    graph: CoordTransformationGraph,
+) -> PolarizedReflectivityOverQ:
+    return compute_reflectivity_calibrate_on_lz(
+        [i000, i001, i010, i011],
+        [im00, im01, im10, im11],
+        [is00, is01, is10, is11],
+        wbins,
+        qbins,
+        graph,
     )
 
 
