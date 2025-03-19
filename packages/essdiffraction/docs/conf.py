@@ -272,6 +272,8 @@ doctest_default_flags = (
 linkcheck_ignore = [
     # Specific lines in Github blobs cannot be found by linkcheck.
     r"https?://github\.com/.*?/blob/[a-f0-9]+/.+?#",
+    # Confluence requires login
+    r"https?://confluence.ess.eu",
 ]
 
 # -- Options for bibtex ---------------------------------------------------
