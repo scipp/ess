@@ -99,7 +99,6 @@ SourceName = NewType('SourceName', str)
 MonitorName = NewType('MonitorName', str)
 MonitorPosition = variable_type('MonitorPosition')
 SourceMonitorPathLength = variable_type('SourceMonitorPathLength')
-FrameTimeMonitor = data_array_type('FrameTimeMonitor')
 WavelengthMonitor = data_array_type('WavelengthMonitor')
 
 LabMomentumTransfer = variable_type('LabMomentumTransfer')
@@ -128,7 +127,9 @@ NXspeFileName = NewType('NXspeFileName', str)
 NXspeFileNames = NewType('NXspeFileNames', list[NXspeFileName])
 
 
-TofMonitor = NewType('TofMonitor', sc.DataArray)
+class TofMonitor(
+    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
+): ...
 
 
 class TofData(sciline.Scope[RunType, sc.DataArray], sc.DataArray): ...
@@ -138,6 +139,9 @@ class SecondarySpecCoordTransformGraph(sciline.Scope[RunType, dict], dict): ...
 
 
 class PrimarySpecCoordTransformGraph(sciline.Scope[RunType, dict], dict): ...
+
+
+MonitorCoordTransformGraph = NewType('MonitorCoordTransformGraph', dict)
 
 
 class BeamlineWithSpectrometerCoords(

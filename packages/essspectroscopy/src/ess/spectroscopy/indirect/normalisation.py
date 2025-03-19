@@ -2,15 +2,19 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 
 import sciline
+import scipp as sc
 
 from ess.reduce import time_of_flight
 
 from ..types import (
     Filename,
-    FrameTimeMonitor,
+    MonitorCoordTransformGraph,
+    MonitorData,
     MonitorName,
     MonitorPosition,
+    MonitorType,
     NormWavelengthEvents,
+    RunType,
     SourceMonitorPathLength,
     SourcePosition,
     TimeOfFlightLookupTable,
@@ -19,6 +23,17 @@ from ..types import (
     WavelengthEvents,
     WavelengthMonitor,
 )
+
+
+def monitor_coordinate_transformation_graph() -> MonitorCoordTransformGraph:
+    from scippneutron.conversion.graph import beamline, tof
+
+    return MonitorCoordTransformGraph(
+        {
+            **beamline.beamline(scatter=False),
+            **tof.elastic_wavelength(start='tof'),
+        }
+    )
 
 
 def monitor_position(file: Filename, monitor: MonitorName) -> MonitorPosition:
@@ -39,7 +54,6 @@ def source_monitor_path_length(
         HDF5 group entries are sorted alphabetically, so you should ensure that
         the NeXus file was constructed with this in mind.
     """
-    import scipp as sc
     from scippnexus import File, NXguide, compute_positions
 
     with File(file) as data:
@@ -109,21 +123,29 @@ def normalise(
 
 
 def unwrap_monitor(
-    monitor: FrameTimeMonitor,
+    monitor: MonitorData[RunType, MonitorType],
     table: TimeOfFlightLookupTable,
-    length: SourceMonitorPathLength,
-) -> TofMonitor:
+    coord_transform_graph: MonitorCoordTransformGraph,
+) -> TofMonitor[RunType, MonitorType]:
+    path_length = monitor.transform_coords(
+        'Ltotal',
+        graph=coord_transform_graph,
+        keep_intermediate=False,
+        keep_aliases=False,
+        rename_dims=False,
+    ).coords['Ltotal']
+
     tof_wf = sciline.Pipeline(
         (*time_of_flight.providers(), time_of_flight.resample_tof_data),
         params={
             **time_of_flight.default_parameters(),
             time_of_flight.TimeOfFlightLookupTable: table,
-            time_of_flight.Ltotal: length,
-            time_of_flight.RawData: monitor.rename(frame_time='tof'),
+            time_of_flight.Ltotal: path_length,
+            time_of_flight.RawData: monitor.rename(t='tof'),
         },
     )
     unwrapped = tof_wf.compute(time_of_flight.ResampledTofData)
-    return TofMonitor(unwrapped)
+    return TofMonitor[RunType, MonitorType](unwrapped)
 
 
 providers = (
