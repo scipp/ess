@@ -195,10 +195,10 @@ def final_energy(final_wavenumber: FinalWavenumber) -> FinalEnergy:
 
 
 def final_wavevector(
-    kf_direction: SampleAnalyzerDirection, kf_magnitude: FinalWavenumber
+    sample_analyzer_vector: SampleAnalyzerVector, final_wavenumber: FinalWavenumber
 ) -> FinalWavevector:
     """Constructs the final wave vector form its direction and magnitude"""
-    return kf_direction * kf_magnitude
+    return sample_analyzer_vector / sc.norm(sample_analyzer_vector) * final_wavenumber
 
 
 def secondary_flight_path_length(
@@ -252,6 +252,7 @@ def secondary_spectrometer_coordinate_transformation_graph(
             "analyzer_detector_vector": analyzer_detector_vector,
             "final_energy": final_energy,
             "final_wavenumber": final_wavenumber,
+            "final_wavevector": final_wavevector,
             "L2": secondary_flight_path_length,
             "secondary_flight_time": secondary_flight_time,
         }

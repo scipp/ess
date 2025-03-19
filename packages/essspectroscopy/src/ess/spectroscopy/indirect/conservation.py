@@ -4,9 +4,6 @@
 from scipp import vector
 
 from ..types import (
-    EnergyTransfer,
-    FinalEnergy,
-    IncidentEnergy,
     LabMomentumTransfer,
     SampleTableAngle,
     TableMomentumTransfer,
@@ -18,6 +15,7 @@ from .ki import providers as ki_providers
 PERP, VERT, PARALLEL = (vector(v) for v in ([1, 0, 0], [0, 1, 0], [0, 0, 1]))
 
 
+# TODO remove
 def sample_table_momentum_vector(
     a3: SampleTableAngle, q: LabMomentumTransfer
 ) -> TableMomentumTransfer:
@@ -44,15 +42,8 @@ def sample_table_momentum_vector(
     return rotations_from_rotvecs(-a3 * VERT) * q
 
 
-def energy_transfer(
-    incident_energy: IncidentEnergy, final_energy: FinalEnergy
-) -> EnergyTransfer:
-    return incident_energy - final_energy
-
-
 providers = (
     *ki_providers,
     *kf_providers,
     sample_table_momentum_vector,
-    energy_transfer,
 )
