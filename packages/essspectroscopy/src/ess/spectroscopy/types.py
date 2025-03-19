@@ -99,7 +99,6 @@ SourceName = NewType('SourceName', str)
 MonitorName = NewType('MonitorName', str)
 MonitorPosition = variable_type('MonitorPosition')
 SourceMonitorPathLength = variable_type('SourceMonitorPathLength')
-WavelengthMonitor = data_array_type('WavelengthMonitor')
 
 LabMomentumTransfer = variable_type('LabMomentumTransfer')
 
@@ -128,6 +127,11 @@ NXspeFileNames = NewType('NXspeFileNames', list[NXspeFileName])
 
 
 class TofMonitor(
+    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
+): ...
+
+
+class WavelengthMonitor(
     sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
 ): ...
 

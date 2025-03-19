@@ -25,17 +25,6 @@ from ..types import (
 )
 
 
-def monitor_coordinate_transformation_graph() -> MonitorCoordTransformGraph:
-    from scippneutron.conversion.graph import beamline, tof
-
-    return MonitorCoordTransformGraph(
-        {
-            **beamline.beamline(scatter=False),
-            **tof.elastic_wavelength(start='tof'),
-        }
-    )
-
-
 def monitor_position(file: Filename, monitor: MonitorName) -> MonitorPosition:
     """Extract the position of the named monitor from a NeXus file"""
     from scippnexus import File, compute_positions
