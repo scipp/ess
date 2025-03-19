@@ -91,7 +91,9 @@ def compute_polarizing_element_correction(
     Parameters
     ----------
     channel :
-        Data including wavelength (and time) for a given spin channel.
+        Data including wavelength (and time) for a given spin channel. Note that the
+        values are not actually used here, but the data's coordinates are required for
+        evaluating the transmission function.
     transmission :
         Transmission function for the polarizing element.
 
@@ -184,6 +186,25 @@ def compute_half_polarized_corrected_data(
 
 
 def CorrectionWorkflow(half_polarized: bool = False) -> sciline.Pipeline:
+    """
+    Create a workflow for polarization correction.
+
+    This is a basic workflow that requires setting the transmission function directly.
+    See :py:func:`PolarizationAnalysisWorkflow` and :py:func:`HalfPolarizedWorkflow` for
+    workflows that can compute the transmission function from a polarizer or analyzer.
+
+    Parameters
+    ----------
+    half_polarized :
+        If True, the workflow is for a half-polarized case (polarizer only).
+        If False, the workflow is for a full polarization case (polarizer and
+        analyzer).
+
+    See Also
+    --------
+    PolarizationAnalysisWorkflow
+    HalfPolarizedWorkflow
+    """
     workflow = sciline.Pipeline(
         (
             make_spin_flipping_matrix_up,
