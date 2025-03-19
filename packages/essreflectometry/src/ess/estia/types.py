@@ -8,8 +8,6 @@ WavelengthResolution = NewType("WavelengthResolution", sc.Variable)
 AngularResolution = NewType("AngularResolution", sc.Variable)
 SampleSizeResolution = NewType("SampleSizeResolution", sc.Variable)
 
-CoordTransformationGraph = NewType("CoordTransformationGraph", dict)
-
 OffOff = NewType("OffOff", str)
 OffOn = NewType("OffOn", str)
 OnOff = NewType("OnOff", str)
