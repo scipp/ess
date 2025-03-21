@@ -11,15 +11,15 @@ import scipp as sc
 from mantid import simpleapi as _mantid_simpleapi
 
 import ess.isissans as isis
-from ess.isissans.data import LoadedFileContents
+from ess.isissans.io import LoadedFileContents
 from ess.isissans.mantidio import DataWorkspace, Period
 from ess.sans.types import (
     EmptyBeamRun,
     Filename,
     Incident,
     MonitorType,
+    NeXusComponent,
     NeXusMonitorName,
-    RawMonitor,
     RunType,
     SampleRun,
     Transmission,
@@ -94,7 +94,7 @@ class MonitorSpectrumNumber(Generic[MonitorType]):
 
 def get_monitor_data(
     dg: LoadedFileContents[RunType], nexus_name: NeXusMonitorName[MonitorType]
-) -> RawMonitor[RunType, MonitorType]:
+) -> NeXusComponent[MonitorType, RunType]:
     """
     Same as :py:func:`ess.isissans.get_monitor_data` but dropping variances.
 
@@ -104,13 +104,13 @@ def get_monitor_data(
     """
     # See https://github.com/scipp/sciline/issues/52 why copy needed
     mon = dg['monitors'][nexus_name]['data'].copy()
-    return RawMonitor[RunType, MonitorType](sc.values(mon))
+    return NeXusComponent[MonitorType, RunType](sc.values(mon))
 
 
 def get_monitor_data_from_empty_beam_run(
     dg: LoadedFileContents[EmptyBeamRun],
     spectrum_number: MonitorSpectrumNumber[MonitorType],
-) -> RawMonitor[EmptyBeamRun, MonitorType]:
+) -> NeXusComponent[MonitorType, EmptyBeamRun]:
     """
     Extract incident or transmission monitor from ZOOM empty beam run
 
@@ -124,7 +124,7 @@ def get_monitor_data_from_empty_beam_run(
 def get_monitor_data_from_transmission_run(
     dg: LoadedFileContents[TransmissionRun[RunType]],
     spectrum_number: MonitorSpectrumNumber[MonitorType],
-) -> RawMonitor[TransmissionRun[RunType], MonitorType]:
+) -> NeXusComponent[MonitorType, TransmissionRun[RunType]]:
     """
     Extract incident or transmission monitor from ZOOM direct-beam run
 
@@ -163,8 +163,8 @@ def ZoomTransmissionFractionWorkflow(runs: Sequence[str]) -> sl.Pipeline:
 
     mapped = workflow.map({Filename[TransmissionRun[SampleRun]]: runs})
     for mon_type in (Incident, Transmission):
-        workflow[RawMonitor[TransmissionRun[SampleRun], mon_type]] = mapped[
-            RawMonitor[TransmissionRun[SampleRun], mon_type]
+        workflow[NeXusComponent[mon_type, TransmissionRun[SampleRun]]] = mapped[
+            NeXusComponent[mon_type, TransmissionRun[SampleRun]]
         ].reduce(func=_get_time_dependent_monitor)
 
     # We are dealing with two different types of files, and monitors are identified
