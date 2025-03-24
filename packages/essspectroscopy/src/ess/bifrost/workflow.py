@@ -55,7 +55,9 @@ _SIMULATION_PROVIDERS = (
 )
 
 
-def BifrostSimulationWorkflow(detector_names: NeXusDetectorName) -> sciline.Pipeline:
+def BifrostSimulationWorkflow(
+    detector_names: list[NeXusDetectorName],
+) -> sciline.Pipeline:
     """Data reduction workflow for simulated BIFROST data."""
     workflow = nexus.LoadNeXusWorkflow()
     for provider in _SIMULATION_PROVIDERS:
