@@ -2,19 +2,25 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import pytest
 import sciline
+import scipp as sc
 import scippnexus as snx
 
 from ess import bifrost
-from ess.bifrost.data import simulated_elastic_incoherent_with_phonon
+from ess.bifrost.data import (
+    simulated_elastic_incoherent_with_phonon,
+    tof_lookup_table_simulation,
+)
 from ess.bifrost.types import FrameMonitor3
 from ess.spectroscopy.types import (
     Analyzers,
     Choppers,
     DetectorData,
+    EnergyData,
     Filename,
     MonitorData,
     NeXusDetectorName,
     SampleRun,
+    TimeOfFlightLookupTable,
 )
 
 
@@ -29,6 +35,7 @@ def simulation_detector_names() -> list[NeXusDetectorName]:
 def workflow(simulation_detector_names: list[NeXusDetectorName]) -> sciline.Pipeline:
     workflow = bifrost.BifrostSimulationWorkflow(simulation_detector_names)
     workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
+    workflow[TimeOfFlightLookupTable] = sc.io.load_hdf5(tof_lookup_table_simulation())
     return workflow
 
 
@@ -81,3 +88,33 @@ def test_simulation_workflow_can_load_choppers(workflow: sciline.Pipeline) -> No
     assert 'position' in first
     assert 'rotation_speed' in first
     assert first['slit_edges'].shape == (2,)
+
+
+def test_simulation_workflow_can_compute_energy_data(
+    workflow: sciline.Pipeline,
+) -> None:
+    energy_data = workflow.compute(EnergyData[SampleRun])
+
+    assert energy_data.sizes == {
+        'triplet': 5,
+        'tube': 3,
+        'length': 100,
+        'a3': 180,
+        'a4': 1,
+    }
+    expected_coords = {'a3', 'a4', 'detector_number'}
+    assert expected_coords.issubset(energy_data.coords)
+    expected_event_coords = {
+        'incident_wavelength',
+        'energy_transfer',
+        'lab_momentum_transfer',
+        'sample_table_momentum_transfer',
+    }
+    assert expected_event_coords.issubset(energy_data.bins.coords)
+
+    # Check that conversions do not raise, i.e., units have expected dimensions.
+    energy_data.coords['a3'].to(unit='rad')
+    energy_data.coords['a4'].to(unit='rad')
+    energy_data.bins.coords['energy_transfer'].to(unit='meV')
+    energy_data.bins.coords['lab_momentum_transfer'].to(unit='1/Å')
+    energy_data.bins.coords['sample_table_momentum_transfer'].to(unit='1/Å')
