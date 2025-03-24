@@ -3,10 +3,12 @@
 import pytest
 import sciline
 import scipp as sc
+import scipp.testing
 import scippnexus as snx
 
 from ess import bifrost
 from ess.bifrost.data import (
+    computed_energy_data_simulated,
     simulated_elastic_incoherent_with_phonon,
     tof_lookup_table_simulation,
 )
@@ -101,3 +103,11 @@ def test_simulation_workflow_can_compute_wavelength_monitor(
     expected_coords = {'position', 'wavelength', 'time'}
     assert expected_coords.issubset(monitor.coords)
     assert monitor.bins is None
+
+
+def test_simulation_workflow_produces_the_same_data_as_before(
+    workflow: sciline.Pipeline,
+) -> None:
+    energy_data = workflow.compute(EnergyData[SampleRun])
+    expected = sc.io.load_hdf5(computed_energy_data_simulated())
+    sc.testing.assert_allclose(energy_data, expected)

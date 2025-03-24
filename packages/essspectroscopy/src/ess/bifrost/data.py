@@ -16,6 +16,7 @@ def _make_pooch():
         version=_version,
         registry={
             "BIFROST_20240914T053723.h5": "md5:0f2fa5c9a851f8e3a4fa61defaa3752e",
+            "computed_energy_data_simulated.h5": "md5:926d7e4215fbe97b9c87fb8e84e34c0d",
             "BIFROST-simulation-tof-lookup-table.h5": "md5:9469b7b8c50463b1110bfbdffa2989d5",  # noqa: E501
         },
     )
@@ -44,7 +45,13 @@ def tof_lookup_table_simulation() -> str:
     return get_path("BIFROST-simulation-tof-lookup-table.h5")
 
 
+def computed_energy_data_simulated() -> str:
+    """Energy and momentum transfer computed from the simulated BIFROST data."""
+    return get_path("computed_energy_data_simulated.h5")
+
+
 __all__ = [
+    "computed_energy_data_simulated",
     "get_path",
     "simulated_elastic_incoherent_with_phonon",
     "tof_lookup_table_simulation",
