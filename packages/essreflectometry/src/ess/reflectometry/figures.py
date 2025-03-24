@@ -5,17 +5,17 @@ import numpy as np
 import plopp as pp
 import scipp as sc
 
-from ess.reflectometry.types import (
+from .types import (
     QBins,
+    QThetaFigure,
+    ReducibleData,
+    Reference,
+    ReflectivityDiagnosticsView,
     ReflectivityOverQ,
     ReflectivityOverZW,
     SampleRun,
-)
-
-from .types import (
-    QThetaFigure,
-    ReflectivityDiagnosticsView,
     ThetaBins,
+    WavelengthBins,
     WavelengthThetaFigure,
     WavelengthZIndexFigure,
 )
@@ -268,18 +268,25 @@ def wavelength_z_figure(
 
 
 def wavelength_theta_diagnostic_figure(
-    da: ReflectivityOverZW,
+    da: ReducibleData[SampleRun],
+    ref: Reference,
+    wbins: WavelengthBins,
     thbins: ThetaBins[SampleRun],
 ) -> WavelengthThetaFigure:
-    return wavelength_theta_figure(da, theta_bins=thbins)
+    s = da.hist(wavelength=wbins, theta=thbins)
+    r = ref.hist(theta=s.coords['theta'], wavelength=s.coords['wavelength']).data
+    return wavelength_theta_figure(s / r)
 
 
 def q_theta_diagnostic_figure(
-    da: ReflectivityOverZW,
+    da: ReducibleData[SampleRun],
+    ref: Reference,
     thbins: ThetaBins[SampleRun],
     qbins: QBins,
 ) -> QThetaFigure:
-    return q_theta_figure(da, q_bins=qbins, theta_bins=thbins)
+    s = da.hist(theta=thbins, Q=qbins)
+    r = ref.hist(theta=s.coords['theta'], Q=s.coords['Q']).data
+    return q_theta_figure(s / r)
 
 
 def wavelength_z_diagnostic_figure(
