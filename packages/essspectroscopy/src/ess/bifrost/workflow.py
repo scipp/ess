@@ -64,8 +64,20 @@ def BifrostSimulationWorkflow(
 
     workflow[DataGroupedByRotation[SampleRun]] = (
         workflow[DataGroupedByRotation[SampleRun]]
-        .map({NeXusDetectorName: detector_names})
+        .map(_make_detector_name_mapping(detector_names))
         .reduce(func=merge_triplets)
     )
 
     return workflow
+
+
+def _make_detector_name_mapping(detector_names: list[NeXusDetectorName]) -> Any:
+    # Use Pandas if possible to label the index.
+    try:
+        import pandas
+
+        return pandas.DataFrame({NeXusDetectorName: detector_names}).rename_axis(
+            index='triplet'
+        )
+    except ModuleNotFoundError:
+        return {NeXusDetectorName: detector_names}
