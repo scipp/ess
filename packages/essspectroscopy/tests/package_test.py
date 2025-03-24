@@ -7,11 +7,12 @@ Note that additional imports need to be added for repositories that
 contain multiple packages.
 """
 
-from ess import spectroscopy as pkg
+from ess import bifrost, spectroscopy
 
 
 def test_has_version():
-    assert hasattr(pkg, '__version__')
+    assert hasattr(bifrost, '__version__')
+    assert hasattr(spectroscopy, '__version__')
 
 
 # This is for CI package tests. They need to run tests with minimal dependencies,
