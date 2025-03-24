@@ -8,97 +8,15 @@ indirect geometry time-of-flight spectrometer
 from __future__ import annotations
 
 import sciline
-from scippnexus import Group
 
 from ess.reduce import time_of_flight
 from ess.spectroscopy.types import (
     DataAtSample,
-    Filename,
-    IncidentDirection,
     PrimarySpecCoordTransformGraph,
     RunType,
-    SampleName,
-    SamplePosition,
-    SourceName,
-    SourcePosition,
     TimeOfFlightLookupTable,
     TofData,
 )
-
-
-def determine_name_with_type(
-    instrument: Group, name: str | None, options: list, type_name: str
-) -> str:
-    """Investigate an open NeXus file group for objects with matching name or base type
-
-    Parameter
-    ---------
-    instrument: scippnexus.Group
-        The group to investigate, likely /entry/instrument
-    name: str
-        A preferred object name, will be returned if present in the scippnexus.Group
-    options: list
-        Should be scippnexus define NeXus object types, e.g., scippnexus.NXdetector
-    type_name: str
-        Candidate group members contain this name
-
-    Returns
-    -------
-    :
-        The matching group-member name
-
-    Raises
-    ------
-    ValueError
-        If no group member has the specified `name`,
-        contains the specified `type_name` or is of the specified `option` type
-    """
-    if name is not None and name in instrument:
-        return name
-    found = {x for x in instrument if type_name in x.lower()}
-    for option in options:
-        found.update(set(instrument[option]))
-    if len(found) != 1:
-        raise ValueError(f"Could not determine {type_name} name: {found}")
-    return next(iter(found))
-
-
-def guess_source_name(file: Filename) -> SourceName:
-    """Guess the name of the source in the NeXus instrument file"""
-    from scippnexus import File, NXmoderator, NXsource
-
-    with File(file) as data:
-        instrument = data['entry/instrument']
-        name = determine_name_with_type(
-            instrument, None, [NXsource, NXmoderator], 'source'
-        )
-        return SourceName(name)
-
-
-def guess_sample_name(file: Filename) -> SampleName:
-    """Guess the name of the sample in the NeXus instrument file"""
-    from scippnexus import File, NXsample
-
-    with File(file) as data:
-        instrument = data['entry/instrument']
-        name = determine_name_with_type(instrument, None, [NXsample], 'sample')
-        return SampleName(name)
-
-
-def source_position(file: Filename, source: SourceName) -> SourcePosition:
-    """Extract the position of the named source from a NeXus file"""
-    from scippnexus import File, compute_positions
-
-    with File(file) as data:
-        return compute_positions(data['entry/instrument'][source][...])['position']
-
-
-def sample_position(file: Filename, sample: SampleName) -> SamplePosition:
-    """Extract the position of the named sample from a NeXus file"""
-    from scippnexus import File, compute_positions
-
-    with File(file) as data:
-        return compute_positions(data['entry/instrument'][sample][...])['position']
 
 
 def primary_spectrometer_coordinate_transformation_graph() -> (
@@ -167,18 +85,7 @@ def unwrap_sample_time(
     return TofData(result)
 
 
-def incident_direction() -> IncidentDirection:
-    """Return the incident neutron direction in the laboratory frame"""
-    from scipp import vector
-
-    return vector([0, 0, 1.0])
-
-
 providers = (
-    sample_position,
-    source_position,
-    guess_sample_name,
-    guess_source_name,
+    primary_spectrometer_coordinate_transformation_graph,
     unwrap_sample_time,
-    incident_direction,
 )

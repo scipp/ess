@@ -2,9 +2,9 @@ import scipp as sc
 import scippnexus as snx
 
 from ess.spectroscopy.types import (
+    BeamlineWithSpectrometerCoords,
     CalibratedDetector,
     DetectorPositionOffset,
-    FinalEnergy,
     NeXusComponent,
     NeXusTransformation,
     RunType,
@@ -13,7 +13,9 @@ from ess.spectroscopy.types import (
 from .types import ArcNumber
 
 
-def arc_number(final_energy: FinalEnergy) -> ArcNumber:
+def arc_number(
+    beamline: BeamlineWithSpectrometerCoords[RunType],
+) -> ArcNumber[RunType]:
     """Calculate BIFROST arc index number from pixel final energy
 
     The BIFROST analyzers are each set to diffract an
@@ -27,8 +29,9 @@ def arc_number(final_energy: FinalEnergy) -> ArcNumber:
 
     Parameters
     ----------
-    final_energy: scipp.Variable
-        The per-pixel (or event) final neutron energy
+    beamline:
+        A data array with a 'final_energy' coordinate which is the
+        per-pixel (or event) final neutron energy.
 
     Returns
     -------
@@ -37,7 +40,8 @@ def arc_number(final_energy: FinalEnergy) -> ArcNumber:
     """
     minimum = sc.scalar(2.7, unit='meV')
     step = sc.scalar(0.575, unit='meV')
-    return sc.round((final_energy - minimum) / step).to(dtype='int')
+    final_energy = beamline.coords['final_energy']
+    return ArcNumber[RunType](sc.round((final_energy - minimum) / step).to(dtype='int'))
 
 
 def get_calibrated_detector_bifrost(
