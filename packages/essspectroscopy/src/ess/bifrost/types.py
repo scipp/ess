@@ -1,4 +1,5 @@
-from typing import NewType
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 
 import sciline
 import scipp as sc
@@ -6,7 +7,9 @@ import scipp as sc
 from ess.reduce.nexus import types as reduce_t
 from ess.spectroscopy.types import RunType
 
-ArcNumber = NewType('ArcNumber', sc.Variable)
+
+class ArcNumber(sciline.Scope[RunType, sc.Variable], sc.Variable): ...
+
 
 # See https://github.com/scipp/essreduce/issues/105 about monitor names
 FrameMonitor0 = reduce_t.Monitor1
