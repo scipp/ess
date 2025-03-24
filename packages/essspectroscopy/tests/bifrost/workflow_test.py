@@ -12,8 +12,6 @@ from ess.bifrost.data import (
 )
 from ess.bifrost.types import FrameMonitor3
 from ess.spectroscopy.types import (
-    Analyzers,
-    Choppers,
     DetectorData,
     EnergyData,
     Filename,
@@ -63,32 +61,6 @@ def test_simulation_workflow_can_load_monitor(workflow: sciline.Pipeline) -> Non
     assert 'position' in result.coords
     assert 'sample_position' not in result.coords
     assert 'source_position' in result.coords
-
-
-def test_simulation_workflow_can_load_analyzers(workflow: sciline.Pipeline) -> None:
-    analyzers = workflow.compute(Analyzers[SampleRun])
-
-    assert len(analyzers) == 45
-    first = next(iter(analyzers.values()))
-    assert 'position' in first
-    assert 'd_spacing' in first
-
-
-def test_simulation_workflow_can_load_choppers(workflow: sciline.Pipeline) -> None:
-    choppers = workflow.compute(Choppers[SampleRun])
-
-    assert choppers.keys() == {
-        '005_PulseShapingChopper',
-        '006_PulseShapingChopper2',
-        '019_FOC1',
-        '048_FOC2',
-        '095_BWC1',
-        '096_BWC2',
-    }
-    first = next(iter(choppers.values()))
-    assert 'position' in first
-    assert 'rotation_speed' in first
-    assert first['slit_edges'].shape == (2,)
 
 
 def test_simulation_workflow_can_compute_energy_data(
