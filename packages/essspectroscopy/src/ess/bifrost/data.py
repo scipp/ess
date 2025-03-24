@@ -5,8 +5,6 @@
 
 _version = "1"
 
-__all__ = ["get_path"]
-
 
 def _make_pooch():
     import pooch
@@ -44,3 +42,10 @@ def simulated_elastic_incoherent_with_phonon() -> str:
 def tof_lookup_table_simulation() -> str:
     """Time-of-flight lookup table for the simulated BIFROST data."""
     return get_path("BIFROST-simulation-tof-lookup-table.h5")
+
+
+__all__ = [
+    "get_path",
+    "simulated_elastic_incoherent_with_phonon",
+    "tof_lookup_table_simulation",
+]
