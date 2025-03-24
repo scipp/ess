@@ -1,5 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+import pytest
+import sciline
+import scippnexus as snx
 
 from ess import bifrost
 from ess.bifrost.data import simulated_elastic_incoherent_with_phonon
@@ -15,11 +18,27 @@ from ess.spectroscopy.types import (
 )
 
 
-def test_simulation_workflow_can_load_detector() -> None:
-    workflow = bifrost.BifrostSimulationWorkflow()
+@pytest.fixture(scope='module')
+def simulation_detector_names() -> list[NeXusDetectorName]:
+    with snx.File(simulated_elastic_incoherent_with_phonon()) as f:
+        names = list(f['entry']['instrument'][snx.NXdetector].keys())
+    return names[:5]  # These should be enough to test the workflow.
+
+
+@pytest.fixture
+def workflow(simulation_detector_names: list[NeXusDetectorName]) -> sciline.Pipeline:
+    workflow = bifrost.BifrostSimulationWorkflow(simulation_detector_names)
     workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
-    workflow[NeXusDetectorName] = "125_channel_1_1_triplet"
-    result = workflow.compute(DetectorData[SampleRun])
+    return workflow
+
+
+def test_simulation_workflow_can_load_detector() -> None:
+    workflow = bifrost.BifrostSimulationWorkflow(
+        [NeXusDetectorName("125_channel_1_1_triplet")]
+    )
+    workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
+    results = sciline.compute_mapped(workflow, DetectorData[SampleRun])
+    result = results.iloc[0]
 
     assert result.bins is not None
     assert set(result.dims) == {'tube', 'length'}
@@ -29,9 +48,7 @@ def test_simulation_workflow_can_load_detector() -> None:
     assert 'source_position' in result.coords
 
 
-def test_simulation_workflow_can_load_monitor() -> None:
-    workflow = bifrost.BifrostSimulationWorkflow()
-    workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
+def test_simulation_workflow_can_load_monitor(workflow: sciline.Pipeline) -> None:
     result = workflow.compute(MonitorData[SampleRun, FrameMonitor3])
 
     assert result.bins is None
@@ -40,9 +57,7 @@ def test_simulation_workflow_can_load_monitor() -> None:
     assert 'source_position' in result.coords
 
 
-def test_simulation_workflow_can_load_analyzers() -> None:
-    workflow = bifrost.BifrostSimulationWorkflow()
-    workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
+def test_simulation_workflow_can_load_analyzers(workflow: sciline.Pipeline) -> None:
     analyzers = workflow.compute(Analyzers[SampleRun])
 
     assert len(analyzers) == 45
@@ -51,9 +66,7 @@ def test_simulation_workflow_can_load_analyzers() -> None:
     assert 'd_spacing' in first
 
 
-def test_simulation_workflow_can_load_choppers() -> None:
-    workflow = bifrost.BifrostSimulationWorkflow()
-    workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
+def test_simulation_workflow_can_load_choppers(workflow: sciline.Pipeline) -> None:
     choppers = workflow.compute(Choppers[SampleRun])
 
     assert choppers.keys() == {
