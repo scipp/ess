@@ -42,12 +42,60 @@ def incident_wavevector_from_incident_wavelength(
 def energy_transfer(
     *, incident_energy: sc.Variable, final_energy: sc.Variable
 ) -> sc.Variable:
+    r"""Compute the energy transfer.
+
+    Here, the energy transfer is defined the same as in ScippNeutron
+    (https://scipp.github.io/scippneutron/user-guide/coordinate-transformations.html)
+    to be
+
+    .. math::
+
+        \Delta E = E_i - E_f
+
+    Note that the energy *loss*, while :func:`lab_momentum_transfer_from_wavevectors`
+    returns the momentum *gain*.
+
+    Parameters
+    ----------
+    incident_energy:
+        The neutron energy :math:`E_i` before scattering.
+    final_energy:
+        The neutron energy :math:`E_f` after scattering.
+
+    Returns
+    -------
+    :
+        The energy transfer :math:`\Delta E`.
+    """
     return incident_energy - final_energy
 
 
 def lab_momentum_transfer_from_wavevectors(
     incident_wavevector: sc.Variable, final_wavevector: sc.Variable
 ) -> sc.Variable:
+    r"""Compute the momentum transfer in the lab frame.
+
+    Here, the momentum transfer is defined as
+
+    .. math::
+
+        \vec{Q} = \vec{k_f} - \vec{k_i}
+
+    Note that the momentum *gain*, while :func:`energy_transfer`
+    returns the energy *loss*.
+
+    Parameters
+    ----------
+    incident_wavevector:
+        The neutron wavevector :math:`\vec{k_i}` before scattering.
+    final_wavevector:
+        The neutron wavevector :math:`\vec{k_f}` after scattering.
+
+    Returns
+    -------
+    :
+        The momentum transfer :math:`\vec{Q}` in the lab frame.
+    """
     return in_same_unit(final_wavevector, incident_wavevector) - incident_wavevector
 
 
@@ -59,8 +107,14 @@ def rotate_to_sample_table_momentum_transfer(
 ) -> sc.Variable:
     """Rotate the momentum transfer vector into the sample-table coordinate system
 
-    Notes
-    -----
+    Here, the momentum transfer is defined as
+
+    .. math::
+
+        \vec{Q} = \vec{k_f} - \vec{k_i}
+
+    Note
+    ----
     When a3 is zero, the sample-table and lab coordinate systems are the same.
     That is, Z is along the incident beam, Y is opposite the gravitational force,
     and X completes the right-handed coordinate system. The sample-table angle, a3,
@@ -75,6 +129,11 @@ def rotate_to_sample_table_momentum_transfer(
         The momentum transfer in the laboratory coordinate system
     gravity:
         The gravity vector which indicates the vertical axis.
+
+    Returns
+    -------
+    :
+        The momentum transfer in the sample-table coordinate system.
     """
     vertical = -gravity / sc.norm(gravity)
     # negative a3 since we rotate coordinates not axes here
