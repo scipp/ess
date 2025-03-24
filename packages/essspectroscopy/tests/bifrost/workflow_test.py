@@ -21,6 +21,7 @@ from ess.spectroscopy.types import (
     NeXusDetectorName,
     SampleRun,
     TimeOfFlightLookupTable,
+    WavelengthMonitor,
 )
 
 
@@ -118,3 +119,13 @@ def test_simulation_workflow_can_compute_energy_data(
     energy_data.bins.coords['energy_transfer'].to(unit='meV')
     energy_data.bins.coords['lab_momentum_transfer'].to(unit='1/Å')
     energy_data.bins.coords['sample_table_momentum_transfer'].to(unit='1/Å')
+
+
+def test_simulation_workflow_can_compute_wavelength_monitor(
+    workflow: sciline.Pipeline,
+) -> None:
+    monitor = workflow.compute(WavelengthMonitor[SampleRun, FrameMonitor3])
+    assert set(monitor.dims) == {'time', 'wavelength'}
+    expected_coords = {'position', 'wavelength', 'time'}
+    assert expected_coords.issubset(monitor.coords)
+    assert monitor.bins is None
