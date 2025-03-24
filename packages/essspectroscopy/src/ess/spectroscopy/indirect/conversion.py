@@ -52,9 +52,6 @@ def energy_transfer(
 
         \Delta E = E_i - E_f
 
-    Note that the energy *loss*, while :func:`lab_momentum_transfer_from_wavevectors`
-    returns the momentum *gain*.
-
     Parameters
     ----------
     incident_energy:
@@ -79,10 +76,7 @@ def lab_momentum_transfer_from_wavevectors(
 
     .. math::
 
-        \vec{Q} = \vec{k_f} - \vec{k_i}
-
-    Note that the momentum *gain*, while :func:`energy_transfer`
-    returns the energy *loss*.
+        \vec{Q} = \vec{k_i} - \vec{k_f}
 
     Parameters
     ----------
@@ -96,7 +90,7 @@ def lab_momentum_transfer_from_wavevectors(
     :
         The momentum transfer :math:`\vec{Q}` in the lab frame.
     """
-    return in_same_unit(final_wavevector, incident_wavevector) - incident_wavevector
+    return in_same_unit(incident_wavevector, final_wavevector) - final_wavevector
 
 
 def rotate_to_sample_table_momentum_transfer(
@@ -111,7 +105,7 @@ def rotate_to_sample_table_momentum_transfer(
 
     .. math::
 
-        \vec{Q} = \vec{k_f} - \vec{k_i}
+        \vec{Q} = \vec{k_i} - \vec{k_f}
 
     Note
     ----
