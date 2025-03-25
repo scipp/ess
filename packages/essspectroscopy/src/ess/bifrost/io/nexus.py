@@ -40,9 +40,9 @@ def load_instrument_angles(
 ) -> InstrumentAngles[RunType]:
     # TODO need mechanism in ESSreduce to load specific components of non-unique
     #  class by name
-    from ess.reduce.nexus._nexus_loader import _open_nexus_file, _unique_child_group
+    from ess.reduce.nexus._nexus_loader import _unique_child_group, open_nexus_file
 
-    with _open_nexus_file(file_spec.value) as file:
+    with open_nexus_file(file_spec.value) as file:
         parameters = _unique_child_group(
             _unique_child_group(file, snx.NXentry, name=None),
             snx.NXparameters,
