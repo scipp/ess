@@ -80,21 +80,24 @@ def _get_time(dg: sc.DataGroup) -> sc.Variable:
     return start + delta // 2
 
 
-def _get_time_dependent_monitor(*monitors: sc.DataArray) -> sc.DataArray:
-    monitors = sc.concat(monitors, 'time')
-    datetime = monitors.coords['datetime']
-    monitors.coords['time'] = datetime - datetime.min()
-    del monitors.coords['spectrum']
-    del monitors.coords['detector_id']
-    return monitors
+def _get_time_dependent_monitor(*monitor_groups: sc.DataGroup) -> sc.DataGroup:
+    monitors = [grp['data'] for grp in monitor_groups]
+    monitor = sc.concat(monitors, 'time')
+    positions = [grp['position'] for grp in monitor_groups]
+    position = _get_unique_position(*positions)
+    datetime = monitor.coords['datetime']
+    monitor.coords['time'] = datetime - datetime.min()
+    del monitor.coords['spectrum']
+    del monitor.coords['detector_id']
+    return sc.DataGroup(data=monitor, position=position)
 
 
-def _get_unique_source_position(*monitors: sc.DataArray) -> sc.DataArray:
-    source_position = monitors[0].coords['source_position']
-    for monitor in monitors[1:]:
-        if not sc.identical(monitor.coords['source_position'], source_position):
+def _get_unique_position(*positions: sc.DataArray) -> sc.DataArray:
+    unique = positions[0]
+    for position in positions[1:]:
+        if not sc.identical(position, unique):
             raise ValueError("Monitors have different source positions")
-    return source_position
+    return unique
 
 
 @dataclass
@@ -114,7 +117,9 @@ def get_monitor_data(
     """
     # See https://github.com/scipp/sciline/issues/52 why copy needed
     mon = dg['monitors'][nexus_name]['data'].copy()
-    return NeXusComponent[MonitorType, RunType](sc.values(mon))
+    return NeXusComponent[MonitorType, RunType](
+        sc.DataGroup(data=sc.values(mon), position=mon.coords['position'])
+    )
 
 
 def get_monitor_data_from_empty_beam_run(
@@ -128,7 +133,8 @@ def get_monitor_data_from_empty_beam_run(
     stores this as a Workspace2D, where each spectrum corresponds to a monitor.
     """
     # Note we index with a scipp.Variable, i.e., by the spectrum number used at ISIS
-    return sc.values(dg["data"]["spectrum", sc.index(spectrum_number.value)]).copy()
+    monitor = sc.values(dg["data"]["spectrum", sc.index(spectrum_number.value)]).copy()
+    return sc.DataGroup(data=monitor, position=monitor.coords['position'])
 
 
 def get_monitor_data_from_transmission_run(
@@ -144,7 +150,7 @@ def get_monitor_data_from_transmission_run(
     # Note we index with a scipp.Variable, i.e., by the spectrum number used at ISIS
     monitor = dg['data']['spectrum', sc.index(spectrum_number.value)].copy()
     monitor.coords['datetime'] = _get_time(dg)
-    return monitor
+    return sc.DataGroup(data=monitor, position=monitor.coords['position'])
 
 
 def ZoomTransmissionFractionWorkflow(runs: Sequence[str]) -> sl.Pipeline:
@@ -178,7 +184,7 @@ def ZoomTransmissionFractionWorkflow(runs: Sequence[str]) -> sl.Pipeline:
         ].reduce(func=_get_time_dependent_monitor)
         workflow[Position[NXsource, TransmissionRun[SampleRun]]] = mapped[
             Position[NXsource, TransmissionRun[SampleRun]]
-        ].reduce(func=_get_unique_source_position)
+        ].reduce(func=_get_unique_position)
 
     # We are dealing with two different types of files, and monitors are identified
     # differently in each case, so there is some duplication here.
