@@ -59,7 +59,7 @@ def convert_simulated_time_to_event_time_offset(
     """
 
     def wrap_event_time_offset(event_time_offset: sc.Variable) -> sc.Variable:
-        return event_time_offset % pulse_period.to(unit=event_time_offset.bins.unit)
+        return event_time_offset % pulse_period.to(unit=event_time_offset.unit)
 
     res = mcstas_data.transform_coords(
         frame_time=wrap_event_time_offset,
