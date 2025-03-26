@@ -147,7 +147,7 @@ pygments==2.19.1
     #   nbconvert
     #   pydata-sphinx-theme
     #   sphinx
-pytz==2025.1
+pytz==2025.2
     # via pandas
 pyyaml==6.0.2
     # via myst-parser
@@ -163,7 +163,7 @@ requests==2.32.3
     # via
     #   pooch
     #   sphinx
-rpds-py==0.23.1
+rpds-py==0.24.0
     # via
     #   jsonschema
     #   referencing
