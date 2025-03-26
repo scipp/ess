@@ -15,7 +15,7 @@ from ..reflectometry.types import (
     RunType,
     SamplePosition,
 )
-from . import conversions, load, maskings, normalization, resolution, workflow
+from . import conversions, load, maskings, normalization, orso, resolution, workflow
 from .types import (
     AngularResolution,
     SampleSizeResolution,
@@ -35,6 +35,7 @@ providers = (
     *maskings.providers,
     *workflow.providers,
     *normalization.providers,
+    *orso.providers,
 )
 """
 List of providers for setting up a Sciline pipeline.
