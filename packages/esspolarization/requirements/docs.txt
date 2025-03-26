@@ -10,8 +10,6 @@ accessible-pygments==0.0.5
     # via pydata-sphinx-theme
 alabaster==1.0.0
     # via sphinx
-appnope==0.1.4
-    # via ipykernel
 asttokens==3.0.0
     # via stack-data
 attrs==25.3.0
@@ -50,6 +48,8 @@ docutils==0.21.2
     #   sphinx
 esssans==25.2.0
     # via -r docs.in
+exceptiongroup==1.2.2
+    # via ipython
 executing==2.2.0
     # via stack-data
 fastjsonschema==2.21.1
@@ -60,13 +60,11 @@ ipydatawidgets==4.3.5
     # via pythreejs
 ipykernel==6.29.5
     # via -r docs.in
-ipython==9.0.2
+ipython==8.34.0
     # via
     #   -r docs.in
     #   ipykernel
     #   ipywidgets
-ipython-pygments-lexers==1.1.1
-    # via ipython
 ipywidgets==8.1.5
     # via
     #   ipydatawidgets
@@ -157,13 +155,12 @@ pygments==2.19.1
     # via
     #   accessible-pygments
     #   ipython
-    #   ipython-pygments-lexers
     #   nbconvert
     #   pydata-sphinx-theme
     #   sphinx
 pythreejs==2.4.2
     # via esssans
-pytz==2025.2
+pytz==2025.1
     # via pandas
 pyzmq==26.3.0
     # via
@@ -219,6 +216,8 @@ sympy==1.13.3
     # via -r docs.in
 tinycss2==1.4.0
     # via bleach
+tomli==2.2.1
+    # via sphinx
 tornado==6.4.2
     # via
     #   ipykernel
@@ -240,7 +239,7 @@ traitlets==5.14.3
     #   traittypes
 traittypes==0.2.1
     # via ipydatawidgets
-tzdata==2025.2
+tzdata==2025.1
     # via pandas
 urllib3==2.3.0
     # via requests
