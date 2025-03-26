@@ -17,7 +17,7 @@ cyclebane==24.10.0
     # via sciline
 cycler==0.12.1
     # via matplotlib
-dask==2025.2.0
+dask==2025.3.0
     # via -r base.in
 dnspython==2.7.0
     # via email-validator
@@ -37,8 +37,6 @@ h5py==3.13.0
     #   scippnexus
 idna==3.10
     # via email-validator
-importlib-metadata==8.6.1
-    # via dask
 kiwisolver==1.4.8
     # via matplotlib
 lazy-loader==0.4
@@ -80,7 +78,7 @@ pydantic==2.10.6
     # via scippneutron
 pydantic-core==2.27.2
     # via pydantic
-pyparsing==3.2.1
+pyparsing==3.2.3
     # via matplotlib
 python-dateutil==2.9.0.post0
     # via
@@ -116,9 +114,7 @@ toolz==1.0.0
     # via
     #   dask
     #   partd
-typing-extensions==4.12.2
+typing-extensions==4.13.0
     # via
     #   pydantic
     #   pydantic-core
-zipp==3.21.0
-    # via importlib-metadata

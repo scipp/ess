@@ -20,7 +20,7 @@ cyclebane==24.10.0
     # via sciline
 cycler==0.12.1
     # via matplotlib
-dask==2025.2.0
+dask==2025.3.0
     # via -r nightly.in
 dnspython==2.7.0
     # via email-validator
@@ -28,8 +28,6 @@ email-validator==2.2.0
     # via scippneutron
 essreduce==25.3.1
     # via -r nightly.in
-exceptiongroup==1.2.2
-    # via pytest
 fonttools==4.56.0
     # via matplotlib
 fsspec==2025.3.0
@@ -42,8 +40,6 @@ h5py==3.13.0
     #   scippnexus
 idna==3.10
     # via email-validator
-importlib-metadata==8.6.1
-    # via dask
 iniconfig==2.1.0
     # via pytest
 kiwisolver==1.4.8
@@ -90,7 +86,7 @@ pydantic==2.11.0b2
     # via scippneutron
 pydantic-core==2.32.0
     # via pydantic
-pyparsing==3.2.1
+pyparsing==3.2.3
     # via matplotlib
 pytest==8.3.5
     # via -r nightly.in
@@ -125,18 +121,14 @@ scipy==1.15.2
     #   scippnexus
 six==1.17.0
     # via python-dateutil
-tomli==2.2.1
-    # via pytest
 toolz==1.0.0
     # via
     #   dask
     #   partd
-typing-extensions==4.13.0rc1
+typing-extensions==4.13.0
     # via
     #   pydantic
     #   pydantic-core
     #   typing-inspection
 typing-inspection==0.4.0
     # via pydantic
-zipp==3.21.0
-    # via importlib-metadata
