@@ -9,10 +9,12 @@ import mantid.api as _mantid_api
 import sciline as sl
 import scipp as sc
 from mantid import simpleapi as _mantid_simpleapi
+from scippnexus import NXsource
 
 import ess.isissans as isis
 from ess.isissans.io import LoadedFileContents
 from ess.isissans.mantidio import DataWorkspace, Period
+from ess.reduce.nexus.types import Position
 from ess.sans.types import (
     EmptyBeamRun,
     Filename,
@@ -85,6 +87,14 @@ def _get_time_dependent_monitor(*monitors: sc.DataArray) -> sc.DataArray:
     del monitors.coords['spectrum']
     del monitors.coords['detector_id']
     return monitors
+
+
+def _get_unique_source_position(*monitors: sc.DataArray) -> sc.DataArray:
+    source_position = monitors[0].coords['source_position']
+    for monitor in monitors[1:]:
+        if not sc.identical(monitor.coords['source_position'], source_position):
+            raise ValueError("Monitors have different source positions")
+    return source_position
 
 
 @dataclass
@@ -166,6 +176,9 @@ def ZoomTransmissionFractionWorkflow(runs: Sequence[str]) -> sl.Pipeline:
         workflow[NeXusComponent[mon_type, TransmissionRun[SampleRun]]] = mapped[
             NeXusComponent[mon_type, TransmissionRun[SampleRun]]
         ].reduce(func=_get_time_dependent_monitor)
+        workflow[Position[NXsource, TransmissionRun[SampleRun]]] = mapped[
+            Position[NXsource, TransmissionRun[SampleRun]]
+        ].reduce(func=_get_unique_source_position)
 
     # We are dealing with two different types of files, and monitors are identified
     # differently in each case, so there is some duplication here.
