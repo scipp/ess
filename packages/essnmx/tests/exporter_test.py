@@ -54,6 +54,14 @@ def reduced_data() -> NMXReducedDataGroup:
     )
 
 
+def _is_bitshuffle_available() -> bool:
+    import platform
+
+    return not (
+        platform.machine().startswith("arm") or platform.platform().startswith('win')
+    )
+
+
 def test_mcstas_reduction_export_to_bytestream(
     reduced_data: NMXReducedDataGroup,
 ) -> None:
@@ -75,7 +83,15 @@ def test_mcstas_reduction_export_to_bytestream(
         with pytest.warns(
             DeprecationWarning, match='Please use ``export_as_nxlauetof`` instead.'
         ):
-            export_as_nexus(reduced_data, bio)
+            if not _is_bitshuffle_available():
+                # bitshuffle does not build correctly on Windows and ARM machines
+                # We are keeping this test here to catch when it builds correctly
+                # in the future.
+                with pytest.warns(UserWarning, match='bitshuffle.h5'):
+                    export_as_nexus(reduced_data, bio)
+            else:
+                export_as_nexus(reduced_data, bio)
+
         with h5py.File(bio, 'r') as f:
             assert 'NMX_data' in f
             nmx_data: h5py.Group = f.require_group('NMX_data')

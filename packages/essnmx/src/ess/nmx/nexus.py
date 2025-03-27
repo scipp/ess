@@ -4,10 +4,9 @@ import io
 import pathlib
 import warnings
 from collections.abc import Callable, Generator
-from functools import partial
+from functools import partial, wraps
 from typing import Any, TypeVar
 
-import bitshuffle.h5
 import h5py
 import numpy as np
 import sciline as sl
@@ -34,7 +33,7 @@ def _create_dataset_from_var(
     name: str,
     long_name: str | None = None,
     compression: str | None = None,
-    compression_opts: int | None = None,
+    compression_opts: int | tuple[int, int] | None = None,
     chunks: tuple[int, ...] | int | bool | None = None,
     dtype: Any = None,
 ) -> h5py.Dataset:
@@ -57,22 +56,47 @@ def _create_dataset_from_var(
     return dataset
 
 
-_create_compressed_dataset = partial(
-    _create_dataset_from_var,
-    compression=bitshuffle.h5.H5FILTER,
-    compression_opts=(0, bitshuffle.h5.H5_COMPRESS_LZ4),
-)
-"""Create dataset with compression options.
+@wraps(_create_dataset_from_var)
+def _create_compressed_dataset(*args, **kwargs):
+    """Create dataset with compression options.
 
-[``Bitshuffle/LZ4``](https://github.com/kiyo-masui/bitshuffle) is used for convenience.
-Since ``Dectris`` uses it for their Nexus file compression, it is compatible with DIALS.
-``Bitshuffle/LZ4`` tends to give similar results to
-GZIP and other compression algorithms with better performance.
-A naive implementation of bitshuffle/LZ4 compression,
-shown in [issue #124](https://github.com/scipp/essnmx/issues/124),
-led to 80% file reduction (365 MB vs 1.8 GB).
+    It will try to use ``bitshuffle`` for compression if available.
+    Otherwise, it will fall back to ``gzip`` compression.
 
-"""
+    [``Bitshuffle/LZ4``](https://github.com/kiyo-masui/bitshuffle)
+    is used for convenience.
+    Since ``Dectris`` uses it for their Nexus file compression,
+    it is compatible with DIALS.
+    ``Bitshuffle/LZ4`` tends to give similar results to
+    GZIP and other compression algorithms with better performance.
+    A naive implementation of bitshuffle/LZ4 compression,
+    shown in [issue #124](https://github.com/scipp/essnmx/issues/124),
+    led to 80% file reduction (365 MB vs 1.8 GB).
+
+    """
+    try:
+        import bitshuffle.h5
+
+        compression_filter = bitshuffle.h5.H5FILTER
+        default_compression_opts = (0, bitshuffle.h5.H5_COMPRESS_LZ4)
+    except ImportError:
+        warnings.warn(
+            UserWarning(
+                "Could not find the bitshuffle.h5 module from bitshuffle package. "
+                "The bitshuffle package is not installed or only partially installed. "
+                "Exporting to NeXus files with bitshuffle compression is not possible."
+            ),
+            stacklevel=2,
+        )
+        compression_filter = "gzip"
+        default_compression_opts = 4
+
+    return _create_dataset_from_var(
+        *args,
+        **kwargs,
+        compression=compression_filter,
+        compression_opts=default_compression_opts,
+    )
 
 
 def _create_root_data_entry(file_obj: h5py.File) -> h5py.Group:
