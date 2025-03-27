@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import Any, NewType
 
 import scipp as sc
@@ -67,5 +68,11 @@ MinimumTimeOfArrival = NewType("MinimumTimeOfArrival", sc.Variable)
 MaximumTimeOfArrival = NewType("MaximumTimeOfArrival", sc.Variable)
 """Maximum time of arrival of the raw data"""
 
-NMXRawDataMetadata = NewType("NMXRawDataMetadata", sc.DataGroup)
-"""Metadata of the raw data, i.e. maximum weight and min/max time of arrival"""
+
+@dataclass
+class NMXRawDataMetadata:
+    """Metadata of the raw data, i.e. maximum weight and min/max time of arrival"""
+
+    max_probability: MaximumProbability
+    min_toa: MinimumTimeOfArrival
+    max_toa: MaximumTimeOfArrival
