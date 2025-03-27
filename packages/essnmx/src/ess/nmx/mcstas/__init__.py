@@ -1,5 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
+from ..types import MaximumCounts
+
+default_parameters = {MaximumCounts: 10000}
 
 
 def McStasWorkflow():
@@ -27,5 +30,6 @@ def McStasWorkflow():
             reduce_raw_event_probability,
             raw_event_probability_to_counts,
             format_nmx_reduced_data,
-        )
+        ),
+        params=default_parameters,
     )

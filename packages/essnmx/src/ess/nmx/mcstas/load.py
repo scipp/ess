@@ -49,13 +49,10 @@ def load_event_data_bank_name(
 def _exclude_zero_events(data: sc.Variable) -> sc.Variable:
     """Exclude events with zero counts from the data.
 
-    McStas can add an extra event line containing 0,0,0,0,0,0
-    This line should not be included so we skip it.
+    McStas can add extra event lines containing 0,0,0,0,0,0
+    These lines should not be included so we skip it.
     """
-    if (data.values[0] == 0).all():
-        data = data["event", 1:]
-    else:
-        data = data
+    data = data[(data != sc.scalar(0.0, unit=data.unit)).any(dim="dim_1")]
     return data
 
 
@@ -295,11 +292,7 @@ def retrieve_raw_data_metadata(
 ) -> NMXRawDataMetadata:
     """Retrieve the metadata of the raw data."""
     return NMXRawDataMetadata(
-        sc.DataGroup(
-            min_toa=min_toa,
-            max_toa=max_toa,
-            max_probability=max_probability,
-        )
+        min_toa=min_toa, max_toa=max_toa, max_probability=max_probability
     )
 
 

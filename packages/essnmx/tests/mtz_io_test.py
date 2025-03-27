@@ -9,7 +9,7 @@ import scipp as sc
 from ess.nmx import mtz_io
 from ess.nmx.data import get_small_mtz_samples
 from ess.nmx.mtz_io import (
-    DEFAULT_SPACE_GROUP_DESC,  # P 21 21 21
+    DEFAULT_SPACE_GROUP_DESC,  # P 1
     MtzDataFrame,
     MTZFileIndex,
     MTZFilePath,
@@ -75,7 +75,7 @@ def mtz_list() -> list[gemmi.Mtz]:
 def test_get_space_group_with_spacegroup_desc() -> None:
     assert (
         mtz_io.get_space_group_from_description(DEFAULT_SPACE_GROUP_DESC).short_name()
-        == "P212121"
+        == "P1"
     )
 
 
@@ -96,7 +96,7 @@ def conflicting_mtz_series(
 def test_get_unique_space_group_raises_on_conflict(
     conflicting_mtz_series: list[gemmi.Mtz],
 ) -> None:
-    reg = r"Multiple space groups found:.+P 21 21 21.+C 1 2 1"
+    reg = r"Multiple space groups found:.+P 1.+C 1 2 1"
     space_groups = [
         mtz_io.get_space_group_from_mtz(mtz) for mtz in conflicting_mtz_series
     ]

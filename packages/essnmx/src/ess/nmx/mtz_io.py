@@ -17,7 +17,7 @@ MTZFilePath = NewType("MTZFilePath", pathlib.Path)
 """Path to the mtz file"""
 SpaceGroupDesc = NewType("SpaceGroupDesc", str)
 """The space group description. e.g. 'P 21 21 21'"""
-DEFAULT_SPACE_GROUP_DESC = SpaceGroupDesc("P 21 21 21")
+DEFAULT_SPACE_GROUP_DESC = SpaceGroupDesc("P 1")
 """The default space group description to use if not found in the mtz files."""
 
 # Custom column names

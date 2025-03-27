@@ -42,9 +42,13 @@ dependencies = [
   "pandas",
   "gemmi",
   "defusedxml",
+  "bitshuffle",
 ]
 
 dynamic = ["version"]
+
+[project.scripts]
+essnmx_reduce_mcstas = "ess.nmx.mcstas.executables:main"
 
 [project.optional-dependencies]
 test = [
