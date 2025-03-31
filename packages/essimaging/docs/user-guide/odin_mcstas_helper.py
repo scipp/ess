@@ -133,6 +133,7 @@ def load_odin_simulation_data(
         positions = data['dim_1', 2:5]
         counts = (probabilities / probabilities.max()) * probability_scale_factor
         counts.unit = 'counts'
+        counts.variances = counts.values**2
         # Units are hardcoded from the data.
         x_pos = cast(sc.Variable, positions['dim_1', 0].copy())
         x_pos.unit = 'm'
@@ -148,7 +149,7 @@ def load_odin_simulation_data(
             resolution=resolution,
         )
         da = sc.DataArray(
-            data=counts.copy().astype(sc.DType.int32),
+            data=counts.copy(),  # .astype(sc.DType.int32),
             coords={
                 'time_of_arrival': time_of_arrival.to(unit='us'),
                 'sample_position': sc.vector([0.0, 0.0, 60.5], unit='m'),
