@@ -14,7 +14,7 @@ source:
 
 requirements:
   build:
-    - setuptools>=77
+    - setuptools
     - setuptools_scm
   run:
     - python>=3.10
