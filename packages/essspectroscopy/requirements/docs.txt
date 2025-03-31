@@ -116,8 +116,6 @@ nbsphinx==0.9.7
     # via -r docs.in
 nest-asyncio==1.6.0
     # via ipykernel
-pandas==2.2.3
-    # via -r docs.in
 pandocfilters==1.5.1
     # via nbconvert
 parso==0.8.4
@@ -147,8 +145,6 @@ pygments==2.19.1
     #   nbconvert
     #   pydata-sphinx-theme
     #   sphinx
-pytz==2025.2
-    # via pandas
 pyyaml==6.0.2
     # via myst-parser
 pyzmq==26.3.0
@@ -220,8 +216,6 @@ traitlets==5.14.3
     #   nbconvert
     #   nbformat
     #   nbsphinx
-tzdata==2025.2
-    # via pandas
 urllib3==2.3.0
     # via requests
 wcwidth==0.2.13
