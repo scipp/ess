@@ -8,10 +8,10 @@ import numpy
 import scippnexus
 from scipp import DataArray
 
-from ..types import NormWavelengthEvents, NXspeFileName, NXspeFileNames
+from ..types import EnergyData, NXspeFileName, NXspeFileNames, SampleRun
 
 
-def to_nxspe(events: NormWavelengthEvents, base: NXspeFileName) -> NXspeFileNames:
+def to_nxspe(events: EnergyData[SampleRun], base: NXspeFileName) -> NXspeFileNames:
     """Take events, which have been binned in incident wavelength and have monitor
     counts per bin, and output one NXspe file per setting
 
