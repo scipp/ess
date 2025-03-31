@@ -149,7 +149,7 @@ def load_odin_simulation_data(
             resolution=resolution,
         )
         da = sc.DataArray(
-            data=counts.copy(),  # .astype(sc.DType.int32),
+            data=counts.copy(),
             coords={
                 'time_of_arrival': time_of_arrival.to(unit='us'),
                 'sample_position': sc.vector([0.0, 0.0, 60.5], unit='m'),
