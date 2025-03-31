@@ -32,6 +32,7 @@ requires-python = ">=3.10"
 # Make sure to list one dependency per line.
 dependencies = [
   "essreduce>=25.02.4",
+  "graphviz >= 0.20",
   "pandas>=2",
   "sciline>=24.6.3",
   "scipp>=25.3.0",
