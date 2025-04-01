@@ -245,7 +245,7 @@ def main() -> None:
         "--chunk_size",
         type=int,
         default=10_000_000,
-        help="Chunk size for processing",
+        help="Chunk size for processing. Pass -1 to process the whole file at once",
     )
     parser.add_argument(
         "--detector_ids",
