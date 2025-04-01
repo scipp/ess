@@ -7,7 +7,7 @@ import scippnexus as snx
 
 from ess.reduce.streaming import Accumulator
 
-from .mcstas.load import load_event_data_bank_name
+from .mcstas.load import _validate_chunk_size, load_event_data_bank_name
 from .types import DetectorBankPrefix, DetectorName, FilePath
 
 
@@ -71,7 +71,20 @@ def calculate_number_of_chunks(
         If 0, chunk slice is determined automatically by the ``iter_chunks``.
         Note that it only works if the dataset is already chunked.
 
+    Returns
+    -------
+    :
+        Number of chunks in the event data.
+
+    Raises
+    ------
+    ValueError:
+        If the chunk size is not valid. (>= -1)
+    TypeError:
+        If the chunk size is not an integer.
+
     """
+    _validate_chunk_size(chunk_size)
     # Find the data bank name associated with the detector
     bank_prefix = load_event_data_bank_name(
         detector_name=detector_name, file_path=file_path
@@ -85,5 +98,7 @@ def calculate_number_of_chunks(
         dset: snx.Field = root[bank_name]["events"]
         if chunk_size == 0:
             return len(list(dset.dataset.iter_chunks()))
+        elif chunk_size == -1:
+            return 1  # Read all at once
         else:
             return dset.shape[0] // chunk_size + int(dset.shape[0] % chunk_size != 0)

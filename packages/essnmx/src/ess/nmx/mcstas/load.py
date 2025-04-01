@@ -100,6 +100,35 @@ def load_raw_event_data(
         return _wrap_raw_event_data(data)
 
 
+def _check_chunk_size(chunk_size: int) -> None:
+    if 0 < chunk_size < 10_000_000:
+        import warnings
+
+        warnings.warn(
+            "The chunk size may be too small < 10_000_000.\n"
+            "Consider increasing the chunk size for better performance.\n"
+            "Hint: NMX typically expect ~10^8 bins as reduced data.",
+            UserWarning,
+            stacklevel=2,
+        )
+
+
+def _check_maximum_chunk_size(d_slices: tuple[slice, ...]) -> None:
+    """Check the maximum size of the slices."""
+    max_chunk_size = max(
+        (d_slice.stop - d_slice.start) / d_slice.step for d_slice in d_slices
+    )
+    _check_chunk_size(max_chunk_size)
+
+
+def _validate_chunk_size(chunk_size: int) -> None:
+    """Validate the chunk size."""
+    if not isinstance(chunk_size, int):
+        raise TypeError("Chunk size must be an integer.")
+    if chunk_size < -1:
+        raise ValueError("Invalid chunk size. It should be -1(for all) or > 0.")
+
+
 def raw_event_data_chunk_generator(
     file_path: FilePath,
     *,
@@ -122,17 +151,23 @@ def raw_event_data_chunk_generator(
         If 0, chunk slice is determined automatically by the ``iter_chunks``.
         Note that it only works if the dataset is already chunked.
 
-    """
-    if 0 < chunk_size < 10_000_000:
-        import warnings
+    Yields
+    ------
+    RawEventProbability:
+        Data array containing the events of the detector.
 
-        warnings.warn(
-            "The chunk size may be too small < 10_000_000.\n"
-            "Consider increasing the chunk size for better performance.\n"
-            "Hint: NMX typically expect ~10^8 bins as reduced data.",
-            UserWarning,
-            stacklevel=2,
-        )
+    Raises
+    ------
+    ValueError:
+        If the chunk size is not valid. (>= -1)
+    TypeError:
+        If the chunk size is not an integer.
+    Warning
+        If the chunk size is too small (< 10_000_000).
+
+    """
+    _check_chunk_size(chunk_size)
+    _validate_chunk_size(chunk_size)
 
     # Find the data bank name associated with the detector
     bank_prefix = load_event_data_bank_name(
@@ -147,21 +182,16 @@ def raw_event_data_chunk_generator(
         root = f["entry1/data"]
         dset = root[bank_name]["events"]
         if chunk_size == 0:
-            for data_slice in dset.dataset.iter_chunks():
-                dim_0_slice, _ = data_slice  # dim_0_slice, dim_1_slice
+            # dset.dataset.iter_chunks() yields (dim_0_slice, dim_1_slice)
+            dim_0_slices = tuple(dim0_sl for dim0_sl, _ in dset.dataset.iter_chunks())
+            # Only checking maximum chunk size
+            # since the last chunk may be smaller than the rest of the chunks
+            _check_maximum_chunk_size(dim_0_slices)
+            for dim_0_slice in dim_0_slices:
                 da = _wrap_raw_event_data(dset["dim_0", dim_0_slice])
-                if da.sizes['event'] < 10_000_000:
-                    import warnings
-
-                    warnings.warn(
-                        "The chunk size may be too small < 10_000_000.\n"
-                        "Consider increasing the chunk size for better performance.\n"
-                        "Hint: NMX typically expect ~10^8 bins as reduced data.",
-                        UserWarning,
-                        stacklevel=2,
-                    )
                 yield da
-
+        elif chunk_size == -1:
+            yield _wrap_raw_event_data(dset[()])
         else:
             num_events = dset.shape[0]
             for start in range(0, num_events, chunk_size):
