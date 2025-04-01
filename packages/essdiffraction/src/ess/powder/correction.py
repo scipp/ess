@@ -12,6 +12,9 @@ from ess.reduce.uncertainty import broadcast_uncertainties
 from ._util import event_or_outer_coord
 from .types import (
     AccumulatedProtonCharge,
+    BackgroundRun,
+    BackgroundSubtractedData,
+    BackgroundSubtractedDataTwoTheta,
     CaveMonitor,
     DataWithScatteringCoordinates,
     FocussedDataDspacing,
@@ -155,7 +158,7 @@ def _normalize_by_vanadium(
 
 
 def normalize_by_vanadium_dspacing(
-    data: FocussedDataDspacing[SampleRun],
+    data: BackgroundSubtractedData[SampleRun],
     vanadium: FocussedDataDspacing[VanadiumRun],
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
 ) -> IofDspacing:
@@ -185,7 +188,7 @@ def normalize_by_vanadium_dspacing(
 
 
 def normalize_by_vanadium_dspacing_and_two_theta(
-    data: FocussedDataDspacingTwoTheta[SampleRun],
+    data: BackgroundSubtractedDataTwoTheta[SampleRun],
     vanadium: FocussedDataDspacingTwoTheta[VanadiumRun],
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
 ) -> IofDspacingTwoTheta:
@@ -335,6 +338,22 @@ def _shallow_copy(da: sc.DataArray) -> sc.DataArray:
     return out
 
 
+def subtract_background(
+    data: FocussedDataDspacing[SampleRun],
+    background: FocussedDataDspacing[BackgroundRun],
+) -> BackgroundSubtractedData[SampleRun]:
+    return BackgroundSubtractedData[SampleRun](data.bins.concatenate(-background))
+
+
+def subtract_background_two_theta(
+    data: FocussedDataDspacingTwoTheta[SampleRun],
+    background: FocussedDataDspacingTwoTheta[BackgroundRun],
+) -> BackgroundSubtractedDataTwoTheta[SampleRun]:
+    return BackgroundSubtractedDataTwoTheta[SampleRun](
+        data.bins.concatenate(-background)
+    )
+
+
 class RunNormalization(enum.Enum):
     """Type of normalization applied to each run."""
 
@@ -357,6 +376,8 @@ def insert_run_normalization(
 
 
 providers = (
+    subtract_background,
+    subtract_background_two_theta,
     normalize_by_proton_charge,
     normalize_by_vanadium_dspacing,
     normalize_by_vanadium_dspacing_and_two_theta,
