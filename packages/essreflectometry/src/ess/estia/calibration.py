@@ -68,7 +68,7 @@ def solve_for_calibration_parameters(Io, Is):
     Rspp = (Rspp_plus_Rsaa + Rspp_minus_Rsaa) / 2
     Rsaa = Rspp_plus_Rsaa - Rspp
 
-    return I0 / 4, Pp, Pa, Ap, Aa, Rspp, Rsaa
+    return I0, Pp, Pa, Ap, Aa, Rspp, Rsaa
 
 
 def correction_matrix(Pp, Pa, Ap, Aa):
@@ -78,28 +78,28 @@ def correction_matrix(Pp, Pa, Ap, Aa):
     """
     return [
         [
-            (1 + Pp) * (1 + Ap),
-            (1 + Pp) * (1 - Ap),
-            (1 - Pp) * (1 + Ap),
-            (1 - Pp) * (1 - Ap),
+            (1 + Pp) * (1 + Ap) / 4,
+            (1 + Pp) * (1 - Ap) / 4,
+            (1 - Pp) * (1 + Ap) / 4,
+            (1 - Pp) * (1 - Ap) / 4,
         ],
         [
-            (1 + Pp) * (1 + Aa),
-            (1 + Pp) * (1 - Aa),
-            (1 - Pp) * (1 + Aa),
-            (1 - Pp) * (1 - Aa),
+            (1 + Pp) * (1 + Aa) / 4,
+            (1 + Pp) * (1 - Aa) / 4,
+            (1 - Pp) * (1 + Aa) / 4,
+            (1 - Pp) * (1 - Aa) / 4,
         ],
         [
-            (1 + Pa) * (1 + Ap),
-            (1 + Pa) * (1 - Ap),
-            (1 - Pa) * (1 + Ap),
-            (1 - Pa) * (1 - Ap),
+            (1 + Pa) * (1 + Ap) / 4,
+            (1 + Pa) * (1 - Ap) / 4,
+            (1 - Pa) * (1 + Ap) / 4,
+            (1 - Pa) * (1 - Ap) / 4,
         ],
         [
-            (1 + Pa) * (1 + Aa),
-            (1 + Pa) * (1 - Aa),
-            (1 - Pa) * (1 + Aa),
-            (1 - Pa) * (1 - Aa),
+            (1 + Pa) * (1 + Aa) / 4,
+            (1 + Pa) * (1 - Aa) / 4,
+            (1 - Pa) * (1 + Aa) / 4,
+            (1 - Pa) * (1 - Aa) / 4,
         ],
     ]
 
