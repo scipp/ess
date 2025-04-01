@@ -1,6 +1,6 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import h5py
-import numpy as np
+import pandas as pd
 import scipp as sc
 
 from ess.reflectometry.load import load_h5
@@ -33,9 +33,9 @@ def parse_events_ascii(lines):
                 key, _, value = value.partition('=')
             meta[key] = value
         else:
-            data.append(list(map(float, line.strip().split(' '))))
+            break
 
-    data = np.array(data)
+    data = pd.read_csv(lines, comment='#', header=None, delimiter=' ')
 
     if 'ylabel' in meta:
         labels = meta['ylabel'].strip().split(' ')
@@ -46,10 +46,15 @@ def parse_events_ascii(lines):
                 # Consult the McStas documentation
                 # (section 2.2.1) https://www.mcstas.org/documentation/manual/
                 # for more information.
-                sc.array(dims=['events'], values=data[:, 0], variances=data[:, 0] ** 2),
+                sc.array(
+                    dims=['events'],
+                    values=data[0].to_numpy(),
+                    variances=data[0].to_numpy() ** 2,
+                ),
                 coords={
-                    label: sc.array(dims=['events'], values=values)
-                    for values, label in zip(data[:, 1:].T, labels[1:], strict=False)
+                    label: sc.array(dims=['events'], values=data[i].to_numpy())
+                    for i, label in enumerate(labels)
+                    if i != 0
                 },
             )
             for k, v in meta.items():
