@@ -1,11 +1,11 @@
 # User guide
 
-
 ```{toctree}
 ---
 maxdepth: 1
 ---
 installation
-histogram_mode_detectors
-odin_simulation
+odin/index
+tbl/index
+ymir/index
 ```
