@@ -8,7 +8,7 @@
 ## Imaging Data Reduction Examples
 ````{card}
 
-```{button-ref} user-guide/ymin/histogram_mode_detector
+```{button-ref} user-guide/ymir/histogram_mode_detector
 :class: stretched-link
 
 Ymir - Histogram Mode Detector
