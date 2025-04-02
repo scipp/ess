@@ -72,16 +72,22 @@ def reduce_sample_over_q(
     Returns reflectivity as a function of :math:`Q`.
     """
     s = reduce_from_events_to_q(sample, qbins)
-    h = sc.values(reduce_from_lz_to_q(reference, s.coords['Q']))
+    if len(reference.dims) > 1:
+        h = sc.values(reduce_from_lz_to_q(reference, s.coords['Q']))
+    elif reference.bins:
+        h = sc.values(reference.hist())
+    else:
+        h = sc.values(reference)
     R = s / h.data
-    R.coords['Q_resolution'] = sc.sqrt(
-        (
-            (sc.values(reference) * reference.coords['Q_resolution'] ** 2)
-            .flatten(to='Q')
-            .hist(Q=s.coords['Q'])
-        )
-        / h
-    ).data
+    if 'Q_resolution' in reference.coords:
+        R.coords['Q_resolution'] = sc.sqrt(
+            (
+                (sc.values(reference) * reference.coords['Q_resolution'] ** 2)
+                .flatten(to='Q')
+                .hist(Q=s.coords['Q'])
+            )
+            / h
+        ).data
     return R
 
 
