@@ -1,6 +1,6 @@
 # Installation
 
-To install `esssans` and all of its dependencies, use
+To install ESSsans and all of its dependencies, use
 
 `````{tab-set}
 ````{tab-item} pip
