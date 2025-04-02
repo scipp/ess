@@ -20,6 +20,7 @@ def generate_valid_calibration_parameters():
 def intensity_from_parameters(I0, Pp, Pa, Ap, Aa, Rpp, Rpa, Rap, Raa):
     return (
         I0
+        / 4
         * (
             Rpp * (1 + Ap) * (1 + Pp)
             + Rpa * (1 - Ap) * (1 + Pp)
@@ -27,6 +28,7 @@ def intensity_from_parameters(I0, Pp, Pa, Ap, Aa, Rpp, Rpa, Rap, Raa):
             + Raa * (1 - Ap) * (1 - Pp)
         ),
         I0
+        / 4
         * (
             Rpp * (1 + Aa) * (1 + Pp)
             + Rpa * (1 - Aa) * (1 + Pp)
@@ -34,6 +36,7 @@ def intensity_from_parameters(I0, Pp, Pa, Ap, Aa, Rpp, Rpa, Rap, Raa):
             + Raa * (1 - Aa) * (1 - Pp)
         ),
         I0
+        / 4
         * (
             Rpp * (1 + Ap) * (1 + Pa)
             + Rpa * (1 - Ap) * (1 + Pa)
@@ -41,6 +44,7 @@ def intensity_from_parameters(I0, Pp, Pa, Ap, Aa, Rpp, Rpa, Rap, Raa):
             + Raa * (1 - Ap) * (1 - Pa)
         ),
         I0
+        / 4
         * (
             Rpp * (1 + Aa) * (1 + Pa)
             + Rpa * (1 - Aa) * (1 + Pa)
