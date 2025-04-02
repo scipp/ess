@@ -8,7 +8,7 @@
 ## Imaging Data Reduction Examples
 ````{card}
 
-```{button-ref} user-guide/histogram_mode_detector
+```{button-ref} user-guide/ymir/histogram_mode_detector
 :class: stretched-link
 
 Ymir - Histogram Mode Detector
@@ -19,7 +19,7 @@ Ymir - Histogram Mode Detector
 
 ````{card}
 
-```{button-ref} user-guide/odin_simulation
+```{button-ref} user-guide/odin/odin_simulation
 :class: stretched-link
 
 ODIN McStas Simulation - Timepix Simulation with Choppers
