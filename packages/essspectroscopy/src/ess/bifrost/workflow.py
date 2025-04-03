@@ -20,10 +20,10 @@ from ess.spectroscopy.types import (
     SampleRun,
 )
 
+from .cutting import providers as cutting_providers
 from .detector import merge_triplets
 from .detector import providers as detector_providers
 from .io import mcstas, nexus
-from .slicing import providers as slicing_providers
 from .types import (
     FrameMonitor0,
     FrameMonitor1,
@@ -48,7 +48,7 @@ _SIMULATION_PROVIDERS = (
     *conversion_providers,
     *detector_providers,
     *mcstas.providers,
-    *slicing_providers,
+    *cutting_providers,
     *ki_providers,
     *kf_providers,
     *normalisation_providers,
