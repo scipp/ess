@@ -4,13 +4,13 @@
 ### Description
 Comparing the event times when unwrapped and propagated to the sample with the normalization monitor histogram
 it appeared that too much time had been removed from the recorded frame-times before unwrapping.
-![Screenshot from 2024-08-27 08-24-50.png](../_static/developer/Screenshot%20from%202024-08-27%2008-24-50.png)
+![Screenshot from 2024-08-27 08-24-50.png](../_static/developer/Screenshot_from_2024-08-27T08-24-50.png)
 
 The calculated time of flight from sample to detector had only been checked relative
 to an order of magnitude estimate, which was not accurate enough.
 A more careful estimate shows that neutrons hitting the central pixel of each central tube in the symmetric
 geometry case should take around 3.3 &mu;sec from sample to detector.
-![Screenshot from 2024-08-27 08-20-49.png](../_static/developer/Screenshot%20from%202024-08-27%2008-20-49.png)
+![Screenshot from 2024-08-27 08-20-49.png](../_static/developer/Screenshot_from_2024-08-27T08-20-49.png)
 
 ### Cause
 The sample-to-detector time-of-flight depends on the square root of the energy of the neutron,
@@ -24,13 +24,13 @@ This then produced the wrong scattering angle, the wrong wavevector magnitude, a
 
 ### Resolution
 Correcting the calculation also corrected the per detector pixel energies
-![Screenshot from 2024-08-27 10-54-08.png](../_static/developer/Screenshot%20from%202024-08-27%2010-54-08.png)
+![Screenshot from 2024-08-27 10-54-08.png](../_static/developer/Screenshot_from_2024-08-27T10-54-08.png)
 
 The calculated sample-to-detector time-of-flights are consistent with the limited hand calculated values
-![Screenshot from 2024-08-27 10-55-10.png](../_static/developer/Screenshot%20from%202024-08-27%2010-55-10.png)
+![Screenshot from 2024-08-27 10-55-10.png](../_static/developer/Screenshot_from_2024-08-27T10-55-10.png)
 
 And the unwrapped time-at-sample seems more consistent with the monitor histogram.
-![Screenshot from 2024-08-27 10-56-40.png](../_static/developer/Screenshot%20from%202024-08-27%2010-56-40.png)
+![Screenshot from 2024-08-27 10-56-40.png](../_static/developer/Screenshot_from_2024-08-27T10-56-40.png)
 
 
 ## Wrong pixel indexing?
@@ -43,7 +43,7 @@ This should mean that the first 900 pixel's events arrive at a later time-of-fli
 (barring wrap-around at the frame boundary).
 
 Instead, the opposite is shown
-![Screenshot from 2024-08-28 08-12-56.png](../_static/developer/Screenshot%20from%202024-08-28%2008-12-56.png)
+![Screenshot from 2024-08-28 08-12-56.png](../_static/developer/Screenshot_from_2024-08-28T08-12-56.png)
 
 ### Cause
 This could indicate a problem with the read geometry per pixel, but that seems unlikely given
