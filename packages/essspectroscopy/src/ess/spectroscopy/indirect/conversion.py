@@ -99,7 +99,7 @@ def rotate_to_sample_table_momentum_transfer(
     lab_momentum_transfer: sc.Variable,
     gravity: sc.Variable,
 ) -> sc.Variable:
-    """Rotate the momentum transfer vector into the sample-table coordinate system
+    r"""Rotate the momentum transfer vector into the sample-table coordinate system
 
     Here, the momentum transfer is defined as
 
