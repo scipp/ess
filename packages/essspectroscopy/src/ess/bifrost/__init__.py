@@ -2,7 +2,7 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 # ruff: noqa: E402, F401
 
-"""Components for BIFROST."""
+"""BIFROST data reduction."""
 
 import importlib.metadata
 

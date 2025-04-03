@@ -1,6 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 
+"""Domain types for BIFROST.
+
+This module supplements :mod:`ess.spectroscopy.types` with BIFROST-specific types.
+"""
+
 import sciline
 import scipp as sc
 
