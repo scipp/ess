@@ -1,5 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+
+"""Handling of final parameters / secondary spectrometer."""
+
 import numpy as np
 import scipp as sc
 from scippneutron.conversion.beamline import (

@@ -1,9 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 
-"""Utilities for the primary spectrometer of an
-indirect geometry time-of-flight spectrometer
-"""
+"""Handling of initial parameters / primary spectrometer."""
 
 from __future__ import annotations
 
