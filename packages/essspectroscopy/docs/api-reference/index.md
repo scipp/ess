@@ -38,10 +38,10 @@
    :template: module-template.rst
    :recursive:
 
+   cutting
    data
    detector
    io
-   slicing
    types
    workflow
 ```
