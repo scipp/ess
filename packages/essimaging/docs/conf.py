@@ -170,7 +170,9 @@ html_theme_options = {
         {"name": "Plopp", "url": "https://scipp.github.io/plopp"},
         {"name": "Sciline", "url": "https://scipp.github.io/sciline"},
         {"name": "Scipp", "url": "https://scipp.github.io"},
+        {"name": "ScippNeutron", "url": "https://scipp.github.io/scippneutron"},
         {"name": "ScippNexus", "url": "https://scipp.github.io/scippnexus"},
+        {"name": "Tof", "url": "https://scipp.github.io/tof"},
     ],
     "icon_links": [
         {

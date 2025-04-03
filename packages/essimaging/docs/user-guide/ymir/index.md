@@ -5,5 +5,5 @@
 maxdepth: 1
 ---
 
-histogram_mode_detectors
+histogram_mode_detector
 ```
