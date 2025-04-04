@@ -3,8 +3,7 @@ import scipp as sc
 
 from ..reflectometry.normalization import (
     reduce_from_events_to_lz,
-    reduce_from_events_to_q,
-    reduce_from_lz_to_q,
+    reduce_to_q,
 )
 from ..reflectometry.types import CoordTransformationGraph, QBins, WavelengthBins
 from .types import (
@@ -138,16 +137,14 @@ def compute_reflectivity_calibrate_on_q(
 ):
     """Reduces reference and sample to Q before applying
     the polarization correction and normalization."""
-    reference_supermirror = [
-        reduce_from_lz_to_q(i, qbins) for i in reference_supermirror
-    ]
+    reference_supermirror = [reduce_to_q(i, qbins) for i in reference_supermirror]
     reference_polarized_supermirror = [
-        reduce_from_lz_to_q(i, qbins) for i in reference_polarized_supermirror
+        reduce_to_q(i, qbins) for i in reference_polarized_supermirror
     ]
     I0, C = calibration_factors_from_reference_measurements(
         reference_supermirror, reference_polarized_supermirror
     )
-    sample = [reduce_from_events_to_q(i, qbins).hist() for i in sample]
+    sample = [reduce_to_q(i, qbins).hist() for i in sample]
     sample = linsolve(C, sample)
     return [i / I0 for i in sample]
 
@@ -179,11 +176,11 @@ def compute_reflectivity_calibrate_on_lz(
 
     masks = [sc.isnan(I0.data) | sc.isnan(s.data) for s in sample]
     sample = [
-        reduce_from_lz_to_q(s.assign_masks(isnan=m), qbins)
+        reduce_to_q(s.assign_masks(isnan=m), qbins)
         for s, m in zip(sample, masks, strict=True)
     ]
     return [
-        s / reduce_from_lz_to_q(I0.assign_masks(isnan=m), qbins).data
+        s / reduce_to_q(I0.assign_masks(isnan=m), qbins).data
         for s, m in zip(sample, masks, strict=True)
     ]
 
