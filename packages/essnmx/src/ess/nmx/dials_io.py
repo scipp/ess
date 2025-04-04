@@ -9,13 +9,12 @@ import numpy as np
 import pandas as pd
 import scipp as sc
 
-from .dials_reflection_io import load_reflection_file
-from .mtz_io import NMXMtzDataArray
+from .dials_reflection_io import load
 
 # User defined or configurable types
 DialsReflectionFilePath = NewType("DialsReflectionFilePath", pathlib.Path)
 """Path to the dials reflection file"""
-DialsReflections = NewType("DialsReflections", dict)
+DialsReflectionFile = NewType("DialsReflectionFile", dict)
 """The raw DIALS reflection file, read in as a dict"""
 DialsExperimentFilePath = NewType("DialsExperimentFilePath", pathlib.Path)
 """Path to the dials experiment file"""
@@ -56,17 +55,18 @@ NMXDialsDataFrame = NewType("NMXDialsDataFrame", pd.DataFrame)
 NMXDialsDataArray = NewType("NMXDialsDataArray", sc.DataArray)
 
 
-def read_dials_reflection_file(file_path: DialsReflectionFilePath) -> DialsReflections:
+def read_dials_reflection_file(
+    file_path: DialsReflectionFilePath,
+) -> DialsReflectionFile:
     """read dials reflection file"""
 
-    return DialsReflections(load_reflection_file(file_path.as_posix(), copy=True))
+    return DialsReflectionFile(load(file_path.as_posix(), copy=True))
 
 
 def read_dials_experiment_file(file_path: DialsExperimentFilePath) -> DialsExperiment:
     """Read Dials Experiment .expt file"""
-    with open(file_path) as fp:
-        json_data = json.load(fp)
-    return DialsExperiment(json_data)
+
+    return DialsExperiment(json.load(open(file_path)))
 
 
 def get_unit_cell(dials_expt: DialsExperiment) -> UnitCell:
@@ -87,7 +87,7 @@ def get_unit_cell(dials_expt: DialsExperiment) -> UnitCell:
     return UnitCell(a, b, c, al, be, ga)
 
 
-def get_space_group(dials_expt: DialsExperiment) -> gemmi.SpaceGroup:
+def get_unique_space_group(dials_expt: DialsExperiment) -> gemmi.SpaceGroup:
     """
     Get space group from Dials expt file.
     For cctbx/disambiguation reasons it is saved as the Hall symbol, but
@@ -105,7 +105,7 @@ def get_reciprocal_asu(spacegroup: gemmi.SpaceGroup) -> gemmi.ReciprocalAsu:
     return gemmi.ReciprocalAsu(spacegroup)
 
 
-def dials_refl_to_pandas(refls: DialsReflections) -> pd.DataFrame:
+def dials_refl_to_pandas(refls: dict) -> pd.DataFrame:
     """Converts the loaded DIALS reflection file to a pandas dataframe.
 
     It is equivalent to the following code:
@@ -124,19 +124,16 @@ def dials_refl_to_pandas(refls: DialsReflections) -> pd.DataFrame:
     """
     if refls.get('experiment_identifier'):  # this has no relevant information
         del refls['experiment_identifier']  # and it complicates loading as a df
-    df = pd.DataFrame(
+    return pd.DataFrame(
         {
             key: list(val) if isinstance(val, np.ndarray) and val.ndim > 1 else val
             for key, val in refls.items()
         }
     )
-    for col in df.select_dtypes('uint64'):
-        df[col] = df[col].astype('int64')
-    return df
 
 
 def process_dials_refl_list_to_dataframe(
-    refls: DialsReflections,
+    refls: dict,
 ) -> DialsDataFrame:
     """Select and derive columns from the original ``MtzDataFrame``.
 
@@ -173,8 +170,6 @@ def process_dials_refl_list_to_dataframe(
         Other columns are kept as they are.
 
     """
-    from .dials_io import dials_refl_to_pandas
-
     orig_df = dials_refl_to_pandas(refls)
     new_df = pd.DataFrame()
 
@@ -189,6 +184,9 @@ def process_dials_refl_list_to_dataframe(
     new_df[DEFAULT_INTENSITY_COLUMN_NAME] = orig_df['intensity.sum.value']
     new_df[DEFAULT_VARIANCE_COLUMN_NAME] = orig_df['intensity.sum.variance']
     new_df[DEFAULT_STDEV_COLUMN_NAME] = np.sqrt(orig_df['intensity.sum.variance'])
+
+    for column in [col for col in orig_df.columns if col not in new_df]:
+        new_df[column] = orig_df[column]
 
     return DialsDataFrame(new_df)
 
@@ -222,7 +220,7 @@ def process_dials_dataframe(
 
 def nmx_dials_dataframe_to_scipp_dataarray(
     nmx_mtz_df: NMXDialsDataFrame,
-) -> NMXMtzDataArray:
+) -> NMXDialsDataArray:
     """Converts the processed mtz dataframe to a scipp dataarray.
 
     The intensity, with column name :attr:`~DEFAULT_INTENSITY_COLUMN_NAME`
@@ -296,24 +294,4 @@ def nmx_dials_dataframe_to_scipp_dataarray(
     nmx_mtz_da.variances = nmx_mtz_ds[DEFAULT_VARIANCE_COLUMN_NAME].values
 
     # Return DataArray without negative intensities
-    return NMXMtzDataArray(nmx_mtz_da[nmx_mtz_da.data > 0])
-
-
-providers = (
-    read_dials_reflection_file,
-    read_dials_experiment_file,
-    process_dials_refl_list_to_dataframe,
-    process_dials_dataframe,
-    get_space_group,
-    get_reciprocal_asu,
-    process_dials_dataframe,
-    nmx_dials_dataframe_to_scipp_dataarray,
-)
-"""The providers related to the Dials IO."""
-
-default_parameters = {
-    WavelengthColumnName: DEFAULT_WAVELENGTH_COLUMN_NAME,
-    IntensityColumnName: DEFAULT_INTENSITY_COLUMN_NAME,
-    StdDevColumnName: DEFAULT_STDEV_COLUMN_NAME,
-}
-"""The parameters related to the Dials IO."""
+    return NMXDialsDataArray(nmx_mtz_da[nmx_mtz_da.data > 0])
