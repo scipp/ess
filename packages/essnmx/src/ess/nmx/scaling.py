@@ -455,7 +455,7 @@ providers = (
 """Providers for scaling data."""
 
 default_parameters = {
-    WavelengthBins: sc.linspace("wavelength", 2.6, 3.6, 250, unit="angstrom"),
+    WavelengthBins: sc.linspace("wavelength", 1.8, 3.5, 250, unit="angstrom"),
     ScaledIntensityLeftTailThreshold: DEFAULT_LEFT_TAIL_THRESHOLD,
     ScaledIntensityRightTailThreshold: DEFAULT_RIGHT_TAIL_THRESHOLD,
     WavelengthFittingPolynomialDegree: WavelengthFittingPolynomialDegree(7),
