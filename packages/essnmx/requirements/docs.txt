@@ -14,7 +14,7 @@ appnope==0.1.4
     # via ipykernel
 asttokens==3.0.0
     # via stack-data
-attrs==25.1.0
+attrs==25.3.0
     # via
     #   jsonschema
     #   referencing
@@ -32,7 +32,7 @@ comm==0.2.2
     # via
     #   ipykernel
     #   ipywidgets
-debugpy==1.8.12
+debugpy==1.8.13
     # via ipykernel
 decorator==5.2.1
     # via ipython
@@ -54,7 +54,7 @@ ipydatawidgets==4.3.5
     # via pythreejs
 ipykernel==6.29.5
     # via -r docs.in
-ipython==8.33.0
+ipython==8.34.0
     # via
     #   -r docs.in
     #   ipykernel
@@ -65,7 +65,7 @@ ipywidgets==8.1.5
     #   pythreejs
 jedi==0.19.2
     # via ipython
-jinja2==3.1.5
+jinja2==3.1.6
     # via
     #   myst-parser
     #   nbconvert
@@ -106,7 +106,7 @@ mdit-py-plugins==0.4.2
     # via myst-parser
 mdurl==0.1.2
     # via markdown-it-py
-mistune==3.1.2
+mistune==3.1.3
     # via nbconvert
 myst-parser==4.0.1
     # via -r docs.in
@@ -119,7 +119,7 @@ nbformat==5.10.4
     #   nbclient
     #   nbconvert
     #   nbsphinx
-nbsphinx==0.9.6
+nbsphinx==0.9.7
     # via -r docs.in
 nest-asyncio==1.6.0
     # via ipykernel
@@ -148,7 +148,7 @@ pygments==2.19.1
     #   sphinx
 pythreejs==2.4.2
     # via -r docs.in
-pyzmq==26.2.1
+pyzmq==26.4.0
     # via
     #   ipykernel
     #   jupyter-client
@@ -156,7 +156,7 @@ referencing==0.36.2
     # via
     #   jsonschema
     #   jsonschema-specifications
-rpds-py==0.23.1
+rpds-py==0.24.0
     # via
     #   jsonschema
     #   referencing
@@ -226,3 +226,6 @@ webencodings==0.5.1
     #   tinycss2
 widgetsnbextension==4.0.13
     # via ipywidgets
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools
