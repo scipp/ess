@@ -59,18 +59,37 @@ def _exclude_zero_events(data: sc.Variable) -> sc.Variable:
 def _wrap_raw_event_data(data: sc.Variable) -> RawEventProbability:
     data = data.rename_dims({'dim_0': 'event'})
     data = _exclude_zero_events(data)
-    event_da = sc.DataArray(
-        coords={
-            'id': sc.array(
-                dims=['event'],
-                values=data['dim_1', 4].values,
-                dtype='int64',
-                unit=None,
+    try:
+        event_da = sc.DataArray(
+            coords={
+                'id': sc.array(
+                    dims=['event'],
+                    values=data['dim_1', 4].values,
+                    dtype='int64',
+                    unit=None,
+                ),
+                't': sc.array(dims=['event'], values=data['dim_1', 5].values, unit='s'),
+            },
+            data=sc.array(
+                dims=['event'], values=data['dim_1', 0].values, unit='counts'
             ),
-            't': sc.array(dims=['event'], values=data['dim_1', 5].values, unit='s'),
-        },
-        data=sc.array(dims=['event'], values=data['dim_1', 0].values, unit='counts'),
-    )
+        )
+    except IndexError:
+        event_da = sc.DataArray(
+            coords={
+                'id': sc.array(
+                    dims=['event'],
+                    values=data['dim_1', 1].values,
+                    dtype='int64',
+                    unit=None,
+                ),
+                't': sc.array(dims=['event'], values=data['dim_1', 2].values, unit='s'),
+            },
+            data=sc.array(
+                dims=['event'], values=data['dim_1', 0].values, unit='counts'
+            ),
+        )
+
     return RawEventProbability(event_da)
 
 
