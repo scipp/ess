@@ -43,6 +43,7 @@ dependencies = [
   "gemmi",
   "defusedxml",
   "bitshuffle",
+  "msgpack",
 ]
 
 dynamic = ["version"]
