@@ -13,3 +13,5 @@ pooch
 pandas
 gemmi
 defusedxml
+bitshuffle
+msgpack
