@@ -8,6 +8,8 @@ pooch
 pandas
 gemmi
 defusedxml
+bitshuffle
+msgpack
 pytest
 scipp
 --index-url=https://pypi.anaconda.org/scipp-nightly-wheels/simple/
