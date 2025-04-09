@@ -57,6 +57,7 @@ from ess.reduce import workflow as reduce_workflow
 sample = sc.vector([0.0, 0.0, 0.0], unit='mm')
 source = sc.vector([-3.478, 0.0, -76550], unit='mm')
 charge = sc.scalar(1.0, unit='µAh')
+dream_source_position = sc.vector(value=[0, 0, -76.55], unit="m")
 
 params = {
     Filename[SampleRun]: dream.data.simulated_diamond_sample(small=True),
@@ -91,7 +92,6 @@ params = {
         ]
     ),
 }
-
 
 @pytest.fixture(params=["mantle", "endcap_backward", "endcap_forward"])
 def params_for_det(request):
@@ -132,6 +132,7 @@ def simulation_dream_choppers():
         choppers=dream.beamline.choppers(
             dream.beamline.InstrumentConfiguration.high_flux
         ),
+        source_position=dream_source_position,
         neutrons=500_000,
     )
 
