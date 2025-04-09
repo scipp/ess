@@ -20,8 +20,10 @@ from .types import (
 )
 
 
-def reduce_from_events_to_q(da, qbins):
-    return da.bins.concat().bin(Q=qbins)
+def reduce_to_q(da, qbins):
+    if da.bins:
+        return da.bins.concat().bin(Q=qbins)
+    return da.hist(Q=qbins)
 
 
 def reduce_from_events_to_lz(da, wbins):
@@ -29,10 +31,6 @@ def reduce_from_events_to_lz(da, wbins):
     if 'position' in da.coords:
         out.coords['position'] = da.coords['position'].mean('stripe')
     return out
-
-
-def reduce_from_lz_to_q(da, qbins):
-    return da.flatten(to='Q').hist(Q=qbins)
 
 
 def reduce_reference(
@@ -71,9 +69,9 @@ def reduce_sample_over_q(
 
     Returns reflectivity as a function of :math:`Q`.
     """
-    s = reduce_from_events_to_q(sample, qbins)
+    s = reduce_to_q(sample, qbins)
     if len(reference.dims) > 1:
-        h = sc.values(reduce_from_lz_to_q(reference, s.coords['Q']))
+        h = sc.values(reduce_to_q(reference, s.coords['Q']))
     elif reference.bins:
         h = sc.values(reference.hist())
     else:
