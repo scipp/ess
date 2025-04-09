@@ -1,6 +1,7 @@
 name: Nightly test at main branch
 
 on:
+  pull_request:
   workflow_dispatch:
   schedule:
     - cron: '30 1 * * 1-5'
