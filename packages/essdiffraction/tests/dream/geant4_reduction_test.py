@@ -2,6 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 import io
+from pathlib import Path
 
 import pytest
 import sciline
@@ -256,6 +257,16 @@ def test_pipeline_can_save_data(workflow):
     _assert_contains_author_info(content)
     _assert_contains_beamline_info(content)
     _assert_contains_tof_data(content)
+
+
+def test_pipeline_save_data_to_disk(workflow, output_folder: Path):
+    workflow = powder.with_pixel_mask_filenames(workflow, [])
+    result = workflow.compute(ReducedTofCIF)
+    result.comment = """This file was generated with the DREAM data reduction user guide
+    in the documentation of ESSdiffraction.
+    See https://scipp.github.io/essdiffraction/
+    """
+    result.save(output_folder / "dream_reduced.cif")
 
 
 def _assert_contains_source_info(cif_content: str) -> None:
