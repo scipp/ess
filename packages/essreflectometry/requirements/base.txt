@@ -21,7 +21,7 @@ cyclebane==24.10.0
     # via sciline
 cycler==0.12.1
     # via matplotlib
-dask==2025.2.0
+dask==2025.3.0
     # via
     #   -r base.in
     #   esspolarization
@@ -31,17 +31,19 @@ dnspython==2.7.0
     # via email-validator
 email-validator==2.2.0
     # via scippneutron
-esspolarization==24.7.0
+esspolarization==25.3.0
     # via -r base.in
 essreduce==25.3.1
-    # via -r base.in
+    # via
+    #   -r base.in
+    #   esspolarization
 exceptiongroup==1.2.2
     # via ipython
 executing==2.2.0
     # via stack-data
-fonttools==4.56.0
+fonttools==4.57.0
     # via matplotlib
-fsspec==2025.3.0
+fsspec==2025.3.2
     # via dask
 graphviz==0.20.3
     # via
@@ -57,7 +59,7 @@ importlib-metadata==8.6.1
     # via dask
 ipydatawidgets==4.3.5
     # via pythreejs
-ipython==8.34.0
+ipython==8.35.0
     # via ipywidgets
 ipywidgets==8.1.5
     # via
@@ -125,13 +127,13 @@ ptyprocess==0.7.0
     # via pexpect
 pure-eval==0.2.3
     # via stack-data
-pydantic==2.10.6
+pydantic==2.11.3
     # via scippneutron
-pydantic-core==2.27.2
+pydantic-core==2.33.1
     # via pydantic
 pygments==2.19.1
     # via ipython
-pyparsing==3.2.1
+pyparsing==3.2.3
     # via matplotlib
 python-dateutil==2.9.0.post0
     # via
@@ -142,18 +144,18 @@ python-dateutil==2.9.0.post0
     #   scippnexus
 pythreejs==2.4.2
     # via -r base.in
-pytz==2025.1
+pytz==2025.2
     # via pandas
 pyyaml==6.0.2
     # via
     #   dask
     #   orsopy
-sciline==24.10.0
+sciline==25.4.0
     # via
     #   -r base.in
     #   esspolarization
     #   essreduce
-scipp==25.2.0
+scipp==25.4.0
     # via
     #   -r base.in
     #   esspolarization
@@ -164,7 +166,7 @@ scippneutron==25.2.1
     # via
     #   -r base.in
     #   essreduce
-scippnexus==24.11.1
+scippnexus==25.4.0
     # via
     #   -r base.in
     #   essreduce
@@ -192,12 +194,15 @@ traitlets==5.14.3
     #   traittypes
 traittypes==0.2.1
     # via ipydatawidgets
-typing-extensions==4.12.2
+typing-extensions==4.13.1
     # via
     #   ipython
     #   pydantic
     #   pydantic-core
-tzdata==2025.1
+    #   typing-inspection
+typing-inspection==0.4.0
+    # via pydantic
+tzdata==2025.2
     # via pandas
 wcwidth==0.2.13
     # via prompt-toolkit
