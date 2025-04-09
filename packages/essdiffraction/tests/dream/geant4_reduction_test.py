@@ -93,6 +93,7 @@ params = {
     ),
 }
 
+
 @pytest.fixture(params=["mantle", "endcap_backward", "endcap_forward"])
 def params_for_det(request):
     # Not available in simulated data
