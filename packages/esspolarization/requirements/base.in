@@ -5,7 +5,7 @@
 dask
 graphviz
 numpy<2.0
-sciline>=24.06.0
+sciline>=25.04.1
 scipp>=23.8.0
 scipy
 essreduce>=24.07.1

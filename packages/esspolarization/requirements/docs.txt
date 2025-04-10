@@ -60,7 +60,7 @@ ipydatawidgets==4.3.5
     # via pythreejs
 ipykernel==6.29.5
     # via -r docs.in
-ipython==8.34.0
+ipython==8.35.0
     # via
     #   -r docs.in
     #   ipykernel
@@ -160,9 +160,9 @@ pygments==2.19.1
     #   sphinx
 pythreejs==2.4.2
     # via esssans
-pytz==2025.1
+pytz==2025.2
     # via pandas
-pyzmq==26.3.0
+pyzmq==26.4.0
     # via
     #   ipykernel
     #   jupyter-client
@@ -172,7 +172,7 @@ referencing==0.36.2
     #   jsonschema-specifications
 requests==2.32.3
     # via sphinx
-rpds-py==0.23.1
+rpds-py==0.24.0
     # via
     #   jsonschema
     #   referencing
@@ -239,7 +239,7 @@ traitlets==5.14.3
     #   traittypes
 traittypes==0.2.1
     # via ipydatawidgets
-tzdata==2025.1
+tzdata==2025.2
     # via pandas
 urllib3==2.3.0
     # via requests
