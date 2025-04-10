@@ -1,6 +1,7 @@
 import glob
 import os
 import uuid
+from collections.abc import Callable
 
 import h5py
 import ipywidgets as widgets
@@ -28,7 +29,7 @@ from ess.reflectometry.workflow import with_filenames
 
 
 class NexusExplorer:
-    def __init__(self, runs_table, run_to_filepath):
+    def __init__(self, runs_table: DataGrid, run_to_filepath: Callable[[str], str]):
         self.runs_table = runs_table
         self.run_to_filepath = run_to_filepath
 
