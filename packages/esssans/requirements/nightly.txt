@@ -28,9 +28,9 @@ cyclebane==24.10.0
     # via sciline
 cycler==0.12.1
     # via matplotlib
-dask==2025.2.0
+dask==2025.3.0
     # via -r nightly.in
-decorator==5.1.1
+decorator==5.2.1
     # via ipython
 dnspython==2.7.0
     # via email-validator
@@ -44,9 +44,9 @@ exceptiongroup==1.2.2
     #   pytest
 executing==2.2.0
     # via stack-data
-fonttools==4.56.0
+fonttools==4.57.0
     # via matplotlib
-fsspec==2025.2.0
+fsspec==2025.3.2
     # via dask
 graphviz==0.20.3
     # via -r nightly.in
@@ -60,11 +60,11 @@ idna==3.10
     #   requests
 importlib-metadata==8.6.1
     # via dask
-iniconfig==2.0.0
+iniconfig==2.1.0
     # via pytest
 ipydatawidgets==4.3.5
     # via pythreejs
-ipython==8.32.0
+ipython==8.35.0
     # via ipywidgets
 ipywidgets==8.1.5
     # via
@@ -82,7 +82,7 @@ lazy-loader==0.4
     #   scippneutron
 locket==1.0.0
     # via partd
-matplotlib==3.10.0
+matplotlib==3.10.1
     # via
     #   mpltoolbox
     #   plopp
@@ -92,7 +92,7 @@ mpltoolbox==24.5.1
     # via scippneutron
 networkx==3.4.2
     # via cyclebane
-numpy==2.2.3
+numpy==2.2.4
     # via
     #   -r nightly.in
     #   contourpy
@@ -122,7 +122,7 @@ pexpect==4.9.0
     # via ipython
 pillow==11.1.0
     # via matplotlib
-platformdirs==4.3.6
+platformdirs==4.3.7
     # via pooch
 plopp @ git+https://github.com/scipp/plopp@main
     # via
@@ -138,15 +138,15 @@ ptyprocess==0.7.0
     # via pexpect
 pure-eval==0.2.3
     # via stack-data
-pydantic==2.11.0a2
+pydantic==2.11.3
     # via scippneutron
-pydantic-core==2.29.0
+pydantic-core==2.33.1
     # via pydantic
 pygments==2.19.1
     # via ipython
-pyparsing==3.2.1
+pyparsing==3.2.3
     # via matplotlib
-pytest==8.3.4
+pytest==8.3.5
     # via -r nightly.in
 python-dateutil==2.9.0.post0
     # via
@@ -156,7 +156,7 @@ python-dateutil==2.9.0.post0
     #   scippnexus
 pythreejs==2.4.2
     # via -r nightly.in
-pytz==2025.1
+pytz==2025.2
     # via pandas
 pyyaml==6.0.2
     # via dask
@@ -206,12 +206,16 @@ traitlets==5.14.3
     #   traittypes
 traittypes==0.2.1
     # via ipydatawidgets
-typing-extensions==4.12.2
+typing-extensions==4.13.1
     # via
     #   ipython
     #   pydantic
     #   pydantic-core
-tzdata==2025.1
+    #   sciline
+    #   typing-inspection
+typing-inspection==0.4.0
+    # via pydantic
+tzdata==2025.2
     # via pandas
 urllib3==2.3.0
     # via requests
