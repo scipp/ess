@@ -48,7 +48,7 @@ DarkCurrentImageStacks = NewType("DarkCurrentImageStacks", sc.DataArray)
 IMAGE_KEY_COORD_NAME = "image_key"
 """Image key coordinate name."""
 TIME_COORD_NAME = "time"
-"""Time coordinate name."""
+"""Time coordinate name. **Note that it is not time of flight.**"""
 ROTATION_ANGLE_COORD_NAME = "rotation_angle"
 """Rotation angle coordinate name."""
 DIM1_COORD_NAME = "dim_1"
