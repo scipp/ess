@@ -650,6 +650,9 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
 
     def display_results(self):
         df = self.get_selected_rows()
+        if len(df) == 0:
+            self.log('There was nothing to display')
+            return
         try:
             results = [
                 next(v for (m, _), v in self.results.items() if m == key)
@@ -770,6 +773,7 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
             for table in (self.reduction_table, self.custom_reduction_table)
             for s in table.selections
         ]
+        # Select everything if nothing is selected
         if len(chunks) == 0:
             chunks = [self.reduction_table.data, self.custom_reduction_table.data]
         return pd.concat(chunks)
