@@ -221,6 +221,7 @@ class ReflectometryBatchReductionGUI:
         raise NotImplementedError()
 
     def display_results(self):
+        '''Displays the results that are currently selected'''
         raise NotImplementedError()
 
     def run_workflow(self):
