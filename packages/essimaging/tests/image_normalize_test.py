@@ -188,32 +188,43 @@ def test_apply_threshold_to_sample_images() -> None:
         },
     )
     threshold = sc.scalar(1.0, unit="counts")
+    mask = sc.array(
+        dims=["time", "dim_1", "dim_2"],
+        values=[[[False, False], [False, True]], [[False, False], [False, True]]],
+    )
     thresholded_sample_images = apply_threshold_to_sample_images(
         CleansedSampleImages(sample_images_with_negative_values),
         SamplePixelThreshold(threshold),
     )
     with pytest.raises(AssertionError, match="Arrays are not equal"):
         assert_identical(sample_images_with_negative_values.data.min(), threshold)
-    assert_identical(thresholded_sample_images.data.min(), threshold)
+    assert_identical(
+        thresholded_sample_images,
+        sample_images_with_negative_values.assign_masks(counts=mask),
+    )
 
 
 def test_apply_threshold_to_background_image() -> None:
-    background_image_with_negative_values = sc.DataArray(
+    background_image_with_zeros = sc.DataArray(
         data=sc.array(
             dims=["dim_1", "dim_2"],
-            values=[[3.0, 3.0], [3.0, -1.0]],
+            values=[[3.0, 3.0], [3.0, 0.0]],
             unit="counts",
         ),
         coords={},
     )
     threshold = sc.scalar(1.0, unit="counts")
+    mask = sc.array(dims=["dim_1", "dim_2"], values=[[False, False], [False, True]])
     thresholded_background_image = apply_threshold_to_background_image(
-        CleansedOpenBeamImage(background_image_with_negative_values),
+        CleansedOpenBeamImage(background_image_with_zeros),
         BackgroundPixelThreshold(threshold),
     )
     with pytest.raises(AssertionError, match="Arrays are not equal"):
-        assert_identical(background_image_with_negative_values.data.min(), threshold)
-    assert_identical(thresholded_background_image.data.min(), threshold)
+        assert_identical(background_image_with_zeros.data.min(), threshold)
+    assert_identical(
+        thresholded_background_image,
+        background_image_with_zeros.assign_masks(counts=mask),
+    )
 
 
 def test_normalize_negative_scale_factor_raises(
@@ -242,13 +253,28 @@ def test_normalize_workflow(
         data=sc.array(
             dims=["time", "dim_1", "dim_2"],
             values=[
-                [[1 / 3 * (5 / 3), 1 / 3 * (5 / 3)], [1 / 3 * (5 / 3), 0.0]],
-                [[3 / 3 * (5 / 3), 3 / 3 * (5 / 3)], [3 / 3 * (5 / 3), 0.0]],
+                [
+                    [(2 - 1) / ((4 - 1) / 1.6), (2 - 1) / ((4 - 1) / 1.6)],
+                    [(2 - 1) / ((4 - 1) / 1.6), (0 - 1) / ((0 - 1) / 1.6)],
+                ],
+                [
+                    [(4 - 1) / ((4 - 1) / 1.6), (4 - 1) / ((4 - 1) / 1.6)],
+                    [(4 - 1) / ((4 - 1) / 1.6), (0 - 1) / ((0 - 1) / 1.6)],
+                ],
             ],
             unit="counts",
         ),
         coords={
             "time": sc.array(dims=["time"], values=[1, 2], unit="s"),
+        },
+        masks={
+            "counts": sc.array(
+                dims=["time", "dim_1", "dim_2"],
+                values=[
+                    [[False, False], [False, True]],
+                    [[False, False], [False, True]],
+                ],
+            )
         },
     )
 

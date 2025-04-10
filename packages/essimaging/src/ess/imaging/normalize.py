@@ -181,7 +181,7 @@ def calculate_scale_factor(
 def apply_threshold_to_sample_images(
     samples: CleansedSampleImages, sample_threshold: SamplePixelThreshold
 ) -> SampleImageStacks:
-    """Apply the threshold to the sample image stack.
+    """Apply a mask based on the threshold to the sample image stack.
 
     Parameters
     ----------
@@ -190,21 +190,18 @@ def apply_threshold_to_sample_images(
 
     sample_threshold:
         Threshold for the sample pixel values.
-        Any pixel values less than ``sample_threshold``
-        are replaced with ``sample_threshold``.
+        Any pixel values less than ``sample_threshold`` will be masked.
 
     """
-    samples = CleansedSampleImages(samples.copy(deep=False))
-    samples.data = sc.where(
-        samples.data < sample_threshold, sample_threshold, samples.data
+    return SampleImageStacks(
+        samples.assign_masks(counts=samples.data < sample_threshold)
     )
-    return SampleImageStacks(samples)
 
 
 def apply_threshold_to_background_image(
     background: CleansedOpenBeamImage, background_threshold: BackgroundPixelThreshold
 ) -> BackgroundImage:
-    """Apply the threshold to the background image.
+    """Apply a mask based on the threshold to the background image.
 
     Parameters
     ----------
@@ -213,15 +210,12 @@ def apply_threshold_to_background_image(
 
     background_threshold:
         Threshold for the background pixel values.
-        Any pixel values less than ``background_threshold``
-        are replaced with ``background_threshold``.
+        Any pixel values less than ``background_threshold`` will be masked.
 
     """
-    background = CleansedOpenBeamImage(background.copy(deep=False))
-    background.data = sc.where(
-        background.data < background_threshold, background_threshold, background.data
+    return BackgroundImage(
+        background.assign_masks(counts=background.data < background_threshold)
     )
-    return BackgroundImage(background)
 
 
 def normalize_sample_images(
