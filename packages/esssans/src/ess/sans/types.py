@@ -178,9 +178,7 @@ class TofData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Data with a time-of-flight coordinate"""
 
 
-class TofMonitor(
-    sciline.Scope[RunType, MonitorType, sc.DataGroup], sc.DataGroup
-):
+class TofMonitor(sciline.Scope[RunType, MonitorType, sc.DataGroup], sc.DataGroup):
     """Monitor data with a time-of-flight coordinate"""
 
 
@@ -219,15 +217,11 @@ class WavelengthScaledQxy(
     """Result of applying wavelength scaling/masking to :py:class:`CleanSummedQxy`"""
 
 
-class CleanQ(
-    sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
-):
+class CleanQ(sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray):
     """Result of converting :py:class:`CleanWavelengthMasked` to Q"""
 
 
-class CleanQxy(
-    sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
-):
+class CleanQxy(sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray):
     """Result of converting :py:class:`CleanWavelengthMasked` to Qx and Qy"""
 
 
@@ -244,9 +238,7 @@ class CleanSummedQxy(
     Qy bins"""
 
 
-class ReducedQ(
-    sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
-):
+class ReducedQ(sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray):
     """Result of reducing :py:class:`CleanSummedQ` over the wavelength dimensions"""
 
 
@@ -277,9 +269,7 @@ class WavelengthMonitor(
     """Monitor data converted to wavelength"""
 
 
-class CleanMonitor(
-    sciline.Scope[RunType, MonitorType, sc.DataArray], sc.DataArray
-):
+class CleanMonitor(sciline.Scope[RunType, MonitorType, sc.DataArray], sc.DataArray):
     """Monitor data cleaned of background counts"""
 
 
