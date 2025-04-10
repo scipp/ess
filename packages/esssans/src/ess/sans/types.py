@@ -179,7 +179,7 @@ class TofData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
 
 
 class TofMonitor(
-    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataGroup], sc.DataGroup
+    sciline.Scope[RunType, MonitorType, sc.DataGroup], sc.DataGroup
 ):
     """Monitor data with a time-of-flight coordinate"""
 
@@ -196,7 +196,7 @@ class MonitorTerm(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
 
 
 class CleanWavelength(
-    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
+    sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
 ):
     """
     Prerequisite for IofQ numerator or denominator.
@@ -208,50 +208,50 @@ class CleanWavelength(
 
 
 class WavelengthScaledQ(
-    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
+    sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
 ):
     """Result of applying wavelength scaling/masking to :py:class:`CleanSummedQ`"""
 
 
 class WavelengthScaledQxy(
-    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
+    sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
 ):
     """Result of applying wavelength scaling/masking to :py:class:`CleanSummedQxy`"""
 
 
 class CleanQ(
-    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
+    sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
 ):
     """Result of converting :py:class:`CleanWavelengthMasked` to Q"""
 
 
 class CleanQxy(
-    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
+    sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
 ):
     """Result of converting :py:class:`CleanWavelengthMasked` to Qx and Qy"""
 
 
 class CleanSummedQ(
-    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
+    sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
 ):
     """Result of histogramming/binning :py:class:`CleanQ` over all pixels into Q bins"""
 
 
 class CleanSummedQxy(
-    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
+    sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
 ):
     """Result of histogramming/binning :py:class:`CleanQxy` over all pixels into Qx and
     Qy bins"""
 
 
 class ReducedQ(
-    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
+    sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
 ):
     """Result of reducing :py:class:`CleanSummedQ` over the wavelength dimensions"""
 
 
 class ReducedQxy(
-    sciline.ScopeTwoParams[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
+    sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
 ):
     """Result of reducing :py:class:`CleanSummedQxy` over the wavelength dimensions"""
 
@@ -272,13 +272,13 @@ BackgroundSubtractedIofQxy = NewType('BackgroundSubtractedIofQxy', sc.DataArray)
 
 
 class WavelengthMonitor(
-    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
+    sciline.Scope[RunType, MonitorType, sc.DataArray], sc.DataArray
 ):
     """Monitor data converted to wavelength"""
 
 
 class CleanMonitor(
-    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
+    sciline.Scope[RunType, MonitorType, sc.DataArray], sc.DataArray
 ):
     """Monitor data cleaned of background counts"""
 
