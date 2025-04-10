@@ -16,7 +16,7 @@ NoAnalyzer = Up
 
 
 class ReducedSampleDataBySpinChannel(
-    sl.ScopeTwoParams[PolarizerSpin, AnalyzerSpin, sc.DataArray], sc.DataArray
+    sl.Scope[PolarizerSpin, AnalyzerSpin, sc.DataArray], sc.DataArray
 ):
     """Sample data for a given spin channel."""
 
