@@ -164,7 +164,7 @@ class MonitorFilename(sciline.Scope[RunType, Path], Path):
 
 
 class WavelengthMonitor(
-    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
+    sciline.Scope[RunType, MonitorType, sc.DataArray], sc.DataArray
 ):
     """Monitor histogram in wavelength."""
 
@@ -216,15 +216,11 @@ class DetectorLtotal(sciline.Scope[RunType, sc.Variable], sc.Variable):
     """Total path length of neutrons from source to detector (L1 + L2)."""
 
 
-class MonitorLtotal(
-    sciline.ScopeTwoParams[RunType, MonitorType, sc.Variable], sc.Variable
-):
+class MonitorLtotal(sciline.Scope[RunType, MonitorType, sc.Variable], sc.Variable):
     """Total path length of neutrons from source to monitor."""
 
 
-class TofMonitorData(
-    sciline.ScopeTwoParams[RunType, MonitorType, sc.DataArray], sc.DataArray
-):
+class TofMonitorData(sciline.Scope[RunType, MonitorType, sc.DataArray], sc.DataArray):
     """Monitor data with time-of-flight coordinate."""
 
 
