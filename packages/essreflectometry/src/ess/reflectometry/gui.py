@@ -196,36 +196,27 @@ class NexusExplorer:
 
 
 class ReflectometryBatchReductionGUI:
-    """GUI for batch reduction of reflectometry data.
-
-    Known limitations:
-    1. Remove plot button behavior is inconsistent:
-       - Removes the target plot with its controls
-       - Previous plots disappear but their control buttons remain
-       - Previous plots maintain interactivity despite attempted conversion to static
-    2. Dataset toggle does not affect error bars as they are separate matplotlib artists
-    3. Remove row button removes last row instead of selected row
-    4. LogY toggle doesn't work due to workarounds for plopp's axis behavior:
-       - Plopp's autoscale was flipping the y-axis orientation
-       - We override multiple plopp/matplotlib methods to maintain correct orientation
-       - This prevents the LogY toggle from working as it would interfere with our fixes
-
-    These limitations are documented with FIXME comments in the relevant code sections.
-    """
+    """GUI for batch reduction of reflectometry data."""
 
     def read_meta_data(self, path):
+        'Reads metadata from the hdf5 file at ``path``'
         raise NotImplementedError()
 
     def sync_runs_table(self, db):
+        'Returns the updated runs table based after metadata has been updated'
         raise NotImplementedError()
 
     def sync_reduction_table(self, db):
+        'Returns the updated reduction table based after runs table has been updated'
         raise NotImplementedError()
 
     def sync_reference_table(self, db):
+        'Returns the updated reference table based after runs table has been updated'
         raise NotImplementedError()
 
     def sync_custom_reduction_table(self):
+        '''Returns the updated custom reduction table after
+        the custom reduction table has been updated'''
         raise NotImplementedError()
 
     def display_results(self):
@@ -235,12 +226,8 @@ class ReflectometryBatchReductionGUI:
         raise NotImplementedError()
 
     def get_row_key(self, row):
-        reference_metadata = (
-            tuple(self.reference_table.data.iloc[0])
-            if len(self.reference_table.data) > 0
-            else (None,)
-        )
-        return (tuple(row), tuple(reference_metadata))
+        'Key determines if a result needs to be recomputed or not'
+        raise NotImplementedError()
 
     def sync_table_colors(self, table):
         template = 'row == {i} ? {reduced_color} : '
@@ -765,6 +752,14 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
 
     def get_filepath_from_run(self, run):
         return os.path.join(self.path, f'amor2024n{run:0>6}.hdf')
+
+    def get_row_key(self, row):
+        reference_metadata = (
+            tuple(self.reference_table.data.iloc[0])
+            if len(self.reference_table.data) > 0
+            else (None,)
+        )
+        return (tuple(row), tuple(reference_metadata))
 
     def get_selected_rows(self):
         chunks = [
