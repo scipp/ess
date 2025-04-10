@@ -28,7 +28,7 @@ essreduce @ git+https://github.com/scipp/essreduce@main
     # via -r nightly.in
 exceptiongroup==1.2.2
     # via pytest
-fonttools==4.56.0
+fonttools==4.57.0
     # via matplotlib
 graphviz==0.20.3
     # via -r nightly.in
@@ -89,9 +89,9 @@ pluggy==1.5.0
     # via pytest
 pooch==1.8.2
     # via -r nightly.in
-pydantic==2.11.1
+pydantic==2.11.3
     # via scippneutron
-pydantic-core==2.33.0
+pydantic-core==2.33.1
     # via pydantic
 pyparsing==3.2.3
     # via matplotlib
@@ -134,14 +134,15 @@ scipy==1.15.2
     #   tof
 six==1.17.0
     # via python-dateutil
-tof==25.2.0
+tof==25.4.0
     # via -r nightly.in
 tomli==2.2.1
     # via pytest
-typing-extensions==4.13.0
+typing-extensions==4.13.1
     # via
     #   pydantic
     #   pydantic-core
+    #   sciline
     #   typing-inspection
 typing-inspection==0.4.0
     # via pydantic

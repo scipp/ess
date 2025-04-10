@@ -54,7 +54,7 @@ imagesize==1.4.1
     # via sphinx
 ipykernel==6.29.5
     # via -r docs.in
-ipython==8.34.0
+ipython==8.35.0
     # via
     #   -r docs.in
     #   ipykernel
@@ -147,7 +147,7 @@ pygments==2.19.1
     #   sphinx
 pyyaml==6.0.2
     # via myst-parser
-pyzmq==26.3.0
+pyzmq==26.4.0
     # via
     #   ipykernel
     #   jupyter-client
