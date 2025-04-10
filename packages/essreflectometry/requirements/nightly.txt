@@ -40,7 +40,7 @@ dnspython==2.7.0
     # via email-validator
 email-validator==2.2.0
     # via scippneutron
-essreduce==25.3.1
+essreduce==25.4.1
     # via -r nightly.in
 exceptiongroup==1.2.2
     # via
@@ -48,9 +48,9 @@ exceptiongroup==1.2.2
     #   pytest
 executing==2.2.0
     # via stack-data
-fonttools==4.56.0
+fonttools==4.57.0
     # via matplotlib
-fsspec==2025.3.0
+fsspec==2025.3.2
     # via dask
 gast==0.4.0
     # via py2vega
@@ -72,7 +72,7 @@ ipydatagrid==1.4.0
     # via -r nightly.in
 ipydatawidgets==4.3.5
     # via pythreejs
-ipython==8.34.0
+ipython==8.35.0
     # via ipywidgets
 ipytree==0.2.2
     # via -r nightly.in
@@ -161,9 +161,9 @@ pure-eval==0.2.3
     # via stack-data
 py2vega==0.6.1
     # via ipydatagrid
-pydantic==2.11.0
+pydantic==2.11.3
     # via scippneutron
-pydantic-core==2.33.0
+pydantic-core==2.33.1
     # via pydantic
 pygments==2.19.1
     # via ipython
@@ -236,11 +236,12 @@ traittypes==0.2.1
     #   bqplot
     #   bqscales
     #   ipydatawidgets
-typing-extensions==4.13.0
+typing-extensions==4.13.1
     # via
     #   ipython
     #   pydantic
     #   pydantic-core
+    #   sciline
     #   typing-inspection
 typing-inspection==0.4.0
     # via pydantic
