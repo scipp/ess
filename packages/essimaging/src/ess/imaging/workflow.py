@@ -72,6 +72,14 @@ def YmirImageNormalizationWorkflow() -> sl.Pipeline:
     """
     Ymir histogram mode imaging normalization workflow.
 
+    .. note:: `time` dimension is not `time-of-flight` but the wall-clock time.
+
+    Returns
+    -------
+    :
+        Workflow pipeline object for multiple Ymir histogram mode images reduction.
+
+
     Default Normalization Formula
     -----------------------------
 
@@ -91,18 +99,15 @@ def YmirImageNormalizationWorkflow() -> sl.Pipeline:
 
         \\text{where } i \\text{ is an index of an image.}
 
-        \\text{Pixel values less than sample_threshold}
-
-        \\text{ are replaced with sample_threshold}.
+        \\text{Pixel values less than sample_threshold are masked.}
 
     .. math::
 
         BackgroundImage = mean(OpenBeam, dim=\\text{'time'})
         - mean(DarkCurrent, dim=\\text{'time'})
 
-        \\text{Pixel values less than } \\text{background_threshold}
+        \\text{Pixel values less than background_threshold are masked}
 
-        \\text{ are replaced with } \\text{background_threshold}.
     """
     return sl.Pipeline(
         (*_IO_PROVIDERS, *_NORMALIZATION_PROVIDERS),
