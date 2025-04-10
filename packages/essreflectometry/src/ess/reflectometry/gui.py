@@ -229,7 +229,7 @@ class ReflectometryBatchReductionGUI:
         'Key determines if a result needs to be recomputed or not'
         raise NotImplementedError()
 
-    def sync_table_colors(self, table):
+    def set_table_colors(self, table):
         template = 'row == {i} ? {reduced_color} : '
         expr = ''
         for i, (_, row) in enumerate(table.data.iterrows()):
@@ -239,22 +239,22 @@ class ReflectometryBatchReductionGUI:
         expr += "default_value"
         table.default_renderer.background_color = VegaExpr(expr)
 
+    @staticmethod
+    def set_table_height(table, extra=0):
+        height = (len(table.data) + 1) * (table.base_row_size + 1) + 5 + extra
+        table.layout.height = f'{height}px'
+
     def set_result(self, metadata, result):
         self.results[self.get_row_key(metadata)] = result
-        self.sync_table_colors(self.reduction_table)
-        self.sync_table_colors(self.custom_reduction_table)
-        self.sync_table_colors(self.reference_table)
+        self.set_table_colors(self.reduction_table)
+        self.set_table_colors(self.custom_reduction_table)
+        self.set_table_colors(self.reference_table)
 
     def log(self, message):
         out = widgets.Output()
         with out:
             display(message)
         self.text_log.children = (out, *self.text_log.children)
-
-    @staticmethod
-    def set_table_height(table, extra=0):
-        height = (len(table.data) + 1) * (table.base_row_size + 1) + 5 + extra
-        table.layout.height = f'{height}px'
 
     def sync(self, *_):
         db = {}
@@ -277,9 +277,9 @@ class ReflectometryBatchReductionGUI:
         self.set_table_height(self.runs_table)
         self.set_table_height(self.reduction_table)
         self.set_table_height(self.custom_reduction_table)
-        self.sync_table_colors(self.reduction_table)
-        self.sync_table_colors(self.custom_reduction_table)
-        self.sync_table_colors(self.reference_table)
+        self.set_table_colors(self.reduction_table)
+        self.set_table_colors(self.custom_reduction_table)
+        self.set_table_colors(self.reference_table)
 
     @property
     def path(self):
@@ -406,12 +406,14 @@ class ReflectometryBatchReductionGUI:
                     ]
                 )
             # To avoid a flickering scrollbar
+            # - increase table height with some margin before adding row
+            # - adjust able height afterwards
             self.set_table_height(self.custom_reduction_table, extra=25)
             self.custom_reduction_table.data = pd.concat(
                 [self.custom_reduction_table.data, row]
             )
             self.set_table_height(self.custom_reduction_table)
-            self.sync_table_colors(self.custom_reduction_table)
+            self.set_table_colors(self.custom_reduction_table)
 
         def delete_row(_):
             self.log("delete row")
@@ -643,7 +645,7 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
                 else tuple(x.split(','))
             )
         self.custom_reduction_table.data = df
-        self.sync_table_colors(self.custom_reduction_table)
+        self.set_table_colors(self.custom_reduction_table)
 
     def display_results(self):
         df = self.get_selected_rows()
