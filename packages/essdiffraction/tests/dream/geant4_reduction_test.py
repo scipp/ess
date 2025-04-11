@@ -2,6 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 import io
+from pathlib import Path
 
 import pytest
 import sciline
@@ -56,6 +57,7 @@ from ess.reduce import workflow as reduce_workflow
 sample = sc.vector([0.0, 0.0, 0.0], unit='mm')
 source = sc.vector([-3.478, 0.0, -76550], unit='mm')
 charge = sc.scalar(1.0, unit='µAh')
+dream_source_position = sc.vector(value=[0, 0, -76.55], unit="m")
 
 params = {
     Filename[SampleRun]: dream.data.simulated_diamond_sample(small=True),
@@ -131,6 +133,7 @@ def simulation_dream_choppers():
         choppers=dream.beamline.choppers(
             dream.beamline.InstrumentConfiguration.high_flux
         ),
+        source_position=dream_source_position,
         neutrons=500_000,
     )
 
@@ -256,6 +259,16 @@ def test_pipeline_can_save_data(workflow):
     _assert_contains_author_info(content)
     _assert_contains_beamline_info(content)
     _assert_contains_tof_data(content)
+
+
+def test_pipeline_save_data_to_disk(workflow, output_folder: Path):
+    workflow = powder.with_pixel_mask_filenames(workflow, [])
+    result = workflow.compute(ReducedTofCIF)
+    result.comment = """This file was generated with the DREAM data reduction user guide
+    in the documentation of ESSdiffraction.
+    See https://scipp.github.io/essdiffraction/
+    """
+    result.save(output_folder / "dream_reduced.cif")
 
 
 def _assert_contains_source_info(cif_content: str) -> None:
