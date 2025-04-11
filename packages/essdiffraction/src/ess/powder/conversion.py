@@ -4,7 +4,6 @@
 Coordinate transformations for powder diffraction.
 """
 
-import numpy as np
 import sciline as sl
 import scipp as sc
 import scippneutron as scn
