@@ -112,7 +112,7 @@ def normalize_by_monitor_integrated(
     monitor = sc.rebin(monitor, {dim: edges})
 
     coord = monitor.coords[dim]
-    norm = sc.nansum(monitor.data * (coord[1:] - coord[:-1]))
+    norm = sc.sum(monitor.data * (coord[1:] - coord[:-1]))
     norm = broadcast_uncertainties(
         norm, prototype=detector, mode=uncertainty_broadcast_mode
     )

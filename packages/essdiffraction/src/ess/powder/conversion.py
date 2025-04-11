@@ -317,8 +317,7 @@ def compute_monitor_time_of_flight(
     wf[time_of_flight.PulseStride] = pulse_stride
     wf[time_of_flight.PulseStrideOffset] = pulse_stride_offset
     out = wf.compute(time_of_flight.ResampledTofData)
-    inds = out.values == 0.0
-    out.values[inds] = np.nan
+    out.masks["zero_counts"] = out.data == sc.scalar(0.0, unit=out.data.unit)
     return TofMonitorData[RunType, MonitorType](out)
 
 
