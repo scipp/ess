@@ -46,13 +46,13 @@ class He3FillingTime(sl.Scope[PolarizingElement, sc.Variable], sc.Variable):
 
 
 class He3CellTransmissionFractionIncomingUnpolarized(
-    sl.ScopeTwoParams[PolarizingElement, PolarizationState, sc.DataArray], sc.DataArray
+    sl.Scope[PolarizingElement, PolarizationState, sc.DataArray], sc.DataArray
 ):
     """Transmission fraction for a given cell"""
 
 
 class He3AnalyzerTransmissionFractionIncomingPolarized(
-    sl.ScopeTwoParams[PolarizerSpin, AnalyzerSpin, sc.DataArray], sc.DataArray
+    sl.Scope[PolarizerSpin, AnalyzerSpin, sc.DataArray], sc.DataArray
 ):
     """Transmission fraction of the analyzer with polarized incoming beam"""
 
@@ -74,7 +74,7 @@ class He3TransmissionEmptyGlass(sl.Scope[PolarizingElement, sc.Variable], sc.Var
 
 
 class He3DirectBeam(
-    sl.ScopeTwoParams[PolarizingElement, PolarizationState, sc.DataArray], sc.DataArray
+    sl.Scope[PolarizingElement, PolarizationState, sc.DataArray], sc.DataArray
 ):
     """
     Direct beam data for a given cell and spin state as a function of wavelength.
@@ -438,7 +438,7 @@ ReducedDirectBeamDataNoCell = NewType('ReducedDirectBeamDataNoCell', sc.DataArra
 
 
 class ReducedDirectBeamData(
-    sl.ScopeTwoParams[PolarizingElement, PolarizationState, sc.DataArray], sc.DataArray
+    sl.Scope[PolarizingElement, PolarizationState, sc.DataArray], sc.DataArray
 ):
     """Direct beam data for a given cell, as a function of wavelength and time."""
 
