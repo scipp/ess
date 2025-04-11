@@ -1,29 +1,47 @@
 # API Reference
 
-## Classes
+## Workflows
+
+### BIFROST
+
+```{eval-rst}
+.. currentmodule:: ess.bifrost
+
+.. autosummary::
+   :toctree: ../generated/functions
+   :recursive:
+
+   BifrostSimulationWorkflow
+```
+
+## Spectroscopy
 
 ```{eval-rst}
 .. currentmodule:: ess.spectroscopy
 
 .. autosummary::
-   :toctree: ../generated/classes
-   :template: class-template.rst
+   :toctree: ../generated/modules
+   :template: module-template.rst
    :recursive:
+
+   indirect
+   types
 ```
 
-## Top-level functions
+## BIFROST
 
 ```{eval-rst}
-.. autosummary::
-   :toctree: ../generated/functions
-   :recursive:
-```
+.. currentmodule:: ess.bifrost
 
-## Submodules
-
-```{eval-rst}
 .. autosummary::
    :toctree: ../generated/modules
    :template: module-template.rst
    :recursive:
+
+   cutting
+   data
+   detector
+   io
+   types
+   workflow
 ```

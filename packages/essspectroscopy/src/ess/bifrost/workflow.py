@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 
+"""BIFROST workflows."""
+
 from typing import Any
 
 import sciline
@@ -18,10 +20,10 @@ from ess.spectroscopy.types import (
     SampleRun,
 )
 
+from .cutting import providers as cutting_providers
 from .detector import merge_triplets
 from .detector import providers as detector_providers
 from .io import mcstas, nexus
-from .slicing import providers as slicing_providers
 from .types import (
     FrameMonitor0,
     FrameMonitor1,
@@ -30,7 +32,8 @@ from .types import (
 )
 
 
-def default_parameters() -> dict[type, Any]:
+def simulation_default_parameters() -> dict[type, Any]:
+    """Default parameters for BifrostSimulationWorkflow."""
     tof_params = time_of_flight.default_parameters()
     return {
         NeXusMonitorName[FrameMonitor0]: '007_frame_0',
@@ -45,7 +48,7 @@ _SIMULATION_PROVIDERS = (
     *conversion_providers,
     *detector_providers,
     *mcstas.providers,
-    *slicing_providers,
+    *cutting_providers,
     *ki_providers,
     *kf_providers,
     *normalisation_providers,
@@ -55,11 +58,22 @@ _SIMULATION_PROVIDERS = (
 def BifrostSimulationWorkflow(
     detector_names: list[NeXusDetectorName],
 ) -> sciline.Pipeline:
-    """Data reduction workflow for simulated BIFROST data."""
+    """Data reduction workflow for simulated BIFROST data.
+
+    Parameters
+    ----------
+    detector_names:
+        Names of ``NXdetector`` groups in the input NeXus file.
+
+    Returns
+    -------
+    :
+        A pipeline for reducing simulated BIFROST data.
+    """
     workflow = nexus.LoadNeXusWorkflow()
     for provider in _SIMULATION_PROVIDERS:
         workflow.insert(provider)
-    for key, val in default_parameters().items():
+    for key, val in simulation_default_parameters().items():
         workflow[key] = val
 
     workflow[DataGroupedByRotation[SampleRun]] = (

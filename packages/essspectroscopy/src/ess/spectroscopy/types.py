@@ -1,5 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+
+"""Domain types for spectroscopy."""
+
 from typing import Any, NewType, TypeVar
 
 import sciline

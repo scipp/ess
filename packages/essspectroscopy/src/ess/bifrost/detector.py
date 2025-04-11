@@ -1,3 +1,8 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+
+"""Detector handling for BIFROST."""
+
 import scipp as sc
 import scippnexus as snx
 

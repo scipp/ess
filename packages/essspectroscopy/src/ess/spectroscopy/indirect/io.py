@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 
+"""Input / output for indirect spectroscopy."""
+
 from __future__ import annotations
 
 import h5py
@@ -29,6 +31,9 @@ def to_nxspe(events: EnergyData[SampleRun], base: NXspeFileName) -> NXspeFileNam
     :
         The list of filenames containing the NXspe data. If there are N settings in the
         input DataArray, N filenames are returned. The names are of the form
+
+        .. code-block::
+
             {base}_{i+1:0{ceil(log10(N+1))}d}.nxspe
     """
     from pathlib import Path

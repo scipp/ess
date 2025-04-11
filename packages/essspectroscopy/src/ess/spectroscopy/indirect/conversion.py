@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 
+"""Coordinate conversions for indirect spectroscopy."""
+
 import numpy as np
 import scipp as sc
 from scippneutron.conversion.tof import energy_from_wavelength, wavelength_from_tof
@@ -99,7 +101,7 @@ def rotate_to_sample_table_momentum_transfer(
     lab_momentum_transfer: sc.Variable,
     gravity: sc.Variable,
 ) -> sc.Variable:
-    """Rotate the momentum transfer vector into the sample-table coordinate system
+    r"""Rotate the momentum transfer vector into the sample-table coordinate system
 
     Here, the momentum transfer is defined as
 
