@@ -55,7 +55,7 @@
 
 ## Get in touch
 
-- If you have questions that are not answered by these documentation pages, ask on [GitHub discussions](https://github.com/scipp/essdiffraction/discussions). Please include a self-contained reproducible example if possible.
+- If you have questions that are not answered by these documentation pages, ask on [discussions](https://github.com/scipp/essdiffraction/discussions). Please include a self-contained reproducible example if possible.
 - Report bugs (including unclear, missing, or wrong documentation!), suggest features or view the source code [on GitHub](https://github.com/scipp/essdiffraction).
 
 ```{toctree}
