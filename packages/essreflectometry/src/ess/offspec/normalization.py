@@ -16,17 +16,17 @@ def evaluate_reference(
     qresolution: QResolution,
 ) -> Reference:
     """
-    Adds a :math:`Q`. The coordinate is computed as if the data came from
+    Adds a :math:`Q` coordinate computed as if the data came from
     the sample measurement, that is, they use the ``sample_rotation``
     of the sample measurement.
     """
-    ref = reference.copy()
+    ref = reference.copy(deep=False)
     ref.coords.pop("theta")
     ref.bins.coords['Q'] = reflectometry_q(
         wavelength=ref.bins.coords['wavelength'], theta=sample.coords['theta']
     )
     ref.bins.coords['Q_resolution'] = qresolution * ref.bins.coords['Q']
-    return ref.bins.concat()
+    return ref
 
 
 def evaluate_sample(
@@ -34,13 +34,13 @@ def evaluate_sample(
     sample: ReducibleData[SampleRun],
 ) -> Sample:
     """
-    Adds a :math:`Q`.
+    Adds the :math:`Q` coordinate.
     """
-    sample = sample.copy()
+    sample = sample.copy(deep=False)
     sample.bins.coords['Q'] = reflectometry_q(
         wavelength=sample.bins.coords['wavelength'], theta=sample.coords['theta']
     )
-    return sample.bins.concat()
+    return sample
 
 
 providers = (
