@@ -1,7 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-import scipp as sc
-from scipp.spatial import rotations_from_rotvecs
 from scippneutron.conversion.graph import beamline, tof
 
 from ..reflectometry.types import (
@@ -9,17 +7,6 @@ from ..reflectometry.types import (
     SampleRun,
 )
 from .types import CoordTransformationGraph
-
-
-def adjust_pixel_positions_for_sample(data: sc.DataArray):
-    rotation = rotations_from_rotvecs(
-        rotation_vectors=sc.vector(
-            value=[-2.0 * data.coords['theta'].value, 0, 0], unit=sc.units.deg
-        )
-    )
-    return data.assign_coords(
-        position=rotation * (data.coords['position'] - data.coords['sample_position'])
-    )
 
 
 def coordinate_transformation_graph_sample() -> CoordTransformationGraph[SampleRun]:
