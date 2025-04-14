@@ -62,14 +62,13 @@ def reduce_sample_over_q(
     s = sample.bins.concat().bin(Q=qbins)
     h = sc.values(reference.hist(Q=s.coords['Q']))
     R = s / h.data
-    R.coords['Q_resolution'] = sc.sqrt(
-        (
-            (sc.values(reference) * reference.coords['Q_resolution'] ** 2)
-            .flatten(to='Q')
-            .hist(Q=s.coords['Q'])
+    if 'Q_resolution' in reference.coords or 'Q_resolution' in reference.bins.coords:
+        resolution = reference.coords.get(
+            'Q_resolution', reference.bins.coords['Q_resolution']
         )
-        / h
-    ).data
+        R.coords['Q_resolution'] = sc.sqrt(
+            ((sc.values(reference) * resolution**2).hist(Q=s.coords['Q'])) / h
+        ).data
     return R
 
 
