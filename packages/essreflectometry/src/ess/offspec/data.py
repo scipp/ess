@@ -33,6 +33,6 @@ def offspec_direct_beam_run() -> Filename[ReferenceRun]:
 
 
 __all__ = [
-    "offspec_sample_run",
     "offspec_direct_beam_run",
+    "offspec_sample_run",
 ]
