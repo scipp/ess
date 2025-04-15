@@ -14,9 +14,12 @@ from ipytree import Node, Tree
 
 from ess import amor
 from ess.amor.types import ChopperPhase
+from ess.reflectometry.figures import wavelength_z_figure
 from ess.reflectometry.types import (
+    Filename,
     QBins,
     ReducedReference,
+    ReducibleData,
     ReferenceRun,
     ReflectivityOverQ,
     SampleRun,
@@ -26,6 +29,72 @@ from ess.reflectometry.types import (
     ZIndexLimits,
 )
 from ess.reflectometry.workflow import with_filenames
+
+
+class DetectorView:
+    def __init__(self, runs_table: DataGrid, run_to_filepath: Callable[[str], str]):
+        self.runs_table = runs_table
+        self.run_to_filepath = run_to_filepath
+        self.runs_table.observe(self.run_workflow, names='selections')
+        self.plot_log = widgets.VBox([])
+        self.working_label = widgets.Label(
+            "working...", layout=widgets.Layout(display='none')
+        )
+        self.widget = widgets.HBox(
+            [
+                widgets.VBox(
+                    [
+                        widgets.Label("Runs Table"),
+                        self.runs_table,
+                    ],
+                    layout={"width": "35%"},
+                ),
+                widgets.VBox(
+                    [
+                        widgets.Label("Wavelength z-index counts distribution"),
+                        self.plot_log,
+                        self.working_label,
+                    ],
+                    layout={"width": "60%"},
+                ),
+            ]
+        )
+
+    def run_workflow(self, _):
+        self.working_label.layout.display = ''
+        selections = self.runs_table.selections
+
+        if not selections:
+            return
+
+        row_idx = selections[0]['r1']
+        run = self.runs_table.data.iloc[row_idx]['Run']
+
+        workflow = amor.AmorWorkflow()
+        workflow[SampleSize[SampleRun]] = sc.scalar(10, unit='mm')
+        workflow[SampleSize[ReferenceRun]] = sc.scalar(10, unit='mm')
+
+        workflow[ChopperPhase[ReferenceRun]] = sc.scalar(7.5, unit='deg')
+        workflow[ChopperPhase[SampleRun]] = sc.scalar(7.5, unit='deg')
+
+        workflow[YIndexLimits] = (0, 64)
+        workflow[ZIndexLimits] = (0, 16 * 32)
+        workflow[WavelengthBins] = sc.geomspace(
+            'wavelength',
+            2,
+            13.5,
+            2001,
+            unit='angstrom',
+        )
+        workflow[Filename[SampleRun]] = self.run_to_filepath(run)
+        da = workflow.compute(ReducibleData[SampleRun])
+        da.bins.data[...] = sc.scalar(1.0, variance=1.0, unit=da.bins.unit)
+        da.bins.unit = 'counts'
+        da.masks.clear()
+        da.bins.masks.clear()
+        p = wavelength_z_figure(da, wavelength_bins=workflow.compute(WavelengthBins))
+        self.plot_log.children = (p,)
+        self.working_label.layout.display = 'none'
 
 
 class NexusExplorer:
@@ -571,8 +640,16 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
     def __init__(self):
         super().__init__()
         self.nexus_explorer = NexusExplorer(self.runs_table, self.get_filepath_from_run)
-        self.tabs.children = (*self.tabs.children, self.nexus_explorer.widget)
-        self.tabs.set_title(len(self.tabs.children) - 1, "Nexus Explorer")
+        self.detector_display = DetectorView(
+            self.runs_table, self.get_filepath_from_run
+        )
+        self.tabs.children = (
+            *self.tabs.children,
+            self.nexus_explorer.widget,
+            self.detector_display.widget,
+        )
+        self.tabs.set_title(len(self.tabs.children) - 2, "Nexus Explorer")
+        self.tabs.set_title(len(self.tabs.children) - 1, "Detector View")
 
     def read_meta_data(self, path):
         with h5py.File(path) as f:
