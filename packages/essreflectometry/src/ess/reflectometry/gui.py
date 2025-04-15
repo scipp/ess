@@ -654,13 +654,13 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
         if len(df) == 0:
             self.log('There was nothing to display')
             return
-        try:
-            results = [
-                next(v for (m, _), v in self.results.items() if m == key)
-                for key in (tuple(row) for _, row in df.iterrows())
-            ]
-        except StopIteration:
-            # No results were found for the selected row
+        results = [
+            self.results[key]
+            for _, row in df.iterrows()
+            if (key := self.get_row_key(row)) in self.results
+        ]
+        if len(results) < len(df):
+            # No results were found for some of the selected rows.
             # It hasn't been computed yet, so compute it and try again.
             self.run_workflow()
             self.display_results()
@@ -692,6 +692,7 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
                     results,
                     norm='log',
                     figsize=(12, 6),
+                    vmin=1e-6,
                 )
             ]
         )
