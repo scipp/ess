@@ -731,13 +731,15 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
         df = db["user_runs"]
         df = (
             df[df["Sample"] == "sm5"][~df["Exclude"]]
-            .groupby(["Sample"], as_index=False)
+            .groupby(["Sample", "Angle"], as_index=False)
             .agg(Runs=("Run", tuple))
-            .sort_values(by="Sample")
+            .sort_values(["Sample", "Angle"])
         )
         # We don't want changes to Sample
         # in the user_reference table to persist
-        user_reference = db['user_reference'].drop(columns=["Sample"], errors='ignore')
+        user_reference = db['user_reference'].drop(
+            columns=["Sample", "Angle"], errors='ignore'
+        )
         df = self._merge_old_and_new_state(df, user_reference, on='Runs')
         self._setdefault(df, "Ymin", 17)
         self._setdefault(df, "Ymax", 47)
@@ -745,8 +747,8 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
         self._setdefault(df, "Zmax", 380)
         self._setdefault(df, "Lmin", 3.0)
         self._setdefault(df, "Lmax", 12.5)
-        df = self._ordercolumns(df, 'Sample', 'Runs')
-        return df.sort_values(by="Sample")
+        df = self._ordercolumns(df, 'Sample', 'Angle', 'Runs')
+        return df.sort_values(["Sample", "Angle"])
 
     def sync_custom_reduction_table(self):
         df = self.custom_reduction_table.data.copy()
