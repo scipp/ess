@@ -8,7 +8,7 @@ import ipywidgets as widgets
 import pandas as pd
 import plopp as pp
 import scipp as sc
-from ipydatagrid import DataGrid, VegaExpr
+from ipydatagrid import DataGrid, TextRenderer, VegaExpr
 from IPython.display import display
 from ipytree import Node, Tree
 
@@ -239,6 +239,8 @@ class ReflectometryBatchReductionGUI:
                 if self.get_row_key(row) == row_key:
                     expr += template.format(i=i, reduced_color="'lightgreen'")
         expr += "default_value"
+        for renderer in table.renderers.values():
+            renderer.background_color = VegaExpr(expr)
         table.default_renderer.background_color = VegaExpr(expr)
 
     @staticmethod
@@ -251,6 +253,18 @@ class ReflectometryBatchReductionGUI:
         self.set_table_colors(self.reduction_table)
         self.set_table_colors(self.custom_reduction_table)
         self.set_table_colors(self.reference_table)
+
+    def get_renderers_for_reduction_table(self):
+        return {}
+
+    def get_renderers_for_reference_table(self):
+        return {}
+
+    def get_renderers_for_custom_reduction_table(self):
+        return {}
+
+    def get_renderers_for_runs_table(self):
+        return {}
 
     def log(self, message):
         out = widgets.Output()
@@ -304,6 +318,7 @@ class ReflectometryBatchReductionGUI:
             auto_fit_columns=True,
             column_visibility={"key": False},
             selection_mode="cell",
+            renderers=self.get_renderers_for_runs_table(),
         )
         self.reduction_table = DataGrid(
             pd.DataFrame([]),
@@ -311,6 +326,7 @@ class ReflectometryBatchReductionGUI:
             auto_fit_columns=True,
             column_visibility={"key": False},
             selection_mode="cell",
+            renderers=self.get_renderers_for_reduction_table(),
         )
         self.reference_table = DataGrid(
             pd.DataFrame([]),
@@ -318,6 +334,7 @@ class ReflectometryBatchReductionGUI:
             auto_fit_columns=True,
             column_visibility={"key": False},
             selection_mode="cell",
+            renderers=self.get_renderers_for_reference_table(),
         )
         self.custom_reduction_table = DataGrid(
             pd.DataFrame([]),
@@ -325,6 +342,7 @@ class ReflectometryBatchReductionGUI:
             auto_fit_columns=True,
             column_visibility={"key": False},
             selection_mode="cell",
+            renderers=self.get_renderers_for_custom_reduction_table(),
         )
 
         self.runs_table.on_cell_change(self.sync)
@@ -563,6 +581,21 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
                 "Run": path[-8:-4],
                 "Angle": f['entry1']['Amor']['master_parameters']['mu']['value'][0, 0],
             }
+
+    def get_renderers_for_reduction_table(self):
+        return {
+            'Angle': TextRenderer(text_value=VegaExpr("format(cell.value, ',.3f')"))
+        }
+
+    def get_renderers_for_custom_reduction_table(self):
+        return {
+            'Angle': TextRenderer(text_value=VegaExpr("format(cell.value, ',.3f')"))
+        }
+
+    def get_renderers_for_runs_table(self):
+        return {
+            'Angle': TextRenderer(text_value=VegaExpr("format(cell.value, ',.3f')"))
+        }
 
     @staticmethod
     def _merge_old_and_new_state(new, old, on, how='left'):
