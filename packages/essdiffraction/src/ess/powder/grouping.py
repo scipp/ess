@@ -32,24 +32,24 @@ def focus_data_dspacing_and_two_theta(
     )
 
 
-def stack_detectors(*detectors: sc.DataArray) -> sc.DataArray:
-    """Concatenate all inputs along a 'detector' dimension.
+def collect_detectors(*detectors: sc.DataArray) -> sc.DataGroup:
+    """Store all inputs in a single data group.
 
-    This function is intended to be used to reduce a workflow that
+    This function is intended to be used to reduce a workflow which
     was mapped over detectors.
 
     Parameters
     ----------
     detectors:
         Data arrays for each detector bank.
-        Must all have the same shape.
+        All arrays must have a scalar "detector" coord containing a ``str``.
 
     Returns
     -------
     :
-        The inputs ``detectors`` concatenated along the 'detector' dimension.
+        The inputs as a data group with the "detector" coord as the key.
     """
-    return sc.concat(list(detectors), dim='detector')
+    return sc.DataGroup({da.coords.pop('detector').value: da for da in detectors})
 
 
 providers = (focus_data_dspacing, focus_data_dspacing_and_two_theta)
