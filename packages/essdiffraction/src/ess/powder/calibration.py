@@ -9,7 +9,7 @@ from collections.abc import Callable, ItemsView, Iterable, Iterator, KeysView, M
 import scipp as sc
 import scipp.constants
 
-from .types import DspacingData, SampleRun
+from .types import CalibratedBeamline, SampleRun
 
 
 class OutputCalibrationData(Mapping[int, sc.Variable]):
@@ -94,19 +94,18 @@ class OutputCalibrationData(Mapping[int, sc.Variable]):
 
 
 def assemble_output_calibration(
-    data: DspacingData[SampleRun],
+    beamline: CalibratedBeamline[SampleRun],
 ) -> OutputCalibrationData:
-    """Construct output calibration data from average pixel positions."""
-    # Use nanmean because pixels without events have position=NaN.
-    average_l = sc.nanmean(data.coords["Ltotal"])
-    average_two_theta = sc.nanmean(data.coords["two_theta"])
+    """Construct output calibration data from fake pixel positions."""
+    l1 = sc.norm(
+        beamline.coords['sample_position'] - beamline.coords['source_position']
+    )
+    # A very rough average of DREAM's detector positions.
+    # The value doesn't matter, but this moves the detector away from the sample.
+    l2 = sc.scalar(1000, unit='mm').to(unit=l1.unit)
+
     difc = sc.to_unit(
-        2
-        * sc.constants.m_n
-        / sc.constants.h
-        * average_l
-        * sc.sin(0.5 * average_two_theta),
-        unit='us / angstrom',
+        2 * sc.constants.m_n / sc.constants.h * (l1 + l2), unit='us / angstrom'
     )
     return OutputCalibrationData({1: difc})
 
