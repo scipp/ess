@@ -5,6 +5,7 @@ Contains the providers to compute neutron time-of-flight and wavelength.
 """
 
 import sciline as sl
+import scipp as sc
 import scippneutron as scn
 
 from ess.reduce import time_of_flight
@@ -71,7 +72,11 @@ def simulate_chopper_cascade(choppers: Choppers[SampleRun]) -> SimulationResults
     choppers:
         Chopper settings.
     """
-    return time_of_flight.simulate_beamline(choppers=choppers, neutrons=200_000)
+    return time_of_flight.simulate_beamline(
+        choppers=choppers,
+        neutrons=200_000,
+        source_position=sc.vector([0, 0, 0], unit="m"),
+    )
 
 
 def build_tof_lookup_table(
