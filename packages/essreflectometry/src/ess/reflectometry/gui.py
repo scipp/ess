@@ -38,7 +38,7 @@ class DetectorView:
         self.runs_table.observe(self.run_workflow, names='selections')
         self.plot_log = widgets.VBox([])
         self.working_label = widgets.Label(
-            "working...", layout=widgets.Layout(display='none')
+            "...working", layout=widgets.Layout(display='none')
         )
         self.widget = widgets.HBox(
             [
@@ -51,9 +51,13 @@ class DetectorView:
                 ),
                 widgets.VBox(
                     [
-                        widgets.Label("Wavelength z-index counts distribution"),
+                        widgets.HBox(
+                            [
+                                widgets.Label("Wavelength z-index counts distribution"),
+                                self.working_label,
+                            ]
+                        ),
                         self.plot_log,
-                        self.working_label,
                     ],
                     layout={"width": "60%"},
                 ),
@@ -61,12 +65,11 @@ class DetectorView:
         )
 
     def run_workflow(self, _):
-        self.working_label.layout.display = ''
         selections = self.runs_table.selections
-
         if not selections:
             return
 
+        self.working_label.layout.display = ''
         row_idx = selections[0]['r1']
         run = self.runs_table.data.iloc[row_idx]['Run']
 
@@ -766,17 +769,17 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
         if len(df) == 0:
             self.log('There was nothing to display')
             return
-        results = [
-            self.results[key]
-            for _, row in df.iterrows()
-            if (key := self.get_row_key(row)) in self.results
-        ]
-        if len(results) < len(df):
+        for _ in range(2):
+            results = [
+                self.results[key]
+                for _, row in df.iterrows()
+                if (key := self.get_row_key(row)) in self.results
+            ]
+            if len(results) == len(df):
+                break
             # No results were found for some of the selected rows.
             # It hasn't been computed yet, so compute it and try again.
             self.run_workflow()
-            self.display_results()
-            return
 
         def get_unique_names(df):
             # Create labels with Sample name and runs
