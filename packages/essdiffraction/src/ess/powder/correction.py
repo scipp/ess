@@ -147,7 +147,11 @@ def _normalize_by_vanadium(
     # Converting to unit 'one' because the division might produce a unit
     # with a large scale if the proton charges in data and vanadium were
     # measured with different units.
-    return (data / norm).to(unit="one", copy=False)
+    normed = (data / norm).to(unit="one", copy=False)
+    mask = norm.data == sc.scalar(0.0, unit=norm.unit)
+    if mask.any():
+        normed.masks['zero_vanadium'] = mask
+    return normed
 
 
 def normalize_by_vanadium_dspacing(
@@ -167,6 +171,13 @@ def normalize_by_vanadium_dspacing(
     uncertainty_broadcast_mode:
         Choose how uncertainties of vanadium are broadcast to the sample data.
         Defaults to ``UncertaintyBroadcastMode.fail``.
+
+    Returns
+    -------
+    :
+        ``data / vanadium``.
+        May contain a mask "zero_vanadium" which is ``True``
+        for bins where vanadium is zero.
     """
     return IofDspacing(
         _normalize_by_vanadium(data, vanadium, uncertainty_broadcast_mode)
@@ -191,6 +202,13 @@ def normalize_by_vanadium_dspacing_and_two_theta(
     uncertainty_broadcast_mode:
         Choose how uncertainties of vanadium are broadcast to the sample data.
         Defaults to ``UncertaintyBroadcastMode.fail``.
+
+    Returns
+    -------
+    :
+        ``data / vanadium``.
+        May contain a mask "zero_vanadium" which is ``True``
+        for bins where vanadium is zero.
     """
     return IofDspacingTwoTheta(
         _normalize_by_vanadium(data, vanadium, uncertainty_broadcast_mode)
