@@ -619,9 +619,7 @@ class ReflectometryBatchReductionGUI:
             tab_settings,
             tab_log,
         ]
-        self.tabs.set_title(0, "Reduce")
-        self.tabs.set_title(1, "Settings")
-        self.tabs.set_title(2, "Log")
+        self.tabs.titles = ["Reduce", "Settings", "Log"]
 
         def on_tab_change(change):
             old = self.tabs.children[change['old']]
