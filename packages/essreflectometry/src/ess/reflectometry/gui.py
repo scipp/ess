@@ -11,6 +11,7 @@ import scipp as sc
 from ipydatagrid import DataGrid, TextRenderer, VegaExpr
 from IPython.display import display
 from ipytree import Node, Tree
+from traitlets import Bool
 
 from ess import amor
 from ess.amor.types import ChopperPhase
@@ -31,42 +32,56 @@ from ess.reflectometry.types import (
 from ess.reflectometry.workflow import with_filenames
 
 
-class DetectorView:
-    def __init__(self, runs_table: DataGrid, run_to_filepath: Callable[[str], str]):
+class DetectorView(widgets.HBox):
+    is_active_tab = Bool(False).tag(sync=True)
+
+    def __init__(
+        self, runs_table: DataGrid, run_to_filepath: Callable[[str], str], **kwargs
+    ):
+        super().__init__([], **kwargs)
         self.runs_table = runs_table
         self.run_to_filepath = run_to_filepath
-        self.runs_table.observe(self.run_workflow, names='selections')
         self.plot_log = widgets.VBox([])
         self.working_label = widgets.Label(
             "...working", layout=widgets.Layout(display='none')
         )
-        self.widget = widgets.HBox(
-            [
-                widgets.VBox(
-                    [
-                        widgets.Label("Runs Table"),
-                        self.runs_table,
-                    ],
-                    layout={"width": "35%"},
-                ),
-                widgets.VBox(
-                    [
-                        widgets.HBox(
-                            [
-                                widgets.Label("Wavelength z-index counts distribution"),
-                                self.working_label,
-                            ]
-                        ),
-                        self.plot_log,
-                    ],
-                    layout={"width": "60%"},
-                ),
-            ]
+        self.children = (
+            widgets.VBox(
+                [
+                    widgets.Label("Runs Table"),
+                    self.runs_table,
+                ],
+                layout={"width": "35%"},
+            ),
+            widgets.VBox(
+                [
+                    widgets.HBox(
+                        [
+                            widgets.Label("Wavelength z-index counts distribution"),
+                            self.working_label,
+                        ]
+                    ),
+                    self.plot_log,
+                ],
+                layout={"width": "60%"},
+            ),
         )
 
-    def run_workflow(self, _):
+        def run_when_selected_row_changes(change):
+            if not change['old'] or change['old'][0]['r1'] != change['new'][0]['r1']:
+                self.run_workflow()
+
+        self.runs_table.observe(run_when_selected_row_changes, names='selections')
+
+        def run_when_active_tab(change):
+            if change['new']:
+                self.run_workflow()
+
+        self.observe(run_when_active_tab, 'is_active_tab')
+
+    def run_workflow(self):
         selections = self.runs_table.selections
-        if not selections:
+        if not self.is_active_tab or not selections:
             return
 
         self.working_label.layout.display = ''
@@ -100,8 +115,12 @@ class DetectorView:
         self.working_label.layout.display = 'none'
 
 
-class NexusExplorer:
-    def __init__(self, runs_table: DataGrid, run_to_filepath: Callable[[str], str]):
+class NexusExplorer(widgets.VBox):
+    def __init__(
+        self, runs_table: DataGrid, run_to_filepath: Callable[[str], str], **kwargs
+    ):
+        kwargs.setdefault('layout', {"width": "100%"})
+        super().__init__(**kwargs)
         self.runs_table = runs_table
         self.run_to_filepath = run_to_filepath
 
@@ -128,47 +147,44 @@ class NexusExplorer:
         self.nexus_tree.observe(self.on_tree_select, names='selected_nodes')
 
         # Create the Nexus Explorer tab content
-        self.widget = widgets.VBox(
-            [
-                widgets.Label("Nexus Explorer"),
-                widgets.HBox(
-                    [
-                        widgets.VBox(
-                            [
-                                widgets.Label("Runs Table"),
-                                self.runs_table,
-                            ],
-                            layout={"width": "30%"},
-                        ),
-                        widgets.VBox(
-                            [
-                                widgets.Label("File Structure"),
-                                widgets.VBox(
-                                    [self.nexus_tree],
-                                    layout=widgets.Layout(
-                                        width='100%',
-                                        height='600px',
-                                        min_height='100px',  # Min resize height
-                                        max_height='1000px',  # Max resize height
-                                        overflow_y='scroll',
-                                        border='1px solid lightgray',
-                                        resize='vertical',  # Add resize handle
-                                    ),
+        self.children = (
+            widgets.Label("Nexus Explorer"),
+            widgets.HBox(
+                [
+                    widgets.VBox(
+                        [
+                            widgets.Label("Runs Table"),
+                            self.runs_table,
+                        ],
+                        layout={"width": "30%"},
+                    ),
+                    widgets.VBox(
+                        [
+                            widgets.Label("File Structure"),
+                            widgets.VBox(
+                                [self.nexus_tree],
+                                layout=widgets.Layout(
+                                    width='100%',
+                                    height='600px',
+                                    min_height='100px',  # Min resize height
+                                    max_height='1000px',  # Max resize height
+                                    overflow_y='scroll',
+                                    border='1px solid lightgray',
+                                    resize='vertical',  # Add resize handle
                                 ),
-                            ],
-                            layout={"width": "35%"},
-                        ),
-                        widgets.VBox(
-                            [
-                                widgets.Label("Content"),
-                                self.nexus_content,
-                            ],
-                            layout={"width": "35%"},
-                        ),
-                    ]
-                ),
-            ],
-            layout={"width": "100%"},
+                            ),
+                        ],
+                        layout={"width": "35%"},
+                    ),
+                    widgets.VBox(
+                        [
+                            widgets.Label("Content"),
+                            self.nexus_content,
+                        ],
+                        layout={"width": "35%"},
+                    ),
+                ]
+            ),
         )
 
     def create_hdf5_tree(self, filepath):
@@ -607,6 +623,16 @@ class ReflectometryBatchReductionGUI:
         self.tabs.set_title(1, "Settings")
         self.tabs.set_title(2, "Log")
 
+        def on_tab_change(change):
+            old = self.tabs.children[change['old']]
+            new = self.tabs.children[change['new']]
+            if hasattr(old, 'is_active_tab'):
+                old.is_active_tab = False
+            if hasattr(new, 'is_active_tab'):
+                new.is_active_tab = True
+
+        self.tabs.observe(on_tab_change, names='selected_index')
+
         self.main = widgets.VBox(
             [
                 self.proposal_number_box,
@@ -648,11 +674,11 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
         )
         self.tabs.children = (
             *self.tabs.children,
-            self.nexus_explorer.widget,
-            self.detector_display.widget,
+            self.nexus_explorer,
+            self.detector_display,
         )
-        self.tabs.set_title(len(self.tabs.children) - 2, "Nexus Explorer")
-        self.tabs.set_title(len(self.tabs.children) - 1, "Detector View")
+        # Empty titles are automatically added for the new children
+        self.tabs.titles = [*self.tabs.titles[:-2], "Nexus Explorer", "Detector View"]
 
     def read_meta_data(self, path):
         with h5py.File(path) as f:
