@@ -70,7 +70,11 @@ class DetectorView(widgets.HBox):
         )
 
         def run_when_selected_row_changes(change):
-            if not change['old'] or change['old'][0]['r1'] != change['new'][0]['r1']:
+            # Runs when there are no previous selections,
+            # or the new selection is different from the old.
+            if not change['old'] or (
+                change['new'] and change['new'][0]['r1'] != change['old'][0]['r1']
+            ):
                 self.run_workflow()
 
         self.runs_table.observe(run_when_selected_row_changes, names='selections')
@@ -88,7 +92,7 @@ class DetectorView(widgets.HBox):
 
         self.working_label.layout.display = ''
         row_idx = selections[0]['r1']
-        run = self.runs_table.data.iloc[row_idx]['Run']
+        run = self.runs_table.get_visible_data().iloc[row_idx]['Run']
 
         workflow = amor.AmorWorkflow()
         workflow[SampleSize[SampleRun]] = sc.scalar(10, unit='mm')
@@ -226,7 +230,7 @@ class NexusExplorer(widgets.VBox):
 
         # Get the first selected row
         row_idx = selections[0]['r1']
-        run = self.runs_table.data.iloc[row_idx]['Run']
+        run = self.runs_table.get_visible_data().iloc[row_idx]['Run']
         filepath = self.run_to_filepath(run)
 
         # Create and display the tree for this file
@@ -279,7 +283,7 @@ class NexusExplorer(widgets.VBox):
             return
 
         row_idx = selections[0]['r1']
-        run = self.runs_table.data.iloc[row_idx]['Run']
+        run = self.runs_table.get_visible_data().iloc[row_idx]['Run']
         filepath = self.run_to_filepath(run)
 
         with h5py.File(filepath, 'r') as f:
@@ -497,7 +501,7 @@ class ReflectometryBatchReductionGUI:
             if len(self.reduction_table.selections) > 0:
                 # Get the first selected row
                 selection = self.reduction_table.selections[0]
-                row = self.reduction_table.data.iloc[
+                row = self.reduction_table.get_visible_data().iloc[
                     selection['r1'] : selection['r2'] + 1
                 ]
             else:
@@ -660,9 +664,6 @@ class ReflectometryBatchReductionGUI:
 
     def log_progress(self, progress):
         self.progress_log.children = (progress,)
-
-    def log_plot(self, plot):
-        """Log a plot to the top of the plot log"""
 
 
 class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
@@ -912,7 +913,7 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
 
     def get_selected_rows(self):
         chunks = [
-            table.data.iloc[s['r1'] : s['r2'] + 1]
+            table.get_visible_data().iloc[s['r1'] : s['r2'] + 1]
             for table in (self.reduction_table, self.custom_reduction_table)
             for s in table.selections
         ]
