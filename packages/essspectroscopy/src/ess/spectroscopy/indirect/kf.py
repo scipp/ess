@@ -18,8 +18,6 @@ from ess.spectroscopy.types import (
     SecondarySpecCoordTransformGraph,
 )
 
-from ..utils import in_same_unit
-
 
 def sample_analyzer_vector(
     sample_position: sc.Variable,
@@ -259,11 +257,11 @@ def move_time_to_sample(
         A shallow copy of ``data`` where the "event_time_offset" coordinate has been
         shifted to the time at the sample.
     """
-    offset = in_same_unit(
-        data.coords['secondary_flight_time'], data.bins.coords['event_time_offset']
+    offset = data.coords['secondary_flight_time'].to(
+        unit=data.bins.coords['event_time_offset'].unit, copy=False
     )
     time = data.bins.coords['event_time_offset'] - offset
-    time %= in_same_unit(pulse_period, time)
+    time %= pulse_period.to(unit=time.unit)
     return DataAtSample[RunType](
         data
         # These are the detector positions and they no longer match the time:
