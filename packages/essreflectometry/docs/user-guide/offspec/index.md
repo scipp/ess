@@ -4,5 +4,5 @@
 ---
 maxdepth: 1
 ---
-offspec-reduction
+offspec_reduction
 ```
