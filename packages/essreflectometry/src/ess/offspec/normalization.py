@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 from ..reflectometry.conversions import reflectometry_q
 from ..reflectometry.types import (
