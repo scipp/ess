@@ -22,7 +22,6 @@ from ..types import (
     SecondarySpecCoordTransformGraph,
     WavelengthMonitor,
 )
-from ..utils import in_same_unit
 
 
 def incident_energy_from_wavelength(*, incident_wavelength: sc.Variable) -> sc.Variable:
@@ -92,7 +91,10 @@ def lab_momentum_transfer_from_wavevectors(
     :
         The momentum transfer :math:`\vec{Q}` in the lab frame.
     """
-    return in_same_unit(incident_wavevector, final_wavevector) - final_wavevector
+    return (
+        incident_wavevector.to(unit=final_wavevector.unit, copy=False)
+        - final_wavevector
+    )
 
 
 def rotate_to_sample_table_momentum_transfer(
@@ -132,7 +134,7 @@ def rotate_to_sample_table_momentum_transfer(
         The momentum transfer in the sample-table coordinate system.
     """
     vertical = -gravity / sc.norm(gravity)
-    # negative a3 since we rotate coordinates not axes here
+    # negative a3 since we rotate coordinates, not axes here
     return sc.spatial.rotations_from_rotvecs(-a3 * vertical) * lab_momentum_transfer
 
 
@@ -163,7 +165,7 @@ def add_inelastic_coordinates(
             'incident_energy',
             'lab_momentum_transfer',
             'sample_table_momentum_transfer',
-            # These are inputs but we want to preserve them
+            # These are inputs, but we want to preserve them
             'a3',
             'a4',
         ],
