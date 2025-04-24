@@ -65,7 +65,7 @@ def energy_transfer(
     :
         The energy transfer :math:`\Delta E`.
     """
-    return incident_energy - final_energy
+    return incident_energy - final_energy.to(unit=incident_energy.unit, copy=False)
 
 
 def lab_momentum_transfer_from_wavevectors(
