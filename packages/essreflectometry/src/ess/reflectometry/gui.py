@@ -10,15 +10,19 @@ import ipywidgets as widgets
 import pandas as pd
 import plopp as pp
 import scipp as sc
-from ipydatagrid import DataGrid, VegaExpr
+from ipydatagrid import DataGrid, TextRenderer, VegaExpr
 from IPython.display import display
 from ipytree import Node, Tree
+from traitlets import Bool
 
 from ess import amor
 from ess.amor.types import ChopperPhase
+from ess.reflectometry.figures import wavelength_z_figure
 from ess.reflectometry.types import (
+    Filename,
     QBins,
     ReducedReference,
+    ReducibleData,
     ReferenceRun,
     ReflectivityOverQ,
     SampleRun,
@@ -30,8 +34,95 @@ from ess.reflectometry.types import (
 from ess.reflectometry.workflow import with_filenames
 
 
-class NexusExplorer:
-    def __init__(self, runs_table: DataGrid, run_to_filepath: Callable[[str], str]):
+class DetectorView(widgets.HBox):
+    is_active_tab = Bool(False).tag(sync=True)
+
+    def __init__(
+        self, runs_table: DataGrid, run_to_filepath: Callable[[str], str], **kwargs
+    ):
+        super().__init__([], **kwargs)
+        self.runs_table = runs_table
+        self.run_to_filepath = run_to_filepath
+        self.plot_log = widgets.VBox([])
+        self.working_label = widgets.Label(
+            "...working", layout=widgets.Layout(display='none')
+        )
+        self.children = (
+            widgets.VBox(
+                [
+                    widgets.Label("Runs Table"),
+                    self.runs_table,
+                ],
+                layout={"width": "35%"},
+            ),
+            widgets.VBox(
+                [
+                    widgets.HBox(
+                        [
+                            widgets.Label("Wavelength z-index counts distribution"),
+                            self.working_label,
+                        ]
+                    ),
+                    self.plot_log,
+                ],
+                layout={"width": "60%"},
+            ),
+        )
+
+        def run_when_selected_row_changes(change):
+            if not change['old'] or change['old'][0]['r1'] != change['new'][0]['r1']:
+                self.run_workflow()
+
+        self.runs_table.observe(run_when_selected_row_changes, names='selections')
+
+        def run_when_active_tab(change):
+            if change['new']:
+                self.run_workflow()
+
+        self.observe(run_when_active_tab, 'is_active_tab')
+
+    def run_workflow(self):
+        selections = self.runs_table.selections
+        if not self.is_active_tab or not selections:
+            return
+
+        self.working_label.layout.display = ''
+        row_idx = selections[0]['r1']
+        run = self.runs_table.data.iloc[row_idx]['Run']
+
+        workflow = amor.AmorWorkflow()
+        workflow[SampleSize[SampleRun]] = sc.scalar(10, unit='mm')
+        workflow[SampleSize[ReferenceRun]] = sc.scalar(10, unit='mm')
+
+        workflow[ChopperPhase[ReferenceRun]] = sc.scalar(7.5, unit='deg')
+        workflow[ChopperPhase[SampleRun]] = sc.scalar(7.5, unit='deg')
+
+        workflow[YIndexLimits] = (0, 64)
+        workflow[ZIndexLimits] = (0, 16 * 32)
+        workflow[WavelengthBins] = sc.geomspace(
+            'wavelength',
+            2,
+            13.5,
+            2001,
+            unit='angstrom',
+        )
+        workflow[Filename[SampleRun]] = self.run_to_filepath(run)
+        da = workflow.compute(ReducibleData[SampleRun])
+        da.bins.data[...] = sc.scalar(1.0, variance=1.0, unit=da.bins.unit)
+        da.bins.unit = 'counts'
+        da.masks.clear()
+        da.bins.masks.clear()
+        p = wavelength_z_figure(da, wavelength_bins=workflow.compute(WavelengthBins))
+        self.plot_log.children = (p,)
+        self.working_label.layout.display = 'none'
+
+
+class NexusExplorer(widgets.VBox):
+    def __init__(
+        self, runs_table: DataGrid, run_to_filepath: Callable[[str], str], **kwargs
+    ):
+        kwargs.setdefault('layout', {"width": "100%"})
+        super().__init__(**kwargs)
         self.runs_table = runs_table
         self.run_to_filepath = run_to_filepath
 
@@ -58,47 +149,44 @@ class NexusExplorer:
         self.nexus_tree.observe(self.on_tree_select, names='selected_nodes')
 
         # Create the Nexus Explorer tab content
-        self.widget = widgets.VBox(
-            [
-                widgets.Label("Nexus Explorer"),
-                widgets.HBox(
-                    [
-                        widgets.VBox(
-                            [
-                                widgets.Label("Runs Table"),
-                                self.runs_table,
-                            ],
-                            layout={"width": "30%"},
-                        ),
-                        widgets.VBox(
-                            [
-                                widgets.Label("File Structure"),
-                                widgets.VBox(
-                                    [self.nexus_tree],
-                                    layout=widgets.Layout(
-                                        width='100%',
-                                        height='600px',
-                                        min_height='100px',  # Min resize height
-                                        max_height='1000px',  # Max resize height
-                                        overflow_y='scroll',
-                                        border='1px solid lightgray',
-                                        resize='vertical',  # Add resize handle
-                                    ),
+        self.children = (
+            widgets.Label("Nexus Explorer"),
+            widgets.HBox(
+                [
+                    widgets.VBox(
+                        [
+                            widgets.Label("Runs Table"),
+                            self.runs_table,
+                        ],
+                        layout={"width": "30%"},
+                    ),
+                    widgets.VBox(
+                        [
+                            widgets.Label("File Structure"),
+                            widgets.VBox(
+                                [self.nexus_tree],
+                                layout=widgets.Layout(
+                                    width='100%',
+                                    height='600px',
+                                    min_height='100px',  # Min resize height
+                                    max_height='1000px',  # Max resize height
+                                    overflow_y='scroll',
+                                    border='1px solid lightgray',
+                                    resize='vertical',  # Add resize handle
                                 ),
-                            ],
-                            layout={"width": "35%"},
-                        ),
-                        widgets.VBox(
-                            [
-                                widgets.Label("Content"),
-                                self.nexus_content,
-                            ],
-                            layout={"width": "35%"},
-                        ),
-                    ]
-                ),
-            ],
-            layout={"width": "100%"},
+                            ),
+                        ],
+                        layout={"width": "35%"},
+                    ),
+                    widgets.VBox(
+                        [
+                            widgets.Label("Content"),
+                            self.nexus_content,
+                        ],
+                        layout={"width": "35%"},
+                    ),
+                ]
+            ),
         )
 
     def create_hdf5_tree(self, filepath):
@@ -241,6 +329,8 @@ class ReflectometryBatchReductionGUI:
                 if self.get_row_key(row) == row_key:
                     expr += template.format(i=i, reduced_color="'lightgreen'")
         expr += "default_value"
+        for renderer in table.renderers.values():
+            renderer.background_color = VegaExpr(expr)
         table.default_renderer.background_color = VegaExpr(expr)
 
     @staticmethod
@@ -253,6 +343,18 @@ class ReflectometryBatchReductionGUI:
         self.set_table_colors(self.reduction_table)
         self.set_table_colors(self.custom_reduction_table)
         self.set_table_colors(self.reference_table)
+
+    def get_renderers_for_reduction_table(self):
+        return {}
+
+    def get_renderers_for_reference_table(self):
+        return {}
+
+    def get_renderers_for_custom_reduction_table(self):
+        return {}
+
+    def get_renderers_for_runs_table(self):
+        return {}
 
     def log(self, message):
         out = widgets.Output()
@@ -306,6 +408,7 @@ class ReflectometryBatchReductionGUI:
             auto_fit_columns=True,
             column_visibility={"key": False},
             selection_mode="cell",
+            renderers=self.get_renderers_for_runs_table(),
         )
         self.reduction_table = DataGrid(
             pd.DataFrame([]),
@@ -313,6 +416,7 @@ class ReflectometryBatchReductionGUI:
             auto_fit_columns=True,
             column_visibility={"key": False},
             selection_mode="cell",
+            renderers=self.get_renderers_for_reduction_table(),
         )
         self.reference_table = DataGrid(
             pd.DataFrame([]),
@@ -320,6 +424,7 @@ class ReflectometryBatchReductionGUI:
             auto_fit_columns=True,
             column_visibility={"key": False},
             selection_mode="cell",
+            renderers=self.get_renderers_for_reference_table(),
         )
         self.custom_reduction_table = DataGrid(
             pd.DataFrame([]),
@@ -327,6 +432,7 @@ class ReflectometryBatchReductionGUI:
             auto_fit_columns=True,
             column_visibility={"key": False},
             selection_mode="cell",
+            renderers=self.get_renderers_for_custom_reduction_table(),
         )
 
         self.runs_table.on_cell_change(self.sync)
@@ -515,9 +621,17 @@ class ReflectometryBatchReductionGUI:
             tab_settings,
             tab_log,
         ]
-        self.tabs.set_title(0, "Reduce")
-        self.tabs.set_title(1, "Settings")
-        self.tabs.set_title(2, "Log")
+        self.tabs.titles = ["Reduce", "Settings", "Log"]
+
+        def on_tab_change(change):
+            old = self.tabs.children[change['old']]
+            new = self.tabs.children[change['new']]
+            if hasattr(old, 'is_active_tab'):
+                old.is_active_tab = False
+            if hasattr(new, 'is_active_tab'):
+                new.is_active_tab = True
+
+        self.tabs.observe(on_tab_change, names='selected_index')
 
         self.main = widgets.VBox(
             [
@@ -555,8 +669,16 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
     def __init__(self):
         super().__init__()
         self.nexus_explorer = NexusExplorer(self.runs_table, self.get_filepath_from_run)
-        self.tabs.children = (*self.tabs.children, self.nexus_explorer.widget)
-        self.tabs.set_title(len(self.tabs.children) - 1, "Nexus Explorer")
+        self.detector_display = DetectorView(
+            self.runs_table, self.get_filepath_from_run
+        )
+        self.tabs.children = (
+            *self.tabs.children,
+            self.nexus_explorer,
+            self.detector_display,
+        )
+        # Empty titles are automatically added for the new children
+        self.tabs.titles = [*self.tabs.titles[:-2], "Nexus Explorer", "Detector View"]
 
     def read_meta_data(self, path):
         with h5py.File(path) as f:
@@ -565,6 +687,21 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
                 "Run": path[-8:-4],
                 "Angle": f['entry1']['Amor']['master_parameters']['mu']['value'][0, 0],
             }
+
+    def get_renderers_for_reduction_table(self):
+        return {
+            'Angle': TextRenderer(text_value=VegaExpr("format(cell.value, ',.3f')"))
+        }
+
+    def get_renderers_for_custom_reduction_table(self):
+        return {
+            'Angle': TextRenderer(text_value=VegaExpr("format(cell.value, ',.3f')"))
+        }
+
+    def get_renderers_for_runs_table(self):
+        return {
+            'Angle': TextRenderer(text_value=VegaExpr("format(cell.value, ',.3f')"))
+        }
 
     @staticmethod
     def _merge_old_and_new_state(new, old, on, how='left'):
@@ -623,13 +760,15 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
         df = db["user_runs"]
         df = (
             df[df["Sample"] == "sm5"][~df["Exclude"]]
-            .groupby(["Sample"], as_index=False)
+            .groupby(["Sample", "Angle"], as_index=False)
             .agg(Runs=("Run", tuple))
-            .sort_values(by="Sample")
+            .sort_values(["Sample", "Angle"])
         )
         # We don't want changes to Sample
         # in the user_reference table to persist
-        user_reference = db['user_reference'].drop(columns=["Sample"], errors='ignore')
+        user_reference = db['user_reference'].drop(
+            columns=["Sample", "Angle"], errors='ignore'
+        )
         df = self._merge_old_and_new_state(df, user_reference, on='Runs')
         self._setdefault(df, "Ymin", 17)
         self._setdefault(df, "Ymax", 47)
@@ -637,8 +776,8 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
         self._setdefault(df, "Zmax", 380)
         self._setdefault(df, "Lmin", 3.0)
         self._setdefault(df, "Lmax", 12.5)
-        df = self._ordercolumns(df, 'Sample', 'Runs')
-        return df.sort_values(by="Sample")
+        df = self._ordercolumns(df, 'Sample', 'Angle', 'Runs')
+        return df.sort_values(["Sample", "Angle"])
 
     def sync_custom_reduction_table(self):
         df = self.custom_reduction_table.data.copy()
@@ -656,17 +795,17 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
         if len(df) == 0:
             self.log('There was nothing to display')
             return
-        try:
+        for _ in range(2):
             results = [
-                next(v for (m, _), v in self.results.items() if m == key)
-                for key in (tuple(row) for _, row in df.iterrows())
+                self.results[key]
+                for _, row in df.iterrows()
+                if (key := self.get_row_key(row)) in self.results
             ]
-        except StopIteration:
-            # No results were found for the selected row
+            if len(results) == len(df):
+                break
+            # No results were found for some of the selected rows.
             # It hasn't been computed yet, so compute it and try again.
             self.run_workflow()
-            self.display_results()
-            return
 
         def get_unique_names(df):
             # Create labels with Sample name and runs
@@ -694,6 +833,7 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
                     results,
                     norm='log',
                     figsize=(12, 6),
+                    vmin=1e-6,
                 )
             ]
         )
