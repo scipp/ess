@@ -3,7 +3,7 @@
 import scipp as sc
 
 from ..reflectometry.types import Filename, RawDetectorData, ReferenceRun, RunType
-from .types import CoordTransformationGraph, MonitorData
+from .types import CoordTransformationGraph, MonitorData, NeXusMonitorName
 
 
 def load_offspec_events(
@@ -19,9 +19,10 @@ def load_offspec_events(
 def load_offspec_monitor(
     filename: Filename[RunType],
     graph: CoordTransformationGraph[ReferenceRun],
+    monitor_name: NeXusMonitorName,
 ) -> MonitorData[RunType]:
     full = sc.io.load_hdf5(filename)
-    mon = full["monitors"]["monitor2"]["data"].transform_coords(
+    mon = full["monitors"][monitor_name]["data"].transform_coords(
         "wavelength", graph=graph
     )
     return mon

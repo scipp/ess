@@ -1,22 +1,42 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+import sciline
+
+from ..reflectometry import providers as reflectometry_providers
 from ..reflectometry.types import (
     RawDetectorData,
     ReducibleData,
     RunType,
     WavelengthBins,
 )
+from . import conversions, load, maskings, normalization
 from .corrections import correct_by_monitor
 from .maskings import add_masks
 from .types import (
     BackgroundMinWavelength,
     CoordTransformationGraph,
     MonitorData,
+    NeXusMonitorName,
     SpectrumLimits,
 )
 
 
-def add_coords_masks_and_apply_corrections_direct_beam(
+def OffspecWorkflow() -> sciline.Pipeline:
+    """
+    Workflow with default parameters for the Offspec instrument.
+    """
+    ps = (
+        *providers,
+        *reflectometry_providers,
+        *load.providers,
+        *conversions.providers,
+        *maskings.providers,
+        *normalization.providers,
+    )
+    return sciline.Pipeline(providers=ps, params={NeXusMonitorName: 'monitor2'})
+
+
+def add_coords_masks_and_apply_corrections(
     da: RawDetectorData[RunType],
     spectrum_limits: SpectrumLimits,
     wlims: WavelengthBins,
@@ -34,4 +54,4 @@ def add_coords_masks_and_apply_corrections_direct_beam(
     return da
 
 
-providers = (add_coords_masks_and_apply_corrections_direct_beam,)
+providers = (add_coords_masks_and_apply_corrections,)
