@@ -3,9 +3,12 @@
 
 """Coordinate conversions for indirect spectroscopy."""
 
-import numpy as np
 import scipp as sc
-from scippneutron.conversion.tof import energy_from_wavelength, wavelength_from_tof
+from scippneutron.conversion.tof import (
+    energy_from_wavelength,
+    wavelength_from_tof,
+    wavevector_from_wavelength,
+)
 
 from ..types import (
     BeamlineWithSpectrometerCoords,
@@ -37,7 +40,9 @@ def incident_wavelength_from_tof(
 def incident_wavevector_from_incident_wavelength(
     *, incident_wavelength: sc.Variable, incident_beam: sc.Variable
 ) -> sc.Variable:
-    return 2 * np.pi * incident_beam / sc.norm(incident_beam) / incident_wavelength
+    return wavevector_from_wavelength(
+        wavelength=incident_wavelength, beam=incident_beam
+    )
 
 
 def energy_transfer(
