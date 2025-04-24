@@ -60,16 +60,27 @@ def reduce_sample_over_q(
     Returns reflectivity as a function of :math:`Q`.
     """
     s = sample.bins.concat().bin(Q=qbins)
-    h = sc.values(reference.hist(Q=s.coords['Q']))
-    R = s / h.data
-    R.coords['Q_resolution'] = sc.sqrt(
-        (
-            (sc.values(reference) * reference.coords['Q_resolution'] ** 2)
-            .flatten(to='Q')
-            .hist(Q=s.coords['Q'])
+    h = sc.values(
+        (reference if reference.bins is None else reference.bins.concat()).hist(
+            Q=s.coords['Q']
         )
-        / h
-    ).data
+    )
+    R = s / h.data
+    if 'Q_resolution' in reference.coords or 'Q_resolution' in reference.bins.coords:
+        resolution = (
+            reference.coords['Q_resolution']
+            if 'Q_resolution' in reference.coords
+            else reference.bins.coords['Q_resolution']
+        )
+        weighted_resolution = sc.values(reference) * resolution**2
+        R.coords['Q_resolution'] = sc.sqrt(
+            (
+                weighted_resolution
+                if weighted_resolution.bins is None
+                else weighted_resolution.bins.concat()
+            ).hist(Q=s.coords['Q'])
+            / h
+        ).data
     return R
 
 
