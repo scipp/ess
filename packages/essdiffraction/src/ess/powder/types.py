@@ -25,7 +25,9 @@ from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroad
 BackgroundRun = reduce_t.BackgroundRun
 BunkerMonitor = reduce_t.Monitor2
 CalibratedDetector = reduce_t.CalibratedDetector
+CalibratedDetectorBeamline = reduce_t.CalibratedDetectorBeamline
 CalibratedMonitor = reduce_t.CalibratedMonitor
+CalibratedMonitorBeamline = reduce_t.CalibratedMonitorBeamline
 DetectorData = reduce_t.DetectorData
 DetectorPositionOffset = reduce_t.DetectorPositionOffset
 EmptyBeamRun = reduce_t.EmptyBeamRun
@@ -42,6 +44,8 @@ VanadiumRun = reduce_t.VanadiumRun
 
 DetectorBankSizes = reduce_t.DetectorBankSizes
 
+DetectorTofData = tof_t.DetectorTofData
+MonitorTofData = tof_t.MonitorTofData
 PulsePeriod = tof_t.PulsePeriod
 PulseStride = tof_t.PulseStride
 PulseStrideOffset = tof_t.PulseStrideOffset
@@ -101,8 +105,8 @@ CalibrationData = NewType("CalibrationData", sc.Dataset | None)
 """Detector calibration data."""
 
 
-class TofData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Data with time-of-flight coordinate."""
+# class TofData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+#     """Data with time-of-flight coordinate."""
 
 
 class DataWithScatteringCoordinates(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
@@ -212,16 +216,16 @@ ReducedTofCIF = NewType("ReducedTofCIF", cif.CIF)
 """Reduced data in time-of-flight, ready to be saved to a CIF file."""
 
 
-class DetectorLtotal(sciline.Scope[RunType, sc.Variable], sc.Variable):
-    """Total path length of neutrons from source to detector (L1 + L2)."""
+# class DetectorLtotal(sciline.Scope[RunType, sc.Variable], sc.Variable):
+#     """Total path length of neutrons from source to detector (L1 + L2)."""
 
 
-class MonitorLtotal(sciline.Scope[RunType, MonitorType, sc.Variable], sc.Variable):
-    """Total path length of neutrons from source to monitor."""
+# class MonitorLtotal(sciline.Scope[RunType, MonitorType, sc.Variable], sc.Variable):
+#     """Total path length of neutrons from source to monitor."""
 
 
-class TofMonitorData(sciline.Scope[RunType, MonitorType, sc.DataArray], sc.DataArray):
-    """Monitor data with time-of-flight coordinate."""
+# class TofMonitorData(sciline.Scope[RunType, MonitorType, sc.DataArray], sc.DataArray):
+#     """Monitor data with time-of-flight coordinate."""
 
 
 TimeOfFlightLookupTableFilename = NewType("TimeOfFlightLookupTableFilename", str)
