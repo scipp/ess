@@ -75,32 +75,13 @@ def correction_matrix(Pp, Pa, Ap, Aa):
     Defines the linear relationship between measured intensity
     and reflectivity.
     """
-    return [
-        [
-            (1 + Pp) * (1 + Ap) / 4,
-            (1 + Pp) * (1 - Ap) / 4,
-            (1 - Pp) * (1 + Ap) / 4,
-            (1 - Pp) * (1 - Ap) / 4,
-        ],
-        [
-            (1 + Pp) * (1 + Aa) / 4,
-            (1 + Pp) * (1 - Aa) / 4,
-            (1 - Pp) * (1 + Aa) / 4,
-            (1 - Pp) * (1 - Aa) / 4,
-        ],
-        [
-            (1 + Pa) * (1 + Ap) / 4,
-            (1 + Pa) * (1 - Ap) / 4,
-            (1 - Pa) * (1 + Ap) / 4,
-            (1 - Pa) * (1 - Ap) / 4,
-        ],
-        [
-            (1 + Pa) * (1 + Aa) / 4,
-            (1 + Pa) * (1 - Aa) / 4,
-            (1 - Pa) * (1 + Aa) / 4,
-            (1 - Pa) * (1 - Aa) / 4,
-        ],
-    ]
+    return (
+        np.kron(
+            np.array([[1 + Pp, 1 - Pp], [1 + Pa, 1 - Pa]]),
+            np.array([[1 + Ap, 1 - Ap], [1 + Aa, 1 - Aa]]),
+        )
+        / 4
+    )
 
 
 def calibration_factors_from_reference_measurements(Io, Is):

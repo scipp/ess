@@ -3,7 +3,11 @@ import pytest
 import scipp as sc
 from scipp.testing import assert_allclose
 
-from ess.estia.calibration import linsolve, solve_for_calibration_parameters
+from ess.estia.calibration import (
+    correction_matrix,
+    linsolve,
+    solve_for_calibration_parameters,
+)
 
 
 def generate_valid_calibration_parameters():
@@ -83,3 +87,18 @@ def test_stacking_in_linsolve(dims, shape):
     b = [sum(xi * ai for xi, ai in zip(x, a, strict=True)) for a in A]
     for u, v in zip(linsolve(A, b), x, strict=True):
         assert_allclose(u, v, atol=sc.scalar(1e-9))
+
+
+@pytest.mark.parametrize("seed", range(5))
+def test_calibration_factor_matches_intensity_from_parameters(seed):
+    np.random.seed(seed)
+    I0, Pp, Pa, Ap, Aa, _, _ = (
+        v.value for v in generate_valid_calibration_parameters()
+    )
+    Rpp, Rpa, Rap, Raa = np.random.random(4)
+    assert np.allclose(
+        intensity_from_parameters(I0, Pp, Pa, Ap, Aa, Rpp, Rpa, Rap, Raa),
+        I0
+        * np.array(correction_matrix(Pp, Pa, Ap, Aa))
+        @ np.array([Rpp, Rpa, Rap, Raa]),
+    )
