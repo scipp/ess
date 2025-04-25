@@ -8,7 +8,7 @@ graphviz
 plopp
 pythreejs
 orsopy
-sciline>=24.6.0
+sciline>=25.4.1
 scipp>=24.09.1
 scippneutron>=24.7.0
 scippnexus>=24.9.1

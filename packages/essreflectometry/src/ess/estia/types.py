@@ -23,7 +23,7 @@ PolarizedRunType = TypeVar(
 
 
 class Intensity(
-    sciline.ScopeTwoParams[PolarizedRunType, FlipperSetting, sc.DataArray], sc.DataArray
+    sciline.Scope[PolarizedRunType, FlipperSetting, sc.DataArray], sc.DataArray
 ):
     """Intensity distribution"""
 
