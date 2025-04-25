@@ -51,10 +51,11 @@ test = [
     "pytest",
     "pooch",
 ]
-gui = [
+all = [
   "ipywidgets",
   "ipydatagrid",
   "ipytree",
+  "pythreejs",
 ]
 
 [project.urls]
