@@ -26,7 +26,7 @@ pip install essreflectometry[all]
 ````
 ````{tab-item} conda
 ```sh
-conda install -c conda-forge -c scipp essreflectometry[all]
+conda install -c conda-forge -c scipp essreflectometry ipywidgets ipydatagrid ipytree pythreejs
 ```
 ````
 `````
