@@ -34,6 +34,19 @@ from ess.reflectometry.types import (
 from ess.reflectometry.workflow import with_filenames
 
 
+def _get_selected_rows(grid):
+    return (
+        pd.concat(
+            [
+                grid.get_visible_data().iloc[s['r1'] : s['r2'] + 1]
+                for s in grid.selections
+            ]
+        )
+        if grid.selections
+        else None
+    )
+
+
 class DetectorView(widgets.HBox):
     is_active_tab = Bool(False).tag(sync=True)
 
@@ -70,7 +83,11 @@ class DetectorView(widgets.HBox):
         )
 
         def run_when_selected_row_changes(change):
-            if not change['old'] or change['old'][0]['r1'] != change['new'][0]['r1']:
+            # Runs when there are no previous selections,
+            # or the new selection is different from the old.
+            if not change['old'] or (
+                change['new'] and change['new'][0]['r1'] != change['old'][0]['r1']
+            ):
                 self.run_workflow()
 
         self.runs_table.observe(run_when_selected_row_changes, names='selections')
@@ -82,13 +99,12 @@ class DetectorView(widgets.HBox):
         self.observe(run_when_active_tab, 'is_active_tab')
 
     def run_workflow(self):
-        selections = self.runs_table.selections
-        if not self.is_active_tab or not selections:
+        selected_rows = _get_selected_rows(self.runs_table)
+        if not self.is_active_tab or selected_rows is None:
             return
 
         self.working_label.layout.display = ''
-        row_idx = selections[0]['r1']
-        run = self.runs_table.data.iloc[row_idx]['Run']
+        run = selected_rows.iloc[0]['Run']
 
         workflow = amor.AmorWorkflow()
         workflow[SampleSize[SampleRun]] = sc.scalar(10, unit='mm')
@@ -219,14 +235,12 @@ class NexusExplorer(widgets.VBox):
 
     def update_nexus_view(self, *_):
         """Update the Nexus file viewer based on selected run."""
-        selections = self.runs_table.selections
-        if not selections:
+        selected_rows = _get_selected_rows(self.runs_table)
+        if selected_rows is None:
             self.nexus_tree.nodes = [Node("Select a run to view its structure")]
             return
 
-        # Get the first selected row
-        row_idx = selections[0]['r1']
-        run = self.runs_table.data.iloc[row_idx]['Run']
+        run = selected_rows.iloc[0]['Run']
         filepath = self.run_to_filepath(run)
 
         # Create and display the tree for this file
@@ -273,13 +287,11 @@ class NexusExplorer(widgets.VBox):
         # Get the path from the custom attribute
         path = getattr(selected_node, 'nexus_path', selected_node.name)
 
-        # Get the currently selected run
-        selections = self.runs_table.selections
-        if not selections:
+        selected_rows = _get_selected_rows(self.runs_table)
+        if selected_rows is None:
             return
 
-        row_idx = selections[0]['r1']
-        run = self.runs_table.data.iloc[row_idx]['Run']
+        run = selected_rows.iloc[0]['Run']
         filepath = self.run_to_filepath(run)
 
         with h5py.File(filepath, 'r') as f:
@@ -493,15 +505,8 @@ class ReflectometryBatchReductionGUI:
 
         def add_row(_):
             self.log("add row")
-            # Check if there are any selections in the reduction table
-            if len(self.reduction_table.selections) > 0:
-                # Get the first selected row
-                selection = self.reduction_table.selections[0]
-                row = self.reduction_table.data.iloc[
-                    selection['r1'] : selection['r2'] + 1
-                ]
-            else:
-                # Create an empty row with default values
+            row = _get_selected_rows(self.reduction_table)
+            if row is None:
                 row = pd.DataFrame(
                     [
                         {
@@ -660,9 +665,6 @@ class ReflectometryBatchReductionGUI:
 
     def log_progress(self, progress):
         self.progress_log.children = (progress,)
-
-    def log_plot(self, plot):
-        """Log a plot to the top of the plot log"""
 
 
 class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
@@ -912,9 +914,9 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
 
     def get_selected_rows(self):
         chunks = [
-            table.data.iloc[s['r1'] : s['r2'] + 1]
+            rows
             for table in (self.reduction_table, self.custom_reduction_table)
-            for s in table.selections
+            if (rows := _get_selected_rows(table)) is not None
         ]
         # Select everything if nothing is selected
         if len(chunks) == 0:
