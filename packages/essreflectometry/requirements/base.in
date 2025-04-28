@@ -6,7 +6,6 @@ dask
 python-dateutil
 graphviz
 plopp
-pythreejs
 orsopy
 sciline>=24.6.0
 scipp>=24.09.1
@@ -14,6 +13,3 @@ scippneutron>=24.7.0
 scippnexus>=24.9.1
 essreduce
 pandas
-ipywidgets
-ipydatagrid
-ipytree
