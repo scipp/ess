@@ -35,7 +35,6 @@ dependencies = [
   "python-dateutil",
   "graphviz",
   "plopp",
-  "pythreejs",
   "orsopy",
   "sciline>=24.6.0",
   "scipp>=24.09.1",  # Fixed new hist/bin API
@@ -43,9 +42,6 @@ dependencies = [
   "scippnexus>=24.9.1",
   "essreduce",
   "pandas",
-  "ipywidgets",
-  "ipydatagrid",
-  "ipytree",
 ]
 
 dynamic = ["version"]
@@ -54,6 +50,12 @@ dynamic = ["version"]
 test = [
     "pytest",
     "pooch",
+]
+all = [
+  "ipywidgets",
+  "ipydatagrid",
+  "ipytree",
+  "pythreejs",
 ]
 
 [project.urls]
