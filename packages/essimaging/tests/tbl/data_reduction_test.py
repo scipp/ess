@@ -8,12 +8,12 @@ import ess.tbl.data  # noqa: F401
 from ess import tbl
 from ess.tbl.types import (
     DetectorData,
+    DetectorTofData,
+    DetectorWavelengthData,
     Filename,
     NeXusDetectorName,
     SampleRun,
     TimeOfFlightLookupTable,
-    TofData,
-    WavelengthData,
 )
 
 
@@ -55,7 +55,7 @@ def test_can_load_detector_data(workflow, bank_name):
 )
 def test_can_compute_time_of_flight(workflow, bank_name):
     workflow[NeXusDetectorName] = bank_name
-    da = workflow.compute(TofData[SampleRun])
+    da = workflow.compute(DetectorTofData[SampleRun])
 
     assert "tof" in da.bins.coords
 
@@ -65,6 +65,6 @@ def test_can_compute_time_of_flight(workflow, bank_name):
 )
 def test_can_compute_wavelength(workflow, bank_name):
     workflow[NeXusDetectorName] = bank_name
-    da = workflow.compute(WavelengthData[SampleRun])
+    da = workflow.compute(DetectorWavelengthData[SampleRun])
 
     assert "wavelength" in da.bins.coords

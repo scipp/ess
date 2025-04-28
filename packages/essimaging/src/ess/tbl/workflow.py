@@ -7,11 +7,9 @@ Default parameters, providers and utility functions for the TBL workflow.
 import sciline
 import scipp as sc
 
-# from ess.reduce.workflow import register_workflow
-# from ess.sans.io import read_xml_detector_masking
-# from ess.sans.parameters import typical_outputs
+from ess.reduce.time_of_flight.workflow import GenericTofWorkflow
+
 from .conversion import providers as conversion_providers
-from .nexus import LoadNeXusWorkflow
 from .types import (
     DistanceResolution,
     LookupTableRelativeErrorThreshold,
@@ -21,6 +19,7 @@ from .types import (
     PulsePeriod,
     PulseStride,
     PulseStrideOffset,
+    SampleRun,
     TimeResolution,
 )
 
@@ -45,7 +44,7 @@ def TblWorkflow() -> sciline.Pipeline:
     """
     Workflow with default parameters for TBL.
     """
-    workflow = LoadNeXusWorkflow()
+    workflow = GenericTofWorkflow(run_types=[SampleRun], monitor_types=[Monitor1])
     for provider in providers:
         workflow.insert(provider)
     for key, param in default_parameters().items():

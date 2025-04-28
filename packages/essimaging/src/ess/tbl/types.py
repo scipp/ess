@@ -30,6 +30,8 @@ NeXusMonitorName = reduce_t.NeXusName
 NeXusComponent = reduce_t.NeXusComponent
 SampleRun = reduce_t.SampleRun
 
+DetectorLtotal = tof_t.DetectorLtotal
+DetectorTofData = tof_t.DetectorTofData
 PulsePeriod = tof_t.PulsePeriod
 PulseStride = tof_t.PulseStride
 PulseStrideOffset = tof_t.PulseStrideOffset
@@ -50,16 +52,8 @@ time-of-flight.
 """
 
 
-class TofData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Data with time-of-flight coordinate."""
-
-
-class DetectorLtotal(sciline.Scope[RunType, sc.Variable], sc.Variable):
-    """Total path length of neutrons from source to detector (L1 + L2)."""
-
-
-class WavelengthData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Data with wavelength coordinate."""
+class DetectorWavelengthData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Detector data with wavelength coordinate."""
 
 
 del sc, sciline, NewType, TypeVar
