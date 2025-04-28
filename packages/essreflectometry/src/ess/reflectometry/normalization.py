@@ -22,12 +22,12 @@ from .types import (
 
 def reduce_to_q(da, qbins):
     if da.bins:
-        return da.bins.concat().bin(Q=qbins)
+        return da.bin(Q=qbins, dim=da.dims)
     return da.hist(Q=qbins)
 
 
 def reduce_from_events_to_lz(da, wbins):
-    out = da.bins.concat(('stripe',)).bin(wavelength=wbins)
+    out = da.bin(wavelength=wbins, dim=('stripe',))
     if 'position' in da.coords:
         out.coords['position'] = da.coords['position'].mean('stripe')
     return out
