@@ -24,7 +24,7 @@ from .types import (
 @dataclass
 class PolarizationCalibrationParameters:
     I0: sc.DataArray
-    '''Intensity term.'''
+    '''Reference intensity.'''
     Pp: sc.DataArray
     '''Effective polarization of polarizer when polarizer flipper is off.'''
     Pa: sc.DataArray
@@ -200,7 +200,7 @@ def compute_reflectivity_calibrate_on_lz(
     cal = PolarizationCalibrationParameters.from_reference_measurements(
         reference_supermirror, reference_polarized_supermirror
     )
-    for i, s in enumerate(cal.correct_intensities(sample)):
+    for i, s in enumerate(cal.polarization_correction(sample)):
         sample[i].data = s
         sample[i] = sample[i].transform_coords(
             ("Q",),
