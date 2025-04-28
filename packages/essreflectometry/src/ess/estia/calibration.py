@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 import numpy as np
 import scipp as sc
 
@@ -19,82 +21,123 @@ from .types import (
 )
 
 
-def solve_for_calibration_parameters(Io, Is):
-    """
-    Solves for the calibration parameters given the reference
-    measurements.
+@dataclass
+class PolarizationCalibrationParameters:
+    I0: sc.DataArray
+    '''Intensity term.'''
+    Pp: sc.DataArray
+    '''Effective polarization of polarizer when polarizer flipper is off.'''
+    Pa: sc.DataArray
+    '''Effective polarization of polarizer when polarizer flipper is on.'''
+    Ap: sc.DataArray
+    '''Effective polarization of analyzer when analyzer flipper if on.'''
+    Aa: sc.DataArray
+    '''Effective polarization of analyzer when analyzer flipper is off.'''
+    Rspp: sc.DataArray
+    '''Magnetic supermirror reflectivity for neutrons with
+    spin parallel to instrument polarization.'''
+    Rsaa: sc.DataArray
+    '''Magnetic supermirror reflectivity for neutrons with
+    spin anti-parallel to instrument polarization.'''
 
-    See https://doi.org/10.1016/S0921-4526(00)00823-1.
-    """
-    Iopp, Iopa, Ioap, Ioaa = Io
-    Ipp, Ipa, Iap, Iaa = Is
+    @property
+    def polarization_matrix(self):
+        """
+        The linear relationship :math:`\\mathbf{C}`
+        such that :math:`\\mathbf{I} = I0 \\mathbf{C} \\mathbf{R}`.
 
-    I0 = 2 * (Iopp * Ioaa - Iopa * Ioap) / (Iopp + Ioaa - Iopa - Ioap)
-    rho = (Ioaa - Ioap) / (Iopp - Iopa)
-    alp = (Ioaa - Iopa) / (Iopp - Ioap)
-
-    Rspp_plus_Rsaa = (
-        4
-        * (rho * alp * Ipp + Iaa + rho * Ipa + alp * Iap)
-        / ((1 + rho) * (1 + alp) * I0)
-    )
-    Pp = sc.sqrt(
-        (Ipp + Iaa - Ipa - Iap)
-        * (alp * (Ipp - Iap) - Iaa + Ipa)
-        / (
-            (rho * alp * Ipp + Iaa + rho * Ipa + alp * Iap)
-            * (rho * (Ipp - Ipa) - Iaa + Iap)
+        Returns
+        ----------
+        :
+            The polarization matrix.
+        """
+        return (
+            np.kron(
+                np.array([[1 + self.Pp, 1 - self.Pp], [1 + self.Pa, 1 - self.Pa]]),
+                np.array([[1 + self.Ap, 1 - self.Ap], [1 + self.Aa, 1 - self.Aa]]),
+            )
+            / 4
         )
-    )
-    Ap = sc.sqrt(
-        (Ipp + Iaa - Ipa - Iap)
-        * (rho * (Ipp - Ipa) - Iaa + Iap)
-        / (
-            (rho * alp * Ipp + Iaa + rho * Ipa + alp * Iap)
+
+    @classmethod
+    def from_reference_measurements(cls, Io, Is):
+        """
+        Solves for the calibration parameters given the reference
+        measurements.
+
+        See https://doi.org/10.1016/S0921-4526(00)00823-1.
+
+        Parameters
+        ------------
+        Io:
+            Intensity from measurements with perfect
+            non-magnetic supermirror.
+        Is:
+            Intensity from measurements with
+            magnetic supermirror.
+
+        Returns
+        ----------
+        :
+            Polarization calibration parameters
+        """
+        Iopp, Iopa, Ioap, Ioaa = Io
+        Ipp, Ipa, Iap, Iaa = Is
+
+        I0 = 2 * (Iopp * Ioaa - Iopa * Ioap) / (Iopp + Ioaa - Iopa - Ioap)
+        rho = (Ioaa - Ioap) / (Iopp - Iopa)
+        alp = (Ioaa - Iopa) / (Iopp - Ioap)
+
+        Rspp_plus_Rsaa = (
+            4
+            * (rho * alp * Ipp + Iaa + rho * Ipa + alp * Iap)
+            / ((1 + rho) * (1 + alp) * I0)
+        )
+        Pp = sc.sqrt(
+            (Ipp + Iaa - Ipa - Iap)
             * (alp * (Ipp - Iap) - Iaa + Ipa)
+            / (
+                (rho * alp * Ipp + Iaa + rho * Ipa + alp * Iap)
+                * (rho * (Ipp - Ipa) - Iaa + Iap)
+            )
         )
-    )
-    Rs = sc.sqrt(
-        (alp * (Ipp - Iap) - Iaa + Ipa)
-        * (rho * (Ipp - Ipa) - Iaa + Iap)
-        / ((rho * alp * Ipp + Iaa + rho * Ipa + alp * Iap) * (Ipp + Iaa - Ipa - Iap))
-    )
-
-    Pa = -rho * Pp
-    Aa = -alp * Ap
-
-    Rspp_minus_Rsaa = Rs * Rspp_plus_Rsaa
-    Rspp = (Rspp_plus_Rsaa + Rspp_minus_Rsaa) / 2
-    Rsaa = Rspp_plus_Rsaa - Rspp
-
-    return I0, Pp, Pa, Ap, Aa, Rspp, Rsaa
-
-
-def correction_matrix(Pp, Pa, Ap, Aa):
-    """
-    Defines the linear relationship between measured intensity
-    and reflectivity.
-    """
-    return (
-        np.kron(
-            np.array([[1 + Pp, 1 - Pp], [1 + Pa, 1 - Pa]]),
-            np.array([[1 + Ap, 1 - Ap], [1 + Aa, 1 - Aa]]),
+        Ap = sc.sqrt(
+            (Ipp + Iaa - Ipa - Iap)
+            * (rho * (Ipp - Ipa) - Iaa + Iap)
+            / (
+                (rho * alp * Ipp + Iaa + rho * Ipa + alp * Iap)
+                * (alp * (Ipp - Iap) - Iaa + Ipa)
+            )
         )
-        / 4
-    )
+        Rs = sc.sqrt(
+            (alp * (Ipp - Iap) - Iaa + Ipa)
+            * (rho * (Ipp - Ipa) - Iaa + Iap)
+            / (
+                (rho * alp * Ipp + Iaa + rho * Ipa + alp * Iap)
+                * (Ipp + Iaa - Ipa - Iap)
+            )
+        )
+
+        Pa = -rho * Pp
+        Aa = -alp * Ap
+
+        Rspp_minus_Rsaa = Rs * Rspp_plus_Rsaa
+        Rspp = (Rspp_plus_Rsaa + Rspp_minus_Rsaa) / 2
+        Rsaa = Rspp_plus_Rsaa - Rspp
+
+        return cls(I0, Pp, Pa, Ap, Aa, Rspp, Rsaa)
+
+    def polarization_correction(self, Is):
+        '''Corrects the intensities for imperfections of polarizing components'''
+        return _linsolve(self.polarization_matrix, Is)
+
+    def correct_intensities_and_normalize_by_reference(self, Is):
+        '''Corrects the intensities for imperfections of polarizing components
+        and normalizes by reference intensity to obtain reflectivity.'''
+        return [i / self.I0 for i in self.polarization_correction(Is)]
 
 
-def calibration_factors_from_reference_measurements(Io, Is):
-    """
-    Computes the polarization instrument parameters from
-    the calibration measurements on the non-magnetic reference
-    and the calibration measurements on the magnetic reference.
-    """
-    I0, Pp, Pa, Ap, Aa, _, _ = solve_for_calibration_parameters(Io, Is)
-    return I0, correction_matrix(Pp, Pa, Ap, Aa)
-
-
-def _linsolve(A, b):
+def _linsolve_numpy(A, b):
     x = np.linalg.solve(
         np.stack([np.stack(row, -1) for row in A], -2),
         np.stack(b, -1)[..., None],
@@ -102,8 +145,25 @@ def _linsolve(A, b):
     return np.moveaxis(x, -1, 0)
 
 
-def linsolve(A, b):
-    x = _linsolve(
+def _linsolve(A, b):
+    '''
+    Solves :math:`\\mathbf{b}=\\mathbf{A}\\mathbf{x}`
+    at each point of the ``DataArrays`` in ``A`` and ``b``.
+
+    Parameters
+    ------------
+    A:
+        4x4 matrix containing `scipp.DataArray` or `scipp.Variable``.
+    b:
+        4-vector containing `scipp.DataArray` or `scipp.Variable``.
+
+    Returns
+    ----------
+    :
+        4-vector containing `scipp.DataArray` or `scipp.Variable``,
+        representing the solution to the equation.
+    '''
+    x = _linsolve_numpy(
         [[a.values for a in row] for row in A],
         [bi.values for bi in b],
     )
@@ -118,16 +178,12 @@ def compute_reflectivity_calibrate_on_q(
 ):
     """Reduces reference and sample to Q before applying
     the polarization correction and normalization."""
-    reference_supermirror = [reduce_to_q(i, qbins) for i in reference_supermirror]
-    reference_polarized_supermirror = [
-        reduce_to_q(i, qbins) for i in reference_polarized_supermirror
-    ]
-    I0, C = calibration_factors_from_reference_measurements(
-        reference_supermirror, reference_polarized_supermirror
+    return PolarizationCalibrationParameters.from_reference_measurements(
+        [reduce_to_q(i, qbins) for i in reference_supermirror],
+        [reduce_to_q(i, qbins) for i in reference_polarized_supermirror],
+    ).correct_intensities_and_normalize_by_reference(
+        [reduce_to_q(i, qbins).hist() for i in sample]
     )
-    sample = [reduce_to_q(i, qbins).hist() for i in sample]
-    sample = linsolve(C, sample)
-    return [i / I0 for i in sample]
 
 
 def compute_reflectivity_calibrate_on_lz(
@@ -141,10 +197,10 @@ def compute_reflectivity_calibrate_on_lz(
     """Applied the polarization correction on the wavelength-z grid
     then reduces to Q to apply the normalization."""
     sample = [reduce_from_events_to_lz(s, wbins).hist() for s in sample]
-    I0, C = calibration_factors_from_reference_measurements(
+    cal = PolarizationCalibrationParameters.from_reference_measurements(
         reference_supermirror, reference_polarized_supermirror
     )
-    for i, s in enumerate(linsolve(C, sample)):
+    for i, s in enumerate(cal.correct_intensities(sample)):
         sample[i].data = s
         sample[i] = sample[i].transform_coords(
             ("Q",),
@@ -155,13 +211,13 @@ def compute_reflectivity_calibrate_on_lz(
         )
         sample[i].coords['Q'] = sc.midpoints(sample[i].coords['Q'], 'wavelength')
 
-    masks = [sc.isnan(I0.data) | sc.isnan(s.data) for s in sample]
+    masks = [sc.isnan(cal.I0.data) | sc.isnan(s.data) for s in sample]
     sample = [
         reduce_to_q(s.assign_masks(isnan=m), qbins)
         for s, m in zip(sample, masks, strict=True)
     ]
     return [
-        s / reduce_to_q(I0.assign_masks(isnan=m), qbins).data
+        s / reduce_to_q(cal.I0.assign_masks(isnan=m), qbins).data
         for s, m in zip(sample, masks, strict=True)
     ]
 

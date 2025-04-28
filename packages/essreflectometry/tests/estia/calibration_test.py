@@ -4,9 +4,8 @@ import scipp as sc
 from scipp.testing import assert_allclose
 
 from ess.estia.calibration import (
-    correction_matrix,
-    linsolve,
-    solve_for_calibration_parameters,
+    PolarizationCalibrationParameters,
+    _linsolve,
 )
 
 
@@ -68,10 +67,11 @@ def test_calibration_solve_recovers_input(seed):
     Is = intensity_from_parameters(
         I0, Pp, Pa, Ap, Aa, Rspp, sc.scalar(0), sc.scalar(0), Rsaa
     )
+    cal = PolarizationCalibrationParameters.from_reference_measurements(Io, Is)
     tuple(
         map(
             assert_allclose,
-            solve_for_calibration_parameters(Io, Is),
+            (cal.I0, cal.Pp, cal.Pa, cal.Ap, cal.Aa, cal.Rspp, cal.Rsaa),
             (I0, Pp, Pa, Ap, Aa, Rspp, Rsaa),
         )
     )
@@ -85,20 +85,20 @@ def test_stacking_in_linsolve(dims, shape):
     ]
     x = [sc.array(dims=dims, values=np.random.randn(*shape)) for _ in range(4)]
     b = [sum(xi * ai for xi, ai in zip(x, a, strict=True)) for a in A]
-    for u, v in zip(linsolve(A, b), x, strict=True):
+    for u, v in zip(_linsolve(A, b), x, strict=True):
         assert_allclose(u, v, atol=sc.scalar(1e-9))
 
 
 @pytest.mark.parametrize("seed", range(5))
 def test_calibration_factor_matches_intensity_from_parameters(seed):
     np.random.seed(seed)
-    I0, Pp, Pa, Ap, Aa, _, _ = (
-        v.value for v in generate_valid_calibration_parameters()
+    cal = PolarizationCalibrationParameters(
+        *(v.value for v in generate_valid_calibration_parameters())
     )
     Rpp, Rpa, Rap, Raa = np.random.random(4)
     assert np.allclose(
-        intensity_from_parameters(I0, Pp, Pa, Ap, Aa, Rpp, Rpa, Rap, Raa),
-        I0
-        * np.array(correction_matrix(Pp, Pa, Ap, Aa))
-        @ np.array([Rpp, Rpa, Rap, Raa]),
+        intensity_from_parameters(
+            cal.I0, cal.Pp, cal.Pa, cal.Ap, cal.Aa, Rpp, Rpa, Rap, Raa
+        ),
+        cal.I0 * np.array(cal.polarization_matrix) @ np.array([Rpp, Rpa, Rap, Raa]),
     )
