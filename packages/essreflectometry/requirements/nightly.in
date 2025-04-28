@@ -4,7 +4,6 @@
 dask
 python-dateutil
 graphviz
-pythreejs
 orsopy
 essreduce
 esspolarization
