@@ -21,6 +21,14 @@ from .types import (
 )
 
 
+def _kronecker_product(A, B):
+    return [
+        [A[ia][ja] * B[ib][jb] for ja in range(2) for jb in range(2)]
+        for ia in range(2)
+        for ib in range(2)
+    ]
+
+
 @dataclass
 class PolarizationCalibrationParameters:
     I0: sc.DataArray
@@ -51,12 +59,15 @@ class PolarizationCalibrationParameters:
         :
             The polarization matrix.
         """
-        return (
-            np.kron(
-                np.array([[1 + self.Pp, 1 - self.Pp], [1 + self.Pa, 1 - self.Pa]]),
-                np.array([[1 + self.Ap, 1 - self.Ap], [1 + self.Aa, 1 - self.Aa]]),
-            )
-            / 4
+        return _kronecker_product(
+            [
+                [(1 + self.Pp) / 2, (1 - self.Pp) / 2],
+                [(1 + self.Pa) / 2, (1 - self.Pa) / 2],
+            ],
+            [
+                [(1 + self.Ap) / 2, (1 - self.Ap) / 2],
+                [(1 + self.Aa) / 2, (1 - self.Aa) / 2],
+            ],
         )
 
     @classmethod
