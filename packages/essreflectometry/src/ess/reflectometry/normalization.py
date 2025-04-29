@@ -70,12 +70,9 @@ def reduce_sample_over_q(
     Returns reflectivity as a function of :math:`Q`.
     """
     s = reduce_to_q(sample, qbins)
-    if len(reference.dims) > 1:
-        h = sc.values(reduce_to_q(reference, s.coords['Q']))
-    elif reference.bins:
-        h = sc.values(reference.hist())
-    else:
-        h = sc.values(reference)
+    h = sc.values(reduce_to_q(reference, s.coords['Q']))
+    if h.bins:
+        h = h.hist()
     R = s / h.data
     if 'Q_resolution' in reference.coords or 'Q_resolution' in reference.bins.coords:
         resolution = (
