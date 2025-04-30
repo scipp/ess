@@ -4,13 +4,9 @@
 dask
 python-dateutil
 graphviz
-pythreejs
 orsopy
 essreduce
 pandas
-ipywidgets
-ipydatagrid
-ipytree
 pytest
 pooch
 plopp @ git+https://github.com/scipp/plopp@main

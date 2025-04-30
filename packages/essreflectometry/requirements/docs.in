@@ -10,3 +10,6 @@ sphinx-copybutton
 sphinx-design
 pooch
 ipympl
+ipywidgets
+ipydatagrid
+ipytree
