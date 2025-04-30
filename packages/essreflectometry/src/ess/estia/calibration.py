@@ -8,6 +8,7 @@ from ess.reflectometry.normalization import (
     reduce_to_q,
 )
 from ess.reflectometry.types import CoordTransformationGraph, QBins, WavelengthBins
+
 from .types import (
     Intensity,
     MagneticReference,
