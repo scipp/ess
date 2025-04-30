@@ -3,11 +3,11 @@ from dataclasses import dataclass
 import numpy as np
 import scipp as sc
 
-from ..reflectometry.normalization import (
+from ess.reflectometry.normalization import (
     reduce_from_events_to_lz,
     reduce_to_q,
 )
-from ..reflectometry.types import CoordTransformationGraph, QBins, WavelengthBins
+from ess.reflectometry.types import CoordTransformationGraph, QBins, WavelengthBins
 from .types import (
     Intensity,
     MagneticReference,
