@@ -48,7 +48,7 @@ def amor_pipeline() -> sciline.Pipeline:
     )
     # The sample rotation value in the file is slightly off, so we set it manually
     pl[SampleRotation[ReferenceRun]] = sc.scalar(0.65, unit="deg")
-    pl[Filename[ReferenceRun]] = amor.data.amor_reference_run()
+    pl[Filename[ReferenceRun]] = amor.data.amor_run(614, year=2023)
 
     pl[orso.OrsoCreator] = orso.OrsoCreator(
         fileio.base.Person(
@@ -65,7 +65,7 @@ def amor_pipeline() -> sciline.Pipeline:
 def test_has_expected_coordinates(amor_pipeline: sciline.Pipeline):
     # The sample rotation value in the file is slightly off, so we set it manually
     amor_pipeline[SampleRotation[SampleRun]] = sc.scalar(0.85, unit="deg")
-    amor_pipeline[Filename[SampleRun]] = amor.data.amor_sample_run(608)
+    amor_pipeline[Filename[SampleRun]] = amor.data.amor_run(608, year=2023)
     reflectivity_over_q = amor_pipeline.compute(ReflectivityOverQ)
     assert "Q" in reflectivity_over_q.coords
     assert "Q_resolution" in reflectivity_over_q.coords
@@ -76,7 +76,7 @@ def test_has_expected_coordinates(amor_pipeline: sciline.Pipeline):
 def test_pipeline_no_gravity_correction(amor_pipeline: sciline.Pipeline):
     # The sample rotation value in the file is slightly off, so we set it manually
     amor_pipeline[SampleRotation[SampleRun]] = sc.scalar(0.85, unit="deg")
-    amor_pipeline[Filename[SampleRun]] = amor.data.amor_sample_run(608)
+    amor_pipeline[Filename[SampleRun]] = amor.data.amor_run(608, year=2023)
     amor_pipeline[amor.types.GravityToggle] = False
     reflectivity_over_q = amor_pipeline.compute(ReflectivityOverQ)
     assert "Q" in reflectivity_over_q.coords
@@ -88,7 +88,7 @@ def test_pipeline_no_gravity_correction(amor_pipeline: sciline.Pipeline):
 def test_orso_pipeline(amor_pipeline: sciline.Pipeline):
     # The sample rotation value in the file is slightly off, so we set it manually
     amor_pipeline[SampleRotation[SampleRun]] = sc.scalar(0.85, unit="deg")
-    amor_pipeline[Filename[SampleRun]] = amor.data.amor_sample_run(608)
+    amor_pipeline[Filename[SampleRun]] = amor.data.amor_run(608, year=2023)
     res = amor_pipeline.compute(orso.OrsoIofQDataset)
     assert res.info.data_source.experiment.instrument == "Amor"
     assert res.info.reduction.software.name == "ess.reflectometry"
@@ -109,7 +109,7 @@ def test_save_reduced_orso_file(amor_pipeline: sciline.Pipeline, output_folder: 
     from orsopy import fileio
 
     amor_pipeline[SampleRotation[SampleRun]] = sc.scalar(0.85, unit="deg")
-    amor_pipeline[Filename[SampleRun]] = amor.data.amor_sample_run(608)
+    amor_pipeline[Filename[SampleRun]] = amor.data.amor_run(608, year=2023)
     res = amor_pipeline.compute(orso.OrsoIofQDataset)
     fileio.orso.save_orso(datasets=[res], fname=output_folder / 'amor_reduced_iofq.ort')
 
@@ -120,8 +120,8 @@ def test_pipeline_can_compute_reflectivity_merging_events_from_multiple_runs(
     amor_pipeline: sciline.Pipeline,
 ):
     sample_runs = [
-        amor.data.amor_sample_run(608),
-        amor.data.amor_sample_run(609),
+        amor.data.amor_run(608, year=2023),
+        amor.data.amor_run(609, year=2023),
     ]
     pipeline = with_filenames(amor_pipeline, SampleRun, sample_runs)
     pipeline[SampleRotation[SampleRun]] = pipeline.compute(
@@ -135,7 +135,7 @@ def test_pipeline_can_compute_reflectivity_merging_events_from_multiple_runs(
 @pytest.mark.filterwarnings("ignore:Invalid transformation, missing attribute")
 def test_pipeline_merging_events_result_unchanged(amor_pipeline: sciline.Pipeline):
     sample_runs = [
-        amor.data.amor_sample_run(608),
+        amor.data.amor_run(608, year=2023),
     ]
     pipeline = with_filenames(amor_pipeline, SampleRun, sample_runs)
     pipeline[SampleRotation[SampleRun]] = pipeline.compute(
@@ -143,8 +143,8 @@ def test_pipeline_merging_events_result_unchanged(amor_pipeline: sciline.Pipelin
     ) + sc.scalar(0.05, unit="deg")
     result = pipeline.compute(ReflectivityOverQ).hist()
     sample_runs = [
-        amor.data.amor_sample_run(608),
-        amor.data.amor_sample_run(608),
+        amor.data.amor_run(608, year=2023),
+        amor.data.amor_run(608, year=2023),
     ]
     pipeline = with_filenames(amor_pipeline, SampleRun, sample_runs)
     pipeline[SampleRotation[SampleRun]] = pipeline.compute(
@@ -162,7 +162,7 @@ def test_pipeline_merging_events_result_unchanged(amor_pipeline: sciline.Pipelin
 @pytest.mark.filterwarnings("ignore:Failed to convert .* into a transformation")
 @pytest.mark.filterwarnings("ignore:Invalid transformation, missing attribute")
 def test_proton_current(amor_pipeline: sciline.Pipeline):
-    amor_pipeline[Filename[SampleRun]] = amor.data.amor_sample_run(611)
+    amor_pipeline[Filename[SampleRun]] = amor.data.amor_run(611, year=2023)
     da_without_proton_current = amor_pipeline.compute(ReducibleData[SampleRun])
 
     proton_current = [1, 2, 0.1]
