@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+import re
 
 from ..reflectometry.types import Filename, ReferenceRun, SampleRun
 
@@ -83,8 +84,15 @@ def amor_old_reference_run() -> Filename[ReferenceRun]:
     return Filename[ReferenceRun](_pooch.fetch("reference.nxs"))
 
 
-def amor_run(number: int | str, year: int | str = 2024) -> Filename[SampleRun]:
-    return Filename[SampleRun](_pooch.fetch(f"amor{year}n{int(number):06d}.hdf"))
+def amor_run(number: int | str) -> Filename[SampleRun]:
+    fnames = [
+        name
+        for name in _pooch.registry.keys()
+        if re.match(f'amor\\d{{4}}n{int(number):06d}.hdf', name)
+    ]
+    if len(fnames) != 1:
+        raise ValueError(f'Expected exactly one matching file, found {len(fnames)}')
+    return Filename[SampleRun](_pooch.fetch(fnames[0]))
 
 
 def amor_psi_software_result(number: int | str) -> Filename[SampleRun]:
