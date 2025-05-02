@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+import re
 
 from ..reflectometry.types import Filename, ReferenceRun, SampleRun
 
@@ -50,6 +51,24 @@ def _make_pooch():
             "611.Rqz.ort": "md5:0c51e8ac5c00041434417673be186151",
             "612.Rqz.ort": "md5:d785d27151e7f1edc05e86d35bef6a63",
             "613.Rqz.ort": "md5:e999c85f7a47665c4ddd1538b19d402d",
+            "amor2024n001632.hdf": "md5:2253f0ec6d2e96a986a6aa35d43a7480",
+            "amor2024n001634.hdf": "md5:7cdd87bbd96fb3fb1e046800a9b1d77e",
+            "amor2024n001635.hdf": "md5:fb9eb0e7b803c13f1804d085b3b0058f",
+            "amor2024n001636.hdf": "md5:f7deb51d22652d1f5d0e4b51927af5a3",
+            "amor2024n001637.hdf": "md5:06e5957d34d82035cfece40cbbf47d7a",
+            "amor2024n001638.hdf": "md5:1193fe808af2afeb0f48d3b0022fe40b",
+            "amor2024n001639.hdf": "md5:ff24e31a07c4020927aaa6df9f2ee05f",
+            "amor2024n001640.hdf": "md5:051335fea1c369322a2328d530dedb77",
+            "amor2024n001641.hdf": "md5:d543b5890b63707cf8d7f6666e8830a4",
+            "amor2024n001642.hdf": "md5:b1474e32cc64371e1005f44f2c5b6ae7",
+            "amor2024n004079.hdf": "md5:5bf1dabc2ff902a57ed7593903c8e1a5",
+            "amor2024n004080.hdf": "md5:7dcaa5da00b7eedc178b9e55209bfbce",
+            "amor2024n004081.hdf": "md5:2f4f46f0e56ab75aad0c2933060df504",
+            "amor2024n004083.hdf": "md5:ffd13420e44cbf966b94bd532e293c1c",
+            "amor2024n004084.hdf": "md5:5041a9486b3cd6407a9b9f44104c9b54",
+            "amor2024n004085.hdf": "md5:152ac63bad6f3b2b5cf1c4e4c7df5e30",
+            "amor2024n004152.hdf": "md5:244459be7a3caeac523c289815c5b7dc",
+            "amor2024n004154.hdf": "md5:6184553f795fd2b230baab9a421da9e4",
         },
     )
 
@@ -65,12 +84,15 @@ def amor_old_reference_run() -> Filename[ReferenceRun]:
     return Filename[ReferenceRun](_pooch.fetch("reference.nxs"))
 
 
-def amor_reference_run() -> Filename[ReferenceRun]:
-    return Filename[ReferenceRun](_pooch.fetch("amor2023n000614.hdf"))
-
-
-def amor_sample_run(number: int | str) -> Filename[SampleRun]:
-    return Filename[SampleRun](_pooch.fetch(f"amor2023n{int(number):06d}.hdf"))
+def amor_run(number: int | str) -> Filename[SampleRun]:
+    fnames = [
+        name
+        for name in _pooch.registry.keys()
+        if re.match(f'amor\\d{{4}}n{int(number):06d}.hdf', name)
+    ]
+    if len(fnames) != 1:
+        raise ValueError(f'Expected exactly one matching file, found {len(fnames)}')
+    return Filename[SampleRun](_pooch.fetch(fnames[0]))
 
 
 def amor_psi_software_result(number: int | str) -> Filename[SampleRun]:
@@ -79,6 +101,5 @@ def amor_psi_software_result(number: int | str) -> Filename[SampleRun]:
 
 __all__ = [
     "amor_psi_software_result",
-    "amor_reference_run",
-    "amor_sample_run",
+    "amor_run",
 ]
