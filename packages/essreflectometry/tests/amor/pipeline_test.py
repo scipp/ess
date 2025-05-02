@@ -121,7 +121,7 @@ def test_save_reduced_orso_file(output_folder: Path):
     wf[Filename[ReferenceRun]] = data.amor_run(4152)
     wf[QBins] = sc.geomspace(dim="Q", start=0.01, stop=0.06, num=201, unit="1/angstrom")
     r = wf.compute(ReflectivityOverQ)
-    _, (s, *_) = scale_reflectivity_curves_to_overlap(
+    _, (s,) = scale_reflectivity_curves_to_overlap(
         [r.hist()],
         critical_edge_interval=(
             sc.scalar(0.01, unit='1/angstrom'),
