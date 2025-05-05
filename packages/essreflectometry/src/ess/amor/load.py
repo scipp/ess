@@ -10,6 +10,7 @@ from ..reflectometry.types import (
     LoadedNeXusDetector,
     NeXusDetectorName,
     ProtonCurrent,
+    RawChopper,
     RawDetectorData,
     RunType,
     SampleRotation,
@@ -21,7 +22,6 @@ from .types import (
     ChopperFrequency,
     ChopperPhase,
     ChopperSeparation,
-    RawChopper,
 )
 
 

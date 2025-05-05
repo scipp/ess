@@ -6,7 +6,6 @@ import pandas as pd
 import sciline
 import scipp as sc
 
-from ess.amor.types import RawChopper
 from ess.reflectometry.orso import (
     OrsoExperiment,
     OrsoOwner,
@@ -15,6 +14,7 @@ from ess.reflectometry.orso import (
 )
 from ess.reflectometry.types import (
     Filename,
+    RawChopper,
     ReducibleData,
     RunType,
     SampleRotation,

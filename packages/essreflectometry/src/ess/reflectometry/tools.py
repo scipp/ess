@@ -8,10 +8,15 @@ import numpy as np
 import sciline
 import scipp as sc
 import scipy.optimize as opt
-from orsopy.fileio.orso import OrsoDataset
 
 from ess.reflectometry import orso
-from ess.reflectometry.types import ReflectivityOverQ
+from ess.reflectometry.types import (
+    Filename,
+    ReducibleData,
+    ReflectivityOverQ,
+    SampleRun,
+)
+from ess.reflectometry.workflow import with_filenames
 
 _STD_TO_FWHM = sc.scalar(2.0) * sc.sqrt(sc.scalar(2.0) * sc.log(sc.scalar(2.0)))
 
@@ -280,18 +285,18 @@ def combine_curves(
     )
 
 
-def orso_datasets_from_measurements(
+def from_measurements(
     workflow: sciline.Pipeline,
-    runs: Sequence[Mapping[type, Any]],
+    runs: Sequence[Mapping[type, Any]] | Mapping[Any, Mapping[type, Any]],
+    target: type | Sequence[type] = orso.OrsoIofQDataset,
     *,
-    scale_to_overlap: bool = True,
-) -> list[OrsoDataset]:
-    '''Produces a list of ORSO datasets containing one
-    reflectivity curve for each of the provided runs.
+    scale_to_overlap: bool | tuple[sc.Variable, sc.Variable] = False,
+) -> list | Mapping:
+    '''Produces a list of datasets containing for each of the provided runs.
     Each entry of :code:`runs` is a mapping of parameters and
     values needed to produce the dataset.
 
-    Optionally, the reflectivity curves can be scaled to overlap in
+    Optionally, the results can be scaled so that the reflectivity curves overlap in
     the regions where they have the same Q-value.
 
     Parameters
@@ -300,38 +305,82 @@ def orso_datasets_from_measurements(
         The sciline workflow used to compute `ReflectivityOverQ` for each of the runs.
 
     runs:
-        The sciline parameters to be used for each run
+        The sciline parameters to be used for each run.
+
+    target:
+        The domain type to compute for each run.
 
     scale_to_overlap:
-        If True the curves will be scaled to overlap.
-        Note that the curve of the first run is unscaled and
-        the rest are scaled to match it.
+        If not ``None`` the curves will be scaled to overlap.
+        If a tuple then this argument will be passed as the ``critical_edge_interval``
+        to the ``scale_reflectivity_curves_to_overlap`` function.
 
     Returns
     ---------
     list of the computed ORSO datasets, containing one reflectivity curve each
     '''
-    reflectivity_curves = []
-    for parameters in runs:
-        wf = workflow.copy()
-        for name, value in parameters.items():
-            wf[name] = value
-        reflectivity_curves.append(wf.compute(ReflectivityOverQ))
+    names = runs.keys() if hasattr(runs, 'keys') else None
+    runs = runs.values() if hasattr(runs, 'values') else runs
 
-    scale_factors = (
-        scale_reflectivity_curves_to_overlap([r.hist() for r in reflectivity_curves])[1]
-        if scale_to_overlap
-        else (1,) * len(runs)
-    )
+    def init_workflow(workflow, parameters):
+        if Filename[SampleRun] in parameters:
+            if isinstance(parameters[Filename[SampleRun]], list | tuple):
+                wf = with_filenames(
+                    workflow,
+                    SampleRun,
+                    parameters[Filename[SampleRun]],
+                )
+            else:
+                wf = workflow.copy()
+                wf[Filename[SampleRun]] = parameters[Filename[SampleRun]]
+        else:
+            wf = workflow.copy()
+        for tp, value in parameters.items():
+            if tp is Filename[SampleRun]:
+                continue
+            wf[tp] = value
+        return wf
+
+    if scale_to_overlap:
+        results = []
+        for parameters in runs:
+            wf = init_workflow(workflow, parameters)
+            results.append(wf.compute((ReflectivityOverQ, ReducibleData[SampleRun])))
+
+        scale_factors = scale_reflectivity_curves_to_overlap(
+            [r[ReflectivityOverQ].hist() for r in results],
+            critical_edge_interval=scale_to_overlap
+            if isinstance(scale_to_overlap, list | tuple)
+            else None,
+        )[1]
 
     datasets = []
-    for parameters, curve, scale_factor in zip(
-        runs, reflectivity_curves, scale_factors, strict=True
-    ):
-        wf = workflow.copy()
-        for name, value in parameters.items():
-            wf[name] = value
-        wf[ReflectivityOverQ] = scale_factor * curve
-        dataset = wf.compute(orso.OrsoIofQDataset)
+    for i, parameters in enumerate(runs):
+        wf = init_workflow(workflow, parameters)
+        if scale_to_overlap:
+            # Optimization in case we can avoid re-doing some work:
+            # Check if any of the targets need ReducibleData if
+            # ReflectivityOverQ already exists.
+            # If they don't, we can avoid recomputing ReducibleData.
+            targets = target if hasattr(target, '__len__') else (target,)
+            if any(
+                _workflow_needs_quantity_A_even_if_quantitiy_B_is_set(
+                    wf[t], ReducibleData[SampleRun], ReflectivityOverQ
+                )
+                for t in targets
+            ):
+                wf[ReducibleData[SampleRun]] = (
+                    scale_factors[i] * results[i][ReducibleData[SampleRun]]
+                )
+            else:
+                wf[ReflectivityOverQ] = scale_factors[i] * results[i][ReflectivityOverQ]
+
+        dataset = wf.compute(target)
         datasets.append(dataset)
-    return datasets
+    return datasets if names is None else dict(zip(names, datasets, strict=True))
+
+
+def _workflow_needs_quantity_A_even_if_quantitiy_B_is_set(workflow, A, B):
+    wf = workflow.copy()
+    wf[B] = 'Not important'
+    return A in wf.underlying_graph
