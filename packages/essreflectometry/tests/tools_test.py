@@ -224,32 +224,6 @@ def test_linlogspace_bad_input():
 
 
 @pytest.mark.filterwarnings("ignore:No suitable")
-def test_from_measurements_tool():
-    def normalized_ioq(filename: Filename[SampleRun]) -> ReflectivityOverQ:
-        return filename
-
-    def orso_dataset(filename: Filename[SampleRun]) -> OrsoDataset:
-        class Reduction:
-            corrections = []  # noqa: RUF012
-
-        return OrsoDataset(
-            Orso({}, Reduction, [], name=f'{filename}.orso'), np.ones((0, 0))
-        )
-
-    workflow = sl.Pipeline(
-        [normalized_ioq, orso_dataset], params={Filename[SampleRun]: 'default'}
-    )
-    datasets = from_measurements(
-        workflow,
-        [{}, {Filename[SampleRun]: 'special'}],
-        target=OrsoDataset,
-        scale_to_overlap=False,
-    )
-    assert len(datasets) == 2
-    assert tuple(d.info.name for d in datasets) == ('default.orso', 'special.orso')
-
-
-@pytest.mark.filterwarnings("ignore:No suitable")
 def test_from_measurements_tool_uses_expected_parameters_from_each_run():
     def normalized_ioq(filename: Filename[SampleRun]) -> ReflectivityOverQ:
         return filename
