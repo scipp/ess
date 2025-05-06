@@ -364,7 +364,7 @@ def from_measurements(
             # If they don't, we can avoid recomputing ReducibleData.
             targets = target if hasattr(target, '__len__') else (target,)
             if any(
-                _workflow_needs_quantity_A_even_if_quantitiy_B_is_set(
+                _workflow_needs_quantity_A_even_if_quantity_B_is_set(
                     wf[t], ReducibleData[SampleRun], ReflectivityOverQ
                 )
                 for t in targets
@@ -380,7 +380,7 @@ def from_measurements(
     return datasets if names is None else dict(zip(names, datasets, strict=True))
 
 
-def _workflow_needs_quantity_A_even_if_quantitiy_B_is_set(workflow, A, B):
+def _workflow_needs_quantity_A_even_if_quantity_B_is_set(workflow, A, B):
     wf = workflow.copy()
     wf[B] = 'Not important'
     return A in wf.underlying_graph
