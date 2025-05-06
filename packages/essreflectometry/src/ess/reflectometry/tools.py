@@ -308,7 +308,7 @@ def from_measurements(
         The sciline parameters to be used for each run.
 
     target:
-        The domain type to compute for each run.
+        The domain type(s) to compute for each run.
 
     scale_to_overlap:
         If not ``None`` the curves will be scaled to overlap.
@@ -323,22 +323,21 @@ def from_measurements(
     runs = runs.values() if hasattr(runs, 'values') else runs
 
     def init_workflow(workflow, parameters):
-        if Filename[SampleRun] in parameters:
-            if isinstance(parameters[Filename[SampleRun]], list | tuple):
-                wf = with_filenames(
-                    workflow,
-                    SampleRun,
-                    parameters[Filename[SampleRun]],
-                )
-            else:
-                wf = workflow.copy()
-                wf[Filename[SampleRun]] = parameters[Filename[SampleRun]]
-        else:
-            wf = workflow.copy()
+        wf = workflow.copy()
         for tp, value in parameters.items():
             if tp is Filename[SampleRun]:
                 continue
             wf[tp] = value
+
+        if Filename[SampleRun] in parameters:
+            if isinstance(parameters[Filename[SampleRun]], list | tuple):
+                wf = with_filenames(
+                    wf,
+                    SampleRun,
+                    parameters[Filename[SampleRun]],
+                )
+            else:
+                wf[Filename[SampleRun]] = parameters[Filename[SampleRun]]
         return wf
 
     if scale_to_overlap:
