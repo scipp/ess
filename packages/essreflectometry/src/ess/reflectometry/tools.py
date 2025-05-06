@@ -311,9 +311,9 @@ def from_measurements(
         The domain type(s) to compute for each run.
 
     scale_to_overlap:
-        If not ``None`` the curves will be scaled to overlap.
+        If ``True`` the curves will be scaled to overlap.
         If a tuple then this argument will be passed as the ``critical_edge_interval``
-        to the ``scale_reflectivity_curves_to_overlap`` function.
+        argument to the ``scale_reflectivity_curves_to_overlap`` function.
 
     Returns
     ---------
