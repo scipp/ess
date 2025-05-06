@@ -9,7 +9,7 @@ from collections.abc import Callable, ItemsView, Iterable, Iterator, KeysView, M
 import scipp as sc
 import scipp.constants
 
-from .types import CalibratedBeamline, SampleRun
+from .types import CalibratedBeamline, ElasticCoordTransformGraph, SampleRun
 
 
 class OutputCalibrationData(Mapping[int, sc.Variable]):
@@ -95,11 +95,12 @@ class OutputCalibrationData(Mapping[int, sc.Variable]):
 
 def assemble_output_calibration(
     beamline: CalibratedBeamline[SampleRun],
+    coord_transform_graph: ElasticCoordTransformGraph,
 ) -> OutputCalibrationData:
     """Construct output calibration data from fake pixel positions."""
-    l1 = sc.norm(
-        beamline.coords['sample_position'] - beamline.coords['source_position']
-    )
+    l1 = beamline.transform_coords(
+        'L1', graph=coord_transform_graph, quiet=True
+    ).coords['L1']
     # A very rough average of DREAM's detector positions.
     # The value doesn't matter, but this moves the detector away from the sample.
     l2 = sc.scalar(1000, unit='mm').to(unit=l1.unit)
