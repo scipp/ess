@@ -14,7 +14,12 @@ from ess.reflectometry.tools import (
     linlogspace,
     scale_reflectivity_curves_to_overlap,
 )
-from ess.reflectometry.types import Filename, ReflectivityOverQ, SampleRun
+from ess.reflectometry.types import (
+    Filename,
+    ReducibleData,
+    ReflectivityOverQ,
+    SampleRun,
+)
 
 
 def curve(d, qmin, qmax):
@@ -268,3 +273,74 @@ def test_from_measurements_tool_returns_mapping_if_passed_mapping(params, target
     )
     assert len(datasets) == len(params)
     assert type(datasets) is type(params)
+
+
+def test_from_measurements_tool_does_not_recompute_reflectivity():
+    R = sc.DataArray(
+        sc.ones(dims=['Q'], shape=(50,), with_variances=True),
+        coords={'Q': sc.linspace('Q', 0.1, 1, 50)},
+    ).bin(Q=10)
+
+    times_evaluated = 0
+
+    def reflectivity() -> ReflectivityOverQ:
+        nonlocal times_evaluated
+        times_evaluated += 1
+        return ReflectivityOverQ(R)
+
+    def reducible_data() -> ReducibleData[SampleRun]:
+        return 'Not important'
+
+    pl = sl.Pipeline([reflectivity, reducible_data])
+
+    from_measurements(
+        pl,
+        [{}, {}],
+        target=(ReflectivityOverQ,),
+        scale_to_overlap=True,
+    )
+    assert times_evaluated == 2
+
+
+def test_from_measurements_tool_applies_scaling_to_reflectivityoverq():
+    R1 = sc.DataArray(
+        sc.ones(dims=['Q'], shape=(50,), with_variances=True),
+        coords={'Q': sc.linspace('Q', 0.1, 1, 50)},
+    ).bin(Q=10)
+    R2 = 0.5 * R1
+
+    def reducible_data() -> ReducibleData[SampleRun]:
+        return 'Not important'
+
+    pl = sl.Pipeline([reducible_data])
+
+    results = from_measurements(
+        pl,
+        [{ReflectivityOverQ: R1}, {ReflectivityOverQ: R2}],
+        target=(ReflectivityOverQ,),
+        scale_to_overlap=(sc.scalar(0.0), sc.scalar(1.0)),
+    )
+    assert_allclose(results[0][ReflectivityOverQ], results[1][ReflectivityOverQ])
+
+
+def test_from_measurements_tool_applies_scaling_to_reducibledata():
+    R1 = sc.DataArray(
+        sc.ones(dims=['Q'], shape=(50,), with_variances=True),
+        coords={'Q': sc.linspace('Q', 0.1, 1, 50)},
+    ).bin(Q=10)
+    R2 = 0.5 * R1
+
+    def reducible_data() -> ReducibleData[SampleRun]:
+        return sc.scalar(1)
+
+    pl = sl.Pipeline([reducible_data])
+
+    results = from_measurements(
+        pl,
+        [{ReflectivityOverQ: R1}, {ReflectivityOverQ: R2}],
+        target=(ReducibleData[SampleRun],),
+        scale_to_overlap=(sc.scalar(0.0), sc.scalar(1.0)),
+    )
+    assert_allclose(
+        results[0][ReducibleData[SampleRun]], 0.5 * results[1][ReducibleData[SampleRun]]
+    )
