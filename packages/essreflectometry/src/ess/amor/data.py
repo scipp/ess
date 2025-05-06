@@ -2,8 +2,6 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import re
 
-from ..reflectometry.types import Filename, ReferenceRun, SampleRun
-
 _version = "2"
 
 
@@ -76,15 +74,15 @@ def _make_pooch():
 _pooch = _make_pooch()
 
 
-def amor_old_sample_run() -> Filename[SampleRun]:
-    return Filename[SampleRun](_pooch.fetch("sample.nxs"))
+def amor_old_sample_run() -> str:
+    return _pooch.fetch("sample.nxs")
 
 
-def amor_old_reference_run() -> Filename[ReferenceRun]:
-    return Filename[ReferenceRun](_pooch.fetch("reference.nxs"))
+def amor_old_reference_run() -> str:
+    return _pooch.fetch("reference.nxs")
 
 
-def amor_run(number: int | str) -> Filename[SampleRun]:
+def amor_run(number: int | str) -> str:
     fnames = [
         name
         for name in _pooch.registry.keys()
@@ -92,11 +90,11 @@ def amor_run(number: int | str) -> Filename[SampleRun]:
     ]
     if len(fnames) != 1:
         raise ValueError(f'Expected exactly one matching file, found {len(fnames)}')
-    return Filename[SampleRun](_pooch.fetch(fnames[0]))
+    return _pooch.fetch(fnames[0])
 
 
-def amor_psi_software_result(number: int | str) -> Filename[SampleRun]:
-    return Filename[SampleRun](_pooch.fetch(f"{int(number):03d}.Rqz.ort"))
+def amor_psi_software_result(number: int | str) -> str:
+    return _pooch.fetch(f"{int(number):03d}.Rqz.ort")
 
 
 __all__ = [
