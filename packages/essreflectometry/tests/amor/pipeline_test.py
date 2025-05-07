@@ -10,8 +10,9 @@ from orsopy import fileio
 from scipp.testing import assert_allclose
 
 from ess import amor
-from ess.amor import data  # noqa: F401
+from ess.amor import data
 from ess.reflectometry import orso
+from ess.reflectometry.tools import scale_reflectivity_curves_to_overlap
 from ess.reflectometry.types import (
     Filename,
     ProtonCurrent,
@@ -105,13 +106,40 @@ def test_orso_pipeline(amor_pipeline: sciline.Pipeline):
 
 @pytest.mark.filterwarnings("ignore:Failed to convert .* into a transformation")
 @pytest.mark.filterwarnings("ignore:Invalid transformation, missing attribute")
-def test_save_reduced_orso_file(amor_pipeline: sciline.Pipeline, output_folder: Path):
+def test_save_reduced_orso_file(output_folder: Path):
     from orsopy import fileio
 
-    amor_pipeline[SampleRotation[SampleRun]] = sc.scalar(0.85, unit="deg")
-    amor_pipeline[Filename[SampleRun]] = amor.data.amor_run(608)
-    res = amor_pipeline.compute(orso.OrsoIofQDataset)
-    fileio.orso.save_orso(datasets=[res], fname=output_folder / 'amor_reduced_iofq.ort')
+    wf = sciline.Pipeline(providers=amor.providers, params=amor.default_parameters())
+    wf[SampleSize[SampleRun]] = sc.scalar(10.0, unit="mm")
+    wf[SampleSize[ReferenceRun]] = sc.scalar(10.0, unit="mm")
+    wf[YIndexLimits] = sc.scalar(11), sc.scalar(41)
+    wf[WavelengthBins] = sc.geomspace("wavelength", 3, 12.5, 2000, unit="angstrom")
+    wf[ZIndexLimits] = sc.scalar(170), sc.scalar(266)
+    wf = with_filenames(
+        wf, SampleRun, [data.amor_run(4079), data.amor_run(4080), data.amor_run(4081)]
+    )
+    wf[Filename[ReferenceRun]] = data.amor_run(4152)
+    wf[QBins] = sc.geomspace(dim="Q", start=0.01, stop=0.06, num=201, unit="1/angstrom")
+    r = wf.compute(ReflectivityOverQ)
+    _, (s,) = scale_reflectivity_curves_to_overlap(
+        [r.hist()],
+        critical_edge_interval=(
+            sc.scalar(0.01, unit='1/angstrom'),
+            sc.scalar(0.014, unit='1/angstrom'),
+        ),
+    )
+    wf[ReflectivityOverQ] = s * r
+    wf[orso.OrsoCreator] = orso.OrsoCreator(
+        fileio.base.Person(
+            name="Max Mustermann",
+            affiliation="European Spallation Source ERIC",
+            contact="max.mustermann@ess.eu",
+        )
+    )
+    fileio.orso.save_orso(
+        datasets=[wf.compute(orso.OrsoIofQDataset)],
+        fname=output_folder / 'amor_reduced_iofq.ort',
+    )
 
 
 @pytest.mark.filterwarnings("ignore:Failed to convert .* into a transformation")

@@ -2,6 +2,7 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import glob
 import os
+import re
 import uuid
 from collections.abc import Callable
 
@@ -902,7 +903,12 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
         self.plot_log.children = (box, *self.plot_log.children)
 
     def get_filepath_from_run(self, run):
-        return os.path.join(self.path, f'amor2024n{run:0>6}.hdf')
+        fname = next(
+            name
+            for name in os.listdir(self.path)
+            if re.match(f'amor\\d{{4}}n{int(run):06d}.hdf', name)
+        )
+        return os.path.join(self.path, fname)
 
     def get_row_key(self, row):
         reference_metadata = (
