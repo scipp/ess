@@ -28,7 +28,6 @@ MonitorPositionOffset = reduce_t.MonitorPositionOffset
 NeXusMonitorName = reduce_t.NeXusName
 NeXusComponent = reduce_t.NeXusComponent
 SampleRun = reduce_t.SampleRun
-ScatteringRunType = reduce_t.ScatteringRunType
 Transmission = reduce_t.TransmissionMonitor
 TransmissionRun = reduce_t.TransmissionRun
 
@@ -44,6 +43,8 @@ RunType = TypeVar(
     TransmissionRun[SampleRun],
     TransmissionRun[BackgroundRun],
 )
+ScatteringRunType = TypeVar('ScatteringRunType', BackgroundRun, SampleRun)
+
 
 UncertaintyBroadcastMode = _UncertaintyBroadcastMode
 
