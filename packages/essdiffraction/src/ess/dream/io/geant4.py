@@ -74,9 +74,9 @@ def extract_geant4_detector(
     detectors: AllRawDetectors[RunType], detector_name: NeXusDetectorName
 ) -> NeXusComponent[snx.NXdetector, RunType]:
     """Extract a single detector from a loaded GEANT4 simulation."""
-    return NeXusComponent[snx.NXdetector, RunType](
-        detectors["instrument"][detector_name]
-    )
+    detector = detectors["instrument"][detector_name]
+    detector['events'].coords['detector'] = sc.scalar(detector_name)
+    return NeXusComponent[snx.NXdetector, RunType](detector)
 
 
 def get_calibrated_geant4_detector(

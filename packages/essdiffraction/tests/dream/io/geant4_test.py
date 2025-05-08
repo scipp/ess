@@ -189,4 +189,5 @@ def test_geant4_in_pipeline(file_path, file):
 
     detector = pipeline.compute(NeXusComponent[snx.NXdetector, SampleRun])['events']
     expected = load_geant4_csv(file)["instrument"]["mantle"]["events"]
+    expected.coords["detector"] = sc.scalar("mantle")
     sc.testing.assert_identical(detector, expected)

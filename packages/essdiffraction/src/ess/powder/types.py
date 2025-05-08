@@ -24,6 +24,7 @@ from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroad
 
 BackgroundRun = reduce_t.BackgroundRun
 BunkerMonitor = reduce_t.Monitor2
+CalibratedBeamline = reduce_t.CalibratedBeamline
 CalibratedDetector = reduce_t.CalibratedDetector
 CalibratedBeamline = reduce_t.CalibratedBeamline
 CalibratedMonitor = reduce_t.CalibratedMonitor

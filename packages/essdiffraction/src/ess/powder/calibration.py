@@ -93,9 +93,7 @@ class OutputCalibrationData(Mapping[int, sc.Variable]):
         )
 
 
-def assemble_output_calibration(
-    data: DspacingData[SampleRun],
-) -> OutputCalibrationData:
+def assemble_output_calibration(data: DspacingData[SampleRun]) -> OutputCalibrationData:
     """Construct output calibration data from average pixel positions."""
     # Use nanmean because pixels without events have position=NaN.
     average_l = sc.nanmean(data.coords["Ltotal"])
