@@ -91,7 +91,7 @@ def default_parameters() -> dict:
 def _collect_reducer_software() -> ReducerSoftwares:
     return ReducerSoftwares(
         [
-            # Software.from_package_metadata('essdiffraction'),
+            Software.from_package_metadata('essdiffraction'),
             Software.from_package_metadata('scippneutron'),
             Software.from_package_metadata('scipp'),
         ]
