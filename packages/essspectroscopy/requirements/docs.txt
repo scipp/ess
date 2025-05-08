@@ -20,19 +20,19 @@ babel==2.17.0
     # via
     #   pydata-sphinx-theme
     #   sphinx
-beautifulsoup4==4.13.3
+beautifulsoup4==4.13.4
     # via
     #   nbconvert
     #   pydata-sphinx-theme
 bleach[css]==6.2.0
     # via nbconvert
-certifi==2025.1.31
+certifi==2025.4.26
     # via requests
-charset-normalizer==3.4.1
+charset-normalizer==3.4.2
     # via requests
 comm==0.2.2
     # via ipykernel
-debugpy==1.8.13
+debugpy==1.8.14
     # via ipykernel
 decorator==5.2.1
     # via ipython
@@ -54,7 +54,7 @@ imagesize==1.4.1
     # via sphinx
 ipykernel==6.29.5
     # via -r docs.in
-ipython==8.35.0
+ipython==8.36.0
     # via
     #   -r docs.in
     #   ipykernel
@@ -68,7 +68,7 @@ jinja2==3.1.6
     #   sphinx
 jsonschema==4.23.0
     # via nbformat
-jsonschema-specifications==2024.10.1
+jsonschema-specifications==2025.4.1
     # via jsonschema
 jupyter-client==8.6.3
     # via
@@ -122,13 +122,13 @@ parso==0.8.4
     # via jedi
 pexpect==4.9.0
     # via ipython
-platformdirs==4.3.7
+platformdirs==4.3.8
     # via
     #   jupyter-core
     #   pooch
 pooch==1.8.2
     # via -r docs.in
-prompt-toolkit==3.0.50
+prompt-toolkit==3.0.51
     # via ipython
 psutil==7.0.0
     # via ipykernel
@@ -165,7 +165,7 @@ rpds-py==0.24.0
     #   referencing
 snowballstemmer==2.2.0
     # via sphinx
-soupsieve==2.6
+soupsieve==2.7
     # via beautifulsoup4
 sphinx==8.1.3
     # via
@@ -216,7 +216,7 @@ traitlets==5.14.3
     #   nbconvert
     #   nbformat
     #   nbsphinx
-urllib3==2.3.0
+urllib3==2.4.0
     # via requests
 wcwidth==0.2.13
     # via prompt-toolkit

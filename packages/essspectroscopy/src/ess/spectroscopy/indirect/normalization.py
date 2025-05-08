@@ -5,15 +5,16 @@
 
 import sciline
 
-from ess.reduce import time_of_flight
+from ess.reduce import nexus, time_of_flight
 
 from ..types import (
     MonitorCoordTransformGraph,
     MonitorData,
+    MonitorTofData,
     MonitorType,
     RunType,
+    SampleRun,
     TimeOfFlightLookupTable,
-    TofMonitor,
 )
 
 
@@ -21,7 +22,7 @@ def unwrap_monitor(
     monitor: MonitorData[RunType, MonitorType],
     table: TimeOfFlightLookupTable,
     coord_transform_graph: MonitorCoordTransformGraph,
-) -> TofMonitor[RunType, MonitorType]:
+) -> MonitorTofData[RunType, MonitorType]:
     path_length = monitor.transform_coords(
         'Ltotal',
         graph=coord_transform_graph,
@@ -31,16 +32,23 @@ def unwrap_monitor(
     ).coords['Ltotal']
 
     tof_wf = sciline.Pipeline(
-        (*time_of_flight.providers(), time_of_flight.resample_tof_data),
+        (
+            *time_of_flight.providers(),
+            time_of_flight.resample_monitor_time_of_flight_data,
+        ),
         params={
             **time_of_flight.default_parameters(),
             time_of_flight.TimeOfFlightLookupTable: table,
-            time_of_flight.Ltotal: path_length,
-            time_of_flight.RawData: monitor.rename(t='tof'),
+            time_of_flight.MonitorLtotal[SampleRun, nexus.types.Monitor1]: path_length,
+            nexus.types.MonitorData[SampleRun, nexus.types.Monitor1]: monitor.rename(
+                t='tof'
+            ),
         },
     )
-    unwrapped = tof_wf.compute(time_of_flight.ResampledTofData)
-    return TofMonitor[RunType, MonitorType](unwrapped)
+    unwrapped = tof_wf.compute(
+        time_of_flight.ResampledMonitorTofData[SampleRun, nexus.types.Monitor1]
+    )
+    return MonitorTofData[RunType, MonitorType](unwrapped)
 
 
 providers = (unwrap_monitor,)

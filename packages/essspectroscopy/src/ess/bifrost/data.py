@@ -3,7 +3,7 @@
 
 """Data for tests and documentation with BIFROST."""
 
-_version = "1"
+_version = "2"
 
 
 def _make_pooch():
@@ -16,8 +16,8 @@ def _make_pooch():
         version=_version,
         registry={
             "BIFROST_20240914T053723.h5": "md5:0f2fa5c9a851f8e3a4fa61defaa3752e",
-            "computed_energy_data_simulated.h5": "md5:ba3e4834d12bd5153c9f1bf88f4848a1",
-            "BIFROST-simulation-tof-lookup-table.h5": "md5:9469b7b8c50463b1110bfbdffa2989d5",  # noqa: E501
+            "computed_energy_data_simulated.h5": "md5:f07197a552b90decb8c8efd5515b6c26",
+            "BIFROST-simulation-tof-lookup-table.h5": "md5:d9d8173008ce9f03166953da28496488",  # noqa: E501
         },
     )
 

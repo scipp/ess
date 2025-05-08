@@ -48,6 +48,8 @@ MonitorType = TypeVar(
 
 # Time-of-flight types
 
+DetectorTofData = time_of_flight.DetectorTofData
+MonitorTofData = time_of_flight.MonitorTofData
 PulseStride = time_of_flight.PulseStride
 PulsePeriod = time_of_flight.PulsePeriod
 TimeOfFlightLookupTable = time_of_flight.TimeOfFlightLookupTable
@@ -92,12 +94,6 @@ class PrimarySpecCoordTransformGraph(sciline.Scope[RunType, dict], dict): ...
 
 
 class SecondarySpecCoordTransformGraph(sciline.Scope[RunType, dict], dict): ...
-
-
-class TofData(sciline.Scope[RunType, sc.DataArray], sc.DataArray): ...
-
-
-class TofMonitor(sciline.Scope[RunType, MonitorType, sc.DataArray], sc.DataArray): ...
 
 
 class WavelengthMonitor(
