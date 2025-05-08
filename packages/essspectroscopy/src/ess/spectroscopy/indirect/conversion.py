@@ -10,16 +10,16 @@ from scippneutron.conversion.tof import energy_from_wavelength, wavelength_from_
 from ..types import (
     BeamlineWithSpectrometerCoords,
     CalibratedBeamline,
+    DetectorTofData,
     EnergyData,
     GravityVector,
     InelasticCoordTransformGraph,
     MonitorCoordTransformGraph,
+    MonitorTofData,
     MonitorType,
     PrimarySpecCoordTransformGraph,
     RunType,
     SecondarySpecCoordTransformGraph,
-    TofData,
-    TofMonitor,
     WavelengthMonitor,
 )
 from ..utils import in_same_unit
@@ -153,7 +153,7 @@ def inelastic_coordinate_transformation_graph_at_sample(
 
 
 def add_inelastic_coordinates(
-    data: TofData[RunType], graph: InelasticCoordTransformGraph
+    data: DetectorTofData[RunType], graph: InelasticCoordTransformGraph
 ) -> EnergyData[RunType]:
     transformed = data.transform_coords(
         [
@@ -229,7 +229,7 @@ def monitor_coordinate_transformation_graph() -> MonitorCoordTransformGraph:
 
 
 def add_monitor_wavelength_coords(
-    monitor: TofMonitor[RunType, MonitorType], graph: MonitorCoordTransformGraph
+    monitor: MonitorTofData[RunType, MonitorType], graph: MonitorCoordTransformGraph
 ) -> WavelengthMonitor[RunType, MonitorType]:
     return WavelengthMonitor[RunType, MonitorType](
         monitor.transform_coords(
