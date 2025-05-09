@@ -1,39 +1,25 @@
+# SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 from typing import Any, NewType, TypeVar
 
 import sciline
 import scipp as sc
+from ess.reduce.nexus import types as reduce_t
 
-ReferenceRun = NewType("ReferenceRun", str)
-SampleRun = NewType("SampleRun", str)
+SampleRun = reduce_t.SampleRun
+# `VanadiumRun` is not the best name, see https://github.com/scipp/essreduce/issues/238
+ReferenceRun = reduce_t.VanadiumRun
 RunType = TypeVar("RunType", ReferenceRun, SampleRun)
 
+CalibratedDetector = reduce_t.CalibratedDetector
+DetectorData = reduce_t.DetectorData
+DetectorPositionOffset = reduce_t.DetectorPositionOffset
+Filename = reduce_t.Filename
+NeXusComponent = reduce_t.NeXusComponent
+NeXusDetectorName = reduce_t.NeXusDetectorName
+Position = reduce_t.Position
+
 CoordTransformationGraph = NewType("CoordTransformationGraph", dict)
-
-
-class NeXusDetectorName(sciline.Scope[RunType, str], str):
-    """Name of the detector in the nexus file containing the events of the RunType"""
-
-
-class DetectorPosition(sciline.Scope[RunType, sc.Variable], sc.Variable):
-    """Positions of the detector pixels, relative to the source(?), as a 3d-vector"""
-
-
-class SamplePosition(sciline.Scope[RunType, sc.Variable], sc.Variable):
-    """The position of the sample relative to the source(?)."""
-
-
-class SpecularReflectionCoordTransformGraph(sciline.Scope[RunType, dict], dict):
-    """Coordinate transformation graph for specular reflection"""
-
-
-class RawDetectorData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Event time data from nexus file,
-    binned by `detector_number` (pixel of the detector frame)."""
-
-
-class LoadedNeXusDetector(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
-    """NXdetector loaded from file"""
 
 
 class ReducibleData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
@@ -73,10 +59,6 @@ WavelengthBins = NewType("WavelengthBins", sc.Variable)
 class ThetaBins(sciline.Scope[RunType, sc.Variable], sc.Variable):
     """Binning in theta that takes into consideration that some
     detector pixels have the same theta value."""
-
-
-class Filename(sciline.Scope[RunType, str], str):
-    """Filename of an event data nexus file."""
 
 
 class RawSampleRotation(sciline.Scope[RunType, sc.Variable], sc.Variable):

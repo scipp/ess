@@ -4,6 +4,7 @@ import importlib.metadata
 
 import sciline
 import scipp as sc
+import scippnexus as snx
 
 from ..reflectometry import providers as reflectometry_providers
 from ..reflectometry import supermirror
@@ -13,7 +14,7 @@ from ..reflectometry.types import (
     DetectorSpatialResolution,
     NeXusDetectorName,
     RunType,
-    SamplePosition,
+    Position,
     SampleRotationOffset,
 )
 from . import conversions, load, maskings, normalization, orso, resolution, workflow
@@ -52,8 +53,8 @@ def default_parameters() -> dict:
         supermirror.Alpha: sc.scalar(0.25 / 0.088, unit=sc.units.angstrom),
         BeamSize[RunType]: 2.0 * sc.units.mm,
         DetectorSpatialResolution[RunType]: 0.0025 * sc.units.m,
-        SamplePosition[RunType]: sc.vector([0, 0, 0], unit="m"),
-        NeXusDetectorName[RunType]: "detector",
+        Position[snx.NXsample, RunType]: sc.vector([0, 0, 0], unit="m"),
+        NeXusDetectorName: "detector",
         BeamDivergenceLimits: (
             sc.scalar(-0.75, unit='deg'),
             sc.scalar(0.75, unit='deg'),

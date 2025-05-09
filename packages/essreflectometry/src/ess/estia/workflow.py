@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 from ..reflectometry.conversions import (
     add_coords,
@@ -9,7 +10,7 @@ from ..reflectometry.types import (
     BeamDivergenceLimits,
     CoordTransformationGraph,
     ProtonCurrent,
-    RawDetectorData,
+    DetectorData,
     ReducibleData,
     RunType,
     WavelengthBins,
@@ -21,7 +22,7 @@ from .maskings import add_masks
 
 
 def add_coords_masks_and_apply_corrections(
-    da: RawDetectorData[RunType],
+    da: DetectorData[RunType],
     ylim: YIndexLimits,
     zlims: ZIndexLimits,
     bdlim: BeamDivergenceLimits,

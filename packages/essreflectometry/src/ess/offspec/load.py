@@ -2,13 +2,13 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 
-from ..reflectometry.types import Filename, RawDetectorData, ReferenceRun, RunType
+from ..reflectometry.types import Filename, DetectorData, ReferenceRun, RunType
 from .types import CoordTransformationGraph, MonitorData, NeXusMonitorName
 
 
 def load_offspec_events(
     filename: Filename[RunType],
-) -> RawDetectorData[RunType]:
+) -> DetectorData[RunType]:
     full = sc.io.load_hdf5(filename)
     da = full['data']
     da.coords['theta'] = full.pop('Theta')[-1].data
