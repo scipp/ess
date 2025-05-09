@@ -4,6 +4,7 @@ from typing import Any, NewType, TypeVar
 
 import sciline
 import scipp as sc
+
 from ess.reduce.nexus import types as reduce_t
 
 SampleRun = reduce_t.SampleRun
@@ -11,10 +12,12 @@ SampleRun = reduce_t.SampleRun
 ReferenceRun = reduce_t.VanadiumRun
 RunType = TypeVar("RunType", ReferenceRun, SampleRun)
 
+Beamline = reduce_t.Beamline
 CalibratedDetector = reduce_t.CalibratedDetector
 DetectorData = reduce_t.DetectorData
 DetectorPositionOffset = reduce_t.DetectorPositionOffset
 Filename = reduce_t.Filename
+Measurement = reduce_t.Measurement
 NeXusComponent = reduce_t.NeXusComponent
 NeXusDetectorName = reduce_t.NeXusDetectorName
 Position = reduce_t.Position

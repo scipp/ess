@@ -13,14 +13,15 @@ from typing import NewType
 
 import numpy as np
 import scipp as sc
-from dateutil.parser import parse as parse_datetime
 from orsopy.fileio import base as orso_base
 from orsopy.fileio import data_source, orso, reduction
 from orsopy.fileio.orso import Column, Orso, OrsoDataset
 
 from .load import load_nx
 from .types import (
+    Beamline,
     Filename,
+    Measurement,
     ReducibleData,
     ReferenceRun,
     ReflectivityOverQ,
@@ -60,21 +61,18 @@ OrsoSampleFilenames = NewType("OrsoSampleFilenames", list[orso_base.File])
 OrsoCorrectionList = NewType("OrsoCorrectionList", list[str])
 
 
-def parse_orso_experiment(filename: Filename[SampleRun]) -> OrsoExperiment:
+def parse_orso_experiment(
+    beamline: Beamline, measurement: Measurement
+) -> OrsoExperiment:
     """Parse ORSO experiment metadata from raw NeXus data."""
-    title, instrument_name, facility, start_time = load_nx(
-        filename,
-        "NXentry/title",
-        "NXentry/NXinstrument/name",
-        "NXentry/facility",
-        "NXentry/start_time",
-    )
     return OrsoExperiment(
         data_source.Experiment(
-            title=title,
-            instrument=instrument_name,
-            facility=facility,
-            start_date=parse_datetime(start_time),
+            instrument=beamline.name,
+            facility=beamline.facility,
+            title=measurement.title,
+            start_date=measurement.start_time,
+            proposalID=measurement.experiment_id,
+            doi=measurement.experiment_doi,
             probe="neutron",
         )
     )
@@ -101,7 +99,7 @@ def parse_orso_sample(filename: Filename[SampleRun]) -> OrsoSample:
         data_source.Sample(
             name=sample["name"],
             model=data_source.SampleModel(
-                stack=sample["model"],
+                stack=sample.get("model", ""),
             ),
         )
     )

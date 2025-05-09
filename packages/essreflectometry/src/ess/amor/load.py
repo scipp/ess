@@ -3,18 +3,24 @@
 import scipp as sc
 import scippnexus as snx
 
+from ess.reduce.nexus import workflow as nexus_workflow
+from ess.reduce.nexus.types import NeXusFileSpec
+
 from ..reflectometry.load import load_nx
 from ..reflectometry.types import (
+    Beamline,
     BeamSize,
     DetectorData,
     DetectorRotation,
     Filename,
+    Measurement,
     NeXusComponent,
     NeXusDetectorName,
     ProtonCurrent,
     RawSampleRotation,
     RunType,
     SampleRotation,
+    SampleRun,
     SampleSize,
 )
 from .geometry import pixel_coordinates_in_detector_system
@@ -127,6 +133,18 @@ def load_amor_proton_current(
     return pc
 
 
+def load_beamline_metadata(filename: Filename[SampleRun]) -> Beamline:
+    return nexus_workflow.load_beamline_metadata_from_nexus(
+        NeXusFileSpec[SampleRun](filename)
+    )
+
+
+def load_measurement_metadata(filename: Filename[SampleRun]) -> Measurement:
+    return nexus_workflow.load_measurement_metadata_from_nexus(
+        NeXusFileSpec[SampleRun](filename)
+    )
+
+
 providers = (
     load_detector,
     load_events,
@@ -138,4 +156,6 @@ providers = (
     load_amor_detector_rotation,
     load_amor_proton_current,
     amor_chopper,
+    load_beamline_metadata,
+    load_measurement_metadata,
 )
