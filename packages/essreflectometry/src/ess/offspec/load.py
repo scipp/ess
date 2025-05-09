@@ -2,7 +2,7 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 
-from ..reflectometry.types import Filename, DetectorData, ReferenceRun, RunType
+from ..reflectometry.types import DetectorData, Filename, ReferenceRun, RunType
 from .types import CoordTransformationGraph, MonitorData, NeXusMonitorName
 
 

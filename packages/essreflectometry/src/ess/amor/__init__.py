@@ -13,8 +13,8 @@ from ..reflectometry.types import (
     BeamSize,
     DetectorSpatialResolution,
     NeXusDetectorName,
-    RunType,
     Position,
+    RunType,
     SampleRotationOffset,
 )
 from . import (

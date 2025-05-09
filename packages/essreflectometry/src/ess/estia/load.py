@@ -4,8 +4,8 @@ import h5py
 import scipp as sc
 
 from ..reflectometry.types import (
-    Filename,
     DetectorData,
+    Filename,
     RunType,
     SampleRotationOffset,
 )

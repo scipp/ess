@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import scipp as sc
+
 from ..reflectometry.conversions import (
     add_coords,
     add_proton_current_coord,
@@ -10,8 +11,8 @@ from ..reflectometry.corrections import correct_by_proton_current
 from ..reflectometry.types import (
     BeamDivergenceLimits,
     CoordTransformationGraph,
-    ProtonCurrent,
     DetectorData,
+    ProtonCurrent,
     ReducibleData,
     RunType,
     WavelengthBins,
@@ -46,9 +47,9 @@ def add_coords_masks_and_apply_corrections(
     return ReducibleData[RunType](da)
 
 
-
 def correct_by_footprint(da: sc.DataArray) -> sc.DataArray:
     """Corrects the data by the size of the footprint on the sample."""
     return da / sc.sin(da.coords['theta'])
+
 
 providers = (add_coords_masks_and_apply_corrections,)

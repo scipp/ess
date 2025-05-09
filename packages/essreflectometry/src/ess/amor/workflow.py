@@ -8,8 +8,8 @@ from ..reflectometry.corrections import correct_by_footprint, correct_by_proton_
 from ..reflectometry.types import (
     BeamDivergenceLimits,
     CoordTransformationGraph,
-    ProtonCurrent,
     DetectorData,
+    ProtonCurrent,
     ReducibleData,
     RunType,
     WavelengthBins,
