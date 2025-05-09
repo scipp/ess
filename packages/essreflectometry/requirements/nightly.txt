@@ -30,7 +30,7 @@ dnspython==2.7.0
     # via email-validator
 email-validator==2.2.0
     # via scippneutron
-essreduce==25.4.1
+essreduce==25.5.0
     # via -r nightly.in
 exceptiongroup==1.2.2
     # via pytest
@@ -60,7 +60,7 @@ lazy-loader==0.4
     #   scippneutron
 locket==1.0.0
     # via partd
-matplotlib==3.10.1
+matplotlib==3.10.3
     # via
     #   mpltoolbox
     #   plopp
@@ -92,7 +92,7 @@ partd==1.4.2
     # via dask
 pillow==11.2.1
     # via matplotlib
-platformdirs==4.3.7
+platformdirs==4.3.8
     # via pooch
 plopp @ git+https://github.com/scipp/plopp@main
     # via
@@ -144,7 +144,7 @@ scippnexus @ git+https://github.com/scipp/scippnexus@main
     #   -r nightly.in
     #   essreduce
     #   scippneutron
-scipy==1.15.2
+scipy==1.15.3
     # via
     #   scippneutron
     #   scippnexus
