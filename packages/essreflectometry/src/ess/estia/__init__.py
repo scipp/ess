@@ -2,11 +2,6 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import importlib.metadata
 
-import sciline
-import scipp as sc
-import scippnexus as snx
-
-from ..reflectometry import providers as reflectometry_providers
 from ..reflectometry import supermirror
 from ..reflectometry.types import (
     BeamDivergenceLimits,
@@ -23,6 +18,7 @@ from .types import (
     SampleSizeResolution,
     WavelengthResolution,
 )
+from .workflow import EstiaMcStasWorkflow
 
 try:
     __version__ = importlib.metadata.version(__package__ or __name__)
@@ -72,13 +68,11 @@ def EstiaWorkflow() -> sciline.Pipeline:
 
 __all__ = [
     "AngularResolution",
-    "EstiaWorkflow",
+    "EstiaMcStasWorkflow",
     "SampleSizeResolution",
     "WavelengthResolution",
     "conversions",
-    "default_parameters",
     "load",
-    "providers",
     "resolution",
     "supermirror",
 ]
