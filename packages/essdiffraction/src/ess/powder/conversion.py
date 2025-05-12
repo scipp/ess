@@ -22,8 +22,6 @@ from .types import (
     MonitorTofData,
     MonitorType,
     RunType,
-    TimeOfFlightLookupTable,
-    TimeOfFlightLookupTableFilename,
     WavelengthMonitor,
 )
 
@@ -231,12 +229,6 @@ def convert_reduced_to_tof(
     )
 
 
-def load_tof_lookup_table(
-    filename: TimeOfFlightLookupTableFilename,
-) -> TimeOfFlightLookupTable:
-    return TimeOfFlightLookupTable(sc.io.load_hdf5(filename))
-
-
 def convert_monitor_to_wavelength(
     monitor: MonitorTofData[RunType, MonitorType],
 ) -> WavelengthMonitor[RunType, MonitorType]:
@@ -255,5 +247,4 @@ providers = (
     convert_to_dspacing,
     convert_reduced_to_tof,
     convert_monitor_to_wavelength,
-    load_tof_lookup_table,
 )

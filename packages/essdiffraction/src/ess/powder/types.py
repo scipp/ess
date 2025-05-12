@@ -55,6 +55,7 @@ TimeResolution = tof_t.TimeResolution
 LtotalRange = tof_t.LtotalRange
 LookupTableRelativeErrorThreshold = tof_t.LookupTableRelativeErrorThreshold
 TimeOfFlightLookupTable = tof_t.TimeOfFlightLookupTable
+TimeOfFlightLookupTableFilename = tof_t.TimeOfFlightLookupTableFilename
 SimulationResults = tof_t.SimulationResults
 
 RunType = TypeVar("RunType", SampleRun, VanadiumRun)
@@ -211,10 +212,6 @@ CIFAuthors = NewType('CIFAuthors', list[Person])
 
 ReducedTofCIF = NewType("ReducedTofCIF", cif.CIF)
 """Reduced data in time-of-flight, ready to be saved to a CIF file."""
-
-
-TimeOfFlightLookupTableFilename = NewType("TimeOfFlightLookupTableFilename", str)
-"""Filename of the time-of-flight lookup table."""
 
 
 del sc, sciline, NewType, TypeVar
