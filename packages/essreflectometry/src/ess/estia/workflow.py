@@ -3,7 +3,6 @@
 
 import sciline
 import scipp as sc
-import scippnexus as snx
 
 from ess.reduce import nexus
 
@@ -11,10 +10,8 @@ from ..reflectometry import providers as reflectometry_providers
 from ..reflectometry import supermirror
 from ..reflectometry.types import (
     BeamDivergenceLimits,
-    BeamSize,
     DetectorSpatialResolution,
     NeXusDetectorName,
-    Position,
     ReferenceRun,
     RunType,
     SampleRotationOffset,
@@ -52,7 +49,6 @@ def mcstas_default_parameters() -> dict:
         supermirror.MValue: sc.scalar(5, unit=sc.units.dimensionless),
         supermirror.CriticalEdge: 0.022 * sc.Unit("1/angstrom"),
         supermirror.Alpha: sc.scalar(0.25 / 0.088, unit=sc.units.angstrom),
-        BeamSize[RunType]: 2.0 * sc.units.mm,
         DetectorSpatialResolution[RunType]: 0.0025 * sc.units.m,
         NeXusDetectorName: "detector",
         BeamDivergenceLimits: (
