@@ -16,9 +16,9 @@ def coordinate_transformation_graph_sample() -> CoordTransformationGraph[SampleR
     }
 
 
-def coordinate_transformation_graph_reference() -> (
-    CoordTransformationGraph[ReferenceRun]
-):
+def coordinate_transformation_graph_reference() -> CoordTransformationGraph[
+    ReferenceRun
+]:
     return {
         **beamline.beamline(scatter=False),
         **tof.elastic_wavelength("tof"),

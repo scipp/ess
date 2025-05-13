@@ -28,7 +28,7 @@ cffi==1.17.1
     # via argon2-cffi-bindings
 copier==9.7.1
     # via -r dev.in
-dunamai==1.23.1
+dunamai==1.24.0
     # via copier
 fqdn==1.5.1
     # via jsonschema
@@ -65,7 +65,7 @@ jupyter-server==2.15.0
     #   notebook-shim
 jupyter-server-terminals==0.5.3
     # via jupyter-server
-jupyterlab==4.4.1
+jupyterlab==4.4.2
     # via -r dev.in
 jupyterlab-server==2.27.3
     # via jupyterlab

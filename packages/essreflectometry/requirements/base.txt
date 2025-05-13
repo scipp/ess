@@ -23,7 +23,7 @@ dnspython==2.7.0
     # via email-validator
 email-validator==2.2.0
     # via scippneutron
-essreduce==25.4.1
+essreduce==25.5.0
     # via -r base.in
 fonttools==4.57.0
     # via matplotlib
@@ -47,7 +47,7 @@ lazy-loader==0.4
     #   scippneutron
 locket==1.0.0
     # via partd
-matplotlib==3.10.1
+matplotlib==3.10.3
     # via
     #   mpltoolbox
     #   plopp
@@ -110,7 +110,7 @@ scipp==25.5.0
     #   essreduce
     #   scippneutron
     #   scippnexus
-scippneutron==25.2.1
+scippneutron==25.5.0
     # via
     #   -r base.in
     #   essreduce
@@ -119,7 +119,7 @@ scippnexus==25.4.0
     #   -r base.in
     #   essreduce
     #   scippneutron
-scipy==1.15.2
+scipy==1.15.3
     # via
     #   scippneutron
     #   scippnexus
