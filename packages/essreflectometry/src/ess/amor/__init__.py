@@ -14,6 +14,7 @@ from ..reflectometry.types import (
     NeXusDetectorName,
     RunType,
     SamplePosition,
+    SampleRotationOffset,
 )
 from . import (
     conversions,
@@ -71,6 +72,7 @@ def default_parameters() -> dict:
             sc.scalar(0.75, unit='deg'),
         ),
         GravityToggle: True,
+        SampleRotationOffset[RunType]: sc.scalar(0.0, unit='deg'),
     }
 
 

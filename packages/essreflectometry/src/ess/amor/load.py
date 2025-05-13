@@ -11,6 +11,7 @@ from ..reflectometry.types import (
     NeXusDetectorName,
     ProtonCurrent,
     RawDetectorData,
+    RawSampleRotation,
     RunType,
     SampleRotation,
     SampleSize,
@@ -100,7 +101,7 @@ def load_amor_ch_frequency(ch: RawChopper[RunType]) -> ChopperFrequency[RunType]
     raise ValueError("No unit was found for the chopper frequency")
 
 
-def load_amor_sample_rotation(fp: Filename[RunType]) -> SampleRotation[RunType]:
+def load_amor_sample_rotation(fp: Filename[RunType]) -> RawSampleRotation[RunType]:
     (mu,) = load_nx(fp, "NXentry/NXinstrument/master_parameters/mu")
     # Jochens Amor code reads the first value of this log
     # see https://github.com/jochenstahn/amor/blob/140e3192ddb7e7f28acee87e2acaee65ce1332aa/libeos/file_reader.py#L272  # noqa: E501

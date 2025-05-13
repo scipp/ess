@@ -2,6 +2,7 @@
 import scipp as sc
 
 from .tools import fwhm_to_std
+from .types import RawSampleRotation, RunType, SampleRotation, SampleRotationOffset
 
 
 def footprint_on_sample(
@@ -45,3 +46,12 @@ def correct_by_footprint(da: sc.DataArray) -> sc.DataArray:
 def correct_by_proton_current(da: sc.DataArray) -> sc.DataArray:
     "Corrects the data by the proton current during the time of data collection"
     return da / da.bins.coords['proton_current']
+
+
+def correct_sample_rotation(
+    mu: RawSampleRotation[RunType], mu_offset: SampleRotationOffset[RunType]
+) -> SampleRotation[RunType]:
+    return mu + mu_offset.to(unit=mu.unit)
+
+
+providers = (correct_sample_rotation,)
