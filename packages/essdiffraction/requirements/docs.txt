@@ -142,7 +142,7 @@ rpds-py==0.24.0
     # via
     #   jsonschema
     #   referencing
-snowballstemmer==2.2.0
+snowballstemmer==3.0.1
     # via sphinx
 soupsieve==2.7
     # via beautifulsoup4

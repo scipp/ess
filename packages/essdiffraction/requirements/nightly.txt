@@ -16,7 +16,7 @@ certifi==2025.4.26
     # via requests
 charset-normalizer==3.4.2
     # via requests
-click==8.1.8
+click==8.2.0
     # via dask
 cloudpickle==3.1.1
     # via dask
@@ -28,7 +28,7 @@ cyclebane==24.10.0
     # via sciline
 cycler==0.12.1
     # via matplotlib
-dask==2025.4.1
+dask==2025.5.0
     # via -r nightly.in
 decorator==5.2.1
     # via ipython
@@ -38,13 +38,13 @@ email-validator==2.2.0
     # via scippneutron
 essreduce @ git+https://github.com/scipp/essreduce@main
     # via -r nightly.in
-exceptiongroup==1.2.2
+exceptiongroup==1.3.0
     # via
     #   ipython
     #   pytest
 executing==2.2.0
     # via stack-data
-fonttools==4.57.0
+fonttools==4.58.0
     # via matplotlib
 fsspec==2025.3.2
     # via dask
@@ -83,7 +83,7 @@ lazy-loader==0.4
     #   tof
 locket==1.0.0
     # via partd
-matplotlib==3.10.1
+matplotlib==3.10.3
     # via
     #   mpltoolbox
     #   plopp
@@ -183,7 +183,7 @@ scippnexus @ git+https://github.com/scipp/scippnexus@main
     #   -r nightly.in
     #   essreduce
     #   scippneutron
-scipy==1.15.2
+scipy==1.15.3
     # via
     #   scippneutron
     #   scippnexus
@@ -212,6 +212,7 @@ traittypes==0.2.1
     # via ipydatawidgets
 typing-extensions==4.13.2
     # via
+    #   exceptiongroup
     #   ipython
     #   pydantic
     #   pydantic-core
