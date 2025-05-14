@@ -16,8 +16,8 @@ def _make_pooch():
         version=_version,
         registry={
             "BIFROST_20240914T053723.h5": "md5:0f2fa5c9a851f8e3a4fa61defaa3752e",
-            "computed_energy_data_simulated.h5": "md5:f07197a552b90decb8c8efd5515b6c26",
-            "BIFROST-simulation-tof-lookup-table.h5": "md5:d9d8173008ce9f03166953da28496488",  # noqa: E501
+            "computed_energy_data_simulated.h5": "md5:31b2444042935e99831c3c84a375ccae",
+            "BIFROST-simulation-tof-lookup-table.h5": "md5:f2c12eb39d0750238805d0e5a5d561f7",  # noqa: E501
         },
     )
 

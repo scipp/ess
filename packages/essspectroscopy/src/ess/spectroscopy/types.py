@@ -50,9 +50,22 @@ MonitorType = TypeVar(
 
 DetectorTofData = time_of_flight.DetectorTofData
 MonitorTofData = time_of_flight.MonitorTofData
+MonitorLtotal = time_of_flight.MonitorLtotal
 PulseStride = time_of_flight.PulseStride
+PulseStrideOffset = time_of_flight.PulseStrideOffset
 PulsePeriod = time_of_flight.PulsePeriod
 TimeOfFlightLookupTable = time_of_flight.TimeOfFlightLookupTable
+TimeOfFlightLookupTableFilename = time_of_flight.TimeOfFlightLookupTableFilename
+
+L1Range = NewType("L1Range", tuple[sc.Variable, sc.Variable])
+"""
+Range (min, max) of the length of the flight path from the source to the sample.
+
+This type corresponds to :class:`ess.reduce.time_of_flight.types.LtotalRange`
+for other instruments.
+But for indirect geometry spectrometers, we compute time of flight
+to the sample, not the detectors.
+"""
 
 # Custom types
 

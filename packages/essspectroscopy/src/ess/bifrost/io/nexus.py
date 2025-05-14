@@ -5,11 +5,9 @@
 
 from collections.abc import Iterable
 
-import sciline
 import scipp as sc
 import scippnexus as snx
 
-from ess.reduce.nexus.workflow import GenericNeXusWorkflow
 from ess.spectroscopy.types import (
     Analyzer,
     InstrumentAngles,
@@ -18,14 +16,6 @@ from ess.spectroscopy.types import (
     NeXusDetectorName,
     NeXusFileSpec,
     RunType,
-    SampleRun,
-)
-
-from ..types import (
-    FrameMonitor0,
-    FrameMonitor1,
-    FrameMonitor2,
-    FrameMonitor3,
 )
 
 
@@ -107,24 +97,8 @@ def load_analyzer_for_detector(
     )
 
 
-_PROVIDERS = (
+providers = (
     load_analyzer_for_detector,
     load_instrument_angles,
     moderator_class_for_source,
 )
-
-
-def LoadNeXusWorkflow() -> sciline.Pipeline:
-    """Workflow for loading BIFROST NeXus files."""
-    workflow = GenericNeXusWorkflow(
-        run_types=(SampleRun,),
-        monitor_types=(
-            FrameMonitor0,
-            FrameMonitor1,
-            FrameMonitor2,
-            FrameMonitor3,
-        ),
-    )
-    for provider in _PROVIDERS:
-        workflow.insert(provider)
-    return workflow
