@@ -5,16 +5,9 @@
 
 from __future__ import annotations
 
-import sciline
-
-from ess.reduce import nexus, time_of_flight
 from ess.spectroscopy.types import (
-    DataAtSample,
-    DetectorTofData,
     PrimarySpecCoordTransformGraph,
     RunType,
-    SampleRun,
-    TimeOfFlightLookupTable,
 )
 
 
@@ -46,45 +39,4 @@ def primary_spectrometer_coordinate_transformation_graph() -> (
     )
 
 
-def unwrap_sample_time(
-    sample_data: DataAtSample[RunType],
-    table: TimeOfFlightLookupTable,
-) -> DetectorTofData[RunType]:
-    """Compute time-of-flight at the sample using a lookup table.
-
-    Parameters
-    ----------
-    sample_data:
-        Data with 'event_time_offset' and 'event_time_zero' coordinates
-        describing the time-of-arrival at the sample.
-    table:
-        A time-of-flight lookup table.
-
-    Returns
-    -------
-    :
-        A copy of ``sample_data`` with a "sample_tof" coordinate containing
-        the time-of-flight at the sample.
-    """
-
-    pipeline = sciline.Pipeline(
-        time_of_flight.providers(),
-        params={
-            **time_of_flight.default_parameters(),
-            time_of_flight.TimeOfFlightLookupTable: table,
-            time_of_flight.DetectorLtotal[SampleRun]: sample_data.coords['L1'],
-            nexus.types.DetectorData[SampleRun]: sample_data,
-        },
-    )
-    result = pipeline.compute(time_of_flight.DetectorTofData[SampleRun])
-    # This is time-of-flight at the sample.
-    result.bins.coords['sample_tof'] = result.bins.coords.pop('tof')
-    del result.bins.coords['event_time_offset']
-    del result.bins.coords['event_time_zero']
-    return DetectorTofData[RunType](result)
-
-
-providers = (
-    primary_spectrometer_coordinate_transformation_graph,
-    unwrap_sample_time,
-)
+providers = (primary_spectrometer_coordinate_transformation_graph,)
