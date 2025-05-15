@@ -275,9 +275,10 @@ linkcheck_ignore = [
     # Confluence requires login
     r"https?://confluence.ess.eu",
     # This returns '403 Forbidden' but the link works in a browser.
-    "https://doi.org/10.3233/JNR-220049",
-    # This returns '403 Forbidden' but the link works in a browser.
     "https://www.sciencedirect.com/science/article/pii/S2773183922000374",
+    # Linkcheck seems to be denied access by some DOI resolvers.
+    # Since DOIs are supposed to be permanent, we don't need to check them.'
+    r'https://doi\.org/',
 ]
 
 # -- Options for bibtex ---------------------------------------------------
