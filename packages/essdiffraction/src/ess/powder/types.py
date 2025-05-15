@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 
 """This module defines the domain types used in ess.powder.
 
@@ -26,6 +26,7 @@ BackgroundRun = reduce_t.BackgroundRun
 BunkerMonitor = reduce_t.Monitor2
 CalibratedBeamline = reduce_t.CalibratedBeamline
 CalibratedDetector = reduce_t.CalibratedDetector
+CalibratedBeamline = reduce_t.CalibratedBeamline
 CalibratedMonitor = reduce_t.CalibratedMonitor
 DetectorData = reduce_t.DetectorData
 DetectorPositionOffset = reduce_t.DetectorPositionOffset
@@ -43,6 +44,9 @@ VanadiumRun = reduce_t.VanadiumRun
 
 DetectorBankSizes = reduce_t.DetectorBankSizes
 
+DetectorTofData = tof_t.DetectorTofData
+MonitorTofData = tof_t.MonitorTofData
+ResampledMonitorTofData = tof_t.ResampledMonitorTofData
 PulsePeriod = tof_t.PulsePeriod
 PulseStride = tof_t.PulseStride
 PulseStrideOffset = tof_t.PulseStrideOffset
@@ -51,6 +55,7 @@ TimeResolution = tof_t.TimeResolution
 LtotalRange = tof_t.LtotalRange
 LookupTableRelativeErrorThreshold = tof_t.LookupTableRelativeErrorThreshold
 TimeOfFlightLookupTable = tof_t.TimeOfFlightLookupTable
+TimeOfFlightLookupTableFilename = tof_t.TimeOfFlightLookupTableFilename
 SimulationResults = tof_t.SimulationResults
 
 RunType = TypeVar("RunType", SampleRun, VanadiumRun)
@@ -100,10 +105,6 @@ class AccumulatedProtonCharge(sciline.Scope[RunType, sc.Variable], sc.Variable):
 
 CalibrationData = NewType("CalibrationData", sc.Dataset | None)
 """Detector calibration data."""
-
-
-class TofData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Data with time-of-flight coordinate."""
 
 
 class DataWithScatteringCoordinates(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
@@ -211,22 +212,6 @@ CIFAuthors = NewType('CIFAuthors', list[Person])
 
 ReducedTofCIF = NewType("ReducedTofCIF", cif.CIF)
 """Reduced data in time-of-flight, ready to be saved to a CIF file."""
-
-
-class DetectorLtotal(sciline.Scope[RunType, sc.Variable], sc.Variable):
-    """Total path length of neutrons from source to detector (L1 + L2)."""
-
-
-class MonitorLtotal(sciline.Scope[RunType, MonitorType, sc.Variable], sc.Variable):
-    """Total path length of neutrons from source to monitor."""
-
-
-class TofMonitorData(sciline.Scope[RunType, MonitorType, sc.DataArray], sc.DataArray):
-    """Monitor data with time-of-flight coordinate."""
-
-
-TimeOfFlightLookupTableFilename = NewType("TimeOfFlightLookupTableFilename", str)
-"""Filename of the time-of-flight lookup table."""
 
 
 del sc, sciline, NewType, TypeVar

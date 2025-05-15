@@ -4,12 +4,12 @@
 import numpy as np
 import sciline
 import scipp as sc
-import scippneutron as scn
 import scippnexus as snx
 from scippneutron.metadata import ESS_SOURCE
 
 from ess.powder.types import (
     Beamline,
+    CalibratedBeamline,
     CalibratedDetector,
     CalibratedMonitor,
     CalibrationData,
@@ -17,11 +17,9 @@ from ess.powder.types import (
     CaveMonitor,
     CaveMonitorPosition,
     DetectorData,
-    DetectorLtotal,
     Filename,
     MonitorData,
     MonitorFilename,
-    MonitorLtotal,
     MonitorType,
     NeXusComponent,
     NeXusDetectorName,
@@ -31,8 +29,7 @@ from ess.powder.types import (
     Source,
     VanadiumRun,
 )
-from ess.reduce.nexus.types import CalibratedBeamline
-from ess.reduce.nexus.workflow import GenericNeXusWorkflow
+from ess.reduce.time_of_flight.workflow import GenericTofWorkflow
 
 MANTLE_DETECTOR_ID = sc.index(7)
 HIGH_RES_DETECTOR_ID = sc.index(8)
@@ -276,30 +273,22 @@ def assemble_detector_data(
     out.bins.coords['event_time_offset'] = out.bins.coords['tof'] % period.to(
         unit=detector.bins.coords['tof'].bins.unit
     )
-    graph = scn.conversion.graph.beamline.beamline(scatter=True)
-    return DetectorData[RunType](
-        out.bins.drop_coords('tof').transform_coords(
-            "Ltotal", graph=graph, keep_intermediate=True
-        )
-    )
+    return DetectorData[RunType](out.bins.drop_coords('tof'))
 
 
 def assemble_monitor_data(
     monitor: CalibratedMonitor[RunType, MonitorType],
 ) -> MonitorData[RunType, MonitorType]:
     """
-    Dummy assembly of monitor data, monitor already contains neutron data.
-    We simply add a Ltotal coordinate necessary to calculate the time-of-flight.
+    Dummy assembly of monitor data, monitor already contains neutron data with all
+    necessary coordinates.
 
     Parameters
     ----------
     monitor:
         The calibrated monitor data.
     """
-    graph = scn.conversion.graph.beamline.beamline(scatter=False)
-    return MonitorData[RunType, MonitorType](
-        monitor.transform_coords("Ltotal", graph=graph)
-    )
+    return MonitorData[RunType, MonitorType](monitor)
 
 
 def dummy_source_position() -> Position[snx.NXsource, RunType]:
@@ -312,28 +301,6 @@ def dummy_sample_position() -> Position[snx.NXsample, RunType]:
     return Position[snx.NXsample, RunType](
         sc.vector([np.nan, np.nan, np.nan], unit="mm")
     )
-
-
-def extract_detector_ltotal(detector: DetectorData[RunType]) -> DetectorLtotal[RunType]:
-    """
-    Extract Ltotal from the detector data.
-    TODO: This is a temporary implementation. We should instead read the positions
-    separately from the event data, so we don't need to re-load the positions every time
-    new events come in while streaming live data.
-    """
-    return DetectorLtotal[RunType](detector.coords["Ltotal"])
-
-
-def extract_monitor_ltotal(
-    monitor: MonitorData[RunType, MonitorType],
-) -> MonitorLtotal[RunType, MonitorType]:
-    """
-    Extract Ltotal from the monitor data.
-    TODO: This is a temporary implementation. We should instead read the positions
-    separately from the event data, so we don't need to re-load the positions every time
-    new events come in while streaming live data.
-    """
-    return MonitorLtotal[RunType, MonitorType](monitor.coords["Ltotal"])
 
 
 def dream_beamline() -> Beamline:
@@ -352,7 +319,7 @@ def LoadGeant4Workflow() -> sciline.Pipeline:
     """
     Workflow for loading NeXus data.
     """
-    wf = GenericNeXusWorkflow(
+    wf = GenericTofWorkflow(
         run_types=[SampleRun, VanadiumRun], monitor_types=[CaveMonitor]
     )
     wf.insert(extract_geant4_detector)
@@ -364,8 +331,6 @@ def LoadGeant4Workflow() -> sciline.Pipeline:
     wf.insert(assemble_monitor_data)
     wf.insert(dummy_source_position)
     wf.insert(dummy_sample_position)
-    wf.insert(extract_detector_ltotal)
-    wf.insert(extract_monitor_ltotal)
     wf.insert(dream_beamline)
     wf.insert(ess_source)
     return wf

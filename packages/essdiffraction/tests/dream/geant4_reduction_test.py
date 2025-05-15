@@ -141,7 +141,9 @@ def simulation_dream_choppers():
 def test_pipeline_can_compute_dspacing_result_using_custom_built_tof_lookup(
     workflow, simulation_dream_choppers
 ):
-    workflow.insert(powder.conversion.build_tof_lookup_table)
+    from ess.reduce.time_of_flight.eto_to_tof import compute_tof_lookup_table
+
+    workflow.insert(compute_tof_lookup_table)
     workflow = powder.with_pixel_mask_filenames(workflow, [])
     workflow[SimulationResults] = simulation_dream_choppers
     workflow[LtotalRange] = sc.scalar(60.0, unit="m"), sc.scalar(80.0, unit="m")

@@ -2,7 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 """Data for tests and documentation with DREAM."""
 
-_version = "1"
+_version = "2"
 
 __all__ = ["get_path"]
 
@@ -21,16 +21,16 @@ def _make_pooch():
             "DREAM_nexus_sorted-2023-12-07.nxs": "md5:22824e14f6eb950d24a720b2a0e2cb66",
             "DREAM_simple_pwd_workflow/data_dream_diamond_vana_container_sample_union.csv.zip": "md5:33302d0506b36aab74003b8aed4664cc",  # noqa: E501
             "DREAM_simple_pwd_workflow/data_dream_diamond_vana_container_sample_union_run2.csv.zip": "md5:c7758682f978d162dcb91e47c79abb83",  # noqa: E501
-            "DREAM_simple_pwd_workflow/data_dream_vana_container_sample_union.csv.zip": "md5:1e22917b2bb68b5cacfb506b72700a4d",  # noqa: E501
+            "DREAM_simple_pwd_workflow/data_dream_vana_container_sample_union.csv.zip": "md5:b8bb7c4bdf74ad5f19342bced8670915",  # noqa: E501
             "DREAM_simple_pwd_workflow/data_dream_vanadium.csv.zip": "md5:e5addfc06768140c76533946433fa2ec",  # noqa: E501
             "DREAM_simple_pwd_workflow/data_dream_vanadium_inc_coh.csv.zip": "md5:39d1a44e248b12966b26f7c2f6c602a2",  # noqa: E501
             "DREAM_simple_pwd_workflow/Cave_TOF_Monitor_diam_in_can.dat": "md5:ef24f4a4186c628574046e6629e31611",  # noqa: E501
-            "DREAM_simple_pwd_workflow/Cave_TOF_Monitor_van_can.dat": "md5:e63456c347fb36a362a0b5ae2556b3cf",  # noqa: E501
+            "DREAM_simple_pwd_workflow/Cave_TOF_Monitor_van_can.dat": "md5:2cdef7ad9912652149b7e687381d2e99",  # noqa: E501
             "DREAM_simple_pwd_workflow/Cave_TOF_Monitor_vana_inc_coh.dat": "md5:701d66792f20eb283a4ce76bae0c8f8f",  # noqa: E501
-            "DREAM-high-flux-tof-lookup-table.h5": "md5:404145a970ed1188e524cba10194610e",  # noqa: E501
+            "DREAM-high-flux-tof-lookup-table.h5": "md5:1b95a359fa7b0d8b4277806ece9bf279",  # noqa: E501
             # Smaller files for unit tests
             "DREAM_simple_pwd_workflow/TEST_data_dream_diamond_vana_container_sample_union.csv.zip": "md5:018a87e0934c1dd0f07a708e9d497891",  # noqa: E501
-            "DREAM_simple_pwd_workflow/TEST_data_dream_vana_container_sample_union.csv.zip": "md5:6b4b6c3a7358cdb1dc5a36b56291ab1b",  # noqa: E501
+            "DREAM_simple_pwd_workflow/TEST_data_dream_vana_container_sample_union.csv.zip": "md5:d244126cd8012f9ed186f4e08a19f88d",  # noqa: E501
             "DREAM_simple_pwd_workflow/TEST_data_dream_vanadium.csv.zip": "md5:178f9bea9f35dbdef693e38ff893c258",  # noqa: E501
             "TEST_data_dream0_new_hkl_Si_pwd.csv.zip": "md5:df6c41f4b7b21e129915808f625828f6",  # noqa: E501
             "TEST_data_dream_with_sectors.csv.zip": "md5:2a6b5e40e6b67f6c71b25373bf4b11a1",  # noqa: E501
