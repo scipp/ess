@@ -109,6 +109,5 @@ def test_simulation_workflow_produces_the_same_data_as_before(
     workflow: sciline.Pipeline,
 ) -> None:
     energy_data = workflow.compute(EnergyData[SampleRun])
-    energy_data.save_hdf5('computed_energy_data_simulated.h5')
     expected = sc.io.load_hdf5(computed_energy_data_simulated())
     sc.testing.assert_allclose(energy_data, expected)
