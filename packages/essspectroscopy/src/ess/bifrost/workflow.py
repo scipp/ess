@@ -12,6 +12,7 @@ from ess.spectroscopy.indirect.conversion import providers as conversion_provide
 from ess.spectroscopy.indirect.kf import providers as kf_providers
 from ess.spectroscopy.indirect.ki import providers as ki_providers
 from ess.spectroscopy.indirect.normalization import providers as normalisation_providers
+from ess.spectroscopy.indirect.time_of_flight import TofWorkflow
 from ess.spectroscopy.types import (
     DataGroupedByRotation,
     NeXusDetectorName,
@@ -45,6 +46,7 @@ def simulation_default_parameters() -> dict[type, Any]:
 
 
 _SIMULATION_PROVIDERS = (
+    *nexus.providers,
     *conversion_providers,
     *detector_providers,
     *mcstas.providers,
@@ -57,6 +59,7 @@ _SIMULATION_PROVIDERS = (
 
 def BifrostSimulationWorkflow(
     detector_names: list[NeXusDetectorName],
+    tof_lut_provider: time_of_flight.TofLutProvider = time_of_flight.TofLutProvider.FILE,  # noqa: E501
 ) -> sciline.Pipeline:
     """Data reduction workflow for simulated BIFROST data.
 
@@ -64,13 +67,22 @@ def BifrostSimulationWorkflow(
     ----------
     detector_names:
         Names of ``NXdetector`` groups in the input NeXus file.
+    tof_lut_provider:
+        Specifies how the time-of-flight lookup table is provided:
+        - FILE: Read from a file.
+        - TOF: Computed from chopper settings using the 'tof' package.
+        - MCSTAS: From McStas simulation (not implemented yet).
 
     Returns
     -------
     :
         A pipeline for reducing simulated BIFROST data.
     """
-    workflow = nexus.LoadNeXusWorkflow()
+    workflow = TofWorkflow(
+        run_types=(SampleRun,),
+        monitor_types=(FrameMonitor0, FrameMonitor1, FrameMonitor2, FrameMonitor3),
+        tof_lut_provider=tof_lut_provider,
+    )
     for provider in _SIMULATION_PROVIDERS:
         workflow.insert(provider)
     for key, val in simulation_default_parameters().items():
