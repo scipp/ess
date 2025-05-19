@@ -29,9 +29,10 @@ def _make_pooch():
             "DREAM_simple_pwd_workflow/Cave_TOF_Monitor_vana_inc_coh.dat": "md5:701d66792f20eb283a4ce76bae0c8f8f",  # noqa: E501
             "DREAM-high-flux-tof-lookup-table.h5": "md5:1b95a359fa7b0d8b4277806ece9bf279",  # noqa: E501
             # Smaller files for unit tests
-            "DREAM_simple_pwd_workflow/TEST_data_dream_diamond_vana_container_sample_union.csv.zip": "md5:83638c70a445f45816aee67f43d7f749",  # noqa: E501
-            "DREAM_simple_pwd_workflow/TEST_data_dream_vana_container_sample_union.csv.zip": "md5:6b4b6c3a7358cdb1dc5a36b56291ab1b",  # noqa: E501
-            "DREAM_simple_pwd_workflow/TEST_data_dream_vanadium.csv.zip": "md5:178f9bea9f35dbdef693e38ff893c258",  # noqa: E501
+            "DREAM_simple_pwd_workflow/TEST_data_dream_diamond_vana_container_sample_union.csv.zip": "md5:405df9b5ade9d61ab71fe8d8c19bb51b",  # noqa: E501
+            "DREAM_simple_pwd_workflow/TEST_data_dream_vana_container_sample_union.csv.zip": "md5:20186119d1debfb0c2352f9db384cd0a",  # noqa: E501
+            "DREAM_simple_pwd_workflow/TEST_data_dream_vanadium.csv.zip": "md5:e5624a973f30dfe440642319c5bf0da6",  # noqa: E501
+            "DREAM_simple_pwd_workflow/TEST_data_dream_vanadium_inc_coh.csv.zip": "md5:a2e7756b264f65ab5ed7ff7fb5eca280",  # noqa: E501
             "TEST_data_dream0_new_hkl_Si_pwd.csv.zip": "md5:df6c41f4b7b21e129915808f625828f6",  # noqa: E501
             "TEST_data_dream_with_sectors.csv.zip": "md5:2a6b5e40e6b67f6c71b25373bf4b11a1",  # noqa: E501
             # The TEST_DREAM_nexus_sorted-2023-12-07.nxs file was created using the
@@ -147,7 +148,9 @@ def simulated_vanadium_sample(*, small: bool = False) -> str:
         ```
     """
     prefix = "TEST_" if small else ""
-    return get_path(f"DREAM_simple_pwd_workflow/{prefix}data_dream_vanadium.csv.zip")
+    return get_path(
+        f"DREAM_simple_pwd_workflow/{prefix}data_dream_vanadium_inc_coh.csv.zip"
+    )
 
 
 def simulated_vanadium_sample_incoherent(*, small: bool = False) -> str:
