@@ -14,7 +14,7 @@ from .mcstas import parse_events_ascii, parse_events_h5
 
 def load_mcstas_events(
     filename: Filename[RunType],
-sample_rotation_offset: SampleRotationOffset[RunType],
+    sample_rotation_offset: SampleRotationOffset[RunType],
 ) -> DetectorData[RunType]:
     """
     Load event data from a McStas run and reshape it
