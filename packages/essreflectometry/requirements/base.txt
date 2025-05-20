@@ -7,7 +7,7 @@
 #
 annotated-types==0.7.0
     # via pydantic
-click==8.1.8
+click==8.2.0
     # via dask
 cloudpickle==3.1.1
     # via dask
@@ -17,17 +17,17 @@ cyclebane==24.10.0
     # via sciline
 cycler==0.12.1
     # via matplotlib
-dask==2025.4.1
+dask==2025.5.0
     # via -r base.in
 dnspython==2.7.0
     # via email-validator
 email-validator==2.2.0
     # via scippneutron
-essreduce==25.5.0
+essreduce==25.5.1
     # via -r base.in
-fonttools==4.57.0
+fonttools==4.58.0
     # via matplotlib
-fsspec==2025.3.2
+fsspec==2025.5.0
     # via dask
 graphviz==0.20.3
     # via -r base.in
@@ -55,7 +55,7 @@ mpltoolbox==25.4.0
     # via scippneutron
 networkx==3.4.2
     # via cyclebane
-numpy==2.2.5
+numpy==2.2.6
     # via
     #   contourpy
     #   h5py
@@ -77,7 +77,7 @@ partd==1.4.2
     # via dask
 pillow==11.2.1
     # via matplotlib
-plopp==25.4.1
+plopp==25.5.0
     # via
     #   -r base.in
     #   scippneutron
@@ -100,7 +100,7 @@ pyyaml==6.0.2
     # via
     #   dask
     #   orsopy
-sciline==25.4.1
+sciline==25.5.1
     # via
     #   -r base.in
     #   essreduce
