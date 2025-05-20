@@ -14,7 +14,7 @@ from ess.powder.types import (
     IofTof,
     ReducedEmptyCanSubtractedTofCIF,
     ReducedTofCIF,
-    ReducerSoftwares,
+    ReducerSoftware,
     Source,
 )
 
@@ -25,7 +25,7 @@ def prepare_reduced_tof_cif(
     authors: CIFAuthors,
     beamline: Beamline,
     source: Source,
-    reducers: ReducerSoftwares,
+    reducers: ReducerSoftware,
     calibration: OutputCalibrationData,
 ) -> ReducedTofCIF:
     """Construct a CIF builder with reduced data in d-spacing.

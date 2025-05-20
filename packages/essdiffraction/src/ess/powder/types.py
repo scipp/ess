@@ -68,7 +68,7 @@ CalibrationFilename = NewType("CalibrationFilename", str | None)
 """Filename of the instrument calibration file."""
 
 
-DspacingBins = NewType("DSpacingBins", sc.Variable)
+DspacingBins = NewType("DspacingBins", sc.Variable)
 """Bin edges for d-spacing."""
 
 
@@ -216,7 +216,7 @@ WavelengthMask = NewType("WavelengthMask", Callable | None)
 Beamline = reduce_t.Beamline
 """Beamline metadata."""
 
-ReducerSoftwares = NewType('ReducerSoftware', list[Software])
+ReducerSoftware = NewType('ReducerSoftware', list[Software])
 """Pieces of software used to reduce the data."""
 
 Source = reduce_t.Source

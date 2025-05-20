@@ -10,7 +10,7 @@ from scippneutron.metadata import ESS_SOURCE, Person
 
 import ess.dream.io.cif
 from ess.powder.calibration import OutputCalibrationData
-from ess.powder.types import Beamline, CIFAuthors, IofTof, ReducerSoftwares, Software
+from ess.powder.types import Beamline, CIFAuthors, IofTof, ReducerSoftware, Software
 
 
 @pytest.fixture
@@ -54,7 +54,7 @@ def test_save_reduced_tof(ioftof: IofTof, cal: OutputCalibrationData) -> None:
             site="ESS",
         ),
         source=ESS_SOURCE,
-        reducers=ReducerSoftwares(
+        reducers=ReducerSoftware(
             [
                 Software.from_package_metadata('ess.diffraction'),
                 Software.from_package_metadata('ess.dream'),

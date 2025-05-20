@@ -24,7 +24,7 @@ from ess.powder.types import (
     MonitorType,
     PixelMaskFilename,
     Position,
-    ReducerSoftwares,
+    ReducerSoftware,
     ResampledMonitorTofData,
     RunType,
     SampleRun,
@@ -93,12 +93,12 @@ def default_parameters() -> dict:
         TwoThetaMask: None,
         CaveMonitorPosition: sc.vector([0.0, 0.0, -4220.0], unit='mm'),
         CIFAuthors: CIFAuthors([]),
-        ReducerSoftwares: _collect_reducer_software(),
+        ReducerSoftware: _collect_reducer_software(),
     }
 
 
-def _collect_reducer_software() -> ReducerSoftwares:
-    return ReducerSoftwares(
+def _collect_reducer_software() -> ReducerSoftware:
+    return ReducerSoftware(
         [
             Software.from_package_metadata('essdiffraction'),
             Software.from_package_metadata('scippneutron'),
