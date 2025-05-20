@@ -15,6 +15,10 @@ from ess.spectroscopy.indirect.normalization import providers as normalisation_p
 from ess.spectroscopy.indirect.time_of_flight import TofWorkflow
 from ess.spectroscopy.types import (
     DataGroupedByRotation,
+    FrameMonitor0,
+    FrameMonitor1,
+    FrameMonitor2,
+    FrameMonitor3,
     NeXusDetectorName,
     NeXusMonitorName,
     PulsePeriod,
@@ -25,12 +29,6 @@ from .cutting import providers as cutting_providers
 from .detector import merge_triplets
 from .detector import providers as detector_providers
 from .io import mcstas, nexus
-from .types import (
-    FrameMonitor0,
-    FrameMonitor1,
-    FrameMonitor2,
-    FrameMonitor3,
-)
 
 
 def simulation_default_parameters() -> dict[type, Any]:

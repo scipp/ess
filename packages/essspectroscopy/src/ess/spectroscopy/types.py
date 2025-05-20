@@ -30,20 +30,25 @@ NeXusMonitorName = reduce_t.NeXusName
 NeXusTransformation = reduce_t.NeXusTransformation
 Position = reduce_t.Position
 PreopenNeXusFile = reduce_t.PreopenNeXusFile
+
+
 SampleRun = reduce_t.SampleRun
+VanadiumRun = reduce_t.VanadiumRun
+
+FrameMonitor0 = reduce_t.FrameMonitor0
+FrameMonitor1 = reduce_t.FrameMonitor1
+FrameMonitor2 = reduce_t.FrameMonitor2
+FrameMonitor3 = reduce_t.FrameMonitor3
 
 # Type vars
 
-# Include BackgroundRun because a single constraint is not allowed.
-# We will eventually have more than one...
-RunType = TypeVar("RunType", SampleRun, reduce_t.BackgroundRun)
-# Monitor types include all monitors used by instrument packages.
+RunType = TypeVar("RunType", SampleRun, VanadiumRun)
 MonitorType = TypeVar(
     "MonitorType",
-    reduce_t.Monitor1,
-    reduce_t.Monitor2,
-    reduce_t.Monitor3,
-    reduce_t.Monitor4,
+    FrameMonitor0,
+    FrameMonitor1,
+    FrameMonitor2,
+    FrameMonitor3,
 )
 
 # Time-of-flight types
