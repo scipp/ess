@@ -83,8 +83,17 @@ class Filename(sciline.Scope[RunType, str], str):
     """Filename of an event data nexus file."""
 
 
+class RawSampleRotation(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """The rotation of the sample registered in the NeXus file."""
+
+
 class SampleRotation(sciline.Scope[RunType, sc.Variable], sc.Variable):
     """The rotation of the sample relative to the center of the incoming beam."""
+
+
+class SampleRotationOffset(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """The difference between the true slope of the sample surface
+    and the sample rotation value in the file."""
 
 
 class DetectorRotation(sciline.Scope[RunType, sc.Variable], sc.Variable):

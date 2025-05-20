@@ -17,10 +17,12 @@ from ess.reflectometry.types import (
     Filename,
     ProtonCurrent,
     QBins,
+    RawSampleRotation,
     ReducibleData,
     ReferenceRun,
     ReflectivityOverQ,
     SampleRotation,
+    SampleRotationOffset,
     SampleRun,
     SampleSize,
     WavelengthBins,
@@ -226,3 +228,18 @@ def test_proton_current(amor_pipeline: sciline.Pipeline):
     np.testing.assert_allclose(
         proton_current[np.searchsorted(timestamps, t) - 1], w_without / w_with
     )
+
+
+@pytest.mark.filterwarnings("ignore:Failed to convert .* into a transformation")
+@pytest.mark.filterwarnings("ignore:Invalid transformation, missing attribute")
+def test_sample_rotation_offset(amor_pipeline: sciline.Pipeline):
+    amor_pipeline[Filename[SampleRun]] = amor.data.amor_run(608)
+    amor_pipeline[SampleRotationOffset[SampleRun]] = sc.scalar(1.0, unit='deg')
+    mu, muoffset, muraw = amor_pipeline.compute(
+        (
+            SampleRotation[SampleRun],
+            SampleRotationOffset[SampleRun],
+            RawSampleRotation[SampleRun],
+        )
+    ).values()
+    assert mu == muoffset.to(unit=muraw.unit) + muraw

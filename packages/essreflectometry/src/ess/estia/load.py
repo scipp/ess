@@ -6,12 +6,14 @@ from ..reflectometry.types import (
     Filename,
     RawDetectorData,
     RunType,
+    SampleRotationOffset,
 )
 from .mcstas import parse_events_ascii, parse_events_h5
 
 
 def load_mcstas_events(
     filename: Filename[RunType],
+    sample_rotation_offset: SampleRotationOffset[RunType],
 ) -> RawDetectorData[RunType]:
     """
     Load event data from a McStas run and reshape it
@@ -30,6 +32,9 @@ def load_mcstas_events(
     )
     da.coords['detector_rotation'] = 2 * da.coords['sample_rotation'] + sc.scalar(
         1.65, unit='deg'
+    )
+    da.coords['sample_rotation'] += sample_rotation_offset.to(
+        unit=da.coords['sample_rotation'].unit
     )
 
     xbins = sc.linspace('x', -0.25, 0.25, 14 * 32 + 1)
