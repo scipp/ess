@@ -8,8 +8,7 @@ import scipp as sc
 from ess.reduce.nexus import types as reduce_t
 
 SampleRun = reduce_t.SampleRun
-# `VanadiumRun` is not the best name, see https://github.com/scipp/essreduce/issues/238
-ReferenceRun = reduce_t.VanadiumRun
+ReferenceRun = NewType("ReferenceRun", int)
 RunType = TypeVar("RunType", ReferenceRun, SampleRun)
 
 Beamline = reduce_t.Beamline
