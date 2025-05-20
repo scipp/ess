@@ -5,9 +5,9 @@
 from __future__ import annotations
 
 from ess.powder.types import (
-    BackgroundRun,
     CalibrationFilename,
     DspacingBins,
+    EmptyCanRun,
     Filename,
     IofDspacing,
     IofDspacingTwoTheta,
@@ -36,8 +36,8 @@ parameter_registry[Filename[SampleRun]] = FilenameParameter.from_type(
 parameter_registry[Filename[VanadiumRun]] = FilenameParameter.from_type(
     Filename[VanadiumRun]
 )
-parameter_registry[Filename[BackgroundRun]] = FilenameParameter.from_type(
-    Filename[BackgroundRun]
+parameter_registry[Filename[EmptyCanRun]] = FilenameParameter.from_type(
+    Filename[EmptyCanRun]
 )
 parameter_registry[CalibrationFilename] = FilenameParameter.from_type(
     CalibrationFilename

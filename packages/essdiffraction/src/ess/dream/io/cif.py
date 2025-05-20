@@ -71,7 +71,7 @@ def prepare_reduced_empty_can_subtracted_tof_cif(
     authors: CIFAuthors,
     beamline: Beamline,
     source: Source,
-    reducers: ReducerSoftwares,
+    reducers: ReducerSoftware,
     calibration: OutputCalibrationData,
 ) -> ReducedEmptyCanSubtractedTofCIF:
     """Construct a CIF builder with reduced data in d-spacing.
@@ -117,7 +117,7 @@ def _prepare_reduced_tof_cif_impl(
     authors: CIFAuthors,
     beamline: Beamline,
     source: Source,
-    reducers: ReducerSoftwares,
+    reducers: ReducerSoftware,
     calibration: OutputCalibrationData,
 ) -> ReducedTofCIF:
     to_save = _prepare_data(da)

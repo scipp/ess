@@ -20,27 +20,18 @@ from ess.reduce.nexus import types as reduce_t
 from ess.reduce.time_of_flight import types as tof_t
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
 
-# 1 TypeVars used to parametrize the generic parts of the workflow
-
-BackgroundRun = reduce_t.BackgroundRun
-BunkerMonitor = reduce_t.Monitor2
 CalibratedBeamline = reduce_t.CalibratedBeamline
 CalibratedDetector = reduce_t.CalibratedDetector
-CalibratedBeamline = reduce_t.CalibratedBeamline
 CalibratedMonitor = reduce_t.CalibratedMonitor
 DetectorData = reduce_t.DetectorData
 DetectorPositionOffset = reduce_t.DetectorPositionOffset
-EmptyBeamRun = reduce_t.EmptyBeamRun
 Filename = reduce_t.Filename
-CaveMonitor = reduce_t.Monitor1
 MonitorData = reduce_t.MonitorData
 MonitorPositionOffset = reduce_t.MonitorPositionOffset
 NeXusDetectorName = reduce_t.NeXusDetectorName
 NeXusMonitorName = reduce_t.NeXusName
 NeXusComponent = reduce_t.NeXusComponent
-SampleRun = reduce_t.SampleRun
 Position = reduce_t.Position
-VanadiumRun = reduce_t.VanadiumRun
 
 DetectorBankSizes = reduce_t.DetectorBankSizes
 
@@ -58,19 +49,22 @@ TimeOfFlightLookupTable = tof_t.TimeOfFlightLookupTable
 TimeOfFlightLookupTableFilename = tof_t.TimeOfFlightLookupTableFilename
 SimulationResults = tof_t.SimulationResults
 
-RunType = TypeVar("RunType", SampleRun, VanadiumRun, BackgroundRun)
+SampleRun = reduce_t.SampleRun
+VanadiumRun = reduce_t.VanadiumRun
+EmptyCanRun = NewType("EmptyCanRun", int)
+
+CaveMonitor = reduce_t.CaveMonitor
+BunkerMonitor = NewType("BunkerMonitor", int)
+
+RunType = TypeVar("RunType", SampleRun, VanadiumRun, EmptyCanRun)
 MonitorType = TypeVar("MonitorType", CaveMonitor, BunkerMonitor)
 
-
-# 2 Workflow parameters
 
 CalibrationFilename = NewType("CalibrationFilename", str | None)
 """Filename of the instrument calibration file."""
 
-
 DspacingBins = NewType("DspacingBins", sc.Variable)
 """Bin edges for d-spacing."""
-
 
 OutFilename = NewType("OutFilename", str)
 """Filename of the output."""

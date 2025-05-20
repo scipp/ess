@@ -9,10 +9,10 @@ from ess import dream
 from ess.reduce.nexus.types import (
     CalibratedDetector,
     CalibratedMonitor,
+    CaveMonitor,
     DetectorBankSizes,
     DetectorData,
     Filename,
-    Monitor1,
     NeXusDetectorName,
     SampleRun,
 )
@@ -95,8 +95,8 @@ def test_can_load_nexus_monitor_data(nexus_workflow):
     nexus_workflow[Filename[SampleRun]] = dream.data.get_path(
         'TEST_DREAM_nexus_sorted-2023-12-07.nxs'
     )
-    nexus_workflow[NeXusMonitorName[Monitor1]] = 'monitor_cave'
-    result = nexus_workflow.compute(CalibratedMonitor[SampleRun, Monitor1])
+    nexus_workflow[NeXusMonitorName[CaveMonitor]] = 'monitor_cave'
+    result = nexus_workflow.compute(CalibratedMonitor[SampleRun, CaveMonitor])
     assert result.sizes == {'event_time_zero': 0}
 
 

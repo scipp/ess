@@ -15,7 +15,13 @@ See https://confluence.ess.eu/pages/viewpage.action?pageId=462000005
 
 import sciline
 
-from ess.powder.types import BunkerMonitor, CaveMonitor
+from ess.powder.types import (
+    BunkerMonitor,
+    CaveMonitor,
+    EmptyCanRun,
+    SampleRun,
+    VanadiumRun,
+)
 from ess.reduce.nexus.types import DetectorBankSizes, NeXusName
 from ess.reduce.nexus.workflow import GenericNeXusWorkflow
 
@@ -50,7 +56,10 @@ def LoadNeXusWorkflow() -> sciline.Pipeline:
     """
     Workflow for loading NeXus data.
     """
-    wf = GenericNeXusWorkflow()
+    wf = GenericNeXusWorkflow(
+        run_types=(SampleRun, VanadiumRun, EmptyCanRun),
+        monitor_types=(BunkerMonitor, CaveMonitor),
+    )
     wf[DetectorBankSizes] = DETECTOR_BANK_SIZES
     wf[NeXusName[BunkerMonitor]] = "monitor_bunker"
     wf[NeXusName[CaveMonitor]] = "monitor_cave"
