@@ -110,4 +110,18 @@ def test_simulation_workflow_produces_the_same_data_as_before(
 ) -> None:
     energy_data = workflow.compute(EnergyData[SampleRun])
     expected = sc.io.load_hdf5(computed_energy_data_simulated())
-    sc.testing.assert_allclose(energy_data, expected)
+
+    assert not energy_data.masks
+    assert not energy_data.bins.masks
+
+    assert energy_data.coords.keys() == expected.coords.keys()
+    for name in energy_data.coords.keys():
+        sc.testing.assert_allclose(energy_data.coords[name], expected.coords[name])
+
+    assert energy_data.bins.coords.keys() == expected.bins.coords.keys()
+    for name in energy_data.bins.coords.keys():
+        sc.testing.assert_allclose(
+            energy_data.bins.coords[name], expected.bins.coords[name]
+        )
+
+    sc.testing.assert_allclose(energy_data.bins.data, expected.bins.data)

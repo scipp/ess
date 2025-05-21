@@ -18,8 +18,6 @@ from ess.spectroscopy.types import (
     SecondarySpecCoordTransformGraph,
 )
 
-from ..utils import in_same_unit
-
 
 def sample_analyzer_vector(
     sample_position: sc.Variable,
@@ -125,7 +123,10 @@ def analyzer_detector_vector(
     detector_position: sc.Variable,
 ) -> sc.Variable:
     """Calculate the analyzer-detector vector"""
-    return detector_position - (sample_position + sample_analyzer_vector)
+    analyzer_position = sample_position + sample_analyzer_vector.to(
+        unit=sample_analyzer_vector.unit
+    )
+    return detector_position - analyzer_position.to(unit=detector_position.unit)
 
 
 def final_wavenumber(
@@ -164,26 +165,30 @@ def final_wavenumber(
     # 2 theta is measured from the direction S-A, so the internal angle is
     # (pi - 2 theta) and the normal law of Cosines is modified accordingly to be
     # -cos(2 theta) instead of cos(pi - 2 theta)
-    cos2theta = (l_diff * l_diff - l_sa * l_sa - l_ad * l_ad) / (2 * l_sa * l_ad)
+    cos2theta = (l_diff**2 - l_sa**2 - l_ad**2) / (2 * l_sa * l_ad)
 
     # law of Cosines gives the Bragg reflected wavevector magnitude
-    return 2 * np.pi / analyzer_dspacing / sc.sqrt(2 - 2 * cos2theta)
+    return (
+        2 * np.pi / sc.sqrt(2 - 2 * cos2theta) / analyzer_dspacing.to(unit='angstrom')
+    )
 
 
 def final_energy(final_wavenumber: sc.Variable) -> sc.Variable:
     """Converts (final) wave number to (final) energy"""
     from scipp.constants import hbar, neutron_mass
 
-    return ((hbar * hbar / 2 / neutron_mass) * final_wavenumber * final_wavenumber).to(
-        unit='meV'
-    )
+    return ((hbar**2 / 2 / neutron_mass) * final_wavenumber**2).to(unit='meV')
 
 
 def final_wavevector(
     sample_analyzer_vector: sc.Variable, final_wavenumber: sc.Variable
 ) -> sc.Variable:
-    """Constructs the final wave vector form its direction and magnitude"""
-    return sample_analyzer_vector / sc.norm(sample_analyzer_vector) * final_wavenumber
+    """Constructs the final wave vector from its direction and magnitude"""
+    return (
+        sample_analyzer_vector
+        / sc.norm(sample_analyzer_vector)
+        * final_wavenumber.to(unit='1/angstrom')
+    )
 
 
 def secondary_flight_path_length(
@@ -191,7 +196,9 @@ def secondary_flight_path_length(
     analyzer_detector_vector: sc.Variable,
 ) -> sc.Variable:
     """Returns the path-length-distance between the sample and each detector element"""
-    return sc.norm(sample_analyzer_vector) + sc.norm(analyzer_detector_vector)
+    ad = sc.norm(analyzer_detector_vector)
+    sa = sc.norm(sample_analyzer_vector).to(unit=ad.unit)
+    return sa + ad
 
 
 def secondary_flight_time(
@@ -259,11 +266,11 @@ def move_time_to_sample(
         A shallow copy of ``data`` where the "event_time_offset" coordinate has been
         shifted to the time at the sample.
     """
-    offset = in_same_unit(
-        data.coords['secondary_flight_time'], data.bins.coords['event_time_offset']
+    offset = data.coords['secondary_flight_time'].to(
+        unit=data.bins.coords['event_time_offset'].unit, copy=False
     )
     time = data.bins.coords['event_time_offset'] - offset
-    time %= in_same_unit(pulse_period, time)
+    time %= pulse_period.to(unit=time.unit)
     return DataAtSample[RunType](
         data
         # These are the detector positions and they no longer match the time:
