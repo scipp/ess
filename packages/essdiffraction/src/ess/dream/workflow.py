@@ -15,10 +15,12 @@ from ess.powder import with_pixel_mask_filenames
 from ess.powder.conversion import convert_monitor_to_wavelength
 from ess.powder.correction import (
     RunNormalization,
+    add_empty_can_subtraction,
     insert_run_normalization,
 )
 from ess.powder.types import (
     AccumulatedProtonCharge,
+    BackgroundRun,
     CaveMonitorPosition,  # Should this be a DREAM-only parameter?
     MonitorType,
     PixelMaskFilename,
@@ -75,10 +77,13 @@ def default_parameters() -> dict:
     return {
         Position[snx.NXsample, SampleRun]: sample_position,
         Position[snx.NXsample, VanadiumRun]: sample_position,
+        Position[snx.NXsample, BackgroundRun]: sample_position,
         Position[snx.NXsource, SampleRun]: source_position,
         Position[snx.NXsource, VanadiumRun]: source_position,
+        Position[snx.NXsource, BackgroundRun]: source_position,
         AccumulatedProtonCharge[SampleRun]: charge,
         AccumulatedProtonCharge[VanadiumRun]: charge,
+        AccumulatedProtonCharge[BackgroundRun]: charge,
         TofMask: None,
         WavelengthMask: None,
         TwoThetaMask: None,
@@ -110,9 +115,25 @@ def convert_dream_monitor_to_wavelength(
     return convert_monitor_to_wavelength(monitor)
 
 
-def DreamGeant4Workflow(*, run_norm: RunNormalization) -> sciline.Pipeline:
+def DreamGeant4Workflow(
+    *, run_norm: RunNormalization, subtract_empty_can: bool = False
+) -> sciline.Pipeline:
     """
     Workflow with default parameters for the Dream Geant4 simulation.
+
+    Parameters
+    ----------
+    run_norm:
+        Select how to normalize each run (sample, vanadium, etc.).
+    subtract_empty_can:
+        If ``True``, subtract the same data by an empty can / empty instrument
+        measurement before normalizing by vanadium.
+        This requires specifying a filename parameter for the empty can run.
+
+    Returns
+    -------
+    :
+        A workflow object for DREAM.
     """
     wf = LoadGeant4Workflow()
     for provider in itertools.chain(powder_providers, _dream_providers):
@@ -120,6 +141,8 @@ def DreamGeant4Workflow(*, run_norm: RunNormalization) -> sciline.Pipeline:
     wf.insert(convert_dream_monitor_to_wavelength)
     wf.insert(resample_monitor_time_of_flight_data)
     insert_run_normalization(wf, run_norm)
+    if subtract_empty_can:
+        add_empty_can_subtraction(wf)
     for key, value in itertools.chain(
         default_parameters().items(), time_of_flight.default_parameters().items()
     ):

@@ -101,8 +101,14 @@ def params_for_det(request):
 
 
 @pytest.fixture
-def workflow(params_for_det):
+def workflow_no_empy_can(params_for_det):
     return make_workflow(params_for_det, run_norm=powder.RunNormalization.proton_charge)
+
+
+@pytest.fixture
+def workflow(workflow_no_empy_can):
+    powder.correction.add_empty_can_subtraction(workflow_no_empy_can)
+    return workflow_no_empy_can
 
 
 def make_workflow(params_for_det, *, run_norm):
@@ -115,6 +121,15 @@ def make_workflow(params_for_det, *, run_norm):
 def test_pipeline_can_compute_dspacing_result(workflow):
     workflow = powder.with_pixel_mask_filenames(workflow, [])
     result = workflow.compute(IofDspacing)
+    assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
+    assert sc.identical(result.coords['dspacing'], params[DspacingBins])
+
+
+def test_pipeline_can_compute_dspacing_result_without_empty_can(workflow_no_empy_can):
+    workflow_no_empy_can[Filename[BackgroundRun]] = None
+    workflow_no_empy_can[MonitorFilename[BackgroundRun]] = None
+    workflow_no_empy_can = powder.with_pixel_mask_filenames(workflow_no_empy_can, [])
+    result = workflow_no_empy_can.compute(IofDspacing)
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 

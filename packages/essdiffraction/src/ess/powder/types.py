@@ -58,7 +58,7 @@ TimeOfFlightLookupTable = tof_t.TimeOfFlightLookupTable
 TimeOfFlightLookupTableFilename = tof_t.TimeOfFlightLookupTableFilename
 SimulationResults = tof_t.SimulationResults
 
-RunType = TypeVar("RunType", SampleRun, VanadiumRun)
+RunType = TypeVar("RunType", SampleRun, VanadiumRun, BackgroundRun)
 MonitorType = TypeVar("MonitorType", CaveMonitor, BunkerMonitor)
 
 
@@ -173,6 +173,16 @@ class WavelengthMonitor(
 
 class NormalizedRunData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Data that has been normalized by proton charge."""
+
+
+class BackgroundSubtractedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Data where background has been subtracted."""
+
+
+class BackgroundSubtractedDataTwoTheta(
+    sciline.Scope[RunType, sc.DataArray], sc.DataArray
+):
+    """Data with 2theta bins where background has been subtracted."""
 
 
 PixelMaskFilename = NewType("PixelMaskFilename", str)
