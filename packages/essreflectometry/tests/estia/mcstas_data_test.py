@@ -37,7 +37,7 @@ def estia_mcstas_pipeline() -> sciline.Pipeline:
     wf[Filename[ReferenceRun]] = estia_mcstas_reference_run()
 
     wf[YIndexLimits] = sc.scalar(35), sc.scalar(64)
-    wf[ZIndexLimits] = sc.scalar(0), sc.scalar(14 * 32)
+    wf[ZIndexLimits] = sc.scalar(0), sc.scalar(48 * 32)
     wf[BeamDivergenceLimits] = sc.scalar(-1.0, unit='deg'), sc.scalar(1.0, unit='deg')
     wf[WavelengthBins] = sc.geomspace('wavelength', 3.5, 12, 2001, unit='angstrom')
     wf[QBins] = sc.geomspace('Q', 0.005, 0.1, 200, unit='1/angstrom')
@@ -79,8 +79,8 @@ def estia_mcstas_pipeline() -> sciline.Pipeline:
 def test_mcstas_compute_reducible_data(estia_mcstas_pipeline: sciline.Pipeline):
     estia_mcstas_pipeline[Filename[SampleRun]] = estia_mcstas_sample_run(11)
     da = estia_mcstas_pipeline.compute(ReducibleData[SampleRun])
-    assert da.dims == ('blade', 'wire', 'stripe')
-    assert da.shape == (14, 32, 64)
+    assert da.dims == ('stripe', 'blade', 'wire')
+    assert da.shape == (64, 48, 32)
     assert 'position' in da.coords
     assert 'sample_rotation' in da.coords
     assert 'detector_rotation' in da.coords
