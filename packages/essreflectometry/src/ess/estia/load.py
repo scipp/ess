@@ -38,11 +38,14 @@ def load_mcstas_events(
         unit=da.coords['sample_rotation'].unit
     )
 
-    xbins = sc.linspace('x', -0.25, 0.25, 14 * 32 + 1)
-    ybins = sc.linspace('y', -0.25, 0.25, 65)
-    da = da.bin(x=xbins, y=ybins).rename_dims({'y': 'stripe'})
-    da.coords['stripe'] = sc.arange('stripe', 0, 64)
-    da.coords['z_index'] = sc.arange('x', 14 * 32 - 1, -1, -1)
+    nblades = 48
+    nwires = 32
+    nstripes = 64
+    xbins = sc.linspace('x', -0.25, 0.25, nblades * nwires + 1)
+    ybins = sc.linspace('y', -0.13, 0.13, nstripes + 1)
+    da = da.bin(y=ybins, x=xbins).rename_dims({'y': 'stripe'})
+    da.coords['stripe'] = sc.arange('stripe', 0, nstripes)
+    da.coords['z_index'] = sc.arange('x', nblades * nwires - 1, -1, -1)
 
     # Information is not available in the mcstas output files, therefore it's hardcoded
     da.coords['sample_position'] = sc.vector([0.264298, -0.427595, 35.0512], unit='m')
@@ -64,7 +67,7 @@ def load_mcstas_events(
         x=sc.midpoints(da.coords['x']) * sc.scalar(1.0, unit='m'),
         y=sc.midpoints(da.coords['y']) * sc.scalar(1.0, unit='m'),
         z=sc.scalar(0.0, unit='m'),
-    )
+    ).transpose(da.dims)
     da.coords['position'] = (
         da.coords['detector_position'] + rotation_by_detector_rotation * position
     )
@@ -82,7 +85,7 @@ def load_mcstas_events(
     )
     da.coords["beam_size"] = sc.scalar(2.0, unit='mm')
 
-    da = da.fold('x', sizes={'blade': 14, 'wire': 32})
+    da = da.fold('x', sizes={'blade': nblades, 'wire': nwires})
     da.bins.coords.pop('L')
     da.bins.coords.pop('t')
     return DetectorData[RunType](da)
