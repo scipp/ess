@@ -15,7 +15,6 @@ from ess.powder import with_pixel_mask_filenames
 from ess.powder.conversion import convert_monitor_to_wavelength
 from ess.powder.correction import (
     RunNormalization,
-    add_empty_can_subtraction,
     insert_run_normalization,
 )
 from ess.powder.types import (
@@ -42,7 +41,11 @@ from ess.reduce.time_of_flight import resample_monitor_time_of_flight_data
 from ess.reduce.workflow import register_workflow
 
 from .beamline import InstrumentConfiguration
-from .io.cif import CIFAuthors, prepare_reduced_tof_cif
+from .io.cif import (
+    CIFAuthors,
+    prepare_reduced_empty_can_subtracted_tof_cif,
+    prepare_reduced_tof_cif,
+)
 from .io.geant4 import LoadGeant4Workflow
 from .parameters import typical_outputs
 
@@ -63,6 +66,7 @@ def _get_lookup_table_filename_from_configuration(
 
 _dream_providers = (
     prepare_reduced_tof_cif,
+    prepare_reduced_empty_can_subtracted_tof_cif,
     _get_lookup_table_filename_from_configuration,
 )
 
@@ -115,9 +119,7 @@ def convert_dream_monitor_to_wavelength(
     return convert_monitor_to_wavelength(monitor)
 
 
-def DreamGeant4Workflow(
-    *, run_norm: RunNormalization, subtract_empty_can: bool = False
-) -> sciline.Pipeline:
+def DreamGeant4Workflow(*, run_norm: RunNormalization) -> sciline.Pipeline:
     """
     Workflow with default parameters for the Dream Geant4 simulation.
 
@@ -125,10 +127,6 @@ def DreamGeant4Workflow(
     ----------
     run_norm:
         Select how to normalize each run (sample, vanadium, etc.).
-    subtract_empty_can:
-        If ``True``, subtract the same data by an empty can / empty instrument
-        measurement before normalizing by vanadium.
-        This requires specifying a filename parameter for the empty can run.
 
     Returns
     -------
@@ -141,8 +139,6 @@ def DreamGeant4Workflow(
     wf.insert(convert_dream_monitor_to_wavelength)
     wf.insert(resample_monitor_time_of_flight_data)
     insert_run_normalization(wf, run_norm)
-    if subtract_empty_can:
-        add_empty_can_subtraction(wf)
     for key, value in itertools.chain(
         default_parameters().items(), time_of_flight.default_parameters().items()
     ):

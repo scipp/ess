@@ -15,6 +15,8 @@ from .types import (
     DataWithScatteringCoordinates,
     DspacingData,
     ElasticCoordTransformGraph,
+    EmptyCanSubtractedIofDspacing,
+    EmptyCanSubtractedIofTof,
     FilteredData,
     IofDspacing,
     IofTof,
@@ -221,12 +223,24 @@ def convert_to_dspacing(
     return DspacingData[RunType](out)
 
 
+def _convert_reduced_to_tof_impl(
+    data: sc.DataArray, calibration: OutputCalibrationData
+) -> sc.DataArray:
+    return data.transform_coords(
+        tof=calibration.d_to_tof_transformer(), keep_inputs=False
+    )
+
+
 def convert_reduced_to_tof(
     data: IofDspacing, calibration: OutputCalibrationData
 ) -> IofTof:
-    return IofTof(
-        data.transform_coords(tof=calibration.d_to_tof_transformer(), keep_inputs=False)
-    )
+    return IofTof(_convert_reduced_to_tof_impl(data, calibration))
+
+
+def convert_reduced_to_empty_can_subtracted_tof(
+    data: EmptyCanSubtractedIofDspacing, calibration: OutputCalibrationData
+) -> EmptyCanSubtractedIofTof:
+    return EmptyCanSubtractedIofTof(_convert_reduced_to_tof_impl(data, calibration))
 
 
 def convert_monitor_to_wavelength(
@@ -246,5 +260,6 @@ providers = (
     add_scattering_coordinates_from_positions,
     convert_to_dspacing,
     convert_reduced_to_tof,
+    convert_reduced_to_empty_can_subtracted_tof,
     convert_monitor_to_wavelength,
 )

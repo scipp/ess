@@ -10,7 +10,9 @@ from ess.powder.calibration import OutputCalibrationData
 from ess.powder.types import (
     Beamline,
     CIFAuthors,
+    EmptyCanSubtractedIofTof,
     IofTof,
+    ReducedEmptyCanSubtractedTofCIF,
     ReducedTofCIF,
     ReducerSoftwares,
     Source,
@@ -53,6 +55,71 @@ def prepare_reduced_tof_cif(
         An object that contains the reduced data and metadata.
         Us its ``save`` method to write the CIF file.
     """
+    return _prepare_reduced_tof_cif_impl(
+        da,
+        authors=authors,
+        beamline=beamline,
+        source=source,
+        reducers=reducers,
+        calibration=calibration,
+    )
+
+
+def prepare_reduced_empty_can_subtracted_tof_cif(
+    da: EmptyCanSubtractedIofTof,
+    *,
+    authors: CIFAuthors,
+    beamline: Beamline,
+    source: Source,
+    reducers: ReducerSoftwares,
+    calibration: OutputCalibrationData,
+) -> ReducedEmptyCanSubtractedTofCIF:
+    """Construct a CIF builder with reduced data in d-spacing.
+
+    The object contains the d-spacing coordinate, intensities,
+    and some metadata.
+
+    Parameters
+    ----------
+    da:
+        Reduced 1d data with a ``'tof'`` dimension and coordinate.
+    authors:
+        List of authors to write to the file.
+    beamline:
+        Information about the beamline that the data was produced at.
+    source:
+        Information about the neutron source.
+    reducers:
+        List of software pieces used to reduce the data.
+    calibration:
+        Coefficients for conversion between d-spacing and final ToF.
+        See :meth:`scippneutron.io.cif.CIF.with_powder_calibration`.
+
+    Returns
+    -------
+    :
+        An object that contains the reduced data and metadata.
+        Us its ``save`` method to write the CIF file.
+    """
+    return _prepare_reduced_tof_cif_impl(
+        da,
+        authors=authors,
+        beamline=beamline,
+        source=source,
+        reducers=reducers,
+        calibration=calibration,
+    )
+
+
+def _prepare_reduced_tof_cif_impl(
+    da: IofTof,
+    *,
+    authors: CIFAuthors,
+    beamline: Beamline,
+    source: Source,
+    reducers: ReducerSoftwares,
+    calibration: OutputCalibrationData,
+) -> ReducedTofCIF:
     to_save = _prepare_data(da)
     return ReducedTofCIF(
         cif.CIF('reduced_tof')

@@ -13,10 +13,10 @@ from ._util import event_or_outer_coord
 from .types import (
     AccumulatedProtonCharge,
     BackgroundRun,
-    BackgroundSubtractedData,
-    BackgroundSubtractedDataTwoTheta,
     CaveMonitor,
     DataWithScatteringCoordinates,
+    EmptyCanSubtractedIofDspacing,
+    EmptyCanSubtractedIofDspacingTwoTheta,
     FocussedDataDspacing,
     FocussedDataDspacingTwoTheta,
     IofDspacing,
@@ -157,42 +157,6 @@ def _normalize_by_vanadium(
     return normed
 
 
-def normalize_by_vanadium_dspacing_removed_empty_can(
-    data: BackgroundSubtractedData[SampleRun],
-    vanadium: FocussedDataDspacing[VanadiumRun],
-    uncertainty_broadcast_mode: UncertaintyBroadcastMode,
-) -> IofDspacing:
-    """
-    Normalize sample data by a vanadium measurement and return intensity vs. d-spacing.
-
-    Parameters
-    ----------
-    data:
-        Sample data where events from an empty can / empty instrument measurement
-        have been subtracted.
-    vanadium:
-        Vanadium data.
-    uncertainty_broadcast_mode:
-        Choose how uncertainties of vanadium are broadcast to the sample data.
-        Defaults to ``UncertaintyBroadcastMode.fail``.
-
-    Returns
-    -------
-    :
-        ``data / vanadium``.
-        May contain a mask "zero_vanadium" which is ``True``
-        for bins where vanadium is zero.
-
-    See also
-    --------
-    normalize_by_vanadium_dspacing:
-        The same function but using data where no empty can has been subtracted.
-    """
-    return IofDspacing(
-        _normalize_by_vanadium(data, vanadium, uncertainty_broadcast_mode)
-    )
-
-
 def normalize_by_vanadium_dspacing(
     data: FocussedDataDspacing[SampleRun],
     vanadium: FocussedDataDspacing[VanadiumRun],
@@ -217,51 +181,8 @@ def normalize_by_vanadium_dspacing(
         ``data / vanadium``.
         May contain a mask "zero_vanadium" which is ``True``
         for bins where vanadium is zero.
-
-    See also
-    --------
-    normalize_by_vanadium_dspacing_removed_empty_can:
-        The same function but using data where events from an empty can /
-        empty instrument measurement have been subtracted.
     """
     return IofDspacing(
-        _normalize_by_vanadium(data, vanadium, uncertainty_broadcast_mode)
-    )
-
-
-def normalize_by_vanadium_dspacing_and_two_theta_removed_empty_can(
-    data: BackgroundSubtractedDataTwoTheta[SampleRun],
-    vanadium: FocussedDataDspacingTwoTheta[VanadiumRun],
-    uncertainty_broadcast_mode: UncertaintyBroadcastMode,
-) -> IofDspacingTwoTheta:
-    """
-    Normalize sample data by a vanadium measurement and return intensity vs.
-    (d-spacing, 2theta).
-
-    Parameters
-    ----------
-    data:
-        Sample data where events from an empty can / empty instrument measurement
-        have been subtracted.
-    vanadium:
-        Vanadium data.
-    uncertainty_broadcast_mode:
-        Choose how uncertainties of vanadium are broadcast to the sample data.
-        Defaults to ``UncertaintyBroadcastMode.fail``.
-
-    Returns
-    -------
-    :
-        ``data / vanadium``.
-        May contain a mask "zero_vanadium" which is ``True``
-        for bins where vanadium is zero.
-
-    See also
-    --------
-    normalize_by_vanadium_dspacing_and_two_theta:
-        The same function but using data where no empty can has been subtracted.
-    """
-    return IofDspacingTwoTheta(
         _normalize_by_vanadium(data, vanadium, uncertainty_broadcast_mode)
     )
 
@@ -291,12 +212,6 @@ def normalize_by_vanadium_dspacing_and_two_theta(
         ``data / vanadium``.
         May contain a mask "zero_vanadium" which is ``True``
         for bins where vanadium is zero.
-
-    See also
-    --------
-    normalize_by_vanadium_dspacing_and_two_theta_removed_empty_can:
-        The same function but using data where events from an empty can /
-        empty instrument measurement have been subtracted.
     """
     return IofDspacingTwoTheta(
         _normalize_by_vanadium(data, vanadium, uncertainty_broadcast_mode)
@@ -424,19 +339,17 @@ def _shallow_copy(da: sc.DataArray) -> sc.DataArray:
 
 
 def subtract_background(
-    data: FocussedDataDspacing[SampleRun],
+    data: IofDspacing,
     background: FocussedDataDspacing[BackgroundRun],
-) -> BackgroundSubtractedData[SampleRun]:
-    return BackgroundSubtractedData[SampleRun](data.bins.concatenate(-background))
+) -> EmptyCanSubtractedIofDspacing:
+    return EmptyCanSubtractedIofDspacing(data.bins.concatenate(-background))
 
 
 def subtract_background_two_theta(
-    data: FocussedDataDspacingTwoTheta[SampleRun],
+    data: IofDspacingTwoTheta,
     background: FocussedDataDspacingTwoTheta[BackgroundRun],
-) -> BackgroundSubtractedDataTwoTheta[SampleRun]:
-    return BackgroundSubtractedDataTwoTheta[SampleRun](
-        data.bins.concatenate(-background)
-    )
+) -> EmptyCanSubtractedIofDspacingTwoTheta:
+    return EmptyCanSubtractedIofDspacingTwoTheta(data.bins.concatenate(-background))
 
 
 class RunNormalization(enum.Enum):
@@ -460,17 +373,11 @@ def insert_run_normalization(
             workflow.insert(normalize_by_proton_charge)
 
 
-def add_empty_can_subtraction(workflow: sciline.Pipeline) -> None:
-    """Insert providers to subtract empty can events from sample data."""
-    workflow.insert(normalize_by_vanadium_dspacing_removed_empty_can)
-    workflow.insert(normalize_by_vanadium_dspacing_and_two_theta_removed_empty_can)
-
-
 providers = (
-    subtract_background,
-    subtract_background_two_theta,
     normalize_by_proton_charge,
     normalize_by_vanadium_dspacing,
     normalize_by_vanadium_dspacing_and_two_theta,
+    subtract_background,
+    subtract_background_two_theta,
 )
 """Sciline providers for powder diffraction corrections."""
