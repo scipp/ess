@@ -24,6 +24,7 @@ from .types import (
     MonitorTofData,
     MonitorType,
     RunType,
+    SampleRun,
     WavelengthMonitor,
 )
 
@@ -232,13 +233,13 @@ def _convert_reduced_to_tof_impl(
 
 
 def convert_reduced_to_tof(
-    data: IofDspacing, calibration: OutputCalibrationData
+    data: IofDspacing[SampleRun], calibration: OutputCalibrationData
 ) -> IofTof:
     return IofTof(_convert_reduced_to_tof_impl(data, calibration))
 
 
 def convert_reduced_to_empty_can_subtracted_tof(
-    data: EmptyCanSubtractedIofDspacing, calibration: OutputCalibrationData
+    data: EmptyCanSubtractedIofDspacing[SampleRun], calibration: OutputCalibrationData
 ) -> EmptyCanSubtractedIofTof:
     return EmptyCanSubtractedIofTof(_convert_reduced_to_tof_impl(data, calibration))
 

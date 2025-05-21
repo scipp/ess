@@ -61,7 +61,7 @@ def test_can_create_pipeline(providers, params):
 def test_pipeline_can_compute_dspacing_result(providers, params):
     pipeline = sciline.Pipeline(providers, params=params)
     pipeline = powder.with_pixel_mask_filenames(pipeline, [])
-    result = pipeline.compute(IofDspacing)
+    result = pipeline.compute(IofDspacing[SampleRun])
     assert result.sizes == {
         'dspacing': len(params[DspacingBins]) - 1,
     }
@@ -72,7 +72,7 @@ def test_pipeline_can_compute_dspacing_result_without_calibration(providers, par
     params[CalibrationFilename] = None
     pipeline = sciline.Pipeline(providers, params=params)
     pipeline = powder.with_pixel_mask_filenames(pipeline, [])
-    result = pipeline.compute(IofDspacing)
+    result = pipeline.compute(IofDspacing[SampleRun])
     assert result.sizes == {
         'dspacing': len(params[DspacingBins]) - 1,
     }
@@ -82,12 +82,12 @@ def test_pipeline_can_compute_dspacing_result_without_calibration(providers, par
 def test_pipeline_compare_with_and_without_calibration(providers, params):
     pipeline = sciline.Pipeline(providers, params=params)
     pipeline = powder.with_pixel_mask_filenames(pipeline, [])
-    result_w_cal = pipeline.compute(IofDspacing)
+    result_w_cal = pipeline.compute(IofDspacing[SampleRun])
 
     params[CalibrationFilename] = None
     pipeline = sciline.Pipeline(providers, params=params)
     pipeline = powder.with_pixel_mask_filenames(pipeline, [])
-    result_wo_cal = pipeline.compute(IofDspacing)
+    result_wo_cal = pipeline.compute(IofDspacing[SampleRun])
 
     assert sc.identical(
         result_w_cal.coords['dspacing'], result_wo_cal.coords['dspacing']
@@ -100,7 +100,7 @@ def test_workflow_is_deterministic(providers, params):
     pipeline = powder.with_pixel_mask_filenames(pipeline, [])
     # This is Sciline's default scheduler, but we want to be explicit here
     scheduler = sciline.scheduler.DaskScheduler()
-    graph = pipeline.get(IofDspacing, scheduler=scheduler)
+    graph = pipeline.get(IofDspacing[SampleRun], scheduler=scheduler)
     reference = graph.compute().hist().data
     result = graph.compute().hist().data
     assert sc.identical(sc.values(result), sc.values(reference))
@@ -119,7 +119,7 @@ def test_pipeline_group_by_two_theta(providers, params):
     ).to(unit='rad')
     pipeline = sciline.Pipeline(providers, params=params)
     pipeline = powder.with_pixel_mask_filenames(pipeline, [])
-    result = pipeline.compute(IofDspacingTwoTheta)
+    result = pipeline.compute(IofDspacingTwoTheta[SampleRun])
     assert result.sizes == {
         'two_theta': 15,
         'dspacing': len(params[DspacingBins]) - 1,
@@ -172,7 +172,7 @@ def test_use_workflow_helper(params):
     for key, value in params.items():
         workflow[key] = value
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    result = workflow.compute(IofDspacing)
+    result = workflow.compute(IofDspacing[SampleRun])
     assert result.sizes == {
         'dspacing': len(params[DspacingBins]) - 1,
     }

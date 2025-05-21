@@ -115,7 +115,7 @@ def make_workflow(params_for_det, *, run_norm):
 
 def test_pipeline_can_compute_dspacing_result(workflow):
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    result = workflow.compute(EmptyCanSubtractedIofDspacing)
+    result = workflow.compute(EmptyCanSubtractedIofDspacing[SampleRun])
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
@@ -124,7 +124,7 @@ def test_pipeline_can_compute_dspacing_result_without_empty_can(workflow):
     workflow[Filename[BackgroundRun]] = None
     workflow[MonitorFilename[BackgroundRun]] = None
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    result = workflow.compute(IofDspacing)
+    result = workflow.compute(IofDspacing[SampleRun])
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
@@ -132,7 +132,7 @@ def test_pipeline_can_compute_dspacing_result_without_empty_can(workflow):
 def test_pipeline_can_compute_dspacing_result_using_lookup_table_filename(workflow):
     workflow = powder.with_pixel_mask_filenames(workflow, [])
     workflow[TimeOfFlightLookupTableFilename] = dream.data.tof_lookup_table_high_flux()
-    result = workflow.compute(IofDspacing)
+    result = workflow.compute(EmptyCanSubtractedIofDspacing[SampleRun])
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
@@ -160,7 +160,7 @@ def test_pipeline_can_compute_dspacing_result_using_custom_built_tof_lookup(
     workflow[DistanceResolution] = sc.scalar(0.1, unit="m")
     workflow[TimeResolution] = sc.scalar(250.0, unit='us')
     workflow[LookupTableRelativeErrorThreshold] = 0.02
-    result = workflow.compute(IofDspacing)
+    result = workflow.compute(IofDspacing[SampleRun])
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
@@ -170,7 +170,7 @@ def test_pipeline_can_compute_dspacing_result_with_hist_monitor_norm(params_for_
         params_for_det, run_norm=powder.RunNormalization.monitor_histogram
     )
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    result = workflow.compute(IofDspacing)
+    result = workflow.compute(IofDspacing[SampleRun])
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
@@ -182,7 +182,7 @@ def test_pipeline_can_compute_dspacing_result_with_integrated_monitor_norm(
         params_for_det, run_norm=powder.RunNormalization.monitor_integrated
     )
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    result = workflow.compute(IofDspacing)
+    result = workflow.compute(IofDspacing[SampleRun])
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
@@ -216,7 +216,7 @@ def test_pipeline_group_by_two_theta(workflow):
     )
     workflow[TwoThetaBins] = two_theta_bins
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    result = workflow.compute(IofDspacingTwoTheta)
+    result = workflow.compute(IofDspacingTwoTheta[SampleRun])
     assert result.sizes['two_theta'] == 16
     assert result.sizes['dspacing'] == len(params[DspacingBins]) - 1
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])

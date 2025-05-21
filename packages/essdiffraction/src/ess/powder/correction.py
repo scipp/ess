@@ -3,6 +3,7 @@
 """Correction algorithms for powder diffraction."""
 
 import enum
+from typing import TypeVar
 
 import sciline
 import scipp as sc
@@ -157,11 +158,14 @@ def _normalize_by_vanadium(
     return normed
 
 
+_RunTypeNoVanadium = TypeVar("_RunTypeNoVanadium", SampleRun, BackgroundRun)
+
+
 def normalize_by_vanadium_dspacing(
-    data: FocussedDataDspacing[SampleRun],
+    data: FocussedDataDspacing[_RunTypeNoVanadium],
     vanadium: FocussedDataDspacing[VanadiumRun],
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
-) -> IofDspacing:
+) -> IofDspacing[_RunTypeNoVanadium]:
     """
     Normalize sample data by a vanadium measurement and return intensity vs. d-spacing.
 
@@ -188,10 +192,10 @@ def normalize_by_vanadium_dspacing(
 
 
 def normalize_by_vanadium_dspacing_and_two_theta(
-    data: FocussedDataDspacingTwoTheta[SampleRun],
+    data: FocussedDataDspacingTwoTheta[_RunTypeNoVanadium],
     vanadium: FocussedDataDspacingTwoTheta[VanadiumRun],
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
-) -> IofDspacingTwoTheta:
+) -> IofDspacingTwoTheta[_RunTypeNoVanadium]:
     """
     Normalize sample data by a vanadium measurement and return intensity vs.
     (d-spacing, 2theta).
@@ -339,16 +343,16 @@ def _shallow_copy(da: sc.DataArray) -> sc.DataArray:
 
 
 def subtract_background(
-    data: IofDspacing,
-    background: FocussedDataDspacing[BackgroundRun],
-) -> EmptyCanSubtractedIofDspacing:
+    data: IofDspacing[SampleRun],
+    background: IofDspacing[BackgroundRun],
+) -> EmptyCanSubtractedIofDspacing[SampleRun]:
     return EmptyCanSubtractedIofDspacing(data.bins.concatenate(-background))
 
 
 def subtract_background_two_theta(
-    data: IofDspacingTwoTheta,
-    background: FocussedDataDspacingTwoTheta[BackgroundRun],
-) -> EmptyCanSubtractedIofDspacingTwoTheta:
+    data: IofDspacingTwoTheta[SampleRun],
+    background: IofDspacingTwoTheta[BackgroundRun],
+) -> EmptyCanSubtractedIofDspacingTwoTheta[SampleRun]:
     return EmptyCanSubtractedIofDspacingTwoTheta(data.bins.concatenate(-background))
 
 

@@ -135,19 +135,23 @@ class FocussedDataDspacingTwoTheta(sciline.Scope[RunType, sc.DataArray], sc.Data
     """Intensity vs (d-spacing, 2theta) after focussing pixels."""
 
 
-IofDspacing = NewType("IofDspacing", sc.DataArray)
-"""Data that has been normalized by a vanadium run."""
+class IofDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Data that has been normalized by a vanadium run."""
 
-IofDspacingTwoTheta = NewType("IofDspacingTwoTheta", sc.DataArray)
-"""Data that has been normalized by a vanadium run, and grouped into 2theta bins."""
 
-EmptyCanSubtractedIofDspacing = NewType("EmptyCanSubtractedIofDspacing", sc.DataArray)
-"""Intensity vs. d-spacing, subtracted by empty can measurement."""
+class IofDspacingTwoTheta(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Data that has been normalized by a vanadium run, and grouped into 2theta bins."""
 
-EmptyCanSubtractedIofDspacingTwoTheta = NewType(
-    "EmptyCanSubtractedIofDspacingTwoTheta", sc.DataArray
-)
-"""Intensity vs. d-spacing and 2theta, subtracted by empty can measurement."""
+
+class EmptyCanSubtractedIofDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Intensity vs. d-spacing, subtracted by empty can measurement."""
+
+
+class EmptyCanSubtractedIofDspacingTwoTheta(
+    sciline.Scope[RunType, sc.DataArray], sc.DataArray
+):
+    """Intensity vs. d-spacing and 2theta, subtracted by empty can measurement."""
+
 
 IofTof = NewType("IofTof", sc.DataArray)
 """Normalized data that has been converted to ToF."""
