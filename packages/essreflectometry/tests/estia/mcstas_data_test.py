@@ -11,7 +11,7 @@ import sciline
 import scipp as sc
 from orsopy import fileio
 
-from ess.estia import EstiaWorkflow
+from ess.estia import EstiaMcStasWorkflow
 from ess.estia.data import estia_mcstas_reference_run, estia_mcstas_sample_run
 from ess.estia.load import load_mcstas_events
 from ess.reflectometry import orso
@@ -32,7 +32,7 @@ from ess.reflectometry.types import (
 
 @pytest.fixture
 def estia_mcstas_pipeline() -> sciline.Pipeline:
-    wf = EstiaWorkflow()
+    wf = EstiaMcStasWorkflow()
     wf.insert(load_mcstas_events)
     wf[Filename[ReferenceRun]] = estia_mcstas_reference_run()
 
