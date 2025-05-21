@@ -191,24 +191,22 @@ def test_pipeline_can_compute_dspacing_result_with_integrated_monitor_norm(
 def test_pipeline_normalizes_and_subtracts_empty_can_as_expected(
     workflow: sciline.Pipeline,
 ) -> None:
+    sample = sc.data.binned_x(13, 3)
+    vanadium = sc.data.binned_x(16, 3)
+    empty_can = sc.data.binned_x(9, 3)
+
+    workflow[FocussedDataDspacing[SampleRun]] = sample
+    workflow[FocussedDataDspacing[VanadiumRun]] = vanadium
+    workflow[FocussedDataDspacing[BackgroundRun]] = empty_can
     workflow[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    results = workflow.compute(
-        [
-            EmptyCanSubtractedIofDspacing[SampleRun],
-            FocussedDataDspacing[SampleRun],
-            FocussedDataDspacing[VanadiumRun],
-            FocussedDataDspacing[BackgroundRun],
-        ]
-    )
-    result = results[EmptyCanSubtractedIofDspacing[SampleRun]]
+    result = workflow.compute(EmptyCanSubtractedIofDspacing[SampleRun])
 
-    sample = results[FocussedDataDspacing[SampleRun]]
-    empty_can = results[FocussedDataDspacing[BackgroundRun]]
-    vanadium = results[FocussedDataDspacing[VanadiumRun]]
-
+    subtracted = sample.bins.concatenate(-empty_can)
     expected = powder.correction.normalize_by_vanadium_dspacing(
-        sample.bins.concatenate(-empty_can), vanadium, UncertaintyBroadcastMode.drop
+        FocussedDataDspacing[SampleRun](subtracted),
+        FocussedDataDspacing[VanadiumRun](vanadium),
+        UncertaintyBroadcastMode.drop,
     )
     sc.testing.assert_allclose(result, expected)
 
