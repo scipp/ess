@@ -135,14 +135,29 @@ class FocussedDataDspacingTwoTheta(sciline.Scope[RunType, sc.DataArray], sc.Data
     """Intensity vs (d-spacing, 2theta) after focussing pixels."""
 
 
-IofDspacing = NewType("IofDspacing", sc.DataArray)
-"""Data that has been normalized by a vanadium run."""
+class IofDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Data that has been normalized by a vanadium run."""
+
+
+class IofDspacingTwoTheta(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Data that has been normalized by a vanadium run, and grouped into 2theta bins."""
+
+
+class EmptyCanSubtractedIofDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Intensity vs. d-spacing, subtracted by empty can measurement."""
+
+
+class EmptyCanSubtractedIofDspacingTwoTheta(
+    sciline.Scope[RunType, sc.DataArray], sc.DataArray
+):
+    """Intensity vs. d-spacing and 2theta, subtracted by empty can measurement."""
+
 
 IofTof = NewType("IofTof", sc.DataArray)
-"""Data that has been normalized by a vanadium run and converted to ToF."""
+"""Normalized data that has been converted to ToF."""
 
-IofDspacingTwoTheta = NewType("IofDspacingTwoTheta", sc.DataArray)
-"""Data that has been normalized by a vanadium run, and grouped into 2theta bins."""
+EmptyCanSubtractedIofTof = NewType("EmptyCanSubtractedIofTof", sc.DataArray)
+"""Normalized and empty-can-subtracted data that has been converted to ToF."""
 
 
 class MaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
@@ -173,16 +188,6 @@ class WavelengthMonitor(
 
 class NormalizedRunData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Data that has been normalized by proton charge."""
-
-
-class BackgroundSubtractedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Data where background has been subtracted."""
-
-
-class BackgroundSubtractedDataTwoTheta(
-    sciline.Scope[RunType, sc.DataArray], sc.DataArray
-):
-    """Data with 2theta bins where background has been subtracted."""
 
 
 PixelMaskFilename = NewType("PixelMaskFilename", str)
@@ -221,6 +226,9 @@ CIFAuthors = NewType('CIFAuthors', list[Person])
 """List of authors to save to output CIF files."""
 
 ReducedTofCIF = NewType("ReducedTofCIF", cif.CIF)
+"""Reduced data in time-of-flight, ready to be saved to a CIF file."""
+
+ReducedEmptyCanSubtractedTofCIF = NewType("ReducedEmptyCanSubtractedTofCIF", cif.CIF)
 """Reduced data in time-of-flight, ready to be saved to a CIF file."""
 
 

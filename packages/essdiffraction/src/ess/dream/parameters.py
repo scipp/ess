@@ -9,8 +9,8 @@ from ess.powder.types import (
     CalibrationFilename,
     DspacingBins,
     Filename,
+    IofDspacing,
     IofDspacingTwoTheta,
-    IofTof,
     MonitorFilename,
     NeXusDetectorName,
     PixelMaskFilename,
@@ -68,4 +68,8 @@ parameter_registry[UncertaintyBroadcastMode] = ParamWithOptions.from_enum(
 # that allows to define a python function in the notebook and pass it to the workflow.
 # We defer this to later; the masks are set to None by default in the workflow for now.
 
-typical_outputs = (IofTof, IofDspacingTwoTheta, ReducedTofCIF)
+typical_outputs = (
+    IofDspacing[SampleRun],
+    IofDspacingTwoTheta[SampleRun],
+    ReducedTofCIF,
+)

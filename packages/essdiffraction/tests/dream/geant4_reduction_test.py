@@ -28,7 +28,9 @@ from ess.powder.types import (
     DistanceResolution,
     DspacingBins,
     DspacingData,
+    EmptyCanSubtractedIofDspacing,
     Filename,
+    FocussedDataDspacing,
     IofDspacing,
     IofDspacingTwoTheta,
     IofTof,
@@ -54,9 +56,9 @@ from ess.powder.types import (
 from ess.reduce import time_of_flight
 from ess.reduce import workflow as reduce_workflow
 
-sample = sc.vector([0.0, 0.0, 0.0], unit='mm')
-source = sc.vector([-3.478, 0.0, -76550], unit='mm')
-charge = sc.scalar(1.0, unit='µAh')
+sample_position = sc.vector([0.0, 0.0, 0.0], unit='mm')
+source_position = sc.vector([-3.478, 0.0, -76550], unit='mm')
+proton_charge = sc.scalar(1.0, unit='µAh')
 dream_source_position = sc.vector(value=[0, 0, -76.55], unit="m")
 
 params = {
@@ -72,12 +74,12 @@ params = {
     DspacingBins: sc.linspace('dspacing', 0.0, 2.3434, 201, unit='angstrom'),
     TofMask: lambda x: (x < sc.scalar(0.0, unit='us').to(unit=elem_unit(x)))
     | (x > sc.scalar(86e3, unit='us').to(unit=elem_unit(x))),
-    Position[snx.NXsample, SampleRun]: sample,
-    Position[snx.NXsample, VanadiumRun]: sample,
-    Position[snx.NXsource, SampleRun]: source,
-    Position[snx.NXsource, VanadiumRun]: source,
-    AccumulatedProtonCharge[SampleRun]: charge,
-    AccumulatedProtonCharge[VanadiumRun]: charge,
+    Position[snx.NXsample, SampleRun]: sample_position,
+    Position[snx.NXsample, VanadiumRun]: sample_position,
+    Position[snx.NXsource, SampleRun]: source_position,
+    Position[snx.NXsource, VanadiumRun]: source_position,
+    AccumulatedProtonCharge[SampleRun]: proton_charge,
+    AccumulatedProtonCharge[VanadiumRun]: proton_charge,
     TwoThetaMask: None,
     WavelengthMask: None,
     CaveMonitorPosition: sc.vector([0.0, 0.0, -4220.0], unit='mm'),
@@ -101,14 +103,8 @@ def params_for_det(request):
 
 
 @pytest.fixture
-def workflow_no_empy_can(params_for_det):
+def workflow(params_for_det):
     return make_workflow(params_for_det, run_norm=powder.RunNormalization.proton_charge)
-
-
-@pytest.fixture
-def workflow(workflow_no_empy_can):
-    powder.correction.add_empty_can_subtraction(workflow_no_empy_can)
-    return workflow_no_empy_can
 
 
 def make_workflow(params_for_det, *, run_norm):
@@ -120,16 +116,16 @@ def make_workflow(params_for_det, *, run_norm):
 
 def test_pipeline_can_compute_dspacing_result(workflow):
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    result = workflow.compute(IofDspacing)
+    result = workflow.compute(EmptyCanSubtractedIofDspacing[SampleRun])
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
 
-def test_pipeline_can_compute_dspacing_result_without_empty_can(workflow_no_empy_can):
-    workflow_no_empy_can[Filename[BackgroundRun]] = None
-    workflow_no_empy_can[MonitorFilename[BackgroundRun]] = None
-    workflow_no_empy_can = powder.with_pixel_mask_filenames(workflow_no_empy_can, [])
-    result = workflow_no_empy_can.compute(IofDspacing)
+def test_pipeline_can_compute_dspacing_result_without_empty_can(workflow):
+    workflow[Filename[BackgroundRun]] = None
+    workflow[MonitorFilename[BackgroundRun]] = None
+    workflow = powder.with_pixel_mask_filenames(workflow, [])
+    result = workflow.compute(IofDspacing[SampleRun])
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
@@ -137,7 +133,7 @@ def test_pipeline_can_compute_dspacing_result_without_empty_can(workflow_no_empy
 def test_pipeline_can_compute_dspacing_result_using_lookup_table_filename(workflow):
     workflow = powder.with_pixel_mask_filenames(workflow, [])
     workflow[TimeOfFlightLookupTableFilename] = dream.data.tof_lookup_table_high_flux()
-    result = workflow.compute(IofDspacing)
+    result = workflow.compute(EmptyCanSubtractedIofDspacing[SampleRun])
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
@@ -165,7 +161,7 @@ def test_pipeline_can_compute_dspacing_result_using_custom_built_tof_lookup(
     workflow[DistanceResolution] = sc.scalar(0.1, unit="m")
     workflow[TimeResolution] = sc.scalar(250.0, unit='us')
     workflow[LookupTableRelativeErrorThreshold] = 0.02
-    result = workflow.compute(IofDspacing)
+    result = workflow.compute(IofDspacing[SampleRun])
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
@@ -175,7 +171,7 @@ def test_pipeline_can_compute_dspacing_result_with_hist_monitor_norm(params_for_
         params_for_det, run_norm=powder.RunNormalization.monitor_histogram
     )
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    result = workflow.compute(IofDspacing)
+    result = workflow.compute(IofDspacing[SampleRun])
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
@@ -187,9 +183,32 @@ def test_pipeline_can_compute_dspacing_result_with_integrated_monitor_norm(
         params_for_det, run_norm=powder.RunNormalization.monitor_integrated
     )
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    result = workflow.compute(IofDspacing)
+    result = workflow.compute(IofDspacing[SampleRun])
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
+
+
+def test_pipeline_normalizes_and_subtracts_empty_can_as_expected(
+    workflow: sciline.Pipeline,
+) -> None:
+    sample = sc.data.binned_x(13, 3)
+    vanadium = sc.data.binned_x(16, 3)
+    empty_can = sc.data.binned_x(9, 3)
+
+    workflow[FocussedDataDspacing[SampleRun]] = sample
+    workflow[FocussedDataDspacing[VanadiumRun]] = vanadium
+    workflow[FocussedDataDspacing[BackgroundRun]] = empty_can
+    workflow[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
+    workflow = powder.with_pixel_mask_filenames(workflow, [])
+    result = workflow.compute(EmptyCanSubtractedIofDspacing[SampleRun])
+
+    subtracted = sample.bins.concatenate(-empty_can)
+    expected = powder.correction.normalize_by_vanadium_dspacing(
+        FocussedDataDspacing[SampleRun](subtracted),
+        FocussedDataDspacing[VanadiumRun](vanadium),
+        UncertaintyBroadcastMode.drop,
+    )
+    sc.testing.assert_allclose(result, expected)
 
 
 def test_workflow_is_deterministic(workflow):
@@ -221,7 +240,7 @@ def test_pipeline_group_by_two_theta(workflow):
     )
     workflow[TwoThetaBins] = two_theta_bins
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    result = workflow.compute(IofDspacingTwoTheta)
+    result = workflow.compute(IofDspacingTwoTheta[SampleRun])
     assert result.sizes['two_theta'] == 16
     assert result.sizes['dspacing'] == len(params[DspacingBins]) - 1
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
