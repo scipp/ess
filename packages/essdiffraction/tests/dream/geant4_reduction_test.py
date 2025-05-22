@@ -21,13 +21,13 @@ from ess.dream.workflow import (
 )
 from ess.powder.types import (
     AccumulatedProtonCharge,
-    BackgroundRun,
     CalibrationFilename,
     CaveMonitorPosition,
     CIFAuthors,
     DistanceResolution,
     DspacingBins,
     DspacingData,
+    EmptyCanRun,
     EmptyCanSubtractedIofDspacing,
     Filename,
     FocussedDataDspacing,
@@ -64,10 +64,10 @@ dream_source_position = sc.vector(value=[0, 0, -76.55], unit="m")
 params = {
     Filename[SampleRun]: dream.data.simulated_diamond_sample(small=True),
     Filename[VanadiumRun]: dream.data.simulated_vanadium_sample(small=True),
-    Filename[BackgroundRun]: dream.data.simulated_empty_can(small=True),
+    Filename[EmptyCanRun]: dream.data.simulated_empty_can(small=True),
     MonitorFilename[SampleRun]: dream.data.simulated_monitor_diamond_sample(),
     MonitorFilename[VanadiumRun]: dream.data.simulated_monitor_vanadium_sample(),
-    MonitorFilename[BackgroundRun]: dream.data.simulated_monitor_empty_can(),
+    MonitorFilename[EmptyCanRun]: dream.data.simulated_monitor_empty_can(),
     dream.InstrumentConfiguration: dream.beamline.InstrumentConfiguration.high_flux,
     CalibrationFilename: None,
     UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
@@ -122,8 +122,8 @@ def test_pipeline_can_compute_dspacing_result(workflow):
 
 
 def test_pipeline_can_compute_dspacing_result_without_empty_can(workflow):
-    workflow[Filename[BackgroundRun]] = None
-    workflow[MonitorFilename[BackgroundRun]] = None
+    workflow[Filename[EmptyCanRun]] = None
+    workflow[MonitorFilename[EmptyCanRun]] = None
     workflow = powder.with_pixel_mask_filenames(workflow, [])
     result = workflow.compute(IofDspacing[SampleRun])
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
@@ -197,7 +197,7 @@ def test_pipeline_normalizes_and_subtracts_empty_can_as_expected(
 
     workflow[FocussedDataDspacing[SampleRun]] = sample
     workflow[FocussedDataDspacing[VanadiumRun]] = vanadium
-    workflow[FocussedDataDspacing[BackgroundRun]] = empty_can
+    workflow[FocussedDataDspacing[EmptyCanRun]] = empty_can
     workflow[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
     workflow = powder.with_pixel_mask_filenames(workflow, [])
     result = workflow.compute(EmptyCanSubtractedIofDspacing[SampleRun])
@@ -352,4 +352,4 @@ def test_dream_workflow_parameters_returns_filtered_params():
     wf = DreamGeant4ProtonChargeWorkflow()
     parameters = reduce_workflow.get_parameters(wf, (DspacingData[SampleRun],))
     assert Filename[SampleRun] in parameters
-    assert Filename[BackgroundRun] not in parameters
+    assert Filename[EmptyCanRun] not in parameters

@@ -8,7 +8,6 @@ import scippnexus as snx
 from scippneutron.metadata import ESS_SOURCE
 
 from ess.powder.types import (
-    BackgroundRun,
     Beamline,
     CalibratedBeamline,
     CalibratedDetector,
@@ -18,6 +17,7 @@ from ess.powder.types import (
     CaveMonitor,
     CaveMonitorPosition,
     DetectorData,
+    EmptyCanRun,
     Filename,
     MonitorData,
     MonitorFilename,
@@ -321,7 +321,7 @@ def LoadGeant4Workflow() -> sciline.Pipeline:
     Workflow for loading NeXus data.
     """
     wf = GenericTofWorkflow(
-        run_types=[SampleRun, VanadiumRun, BackgroundRun], monitor_types=[CaveMonitor]
+        run_types=[SampleRun, VanadiumRun, EmptyCanRun], monitor_types=[CaveMonitor]
     )
     wf.insert(extract_geant4_detector)
     wf.insert(load_geant4_csv)

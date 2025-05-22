@@ -19,12 +19,12 @@ from ess.powder.correction import (
 )
 from ess.powder.types import (
     AccumulatedProtonCharge,
-    BackgroundRun,
     CaveMonitorPosition,  # Should this be a DREAM-only parameter?
+    EmptyCanRun,
     MonitorType,
     PixelMaskFilename,
     Position,
-    ReducerSoftwares,
+    ReducerSoftware,
     ResampledMonitorTofData,
     RunType,
     SampleRun,
@@ -81,24 +81,24 @@ def default_parameters() -> dict:
     return {
         Position[snx.NXsample, SampleRun]: sample_position,
         Position[snx.NXsample, VanadiumRun]: sample_position,
-        Position[snx.NXsample, BackgroundRun]: sample_position,
+        Position[snx.NXsample, EmptyCanRun]: sample_position,
         Position[snx.NXsource, SampleRun]: source_position,
         Position[snx.NXsource, VanadiumRun]: source_position,
-        Position[snx.NXsource, BackgroundRun]: source_position,
+        Position[snx.NXsource, EmptyCanRun]: source_position,
         AccumulatedProtonCharge[SampleRun]: charge,
         AccumulatedProtonCharge[VanadiumRun]: charge,
-        AccumulatedProtonCharge[BackgroundRun]: charge,
+        AccumulatedProtonCharge[EmptyCanRun]: charge,
         TofMask: None,
         WavelengthMask: None,
         TwoThetaMask: None,
         CaveMonitorPosition: sc.vector([0.0, 0.0, -4220.0], unit='mm'),
         CIFAuthors: CIFAuthors([]),
-        ReducerSoftwares: _collect_reducer_software(),
+        ReducerSoftware: _collect_reducer_software(),
     }
 
 
-def _collect_reducer_software() -> ReducerSoftwares:
-    return ReducerSoftwares(
+def _collect_reducer_software() -> ReducerSoftware:
+    return ReducerSoftware(
         [
             Software.from_package_metadata('essdiffraction'),
             Software.from_package_metadata('scippneutron'),

@@ -13,9 +13,9 @@ from ess.reduce.uncertainty import broadcast_uncertainties
 from ._util import event_or_outer_coord
 from .types import (
     AccumulatedProtonCharge,
-    BackgroundRun,
     CaveMonitor,
     DataWithScatteringCoordinates,
+    EmptyCanRun,
     EmptyCanSubtractedIofDspacing,
     EmptyCanSubtractedIofDspacingTwoTheta,
     FocussedDataDspacing,
@@ -158,7 +158,7 @@ def _normalize_by_vanadium(
     return normed
 
 
-_RunTypeNoVanadium = TypeVar("_RunTypeNoVanadium", SampleRun, BackgroundRun)
+_RunTypeNoVanadium = TypeVar("_RunTypeNoVanadium", SampleRun, EmptyCanRun)
 
 
 def normalize_by_vanadium_dspacing(
@@ -342,16 +342,16 @@ def _shallow_copy(da: sc.DataArray) -> sc.DataArray:
     return out
 
 
-def subtract_background(
+def subtract_empty_can(
     data: IofDspacing[SampleRun],
-    background: IofDspacing[BackgroundRun],
+    background: IofDspacing[EmptyCanRun],
 ) -> EmptyCanSubtractedIofDspacing[SampleRun]:
     return EmptyCanSubtractedIofDspacing(data.bins.concatenate(-background))
 
 
-def subtract_background_two_theta(
+def subtract_empty_can_two_theta(
     data: IofDspacingTwoTheta[SampleRun],
-    background: IofDspacingTwoTheta[BackgroundRun],
+    background: IofDspacingTwoTheta[EmptyCanRun],
 ) -> EmptyCanSubtractedIofDspacingTwoTheta[SampleRun]:
     return EmptyCanSubtractedIofDspacingTwoTheta(data.bins.concatenate(-background))
 
@@ -381,7 +381,7 @@ providers = (
     normalize_by_proton_charge,
     normalize_by_vanadium_dspacing,
     normalize_by_vanadium_dspacing_and_two_theta,
-    subtract_background,
-    subtract_background_two_theta,
+    subtract_empty_can,
+    subtract_empty_can_two_theta,
 )
 """Sciline providers for powder diffraction corrections."""

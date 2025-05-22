@@ -138,7 +138,7 @@ requests==2.32.3
     # via
     #   pooch
     #   sphinx
-rpds-py==0.24.0
+rpds-py==0.25.1
     # via
     #   jsonschema
     #   referencing
@@ -180,7 +180,7 @@ tinycss2==1.4.0
     # via bleach
 tomli==2.2.1
     # via sphinx
-tornado==6.4.2
+tornado==6.5
     # via
     #   ipykernel
     #   jupyter-client
