@@ -158,7 +158,7 @@ def _normalize_by_vanadium(
     return normed
 
 
-_RunTypeNoVanadium = TypeVar("_RunTypeNoVanadium", SampleRun, BackgroundRun)
+_RunTypeNoVanadium = TypeVar("_RunTypeNoVanadium", SampleRun, EmptyCanRun)
 
 
 def normalize_by_vanadium_dspacing(

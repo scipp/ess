@@ -197,7 +197,7 @@ def test_pipeline_normalizes_and_subtracts_empty_can_as_expected(
 
     workflow[FocussedDataDspacing[SampleRun]] = sample
     workflow[FocussedDataDspacing[VanadiumRun]] = vanadium
-    workflow[FocussedDataDspacing[BackgroundRun]] = empty_can
+    workflow[FocussedDataDspacing[EmptyCanRun]] = empty_can
     workflow[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
     workflow = powder.with_pixel_mask_filenames(workflow, [])
     result = workflow.compute(EmptyCanSubtractedIofDspacing[SampleRun])
