@@ -4,7 +4,7 @@ import sciline
 
 from ..reflectometry import providers as reflectometry_providers
 from ..reflectometry.types import (
-    RawDetectorData,
+    DetectorData,
     ReducibleData,
     RunType,
     WavelengthBins,
@@ -37,7 +37,7 @@ def OffspecWorkflow() -> sciline.Pipeline:
 
 
 def add_coords_masks_and_apply_corrections(
-    da: RawDetectorData[RunType],
+    da: DetectorData[RunType],
     spectrum_limits: SpectrumLimits,
     wlims: WavelengthBins,
     wbmin: BackgroundMinWavelength,
