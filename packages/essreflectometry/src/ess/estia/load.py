@@ -9,6 +9,7 @@ from ..reflectometry.types import (
     RunType,
     SampleRotationOffset,
 )
+from .beamline import DETECTOR_BANK_SIZES
 from .mcstas import parse_events_ascii, parse_events_h5
 
 
@@ -38,13 +39,13 @@ def load_mcstas_events(
         unit=da.coords['sample_rotation'].unit
     )
 
-    nblades = 48
-    nwires = 32
-    nstripes = 64
+    nblades = DETECTOR_BANK_SIZES['multiblade_detector']['blade']
+    nwires = DETECTOR_BANK_SIZES['multiblade_detector']['wire']
+    nstrips = DETECTOR_BANK_SIZES['multiblade_detector']['strip']
     xbins = sc.linspace('x', -0.25, 0.25, nblades * nwires + 1)
-    ybins = sc.linspace('y', -0.13, 0.13, nstripes + 1)
-    da = da.bin(y=ybins, x=xbins).rename_dims({'y': 'stripe'})
-    da.coords['stripe'] = sc.arange('stripe', 0, nstripes)
+    ybins = sc.linspace('y', -0.13, 0.13, nstrips + 1)
+    da = da.bin(y=ybins, x=xbins).rename_dims({'y': 'strip'})
+    da.coords['strip'] = sc.arange('strip', 0, nstrips)
     da.coords['z_index'] = sc.arange('x', nblades * nwires - 1, -1, -1)
 
     # Information is not available in the mcstas output files, therefore it's hardcoded
@@ -85,7 +86,14 @@ def load_mcstas_events(
     )
     da.coords["beam_size"] = sc.scalar(2.0, unit='mm')
 
-    da = da.fold('x', sizes={'blade': nblades, 'wire': nwires})
+    da = da.fold(
+        'x',
+        sizes={
+            k: v
+            for k, v in DETECTOR_BANK_SIZES['multiblade_detector'].items()
+            if k in ('blade', 'wire')
+        },
+    )
     da.bins.coords.pop('L')
     da.bins.coords.pop('t')
     return DetectorData[RunType](da)
