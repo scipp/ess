@@ -4,20 +4,16 @@
 import sciline
 import scipp as sc
 
-from ess.reduce import nexus
-
 from ..reflectometry import providers as reflectometry_providers
 from ..reflectometry import supermirror
 from ..reflectometry.types import (
     BeamDivergenceLimits,
     DetectorSpatialResolution,
     NeXusDetectorName,
-    ReferenceRun,
     RunType,
     SampleRotationOffset,
-    SampleRun,
 )
-from . import conversions, corrections, load, maskings, normalization, orso
+from . import beamline, conversions, corrections, load, maskings, normalization, orso
 
 _general_providers = (
     *reflectometry_providers,
@@ -74,9 +70,7 @@ def EstiaMcStasWorkflow() -> sciline.Pipeline:
 
 def EstiaWorkflow() -> sciline.Pipeline:
     """Workflow for reduction of data for the Estia instrument."""
-    workflow = nexus.GenericNeXusWorkflow(
-        run_types=[SampleRun, ReferenceRun], monitor_types=[]
-    )
+    workflow = beamline.LoadNeXusWorkflow()
     for provider in providers:
         workflow.insert(provider)
     for name, param in default_parameters().items():

@@ -10,8 +10,8 @@ class Detector:
     nBlades = sc.scalar(14)
     # number of wires per blade
     nWires = sc.scalar(32)
-    # number of stripes per blade
-    nStripes = sc.scalar(64)
+    # number of strips per blade
+    nStrips = sc.scalar(64)
     # angle of incidence of the beam on the blades (def: 5.1)
     angle = sc.scalar(5.1, unit="degree").to(unit="rad")
     # height-distance of neighboring pixels on one blade
@@ -34,7 +34,7 @@ def pixel_coordinates_in_detector_system() -> tuple[sc.Variable, sc.Variable]:
             'row',
             1,
             (
-                Detector.nBlades * Detector.nWires * Detector.nStripes + sc.scalar(1)
+                Detector.nBlades * Detector.nWires * Detector.nStrips + sc.scalar(1)
             ).values,
             unit=None,
         ).fold(
@@ -42,13 +42,13 @@ def pixel_coordinates_in_detector_system() -> tuple[sc.Variable, sc.Variable]:
             sizes={
                 'blade': Detector.nBlades,
                 'wire': Detector.nWires,
-                'stripe': Detector.nStripes,
+                'strip': Detector.nStrips,
             },
         ),
         coords={
             'blade': sc.arange('blade', sc.scalar(0), Detector.nBlades),
             'wire': sc.arange('wire', sc.scalar(0), Detector.nWires),
-            'stripe': sc.arange('stripe', sc.scalar(0), Detector.nStripes),
+            'strip': sc.arange('strip', sc.scalar(0), Detector.nStrips),
         },
     )
     # x position in detector
