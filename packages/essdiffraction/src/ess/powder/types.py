@@ -37,7 +37,6 @@ DetectorBankSizes = reduce_t.DetectorBankSizes
 
 DetectorTofData = tof_t.DetectorTofData
 MonitorTofData = tof_t.MonitorTofData
-ResampledMonitorTofData = tof_t.ResampledMonitorTofData
 PulsePeriod = tof_t.PulsePeriod
 PulseStride = tof_t.PulseStride
 PulseStrideOffset = tof_t.PulseStrideOffset

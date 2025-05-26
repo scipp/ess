@@ -12,7 +12,6 @@ from scippneutron.metadata import Software
 
 from ess.powder import providers as powder_providers
 from ess.powder import with_pixel_mask_filenames
-from ess.powder.conversion import convert_monitor_to_wavelength
 from ess.powder.correction import (
     RunNormalization,
     insert_run_normalization,
@@ -21,23 +20,18 @@ from ess.powder.types import (
     AccumulatedProtonCharge,
     CaveMonitorPosition,  # Should this be a DREAM-only parameter?
     EmptyCanRun,
-    MonitorType,
     PixelMaskFilename,
     Position,
     ReducerSoftware,
-    ResampledMonitorTofData,
-    RunType,
     SampleRun,
     TimeOfFlightLookupTableFilename,
     TofMask,
     TwoThetaMask,
     VanadiumRun,
     WavelengthMask,
-    WavelengthMonitor,
 )
 from ess.reduce import time_of_flight
 from ess.reduce.parameter import parameter_mappers
-from ess.reduce.time_of_flight import resample_monitor_time_of_flight_data
 from ess.reduce.workflow import register_workflow
 
 from .beamline import InstrumentConfiguration
@@ -107,18 +101,6 @@ def _collect_reducer_software() -> ReducerSoftware:
     )
 
 
-def convert_dream_monitor_to_wavelength(
-    monitor: ResampledMonitorTofData[RunType, MonitorType],
-) -> WavelengthMonitor[RunType, MonitorType]:
-    """
-    We know that DREAM monitors are recording in histogram mode, so we need to use the
-    resampled monitor data to avoid having nans in the time-of-flight coordinates.
-
-    This provider should be inserted in the Dream workflow below.
-    """
-    return convert_monitor_to_wavelength(monitor)
-
-
 def DreamGeant4Workflow(*, run_norm: RunNormalization) -> sciline.Pipeline:
     """
     Workflow with default parameters for the Dream Geant4 simulation.
@@ -136,8 +118,6 @@ def DreamGeant4Workflow(*, run_norm: RunNormalization) -> sciline.Pipeline:
     wf = LoadGeant4Workflow()
     for provider in itertools.chain(powder_providers, _dream_providers):
         wf.insert(provider)
-    wf.insert(convert_dream_monitor_to_wavelength)
-    wf.insert(resample_monitor_time_of_flight_data)
     insert_run_normalization(wf, run_norm)
     for key, value in itertools.chain(
         default_parameters().items(), time_of_flight.default_parameters().items()
