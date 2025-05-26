@@ -12,7 +12,7 @@ from ess.reduce.parameter import parameter_mappers
 from . import common, conversions, i_of_q, masking, normalization
 from .types import (
     BackgroundRun,
-    CleanSummedQ,
+    ReducedQ,
     CorrectForGravity,
     Denominator,
     DetectorBankSizes,
@@ -99,8 +99,8 @@ def _set_runs(
     pipeline = pipeline.copy()
     runs = pd.DataFrame({Filename[key]: runs}).rename_axis(axis_name)
     for part in (Numerator, Denominator):
-        pipeline[CleanSummedQ[key, part]] = (
-            pipeline[CleanSummedQ[key, part]]
+        pipeline[ReducedQ[key, part]] = (
+            pipeline[ReducedQ[key, part]]
             .map(runs)
             .reduce(index=axis_name, func=merge_contributions)
         )
