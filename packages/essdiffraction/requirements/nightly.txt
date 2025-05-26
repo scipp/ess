@@ -46,7 +46,7 @@ executing==2.2.0
     # via stack-data
 fonttools==4.58.0
     # via matplotlib
-fsspec==2025.5.0
+fsspec==2025.5.1
     # via dask
 graphviz==0.20.3
     # via -r nightly.in
@@ -139,7 +139,7 @@ ptyprocess==0.7.0
     # via pexpect
 pure-eval==0.2.3
     # via stack-data
-pydantic==2.11.4
+pydantic==2.11.5
     # via scippneutron
 pydantic-core==2.33.2
     # via pydantic
@@ -210,7 +210,7 @@ traitlets==5.14.3
     #   traittypes
 traittypes==0.2.1
     # via ipydatawidgets
-typing-extensions==4.13.2
+typing-extensions==4.14.0rc1
     # via
     #   exceptiongroup
     #   ipython
