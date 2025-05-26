@@ -12,7 +12,6 @@ from ess.reduce.parameter import parameter_mappers
 from . import common, conversions, i_of_q, masking, normalization
 from .types import (
     BackgroundRun,
-    ReducedQ,
     CorrectForGravity,
     Denominator,
     DetectorBankSizes,
@@ -24,6 +23,7 @@ from .types import (
     NeXusDetectorName,
     Numerator,
     PixelMaskFilename,
+    ReducedQ,
     SampleRun,
     TransformationPath,
     Transmission,
