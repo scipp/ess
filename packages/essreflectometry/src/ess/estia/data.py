@@ -46,22 +46,22 @@ def _make_pooch():
             # Each sample is measured using all four flipper setting.
             "spin_flip_example/ground_truth_spin_down_reflectivity.h5": "md5:1b3f4c70be6e2d5bae35836c378a0762",  # noqa: E501
             "spin_flip_example/ground_truth_spin_up_reflectivity.h5": "md5:77ded33407a5004587e475ede0312424",  # noqa: E501
-            "spin_flip_example/magnetic_supermirror_2_offoff.h5": "md5:4ab8b8a51d72bbafe577da79de18a5e5",  # noqa: E501
-            "spin_flip_example/magnetic_supermirror_2_offon.h5": "md5:d62d7291f4b45e6d7b64a0671c47f384",  # noqa: E501
-            "spin_flip_example/magnetic_supermirror_2_onoff.h5": "md5:fbc866ff8ee10ec8a081f7d5166e876a",  # noqa: E501
-            "spin_flip_example/magnetic_supermirror_2_onon.h5": "md5:6e4a5abdb9a1c92ca8c7eab76c6d3fb5",  # noqa: E501
-            "spin_flip_example/magnetic_supermirror_offoff.h5": "md5:aacee27dfe5459c48236f5a204e4e984",  # noqa: E501
-            "spin_flip_example/magnetic_supermirror_offon.h5": "md5:8241117da2b7ee7abbaac607d0be6ca7",  # noqa: E501
-            "spin_flip_example/magnetic_supermirror_onoff.h5": "md5:f43b512d754f310d1739f7bd2e462b49",  # noqa: E501
-            "spin_flip_example/magnetic_supermirror_onon.h5": "md5:03892f59bd7d5e4295d5432365182b75",  # noqa: E501
-            "spin_flip_example/spin_flip_sample_offoff.h5": "md5:d626ad0e38068121eafd869e82dd048f",  # noqa: E501
-            "spin_flip_example/spin_flip_sample_offon.h5": "md5:a3aa7605f54127e347dae5db18ca0f10",  # noqa: E501
-            "spin_flip_example/spin_flip_sample_onoff.h5": "md5:e23c8fdc9dbdffce41d9307e035141f3",  # noqa: E501
-            "spin_flip_example/spin_flip_sample_onon.h5": "md5:84b7cd5c3bc9a98e8d453f55efc12f8e",  # noqa: E501
-            "spin_flip_example/supermirror_offoff.h5": "md5:6e9864ff523cee64d615db1b6ef8e5b5",  # noqa: E501
-            "spin_flip_example/supermirror_offon.h5": "md5:9ce5de9b9c64b1fc637276ae8eebdf02",  # noqa: E501
-            "spin_flip_example/supermirror_onoff.h5": "md5:039828202328afc6cd66810423851cdc",  # noqa: E501
-            "spin_flip_example/supermirror_onon.h5": "md5:fffc4838b160b7f067592f01c067ec49",  # noqa: E501
+            "spin_flip_example/spin_flip_sample_onon.h5": "md5:da3a075869d4b5525f58c317c914059d",  # noqa: E501
+            "spin_flip_example/spin_flip_sample_offon.h5": "md5:7382118990012204c6f1d0419b23c68b",  # noqa: E501
+            "spin_flip_example/magnetic_supermirror_2_offoff.h5": "md5:c2176171d227e58dc0fbf2e81385b1cc",  # noqa: E501
+            "spin_flip_example/magnetic_supermirror_onon.h5": "md5:bdc4beaca386acda53afdae361a815d9",  # noqa: E501
+            "spin_flip_example/supermirror_offon.h5": "md5:88caf8839cc3ea06589a41a63847dc1e",  # noqa: E501
+            "spin_flip_example/magnetic_supermirror_onoff.h5": "md5:3e2dda52e536f1a00c7a26f30d0ed63f",  # noqa: E501
+            "spin_flip_example/magnetic_supermirror_2_onon.h5": "md5:670df3ed849239208f2b47512c9f6fa1",  # noqa: E501
+            "spin_flip_example/magnetic_supermirror_2_offon.h5": "md5:6017dc15ed7ab37265d1376aec4fa76e",  # noqa: E501
+            "spin_flip_example/magnetic_supermirror_offoff.h5": "md5:1a992b7e74d5e5be3267674ea22f5b1c",  # noqa: E501
+            "spin_flip_example/supermirror_onon.h5": "md5:05929e088691601210a5fdc068375b59",  # noqa: E501
+            "spin_flip_example/spin_flip_sample_offoff.h5": "md5:249024737f59c83e28efe9633a3b6b73",  # noqa: E501
+            "spin_flip_example/spin_flip_sample_onoff.h5": "md5:897ce7e94c748a2bb9eb44b4dc9f023a",  # noqa: E501
+            "spin_flip_example/magnetic_supermirror_2_onoff.h5": "md5:11dcd560b1d90b0dde699a55b2998d15",  # noqa: E501
+            "spin_flip_example/magnetic_supermirror_offon.h5": "md5:f2e06c989c347e8e1f32e3f2a48580ce",  # noqa: E501
+            "spin_flip_example/supermirror_onoff.h5": "md5:3ae9863d13d79c24e29017948bd383ab",  # noqa: E501
+            "spin_flip_example/supermirror_offoff.h5": "md5:22bc20099b2f456e459391189ee60977",  # noqa: E501
         },
     )
 
