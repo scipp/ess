@@ -27,9 +27,9 @@ def reduce_to_q(da, qbins):
 
 
 def reduce_from_events_to_lz(da, wbins):
-    out = da.bin(wavelength=wbins, dim=('stripe',))
+    out = da.bin(wavelength=wbins, dim=('strip',))
     if 'position' in da.coords:
-        out.coords['position'] = da.coords['position'].mean('stripe')
+        out.coords['position'] = da.coords['position'].mean('strip')
     return out
 
 
@@ -53,11 +53,11 @@ def reduce_reference(
     )
     reference = reference.bins.assign_masks(invalid=sc.isnan(R))
     reference = reference / R
-    out = reduce_from_events_to_lz(reference, wavelength_bins).hist()
-
-    if 'position' in reference.coords:
-        out.coords['position'] = reference.coords['position'].mean('strip')
-    return out
+    binned = reduce_from_events_to_lz(reference, wavelength_bins)
+    h = binned.hist()
+    if 'Q' in binned.bins.coords:
+        h.coords['Q'] = binned.bins.coords['Q'].bins.mean()
+    return h
 
 
 def reduce_sample_over_q(
