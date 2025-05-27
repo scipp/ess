@@ -54,6 +54,9 @@ def reduce_reference(
     reference = reference.bins.assign_masks(invalid=sc.isnan(R))
     reference = reference / R
     out = reduce_from_events_to_lz(reference, wavelength_bins).hist()
+
+    if 'position' in reference.coords:
+        out.coords['position'] = reference.coords['position'].mean('strip')
     return out
 
 

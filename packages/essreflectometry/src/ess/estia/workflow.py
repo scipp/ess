@@ -1,48 +1,78 @@
+# SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
-from ..reflectometry.conversions import (
-    add_coords,
-    add_proton_current_coord,
-    add_proton_current_mask,
-)
-from ..reflectometry.corrections import correct_by_proton_current
+
+import sciline
+import scipp as sc
+
+from ..reflectometry import providers as reflectometry_providers
+from ..reflectometry import supermirror
 from ..reflectometry.types import (
     BeamDivergenceLimits,
-    CoordTransformationGraph,
-    ProtonCurrent,
-    RawDetectorData,
-    ReducibleData,
+    DetectorSpatialResolution,
+    NeXusDetectorName,
     RunType,
-    WavelengthBins,
-    YIndexLimits,
-    ZIndexLimits,
+    SampleRotationOffset,
 )
-from .corrections import correct_by_footprint
-from .maskings import add_masks
+from . import beamline, conversions, corrections, load, maskings, normalization, orso
+
+_general_providers = (
+    *reflectometry_providers,
+    *conversions.providers,
+    *corrections.providers,
+    *maskings.providers,
+    *normalization.providers,
+    *orso.providers,
+)
+
+mcstas_providers = (
+    *_general_providers,
+    *load.providers,
+)
+"""List of providers for setting up a Sciline pipeline for McStas data.
+
+This provides a default Estia workflow including providers for loadings files.
+"""
+
+providers = (*_general_providers,)
+"""List of providers for setting up a Sciline pipeline data.
+
+This provides a default Estia workflow including providers for loadings files.
+"""
 
 
-def add_coords_masks_and_apply_corrections(
-    da: RawDetectorData[RunType],
-    ylim: YIndexLimits,
-    zlims: ZIndexLimits,
-    bdlim: BeamDivergenceLimits,
-    wbins: WavelengthBins,
-    proton_current: ProtonCurrent[RunType],
-    graph: CoordTransformationGraph,
-) -> ReducibleData[RunType]:
-    """
-    Computes coordinates, masks and corrections that are
-    the same for the sample measurement and the reference measurement.
-    """
-    da = add_coords(da, graph)
-    da = add_masks(da, ylim, zlims, bdlim, wbins)
-    da = correct_by_footprint(da)
-
-    if len(proton_current) != 0:
-        da = add_proton_current_coord(da, proton_current)
-        da = add_proton_current_mask(da)
-        da = correct_by_proton_current(da)
-
-    return ReducibleData[RunType](da)
+def mcstas_default_parameters() -> dict:
+    return {
+        supermirror.MValue: sc.scalar(5, unit=sc.units.dimensionless),
+        supermirror.CriticalEdge: 0.022 * sc.Unit("1/angstrom"),
+        supermirror.Alpha: sc.scalar(0.25 / 0.088, unit=sc.units.angstrom),
+        DetectorSpatialResolution[RunType]: 0.0025 * sc.units.m,
+        NeXusDetectorName: "detector",
+        BeamDivergenceLimits: (
+            sc.scalar(-0.75, unit='deg'),
+            sc.scalar(0.75, unit='deg'),
+        ),
+        SampleRotationOffset[RunType]: sc.scalar(0.0, unit='deg'),
+    }
 
 
-providers = (add_coords_masks_and_apply_corrections,)
+def default_parameters() -> dict:
+    return {
+        NeXusDetectorName: "multiblade_detector",
+    }
+
+
+def EstiaMcStasWorkflow() -> sciline.Pipeline:
+    """Workflow for reduction of McStas data for the Estia instrument."""
+    return sciline.Pipeline(
+        providers=mcstas_providers, params=mcstas_default_parameters()
+    )
+
+
+def EstiaWorkflow() -> sciline.Pipeline:
+    """Workflow for reduction of data for the Estia instrument."""
+    workflow = beamline.LoadNeXusWorkflow()
+    for provider in providers:
+        workflow.insert(provider)
+    for name, param in default_parameters().items():
+        workflow[name] = param
+    return workflow
