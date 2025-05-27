@@ -10,10 +10,11 @@ except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
 
-from . import conversions, figures, normalization, orso
+from . import conversions, corrections, figures, normalization, orso
 from .load import load_reference, save_reference
 
 providers = (
+    *corrections.providers,
     *conversions.providers,
     *orso.providers,
     *normalization.providers,

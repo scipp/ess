@@ -1,14 +1,16 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 from datetime import datetime
+from math import isnan
 
 import sciline
+import scipp as sc
 from orsopy import fileio
 
 from ess import amor, reflectometry
 from ess.amor import data  # noqa: F401
 from ess.reflectometry import orso
-from ess.reflectometry.types import Filename, ReferenceRun, SampleRun
+from ess.reflectometry.types import Filename, ReducibleData, ReferenceRun, SampleRun
 
 
 def test_build_orso_data_source():
@@ -54,3 +56,23 @@ def test_build_orso_reduction_with_creator():
     assert reduction.software.name == "ess.reflectometry"
     assert reduction.software.version == str(reflectometry.__version__)
     assert reduction.creator == creator
+
+
+def test_build_orso_aggregates_are_not_nan():
+    events = sc.DataArray(
+        sc.array(dims='x', values=[1, 2, 3, 4]),
+        coords={
+            'theta': sc.array(dims='x', values=[0, 0.5, 1, float('nan')]),
+            'wavelength': sc.array(dims='x', values=[0, 0.5, 1, float('nan')]),
+        },
+    )
+    pipeline = sciline.Pipeline(
+        orso.providers, params={ReducibleData[SampleRun]: events}
+    )
+    instrument = pipeline.compute(orso.OrsoInstrument)
+    assert not any(
+        isnan(getattr(instrument.incident_angle, attr)) for attr in ('min', 'max')
+    )
+    assert not any(
+        isnan(getattr(instrument.wavelength, attr)) for attr in ('min', 'max')
+    )

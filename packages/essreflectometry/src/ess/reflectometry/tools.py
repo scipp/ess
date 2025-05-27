@@ -84,8 +84,7 @@ def linlogspace(
         num = [num]
     if len(scale) != len(edges) - 1:
         raise ValueError(
-            "Sizes do not match. The length of edges should be one "
-            "greater than scale."
+            "Sizes do not match. The length of edges should be one greater than scale."
         )
 
     funcs = {"linear": sc.linspace, "log": sc.geomspace}

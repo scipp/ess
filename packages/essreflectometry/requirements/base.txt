@@ -7,7 +7,7 @@
 #
 annotated-types==0.7.0
     # via pydantic
-click==8.1.8
+click==8.2.1
     # via dask
 cloudpickle==3.1.1
     # via dask
@@ -17,7 +17,7 @@ cyclebane==24.10.0
     # via sciline
 cycler==0.12.1
     # via matplotlib
-dask==2025.4.1
+dask==2025.5.1
     # via
     #   -r base.in
     #   esspolarization
@@ -27,13 +27,13 @@ email-validator==2.2.0
     # via scippneutron
 esspolarization==25.3.0
     # via -r base.in
-essreduce==25.4.1
+essreduce==25.5.3
     # via
     #   -r base.in
     #   esspolarization
-fonttools==4.57.0
+fonttools==4.58.0
     # via matplotlib
-fsspec==2025.3.2
+fsspec==2025.5.1
     # via dask
 graphviz==0.20.3
     # via
@@ -45,8 +45,6 @@ h5py==3.13.0
     #   scippnexus
 idna==3.10
     # via email-validator
-importlib-metadata==8.7.0
-    # via dask
 kiwisolver==1.4.8
     # via matplotlib
 lazy-loader==0.4
@@ -55,11 +53,11 @@ lazy-loader==0.4
     #   scippneutron
 locket==1.0.0
     # via partd
-matplotlib==3.10.1
+matplotlib==3.10.3
     # via
     #   mpltoolbox
     #   plopp
-mpltoolbox==24.5.1
+mpltoolbox==25.5.0
     # via scippneutron
 networkx==3.4.2
     # via cyclebane
@@ -69,7 +67,6 @@ numpy==1.26.4
     #   esspolarization
     #   h5py
     #   matplotlib
-    #   mpltoolbox
     #   pandas
     #   scipp
     #   scippneutron
@@ -87,13 +84,13 @@ partd==1.4.2
     # via dask
 pillow==11.2.1
     # via matplotlib
-plopp==25.4.1
+plopp==25.5.0
     # via
     #   -r base.in
     #   scippneutron
-pydantic==2.11.3
+pydantic==2.11.5
     # via scippneutron
-pydantic-core==2.33.1
+pydantic-core==2.33.2
     # via pydantic
 pyparsing==3.2.3
     # via matplotlib
@@ -110,19 +107,19 @@ pyyaml==6.0.2
     # via
     #   dask
     #   orsopy
-sciline==25.4.1
+sciline==25.5.2
     # via
     #   -r base.in
     #   esspolarization
     #   essreduce
-scipp==25.4.0
+scipp==25.5.0
     # via
     #   -r base.in
     #   esspolarization
     #   essreduce
     #   scippneutron
     #   scippnexus
-scippneutron==25.2.1
+scippneutron==25.5.0
     # via
     #   -r base.in
     #   essreduce
@@ -131,7 +128,7 @@ scippnexus==25.4.0
     #   -r base.in
     #   essreduce
     #   scippneutron
-scipy==1.15.2
+scipy==1.15.3
     # via
     #   esspolarization
     #   scippneutron
@@ -148,9 +145,7 @@ typing-extensions==4.13.2
     #   pydantic-core
     #   sciline
     #   typing-inspection
-typing-inspection==0.4.0
+typing-inspection==0.4.1
     # via pydantic
 tzdata==2025.2
     # via pandas
-zipp==3.21.0
-    # via importlib-metadata

@@ -10,16 +10,19 @@ from orsopy import fileio
 from scipp.testing import assert_allclose
 
 from ess import amor
-from ess.amor import data  # noqa: F401
+from ess.amor import data
 from ess.reflectometry import orso
+from ess.reflectometry.tools import scale_reflectivity_curves_to_overlap
 from ess.reflectometry.types import (
     Filename,
     ProtonCurrent,
     QBins,
+    RawSampleRotation,
     ReducibleData,
     ReferenceRun,
     ReflectivityOverQ,
     SampleRotation,
+    SampleRotationOffset,
     SampleRun,
     SampleSize,
     WavelengthBins,
@@ -48,7 +51,7 @@ def amor_pipeline() -> sciline.Pipeline:
     )
     # The sample rotation value in the file is slightly off, so we set it manually
     pl[SampleRotation[ReferenceRun]] = sc.scalar(0.65, unit="deg")
-    pl[Filename[ReferenceRun]] = amor.data.amor_reference_run()
+    pl[Filename[ReferenceRun]] = amor.data.amor_run(614)
 
     pl[orso.OrsoCreator] = orso.OrsoCreator(
         fileio.base.Person(
@@ -65,7 +68,7 @@ def amor_pipeline() -> sciline.Pipeline:
 def test_has_expected_coordinates(amor_pipeline: sciline.Pipeline):
     # The sample rotation value in the file is slightly off, so we set it manually
     amor_pipeline[SampleRotation[SampleRun]] = sc.scalar(0.85, unit="deg")
-    amor_pipeline[Filename[SampleRun]] = amor.data.amor_sample_run(608)
+    amor_pipeline[Filename[SampleRun]] = amor.data.amor_run(608)
     reflectivity_over_q = amor_pipeline.compute(ReflectivityOverQ)
     assert "Q" in reflectivity_over_q.coords
     assert "Q_resolution" in reflectivity_over_q.coords
@@ -76,7 +79,7 @@ def test_has_expected_coordinates(amor_pipeline: sciline.Pipeline):
 def test_pipeline_no_gravity_correction(amor_pipeline: sciline.Pipeline):
     # The sample rotation value in the file is slightly off, so we set it manually
     amor_pipeline[SampleRotation[SampleRun]] = sc.scalar(0.85, unit="deg")
-    amor_pipeline[Filename[SampleRun]] = amor.data.amor_sample_run(608)
+    amor_pipeline[Filename[SampleRun]] = amor.data.amor_run(608)
     amor_pipeline[amor.types.GravityToggle] = False
     reflectivity_over_q = amor_pipeline.compute(ReflectivityOverQ)
     assert "Q" in reflectivity_over_q.coords
@@ -88,7 +91,7 @@ def test_pipeline_no_gravity_correction(amor_pipeline: sciline.Pipeline):
 def test_orso_pipeline(amor_pipeline: sciline.Pipeline):
     # The sample rotation value in the file is slightly off, so we set it manually
     amor_pipeline[SampleRotation[SampleRun]] = sc.scalar(0.85, unit="deg")
-    amor_pipeline[Filename[SampleRun]] = amor.data.amor_sample_run(608)
+    amor_pipeline[Filename[SampleRun]] = amor.data.amor_run(608)
     res = amor_pipeline.compute(orso.OrsoIofQDataset)
     assert res.info.data_source.experiment.instrument == "Amor"
     assert res.info.reduction.software.name == "ess.reflectometry"
@@ -105,13 +108,40 @@ def test_orso_pipeline(amor_pipeline: sciline.Pipeline):
 
 @pytest.mark.filterwarnings("ignore:Failed to convert .* into a transformation")
 @pytest.mark.filterwarnings("ignore:Invalid transformation, missing attribute")
-def test_save_reduced_orso_file(amor_pipeline: sciline.Pipeline, output_folder: Path):
+def test_save_reduced_orso_file(output_folder: Path):
     from orsopy import fileio
 
-    amor_pipeline[SampleRotation[SampleRun]] = sc.scalar(0.85, unit="deg")
-    amor_pipeline[Filename[SampleRun]] = amor.data.amor_sample_run(608)
-    res = amor_pipeline.compute(orso.OrsoIofQDataset)
-    fileio.orso.save_orso(datasets=[res], fname=output_folder / 'amor_reduced_iofq.ort')
+    wf = sciline.Pipeline(providers=amor.providers, params=amor.default_parameters())
+    wf[SampleSize[SampleRun]] = sc.scalar(10.0, unit="mm")
+    wf[SampleSize[ReferenceRun]] = sc.scalar(10.0, unit="mm")
+    wf[YIndexLimits] = sc.scalar(11), sc.scalar(41)
+    wf[WavelengthBins] = sc.geomspace("wavelength", 3, 12.5, 2000, unit="angstrom")
+    wf[ZIndexLimits] = sc.scalar(170), sc.scalar(266)
+    wf = with_filenames(
+        wf, SampleRun, [data.amor_run(4079), data.amor_run(4080), data.amor_run(4081)]
+    )
+    wf[Filename[ReferenceRun]] = data.amor_run(4152)
+    wf[QBins] = sc.geomspace(dim="Q", start=0.01, stop=0.06, num=201, unit="1/angstrom")
+    r = wf.compute(ReflectivityOverQ)
+    _, (s,) = scale_reflectivity_curves_to_overlap(
+        [r.hist()],
+        critical_edge_interval=(
+            sc.scalar(0.01, unit='1/angstrom'),
+            sc.scalar(0.014, unit='1/angstrom'),
+        ),
+    )
+    wf[ReflectivityOverQ] = s * r
+    wf[orso.OrsoCreator] = orso.OrsoCreator(
+        fileio.base.Person(
+            name="Max Mustermann",
+            affiliation="European Spallation Source ERIC",
+            contact="max.mustermann@ess.eu",
+        )
+    )
+    fileio.orso.save_orso(
+        datasets=[wf.compute(orso.OrsoIofQDataset)],
+        fname=output_folder / 'amor_reduced_iofq.ort',
+    )
 
 
 @pytest.mark.filterwarnings("ignore:Failed to convert .* into a transformation")
@@ -120,8 +150,8 @@ def test_pipeline_can_compute_reflectivity_merging_events_from_multiple_runs(
     amor_pipeline: sciline.Pipeline,
 ):
     sample_runs = [
-        amor.data.amor_sample_run(608),
-        amor.data.amor_sample_run(609),
+        amor.data.amor_run(608),
+        amor.data.amor_run(609),
     ]
     pipeline = with_filenames(amor_pipeline, SampleRun, sample_runs)
     pipeline[SampleRotation[SampleRun]] = pipeline.compute(
@@ -135,7 +165,7 @@ def test_pipeline_can_compute_reflectivity_merging_events_from_multiple_runs(
 @pytest.mark.filterwarnings("ignore:Invalid transformation, missing attribute")
 def test_pipeline_merging_events_result_unchanged(amor_pipeline: sciline.Pipeline):
     sample_runs = [
-        amor.data.amor_sample_run(608),
+        amor.data.amor_run(608),
     ]
     pipeline = with_filenames(amor_pipeline, SampleRun, sample_runs)
     pipeline[SampleRotation[SampleRun]] = pipeline.compute(
@@ -143,8 +173,8 @@ def test_pipeline_merging_events_result_unchanged(amor_pipeline: sciline.Pipelin
     ) + sc.scalar(0.05, unit="deg")
     result = pipeline.compute(ReflectivityOverQ).hist()
     sample_runs = [
-        amor.data.amor_sample_run(608),
-        amor.data.amor_sample_run(608),
+        amor.data.amor_run(608),
+        amor.data.amor_run(608),
     ]
     pipeline = with_filenames(amor_pipeline, SampleRun, sample_runs)
     pipeline[SampleRotation[SampleRun]] = pipeline.compute(
@@ -162,7 +192,7 @@ def test_pipeline_merging_events_result_unchanged(amor_pipeline: sciline.Pipelin
 @pytest.mark.filterwarnings("ignore:Failed to convert .* into a transformation")
 @pytest.mark.filterwarnings("ignore:Invalid transformation, missing attribute")
 def test_proton_current(amor_pipeline: sciline.Pipeline):
-    amor_pipeline[Filename[SampleRun]] = amor.data.amor_sample_run(611)
+    amor_pipeline[Filename[SampleRun]] = amor.data.amor_run(611)
     da_without_proton_current = amor_pipeline.compute(ReducibleData[SampleRun])
 
     proton_current = [1, 2, 0.1]
@@ -198,3 +228,18 @@ def test_proton_current(amor_pipeline: sciline.Pipeline):
     np.testing.assert_allclose(
         proton_current[np.searchsorted(timestamps, t) - 1], w_without / w_with
     )
+
+
+@pytest.mark.filterwarnings("ignore:Failed to convert .* into a transformation")
+@pytest.mark.filterwarnings("ignore:Invalid transformation, missing attribute")
+def test_sample_rotation_offset(amor_pipeline: sciline.Pipeline):
+    amor_pipeline[Filename[SampleRun]] = amor.data.amor_run(608)
+    amor_pipeline[SampleRotationOffset[SampleRun]] = sc.scalar(1.0, unit='deg')
+    mu, muoffset, muraw = amor_pipeline.compute(
+        (
+            SampleRotation[SampleRun],
+            SampleRotationOffset[SampleRun],
+            RawSampleRotation[SampleRun],
+        )
+    ).values()
+    assert mu == muoffset.to(unit=muraw.unit) + muraw

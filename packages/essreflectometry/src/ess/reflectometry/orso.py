@@ -244,8 +244,8 @@ def _extract_values_array(var: sc.Variable) -> np.ndarray:
 def _limits_of_coord(data: sc.DataArray, name: str) -> tuple[float, float, str] | None:
     if (coord := _get_coord(data, name)) is None:
         return None
-    min_ = coord.min().value
-    max_ = coord.max().value
+    min_ = coord.nanmin().value
+    max_ = coord.nanmax().value
     # Explicit conversions to float because orsopy does not like np.float* types.
     return float(min_), float(max_), _ascii_unit(coord.unit)
 
