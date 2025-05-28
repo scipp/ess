@@ -45,6 +45,8 @@ dynamic = ["version"]
 [project.optional-dependencies]
 test = [
     "pytest",
+    "numpy<2.0",
+    "pandas",
 ]
 
 [project.urls]

@@ -1,7 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
+import io
+
 import pytest
 import scipp as sc
+from scipp.testing import assert_allclose
 
 import ess.polarization as pol
 
@@ -62,3 +65,38 @@ def test_SecondDegreePolynomialEfficiency_converts_units():
     assert f(wavelength=sc.scalar(0.0, unit='nm')) == 3.0
     assert f(wavelength=sc.scalar(0.1, unit='nm')) == 6.0
     assert f(wavelength=sc.scalar(0.2, unit='nm')) == 11.0
+
+
+def test_EfficiencyLookupTable_returns_expected_result():
+    tab = pol.EfficiencyLookupTable(
+        sc.DataArray(
+            sc.midpoints(sc.linspace('wavelength', 0, 1, 10)),
+            coords={'wavelength': sc.linspace('wavelength', 0, 1, 10, unit='angstrom')},
+        )
+    )
+    assert_allclose(
+        tab(
+            wavelength=sc.midpoints(
+                sc.linspace('wavelength', 0, 1, 10, unit='angstrom')
+            )
+        ),
+        sc.midpoints(sc.linspace('wavelength', 0, 1, 10)),
+    )
+
+
+def test_EfficiencyLookupTable_load_from_file():
+    f = io.StringIO('a,b,c\n1,2,3\n4,5,6')
+    elt = pol.EfficiencyLookupTable.from_file(
+        f, wavelength_colname='a', efficiency_colname='b'
+    )
+    assert_allclose(
+        sc.DataArray(
+            sc.array(dims=('wavelength',), values=[2, 5]),
+            coords={
+                'wavelength': sc.array(
+                    dims=('wavelength',), values=[1, 4], unit='angstrom'
+                )
+            },
+        ),
+        elt.table,
+    )
