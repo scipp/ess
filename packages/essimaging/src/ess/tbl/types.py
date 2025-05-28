@@ -19,11 +19,11 @@ from ess.reduce.time_of_flight import types as tof_t
 
 BackgroundRun = reduce_t.BackgroundRun
 DetectorData = reduce_t.DetectorData
-Choppers = reduce_t.Choppers
+DiskChoppers = reduce_t.DiskChoppers
 EmptyBeamRun = reduce_t.EmptyBeamRun
 Filename = reduce_t.Filename
-Monitor1 = reduce_t.Monitor1
-Monitor2 = reduce_t.Monitor2
+FrameMonitor1 = reduce_t.FrameMonitor1
+FrameMonitor2 = reduce_t.FrameMonitor1
 MonitorData = reduce_t.MonitorData
 NeXusDetectorName = reduce_t.NeXusDetectorName
 NeXusMonitorName = reduce_t.NeXusName
@@ -43,7 +43,7 @@ TimeOfFlightLookupTable = tof_t.TimeOfFlightLookupTable
 SimulationResults = tof_t.SimulationResults
 
 RunType = TypeVar("RunType", SampleRun, BackgroundRun)
-MonitorType = TypeVar("MonitorType", Monitor1, Monitor2)
+MonitorType = TypeVar("MonitorType", FrameMonitor1, FrameMonitor2)
 
 CoordTransformGraph = NewType("CoordTransformGraph", dict)
 """

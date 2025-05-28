@@ -10,10 +10,10 @@ import scippneutron as scn
 from ess.reduce import time_of_flight
 
 from .types import (
-    Choppers,
     CoordTransformGraph,
     DetectorTofData,
     DetectorWavelengthData,
+    DiskChoppers,
     RunType,
     SampleRun,
     SimulationResults,
@@ -32,7 +32,7 @@ def make_coordinate_transform_graph() -> CoordTransformGraph:
     return CoordTransformGraph(graph)
 
 
-def simulate_chopper_cascade(choppers: Choppers[SampleRun]) -> SimulationResults:
+def simulate_chopper_cascade(choppers: DiskChoppers[SampleRun]) -> SimulationResults:
     """
     Simulate neutrons traveling through the chopper cascade.
 

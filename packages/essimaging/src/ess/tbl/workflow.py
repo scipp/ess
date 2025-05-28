@@ -12,9 +12,9 @@ from ess.reduce.time_of_flight.workflow import GenericTofWorkflow
 from .conversion import providers as conversion_providers
 from .types import (
     DistanceResolution,
+    FrameMonitor1,
     LookupTableRelativeErrorThreshold,
     LtotalRange,
-    Monitor1,
     NeXusMonitorName,
     PulsePeriod,
     PulseStride,
@@ -26,7 +26,7 @@ from .types import (
 
 def default_parameters() -> dict:
     return {
-        NeXusMonitorName[Monitor1]: "monitor_1",
+        NeXusMonitorName[FrameMonitor1]: "monitor_1",
         PulsePeriod: 1.0 / sc.scalar(14.0, unit="Hz"),
         PulseStride: 1,
         PulseStrideOffset: None,
@@ -40,11 +40,13 @@ def default_parameters() -> dict:
 providers = (*conversion_providers,)
 
 
-def TblWorkflow() -> sciline.Pipeline:
+def TblWorkflow(**kwargs) -> sciline.Pipeline:
     """
     Workflow with default parameters for TBL.
     """
-    workflow = GenericTofWorkflow(run_types=[SampleRun], monitor_types=[Monitor1])
+    workflow = GenericTofWorkflow(
+        run_types=[SampleRun], monitor_types=[FrameMonitor1], **kwargs
+    )
     for provider in providers:
         workflow.insert(provider)
     for key, param in default_parameters().items():
