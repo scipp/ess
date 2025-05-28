@@ -86,6 +86,8 @@ class PolarizationCorrectedData(Generic[PolarizerSpin, AnalyzerSpin]):
     downdown: sc.DataArray
 
 
+TotalPolarizationCorrectedData = NewType("TotalPolarizationCorrectedData", PolarizationCorrectedData)
+
 @dataclass
 class HalfPolarizedCorrectedData(Generic[PolarizerSpin]):
     """
