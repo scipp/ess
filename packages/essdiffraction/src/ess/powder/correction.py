@@ -14,7 +14,6 @@ from ._util import event_or_outer_coord
 from .types import (
     AccumulatedProtonCharge,
     CaveMonitor,
-    DataWithScatteringCoordinates,
     EmptyCanRun,
     EmptyCanSubtractedIofDspacing,
     EmptyCanSubtractedIofDspacingTwoTheta,
@@ -23,6 +22,7 @@ from .types import (
     IofDspacing,
     IofDspacingTwoTheta,
     NormalizedRunData,
+    ReducedCountsDspacing,
     RunType,
     SampleRun,
     UncertaintyBroadcastMode,
@@ -32,7 +32,7 @@ from .types import (
 
 
 def normalize_by_monitor_histogram(
-    detector: DataWithScatteringCoordinates[RunType],
+    detector: ReducedCountsDspacing[RunType],
     *,
     monitor: WavelengthMonitor[RunType, CaveMonitor],
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
@@ -59,11 +59,16 @@ def normalize_by_monitor_histogram(
     norm = broadcast_uncertainties(
         monitor, prototype=detector, mode=uncertainty_broadcast_mode
     )
-    return NormalizedRunData[RunType](detector.bins / sc.lookup(norm, dim="wavelength"))
+    lut = sc.lookup(norm, dim="wavelength")
+    if detector.bins is None:
+        result = detector / lut[detector.coords['wavelength']]
+    else:
+        result = detector.bins / lut
+    return NormalizedRunData[RunType](result)
 
 
 def normalize_by_monitor_integrated(
-    detector: DataWithScatteringCoordinates[RunType],
+    detector: ReducedCountsDspacing[RunType],
     *,
     monitor: WavelengthMonitor[RunType, CaveMonitor],
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
@@ -144,7 +149,7 @@ def _normalize_by_vanadium(
     vanadium: sc.DataArray,
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
 ) -> sc.DataArray:
-    norm = vanadium.hist()
+    norm = vanadium.hist() if vanadium.bins is not None else vanadium
     norm = broadcast_uncertainties(
         norm, prototype=data, mode=uncertainty_broadcast_mode
     )
@@ -223,7 +228,7 @@ def normalize_by_vanadium_dspacing_and_two_theta(
 
 
 def normalize_by_proton_charge(
-    data: DataWithScatteringCoordinates[RunType],
+    data: ReducedCountsDspacing[RunType],
     proton_charge: AccumulatedProtonCharge[RunType],
 ) -> NormalizedRunData[RunType]:
     """Normalize data by an accumulated proton charge.

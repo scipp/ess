@@ -39,7 +39,6 @@ from ess.powder.types import (
     MaskedData,
     MonitorFilename,
     NeXusDetectorName,
-    NormalizedRunData,
     Position,
     ReducedTofCIF,
     SampleRun,
@@ -223,8 +222,8 @@ def test_workflow_is_deterministic(workflow):
 
 def test_pipeline_can_compute_intermediate_results(workflow):
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    results = workflow.compute((NormalizedRunData[SampleRun], NeXusDetectorName))
-    result = results[NormalizedRunData[SampleRun]]
+    results = workflow.compute((DspacingData[SampleRun], NeXusDetectorName))
+    result = results[DspacingData[SampleRun]]
 
     detector_name = results[NeXusDetectorName]
     expected_dims = {'segment', 'wire', 'counter', 'strip', 'module'}

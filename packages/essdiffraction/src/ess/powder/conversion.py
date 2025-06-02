@@ -169,9 +169,9 @@ def powder_coordinate_transformation_graph() -> ElasticCoordTransformGraph:
 
 def _restore_tof_if_in_wavelength(data: sc.DataArray) -> sc.DataArray:
     out = data.copy(deep=False)
-    outer = out.coords.pop("wavelength", None)
+    outer = out.coords.get("wavelength", None)
     if out.bins is not None:
-        binned = out.bins.coords.pop("wavelength", None)
+        binned = out.bins.coords.get("wavelength", None)
     else:
         binned = None
 
@@ -220,7 +220,8 @@ def convert_to_dspacing(
             if key in out.coords.keys():
                 out.coords.set_aligned(key, False)
     out.bins.coords.pop("tof", None)
-    out.bins.coords.pop("wavelength", None)
+    # See scipp/essreduce#249
+    out.bins.coords.pop("event_time_offset", None)
     return DspacingData[RunType](out)
 
 

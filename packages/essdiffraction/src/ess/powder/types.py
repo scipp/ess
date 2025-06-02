@@ -8,8 +8,9 @@ pipeline.
 """
 
 from collections.abc import Callable
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, NewType, TypeVar
+from typing import Any, Generic, NewType, TypeVar
 
 import sciline
 import scipp as sc
@@ -179,6 +180,10 @@ class WavelengthMonitor(
     """Monitor histogram in wavelength."""
 
 
+class ReducedCountsDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Reduced counts in Dspacing after partial reduction over pixel dimension."""
+
+
 class NormalizedRunData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Data that has been normalized by proton charge."""
 
@@ -223,6 +228,17 @@ ReducedTofCIF = NewType("ReducedTofCIF", cif.CIF)
 
 ReducedEmptyCanSubtractedTofCIF = NewType("ReducedEmptyCanSubtractedTofCIF", cif.CIF)
 """Reduced data in time-of-flight, ready to be saved to a CIF file."""
+
+
+@dataclass(frozen=True)
+class KeepEvents(Generic[RunType]):
+    """
+    Flag indicating whether the workflow should keep all events when focussing data.
+
+    If False, data will be histogrammed when focussing.
+    """
+
+    value: bool
 
 
 del sc, sciline, NewType, TypeVar

@@ -12,12 +12,13 @@ from ess.powder.types import (
     CalibrationFilename,
     DetectorBankSizes,
     DspacingBins,
+    DspacingData,
     Filename,
     IofDspacing,
     IofDspacingTwoTheta,
+    KeepEvents,
     MaskedData,
     NeXusDetectorName,
-    NormalizedRunData,
     SampleRun,
     TofMask,
     TwoThetaBins,
@@ -39,6 +40,8 @@ def providers():
 @pytest.fixture
 def params():
     return {
+        KeepEvents[SampleRun]: KeepEvents[SampleRun](True),
+        KeepEvents[VanadiumRun]: KeepEvents[VanadiumRun](False),
         NeXusDetectorName: "powgen_detector",
         Filename[SampleRun]: powgen.data.powgen_tutorial_sample_file(small=True),
         Filename[VanadiumRun]: powgen.data.powgen_tutorial_vanadium_file(small=True),
@@ -109,7 +112,7 @@ def test_workflow_is_deterministic(providers, params):
 def test_pipeline_can_compute_intermediate_results(providers, params):
     pipeline = sciline.Pipeline(providers, params=params)
     pipeline = powder.with_pixel_mask_filenames(pipeline, [])
-    result = pipeline.compute(NormalizedRunData[SampleRun])
+    result = pipeline.compute(DspacingData[SampleRun])
     assert set(result.dims) == {'bank', 'column', 'row'}
 
 
@@ -143,7 +146,9 @@ def test_pipeline_wavelength_masking(providers, params):
     )
     assert sc.allclose(
         sum_in_masked_region,
-        sc.scalar(0.0, unit=sum_in_masked_region.unit),
+        sc.scalar(
+            0.0, unit=sum_in_masked_region.unit, dtype=sum_in_masked_region.dtype
+        ),
     )
 
 
@@ -163,7 +168,9 @@ def test_pipeline_two_theta_masking(providers, params):
     )
     assert sc.allclose(
         sum_in_masked_region,
-        sc.scalar(0.0, unit=sum_in_masked_region.unit),
+        sc.scalar(
+            0.0, unit=sum_in_masked_region.unit, dtype=sum_in_masked_region.dtype
+        ),
     )
 
 

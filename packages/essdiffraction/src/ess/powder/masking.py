@@ -11,9 +11,9 @@ import sciline
 import scipp as sc
 
 from .types import (
+    DataWithScatteringCoordinates,
     MaskedData,
     MaskedDetectorIDs,
-    NormalizedRunData,
     PixelMaskFilename,
     RunType,
     TofMask,
@@ -34,7 +34,7 @@ def read_pixel_masks(filename: PixelMaskFilename) -> MaskedDetectorIDs:
 
 
 def apply_masks(
-    data: NormalizedRunData[RunType],
+    data: DataWithScatteringCoordinates[RunType],
     masked_pixel_ids: MaskedDetectorIDs,
     tof_mask_func: TofMask,
     wavelength_mask_func: WavelengthMask,
