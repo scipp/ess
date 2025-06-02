@@ -28,6 +28,17 @@
   </br></br>
 </div>
 
+## Quick links
+
+::::{grid} 3
+
+:::{grid-item-card} BIFROST
+:link: user-guide/bifrost/index.md
+
+:::
+
+::::
+
 :::{include} user-guide/installation.md
 :heading-offset: 1
 :::
