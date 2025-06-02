@@ -23,6 +23,31 @@ def focus_data_dspacing_and_two_theta(
     dspacing_bins: DspacingBins,
     keep_events: KeepEvents[RunType],
 ) -> ReducedCountsDspacing[RunType]:
+    """
+    Reduce the pixel-based data to d-spacing and two-theta dimensions.
+
+    The two-theta binning does not use :py:class:`TwoThetaBins` but instead
+    computes the two-theta bins from the 'two_theta' coordinate of the input data. This
+    is necessary to ensure that we have sufficiently high wavelength resolution when
+    performing a monitor normalization in a follow-up workflow step. If we were to use
+    :py:class:`TwoThetaBins` we would be influenced by and limited to the tw-theta
+    binning the user requests for the end result, which may not be sufficient.
+
+    Parameters
+    ----------
+    data:
+        The input data to be reduced, which must have 'wavelength', 'dspacing',
+        'two_theta' coordinates.
+    dspacing_bins:
+        The bins to use for the d-spacing dimension.
+    keep_events:
+        Whether to keep the events in the output. If `False`, the output will be
+        histogrammed instead of binned.
+    Returns
+    -------
+    :
+        The reduced data with 'dspacing' and 'two_theta' dimensions.
+    """
     ttheta = data.coords['two_theta']
     ttheta_min = ttheta.nanmin()
     ttheta_max = ttheta.nanmax()
