@@ -48,7 +48,7 @@ def to_nxspe(events: EnergyData[SampleRun], base: NXspeFileName) -> NXspeFileNam
 
     for i in range(events.sizes[dim]):
         ev = events[dim, i]
-        fn = str(base) + '_' + f'{i+1}'.rjust(length, '0') + '.nxspe'
+        fn = str(base) + '_' + f'{i + 1}'.rjust(length, '0') + '.nxspe'
         files.append(NXspeFileName(fn))
         _to_one_nxspe(ev, fn)
     return NXspeFileNames(files)
