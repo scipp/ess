@@ -53,9 +53,6 @@ def normalize_by_monitor_histogram(
     :
         `detector` normalized by a monitor.
     """
-    _expect_monitor_covers_range_of_detector(
-        detector=detector, monitor=monitor, dim="wavelength"
-    )
     norm = broadcast_uncertainties(
         monitor, prototype=detector, mode=uncertainty_broadcast_mode
     )
@@ -104,17 +101,27 @@ def normalize_by_monitor_integrated(
         raise sc.CoordError(
             f"Monitor coordinate '{dim}' must be bin-edges to integrate the monitor."
         )
-    _expect_monitor_covers_range_of_detector(
-        detector=detector, monitor=monitor, dim=dim
-    )
 
     # Clip `monitor` to the range of `detector`, where the bins at the boundary
     # may extend past the detector range (how label-based indexing works).
-    det_coord = (
-        detector.coords[dim] if dim in detector.coords else detector.bins.coords[dim]
-    )
+    if dim not in detector.coords:
+        det_coord = detector.bins.coords.get(dim)
+    else:
+        # In this case, we have the wavelength at the bin centers. There is thus some
+        # imprecision in the definition of the wavelength limits, since the detector
+        # bins strictly speaking extend beyond these limits.
+        counts = detector if detector.bins is None else detector.bins.size()
+        flat_counts = counts.flatten(to='dummy')
+        with_counts = flat_counts[flat_counts.data > sc.scalar(0.0, unit=counts.unit)]
+        det_coord = with_counts.coords[dim]
+
     lo = det_coord.nanmin()
     hi = det_coord.nanmax()
+    if monitor.coords[dim].min() > lo or monitor.coords[dim].max() < hi:
+        raise ValueError(
+            "Cannot normalize by monitor: The wavelength range of the monitor is "
+            "smaller than the range of the detector."
+        )
     monitor = monitor[dim, lo:hi]
     # Strictly limit `monitor` to the range of `detector`.
     edges = sc.concat([lo, monitor.coords[dim][1:-1], hi], dim=dim)
@@ -126,22 +133,6 @@ def normalize_by_monitor_integrated(
         norm, prototype=detector, mode=uncertainty_broadcast_mode
     )
     return ScaledCountsDspacing[RunType](detector / norm)
-
-
-def _expect_monitor_covers_range_of_detector(
-    *, detector: sc.DataArray, monitor: sc.DataArray, dim: str
-) -> None:
-    det_coord = (
-        detector.coords[dim] if detector.bins is None else detector.bins.coords[dim]
-    )
-    if (
-        monitor.coords[dim].min() > det_coord.min()
-        or monitor.coords[dim].max() < det_coord.max()
-    ):
-        raise ValueError(
-            "Cannot normalize by monitor: The wavelength range of the monitor is "
-            "smaller than the range of the detector."
-        )
 
 
 def _normalize_by_vanadium(

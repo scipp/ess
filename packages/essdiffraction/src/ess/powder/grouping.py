@@ -18,6 +18,14 @@ from .types import (
 )
 
 
+def _reconstruct_wavelength(
+    dspacing_bins: DspacingBins, two_theta_bins: TwoThetaBins
+) -> sc.Variable:
+    dspacing = sc.midpoints(dspacing_bins)
+    two_theta = sc.midpoints(two_theta_bins)
+    return (2 * dspacing * sc.sin(two_theta / 2)).to(unit='angstrom')
+
+
 def focus_data_dspacing_and_two_theta(
     data: CountsDspacing[RunType],
     dspacing_bins: DspacingBins,
@@ -63,15 +71,16 @@ def focus_data_dspacing_and_two_theta(
     if keep_events.value:
         result = data.bin(args)
     else:
-        # It would be cheaper to simply use `result = data.hist(args)` and computing
-        # wavelength from bin centers. This would however not result in a consistent
-        # wavelength, unless we do so using the d-spacing calibration table.
-        stripped = data.bins.drop_coords(
-            list(set(data.bins.coords) - {'dspacing', 'wavelength'})
+        # Reconstructing the wavelength results in an inconsistency if dspacing was
+        # computed with a calibration table. Another option would be to use, e.g., the
+        # mean wavelength in each bin, but this leads to random wavelength values that
+        # break stream processing.
+        result = data.hist(args).assign_coords(
+            wavelength=_reconstruct_wavelength(
+                dspacing_bins=dspacing_bins, two_theta_bins=twotheta_bins
+            )
         )
-        binned = stripped.bin(args)
-        result = binned.hist()
-        result.coords['wavelength'] = binned.bins.coords['wavelength'].bins.nanmean()
+
     return ReducedCountsDspacing[RunType](result)
 
 
