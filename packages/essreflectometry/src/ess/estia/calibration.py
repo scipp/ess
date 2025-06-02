@@ -3,14 +3,6 @@ from dataclasses import dataclass
 import scipp as sc
 
 
-def _kronecker_product(A, B):
-    return [
-        [A[ia][ja] * B[ib][jb] for ja in range(2) for jb in range(2)]
-        for ia in range(2)
-        for ib in range(2)
-    ]
-
-
 @dataclass
 class PolarizationCalibrationParameters:
     I0: sc.DataArray
@@ -29,28 +21,6 @@ class PolarizationCalibrationParameters:
     Rsaa: sc.DataArray
     '''Magnetic supermirror reflectivity for neutrons with
     spin anti-parallel to instrument polarization.'''
-
-    @property
-    def polarization_matrix(self):
-        """
-        The linear relationship :math:`\\mathbf{C}`
-        such that :math:`\\mathbf{I} = I0 \\mathbf{C} \\mathbf{R}`.
-
-        Returns
-        ----------
-        :
-            The polarization matrix.
-        """
-        return _kronecker_product(
-            [
-                [(1 + self.Pp) / 2, (1 - self.Pp) / 2],
-                [(1 + self.Pa) / 2, (1 - self.Pa) / 2],
-            ],
-            [
-                [(1 + self.Ap) / 2, (1 - self.Ap) / 2],
-                [(1 + self.Aa) / 2, (1 - self.Aa) / 2],
-            ],
-        )
 
     @classmethod
     def from_reference_measurements(cls, Io, Is):
