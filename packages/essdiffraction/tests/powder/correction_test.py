@@ -13,9 +13,9 @@ from ess.powder.correction import (
 )
 from ess.powder.types import (
     CaveMonitor,
-    DataWithScatteringCoordinates,
-    NormalizedRunData,
+    CountsWavelength,
     SampleRun,
+    ScaledCountsDspacing,
     UncertaintyBroadcastMode,
     WavelengthMonitor,
 )
@@ -343,11 +343,11 @@ def test_normalize_by_monitor_histogram_expected_results():
         },
     )
     normalized = normalize_by_monitor_histogram(
-        DataWithScatteringCoordinates[SampleRun](detector),
+        CountsWavelength[SampleRun](detector),
         monitor=WavelengthMonitor[SampleRun, CaveMonitor](monitor),
         uncertainty_broadcast_mode=UncertaintyBroadcastMode.fail,
     )
-    expected = NormalizedRunData[SampleRun](detector / monitor.data)
+    expected = ScaledCountsDspacing[SampleRun](detector / monitor.data)
     sc.testing.assert_identical(normalized, expected)
 
 
@@ -363,11 +363,11 @@ def test_normalize_by_monitor_histogram_ignores_monitor_values_out_of_range():
         },
     )
     normalized = normalize_by_monitor_histogram(
-        DataWithScatteringCoordinates[SampleRun](detector),
+        CountsWavelength[SampleRun](detector),
         monitor=WavelengthMonitor[SampleRun, CaveMonitor](monitor),
         uncertainty_broadcast_mode=UncertaintyBroadcastMode.fail,
     )
-    expected = NormalizedRunData[SampleRun](detector / sc.scalar(4.0, unit='counts'))
+    expected = ScaledCountsDspacing[SampleRun](detector / sc.scalar(4.0, unit='counts'))
     sc.testing.assert_identical(normalized, expected)
 
 
@@ -384,7 +384,7 @@ def test_normalize_by_monitor_histogram_raises_if_monitor_range_too_narrow():
     )
     with pytest.raises(ValueError, match="wavelength range of the monitor is smaller"):
         normalize_by_monitor_histogram(
-            DataWithScatteringCoordinates[SampleRun](detector),
+            CountsWavelength[SampleRun](detector),
             monitor=WavelengthMonitor[SampleRun, CaveMonitor](monitor),
             uncertainty_broadcast_mode=UncertaintyBroadcastMode.fail,
         )
@@ -404,11 +404,11 @@ def test_normalize_by_monitor_integrated_expected_results():
         },
     )
     normalized = normalize_by_monitor_integrated(
-        DataWithScatteringCoordinates[SampleRun](detector),
+        CountsWavelength[SampleRun](detector),
         monitor=WavelengthMonitor[SampleRun, CaveMonitor](monitor),
         uncertainty_broadcast_mode=UncertaintyBroadcastMode.fail,
     )
-    expected = NormalizedRunData[SampleRun](
+    expected = ScaledCountsDspacing[SampleRun](
         detector / sc.scalar(4 * 0.5 + 5 * 1.5 + 6 * 1, unit='counts * Å')
     )
     sc.testing.assert_identical(normalized, expected)
@@ -426,11 +426,11 @@ def test_normalize_by_monitor_integrated_ignores_monitor_values_out_of_range():
         },
     )
     normalized = normalize_by_monitor_integrated(
-        DataWithScatteringCoordinates[SampleRun](detector),
+        CountsWavelength[SampleRun](detector),
         monitor=WavelengthMonitor[SampleRun, CaveMonitor](monitor),
         uncertainty_broadcast_mode=UncertaintyBroadcastMode.fail,
     )
-    expected = NormalizedRunData[SampleRun](
+    expected = ScaledCountsDspacing[SampleRun](
         detector / sc.scalar(4.0 * 3, unit='counts')
     )
     sc.testing.assert_identical(normalized, expected)
@@ -448,11 +448,11 @@ def test_normalize_by_monitor_integrated_uses_monitor_values_at_boundary():
         },
     )
     normalized = normalize_by_monitor_integrated(
-        DataWithScatteringCoordinates[SampleRun](detector),
+        CountsWavelength[SampleRun](detector),
         monitor=WavelengthMonitor[SampleRun, CaveMonitor](monitor),
         uncertainty_broadcast_mode=UncertaintyBroadcastMode.fail,
     )
-    expected = NormalizedRunData[SampleRun](
+    expected = ScaledCountsDspacing[SampleRun](
         detector / sc.scalar(4.0 * 2 + 10.0 * 1 / 2, unit='counts')
     )
     sc.testing.assert_identical(normalized, expected)
@@ -471,7 +471,7 @@ def test_normalize_by_monitor_integrated_raises_if_monitor_range_too_narrow():
     )
     with pytest.raises(ValueError, match="wavelength range of the monitor is smaller"):
         normalize_by_monitor_integrated(
-            DataWithScatteringCoordinates[SampleRun](detector),
+            CountsWavelength[SampleRun](detector),
             monitor=WavelengthMonitor[SampleRun, CaveMonitor](monitor),
             uncertainty_broadcast_mode=UncertaintyBroadcastMode.fail,
         )

@@ -21,10 +21,10 @@ from .types import (
     FocussedDataDspacingTwoTheta,
     IofDspacing,
     IofDspacingTwoTheta,
-    NormalizedRunData,
     ReducedCountsDspacing,
     RunType,
     SampleRun,
+    ScaledCountsDspacing,
     UncertaintyBroadcastMode,
     VanadiumRun,
     WavelengthMonitor,
@@ -36,7 +36,7 @@ def normalize_by_monitor_histogram(
     *,
     monitor: WavelengthMonitor[RunType, CaveMonitor],
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
-) -> NormalizedRunData[RunType]:
+) -> ScaledCountsDspacing[RunType]:
     """Normalize detector data by a histogrammed monitor.
 
     Parameters
@@ -64,7 +64,7 @@ def normalize_by_monitor_histogram(
         result = detector / lut[detector.coords['wavelength']]
     else:
         result = detector.bins / lut
-    return NormalizedRunData[RunType](result)
+    return ScaledCountsDspacing[RunType](result)
 
 
 def normalize_by_monitor_integrated(
@@ -72,7 +72,7 @@ def normalize_by_monitor_integrated(
     *,
     monitor: WavelengthMonitor[RunType, CaveMonitor],
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
-) -> NormalizedRunData[RunType]:
+) -> ScaledCountsDspacing[RunType]:
     """Normalize detector data by an integrated monitor.
 
     The monitor is integrated according to
@@ -125,7 +125,7 @@ def normalize_by_monitor_integrated(
     norm = broadcast_uncertainties(
         norm, prototype=detector, mode=uncertainty_broadcast_mode
     )
-    return NormalizedRunData[RunType](detector / norm)
+    return ScaledCountsDspacing[RunType](detector / norm)
 
 
 def _expect_monitor_covers_range_of_detector(
@@ -230,7 +230,7 @@ def normalize_by_vanadium_dspacing_and_two_theta(
 def normalize_by_proton_charge(
     data: ReducedCountsDspacing[RunType],
     proton_charge: AccumulatedProtonCharge[RunType],
-) -> NormalizedRunData[RunType]:
+) -> ScaledCountsDspacing[RunType]:
     """Normalize data by an accumulated proton charge.
 
     Parameters
@@ -245,7 +245,7 @@ def normalize_by_proton_charge(
     :
         ``data / proton_charge``
     """
-    return NormalizedRunData[RunType](data / proton_charge)
+    return ScaledCountsDspacing[RunType](data / proton_charge)
 
 
 def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.DataArray:

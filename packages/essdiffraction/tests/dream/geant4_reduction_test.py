@@ -24,9 +24,9 @@ from ess.powder.types import (
     CalibrationFilename,
     CaveMonitorPosition,
     CIFAuthors,
+    CountsDspacing,
     DistanceResolution,
     DspacingBins,
-    DspacingData,
     EmptyCanRun,
     EmptyCanSubtractedIofDspacing,
     Filename,
@@ -222,8 +222,8 @@ def test_workflow_is_deterministic(workflow):
 
 def test_pipeline_can_compute_intermediate_results(workflow):
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    results = workflow.compute((DspacingData[SampleRun], NeXusDetectorName))
-    result = results[DspacingData[SampleRun]]
+    results = workflow.compute((CountsDspacing[SampleRun], NeXusDetectorName))
+    result = results[CountsDspacing[SampleRun]]
 
     detector_name = results[NeXusDetectorName]
     expected_dims = {'segment', 'wire', 'counter', 'strip', 'module'}
@@ -349,6 +349,6 @@ def test_dream_workflow_registers_subclasses():
 
 def test_dream_workflow_parameters_returns_filtered_params():
     wf = DreamGeant4ProtonChargeWorkflow()
-    parameters = reduce_workflow.get_parameters(wf, (DspacingData[SampleRun],))
+    parameters = reduce_workflow.get_parameters(wf, (CountsDspacing[SampleRun],))
     assert Filename[SampleRun] in parameters
     assert Filename[EmptyCanRun] not in parameters

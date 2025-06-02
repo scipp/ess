@@ -10,9 +10,9 @@ import ess.snspowder.powgen.data  # noqa: F401
 from ess import powder
 from ess.powder.types import (
     CalibrationFilename,
+    CountsDspacing,
     DetectorBankSizes,
     DspacingBins,
-    DspacingData,
     Filename,
     IofDspacing,
     IofDspacingTwoTheta,
@@ -112,7 +112,7 @@ def test_workflow_is_deterministic(providers, params):
 def test_pipeline_can_compute_intermediate_results(providers, params):
     pipeline = sciline.Pipeline(providers, params=params)
     pipeline = powder.with_pixel_mask_filenames(pipeline, [])
-    result = pipeline.compute(DspacingData[SampleRun])
+    result = pipeline.compute(CountsDspacing[SampleRun])
     assert set(result.dims) == {'bank', 'column', 'row'}
 
 

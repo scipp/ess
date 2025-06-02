@@ -101,12 +101,12 @@ CalibrationData = NewType("CalibrationData", sc.Dataset | None)
 """Detector calibration data."""
 
 
-class DataWithScatteringCoordinates(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+class CountsWavelength(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Data with scattering coordinates computed for all events: wavelength, 2theta,
     d-spacing."""
 
 
-class DspacingData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+class CountsDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Data converted to d-spacing."""
 
 
@@ -184,8 +184,8 @@ class ReducedCountsDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Reduced counts in Dspacing after partial reduction over pixel dimension."""
 
 
-class NormalizedRunData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Data that has been normalized by proton charge."""
+class ScaledCountsDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Reduced counts in Dspacing after scaling by monitor or proton charge."""
 
 
 PixelMaskFilename = NewType("PixelMaskFilename", str)

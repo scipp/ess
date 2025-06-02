@@ -6,20 +6,20 @@ import numpy as np
 import scipp as sc
 
 from .types import (
+    CountsDspacing,
     DspacingBins,
-    DspacingData,
     FocussedDataDspacing,
     FocussedDataDspacingTwoTheta,
     KeepEvents,
-    NormalizedRunData,
     ReducedCountsDspacing,
     RunType,
+    ScaledCountsDspacing,
     TwoThetaBins,
 )
 
 
 def focus_data_dspacing_and_two_theta(
-    data: DspacingData[RunType],
+    data: CountsDspacing[RunType],
     dspacing_bins: DspacingBins,
     keep_events: KeepEvents[RunType],
 ) -> ReducedCountsDspacing[RunType]:
@@ -51,7 +51,7 @@ def focus_data_dspacing_and_two_theta(
 
 
 def integrate_two_theta(
-    data: NormalizedRunData[RunType],
+    data: ScaledCountsDspacing[RunType],
 ) -> FocussedDataDspacing[RunType]:
     """Integrate the two-theta dimension of the data."""
     if 'two_theta' not in data.dims:
@@ -64,7 +64,7 @@ def integrate_two_theta(
 
 
 def group_two_theta(
-    data: NormalizedRunData[RunType],
+    data: ScaledCountsDspacing[RunType],
     two_theta_bins: TwoThetaBins,
 ) -> FocussedDataDspacingTwoTheta[RunType]:
     """Group the data by two-theta bins."""
