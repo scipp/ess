@@ -6,4 +6,5 @@ maxdepth: 1
 ---
 amor-reduction
 compare-to-eos
+workflow-widget
 ```
