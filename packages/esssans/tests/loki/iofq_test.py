@@ -27,12 +27,12 @@ from ess.sans.types import (
     QBins,
     QxBins,
     QyBins,
-    ReducedQ,
     ReturnEvents,
     SampleRun,
     UncertaintyBroadcastMode,
     WavelengthBands,
     WavelengthBins,
+    WavelengthScaledQ,
 )
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -251,13 +251,22 @@ def test_pipeline_IofQ_merging_events_yields_consistent_results():
     assert sc.identical(iofq1.coords['Q'], iofq3.coords['Q'])
     assert all(sc.variances(iofq1.data) > sc.variances(iofq3.data))
     assert sc.allclose(
-        sc.values(pipeline_single.compute(ReducedQ[SampleRun, Numerator]).hist().data)
+        sc.values(
+            pipeline_single.compute(WavelengthScaledQ[SampleRun, Numerator]).hist().data
+        )
         * N,
-        sc.values(pipeline_triple.compute(ReducedQ[SampleRun, Numerator]).hist().data),
+        sc.values(
+            pipeline_triple.compute(WavelengthScaledQ[SampleRun, Numerator]).hist().data
+        ),
     )
     assert sc.allclose(
-        sc.values(pipeline_single.compute(ReducedQ[SampleRun, Denominator]).data) * N,
-        sc.values(pipeline_triple.compute(ReducedQ[SampleRun, Denominator]).data),
+        sc.values(
+            pipeline_single.compute(WavelengthScaledQ[SampleRun, Denominator]).data
+        )
+        * N,
+        sc.values(
+            pipeline_triple.compute(WavelengthScaledQ[SampleRun, Denominator]).data
+        ),
     )
 
 

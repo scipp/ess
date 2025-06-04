@@ -23,13 +23,13 @@ from .types import (
     NeXusDetectorName,
     Numerator,
     PixelMaskFilename,
-    ReducedQ,
     SampleRun,
     TransformationPath,
     Transmission,
     TransmissionRun,
     WavelengthBands,
     WavelengthMask,
+    WavelengthScaledQ,
 )
 
 
@@ -99,8 +99,8 @@ def _set_runs(
     pipeline = pipeline.copy()
     runs = pd.DataFrame({Filename[key]: runs}).rename_axis(axis_name)
     for part in (Numerator, Denominator):
-        pipeline[ReducedQ[key, part]] = (
-            pipeline[ReducedQ[key, part]]
+        pipeline[WavelengthScaledQ[key, part]] = (
+            pipeline[WavelengthScaledQ[key, part]]
             .map(runs)
             .reduce(index=axis_name, func=merge_contributions)
         )
