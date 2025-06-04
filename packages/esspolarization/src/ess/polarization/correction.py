@@ -21,9 +21,9 @@ from .types import (
     PolarizingElement,
     PolarizingElementCorrection,
     ReducedSampleDataBySpinChannel,
+    TotalPolarizationCorrectedData,
     TransmissionFunction,
     Up,
-    TotalPolarizationCorrectedData,
 )
 
 
@@ -175,10 +175,18 @@ def sum_polarization_contributions(
 ) -> TotalPolarizationCorrectedData:
     if upup.upup.bins is not None:
         return PolarizationCorrectedData(
-            upup=sc.reduce([v.upup for v in (upup, updown, downup, downdown)]).bins.concat(),
-            updown=sc.reduce([v.updown for v in (upup, updown, downup, downdown)]).bins.concat(),
-            downup=sc.reduce([v.downup for v in (upup, updown, downup, downdown)]).bins.concat(),
-            downdown=sc.reduce([v.downdown for v in (upup, updown, downup, downdown)]).bins.concat(),
+            upup=sc.reduce(
+                [v.upup for v in (upup, updown, downup, downdown)]
+            ).bins.concat(),
+            updown=sc.reduce(
+                [v.updown for v in (upup, updown, downup, downdown)]
+            ).bins.concat(),
+            downup=sc.reduce(
+                [v.downup for v in (upup, updown, downup, downdown)]
+            ).bins.concat(),
+            downdown=sc.reduce(
+                [v.downdown for v in (upup, updown, downup, downdown)]
+            ).bins.concat(),
         )
     return PolarizationCorrectedData(
         upup=sum((v.upup for v in (upup, updown, downup, downdown))),
