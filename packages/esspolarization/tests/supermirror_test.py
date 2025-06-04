@@ -68,9 +68,11 @@ def test_SecondDegreePolynomialEfficiency_converts_units():
 
 
 def test_EfficiencyLookupTable_returns_expected_result():
+    data = sc.midpoints(sc.linspace('wavelength', 0, 1, 10))
+    data.variances = data.values
     tab = pol.EfficiencyLookupTable(
         sc.DataArray(
-            sc.midpoints(sc.linspace('wavelength', 0, 1, 10)),
+            data,
             coords={'wavelength': sc.linspace('wavelength', 0, 1, 10, unit='angstrom')},
         )
     )

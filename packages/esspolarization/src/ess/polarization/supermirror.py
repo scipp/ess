@@ -66,9 +66,13 @@ class EfficiencyLookupTable(SupermirrorEfficiencyFunction[PolarizingElement]):
 
     table: sc.DataArray
 
+    def __post_init__(self):
+        table = self.table if self.table.variances is None else sc.values(self.table)
+        self._lut = sc.lookup(table, 'wavelength')
+
     def __call__(self, *, wavelength: sc.Variable) -> sc.DataArray:
         """Return the efficiency of a supermirror for a given wavelength"""
-        return sc.lookup(sc.values(self.table), 'wavelength')(wavelength)
+        return self._lut(wavelength)
 
     @classmethod
     def from_file(
