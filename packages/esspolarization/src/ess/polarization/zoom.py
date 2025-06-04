@@ -16,7 +16,6 @@ from ess.isissans.io import LoadedFileContents
 from ess.isissans.mantidio import DataWorkspace, Period
 from ess.reduce.nexus.types import Position
 from ess.sans.types import (
-    EmptyBeamRun,
     Filename,
     Incident,
     MonitorType,
@@ -106,7 +105,9 @@ class MonitorSpectrumNumber(Generic[MonitorType]):
 
 
 def get_monitor_data(
-    dg: LoadedFileContents[RunType], nexus_name: NeXusMonitorName[MonitorType]
+    dg: LoadedFileContents[RunType],
+    nexus_name: NeXusMonitorName[MonitorType],
+    spectrum_number: MonitorSpectrumNumber[MonitorType],
 ) -> NeXusComponent[MonitorType, RunType]:
     """
     Same as :py:func:`ess.isissans.get_monitor_data` but dropping variances.
@@ -114,27 +115,20 @@ def get_monitor_data(
     Dropping variances is a workaround required since ESSsans does not handle
     variance broadcasting when combining monitors. In our case some of the monitors
     are time-dependent, so this is required for now.
+
+    If the raw files is histogram data, Mantid stores this as a Workspace2D, where some
+    or all spectra corresponds to monitors.
     """
-    # See https://github.com/scipp/sciline/issues/52 why copy needed
-    mon = dg['monitors'][nexus_name]['data'].copy()
+    if 'monitors' in dg:
+        # From EventWorkspace
+        # See https://github.com/scipp/sciline/issues/52 why copy needed
+        mon = dg['monitors'][nexus_name]['data'].copy()
+    else:
+        # From Workspace2D
+        mon = sc.values(dg["data"]["spectrum", sc.index(spectrum_number.value)]).copy()
     return NeXusComponent[MonitorType, RunType](
         sc.DataGroup(data=sc.values(mon), position=mon.coords['position'])
     )
-
-
-def get_monitor_data_from_empty_beam_run(
-    dg: LoadedFileContents[EmptyBeamRun],
-    spectrum_number: MonitorSpectrumNumber[MonitorType],
-) -> NeXusComponent[MonitorType, EmptyBeamRun]:
-    """
-    Extract incident or transmission monitor from ZOOM empty beam run
-
-    The files in this case do not contain detector data, only monitor data. Mantid
-    stores this as a Workspace2D, where each spectrum corresponds to a monitor.
-    """
-    # Note we index with a scipp.Variable, i.e., by the spectrum number used at ISIS
-    monitor = sc.values(dg["data"]["spectrum", sc.index(spectrum_number.value)]).copy()
-    return sc.DataGroup(data=monitor, position=monitor.coords['position'])
 
 
 def get_monitor_data_from_transmission_run(
@@ -151,6 +145,32 @@ def get_monitor_data_from_transmission_run(
     monitor = dg['data']['spectrum', sc.index(spectrum_number.value)].copy()
     monitor.coords['datetime'] = _get_time(dg)
     return sc.DataGroup(data=monitor, position=monitor.coords['position'])
+
+
+def ZoomPolarizedWorkflow() -> sl.Pipeline:
+    """
+    Zoom workflow for polarized data.
+
+    This workflow is based on `ess.sans.isis.zoom.ZoomWorkflow` but is adapted to work
+    with histogrammed data.
+    """
+    workflow = isis.zoom.ZoomWorkflow()
+    workflow.insert(get_monitor_data)
+    workflow.insert(load_histogrammed_run)
+
+    # We are dealing with two different types of files, and monitors are identified
+    # differently in each case, so there is some duplication here.
+    workflow[MonitorSpectrumNumber[Incident]] = MonitorSpectrumNumber[Incident](3)
+    workflow[MonitorSpectrumNumber[Transmission]] = MonitorSpectrumNumber[Transmission](
+        4
+    )
+    workflow[NeXusMonitorName[Incident]] = NeXusMonitorName[Incident]("monitor3")
+    workflow[NeXusMonitorName[Transmission]] = NeXusMonitorName[Transmission](
+        "monitor4"
+    )
+    workflow[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
+
+    return workflow
 
 
 def ZoomTransmissionFractionWorkflow(runs: Sequence[str]) -> sl.Pipeline:
@@ -171,11 +191,8 @@ def ZoomTransmissionFractionWorkflow(runs: Sequence[str]) -> sl.Pipeline:
     runs:
         List of filenames of the runs to use for the transmission fraction.
     """
-    workflow = isis.zoom.ZoomWorkflow()
-    workflow.insert(get_monitor_data)
-    workflow.insert(get_monitor_data_from_empty_beam_run)
+    workflow = ZoomPolarizedWorkflow()
     workflow.insert(get_monitor_data_from_transmission_run)
-    workflow.insert(load_histogrammed_run)
 
     mapped = workflow.map({Filename[TransmissionRun[SampleRun]]: runs})
     for mon_type in (Incident, Transmission):
@@ -185,17 +202,5 @@ def ZoomTransmissionFractionWorkflow(runs: Sequence[str]) -> sl.Pipeline:
         workflow[Position[NXsource, TransmissionRun[SampleRun]]] = mapped[
             Position[NXsource, TransmissionRun[SampleRun]]
         ].reduce(func=_get_unique_position)
-
-    # We are dealing with two different types of files, and monitors are identified
-    # differently in each case, so there is some duplication here.
-    workflow[MonitorSpectrumNumber[Incident]] = MonitorSpectrumNumber[Incident](3)
-    workflow[MonitorSpectrumNumber[Transmission]] = MonitorSpectrumNumber[Transmission](
-        4
-    )
-    workflow[NeXusMonitorName[Incident]] = NeXusMonitorName[Incident]("monitor3")
-    workflow[NeXusMonitorName[Transmission]] = NeXusMonitorName[Transmission](
-        "monitor4"
-    )
-    workflow[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
 
     return workflow
