@@ -5,10 +5,11 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from io import BytesIO, StringIO
 from pathlib import Path
-from typing import Generic, Self
+from typing import Generic
 
 import sciline
 import scipp as sc
+from typing_extensions import Self
 
 from .types import PlusMinus, PolarizingElement, TransmissionFunction
 
