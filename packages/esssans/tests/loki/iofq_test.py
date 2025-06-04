@@ -16,7 +16,6 @@ from ess.sans.types import (
     BackgroundSubtractedIofQ,
     BackgroundSubtractedIofQxy,
     BeamCenter,
-    CleanSummedQ,
     CleanWavelength,
     CorrectForGravity,
     Denominator,
@@ -28,6 +27,7 @@ from ess.sans.types import (
     QBins,
     QxBins,
     QyBins,
+    ReducedQ,
     ReturnEvents,
     SampleRun,
     UncertaintyBroadcastMode,
@@ -252,17 +252,17 @@ def test_pipeline_IofQ_merging_events_yields_consistent_results():
     assert all(sc.variances(iofq1.data) > sc.variances(iofq3.data))
     assert sc.allclose(
         sc.values(
-            pipeline_single.compute(CleanSummedQ[SampleRun, Numerator]).hist().data
+            pipeline_single.compute(ReducedQ[SampleRun, Numerator]).hist().data
         )
         * N,
         sc.values(
-            pipeline_triple.compute(CleanSummedQ[SampleRun, Numerator]).hist().data
+            pipeline_triple.compute(ReducedQ[SampleRun, Numerator]).hist().data
         ),
     )
     assert sc.allclose(
-        sc.values(pipeline_single.compute(CleanSummedQ[SampleRun, Denominator]).data)
+        sc.values(pipeline_single.compute(ReducedQ[SampleRun, Denominator]).data)
         * N,
-        sc.values(pipeline_triple.compute(CleanSummedQ[SampleRun, Denominator]).data),
+        sc.values(pipeline_triple.compute(ReducedQ[SampleRun, Denominator]).data),
     )
 
 
