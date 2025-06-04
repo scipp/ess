@@ -8,13 +8,13 @@
 :link: estia-mcstas-reduction.ipynb
 :text-align: center
 
-```{image} ../../_static/thumbnails/estia_mcstas_reduction.svg
+```{image} ../../_static/thumbnails/estia_mcstas_reduction_light.svg
 :class: only-light
-:width: 75%
+:width: 100%
 ```
-```{image} ../../_static/thumbnails/estia_mcstas_reduction.svg
+```{image} ../../_static/thumbnails/estia_mcstas_reduction_dark.svg
 :class: only-dark
-:width: 75%
+:width: 100%
 ```
 :::
 
@@ -22,13 +22,13 @@
 :link: estia-advanced-mcstas-reduction.ipynb
 :text-align: center
 
-```{image} ../../_static/thumbnails/estia_advanced_mcstas_reduction.svg
+```{image} ../../_static/thumbnails/estia_advanced_mcstas_reduction_light.svg
 :class: only-light
-:width: 75%
+:width: 100%
 ```
-```{image} ../../_static/thumbnails/estia_advanced_mcstas_reduction.svg
+```{image} ../../_static/thumbnails/estia_advanced_mcstas_reduction_dark.svg
 :class: only-dark
-:width: 75%
+:width: 100%
 ```
 :::
 
