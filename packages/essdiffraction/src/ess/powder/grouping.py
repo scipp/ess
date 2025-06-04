@@ -51,6 +51,7 @@ def focus_data_dspacing_and_two_theta(
     keep_events:
         Whether to keep the events in the output. If `False`, the output will be
         histogrammed instead of binned.
+
     Returns
     -------
     :
