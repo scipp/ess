@@ -120,14 +120,16 @@ def normalize_by_monitor_integrated(
         )
         counts.masks[uuid4().hex] = counts.data == sc.scalar(0.0, unit=counts.unit)
         det_coord = detector.coords[dim]
-        edge_dims = {
-            dim: size == det_coord.sizes[dim] + 1 for dim, size in counts.sizes.items()
-        }
+        edge_dims = [
+            dim
+            for dim, size in counts.sizes.items()
+            if size + 1 == det_coord.sizes[dim]
+        ]
         if len(edge_dims) != 1:
             raise sc.CoordError(
-                f"Cannot determine edges of coordinate '{dim}' in detector data."
+                f"Cannot determine edge dimension of coordinate '{dim}'."
             )
-        edge_dim = next(iter(edge_dims))
+        edge_dim = edge_dims[0]
         lo = counts.assign(det_coord[edge_dim, :-1]).nanmin().data
         hi = counts.assign(det_coord[edge_dim, 1:]).nanmax().data
 
