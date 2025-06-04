@@ -45,6 +45,7 @@ dynamic = ["version"]
 test = [
     "pytest",
     "pandas",
+    "pooch",
 ]
 
 [project.urls]
