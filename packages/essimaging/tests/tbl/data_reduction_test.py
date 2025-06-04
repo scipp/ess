@@ -6,10 +6,12 @@ import sciline as sl
 
 import ess.tbl.data  # noqa: F401
 from ess import tbl
+from ess.reduce import time_of_flight
 from ess.tbl.types import (
     DetectorData,
     DetectorTofData,
     DetectorWavelengthData,
+    DiskChoppers,
     Filename,
     NeXusDetectorName,
     SampleRun,
@@ -22,8 +24,9 @@ def workflow() -> sl.Pipeline:
     """
     Workflow for loading NeXus data.
     """
-    wf = tbl.TblWorkflow()
+    wf = tbl.TblWorkflow(tof_lut_provider=time_of_flight.TofLutProvider.TOF)
     wf[Filename[SampleRun]] = tbl.data.tutorial_sample_data()
+    wf[DiskChoppers[SampleRun]] = {}
     # Cache the lookup table
     wf[TimeOfFlightLookupTable] = wf.compute(TimeOfFlightLookupTable)
     return wf
