@@ -189,10 +189,10 @@ def sum_polarization_contributions(
             ).bins.concat(),
         )
     return PolarizationCorrectedData(
-        upup=sum((v.upup for v in (upup, updown, downup, downdown))),
-        updown=sum((v.updown for v in (upup, updown, downup, downdown))),
-        downup=sum((v.downup for v in (upup, updown, downup, downdown))),
-        downdown=sum((v.downdown for v in (upup, updown, downup, downdown))),
+        upup=sum(v.upup for v in (upup, updown, downup, downdown)),
+        updown=sum(v.updown for v in (upup, updown, downup, downdown)),
+        downup=sum(v.downup for v in (upup, updown, downup, downdown)),
+        downdown=sum(v.downdown for v in (upup, updown, downup, downdown)),
     )
 
 
