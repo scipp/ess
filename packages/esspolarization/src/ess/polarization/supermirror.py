@@ -3,8 +3,9 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from io import BytesIO, StringIO
 from pathlib import Path
-from typing import IO, Generic
+from typing import Generic, Self
 
 import sciline
 import scipp as sc
@@ -77,24 +78,24 @@ class EfficiencyLookupTable(SupermirrorEfficiencyFunction[PolarizingElement]):
     @classmethod
     def from_file(
         cls,
-        path: str | Path | IO,
-        wavelength_colname,
-        efficiency_colname,
-        wavelength_unit='angstrom',
-    ):
+        path: str | Path | StringIO | BytesIO,
+        wavelength_colname: str,
+        efficiency_colname: str,
+        wavelength_unit: sc.Unit | str = 'angstrom',
+    ) -> Self:
         ds = sc.io.load_csv(path)
-        return cls(
-            sc.DataArray(
-                sc.array(dims=('wavelength',), values=ds[efficiency_colname].values),
-                coords={
-                    'wavelength': sc.array(
-                        dims=('wavelength',),
-                        values=ds[wavelength_colname].values,
-                        unit=wavelength_unit,
-                    )
-                },
-            )
+        wavelength = (
+            ds[wavelength_colname]
+            .rename_dims({ds[wavelength_colname].dim: 'wavelength'})
+            .data
         )
+        wavelength.unit = wavelength_unit
+        efficiency = (
+            ds[efficiency_colname]
+            .rename_dims({ds[efficiency_colname].dim: 'wavelength'})
+            .data
+        )
+        return cls(sc.DataArray(efficiency, coords={'wavelength': wavelength}))
 
 
 @dataclass
