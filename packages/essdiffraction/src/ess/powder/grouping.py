@@ -38,7 +38,7 @@ def focus_data_dspacing_and_two_theta(
     computes the two-theta bins from the 'two_theta' coordinate of the input data. This
     is necessary to ensure that we have sufficiently high wavelength resolution when
     performing a monitor normalization in a follow-up workflow step. If we were to use
-    :py:class:`TwoThetaBins` we would be influenced by and limited to the tw-theta
+    :py:class:`TwoThetaBins` we would be influenced by and limited to the two-theta
     binning the user requests for the end result, which may not be sufficient.
 
     Parameters
