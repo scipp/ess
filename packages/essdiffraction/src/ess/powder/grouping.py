@@ -89,7 +89,7 @@ def integrate_two_theta(
 ) -> FocussedDataDspacing[RunType]:
     """Integrate the two-theta dimension of the data."""
     if 'two_theta' not in data.dims:
-        raise ValueError("Data does not have a 'two_theta' dimension.")
+        raise sc.DimensionError("Data does not have a 'two_theta' dimension.")
     return FocussedDataDspacing[RunType](
         data.nansum(dim='two_theta')
         if data.bins is None
