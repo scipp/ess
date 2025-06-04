@@ -48,6 +48,8 @@ docutils==0.21.2
     #   sphinx
 esssans==25.5.0
     # via -r docs.in
+exceptiongroup==1.3.0
+    # via ipython
 executing==2.2.0
     # via stack-data
 fastjsonschema==2.21.1
@@ -58,13 +60,11 @@ ipydatawidgets==4.3.5
     # via pythreejs
 ipykernel==6.29.5
     # via -r docs.in
-ipython==9.3.0
+ipython==8.37.0
     # via
     #   -r docs.in
     #   ipykernel
     #   ipywidgets
-ipython-pygments-lexers==1.1.1
-    # via ipython
 ipywidgets==8.1.7
     # via
     #   ipydatawidgets
@@ -155,7 +155,6 @@ pygments==2.19.1
     # via
     #   accessible-pygments
     #   ipython
-    #   ipython-pygments-lexers
     #   nbconvert
     #   pydata-sphinx-theme
     #   sphinx
@@ -217,6 +216,8 @@ sympy==1.14.0
     # via -r docs.in
 tinycss2==1.4.0
     # via bleach
+tomli==2.2.1
+    # via sphinx
 tornado==6.5.1
     # via
     #   ipykernel

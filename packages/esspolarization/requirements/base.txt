@@ -37,6 +37,8 @@ h5py==3.13.0
     #   scippnexus
 idna==3.10
     # via email-validator
+importlib-metadata==8.7.0
+    # via dask
 kiwisolver==1.4.8
     # via matplotlib
 lazy-loader==0.4
@@ -51,7 +53,7 @@ matplotlib==3.10.3
     #   plopp
 mpltoolbox==25.5.0
     # via scippneutron
-networkx==3.5
+networkx==3.4.2
     # via cyclebane
 numpy==2.2.6
     # via
@@ -120,3 +122,5 @@ typing-extensions==4.14.0
     #   typing-inspection
 typing-inspection==0.4.1
     # via pydantic
+zipp==3.22.0
+    # via importlib-metadata
