@@ -76,13 +76,10 @@ def test_EfficiencyLookupTable_returns_expected_result():
             coords={'wavelength': sc.linspace('wavelength', 0, 1, 10, unit='angstrom')},
         )
     )
+    x = sc.midpoints(sc.linspace('wavelength', 0, 1, 10, unit='angstrom'))
     assert_allclose(
-        tab(
-            wavelength=sc.midpoints(
-                sc.linspace('wavelength', 0, 1, 10, unit='angstrom')
-            )
-        ),
-        sc.midpoints(sc.linspace('wavelength', 0, 1, 10)),
+        tab(wavelength=x),
+        sc.DataArray(sc.values(tab.table.data), coords={'wavelength': x}),
     )
 
 
