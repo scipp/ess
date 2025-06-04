@@ -40,10 +40,10 @@ def reduce_reference(
     )
     reference = reference.bins.assign_masks(invalid=sc.isnan(R))
     reference = reference / R
-    out = reference.bins.concat(('stripe',)).hist(wavelength=wavelength_bins)
+    out = reference.bins.concat(('strip',)).hist(wavelength=wavelength_bins)
 
     if 'position' in reference.coords:
-        out.coords['position'] = reference.coords['position'].mean('stripe')
+        out.coords['position'] = reference.coords['position'].mean('strip')
     return out
 
 
@@ -96,7 +96,7 @@ def reduce_sample_over_zw(
 
     Returns reflectivity as a function of ``blade``, ``wire`` and :math:`\\wavelength`.
     """
-    return sample.bins.concat(('stripe',)).bin(wavelength=wbins) / sc.values(
+    return sample.bins.concat(('strip',)).bin(wavelength=wbins) / sc.values(
         reference.data
     )
 

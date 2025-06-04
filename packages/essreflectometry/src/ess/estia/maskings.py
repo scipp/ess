@@ -27,7 +27,7 @@ def add_masks(
     and by wavelength.
     """
     da = da.assign_masks(
-        stripe_range=_not_between(da.coords["stripe"], *ylim),
+        strip_range=_not_between(da.coords["strip"], *ylim),
         z_range=_not_between(da.coords["z_index"], *zlims),
         divergence_too_large=_not_between(
             da.coords["divergence_angle"],

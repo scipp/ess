@@ -8,8 +8,8 @@ from ..reflectometry.corrections import correct_by_footprint, correct_by_proton_
 from ..reflectometry.types import (
     BeamDivergenceLimits,
     CoordTransformationGraph,
+    DetectorData,
     ProtonCurrent,
-    RawDetectorData,
     ReducibleData,
     RunType,
     WavelengthBins,
@@ -20,7 +20,7 @@ from .conversions import add_masks
 
 
 def add_coords_masks_and_apply_corrections(
-    da: RawDetectorData[RunType],
+    da: DetectorData[RunType],
     ylim: YIndexLimits,
     zlims: ZIndexLimits,
     bdlim: BeamDivergenceLimits,

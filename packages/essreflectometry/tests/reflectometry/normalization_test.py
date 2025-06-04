@@ -15,10 +15,10 @@ def sample(request):
         coords={
             'wavelength': sc.linspace('events', 1, 5, n),
             'wire': sc.array(dims=('events',), values=np.random.randint(0, 5, n)),
-            'stripe': sc.array(dims=('events',), values=np.random.randint(0, 10, n)),
+            'strip': sc.array(dims=('events',), values=np.random.randint(0, 10, n)),
         },
     )
-    return da.group('wire', 'stripe')
+    return da.group('wire', 'strip')
 
 
 @pytest.fixture
@@ -29,7 +29,7 @@ def reference(request):
         coords={
             'wavelength': sc.linspace('events', 1, 5, n),
             'wire': sc.array(dims=('events',), values=np.random.randint(0, 5, n)),
-            'stripe': sc.array(dims=('events',), values=np.random.randint(0, 10, n)),
+            'strip': sc.array(dims=('events',), values=np.random.randint(0, 10, n)),
         },
     )
     return da.group('wire').bin(wavelength=2).bins.sum()
