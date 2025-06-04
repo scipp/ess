@@ -276,7 +276,8 @@ def bank_names_to_detector_names(description: str) -> dict[str, list[str]]:
 
     detector_component_regex = (
         # Start of the detector component definition, contains the detector name.
-        r'^COMPONENT (?P<detector_name>.*) = Monitor_nD\(\n'
+        # r'^COMPONENT (?P<detector_name>.*) = Monitor_nD\(\n'
+        r'^COMPONENT (?P<detector_name>.*) = (Monitor_nD|Union_abs_logger_nD)\(\n'
         # Some uninteresting lines, we're looking for 'filename'.
         # Make sure no new component begins.
         r'(?:(?!COMPONENT)(?!filename)(?:.|\s))*'
