@@ -7,6 +7,7 @@ import scipp as sc
 from scipp.testing import assert_allclose
 
 import ess.polarization as pol
+from ess.polarization.data import example_polarization_efficiency_table
 
 
 def test_SecondDegreePolynomialEfficiency_raises_if_units_incompatible():
@@ -84,9 +85,9 @@ def test_EfficiencyLookupTable_returns_expected_result():
 
 
 def test_EfficiencyLookupTable_load_from_file():
-    f = io.StringIO('a,b,c\n1,2,3\n4,5,6')
+    fname = io.StringIO('a,b,c\n1,2,3\n4,5,6')
     elt = pol.EfficiencyLookupTable.from_file(
-        f, wavelength_colname='a', efficiency_colname='b'
+        fname, wavelength_colname='a', efficiency_colname='b'
     )
     assert_allclose(
         sc.DataArray(
@@ -99,3 +100,13 @@ def test_EfficiencyLookupTable_load_from_file():
         ),
         elt.table,
     )
+
+
+def test_EfficiencyLookupTable_load_from_example_file():
+    fname = example_polarization_efficiency_table()
+    elt = pol.EfficiencyLookupTable.from_file(
+        fname, wavelength_colname='# X ', efficiency_colname=' Y '
+    )
+    assert elt.table.size == 120
+    assert elt.table.coords['wavelength'].min() == sc.scalar(3.05, unit='angstrom')
+    assert elt.table.coords['wavelength'].max() == sc.scalar(14.95, unit='angstrom')

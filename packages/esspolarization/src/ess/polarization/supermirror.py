@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from io import BytesIO, StringIO
 from pathlib import Path
-from typing import Generic
+from typing import Any, Generic
 
 import sciline
 import scipp as sc
@@ -83,8 +83,9 @@ class EfficiencyLookupTable(SupermirrorEfficiencyFunction[PolarizingElement]):
         wavelength_colname: str,
         efficiency_colname: str,
         wavelength_unit: sc.Unit | str = 'angstrom',
+        **kwargs: Any,
     ) -> Self:
-        ds = sc.io.load_csv(path)
+        ds = sc.io.load_csv(path, **kwargs)
         wavelength = (
             ds[wavelength_colname]
             .rename_dims({ds[wavelength_colname].dim: 'wavelength'})
