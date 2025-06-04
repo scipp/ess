@@ -4,6 +4,7 @@
 
 import enum
 from typing import TypeVar
+from uuid import uuid4
 
 import sciline
 import scipp as sc
@@ -58,7 +59,9 @@ def normalize_by_monitor_histogram(
     )
     lut = sc.lookup(norm, dim="wavelength")
     if detector.bins is None:
-        result = detector / lut[detector.coords['wavelength']]
+        result = (
+            detector / lut[sc.midpoints(detector.coords['wavelength'], dim='dspacing')]
+        )
     else:
         result = detector.bins / lut
     return ScaledCountsDspacing[RunType](result)
@@ -104,19 +107,30 @@ def normalize_by_monitor_integrated(
 
     # Clip `monitor` to the range of `detector`, where the bins at the boundary
     # may extend past the detector range (how label-based indexing works).
-    if dim not in detector.coords:
+    if detector.bins is not None and dim in detector.bins.coords:
         det_coord = detector.bins.coords.get(dim)
+        lo = det_coord.nanmin()
+        hi = det_coord.nanmax()
     else:
-        # In this case, we have the wavelength at the bin centers. There is thus some
-        # imprecision in the definition of the wavelength limits, since the detector
-        # bins strictly speaking extend beyond these limits.
-        counts = detector if detector.bins is None else detector.bins.size()
-        flat_counts = counts.flatten(to='dummy')
-        with_counts = flat_counts[flat_counts.data > sc.scalar(0.0, unit=counts.unit)]
-        det_coord = with_counts.coords[dim]
+        # Mask zero count bins, which are an artifact from the rectangular 2-D binning.
+        # The wavelength of those bins must be excluded when determining the integration
+        # range.
+        counts = (
+            detector.copy(deep=False) if detector.bins is None else detector.bins.size()
+        )
+        counts.masks[uuid4().hex] = counts.data == sc.scalar(0.0, unit=counts.unit)
+        det_coord = detector.coords[dim]
+        edge_dims = {
+            dim: size == det_coord.sizes[dim] + 1 for dim, size in counts.sizes.items()
+        }
+        if len(edge_dims) != 1:
+            raise sc.CoordError(
+                f"Cannot determine edges of coordinate '{dim}' in detector data."
+            )
+        edge_dim = next(iter(edge_dims))
+        lo = counts.assign(det_coord[edge_dim, :-1]).nanmin().data
+        hi = counts.assign(det_coord[edge_dim, 1:]).nanmax().data
 
-    lo = det_coord.nanmin()
-    hi = det_coord.nanmax()
     if monitor.coords[dim].min() > lo or monitor.coords[dim].max() < hi:
         raise ValueError(
             "Cannot normalize by monitor: The wavelength range of the monitor is "

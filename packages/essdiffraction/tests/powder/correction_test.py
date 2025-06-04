@@ -376,8 +376,6 @@ def test_normalize_by_monitor_integrated_expected_results():
         sc.arange('wavelength', 1, 4, unit='counts'),
         coords={'wavelength': sc.arange('wavelength', 3.0, unit='Å')},
     ).bin(wavelength=sc.array(dims=['wavelength'], values=[0.0, 2, 3], unit='Å'))
-    # "midpoints" at bounds to ensure we include that range.
-    detector.coords['wavelength'] = detector.coords['wavelength'][::2]
     monitor = sc.DataArray(
         sc.array(dims=['wavelength'], values=[4.0, 5.0, 6.0], unit='counts'),
         coords={
@@ -391,19 +389,32 @@ def test_normalize_by_monitor_integrated_expected_results():
         monitor=WavelengthMonitor[SampleRun, CaveMonitor](monitor),
         uncertainty_broadcast_mode=UncertaintyBroadcastMode.fail,
     )
+    # Last event is at 2, so the monitor bin with value 6.0 is not used.
     expected = ScaledCountsDspacing[SampleRun](
-        detector / sc.scalar(4 * 0.5 + 5 * 1.5 + 6 * 1, unit='counts * Å')
+        detector / sc.scalar(4 * 0.5 + 5 * 1.5, unit='counts * Å')
     )
     sc.testing.assert_identical(normalized, expected)
 
 
-def test_normalize_by_monitor_integrated_ignores_monitor_values_out_of_range():
+@pytest.mark.parametrize('event_coord', [True, False])
+def test_normalize_by_monitor_integrated_ignores_monitor_values_out_of_range(
+    event_coord: bool,
+):
     detector = sc.DataArray(
-        sc.arange('wavelength', 3, unit='counts'),
-        coords={'wavelength': sc.arange('wavelength', 3.0, unit='Å')},
-    ).bin(wavelength=sc.array(dims=['wavelength'], values=[0.0, 2, 3], unit='Å'))
-    # "midpoints" at bounds to ensure we include that range.
-    detector.coords['wavelength'] = detector.coords['wavelength'][::2]
+        sc.arange('wavelength', 4, unit='counts'),
+        coords={'wavelength': sc.arange('wavelength', 4.0, unit='Å')},
+    )
+    if event_coord:
+        # Make sure event at 3 is included
+        detector = detector.bin(
+            wavelength=sc.array(dims=['wavelength'], values=[0.0, 2, 3.1], unit='Å')
+        )
+        del detector.coords['wavelength']
+    else:
+        detector = detector.bin(
+            wavelength=sc.array(dims=['wavelength'], values=[0.0, 2, 3], unit='Å')
+        )
+        del detector.bins.coords['wavelength']
     monitor = sc.DataArray(
         sc.array(dims=['wavelength'], values=[4.0, 10.0], unit='counts'),
         coords={
@@ -421,13 +432,25 @@ def test_normalize_by_monitor_integrated_ignores_monitor_values_out_of_range():
     sc.testing.assert_identical(normalized, expected)
 
 
-def test_normalize_by_monitor_integrated_uses_monitor_values_at_boundary():
+@pytest.mark.parametrize('event_coord', [True, False])
+def test_normalize_by_monitor_integrated_uses_monitor_values_at_boundary(
+    event_coord: bool,
+):
     detector = sc.DataArray(
-        sc.arange('wavelength', 3, unit='counts'),
-        coords={'wavelength': sc.arange('wavelength', 3.0, unit='Å')},
-    ).bin(wavelength=sc.array(dims=['wavelength'], values=[0.0, 2, 3], unit='Å'))
-    # "midpoints" at bounds to ensure we include that range.
-    detector.coords['wavelength'] = detector.coords['wavelength'][::2]
+        sc.arange('wavelength', 4, unit='counts'),
+        coords={'wavelength': sc.arange('wavelength', 4.0, unit='Å')},
+    )
+    if event_coord:
+        # Make sure event at 3 is included
+        detector = detector.bin(
+            wavelength=sc.array(dims=['wavelength'], values=[0.0, 2, 3.1], unit='Å')
+        )
+        del detector.coords['wavelength']
+    else:
+        detector = detector.bin(
+            wavelength=sc.array(dims=['wavelength'], values=[0.0, 2, 3], unit='Å')
+        )
+        del detector.bins.coords['wavelength']
     monitor = sc.DataArray(
         sc.array(dims=['wavelength'], values=[4.0, 10.0], unit='counts'),
         coords={
@@ -450,8 +473,6 @@ def test_normalize_by_monitor_integrated_raises_if_monitor_range_too_narrow():
         sc.arange('wavelength', 3, unit='counts'),
         coords={'wavelength': sc.arange('wavelength', 3.0, unit='Å')},
     ).bin(wavelength=sc.array(dims=['wavelength'], values=[0.0, 2, 3], unit='Å'))
-    # "midpoints" at bounds to ensure we include that range.
-    detector.coords['wavelength'] = detector.coords['wavelength'][::2]
     monitor = sc.DataArray(
         sc.array(dims=['wavelength'], values=[4.0, 10.0], unit='counts'),
         coords={

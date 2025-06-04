@@ -21,7 +21,7 @@ from .types import (
 def _reconstruct_wavelength(
     dspacing_bins: DspacingBins, two_theta_bins: TwoThetaBins
 ) -> sc.Variable:
-    dspacing = sc.midpoints(dspacing_bins)
+    dspacing = dspacing_bins
     two_theta = sc.midpoints(two_theta_bins)
     return (2 * dspacing * sc.sin(two_theta / 2)).to(unit='angstrom')
 
