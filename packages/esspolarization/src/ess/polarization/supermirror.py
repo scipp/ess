@@ -3,10 +3,13 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Generic
+from io import BytesIO, StringIO
+from pathlib import Path
+from typing import Any, Generic
 
 import sciline
 import scipp as sc
+from typing_extensions import Self
 
 from .types import PlusMinus, PolarizingElement, TransmissionFunction
 
@@ -49,6 +52,52 @@ class SecondDegreePolynomialEfficiency(
             + (self.b * wavelength).to(unit='', copy=False)
             + self.c.to(unit='', copy=False)
         )
+
+
+@dataclass
+class EfficiencyLookupTable(SupermirrorEfficiencyFunction[PolarizingElement]):
+    """
+    Efficiency of a supermirror as a lookup table.
+    The names of the columns in the table has to be "wavelength", "efficiency".
+
+    Parameters
+    ----------
+    table:
+        The lookup table.
+    """
+
+    table: sc.DataArray
+
+    def __post_init__(self):
+        table = self.table if self.table.variances is None else sc.values(self.table)
+        self._lut = sc.lookup(table, 'wavelength')
+
+    def __call__(self, *, wavelength: sc.Variable) -> sc.DataArray:
+        """Return the efficiency of a supermirror for a given wavelength"""
+        return sc.DataArray(self._lut(wavelength), coords={'wavelength': wavelength})
+
+    @classmethod
+    def from_file(
+        cls,
+        path: str | Path | StringIO | BytesIO,
+        wavelength_colname: str,
+        efficiency_colname: str,
+        wavelength_unit: sc.Unit | str = 'angstrom',
+        **kwargs: Any,
+    ) -> Self:
+        ds = sc.io.load_csv(path, **kwargs)
+        wavelength = (
+            ds[wavelength_colname]
+            .rename_dims({ds[wavelength_colname].dim: 'wavelength'})
+            .data
+        )
+        wavelength.unit = wavelength_unit
+        efficiency = (
+            ds[efficiency_colname]
+            .rename_dims({ds[efficiency_colname].dim: 'wavelength'})
+            .data
+        )
+        return cls(sc.DataArray(efficiency, coords={'wavelength': wavelength}))
 
 
 @dataclass

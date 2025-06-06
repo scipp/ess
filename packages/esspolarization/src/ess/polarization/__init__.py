@@ -35,6 +35,7 @@ from .he3 import (
     Polarized,
 )
 from .supermirror import (
+    EfficiencyLookupTable,
     SecondDegreePolynomialEfficiency,
     SupermirrorEfficiencyFunction,
     SupermirrorWorkflow,
@@ -60,6 +61,7 @@ __all__ = [
     "DirectBeamNoCell",
     "DirectBeamQRange",
     "Down",
+    "EfficiencyLookupTable",
     "HalfPolarizedCorrectedData",
     "HalfPolarizedWorkflow",
     "He3CellLength",
