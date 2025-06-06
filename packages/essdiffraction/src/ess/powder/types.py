@@ -63,6 +63,9 @@ MonitorType = TypeVar("MonitorType", CaveMonitor, BunkerMonitor)
 CalibrationFilename = NewType("CalibrationFilename", str | None)
 """Filename of the instrument calibration file."""
 
+WavelengthBins = NewType("WavelengthBins", sc.Variable)
+"""Bin edges for wavelength, used to bin event-mode monitors."""
+
 DspacingBins = NewType("DspacingBins", sc.Variable)
 """Bin edges for d-spacing."""
 

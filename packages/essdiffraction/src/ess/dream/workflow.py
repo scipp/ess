@@ -30,6 +30,7 @@ from ess.powder.types import (
     TofMask,
     TwoThetaMask,
     VanadiumRun,
+    WavelengthBins,
     WavelengthMask,
 )
 from ess.reduce import time_of_flight
@@ -90,6 +91,7 @@ def default_parameters() -> dict:
         AccumulatedProtonCharge[VanadiumRun]: charge,
         AccumulatedProtonCharge[EmptyCanRun]: charge,
         TofMask: None,
+        WavelengthBins: sc.linspace('wavelength', 0.0, 10.0, 1000, unit='angstrom'),
         WavelengthMask: None,
         TwoThetaMask: None,
         CaveMonitorPosition: sc.vector([0.0, 0.0, -4220.0], unit='mm'),

@@ -25,6 +25,7 @@ from .types import (
     MonitorType,
     RunType,
     SampleRun,
+    WavelengthBins,
     WavelengthMonitor,
 )
 
@@ -246,15 +247,27 @@ def convert_reduced_to_empty_can_subtracted_tof(
 
 
 def convert_monitor_to_wavelength(
-    monitor: MonitorTofData[RunType, MonitorType],
+    monitor: MonitorTofData[RunType, MonitorType], wavelength: WavelengthBins
 ) -> WavelengthMonitor[RunType, MonitorType]:
+    """
+    Convert monitor data with time-of-flight coordinate to wavelength.
+
+    Parameters
+    ----------
+    monitor:
+        Monitor data with time-of-flight coordinate.
+    wavelength:
+        Bins for the wavelength coordinate. This will be used ONLY if the monitor is
+        recorded in event mode. For histogrammed monitors no rebinning is performed.
+    """
     graph = {
         **scn.conversion.graph.beamline.beamline(scatter=False),
         **scn.conversion.graph.tof.elastic("tof"),
     }
-    return WavelengthMonitor[RunType, MonitorType](
-        monitor.transform_coords("wavelength", graph=graph, keep_intermediate=False)
-    )
+    mon = monitor.transform_coords("wavelength", graph=graph, keep_intermediate=False)
+    if mon.bins is not None:
+        mon = mon.hist(wavelength=wavelength, dim=mon.dims)
+    return WavelengthMonitor[RunType, MonitorType](mon)
 
 
 providers = (
