@@ -53,7 +53,7 @@ def _get_unique_position(*positions: sc.DataArray) -> sc.DataArray:
     return unique
 
 
-def get_monitor_data(
+def get_monitor_data_no_variances(
     dg: LoadedFileContents[RunType],
     nexus_name: NeXusMonitorName[MonitorType],
     spectrum_number: isis.MonitorSpectrumNumber[MonitorType],
@@ -64,7 +64,8 @@ def get_monitor_data(
     monitor = isis.general.get_monitor_data(
         dg, nexus_name=nexus_name, spectrum_number=spectrum_number
     )
-    return NeXusComponent[MonitorType, RunType](sc.values(monitor))
+    monitor['data'] = sc.values(monitor['data'])
+    return NeXusComponent[MonitorType, RunType](monitor)
 
 
 def get_monitor_data_from_transmission_run(
@@ -102,6 +103,7 @@ def ZoomTransmissionFractionWorkflow(runs: Sequence[str]) -> sl.Pipeline:
         List of filenames of the runs to use for the transmission fraction.
     """
     workflow = isis.zoom.ZoomWorkflow()
+    workflow.insert(get_monitor_data_no_variances)
     workflow.insert(get_monitor_data_from_transmission_run)
 
     mapped = workflow.map({Filename[TransmissionRun[SampleRun]]: runs})

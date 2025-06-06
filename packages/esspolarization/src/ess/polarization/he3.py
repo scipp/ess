@@ -99,10 +99,7 @@ class He3OpacityFunction(Generic[PolarizingElement]):
         scale = broadcast_with_upper_bound_variances(
             self.opacity0, prototype=wavelength
         )
-        return sc.DataArray(
-            (scale * wavelength).to(unit='', copy=False),
-            coords={'wavelength': wavelength},
-        )
+        return (scale * wavelength).to(unit='', copy=False)
 
 
 def he3_opacity_from_cell_params(
@@ -192,7 +189,7 @@ class He3PolarizationFunction(Generic[PolarizingElement]):
         return self._T1
 
     def __call__(self, time: sc.Variable) -> sc.Variable:
-        return sc.DataArray(self.C * sc.exp(-time / self.T1), coords={'time': time})
+        return self.C * sc.exp(-time / self.T1)
 
 
 @dataclass
@@ -214,7 +211,7 @@ class He3TransmissionFunction(TransmissionFunction[PolarizingElement]):
             polarization *= -plus_minus
         return self.transmission_empty_glass * sc.exp(-opacity * (1.0 + polarization))
 
-    def apply(self, data: sc.DataArray, plus_minus: PlusMinus) -> sc.DataArray:
+    def apply(self, data: sc.DataArray, plus_minus: PlusMinus) -> sc.Variable:
         return self(
             time=data.coords['time'],
             wavelength=data.coords['wavelength'],

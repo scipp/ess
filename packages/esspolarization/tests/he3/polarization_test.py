@@ -18,10 +18,16 @@ def test_incoming_unpolarized_reproduces_input_params_within_errors() -> None:
     transmission_empty_glass = sc.scalar(0.9)
     opacity = opacity_function(wavelength)
     polarization = polarization_function(time)
-    transmission = he3.transmission_incoming_unpolarized(
-        transmission_empty_glass=transmission_empty_glass,
-        opacity=opacity,
-        polarization=polarization,
+    transmission = sc.DataArray(
+        he3.transmission_incoming_unpolarized(
+            transmission_empty_glass=transmission_empty_glass,
+            opacity=opacity,
+            polarization=polarization,
+        ),
+        coords={
+            'time': time,
+            'wavelength': wavelength,
+        },
     )
 
     result = he3.get_he3_transmission_incoming_unpolarized_from_fit_to_direct_beam(
@@ -67,11 +73,23 @@ def test_incoming_polarized_reproduces_input_params_within_errors() -> None:
         polarization_function=polarization_function,
     )
     # State switch at 456th time point, cut further below into 4 channels total.
-    plus = transmission_function(
-        time=time[:456], wavelength=wavelength, plus_minus='plus'
+    plus = sc.DataArray(
+        transmission_function(
+            time=time[:456], wavelength=wavelength, plus_minus='plus'
+        ),
+        coords={
+            'time': time[:456],
+            'wavelength': wavelength,
+        },
     )
-    minus = transmission_function(
-        time=time[456:], wavelength=wavelength, plus_minus='minus'
+    minus = sc.DataArray(
+        transmission_function(
+            time=time[456:], wavelength=wavelength, plus_minus='minus'
+        ),
+        coords={
+            'time': time[456:],
+            'wavelength': wavelength,
+        },
     )
 
     result = he3.get_he3_transmission_incoming_polarized_from_fit_to_direct_beam(
@@ -121,11 +139,23 @@ def test_incoming_polarized_raises_if_plus_minus_coord_is_bad() -> None:
         polarization_function=polarization_function,
     )
     # State switch at 456th time point, cut further below into 4 channels total.
-    plus = transmission_function(
-        time=time[:456], wavelength=wavelength, plus_minus='plus'
+    plus = sc.DataArray(
+        transmission_function(
+            time=time[:456], wavelength=wavelength, plus_minus='plus'
+        ),
+        coords={
+            'time': time[:456],
+            'wavelength': wavelength,
+        },
     )
-    minus = transmission_function(
-        time=time[456:], wavelength=wavelength, plus_minus='minus'
+    minus = sc.DataArray(
+        transmission_function(
+            time=time[456:], wavelength=wavelength, plus_minus='minus'
+        ),
+        coords={
+            'time': time[456:],
+            'wavelength': wavelength,
+        },
     )
 
     with pytest.raises(ValueError, match='plus-minus coordinate of plus channel'):

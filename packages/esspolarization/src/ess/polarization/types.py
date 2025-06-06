@@ -32,7 +32,7 @@ class TransmissionFunction(Generic[PolarizingElement], ABC):
     """Wavelength- and time-dependent transmission for a given cell."""
 
     @abstractmethod
-    def apply(self, data: sc.DataArray, plus_minus: PlusMinus) -> sc.DataArray: ...
+    def apply(self, data: sc.DataArray, plus_minus: PlusMinus) -> sc.Variable: ...
 
 
 @dataclass

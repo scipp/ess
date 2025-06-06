@@ -103,6 +103,9 @@ def compute_polarizing_element_correction(
     :
         Correction matrix coefficients.
     """
+    if isinstance(channel, sc.Variable | sc.DataArray) and channel.bins is not None:
+        channel = channel.bins
+
     t_plus = transmission.apply(channel, 'plus')
     t_minus = transmission.apply(channel, 'minus')
     t_minus *= -1

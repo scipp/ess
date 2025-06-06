@@ -18,7 +18,7 @@ def test_opacity_from_cell_params() -> None:
         pressure=pressure, length=length, temperature=temperature
     )
     opacity_function = he3.he3_opacity_function_from_cell_opacity(opacity0)
-    opacity = opacity_function(wavelength).data
+    opacity = opacity_function(wavelength)
     assert_identical(2 * opacity['pressure', 0], opacity['pressure', 1])
     assert_identical(2 * opacity['cell_length', 0], opacity['cell_length', 1])
     assert_identical(2 * opacity['wavelength', 0], opacity['wavelength', 1])
@@ -38,7 +38,7 @@ def test_opacity_from_cell_params_reproduces_literature_value() -> None:
         pressure=pressure, length=length, temperature=temperature
     )
     opacity_function = he3.he3_opacity_function_from_cell_opacity(opacity0)
-    opacity = opacity_function(wavelength).data
+    opacity = opacity_function(wavelength)
     assert sc.isclose(opacity, sc.scalar(0.0733, unit=''), rtol=sc.scalar(1e-3))
 
 
@@ -64,7 +64,7 @@ def test_opacity_from_beam_data() -> None:
         transmission_fraction=transmission,
         opacity0_initial_guess=opacity0 * 1.23,  # starting guess imperfect
     )
-    opacity = opacity_function(wavelength).data
+    opacity = opacity_function(wavelength)
     assert sc.isclose(
         opacity_function.opacity0, opacity0.to(unit=opacity_function.opacity0.unit)
     )
