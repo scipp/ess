@@ -49,6 +49,7 @@ from .types import (
     Polarizer,
     PolarizingElement,
     ReducedSampleDataBySpinChannel,
+    TotalPolarizationCorrectedData,
     TransmissionFunction,
     Up,
 )
@@ -83,6 +84,7 @@ __all__ = [
     "SecondDegreePolynomialEfficiency",
     "SupermirrorEfficiencyFunction",
     "SupermirrorWorkflow",
+    "TotalPolarizationCorrectedData",
     "TransmissionFunction",
     "Up",
 ]

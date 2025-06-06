@@ -21,6 +21,7 @@ from .types import (
     PolarizingElement,
     PolarizingElementCorrection,
     ReducedSampleDataBySpinChannel,
+    TotalPolarizationCorrectedData,
     TransmissionFunction,
     Up,
 )
@@ -166,6 +167,43 @@ def compute_polarization_corrected_data(
     )
 
 
+def sum_polarization_contributions(
+    upup: PolarizationCorrectedData[Up, Up],
+    updown: PolarizationCorrectedData[Up, Down],
+    downup: PolarizationCorrectedData[Down, Up],
+    downdown: PolarizationCorrectedData[Down, Down],
+) -> TotalPolarizationCorrectedData:
+    """
+    Sums contributions from the flipper state channels to the spin state channels.
+
+    Returns
+    ------------
+        :
+        The polarization corrected data.
+    """
+    if upup.upup.bins is not None:
+        return PolarizationCorrectedData(
+            upup=sc.reduce(
+                [v.upup for v in (upup, updown, downup, downdown)]
+            ).bins.concat(),
+            updown=sc.reduce(
+                [v.updown for v in (upup, updown, downup, downdown)]
+            ).bins.concat(),
+            downup=sc.reduce(
+                [v.downup for v in (upup, updown, downup, downdown)]
+            ).bins.concat(),
+            downdown=sc.reduce(
+                [v.downdown for v in (upup, updown, downup, downdown)]
+            ).bins.concat(),
+        )
+    return PolarizationCorrectedData(
+        upup=sum(v.upup for v in (upup, updown, downup, downdown)),
+        updown=sum(v.updown for v in (upup, updown, downup, downdown)),
+        downup=sum(v.downup for v in (upup, updown, downup, downdown)),
+        downdown=sum(v.downdown for v in (upup, updown, downup, downdown)),
+    )
+
+
 def compute_half_polarized_correction(
     *,
     polarizer: PolarizingElementCorrection[PolarizerSpin, NoAnalyzer, Polarizer],
@@ -210,6 +248,7 @@ def CorrectionWorkflow(half_polarized: bool = False) -> sciline.Pipeline:
             make_spin_flipping_matrix_up,
             make_spin_flipping_matrix_down,
             compute_polarizing_element_correction,
+            sum_polarization_contributions,
         )
     )
     if half_polarized:

@@ -86,6 +86,12 @@ class PolarizationCorrectedData(Generic[PolarizerSpin, AnalyzerSpin]):
     downdown: sc.DataArray
 
 
+"""The sum of polarization corrected data from all flipper state channels."""
+TotalPolarizationCorrectedData = NewType(
+    "TotalPolarizationCorrectedData", PolarizationCorrectedData
+)
+
+
 @dataclass
 class HalfPolarizedCorrectedData(Generic[PolarizerSpin]):
     """

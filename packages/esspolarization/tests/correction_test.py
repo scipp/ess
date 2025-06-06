@@ -24,6 +24,7 @@ from ess.polarization.types import (
     PolarizationCorrectedData,
     Polarizer,
     ReducedSampleDataBySpinChannel,
+    TotalPolarizationCorrectedData,
     TransmissionFunction,
     Up,
 )
@@ -219,6 +220,38 @@ def test_workflow_with_two_flipper_computes_and_applies_matrix_inverse(
             )
             result += contrib.values
     np.testing.assert_allclose(result, ground_truth)
+
+
+@pytest.mark.parametrize('f1', [0.1, 0.99])
+@pytest.mark.parametrize('f2', [0.1, 0.99])
+def test_sum_contributions_provider(f1: float, f2: float) -> None:
+    ground_truth = np.array([7.0, 11.0, 13.0, 17.0])
+    analyzer = np.array([[1.3, 0.9], [0.9, 1.3]])
+    polarizer = np.array([[1.1, 0.7], [0.7, 1.1]])
+    identity = np.array([[1.0, 0.0], [0.0, 1.0]])
+
+    flipper1 = np.array([[1.0, 0.0], [1 - f1, f1]])
+    flipper2 = np.array([[1.0, 0.0], [1 - f2, f2]])
+    intensity = (
+        np.kron(identity, analyzer @ flipper2)
+        @ np.kron(flipper1 @ polarizer, identity)
+        @ ground_truth
+    )
+
+    workflow = CorrectionWorkflow()
+    workflow[TransmissionFunction[Analyzer]] = FakeTransmissionFunction(analyzer)
+    workflow[TransmissionFunction[Polarizer]] = FakeTransmissionFunction(polarizer)
+    workflow[ReducedSampleDataBySpinChannel[Up, Up]] = intensity[0]
+    workflow[ReducedSampleDataBySpinChannel[Up, Down]] = intensity[1]
+    workflow[ReducedSampleDataBySpinChannel[Down, Up]] = intensity[2]
+    workflow[ReducedSampleDataBySpinChannel[Down, Down]] = intensity[3]
+    workflow[FlipperEfficiency[Polarizer]] = FlipperEfficiency(f1)
+    workflow[FlipperEfficiency[Analyzer]] = FlipperEfficiency(f2)
+    d = workflow.compute(TotalPolarizationCorrectedData)
+    np.testing.assert_allclose(
+        np.array([d.upup.value, d.updown.value, d.downup.value, d.downdown.value]),
+        ground_truth,
+    )
 
 
 _he3_workflow = He3CellWorkflow()

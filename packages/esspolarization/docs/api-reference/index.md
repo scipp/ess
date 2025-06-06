@@ -33,6 +33,7 @@
    DirectBeamNoCell
    DirectBeamQRange
    Down
+   EfficiencyLookupTable
    HalfPolarizedCorrectedData
    He3CellLength
    He3CellPressure
@@ -47,6 +48,7 @@
    Polarizer
    SecondDegreePolynomialEfficiency
    SupermirrorEfficiencyFunction
+   TotalPolarizationCorrectedData
    Up
 ```
 
