@@ -173,6 +173,14 @@ def sum_polarization_contributions(
     downup: PolarizationCorrectedData[Down, Up],
     downdown: PolarizationCorrectedData[Down, Down],
 ) -> TotalPolarizationCorrectedData:
+    """
+    Sums contributions from the flipper state channels to the spin state channels.
+
+    Returns
+    ------------
+        :
+        The polarization corrected data.
+    """
     if upup.upup.bins is not None:
         return PolarizationCorrectedData(
             upup=sc.reduce(
