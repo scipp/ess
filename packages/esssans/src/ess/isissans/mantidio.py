@@ -105,14 +105,13 @@ def load_run(filename: Filename[RunType], period: Period) -> DataWorkspace[RunTy
     # best, 2 is a bit slower but still fast). We can either limit that thread count,
     # or add a lock here, which is more specific.
     with load_run.lock:
-        loaded = _mantid_simpleapi.Load(Filename=str(filename), StoreInADS=False)
-    try:
-        loaded = _mantid_simpleapi.Load(
-            Filename=str(filename), LoadMonitors=True, StoreInADS=False
-        )
-    except TypeError:
-        # Not loaded using LoadEventNexus, so LoadMonitor option is not available.
-        loaded = _mantid_simpleapi.Load(Filename=str(filename), StoreInADS=False)
+        try:
+            loaded = _mantid_simpleapi.Load(
+                Filename=str(filename), LoadMonitors=True, StoreInADS=False
+            )
+        except TypeError:
+            # Not loaded using LoadEventNexus, so LoadMonitor option is not available.
+            loaded = _mantid_simpleapi.Load(Filename=str(filename), StoreInADS=False)
     if isinstance(loaded, _mantid_api.Workspace):
         # A single workspace
         data_ws = loaded
