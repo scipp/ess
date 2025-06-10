@@ -29,5 +29,6 @@
 
    normalize
    io
+   tools
    workflow
 ```
