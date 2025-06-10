@@ -167,8 +167,8 @@ def get_monitor_data(
         'transmission_monitor'. Used when raw data is an EventWorkspace, where
         monitors are stored in a group with this name.
     spectrum_number:
-        Spectrum number of the monitor in the NeXus file, e.g. 0 for incident monitor
-        or 1 for transmission monitor. This is used when the raw data is a
+        Spectrum number of the monitor in the NeXus file, e.g., 3 for incident monitor
+        or 4 for transmission monitor. This is used when the raw data is a
         Workspace2D, where the monitor data is stored in a spectrum with this number.
 
     Returns
