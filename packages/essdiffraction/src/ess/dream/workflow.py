@@ -20,6 +20,7 @@ from ess.powder.types import (
     AccumulatedProtonCharge,
     CaveMonitorPosition,  # Should this be a DREAM-only parameter?
     EmptyCanRun,
+    KeepEvents,
     PixelMaskFilename,
     Position,
     ReducerSoftware,
@@ -73,6 +74,9 @@ def default_parameters() -> dict:
     source_position = sc.vector([-3.478, 0.0, -76550], unit="mm")
     charge = sc.scalar(1.0, unit="µAh")
     return {
+        KeepEvents[SampleRun]: KeepEvents[SampleRun](True),
+        KeepEvents[VanadiumRun]: KeepEvents[VanadiumRun](False),
+        KeepEvents[EmptyCanRun]: KeepEvents[EmptyCanRun](True),
         Position[snx.NXsample, SampleRun]: sample_position,
         Position[snx.NXsample, VanadiumRun]: sample_position,
         Position[snx.NXsample, EmptyCanRun]: sample_position,

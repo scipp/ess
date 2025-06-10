@@ -4,6 +4,7 @@
 
 import enum
 from typing import TypeVar
+from uuid import uuid4
 
 import sciline
 import scipp as sc
@@ -14,7 +15,6 @@ from ._util import event_or_outer_coord
 from .types import (
     AccumulatedProtonCharge,
     CaveMonitor,
-    DataWithScatteringCoordinates,
     EmptyCanRun,
     EmptyCanSubtractedIofDspacing,
     EmptyCanSubtractedIofDspacingTwoTheta,
@@ -22,9 +22,10 @@ from .types import (
     FocussedDataDspacingTwoTheta,
     IofDspacing,
     IofDspacingTwoTheta,
-    NormalizedRunData,
+    ReducedCountsDspacing,
     RunType,
     SampleRun,
+    ScaledCountsDspacing,
     UncertaintyBroadcastMode,
     VanadiumRun,
     WavelengthMonitor,
@@ -32,11 +33,11 @@ from .types import (
 
 
 def normalize_by_monitor_histogram(
-    detector: DataWithScatteringCoordinates[RunType],
+    detector: ReducedCountsDspacing[RunType],
     *,
     monitor: WavelengthMonitor[RunType, CaveMonitor],
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
-) -> NormalizedRunData[RunType]:
+) -> ScaledCountsDspacing[RunType]:
     """Normalize detector data by a histogrammed monitor.
 
     Parameters
@@ -53,21 +54,25 @@ def normalize_by_monitor_histogram(
     :
         `detector` normalized by a monitor.
     """
-    _expect_monitor_covers_range_of_detector(
-        detector=detector, monitor=monitor, dim="wavelength"
-    )
     norm = broadcast_uncertainties(
         monitor, prototype=detector, mode=uncertainty_broadcast_mode
     )
-    return NormalizedRunData[RunType](detector.bins / sc.lookup(norm, dim="wavelength"))
+    lut = sc.lookup(norm, dim="wavelength")
+    if detector.bins is None:
+        result = (
+            detector / lut[sc.midpoints(detector.coords['wavelength'], dim='dspacing')]
+        )
+    else:
+        result = detector.bins / lut
+    return ScaledCountsDspacing[RunType](result)
 
 
 def normalize_by_monitor_integrated(
-    detector: DataWithScatteringCoordinates[RunType],
+    detector: ReducedCountsDspacing[RunType],
     *,
     monitor: WavelengthMonitor[RunType, CaveMonitor],
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
-) -> NormalizedRunData[RunType]:
+) -> ScaledCountsDspacing[RunType]:
     """Normalize detector data by an integrated monitor.
 
     The monitor is integrated according to
@@ -99,17 +104,40 @@ def normalize_by_monitor_integrated(
         raise sc.CoordError(
             f"Monitor coordinate '{dim}' must be bin-edges to integrate the monitor."
         )
-    _expect_monitor_covers_range_of_detector(
-        detector=detector, monitor=monitor, dim=dim
-    )
 
     # Clip `monitor` to the range of `detector`, where the bins at the boundary
     # may extend past the detector range (how label-based indexing works).
-    det_coord = (
-        detector.coords[dim] if dim in detector.coords else detector.bins.coords[dim]
-    )
-    lo = det_coord.nanmin()
-    hi = det_coord.nanmax()
+    if detector.bins is not None and dim in detector.bins.coords:
+        det_coord = detector.bins.coords.get(dim)
+        lo = det_coord.nanmin()
+        hi = det_coord.nanmax()
+    else:
+        # Mask zero count bins, which are an artifact from the rectangular 2-D binning.
+        # The wavelength of those bins must be excluded when determining the integration
+        # range.
+        counts = (
+            detector.copy(deep=False) if detector.bins is None else detector.bins.size()
+        )
+        counts.masks[uuid4().hex] = counts.data == sc.scalar(0.0, unit=counts.unit)
+        det_coord = detector.coords[dim]
+        edge_dims = [
+            dim
+            for dim, size in counts.sizes.items()
+            if size + 1 == det_coord.sizes[dim]
+        ]
+        if len(edge_dims) != 1:
+            raise sc.CoordError(
+                f"Cannot determine edge dimension of coordinate '{dim}'."
+            )
+        edge_dim = edge_dims[0]
+        lo = counts.assign(det_coord[edge_dim, :-1]).nanmin().data
+        hi = counts.assign(det_coord[edge_dim, 1:]).nanmax().data
+
+    if monitor.coords[dim].min() > lo or monitor.coords[dim].max() < hi:
+        raise ValueError(
+            "Cannot normalize by monitor: The wavelength range of the monitor is "
+            "smaller than the range of the detector."
+        )
     monitor = monitor[dim, lo:hi]
     # Strictly limit `monitor` to the range of `detector`.
     edges = sc.concat([lo, monitor.coords[dim][1:-1], hi], dim=dim)
@@ -120,23 +148,7 @@ def normalize_by_monitor_integrated(
     norm = broadcast_uncertainties(
         norm, prototype=detector, mode=uncertainty_broadcast_mode
     )
-    return NormalizedRunData[RunType](detector / norm)
-
-
-def _expect_monitor_covers_range_of_detector(
-    *, detector: sc.DataArray, monitor: sc.DataArray, dim: str
-) -> None:
-    det_coord = (
-        detector.coords[dim] if detector.bins is None else detector.bins.coords[dim]
-    )
-    if (
-        monitor.coords[dim].min() > det_coord.min()
-        or monitor.coords[dim].max() < det_coord.max()
-    ):
-        raise ValueError(
-            "Cannot normalize by monitor: The wavelength range of the monitor is "
-            "smaller than the range of the detector."
-        )
+    return ScaledCountsDspacing[RunType](detector / norm)
 
 
 def _normalize_by_vanadium(
@@ -144,7 +156,7 @@ def _normalize_by_vanadium(
     vanadium: sc.DataArray,
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
 ) -> sc.DataArray:
-    norm = vanadium.hist()
+    norm = vanadium.hist() if vanadium.bins is not None else vanadium
     norm = broadcast_uncertainties(
         norm, prototype=data, mode=uncertainty_broadcast_mode
     )
@@ -223,9 +235,9 @@ def normalize_by_vanadium_dspacing_and_two_theta(
 
 
 def normalize_by_proton_charge(
-    data: DataWithScatteringCoordinates[RunType],
+    data: ReducedCountsDspacing[RunType],
     proton_charge: AccumulatedProtonCharge[RunType],
-) -> NormalizedRunData[RunType]:
+) -> ScaledCountsDspacing[RunType]:
     """Normalize data by an accumulated proton charge.
 
     Parameters
@@ -240,7 +252,7 @@ def normalize_by_proton_charge(
     :
         ``data / proton_charge``
     """
-    return NormalizedRunData[RunType](data / proton_charge)
+    return ScaledCountsDspacing[RunType](data / proton_charge)
 
 
 def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.DataArray:

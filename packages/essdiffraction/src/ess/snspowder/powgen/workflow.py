@@ -4,13 +4,24 @@
 import sciline
 
 from ess.powder import providers as powder_providers
-from ess.powder.types import NeXusDetectorName
+from ess.powder.types import (
+    EmptyCanRun,
+    KeepEvents,
+    NeXusDetectorName,
+    SampleRun,
+    VanadiumRun,
+)
 
 from . import beamline
 
 
 def default_parameters() -> dict:
-    return {NeXusDetectorName: "powgen_detector"}
+    return {
+        KeepEvents[SampleRun]: KeepEvents[SampleRun](True),
+        KeepEvents[VanadiumRun]: KeepEvents[VanadiumRun](False),
+        KeepEvents[EmptyCanRun]: KeepEvents[EmptyCanRun](True),
+        NeXusDetectorName: "powgen_detector",
+    }
 
 
 def PowgenWorkflow() -> sciline.Pipeline:
