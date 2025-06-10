@@ -19,17 +19,19 @@ from ess.reduce.time_of_flight import types as tof_t
 
 BackgroundRun = reduce_t.BackgroundRun
 DetectorData = reduce_t.DetectorData
-Choppers = reduce_t.Choppers
+DiskChoppers = reduce_t.DiskChoppers
 EmptyBeamRun = reduce_t.EmptyBeamRun
 Filename = reduce_t.Filename
-Monitor1 = reduce_t.Monitor1
-Monitor2 = reduce_t.Monitor2
+FrameMonitor1 = reduce_t.FrameMonitor1
+FrameMonitor2 = reduce_t.FrameMonitor1
 MonitorData = reduce_t.MonitorData
 NeXusDetectorName = reduce_t.NeXusDetectorName
 NeXusMonitorName = reduce_t.NeXusName
 NeXusComponent = reduce_t.NeXusComponent
 SampleRun = reduce_t.SampleRun
 
+DetectorLtotal = tof_t.DetectorLtotal
+DetectorTofData = tof_t.DetectorTofData
 PulsePeriod = tof_t.PulsePeriod
 PulseStride = tof_t.PulseStride
 PulseStrideOffset = tof_t.PulseStrideOffset
@@ -41,7 +43,7 @@ TimeOfFlightLookupTable = tof_t.TimeOfFlightLookupTable
 SimulationResults = tof_t.SimulationResults
 
 RunType = TypeVar("RunType", SampleRun, BackgroundRun)
-MonitorType = TypeVar("MonitorType", Monitor1, Monitor2)
+MonitorType = TypeVar("MonitorType", FrameMonitor1, FrameMonitor2)
 
 CoordTransformGraph = NewType("CoordTransformGraph", dict)
 """
@@ -50,16 +52,8 @@ time-of-flight.
 """
 
 
-class TofData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Data with time-of-flight coordinate."""
-
-
-class DetectorLtotal(sciline.Scope[RunType, sc.Variable], sc.Variable):
-    """Total path length of neutrons from source to detector (L1 + L2)."""
-
-
-class WavelengthData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Data with wavelength coordinate."""
+class DetectorWavelengthData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Detector data with wavelength coordinate."""
 
 
 del sc, sciline, NewType, TypeVar
