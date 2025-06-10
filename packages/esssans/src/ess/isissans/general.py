@@ -164,7 +164,7 @@ def get_monitor_data(
         Data loaded with Mantid and converted to Scipp.
     nexus_name:
         Name of the monitor in the NeXus file, e.g. 'incident_monitor' or
-        'transmission_monitor'. USed when raw data is an EventWorkspace, where
+        'transmission_monitor'. Used when raw data is an EventWorkspace, where
         monitors are stored in a group with this name.
     spectrum_number:
         Spectrum number of the monitor in the NeXus file, e.g. 0 for incident monitor
