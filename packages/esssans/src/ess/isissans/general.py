@@ -155,7 +155,7 @@ def get_monitor_data(
     """
     Extract monitor data that was loaded together with detector data.
 
-    If the raw files is histogram data, Mantid stores this as a Workspace2D, where some
+    If the raw file is histogram data, Mantid stores this as a Workspace2D, where some
     or all spectra corresponds to monitors.
 
     Parameters
