@@ -114,4 +114,4 @@ def sharpness(
         Other dimensions will be preserved in the output.
     """
     lap = laplace_2d(image, dims=dims)
-    return sc.abs(lap).sum(dims)
+    return sc.abs(lap).sum(dims) / np.prod([image.sizes[dim] for dim in dims])
