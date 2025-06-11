@@ -5,6 +5,7 @@ Tools for image analysis and manipulation.
 """
 
 import uuid
+from itertools import combinations
 
 import numpy as np
 import scipp as sc
@@ -27,7 +28,7 @@ def blockify(image: sc.Variable | sc.DataArray, **sizes) -> sc.Variable | sc.Dat
     """
     out = image
     for dim, size in sizes.items():
-        out = out.fold(dim=dim, sizes={dim: -1, uuid.uuid4().hex: size})
+        out = out.fold(dim=dim, sizes={dim: -1, uuid.uuid4().hex[:7]: size})
     return out
 
 
@@ -78,11 +79,12 @@ def laplace_2d(
         The dimensions of the image over which to compute the Laplace operator.
         Other dimensions will be preserved in the output.
     """
+    out = sc.zeros(sizes=image.sizes)
     kernel = [8] + ([-1] * 8)
     ii = np.repeat([0, -1, 1], 3)
     jj = np.tile([0, -1, 1], 3)
 
-    return sc.reduce(
+    out[dims[0], 1:-1][dims[1], 1:-1] = sc.reduce(
         (
             image[dims[0], (1 + j) : (image.sizes[dims[0]] - 1 + j)][
                 dims[1], (1 + i) : (image.sizes[dims[1]] - 1 + i)
@@ -91,10 +93,41 @@ def laplace_2d(
             for i, j, k in zip(ii, jj, kernel, strict=True)
         )
     ).sum()
+    return out
+
+
+def _prime_factors(n):
+    i = 2
+    factors = []
+    while i * i <= n:
+        if n % i == 0:
+            factors.append(i)
+            n //= i
+        else:
+            i += 1
+    if n > 1:
+        factors.append(n)
+    return factors
+
+
+def _best_subset_product(factors, target):
+    best_product = 1
+    # best_subset = []
+
+    for r in range(1, len(factors) + 1):
+        for combo in combinations(factors, r):
+            prod = np.prod(combo)
+            if abs(prod - target) < abs(best_product - target):
+                best_product = prod
+                # best_subset = combo
+
+    return best_product
 
 
 def sharpness(
-    image: sc.Variable | sc.DataArray, dims: tuple[str, str] | list[str]
+    image: sc.Variable | sc.DataArray,
+    dims: tuple[str, str] | list[str],
+    max_size: int | None = 512,
 ) -> sc.Variable | sc.DataArray:
     """
     Calculate the sharpness of an image by computing the Laplace operator
@@ -112,6 +145,24 @@ def sharpness(
     dims:
         The dimensions of the image over which to compute the sharpness.
         Other dimensions will be preserved in the output.
+    max_size:
+        The maximum size of the image to compute the sharpness on. If the
+        image is larger than this size, it will be downsampled to fit within
+        the specified maximum size. This is useful for large images where
+        computing the Laplace operator directly would be computationally
+        expensive.
     """
+    if max_size is not None:
+        sizes = {}
+        for dim in dims:
+            if image.sizes[dim] > max_size:
+                # Decompose size into prime numbers to find the best subset product
+                # closest to the maximum size
+                factors = _prime_factors(image.sizes[dim])
+                best_product = _best_subset_product(factors, max_size)
+                sizes[dim] = image.sizes[dim] // best_product
+        print(f"Resampling sizes: {sizes}")
+        image = resample(image, sizes=sizes)
+
     lap = laplace_2d(image, dims=dims)
     return sc.abs(lap).sum(dims) / np.prod([image.sizes[dim] for dim in dims])
