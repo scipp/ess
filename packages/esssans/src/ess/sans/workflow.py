@@ -12,7 +12,6 @@ from ess.reduce.parameter import parameter_mappers
 from . import common, conversions, i_of_q, masking, normalization
 from .types import (
     BackgroundRun,
-    CleanSummedQ,
     CorrectForGravity,
     Denominator,
     DetectorBankSizes,
@@ -30,6 +29,7 @@ from .types import (
     TransmissionRun,
     WavelengthBands,
     WavelengthMask,
+    WavelengthScaledQ,
 )
 
 
@@ -99,8 +99,8 @@ def _set_runs(
     pipeline = pipeline.copy()
     runs = pd.DataFrame({Filename[key]: runs}).rename_axis(axis_name)
     for part in (Numerator, Denominator):
-        pipeline[CleanSummedQ[key, part]] = (
-            pipeline[CleanSummedQ[key, part]]
+        pipeline[WavelengthScaledQ[key, part]] = (
+            pipeline[WavelengthScaledQ[key, part]]
             .map(runs)
             .reduce(index=axis_name, func=merge_contributions)
         )

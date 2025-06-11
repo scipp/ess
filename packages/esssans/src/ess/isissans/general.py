@@ -4,7 +4,8 @@
 Providers for the ISIS instruments.
 """
 
-from typing import NewType
+from dataclasses import dataclass
+from typing import Generic, NewType
 
 import sciline
 import scipp as sc
@@ -45,6 +46,17 @@ class MonitorOffset(sciline.Scope[MonitorType, sc.Variable], sc.Variable):
     """
 
 
+@dataclass
+class MonitorSpectrumNumber(Generic[MonitorType]):
+    """
+    Spectrum number for monitor data.
+
+    This is used to identify the monitor in ISIS histogram data files.
+    """
+
+    value: int
+
+
 DetectorBankOffset = NewType('DetectorBankOffset', sc.Variable)
 SampleOffset = NewType('SampleOffset', sc.Variable)
 
@@ -61,6 +73,10 @@ def default_parameters() -> dict:
         SampleOffset: SampleOffset(sc.vector([0, 0, 0], unit='m')),
         NonBackgroundWavelengthRange: None,
         Period: None,
+        # Not used for event files, setting default so the workflow works. If histogram
+        # data is used, the user should set this to the correct value.
+        MonitorSpectrumNumber[Incident]: MonitorSpectrumNumber[Incident](-1),
+        MonitorSpectrumNumber[Transmission]: MonitorSpectrumNumber[Transmission](-1),
     }
 
 
@@ -132,12 +148,43 @@ def get_calibrated_isis_detector(
 
 
 def get_monitor_data(
-    dg: LoadedFileContents[RunType], nexus_name: NeXusMonitorName[MonitorType]
+    dg: LoadedFileContents[RunType],
+    nexus_name: NeXusMonitorName[MonitorType],
+    spectrum_number: MonitorSpectrumNumber[MonitorType],
 ) -> NeXusComponent[MonitorType, RunType]:
+    """
+    Extract monitor data that was loaded together with detector data.
+
+    If the raw file is histogram data, Mantid stores this as a Workspace2D, where some
+    or all spectra correspond to monitors.
+
+    Parameters
+    ----------
+    dg:
+        Data loaded with Mantid and converted to Scipp.
+    nexus_name:
+        Name of the monitor in the NeXus file, e.g. 'incident_monitor' or
+        'transmission_monitor'. Used when raw data is an EventWorkspace, where
+        monitors are stored in a group with this name.
+    spectrum_number:
+        Spectrum number of the monitor in the NeXus file, e.g., 3 for incident monitor
+        or 4 for transmission monitor. This is used when the raw data is a
+        Workspace2D, where the monitor data is stored in a spectrum with this number.
+
+    Returns
+    -------
+    :
+        Monitor data extracted from the loaded file.
+    """
     # The generic NeXus workflow will try to extract 'data' from this, which is exactly
     # what we also have in the Mantid data. We use the generic workflow since it also
     # applies offsets, etc.
-    monitor = dg['monitors'][nexus_name]['data']
+    if 'monitors' in dg:
+        # From EventWorkspace
+        monitor = dg['monitors'][nexus_name]['data']
+    else:
+        # From Workspace2D
+        monitor = sc.values(dg["data"]["spectrum", sc.index(spectrum_number.value)])
     return NeXusComponent[MonitorType, RunType](
         sc.DataGroup(data=monitor, position=monitor.coords['position'])
     )
