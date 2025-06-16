@@ -56,21 +56,6 @@ def _decode_raw_numpy(dtype, shape: int | Iterable = 1):
 
         if shape != (1,):
             item_width = functools.reduce(operator.mul, shape)
-<<<<<<< HEAD
-            if (len(raw) % item_width) != 0:
-                raise AssertionError(
-                    "Data length %s is not divisible by item width %s",
-                    len(raw),
-                    item_width,
-                )
-            elif (num_items * item_width) != len(array):
-                raise AssertionError(
-                    "Data length %s is not equal to "
-                    "number of items %s times item width %s",
-                    len(array),
-                    num_items,
-                    item_width,
-=======
             if len(raw) % item_width != 0:
                 raise AssertionError(
                     "Raw data length %s not divisible by item width %s",
@@ -83,7 +68,6 @@ def _decode_raw_numpy(dtype, shape: int | Iterable = 1):
                     num_items,
                     item_width,
                     len(raw),
->>>>>>> 2ea4824 (Checkout dial related modules from scaling_dials branch.)
                 )
             array = array.reshape(num_items, *shape)
         if copy:
@@ -93,11 +77,7 @@ def _decode_raw_numpy(dtype, shape: int | Iterable = 1):
     return _decode_specific
 
 
-<<<<<<< HEAD
-def _decode_shoeboxes(data: list, copy) -> list[Shoebox | None]:
-=======
 def _decode_shoeboxes(data: list, copy) -> Iterable[Shoebox]:
->>>>>>> 2ea4824 (Checkout dial related modules from scaling_dials branch.)
     # Shoebox is float
     num_items, raw = data
     shoeboxes: list[Shoebox | None] = []
@@ -139,17 +119,8 @@ def _decode_shoeboxes(data: list, copy) -> Iterable[Shoebox]:
             shoeboxes.append(Shoebox(**shoebox))
     if len(shoeboxes) != num_items:
         raise AssertionError(
-<<<<<<< HEAD
-            "Warning: Mismatch of shoebox length: %s "
-            "is not same as the number of items: %s",
-            len(shoeboxes),
-            num_items,
-        )
-
-=======
             f"Mismatch of shoebox lengths: {len(shoeboxes)} != {num_items}"
         )
->>>>>>> 2ea4824 (Checkout dial related modules from scaling_dials branch.)
     return np.array(shoeboxes, dtype=np.object_)
 
 
@@ -188,10 +159,7 @@ def _get_unpacked(stream_or_path: str | IO | bytes | os.PathLike):
         path = os.fspath(cast(str, stream_or_path))
         is_fspathlike = True
     except (TypeError, ValueError):
-<<<<<<< HEAD
         path = stream_or_path
-=======
->>>>>>> 2ea4824 (Checkout dial related modules from scaling_dials branch.)
         is_fspathlike = isinstance(stream_or_path, str)
 
     if is_fspathlike:
@@ -213,17 +181,10 @@ def loads(data: bytes, copy=False):
 
     Returns: See .load(stream_or_path)
     """
-<<<<<<< HEAD
-    return load_reflection_file(BytesIO(data), copy)
-
-
-def load_reflection_file(stream_or_path: IO | Path | os.PathLike, copy=False) -> dict:
-=======
     return load(BytesIO(data), copy)
 
 
 def load(stream_or_path: IO | Path | os.PathLike, copy=False) -> dict:
->>>>>>> 2ea4824 (Checkout dial related modules from scaling_dials branch.)
     """
     Load a DIALS msgpack-encoded .refl file
 
@@ -254,11 +215,7 @@ def load(stream_or_path: IO | Path | os.PathLike, copy=False) -> dict:
         raise ValueError("Does not appear to be a dials reflection table file")
     if not root_data[1] == 1:
         raise ValueError(
-<<<<<<< HEAD
-            f"reflection_table data is version {root_data[1]}. "
-=======
             f"reflection_table data is version {root_data[1]}."
->>>>>>> 2ea4824 (Checkout dial related modules from scaling_dials branch.)
             "Only Version 1 is understood"
         )
     refdata = root_data[2]
@@ -278,12 +235,8 @@ def load(stream_or_path: IO | Path | os.PathLike, copy=False) -> dict:
     for name, column in decoded_data.items():
         if len(column) != rows:
             logging.warning(
-<<<<<<< HEAD
-                "Warning: Mismatch of column lengths: %s is %s instead of expected %s",
-=======
                 "Warning: Mismatch of column lengths: "
                 "[%s] is [%d] instead of expected [%s]",
->>>>>>> 2ea4824 (Checkout dial related modules from scaling_dials branch.)
                 name,
                 len(column),
                 rows,
