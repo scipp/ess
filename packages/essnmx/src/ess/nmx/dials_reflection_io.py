@@ -29,9 +29,9 @@ import numpy as np
 class Shoebox:
     panel: int
     bbox: tuple[int]
-    data: np.array = None
-    mask: np.array = None
-    background: np.array = None
+    data: np.ndarray | None = None
+    mask: np.ndarray | None = None
+    background: np.ndarray | None = None
 
 
 def _decode_raw_numpy(dtype, shape: int | Iterable = 1):
@@ -56,19 +56,18 @@ def _decode_raw_numpy(dtype, shape: int | Iterable = 1):
 
         if shape != (1,):
             item_width = functools.reduce(operator.mul, shape)
-            if (len(raw) % item_width) != 0:
+            if len(raw) % item_width != 0:
                 raise AssertionError(
-                    "Data length %s is not divisible by item width %s",
+                    "Raw data length %s not divisible by item width %s",
                     len(raw),
                     item_width,
                 )
-            elif (num_items * item_width) != len(array):
+            if num_items * item_width != len(array):
                 raise AssertionError(
-                    "Data length %s is not equal to "
-                    "number of items %s times item width %s",
-                    len(array),
+                    "(Num items) %s * (item width) %s != (raw data length) %s",
                     num_items,
                     item_width,
+                    len(raw),
                 )
             array = array.reshape(num_items, *shape)
         if copy:
@@ -78,7 +77,7 @@ def _decode_raw_numpy(dtype, shape: int | Iterable = 1):
     return _decode_specific
 
 
-def _decode_shoeboxes(data: list, copy) -> list[Shoebox | None]:
+def _decode_shoeboxes(data: list, copy) -> Iterable[Shoebox]:
     # Shoebox is float
     num_items, raw = data
     shoeboxes: list[Shoebox | None] = []
@@ -120,12 +119,8 @@ def _decode_shoeboxes(data: list, copy) -> list[Shoebox | None]:
             shoeboxes.append(Shoebox(**shoebox))
     if len(shoeboxes) != num_items:
         raise AssertionError(
-            "Warning: Mismatch of shoebox length: %s "
-            "is not same as the number of items: %s",
-            len(shoeboxes),
-            num_items,
+            f"Mismatch of shoebox lengths: {len(shoeboxes)} != {num_items}"
         )
-
     return np.array(shoeboxes, dtype=np.object_)
 
 
@@ -186,10 +181,10 @@ def loads(data: bytes, copy=False):
 
     Returns: See .load(stream_or_path)
     """
-    return load_reflection_file(BytesIO(data), copy)
+    return load(BytesIO(data), copy)
 
 
-def load_reflection_file(stream_or_path: IO | Path | os.PathLike, copy=False) -> dict:
+def load(stream_or_path: IO | Path | os.PathLike, copy=False) -> dict:
     """
     Load a DIALS msgpack-encoded .refl file
 
@@ -220,7 +215,7 @@ def load_reflection_file(stream_or_path: IO | Path | os.PathLike, copy=False) ->
         raise ValueError("Does not appear to be a dials reflection table file")
     if not root_data[1] == 1:
         raise ValueError(
-            f"reflection_table data is version {root_data[1]}. "
+            f"reflection_table data is version {root_data[1]}."
             "Only Version 1 is understood"
         )
     refdata = root_data[2]
@@ -240,7 +235,8 @@ def load_reflection_file(stream_or_path: IO | Path | os.PathLike, copy=False) ->
     for name, column in decoded_data.items():
         if len(column) != rows:
             logging.warning(
-                "Warning: Mismatch of column lengths: %s is %s instead of expected %s",
+                "Warning: Mismatch of column lengths: "
+                "[%s] is [%d] instead of expected [%s]",
                 name,
                 len(column),
                 rows,
