@@ -139,6 +139,8 @@ def reduction(
     input_file: pathlib.Path,
     output_file: pathlib.Path,
     chunk_size: int = 10_000_000,
+    nbins: int = 51,
+    max_counts: int | None = None,
     detector_ids: list[int | str],
     compression: bool = True,
     wf: sl.Pipeline | None = None,
@@ -159,7 +161,7 @@ def reduction(
             logger.info("Metadata retrieved: %s", data_metadata)
 
         toa_bin_edges = sc.linspace(
-            dim='t', start=data_metadata.min_toa, stop=data_metadata.max_toa, num=51
+            dim='t', start=data_metadata.min_toa, stop=data_metadata.max_toa, num=nbins
         )
         scale_factor = mcstas_weight_to_probability_scalefactor(
             max_counts=wf.compute(MaximumCounts),
@@ -171,12 +173,22 @@ def reduction(
         toa_min = sc.scalar(toa_min_max_prob[0], unit='s')
         toa_max = sc.scalar(toa_min_max_prob[1], unit='s')
         prob_max = sc.scalar(toa_min_max_prob[2])
-        toa_bin_edges = sc.linspace(dim='t', start=toa_min, stop=toa_max, num=51)
+        toa_bin_edges = sc.linspace(dim='t', start=toa_min, stop=toa_max, num=nbins)
         scale_factor = mcstas_weight_to_probability_scalefactor(
             max_counts=wf.compute(MaximumCounts),
             max_probability=prob_max,
         )
 
+    if max_counts:
+        scale_factor = mcstas_weight_to_probability_scalefactor(
+            max_counts=MaximumCounts(max_counts),
+            max_probability=data_metadata.max_probability,
+        )
+    else:
+        scale_factor = mcstas_weight_to_probability_scalefactor(
+            max_counts=wf.compute(MaximumCounts),
+            max_probability=data_metadata.max_probability,
+        )
     # Compute metadata and make the skeleton output file
     experiment_metadata = wf.compute(NMXExperimentMetadata)
     detector_metas = []
@@ -270,6 +282,18 @@ def main() -> None:
         help="Chunk size for processing",
     )
     parser.add_argument(
+        "--nbins",
+        type=int,
+        default=51,
+        help="Number of TOF bins",
+    )
+    parser.add_argument(
+        "--max_counts",
+        type=int,
+        default=None,
+        help="Maximum Counts",
+    )
+    parser.add_argument(
         "--detector_ids",
         type=int,
         nargs="+",
@@ -298,6 +322,8 @@ def main() -> None:
         input_file=input_file,
         output_file=output_file,
         chunk_size=args.chunk_size,
+        nbins=args.nbins,
+        max_counts=args.max_counts,
         detector_ids=args.detector_ids,
         compression=args.compression,
         logger=logger,
