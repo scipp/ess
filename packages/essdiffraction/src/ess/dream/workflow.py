@@ -18,6 +18,7 @@ from ess.powder.correction import (
 )
 from ess.powder.types import (
     AccumulatedProtonCharge,
+    CaveMonitor,
     CaveMonitorPosition,  # Should this be a DREAM-only parameter?
     EmptyCanRun,
     KeepEvents,
@@ -32,7 +33,9 @@ from ess.powder.types import (
     WavelengthMask,
 )
 from ess.reduce import time_of_flight
+from ess.reduce.nexus.types import NeXusName
 from ess.reduce.parameter import parameter_mappers
+from ess.reduce.time_of_flight import GenericTofWorkflow
 from ess.reduce.workflow import register_workflow
 
 from .beamline import InstrumentConfiguration
@@ -103,6 +106,33 @@ def _collect_reducer_software() -> ReducerSoftware:
             Software.from_package_metadata('scipp'),
         ]
     )
+
+
+def DreamPowderWorkflow(*, run_norm: RunNormalization) -> sciline.Pipeline:
+    """
+    Dream powder workflow with default parameters.
+
+    Parameters
+    ----------
+    run_norm:
+        Select how to normalize each run (sample, vanadium, etc.).
+
+    Returns
+    -------
+    :
+        A workflow object for DREAM.
+    """
+    wf = GenericTofWorkflow(run_types=[SampleRun], monitor_types=[CaveMonitor])
+    for provider in itertools.chain(powder_providers, _dream_providers):
+        wf.insert(provider)
+    wf[NeXusName[CaveMonitor]] = "monitor_cave"
+    insert_run_normalization(wf, run_norm)
+    for key, value in itertools.chain(
+        default_parameters().items(), time_of_flight.default_parameters().items()
+    ):
+        wf[key] = value
+    wf.typical_outputs = typical_outputs
+    return wf
 
 
 def DreamGeant4Workflow(*, run_norm: RunNormalization) -> sciline.Pipeline:
