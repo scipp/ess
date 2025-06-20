@@ -479,7 +479,7 @@ def test_normalize_by_monitor_integrated_raises_if_monitor_range_too_narrow():
             'wavelength': sc.array(dims=['wavelength'], values=[1.0, 3, 4], unit='Å')
         },
     )
-    with pytest.raises(ValueError, match="wavelength range of the monitor is smaller"):
+    with pytest.raises(ValueError, match="smaller than the range of the detector"):
         normalize_by_monitor_integrated(
             CountsWavelength[SampleRun](detector),
             monitor=WavelengthMonitor[SampleRun, CaveMonitor](monitor),
