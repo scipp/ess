@@ -31,7 +31,7 @@ def _make_pooch():
             "DREAM_simple_pwd_workflow/Cave_TOF_Monitor_vana_inc_coh.dat": "md5:701d66792f20eb283a4ce76bae0c8f8f",  # noqa: E501
             # BC215
             "DREAM-high-flux-tof-lookup-table.h5": "md5:1b95a359fa7b0d8b4277806ece9bf279",  # noqa: E501
-            "DREAM-high-flux-tof-lookup-table-BC240-new0.h5": "2cc9dc802082101933429a2ea3624126",  # noqa: E501
+            "DREAM-high-flux-tof-lookup-table-BC240-new0.h5": "md5:2cc9dc802082101933429a2ea3624126",  # noqa: E501
             # Smaller files for unit tests
             "DREAM_simple_pwd_workflow/TEST_data_dream_diamond_vana_container_sample_union.csv.zip": "md5:405df9b5ade9d61ab71fe8d8c19bb51b",  # noqa: E501
             "DREAM_simple_pwd_workflow/TEST_data_dream_vana_container_sample_union.csv.zip": "md5:20186119d1debfb0c2352f9db384cd0a",  # noqa: E501
