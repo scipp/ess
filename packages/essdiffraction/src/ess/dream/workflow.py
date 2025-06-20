@@ -54,8 +54,10 @@ def _get_lookup_table_filename_from_configuration(
     from .data import tof_lookup_table_high_flux
 
     match configuration:
-        case InstrumentConfiguration.high_flux:
-            out = tof_lookup_table_high_flux()
+        case InstrumentConfiguration.high_flux_BC215:
+            out = tof_lookup_table_high_flux(bc=215)
+        case InstrumentConfiguration.high_flux_BC240:
+            out = tof_lookup_table_high_flux(bc=240)
         case InstrumentConfiguration.high_resolution:
             raise NotImplementedError("High resolution configuration not yet supported")
 

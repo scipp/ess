@@ -135,8 +135,9 @@ def normalize_by_monitor_integrated(
 
     if monitor.coords[dim].min() > lo or monitor.coords[dim].max() < hi:
         raise ValueError(
-            "Cannot normalize by monitor: The wavelength range of the monitor is "
-            "smaller than the range of the detector."
+            f"Cannot normalize by monitor: The wavelength range of the monitor "
+            f"({monitor.coords[dim].min().value} to {monitor.coords[dim].max().value}) "
+            f"is smaller than the range of the detector ({lo.value} to {hi.value})."
         )
     monitor = monitor[dim, lo:hi]
     # Strictly limit `monitor` to the range of `detector`.
