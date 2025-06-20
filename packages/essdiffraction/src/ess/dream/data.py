@@ -2,6 +2,8 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 """Data for tests and documentation with DREAM."""
 
+from typing import Literal
+
 _version = "2"
 
 __all__ = ["get_path"]
@@ -27,7 +29,9 @@ def _make_pooch():
             "DREAM_simple_pwd_workflow/Cave_TOF_Monitor_diam_in_can.dat": "md5:ef24f4a4186c628574046e6629e31611",  # noqa: E501
             "DREAM_simple_pwd_workflow/Cave_TOF_Monitor_van_can.dat": "md5:2cdef7ad9912652149b7e687381d2e99",  # noqa: E501
             "DREAM_simple_pwd_workflow/Cave_TOF_Monitor_vana_inc_coh.dat": "md5:701d66792f20eb283a4ce76bae0c8f8f",  # noqa: E501
+            # BC215
             "DREAM-high-flux-tof-lookup-table.h5": "md5:1b95a359fa7b0d8b4277806ece9bf279",  # noqa: E501
+            "DREAM-high-flux-tof-lookup-table-BC240-new0.h5": "2cc9dc802082101933429a2ea3624126",  # noqa: E501
             # Smaller files for unit tests
             "DREAM_simple_pwd_workflow/TEST_data_dream_diamond_vana_container_sample_union.csv.zip": "md5:405df9b5ade9d61ab71fe8d8c19bb51b",  # noqa: E501
             "DREAM_simple_pwd_workflow/TEST_data_dream_vana_container_sample_union.csv.zip": "md5:20186119d1debfb0c2352f9db384cd0a",  # noqa: E501
@@ -267,7 +271,7 @@ def simulated_monitor_empty_can() -> str:
     return get_path("DREAM_simple_pwd_workflow/Cave_TOF_Monitor_van_can.dat")
 
 
-def tof_lookup_table_high_flux() -> str:
+def tof_lookup_table_high_flux(bc: Literal[215, 240] = 215) -> str:
     """Path to a HDF5 file containing a lookup table for high-flux ToF.
 
     The table was created using the ``tof`` package and the chopper settings for the
@@ -278,5 +282,17 @@ def tof_lookup_table_high_flux() -> str:
 
     The notebook that was used to create the table can be found at
     https://github.com/scipp/essdiffraction/blob/main/tools/dream-make-tof-lookup-table.ipynb
+
+    Parameters
+    ----------
+    bc:
+        Band-control chopper (BC) setting. The default is 215, which corresponds to the
+        settings of the choppers in the tutorial data.
     """
-    return get_path("DREAM-high-flux-tof-lookup-table.h5")
+    match bc:
+        case 215:
+            return get_path("DREAM-high-flux-tof-lookup-table.h5")
+        case 240:
+            return get_path("DREAM-high-flux-tof-lookup-table-BC240-new0.h5")
+        case _:
+            raise ValueError(f"Unsupported band-control chopper (BC) value: {bc}")

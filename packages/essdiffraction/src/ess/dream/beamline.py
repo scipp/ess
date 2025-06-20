@@ -8,10 +8,18 @@ from scippneutron.chopper import DiskChopper
 
 
 class InstrumentConfiguration(enum.Enum):
-    """Choose between high-flux and high-resolution configurations."""
+    """
+    Choose between high-flux and high-resolution configurations.
 
-    high_flux = enum.auto()
-    high_resolution = enum.auto()
+    The high_flux setting is the same as the high_flux_BC215. Setting the band chopper
+    phase explicitly should be favored over using the high_flux setting which is kept
+    for backwards compatibility.
+    """
+
+    high_flux_BC215 = 1
+    high_flux = 1  # Legacy alias for high_flux
+    high_flux_BC240 = 2
+    high_resolution = 3
 
 
 def choppers(configuration: InstrumentConfiguration) -> dict[str, DiskChopper]:
