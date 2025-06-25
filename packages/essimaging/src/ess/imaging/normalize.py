@@ -227,6 +227,18 @@ def normalize_sample_images(
 
             NormalizedImages = SampleImages / Background * ScaleFactor
 
+    .. note::
+        `factor` should correct the different neutron flux
+        between the sample and the background.
+
+        For example, if the open beam(background) image
+        is taken with longer exposure time
+        than the sample image with the same neutron rate,
+        the scale factor should be larger than 1.
+
+        The scale factor could be derived from the exposure time,
+        proton charge or monitor counts depending on the experiment.
+
     Parameters
     ----------
 
