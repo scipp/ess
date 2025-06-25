@@ -13,6 +13,7 @@ from ess.reduce.time_of_flight.workflow import GenericTofWorkflow
 from ..imaging.conversion import providers as conversion_providers
 from ..imaging.types import (
     DistanceResolution,
+    EmptyBeamRun,
     FrameMonitor1,
     LookupTableRelativeErrorThreshold,
     LtotalRange,
@@ -28,12 +29,12 @@ from ..imaging.types import (
 
 def default_parameters() -> dict:
     return {
-        NeXusMonitorName[FrameMonitor1]: "monitor_1",
+        NeXusMonitorName[FrameMonitor1]: "beam_monitor_3",
         PulsePeriod: 1.0 / sc.scalar(14.0, unit="Hz"),
-        PulseStride: 1,
+        PulseStride: 2,
         PulseStrideOffset: None,
-        LookupTableRelativeErrorThreshold: 1.0,
-        LtotalRange: (sc.scalar(25.0, unit="m"), sc.scalar(35.0, unit="m")),
+        LookupTableRelativeErrorThreshold: 0.1,
+        LtotalRange: (sc.scalar(55.0, unit="m"), sc.scalar(65.0, unit="m")),
         DistanceResolution: sc.scalar(0.1, unit="m"),
         TimeResolution: sc.scalar(250.0, unit='us'),
         NumberOfSimulatedNeutrons: 1_000_000,
@@ -43,13 +44,13 @@ def default_parameters() -> dict:
 providers = (*conversion_providers,)
 
 
-def TblWorkflow(**kwargs) -> sciline.Pipeline:
+def OdinWorkflow(**kwargs) -> sciline.Pipeline:
     """
-    Workflow with default parameters for TBL.
+    Workflow with default parameters for Odin.
     """
     workflow = GenericTofWorkflow(
         tof_lut_provider=time_of_flight.TofLutProvider.TOF,
-        run_types=[SampleRun],
+        run_types=[SampleRun, EmptyBeamRun],
         monitor_types=[FrameMonitor1],
         **kwargs,
     )
