@@ -16,8 +16,10 @@ def _make_pooch():
         base_url="https://public.esss.dk/groups/scipp/ess/odin/{version}/",
         version=_version,
         registry={
-            "small_mcstas_ob_images.nxs": "md5:2d0c85fbd1917d7616a6c2c408e09ac3",
-            "small_mcstas_sample_images.nxs": "md5:e2deec45e04c05931b26713f184190c5",
+            "iron_simulation_ob_large.nxs": "md5:a93517ea2aa167d134ca63671f663f99",
+            "iron_simulation_ob_small.nxs": "md5:7591ed8f0adec2658fb08190bd530b12",
+            "iron_simulation_sample_large.nxs": "md5:c162b6abeccb51984880d8d5002bae95",
+            "iron_simulation_sample_small.nxs": "md5:dda6fb30aa88780c5a3d4cef6ea05278",
         },
     )
 
@@ -37,17 +39,33 @@ def get_path(name: str, unzip: bool = False) -> str:
     return _pooch.fetch(name, processor=pooch.Unzip() if unzip else None)
 
 
-def small_mcstas_sample_images() -> str:
+def iron_simulation_sample_small() -> str:
     """
     Thinned down version of McStas data stored in a Odin NeXus file with simulation
     of an Fe sample.
     """
-    return get_path("small_mcstas_sample_images.nxs")
+    return get_path("iron_simulation_sample_small.nxs")
 
 
-def small_mcstas_ob_images() -> str:
+def iron_simulation_ob_small() -> str:
     """
     Thinned down version of McStas data stored in a Odin NeXus file with simulation
     of the open beam.
     """
-    return get_path("small_mcstas_ob_images.nxs")
+    return get_path("iron_simulation_ob_small.nxs")
+
+
+def iron_simulation_sample_large() -> str:
+    """
+    Full version of McStas data stored in a Odin NeXus file with simulation
+    of an Fe sample.
+    """
+    return get_path("iron_simulation_sample_large.nxs")
+
+
+def iron_simulation_ob_large() -> str:
+    """
+    Full version of McStas data stored in a Odin NeXus file with simulation
+    of the open beam.
+    """
+    return get_path("iron_simulation_ob_large.nxs")

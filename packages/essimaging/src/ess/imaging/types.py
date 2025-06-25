@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
+from collections.abc import Callable
+from types import MappingProxyType
 from typing import NewType, TypeVar
 
 import sciline
@@ -49,6 +51,14 @@ time-of-flight.
 
 class DetectorWavelengthData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Detector data with wavelength coordinate."""
+
+
+MaskingRules = NewType('MaskingRules', MappingProxyType[str, Callable])
+"""Functions to mask different dimensions of Odin data."""
+
+
+class MaskedDetectorData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Detector data with masks."""
 
 
 ImageDetectorName = NewType('ImageDetectorName', str)

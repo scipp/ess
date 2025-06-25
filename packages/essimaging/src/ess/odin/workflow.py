@@ -25,6 +25,7 @@ from ..imaging.types import (
     SampleRun,
     TimeResolution,
 )
+from .masking import providers as masking_providers
 
 
 def default_parameters() -> dict:
@@ -41,7 +42,7 @@ def default_parameters() -> dict:
     }
 
 
-providers = (*conversion_providers,)
+providers = (*conversion_providers, *masking_providers)
 
 
 def OdinWorkflow(**kwargs) -> sciline.Pipeline:
