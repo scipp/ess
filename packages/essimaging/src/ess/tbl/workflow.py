@@ -36,7 +36,7 @@ def default_parameters() -> dict:
         LtotalRange: (sc.scalar(25.0, unit="m"), sc.scalar(35.0, unit="m")),
         DistanceResolution: sc.scalar(0.1, unit="m"),
         TimeResolution: sc.scalar(250.0, unit='us'),
-        NumberOfSimulatedNeutrons: 1_000_000,
+        NumberOfSimulatedNeutrons: 200_000,
     }
 
 
@@ -48,7 +48,6 @@ def TblWorkflow(**kwargs) -> sciline.Pipeline:
     Workflow with default parameters for TBL.
     """
     workflow = GenericTofWorkflow(
-        tof_lut_provider=time_of_flight.TofLutProvider.TOF,
         run_types=[SampleRun],
         monitor_types=[FrameMonitor1],
         **kwargs,

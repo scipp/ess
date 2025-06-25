@@ -50,7 +50,6 @@ def OdinWorkflow(**kwargs) -> sciline.Pipeline:
     Workflow with default parameters for Odin.
     """
     workflow = GenericTofWorkflow(
-        tof_lut_provider=time_of_flight.TofLutProvider.TOF,
         run_types=[SampleRun, EmptyBeamRun],
         monitor_types=[FrameMonitor1],
         **kwargs,

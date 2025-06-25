@@ -6,8 +6,7 @@ import sciline as sl
 
 import ess.tbl.data  # noqa: F401
 from ess import tbl
-from ess.reduce import time_of_flight
-from ess.tbl.types import (
+from ess.imaging.types import (
     DetectorData,
     DetectorTofData,
     DetectorWavelengthData,
@@ -17,6 +16,7 @@ from ess.tbl.types import (
     SampleRun,
     TimeOfFlightLookupTable,
 )
+from ess.reduce import time_of_flight
 
 
 @pytest.fixture(scope="module")
