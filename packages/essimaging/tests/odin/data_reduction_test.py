@@ -11,7 +11,7 @@ from ess.imaging.types import (
     DetectorTofData,
     DetectorWavelengthData,
     DiskChoppers,
-    EmptyBeamRun,
+    OpenBeamRun,
     Filename,
     NeXusDetectorName,
     SampleRun,
@@ -27,7 +27,7 @@ def workflow() -> sl.Pipeline:
     """
     wf = odin.OdinWorkflow(tof_lut_provider=time_of_flight.TofLutProvider.TOF)
     wf[Filename[SampleRun]] = odin.data.iron_simulation_sample_small()
-    wf[Filename[EmptyBeamRun]] = odin.data.iron_simulation_ob_small()
+    wf[Filename[OpenBeamRun]] = odin.data.iron_simulation_ob_small()
     wf[NeXusDetectorName] = "event_mode_detectors/timepix3"
     wf[DiskChoppers[SampleRun]] = odin.beamline.choppers(
         source_position=wf.compute(DetectorData[SampleRun]).coords["source_position"]
@@ -37,7 +37,7 @@ def workflow() -> sl.Pipeline:
     return wf
 
 
-@pytest.mark.parametrize("run_type", [SampleRun, EmptyBeamRun])
+@pytest.mark.parametrize("run_type", [SampleRun, OpenBeamRun])
 def test_can_load_detector_data(workflow, run_type):
     da = workflow.compute(DetectorData[run_type])
     assert {
@@ -54,14 +54,14 @@ def test_can_load_detector_data(workflow, run_type):
     assert "event_time_zero" in da.bins.coords
 
 
-@pytest.mark.parametrize("run_type", [SampleRun, EmptyBeamRun])
+@pytest.mark.parametrize("run_type", [SampleRun, OpenBeamRun])
 def test_can_compute_time_of_flight(workflow, run_type):
     da = workflow.compute(DetectorTofData[run_type])
 
     assert "tof" in da.bins.coords
 
 
-@pytest.mark.parametrize("run_type", [SampleRun, EmptyBeamRun])
+@pytest.mark.parametrize("run_type", [SampleRun, OpenBeamRun])
 def test_can_compute_wavelength(workflow, run_type):
     da = workflow.compute(DetectorWavelengthData[run_type])
 
