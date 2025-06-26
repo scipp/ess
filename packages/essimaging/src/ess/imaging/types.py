@@ -12,10 +12,10 @@ from ess.reduce.time_of_flight import types as tof_t
 
 # 1 TypeVars used to parametrize the generic parts of the workflow
 
-BackgroundRun = reduce_t.BackgroundRun
+DarkBackgroundRun = reduce_t.BackgroundRun
 DetectorData = reduce_t.DetectorData
 DiskChoppers = reduce_t.DiskChoppers
-EmptyBeamRun = reduce_t.EmptyBeamRun
+OpenBeamRun = reduce_t.EmptyBeamRun
 Filename = reduce_t.Filename
 FrameMonitor1 = reduce_t.FrameMonitor1
 FrameMonitor2 = reduce_t.FrameMonitor2
@@ -39,7 +39,7 @@ NumberOfSimulatedNeutrons = tof_t.NumberOfSimulatedNeutrons
 TimeOfFlightLookupTable = tof_t.TimeOfFlightLookupTable
 SimulationResults = tof_t.SimulationResults
 
-RunType = TypeVar("RunType", SampleRun, BackgroundRun, EmptyBeamRun)
+RunType = TypeVar("RunType", SampleRun, DarkBackgroundRun, OpenBeamRun)
 MonitorType = TypeVar("MonitorType", FrameMonitor1, FrameMonitor2, FrameMonitor3)
 
 CoordTransformGraph = NewType("CoordTransformGraph", dict)

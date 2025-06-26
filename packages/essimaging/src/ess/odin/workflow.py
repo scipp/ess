@@ -12,12 +12,12 @@ from ess.reduce.time_of_flight.workflow import GenericTofWorkflow
 from ..imaging.conversion import providers as conversion_providers
 from ..imaging.types import (
     DistanceResolution,
-    EmptyBeamRun,
     FrameMonitor1,
     LookupTableRelativeErrorThreshold,
     LtotalRange,
     NeXusMonitorName,
     NumberOfSimulatedNeutrons,
+    OpenBeamRun,
     PulsePeriod,
     PulseStride,
     PulseStrideOffset,
@@ -49,7 +49,7 @@ def OdinWorkflow(**kwargs) -> sciline.Pipeline:
     Workflow with default parameters for Odin.
     """
     workflow = GenericTofWorkflow(
-        run_types=[SampleRun, EmptyBeamRun],
+        run_types=[SampleRun, OpenBeamRun],
         monitor_types=[FrameMonitor1],
         **kwargs,
     )
