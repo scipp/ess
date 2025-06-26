@@ -11,9 +11,9 @@ from ess.imaging.types import (
     DetectorTofData,
     DetectorWavelengthData,
     DiskChoppers,
-    OpenBeamRun,
     Filename,
     NeXusDetectorName,
+    OpenBeamRun,
     SampleRun,
     TimeOfFlightLookupTable,
 )
