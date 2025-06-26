@@ -43,6 +43,8 @@ def iron_simulation_sample_small() -> str:
     """
     Thinned down version of McStas data stored in a Odin NeXus file with simulation
     of an Fe sample.
+    The file was generated with the ``tools/mcstas_to_nexus.ipynb`` notebook, sampling
+    1M events from the McStas results.
     """
     return get_path("iron_simulation_sample_small.nxs")
 
@@ -51,6 +53,8 @@ def iron_simulation_ob_small() -> str:
     """
     Thinned down version of McStas data stored in a Odin NeXus file with simulation
     of the open beam.
+    The file was generated with the ``tools/mcstas_to_nexus.ipynb`` notebook, sampling
+    1M events from the McStas results.
     """
     return get_path("iron_simulation_ob_small.nxs")
 
@@ -59,6 +63,8 @@ def iron_simulation_sample_large() -> str:
     """
     Full version of McStas data stored in a Odin NeXus file with simulation
     of an Fe sample.
+    The file was generated with the ``tools/mcstas_to_nexus.ipynb`` notebook, sampling
+    10M events from the McStas results.
     """
     return get_path("iron_simulation_sample_large.nxs")
 
@@ -67,5 +73,7 @@ def iron_simulation_ob_large() -> str:
     """
     Full version of McStas data stored in a Odin NeXus file with simulation
     of the open beam.
+    The file was generated with the ``tools/mcstas_to_nexus.ipynb`` notebook, sampling
+    10M events from the McStas results.
     """
     return get_path("iron_simulation_ob_large.nxs")
