@@ -1,7 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
-
-from __future__ import annotations
+# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 
 import itertools
 
@@ -14,7 +12,6 @@ from ess.powder import with_pixel_mask_filenames
 from ess.powder.correction import RunNormalization, insert_run_normalization
 from ess.powder.types import (
     AccumulatedProtonCharge,
-    CaveMonitor,
     CaveMonitorPosition,  # Should this be a DREAM-only parameter?
     EmptyCanRun,
     KeepEvents,
@@ -27,7 +24,6 @@ from ess.powder.types import (
     WavelengthMask,
 )
 from ess.reduce.parameter import parameter_mappers
-from ess.reduce.time_of_flight import GenericTofWorkflow
 from ess.reduce.workflow import register_workflow
 
 from ..io.cif import (
