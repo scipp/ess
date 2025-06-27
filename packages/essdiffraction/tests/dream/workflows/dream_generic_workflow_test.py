@@ -50,8 +50,8 @@ TEST_DETECTOR_BANK_SIZES = {
 
 
 @pytest.fixture
-def nexus_workflow() -> sciline.Pipeline:
-    return dream.io.nexus.LoadNeXusWorkflow()
+def generic_workflow() -> sciline.Pipeline:
+    return dream.DreamGenericWorkflow()
 
 
 @pytest.fixture(
@@ -74,10 +74,10 @@ def params(request):
     return params
 
 
-def test_can_load_nexus_detector_data(nexus_workflow, params):
+def test_can_load_nexus_detector_data(generic_workflow, params):
     for key, value in params.items():
-        nexus_workflow[key] = value
-    result = nexus_workflow.compute(CalibratedDetector[SampleRun])
+        generic_workflow[key] = value
+    result = generic_workflow.compute(CalibratedDetector[SampleRun])
     assert (
         set(result.dims) == hr_sans_dims
         if params[NeXusDetectorName]
@@ -91,19 +91,19 @@ def test_can_load_nexus_detector_data(nexus_workflow, params):
     assert sc.identical(result.data, result.coords['detector_number'])
 
 
-def test_can_load_nexus_monitor_data(nexus_workflow):
-    nexus_workflow[Filename[SampleRun]] = dream.data.get_path(
+def test_can_load_nexus_monitor_data(generic_workflow):
+    generic_workflow[Filename[SampleRun]] = dream.data.get_path(
         'TEST_DREAM_nexus_sorted-2023-12-07.nxs'
     )
-    nexus_workflow[NeXusMonitorName[CaveMonitor]] = 'monitor_cave'
-    result = nexus_workflow.compute(CalibratedMonitor[SampleRun, CaveMonitor])
+    generic_workflow[NeXusMonitorName[CaveMonitor]] = 'monitor_cave'
+    result = generic_workflow.compute(CalibratedMonitor[SampleRun, CaveMonitor])
     assert result.sizes == {'event_time_zero': 0}
 
 
-def test_assemble_nexus_detector_data(nexus_workflow, params):
+def test_assemble_nexus_detector_data(generic_workflow, params):
     for key, value in params.items():
-        nexus_workflow[key] = value
-    result = nexus_workflow.compute(DetectorData[SampleRun])
+        generic_workflow[key] = value
+    result = generic_workflow.compute(DetectorData[SampleRun])
     assert (
         set(result.dims) == hr_sans_dims
         if params[NeXusDetectorName]

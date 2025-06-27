@@ -9,7 +9,7 @@ import importlib.metadata
 
 from .beamline import InstrumentConfiguration
 from .instrument_view import instrument_view
-from .io import load_geant4_csv, nexus
+from .io import load_geant4_csv
 from .workflows import DreamGeant4Workflow, DreamGenericWorkflow, DreamPowderWorkflow
 
 try:
@@ -27,5 +27,4 @@ __all__ = [
     '__version__',
     'instrument_view',
     'load_geant4_csv',
-    'nexus',
 ]

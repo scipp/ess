@@ -11,10 +11,7 @@ import scippnexus as snx
 
 from ess.powder import providers as powder_providers
 from ess.powder import with_pixel_mask_filenames
-from ess.powder.correction import (
-    RunNormalization,
-    insert_run_normalization,
-)
+from ess.powder.correction import RunNormalization, insert_run_normalization
 from ess.powder.types import (
     AccumulatedProtonCharge,
     CaveMonitor,

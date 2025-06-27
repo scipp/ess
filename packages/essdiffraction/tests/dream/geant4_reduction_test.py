@@ -14,7 +14,7 @@ from scippneutron._utils import elem_unit
 
 import ess.dream.data  # noqa: F401
 from ess import dream, powder
-from ess.dream.workflow import (
+from ess.dream.workflows import (
     DreamGeant4MonitorHistogramWorkflow,
     DreamGeant4MonitorIntegratedWorkflow,
     DreamGeant4ProtonChargeWorkflow,
