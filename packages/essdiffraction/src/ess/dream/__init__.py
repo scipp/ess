@@ -10,7 +10,7 @@ import importlib.metadata
 from .beamline import InstrumentConfiguration
 from .instrument_view import instrument_view
 from .io import load_geant4_csv, nexus
-from .workflow import DreamGeant4Workflow, default_parameters
+from .workflows import DreamGeant4Workflow, DreamGenericWorkflow, DreamPowderWorkflow
 
 try:
     __version__ = importlib.metadata.version("essdiffraction")
@@ -21,9 +21,10 @@ del importlib
 
 __all__ = [
     'DreamGeant4Workflow',
+    'DreamGenericWorkflow',
+    'DreamPowderWorkflow',
     'InstrumentConfiguration',
     '__version__',
-    'default_parameters',
     'instrument_view',
     'load_geant4_csv',
     'nexus',
