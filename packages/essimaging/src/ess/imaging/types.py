@@ -17,6 +17,7 @@ DetectorData = reduce_t.DetectorData
 DiskChoppers = reduce_t.DiskChoppers
 OpenBeamRun = reduce_t.EmptyBeamRun
 Filename = reduce_t.Filename
+FrameMonitor0 = reduce_t.FrameMonitor0
 FrameMonitor1 = reduce_t.FrameMonitor1
 FrameMonitor2 = reduce_t.FrameMonitor2
 FrameMonitor3 = reduce_t.FrameMonitor3
@@ -40,7 +41,9 @@ TimeOfFlightLookupTable = tof_t.TimeOfFlightLookupTable
 SimulationResults = tof_t.SimulationResults
 
 RunType = TypeVar("RunType", SampleRun, DarkBackgroundRun, OpenBeamRun)
-MonitorType = TypeVar("MonitorType", FrameMonitor1, FrameMonitor2, FrameMonitor3)
+MonitorType = TypeVar(
+    "MonitorType", FrameMonitor0, FrameMonitor1, FrameMonitor2, FrameMonitor3
+)
 
 CoordTransformGraph = NewType("CoordTransformGraph", dict)
 """

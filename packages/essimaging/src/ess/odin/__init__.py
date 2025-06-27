@@ -5,7 +5,7 @@
 import importlib.metadata
 
 from . import beamline
-from .workflow import OdinWorkflow, default_parameters
+from .workflows import OdinBraggEdgeWorkflow, OdinGenericWorkflow
 
 try:
     __version__ = importlib.metadata.version("esstbl")
@@ -15,7 +15,7 @@ except importlib.metadata.PackageNotFoundError:
 del importlib
 
 __all__ = [
-    "OdinWorkflow",
+    "OdinBraggEdgeWorkflow",
+    "OdinGenericWorkflow",
     "beamline",
-    "default_parameters",
 ]
