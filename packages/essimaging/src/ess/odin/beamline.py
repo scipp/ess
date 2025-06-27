@@ -93,7 +93,17 @@ parameters = {
 
 
 def choppers(source_position: sc.Variable) -> MappingProxyType[str, DiskChopper]:
-    """Hard-coded DISK_CHOPPERS dictionary for ESS ODIN choppers."""
+    """
+    List of ESS ODIN choppers.
+    We make the choppers information available in this way as loading them directly from
+    the NeXus files is currently failing due to empty time-series logs.
+
+    Parameters
+    ----------
+    source_position:
+        Position of the source in the coordinate system of the choppers.
+        The raw chopper positions are defined relative to the source position.
+    """
     return MappingProxyType(
         {
             key: DiskChopper(
