@@ -58,10 +58,15 @@ def apply_masks(
         "two_theta": two_theta_mask_func,
     }.items():
         if mask is not None:
-            if dim in out.bins.coords:
+            if (out.bins is not None) and (dim in out.bins.coords):
                 out.bins.masks[dim] = mask(out.bins.coords[dim])
             else:
-                out.masks[dim] = mask(out.coords[dim])
+                coord = (
+                    sc.midpoints(out.coords[dim])
+                    if out.coords.is_edges(dim)
+                    else out.coords[dim]
+                )
+                out.masks[dim] = mask(coord)
 
     return MaskedData[RunType](out)
 
