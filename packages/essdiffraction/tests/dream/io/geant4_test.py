@@ -11,7 +11,6 @@ import scipp.testing
 import scippnexus as snx
 
 from ess.dream import DreamGeant4ProtonChargeWorkflow, data, load_geant4_csv
-from ess.dream.io.geant4 import providers as geant4_providers
 from ess.powder.types import Filename, NeXusComponent, NeXusDetectorName, SampleRun
 
 
