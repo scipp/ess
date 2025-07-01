@@ -63,7 +63,7 @@ def apply_masks(
             else:
                 coord = (
                     sc.midpoints(out.coords[dim])
-                    if out.coords.is_edges(dim)
+                    if out.coords.is_edges(dim, dim)
                     else out.coords[dim]
                 )
                 out.masks[dim] = mask(coord)
