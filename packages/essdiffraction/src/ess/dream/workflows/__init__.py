@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 """
-Workflow for the DREAM instrument.
+Workflows for the DREAM instrument.
 """
 
 from .generic import DreamGenericWorkflow

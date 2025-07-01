@@ -10,7 +10,7 @@ import scipp as sc
 import scipp.testing
 import scippnexus as snx
 
-from ess.dream import DreamGenericWorkflow, data, load_geant4_csv
+from ess.dream import DreamGeant4ProtonChargeWorkflow, data, load_geant4_csv
 from ess.dream.io.geant4 import providers as geant4_providers
 from ess.powder.types import Filename, NeXusComponent, NeXusDetectorName, SampleRun
 
@@ -177,17 +177,9 @@ def test_load_geant4_csv_sans_has_expected_coords(file):
 
 
 def test_geant4_in_workflow(file_path, file):
-    wf = DreamGenericWorkflow()
-    for provider in geant4_providers:
-        wf.insert(provider)
+    wf = DreamGeant4ProtonChargeWorkflow()
     wf[Filename[SampleRun]] = file_path
     wf[NeXusDetectorName] = NeXusDetectorName("mantle")
-    wf[NeXusComponent[snx.NXsample, SampleRun]] = sc.DataGroup(
-        position=sc.vector([0.0, 0.0, 0.0], unit="mm")
-    )
-    wf[NeXusComponent[snx.NXsource, SampleRun]] = sc.DataGroup(
-        position=sc.vector([-3.478, 0.0, -76550], unit="mm")
-    )
 
     detector = wf.compute(NeXusComponent[snx.NXdetector, SampleRun])['events']
     expected = load_geant4_csv(file)["instrument"]["mantle"]["events"]
