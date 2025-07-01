@@ -17,7 +17,6 @@ from ess.powder.types import (
     CaveMonitor,
     CaveMonitorPosition,
     DetectorData,
-    EmptyCanRun,
     Filename,
     MonitorData,
     MonitorFilename,
@@ -26,11 +25,8 @@ from ess.powder.types import (
     NeXusDetectorName,
     Position,
     RunType,
-    SampleRun,
     Source,
-    VanadiumRun,
 )
-from ess.reduce.time_of_flight.workflow import GenericTofWorkflow
 
 MANTLE_DETECTOR_ID = sc.index(7)
 HIGH_RES_DETECTOR_ID = sc.index(8)
@@ -316,22 +312,16 @@ def ess_source() -> Source:
     return ESS_SOURCE
 
 
-def LoadGeant4Workflow() -> sciline.Pipeline:
-    """
-    Workflow for loading NeXus data.
-    """
-    wf = GenericTofWorkflow(
-        run_types=[SampleRun, VanadiumRun, EmptyCanRun], monitor_types=[CaveMonitor]
-    )
-    wf.insert(extract_geant4_detector)
-    wf.insert(load_geant4_csv)
-    wf.insert(load_mcstas_monitor)
-    wf.insert(geant4_load_calibration)
-    wf.insert(get_calibrated_geant4_detector)
-    wf.insert(assemble_detector_data)
-    wf.insert(assemble_monitor_data)
-    wf.insert(dummy_source_position)
-    wf.insert(dummy_sample_position)
-    wf.insert(dream_beamline)
-    wf.insert(ess_source)
-    return wf
+providers = (
+    load_geant4_csv,
+    extract_geant4_detector,
+    get_calibrated_geant4_detector,
+    assemble_detector_data,
+    assemble_monitor_data,
+    load_mcstas_monitor,
+    geant4_load_calibration,
+    dummy_source_position,
+    dummy_sample_position,
+    dream_beamline,
+    ess_source,
+)

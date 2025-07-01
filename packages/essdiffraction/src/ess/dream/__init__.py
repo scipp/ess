@@ -9,8 +9,15 @@ import importlib.metadata
 
 from .beamline import InstrumentConfiguration
 from .instrument_view import instrument_view
-from .io import load_geant4_csv, nexus
-from .workflow import DreamGeant4Workflow, default_parameters
+from .io import load_geant4_csv
+from .workflows import (
+    DreamGeant4MonitorHistogramWorkflow,
+    DreamGeant4MonitorIntegratedWorkflow,
+    DreamGeant4ProtonChargeWorkflow,
+    DreamGeant4Workflow,
+    DreamPowderWorkflow,
+    DreamWorkflow,
+)
 
 try:
     __version__ = importlib.metadata.version("essdiffraction")
@@ -20,11 +27,14 @@ except importlib.metadata.PackageNotFoundError:
 del importlib
 
 __all__ = [
+    'DreamGeant4MonitorHistogramWorkflow',
+    'DreamGeant4MonitorIntegratedWorkflow',
+    'DreamGeant4ProtonChargeWorkflow',
     'DreamGeant4Workflow',
+    'DreamPowderWorkflow',
+    'DreamWorkflow',
     'InstrumentConfiguration',
     '__version__',
-    'default_parameters',
     'instrument_view',
     'load_geant4_csv',
-    'nexus',
 ]

@@ -10,8 +10,7 @@ import scipp as sc
 import scipp.testing
 import scippnexus as snx
 
-from ess.dream import data, load_geant4_csv
-from ess.dream.io.geant4 import LoadGeant4Workflow
+from ess.dream import DreamGeant4ProtonChargeWorkflow, data, load_geant4_csv
 from ess.powder.types import Filename, NeXusComponent, NeXusDetectorName, SampleRun
 
 
@@ -176,18 +175,12 @@ def test_load_geant4_csv_sans_has_expected_coords(file):
     assert "position" in sans.coords
 
 
-def test_geant4_in_pipeline(file_path, file):
-    pipeline = LoadGeant4Workflow()
-    pipeline[Filename[SampleRun]] = file_path
-    pipeline[NeXusDetectorName] = NeXusDetectorName("mantle")
-    pipeline[NeXusComponent[snx.NXsample, SampleRun]] = sc.DataGroup(
-        position=sc.vector([0.0, 0.0, 0.0], unit="mm")
-    )
-    pipeline[NeXusComponent[snx.NXsource, SampleRun]] = sc.DataGroup(
-        position=sc.vector([-3.478, 0.0, -76550], unit="mm")
-    )
+def test_geant4_in_workflow(file_path, file):
+    wf = DreamGeant4ProtonChargeWorkflow()
+    wf[Filename[SampleRun]] = file_path
+    wf[NeXusDetectorName] = NeXusDetectorName("mantle")
 
-    detector = pipeline.compute(NeXusComponent[snx.NXdetector, SampleRun])['events']
+    detector = wf.compute(NeXusComponent[snx.NXdetector, SampleRun])['events']
     expected = load_geant4_csv(file)["instrument"]["mantle"]["events"]
     expected.coords["detector"] = sc.scalar("mantle")
     sc.testing.assert_identical(detector, expected)

@@ -3,10 +3,9 @@
 
 """Input/output for DREAM."""
 
-from . import nexus
 from .cif import prepare_reduced_tof_cif
 from .geant4 import load_geant4_csv
 
 providers = (prepare_reduced_tof_cif,)
 
-__all__ = ["load_geant4_csv", "nexus", "prepare_reduced_tof_cif", "providers"]
+__all__ = ["load_geant4_csv", "prepare_reduced_tof_cif", "providers"]
