@@ -51,7 +51,7 @@ TEST_DETECTOR_BANK_SIZES = {
 
 @pytest.fixture
 def generic_workflow() -> sciline.Pipeline:
-    return dream.DreamGenericWorkflow()
+    return dream.DreamWorkflow()
 
 
 @pytest.fixture(

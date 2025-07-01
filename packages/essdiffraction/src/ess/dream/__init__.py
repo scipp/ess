@@ -15,8 +15,8 @@ from .workflows import (
     DreamGeant4MonitorIntegratedWorkflow,
     DreamGeant4ProtonChargeWorkflow,
     DreamGeant4Workflow,
-    DreamGenericWorkflow,
     DreamPowderWorkflow,
+    DreamWorkflow,
 )
 
 try:
@@ -31,8 +31,8 @@ __all__ = [
     'DreamGeant4MonitorIntegratedWorkflow',
     'DreamGeant4ProtonChargeWorkflow',
     'DreamGeant4Workflow',
-    'DreamGenericWorkflow',
     'DreamPowderWorkflow',
+    'DreamWorkflow',
     'InstrumentConfiguration',
     '__version__',
     'instrument_view',
