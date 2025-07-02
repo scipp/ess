@@ -97,16 +97,15 @@ def simulated_diamond_sample(*, small: bool = False) -> str:
         If True, return a smaller version of the data file, with randomly selected rows.
         The small version of the file was created using the following code:
 
-        ```python
-        import numpy as np
-        import pandas as pd
+        .. code-block:: python
 
-        fname = dream.data.simulated_diamond_sample()
-        df = pd.read_csv(fname, sep='\t')
-        inds = np.sort(np.random.choice(len(df), 10_000, replace=False))
-        df.iloc[inds].to_csv('TEST_' + fname.split('/')[-1], sep='\t', index=False)
-        ```
+            import numpy as np
+            import pandas as pd
 
+            fname = dream.data.simulated_diamond_sample()
+            df = pd.read_csv(fname, sep='\t')
+            inds = np.sort(np.random.choice(len(df), 10_000, replace=False))
+            df.iloc[inds].to_csv('TEST_' + fname.split('/')[-1], sep='\t', index=False)
     """
     prefix = "TEST_" if small else ""
     return get_path(
@@ -141,15 +140,15 @@ def simulated_vanadium_sample(*, small: bool = False) -> str:
         If True, return a smaller version of the data file, with randomly selected rows.
         The small version of the file was created using the following code:
 
-        ```python
-        import numpy as np
-        import pandas as pd
+        .. code-block:: python
 
-        fname = dream.data.simulated_vanadium_sample()
-        df = pd.read_csv(fname, sep='\t')
-        inds = np.sort(np.random.choice(len(df), 10_000, replace=False))
-        df.iloc[inds].to_csv('TEST_' + fname.split('/')[-1], sep='\t', index=False)
-        ```
+            import numpy as np
+            import pandas as pd
+
+            fname = dream.data.simulated_vanadium_sample()
+            df = pd.read_csv(fname, sep='\t')
+            inds = np.sort(np.random.choice(len(df), 10_000, replace=False))
+            df.iloc[inds].to_csv('TEST_' + fname.split('/')[-1], sep='\t', index=False)
     """
     prefix = "TEST_" if small else ""
     return get_path(
@@ -177,15 +176,15 @@ def simulated_vanadium_sample_incoherent(*, small: bool = False) -> str:
         If True, return a smaller version of the data file, with randomly selected rows.
         The small version of the file was created using the following code:
 
-        ```python
-        import numpy as np
-        import pandas as pd
+        .. code-block:: python
 
-        fname = dream.data.simulated_vanadium_sample_incoherent()
-        df = pd.read_csv(fname, sep='\t')
-        inds = np.sort(np.random.choice(len(df), 10_000, replace=False))
-        df.iloc[inds].to_csv('TEST_' + fname.split('/')[-1], sep='\t', index=False)
-        ```
+            import numpy as np
+            import pandas as pd
+
+            fname = dream.data.simulated_vanadium_sample_incoherent()
+            df = pd.read_csv(fname, sep='\t')
+            inds = np.sort(np.random.choice(len(df), 10_000, replace=False))
+            df.iloc[inds].to_csv('TEST_' + fname.split('/')[-1], sep='\t', index=False)
     """
     prefix = "TEST_" if small else ""
     return get_path(f"DREAM_simple_pwd_workflow/{prefix}data_dream_vanadium.csv.zip")
@@ -215,15 +214,15 @@ def simulated_empty_can(*, small: bool = False) -> str:
         If True, return a smaller version of the data file, with randomly selected rows.
         The small version of the file was created using the following code:
 
-        ```python
-        import numpy as np
-        import pandas as pd
+        .. code-block:: python
 
-        fname = dream.data.simulated_empty_can()
-        df = pd.read_csv(fname, sep='\t')
-        inds = np.sort(np.random.choice(len(df), 10_000, replace=False))
-        df.iloc[inds].to_csv('TEST_' + fname.split('/')[-1], sep='\t', index=False)
-        ```
+            import numpy as np
+            import pandas as pd
+
+            fname = dream.data.simulated_empty_can()
+            df = pd.read_csv(fname, sep='\t')
+            inds = np.sort(np.random.choice(len(df), 10_000, replace=False))
+            df.iloc[inds].to_csv('TEST_' + fname.split('/')[-1], sep='\t', index=False)
     """
     prefix = "TEST_" if small else ""
     return get_path(
