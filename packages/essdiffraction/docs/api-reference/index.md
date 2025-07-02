@@ -10,6 +10,15 @@
    :toctree: ../generated/attributes
 
    providers
+
+.. autosummary::
+   :toctree: ../generated/classes
+
+   RunNormalization
+
+.. autosummary::
+   :toctree: ../generated/functions
+
    with_pixel_mask_filenames
 ```
 
@@ -21,16 +30,36 @@
    :template: module-template.rst
    :recursive:
 
+   calibration
    conversion
    correction
    filtering
    grouping
+   logging
+   masking
    smoothing
    transform
    types
 ```
 
 ## ESSdream
+
+### Workflows
+
+
+```{eval-rst}
+.. currentmodule:: ess.dream
+
+.. autosummary::
+   :toctree: ../generated/functions
+
+   DreamGeant4MonitorHistogramWorkflow
+   DreamGeant4MonitorIntegratedWorkflow
+   DreamGeant4ProtonChargeWorkflow
+   DreamGeant4Workflow
+   DreamPowderWorkflow
+   DreamWorkflow
+```
 
 ### Top-level functions
 
@@ -41,7 +70,18 @@
    :toctree: ../generated/functions
 
    instrument_view
-   DreamGeant4Workflow
+   load_geant4_csv
+```
+
+### Top-level classes
+
+```{eval-rst}
+.. currentmodule:: ess.dream
+
+.. autosummary::
+   :toctree: ../generated/classes
+
+   InstrumentConfiguration
 ```
 
 ### Submodules
@@ -52,6 +92,7 @@
    :template: module-template.rst
    :recursive:
 
+   beamline
    data
    diagnostics
    io
