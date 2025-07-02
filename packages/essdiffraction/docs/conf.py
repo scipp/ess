@@ -32,6 +32,7 @@ extensions = [
     "sphinx_autodoc_typehints",
     "sphinx_copybutton",
     "sphinx_design",
+    "sphinxcontrib.autodoc_pydantic",
     "sphinxcontrib.bibtex",
     "nbsphinx",
     "myst_parser",
@@ -70,6 +71,7 @@ autodoc_type_aliases = {
 
 intersphinx_mapping = {
     "numpy": ("https://numpy.org/doc/stable/", None),
+    "pydantic": ("https://docs.pydantic.dev/latest", None),
     "python": ("https://docs.python.org/3", None),
     # Scipp:
     "essreduce": ("https://scipp.github.io/essreduce", None),
