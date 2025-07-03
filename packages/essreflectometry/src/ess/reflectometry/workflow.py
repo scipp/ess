@@ -16,10 +16,10 @@ from ess.reflectometry.types import (
     DetectorRotation,
     Filename,
     RawChopper,
-    ReducibleData,
     RunType,
     SampleRotation,
     SampleRun,
+    UnscaledReducibleData,
 )
 
 
@@ -64,11 +64,11 @@ def with_filenames(
     mapped = wf.map(df)
 
     try:
-        wf[ReducibleData[runtype]] = mapped[ReducibleData[runtype]].reduce(
-            index=axis_name, func=_concatenate_event_lists
-        )
+        wf[UnscaledReducibleData[runtype]] = mapped[
+            UnscaledReducibleData[runtype]
+        ].reduce(index=axis_name, func=_concatenate_event_lists)
     except ValueError:
-        # ReducibleData[runtype] is independent of Filename[runtype]
+        # UnscaledReducibleData[runtype] is independent of Filename[runtype]
         pass
     try:
         wf[RawChopper[runtype]] = mapped[RawChopper[runtype]].reduce(
