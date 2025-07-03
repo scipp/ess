@@ -40,6 +40,7 @@ providers = (
 __all__ = [
     "RunNormalization",
     "__version__",
+    "calibration",
     "conversion",
     "correction",
     "filtering",

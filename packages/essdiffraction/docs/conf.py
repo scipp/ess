@@ -32,6 +32,7 @@ extensions = [
     "sphinx_autodoc_typehints",
     "sphinx_copybutton",
     "sphinx_design",
+    "sphinxcontrib.autodoc_pydantic",
     "sphinxcontrib.bibtex",
     "nbsphinx",
     "myst_parser",
@@ -69,9 +70,17 @@ autodoc_type_aliases = {
 }
 
 intersphinx_mapping = {
-    "python": ("https://docs.python.org/3", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
+    "pydantic": ("https://docs.pydantic.dev/latest", None),
+    "python": ("https://docs.python.org/3", None),
+    # Scipp:
+    "essreduce": ("https://scipp.github.io/essreduce", None),
+    "plopp": ("https://scipp.github.io/plopp", None),
+    "sciline": ("https://scipp.github.io/sciline", None),
     "scipp": ("https://scipp.github.io/", None),
+    "scippneutron": ("https://scipp.github.io/scippneutron", None),
+    "scippnexus": ("https://scipp.github.io/scippnexus", None),
+    "tof": ("https://scipp.github.io/tof", None),
 }
 
 # autodocs includes everything, even irrelevant API internals. autosummary
