@@ -28,8 +28,16 @@ class RawChopper(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
     """Chopper data loaded from nexus file."""
 
 
+class UnscaledReducibleData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """"""
+
+
 class ReducibleData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Event data with common coordinates added"""
+
+
+class ScalingFactorForOverlap(sciline.Scope[RunType, float], float):
+    """"""
 
 
 ReducedReference = NewType("ReducedReference", sc.DataArray)
