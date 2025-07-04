@@ -108,7 +108,8 @@ def DreamWorkflow(**kwargs) -> sciline.Pipeline:
     Parameters
     ----------
     kwargs:
-        Additional keyword arguments are forwarded to the base ``GenericTofWorkflow``.
+        Additional keyword arguments are forwarded to the base
+        :func:`GenericTofWorkflow`.
     """
     wf = GenericTofWorkflow(
         run_types=[SampleRun, VanadiumRun, EmptyCanRun],
@@ -152,7 +153,7 @@ def DreamPowderWorkflow(*, run_norm: RunNormalization, **kwargs) -> sciline.Pipe
     run_norm:
         Select how to normalize each run (sample, vanadium, etc.).
     kwargs:
-        Additional keyword arguments are forwarded to the base ``DreamWorkflow``.
+        Additional keyword arguments are forwarded to the base :func:`DreamWorkflow`.
 
     Returns
     -------
@@ -178,7 +179,7 @@ def DreamGeant4Workflow(*, run_norm: RunNormalization, **kwargs) -> sciline.Pipe
     run_norm:
         Select how to normalize each run (sample, vanadium, etc.).
     kwargs:
-        Additional keyword arguments are forwarded to the base ``DreamWorkflow``.
+        Additional keyword arguments are forwarded to the base :func:`DreamWorkflow`.
 
     Returns
     -------
