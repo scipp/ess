@@ -95,7 +95,7 @@ def _collect_reducer_software() -> ReducerSoftware:
     )
 
 
-def DreamWorkflow() -> sciline.Pipeline:
+def DreamWorkflow(**kwargs) -> sciline.Pipeline:
     """
     Dream generic workflow with default parameters.
     The workflow is based on the GenericTofWorkflow.
@@ -104,10 +104,17 @@ def DreamWorkflow() -> sciline.Pipeline:
 
     It can be used as is, or as a base for more specific workflows, such as
     ``DreamPowderWorkflow``.
+
+    Parameters
+    ----------
+    kwargs:
+        Additional keyword arguments are forwarded to the base
+        :func:`GenericTofWorkflow`.
     """
     wf = GenericTofWorkflow(
         run_types=[SampleRun, VanadiumRun, EmptyCanRun],
         monitor_types=[BunkerMonitor, CaveMonitor],
+        **kwargs,
     )
     wf[DetectorBankSizes] = DETECTOR_BANK_SIZES
     wf[NeXusName[BunkerMonitor]] = "monitor_bunker"
@@ -137,7 +144,7 @@ def default_parameters() -> dict:
     }
 
 
-def DreamPowderWorkflow(*, run_norm: RunNormalization) -> sciline.Pipeline:
+def DreamPowderWorkflow(*, run_norm: RunNormalization, **kwargs) -> sciline.Pipeline:
     """
     Dream powder workflow with default parameters.
 
@@ -145,13 +152,15 @@ def DreamPowderWorkflow(*, run_norm: RunNormalization) -> sciline.Pipeline:
     ----------
     run_norm:
         Select how to normalize each run (sample, vanadium, etc.).
+    kwargs:
+        Additional keyword arguments are forwarded to the base :func:`DreamWorkflow`.
 
     Returns
     -------
     :
         A workflow object for DREAM.
     """
-    wf = DreamWorkflow()
+    wf = DreamWorkflow(**kwargs)
     for provider in itertools.chain(powder_providers, _cif_providers):
         wf.insert(provider)
     insert_run_normalization(wf, run_norm)
@@ -161,7 +170,7 @@ def DreamPowderWorkflow(*, run_norm: RunNormalization) -> sciline.Pipeline:
     return wf
 
 
-def DreamGeant4Workflow(*, run_norm: RunNormalization) -> sciline.Pipeline:
+def DreamGeant4Workflow(*, run_norm: RunNormalization, **kwargs) -> sciline.Pipeline:
     """
     Workflow with default parameters for the Dream Geant4 simulation.
 
@@ -169,13 +178,15 @@ def DreamGeant4Workflow(*, run_norm: RunNormalization) -> sciline.Pipeline:
     ----------
     run_norm:
         Select how to normalize each run (sample, vanadium, etc.).
+    kwargs:
+        Additional keyword arguments are forwarded to the base :func:`DreamWorkflow`.
 
     Returns
     -------
     :
         A workflow object for DREAM.
     """
-    wf = DreamWorkflow()
+    wf = DreamWorkflow(**kwargs)
     for provider in itertools.chain(geant4_providers, powder_providers, _cif_providers):
         wf.insert(provider)
     insert_run_normalization(wf, run_norm)
