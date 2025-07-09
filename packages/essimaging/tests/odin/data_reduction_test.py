@@ -7,6 +7,7 @@ import sciline as sl
 import ess.odin.data  # noqa: F401
 from ess import odin
 from ess.imaging.types import (
+    CountsWavelength,
     DetectorData,
     DetectorTofData,
     DiskChoppers,
@@ -26,7 +27,7 @@ def workflow() -> sl.Pipeline:
     """
     Workflow for loading NeXus data.
     """
-    wf = odin.OdinWorkflow()
+    wf = odin.OdinBraggEdgeWorkflow()
     wf[Filename[SampleRun]] = odin.data.iron_simulation_sample_small()
     wf[Filename[OpenBeamRun]] = odin.data.iron_simulation_ob_small()
     wf[NeXusDetectorName] = "event_mode_detectors/timepix3"

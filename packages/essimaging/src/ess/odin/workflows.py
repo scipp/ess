@@ -5,21 +5,16 @@ Default parameters and workflow for Odin.
 """
 
 import sciline
-import scipp as sc
 
 from ess.reduce.time_of_flight.workflow import GenericTofWorkflow
 
 from ..imaging.conversion import providers as conversion_providers
 from ..imaging.types import (
-    # DistanceResolution,
-    # FrameMonitor0,
     BeamMonitor1,
     BeamMonitor2,
     BeamMonitor3,
     BeamMonitor4,
     DarkBackgroundRun,
-    # LookupTableRelativeErrorThreshold,
-    # LtotalRange,
     NeXusMonitorName,
     # NumberOfSimulatedNeutrons,
     OpenBeamRun,
