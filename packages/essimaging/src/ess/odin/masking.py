@@ -20,7 +20,7 @@ def apply_masks(
         else:
             coord = (
                 sc.midpoints(out.coords[coord_name])
-                if out.coords.is_edges(coord_name)
+                if out.coords.is_edges(coord_name, coord_name)
                 else out.coords[coord_name]
             )
             out.masks[coord_name] = mask(coord)
