@@ -10,7 +10,6 @@ from ess.imaging.types import (
     CountsWavelength,
     DetectorData,
     DetectorTofData,
-    DiskChoppers,
     Filename,
     NeXusDetectorName,
     OpenBeamRun,
@@ -29,9 +28,6 @@ def workflow() -> sl.Pipeline:
     wf[Filename[SampleRun]] = odin.data.iron_simulation_sample_small()
     wf[Filename[OpenBeamRun]] = odin.data.iron_simulation_ob_small()
     wf[NeXusDetectorName] = "event_mode_detectors/timepix3"
-    wf[DiskChoppers[SampleRun]] = odin.beamline.choppers(
-        source_position=wf.compute(DetectorData[SampleRun]).coords["source_position"]
-    )
     wf[TimeOfFlightLookupTableFilename] = odin.data.odin_tof_lookup_table()
     # Cache the lookup table
     wf[TimeOfFlightLookupTable] = wf.compute(TimeOfFlightLookupTable)
