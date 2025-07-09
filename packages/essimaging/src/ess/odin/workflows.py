@@ -16,13 +16,9 @@ from ..imaging.types import (
     BeamMonitor4,
     DarkBackgroundRun,
     NeXusMonitorName,
-    # NumberOfSimulatedNeutrons,
     OpenBeamRun,
-    # PulsePeriod,
-    # PulseStride,
     PulseStrideOffset,
     SampleRun,
-    # TimeResolution,
 )
 from .masking import providers as masking_providers
 
@@ -33,18 +29,8 @@ def default_parameters() -> dict:
         NeXusMonitorName[BeamMonitor2]: "beam_monitor_2",
         NeXusMonitorName[BeamMonitor3]: "beam_monitor_3",
         NeXusMonitorName[BeamMonitor4]: "beam_monitor_4",
-        # PulsePeriod: 1.0 / sc.scalar(14.0, unit="Hz"),
-        # PulseStride: 2,
         PulseStrideOffset: None,
-        # LookupTableRelativeErrorThreshold: 0.1,
-        # LtotalRange: (sc.scalar(55.0, unit="m"), sc.scalar(65.0, unit="m")),
-        # DistanceResolution: sc.scalar(0.1, unit="m"),
-        # TimeResolution: sc.scalar(250.0, unit='us'),
-        # NumberOfSimulatedNeutrons: 1_000_000,
     }
-
-
-# providers = (*conversion_providers, *masking_providers)
 
 
 def OdinWorkflow(**kwargs) -> sciline.Pipeline:
@@ -56,8 +42,6 @@ def OdinWorkflow(**kwargs) -> sciline.Pipeline:
         monitor_types=[BeamMonitor1, BeamMonitor2, BeamMonitor3, BeamMonitor4],
         **kwargs,
     )
-    # for provider in providers:
-    #     workflow.insert(provider)
     for key, param in default_parameters().items():
         workflow[key] = param
     return workflow

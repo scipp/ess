@@ -20,14 +20,7 @@ from ..imaging.types import (
 def default_parameters() -> dict:
     return {
         NeXusMonitorName[BeamMonitor1]: "monitor_1",
-        # PulsePeriod: 1.0 / sc.scalar(14.0, unit="Hz"),
-        # PulseStride: 1,
         PulseStrideOffset: None,
-        # LookupTableRelativeErrorThreshold: 1.0,
-        # LtotalRange: (sc.scalar(25.0, unit="m"), sc.scalar(35.0, unit="m")),
-        # DistanceResolution: sc.scalar(0.1, unit="m"),
-        # TimeResolution: sc.scalar(250.0, unit='us'),
-        # NumberOfSimulatedNeutrons: 200_000,
     }
 
 

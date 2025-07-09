@@ -19,8 +19,6 @@ from ess.imaging.types import (
     TimeOfFlightLookupTableFilename,
 )
 
-# from ess.reduce import time_of_flight
-
 
 @pytest.fixture(scope="module")
 def workflow() -> sl.Pipeline:

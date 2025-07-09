@@ -11,7 +11,6 @@ from ess.imaging.types import (
     CountsWavelength,
     DetectorData,
     DetectorTofData,
-    DiskChoppers,
     Filename,
     NeXusDetectorName,
     SampleRun,
@@ -38,11 +37,6 @@ def workflow() -> sl.Pipeline:
         sc.scalar(25.0, unit="m"),
         sc.scalar(35.0, unit="m"),
     )
-
-    # lut_wf[time_of_flight.SimulationResults] = lut_wf.compute(
-    #     time_of_flight.SimulationResults
-    # )
-
     # Cache the lookup table
     wf[TimeOfFlightLookupTable] = lut_wf.compute(TimeOfFlightLookupTable)
     return wf
