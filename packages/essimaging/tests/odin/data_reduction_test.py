@@ -9,15 +9,16 @@ from ess import odin
 from ess.imaging.types import (
     DetectorData,
     DetectorTofData,
-    DetectorWavelengthData,
     DiskChoppers,
     Filename,
     NeXusDetectorName,
     OpenBeamRun,
     SampleRun,
     TimeOfFlightLookupTable,
+    TimeOfFlightLookupTableFilename,
 )
-from ess.reduce import time_of_flight
+
+# from ess.reduce import time_of_flight
 
 
 @pytest.fixture(scope="module")
@@ -25,13 +26,14 @@ def workflow() -> sl.Pipeline:
     """
     Workflow for loading NeXus data.
     """
-    wf = odin.OdinWorkflow(tof_lut_provider=time_of_flight.TofLutProvider.TOF)
+    wf = odin.OdinWorkflow()
     wf[Filename[SampleRun]] = odin.data.iron_simulation_sample_small()
     wf[Filename[OpenBeamRun]] = odin.data.iron_simulation_ob_small()
     wf[NeXusDetectorName] = "event_mode_detectors/timepix3"
     wf[DiskChoppers[SampleRun]] = odin.beamline.choppers(
         source_position=wf.compute(DetectorData[SampleRun]).coords["source_position"]
     )
+    wf[TimeOfFlightLookupTableFilename] = odin.data.odin_tof_lookup_table()
     # Cache the lookup table
     wf[TimeOfFlightLookupTable] = wf.compute(TimeOfFlightLookupTable)
     return wf
@@ -63,6 +65,6 @@ def test_can_compute_time_of_flight(workflow, run_type):
 
 @pytest.mark.parametrize("run_type", [SampleRun, OpenBeamRun])
 def test_can_compute_wavelength(workflow, run_type):
-    da = workflow.compute(DetectorWavelengthData[run_type])
+    da = workflow.compute(CountsWavelength[run_type])
 
     assert "wavelength" in da.bins.coords

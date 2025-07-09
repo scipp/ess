@@ -8,8 +8,8 @@ import scippneutron as scn
 
 from .types import (
     CoordTransformGraph,
+    CountsWavelength,
     DetectorTofData,
-    DetectorWavelengthData,
     RunType,
 )
 
@@ -29,7 +29,7 @@ def make_coordinate_transform_graph() -> CoordTransformGraph:
 def compute_detector_wavelength(
     tof_data: DetectorTofData[RunType],
     graph: CoordTransformGraph,
-) -> DetectorWavelengthData[RunType]:
+) -> CountsWavelength[RunType]:
     """
     Compute the wavelength of neutrons detected by the detector.
 
@@ -40,7 +40,7 @@ def compute_detector_wavelength(
     graph:
         Graph of coordinate transformations.
     """
-    return DetectorWavelengthData[RunType](
+    return CountsWavelength[RunType](
         tof_data.transform_coords("wavelength", graph=graph)
     )
 
