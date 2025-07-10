@@ -27,7 +27,7 @@ def workflow() -> sl.Pipeline:
     wf = tbl.TblWorkflow()
     wf[Filename[SampleRun]] = tbl.data.tutorial_sample_data()
 
-    lut_wf = time_of_flight.TofLutWorkflow()
+    lut_wf = time_of_flight.TofLookupTableWorkflow()
     lut_wf[time_of_flight.DiskChoppers] = {}
     lut_wf[time_of_flight.SourcePosition] = sc.vector([0, 0, 0], unit="m")
     lut_wf[time_of_flight.NumberOfSimulatedNeutrons] = 200_000
