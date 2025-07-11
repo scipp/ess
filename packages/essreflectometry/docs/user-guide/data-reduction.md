@@ -1,21 +1,21 @@
 # Focused reflectometry data reduction
 
-The goal of the reflectometry data reduction is to compute the sample reflectivity $R(Q)$ as a function of the momentum transfer $Q$.
+The goal of the reflectometry data reduction is to compute the reflectivity $R(Q)$ of the sample as a function of the momentum transfer $Q$.
 
 Based on [J. Stahn, A. Glavic, Focusing neutron reflectometry: Implementation and experience on the TOF-reflectometer Amor](#reference).
 
 
 ## Preliminaries
 
-The detector data consists of a list $EV$ of neutron detector events.
-For each neutron event in the list we know its wavelength $\lambda$ and the pixel number $j$ of the detector pixel that it hit.
+The detector data consists of a list $EV$ of detected neutron events.
+Lets say that for each event in the list we know its wavelength $\lambda$ and the pixel number $j$ of the detector pixel that it hit.
 The detector pixel positions are known and so is the position and the orientation of the sample.
 From this information we can compute the reflection angle $\theta$, and the momentum transfer $Q$ caused by the interaction with the sample.
 
-The purpose of this text is not to describe how the event coordinates $Q$ and $\theta$ are derived from the raw event data and the geometry information, so for now just take those relations for given.
+The purpose of this text is not to describe how the event coordinates wavelengt, $Q$ and $\theta$ are derived from the raw detector data and the instrument geometry, so for now just take those for given.
 For more details see the implementations for the respective instruments [Amor] and [Estia].
 
-To simplify the description it is assumed that the sample- and reference measurements were made over the same length of time, and it is assumed the neutron intensity from the source did not vary between the two measurements.
+To simplify the description it is assumed that the sample- and reference measurements were made over the same length of time, and it is assumed the brightness of the source did not change between the measurements.
 
 
 ## Model of event intensity in the detector
@@ -26,10 +26,10 @@ I_{\text{sam}}(\lambda, j) = F(\theta(\lambda, j, \mu_{\text{sam}}), w_{\text{sa
 $$ (model)
 where $I_{\text{sam}}(\lambda, j)$ represents the expected number of neutrons detected in the $j$ pixel of the detector per unit of wavelength at the wavelength value $\lambda$. $I_{\text{ideal}}$ represents the expected number of neutrons detected if the sample was a perfect reflector and large enough so that the footprint of the focused beam on the sample was small compared to the sample. $F(\theta, w)$ is the fraction of the beam that hits the sample. It depends on the incidence angle $\theta$ and on the size of the sample represented by $w,$ and $\mu_{\text{sam}}$ is the sample rotation.
 
-The model does not hold for any $\lambda,j$. To make this explicit, let $M_{sam}$ represent the region of $\lambda,j$  where the model is expected to hold.
+The model does not hold for any $\lambda,j$. For example, there might be a region in the detector where we can see part of the direct beam. To make this explicit, let $M_{sam}$ represent the region of $\lambda,j$  where the model is expected to hold (the "region of interest").
 
-The ideal intensity is estimated from a reference measurement on a neutron supermirror.
-How it is computed will be described later, for now assume it is known.
+The ideal intensity $I_{ideal}$ will be estimated from a reference measurement on a neutron supermirror.
+How that is done will be described in more detail later, for now assume it is a known quantity.
 
 ## Estimating $R(Q)$
 Move $F$ to the left-hand-side of equation {eq}`model` and integrate over all $\lambda, j\in M$ contributing to the $Q$-bin $[q_{i}, q_{i+1}]$
@@ -45,7 +45,7 @@ $$
 $$
 for $Q_{i+\frac{1}{2}} \in [q_{i}, q_{i+1}]$.
 
-For the integral to make sense $M\sub M_{sam}$, but there might be other constraints limiting $M$ more, for now we leave it undefined.
+For the integral to make sense the region of interest $M$ has to be contained in the region where {eq}`model` holds, $M\sub M_{sam}$, but there might be other constraints limiting the region of interest $M$ even more, so it is left undefined for now.
 
 
 ## The reference intensity $I_{\text{ideal}}$
@@ -70,7 +70,7 @@ For this integral to make sense $M\sub M_{ref}$, so now we have an additional co
 ## Estimating intensities from detector counts
 
 The number of neutron counts in the detector is a Poisson process where the expected number of neutrons per pixel and unit of wavelength are the measurement intensities $I_{sam}$ and $I_{ref}$ defined above.
-The expected number of counts can be estimated by the empirically observed count:
+The expected intensity can be estimated by the measured intensity:
 $$
 I_{measured}(Q_{i+\frac{1}{2}}) = \int_{M\cap Q(\lambda, \theta(\lambda, j, \mu_{\text{sam}})) \in [q_{i}, q_{i+1}]} \frac{I_{\text{sam}}(\lambda, j)}{F(\theta(\lambda, j, \mu_{\text{sam}}), w_{\text{sam}})} d\lambda \ dj = \\
  \approx
