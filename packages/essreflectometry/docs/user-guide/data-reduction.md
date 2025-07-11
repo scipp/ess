@@ -12,7 +12,7 @@ Lets say that for each event in the list we know its wavelength $\lambda$ and th
 The detector pixel positions are known and so is the position and the orientation of the sample.
 From this information we can compute the reflection angle $\theta$, and the momentum transfer $Q$ caused by the interaction with the sample.
 
-The purpose of this text is not to describe how the event coordinates wavelengt, $Q$ and $\theta$ are derived from the raw detector data and the instrument geometry, so for now just take those for given.
+The purpose of this text is not to describe how the event coordinates wavelength, $Q$ and $\theta$ are derived from the raw detector data and the instrument geometry, so for now just take those for given.
 For more details see the implementations for the respective instruments [Amor] and [Estia].
 
 To simplify the description it is assumed that the sample- and reference measurements were made over the same length of time, and it is assumed the brightness of the source did not change between the measurements.
