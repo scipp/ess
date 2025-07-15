@@ -8,8 +8,7 @@ from collections.abc import Iterable
 import sciline
 
 from ess.reduce import time_of_flight as reduce_time_of_flight
-from ess.reduce.time_of_flight.types import (
-    DetectorLtotal,
+from ess.reduce.time_of_flight.lut import (
     DistanceResolution,
     LookupTableRelativeErrorThreshold,
     LtotalRange,
@@ -18,6 +17,7 @@ from ess.reduce.time_of_flight.types import (
     SimulationResults,
     TimeResolution,
 )
+from ess.reduce.time_of_flight.types import DetectorLtotal
 
 from ..types import (
     DataAtSample,
@@ -39,20 +39,19 @@ def TofWorkflow(
     *,
     run_types: Iterable[sciline.typing.Key],
     monitor_types: Iterable[sciline.typing.Key],
-    tof_lut_provider: reduce_time_of_flight.TofLutProvider,
 ) -> sciline.Pipeline:
     workflow = reduce_time_of_flight.GenericTofWorkflow(
         run_types=run_types,
         monitor_types=monitor_types,
-        tof_lut_provider=tof_lut_provider,
     )
     for provider in providers:
         workflow.insert(provider)
-    if tof_lut_provider in (
-        reduce_time_of_flight.TofLutProvider.MCSTAS,
-        reduce_time_of_flight.TofLutProvider.TOF,
-    ):
-        workflow.insert(compute_tof_lookup_table)
+    return workflow
+
+
+def TofLookupTableWorkflow() -> sciline.Pipeline:
+    workflow = reduce_time_of_flight.lut.TofLookupTableWorkflow()
+    workflow.insert(compute_tof_lookup_table)
     return workflow
 
 
@@ -71,7 +70,7 @@ def compute_tof_lookup_table(
     This is a wrapper around :func:`ess.reduce.time_of_flight.compute_tof_lookup_table`
     for indirect geometry spectrometers.
     """
-    return reduce_time_of_flight.eto_to_tof.compute_tof_lookup_table(
+    return reduce_time_of_flight.lut.make_tof_lookup_table(
         simulation=simulation,
         ltotal_range=LtotalRange(l1_range),
         distance_resolution=distance_resolution,
@@ -104,7 +103,6 @@ def detector_time_of_flight_data(
     )
     # This is time-of-flight at the sample.
     result.bins.coords['sample_tof'] = result.bins.coords.pop('tof')
-    del result.bins.coords['event_time_offset']
     del result.bins.coords['event_time_zero']
     return result
 

@@ -5,7 +5,7 @@
 #
 #    requirements upgrade
 #
-certifi==2025.4.26
+certifi==2025.7.14
     # via requests
 charset-normalizer==3.4.2
     # via requests
@@ -23,9 +23,11 @@ pluggy==1.6.0
     # via pytest
 pooch==1.8.2
     # via -r basetest.in
-pytest==8.3.5
+pygments==2.19.2
+    # via pytest
+pytest==8.4.1
     # via -r basetest.in
-requests==2.32.3
+requests==2.32.4
     # via pooch
-urllib3==2.4.0
+urllib3==2.5.0
     # via requests
