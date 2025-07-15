@@ -17,6 +17,7 @@ def _make_pooch():
         version=_version,
         registry={
             "tbl_sample_data_2025-03.hdf": "md5:12db6bc06721278b3abe47992eac3e77",
+            "TBL-tof-lookup-table-no-choppers.h5": "md5:8bc98fac0ee64fc8f5decf509c75bafe",  # noqa: E501
         },
     )
 
@@ -39,3 +40,11 @@ def get_path(name: str, unzip: bool = False) -> str:
 def tutorial_sample_data() -> str:
     """ """
     return get_path("tbl_sample_data_2025-03.hdf")
+
+
+def tbl_tof_lookup_table_no_choppers() -> str:
+    """
+    TBL TOF lookup table without choppers.
+    This file is used to convert the neutron arrival time to time-of-flight.
+    """
+    return get_path("TBL-tof-lookup-table-no-choppers.h5")
