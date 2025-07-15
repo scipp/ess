@@ -24,7 +24,7 @@ beautifulsoup4==4.13.4
     #   pydata-sphinx-theme
 bleach[css]==6.2.0
     # via nbconvert
-certifi==2025.4.26
+certifi==2025.7.14
     # via requests
 charset-normalizer==3.4.2
     # via requests
@@ -108,7 +108,7 @@ psutil==7.0.0
     # via ipykernel
 pydata-sphinx-theme==0.16.1
     # via -r docs.in
-pyzmq==26.4.0
+pyzmq==27.0.0
     # via
     #   ipykernel
     #   jupyter-client
@@ -116,11 +116,11 @@ referencing==0.36.2
     # via
     #   jsonschema
     #   jsonschema-specifications
-requests==2.32.3
+requests==2.32.4
     # via
     #   pooch
     #   sphinx
-rpds-py==0.25.1
+rpds-py==0.26.0
     # via
     #   jsonschema
     #   referencing
@@ -167,7 +167,7 @@ tornado==6.5.1
     #   jupyter-client
 tqdm==4.67.1
     # via -r docs.in
-urllib3==2.4.0
+urllib3==2.5.0
     # via requests
 webencodings==0.5.1
     # via
