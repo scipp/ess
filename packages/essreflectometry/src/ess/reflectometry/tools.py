@@ -2,7 +2,7 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 from collections.abc import Mapping, Sequence
 from itertools import chain
-from typing import Any
+from typing import Any, NewType
 
 import numpy as np
 import sciline
@@ -13,7 +13,6 @@ import scipy.optimize as opt
 from ess.reflectometry.types import (
     Filename,
     QBins,
-    # ReducibleData,
     ReflectivityOverQ,
     SampleRun,
     ScalingFactorForOverlap,
@@ -167,6 +166,10 @@ def _interpolate_on_qgrid(curves, grid):
     )
 
 
+CriticalEdgeKey = NewType('CriticalEdgeKey', None)
+"""A unique key used to store a 'fake' critical edge in a workflow collection."""
+
+
 def scale_reflectivity_curves_to_overlap(
     wf_collection: Sequence[sc.DataArray],
     critical_edge_interval: tuple[sc.Variable, sc.Variable] | None = None,
@@ -202,22 +205,29 @@ def scale_reflectivity_curves_to_overlap(
     :
         A list of scaled reflectivity curves and a list of the scaling factors.
     '''
-    # if critical_edge_interval is not None:
-    #     # Find q bins with the lowest Q start point
-    #     qmin = min(
-    #         wf.compute(QBins).min() for wf in wf_collection.values())
-    #     q = next(iter(wf_collection.values())).compute(QBins)
-    #     N = (
-    #         ((q >= critical_edge_interval[0]) & (q < critical_edge_interval[1]))
-    #         .sum()
-    #         .value
-    #     )
-    #     edge = sc.DataArray(
-    #         data=sc.ones(dims=('Q',), shape=(N,), with_variances=True),
-    #         coords={'Q': sc.linspace('Q', *critical_edge_interval, N + 1)},
-    #     )
-    #     curves, factors = scale_reflectivity_curves_to_overlap([edge, *curves])
-    #     return curves[1:], factors[1:]
+    if critical_edge_interval is not None:
+        # Find q bins with the lowest Q start point
+        q = min(
+            (wf.compute(QBins) for wf in wf_collection.values()),
+            key=lambda q_: q_.min(),
+        )
+        N = (
+            ((q >= critical_edge_interval[0]) & (q < critical_edge_interval[1]))
+            .sum()
+            .value
+        )
+        edge = sc.DataArray(
+            data=sc.ones(dims=('Q',), shape=(N,), with_variances=True),
+            coords={'Q': sc.linspace('Q', *critical_edge_interval, N + 1)},
+        )
+        wfc = wf_collection.copy()
+        underlying_wf = next(iter(wfc.values()))
+        edge_wf = underlying_wf.copy()
+        edge_wf[ReflectivityOverQ] = edge
+        wfc.add(CriticalEdgeKey, edge_wf)
+        return scale_reflectivity_curves_to_overlap(
+            wfc, cache_intermediate_results=cache_intermediate_results
+        )
 
     wfc = wf_collection.copy()
     if cache_intermediate_results:
@@ -225,17 +235,28 @@ def scale_reflectivity_curves_to_overlap(
             UnscaledReducibleData[SampleRun]
         )
 
-    curves = [r.hist() for r in wfc.compute(ReflectivityOverQ).values()]
+    reflectivities = wfc.compute(ReflectivityOverQ)
 
-    if len({c.data.unit for c in curves}) != 1:
+    # First sort the dict of reflectivities by the Q min value
+    curves = {
+        k: v.hist() if v.bins is not None else v
+        for k, v in sorted(
+            reflectivities.items(), key=lambda item: item[1].coords['Q'].min().value
+        )
+    }
+    # Now place the critical edge at the beginning, if it exists
+    if CriticalEdgeKey in curves.keys():
+        curves = {CriticalEdgeKey: curves[CriticalEdgeKey]} | curves
+
+    if len({c.data.unit for c in curves.values()}) != 1:
         raise ValueError('The reflectivity curves must have the same unit')
-    if len({c.coords['Q'].unit for c in curves}) != 1:
+    if len({c.coords['Q'].unit for c in curves.values()}) != 1:
         raise ValueError('The Q-coordinates must have the same unit for each curve')
 
-    qgrid = _create_qgrid_where_overlapping([c.coords['Q'] for c in curves])
+    qgrid = _create_qgrid_where_overlapping([c.coords['Q'] for c in curves.values()])
 
-    r = _interpolate_on_qgrid(map(sc.values, curves), qgrid).values
-    v = _interpolate_on_qgrid(map(sc.variances, curves), qgrid).values
+    r = _interpolate_on_qgrid(map(sc.values, curves.values()), qgrid).values
+    v = _interpolate_on_qgrid(map(sc.variances, curves.values()), qgrid).values
 
     def cost(scaling_factors):
         scaling_factors = np.concatenate([[1.0], scaling_factors])[:, None]
@@ -252,14 +273,13 @@ def scale_reflectivity_curves_to_overlap(
     scaling_factors = (1.0, *map(float, sol.x))
 
     wfc[ScalingFactorForOverlap[SampleRun]] = dict(
-        zip(wfc.keys(), scaling_factors, strict=True)
+        zip(curves.keys(), scaling_factors, strict=True)
     )
 
+    if CriticalEdgeKey in wfc.keys():
+        wfc.remove(CriticalEdgeKey)
+
     return wfc
-    # return [
-    #     scaling_factor * curve
-    #     for scaling_factor, curve in zip(scaling_factors, curves, strict=True)
-    # ], scaling_factors
 
 
 def combine_curves(
