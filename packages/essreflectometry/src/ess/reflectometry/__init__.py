@@ -12,6 +12,7 @@ except importlib.metadata.PackageNotFoundError:
 
 from . import conversions, corrections, figures, normalization, orso
 from .load import load_reference, save_reference
+from .tools import batch_processor
 
 providers = (
     *corrections.providers,
@@ -31,9 +32,23 @@ see :py:data:`essreflectometry.amor.providers`.
 
 del importlib
 
-
 __all__ = [
+    "__version__",
+    "batch_processor",
+    "conversions",
+    "corrections",
     "figures",
     "load_reference",
+    "normalization",
+    "orso",
+    "providers",
     "save_reference",
 ]
+
+# __all__ = [
+#     "__version__",
+#     "batch_processor",
+#     "figures",
+#     "load_reference",
+#     "save_reference",
+# ]
