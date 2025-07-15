@@ -8,22 +8,12 @@ from collections.abc import Iterable
 import sciline
 
 from ess.reduce import time_of_flight as reduce_time_of_flight
-from ess.reduce.time_of_flight.lut import (
-    DistanceResolution,
-    LookupTableRelativeErrorThreshold,
-    LtotalRange,
-    PulsePeriod,
-    PulseStride,
-    SimulationResults,
-    TimeResolution,
-)
 from ess.reduce.time_of_flight.types import DetectorLtotal
 
 from ..types import (
     DataAtSample,
     DetectorData,
     DetectorTofData,
-    L1Range,
     MonitorCoordTransformGraph,
     MonitorData,
     MonitorLtotal,
@@ -47,38 +37,6 @@ def TofWorkflow(
     for provider in providers:
         workflow.insert(provider)
     return workflow
-
-
-def TofLookupTableWorkflow() -> sciline.Pipeline:
-    workflow = reduce_time_of_flight.lut.TofLookupTableWorkflow()
-    workflow.insert(compute_tof_lookup_table)
-    return workflow
-
-
-def compute_tof_lookup_table(
-    simulation: SimulationResults,
-    l1_range: L1Range,
-    distance_resolution: DistanceResolution,
-    time_resolution: TimeResolution,
-    pulse_period: PulsePeriod,
-    pulse_stride: PulseStride,
-    error_threshold: LookupTableRelativeErrorThreshold,
-) -> TimeOfFlightLookupTable:
-    """Compute a lookup table for time-of-flight as a function of distance and
-    time-of-arrival.
-
-    This is a wrapper around :func:`ess.reduce.time_of_flight.compute_tof_lookup_table`
-    for indirect geometry spectrometers.
-    """
-    return reduce_time_of_flight.lut.make_tof_lookup_table(
-        simulation=simulation,
-        ltotal_range=LtotalRange(l1_range),
-        distance_resolution=distance_resolution,
-        time_resolution=time_resolution,
-        pulse_period=pulse_period,
-        pulse_stride=pulse_stride,
-        error_threshold=error_threshold,
-    )
 
 
 def detector_time_of_flight_data(
