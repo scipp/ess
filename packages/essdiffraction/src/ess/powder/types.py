@@ -38,16 +38,9 @@ DetectorBankSizes = reduce_t.DetectorBankSizes
 
 DetectorTofData = tof_t.DetectorTofData
 MonitorTofData = tof_t.MonitorTofData
-PulsePeriod = tof_t.PulsePeriod
-PulseStride = tof_t.PulseStride
 PulseStrideOffset = tof_t.PulseStrideOffset
-DistanceResolution = tof_t.DistanceResolution
-TimeResolution = tof_t.TimeResolution
-LtotalRange = tof_t.LtotalRange
-LookupTableRelativeErrorThreshold = tof_t.LookupTableRelativeErrorThreshold
 TimeOfFlightLookupTable = tof_t.TimeOfFlightLookupTable
 TimeOfFlightLookupTableFilename = tof_t.TimeOfFlightLookupTableFilename
-SimulationResults = tof_t.SimulationResults
 
 SampleRun = reduce_t.SampleRun
 VanadiumRun = reduce_t.VanadiumRun
