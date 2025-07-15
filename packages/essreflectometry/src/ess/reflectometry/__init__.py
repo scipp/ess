@@ -44,11 +44,3 @@ __all__ = [
     "providers",
     "save_reference",
 ]
-
-# __all__ = [
-#     "__version__",
-#     "batch_processor",
-#     "figures",
-#     "load_reference",
-#     "save_reference",
-# ]
