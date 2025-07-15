@@ -21,21 +21,21 @@ author = 'Scipp contributors'
 html_show_sourcelink = True
 
 extensions = [
-    "sphinx.ext.autodoc",
-    "sphinx.ext.autosummary",
-    "sphinx.ext.doctest",
-    "sphinx.ext.githubpages",
-    "sphinx.ext.intersphinx",
-    "sphinx.ext.mathjax",
-    "sphinx.ext.napoleon",
-    "sphinx.ext.viewcode",
-    "sphinx_autodoc_typehints",
-    "sphinx_copybutton",
-    "sphinx_design",
-    "sphinxcontrib.autodoc_pydantic",
-    "sphinxcontrib.bibtex",
-    "nbsphinx",
-    "myst_parser",
+    'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.doctest',
+    'sphinx.ext.githubpages',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.mathjax',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.viewcode',
+    'sphinx_autodoc_typehints',
+    'sphinx_copybutton',
+    'sphinx_design',
+    'sphinxcontrib.autodoc_pydantic',
+    'sphinxcontrib.bibtex',
+    'nbsphinx',
+    'myst_parser',
 ]
 
 try:
