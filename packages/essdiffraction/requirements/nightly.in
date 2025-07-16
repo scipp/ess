@@ -5,7 +5,7 @@ dask>=2022.1.0
 graphviz
 numpy>=1.25
 pythreejs>=2.4.1
-pandas>=2.2.2
+pandas>=2.1.2
 pooch>=1.5
 pytest>=7.0
 ipywidgets>=8.1.7
