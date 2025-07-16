@@ -21,6 +21,7 @@ To simplify the description it is assumed that the sample- and reference measure
 ## Model of event intensity in the detector
 
 The reflectivity of the sample is related to the intensity of neutron counts in the detector by the model
+
 $$
 I_{\text{sam}}(\lambda, j) = F(\theta(\lambda, j, \mu_{\text{sam}}), w_{\text{sam}}) \cdot R(Q(\lambda, \theta(\lambda, j, \mu_{\text{sam}}))) \cdot I_{\text{ideal}}(\lambda, j)
 $$ (model)
@@ -33,6 +34,7 @@ How that is done will be described in more detail later, for now assume it is a 
 
 ## Estimating $R(Q)$
 Move $F$ to the left-hand-side of equation {eq}`model` and integrate over all $\lambda, j\in M$ contributing to the $Q$-bin $[q_{i}, q_{i+1}]$
+
 $$
 \int_{M \cap Q(\lambda, \theta(\lambda, j, \mu_{\text{sam}})) \in [q_{i}, q_{i+1}]} \frac{I_{\text{sam}}(\lambda, j)}{F(\theta(\lambda, j, \mu_{\text{sam}}), w_{\text{sam}})} d\lambda \ dj = \\
 \int_{M \cap Q(\lambda, \theta(\lambda, j, \mu_{\text{sam}})) \in [q_{i}, q_{i+1}]}  I_{\text{ideal}}(\lambda, j) R(Q(\lambda, \theta(\lambda, j, \mu_{\text{sam}}))) d\lambda  \ dj.
@@ -45,7 +47,7 @@ $$
 $$
 for $Q_{i+\frac{1}{2}} \in [q_{i}, q_{i+1}]$.
 
-For the integral to make sense the region of interest $M$ has to be contained in the region where {eq}`model` holds, $M\sub M_{sam}$, but there might be other constraints limiting the region of interest $M$ even more, so it is left undefined for now.
+For the integral to make sense the region of interest $M$ has to be contained in the region where {eq}`model` holds, $M\subs M_{sam}$, but there might be other constraints limiting the region of interest $M$ even more, so it is left undefined for now.
 
 
 ## The reference intensity $I_{\text{ideal}}$
@@ -60,6 +62,7 @@ but in this case $R_{\text{supermirror}}(Q)$ is known.
 As before, the model does not hold for any $\lambda,j$. Let $M_{ref}$ represent the region of $\lambda,j$  where the model is expected to hold. $M_{ref}$ is typically not the same as $M_{sam}$. For example, if the supermirror reflectivity is not known for all $Q$ we are not going to have a model for the reference intensity at the $\lambda,j$ corresponding to those $Q$ and that is reflected in $M_{ref}$ but not in $M_{sam}$.
 
 Using the definition in {eq}`reflectivity`
+
 $$
 I_{\text{ideal}}(Q_{i+\frac{1}{2}}) = \int_{M \cap Q(\lambda, \theta(\lambda, j, \mu_{\text{sam}})) \in [q_{i}, q_{i+1}]} \frac{I_{\text{ref}}(\lambda, j)}{F(\theta(\lambda, j, \mu_{\text{ref}}), w_{\text{ref}}) R_{\text{supermirror}}(Q(\lambda, \theta(\lambda, j, \mu_{\text{ref}})))}
  d\lambda  \ dj.
@@ -71,6 +74,7 @@ For this integral to make sense $M\sub M_{ref}$, so now we have an additional co
 
 The number of neutron counts in the detector is a Poisson process where the expected number of neutrons per pixel and unit of wavelength are the measurement intensities $I_{sam}$ and $I_{ref}$ defined above.
 The expected intensity can be estimated by the measured intensity:
+
 $$
 I_{measured}(Q_{i+\frac{1}{2}}) = \int_{M\cap Q(\lambda, \theta(\lambda, j, \mu_{\text{sam}})) \in [q_{i}, q_{i+1}]} \frac{I_{\text{sam}}(\lambda, j)}{F(\theta(\lambda, j, \mu_{\text{sam}}), w_{\text{sam}})} d\lambda \ dj = \\
  \approx
@@ -79,12 +83,14 @@ $$
 where $EV_{\text{sam}}$ refers to the event list from the sample experiment.
 
 The sum is compound Poisson distributed and for such random variables the variance is well approximated by the sum of squared summands
+
 $$
 V\bigg[ \sum_{\substack{k \in EV_{\text{sam}} \\ Q(\lambda_{k}, \theta(\lambda_{k}, j_{k}, \mu_{\text{sam}})) \in [q_{i}, q_{i+1}]\\ (\lambda_k, j_k)\in M}} \frac{1}{F(\theta(\lambda_{k}, j_{k}, \mu_{\text{sam}}), w_{\text{sam}})} \bigg] \approx
 \sum_{\substack{k \in EV_{\text{sam}} \\ Q(\lambda_{k}, \theta(\lambda_{k}, j_{k}, \mu_{\text{sam}})) \in [q_{i}, q_{i+1}]\\ (\lambda_k, j_k)\in M}} \frac{1}{F(\theta(\lambda_{k}, j_{k}, \mu_{\text{sam}}), w_{\text{sam}})^2}.
 $$
 
 The same estimates are used to approximate the ideal intensity:
+
 $$
 I_{\text{ideal}}(Q_{i+\frac{1}{2}}) \approx \sum_{\substack{k \in EV_{\text{ref}} \\ Q(\lambda_{k}, \theta(\lambda_{k}, j_{k}, \mu_{\text{sam}})) \in [q_{i}, q_{i+1}]\\ (\lambda_k, j_k)\in M}} \frac{1}{F(\theta(\lambda_{k}, j_{k}, \mu_{\text{ref}}), w_{\text{ref}}) R_{\text{supermirror}}(Q(\lambda_{k}, \theta(\lambda_{k}, j_{k}, \mu_{\text{ref}})))}
 $$
