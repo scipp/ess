@@ -76,13 +76,12 @@ The number of neutron counts in the detector is a Poisson process where the expe
 The expected intensity can be estimated by the measured intensity:
 
 $$
-I_{measured}(Q_{i+\frac{1}{2}}) = \int_{M\cap Q(\lambda, \theta(\lambda, j, \mu_{\text{sam}})) \in [q_{i}, q_{i+1}]} \frac{I_{\text{sam}}(\lambda, j)}{F(\theta(\lambda, j, \mu_{\text{sam}}), w_{\text{sam}})} d\lambda \ dj = \\
- \approx
-\sum_{\substack{k \in EV_{\text{sam}} \\ Q(\lambda_{k}, \theta(\lambda_{k}, j_{k}, \mu_{\text{sam}})) \in [q_{i}, q_{i+1}]\\ (\lambda_k, j_k)\in M}} \frac{1}{F(\theta(\lambda_{k}, j_{k}, \mu_{\text{sam}}), w_{\text{sam}})}
+I_{measured}(Q_{i+\frac{1}{2}}) = \int_{M\cap Q(\lambda, \theta(\lambda, j, \mu_{\text{sam}})) \in [q_{i}, q_{i+1}]} \frac{I_{\text{sam}}(\lambda, j)}{F(\theta(\lambda, j, \mu_{\text{sam}}), w_{\text{sam}})} d\lambda \ dj \\
+ \approx \sum_{\substack{k \in EV_{\text{sam}} \\ Q(\lambda_{k}, \theta(\lambda_{k}, j_{k}, \mu_{\text{sam}})) \in [q_{i}, q_{i+1}]\\ (\lambda_k, j_k)\in M}} \frac{1}{F(\theta(\lambda_{k}, j_{k}, \mu_{\text{sam}}), w_{\text{sam}})}
 $$
 where $EV_{\text{sam}}$ refers to the event list from the sample experiment.
 
-The sum is compound Poisson distributed and for such random variables the variance is well approximated by the sum of squared summands
+The sum is compound Poisson distributed and for such random variables the variance can be estimated as the sum of squared summands
 
 $$
 V\bigg[ \sum_{\substack{k \in EV_{\text{sam}} \\ Q(\lambda_{k}, \theta(\lambda_{k}, j_{k}, \mu_{\text{sam}})) \in [q_{i}, q_{i+1}]\\ (\lambda_k, j_k)\in M}} \frac{1}{F(\theta(\lambda_{k}, j_{k}, \mu_{\text{sam}}), w_{\text{sam}})} \bigg] \approx
