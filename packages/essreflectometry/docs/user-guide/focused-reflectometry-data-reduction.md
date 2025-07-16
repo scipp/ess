@@ -8,7 +8,7 @@ Based on [J. Stahn, A. Glavic, Focusing neutron reflectometry: Implementation an
 ## Preliminaries
 
 The detector data consists of a list $EV$ of detected neutron events.
-Lets say that for each event in the list we know its wavelength $\lambda$ and the pixel number $j$ of the detector pixel that it hit.
+Let's say that for each event in the list we know its wavelength $\lambda$ and the pixel number $j$ of the detector pixel that it hit.
 The detector pixel positions are known and so is the position and the orientation of the sample.
 From this information we can compute the reflection angle $\theta$, and the momentum transfer $Q$ caused by the interaction with the sample.
 
