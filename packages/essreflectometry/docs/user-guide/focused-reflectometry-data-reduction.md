@@ -2,7 +2,7 @@
 
 The goal of the reflectometry data reduction is to compute the reflectivity $R(Q)$ of the sample as a function of the momentum transfer $Q$.
 
-Based on [J. Stahn, A. Glavic, Focusing neutron reflectometry: Implementation and experience on the TOF-reflectometer Amor](#reference).
+Based on :cite:`STAHN201644`.
 
 
 ## Preliminaries
