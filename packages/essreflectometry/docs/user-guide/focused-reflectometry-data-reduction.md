@@ -2,7 +2,7 @@
 
 The goal of the reflectometry data reduction is to compute the reflectivity $R(Q)$ of the sample as a function of the momentum transfer $Q$.
 
-Based on :cite:`STAHN201644`.
+Based on {cite}`STAHN201644`.
 
 
 ## Target audience
