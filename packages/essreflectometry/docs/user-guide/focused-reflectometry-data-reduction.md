@@ -158,17 +158,3 @@ can be pre-computed because it doesn't depend on $\mu_{\text{sam}}$.
 But unlike before $I_{k+\frac{1}{2},z}$ now has a much more manageable size, about 64x smaller than the first attempt.
 This makes it comfortably smaller than the sample measurement.
 
-
-## Reference
-
-```
-J. Stahn, A. Glavic,
-Focusing neutron reflectometry: Implementation and experience on the TOF-reflectometer Amor,
-Nuclear Instruments and Methods in Physics Research Section A: Accelerators, Spectrometers, Detectors and Associated Equipment,
-Volume 821,
-2016,
-Pages 44-54,
-ISSN 0168-9002,
-https://doi.org/10.1016/j.nima.2016.03.007.
-(https://www.sciencedirect.com/science/article/pii/S0168900216300250)
-```
