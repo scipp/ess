@@ -76,13 +76,12 @@ The number of neutron counts in the detector is a Poisson process where the expe
 The expected intensity can be estimated by the measured intensity:
 
 $$
-I_{measured}(Q_{i+\frac{1}{2}}) = \int_{M\cap Q(\lambda, \theta(\lambda, j, \mu_{\text{sam}})) \in [q_{i}, q_{i+1}]} \frac{I_{\text{sam}}(\lambda, j)}{F(\theta(\lambda, j, \mu_{\text{sam}}), w_{\text{sam}})} d\lambda \ dj = \\
- \approx
-\sum_{\substack{k \in EV_{\text{sam}} \\ Q(\lambda_{k}, \theta(\lambda_{k}, j_{k}, \mu_{\text{sam}})) \in [q_{i}, q_{i+1}]\\ (\lambda_k, j_k)\in M}} \frac{1}{F(\theta(\lambda_{k}, j_{k}, \mu_{\text{sam}}), w_{\text{sam}})}
+I_{measured}(Q_{i+\frac{1}{2}}) = \int_{M\cap Q(\lambda, \theta(\lambda, j, \mu_{\text{sam}})) \in [q_{i}, q_{i+1}]} \frac{I_{\text{sam}}(\lambda, j)}{F(\theta(\lambda, j, \mu_{\text{sam}}), w_{\text{sam}})} d\lambda \ dj \\
+ \approx \sum_{\substack{k \in EV_{\text{sam}} \\ Q(\lambda_{k}, \theta(\lambda_{k}, j_{k}, \mu_{\text{sam}})) \in [q_{i}, q_{i+1}]\\ (\lambda_k, j_k)\in M}} \frac{1}{F(\theta(\lambda_{k}, j_{k}, \mu_{\text{sam}}), w_{\text{sam}})}
 $$
 where $EV_{\text{sam}}$ refers to the event list from the sample experiment.
 
-The sum is compound Poisson distributed and for such random variables the variance is well approximated by the sum of squared summands
+The sum is compound Poisson distributed and for such random variables the variance can be estimated by the sum of squared summands
 
 $$
 V\bigg[ \sum_{\substack{k \in EV_{\text{sam}} \\ Q(\lambda_{k}, \theta(\lambda_{k}, j_{k}, \mu_{\text{sam}})) \in [q_{i}, q_{i+1}]\\ (\lambda_k, j_k)\in M}} \frac{1}{F(\theta(\lambda_{k}, j_{k}, \mu_{\text{sam}}), w_{\text{sam}})} \bigg] \approx
@@ -94,7 +93,7 @@ The same estimates are used to approximate the ideal intensity:
 $$
 I_{\text{ideal}}(Q_{i+\frac{1}{2}}) \approx \sum_{\substack{k \in EV_{\text{ref}} \\ Q(\lambda_{k}, \theta(\lambda_{k}, j_{k}, \mu_{\text{sam}})) \in [q_{i}, q_{i+1}]\\ (\lambda_k, j_k)\in M}} \frac{1}{F(\theta(\lambda_{k}, j_{k}, \mu_{\text{ref}}), w_{\text{ref}}) R_{\text{supermirror}}(Q(\lambda_{k}, \theta(\lambda_{k}, j_{k}, \mu_{\text{ref}})))}
 $$
-The above two expressions together with {eq}`reflectivity` lets us express $R(Q_{i+{\frac{1}{2}}})$ entirely in terms of the neutron counts in the detector.
+The above two expressions together with {eq}`reflectivity` lets us express $R(Q_{i+{\frac{1}{2}}})$ and its uncertainty in terms of the neutron counts in the detector.
 
 ## More efficient evaluation of the reference intensity
 The above expression for the reference intensity is cumbersome to compute because it is a sum over the reference measurement event list, and the reference measurement is large compared to the sample measurement.
