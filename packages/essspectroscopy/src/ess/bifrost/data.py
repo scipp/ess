@@ -41,7 +41,12 @@ def simulated_elastic_incoherent_with_phonon() -> str:
 
 
 def tof_lookup_table_simulation() -> str:
-    """Time-of-flight lookup table for the simulated BIFROST data."""
+    """Time-of-flight lookup table for the simulated BIFROST data.
+
+    This table was computed with [tof](https://github.com/scipp/tof)
+    using
+    with ``NumberOfSimulatedNeutrons = 5_000_000``.
+    """
     return get_path("BIFROST-simulation-tof-lookup-table.h5")
 
 

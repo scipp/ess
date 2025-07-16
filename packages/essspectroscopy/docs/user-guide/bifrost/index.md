@@ -26,3 +26,13 @@ hidden:
 
 bifrost-reduction
 ```
+
+## Advanced Tools
+
+```{toctree}
+---
+maxdepth: 1
+---
+
+bifrost-make-tof-lookup-table
+```
