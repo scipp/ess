@@ -32,6 +32,7 @@ extensions = [
     'sphinx_autodoc_typehints',
     'sphinx_copybutton',
     'sphinx_design',
+    "sphinxcontrib.bibtex",
     'nbsphinx',
     'myst_parser',
 ]
@@ -274,3 +275,8 @@ linkcheck_ignore = [
 nbsphinx_execute_arguments = [
     "--Session.metadata=scipp_sphinx_build=True",
 ]
+
+
+# -- Options for bibtex ----------------------------------------------------
+bibtex_bibfiles = ["bibliography.bib"]
+bibtex_reference_style = "label"

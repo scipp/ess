@@ -24,3 +24,12 @@ Simply download the archive, unzip and view locally in a web browser.
 ## Source code and development
 
 ESSreflectometry is hosted and developed [on GitHub](https://github.com/scipp/essreflectometry).
+
+
+```{toctree}
+---
+hidden:
+---
+
+bibliography
+```
