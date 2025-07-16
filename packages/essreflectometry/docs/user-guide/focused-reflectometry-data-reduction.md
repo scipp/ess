@@ -5,10 +5,16 @@ The goal of the reflectometry data reduction is to compute the reflectivity $R(Q
 Based on :cite:`STAHN201644`.
 
 
+## Target audience
+
+The target audience of this text is anyone who wants to know the reasoning behind the data reduction workflow implemented for the focusing reflectometry instruments ESTIA at ESS and AMOR at PSI.
+It is not necessary to read this to be able to use the workflow, for that we recommend the tutorial notebooks as they will give a much more practically useful introduction, but if you are going to develop new features it is probably good to at least skim it.
+
+
 ## Preliminaries
 
-The detector data consists of a list $EV$ of detected neutron events.
-Let's say that for each event in the list we know its wavelength $\lambda$ and the pixel number $j$ of the detector pixel that it hit.
+The detector data is a list $EV$ of detected neutron events.
+For each event in the list we know its wavelength $\lambda$ and the pixel number $j$ of the detector pixel that it hit.
 The detector pixel positions are known and so is the position and the orientation of the sample.
 From this information we can compute the reflection angle $\theta$, and the momentum transfer $Q$ caused by the interaction with the sample.
 
@@ -32,19 +38,20 @@ The model does not hold for any $\lambda,j$. For example, there might be a regio
 The ideal intensity $I_{ideal}$ will be estimated from a reference measurement on a neutron supermirror.
 How that is done will be described in more detail later, for now assume it is a known quantity.
 
+
 ## Estimating $R(Q)$
 Move $F$ to the left-hand-side of equation {eq}`model` and integrate over all $\lambda, j\in M$ contributing to the $Q$-bin $[q_{i}, q_{i+1}]$
 
 $$
 \int_{M \cap Q(\lambda, \theta(\lambda, j, \mu_{\text{sam}})) \in [q_{i}, q_{i+1}]} \frac{I_{\text{sam}}(\lambda, j)}{F(\theta(\lambda, j, \mu_{\text{sam}}), w_{\text{sam}})} d\lambda \ dj = \\
 \int_{M \cap Q(\lambda, \theta(\lambda, j, \mu_{\text{sam}})) \in [q_{i}, q_{i+1}]}  I_{\text{ideal}}(\lambda, j) R(Q(\lambda, \theta(\lambda, j, \mu_{\text{sam}}))) d\lambda  \ dj.
-$$ (reflectivity)
+$$
 Notice that if the $Q$ binning is sufficiently fine then $R(Q)$ is approximately constant in the integration region.
 Assuming the binning is fine enough $R(Q)$ can be moved outside the integral and isolated so that
 
 $$
  R(Q_{i+\frac{1}{2}}) \approx \frac{\int_{M \cap Q(\lambda, j, \mu_{\text{sam}}) \in [q_{i}, q_{i+1}]} \frac{I_{\text{sam}}(\lambda, j)}{F(\theta(\lambda, j, \mu_{\text{sam}}), w_{\text{sam}})} d\lambda \ dj }{\int_{M \cap Q(\lambda, \theta(\lambda, j, \mu_{\text{sam}})) \in [q_{i}, q_{i+1}]}  I_{\text{ideal}}(\lambda, j) d\lambda  \ dj} =: \frac{I_{measured}(Q_{i+\frac{1}{2}})}{I_{\text{ideal}}(Q_{i+\frac{1}{2}})}
-$$
+$$ (reflectivity)
 for $Q_{i+\frac{1}{2}} \in [q_{i}, q_{i+1}]$.
 
 For the integral to make sense the region of interest $M$ has to be contained in the region where {eq}`model` holds, $M\subset M_{sam}$, but there might be other constraints limiting the region of interest $M$ even more, so it is left undefined for now.
@@ -93,7 +100,8 @@ The same estimates are used to approximate the ideal intensity:
 $$
 I_{\text{ideal}}(Q_{i+\frac{1}{2}}) \approx \sum_{\substack{k \in EV_{\text{ref}} \\ Q(\lambda_{k}, \theta(\lambda_{k}, j_{k}, \mu_{\text{sam}})) \in [q_{i}, q_{i+1}]\\ (\lambda_k, j_k)\in M}} \frac{1}{F(\theta(\lambda_{k}, j_{k}, \mu_{\text{ref}}), w_{\text{ref}}) R_{\text{supermirror}}(Q(\lambda_{k}, \theta(\lambda_{k}, j_{k}, \mu_{\text{ref}})))}
 $$
-The above two expressions together with {eq}`reflectivity` lets us express $R(Q_{i+{\frac{1}{2}}})$ and its uncertainty in terms of the neutron counts in the detector.
+The above expressions and {eq}`reflectivity` lets us express $R(Q_{i+{\frac{1}{2}}})$ and its uncertainty in terms of the neutron counts in the detector.
+
 
 ## More efficient evaluation of the reference intensity
 The above expression for the reference intensity is cumbersome to compute because it is a sum over the reference measurement event list, and the reference measurement is large compared to the sample measurement.
@@ -131,7 +139,7 @@ In the next section it is described specifically for the Amor instrument.
 
 ### Evaluating the reference intensity for the Amor instrument
 
-The Amor detector has three logical dimensions, `blade`, `wire` and `stripe`. It happens to be the case that $\theta(\lambda, j)$ is almost the same for all $j$ belonging to the same `stripe` of the detector.
+The Amor detector has three logical dimensions, `blade`, `wire` and `strip`. It happens to be the case that $\theta(\lambda, j)$ is almost the same for all $j$ belonging to the same `strip` of the detector.
 We can express this as
 
 $$
