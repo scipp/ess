@@ -47,7 +47,7 @@ $$
 $$
 for $Q_{i+\frac{1}{2}} \in [q_{i}, q_{i+1}]$.
 
-For the integral to make sense the region of interest $M$ has to be contained in the region where {eq}`model` holds, $M\subs M_{sam}$, but there might be other constraints limiting the region of interest $M$ even more, so it is left undefined for now.
+For the integral to make sense the region of interest $M$ has to be contained in the region where {eq}`model` holds, $M\subset M_{sam}$, but there might be other constraints limiting the region of interest $M$ even more, so it is left undefined for now.
 
 
 ## The reference intensity $I_{\text{ideal}}$
@@ -67,7 +67,7 @@ $$
 I_{\text{ideal}}(Q_{i+\frac{1}{2}}) = \int_{M \cap Q(\lambda, \theta(\lambda, j, \mu_{\text{sam}})) \in [q_{i}, q_{i+1}]} \frac{I_{\text{ref}}(\lambda, j)}{F(\theta(\lambda, j, \mu_{\text{ref}}), w_{\text{ref}}) R_{\text{supermirror}}(Q(\lambda, \theta(\lambda, j, \mu_{\text{ref}})))}
  d\lambda  \ dj.
 $$
-For this integral to make sense $M\sub M_{ref}$, so now we have an additional constraint on $M$ to keep in mind.
+For this integral to make sense $M\subset M_{ref}$, so now we have an additional constraint on $M$ to keep in mind.
 
 
 ## Estimating intensities from detector counts
