@@ -23,10 +23,10 @@
 
 # {transparent}`ESSimaging`
 
-<span style="font-size:1.2em;font-style:italic;color:var(--pst-color-text-muted)">
+<div style="font-size:1.2em;font-style:italic;color:var(--pst-color-text-muted);text-align:center;">
   Imaging data reduction for the European Spallation Source
   </br></br>
-</span>
+</div>
 
 ## Imaging Data Reduction Examples
 ````{card}
