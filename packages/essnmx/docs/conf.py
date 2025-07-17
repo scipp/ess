@@ -21,19 +21,20 @@ author = 'Scipp contributors'
 html_show_sourcelink = True
 
 extensions = [
-    "sphinx.ext.autodoc",
-    "sphinx.ext.autosummary",
-    "sphinx.ext.doctest",
-    "sphinx.ext.githubpages",
-    "sphinx.ext.intersphinx",
-    "sphinx.ext.mathjax",
-    "sphinx.ext.napoleon",
-    "sphinx.ext.viewcode",
-    "sphinx_autodoc_typehints",
-    "sphinx_copybutton",
-    "sphinx_design",
-    "nbsphinx",
-    "myst_parser",
+    'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.doctest',
+    'sphinx.ext.githubpages',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.mathjax',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.viewcode',
+    'sphinx_autodoc_typehints',
+    'sphinx_copybutton',
+    'sphinx_design',
+    'sphinxcontrib.autodoc_pydantic',
+    'nbsphinx',
+    'myst_parser',
 ]
 
 try:
@@ -263,5 +264,8 @@ doctest_default_flags = (
 
 linkcheck_ignore = [
     # Specific lines in Github blobs cannot be found by linkcheck.
-    r"https?://github\.com/.*?/blob/[a-f0-9]+/.+?#",
+    r'https?://github\.com/.*?/blob/[a-f0-9]+/.+?#',
+    # Linkcheck seems to be denied access by some DOI resolvers.
+    # Since DOIs are supposed to be permanent, we don't need to check them.'
+    r'https://doi\.org/',
 ]
