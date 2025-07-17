@@ -31,19 +31,19 @@ requires-python = ">=3.10"
 # Run 'tox -e deps' after making changes here. This will update requirement files.
 # Make sure to list one dependency per line.
 dependencies = [
-  "dask",
+  "dask>=2022.1.0",
   "essreduce>=24.03.0",
   "graphviz",
-  "plopp",
+  "plopp>=24.7.0",
   "sciline>=24.06.0",
   "scipp>=23.8.0",
   "scippnexus>=23.12.0",
-  "pooch",
-  "pandas",
-  "gemmi",
-  "defusedxml",
-  "bitshuffle",
-  "msgpack",
+  "pooch>=1.5",
+  "pandas>=2.1.2",
+  "gemmi>=0.6.6",
+  "defusedxml>=0.7.1",
+  "bitshuffle>=0.5.2",
+  "msgpack>=1.0.8",
 ]
 
 dynamic = ["version"]
@@ -53,7 +53,7 @@ essnmx_reduce_mcstas = "ess.nmx.mcstas.executables:main"
 
 [project.optional-dependencies]
 test = [
-    "pytest",
+    "pytest>=7.0",
 ]
 
 [project.urls]
