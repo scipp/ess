@@ -48,7 +48,7 @@ json5==0.12.0
     # via jupyterlab-server
 jsonpointer==3.0.0
     # via jsonschema
-jsonschema[format-nongpl]==4.24.0
+jsonschema[format-nongpl]==4.24.1
     # via
     #   jupyter-events
     #   jupyterlab-server
