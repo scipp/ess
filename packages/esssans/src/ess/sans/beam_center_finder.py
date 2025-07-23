@@ -37,6 +37,60 @@ def _xy_extrema(pos: sc.Variable) -> sc.Variable:
     return sc.concat([x_min, x_max, y_min, y_max], dim='extremes')
 
 
+def _find_beam_center(
+    data,
+    sample_holder_radius=None,
+    sample_holder_arm_width=None,
+):
+    if sample_holder_radius is None:
+        sample_holder_radius = sc.scalar(0.05, unit='m')
+    if sample_holder_arm_width is None:
+        sample_holder_arm_width = sc.scalar(0.015, unit='m')
+
+    m = data.copy()
+    m.masks.clear()
+    s = m.bins.sum()
+
+    for i in range(20):
+        c = (s.coords['position'] * sc.values(s)).sum() / sc.values(s).sum()
+        d = s.coords['position'] - c.data
+
+        outer = 0.9 * min(
+            sc.abs(d.fields.x.min()),
+            sc.abs(d.fields.x.max()),
+            sc.abs(d.fields.y.min()),
+            sc.abs(d.fields.y.max()),
+        )
+        s.masks['_outer'] = d.fields.x**2 + d.fields.y**2 > outer**2
+        s.masks['_inner'] = d.fields.x**2 + d.fields.y**2 < sample_holder_radius**2
+
+        if i > 10:
+            s.coords['th'] = sc.where(
+                d.fields.x > sc.scalar(0.0, unit='m'),
+                sc.atan2(y=d.fields.y, x=d.fields.x),
+                sc.scalar(sc.constants.pi.value, unit='rad')
+                - sc.atan2(y=d.fields.y, x=-d.fields.x),
+            )
+            h = s.drop_masks(['_arm'] if '_arm' in s.masks else []).hist(th=100)
+            th = s.coords['th'][np.argmin(h.values)]
+
+            slope = sc.tan(th) / 2
+            s.masks['_arm'] = (
+                d.fields.y < slope * d.fields.x + sample_holder_arm_width
+            ) & (d.fields.y > slope * d.fields.x - sample_holder_arm_width)
+    return c.data
+
+
+def beam_center_from_center_of_mass_alternative(workflow) -> BeamCenter:
+    try:
+        beam_center = workflow.compute(BeamCenter)
+    except sciline.UnsatisfiedRequirement:
+        beam_center = sc.vector([0.0, 0.0, 0.0], unit='m')
+        workflow[BeamCenter] = beam_center
+    data = workflow.compute(MaskedData[SampleRun])
+    return _find_beam_center(data)
+
+
 def beam_center_from_center_of_mass(workflow: sciline.Pipeline) -> BeamCenter:
     """
     Estimate the beam center via the center-of-mass of the data counts.
