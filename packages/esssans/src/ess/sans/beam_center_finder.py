@@ -60,7 +60,7 @@ def _find_beam_center(
     The "inner" mask radius is supplied by the caller.
     The "arm" mask slope is determined by the direction of minimum intensity
     around the current beam center guess, the "arm" mask width is an argument
-    supplied by the user.
+    supplied by the caller.
     '''
     m = data.copy()
     m.masks.clear()
