@@ -42,6 +42,26 @@ def _find_beam_center(
     sample_holder_radius,
     sample_holder_arm_width,
 ):
+    '''
+    Each iteration the center of mass of the remaining intensity is computed
+    and assigned to be the current beam center guess ``c``.
+    Then three symmetrical masks are created to make sure that the remaining intensity
+    distribution does not extend outside of the detector and that the sample holder
+    does not make the remaining intensity asymmetrical.
+
+    The three masks are:
+
+      - one "outer" circular mask with radius less than the minimal distance
+        from the current beam center guess to the border of the detector
+      - one "inner" circular mask with radius larger than the sample holder
+      - one "arm" rectangular mask with width wider than the sample holder arm
+
+    The "outer" mask radius is found from the detector size.
+    The "inner" mask radius is supplied by the caller.
+    The "arm" mask slope is determined by the direction of minimum intensity
+    around the current beam center guess, the "arm" mask width is an argument
+    supplied by the user.
+    '''
     m = data.copy()
     m.masks.clear()
     s = m.bins.sum()
@@ -81,6 +101,50 @@ def beam_center_from_center_of_mass_alternative(
     sample_holder_radius=None,
     sample_holder_arm_width=None,
 ) -> BeamCenter:
+    """
+    Estimate the beam center via the center-of-mass of the data counts.
+
+    We are assuming the intensity distribution is symmetric around the beam center.
+    Even if the intensity distribution is symmetric around the beam center
+    the intensity distribution in the detector might not be, because
+
+        - the detector has a finite extent,
+        - and there is a sample holder covering part of the detector.
+
+    To deal with the limited size of the detector a mask can be applied that is small
+    enough so that the the remaining intensity is entirely inside the detector.
+    To deal with the sample holder we can mask the region of the detector that the
+    sample holder covers.
+
+    But to preserve the symmetry of the intensity around the beam center the masks
+    also need to be symmetical around the beam center.
+    The problem is, the beam center is unknown.
+    However, if the beam center was known to us, and we applied symmetrical masks
+    that covered the regions of the detector where the intensity distribution is
+    asymmetrical,
+    then the center of mass of the remaining intensity would equal the beam center.
+    Conversely, if we apply symmetrical masks around a point that is not the beam center
+    the center of mass of the remaining intensity will (likely) not equal the original
+    point.
+    This suggests the beam center can be found using a fixed point iteration where each
+    iteration we
+
+    1. Compute the center of mass of the remaining intensity and assign it to be our
+       current estimate of the beam center.
+    2. Create symmetrical masks around the current estimate of the beam center.
+    3. Repeat from 1. until convergence.
+
+    Parameters
+    ----------
+    workflow:
+        The reduction workflow to compute MaskedData[SampleRun].
+
+    Returns
+    -------
+    :
+        The beam center position as a vector.
+    """
+
     if sample_holder_radius is None:
         sample_holder_radius = sc.scalar(0.05, unit='m')
     if sample_holder_arm_width is None:
