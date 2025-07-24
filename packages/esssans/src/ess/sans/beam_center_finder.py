@@ -39,14 +39,9 @@ def _xy_extrema(pos: sc.Variable) -> sc.Variable:
 
 def _find_beam_center(
     data,
-    sample_holder_radius=None,
-    sample_holder_arm_width=None,
+    sample_holder_radius,
+    sample_holder_arm_width,
 ):
-    if sample_holder_radius is None:
-        sample_holder_radius = sc.scalar(0.05, unit='m')
-    if sample_holder_arm_width is None:
-        sample_holder_arm_width = sc.scalar(0.015, unit='m')
-
     m = data.copy()
     m.masks.clear()
     s = m.bins.sum()
@@ -72,23 +67,32 @@ def _find_beam_center(
                 - sc.atan2(y=d.fields.y, x=-d.fields.x),
             )
             h = s.drop_masks(['_arm'] if '_arm' in s.masks else []).hist(th=100)
-            th = s.coords['th'][np.argmin(h.values)]
+            th = h.coords['th'][np.argmin(h.values)]
 
-            slope = sc.tan(th) / 2
+            slope = sc.tan(th)
             s.masks['_arm'] = (
                 d.fields.y < slope * d.fields.x + sample_holder_arm_width
             ) & (d.fields.y > slope * d.fields.x - sample_holder_arm_width)
     return c.data
 
 
-def beam_center_from_center_of_mass_alternative(workflow) -> BeamCenter:
+def beam_center_from_center_of_mass_alternative(
+    workflow,
+    sample_holder_radius=None,
+    sample_holder_arm_width=None,
+) -> BeamCenter:
+    if sample_holder_radius is None:
+        sample_holder_radius = sc.scalar(0.05, unit='m')
+    if sample_holder_arm_width is None:
+        sample_holder_arm_width = sc.scalar(0.02, unit='m')
+
     try:
         beam_center = workflow.compute(BeamCenter)
     except sciline.UnsatisfiedRequirement:
         beam_center = sc.vector([0.0, 0.0, 0.0], unit='m')
         workflow[BeamCenter] = beam_center
     data = workflow.compute(MaskedData[SampleRun])
-    return _find_beam_center(data)
+    return _find_beam_center(data, sample_holder_radius, sample_holder_arm_width)
 
 
 def beam_center_from_center_of_mass(workflow: sciline.Pipeline) -> BeamCenter:
