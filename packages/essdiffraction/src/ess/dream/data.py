@@ -279,8 +279,9 @@ def tof_lookup_table_high_flux(bc: Literal[215, 240] = 215) -> str:
     match that of the simulated data (this has since been found to be non-optimal as it
     leads to time overlap between the two frames).
 
-    The notebook that was used to create the table can be found at
-    https://github.com/scipp/essdiffraction/blob/main/tools/dream-make-tof-lookup-table.ipynb
+    This table was computed using `Create a time-of-flight lookup table for DREAM
+    <../../user-guide/dream/dream-make-tof-lookup-table.rst>`_
+    with ``NumberOfSimulatedNeutrons = 5_000_000``.
 
     Parameters
     ----------
