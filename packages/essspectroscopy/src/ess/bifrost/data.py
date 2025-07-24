@@ -19,6 +19,7 @@ def _make_pooch():
             "computed_energy_data_simulated.h5": "md5:31b2444042935e99831c3c84a375ccae",
             "BIFROST-simulation-tof-lookup-table.h5": "md5:f2c12eb39d0750238805d0e5a5d561f7",  # noqa: E501
         },
+        retry_if_failed=3,
     )
 
 
