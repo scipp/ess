@@ -21,6 +21,7 @@ def _make_pooch():
             'README.md': 'md5:9e1beeb325f127d691a8d7882db3255d',
             'siemens_star.tiff': 'md5:0ba27c2daf745338959f5156a3b0a2c0',
             'resolving_power_test_target.tiff': 'md5:a5d414603797f4cc02fe7b2ae4d7aa48',
+            'tbl-orca-focussing.hdf.zip': 'md5:f365acd9ea45dd205c0b9398d163cfa4',
         },
     )
 
@@ -29,15 +30,19 @@ _pooch = _make_pooch()
 _pooch.fetch('README.md')
 
 
-def get_path(name: str) -> pathlib.Path:
+def get_path(name: str, unzip: bool = False) -> pathlib.Path:
     """
-    Return the path to a data file bundled with ess.imaging test helpers.
+    Return the path to a data file bundled with ess.imaging.
 
     This function only works with example data and cannot handle
     paths to custom files.
     """
+    if unzip:
+        path = _pooch.fetch(name, processor=pooch.Unzip())[0]
+    else:
+        path = _pooch.fetch(name)
 
-    return pathlib.Path(_pooch.fetch(name))
+    return pathlib.Path(path)
 
 
 def get_ymir_images_path() -> pathlib.Path:
@@ -78,3 +83,11 @@ def get_resolving_power_test_target_path() -> pathlib.Path:
     """
 
     return get_path('resolving_power_test_target.tiff')
+
+
+def get_tbl_orca_focussing_path() -> pathlib.Path:
+    """
+    Return the path to the TBL ORCA focussing HDF5 file.
+    """
+
+    return get_path('tbl-orca-focussing.hdf.zip', unzip=True)
