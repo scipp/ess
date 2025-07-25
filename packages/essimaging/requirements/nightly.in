@@ -6,6 +6,7 @@ graphviz
 tifffile
 pytest
 pooch
+scitiff
 scipp
 --index-url=https://pypi.anaconda.org/scipp-nightly-wheels/simple/
 --extra-index-url=https://pypi.org/simple
