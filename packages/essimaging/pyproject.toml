@@ -49,6 +49,7 @@ test = [
     "pytest",
     "pooch",
     "tof",
+    "scitiff",
 ]
 
 [project.urls]
