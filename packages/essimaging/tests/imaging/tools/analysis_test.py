@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
-import pytest
+# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 from scitiff.io import load_scitiff
 
@@ -40,7 +39,7 @@ def test_laplace_2d() -> None:
 
 def test_sharpness() -> None:
     da = load_scitiff(get_siemens_star_path())["image"]
-    sharp = img.tools.sharpness(da)
+    sharp = img.tools.sharpness(da, dims=('x', 'y'))
     assert sharp['t'][0] < sharp['t'][1]
     assert sharp['t'][0] > sharp['t'][2]
     assert sharp['t'][1] > sharp['t'][2]

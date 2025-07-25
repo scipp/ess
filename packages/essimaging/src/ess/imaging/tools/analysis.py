@@ -79,12 +79,14 @@ def laplace_2d(
         The dimensions of the image over which to compute the Laplace operator.
         Other dimensions will be preserved in the output.
     """
-    out = sc.zeros(sizes=image.sizes)
+    # if isinstance(image, sc.DataArray):
+    #     image = image.data
+
     kernel = [8] + ([-1] * 8)
     ii = np.repeat([0, -1, 1], 3)
     jj = np.tile([0, -1, 1], 3)
 
-    out[dims[0], 1:-1][dims[1], 1:-1] = sc.reduce(
+    lp2d = sc.reduce(
         (
             image[dims[0], (1 + j) : (image.sizes[dims[0]] - 1 + j)][
                 dims[1], (1 + i) : (image.sizes[dims[1]] - 1 + i)
@@ -93,6 +95,14 @@ def laplace_2d(
             for i, j, k in zip(ii, jj, kernel, strict=True)
         )
     ).sum()
+
+    # out = sc.zeros_like(lp2d)
+    out = (
+        sc.DataArray(data=sc.zeros(sizes=image.sizes, dtype=lp2d.dtype))
+        .assign_coords(image.coords)
+        .assign_masks(image.masks)
+    )
+    out[dims[0], 1:-1][dims[1], 1:-1] = lp2d
     return out
 
 
@@ -112,15 +122,11 @@ def _prime_factors(n):
 
 def _best_subset_product(factors, target):
     best_product = 1
-    # best_subset = []
-
     for r in range(1, len(factors) + 1):
         for combo in combinations(factors, r):
             prod = np.prod(combo)
             if abs(prod - target) < abs(best_product - target):
                 best_product = prod
-                # best_subset = combo
-
     return best_product
 
 
@@ -134,9 +140,8 @@ def sharpness(
     and summing the absolute values of the results over specified dimensions.
     The sharpness is a measure of the amount of detail in the image, with
     higher values indicating sharper images. The Laplace operator is used to
-    detect edges in the image, and the sum of the absolute values of the
-    Laplacian highlights areas of rapid intensity change, which are indicative
-    of sharp features.
+    detect edges in the image, and the variance of the Laplacian highlights areas of
+    rapid intensity change, which are indicative of sharp features.
 
     Parameters
     ----------
@@ -161,8 +166,6 @@ def sharpness(
                 factors = _prime_factors(image.sizes[dim])
                 best_product = _best_subset_product(factors, max_size)
                 sizes[dim] = image.sizes[dim] // best_product
-        print(f"Resampling sizes: {sizes}")
         image = resample(image, sizes=sizes)
 
-    lap = laplace_2d(image, dims=dims)
-    return sc.abs(lap).sum(dims) / np.prod([image.sizes[dim] for dim in dims])
+    return laplace_2d(image, dims=dims).var(dim=dims, ddof=1)
