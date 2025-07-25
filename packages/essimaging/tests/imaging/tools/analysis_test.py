@@ -34,12 +34,12 @@ def test_laplace_2d() -> None:
     da = load_scitiff(get_siemens_star_path())["image"]
     resampled = img.tools.resample(da, sizes={'x': 2, 'y': 2})
     laplacian = img.tools.laplace_2d(resampled, dims=('x', 'y'))
-    assert laplacian.sizes == da.sizes
+    assert laplacian.sizes == resampled.sizes
 
 
 def test_sharpness() -> None:
     da = load_scitiff(get_siemens_star_path())["image"]
     sharp = img.tools.sharpness(da, dims=('x', 'y'))
-    assert sharp['t'][0] < sharp['t'][1]
-    assert sharp['t'][0] > sharp['t'][2]
-    assert sharp['t'][1] > sharp['t'][2]
+    assert (sharp['t', 0] < sharp['t', 1]).value
+    assert (sharp['t', 0] > sharp['t', 2]).value
+    assert (sharp['t', 1] > sharp['t', 2]).value

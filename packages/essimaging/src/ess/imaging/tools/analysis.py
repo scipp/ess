@@ -96,7 +96,7 @@ def laplace_2d(
         )
     ).sum()
 
-    # out = sc.zeros_like(lp2d)
+    lp2d.unit = ""  # Laplacian is dimensionless
     out = (
         sc.DataArray(data=sc.zeros(sizes=image.sizes, dtype=lp2d.dtype))
         .assign_coords(image.coords)
