@@ -396,6 +396,7 @@ class ReflectometryBatchReductionGUI:
         self.set_table_height(self.runs_table)
         self.set_table_height(self.reduction_table)
         self.set_table_height(self.custom_reduction_table)
+
         self.set_table_colors(self.reduction_table)
         self.set_table_colors(self.custom_reduction_table)
         self.set_table_colors(self.reference_table)
@@ -406,56 +407,7 @@ class ReflectometryBatchReductionGUI:
             raise ValueError("Path is not set")
         return self._path
 
-    def __init__(self):
-        self.text_log = widgets.VBox([])
-        self.progress_log = widgets.VBox([])
-        self.plot_log = widgets.VBox([])
-        self._path = None
-        self.log("init")
-
-        self.results = {}
-
-        self.runs_table = DataGrid(
-            pd.DataFrame([]),
-            editable=True,
-            auto_fit_columns=True,
-            column_visibility={"key": False},
-            selection_mode="cell",
-            renderers=self.get_renderers_for_runs_table(),
-        )
-        self.reduction_table = DataGrid(
-            pd.DataFrame([]),
-            editable=True,
-            auto_fit_columns=True,
-            column_visibility={"key": False},
-            selection_mode="cell",
-            renderers=self.get_renderers_for_reduction_table(),
-        )
-        self.reference_table = DataGrid(
-            pd.DataFrame([]),
-            editable=True,
-            auto_fit_columns=True,
-            column_visibility={"key": False},
-            selection_mode="cell",
-            renderers=self.get_renderers_for_reference_table(),
-        )
-        self.custom_reduction_table = DataGrid(
-            pd.DataFrame([]),
-            editable=True,
-            auto_fit_columns=True,
-            column_visibility={"key": False},
-            selection_mode="cell",
-            renderers=self.get_renderers_for_custom_reduction_table(),
-        )
-
-        self.runs_table.on_cell_change(self.sync)
-        self.reduction_table.on_cell_change(self.sync)
-        self.reference_table.on_cell_change(self.sync)
-
-        self.custom_reduction_table.on_cell_change(
-            lambda _: self.sync_custom_reduction_table()
-        )
-
+    def _init_proposal_number_box(self):
         self.proposal_number_box = widgets.Text(
             value="",
             placeholder="Proposal number or file path",
@@ -487,6 +439,28 @@ class ReflectometryBatchReductionGUI:
         set_proposal_number_state("bad")
         self.proposal_number_box.observe(on_proposal_number_change, names='value')
 
+    def _init_runs_table_component(self):
+        self.run_number_min = widgets.IntText(
+            value=0, description='', layout=widgets.Layout(width='5em')
+        )
+        self.run_number_max = widgets.IntText(
+            value=9999, description='', layout=widgets.Layout(width='5em')
+        )
+        self.run_number_min.observe(self.sync, names='value')
+        self.run_number_max.observe(self.sync, names='value')
+        run_number_filter = widgets.HBox(
+            [self.run_number_min, widgets.Label("<=Run<="), self.run_number_max]
+        )
+        self.runs_table_component = widgets.VBox(
+            [
+                widgets.Label("Runs Table"),
+                run_number_filter,
+                self.runs_table,
+            ],
+            layout={"width": "35%"},
+        )
+
+    def _init_reduction_table_component(self):
         reduce_button = widgets.Button(description="Reduce")
         plot_button = widgets.Button(description="Plot")
 
@@ -542,71 +516,111 @@ class ReflectometryBatchReductionGUI:
         delete_row_button.on_click(delete_row)
         data_buttons = widgets.HBox([reduce_button, plot_button])
 
-        self.run_number_min = widgets.IntText(
-            value=0, description='', layout=widgets.Layout(width='5em')
+        self.reduction_table_component = widgets.VBox(
+            [
+                data_buttons,
+                widgets.VBox(
+                    [
+                        widgets.Label("Auto Reduction Table"),
+                        self.reduction_table,
+                    ],
+                    layout={'margin': '10px 0'},
+                ),
+                widgets.VBox(
+                    [
+                        widgets.Label("Manual Reduction Table"),
+                        widgets.HBox(
+                            [add_row_button, delete_row_button],
+                            layout={'margin': '5px 0'},
+                        ),
+                        self.custom_reduction_table,
+                    ],
+                    layout={'margin': '10px 0'},
+                ),
+            ],
+            layout={"width": "60%"},
         )
-        self.run_number_max = widgets.IntText(
-            value=9999, description='', layout=widgets.Layout(width='5em')
+
+    def _init_display_component(self):
+        self.progress_log = widgets.VBox([])
+        self.plot_log = widgets.VBox([])
+        self.display_component = widgets.VBox(
+            [
+                widgets.VBox(
+                    [widgets.Label("Progress"), self.progress_log],
+                    layout={'width': '100%', 'margin': '10px 0'},
+                ),
+                widgets.VBox(
+                    [widgets.Label("Plots"), self.plot_log],
+                    layout={'width': '100%', 'margin': '10px 0'},
+                ),
+            ]
         )
-        self.run_number_min.observe(self.sync, names='value')
-        self.run_number_max.observe(self.sync, names='value')
-        run_number_filter = widgets.HBox(
-            [self.run_number_min, widgets.Label("<=Run<="), self.run_number_max]
+
+    def __init__(self):
+        self.text_log = widgets.VBox([])
+        self._path = None
+        self.log("init")
+
+        self.results = {}
+
+        self.runs_table = DataGrid(
+            pd.DataFrame([]),
+            editable=True,
+            auto_fit_columns=True,
+            column_visibility={"key": False},
+            selection_mode="cell",
+            renderers=self.get_renderers_for_runs_table(),
         )
+        self.reduction_table = DataGrid(
+            pd.DataFrame([]),
+            editable=True,
+            auto_fit_columns=True,
+            column_visibility={"key": False},
+            selection_mode="cell",
+            renderers=self.get_renderers_for_reduction_table(),
+        )
+        self.reference_table = DataGrid(
+            pd.DataFrame([]),
+            editable=True,
+            auto_fit_columns=True,
+            column_visibility={"key": False},
+            selection_mode="cell",
+            renderers=self.get_renderers_for_reference_table(),
+        )
+        self.custom_reduction_table = DataGrid(
+            pd.DataFrame([]),
+            editable=True,
+            auto_fit_columns=True,
+            column_visibility={"key": False},
+            selection_mode="cell",
+            renderers=self.get_renderers_for_custom_reduction_table(),
+        )
+
+        self.runs_table.on_cell_change(self.sync)
+        self.reduction_table.on_cell_change(self.sync)
+        self.reference_table.on_cell_change(self.sync)
+
+        self.custom_reduction_table.on_cell_change(
+            lambda _: self.sync_custom_reduction_table()
+        )
+
+        self._init_proposal_number_box()
+        self._init_runs_table_component()
+        self._init_reduction_table_component()
+        self._init_display_component()
 
         tab_data = widgets.VBox(
             [
                 widgets.HBox(
                     [
-                        widgets.VBox(
-                            [
-                                widgets.Label("Runs Table"),
-                                run_number_filter,
-                                self.runs_table,
-                            ],
-                            layout={"width": "35%"},
-                        ),
-                        widgets.VBox(
-                            [
-                                data_buttons,
-                                widgets.VBox(
-                                    [
-                                        widgets.Label("Auto Reduction Table"),
-                                        self.reduction_table,
-                                    ],
-                                    layout={'margin': '10px 0'},
-                                ),
-                                widgets.VBox(
-                                    [
-                                        widgets.Label("Manual Reduction Table"),
-                                        widgets.HBox(
-                                            [add_row_button, delete_row_button],
-                                            layout={'margin': '5px 0'},
-                                        ),
-                                        self.custom_reduction_table,
-                                    ],
-                                    layout={'margin': '10px 0'},
-                                ),
-                            ],
-                            layout={"width": "60%"},
-                        ),
+                        self.runs_table_component,
+                        self.reduction_table_component,
                     ]
                 ),
-                widgets.VBox(
-                    [
-                        widgets.VBox(
-                            [widgets.Label("Progress"), self.progress_log],
-                            layout={'width': '100%', 'margin': '10px 0'},
-                        ),
-                        widgets.VBox(
-                            [widgets.Label("Plots"), self.plot_log],
-                            layout={'width': '100%', 'margin': '10px 0'},
-                        ),
-                    ]
-                ),
+                self.display_component,
             ]
         )
-
         tab_settings = widgets.VBox(
             [
                 widgets.Label("This is the settings tab"),
@@ -615,12 +629,10 @@ class ReflectometryBatchReductionGUI:
             ],
             layout={"width": "100%"},
         )
-
         tab_log = widgets.VBox(
             [widgets.Label("Messages"), self.text_log],
             layout={"width": "100%"},
         )
-
         self.tabs = widgets.Tab()
         self.tabs.children = [
             tab_data,
