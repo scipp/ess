@@ -467,7 +467,7 @@ class ReflectometryBatchReductionGUI:
         self.run_number_min.observe(self.sync, names='value')
         self.run_number_max.observe(self.sync, names='value')
         run_number_filter = widgets.HBox(
-            [self.run_number_min, widgets.Label("&le;Run&le;"), self.run_number_max]
+            [self.run_number_min, widgets.Label(r"≤ Run ≤"), self.run_number_max]
         )
         self.runs_table_component = widgets.VBox(
             [
