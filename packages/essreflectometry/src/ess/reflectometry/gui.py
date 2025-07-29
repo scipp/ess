@@ -35,6 +35,24 @@ from ess.reflectometry.types import (
 from ess.reflectometry.workflow import with_filenames
 
 
+def _get_unique_names(df):
+    # Create labels with Sample name and runs
+    labels = [
+        f"{params['Sample']} ({','.join(params['Runs'])})"
+        for (_, params) in df.iterrows()
+    ]
+    duplicated_name_counter = {}
+    unique = []
+    for i, name in enumerate(labels):
+        if name not in labels[:i]:
+            unique.append(name)
+        else:
+            duplicated_name_counter.setdefault(name, 0)
+            duplicated_name_counter[name] += 1
+            unique.append(f'{name}_{duplicated_name_counter[name]}')
+    return unique
+
+
 def _get_selected_rows(grid):
     return (
         pd.concat(
@@ -386,8 +404,8 @@ class ReflectometryBatchReductionGUI:
         db["user_reference"] = self.reference_table.data
 
         db["user_runs"] = self.sync_runs_table(db)
-        db["user_reduction"] = self.sync_reduction_table(db)
         db["user_reference"] = self.sync_reference_table(db)
+        db["user_reduction"] = self.sync_reduction_table(db)
 
         self.runs_table.data = db["user_runs"]
         self.reduction_table.data = db["user_reduction"]
@@ -449,7 +467,7 @@ class ReflectometryBatchReductionGUI:
         self.run_number_min.observe(self.sync, names='value')
         self.run_number_max.observe(self.sync, names='value')
         run_number_filter = widgets.HBox(
-            [self.run_number_min, widgets.Label("<=Run<="), self.run_number_max]
+            [self.run_number_min, widgets.Label("&le;Run&le;"), self.run_number_max]
         )
         self.runs_table_component = widgets.VBox(
             [
@@ -491,6 +509,9 @@ class ReflectometryBatchReductionGUI:
                             'QBins': 391,
                             'QStart': 0.01,
                             'QStop': 0.3,
+                            'Reference': self.reference_table.data.iloc[0]['Sample']
+                            if len(self.reference_table.data) > 0
+                            else pd.NA,
                             'Scale': 1.0,
                         }
                     ]
@@ -557,6 +578,16 @@ class ReflectometryBatchReductionGUI:
             ]
         )
 
+    def _init_settings_component(self):
+        self.settings_component = widgets.VBox(
+            [
+                widgets.Label("This is the settings tab"),
+                widgets.Label("Reference runs"),
+                self.reference_table,
+            ],
+            layout={"width": "100%"},
+        )
+
     def __init__(self):
         self.text_log = widgets.VBox([])
         self._path = None
@@ -609,6 +640,7 @@ class ReflectometryBatchReductionGUI:
         self._init_runs_table_component()
         self._init_reduction_table_component()
         self._init_display_component()
+        self._init_settings_component()
 
         tab_data = widgets.VBox(
             [
@@ -621,14 +653,7 @@ class ReflectometryBatchReductionGUI:
                 self.display_component,
             ]
         )
-        tab_settings = widgets.VBox(
-            [
-                widgets.Label("This is the settings tab"),
-                widgets.Label("Reference runs"),
-                self.reference_table,
-            ],
-            layout={"width": "100%"},
-        )
+        tab_settings = self.settings_component
         tab_log = widgets.VBox(
             [widgets.Label("Messages"), self.text_log],
             layout={"width": "100%"},
@@ -746,14 +771,17 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
             db['run_number_max'] >= df['Run'].astype(int)
         ]
         self._setdefault(df, "Exclude", False)
+        self._setdefault(df, "Reference", False)
         self._setdefault(df, "Comment", "")  # Add default empty comment
-        df = self._ordercolumns(df, 'Run', 'Sample', 'Angle', 'Exclude', 'Comment')
+        df = self._ordercolumns(
+            df, 'Run', 'Sample', 'Angle', 'Exclude', 'Reference', 'Comment'
+        )
         return df.sort_values(by='Run')
 
     def sync_reduction_table(self, db):
         df = db["user_runs"]
         df = (
-            df[df["Sample"] != "sm5"][~df["Exclude"]]
+            df[~df["Reference"]][~df["Exclude"]]
             .groupby(["Sample", "Angle"], as_index=False)
             .agg(Runs=("Run", tuple))
             .sort_values(["Sample", "Angle"])
@@ -768,13 +796,20 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
         self._setdefault(df, "QStart", 0.01)
         self._setdefault(df, "QStop", 0.3)
         self._setdefault(df, "Scale", 1.0)
+        self._setdefault(
+            df,
+            "Reference",
+            db['user_reference'].iloc[0]['Sample']
+            if len(db['user_reference']) > 0
+            else pd.NA,
+        )
         df = self._ordercolumns(df, 'Sample', 'Angle', 'Runs')
         return df.sort_values(["Sample", "Angle"])
 
     def sync_reference_table(self, db):
         df = db["user_runs"]
         df = (
-            df[df["Sample"] == "sm5"][~df["Exclude"]]
+            df[df["Reference"]][~df["Exclude"]]
             .groupby(["Sample", "Angle"], as_index=False)
             .agg(Runs=("Run", tuple))
             .sort_values(["Sample", "Angle"])
@@ -816,30 +851,21 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
                 for _, row in df.iterrows()
                 if (key := self.get_row_key(row)) in self.results
             ]
+            labels = [
+                label
+                for label, (_, row) in zip(
+                    _get_unique_names(df), df.iterrows(), strict=True
+                )
+                if (key := self.get_row_key(row)) in self.results
+            ]
+
             if len(results) == len(df):
                 break
             # No results were found for some of the selected rows.
             # It hasn't been computed yet, so compute it and try again.
             self.run_workflow()
 
-        def get_unique_names(df):
-            # Create labels with Sample name and runs
-            labels = [
-                f"{params['Sample']} ({','.join(params['Runs'])})"
-                for (_, params) in df.iterrows()
-            ]
-            duplicated_name_counter = {}
-            unique = []
-            for i, name in enumerate(labels):
-                if name not in labels[:i]:
-                    unique.append(name)
-                else:
-                    duplicated_name_counter.setdefault(name, 0)
-                    duplicated_name_counter[name] += 1
-                    unique.append(f'{name}_{duplicated_name_counter[name]}')
-            return unique
-
-        results = dict(zip(get_unique_names(df), results, strict=True))
+        results = dict(zip(labels, results, strict=True))
 
         q4toggle = widgets.ToggleButton(value=False, description="R*Q^4")
         plot_box = widgets.VBox(
@@ -922,13 +948,22 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
         )
         return os.path.join(self.path, fname)
 
+    def get_reference_for_row(self, row):
+        if 'Reference' in row:
+            return self.reference_table.data[
+                self.reference_table.data['Sample'] == row['Reference']
+            ]
+        else:
+            return None
+
     def get_row_key(self, row):
-        reference_metadata = (
-            tuple(self.reference_table.data.iloc[0])
-            if len(self.reference_table.data) > 0
-            else (None,)
+        reference = self.get_reference_for_row(row)
+        return (
+            tuple(row),
+            tuple(tuple(row) for _, row in reference.iterrows())
+            if reference is not None
+            else None,
         )
-        return (tuple(row), tuple(reference_metadata))
 
     def get_selected_rows(self):
         chunks = [
@@ -943,7 +978,7 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
 
     def run_workflow(self):
         sample_df = self.get_selected_rows()
-        reference_df = self.reference_table.data.iloc[0]
+        used_references = set(sample_df['Reference'])
 
         workflow = amor.AmorWorkflow()
         workflow[SampleSize[SampleRun]] = sc.scalar(10, unit='mm')
@@ -952,46 +987,67 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
         workflow[ChopperPhase[ReferenceRun]] = sc.scalar(7.5, unit='deg')
         workflow[ChopperPhase[SampleRun]] = sc.scalar(7.5, unit='deg')
 
-        workflow[WavelengthBins] = sc.geomspace(
-            'wavelength',
-            reference_df['Lmin'],
-            reference_df['Lmax'],
-            2001,
-            unit='angstrom',
-        )
-
-        workflow[YIndexLimits] = (
-            sc.scalar(reference_df['Ymin']),
-            sc.scalar(reference_df['Ymax']),
-        )
-        workflow[ZIndexLimits] = (
-            sc.scalar(reference_df['Zmin']),
-            sc.scalar(reference_df['Zmax']),
-        )
-
-        progress = widgets.IntProgress(min=0, max=len(sample_df))
+        progress = widgets.IntProgress(min=0, max=len(sample_df) + len(used_references))
         self.log_progress(progress)
-
-        if (key := self.get_row_key(reference_df)) in self.results:
-            reference_result = self.results[key]
-        else:
-            reference_result = with_filenames(
-                workflow,
-                ReferenceRun,
-                list(map(self.get_filepath_from_run, reference_df["Runs"])),
-            ).compute(ReducedReference)
-            self.set_result(reference_df, reference_result)
-
-        workflow[ReducedReference] = reference_result
-        progress.value += 1
 
         for _, params in sample_df.iterrows():
             if (key := self.get_row_key(params)) in self.results:
                 progress.value += 1
                 continue
 
+            reference_rows_matching_selected_reference = self.get_reference_for_row(
+                params
+            )
+            if len(reference_rows_matching_selected_reference) < 1:
+                self.log(
+                    f'Reference "{params["Reference"]}" '
+                    'does not exist in the reference list.'
+                )
+                continue
+            if len(reference_rows_matching_selected_reference) > 1:
+                self.log(
+                    f'Reference "{params["Reference"]}" does not refer to a unique '
+                    'refererence! Make sure that the reference '
+                    '"Sample" names are unique.'
+                )
+
+            reference_row = reference_rows_matching_selected_reference.iloc[0]
+
+            wf = workflow.copy()
+            wf[WavelengthBins] = sc.geomspace(
+                'wavelength',
+                reference_row['Lmin'],
+                reference_row['Lmax'],
+                2001,
+                unit='angstrom',
+            )
+            wf[YIndexLimits] = (
+                sc.scalar(reference_row['Ymin']),
+                sc.scalar(reference_row['Ymax']),
+            )
+            wf[ZIndexLimits] = (
+                sc.scalar(reference_row['Zmin']),
+                sc.scalar(reference_row['Zmax']),
+            )
+
+            if (key := self.get_row_key(reference_row)) in self.results:
+                reference_result = self.results[key]
+            else:
+                reference_result = with_filenames(
+                    wf,
+                    ReferenceRun,
+                    list(map(self.get_filepath_from_run, reference_row["Runs"])),
+                ).compute(ReducedReference)
+                self.set_result(reference_row, reference_result)
+
+            if params['Reference'] in used_references:
+                progress.value += 1
+                used_references.remove(params['Reference'])
+
+            wf[ReducedReference] = reference_result
+
             wf = with_filenames(
-                workflow,
+                wf,
                 SampleRun,
                 list(map(self.get_filepath_from_run, params['Runs'])),
             )
