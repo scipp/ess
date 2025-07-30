@@ -1,7 +1,17 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 
-from ..reflectometry.types import DetectorRotation, RunType, SampleRotation, ThetaBins
+from ..reflectometry.conversions import reflectometry_q
+from ..reflectometry.types import (
+    BeamDivergenceLimits,
+    DetectorRotation,
+    QBins,
+    RunType,
+    SampleRotation,
+    SampleRun,
+    ThetaBins,
+    WavelengthBins,
+)
 from .geometry import Detector
 
 
@@ -55,4 +65,27 @@ def theta_grid(
     return grid
 
 
-providers = (theta_grid,)
+def qgrid(
+    detector_rotation: DetectorRotation[SampleRun],
+    sample_rotation: SampleRotation[SampleRun],
+    wbins: WavelengthBins,
+    bdlims: BeamDivergenceLimits,
+) -> QBins:
+    theta_min = (
+        bdlims[0].to(unit='rad', copy=False)
+        + detector_rotation.to(unit='rad', dtype='float64')
+        - sample_rotation.to(unit='rad', dtype='float64')
+    )
+    theta_max = (
+        bdlims[-1].to(unit='rad', copy=False)
+        + detector_rotation.to(unit='rad', dtype='float64')
+        - sample_rotation.to(unit='rad', dtype='float64')
+    )
+    wmin, wmax = wbins[0], wbins[-1]
+    qmin = reflectometry_q(wavelength=wmax, theta=theta_min)
+    qmax = reflectometry_q(wavelength=wmin, theta=theta_max)
+    qmin = max(qmin, sc.scalar(1e-3, unit='1/angstrom'))
+    return QBins(sc.geomspace('Q', qmin, qmax, 499))
+
+
+providers = (theta_grid, qgrid)
