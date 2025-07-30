@@ -71,6 +71,8 @@ def qgrid(
     wbins: WavelengthBins,
     bdlims: BeamDivergenceLimits,
 ) -> QBins:
+    '''Generates a suitable Q-binnning from
+    the limits on wavelength and divergence angle.'''
     theta_min = (
         bdlims[0].to(unit='rad', copy=False)
         + detector_rotation.to(unit='rad', dtype='float64')
