@@ -4,7 +4,7 @@
 
 class Registry:
     def __init__(
-        self, instrument: str, files: dict[str, str], version: str, retry_if_failed=3
+        self, instrument: str, files: dict[str, str], version: str, retry_if_failed: int=3
     ):
         import pooch
 
