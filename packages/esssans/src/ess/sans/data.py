@@ -3,7 +3,9 @@
 
 
 class Registry:
-    def __init__(self, instrument: str, files: dict[str, str], version: str):
+    def __init__(
+        self, instrument: str, files: dict[str, str], version: str, retry_if_failed=3
+    ):
         import pooch
 
         self._registry = pooch.create(
@@ -12,6 +14,7 @@ class Registry:
             base_url=f'https://public.esss.dk/groups/scipp/ess/{instrument}/'
             + '{version}/',
             version=version,
+            retry_if_failed=retry_if_failed,
             registry=files,
         )
 
