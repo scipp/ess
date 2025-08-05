@@ -25,7 +25,6 @@ from ess.powder.types import (
     CaveMonitorPosition,
     CIFAuthors,
     CountsDspacing,
-    DistanceResolution,
     DspacingBins,
     EmptyCanRun,
     EmptyCanSubtractedIofDspacing,
@@ -34,17 +33,14 @@ from ess.powder.types import (
     IofDspacing,
     IofDspacingTwoTheta,
     IofTof,
-    LookupTableRelativeErrorThreshold,
-    LtotalRange,
     MaskedData,
     MonitorFilename,
     NeXusDetectorName,
     Position,
     ReducedTofCIF,
     SampleRun,
-    SimulationResults,
+    TimeOfFlightLookupTable,
     TimeOfFlightLookupTableFilename,
-    TimeResolution,
     TofMask,
     TwoThetaBins,
     TwoThetaMask,
@@ -138,28 +134,31 @@ def test_pipeline_can_compute_dspacing_result_using_lookup_table_filename(workfl
 
 
 @pytest.fixture(scope="module")
-def simulation_dream_choppers():
-    return time_of_flight.simulate_beamline(
-        choppers=dream.beamline.choppers(
-            dream.beamline.InstrumentConfiguration.high_flux
-        ),
-        source_position=dream_source_position,
-        neutrons=500_000,
+def dream_tof_lookup_table():
+    lut_wf = time_of_flight.TofLookupTableWorkflow()
+    lut_wf[time_of_flight.DiskChoppers] = dream.beamline.choppers(
+        dream.beamline.InstrumentConfiguration.high_flux
     )
+    lut_wf[time_of_flight.SourcePosition] = dream_source_position
+    lut_wf[time_of_flight.NumberOfSimulatedNeutrons] = 500_000
+    lut_wf[time_of_flight.SimulationSeed] = 555
+    lut_wf[time_of_flight.PulseStride] = 1
+    lut_wf[time_of_flight.LtotalRange] = (
+        sc.scalar(60.0, unit="m"),
+        sc.scalar(80.0, unit="m"),
+    )
+    lut_wf[time_of_flight.DistanceResolution] = sc.scalar(0.1, unit="m")
+    lut_wf[time_of_flight.TimeResolution] = sc.scalar(250.0, unit='us')
+    lut_wf[time_of_flight.LookupTableRelativeErrorThreshold] = 0.02
+    return lut_wf.compute(time_of_flight.TimeOfFlightLookupTable)
 
 
 def test_pipeline_can_compute_dspacing_result_using_custom_built_tof_lookup(
-    workflow, simulation_dream_choppers
+    workflow, dream_tof_lookup_table
 ):
-    from ess.reduce.time_of_flight.eto_to_tof import compute_tof_lookup_table
-
-    workflow.insert(compute_tof_lookup_table)
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    workflow[SimulationResults] = simulation_dream_choppers
-    workflow[LtotalRange] = sc.scalar(60.0, unit="m"), sc.scalar(80.0, unit="m")
-    workflow[DistanceResolution] = sc.scalar(0.1, unit="m")
-    workflow[TimeResolution] = sc.scalar(250.0, unit='us')
-    workflow[LookupTableRelativeErrorThreshold] = 0.02
+    workflow[TimeOfFlightLookupTable] = dream_tof_lookup_table
+
     result = workflow.compute(IofDspacing[SampleRun])
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
