@@ -46,5 +46,9 @@ def tbl_tof_lookup_table_no_choppers() -> str:
     """
     TBL TOF lookup table without choppers.
     This file is used to convert the neutron arrival time to time-of-flight.
+
+    This table was computed using `Create a time-of-flight lookup table for TBL
+    <../../user-guide/tbl/tbl-make-tof-lookup-table.rst>`_
+    with ``NumberOfSimulatedNeutrons = 2_000_000``.
     """
     return get_path("TBL-tof-lookup-table-no-choppers.h5")

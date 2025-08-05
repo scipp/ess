@@ -84,5 +84,9 @@ def odin_tof_lookup_table() -> str:
     """
     Odin TOF lookup table.
     This file is used to convert the time-of-flight to wavelength.
+
+    This table was computed using `Create a time-of-flight lookup table for ODIN
+    <../../user-guide/odin/odin-make-tof-lookup-table.rst>`_
+    with ``NumberOfSimulatedNeutrons = 5_000_000``.
     """
     return get_path("ODIN-tof-lookup-table.h5")
