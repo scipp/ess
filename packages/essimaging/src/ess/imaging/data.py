@@ -10,7 +10,7 @@ _version = '1'
 def _make_pooch():
     return pooch.create(
         path=pooch.os_cache('essimaging'),
-        env='BEAMLIME_DATA_DIR',
+        env='ESS_DATA_DIR',
         retry_if_failed=3,
         base_url=f'https://public.esss.dk/groups/scipp/ess/imaging/{_version}/',
         version=_version,
@@ -24,7 +24,6 @@ def _make_pooch():
 
 
 _pooch = _make_pooch()
-_pooch.fetch('README.md')
 
 
 def get_path(name: str) -> pathlib.Path:

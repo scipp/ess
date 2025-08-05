@@ -13,6 +13,7 @@ def _make_pooch():
     return pooch.create(
         path=pooch.os_cache("ess/odin"),
         env="ESS_DATA_DIR",
+        retry_if_failed=3,
         base_url="https://public.esss.dk/groups/scipp/ess/odin/{version}/",
         version=_version,
         registry={
