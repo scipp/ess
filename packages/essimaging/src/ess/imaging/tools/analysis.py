@@ -88,9 +88,6 @@ def laplace_2d(
         The dimensions of the image over which to compute the Laplace operator.
         Other dimensions will be preserved in the output.
     """
-    # if isinstance(image, sc.DataArray):
-    #     image = image.data
-
     kernel = [8] + ([-1] * 8)
     ii = np.repeat([0, -1, 1], 3)
     jj = np.tile([0, -1, 1], 3)
