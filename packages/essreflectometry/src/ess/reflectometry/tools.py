@@ -394,8 +394,36 @@ def batch_processor(
     """
     Creates a collection of sciline workflows from the provided runs.
 
-    Runs can be provided as a mapping of names to parameters or as a sequence
-    of mappings of parameters and values.
+    Example:
+
+    ```
+    from ess.reflectometry import amor, tools
+
+    workflow = amor.AmorWorkflow()
+
+    runs = {
+        '608': {
+            SampleRotationOffset[SampleRun]: sc.scalar(0.05, unit='deg'),
+            Filename[SampleRun]: amor.data.amor_run(608),
+        },
+        '609': {
+            SampleRotationOffset[SampleRun]: sc.scalar(0.05, unit='deg'),
+            Filename[SampleRun]: amor.data.amor_run(609),
+        },
+        '610': {
+            SampleRotationOffset[SampleRun]: sc.scalar(0.05, unit='deg'),
+            Filename[SampleRun]: amor.data.amor_run(610),
+        },
+        '611': {
+            SampleRotationOffset[SampleRun]: sc.scalar(0.05, unit='deg'),
+            Filename[SampleRun]: amor.data.amor_run(611),
+        },
+    }
+
+    batch = tools.batch_processor(workflow, runs)
+
+    results = batch.compute(ReflectivityOverQ)
+    ```
 
     Parameters
     ----------
@@ -403,7 +431,11 @@ def batch_processor(
         The sciline workflow used to compute the targets for each of the runs.
     runs:
         The sciline parameters to be used for each run.
-        TODO: explain how grouping works depending on the type of `runs`.
+        Should be a mapping where the keys are the names of the runs
+        and the values are mappings of type to value pairs.
+        In addition, if one of the values for ``Filename[SampleRun]``
+        is a list or a tuple, then the events from the files
+        will be concatenated into a single event list.
     """
     workflows = {}
     for name, parameters in runs.items():
