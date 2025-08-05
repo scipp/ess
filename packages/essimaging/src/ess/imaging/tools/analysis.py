@@ -5,6 +5,7 @@ Tools for image analysis and manipulation.
 """
 
 import uuid
+from collections.abc import Callable
 from itertools import combinations
 
 import numpy as np
@@ -33,7 +34,9 @@ def blockify(image: sc.Variable | sc.DataArray, **sizes) -> sc.Variable | sc.Dat
 
 
 def resample(
-    image: sc.Variable | sc.DataArray, sizes: dict[str, int], method: str = 'sum'
+    image: sc.Variable | sc.DataArray,
+    sizes: dict[str, int],
+    method: str | Callable = 'sum',
 ) -> sc.Variable | sc.DataArray:
     """
     Resample an image by folding it into blocks of specified sizes and applying a
@@ -48,13 +51,19 @@ def resample(
         The image to resample.
     sizes:
         A dictionary specifying the block sizes for each dimension.
-        For example, `{'x': 4, 'y': 4}` will create blocks of size 4x4.
+        For example, ``{'x': 4, 'y': 4}`` will create blocks of size 4x4.
     method:
-        The reduction method to apply to the blocks. This can be any valid
-        reduction method, such as 'sum', 'mean', 'max', etc.
+        The reduction method to apply to the blocks. This can be a string referring to
+        any valid Scipp reduction method, such as 'sum', 'mean', 'max', etc.
+        Alternatively, a custom reduction function can be provided. The function
+        signature should accept a ``scipp.Variable`` or ``scipp.DataArray`` as first
+        argument and a set of dimensions to reduce over as second argument. The
+        function should return a ``scipp.Variable`` or ``scipp.DataArray``.
     """
     blocked = blockify(image, **sizes)
-    return getattr(sc, method)(blocked, set(blocked.dims) - set(image.dims))
+    if isinstance(method, str):
+        return getattr(sc, method)(blocked, set(blocked.dims) - set(image.dims))
+    return method(blocked, set(blocked.dims) - set(image.dims))
 
 
 def laplace_2d(

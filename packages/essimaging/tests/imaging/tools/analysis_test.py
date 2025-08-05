@@ -30,6 +30,13 @@ def test_resample_mean() -> None:
     assert resampled.sum().value < da.sum().value
 
 
+def test_resample_callable() -> None:
+    da = load_scitiff(get_siemens_star_path())["image"]
+    resampled = img.tools.resample(da, sizes={'x': 2, 'y': 2}, method=sc.max)
+    assert resampled.sizes['x'] == da.sizes['x'] // 2
+    assert resampled.sizes['y'] == da.sizes['y'] // 2
+
+
 def test_laplace_2d() -> None:
     da = load_scitiff(get_siemens_star_path())["image"]
     resampled = img.tools.resample(da, sizes={'x': 2, 'y': 2})
