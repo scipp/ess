@@ -10,7 +10,7 @@ pip install essdiffraction
 ````
 ````{tab-item} conda
 ```sh
-conda install -c conda-forge -c scipp essdiffraction
+conda install -c conda-forge essdiffraction
 ```
 ````
 `````

@@ -10,6 +10,8 @@ accessible-pygments==0.0.5
     # via pydata-sphinx-theme
 alabaster==1.0.0
     # via sphinx
+appnope==0.1.4
+    # via ipykernel
 attrs==25.3.0
     # via
     #   jsonschema
