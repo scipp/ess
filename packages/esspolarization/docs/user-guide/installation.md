@@ -10,7 +10,7 @@ pip install esspolarization
 ````
 ````{tab-item} conda
 ```sh
-conda install -c conda-forge -c scipp esspolarization
+conda install -c conda-forge esspolarization
 ```
 ````
 `````

@@ -187,7 +187,7 @@ html_theme_options = {
         },
         {
             "name": "Conda",
-            "url": "https://anaconda.org/scipp/esspolarization",
+            "url": "https://anaconda.org/conda-forge/esspolarization",
             "icon": "fa-custom fa-anaconda",
             "type": "fontawesome",
         },
@@ -267,5 +267,6 @@ linkcheck_ignore = [
     r'https?://github\.com/.*?/blob/[a-f0-9]+/.+?#',
     # Linkcheck seems to be denied access by some DOI resolvers.
     # Since DOIs are supposed to be permanent, we don't need to check them.'
-    r'https://doi\.org/',
+    r'https?://doi\.org/',
+    r'https?://dx\.doi\.org/',
 ]
