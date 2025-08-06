@@ -48,6 +48,7 @@ test = [
     "pytest>=7.0",
     "pooch>=1.5",
     "tof>=24.7.0",
+    "scitiff>=24.6.0",
 ]
 
 [project.urls]

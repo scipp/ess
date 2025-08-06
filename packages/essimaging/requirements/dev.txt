@@ -53,6 +53,7 @@ jsonschema[format-nongpl]==4.25.0
     #   jupyter-events
     #   jupyterlab-server
     #   nbformat
+    #   scitiff
 jupyter-events==0.12.0
     # via jupyter-server
 jupyter-lsp==2.2.6
