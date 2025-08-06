@@ -103,7 +103,7 @@ class InstrumentView:
 
         if dim is not None:
             self.slider = SliceWidget(next(iter(self.data.values())), dims=[dim])
-            self.slider.controls[dim]["slider"].layout = {"width": "600px"}
+            self.slider.controls[dim].slider.layout = {"width": "600px"}
             self.slider_node = pp.widget_node(self.slider)
             self.slice_nodes = {
                 key: slice_dims(n, self.slider_node)
