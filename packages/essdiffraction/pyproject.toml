@@ -30,12 +30,12 @@ requires-python = ">=3.11"
 # Run 'tox -e deps' after making changes here. This will update requirement files.
 # Make sure to list one dependency per line.
 dependencies = [
-  "dask",
+  "dask>=2022.1.0",
   "essreduce>=25.07.0",
   "graphviz",
-  "numpy",
-  "plopp>=25.03.0",
-  "pythreejs",
+  "numpy>=1.25",
+  "plopp>=25.07.0",
+  "pythreejs>=2.4.1",
   "sciline>=25.04.1",
   "scipp>=25.05.1",
   "scippneutron>=25.02.0",
@@ -47,9 +47,10 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 test = [
-    "pandas",
-    "pooch",
-    "pytest",
+    "pandas>=2.1.2",
+    "pooch>=1.5",
+    "pytest>=7.0",
+    "ipywidgets>=8.1.7"
 ]
 
 [project.urls]
