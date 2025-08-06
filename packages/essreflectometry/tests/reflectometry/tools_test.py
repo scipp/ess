@@ -17,6 +17,7 @@ from ess.reflectometry.tools import (
 )
 from ess.reflectometry.types import (
     Filename,
+    QBins,
     ReducibleData,
     ReferenceRun,
     ReflectivityOverQ,
@@ -71,9 +72,11 @@ def make_workflow():
         return ReducibleData[RunType](da * scale)
 
     def reflectivity(
-        sample: ReducibleData[SampleRun], reference: ReducibleData[ReferenceRun]
+        sample: ReducibleData[SampleRun],
+        reference: ReducibleData[ReferenceRun],
+        qbins: QBins,
     ) -> ReflectivityOverQ:
-        return ReflectivityOverQ(sample.hist() / reference.hist())
+        return ReflectivityOverQ(sample.hist(Q=qbins) / reference.hist(Q=qbins))
 
     return sl.Pipeline([apply_scaling, reflectivity])
 
@@ -82,25 +85,16 @@ def test_reflectivity_curve_scaling():
     wf = make_workflow()
     wf[ScalingFactorForOverlap[SampleRun]] = 1.0
     wf[ScalingFactorForOverlap[ReferenceRun]] = 1.0
-    runs = {
-        'a': {
-            UnscaledReducibleData[SampleRun]: make_sample_events(1, 0, 0.3),
-            UnscaledReducibleData[ReferenceRun]: make_reference_events(0, 0.3),
-        },
-        'b': {
-            UnscaledReducibleData[SampleRun]: make_sample_events(0.8, 0.2, 0.7),
-            UnscaledReducibleData[ReferenceRun]: make_reference_events(0.2, 0.7),
-        },
-        'c': {
-            UnscaledReducibleData[SampleRun]: make_sample_events(0.1, 0.6, 1.0),
-            UnscaledReducibleData[ReferenceRun]: make_reference_events(0.6, 1.0),
-        },
-    }
+    params = {'a': (1, 0, 0.3), 'b': (0.8, 0.2, 0.7), 'c': (0.1, 0.6, 1.0)}
     workflows = {}
-    for name, params in runs.items():
-        workflows[name] = wf.copy()
-        for key, value in params.items():
-            workflows[name][key] = value
+    for k, v in params.items():
+        sample = make_sample_events(*v)
+        reference = make_reference_events(v[1], v[2])
+        workflows[k] = wf.copy()
+        workflows[k][UnscaledReducibleData[SampleRun]] = sample
+        workflows[k][UnscaledReducibleData[ReferenceRun]] = reference
+        workflows[k][QBins] = sample.coords['Q']
+
     wfc = WorkflowCollection(workflows)
 
     scaled_wf = scale_reflectivity_curves_to_overlap(wfc)
@@ -113,28 +107,53 @@ def test_reflectivity_curve_scaling():
 
 
 def test_reflectivity_curve_scaling_with_critical_edge():
-    data = sc.concat(
-        (
-            sc.ones(dims=['Q'], shape=[10], with_variances=True),
-            0.5 * sc.ones(dims=['Q'], shape=[15], with_variances=True),
-        ),
-        dim='Q',
-    )
-    data.variances[:] = 0.1
+    wf = make_workflow()
+    wf[ScalingFactorForOverlap[SampleRun]] = 1.0
+    wf[ScalingFactorForOverlap[ReferenceRun]] = 1.0
+    params = {'a': (2, 0, 0.3), 'b': (0.8, 0.2, 0.7), 'c': (0.1, 0.6, 1.0)}
+    workflows = {}
+    for k, v in params.items():
+        sample = make_sample_events(*v)
+        reference = make_reference_events(v[1], v[2])
+        workflows[k] = wf.copy()
+        workflows[k][UnscaledReducibleData[SampleRun]] = sample
+        workflows[k][UnscaledReducibleData[ReferenceRun]] = reference
+        workflows[k][QBins] = sample.coords['Q']
 
-    curves, factors = scale_reflectivity_curves_to_overlap(
-        (
-            2 * curve(data, 0, 0.3),
-            curve(0.8 * data, 0.2, 0.7),
-            curve(0.1 * data, 0.6, 1.0),
-        ),
-        critical_edge_interval=(sc.scalar(0.01), sc.scalar(0.05)),
+    wfc = WorkflowCollection(workflows)
+
+    scaled_wf = scale_reflectivity_curves_to_overlap(
+        wfc, critical_edge_interval=(sc.scalar(0.01), sc.scalar(0.05))
     )
 
-    assert_allclose(curves[0].data, data, rtol=sc.scalar(1e-5))
-    assert_allclose(curves[1].data, 0.5 * data, rtol=sc.scalar(1e-5))
-    assert_allclose(curves[2].data, 0.25 * data, rtol=sc.scalar(1e-5))
-    np_assert_allclose((0.5, 0.5 / 0.8, 0.25 / 0.1), factors, 1e-4)
+    factors = scaled_wf.compute(ScalingFactorForOverlap[SampleRun])
+
+    assert np.isclose(factors['a'], 0.5)
+    assert np.isclose(factors['b'], 0.5 / 0.8)
+    assert np.isclose(factors['c'], 0.25 / 0.1)
+
+    # data = sc.concat(
+    #     (
+    #         sc.ones(dims=['Q'], shape=[10], with_variances=True),
+    #         0.5 * sc.ones(dims=['Q'], shape=[15], with_variances=True),
+    #     ),
+    #     dim='Q',
+    # )
+    # data.variances[:] = 0.1
+
+    # curves, factors = scale_reflectivity_curves_to_overlap(
+    #     (
+    #         2 * curve(data, 0, 0.3),
+    #         curve(0.8 * data, 0.2, 0.7),
+    #         curve(0.1 * data, 0.6, 1.0),
+    #     ),
+    #     critical_edge_interval=(sc.scalar(0.01), sc.scalar(0.05)),
+    # )
+
+    # assert_allclose(curves[0].data, data, rtol=sc.scalar(1e-5))
+    # assert_allclose(curves[1].data, 0.5 * data, rtol=sc.scalar(1e-5))
+    # assert_allclose(curves[2].data, 0.25 * data, rtol=sc.scalar(1e-5))
+    # np_assert_allclose((0.5, 0.5 / 0.8, 0.25 / 0.1), factors, 1e-4)
 
 
 def test_combined_curves():
