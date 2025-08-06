@@ -6,9 +6,9 @@ The Sciline providers and types in this module largely ignore the metadata
 of reference runs and only use the metadata of the sample run.
 """
 
+import datetime
 import os
 import platform
-from datetime import datetime, timezone
 from typing import NewType
 
 import numpy as np
@@ -152,7 +152,7 @@ def build_orso_reduction(creator: OrsoCreator) -> OrsoReduction:
                 version=str(__version__),
                 platform=platform.system(),
             ),
-            timestamp=datetime.now(tz=timezone.utc),
+            timestamp=datetime.datetime.now(tz=datetime.UTC),
             creator=creator,
             corrections=[],
         )
