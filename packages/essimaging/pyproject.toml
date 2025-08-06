@@ -32,7 +32,7 @@ requires-python = ">=3.11"
 dependencies = [
   "dask>=2022.1.0",
   "graphviz",
-  "plopp[all]",
+  "plopp[all]>=23.10.0",
   "sciline>=23.9.1",
   "scipp>=23.8.0",
   "scippneutron>=24.12.0",
