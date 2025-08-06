@@ -10,7 +10,7 @@ pip install essimaging
 ````
 ````{tab-item} conda
 ```sh
-conda install -c conda-forge -c scipp essimaging
+conda install -c conda-forge essimaging
 ```
 ````
 `````
