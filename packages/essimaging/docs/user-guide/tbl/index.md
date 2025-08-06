@@ -5,5 +5,6 @@
 maxdepth: 1
 ---
 
-tbl-data-reduction.ipynb
+tbl-data-reduction
+tbl-make-tof-lookup-table
 ```

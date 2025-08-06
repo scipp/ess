@@ -5,5 +5,6 @@
 maxdepth: 1
 ---
 
-odin_simulation
+odin-data-reduction
+odin-make-tof-lookup-table
 ```

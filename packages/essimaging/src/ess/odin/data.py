@@ -13,6 +13,7 @@ def _make_pooch():
     return pooch.create(
         path=pooch.os_cache("ess/odin"),
         env="ESS_DATA_DIR",
+        retry_if_failed=3,
         base_url="https://public.esss.dk/groups/scipp/ess/odin/{version}/",
         version=_version,
         registry={
@@ -84,5 +85,9 @@ def odin_tof_lookup_table() -> str:
     """
     Odin TOF lookup table.
     This file is used to convert the time-of-flight to wavelength.
+
+    This table was computed using `Create a time-of-flight lookup table for ODIN
+    <../../user-guide/odin/odin-make-tof-lookup-table.rst>`_
+    with ``NumberOfSimulatedNeutrons = 5_000_000``.
     """
     return get_path("ODIN-tof-lookup-table.h5")
