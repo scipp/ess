@@ -189,7 +189,7 @@ html_theme_options = {
         },
         {
             "name": "Conda",
-            "url": "https://anaconda.org/scipp/essspectroscopy",
+            "url": "https://anaconda.org/conda-forge/essspectroscopy",
             "icon": "fa-custom fa-anaconda",
             "type": "fontawesome",
         },
@@ -272,4 +272,5 @@ linkcheck_ignore = [
     r'https://doi\.org/',
     # ESS Jira is not publicly accessible.
     r'https?://jira\.ess\.eu',
+    r'https?://dx\.doi\.org/',
 ]

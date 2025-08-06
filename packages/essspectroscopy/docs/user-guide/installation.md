@@ -10,7 +10,7 @@ pip install essspectroscopy
 ````
 ````{tab-item} conda
 ```sh
-conda install -c conda-forge -c scipp essspectroscopy
+conda install -c conda-forge essspectroscopy
 ```
 ````
 `````
