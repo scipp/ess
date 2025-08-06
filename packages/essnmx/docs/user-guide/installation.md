@@ -10,7 +10,7 @@ pip install essnmx
 ````
 ````{tab-item} conda
 ```sh
-conda install -c conda-forge -c scipp essnmx
+conda install -c conda-forge essnmx
 ```
 ````
 `````
