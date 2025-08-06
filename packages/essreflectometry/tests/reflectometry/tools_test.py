@@ -9,41 +9,107 @@ from orsopy.fileio import Orso, OrsoDataset
 from scipp.testing import assert_allclose
 
 from ess.reflectometry.tools import (
+    WorkflowCollection,
+    batch_processor,
     combine_curves,
-    from_measurements,
     linlogspace,
     scale_reflectivity_curves_to_overlap,
 )
 from ess.reflectometry.types import (
     Filename,
     ReducibleData,
+    ReferenceRun,
     ReflectivityOverQ,
+    RunType,
     SampleRun,
+    ScalingFactorForOverlap,
+    UnscaledReducibleData,
 )
 
+# def curve(d, qmin, qmax):
+#     return sc.DataArray(data=d, coords={'Q': sc.linspace('Q', qmin, qmax, len(d) + 1)})
 
-def curve(d, qmin, qmax):
-    return sc.DataArray(data=d, coords={'Q': sc.linspace('Q', qmin, qmax, len(d) + 1)})
+
+def make_sample_events(scale, qmin, qmax):
+    n1 = 10
+    n2 = 15
+    qbins = sc.linspace('Q', qmin, qmax, n1 + n2 + 1)
+    data = sc.DataArray(
+        data=sc.concat(
+            (
+                sc.ones(dims=['Q'], shape=[10], with_variances=True),
+                0.5 * sc.ones(dims=['Q'], shape=[15], with_variances=True),
+            ),
+            dim='Q',
+        )
+        * scale,
+        coords={'Q': sc.midpoints(qbins, 'Q')},
+    )
+    data.variances[:] = 0.1
+    return data.bin(Q=qbins)
+
+
+def make_reference_events(qmin, qmax):
+    n = 25
+    qbins = sc.linspace('Q', qmin, qmax, n + 1)
+    data = sc.DataArray(
+        data=sc.ones(dims=['Q'], shape=[n], with_variances=True),
+        coords={'Q': sc.midpoints(qbins, 'Q')},
+    )
+    data.variances[:] = 0.1
+    return data.bin(Q=qbins)
+
+
+def make_workflow():
+    def apply_scaling(
+        da: UnscaledReducibleData[RunType],
+        scale: ScalingFactorForOverlap[RunType],
+    ) -> ReducibleData[RunType]:
+        """
+        Scales the raw data by a given factor.
+        """
+        return ReducibleData[RunType](da * scale)
+
+    def reflectivity(
+        sample: ReducibleData[SampleRun], reference: ReducibleData[ReferenceRun]
+    ) -> ReflectivityOverQ:
+        return ReflectivityOverQ(sample.hist() / reference.hist())
+
+    return sl.Pipeline([apply_scaling, reflectivity])
 
 
 def test_reflectivity_curve_scaling():
-    data = sc.concat(
-        (
-            sc.ones(dims=['Q'], shape=[10], with_variances=True),
-            0.5 * sc.ones(dims=['Q'], shape=[15], with_variances=True),
-        ),
-        dim='Q',
-    )
-    data.variances[:] = 0.1
+    wf = make_workflow()
+    wf[ScalingFactorForOverlap[SampleRun]] = 1.0
+    wf[ScalingFactorForOverlap[ReferenceRun]] = 1.0
+    runs = {
+        'a': {
+            UnscaledReducibleData[SampleRun]: make_sample_events(1, 0, 0.3),
+            UnscaledReducibleData[ReferenceRun]: make_reference_events(0, 0.3),
+        },
+        'b': {
+            UnscaledReducibleData[SampleRun]: make_sample_events(0.8, 0.2, 0.7),
+            UnscaledReducibleData[ReferenceRun]: make_reference_events(0.2, 0.7),
+        },
+        'c': {
+            UnscaledReducibleData[SampleRun]: make_sample_events(0.1, 0.6, 1.0),
+            UnscaledReducibleData[ReferenceRun]: make_reference_events(0.6, 1.0),
+        },
+    }
+    workflows = {}
+    for name, params in runs.items():
+        workflows[name] = wf.copy()
+        for key, value in params.items():
+            workflows[name][key] = value
+    wfc = WorkflowCollection(workflows)
 
-    curves, factors = scale_reflectivity_curves_to_overlap(
-        (curve(data, 0, 0.3), curve(0.8 * data, 0.2, 0.7), curve(0.1 * data, 0.6, 1.0)),
-    )
+    scaled_wf = scale_reflectivity_curves_to_overlap(wfc)
 
-    assert_allclose(curves[0].data, data, rtol=sc.scalar(1e-5))
-    assert_allclose(curves[1].data, 0.5 * data, rtol=sc.scalar(1e-5))
-    assert_allclose(curves[2].data, 0.25 * data, rtol=sc.scalar(1e-5))
-    np_assert_allclose((1, 0.5 / 0.8, 0.25 / 0.1), factors, 1e-4)
+    factors = scaled_wf.compute(ScalingFactorForOverlap[SampleRun])
+
+    assert np.isclose(factors['a'], 1.0)
+    assert np.isclose(factors['b'], 0.5 / 0.8)
+    assert np.isclose(factors['c'], 0.25 / 0.1)
 
 
 def test_reflectivity_curve_scaling_with_critical_edge():
