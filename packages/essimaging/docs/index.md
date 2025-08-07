@@ -28,28 +28,29 @@
   </br></br>
 </div>
 
-## Imaging Data Reduction Examples
-````{card}
+## Quick links
 
-```{button-ref} user-guide/ymir/histogram_mode_detector
-:class: stretched-link
+::::{grid} 3
 
-Ymir - Histogram Mode Detector
+:::{grid-item-card} ODIN
+:link: user-guide/odin/index.md
+:img-top: _static/odin.svg
 
-```
+:::
 
-````
+:::{grid-item-card} Test beamline
+:link: user-guide/tbl/index.md
 
-````{card}
+:::
 
-```{button-ref} user-guide/odin/odin_simulation
-:class: stretched-link
+::::{grid-item-card} YMIR
+:link: user-guide/ymir/index.md
+:img-top: _static/ymir.svg
 
-ODIN McStas Simulation - Timepix Simulation with Choppers
+:::
 
-```
+::::
 
-````
 :::{include} user-guide/installation.md
 :heading-offset: 1
 :::
