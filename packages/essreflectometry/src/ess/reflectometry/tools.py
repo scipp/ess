@@ -3,7 +3,7 @@
 import uuid
 from collections.abc import Mapping, Sequence
 from itertools import chain
-from typing import Any, NewType
+from typing import Any
 
 import numpy as np
 import sciline
@@ -14,6 +14,7 @@ import scipy.optimize as opt
 from ess.reflectometry.types import (
     Filename,
     QBins,
+    ReferenceRun,
     ReflectivityOverQ,
     SampleRun,
     ScalingFactorForOverlap,
@@ -207,6 +208,9 @@ def scale_reflectivity_curves_to_overlap(
         wfc[UnscaledReducibleData[SampleRun]] = wfc.compute(
             UnscaledReducibleData[SampleRun]
         )
+        wfc[UnscaledReducibleData[ReferenceRun]] = wfc.compute(
+            UnscaledReducibleData[ReferenceRun]
+        )
 
     reflectivities = wfc.compute(ReflectivityOverQ)
 
@@ -218,9 +222,8 @@ def scale_reflectivity_curves_to_overlap(
         )
     }
 
-    critical_edge_key = None
+    critical_edge_key = uuid.uuid4().hex
     if critical_edge_interval is not None:
-        critical_edge_key = uuid.uuid4().hex
         # Find q bins with the lowest Q start point
         q = min(
             (wf.compute(QBins) for wf in wf_collection.values()),

@@ -1,10 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+
 import numpy as np
 import pytest
 import sciline as sl
 import scipp as sc
-from numpy.testing import assert_allclose as np_assert_allclose
+from numpy.testing import assert_almost_equal
 from orsopy.fileio import Orso, OrsoDataset
 from scipp.testing import assert_allclose
 
@@ -27,9 +28,6 @@ from ess.reflectometry.types import (
     UnscaledReducibleData,
 )
 
-# def curve(d, qmin, qmax):
-#     return sc.DataArray(data=d, coords={'Q': sc.linspace('Q', qmin, qmax, len(d) + 1)})
-
 
 def make_sample_events(scale, qmin, qmax):
     n1 = 10
@@ -47,6 +45,7 @@ def make_sample_events(scale, qmin, qmax):
         coords={'Q': sc.midpoints(qbins, 'Q')},
     )
     data.variances[:] = 0.1
+    data.unit = 'counts'
     return data.bin(Q=qbins)
 
 
@@ -58,10 +57,29 @@ def make_reference_events(qmin, qmax):
         coords={'Q': sc.midpoints(qbins, 'Q')},
     )
     data.variances[:] = 0.1
+    data.unit = 'counts'
     return data.bin(Q=qbins)
 
 
+# class RawData(sl.Scope[RunType, sc.DataArray], sc.DataArray):
+#     """A type alias for raw data arrays used in the test workflow."""
+
+
 def make_workflow():
+    def sample_data_from_filename(
+        filename: Filename[SampleRun],
+    ) -> UnscaledReducibleData[SampleRun]:
+        return UnscaledReducibleData[SampleRun](
+            make_sample_events(*(float(x) for x in filename.split('_')))
+        )
+
+    def reference_data_from_filename(
+        filename: Filename[ReferenceRun],
+    ) -> UnscaledReducibleData[ReferenceRun]:
+        return UnscaledReducibleData[ReferenceRun](
+            make_reference_events(*(float(x) for x in filename.split('_')))
+        )
+
     def apply_scaling(
         da: UnscaledReducibleData[RunType],
         scale: ScalingFactorForOverlap[RunType],
@@ -78,22 +96,27 @@ def make_workflow():
     ) -> ReflectivityOverQ:
         return ReflectivityOverQ(sample.hist(Q=qbins) / reference.hist(Q=qbins))
 
-    return sl.Pipeline([apply_scaling, reflectivity])
+    return sl.Pipeline(
+        [
+            sample_data_from_filename,
+            reference_data_from_filename,
+            apply_scaling,
+            reflectivity,
+        ]
+    )
 
 
 def test_reflectivity_curve_scaling():
     wf = make_workflow()
     wf[ScalingFactorForOverlap[SampleRun]] = 1.0
     wf[ScalingFactorForOverlap[ReferenceRun]] = 1.0
-    params = {'a': (1, 0, 0.3), 'b': (0.8, 0.2, 0.7), 'c': (0.1, 0.6, 1.0)}
+    params = {'a': (1.0, 0, 0.3), 'b': (0.8, 0.2, 0.7), 'c': (0.1, 0.6, 1.0)}
     workflows = {}
     for k, v in params.items():
-        sample = make_sample_events(*v)
-        reference = make_reference_events(v[1], v[2])
         workflows[k] = wf.copy()
-        workflows[k][UnscaledReducibleData[SampleRun]] = sample
-        workflows[k][UnscaledReducibleData[ReferenceRun]] = reference
-        workflows[k][QBins] = sample.coords['Q']
+        workflows[k][Filename[SampleRun]] = "_".join(map(str, v))
+        workflows[k][Filename[ReferenceRun]] = "_".join(map(str, v[1:]))
+        workflows[k][QBins] = make_reference_events(*v[1:]).coords['Q']
 
     wfc = WorkflowCollection(workflows)
 
@@ -113,12 +136,10 @@ def test_reflectivity_curve_scaling_with_critical_edge():
     params = {'a': (2, 0, 0.3), 'b': (0.8, 0.2, 0.7), 'c': (0.1, 0.6, 1.0)}
     workflows = {}
     for k, v in params.items():
-        sample = make_sample_events(*v)
-        reference = make_reference_events(v[1], v[2])
         workflows[k] = wf.copy()
-        workflows[k][UnscaledReducibleData[SampleRun]] = sample
-        workflows[k][UnscaledReducibleData[ReferenceRun]] = reference
-        workflows[k][QBins] = sample.coords['Q']
+        workflows[k][Filename[SampleRun]] = "_".join(map(str, v))
+        workflows[k][Filename[ReferenceRun]] = "_".join(map(str, v[1:]))
+        workflows[k][QBins] = make_reference_events(*v[1:]).coords['Q']
 
     wfc = WorkflowCollection(workflows)
 
@@ -132,44 +153,92 @@ def test_reflectivity_curve_scaling_with_critical_edge():
     assert np.isclose(factors['b'], 0.5 / 0.8)
     assert np.isclose(factors['c'], 0.25 / 0.1)
 
-    # data = sc.concat(
-    #     (
-    #         sc.ones(dims=['Q'], shape=[10], with_variances=True),
-    #         0.5 * sc.ones(dims=['Q'], shape=[15], with_variances=True),
-    #     ),
-    #     dim='Q',
-    # )
-    # data.variances[:] = 0.1
 
-    # curves, factors = scale_reflectivity_curves_to_overlap(
-    #     (
-    #         2 * curve(data, 0, 0.3),
-    #         curve(0.8 * data, 0.2, 0.7),
-    #         curve(0.1 * data, 0.6, 1.0),
-    #     ),
-    #     critical_edge_interval=(sc.scalar(0.01), sc.scalar(0.05)),
-    # )
+def test_reflectivity_curve_scaling_caches_intermediate_results():
+    sample_count = 0
+    reference_count = 0
 
-    # assert_allclose(curves[0].data, data, rtol=sc.scalar(1e-5))
-    # assert_allclose(curves[1].data, 0.5 * data, rtol=sc.scalar(1e-5))
-    # assert_allclose(curves[2].data, 0.25 * data, rtol=sc.scalar(1e-5))
-    # np_assert_allclose((0.5, 0.5 / 0.8, 0.25 / 0.1), factors, 1e-4)
+    def sample_data_from_filename(
+        filename: Filename[SampleRun],
+    ) -> UnscaledReducibleData[SampleRun]:
+        nonlocal sample_count
+        sample_count += 1
+        return UnscaledReducibleData[SampleRun](
+            make_sample_events(*(float(x) for x in filename.split('_')))
+        )
+
+    def reference_data_from_filename(
+        filename: Filename[ReferenceRun],
+    ) -> UnscaledReducibleData[ReferenceRun]:
+        nonlocal reference_count
+        reference_count += 1
+        return UnscaledReducibleData[ReferenceRun](
+            make_reference_events(*(float(x) for x in filename.split('_')))
+        )
+
+    def apply_scaling(
+        da: UnscaledReducibleData[RunType],
+        scale: ScalingFactorForOverlap[RunType],
+    ) -> ReducibleData[RunType]:
+        """
+        Scales the raw data by a given factor.
+        """
+        return ReducibleData[RunType](da * scale)
+
+    def reflectivity(
+        sample: ReducibleData[SampleRun],
+        reference: ReducibleData[ReferenceRun],
+        qbins: QBins,
+    ) -> ReflectivityOverQ:
+        return ReflectivityOverQ(sample.hist(Q=qbins) / reference.hist(Q=qbins))
+
+    wf = sl.Pipeline(
+        [
+            sample_data_from_filename,
+            reference_data_from_filename,
+            apply_scaling,
+            reflectivity,
+        ]
+    )
+    wf[ScalingFactorForOverlap[SampleRun]] = 1.0
+    wf[ScalingFactorForOverlap[ReferenceRun]] = 1.0
+    params = {'a': (1.0, 0, 0.3), 'b': (0.8, 0.2, 0.7), 'c': (0.1, 0.6, 1.0)}
+    workflows = {}
+    for k, v in params.items():
+        workflows[k] = wf.copy()
+        workflows[k][Filename[SampleRun]] = "_".join(map(str, v))
+        workflows[k][Filename[ReferenceRun]] = "_".join(map(str, v[1:]))
+        workflows[k][QBins] = make_reference_events(*v[1:]).coords['Q']
+
+    wfc = WorkflowCollection(workflows)
+
+    scaled_wf = scale_reflectivity_curves_to_overlap(
+        wfc, cache_intermediate_results=False
+    )
+    scaled_wf.compute(ReflectivityOverQ)
+    # We expect 6 counts: 3 for each of the 3 runs * 2 for computing ReflectivityOverQ
+    # inside the scaling function and one more time for the final computation just above
+    assert sample_count == 6
+    assert reference_count == 6
+
+    sample_count = 0
+    reference_count = 0
+
+    scaled_wf = scale_reflectivity_curves_to_overlap(
+        wfc, cache_intermediate_results=True
+    )
+    scaled_wf.compute(ReflectivityOverQ)
+    # We expect 3 counts: 1 for each of the 3 runs * 1 for computing ReflectivityOverQ
+    assert sample_count == 3
+    assert reference_count == 3
 
 
 def test_combined_curves():
     qgrid = sc.linspace('Q', 0, 1, 26)
-    data = sc.concat(
-        (
-            sc.ones(dims=['Q'], shape=[10], with_variances=True),
-            0.5 * sc.ones(dims=['Q'], shape=[15], with_variances=True),
-        ),
-        dim='Q',
-    )
-    data.variances[:] = 0.1
     curves = (
-        curve(data, 0, 0.3),
-        curve(0.5 * data, 0.2, 0.7),
-        curve(0.25 * data, 0.6, 1.0),
+        make_sample_events(1.0, 0, 0.3).hist(),
+        0.5 * make_sample_events(1.0, 0.2, 0.7).hist(),
+        0.25 * make_sample_events(1.0, 0.6, 1.0).hist(),
     )
 
     combined = combine_curves(curves, qgrid)
@@ -231,6 +300,7 @@ def test_combined_curves():
                 0.00625,
                 0.00625,
             ],
+            unit='counts',
         ),
     )
 
@@ -314,7 +384,7 @@ def test_linlogspace_bad_input():
 
 
 @pytest.mark.filterwarnings("ignore:No suitable")
-def test_from_measurements_tool_uses_expected_parameters_from_each_run():
+def test_batch_processor_tool_uses_expected_parameters_from_each_run():
     def normalized_ioq(filename: Filename[SampleRun]) -> ReflectivityOverQ:
         return filename
 
@@ -329,103 +399,31 @@ def test_from_measurements_tool_uses_expected_parameters_from_each_run():
     workflow = sl.Pipeline(
         [normalized_ioq, orso_dataset], params={Filename[SampleRun]: 'default'}
     )
-    datasets = from_measurements(
-        workflow,
-        [{}, {Filename[SampleRun]: 'special'}],
-        target=OrsoDataset,
-        scale_to_overlap=False,
-    )
-    assert len(datasets) == 2
-    assert tuple(d.info.name for d in datasets) == ('default.orso', 'special.orso')
+
+    batch = batch_processor(workflow, {'a': {}, 'b': {Filename[SampleRun]: 'special'}})
+
+    results = batch.compute(OrsoDataset)
+    assert len(results) == 2
+    assert results['a'].info.name == 'default.orso'
+    assert results['b'].info.name == 'special.orso'
 
 
-@pytest.mark.parametrize('targets', [(int,), (float, int)])
-@pytest.mark.parametrize(
-    'params', [[{str: '1'}, {str: '2'}], {'a': {str: '1'}, 'b': {str: '2'}}]
-)
-def test_from_measurements_tool_returns_mapping_if_passed_mapping(params, targets):
-    def A(x: str) -> float:
-        return float(x)
+def test_batch_processor_tool_merges_event_lists():
+    wf = make_workflow()
+    wf[ScalingFactorForOverlap[SampleRun]] = 1.0
+    wf[ScalingFactorForOverlap[ReferenceRun]] = 1.0
 
-    def B(x: str) -> int:
-        return int(x)
+    runs = {
+        'a': {Filename[SampleRun]: ('1.0_0.0_0.3', '1.5_0.0_0.3')},
+        'b': {Filename[SampleRun]: '0.8_0.2_0.7'},
+        'c': {Filename[SampleRun]: ('0.1_0.6_1.0', '0.2_0.6_1.0')},
+    }
+    batch = batch_processor(wf, runs)
 
-    workflow = sl.Pipeline([A, B])
-    datasets = from_measurements(
-        workflow,
-        params,
-        target=targets,
-    )
-    assert len(datasets) == len(params)
-    assert type(datasets) is type(params)
+    results = batch.compute(UnscaledReducibleData[SampleRun])
 
-
-def test_from_measurements_tool_does_not_recompute_reflectivity():
-    R = sc.DataArray(
-        sc.ones(dims=['Q'], shape=(50,), with_variances=True),
-        coords={'Q': sc.linspace('Q', 0.1, 1, 50)},
-    ).bin(Q=10)
-
-    times_evaluated = 0
-
-    def reflectivity() -> ReflectivityOverQ:
-        nonlocal times_evaluated
-        times_evaluated += 1
-        return ReflectivityOverQ(R)
-
-    def reducible_data() -> ReducibleData[SampleRun]:
-        return 'Not important'
-
-    pl = sl.Pipeline([reflectivity, reducible_data])
-
-    from_measurements(
-        pl,
-        [{}, {}],
-        target=(ReflectivityOverQ,),
-        scale_to_overlap=True,
-    )
-    assert times_evaluated == 2
-
-
-def test_from_measurements_tool_applies_scaling_to_reflectivityoverq():
-    R1 = sc.DataArray(
-        sc.ones(dims=['Q'], shape=(50,), with_variances=True),
-        coords={'Q': sc.linspace('Q', 0.1, 1, 50)},
-    ).bin(Q=10)
-    R2 = 0.5 * R1
-
-    def reducible_data() -> ReducibleData[SampleRun]:
-        return 'Not important'
-
-    pl = sl.Pipeline([reducible_data])
-
-    results = from_measurements(
-        pl,
-        [{ReflectivityOverQ: R1}, {ReflectivityOverQ: R2}],
-        target=(ReflectivityOverQ,),
-        scale_to_overlap=(sc.scalar(0.0), sc.scalar(1.0)),
-    )
-    assert_allclose(results[0][ReflectivityOverQ], results[1][ReflectivityOverQ])
-
-
-def test_from_measurements_tool_applies_scaling_to_reducibledata():
-    R1 = sc.DataArray(
-        sc.ones(dims=['Q'], shape=(50,), with_variances=True),
-        coords={'Q': sc.linspace('Q', 0.1, 1, 50)},
-    ).bin(Q=10)
-    R2 = 0.5 * R1
-
-    def reducible_data() -> ReducibleData[SampleRun]:
-        return sc.scalar(1)
-
-    pl = sl.Pipeline([reducible_data])
-
-    results = from_measurements(
-        pl,
-        [{ReflectivityOverQ: R1}, {ReflectivityOverQ: R2}],
-        target=(ReducibleData[SampleRun],),
-        scale_to_overlap=(sc.scalar(0.0), sc.scalar(1.0)),
-    )
-    assert_allclose(
-        results[0][ReducibleData[SampleRun]], 0.5 * results[1][ReducibleData[SampleRun]]
+    assert_almost_equal(results['a'].sum().value, 10 + 15 * 0.5 + (10 + 15 * 0.5) * 1.5)
+    assert_almost_equal(results['b'].sum().value, 10 * 0.8 + 15 * 0.5 * 0.8)
+    assert_almost_equal(
+        results['c'].sum().value, (10 + 15 * 0.5) * 0.1 + (10 + 15 * 0.5) * 0.2
     )
