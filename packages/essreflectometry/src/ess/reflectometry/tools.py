@@ -10,7 +10,6 @@ import sciline as sl
 import scipp as sc
 import scipy.optimize as opt
 
-# from ess.reflectometry import orso
 from ess.reflectometry.types import (
     Filename,
     QBins,

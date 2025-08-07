@@ -127,7 +127,6 @@ def test_save_reduced_orso_file(output_folder: Path):
     )
     wf[Filename[ReferenceRun]] = data.amor_run(4152)
     wf[QBins] = sc.geomspace(dim="Q", start=0.01, stop=0.06, num=201, unit="1/angstrom")
-    # r = wf.compute(ReflectivityOverQ)
 
     scaled_wf = scale_reflectivity_curves_to_overlap(
         wf,
@@ -136,7 +135,6 @@ def test_save_reduced_orso_file(output_folder: Path):
             sc.scalar(0.014, unit='1/angstrom'),
         ),
     )
-    # wf[ReflectivityOverQ] = s * r
     scaled_wf[orso.OrsoCreator] = orso.OrsoCreator(
         fileio.base.Person(
             name="Max Mustermann",

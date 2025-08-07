@@ -61,10 +61,6 @@ def make_reference_events(qmin, qmax):
     return data.bin(Q=qbins)
 
 
-# class RawData(sl.Scope[RunType, sc.DataArray], sc.DataArray):
-#     """A type alias for raw data arrays used in the test workflow."""
-
-
 def make_workflow():
     def sample_data_from_filename(
         filename: Filename[SampleRun],
