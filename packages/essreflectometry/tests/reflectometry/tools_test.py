@@ -154,6 +154,23 @@ def test_reflectivity_curve_scaling_with_critical_edge():
     assert np.isclose(factors['c'], 0.25 / 0.1)
 
 
+def test_reflectivity_curve_scaling_works_with_single_workflow_and_critical_edge():
+    wf = make_workflow()
+    wf[ScalingFactorForOverlap[SampleRun]] = 1.0
+    wf[ScalingFactorForOverlap[ReferenceRun]] = 1.0
+    wf[Filename[SampleRun]] = '2.5_0.4_0.8'
+    wf[Filename[ReferenceRun]] = '0.4_0.8'
+    wf[QBins] = make_reference_events(0.4, 0.8).coords['Q']
+
+    scaled_wf = scale_reflectivity_curves_to_overlap(
+        wf, critical_edge_interval=(sc.scalar(0.0), sc.scalar(0.5))
+    )
+
+    factor = scaled_wf.compute(ScalingFactorForOverlap[SampleRun])
+
+    assert np.isclose(factor, 0.4)
+
+
 def test_reflectivity_curve_scaling_caches_intermediate_results():
     sample_count = 0
     reference_count = 0

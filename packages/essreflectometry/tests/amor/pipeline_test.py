@@ -127,16 +127,17 @@ def test_save_reduced_orso_file(output_folder: Path):
     )
     wf[Filename[ReferenceRun]] = data.amor_run(4152)
     wf[QBins] = sc.geomspace(dim="Q", start=0.01, stop=0.06, num=201, unit="1/angstrom")
-    r = wf.compute(ReflectivityOverQ)
-    _, (s,) = scale_reflectivity_curves_to_overlap(
-        [r.hist()],
+    # r = wf.compute(ReflectivityOverQ)
+
+    scaled_wf = scale_reflectivity_curves_to_overlap(
+        wf,
         critical_edge_interval=(
             sc.scalar(0.01, unit='1/angstrom'),
             sc.scalar(0.014, unit='1/angstrom'),
         ),
     )
-    wf[ReflectivityOverQ] = s * r
-    wf[orso.OrsoCreator] = orso.OrsoCreator(
+    # wf[ReflectivityOverQ] = s * r
+    scaled_wf[orso.OrsoCreator] = orso.OrsoCreator(
         fileio.base.Person(
             name="Max Mustermann",
             affiliation="European Spallation Source ERIC",
@@ -144,7 +145,7 @@ def test_save_reduced_orso_file(output_folder: Path):
         )
     )
     fileio.orso.save_orso(
-        datasets=[wf.compute(orso.OrsoIofQDataset)],
+        datasets=[scaled_wf.compute(orso.OrsoIofQDataset)],
         fname=output_folder / 'amor_reduced_iofq.ort',
     )
 

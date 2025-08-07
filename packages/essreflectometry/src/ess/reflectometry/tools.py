@@ -6,7 +6,7 @@ from itertools import chain
 from typing import Any
 
 import numpy as np
-import sciline
+import sciline as sl
 import scipp as sc
 import scipy.optimize as opt
 
@@ -109,6 +109,60 @@ def linlogspace(
     return sc.concat(grids, dim)
 
 
+class WorkflowCollection:
+    """
+    A collection of sciline workflows that can be used to compute multiple
+    targets from multiple workflows.
+    It can also be used to set parameters for all workflows in a single shot.
+    """
+
+    def __init__(self, workflows: Mapping[str, sl.Pipeline]):
+        self._workflows = {name: pl.copy() for name, pl in workflows.items()}
+
+    def __setitem__(self, key: type, value: Any | Mapping[type, Any]):
+        if hasattr(value, 'items'):
+            for name, v in value.items():
+                self._workflows[name][key] = v
+        else:
+            for pl in self._workflows.values():
+                pl[key] = value
+
+    def __getitem__(self, name: str) -> sl.Pipeline:
+        """
+        Returns a single workflow from the collection given by its name.
+        """
+        return self._workflows[name]
+
+    def compute(self, target: type | Sequence[type], **kwargs) -> Mapping[str, Any]:
+        return {
+            name: pl.compute(target, **kwargs) for name, pl in self._workflows.items()
+        }
+
+    def copy(self) -> 'WorkflowCollection':
+        return self.__class__(self._workflows)
+
+    def keys(self) -> Sequence[str]:
+        return self._workflows.keys()
+
+    def values(self) -> Sequence[sl.Pipeline]:
+        return self._workflows.values()
+
+    def items(self) -> Sequence[tuple[str, sl.Pipeline]]:
+        return self._workflows.items()
+
+    def add(self, name: str, workflow: sl.Pipeline):
+        """
+        Adds a new workflow to the collection.
+        """
+        self._workflows[name] = workflow.copy()
+
+    def remove(self, name: str):
+        """
+        Removes a workflow from the collection by its name.
+        """
+        del self._workflows[name]
+
+
 def _sort_by(a, by):
     return [x for x, _ in sorted(zip(a, by, strict=True), key=lambda x: x[1])]
 
@@ -169,13 +223,14 @@ def _interpolate_on_qgrid(curves, grid):
 
 
 def scale_reflectivity_curves_to_overlap(
-    wf_collection: Sequence[sc.DataArray],
+    workflows: WorkflowCollection | sl.Pipeline,
     critical_edge_interval: tuple[sc.Variable, sc.Variable] | None = None,
     cache_intermediate_results: bool = True,
 ) -> tuple[list[sc.DataArray], list[sc.Variable]]:
     '''
     Set the ``ScalingFactorForOverlap`` parameter on the provided workflows
     in a way that would makes the 1D reflectivity curves overlap.
+    One can supply either a collection of workflows or a single workflow.
 
     If :code:`critical_edge_interval` is not provided, all workflows are scaled except
     the data with the lowest Q-range, which is considered to be the reference curve.
@@ -188,8 +243,8 @@ def scale_reflectivity_curves_to_overlap(
 
     Parameters
     ---------
-    wf_collection:
-        The collection of workflows that can compute the ``ReflectivityOverQ``.
+    workflows:
+        The workflow or collection of workflows that can compute ``ReflectivityOverQ``.
     critical_edge_interval:
         A tuple denoting an interval that is known to belong
         to the critical edge, i.e. where the reflectivity is
@@ -203,7 +258,17 @@ def scale_reflectivity_curves_to_overlap(
     :
         A list of scaled reflectivity curves and a list of the scaling factors.
     '''
-    wfc = wf_collection.copy()
+    if isinstance(workflows, sl.Pipeline):
+        # If a single workflow is provided, convert it to a collection
+        wfc = WorkflowCollection({"": workflows})
+        out = scale_reflectivity_curves_to_overlap(
+            wfc,
+            critical_edge_interval=critical_edge_interval,
+            cache_intermediate_results=cache_intermediate_results,
+        )
+        return out[""]
+
+    wfc = workflows.copy()
     if cache_intermediate_results:
         wfc[UnscaledReducibleData[SampleRun]] = wfc.compute(
             UnscaledReducibleData[SampleRun]
@@ -226,7 +291,7 @@ def scale_reflectivity_curves_to_overlap(
     if critical_edge_interval is not None:
         # Find q bins with the lowest Q start point
         q = min(
-            (wf.compute(QBins) for wf in wf_collection.values()),
+            (wf.compute(QBins) for wf in workflows.values()),
             key=lambda q_: q_.min(),
         )
         N = (
@@ -326,62 +391,8 @@ def combine_curves(
     )
 
 
-class WorkflowCollection:
-    """
-    A collection of sciline workflows that can be used to compute multiple
-    targets from multiple workflows.
-    It can also be used to set parameters for all workflows in a single shot.
-    """
-
-    def __init__(self, workflows: Mapping[str, sciline.Pipeline]):
-        self._workflows = {name: pl.copy() for name, pl in workflows.items()}
-
-    def __setitem__(self, key: type, value: Any | Mapping[type, Any]):
-        if hasattr(value, 'items'):
-            for name, v in value.items():
-                self._workflows[name][key] = v
-        else:
-            for pl in self._workflows.values():
-                pl[key] = value
-
-    def __getitem__(self, name: str) -> sciline.Pipeline:
-        """
-        Returns a single workflow from the collection given by its name.
-        """
-        return self._workflows[name]
-
-    def compute(self, target: type | Sequence[type], **kwargs) -> Mapping[str, Any]:
-        return {
-            name: pl.compute(target, **kwargs) for name, pl in self._workflows.items()
-        }
-
-    def copy(self) -> 'WorkflowCollection':
-        return self.__class__(self._workflows)
-
-    def keys(self) -> Sequence[str]:
-        return self._workflows.keys()
-
-    def values(self) -> Sequence[sciline.Pipeline]:
-        return self._workflows.values()
-
-    def items(self) -> Sequence[tuple[str, sciline.Pipeline]]:
-        return self._workflows.items()
-
-    def add(self, name: str, workflow: sciline.Pipeline):
-        """
-        Adds a new workflow to the collection.
-        """
-        self._workflows[name] = workflow.copy()
-
-    def remove(self, name: str):
-        """
-        Removes a workflow from the collection by its name.
-        """
-        del self._workflows[name]
-
-
 def batch_processor(
-    workflow: sciline.Pipeline, runs: Mapping[Any, Mapping[type, Any]]
+    workflow: sl.Pipeline, runs: Mapping[Any, Mapping[type, Any]]
 ) -> WorkflowCollection:
     """
     Creates a collection of sciline workflows from the provided runs.
