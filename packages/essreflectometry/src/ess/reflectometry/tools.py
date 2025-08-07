@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+import uuid
 from collections.abc import Mapping, Sequence
 from itertools import chain
 from typing import Any, NewType
@@ -166,10 +167,6 @@ def _interpolate_on_qgrid(curves, grid):
     )
 
 
-CriticalEdgeKey = NewType('CriticalEdgeKey', None)
-"""A unique key used to store a 'fake' critical edge in a workflow collection."""
-
-
 def scale_reflectivity_curves_to_overlap(
     wf_collection: Sequence[sc.DataArray],
     critical_edge_interval: tuple[sc.Variable, sc.Variable] | None = None,
@@ -205,30 +202,6 @@ def scale_reflectivity_curves_to_overlap(
     :
         A list of scaled reflectivity curves and a list of the scaling factors.
     '''
-    if critical_edge_interval is not None:
-        # Find q bins with the lowest Q start point
-        q = min(
-            (wf.compute(QBins) for wf in wf_collection.values()),
-            key=lambda q_: q_.min(),
-        )
-        N = (
-            ((q >= critical_edge_interval[0]) & (q < critical_edge_interval[1]))
-            .sum()
-            .value
-        )
-        edge = sc.DataArray(
-            data=sc.ones(dims=('Q',), shape=(N,), with_variances=True),
-            coords={'Q': sc.linspace('Q', *critical_edge_interval, N + 1)},
-        )
-        wfc = wf_collection.copy()
-        underlying_wf = next(iter(wfc.values()))
-        edge_wf = underlying_wf.copy()
-        edge_wf[ReflectivityOverQ] = edge
-        wfc.add(CriticalEdgeKey, edge_wf)
-        return scale_reflectivity_curves_to_overlap(
-            wfc, cache_intermediate_results=cache_intermediate_results
-        )
-
     wfc = wf_collection.copy()
     if cache_intermediate_results:
         wfc[UnscaledReducibleData[SampleRun]] = wfc.compute(
@@ -244,9 +217,26 @@ def scale_reflectivity_curves_to_overlap(
             reflectivities.items(), key=lambda item: item[1].coords['Q'].min().value
         )
     }
-    # Now place the critical edge at the beginning, if it exists
-    if CriticalEdgeKey in curves.keys():
-        curves = {CriticalEdgeKey: curves[CriticalEdgeKey]} | curves
+
+    critical_edge_key = None
+    if critical_edge_interval is not None:
+        critical_edge_key = uuid.uuid4().hex
+        # Find q bins with the lowest Q start point
+        q = min(
+            (wf.compute(QBins) for wf in wf_collection.values()),
+            key=lambda q_: q_.min(),
+        )
+        N = (
+            ((q >= critical_edge_interval[0]) & (q < critical_edge_interval[1]))
+            .sum()
+            .value
+        )
+        edge = sc.DataArray(
+            data=sc.ones(dims=('Q',), shape=(N,), with_variances=True),
+            coords={'Q': sc.linspace('Q', *critical_edge_interval, N + 1)},
+        )
+        # Now place the critical edge at the beginning
+        curves = {critical_edge_key: edge} | curves
 
     if len({c.data.unit for c in curves.values()}) != 1:
         raise ValueError('The reflectivity curves must have the same unit')
@@ -272,12 +262,11 @@ def scale_reflectivity_curves_to_overlap(
     sol = opt.minimize(cost, [1.0] * (len(curves) - 1))
     scaling_factors = (1.0, *map(float, sol.x))
 
-    wfc[ScalingFactorForOverlap[SampleRun]] = dict(
-        zip(curves.keys(), scaling_factors, strict=True)
-    )
-
-    if CriticalEdgeKey in wfc.keys():
-        wfc.remove(CriticalEdgeKey)
+    wfc[ScalingFactorForOverlap[SampleRun]] = {
+        k: v
+        for k, v in zip(curves.keys(), scaling_factors, strict=True)
+        if k != critical_edge_key
+    }
 
     return wfc
 
