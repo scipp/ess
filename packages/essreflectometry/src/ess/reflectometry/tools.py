@@ -269,12 +269,18 @@ def scale_reflectivity_curves_to_overlap(
 
     wfc = workflows.copy()
     if cache_intermediate_results:
-        wfc[UnscaledReducibleData[SampleRun]] = wfc.compute(
-            UnscaledReducibleData[SampleRun]
-        )
-        wfc[UnscaledReducibleData[ReferenceRun]] = wfc.compute(
-            UnscaledReducibleData[ReferenceRun]
-        )
+        try:
+            wfc[UnscaledReducibleData[SampleRun]] = wfc.compute(
+                UnscaledReducibleData[SampleRun]
+            )
+        except sl.UnsatisfiedRequirement:
+            pass
+        try:
+            wfc[UnscaledReducibleData[ReferenceRun]] = wfc.compute(
+                UnscaledReducibleData[ReferenceRun]
+            )
+        except sl.UnsatisfiedRequirement:
+            pass
 
     reflectivities = wfc.compute(ReflectivityOverQ)
 
