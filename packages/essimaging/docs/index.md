@@ -32,7 +32,7 @@
 
 ::::{grid} 3
 
-:::{grid-item-card} ODIN
+:::{grid-item-card} Odin
 :link: odin/index.md
 :img-top: _static/odin.svg
 
@@ -43,7 +43,7 @@
 
 :::
 
-:::{grid-item-card} YMIR
+:::{grid-item-card} Ymir
 :link: ymir/index.md
 :img-top: _static/ymir.svg
 
