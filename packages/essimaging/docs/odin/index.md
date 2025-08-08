@@ -1,4 +1,4 @@
-# ODIN
+# Odin
 
 ```{toctree}
 ---

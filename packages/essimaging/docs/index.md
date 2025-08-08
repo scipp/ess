@@ -33,27 +33,40 @@
 ::::{grid} 3
 
 :::{grid-item-card} ODIN
-:link: user-guide/odin/index.md
+:link: odin/index.md
 :img-top: _static/odin.svg
 
 :::
 
 :::{grid-item-card} Test beamline
-:link: user-guide/tbl/index.md
+:link: tbl/index.md
 
 :::
 
-::::{grid-item-card} YMIR
-:link: user-guide/ymir/index.md
+:::{grid-item-card} YMIR
+:link: ymir/index.md
 :img-top: _static/ymir.svg
 
 :::
 
 ::::
 
-:::{include} user-guide/installation.md
-:heading-offset: 1
-:::
+## Installation
+
+To install ESSimaging and all of its dependencies, use
+
+`````{tab-set}
+````{tab-item} pip
+```sh
+pip install essimaging
+```
+````
+````{tab-item} conda
+```sh
+conda install -c conda-forge essimaging
+```
+````
+`````
 
 ## Get in touch
 
@@ -65,7 +78,10 @@
 hidden:
 ---
 
-user-guide/index
+odin/index
+tbl/index
+ymir/index
+tools/index
 api-reference/index
 developer/index
 about/index
