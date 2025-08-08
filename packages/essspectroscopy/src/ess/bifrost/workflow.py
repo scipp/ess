@@ -14,7 +14,7 @@ from ess.spectroscopy.indirect.ki import providers as ki_providers
 from ess.spectroscopy.indirect.normalization import providers as normalisation_providers
 from ess.spectroscopy.indirect.time_of_flight import TofWorkflow
 from ess.spectroscopy.types import (
-    DataGroupedByRotation,
+    DetectorData,
     FrameMonitor0,
     FrameMonitor1,
     FrameMonitor2,
@@ -78,8 +78,8 @@ def BifrostSimulationWorkflow(
     for key, val in simulation_default_parameters().items():
         workflow[key] = val
 
-    workflow[DataGroupedByRotation[SampleRun]] = (
-        workflow[DataGroupedByRotation[SampleRun]]
+    workflow[DetectorData[SampleRun]] = (
+        workflow[DetectorData[SampleRun]]
         .map(_make_detector_name_mapping(detector_names))
         .reduce(func=merge_triplets)
     )
