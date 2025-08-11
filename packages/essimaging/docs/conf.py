@@ -159,22 +159,14 @@ html_theme_options = {
     "navbar_persistent": ["search-button"],
     "show_nav_level": 1,
     # Adjust this to ensure external links are moved to "Move" menu
-    "header_links_before_dropdown": 4,
+    "header_links_before_dropdown": 7,
     "pygment_light_style": "github-light-high-contrast",
     "pygment_dark_style": "github-dark-high-contrast",
     "logo": {
         "image_light": "_static/logo.svg",
         "image_dark": "_static/logo-dark.svg",
     },
-    "external_links": [
-        {"name": "Essreduce", "url": "https://scipp.github.io/essreduce"},
-        {"name": "Plopp", "url": "https://scipp.github.io/plopp"},
-        {"name": "Sciline", "url": "https://scipp.github.io/sciline"},
-        {"name": "Scipp", "url": "https://scipp.github.io"},
-        {"name": "ScippNeutron", "url": "https://scipp.github.io/scippneutron"},
-        {"name": "ScippNexus", "url": "https://scipp.github.io/scippnexus"},
-        {"name": "Tof", "url": "https://scipp.github.io/tof"},
-    ],
+    "external_links": [],
     "icon_links": [
         {
             "name": "GitHub",
@@ -193,6 +185,13 @@ html_theme_options = {
             "url": "https://anaconda.org/conda-forge/essimaging",
             "icon": "fa-custom fa-anaconda",
             "type": "fontawesome",
+        },
+        {
+            "name": "Scipp",
+            # TODO: this should be a link to a docs landing page once we have one
+            "url": "https://github.com/scipp",
+            "icon": "_static/favicon.ico",
+            "type": "local",
         },
     ],
     "footer_start": ["copyright", "sphinx-version"],
