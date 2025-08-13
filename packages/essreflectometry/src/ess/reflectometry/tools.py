@@ -11,7 +11,6 @@ import scipp as sc
 import scipy.optimize as opt
 
 from ess.reflectometry.types import (
-    Filename,
     QBins,
     ReferenceRun,
     ReflectivityOverQ,
@@ -19,7 +18,6 @@ from ess.reflectometry.types import (
     ScalingFactorForOverlap,
     UnscaledReducibleData,
 )
-from ess.reflectometry.workflow import with_filenames
 
 _STD_TO_FWHM = sc.scalar(2.0) * sc.sqrt(sc.scalar(2.0) * sc.log(sc.scalar(2.0)))
 
@@ -111,55 +109,50 @@ def linlogspace(
 class WorkflowCollection:
     """
     A collection of sciline workflows that can be used to compute multiple
-    targets from multiple workflows.
-    It can also be used to set parameters for all workflows in a single shot.
+    targets from mapping a workflow over a parameter table.
+    It can also be used to set parameters for all mapped nodes in a single shot.
     """
 
-    def __init__(self, workflows: Mapping[str, sl.Pipeline]):
-        self._workflows = {name: pl.copy() for name, pl in workflows.items()}
+    def __init__(self, workflow: sl.Pipeline, param_table):
+        self._original_workflow = workflow.copy()
+        self.param_table = param_table
+        self._mapped_workflow = self._original_workflow.map(self.param_table)
 
-    def __setitem__(self, key: type, value: Any | Mapping[type, Any]):
-        if hasattr(value, 'items'):
-            for name, v in value.items():
-                self._workflows[name][key] = v
+    def __setitem__(self, key, value):
+        if key in self.param_table:
+            ind = list(self.param_table.keys()).index(key)
+            self.param_table.iloc[:, ind] = value
+            self._mapped_workflow = self._original_workflow.map(self.param_table)
         else:
-            for pl in self._workflows.values():
-                pl[key] = value
-
-    def __getitem__(self, name: str) -> sl.Pipeline:
-        """
-        Returns a single workflow from the collection given by its name.
-        """
-        return self._workflows[name]
+            self.param_table.insert(len(self.param_table.columns), key, value)
+            self._original_workflow[key] = None
+            self._mapped_workflow = self._original_workflow.map(self.param_table)
 
     def compute(self, target: type | Sequence[type], **kwargs) -> Mapping[str, Any]:
-        return {
-            name: pl.compute(target, **kwargs) for name, pl in self._workflows.items()
-        }
+        try:
+            # TODO: Sciline here returns a pandas Series.
+            # Should we convert it to a dict instead?
+            return sl.compute_mapped(self._mapped_workflow, target, **kwargs)
+        except ValueError:
+            return self._mapped_workflow.compute(target, **kwargs)
+
+    def get(self, targets, **kwargs):
+        try:
+            targets = sl.get_mapped_node_names(self._mapped_workflow, targets)
+            return self._mapped_workflow.get(targets, **kwargs)
+        except ValueError:
+            return self._mapped_workflow.get(targets, **kwargs)
+
+    # TODO: implement the group() method to group by params in the parameter table
+
+    def visualize(self, targets, **kwargs):
+        targets = sl.get_mapped_node_names(self._mapped_workflow, targets)
+        return self._mapped_workflow.visualize(targets, **kwargs)
 
     def copy(self) -> 'WorkflowCollection':
-        return self.__class__(self._workflows)
-
-    def keys(self) -> Sequence[str]:
-        return self._workflows.keys()
-
-    def values(self) -> Sequence[sl.Pipeline]:
-        return self._workflows.values()
-
-    def items(self) -> Sequence[tuple[str, sl.Pipeline]]:
-        return self._workflows.items()
-
-    def add(self, name: str, workflow: sl.Pipeline):
-        """
-        Adds a new workflow to the collection.
-        """
-        self._workflows[name] = workflow.copy()
-
-    def remove(self, name: str):
-        """
-        Removes a workflow from the collection by its name.
-        """
-        del self._workflows[name]
+        return self.__class__(
+            workflow=self._original_workflow, param_table=self.param_table
+        )
 
 
 def _sort_by(a, by):
@@ -222,7 +215,7 @@ def _interpolate_on_qgrid(curves, grid):
 
 
 def scale_reflectivity_curves_to_overlap(
-    workflows: WorkflowCollection | sl.Pipeline,
+    workflow: WorkflowCollection | sl.Pipeline,
     critical_edge_interval: tuple[sc.Variable, sc.Variable] | None = None,
     cache_intermediate_results: bool = True,
 ) -> tuple[list[sc.DataArray], list[sc.Variable]]:
@@ -257,17 +250,9 @@ def scale_reflectivity_curves_to_overlap(
     :
         A list of scaled reflectivity curves and a list of the scaling factors.
     '''
-    if isinstance(workflows, sl.Pipeline):
-        # If a single workflow is provided, convert it to a collection
-        wfc = WorkflowCollection({"": workflows})
-        out = scale_reflectivity_curves_to_overlap(
-            wfc,
-            critical_edge_interval=critical_edge_interval,
-            cache_intermediate_results=cache_intermediate_results,
-        )
-        return out[""]
+    not_collection = isinstance(workflow, sl.Pipeline)
 
-    wfc = workflows.copy()
+    wfc = workflow.copy()
     if cache_intermediate_results:
         try:
             wfc[UnscaledReducibleData[SampleRun]] = wfc.compute(
@@ -283,6 +268,8 @@ def scale_reflectivity_curves_to_overlap(
             pass
 
     reflectivities = wfc.compute(ReflectivityOverQ)
+    if not_collection:
+        reflectivities = {"": reflectivities}
 
     # First sort the dict of reflectivities by the Q min value
     curves = {
@@ -294,20 +281,21 @@ def scale_reflectivity_curves_to_overlap(
 
     critical_edge_key = uuid.uuid4().hex
     if critical_edge_interval is not None:
-        # Find q bins with the lowest Q start point
-        q = min(
-            (wf.compute(QBins) for wf in workflows.values()),
-            key=lambda q_: q_.min(),
-        )
-        N = (
-            ((q >= critical_edge_interval[0]) & (q < critical_edge_interval[1]))
-            .sum()
-            .value
-        )
+        q = wfc.compute(QBins)
+        if hasattr(q, "items"):
+            # If QBins is a mapping, find the one with the lowest Q start
+            # Note the conversion to a dict, because if pandas is used for the mapping,
+            # it will return a Series, whose `.values` attribute is not callable.
+            q = min(dict(q).values(), key=lambda q_: q_.min())
+
+        # TODO: This is slightly different from before: it extracts the bins from the
+        # QBins variable that cover the critical edge interval. This means that the
+        # resulting curve will not necessarily begin and end exactly at the values
+        # specified, but rather at the closest bin edges.
         edge = sc.DataArray(
-            data=sc.ones(dims=('Q',), shape=(N,), with_variances=True),
-            coords={'Q': sc.linspace('Q', *critical_edge_interval, N + 1)},
-        )
+            data=sc.ones(sizes={q.dim: q.sizes[q.dim] - 1}, with_variances=True),
+            coords={q.dim: q},
+        )[q.dim, critical_edge_interval[0] : critical_edge_interval[1]]
         # Now place the critical edge at the beginning
         curves = {critical_edge_key: edge} | curves
 
@@ -335,11 +323,14 @@ def scale_reflectivity_curves_to_overlap(
     sol = opt.minimize(cost, [1.0] * (len(curves) - 1))
     scaling_factors = (1.0, *map(float, sol.x))
 
-    wfc[ScalingFactorForOverlap[SampleRun]] = {
+    results = {
         k: v
         for k, v in zip(curves.keys(), scaling_factors, strict=True)
         if k != critical_edge_key
     }
+    if not_collection:
+        results = results[""]
+    wfc[ScalingFactorForOverlap[SampleRun]] = results
 
     return wfc
 
@@ -397,10 +388,10 @@ def combine_curves(
 
 
 def batch_processor(
-    workflow: sl.Pipeline, runs: Mapping[Any, Mapping[type, Any]]
+    workflow: sl.Pipeline, params: Mapping[Any, Mapping[type, Any]]
 ) -> WorkflowCollection:
     """
-    Creates a collection of sciline workflows from the provided runs.
+    Maps the provided workflow over the provided params.
 
     Example:
 
@@ -415,7 +406,7 @@ def batch_processor(
             Filename[SampleRun]: amor.data.amor_run(608),
         },
         '609': {
-            SampleRotationOffset[SampleRun]: sc.scalar(0.05, unit='deg'),
+            SampleRotationOffset[SampleRun]: sc.scalar(0.06, unit='deg'),
             Filename[SampleRun]: amor.data.amor_run(609),
         },
         '610': {
@@ -423,7 +414,7 @@ def batch_processor(
             Filename[SampleRun]: amor.data.amor_run(610),
         },
         '611': {
-            SampleRotationOffset[SampleRun]: sc.scalar(0.05, unit='deg'),
+            SampleRotationOffset[SampleRun]: sc.scalar(0.07, unit='deg'),
             Filename[SampleRun]: amor.data.amor_run(611),
         },
     }
@@ -437,30 +428,23 @@ def batch_processor(
     ----------
     workflow:
         The sciline workflow used to compute the targets for each of the runs.
-    runs:
+    params:
         The sciline parameters to be used for each run.
         Should be a mapping where the keys are the names of the runs
         and the values are mappings of type to value pairs.
-        In addition, if one of the values for ``Filename[SampleRun]``
-        is a list or a tuple, then the events from the files
-        will be concatenated into a single event list.
     """
-    workflows = {}
-    for name, parameters in runs.items():
-        wf = workflow.copy()
-        for tp, value in parameters.items():
-            if tp is Filename[SampleRun]:
-                continue
-            wf[tp] = value
+    import pandas as pd
 
-        if Filename[SampleRun] in parameters:
-            if isinstance(parameters[Filename[SampleRun]], list | tuple):
-                wf = with_filenames(
-                    wf,
-                    SampleRun,
-                    parameters[Filename[SampleRun]],
-                )
+    all_types = {t for v in params.values() for t in v.keys()}
+    data = {t: [] for t in all_types}
+    for param in params.values():
+        for t in all_types:
+            if t in param:
+                data[t].append(param[t])
             else:
-                wf[Filename[SampleRun]] = parameters[Filename[SampleRun]]
-        workflows[name] = wf
-    return WorkflowCollection(workflows)
+                # Set the default value
+                data[t].append(workflow.compute(t))
+
+    param_table = pd.DataFrame(data, index=params.keys()).rename_axis(index='run_id')
+
+    return WorkflowCollection(workflow, param_table)
