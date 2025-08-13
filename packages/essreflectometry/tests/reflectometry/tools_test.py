@@ -437,7 +437,8 @@ def test_batch_processor_tool_uses_expected_parameters_from_each_run():
 
 #     results = batch.compute(UnscaledReducibleData[SampleRun])
 
-#     assert_almost_equal(results['a'].sum().value, 10 + 15 * 0.5 + (10 + 15 * 0.5) * 1.5)
+#     assert_almost_equal(results['a'].sum().value,
+#                         10 + 15 * 0.5 + (10 + 15 * 0.5) * 1.5)
 #     assert_almost_equal(results['b'].sum().value, 10 * 0.8 + 15 * 0.5 * 0.8)
 #     assert_almost_equal(
 #         results['c'].sum().value, (10 + 15 * 0.5) * 0.1 + (10 + 15 * 0.5) * 0.2
