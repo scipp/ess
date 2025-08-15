@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 
+import pandas as pd
 import sciline as sl
 
 from ess.reflectometry.tools import WorkflowCollection
@@ -14,25 +15,34 @@ def int_float_to_str(x: int, y: float) -> str:
     return f"{x};{y}"
 
 
+def make_param_table(params: dict) -> pd.DataFrame:
+    all_types = {t for v in params.values() for t in v.keys()}
+    data = {t: [] for t in all_types}
+    for param in params.values():
+        for t in all_types:
+            data[t].append(param[t])
+    return pd.DataFrame(data, index=params.keys()).rename_axis(index='run_id')
+
+
 def test_compute() -> None:
     wf = sl.Pipeline([int_to_float, int_float_to_str])
-    wfa = wf.copy()
-    wfa[int] = 3
-    wfb = wf.copy()
-    wfb[int] = 4
-    coll = WorkflowCollection({'a': wfa, 'b': wfb})
 
-    assert coll.compute(float) == {'a': 1.5, 'b': 2.0}
-    assert coll.compute(str) == {'a': '3;1.5', 'b': '4;2.0'}
+    coll = WorkflowCollection(wf, make_param_table({'a': {int: 3}, 'b': {int: 4}}))
+
+    assert dict(coll.compute(float)) == {'a': 1.5, 'b': 2.0}
+    assert dict(coll.compute(str)) == {'a': '3;1.5', 'b': '4;2.0'}
 
 
 def test_compute_multiple() -> None:
     wf = sl.Pipeline([int_to_float, int_float_to_str])
-    wfa = wf.copy()
-    wfa[int] = 3
-    wfb = wf.copy()
-    wfb[int] = 4
-    coll = WorkflowCollection({'a': wfa, 'b': wfb})
+
+    coll = WorkflowCollection(wf, make_param_table({'a': {int: 3}, 'b': {int: 4}}))
+
+    # wfa = wf.copy()
+    # wfa[int] = 3
+    # wfb = wf.copy()
+    # wfb[int] = 4
+    # coll = WorkflowCollection({'a': wfa, 'b': wfb})
 
     result = coll.compute([float, str])
 
