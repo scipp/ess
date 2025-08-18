@@ -91,7 +91,7 @@ def qgrid(
     qmin = reflectometry_q(wavelength=wmax, theta=theta_min)
     qmax = reflectometry_q(wavelength=wmin, theta=theta_max)
     qmin = max(qmin, sc.scalar(1e-3, unit='1/angstrom'))
-    return QBins(sc.geomspace('Q', qmin, qmax, 499))
+    return QBins(sc.geomspace('Q', qmin, qmax, 501))
 
 
 providers = (theta_grid, qgrid)
