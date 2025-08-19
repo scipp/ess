@@ -132,75 +132,20 @@ class WorkflowCollection:
         from sciline.pipeline import _is_multiple_keys
 
         out = {}
-        if _is_multiple_keys(keys):
-            for key in keys:
-                if sl.is_mapped_node(self._mapped_workflow, key):
-                    targets = [
-                        n
-                        for x in key
-                        for n in sl.get_mapped_node_names(self._mapped_workflow, x)
-                    ]
-                    results = self._mapped_workflow.compute(targets, **kwargs)
-                    for node, v in results.items():
-                        key = node.index.values[0]
-                        if key not in out:
-                            out[key] = {node.name: [v]}
-                        else:
-                            out[key][node.name] = v
+        if not _is_multiple_keys(keys):
+            keys = [keys]
+        for key in keys:
+            out[key] = {}
+            if sl.is_mapped_node(self._mapped_workflow, key):
+                targets = sl.get_mapped_node_names(self._mapped_workflow, key)
+                results = self._mapped_workflow.compute(targets, **kwargs)
+                for node, v in results.items():
+                    out[key][node.index.values[0]] = v
+            else:
+                out[key] = self._mapped_workflow.compute(key, **kwargs)
+        return next(iter(out.values())) if len(out) == 1 else out
 
-        # if sl.is_mapped_node(target):
-        #     from sciline.pipeline import _is_multiple_keys
-
-        #         targets = [
-        #             n
-        #             for x in target
-        #             for n in sl.get_mapped_node_names(self._mapped_workflow, x)
-        #         ]
-        #         results = self._mapped_workflow.compute(targets, **kwargs)
-        #         out = {}
-        #         for node, v in results.items():
-        #             key = node.index.values[0]
-        #             if key not in out:
-        #                 out[key] = {node.name: [v]}
-        #             else:
-        #                 out[key][node.name] = v
-        #         return out
-        #     else:
-        #         return dict(sl.compute_mapped(self._mapped_workflow, target, **kwargs))
-        # else:
-        #     return self._mapped_workflow.compute(target, **kwargs)
-
-    # def get(self, keys, **kwargs):
-    #     if _is_multiple_keys(target):
-
-    #     if sl.is_mapped_node(target):
-    #         from sciline.pipeline import _is_multiple_keys
-
-    #         if _is_multiple_keys(target):
-    #             targets = [
-    #                 n
-    #                 for x in target
-    #                 for n in sl.get_mapped_node_names(self._mapped_workflow, x)
-    #             ]
-
-    #             results = self._mapped_workflow.compute(targets, **kwargs)
-    #             out = {}
-    #             for node, v in results.items():
-    #                 key = node.index.values[0]
-    #                 if key not in out:
-    #                     out[key] = {node.name: [v]}
-    #                 else:
-    #                     out[key][node.name] = v
-    #             return out
-    #         else:
-    #             return dict(sl.compute_mapped(self._mapped_workflow, target, **kwargs))
-    #     else:
-    #         return self._mapped_workflow.compute(target, **kwargs)
-    #     # try:
-    #     #     targets = sl.get_mapped_node_names(self._mapped_workflow, targets)
-    #     #     return self._mapped_workflow.get(targets, **kwargs)
-    #     # except ValueError:
-    #     #     return self._mapped_workflow.get(targets, **kwargs)
+    # TODO: implement get()
 
     # TODO: implement the group() method to group by params in the parameter table
 
