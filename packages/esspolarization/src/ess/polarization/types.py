@@ -85,6 +85,12 @@ class PolarizationCorrectedData(Generic[PolarizerSpin, AnalyzerSpin]):
     downup: sc.DataArray
     downdown: sc.DataArray
 
+    def __post_init__(self):
+        self.upup.name = '(up, up)'
+        self.updown.name = '(up, down)'
+        self.downup.name = '(down, up)'
+        self.downdown.name = '(down, down)'
+
 
 """The sum of polarization corrected data from all flipper state channels."""
 TotalPolarizationCorrectedData = NewType(
