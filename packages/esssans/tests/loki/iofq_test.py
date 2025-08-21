@@ -13,6 +13,7 @@ import ess.loki.data  # noqa: F401
 from ess import loki, sans
 from ess.sans.conversions import ElasticCoordTransformGraph
 from ess.sans.types import (
+    BackgroundRun,
     BackgroundSubtractedIofQ,
     BackgroundSubtractedIofQxy,
     BeamCenter,
@@ -20,6 +21,7 @@ from ess.sans.types import (
     CorrectForGravity,
     Denominator,
     DimsToKeep,
+    Filename,
     IofQ,
     IofQxy,
     MaskedData,
@@ -192,11 +194,16 @@ def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs():
     pipeline = make_workflow()
     pipeline[BeamCenter] = _compute_beam_center()
 
+    # Remove previously set runs so we can be sure that below we use the mapped ones
+    pipeline[Filename[SampleRun]] = None
+    pipeline[Filename[BackgroundRun]] = None
     pipeline = sans.with_sample_runs(pipeline, runs=sample_runs)
     pipeline = sans.with_background_runs(pipeline, runs=background_runs)
 
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('Q',)
+    result = pipeline.compute(BackgroundSubtractedIofQxy)
+    assert result.dims == ('Qy', 'Qx')
 
 
 def test_pipeline_can_compute_IofQ_by_bank():
