@@ -15,6 +15,7 @@ def _make_pooch():
         env="ESS_ESTIA_DATA_DIR",
         base_url="https://public.esss.dk/groups/scipp/ess/estia/{version}/",
         version=_version,
+        retry_if_failed=3,
         registry={
             "218610_tof_detector_list.p.x.y.t.L.sx.sy": "md5:65145a26c36d12954a97d27d6e7f4ed9",  # noqa: E501
             "218611_tof_detector_list.p.x.y.t.L.sx.sy": "md5:4599e938568f3b73a72d6d48fe5160e7",  # noqa: E501
