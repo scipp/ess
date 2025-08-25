@@ -12,5 +12,6 @@ scipp>=24.09.1
 scippneutron>=24.10.0
 scippnexus>=24.9.1
 essreduce>=24.9.0
+esspolarization>=25.7.0
 essreduce>=25.4.0
 pandas>=2.1.2
