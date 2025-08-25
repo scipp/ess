@@ -13,6 +13,7 @@ def _make_pooch():
         env="ESS_AMOR_DATA_DIR",
         base_url="https://public.esss.dk/groups/scipp/ess/amor/{version}/",
         version=_version,
+        retry_if_failed=3,
         registry={
             "reference.nxs": "md5:56d493c8051e1c5c86fb7a95f8ec643b",
             "sample.nxs": "md5:4e07ccc87b5c6549e190bc372c298e83",

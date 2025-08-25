@@ -10,7 +10,7 @@ pip install essreflectometry
 ````
 ````{tab-item} conda
 ```sh
-conda install -c conda-forge -c scipp essreflectometry
+conda install -c conda-forge essreflectometry
 ```
 ````
 `````

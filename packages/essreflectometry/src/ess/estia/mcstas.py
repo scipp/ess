@@ -74,6 +74,7 @@ def parse_events_h5(f):
         'NXentry/NXdetector/NXdata/events',
         'NXentry/simulation/Param',
     )
+    events = events[()]
     da = sc.DataArray(
         # The squares on the variances is the correct way to load weighted event data.
         # Consult the McStas documentation

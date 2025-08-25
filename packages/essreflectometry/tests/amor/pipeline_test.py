@@ -14,6 +14,7 @@ from ess.amor import data
 from ess.reflectometry import orso
 from ess.reflectometry.tools import scale_reflectivity_curves_to_overlap
 from ess.reflectometry.types import (
+    BeamDivergenceLimits,
     Filename,
     ProtonCurrent,
     QBins,
@@ -111,12 +112,16 @@ def test_orso_pipeline(amor_pipeline: sciline.Pipeline):
 def test_save_reduced_orso_file(output_folder: Path):
     from orsopy import fileio
 
-    wf = sciline.Pipeline(providers=amor.providers, params=amor.default_parameters())
+    wf = amor.AmorWorkflow()
     wf[SampleSize[SampleRun]] = sc.scalar(10.0, unit="mm")
     wf[SampleSize[ReferenceRun]] = sc.scalar(10.0, unit="mm")
     wf[YIndexLimits] = sc.scalar(11), sc.scalar(41)
     wf[WavelengthBins] = sc.geomspace("wavelength", 3, 12.5, 2000, unit="angstrom")
     wf[ZIndexLimits] = sc.scalar(170), sc.scalar(266)
+    wf[BeamDivergenceLimits] = (
+        sc.scalar(-0.16, unit='deg'),
+        sc.scalar(0.2, unit='deg'),
+    )
     wf = with_filenames(
         wf, SampleRun, [data.amor_run(4079), data.amor_run(4080), data.amor_run(4081)]
     )
