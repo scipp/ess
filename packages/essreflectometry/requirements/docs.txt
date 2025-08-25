@@ -20,7 +20,7 @@ babel==2.17.0
     # via
     #   pydata-sphinx-theme
     #   sphinx
-beautifulsoup4==4.13.4
+beautifulsoup4==4.13.5
     # via
     #   nbconvert
     #   pydata-sphinx-theme
@@ -28,15 +28,15 @@ bleach[css]==6.2.0
     # via nbconvert
 bqplot==0.12.45
     # via ipydatagrid
-certifi==2025.4.26
+certifi==2025.8.3
     # via requests
-charset-normalizer==3.4.2
+charset-normalizer==3.4.3
     # via requests
-comm==0.2.2
+comm==0.2.3
     # via
     #   ipykernel
     #   ipywidgets
-debugpy==1.8.14
+debugpy==1.8.16
     # via ipykernel
 decorator==5.2.1
     # via ipython
@@ -50,7 +50,7 @@ docutils==0.21.2
     #   sphinx
 executing==2.2.0
     # via stack-data
-fastjsonschema==2.21.1
+fastjsonschema==2.21.2
     # via nbformat
 gast==0.4.0
     # via py2vega
@@ -58,11 +58,11 @@ imagesize==1.4.1
     # via sphinx
 ipydatagrid==1.4.0
     # via -r docs.in
-ipykernel==6.29.5
+ipykernel==6.30.1
     # via -r docs.in
 ipympl==0.9.7
     # via -r docs.in
-ipython==9.2.0
+ipython==9.4.0
     # via
     #   -r docs.in
     #   ipykernel
@@ -87,7 +87,7 @@ jinja2==3.1.6
     #   nbconvert
     #   nbsphinx
     #   sphinx
-jsonschema==4.24.0
+jsonschema==4.25.1
     # via nbformat
 jsonschema-specifications==2025.4.1
     # via jsonschema
@@ -118,7 +118,7 @@ matplotlib-inline==0.1.7
     # via
     #   ipykernel
     #   ipython
-mdit-py-plugins==0.4.2
+mdit-py-plugins==0.5.0
     # via myst-parser
 mdurl==0.1.2
     # via markdown-it-py
@@ -141,7 +141,7 @@ nest-asyncio==1.6.0
     # via ipykernel
 pandocfilters==1.5.1
     # via nbconvert
-parso==0.8.4
+parso==0.8.5
     # via jedi
 pexpect==4.9.0
     # via ipython
@@ -163,7 +163,7 @@ py2vega==0.6.1
     # via ipydatagrid
 pydata-sphinx-theme==0.16.1
     # via -r docs.in
-pygments==2.19.1
+pygments==2.19.2
     # via
     #   accessible-pygments
     #   ipython
@@ -171,7 +171,7 @@ pygments==2.19.1
     #   nbconvert
     #   pydata-sphinx-theme
     #   sphinx
-pyzmq==26.4.0
+pyzmq==27.0.2
     # via
     #   ipykernel
     #   jupyter-client
@@ -179,11 +179,11 @@ referencing==0.36.2
     # via
     #   jsonschema
     #   jsonschema-specifications
-requests==2.32.3
+requests==2.32.5
     # via
     #   pooch
     #   sphinx
-rpds-py==0.25.1
+rpds-py==0.27.0
     # via
     #   jsonschema
     #   referencing
@@ -222,14 +222,13 @@ stack-data==0.6.3
     # via ipython
 tinycss2==1.4.0
     # via bleach
-tornado==6.5.1
+tornado==6.5.2
     # via
     #   ipykernel
     #   jupyter-client
 traitlets==5.14.3
     # via
     #   bqplot
-    #   comm
     #   ipykernel
     #   ipympl
     #   ipython
@@ -244,7 +243,7 @@ traitlets==5.14.3
     #   traittypes
 traittypes==0.2.1
     # via bqplot
-urllib3==2.4.0
+urllib3==2.5.0
     # via requests
 wcwidth==0.2.13
     # via prompt-toolkit
