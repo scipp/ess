@@ -28,23 +28,26 @@
   </br></br>
 </div>
 
-## Overview
+## Quick links
 
-This documentation is under construction.
-See the [Amor data reduction](examples/amor) example for a quick start.
+::::{grid} 3
 
-## Table of contents
+:::{grid-item-card} ESTIA
+:link: user-guide/estia/index.md
 
-```{toctree}
----
-maxdepth: 2
----
+:::
 
-user-guide/index
-api-reference/index
-developer/index
-about/index
-```
+:::{grid-item-card} Amor
+:link: user-guide/amor/index.md
+
+:::
+
+::::{grid-item-card} Offspec
+:link: user-guide/offspec/index.md
+
+:::
+
+::::
 
 :::{include} user-guide/installation.md
 :heading-offset: 1
@@ -54,3 +57,14 @@ about/index
 
 - If you have questions that are not answered by these documentation pages, ask on [discussions](https://github.com/scipp/essreflectometry/discussions). Please include a self-contained reproducible example if possible.
 - Report bugs (including unclear, missing, or wrong documentation!), suggest features or view the source code [on GitHub](https://github.com/scipp/essreflectometry).
+
+```{toctree}
+---
+hidden:
+---
+
+user-guide/index
+api-reference/index
+developer/index
+about/index
+```

@@ -27,6 +27,7 @@ _general_providers = (
 mcstas_providers = (
     *_general_providers,
     *load.providers,
+    load.load_mcstas_events,
 )
 """List of providers for setting up a Sciline pipeline for McStas data.
 

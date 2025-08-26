@@ -2,11 +2,11 @@
 
 ## Development
 
-ESSreflectometry is an open source project by the [European Spallation Source ERIC](https://europeanspallationsource.se/) (ESS).
+ESSreflectometry is an open source project by the [European Spallation Source ERIC](https://ess.eu/) (ESS).
 
 ## License
 
-ESSreflectometry is available as open source under the [BSD-3 license](https://opensource.org/licenses/BSD-3-Clause).
+ESSreflectometry is available as open source under the [BSD-3 license](https://opensource.org/license/BSD-3-Clause).
 
 ## Citing ESSreflectometry
 
@@ -24,3 +24,12 @@ Simply download the archive, unzip and view locally in a web browser.
 ## Source code and development
 
 ESSreflectometry is hosted and developed [on GitHub](https://github.com/scipp/essreflectometry).
+
+
+```{toctree}
+---
+hidden:
+---
+
+bibliography
+```
