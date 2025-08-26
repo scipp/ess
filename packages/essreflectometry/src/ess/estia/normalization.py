@@ -81,6 +81,8 @@ def evaluate_reference(
     ref.coords["detector_spatial_resolution"] = detector_spatial_resolution
     ref.coords["wavelength"] = sc.midpoints(ref.coords["wavelength"])
 
+    if "Q" in ref.coords:
+        ref.coords.pop("Q")
     if "theta" in ref.coords:
         ref.coords.pop("theta")
 

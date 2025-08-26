@@ -85,6 +85,12 @@ def evaluate_reference_at_sample_coords(
     ref.coords["sample_size"] = sample.coords["sample_size"]
     ref.coords["detector_spatial_resolution"] = detector_spatial_resolution
     ref.coords["wavelength"] = sc.midpoints(ref.coords["wavelength"])
+
+    if "Q" in ref.coords:
+        ref.coords.pop("Q")
+    if "theta" in ref.coords:
+        ref.coords.pop("theta")
+
     ref = ref.transform_coords(
         (
             "Q",
