@@ -664,8 +664,11 @@ class ReflectometryBatchReductionGUI:
             display(message)
         self.text_log.children = (out, *self.text_log.children)
 
-    def log_progress(self, progress):
+    def show_progress(self, progress):
         self.progress_log.children = (progress,)
+
+    def hide_progress(self):
+        self.progress_log.children = ()
 
 
 class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
@@ -958,7 +961,7 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
         )
 
         progress = widgets.IntProgress(min=0, max=len(sample_df))
-        self.log_progress(progress)
+        self.show_progress(progress)
 
         if (key := self.get_row_key(reference_df)) in self.results:
             reference_result = self.results[key]
@@ -994,3 +997,5 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
                 params, params["Scale"] * wf.compute(ReflectivityOverQ).hist()
             )
             progress.value += 1
+
+        self.hide_progress()
