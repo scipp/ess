@@ -44,7 +44,8 @@ This provides a default Estia workflow including providers for loadings files.
 def mcstas_default_parameters() -> dict:
     return {
         supermirror.MValue: sc.scalar(5, unit=sc.units.dimensionless),
-        supermirror.CriticalEdge: 0.022 * sc.Unit("1/angstrom"),
+        # The reference sample in the McStas simulation has R=1 everywhere
+        supermirror.CriticalEdge: sc.scalar(float('inf'), unit='1/angstrom'),
         supermirror.Alpha: sc.scalar(0.25 / 0.088, unit=sc.units.angstrom),
         DetectorSpatialResolution[RunType]: 0.0025 * sc.units.m,
         NeXusDetectorName: "detector",
