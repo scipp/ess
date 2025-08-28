@@ -16,7 +16,7 @@ attrs==25.3.0
     #   referencing
 certifi==2025.8.3
     # via requests
-charset-normalizer==3.4.2
+charset-normalizer==3.4.3
     # via requests
 click==8.2.1
     # via dask
@@ -32,11 +32,11 @@ dask==2025.7.0
     # via -r nightly.in
 dnspython==2.7.0
     # via email-validator
-email-validator==2.2.0
+email-validator==2.3.0
     # via scippneutron
 essreduce @ git+https://github.com/scipp/essreduce@main
     # via -r nightly.in
-fonttools==4.59.0
+fonttools==4.59.2
     # via matplotlib
 fsspec==2025.7.0
     # via dask
@@ -54,11 +54,11 @@ importlib-metadata==8.7.0
     # via dask
 iniconfig==2.1.0
     # via pytest
-jsonschema==4.25.0
+jsonschema==4.25.1
     # via scitiff
 jsonschema-specifications==2025.4.1
     # via jsonschema
-kiwisolver==1.4.8
+kiwisolver==1.4.10rc0
     # via matplotlib
 lazy-loader==0.4
     # via
@@ -95,7 +95,7 @@ partd==1.4.2
     # via dask
 pillow==11.3.0
     # via matplotlib
-platformdirs==4.3.8
+platformdirs==4.4.0
     # via pooch
 plopp @ git+https://github.com/scipp/plopp@main
     # via
@@ -128,9 +128,9 @@ referencing==0.36.2
     # via
     #   jsonschema
     #   jsonschema-specifications
-requests==2.32.4
+requests==2.32.5
     # via pooch
-rpds-py==0.26.0
+rpds-py==0.27.1
     # via
     #   jsonschema
     #   referencing
@@ -164,7 +164,7 @@ scitiff==25.7.0
     # via -r nightly.in
 six==1.17.0
     # via python-dateutil
-tifffile==2025.6.11
+tifffile==2025.8.28
     # via
     #   -r nightly.in
     #   scitiff
@@ -174,7 +174,7 @@ toolz==1.0.0
     # via
     #   dask
     #   partd
-typing-extensions==4.14.1
+typing-extensions==4.15.0
     # via
     #   pydantic
     #   pydantic-core
