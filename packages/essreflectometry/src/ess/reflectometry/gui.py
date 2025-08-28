@@ -481,6 +481,7 @@ class ReflectometryBatchReductionGUI:
     def _init_reduction_table_component(self):
         reduce_button = widgets.Button(description="Reduce")
         plot_button = widgets.Button(description="Plot")
+        self.progress_log = widgets.VBox([])
 
         def reduce_data(_):
             self.log("reduce data")
@@ -535,7 +536,7 @@ class ReflectometryBatchReductionGUI:
 
         add_row_button.on_click(add_row)
         delete_row_button.on_click(delete_row)
-        data_buttons = widgets.HBox([reduce_button, plot_button])
+        data_buttons = widgets.HBox([reduce_button, plot_button, self.progress_log])
 
         self.reduction_table_component = widgets.VBox(
             [
@@ -563,19 +564,10 @@ class ReflectometryBatchReductionGUI:
         )
 
     def _init_display_component(self):
-        self.progress_log = widgets.VBox([])
         self.plot_log = widgets.VBox([])
         self.display_component = widgets.VBox(
-            [
-                widgets.VBox(
-                    [widgets.Label("Progress"), self.progress_log],
-                    layout={'width': '100%', 'margin': '10px 0'},
-                ),
-                widgets.VBox(
-                    [widgets.Label("Plots"), self.plot_log],
-                    layout={'width': '100%', 'margin': '10px 0'},
-                ),
-            ]
+            [widgets.Label("Plots"), self.plot_log],
+            layout={'width': '100%', 'margin': '10px 0'},
         )
 
     def _init_settings_component(self):
@@ -701,8 +693,11 @@ class ReflectometryBatchReductionGUI:
             display(message)
         self.text_log.children = (out, *self.text_log.children)
 
-    def log_progress(self, progress):
+    def show_progress(self, progress):
         self.progress_log.children = (progress,)
+
+    def hide_progress(self):
+        self.progress_log.children = ()
 
 
 class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
@@ -988,7 +983,7 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
         workflow[ChopperPhase[SampleRun]] = sc.scalar(7.5, unit='deg')
 
         progress = widgets.IntProgress(min=0, max=len(sample_df) + len(used_references))
-        self.log_progress(progress)
+        self.show_progress(progress)
 
         for _, params in sample_df.iterrows():
             if (key := self.get_row_key(params)) in self.results:
@@ -1062,3 +1057,5 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
                 params, params["Scale"] * wf.compute(ReflectivityOverQ).hist()
             )
             progress.value += 1
+
+        self.hide_progress()
