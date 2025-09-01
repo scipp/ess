@@ -2,12 +2,12 @@ import scipp as sc
 
 
 def maximum_resolution_achievable(
-    events,
-    coarse_x_bin_edges,
-    coarse_y_bin_edges,
-    time_bin_edges,
-    max_tries=10,
-    raise_if_not_maximum=False,
+    events: sc.DataArray,
+    coarse_x_bin_edges: sc.Variable,
+    coarse_y_bin_edges: sc.Variable,
+    time_bin_edges: sc.Variable,
+    max_tries: int = 10,
+    raise_if_not_maximum: bool = False,
 ):
     """
     Estimates the maximum resolution achievable
