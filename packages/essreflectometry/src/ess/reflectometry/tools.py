@@ -6,6 +6,7 @@ from itertools import chain
 from typing import Any
 
 import numpy as np
+import pandas as pd
 import sciline as sl
 import scipp as sc
 import scipy.optimize as opt
@@ -118,14 +119,20 @@ class WorkflowCollection:
     def __init__(self, workflow: sl.Pipeline, params: Mapping[Any, Mapping[type, Any]]):
         # self._original_workflow = workflow
         self.workflows = {}
-        for name, parameters in params.items():
-            wf = workflow.copy()
-            for tp, value in parameters.items():
-                # if tp is Filename[SampleRun]:
-                #     continue
-                wf[tp] = value
-            self.workflows[name] = wf
-        # self.workflows = {name: pl.copy() for name, pl in workflows.items()}
+
+        for index, row in params.iterrows():
+            self.workflows[index] = workflow.copy()
+            for k, v in row.items():
+                self.workflows[index][k] = v
+
+        # for name, parameters in params.items():
+        #     wf = workflow.copy()
+        #     for tp, value in parameters.items():
+        #         # if tp is Filename[SampleRun]:
+        #         #     continue
+        #         wf[tp] = value
+        #     self.workflows[name] = wf
+        # # self.workflows = {name: pl.copy() for name, pl in workflows.items()}
 
     def __setitem__(self, key: type, value: Any | Mapping[type, Any]):
         if hasattr(value, 'items'):
@@ -140,9 +147,17 @@ class WorkflowCollection:
         return {key: wf[name] for key, wf in self.workflows.items()}
 
     def compute(self, target: type | Sequence[type], **kwargs) -> Mapping[str, Any]:
-        return {
-            name: pl.compute(target, **kwargs) for name, pl in self.workflows.items()
-        }
+        # return {
+        #     name: wf.compute(target, **kwargs) for name, wf in self.workflows.items()
+        # }
+        if not isinstance(target, list | tuple):
+            target = [target]
+        out = {}
+        for t in target:
+            out[t] = {
+                name: wf.compute(t, **kwargs) for name, wf in self.workflows.items()
+            }
+        return pd.DataFrame(out)
 
     def copy(self) -> 'WorkflowCollection':
         out = self.__class__(sl.Pipeline(), params={})
