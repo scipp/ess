@@ -41,10 +41,10 @@ from ..sans.types import (
     TransmissionRun,
 )
 
+bank_size = {'layer': 4, 'tube': -1, 'straw': 7, 'pixel': 512}
 DETECTOR_BANK_SIZES = {
-    'larmor_detector': {'layer': 4, 'tube': 32, 'straw': 7, 'pixel': 512},
-    'loki_detector_0': {'layer': 4, 'tube': -1, 'straw': 7, 'pixel': 512},
-    # TODO What shapes do the others banks have?
+    'larmor_detector': bank_size,
+    **{f'loki_detector_{i}': bank_size for i in range(9)},
 }
 
 
