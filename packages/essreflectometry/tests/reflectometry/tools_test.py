@@ -5,10 +5,12 @@ import numpy as np
 import pytest
 import sciline as sl
 import scipp as sc
+from numpy.testing import assert_almost_equal
 from orsopy.fileio import Orso, OrsoDataset
 from scipp.testing import assert_allclose
 
 from ess.reflectometry.tools import (
+    WorkflowCollection,
     batch_processor,
     combine_curves,
     linlogspace,
@@ -105,15 +107,14 @@ def test_reflectivity_curve_scaling():
     wf[ScalingFactorForOverlap[SampleRun]] = 1.0
     wf[ScalingFactorForOverlap[ReferenceRun]] = 1.0
     params = {'a': (1.0, 0, 0.3), 'b': (0.8, 0.2, 0.7), 'c': (0.1, 0.6, 1.0)}
-    table = {
-        k: {
-            Filename[SampleRun]: "_".join(map(str, v)),
-            Filename[ReferenceRun]: "_".join(map(str, v[1:])),
-            QBins: make_reference_events(*v[1:]).coords['Q'],
-        }
-        for k, v in params.items()
-    }
-    wfc = batch_processor(wf, table)
+    workflows = {}
+    for k, v in params.items():
+        workflows[k] = wf.copy()
+        workflows[k][Filename[SampleRun]] = "_".join(map(str, v))
+        workflows[k][Filename[ReferenceRun]] = "_".join(map(str, v[1:]))
+        workflows[k][QBins] = make_reference_events(*v[1:]).coords['Q']
+
+    wfc = WorkflowCollection(workflows)
 
     scaled_wf = scale_reflectivity_curves_to_overlap(wfc)
 
@@ -129,15 +130,14 @@ def test_reflectivity_curve_scaling_with_critical_edge():
     wf[ScalingFactorForOverlap[SampleRun]] = 1.0
     wf[ScalingFactorForOverlap[ReferenceRun]] = 1.0
     params = {'a': (2, 0, 0.3), 'b': (0.8, 0.2, 0.7), 'c': (0.1, 0.6, 1.0)}
-    table = {
-        k: {
-            Filename[SampleRun]: "_".join(map(str, v)),
-            Filename[ReferenceRun]: "_".join(map(str, v[1:])),
-            QBins: make_reference_events(*v[1:]).coords['Q'],
-        }
-        for k, v in params.items()
-    }
-    wfc = batch_processor(wf, table)
+    workflows = {}
+    for k, v in params.items():
+        workflows[k] = wf.copy()
+        workflows[k][Filename[SampleRun]] = "_".join(map(str, v))
+        workflows[k][Filename[ReferenceRun]] = "_".join(map(str, v[1:]))
+        workflows[k][QBins] = make_reference_events(*v[1:]).coords['Q']
+
+    wfc = WorkflowCollection(workflows)
 
     scaled_wf = scale_reflectivity_curves_to_overlap(
         wfc, critical_edge_interval=(sc.scalar(0.01), sc.scalar(0.05))
@@ -216,15 +216,14 @@ def test_reflectivity_curve_scaling_caches_intermediate_results():
     wf[ScalingFactorForOverlap[SampleRun]] = 1.0
     wf[ScalingFactorForOverlap[ReferenceRun]] = 1.0
     params = {'a': (1.0, 0, 0.3), 'b': (0.8, 0.2, 0.7), 'c': (0.1, 0.6, 1.0)}
-    table = {
-        k: {
-            Filename[SampleRun]: "_".join(map(str, v)),
-            Filename[ReferenceRun]: "_".join(map(str, v[1:])),
-            QBins: make_reference_events(*v[1:]).coords['Q'],
-        }
-        for k, v in params.items()
-    }
-    wfc = batch_processor(wf, table)
+    workflows = {}
+    for k, v in params.items():
+        workflows[k] = wf.copy()
+        workflows[k][Filename[SampleRun]] = "_".join(map(str, v))
+        workflows[k][Filename[ReferenceRun]] = "_".join(map(str, v[1:]))
+        workflows[k][QBins] = make_reference_events(*v[1:]).coords['Q']
+
+    wfc = WorkflowCollection(workflows)
 
     scaled_wf = scale_reflectivity_curves_to_overlap(
         wfc, cache_intermediate_results=False
@@ -422,23 +421,22 @@ def test_batch_processor_tool_uses_expected_parameters_from_each_run():
     assert results['b'].info.name == 'special.orso'
 
 
-# TODO: need to implement groupby in the mapping
-# def test_batch_processor_tool_merges_event_lists():
-#     wf = make_workflow()
-#     wf[ScalingFactorForOverlap[SampleRun]] = 1.0
-#     wf[ScalingFactorForOverlap[ReferenceRun]] = 1.0
+def test_batch_processor_tool_merges_event_lists():
+    wf = make_workflow()
+    wf[ScalingFactorForOverlap[SampleRun]] = 1.0
+    wf[ScalingFactorForOverlap[ReferenceRun]] = 1.0
 
-#     runs = {
-#         'a': {Filename[SampleRun]: ('1.0_0.0_0.3', '1.5_0.0_0.3')},
-#         'b': {Filename[SampleRun]: '0.8_0.2_0.7'},
-#         'c': {Filename[SampleRun]: ('0.1_0.6_1.0', '0.2_0.6_1.0')},
-#     }
-#     batch = batch_processor(wf, runs)
+    runs = {
+        'a': {Filename[SampleRun]: ('1.0_0.0_0.3', '1.5_0.0_0.3')},
+        'b': {Filename[SampleRun]: '0.8_0.2_0.7'},
+        'c': {Filename[SampleRun]: ('0.1_0.6_1.0', '0.2_0.6_1.0')},
+    }
+    batch = batch_processor(wf, runs)
 
-#     results = batch.compute(UnscaledReducibleData[SampleRun])
+    results = batch.compute(UnscaledReducibleData[SampleRun])
 
-#     assert_almost_equal(results['a'].sum().value, 10 + 15 * 0.5 + (10 + 15 * 0.5) * 1.5)
-#     assert_almost_equal(results['b'].sum().value, 10 * 0.8 + 15 * 0.5 * 0.8)
-#     assert_almost_equal(
-#         results['c'].sum().value, (10 + 15 * 0.5) * 0.1 + (10 + 15 * 0.5) * 0.2
-#     )
+    assert_almost_equal(results['a'].sum().value, 10 + 15 * 0.5 + (10 + 15 * 0.5) * 1.5)
+    assert_almost_equal(results['b'].sum().value, 10 * 0.8 + 15 * 0.5 * 0.8)
+    assert_almost_equal(
+        results['c'].sum().value, (10 + 15 * 0.5) * 0.1 + (10 + 15 * 0.5) * 0.2
+    )
