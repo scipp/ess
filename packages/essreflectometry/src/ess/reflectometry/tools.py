@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import uuid
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from itertools import chain
 from typing import Any
 
@@ -115,51 +115,64 @@ class WorkflowCollection:
     It can also be used to set parameters for all workflows in a single shot.
     """
 
-    def __init__(self, workflows: Mapping[str, sl.Pipeline]):
-        self._workflows = {name: pl.copy() for name, pl in workflows.items()}
+    def __init__(self, workflow: sl.Pipeline, params: Mapping[Any, Mapping[type, Any]]):
+        # self._original_workflow = workflow
+        self.workflows = {}
+        for name, parameters in params.items():
+            wf = workflow.copy()
+            for tp, value in parameters.items():
+                # if tp is Filename[SampleRun]:
+                #     continue
+                wf[tp] = value
+            self.workflows[name] = wf
+        # self.workflows = {name: pl.copy() for name, pl in workflows.items()}
 
     def __setitem__(self, key: type, value: Any | Mapping[type, Any]):
         if hasattr(value, 'items'):
             for name, v in value.items():
-                self._workflows[name][key] = v
+                self.workflows[name][key] = v
         else:
-            for pl in self._workflows.values():
-                pl[key] = value
+            for wf in self.workflows.values():
+                wf[key] = value
 
     def __getitem__(self, name: str) -> sl.Pipeline:
-        """
-        Returns a single workflow from the collection given by its name.
-        """
-        return self._workflows[name]
+        """ """
+        return {key: wf[name] for key, wf in self.workflows.items()}
 
     def compute(self, target: type | Sequence[type], **kwargs) -> Mapping[str, Any]:
         return {
-            name: pl.compute(target, **kwargs) for name, pl in self._workflows.items()
+            name: pl.compute(target, **kwargs) for name, pl in self.workflows.items()
         }
 
     def copy(self) -> 'WorkflowCollection':
-        return self.__class__(self._workflows)
+        out = self.__class__(sl.Pipeline(), params={})
+        for name, wf in self.workflows.items():
+            out.workflows[name] = wf.copy()
+        return out
 
-    def keys(self) -> Sequence[str]:
-        return self._workflows.keys()
+    def groupby(self, key: type, reduce: Callable) -> 'WorkflowCollection':
+        results = self.compute(key)
 
-    def values(self) -> Sequence[sl.Pipeline]:
-        return self._workflows.values()
+    # def keys(self) -> Sequence[str]:
+    #     return self.workflows.keys()
 
-    def items(self) -> Sequence[tuple[str, sl.Pipeline]]:
-        return self._workflows.items()
+    # def values(self) -> Sequence[sl.Pipeline]:
+    #     return self.workflows.values()
 
-    def add(self, name: str, workflow: sl.Pipeline):
-        """
-        Adds a new workflow to the collection.
-        """
-        self._workflows[name] = workflow.copy()
+    # def items(self) -> Sequence[tuple[str, sl.Pipeline]]:
+    #     return self.workflows.items()
 
-    def remove(self, name: str):
-        """
-        Removes a workflow from the collection by its name.
-        """
-        del self._workflows[name]
+    # def add(self, name: str, workflow: sl.Pipeline):
+    #     """
+    #     Adds a new workflow to the collection.
+    #     """
+    #     self.workflows[name] = workflow.copy()
+
+    # def remove(self, name: str):
+    #     """
+    #     Removes a workflow from the collection by its name.
+    #     """
+    #     del self.workflows[name]
 
 
 def _sort_by(a, by):
@@ -294,20 +307,18 @@ def scale_reflectivity_curves_to_overlap(
 
     critical_edge_key = uuid.uuid4().hex
     if critical_edge_interval is not None:
-        # Find q bins with the lowest Q start point
-        q = min(
-            (wf.compute(QBins) for wf in workflows.values()),
-            key=lambda q_: q_.min(),
-        )
-        N = (
-            ((q >= critical_edge_interval[0]) & (q < critical_edge_interval[1]))
-            .sum()
-            .value
-        )
+        q = wfc.compute(QBins)
+        if hasattr(q, "items"):
+            # If QBins is a mapping, find the one with the lowest Q start
+            q = min(q.values(), key=lambda q_: q_.min())
+        # TODO: This is slightly different from before: it extracts the bins from the
+        # QBins variable that cover the critical edge interval. This means that the
+        # resulting curve will not necessarily begin and end exactly at the values
+        # specified, but rather at the closest bin edges.
         edge = sc.DataArray(
-            data=sc.ones(dims=('Q',), shape=(N,), with_variances=True),
-            coords={'Q': sc.linspace('Q', *critical_edge_interval, N + 1)},
-        )
+            data=sc.ones(sizes={q.dim: q.sizes[q.dim] - 1}, with_variances=True),
+            coords={q.dim: q},
+        )[q.dim, critical_edge_interval[0] : critical_edge_interval[1]]
         # Now place the critical edge at the beginning
         curves = {critical_edge_key: edge} | curves
 
