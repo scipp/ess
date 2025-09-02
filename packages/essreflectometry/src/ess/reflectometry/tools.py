@@ -109,6 +109,23 @@ def linlogspace(
     return sc.concat(grids, dim)
 
 
+class DataTable(dict):
+    def _repr_html_(self):
+        clean = {
+            str(tp.__name__)
+            if hasattr(tp, '__name__')
+            else str(tp).split('.')[-1]: value
+            for tp, value in self.items()
+        }
+        try:
+            import pandas as pd
+
+            df = pd.DataFrame(clean)
+            return df._repr_html_()
+        except ImportError:
+            return clean._repr_html_()
+
+
 class WorkflowCollection:
     """
     A collection of sciline workflows that can be used to compute multiple
@@ -118,12 +135,16 @@ class WorkflowCollection:
 
     def __init__(self, workflow: sl.Pipeline, params: Mapping[Any, Mapping[type, Any]]):
         # self._original_workflow = workflow
-        self.workflows = {}
+        self.workflows = []
 
-        for index, row in params.iterrows():
-            self.workflows[index] = workflow.copy()
+        if not isinstance(params, pd.DataFrame):
+            params = pd.DataFrame(params)
+
+        for _, row in params.iterrows():
+            wf = workflow.copy()
             for k, v in row.items():
-                self.workflows[index][k] = v
+                wf[k] = v
+            self.workflows.append(wf)
 
         # for name, parameters in params.items():
         #     wf = workflow.copy()
@@ -134,17 +155,19 @@ class WorkflowCollection:
         #     self.workflows[name] = wf
         # # self.workflows = {name: pl.copy() for name, pl in workflows.items()}
 
-    def __setitem__(self, key: type, value: Any | Mapping[type, Any]):
-        if hasattr(value, 'items'):
-            for name, v in value.items():
-                self.workflows[name][key] = v
-        else:
-            for wf in self.workflows.values():
-                wf[key] = value
+    def __setitem__(self, key: type, value: Sequence[Any]):
+        for i, v in enumerate(value):
+            self.workflows[i][key] = v
+        # if hasattr(value, 'items'):
+        #     for name, v in value.items():
+        #         self.workflows[name][key] = v
+        # else:
+        #     for wf in self.workflows.values():
+        #         wf[key] = value
 
-    def __getitem__(self, name: str) -> sl.Pipeline:
-        """ """
-        return {key: wf[name] for key, wf in self.workflows.items()}
+    # def __getitem__(self, name: str) -> sl.Pipeline:
+    #     """ """
+    #     return {key: wf[name] for key, wf in self.workflows.items()}
 
     def compute(self, target: type | Sequence[type], **kwargs) -> Mapping[str, Any]:
         # return {
@@ -154,15 +177,20 @@ class WorkflowCollection:
             target = [target]
         out = {}
         for t in target:
-            out[t] = {
-                name: wf.compute(t, **kwargs) for name, wf in self.workflows.items()
-            }
-        return pd.DataFrame(out)
+            # out[t] = {
+            #     name: wf.compute(t, **kwargs) for name, wf in self.workflows.items()
+            # }
+            out[t] = [wf.compute(t, **kwargs) for wf in self.workflows]
+        # return pd.DataFrame(out), out
+        return DataTable(out)
 
     def copy(self) -> 'WorkflowCollection':
-        out = self.__class__(sl.Pipeline(), params={})
-        for name, wf in self.workflows.items():
-            out.workflows[name] = wf.copy()
+        # out = self.__class__(sl.Pipeline(), params={})
+        # for name, wf in self.workflows.items():
+        #     out.workflows[name] = wf.copy()
+        # return out
+        out = WorkflowCollection(None, {})
+        out.workflows = [wf.copy() for wf in self.workflows]
         return out
 
     def groupby(self, key: type, reduce: Callable) -> 'WorkflowCollection':
