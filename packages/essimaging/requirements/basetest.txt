@@ -82,7 +82,7 @@ rpds-py==0.27.1
     # via
     #   jsonschema
     #   referencing
-scipp==25.5.1
+scipp==25.8.0
     # via
     #   scitiff
     #   tof
