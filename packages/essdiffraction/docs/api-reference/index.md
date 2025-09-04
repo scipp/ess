@@ -42,7 +42,7 @@
    types
 ```
 
-## ESSdream
+## DREAM
 
 ### Workflows
 
@@ -96,6 +96,47 @@
    data
    diagnostics
    io
+```
+
+## BEER
+
+### Workflows
+
+
+```{eval-rst}
+.. currentmodule:: ess.beer
+
+.. autosummary::
+   :toctree: ../generated/functions
+
+   BeerModMcStasWorkflowKnownPeaks
+   BeerModMcStasWorkflow
+```
+
+### Top-level functions
+
+```{eval-rst}
+.. currentmodule:: ess.beer
+
+.. autosummary::
+   :toctree: ../generated/functions
+
+    load_beer_mcstas
+```
+
+### Submodules
+
+```{eval-rst}
+.. autosummary::
+   :toctree: ../generated/modules
+   :template: module-template.rst
+   :recursive:
+
+   clustering
+   conversions
+   data
+   io
+   workflow
 ```
 
 ## SNS powder
