@@ -35,7 +35,7 @@ lazy-loader==0.4
     # via
     #   plopp
     #   tof
-matplotlib==3.10.5
+matplotlib==3.10.6
     # via plopp
 numpy==2.3.2
     # via
