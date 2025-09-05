@@ -7,6 +7,8 @@ def maximum_resolution_achievable(
     coarse_y_bin_edges: sc.Variable,
     time_bin_edges: sc.Variable,
     max_tries: int = 10,
+    max_pixels_x: int = 2048,
+    max_pixels_y: int = 2048,
     raise_if_not_maximum: bool = False,
 ):
     """
@@ -31,6 +33,10 @@ def maximum_resolution_achievable(
         Desired resolution in ``t``.
     max_tries:
         The maximum number of iterations before giving up.
+    max_pixels_x:
+        The maximum number of pixels in ``x``.
+    max_pixels_y:
+        The maximum number of pixels in ``y``.
     raise_if_not_maximum:
         Often it is not important to find the exact maximum resolution.
         Therefore this parameter is ``False`` by default, and the function
@@ -46,8 +52,8 @@ def maximum_resolution_achievable(
 
     lower_nx = coarse_x_bin_edges.size
     lower_ny = coarse_y_bin_edges.size
-    upper_nx = 10000
-    upper_ny = 10000
+    upper_nx = max_pixels_x
+    upper_ny = max_pixels_y
 
     nx = int(2**0.5 * lower_nx) + 1
     ny = int(2**0.5 * lower_ny) + 1
