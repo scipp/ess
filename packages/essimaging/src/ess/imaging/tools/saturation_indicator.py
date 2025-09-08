@@ -4,68 +4,44 @@ import scipp as sc
 
 def saturation_indicator(
     intensity: sc.DataArray,
-) -> sc.DataArray:
+    threshold: float = 0.9,
+) -> tuple[sc.DataArray, sc.Variable]:
     """
 
     Parameters
     -------------
     intensity:
-        The intensity as a function of wavelength and gain.
+        The intensity as a function of gain and wavelength.
+    threshold:
+        Safety factor to avoid saturation region.
+        Must be between 0 and 1.
+        Corresponds to the acceptable reduction in intensity
+        to create margin to the saturation region.
 
     Returns
     -------------
-        The saturation indicator value as a function of 'gain'
+        The saturation indicator value as a function of 'gain',
+        and the maximum gain value acceptable according to the
+        provided threshold.
+        Note that the maximum of the saturation indicator occurs
+        at the gain where saturation kicks in.
     """
     if intensity.dims != ('gain', 'wavelength'):
         raise ValueError(
             'Expected two dimensional input, with dimensions "gain" and "wavelength".'
         )
 
-    wavelength = intensity.coords['wavelength']
-    wavelength = (
-        wavelength
-        if len(wavelength) == intensity.shape[1]
-        else sc.midpoints(wavelength)
-    )
-    _wavelength = wavelength.values
-    _intensity = intensity.data.values
+    def indicator(i):
+        # Assuming all intensity curves
+        # in the non-saturated region are
+        # proportional means the ratio between the largest
+        # and second largest singular value is large.
+        s = np.linalg.svd(i)[1]
+        return s[0] / s[1]
 
-    p = [
-        np.polyfit(_wavelength, _intensity[i + 1] / _intensity[i], 1)
-        for i in range(_intensity.shape[0] - 1)
-    ]
-    slope_to_amplitude_ratio = sc.DataArray(
-        sc.array(
-            dims=['gain'],
-            values=[abs(x[0] / x[1]) for x in p],
-            unit=sc.Unit('dimensionless') / wavelength.unit,
-        ),
-        coords={'gain': intensity.coords['gain']},
-    )
-    return slope_to_amplitude_ratio
-
-
-def gain_at_saturation(
-    saturation: sc.DataArray,
-    threshold: sc.Variable,
-) -> sc.Variable:
-    """
-
-    Parameters
-    -------------
-    saturation:
-        The saturation as a function of gain.
-    threshold:
-        A threshold value determining the acceptable slope
-        in 'wavelength' relative to the amplitude, of
-        the ratio between intensities at subsequent 'gains'.
-
-    Returns
-    -------------
-        The saturation indicator value as a function of 'gain'
-    """
-
-    # Find index of the first entry where all subsequent slope_to_amplitude_ratios
-    # are below the provided threshold.
-    elbow_index = np.argmax(np.cumprod((saturation < threshold).values[::-1])[::-1])
-    return saturation.coords['gain']['gain', elbow_index]
+    ind = np.array([indicator(intensity.values[:i]) for i in range(2, len(intensity))])
+    max_gain_index = np.argmax(ind > threshold * ind.max())
+    gain = intensity.coords['gain']['gain', 1:]
+    return sc.DataArray(
+        sc.array(dims=['gain'], values=ind), coords={'gain': gain}
+    ), gain['gain', max_gain_index]
