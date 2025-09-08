@@ -4,22 +4,17 @@ import scipp as sc
 
 def saturation_indicator(
     intensity: sc.DataArray,
-    threshold: sc.Variable,
-) -> sc.Variable:
+) -> sc.DataArray:
     """
 
     Parameters
     -------------
     intensity:
         The intensity as a function of wavelength and gain.
-    threshold:
-        A threshold value determining the acceptable slope
-        in 'wavelength' relative to the amplitude, of
-        the ratio between intensities at subsequent 'gains'.
 
     Returns
     -------------
-        The 'gain' value where the saturation occurs.
+        The saturation indicator value as a function of 'gain'
     """
     if intensity.dims != ('gain', 'wavelength'):
         raise ValueError(
@@ -44,11 +39,33 @@ def saturation_indicator(
             dims=['gain'],
             values=[abs(x[0] / x[1]) for x in p],
             unit=sc.Unit('dimensionless') / wavelength.unit,
-        )
+        ),
+        coords={'gain': intensity.coords['gain']},
     )
+    return slope_to_amplitude_ratio
+
+
+def gain_at_saturation(
+    saturation: sc.DataArray,
+    threshold: sc.Variable,
+) -> sc.Variable:
+    """
+
+    Parameters
+    -------------
+    saturation:
+        The saturation as a function of gain.
+    threshold:
+        A threshold value determining the acceptable slope
+        in 'wavelength' relative to the amplitude, of
+        the ratio between intensities at subsequent 'gains'.
+
+    Returns
+    -------------
+        The saturation indicator value as a function of 'gain'
+    """
+
     # Find index of the first entry where all subsequent slope_to_amplitude_ratios
     # are below the provided threshold.
-    elbow_index = np.argmax(
-        np.cumprod((slope_to_amplitude_ratio < threshold).values[::-1])[::-1]
-    )
-    return intensity.coords['gain']['gain', elbow_index]
+    elbow_index = np.argmax(np.cumprod((saturation < threshold).values[::-1])[::-1])
+    return saturation.coords['gain']['gain', elbow_index]
