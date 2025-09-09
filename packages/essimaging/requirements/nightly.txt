@@ -30,7 +30,7 @@ cycler==0.12.1
     # via matplotlib
 dask==2025.7.0
     # via -r nightly.in
-dnspython==2.7.0
+dnspython==2.8.0rc1
     # via email-validator
 email-validator==2.3.0
     # via scippneutron
@@ -38,7 +38,7 @@ essreduce @ git+https://github.com/scipp/essreduce@main
     # via -r nightly.in
 fonttools==4.59.2
     # via matplotlib
-fsspec==2025.7.0
+fsspec==2025.9.0
     # via dask
 graphviz==0.21
     # via -r nightly.in
@@ -67,7 +67,7 @@ lazy-loader==0.4
     #   tof
 locket==1.0.0
     # via partd
-matplotlib==3.10.5
+matplotlib==3.10.6
     # via
     #   mpltoolbox
     #   plopp
