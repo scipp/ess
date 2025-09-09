@@ -7,7 +7,6 @@ def saturation_indicator(
     threshold: float = 0.9,
 ) -> tuple[sc.DataArray, sc.Variable]:
     """
-
     The intensity is supposed to be a signal that scales with the gain
     of the image intensifier.
     Near saturation that is not the case anymore.
