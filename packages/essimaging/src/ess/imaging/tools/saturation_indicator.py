@@ -23,7 +23,7 @@ def saturation_indicator(
         The saturation indicator value as a function of 'gain',
         and the maximum gain value acceptable according to the
         provided threshold.
-        Note that the maximum of the saturation indicator occurs
+        Note that the minimum of the saturation indicator occurs
         at the gain where saturation kicks in.
     """
     if intensity.dims != ('gain', 'wavelength'):
@@ -31,17 +31,14 @@ def saturation_indicator(
             'Expected two dimensional input, with dimensions "gain" and "wavelength".'
         )
 
-    def indicator(i):
-        # Assuming all intensity curves
-        # in the non-saturated region are
-        # proportional means the ratio between the largest
-        # and second largest singular value is large.
-        s = np.linalg.svd(i)[1]
-        return s[0] / s[1]
+    gain = intensity.coords['gain']
+    # The change in the amplitude of the second component indicates
+    # a new component is present in the signal.
+    indicator = np.linalg.svd(intensity.values, full_matrices=False)[0][:, 1]
+    # The sign of indicator is arbitrary, to make sure the extremum is a minimum
+    # multiply by the sign of the second derivative.
+    indicator *= np.sign(np.polyfit(gain.values, indicator, 2)[0])
 
-    ind = np.array([indicator(intensity.values[:i]) for i in range(2, len(intensity))])
-    max_gain_index = np.argmax(ind > threshold * ind.max())
-    gain = intensity.coords['gain']['gain', 1:]
     return sc.DataArray(
-        sc.array(dims=['gain'], values=ind), coords={'gain': gain}
-    ), gain['gain', max_gain_index]
+        sc.array(dims=['gain'], values=indicator), coords={'gain': gain}
+    ), threshold * gain['gain', np.argmin(indicator)]
