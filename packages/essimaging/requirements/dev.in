@@ -9,3 +9,4 @@ copier
 jupyterlab
 pip-compile-multi
 pre-commit
+prompt-toolkit>=3.0.52
