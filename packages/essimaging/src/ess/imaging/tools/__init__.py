@@ -3,8 +3,8 @@
 
 
 from .analysis import blockify, laplace_2d, resample, sharpness
-from .maximum_resolution_monitor import maximum_resolution_achievable
-from .saturation_indicator import saturation_indicator
+from .resolution import maximum_resolution_achievable
+from .saturation import saturation_indicator
 
 __all__ = [
     "blockify",
