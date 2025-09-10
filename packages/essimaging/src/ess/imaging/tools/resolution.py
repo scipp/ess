@@ -1,6 +1,7 @@
 import numpy as np
 import scipp as sc
 from numpy.typing import NDArray
+from scipy.signal.windows import tukey
 
 
 def maximum_resolution_achievable(
@@ -126,30 +127,58 @@ def _radial_profile(data: NDArray):
     return tbin / (nr + 1e-15)
 
 
-def mtf(
+def modulation_transfer_function(
     measured_image: sc.DataArray,
     ideal_image: sc.DataArray,
 ) -> sc.DataArray:
+    '''
+    Computes the modulation transfer function (MTF) of
+    the camera given a measured image and the
+    ideal image that would have been captured if
+    the instrument had infinite resolution.
+
+    Parameters
+    ------------
+    measured_image:
+        The image captured by the camera.
+    ideal_image:
+        A perfect representation of the target
+        on the same grid as `measured_image`.
+
+    Returns
+    ------------
+    :
+        The modulation transfer function as a function
+        of "frequency" representing "line pairs" per pixel.
+    '''
     _measured = measured_image.values
     _ideal = ideal_image.values
-    f_measured = np.fft.fft2(_measured)
-    f_ideal = np.fft.fft2(_ideal)
+    ny, nx = _measured.shape
+    win = np.outer(tukey(ny, alpha=0.1), tukey(nx, alpha=0.1))
+    f_ideal = np.abs(np.fft.fftshift(np.fft.fft2(_ideal * win)))
+    f_measured = np.abs(np.fft.fftshift(np.fft.fft2(_measured * win)))
     _mtf = _radial_profile(f_measured) / _radial_profile(f_ideal)
     return sc.DataArray(
         sc.array(dims=['frequency'], values=_mtf),
-        coords={
-            'frequency': sc.linspace('frequency', 0, 0.5, len(_mtf), unit='1/pixel')
-        },
+        coords={'frequency': sc.linspace('frequency', 0, 0.5, len(_mtf))},
     )
 
 
-def estimate_fc(x, y):
-    m = np.ones(len(x), dtype='bool')
+def estimate_cut_off_frequency(mtf: sc.DataArray):
+    '''Estimates the cut off frequency of
+    the modulation transfer function (mtf).'''
+    _freq = mtf.coords['frequency'].values
+    _mtf = mtf.values
+    m = np.ones(len(_freq), dtype='bool')
     for _ in range(5):
-        p = np.polyfit(x[m], y[m], 1)
-        m = np.polyval(p, x) >= 0
-    return -p[1] / p[0]
+        p = np.polyfit(_freq[m], _mtf[m], 1)
+        m = np.polyval(p, _freq) >= 0
+    return sc.scalar(-p[1] / p[0], unit=mtf.coords['frequency'].unit)
 
 
-def mft50(x, y):
-    return x[y <= 0.5].min()
+def mtf50(mtf: sc.DataArray):
+    '''Computes the frequency where the
+    modulation transfer function is 50%.'''
+    _freq = mtf.coords['frequency'].values
+    _mtf = mtf.values
+    return sc.scalar(_freq[_mtf <= 0.5].min(), unit=mtf.coords['frequency'].unit)
