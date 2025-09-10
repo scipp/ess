@@ -1,4 +1,6 @@
+import numpy as np
 import scipp as sc
+from numpy.typing import NDArray
 
 
 def maximum_resolution_achievable(
@@ -112,3 +114,42 @@ def maximum_resolution_achievable(
             lower_ny,
         ),
     )
+
+
+def _radial_profile(data: NDArray):
+    y, x = np.indices(data.shape)
+    cy, cx = np.array(data.shape) / 2.0
+    r = np.hypot(x - cx, y - cy)
+    r = r.astype(np.int32)
+    tbin = np.bincount(r.ravel(), data.ravel())
+    nr = np.bincount(r.ravel())
+    return tbin / (nr + 1e-15)
+
+
+def mtf(
+    measured_image: sc.DataArray,
+    ideal_image: sc.DataArray,
+) -> sc.DataArray:
+    _measured = measured_image.values
+    _ideal = ideal_image.values
+    f_measured = np.fft.fft2(_measured)
+    f_ideal = np.fft.fft2(_ideal)
+    _mtf = _radial_profile(f_measured) / _radial_profile(f_ideal)
+    return sc.DataArray(
+        sc.array(dims=['frequency'], values=_mtf),
+        coords={
+            'frequency': sc.linspace('frequency', 0, 0.5, len(_mtf), unit='1/pixel')
+        },
+    )
+
+
+def estimate_fc(x, y):
+    m = np.ones(len(x), dtype='bool')
+    for _ in range(5):
+        p = np.polyfit(x[m], y[m], 1)
+        m = np.polyval(p, x) >= 0
+    return -p[1] / p[0]
+
+
+def mft50(x, y):
+    return x[y <= 0.5].min()
