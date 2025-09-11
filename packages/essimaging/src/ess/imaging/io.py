@@ -385,6 +385,8 @@ def tiff_from_nexus(
     workflow: sciline.Pipeline,
     nexus_file_name: str | Path | io.BytesIO,
     output_path: str | Path | io.BytesIO,
+    *,
+    time_bins: int | sc.Variable = 50,
 ) -> None:
     '''
     Write a tiff image file representing the data from the nexus file.
@@ -413,7 +415,7 @@ def tiff_from_nexus(
     )
     image = (
         sc.concat([data], dim='c')
-        .hist(event_time_offset=50)
+        .hist(event_time_offset=time_bins)
         .rename_dims(event_time_offset='t')
         .transpose(('t', 'c', 'dim_0', 'dim_1'))
     )
