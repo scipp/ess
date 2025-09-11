@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
+import io
 import warnings
 from collections.abc import Callable, Generator, Iterable
 from enum import Enum
@@ -7,6 +8,7 @@ from itertools import pairwise
 from pathlib import Path
 from typing import NewType
 
+import sciline
 import scipp as sc
 import scippnexus as snx
 from tifffile import imwrite
@@ -380,10 +382,23 @@ def _add_to_event_time_offset_in_case_of_pulse_skipping(
 
 
 def tiff_from_nexus(
-    workflow,
-    nexus_file_name,
-    output_path,
-):
+    workflow: sciline.Pipeline,
+    nexus_file_name: str | Path | io.BytesIO,
+    output_path: str | Path | io.BytesIO,
+) -> None:
+    '''
+    Write a tiff image file representing the data from the nexus file.
+
+    Parameters
+    ------------
+    workflow:
+        The Sciline workflow that tells us how
+        to compute the detector data.
+    nexus_file_name:
+        The file name of the nexus file to write to tiff.
+    output_path:
+        Where to write the tiff file.
+    '''
     wf = workflow.copy()
     wf[Filename[SampleRun]] = nexus_file_name
     data = wf.compute(DetectorData[SampleRun])
