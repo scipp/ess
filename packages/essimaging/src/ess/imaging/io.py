@@ -15,11 +15,14 @@ from ess.reduce.nexus.types import FilePath
 
 from .types import (
     DEFAULT_HISTOGRAM_PATH,
+    DetectorData,
+    Filename,
     HistogramModeDetectorsPath,
     ImageDetectorName,
     ImageKeyLogs,
     RotationLogs,
     RotationMotionSensorName,
+    SampleRun,
 )
 
 FileLock = NewType("FileLock", bool)
@@ -340,7 +343,8 @@ def export_image_stacks_as_tiff(
         and output_path.is_dir()
     ):
         for file in output_path.iterdir():
-            file.unlink()
+            if not file.is_dir():
+                file.unlink()
 
     _validate_output_dir(output_path)
 
@@ -358,3 +362,45 @@ def export_image_stacks_as_tiff(
                 output_dir=output_path,
                 progress_wrapper=progress_wrapper,
             )
+
+
+def _add_to_event_time_offset_in_case_of_pulse_skipping(
+    event_time_zero: sc.Variable,
+    pulse_stride: int,
+    pulse_period: sc.Variable,
+) -> sc.Variable:
+    _pulse_period = pulse_period.to(unit=event_time_zero.unit)
+    etz = event_time_zero - sc.datetime(0, unit=event_time_zero.unit)
+    # The offset is used to place some etz value in the center of a binning
+    # where the bins have constant width pulse_period.
+    # That way small deviations in etz will not move the etz to the next
+    # or previous bin and each subsequent pulse will have a different index.
+    offset = _pulse_period / 2 - etz.nanmin() % _pulse_period
+    index = ((etz + offset) // _pulse_period) % pulse_stride
+    return index * pulse_period
+
+
+def tiff_from_nexus(
+    workflow,
+    nexus_file_name,
+    output_path,
+):
+    wf = workflow.copy()
+    wf[Filename[SampleRun]] = nexus_file_name
+    data = wf.compute(DetectorData[SampleRun])
+    data.bins.coords['event_time_offset'] += (
+        _add_to_event_time_offset_in_case_of_pulse_skipping(
+            data.bins.coords['event_time_zero'],
+            pulse_stride=2,
+            pulse_period=sc.scalar(1 / 14, unit="s").to(
+                unit=data.bins.coords['event_time_offset'].unit
+            ),
+        )
+    )
+    image = (
+        sc.concat([data], dim='c')
+        .hist(event_time_offset=50)
+        .rename_dims(event_time_offset='t')
+        .transpose(('t', 'c', 'dim_0', 'dim_1'))
+    )
+    imwrite(output_path, image.values)
