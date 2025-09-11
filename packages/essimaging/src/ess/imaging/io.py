@@ -343,8 +343,7 @@ def export_image_stacks_as_tiff(
         and output_path.is_dir()
     ):
         for file in output_path.iterdir():
-            if not file.is_dir():
-                file.unlink()
+            file.unlink()
 
     _validate_output_dir(output_path)
 
