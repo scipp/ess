@@ -39,6 +39,7 @@ dependencies = [
   "scippnexus>=23.11.1",
   "tifffile>=2024.7.2",
   "essreduce>=25.07.0",
+  "scitiff>=25.7",
 ]
 
 dynamic = ["version"]
