@@ -390,13 +390,14 @@ def tiff_from_nexus(
 
     Parameters
     ------------
-    workflow:
-        The Sciline workflow that tells us how
-        to compute the detector data.
     nexus_file_name:
         The file name of the nexus file to write to tiff.
     output_path:
         Where to write the tiff file.
+    time_bins:
+        The number of time slices the image should have.
+    pulse_stride:
+        The pulse stride that was used when doing the measurement.
     '''
     with snx.File(nexus_file_name) as f:
         data = f['/entry/instrument/event_mode_detectors/timepix3'][()][
