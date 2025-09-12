@@ -8,23 +8,20 @@ from itertools import pairwise
 from pathlib import Path
 from typing import NewType
 
-import sciline
 import scipp as sc
 import scippnexus as snx
+import scitiff
 from tifffile import imwrite
 
 from ess.reduce.nexus.types import FilePath
 
 from .types import (
     DEFAULT_HISTOGRAM_PATH,
-    DetectorData,
-    Filename,
     HistogramModeDetectorsPath,
     ImageDetectorName,
     ImageKeyLogs,
     RotationLogs,
     RotationMotionSensorName,
-    SampleRun,
 )
 
 FileLock = NewType("FileLock", bool)
@@ -382,11 +379,11 @@ def _add_to_event_time_offset_in_case_of_pulse_skipping(
 
 
 def tiff_from_nexus(
-    workflow: sciline.Pipeline,
     nexus_file_name: str | Path | io.BytesIO,
     output_path: str | Path | io.BytesIO,
     *,
-    time_bins: int | sc.Variable = 50,
+    time_bins: int | sc.Variable,
+    pulse_stride: int,
 ) -> None:
     '''
     Write a tiff image file representing the data from the nexus file.
@@ -401,13 +398,14 @@ def tiff_from_nexus(
     output_path:
         Where to write the tiff file.
     '''
-    wf = workflow.copy()
-    wf[Filename[SampleRun]] = nexus_file_name
-    data = wf.compute(DetectorData[SampleRun])
+    with snx.File(nexus_file_name) as f:
+        data = f['/entry/instrument/event_mode_detectors/timepix3'][()][
+            'timepix3_events'
+        ]
     data.bins.coords['event_time_offset'] += (
         _add_to_event_time_offset_in_case_of_pulse_skipping(
             data.bins.coords['event_time_zero'],
-            pulse_stride=2,
+            pulse_stride=pulse_stride,
             pulse_period=sc.scalar(1 / 14, unit="s").to(
                 unit=data.bins.coords['event_time_offset'].unit
             ),
@@ -416,7 +414,7 @@ def tiff_from_nexus(
     image = (
         sc.concat([data], dim='c')
         .hist(event_time_offset=time_bins)
-        .rename_dims(event_time_offset='t')
-        .transpose(('t', 'c', 'dim_0', 'dim_1'))
+        .rename_dims(event_time_offset='t', dim_0='y', dim_1='x')
     )
-    imwrite(output_path, image.values)
+    image = image.drop_coords([c for c in image.coords if image.coords[c].ndim > 1])
+    scitiff.save_scitiff(image, output_path)
