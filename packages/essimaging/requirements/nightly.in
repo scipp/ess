@@ -5,7 +5,7 @@ dask>=2022.1.0
 graphviz
 tifffile>=2024.7.2
 scitiff>=25.7
-pytest>=7.0
+pytest>=8.0
 pooch>=1.5
 scitiff>=24.6.0
 scipp
