@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+from __future__ import annotations
+
 import uuid
 from collections.abc import Callable, Mapping, Sequence
 from itertools import chain
@@ -109,21 +111,21 @@ def linlogspace(
     return sc.concat(grids, dim)
 
 
-class DataTable(dict):
-    def _repr_html_(self):
-        clean = {
-            str(tp.__name__)
-            if hasattr(tp, '__name__')
-            else str(tp).split('.')[-1]: value
-            for tp, value in self.items()
-        }
-        try:
-            import pandas as pd
+# class DataTable(dict):
+#     def _repr_html_(self):
+#         clean = {
+#             str(tp.__name__)
+#             if hasattr(tp, '__name__')
+#             else str(tp).split('.')[-1]: value
+#             for tp, value in self.items()
+#         }
+#         try:
+#             import pandas as pd
 
-            df = pd.DataFrame(clean)
-            return df._repr_html_()
-        except ImportError:
-            return clean._repr_html_()
+#             df = pd.DataFrame(clean)
+#             return df._repr_html_()
+#         except ImportError:
+#             return clean._repr_html_()
 
 
 class WorkflowCollection:
@@ -133,18 +135,18 @@ class WorkflowCollection:
     It can also be used to set parameters for all workflows in a single shot.
     """
 
-    def __init__(self, workflow: sl.Pipeline, params: Mapping[Any, Mapping[type, Any]]):
+    def __init__(self, workflows: Mapping[str, sl.Pipeline]):
         # self._original_workflow = workflow
-        self.workflows = []
+        self.workflows = workflows
 
-        if not isinstance(params, pd.DataFrame):
-            params = pd.DataFrame(params)
+        # if not isinstance(params, pd.DataFrame):
+        #     params = pd.DataFrame(params)
 
-        for _, row in params.iterrows():
-            wf = workflow.copy()
-            for k, v in row.items():
-                wf[k] = v
-            self.workflows.append(wf)
+        # for _, row in params.iterrows():
+        #     wf = workflow.copy()
+        #     for k, v in row.items():
+        #         wf[k] = v
+        #     self.workflows.append(wf)
 
         # for name, parameters in params.items():
         #     wf = workflow.copy()
@@ -156,45 +158,63 @@ class WorkflowCollection:
         # # self.workflows = {name: pl.copy() for name, pl in workflows.items()}
 
     def __setitem__(self, key: type, value: Sequence[Any]):
-        for i, v in enumerate(value):
-            self.workflows[i][key] = v
-        # if hasattr(value, 'items'):
-        #     for name, v in value.items():
-        #         self.workflows[name][key] = v
-        # else:
-        #     for wf in self.workflows.values():
-        #         wf[key] = value
+        # for i, v in enumerate(value):
+        #     self.workflows[i][key] = v
+        if hasattr(value, 'items'):
+            for name, v in value.items():
+                self.workflows[name][key] = v
+        else:
+            for wf in self.workflows.values():
+                wf[key] = value
 
-    # def __getitem__(self, name: str) -> sl.Pipeline:
-    #     """ """
-    #     return {key: wf[name] for key, wf in self.workflows.items()}
+    def __getitem__(self, name: str) -> sl.Pipeline:
+        """ """
+        return WorkflowCollection({k: wf[name] for k, wf in self.workflows.items()})
 
-    def compute(self, target: type | Sequence[type], **kwargs) -> Mapping[str, Any]:
+    def compute(self, targets: type | Sequence[type], **kwargs) -> Mapping[str, Any]:
         # return {
         #     name: wf.compute(target, **kwargs) for name, wf in self.workflows.items()
         # }
-        if not isinstance(target, list | tuple):
-            target = [target]
+        if not isinstance(targets, list | tuple):
+            targets = [targets]
         out = {}
-        for t in target:
-            # out[t] = {
-            #     name: wf.compute(t, **kwargs) for name, wf in self.workflows.items()
-            # }
-            out[t] = [wf.compute(t, **kwargs) for wf in self.workflows]
+        for t in targets:
+            out[t] = {
+                name: wf.compute(t, **kwargs) for name, wf in self.workflows.items()
+            }
+            # out[t] = [wf.compute(t, **kwargs) for wf in self.workflows]
         # return pd.DataFrame(out), out
-        return DataTable(out)
+        return next(iter(out.values())) if len(out) == 1 else out
 
-    def copy(self) -> 'WorkflowCollection':
+    def copy(self) -> WorkflowCollection:
         # out = self.__class__(sl.Pipeline(), params={})
         # for name, wf in self.workflows.items():
         #     out.workflows[name] = wf.copy()
         # return out
-        out = WorkflowCollection(None, {})
-        out.workflows = [wf.copy() for wf in self.workflows]
-        return out
+        return WorkflowCollection({k: wf.copy() for k, wf in self.workflows.items()})
 
-    def groupby(self, key: type, reduce: Callable) -> 'WorkflowCollection':
-        results = self.compute(key)
+    def visualize(self, targets: type | Sequence[type], **kwargs) -> None:
+        """
+        Visualize all workflows in the collection.
+
+        Parameters
+        ----------
+        targets : type | Sequence[type]
+            The target type(s) to visualize.
+        **kwargs:
+            Additional keyword arguments passed to `sciline.Pipeline.visualize`.
+        """
+        # merge all the graphviz Digraphs into a single one
+        graphs = [wf.visualize(targets, **kwargs) for wf in self.workflows.values()]
+        from graphviz import Digraph
+
+        combined = Digraph()
+        for g in graphs:
+            combined.body.extend(g.body)
+        return combined
+
+    # def groupby(self, key: type, reduce: Callable) -> 'WorkflowCollection':
+    #     results = self.compute(key)
 
     # def keys(self) -> Sequence[str]:
     #     return self.workflows.keys()
@@ -509,11 +529,18 @@ def batch_processor(
 
         if Filename[SampleRun] in parameters:
             if isinstance(parameters[Filename[SampleRun]], list | tuple):
-                wf = with_filenames(
-                    wf,
-                    SampleRun,
-                    parameters[Filename[SampleRun]],
-                )
+                # axis_name = f'{str(runtype).lower()}_runs'
+                df = pd.DataFrame(
+                    {Filename[SampleRun]: parameters[Filename[SampleRun]]}
+                )  # .rename_axis()
+                # wf = workflow.copy()
+
+                wf = wf.map(df)
+                # wf = with_filenames(
+                #     wf,
+                #     SampleRun,
+                #     parameters[Filename[SampleRun]],
+                # )
             else:
                 wf[Filename[SampleRun]] = parameters[Filename[SampleRun]]
         workflows[name] = wf
