@@ -196,6 +196,10 @@ class WorkflowCollection:
             for name, wf in self.workflows.items():
                 if sl.is_mapped_node(wf, t):
                     out[t][name] = sl.compute_mapped(wf, t, **kwargs)
+                    # results = sl.compute_mapped(wf, t, **kwargs)
+                    # # results = self.workflow.compute(targets, **kwargs)
+                    # for node, v in results.items():
+                    #     out[key][node.index.values[0]] = v
                 else:
                     out[t][name] = wf.compute(t, **kwargs)
             # out[t] = [wf.compute(t, **kwargs) for wf in self.workflows]
