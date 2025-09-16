@@ -128,6 +128,19 @@ def linlogspace(
 #             return clean._repr_html_()
 
 
+class MultiGraphViz:
+    """
+    A dummy class to concatenate multiple graphviz visualizations into a single repr
+    output for Jupyter notebooks.
+    """
+
+    def __init__(self, graphs: Sequence):
+        self.graphs = graphs
+
+    def _repr_html_(self) -> str:
+        return "".join(g._repr_image_svg_xml() for g in self.graphs)
+
+
 class WorkflowCollection:
     """
     A collection of sciline workflows that can be used to compute multiple
@@ -167,7 +180,7 @@ class WorkflowCollection:
             for wf in self.workflows.values():
                 wf[key] = value
 
-    def __getitem__(self, name: str) -> sl.Pipeline:
+    def __getitem__(self, name: str) -> WorkflowCollection:
         """ """
         return WorkflowCollection({k: wf[name] for k, wf in self.workflows.items()})
 
@@ -179,9 +192,12 @@ class WorkflowCollection:
             targets = [targets]
         out = {}
         for t in targets:
-            out[t] = {
-                name: wf.compute(t, **kwargs) for name, wf in self.workflows.items()
-            }
+            out[t] = {}
+            for name, wf in self.workflows.items():
+                if sl.is_mapped_node(wf, t):
+                    out[t][name] = sl.compute_mapped(wf, t, **kwargs)
+                else:
+                    out[t][name] = wf.compute(t, **kwargs)
             # out[t] = [wf.compute(t, **kwargs) for wf in self.workflows]
         # return pd.DataFrame(out), out
         return next(iter(out.values())) if len(out) == 1 else out
@@ -193,7 +209,7 @@ class WorkflowCollection:
         # return out
         return WorkflowCollection({k: wf.copy() for k, wf in self.workflows.items()})
 
-    def visualize(self, targets: type | Sequence[type], **kwargs) -> None:
+    def visualize(self, targets: type | Sequence[type], **kwargs) -> MultiGraphViz:
         """
         Visualize all workflows in the collection.
 
@@ -204,14 +220,34 @@ class WorkflowCollection:
         **kwargs:
             Additional keyword arguments passed to `sciline.Pipeline.visualize`.
         """
-        # merge all the graphviz Digraphs into a single one
-        graphs = [wf.visualize(targets, **kwargs) for wf in self.workflows.values()]
         from graphviz import Digraph
 
-        combined = Digraph()
-        for g in graphs:
-            combined.body.extend(g.body)
-        return combined
+        # Place all the graphviz Digraphs side by side into a single one.
+        if not isinstance(targets, list | tuple):
+            targets = [targets]
+        graphs = []
+        for key, wf in self.workflows.items():
+            v = wf.visualize(targets, **kwargs)
+            g = Digraph()
+            with g.subgraph(name=f"cluster_{key}") as c:
+                c.attr(label=key, style="rounded", color="black")
+                c.body.extend(v.body)
+
+            graphs.append(g)
+
+        return MultiGraphViz(graphs)
+
+        # master = Digraph(comment="All Graphs Side by Side")
+        # # master.attr(rankdir="LR")  # Left-to-right layout
+
+        # for name, sub in graphs.items():
+        #     with master.subgraph(name=f"cluster_{name}") as c:
+        #         c.attr(label=name, style="rounded", color="black")
+        #         c.body.extend(sub.body)
+
+        # return master
+
+        #
 
     # def groupby(self, key: type, reduce: Callable) -> 'WorkflowCollection':
     #     results = self.compute(key)
@@ -470,6 +506,12 @@ def combine_curves(
     )
 
 
+def _concatenate_event_lists(*das):
+    da = sc.reduce(das).bins.concat()
+    missing_coords = set(das[0].coords) - set(da.coords)
+    return da.assign_coords({coord: das[0].coords[coord] for coord in missing_coords})
+
+
 def batch_processor(
     workflow: sl.Pipeline, runs: Mapping[Any, Mapping[type, Any]]
 ) -> WorkflowCollection:
@@ -535,7 +577,11 @@ def batch_processor(
                 )  # .rename_axis()
                 # wf = workflow.copy()
 
-                wf = wf.map(df)
+                mapped = wf.map(df)
+
+                wf[UnscaledReducibleData[SampleRun]] = mapped[
+                    UnscaledReducibleData[SampleRun]
+                ].reduce(func=_concatenate_event_lists)
                 # wf = with_filenames(
                 #     wf,
                 #     SampleRun,
