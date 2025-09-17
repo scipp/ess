@@ -10,14 +10,16 @@ import scipp as sc
 from ess.spectroscopy.types import (
     DataGroupedByRotation,
     DetectorData,
-    InstrumentAngles,
+    InstrumentAngle,
     RunType,
+    SampleAngle,
 )
 
 
 def group_by_rotation(
     data: DetectorData[RunType],
-    angles: InstrumentAngles[RunType],
+    sample_angle: SampleAngle[RunType],
+    instrument_angle: InstrumentAngle[RunType],
 ) -> DataGroupedByRotation[RunType]:
     """Group data by rotation angles.
 
@@ -25,9 +27,12 @@ def group_by_rotation(
     ----------
     data:
         Detector events with time coordinates.
-    angles:
-        Data group with entries "a3" and "a4".
-        Each entry may be time-dependent (1d array with dim "time") or scalar.
+    sample_angle:
+        Sample rotation angle "a3".
+        May be time-dependent (1d array with dim "time") or scalar.
+    instrument_angle:
+        Instrument rotation angle "a4".
+        May be time-dependent (1d array with dim "time") or scalar.
 
     Returns
     -------
@@ -35,7 +40,8 @@ def group_by_rotation(
         ``data`` grouped by rotation angles "a3" and "a4".
     """
     graph = {
-        name: _make_angle_from_time_calculator(angle) for name, angle in angles.items()
+        'a3': _make_angle_from_time_calculator(sample_angle),
+        'a4': _make_angle_from_time_calculator(instrument_angle),
     }
     grouped = data.transform_coords(('a3', 'a4'), graph=graph).group('a3', 'a4')
     return DataGroupedByRotation[RunType](grouped)

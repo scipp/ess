@@ -11,13 +11,14 @@ import sciline
 import scipp as sc
 import scippnexus as snx
 
-from ess.reduce.streaming import EternalAccumulator, StreamProcessor
+from ess.reduce.streaming import StreamProcessor
 from ess.spectroscopy.types import (
     EnergyData,
-    InstrumentAngles,
+    InstrumentAngle,
     NeXusData,
     NeXusDetectorName,
     RunType,
+    SampleAngle,
     SampleRun,
 )
 
@@ -87,7 +88,7 @@ def BIFROSTQCutStreamProcessor(workflow: sciline.Pipeline) -> StreamProcessor:
     return StreamProcessor(
         workflow,
         dynamic_keys=(NeXusData[snx.NXdetector, SampleRun],),
-        context_keys=(InstrumentAngles[SampleRun],),
+        context_keys=(InstrumentAngle[SampleRun], SampleAngle[SampleRun]),
         target_keys=(CutData[SampleRun],),
         accumulators=(CutData[SampleRun],),
     )
