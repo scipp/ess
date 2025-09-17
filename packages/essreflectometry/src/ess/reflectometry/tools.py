@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Mapping, Sequence
 from itertools import chain
 from typing import Any
 
@@ -22,7 +22,6 @@ from ess.reflectometry.types import (
     ScalingFactorForOverlap,
     UnscaledReducibleData,
 )
-from ess.reflectometry.workflow import with_filenames
 
 _STD_TO_FWHM = sc.scalar(2.0) * sc.sqrt(sc.scalar(2.0) * sc.log(sc.scalar(2.0)))
 
