@@ -89,7 +89,5 @@ def BIFROSTQCutStreamProcessor(workflow: sciline.Pipeline) -> StreamProcessor:
         dynamic_keys=(NeXusData[snx.NXdetector, SampleRun],),
         context_keys=(InstrumentAngles[SampleRun],),
         target_keys=(CutData[SampleRun],),
-        accumulators={
-            CutData[SampleRun]: EternalAccumulator(),
-        },
+        accumulators=(CutData[SampleRun],),
     )
