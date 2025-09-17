@@ -194,14 +194,24 @@ class WorkflowCollection:
         for t in targets:
             out[t] = {}
             for name, wf in self.workflows.items():
-                if sl.is_mapped_node(wf, t):
-                    out[t][name] = sl.compute_mapped(wf, t, **kwargs)
-                    # results = sl.compute_mapped(wf, t, **kwargs)
-                    # # results = self.workflow.compute(targets, **kwargs)
-                    # for node, v in results.items():
-                    #     out[key][node.index.values[0]] = v
-                else:
+                try:
                     out[t][name] = wf.compute(t, **kwargs)
+                except sl.UnsatisfiedRequirement as e:
+                    try:
+                        out[t][name] = sl.compute_mapped(
+                            wf, t, **kwargs
+                        ).values.tolist()
+                    except (sl.UnsatisfiedRequirement, ValueError):
+                        # ValueError is raised when the requested type is not mapped
+                        raise e from e
+                # if sl.is_mapped_node(wf, t):
+                #     out[t][name] = sl.compute_mapped(wf, t, **kwargs).values.tolist()
+                #     # results = sl.compute_mapped(wf, t, **kwargs)
+                #     # # results = self.workflow.compute(targets, **kwargs)
+                #     # for node, v in results.items():
+                #     #     out[key][node.index.values[0]] = v
+                # else:
+                #     out[t][name] = wf.compute(t, **kwargs)
             # out[t] = [wf.compute(t, **kwargs) for wf in self.workflows]
         # return pd.DataFrame(out), out
         return next(iter(out.values())) if len(out) == 1 else out
@@ -232,7 +242,7 @@ class WorkflowCollection:
         graphs = []
         for key, wf in self.workflows.items():
             v = wf.visualize(targets, **kwargs)
-            g = Digraph()
+            g = Digraph(**kwargs)
             with g.subgraph(name=f"cluster_{key}") as c:
                 c.attr(label=key, style="rounded", color="black")
                 c.body.extend(v.body)
@@ -449,8 +459,10 @@ def scale_reflectivity_curves_to_overlap(
     sol = opt.minimize(cost, [1.0] * (len(curves) - 1))
     scaling_factors = (1.0, *map(float, sol.x))
 
+    original_factors = wfc.compute(ScalingFactorForOverlap[SampleRun])
+
     wfc[ScalingFactorForOverlap[SampleRun]] = {
-        k: v
+        k: v * original_factors[k]
         for k, v in zip(curves.keys(), scaling_factors, strict=True)
         if k != critical_edge_key
     }
