@@ -35,6 +35,24 @@ from ess.reflectometry.types import (
 from ess.reflectometry.workflow import with_filenames
 
 
+def _get_unique_names(df):
+    # Create labels with Sample name and runs
+    labels = [
+        f"{params['Sample']} ({','.join(params['Runs'])})"
+        for (_, params) in df.iterrows()
+    ]
+    duplicated_name_counter = {}
+    unique = []
+    for i, name in enumerate(labels):
+        if name not in labels[:i]:
+            unique.append(name)
+        else:
+            duplicated_name_counter.setdefault(name, 0)
+            duplicated_name_counter[name] += 1
+            unique.append(f'{name}_{duplicated_name_counter[name]}')
+    return unique
+
+
 def _get_selected_rows(grid):
     return (
         pd.concat(
@@ -386,8 +404,8 @@ class ReflectometryBatchReductionGUI:
         db["user_reference"] = self.reference_table.data
 
         db["user_runs"] = self.sync_runs_table(db)
-        db["user_reduction"] = self.sync_reduction_table(db)
         db["user_reference"] = self.sync_reference_table(db)
+        db["user_reduction"] = self.sync_reduction_table(db)
 
         self.runs_table.data = db["user_runs"]
         self.reduction_table.data = db["user_reduction"]
@@ -396,6 +414,7 @@ class ReflectometryBatchReductionGUI:
         self.set_table_height(self.runs_table)
         self.set_table_height(self.reduction_table)
         self.set_table_height(self.custom_reduction_table)
+
         self.set_table_colors(self.reduction_table)
         self.set_table_colors(self.custom_reduction_table)
         self.set_table_colors(self.reference_table)
@@ -406,10 +425,163 @@ class ReflectometryBatchReductionGUI:
             raise ValueError("Path is not set")
         return self._path
 
+    def _init_proposal_number_box(self):
+        self.proposal_number_box = widgets.Text(
+            value="",
+            placeholder="Proposal number or file path",
+            description="Proposal no.:",
+            layout=widgets.Layout(description_width="auto"),
+            disabled=False,
+        )
+
+        def set_proposal_number_state(state):
+            if state == "good":
+                self.proposal_number_box.layout.border = '2px solid green'
+            if state == "bad":
+                self.proposal_number_box.layout.border = '2px solid red'
+
+        def on_proposal_number_change(_):
+            p = self.proposal_number_box.value
+            if p.isdigit():
+                # Handling proposal numbers is not yet implemented
+                self._path = None
+                set_proposal_number_state("bad")
+            elif not os.path.isdir(p):
+                self._path = None
+                set_proposal_number_state("bad")
+            else:
+                self._path = p
+                set_proposal_number_state("good")
+                self.sync()
+
+        set_proposal_number_state("bad")
+        self.proposal_number_box.observe(on_proposal_number_change, names='value')
+
+    def _init_runs_table_component(self):
+        self.run_number_min = widgets.IntText(
+            value=0, description='', layout=widgets.Layout(width='5em')
+        )
+        self.run_number_max = widgets.IntText(
+            value=9999, description='', layout=widgets.Layout(width='5em')
+        )
+        self.run_number_min.observe(self.sync, names='value')
+        self.run_number_max.observe(self.sync, names='value')
+        run_number_filter = widgets.HBox(
+            [self.run_number_min, widgets.Label(r"≤ Run ≤"), self.run_number_max]
+        )
+        self.runs_table_component = widgets.VBox(
+            [
+                widgets.Label("Runs Table"),
+                run_number_filter,
+                self.runs_table,
+            ],
+            layout={"width": "35%"},
+        )
+
+    def _init_reduction_table_component(self):
+        reduce_button = widgets.Button(description="Reduce")
+        plot_button = widgets.Button(description="Plot")
+        self.progress_log = widgets.VBox([])
+
+        def reduce_data(_):
+            self.log("reduce data")
+            self.run_workflow()
+
+        def plot_results(_):
+            self.log("plot results")
+            self.display_results()
+
+        reduce_button.on_click(reduce_data)
+        plot_button.on_click(plot_results)
+
+        add_row_button = widgets.Button(description="Add row")
+        delete_row_button = widgets.Button(description="Remove row")
+
+        def add_row(_):
+            self.log("add row")
+            row = _get_selected_rows(self.reduction_table)
+            if row is None:
+                row = pd.DataFrame(
+                    [
+                        {
+                            'Sample': '',
+                            'Angle': 0.0,
+                            'Runs': (),
+                            'QBins': 391,
+                            'QStart': 0.01,
+                            'QStop': 0.3,
+                            'Reference': self.reference_table.data.iloc[0]['Sample']
+                            if len(self.reference_table.data) > 0
+                            else pd.NA,
+                            'Scale': 1.0,
+                        }
+                    ]
+                )
+            # To avoid a flickering scrollbar
+            # - increase table height with some margin before adding row
+            # - adjust able height afterwards
+            self.set_table_height(self.custom_reduction_table, extra=25)
+            self.custom_reduction_table.data = pd.concat(
+                [self.custom_reduction_table.data, row]
+            )
+            self.set_table_height(self.custom_reduction_table)
+            self.set_table_colors(self.custom_reduction_table)
+
+        def delete_row(_):
+            self.log("delete row")
+            self.custom_reduction_table.data = self.custom_reduction_table.data.iloc[
+                :-1
+            ]
+            self.set_table_height(self.custom_reduction_table)
+
+        add_row_button.on_click(add_row)
+        delete_row_button.on_click(delete_row)
+        data_buttons = widgets.HBox([reduce_button, plot_button, self.progress_log])
+
+        self.reduction_table_component = widgets.VBox(
+            [
+                data_buttons,
+                widgets.VBox(
+                    [
+                        widgets.Label("Auto Reduction Table"),
+                        self.reduction_table,
+                    ],
+                    layout={'margin': '10px 0'},
+                ),
+                widgets.VBox(
+                    [
+                        widgets.Label("Manual Reduction Table"),
+                        widgets.HBox(
+                            [add_row_button, delete_row_button],
+                            layout={'margin': '5px 0'},
+                        ),
+                        self.custom_reduction_table,
+                    ],
+                    layout={'margin': '10px 0'},
+                ),
+            ],
+            layout={"width": "60%"},
+        )
+
+    def _init_display_component(self):
+        self.plot_log = widgets.VBox([])
+        self.display_component = widgets.VBox(
+            [widgets.Label("Plots"), self.plot_log],
+            layout={'width': '100%', 'margin': '10px 0'},
+        )
+
+    def _init_settings_component(self):
+        self.settings_component = widgets.VBox(
+            [
+                widgets.Label("This is the settings tab"),
+                widgets.Label("Reference runs"),
+                self.reference_table,
+            ],
+            layout={"width": "100%"},
+        )
+
     def __init__(self):
         self.text_log = widgets.VBox([])
-        self.progress_log = widgets.VBox([])
-        self.plot_log = widgets.VBox([])
         self._path = None
         self.log("init")
 
@@ -456,171 +628,28 @@ class ReflectometryBatchReductionGUI:
             lambda _: self.sync_custom_reduction_table()
         )
 
-        self.proposal_number_box = widgets.Text(
-            value="",
-            placeholder="Proposal number or file path",
-            description="Proposal no.:",
-            layout=widgets.Layout(description_width="auto"),
-            disabled=False,
-        )
-
-        def set_proposal_number_state(state):
-            if state == "good":
-                self.proposal_number_box.layout.border = '2px solid green'
-            if state == "bad":
-                self.proposal_number_box.layout.border = '2px solid red'
-
-        def on_proposal_number_change(_):
-            p = self.proposal_number_box.value
-            if p.isdigit():
-                # Handling proposal numbers is not yet implemented
-                self._path = None
-                set_proposal_number_state("bad")
-            elif not os.path.isdir(p):
-                self._path = None
-                set_proposal_number_state("bad")
-            else:
-                self._path = p
-                set_proposal_number_state("good")
-                self.sync()
-
-        set_proposal_number_state("bad")
-        self.proposal_number_box.observe(on_proposal_number_change, names='value')
-
-        reduce_button = widgets.Button(description="Reduce")
-        plot_button = widgets.Button(description="Plot")
-
-        def reduce_data(_):
-            self.log("reduce data")
-            self.run_workflow()
-
-        def plot_results(_):
-            self.log("plot results")
-            self.display_results()
-
-        reduce_button.on_click(reduce_data)
-        plot_button.on_click(plot_results)
-
-        add_row_button = widgets.Button(description="Add row")
-        delete_row_button = widgets.Button(description="Remove row")
-
-        def add_row(_):
-            self.log("add row")
-            row = _get_selected_rows(self.reduction_table)
-            if row is None:
-                row = pd.DataFrame(
-                    [
-                        {
-                            'Sample': '',
-                            'Angle': 0.0,
-                            'Runs': (),
-                            'QBins': 391,
-                            'QStart': 0.01,
-                            'QStop': 0.3,
-                            'Scale': 1.0,
-                        }
-                    ]
-                )
-            # To avoid a flickering scrollbar
-            # - increase table height with some margin before adding row
-            # - adjust able height afterwards
-            self.set_table_height(self.custom_reduction_table, extra=25)
-            self.custom_reduction_table.data = pd.concat(
-                [self.custom_reduction_table.data, row]
-            )
-            self.set_table_height(self.custom_reduction_table)
-            self.set_table_colors(self.custom_reduction_table)
-
-        def delete_row(_):
-            self.log("delete row")
-            self.custom_reduction_table.data = self.custom_reduction_table.data.iloc[
-                :-1
-            ]
-            self.set_table_height(self.custom_reduction_table)
-
-        add_row_button.on_click(add_row)
-        delete_row_button.on_click(delete_row)
-        data_buttons = widgets.HBox([reduce_button, plot_button])
-
-        self.run_number_min = widgets.IntText(
-            value=0, description='', layout=widgets.Layout(width='5em')
-        )
-        self.run_number_max = widgets.IntText(
-            value=9999, description='', layout=widgets.Layout(width='5em')
-        )
-        self.run_number_min.observe(self.sync, names='value')
-        self.run_number_max.observe(self.sync, names='value')
-        run_number_filter = widgets.HBox(
-            [self.run_number_min, widgets.Label("<=Run<="), self.run_number_max]
-        )
+        self._init_proposal_number_box()
+        self._init_runs_table_component()
+        self._init_reduction_table_component()
+        self._init_display_component()
+        self._init_settings_component()
 
         tab_data = widgets.VBox(
             [
                 widgets.HBox(
                     [
-                        widgets.VBox(
-                            [
-                                widgets.Label("Runs Table"),
-                                run_number_filter,
-                                self.runs_table,
-                            ],
-                            layout={"width": "35%"},
-                        ),
-                        widgets.VBox(
-                            [
-                                data_buttons,
-                                widgets.VBox(
-                                    [
-                                        widgets.Label("Auto Reduction Table"),
-                                        self.reduction_table,
-                                    ],
-                                    layout={'margin': '10px 0'},
-                                ),
-                                widgets.VBox(
-                                    [
-                                        widgets.Label("Manual Reduction Table"),
-                                        widgets.HBox(
-                                            [add_row_button, delete_row_button],
-                                            layout={'margin': '5px 0'},
-                                        ),
-                                        self.custom_reduction_table,
-                                    ],
-                                    layout={'margin': '10px 0'},
-                                ),
-                            ],
-                            layout={"width": "60%"},
-                        ),
+                        self.runs_table_component,
+                        self.reduction_table_component,
                     ]
                 ),
-                widgets.VBox(
-                    [
-                        widgets.VBox(
-                            [widgets.Label("Progress"), self.progress_log],
-                            layout={'width': '100%', 'margin': '10px 0'},
-                        ),
-                        widgets.VBox(
-                            [widgets.Label("Plots"), self.plot_log],
-                            layout={'width': '100%', 'margin': '10px 0'},
-                        ),
-                    ]
-                ),
+                self.display_component,
             ]
         )
-
-        tab_settings = widgets.VBox(
-            [
-                widgets.Label("This is the settings tab"),
-                widgets.Label("Reference runs"),
-                self.reference_table,
-            ],
-            layout={"width": "100%"},
-        )
-
+        tab_settings = self.settings_component
         tab_log = widgets.VBox(
             [widgets.Label("Messages"), self.text_log],
             layout={"width": "100%"},
         )
-
         self.tabs = widgets.Tab()
         self.tabs.children = [
             tab_data,
@@ -664,8 +693,11 @@ class ReflectometryBatchReductionGUI:
             display(message)
         self.text_log.children = (out, *self.text_log.children)
 
-    def log_progress(self, progress):
+    def show_progress(self, progress):
         self.progress_log.children = (progress,)
+
+    def hide_progress(self):
+        self.progress_log.children = ()
 
 
 class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
@@ -734,14 +766,17 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
             db['run_number_max'] >= df['Run'].astype(int)
         ]
         self._setdefault(df, "Exclude", False)
+        self._setdefault(df, "Reference", False)
         self._setdefault(df, "Comment", "")  # Add default empty comment
-        df = self._ordercolumns(df, 'Run', 'Sample', 'Angle', 'Exclude', 'Comment')
+        df = self._ordercolumns(
+            df, 'Run', 'Sample', 'Angle', 'Exclude', 'Reference', 'Comment'
+        )
         return df.sort_values(by='Run')
 
     def sync_reduction_table(self, db):
         df = db["user_runs"]
         df = (
-            df[df["Sample"] != "sm5"][~df["Exclude"]]
+            df[~df["Reference"]][~df["Exclude"]]
             .groupby(["Sample", "Angle"], as_index=False)
             .agg(Runs=("Run", tuple))
             .sort_values(["Sample", "Angle"])
@@ -756,13 +791,20 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
         self._setdefault(df, "QStart", 0.01)
         self._setdefault(df, "QStop", 0.3)
         self._setdefault(df, "Scale", 1.0)
+        self._setdefault(
+            df,
+            "Reference",
+            db['user_reference'].iloc[0]['Sample']
+            if len(db['user_reference']) > 0
+            else pd.NA,
+        )
         df = self._ordercolumns(df, 'Sample', 'Angle', 'Runs')
         return df.sort_values(["Sample", "Angle"])
 
     def sync_reference_table(self, db):
         df = db["user_runs"]
         df = (
-            df[df["Sample"] == "sm5"][~df["Exclude"]]
+            df[df["Reference"]][~df["Exclude"]]
             .groupby(["Sample", "Angle"], as_index=False)
             .agg(Runs=("Run", tuple))
             .sort_values(["Sample", "Angle"])
@@ -804,30 +846,21 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
                 for _, row in df.iterrows()
                 if (key := self.get_row_key(row)) in self.results
             ]
+            labels = [
+                label
+                for label, (_, row) in zip(
+                    _get_unique_names(df), df.iterrows(), strict=True
+                )
+                if (key := self.get_row_key(row)) in self.results
+            ]
+
             if len(results) == len(df):
                 break
             # No results were found for some of the selected rows.
             # It hasn't been computed yet, so compute it and try again.
             self.run_workflow()
 
-        def get_unique_names(df):
-            # Create labels with Sample name and runs
-            labels = [
-                f"{params['Sample']} ({','.join(params['Runs'])})"
-                for (_, params) in df.iterrows()
-            ]
-            duplicated_name_counter = {}
-            unique = []
-            for i, name in enumerate(labels):
-                if name not in labels[:i]:
-                    unique.append(name)
-                else:
-                    duplicated_name_counter.setdefault(name, 0)
-                    duplicated_name_counter[name] += 1
-                    unique.append(f'{name}_{duplicated_name_counter[name]}')
-            return unique
-
-        results = dict(zip(get_unique_names(df), results, strict=True))
+        results = dict(zip(labels, results, strict=True))
 
         q4toggle = widgets.ToggleButton(value=False, description="R*Q^4")
         plot_box = widgets.VBox(
@@ -910,13 +943,22 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
         )
         return os.path.join(self.path, fname)
 
+    def get_reference_for_row(self, row):
+        if 'Reference' in row:
+            return self.reference_table.data[
+                self.reference_table.data['Sample'] == row['Reference']
+            ]
+        else:
+            return None
+
     def get_row_key(self, row):
-        reference_metadata = (
-            tuple(self.reference_table.data.iloc[0])
-            if len(self.reference_table.data) > 0
-            else (None,)
+        reference = self.get_reference_for_row(row)
+        return (
+            tuple(row),
+            tuple(tuple(row) for _, row in reference.iterrows())
+            if reference is not None
+            else None,
         )
-        return (tuple(row), tuple(reference_metadata))
 
     def get_selected_rows(self):
         chunks = [
@@ -931,7 +973,7 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
 
     def run_workflow(self):
         sample_df = self.get_selected_rows()
-        reference_df = self.reference_table.data.iloc[0]
+        used_references = set(sample_df['Reference'])
 
         workflow = amor.AmorWorkflow()
         workflow[SampleSize[SampleRun]] = sc.scalar(10, unit='mm')
@@ -940,46 +982,67 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
         workflow[ChopperPhase[ReferenceRun]] = sc.scalar(7.5, unit='deg')
         workflow[ChopperPhase[SampleRun]] = sc.scalar(7.5, unit='deg')
 
-        workflow[WavelengthBins] = sc.geomspace(
-            'wavelength',
-            reference_df['Lmin'],
-            reference_df['Lmax'],
-            2001,
-            unit='angstrom',
-        )
-
-        workflow[YIndexLimits] = (
-            sc.scalar(reference_df['Ymin']),
-            sc.scalar(reference_df['Ymax']),
-        )
-        workflow[ZIndexLimits] = (
-            sc.scalar(reference_df['Zmin']),
-            sc.scalar(reference_df['Zmax']),
-        )
-
-        progress = widgets.IntProgress(min=0, max=len(sample_df))
-        self.log_progress(progress)
-
-        if (key := self.get_row_key(reference_df)) in self.results:
-            reference_result = self.results[key]
-        else:
-            reference_result = with_filenames(
-                workflow,
-                ReferenceRun,
-                list(map(self.get_filepath_from_run, reference_df["Runs"])),
-            ).compute(ReducedReference)
-            self.set_result(reference_df, reference_result)
-
-        workflow[ReducedReference] = reference_result
-        progress.value += 1
+        progress = widgets.IntProgress(min=0, max=len(sample_df) + len(used_references))
+        self.show_progress(progress)
 
         for _, params in sample_df.iterrows():
             if (key := self.get_row_key(params)) in self.results:
                 progress.value += 1
                 continue
 
+            reference_rows_matching_selected_reference = self.get_reference_for_row(
+                params
+            )
+            if len(reference_rows_matching_selected_reference) < 1:
+                self.log(
+                    f'Reference "{params["Reference"]}" '
+                    'does not exist in the reference list.'
+                )
+                continue
+            if len(reference_rows_matching_selected_reference) > 1:
+                self.log(
+                    f'Reference "{params["Reference"]}" does not refer to a unique '
+                    'refererence! Make sure that the reference '
+                    '"Sample" names are unique.'
+                )
+
+            reference_row = reference_rows_matching_selected_reference.iloc[0]
+
+            wf = workflow.copy()
+            wf[WavelengthBins] = sc.geomspace(
+                'wavelength',
+                reference_row['Lmin'],
+                reference_row['Lmax'],
+                2001,
+                unit='angstrom',
+            )
+            wf[YIndexLimits] = (
+                sc.scalar(reference_row['Ymin']),
+                sc.scalar(reference_row['Ymax']),
+            )
+            wf[ZIndexLimits] = (
+                sc.scalar(reference_row['Zmin']),
+                sc.scalar(reference_row['Zmax']),
+            )
+
+            if (key := self.get_row_key(reference_row)) in self.results:
+                reference_result = self.results[key]
+            else:
+                reference_result = with_filenames(
+                    wf,
+                    ReferenceRun,
+                    list(map(self.get_filepath_from_run, reference_row["Runs"])),
+                ).compute(ReducedReference)
+                self.set_result(reference_row, reference_result)
+
+            if params['Reference'] in used_references:
+                progress.value += 1
+                used_references.remove(params['Reference'])
+
+            wf[ReducedReference] = reference_result
+
             wf = with_filenames(
-                workflow,
+                wf,
                 SampleRun,
                 list(map(self.get_filepath_from_run, params['Runs'])),
             )
@@ -994,3 +1057,5 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
                 params, params["Scale"] * wf.compute(ReflectivityOverQ).hist()
             )
             progress.value += 1
+
+        self.hide_progress()
