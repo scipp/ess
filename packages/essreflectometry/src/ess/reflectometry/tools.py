@@ -307,12 +307,6 @@ def scale_reflectivity_curves_to_overlap(
     if is_single_workflow:
         # If a single workflow is provided, convert it to a collection
         workflows = WorkflowCollection({"": workflows})
-        # out = scale_reflectivity_curves_to_overlap(
-        #     wfc,
-        #     critical_edge_interval=critical_edge_interval,
-        #     cache_intermediate_results=cache_intermediate_results,
-        # )
-        # return out[""]
 
     wfc = workflows.copy()
     if cache_intermediate_results:
