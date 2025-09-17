@@ -129,6 +129,8 @@ def concat_event_lists(
     Note that the output will likely have repeated values for 'event_time_zero'.
     E.g., if input 1 has times `[0, 1, 2]` and input 2 has times `[0, 2, 3]`,
     the output will have times `[0, 1, 2, 0, 2, 3]`.
+    Note that this sawtooth pattern will disappear again after grouping into pixels.
+    Preserving it will likely actually lead to more efficient memory access patterns when grouping.
 
     Parameters
     ----------
