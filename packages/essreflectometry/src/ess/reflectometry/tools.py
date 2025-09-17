@@ -142,10 +142,19 @@ class WorkflowCollection:
                 wf[key] = value
 
     def __getitem__(self, name: str) -> WorkflowCollection:
-        """ """
         return WorkflowCollection({k: wf[name] for k, wf in self.workflows.items()})
 
     def compute(self, targets: type | Sequence[type], **kwargs) -> Mapping[str, Any]:
+        """
+        Compute the given target(s) for all workflows in the collection.
+
+        Parameters
+        ----------
+        targets:
+            The target type(s) to compute.
+        **kwargs:
+            Additional keyword arguments passed to `sciline.Pipeline.compute`.
+        """
         if not isinstance(targets, list | tuple):
             targets = [targets]
         out = {}
@@ -165,6 +174,9 @@ class WorkflowCollection:
         return next(iter(out.values())) if len(out) == 1 else out
 
     def copy(self) -> WorkflowCollection:
+        """
+        Create a copy of the workflow collection.
+        """
         return WorkflowCollection({k: wf.copy() for k, wf in self.workflows.items()})
 
     def visualize(self, targets: type | Sequence[type], **kwargs) -> MultiGraphViz:
@@ -291,15 +303,16 @@ def scale_reflectivity_curves_to_overlap(
     :
         A list of scaled reflectivity curves and a list of the scaling factors.
     '''
-    if isinstance(workflows, sl.Pipeline):
+    is_single_workflow = isinstance(workflows, sl.Pipeline)
+    if is_single_workflow:
         # If a single workflow is provided, convert it to a collection
-        wfc = WorkflowCollection({"": workflows})
-        out = scale_reflectivity_curves_to_overlap(
-            wfc,
-            critical_edge_interval=critical_edge_interval,
-            cache_intermediate_results=cache_intermediate_results,
-        )
-        return out[""]
+        workflows = WorkflowCollection({"": workflows})
+        # out = scale_reflectivity_curves_to_overlap(
+        #     wfc,
+        #     critical_edge_interval=critical_edge_interval,
+        #     cache_intermediate_results=cache_intermediate_results,
+        # )
+        # return out[""]
 
     wfc = workflows.copy()
     if cache_intermediate_results:
@@ -375,7 +388,7 @@ def scale_reflectivity_curves_to_overlap(
         if k != critical_edge_key
     }
 
-    return wfc
+    return wfc.workflows[""] if is_single_workflow else wfc
 
 
 def combine_curves(
