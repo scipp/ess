@@ -65,12 +65,6 @@ def with_filenames(
     wf[ReducibleData[runtype]] = mapped[ReducibleData[runtype]].reduce(
         index=axis_name, func=_concatenate_event_lists
     )
-    # wf[RawChopper[runtype]] = mapped[RawChopper[runtype]].reduce(
-    #     index=axis_name, func=_any_value
-    # )
-    # wf[SampleRotation[runtype]] = mapped[SampleRotation[runtype]].reduce(
-    #     index=axis_name, func=_any_value
-    # )
 
     if runtype is SampleRun:
         wf[OrsoSample] = mapped[OrsoSample].reduce(index=axis_name, func=_any_value)
