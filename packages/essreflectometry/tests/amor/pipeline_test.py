@@ -157,10 +157,9 @@ def test_pipeline_can_compute_reflectivity_merging_events_from_multiple_runs(
         amor.data.amor_run(608),
         amor.data.amor_run(609),
     ]
-    pipeline = with_filenames(amor_pipeline, SampleRun, sample_runs)
-    pipeline[SampleRotation[SampleRun]] = pipeline.compute(
-        SampleRotation[SampleRun]
-    ) + sc.scalar(0.05, unit="deg")
+    wf = amor_pipeline.copy()
+    wf[SampleRotationOffset[SampleRun]] = sc.scalar(0.05, unit="deg")
+    pipeline = with_filenames(wf, SampleRun, sample_runs)
     result = pipeline.compute(ReflectivityOverQ)
     assert result.dims == ('Q',)
 
@@ -168,22 +167,18 @@ def test_pipeline_can_compute_reflectivity_merging_events_from_multiple_runs(
 @pytest.mark.filterwarnings("ignore:Failed to convert .* into a transformation")
 @pytest.mark.filterwarnings("ignore:Invalid transformation, missing attribute")
 def test_pipeline_merging_events_result_unchanged(amor_pipeline: sciline.Pipeline):
+    wf = amor_pipeline.copy()
+    wf[SampleRotationOffset[SampleRun]] = sc.scalar(0.05, unit="deg")
     sample_runs = [
         amor.data.amor_run(608),
     ]
-    pipeline = with_filenames(amor_pipeline, SampleRun, sample_runs)
-    pipeline[SampleRotation[SampleRun]] = pipeline.compute(
-        SampleRotation[SampleRun]
-    ) + sc.scalar(0.05, unit="deg")
+    pipeline = with_filenames(wf, SampleRun, sample_runs)
     result = pipeline.compute(ReflectivityOverQ).hist()
     sample_runs = [
         amor.data.amor_run(608),
         amor.data.amor_run(608),
     ]
-    pipeline = with_filenames(amor_pipeline, SampleRun, sample_runs)
-    pipeline[SampleRotation[SampleRun]] = pipeline.compute(
-        SampleRotation[SampleRun]
-    ) + sc.scalar(0.05, unit="deg")
+    pipeline = with_filenames(wf, SampleRun, sample_runs)
     result2 = pipeline.compute(ReflectivityOverQ).hist()
     assert_allclose(
         2 * sc.values(result.data), sc.values(result2.data), rtol=sc.scalar(1e-6)

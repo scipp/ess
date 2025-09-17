@@ -320,13 +320,13 @@ def scale_reflectivity_curves_to_overlap(
             wfc[UnscaledReducibleData[SampleRun]] = wfc.compute(
                 UnscaledReducibleData[SampleRun]
             )
-        except sl.UnsatisfiedRequirement:
+        except (sl.UnsatisfiedRequirement, NotImplementedError):
             pass
         try:
             wfc[UnscaledReducibleData[ReferenceRun]] = wfc.compute(
                 UnscaledReducibleData[ReferenceRun]
             )
-        except sl.UnsatisfiedRequirement:
+        except (sl.UnsatisfiedRequirement, NotImplementedError):
             pass
 
     reflectivities = wfc.compute(ReflectivityOverQ)

@@ -6,7 +6,6 @@ import pandas as pd
 import sciline
 import scipp as sc
 
-from ess.amor.types import RawChopper
 from ess.reflectometry.orso import (
     OrsoExperiment,
     OrsoOwner,
@@ -15,6 +14,7 @@ from ess.reflectometry.orso import (
 )
 from ess.reflectometry.types import (
     Filename,
+    RawChopper,
     ReducibleData,
     RunType,
     SampleRotation,
@@ -65,12 +65,12 @@ def with_filenames(
     wf[ReducibleData[runtype]] = mapped[ReducibleData[runtype]].reduce(
         index=axis_name, func=_concatenate_event_lists
     )
-    wf[RawChopper[runtype]] = mapped[RawChopper[runtype]].reduce(
-        index=axis_name, func=_any_value
-    )
-    wf[SampleRotation[runtype]] = mapped[SampleRotation[runtype]].reduce(
-        index=axis_name, func=_any_value
-    )
+    # wf[RawChopper[runtype]] = mapped[RawChopper[runtype]].reduce(
+    #     index=axis_name, func=_any_value
+    # )
+    # wf[SampleRotation[runtype]] = mapped[SampleRotation[runtype]].reduce(
+    #     index=axis_name, func=_any_value
+    # )
 
     if runtype is SampleRun:
         wf[OrsoSample] = mapped[OrsoSample].reduce(index=axis_name, func=_any_value)
