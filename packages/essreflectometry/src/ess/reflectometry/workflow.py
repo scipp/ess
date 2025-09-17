@@ -6,6 +6,7 @@ import pandas as pd
 import sciline
 import scipp as sc
 
+from ess.amor.types import RawChopper
 from ess.reflectometry.orso import (
     OrsoExperiment,
     OrsoOwner,
@@ -13,13 +14,11 @@ from ess.reflectometry.orso import (
     OrsoSampleFilenames,
 )
 from ess.reflectometry.types import (
-    DetectorRotation,
     Filename,
-    RawChopper,
+    ReducibleData,
     RunType,
     SampleRotation,
     SampleRun,
-    UnscaledReducibleData,
 )
 
 
@@ -63,54 +62,26 @@ def with_filenames(
 
     mapped = wf.map(df)
 
-    try:
-        wf[UnscaledReducibleData[runtype]] = mapped[
-            UnscaledReducibleData[runtype]
-        ].reduce(index=axis_name, func=_concatenate_event_lists)
-    except (ValueError, KeyError):
-        # UnscaledReducibleData[runtype] is independent of Filename[runtype] or is not
-        # present in the workflow.
-        pass
-    try:
-        wf[RawChopper[runtype]] = mapped[RawChopper[runtype]].reduce(
-            index=axis_name, func=_any_value
-        )
-    except (ValueError, KeyError):
-        # RawChopper[runtype] is independent of Filename[runtype] or is not
-        # present in the workflow.
-        pass
-    try:
-        wf[SampleRotation[runtype]] = mapped[SampleRotation[runtype]].reduce(
-            index=axis_name, func=_any_value
-        )
-    except (ValueError, KeyError):
-        # SampleRotation[runtype] is independent of Filename[runtype] or is not
-        # present in the workflow.
-        pass
-    try:
-        wf[DetectorRotation[runtype]] = mapped[DetectorRotation[runtype]].reduce(
-            index=axis_name, func=_any_value
-        )
-    except (ValueError, KeyError):
-        # DetectorRotation[runtype] is independent of Filename[runtype] or is not
-        # present in the workflow.
-        pass
+    wf[ReducibleData[runtype]] = mapped[ReducibleData[runtype]].reduce(
+        index=axis_name, func=_concatenate_event_lists
+    )
+    wf[RawChopper[runtype]] = mapped[RawChopper[runtype]].reduce(
+        index=axis_name, func=_any_value
+    )
+    wf[SampleRotation[runtype]] = mapped[SampleRotation[runtype]].reduce(
+        index=axis_name, func=_any_value
+    )
 
     if runtype is SampleRun:
-        if OrsoSample in wf.underlying_graph:
-            wf[OrsoSample] = mapped[OrsoSample].reduce(index=axis_name, func=_any_value)
-        if OrsoExperiment in wf.underlying_graph:
-            wf[OrsoExperiment] = mapped[OrsoExperiment].reduce(
-                index=axis_name, func=_any_value
-            )
-        if OrsoOwner in wf.underlying_graph:
-            wf[OrsoOwner] = mapped[OrsoOwner].reduce(
-                index=axis_name, func=lambda x, *_: x
-            )
-        if OrsoSampleFilenames in wf.underlying_graph:
+        wf[OrsoSample] = mapped[OrsoSample].reduce(index=axis_name, func=_any_value)
+        wf[OrsoExperiment] = mapped[OrsoExperiment].reduce(
+            index=axis_name, func=_any_value
+        )
+        wf[OrsoOwner] = mapped[OrsoOwner].reduce(index=axis_name, func=lambda x, *_: x)
+        wf[OrsoSampleFilenames] = mapped[OrsoSampleFilenames].reduce(
             # When we don't map over filenames
             # each OrsoSampleFilenames is a list with a single entry.
-            wf[OrsoSampleFilenames] = mapped[OrsoSampleFilenames].reduce(
-                index=axis_name, func=_concatenate_lists
-            )
+            index=axis_name,
+            func=_concatenate_lists,
+        )
     return wf
