@@ -12,14 +12,7 @@ from ess.reflectometry.orso import (
     OrsoSample,
     OrsoSampleFilenames,
 )
-from ess.reflectometry.types import (
-    Filename,
-    RawChopper,
-    ReducibleData,
-    RunType,
-    SampleRotation,
-    SampleRun,
-)
+from ess.reflectometry.types import Filename, ReducibleData, RunType, SampleRun
 
 
 def _concatenate_event_lists(*das):
