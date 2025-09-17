@@ -110,23 +110,6 @@ def linlogspace(
     return sc.concat(grids, dim)
 
 
-# class DataTable(dict):
-#     def _repr_html_(self):
-#         clean = {
-#             str(tp.__name__)
-#             if hasattr(tp, '__name__')
-#             else str(tp).split('.')[-1]: value
-#             for tp, value in self.items()
-#         }
-#         try:
-#             import pandas as pd
-
-#             df = pd.DataFrame(clean)
-#             return df._repr_html_()
-#         except ImportError:
-#             return clean._repr_html_()
-
-
 class MultiGraphViz:
     """
     A dummy class to concatenate multiple graphviz visualizations into a single repr
@@ -148,30 +131,9 @@ class WorkflowCollection:
     """
 
     def __init__(self, workflows: Mapping[str, sl.Pipeline]):
-        # self._original_workflow = workflow
         self.workflows = workflows
 
-        # if not isinstance(params, pd.DataFrame):
-        #     params = pd.DataFrame(params)
-
-        # for _, row in params.iterrows():
-        #     wf = workflow.copy()
-        #     for k, v in row.items():
-        #         wf[k] = v
-        #     self.workflows.append(wf)
-
-        # for name, parameters in params.items():
-        #     wf = workflow.copy()
-        #     for tp, value in parameters.items():
-        #         # if tp is Filename[SampleRun]:
-        #         #     continue
-        #         wf[tp] = value
-        #     self.workflows[name] = wf
-        # # self.workflows = {name: pl.copy() for name, pl in workflows.items()}
-
     def __setitem__(self, key: type, value: Sequence[Any]):
-        # for i, v in enumerate(value):
-        #     self.workflows[i][key] = v
         if hasattr(value, 'items'):
             for name, v in value.items():
                 self.workflows[name][key] = v
@@ -184,9 +146,6 @@ class WorkflowCollection:
         return WorkflowCollection({k: wf[name] for k, wf in self.workflows.items()})
 
     def compute(self, targets: type | Sequence[type], **kwargs) -> Mapping[str, Any]:
-        # return {
-        #     name: wf.compute(target, **kwargs) for name, wf in self.workflows.items()
-        # }
         if not isinstance(targets, list | tuple):
             targets = [targets]
         out = {}
@@ -203,23 +162,9 @@ class WorkflowCollection:
                     except (sl.UnsatisfiedRequirement, ValueError):
                         # ValueError is raised when the requested type is not mapped
                         raise e from e
-                # if sl.is_mapped_node(wf, t):
-                #     out[t][name] = sl.compute_mapped(wf, t, **kwargs).values.tolist()
-                #     # results = sl.compute_mapped(wf, t, **kwargs)
-                #     # # results = self.workflow.compute(targets, **kwargs)
-                #     # for node, v in results.items():
-                #     #     out[key][node.index.values[0]] = v
-                # else:
-                #     out[t][name] = wf.compute(t, **kwargs)
-            # out[t] = [wf.compute(t, **kwargs) for wf in self.workflows]
-        # return pd.DataFrame(out), out
         return next(iter(out.values())) if len(out) == 1 else out
 
     def copy(self) -> WorkflowCollection:
-        # out = self.__class__(sl.Pipeline(), params={})
-        # for name, wf in self.workflows.items():
-        #     out.workflows[name] = wf.copy()
-        # return out
         return WorkflowCollection({k: wf.copy() for k, wf in self.workflows.items()})
 
     def visualize(self, targets: type | Sequence[type], **kwargs) -> MultiGraphViz:
@@ -249,42 +194,6 @@ class WorkflowCollection:
             graphs.append(g)
 
         return MultiGraphViz(graphs)
-
-        # master = Digraph(comment="All Graphs Side by Side")
-        # # master.attr(rankdir="LR")  # Left-to-right layout
-
-        # for name, sub in graphs.items():
-        #     with master.subgraph(name=f"cluster_{name}") as c:
-        #         c.attr(label=name, style="rounded", color="black")
-        #         c.body.extend(sub.body)
-
-        # return master
-
-        #
-
-    # def groupby(self, key: type, reduce: Callable) -> 'WorkflowCollection':
-    #     results = self.compute(key)
-
-    # def keys(self) -> Sequence[str]:
-    #     return self.workflows.keys()
-
-    # def values(self) -> Sequence[sl.Pipeline]:
-    #     return self.workflows.values()
-
-    # def items(self) -> Sequence[tuple[str, sl.Pipeline]]:
-    #     return self.workflows.items()
-
-    # def add(self, name: str, workflow: sl.Pipeline):
-    #     """
-    #     Adds a new workflow to the collection.
-    #     """
-    #     self.workflows[name] = workflow.copy()
-
-    # def remove(self, name: str):
-    #     """
-    #     Removes a workflow from the collection by its name.
-    #     """
-    #     del self.workflows[name]
 
 
 def _sort_by(a, by):
@@ -586,22 +495,13 @@ def batch_processor(
 
         if Filename[SampleRun] in parameters:
             if isinstance(parameters[Filename[SampleRun]], list | tuple):
-                # axis_name = f'{str(runtype).lower()}_runs'
                 df = pd.DataFrame(
                     {Filename[SampleRun]: parameters[Filename[SampleRun]]}
-                )  # .rename_axis()
-                # wf = workflow.copy()
-
+                )
                 mapped = wf.map(df)
-
                 wf[UnscaledReducibleData[SampleRun]] = mapped[
                     UnscaledReducibleData[SampleRun]
                 ].reduce(func=_concatenate_event_lists)
-                # wf = with_filenames(
-                #     wf,
-                #     SampleRun,
-                #     parameters[Filename[SampleRun]],
-                # )
             else:
                 wf[Filename[SampleRun]] = parameters[Filename[SampleRun]]
         workflows[name] = wf
