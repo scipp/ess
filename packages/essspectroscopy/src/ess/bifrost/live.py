@@ -76,7 +76,7 @@ def cut(
     )
 
 
-def BIFROSTQCutWorkflow(detector_names: list[NeXusDetectorName]) -> sciline.Pipeline:
+def BifrostQCutWorkflow(detector_names: list[NeXusDetectorName]) -> sciline.Pipeline:
     """Workflow for BIFROST to compute cuts in Q-E-space."""
     workflow = BifrostWorkflow(detector_names)
     workflow.insert(cut)
