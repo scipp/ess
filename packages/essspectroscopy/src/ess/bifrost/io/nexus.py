@@ -10,12 +10,13 @@ import scippnexus as snx
 
 from ess.spectroscopy.types import (
     Analyzer,
-    InstrumentAngles,
+    InstrumentAngle,
     NeXusClass,
     NeXusComponentLocationSpec,
     NeXusDetectorName,
     NeXusFileSpec,
     RunType,
+    SampleAngle,
 )
 
 
@@ -25,9 +26,21 @@ def moderator_class_for_source() -> NeXusClass[snx.NXsource]:
     return NeXusClass[snx.NXsource](snx.NXmoderator)
 
 
-def load_instrument_angles(
+def load_sample_angle(
     file_spec: NeXusFileSpec[RunType],
-) -> InstrumentAngles[RunType]:
+) -> SampleAngle[RunType]:
+    return SampleAngle[RunType](_load_experiment_parameter(file_spec, "a3"))
+
+
+def load_instrument_angle(
+    file_spec: NeXusFileSpec[RunType],
+) -> InstrumentAngle[RunType]:
+    return InstrumentAngle[RunType](_load_experiment_parameter(file_spec, "a4"))
+
+
+def _load_experiment_parameter(
+    file_spec: NeXusFileSpec[RunType], param_name: str
+) -> sc.DataArray:
     # TODO need mechanism in ESSreduce to load specific components of non-unique
     #  class by name
     from ess.reduce.nexus._nexus_loader import _unique_child_group, open_nexus_file
@@ -38,11 +51,7 @@ def load_instrument_angles(
             snx.NXparameters,
             name=None,
         )
-        return InstrumentAngles[RunType](
-            sc.DataGroup[sc.DataArray](
-                {name: parameters[name][()]['value'] for name in ('a3', 'a4')}
-            )
-        )
+        return parameters[param_name][()]['value']
 
 
 def _analyzer_name_for_detector_name(
@@ -99,6 +108,7 @@ def load_analyzer_for_detector(
 
 providers = (
     load_analyzer_for_detector,
-    load_instrument_angles,
+    load_instrument_angle,
+    load_sample_angle,
     moderator_class_for_source,
 )
