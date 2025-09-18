@@ -156,7 +156,7 @@ class MultiGraphViz:
         return {"image/svg+xml": combined}
 
 
-class WorkflowCollection:
+class BatchProcessor:
     """
     A collection of sciline workflows that can be used to compute multiple
     targets from multiple workflows.
@@ -174,8 +174,8 @@ class WorkflowCollection:
             for wf in self.workflows.values():
                 wf[key] = value
 
-    def __getitem__(self, name: str) -> WorkflowCollection:
-        return WorkflowCollection({k: wf[name] for k, wf in self.workflows.items()})
+    def __getitem__(self, name: str) -> BatchProcessor:
+        return BatchProcessor({k: wf[name] for k, wf in self.workflows.items()})
 
     def compute(self, targets: type | Sequence[type], **kwargs) -> Mapping[str, Any]:
         """
@@ -206,11 +206,11 @@ class WorkflowCollection:
                         raise e from e
         return next(iter(out.values())) if len(out) == 1 else out
 
-    def copy(self) -> WorkflowCollection:
+    def copy(self) -> BatchProcessor:
         """
         Create a copy of the workflow collection.
         """
-        return WorkflowCollection({k: wf.copy() for k, wf in self.workflows.items()})
+        return BatchProcessor({k: wf.copy() for k, wf in self.workflows.items()})
 
     def visualize(self, targets: type | Sequence[type], **kwargs) -> MultiGraphViz:
         """
@@ -303,7 +303,7 @@ def _interpolate_on_qgrid(curves, grid):
 
 
 def scale_reflectivity_curves_to_overlap(
-    workflows: WorkflowCollection | sl.Pipeline,
+    workflows: BatchProcessor | sl.Pipeline,
     critical_edge_interval: tuple[sc.Variable, sc.Variable] | None = None,
 ) -> tuple[list[sc.DataArray], list[sc.Variable]]:
     '''
@@ -337,7 +337,7 @@ def scale_reflectivity_curves_to_overlap(
     is_single_workflow = isinstance(workflows, sl.Pipeline)
     if is_single_workflow:
         # If a single workflow is provided, convert it to a collection
-        workflows = WorkflowCollection({"": workflows})
+        workflows = BatchProcessor({"": workflows})
 
     wfc = workflows.copy()
     reflectivities = wfc.compute(ReflectivityOverQ)
@@ -462,7 +462,7 @@ def _concatenate_event_lists(*das):
 
 def batch_processor(
     workflow: sl.Pipeline, runs: Mapping[Any, Mapping[type, Any]]
-) -> WorkflowCollection:
+) -> BatchProcessor:
     """
     Creates a collection of sciline workflows from the provided runs.
 
@@ -529,4 +529,4 @@ def batch_processor(
             else:
                 wf[Filename[SampleRun]] = parameters[Filename[SampleRun]]
         workflows[name] = wf
-    return WorkflowCollection(workflows)
+    return BatchProcessor(workflows)

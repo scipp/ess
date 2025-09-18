@@ -3,7 +3,7 @@
 
 import sciline as sl
 
-from ess.reflectometry.tools import WorkflowCollection
+from ess.reflectometry.tools import BatchProcessor
 
 
 def int_to_float(x: int) -> float:
@@ -20,7 +20,7 @@ def test_compute() -> None:
     wfa[int] = 3
     wfb = wf.copy()
     wfb[int] = 4
-    coll = WorkflowCollection({'a': wfa, 'b': wfb})
+    coll = BatchProcessor({'a': wfa, 'b': wfb})
 
     assert coll.compute(float) == {'a': 1.5, 'b': 2.0}
     assert coll.compute(str) == {'a': '3;1.5', 'b': '4;2.0'}
@@ -32,7 +32,7 @@ def test_compute_multiple() -> None:
     wfa[int] = 3
     wfb = wf.copy()
     wfb[int] = 4
-    coll = WorkflowCollection({'a': wfa, 'b': wfb})
+    coll = BatchProcessor({'a': wfa, 'b': wfb})
 
     result = coll.compute([float, str])
 
@@ -46,7 +46,7 @@ def test_setitem_mapping() -> None:
     wfa[int] = 3
     wfb = wf.copy()
     wfb[int] = 4
-    coll = WorkflowCollection({'a': wfa, 'b': wfb})
+    coll = BatchProcessor({'a': wfa, 'b': wfb})
 
     coll[int] = {'a': 7, 'b': 8}
 
@@ -60,7 +60,7 @@ def test_setitem_single_value() -> None:
     wfa[int] = 3
     wfb = wf.copy()
     wfb[int] = 4
-    coll = WorkflowCollection({'a': wfa, 'b': wfb})
+    coll = BatchProcessor({'a': wfa, 'b': wfb})
 
     coll[int] = 5
 
@@ -74,7 +74,7 @@ def test_copy() -> None:
     wfa[int] = 3
     wfb = wf.copy()
     wfb[int] = 4
-    coll = WorkflowCollection({'a': wfa, 'b': wfb})
+    coll = BatchProcessor({'a': wfa, 'b': wfb})
 
     coll_copy = coll.copy()
 

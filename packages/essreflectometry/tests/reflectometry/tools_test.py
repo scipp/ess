@@ -10,7 +10,7 @@ from orsopy.fileio import Orso, OrsoDataset
 from scipp.testing import assert_allclose
 
 from ess.reflectometry.tools import (
-    WorkflowCollection,
+    BatchProcessor,
     batch_processor,
     combine_curves,
     linlogspace,
@@ -114,7 +114,7 @@ def test_reflectivity_curve_scaling():
         workflows[k][Filename[ReferenceRun]] = "_".join(map(str, v[1:]))
         workflows[k][QBins] = make_reference_events(*v[1:]).coords['Q']
 
-    wfc = WorkflowCollection(workflows)
+    wfc = BatchProcessor(workflows)
 
     scaled_wf = scale_reflectivity_curves_to_overlap(wfc)
 
@@ -137,7 +137,7 @@ def test_reflectivity_curve_scaling_with_critical_edge():
         workflows[k][Filename[ReferenceRun]] = "_".join(map(str, v[1:]))
         workflows[k][QBins] = make_reference_events(*v[1:]).coords['Q']
 
-    wfc = WorkflowCollection(workflows)
+    wfc = BatchProcessor(workflows)
 
     scaled_wf = scale_reflectivity_curves_to_overlap(
         wfc, critical_edge_interval=(sc.scalar(0.01), sc.scalar(0.05))
@@ -165,85 +165,6 @@ def test_reflectivity_curve_scaling_works_with_single_workflow_and_critical_edge
     factor = scaled_wf.compute(ScalingFactorForOverlap[SampleRun])
 
     assert np.isclose(factor, 0.4)
-
-
-def test_reflectivity_curve_scaling_caches_intermediate_results():
-    sample_count = 0
-    reference_count = 0
-
-    def sample_data_from_filename(
-        filename: Filename[SampleRun],
-    ) -> UnscaledReducibleData[SampleRun]:
-        nonlocal sample_count
-        sample_count += 1
-        return UnscaledReducibleData[SampleRun](
-            make_sample_events(*(float(x) for x in filename.split('_')))
-        )
-
-    def reference_data_from_filename(
-        filename: Filename[ReferenceRun],
-    ) -> UnscaledReducibleData[ReferenceRun]:
-        nonlocal reference_count
-        reference_count += 1
-        return UnscaledReducibleData[ReferenceRun](
-            make_reference_events(*(float(x) for x in filename.split('_')))
-        )
-
-    def apply_scaling(
-        da: UnscaledReducibleData[RunType],
-        scale: ScalingFactorForOverlap[RunType],
-    ) -> ReducibleData[RunType]:
-        """
-        Scales the raw data by a given factor.
-        """
-        return ReducibleData[RunType](da * scale)
-
-    def reflectivity(
-        sample: ReducibleData[SampleRun],
-        reference: ReducibleData[ReferenceRun],
-        qbins: QBins,
-    ) -> ReflectivityOverQ:
-        return ReflectivityOverQ(sample.hist(Q=qbins) / reference.hist(Q=qbins))
-
-    wf = sl.Pipeline(
-        [
-            sample_data_from_filename,
-            reference_data_from_filename,
-            apply_scaling,
-            reflectivity,
-        ]
-    )
-    wf[ScalingFactorForOverlap[SampleRun]] = 1.0
-    wf[ScalingFactorForOverlap[ReferenceRun]] = 1.0
-    params = {'a': (1.0, 0, 0.3), 'b': (0.8, 0.2, 0.7), 'c': (0.1, 0.6, 1.0)}
-    workflows = {}
-    for k, v in params.items():
-        workflows[k] = wf.copy()
-        workflows[k][Filename[SampleRun]] = "_".join(map(str, v))
-        workflows[k][Filename[ReferenceRun]] = "_".join(map(str, v[1:]))
-        workflows[k][QBins] = make_reference_events(*v[1:]).coords['Q']
-
-    wfc = WorkflowCollection(workflows)
-
-    scaled_wf = scale_reflectivity_curves_to_overlap(
-        wfc, cache_intermediate_results=False
-    )
-    scaled_wf.compute(ReflectivityOverQ)
-    # We expect 6 counts: 3 for each of the 3 runs * 2 for computing ReflectivityOverQ
-    # inside the scaling function and one more time for the final computation just above
-    assert sample_count == 6
-    assert reference_count == 6
-
-    sample_count = 0
-    reference_count = 0
-
-    scaled_wf = scale_reflectivity_curves_to_overlap(
-        wfc, cache_intermediate_results=True
-    )
-    scaled_wf.compute(ReflectivityOverQ)
-    # We expect 3 counts: 1 for each of the 3 runs * 1 for computing ReflectivityOverQ
-    assert sample_count == 3
-    assert reference_count == 3
 
 
 def test_combined_curves():
