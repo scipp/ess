@@ -2,6 +2,7 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 from __future__ import annotations
 
+import re
 import uuid
 from collections.abc import Mapping, Sequence
 from itertools import chain
@@ -113,13 +114,46 @@ class MultiGraphViz:
     """
     A dummy class to concatenate multiple graphviz visualizations into a single repr
     output for Jupyter notebooks.
+    This combines the SVG representations of multiple graphs vertically with a small gap
+    in between.
     """
 
     def __init__(self, graphs: Sequence):
         self.graphs = graphs
 
-    def _repr_html_(self) -> str:
-        return "".join(g._repr_image_svg_xml() for g in self.graphs)
+    def _repr_mimebundle_(self, include=None, exclude=None):
+        gap = 10
+        parsed = []
+        for svg in [g._repr_image_svg_xml() for g in self.graphs]:
+            # extract width, height, and inner <g> content
+            m = re.search(r'width="([\d.]+)pt".*?height="([\d.]+)pt"', svg, re.S)
+            w, h = float(m.group(1)), float(m.group(2))
+            inner = re.search(r'<svg[^>]*>(.*)</svg>', svg, re.S).group(1)
+            parsed.append((w, h, inner))
+
+        # vertical shift
+        total_width = max(w for w, _, _ in parsed)
+        total_height = sum(h for _, h, _ in parsed) + gap * (len(parsed) - 1)
+
+        pieces = []
+        offset_x = offset_y = 0
+        for _, h, inner in parsed:
+            pieces.append(
+                f'<g transform="translate({offset_x},{offset_y})">{inner}</g>'
+            )
+            offset_y += h + gap
+
+        # TODO: for some reason, combining the svgs seems to scale them down. This
+        # then means that the computed bounding box is too large. For now, we
+        # apply a fudge factor of 0.75 to the width and height. It is unclear where
+        # exactly this comes from.
+        combined = f'''
+        <svg xmlns="http://www.w3.org/2000/svg"
+            width="{total_width * 0.75}pt" height="{total_height * 0.75}pt">
+        {''.join(pieces)}
+        </svg>
+        '''
+        return {"image/svg+xml": combined}
 
 
 class WorkflowCollection:
@@ -197,7 +231,9 @@ class WorkflowCollection:
         graphs = []
         for key, wf in self.workflows.items():
             v = wf.visualize(targets, **kwargs)
-            g = Digraph(**kwargs)
+            g = Digraph(
+                graph_attr=v.graph_attr, node_attr=v.node_attr, edge_attr=v.edge_attr
+            )
             with g.subgraph(name=f"cluster_{key}") as c:
                 c.attr(label=key, style="rounded", color="black")
                 c.body.extend(v.body)
