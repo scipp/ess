@@ -16,7 +16,6 @@ import scipy.optimize as opt
 from ess.reflectometry.types import (
     Filename,
     QBins,
-    ReferenceRun,
     ReflectivityOverQ,
     SampleRun,
     ScalingFactorForOverlap,
@@ -270,7 +269,6 @@ def _interpolate_on_qgrid(curves, grid):
 def scale_reflectivity_curves_to_overlap(
     workflows: WorkflowCollection | sl.Pipeline,
     critical_edge_interval: tuple[sc.Variable, sc.Variable] | None = None,
-    cache_intermediate_results: bool = True,
 ) -> tuple[list[sc.DataArray], list[sc.Variable]]:
     '''
     Set the ``ScalingFactorForOverlap`` parameter on the provided workflows
@@ -294,9 +292,6 @@ def scale_reflectivity_curves_to_overlap(
         A tuple denoting an interval that is known to belong
         to the critical edge, i.e. where the reflectivity is
         known to be 1.
-    cache_intermediate_results:
-        If ``True`` the intermediate results ``UnscaledReducibleData`` will be cached
-        (this is the base for all types that are downstream of the scaling factor).
 
     Returns
     ---------
@@ -309,20 +304,6 @@ def scale_reflectivity_curves_to_overlap(
         workflows = WorkflowCollection({"": workflows})
 
     wfc = workflows.copy()
-    if cache_intermediate_results:
-        try:
-            wfc[UnscaledReducibleData[SampleRun]] = wfc.compute(
-                UnscaledReducibleData[SampleRun]
-            )
-        except (sl.UnsatisfiedRequirement, NotImplementedError):
-            pass
-        try:
-            wfc[UnscaledReducibleData[ReferenceRun]] = wfc.compute(
-                UnscaledReducibleData[ReferenceRun]
-            )
-        except (sl.UnsatisfiedRequirement, NotImplementedError):
-            pass
-
     reflectivities = wfc.compute(ReflectivityOverQ)
 
     # First sort the dict of reflectivities by the Q min value
