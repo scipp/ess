@@ -30,7 +30,12 @@
 
 ## Quick links
 
-::::{grid} 3
+::::{grid} 2
+
+:::{grid-item-card} BEER
+:link: user-guide/beer/index.md
+
+:::
 
 :::{grid-item-card} DREAM
 :link: user-guide/dream/index.md
