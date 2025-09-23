@@ -129,7 +129,8 @@ def _radial_profile(data: NDArray):
 
 def modulation_transfer_function(
     measured_image: sc.DataArray,
-    ideal_image: sc.DataArray,
+    open_beam_image: sc.DataArray,
+    target: sc.DataArray,
 ) -> sc.DataArray:
     '''
     Computes the modulation transfer function (MTF) of
@@ -140,9 +141,11 @@ def modulation_transfer_function(
     Parameters
     ------------
     measured_image:
-        The image captured by the camera.
-    ideal_image:
-        A perfect representation of the target
+        The image of the sample captured by the camera.
+    open_beam_image:
+        The image without the sample captured by the camera.
+    target:
+        A perfect image of the sample
         on the same grid as `measured_image`.
 
     Returns
@@ -152,10 +155,13 @@ def modulation_transfer_function(
         of "frequency" representing "line pairs" per pixel.
     '''
     _measured = measured_image.values
-    _ideal = ideal_image.values
+    # Can't do inplace because dtype of sum might be different from dtype of input
+    _measured = _measured / _measured.sum()
+    _reference = (open_beam_image * target).to(unit=measured_image.unit).values
+    _reference = _reference / _reference.sum()
     ny, nx = _measured.shape
     win = np.outer(tukey(ny, alpha=0.1), tukey(nx, alpha=0.1))
-    f_ideal = np.abs(np.fft.fftshift(np.fft.fft2(_ideal * win)))
+    f_ideal = np.abs(np.fft.fftshift(np.fft.fft2(_reference * win)))
     f_measured = np.abs(np.fft.fftshift(np.fft.fft2(_measured * win)))
     _mtf = _radial_profile(f_measured) / _radial_profile(f_ideal)
     return sc.DataArray(
@@ -176,9 +182,9 @@ def estimate_cut_off_frequency(mtf: sc.DataArray):
     return sc.scalar(-p[1] / p[0], unit=mtf.coords['frequency'].unit)
 
 
-def mtf50(mtf: sc.DataArray):
+def mtf_less_than(mtf: sc.DataArray, limit: float):
     '''Computes the frequency where the
-    modulation transfer function is 50%.'''
+    modulation transfer function goes below ``limit``.'''
     _freq = mtf.coords['frequency'].values
     _mtf = mtf.values
-    return sc.scalar(_freq[_mtf <= 0.5].min(), unit=mtf.coords['frequency'].unit)
+    return sc.scalar(_freq[_mtf <= limit].min(), unit=mtf.coords['frequency'].unit)

@@ -7,7 +7,7 @@ from .resolution import (
     estimate_cut_off_frequency,
     maximum_resolution_achievable,
     modulation_transfer_function,
-    mtf50,
+    mtf_less_than,
 )
 from .saturation import saturation_indicator
 
@@ -17,7 +17,7 @@ __all__ = [
     "laplace_2d",
     "maximum_resolution_achievable",
     "modulation_transfer_function",
-    "mtf50",
+    "mtf_less_than",
     "resample",
     "resize",
     "saturation_indicator",
