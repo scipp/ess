@@ -4,8 +4,6 @@
 Tools for image analysis and manipulation.
 """
 
-import math
-import uuid
 from collections.abc import Callable
 from itertools import combinations
 
@@ -32,7 +30,10 @@ def blockify(
     """
     out = image
     for dim, size in sizes.items():
-        out = out.fold(dim=dim, sizes={dim: -1, uuid.uuid4().hex[:7]: size})
+        i = 0
+        while f'newdim{i}' in out.dims:
+            i += 1
+        out = out.fold(dim=dim, sizes={dim: -1, f'newdim{i}': size})
     return out
 
 
