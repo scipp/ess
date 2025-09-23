@@ -2,7 +2,7 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 
 
-from .analysis import blockify, laplace_2d, resample, sharpness
+from .analysis import blockify, laplace_2d, resample, resize, sharpness
 from .resolution import maximum_resolution_achievable
 from .saturation import saturation_indicator
 
@@ -11,6 +11,7 @@ __all__ = [
     "laplace_2d",
     "maximum_resolution_achievable",
     "resample",
+    "resize",
     "saturation_indicator",
     "sharpness",
 ]

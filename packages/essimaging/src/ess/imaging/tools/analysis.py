@@ -54,6 +54,39 @@ def resample(
     image:
         The image to resample.
     sizes:
+         A dictionary specifying the block sizes for each dimension.
+        For example, ``{'x': 4, 'y': 4}`` will create blocks of size 4x4.
+    method:
+        The reduction method to apply to the blocks. This can be a string referring to
+        any valid Scipp reduction method, such as 'sum', 'mean', 'max', etc.
+        Alternatively, a custom reduction function can be provided. The function
+        signature should accept a ``scipp.Variable`` or ``scipp.DataArray`` as first
+        argument and a set of dimensions to reduce over as second argument. The
+        function should return a ``scipp.Variable`` or ``scipp.DataArray``.
+    """
+    blocked = blockify(image, sizes=sizes)
+    if isinstance(method, str):
+        return getattr(sc, method)(blocked, set(blocked.dims) - set(image.dims))
+    return method(blocked, set(blocked.dims) - set(image.dims))
+
+
+def resize(
+    image: sc.Variable | sc.DataArray,
+    sizes: dict[str, int],
+    method: str | Callable = 'sum',
+) -> sc.Variable | sc.DataArray:
+    """
+    Resize an image by folding it into blocks of specified sizes and applying a
+    reduction method.
+    The sizes should be provided as a dictionary where the keys are dimension names
+    and the values are the sizes of the blocks. The shape of the input image must be
+    divisible by the block sizes.
+
+    Parameters
+    ----------
+    image:
+        The image to resample.
+    sizes:
         A dictionary specifying the desired size of the output image for each dimension.
         The original sizes should be divisible by the specified sizes.
         For example, ``{'x': 128, 'y': 128}`` will create an output image of size
@@ -74,10 +107,7 @@ def resample(
                 f" the requested size ({size})."
             )
         block_sizes[dim] = image.sizes[dim] // size
-    blocked = blockify(image, sizes=block_sizes)
-    if isinstance(method, str):
-        return getattr(sc, method)(blocked, set(blocked.dims) - set(image.dims))
-    return method(blocked, set(blocked.dims) - set(image.dims))
+    return resample(image, sizes=block_sizes, method=method)
 
 
 def laplace_2d(
