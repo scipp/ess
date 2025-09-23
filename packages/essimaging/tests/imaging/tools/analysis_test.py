@@ -17,31 +17,53 @@ def test_blockify() -> None:
 
 def test_resample() -> None:
     da = load_scitiff(get_siemens_star_path())["image"]
-    resampled = img.tools.resample(da, sizes={'x': 128, 'y': 128})
-    assert resampled.sizes['x'] == 128
-    assert resampled.sizes['y'] == 128
-    assert sc.identical(resampled.sum(), da.sum())
+    resampled = img.tools.resample(da, sizes={'x': 2, 'y': 2})
+    assert resampled.sizes['x'] == da.sizes['x'] // 2
+    assert resampled.sizes['y'] == da.sizes['y'] // 2
 
 
 def test_resample_mean() -> None:
     da = load_scitiff(get_siemens_star_path())["image"]
-    resampled = img.tools.resample(da, sizes={'x': 128, 'y': 128}, method='mean')
-    assert resampled.sizes['x'] == 128
-    assert resampled.sizes['y'] == 128
+    resampled = img.tools.resample(da, sizes={'x': 2, 'y': 2}, method='mean')
+    assert resampled.sizes['x'] == da.sizes['x'] // 2
+    assert resampled.sizes['y'] == da.sizes['y'] // 2
     assert resampled.sum().value < da.sum().value
 
 
 def test_resample_callable() -> None:
     da = load_scitiff(get_siemens_star_path())["image"]
-    resampled = img.tools.resample(da, sizes={'x': 256, 'y': 256}, method=sc.max)
-    assert resampled.sizes['x'] == 256
-    assert resampled.sizes['y'] == 256
+    resampled = img.tools.resample(da, sizes={'x': 2, 'y': 2}, method=sc.min)
+    assert resampled.sizes['x'] == da.sizes['x'] // 2
+    assert resampled.sizes['y'] == da.sizes['y'] // 2
 
 
-def test_resample_bad_size_requested_raises():
+def test_resize() -> None:
+    da = load_scitiff(get_siemens_star_path())["image"]
+    resized = img.tools.resize(da, sizes={'x': 128, 'y': 128})
+    assert resized.sizes['x'] == 128
+    assert resized.sizes['y'] == 128
+    assert sc.identical(resized.sum(), da.sum())
+
+
+def test_resize_mean() -> None:
+    da = load_scitiff(get_siemens_star_path())["image"]
+    resized = img.tools.resize(da, sizes={'x': 128, 'y': 128}, method='mean')
+    assert resized.sizes['x'] == 128
+    assert resized.sizes['y'] == 128
+    assert resized.sum().value < da.sum().value
+
+
+def test_resize_callable() -> None:
+    da = load_scitiff(get_siemens_star_path())["image"]
+    resized = img.tools.resize(da, sizes={'x': 256, 'y': 256}, method=sc.max)
+    assert resized.sizes['x'] == 256
+    assert resized.sizes['y'] == 256
+
+
+def test_resize_bad_size_requested_raises():
     da = load_scitiff(get_siemens_star_path())["image"]
     with pytest.raises(ValueError, match="Size of dimension 'x' .* is not divisible"):
-        img.tools.resample(da, sizes={'x': 127, 'y': 127})
+        img.tools.resize(da, sizes={'x': 127, 'y': 127})
 
 
 def test_laplace_2d() -> None:

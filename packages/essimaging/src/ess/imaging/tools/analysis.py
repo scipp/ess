@@ -215,6 +215,6 @@ def sharpness(
                 # closest to the maximum size
                 factors = _prime_factors(image.sizes[dim])
                 sizes[dim] = _best_subset_product(factors, max_size)
-        image = resample(image, sizes=sizes)
+        image = resize(image, sizes=sizes)
 
     return laplace_2d(image, dims=dims).var(dim=dims, ddof=1)
