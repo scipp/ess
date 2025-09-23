@@ -54,7 +54,7 @@ def resample(
     image:
         The image to resample.
     sizes:
-         A dictionary specifying the block sizes for each dimension.
+        A dictionary specifying the block sizes for each dimension.
         For example, ``{'x': 4, 'y': 4}`` will create blocks of size 4x4.
     method:
         The reduction method to apply to the blocks. This can be a string referring to
