@@ -4,6 +4,7 @@
 Tools for image analysis and manipulation.
 """
 
+import math
 import uuid
 from collections.abc import Callable
 from itertools import combinations
@@ -12,7 +13,9 @@ import numpy as np
 import scipp as sc
 
 
-def blockify(image: sc.Variable | sc.DataArray, **sizes) -> sc.Variable | sc.DataArray:
+def blockify(
+    image: sc.Variable | sc.DataArray, sizes: dict[str, int]
+) -> sc.Variable | sc.DataArray:
     """
     Blockify an image by folding it into blocks of specified sizes.
     The sizes should be provided as keyword arguments, where the keys are
@@ -24,8 +27,8 @@ def blockify(image: sc.Variable | sc.DataArray, **sizes) -> sc.Variable | sc.Dat
     image:
         The image to blockify.
     sizes:
-        Keyword arguments specifying the block sizes for each dimension.
-        For example, `x=4, y=4` will create blocks of size 4x4.
+        The block sizes for each dimension.
+        For example, `{'x': 4, 'y': 4}` will create blocks of size 4x4.
     """
     out = image
     for dim, size in sizes.items():
@@ -50,8 +53,10 @@ def resample(
     image:
         The image to resample.
     sizes:
-        A dictionary specifying the block sizes for each dimension.
-        For example, ``{'x': 4, 'y': 4}`` will create blocks of size 4x4.
+        A dictionary specifying the desired size of the output image for each dimension.
+        The original sizes should be divisible by the specified sizes.
+        For example, ``{'x': 128, 'y': 128}`` will create an output image of size
+        128x128.
     method:
         The reduction method to apply to the blocks. This can be a string referring to
         any valid Scipp reduction method, such as 'sum', 'mean', 'max', etc.
@@ -60,7 +65,15 @@ def resample(
         argument and a set of dimensions to reduce over as second argument. The
         function should return a ``scipp.Variable`` or ``scipp.DataArray``.
     """
-    blocked = blockify(image, **sizes)
+    block_sizes = {}
+    for dim, size in sizes.items():
+        if image.sizes[dim] % size != 0:
+            raise ValueError(
+                f"Size of dimension '{dim}' ({image.sizes[dim]}) is not divisible by"
+                f" the requested size ({size})."
+            )
+        block_sizes[dim] = image.sizes[dim] // size
+    blocked = blockify(image, sizes=block_sizes)
     if isinstance(method, str):
         return getattr(sc, method)(blocked, set(blocked.dims) - set(image.dims))
     return method(blocked, set(blocked.dims) - set(image.dims))
@@ -170,8 +183,7 @@ def sharpness(
                 # Decompose size into prime numbers to find the best subset product
                 # closest to the maximum size
                 factors = _prime_factors(image.sizes[dim])
-                best_product = _best_subset_product(factors, max_size)
-                sizes[dim] = image.sizes[dim] // best_product
+                sizes[dim] = _best_subset_product(factors, max_size)
         image = resample(image, sizes=sizes)
 
     return laplace_2d(image, dims=dims).var(dim=dims, ddof=1)
