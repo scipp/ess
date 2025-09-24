@@ -10,7 +10,7 @@ pip install esssans
 ````
 ````{tab-item} conda
 ```sh
-conda install -c conda-forge -c scipp esssans
+conda install -c conda-forge esssans
 ```
 ````
 `````

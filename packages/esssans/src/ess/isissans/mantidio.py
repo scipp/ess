@@ -5,7 +5,7 @@ File loading functions for ISIS data using Mantid.
 """
 
 import threading
-from typing import NewType, NoReturn
+from typing import NewType
 
 import sciline
 import scipp as sc
@@ -23,10 +23,18 @@ try:
 except ModuleNotFoundError:
     # Catch runtime usages of Mantid
     class _MantidFallback:
-        def __getattr__(self, name: str) -> NoReturn:
+        # autodoc_pydantic isn't happy with the getattr method, so we define the methods
+        # here instead.
+        def _raise_import_error(self):
             raise ImportError(
                 'Mantid is required to use `sans.isis.mantidio` but is not installed'
             ) from None
+
+        def Load(self, *args, **kwargs):
+            self._raise_import_error()
+
+        def CopyInstrumentParameters(self, *args, **kwargs):
+            self._raise_import_error()
 
     _mantid_api = _MantidFallback()
     _mantid_simpleapi = _MantidFallback

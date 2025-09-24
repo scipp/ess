@@ -56,8 +56,8 @@
    :recursive:
 
    data
-   general
-   io
+   live
+   workflow
 ```
 
 ```{eval-rst}
@@ -65,7 +65,7 @@
    :toctree: ../generated/functions
    :recursive:
 
-   ess.loki.LokiAtLarmorWorkflow
+   LokiAtLarmorWorkflow
 ```
 
 ## ISIS sans
@@ -78,7 +78,6 @@
    :template: module-template.rst
    :recursive:
 
-   components
    data
    general
    io
