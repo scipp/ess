@@ -120,7 +120,7 @@ def maximum_resolution_achievable(
 def _radial_profile(data: NDArray):
     y, x = np.indices(data.shape)
     cy, cx = np.array(data.shape) / 2.0
-    r = np.hypot(x - cx, y - cy)
+    r = np.hypot((cx * cy) ** 0.5 * (x - cx) / cx, (cx * cy) ** 0.5 * (y - cy) / cy)
     r = r.astype(np.int32)
     tbin = np.bincount(r.ravel(), data.ravel())
     nr = np.bincount(r.ravel())
@@ -173,11 +173,18 @@ def modulation_transfer_function(
 def estimate_cut_off_frequency(mtf: sc.DataArray):
     '''Estimates the cut off frequency of
     the modulation transfer function (mtf).'''
-    _freq = mtf.coords['frequency'].values
-    _mtf = mtf.values
+    _freq = np.concat([[0.0], mtf.coords['frequency'].values])
+    _mtf = np.concat([[1.0], mtf.values])
+    # The line should go through (0, 1), so give it a big weight.
+    w = np.concat([[10 * len(mtf)], np.ones(len(mtf))])
     m = np.ones(len(_freq), dtype='bool')
-    for _ in range(5):
-        p = np.polyfit(_freq[m], _mtf[m], 1)
+    fc = np.nan
+    maxiters = 100
+    for _ in range(maxiters):
+        p = np.polyfit(_freq[m], _mtf[m], 1, w=w[m])
+        if abs(-p[1] / p[0] - fc) < 1e-4:
+            break
+        fc = -p[1] / p[0]
         m = np.polyval(p, _freq) >= 0
     return sc.scalar(-p[1] / p[0], unit=mtf.coords['frequency'].unit)
 
