@@ -7,6 +7,7 @@ from typing import Any
 
 import sciline
 import scipp as sc
+from scippnexus import NXdetector
 
 from ess.spectroscopy.indirect.conversion import providers as conversion_providers
 from ess.spectroscopy.indirect.kf import providers as kf_providers
@@ -14,11 +15,13 @@ from ess.spectroscopy.indirect.ki import providers as ki_providers
 from ess.spectroscopy.indirect.normalization import providers as normalisation_providers
 from ess.spectroscopy.indirect.time_of_flight import TofWorkflow
 from ess.spectroscopy.types import (
+    BeamlineWithSpectrometerCoords,
     DetectorData,
     FrameMonitor0,
     FrameMonitor1,
     FrameMonitor2,
     FrameMonitor3,
+    NeXusData,
     NeXusDetectorName,
     NeXusMonitorName,
     PulsePeriod,
@@ -85,6 +88,63 @@ def BifrostSimulationWorkflow(
     )
 
     return workflow
+
+
+def BifrostWorkflow(
+    detector_names: list[NeXusDetectorName],
+) -> sciline.Pipeline:
+    """Data reduction workflow for BIFROST."""
+    workflow = TofWorkflow(
+        run_types=(SampleRun,),
+        monitor_types=(FrameMonitor0, FrameMonitor1, FrameMonitor2, FrameMonitor3),
+    )
+    # TODO change to use non-simulation providers
+    for provider in _SIMULATION_PROVIDERS:
+        workflow.insert(provider)
+    # TODO change to use non-simulation parameters
+    for key, val in simulation_default_parameters().items():
+        workflow[key] = val
+
+    workflow[BeamlineWithSpectrometerCoords[SampleRun]] = (
+        workflow[BeamlineWithSpectrometerCoords[SampleRun]]
+        .map(_make_detector_name_mapping(detector_names))
+        .reduce(func=merge_triplets)
+    )
+
+    workflow[NeXusData[NXdetector, SampleRun]] = (
+        workflow[NeXusData[NXdetector, SampleRun]]
+        .map(_make_detector_name_mapping(detector_names))
+        .reduce(func=concat_event_lists)
+    )
+
+    return workflow
+
+
+# TODO remove or move
+def concat_event_lists(
+    *data: sc.DataArray,
+) -> sc.DataArray:
+    """Concatenate binned event lists into a single data array in 'event_time_zero'.
+
+    Note that the output will likely have repeated values for 'event_time_zero'.
+    E.g., if input 1 has times `[0, 1, 2]` and input 2 has times `[0, 2, 3]`,
+    the output will have times `[0, 1, 2, 0, 2, 3]`.
+    Note that this sawtooth pattern will disappear again after grouping into pixels.
+    Preserving it will likely actually lead to more efficient memory
+    access patterns when grouping.
+
+    Parameters
+    ----------
+    data:
+        Data arrays to concatenate.
+        Must be binned in 'event_time_zero'.
+
+    Returns
+    -------
+    :
+        Concatenated data array.
+    """
+    return sc.concat(data, dim="event_time_zero")
 
 
 def _make_detector_name_mapping(detector_names: list[NeXusDetectorName]) -> Any:

@@ -3,19 +3,23 @@
 
 """Cutting BIFROST data."""
 
+from collections.abc import Callable
+
 import scipp as sc
 
 from ess.spectroscopy.types import (
     DataGroupedByRotation,
     DetectorData,
-    InstrumentAngles,
+    InstrumentAngle,
     RunType,
+    SampleAngle,
 )
 
 
 def group_by_rotation(
     data: DetectorData[RunType],
-    angles: InstrumentAngles[RunType],
+    sample_angle: SampleAngle[RunType],
+    instrument_angle: InstrumentAngle[RunType],
 ) -> DataGroupedByRotation[RunType]:
     """Group data by rotation angles.
 
@@ -23,22 +27,32 @@ def group_by_rotation(
     ----------
     data:
         Detector events with time coordinates.
-    angles:
-        Data group with time-dependent entries "a3" and "a4".
+    sample_angle:
+        Sample rotation angle "a3".
+        May be time-dependent (1d array with dim "time") or scalar.
+    instrument_angle:
+        Instrument rotation angle "a4".
+        May be time-dependent (1d array with dim "time") or scalar.
 
     Returns
     -------
     :
         ``data`` grouped by rotation angles "a3" and "a4".
     """
-    a3 = sc.lookup(angles['a3'], 'time')
-    a4 = sc.lookup(angles['a4'], 'time')
     graph = {
-        'a3': lambda event_time_zero: a3[event_time_zero],
-        'a4': lambda event_time_zero: a4[event_time_zero],
+        'a3': _make_angle_from_time_calculator(sample_angle),
+        'a4': _make_angle_from_time_calculator(instrument_angle),
     }
     grouped = data.transform_coords(('a3', 'a4'), graph=graph).group('a3', 'a4')
     return DataGroupedByRotation[RunType](grouped)
+
+
+def _make_angle_from_time_calculator(angle: sc.DataArray) -> Callable[..., sc.Variable]:
+    if angle.ndim == 0:
+        return lambda: angle.data
+    else:
+        lut = sc.lookup(angle, 'time')
+        return lambda event_time_zero: lut[event_time_zero]
 
 
 providers = (group_by_rotation,)
