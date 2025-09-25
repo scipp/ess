@@ -31,6 +31,7 @@
 ## Quick links
 
 ::::{grid} 2
+:gutter: 4
 
 :::{grid-item-card} BEER
 :link: user-guide/beer/index.md
@@ -68,8 +69,4 @@
 hidden:
 ---
 
-user-guide/index
-api-reference/index
-developer/index
-about/index
 ```
