@@ -17,7 +17,7 @@ class SupermirrorEfficiencyFunction(Generic[PolarizingElement], ABC):
     """Base class for supermirror efficiency functions"""
 
     @abstractmethod
-    def __call__(self, *, wavelength: sc.Variable) -> sc.DataArray:
+    def __call__(self, *, wavelength: sc.Variable) -> sc.Variable:
         """Return the efficiency of a supermirror for a given wavelength"""
 
 
@@ -44,7 +44,7 @@ class SecondDegreePolynomialEfficiency(
     b: sc.Variable
     c: sc.Variable
 
-    def __call__(self, *, wavelength: sc.Variable) -> sc.DataArray:
+    def __call__(self, *, wavelength: sc.Variable) -> sc.Variable:
         """Return the efficiency of a supermirror for a given wavelength"""
         return (
             (self.a * wavelength**2).to(unit='', copy=False)
@@ -71,9 +71,9 @@ class EfficiencyLookupTable(SupermirrorEfficiencyFunction[PolarizingElement]):
         table = self.table if self.table.variances is None else sc.values(self.table)
         self._lut = sc.lookup(table, 'wavelength')
 
-    def __call__(self, *, wavelength: sc.Variable) -> sc.DataArray:
+    def __call__(self, *, wavelength: sc.Variable) -> sc.Variable:
         """Return the efficiency of a supermirror for a given wavelength"""
-        return sc.DataArray(self._lut(wavelength), coords={'wavelength': wavelength})
+        return self._lut(wavelength)
 
     @classmethod
     def from_file(
@@ -107,7 +107,7 @@ class SupermirrorTransmissionFunction(TransmissionFunction[PolarizingElement]):
 
     def __call__(
         self, *, wavelength: sc.Variable, plus_minus: PlusMinus
-    ) -> sc.DataArray:
+    ) -> sc.Variable:
         """Return the transmission fraction for a given wavelength"""
         efficiency = self.efficiency_function(wavelength=wavelength)
         if plus_minus == 'plus':
@@ -115,7 +115,7 @@ class SupermirrorTransmissionFunction(TransmissionFunction[PolarizingElement]):
         else:
             return 0.5 * (1 - efficiency)
 
-    def apply(self, data: sc.DataArray, plus_minus: PlusMinus) -> sc.DataArray:
+    def apply(self, data: sc.DataArray, plus_minus: PlusMinus) -> sc.Variable:
         """Apply the transmission function to a data array"""
         return self(wavelength=data.coords['wavelength'], plus_minus=plus_minus)
 

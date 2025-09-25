@@ -32,7 +32,7 @@ class TransmissionFunction(Generic[PolarizingElement], ABC):
     """Wavelength- and time-dependent transmission for a given cell."""
 
     @abstractmethod
-    def apply(self, data: sc.DataArray, plus_minus: PlusMinus) -> sc.DataArray: ...
+    def apply(self, data: sc.DataArray, plus_minus: PlusMinus) -> sc.Variable: ...
 
 
 @dataclass
@@ -84,6 +84,12 @@ class PolarizationCorrectedData(Generic[PolarizerSpin, AnalyzerSpin]):
     updown: sc.DataArray
     downup: sc.DataArray
     downdown: sc.DataArray
+
+    def __post_init__(self):
+        self.upup.name = '(up, up)'
+        self.updown.name = '(up, down)'
+        self.downup.name = '(down, up)'
+        self.downdown.name = '(down, down)'
 
 
 """The sum of polarization corrected data from all flipper state channels."""

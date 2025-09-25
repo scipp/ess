@@ -78,10 +78,7 @@ def test_EfficiencyLookupTable_returns_expected_result():
         )
     )
     x = sc.midpoints(sc.linspace('wavelength', 0, 1, 10, unit='angstrom'))
-    assert_allclose(
-        tab(wavelength=x),
-        sc.DataArray(sc.values(tab.table.data), coords={'wavelength': x}),
-    )
+    assert_allclose(tab(wavelength=x), sc.values(tab.table.data))
 
 
 def test_EfficiencyLookupTable_load_from_file():

@@ -68,6 +68,30 @@ def test_compute_polarizing_element_correction() -> None:
     assert_allclose(off_diag, -transmission_minus / denom)
 
 
+def test_compute_polarizing_element_correction_binned_data() -> None:
+    time = sc.linspace('event', 1, 10, 10, unit='')
+    wavelength = sc.linspace('event', 0.1, 1, 10, unit='')
+    events = sc.DataArray(
+        sc.arange('event', 10),
+        coords={'time': time, 'wavelength': wavelength},
+    )
+    binned = sc.bins(
+        data=events, dim='event', begin=sc.array(dims=['Q'], values=[0, 3], unit=None)
+    )
+    transmission = SimpleTransmissionFunction()
+
+    result = compute_polarizing_element_correction(
+        channel=binned, transmission=transmission
+    )
+    diag = result.diag
+    off_diag = result.off_diag
+    transmission_plus = transmission(time, wavelength, 'plus')
+    transmission_minus = transmission(time, wavelength, 'minus')
+    denom = transmission_plus**2 - transmission_minus**2
+    assert_allclose(diag.bins.concat().value, transmission_plus / denom)
+    assert_allclose(off_diag.bins.concat().value, -transmission_minus / denom)
+
+
 class FakeTransmissionFunction:
     def __init__(self, coeffs: np.ndarray) -> None:
         self.coeffs = coeffs
