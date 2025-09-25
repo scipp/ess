@@ -42,6 +42,7 @@
    data
    detector
    io
+   live
    types
    workflow
 ```
