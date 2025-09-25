@@ -9,17 +9,11 @@ from typing import NewType
 
 import sciline
 import scipp as sc
-import scippnexus as snx
 
-from ess.reduce.streaming import StreamProcessor
 from ess.spectroscopy.types import (
     EnergyData,
-    InstrumentAngle,
-    NeXusData,
     NeXusDetectorName,
     RunType,
-    SampleAngle,
-    SampleRun,
 )
 
 from .workflow import BifrostWorkflow
@@ -82,13 +76,3 @@ def BifrostQCutWorkflow(detector_names: list[NeXusDetectorName]) -> sciline.Pipe
     workflow = BifrostWorkflow(detector_names)
     workflow.insert(cut)
     return workflow
-
-
-def BIFROSTQCutStreamProcessor(workflow: sciline.Pipeline) -> StreamProcessor:
-    return StreamProcessor(
-        workflow,
-        dynamic_keys=(NeXusData[snx.NXdetector, SampleRun],),
-        context_keys=(InstrumentAngle[SampleRun], SampleAngle[SampleRun]),
-        target_keys=(CutData[SampleRun],),
-        accumulators=(CutData[SampleRun],),
-    )
