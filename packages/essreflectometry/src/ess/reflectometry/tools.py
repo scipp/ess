@@ -159,7 +159,7 @@ class BatchProcessor:
     def __init__(self, workflows: Mapping[str, sl.Pipeline]):
         self.workflows = workflows
 
-    def __setitem__(self, key: type, value: Sequence[Any]):
+    def __setitem__(self, key: type, value: Mapping[str, Any] | Any) -> None:
         if hasattr(value, 'items'):
             for name, v in value.items():
                 self.workflows[name][key] = v
