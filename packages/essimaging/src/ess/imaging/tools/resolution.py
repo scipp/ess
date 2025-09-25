@@ -1,7 +1,6 @@
 import numpy as np
 import scipp as sc
 from numpy.typing import NDArray
-from scipy.signal.windows import tukey
 
 
 def maximum_resolution_achievable(
@@ -118,6 +117,7 @@ def maximum_resolution_achievable(
 
 
 def _radial_profile(data: NDArray):
+    '''Integrate ellipses around center of image.'''
     y, x = np.indices(data.shape)
     cy, cx = np.array(data.shape) / 2.0
     r = np.hypot((cx * cy) ** 0.5 * (x - cx) / cx, (cx * cy) ** 0.5 * (y - cy) / cy)
@@ -159,10 +159,8 @@ def modulation_transfer_function(
     _measured = _measured / _measured.sum()
     _reference = (open_beam_image * target).to(unit=measured_image.unit).values
     _reference = _reference / _reference.sum()
-    ny, nx = _measured.shape
-    win = np.outer(tukey(ny, alpha=0.1), tukey(nx, alpha=0.1))
-    f_ideal = np.abs(np.fft.fftshift(np.fft.fft2(_reference * win)))
-    f_measured = np.abs(np.fft.fftshift(np.fft.fft2(_measured * win)))
+    f_ideal = np.abs(np.fft.fftshift(np.fft.fft2(_reference)))
+    f_measured = np.abs(np.fft.fftshift(np.fft.fft2(_measured)))
     _mtf = _radial_profile(f_measured) / _radial_profile(f_ideal)
     return sc.DataArray(
         sc.array(dims=['frequency'], values=_mtf),
