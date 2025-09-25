@@ -30,7 +30,7 @@ def _make_pooch():
             "mccode_quartz_mode7.h5": "md5:24c7006336f58c26689abec1645cfba1",
             "mccode_quartz_mode8.h5": "md5:9a4606ce56a6397d05d70246d54407d6",
             "mccode_quartz_mode9.h5": "md5:1394df47287ecd62bfa62c200203f214",
-            "silicon-dhkl.tab": "md5:90bedceb23245b045ce1ed0170c1313b",
+            "silicon-dhkl.tab": "md5:59ee9ed57a7c039ce416c8df886da9cc",
             "duplex-dhkl.tab": "md5:b4c6c2fcd66466ad291f306b2d6b346e",
             "dhkl_quartz_nc.tab": "md5:40887d736e3acf859e44488bfd9a9213",
         },
