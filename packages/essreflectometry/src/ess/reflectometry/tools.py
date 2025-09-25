@@ -9,19 +9,12 @@ from itertools import chain
 from typing import Any
 
 import numpy as np
-import pandas as pd
 import sciline as sl
 import scipp as sc
 import scipy.optimize as opt
 
-from ess.reflectometry.types import (
-    Filename,
-    QBins,
-    ReflectivityOverQ,
-    SampleRun,
-    ScalingFactorForOverlap,
-    UnscaledReducibleData,
-)
+from ess.reflectometry.types import Filename, SampleRun
+from ess.reflectometry.workflow import with_filenames
 
 _STD_TO_FWHM = sc.scalar(2.0) * sc.sqrt(sc.scalar(2.0) * sc.log(sc.scalar(2.0)))
 
@@ -192,7 +185,7 @@ class BatchProcessor:
             targets = [targets]
         out = {}
         for t in targets:
-            out[t] = {}
+            out[t] = sc.DataGroup()
             for name, wf in self.workflows.items():
                 try:
                     out[t][name] = wf.compute(t, **kwargs)
@@ -302,16 +295,16 @@ def _interpolate_on_qgrid(curves, grid):
     )
 
 
-def scale_reflectivity_curves_to_overlap(
-    workflows: BatchProcessor | sl.Pipeline,
+def scale_for_reflectivity_overlap(
+    reflectivities: sc.DataArray | Mapping[str, sc.DataArray] | sc.DataGroup,
     critical_edge_interval: tuple[sc.Variable, sc.Variable] | None = None,
-) -> tuple[list[sc.DataArray], list[sc.Variable]]:
+) -> sc.DataArray | sc.DataGroup:
     '''
-    Set the ``ScalingFactorForOverlap`` parameter on the provided workflows
-    in a way that would makes the 1D reflectivity curves overlap.
-    One can supply either a collection of workflows or a single workflow.
+    Compute a scaling for 1D reflectivity curves in a way that would makes the curves
+    overlap.
+    One can supply either a single curve or a collection/DataGroup of curves.
 
-    If :code:`critical_edge_interval` is not provided, all workflows are scaled except
+    If :code:`critical_edge_interval` is not provided, all curves are scaled except
     the data with the lowest Q-range, which is considered to be the reference curve.
     The scaling factors are determined by a maximum likelihood estimate
     (assuming the errors are normal distributed).
@@ -322,8 +315,8 @@ def scale_reflectivity_curves_to_overlap(
 
     Parameters
     ---------
-    workflows:
-        The workflow or collection of workflows that can compute ``ReflectivityOverQ``.
+    reflectivities:
+        The reflectivity curves that should be scaled.
     critical_edge_interval:
         A tuple denoting an interval that is known to belong
         to the critical edge, i.e. where the reflectivity is
@@ -332,15 +325,12 @@ def scale_reflectivity_curves_to_overlap(
     Returns
     ---------
     :
-        A list of scaled reflectivity curves and a list of the scaling factors.
+        A DataGroup with the same keys as the input containing the
+        scaling factors for each reflectivity curve.
     '''
-    is_single_workflow = isinstance(workflows, sl.Pipeline)
-    if is_single_workflow:
-        # If a single workflow is provided, convert it to a collection
-        workflows = BatchProcessor({"": workflows})
-
-    wfc = workflows.copy()
-    reflectivities = wfc.compute(ReflectivityOverQ)
+    only_one_curve = isinstance(reflectivities, sc.DataArray)
+    if only_one_curve:
+        reflectivities = {"": reflectivities}
 
     # First sort the dict of reflectivities by the Q min value
     curves = {
@@ -352,10 +342,8 @@ def scale_reflectivity_curves_to_overlap(
 
     critical_edge_key = uuid.uuid4().hex
     if critical_edge_interval is not None:
-        q = wfc.compute(QBins)
-        if hasattr(q, "items"):
-            # If QBins is a mapping, find the one with the lowest Q start
-            q = min(q.values(), key=lambda q_: q_.min())
+        q = {key: c.coords['Q'] for key, c in curves.items()}
+        q = min(q.values(), key=lambda q_: q_.min())
         # TODO: This is slightly different from before: it extracts the bins from the
         # QBins variable that cover the critical edge interval. This means that the
         # resulting curve will not necessarily begin and end exactly at the values
@@ -391,19 +379,19 @@ def scale_reflectivity_curves_to_overlap(
     sol = opt.minimize(cost, [1.0] * (len(curves) - 1))
     scaling_factors = (1.0, *map(float, sol.x))
 
-    original_factors = wfc.compute(ScalingFactorForOverlap[SampleRun])
+    out = sc.DataGroup(
+        {
+            k: v
+            for k, v in zip(curves.keys(), scaling_factors, strict=True)
+            if k != critical_edge_key
+        }
+    )
 
-    wfc[ScalingFactorForOverlap[SampleRun]] = {
-        k: v * original_factors[k]
-        for k, v in zip(curves.keys(), scaling_factors, strict=True)
-        if k != critical_edge_key
-    }
-
-    return wfc.workflows[""] if is_single_workflow else wfc
+    return out[""] if only_one_curve else out
 
 
 def combine_curves(
-    curves: Sequence[sc.DataArray],
+    curves: Sequence[sc.DataArray] | sc.DataGroup | Mapping[str, sc.DataArray],
     q_bin_edges: sc.Variable | None = None,
 ) -> sc.DataArray:
     '''Combines the given curves by interpolating them
@@ -431,6 +419,8 @@ def combine_curves(
     :
         A data array representing the combined reflectivity curve
     '''
+    if hasattr(curves, 'items'):
+        curves = list(curves.values())
     if len({c.data.unit for c in curves}) != 1:
         raise ValueError('The reflectivity curves must have the same unit')
     if len({c.coords['Q'].unit for c in curves}) != 1:
@@ -452,12 +442,6 @@ def combine_curves(
         ),
         coords={'Q': q_bin_edges},
     )
-
-
-def _concatenate_event_lists(*das):
-    da = sc.reduce(das).bins.concat()
-    missing_coords = set(das[0].coords) - set(da.coords)
-    return da.assign_coords({coord: das[0].coords[coord] for coord in missing_coords})
 
 
 def batch_processor(
@@ -519,13 +503,7 @@ def batch_processor(
 
         if Filename[SampleRun] in parameters:
             if isinstance(parameters[Filename[SampleRun]], list | tuple):
-                df = pd.DataFrame(
-                    {Filename[SampleRun]: parameters[Filename[SampleRun]]}
-                )
-                mapped = wf.map(df)
-                wf[UnscaledReducibleData[SampleRun]] = mapped[
-                    UnscaledReducibleData[SampleRun]
-                ].reduce(func=_concatenate_event_lists)
+                wf = with_filenames(wf, SampleRun, parameters[Filename[SampleRun]])
             else:
                 wf[Filename[SampleRun]] = parameters[Filename[SampleRun]]
         workflows[name] = wf

@@ -12,8 +12,6 @@ from ..reflectometry.types import (
     ProtonCurrent,
     ReducibleData,
     RunType,
-    ScalingFactorForOverlap,
-    UnscaledReducibleData,
     WavelengthBins,
     YIndexLimits,
     ZIndexLimits,
@@ -29,7 +27,7 @@ def add_coords_masks_and_apply_corrections(
     wbins: WavelengthBins,
     proton_current: ProtonCurrent[RunType],
     graph: CoordTransformationGraph,
-) -> UnscaledReducibleData[RunType]:
+) -> ReducibleData[RunType]:
     """
     Computes coordinates, masks and corrections that are
     the same for the sample measurement and the reference measurement.
@@ -45,17 +43,7 @@ def add_coords_masks_and_apply_corrections(
         da = add_proton_current_mask(da)
         da = correct_by_proton_current(da)
 
-    return UnscaledReducibleData[RunType](da)
+    return ReducibleData[RunType](da)
 
 
-def scale_raw_reducible_data(
-    da: UnscaledReducibleData[RunType],
-    scale: ScalingFactorForOverlap[RunType],
-) -> ReducibleData[RunType]:
-    """
-    Scales the raw data by a given factor.
-    """
-    return ReducibleData[RunType](da * scale)
-
-
-providers = (add_coords_masks_and_apply_corrections, scale_raw_reducible_data)
+providers = (add_coords_masks_and_apply_corrections,)

@@ -16,7 +16,6 @@ from ..reflectometry.types import (
     Position,
     RunType,
     SampleRotationOffset,
-    ScalingFactorForOverlap,
 )
 from . import (
     conversions,
@@ -75,7 +74,6 @@ def default_parameters() -> dict:
         ),
         GravityToggle: True,
         SampleRotationOffset[RunType]: sc.scalar(0.0, unit='deg'),
-        ScalingFactorForOverlap[RunType]: 1.0,
     }
 
 
