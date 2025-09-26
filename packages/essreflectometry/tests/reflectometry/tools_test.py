@@ -11,6 +11,7 @@ from scipp.testing import assert_allclose
 
 from ess.reflectometry.tools import (
     BatchProcessor,
+    batch_compute,
     batch_processor,
     combine_curves,
     linlogspace,
@@ -291,7 +292,7 @@ def test_linlogspace_bad_input():
 
 
 @pytest.mark.filterwarnings("ignore:No suitable")
-def test_batch_processor_tool_uses_expected_parameters_from_each_run():
+def test_batch_processor_uses_expected_parameters_from_each_run():
     def normalized_ioq(filename: Filename[SampleRun]) -> ReflectivityOverQ:
         return filename
 
@@ -315,7 +316,7 @@ def test_batch_processor_tool_uses_expected_parameters_from_each_run():
     assert results['b'].info.name == 'special.orso'
 
 
-def test_batch_processor_tool_merges_event_lists():
+def test_batch_processor_merges_event_lists():
     wf = make_workflow()
 
     runs = {
@@ -332,3 +333,94 @@ def test_batch_processor_tool_merges_event_lists():
     assert_almost_equal(
         results['c'].sum().value, (10 + 15 * 0.5) * 0.1 + (10 + 15 * 0.5) * 0.2
     )
+
+
+def test_batch_compute_single_target():
+    def A(x: str) -> int:
+        return int(x)
+
+    params = {'a': {str: '1'}, 'b': {str: '2'}}
+    workflow = sl.Pipeline([A])
+    results = batch_compute(workflow, params, target=int)
+    assert results == {'a': 1, 'b': 2}
+
+
+def test_batch_compute_multiple_targets():
+    def A(x: str) -> float:
+        return float(x)
+
+    def B(x: str) -> int:
+        return int(x)
+
+    params = {'a': {str: '1'}, 'b': {str: '2'}}
+    workflow = sl.Pipeline([A, B])
+    results = batch_compute(workflow, params, target=(float, int))
+    assert results[float] == {'a': 1.0, 'b': 2.0}
+    assert results[int] == {'a': 1, 'b': 2}
+
+
+def test_batch_compute_does_not_recompute_reflectivity():
+    R = sc.DataArray(
+        sc.ones(dims=['Q'], shape=(50,), with_variances=True),
+        coords={'Q': sc.linspace('Q', 0.1, 1, 50)},
+    ).bin(Q=10)
+
+    times_evaluated = 0
+
+    def reflectivity() -> ReflectivityOverQ:
+        nonlocal times_evaluated
+        times_evaluated += 1
+        return ReflectivityOverQ(R)
+
+    def reducible_data() -> ReducibleData[SampleRun]:
+        return ReducibleData[SampleRun](1.5)
+
+    pl = sl.Pipeline([reflectivity, reducible_data])
+
+    batch_compute(
+        pl, {'a': {}, 'b': {}}, target=(ReflectivityOverQ,), scale_to_overlap=True
+    )
+    assert times_evaluated == 2
+
+
+def test_batch_compute_applies_scaling_to_reflectivityoverq():
+    R1 = sc.DataArray(
+        sc.ones(dims=['Q'], shape=(50,), with_variances=True),
+        coords={'Q': sc.linspace('Q', 0.1, 1, 50)},
+    ).bin(Q=10)
+    R2 = 0.5 * R1
+
+    def reducible_data() -> ReducibleData[SampleRun]:
+        return 1.5
+
+    pl = sl.Pipeline([reducible_data])
+
+    results = batch_compute(
+        pl,
+        {'a': {ReflectivityOverQ: R1}, 'b': {ReflectivityOverQ: R2}},
+        target=ReflectivityOverQ,
+        scale_to_overlap=True,
+        critical_edge_interval=(sc.scalar(0.0), sc.scalar(1.0)),
+    )
+    assert_allclose(results['a'], results['b'])
+
+
+def test_batch_compute_applies_scaling_to_reducibledata():
+    R1 = sc.DataArray(
+        sc.ones(dims=['Q'], shape=(50,), with_variances=True),
+        coords={'Q': sc.linspace('Q', 0.1, 1, 50)},
+    ).bin(Q=10)
+    R2 = 0.5 * R1
+
+    def reducible_data() -> ReducibleData[SampleRun]:
+        return sc.scalar(1)
+
+    pl = sl.Pipeline([reducible_data])
+
+    results = batch_compute(
+        pl,
+        {'a': {ReflectivityOverQ: R1}, 'b': {ReflectivityOverQ: R2}},
+        target=ReducibleData[SampleRun],
+        scale_to_overlap=(sc.scalar(0.0), sc.scalar(1.0)),
+    )
+    assert_allclose(results['a'], 0.5 * results['b'])

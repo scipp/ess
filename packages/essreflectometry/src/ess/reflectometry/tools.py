@@ -13,7 +13,15 @@ import sciline as sl
 import scipp as sc
 import scipy.optimize as opt
 
-from ess.reflectometry.types import Filename, SampleRun
+from ess.reflectometry import orso
+from ess.reflectometry.types import (
+    Filename,
+    ReducedReference,
+    ReducibleData,
+    ReferenceRun,
+    ReflectivityOverQ,
+    SampleRun,
+)
 from ess.reflectometry.workflow import with_filenames
 
 _STD_TO_FWHM = sc.scalar(2.0) * sc.sqrt(sc.scalar(2.0) * sc.log(sc.scalar(2.0)))
@@ -514,3 +522,78 @@ def batch_processor(
                 wf[Filename[SampleRun]] = parameters[Filename[SampleRun]]
         workflows[name] = wf
     return BatchProcessor(workflows)
+
+
+def batch_compute(
+    workflow: sl.Pipeline,
+    runs: Sequence[Mapping[type, Any]] | Mapping[Any, Mapping[type, Any]],
+    target: type | Sequence[type] = orso.OrsoIofQDataset,
+    *,
+    scale_to_overlap: bool = False,
+    critical_edge_interval: tuple[sc.Variable, sc.Variable] | None = None,
+) -> list | Mapping:
+    '''
+    Computes requested target(s) from a supplied workflow for a number of runs.
+    Each entry of :code:`runs` is a mapping of parameters and
+    values needed to produce the targets.
+
+    This is an alternative to using :func:`batch_processor`: instead of returning a
+    BatchProcessor object which can operate on multiple workflows at once,
+    this function directly computes the requested targets, reducing the risk of
+    accidentally compromizing the workflows in the collection.
+
+    It also provides the option to scale the reflectivity curves so that they overlap
+    in the regions where they have the same Q-value.
+
+    Beginners should prefer this function over :func:`batch_processor` unless
+    they need the extra flexibility of the latter (caching intermediate results,
+    quickly exploring results, etc).
+
+    Parameters
+    -----------
+    workflow:
+        The sciline workflow used to compute `ReflectivityOverQ` for each of the runs.
+
+    runs:
+        The sciline parameters to be used for each run.
+
+    target:
+        The domain type(s) to compute for each run.
+
+    scale_to_overlap:
+        If ``True`` the loaded data will be scaled so that the computed reflectivity
+        curves to overlap.
+    critical_edge_interval:
+        A tuple denoting an interval that is known to belong to the critical edge,
+        i.e. where the reflectivity is known to be 1.
+    '''
+    batch = batch_processor(workflow=workflow, runs=runs)
+
+    # Cache the Reference results as it is often the case that the same reference is
+    # used for multiple sample runs.
+    try:
+        reference_filenames = batch.compute(Filename[ReferenceRun])
+        reference_results = {}
+        wf = workflow.copy()
+        for fname in set(reference_filenames.values()):
+            wf[Filename[ReferenceRun]] = fname
+            reference_results[fname] = wf.compute(ReducedReference)
+        batch[ReducedReference] = sc.DataGroup(
+            {k: reference_results[v] for k, v in reference_filenames.items()}
+        )
+    except sl.UnsatisfiedRequirement:
+        # No reference run found in pipeline
+        pass
+
+    if scale_to_overlap:
+        results = batch.compute((ReflectivityOverQ, ReducibleData[SampleRun]))
+        scale_factors = scale_for_reflectivity_overlap(
+            results[ReflectivityOverQ].hist(),
+            critical_edge_interval=critical_edge_interval,
+        )
+        batch[ReducibleData[SampleRun]] = (
+            scale_factors * results[ReducibleData[SampleRun]]
+        )
+        batch[ReflectivityOverQ] = scale_factors * results[ReflectivityOverQ]
+
+    return batch.compute(target)

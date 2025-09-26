@@ -12,7 +12,12 @@ except importlib.metadata.PackageNotFoundError:
 
 from . import conversions, corrections, figures, normalization, orso
 from .load import load_reference, save_reference
-from .tools import BatchProcessor, batch_processor
+from .tools import (
+    BatchProcessor,
+    batch_compute,
+    batch_processor,
+    scale_for_reflectivity_overlap,
+)
 
 providers = (
     *corrections.providers,
@@ -35,6 +40,7 @@ del importlib
 __all__ = [
     "BatchProcessor",
     "__version__",
+    "batch_compute",
     "batch_processor",
     "conversions",
     "corrections",
@@ -44,4 +50,5 @@ __all__ = [
     "orso",
     "providers",
     "save_reference",
+    "scale_for_reflectivity_overlap",
 ]
