@@ -632,22 +632,6 @@ def batch_compute(
     '''
     batch = batch_processor(workflow=workflow, runs=runs)
 
-    # Cache the Reference results as it is often the case that the same reference is
-    # used for multiple sample runs.
-    try:
-        reference_filenames = batch.compute(Filename[ReferenceRun])
-        reference_results = {}
-        wf = workflow.copy()
-        for fname in set(reference_filenames.values()):
-            wf[Filename[ReferenceRun]] = fname
-            reference_results[fname] = wf.compute(ReducedReference)
-        batch[ReducedReference] = sc.DataGroup(
-            {k: reference_results[v] for k, v in reference_filenames.items()}
-        )
-    except sl.UnsatisfiedRequirement:
-        # No reference run found in pipeline
-        pass
-
     if scale_to_overlap:
         results = batch.compute((ReflectivityOverQ, ReducibleData[SampleRun]))
         scale_factors = scale_for_reflectivity_overlap(
