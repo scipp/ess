@@ -12,7 +12,7 @@ from scipp.testing import assert_allclose
 from ess import amor
 from ess.amor import data
 from ess.reflectometry import orso
-from ess.reflectometry.tools import scale_reflectivity_curves_to_overlap
+from ess.reflectometry.tools import scale_for_reflectivity_overlap
 from ess.reflectometry.types import (
     BeamDivergenceLimits,
     Filename,
@@ -128,14 +128,15 @@ def test_save_reduced_orso_file(output_folder: Path):
     wf[Filename[ReferenceRun]] = data.amor_run(4152)
     wf[QBins] = sc.geomspace(dim="Q", start=0.01, stop=0.06, num=201, unit="1/angstrom")
 
-    scaled_wf = scale_reflectivity_curves_to_overlap(
-        wf,
+    r_of_q = wf.compute(ReflectivityOverQ)
+    wf[ReflectivityOverQ] = r_of_q * scale_for_reflectivity_overlap(
+        r_of_q,
         critical_edge_interval=(
             sc.scalar(0.01, unit='1/angstrom'),
             sc.scalar(0.014, unit='1/angstrom'),
         ),
     )
-    scaled_wf[orso.OrsoCreator] = orso.OrsoCreator(
+    wf[orso.OrsoCreator] = orso.OrsoCreator(
         fileio.base.Person(
             name="Max Mustermann",
             affiliation="European Spallation Source ERIC",
@@ -143,7 +144,7 @@ def test_save_reduced_orso_file(output_folder: Path):
         )
     )
     fileio.orso.save_orso(
-        datasets=[scaled_wf.compute(orso.OrsoIofQDataset)],
+        datasets=[wf.compute(orso.OrsoIofQDataset)],
         fname=output_folder / 'amor_reduced_iofq.ort',
     )
 
