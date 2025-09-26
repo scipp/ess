@@ -249,7 +249,7 @@ def test_sample_rotation_offset(amor_pipeline: sciline.Pipeline):
 
 
 @pytest.fixture
-def pipeline_with_1632_reference(amor_pipeline):  # noqa: F811
+def pipeline_with_1632_reference(amor_pipeline):
     amor_pipeline[ChopperPhase[ReferenceRun]] = sc.scalar(7.5, unit='deg')
     amor_pipeline[ChopperPhase[SampleRun]] = sc.scalar(7.5, unit='deg')
     amor_pipeline[Filename[ReferenceRun]] = data.amor_run('1632')
