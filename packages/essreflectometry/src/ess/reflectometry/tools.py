@@ -16,9 +16,7 @@ import scipy.optimize as opt
 from ess.reflectometry import orso
 from ess.reflectometry.types import (
     Filename,
-    ReducedReference,
     ReducibleData,
-    ReferenceRun,
     ReflectivityOverQ,
     SampleRun,
 )
