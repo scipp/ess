@@ -529,8 +529,9 @@ def batch_compute(
     runs: Sequence[Mapping[type, Any]] | Mapping[Any, Mapping[type, Any]],
     target: type | Sequence[type] = orso.OrsoIofQDataset,
     *,
-    scale_to_overlap: bool = False,
-    critical_edge_interval: tuple[sc.Variable, sc.Variable] | None = None,
+    scale_to_overlap: bool
+    | tuple[sc.Variable, sc.Variable]
+    | list[sc.Variable, sc.Variable] = False,
 ) -> list | Mapping:
     '''
     Computes requested target(s) from a supplied workflow for a number of runs.
@@ -563,9 +564,8 @@ def batch_compute(
     scale_to_overlap:
         If ``True`` the loaded data will be scaled so that the computed reflectivity
         curves to overlap.
-    critical_edge_interval:
-        A tuple denoting an interval that is known to belong to the critical edge,
-        i.e. where the reflectivity is known to be 1.
+        If a tuple is provided, it is interpreted as a critical edge interval where
+        the reflectivity is known to be 1.
     '''
     batch = batch_processor(workflow=workflow, runs=runs)
 
@@ -589,7 +589,9 @@ def batch_compute(
         results = batch.compute((ReflectivityOverQ, ReducibleData[SampleRun]))
         scale_factors = scale_for_reflectivity_overlap(
             results[ReflectivityOverQ].hist(),
-            critical_edge_interval=critical_edge_interval,
+            critical_edge_interval=scale_to_overlap
+            if isinstance(scale_to_overlap, tuple | list)
+            else None,
         )
         batch[ReducibleData[SampleRun]] = (
             scale_factors * results[ReducibleData[SampleRun]]

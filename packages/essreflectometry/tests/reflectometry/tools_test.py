@@ -399,8 +399,7 @@ def test_batch_compute_applies_scaling_to_reflectivityoverq():
         pl,
         {'a': {ReflectivityOverQ: R1}, 'b': {ReflectivityOverQ: R2}},
         target=ReflectivityOverQ,
-        scale_to_overlap=True,
-        critical_edge_interval=(sc.scalar(0.0), sc.scalar(1.0)),
+        scale_to_overlap=(sc.scalar(0.0), sc.scalar(1.0)),
     )
     assert_allclose(results['a'], results['b'])
 
