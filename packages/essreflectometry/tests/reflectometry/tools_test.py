@@ -14,7 +14,7 @@ from ess.reflectometry.tools import (
     batch_processor,
     combine_curves,
     linlogspace,
-    scale_reflectivity_curves_to_overlap,
+    scale_for_reflectivity_overlap,
 )
 from ess.reflectometry.types import (
     Filename,
@@ -24,8 +24,6 @@ from ess.reflectometry.types import (
     ReflectivityOverQ,
     RunType,
     SampleRun,
-    ScalingFactorForOverlap,
-    UnscaledReducibleData,
 )
 
 
@@ -64,26 +62,17 @@ def make_reference_events(qmin, qmax):
 def make_workflow():
     def sample_data_from_filename(
         filename: Filename[SampleRun],
-    ) -> UnscaledReducibleData[SampleRun]:
-        return UnscaledReducibleData[SampleRun](
+    ) -> ReducibleData[SampleRun]:
+        return ReducibleData[SampleRun](
             make_sample_events(*(float(x) for x in filename.split('_')))
         )
 
     def reference_data_from_filename(
         filename: Filename[ReferenceRun],
-    ) -> UnscaledReducibleData[ReferenceRun]:
-        return UnscaledReducibleData[ReferenceRun](
+    ) -> ReducibleData[ReferenceRun]:
+        return ReducibleData[ReferenceRun](
             make_reference_events(*(float(x) for x in filename.split('_')))
         )
-
-    def apply_scaling(
-        da: UnscaledReducibleData[RunType],
-        scale: ScalingFactorForOverlap[RunType],
-    ) -> ReducibleData[RunType]:
-        """
-        Scales the raw data by a given factor.
-        """
-        return ReducibleData[RunType](da * scale)
 
     def reflectivity(
         sample: ReducibleData[SampleRun],
@@ -93,19 +82,12 @@ def make_workflow():
         return ReflectivityOverQ(sample.hist(Q=qbins) / reference.hist(Q=qbins))
 
     return sl.Pipeline(
-        [
-            sample_data_from_filename,
-            reference_data_from_filename,
-            apply_scaling,
-            reflectivity,
-        ]
+        [sample_data_from_filename, reference_data_from_filename, reflectivity]
     )
 
 
 def test_reflectivity_curve_scaling():
     wf = make_workflow()
-    wf[ScalingFactorForOverlap[SampleRun]] = 1.0
-    wf[ScalingFactorForOverlap[ReferenceRun]] = 1.0
     params = {'a': (1.0, 0, 0.3), 'b': (0.8, 0.2, 0.7), 'c': (0.1, 0.6, 1.0)}
     workflows = {}
     for k, v in params.items():
@@ -114,21 +96,17 @@ def test_reflectivity_curve_scaling():
         workflows[k][Filename[ReferenceRun]] = "_".join(map(str, v[1:]))
         workflows[k][QBins] = make_reference_events(*v[1:]).coords['Q']
 
-    wfc = BatchProcessor(workflows)
+    batch = BatchProcessor(workflows)
 
-    scaled_wf = scale_reflectivity_curves_to_overlap(wfc)
+    scaling_factors = scale_for_reflectivity_overlap(batch.compute(ReflectivityOverQ))
 
-    factors = scaled_wf.compute(ScalingFactorForOverlap[SampleRun])
-
-    assert np.isclose(factors['a'], 1.0)
-    assert np.isclose(factors['b'], 0.5 / 0.8)
-    assert np.isclose(factors['c'], 0.25 / 0.1)
+    assert np.isclose(scaling_factors['a'], 1.0)
+    assert np.isclose(scaling_factors['b'], 0.5 / 0.8)
+    assert np.isclose(scaling_factors['c'], 0.25 / 0.1)
 
 
 def test_reflectivity_curve_scaling_with_critical_edge():
     wf = make_workflow()
-    wf[ScalingFactorForOverlap[SampleRun]] = 1.0
-    wf[ScalingFactorForOverlap[ReferenceRun]] = 1.0
     params = {'a': (2, 0, 0.3), 'b': (0.8, 0.2, 0.7), 'c': (0.1, 0.6, 1.0)}
     workflows = {}
     for k, v in params.items():
@@ -137,34 +115,30 @@ def test_reflectivity_curve_scaling_with_critical_edge():
         workflows[k][Filename[ReferenceRun]] = "_".join(map(str, v[1:]))
         workflows[k][QBins] = make_reference_events(*v[1:]).coords['Q']
 
-    wfc = BatchProcessor(workflows)
+    batch = BatchProcessor(workflows)
 
-    scaled_wf = scale_reflectivity_curves_to_overlap(
-        wfc, critical_edge_interval=(sc.scalar(0.01), sc.scalar(0.05))
+    scaling_factors = scale_for_reflectivity_overlap(
+        batch.compute(ReflectivityOverQ),
+        critical_edge_interval=(sc.scalar(0.01), sc.scalar(0.05)),
     )
 
-    factors = scaled_wf.compute(ScalingFactorForOverlap[SampleRun])
-
-    assert np.isclose(factors['a'], 0.5)
-    assert np.isclose(factors['b'], 0.5 / 0.8)
-    assert np.isclose(factors['c'], 0.25 / 0.1)
+    assert np.isclose(scaling_factors['a'], 0.5)
+    assert np.isclose(scaling_factors['b'], 0.5 / 0.8)
+    assert np.isclose(scaling_factors['c'], 0.25 / 0.1)
 
 
-def test_reflectivity_curve_scaling_works_with_single_workflow_and_critical_edge():
+def test_reflectivity_curve_scaling_works_with_single_curve_and_critical_edge():
     wf = make_workflow()
-    wf[ScalingFactorForOverlap[SampleRun]] = 1.0
-    wf[ScalingFactorForOverlap[ReferenceRun]] = 1.0
     wf[Filename[SampleRun]] = '2.5_0.4_0.8'
     wf[Filename[ReferenceRun]] = '0.4_0.8'
     wf[QBins] = make_reference_events(0.4, 0.8).coords['Q']
 
-    scaled_wf = scale_reflectivity_curves_to_overlap(
-        wf, critical_edge_interval=(sc.scalar(0.0), sc.scalar(0.5))
+    scaling_factor = scale_for_reflectivity_overlap(
+        wf.compute(ReflectivityOverQ),
+        critical_edge_interval=(sc.scalar(0.0), sc.scalar(0.5)),
     )
 
-    factor = scaled_wf.compute(ScalingFactorForOverlap[SampleRun])
-
-    assert np.isclose(factor, 0.4)
+    assert np.isclose(scaling_factor, 0.4)
 
 
 def test_combined_curves():
@@ -344,8 +318,6 @@ def test_batch_processor_tool_uses_expected_parameters_from_each_run():
 
 def test_batch_processor_tool_merges_event_lists():
     wf = make_workflow()
-    wf[ScalingFactorForOverlap[SampleRun]] = 1.0
-    wf[ScalingFactorForOverlap[ReferenceRun]] = 1.0
 
     runs = {
         'a': {Filename[SampleRun]: ('1.0_0.0_0.3', '1.5_0.0_0.3')},
@@ -354,7 +326,7 @@ def test_batch_processor_tool_merges_event_lists():
     }
     batch = batch_processor(wf, runs)
 
-    results = batch.compute(UnscaledReducibleData[SampleRun])
+    results = batch.compute(ReducibleData[SampleRun])
 
     assert_almost_equal(results['a'].sum().value, 10 + 15 * 0.5 + (10 + 15 * 0.5) * 1.5)
     assert_almost_equal(results['b'].sum().value, 10 * 0.8 + 15 * 0.5 * 0.8)

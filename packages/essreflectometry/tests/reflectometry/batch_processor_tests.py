@@ -40,7 +40,7 @@ def test_compute_multiple() -> None:
     assert result[str] == {'a': '3;1.5', 'b': '4;2.0'}
 
 
-def test_setitem_mapping() -> None:
+def test_setitem() -> None:
     wf = sl.Pipeline([int_to_float, int_float_to_str])
     wfa = wf.copy()
     wfa[int] = 3
@@ -52,20 +52,6 @@ def test_setitem_mapping() -> None:
 
     assert coll.compute(float) == {'a': 3.5, 'b': 4.0}
     assert coll.compute(str) == {'a': '7;3.5', 'b': '8;4.0'}
-
-
-def test_setitem_single_value() -> None:
-    wf = sl.Pipeline([int_to_float, int_float_to_str])
-    wfa = wf.copy()
-    wfa[int] = 3
-    wfb = wf.copy()
-    wfb[int] = 4
-    coll = BatchProcessor({'a': wfa, 'b': wfb})
-
-    coll[int] = 5
-
-    assert coll.compute(float) == {'a': 2.5, 'b': 2.5}
-    assert coll.compute(str) == {'a': '5;2.5', 'b': '5;2.5'}
 
 
 def test_copy() -> None:
