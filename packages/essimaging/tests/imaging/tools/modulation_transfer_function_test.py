@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 import scipp as sc
 from scipp.testing import assert_allclose
+from scipy.signal import fftconvolve
 
 from ess.imaging.data import get_path
 from ess.imaging.tools import (
@@ -72,8 +73,42 @@ def test_modulation_transfer_function(xlims, ylims):
         target[slicey][slicex],
     )
     assert_allclose(
-        estimate_cut_off_frequency(mtf), sc.scalar(0.036), atol=sc.scalar(0.01)
+        estimate_cut_off_frequency(mtf), sc.scalar(0.05), atol=sc.scalar(0.01)
     )
-    assert_allclose(mtf_less_than(mtf, 0.1), sc.scalar(0.036), atol=sc.scalar(0.01))
+    assert_allclose(mtf_less_than(mtf, 0.1), sc.scalar(0.046), atol=sc.scalar(0.01))
     assert isinstance(mtf, sc.DataArray)
     assert 'frequency' in mtf.coords
+
+
+@pytest.mark.parametrize(
+    ('xlims', 'ylims'),
+    [
+        ((150, 450), (150, 450)),
+        ((350, 750), (150, 450)),
+        ((150, 450), (350, 750)),
+        ((150, 450), (150, 750)),
+        ((150, 750), (150, 450)),
+    ],
+)
+def test_modulation_transfer_function_ideal_case(xlims, ylims):
+    N = 1024
+    f_c = 1 / 5
+    target = create_star((N, N), N / 2, N / 2, 135)
+
+    x, y = np.meshgrid(np.arange(1024), np.arange(1024))
+    p = (((x - N / 2) ** 2 + (y - N / 2) ** 2) ** 0.5 < N / 2 * f_c).astype('float64')
+    P = np.abs(np.fft.fftshift(np.fft.fft2(p))) ** 2
+    image = fftconvolve(target.values, P, mode='same')
+
+    image = sc.DataArray(sc.array(dims=('y', 'x'), values=image))
+    ob = sc.DataArray(sc.array(dims=('y', 'x'), values=np.ones((N, N))))
+
+    slicex = ('x', slice(*xlims))
+    slicey = ('y', slice(*ylims))
+
+    mtf = modulation_transfer_function(
+        image[slicey][slicex],
+        ob[slicey][slicex],
+        target[slicey][slicex],
+    )
+    assert 0.9 * f_c < estimate_cut_off_frequency(mtf) < 1.1 * f_c

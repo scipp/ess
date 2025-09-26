@@ -164,8 +164,12 @@ def modulation_transfer_function(
     _mtf = _radial_profile(f_measured) / _radial_profile(f_ideal)
     return sc.DataArray(
         sc.array(dims=['frequency'], values=_mtf),
-        coords={'frequency': sc.linspace('frequency', 0, 0.5, len(_mtf))},
-    )
+        # Unit of frequency is line_pairs / pixel but since both of those are
+        # a kind of counts I think in our unit system that is best
+        # represented as 'dimensionless'.
+        coords={'frequency': sc.linspace('frequency', 0, (1 / 2) ** 0.5, len(_mtf))},
+        # We're only interested in frequencies below 0.5 oscillations per pixel
+    )['frequency', : sc.scalar(0.5)]
 
 
 def estimate_cut_off_frequency(mtf: sc.DataArray):
@@ -184,7 +188,14 @@ def estimate_cut_off_frequency(mtf: sc.DataArray):
             break
         fc = -p[1] / p[0]
         m = np.polyval(p, _freq) >= 0
-    return sc.scalar(-p[1] / p[0], unit=mtf.coords['frequency'].unit)
+    # Correction factor 9/8 is the ratio between where a linear approximation
+    # of the MTF of a circular apparture crosses 0 and where the actual cutoff frequency
+    # of the same circular apparture is.
+    # For reference:
+    # import sympy as sp
+    # x, f, a = sp.symbols('x, f, a', positive=True)
+    # sp.solve(sp.integrate(sp.diff((1 - a * x - 2 / sp.pi * (sp.acos(x/f) - x/f * sp.sqrt(1 - x**2/f**2)))**2, a), (x, 0, f)), f)  # noqa: E501
+    return 9 / 8 * sc.scalar(-p[1] / p[0], unit=mtf.coords['frequency'].unit)
 
 
 def mtf_less_than(mtf: sc.DataArray, limit: float):
