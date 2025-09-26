@@ -159,15 +159,21 @@ class BatchProcessor:
     def __init__(self, workflows: Mapping[str, sl.Pipeline]):
         self.workflows = workflows
 
-    def __setitem__(self, key: type, value: Mapping[str, Any] | Any) -> None:
-        if hasattr(value, 'items'):
-            for name, v in value.items():
-                self.workflows[name][key] = v
-        else:
-            for wf in self.workflows.values():
-                wf[key] = value
+    def __setitem__(self, key: type, value: Mapping[str, Any]) -> None:
+        """
+        A mapping (dict or DataGroup) should be supplied as the value. The keys
+        of the mapping should correspond to the names of the workflows in the
+        collection. The node matching the key will be set to the corresponding value for
+        each of the workflows.
+        """
+        for name, v in value.items():
+            self.workflows[name][key] = v
 
     def __getitem__(self, name: str) -> BatchProcessor:
+        """
+        Get a new BatchProcessor where the workflows are the sub-workflows that lead to
+        the node with the given name.
+        """
         return BatchProcessor({k: wf[name] for k, wf in self.workflows.items()})
 
     def compute(self, targets: type | Sequence[type], **kwargs) -> Mapping[str, Any]:
