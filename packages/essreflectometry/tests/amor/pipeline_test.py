@@ -11,14 +11,17 @@ from scipp.testing import assert_allclose
 
 from ess import amor
 from ess.amor import data
+from ess.amor.types import ChopperPhase
 from ess.reflectometry import orso
-from ess.reflectometry.tools import scale_for_reflectivity_overlap
+from ess.reflectometry.tools import batch_compute, scale_for_reflectivity_overlap
 from ess.reflectometry.types import (
     BeamDivergenceLimits,
+    DetectorRotation,
     Filename,
     ProtonCurrent,
     QBins,
     RawSampleRotation,
+    ReducedReference,
     ReducibleData,
     ReferenceRun,
     ReflectivityOverQ,
@@ -243,3 +246,44 @@ def test_sample_rotation_offset(amor_pipeline: sciline.Pipeline):
         )
     ).values()
     assert mu == muoffset.to(unit=muraw.unit) + muraw
+
+
+@pytest.fixture
+def pipeline_with_1632_reference(amor_pipeline):  # noqa: F811
+    amor_pipeline[ChopperPhase[ReferenceRun]] = sc.scalar(7.5, unit='deg')
+    amor_pipeline[ChopperPhase[SampleRun]] = sc.scalar(7.5, unit='deg')
+    amor_pipeline[Filename[ReferenceRun]] = data.amor_run('1632')
+    amor_pipeline[ReducedReference] = amor_pipeline.compute(ReducedReference)
+    return amor_pipeline
+
+
+def test_batch_compute_concatenates_event_lists(
+    pipeline_with_1632_reference: sciline.Pipeline,
+):
+    pl = pipeline_with_1632_reference
+
+    run = {
+        Filename[SampleRun]: list(map(data.amor_run, (1636, 1639, 1641))),
+        QBins: sc.geomspace(
+            dim='Q', start=0.062, stop=0.18, num=391, unit='1/angstrom'
+        ),
+        DetectorRotation[SampleRun]: sc.scalar(0.140167, unit='rad'),
+        SampleRotation[SampleRun]: sc.scalar(0.0680678, unit='rad'),
+    }
+    result = batch_compute(
+        pl,
+        {"": run},
+        target=ReflectivityOverQ,
+        scale_to_overlap=False,
+    )[""]
+
+    result2 = []
+    for fname in run[Filename[SampleRun]]:
+        pl.copy()
+        pl[Filename[SampleRun]] = fname
+        pl[QBins] = run[QBins]
+        pl[DetectorRotation[SampleRun]] = run[DetectorRotation[SampleRun]]
+        pl[SampleRotation[SampleRun]] = run[SampleRotation[SampleRun]]
+        result2.append(pl.compute(ReflectivityOverQ).hist().data)
+
+    assert_allclose(sum(result2), result.hist().data)
