@@ -22,7 +22,6 @@ from ess.reflectometry.types import (
     ReducibleData,
     ReferenceRun,
     ReflectivityOverQ,
-    RunType,
     SampleRun,
 )
 
