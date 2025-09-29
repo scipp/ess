@@ -111,4 +111,6 @@ def test_modulation_transfer_function_ideal_case(xlims, ylims):
         ob[slicey][slicex],
         target[slicey][slicex],
     )
-    assert 0.9 * f_c < estimate_cut_off_frequency(mtf) < 1.1 * f_c
+    assert_allclose(
+        estimate_cut_off_frequency(mtf), sc.scalar(f_c), rtol=sc.scalar(5e-2)
+    )
