@@ -172,9 +172,22 @@ def modulation_transfer_function(
     )['frequency', : sc.scalar(0.5)]
 
 
-def estimate_cut_off_frequency(mtf: sc.DataArray):
+def estimate_cut_off_frequency(mtf: sc.DataArray) -> sc.Variable:
     '''Estimates the cut off frequency of
-    the modulation transfer function (mtf).'''
+    the modulation transfer function (mtf).
+
+    Parameters
+    -------------
+    mtf:
+        A (potentially noisy) modulation transfer function curve
+        having a coordinate named "frequency".
+
+    Returns
+    -------------
+    :
+        An estimate of the frequency where the modulation
+        transfer function goes to zero, the "cut off frequency".
+    '''
     _freq = np.concat([[0.0], mtf.coords['frequency'].values])
     _mtf = np.concat([[1.0], mtf.values])
     # The line should go through (0, 1), so give it a big weight.
@@ -198,9 +211,24 @@ def estimate_cut_off_frequency(mtf: sc.DataArray):
     return 9 / 8 * sc.scalar(-p[1] / p[0], unit=mtf.coords['frequency'].unit)
 
 
-def mtf_less_than(mtf: sc.DataArray, limit: float):
+def mtf_less_than(mtf: sc.DataArray, limit: float) -> sc.Variable:
     '''Computes the frequency where the
-    modulation transfer function goes below ``limit``.'''
+    modulation transfer function goes below ``limit``.
+
+    Parameters
+    --------------
+    mtf:
+        A (potentially noisy) modulation transfer function curve
+        having a coordinate named "frequency".
+
+    limit:
+        The modulation transfer function value at the returned frequency.
+
+    Returns
+    -----------
+    :
+        The frequency where the modulation transfer function goes below "limit".
+    '''
     _freq = mtf.coords['frequency'].values
     _mtf = mtf.values
     return sc.scalar(_freq[_mtf <= limit].min(), unit=mtf.coords['frequency'].unit)
