@@ -309,7 +309,9 @@ def _interpolate_on_qgrid(curves, grid):
 
 def scale_for_reflectivity_overlap(
     reflectivities: sc.DataArray | Mapping[str, sc.DataArray] | sc.DataGroup,
-    critical_edge_interval: tuple[sc.Variable, sc.Variable] | None = None,
+    critical_edge_interval: tuple[sc.Variable, sc.Variable]
+    | list[sc.Variable]
+    | None = None,
 ) -> sc.DataArray | sc.DataGroup:
     '''
     Compute a scaling for 1D reflectivity curves in a way that would makes the curves
@@ -546,7 +548,7 @@ def batch_compute(
     *,
     scale_to_overlap: bool
     | tuple[sc.Variable, sc.Variable]
-    | list[sc.Variable, sc.Variable] = False,
+    | list[sc.Variable] = False,
 ) -> list | Mapping:
     '''
     Computes requested target(s) from a supplied workflow for a number of runs.
