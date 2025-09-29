@@ -27,8 +27,4 @@ class ChopperSeparation(sciline.Scope[RunType, sc.Variable], sc.Variable):
     """Distance between the two choppers."""
 
 
-class RawChopper(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
-    """Chopper data loaded from nexus file."""
-
-
 GravityToggle = NewType("GravityToggle", bool)

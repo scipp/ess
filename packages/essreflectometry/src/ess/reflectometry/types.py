@@ -24,6 +24,10 @@ Position = reduce_t.Position
 CoordTransformationGraph = NewType("CoordTransformationGraph", dict)
 
 
+class RawChopper(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+    """Chopper data loaded from nexus file."""
+
+
 class ReducibleData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Event data with common coordinates added"""
 

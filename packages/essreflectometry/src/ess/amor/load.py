@@ -17,6 +17,7 @@ from ..reflectometry.types import (
     NeXusComponent,
     NeXusDetectorName,
     ProtonCurrent,
+    RawChopper,
     RawSampleRotation,
     RunType,
     SampleRotation,
@@ -29,7 +30,6 @@ from .types import (
     ChopperFrequency,
     ChopperPhase,
     ChopperSeparation,
-    RawChopper,
 )
 
 
