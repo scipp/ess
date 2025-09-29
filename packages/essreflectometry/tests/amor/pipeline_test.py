@@ -67,8 +67,6 @@ def amor_pipeline() -> sciline.Pipeline:
     return pl
 
 
-@pytest.mark.filterwarnings("ignore:Failed to convert .* into a transformation")
-@pytest.mark.filterwarnings("ignore:Invalid transformation, missing attribute")
 def test_has_expected_coordinates(amor_pipeline: sciline.Pipeline):
     # The sample rotation value in the file is slightly off, so we set it manually
     amor_pipeline[SampleRotation[SampleRun]] = sc.scalar(0.85, unit="deg")
@@ -78,8 +76,6 @@ def test_has_expected_coordinates(amor_pipeline: sciline.Pipeline):
     assert "Q_resolution" in reflectivity_over_q.coords
 
 
-@pytest.mark.filterwarnings("ignore:Failed to convert .* into a transformation")
-@pytest.mark.filterwarnings("ignore:Invalid transformation, missing attribute")
 def test_pipeline_no_gravity_correction(amor_pipeline: sciline.Pipeline):
     # The sample rotation value in the file is slightly off, so we set it manually
     amor_pipeline[SampleRotation[SampleRun]] = sc.scalar(0.85, unit="deg")
@@ -90,8 +86,6 @@ def test_pipeline_no_gravity_correction(amor_pipeline: sciline.Pipeline):
     assert "Q_resolution" in reflectivity_over_q.coords
 
 
-@pytest.mark.filterwarnings("ignore:Failed to convert .* into a transformation")
-@pytest.mark.filterwarnings("ignore:Invalid transformation, missing attribute")
 def test_orso_pipeline(amor_pipeline: sciline.Pipeline):
     # The sample rotation value in the file is slightly off, so we set it manually
     amor_pipeline[SampleRotation[SampleRun]] = sc.scalar(0.85, unit="deg")
@@ -110,8 +104,6 @@ def test_orso_pipeline(amor_pipeline: sciline.Pipeline):
     assert np.isfinite(res.data).all()
 
 
-@pytest.mark.filterwarnings("ignore:Failed to convert .* into a transformation")
-@pytest.mark.filterwarnings("ignore:Invalid transformation, missing attribute")
 def test_save_reduced_orso_file(output_folder: Path):
     from orsopy import fileio
 
@@ -152,8 +144,6 @@ def test_save_reduced_orso_file(output_folder: Path):
     )
 
 
-@pytest.mark.filterwarnings("ignore:Failed to convert .* into a transformation")
-@pytest.mark.filterwarnings("ignore:Invalid transformation, missing attribute")
 def test_pipeline_can_compute_reflectivity_merging_events_from_multiple_runs(
     amor_pipeline: sciline.Pipeline,
 ):
@@ -168,8 +158,6 @@ def test_pipeline_can_compute_reflectivity_merging_events_from_multiple_runs(
     assert result.dims == ('Q',)
 
 
-@pytest.mark.filterwarnings("ignore:Failed to convert .* into a transformation")
-@pytest.mark.filterwarnings("ignore:Invalid transformation, missing attribute")
 def test_pipeline_merging_events_result_unchanged(amor_pipeline: sciline.Pipeline):
     wf = amor_pipeline.copy()
     wf[SampleRotationOffset[SampleRun]] = sc.scalar(0.05, unit="deg")
@@ -192,8 +180,6 @@ def test_pipeline_merging_events_result_unchanged(amor_pipeline: sciline.Pipelin
     )
 
 
-@pytest.mark.filterwarnings("ignore:Failed to convert .* into a transformation")
-@pytest.mark.filterwarnings("ignore:Invalid transformation, missing attribute")
 def test_proton_current(amor_pipeline: sciline.Pipeline):
     amor_pipeline[Filename[SampleRun]] = amor.data.amor_run(611)
     da_without_proton_current = amor_pipeline.compute(ReducibleData[SampleRun])
@@ -233,8 +219,6 @@ def test_proton_current(amor_pipeline: sciline.Pipeline):
     )
 
 
-@pytest.mark.filterwarnings("ignore:Failed to convert .* into a transformation")
-@pytest.mark.filterwarnings("ignore:Invalid transformation, missing attribute")
 def test_sample_rotation_offset(amor_pipeline: sciline.Pipeline):
     amor_pipeline[Filename[SampleRun]] = amor.data.amor_run(608)
     amor_pipeline[SampleRotationOffset[SampleRun]] = sc.scalar(1.0, unit='deg')

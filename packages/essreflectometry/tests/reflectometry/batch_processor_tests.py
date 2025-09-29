@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 
+import pandas as pd
 import sciline as sl
 
 from ess.reflectometry.tools import BatchProcessor
@@ -20,10 +21,10 @@ def test_compute() -> None:
     wfa[int] = 3
     wfb = wf.copy()
     wfb[int] = 4
-    coll = BatchProcessor({'a': wfa, 'b': wfb})
+    batch = BatchProcessor({'a': wfa, 'b': wfb})
 
-    assert coll.compute(float) == {'a': 1.5, 'b': 2.0}
-    assert coll.compute(str) == {'a': '3;1.5', 'b': '4;2.0'}
+    assert batch.compute(float) == {'a': 1.5, 'b': 2.0}
+    assert batch.compute(str) == {'a': '3;1.5', 'b': '4;2.0'}
 
 
 def test_compute_multiple() -> None:
@@ -32,12 +33,38 @@ def test_compute_multiple() -> None:
     wfa[int] = 3
     wfb = wf.copy()
     wfb[int] = 4
-    coll = BatchProcessor({'a': wfa, 'b': wfb})
+    batch = BatchProcessor({'a': wfa, 'b': wfb})
 
-    result = coll.compute([float, str])
+    result = batch.compute([float, str])
 
     assert result[float] == {'a': 1.5, 'b': 2.0}
     assert result[str] == {'a': '3;1.5', 'b': '4;2.0'}
+
+
+def test_compute_mapped() -> None:
+    ints = [1, 2, 3]
+    df = pd.DataFrame({int: ints})
+    wf = sl.Pipeline([int_to_float, int_float_to_str]).map(df)
+    batch = BatchProcessor({"": wf})
+    res_float = batch.compute(float)
+    assert res_float[""] == [0.5, 1.0, 1.5]
+    res_str = batch.compute(str)
+    assert res_str[""] == ["1;0.5", "2;1.0", "3;1.5"]
+
+
+def test_compute_mixed_mapped_unmapped() -> None:
+    ints = [1, 2, 3]
+    df = pd.DataFrame({int: ints})
+    unmapped = sl.Pipeline([int_to_float, int_float_to_str])
+    mapped = unmapped.map(df)
+    unmapped[int] = 5
+    batch = BatchProcessor({"unmapped": unmapped, "mapped": mapped})
+    res_float = batch.compute(float)
+    assert res_float['unmapped'] == 2.5
+    assert res_float['mapped'] == [0.5, 1.0, 1.5]
+    res_str = batch.compute(str)
+    assert res_str['unmapped'] == '5;2.5'
+    assert res_str['mapped'] == ['1;0.5', '2;1.0', '3;1.5']
 
 
 def test_setitem() -> None:
@@ -46,12 +73,12 @@ def test_setitem() -> None:
     wfa[int] = 3
     wfb = wf.copy()
     wfb[int] = 4
-    coll = BatchProcessor({'a': wfa, 'b': wfb})
+    batch = BatchProcessor({'a': wfa, 'b': wfb})
 
-    coll[int] = {'a': 7, 'b': 8}
+    batch[int] = {'a': 7, 'b': 8}
 
-    assert coll.compute(float) == {'a': 3.5, 'b': 4.0}
-    assert coll.compute(str) == {'a': '7;3.5', 'b': '8;4.0'}
+    assert batch.compute(float) == {'a': 3.5, 'b': 4.0}
+    assert batch.compute(str) == {'a': '7;3.5', 'b': '8;4.0'}
 
 
 def test_copy() -> None:
@@ -60,15 +87,15 @@ def test_copy() -> None:
     wfa[int] = 3
     wfb = wf.copy()
     wfb[int] = 4
-    coll = BatchProcessor({'a': wfa, 'b': wfb})
+    batch = BatchProcessor({'a': wfa, 'b': wfb})
 
-    coll_copy = coll.copy()
+    batch_copy = batch.copy()
 
-    assert coll_copy.compute(float) == {'a': 1.5, 'b': 2.0}
-    assert coll_copy.compute(str) == {'a': '3;1.5', 'b': '4;2.0'}
+    assert batch_copy.compute(float) == {'a': 1.5, 'b': 2.0}
+    assert batch_copy.compute(str) == {'a': '3;1.5', 'b': '4;2.0'}
 
-    coll_copy[int] = {'a': 7, 'b': 8}
-    assert coll.compute(float) == {'a': 1.5, 'b': 2.0}
-    assert coll.compute(str) == {'a': '3;1.5', 'b': '4;2.0'}
-    assert coll_copy.compute(float) == {'a': 3.5, 'b': 4.0}
-    assert coll_copy.compute(str) == {'a': '7;3.5', 'b': '8;4.0'}
+    batch_copy[int] = {'a': 7, 'b': 8}
+    assert batch.compute(float) == {'a': 1.5, 'b': 2.0}
+    assert batch.compute(str) == {'a': '3;1.5', 'b': '4;2.0'}
+    assert batch_copy.compute(float) == {'a': 3.5, 'b': 4.0}
+    assert batch_copy.compute(str) == {'a': '7;3.5', 'b': '8;4.0'}
