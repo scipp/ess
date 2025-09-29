@@ -1,4 +1,3 @@
-from collections.abc import Callable
 from typing import NewType
 
 import sciline
@@ -18,9 +17,7 @@ SampleRun = SampleRun
 DetectorTofData = DetectorTofData
 
 
-TwoThetaMaskFunction = NewType(
-    'TwoThetaMaskFunction', Callable[[sc.Variable], sc.Variable]
-)
+TwoThetaLimits = NewType('TwoThetaLimits', tuple[sc.Variable, sc.Variable])
 
 TofCoordTransformGraph = NewType("TofCoordTransformGraph", dict)
 

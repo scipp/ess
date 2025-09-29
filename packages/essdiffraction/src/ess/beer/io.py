@@ -10,7 +10,7 @@ from .types import (
     Filename,
     ModulationPeriod,
     SampleRun,
-    TwoThetaMaskFunction,
+    TwoThetaLimits,
     WavelengthDefinitionChopperDelay,
 )
 
@@ -122,19 +122,27 @@ def load_beer_mcstas(f: str | Path | h5py.File) -> sc.DataGroup:
     )
 
 
+def _not_between(x, a, b):
+    return (x < a) | (b < x)
+
+
 def load_beer_mcstas_provider(
-    fname: Filename[SampleRun], two_theta_mask: TwoThetaMaskFunction
+    fname: Filename[SampleRun], two_theta_limits: TwoThetaLimits
 ) -> DetectorData[SampleRun]:
     da = load_beer_mcstas(fname)
     da = (
         sc.DataGroup(
             {
-                k: v.assign_masks(two_theta=two_theta_mask(v.coords['two_theta']))
+                k: v.assign_masks(
+                    two_theta=_not_between(v.coords['two_theta'], *two_theta_limits)
+                )
                 for k, v in da.items()
             }
         )
         if isinstance(da, sc.DataGroup)
-        else da.assign_masks(two_theta=two_theta_mask(da.coords['two_theta']))
+        else da.assign_masks(
+            two_theta=_not_between(da.coords['two_theta'], *two_theta_limits)
+        )
     )
     return DetectorData[SampleRun](da)
 

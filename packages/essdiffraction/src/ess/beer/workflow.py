@@ -11,14 +11,14 @@ from .types import (
     PulseLength,
     RunType,
     SampleRun,
-    TwoThetaMaskFunction,
+    TwoThetaLimits,
 )
 
 default_parameters = {
     PulseLength: sc.scalar(0.003, unit='s'),
-    TwoThetaMaskFunction: lambda two_theta: (
-        (two_theta >= sc.scalar(105, unit='deg').to(unit='rad', dtype='float64'))
-        | (two_theta <= sc.scalar(75, unit='deg').to(unit='rad', dtype='float64'))
+    TwoThetaLimits: (
+        sc.scalar(75, unit='deg').to(unit='rad', dtype='float64'),
+        sc.scalar(105, unit='deg').to(unit='rad', dtype='float64'),
     ),
 }
 
