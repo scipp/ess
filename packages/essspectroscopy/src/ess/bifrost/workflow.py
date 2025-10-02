@@ -37,7 +37,6 @@ from .io import mcstas, nexus
 def simulation_default_parameters() -> dict[type, Any]:
     """Default parameters for BifrostSimulationWorkflow."""
     return {
-        NeXusMonitorName[FrameMonitor0]: '007_frame_0',
         NeXusMonitorName[FrameMonitor1]: '090_frame_1',
         NeXusMonitorName[FrameMonitor2]: '097_frame_2',
         NeXusMonitorName[FrameMonitor3]: '110_frame_3',
