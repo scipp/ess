@@ -4,7 +4,6 @@
 """Domain types for single crystal diffraction on BIFROST."""
 
 from dataclasses import dataclass
-from typing import NewType
 
 import sciline
 import scipp as sc
@@ -12,7 +11,7 @@ import scipp as sc
 from ess.spectroscopy.types import RunType
 
 
-class QMap(sciline.Scope[RunType, sc.DataArray], sc.DataArray): ...
+class CountsWithQMapCoords(sciline.Scope[RunType, sc.DataArray], sc.DataArray): ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -21,7 +20,3 @@ class QProjection:
 
     parallel: sc.Variable
     perpendicular: sc.Variable
-
-
-QBinsParallel = NewType('QBinsParallel', sc.Variable)
-QBinsPerpendicular = NewType('QBinsPerpendicular', sc.Variable)
