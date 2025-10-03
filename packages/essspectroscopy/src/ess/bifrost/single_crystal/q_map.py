@@ -43,8 +43,10 @@ def project_momentum_transfer(
 
 
 def _make_projection_kernel(vector: sc.Variable) -> Callable[..., sc.Variable]:
+    normal = vector / sc.norm(vector)
+
     def projection(sample_table_momentum_transfer: sc.Variable) -> sc.Variable:
-        return sc.dot(sample_table_momentum_transfer, vector / sc.norm(vector))
+        return sc.dot(sample_table_momentum_transfer, normal)
 
     return projection
 
