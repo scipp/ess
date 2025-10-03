@@ -1,7 +1,9 @@
 -r base.in
 autodoc-pydantic
 ipykernel
+ipympl
 ipython!=8.7.0  # Breaks syntax highlighting in Jupyter code cells.
+ipywidgets
 myst-parser
 nbsphinx
 pandas
