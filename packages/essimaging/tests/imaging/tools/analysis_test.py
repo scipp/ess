@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+import numpy as np
 import pytest
 import scipp as sc
 from scitiff.io import load_scitiff
@@ -20,6 +21,18 @@ def test_resample() -> None:
     resampled = img.tools.resample(da, sizes={'x': 2, 'y': 2})
     assert resampled.sizes['x'] == da.sizes['x'] // 2
     assert resampled.sizes['y'] == da.sizes['y'] // 2
+
+
+def test_resample_with_position_coord() -> None:
+    da = load_scitiff(get_siemens_star_path())["image"]
+    vectors = np.random.randn(*da.shape[1:], 3)
+    da.coords['position'] = sc.vectors(dims=['x', 'y'], values=vectors)
+    resampled = img.tools.resample(da, sizes={'x': 2, 'y': 2})
+    ny, nx = resampled.shape[1:]
+    np.testing.assert_allclose(
+        resampled.coords['position'].values,
+        vectors.reshape(ny, 2, nx, 2, 3).mean((1, 3)),
+    )
 
 
 def test_resample_mean() -> None:

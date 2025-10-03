@@ -65,9 +65,13 @@ def resample(
         function should return a ``scipp.Variable`` or ``scipp.DataArray``.
     """
     blocked = blockify(image, sizes=sizes)
-    if isinstance(method, str):
-        return getattr(sc, method)(blocked, set(blocked.dims) - set(image.dims))
-    return method(blocked, set(blocked.dims) - set(image.dims))
+    _method = getattr(sc, method) if isinstance(method, str) else method
+    out = _method(blocked, set(blocked.dims) - set(image.dims))
+    if 'position' in blocked.coords:
+        out.coords['position'] = blocked.coords['position'].mean(
+            set(blocked.dims) - set(image.dims)
+        )
+    return out
 
 
 def resize(
