@@ -116,6 +116,8 @@ def make_q_map(
         roi_circle.set(*q_range)
         q_map_fig.canvas.draw()
 
+    # Create aview without any output so that `update_roi` gets called
+    # when the slider is moved. See https://github.com/scipp/plopp/pull/496
     pp.View(pp.Node(update_roi, slider_node))
     return Box([[q_map_fig], [q_slice_fig], [slider]])
 
