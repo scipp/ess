@@ -23,10 +23,10 @@
 
 # {transparent}`ESSsans`
 
-<span style="font-size:1.2em;font-style:italic;color:var(--pst-color-text-muted)">
+<div style="font-size:1.2em;font-style:italic;color:var(--pst-color-text-muted);text-align:center;">
   SANS data reduction for the European Spallation Source
   </br></br>
-</span>
+</div>
 
 ## Quick links
 
