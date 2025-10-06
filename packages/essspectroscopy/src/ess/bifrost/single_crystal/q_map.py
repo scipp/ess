@@ -114,7 +114,7 @@ def make_q_map(
 
     def update_roi(q_range: tuple[float, float]) -> None:
         roi_circle.set(*q_range)
-        q_map_fig.fig.canvas.draw_idle()
+        q_map_fig.canvas.draw()
 
     pp.View(pp.Node(update_roi, slider_node))
     return Box([[q_map_fig], [q_slice_fig], [slider]])
