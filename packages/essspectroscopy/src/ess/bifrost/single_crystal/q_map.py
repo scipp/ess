@@ -4,11 +4,13 @@
 """Build a Q-map for single crystal diffraction."""
 
 from collections.abc import Callable
+from typing import Any
 
+import numpy as np
+import numpy.typing as npt
 import plopp as pp
 import scipp as sc
 from matplotlib.axes import Axes
-from matplotlib.patches import Circle
 from plopp.widgets import Box
 
 from ess.spectroscopy.types import DetectorCountsWithQ, RunType
@@ -62,6 +64,11 @@ def make_q_map(
     q_parallel_bins: int | sc.Variable,
     q_perpendicular_bins: int | sc.Variable,
     sample_rotation_bins: int | sc.Variable,
+    *,
+    circle_n_points: int = 100,
+    roi_fill_alpha: float = 0.2,
+    roi_fill_color: Any = 'C1',
+    roi_line_color: Any = 'C1',
 ) -> Box:
     """Build a figure with a 2D Q-map and a 1D slice for a range of Q values."""
     import ipywidgets as ipw
@@ -96,22 +103,122 @@ def make_q_map(
     q_map_fig = pp.imagefigure(q_map_node, aspect='equal', norm='log')
     q_slice_fig = pp.linefigure(q_slice_node)
 
-    lo_circle = _draw_circle(q_map_fig.ax, q_lo)
-    hi_circle = _draw_circle(q_map_fig.ax, q_hi)
+    roi_path = _ROICirclePath(q_lo, q_hi, circle_n_points)
+    roi_circle = _ROICircle(
+        roi_path,
+        q_map_fig.ax,
+        fill_alpha=roi_fill_alpha,
+        fill_color=roi_fill_color,
+        line_color=roi_line_color,
+    )
 
-    def update_circle(q_range: tuple[float, float]) -> None:
-        lo_circle.radius, hi_circle.radius = q_range
+    def update_roi(q_range: tuple[float, float]) -> None:
+        roi_circle.set(*q_range)
         q_map_fig.fig.canvas.draw_idle()
 
-    pp.View(pp.Node(update_circle, slider_node))
-
+    pp.View(pp.Node(update_roi, slider_node))
     return Box([[q_map_fig], [q_slice_fig], [slider]])
 
 
-def _draw_circle(ax: Axes, radius: float) -> Circle:
-    circle = Circle((0, 0), radius, edgecolor='C1', facecolor='none', linewidth=1.5)
-    ax.add_artist(circle)
-    return circle
+class _ROICirclePath:
+    # The path is encoded as an array xy with shape (n_points * 2 + 1, 2).
+    # Where xy[:, 0] is the x coordinate and xy[:, 1] is the y coordinate.
+    # xy[:n_points] is the outer circle, xy[n_points:-1] is the inner circle.
+    # xy[-1] is the same as xy[0]; we close the path to be compatible with MPL.
+
+    def __init__(self, r_inner: float, r_outer: float, n_points: int) -> None:
+        self._r_inner = r_inner
+        self._r_outer = r_outer
+        self._n_points = n_points
+
+        self._angles = np.linspace(0, 2 * np.pi, n_points, endpoint=True)
+        # 2*n_points for the inner and outer circle,
+        # +1 to repeat the first point at the end.
+        self._xy = np.zeros((n_points * 2 + 1, 2), dtype=float)
+
+        self.set_inner(r_inner)
+        self.set_outer(r_outer)
+
+    @property
+    def r_inner(self) -> float:
+        return self._r_inner
+
+    @property
+    def r_outer(self) -> float:
+        return self._r_outer
+
+    @property
+    def closed_xy(self) -> npt.NDArray[float]:
+        # includes the last point
+        return self._xy
+
+    @property
+    def inner(self) -> npt.NDArray[float]:
+        # does not include the last point
+        return self._xy[self._n_points : -1]
+
+    @property
+    def outer(self) -> npt.NDArray[float]:
+        # does not include the last point
+        return self._xy[: self._n_points]
+
+    @property
+    def open_path(self) -> npt.NDArray[float]:
+        # does not include the last point
+        return self._xy[:-1]
+
+    def set_inner(self, r: float) -> None:
+        # reverse=True makes MPL render this circle as a cutout.
+        self._r_inner = r
+        x, y = self.inner.T
+        self._set_circle(x, y, r, reverse=True)
+
+    def set_outer(self, r: float) -> None:
+        self._r_outer = r
+        x, y = self.outer.T
+        self._set_circle(x, y, r, reverse=False)
+        self._xy[-1] = self._xy[0]
+
+    def _set_circle(
+        self, x: npt.NDArray[float], y: npt.NDArray[float], r: float, reverse: bool
+    ) -> None:
+        if reverse:
+            angles = self._angles[::-1]
+        else:
+            angles = self._angles
+
+        np.cos(angles, out=x)
+        x *= r
+
+        np.sin(angles, out=y)
+        y *= r
+
+
+class _ROICircle:
+    def __init__(
+        self,
+        path: _ROICirclePath,
+        ax: Axes,
+        *,
+        fill_alpha: float = 0.2,
+        fill_color: Any = 'C1',
+        line_color: Any = 'C1',
+    ) -> None:
+        self._path = path
+        self._fill = ax.fill(
+            *self._path.open_path.T, fill_color, alpha=fill_alpha, zorder=-1
+        )[0]
+        self._inner = ax.plot(*self._path.inner.T, c=line_color, zorder=2)[0]
+        self._outer = ax.plot(*self._path.outer.T, c=line_color, zorder=2)[0]
+
+    def set(self, r_inner: float, r_outer: float) -> None:
+        if r_inner != self._path.r_inner:
+            self._path.set_inner(r_inner)
+            self._inner.set_data(*self._path.inner.T)
+        if r_outer != self._path.r_outer:
+            self._path.set_outer(r_outer)
+            self._outer.set_data(*self._path.outer.T)
+        self._fill.set_xy(self._path.closed_xy)
 
 
 def _empty_angle_array_like(
