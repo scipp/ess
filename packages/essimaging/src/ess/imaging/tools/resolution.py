@@ -153,7 +153,91 @@ def modulation_transfer_function(
     :
         The modulation transfer function as a function
         of "frequency" representing "line pairs" per pixel.
-    '''
+
+    Notes
+    -----------
+
+    Computing modulation transfer function (MTF)
+    ============================================
+
+    The definition of the MTF is
+
+    .. math::
+
+        \\mathrm{MTF}(f) = |\\mathcal{F}(P)|
+
+    where :math:`\\mathcal{F}(P)` is the Fourier transform of the point spread function :math:`P`.
+
+    The Fourier transform of the point spread function is really a function of two variables, but it is assumed that the MTF does not vary depending on the direction of change, so here it's denoted as a function of the frequency independent of direction:
+
+    .. math::
+
+        \\mathrm{MTF}(\\|(f_x, f_y)\\|) = |\\mathcal{F}(P)|(f_x, f_y)
+
+    Model for images in detector
+    ----------------------------
+
+    The intensity distribution in the detector (the "image") :math:`I` is modeled as
+
+    .. math::
+
+        I = I_0 S \\star P
+
+    where :math:`I_0` is the intensity distribution at the sample, :math:`S` is the transmission function of the sample, and :math:`P` is the point-spread function.
+
+    For the open beam we don't have any sample and the intensity distribution in the detector is modeled as
+
+    .. math::
+
+        I_{ob} = I_0 \\star P
+
+    Approximation
+    -------------
+
+    Assuming :math:`I_0` is more or less uniform, and :math:`P` is relatively localized, we can approximate
+
+    .. math::
+
+        I_0 \\star P \\approx I_0
+
+    Making this assumption we can substitute :math:`I_0` for :math:`I_{ob}` in the model for the image:
+
+    .. math::
+
+        I = I_{ob} S \\star P
+
+    Applying the Fourier transform on both sides we have
+
+    .. math::
+
+        \\mathcal{F}(I) = \\mathcal{F}(I_{ob} S)\\, \\mathcal{F}(P)
+
+    which implies
+
+    .. math::
+
+        |\\mathcal{F}(P)| = \\left| \\frac{\\mathcal{F}(I)}{\\mathcal{F}(I_{ob} S)} \\right|
+
+    and therefore
+
+    .. math::
+
+        \\mathrm{MTF}(\\|(f_x, f_y)\\|) =
+        \\frac{|\\mathcal{F}(I)|(f_x, f_y)}{|\\mathcal{F}(I_{ob} S)|(f_x, f_y)}
+
+    Finally, integrating over constant frequency magnitude:
+
+    .. math::
+
+        \\mathrm{MTF}(f) =
+        \\frac{\\int_{\\|(f_x, f_y)\\| = f} |\\mathcal{F}(I)|(f_x, f_y)\\, df_x\\, df_y}
+             {\\int_{\\|(f_x, f_y)\\| = f} |\\mathcal{F}(I_{ob} S)|(f_x, f_y)\\, df_x\\, df_y}
+
+    Conclusion
+    ----------
+
+    The modulation transfer function at frequency :math:`f` can be estimated as the ratio of the Fourier transform of the image (integrated over constant frequency magnitude) to the Fourier transform of the open beam image multiplied by the sample mask (also integrated over constant frequency magnitude).
+    '''  # noqa: E501
     _measured = measured_image.values
     # Can't do inplace because dtype of sum might be different from dtype of input
     _measured = _measured / _measured.sum()
@@ -167,8 +251,10 @@ def modulation_transfer_function(
         # Unit of frequency is line_pairs / pixel but since both of those are
         # a kind of counts I think in our unit system that is best
         # represented as 'dimensionless'.
+        # The largest frequency magnitude in 2d fft is sqrt(1/2).
         coords={'frequency': sc.linspace('frequency', 0, (1 / 2) ** 0.5, len(_mtf))},
         # We're only interested in frequencies below 0.5 oscillations per pixel
+        # because those above are unphysical.
     )['frequency', : sc.scalar(0.5)]
 
 
@@ -191,12 +277,15 @@ def estimate_cut_off_frequency(mtf: sc.DataArray) -> sc.Variable:
     _freq = np.concat([[0.0], mtf.coords['frequency'].values])
     _mtf = np.concat([[1.0], mtf.values])
     # The line should go through (0, 1), so give it a big weight.
+    # 10 x total_weight was determined good enough by trial and error.
     w = np.concat([[10 * len(mtf)], np.ones(len(mtf))])
     m = np.ones(len(_freq), dtype='bool')
     fc = np.nan
     maxiters = 100
     for _ in range(maxiters):
         p = np.polyfit(_freq[m], _mtf[m], 1, w=w[m])
+        # 1e-4 is used as a threshold because the method is not
+        # accurate to less than 1e-4 anyway so we can just as well stop there.
         if abs(-p[1] / p[0] - fc) < 1e-4:
             break
         fc = -p[1] / p[0]
@@ -211,7 +300,7 @@ def estimate_cut_off_frequency(mtf: sc.DataArray) -> sc.Variable:
     return 9 / 8 * sc.scalar(-p[1] / p[0], unit=mtf.coords['frequency'].unit)
 
 
-def mtf_less_than(mtf: sc.DataArray, limit: float) -> sc.Variable:
+def mtf_less_than(mtf: sc.DataArray, limit: sc.Variable) -> sc.Variable:
     '''Computes the frequency where the
     modulation transfer function goes below ``limit``.
 
