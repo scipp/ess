@@ -229,6 +229,4 @@ def mtf_less_than(mtf: sc.DataArray, limit: float) -> sc.Variable:
     :
         The frequency where the modulation transfer function goes below "limit".
     '''
-    _freq = mtf.coords['frequency'].values
-    _mtf = mtf.values
-    return sc.scalar(_freq[_mtf <= limit].min(), unit=mtf.coords['frequency'].unit)
+    return mtf.coords['frequency'][mtf.data <= limit].min()
