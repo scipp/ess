@@ -11,7 +11,6 @@ import numpy.typing as npt
 import plopp as pp
 import scipp as sc
 from matplotlib.axes import Axes
-from plopp.widgets import Box
 
 from ess.spectroscopy.types import DetectorCountsWithQ, RunType
 
@@ -69,9 +68,10 @@ def make_q_map(
     roi_fill_alpha: float = 0.2,
     roi_fill_color: Any = 'C1',
     roi_line_color: Any = 'C1',
-) -> Box:
+) -> Any:
     """Build a figure with a 2D Q-map and a 1D slice for a range of Q values."""
     import ipywidgets as ipw
+    from plopp.widgets import Box
 
     def make_q_hist(da: sc.DataArray) -> sc.DataArray:
         return da.hist(
