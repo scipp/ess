@@ -116,7 +116,7 @@ def maximum_resolution_achievable(
     )
 
 
-def _radial_profile(data: NDArray):
+def _radial_profile(data: NDArray) -> NDArray:
     '''Integrate ellipses around center of image.'''
     y, x = np.indices(data.shape)
     cy, cx = np.array(data.shape) / 2.0
