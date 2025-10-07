@@ -4,7 +4,7 @@ import scipp as sc
 from scipp.testing import assert_allclose
 from scipy.signal import fftconvolve
 
-from ess.imaging.data import get_path
+from ess.imaging import data
 from ess.imaging.tools import (
     estimate_cut_off_frequency,
     modulation_transfer_function,
@@ -60,8 +60,8 @@ def create_star(shape, cx, cy, spokes):
     ],
 )
 def test_modulation_transfer_function(xlims, ylims):
-    measured = sc.io.hdf5.load_hdf5(get_path('siemens-star-measured.h5'))
-    openbeam = sc.io.hdf5.load_hdf5(get_path('siemens-star-openbeam.h5'))
+    measured = sc.io.hdf5.load_hdf5(data.jparc_siemens_star_measured_path())
+    openbeam = sc.io.hdf5.load_hdf5(data.jparc_siemens_star_openbeam_path())
     target = create_star(measured.shape, 642, 630, 135)
 
     slicex = ('x', slice(*xlims))
