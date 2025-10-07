@@ -73,4 +73,28 @@ class CountsMasked(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Detector data with masks."""
 
 
+class RawDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Raw detector counts read from file."""
+
+
+class CorrectedDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Corrected detector counts with masking applied."""
+
+
+class NormalizedDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Detector counts normalized to proton charge."""
+
+
+class BackgroundSubtractedDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Detector counts with dark background subtracted."""
+
+
+class IntensityDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Detector counts normalized by open beam measurement."""
+
+
+class ProtonCharge(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Proton charge data for a run."""
+
+
 del sc, sciline, NewType, TypeVar
