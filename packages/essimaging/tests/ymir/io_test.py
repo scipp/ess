@@ -4,8 +4,8 @@ import pytest
 import scipp as sc
 from scipp.testing import assert_identical
 
-from ess.imaging.data import get_ymir_images_path
-from ess.imaging.io import (
+from ess.ymir.data import ymir_lego_images_path
+from ess.ymir.io import (
     FilePath,
     ImageDetectorName,
     RotationMotionSensorName,
@@ -13,7 +13,7 @@ from ess.imaging.io import (
     load_nexus_histogram_mode_detector,
     load_nexus_rotation_logs,
 )
-from ess.imaging.types import DEFAULT_HISTOGRAM_PATH
+from ess.ymir.types import DEFAULT_HISTOGRAM_PATH
 
 
 def test_nexus_histogram_mode_detector_loading_warnings() -> None:
@@ -22,7 +22,7 @@ def test_nexus_histogram_mode_detector_loading_warnings() -> None:
         # once the files are updated to have the correct unit
         assert isinstance(
             load_nexus_histogram_mode_detector(
-                file_path=FilePath(get_ymir_images_path()),
+                file_path=FilePath(ymir_lego_images_path()),
                 image_detector_name=ImageDetectorName('orca'),
                 histogram_mode_detectors_path=DEFAULT_HISTOGRAM_PATH,
             ),
@@ -33,7 +33,7 @@ def test_nexus_histogram_mode_detector_loading_warnings() -> None:
 def test_nexus_rotation_logs_loading() -> None:
     assert isinstance(
         load_nexus_rotation_logs(
-            file_path=FilePath(get_ymir_images_path()),
+            file_path=FilePath(ymir_lego_images_path()),
             motion_sensor_name=RotationMotionSensorName('motion_cabinet_2'),
         ),
         sc.DataArray,
