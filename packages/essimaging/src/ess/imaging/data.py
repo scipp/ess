@@ -15,13 +15,8 @@ def _make_pooch():
         base_url=f'https://public.esss.dk/groups/scipp/ess/imaging/{_version}/',
         version=_version,
         registry={
-            'small_mcstas_ob_images.h5': 'md5:2f181bbacb164c28bfaf7cce09701d92',
-            'small_mcstas_sample_images.h5': 'md5:3c42570951cabec7caedc76d90d03fa3',
-            'small_ymir_images.hdf': 'md5:cf83695d5da29e686c10a31b402b8bdb',
-            'README.md': 'md5:9e1beeb325f127d691a8d7882db3255d',
             'siemens_star.tiff': 'md5:0ba27c2daf745338959f5156a3b0a2c0',
             'resolving_power_test_target.tiff': 'md5:a5d414603797f4cc02fe7b2ae4d7aa48',
-            'tbl-orca-focussing.hdf.zip': 'md5:f365acd9ea45dd205c0b9398d163cfa4',
             # Measurements that Søren Schmidt (imaging IDS 2025) made at JPark.
             "siemens-star-measured.h5": "md5:8e333d36c7c102f474b2b66cb785f5e8",
             "siemens-star-openbeam.h5": "md5:ee429b2c247aeaafb0ef3ca4171f2e6a",
@@ -47,31 +42,7 @@ def get_path(name: str, unzip: bool = False) -> pathlib.Path:
     return pathlib.Path(path)
 
 
-def get_ymir_images_path() -> pathlib.Path:
-    """
-    Return the path to the small YMIR images HDF5 file.
-    """
-
-    return get_path('small_ymir_images.hdf')
-
-
-def get_mcstas_ob_images_path() -> pathlib.Path:
-    """
-    Return the path to the small McStas OB images HDF5 file.
-    """
-
-    return get_path('small_mcstas_ob_images.h5')
-
-
-def get_mcstas_sample_images_path() -> pathlib.Path:
-    """
-    Return the path to the small McStas sample images HDF5 file.
-    """
-
-    return get_path('small_mcstas_sample_images.h5')
-
-
-def get_siemens_star_path() -> pathlib.Path:
+def siemens_star_path() -> pathlib.Path:
     """
     Return the path to the Siemens star test image.
     """
@@ -79,19 +50,9 @@ def get_siemens_star_path() -> pathlib.Path:
     return get_path('siemens_star.tiff')
 
 
-def get_resolving_power_test_target_path() -> pathlib.Path:
+def resolving_power_test_target_path() -> pathlib.Path:
     """
     Return the path to the resolving power test target image.
     """
 
     return get_path('resolving_power_test_target.tiff')
-
-
-def get_tbl_orca_focussing_path() -> pathlib.Path:
-    """
-    Return the path to the TBL ORCA HDF5 file used for camera focussing.
-    Note that the images in this file have been resized from 2048x2048 to 512x512
-    to reduce the file size.
-    """
-
-    return get_path('tbl-orca-focussing.hdf.zip', unzip=True)

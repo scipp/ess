@@ -53,3 +53,13 @@ def tbl_tof_lookup_table_no_choppers() -> str:
     with ``NumberOfSimulatedNeutrons = 2_000_000``.
     """
     return get_path("TBL-tof-lookup-table-no-choppers.h5")
+
+
+def tbl_orca_focussing_data() -> str:
+    """
+    Return the path to the TBL ORCA HDF5 file used for camera focussing.
+    Note that the images in this file have been resized from 2048x2048 to 512x512
+    to reduce the file size.
+    """
+
+    return get_path('tbl-orca-focussing.hdf.zip', unzip=True)
