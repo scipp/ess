@@ -155,6 +155,11 @@ class _ROICirclePath:
         return self._xy
 
     @property
+    def open_xy(self) -> npt.NDArray[float]:
+        # does not include the last point
+        return self._xy[:-1]
+
+    @property
     def inner(self) -> npt.NDArray[float]:
         # does not include the last point
         return self._xy[self._n_points : -1]
@@ -163,11 +168,6 @@ class _ROICirclePath:
     def outer(self) -> npt.NDArray[float]:
         # does not include the last point
         return self._xy[: self._n_points]
-
-    @property
-    def open_path(self) -> npt.NDArray[float]:
-        # does not include the last point
-        return self._xy[:-1]
 
     def set_inner(self, r: float) -> None:
         # reverse=True makes MPL render this circle as a cutout.
@@ -208,7 +208,7 @@ class _ROICircle:
     ) -> None:
         self._path = path
         self._fill = ax.fill(
-            *self._path.open_path.T, fill_color, alpha=fill_alpha, zorder=-1
+            *self._path.open_xy.T, fill_color, alpha=fill_alpha, zorder=-1
         )[0]
         self._inner = ax.plot(*self._path.inner.T, c=line_color, zorder=2)[0]
         self._outer = ax.plot(*self._path.outer.T, c=line_color, zorder=2)[0]
