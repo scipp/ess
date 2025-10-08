@@ -47,6 +47,7 @@ class Registry:
 
 _registry = Registry(
     instrument='imaging',
+    version="1",
     files={
         'siemens_star.tiff': 'md5:0ba27c2daf745338959f5156a3b0a2c0',
         'resolving_power_test_target.tiff': 'md5:a5d414603797f4cc02fe7b2ae4d7aa48',
@@ -54,7 +55,6 @@ _registry = Registry(
         "siemens-star-measured.h5": "md5:8e333d36c7c102f474b2b66cb785f5e8",
         "siemens-star-openbeam.h5": "md5:ee429b2c247aeaafb0ef3ca4171f2e6a",
     },
-    version="1",
 )
 
 

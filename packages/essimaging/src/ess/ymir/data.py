@@ -6,10 +6,10 @@ from ..imaging.data import Registry
 
 _registry = Registry(
     instrument='ymir',
+    version="1",
     files={
         'small_ymir_images.hdf': 'md5:cf83695d5da29e686c10a31b402b8bdb',
     },
-    version="1",
 )
 
 

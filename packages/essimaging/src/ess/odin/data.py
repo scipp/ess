@@ -8,6 +8,7 @@ from ..imaging.data import Registry
 
 _registry = Registry(
     instrument='odin',
+    version="1",
     files={
         "iron_simulation_ob_large.nxs": "md5:a93517ea2aa167d134ca63671f663f99",
         "iron_simulation_ob_small.nxs": "md5:7591ed8f0adec2658fb08190bd530b12",
@@ -15,7 +16,6 @@ _registry = Registry(
         "iron_simulation_sample_small.nxs": "md5:dda6fb30aa88780c5a3d4cef6ea05278",
         "ODIN-tof-lookup-table.h5": "md5:e657021f4508f167b2a2eb550853b06b",
     },
-    version="1",
 )
 
 

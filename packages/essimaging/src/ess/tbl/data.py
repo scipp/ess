@@ -8,12 +8,12 @@ from ..imaging.data import Registry
 
 _registry = Registry(
     instrument='tbl',
+    version="1",
     files={
         "tbl_sample_data_2025-03.hdf": "md5:12db6bc06721278b3abe47992eac3e77",
         "TBL-tof-lookup-table-no-choppers.h5": "md5:8bc98fac0ee64fc8f5decf509c75bafe",
         'tbl-orca-focussing.hdf.zip': 'md5:f365acd9ea45dd205c0b9398d163cfa4',
     },
-    version="1",
 )
 
 
