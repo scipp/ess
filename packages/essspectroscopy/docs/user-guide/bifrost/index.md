@@ -25,6 +25,7 @@ hidden:
 ---
 
 bifrost-reduction
+bifrost-bragg-peak-monitor
 ```
 
 ## Advanced Tools
