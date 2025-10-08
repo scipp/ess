@@ -73,24 +73,4 @@ class CountsMasked(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Detector data with masks."""
 
 
-ImageDetectorName = NewType('ImageDetectorName', str)
-"""Histogram mode detector name."""
-
-ImageKeyLogs = NewType('ImageKeyLogs', sc.DataArray)
-"""Image key logs."""
-
-RotationMotionSensorName = NewType('RotationMotionSensorName', str)
-"""Rotation sensor name."""
-
-RotationLogs = NewType('RotationLogs', sc.DataArray)
-"""Rotation logs data."""
-
-HistogramModeDetectorsPath = NewType('HistogramModeDetectorsPath', str)
-"""Path to the histogram mode detectors in a nexus file."""
-
-DEFAULT_HISTOGRAM_PATH = HistogramModeDetectorsPath(
-    "/entry/instrument/histogram_mode_detectors"
-)
-
-
 del sc, sciline, NewType, TypeVar

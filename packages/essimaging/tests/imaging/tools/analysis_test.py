@@ -5,25 +5,25 @@ import scipp as sc
 from scitiff.io import load_scitiff
 
 from ess import imaging as img
-from ess.imaging.data import get_siemens_star_path
+from ess.imaging.data import siemens_star_path
 
 
 def test_blockify() -> None:
-    da = load_scitiff(get_siemens_star_path())["image"]
+    da = load_scitiff(siemens_star_path())["image"]
     blocks = img.tools.blockify(da, {'x': 4, 'y': 4})
     assert len(blocks.dims) == len(da.dims) + 2
     assert {da.sizes['x'] // 4, da.sizes['y'] // 4, 4}.issubset(blocks.sizes.values())
 
 
 def test_resample() -> None:
-    da = load_scitiff(get_siemens_star_path())["image"]
+    da = load_scitiff(siemens_star_path())["image"]
     resampled = img.tools.resample(da, sizes={'x': 2, 'y': 2})
     assert resampled.sizes['x'] == da.sizes['x'] // 2
     assert resampled.sizes['y'] == da.sizes['y'] // 2
 
 
 def test_resample_mean() -> None:
-    da = load_scitiff(get_siemens_star_path())["image"]
+    da = load_scitiff(siemens_star_path())["image"]
     resampled = img.tools.resample(da, sizes={'x': 2, 'y': 2}, method='mean')
     assert resampled.sizes['x'] == da.sizes['x'] // 2
     assert resampled.sizes['y'] == da.sizes['y'] // 2
@@ -31,14 +31,14 @@ def test_resample_mean() -> None:
 
 
 def test_resample_callable() -> None:
-    da = load_scitiff(get_siemens_star_path())["image"]
+    da = load_scitiff(siemens_star_path())["image"]
     resampled = img.tools.resample(da, sizes={'x': 2, 'y': 2}, method=sc.min)
     assert resampled.sizes['x'] == da.sizes['x'] // 2
     assert resampled.sizes['y'] == da.sizes['y'] // 2
 
 
 def test_resize() -> None:
-    da = load_scitiff(get_siemens_star_path())["image"]
+    da = load_scitiff(siemens_star_path())["image"]
     resized = img.tools.resize(da, sizes={'x': 128, 'y': 128})
     assert resized.sizes['x'] == 128
     assert resized.sizes['y'] == 128
@@ -46,7 +46,7 @@ def test_resize() -> None:
 
 
 def test_resize_mean() -> None:
-    da = load_scitiff(get_siemens_star_path())["image"]
+    da = load_scitiff(siemens_star_path())["image"]
     resized = img.tools.resize(da, sizes={'x': 128, 'y': 128}, method='mean')
     assert resized.sizes['x'] == 128
     assert resized.sizes['y'] == 128
@@ -54,27 +54,27 @@ def test_resize_mean() -> None:
 
 
 def test_resize_callable() -> None:
-    da = load_scitiff(get_siemens_star_path())["image"]
+    da = load_scitiff(siemens_star_path())["image"]
     resized = img.tools.resize(da, sizes={'x': 256, 'y': 256}, method=sc.max)
     assert resized.sizes['x'] == 256
     assert resized.sizes['y'] == 256
 
 
 def test_resize_bad_size_requested_raises():
-    da = load_scitiff(get_siemens_star_path())["image"]
+    da = load_scitiff(siemens_star_path())["image"]
     with pytest.raises(ValueError, match="Size of dimension 'x' .* is not divisible"):
         img.tools.resize(da, sizes={'x': 127, 'y': 127})
 
 
 def test_laplace_2d() -> None:
-    da = load_scitiff(get_siemens_star_path())["image"]
+    da = load_scitiff(siemens_star_path())["image"]
     resampled = img.tools.resample(da, sizes={'x': 2, 'y': 2})
     laplacian = img.tools.laplace_2d(resampled, dims=('x', 'y'))
     assert laplacian.sizes == resampled.sizes
 
 
 def test_sharpness() -> None:
-    da = load_scitiff(get_siemens_star_path())["image"]
+    da = load_scitiff(siemens_star_path())["image"]
     sharp = img.tools.sharpness(da, dims=('x', 'y'))
     assert (sharp['t', 0] < sharp['t', 1]).value
     assert (sharp['t', 0] > sharp['t', 2]).value

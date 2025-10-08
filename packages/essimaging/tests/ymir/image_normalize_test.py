@@ -4,13 +4,13 @@ import pytest
 import scipp as sc
 from scipp.testing.assertions import assert_allclose, assert_identical
 
-from ess.imaging.io import (
+from ess.ymir.io import (
     DarkCurrentImageStacks,
     OpenBeamImageStacks,
     RawSampleImageStacks,
     SampleImageStacksWithLogs,
 )
-from ess.imaging.normalize import (
+from ess.ymir.normalize import (
     BackgroundImage,
     BackgroundPixelThreshold,
     CleansedOpenBeamImage,
@@ -24,10 +24,11 @@ from ess.imaging.normalize import (
     apply_threshold_to_sample_images,
     average_dark_current_images,
     average_open_beam_images,
+    cleanse_open_beam_image,
     cleanse_sample_images,
     normalize_sample_images,
 )
-from ess.imaging.workflow import YmirImageNormalizationWorkflow
+from ess.ymir.workflow import YmirImageNormalizationWorkflow
 
 
 @pytest.fixture
@@ -140,8 +141,6 @@ def test_average_dark_current_images(
 def test_cleanse_open_beam_image(
     open_beam_image: OpenBeamImage, dark_current_image: DarkCurrentImage
 ) -> None:
-    from ess.imaging.normalize import cleanse_open_beam_image
-
     expected_background_image = sc.DataArray(
         data=sc.array(
             dims=["dim_1", "dim_2"],
