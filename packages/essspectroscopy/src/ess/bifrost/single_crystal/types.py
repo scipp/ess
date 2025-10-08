@@ -4,6 +4,7 @@
 """Domain types for single crystal diffraction on BIFROST."""
 
 from dataclasses import dataclass
+from typing import NewType
 
 import sciline
 import scipp as sc
@@ -20,3 +21,18 @@ class QProjection:
 
     parallel: sc.Variable
     perpendicular: sc.Variable
+
+
+QParallelBins = NewType("QParallelBins", sc.Variable)
+QPerpendicularBins = NewType("QPerpendicularBins", sc.Variable)
+
+
+class Q2dHistogram(sciline.Scope[RunType, sc.DataArray], sc.DataArray): ...
+
+
+class QHistogram(sciline.Scope[RunType, sc.DataArray], sc.DataArray): ...
+
+
+QRange = NewType("QRange", tuple[sc.Variable, sc.Variable])
+
+SampleRotationBins = NewType("SampleRotationBins", sc.Variable)
