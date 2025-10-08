@@ -1,34 +1,64 @@
 # API Reference
 
-## Classes
+## Submodules
 
 ```{eval-rst}
 .. currentmodule:: ess.imaging
 
 .. autosummary::
-   :toctree: ../generated/classes
-   :template: class-template.rst
+   :toctree: ../generated/modules
+   :template: module-template.rst
    :recursive:
+
+   conversion
+   data
+   tools
+   types
 ```
 
-## Top-level functions
+## Odin
 
 ```{eval-rst}
-.. autosummary::
-   :toctree: ../generated/functions
-   :recursive:
-```
+.. currentmodule:: ess.odin
 
-## Submodules
-
-```{eval-rst}
 .. autosummary::
    :toctree: ../generated/modules
    :template: module-template.rst
    :recursive:
 
-   normalize
+   beamline
+   data
+   masking
+   workflows
+```
+
+## TBL
+
+```{eval-rst}
+.. currentmodule:: ess.tbl
+
+.. autosummary::
+   :toctree: ../generated/modules
+   :template: module-template.rst
+   :recursive:
+
+   data
+   workflow
+```
+
+## Ymir
+
+```{eval-rst}
+.. currentmodule:: ess.ymir
+
+.. autosummary::
+   :toctree: ../generated/modules
+   :template: module-template.rst
+   :recursive:
+
+   data
    io
-   tools
+   normalize
+   types
    workflow
 ```
