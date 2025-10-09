@@ -2,40 +2,15 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 import pathlib
 
-import pooch
+from ..imaging.data import Registry
 
-_version = '1'
-
-
-def _make_pooch():
-    return pooch.create(
-        path=pooch.os_cache('essimaging'),
-        env='ESS_DATA_DIR',
-        retry_if_failed=3,
-        base_url=f'https://public.esss.dk/groups/scipp/ess/ymir/{_version}/',
-        version=_version,
-        registry={
-            'small_ymir_images.hdf': 'md5:cf83695d5da29e686c10a31b402b8bdb',
-        },
-    )
-
-
-_pooch = _make_pooch()
-
-
-def get_path(name: str, unzip: bool = False) -> pathlib.Path:
-    """
-    Return the path to a data file bundled with ess.imaging.
-
-    This function only works with example data and cannot handle
-    paths to custom files.
-    """
-    if unzip:
-        path = _pooch.fetch(name, processor=pooch.Unzip())[0]
-    else:
-        path = _pooch.fetch(name)
-
-    return pathlib.Path(path)
+_registry = Registry(
+    instrument='ymir',
+    version="1",
+    files={
+        'small_ymir_images.hdf': 'md5:cf83695d5da29e686c10a31b402b8bdb',
+    },
+)
 
 
 def ymir_lego_images_path() -> pathlib.Path:
@@ -43,4 +18,4 @@ def ymir_lego_images_path() -> pathlib.Path:
     Return the path to the small YMIR images HDF5 file.
     """
 
-    return get_path('small_ymir_images.hdf')
+    return _registry('small_ymir_images.hdf')
