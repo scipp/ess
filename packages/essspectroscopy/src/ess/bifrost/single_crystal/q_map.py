@@ -16,8 +16,8 @@ from ess.spectroscopy.types import DetectorCountsWithQ, RunType
 
 from .types import (
     CountsWithQMapCoords,
-    Q2dHistogram,
-    QHistogram,
+    IntensityQparQperp,
+    IntensitySampleRotation,
     QParallelBins,
     QPerpendicularBins,
     QProjection,
@@ -67,13 +67,13 @@ def default_q_projection() -> QProjection:
     )
 
 
-def histogram_q_2d(
+def histogram_qparallel_qperpendicular(
     events: CountsWithQMapCoords[RunType],
     q_parallel_bins: QParallelBins,
     q_perpendicular_bins: QPerpendicularBins,
-) -> Q2dHistogram[RunType]:
+) -> IntensityQparQperp[RunType]:
     """Histogram the data in Q_parallel and Q_perpendicular"""
-    return Q2dHistogram[RunType](
+    return IntensityQparQperp[RunType](
         events.hist(Q_perpendicular=q_perpendicular_bins, Q_parallel=q_parallel_bins)
     )
 
@@ -82,19 +82,19 @@ def integrate_q(
     events: CountsWithQMapCoords[RunType],
     q_range: QRange,
     sample_rotation_bins: SampleRotationBins,
-) -> QHistogram[RunType]:
+) -> IntensitySampleRotation[RunType]:
     """Integrate the data over |Q| and histogram in the sample rotation."""
     unit = events.bins.coords['Q'].unit
     lo = q_range[0].to(unit=unit)
     hi = q_range[1].to(unit=unit)
     sliced = events.bins['Q', lo:hi]
     try:
-        return QHistogram[RunType](sliced.hist(a3=sample_rotation_bins))
+        return IntensitySampleRotation[RunType](sliced.hist(a3=sample_rotation_bins))
     except ValueError as err:
         if "empty data range" in err.args[0].lower():
             # This happens when the user selects an empty range Q range,
             # which is mainly a problem in the widget.
-            return QHistogram[RunType](_empty_angle_array_like(sliced))
+            return IntensitySampleRotation[RunType](_empty_angle_array_like(sliced))
         raise
 
 
@@ -114,9 +114,9 @@ def make_q_map(
     from plopp.widgets import Box
 
     def make_q_hist(da: sc.DataArray) -> sc.DataArray:
-        return histogram_q_2d(da, q_parallel_bins, q_perpendicular_bins).rename(
-            Q_perpendicular=r'$Q_{\perp}$', Q_parallel='$Q_{||}$'
-        )
+        return histogram_qparallel_qperpendicular(
+            da, q_parallel_bins, q_perpendicular_bins
+        ).rename(Q_perpendicular=r'$Q_{\perp}$', Q_parallel='$Q_{||}$')
 
     def make_q_slice(da: sc.DataArray, q_range: tuple[float, float]) -> sc.DataArray:
         unit = da.bins.coords['Q'].unit
@@ -281,6 +281,6 @@ def _empty_angle_array_like(
 providers = (
     default_q_projection,
     integrate_q,
-    histogram_q_2d,
+    histogram_qparallel_qperpendicular,
     project_momentum_transfer,
 )
