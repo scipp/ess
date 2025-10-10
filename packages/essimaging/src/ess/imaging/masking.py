@@ -12,6 +12,8 @@ from ..imaging.types import CorrectedDetector, MaskingRules, RawDetector, RunTyp
 def apply_masks(
     da: RawDetector[RunType], masks: MaskingRules
 ) -> CorrectedDetector[RunType]:
+    if not masks:
+        return CorrectedDetector[RunType](da)
     out = da.copy(deep=False)
     for coord_name, mask in masks.items():
         if (out.bins is not None) and (coord_name in out.bins.coords):

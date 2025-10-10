@@ -30,6 +30,16 @@ def normalize_by_proton_charge(
     proton_charge:
         Proton charge data for normalization.
     """
+
+    # How do we do this?
+    # The data can have a time dimension. We want to sum the proton charge inside each
+    # time bin (defined by the duration of each frame). However, the time dimension of
+    # the data recorded at the detector is not the same time as the proton charge
+    # (which is when the protons hit the target). We need to shift the proton charge
+    # time to account for the time it takes for neutrons to travel from the target
+    # to the detector. Does this mean we can't do the normalization without computing
+    # time of flight?
+
     return NormalizedDetector[RunType](data / proton_charge.sum())
 
 
