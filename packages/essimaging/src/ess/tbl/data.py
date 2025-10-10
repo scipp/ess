@@ -4,22 +4,24 @@
 
 import pathlib
 
-from ..imaging.data import Registry
+from ess.reduce.data import Entry, make_registry
 
-_registry = Registry(
-    instrument='tbl',
+_registry = make_registry(
+    'ess/tbl',
     version="1",
     files={
         "tbl_sample_data_2025-03.hdf": "md5:12db6bc06721278b3abe47992eac3e77",
         "TBL-tof-lookup-table-no-choppers.h5": "md5:8bc98fac0ee64fc8f5decf509c75bafe",
-        'tbl-orca-focussing.hdf.zip': 'md5:f365acd9ea45dd205c0b9398d163cfa4',
+        'tbl-orca-focussing.hdf.zip': Entry(
+            alg='md5', chk='f365acd9ea45dd205c0b9398d163cfa4', unzip=True
+        ),
     },
 )
 
 
 def tutorial_sample_data() -> pathlib.Path:
     """ """
-    return _registry("tbl_sample_data_2025-03.hdf")
+    return _registry.get_path("tbl_sample_data_2025-03.hdf")
 
 
 def tbl_tof_lookup_table_no_choppers() -> pathlib.Path:
@@ -31,7 +33,7 @@ def tbl_tof_lookup_table_no_choppers() -> pathlib.Path:
     <../../user-guide/tbl/tbl-make-tof-lookup-table.rst>`_
     with ``NumberOfSimulatedNeutrons = 2_000_000``.
     """
-    return _registry("TBL-tof-lookup-table-no-choppers.h5")
+    return _registry.get_path("TBL-tof-lookup-table-no-choppers.h5")
 
 
 def tbl_orca_focussing_data() -> pathlib.Path:
@@ -41,4 +43,4 @@ def tbl_orca_focussing_data() -> pathlib.Path:
     to reduce the file size.
     """
 
-    return _registry('tbl-orca-focussing.hdf.zip', unzip=True)
+    return _registry.get_path('tbl-orca-focussing.hdf.zip')

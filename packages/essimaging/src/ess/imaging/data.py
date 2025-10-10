@@ -2,51 +2,10 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 import pathlib
 
+from ess.reduce.data import make_registry
 
-class Registry:
-    def __init__(
-        self,
-        instrument: str,
-        files: dict[str, str],
-        version: str,
-        retry_if_failed: int = 3,
-    ):
-        import pooch
-
-        self._registry = pooch.create(
-            path=pooch.os_cache(f'ess/{instrument}'),
-            env=f'ESS_{instrument.upper()}_DATA_DIR',
-            base_url=f'https://public.esss.dk/groups/scipp/ess/{instrument}/{version}/',
-            version=version,
-            retry_if_failed=retry_if_failed,
-            registry=files,
-        )
-
-    def __contains__(self, key):
-        return key in self._registry.registry
-
-    def __call__(self, name: str, unzip: bool = False) -> pathlib.Path:
-        """
-        Get the path to a file in the registry.
-
-        Parameters
-        ----------
-        name:
-            Name of the file to get the path for.
-        unzip:
-            If `True`, unzip the file before returning the path.
-        """
-        import pooch
-
-        if unzip:
-            path = self._registry.fetch(name, processor=pooch.Unzip())[0]
-        else:
-            path = self._registry.fetch(name)
-        return pathlib.Path(path)
-
-
-_registry = Registry(
-    instrument='imaging',
+_registry = make_registry(
+    'ess/imaging',
     version="1",
     files={
         'siemens_star.tiff': 'md5:0ba27c2daf745338959f5156a3b0a2c0',
@@ -63,7 +22,7 @@ def siemens_star_path() -> pathlib.Path:
     Return the path to the Siemens star test image.
     """
 
-    return _registry('siemens_star.tiff')
+    return _registry.get_path('siemens_star.tiff')
 
 
 def resolving_power_test_target_path() -> pathlib.Path:
@@ -71,7 +30,7 @@ def resolving_power_test_target_path() -> pathlib.Path:
     Return the path to the resolving power test target image.
     """
 
-    return _registry('resolving_power_test_target.tiff')
+    return _registry.get_path('resolving_power_test_target.tiff')
 
 
 def jparc_siemens_star_measured_path() -> pathlib.Path:
@@ -79,7 +38,7 @@ def jparc_siemens_star_measured_path() -> pathlib.Path:
     Return the path to the Siemens star test image measured at J-PARC.
     """
 
-    return _registry('siemens-star-measured.h5')
+    return _registry.get_path('siemens-star-measured.h5')
 
 
 def jparc_siemens_star_openbeam_path() -> pathlib.Path:
@@ -87,4 +46,4 @@ def jparc_siemens_star_openbeam_path() -> pathlib.Path:
     Return the path to the Siemens star open beam image measured at J-PARC.
     """
 
-    return _registry('siemens-star-openbeam.h5')
+    return _registry.get_path('siemens-star-openbeam.h5')
