@@ -90,7 +90,7 @@ class BackgroundSubtractedDetector(sciline.Scope[RunType, sc.DataArray], sc.Data
 
 
 class IntensityDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Detector counts normalized by open beam measurement."""
+    """Intensity at the detector normalized by open beam measurement."""
 
 
 class ProtonCharge(sciline.Scope[RunType, sc.DataArray], sc.DataArray):

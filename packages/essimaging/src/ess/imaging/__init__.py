@@ -9,11 +9,13 @@ try:
 except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
-from . import tools
+from . import masking, normalization, tools
 
 del importlib
 
 __all__ = [
     "__version__",
+    "masking",
+    "normalization",
     "tools",
 ]
