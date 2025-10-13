@@ -4,10 +4,10 @@
 
 import pathlib
 
-from ..imaging.data import Registry
+from ess.reduce.data import make_registry
 
-_registry = Registry(
-    instrument='odin',
+_registry = make_registry(
+    'ess/odin',
     version="1",
     files={
         "iron_simulation_ob_large.nxs": "md5:a93517ea2aa167d134ca63671f663f99",
@@ -26,7 +26,7 @@ def iron_simulation_sample_small() -> pathlib.Path:
     The file was generated with the ``tools/mcstas_to_nexus.ipynb`` notebook, sampling
     1M events from the McStas results.
     """
-    return _registry("iron_simulation_sample_small.nxs")
+    return _registry.get_path("iron_simulation_sample_small.nxs")
 
 
 def iron_simulation_ob_small() -> pathlib.Path:
@@ -36,7 +36,7 @@ def iron_simulation_ob_small() -> pathlib.Path:
     The file was generated with the ``tools/mcstas_to_nexus.ipynb`` notebook, sampling
     1M events from the McStas results.
     """
-    return _registry("iron_simulation_ob_small.nxs")
+    return _registry.get_path("iron_simulation_ob_small.nxs")
 
 
 def iron_simulation_sample_large() -> pathlib.Path:
@@ -46,7 +46,7 @@ def iron_simulation_sample_large() -> pathlib.Path:
     The file was generated with the ``tools/mcstas_to_nexus.ipynb`` notebook, sampling
     10M events from the McStas results.
     """
-    return _registry("iron_simulation_sample_large.nxs")
+    return _registry.get_path("iron_simulation_sample_large.nxs")
 
 
 def iron_simulation_ob_large() -> pathlib.Path:
@@ -56,7 +56,7 @@ def iron_simulation_ob_large() -> pathlib.Path:
     The file was generated with the ``tools/mcstas_to_nexus.ipynb`` notebook, sampling
     10M events from the McStas results.
     """
-    return _registry("iron_simulation_ob_large.nxs")
+    return _registry.get_path("iron_simulation_ob_large.nxs")
 
 
 def odin_tof_lookup_table() -> pathlib.Path:
@@ -68,4 +68,4 @@ def odin_tof_lookup_table() -> pathlib.Path:
     <../../user-guide/odin/odin-make-tof-lookup-table.rst>`_
     with ``NumberOfSimulatedNeutrons = 5_000_000``.
     """
-    return _registry("ODIN-tof-lookup-table.h5")
+    return _registry.get_path("ODIN-tof-lookup-table.h5")
