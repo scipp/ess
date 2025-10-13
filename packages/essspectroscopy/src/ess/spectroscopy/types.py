@@ -89,6 +89,10 @@ class EnergyQDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Detector counts with a momentum transfer and energy transfer coordinates."""
 
 
+class IncidentEnergyDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Detector counts with an incident energy coordinate."""
+
+
 class SampleAngle(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Rotation angle of the sample, possibly as a function of time.
 
