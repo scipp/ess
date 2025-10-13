@@ -221,9 +221,7 @@ class TestBifrostQCutWorkflow:
         total_counts_after = sc.sum(cut_data).value
         assert total_counts_before == total_counts_after
 
-    def test_cut_preserves_arc_dimension(
-        self, qcut_workflow: sciline.Pipeline
-    ) -> None:
+    def test_cut_preserves_arc_dimension(self, qcut_workflow: sciline.Pipeline) -> None:
         # Test that cut preserves the arc dimension (renamed from triplet)
         axis_1 = CutAxis(
             output='|Q|',
