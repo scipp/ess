@@ -3,6 +3,8 @@
 
 """Utilities for loading example data for POWGEN."""
 
+from pathlib import Path
+
 import scipp as sc
 
 from ess.powder.types import (
@@ -16,73 +18,53 @@ from ess.powder.types import (
     RawDataAndMetadata,
     RunType,
 )
+from ess.reduce.data import Entry, make_registry
 
-_version = "1"
-
-
-def _make_pooch():
-    import pooch
-
-    return pooch.create(
-        path=pooch.os_cache("ess/powgen"),
-        env="ESS_DATA_DIR",
-        base_url="https://public.esss.dk/groups/scipp/ess/powgen/{version}/",
-        version=_version,
-        registry={
-            # Files loadable with Mantid
-            "PG3_4844_event.nxs": "md5:d5ae38871d0a09a28ae01f85d969de1e",
-            "PG3_4866_event.nxs": "md5:3d543bc6a646e622b3f4542bc3435e7e",
-            "PG3_5226_event.nxs": "md5:58b386ebdfeb728d34fd3ba00a2d4f1e",
-            "PG3_FERNS_d4832_2011_08_24.cal": "md5:c181221ebef9fcf30114954268c7a6b6",
-            # Zipped Scipp HDF5 files
-            "PG3_4844_event.zip": "md5:a644c74f5e740385469b67431b690a3e",
-            "PG3_4866_event.zip": "md5:5bc49def987f0faeb212a406b92b548e",
-            "PG3_FERNS_d4832_2011_08_24.zip": "md5:0fef4ed5f61465eaaa3f87a18f5bb80d",
-            "PG3_FERNS_d4832_2011_08_24_spectrum.h5": "md5:7aee0b40deee22d57e21558baa7a6a1a",  # noqa: E501
-            # Smaller files for unit tests
-            "TEST_PG3_4844_event.h5": "md5:03ea1018c825b0d90a67b4fc7932ea3d",
-            "TEST_PG3_4866_event.h5": "md5:4a8df454871cec7de9ac624ebdc97095",
-            "TEST_PG3_FERNS_d4832_2011_08_24_spectrum.h5": "md5:b577a054e9aa7b372df79bf4489947d0",  # noqa: E501
-        },
-    )
-
-
-_pooch = _make_pooch()
+_registry = make_registry(
+    "ess/powgen",
+    version="1",
+    files={
+        # Files loadable with Mantid
+        "PG3_4844_event.nxs": "md5:d5ae38871d0a09a28ae01f85d969de1e",
+        "PG3_4866_event.nxs": "md5:3d543bc6a646e622b3f4542bc3435e7e",
+        "PG3_5226_event.nxs": "md5:58b386ebdfeb728d34fd3ba00a2d4f1e",
+        "PG3_FERNS_d4832_2011_08_24.cal": "md5:c181221ebef9fcf30114954268c7a6b6",
+        # Zipped Scipp HDF5 files
+        "PG3_4844_event.zip": Entry(
+            alg="md5", chk="a644c74f5e740385469b67431b690a3e", unzip=True
+        ),
+        "PG3_4866_event.zip": Entry(
+            alg="md5", chk="5bc49def987f0faeb212a406b92b548e", unzip=True
+        ),
+        "PG3_FERNS_d4832_2011_08_24.zip": Entry(
+            alg="md5", chk="0fef4ed5f61465eaaa3f87a18f5bb80d", unzip=True
+        ),
+        "PG3_FERNS_d4832_2011_08_24_spectrum.h5": "md5:7aee0b40deee22d57e21558baa7a6a1a",  # noqa: E501
+        # Smaller files for unit tests
+        "TEST_PG3_4844_event.h5": "md5:03ea1018c825b0d90a67b4fc7932ea3d",
+        "TEST_PG3_4866_event.h5": "md5:4a8df454871cec7de9ac624ebdc97095",
+        "TEST_PG3_FERNS_d4832_2011_08_24_spectrum.h5": "md5:b577a054e9aa7b372df79bf4489947d0",  # noqa: E501
+    },
+)
 
 
-def _get_path(name: str) -> str:
-    """
-    Return the path to a data file bundled with scippneutron.
-
-    This function only works with example data and cannot handle
-    paths to custom files.
-    """
-    import pooch
-
-    if name.endswith(".zip"):
-        (path,) = _pooch.fetch(name, processor=pooch.Unzip())
-    else:
-        path = _pooch.fetch(name)
-    return path
+def powgen_tutorial_mantid_sample_file() -> Path:
+    return _registry.get_path("PG3_4844_event.nxs")
 
 
-def powgen_tutorial_mantid_sample_file() -> str:
-    return _get_path("PG3_4844_event.nxs")
+def powgen_tutorial_mantid_vanadium_file() -> Path:
+    return _registry.get_path("PG3_4866_event.nxs")
 
 
-def powgen_tutorial_mantid_vanadium_file() -> str:
-    return _get_path("PG3_4866_event.nxs")
+def powgen_tutorial_mantid_empty_instrument_file() -> Path:
+    return _registry.get_path("PG3_5226_event.nxs")
 
 
-def powgen_tutorial_mantid_empty_instrument_file() -> str:
-    return _get_path("PG3_5226_event.nxs")
+def powgen_tutorial_mantid_calibration_file() -> Path:
+    return _registry.get_path("PG3_FERNS_d4832_2011_08_24.cal")
 
 
-def powgen_tutorial_mantid_calibration_file() -> str:
-    return _get_path("PG3_FERNS_d4832_2011_08_24.cal")
-
-
-def powgen_tutorial_sample_file(*, small: bool = False) -> str:
+def powgen_tutorial_sample_file(*, small: bool = False) -> Path:
     """
     Return the path to the POWGEN sample file.
 
@@ -116,10 +98,10 @@ def powgen_tutorial_sample_file(*, small: bool = False) -> str:
     """
     prefix = "TEST_" if small else ""
     ext = ".h5" if small else ".zip"
-    return _get_path(f"{prefix}PG3_4844_event{ext}")
+    return _registry.get_path(f"{prefix}PG3_4844_event{ext}")
 
 
-def powgen_tutorial_vanadium_file(*, small: bool = False) -> str:
+def powgen_tutorial_vanadium_file(*, small: bool = False) -> Path:
     """
     Return the path to the POWGEN vanadium file.
 
@@ -151,10 +133,10 @@ def powgen_tutorial_vanadium_file(*, small: bool = False) -> str:
     """
     prefix = "TEST_" if small else ""
     ext = ".h5" if small else ".zip"
-    return _get_path(f"{prefix}PG3_4866_event{ext}")
+    return _registry.get_path(f"{prefix}PG3_4866_event{ext}")
 
 
-def powgen_tutorial_calibration_file(*, small: bool = False) -> str:
+def powgen_tutorial_calibration_file(*, small: bool = False) -> Path:
     """
     Return the path to the POWGEN calibration file.
 
@@ -185,7 +167,7 @@ def powgen_tutorial_calibration_file(*, small: bool = False) -> str:
             sc.io.save_hdf5(small, 'TEST_PG3_FERNS_d4832_2011_08_24_spectrum.h5')
     """
     prefix = "TEST_" if small else ""
-    return _get_path(f"{prefix}PG3_FERNS_d4832_2011_08_24_spectrum.h5")
+    return _registry.get_path(f"{prefix}PG3_FERNS_d4832_2011_08_24_spectrum.h5")
 
 
 def pooch_load(filename: Filename[RunType]) -> RawDataAndMetadata[RunType]:
