@@ -2,7 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 from pathlib import Path
 
-from ess.sans.data import Registry
+from ess.reduce.data import make_registry
 from ess.sans.types import (
     BackgroundRun,
     DirectBeamFilename,
@@ -12,8 +12,8 @@ from ess.sans.types import (
     TransmissionRun,
 )
 
-_registry = Registry(
-    instrument='loki',
+_registry = make_registry(
+    'ess/loki',
     files={
         # Files from LoKI@Larmor detector test experiment.
         # Original files are available at:

@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
-from ess.sans.data import Registry
+from pathlib import Path
+
+from ess.reduce.data import Entry, make_registry
 from ess.sans.types import (
     BackgroundRun,
     DirectBeamFilename,
@@ -12,8 +14,8 @@ from ess.sans.types import (
 
 from .io import CalibrationFilename
 
-_sans2d_registry = Registry(
-    instrument='sans2d',
+_sans2d_registry = make_registry(
+    'ess/sans2d',
     files={
         # Direct beam file (efficiency of detectors as a function of wavelength)
         'DIRECT_SANS2D_REAR_34327_4m_8mm_16Feb16.dat.h5': 'md5:43f4188301d709aa49df0631d03a67cb',  # noqa: E501
@@ -30,16 +32,18 @@ _sans2d_registry = Registry(
 )
 
 
-def sans2d_solid_angle_reference() -> str:
+def sans2d_solid_angle_reference() -> Path:
     """Solid angles of the SANS2D detector pixels computed by Mantid (for tests)"""
     return _sans2d_registry.get_path('SANS2D00063091.SolidAngle_from_mantid.h5')
 
 
-_zoom_registry = Registry(
-    instrument='zoom',
+_zoom_registry = make_registry(
+    'ess/zoom',
     files={
         # Sample run (sample and sample holder/can) with applied 192tubeCalibration_11-02-2019_r5_10lines.nxs  # noqa: E501
-        'ZOOM00034786.nxs.h5.zip': 'md5:e1c53bf826dd87545df1b3629f424762',
+        'ZOOM00034786.nxs.h5.zip': Entry(
+            alg='md5', chk='e1c53bf826dd87545df1b3629f424762', unzip=True
+        ),
         # Empty beam run (no sample and no sample holder/can) - Scipp-hdf5 format
         'ZOOM00034787.nxs.h5': 'md5:27e563d4e57621518658307acbbc3413',
         # Calibration file, Mantid processed NeXus
@@ -94,9 +98,7 @@ def zoom_tutorial_calibration() -> Filename[CalibrationFilename]:
 
 
 def zoom_tutorial_sample_run() -> Filename[SampleRun]:
-    return Filename[SampleRun](
-        _zoom_registry.get_path('ZOOM00034786.nxs.h5.zip', unzip=True)[0]
-    )
+    return Filename[SampleRun](_zoom_registry.get_path('ZOOM00034786.nxs.h5.zip'))
 
 
 def zoom_tutorial_empty_beam_run() -> Filename[EmptyBeamRun]:
