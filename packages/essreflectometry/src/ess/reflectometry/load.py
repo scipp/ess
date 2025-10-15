@@ -1,27 +1,28 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
+from pathlib import Path
+
 import h5py
 import sciline
 import scipp as sc
 import scippnexus as snx
 
+# This should be made public in ESSreduce:
+from ess.reduce.nexus._nexus_loader import open_nexus_file
+
 from .types import ReducedReference, ReferenceFilePath
 
 
-def load_nx(group: snx.Group | str, *paths: str):
-    if isinstance(group, str):
-        with snx.File(group) as group:
-            yield from load_nx(group, *paths)
-        return
-    for path in paths:
-        g = group
-        for p in path.strip('/').split('/'):
-            g = (
-                _unique_child_group(g, getattr(snx, p))
-                if p.startswith('NX')
-                else g.get(p)
-            )
-        yield g[...] if g is not None else None
+def load_nx(group: snx.Group | str | Path, *paths: str):
+    with open_nexus_file(group) as g:
+        for path in paths:
+            for p in path.strip('/').split('/'):
+                g = (
+                    _unique_child_group(g, getattr(snx, p))
+                    if p.startswith('NX')
+                    else g.get(p)
+                )
+            yield g[...] if g is not None else None
 
 
 # Remove when this function is exposed in essreduce
