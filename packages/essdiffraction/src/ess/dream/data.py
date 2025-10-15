@@ -2,67 +2,57 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 """Data for tests and documentation with DREAM."""
 
+from pathlib import Path
 from typing import Literal
 
-_version = "2"
+from ess.reduce.data import make_registry
 
 __all__ = ["get_path"]
 
-
-def _make_pooch():
-    import pooch
-
-    return pooch.create(
-        path=pooch.os_cache("ess/dream"),
-        env="ESS_DATA_DIR",
-        base_url="https://public.esss.dk/groups/scipp/ess/dream/{version}/",
-        version=_version,
-        registry={
-            "data_dream_with_sectors.csv.zip": "md5:52ae6eb3705e5e54306a001bc0ae85d8",
-            "data_dream0_new_hkl_Si_pwd.csv.zip": "md5:d0ae518dc1b943bb817b3d18c354ed01",  # noqa: E501
-            "DREAM_nexus_sorted-2023-12-07.nxs": "md5:22824e14f6eb950d24a720b2a0e2cb66",
-            "DREAM_simple_pwd_workflow/data_dream_diamond_vana_container_sample_union.csv.zip": "md5:33302d0506b36aab74003b8aed4664cc",  # noqa: E501
-            "DREAM_simple_pwd_workflow/data_dream_diamond_vana_container_sample_union_run2.csv.zip": "md5:c7758682f978d162dcb91e47c79abb83",  # noqa: E501
-            "DREAM_simple_pwd_workflow/data_dream_vana_container_sample_union.csv.zip": "md5:b8bb7c4bdf74ad5f19342bced8670915",  # noqa: E501
-            "DREAM_simple_pwd_workflow/data_dream_vanadium.csv.zip": "md5:e5addfc06768140c76533946433fa2ec",  # noqa: E501
-            "DREAM_simple_pwd_workflow/data_dream_vanadium_inc_coh.csv.zip": "md5:39d1a44e248b12966b26f7c2f6c602a2",  # noqa: E501
-            "DREAM_simple_pwd_workflow/Cave_TOF_Monitor_diam_in_can.dat": "md5:ef24f4a4186c628574046e6629e31611",  # noqa: E501
-            "DREAM_simple_pwd_workflow/Cave_TOF_Monitor_van_can.dat": "md5:2cdef7ad9912652149b7e687381d2e99",  # noqa: E501
-            "DREAM_simple_pwd_workflow/Cave_TOF_Monitor_vana_inc_coh.dat": "md5:701d66792f20eb283a4ce76bae0c8f8f",  # noqa: E501
-            # BC215
-            "DREAM-high-flux-tof-lookup-table.h5": "md5:1b95a359fa7b0d8b4277806ece9bf279",  # noqa: E501
-            "DREAM-high-flux-tof-lookup-table-BC240-new0.h5": "md5:2cc9dc802082101933429a2ea3624126",  # noqa: E501
-            # Smaller files for unit tests
-            "DREAM_simple_pwd_workflow/TEST_data_dream_diamond_vana_container_sample_union.csv.zip": "md5:405df9b5ade9d61ab71fe8d8c19bb51b",  # noqa: E501
-            "DREAM_simple_pwd_workflow/TEST_data_dream_vana_container_sample_union.csv.zip": "md5:20186119d1debfb0c2352f9db384cd0a",  # noqa: E501
-            "DREAM_simple_pwd_workflow/TEST_data_dream_vanadium.csv.zip": "md5:e5624a973f30dfe440642319c5bf0da6",  # noqa: E501
-            "DREAM_simple_pwd_workflow/TEST_data_dream_vanadium_inc_coh.csv.zip": "md5:a2e7756b264f65ab5ed7ff7fb5eca280",  # noqa: E501
-            "TEST_data_dream0_new_hkl_Si_pwd.csv.zip": "md5:df6c41f4b7b21e129915808f625828f6",  # noqa: E501
-            "TEST_data_dream_with_sectors.csv.zip": "md5:2a6b5e40e6b67f6c71b25373bf4b11a1",  # noqa: E501
-            # The TEST_DREAM_nexus_sorted-2023-12-07.nxs file was created using the
-            # `shrink_nexus.py` script in the `tools` folder at the top level of the
-            # `essdiffraction` repository.
-            "TEST_DREAM_nexus_sorted-2023-12-07.nxs": "md5:599b426a93c46a7b4b09a874bf288c53",  # noqa: E501
-        },
-    )
+_registry = make_registry(
+    "ess/dream",
+    version="2",
+    files={
+        "data_dream_with_sectors.csv.zip": "md5:52ae6eb3705e5e54306a001bc0ae85d8",
+        "data_dream0_new_hkl_Si_pwd.csv.zip": "md5:d0ae518dc1b943bb817b3d18c354ed01",
+        "DREAM_nexus_sorted-2023-12-07.nxs": "md5:22824e14f6eb950d24a720b2a0e2cb66",
+        "DREAM_simple_pwd_workflow/data_dream_diamond_vana_container_sample_union.csv.zip": "md5:33302d0506b36aab74003b8aed4664cc",  # noqa: E501
+        "DREAM_simple_pwd_workflow/data_dream_diamond_vana_container_sample_union_run2.csv.zip": "md5:c7758682f978d162dcb91e47c79abb83",  # noqa: E501
+        "DREAM_simple_pwd_workflow/data_dream_vana_container_sample_union.csv.zip": "md5:b8bb7c4bdf74ad5f19342bced8670915",  # noqa: E501
+        "DREAM_simple_pwd_workflow/data_dream_vanadium.csv.zip": "md5:e5addfc06768140c76533946433fa2ec",  # noqa: E501
+        "DREAM_simple_pwd_workflow/data_dream_vanadium_inc_coh.csv.zip": "md5:39d1a44e248b12966b26f7c2f6c602a2",  # noqa: E501
+        "DREAM_simple_pwd_workflow/Cave_TOF_Monitor_diam_in_can.dat": "md5:ef24f4a4186c628574046e6629e31611",  # noqa: E501
+        "DREAM_simple_pwd_workflow/Cave_TOF_Monitor_van_can.dat": "md5:2cdef7ad9912652149b7e687381d2e99",  # noqa: E501
+        "DREAM_simple_pwd_workflow/Cave_TOF_Monitor_vana_inc_coh.dat": "md5:701d66792f20eb283a4ce76bae0c8f8f",  # noqa: E501
+        # BC215
+        "DREAM-high-flux-tof-lookup-table.h5": "md5:1b95a359fa7b0d8b4277806ece9bf279",
+        "DREAM-high-flux-tof-lookup-table-BC240-new0.h5": "md5:2cc9dc802082101933429a2ea3624126",  # noqa: E501
+        # Smaller files for unit tests
+        "DREAM_simple_pwd_workflow/TEST_data_dream_diamond_vana_container_sample_union.csv.zip": "md5:405df9b5ade9d61ab71fe8d8c19bb51b",  # noqa: E501
+        "DREAM_simple_pwd_workflow/TEST_data_dream_vana_container_sample_union.csv.zip": "md5:20186119d1debfb0c2352f9db384cd0a",  # noqa: E501
+        "DREAM_simple_pwd_workflow/TEST_data_dream_vanadium.csv.zip": "md5:e5624a973f30dfe440642319c5bf0da6",  # noqa: E501
+        "DREAM_simple_pwd_workflow/TEST_data_dream_vanadium_inc_coh.csv.zip": "md5:a2e7756b264f65ab5ed7ff7fb5eca280",  # noqa: E501
+        "TEST_data_dream0_new_hkl_Si_pwd.csv.zip": "md5:df6c41f4b7b21e129915808f625828f6",  # noqa: E501
+        "TEST_data_dream_with_sectors.csv.zip": "md5:2a6b5e40e6b67f6c71b25373bf4b11a1",
+        # The TEST_DREAM_nexus_sorted-2023-12-07.nxs file was created using the
+        # `shrink_nexus.py` script in the `tools` folder at the top level of the
+        # `essdiffraction` repository.
+        "TEST_DREAM_nexus_sorted-2023-12-07.nxs": "md5:599b426a93c46a7b4b09a874bf288c53",  # noqa: E501
+    },
+)
 
 
-_pooch = _make_pooch()
-
-
-def get_path(name: str, unzip: bool = False) -> str:
+def get_path(name: str) -> Path:
     """
     Return the path to a data file bundled with ess.dream.
 
     This function only works with example data and cannot handle
     paths to custom files.
     """
-    import pooch
-
-    return _pooch.fetch(name, processor=pooch.Unzip() if unzip else None)
+    return _registry.get_path(name)
 
 
-def simulated_diamond_sample(*, small: bool = False) -> str:
+def simulated_diamond_sample(*, small: bool = False) -> Path:
     """Path to a GEANT4 CSV file for a diamond sample.
 
     SciCat:
@@ -114,7 +104,7 @@ def simulated_diamond_sample(*, small: bool = False) -> str:
     )
 
 
-def simulated_vanadium_sample(*, small: bool = False) -> str:
+def simulated_vanadium_sample(*, small: bool = False) -> Path:
     """Path to a GEANT4 CSV file for a vanadium sample.
 
     SciCat:
@@ -156,7 +146,7 @@ def simulated_vanadium_sample(*, small: bool = False) -> str:
     )
 
 
-def simulated_vanadium_sample_incoherent(*, small: bool = False) -> str:
+def simulated_vanadium_sample_incoherent(*, small: bool = False) -> Path:
     """Path to a GEANT4 CSV file for a vanadium sample with only incoherent scattering.
 
     SciCat:
@@ -190,7 +180,7 @@ def simulated_vanadium_sample_incoherent(*, small: bool = False) -> str:
     return get_path(f"DREAM_simple_pwd_workflow/{prefix}data_dream_vanadium.csv.zip")
 
 
-def simulated_empty_can(*, small: bool = False) -> str:
+def simulated_empty_can(*, small: bool = False) -> Path:
     """Path to a GEANT4 CSV file for an empty can measurement.
 
     SciCat:
@@ -231,7 +221,7 @@ def simulated_empty_can(*, small: bool = False) -> str:
     )
 
 
-def simulated_monitor_diamond_sample() -> str:
+def simulated_monitor_diamond_sample() -> Path:
     """Path to a Mcstas file for a monitor for the diamond measurement.
 
     SciCat:
@@ -244,7 +234,7 @@ def simulated_monitor_diamond_sample() -> str:
     return get_path("DREAM_simple_pwd_workflow/Cave_TOF_Monitor_diam_in_can.dat")
 
 
-def simulated_monitor_vanadium_sample() -> str:
+def simulated_monitor_vanadium_sample() -> Path:
     """Path to a Mcstas file for a monitor for the vanadium measurement.
 
     SciCat:
@@ -257,7 +247,7 @@ def simulated_monitor_vanadium_sample() -> str:
     return get_path("DREAM_simple_pwd_workflow/Cave_TOF_Monitor_vana_inc_coh.dat")
 
 
-def simulated_monitor_empty_can() -> str:
+def simulated_monitor_empty_can() -> Path:
     """Path to a Mcstas file for a monitor for the empty can measurement.
 
     SciCat:
@@ -270,7 +260,7 @@ def simulated_monitor_empty_can() -> str:
     return get_path("DREAM_simple_pwd_workflow/Cave_TOF_Monitor_van_can.dat")
 
 
-def tof_lookup_table_high_flux(bc: Literal[215, 240] = 215) -> str:
+def tof_lookup_table_high_flux(bc: Literal[215, 240] = 215) -> Path:
     """Path to a HDF5 file containing a lookup table for high-flux ToF.
 
     The table was created using the ``tof`` package and the chopper settings for the
