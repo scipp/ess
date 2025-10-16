@@ -154,9 +154,7 @@ def merge_triplets(
         remainder = idx % pixels_per_arc
         # Within an arc, pattern repeats every (pixels_per_tube * channels_per_arc)
         # for each of the 3 tubes. Channel is determined by position within that.
-        channel = (
-            (remainder % (pixels_per_tube * channels_per_arc)) // pixels_per_tube
-        )
+        channel = (remainder % (pixels_per_tube * channels_per_arc)) // pixels_per_tube
         arc_channel_pairs.append((arc, channel))
 
     # Sort triplets by (arc, channel)
