@@ -72,7 +72,7 @@ def test_simulation_workflow_can_compute_energy_data(
     energy_data = workflow.compute(EnergyData[SampleRun])
 
     assert energy_data.sizes == {
-        'triplet': 5,
+        'arc': 5,
         'tube': 3,
         'length': 100,
         'a3': 180,
@@ -114,6 +114,10 @@ def test_simulation_workflow_produces_the_same_data_as_before(
 
     assert not energy_data.masks
     assert not energy_data.bins.masks
+
+    # Handle transition from 'triplet' to 'arc' dimension
+    if 'triplet' in expected.dims and 'arc' in energy_data.dims:
+        expected = expected.rename_dims(triplet='arc')
 
     assert energy_data.coords.keys() == expected.coords.keys()
     for name in energy_data.coords.keys():

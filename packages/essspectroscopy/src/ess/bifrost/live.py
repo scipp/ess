@@ -120,8 +120,8 @@ def cut(
 
     This function projects the input ``data`` expressed in :math:`Q` and
     :math:`\\Delta E` onto a 2D surface defined by the cut axes.
-    This integrates over the other dimensions while preserving the arc dimension.
-    Then, the projected data is histogrammed according to the axis bins.
+    This integrates over the other dimensions while preserving the arc dimension
+    if present. Then, the projected data is histogrammed according to the axis bins.
 
     Parameters
     ----------
@@ -138,15 +138,20 @@ def cut(
     Returns
     -------
     :
-        ``data`` projected and histogrammed along the cut axes, with arc dimension.
+        ``data`` projected and histogrammed along the cut axes. If the input has
+        an arc dimension, it is preserved in the output. Otherwise, all dimensions
+        are integrated.
     """
-    # Rename triplet dimension to arc
-    # TODO This is wrong, triplet is a flattened version of (arc, channel), but in
-    # unknown order.
-    data = data.rename_dims(triplet='arc')
+    # Determine which dimensions to preserve
+    # Only preserve 'arc' dimension if present; concat everything else
+    preserve_dim = 'arc' if 'arc' in data.dims else None
 
-    # Concat over all dimensions except arc
-    dims_to_concat = [dim for dim in data.dims if dim != 'arc']
+    # Concat over all dimensions except the one we want to preserve
+    if preserve_dim is not None:
+        dims_to_concat = [dim for dim in data.dims if dim != preserve_dim]
+    else:
+        dims_to_concat = list(data.dims)
+
     new_coords = {axis_1.output, axis_2.output}
     projected = data.bins.concat(dims_to_concat).transform_coords(
         new_coords,
@@ -155,9 +160,11 @@ def cut(
     )
     projected = projected.drop_coords(list(set(projected.coords.keys()) - new_coords))
 
-    # Add arc coordinate. Note that is for identifying the arc, it should NOT be used
+    # Add arc coordinate if we're working with arc dimension
+    # Note that this is for identifying the arc, it should NOT be used
     # as a replacement for a precise final_energy coordinate!
-    projected = projected.assign_coords(arc=arc_energy)
+    if preserve_dim == 'arc':
+        projected = projected.assign_coords(arc=arc_energy)
 
     return CutData[RunType](
         projected.hist({axis_2.output: axis_2.bins, axis_1.output: axis_1.bins})
