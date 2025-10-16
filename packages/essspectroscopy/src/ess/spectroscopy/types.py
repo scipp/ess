@@ -85,6 +85,12 @@ class QDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Detector counts with a momentum transfer coordinate."""
 
 
+EnergyBins = NewType('EnergyBins', sc.Variable)
+
+
+class EnergyData(sciline.Scope[RunType, sc.DataArray], sc.DataArray): ...
+
+
 class EnergyQDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Detector counts with a momentum transfer and energy transfer coordinates."""
 
@@ -112,6 +118,8 @@ MonitorCoordTransformGraph = NewType('MonitorCoordTransformGraph', dict)
 
 NXspeFileName = NewType('NXspeFileName', str)
 NXspeFileNames = NewType('NXspeFileNames', list[NXspeFileName])
+
+OutFilename = NewType("OutFilename", str)
 
 
 class PrimarySpecCoordTransformGraph(sciline.Scope[RunType, dict], dict): ...
