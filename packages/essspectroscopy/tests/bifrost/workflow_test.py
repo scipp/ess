@@ -30,7 +30,7 @@ from ess.spectroscopy.types import (
 def simulation_detector_names() -> list[NeXusDetectorName]:
     with snx.File(simulated_elastic_incoherent_with_phonon()) as f:
         names = list(f['entry']['instrument'][snx.NXdetector].keys())
-    return names[:5]  # These should be enough to test the workflow.
+    return names[:10]  # First 10 detectors form a 5x2 grid (arc=5, channel=2)
 
 
 @pytest.fixture
@@ -73,6 +73,7 @@ def test_simulation_workflow_can_compute_energy_data(
 
     assert energy_data.sizes == {
         'arc': 5,
+        'channel': 2,
         'tube': 3,
         'length': 100,
         'a3': 180,
@@ -115,9 +116,21 @@ def test_simulation_workflow_produces_the_same_data_as_before(
     assert not energy_data.masks
     assert not energy_data.bins.masks
 
-    # Handle transition from 'triplet' to 'arc' dimension
-    if 'triplet' in expected.dims and 'arc' in energy_data.dims:
-        expected = expected.rename_dims(triplet='arc')
+    # The reference file was computed with 5 detectors (arc=5, no channel dimension).
+    # The current test uses 10 detectors (arc=5, channel=2).
+    # We can only compare a subset of the data by selecting matching detectors.
+
+    # Handle transition from 'triplet' to 'arc'/'channel' dimensions
+    if 'triplet' in expected.dims:
+        if 'arc' in energy_data.dims and 'channel' in energy_data.dims:
+            # Current data has (arc, channel), reference has triplet
+            # Compare only the first channel to match the reference
+            # (which was channel 0)
+            energy_data = energy_data['channel', 0]
+            # After slicing, rename arc -> triplet for comparison
+            expected = expected.rename_dims(triplet='arc')
+        elif 'arc' in energy_data.dims:
+            expected = expected.rename_dims(triplet='arc')
 
     assert energy_data.coords.keys() == expected.coords.keys()
     for name in energy_data.coords.keys():
