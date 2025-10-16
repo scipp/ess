@@ -141,6 +141,8 @@ def cut(
         ``data`` projected and histogrammed along the cut axes, with arc dimension.
     """
     # Rename triplet dimension to arc
+    # TODO This is wrong, triplet is a flattened version of (arc, channel), but in
+    # unknown order.
     data = data.rename_dims(triplet='arc')
 
     # Concat over all dimensions except arc
@@ -153,7 +155,8 @@ def cut(
     )
     projected = projected.drop_coords(list(set(projected.coords.keys()) - new_coords))
 
-    # Add arc coordinate
+    # Add arc coordinate. Note that is for identifying the arc, it should NOT be used
+    # as a replacement for a precise final_energy coordinate!
     projected = projected.assign_coords(arc=arc_energy)
 
     return CutData[RunType](
