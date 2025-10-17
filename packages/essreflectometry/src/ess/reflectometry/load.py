@@ -7,8 +7,7 @@ import sciline
 import scipp as sc
 import scippnexus as snx
 
-# This should be made public in ESSreduce:
-from ess.reduce.nexus._nexus_loader import open_nexus_file
+from ess.reduce.nexus import open_nexus_file
 
 from .types import ReducedReference, ReferenceFilePath
 
