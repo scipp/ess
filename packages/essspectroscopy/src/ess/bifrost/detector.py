@@ -167,22 +167,12 @@ def merge_triplets(
         if sorted_pairs == expected_pairs:
             # We have a regular grid, fold it
             concatenated = sc.concat(sorted_triplets, dim='triplet')
-            try:
-                folded = concatenated.fold(
-                    dim='triplet',
-                    sizes={'arc': len(unique_arcs), 'channel': len(unique_channels)},
-                )
-                # Remove size-1 dimensions (e.g., if only one channel is present)
-                folded = folded.squeeze()
-                return folded
-            except Exception as e:
-                # If folding fails for any reason, fall back to triplet dim
-                import warnings
-
-                warnings.warn(
-                    f"Failed to fold triplets into (arc, channel): {e}",
-                    stacklevel=2,
-                )
+            folded = concatenated.fold(
+                dim='triplet',
+                sizes={'arc': len(unique_arcs), 'channel': len(unique_channels)},
+            )
+            # Remove size-1 dimensions (e.g., if only one channel is present)
+            return folded.squeeze()
 
     # Fall back to simple concatenation if not a regular grid
     return sc.concat(triplets, dim="triplet")
