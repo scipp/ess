@@ -92,6 +92,25 @@ def get_calibrated_detector_bifrost(
         bank_sizes=DetectorBankSizes({}),
     )
     da = da.rename(dim_0='tube', dim_1='length')
+
+    # Calculate arc and channel for this triplet based on detector_number layout.
+    # BIFROST detector_number ordering is (arc, tube, channel, pixel).
+    # Each triplet contains 3 tubes of 100 pixels for a single arc-channel pair.
+    det_num = da.coords['detector_number']['tube', 0]['length', 0].value
+    pixels_per_tube = 100
+    tubes_per_channel = 3
+    channels_per_arc = 9
+    pixels_per_arc = pixels_per_tube * tubes_per_channel * channels_per_arc  # 2700
+
+    # detector_number is 1-indexed
+    idx = det_num - 1
+    arc = idx // pixels_per_arc
+    remainder = idx % pixels_per_arc
+    channel = (remainder % (pixels_per_tube * channels_per_arc)) // pixels_per_tube
+
+    da.coords['arc'] = sc.index(arc)
+    da.coords['channel'] = sc.index(channel)
+
     return CalibratedDetector[RunType](da)
 
 
@@ -100,16 +119,16 @@ def merge_triplets(
 ) -> sc.DataArray:
     """Merge BIFROST detector triplets into a single data array.
 
-    This function attempts to fold the triplets into (arc, channel) dimensions
-    based on the detector_number coordinate. If the triplets form a regular
-    rectangular subset of the full 5x9 detector array, they will be folded
-    into those dimensions. Otherwise, they are concatenated along a 'triplet'
-    dimension.
+    This function folds the triplets into (arc, channel) dimensions based on
+    the scalar 'arc' and 'channel' coordinates assigned to each triplet. If the
+    triplets form a regular rectangular subset of the full 5x9 detector array,
+    they will be folded into those dimensions. Otherwise, they are concatenated
+    along a 'triplet' dimension.
 
     Parameters
     ----------
     triplets:
-        Data arrays to merge.
+        Data arrays to merge. Each must have scalar 'arc' and 'channel' coordinates.
 
     Returns
     -------
@@ -120,39 +139,11 @@ def merge_triplets(
     if len(triplets) == 0:
         raise ValueError("At least one triplet is required")
 
-    # Extract detector_number from first pixel of first tube in each triplet
-    # to determine arc and channel indices
-    detector_numbers = []
-    for triplet in triplets:
-        # Get the first detector number (position [0, 0] in tube, length dims)
-        det_num = triplet.coords['detector_number']['tube', 0]['length', 0]
-        detector_numbers.append(det_num.value)
-
-    # Calculate arc and channel indices based on detector_number layout
-    # BIFROST has 5 arcs, each with 9 channels, each with 3 tubes of 100 pixels
-    # detector_number runs 1 to 13500, folded as (arc=5, tube=3, channel=9, pixel=100)
-    # Layout within an arc:
-    # - pixels 0-99: channel 0, tube 0
-    # - pixels 100-199: channel 1, tube 0
-    # - ...
-    # - pixels 800-899: channel 8, tube 0
-    # - pixels 900-999: channel 0, tube 1
-    # - etc.
-    pixels_per_tube = 100
-    tubes_per_channel = 3
-    channels_per_arc = 9
-    pixels_per_arc = pixels_per_tube * tubes_per_channel * channels_per_arc  # 2700
-
-    arc_channel_pairs = []
-    for det_num in detector_numbers:
-        # detector_number is 1-indexed
-        idx = det_num - 1
-        arc = idx // pixels_per_arc
-        remainder = idx % pixels_per_arc
-        # Within an arc, pattern repeats every (pixels_per_tube * channels_per_arc)
-        # for each of the 3 tubes. Channel is determined by position within that.
-        channel = (remainder % (pixels_per_tube * channels_per_arc)) // pixels_per_tube
-        arc_channel_pairs.append((arc, channel))
+    # Extract arc and channel from scalar coordinates
+    arc_channel_pairs = [
+        (triplet.coords['arc'].value, triplet.coords['channel'].value)
+        for triplet in triplets
+    ]
 
     # Sort triplets by (arc, channel)
     sorted_indices = sorted(range(len(triplets)), key=lambda i: arc_channel_pairs[i])
@@ -192,7 +183,6 @@ def merge_triplets(
                     f"Failed to fold triplets into (arc, channel): {e}",
                     stacklevel=2,
                 )
-                pass
 
     # Fall back to simple concatenation if not a regular grid
     return sc.concat(triplets, dim="triplet")

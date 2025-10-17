@@ -132,8 +132,10 @@ def test_simulation_workflow_produces_the_same_data_as_before(
         elif 'arc' in energy_data.dims:
             expected = expected.rename_dims(triplet='arc')
 
-    assert energy_data.coords.keys() == expected.coords.keys()
-    for name in energy_data.coords.keys():
+    # Compare only coordinates that exist in the reference data
+    # (newer versions may add arc and channel scalar coordinates)
+    assert set(expected.coords.keys()).issubset(set(energy_data.coords.keys()))
+    for name in expected.coords.keys():
         sc.testing.assert_allclose(energy_data.coords[name], expected.coords[name])
 
     assert energy_data.bins.coords.keys() == expected.bins.coords.keys()
