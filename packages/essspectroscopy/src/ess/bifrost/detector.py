@@ -124,9 +124,6 @@ def merge_triplets(
     # to determine arc and channel indices
     detector_numbers = []
     for triplet in triplets:
-        if 'detector_number' not in triplet.coords:
-            # If no detector_number, fall back to simple concatenation
-            return sc.concat(triplets, dim="triplet")
         # Get the first detector number (position [0, 0] in tube, length dims)
         det_num = triplet.coords['detector_number']['tube', 0]['length', 0]
         detector_numbers.append(det_num.value)
