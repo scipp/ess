@@ -10,15 +10,15 @@
 
 annotated-types==0.7.0
     # via pydantic
-attrs==25.3.0
+attrs==25.4.0
     # via
     #   jsonschema
     #   referencing
-certifi==2025.8.3
+certifi==2025.10.5
     # via requests
 charset-normalizer==3.4.3
     # via requests
-click==8.2.1
+click==8.3.0
     # via dask
 cloudpickle==3.1.1
     # via dask
@@ -28,7 +28,7 @@ cyclebane==24.10.0
     # via sciline
 cycler==0.12.1
     # via matplotlib
-dask==2025.9.0
+dask==2025.9.1
     # via -r nightly.in
 dnspython==2.8.0
     # via email-validator
@@ -36,7 +36,7 @@ email-validator==2.3.0
     # via scippneutron
 essreduce @ git+https://github.com/scipp/essreduce@main
     # via -r nightly.in
-fonttools==4.59.2
+fonttools==4.60.1
     # via matplotlib
 fsspec==2025.9.0
     # via dask
@@ -67,7 +67,7 @@ lazy-loader==0.4
     #   tof
 locket==1.0.0
     # via partd
-matplotlib==3.10.6
+matplotlib==3.10.7
     # via
     #   mpltoolbox
     #   plopp
@@ -95,7 +95,7 @@ partd==1.4.2
     # via dask
 pillow==11.3.0
     # via matplotlib
-platformdirs==4.4.0
+platformdirs==4.5.0
     # via pooch
 plopp @ git+https://github.com/scipp/plopp@main
     # via
@@ -106,15 +106,15 @@ pluggy==1.6.0
     # via pytest
 pooch==1.8.2
     # via -r nightly.in
-pydantic==2.12.0a1
+pydantic==2.12.0
     # via
     #   scippneutron
     #   scitiff
-pydantic-core==2.37.2
+pydantic-core==2.41.1
     # via pydantic
 pygments==2.19.2
     # via pytest
-pyparsing==3.2.4
+pyparsing==3.3.0a1
     # via matplotlib
 pytest==8.4.2
     # via -r nightly.in
@@ -122,7 +122,7 @@ python-dateutil==2.9.0.post0
     # via
     #   matplotlib
     #   scippneutron
-pyyaml==6.0.2
+pyyaml==6.0.3
     # via dask
 referencing==0.36.2
     # via
@@ -164,7 +164,7 @@ scitiff==25.7.0
     # via -r nightly.in
 six==1.17.0
     # via python-dateutil
-tifffile==2025.9.9
+tifffile==2025.10.4
     # via
     #   -r nightly.in
     #   scitiff
@@ -181,7 +181,7 @@ typing-extensions==4.15.0
     #   referencing
     #   sciline
     #   typing-inspection
-typing-inspection==0.4.1
+typing-inspection==0.4.2
     # via pydantic
 urllib3==2.5.0
     # via requests
