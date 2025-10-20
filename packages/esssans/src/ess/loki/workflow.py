@@ -124,13 +124,15 @@ def LokiAtLarmorTutorialWorkflow() -> sciline.Pipeline:
 
     workflow = LokiAtLarmorWorkflow()
 
-    workflow[PixelMaskFilename] = data.loki_tutorial_mask_filenames()
-    workflow[Filename[SampleRun]] = data.loki_tutorial_sample_run_60339()
-    workflow[Filename[BackgroundRun]] = data.loki_tutorial_background_run_60393()
-    workflow[Filename[TransmissionRun[SampleRun]]] = (
+    workflow[PixelMaskFilename] = list(map(str, data.loki_tutorial_mask_filenames()))
+    workflow[Filename[SampleRun]] = str(data.loki_tutorial_sample_run_60339())
+    workflow[Filename[BackgroundRun]] = str(data.loki_tutorial_background_run_60393())
+    workflow[Filename[TransmissionRun[SampleRun]]] = str(
         data.loki_tutorial_sample_transmission_run()
     )
-    workflow[Filename[TransmissionRun[BackgroundRun]]] = data.loki_tutorial_run_60392()
-    workflow[Filename[EmptyBeamRun]] = data.loki_tutorial_run_60392()
+    workflow[Filename[TransmissionRun[BackgroundRun]]] = str(
+        data.loki_tutorial_run_60392()
+    )
+    workflow[Filename[EmptyBeamRun]] = str(data.loki_tutorial_run_60392())
     workflow[BeamCenter] = sc.vector(value=[-0.02914868, -0.01816138, 0.0], unit='m')
     return workflow
