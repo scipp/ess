@@ -73,8 +73,8 @@ class CountsMasked(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Detector data with masks."""
 
 
-class RawDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Raw detector counts read from file."""
+# class RawDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+#     """Raw detector counts read from file."""
 
 
 class CorrectedDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
@@ -96,5 +96,16 @@ class IntensityDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
 class ProtonCharge(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Proton charge data for a run."""
 
+
+ProtonChargePath = NewType('ProtonChargePath', str)
+"""Path to proton charge inside nexus file"""
+
+
+class ExposureTime(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Exposure time for a run."""
+
+
+ExposureTimePath = NewType('ExposureTimePath', str)
+"""Path to exposure time inside nexus file"""
 
 del sc, sciline, NewType, TypeVar

@@ -6,11 +6,13 @@ Contains the providers to apply masks to detector data.
 
 import scipp as sc
 
-from ..imaging.types import CorrectedDetector, MaskingRules, RawDetector, RunType
+from ess.reduce.nexus.types import DetectorData
+
+from ..imaging.types import CorrectedDetector, MaskingRules, RunType
 
 
 def apply_masks(
-    da: RawDetector[RunType], masks: MaskingRules
+    da: DetectorData[RunType], masks: MaskingRules
 ) -> CorrectedDetector[RunType]:
     if not masks:
         return CorrectedDetector[RunType](da)

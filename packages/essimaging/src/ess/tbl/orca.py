@@ -6,23 +6,41 @@ Contains the providers for the orca workflow.
 
 import sciline as sl
 import scipp as sc
+import scippnexus as sx
 
-from ess.reduce.nexus import GenericNeXusWorkflow
+from ess.reduce.nexus import GenericNeXusWorkflow, load_component
+from ess.reduce.nexus.types import (
+    NeXusComponentLocationSpec,
+    NeXusDetectorName,
+    NeXusFileSpec,
+    NeXusName,
+)
 
 from .. import imaging
 from ..imaging.types import (
     CorrectedDetector,
     DarkBackgroundRun,
+    ExposureTime,
+    ExposureTimePath,
     NormalizedDetector,
     OpenBeamRun,
     ProtonCharge,
+    ProtonChargePath,
     RunType,
     SampleRun,
 )
 
 
-class ExposureTime(sl.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Exposure time for a run."""
+def load_proton_charge(
+    location: NeXusComponentLocationSpec[ProtonCharge, RunType],
+) -> ProtonCharge[RunType]:
+    return ProtonCharge[RunType](load_component(location, nx_class=sx.NXlog)["value"])
+
+
+def load_exposure_time(
+    location: NeXusComponentLocationSpec[ExposureTime, RunType],
+) -> ExposureTime[RunType]:
+    return ExposureTime[RunType](load_component(location, nx_class=sx.NXlog))
 
 
 def _compute_proton_charge_per_exposure(
@@ -109,10 +127,22 @@ def normalize_by_proton_charge_orca_sample(
     return NormalizedDetector[SampleRun](data / charge_per_frame)
 
 
-# providers = (
-#     normalize_by_proton_charge_orca,
-#     normalize_by_proton_charge_orca_sample,
-# )
+providers = (
+    load_exposure_time,
+    load_proton_charge,
+    normalize_by_proton_charge_orca,
+    normalize_by_proton_charge_orca_sample,
+)
+
+
+def default_parameters() -> dict:
+    return {
+        # ProtonChargePath: '/entry/neutron_prod_info/pulse_charge',
+        # ExposureTimePath: '/entry/instrument/detector/exposure_time',
+        NeXusDetectorName: 'orca_detector',
+        NeXusName[ProtonCharge]: '/entry/neutron_prod_info/pulse_charge',
+        NeXusName[ExposureTime]: '/entry/instrument/orca_detector/camera_exposure',
+    }
 
 
 def OrcaNormalizedImagesWorkflow(**kwargs) -> sl.Pipeline:
@@ -122,12 +152,18 @@ def OrcaNormalizedImagesWorkflow(**kwargs) -> sl.Pipeline:
 
     wf = GenericNeXusWorkflow(
         run_types=[SampleRun, OpenBeamRun, DarkBackgroundRun],
-        monitor_types=[],
+        # Abusing the monitor_types to load proton charge and exposure time.
+        # How to we expand the list of possible components?
+        monitor_types=[ProtonCharge, ExposureTime],
         **kwargs,
     )
 
-    for provider in (*imaging.normalization.providers, *imaging.masking.providers):
+    for provider in (
+        *imaging.normalization.providers,
+        *imaging.masking.providers,
+        *providers,
+    ):
         wf.insert(provider)
-    wf.insert(normalize_by_proton_charge_orca)
-    wf.insert(normalize_by_proton_charge_orca_sample)
+    for key, param in default_parameters().items():
+        wf[key] = param
     return wf
