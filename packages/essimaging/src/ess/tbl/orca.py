@@ -7,8 +7,10 @@ Contains the providers for the orca workflow.
 import sciline as sl
 import scipp as sc
 
+from ess.reduce.nexus import GenericNeXusWorkflow
+
 from .. import imaging
-from .types import (
+from ..imaging.types import (
     CorrectedDetector,
     DarkBackgroundRun,
     NormalizedDetector,
@@ -23,13 +25,45 @@ class ExposureTime(sl.Scope[RunType, sc.DataArray], sc.DataArray):
     """Exposure time for a run."""
 
 
+def _compute_proton_charge_per_exposure(
+    data: sc.DataArray, proton_charge: sc.DataArray, exposure_time: sc.DataArray
+) -> sc.DataArray:
+    # A note on timings:
+    # We want to sum the proton charge inside each time bin (defined by the duration of
+    # each frame). However, the time dimension of the data recorded at the detector is
+    # not the same time as the proton charge (which is when the protons hit the
+    # target). We need to shift the proton charge time to account for the time it takes
+    # for neutrons to travel from the target to the detector. Does this mean we cannot
+    # do the normalization without computing time of flight?
+
+    t = data.coords['time']
+    exp = exposure_time.to(unit=t.unit)
+    # The following assumes that the different between successive frames (time stamps)
+    # is larger than the exposure time. We need to check that this is indeed the case.
+    if (t[1:] - t[:-1]).min() < exp:
+        raise ValueError(
+            "normalize_by_proton_charge_orca: Exposure time is larger than the "
+            "smallest time between successive frames."
+        )
+
+    bins = sc.sort(sc.concat([t, t + exp], dim=t.dim), t.dim)
+    # We select every second bin, as the odd bins lie between the end of the exposure
+    # of one frame and the start of the next frame.
+    return proton_charge.hist(time=bins).data[::2]
+
+
 def normalize_by_proton_charge_orca(
     data: CorrectedDetector[RunType],
     proton_charge: ProtonCharge[RunType],
     exposure_time: ExposureTime[RunType],
 ) -> NormalizedDetector[RunType]:
     """
-    Normalize detector data by the proton charge (for dark and open beam runs).
+    Normalize detector data by the proton charge (dark and open beam runs).
+    We find the time stamps for the data, which mark the start of an exposure.
+    We sum the proton charge within the intervals timestamp to timestamp +
+    exposure_time.
+    We then sum the data along the time dimension, and divide by the sum of the proton
+    charge accumulated during each exposure.
 
     Parameters
     ----------
@@ -37,9 +71,15 @@ def normalize_by_proton_charge_orca(
         Corrected detector data to be normalized.
     proton_charge:
         Proton charge data for normalization.
+    exposure_time:
+        Exposure time for each image in the data.
     """
 
-    return NormalizedDetector[RunType](data.sum('time') / proton_charge.sum('time'))
+    charge_per_frame = _compute_proton_charge_per_exposure(
+        data, proton_charge, exposure_time
+    )
+
+    return NormalizedDetector[RunType](data.sum('time') / charge_per_frame.sum('time'))
 
 
 def normalize_by_proton_charge_orca_sample(
@@ -61,24 +101,12 @@ def normalize_by_proton_charge_orca_sample(
         Proton charge data for normalization.
     """
 
-    # How do we do this?
-    # The data can have a time dimension. We want to sum the proton charge inside each
-    # time bin (defined by the duration of each frame). However, the time dimension of
-    # the data recorded at the detector is not the same time as the proton charge
-    # (which is when the protons hit the target). We need to shift the proton charge
-    # time to account for the time it takes for neutrons to travel from the target
-    # to the detector. Does this mean we can't do the normalization without computing
-    # time of flight?
-
-    time = data.coords['time']
-    last_exposure_time = time[-1] - time[-2]
-    time_bins = sc.concat([time, time[-1] + last_exposure_time], dim='time')
-    rebinned_proton_charge = proton_charge.hist(time=time_bins)
-
-    # Here we assume the proton charge only has a single time dimension.
-    return NormalizedDetector[SampleRun](
-        data / rebinned_proton_charge.drop_coords('time')
+    charge_per_frame = _compute_proton_charge_per_exposure(
+        data, proton_charge, exposure_time
     )
+
+    # Here we preserve the time dimension of the sample data and the proton charge.
+    return NormalizedDetector[SampleRun](data / charge_per_frame)
 
 
 # providers = (
@@ -92,10 +120,14 @@ def OrcaNormalizedImagesWorkflow(**kwargs) -> sl.Pipeline:
     Workflow with default parameters for TBL.
     """
 
-    wf = sl.Pipeline(
-        (*imaging.normalization.providers, *imaging.masking.providers),
-        constraints={RunType: [SampleRun, OpenBeamRun, DarkBackgroundRun]},
+    wf = GenericNeXusWorkflow(
+        run_types=[SampleRun, OpenBeamRun, DarkBackgroundRun],
+        monitor_types=[],
+        **kwargs,
     )
+
+    for provider in (*imaging.normalization.providers, *imaging.masking.providers):
+        wf.insert(provider)
     wf.insert(normalize_by_proton_charge_orca)
     wf.insert(normalize_by_proton_charge_orca_sample)
     return wf

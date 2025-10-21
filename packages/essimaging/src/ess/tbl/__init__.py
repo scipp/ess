@@ -4,6 +4,7 @@
 
 import importlib.metadata
 
+from . import orca
 from .workflow import TblWorkflow, default_parameters
 
 try:
@@ -16,4 +17,5 @@ del importlib
 __all__ = [
     "TblWorkflow",
     "default_parameters",
+    "orca",
 ]
