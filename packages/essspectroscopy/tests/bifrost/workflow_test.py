@@ -8,7 +8,7 @@ import scippnexus as snx
 
 from ess import bifrost
 from ess.bifrost.data import (
-    computed_energy_data_simulated,
+    computed_energy_data_simulated_5x2,
     simulated_elastic_incoherent_with_phonon,
     tof_lookup_table_simulation,
 )
@@ -111,29 +111,11 @@ def test_simulation_workflow_produces_the_same_data_as_before(
     workflow: sciline.Pipeline,
 ) -> None:
     energy_data = workflow.compute(EnergyData[SampleRun])
-    expected = sc.io.load_hdf5(computed_energy_data_simulated())
+    expected = sc.io.load_hdf5(computed_energy_data_simulated_5x2())
 
     assert not energy_data.masks
     assert not energy_data.bins.masks
 
-    # The reference file was computed with 5 detectors (arc=5, no channel dimension).
-    # The current test uses 10 detectors (arc=5, channel=2).
-    # We can only compare a subset of the data by selecting matching detectors.
-
-    # Handle transition from 'triplet' to 'arc'/'channel' dimensions
-    if 'triplet' in expected.dims:
-        if 'arc' in energy_data.dims and 'channel' in energy_data.dims:
-            # Current data has (arc, channel), reference has triplet
-            # Compare only the first channel to match the reference
-            # (which was channel 0)
-            energy_data = energy_data['channel', 0]
-            # After slicing, rename arc -> triplet for comparison
-            expected = expected.rename_dims(triplet='arc')
-        elif 'arc' in energy_data.dims:
-            expected = expected.rename_dims(triplet='arc')
-
-    # Compare only coordinates that exist in the reference data
-    # (newer versions may add arc and channel scalar coordinates)
     assert set(expected.coords.keys()).issubset(set(energy_data.coords.keys()))
     for name in expected.coords.keys():
         sc.testing.assert_allclose(energy_data.coords[name], expected.coords[name])
