@@ -155,21 +155,18 @@ def merge_triplets(
     unique_channels = sorted({pair[1] for pair in sorted_pairs})
 
     # Check if we have a complete rectangular subset
-    expected_count = len(unique_arcs) * len(unique_channels)
-    if len(sorted_triplets) == expected_count:
-        # Verify that all (arc, channel) combinations are present
-        expected_pairs = [
-            (arc, channel) for arc in unique_arcs for channel in unique_channels
-        ]
-        if sorted_pairs == expected_pairs:
-            # We have a regular grid, fold it
-            concatenated = sc.concat(sorted_triplets, dim='triplet')
-            folded = concatenated.fold(
-                dim='triplet',
-                sizes={'arc': len(unique_arcs), 'channel': len(unique_channels)},
-            )
-            # Remove size-1 dimensions (e.g., if only one channel is present)
-            return folded.squeeze()
+    expected_pairs = [
+        (arc, channel) for arc in unique_arcs for channel in unique_channels
+    ]
+    if sorted_pairs == expected_pairs:
+        # We have a regular grid, fold it
+        concatenated = sc.concat(sorted_triplets, dim='triplet')
+        folded = concatenated.fold(
+            dim='triplet',
+            sizes={'arc': len(unique_arcs), 'channel': len(unique_channels)},
+        )
+        # Remove size-1 dimensions (e.g., if only one channel is present)
+        return folded.squeeze()
 
     # Fall back to simple concatenation if not a regular grid
     return sc.concat(triplets, dim="triplet")
