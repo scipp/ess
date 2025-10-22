@@ -158,9 +158,9 @@ def merge_triplets(
     expected_pairs = [
         (arc, channel) for arc in unique_arcs for channel in unique_channels
     ]
+    concatenated = sc.concat(sorted_triplets, dim='triplet')
     if sorted_pairs == expected_pairs:
         # We have a regular grid, fold it
-        concatenated = sc.concat(sorted_triplets, dim='triplet')
         folded = concatenated.fold(
             dim='triplet',
             sizes={'arc': len(unique_arcs), 'channel': len(unique_channels)},
@@ -169,7 +169,7 @@ def merge_triplets(
         return folded.squeeze()
 
     # Fall back to simple concatenation if not a regular grid
-    return sc.concat(triplets, dim="triplet")
+    return concatenated
 
 
 providers = (arc_number, get_calibrated_detector_bifrost)
