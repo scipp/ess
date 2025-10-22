@@ -161,12 +161,10 @@ def merge_triplets(
     concatenated = sc.concat(sorted_triplets, dim='triplet')
     if sorted_pairs == expected_pairs:
         # We have a regular grid, fold it
-        folded = concatenated.fold(
+        return concatenated.fold(
             dim='triplet',
             sizes={'arc': len(unique_arcs), 'channel': len(unique_channels)},
         )
-        # Remove size-1 dimensions (e.g., if only one channel is present)
-        return folded.squeeze()
 
     # Fall back to simple concatenation if not a regular grid
     return concatenated
