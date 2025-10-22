@@ -21,11 +21,9 @@ from ..imaging.types import (
     CorrectedDetector,
     DarkBackgroundRun,
     ExposureTime,
-    ExposureTimePath,
     NormalizedDetector,
     OpenBeamRun,
     ProtonCharge,
-    ProtonChargePath,
     RunType,
     SampleRun,
 )
