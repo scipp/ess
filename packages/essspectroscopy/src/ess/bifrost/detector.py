@@ -151,11 +151,8 @@ def merge_triplets(
     sorted_pairs = [arc_channel_pairs[i] for i in sorted_indices]
 
     # Check if the pairs form a regular rectangular grid
-    arcs = [pair[0] for pair in sorted_pairs]
-    channels = [pair[1] for pair in sorted_pairs]
-
-    unique_arcs = sorted(set(arcs))
-    unique_channels = sorted(set(channels))
+    unique_arcs = sorted({pair[0] for pair in sorted_pairs})
+    unique_channels = sorted({pair[1] for pair in sorted_pairs})
 
     # Check if we have a complete rectangular subset
     expected_count = len(unique_arcs) * len(unique_channels)
