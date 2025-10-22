@@ -82,7 +82,7 @@ def test_EfficiencyLookupTable_returns_expected_result():
 
 
 def test_EfficiencyLookupTable_load_from_file():
-    fname = io.StringIO('a,b,c\n1,2,3\n4,5,6')
+    fname = io.StringIO('a,b,c\n1.0,2,3\n4,5,6')
     elt = pol.EfficiencyLookupTable.from_file(
         fname, wavelength_colname='a', efficiency_colname='b'
     )
@@ -91,7 +91,7 @@ def test_EfficiencyLookupTable_load_from_file():
             sc.array(dims=('wavelength',), values=[2, 5]),
             coords={
                 'wavelength': sc.array(
-                    dims=('wavelength',), values=[1, 4], unit='angstrom'
+                    dims=('wavelength',), values=[1.0, 4], unit='angstrom'
                 )
             },
         ),
