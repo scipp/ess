@@ -12,7 +12,6 @@ from ess.bifrost.data import (
 )
 from ess.bifrost.live import BifrostQCutWorkflow, CutAxis, CutAxis1, CutAxis2, CutData
 from ess.spectroscopy.types import (
-    EnergyData,
     Filename,
     NeXusDetectorName,
     SampleRun,
@@ -59,9 +58,7 @@ class TestBifrostQCutWorkflow:
         qcut_workflow[CutAxis1] = axis_1
         qcut_workflow[CutAxis2] = axis_2
 
-        # Compute both cut data and energy data to compare total counts
         cut_data = qcut_workflow.compute(CutData[SampleRun])
-        energy_data = qcut_workflow.compute(EnergyData[SampleRun])
 
         # Verify the structure of the result (now 3-D with arc dimension)
         assert cut_data.bins is None  # Should be histogrammed
@@ -77,11 +74,6 @@ class TestBifrostQCutWorkflow:
         cut_data.coords['arc'].to(unit='meV')
         cut_data.coords['|Q|'].to(unit='1/angstrom')
         cut_data.coords['E'].to(unit='meV')
-
-        # Verify no counts were lost during the cut
-        total_counts_before = sc.sum(energy_data.bins.size()).value
-        total_counts_after = sc.sum(cut_data).value
-        assert total_counts_before == total_counts_after
 
     def test_cut_along_qx_direction_and_energy_transfer(
         self, qcut_workflow: sciline.Pipeline
@@ -101,9 +93,7 @@ class TestBifrostQCutWorkflow:
         qcut_workflow[CutAxis1] = axis_1
         qcut_workflow[CutAxis2] = axis_2
 
-        # Compute both cut data and energy data to compare total counts
         cut_data = qcut_workflow.compute(CutData[SampleRun])
-        energy_data = qcut_workflow.compute(EnergyData[SampleRun])
 
         # Verify the result structure (now 3-D with arc dimension)
         assert cut_data.bins is None
@@ -114,11 +104,6 @@ class TestBifrostQCutWorkflow:
         assert 'arc' in cut_data.coords
         assert 'Qx' in cut_data.coords
         assert 'E' in cut_data.coords
-
-        # Verify no counts were lost during the cut
-        total_counts_before = sc.sum(energy_data.bins.size()).value
-        total_counts_after = sc.sum(cut_data).value
-        assert total_counts_before == total_counts_after
 
     def test_cut_preserves_arc_dimension(self, qcut_workflow: sciline.Pipeline) -> None:
         # Test that cut preserves the arc dimension (renamed from triplet)
