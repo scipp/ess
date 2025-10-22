@@ -70,10 +70,16 @@ class TestBifrostQCutWorkflow:
         assert '|Q|' in cut_data.coords
         assert 'E' in cut_data.coords
 
-        # Check that coordinates have expected units
+        # Check that coordinates have expected units and values
         cut_data.coords['arc'].to(unit='meV')
         cut_data.coords['|Q|'].to(unit='1/angstrom')
         cut_data.coords['E'].to(unit='meV')
+
+        # Verify arc coordinate values
+        expected_arc_energies = sc.array(
+            dims=['arc'], values=[2.7, 3.2, 3.8, 4.4, 5.0], unit='meV'
+        )
+        sc.testing.assert_allclose(cut_data.coords['arc'], expected_arc_energies)
 
     def test_cut_along_qx_direction_and_energy_transfer(
         self, qcut_workflow: sciline.Pipeline
@@ -104,37 +110,3 @@ class TestBifrostQCutWorkflow:
         assert 'arc' in cut_data.coords
         assert 'Qx' in cut_data.coords
         assert 'E' in cut_data.coords
-
-    def test_cut_preserves_arc_dimension(self, qcut_workflow: sciline.Pipeline) -> None:
-        # Test that cut preserves the arc dimension (renamed from triplet)
-        axis_1 = CutAxis(
-            output='|Q|',
-            fn=lambda sample_table_momentum_transfer: sc.norm(
-                sample_table_momentum_transfer
-            ),
-            bins=sc.linspace(dim='|Q|', start=0.0, stop=3.0, num=50, unit='1/angstrom'),
-        )
-        axis_2 = CutAxis(
-            output='E',
-            fn=lambda energy_transfer: energy_transfer,
-            bins=sc.linspace(dim='E', start=-10.0, stop=10.0, num=50, unit='meV'),
-        )
-
-        qcut_workflow[CutAxis1] = axis_1
-        qcut_workflow[CutAxis2] = axis_2
-
-        cut_data = qcut_workflow.compute(CutData[SampleRun])
-
-        # Verify the result is 3-D with arc dimension preserved
-        assert cut_data.bins is None
-        assert set(cut_data.dims) == {'arc', '|Q|', 'E'}
-        assert cut_data.sizes['arc'] == 5
-        assert cut_data.sizes['|Q|'] == 49
-        assert cut_data.sizes['E'] == 49
-
-        # Verify arc coordinate exists with correct values
-        assert 'arc' in cut_data.coords
-        expected_arc_energies = sc.array(
-            dims=['arc'], values=[2.7, 3.2, 3.8, 4.4, 5.0], unit='meV'
-        )
-        sc.testing.assert_allclose(cut_data.coords['arc'], expected_arc_energies)
