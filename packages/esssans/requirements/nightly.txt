@@ -200,7 +200,7 @@ traitlets==5.14.3
     #   matplotlib-inline
     #   pythreejs
     #   traittypes
-traittypes==0.2.2
+traittypes==0.2.3
     # via ipydatawidgets
 typing-extensions==4.15.0
     # via
