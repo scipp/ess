@@ -44,7 +44,7 @@ fastjsonschema==2.21.2
     # via nbformat
 imagesize==1.4.1
     # via sphinx
-ipykernel==7.0.0
+ipykernel==7.0.1
     # via -r docs.in
 jinja2==3.1.6
     # via
@@ -60,7 +60,7 @@ jupyter-client==8.6.3
     # via
     #   ipykernel
     #   nbclient
-jupyter-core==5.8.1
+jupyter-core==5.9.1
     # via
     #   ipykernel
     #   jupyter-client
@@ -106,7 +106,7 @@ platformdirs==4.5.0
     #   pooch
 pooch==1.8.2
     # via -r docs.in
-psutil==7.1.0
+psutil==7.1.1
     # via ipykernel
 pydantic-settings==2.11.0
     # via autodoc-pydantic
@@ -126,7 +126,7 @@ requests==2.32.5
     # via
     #   pooch
     #   sphinx
-rpds-py==0.27.1
+rpds-py==0.28.0
     # via
     #   jsonschema
     #   referencing
