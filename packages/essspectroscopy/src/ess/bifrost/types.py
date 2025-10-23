@@ -6,6 +6,8 @@
 This module supplements :mod:`ess.spectroscopy.types` with BIFROST-specific types.
 """
 
+from typing import NewType
+
 import sciline
 import scipp as sc
 
@@ -16,3 +18,6 @@ class ArcNumber(sciline.Scope[RunType, sc.Variable], sc.Variable): ...
 
 
 class McStasDetectorData(sciline.Scope[RunType, sc.DataArray], sc.DataArray): ...
+
+
+ArcEnergy = NewType('ArcEnergy', sc.Variable)

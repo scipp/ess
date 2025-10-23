@@ -16,6 +16,7 @@ from ess.spectroscopy.types import (
     RunType,
 )
 
+from .types import ArcEnergy
 from .workflow import BifrostWorkflow
 
 
@@ -95,15 +96,32 @@ class CutData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Data that was cut along CutAxis1 and CutAxis2."""
 
 
+def arc_energy() -> ArcEnergy:
+    """Provide the BIFROST arc energies.
+
+    Returns
+    -------
+    :
+        The final energies for each of the 5 BIFROST analyzer arcs.
+    """
+    return ArcEnergy(
+        sc.array(dims=['arc'], values=[2.7, 3.2, 3.8, 4.4, 5.0], unit='meV')
+    )
+
+
 def cut(
-    data: EnergyData[RunType], *, axis_1: CutAxis1, axis_2: CutAxis2
+    data: EnergyData[RunType],
+    *,
+    axis_1: CutAxis1,
+    axis_2: CutAxis2,
+    arc_energy: ArcEnergy,
 ) -> CutData[RunType]:
     """Cut data along two axes.
 
     This function projects the input ``data`` expressed in :math:`Q` and
     :math:`\\Delta E` onto a 2D surface defined by the cut axes.
-    This integrates over the other dimensions.
-    Then, the projected data is histogrammed according to the axis bins.
+    This integrates over the other dimensions while preserving the arc dimension
+    if present. Then, the projected data is histogrammed according to the axis bins.
 
     Parameters
     ----------
@@ -114,19 +132,40 @@ def cut(
         Defines the projection onto and binning in the first axis.
     axis_2:
         Defines the projection onto and binning in the second axis.
+    arc_energy:
+        The final energies for each analyzer arc.
 
     Returns
     -------
     :
-        ``data`` projected and histogrammed along the cut axes.
+        ``data`` projected and histogrammed along the cut axes. If the input has
+        an arc dimension, it is preserved in the output. Otherwise, all dimensions
+        are integrated.
     """
+    # Determine which dimensions to preserve
+    # Only preserve 'arc' dimension if present; concat everything else
+    preserve_dim = 'arc' if 'arc' in data.dims else None
+
+    # Concat over all dimensions except the one we want to preserve
+    if preserve_dim is not None:
+        dims_to_concat = [dim for dim in data.dims if dim != preserve_dim]
+    else:
+        dims_to_concat = list(data.dims)
+
     new_coords = {axis_1.output, axis_2.output}
-    projected = data.bins.concat().transform_coords(
+    projected = data.bins.concat(dims_to_concat).transform_coords(
         new_coords,
         graph={axis_1.output: axis_1.fn, axis_2.output: axis_2.fn},
         keep_inputs=False,
     )
     projected = projected.drop_coords(list(set(projected.coords.keys()) - new_coords))
+
+    # Add arc coordinate if we're working with arc dimension
+    # Note that this is for identifying the arc, it should NOT be used
+    # as a replacement for a precise final_energy coordinate!
+    if preserve_dim == 'arc':
+        projected = projected.assign_coords(arc=arc_energy)
+
     return CutData[RunType](
         projected.hist({axis_2.output: axis_2.bins, axis_1.output: axis_1.bins})
     )
@@ -135,5 +174,6 @@ def cut(
 def BifrostQCutWorkflow(detector_names: list[NeXusDetectorName]) -> sciline.Pipeline:
     """Workflow for BIFROST to compute cuts in Q-E-space."""
     workflow = BifrostWorkflow(detector_names)
+    workflow.insert(arc_energy)
     workflow.insert(cut)
     return workflow

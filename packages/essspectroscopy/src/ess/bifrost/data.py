@@ -17,6 +17,7 @@ def _make_pooch():
         registry={
             "BIFROST_20240914T053723.h5": "md5:0f2fa5c9a851f8e3a4fa61defaa3752e",
             "computed_energy_data_simulated.h5": "blake2b:3c398443cb85c8294d283c7212255bc695c2520f2332c2c99d041a0760b6bcbb9937e19bcd8a498daf306d279c88d2ea911c510c1ce3b3a7f1e6b7e54022a943",  # noqa: E501
+            "computed_energy_data_simulated_5x2.h5": "blake2b:d9d5e785a08e14d9c3416cf04db89a8c6f2fae3c0bae27bf0e73e8e5d492b4ca406e6578a935fa9f72dd9199dc15536409f614791fee6899c4265fe5d31e2706",  # noqa: E501
             "BIFROST-simulation-tof-lookup-table.h5": "blake2b:682021920a355f789da37b18029719fe20569d86db26cdaf5f3d916d2f76f9360907960ba86903be4cab489d39f1b6f9f265f3a4ab3f82c5e095afa4a2c456af",  # noqa: E501
         },
         retry_if_failed=3,
@@ -57,8 +58,18 @@ def computed_energy_data_simulated() -> str:
     return get_path("computed_energy_data_simulated.h5")
 
 
+def computed_energy_data_simulated_5x2() -> str:
+    """Energy and momentum transfer computed from the simulated BIFROST data.
+
+    This reference was computed with 10 detectors forming a 5x2 grid
+    (arc=5, channel=2).
+    """
+    return get_path("computed_energy_data_simulated_5x2.h5")
+
+
 __all__ = [
     "computed_energy_data_simulated",
+    "computed_energy_data_simulated_5x2",
     "get_path",
     "simulated_elastic_incoherent_with_phonon",
     "tof_lookup_table_simulation",

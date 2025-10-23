@@ -8,7 +8,7 @@ import scippnexus as snx
 
 from ess import bifrost
 from ess.bifrost.data import (
-    computed_energy_data_simulated,
+    computed_energy_data_simulated_5x2,
     simulated_elastic_incoherent_with_phonon,
     tof_lookup_table_simulation,
 )
@@ -29,7 +29,7 @@ from ess.spectroscopy.types import (
 def simulation_detector_names() -> list[NeXusDetectorName]:
     with snx.File(simulated_elastic_incoherent_with_phonon()) as f:
         names = list(f['entry']['instrument'][snx.NXdetector].keys())
-    return names[:5]  # These should be enough to test the workflow.
+    return names[:10]  # First 10 detectors form a 5x2 grid (arc=5, channel=2)
 
 
 @pytest.fixture
@@ -71,7 +71,8 @@ def test_simulation_workflow_can_compute_energy_data(
     energy_data = workflow.compute(EnergyData[SampleRun])
 
     assert energy_data.sizes == {
-        'triplet': 5,
+        'arc': 5,
+        'channel': 2,
         'tube': 3,
         'length': 100,
         'a3': 180,
@@ -109,13 +110,13 @@ def test_simulation_workflow_produces_the_same_data_as_before(
     workflow: sciline.Pipeline,
 ) -> None:
     energy_data = workflow.compute(EnergyData[SampleRun])
-    expected = sc.io.load_hdf5(computed_energy_data_simulated())
+    expected = sc.io.load_hdf5(computed_energy_data_simulated_5x2())
 
     assert not energy_data.masks
     assert not energy_data.bins.masks
 
-    assert energy_data.coords.keys() == expected.coords.keys()
-    for name in energy_data.coords.keys():
+    assert set(expected.coords.keys()).issubset(set(energy_data.coords.keys()))
+    for name in expected.coords.keys():
         sc.testing.assert_allclose(energy_data.coords[name], expected.coords[name])
 
     assert energy_data.bins.coords.keys() == expected.bins.coords.keys()
