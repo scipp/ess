@@ -273,14 +273,7 @@ def _make_dnd_metadata(
         Sample metadata.
     """
     img_range = [
-        sc.array(
-            dims=[name],
-            values=[
-                dnd.coords[name].min(),
-                dnd.coords[name].max(),
-            ],
-            unit=dnd.coords[name].unit,
-        )
+        sc.concat([dnd.coords[name].min(), dnd.coords[name].max()], dim=name)
         for name in ("u1", "u2", "u3", "u4")
     ]
 
