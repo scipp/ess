@@ -193,10 +193,24 @@ def _with_inelastic_coords(observations: sc.DataArray) -> sc.DataArray:
             dtype='float32', copy=False
         ),
         **{
-            f'Q{dim}': sc.dot(axis / sc.norm(axis), q).to(dtype='float32')
+            f'Q{dim}': _project_onto(q, axis).to(dtype='float32')
             for dim, axis in zip('xyz', (_AXIS_U, _AXIS_V, _AXIS_W), strict=True)
         },
     )
+
+
+def _project_onto(vec: sc.Variable, axis: sc.Variable) -> sc.Variable:
+    axis = axis / sc.norm(axis)
+    # Optimization to avoid huge dot-products:
+    match list(axis.values):
+        case [1, 0, 0]:
+            return vec.fields.x
+        case [0, 1, 0]:
+            return vec.fields.y
+        case [0, 0, 1]:
+            return vec.fields.z
+        case _:
+            return sc.dot(axis, vec)
 
 
 def _bin_image(
