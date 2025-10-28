@@ -1,20 +1,29 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+
+"""Domain types for BEER workflows.
+
+The domain types are used to define parameters and to request results from a Sciline
+pipeline.
+"""
+
 from typing import NewType
 
 import sciline
 import scipp as sc
 
-from ess.reduce.nexus.types import DetectorData, Filename, RunType, SampleRun
-from ess.reduce.time_of_flight.types import DetectorTofData
+from ess.reduce.nexus.types import Filename, RawDetector, RunType, SampleRun
+from ess.reduce.time_of_flight.types import TofDetector
 
 
 class StreakClusteredData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Detector data binned by streak"""
 
 
-DetectorData = DetectorData
+RawDetector = RawDetector
 Filename = Filename
 SampleRun = SampleRun
-DetectorTofData = DetectorTofData
+TofDetector = TofDetector
 
 
 TwoThetaLimits = NewType('TwoThetaLimits', tuple[sc.Variable, sc.Variable])

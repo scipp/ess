@@ -22,12 +22,12 @@ from ess.reduce.time_of_flight import types as tof_t
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
 
 CalibratedBeamline = reduce_t.CalibratedBeamline
-CalibratedDetector = reduce_t.CalibratedDetector
-CalibratedMonitor = reduce_t.CalibratedMonitor
-DetectorData = reduce_t.DetectorData
+EmptyDetector = reduce_t.EmptyDetector
+EmptyMonitor = reduce_t.EmptyMonitor
+RawDetector = reduce_t.RawDetector
 DetectorPositionOffset = reduce_t.DetectorPositionOffset
 Filename = reduce_t.Filename
-MonitorData = reduce_t.MonitorData
+RawMonitor = reduce_t.RawMonitor
 MonitorPositionOffset = reduce_t.MonitorPositionOffset
 NeXusDetectorName = reduce_t.NeXusDetectorName
 NeXusMonitorName = reduce_t.NeXusName
@@ -36,8 +36,8 @@ Position = reduce_t.Position
 
 DetectorBankSizes = reduce_t.DetectorBankSizes
 
-DetectorTofData = tof_t.DetectorTofData
-MonitorTofData = tof_t.MonitorTofData
+TofDetector = tof_t.TofDetector
+TofMonitor = tof_t.TofMonitor
 PulseStrideOffset = tof_t.PulseStrideOffset
 TimeOfFlightLookupTable = tof_t.TimeOfFlightLookupTable
 TimeOfFlightLookupTableFilename = tof_t.TimeOfFlightLookupTableFilename
@@ -94,12 +94,12 @@ CalibrationData = NewType("CalibrationData", sc.Dataset | None)
 """Detector calibration data."""
 
 
-class CountsWavelength(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+class WavelengthDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Data with scattering coordinates computed for all events: wavelength, 2theta,
     d-spacing."""
 
 
-class CountsDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+class DspacingDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Data converted to d-spacing."""
 
 
@@ -122,11 +122,11 @@ class FocussedDataDspacingTwoTheta(sciline.Scope[RunType, sc.DataArray], sc.Data
     """Intensity vs (d-spacing, 2theta) after focussing pixels."""
 
 
-class IofDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+class IntensityDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Data that has been normalized by a vanadium run."""
 
 
-class IofDspacingTwoTheta(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+class IntensityDspacingTwoTheta(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Data that has been normalized by a vanadium run, and grouped into 2theta bins."""
 
 
@@ -140,16 +140,21 @@ class EmptyCanSubtractedIofDspacingTwoTheta(
     """Intensity vs. d-spacing and 2theta, subtracted by empty can measurement."""
 
 
-IofTof = NewType("IofTof", sc.DataArray)
+IntensityTof = NewType("IntensityTof", sc.DataArray)
 """Normalized data that has been converted to ToF."""
 
-EmptyCanSubtractedIofTof = NewType("EmptyCanSubtractedIofTof", sc.DataArray)
+EmptyCanSubtractedIntensityTof = NewType("EmptyCanSubtractedIntensityTof", sc.DataArray)
 """Normalized and empty-can-subtracted data that has been converted to ToF."""
 
 
-class MaskedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Data with masked pixels, tof regions, wavelength regions, 2theta regions, or
-    dspacing regions."""
+class CorrectedDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Data with masks and applied corrections.
+
+    Corrections can include
+
+    - Lorentz correction
+    - Absorption correction
+    """
 
 
 MaskedDetectorIDs = NewType("MaskedDetectorIDs", dict[str, sc.Variable])
@@ -173,12 +178,12 @@ class WavelengthMonitor(
     """Monitor histogram in wavelength."""
 
 
-class ReducedCountsDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Reduced counts in Dspacing after partial reduction over pixel dimension."""
+class CorrectedDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Detector data in d-spacing - 2theta space including corrections."""
 
 
-class ScaledCountsDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Reduced counts in Dspacing after scaling by monitor or proton charge."""
+class NormalizedDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Detector data in d-spacing - 2theta space normalized by monitor/proton charge."""
 
 
 PixelMaskFilename = NewType("PixelMaskFilename", str)

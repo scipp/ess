@@ -9,7 +9,7 @@ from collections.abc import Callable, ItemsView, Iterable, Iterator, KeysView, M
 import scipp as sc
 import scipp.constants
 
-from .types import CountsDspacing, SampleRun
+from .types import DspacingDetector, SampleRun
 
 
 class OutputCalibrationData(Mapping[int, sc.Variable]):
@@ -94,7 +94,7 @@ class OutputCalibrationData(Mapping[int, sc.Variable]):
 
 
 def assemble_output_calibration(
-    data: CountsDspacing[SampleRun],
+    data: DspacingDetector[SampleRun],
 ) -> OutputCalibrationData:
     """Construct output calibration data from average pixel positions."""
     # Use nanmean because pixels without events have position=NaN.

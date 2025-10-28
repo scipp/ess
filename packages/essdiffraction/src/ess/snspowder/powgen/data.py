@@ -12,11 +12,11 @@ from ess.powder.types import (
     CalibrationData,
     CalibrationFilename,
     DetectorBankSizes,
-    DetectorTofData,
     Filename,
     ProtonCharge,
     RawDataAndMetadata,
     RunType,
+    TofDetector,
 )
 from ess.reduce.data import Entry, make_registry
 
@@ -200,14 +200,14 @@ def pooch_load_calibration(
 
 def extract_raw_data(
     dg: RawDataAndMetadata[RunType], sizes: DetectorBankSizes
-) -> DetectorTofData[RunType]:
+) -> TofDetector[RunType]:
     """Return the events from a loaded data group."""
     # Remove the tof binning and dimension, as it is not needed and it gets in the way
     # of masking.
     out = dg["data"].squeeze()
     out.coords.pop("tof", None)
     out = out.fold(dim="spectrum", sizes=sizes)
-    return DetectorTofData[RunType](out)
+    return TofDetector[RunType](out)
 
 
 def extract_proton_charge(dg: RawDataAndMetadata[RunType]) -> ProtonCharge[RunType]:
@@ -216,7 +216,7 @@ def extract_proton_charge(dg: RawDataAndMetadata[RunType]) -> ProtonCharge[RunTy
 
 
 def extract_accumulated_proton_charge(
-    data: DetectorTofData[RunType],
+    data: TofDetector[RunType],
 ) -> AccumulatedProtonCharge[RunType]:
     """Return the stored accumulated proton charge from a loaded data group."""
     return AccumulatedProtonCharge[RunType](data.coords["gd_prtn_chrg"])

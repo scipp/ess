@@ -10,8 +10,8 @@ from ess.powder.calibration import OutputCalibrationData
 from ess.powder.types import (
     Beamline,
     CIFAuthors,
-    EmptyCanSubtractedIofTof,
-    IofTof,
+    EmptyCanSubtractedIntensityTof,
+    IntensityTof,
     ReducedEmptyCanSubtractedTofCIF,
     ReducedTofCIF,
     ReducerSoftware,
@@ -20,7 +20,7 @@ from ess.powder.types import (
 
 
 def prepare_reduced_tof_cif(
-    da: IofTof,
+    da: IntensityTof,
     *,
     authors: CIFAuthors,
     beamline: Beamline,
@@ -66,7 +66,7 @@ def prepare_reduced_tof_cif(
 
 
 def prepare_reduced_empty_can_subtracted_tof_cif(
-    da: EmptyCanSubtractedIofTof,
+    da: EmptyCanSubtractedIntensityTof,
     *,
     authors: CIFAuthors,
     beamline: Beamline,
@@ -112,7 +112,7 @@ def prepare_reduced_empty_can_subtracted_tof_cif(
 
 
 def _prepare_reduced_tof_cif_impl(
-    da: IofTof,
+    da: IntensityTof,
     *,
     authors: CIFAuthors,
     beamline: Beamline,

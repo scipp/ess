@@ -6,14 +6,14 @@ import numpy as np
 import scipp as sc
 
 from .types import (
-    CountsDspacing,
+    CorrectedDspacing,
     DspacingBins,
+    DspacingDetector,
     FocussedDataDspacing,
     FocussedDataDspacingTwoTheta,
     KeepEvents,
-    ReducedCountsDspacing,
+    NormalizedDspacing,
     RunType,
-    ScaledCountsDspacing,
     TwoThetaBins,
 )
 
@@ -27,10 +27,10 @@ def _reconstruct_wavelength(
 
 
 def focus_data_dspacing_and_two_theta(
-    data: CountsDspacing[RunType],
+    data: DspacingDetector[RunType],
     dspacing_bins: DspacingBins,
     keep_events: KeepEvents[RunType],
-) -> ReducedCountsDspacing[RunType]:
+) -> CorrectedDspacing[RunType]:
     """
     Reduce the pixel-based data to d-spacing and two-theta dimensions.
 
@@ -82,11 +82,11 @@ def focus_data_dspacing_and_two_theta(
             )
         )
 
-    return ReducedCountsDspacing[RunType](result)
+    return CorrectedDspacing[RunType](result)
 
 
 def integrate_two_theta(
-    data: ScaledCountsDspacing[RunType],
+    data: NormalizedDspacing[RunType],
 ) -> FocussedDataDspacing[RunType]:
     """Integrate the two-theta dimension of the data."""
     if 'two_theta' not in data.dims:
@@ -99,7 +99,7 @@ def integrate_two_theta(
 
 
 def group_two_theta(
-    data: ScaledCountsDspacing[RunType],
+    data: NormalizedDspacing[RunType],
     two_theta_bins: TwoThetaBins,
 ) -> FocussedDataDspacingTwoTheta[RunType]:
     """Group the data by two-theta bins."""

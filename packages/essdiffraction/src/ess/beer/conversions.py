@@ -2,14 +2,14 @@ import scipp as sc
 import scipp.constants
 
 from .types import (
-    DetectorData,
-    DetectorTofData,
     DHKLList,
     ModulationPeriod,
     PulseLength,
+    RawDetector,
     RunType,
     StreakClusteredData,
     TofCoordTransformGraph,
+    TofDetector,
     WavelengthDefinitionChopperDelay,
 )
 
@@ -17,7 +17,7 @@ from .types import (
 def compute_tof_in_each_cluster(
     da: StreakClusteredData[RunType],
     mod_period: ModulationPeriod,
-) -> DetectorTofData[RunType]:
+) -> TofDetector[RunType]:
     '''Fits a line through each cluster, the intercept of the line is t0.
     The line is fitted using linear regression with an outlier removal procedure.
 
@@ -182,8 +182,8 @@ def tof_from_known_dhkl_graph(
 
 
 def compute_tof_from_known_peaks(
-    da: DetectorData[RunType], graph: TofCoordTransformGraph
-) -> DetectorTofData[RunType]:
+    da: RawDetector[RunType], graph: TofCoordTransformGraph
+) -> TofDetector[RunType]:
     return da.transform_coords(('tof',), graph=graph)
 
 

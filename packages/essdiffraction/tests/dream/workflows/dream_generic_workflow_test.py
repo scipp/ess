@@ -7,13 +7,13 @@ import scipp as sc
 import ess.dream.data  # noqa: F401
 from ess import dream
 from ess.reduce.nexus.types import (
-    CalibratedDetector,
-    CalibratedMonitor,
     CaveMonitor,
     DetectorBankSizes,
-    DetectorData,
+    EmptyDetector,
+    EmptyMonitor,
     Filename,
     NeXusDetectorName,
+    RawDetector,
     SampleRun,
 )
 from ess.reduce.nexus.types import NeXusName as NeXusMonitorName
@@ -77,7 +77,7 @@ def params(request):
 def test_can_load_nexus_detector_data(generic_workflow, params):
     for key, value in params.items():
         generic_workflow[key] = value
-    result = generic_workflow.compute(CalibratedDetector[SampleRun])
+    result = generic_workflow.compute(EmptyDetector[SampleRun])
     assert (
         set(result.dims) == hr_sans_dims
         if params[NeXusDetectorName]
@@ -96,14 +96,14 @@ def test_can_load_nexus_monitor_data(generic_workflow):
         'TEST_DREAM_nexus_sorted-2023-12-07.nxs'
     )
     generic_workflow[NeXusMonitorName[CaveMonitor]] = 'monitor_cave'
-    result = generic_workflow.compute(CalibratedMonitor[SampleRun, CaveMonitor])
+    result = generic_workflow.compute(EmptyMonitor[SampleRun, CaveMonitor])
     assert result.sizes == {'event_time_zero': 0}
 
 
 def test_assemble_nexus_detector_data(generic_workflow, params):
     for key, value in params.items():
         generic_workflow[key] = value
-    result = generic_workflow.compute(DetectorData[SampleRun])
+    result = generic_workflow.compute(RawDetector[SampleRun])
     assert (
         set(result.dims) == hr_sans_dims
         if params[NeXusDetectorName]

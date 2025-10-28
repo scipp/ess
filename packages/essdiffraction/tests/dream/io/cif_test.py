@@ -10,12 +10,18 @@ from scippneutron.metadata import ESS_SOURCE, Person
 
 import ess.dream.io.cif
 from ess.powder.calibration import OutputCalibrationData
-from ess.powder.types import Beamline, CIFAuthors, IofTof, ReducerSoftware, Software
+from ess.powder.types import (
+    Beamline,
+    CIFAuthors,
+    IntensityTof,
+    ReducerSoftware,
+    Software,
+)
 
 
 @pytest.fixture
-def ioftof() -> IofTof:
-    return IofTof(
+def ioftof() -> IntensityTof:
+    return IntensityTof(
         sc.DataArray(
             sc.array(dims=['tof'], values=[2.1, 3.2], variances=[0.3, 0.4]),
             coords={'tof': sc.linspace('tof', 0.1, 1.2, 3, unit='us')},
@@ -41,7 +47,7 @@ def save_reduced_tof_to_str(cif_: cif.CIF) -> str:
     return buffer.read()
 
 
-def test_save_reduced_tof(ioftof: IofTof, cal: OutputCalibrationData) -> None:
+def test_save_reduced_tof(ioftof: IntensityTof, cal: OutputCalibrationData) -> None:
     from ess.dream import __version__
 
     author = Person(name='John Doe', corresponding=True)
