@@ -110,10 +110,6 @@ ElasticCoordTransformGraph = NewType("ElasticCoordTransformGraph", dict)
 """Graph for transforming coordinates in elastic scattering."""
 
 
-class FilteredData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Raw data without invalid events."""
-
-
 class FocussedDataDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Intensity vs d-spacing after focussing pixels."""
 

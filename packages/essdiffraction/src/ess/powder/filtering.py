@@ -1,18 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Jan-Lukas Wynen
-"""
-Prototype for event filtering.
-
-IMPORTANT Will be moved to a different place and potentially modified.
-"""
+"""Event filtering."""
 
 from contextlib import contextmanager
 from numbers import Real
 
 import scipp as sc
-
-from .types import FilteredData, RunType, TofDetector
 
 
 def _equivalent_bin_indices(a, b) -> bool:
@@ -72,29 +66,5 @@ def remove_bad_pulses(
     return filtered
 
 
-def filter_events(data: TofDetector[RunType]) -> FilteredData[RunType]:
-    """Remove bad events.
-
-    Attention
-    ---------
-    This function currently does nothing because it is unclear how to filter
-    events at ESS.
-    In the future, this function will filter out events that
-    cannot be used for analysis.
-
-    Parameters
-    ----------
-    data:
-        Input events to be filtered.
-
-    Returns
-    -------
-    :
-        `data` with bad events removed.
-    """
-    # TODO this needs to filter by proton charge once we know how
-    return FilteredData[RunType](data)
-
-
-providers = (filter_events,)
+providers = ()
 """Sciline providers for event filtering."""

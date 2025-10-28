@@ -17,12 +17,12 @@ from .types import (
     ElasticCoordTransformGraph,
     EmptyCanSubtractedIntensityTof,
     EmptyCanSubtractedIofDspacing,
-    FilteredData,
     IntensityDspacing,
     IntensityTof,
     MonitorType,
     RunType,
     SampleRun,
+    TofDetector,
     TofMonitor,
     WavelengthDetector,
     WavelengthMonitor,
@@ -184,7 +184,7 @@ def _restore_tof_if_in_wavelength(data: sc.DataArray) -> sc.DataArray:
 
 
 def add_scattering_coordinates_from_positions(
-    data: FilteredData[RunType], graph: ElasticCoordTransformGraph
+    data: TofDetector[RunType], graph: ElasticCoordTransformGraph
 ) -> WavelengthDetector[RunType]:
     """
     Add ``wavelength`` and ``two_theta`` coordinates to the data.
