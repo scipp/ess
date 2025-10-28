@@ -31,7 +31,7 @@ from ess.sans.types import (
     RunType,
     SampleRun,
     ScatteringRunType,
-    TofData,
+    TofDetector,
     TofMonitor,
     Transmission,
 )
@@ -206,10 +206,10 @@ def dummy_assemble_monitor_data(
 
 def data_to_tof(
     da: RawDetector[ScatteringRunType],
-) -> TofData[ScatteringRunType]:
+) -> TofDetector[ScatteringRunType]:
     """Dummy conversion of data to time-of-flight data.
     The data already has a time-of-flight coordinate."""
-    return TofData[ScatteringRunType](da)
+    return TofDetector[ScatteringRunType](da)
 
 
 def monitor_to_tof(
@@ -262,7 +262,7 @@ def lab_frame_transform() -> NeXusTransformation[snx.NXdetector, ScatteringRunTy
     )
 
 
-def get_detector_ids_from_sample_run(data: TofData[SampleRun]) -> DetectorIDs:
+def get_detector_ids_from_sample_run(data: TofDetector[SampleRun]) -> DetectorIDs:
     """Extract detector IDs from sample run.
 
     This overrides the function in the masking module which gets the detector IDs from

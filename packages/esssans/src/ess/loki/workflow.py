@@ -35,7 +35,7 @@ from ..sans.types import (
     RunType,
     SampleRun,
     ScatteringRunType,
-    TofData,
+    TofDetector,
     TofMonitor,
     Transmission,
     TransmissionRun,
@@ -67,8 +67,8 @@ def _convert_to_tof(da: sc.DataArray) -> sc.DataArray:
 
 def data_to_tof(
     da: RawDetector[ScatteringRunType],
-) -> TofData[ScatteringRunType]:
-    return TofData[ScatteringRunType](_convert_to_tof(da))
+) -> TofDetector[ScatteringRunType]:
+    return TofDetector[ScatteringRunType](_convert_to_tof(da))
 
 
 def monitor_to_tof(

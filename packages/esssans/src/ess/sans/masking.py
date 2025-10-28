@@ -16,7 +16,7 @@ from .types import (
     PixelMaskFilename,
     SampleRun,
     ScatteringRunType,
-    TofData,
+    TofDetector,
 )
 
 
@@ -52,7 +52,7 @@ def to_detector_mask(
 
 
 def apply_pixel_masks(
-    data: TofData[ScatteringRunType],
+    data: TofDetector[ScatteringRunType],
     masks: DetectorMasks,
 ) -> MaskedData[ScatteringRunType]:
     """Apply pixel-specific masks to raw data.

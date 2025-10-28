@@ -175,7 +175,7 @@ class MaskedSolidAngle(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataAr
     """Same as :py:class:`SolidAngle`, but with pixel masks applied"""
 
 
-class TofData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
+class TofDetector(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Data with a time-of-flight coordinate"""
 
 
