@@ -9,7 +9,6 @@ from scippneutron.metadata import ESS_SOURCE
 
 from ess.powder.types import (
     Beamline,
-    CalibratedBeamline,
     CalibrationData,
     CalibrationFilename,
     CaveMonitor,
@@ -265,7 +264,7 @@ def geant4_load_calibration(filename: CalibrationFilename) -> CalibrationData:
 
 
 def assemble_detector_data(
-    detector: CalibratedBeamline[RunType],
+    detector: EmptyDetector[RunType],
 ) -> RawDetector[RunType]:
     """
     In the raw data, the tofs extend beyond 71ms, this is thus not an event_time_offset.

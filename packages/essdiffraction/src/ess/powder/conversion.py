@@ -6,6 +6,7 @@ Coordinate transformations for powder diffraction.
 
 import scipp as sc
 import scippneutron as scn
+import scippnexus as snx
 
 from .calibration import OutputCalibrationData
 from .correction import merge_calibration
@@ -17,9 +18,11 @@ from .types import (
     ElasticCoordTransformGraph,
     EmptyCanSubtractedIntensityTof,
     EmptyCanSubtractedIofDspacing,
+    GravityVector,
     IntensityDspacing,
     IntensityTof,
     MonitorType,
+    Position,
     RunType,
     SampleRun,
     TofDetector,
@@ -150,9 +153,22 @@ def to_dspacing_with_calibration(
     return DspacingDetector[RunType](out)
 
 
-def powder_coordinate_transformation_graph() -> ElasticCoordTransformGraph:
+def powder_coordinate_transformation_graph(
+    source_position: Position[snx.NXsource, RunType],
+    sample_position: Position[snx.NXsample, RunType],
+    gravity: GravityVector,
+) -> ElasticCoordTransformGraph[RunType]:
     """
     Generate a coordinate transformation graph for powder diffraction.
+
+    Parameters
+    ----------
+    source_position:
+        Position of the neutron source.
+    sample_position:
+        Position of the sample.
+    gravity:
+        Gravity vector.
 
     Returns
     -------
@@ -163,6 +179,9 @@ def powder_coordinate_transformation_graph() -> ElasticCoordTransformGraph:
         {
             **scn.conversion.graph.beamline.beamline(scatter=True),
             **scn.conversion.graph.tof.elastic("tof"),
+            'source_position': lambda: source_position,
+            'sample_position': lambda: sample_position,
+            'gravity': lambda: gravity,
         }
     )
 
@@ -184,7 +203,7 @@ def _restore_tof_if_in_wavelength(data: sc.DataArray) -> sc.DataArray:
 
 
 def add_scattering_coordinates_from_positions(
-    data: TofDetector[RunType], graph: ElasticCoordTransformGraph
+    data: TofDetector[RunType], graph: ElasticCoordTransformGraph[RunType]
 ) -> WavelengthDetector[RunType]:
     """
     Add ``wavelength`` and ``two_theta`` coordinates to the data.
@@ -209,7 +228,7 @@ def add_scattering_coordinates_from_positions(
 
 def convert_to_dspacing(
     data: CorrectedDetector[RunType],
-    graph: ElasticCoordTransformGraph,
+    graph: ElasticCoordTransformGraph[RunType],
     calibration: CalibrationData,
 ) -> DspacingDetector[RunType]:
     if calibration is None:

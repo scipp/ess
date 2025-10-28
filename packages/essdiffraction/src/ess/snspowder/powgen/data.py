@@ -6,6 +6,7 @@
 from pathlib import Path
 
 import scipp as sc
+import scippnexus as snx
 
 from ess.powder.types import (
     AccumulatedProtonCharge,
@@ -13,6 +14,7 @@ from ess.powder.types import (
     CalibrationFilename,
     DetectorBankSizes,
     Filename,
+    Position,
     ProtonCharge,
     RawDataAndMetadata,
     RunType,
@@ -222,11 +224,23 @@ def extract_accumulated_proton_charge(
     return AccumulatedProtonCharge[RunType](data.coords["gd_prtn_chrg"])
 
 
+def source_position(dg: RawDataAndMetadata[RunType]) -> Position[snx.NXsource, RunType]:
+    """Return the source position from a loaded data group."""
+    return Position[snx.NXsource, RunType](dg["data"].coords["source_position"])
+
+
+def sample_position(dg: RawDataAndMetadata[RunType]) -> Position[snx.NXsample, RunType]:
+    """Return the sample position from a loaded data group."""
+    return Position[snx.NXsample, RunType](dg["data"].coords["sample_position"])
+
+
 providers = (
     pooch_load,
     pooch_load_calibration,
     extract_accumulated_proton_charge,
     extract_proton_charge,
     extract_raw_data,
+    sample_position,
+    source_position,
 )
 """Sciline Providers for loading POWGEN data."""

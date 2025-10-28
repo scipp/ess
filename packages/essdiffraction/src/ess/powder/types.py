@@ -21,12 +21,12 @@ from ess.reduce.nexus import types as reduce_t
 from ess.reduce.time_of_flight import types as tof_t
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
 
-CalibratedBeamline = reduce_t.CalibratedBeamline
 EmptyDetector = reduce_t.EmptyDetector
 EmptyMonitor = reduce_t.EmptyMonitor
 RawDetector = reduce_t.RawDetector
 DetectorPositionOffset = reduce_t.DetectorPositionOffset
 Filename = reduce_t.Filename
+GravityVector = reduce_t.GravityVector
 RawMonitor = reduce_t.RawMonitor
 MonitorPositionOffset = reduce_t.MonitorPositionOffset
 NeXusDetectorName = reduce_t.NeXusDetectorName
@@ -106,8 +106,9 @@ class DspacingDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
 DspacingHistogram = NewType("DspacingHistogram", sc.DataArray)
 """Histogrammed intensity vs d-spacing."""
 
-ElasticCoordTransformGraph = NewType("ElasticCoordTransformGraph", dict)
-"""Graph for transforming coordinates in elastic scattering."""
+
+class ElasticCoordTransformGraph(sciline.Scope[RunType, dict], dict):
+    """Graph for transforming coordinates in elastic scattering."""
 
 
 class FocussedDataDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):

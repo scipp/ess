@@ -113,5 +113,3 @@ def test_assemble_nexus_detector_data(generic_workflow, params):
         )
         else bank_dims
     )
-    assert "source_position" in result.coords
-    assert "sample_position" in result.coords
