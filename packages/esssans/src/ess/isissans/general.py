@@ -15,7 +15,7 @@ from ess.reduce.nexus.types import NeXusTransformation, Position
 from ess.sans.types import (
     BeamCenter,
     EmptyDetector,
-    CalibratedMonitor,
+    EmptyMonitor,
     DetectorData,
     DetectorIDs,
     DetectorPixelShape,
@@ -198,7 +198,7 @@ def dummy_assemble_detector_data(
 
 
 def dummy_assemble_monitor_data(
-    monitor: CalibratedMonitor[RunType, MonitorType],
+    monitor: EmptyMonitor[RunType, MonitorType],
 ) -> MonitorData[RunType, MonitorType]:
     """Dummy assembly of monitor data, monitor already contains neutron data."""
     return MonitorData[RunType, MonitorType](monitor)
