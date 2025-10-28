@@ -22,7 +22,7 @@ from ess.sans.types import (
     BeamCenter,
     CorrectForGravity,
     Denominator,
-    DetectorData,
+    RawDetector,
     DirectBeamFilename,
     EmptyBeamRun,
     Filename,
@@ -49,7 +49,7 @@ from ess.sans.types import (
 RawDetectorView = NewType('RawDetectorView', sc.DataArray)
 
 
-def _raw_detector_view(data: DetectorData[SampleRun]) -> RawDetectorView:
+def _raw_detector_view(data: RawDetector[SampleRun]) -> RawDetectorView:
     """Very simple raw detector view for initial testing."""
     # Instead of histogramming concrete x and y (which leads to artifacts), another
     # quick option is to slice/sum some dimensions. But it will not give true positions:

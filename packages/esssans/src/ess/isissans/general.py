@@ -16,7 +16,7 @@ from ess.sans.types import (
     BeamCenter,
     EmptyDetector,
     EmptyMonitor,
-    DetectorData,
+    RawDetector,
     DetectorIDs,
     DetectorPixelShape,
     DetectorPositionOffset,
@@ -192,9 +192,9 @@ def get_monitor_data(
 
 def dummy_assemble_detector_data(
     detector: EmptyDetector[RunType],
-) -> DetectorData[RunType]:
+) -> RawDetector[RunType]:
     """Dummy assembly of detector data, detector already contains neutron data."""
-    return DetectorData[RunType](detector)
+    return RawDetector[RunType](detector)
 
 
 def dummy_assemble_monitor_data(
@@ -205,7 +205,7 @@ def dummy_assemble_monitor_data(
 
 
 def data_to_tof(
-    da: DetectorData[ScatteringRunType],
+    da: RawDetector[ScatteringRunType],
 ) -> TofData[ScatteringRunType]:
     """Dummy conversion of data to time-of-flight data.
     The data already has a time-of-flight coordinate."""

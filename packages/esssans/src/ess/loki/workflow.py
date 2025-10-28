@@ -17,7 +17,7 @@ from ..sans.types import (
     BackgroundRun,
     BeamCenter,
     DetectorBankSizes,
-    DetectorData,
+    RawDetector,
     DetectorPixelShape,
     DirectBeam,
     DirectBeamFilename,
@@ -66,7 +66,7 @@ def _convert_to_tof(da: sc.DataArray) -> sc.DataArray:
 
 
 def data_to_tof(
-    da: DetectorData[ScatteringRunType],
+    da: RawDetector[ScatteringRunType],
 ) -> TofData[ScatteringRunType]:
     return TofData[ScatteringRunType](_convert_to_tof(da))
 

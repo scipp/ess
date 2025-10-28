@@ -18,7 +18,7 @@ from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroad
 BackgroundRun = reduce_t.BackgroundRun
 EmptyDetector = reduce_t.EmptyDetector
 EmptyMonitor = reduce_t.EmptyMonitor
-DetectorData = reduce_t.DetectorData
+RawDetector = reduce_t.RawDetector
 DetectorPositionOffset = reduce_t.DetectorPositionOffset
 EmptyBeamRun = reduce_t.EmptyBeamRun
 Filename = reduce_t.Filename
