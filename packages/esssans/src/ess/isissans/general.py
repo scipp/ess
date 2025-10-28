@@ -22,7 +22,7 @@ from ess.sans.types import (
     DetectorPositionOffset,
     Incident,
     Measurement,
-    MonitorData,
+    RawMonitor,
     MonitorPositionOffset,
     MonitorType,
     NeXusComponent,
@@ -199,9 +199,9 @@ def dummy_assemble_detector_data(
 
 def dummy_assemble_monitor_data(
     monitor: EmptyMonitor[RunType, MonitorType],
-) -> MonitorData[RunType, MonitorType]:
+) -> RawMonitor[RunType, MonitorType]:
     """Dummy assembly of monitor data, monitor already contains neutron data."""
-    return MonitorData[RunType, MonitorType](monitor)
+    return RawMonitor[RunType, MonitorType](monitor)
 
 
 def data_to_tof(
@@ -213,7 +213,7 @@ def data_to_tof(
 
 
 def monitor_to_tof(
-    da: MonitorData[RunType, MonitorType],
+    da: RawMonitor[RunType, MonitorType],
 ) -> TofMonitor[RunType, MonitorType]:
     """Dummy conversion of monitor data to time-of-flight data.
     The monitor data already has a time-of-flight coordinate."""

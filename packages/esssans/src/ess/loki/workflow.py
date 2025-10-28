@@ -24,7 +24,7 @@ from ..sans.types import (
     EmptyBeamRun,
     Filename,
     Incident,
-    MonitorData,
+    RawMonitor,
     MonitorType,
     NeXusComponent,
     NeXusDetectorName,
@@ -72,7 +72,7 @@ def data_to_tof(
 
 
 def monitor_to_tof(
-    da: MonitorData[RunType, MonitorType],
+    da: RawMonitor[RunType, MonitorType],
 ) -> TofMonitor[RunType, MonitorType]:
     return TofMonitor[RunType, MonitorType](_convert_to_tof(da))
 
