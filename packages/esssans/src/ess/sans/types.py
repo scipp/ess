@@ -270,7 +270,7 @@ class WavelengthMonitor(
     """Monitor data converted to wavelength"""
 
 
-class CleanMonitor(sciline.Scope[RunType, MonitorType, sc.DataArray], sc.DataArray):
+class CorrectedMonitor(sciline.Scope[RunType, MonitorType, sc.DataArray], sc.DataArray):
     """Monitor data cleaned of background counts"""
 
 

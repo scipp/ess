@@ -12,7 +12,7 @@ from .types import (
     BackgroundSubtractedIofQ,
     BackgroundSubtractedIofQxy,
     CleanDirectBeam,
-    CleanMonitor,
+    CorrectedMonitor,
     CleanQ,
     CleanQxy,
     CleanSummedQ,
@@ -41,7 +41,7 @@ def preprocess_monitor_data(
     wavelength_bins: WavelengthBins,
     non_background_range: NonBackgroundWavelengthRange,
     uncertainties: UncertaintyBroadcastMode,
-) -> CleanMonitor[RunType, MonitorType]:
+) -> CorrectedMonitor[RunType, MonitorType]:
     """
     Prepare monitor data for computing the transmission fraction.
     The input data are first converted to wavelength (if needed).
@@ -88,7 +88,7 @@ def preprocess_monitor_data(
         monitor -= broadcast_uncertainties(
             background, prototype=monitor, mode=uncertainties
         )
-    return CleanMonitor(monitor)
+    return CorrectedMonitor(monitor)
 
 
 def resample_direct_beam(
