@@ -16,7 +16,7 @@ from ess.reduce.nexus import types as reduce_t
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
 
 BackgroundRun = reduce_t.BackgroundRun
-CalibratedDetector = reduce_t.CalibratedDetector
+EmptyDetector = reduce_t.EmptyDetector
 CalibratedMonitor = reduce_t.CalibratedMonitor
 DetectorData = reduce_t.DetectorData
 DetectorPositionOffset = reduce_t.DetectorPositionOffset

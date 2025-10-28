@@ -8,7 +8,7 @@ import scipp as sc
 from ess.reduce.workflow import register_workflow
 from ess.sans import SansWorkflow
 from ess.sans.parameters import typical_outputs
-from ess.sans.types import BeamCenter, CalibratedDetector, DetectorMasks, SampleRun
+from ess.sans.types import BeamCenter, EmptyDetector, DetectorMasks, SampleRun
 
 from .general import default_parameters
 from .io import load_tutorial_direct_beam, load_tutorial_run
@@ -26,7 +26,7 @@ SampleHolderMask = NewType('SampleHolderMask', sc.Variable | None)
 
 
 def detector_edge_mask(
-    beam_center: BeamCenter, sample: CalibratedDetector[SampleRun]
+    beam_center: BeamCenter, sample: EmptyDetector[SampleRun]
 ) -> DetectorEdgeMask:
     # These values were determined by hand before the beam center was available.
     # We therefore undo the shift introduced by the beam center.
@@ -39,7 +39,7 @@ def detector_edge_mask(
 
 def sample_holder_mask(
     beam_center: BeamCenter,
-    sample: CalibratedDetector[SampleRun],
+    sample: EmptyDetector[SampleRun],
     low_counts_threshold: LowCountThreshold,
 ) -> SampleHolderMask:
     # These values were determined by hand before the beam center was available.

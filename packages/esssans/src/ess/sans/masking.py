@@ -8,7 +8,7 @@ import numpy as np
 import scipp as sc
 
 from .types import (
-    CalibratedDetector,
+    EmptyDetector,
     DetectorIDs,
     DetectorMasks,
     MaskedData,
@@ -20,7 +20,7 @@ from .types import (
 )
 
 
-def get_detector_ids_from_detector(data: CalibratedDetector[SampleRun]) -> DetectorIDs:
+def get_detector_ids_from_detector(data: EmptyDetector[SampleRun]) -> DetectorIDs:
     """Extract detector IDs from a detector."""
     return DetectorIDs(
         data.coords[

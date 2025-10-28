@@ -14,7 +14,7 @@ import scippnexus as snx
 from ess.reduce.nexus.types import NeXusTransformation, Position
 from ess.sans.types import (
     BeamCenter,
-    CalibratedDetector,
+    EmptyDetector,
     CalibratedMonitor,
     DetectorData,
     DetectorIDs,
@@ -128,7 +128,7 @@ def get_calibrated_isis_detector(
     detector: NeXusComponent[snx.NXdetector, RunType],
     *,
     offset: DetectorPositionOffset[RunType],
-) -> CalibratedDetector[RunType]:
+) -> EmptyDetector[RunType]:
     """
     Replacement for :py:func:`ess.reduce.nexus.workflow.get_calibrated_detector`.
 
@@ -142,7 +142,7 @@ def get_calibrated_isis_detector(
     """
     da = detector['data']
     position = detector['data'].coords['position']
-    return CalibratedDetector[RunType](
+    return EmptyDetector[RunType](
         da.assign_coords(position=position + offset.to(unit=position.unit))
     )
 
@@ -191,7 +191,7 @@ def get_monitor_data(
 
 
 def dummy_assemble_detector_data(
-    detector: CalibratedDetector[RunType],
+    detector: EmptyDetector[RunType],
 ) -> DetectorData[RunType]:
     """Dummy assembly of detector data, detector already contains neutron data."""
     return DetectorData[RunType](detector)

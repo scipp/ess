@@ -171,7 +171,7 @@ def _iofq_in_quadrants(
     for i, quad in enumerate(quadrants):
         # Select pixels based on phi
         sel = (phi >= phi_bins[i]) & (phi < phi_bins[i + 1])
-        # The beam center is applied when computing CalibratedDetector, set quadrant
+        # The beam center is applied when computing EmptyDetector, set quadrant
         # *before* that step.
         workflow[NeXusComponent[snx.NXdetector, SampleRun]] = sc.DataGroup(
             data=detector[sel]
