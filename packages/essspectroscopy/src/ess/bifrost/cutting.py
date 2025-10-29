@@ -9,15 +9,15 @@ import scipp as sc
 
 from ess.spectroscopy.types import (
     DataGroupedByRotation,
-    DetectorData,
     InstrumentAngle,
+    RawDetector,
     RunType,
     SampleAngle,
 )
 
 
 def group_by_rotation(
-    data: DetectorData[RunType],
+    data: RawDetector[RunType],
     sample_angle: SampleAngle[RunType],
     instrument_angle: InstrumentAngle[RunType],
 ) -> DataGroupedByRotation[RunType]:

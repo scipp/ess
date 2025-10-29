@@ -12,7 +12,7 @@ from ess.bifrost.data import (
 )
 from ess.bifrost.live import CutAxis, CutAxis1, CutAxis2, arc_energy, cut
 from ess.spectroscopy.types import (
-    EnergyData,
+    EnergyQDetector,
     Filename,
     NeXusDetectorName,
     SampleRun,
@@ -30,15 +30,15 @@ def simulation_detector_names() -> list[NeXusDetectorName]:
 @pytest.fixture
 def energy_data(
     simulation_detector_names: list[NeXusDetectorName],
-) -> EnergyData[SampleRun]:
+) -> EnergyQDetector[SampleRun]:
     workflow = bifrost.BifrostSimulationWorkflow(simulation_detector_names)
     workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
     workflow[TimeOfFlightLookupTable] = sc.io.load_hdf5(tof_lookup_table_simulation())
-    return workflow.compute(EnergyData[SampleRun])
+    return workflow.compute(EnergyQDetector[SampleRun])
 
 
 def test_cut_along_q_norm_and_energy_transfer_preserves_counts(
-    energy_data: EnergyData[SampleRun],
+    energy_data: EnergyQDetector[SampleRun],
 ) -> None:
     # Define cut axes for |Q| and energy transfer
     axis_1 = CutAxis(
@@ -68,7 +68,7 @@ def test_cut_along_q_norm_and_energy_transfer_preserves_counts(
 
 
 def test_cut_along_qx_direction_preserves_counts(
-    energy_data: EnergyData[SampleRun],
+    energy_data: EnergyQDetector[SampleRun],
 ) -> None:
     # Test cutting along a specific Q direction (Qx)
     axis_1 = CutAxis.from_q_vector(

@@ -7,30 +7,30 @@ import scipp as sc
 import scippnexus as snx
 
 from ess.spectroscopy.types import (
-    BeamlineWithSpectrometerCoords,
-    DetectorData,
+    EmptyDetector,
     NeXusData,
     PulsePeriod,
+    RawDetector,
     RunType,
 )
 
-from ..types import McStasDetectorData
+from ..types import McStasRawDetector
 
 
 def assemble_detector_data(
-    detector: BeamlineWithSpectrometerCoords[RunType],
+    detector: EmptyDetector[RunType],
     event_data: NeXusData[snx.NXdetector, RunType],
-) -> McStasDetectorData[RunType]:
+) -> McStasRawDetector[RunType]:
     """Custom assemble function that returns McStasDetectorData."""
     from ess.reduce.nexus.workflow import assemble_detector_data as reduce_assemble
 
-    return McStasDetectorData[RunType](reduce_assemble(detector, event_data))
+    return McStasRawDetector[RunType](reduce_assemble(detector, event_data))
 
 
 def convert_simulated_time_to_event_time_offset(
-    mcstas_data: McStasDetectorData[RunType],
+    mcstas_data: McStasRawDetector[RunType],
     pulse_period: PulsePeriod,
-) -> DetectorData[RunType]:
+) -> RawDetector[RunType]:
     """Helper to make McStas simulated event data look more like real data
 
     McStas has the ability to track the time-of-flight from source to detector for
@@ -67,7 +67,7 @@ def convert_simulated_time_to_event_time_offset(
         keep_intermediate=False,
         keep_inputs=False,
     )
-    return DetectorData[RunType](
+    return RawDetector[RunType](
         res.transform_coords(event_time_offset='frame_time', keep_inputs=False)
     )
 

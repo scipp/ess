@@ -13,13 +13,12 @@ from ess.reduce.nexus import types as reduce_t
 
 # NeXus types
 
-CalibratedBeamline = reduce_t.CalibratedBeamline
-CalibratedDetector = reduce_t.CalibratedDetector
-DetectorData = reduce_t.DetectorData
+EmptyDetector = reduce_t.EmptyDetector
+RawDetector = reduce_t.RawDetector
 DetectorPositionOffset = reduce_t.DetectorPositionOffset
 GravityVector = reduce_t.GravityVector
 Filename = reduce_t.Filename
-MonitorData = reduce_t.MonitorData
+RawMonitor = reduce_t.RawMonitor
 NeXusClass = reduce_t.NeXusClass
 NeXusComponentLocationSpec = reduce_t.NeXusComponentLocationSpec
 NeXusComponent = reduce_t.NeXusComponent
@@ -53,8 +52,8 @@ MonitorType = TypeVar(
 
 # Time-of-flight types
 
-DetectorTofData = time_of_flight.DetectorTofData
-MonitorTofData = time_of_flight.MonitorTofData
+TofDetector = time_of_flight.TofDetector
+TofMonitor = time_of_flight.TofMonitor
 MonitorLtotal = time_of_flight.MonitorLtotal
 PulseStride = time_of_flight.PulseStride
 PulseStrideOffset = time_of_flight.PulseStrideOffset
@@ -65,15 +64,15 @@ TimeOfFlightLookupTableFilename = time_of_flight.TimeOfFlightLookupTableFilename
 # Custom types
 
 
-class Analyzer(sciline.Scope[RunType, sc.DataGroup[Any]], sc.DataGroup[Any]): ...
+class Analyzer(sciline.Scope[RunType, sc.DataGroup[Any]], sc.DataGroup[Any]):
+    """A single wavelength analyzer loaded from an NXcrystal.
+
+    Can be obtained from ``Analyzers``.
+    """
 
 
-class Analyzers(sciline.Scope[RunType, sc.DataGroup[Any]], sc.DataGroup[Any]): ...
-
-
-class BeamlineWithSpectrometerCoords(
-    sciline.Scope[RunType, sc.DataArray], sc.DataArray
-): ...
+class Analyzers(sciline.Scope[RunType, sc.DataGroup[Any]], sc.DataGroup[Any]):
+    """All wavelength analyzers loaded from a NXcrystals."""
 
 
 class DataAtSample(sciline.Scope[RunType, sc.DataArray], sc.DataArray): ...
@@ -88,7 +87,10 @@ class DetectorCountsWithQ(sciline.Scope[RunType, sc.DataArray], sc.DataArray): .
 ElasticCoordTransformGraph = NewType('ElasticCoordTransformGraph', dict)
 
 
-class EnergyData(sciline.Scope[RunType, sc.DataArray], sc.DataArray): ...
+class QDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray): ...
+
+
+class EnergyQDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray): ...
 
 
 InelasticCoordTransformGraph = NewType('InelasticCoordTransformGraph', dict)
@@ -119,6 +121,12 @@ class PrimarySpecCoordTransformGraph(sciline.Scope[RunType, dict], dict): ...
 
 
 class SecondarySpecCoordTransformGraph(sciline.Scope[RunType, dict], dict): ...
+
+
+class ElasticCoordTransformGraph(sciline.Scope[RunType, dict], dict): ...
+
+
+SQWBinSizes = NewType('SQWBinSizes', dict[str, int])
 
 
 class WavelengthMonitor(
