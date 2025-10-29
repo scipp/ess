@@ -3,7 +3,7 @@
 
 """Data for tests and documentation with BIFROST."""
 
-_version = "3"
+_version = "4"
 
 
 def _make_pooch():
@@ -16,8 +16,8 @@ def _make_pooch():
         version=_version,
         registry={
             "BIFROST_20240914T053723.h5": "md5:0f2fa5c9a851f8e3a4fa61defaa3752e",
-            "computed_energy_data_simulated.h5": "blake2b:3c398443cb85c8294d283c7212255bc695c2520f2332c2c99d041a0760b6bcbb9937e19bcd8a498daf306d279c88d2ea911c510c1ce3b3a7f1e6b7e54022a943",  # noqa: E501
-            "computed_energy_data_simulated_5x2.h5": "blake2b:d9d5e785a08e14d9c3416cf04db89a8c6f2fae3c0bae27bf0e73e8e5d492b4ca406e6578a935fa9f72dd9199dc15536409f614791fee6899c4265fe5d31e2706",  # noqa: E501
+            "computed_energy_data_simulated.h5": "blake2b:690d837ce684a0aeea021b2624c5f7371e299f1bbc803725b40bf3eca35816e3348a79e5fdf04dc89e29c4bdd4f6ea2b052b49058eecfdf535b9733eefa8a854",  # noqa: E501
+            "computed_energy_data_simulated_5x2.h5": "blake2b:0353f7e675a276451637fd175eef4f3d231a68a8983faf1240796fef44c9f3e78a264baf705e24d71f001afc83d07bbf1bff17e5bd83a15db89386a43dd5d5d7",  # noqa: E501
             "BIFROST-simulation-tof-lookup-table.h5": "blake2b:682021920a355f789da37b18029719fe20569d86db26cdaf5f3d916d2f76f9360907960ba86903be4cab489d39f1b6f9f265f3a4ab3f82c5e095afa4a2c456af",  # noqa: E501
         },
         retry_if_failed=3,

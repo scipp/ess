@@ -5,16 +5,31 @@
 
 from __future__ import annotations
 
+import scippnexus as snx
+
 from ess.spectroscopy.types import (
+    GravityVector,
+    Position,
     PrimarySpecCoordTransformGraph,
     RunType,
 )
 
 
-def primary_spectrometer_coordinate_transformation_graph() -> (
-    PrimarySpecCoordTransformGraph[RunType]
-):
+def primary_spectrometer_coordinate_transformation_graph(
+    source_position: Position[snx.NXsource, RunType],
+    sample_position: Position[snx.NXsample, RunType],
+    gravity: GravityVector,
+) -> PrimarySpecCoordTransformGraph[RunType]:
     """Return a coordinate transformation graph for the primary spectrometer.
+
+    Parameters
+    ----------
+    source_position:
+        Position of the neutron source.
+    sample_position:
+        Position of the sample.
+    gravity:
+        Gravity vector.
 
     Returns
     -------
@@ -35,6 +50,9 @@ def primary_spectrometer_coordinate_transformation_graph() -> (
         {
             "incident_beam": straight_incident_beam,
             "L1": L1,
+            "sample_position": lambda: sample_position,
+            "source_position": lambda: source_position,
+            "gravity": lambda: gravity,
         }
     )
 

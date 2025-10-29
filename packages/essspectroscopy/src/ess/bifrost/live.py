@@ -11,7 +11,7 @@ import sciline
 import scipp as sc
 
 from ess.spectroscopy.types import (
-    EnergyData,
+    EnergyQDetector,
     NeXusDetectorName,
     RunType,
 )
@@ -110,7 +110,7 @@ def arc_energy() -> ArcEnergy:
 
 
 def cut(
-    data: EnergyData[RunType],
+    data: EnergyQDetector[RunType],
     *,
     axis_1: CutAxis1,
     axis_2: CutAxis2,

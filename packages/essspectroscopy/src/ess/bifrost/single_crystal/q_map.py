@@ -12,7 +12,7 @@ import plopp as pp
 import scipp as sc
 from matplotlib.axes import Axes
 
-from ess.spectroscopy.types import DetectorCountsWithQ, RunType
+from ess.spectroscopy.types import QDetector, RunType
 
 from .types import (
     CountsWithQMapCoords,
@@ -27,7 +27,7 @@ from .types import (
 
 
 def project_momentum_transfer(
-    counts: DetectorCountsWithQ[RunType],
+    counts: QDetector[RunType],
     *,
     q_projection: QProjection,
 ) -> CountsWithQMapCoords[RunType]:
