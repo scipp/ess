@@ -84,7 +84,7 @@ matplotlib==3.10.7
     # via
     #   mpltoolbox
     #   plopp
-matplotlib-inline==0.1.7
+matplotlib-inline==0.2.1
     # via ipython
 mpltoolbox==25.10.0
     # via scippneutron
@@ -180,7 +180,7 @@ scippnexus @ git+https://github.com/scipp/scippnexus@main
     #   -r nightly.in
     #   essreduce
     #   scippneutron
-scipy==1.16.2
+scipy==1.16.3
     # via
     #   -r nightly.in
     #   scippneutron

@@ -24,7 +24,7 @@ beautifulsoup4==4.14.2
     # via
     #   nbconvert
     #   pydata-sphinx-theme
-bleach[css]==6.2.0
+bleach[css]==6.3.0
     # via nbconvert
 certifi==2025.10.5
     # via requests
@@ -44,7 +44,7 @@ fastjsonschema==2.21.2
     # via nbformat
 imagesize==1.4.1
     # via sphinx
-ipykernel==7.0.1
+ipykernel==7.1.0
     # via -r docs.in
 jinja2==3.1.6
     # via
@@ -106,13 +106,13 @@ platformdirs==4.5.0
     #   pooch
 pooch==1.8.2
     # via -r docs.in
-psutil==7.1.1
+psutil==7.1.2
     # via ipykernel
 pydantic-settings==2.11.0
     # via autodoc-pydantic
 pydata-sphinx-theme==0.16.1
     # via -r docs.in
-python-dotenv==1.1.1
+python-dotenv==1.2.1
     # via pydantic-settings
 pyzmq==27.1.0
     # via
