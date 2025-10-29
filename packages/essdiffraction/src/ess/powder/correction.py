@@ -59,11 +59,15 @@ def normalize_by_monitor_histogram(
     )
     lut = sc.lookup(norm, dim="wavelength")
     if detector.bins is None:
-        result = (
-            detector / lut[sc.midpoints(detector.coords['wavelength'], dim='dspacing')]
-        )
+        c = lut[sc.midpoints(detector.coords['wavelength'], dim='dspacing')]
+        result = detector / c
+        result.masks['monitor_intensity_is_zero'] = c == sc.scalar(0.0, unit=c.unit)
     else:
-        result = detector.bins / lut
+        c = lut(detector.bins.coords['wavelength'])
+        result = detector / c
+        result.bins.masks['monitor_intensity_is_zero'] = c == sc.scalar(
+            0.0, unit=c.unit
+        )
     return ScaledCountsDspacing[RunType](result)
 
 

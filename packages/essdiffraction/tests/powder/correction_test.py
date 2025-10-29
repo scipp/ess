@@ -347,7 +347,12 @@ def test_normalize_by_monitor_histogram_expected_results():
         monitor=WavelengthMonitor[SampleRun, CaveMonitor](monitor),
         uncertainty_broadcast_mode=UncertaintyBroadcastMode.fail,
     )
-    expected = ScaledCountsDspacing[SampleRun](detector / monitor.data)
+    # Simple way to get all false array same shape as detector data.
+    # Is there a better way?
+    all_false = sc.isinf(detector.bins.data)
+    expected = ScaledCountsDspacing[SampleRun](
+        detector / monitor.data
+    ).bins.assign_masks({'monitor_intensity_is_zero': all_false})
     sc.testing.assert_identical(normalized, expected)
 
 
@@ -362,12 +367,16 @@ def test_normalize_by_monitor_histogram_ignores_monitor_values_out_of_range():
             'wavelength': sc.array(dims=['wavelength'], values=[0.0, 3, 4], unit='Å')
         },
     )
+    # Simple way to get all false array same shape as detector data.
+    all_false = sc.isinf(detector.bins.data)
     normalized = normalize_by_monitor_histogram(
         CountsWavelength[SampleRun](detector),
         monitor=WavelengthMonitor[SampleRun, CaveMonitor](monitor),
         uncertainty_broadcast_mode=UncertaintyBroadcastMode.fail,
     )
-    expected = ScaledCountsDspacing[SampleRun](detector / sc.scalar(4.0, unit='counts'))
+    expected = ScaledCountsDspacing[SampleRun](
+        detector / sc.scalar(4.0, unit='counts')
+    ).bins.assign_masks({'monitor_intensity_is_zero': all_false})
     sc.testing.assert_identical(normalized, expected)
 
 

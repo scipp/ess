@@ -10,8 +10,19 @@ import scipp as sc
 import scipp.testing
 import scippnexus as snx
 
-from ess.dream import DreamGeant4ProtonChargeWorkflow, data, load_geant4_csv
-from ess.powder.types import Filename, NeXusComponent, NeXusDetectorName, SampleRun
+from ess.dream import DreamGeant4ProtonChargeWorkflow, data, io, load_geant4_csv
+from ess.powder.types import (
+    CaveMonitorPosition,
+    Filename,
+    NeXusComponent,
+    NeXusDetectorName,
+    SampleRun,
+)
+
+
+@pytest.fixture(scope="module")
+def monitor_file_path():
+    return data.simulated_monitor_diamond_sample()
 
 
 @pytest.fixture(scope="module")
@@ -184,3 +195,15 @@ def test_geant4_in_workflow(file_path, file):
     expected = load_geant4_csv(file)["instrument"]["mantle"]["events"]
     expected.coords["detector"] = sc.scalar("mantle")
     sc.testing.assert_identical(detector, expected)
+
+
+def test_geant4_monitor_in_expected_range(monitor_file_path):
+    dummy_position = CaveMonitorPosition(sc.vector([0, 0, 0.0], unit='m'))
+    mon = io.geant4.load_mcstas_monitor(monitor_file_path, dummy_position)['data']
+    assert (
+        mon.coords['tof'] >= sc.scalar(0.0, unit='s').to(unit=mon.coords['tof'].unit)
+    ).all()
+    assert (
+        mon.coords['tof']
+        <= sc.scalar(1 / 14.0, unit='s').to(unit=mon.coords['tof'].unit)
+    ).all()

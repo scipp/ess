@@ -196,6 +196,27 @@ def _to_edges(centers: sc.Variable) -> sc.Variable:
     )
 
 
+def _rebin_to_tofrange(da):
+    '''Rebins a monitor TOA histogram to the range of values
+    expected from a real instrument at ESS.
+    That is, to the range [0, 1/14] s.
+
+    Strategy:
+        1. Create a grid that alingns with the pulse times.
+        2. Rebin TOA on that grid.
+        3. Fold pulses into new dimension and sum over pulses.
+    '''
+    dim = da.dim
+    unit = da.coords[dim].unit
+    period = (1.0 / sc.scalar(14.0, unit='Hz')).to(unit=unit)
+    N = sc.sum(da.coords[dim] < period).value
+    K = (da.coords[dim].max() // period + 1).to(dtype='int')
+    grid = sc.linspace(dim, sc.scalar(0.0, unit=unit), K * period, K * (N - 1) + 1)
+    out = da.rebin({dim: grid}).fold(dim, sizes={'_': K, dim: N - 1}).sum('_')
+    out.coords[dim] = sc.linspace(dim, sc.scalar(0.0, unit=unit), period, N)
+    return out
+
+
 def load_mcstas_monitor(
     file_path: MonitorFilename[RunType],
     position: CaveMonitorPosition,
@@ -221,14 +242,14 @@ def load_mcstas_monitor(
     tof, counts, err = np.loadtxt(file_path, usecols=(0, 1, 2), unpack=True)
 
     tof = _to_edges(sc.array(dims=["tof"], values=tof, unit="us"))
+    data = sc.DataArray(
+        sc.array(dims=["tof"], values=counts, variances=err**2, unit="counts"),
+        coords={"tof": tof},
+    )
+    data = _rebin_to_tofrange(data)
     return NeXusComponent[CaveMonitor, RunType](
         sc.DataGroup(
-            data=sc.DataArray(
-                sc.array(dims=["tof"], values=counts, variances=err**2, unit="counts"),
-                coords={
-                    "tof": tof,
-                },
-            ),
+            data=data,
             position=position,
         )
     )
