@@ -26,7 +26,7 @@ beautifulsoup4==4.14.2
     # via
     #   nbconvert
     #   pydata-sphinx-theme
-bleach[css]==6.2.0
+bleach[css]==6.3.0
     # via nbconvert
 certifi==2025.10.5
     # via requests
@@ -54,7 +54,7 @@ fastjsonschema==2.21.2
     # via nbformat
 imagesize==1.4.1
     # via sphinx
-ipykernel==7.0.1
+ipykernel==7.1.0
     # via -r docs.in
 ipympl==0.9.8
     # via -r docs.in
@@ -105,7 +105,7 @@ markupsafe==3.0.3
     # via
     #   jinja2
     #   nbconvert
-matplotlib-inline==0.1.7
+matplotlib-inline==0.2.1
     # via
     #   ipykernel
     #   ipython
@@ -144,7 +144,7 @@ pooch==1.8.2
     # via -r docs.in
 prompt-toolkit==3.0.52
     # via ipython
-psutil==7.1.1
+psutil==7.1.2
     # via ipykernel
 ptyprocess==0.7.0
     # via pexpect
@@ -162,7 +162,7 @@ pygments==2.19.2
     #   nbconvert
     #   pydata-sphinx-theme
     #   sphinx
-python-dotenv==1.1.1
+python-dotenv==1.2.1
     # via pydantic-settings
 pyyaml==6.0.3
     # via myst-parser
@@ -178,7 +178,7 @@ requests==2.32.5
     # via
     #   pooch
     #   sphinx
-rpds-py==0.27.1
+rpds-py==0.28.0
     # via
     #   jsonschema
     #   referencing
