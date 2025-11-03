@@ -69,4 +69,8 @@
 hidden:
 ---
 
+user-guide/index
+api-reference/index
+developer/index
+about/index
 ```
