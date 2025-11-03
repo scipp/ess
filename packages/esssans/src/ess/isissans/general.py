@@ -220,9 +220,9 @@ def monitor_to_tof(
     return TofMonitor[RunType, MonitorType](da)
 
 
-def experiment_metadata(dg: LoadedFileContents[SampleRun]) -> Measurement:
+def experiment_metadata(dg: LoadedFileContents[RunType]) -> Measurement[RunType]:
     """Get experiment metadata from the raw sample data."""
-    return Measurement(
+    return Measurement[RunType](
         title=dg['run_title'].value,
         run_number=dg['run_number'],
     )
