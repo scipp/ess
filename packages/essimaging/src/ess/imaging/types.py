@@ -2,7 +2,7 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 from collections.abc import Callable
 from types import MappingProxyType
-from typing import NewType, TypeVar
+from typing import NewType
 
 import sciline
 import scipp as sc
@@ -51,11 +51,8 @@ BeamMonitor3 = NewType('BeamMonitor3', int)
 BeamMonitor4 = NewType('BeamMonitor4', int)
 """Beam monitor number 4"""
 
-# TODO no constraints!
-RunType = TypeVar("RunType", SampleRun, DarkBackgroundRun, OpenBeamRun)
-MonitorType = TypeVar(
-    "MonitorType", BeamMonitor1, BeamMonitor2, BeamMonitor3, BeamMonitor4
-)
+RunType = reduce_t.RunType
+MonitorType = reduce_t.MonitorType
 
 
 class CoordTransformGraph(sciline.Scope[RunType, dict], dict):
@@ -77,4 +74,4 @@ class MaskedDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Detector data with masks."""
 
 
-del sc, sciline, NewType, TypeVar
+del sc, sciline, NewType
