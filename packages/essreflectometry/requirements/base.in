@@ -11,5 +11,5 @@ sciline>=24.6.0
 scipp>=24.09.1
 scippneutron>=24.10.0
 scippnexus>=24.9.1
-essreduce>=25.10.2
+essreduce>=25.11.0
 pandas>=2.1.2

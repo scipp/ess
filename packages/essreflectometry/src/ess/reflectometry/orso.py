@@ -62,7 +62,7 @@ OrsoCorrectionList = NewType("OrsoCorrectionList", list[str])
 
 
 def parse_orso_experiment(
-    beamline: Beamline, measurement: Measurement
+    beamline: Beamline[SampleRun], measurement: Measurement[SampleRun]
 ) -> OrsoExperiment:
     """Parse ORSO experiment metadata from raw NeXus data."""
     return OrsoExperiment(
