@@ -8,7 +8,6 @@ import scipp as sc
 import ess.tbl.data  # noqa: F401
 from ess import tbl
 from ess.imaging.types import (
-    CountsWavelength,
     Filename,
     NeXusDetectorName,
     RawDetector,
@@ -16,6 +15,7 @@ from ess.imaging.types import (
     TimeOfFlightLookupTable,
     TimeOfFlightLookupTableFilename,
     TofDetector,
+    WavelengthDetector,
 )
 from ess.reduce import time_of_flight
 from ess.reduce.nexus.types import AnyRun
@@ -97,6 +97,6 @@ def test_can_compute_time_of_flight_from_custom_lut(
 )
 def test_can_compute_wavelength(workflow, bank_name):
     workflow[NeXusDetectorName] = bank_name
-    da = workflow.compute(CountsWavelength[SampleRun])
+    da = workflow.compute(WavelengthDetector[SampleRun])
 
     assert "wavelength" in da.bins.coords

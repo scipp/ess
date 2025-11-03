@@ -9,11 +9,11 @@ import scippnexus as snx
 
 from .types import (
     CoordTransformGraph,
-    CountsWavelength,
     GravityVector,
     Position,
     RunType,
     TofDetector,
+    WavelengthDetector,
 )
 
 
@@ -39,7 +39,7 @@ def make_coordinate_transform_graph(
 def compute_detector_wavelength(
     tof_data: TofDetector[RunType],
     graph: CoordTransformGraph[RunType],
-) -> CountsWavelength[RunType]:
+) -> WavelengthDetector[RunType]:
     """
     Compute the wavelength of neutrons detected by the detector.
 
@@ -50,7 +50,7 @@ def compute_detector_wavelength(
     graph:
         Graph of coordinate transformations.
     """
-    return CountsWavelength[RunType](
+    return WavelengthDetector[RunType](
         tof_data.transform_coords("wavelength", graph=graph)
     )
 

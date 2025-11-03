@@ -7,7 +7,6 @@ import sciline as sl
 import ess.odin.data  # noqa: F401
 from ess import odin
 from ess.imaging.types import (
-    CountsWavelength,
     Filename,
     NeXusDetectorName,
     OpenBeamRun,
@@ -16,6 +15,7 @@ from ess.imaging.types import (
     TimeOfFlightLookupTable,
     TimeOfFlightLookupTableFilename,
     TofDetector,
+    WavelengthDetector,
 )
 
 
@@ -57,6 +57,6 @@ def test_can_compute_time_of_flight(workflow, run_type):
 
 @pytest.mark.parametrize("run_type", [SampleRun, OpenBeamRun])
 def test_can_compute_wavelength(workflow, run_type):
-    da = workflow.compute(CountsWavelength[run_type])
+    da = workflow.compute(WavelengthDetector[run_type])
 
     assert "wavelength" in da.bins.coords
