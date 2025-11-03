@@ -84,16 +84,10 @@ class DataGroupedByRotation(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
 class DetectorCountsWithQ(sciline.Scope[RunType, sc.DataArray], sc.DataArray): ...
 
 
-ElasticCoordTransformGraph = NewType('ElasticCoordTransformGraph', dict)
-
-
 class QDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray): ...
 
 
 class EnergyQDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray): ...
-
-
-InelasticCoordTransformGraph = NewType('InelasticCoordTransformGraph', dict)
 
 
 class SampleAngle(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
@@ -121,6 +115,9 @@ class PrimarySpecCoordTransformGraph(sciline.Scope[RunType, dict], dict): ...
 
 
 class SecondarySpecCoordTransformGraph(sciline.Scope[RunType, dict], dict): ...
+
+
+InelasticCoordTransformGraph = NewType('InelasticCoordTransformGraph', dict)
 
 
 class ElasticCoordTransformGraph(sciline.Scope[RunType, dict], dict): ...
