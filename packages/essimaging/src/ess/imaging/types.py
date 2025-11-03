@@ -12,15 +12,17 @@ from ess.reduce.time_of_flight import types as tof_t
 
 # 1 TypeVars used to parametrize the generic parts of the workflow
 
-DetectorData = reduce_t.DetectorData
 Filename = reduce_t.Filename
-MonitorData = reduce_t.MonitorData
+GravityVector = reduce_t.GravityVector
 NeXusDetectorName = reduce_t.NeXusDetectorName
 NeXusMonitorName = reduce_t.NeXusName
 NeXusComponent = reduce_t.NeXusComponent
+Position = reduce_t.Position
+RawDetector = reduce_t.RawDetector
+RawMonitor = reduce_t.RawMonitor
 
 DetectorLtotal = tof_t.DetectorLtotal
-DetectorTofData = tof_t.DetectorTofData
+TofDetector = tof_t.TofDetector
 PulseStrideOffset = tof_t.PulseStrideOffset
 TimeOfFlightLookupTable = tof_t.TimeOfFlightLookupTable
 TimeOfFlightLookupTableFilename = tof_t.TimeOfFlightLookupTableFilename
@@ -49,16 +51,18 @@ BeamMonitor3 = NewType('BeamMonitor3', int)
 BeamMonitor4 = NewType('BeamMonitor4', int)
 """Beam monitor number 4"""
 
+# TODO no constraints!
 RunType = TypeVar("RunType", SampleRun, DarkBackgroundRun, OpenBeamRun)
 MonitorType = TypeVar(
     "MonitorType", BeamMonitor1, BeamMonitor2, BeamMonitor3, BeamMonitor4
 )
 
-CoordTransformGraph = NewType("CoordTransformGraph", dict)
-"""
-Graph of coordinate transformations used to compute the wavelength from the
-time-of-flight.
-"""
+
+class CoordTransformGraph(sciline.Scope[RunType, dict], dict):
+    """
+    Graph of coordinate transformations used to compute the wavelength from the
+    time-of-flight.
+    """
 
 
 class CountsWavelength(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
