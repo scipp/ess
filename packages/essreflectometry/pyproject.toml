@@ -39,7 +39,7 @@ dependencies = [
   "scipp>=24.09.1",  # Fixed new hist/bin API
   "scippneutron>=24.10.0",
   "scippnexus>=24.9.1",
-  "essreduce>=25.10.0",
+  "essreduce>=25.10.2",
   "pandas>=2.1.2",
 ]
 
