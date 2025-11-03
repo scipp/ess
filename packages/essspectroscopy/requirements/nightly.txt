@@ -137,7 +137,6 @@ typing-extensions==4.15.0
     # via
     #   pydantic
     #   pydantic-core
-    #   sciline
     #   typing-inspection
 typing-inspection==0.4.2
     # via pydantic
