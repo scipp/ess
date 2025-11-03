@@ -350,9 +350,9 @@ def test_normalize_by_monitor_histogram_expected_results():
     # Simple way to get all false array same shape as detector data.
     # Is there a better way?
     all_false = sc.isinf(detector.bins.data)
-    expected = NormalizedDspacing[SampleRun](
-        detector / monitor.data
-    ).bins.assign_masks({'monitor_intensity_is_zero': all_false})
+    expected = NormalizedDspacing[SampleRun](detector / monitor.data).bins.assign_masks(
+        {'monitor_intensity_is_zero': all_false}
+    )
     sc.testing.assert_identical(normalized, expected)
 
 
