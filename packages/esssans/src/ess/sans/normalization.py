@@ -22,6 +22,7 @@ from .types import (
     MonitorTerm,
     NeXusTransformation,
     Numerator,
+    Position,
     ProcessedWavelengthBands,
     ReducedQ,
     ReducedQxy,
@@ -42,6 +43,7 @@ def solid_angle(
     data: EmptyDetector[ScatteringRunType],
     pixel_shape: DetectorPixelShape[ScatteringRunType],
     transform: NeXusTransformation[snx.NXdetector, ScatteringRunType],
+    sample_position: Position[snx.NXsample, ScatteringRunType],
 ) -> SolidAngle[ScatteringRunType]:
     """
     Solid angle for cylindrical pixels.
@@ -75,7 +77,7 @@ def solid_angle(
     length = sc.norm(cylinder_axis)
 
     omega = _approximate_solid_angle_for_cylinder_shaped_pixel_of_detector(
-        pixel_position=data.coords['position'] - data.coords['sample_position'],
+        pixel_position=data.coords['position'] - sample_position,
         cylinder_axis=cylinder_axis,
         radius=radius,
         length=length,

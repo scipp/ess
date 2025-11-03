@@ -2,14 +2,15 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 from typing import NewType
 
+import sciline
 import scipp as sc
+import scippnexus as snx
+from ess.reduce.uncertainty import broadcast_uncertainties
 from scippneutron.conversion.beamline import (
     beam_aligned_unit_vectors,
     scattering_angles_with_gravity,
 )
 from scippneutron.conversion.graph import beamline, tof
-
-from ess.reduce.uncertainty import broadcast_uncertainties
 
 from .common import mask_range
 from .types import (
@@ -20,11 +21,13 @@ from .types import (
     CleanWavelength,
     CorrectForGravity,
     Denominator,
+    GravityVector,
     IofQPart,
     MaskedData,
     MonitorTerm,
     MonitorType,
     Numerator,
+    Position,
     RunType,
     ScatteringRunType,
     TofMonitor,
@@ -92,11 +95,19 @@ def Qxy(Q: sc.Variable, phi: sc.Variable) -> dict[str, sc.Variable]:
     return {'Qx': Qx, 'Qy': Qy}
 
 
-ElasticCoordTransformGraph = NewType('ElasticCoordTransformGraph', dict)
-MonitorCoordTransformGraph = NewType('MonitorCoordTransformGraph', dict)
+class ElasticCoordTransformGraph(sciline.Scope[RunType, dict], dict): ...
 
 
-def sans_elastic(correct_for_gravity: CorrectForGravity) -> ElasticCoordTransformGraph:
+class MonitorCoordTransformGraph(sciline.Scope[RunType, dict], dict): ...
+
+
+def sans_elastic(
+    correct_for_gravity: CorrectForGravity,
+    *,
+    sample_position: Position[snx.NXsample, RunType],
+    source_position: Position[snx.NXsource, RunType],
+    gravity: GravityVector,
+) -> ElasticCoordTransformGraph[RunType]:
     """
     Generate a coordinate transformation graph for SANS elastic scattering.
 
@@ -128,8 +139,21 @@ def sans_elastic(correct_for_gravity: CorrectForGravity) -> ElasticCoordTransfor
     correct_for_gravity:
         Take into account the bending of the neutron flight paths from the
         Earth's gravitational field if ``True``.
+    gravity:
+        A vector indicating the strength and direction of gravity.
+        Required even if ``correct_for_gravity`` is ``False``.
+    sample_position:
+        Position of the sample as a vector.
+    source_position:
+        Position of the source as a vector.
     """  # noqa: E501
-    graph = {**beamline.beamline(scatter=True), **tof.elastic_Q('tof')}
+    graph = {
+        **beamline.beamline(scatter=True),
+        **tof.elastic_Q('tof'),
+        'sample_position': lambda: sample_position,
+        'source_position': lambda: source_position,
+        'gravity': lambda: gravity,
+    }
     if correct_for_gravity:
         del graph['two_theta']
         graph[('two_theta', 'phi')] = scattering_angles_with_gravity
@@ -142,17 +166,24 @@ def sans_elastic(correct_for_gravity: CorrectForGravity) -> ElasticCoordTransfor
     return ElasticCoordTransformGraph(graph)
 
 
-def sans_monitor() -> MonitorCoordTransformGraph:
+def sans_monitor(
+    source_position: Position[snx.NXsource, RunType],
+) -> MonitorCoordTransformGraph[RunType]:
     """
     Generate a coordinate transformation graph for SANS monitor (no scattering).
     """
     return MonitorCoordTransformGraph(
-        {**beamline.beamline(scatter=False), **tof.elastic_wavelength('tof')}
+        {
+            **beamline.beamline(scatter=False),
+            **tof.elastic_wavelength('tof'),
+            'source_position': lambda: source_position,
+        }
     )
 
 
 def monitor_to_wavelength(
-    monitor: TofMonitor[RunType, MonitorType], graph: MonitorCoordTransformGraph
+    monitor: TofMonitor[RunType, MonitorType],
+    graph: MonitorCoordTransformGraph[RunType],
 ) -> WavelengthMonitor[RunType, MonitorType]:
     return WavelengthMonitor[RunType, MonitorType](
         monitor.transform_coords('wavelength', graph=graph, keep_inputs=False)
@@ -164,7 +195,7 @@ def monitor_to_wavelength(
 # Would we be fine with just choosing on option, or will this get in the way for users?
 def detector_to_wavelength(
     detector: MaskedData[ScatteringRunType],
-    graph: ElasticCoordTransformGraph,
+    graph: ElasticCoordTransformGraph[ScatteringRunType],
 ) -> CleanWavelength[ScatteringRunType, Numerator]:
     return CleanWavelength[ScatteringRunType, Numerator](
         detector.transform_coords('wavelength', graph=graph, keep_inputs=False)
@@ -227,7 +258,7 @@ def _compute_Q(
 
 def compute_Q(
     data: CleanWavelength[ScatteringRunType, IofQPart],
-    graph: ElasticCoordTransformGraph,
+    graph: ElasticCoordTransformGraph[ScatteringRunType],
 ) -> CleanQ[ScatteringRunType, IofQPart]:
     """
     Convert a data array from wavelength to Q.
@@ -239,7 +270,7 @@ def compute_Q(
 
 def compute_Qxy(
     data: CleanWavelength[ScatteringRunType, IofQPart],
-    graph: ElasticCoordTransformGraph,
+    graph: ElasticCoordTransformGraph[ScatteringRunType],
 ) -> CleanQxy[ScatteringRunType, IofQPart]:
     """
     Convert a data array from wavelength to Qx and Qy.

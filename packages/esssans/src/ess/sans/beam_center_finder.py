@@ -7,9 +7,8 @@ import numpy as np
 import sciline
 import scipp as sc
 import scippnexus as snx
-from scipp.core import concepts
-
 from ess.reduce.uncertainty import UncertaintyBroadcastMode
+from scipp.core import concepts
 
 from .conversions import ElasticCoordTransformGraph
 from .logging import get_logger
@@ -65,7 +64,7 @@ def beam_center_from_center_of_mass(workflow: sciline.Pipeline) -> BeamCenter:
         workflow = workflow.copy()
         workflow[BeamCenter] = beam_center
     data = workflow.compute(MaskedData[SampleRun])
-    graph = workflow.compute(ElasticCoordTransformGraph)
+    graph = workflow.compute(ElasticCoordTransformGraph[SampleRun])
 
     dims_to_sum = set(data.dims) - set(data.coords['position'].dims)
     if dims_to_sum:
@@ -150,7 +149,7 @@ def _iofq_in_quadrants(
     phi_bins = sc.linspace('phi', -pi, pi, 5, unit='rad')
     quadrants = ['south-west', 'south-east', 'north-east', 'north-west']
 
-    graph = workflow.compute(ElasticCoordTransformGraph)
+    graph = workflow.compute(ElasticCoordTransformGraph[SampleRun])
     workflow = workflow.copy()
     workflow[BeamCenter] = _offsets_to_vector(data=detector, xy=xy, graph=graph)
     calibrated = workflow.compute(MaskedData[SampleRun])
@@ -366,7 +365,7 @@ def beam_center_from_iofq(
         NeXusComponent[snx.NXdetector, SampleRun],
         MaskedData[SampleRun],
         CleanDirectBeam,
-        ElasticCoordTransformGraph,
+        ElasticCoordTransformGraph[SampleRun],
     )
     workflow = workflow.copy()
     # Avoid reshape of detector, which would break boolean-indexing by cost function
@@ -375,7 +374,7 @@ def beam_center_from_iofq(
     detector = results[NeXusComponent[snx.NXdetector, SampleRun]]['data']
     data = results[MaskedData[SampleRun]]
     norm = results[CleanDirectBeam]
-    graph = results[ElasticCoordTransformGraph]
+    graph = results[ElasticCoordTransformGraph[SampleRun]]
 
     # Avoid reloading the detector
     workflow[NeXusComponent[snx.NXdetector, SampleRun]] = sc.DataGroup(data=detector)

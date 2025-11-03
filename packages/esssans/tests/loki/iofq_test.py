@@ -294,14 +294,14 @@ def test_phi_with_gravity():
     data_no_grav = pipeline.compute(CleanWavelength[SampleRun, Numerator]).flatten(
         to='pixel'
     )
-    graph_no_grav = pipeline.compute(ElasticCoordTransformGraph)
+    graph_no_grav = pipeline.compute(ElasticCoordTransformGraph[SampleRun])
     pipeline[CorrectForGravity] = True
     data_with_grav = (
         pipeline.compute(CleanWavelength[SampleRun, Numerator])
         .flatten(to='pixel')
         .hist(wavelength=sc.linspace('wavelength', 1.0, 12.0, 101, unit='angstrom'))
     )
-    graph_with_grav = pipeline.compute(ElasticCoordTransformGraph)
+    graph_with_grav = pipeline.compute(ElasticCoordTransformGraph[SampleRun])
 
     no_grav = data_no_grav.transform_coords(('two_theta', 'phi'), graph_no_grav)
     phi_no_grav = no_grav.coords['phi']

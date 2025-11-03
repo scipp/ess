@@ -5,9 +5,9 @@ import numpy as np
 import pytest
 import scipp as sc
 import scippnexus as snx
+from ess.reduce.nexus.types import NeXusTransformation, SampleRun
 
 from ess.isissans.data import sans2d_solid_angle_reference
-from ess.reduce.nexus.types import NeXusTransformation, SampleRun
 from ess.sans import normalization
 
 # See https://github.com/mantidproject/mantid/blob/main/instrument/SANS2D_Definition_Tubes.xml  # noqa: E501
@@ -81,6 +81,7 @@ def test_solid_angle_compare_to_reference_file():
     da = sc.io.load_hdf5(filename=sans2d_solid_angle_reference())
     solid_angle = normalization.solid_angle(
         da,
+        sample_position=da.coords['sample_position'],
         **_sans2d_geometry(),
     ).data
     assert sc.allclose(

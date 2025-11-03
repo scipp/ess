@@ -21,12 +21,14 @@ RawDetector = reduce_t.RawDetector
 DetectorPositionOffset = reduce_t.DetectorPositionOffset
 EmptyBeamRun = reduce_t.EmptyBeamRun
 Filename = reduce_t.Filename
+GravityVector = reduce_t.GravityVector
 Incident = reduce_t.IncidentMonitor
 RawMonitor = reduce_t.RawMonitor
 MonitorPositionOffset = reduce_t.MonitorPositionOffset
 NeXusMonitorName = reduce_t.NeXusName
 NeXusComponent = reduce_t.NeXusComponent
 NeXusTransformation = reduce_t.NeXusTransformation
+Position = reduce_t.Position
 SampleRun = reduce_t.SampleRun
 Transmission = reduce_t.TransmissionMonitor
 TransmissionRun = reduce_t.TransmissionRun
@@ -35,14 +37,7 @@ DetectorBankSizes = reduce_t.DetectorBankSizes
 NeXusDetectorName = reduce_t.NeXusDetectorName
 
 MonitorType = TypeVar('MonitorType', Incident, Transmission)
-RunType = TypeVar(
-    'RunType',
-    SampleRun,
-    BackgroundRun,
-    EmptyBeamRun,
-    TransmissionRun[SampleRun],
-    TransmissionRun[BackgroundRun],
-)
+RunType = reduce_t.RunType
 ScatteringRunType = TypeVar('ScatteringRunType', BackgroundRun, SampleRun)
 
 
