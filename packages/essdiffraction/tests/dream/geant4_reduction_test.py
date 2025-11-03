@@ -50,6 +50,7 @@ from ess.powder.types import (
 )
 from ess.reduce import time_of_flight
 from ess.reduce import workflow as reduce_workflow
+from ess.reduce.nexus.types import AnyRun
 
 sample_position = sc.vector([0.0, 0.0, 0.0], unit='mm')
 source_position = sc.vector([-3.478, 0.0, -76550], unit='mm')
@@ -136,7 +137,7 @@ def test_pipeline_can_compute_dspacing_result_using_lookup_table_filename(workfl
 @pytest.fixture(scope="module")
 def dream_tof_lookup_table():
     lut_wf = time_of_flight.TofLookupTableWorkflow()
-    lut_wf[time_of_flight.DiskChoppers] = dream.beamline.choppers(
+    lut_wf[time_of_flight.DiskChoppers[AnyRun]] = dream.beamline.choppers(
         dream.beamline.InstrumentConfiguration.high_flux
     )
     lut_wf[time_of_flight.SourcePosition] = dream_source_position

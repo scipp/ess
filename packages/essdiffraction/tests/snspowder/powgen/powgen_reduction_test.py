@@ -15,6 +15,7 @@ from ess.powder.types import (
     DspacingBins,
     DspacingDetector,
     Filename,
+    GravityVector,
     IntensityDspacing,
     IntensityDspacingTwoTheta,
     KeepEvents,
@@ -52,6 +53,7 @@ def params():
         | (x > sc.scalar(16666.67, unit="us").to(unit=elem_unit(x))),
         TwoThetaMask: None,
         WavelengthMask: None,
+        GravityVector: sc.vector(value=[0, -1, 0]) * sc.constants.g,
         # Use bank sizes for small files
         DetectorBankSizes: {"bank": 23, "column": 7, "row": 7},
     }
