@@ -1,9 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
-from scipp.scipy.interpolate import interp1d
-
 from ess.reduce.uncertainty import UncertaintyBroadcastMode, broadcast_uncertainties
+from scipp.scipy.interpolate import interp1d
 
 from .common import mask_range
 from .logging import get_logger
@@ -12,16 +11,16 @@ from .types import (
     BackgroundSubtractedIofQ,
     BackgroundSubtractedIofQxy,
     CleanDirectBeam,
-    CorrectedMonitor,
     CleanQ,
     CleanQxy,
     CleanSummedQ,
     CleanSummedQxy,
+    CorrectedMonitor,
     DimsToKeep,
     DirectBeam,
-    IofQ,
+    IntensityQ,
+    IntensityQxQy,
     IofQPart,
-    IofQxy,
     MonitorType,
     NonBackgroundWavelengthRange,
     QBins,
@@ -225,8 +224,8 @@ def _subtract_background(
 
 
 def subtract_background(
-    sample: IofQ[SampleRun],
-    background: IofQ[BackgroundRun],
+    sample: IntensityQ[SampleRun],
+    background: IntensityQ[BackgroundRun],
     return_events: ReturnEvents,
 ) -> BackgroundSubtractedIofQ:
     return BackgroundSubtractedIofQ(
@@ -237,8 +236,8 @@ def subtract_background(
 
 
 def subtract_background_xy(
-    sample: IofQxy[SampleRun],
-    background: IofQxy[BackgroundRun],
+    sample: IntensityQxQy[SampleRun],
+    background: IntensityQxQy[BackgroundRun],
     return_events: ReturnEvents,
 ) -> BackgroundSubtractedIofQxy:
     return BackgroundSubtractedIofQxy(

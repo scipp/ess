@@ -22,7 +22,7 @@ from ess.sans.types import (
     EmptyDetector,
     Filename,
     Incident,
-    IofQ,
+    IntensityQ,
     MaskedData,
     NeXusMonitorName,
     NonBackgroundWavelengthRange,
@@ -103,7 +103,7 @@ def pipeline():
 
 
 def test_can_create_pipeline(pipeline):
-    pipeline.get(IofQ[SampleRun])
+    pipeline.get(IntensityQ[SampleRun])
 
 
 @pytest.mark.parametrize(
@@ -141,7 +141,7 @@ def test_workflow_is_deterministic(pipeline):
     pipeline[BeamCenter] = sans.beam_center_from_center_of_mass(pipeline)
     # This is Sciline's default scheduler, but we want to be explicit here
     scheduler = sciline.scheduler.DaskScheduler()
-    graph = pipeline.get(IofQ[SampleRun], scheduler=scheduler)
+    graph = pipeline.get(IntensityQ[SampleRun], scheduler=scheduler)
     reference = graph.compute().data
     result = graph.compute().data
     assert sc.identical(sc.values(result), sc.values(reference))
@@ -162,9 +162,9 @@ def test_uncertainty_broadcast_mode_drop_yields_smaller_variances(pipeline):
         dim='Q', start=0.01, stop=0.5, num=141, unit='1/angstrom'
     )
     pipeline[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
-    drop = pipeline.compute(IofQ[SampleRun]).data
+    drop = pipeline.compute(IntensityQ[SampleRun]).data
     pipeline[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
-    upper_bound = pipeline.compute(IofQ[SampleRun]).data
+    upper_bound = pipeline.compute(IntensityQ[SampleRun]).data
     assert sc.all(sc.variances(drop) < sc.variances(upper_bound)).value
 
 

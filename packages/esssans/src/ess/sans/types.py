@@ -45,11 +45,11 @@ UncertaintyBroadcastMode = _UncertaintyBroadcastMode
 
 # 1.3  Numerator and denominator of IofQ
 Numerator = NewType('Numerator', sc.DataArray)
-"""Numerator of IofQ"""
+"""Numerator of IntensityQ"""
 Denominator = NewType('Denominator', sc.DataArray)
-"""Denominator of IofQ"""
+"""Denominator of IntensityQ"""
 IofQPart = TypeVar('IofQPart', Numerator, Denominator)
-"""TypeVar used for specifying Numerator or Denominator of IofQ"""
+"""TypeVar used for specifying Numerator or Denominator of IntensityQ"""
 
 # 1.4  Entry paths in NeXus files
 PixelShapePath = NewType('PixelShapePath', str)
@@ -244,11 +244,11 @@ class ReducedQxy(
     """Result of reducing :py:class:`CleanSummedQxy` over the wavelength dimensions"""
 
 
-class IofQ(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
+class IntensityQ(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """I(Q)"""
 
 
-class IofQxy(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
+class IntensityQxQy(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """I(Qx, Qy)"""
 
 

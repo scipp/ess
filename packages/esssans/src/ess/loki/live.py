@@ -9,11 +9,11 @@ from typing import NewType
 
 import sciline
 import scipp as sc
+from ess.reduce import streaming
+from ess.reduce.live import LiveWorkflow
 
 import ess.loki.data  # noqa: F401
 from ess import loki
-from ess.reduce import streaming
-from ess.reduce.live import LiveWorkflow
 from ess.sans import with_pixel_mask_filenames
 from ess.sans.types import (
     BackgroundRun,
@@ -22,17 +22,17 @@ from ess.sans.types import (
     BeamCenter,
     CorrectForGravity,
     Denominator,
-    RawDetector,
     DirectBeamFilename,
     EmptyBeamRun,
     Filename,
     Incident,
-    IofQ,
-    IofQxy,
+    IntensityQ,
+    IntensityQxQy,
     Numerator,
     QBins,
     QxBins,
     QyBins,
+    RawDetector,
     ReducedQ,
     ReducedQxy,
     ReturnEvents,
@@ -181,7 +181,7 @@ def make_sample_run_workflow(
     try:
         workflow.compute(Filename[BackgroundRun])
     except sciline.UnsatisfiedRequirement:
-        iofq_keys = (IofQ[SampleRun], IofQxy[SampleRun])
+        iofq_keys = (IntensityQ[SampleRun], IntensityQxQy[SampleRun])
     else:
         iofq_keys = (BackgroundSubtractedIofQ, BackgroundSubtractedIofQxy)
     outputs.update(dict(zip(('I(Q)', '$I(Q_x, Q_y)$'), iofq_keys, strict=True)))

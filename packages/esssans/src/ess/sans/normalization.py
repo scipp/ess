@@ -15,9 +15,9 @@ from .types import (
     EmptyBeamRun,
     EmptyDetector,
     Incident,
-    IofQ,
+    IntensityQ,
+    IntensityQxQy,
     IofQPart,
-    IofQxy,
     MaskedSolidAngle,
     MonitorTerm,
     NeXusTransformation,
@@ -428,8 +428,8 @@ def normalize_q(
     denominator: ReducedQ[ScatteringRunType, Denominator],
     return_events: ReturnEvents,
     uncertainties: UncertaintyBroadcastMode,
-) -> IofQ[ScatteringRunType]:
-    return IofQ[ScatteringRunType](
+) -> IntensityQ[ScatteringRunType]:
+    return IntensityQ[ScatteringRunType](
         _normalize(
             numerator=numerator,
             denominator=denominator,
@@ -444,8 +444,8 @@ def normalize_qxy(
     denominator: ReducedQxy[ScatteringRunType, Denominator],
     return_events: ReturnEvents,
     uncertainties: UncertaintyBroadcastMode,
-) -> IofQxy[ScatteringRunType]:
-    return IofQxy[ScatteringRunType](
+) -> IntensityQxQy[ScatteringRunType]:
+    return IntensityQxQy[ScatteringRunType](
         _normalize(
             numerator=numerator,
             denominator=denominator,

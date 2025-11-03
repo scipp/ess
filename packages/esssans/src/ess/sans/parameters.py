@@ -7,7 +7,6 @@ Default parameters, providers and utility functions for the loki workflow.
 from __future__ import annotations
 
 import scipp as sc
-
 from ess.reduce.parameter import (
     BinEdgesParameter,
     BooleanParameter,
@@ -30,8 +29,8 @@ from ..sans.types import (
     EmptyBeamRun,
     Filename,
     Incident,
-    IofQ,
-    IofQxy,
+    IntensityQ,
+    IntensityQxQy,
     MaskedData,
     NeXusDetectorName,
     NeXusMonitorName,
@@ -118,10 +117,10 @@ parameter_registry[BeamCenter] = Vector2dParameter.from_type(
 typical_outputs = (
     BackgroundSubtractedIofQ,
     BackgroundSubtractedIofQxy,
-    IofQ[SampleRun],
-    IofQxy[SampleRun],
-    IofQ[BackgroundRun],
-    IofQxy[BackgroundRun],
+    IntensityQ[SampleRun],
+    IntensityQxQy[SampleRun],
+    IntensityQ[BackgroundRun],
+    IntensityQxQy[BackgroundRun],
     MaskedData[BackgroundRun],
     MaskedData[SampleRun],
     WavelengthMonitor[SampleRun, Incident],

@@ -22,8 +22,8 @@ from ess.sans.types import (
     Denominator,
     DimsToKeep,
     Filename,
-    IofQ,
-    IofQxy,
+    IntensityQ,
+    IntensityQxQy,
     MaskedData,
     Numerator,
     QBins,
@@ -94,8 +94,8 @@ def test_pipeline_can_compute_IofQ(uncertainties, qxy: bool):
 @pytest.mark.parametrize(
     'target',
     [
-        IofQ[SampleRun],
-        IofQxy[SampleRun],
+        IntensityQ[SampleRun],
+        IntensityQxQy[SampleRun],
         BackgroundSubtractedIofQ,
         BackgroundSubtractedIofQxy,
     ],
@@ -107,7 +107,7 @@ def test_pipeline_can_compute_IofQ_in_event_mode(uncertainties, target):
     reference = pipeline.compute(target)
     pipeline[ReturnEvents] = True
     result = pipeline.compute(target)
-    qxy = target in (IofQxy[SampleRun], BackgroundSubtractedIofQxy)
+    qxy = target in (IntensityQxQy[SampleRun], BackgroundSubtractedIofQxy)
     assert result.bins is not None
     assert result.dims == ('Qy', 'Qx') if qxy else ('Q',)
     assert sc.allclose(
