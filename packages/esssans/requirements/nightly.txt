@@ -18,7 +18,7 @@ charset-normalizer==3.4.4
     # via requests
 click==8.3.0
     # via dask
-cloudpickle==3.1.1
+cloudpickle==3.1.2
     # via dask
 comm==0.2.3
     # via ipywidgets
@@ -42,7 +42,7 @@ executing==2.2.1
     # via stack-data
 fonttools==4.60.1
     # via matplotlib
-fsspec==2025.9.0
+fsspec==2025.10.0
     # via dask
 graphviz==0.21
     # via -r nightly.in
@@ -64,13 +64,13 @@ ipython==9.6.0
     # via ipywidgets
 ipython-pygments-lexers==1.1.1
     # via ipython
-ipywidgets==8.1.7
+ipywidgets==8.1.8
     # via
     #   ipydatawidgets
     #   pythreejs
 jedi==0.19.2
     # via ipython
-jupyterlab-widgets==3.0.15
+jupyterlab-widgets==3.0.16
     # via ipywidgets
 kiwisolver==1.4.10rc0
     # via matplotlib
@@ -207,7 +207,6 @@ typing-extensions==4.15.0
     #   ipython
     #   pydantic
     #   pydantic-core
-    #   sciline
     #   typing-inspection
 typing-inspection==0.4.2
     # via pydantic
@@ -217,7 +216,7 @@ urllib3==2.5.0
     # via requests
 wcwidth==0.2.14
     # via prompt-toolkit
-widgetsnbextension==4.0.14
+widgetsnbextension==4.0.15
     # via ipywidgets
 zipp==3.23.0
     # via importlib-metadata
