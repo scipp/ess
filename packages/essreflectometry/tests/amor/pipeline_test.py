@@ -43,7 +43,7 @@ pytestmark = pytest.mark.filterwarnings(
 
 @pytest.fixture
 def amor_pipeline() -> sciline.Pipeline:
-    pl = sciline.Pipeline(providers=amor.providers, params=amor.default_parameters())
+    pl = amor.AmorWorkflow()
     pl[SampleSize[SampleRun]] = sc.scalar(10.0, unit="mm")
     pl[SampleSize[ReferenceRun]] = sc.scalar(10.0, unit="mm")
 

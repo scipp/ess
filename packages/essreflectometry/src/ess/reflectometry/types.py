@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
-from typing import Any, NewType, TypeVar
+from typing import Any, NewType
 
 import sciline
 import scipp as sc
@@ -9,11 +9,11 @@ from ess.reduce.nexus import types as reduce_t
 
 SampleRun = reduce_t.SampleRun
 ReferenceRun = NewType("ReferenceRun", int)
-RunType = TypeVar("RunType", ReferenceRun, SampleRun)
+RunType = reduce_t.RunType
 
 Beamline = reduce_t.Beamline
-CalibratedDetector = reduce_t.CalibratedDetector
-DetectorData = reduce_t.DetectorData
+EmptyDetector = reduce_t.EmptyDetector
+RawDetector = reduce_t.RawDetector
 DetectorPositionOffset = reduce_t.DetectorPositionOffset
 Filename = reduce_t.Filename
 Measurement = reduce_t.Measurement
