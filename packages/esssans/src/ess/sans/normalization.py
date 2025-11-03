@@ -2,25 +2,25 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 import scippnexus as snx
-from scipp.core import concepts
-
-from ess.reduce.nexus.types import CalibratedBeamline, NeXusTransformation
 from ess.reduce.uncertainty import UncertaintyBroadcastMode, broadcast_uncertainties
+from scipp.core import concepts
 
 from .types import (
     CleanDirectBeam,
-    CorrectedMonitor,
     CleanWavelength,
+    CorrectedMonitor,
     Denominator,
     DetectorMasks,
     DetectorPixelShape,
     EmptyBeamRun,
+    EmptyDetector,
     Incident,
     IofQ,
     IofQPart,
     IofQxy,
     MaskedSolidAngle,
     MonitorTerm,
+    NeXusTransformation,
     Numerator,
     ProcessedWavelengthBands,
     ReducedQ,
@@ -39,7 +39,7 @@ from .types import (
 
 
 def solid_angle(
-    data: CalibratedBeamline[ScatteringRunType],
+    data: EmptyDetector[ScatteringRunType],
     pixel_shape: DetectorPixelShape[ScatteringRunType],
     transform: NeXusTransformation[snx.NXdetector, ScatteringRunType],
 ) -> SolidAngle[ScatteringRunType]:
@@ -134,7 +134,9 @@ def _approximate_solid_angle_for_cylinder_shaped_pixel_of_detector(
 
 
 def transmission_fraction(
-    sample_incident_monitor: CorrectedMonitor[TransmissionRun[ScatteringRunType], Incident],
+    sample_incident_monitor: CorrectedMonitor[
+        TransmissionRun[ScatteringRunType], Incident
+    ],
     sample_transmission_monitor: CorrectedMonitor[
         TransmissionRun[ScatteringRunType], Transmission
     ],

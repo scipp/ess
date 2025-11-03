@@ -10,24 +10,24 @@ from typing import Generic, NewType
 import sciline
 import scipp as sc
 import scippnexus as snx
-
 from ess.reduce.nexus.types import NeXusTransformation, Position
+
 from ess.sans.types import (
     BeamCenter,
-    EmptyDetector,
-    EmptyMonitor,
-    RawDetector,
     DetectorIDs,
     DetectorPixelShape,
     DetectorPositionOffset,
+    EmptyDetector,
+    EmptyMonitor,
     Incident,
     Measurement,
-    RawMonitor,
     MonitorPositionOffset,
     MonitorType,
     NeXusComponent,
     NeXusMonitorName,
     NonBackgroundWavelengthRange,
+    RawDetector,
+    RawMonitor,
     RunType,
     SampleRun,
     ScatteringRunType,
