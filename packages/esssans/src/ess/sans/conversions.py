@@ -1,7 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-from typing import NewType
-
 import sciline
 import scipp as sc
 import scippnexus as snx

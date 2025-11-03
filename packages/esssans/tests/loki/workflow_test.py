@@ -5,10 +5,10 @@ import sys
 from pathlib import Path
 
 import scipp as sc
-from ess.reduce import workflow
 
 from ess import loki
 from ess.loki import LokiAtLarmorWorkflow
+from ess.reduce import workflow
 from ess.sans.types import (
     BackgroundRun,
     BackgroundSubtractedIofQ,

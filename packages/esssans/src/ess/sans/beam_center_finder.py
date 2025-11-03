@@ -7,8 +7,9 @@ import numpy as np
 import sciline
 import scipp as sc
 import scippnexus as snx
-from ess.reduce.uncertainty import UncertaintyBroadcastMode
 from scipp.core import concepts
+
+from ess.reduce.uncertainty import UncertaintyBroadcastMode
 
 from .conversions import ElasticCoordTransformGraph
 from .logging import get_logger

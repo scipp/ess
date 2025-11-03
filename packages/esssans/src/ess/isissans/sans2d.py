@@ -8,7 +8,7 @@ import scipp as sc
 from ess.reduce.workflow import register_workflow
 from ess.sans import SansWorkflow
 from ess.sans.parameters import typical_outputs
-from ess.sans.types import BeamCenter, EmptyDetector, DetectorMasks, SampleRun
+from ess.sans.types import BeamCenter, DetectorMasks, EmptyDetector, SampleRun
 
 from .general import default_parameters
 from .io import load_tutorial_direct_beam, load_tutorial_run

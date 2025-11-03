@@ -9,11 +9,11 @@ from typing import NewType
 
 import sciline
 import scipp as sc
-from ess.reduce import streaming
-from ess.reduce.live import LiveWorkflow
 
 import ess.loki.data  # noqa: F401
 from ess import loki
+from ess.reduce import streaming
+from ess.reduce.live import LiveWorkflow
 from ess.sans import with_pixel_mask_filenames
 from ess.sans.types import (
     BackgroundRun,

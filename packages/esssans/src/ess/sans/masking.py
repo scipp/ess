@@ -8,9 +8,9 @@ import numpy as np
 import scipp as sc
 
 from .types import (
-    EmptyDetector,
     DetectorIDs,
     DetectorMasks,
+    EmptyDetector,
     MaskedData,
     MaskedDetectorIDs,
     PixelMaskFilename,

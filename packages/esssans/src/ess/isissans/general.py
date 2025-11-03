@@ -10,8 +10,8 @@ from typing import Generic, NewType
 import sciline
 import scipp as sc
 import scippnexus as snx
-from ess.reduce.nexus.types import NeXusTransformation, Position
 
+from ess.reduce.nexus.types import NeXusTransformation, Position
 from ess.sans.types import (
     BeamCenter,
     DetectorIDs,

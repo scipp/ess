@@ -7,6 +7,7 @@ Default parameters, providers and utility functions for the loki workflow.
 from __future__ import annotations
 
 import scipp as sc
+
 from ess.reduce.parameter import (
     BinEdgesParameter,
     BooleanParameter,
