@@ -3,7 +3,6 @@
 import argparse
 import logging
 import pathlib
-import sys
 from collections.abc import Callable
 from functools import partial
 
@@ -24,6 +23,7 @@ from ..nexus import (
 )
 from ..streaming import calculate_number_of_chunks
 from ..types import (
+    Compression,
     DetectorIndex,
     DetectorName,
     FilePath,
@@ -139,10 +139,10 @@ def reduction(
     input_file: pathlib.Path,
     output_file: pathlib.Path,
     chunk_size: int = 10_000_000,
-    nbins: int = 51,
+    nbins: int = 50,
     max_counts: int | None = None,
     detector_ids: list[int | str],
-    compression: bool = True,
+    compression: Compression = Compression.BITSHUFFLE_LZ4,
     wf: sl.Pipeline | None = None,
     logger: logging.Logger | None = None,
     toa_min_max_prob: tuple[float] | None = None,
@@ -161,7 +161,10 @@ def reduction(
             logger.info("Metadata retrieved: %s", data_metadata)
 
         toa_bin_edges = sc.linspace(
-            dim='t', start=data_metadata.min_toa, stop=data_metadata.max_toa, num=nbins
+            dim='t',
+            start=data_metadata.min_toa,
+            stop=data_metadata.max_toa,
+            num=nbins + 1,
         )
         scale_factor = mcstas_weight_to_probability_scalefactor(
             max_counts=wf.compute(MaximumCounts),
@@ -173,7 +176,7 @@ def reduction(
         toa_min = sc.scalar(toa_min_max_prob[0], unit='s')
         toa_max = sc.scalar(toa_min_max_prob[1], unit='s')
         prob_max = sc.scalar(toa_min_max_prob[2])
-        toa_bin_edges = sc.linspace(dim='t', start=toa_min, stop=toa_max, num=nbins)
+        toa_bin_edges = sc.linspace(dim='t', start=toa_min, stop=toa_max, num=nbins + 1)
         scale_factor = mcstas_weight_to_probability_scalefactor(
             max_counts=wf.compute(MaximumCounts),
             max_probability=prob_max,
@@ -253,69 +256,44 @@ def reduction(
         result_list.append(result)
         if logger is not None:
             logger.info("Appending reduced data into the output file %s", output_file)
+
         _export_reduced_data_as_nxlauetof(
-            result, output_file=output_file, compress_counts=compression
+            result,
+            output_file=output_file,
+            compress_counts=(compression == Compression.NONE),
         )
     from ess.nmx.reduction import merge_panels
 
     return merge_panels(*result_list)
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description="McStas Data Reduction.")
-    parser.add_argument(
-        "--input_file", type=str, help="Path to the input file", required=True
-    )
-    parser.add_argument(
-        "--output_file",
-        type=str,
-        default="scipp_output.h5",
-        help="Path to the output file",
-    )
-    parser.add_argument(
-        "--verbose", action="store_true", help="Increase output verbosity"
-    )
-    parser.add_argument(
-        "--chunk_size",
-        type=int,
-        default=10_000_000,
-        help="Chunk size for processing",
-    )
-    parser.add_argument(
-        "--nbins",
-        type=int,
-        default=51,
-        help="Number of TOF bins",
-    )
-    parser.add_argument(
+def _add_mcstas_args(parser: argparse.ArgumentParser) -> None:
+    mcstas_arg_group = parser.add_argument_group("McStas Data Reduction Options")
+    mcstas_arg_group.add_argument(
         "--max_counts",
         type=int,
         default=None,
         help="Maximum Counts",
     )
-    parser.add_argument(
-        "--detector_ids",
+    mcstas_arg_group.add_argument(
+        "--chunk_size",
         type=int,
-        nargs="+",
-        default=[0, 1, 2],
-        help="Detector indices to process",
-    )
-    parser.add_argument(
-        "--compression",
-        type=bool,
-        default=True,
-        help="Compress reduced output with bitshuffle/lz4",
+        default=10_000_000,
+        help="Chunk size for processing (number of events per chunk)",
     )
 
+
+def main() -> None:
+    from .._executable_helper import build_logger, build_reduction_arg_parser
+
+    parser = build_reduction_arg_parser()
+    _add_mcstas_args(parser)
     args = parser.parse_args()
 
     input_file = pathlib.Path(args.input_file).resolve()
     output_file = pathlib.Path(args.output_file).resolve()
 
-    logger = logging.getLogger(__name__)
-    if args.verbose:
-        logger.setLevel(logging.INFO)
-        logger.addHandler(logging.StreamHandler(sys.stdout))
+    logger = build_logger(args)
 
     wf = McStasWorkflow()
     reduction(
@@ -325,7 +303,7 @@ def main() -> None:
         nbins=args.nbins,
         max_counts=args.max_counts,
         detector_ids=args.detector_ids,
-        compression=args.compression,
+        compression=Compression[args.compression],
         logger=logger,
         wf=wf,
     )

@@ -21,6 +21,7 @@ def _make_pooch() -> pooch.Pooch:
             "small_mcstas_3_sample.h5": "md5:2afaac205d13ee857ee5364e3f1957a7",
             "mtz_samples.tar.gz": "md5:bed1eaf604bbe8725c1f6a20ca79fcc0",
             "mtz_random_samples.tar.gz": "md5:c8259ae2e605560ab88959e7109613b6",
+            "small_nmx_nexus.hdf": "md5:42cffb85e4ce7c1aaa5f7e81469b865e",
         },
     )
 
@@ -89,3 +90,9 @@ def get_small_random_mtz_samples() -> list[pathlib.Path]:
         pathlib.Path(file_path)
         for file_path in _pooch.fetch("mtz_random_samples.tar.gz", processor=Untar())
     ]
+
+
+def get_small_nmx_nexus() -> str:
+    """Return the path to a small NMX NeXus file."""
+
+    return _pooch.fetch("small_nmx_nexus.hdf")
