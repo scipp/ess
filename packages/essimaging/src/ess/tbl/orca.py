@@ -21,7 +21,7 @@ from ..imaging.types import (
     CorrectedDetector,
     DarkBackgroundRun,
     ExposureTime,
-    NormalizedDetector,
+    FluxNormalizedDetector,
     OpenBeamRun,
     ProtonCharge,
     RunType,
@@ -38,7 +38,7 @@ def load_proton_charge(
 def load_exposure_time(
     location: NeXusComponentLocationSpec[ExposureTime, RunType],
 ) -> ExposureTime[RunType]:
-    return ExposureTime[RunType](load_component(location, nx_class=sx.NXlog))
+    return ExposureTime[RunType](load_component(location, nx_class=sx.NXlog)["value"])
 
 
 def _compute_proton_charge_per_exposure(
@@ -72,7 +72,7 @@ def normalize_by_proton_charge_orca(
     data: CorrectedDetector[RunType],
     proton_charge: ProtonCharge[RunType],
     exposure_time: ExposureTime[RunType],
-) -> NormalizedDetector[RunType]:
+) -> FluxNormalizedDetector[RunType]:
     """
     Normalize detector data by the proton charge (dark and open beam runs).
     We find the time stamps for the data, which mark the start of an exposure.
@@ -95,14 +95,16 @@ def normalize_by_proton_charge_orca(
         data, proton_charge, exposure_time
     )
 
-    return NormalizedDetector[RunType](data.sum('time') / charge_per_frame.sum('time'))
+    return FluxNormalizedDetector[RunType](
+        data.sum('time') / charge_per_frame.sum('time')
+    )
 
 
 def normalize_by_proton_charge_orca_sample(
     data: CorrectedDetector[SampleRun],
     proton_charge: ProtonCharge[SampleRun],
     exposure_time: ExposureTime[SampleRun],
-) -> NormalizedDetector[SampleRun]:
+) -> FluxNormalizedDetector[SampleRun]:
     """
     Normalize sample run detector data by the proton charge.
     The handling of the SampleRun is different from the other runs:
@@ -122,7 +124,7 @@ def normalize_by_proton_charge_orca_sample(
     )
 
     # Here we preserve the time dimension of the sample data and the proton charge.
-    return NormalizedDetector[SampleRun](data / charge_per_frame)
+    return FluxNormalizedDetector[SampleRun](data / charge_per_frame)
 
 
 providers = (

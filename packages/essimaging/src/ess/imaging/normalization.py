@@ -10,8 +10,8 @@ from .types import (
     BackgroundSubtractedDetector,
     CorrectedDetector,
     DarkBackgroundRun,
-    IntensityDetector,
-    NormalizedDetector,
+    FluxNormalizedDetector,
+    NormalizedImage,
     OpenBeamRun,
     ProtonCharge,
     RunType,
@@ -20,8 +20,8 @@ from .types import (
 
 
 def subtract_background_sample(
-    data: NormalizedDetector[SampleRun],
-    background: NormalizedDetector[DarkBackgroundRun],
+    data: FluxNormalizedDetector[SampleRun],
+    background: FluxNormalizedDetector[DarkBackgroundRun],
 ) -> BackgroundSubtractedDetector[SampleRun]:
     """
     Subtract background from proton-charge normalized sample data.
@@ -37,8 +37,8 @@ def subtract_background_sample(
 
 
 def subtract_background_openbeam(
-    data: NormalizedDetector[OpenBeamRun],
-    background: NormalizedDetector[DarkBackgroundRun],
+    data: FluxNormalizedDetector[OpenBeamRun],
+    background: FluxNormalizedDetector[DarkBackgroundRun],
 ) -> BackgroundSubtractedDetector[OpenBeamRun]:
     """
     Subtract background from proton-charge normalized open beam data.
@@ -56,7 +56,7 @@ def subtract_background_openbeam(
 def sample_over_openbeam(
     sample: BackgroundSubtractedDetector[SampleRun],
     open_beam: BackgroundSubtractedDetector[OpenBeamRun],
-) -> IntensityDetector:
+) -> NormalizedImage:
     """
     Divide background-subtracted sample data by background-subtracted open beam data,
     to obtain final normalized image.
@@ -68,7 +68,7 @@ def sample_over_openbeam(
     open_beam:
         Open beam data to divide by (background subtracted).
     """
-    return IntensityDetector(sample / open_beam)
+    return NormalizedImage(sample / open_beam)
 
 
 providers = (

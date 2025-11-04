@@ -81,7 +81,7 @@ class CorrectedDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Corrected detector counts with masking applied."""
 
 
-class NormalizedDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+class FluxNormalizedDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Detector counts normalized to proton charge."""
 
 
@@ -89,8 +89,9 @@ class BackgroundSubtractedDetector(sciline.Scope[RunType, sc.DataArray], sc.Data
     """Detector counts with dark background subtracted."""
 
 
-class IntensityDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Intensity at the detector normalized by open beam measurement."""
+NormalizedImage = NewType('NormalizedImage', sc.DataArray)
+"""Final image: background-subtracted sample run divided by background-subtracted open
+beam run."""
 
 
 class ProtonCharge(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
