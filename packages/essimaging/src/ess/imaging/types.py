@@ -9,6 +9,7 @@ import scipp as sc
 
 from ess.reduce.nexus import types as reduce_t
 from ess.reduce.time_of_flight import types as tof_t
+from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
 
 # 1 TypeVars used to parametrize the generic parts of the workflow
 
@@ -26,6 +27,8 @@ TofDetector = tof_t.TofDetector
 PulseStrideOffset = tof_t.PulseStrideOffset
 TimeOfFlightLookupTable = tof_t.TimeOfFlightLookupTable
 TimeOfFlightLookupTableFilename = tof_t.TimeOfFlightLookupTableFilename
+
+UncertaintyBroadcastMode = _UncertaintyBroadcastMode
 
 
 SampleRun = NewType('SampleRun', int)

@@ -38,7 +38,9 @@ def load_proton_charge(
 def load_exposure_time(
     location: NeXusComponentLocationSpec[ExposureTime, RunType],
 ) -> ExposureTime[RunType]:
-    return ExposureTime[RunType](load_component(location, nx_class=sx.NXlog)["value"])
+    return ExposureTime[RunType](
+        load_component(location, nx_class=sx.NXlog)["value"].squeeze()
+    )
 
 
 def _compute_proton_charge_per_exposure(
@@ -53,7 +55,7 @@ def _compute_proton_charge_per_exposure(
     # do the normalization without computing time of flight?
 
     t = data.coords['time']
-    exp = exposure_time.to(unit=t.unit)
+    exp = exposure_time.data.to(unit=t.unit)
     # The following assumes that the different between successive frames (time stamps)
     # is larger than the exposure time. We need to check that this is indeed the case.
     if (t[1:] - t[:-1]).min() < exp:
