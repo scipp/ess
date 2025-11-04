@@ -14,7 +14,7 @@ from ess.reduce.uncertainty import broadcast_uncertainties
 from .common import mask_range
 from .types import (
     CleanQ,
-    CleanQxy,
+    QxyDetector,
     CleanSummedQ,
     CleanSummedQxy,
     WavelengthDetector,
@@ -270,11 +270,11 @@ def compute_Q(
 def compute_Qxy(
     data: WavelengthDetector[ScatteringRunType, IofQPart],
     graph: ElasticCoordTransformGraph[ScatteringRunType],
-) -> CleanQxy[ScatteringRunType, IofQPart]:
+) -> QxyDetector[ScatteringRunType, IofQPart]:
     """
     Convert a data array from wavelength to Qx and Qy.
     """
-    return CleanQxy[ScatteringRunType, IofQPart](
+    return QxyDetector[ScatteringRunType, IofQPart](
         _compute_Q(data=data, graph=graph, target=('Qx', 'Qy'))
     )
 

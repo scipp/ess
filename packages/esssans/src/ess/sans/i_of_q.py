@@ -13,7 +13,7 @@ from .types import (
     BackgroundSubtractedIofQxy,
     CleanDirectBeam,
     CleanQ,
-    CleanQxy,
+    QxyDetector,
     CleanSummedQ,
     CleanSummedQxy,
     CorrectedMonitor,
@@ -166,7 +166,7 @@ def bin_in_q(
 
 
 def bin_in_qxy(
-    data: CleanQxy[ScatteringRunType, IofQPart],
+    data: QxyDetector[ScatteringRunType, IofQPart],
     qx_bins: QxBins,
     qy_bins: QyBins,
     dims_to_keep: DimsToKeep,
