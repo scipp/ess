@@ -206,7 +206,7 @@ class WavelengthDetector(
     """
 
 
-class WavelengthScaledQ(
+class NormalizedQ(
     sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
 ):
     """Result of applying wavelength scaling/masking to :py:class:`BinnedQ`"""

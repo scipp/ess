@@ -15,7 +15,7 @@ from .types import (
     SampleRun,
     WavelengthBands,
     WavelengthBins,
-    WavelengthScaledQ,
+    NormalizedQ,
 )
 
 
@@ -103,16 +103,16 @@ def direct_beam(*, workflow: Pipeline, I0: sc.Variable, niter: int = 5) -> list[
 
     wavelength_bins = workflow.compute(WavelengthBins)
     parts = (
-        WavelengthScaledQ[SampleRun, Numerator],
-        WavelengthScaledQ[SampleRun, Denominator],
-        WavelengthScaledQ[BackgroundRun, Numerator],
-        WavelengthScaledQ[BackgroundRun, Denominator],
+        NormalizedQ[SampleRun, Numerator],
+        NormalizedQ[SampleRun, Denominator],
+        NormalizedQ[BackgroundRun, Numerator],
+        NormalizedQ[BackgroundRun, Denominator],
     )
     parts = workflow.compute(parts)
     # Convert events to histograms to make normalization (in every iteration) cheap
     for key in [
-        WavelengthScaledQ[SampleRun, Numerator],
-        WavelengthScaledQ[BackgroundRun, Numerator],
+        NormalizedQ[SampleRun, Numerator],
+        NormalizedQ[BackgroundRun, Numerator],
     ]:
         parts[key] = parts[key].hist(wavelength=wavelength_bins)
 
@@ -121,8 +121,8 @@ def direct_beam(*, workflow: Pipeline, I0: sc.Variable, niter: int = 5) -> list[
     parts = {key: sc.values(result) for key, result in parts.items()}
     for key, part in parts.items():
         workflow[key] = part
-    sample0 = parts[WavelengthScaledQ[SampleRun, Denominator]]
-    background0 = parts[WavelengthScaledQ[BackgroundRun, Denominator]]
+    sample0 = parts[NormalizedQ[SampleRun, Denominator]]
+    background0 = parts[NormalizedQ[BackgroundRun, Denominator]]
 
     results = []
 
@@ -158,8 +158,8 @@ def direct_beam(*, workflow: Pipeline, I0: sc.Variable, niter: int = 5) -> list[
         db.coords['wavelength'] = sc.midpoints(
             db.coords['wavelength'], dim='wavelength'
         )
-        workflow[WavelengthScaledQ[SampleRun, Denominator]] = sample0 * db
-        workflow[WavelengthScaledQ[BackgroundRun, Denominator]] = background0 * db
+        workflow[NormalizedQ[SampleRun, Denominator]] = sample0 * db
+        workflow[NormalizedQ[BackgroundRun, Denominator]] = background0 * db
 
         results.append(
             {

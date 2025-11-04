@@ -33,7 +33,7 @@ from .types import (
     WavelengthDetector,
     WavelengthMask,
     WavelengthMonitor,
-    WavelengthScaledQ,
+    NormalizedQ,
     NormalizedQxQy,
 )
 
@@ -203,10 +203,10 @@ def detector_to_wavelength(
 
 def mask_wavelength_q(
     da: BinnedQ[ScatteringRunType, Numerator], mask: WavelengthMask
-) -> WavelengthScaledQ[ScatteringRunType, Numerator]:
+) -> NormalizedQ[ScatteringRunType, Numerator]:
     if mask is not None:
         da = mask_range(da, mask=mask)
-    return WavelengthScaledQ[ScatteringRunType, Numerator](da)
+    return NormalizedQ[ScatteringRunType, Numerator](da)
 
 
 def mask_wavelength_qxy(
@@ -222,11 +222,11 @@ def mask_and_scale_wavelength_q(
     mask: WavelengthMask,
     wavelength_term: MonitorTerm[ScatteringRunType],
     uncertainties: UncertaintyBroadcastMode,
-) -> WavelengthScaledQ[ScatteringRunType, Denominator]:
+) -> NormalizedQ[ScatteringRunType, Denominator]:
     da = da * broadcast_uncertainties(wavelength_term, prototype=da, mode=uncertainties)
     if mask is not None:
         da = mask_range(da, mask=mask)
-    return WavelengthScaledQ[ScatteringRunType, Denominator](da)
+    return NormalizedQ[ScatteringRunType, Denominator](da)
 
 
 def mask_and_scale_wavelength_qxy(
