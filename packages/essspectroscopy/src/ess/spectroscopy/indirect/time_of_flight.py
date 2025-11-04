@@ -12,16 +12,16 @@ from ess.reduce.time_of_flight.types import DetectorLtotal
 
 from ..types import (
     DataAtSample,
-    DetectorData,
-    DetectorTofData,
     MonitorCoordTransformGraph,
-    MonitorData,
     MonitorLtotal,
-    MonitorTofData,
     MonitorType,
     PulseStrideOffset,
+    RawDetector,
+    RawMonitor,
     RunType,
     TimeOfFlightLookupTable,
+    TofDetector,
+    TofMonitor,
 )
 
 
@@ -43,7 +43,7 @@ def detector_time_of_flight_data(
     sample_data: DataAtSample[RunType],
     lookup: TimeOfFlightLookupTable,
     pulse_stride_offset: PulseStrideOffset,
-) -> DetectorTofData[RunType]:
+) -> TofDetector[RunType]:
     """
     Convert the time-of-arrival data to time-of-flight data using a lookup table.
 
@@ -54,7 +54,7 @@ def detector_time_of_flight_data(
     for indirect geometry spectrometers.
     """
     result = reduce_time_of_flight.eto_to_tof.detector_time_of_flight_data(
-        detector_data=DetectorData[RunType](sample_data),
+        detector_data=RawDetector[RunType](sample_data),
         lookup=lookup,
         ltotal=DetectorLtotal(sample_data.coords['L1']),
         pulse_stride_offset=pulse_stride_offset,
@@ -66,11 +66,11 @@ def detector_time_of_flight_data(
 
 
 def monitor_time_of_flight_data(
-    monitor_data: MonitorData[RunType, MonitorType],
+    monitor_data: RawMonitor[RunType, MonitorType],
     lookup: TimeOfFlightLookupTable,
     ltotal: MonitorLtotal[RunType, MonitorType],
     pulse_stride_offset: PulseStrideOffset,
-) -> MonitorTofData[RunType, MonitorType]:
+) -> TofMonitor[RunType, MonitorType]:
     """
     Convert the time-of-arrival data to time-of-flight data using a lookup table.
 
@@ -90,7 +90,7 @@ def monitor_time_of_flight_data(
 
 
 def compute_monitor_ltotal(
-    monitor_data: MonitorData[RunType, MonitorType],
+    monitor_data: RawMonitor[RunType, MonitorType],
     coord_transform_graph: MonitorCoordTransformGraph,
 ) -> MonitorLtotal[RunType, MonitorType]:
     """Compute the path length from the source to the monitor."""

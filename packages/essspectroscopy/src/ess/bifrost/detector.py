@@ -6,20 +6,22 @@
 import scipp as sc
 import scippnexus as snx
 
+from ess.spectroscopy.indirect.conversion import add_spectrometer_coords
 from ess.spectroscopy.types import (
-    BeamlineWithSpectrometerCoords,
-    CalibratedDetector,
     DetectorPositionOffset,
+    EmptyDetector,
     NeXusComponent,
     NeXusTransformation,
+    PrimarySpecCoordTransformGraph,
     RunType,
+    SecondarySpecCoordTransformGraph,
 )
 
 from .types import ArcNumber
 
 
 def arc_number(
-    beamline: BeamlineWithSpectrometerCoords[RunType],
+    beamline: EmptyDetector[RunType],
 ) -> ArcNumber[RunType]:
     """Calculate BIFROST arc index number from pixel final energy
 
@@ -49,16 +51,41 @@ def arc_number(
     return ArcNumber[RunType](sc.round((final_energy - minimum) / step).to(dtype='int'))
 
 
+def arc_and_channel_from_detector_number(
+    detector_number: sc.Variable,
+) -> tuple[sc.Variable, sc.Variable]:
+    """Calculate arc number and channel from detector number.
+
+    Calculate arc and channel for this triplet based on detector_number layout.
+    BIFROST detector_number ordering is (arc, tube, channel, pixel).
+    Each triplet contains 3 tubes of 100 pixels for a single arc-channel pair.
+    """
+
+    det_num = detector_number['tube', 0]['length', 0].value
+    pixels_per_tube = 100
+    tubes_per_channel = 3
+    channels_per_arc = 9
+    pixels_per_arc = pixels_per_tube * tubes_per_channel * channels_per_arc  # 2700
+
+    # detector_number is 1-indexed
+    idx = det_num - 1
+    arc = idx // pixels_per_arc
+    remainder = idx % pixels_per_arc
+    channel = (remainder % (pixels_per_tube * channels_per_arc)) // pixels_per_tube
+
+    return sc.index(arc), sc.index(channel)
+
+
 def get_calibrated_detector_bifrost(
     detector: NeXusComponent[snx.NXdetector, RunType],
     *,
     transform: NeXusTransformation[snx.NXdetector, RunType],
     offset: DetectorPositionOffset[RunType],
-) -> CalibratedDetector[RunType]:
+    primary_graph: PrimarySpecCoordTransformGraph[RunType],
+    secondary_graph: SecondarySpecCoordTransformGraph[RunType],
+) -> EmptyDetector[RunType]:
     """Extract the data array corresponding to a detector's signal field.
 
-    The returned data array includes coords and masks pertaining directly to the
-    signal values array, but not additional information about the detector.
     The data array is reshaped to the logical detector shape.
 
     This function is specific to BIFROST and differs from the generic
@@ -74,11 +101,18 @@ def get_calibrated_detector_bifrost(
         Transformation that determines the detector position.
     offset:
         Offset to add to the detector position.
+    primary_graph:
+        Coordinate transformation graph for the primary spectrometer.
+    secondary_graph:
+        Coordinate transformation graph for the secondary spectrometer.
+        Must be a closure over analyzer parameters.
+        And those parameters must have a compatible shape with ``data``.
 
     Returns
     -------
     :
-        Detector data.
+        Detector geometry and spectrometer coordinates.
+        This includes "final_energy", "secondary_flight_time", and "L1".
     """
 
     from ess.reduce.nexus.types import DetectorBankSizes
@@ -93,25 +127,13 @@ def get_calibrated_detector_bifrost(
     )
     da = da.rename(dim_0='tube', dim_1='length')
 
-    # Calculate arc and channel for this triplet based on detector_number layout.
-    # BIFROST detector_number ordering is (arc, tube, channel, pixel).
-    # Each triplet contains 3 tubes of 100 pixels for a single arc-channel pair.
-    det_num = da.coords['detector_number']['tube', 0]['length', 0].value
-    pixels_per_tube = 100
-    tubes_per_channel = 3
-    channels_per_arc = 9
-    pixels_per_arc = pixels_per_tube * tubes_per_channel * channels_per_arc  # 2700
+    arc, channel = arc_and_channel_from_detector_number(da.coords['detector_number'])
+    da.coords['arc'] = arc
+    da.coords['channel'] = channel
 
-    # detector_number is 1-indexed
-    idx = det_num - 1
-    arc = idx // pixels_per_arc
-    remainder = idx % pixels_per_arc
-    channel = (remainder % (pixels_per_tube * channels_per_arc)) // pixels_per_tube
+    da = add_spectrometer_coords(da, primary_graph, secondary_graph)
 
-    da.coords['arc'] = sc.index(arc)
-    da.coords['channel'] = sc.index(channel)
-
-    return CalibratedDetector[RunType](da)
+    return EmptyDetector[RunType](da)
 
 
 def merge_triplets(

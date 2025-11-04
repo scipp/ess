@@ -15,8 +15,7 @@ from ess.spectroscopy.indirect.ki import providers as ki_providers
 from ess.spectroscopy.indirect.normalization import providers as normalisation_providers
 from ess.spectroscopy.indirect.time_of_flight import TofWorkflow
 from ess.spectroscopy.types import (
-    BeamlineWithSpectrometerCoords,
-    DetectorData,
+    EmptyDetector,
     FrameMonitor0,
     FrameMonitor1,
     FrameMonitor2,
@@ -25,6 +24,7 @@ from ess.spectroscopy.types import (
     NeXusDetectorName,
     NeXusMonitorName,
     PulsePeriod,
+    RawDetector,
     SampleRun,
 )
 
@@ -80,8 +80,8 @@ def BifrostSimulationWorkflow(
     for key, val in simulation_default_parameters().items():
         workflow[key] = val
 
-    workflow[DetectorData[SampleRun]] = (
-        workflow[DetectorData[SampleRun]]
+    workflow[RawDetector[SampleRun]] = (
+        workflow[RawDetector[SampleRun]]
         .map(_make_detector_name_mapping(detector_names))
         .reduce(func=merge_triplets)
     )
@@ -104,8 +104,8 @@ def BifrostWorkflow(
     for key, val in simulation_default_parameters().items():
         workflow[key] = val
 
-    workflow[BeamlineWithSpectrometerCoords[SampleRun]] = (
-        workflow[BeamlineWithSpectrometerCoords[SampleRun]]
+    workflow[EmptyDetector[SampleRun]] = (
+        workflow[EmptyDetector[SampleRun]]
         .map(_make_detector_name_mapping(detector_names))
         .reduce(func=merge_triplets)
     )

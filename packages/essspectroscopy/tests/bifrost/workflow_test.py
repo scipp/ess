@@ -13,12 +13,12 @@ from ess.bifrost.data import (
     tof_lookup_table_simulation,
 )
 from ess.spectroscopy.types import (
-    DetectorData,
-    EnergyData,
+    EnergyQDetector,
     Filename,
     FrameMonitor3,
-    MonitorData,
     NeXusDetectorName,
+    RawDetector,
+    RawMonitor,
     SampleRun,
     TimeOfFlightLookupTable,
     WavelengthMonitor,
@@ -45,19 +45,17 @@ def test_simulation_workflow_can_load_detector() -> None:
         [NeXusDetectorName("125_channel_1_1_triplet")]
     )
     workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
-    results = sciline.compute_mapped(workflow, DetectorData[SampleRun])
+    results = sciline.compute_mapped(workflow, RawDetector[SampleRun])
     result = results.iloc[0]
 
     assert result.bins is not None
     assert set(result.dims) == {'tube', 'length'}
     assert result.sizes['tube'] == 3
     assert 'position' in result.coords
-    assert 'sample_position' in result.coords
-    assert 'source_position' in result.coords
 
 
 def test_simulation_workflow_can_load_monitor(workflow: sciline.Pipeline) -> None:
-    result = workflow.compute(MonitorData[SampleRun, FrameMonitor3])
+    result = workflow.compute(RawMonitor[SampleRun, FrameMonitor3])
 
     assert result.bins is None
     assert 'position' in result.coords
@@ -68,7 +66,7 @@ def test_simulation_workflow_can_load_monitor(workflow: sciline.Pipeline) -> Non
 def test_simulation_workflow_can_compute_energy_data(
     workflow: sciline.Pipeline,
 ) -> None:
-    energy_data = workflow.compute(EnergyData[SampleRun])
+    energy_data = workflow.compute(EnergyQDetector[SampleRun])
 
     assert energy_data.sizes == {
         'arc': 5,
@@ -109,7 +107,7 @@ def test_simulation_workflow_can_compute_wavelength_monitor(
 def test_simulation_workflow_produces_the_same_data_as_before(
     workflow: sciline.Pipeline,
 ) -> None:
-    energy_data = workflow.compute(EnergyData[SampleRun])
+    energy_data = workflow.compute(EnergyQDetector[SampleRun])
     expected = sc.io.load_hdf5(computed_energy_data_simulated_5x2())
 
     assert not energy_data.masks

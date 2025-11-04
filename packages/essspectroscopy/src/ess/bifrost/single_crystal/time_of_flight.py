@@ -7,11 +7,11 @@ from ess.reduce import time_of_flight as reduce_time_of_flight
 from ess.reduce.time_of_flight.types import DetectorLtotal
 from ess.spectroscopy.types import (
     DataGroupedByRotation,
-    DetectorData,
-    DetectorTofData,
     PulseStrideOffset,
+    RawDetector,
     RunType,
     TimeOfFlightLookupTable,
+    TofDetector,
 )
 
 
@@ -20,7 +20,7 @@ def detector_time_of_flight_data(
     lookup: TimeOfFlightLookupTable,
     ltotal: DetectorLtotal[RunType],
     pulse_stride_offset: PulseStrideOffset,
-) -> DetectorTofData[RunType]:
+) -> TofDetector[RunType]:
     """
     Convert the time-of-arrival data to time-of-flight data using a lookup table.
 
@@ -31,7 +31,7 @@ def detector_time_of_flight_data(
     for different input types.
     """
     return reduce_time_of_flight.eto_to_tof.detector_time_of_flight_data(
-        detector_data=DetectorData[RunType](sample_data),
+        detector_data=RawDetector[RunType](sample_data),
         lookup=lookup,
         ltotal=ltotal,
         pulse_stride_offset=pulse_stride_offset,

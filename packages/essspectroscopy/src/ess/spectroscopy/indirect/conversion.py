@@ -11,18 +11,16 @@ from scippneutron.conversion.tof import (
 )
 
 from ..types import (
-    BeamlineWithSpectrometerCoords,
-    CalibratedBeamline,
-    DetectorTofData,
-    EnergyData,
+    EnergyQDetector,
     GravityVector,
     InelasticCoordTransformGraph,
     MonitorCoordTransformGraph,
-    MonitorTofData,
     MonitorType,
     PrimarySpecCoordTransformGraph,
     RunType,
     SecondarySpecCoordTransformGraph,
+    TofDetector,
+    TofMonitor,
     WavelengthMonitor,
 )
 
@@ -160,8 +158,8 @@ def inelastic_coordinate_transformation_graph_at_sample(
 
 
 def add_inelastic_coordinates(
-    data: DetectorTofData[RunType], graph: InelasticCoordTransformGraph
-) -> EnergyData[RunType]:
+    data: TofDetector[RunType], graph: InelasticCoordTransformGraph
+) -> EnergyQDetector[RunType]:
     transformed = data.transform_coords(
         [
             # TODO pick minimal list of coords
@@ -180,14 +178,14 @@ def add_inelastic_coordinates(
         keep_intermediate=False,
         rename_dims=False,
     )
-    return EnergyData[RunType](transformed)
+    return EnergyQDetector[RunType](transformed)
 
 
 def add_spectrometer_coords(
-    data: CalibratedBeamline[RunType],
+    data: sc.DataArray,
     primary_graph: PrimarySpecCoordTransformGraph[RunType],
     secondary_graph: SecondarySpecCoordTransformGraph[RunType],
-) -> BeamlineWithSpectrometerCoords[RunType]:
+) -> sc.DataArray:
     """Compute and add coordinates for the spectrometer.
 
     Parameters
@@ -236,7 +234,7 @@ def monitor_coordinate_transformation_graph() -> MonitorCoordTransformGraph:
 
 
 def add_monitor_wavelength_coords(
-    monitor: MonitorTofData[RunType, MonitorType], graph: MonitorCoordTransformGraph
+    monitor: TofMonitor[RunType, MonitorType], graph: MonitorCoordTransformGraph
 ) -> WavelengthMonitor[RunType, MonitorType]:
     return WavelengthMonitor[RunType, MonitorType](
         monitor.transform_coords(
@@ -248,7 +246,6 @@ def add_monitor_wavelength_coords(
 providers = (
     add_inelastic_coordinates,
     add_monitor_wavelength_coords,
-    add_spectrometer_coords,
     inelastic_coordinate_transformation_graph_at_sample,
     monitor_coordinate_transformation_graph,
 )
