@@ -70,7 +70,7 @@ MaskingRules = NewType('MaskingRules', MappingProxyType[str, Callable])
 """Functions to mask different dimensions of Odin data."""
 
 
-class MaskedDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+class CorrectedDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Detector data with masks."""
 
 
