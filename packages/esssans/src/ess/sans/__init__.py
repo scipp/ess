@@ -15,7 +15,7 @@ from . import (
 )
 from .beam_center_finder import beam_center_from_center_of_mass
 from .direct_beam import direct_beam
-from .types import BackgroundSubtractedIofQ, IofQ, ReturnEvents, SampleRun
+from .types import BackgroundSubtractedIofQ, IntensityQ, ReturnEvents, SampleRun
 from .workflow import (
     SansWorkflow,
     providers,
@@ -34,7 +34,7 @@ del importlib
 
 __all__ = [
     'BackgroundSubtractedIofQ',
-    'IofQ',
+    'IntensityQ',
     'ReturnEvents',
     'SampleRun',
     'SansWorkflow',

@@ -12,8 +12,8 @@ from ess.sans.types import (
     DetectorPositionOffset,
     Filename,
     Incident,
-    IofQ,
-    IofQxy,
+    IntensityQ,
+    IntensityQxQy,
     NeXusMonitorName,
     NonBackgroundWavelengthRange,
     QBins,
@@ -72,7 +72,7 @@ def test_can_create_pipeline(pipeline):
     pipeline = sans.with_pixel_mask_filenames(
         pipeline, isis.data.zoom_tutorial_mask_filenames()
     )
-    pipeline.get(IofQ[SampleRun])
+    pipeline.get(IntensityQ[SampleRun])
 
 
 def test_pipeline_can_compute_IofQ(pipeline):
@@ -80,7 +80,7 @@ def test_pipeline_can_compute_IofQ(pipeline):
     pipeline = sans.with_pixel_mask_filenames(
         pipeline, isis.data.zoom_tutorial_mask_filenames()
     )
-    result = pipeline.compute(IofQ[SampleRun])
+    result = pipeline.compute(IntensityQ[SampleRun])
     assert result.dims == ('Q',)
 
 
@@ -96,5 +96,5 @@ def test_pipeline_can_compute_IofQxQy(pipeline):
         dim='Qy', start=-0.8, stop=0.8, num=101, unit='1/angstrom'
     )
 
-    result = pipeline.compute(IofQxy[SampleRun])
+    result = pipeline.compute(IntensityQxQy[SampleRun])
     assert result.dims == ('Qy', 'Qx')

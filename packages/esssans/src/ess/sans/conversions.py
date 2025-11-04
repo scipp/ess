@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-from typing import NewType
-
+import sciline
 import scipp as sc
+import scippnexus as snx
 from scippneutron.conversion.beamline import (
     beam_aligned_unit_vectors,
     scattering_angles_with_gravity,
@@ -13,26 +13,28 @@ from ess.reduce.uncertainty import broadcast_uncertainties
 
 from .common import mask_range
 from .types import (
-    CleanQ,
-    CleanQxy,
-    CleanSummedQ,
-    CleanSummedQxy,
-    CleanWavelength,
+    BinnedQ,
+    BinnedQxQy,
+    CorrectedDetector,
     CorrectForGravity,
     Denominator,
+    GravityVector,
     IofQPart,
-    MaskedData,
     MonitorTerm,
     MonitorType,
+    NormalizedQ,
+    NormalizedQxQy,
     Numerator,
+    Position,
+    QDetector,
+    QxyDetector,
     RunType,
     ScatteringRunType,
     TofMonitor,
     UncertaintyBroadcastMode,
+    WavelengthDetector,
     WavelengthMask,
     WavelengthMonitor,
-    WavelengthScaledQ,
-    WavelengthScaledQxy,
 )
 
 
@@ -92,11 +94,19 @@ def Qxy(Q: sc.Variable, phi: sc.Variable) -> dict[str, sc.Variable]:
     return {'Qx': Qx, 'Qy': Qy}
 
 
-ElasticCoordTransformGraph = NewType('ElasticCoordTransformGraph', dict)
-MonitorCoordTransformGraph = NewType('MonitorCoordTransformGraph', dict)
+class ElasticCoordTransformGraph(sciline.Scope[RunType, dict], dict): ...
 
 
-def sans_elastic(correct_for_gravity: CorrectForGravity) -> ElasticCoordTransformGraph:
+class MonitorCoordTransformGraph(sciline.Scope[RunType, dict], dict): ...
+
+
+def sans_elastic(
+    correct_for_gravity: CorrectForGravity,
+    *,
+    sample_position: Position[snx.NXsample, RunType],
+    source_position: Position[snx.NXsource, RunType],
+    gravity: GravityVector,
+) -> ElasticCoordTransformGraph[RunType]:
     """
     Generate a coordinate transformation graph for SANS elastic scattering.
 
@@ -128,8 +138,21 @@ def sans_elastic(correct_for_gravity: CorrectForGravity) -> ElasticCoordTransfor
     correct_for_gravity:
         Take into account the bending of the neutron flight paths from the
         Earth's gravitational field if ``True``.
+    gravity:
+        A vector indicating the strength and direction of gravity.
+        Required even if ``correct_for_gravity`` is ``False``.
+    sample_position:
+        Position of the sample as a vector.
+    source_position:
+        Position of the source as a vector.
     """  # noqa: E501
-    graph = {**beamline.beamline(scatter=True), **tof.elastic_Q('tof')}
+    graph = {
+        **beamline.beamline(scatter=True),
+        **tof.elastic_Q('tof'),
+        'sample_position': lambda: sample_position,
+        'source_position': lambda: source_position,
+        'gravity': lambda: gravity,
+    }
     if correct_for_gravity:
         del graph['two_theta']
         graph[('two_theta', 'phi')] = scattering_angles_with_gravity
@@ -142,17 +165,24 @@ def sans_elastic(correct_for_gravity: CorrectForGravity) -> ElasticCoordTransfor
     return ElasticCoordTransformGraph(graph)
 
 
-def sans_monitor() -> MonitorCoordTransformGraph:
+def sans_monitor(
+    source_position: Position[snx.NXsource, RunType],
+) -> MonitorCoordTransformGraph[RunType]:
     """
     Generate a coordinate transformation graph for SANS monitor (no scattering).
     """
     return MonitorCoordTransformGraph(
-        {**beamline.beamline(scatter=False), **tof.elastic_wavelength('tof')}
+        {
+            **beamline.beamline(scatter=False),
+            **tof.elastic_wavelength('tof'),
+            'source_position': lambda: source_position,
+        }
     )
 
 
 def monitor_to_wavelength(
-    monitor: TofMonitor[RunType, MonitorType], graph: MonitorCoordTransformGraph
+    monitor: TofMonitor[RunType, MonitorType],
+    graph: MonitorCoordTransformGraph[RunType],
 ) -> WavelengthMonitor[RunType, MonitorType]:
     return WavelengthMonitor[RunType, MonitorType](
         monitor.transform_coords('wavelength', graph=graph, keep_inputs=False)
@@ -163,59 +193,59 @@ def monitor_to_wavelength(
 # for RawData, MaskedData, ... no reason to restrict necessarily.
 # Would we be fine with just choosing on option, or will this get in the way for users?
 def detector_to_wavelength(
-    detector: MaskedData[ScatteringRunType],
-    graph: ElasticCoordTransformGraph,
-) -> CleanWavelength[ScatteringRunType, Numerator]:
-    return CleanWavelength[ScatteringRunType, Numerator](
+    detector: CorrectedDetector[ScatteringRunType, Numerator],
+    graph: ElasticCoordTransformGraph[ScatteringRunType],
+) -> WavelengthDetector[ScatteringRunType, Numerator]:
+    return WavelengthDetector[ScatteringRunType, Numerator](
         detector.transform_coords('wavelength', graph=graph, keep_inputs=False)
     )
 
 
 def mask_wavelength_q(
-    da: CleanSummedQ[ScatteringRunType, Numerator], mask: WavelengthMask
-) -> WavelengthScaledQ[ScatteringRunType, Numerator]:
+    da: BinnedQ[ScatteringRunType, Numerator], mask: WavelengthMask
+) -> NormalizedQ[ScatteringRunType, Numerator]:
     if mask is not None:
         da = mask_range(da, mask=mask)
-    return WavelengthScaledQ[ScatteringRunType, Numerator](da)
+    return NormalizedQ[ScatteringRunType, Numerator](da)
 
 
 def mask_wavelength_qxy(
-    da: CleanSummedQxy[ScatteringRunType, Numerator], mask: WavelengthMask
-) -> WavelengthScaledQxy[ScatteringRunType, Numerator]:
+    da: BinnedQxQy[ScatteringRunType, Numerator], mask: WavelengthMask
+) -> NormalizedQxQy[ScatteringRunType, Numerator]:
     if mask is not None:
         da = mask_range(da, mask=mask)
-    return WavelengthScaledQxy[ScatteringRunType, Numerator](da)
+    return NormalizedQxQy[ScatteringRunType, Numerator](da)
 
 
 def mask_and_scale_wavelength_q(
-    da: CleanSummedQ[ScatteringRunType, Denominator],
+    da: BinnedQ[ScatteringRunType, Denominator],
     mask: WavelengthMask,
     wavelength_term: MonitorTerm[ScatteringRunType],
     uncertainties: UncertaintyBroadcastMode,
-) -> WavelengthScaledQ[ScatteringRunType, Denominator]:
+) -> NormalizedQ[ScatteringRunType, Denominator]:
     da = da * broadcast_uncertainties(wavelength_term, prototype=da, mode=uncertainties)
     if mask is not None:
         da = mask_range(da, mask=mask)
-    return WavelengthScaledQ[ScatteringRunType, Denominator](da)
+    return NormalizedQ[ScatteringRunType, Denominator](da)
 
 
 def mask_and_scale_wavelength_qxy(
-    da: CleanSummedQxy[ScatteringRunType, Denominator],
+    da: BinnedQxQy[ScatteringRunType, Denominator],
     mask: WavelengthMask,
     wavelength_term: MonitorTerm[ScatteringRunType],
     uncertainties: UncertaintyBroadcastMode,
-) -> WavelengthScaledQxy[ScatteringRunType, Denominator]:
+) -> NormalizedQxQy[ScatteringRunType, Denominator]:
     da = da * broadcast_uncertainties(wavelength_term, prototype=da, mode=uncertainties)
     if mask is not None:
         da = mask_range(da, mask=mask)
-    return WavelengthScaledQxy[ScatteringRunType, Denominator](da)
+    return NormalizedQxQy[ScatteringRunType, Denominator](da)
 
 
 def _compute_Q(
     data: sc.DataArray, graph: ElasticCoordTransformGraph, target: tuple[str, ...]
 ) -> sc.DataArray:
     # Keep naming of wavelength dim, subsequent steps use a (Q[xy], wavelength) binning.
-    return CleanQ[ScatteringRunType, IofQPart](
+    return QDetector[ScatteringRunType, IofQPart](
         data.transform_coords(
             target,
             graph=graph,
@@ -226,25 +256,25 @@ def _compute_Q(
 
 
 def compute_Q(
-    data: CleanWavelength[ScatteringRunType, IofQPart],
-    graph: ElasticCoordTransformGraph,
-) -> CleanQ[ScatteringRunType, IofQPart]:
+    data: WavelengthDetector[ScatteringRunType, IofQPart],
+    graph: ElasticCoordTransformGraph[ScatteringRunType],
+) -> QDetector[ScatteringRunType, IofQPart]:
     """
     Convert a data array from wavelength to Q.
     """
-    return CleanQ[ScatteringRunType, IofQPart](
+    return QDetector[ScatteringRunType, IofQPart](
         _compute_Q(data=data, graph=graph, target=('Q',))
     )
 
 
 def compute_Qxy(
-    data: CleanWavelength[ScatteringRunType, IofQPart],
-    graph: ElasticCoordTransformGraph,
-) -> CleanQxy[ScatteringRunType, IofQPart]:
+    data: WavelengthDetector[ScatteringRunType, IofQPart],
+    graph: ElasticCoordTransformGraph[ScatteringRunType],
+) -> QxyDetector[ScatteringRunType, IofQPart]:
     """
     Convert a data array from wavelength to Qx and Qy.
     """
-    return CleanQxy[ScatteringRunType, IofQPart](
+    return QxyDetector[ScatteringRunType, IofQPart](
         _compute_Q(data=data, graph=graph, target=('Qx', 'Qy'))
     )
 

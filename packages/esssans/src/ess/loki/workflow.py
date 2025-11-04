@@ -17,14 +17,12 @@ from ..sans.types import (
     BackgroundRun,
     BeamCenter,
     DetectorBankSizes,
-    DetectorData,
     DetectorPixelShape,
     DirectBeam,
     DirectBeamFilename,
     EmptyBeamRun,
     Filename,
     Incident,
-    MonitorData,
     MonitorType,
     NeXusComponent,
     NeXusDetectorName,
@@ -32,10 +30,12 @@ from ..sans.types import (
     NonBackgroundWavelengthRange,
     PixelMaskFilename,
     PixelShapePath,
+    RawDetector,
+    RawMonitor,
     RunType,
     SampleRun,
     ScatteringRunType,
-    TofData,
+    TofDetector,
     TofMonitor,
     Transmission,
     TransmissionRun,
@@ -66,13 +66,13 @@ def _convert_to_tof(da: sc.DataArray) -> sc.DataArray:
 
 
 def data_to_tof(
-    da: DetectorData[ScatteringRunType],
-) -> TofData[ScatteringRunType]:
-    return TofData[ScatteringRunType](_convert_to_tof(da))
+    da: RawDetector[ScatteringRunType],
+) -> TofDetector[ScatteringRunType]:
+    return TofDetector[ScatteringRunType](_convert_to_tof(da))
 
 
 def monitor_to_tof(
-    da: MonitorData[RunType, MonitorType],
+    da: RawMonitor[RunType, MonitorType],
 ) -> TofMonitor[RunType, MonitorType]:
     return TofMonitor[RunType, MonitorType](_convert_to_tof(da))
 
