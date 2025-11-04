@@ -21,6 +21,8 @@ from .types import (
     IofQPart,
     MonitorTerm,
     NeXusTransformation,
+    NormalizedQ,
+    NormalizedQxQy,
     Numerator,
     Position,
     ProcessedWavelengthBands,
@@ -35,8 +37,6 @@ from .types import (
     WavelengthBands,
     WavelengthBins,
     WavelengthDetector,
-    NormalizedQ,
-    NormalizedQxQy,
 )
 
 

@@ -10,12 +10,12 @@ from .types import (
     BackgroundSubtractedIofQ,
     Denominator,
     DirectBeam,
+    NormalizedQ,
     Numerator,
     ProcessedWavelengthBands,
     SampleRun,
     WavelengthBands,
     WavelengthBins,
-    NormalizedQ,
 )
 
 

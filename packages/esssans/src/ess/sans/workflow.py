@@ -21,6 +21,8 @@ from .types import (
     Filename,
     Incident,
     NeXusDetectorName,
+    NormalizedQ,
+    NormalizedQxQy,
     Numerator,
     PixelMaskFilename,
     SampleRun,
@@ -29,8 +31,6 @@ from .types import (
     TransmissionRun,
     WavelengthBands,
     WavelengthMask,
-    NormalizedQ,
-    NormalizedQxQy,
 )
 
 

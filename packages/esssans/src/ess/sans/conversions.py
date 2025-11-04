@@ -22,6 +22,8 @@ from .types import (
     IofQPart,
     MonitorTerm,
     MonitorType,
+    NormalizedQ,
+    NormalizedQxQy,
     Numerator,
     Position,
     QDetector,
@@ -33,8 +35,6 @@ from .types import (
     WavelengthDetector,
     WavelengthMask,
     WavelengthMonitor,
-    NormalizedQ,
-    NormalizedQxQy,
 )
 
 

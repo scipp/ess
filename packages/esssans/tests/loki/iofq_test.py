@@ -17,7 +17,6 @@ from ess.sans.types import (
     BackgroundSubtractedIofQ,
     BackgroundSubtractedIofQxy,
     BeamCenter,
-    WavelengthDetector,
     CorrectForGravity,
     Denominator,
     DimsToKeep,
@@ -25,6 +24,7 @@ from ess.sans.types import (
     IntensityQ,
     IntensityQxQy,
     MaskedData,
+    NormalizedQ,
     Numerator,
     QBins,
     QxBins,
@@ -34,7 +34,7 @@ from ess.sans.types import (
     UncertaintyBroadcastMode,
     WavelengthBands,
     WavelengthBins,
-    NormalizedQ,
+    WavelengthDetector,
 )
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -267,13 +267,9 @@ def test_pipeline_IofQ_merging_events_yields_consistent_results():
         ),
     )
     assert sc.allclose(
-        sc.values(
-            pipeline_single.compute(NormalizedQ[SampleRun, Denominator]).data
-        )
+        sc.values(pipeline_single.compute(NormalizedQ[SampleRun, Denominator]).data)
         * N,
-        sc.values(
-            pipeline_triple.compute(NormalizedQ[SampleRun, Denominator]).data
-        ),
+        sc.values(pipeline_triple.compute(NormalizedQ[SampleRun, Denominator]).data),
     )
 
 
