@@ -190,7 +190,7 @@ class MonitorTerm(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Monitor-dependent factor of the Normalization term (numerator) for IofQ."""
 
 
-class CleanWavelength(
+class WavelengthDetector(
     sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
 ):
     """
@@ -215,11 +215,11 @@ class WavelengthScaledQxy(
 
 
 class CleanQ(sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray):
-    """Result of converting :py:class:`CleanWavelengthMasked` to Q"""
+    """Result of converting :py:class:`WavelengthDetectorMasked` to Q"""
 
 
 class CleanQxy(sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray):
-    """Result of converting :py:class:`CleanWavelengthMasked` to Qx and Qy"""
+    """Result of converting :py:class:`WavelengthDetectorMasked` to Qx and Qy"""
 
 
 class CleanSummedQ(

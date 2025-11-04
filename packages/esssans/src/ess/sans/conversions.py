@@ -17,7 +17,7 @@ from .types import (
     CleanQxy,
     CleanSummedQ,
     CleanSummedQxy,
-    CleanWavelength,
+    WavelengthDetector,
     CorrectForGravity,
     Denominator,
     GravityVector,
@@ -195,8 +195,8 @@ def monitor_to_wavelength(
 def detector_to_wavelength(
     detector: MaskedData[ScatteringRunType],
     graph: ElasticCoordTransformGraph[ScatteringRunType],
-) -> CleanWavelength[ScatteringRunType, Numerator]:
-    return CleanWavelength[ScatteringRunType, Numerator](
+) -> WavelengthDetector[ScatteringRunType, Numerator]:
+    return WavelengthDetector[ScatteringRunType, Numerator](
         detector.transform_coords('wavelength', graph=graph, keep_inputs=False)
     )
 
@@ -256,7 +256,7 @@ def _compute_Q(
 
 
 def compute_Q(
-    data: CleanWavelength[ScatteringRunType, IofQPart],
+    data: WavelengthDetector[ScatteringRunType, IofQPart],
     graph: ElasticCoordTransformGraph[ScatteringRunType],
 ) -> CleanQ[ScatteringRunType, IofQPart]:
     """
@@ -268,7 +268,7 @@ def compute_Q(
 
 
 def compute_Qxy(
-    data: CleanWavelength[ScatteringRunType, IofQPart],
+    data: WavelengthDetector[ScatteringRunType, IofQPart],
     graph: ElasticCoordTransformGraph[ScatteringRunType],
 ) -> CleanQxy[ScatteringRunType, IofQPart]:
     """

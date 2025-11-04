@@ -17,7 +17,7 @@ from ess.sans.types import (
     BackgroundSubtractedIofQ,
     BackgroundSubtractedIofQxy,
     BeamCenter,
-    CleanWavelength,
+    WavelengthDetector,
     CorrectForGravity,
     Denominator,
     DimsToKeep,
@@ -291,13 +291,13 @@ def test_phi_with_gravity():
     pipeline = make_workflow()
     pipeline[BeamCenter] = _compute_beam_center()
     pipeline[CorrectForGravity] = False
-    data_no_grav = pipeline.compute(CleanWavelength[SampleRun, Numerator]).flatten(
+    data_no_grav = pipeline.compute(WavelengthDetector[SampleRun, Numerator]).flatten(
         to='pixel'
     )
     graph_no_grav = pipeline.compute(ElasticCoordTransformGraph[SampleRun])
     pipeline[CorrectForGravity] = True
     data_with_grav = (
-        pipeline.compute(CleanWavelength[SampleRun, Numerator])
+        pipeline.compute(WavelengthDetector[SampleRun, Numerator])
         .flatten(to='pixel')
         .hist(wavelength=sc.linspace('wavelength', 1.0, 12.0, 101, unit='angstrom'))
     )
