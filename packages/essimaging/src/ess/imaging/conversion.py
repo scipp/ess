@@ -5,16 +5,23 @@ Contains the providers to compute neutron time-of-flight and wavelength.
 """
 
 import scippneutron as scn
+import scippnexus as snx
 
 from .types import (
     CoordTransformGraph,
-    CountsWavelength,
-    DetectorTofData,
+    GravityVector,
+    Position,
     RunType,
+    TofDetector,
+    WavelengthDetector,
 )
 
 
-def make_coordinate_transform_graph() -> CoordTransformGraph:
+def make_coordinate_transform_graph(
+    sample_position: Position[snx.NXsample, RunType],
+    source_position: Position[snx.NXsource, RunType],
+    gravity: GravityVector,
+) -> CoordTransformGraph[RunType]:
     """
     Create a graph of coordinate transformations to compute the wavelength from the
     time-of-flight.
@@ -22,14 +29,17 @@ def make_coordinate_transform_graph() -> CoordTransformGraph:
     graph = {
         **scn.conversion.graph.beamline.beamline(scatter=False),
         **scn.conversion.graph.tof.elastic("tof"),
+        'sample_position': lambda: sample_position,
+        'source_position': lambda: source_position,
+        'gravity': lambda: gravity,
     }
     return CoordTransformGraph(graph)
 
 
 def compute_detector_wavelength(
-    tof_data: DetectorTofData[RunType],
-    graph: CoordTransformGraph,
-) -> CountsWavelength[RunType]:
+    tof_data: TofDetector[RunType],
+    graph: CoordTransformGraph[RunType],
+) -> WavelengthDetector[RunType]:
     """
     Compute the wavelength of neutrons detected by the detector.
 
@@ -40,7 +50,7 @@ def compute_detector_wavelength(
     graph:
         Graph of coordinate transformations.
     """
-    return CountsWavelength[RunType](
+    return WavelengthDetector[RunType](
         tof_data.transform_coords("wavelength", graph=graph)
     )
 

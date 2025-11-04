@@ -6,13 +6,13 @@ Contains the providers to apply masks to detector data.
 
 import scipp as sc
 
-from ..imaging.types import CountsMasked, CountsWavelength, MaskingRules, RunType
+from ..imaging.types import CorrectedDetector, MaskingRules, RunType, WavelengthDetector
 
 
 def apply_masks(
-    da: CountsWavelength[RunType],
+    da: WavelengthDetector[RunType],
     masks: MaskingRules,
-) -> CountsMasked[RunType]:
+) -> CorrectedDetector[RunType]:
     out = da.copy(deep=False)
     for coord_name, mask in masks.items():
         if (out.bins is not None) and (coord_name in out.bins.coords):
@@ -24,7 +24,7 @@ def apply_masks(
                 else out.coords[coord_name]
             )
             out.masks[coord_name] = mask(coord)
-    return CountsMasked[RunType](out)
+    return CorrectedDetector[RunType](out)
 
 
 providers = (apply_masks,)
