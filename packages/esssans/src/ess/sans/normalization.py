@@ -8,7 +8,7 @@ from ess.reduce.uncertainty import UncertaintyBroadcastMode, broadcast_uncertain
 
 from .types import (
     CleanDirectBeam,
-    CleanWavelength,
+    CorrectedDetector,
     CorrectedMonitor,
     Denominator,
     DetectorMasks,
@@ -19,14 +19,15 @@ from .types import (
     IntensityQ,
     IntensityQxQy,
     IofQPart,
-    MaskedSolidAngle,
     MonitorTerm,
     NeXusTransformation,
+    NormalizedQ,
+    NormalizedQxQy,
     Numerator,
     Position,
     ProcessedWavelengthBands,
     ReducedQ,
-    ReducedQxy,
+    ReducedQxQy,
     ReturnEvents,
     ScatteringRunType,
     SolidAngle,
@@ -35,8 +36,7 @@ from .types import (
     TransmissionRun,
     WavelengthBands,
     WavelengthBins,
-    WavelengthScaledQ,
-    WavelengthScaledQxy,
+    WavelengthDetector,
 )
 
 
@@ -93,8 +93,10 @@ def solid_angle(
 def mask_solid_angle(
     solid_angle: SolidAngle[ScatteringRunType],
     masks: DetectorMasks,
-) -> MaskedSolidAngle[ScatteringRunType]:
-    return MaskedSolidAngle[ScatteringRunType](solid_angle.assign_masks(masks))
+) -> CorrectedDetector[ScatteringRunType, Denominator]:
+    return CorrectedDetector[ScatteringRunType, Denominator](
+        solid_angle.assign_masks(masks)
+    )
 
 
 def _approximate_solid_angle_for_cylinder_shaped_pixel_of_detector(
@@ -209,10 +211,10 @@ def norm_monitor_term(
 
 
 def norm_detector_term(
-    solid_angle: MaskedSolidAngle[ScatteringRunType],
+    solid_angle: CorrectedDetector[ScatteringRunType, Denominator],
     direct_beam: CleanDirectBeam,
     uncertainties: UncertaintyBroadcastMode,
-) -> CleanWavelength[ScatteringRunType, Denominator]:
+) -> WavelengthDetector[ScatteringRunType, Denominator]:
     """
     Compute the detector-dependent contribution to the denominator term of I(Q).
 
@@ -253,7 +255,7 @@ def norm_detector_term(
     )
     # Convert wavelength coordinate to midpoints for future histogramming
     out.coords['wavelength'] = sc.midpoints(out.coords['wavelength'])
-    return CleanWavelength[ScatteringRunType, Denominator](out)
+    return WavelengthDetector[ScatteringRunType, Denominator](out)
 
 
 def process_wavelength_bands(
@@ -411,17 +413,17 @@ def _reduce(part: sc.DataArray, /, *, bands: ProcessedWavelengthBands) -> sc.Dat
 
 
 def reduce_q(
-    data: WavelengthScaledQ[ScatteringRunType, IofQPart],
+    data: NormalizedQ[ScatteringRunType, IofQPart],
     bands: ProcessedWavelengthBands,
 ) -> ReducedQ[ScatteringRunType, IofQPart]:
     return ReducedQ[ScatteringRunType, IofQPart](_reduce(data, bands=bands))
 
 
 def reduce_qxy(
-    data: WavelengthScaledQxy[ScatteringRunType, IofQPart],
+    data: NormalizedQxQy[ScatteringRunType, IofQPart],
     bands: ProcessedWavelengthBands,
-) -> ReducedQxy[ScatteringRunType, IofQPart]:
-    return ReducedQxy[ScatteringRunType, IofQPart](_reduce(data, bands=bands))
+) -> ReducedQxQy[ScatteringRunType, IofQPart]:
+    return ReducedQxQy[ScatteringRunType, IofQPart](_reduce(data, bands=bands))
 
 
 def normalize_q(
@@ -441,8 +443,8 @@ def normalize_q(
 
 
 def normalize_qxy(
-    numerator: ReducedQxy[ScatteringRunType, Numerator],
-    denominator: ReducedQxy[ScatteringRunType, Denominator],
+    numerator: ReducedQxQy[ScatteringRunType, Numerator],
+    denominator: ReducedQxQy[ScatteringRunType, Denominator],
     return_events: ReturnEvents,
     uncertainties: UncertaintyBroadcastMode,
 ) -> IntensityQxQy[ScatteringRunType]:

@@ -17,14 +17,14 @@ from ess.sans.types import (
     BackgroundSubtractedIofQ,
     BackgroundSubtractedIofQxy,
     BeamCenter,
-    CleanWavelength,
+    CorrectedDetector,
     CorrectForGravity,
     Denominator,
     DimsToKeep,
     Filename,
     IntensityQ,
     IntensityQxQy,
-    MaskedData,
+    NormalizedQ,
     Numerator,
     QBins,
     QxBins,
@@ -34,7 +34,7 @@ from ess.sans.types import (
     UncertaintyBroadcastMode,
     WavelengthBands,
     WavelengthBins,
-    WavelengthScaledQ,
+    WavelengthDetector,
 )
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -259,21 +259,17 @@ def test_pipeline_IofQ_merging_events_yields_consistent_results():
     assert all(sc.variances(iofq1.data) > sc.variances(iofq3.data))
     assert sc.allclose(
         sc.values(
-            pipeline_single.compute(WavelengthScaledQ[SampleRun, Numerator]).hist().data
+            pipeline_single.compute(NormalizedQ[SampleRun, Numerator]).hist().data
         )
         * N,
         sc.values(
-            pipeline_triple.compute(WavelengthScaledQ[SampleRun, Numerator]).hist().data
+            pipeline_triple.compute(NormalizedQ[SampleRun, Numerator]).hist().data
         ),
     )
     assert sc.allclose(
-        sc.values(
-            pipeline_single.compute(WavelengthScaledQ[SampleRun, Denominator]).data
-        )
+        sc.values(pipeline_single.compute(NormalizedQ[SampleRun, Denominator]).data)
         * N,
-        sc.values(
-            pipeline_triple.compute(WavelengthScaledQ[SampleRun, Denominator]).data
-        ),
+        sc.values(pipeline_triple.compute(NormalizedQ[SampleRun, Denominator]).data),
     )
 
 
@@ -291,13 +287,13 @@ def test_phi_with_gravity():
     pipeline = make_workflow()
     pipeline[BeamCenter] = _compute_beam_center()
     pipeline[CorrectForGravity] = False
-    data_no_grav = pipeline.compute(CleanWavelength[SampleRun, Numerator]).flatten(
+    data_no_grav = pipeline.compute(WavelengthDetector[SampleRun, Numerator]).flatten(
         to='pixel'
     )
     graph_no_grav = pipeline.compute(ElasticCoordTransformGraph[SampleRun])
     pipeline[CorrectForGravity] = True
     data_with_grav = (
-        pipeline.compute(CleanWavelength[SampleRun, Numerator])
+        pipeline.compute(WavelengthDetector[SampleRun, Numerator])
         .flatten(to='pixel')
         .hist(wavelength=sc.linspace('wavelength', 1.0, 12.0, 101, unit='angstrom'))
     )
@@ -313,7 +309,7 @@ def test_phi_with_gravity():
     # Exclude pixels near y=0, since phi with gravity could drop below y=0 and give a
     # difference of almost 2*pi.
     y = sc.abs(
-        pipeline.compute(MaskedData[SampleRun])
+        pipeline.compute(CorrectedDetector[SampleRun, Numerator])
         .coords['position']
         .fields.y.flatten(to='pixel')
     )

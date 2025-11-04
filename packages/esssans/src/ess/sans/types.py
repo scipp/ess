@@ -167,10 +167,6 @@ class SolidAngle(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Solid angle of detector pixels seen from sample position"""
 
 
-class MaskedSolidAngle(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
-    """Same as :py:class:`SolidAngle`, but with pixel masks applied"""
-
-
 class TofDetector(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Data with a time-of-flight coordinate"""
 
@@ -182,15 +178,19 @@ class TofMonitor(sciline.Scope[RunType, MonitorType, sc.DataGroup], sc.DataGroup
 PixelMask = NewType('PixelMask', sc.Variable)
 
 
-class MaskedData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
-    """Raw data with pixel-specific masks applied"""
-
-
 class MonitorTerm(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Monitor-dependent factor of the Normalization term (numerator) for IofQ."""
 
 
-class CleanWavelength(
+class CorrectedDetector(
+    sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
+):
+    """
+    Data with masks and corrections applied, used for numerator or denominator of IofQ.
+    """
+
+
+class WavelengthDetector(
     sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
 ):
     """
@@ -202,47 +202,48 @@ class CleanWavelength(
     """
 
 
-class WavelengthScaledQ(
+class NormalizedQ(
     sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
 ):
-    """Result of applying wavelength scaling/masking to :py:class:`CleanSummedQ`"""
+    """Result of applying wavelength scaling/masking to :py:class:`BinnedQ`"""
 
 
-class WavelengthScaledQxy(
+class NormalizedQxQy(
     sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
 ):
-    """Result of applying wavelength scaling/masking to :py:class:`CleanSummedQxy`"""
+    """Result of applying wavelength scaling/masking to :py:class:`BinnedQxQy`"""
 
 
-class CleanQ(sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray):
-    """Result of converting :py:class:`CleanWavelengthMasked` to Q"""
+class QDetector(sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray):
+    """Result of converting :py:class:`WavelengthDetectorMasked` to Q"""
 
 
-class CleanQxy(sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray):
-    """Result of converting :py:class:`CleanWavelengthMasked` to Qx and Qy"""
-
-
-class CleanSummedQ(
+class QxyDetector(
     sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
 ):
-    """Result of histogramming/binning :py:class:`CleanQ` over all pixels into Q bins"""
+    """Result of converting :py:class:`WavelengthDetectorMasked` to Qx and Qy"""
 
 
-class CleanSummedQxy(
+class BinnedQ(sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray):
+    """Result of histogramming/binning :py:class:`QDetector` over all pixels into Q
+    bins"""
+
+
+class BinnedQxQy(
     sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
 ):
-    """Result of histogramming/binning :py:class:`CleanQxy` over all pixels into Qx and
-    Qy bins"""
+    """Result of histogramming/binning :py:class:`QxyDetector` over all pixels into Qx
+    and Qy bins"""
 
 
 class ReducedQ(sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray):
-    """Result of reducing :py:class:`CleanSummedQ` over the wavelength dimensions"""
+    """Result of reducing :py:class:`BinnedQ` over the wavelength dimensions"""
 
 
-class ReducedQxy(
+class ReducedQxQy(
     sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
 ):
-    """Result of reducing :py:class:`CleanSummedQxy` over the wavelength dimensions"""
+    """Result of reducing :py:class:`BinnedQxQy` over the wavelength dimensions"""
 
 
 class IntensityQ(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):

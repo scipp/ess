@@ -14,6 +14,7 @@ from ess.sans.types import (
     BackgroundRun,
     BackgroundSubtractedIofQ,
     BeamCenter,
+    CorrectedDetector,
     CorrectForGravity,
     DimsToKeep,
     DirectBeam,
@@ -23,9 +24,9 @@ from ess.sans.types import (
     Filename,
     Incident,
     IntensityQ,
-    MaskedData,
     NeXusMonitorName,
     NonBackgroundWavelengthRange,
+    Numerator,
     QBins,
     RawDetector,
     ReturnEvents,
@@ -269,7 +270,9 @@ def test_beam_center_finder_works_with_pixel_dependent_direct_beam(pipeline):
     direct_beam = pipeline.compute(DirectBeam)
     pixel_dependent_direct_beam = direct_beam.broadcast(
         sizes={
-            'spectrum': pipeline.compute(MaskedData[SampleRun]).sizes['spectrum'],
+            'spectrum': pipeline.compute(CorrectedDetector[SampleRun, Numerator]).sizes[
+                'spectrum'
+            ],
             'wavelength': direct_beam.sizes['wavelength'],
         }
     ).copy()
