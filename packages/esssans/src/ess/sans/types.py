@@ -167,8 +167,8 @@ class SolidAngle(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Solid angle of detector pixels seen from sample position"""
 
 
-class MaskedSolidAngle(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
-    """Same as :py:class:`SolidAngle`, but with pixel masks applied"""
+# class MaskedSolidAngle(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
+#     """Same as :py:class:`SolidAngle`, but with pixel masks applied"""
 
 
 class TofDetector(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
@@ -182,12 +182,16 @@ class TofMonitor(sciline.Scope[RunType, MonitorType, sc.DataGroup], sc.DataGroup
 PixelMask = NewType('PixelMask', sc.Variable)
 
 
-class MaskedData(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
-    """Raw data with pixel-specific masks applied"""
-
-
 class MonitorTerm(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Monitor-dependent factor of the Normalization term (numerator) for IofQ."""
+
+
+class CorrectedDetector(
+    sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
+):
+    """
+    Data with masks and corrections applied, used for numerator or denominator of IofQ.
+    """
 
 
 class WavelengthDetector(
@@ -218,7 +222,9 @@ class QDetector(sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.Dat
     """Result of converting :py:class:`WavelengthDetectorMasked` to Q"""
 
 
-class QxyDetector(sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray):
+class QxyDetector(
+    sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
+):
     """Result of converting :py:class:`WavelengthDetectorMasked` to Qx and Qy"""
 
 

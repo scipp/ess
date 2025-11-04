@@ -13,24 +13,24 @@ from ess.reduce.uncertainty import broadcast_uncertainties
 
 from .common import mask_range
 from .types import (
-    QDetector,
-    QxyDetector,
     CleanSummedQ,
     CleanSummedQxy,
-    WavelengthDetector,
+    CorrectedDetector,
     CorrectForGravity,
     Denominator,
     GravityVector,
     IofQPart,
-    MaskedData,
     MonitorTerm,
     MonitorType,
     Numerator,
     Position,
+    QDetector,
+    QxyDetector,
     RunType,
     ScatteringRunType,
     TofMonitor,
     UncertaintyBroadcastMode,
+    WavelengthDetector,
     WavelengthMask,
     WavelengthMonitor,
     WavelengthScaledQ,
@@ -193,7 +193,7 @@ def monitor_to_wavelength(
 # for RawData, MaskedData, ... no reason to restrict necessarily.
 # Would we be fine with just choosing on option, or will this get in the way for users?
 def detector_to_wavelength(
-    detector: MaskedData[ScatteringRunType],
+    detector: CorrectedDetector[ScatteringRunType, Numerator],
     graph: ElasticCoordTransformGraph[ScatteringRunType],
 ) -> WavelengthDetector[ScatteringRunType, Numerator]:
     return WavelengthDetector[ScatteringRunType, Numerator](

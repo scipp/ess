@@ -8,7 +8,7 @@ from ess.reduce.uncertainty import UncertaintyBroadcastMode, broadcast_uncertain
 
 from .types import (
     CleanDirectBeam,
-    WavelengthDetector,
+    CorrectedDetector,
     CorrectedMonitor,
     Denominator,
     DetectorMasks,
@@ -19,7 +19,6 @@ from .types import (
     IntensityQ,
     IntensityQxQy,
     IofQPart,
-    MaskedSolidAngle,
     MonitorTerm,
     NeXusTransformation,
     Numerator,
@@ -35,6 +34,7 @@ from .types import (
     TransmissionRun,
     WavelengthBands,
     WavelengthBins,
+    WavelengthDetector,
     WavelengthScaledQ,
     WavelengthScaledQxy,
 )
@@ -93,8 +93,10 @@ def solid_angle(
 def mask_solid_angle(
     solid_angle: SolidAngle[ScatteringRunType],
     masks: DetectorMasks,
-) -> MaskedSolidAngle[ScatteringRunType]:
-    return MaskedSolidAngle[ScatteringRunType](solid_angle.assign_masks(masks))
+) -> CorrectedDetector[ScatteringRunType, Denominator]:
+    return CorrectedDetector[ScatteringRunType, Denominator](
+        solid_angle.assign_masks(masks)
+    )
 
 
 def _approximate_solid_angle_for_cylinder_shaped_pixel_of_detector(
@@ -209,7 +211,7 @@ def norm_monitor_term(
 
 
 def norm_detector_term(
-    solid_angle: MaskedSolidAngle[ScatteringRunType],
+    solid_angle: CorrectedDetector[ScatteringRunType, Denominator],
     direct_beam: CleanDirectBeam,
     uncertainties: UncertaintyBroadcastMode,
 ) -> WavelengthDetector[ScatteringRunType, Denominator]:
