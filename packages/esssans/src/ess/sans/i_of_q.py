@@ -14,7 +14,7 @@ from .types import (
     CleanDirectBeam,
     QDetector,
     QxyDetector,
-    CleanSummedQ,
+    BinnedQ,
     BinnedQxQy,
     CorrectedMonitor,
     DimsToKeep,
@@ -139,7 +139,7 @@ def bin_in_q(
     data: QDetector[ScatteringRunType, IofQPart],
     q_bins: QBins,
     dims_to_keep: DimsToKeep,
-) -> CleanSummedQ[ScatteringRunType, IofQPart]:
+) -> BinnedQ[ScatteringRunType, IofQPart]:
     """
     Merges data from all pixels into a single I(Q) spectrum:
 
@@ -162,7 +162,7 @@ def bin_in_q(
         The input data converted to Q and then summed over all detector pixels.
     """
     out = _bin_in_q(data=data, edges={'Q': q_bins}, dims_to_keep=dims_to_keep)
-    return CleanSummedQ[ScatteringRunType, IofQPart](out)
+    return BinnedQ[ScatteringRunType, IofQPart](out)
 
 
 def bin_in_qxy(
