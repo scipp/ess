@@ -36,7 +36,7 @@ from .types import (
     WavelengthBins,
     WavelengthDetector,
     WavelengthScaledQ,
-    WavelengthScaledQxy,
+    NormalizedQxQy,
 )
 
 
@@ -420,7 +420,7 @@ def reduce_q(
 
 
 def reduce_qxy(
-    data: WavelengthScaledQxy[ScatteringRunType, IofQPart],
+    data: NormalizedQxQy[ScatteringRunType, IofQPart],
     bands: ProcessedWavelengthBands,
 ) -> ReducedQxy[ScatteringRunType, IofQPart]:
     return ReducedQxy[ScatteringRunType, IofQPart](_reduce(data, bands=bands))

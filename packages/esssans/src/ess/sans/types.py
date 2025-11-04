@@ -212,7 +212,7 @@ class WavelengthScaledQ(
     """Result of applying wavelength scaling/masking to :py:class:`BinnedQ`"""
 
 
-class WavelengthScaledQxy(
+class NormalizedQxQy(
     sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
 ):
     """Result of applying wavelength scaling/masking to :py:class:`BinnedQxQy`"""

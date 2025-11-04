@@ -30,7 +30,7 @@ from .types import (
     WavelengthBands,
     WavelengthMask,
     WavelengthScaledQ,
-    WavelengthScaledQxy,
+    NormalizedQxQy,
 )
 
 
@@ -100,7 +100,7 @@ def _set_runs(
     pipeline = pipeline.copy()
     runs = pd.DataFrame({Filename[key]: runs}).rename_axis(axis_name)
     for part in (Numerator, Denominator):
-        for qtype in (WavelengthScaledQ, WavelengthScaledQxy):
+        for qtype in (WavelengthScaledQ, NormalizedQxQy):
             pipeline[qtype[key, part]] = (
                 pipeline[qtype[key, part]]
                 .map(runs)
