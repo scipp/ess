@@ -22,6 +22,73 @@ from .types import (
 )
 
 
+def _fallback_compute_positions(dg: sc.DataGroup) -> sc.DataGroup:
+    import warnings
+
+    import scippnexus as snx
+
+    warnings.warn(
+        "Using fallback compute_positions due to empty log entries. "
+        "This may lead to incorrect results. Please check the data carefully."
+        "The fallback will replace empty logs with a scalar value of zero.",
+        UserWarning,
+        stacklevel=2,
+    )
+
+    empty_transformations = [
+        transformation
+        for transformation in dg['depends_on'].transformations.values()
+        if 'time' in transformation.value.dims
+        and transformation.sizes['time'] == 0  # empty log
+    ]
+    for transformation in empty_transformations:
+        orig_value = transformation.value
+        orig_value = sc.scalar(0, unit=orig_value.unit, dtype=orig_value.dtype)
+        transformation.value = orig_value
+    return snx.compute_positions(dg, store_transform='transform_matrix')
+
+
+def _compute_positions(
+    dg: sc.DataGroup, auto_fix_transformations: bool = False
+) -> sc.DataGroup:
+    """Compute positions of the data group from transformations.
+
+    Wraps the `scippnexus.compute_positions` function
+    and provides a fallback for cases where the transformations
+    contain empty logs.
+
+    Parameters
+    ----------
+    dg:
+        Data group containing the transformations and data.
+    auto_fix_transformations:
+        If `True`, it will attempt to fix empty transformations.
+        It will replace them with a scalar value of zero.
+        It is because adding a time dimension will make it not possible
+        to compute positions of children due to time-dependent transformations.
+
+    Returns
+    -------
+    :
+        Data group with computed positions.
+
+    Warnings
+    --------
+    If `auto_fix_transformations` is `True`, it will warn about the fallback
+    being used due to empty logs or scalar transformations.
+    This is because the fallback may lead to incorrect results.
+
+    """
+    import scippnexus as snx
+
+    try:
+        return snx.compute_positions(dg, store_transform='transform_matrix')
+    except ValueError as e:
+        if auto_fix_transformations:
+            return _fallback_compute_positions(dg)
+        raise e
+
+
 def _create_dataset_from_string(*, root_entry: h5py.Group, name: str, var: str) -> None:
     root_entry.create_dataset(name, dtype=h5py.string_dtype(), data=var)
 
@@ -428,6 +495,16 @@ def _export_detector_metadata_as_nxlauetof(
             _add_lauetof_detector_group(detector_metadata, nx_instrument)
 
 
+def _extract_counts(dg: sc.DataGroup) -> sc.Variable:
+    counts: sc.DataArray = dg['counts'].data
+    if 'id' in counts.dims:
+        num_x, num_y = dg["detector_shape"].value
+        return sc.fold(counts, dim='id', sizes={'x': num_x, 'y': num_y})
+    else:
+        # If there is no 'id' dimension, we assume it is already in the correct shape
+        return counts
+
+
 def _export_reduced_data_as_nxlauetof(
     dg: NMXReducedDataGroup,
     output_file: str | pathlib.Path | io.BytesIO,
@@ -471,9 +548,7 @@ def _export_reduced_data_as_nxlauetof(
             data_dset = _create_compressed_dataset(
                 name="data",
                 root_entry=nx_detector,
-                var=sc.fold(
-                    dg['counts'].data, dim='id', sizes={'x': num_x, 'y': num_y}
-                ),
+                var=_extract_counts(dg),
                 chunks=(num_x, num_y, 1),
                 dtype=np.uint,
             )
@@ -481,9 +556,7 @@ def _export_reduced_data_as_nxlauetof(
             data_dset = _create_dataset_from_var(
                 name="data",
                 root_entry=nx_detector,
-                var=sc.fold(
-                    dg['counts'].data, dim='id', sizes={'x': num_x, 'y': num_y}
-                ),
+                var=_extract_counts(dg),
                 dtype=np.uint,
             )
         data_dset.attrs["signal"] = 1

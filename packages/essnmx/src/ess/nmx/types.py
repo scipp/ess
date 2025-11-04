@@ -1,3 +1,4 @@
+import enum
 from dataclasses import dataclass
 from typing import Any, NewType
 
@@ -76,3 +77,13 @@ class NMXRawDataMetadata:
     max_probability: MaximumProbability
     min_toa: MinimumTimeOfArrival
     max_toa: MaximumTimeOfArrival
+
+
+class Compression(enum.Enum):
+    """Compression type of the output file.
+
+    These options are written as enum for future extensibility.
+    """
+
+    NONE = 0
+    BITSHUFFLE_LZ4 = 1

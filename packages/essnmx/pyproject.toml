@@ -35,7 +35,7 @@ dependencies = [
   "graphviz",
   "plopp>=24.7.0",
   "sciline>=24.06.0",
-  "scipp>=23.8.0",
+  "scipp>=25.3.0",
   "scippnexus>=23.12.0",
   "pooch>=1.5",
   "pandas>=2.1.2",
@@ -49,6 +49,7 @@ dynamic = ["version"]
 
 [project.scripts]
 essnmx_reduce_mcstas = "ess.nmx.mcstas.executables:main"
+essnmx-reduce = "ess.nmx.executables:main"
 
 [project.optional-dependencies]
 test = [
