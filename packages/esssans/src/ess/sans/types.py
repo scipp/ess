@@ -215,7 +215,7 @@ class WavelengthScaledQ(
 class WavelengthScaledQxy(
     sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
 ):
-    """Result of applying wavelength scaling/masking to :py:class:`CleanSummedQxy`"""
+    """Result of applying wavelength scaling/masking to :py:class:`BinnedQxQy`"""
 
 
 class QDetector(sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray):
@@ -234,7 +234,7 @@ class CleanSummedQ(
     """Result of histogramming/binning :py:class:`QDetector` over all pixels into Q bins"""
 
 
-class CleanSummedQxy(
+class BinnedQxQy(
     sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
 ):
     """Result of histogramming/binning :py:class:`QxyDetector` over all pixels into Qx and
@@ -248,7 +248,7 @@ class ReducedQ(sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.Data
 class ReducedQxy(
     sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
 ):
-    """Result of reducing :py:class:`CleanSummedQxy` over the wavelength dimensions"""
+    """Result of reducing :py:class:`BinnedQxQy` over the wavelength dimensions"""
 
 
 class IntensityQ(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):

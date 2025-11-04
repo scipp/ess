@@ -14,7 +14,7 @@ from ess.reduce.uncertainty import broadcast_uncertainties
 from .common import mask_range
 from .types import (
     CleanSummedQ,
-    CleanSummedQxy,
+    BinnedQxQy,
     CorrectedDetector,
     CorrectForGravity,
     Denominator,
@@ -210,7 +210,7 @@ def mask_wavelength_q(
 
 
 def mask_wavelength_qxy(
-    da: CleanSummedQxy[ScatteringRunType, Numerator], mask: WavelengthMask
+    da: BinnedQxQy[ScatteringRunType, Numerator], mask: WavelengthMask
 ) -> WavelengthScaledQxy[ScatteringRunType, Numerator]:
     if mask is not None:
         da = mask_range(da, mask=mask)
@@ -230,7 +230,7 @@ def mask_and_scale_wavelength_q(
 
 
 def mask_and_scale_wavelength_qxy(
-    da: CleanSummedQxy[ScatteringRunType, Denominator],
+    da: BinnedQxQy[ScatteringRunType, Denominator],
     mask: WavelengthMask,
     wavelength_term: MonitorTerm[ScatteringRunType],
     uncertainties: UncertaintyBroadcastMode,
