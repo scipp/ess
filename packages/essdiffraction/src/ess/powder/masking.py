@@ -11,13 +11,13 @@ import sciline
 import scipp as sc
 
 from .types import (
-    CountsWavelength,
-    MaskedData,
+    CorrectedDetector,
     MaskedDetectorIDs,
     PixelMaskFilename,
     RunType,
     TofMask,
     TwoThetaMask,
+    WavelengthDetector,
     WavelengthMask,
 )
 
@@ -34,12 +34,12 @@ def read_pixel_masks(filename: PixelMaskFilename) -> MaskedDetectorIDs:
 
 
 def apply_masks(
-    data: CountsWavelength[RunType],
+    data: WavelengthDetector[RunType],
     masked_pixel_ids: MaskedDetectorIDs,
     tof_mask_func: TofMask,
     wavelength_mask_func: WavelengthMask,
     two_theta_mask_func: TwoThetaMask,
-) -> MaskedData[RunType]:
+) -> CorrectedDetector[RunType]:
     """ """
     out = data.copy(deep=False)
     if len(masked_pixel_ids) > 0:
@@ -68,7 +68,7 @@ def apply_masks(
                 )
                 out.masks[dim] = mask(coord)
 
-    return MaskedData[RunType](out)
+    return CorrectedDetector[RunType](out)
 
 
 providers = (read_pixel_masks, apply_masks)

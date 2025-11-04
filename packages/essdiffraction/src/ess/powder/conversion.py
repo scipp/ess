@@ -6,25 +6,28 @@ Coordinate transformations for powder diffraction.
 
 import scipp as sc
 import scippneutron as scn
+import scippnexus as snx
 
 from .calibration import OutputCalibrationData
 from .correction import merge_calibration
 from .logging import get_logger
 from .types import (
     CalibrationData,
-    CountsDspacing,
-    CountsWavelength,
+    CorrectedDetector,
+    DspacingDetector,
     ElasticCoordTransformGraph,
+    EmptyCanSubtractedIntensityTof,
     EmptyCanSubtractedIofDspacing,
-    EmptyCanSubtractedIofTof,
-    FilteredData,
-    IofDspacing,
-    IofTof,
-    MaskedData,
-    MonitorTofData,
+    GravityVector,
+    IntensityDspacing,
+    IntensityTof,
     MonitorType,
+    Position,
     RunType,
     SampleRun,
+    TofDetector,
+    TofMonitor,
+    WavelengthDetector,
     WavelengthMonitor,
 )
 
@@ -147,12 +150,25 @@ def to_dspacing_with_calibration(
         graph["_tag_positions_consumed"] = lambda: sc.scalar(0)
     out = out.transform_coords("dspacing", graph=graph, keep_intermediate=False)
     out.coords.pop("_tag_positions_consumed", None)
-    return CountsDspacing[RunType](out)
+    return DspacingDetector[RunType](out)
 
 
-def powder_coordinate_transformation_graph() -> ElasticCoordTransformGraph:
+def powder_coordinate_transformation_graph(
+    source_position: Position[snx.NXsource, RunType],
+    sample_position: Position[snx.NXsample, RunType],
+    gravity: GravityVector,
+) -> ElasticCoordTransformGraph[RunType]:
     """
     Generate a coordinate transformation graph for powder diffraction.
+
+    Parameters
+    ----------
+    source_position:
+        Position of the neutron source.
+    sample_position:
+        Position of the sample.
+    gravity:
+        Gravity vector.
 
     Returns
     -------
@@ -163,6 +179,9 @@ def powder_coordinate_transformation_graph() -> ElasticCoordTransformGraph:
         {
             **scn.conversion.graph.beamline.beamline(scatter=True),
             **scn.conversion.graph.tof.elastic("tof"),
+            'source_position': lambda: source_position,
+            'sample_position': lambda: sample_position,
+            'gravity': lambda: gravity,
         }
     )
 
@@ -184,8 +203,8 @@ def _restore_tof_if_in_wavelength(data: sc.DataArray) -> sc.DataArray:
 
 
 def add_scattering_coordinates_from_positions(
-    data: FilteredData[RunType], graph: ElasticCoordTransformGraph
-) -> CountsWavelength[RunType]:
+    data: TofDetector[RunType], graph: ElasticCoordTransformGraph[RunType]
+) -> WavelengthDetector[RunType]:
     """
     Add ``wavelength`` and ``two_theta`` coordinates to the data.
     The input ``data`` must have a ``tof`` coordinate, as well as the necessary
@@ -204,14 +223,14 @@ def add_scattering_coordinates_from_positions(
         graph=graph,
         keep_intermediate=False,
     )
-    return CountsWavelength[RunType](out)
+    return WavelengthDetector[RunType](out)
 
 
 def convert_to_dspacing(
-    data: MaskedData[RunType],
-    graph: ElasticCoordTransformGraph,
+    data: CorrectedDetector[RunType],
+    graph: ElasticCoordTransformGraph[RunType],
     calibration: CalibrationData,
-) -> CountsDspacing[RunType]:
+) -> DspacingDetector[RunType]:
     if calibration is None:
         out = data.transform_coords(["dspacing"], graph=graph, keep_intermediate=False)
     else:
@@ -222,7 +241,7 @@ def convert_to_dspacing(
     out.bins.coords.pop("tof", None)
     # See scipp/essreduce#249
     out.bins.coords.pop("event_time_offset", None)
-    return CountsDspacing[RunType](out)
+    return DspacingDetector[RunType](out)
 
 
 def _convert_reduced_to_tof_impl(
@@ -234,19 +253,21 @@ def _convert_reduced_to_tof_impl(
 
 
 def convert_reduced_to_tof(
-    data: IofDspacing[SampleRun], calibration: OutputCalibrationData
-) -> IofTof:
-    return IofTof(_convert_reduced_to_tof_impl(data, calibration))
+    data: IntensityDspacing[SampleRun], calibration: OutputCalibrationData
+) -> IntensityTof:
+    return IntensityTof(_convert_reduced_to_tof_impl(data, calibration))
 
 
 def convert_reduced_to_empty_can_subtracted_tof(
     data: EmptyCanSubtractedIofDspacing[SampleRun], calibration: OutputCalibrationData
-) -> EmptyCanSubtractedIofTof:
-    return EmptyCanSubtractedIofTof(_convert_reduced_to_tof_impl(data, calibration))
+) -> EmptyCanSubtractedIntensityTof:
+    return EmptyCanSubtractedIntensityTof(
+        _convert_reduced_to_tof_impl(data, calibration)
+    )
 
 
 def convert_monitor_to_wavelength(
-    monitor: MonitorTofData[RunType, MonitorType],
+    monitor: TofMonitor[RunType, MonitorType],
 ) -> WavelengthMonitor[RunType, MonitorType]:
     graph = {
         **scn.conversion.graph.beamline.beamline(scatter=False),

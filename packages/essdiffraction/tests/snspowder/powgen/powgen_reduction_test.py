@@ -10,14 +10,15 @@ import ess.snspowder.powgen.data  # noqa: F401
 from ess import powder
 from ess.powder.types import (
     CalibrationFilename,
-    CountsDspacing,
+    CorrectedDetector,
     DetectorBankSizes,
     DspacingBins,
+    DspacingDetector,
     Filename,
-    IofDspacing,
-    IofDspacingTwoTheta,
+    GravityVector,
+    IntensityDspacing,
+    IntensityDspacingTwoTheta,
     KeepEvents,
-    MaskedData,
     NeXusDetectorName,
     SampleRun,
     TofMask,
@@ -52,6 +53,7 @@ def params():
         | (x > sc.scalar(16666.67, unit="us").to(unit=elem_unit(x))),
         TwoThetaMask: None,
         WavelengthMask: None,
+        GravityVector: sc.vector(value=[0, -1, 0]) * sc.constants.g,
         # Use bank sizes for small files
         DetectorBankSizes: {"bank": 23, "column": 7, "row": 7},
     }
@@ -64,7 +66,7 @@ def test_can_create_pipeline(providers, params):
 def test_pipeline_can_compute_dspacing_result(providers, params):
     pipeline = sciline.Pipeline(providers, params=params)
     pipeline = powder.with_pixel_mask_filenames(pipeline, [])
-    result = pipeline.compute(IofDspacing[SampleRun])
+    result = pipeline.compute(IntensityDspacing[SampleRun])
     assert result.sizes == {
         'dspacing': len(params[DspacingBins]) - 1,
     }
@@ -75,7 +77,7 @@ def test_pipeline_can_compute_dspacing_result_without_calibration(providers, par
     params[CalibrationFilename] = None
     pipeline = sciline.Pipeline(providers, params=params)
     pipeline = powder.with_pixel_mask_filenames(pipeline, [])
-    result = pipeline.compute(IofDspacing[SampleRun])
+    result = pipeline.compute(IntensityDspacing[SampleRun])
     assert result.sizes == {
         'dspacing': len(params[DspacingBins]) - 1,
     }
@@ -85,12 +87,12 @@ def test_pipeline_can_compute_dspacing_result_without_calibration(providers, par
 def test_pipeline_compare_with_and_without_calibration(providers, params):
     pipeline = sciline.Pipeline(providers, params=params)
     pipeline = powder.with_pixel_mask_filenames(pipeline, [])
-    result_w_cal = pipeline.compute(IofDspacing[SampleRun])
+    result_w_cal = pipeline.compute(IntensityDspacing[SampleRun])
 
     params[CalibrationFilename] = None
     pipeline = sciline.Pipeline(providers, params=params)
     pipeline = powder.with_pixel_mask_filenames(pipeline, [])
-    result_wo_cal = pipeline.compute(IofDspacing[SampleRun])
+    result_wo_cal = pipeline.compute(IntensityDspacing[SampleRun])
 
     assert sc.identical(
         result_w_cal.coords['dspacing'], result_wo_cal.coords['dspacing']
@@ -103,7 +105,7 @@ def test_workflow_is_deterministic(providers, params):
     pipeline = powder.with_pixel_mask_filenames(pipeline, [])
     # This is Sciline's default scheduler, but we want to be explicit here
     scheduler = sciline.scheduler.DaskScheduler()
-    graph = pipeline.get(IofDspacing[SampleRun], scheduler=scheduler)
+    graph = pipeline.get(IntensityDspacing[SampleRun], scheduler=scheduler)
     reference = graph.compute().hist().data
     result = graph.compute().hist().data
     assert sc.identical(sc.values(result), sc.values(reference))
@@ -112,7 +114,7 @@ def test_workflow_is_deterministic(providers, params):
 def test_pipeline_can_compute_intermediate_results(providers, params):
     pipeline = sciline.Pipeline(providers, params=params)
     pipeline = powder.with_pixel_mask_filenames(pipeline, [])
-    result = pipeline.compute(CountsDspacing[SampleRun])
+    result = pipeline.compute(DspacingDetector[SampleRun])
     assert set(result.dims) == {'bank', 'column', 'row'}
 
 
@@ -122,7 +124,7 @@ def test_pipeline_group_by_two_theta(providers, params):
     ).to(unit='rad')
     pipeline = sciline.Pipeline(providers, params=params)
     pipeline = powder.with_pixel_mask_filenames(pipeline, [])
-    result = pipeline.compute(IofDspacingTwoTheta[SampleRun])
+    result = pipeline.compute(IntensityDspacingTwoTheta[SampleRun])
     assert result.sizes == {
         'two_theta': 15,
         'dspacing': len(params[DspacingBins]) - 1,
@@ -137,7 +139,7 @@ def test_pipeline_wavelength_masking(providers, params):
     params[WavelengthMask] = lambda x: (x > wmin) & (x < wmax)
     pipeline = sciline.Pipeline(providers, params=params)
     pipeline = powder.with_pixel_mask_filenames(pipeline, [])
-    masked_sample = pipeline.compute(MaskedData[SampleRun])
+    masked_sample = pipeline.compute(CorrectedDetector[SampleRun])
     assert 'wavelength' in masked_sample.bins.masks
     sum_in_masked_region = (
         masked_sample.bin(wavelength=sc.concat([wmin, wmax], dim='wavelength'))
@@ -158,7 +160,7 @@ def test_pipeline_two_theta_masking(providers, params):
     params[TwoThetaMask] = lambda x: (x > tmin) & (x < tmax)
     pipeline = sciline.Pipeline(providers, params=params)
     pipeline = powder.with_pixel_mask_filenames(pipeline, [])
-    masked_sample = pipeline.compute(MaskedData[SampleRun])
+    masked_sample = pipeline.compute(CorrectedDetector[SampleRun])
     assert 'two_theta' in masked_sample.masks
     sum_in_masked_region = (
         masked_sample.flatten(to='pixel')
@@ -179,7 +181,7 @@ def test_use_workflow_helper(params):
     for key, value in params.items():
         workflow[key] = value
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    result = workflow.compute(IofDspacing[SampleRun])
+    result = workflow.compute(IntensityDspacing[SampleRun])
     assert result.sizes == {
         'dspacing': len(params[DspacingBins]) - 1,
     }

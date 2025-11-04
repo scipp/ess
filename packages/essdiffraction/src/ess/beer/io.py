@@ -6,9 +6,9 @@ import h5py
 import scipp as sc
 
 from .types import (
-    DetectorData,
     Filename,
     ModulationPeriod,
+    RawDetector,
     SampleRun,
     TwoThetaLimits,
     WavelengthDefinitionChopperDelay,
@@ -128,7 +128,7 @@ def _not_between(x, a, b):
 
 def load_beer_mcstas_provider(
     fname: Filename[SampleRun], two_theta_limits: TwoThetaLimits
-) -> DetectorData[SampleRun]:
+) -> RawDetector[SampleRun]:
     da = load_beer_mcstas(fname)
     da = (
         sc.DataGroup(
@@ -144,11 +144,11 @@ def load_beer_mcstas_provider(
             two_theta=_not_between(da.coords['two_theta'], *two_theta_limits)
         )
     )
-    return DetectorData[SampleRun](da)
+    return RawDetector[SampleRun](da)
 
 
 def mcstas_chopper_delay_from_mode(
-    da: DetectorData[SampleRun],
+    da: RawDetector[SampleRun],
 ) -> WavelengthDefinitionChopperDelay:
     mode = next(iter(d.coords['mode'] for d in da.values())).value
     if mode in ('7', '8'):
@@ -160,7 +160,7 @@ def mcstas_chopper_delay_from_mode(
     raise ValueError(f'Mode {mode} is not known.')
 
 
-def mcstas_modulation_period_from_mode(da: DetectorData[SampleRun]) -> ModulationPeriod:
+def mcstas_modulation_period_from_mode(da: RawDetector[SampleRun]) -> ModulationPeriod:
     mode = next(iter(d.coords['mode'] for d in da.values())).value
     if mode in ('7', '8'):
         return sc.scalar(1.0 / (8 * 70), unit='s')

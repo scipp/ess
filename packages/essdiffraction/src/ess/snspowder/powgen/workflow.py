@@ -11,6 +11,7 @@ from ess.powder.types import (
     SampleRun,
     VanadiumRun,
 )
+from ess.reduce.nexus.workflow import gravity_vector_neg_y
 
 from . import beamline
 
@@ -33,7 +34,12 @@ def PowgenWorkflow() -> sciline.Pipeline:
     from . import data
 
     return sciline.Pipeline(
-        providers=powder_providers + beamline.providers + data.providers,
+        providers=(
+            *powder_providers,
+            *beamline.providers,
+            *data.providers,
+            gravity_vector_neg_y,
+        ),
         params=default_parameters(),
     )
 

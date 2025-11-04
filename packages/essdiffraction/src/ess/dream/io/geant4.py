@@ -9,21 +9,20 @@ from scippneutron.metadata import ESS_SOURCE
 
 from ess.powder.types import (
     Beamline,
-    CalibratedBeamline,
-    CalibratedDetector,
-    CalibratedMonitor,
     CalibrationData,
     CalibrationFilename,
     CaveMonitor,
     CaveMonitorPosition,
-    DetectorData,
+    EmptyDetector,
+    EmptyMonitor,
     Filename,
-    MonitorData,
     MonitorFilename,
     MonitorType,
     NeXusComponent,
     NeXusDetectorName,
     Position,
+    RawDetector,
+    RawMonitor,
     RunType,
     Source,
 )
@@ -78,7 +77,7 @@ def extract_geant4_detector(
 
 def get_calibrated_geant4_detector(
     detector: NeXusComponent[snx.NXdetector, RunType],
-) -> CalibratedDetector[RunType]:
+) -> EmptyDetector[RunType]:
     """
     Replacement for :py:func:`ess.reduce.nexus.workflow.get_calibrated_detector`.
 
@@ -265,8 +264,8 @@ def geant4_load_calibration(filename: CalibrationFilename) -> CalibrationData:
 
 
 def assemble_detector_data(
-    detector: CalibratedBeamline[RunType],
-) -> DetectorData[RunType]:
+    detector: EmptyDetector[RunType],
+) -> RawDetector[RunType]:
     """
     In the raw data, the tofs extend beyond 71ms, this is thus not an event_time_offset.
     We convert the detector data to data which resembles NeXus data, with
@@ -291,12 +290,12 @@ def assemble_detector_data(
     out.bins.coords['event_time_offset'] = out.bins.coords['tof'] % period.to(
         unit=detector.bins.coords['tof'].bins.unit
     )
-    return DetectorData[RunType](out.bins.drop_coords('tof'))
+    return RawDetector[RunType](out.bins.drop_coords('tof'))
 
 
 def assemble_monitor_data(
-    monitor: CalibratedMonitor[RunType, MonitorType],
-) -> MonitorData[RunType, MonitorType]:
+    monitor: EmptyMonitor[RunType, MonitorType],
+) -> RawMonitor[RunType, MonitorType]:
     """
     Dummy assembly of monitor data, monitor already contains neutron data with all
     necessary coordinates.
@@ -306,7 +305,7 @@ def assemble_monitor_data(
     monitor:
         The calibrated monitor data.
     """
-    return MonitorData[RunType, MonitorType](monitor)
+    return RawMonitor[RunType, MonitorType](monitor)
 
 
 def dummy_source_position() -> Position[snx.NXsource, RunType]:

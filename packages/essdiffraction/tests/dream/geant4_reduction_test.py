@@ -24,16 +24,16 @@ from ess.powder.types import (
     CalibrationFilename,
     CaveMonitorPosition,
     CIFAuthors,
-    CountsDspacing,
+    CorrectedDetector,
     DspacingBins,
+    DspacingDetector,
     EmptyCanRun,
     EmptyCanSubtractedIofDspacing,
     Filename,
     FocussedDataDspacing,
-    IofDspacing,
-    IofDspacingTwoTheta,
-    IofTof,
-    MaskedData,
+    IntensityDspacing,
+    IntensityDspacingTwoTheta,
+    IntensityTof,
     MonitorFilename,
     NeXusDetectorName,
     Position,
@@ -50,6 +50,7 @@ from ess.powder.types import (
 )
 from ess.reduce import time_of_flight
 from ess.reduce import workflow as reduce_workflow
+from ess.reduce.nexus.types import AnyRun
 
 sample_position = sc.vector([0.0, 0.0, 0.0], unit='mm')
 source_position = sc.vector([-3.478, 0.0, -76550], unit='mm')
@@ -120,7 +121,7 @@ def test_pipeline_can_compute_dspacing_result_without_empty_can(workflow):
     workflow[Filename[EmptyCanRun]] = None
     workflow[MonitorFilename[EmptyCanRun]] = None
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    result = workflow.compute(IofDspacing[SampleRun])
+    result = workflow.compute(IntensityDspacing[SampleRun])
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
@@ -136,7 +137,7 @@ def test_pipeline_can_compute_dspacing_result_using_lookup_table_filename(workfl
 @pytest.fixture(scope="module")
 def dream_tof_lookup_table():
     lut_wf = time_of_flight.TofLookupTableWorkflow()
-    lut_wf[time_of_flight.DiskChoppers] = dream.beamline.choppers(
+    lut_wf[time_of_flight.DiskChoppers[AnyRun]] = dream.beamline.choppers(
         dream.beamline.InstrumentConfiguration.high_flux
     )
     lut_wf[time_of_flight.SourcePosition] = dream_source_position
@@ -159,7 +160,7 @@ def test_pipeline_can_compute_dspacing_result_using_custom_built_tof_lookup(
     workflow = powder.with_pixel_mask_filenames(workflow, [])
     workflow[TimeOfFlightLookupTable] = dream_tof_lookup_table
 
-    result = workflow.compute(IofDspacing[SampleRun])
+    result = workflow.compute(IntensityDspacing[SampleRun])
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
@@ -169,7 +170,7 @@ def test_pipeline_can_compute_dspacing_result_with_hist_monitor_norm(params_for_
         params_for_det, run_norm=powder.RunNormalization.monitor_histogram
     )
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    result = workflow.compute(IofDspacing[SampleRun])
+    result = workflow.compute(IntensityDspacing[SampleRun])
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
@@ -181,7 +182,7 @@ def test_pipeline_can_compute_dspacing_result_with_integrated_monitor_norm(
         params_for_det, run_norm=powder.RunNormalization.monitor_integrated
     )
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    result = workflow.compute(IofDspacing[SampleRun])
+    result = workflow.compute(IntensityDspacing[SampleRun])
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
@@ -213,7 +214,7 @@ def test_workflow_is_deterministic(workflow):
     workflow = powder.with_pixel_mask_filenames(workflow, [])
     # This is Sciline's default scheduler, but we want to be explicit here
     scheduler = sciline.scheduler.DaskScheduler()
-    graph = workflow.get(IofTof, scheduler=scheduler)
+    graph = workflow.get(IntensityTof, scheduler=scheduler)
     reference = graph.compute().data
     result = graph.compute().data
     assert sc.identical(sc.values(result), sc.values(reference))
@@ -221,8 +222,8 @@ def test_workflow_is_deterministic(workflow):
 
 def test_pipeline_can_compute_intermediate_results(workflow):
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    results = workflow.compute((CountsDspacing[SampleRun], NeXusDetectorName))
-    result = results[CountsDspacing[SampleRun]]
+    results = workflow.compute((DspacingDetector[SampleRun], NeXusDetectorName))
+    result = results[DspacingDetector[SampleRun]]
 
     detector_name = results[NeXusDetectorName]
     expected_dims = {'segment', 'wire', 'counter', 'strip', 'module'}
@@ -238,7 +239,7 @@ def test_pipeline_group_by_two_theta(workflow):
     )
     workflow[TwoThetaBins] = two_theta_bins
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    result = workflow.compute(IofDspacingTwoTheta[SampleRun])
+    result = workflow.compute(IntensityDspacingTwoTheta[SampleRun])
     assert result.sizes['two_theta'] == 16
     assert result.sizes['dspacing'] == len(params[DspacingBins]) - 1
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
@@ -250,7 +251,7 @@ def test_pipeline_wavelength_masking(workflow):
     wmax = sc.scalar(0.21, unit="angstrom")
     workflow[WavelengthMask] = lambda x: (x > wmin) & (x < wmax)
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    masked_sample = workflow.compute(MaskedData[SampleRun])
+    masked_sample = workflow.compute(CorrectedDetector[SampleRun])
     assert 'wavelength' in masked_sample.bins.masks
     sum_in_masked_region = (
         masked_sample.bin(wavelength=sc.concat([wmin, wmax], dim='wavelength'))
@@ -268,7 +269,7 @@ def test_pipeline_two_theta_masking(workflow):
     tmax = sc.scalar(1.2, unit="rad")
     workflow[TwoThetaMask] = lambda x: (x > tmin) & (x < tmax)
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    masked_sample = workflow.compute(MaskedData[SampleRun])
+    masked_sample = workflow.compute(CorrectedDetector[SampleRun])
     assert 'two_theta' in masked_sample.masks
     sum_in_masked_region = (
         masked_sample.bin(two_theta=sc.concat([tmin, tmax], dim='two_theta')).sum().data
@@ -348,6 +349,6 @@ def test_dream_workflow_registers_subclasses():
 
 def test_dream_workflow_parameters_returns_filtered_params():
     wf = DreamGeant4ProtonChargeWorkflow()
-    parameters = reduce_workflow.get_parameters(wf, (CountsDspacing[SampleRun],))
+    parameters = reduce_workflow.get_parameters(wf, (DspacingDetector[SampleRun],))
     assert Filename[SampleRun] in parameters
     assert Filename[EmptyCanRun] not in parameters

@@ -9,8 +9,8 @@ from ess.powder.types import (
     DspacingBins,
     EmptyCanRun,
     Filename,
-    IofDspacing,
-    IofDspacingTwoTheta,
+    IntensityDspacing,
+    IntensityDspacingTwoTheta,
     MonitorFilename,
     NeXusDetectorName,
     PixelMaskFilename,
@@ -69,7 +69,7 @@ parameter_registry[UncertaintyBroadcastMode] = ParamWithOptions.from_enum(
 # We defer this to later; the masks are set to None by default in the workflow for now.
 
 typical_outputs = (
-    IofDspacing[SampleRun],
-    IofDspacingTwoTheta[SampleRun],
+    IntensityDspacing[SampleRun],
+    IntensityDspacingTwoTheta[SampleRun],
     ReducedTofCIF,
 )

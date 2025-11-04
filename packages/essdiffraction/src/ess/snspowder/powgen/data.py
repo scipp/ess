@@ -6,17 +6,19 @@
 from pathlib import Path
 
 import scipp as sc
+import scippnexus as snx
 
 from ess.powder.types import (
     AccumulatedProtonCharge,
     CalibrationData,
     CalibrationFilename,
     DetectorBankSizes,
-    DetectorTofData,
     Filename,
+    Position,
     ProtonCharge,
     RawDataAndMetadata,
     RunType,
+    TofDetector,
 )
 from ess.reduce.data import Entry, make_registry
 
@@ -200,14 +202,14 @@ def pooch_load_calibration(
 
 def extract_raw_data(
     dg: RawDataAndMetadata[RunType], sizes: DetectorBankSizes
-) -> DetectorTofData[RunType]:
+) -> TofDetector[RunType]:
     """Return the events from a loaded data group."""
     # Remove the tof binning and dimension, as it is not needed and it gets in the way
     # of masking.
     out = dg["data"].squeeze()
     out.coords.pop("tof", None)
     out = out.fold(dim="spectrum", sizes=sizes)
-    return DetectorTofData[RunType](out)
+    return TofDetector[RunType](out)
 
 
 def extract_proton_charge(dg: RawDataAndMetadata[RunType]) -> ProtonCharge[RunType]:
@@ -216,10 +218,20 @@ def extract_proton_charge(dg: RawDataAndMetadata[RunType]) -> ProtonCharge[RunTy
 
 
 def extract_accumulated_proton_charge(
-    data: DetectorTofData[RunType],
+    data: TofDetector[RunType],
 ) -> AccumulatedProtonCharge[RunType]:
     """Return the stored accumulated proton charge from a loaded data group."""
     return AccumulatedProtonCharge[RunType](data.coords["gd_prtn_chrg"])
+
+
+def source_position(dg: RawDataAndMetadata[RunType]) -> Position[snx.NXsource, RunType]:
+    """Return the source position from a loaded data group."""
+    return Position[snx.NXsource, RunType](dg["data"].coords["source_position"])
+
+
+def sample_position(dg: RawDataAndMetadata[RunType]) -> Position[snx.NXsample, RunType]:
+    """Return the sample position from a loaded data group."""
+    return Position[snx.NXsample, RunType](dg["data"].coords["sample_position"])
 
 
 providers = (
@@ -228,5 +240,7 @@ providers = (
     extract_accumulated_proton_charge,
     extract_proton_charge,
     extract_raw_data,
+    sample_position,
+    source_position,
 )
 """Sciline Providers for loading POWGEN data."""

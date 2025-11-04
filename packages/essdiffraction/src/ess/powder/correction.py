@@ -15,17 +15,17 @@ from ._util import event_or_outer_coord
 from .types import (
     AccumulatedProtonCharge,
     CaveMonitor,
+    CorrectedDspacing,
     EmptyCanRun,
     EmptyCanSubtractedIofDspacing,
     EmptyCanSubtractedIofDspacingTwoTheta,
     FocussedDataDspacing,
     FocussedDataDspacingTwoTheta,
-    IofDspacing,
-    IofDspacingTwoTheta,
-    ReducedCountsDspacing,
+    IntensityDspacing,
+    IntensityDspacingTwoTheta,
+    NormalizedDspacing,
     RunType,
     SampleRun,
-    ScaledCountsDspacing,
     UncertaintyBroadcastMode,
     VanadiumRun,
     WavelengthMonitor,
@@ -33,11 +33,11 @@ from .types import (
 
 
 def normalize_by_monitor_histogram(
-    detector: ReducedCountsDspacing[RunType],
+    detector: CorrectedDspacing[RunType],
     *,
     monitor: WavelengthMonitor[RunType, CaveMonitor],
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
-) -> ScaledCountsDspacing[RunType]:
+) -> NormalizedDspacing[RunType]:
     """Normalize detector data by a histogrammed monitor.
 
     Parameters
@@ -68,15 +68,15 @@ def normalize_by_monitor_histogram(
         result.bins.masks['monitor_intensity_is_zero'] = c == sc.scalar(
             0.0, unit=c.unit
         )
-    return ScaledCountsDspacing[RunType](result)
+    return NormalizedDspacing[RunType](result)
 
 
 def normalize_by_monitor_integrated(
-    detector: ReducedCountsDspacing[RunType],
+    detector: CorrectedDspacing[RunType],
     *,
     monitor: WavelengthMonitor[RunType, CaveMonitor],
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
-) -> ScaledCountsDspacing[RunType]:
+) -> NormalizedDspacing[RunType]:
     """Normalize detector data by an integrated monitor.
 
     The monitor is integrated according to
@@ -153,7 +153,7 @@ def normalize_by_monitor_integrated(
     norm = broadcast_uncertainties(
         norm, prototype=detector, mode=uncertainty_broadcast_mode
     )
-    return ScaledCountsDspacing[RunType](detector / norm)
+    return NormalizedDspacing[RunType](detector / norm)
 
 
 def _normalize_by_vanadium(
@@ -182,7 +182,7 @@ def normalize_by_vanadium_dspacing(
     data: FocussedDataDspacing[_RunTypeNoVanadium],
     vanadium: FocussedDataDspacing[VanadiumRun],
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
-) -> IofDspacing[_RunTypeNoVanadium]:
+) -> IntensityDspacing[_RunTypeNoVanadium]:
     """
     Normalize sample data by a vanadium measurement and return intensity vs. d-spacing.
 
@@ -203,7 +203,7 @@ def normalize_by_vanadium_dspacing(
         May contain a mask "zero_vanadium" which is ``True``
         for bins where vanadium is zero.
     """
-    return IofDspacing(
+    return IntensityDspacing(
         _normalize_by_vanadium(data, vanadium, uncertainty_broadcast_mode)
     )
 
@@ -212,7 +212,7 @@ def normalize_by_vanadium_dspacing_and_two_theta(
     data: FocussedDataDspacingTwoTheta[_RunTypeNoVanadium],
     vanadium: FocussedDataDspacingTwoTheta[VanadiumRun],
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
-) -> IofDspacingTwoTheta[_RunTypeNoVanadium]:
+) -> IntensityDspacingTwoTheta[_RunTypeNoVanadium]:
     """
     Normalize sample data by a vanadium measurement and return intensity vs.
     (d-spacing, 2theta).
@@ -234,15 +234,15 @@ def normalize_by_vanadium_dspacing_and_two_theta(
         May contain a mask "zero_vanadium" which is ``True``
         for bins where vanadium is zero.
     """
-    return IofDspacingTwoTheta(
+    return IntensityDspacingTwoTheta(
         _normalize_by_vanadium(data, vanadium, uncertainty_broadcast_mode)
     )
 
 
 def normalize_by_proton_charge(
-    data: ReducedCountsDspacing[RunType],
+    data: CorrectedDspacing[RunType],
     proton_charge: AccumulatedProtonCharge[RunType],
-) -> ScaledCountsDspacing[RunType]:
+) -> NormalizedDspacing[RunType]:
     """Normalize data by an accumulated proton charge.
 
     Parameters
@@ -257,7 +257,7 @@ def normalize_by_proton_charge(
     :
         ``data / proton_charge``
     """
-    return ScaledCountsDspacing[RunType](data / proton_charge)
+    return NormalizedDspacing[RunType](data / proton_charge)
 
 
 def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.DataArray:
@@ -360,15 +360,15 @@ def _shallow_copy(da: sc.DataArray) -> sc.DataArray:
 
 
 def subtract_empty_can(
-    data: IofDspacing[SampleRun],
-    background: IofDspacing[EmptyCanRun],
+    data: IntensityDspacing[SampleRun],
+    background: IntensityDspacing[EmptyCanRun],
 ) -> EmptyCanSubtractedIofDspacing[SampleRun]:
     return EmptyCanSubtractedIofDspacing(data.bins.concatenate(-background))
 
 
 def subtract_empty_can_two_theta(
-    data: IofDspacingTwoTheta[SampleRun],
-    background: IofDspacingTwoTheta[EmptyCanRun],
+    data: IntensityDspacingTwoTheta[SampleRun],
+    background: IntensityDspacingTwoTheta[EmptyCanRun],
 ) -> EmptyCanSubtractedIofDspacingTwoTheta[SampleRun]:
     return EmptyCanSubtractedIofDspacingTwoTheta(data.bins.concatenate(-background))
 
