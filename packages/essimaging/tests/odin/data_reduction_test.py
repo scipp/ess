@@ -7,15 +7,15 @@ import sciline as sl
 import ess.odin.data  # noqa: F401
 from ess import odin
 from ess.imaging.types import (
-    CountsWavelength,
-    DetectorData,
-    DetectorTofData,
     Filename,
     NeXusDetectorName,
     OpenBeamRun,
+    RawDetector,
     SampleRun,
     TimeOfFlightLookupTable,
     TimeOfFlightLookupTableFilename,
+    TofDetector,
+    WavelengthDetector,
 )
 
 
@@ -36,13 +36,10 @@ def workflow() -> sl.Pipeline:
 
 @pytest.mark.parametrize("run_type", [SampleRun, OpenBeamRun])
 def test_can_load_detector_data(workflow, run_type):
-    da = workflow.compute(DetectorData[run_type])
+    da = workflow.compute(RawDetector[run_type])
     assert {
         "detector_number",
-        "gravity",
         "position",
-        "sample_position",
-        "source_position",
         "x_pixel_offset",
         "y_pixel_offset",
     }.issubset(set(da.coords.keys()))
@@ -53,13 +50,13 @@ def test_can_load_detector_data(workflow, run_type):
 
 @pytest.mark.parametrize("run_type", [SampleRun, OpenBeamRun])
 def test_can_compute_time_of_flight(workflow, run_type):
-    da = workflow.compute(DetectorTofData[run_type])
+    da = workflow.compute(TofDetector[run_type])
 
     assert "tof" in da.bins.coords
 
 
 @pytest.mark.parametrize("run_type", [SampleRun, OpenBeamRun])
 def test_can_compute_wavelength(workflow, run_type):
-    da = workflow.compute(CountsWavelength[run_type])
+    da = workflow.compute(WavelengthDetector[run_type])
 
     assert "wavelength" in da.bins.coords

@@ -2,7 +2,7 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 from collections.abc import Callable
 from types import MappingProxyType
-from typing import NewType, TypeVar
+from typing import NewType
 
 import sciline
 import scipp as sc
@@ -12,15 +12,17 @@ from ess.reduce.time_of_flight import types as tof_t
 
 # 1 TypeVars used to parametrize the generic parts of the workflow
 
-DetectorData = reduce_t.DetectorData
 Filename = reduce_t.Filename
-MonitorData = reduce_t.MonitorData
+GravityVector = reduce_t.GravityVector
 NeXusDetectorName = reduce_t.NeXusDetectorName
 NeXusMonitorName = reduce_t.NeXusName
 NeXusComponent = reduce_t.NeXusComponent
+Position = reduce_t.Position
+RawDetector = reduce_t.RawDetector
+RawMonitor = reduce_t.RawMonitor
 
 DetectorLtotal = tof_t.DetectorLtotal
-DetectorTofData = tof_t.DetectorTofData
+TofDetector = tof_t.TofDetector
 PulseStrideOffset = tof_t.PulseStrideOffset
 TimeOfFlightLookupTable = tof_t.TimeOfFlightLookupTable
 TimeOfFlightLookupTableFilename = tof_t.TimeOfFlightLookupTableFilename
@@ -49,32 +51,23 @@ BeamMonitor3 = NewType('BeamMonitor3', int)
 BeamMonitor4 = NewType('BeamMonitor4', int)
 """Beam monitor number 4"""
 
-RunType = TypeVar("RunType", SampleRun, DarkBackgroundRun, OpenBeamRun)
-MonitorType = TypeVar(
-    "MonitorType", BeamMonitor1, BeamMonitor2, BeamMonitor3, BeamMonitor4
-)
-
-CoordTransformGraph = NewType("CoordTransformGraph", dict)
-"""
-Graph of coordinate transformations used to compute the wavelength from the
-time-of-flight.
-"""
+RunType = reduce_t.RunType
+MonitorType = reduce_t.MonitorType
 
 
-class CountsWavelength(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+class CoordTransformGraph(sciline.Scope[RunType, dict], dict):
+    """
+    Graph of coordinate transformations used to compute the wavelength from the
+    time-of-flight.
+    """
+
+
+class WavelengthDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Detector counts with wavelength information."""
 
 
 MaskingRules = NewType('MaskingRules', MappingProxyType[str, Callable])
 """Functions to mask different dimensions of Odin data."""
-
-
-class CountsMasked(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Detector data with masks."""
-
-
-# class RawDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-#     """Raw detector counts read from file."""
 
 
 class CorrectedDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
@@ -99,7 +92,7 @@ class ProtonCharge(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
 
 
 class ExposureTime(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Exposure time for a run."""
+    """Exposure time of each frame recorded by the camera detector."""
 
 
-del sc, sciline, NewType, TypeVar
+del sc, sciline, NewType

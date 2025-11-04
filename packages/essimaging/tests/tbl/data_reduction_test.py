@@ -8,16 +8,17 @@ import scipp as sc
 import ess.tbl.data  # noqa: F401
 from ess import tbl
 from ess.imaging.types import (
-    CountsWavelength,
-    DetectorData,
-    DetectorTofData,
     Filename,
     NeXusDetectorName,
+    RawDetector,
     SampleRun,
     TimeOfFlightLookupTable,
     TimeOfFlightLookupTableFilename,
+    TofDetector,
+    WavelengthDetector,
 )
 from ess.reduce import time_of_flight
+from ess.reduce.nexus.types import AnyRun
 
 
 @pytest.fixture(scope="module")
@@ -27,7 +28,7 @@ def tof_lookup_table() -> sl.Pipeline:
     """
 
     lut_wf = time_of_flight.TofLookupTableWorkflow()
-    lut_wf[time_of_flight.DiskChoppers] = {}
+    lut_wf[time_of_flight.DiskChoppers[AnyRun]] = {}
     lut_wf[time_of_flight.SourcePosition] = sc.vector([0, 0, 0], unit="m")
     lut_wf[time_of_flight.NumberOfSimulatedNeutrons] = 200_000
     lut_wf[time_of_flight.SimulationSeed] = 333
@@ -55,14 +56,11 @@ def workflow() -> sl.Pipeline:
 )
 def test_can_load_detector_data(workflow, bank_name):
     workflow[NeXusDetectorName] = bank_name
-    da = workflow.compute(DetectorData[SampleRun])
+    da = workflow.compute(RawDetector[SampleRun])
 
     assert {
         "detector_number",
-        "gravity",
         "position",
-        "sample_position",
-        "source_position",
         "x_pixel_offset",
         "y_pixel_offset",
     }.issubset(set(da.coords.keys()))
@@ -76,7 +74,7 @@ def test_can_load_detector_data(workflow, bank_name):
 )
 def test_can_compute_time_of_flight(workflow, bank_name):
     workflow[NeXusDetectorName] = bank_name
-    da = workflow.compute(DetectorTofData[SampleRun])
+    da = workflow.compute(TofDetector[SampleRun])
 
     assert "tof" in da.bins.coords
 
@@ -89,7 +87,7 @@ def test_can_compute_time_of_flight_from_custom_lut(
 ):
     workflow[NeXusDetectorName] = bank_name
     workflow[TimeOfFlightLookupTable] = tof_lookup_table
-    da = workflow.compute(DetectorTofData[SampleRun])
+    da = workflow.compute(TofDetector[SampleRun])
 
     assert "tof" in da.bins.coords
 
@@ -99,6 +97,6 @@ def test_can_compute_time_of_flight_from_custom_lut(
 )
 def test_can_compute_wavelength(workflow, bank_name):
     workflow[NeXusDetectorName] = bank_name
-    da = workflow.compute(CountsWavelength[SampleRun])
+    da = workflow.compute(WavelengthDetector[SampleRun])
 
     assert "wavelength" in da.bins.coords

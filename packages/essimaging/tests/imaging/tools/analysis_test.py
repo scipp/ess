@@ -24,7 +24,7 @@ def test_resample() -> None:
 
 
 def test_resample_with_position_coord() -> None:
-    da = load_scitiff(get_siemens_star_path())["image"]
+    da = load_scitiff(siemens_star_path())["image"]
     vectors = np.random.randn(*da.shape[1:], 3)
     da.coords['position'] = sc.vectors(dims=['x', 'y'], values=vectors)
     resampled = img.tools.resample(da, sizes={'x': 2, 'y': 2})
