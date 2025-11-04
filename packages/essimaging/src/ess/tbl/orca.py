@@ -12,7 +12,6 @@ from ess.reduce.nexus import GenericNeXusWorkflow, load_component
 from ess.reduce.nexus.types import (
     NeXusComponentLocationSpec,
     NeXusDetectorName,
-    NeXusFileSpec,
     NeXusName,
 )
 
