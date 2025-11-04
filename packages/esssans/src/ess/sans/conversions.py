@@ -13,7 +13,7 @@ from ess.reduce.uncertainty import broadcast_uncertainties
 
 from .common import mask_range
 from .types import (
-    CleanQ,
+    QDetector,
     QxyDetector,
     CleanSummedQ,
     CleanSummedQxy,
@@ -245,7 +245,7 @@ def _compute_Q(
     data: sc.DataArray, graph: ElasticCoordTransformGraph, target: tuple[str, ...]
 ) -> sc.DataArray:
     # Keep naming of wavelength dim, subsequent steps use a (Q[xy], wavelength) binning.
-    return CleanQ[ScatteringRunType, IofQPart](
+    return QDetector[ScatteringRunType, IofQPart](
         data.transform_coords(
             target,
             graph=graph,
@@ -258,11 +258,11 @@ def _compute_Q(
 def compute_Q(
     data: WavelengthDetector[ScatteringRunType, IofQPart],
     graph: ElasticCoordTransformGraph[ScatteringRunType],
-) -> CleanQ[ScatteringRunType, IofQPart]:
+) -> QDetector[ScatteringRunType, IofQPart]:
     """
     Convert a data array from wavelength to Q.
     """
-    return CleanQ[ScatteringRunType, IofQPart](
+    return QDetector[ScatteringRunType, IofQPart](
         _compute_Q(data=data, graph=graph, target=('Q',))
     )
 
