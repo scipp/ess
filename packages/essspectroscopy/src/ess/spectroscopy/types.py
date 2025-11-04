@@ -81,9 +81,6 @@ class DataAtSample(sciline.Scope[RunType, sc.DataArray], sc.DataArray): ...
 class DataGroupedByRotation(sciline.Scope[RunType, sc.DataArray], sc.DataArray): ...
 
 
-class DetectorCountsWithQ(sciline.Scope[RunType, sc.DataArray], sc.DataArray): ...
-
-
 class QDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Detector counts with a momentum transfer coordinate."""
 
