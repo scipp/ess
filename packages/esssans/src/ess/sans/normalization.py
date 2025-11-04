@@ -25,7 +25,7 @@ from .types import (
     Position,
     ProcessedWavelengthBands,
     ReducedQ,
-    ReducedQxy,
+    ReducedQxQy,
     ReturnEvents,
     ScatteringRunType,
     SolidAngle,
@@ -422,8 +422,8 @@ def reduce_q(
 def reduce_qxy(
     data: NormalizedQxQy[ScatteringRunType, IofQPart],
     bands: ProcessedWavelengthBands,
-) -> ReducedQxy[ScatteringRunType, IofQPart]:
-    return ReducedQxy[ScatteringRunType, IofQPart](_reduce(data, bands=bands))
+) -> ReducedQxQy[ScatteringRunType, IofQPart]:
+    return ReducedQxQy[ScatteringRunType, IofQPart](_reduce(data, bands=bands))
 
 
 def normalize_q(
@@ -443,8 +443,8 @@ def normalize_q(
 
 
 def normalize_qxy(
-    numerator: ReducedQxy[ScatteringRunType, Numerator],
-    denominator: ReducedQxy[ScatteringRunType, Denominator],
+    numerator: ReducedQxQy[ScatteringRunType, Numerator],
+    denominator: ReducedQxQy[ScatteringRunType, Denominator],
     return_events: ReturnEvents,
     uncertainties: UncertaintyBroadcastMode,
 ) -> IntensityQxQy[ScatteringRunType]:

@@ -245,7 +245,7 @@ class ReducedQ(sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.Data
     """Result of reducing :py:class:`BinnedQ` over the wavelength dimensions"""
 
 
-class ReducedQxy(
+class ReducedQxQy(
     sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
 ):
     """Result of reducing :py:class:`BinnedQxQy` over the wavelength dimensions"""
