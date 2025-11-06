@@ -8,6 +8,7 @@ Components for BEER
 import importlib.metadata
 
 from .io import load_beer_mcstas
+from .peakfinding import dhkl_peaks_from_cif
 from .workflow import (
     BeerModMcStasWorkflow,
     BeerModMcStasWorkflowKnownPeaks,
@@ -26,5 +27,6 @@ __all__ = [
     'BeerModMcStasWorkflowKnownPeaks',
     '__version__',
     'default_parameters',
+    'dhkl_peaks_from_cif',
     'load_beer_mcstas',
 ]

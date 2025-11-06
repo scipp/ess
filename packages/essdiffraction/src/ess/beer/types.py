@@ -45,3 +45,9 @@ WavelengthDefinitionChopperDelay = NewType(
 
 DHKLList = NewType('DHKLList', sc.Variable)
 '''List of peak position estimates.'''
+
+CIFIdentifierForPeakPositions = NewType('CIFIdentifierForPeakPositions', object)
+'''CIF file or identifier used to find :py:`DHKLList`.'''
+
+CIFPeaksMinIntensity = NewType('CIFPeaksMinIntensity', sc.Variable)
+'''Mininum peak intensity for peaks from CIF file to be included in :py:`DHKLList`.'''

@@ -41,6 +41,7 @@ dependencies = [
   "scippneutron>=25.02.0",
   "scippnexus>=23.12.0",
   "tof>=25.01.2",
+  "ncrystal[cif]>=4.1.0",
 ]
 
 dynamic = ["version"]
@@ -50,7 +51,7 @@ test = [
     "pandas>=2.1.2",
     "pooch>=1.5",
     "pytest>=7.0",
-    "ipywidgets>=8.1.7"
+    "ipywidgets>=8.1.7",
 ]
 
 [project.urls]
