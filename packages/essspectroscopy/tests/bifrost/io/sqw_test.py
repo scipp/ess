@@ -44,6 +44,8 @@ U = sc.vector([1, 0, 0], unit="1/angstrom")
 V = sc.vector([0, 1, 0], unit="1/angstrom")
 W = sc.vector([0, 0, 1], unit="1/angstrom")
 
+N_PIXELS_PER_DETECTOR = 300  # Fixed, not a parameter!
+
 
 @pytest.fixture(scope='module')
 def detector_names() -> list[NeXusDetectorName]:
@@ -147,3 +149,21 @@ def test_save_sqw_writes_dnd_metadata(
 
     sc.testing.assert_identical(metadata.proj.lattice_spacing, sample.lattice_spacing)
     sc.testing.assert_identical(metadata.proj.lattice_angle, sample.lattice_angle)
+
+
+def test_save_sqw_writes_dnd_data(output_file: sqw.Sqw) -> None:
+    dnd = output_file.read_data_block("data", "nd_data")
+    values, errors, counts = dnd
+    # Fortran order
+    assert values.shape == tuple(BIN_SIZES.values())[::-1]
+    assert errors.shape == tuple(BIN_SIZES.values())[::-1]
+    assert counts.shape == tuple(BIN_SIZES.values())[::-1]
+
+
+def test_save_sqw_writes_pixel_data(output_file: sqw.Sqw) -> None:
+    pix = output_file.read_data_block("pix", "data_wrap")
+    assert pix.shape == (
+        N_DETECTORS * N_PIXELS_PER_DETECTOR * N_ANGLES * ENERGY_BIN_SIZE,
+        9,
+    )
+    # TODO many more checks
