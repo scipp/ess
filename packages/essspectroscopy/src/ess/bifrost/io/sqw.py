@@ -9,11 +9,14 @@ import numpy as np
 import numpy.typing as npt
 import scipp as sc
 from scippneutron.io import sqw
-from scippneutron.metadata import ESS_SOURCE, Beamline, Measurement
+from scippneutron.metadata import ESS_SOURCE
 
 from ess.spectroscopy.types import (
+    Beamline,
     EnergyBins,
+    GravityVector,
     IncidentEnergyDetector,
+    Measurement,
     OutFilename,
     PulsePeriod,
     SampleRun,
@@ -33,9 +36,10 @@ def save_sqw(
     *,
     bin_sizes: SQWBinSizes,
     energy_bins: EnergyBins,  # TODO distinct from above!
-    beamline: Beamline,
-    measurement: Measurement,
+    beamline: Beamline[SampleRun],
+    measurement: Measurement[SampleRun],
     pulse_period: PulsePeriod,
+    gravity: GravityVector,
     sample: sqw.SqwIXSample,
 ) -> None:
     """Save events recorded at BIFROST to an SQW file.
@@ -53,7 +57,7 @@ def save_sqw(
     observations = _histogram_detector_setting_ei(flat_events, energy_bins=energy_bins)
     del flat_events  # 'move' flat_events into _histogram_detector_setting_ei
     final_energy = observations.coords['final_energy']
-    observations = _with_inelastic_coords(observations)
+    observations = _with_inelastic_coords(observations, gravity)
     energy_transfer = observations.coords['energy_transfer'].rename_dims(
         incident_energy='energy_transfer'
     )
@@ -163,7 +167,9 @@ def _histogram_detector_setting_ei(
     return hist
 
 
-def _with_inelastic_coords(observations: sc.DataArray) -> sc.DataArray:
+def _with_inelastic_coords(
+    observations: sc.DataArray, gravity: GravityVector
+) -> sc.DataArray:
     """Compute and assign Qx, Qy, Qz, and energy_transfer.
 
     This also drops all coordinates that are no longer needed.
@@ -178,6 +184,7 @@ def _with_inelastic_coords(observations: sc.DataArray) -> sc.DataArray:
         'lab_momentum_transfer': lab_momentum_transfer_from_incident_energy,
         'sample_table_momentum_transfer': rotate_to_sample_table_momentum_transfer,
         'energy_transfer': energy_transfer,
+        'gravity': lambda: gravity,
     }
     aux = observations.transform_coords(
         ['sample_table_momentum_transfer', 'energy_transfer'],
