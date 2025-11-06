@@ -230,7 +230,7 @@ def add_inelastic_coordinates(
 
 
 def add_incident_energy(
-    data: DetectorTofData[RunType], graph: InelasticCoordTransformGraph
+    data: TofDetector[RunType], graph: InelasticCoordTransformGraph
 ) -> IncidentEnergyDetector[RunType]:
     transformed = data.transform_coords(
         [

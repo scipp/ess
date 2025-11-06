@@ -13,12 +13,12 @@ from ess.reduce.nexus import types as reduce_t
 
 # NeXus types
 
-EmptyDetector = reduce_t.EmptyDetector
-RawDetector = reduce_t.RawDetector
+Beamline = reduce_t.Beamline
 DetectorPositionOffset = reduce_t.DetectorPositionOffset
-GravityVector = reduce_t.GravityVector
+EmptyDetector = reduce_t.EmptyDetector
 Filename = reduce_t.Filename
-RawMonitor = reduce_t.RawMonitor
+GravityVector = reduce_t.GravityVector
+Measurement = reduce_t.Measurement
 NeXusClass = reduce_t.NeXusClass
 NeXusComponentLocationSpec = reduce_t.NeXusComponentLocationSpec
 NeXusComponent = reduce_t.NeXusComponent
@@ -29,7 +29,8 @@ NeXusMonitorName = reduce_t.NeXusName
 NeXusTransformation = reduce_t.NeXusTransformation
 Position = reduce_t.Position
 PreopenNeXusFile = reduce_t.PreopenNeXusFile
-
+RawDetector = reduce_t.RawDetector
+RawMonitor = reduce_t.RawMonitor
 
 SampleRun = reduce_t.SampleRun
 VanadiumRun = reduce_t.VanadiumRun
