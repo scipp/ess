@@ -60,7 +60,7 @@ def tbl_lego_dark_run() -> pathlib.Path:
     return _registry.get_path("ymir_lego_dark_run.hdf")
 
 
-def ymir_lego_openbeam_run() -> pathlib.Path:
+def tbl_lego_openbeam_run() -> pathlib.Path:
     """
     Return the path to the TBL LEGO open beam run HDF5 file, created from the YMIR data.
     This file was created using the tools/make-tbl-images-from-ymir.ipynb notebook.
@@ -71,7 +71,7 @@ def ymir_lego_openbeam_run() -> pathlib.Path:
     return _registry.get_path("ymir_lego_openbeam_run.hdf")
 
 
-def ymir_lego_sample_run() -> pathlib.Path:
+def tbl_lego_sample_run() -> pathlib.Path:
     """
     Return the path to the TBL LEGO sample run HDF5 file, created from the YMIR data.
     This file was created using the tools/make-tbl-images-from-ymir.ipynb notebook.
