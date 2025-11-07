@@ -8,7 +8,7 @@ import scippnexus as sx
 from scipp.testing import assert_identical
 
 import ess.tbl.data  # noqa: F401
-from ess import imaging, tbl
+from ess import tbl
 from ess.imaging.types import (
     BackgroundSubtractedDetector,
     CorrectedDetector,
