@@ -138,8 +138,6 @@ providers = (
 
 def default_parameters() -> dict:
     return {
-        # ProtonChargePath: '/entry/neutron_prod_info/pulse_charge',
-        # ExposureTimePath: '/entry/instrument/detector/exposure_time',
         NeXusDetectorName: 'orca_detector',
         NeXusName[ProtonCharge]: '/entry/neutron_prod_info/pulse_charge',
         NeXusName[ExposureTime]: '/entry/instrument/orca_detector/camera_exposure',
