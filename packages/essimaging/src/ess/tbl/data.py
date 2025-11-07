@@ -8,13 +8,16 @@ from ess.reduce.data import Entry, make_registry
 
 _registry = make_registry(
     'ess/tbl',
-    version="1",
+    version="2",
     files={
         "tbl_sample_data_2025-03.hdf": "md5:12db6bc06721278b3abe47992eac3e77",
         "TBL-tof-lookup-table-no-choppers.h5": "md5:8bc98fac0ee64fc8f5decf509c75bafe",
         'tbl-orca-focussing.hdf.zip': Entry(
             alg='md5', chk='f365acd9ea45dd205c0b9398d163cfa4', unzip=True
         ),
+        "ymir_lego_dark_run.hdf": "md5:c0ed089dd7663986042e29fb47514130",
+        "ymir_lego_openbeam_run.hdf": "md5:00375becd54d2ed3be096413dc30883c",
+        "ymir_lego_sample_run.hdf": "md5:ae56a335cf3d4e87ef090ec4e51da69c",
     },
 )
 
@@ -44,3 +47,36 @@ def tbl_orca_focussing_data() -> pathlib.Path:
     """
 
     return _registry.get_path('tbl-orca-focussing.hdf.zip')
+
+
+def tbl_lego_dark_run() -> pathlib.Path:
+    """
+    Return the path to the TBL LEGO dark run HDF5 file, created from the YMIR data.
+    This file was created using the tools/make-tbl-images-from-ymir.ipynb notebook.
+    A TBL file (857127_00000212.hdf) was used as a template for the NeXus structure.
+    The dark run data was extracted from the YMIR LEGO run (first 5 frames).
+    """
+
+    return _registry.get_path("ymir_lego_dark_run.hdf")
+
+
+def ymir_lego_openbeam_run() -> pathlib.Path:
+    """
+    Return the path to the TBL LEGO open beam run HDF5 file, created from the YMIR data.
+    This file was created using the tools/make-tbl-images-from-ymir.ipynb notebook.
+    A TBL file (857127_00000212.hdf) was used as a template for the NeXus structure.
+    The open beam run data was extracted from the YMIR LEGO run (frames 5 to 10).
+    """
+
+    return _registry.get_path("ymir_lego_openbeam_run.hdf")
+
+
+def ymir_lego_sample_run() -> pathlib.Path:
+    """
+    Return the path to the TBL LEGO sample run HDF5 file, created from the YMIR data.
+    This file was created using the tools/make-tbl-images-from-ymir.ipynb notebook.
+    A TBL file (857127_00000212.hdf) was used as a template for the NeXus structure.
+    The sample run data was extracted from the YMIR LEGO run (frames 10 and onward).
+    """
+
+    return _registry.get_path("ymir_lego_sample_run.hdf")
