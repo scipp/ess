@@ -10,5 +10,5 @@ scipp>=25.4.0
 scippneutron>=24.12.0
 scippnexus>=23.11.1
 tifffile>=2024.7.2
-essreduce>=25.11.0
+essreduce>=25.11.1
 scitiff>=25.7

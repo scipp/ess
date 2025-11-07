@@ -28,7 +28,7 @@ cyclebane==24.10.0
     # via sciline
 cycler==0.12.1
     # via matplotlib
-dask==2025.10.0
+dask==2025.11.0
     # via -r nightly.in
 dnspython==2.8.0
     # via email-validator
@@ -73,7 +73,7 @@ matplotlib==3.10.7
     #   plopp
 mpltoolbox==25.10.0
     # via scippneutron
-networkx==3.5
+networkx==3.6rc0
     # via cyclebane
 numpy==2.3.4
     # via
@@ -106,11 +106,11 @@ pluggy==1.6.0
     # via pytest
 pooch==1.8.2
     # via -r nightly.in
-pydantic==2.12.3
+pydantic==2.12.4
     # via
     #   scippneutron
     #   scitiff
-pydantic-core==2.41.4
+pydantic-core==2.41.5
     # via pydantic
 pygments==2.19.2
     # via pytest
