@@ -30,6 +30,24 @@ def _retrieve_sample_position(file: snx.File) -> sc.Variable:
     return _compute_positions(da, auto_fix_transformations=True)['position']
 
 
+def _retrieve_crystal_rotation(file: snx.File) -> sc.Variable:
+    if 'crystal_rotation' not in file['entry/sample']:
+        import warnings
+
+        warnings.warn(
+            "No crystal rotation found in the Nexus file under "
+            "'entry/sample/crystal_rotation'. Returning zero rotation.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+        return sc.vector([0, 0, 0], unit='deg')
+
+    # Temporary way of storing crystal rotation.
+    # streaming-sample-mcstas module writes crystal rotation under
+    # 'entry/sample/crystal_rotation' as an array of three values.
+    return file['entry/sample/crystal_rotation'][()]
+
+
 def _decide_fast_axis(da: sc.DataArray) -> str:
     x_slice = da['x_pixel_offset', 0].coords['detector_number']
     y_slice = da['y_pixel_offset', 0].coords['detector_number']
@@ -230,11 +248,11 @@ def reduction(
         display(f"Selected detectors: {list(detector_id_map.keys())}")
         source_position = _retrieve_source_position(f)
         sample_position = _retrieve_sample_position(f)
+        crystal_rotation = _retrieve_crystal_rotation(f)
         experiment_metadata = NMXExperimentMetadata(
             sc.DataGroup(
                 {
-                    # Placeholder for crystal rotation
-                    'crystal_rotation': sc.vector([0, 0, 0], unit='deg'),
+                    'crystal_rotation': crystal_rotation,
                     'sample_position': sample_position,
                     'source_position': source_position,
                     'sample_name': sc.scalar(f['entry/sample/name'][()]),
