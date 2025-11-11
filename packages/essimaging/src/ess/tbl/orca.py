@@ -151,9 +151,8 @@ def OrcaNormalizedImagesWorkflow(**kwargs) -> sl.Pipeline:
 
     wf = GenericNeXusWorkflow(
         run_types=[SampleRun, OpenBeamRun, DarkBackgroundRun],
-        # Abusing the monitor_types to load proton charge and exposure time.
-        # How to we expand the list of possible components?
-        monitor_types=[ProtonCharge, ExposureTime],
+        monitor_types=[],
+        component_types=[ProtonCharge, ExposureTime],
         **kwargs,
     )
 
