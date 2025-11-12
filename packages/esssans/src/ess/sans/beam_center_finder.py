@@ -93,6 +93,8 @@ def _find_beam_center(
             s.masks['_arm'] = (
                 d.fields.y < slope * d.fields.x + sample_holder_arm_width
             ) & (d.fields.y > slope * d.fields.x - sample_holder_arm_width)
+
+    c.data.fields.z = sc.scalar(0.0, unit=c.data.unit)
     return c.data
 
 
@@ -156,7 +158,10 @@ def beam_center_from_center_of_mass_alternative(
         beam_center = sc.vector([0.0, 0.0, 0.0], unit='m')
         workflow[BeamCenter] = beam_center
     data = workflow.compute(MaskedData[SampleRun])
-    return _find_beam_center(data, sample_holder_radius, sample_holder_arm_width)
+    return (
+        _find_beam_center(data, sample_holder_radius, sample_holder_arm_width)
+        + beam_center
+    )
 
 
 def beam_center_from_center_of_mass(workflow: sciline.Pipeline) -> BeamCenter:
