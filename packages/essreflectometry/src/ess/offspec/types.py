@@ -4,6 +4,7 @@ from typing import NewType
 
 import sciline
 import scipp as sc
+import scippnexus as snx
 
 from ess.reduce.nexus import types as reduce_t
 
@@ -21,4 +22,4 @@ class MonitorData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """ "Monitor data from the run file, with background subtracted"""
 
 
-NeXusMonitorName = reduce_t.NeXusName
+NeXusMonitorName = reduce_t.NeXusName[snx.NXmonitor]

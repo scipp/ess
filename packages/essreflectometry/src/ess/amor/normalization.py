@@ -94,6 +94,7 @@ def evaluate_reference_at_sample_coords(
     ref = ref.transform_coords(
         (
             "Q",
+            "theta",
             "wavelength_resolution",
             "sample_size_resolution",
             "angular_resolution",
