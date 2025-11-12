@@ -140,7 +140,7 @@ def beam_center_from_center_of_mass_alternative(
     Parameters
     ----------
     workflow:
-        The reduction workflow to compute MaskedData[SampleRun].
+        The reduction workflow to compute CorrectedDetector[SampleRun, Numerator].
 
     Returns
     -------
@@ -158,7 +158,7 @@ def beam_center_from_center_of_mass_alternative(
     except sciline.UnsatisfiedRequirement:
         beam_center = sc.vector([0.0, 0.0, 0.0], unit='m')
         workflow[BeamCenter] = beam_center
-    data = workflow.compute(MaskedData[SampleRun])
+    data = workflow.compute(CorrectedDetector[SampleRun, Numerator])
     return (
         _find_beam_center(data, sample_holder_radius, sample_holder_arm_width)
         + beam_center
