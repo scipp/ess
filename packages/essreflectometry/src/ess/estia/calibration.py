@@ -51,35 +51,16 @@ class PolarizationCalibrationParameters:
         rho = (Ioaa - Ioap) / (Iopp - Iopa)
         alp = (Ioaa - Iopa) / (Iopp - Ioap)
 
-        Rspp_plus_Rsaa = (
-            4
-            * (rho * alp * Ipp + Iaa + rho * Ipa + alp * Iap)
-            / ((1 + rho) * (1 + alp) * I0)
-        )
-        Pp = sc.sqrt(
-            (Ipp + Iaa - Ipa - Iap)
-            * (alp * (Ipp - Iap) - Iaa + Ipa)
-            / (
-                (rho * alp * Ipp + Iaa + rho * Ipa + alp * Iap)
-                * (rho * (Ipp - Ipa) - Iaa + Iap)
-            )
-        )
-        Ap = sc.sqrt(
-            (Ipp + Iaa - Ipa - Iap)
-            * (rho * (Ipp - Ipa) - Iaa + Iap)
-            / (
-                (rho * alp * Ipp + Iaa + rho * Ipa + alp * Iap)
-                * (alp * (Ipp - Iap) - Iaa + Ipa)
-            )
-        )
-        Rs = sc.sqrt(
-            (alp * (Ipp - Iap) - Iaa + Ipa)
-            * (rho * (Ipp - Ipa) - Iaa + Iap)
-            / (
-                (rho * alp * Ipp + Iaa + rho * Ipa + alp * Iap)
-                * (Ipp + Iaa - Ipa - Iap)
-            )
-        )
+        num_base = rho * alp * Ipp + Iaa + rho * Ipa + alp * Iap
+        den_base = Ipp + Iaa - Ipa - Iap
+        term_rho = rho * (Ipp - Ipa) - Iaa + Iap
+        term_alp = alp * (Ipp - Iap) - Iaa + Ipa
+
+        Rspp_plus_Rsaa = 4 * num_base / ((1 + rho) * (1 + alp) * I0)
+
+        Pp = sc.sqrt(den_base * term_alp / (num_base * term_rho))
+        Ap = sc.sqrt(den_base * term_rho / (num_base * term_alp))
+        Rs = sc.sqrt(term_alp * term_rho / (num_base * den_base))
 
         Pa = -rho * Pp
         Aa = -alp * Ap
