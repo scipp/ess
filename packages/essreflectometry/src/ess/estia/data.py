@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
-from multiprocessing import Pool
+from multiprocessing import ThreadPool
 
 import scipp as sc
 
@@ -146,8 +146,8 @@ def _refresh_cache(args):
 
 
 def estia_mcstas_spin_flip_example_download_all_to_cache():
-    with Pool(20) as pool:
-        pool.map(
+    with ThreadPool(20) as pool:
+        for _ in pool.map(
             _refresh_cache,
             [
                 (sample, setting)
@@ -159,7 +159,8 @@ def estia_mcstas_spin_flip_example_download_all_to_cache():
                 )
                 for setting in ('offoff', 'offon', 'onoff', 'onon')
             ],
-        )
+        ):
+            pass
 
 
 __all__ = [
