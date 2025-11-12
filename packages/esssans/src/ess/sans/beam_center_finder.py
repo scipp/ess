@@ -40,8 +40,8 @@ def _xy_extrema(pos: sc.Variable) -> sc.Variable:
 
 def _find_beam_center(
     data,
-    sample_holder_radius,
-    sample_holder_arm_width,
+    beam_stop_radius,
+    beam_stop_arm_width,
 ):
     '''
     Each iteration the center of mass of the remaining intensity is computed
@@ -78,7 +78,7 @@ def _find_beam_center(
             sc.abs(d.fields.y.max()),
         )
         s.masks['_outer'] = d.fields.x**2 + d.fields.y**2 > outer**2
-        s.masks['_inner'] = d.fields.x**2 + d.fields.y**2 < sample_holder_radius**2
+        s.masks['_inner'] = d.fields.x**2 + d.fields.y**2 < beam_stop_radius**2
 
         if i > 10:
             s.coords['th'] = sc.where(
@@ -92,8 +92,8 @@ def _find_beam_center(
 
             slope = sc.tan(th)
             s.masks['_arm'] = (
-                d.fields.y < slope * d.fields.x + sample_holder_arm_width
-            ) & (d.fields.y > slope * d.fields.x - sample_holder_arm_width)
+                d.fields.y < slope * d.fields.x + beam_stop_arm_width
+            ) & (d.fields.y > slope * d.fields.x - beam_stop_arm_width)
 
     c.data.fields.z = sc.scalar(0.0, unit=c.data.unit)
     return c.data
@@ -101,8 +101,8 @@ def _find_beam_center(
 
 def beam_center_from_center_of_mass_alternative(
     workflow,
-    sample_holder_radius=None,
-    sample_holder_arm_width=None,
+    beam_stop_radius=None,
+    beam_stop_arm_width=None,
 ) -> BeamCenter:
     """
     Estimate the beam center via the center-of-mass of the data counts.
@@ -148,10 +148,10 @@ def beam_center_from_center_of_mass_alternative(
         The beam center position as a vector.
     """
 
-    if sample_holder_radius is None:
-        sample_holder_radius = sc.scalar(0.05, unit='m')
-    if sample_holder_arm_width is None:
-        sample_holder_arm_width = sc.scalar(0.02, unit='m')
+    if beam_stop_radius is None:
+        beam_stop_radius = sc.scalar(0.05, unit='m')
+    if beam_stop_arm_width is None:
+        beam_stop_arm_width = sc.scalar(0.02, unit='m')
 
     try:
         beam_center = workflow.compute(BeamCenter)
@@ -159,10 +159,7 @@ def beam_center_from_center_of_mass_alternative(
         beam_center = sc.vector([0.0, 0.0, 0.0], unit='m')
         workflow[BeamCenter] = beam_center
     data = workflow.compute(CorrectedDetector[SampleRun, Numerator])
-    return (
-        _find_beam_center(data, sample_holder_radius, sample_holder_arm_width)
-        + beam_center
-    )
+    return _find_beam_center(data, beam_stop_radius, beam_stop_arm_width) + beam_center
 
 
 def beam_center_from_center_of_mass(workflow: sciline.Pipeline) -> BeamCenter:
