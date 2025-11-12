@@ -55,8 +55,6 @@ def reduce_reference(
     reference = reference / R
     binned = reduce_from_events_to_lz(reference, wavelength_bins)
     h = binned.hist()
-    if 'Q' in binned.bins.coords:
-        h.coords['Q'] = binned.bins.coords['Q'].bins.mean()
     return h
 
 
