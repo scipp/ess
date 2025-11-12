@@ -146,6 +146,8 @@ def _refresh_cache(args):
 
 
 def estia_mcstas_spin_flip_example_download_all_to_cache():
+    # Run once to create the folder structure without conflicts
+    _refresh_cache(('supermirror', 'offoff'))
     with ThreadPool(20) as pool:
         for _ in pool.map(
             _refresh_cache,
