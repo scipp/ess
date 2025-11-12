@@ -14,24 +14,24 @@ import scippnexus as snx
 from ess.reduce.nexus.types import NeXusTransformation, Position
 from ess.sans.types import (
     BeamCenter,
-    CalibratedDetector,
-    CalibratedMonitor,
-    DetectorData,
     DetectorIDs,
     DetectorPixelShape,
     DetectorPositionOffset,
+    EmptyDetector,
+    EmptyMonitor,
     Incident,
     Measurement,
-    MonitorData,
     MonitorPositionOffset,
     MonitorType,
     NeXusComponent,
     NeXusMonitorName,
     NonBackgroundWavelengthRange,
+    RawDetector,
+    RawMonitor,
     RunType,
     SampleRun,
     ScatteringRunType,
-    TofData,
+    TofDetector,
     TofMonitor,
     Transmission,
 )
@@ -128,7 +128,7 @@ def get_calibrated_isis_detector(
     detector: NeXusComponent[snx.NXdetector, RunType],
     *,
     offset: DetectorPositionOffset[RunType],
-) -> CalibratedDetector[RunType]:
+) -> EmptyDetector[RunType]:
     """
     Replacement for :py:func:`ess.reduce.nexus.workflow.get_calibrated_detector`.
 
@@ -142,7 +142,7 @@ def get_calibrated_isis_detector(
     """
     da = detector['data']
     position = detector['data'].coords['position']
-    return CalibratedDetector[RunType](
+    return EmptyDetector[RunType](
         da.assign_coords(position=position + offset.to(unit=position.unit))
     )
 
@@ -191,38 +191,38 @@ def get_monitor_data(
 
 
 def dummy_assemble_detector_data(
-    detector: CalibratedDetector[RunType],
-) -> DetectorData[RunType]:
+    detector: EmptyDetector[RunType],
+) -> RawDetector[RunType]:
     """Dummy assembly of detector data, detector already contains neutron data."""
-    return DetectorData[RunType](detector)
+    return RawDetector[RunType](detector)
 
 
 def dummy_assemble_monitor_data(
-    monitor: CalibratedMonitor[RunType, MonitorType],
-) -> MonitorData[RunType, MonitorType]:
+    monitor: EmptyMonitor[RunType, MonitorType],
+) -> RawMonitor[RunType, MonitorType]:
     """Dummy assembly of monitor data, monitor already contains neutron data."""
-    return MonitorData[RunType, MonitorType](monitor)
+    return RawMonitor[RunType, MonitorType](monitor)
 
 
 def data_to_tof(
-    da: DetectorData[ScatteringRunType],
-) -> TofData[ScatteringRunType]:
+    da: RawDetector[ScatteringRunType],
+) -> TofDetector[ScatteringRunType]:
     """Dummy conversion of data to time-of-flight data.
     The data already has a time-of-flight coordinate."""
-    return TofData[ScatteringRunType](da)
+    return TofDetector[ScatteringRunType](da)
 
 
 def monitor_to_tof(
-    da: MonitorData[RunType, MonitorType],
+    da: RawMonitor[RunType, MonitorType],
 ) -> TofMonitor[RunType, MonitorType]:
     """Dummy conversion of monitor data to time-of-flight data.
     The monitor data already has a time-of-flight coordinate."""
     return TofMonitor[RunType, MonitorType](da)
 
 
-def experiment_metadata(dg: LoadedFileContents[SampleRun]) -> Measurement:
+def experiment_metadata(dg: LoadedFileContents[RunType]) -> Measurement[RunType]:
     """Get experiment metadata from the raw sample data."""
-    return Measurement(
+    return Measurement[RunType](
         title=dg['run_title'].value,
         run_number=dg['run_number'],
     )
@@ -262,7 +262,7 @@ def lab_frame_transform() -> NeXusTransformation[snx.NXdetector, ScatteringRunTy
     )
 
 
-def get_detector_ids_from_sample_run(data: TofData[SampleRun]) -> DetectorIDs:
+def get_detector_ids_from_sample_run(data: TofDetector[SampleRun]) -> DetectorIDs:
     """Extract detector IDs from sample run.
 
     This overrides the function in the masking module which gets the detector IDs from

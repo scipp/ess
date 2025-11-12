@@ -21,6 +21,8 @@ from .types import (
     Filename,
     Incident,
     NeXusDetectorName,
+    NormalizedQ,
+    NormalizedQxQy,
     Numerator,
     PixelMaskFilename,
     SampleRun,
@@ -29,8 +31,6 @@ from .types import (
     TransmissionRun,
     WavelengthBands,
     WavelengthMask,
-    WavelengthScaledQ,
-    WavelengthScaledQxy,
 )
 
 
@@ -100,7 +100,7 @@ def _set_runs(
     pipeline = pipeline.copy()
     runs = pd.DataFrame({Filename[key]: runs}).rename_axis(axis_name)
     for part in (Numerator, Denominator):
-        for qtype in (WavelengthScaledQ, WavelengthScaledQxy):
+        for qtype in (NormalizedQ, NormalizedQxQy):
             pipeline[qtype[key, part]] = (
                 pipeline[qtype[key, part]]
                 .map(runs)

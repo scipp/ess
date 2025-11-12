@@ -11,21 +11,21 @@ from .types import (
     BackgroundRun,
     BackgroundSubtractedIofQ,
     BackgroundSubtractedIofQxy,
+    BinnedQ,
+    BinnedQxQy,
     CleanDirectBeam,
-    CleanMonitor,
-    CleanQ,
-    CleanQxy,
-    CleanSummedQ,
-    CleanSummedQxy,
+    CorrectedMonitor,
     DimsToKeep,
     DirectBeam,
-    IofQ,
+    IntensityQ,
+    IntensityQxQy,
     IofQPart,
-    IofQxy,
     MonitorType,
     NonBackgroundWavelengthRange,
     QBins,
+    QDetector,
     QxBins,
+    QxyDetector,
     QyBins,
     ReturnEvents,
     RunType,
@@ -41,7 +41,7 @@ def preprocess_monitor_data(
     wavelength_bins: WavelengthBins,
     non_background_range: NonBackgroundWavelengthRange,
     uncertainties: UncertaintyBroadcastMode,
-) -> CleanMonitor[RunType, MonitorType]:
+) -> CorrectedMonitor[RunType, MonitorType]:
     """
     Prepare monitor data for computing the transmission fraction.
     The input data are first converted to wavelength (if needed).
@@ -88,7 +88,7 @@ def preprocess_monitor_data(
         monitor -= broadcast_uncertainties(
             background, prototype=monitor, mode=uncertainties
         )
-    return CleanMonitor(monitor)
+    return CorrectedMonitor(monitor)
 
 
 def resample_direct_beam(
@@ -136,10 +136,10 @@ def resample_direct_beam(
 
 
 def bin_in_q(
-    data: CleanQ[ScatteringRunType, IofQPart],
+    data: QDetector[ScatteringRunType, IofQPart],
     q_bins: QBins,
     dims_to_keep: DimsToKeep,
-) -> CleanSummedQ[ScatteringRunType, IofQPart]:
+) -> BinnedQ[ScatteringRunType, IofQPart]:
     """
     Merges data from all pixels into a single I(Q) spectrum:
 
@@ -162,15 +162,15 @@ def bin_in_q(
         The input data converted to Q and then summed over all detector pixels.
     """
     out = _bin_in_q(data=data, edges={'Q': q_bins}, dims_to_keep=dims_to_keep)
-    return CleanSummedQ[ScatteringRunType, IofQPart](out)
+    return BinnedQ[ScatteringRunType, IofQPart](out)
 
 
 def bin_in_qxy(
-    data: CleanQxy[ScatteringRunType, IofQPart],
+    data: QxyDetector[ScatteringRunType, IofQPart],
     qx_bins: QxBins,
     qy_bins: QyBins,
     dims_to_keep: DimsToKeep,
-) -> CleanSummedQxy[ScatteringRunType, IofQPart]:
+) -> BinnedQxQy[ScatteringRunType, IofQPart]:
     """
     Merges data from all pixels into a single I(Q) spectrum:
 
@@ -200,7 +200,7 @@ def bin_in_qxy(
         edges={'Qy': qy_bins, 'Qx': qx_bins},
         dims_to_keep=dims_to_keep,
     )
-    return CleanSummedQxy[ScatteringRunType, IofQPart](out)
+    return BinnedQxQy[ScatteringRunType, IofQPart](out)
 
 
 def _bin_in_q(
@@ -225,8 +225,8 @@ def _subtract_background(
 
 
 def subtract_background(
-    sample: IofQ[SampleRun],
-    background: IofQ[BackgroundRun],
+    sample: IntensityQ[SampleRun],
+    background: IntensityQ[BackgroundRun],
     return_events: ReturnEvents,
 ) -> BackgroundSubtractedIofQ:
     return BackgroundSubtractedIofQ(
@@ -237,8 +237,8 @@ def subtract_background(
 
 
 def subtract_background_xy(
-    sample: IofQxy[SampleRun],
-    background: IofQxy[BackgroundRun],
+    sample: IntensityQxQy[SampleRun],
+    background: IntensityQxQy[BackgroundRun],
     return_events: ReturnEvents,
 ) -> BackgroundSubtractedIofQxy:
     return BackgroundSubtractedIofQxy(

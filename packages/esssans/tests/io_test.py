@@ -9,7 +9,7 @@ import scippnexus as snx
 from scippnexus.application_definitions import nxcansas
 
 from ess.sans.io import save_background_subtracted_iofq
-from ess.sans.types import BackgroundSubtractedIofQ, Measurement, OutFilename
+from ess.sans.types import BackgroundSubtractedIofQ, Measurement, OutFilename, SampleRun
 
 
 @pytest.mark.parametrize('use_edges', [True, False])
@@ -26,8 +26,8 @@ def test_save_background_subtracted_iofq(use_edges, tmp_path):
             )
         )
 
-    def experiment_metadata() -> Measurement:
-        return Measurement(
+    def experiment_metadata() -> Measurement[SampleRun]:
+        return Measurement[SampleRun](
             title='Test-title',
             run_number='7419',
         )

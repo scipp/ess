@@ -81,6 +81,7 @@ def test_solid_angle_compare_to_reference_file():
     da = sc.io.load_hdf5(filename=sans2d_solid_angle_reference())
     solid_angle = normalization.solid_angle(
         da,
+        sample_position=da.coords['sample_position'],
         **_sans2d_geometry(),
     ).data
     assert sc.allclose(

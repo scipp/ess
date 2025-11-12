@@ -37,7 +37,6 @@
    common
    conversions
    normalization
-   data
    direct_beam
    i_of_q
    io

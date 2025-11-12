@@ -11,6 +11,7 @@ from .types import (
     Measurement,
     OutFilename,
     PixelMaskFilename,
+    SampleRun,
 )
 
 
@@ -18,7 +19,7 @@ def save_background_subtracted_iofq(
     *,
     iofq: BackgroundSubtractedIofQ,
     out_filename: OutFilename,
-    measurement: Measurement,
+    measurement: Measurement[SampleRun],
 ) -> None:
     """Save background-subtracted I(Q) histogram as an NXcanSAS file."""
     if iofq.bins is None:

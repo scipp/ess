@@ -14,7 +14,7 @@ from ess.sans.types import (
     BackgroundSubtractedIofQ,
     BeamCenter,
     Filename,
-    IofQ,
+    IntensityQ,
     PixelMaskFilename,
     QBins,
     ReturnEvents,
@@ -40,7 +40,7 @@ def test_sans_workflow_registers_subclasses():
 
 def test_loki_workflow_parameters_returns_filtered_params():
     wf = LokiAtLarmorWorkflow()
-    parameters = workflow.get_parameters(wf, (IofQ[SampleRun],))
+    parameters = workflow.get_parameters(wf, (IntensityQ[SampleRun],))
     assert Filename[SampleRun] in parameters
     assert Filename[BackgroundRun] not in parameters
 
