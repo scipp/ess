@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Self
 
 import scipp as sc
 
@@ -24,10 +25,10 @@ class PolarizationCalibrationParameters:
 
     @classmethod
     def from_reference_measurements(
-        cls: type['PolarizationCalibrationParameters'],
+        cls: type[Self],
         Io: tuple[sc.DataArray, sc.DataArray, sc.DataArray, sc.DataArray],
         Is: tuple[sc.DataArray, sc.DataArray, sc.DataArray, sc.DataArray],
-    ):
+    ) -> Self:
         """
         Solves for the calibration parameters given the reference
         measurements.
