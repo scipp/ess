@@ -126,16 +126,18 @@ def estia_mcstas_groundtruth(name):
 
 
 def estia_mcstas_spin_flip_example(sample, flipper_setting):
-    return _registry.fetch(f'spin_flip_example/{sample}_{flipper_setting}.h5')
+    return _registry.get_path(f'spin_flip_example/{sample}_{flipper_setting}.h5')
 
 
 def estia_mcstas_spin_flip_example_groundtruth(up_or_down):
     if up_or_down == 'down':
-        return _registry.fetch(
+        return _registry.get_path(
             'spin_flip_example/ground_truth_spin_down_reflectivity.h5'
         )
     if up_or_down == 'up':
-        return _registry.fetch('spin_flip_example/ground_truth_spin_up_reflectivity.h5')
+        return _registry.get_path(
+            'spin_flip_example/ground_truth_spin_up_reflectivity.h5'
+        )
     raise ValueError(f'Ground truth curve for spin state "{up_or_down}" does not exist')
 
 
