@@ -23,7 +23,11 @@ class PolarizationCalibrationParameters:
     spin anti-parallel to instrument polarization.'''
 
     @classmethod
-    def from_reference_measurements(cls, Io, Is):
+    def from_reference_measurements(
+        cls: type['PolarizationCalibrationParameters'],
+        Io: tuple[sc.DataArray, sc.DataArray, sc.DataArray, sc.DataArray],
+        Is: tuple[sc.DataArray, sc.DataArray, sc.DataArray, sc.DataArray],
+    ):
         """
         Solves for the calibration parameters given the reference
         measurements.
