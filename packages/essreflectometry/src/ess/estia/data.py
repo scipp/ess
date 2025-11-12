@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
-from multiprocessing import ThreadPool
+from multiprocessing.pool import ThreadPool
 
 import scipp as sc
 
