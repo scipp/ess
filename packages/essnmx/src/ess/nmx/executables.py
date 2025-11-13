@@ -354,7 +354,7 @@ def reduction(
             _export_reduced_data_as_nxlauetof(
                 dg,
                 output_file=output_file,
-                compress_counts=(compression == Compression.NONE),
+                compress_counts=(compression == Compression.BITSHUFFLE_LZ4),
             )
             detector_grs[det_name] = dg
 
