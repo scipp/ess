@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
-import argparse
 import logging
 import pathlib
 from collections.abc import Callable
@@ -10,6 +9,7 @@ from typing import Literal
 import scipp as sc
 import scippnexus as snx
 
+from ._executable_helper import ReductionConfig, build_logger
 from .nexus import (
     _compute_positions,
     _export_detector_metadata_as_nxlauetof,
@@ -362,46 +362,13 @@ def reduction(
     return sc.DataGroup(detector_grs)
 
 
-def _add_ess_reduction_args(arg: argparse.ArgumentParser) -> None:
-    argument_group = arg.add_argument_group("ESS Reduction Options")
-    argument_group.add_argument(
-        "--chunk_size",
-        type=int,
-        default=-1,
-        help="Chunk size for processing (number of pulses per chunk).",
-    )
-    argument_group.add_argument(
-        "--min-toa",
-        type=int,
-        default=0,
-        help="Minimum time of arrival (TOA) in ms.",
-    )
-    argument_group.add_argument(
-        "--max-toa",
-        type=int,
-        default=int((1 / 14) * 1_000),
-        help="Maximum time of arrival (TOA) in ms.",
-    )
-    argument_group.add_argument(
-        "--fast-axis",
-        type=str,
-        choices=['x', 'y', None],
-        default=None,
-        help="Specify the fast axis of the detector. If None, it will be determined "
-        "automatically based on the pixel offsets.",
-    )
-
-
 def main() -> None:
-    from ._executable_helper import build_logger, build_reduction_arg_parser
+    parser = ReductionConfig.build_argument_parser()
+    config = ReductionConfig.from_args(parser.parse_args())
 
-    parser = build_reduction_arg_parser()
-    _add_ess_reduction_args(parser)
-    args = parser.parse_args()
-
-    input_file = pathlib.Path(args.input_file).resolve()
-    output_file = pathlib.Path(args.output_file).resolve()
-    logger = build_logger(args)
+    input_file = pathlib.Path(config.inputs.input_file).resolve()
+    output_file = pathlib.Path(config.output.output_file).resolve()
+    logger = build_logger(config.output)
 
     logger.info("Input file: %s", input_file)
     logger.info("Output file: %s", output_file)
@@ -409,12 +376,12 @@ def main() -> None:
     reduction(
         input_file=input_file,
         output_file=output_file,
-        chunk_size=args.chunk_size,
-        detector_ids=args.detector_ids,
-        compression=Compression[args.compression],
-        toa_bin_edges=args.nbins,
-        min_toa=sc.scalar(args.min_toa, unit='ms'),
-        max_toa=sc.scalar(args.max_toa, unit='ms'),
-        fast_axis=args.fast_axis,
+        chunk_size=config.inputs.chunk_size_pulse,
+        detector_ids=config.inputs.detector_ids,
+        compression=config.output.compression,
+        toa_bin_edges=config.workflow.nbins,
+        min_toa=sc.scalar(config.workflow.min_toa, unit='ms'),
+        max_toa=sc.scalar(config.workflow.max_toa, unit='ms'),
+        fast_axis=config.workflow.fast_axis,
         logger=logger,
     )
