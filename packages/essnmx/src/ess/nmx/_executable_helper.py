@@ -28,14 +28,24 @@ class InputConfig(BaseModel):
             default=[0, 1, 2],
             help="Detector indices to process",
         )
-        group.add_argument(
+        chunk_option_group = parser.add_argument_group("Chunking Options")
+        chunk_option_group.add_argument(
+            "--iter-chunk",
+            type=bool,
+            default=False,
+            help="Whether to process the input file in chunks "
+            " based on the hdf5 dataset chunk size. "
+            "It is ignored if hdf5 dataset is not chunked. "
+            "If True, it overrides chunk-size-pulse and chunk-size-events options.",
+        )
+        chunk_option_group.add_argument(
             "--chunk-size-pulse",
             type=int,
             default=0,
             help="Number of pulses to process in each chunk. "
             "If 0 or negative, process all pulses at once.",
         )
-        group.add_argument(
+        chunk_option_group.add_argument(
             "--chunk-size-events",
             type=int,
             default=0,
