@@ -160,6 +160,22 @@ def build_toa_bin_edges(
         )
 
 
+def _retrieve_input_file(input_file: list[pathlib.Path] | pathlib.Path) -> pathlib.Path:
+    """Temporary helper to retrieve a single input file from the list
+    Until multiple input file support is implemented.
+    """
+    if isinstance(input_file, list) and len(input_file) != 1:
+        raise NotImplementedError(
+            "Currently, only a single input file is supported for reduction."
+        )
+    elif isinstance(input_file, list):
+        input_file_path = input_file[0]
+    else:
+        input_file_path = input_file
+
+    return input_file_path
+
+
 def reduction(
     *,
     input_file: list[pathlib.Path] | pathlib.Path,
@@ -223,15 +239,6 @@ def reduction(
         A DataGroup containing the reduced data for each selected detector.
 
     """
-    if isinstance(input_file, list) and len(input_file) != 1:
-        raise NotImplementedError(
-            "Currently, only a single input file is supported for reduction."
-        )
-    elif isinstance(input_file, list):
-        input_file_path = input_file[0]
-    else:
-        input_file_path = input_file
-
     import scippnexus as snx
 
     if logger is None:
@@ -242,6 +249,7 @@ def reduction(
     toa_bin_edges = build_toa_bin_edges(
         min_toa=min_toa, max_toa=max_toa, toa_bin_edges=toa_bin_edges
     )
+    input_file_path = _retrieve_input_file(input_file)
     with snx.File(input_file_path) as f:
         intrument_group = f['entry/instrument']
         dets = intrument_group[snx.NXdetector]
