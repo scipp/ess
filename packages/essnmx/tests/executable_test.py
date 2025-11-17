@@ -92,7 +92,7 @@ def test_reduction_config() -> None:
     arg_list = _build_arg_list_from_pydantic_instance(
         input_options, workflow_options, output_options
     )
-    assert arg_list == expected_config.to_command_arguments()
+    assert arg_list == expected_config.to_command_arguments(one_line=False)
 
     # Parse arguments and build config from them.
     parser = ReductionConfig.build_argument_parser()
