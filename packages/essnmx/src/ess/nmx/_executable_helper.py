@@ -189,7 +189,16 @@ class ReductionConfig(BaseModel):
     def _children(self) -> list[BaseModel]:
         return [self.inputs, self.workflow, self.output]
 
-    def to_command_arguments(self) -> list[str]:
+    def to_command_arguments(self, one_line: bool = True) -> list[str] | str:
+        """Convert the config to a list of command line arguments.
+
+        Parameters
+        ----------
+        one_line:
+            If True, return a single string with all arguments joined by spaces.
+            If False, return a list of argument strings.
+
+        """
         args = {}
         for instance in self._children:
             args.update(instance.model_dump(mode='python'))
@@ -208,7 +217,10 @@ class ReductionConfig(BaseModel):
             elif v is True:
                 arg_list.append(k)
 
-        return arg_list
+        if one_line:
+            return ' '.join(arg_list)
+        else:
+            return arg_list
 
 
 def build_reduction_arg_parser() -> argparse.ArgumentParser:
