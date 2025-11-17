@@ -30,7 +30,9 @@ class InputConfig(BaseModel):
             "--input-file",
             type=str,
             nargs="+",
-            help="Path to the input file",
+            help="Path to the input file. If multiple file paths are given,"
+            " the output(histogram) will be merged(summed) "
+            "and will not save individual outputs per input file. ",
             required=True,
         )
         group.add_argument(
