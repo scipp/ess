@@ -11,7 +11,10 @@ from .types import Compression
 
 
 class InputConfig(BaseModel):
+    # File IO
     input_file: str
+    swmr: bool = False
+    # Detector selection
     detector_ids: list[int | str] = [0, 1, 2]
     # Chunking options
     iter_chunk: bool = False
@@ -25,6 +28,9 @@ class InputConfig(BaseModel):
             "--input-file", type=str, help="Path to the input file", required=True
         )
         group.add_argument(
+            "--swmr", action="store_true", help="Open the input file in SWMR mode"
+        )
+        group.add_argument(
             "--detector-ids",
             type=int,
             nargs="+",
@@ -34,8 +40,7 @@ class InputConfig(BaseModel):
         chunk_option_group = parser.add_argument_group("Chunking Options")
         chunk_option_group.add_argument(
             "--iter-chunk",
-            type=bool,
-            default=False,
+            action="store_true",
             help="Whether to process the input file in chunks "
             " based on the hdf5 dataset chunk size. "
             "It is ignored if hdf5 dataset is not chunked. "
@@ -63,6 +68,7 @@ class InputConfig(BaseModel):
     def from_args(cls, args: argparse.Namespace) -> "InputConfig":
         return cls(
             input_file=args.input_file,
+            swmr=args.swmr,
             detector_ids=args.detector_ids,
             chunk_size_pulse=args.chunk_size_pulse,
             chunk_size_events=args.chunk_size_events,

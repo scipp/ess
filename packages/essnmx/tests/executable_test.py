@@ -41,25 +41,52 @@ def _build_arg_list_from_pydantic_instance(*instances: pydantic.BaseModel) -> li
     return arg_list
 
 
+def _default_config() -> ReductionConfig:
+    """Helper to create a default ReductionConfig instance."""
+    return ReductionConfig(
+        inputs=InputConfig(input_file=''),
+        workflow=WorkflowConfig(),
+        output=OutputConfig(),
+    )
+
+
+def _check_non_default_config(testing_config: ReductionConfig) -> None:
+    """Helper to check that all values in the config are non-default."""
+    default_config = _default_config()
+    testing_children = testing_config._children
+    default_children = default_config._children
+    for testing_child, default_child in zip(
+        testing_children, default_children, strict=True
+    ):
+        testing_model = testing_child.model_dump(mode='python')
+        default_model = default_child.model_dump(mode='python')
+        for key, testing_value in testing_model.items():
+            default_value = default_model[key]
+            assert (
+                testing_value != default_value
+            ), f"Value for '{key}' is default: {testing_value}"
+
+
 def test_reduction_config() -> None:
     """Test ReductionConfig argument parsing."""
     # Build config instances with non-default values.
     input_options = InputConfig(
-        input_file='test-input.h5', detector_ids=[0, 1, 2, 3], chunk_size_pulse=10
+        input_file='test-input.h5',
+        swmr=True,
+        detector_ids=[0, 1, 2, 3],
+        iter_chunk=True,
+        chunk_size_pulse=10,
+        chunk_size_events=100000,
     )
-    workflow_options = WorkflowConfig(
-        nbins=100, min_toa=10, max_toa=5000, fast_axis='y'
-    )
+    workflow_options = WorkflowConfig(nbins=100, min_toa=10, max_toa=100, fast_axis='y')
     output_options = OutputConfig(
         output_file='test-output.h5', compression=Compression.NONE, verbose=True
     )
     expected_config = ReductionConfig(
         inputs=input_options, workflow=workflow_options, output=output_options
     )
-    # Check if all instances have at least one non-default value.
-    assert expected_config.inputs != InputConfig(input_file='')
-    assert expected_config.workflow != WorkflowConfig()
-    assert expected_config.output != OutputConfig()
+    # Check if all values are non-default.
+    _check_non_default_config(expected_config)
 
     # Build argument list manually, not using `to_command_arguments` to test it.
     arg_list = _build_arg_list_from_pydantic_instance(
