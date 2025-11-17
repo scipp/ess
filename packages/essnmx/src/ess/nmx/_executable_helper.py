@@ -13,7 +13,10 @@ from .types import Compression
 class InputConfig(BaseModel):
     input_file: str
     detector_ids: list[int | str] = [0, 1, 2]
+    # Chunking options
+    iter_chunk: bool = False
     chunk_size_pulse: int = 1
+    chunk_size_events: int = 0
 
     @classmethod
     def add_args(cls, parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
@@ -61,6 +64,9 @@ class InputConfig(BaseModel):
         return cls(
             input_file=args.input_file,
             detector_ids=args.detector_ids,
+            chunk_size_pulse=args.chunk_size_pulse,
+            chunk_size_events=args.chunk_size_events,
+            iter_chunk=args.iter_chunk,
         )
 
 
@@ -104,7 +110,12 @@ class WorkflowConfig(BaseModel):
 
     @classmethod
     def from_args(cls, args: argparse.Namespace) -> "WorkflowConfig":
-        return cls(nbins=args.nbins)
+        return cls(
+            nbins=args.nbins,
+            min_toa=args.min_toa,
+            max_toa=args.max_toa,
+            fast_axis=args.fast_axis,
+        )
 
 
 class OutputConfig(BaseModel):
@@ -167,6 +178,31 @@ class ReductionConfig(BaseModel):
             workflow=WorkflowConfig.from_args(args),
             output=OutputConfig.from_args(args),
         )
+
+    @property
+    def _children(self) -> list[BaseModel]:
+        return [self.inputs, self.workflow, self.output]
+
+    def to_command_arguments(self) -> list[str]:
+        args = {}
+        for instance in self._children:
+            args.update(instance.model_dump(mode='python'))
+        args = {f"--{k.replace('_', '-')}": v for k, v in args.items()}
+
+        arg_list = []
+        for k, v in args.items():
+            if not isinstance(v, bool):
+                arg_list.append(k)
+                if isinstance(v, list):
+                    arg_list.extend(str(item) for item in v)
+                elif isinstance(v, Compression):
+                    arg_list.append(v.name)
+                else:
+                    arg_list.append(str(v))
+            elif v is True:
+                arg_list.append(k)
+
+        return arg_list
 
 
 def build_reduction_arg_parser() -> argparse.ArgumentParser:
