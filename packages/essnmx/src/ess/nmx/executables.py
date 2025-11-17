@@ -366,7 +366,12 @@ def main() -> None:
     parser = ReductionConfig.build_argument_parser()
     config = ReductionConfig.from_args(parser.parse_args())
 
-    input_file = pathlib.Path(config.inputs.input_file).resolve()
+    if len(config.inputs.input_file) > 1:
+        raise NotImplementedError(
+            "Multiple input files are not supported yet in this executable."
+        )
+
+    input_file = pathlib.Path(config.inputs.input_file[0]).resolve()
     output_file = pathlib.Path(config.output.output_file).resolve()
     logger = build_logger(config.output)
 
