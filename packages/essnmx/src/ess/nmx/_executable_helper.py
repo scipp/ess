@@ -31,8 +31,18 @@ class InputConfig(BaseModel):
         group.add_argument(
             "--chunk-size-pulse",
             type=int,
-            default=1,
-            help="Number of pulses to process in each chunk",
+            default=0,
+            help="Number of pulses to process in each chunk. "
+            "If 0 or negative, process all pulses at once.",
+        )
+        group.add_argument(
+            "--chunk-size-events",
+            type=int,
+            default=0,
+            help="Number of events to process in each chunk. "
+            "If 0 or negative, process all events at once."
+            "If both chunk-size-pulse and chunk-size-events are set, "
+            "chunk-size-pulse is preferred.",
         )
         return parser
 
