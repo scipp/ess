@@ -9,7 +9,11 @@ from typing import Literal
 import scipp as sc
 import scippnexus as snx
 
-from ._executable_helper import ReductionConfig, build_logger
+from ._executable_helper import (
+    ReductionConfig,
+    build_logger,
+    collect_matching_input_files,
+)
 from .nexus import (
     _compute_positions,
     _export_detector_metadata_as_nxlauetof,
@@ -158,7 +162,7 @@ def build_toa_bin_edges(
 
 def reduction(
     *,
-    input_file: pathlib.Path,
+    input_file: list[pathlib.Path],
     output_file: pathlib.Path,
     chunk_size: int = 1_000,
     detector_ids: list[int | str],
@@ -219,6 +223,11 @@ def reduction(
         A DataGroup containing the reduced data for each selected detector.
 
     """
+    if len(input_file) != 1:
+        raise NotImplementedError(
+            "Currently, only a single input file is supported for reduction."
+        )
+
     import scippnexus as snx
 
     if logger is None:
@@ -229,7 +238,7 @@ def reduction(
     toa_bin_edges = build_toa_bin_edges(
         min_toa=min_toa, max_toa=max_toa, toa_bin_edges=toa_bin_edges
     )
-    with snx.File(input_file) as f:
+    with snx.File(input_file[0]) as f:
         intrument_group = f['entry/instrument']
         dets = intrument_group[snx.NXdetector]
         detector_group_keys = list(dets.keys())
@@ -366,12 +375,7 @@ def main() -> None:
     parser = ReductionConfig.build_argument_parser()
     config = ReductionConfig.from_args(parser.parse_args())
 
-    if len(config.inputs.input_file) > 1:
-        raise NotImplementedError(
-            "Multiple input files are not supported yet in this executable."
-        )
-
-    input_file = pathlib.Path(config.inputs.input_file[0]).resolve()
+    input_file = collect_matching_input_files(*config.inputs.input_file)
     output_file = pathlib.Path(config.output.output_file).resolve()
     logger = build_logger(config.output)
 

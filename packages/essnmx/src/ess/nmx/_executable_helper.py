@@ -1,7 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import argparse
+import glob
 import logging
+import pathlib
 import sys
 from typing import Literal
 
@@ -286,3 +288,14 @@ def build_logger(args: argparse.Namespace | OutputConfig) -> logging.Logger:
         logger.setLevel(logging.INFO)
         logger.addHandler(logging.StreamHandler(sys.stdout))
     return logger
+
+
+def collect_matching_input_files(*input_file_patterns: str) -> list[pathlib.Path]:
+    """Helper to collect input files matching the given patterns."""
+
+    input_files: list[str] = []
+    for pattern in input_file_patterns:
+        input_files.extend(glob.glob(pattern))
+
+    # Remove duplicates and sort
+    return sorted({pathlib.Path(f).resolve() for f in input_files})
