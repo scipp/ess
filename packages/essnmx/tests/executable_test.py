@@ -44,7 +44,7 @@ def _build_arg_list_from_pydantic_instance(*instances: pydantic.BaseModel) -> li
 def _default_config() -> ReductionConfig:
     """Helper to create a default ReductionConfig instance."""
     return ReductionConfig(
-        inputs=InputConfig(input_file=''),
+        inputs=InputConfig(input_file=['']),
         workflow=WorkflowConfig(),
         output=OutputConfig(),
     )
@@ -71,7 +71,7 @@ def test_reduction_config() -> None:
     """Test ReductionConfig argument parsing."""
     # Build config instances with non-default values.
     input_options = InputConfig(
-        input_file='test-input.h5',
+        input_file=['test-input.h5'],
         swmr=True,
         detector_ids=[0, 1, 2, 3],
         iter_chunk=True,

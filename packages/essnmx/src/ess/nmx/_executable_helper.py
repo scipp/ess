@@ -12,7 +12,7 @@ from .types import Compression
 
 class InputConfig(BaseModel):
     # File IO
-    input_file: str
+    input_file: list[str]
     swmr: bool = False
     # Detector selection
     detector_ids: list[int | str] = [0, 1, 2]
@@ -25,7 +25,11 @@ class InputConfig(BaseModel):
     def add_args(cls, parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         group = parser.add_argument_group("Input Options")
         group.add_argument(
-            "--input-file", type=str, help="Path to the input file", required=True
+            "--input-file",
+            type=str,
+            nargs="+",
+            help="Path to the input file",
+            required=True,
         )
         group.add_argument(
             "--swmr", action="store_true", help="Open the input file in SWMR mode"
