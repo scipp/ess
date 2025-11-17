@@ -4,10 +4,69 @@
 import pathlib
 import subprocess
 
+import pydantic
 import pytest
 import scipp as sc
 import scippnexus as snx
 from scipp.testing import assert_allclose
+
+from ess.nmx._executable_helper import (
+    InputConfig,
+    OutputConfig,
+    ReductionConfig,
+    WorkflowConfig,
+)
+from ess.nmx.types import Compression
+
+
+def _build_arg_list_from_pydantic_instance(*instances: pydantic.BaseModel) -> list[str]:
+    args = {}
+    for instance in instances:
+        args.update(instance.model_dump(mode='python'))
+    args = {f"--{k.replace('_', '-')}": v for k, v in args.items()}
+
+    arg_list = []
+    for k, v in args.items():
+        if not isinstance(v, bool):
+            arg_list.append(k)
+            if isinstance(v, list):
+                arg_list.extend(str(item) for item in v)
+            elif isinstance(v, Compression):
+                arg_list.append(v.name)
+            else:
+                arg_list.append(str(v))
+        elif v is True:
+            arg_list.append(k)
+
+    return arg_list
+
+
+def test_reduction_config() -> None:
+    input_options = InputConfig(
+        input_file='test-input.h5', detector_ids=[0, 1, 2, 3], chunk_size_pulse=10
+    )
+    workflow_options = WorkflowConfig(
+        nbins=100, min_toa=10, max_toa=5000, fast_axis='y'
+    )
+    output_options = OutputConfig(
+        output_file='test-output.h5', compression=Compression.NONE, verbose=True
+    )
+    # Building argument list manually, not using `to_command_arguments` to test it.
+    arg_list = _build_arg_list_from_pydantic_instance(
+        input_options, workflow_options, output_options
+    )
+
+    expected_config = ReductionConfig(
+        inputs=input_options, workflow=workflow_options, output=output_options
+    )
+    assert arg_list == expected_config.to_command_arguments()
+
+    parser = ReductionConfig.build_argument_parser()
+    args = parser.parse_args(arg_list)
+
+    config = ReductionConfig.from_args(args)
+
+    assert expected_config == config
 
 
 @pytest.fixture(scope="session")
@@ -49,11 +108,11 @@ def test_executable_runs(small_nmx_nexus_path, tmp_path: pathlib.Path):
 
     commands = (
         'essnmx-reduce',
-        '--input_file',
+        '--input-file',
         small_nmx_nexus_path,
         '--nbins',
         str(nbins),
-        '--output_file',
+        '--output-file',
         output_file.as_posix(),
         '--min-toa',
         str(int(expected_toa_bins.min().value)),
