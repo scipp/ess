@@ -42,6 +42,8 @@ def _build_arg_list_from_pydantic_instance(*instances: pydantic.BaseModel) -> li
 
 
 def test_reduction_config() -> None:
+    """Test ReductionConfig argument parsing."""
+    # Build config instances with non-default values.
     input_options = InputConfig(
         input_file='test-input.h5', detector_ids=[0, 1, 2, 3], chunk_size_pulse=10
     )
@@ -51,21 +53,24 @@ def test_reduction_config() -> None:
     output_options = OutputConfig(
         output_file='test-output.h5', compression=Compression.NONE, verbose=True
     )
-    # Building argument list manually, not using `to_command_arguments` to test it.
-    arg_list = _build_arg_list_from_pydantic_instance(
-        input_options, workflow_options, output_options
-    )
-
     expected_config = ReductionConfig(
         inputs=input_options, workflow=workflow_options, output=output_options
     )
+    # Check if all instances have at least one non-default value.
+    assert expected_config.inputs != InputConfig(input_file='')
+    assert expected_config.workflow != WorkflowConfig()
+    assert expected_config.output != OutputConfig()
+
+    # Build argument list manually, not using `to_command_arguments` to test it.
+    arg_list = _build_arg_list_from_pydantic_instance(
+        input_options, workflow_options, output_options
+    )
     assert arg_list == expected_config.to_command_arguments()
 
+    # Parse arguments and build config from them.
     parser = ReductionConfig.build_argument_parser()
     args = parser.parse_args(arg_list)
-
     config = ReductionConfig.from_args(args)
-
     assert expected_config == config
 
 
