@@ -81,8 +81,13 @@ def evaluate_reference(
     ref.coords["detector_spatial_resolution"] = detector_spatial_resolution
     ref.coords["wavelength"] = sc.midpoints(ref.coords["wavelength"])
 
+    # If the input already has a theta or Q coord
+    # we must remove them before computing theta and Q
+    # using the new sample- and detector rotation parameters.
     if "theta" in ref.coords:
         ref.coords.pop("theta")
+    if "Q" in ref.coords:
+        ref.coords.pop("Q")
 
     ref = ref.transform_coords(
         (
