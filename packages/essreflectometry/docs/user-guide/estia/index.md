@@ -41,4 +41,5 @@ hidden:
 
 estia-mcstas-reduction
 estia-advanced-mcstas-reduction
+simulated-spin-flip-sample
 ```

@@ -6,6 +6,6 @@
 -r test.in
 -r wheels.in
 copier
-jupyterlab
+jupyterlab>=4.4.3
 pip-compile-multi
 pre-commit
