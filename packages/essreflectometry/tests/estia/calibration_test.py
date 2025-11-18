@@ -42,23 +42,24 @@ def generate_valid_calibration_parameters():
     return tuple(map(sc.scalar, (I0, Pp, Pa, Ap, Aa, Rspp, Rsaa)))
 
 
-def intensity_from_parameters(I0, Pp, Pa, Ap, Aa, Rspp, Rspa, Rsap, Rsaa):
-    return [
-        I0 * v
-        for v in _matvec(_polarization_matrix(Pp, Pa, Ap, Aa), [Rspp, Rspa, Rsap, Rsaa])
-    ]
+def polarization_matrix_from_beamline_parameters(Pp, Pa, Ap, Aa):
+    return _polarization_matrix(Pp, Pa, Ap, Aa)
 
 
 @pytest.mark.parametrize("seed", range(10))
 def test_calibration_solve_recovers_input(seed):
     np.random.seed(seed)
     I0, Pp, Pa, Ap, Aa, Rspp, Rsaa = generate_valid_calibration_parameters()
-    Io = intensity_from_parameters(
-        I0, Pp, Pa, Ap, Aa, sc.scalar(1), sc.scalar(0), sc.scalar(0), sc.scalar(1)
-    )
-    Is = intensity_from_parameters(
-        I0, Pp, Pa, Ap, Aa, Rspp, sc.scalar(0), sc.scalar(0), Rsaa
-    )
+    polmat = polarization_matrix_from_beamline_parameters(Pp, Pa, Ap, Aa)
+    supermirror_reflectivities = [
+        sc.scalar(1),
+        sc.scalar(0),
+        sc.scalar(0),
+        sc.scalar(1),
+    ]
+    magnetic_supermirror_reflectivities = [Rspp, sc.scalar(0), sc.scalar(0), Rsaa]
+    Io = [I0 * v for v in _matvec(polmat, supermirror_reflectivities)]
+    Is = [I0 * v for v in _matvec(polmat, magnetic_supermirror_reflectivities)]
     cal = PolarizationCalibrationParameters.from_reference_measurements(Io, Is)
     tuple(
         map(
