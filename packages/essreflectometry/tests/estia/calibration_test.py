@@ -18,19 +18,6 @@ def _matvec(A, b):
     return [sum(A[i][j] * b[j] for j in range(len(b))) for i in range(len(A))]
 
 
-def _polarization_matrix(Pp, Pa, Ap, Aa):
-    return _kronecker_product(
-        [
-            [(1 + Pp) / 2, (1 - Pp) / 2],
-            [(1 + Pa) / 2, (1 - Pa) / 2],
-        ],
-        [
-            [(1 + Ap) / 2, (1 - Ap) / 2],
-            [(1 + Aa) / 2, (1 - Aa) / 2],
-        ],
-    )
-
-
 def generate_valid_calibration_parameters():
     I0 = np.random.random()
     Pp = np.random.random()
@@ -43,7 +30,16 @@ def generate_valid_calibration_parameters():
 
 
 def polarization_matrix_from_beamline_parameters(Pp, Pa, Ap, Aa):
-    return _polarization_matrix(Pp, Pa, Ap, Aa)
+    return _kronecker_product(
+        [
+            [(1 + Pp) / 2, (1 - Pp) / 2],
+            [(1 + Pa) / 2, (1 - Pa) / 2],
+        ],
+        [
+            [(1 + Ap) / 2, (1 - Ap) / 2],
+            [(1 + Aa) / 2, (1 - Aa) / 2],
+        ],
+    )
 
 
 @pytest.mark.parametrize("seed", range(10))
