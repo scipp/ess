@@ -20,13 +20,13 @@ from .types import (
 )
 
 
-def reduce_to_q(da, qbins):
+def reduce_to_q(da: sc.DataArray, qbins: int | sc.Variable):
     if da.bins:
         return da.bin(Q=qbins, dim=da.dims)
     return da.hist(Q=qbins)
 
 
-def reduce_from_events_to_lz(da, wbins):
+def reduce_from_events_to_lz(da: sc.DataArray, wbins: int | sc.Variable):
     out = da.bin(wavelength=wbins, dim=('strip',))
     if 'position' in da.coords:
         out.coords['position'] = da.coords['position'].mean('strip')
@@ -55,8 +55,6 @@ def reduce_reference(
     reference = reference / R
     binned = reduce_from_events_to_lz(reference, wavelength_bins)
     h = binned.hist()
-    if 'Q' in binned.bins.coords:
-        h.coords['Q'] = binned.bins.coords['Q'].bins.mean()
     return h
 
 
