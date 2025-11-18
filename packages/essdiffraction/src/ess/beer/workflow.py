@@ -4,9 +4,9 @@ import sciline as sl
 import scipp as sc
 
 from .clustering import providers as clustering_providers
-from .conversions import convert_from_known_peaks_providers
+from .conversions import convert_from_known_peaks_providers, convert_pulse_shaping
 from .conversions import providers as conversion_providers
-from .io import mcstas_providers
+from .io import mcstas_modulation_period_from_mode, mcstas_providers
 from .types import (
     PulseLength,
     RunType,
@@ -24,20 +24,38 @@ default_parameters = {
 
 
 def BeerModMcStasWorkflow():
-    '''Workflow to process BEER (modulation regime) McStas files without a list
-    of estimated peak positions.'''
+    """Workflow to process BEER (modulation regime) McStas files without a list
+    of estimated peak positions."""
     return sl.Pipeline(
-        (*mcstas_providers, *clustering_providers, *conversion_providers),
+        (
+            *mcstas_providers,
+            mcstas_modulation_period_from_mode,
+            *clustering_providers,
+            *conversion_providers,
+        ),
         params=default_parameters,
         constraints={RunType: (SampleRun,)},
     )
 
 
 def BeerModMcStasWorkflowKnownPeaks():
-    '''Workflow to process BEER (modulation regime) McStas files using a list
-    of estimated peak positions.'''
+    """Workflow to process BEER (modulation regime) McStas files using a list
+    of estimated peak positions."""
     return sl.Pipeline(
-        (*mcstas_providers, *convert_from_known_peaks_providers),
+        (
+            *mcstas_providers,
+            mcstas_modulation_period_from_mode,
+            *convert_from_known_peaks_providers,
+        ),
+        params=default_parameters,
+        constraints={RunType: (SampleRun,)},
+    )
+
+
+def BeerMcStasWorkflowPulseShaping():
+    """Workflow to process BEER (pulse shaping modes) McStas files"""
+    return sl.Pipeline(
+        (*mcstas_providers, *convert_pulse_shaping),
         params=default_parameters,
         constraints={RunType: (SampleRun,)},
     )

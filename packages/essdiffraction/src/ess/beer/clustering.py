@@ -2,6 +2,7 @@ import scipp as sc
 from scippneutron.conversion.tof import dspacing_from_tof
 from scipy.signal import find_peaks, medfilt
 
+from .conversions import t0_estimate, time_of_arrival
 from .types import RawDetector, RunType, StreakClusteredData
 
 
@@ -10,12 +11,17 @@ def cluster_events_by_streak(da: RawDetector[RunType]) -> StreakClusteredData[Ru
         return sc.DataGroup({k: cluster_events_by_streak(v) for k, v in da.items()})
     da = da.copy(deep=False)
 
-    # TODO: approximate t0 should depend on chopper information
-    approximate_t0 = sc.scalar(6e-3, unit='s')
+    t = time_of_arrival(
+        da.coords['event_time_offset'],
+        da.coords['tc'].to(unit=da.coords['event_time_offset'].unit),
+    )
+    approximate_t0 = t0_estimate(
+        da.coords['wavelength_estimate'], da.coords['L0'], da.coords['Ltotal']
+    ).to(unit=t.unit)
 
     da.coords['coarse_d'] = dspacing_from_tof(
-        tof=da.coords['event_time_offset'] - approximate_t0,
-        Ltotal=da.coords['L0'],
+        tof=t - approximate_t0,
+        Ltotal=da.coords['Ltotal'],
         two_theta=da.coords['two_theta'],
     ).to(unit='angstrom')
 

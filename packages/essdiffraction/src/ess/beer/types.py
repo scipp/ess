@@ -26,28 +26,28 @@ SampleRun = SampleRun
 TofDetector = TofDetector
 
 
-TwoThetaLimits = NewType('TwoThetaLimits', tuple[sc.Variable, sc.Variable])
+TwoThetaLimits = NewType("TwoThetaLimits", tuple[sc.Variable, sc.Variable])
 
 TofCoordTransformGraph = NewType("TofCoordTransformGraph", dict)
 
-PulseLength = NewType('PulseLength', sc.Variable)
-'''Length of the neutron source pulse in time.'''
+PulseLength = NewType("PulseLength", sc.Variable)
+"""Length of the neutron source pulse in time."""
 
-ModulationPeriod = NewType('ModulationPeriod', sc.Variable)
-'''The effective period of the modulating chopper:
+ModulationPeriod = NewType("ModulationPeriod", sc.Variable)
+"""The effective period of the modulating chopper:
 ``1 / (K * F)`` where ``K`` is the number of chopper openings and
-``F`` is the chopper frequency.'''
+``F`` is the chopper frequency."""
 
 WavelengthDefinitionChopperDelay = NewType(
-    'WavelengthDefinitionChopperDelay', sc.Variable
+    "WavelengthDefinitionChopperDelay", sc.Variable
 )
-'''Wavelength definition chopper time delay relative to source pulse.'''
+"""Wavelength definition chopper time delay relative to source pulse."""
 
-DHKLList = NewType('DHKLList', sc.Variable)
-'''List of peak position estimates.'''
+DHKLList = NewType("DHKLList", sc.Variable)
+"""List of peak position estimates."""
 
-CIFIdentifierForPeakPositions = NewType('CIFIdentifierForPeakPositions', object)
-'''CIF file or identifier used to find :py:`DHKLList`.'''
+CIFIdentifierForPeakPositions = NewType("CIFIdentifierForPeakPositions", object)
+"""CIF file or identifier used to find :py:`DHKLList`."""
 
-CIFPeaksMinIntensity = NewType('CIFPeaksMinIntensity', sc.Variable)
-'''Mininum peak intensity for peaks from CIF file to be included in :py:`DHKLList`.'''
+CIFPeaksMinIntensity = NewType("CIFPeaksMinIntensity", sc.Variable)
+"""Minimum peak intensity for peaks from CIF file to be included in :py:`DHKLList`."""
