@@ -5,168 +5,213 @@ import glob
 import logging
 import pathlib
 import sys
-from typing import Literal
+from enum import Enum
+from functools import partial
+from types import UnionType
+from typing import Literal, Self, TypeGuard, Union, get_args, get_origin
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from pydantic.fields import FieldInfo
+from pydantic_core import PydanticUndefined
 
 from .types import Compression
 
 
-class InputConfig(BaseModel):
+def _validate_annotation(annotation) -> TypeGuard[type]:
+    return not (
+        isinstance(annotation, type)
+        or isinstance((origin_type := get_origin(annotation)), type)
+        or (origin_type is UnionType)
+        or (origin_type is Union)  # typing.Optional is Union[X, NoneType]
+    )
+
+
+def _get_no_nonetype_args(annotation) -> type:
+    origin_type = get_origin(annotation)
+    if (origin_type is UnionType or origin_type is Union) and type(None) in (
+        union_args := get_args(annotation)
+    ):
+        arg_types = set(union_args) - {type(None)}
+        if len(arg_types) > 1:
+            raise TypeError(
+                "Optional type with single non-None type is not supported: "
+                f"{annotation}"
+            )
+        return next(iter(arg_types))
+    return annotation
+
+
+def _is_appendable_type(annotation) -> bool:
+    return get_origin(annotation) in (list, tuple, set)
+
+
+def _retrieve_field_value(
+    field_name: str, field_info: FieldInfo, args: argparse.Namespace
+):
+    if isinstance(field_info.annotation, type) and issubclass(
+        field_info.annotation, Enum
+    ):
+        return field_info.annotation[getattr(args, field_name)]
+    return getattr(args, field_name)
+
+
+class CommandArgument(BaseModel):
+    @classmethod
+    def add_args(cls, parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
+        group = parser.add_argument_group(cls.model_config.get("title", cls.__name__))
+        for field_name, field_info in cls.model_fields.items():
+            add_argument = partial(
+                group.add_argument, f"--{field_name.replace('_', '-')}"
+            )
+
+            if _validate_annotation(field_info.annotation):
+                raise TypeError(f"Unsupported annotation type: {field_info.annotation}")
+
+            arg_type = _get_no_nonetype_args(field_info.annotation)
+            if _is_appendable_type(arg_type):
+                nargs = '+'
+                arg_type = get_args(field_info.annotation)[0]
+            else:
+                nargs = None
+                arg_type = arg_type
+
+            required = field_info.default is PydanticUndefined
+            default = ... if required else field_info.default
+
+            if arg_type is bool:
+                add_argument = partial(add_argument, action='store_true')
+            elif isinstance(arg_type, type) and issubclass(arg_type, Enum):
+                add_argument = partial(
+                    add_argument,
+                    type=str,
+                    choices=[e.name for e in arg_type],
+                )
+                default = default.name if isinstance(default, Enum) else default
+            elif get_origin(arg_type) is Literal:
+                add_argument = partial(
+                    add_argument,
+                    type=str,
+                    choices=[str(lit) for lit in get_args(arg_type)],
+                )
+            else:
+                add_argument = partial(add_argument, type=arg_type, nargs=nargs)
+
+            help_text = ' '.join(
+                [field_info.description or '', f"(default: {default})"]
+            )
+            add_argument(default=default, required=required, help=help_text)
+
+        return parser
+
+    @classmethod
+    def from_args(cls, args: argparse.Namespace) -> Self:
+        kwargs = {
+            field_name: _retrieve_field_value(field_name, field_info, args)
+            for field_name, field_info in cls.model_fields.items()
+        }
+        return cls(**kwargs)
+
+
+class InputConfig(CommandArgument, BaseModel):
+    # Add title of the basemodel
+    model_config = {"title": "Input Configuration"}
     # File IO
-    input_file: list[str]
-    swmr: bool = False
+    input_file: list[str] = Field(
+        title="Input File",
+        description="Path to the input file. If multiple file paths are given,"
+        " the output(histogram) will be merged(summed) "
+        "and will not save individual outputs per input file. ",
+    )
+    swmr: bool = Field(
+        title="SWMR Mode",
+        description="Open the input file in SWMR mode",
+        default=False,
+    )
     # Detector selection
-    detector_ids: list[int | str] = [0, 1, 2]
+    detector_ids: list[int] = Field(
+        title="Detector IDs",
+        description="Detector indices to process",
+        default=[0, 1, 2],
+    )
     # Chunking options
-    iter_chunk: bool = False
-    chunk_size_pulse: int = 1
-    chunk_size_events: int = 0
-
-    @classmethod
-    def add_args(cls, parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
-        group = parser.add_argument_group("Input Options")
-        group.add_argument(
-            "--input-file",
-            type=str,
-            nargs="+",
-            help="Path to the input file. If multiple file paths are given,"
-            " the output(histogram) will be merged(summed) "
-            "and will not save individual outputs per input file. ",
-            required=True,
-        )
-        group.add_argument(
-            "--swmr", action="store_true", help="Open the input file in SWMR mode"
-        )
-        group.add_argument(
-            "--detector-ids",
-            type=int,
-            nargs="+",
-            default=[0, 1, 2],
-            help="Detector indices to process",
-        )
-        chunk_option_group = parser.add_argument_group("Chunking Options")
-        chunk_option_group.add_argument(
-            "--iter-chunk",
-            action="store_true",
-            help="Whether to process the input file in chunks "
-            " based on the hdf5 dataset chunk size. "
-            "It is ignored if hdf5 dataset is not chunked. "
-            "If True, it overrides chunk-size-pulse and chunk-size-events options.",
-        )
-        chunk_option_group.add_argument(
-            "--chunk-size-pulse",
-            type=int,
-            default=0,
-            help="Number of pulses to process in each chunk. "
-            "If 0 or negative, process all pulses at once.",
-        )
-        chunk_option_group.add_argument(
-            "--chunk-size-events",
-            type=int,
-            default=0,
-            help="Number of events to process in each chunk. "
-            "If 0 or negative, process all events at once."
-            "If both chunk-size-pulse and chunk-size-events are set, "
-            "chunk-size-pulse is preferred.",
-        )
-        return parser
-
-    @classmethod
-    def from_args(cls, args: argparse.Namespace) -> "InputConfig":
-        return cls(
-            input_file=args.input_file,
-            swmr=args.swmr,
-            detector_ids=args.detector_ids,
-            chunk_size_pulse=args.chunk_size_pulse,
-            chunk_size_events=args.chunk_size_events,
-            iter_chunk=args.iter_chunk,
-        )
+    iter_chunk: bool = Field(
+        title="Iterate in Chunks",
+        description="Whether to process the input file in chunks "
+        " based on the hdf5 dataset chunk size. "
+        "It is ignored if hdf5 dataset is not chunked. "
+        "If True, it overrides chunk-size-pulse and chunk-size-events options.",
+        default=False,
+    )
+    chunk_size_pulse: int = Field(
+        title="Chunk Size Pulse",
+        description="Number of pulses to process in each chunk. "
+        "If 0 or negative, process all pulses at once.",
+        default=0,
+    )
+    chunk_size_events: int = Field(
+        title="Chunk Size Events",
+        description="Number of events to process in each chunk. "
+        "If 0 or negative, process all events at once."
+        "If both chunk-size-pulse and chunk-size-events are set, "
+        "chunk-size-pulse is preferred.",
+        default=0,
+    )
 
 
-class WorkflowConfig(BaseModel):
-    nbins: int = 50
-    min_toa: int = 0
-    max_toa: int = int((1 / 14) * 1_000)
-    fast_axis: Literal['x', 'y'] | None = None
-
-    @classmethod
-    def add_args(cls, parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
-        group = parser.add_argument_group("Workflow Options")
-        group.add_argument(
-            "--nbins",
-            type=int,
-            default=50,
-            help="Number of TOF bins",
-        )
-        group.add_argument(
-            "--min-toa",
-            type=int,
-            default=0,
-            help="Minimum time of arrival (TOA) in [ms].",
-        )
-        group.add_argument(
-            "--max-toa",
-            type=int,
-            default=int((1 / 14) * 1_000),
-            help="Maximum time of arrival (TOA) in [ms].",
-        )
-        group.add_argument(
-            "--fast-axis",
-            type=str,
-            choices=['x', 'y', None],
-            default=None,
-            help="Specify the fast axis of the detector. "
-            "If None, it will be determined "
-            "automatically based on the pixel offsets.",
-        )
-        return parser
-
-    @classmethod
-    def from_args(cls, args: argparse.Namespace) -> "WorkflowConfig":
-        return cls(
-            nbins=args.nbins,
-            min_toa=args.min_toa,
-            max_toa=args.max_toa,
-            fast_axis=args.fast_axis,
-        )
+class TOAUnit(Enum):
+    ms = 'ms'
+    us = 'us'
+    ns = 'ns'
 
 
-class OutputConfig(BaseModel):
+class WorkflowConfig(CommandArgument, BaseModel):
+    nbins: int = Field(
+        title="Number of TOF Bins",
+        description="Number of TOF bins",
+        default=50,
+    )
+    min_toa: int = Field(
+        title="Minimum Time of Arrival",
+        description="Minimum time of arrival (TOA) in [toa_unit].",
+        default=0,
+    )
+    max_toa: int = Field(
+        title="Maximum Time of Arrival",
+        description="Maximum time of arrival (TOA) in [toa_unit].",
+        default=int((1 / 14) * 1_000),
+    )
+    toa_unit: TOAUnit = Field(
+        title="Maximum Time of Arrival",
+        description="Unit of TOA.",
+        default=TOAUnit.ms,
+    )
+    fast_axis: Literal['x', 'y'] | None = Field(
+        title="Fast Axis",
+        description="Specify the fast axis of the detector. "
+        "If None, it will be determined "
+        "automatically based on the pixel offsets.",
+        default=None,
+    )
+
+
+class OutputConfig(CommandArgument, BaseModel):
     # Log verbosity
-    verbose: bool = False
+    verbose: bool = Field(
+        title="Verbose Logging",
+        description="Increase output verbosity.",
+        default=False,
+    )
     # File output
-    output_file: str = "scipp_output.h5"
-    compression: Compression = Compression.BITSHUFFLE_LZ4
-
-    @classmethod
-    def add_args(cls, parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
-        group = parser.add_argument_group("Output Options")
-        group.add_argument(
-            "--verbose", "-v", action="store_true", help="Increase output verbosity"
-        )
-        group.add_argument(
-            "--output-file",
-            type=str,
-            default="scipp_output.h5",
-            help="Path to the output file",
-        )
-        group.add_argument(
-            "--compression",
-            type=str,
-            default=Compression.BITSHUFFLE_LZ4.name,
-            choices=[compression_key.name for compression_key in Compression],
-            help="Compress option of reduced output file. Default: BITSHUFFLE_LZ4",
-        )
-        return parser
-
-    @classmethod
-    def from_args(cls, args: argparse.Namespace) -> "OutputConfig":
-        return cls(
-            verbose=args.verbose,
-            output_file=args.output_file,
-            compression=Compression[args.compression],
-        )
+    output_file: str = Field(
+        title="Output File",
+        description="Path to the output file.",
+        default="scipp_output.h5",
+    )
+    compression: Compression = Field(
+        title="Compression",
+        description="Compress option of reduced output file.",
+        default=Compression.BITSHUFFLE_LZ4,
+    )
 
 
 class ReductionConfig(BaseModel):
