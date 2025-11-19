@@ -6,7 +6,6 @@ Contains the providers for the orca workflow.
 
 import sciline as sl
 import scipp as sc
-import scippnexus as sx
 
 from ess.reduce.nexus import GenericNeXusWorkflow, load_from_path
 from ess.reduce.nexus.types import (
