@@ -14,11 +14,11 @@ attrs==25.4.0
     # via
     #   jsonschema
     #   referencing
-certifi==2025.10.5
+certifi==2025.11.12
     # via requests
 charset-normalizer==3.4.4
     # via requests
-click==8.3.0
+click==8.3.1
     # via dask
 cloudpickle==3.1.2
     # via dask
@@ -28,7 +28,7 @@ cyclebane==24.10.0
     # via sciline
 cycler==0.12.1
     # via matplotlib
-dask==2025.10.0
+dask==2025.11.0
     # via -r nightly.in
 dnspython==2.8.0
     # via email-validator
@@ -73,9 +73,9 @@ matplotlib==3.10.7
     #   plopp
 mpltoolbox==25.10.0
     # via scippneutron
-networkx==3.5
+networkx==3.6rc0
     # via cyclebane
-numpy==2.3.4
+numpy==2.3.5
     # via
     #   contourpy
     #   h5py
@@ -105,18 +105,20 @@ plopp @ git+https://github.com/scipp/plopp@main
 pluggy==1.6.0
     # via pytest
 pooch==1.8.2
-    # via -r nightly.in
-pydantic==2.12.3
+    # via
+    #   -r nightly.in
+    #   tof
+pydantic==2.12.4
     # via
     #   scippneutron
     #   scitiff
-pydantic-core==2.41.4
+pydantic-core==2.41.5
     # via pydantic
 pygments==2.19.2
     # via pytest
 pyparsing==3.3.0a1
     # via matplotlib
-pytest==8.4.2
+pytest==9.0.1
     # via -r nightly.in
 python-dateutil==2.9.0.post0
     # via
@@ -130,7 +132,7 @@ referencing==0.37.0
     #   jsonschema-specifications
 requests==2.32.5
     # via pooch
-rpds-py==0.28.0
+rpds-py==0.29.0
     # via
     #   jsonschema
     #   referencing
@@ -159,7 +161,6 @@ scipy==1.16.3
     # via
     #   scippneutron
     #   scippnexus
-    #   tof
 scitiff==25.7.0
     # via -r nightly.in
 six==1.17.0

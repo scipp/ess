@@ -9,6 +9,7 @@ import scipp as sc
 
 from ess.reduce.nexus import types as reduce_t
 from ess.reduce.time_of_flight import types as tof_t
+from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
 
 # 1 TypeVars used to parametrize the generic parts of the workflow
 
@@ -26,6 +27,8 @@ TofDetector = tof_t.TofDetector
 PulseStrideOffset = tof_t.PulseStrideOffset
 TimeOfFlightLookupTable = tof_t.TimeOfFlightLookupTable
 TimeOfFlightLookupTableFilename = tof_t.TimeOfFlightLookupTableFilename
+
+UncertaintyBroadcastMode = _UncertaintyBroadcastMode
 
 
 SampleRun = NewType('SampleRun', int)
@@ -71,7 +74,28 @@ MaskingRules = NewType('MaskingRules', MappingProxyType[str, Callable])
 
 
 class CorrectedDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Detector data with masks."""
+    """Corrected detector counts with masking applied."""
+
+
+class FluxNormalizedDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Detector counts normalized to proton charge."""
+
+
+class BackgroundSubtractedDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Detector counts with dark background subtracted."""
+
+
+NormalizedImage = NewType('NormalizedImage', sc.DataArray)
+"""Final image: background-subtracted sample run divided by background-subtracted open
+beam run."""
+
+
+class ProtonCharge(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Proton charge data for a run."""
+
+
+class ExposureTime(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Exposure time of each frame recorded by the camera detector."""
 
 
 del sc, sciline, NewType
