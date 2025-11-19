@@ -8,10 +8,11 @@ import sciline as sl
 import scipp as sc
 import scippnexus as sx
 
-from ess.reduce.nexus import GenericNeXusWorkflow, load_component
+from ess.reduce.nexus import GenericNeXusWorkflow, load_from_path
 from ess.reduce.nexus.types import (
-    NeXusComponentLocationSpec,
     NeXusDetectorName,
+    NeXusFileSpec,
+    NeXusLocationSpec,
     NeXusName,
 )
 
@@ -29,16 +30,28 @@ from ..imaging.types import (
 
 
 def load_proton_charge(
-    location: NeXusComponentLocationSpec[ProtonCharge, RunType],
+    file: NeXusFileSpec[RunType], path: NeXusName[ProtonCharge[RunType]]
 ) -> ProtonCharge[RunType]:
-    return ProtonCharge[RunType](load_component(location, nx_class=sx.NXlog)["value"])
+    # Note that putting '/value' at the end of the 'path' in the default_parameters
+    # yields different results as it can return a Variable instead of a DataArray,
+    # depending on the contents of the NeXus file.
+    return ProtonCharge[RunType](
+        load_from_path(NeXusLocationSpec(filename=file.value, component_name=path))[
+            "value"
+        ]
+    )
 
 
 def load_exposure_time(
-    location: NeXusComponentLocationSpec[ExposureTime, RunType],
+    file: NeXusFileSpec[RunType], path: NeXusName[ExposureTime[RunType]]
 ) -> ExposureTime[RunType]:
+    # Note that putting '/value' at the end of the 'path' in the default_parameters
+    # yields different results as it can return a Variable instead of a DataArray,
+    # depending on the contents of the NeXus file.
     return ExposureTime[RunType](
-        load_component(location, nx_class=sx.NXlog)["value"].squeeze()
+        load_from_path(NeXusLocationSpec(filename=file.value, component_name=path))[
+            "value"
+        ].squeeze()
     )
 
 
@@ -152,7 +165,6 @@ def OrcaNormalizedImagesWorkflow(**kwargs) -> sl.Pipeline:
     wf = GenericNeXusWorkflow(
         run_types=[SampleRun, OpenBeamRun, DarkBackgroundRun],
         monitor_types=[],
-        component_types=[ProtonCharge, ExposureTime],
         **kwargs,
     )
 
