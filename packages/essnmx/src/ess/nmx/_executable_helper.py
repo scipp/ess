@@ -165,6 +165,8 @@ class TOAUnit(Enum):
 
 
 class WorkflowConfig(CommandArgument, BaseModel):
+    # Add title of the basemodel
+    model_config = {"title": "Workflow Configuration"}
     nbins: int = Field(
         title="Number of TOF Bins",
         description="Number of TOF bins",
@@ -195,6 +197,8 @@ class WorkflowConfig(CommandArgument, BaseModel):
 
 
 class OutputConfig(CommandArgument, BaseModel):
+    # Add title of the basemodel
+    model_config = {"title": "Output Configuration"}
     # Log verbosity
     verbose: bool = Field(
         title="Verbose Logging",
