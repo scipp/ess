@@ -3,6 +3,7 @@
 
 import pathlib
 import subprocess
+from enum import Enum
 
 import pydantic
 import pytest
@@ -14,6 +15,7 @@ from ess.nmx._executable_helper import (
     InputConfig,
     OutputConfig,
     ReductionConfig,
+    TOAUnit,
     WorkflowConfig,
 )
 from ess.nmx.types import Compression
@@ -31,7 +33,7 @@ def _build_arg_list_from_pydantic_instance(*instances: pydantic.BaseModel) -> li
             arg_list.append(k)
             if isinstance(v, list):
                 arg_list.extend(str(item) for item in v)
-            elif isinstance(v, Compression):
+            elif isinstance(v, Enum):
                 arg_list.append(v.name)
             else:
                 arg_list.append(str(v))
@@ -78,7 +80,9 @@ def test_reduction_config() -> None:
         chunk_size_pulse=10,
         chunk_size_events=100000,
     )
-    workflow_options = WorkflowConfig(nbins=100, min_toa=10, max_toa=100, fast_axis='y')
+    workflow_options = WorkflowConfig(
+        nbins=100, min_toa=10, max_toa=100_000, toa_unit=TOAUnit.us, fast_axis='y'
+    )
     output_options = OutputConfig(
         output_file='test-output.h5', compression=Compression.NONE, verbose=True
     )

@@ -267,7 +267,7 @@ class ReductionConfig(BaseModel):
                 arg_list.append(k)
                 if isinstance(v, list):
                     arg_list.extend(str(item) for item in v)
-                elif isinstance(v, Compression):
+                elif isinstance(v, Enum):
                     arg_list.append(v.name)
                 else:
                     arg_list.append(str(v))
