@@ -8,7 +8,7 @@ import sys
 from enum import Enum
 from functools import partial
 from types import UnionType
-from typing import Literal, Self, TypeGuard, Union, get_args, get_origin
+from typing import Literal, TypeGuard, TypeVar, Union, get_args, get_origin
 
 from pydantic import BaseModel, Field
 from pydantic.fields import FieldInfo
@@ -55,64 +55,65 @@ def _retrieve_field_value(
     return getattr(args, field_name)
 
 
-class CommandArgument(BaseModel):
-    @classmethod
-    def add_args(cls, parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
-        group = parser.add_argument_group(cls.model_config.get("title", cls.__name__))
-        for field_name, field_info in cls.model_fields.items():
+def add_args_from_pydantic_model(
+    model_cls: type[BaseModel], parser: argparse.ArgumentParser
+) -> argparse.ArgumentParser:
+    group = parser.add_argument_group(
+        model_cls.model_config.get("title", model_cls.__name__)
+    )
+    for field_name, field_info in model_cls.model_fields.items():
+        add_argument = partial(group.add_argument, f"--{field_name.replace('_', '-')}")
+
+        if _validate_annotation(field_info.annotation):
+            raise TypeError(f"Unsupported annotation type: {field_info.annotation}")
+
+        arg_type = _get_no_nonetype_args(field_info.annotation)
+        if _is_appendable_type(arg_type):
+            nargs = '+'
+            arg_type = get_args(field_info.annotation)[0]
+        else:
+            nargs = None
+            arg_type = arg_type
+
+        required = field_info.default is PydanticUndefined
+        default = ... if required else field_info.default
+
+        if arg_type is bool:
+            add_argument = partial(add_argument, action='store_true')
+        elif isinstance(arg_type, type) and issubclass(arg_type, Enum):
             add_argument = partial(
-                group.add_argument, f"--{field_name.replace('_', '-')}"
+                add_argument,
+                type=str,
+                choices=[e.name for e in arg_type],
             )
-
-            if _validate_annotation(field_info.annotation):
-                raise TypeError(f"Unsupported annotation type: {field_info.annotation}")
-
-            arg_type = _get_no_nonetype_args(field_info.annotation)
-            if _is_appendable_type(arg_type):
-                nargs = '+'
-                arg_type = get_args(field_info.annotation)[0]
-            else:
-                nargs = None
-                arg_type = arg_type
-
-            required = field_info.default is PydanticUndefined
-            default = ... if required else field_info.default
-
-            if arg_type is bool:
-                add_argument = partial(add_argument, action='store_true')
-            elif isinstance(arg_type, type) and issubclass(arg_type, Enum):
-                add_argument = partial(
-                    add_argument,
-                    type=str,
-                    choices=[e.name for e in arg_type],
-                )
-                default = default.name if isinstance(default, Enum) else default
-            elif get_origin(arg_type) is Literal:
-                add_argument = partial(
-                    add_argument,
-                    type=str,
-                    choices=[str(lit) for lit in get_args(arg_type)],
-                )
-            else:
-                add_argument = partial(add_argument, type=arg_type, nargs=nargs)
-
-            help_text = ' '.join(
-                [field_info.description or '', f"(default: {default})"]
+            default = default.name if isinstance(default, Enum) else default
+        elif get_origin(arg_type) is Literal:
+            add_argument = partial(
+                add_argument,
+                type=str,
+                choices=[str(lit) for lit in get_args(arg_type)],
             )
-            add_argument(default=default, required=required, help=help_text)
+        else:
+            add_argument = partial(add_argument, type=arg_type, nargs=nargs)
 
-        return parser
+        help_text = ' '.join([field_info.description or '', f"(default: {default})"])
+        add_argument(default=default, required=required, help=help_text)
 
-    @classmethod
-    def from_args(cls, args: argparse.Namespace) -> Self:
-        kwargs = {
-            field_name: _retrieve_field_value(field_name, field_info, args)
-            for field_name, field_info in cls.model_fields.items()
-        }
-        return cls(**kwargs)
+    return parser
 
 
-class InputConfig(CommandArgument, BaseModel):
+T = TypeVar('T', bound=BaseModel)
+
+
+def from_args(cls: type[T], args: argparse.Namespace) -> T:
+    kwargs = {
+        field_name: _retrieve_field_value(field_name, field_info, args)
+        for field_name, field_info in cls.model_fields.items()
+    }
+    return cls(**kwargs)
+
+
+class InputConfig(BaseModel):
     # Add title of the basemodel
     model_config = {"title": "Input Configuration"}
     # File IO
@@ -164,7 +165,7 @@ class TOAUnit(Enum):
     ns = 'ns'
 
 
-class WorkflowConfig(CommandArgument, BaseModel):
+class WorkflowConfig(BaseModel):
     # Add title of the basemodel
     model_config = {"title": "Workflow Configuration"}
     nbins: int = Field(
@@ -196,7 +197,7 @@ class WorkflowConfig(CommandArgument, BaseModel):
     )
 
 
-class OutputConfig(CommandArgument, BaseModel):
+class OutputConfig(BaseModel):
     # Add title of the basemodel
     model_config = {"title": "Output Configuration"}
     # Log verbosity
@@ -219,6 +220,8 @@ class OutputConfig(CommandArgument, BaseModel):
 
 
 class ReductionConfig(BaseModel):
+    """Container for all reduction configurations."""
+
     inputs: InputConfig
     workflow: WorkflowConfig
     output: OutputConfig
@@ -229,17 +232,17 @@ class ReductionConfig(BaseModel):
             description="Command line arguments for the ESS NMX reduction. "
             "It assumes 14 Hz pulse speed."
         )
-        parser = InputConfig.add_args(parser)
-        parser = WorkflowConfig.add_args(parser)
-        parser = OutputConfig.add_args(parser)
+        parser = add_args_from_pydantic_model(model_cls=InputConfig, parser=parser)
+        parser = add_args_from_pydantic_model(model_cls=WorkflowConfig, parser=parser)
+        parser = add_args_from_pydantic_model(model_cls=OutputConfig, parser=parser)
         return parser
 
     @classmethod
     def from_args(cls, args: argparse.Namespace) -> "ReductionConfig":
         return cls(
-            inputs=InputConfig.from_args(args),
-            workflow=WorkflowConfig.from_args(args),
-            output=OutputConfig.from_args(args),
+            inputs=from_args(InputConfig, args),
+            workflow=from_args(WorkflowConfig, args),
+            output=from_args(OutputConfig, args),
         )
 
     @property
@@ -278,59 +281,6 @@ class ReductionConfig(BaseModel):
             return ' '.join(arg_list)
         else:
             return arg_list
-
-
-def build_reduction_arg_parser() -> argparse.ArgumentParser:
-    import warnings
-
-    warnings.warn(
-        "build_reduction_arg_parser is deprecated and will be removed "
-        "in the future release (>=26.11.0) "
-        "Please use the config classes to handle command line arguments.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    parser = argparse.ArgumentParser(
-        description="Command line arguments for the NMX reduction. "
-        "It assumes 14 Hz pulse speed."
-    )
-    input_arg_group = parser.add_argument_group("Input Options")
-    input_arg_group.add_argument(
-        "--input_file", type=str, help="Path to the input file", required=True
-    )
-    input_arg_group.add_argument(
-        "--nbins",
-        type=int,
-        default=50,
-        help="Number of TOF bins",
-    )
-    input_arg_group.add_argument(
-        "--detector_ids",
-        type=int,
-        nargs="+",
-        default=[0, 1, 2],
-        help="Detector indices to process",
-    )
-
-    output_arg_group = parser.add_argument_group("Output Options")
-    output_arg_group.add_argument(
-        "--output_file",
-        type=str,
-        default="scipp_output.h5",
-        help="Path to the output file",
-    )
-    output_arg_group.add_argument(
-        "--compression",
-        type=str,
-        default=Compression.BITSHUFFLE_LZ4.name,
-        choices=[compression_key.name for compression_key in Compression],
-        help="Compress option of reduced output file. Default: BITSHUFFLE_LZ4",
-    )
-    output_arg_group.add_argument(
-        "--verbose", "-v", action="store_true", help="Increase output verbosity"
-    )
-
-    return parser
 
 
 def build_logger(args: argparse.Namespace | OutputConfig) -> logging.Logger:
