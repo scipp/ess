@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import argparse
+import enum
 import glob
 import logging
 import pathlib
 import sys
-from enum import Enum
 from functools import partial
 from types import UnionType
 from typing import Literal, TypeGuard, TypeVar, Union, get_args, get_origin
@@ -18,11 +18,28 @@ from .types import Compression
 
 
 def _validate_annotation(annotation) -> TypeGuard[type]:
-    return not (
-        isinstance(annotation, type)
-        or isinstance((origin_type := get_origin(annotation)), type)
-        or (origin_type is UnionType)
-        or (origin_type is Union)  # typing.Optional is Union[X, NoneType]
+    # Supported annotation for command arguments:
+    # - Atomic types: int, float, str, bool, enum.StrEnum, Literal
+    # - Optional[AtomicType]
+    # - List[AtomicType], Tuple[AtomicType, ...], Set[AtomicType]
+    def _validate_atomic_type(annotation) -> bool:
+        return (
+            (annotation in (int, float, str, bool))
+            or (isinstance(annotation, type) and issubclass(annotation, enum.StrEnum))
+            or (get_origin(annotation) is Literal)
+        )
+
+    return (
+        _validate_atomic_type(annotation)
+        or (
+            (origin := get_origin(annotation)) in (Union, UnionType)
+            and _validate_atomic_type(_get_no_nonetype_args(annotation))
+        )
+        or (
+            origin in (list, tuple, set)
+            and len(args := get_args(annotation)) > 0
+            and _validate_atomic_type(args[0])
+        )
     )
 
 
@@ -49,7 +66,7 @@ def _retrieve_field_value(
     field_name: str, field_info: FieldInfo, args: argparse.Namespace
 ):
     if isinstance(field_info.annotation, type) and issubclass(
-        field_info.annotation, Enum
+        field_info.annotation, enum.StrEnum
     ):
         return field_info.annotation[getattr(args, field_name)]
     return getattr(args, field_name)
@@ -64,7 +81,7 @@ def add_args_from_pydantic_model(
     for field_name, field_info in model_cls.model_fields.items():
         add_argument = partial(group.add_argument, f"--{field_name.replace('_', '-')}")
 
-        if _validate_annotation(field_info.annotation):
+        if not _validate_annotation(field_info.annotation):
             raise TypeError(f"Unsupported annotation type: {field_info.annotation}")
 
         arg_type = _get_no_nonetype_args(field_info.annotation)
@@ -80,13 +97,13 @@ def add_args_from_pydantic_model(
 
         if arg_type is bool:
             add_argument = partial(add_argument, action='store_true')
-        elif isinstance(arg_type, type) and issubclass(arg_type, Enum):
+        elif isinstance(arg_type, type) and issubclass(arg_type, enum.StrEnum):
             add_argument = partial(
                 add_argument,
                 type=str,
-                choices=[e.name for e in arg_type],
+                choices=[str(e) for e in arg_type],
             )
-            default = default.name if isinstance(default, Enum) else default
+            default = default.name if isinstance(default, enum.StrEnum) else default
         elif get_origin(arg_type) is Literal:
             add_argument = partial(
                 add_argument,
@@ -159,7 +176,7 @@ class InputConfig(BaseModel):
     )
 
 
-class TOAUnit(Enum):
+class TOAUnit(enum.StrEnum):
     ms = 'ms'
     us = 'us'
     ns = 'ns'
@@ -270,8 +287,8 @@ class ReductionConfig(BaseModel):
                 arg_list.append(k)
                 if isinstance(v, list):
                     arg_list.extend(str(item) for item in v)
-                elif isinstance(v, Enum):
-                    arg_list.append(v.name)
+                elif isinstance(v, enum.StrEnum):
+                    arg_list.append(v.value)
                 else:
                     arg_list.append(str(v))
             elif v is True:
