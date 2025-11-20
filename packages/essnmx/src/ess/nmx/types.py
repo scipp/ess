@@ -79,11 +79,11 @@ class NMXRawDataMetadata:
     max_toa: MaximumTimeOfArrival
 
 
-class Compression(enum.Enum):
+class Compression(enum.StrEnum):
     """Compression type of the output file.
 
     These options are written as enum for future extensibility.
     """
 
-    NONE = 0
-    BITSHUFFLE_LZ4 = 1
+    NONE = 'NONE'
+    BITSHUFFLE_LZ4 = 'BITSHUFFLE_LZ4'
