@@ -183,7 +183,7 @@ class WorkflowConfig(CommandArgument, BaseModel):
         default=int((1 / 14) * 1_000),
     )
     toa_unit: TOAUnit = Field(
-        title="Maximum Time of Arrival",
+        title="Unit of TOA",
         description="Unit of TOA.",
         default=TOAUnit.ms,
     )
