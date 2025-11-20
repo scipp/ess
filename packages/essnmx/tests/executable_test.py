@@ -3,11 +3,106 @@
 
 import pathlib
 import subprocess
+from enum import Enum
 
+import pydantic
 import pytest
 import scipp as sc
 import scippnexus as snx
 from scipp.testing import assert_allclose
+
+from ess.nmx._executable_helper import (
+    InputConfig,
+    OutputConfig,
+    ReductionConfig,
+    TOAUnit,
+    WorkflowConfig,
+)
+from ess.nmx.types import Compression
+
+
+def _build_arg_list_from_pydantic_instance(*instances: pydantic.BaseModel) -> list[str]:
+    args = {}
+    for instance in instances:
+        args.update(instance.model_dump(mode='python'))
+    args = {f"--{k.replace('_', '-')}": v for k, v in args.items()}
+
+    arg_list = []
+    for k, v in args.items():
+        if not isinstance(v, bool):
+            arg_list.append(k)
+            if isinstance(v, list):
+                arg_list.extend(str(item) for item in v)
+            elif isinstance(v, Enum):
+                arg_list.append(v.name)
+            else:
+                arg_list.append(str(v))
+        elif v is True:
+            arg_list.append(k)
+
+    return arg_list
+
+
+def _default_config() -> ReductionConfig:
+    """Helper to create a default ReductionConfig instance."""
+    return ReductionConfig(
+        inputs=InputConfig(input_file=['']),
+        workflow=WorkflowConfig(),
+        output=OutputConfig(),
+    )
+
+
+def _check_non_default_config(testing_config: ReductionConfig) -> None:
+    """Helper to check that all values in the config are non-default."""
+    default_config = _default_config()
+    testing_children = testing_config._children
+    default_children = default_config._children
+    for testing_child, default_child in zip(
+        testing_children, default_children, strict=True
+    ):
+        testing_model = testing_child.model_dump(mode='python')
+        default_model = default_child.model_dump(mode='python')
+        for key, testing_value in testing_model.items():
+            default_value = default_model[key]
+            assert (
+                testing_value != default_value
+            ), f"Value for '{key}' is default: {testing_value}"
+
+
+def test_reduction_config() -> None:
+    """Test ReductionConfig argument parsing."""
+    # Build config instances with non-default values.
+    input_options = InputConfig(
+        input_file=['test-input.h5'],
+        swmr=True,
+        detector_ids=[0, 1, 2, 3],
+        iter_chunk=True,
+        chunk_size_pulse=10,
+        chunk_size_events=100000,
+    )
+    workflow_options = WorkflowConfig(
+        nbins=100, min_toa=10, max_toa=100_000, toa_unit=TOAUnit.us, fast_axis='y'
+    )
+    output_options = OutputConfig(
+        output_file='test-output.h5', compression=Compression.NONE, verbose=True
+    )
+    expected_config = ReductionConfig(
+        inputs=input_options, workflow=workflow_options, output=output_options
+    )
+    # Check if all values are non-default.
+    _check_non_default_config(expected_config)
+
+    # Build argument list manually, not using `to_command_arguments` to test it.
+    arg_list = _build_arg_list_from_pydantic_instance(
+        input_options, workflow_options, output_options
+    )
+    assert arg_list == expected_config.to_command_arguments(one_line=False)
+
+    # Parse arguments and build config from them.
+    parser = ReductionConfig.build_argument_parser()
+    args = parser.parse_args(arg_list)
+    config = ReductionConfig.from_args(args)
+    assert expected_config == config
 
 
 @pytest.fixture(scope="session")
@@ -49,11 +144,11 @@ def test_executable_runs(small_nmx_nexus_path, tmp_path: pathlib.Path):
 
     commands = (
         'essnmx-reduce',
-        '--input_file',
+        '--input-file',
         small_nmx_nexus_path,
         '--nbins',
         str(nbins),
-        '--output_file',
+        '--output-file',
         output_file.as_posix(),
         '--min-toa',
         str(int(expected_toa_bins.min().value)),
