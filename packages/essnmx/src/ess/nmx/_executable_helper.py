@@ -18,10 +18,6 @@ from .types import Compression
 
 
 def _validate_annotation(annotation) -> TypeGuard[type]:
-    # Supported annotation for command arguments:
-    # - Atomic types: int, float, str, bool, enum.StrEnum, Literal
-    # - Optional[AtomicType]
-    # - List[AtomicType], Tuple[AtomicType, ...], Set[AtomicType]
     def _validate_atomic_type(annotation) -> bool:
         return (
             (annotation in (int, float, str, bool))
@@ -73,8 +69,33 @@ def _retrieve_field_value(
 
 
 def add_args_from_pydantic_model(
-    model_cls: type[BaseModel], parser: argparse.ArgumentParser
+    *, model_cls: type[BaseModel], parser: argparse.ArgumentParser
 ) -> argparse.ArgumentParser:
+    """Add arguments to the parser from the pydantic model class.
+
+    Each field in the model class is added as a command line argument
+    with the name `--{field-name}`.
+    Arguments are added based on fields' information:
+      - type annotation (type, choices, nargs)
+      - description (help text)
+      - default value (default, required and help text)
+
+    Supported annotation for command arguments:
+      - Atomic types: int, float, str, bool, enum.StrEnum, Literal
+      - Optional[AtomicType]
+      - List[AtomicType], Tuple[AtomicType, ...], Set[AtomicType]
+
+    Parameters
+    ----------
+    model_cls:
+        Pydantic model class to extract the arguments from.
+    parser:
+        Argument parser to add the arguments to.
+        It adds a new argument group for the model.
+        The group name is taken from the model's title config if available,
+        otherwise the model class name is used.
+
+    """
     group = parser.add_argument_group(
         model_cls.model_config.get("title", model_cls.__name__)
     )
@@ -123,6 +144,10 @@ T = TypeVar('T', bound=BaseModel)
 
 
 def from_args(cls: type[T], args: argparse.Namespace) -> T:
+    """Create an instance of the pydantic model from the argparse namespace.
+
+    It ignores any extra arguments in the namespace that are not part of the model.
+    """
     kwargs = {
         field_name: _retrieve_field_value(field_name, field_info, args)
         for field_name, field_info in cls.model_fields.items()
