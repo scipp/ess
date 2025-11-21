@@ -6,10 +6,12 @@
 # that is shared between all tests.
 # Function-scoped fixtures allow accessing that file for reading.
 
+import itertools
 from collections.abc import Generator
 from pathlib import Path
 
 import numpy as np
+import numpy.typing as npt
 import pytest
 import sciline
 import scipp as sc
@@ -161,9 +163,62 @@ def test_save_sqw_writes_dnd_data(output_file: sqw.Sqw) -> None:
 
 
 def test_save_sqw_writes_pixel_data(output_file: sqw.Sqw) -> None:
+    metadata = output_file.read_data_block("data", "metadata")
+    dnd = output_file.read_data_block("data", "nd_data")
     pix = output_file.read_data_block("pix", "data_wrap")
+
     assert pix.shape == (
         N_DETECTORS * N_PIXELS_PER_DETECTOR * N_ANGLES * ENERGY_BIN_SIZE,
         9,
     )
-    # TODO many more checks
+
+    n_pix = dnd[2].astype(int)
+    check_pixels_in_bin_ranges(pix, metadata, n_pix)
+    check_pixel_indices_in_ranges(pix)
+
+
+def check_pixels_in_bin_ranges(
+    pix: npt.NDArray[np.float32], metadata: sqw.SqwDndMetadata, n_pix: npt.NDArray[int]
+) -> None:
+    """Check that all pixels are within the bin edges defined in the dnd metadata."""
+    img_range = metadata.axes.img_range
+    n_bins = metadata.axes.n_bins_all_dims.values
+    u_edges = [
+        sc.linspace(f'u{i}', img_range[i][0], img_range[i][1], n_bins[i] + 1)
+        for i in range(len(n_bins))
+    ]
+
+    bin_offsets = np.r_[0, np.cumsum(n_pix.flat)]
+    for bin_index, (l, k, j, i) in enumerate(  # noqa: E741
+        itertools.product(*(range(nb) for nb in n_bins[::-1]))
+    ):
+        pix_slice = slice(bin_offsets[bin_index], bin_offsets[bin_index + 1])
+        if pix_slice.stop <= pix_slice.start:
+            continue  # empty bin => no pixels to check
+        for col, index in enumerate((i, j, k, l)):
+            p = pix[pix_slice, col]
+            p_min = p.min()  # actual range
+            p_max = p.max()
+            e_min = u_edges[col][index].value  # expected range
+            e_max = u_edges[col][index + 1].value
+            assert p_min >= e_min - 1e-6  # small offset to account for f32 rounding
+            assert p_max < e_max + 1e6
+
+
+def check_pixel_indices_in_ranges(pix: npt.NDArray[np.float32]) -> None:
+    """Check that all indices in the pixel data are in the correct ranges."""
+
+    irun = pix[:, 4]
+    idet = pix[:, 5]
+    ien = pix[:, 6]
+
+    # 1-based indices!
+    assert irun.min() == 1
+    assert irun.max() == N_ANGLES
+    assert ien.min() == 1
+    assert ien.max() == ENERGY_BIN_SIZE
+
+    # We cannot check the values of idet directly because they are a non-contiguous
+    # subset of all detector numbers. So just check that we have the correct number of
+    # distinct detectors:
+    assert np.unique(idet).size == N_DETECTORS * N_PIXELS_PER_DETECTOR
