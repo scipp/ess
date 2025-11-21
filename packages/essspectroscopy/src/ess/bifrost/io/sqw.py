@@ -35,18 +35,72 @@ def save_sqw(
     events: IncidentEnergyDetector[SampleRun],
     *,
     bin_sizes: SQWBinSizes,
-    energy_bins: EnergyBins,  # TODO distinct from above!
+    energy_bins: EnergyBins,
     beamline: Beamline[SampleRun],
     measurement: Measurement[SampleRun],
+    sample: sqw.SqwIXSample,
     pulse_period: PulsePeriod,
     gravity: GravityVector,
-    sample: sqw.SqwIXSample,
 ) -> None:
     """Save events recorded at BIFROST to an SQW file.
 
-    ``events`` has shape (*logical, a3, a4), is binned with Ei event coord.
+    The files written by this function can be read by
+    `Horace <https://pace-neutrons.github.io/Horace>`_ for further processing.
+    For details on the file format, see the documentation for Horace as well as
+    the `SQW <https://scipp.github.io/scippneutron/developer/file-formats/sqw.html>`_
+    developer guide in ScippNeutron.
+
+    The input to this function should not yet contain inelastic coordinates like
+    'energy_transfer' or 'sample_table_momentum_transfer'.
+    Instead, ``save_sqw`` histograms the events according to detector number,
+    experiment setting, and incident energy and computes inelastic
+    coordinates on that histogram.
+    This is done for consistency with Horace.
+
+    Note
+    ----
+    This function requires large amounts of memory to construct intermediate
+    arrays and fill those with null observations.
+
+    Parameters
+    ----------
+    path:
+        Path of the file to write.
+    events:
+        Binned data array with shape ``(*logical, "a3", "a4")`` where ``logical``
+        is any number of logical detector dimensions (e.g., arc, tube).
+        Must have an ``"incident_energy"`` bin coordinate.
+    bin_sizes:
+        Sizes of the output 'image' bins.
+        The data will be ordered based on these bins, but it is possible
+        to change the binning later in Horace.
+        E.g., ``{'Qx': 50, 'Qy': 50, 'Qz': 50, 'energy_transfer': 50}``.
+    energy_bins:
+        Bin edges or number of bins for (incident) energy.
+        The events are histogrammed according to these bins, so this determines the
+        final energy resolution that is available in Horace.
+        Should typically be larger than ``bin_sizes['energy_transfer']``.
+    beamline:
+        Beamline metadata.
+    measurement:
+        Measurement metadata.
+    sample:
+        Sample metadata in SQW format.
+    pulse_period:
+        Pulse period of the neutron source.
+    gravity:
+        Vector indicating the direction of gravity.
+        Used to define the lab coordinate system.
+        See also
+        :func:`ess.spectroscopy.indirect.conversion.rotate_to_sample_table_momentum_transfer`.
+
+    See also
+    --------
+    scippneutron.io.sqw:
+        For low-level SQW I/O and the underlying implementation of ``save_sqw``.
     """
-    # TODO validate inputs: single a4
+    if np.unique(events.coords['a4'].values).size != 1:
+        raise NotImplementedError("a4 must be constant for all events")
 
     flat_events = _flatten_events(events)
     del events  # 'move' events into _flatten_events
@@ -224,7 +278,6 @@ def _bin_image(
     observations: sc.DataArray, bin_sizes: SQWBinSizes
 ) -> tuple[sc.DataArray, sc.Variable, sc.DataArray]:
     # Dim order to match pixel data (note the transpose for dnd)
-    # TODO correct? Might not be!!
     binned = observations.bin(
         {dim: bin_sizes[dim] for dim in ('energy_transfer', 'Qz', 'Qy', 'Qx')}
     ).rename(energy_transfer='u4', Qz='u3', Qy='u2', Qx='u1')

@@ -69,9 +69,11 @@ autodoc_type_aliases = {
 }
 
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/3', None),
+    'essreduce': ('https://scipp.github.io/essreduce/', None),
     'numpy': ('https://numpy.org/doc/stable/', None),
+    'python': ('https://docs.python.org/3', None),
     'scipp': ('https://scipp.github.io/', None),
+    'scippneutron': ('https://scipp.github.io/scippneutron/', None),
 }
 
 # autodocs includes everything, even irrelevant API internals. autosummary
