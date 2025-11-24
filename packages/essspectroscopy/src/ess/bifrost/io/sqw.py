@@ -406,7 +406,7 @@ def _make_experiments(
     sample_angle: sc.Variable,
 ) -> list[sqw.SqwIXExperiment]:
     experiment_template = sqw.SqwIXExperiment(
-        run_id=0,
+        run_id=0,  # converted to 1-based by ScippNeutron
         efix=final_energy,
         emode=sqw.EnergyMode.indirect,
         en=energy_transfer,
@@ -420,5 +420,5 @@ def _make_experiments(
     )
     return [
         dataclasses.replace(experiment_template, run_id=i, psi=a3)
-        for i, a3 in enumerate(sample_angle, 1)
+        for i, a3 in enumerate(sample_angle)
     ]
