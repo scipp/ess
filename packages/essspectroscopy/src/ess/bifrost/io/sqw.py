@@ -283,7 +283,7 @@ def _bin_image(
     ).rename(energy_transfer='u4', Qz='u3', Qy='u2', Qx='u1')
 
     image = binned.transpose(['u1', 'u2', 'u3', 'u4'])
-    dnd = image.bins.sum().to(dtype='float64', copy=False)
+    dnd = image.bins.mean().to(dtype='float64', copy=False)
     counts = image.bins.size()
 
     return dnd, counts, binned
