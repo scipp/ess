@@ -315,7 +315,7 @@ def _make_pixel_buffer(pix: sc.DataArray) -> npt.NDArray[np.float32]:
             for name in ('u1', 'u2', 'u3', 'u4', 'irun', 'idet', 'ien')
         ),
         pix.values,
-        sc.stddevs(pix).values,
+        sc.variances(pix).values,
     ]
 
 
