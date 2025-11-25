@@ -43,6 +43,7 @@ dependencies = [
   "defusedxml>=0.7.1",
   "bitshuffle>=0.5.2",
   "msgpack>=1.0.8",
+  "tof>=25.12.0",
 ]
 
 dynamic = ["version"]
