@@ -11,11 +11,11 @@ _registry = make_registry(
     'ess/bifrost',
     files={
         "BIFROST_20240914T053723.h5": "md5:0f2fa5c9a851f8e3a4fa61defaa3752e",
-        "computed_energy_data_simulated.h5": "blake2b:690d837ce684a0aeea021b2624c5f7371e299f1bbc803725b40bf3eca35816e3348a79e5fdf04dc89e29c4bdd4f6ea2b052b49058eecfdf535b9733eefa8a854",  # noqa: E501
-        "computed_energy_data_simulated_5x2.h5": "blake2b:0353f7e675a276451637fd175eef4f3d231a68a8983faf1240796fef44c9f3e78a264baf705e24d71f001afc83d07bbf1bff17e5bd83a15db89386a43dd5d5d7",  # noqa: E501
+        "computed_energy_data_simulated.h5": "blake2b:1ff82ef8b23fd9d20fb12efc5c541bb5a67ab7ea21a1b8d8c84d8e05fbf9fc66c3cd640bc80e508c9c24a1f6a21ac4c7c6ebb9494f7fc007e7af51453eb3c88a",  # noqa: E501
+        "computed_energy_data_simulated_5x2.h5": "blake2b:6ebaeee3d75bd61cc9ef15a593d2984bf1c0eb36423aee12310555ef80674edfaa0f910b721bd2161f4af011a4412e927b6b9a7dda8b08dd26f2d36f9452afe3",  # noqa: E501
         "BIFROST-simulation-tof-lookup-table.h5": "blake2b:682021920a355f789da37b18029719fe20569d86db26cdaf5f3d916d2f76f9360907960ba86903be4cab489d39f1b6f9f265f3a4ab3f82c5e095afa4a2c456af",  # noqa: E501
     },
-    version="4",
+    version="5",
 )
 
 
