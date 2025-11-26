@@ -159,7 +159,7 @@ def test_add_scattering_coordinates_from_positions():
         **scn.conversion.graph.tof.elastic('tof'),
     }
 
-    result = add_scattering_coordinates_from_positions(tof, graph)
+    result = add_scattering_coordinates_from_positions(tof, graph, calibration=None)
 
     assert 'wavelength' in result.coords
     assert 'two_theta' in result.coords

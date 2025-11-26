@@ -15,6 +15,7 @@ from . import (
     masking,
     smoothing,
     transform,
+    workflow,
 )
 from .correction import RunNormalization
 from .masking import with_pixel_mask_filenames
@@ -33,6 +34,7 @@ providers = (
     *filtering.providers,
     *grouping.providers,
     *masking.providers,
+    *workflow.providers,
 )
 
 """Sciline providers for powder diffraction."""
@@ -50,4 +52,5 @@ __all__ = [
     "smoothing",
     "transform",
     "with_pixel_mask_filenames",
+    "workflow",
 ]

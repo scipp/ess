@@ -99,10 +99,6 @@ class WavelengthDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     d-spacing."""
 
 
-class DspacingDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Data converted to d-spacing."""
-
-
 DspacingHistogram = NewType("DspacingHistogram", sc.DataArray)
 """Histogrammed intensity vs d-spacing."""
 

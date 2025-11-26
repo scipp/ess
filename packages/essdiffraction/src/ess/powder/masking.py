@@ -11,7 +11,6 @@ import sciline
 import scipp as sc
 
 from .types import (
-    CorrectedDetector,
     MaskedDetectorIDs,
     PixelMaskFilename,
     RunType,
@@ -39,7 +38,7 @@ def apply_masks(
     tof_mask_func: TofMask,
     wavelength_mask_func: WavelengthMask,
     two_theta_mask_func: TwoThetaMask,
-) -> CorrectedDetector[RunType]:
+) -> sc.DataArray:
     """ """
     out = data.copy(deep=False)
     if len(masked_pixel_ids) > 0:
@@ -68,10 +67,10 @@ def apply_masks(
                 )
                 out.masks[dim] = mask(coord)
 
-    return CorrectedDetector[RunType](out)
+    return out
 
 
-providers = (read_pixel_masks, apply_masks)
+providers = (read_pixel_masks,)
 
 
 def _merge(*dicts: dict) -> dict:

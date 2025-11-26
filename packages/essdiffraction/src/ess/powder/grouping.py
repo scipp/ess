@@ -6,9 +6,9 @@ import numpy as np
 import scipp as sc
 
 from .types import (
+    CorrectedDetector,
     CorrectedDspacing,
     DspacingBins,
-    DspacingDetector,
     FocussedDataDspacing,
     FocussedDataDspacingTwoTheta,
     KeepEvents,
@@ -27,7 +27,7 @@ def _reconstruct_wavelength(
 
 
 def focus_data_dspacing_and_two_theta(
-    data: DspacingDetector[RunType],
+    data: CorrectedDetector[RunType],
     dspacing_bins: DspacingBins,
     keep_events: KeepEvents[RunType],
 ) -> CorrectedDspacing[RunType]:

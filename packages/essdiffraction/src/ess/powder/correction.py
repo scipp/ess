@@ -332,30 +332,12 @@ def apply_lorentz_correction(da: sc.DataArray) -> sc.DataArray:
         ``da`` multiplied by :math:`L`.
         Has the same dtype as ``da``.
     """
-    # The implementation is optimized under the assumption that two_theta
-    # is small and dspacing and the data are large.
-    out = _shallow_copy(da)
     dspacing = event_or_outer_coord(da, "dspacing")
     two_theta = event_or_outer_coord(da, "two_theta")
-    theta = 0.5 * two_theta
-
-    d4 = dspacing.broadcast(sizes=out.sizes) ** 4
-    if out.bins is None:
-        out.data = d4.to(dtype=out.dtype, copy=False)
-        out_data = out.data
-    else:
-        out.bins.data = d4.to(dtype=out.bins.dtype, copy=False)
-        out_data = out.bins.data
-    out_data *= sc.sin(theta, out=theta)
-    out_data *= da.data if da.bins is None else da.bins.data
-    return out
-
-
-def _shallow_copy(da: sc.DataArray) -> sc.DataArray:
-    # See https://github.com/scipp/scipp/issues/2773
-    out = da.copy(deep=False)
-    if da.bins is not None:
-        out.data = sc.bins(**da.bins.constituents)
+    sin_theta = sc.sin(0.5 * two_theta)
+    d4 = dspacing**4
+    out = da * sin_theta.to(dtype=da.bins.dtype if da.bins else da.dtype, copy=False)
+    out *= d4.to(dtype=da.bins.dtype if da.bins else da.dtype, copy=False)
     return out
 
 

@@ -13,7 +13,6 @@ from ess.powder.types import (
     CorrectedDetector,
     DetectorBankSizes,
     DspacingBins,
-    DspacingDetector,
     Filename,
     GravityVector,
     IntensityDspacing,
@@ -114,7 +113,7 @@ def test_workflow_is_deterministic(providers, params):
 def test_pipeline_can_compute_intermediate_results(providers, params):
     pipeline = sciline.Pipeline(providers, params=params)
     pipeline = powder.with_pixel_mask_filenames(pipeline, [])
-    result = pipeline.compute(DspacingDetector[SampleRun])
+    result = pipeline.compute(CorrectedDetector[SampleRun])
     assert set(result.dims) == {'bank', 'column', 'row'}
 
 
