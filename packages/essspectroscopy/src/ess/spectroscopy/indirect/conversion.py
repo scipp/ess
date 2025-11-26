@@ -120,7 +120,7 @@ def lab_momentum_transfer_from_incident_energy(
 
     .. math::
 
-        \vec{k_i} = \frac{2\pi}{h} \hat{b}_i \sqrt(2 M_n E_i}
+        \vec{k_i} = \frac{2\pi}{h} \hat{b}_i \sqrt{2 M_n E_i}
 
     Parameters
     ----------
