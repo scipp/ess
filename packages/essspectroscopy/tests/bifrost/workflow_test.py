@@ -101,7 +101,6 @@ def test_simulation_workflow_can_compute_wavelength_monitor(
     assert monitor.bins is None
 
 
-# TODO update reference data once we settled and which coords get computed
 def test_simulation_workflow_produces_the_same_data_as_before(
     workflow: sciline.Pipeline,
 ) -> None:
