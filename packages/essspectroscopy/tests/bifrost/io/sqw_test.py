@@ -202,7 +202,7 @@ def check_pixels_in_bin_ranges(
             e_min = u_edges[col][index].value  # expected range
             e_max = u_edges[col][index + 1].value
             assert p_min >= e_min - 1e-6  # small offset to account for f32 rounding
-            assert p_max < e_max + 1e6
+            assert p_max < e_max + 1e-6
 
 
 def check_pixel_indices_in_ranges(pix: npt.NDArray[np.float32]) -> None:
