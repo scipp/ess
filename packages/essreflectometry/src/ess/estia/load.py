@@ -96,6 +96,11 @@ def load_mcstas_events(
     )
     da.bins.coords.pop('L')
     da.bins.coords.pop('t')
+    da.bins.coords['wavelength_from_mcstas'] = da.bins.coords.pop('wavelength')
+
+    da.coords['chopper_distance'] = sc.scalar(10.895, unit='m')
+    velocity_max = sc.scalar(3.956034e3 / 3.75, unit='m/s')
+    da.coords['chopper_open_time'] = da.coords['chopper_distance'] / velocity_max
     return RawDetector[RunType](da)
 
 

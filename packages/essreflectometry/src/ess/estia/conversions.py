@@ -58,17 +58,60 @@ def divergence_angle(
     return sc.atan2(y=p.fields.x, x=p.fields.z) - detector_rotation.to(unit='rad')
 
 
-def wavelength(
+def time_of_flight(
     event_time_offset,
-    # Other inputs
+    chopper_open_time,
+    chopper_distance,
+    Ltotal,
 ):
-    "Converts event_time_offset to wavelength"
-    # Use frame unwrapping from scippneutron
-    raise NotImplementedError()
+    """
+    Converts event_time_offset to time_of_flight.
+    """
+    center_of_pulse = sc.scalar(1.5, unit='ms').to(unit='ns')
+    end_of_pulse = sc.scalar(3.0, unit='ms').to(unit='ns')
+    cut_time = (
+        Ltotal / chopper_distance * (chopper_open_time.to(unit='ns') - end_of_pulse)
+        + end_of_pulse
+    ).to(unit='ns')
+
+    return (
+        sc.where(
+            event_time_offset <= cut_time,
+            event_time_offset + sc.scalar(1 / 14, unit='s').to(unit='ns'),
+            event_time_offset,
+        )
+        - center_of_pulse
+    )
+
+
+def wavelength(
+    time_of_flight,
+    Ltotal,
+):
+    """
+    Converts time_of_flight to wavelength.
+    """
+    return (((sc.constants.h / sc.constants.m_n) / Ltotal) * time_of_flight).to(
+        unit='angstrom', copy=False
+    )
+
+
+def mcstas_wavelength_coordinate_transformation_graph() -> CoordTransformationGraph:
+    return {
+        "wavelength": lambda wavelength_from_mcstas: wavelength_from_mcstas,
+        "theta": theta,
+        "divergence_angle": divergence_angle,
+        "Q": reflectometry_q,
+        "L1": lambda source_position, sample_position: sc.norm(
+            sample_position - source_position
+        ),  # + extra correction for guides?
+        "L2": lambda position, sample_position: sc.norm(position - sample_position),
+    }
 
 
 def coordinate_transformation_graph() -> CoordTransformationGraph:
     return {
+        "time_of_flight": time_of_flight,
         "wavelength": wavelength,
         "theta": theta,
         "divergence_angle": divergence_angle,
@@ -77,6 +120,7 @@ def coordinate_transformation_graph() -> CoordTransformationGraph:
             sample_position - source_position
         ),  # + extra correction for guides?
         "L2": lambda position, sample_position: sc.norm(position - sample_position),
+        "Ltotal": lambda L1, L2: L1 + L2,
     }
 
 
