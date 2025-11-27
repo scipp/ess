@@ -31,7 +31,7 @@ requires-python = ">=3.11"
 # Make sure to list one dependency per line.
 dependencies = [
   "dask>=2022.1.0",
-  "essreduce>=25.11.0",  # New domain types implemented, see https://scipp.github.io/essreduce/user-guide/reduction-workflow-guidelines.html#c-6-domain-types-for-data-products
+  "essreduce>=25.11.5",  # New domain types implemented, see https://scipp.github.io/essreduce/user-guide/reduction-workflow-guidelines.html#c-6-domain-types-for-data-products
   "graphviz",
   "plopp>=24.7.0",
   "sciline>=24.06.0",
