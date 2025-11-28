@@ -5,21 +5,28 @@ from typing import Any, NewType
 import sciline
 import scipp as sc
 
-from ess.reduce.nexus import types as reduce_t
+from ess.reduce.nexus import types as nexus_t
+from ess.reduce.time_of_flight import types as tof_t
 
-SampleRun = reduce_t.SampleRun
+SampleRun = nexus_t.SampleRun
 ReferenceRun = NewType("ReferenceRun", int)
-RunType = reduce_t.RunType
+RunType = nexus_t.RunType
 
-Beamline = reduce_t.Beamline
-EmptyDetector = reduce_t.EmptyDetector
-RawDetector = reduce_t.RawDetector
-DetectorPositionOffset = reduce_t.DetectorPositionOffset
-Filename = reduce_t.Filename
-Measurement = reduce_t.Measurement
-NeXusComponent = reduce_t.NeXusComponent
-NeXusDetectorName = reduce_t.NeXusDetectorName
-Position = reduce_t.Position
+Beamline = nexus_t.Beamline
+EmptyDetector = nexus_t.EmptyDetector
+RawDetector = nexus_t.RawDetector
+DetectorPositionOffset = nexus_t.DetectorPositionOffset
+Filename = nexus_t.Filename
+Measurement = nexus_t.Measurement
+NeXusComponent = nexus_t.NeXusComponent
+NeXusDetectorName = nexus_t.NeXusDetectorName
+Position = nexus_t.Position
+
+TofDetector = tof_t.TofDetector
+PulseStrideOffset = tof_t.PulseStrideOffset
+TimeOfFlightLookupTable = tof_t.TimeOfFlightLookupTable
+DetectorLtotal = tof_t.DetectorLtotal
+
 
 CoordTransformationGraph = NewType("CoordTransformationGraph", dict)
 

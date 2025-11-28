@@ -15,7 +15,6 @@ from ess.reflectometry.orso import (
 from ess.reflectometry.types import (
     DetectorRotation,
     Filename,
-    # RawChopper,
     ReducibleData,
     RunType,
     SampleRotation,
@@ -67,7 +66,6 @@ def with_filenames(
         ReducibleData[runtype]: _concatenate_event_lists,
         SampleRotation[runtype]: _any_value,
         DetectorRotation[runtype]: _any_value,
-        # RawChopper[runtype]: _any_value,
     }
     if runtype is SampleRun:
         reduce_functions.update(

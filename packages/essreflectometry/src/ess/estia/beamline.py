@@ -1,7 +1,7 @@
 import sciline
 
 from ess.reduce.nexus.types import DetectorBankSizes
-from ess.reduce.nexus.workflow import GenericNeXusWorkflow
+from ess.reduce.time_of_flight.workflow import GenericTofWorkflow
 from ess.reflectometry.types import ReferenceRun, SampleRun
 
 DETECTOR_BANK_SIZES = {
@@ -13,12 +13,14 @@ DETECTOR_BANK_SIZES = {
 }
 
 
-def LoadNeXusWorkflow() -> sciline.Pipeline:
+def LoadNeXusWorkflow(**kwargs) -> sciline.Pipeline:
     """
     Workflow for loading NeXus data.
     """
-    workflow = GenericNeXusWorkflow(
-        run_types=[SampleRun, ReferenceRun], monitor_types=[]
+    workflow = GenericTofWorkflow(
+        run_types=[SampleRun, ReferenceRun],
+        monitor_types=[],
+        **kwargs,
     )
     workflow[DetectorBankSizes] = DETECTOR_BANK_SIZES
     return workflow
