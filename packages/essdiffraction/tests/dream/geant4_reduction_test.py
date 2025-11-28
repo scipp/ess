@@ -33,6 +33,7 @@ from ess.powder.types import (
     IntensityDspacing,
     IntensityDspacingTwoTheta,
     IntensityTof,
+    KeepEvents,
     MonitorFilename,
     NeXusDetectorName,
     Position,
@@ -164,22 +165,30 @@ def test_pipeline_can_compute_dspacing_result_using_custom_built_tof_lookup(
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
 
-def test_pipeline_can_compute_dspacing_result_with_hist_monitor_norm(params_for_det):
+@pytest.mark.parametrize("keep_events", [True, False])
+def test_pipeline_can_compute_dspacing_result_with_hist_monitor_norm(
+    params_for_det, keep_events: bool
+):
     workflow = make_workflow(
         params_for_det, run_norm=powder.RunNormalization.monitor_histogram
     )
+    workflow[KeepEvents[SampleRun]] = KeepEvents[SampleRun](keep_events)
+    workflow[KeepEvents[VanadiumRun]] = KeepEvents[VanadiumRun](keep_events)
     workflow = powder.with_pixel_mask_filenames(workflow, [])
     result = workflow.compute(IntensityDspacing[SampleRun])
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
 
+@pytest.mark.parametrize("keep_events", [True, False])
 def test_pipeline_can_compute_dspacing_result_with_integrated_monitor_norm(
-    params_for_det,
+    params_for_det, keep_events: bool
 ):
     workflow = make_workflow(
         params_for_det, run_norm=powder.RunNormalization.monitor_integrated
     )
+    workflow[KeepEvents[SampleRun]] = KeepEvents[SampleRun](keep_events)
+    workflow[KeepEvents[VanadiumRun]] = KeepEvents[VanadiumRun](keep_events)
     workflow = powder.with_pixel_mask_filenames(workflow, [])
     result = workflow.compute(IntensityDspacing[SampleRun])
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}

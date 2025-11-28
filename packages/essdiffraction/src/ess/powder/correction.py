@@ -4,11 +4,11 @@
 
 import enum
 from typing import TypeVar
-from uuid import uuid4
 
 import sciline
 import scipp as sc
 
+import ess.reduce
 from ess.reduce.uncertainty import broadcast_uncertainties
 
 from ._util import event_or_outer_coord
@@ -40,6 +40,12 @@ def normalize_by_monitor_histogram(
 ) -> NormalizedDspacing[RunType]:
     """Normalize detector data by a histogrammed monitor.
 
+    The detector is normalized according to
+
+    .. math::
+
+        d_i^\\text{Norm} = \\frac{d_i}{m_i} \\Delta \\lambda_i
+
     Parameters
     ----------
     detector:
@@ -53,22 +59,21 @@ def normalize_by_monitor_histogram(
     -------
     :
         `detector` normalized by a monitor.
+
+    See also
+    --------
+    ess.reduce.normalization.normalize_by_monitor_histogram:
+        For details and the actual implementation.
     """
-    norm = broadcast_uncertainties(
-        monitor, prototype=detector, mode=uncertainty_broadcast_mode
-    )
-    lut = sc.lookup(norm, dim="wavelength")
-    if detector.bins is None:
-        c = lut[sc.midpoints(detector.coords['wavelength'], dim='dspacing')]
-        result = detector / c
-        result.masks['monitor_intensity_is_zero'] = c == sc.scalar(0.0, unit=c.unit)
-    else:
-        c = lut(detector.bins.coords['wavelength'])
-        result = detector / c
-        result.bins.masks['monitor_intensity_is_zero'] = c == sc.scalar(
-            0.0, unit=c.unit
+    detector, skip_range_check = _mask_out_of_monitor_range_data(detector, monitor)
+    return NormalizedDspacing[RunType](
+        ess.reduce.normalization.normalize_by_monitor_histogram(
+            detector=detector,
+            monitor=monitor,
+            uncertainty_broadcast_mode=uncertainty_broadcast_mode,
+            skip_range_check=skip_range_check,
         )
-    return NormalizedDspacing[RunType](result)
+    )
 
 
 def normalize_by_monitor_integrated(
@@ -79,15 +84,13 @@ def normalize_by_monitor_integrated(
 ) -> NormalizedDspacing[RunType]:
     """Normalize detector data by an integrated monitor.
 
-    The monitor is integrated according to
+    The detector is normalized according to
 
     .. math::
 
-        M = \\sum_{i=0}^{N-1}\\, m_i (x_{i+1} - x_i) I(x_i, x_{i+1}),
+        d_i^\\text{Norm} = \\frac{d_i}{\\sum_j\\, m_j}
 
-    where :math:`m_i` is the monitor intensity in bin :math:`i`,
-    :math:`x_i` is the lower bin edge of bin :math:`i`, and
-    :math:`I(x_i, x_{i+1})` selects bins that are within the range of the detector.
+    Note that this is not a true integral but only a sum over monitor events.
 
     Parameters
     ----------
@@ -102,58 +105,45 @@ def normalize_by_monitor_integrated(
     -------
     :
         `detector` normalized by a monitor.
+
+    See also
+    --------
+    ess.reduce.normalization.normalize_by_monitor_integrated:
+        For details and the actual implementation.
     """
-    dim = monitor.dim
-    if not monitor.coords.is_edges(dim):
-        raise sc.CoordError(
-            f"Monitor coordinate '{dim}' must be bin-edges to integrate the monitor."
+    detector, skip_range_check = _mask_out_of_monitor_range_data(detector, monitor)
+    return NormalizedDspacing[RunType](
+        ess.reduce.normalization.normalize_by_monitor_integrated(
+            detector=detector,
+            monitor=monitor,
+            uncertainty_broadcast_mode=uncertainty_broadcast_mode,
+            skip_range_check=skip_range_check,
         )
-
-    # Clip `monitor` to the range of `detector`, where the bins at the boundary
-    # may extend past the detector range (how label-based indexing works).
-    if detector.bins is not None and dim in detector.bins.coords:
-        det_coord = detector.bins.coords.get(dim)
-        lo = det_coord.nanmin()
-        hi = det_coord.nanmax()
-    else:
-        # Mask zero count bins, which are an artifact from the rectangular 2-D binning.
-        # The wavelength of those bins must be excluded when determining the integration
-        # range.
-        counts = (
-            detector.copy(deep=False) if detector.bins is None else detector.bins.size()
-        )
-        counts.masks[uuid4().hex] = counts.data == sc.scalar(0.0, unit=counts.unit)
-        det_coord = detector.coords[dim]
-        edge_dims = [
-            dim
-            for dim, size in counts.sizes.items()
-            if size + 1 == det_coord.sizes[dim]
-        ]
-        if len(edge_dims) != 1:
-            raise sc.CoordError(
-                f"Cannot determine edge dimension of coordinate '{dim}'."
-            )
-        edge_dim = edge_dims[0]
-        lo = counts.assign(det_coord[edge_dim, :-1]).nanmin().data
-        hi = counts.assign(det_coord[edge_dim, 1:]).nanmax().data
-
-    if monitor.coords[dim].min() > lo or monitor.coords[dim].max() < hi:
-        raise ValueError(
-            f"Cannot normalize by monitor: The wavelength range of the monitor "
-            f"({monitor.coords[dim].min().value} to {monitor.coords[dim].max().value}) "
-            f"is smaller than the range of the detector ({lo.value} to {hi.value})."
-        )
-    monitor = monitor[dim, lo:hi]
-    # Strictly limit `monitor` to the range of `detector`.
-    edges = sc.concat([lo, monitor.coords[dim][1:-1], hi], dim=dim)
-    monitor = sc.rebin(monitor, {dim: edges})
-
-    coord = monitor.coords[dim]
-    norm = sc.sum(monitor.data * (coord[1:] - coord[:-1]))
-    norm = broadcast_uncertainties(
-        norm, prototype=detector, mode=uncertainty_broadcast_mode
     )
-    return NormalizedDspacing[RunType](detector / norm)
+
+
+def _mask_out_of_monitor_range_data(
+    detector: sc.DataArray, monitor: sc.DataArray
+) -> tuple[sc.DataArray, bool]:
+    if (coord := detector.coords.get("wavelength")) is not None:
+        if detector.bins is None and "wavelength" not in coord.dims:
+            # The detector was histogrammed early, and the wavelength was reconstructed
+            # from d-spacing and 2theta, see focus_data_dspacing_and_two_theta.
+            # This introduces unphysical wavelength bins that we need to mask.
+            #
+            # The detector wavelength coord is bin-edges in d-spacing, but we need
+            # the mask to not be bin-edges, so compute the mask on the left and
+            # right d-spacing edges and `or` them together.
+            mon_coord = monitor.coords["wavelength"]
+            mon_lo, mon_hi = mon_coord.min(), mon_coord.max()
+            left, right = coord['dspacing', :-1], coord['dspacing', 1:]
+            out_of_range = left < mon_lo
+            out_of_range |= left > mon_hi
+            out_of_range |= right < mon_lo
+            out_of_range |= right > mon_hi
+            if sc.any(out_of_range):
+                return detector.assign_masks(out_of_wavelength_range=out_of_range), True
+    return detector, False
 
 
 def _normalize_by_vanadium(

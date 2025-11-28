@@ -13,10 +13,10 @@ from ess.powder.correction import (
 )
 from ess.powder.types import (
     CaveMonitor,
+    CorrectedDspacing,
     NormalizedDspacing,
     SampleRun,
     UncertaintyBroadcastMode,
-    WavelengthDetector,
     WavelengthMonitor,
 )
 
@@ -343,15 +343,14 @@ def test_normalize_by_monitor_histogram_expected_results():
         },
     )
     normalized = normalize_by_monitor_histogram(
-        WavelengthDetector[SampleRun](detector),
+        CorrectedDspacing[SampleRun](detector),
         monitor=WavelengthMonitor[SampleRun, CaveMonitor](monitor),
         uncertainty_broadcast_mode=UncertaintyBroadcastMode.fail,
     )
-    # Simple way to get all false array same shape as detector data.
-    # Is there a better way?
-    all_false = sc.isinf(detector.bins.data)
-    expected = NormalizedDspacing[SampleRun](detector / monitor.data).bins.assign_masks(
-        {'monitor_intensity_is_zero': all_false}
+
+    mon_coord = monitor.coords['wavelength']
+    expected = NormalizedDspacing[SampleRun](
+        detector / monitor.data * (mon_coord[1:] - mon_coord[:-1])
     )
     sc.testing.assert_identical(normalized, expected)
 
@@ -367,16 +366,14 @@ def test_normalize_by_monitor_histogram_ignores_monitor_values_out_of_range():
             'wavelength': sc.array(dims=['wavelength'], values=[0.0, 3, 4], unit='Å')
         },
     )
-    # Simple way to get all false array same shape as detector data.
-    all_false = sc.isinf(detector.bins.data)
     normalized = normalize_by_monitor_histogram(
-        WavelengthDetector[SampleRun](detector),
+        CorrectedDspacing[SampleRun](detector),
         monitor=WavelengthMonitor[SampleRun, CaveMonitor](monitor),
         uncertainty_broadcast_mode=UncertaintyBroadcastMode.fail,
     )
     expected = NormalizedDspacing[SampleRun](
-        detector / sc.scalar(4.0, unit='counts')
-    ).bins.assign_masks({'monitor_intensity_is_zero': all_false})
+        detector / sc.scalar(4.0, unit='counts') * sc.scalar(3.0, unit='Å')
+    )
     sc.testing.assert_identical(normalized, expected)
 
 
@@ -394,49 +391,12 @@ def test_normalize_by_monitor_integrated_expected_results():
         },
     )
     normalized = normalize_by_monitor_integrated(
-        WavelengthDetector[SampleRun](detector),
-        monitor=WavelengthMonitor[SampleRun, CaveMonitor](monitor),
-        uncertainty_broadcast_mode=UncertaintyBroadcastMode.fail,
-    )
-    # Last event is at 2, so the monitor bin with value 6.0 is not used.
-    expected = NormalizedDspacing[SampleRun](
-        detector / sc.scalar(4 * 0.5 + 5 * 1.5, unit='counts * Å')
-    )
-    sc.testing.assert_identical(normalized, expected)
-
-
-@pytest.mark.parametrize('event_coord', [True, False])
-def test_normalize_by_monitor_integrated_ignores_monitor_values_out_of_range(
-    event_coord: bool,
-):
-    detector = sc.DataArray(
-        sc.arange('wavelength', 4, unit='counts'),
-        coords={'wavelength': sc.arange('wavelength', 4.0, unit='Å')},
-    )
-    if event_coord:
-        # Make sure event at 3 is included
-        detector = detector.bin(
-            wavelength=sc.array(dims=['wavelength'], values=[0.0, 2, 3.1], unit='Å')
-        )
-        del detector.coords['wavelength']
-    else:
-        detector = detector.bin(
-            wavelength=sc.array(dims=['wavelength'], values=[0.0, 2, 3], unit='Å')
-        )
-        del detector.bins.coords['wavelength']
-    monitor = sc.DataArray(
-        sc.array(dims=['wavelength'], values=[4.0, 10.0], unit='counts'),
-        coords={
-            'wavelength': sc.array(dims=['wavelength'], values=[0.0, 3, 4], unit='Å')
-        },
-    )
-    normalized = normalize_by_monitor_integrated(
-        WavelengthDetector[SampleRun](detector),
+        CorrectedDspacing[SampleRun](detector),
         monitor=WavelengthMonitor[SampleRun, CaveMonitor](monitor),
         uncertainty_broadcast_mode=UncertaintyBroadcastMode.fail,
     )
     expected = NormalizedDspacing[SampleRun](
-        detector / sc.scalar(4.0 * 3, unit='counts')
+        detector / sc.scalar(4 + 5 + 6, unit='counts * Å')
     )
     sc.testing.assert_identical(normalized, expected)
 
@@ -467,17 +427,17 @@ def test_normalize_by_monitor_integrated_uses_monitor_values_at_boundary(
         },
     )
     normalized = normalize_by_monitor_integrated(
-        WavelengthDetector[SampleRun](detector),
+        CorrectedDspacing[SampleRun](detector),
         monitor=WavelengthMonitor[SampleRun, CaveMonitor](monitor),
         uncertainty_broadcast_mode=UncertaintyBroadcastMode.fail,
     )
     expected = NormalizedDspacing[SampleRun](
-        detector / sc.scalar(4.0 * 2 + 10.0 * 1 / 2, unit='counts')
+        detector / sc.scalar(4.0 + 10.0, unit='counts')
     )
     sc.testing.assert_identical(normalized, expected)
 
 
-def test_normalize_by_monitor_integrated_raises_if_monitor_range_too_narrow():
+def test_normalize_by_monitor_integrated_assigns_mask_if_monitor_range_too_narrow():
     detector = sc.DataArray(
         sc.arange('wavelength', 3, unit='counts'),
         coords={'wavelength': sc.arange('wavelength', 3.0, unit='Å')},
@@ -490,7 +450,7 @@ def test_normalize_by_monitor_integrated_raises_if_monitor_range_too_narrow():
     )
     with pytest.raises(ValueError, match="smaller than the range of the detector"):
         normalize_by_monitor_integrated(
-            WavelengthDetector[SampleRun](detector),
+            CorrectedDspacing[SampleRun](detector),
             monitor=WavelengthMonitor[SampleRun, CaveMonitor](monitor),
             uncertainty_broadcast_mode=UncertaintyBroadcastMode.fail,
         )

@@ -135,7 +135,7 @@ parameter_mappers[PixelMaskFilename] = with_pixel_mask_filenames
 def default_parameters() -> dict:
     return {
         KeepEvents[SampleRun]: KeepEvents[SampleRun](True),
-        KeepEvents[VanadiumRun]: KeepEvents[VanadiumRun](False),
+        KeepEvents[VanadiumRun]: KeepEvents[VanadiumRun](True),
         KeepEvents[EmptyCanRun]: KeepEvents[EmptyCanRun](True),
         TofMask: None,
         WavelengthMask: None,
