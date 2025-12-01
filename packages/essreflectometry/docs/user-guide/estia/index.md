@@ -42,10 +42,10 @@ hidden:
 estia-mcstas-reduction
 estia-advanced-mcstas-reduction
 simulated-spin-flip-sample
-```
-
-## Misc. Workflows
-```{toctree}
-
 create-estia-tof-lookup-table
 ```
+
+
+## Misc. Workflows
+
+:link: create-estia-tof-lookup-table.ipynb
