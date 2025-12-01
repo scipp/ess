@@ -32,7 +32,7 @@ from ess.spectroscopy.types import (
     PreopenNeXusFile,
     SampleRun,
     SQWBinSizes,
-    TimeOfFlightLookupTable,
+    TimeOfFlightLookupTableFilename,
 )
 
 N_DETECTORS = 3
@@ -72,7 +72,7 @@ def common_workflow(
     wf = bifrost.BifrostSimulationWorkflow(detector_names)
 
     wf[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
-    wf[TimeOfFlightLookupTable] = sc.io.load_hdf5(tof_lookup_table_simulation())
+    wf[TimeOfFlightLookupTableFilename] = tof_lookup_table_simulation()
     wf[PreopenNeXusFile] = PreopenNeXusFile(True)
     wf[sqw.SqwIXSample] = sample
     wf[EnergyBins] = ENERGY_BIN_SIZE
