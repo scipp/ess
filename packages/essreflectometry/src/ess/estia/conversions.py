@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import scipp as sc
+from scippneutron.conversion.tof import wavelength_from_tof
 
 from ..reflectometry.conversions import reflectometry_q
 from ..reflectometry.types import (
@@ -61,18 +62,6 @@ def divergence_angle(
     return sc.atan2(y=p.fields.x, x=p.fields.z) - detector_rotation.to(unit='rad')
 
 
-def wavelength(
-    tof,
-    Ltotal,
-):
-    """
-    Converts time_of_flight to wavelength.
-    """
-    return (((sc.constants.h / sc.constants.m_n) / Ltotal) * tof).to(
-        unit='angstrom', copy=False
-    )
-
-
 def detector_ltotal_from_raw(
     da: RawDetector[RunType], graph: CoordTransformationGraph
 ) -> DetectorLtotal[RunType]:
@@ -81,7 +70,7 @@ def detector_ltotal_from_raw(
 
 def coordinate_transformation_graph() -> CoordTransformationGraph:
     return {
-        "wavelength": wavelength,
+        "wavelength": wavelength_from_tof,
         "theta": theta,
         "divergence_angle": divergence_angle,
         "Q": reflectometry_q,
