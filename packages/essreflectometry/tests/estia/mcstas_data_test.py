@@ -12,7 +12,12 @@ import scipp as sc
 from orsopy import fileio
 
 from ess.estia import EstiaMcStasWorkflow
-from ess.estia.data import estia_mcstas_reference_run, estia_mcstas_sample_run
+from ess.estia.conversions import mcstas_wavelength_coordinate_transformation_graph
+from ess.estia.data import (
+    estia_mcstas_reference_run,
+    estia_mcstas_sample_run,
+    estia_tof_lookup_table,
+)
 from ess.estia.load import load_mcstas_events
 from ess.reflectometry import orso
 from ess.reflectometry.types import (
@@ -24,6 +29,7 @@ from ess.reflectometry.types import (
     ReferenceRun,
     ReflectivityOverQ,
     SampleRun,
+    TimeOfFlightLookupTable,
     WavelengthBins,
     YIndexLimits,
     ZIndexLimits,
@@ -41,6 +47,9 @@ def estia_mcstas_pipeline() -> sciline.Pipeline:
     wf[BeamDivergenceLimits] = sc.scalar(-1.0, unit='deg'), sc.scalar(1.0, unit='deg')
     wf[WavelengthBins] = sc.geomspace('wavelength', 3.5, 12, 2001, unit='angstrom')
     wf[QBins] = sc.geomspace('Q', 0.005, 0.1, 200, unit='1/angstrom')
+
+    wf[TimeOfFlightLookupTable] = estia_tof_lookup_table()
+
     wf[ProtonCurrent[SampleRun]] = sc.DataArray(
         sc.array(dims=('time',), values=[]),
         coords={'time': sc.array(dims=('time',), values=[], unit='s')},
@@ -89,9 +98,14 @@ def test_mcstas_compute_reducible_data(estia_mcstas_pipeline: sciline.Pipeline):
     assert 'Q' in da.bins.coords
 
 
-def test_can_compute_reflectivity_curve(estia_mcstas_pipeline: sciline.Pipeline):
-    estia_mcstas_pipeline[Filename[SampleRun]] = estia_mcstas_sample_run(11)
-    r = estia_mcstas_pipeline.compute(ReflectivityOverQ)
+def test_can_compute_reflectivity_curve_exact_wavelengths(
+    estia_mcstas_pipeline: sciline.Pipeline,
+):
+    wf = estia_mcstas_pipeline.copy()
+    wf.insert(mcstas_wavelength_coordinate_transformation_graph)
+    wf[Filename[SampleRun]] = estia_mcstas_sample_run(11)
+    r = wf.compute(ReflectivityOverQ)
+
     assert "Q" in r.coords
     assert "Q_resolution" in r.coords
     r = r.hist()
@@ -108,6 +122,13 @@ def test_can_compute_reflectivity_curve(estia_mcstas_pipeline: sciline.Pipeline)
 
     assert max_q > sc.scalar(0.075, unit='1/angstrom')
     assert min_q < sc.scalar(0.007, unit='1/angstrom')
+
+
+def test_can_compute_reflectivity_curve(estia_mcstas_pipeline: sciline.Pipeline):
+    estia_mcstas_pipeline[Filename[SampleRun]] = estia_mcstas_sample_run(11)
+    r = estia_mcstas_pipeline.compute(ReflectivityOverQ)
+    assert "Q" in r.coords
+    assert "Q_resolution" in r.coords
 
 
 def test_orso_pipeline(estia_mcstas_pipeline: sciline.Pipeline):
