@@ -157,9 +157,10 @@ def test_save_sqw_writes_dnd_data(output_file: sqw.Sqw) -> None:
     dnd = output_file.read_data_block("data", "nd_data")
     values, errors, counts = dnd
     # Fortran order
-    assert values.shape == tuple(BIN_SIZES.values())[::-1]
-    assert errors.shape == tuple(BIN_SIZES.values())[::-1]
-    assert counts.shape == tuple(BIN_SIZES.values())[::-1]
+    expected_shape = tuple(BIN_SIZES.values())[::-1]
+    assert values.shape == expected_shape
+    assert errors.shape == expected_shape
+    assert counts.shape == expected_shape
 
 
 def test_save_sqw_writes_pixel_data(output_file: sqw.Sqw) -> None:
