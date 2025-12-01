@@ -15,7 +15,7 @@ from ess.spectroscopy.types import (
     Filename,
     NeXusDetectorName,
     SampleRun,
-    TimeOfFlightLookupTable,
+    TimeOfFlightLookupTableFilename,
 )
 
 
@@ -33,9 +33,7 @@ class TestBifrostQCutWorkflow:
     ) -> sciline.Pipeline:
         workflow = BifrostQCutWorkflow(simulation_detector_names)
         workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
-        workflow[TimeOfFlightLookupTable] = sc.io.load_hdf5(
-            tof_lookup_table_simulation()
-        )
+        workflow[TimeOfFlightLookupTableFilename] = tof_lookup_table_simulation()
         return workflow
 
     def test_cut_along_q_norm_and_energy_transfer(
