@@ -100,6 +100,8 @@ def save_sqw(
         For low-level SQW I/O and the underlying implementation of ``save_sqw``.
     """
     if np.unique(events.coords['a4'].values).size != 1:
+        # We need to support this eventually, but we don't
+        # have data for a moving detector vessel yet.
         raise NotImplementedError("a4 must be constant for all events")
 
     flat_events = _flatten_events(events)
