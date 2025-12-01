@@ -69,7 +69,7 @@ def save_sqw(
     events:
         Binned data array with shape ``(*logical, "a3", "a4")`` where ``logical``
         is any number of logical detector dimensions (e.g., arc, tube).
-        Must have an ``"incident_energy"`` bin coordinate.
+        Must have an ``"incident_energy"`` event coordinate.
     bin_sizes:
         Sizes of the output 'image' bins.
         The data will be ordered based on these bins, but it is possible
@@ -159,7 +159,7 @@ def _flatten_events(events: IncidentEnergyDetector[SampleRun]) -> sc.DataArray:
 
 
 def _filter_and_convert_coords_in_place(flat_events: sc.DataArray) -> None:
-    """Filter out all coords we no longer need and convert to float32.
+    """Filter out all coords we no longer need and convert remaining coords to float32.
 
     This function mainly serves to reduce memory usage.
     The conversion to float32 is ultimately required when building the 'pixel data',
@@ -283,6 +283,10 @@ def _bin_image(
     ).rename(energy_transfer='u4', Qz='u3', Qy='u2', Qx='u1')
 
     image = binned.transpose(['u1', 'u2', 'u3', 'u4'])
+    # The dense DND array contains the averages of the observations in `image`.
+    # Note that `image` contains 'observations', not 'events', so the expectation value
+    # is the arithmetic mean, not the sum.
+    # See also https://scipp.github.io/scippneutron/developer/file-formats/sqw.html#dnd-data-blocks
     dnd = image.bins.mean().to(dtype='float64', copy=False)
     counts = image.bins.size()
 
