@@ -8,10 +8,10 @@ _version = "1"
 
 __all__ = [
     "get_path",
+    "get_small_mcstas",
     "get_small_mtz_samples",
     "get_small_nmx_nexus",
     "get_small_random_mtz_samples",
-    "small_mcstas_sample",
 ]
 
 
@@ -33,7 +33,7 @@ _registry = make_registry(
 )
 
 
-def small_mcstas_sample() -> pathlib.Path:
+def get_small_mcstas() -> pathlib.Path:
     """McStas file that contains only ``bank0(1-3)`` in the ``data`` group.
 
     Real McStas file should contain more dataset under ``data`` group.

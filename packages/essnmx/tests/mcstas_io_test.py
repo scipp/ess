@@ -3,11 +3,11 @@
 import pytest
 import scipp as sc
 
-from ess.nmx.data import small_mcstas_sample
+from ess.nmx.data import get_small_mcstas
 from ess.nmx.mcstas.load import load_raw_event_data, raw_event_data_chunk_generator
 
 
-@pytest.fixture(params=[small_mcstas_sample])
+@pytest.fixture(params=[get_small_mcstas])
 def mcstas_file_path(request: pytest.FixtureRequest) -> str:
     return request.param()
 

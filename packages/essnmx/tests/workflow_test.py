@@ -6,7 +6,7 @@ import sciline as sl
 import scipp as sc
 
 from ess.nmx import default_parameters
-from ess.nmx.data import small_mcstas_sample
+from ess.nmx.data import get_small_mcstas
 from ess.nmx.mcstas.load import providers as load_providers
 from ess.nmx.reduction import (
     NMXReducedDataGroup,
@@ -25,7 +25,7 @@ from ess.nmx.types import (
 )
 
 
-@pytest.fixture(params=[small_mcstas_sample])
+@pytest.fixture(params=[get_small_mcstas])
 def mcstas_file_path(request: pytest.FixtureRequest) -> str:
     return request.param()
 

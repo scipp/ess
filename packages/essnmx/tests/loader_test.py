@@ -11,7 +11,7 @@ import scippnexus as snx
 from scipp.testing import assert_allclose, assert_identical
 
 from ess.nmx import default_parameters
-from ess.nmx.data import small_mcstas_sample
+from ess.nmx.data import get_small_mcstas
 from ess.nmx.mcstas.load import bank_names_to_detector_names, load_crystal_rotation
 from ess.nmx.mcstas.load import providers as loader_providers
 from ess.nmx.types import (
@@ -75,7 +75,7 @@ def check_scalar_properties_mcstas_3(dg: NMXRawEventCountsDataGroup):
     ],
 )
 def test_file_reader_mcstas3(detector_index, fast_axis, slow_axis) -> None:
-    file_path = small_mcstas_sample()
+    file_path = get_small_mcstas()
 
     pl = sl.Pipeline(
         loader_providers,
@@ -97,7 +97,7 @@ def test_file_reader_mcstas3(detector_index, fast_axis, slow_axis) -> None:
     check_nmxdata_properties(dg, sc.vector(fast_axis), sc.vector(slow_axis))
 
 
-@pytest.fixture(params=[small_mcstas_sample])
+@pytest.fixture(params=[get_small_mcstas])
 def tmp_mcstas_file(
     tmp_path: pathlib.Path,
     request: pytest.FixtureRequest,
