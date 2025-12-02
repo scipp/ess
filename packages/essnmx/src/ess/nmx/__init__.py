@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
-# ruff: noqa: E402, F401, I
+# ruff: noqa: E402, I
 
 import importlib.metadata
 
@@ -11,7 +11,6 @@ except importlib.metadata.PackageNotFoundError:
 
 del importlib
 
-from .data import small_mcstas_3_sample
 from .reduction import NMXReducedDataGroup
 from .types import MaximumCounts, NMXRawEventCountsDataGroup
 
@@ -23,5 +22,4 @@ __all__ = [
     "NMXRawEventCountsDataGroup",
     "NMXReducedDataGroup",
     "default_parameters",
-    "small_mcstas_3_sample",
 ]

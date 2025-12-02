@@ -10,9 +10,6 @@
    :template: class-template.rst
    :recursive:
 
-   NMXRawEventCountsDataGroup
-   NMXReducedDataGroup
-
 ```
 
 ## Top-level functions
@@ -21,8 +18,6 @@
 .. autosummary::
    :toctree: ../generated/functions
    :recursive:
-
-   small_mcstas_3_sample
 
 ```
 

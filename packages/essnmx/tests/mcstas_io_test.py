@@ -3,18 +3,12 @@
 import pytest
 import scipp as sc
 
-from ess.nmx.data import small_mcstas_2_sample, small_mcstas_3_sample
+from ess.nmx.data import small_mcstas_sample
 from ess.nmx.mcstas.load import load_raw_event_data, raw_event_data_chunk_generator
 
 
-@pytest.fixture(params=[small_mcstas_2_sample, small_mcstas_3_sample])
-def mcstas_file_path(
-    request: pytest.FixtureRequest, mcstas_2_deprecation_warning_context
-) -> str:
-    if request.param == small_mcstas_2_sample:
-        with mcstas_2_deprecation_warning_context():
-            return request.param()
-
+@pytest.fixture(params=[small_mcstas_sample])
+def mcstas_file_path(request: pytest.FixtureRequest) -> str:
     return request.param()
 
 
