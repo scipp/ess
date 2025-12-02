@@ -5,8 +5,8 @@
 maxdepth: 1
 ---
 
-workflow
-workflow_chunk
+mcstas_workflow
+mcstas_workflow_chunk
 scaling_workflow
 installation
 ```
