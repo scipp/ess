@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+import pathlib
+
 import h5py
 import scipp as sc
 
@@ -13,16 +15,29 @@ from .beamline import DETECTOR_BANK_SIZES
 from .mcstas import parse_events_ascii, parse_events_h5
 
 
-def load_mcstas_events(
+def load_mcstas_provider(
     filename: Filename[RunType],
     sample_rotation_offset: SampleRotationOffset[RunType],
 ) -> RawDetector[RunType]:
+    """See :py:`load_mcstas`."""
+    da = load_mcstas(filename)
+    da.coords['sample_rotation'] += sample_rotation_offset.to(
+        unit=da.coords['sample_rotation'].unit
+    )
+    return RawDetector[RunType](da)
+
+
+def load_mcstas(
+    filename: str | pathlib.Path | sc.DataArray,
+) -> sc.DataArray:
     """
     Load event data from a McStas run and reshape it
     to look like what we would expect if
     we loaded data from a real experiment file.
     """
-    if h5py.is_hdf5(filename):
+    if isinstance(filename, sc.DataArray):
+        da = filename
+    elif h5py.is_hdf5(filename):
         with h5py.File(filename) as f:
             da = parse_events_h5(f)
     else:
@@ -34,9 +49,6 @@ def load_mcstas_events(
     )
     da.coords['detector_rotation'] = 2 * da.coords['sample_rotation'] + sc.scalar(
         1.65, unit='deg'
-    )
-    da.coords['sample_rotation'] += sample_rotation_offset.to(
-        unit=da.coords['sample_rotation'].unit
     )
 
     nblades = DETECTOR_BANK_SIZES['multiblade_detector']['blade']
@@ -79,7 +91,9 @@ def load_mcstas_events(
     da.bins.coords['event_time_offset'] = (
         sc.scalar(1, unit='s') * da.bins.coords['t']
     ).to(unit='ns') % sc.scalar(1 / 14, unit='s').to(unit='ns')
-    da.bins.coords['wavelength'] = sc.scalar(1, unit='angstrom') * da.bins.coords['L']
+    da.bins.coords['wavelength_from_mcstas'] = (
+        sc.scalar(1.0, unit='angstrom') * da.bins.coords['L']
+    )
 
     da.coords["sample_size"] = sc.scalar(1.0, unit='m') * float(
         da.coords['sample_length'].value
@@ -96,8 +110,7 @@ def load_mcstas_events(
     )
     da.bins.coords.pop('L')
     da.bins.coords.pop('t')
-    da.bins.coords['wavelength_from_mcstas'] = da.bins.coords.pop('wavelength')
-    return RawDetector[RunType](da)
+    return da
 
 
 providers = ()

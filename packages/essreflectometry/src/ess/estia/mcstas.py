@@ -1,5 +1,6 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import h5py
+import numpy as np
 import pandas as pd
 import scipp as sc
 
@@ -63,7 +64,7 @@ def parse_events_ascii(lines):
     raise ValueError('Could not parse the file as a list of events.')
 
 
-def parse_events_h5(f):
+def parse_events_h5(f, nevents_to_sample=None):
     if isinstance(f, str):
         with h5py.File(f) as ff:
             return parse_events_h5(ff)
@@ -75,20 +76,37 @@ def parse_events_h5(f):
         'NXentry/simulation/Param',
     )
     events = events[()]
-    da = sc.DataArray(
-        # The squares on the variances is the correct way to load weighted event data.
-        # Consult the McStas documentation
-        # (section 2.2.1) https://www.mcstas.org/documentation/manual/
-        # for more information.
-        sc.array(dims=['events'], values=events[:, 0], variances=events[:, 0] ** 2),
-    )
+    if nevents_to_sample is None:
+        da = sc.DataArray(
+            # The squares on the variances is the correct way to load
+            # weighted event data.
+            # Consult the McStas documentation
+            # (section 2.2.1) https://www.mcstas.org/documentation/manual/
+            # for more information.
+            sc.array(dims=['events'], values=events[:, 0], variances=events[:, 0] ** 2),
+        )
+        for i, label in enumerate(data.attrs["ylabel"].decode().strip().split(' ')):
+            if label == 'p':
+                continue
+            da.coords[label] = sc.array(dims=['events'], values=events[:, i])
+    else:
+        probabilities = events[:, 0]
+        inds = np.random.choice(
+            np.arange(len(probabilities)),
+            nevents_to_sample,
+            p=probabilities / probabilities.sum(),
+        )
+        da = sc.DataArray(
+            sc.ones(dims=['events'], shape=(nevents_to_sample,), with_variances=True),
+        )
+        for i, label in enumerate(data.attrs["ylabel"].decode().strip().split(' ')):
+            if label == 'p':
+                continue
+            da.coords[label] = sc.array(dims=['events'], values=events[inds, i])
+
     for name, value in data.attrs.items():
         da.coords[name] = sc.scalar(value.decode())
 
-    for i, label in enumerate(data.attrs["ylabel"].decode().strip().split(' ')):
-        if label == 'p':
-            continue
-        da.coords[label] = sc.array(dims=['events'], values=events[:, i])
     for k, v in params.items():
         v = v[0]
         if isinstance(v, bytes):
