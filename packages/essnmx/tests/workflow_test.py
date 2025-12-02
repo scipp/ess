@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+import pathlib
+
 import pandas as pd
 import pytest
 import sciline as sl
@@ -26,12 +28,12 @@ from ess.nmx.types import (
 
 
 @pytest.fixture(params=[get_small_mcstas])
-def mcstas_file_path(request: pytest.FixtureRequest) -> str:
+def mcstas_file_path(request: pytest.FixtureRequest) -> pathlib.Path:
     return request.param()
 
 
 @pytest.fixture
-def mcstas_workflow(mcstas_file_path: str) -> sl.Pipeline:
+def mcstas_workflow(mcstas_file_path: pathlib.Path) -> sl.Pipeline:
     return sl.Pipeline(
         [
             *load_providers,
@@ -59,7 +61,9 @@ def multi_bank_mcstas_workflow(mcstas_workflow: sl.Pipeline) -> sl.Pipeline:
     return pl
 
 
-def test_pipeline_builder(mcstas_workflow: sl.Pipeline, mcstas_file_path: str) -> None:
+def test_pipeline_builder(
+    mcstas_workflow: sl.Pipeline, mcstas_file_path: pathlib.Path
+) -> None:
     assert mcstas_workflow.get(FilePath).compute() == mcstas_file_path
 
 
