@@ -11,7 +11,7 @@ import scippnexus as snx
 from scipp.testing import assert_allclose, assert_identical
 
 from ess.nmx import default_parameters
-from ess.nmx.data import small_mcstas_2_sample, small_mcstas_3_sample
+from ess.nmx.data import small_mcstas_sample
 from ess.nmx.mcstas.load import bank_names_to_detector_names, load_crystal_rotation
 from ess.nmx.mcstas.load import providers as loader_providers
 from ess.nmx.types import (
@@ -51,39 +51,6 @@ def check_nmxdata_properties(
     assert_identical(dg['slow_axis'], slow_axis)
 
 
-@pytest.mark.parametrize(
-    ('detector_index', 'fast_axis', 'slow_axis'),
-    [
-        # Expected values are provided by the IDS
-        # based on the simulation settings of the sample file.
-        (0, (1.0, 0.0, -0.01), (0.0, 1.0, 0.0)),
-        (1, (-0.01, 0.0, -1.0), (0.0, 1.0, 0.0)),
-        (2, (0.01, 0.0, 1.0), (0.0, 1.0, 0.0)),
-    ],
-)
-def test_file_reader_mcstas2(
-    detector_index, fast_axis, slow_axis, mcstas_2_deprecation_warning_context
-) -> None:
-    with mcstas_2_deprecation_warning_context():
-        file_path = small_mcstas_2_sample()
-
-    fast_axis = sc.vector(fast_axis)
-    slow_axis = sc.vector(slow_axis)
-
-    pl = sl.Pipeline(
-        loader_providers,
-        params={
-            FilePath: file_path,
-            DetectorIndex: detector_index,
-            **default_parameters,
-        },
-    )
-    dg = pl.compute(NMXRawEventCountsDataGroup)
-
-    check_scalar_properties_mcstas_2(dg)
-    check_nmxdata_properties(dg, fast_axis, slow_axis)
-
-
 def check_scalar_properties_mcstas_3(dg: NMXRawEventCountsDataGroup):
     """Test helper for NMXData loaded from McStas 3.
 
@@ -108,7 +75,7 @@ def check_scalar_properties_mcstas_3(dg: NMXRawEventCountsDataGroup):
     ],
 )
 def test_file_reader_mcstas3(detector_index, fast_axis, slow_axis) -> None:
-    file_path = small_mcstas_3_sample()
+    file_path = small_mcstas_sample()
 
     pl = sl.Pipeline(
         loader_providers,
@@ -130,20 +97,15 @@ def test_file_reader_mcstas3(detector_index, fast_axis, slow_axis) -> None:
     check_nmxdata_properties(dg, sc.vector(fast_axis), sc.vector(slow_axis))
 
 
-@pytest.fixture(params=[small_mcstas_2_sample, small_mcstas_3_sample])
+@pytest.fixture(params=[small_mcstas_sample])
 def tmp_mcstas_file(
     tmp_path: pathlib.Path,
     request: pytest.FixtureRequest,
-    mcstas_2_deprecation_warning_context,
 ) -> Generator[pathlib.Path, None, None]:
     import os
     import shutil
 
-    if request.param == small_mcstas_2_sample:
-        with mcstas_2_deprecation_warning_context():
-            original_file_path = request.param()
-    else:
-        original_file_path = request.param()
+    original_file_path = request.param()
 
     tmp_file = tmp_path / pathlib.Path('file.h5')
     shutil.copy(original_file_path, tmp_file)
