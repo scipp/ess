@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+import pathlib
+
 import pytest
 import scipp as sc
 
@@ -8,7 +10,7 @@ from ess.nmx.mcstas.load import load_raw_event_data, raw_event_data_chunk_genera
 
 
 @pytest.fixture(params=[get_small_mcstas])
-def mcstas_file_path(request: pytest.FixtureRequest) -> str:
+def mcstas_file_path(request: pytest.FixtureRequest) -> pathlib.Path:
     return request.param()
 
 
