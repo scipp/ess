@@ -3,7 +3,9 @@
 
 """Coordinate conversions for indirect spectroscopy."""
 
+import numpy as np
 import scipp as sc
+import scipp.constants
 from scippneutron.conversion.tof import (
     energy_from_wavelength,
     wavelength_from_tof,
@@ -13,6 +15,7 @@ from scippneutron.conversion.tof import (
 from ..types import (
     EnergyQDetector,
     GravityVector,
+    IncidentEnergyDetector,
     InelasticCoordTransformGraph,
     MonitorCoordTransformGraph,
     MonitorType,
@@ -100,6 +103,55 @@ def lab_momentum_transfer_from_wavevectors(
     )
 
 
+def lab_momentum_transfer_from_incident_energy(
+    incident_energy: sc.Variable,
+    incident_beam: sc.Variable,
+    final_wavevector: sc.Variable,
+) -> sc.Variable:
+    r"""Compute the momentum transfer in the lab frame.
+
+    Here, the momentum transfer is defined as
+
+    .. math::
+
+        \vec{Q} = \vec{k_i} - \vec{k_f}
+
+    with
+
+    .. math::
+
+        \vec{k_i} = \frac{2\pi}{h} \hat{b}_i \sqrt{2 M_n E_i}
+
+    Parameters
+    ----------
+    incident_energy:
+        The neutron energy :math:`E_i` before scattering.
+    incident_beam:
+        The vector of the incident beam in the lab frame :math:`\vec{b}_i`.
+    final_wavevector:
+        The neutron wavevector :math:`\vec{k_f}` after scattering.
+
+    Returns
+    -------
+    :
+        The momentum transfer :math:`\vec{Q}` in the lab frame.
+    """
+    # Typical shapes:
+    #  - incident_beam: ()
+    #  - incident_energy: (incident_energy,)  (small)
+    #  - final_wavevector: (detector,)  (large-ish but 1D)
+    #  - result: (detector, incident_energy)
+    incident_wavevector = (
+        (2 * np.pi / sc.constants.h)
+        * (incident_beam / sc.norm(incident_beam))
+        * sc.sqrt(2 * sc.constants.m_n * incident_energy)
+    )
+    # Order of operations such that the final result has dim order described above.
+    return -final_wavevector + incident_wavevector.to(
+        unit=final_wavevector.unit, copy=False
+    )
+
+
 def rotate_to_sample_table_momentum_transfer(
     *,
     a3: sc.Variable,
@@ -162,11 +214,7 @@ def add_inelastic_coordinates(
 ) -> EnergyQDetector[RunType]:
     transformed = data.transform_coords(
         [
-            # TODO pick minimal list of coords
             'energy_transfer',
-            'incident_wavelength',
-            'incident_energy',
-            'lab_momentum_transfer',
             'sample_table_momentum_transfer',
             # These are inputs, but we want to preserve them
             'a3',
@@ -179,6 +227,27 @@ def add_inelastic_coordinates(
         rename_dims=False,
     )
     return EnergyQDetector[RunType](transformed)
+
+
+def add_incident_energy(
+    data: TofDetector[RunType], graph: InelasticCoordTransformGraph
+) -> IncidentEnergyDetector[RunType]:
+    transformed = data.transform_coords(
+        [
+            'incident_energy',
+            # These are inputs, but we need them for binning:
+            'a3',
+            'a4',
+            'final_energy',
+            'final_wavevector',
+        ],
+        graph=graph,
+        keep_aliases=False,
+        keep_inputs=False,
+        keep_intermediate=False,
+        rename_dims=False,
+    )
+    return IncidentEnergyDetector[RunType](transformed)
 
 
 def add_spectrometer_coords(
@@ -245,6 +314,7 @@ def add_monitor_wavelength_coords(
 
 providers = (
     add_inelastic_coordinates,
+    add_incident_energy,
     add_monitor_wavelength_coords,
     inelastic_coordinate_transformation_graph_at_sample,
     monitor_coordinate_transformation_graph,

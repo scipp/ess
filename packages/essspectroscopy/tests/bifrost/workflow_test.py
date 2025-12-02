@@ -79,9 +79,7 @@ def test_simulation_workflow_can_compute_energy_data(
     expected_coords = {'a3', 'a4', 'detector_number'}
     assert expected_coords.issubset(energy_data.coords)
     expected_event_coords = {
-        'incident_wavelength',
         'energy_transfer',
-        'lab_momentum_transfer',
         'sample_table_momentum_transfer',
     }
     assert expected_event_coords.issubset(energy_data.bins.coords)
@@ -90,7 +88,6 @@ def test_simulation_workflow_can_compute_energy_data(
     energy_data.coords['a3'].to(unit='rad')
     energy_data.coords['a4'].to(unit='rad')
     energy_data.bins.coords['energy_transfer'].to(unit='meV')
-    energy_data.bins.coords['lab_momentum_transfer'].to(unit='1/Å')
     energy_data.bins.coords['sample_table_momentum_transfer'].to(unit='1/Å')
 
 

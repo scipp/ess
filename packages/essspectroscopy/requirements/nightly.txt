@@ -10,7 +10,7 @@
 
 annotated-types==0.7.0
     # via pydantic
-certifi==2025.10.5
+certifi==2025.11.12
     # via requests
 charset-normalizer==3.4.4
     # via requests
@@ -26,7 +26,7 @@ email-validator==2.3.0
     # via scippneutron
 essreduce @ git+https://github.com/scipp/essreduce@main
     # via -r nightly.in
-fonttools==4.60.1
+fonttools==4.61.0
     # via matplotlib
 graphviz==0.21
     # via -r nightly.in
@@ -53,9 +53,9 @@ matplotlib==3.10.7
     #   plopp
 mpltoolbox==25.10.0
     # via scippneutron
-networkx==3.5
+networkx==3.6
     # via cyclebane
-numpy==2.3.4
+numpy==2.3.5
     # via
     #   contourpy
     #   h5py
@@ -84,16 +84,18 @@ plopp @ git+https://github.com/scipp/plopp@main
 pluggy==1.6.0
     # via pytest
 pooch==1.8.2
-    # via -r nightly.in
-pydantic==2.12.3
+    # via
+    #   -r nightly.in
+    #   tof
+pydantic==2.12.5
     # via scippneutron
-pydantic-core==2.41.4
+pydantic-core==2.41.5
     # via pydantic
 pygments==2.19.2
     # via pytest
-pyparsing==3.3.0a1
+pyparsing==3.3.0b1
     # via matplotlib
-pytest==8.4.2
+pytest==9.0.1
     # via -r nightly.in
 python-dateutil==2.9.0.post0
     # via
@@ -128,10 +130,9 @@ scipy==1.16.3
     # via
     #   scippneutron
     #   scippnexus
-    #   tof
 six==1.17.0
     # via python-dateutil
-tof==25.10.1
+tof==25.12.0
     # via -r nightly.in
 typing-extensions==4.15.0
     # via

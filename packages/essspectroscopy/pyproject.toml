@@ -35,7 +35,7 @@ dependencies = [
   "pandas>=2.1.2",
   "sciline>=25.4.1",
   "scipp>=25.3.0",
-  "scippneutron>=25.3.0",
+  "scippneutron>=25.11.2",
   "scippnexus>=24.9.0",
   "tof>=25.01.2",
 ]

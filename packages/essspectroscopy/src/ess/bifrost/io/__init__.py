@@ -3,6 +3,6 @@
 
 """Input/output for BIFROST."""
 
-from . import nexus
+from . import nexus, sqw
 
-__all__ = ['nexus']
+__all__ = ['nexus', 'sqw']
