@@ -21,7 +21,7 @@ Then the single events get binned into pixels and then histogramed in the TOF di
 This result can be exported to an HDF5 file
 along with additional metadata and instrument coordinates (pixel IDs).
 
-See [workflow example](../examples/workflow) for more details.
+See [workflow example](../user-guide/workflow) for more details.
 
 ### Spot finding and integration (DIALS)
 For the next five steps of the data reduction from spot finding to spot integration,
