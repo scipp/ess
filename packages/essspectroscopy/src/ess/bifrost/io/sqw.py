@@ -57,6 +57,13 @@ def save_sqw(
     coordinates on that histogram.
     This is done for consistency with Horace.
 
+    The data is encoded as a 4-dimensional array, and Horace calls the dimensions
+    ``u1 ... u4``. The first three correspond to the three dimensions of $\\vec{Q}$
+    and the ``u4`` corresponds to energy transfer. Horace supports customizable
+    projections onto the cardinal axes $Q_x, Q_y, Q_z$, but the implementation here
+    has hard-coded ``(Qx, Qy, Qz) = (u1, u2, u3)``, however, you need to express the
+    binning in terms of the `u`'s.
+
     Note
     ----
     This function requires large amounts of memory to construct intermediate
@@ -74,7 +81,7 @@ def save_sqw(
         Sizes of the output 'image' bins.
         The data will be ordered based on these bins, but it is possible
         to change the binning later in Horace.
-        E.g., ``{'Qx': 50, 'Qy': 50, 'Qz': 50, 'energy_transfer': 50}``.
+        E.g., ``{'u1': 50, 'u2': 50, 'u3': 50, 'u4': 50}``.
     energy_bins:
         Bin edges or number of bins for (incident) energy.
         The events are histogrammed according to these bins, so this determines the
@@ -280,8 +287,9 @@ def _bin_image(
     observations: sc.DataArray, bin_sizes: SQWBinSizes
 ) -> tuple[sc.DataArray, sc.Variable, sc.DataArray]:
     # Dim order to match pixel data (note the transpose for dnd)
+    dim_order = {'energy_transfer': 'u4', 'Qz': 'u3', 'Qy': 'u2', 'Qx': 'u1'}
     binned = observations.bin(
-        {dim: bin_sizes[dim] for dim in ('energy_transfer', 'Qz', 'Qy', 'Qx')}
+        {coord: bin_sizes[dim] for coord, dim in dim_order.items()}
     ).rename(energy_transfer='u4', Qz='u3', Qy='u2', Qx='u1')
 
     image = binned.transpose(['u1', 'u2', 'u3', 'u4'])
@@ -347,8 +355,7 @@ def _make_dnd_metadata(
     ----------
     dnd:
         DND 'image data'.
-        Must be histogrammed along the Qx, Qy, Qz, and energy_transfer axes
-        with linspace coordinates.
+        Must be histogrammed along the u-axes with linspace coordinates.
     sample:
         Sample metadata.
     """

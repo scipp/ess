@@ -38,7 +38,7 @@ from ess.spectroscopy.types import (
 N_DETECTORS = 3
 N_ANGLES = 180
 
-BIN_SIZES = {'Qx': 6, 'Qy': 7, 'Qz': 8, 'energy_transfer': 9}
+BIN_SIZES = {'u1': 6, 'u2': 7, 'u3': 8, 'u4': 9}
 ENERGY_BIN_SIZE = 13
 
 # Q projections
