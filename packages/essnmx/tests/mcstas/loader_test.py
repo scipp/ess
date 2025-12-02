@@ -5,16 +5,14 @@ import sys
 from collections.abc import Generator
 
 import pytest
-import sciline as sl
 import scipp as sc
 import scippnexus as snx
 from scipp.testing import assert_allclose, assert_identical
 
-from ess.nmx import default_parameters
+from ess.nmx import NMXMcStasWorkflow
 from ess.nmx.data import get_small_mcstas
 from ess.nmx.mcstas.load import bank_names_to_detector_names, load_crystal_rotation
-from ess.nmx.mcstas.load import providers as loader_providers
-from ess.nmx.types import (
+from ess.nmx.mcstas.types import (
     DetectorBankPrefix,
     DetectorIndex,
     FilePath,
@@ -64,14 +62,9 @@ def check_scalar_properties_mcstas_3(dg: NMXRawEventCountsDataGroup):
 def test_file_reader_mcstas3(detector_index, fast_axis, slow_axis) -> None:
     file_path = get_small_mcstas()
 
-    pl = sl.Pipeline(
-        loader_providers,
-        params={
-            FilePath: file_path,
-            DetectorIndex: detector_index,
-            **default_parameters,
-        },
-    )
+    pl = NMXMcStasWorkflow()
+    pl[FilePath] = file_path
+    pl[DetectorIndex] = detector_index
     dg, bank = pl.compute((NMXRawEventCountsDataGroup, DetectorBankPrefix)).values()
 
     entry_path = f"entry1/data/{bank}_dat_list_p_x_y_n_id_t"
@@ -112,14 +105,9 @@ def test_file_reader_mcstas_additional_fields(tmp_mcstas_file: pathlib.Path) -> 
         del file[entry_path]
         file[new_entry_path] = dataset
 
-    pl = sl.Pipeline(
-        loader_providers,
-        params={
-            FilePath: str(tmp_mcstas_file),
-            DetectorIndex: 0,
-            **default_parameters,
-        },
-    )
+    pl = NMXMcStasWorkflow()
+    pl[FilePath] = str(tmp_mcstas_file)
+    pl[DetectorIndex] = 0
     dg = pl.compute(NMXRawEventCountsDataGroup)
 
     assert isinstance(dg, sc.DataGroup)

@@ -6,8 +6,8 @@ import numpy as np
 import pytest
 import scipp as sc
 
-from ess.nmx.nexus import export_as_nexus
-from ess.nmx.reduction import NMXReducedDataGroup
+from ess.nmx.mcstas.nexus import export_as_nexus
+from ess.nmx.mcstas.types import NMXReducedDataGroup
 
 
 @pytest.fixture

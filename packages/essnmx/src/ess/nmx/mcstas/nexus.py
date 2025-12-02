@@ -256,7 +256,8 @@ def export_as_nexus(
     """
     warnings.warn(
         DeprecationWarning(
-            "Exporting to custom NeXus format will be deprecated in the near future."
+            "Exporting to custom NeXus format will be deprecated in the near future "
+            ">=26.12.0. "
             "Please use ``export_as_nxlauetof`` instead."
         ),
         stacklevel=2,

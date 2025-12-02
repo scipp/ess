@@ -1,14 +1,15 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
-from ..types import MaximumCounts
+from .types import MaximumCounts
 
 default_parameters = {MaximumCounts: 10000}
 
 
-def McStasWorkflow():
+def NMXMcStasWorkflow():
     import sciline as sl
 
-    from ess.nmx.reduction import (
+    from .load import providers as loader_providers
+    from .reduction import (
         calculate_maximum_toa,
         calculate_minimum_toa,
         format_nmx_reduced_data,
@@ -16,8 +17,6 @@ def McStasWorkflow():
         raw_event_probability_to_counts,
         reduce_raw_event_probability,
     )
-
-    from .load import providers as loader_providers
     from .xml import read_mcstas_geometry_xml
 
     return sl.Pipeline(
