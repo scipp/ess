@@ -30,19 +30,6 @@ from mcstas_description_examples import (
 )
 
 
-def check_scalar_properties_mcstas_2(dg: NMXRawEventCountsDataGroup):
-    """Test helper for NMXData loaded from McStas 2.
-
-    Expected numbers are hard-coded based on the sample file.
-    """
-    assert_identical(dg['crystal_rotation'], sc.vector([20, 0, 90], unit='deg'))
-    assert_identical(dg['sample_position'], sc.vector(value=[0, 0, 0], unit='m'))
-    assert_identical(
-        dg['source_position'], sc.vector(value=[-0.53123, 0.0, -157.405], unit='m')
-    )
-    assert dg['sample_name'] == sc.scalar("sampleMantid")
-
-
 def check_nmxdata_properties(
     dg: NMXRawEventCountsDataGroup, fast_axis, slow_axis
 ) -> None:
