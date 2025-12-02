@@ -34,6 +34,16 @@ from .detector import providers as detector_providers
 from .io import mcstas, nexus
 
 
+def default_parameters() -> dict[type, Any]:
+    """Default parameters for BifrostWorkflow."""
+    return {
+        NeXusMonitorName[FrameMonitor1]: '090_frame_1',
+        NeXusMonitorName[FrameMonitor2]: '097_frame_2',
+        NeXusMonitorName[FrameMonitor3]: '110_frame_3',
+        PulsePeriod: 1.0 / sc.scalar(14.0, unit="Hz"),
+    }
+
+
 def simulation_default_parameters() -> dict[type, Any]:
     """Default parameters for BifrostSimulationWorkflow."""
     return {
@@ -43,6 +53,16 @@ def simulation_default_parameters() -> dict[type, Any]:
         PulsePeriod: 1.0 / sc.scalar(14.0, unit="Hz"),
     }
 
+
+_PROVIDERS = (
+    *nexus.providers,
+    *conversion_providers,
+    *detector_providers,
+    *cutting_providers,
+    *ki_providers,
+    *kf_providers,
+    *normalisation_providers,
+)
 
 _SIMULATION_PROVIDERS = (
     *nexus.providers,
@@ -97,11 +117,9 @@ def BifrostWorkflow(
         run_types=(SampleRun,),
         monitor_types=(FrameMonitor0, FrameMonitor1, FrameMonitor2, FrameMonitor3),
     )
-    # TODO change to use non-simulation providers
-    for provider in _SIMULATION_PROVIDERS:
+    for provider in _PROVIDERS:
         workflow.insert(provider)
-    # TODO change to use non-simulation parameters
-    for key, val in simulation_default_parameters().items():
+    for key, val in default_parameters().items():
         workflow[key] = val
 
     workflow[EmptyDetector[SampleRun]] = (
