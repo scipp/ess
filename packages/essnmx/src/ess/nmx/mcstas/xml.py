@@ -11,7 +11,7 @@ import scipp as sc
 from defusedxml.ElementTree import fromstring
 
 from ..rotation import axis_angle_to_quaternion, quaternion_to_matrix
-from ..types import FilePath
+from .types import FilePath
 
 T = TypeVar('T')
 

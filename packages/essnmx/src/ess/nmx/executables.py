@@ -14,14 +14,26 @@ from ._executable_helper import (
     build_logger,
     collect_matching_input_files,
 )
-from .nexus import (
+
+# Temporarily keeping them until we migrate GenericWorkflow here
+from .mcstas.nexus import (
     _compute_positions,
     _export_detector_metadata_as_nxlauetof,
     _export_reduced_data_as_nxlauetof,
     _export_static_metadata_as_nxlauetof,
 )
-from .streaming import _validate_chunk_size
-from .types import Compression, NMXDetectorMetadata, NMXExperimentMetadata
+
+# Temporarily keeping them until we migrate GenericWorkflow here
+from .mcstas.types import NMXDetectorMetadata, NMXExperimentMetadata
+from .types import Compression
+
+
+def _validate_chunk_size(chunk_size: int) -> None:
+    """Validate the chunk size."""
+    if not isinstance(chunk_size, int):
+        raise TypeError("Chunk size must be an integer.")
+    if chunk_size < -1:
+        raise ValueError("Invalid chunk size. It should be -1(for all) or > 0.")
 
 
 def _retrieve_source_position(file: snx.File) -> sc.Variable:

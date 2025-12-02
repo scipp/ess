@@ -16,14 +16,19 @@ from ess.reduce.streaming import (
     StreamProcessor,
 )
 
-from ..nexus import (
+from ..types import Compression
+from . import NMXMcStasWorkflow
+from .load import (
+    mcstas_weight_to_probability_scalefactor,
+    raw_event_data_chunk_generator,
+)
+from .nexus import (
     _export_detector_metadata_as_nxlauetof,
     _export_reduced_data_as_nxlauetof,
     _export_static_metadata_as_nxlauetof,
 )
-from ..streaming import calculate_number_of_chunks
-from ..types import (
-    Compression,
+from .streaming import calculate_number_of_chunks
+from .types import (
     DetectorIndex,
     DetectorName,
     FilePath,
@@ -40,11 +45,6 @@ from ..types import (
     PixelIds,
     RawEventProbability,
     TimeBinSteps,
-)
-from . import McStasWorkflow
-from .load import (
-    mcstas_weight_to_probability_scalefactor,
-    raw_event_data_chunk_generator,
 )
 from .xml import McStasInstrument
 
@@ -147,7 +147,7 @@ def reduction(
     logger: logging.Logger | None = None,
     toa_min_max_prob: tuple[float] | None = None,
 ) -> None:
-    wf = wf.copy() if wf is not None else McStasWorkflow()
+    wf = wf.copy() if wf is not None else NMXMcStasWorkflow()
     wf[FilePath] = input_file
     # Set static info
     wf[McStasInstrument] = wf.compute(McStasInstrument)
@@ -283,8 +283,52 @@ def _add_mcstas_args(parser: argparse.ArgumentParser) -> None:
     )
 
 
+def build_reduction_arg_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description="Command line arguments for the NMX reduction. "
+        "It assumes 14 Hz pulse speed."
+    )
+    input_arg_group = parser.add_argument_group("Input Options")
+    input_arg_group.add_argument(
+        "--input_file", type=str, help="Path to the input file", required=True
+    )
+    input_arg_group.add_argument(
+        "--nbins",
+        type=int,
+        default=50,
+        help="Number of TOF bins",
+    )
+    input_arg_group.add_argument(
+        "--detector_ids",
+        type=int,
+        nargs="+",
+        default=[0, 1, 2],
+        help="Detector indices to process",
+    )
+
+    output_arg_group = parser.add_argument_group("Output Options")
+    output_arg_group.add_argument(
+        "--output_file",
+        type=str,
+        default="scipp_output.h5",
+        help="Path to the output file",
+    )
+    output_arg_group.add_argument(
+        "--compression",
+        type=str,
+        default=Compression.BITSHUFFLE_LZ4.name,
+        choices=[compression_key.name for compression_key in Compression],
+        help="Compress option of reduced output file. Default: BITSHUFFLE_LZ4",
+    )
+    output_arg_group.add_argument(
+        "--verbose", "-v", action="store_true", help="Increase output verbosity"
+    )
+
+    return parser
+
+
 def main() -> None:
-    from .._executable_helper import build_logger, build_reduction_arg_parser
+    from .._executable_helper import build_logger
 
     parser = build_reduction_arg_parser()
     _add_mcstas_args(parser)
@@ -295,7 +339,7 @@ def main() -> None:
 
     logger = build_logger(args)
 
-    wf = McStasWorkflow()
+    wf = NMXMcStasWorkflow()
     reduction(
         input_file=input_file,
         output_file=output_file,
