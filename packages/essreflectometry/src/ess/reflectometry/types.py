@@ -25,6 +25,7 @@ Position = nexus_t.Position
 TofDetector = tof_t.TofDetector
 PulseStrideOffset = tof_t.PulseStrideOffset
 TimeOfFlightLookupTable = tof_t.TimeOfFlightLookupTable
+TimeOfFlightLookupTableFilename = tof_t.TimeOfFlightLookupTableFilename
 DetectorLtotal = tof_t.DetectorLtotal
 
 

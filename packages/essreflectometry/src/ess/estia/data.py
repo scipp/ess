@@ -166,12 +166,8 @@ def estia_mcstas_spin_flip_example_download_all_to_cache():
             pass
 
 
-def estia_tof_lookup_table(pulse_stride=1):
-    if pulse_stride == 1:
-        return sc.io.load_hdf5(
-            _registry.get_path('estia-tof-lookup-table-pulse-stride-1.h5')
-        )
-    raise ValueError('Tof lookup table for pulse_stride={pulse_stride} does not exist.')
+def estia_tof_lookup_table():
+    return _registry.get_path('estia-tof-lookup-table-pulse-stride-1.h5')
 
 
 __all__ = [

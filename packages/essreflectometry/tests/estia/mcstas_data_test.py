@@ -29,7 +29,7 @@ from ess.reflectometry.types import (
     ReferenceRun,
     ReflectivityOverQ,
     SampleRun,
-    TimeOfFlightLookupTable,
+    TimeOfFlightLookupTableFilename,
     WavelengthBins,
     YIndexLimits,
     ZIndexLimits,
@@ -48,7 +48,7 @@ def estia_mcstas_pipeline() -> sciline.Pipeline:
     wf[WavelengthBins] = sc.geomspace('wavelength', 3.5, 12, 2001, unit='angstrom')
     wf[QBins] = sc.geomspace('Q', 0.005, 0.1, 200, unit='1/angstrom')
 
-    wf[TimeOfFlightLookupTable] = estia_tof_lookup_table()
+    wf[TimeOfFlightLookupTableFilename] = estia_tof_lookup_table()
 
     wf[ProtonCurrent[SampleRun]] = sc.DataArray(
         sc.array(dims=('time',), values=[]),
