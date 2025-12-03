@@ -3,6 +3,13 @@
 """A single crystal reduction workflow for BIFROST's Bragg peak monitor."""
 
 from .q_map import make_q_map
-from .workflow import BifrostBraggPeakMonitorWorkflow
+from .workflow import (
+    BifrostBraggPeakMonitorWorkflow,
+    BifrostSimulationBraggPeakMonitorWorkflow,
+)
 
-__all__ = ["BifrostBraggPeakMonitorWorkflow", "make_q_map"]
+__all__ = [
+    "BifrostBraggPeakMonitorWorkflow",
+    "BifrostSimulationBraggPeakMonitorWorkflow",
+    "make_q_map",
+]
