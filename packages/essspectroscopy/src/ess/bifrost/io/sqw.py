@@ -15,8 +15,8 @@ from ess.spectroscopy.types import (
     Beamline,
     EnergyBins,
     GravityVector,
-    IncidentEnergyDetector,
     Measurement,
+    NormalizedIncidentEnergyDetector,
     OutFilename,
     PulsePeriod,
     SampleRun,
@@ -32,7 +32,7 @@ _AXIS_W = sc.vector([0, 0, 1], unit="1/angstrom")
 
 def save_sqw(
     path: OutFilename,
-    events: IncidentEnergyDetector[SampleRun],
+    events: NormalizedIncidentEnergyDetector[SampleRun],
     *,
     bin_sizes: SQWBinSizes,
     energy_bins: EnergyBins,
@@ -148,7 +148,9 @@ def save_sqw(
     builder.create()
 
 
-def _flatten_events(events: IncidentEnergyDetector[SampleRun]) -> sc.DataArray:
+def _flatten_events(
+    events: NormalizedIncidentEnergyDetector[SampleRun],
+) -> sc.DataArray:
     """Flatten events from (*logical, a3, a4) to (detector, setting).
 
     Also assigns the 'irun' coordinate as that requires the initial shape.

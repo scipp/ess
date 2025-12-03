@@ -14,8 +14,10 @@ from ess.bifrost.live import BifrostQCutWorkflow, CutAxis, CutAxis1, CutAxis2, C
 from ess.spectroscopy.types import (
     Filename,
     NeXusDetectorName,
+    ProtonCharge,
     SampleRun,
     TimeOfFlightLookupTableFilename,
+    UncertaintyBroadcastMode,
 )
 
 
@@ -34,6 +36,8 @@ class TestBifrostQCutWorkflow:
         workflow = BifrostQCutWorkflow(simulation_detector_names)
         workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
         workflow[TimeOfFlightLookupTableFilename] = tof_lookup_table_simulation()
+        workflow[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
+        workflow[ProtonCharge[SampleRun]] = sc.DataArray(sc.scalar(1.0, unit='pC'))
         return workflow
 
     def test_cut_along_q_norm_and_energy_transfer(
