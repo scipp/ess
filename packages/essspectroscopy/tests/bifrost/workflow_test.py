@@ -21,6 +21,7 @@ from ess.spectroscopy.types import (
     RawMonitor,
     SampleRun,
     TimeOfFlightLookupTableFilename,
+    UncertaintyBroadcastMode,
     WavelengthMonitor,
 )
 
@@ -37,6 +38,7 @@ def workflow(simulation_detector_names: list[NeXusDetectorName]) -> sciline.Pipe
     workflow = bifrost.BifrostSimulationWorkflow(simulation_detector_names)
     workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
     workflow[TimeOfFlightLookupTableFilename] = tof_lookup_table_simulation()
+    workflow[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
     return workflow
 
 
@@ -95,8 +97,8 @@ def test_simulation_workflow_can_compute_wavelength_monitor(
     workflow: sciline.Pipeline,
 ) -> None:
     monitor = workflow.compute(WavelengthMonitor[SampleRun, FrameMonitor3])
-    assert set(monitor.dims) == {'time', 'wavelength'}
-    expected_coords = {'position', 'wavelength', 'time'}
+    assert set(monitor.dims) == {'time', 'incident_wavelength'}
+    expected_coords = {'position', 'incident_wavelength', 'time'}
     assert expected_coords.issubset(monitor.coords)
     assert monitor.bins is None
 

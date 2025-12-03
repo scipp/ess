@@ -11,6 +11,7 @@
    :toctree: ../generated/functions
    :recursive:
 
+   BifrostWorkflow
    BifrostSimulationWorkflow
 ```
 
@@ -43,6 +44,7 @@
    detector
    io
    live
+   normalization
    types
    workflow
 ```

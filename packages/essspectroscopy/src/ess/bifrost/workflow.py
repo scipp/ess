@@ -12,7 +12,6 @@ from scippnexus import NXdetector
 from ess.spectroscopy.indirect.conversion import providers as conversion_providers
 from ess.spectroscopy.indirect.kf import providers as kf_providers
 from ess.spectroscopy.indirect.ki import providers as ki_providers
-from ess.spectroscopy.indirect.normalization import providers as normalisation_providers
 from ess.spectroscopy.indirect.time_of_flight import TofWorkflow
 from ess.spectroscopy.types import (
     EmptyDetector,
@@ -23,15 +22,18 @@ from ess.spectroscopy.types import (
     NeXusData,
     NeXusDetectorName,
     NeXusMonitorName,
+    ProtonCharge,
     PulsePeriod,
     RawDetector,
     SampleRun,
+    UncertaintyBroadcastMode,
 )
 
 from .cutting import providers as cutting_providers
 from .detector import merge_triplets
 from .detector import providers as detector_providers
 from .io import mcstas, nexus
+from .normalization import providers as normalisation_providers
 
 
 def default_parameters() -> dict[type, Any]:
@@ -41,6 +43,7 @@ def default_parameters() -> dict[type, Any]:
         NeXusMonitorName[FrameMonitor2]: '097_frame_2',
         NeXusMonitorName[FrameMonitor3]: '110_frame_3',
         PulsePeriod: 1.0 / sc.scalar(14.0, unit="Hz"),
+        UncertaintyBroadcastMode: UncertaintyBroadcastMode.fail,
     }
 
 
@@ -51,6 +54,8 @@ def simulation_default_parameters() -> dict[type, Any]:
         NeXusMonitorName[FrameMonitor2]: '097_frame_2',
         NeXusMonitorName[FrameMonitor3]: '110_frame_3',
         PulsePeriod: 1.0 / sc.scalar(14.0, unit="Hz"),
+        ProtonCharge[SampleRun]: sc.DataArray(sc.scalar(1.0, unit='pC')),
+        UncertaintyBroadcastMode: UncertaintyBroadcastMode.fail,
     }
 
 
