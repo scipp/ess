@@ -234,14 +234,18 @@ def reduction(
 
     """
     display = _retrieve_display(logger, display)
+    input_file_path = _retrieve_input_file(
+        collect_matching_input_files(*config.inputs.input_file)
+    ).resolve()
+    display(f"Input file: {input_file_path}")
+
+    output_file_path = pathlib.Path(config.output.output_file).resolve()
+    display(f"Output file: {output_file_path}")
 
     toa_bin_edges = build_toa_bin_edges(
         min_toa=config.workflow.min_time_bin or 0,
         max_toa=config.workflow.max_time_bin or int((1 / 14) * 1_000),
         toa_bin_edges=config.workflow.nbins,
-    )
-    input_file_path = _retrieve_input_file(
-        [pathlib.Path(p) for p in config.inputs.input_file]
     )
     with snx.File(input_file_path) as f:
         intrument_group = f['entry/instrument']
@@ -281,7 +285,7 @@ def reduction(
 
         _export_static_metadata_as_nxlauetof(
             experiment_metadata=experiment_metadata,
-            output_file=pathlib.Path(config.output.output_file),
+            output_file=output_file_path,
         )
         detector_grs = {}
         for det_name, det_group in detector_id_map.items():
@@ -313,7 +317,7 @@ def reduction(
             )
             _export_detector_metadata_as_nxlauetof(
                 NMXDetectorMetadata(detector_meta),
-                output_file=pathlib.Path(config.output.output_file),
+                output_file=output_file_path,
             )
 
             da: sc.DataArray = dg['data']
@@ -371,7 +375,7 @@ def reduction(
             display("Saving reduced data to Nexus file...")
             _export_reduced_data_as_nxlauetof(
                 dg,
-                output_file=pathlib.Path(config.output.output_file),
+                output_file=output_file_path,
                 compress_counts=(
                     config.output.compression == Compression.BITSHUFFLE_LZ4
                 ),
@@ -386,12 +390,6 @@ def reduction(
 def main() -> None:
     parser = build_reduction_argument_parser()
     config = reduction_config_from_args(parser.parse_args())
-
-    input_file = collect_matching_input_files(*config.inputs.input_file)
-    output_file = pathlib.Path(config.output.output_file).resolve()
     logger = build_logger(config.output)
-
-    logger.info("Input file: %s", input_file)
-    logger.info("Output file: %s", output_file)
 
     reduction(config=config, logger=logger)
