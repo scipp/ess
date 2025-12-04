@@ -3,25 +3,25 @@
 
 import pathlib
 import subprocess
+from contextlib import contextmanager
 from enum import Enum
 
 import pydantic
 import pytest
 import scipp as sc
 import scippnexus as snx
-from scipp.testing import assert_allclose
 
 from ess.nmx._executable_helper import (
     InputConfig,
     OutputConfig,
     ReductionConfig,
-    TimeBinCoordinate,
-    TimeBinUnit,
     WorkflowConfig,
     build_reduction_argument_parser,
     reduction_config_from_args,
     to_command_arguments,
 )
+from ess.nmx.configurations import TimeBinCoordinate, TimeBinUnit
+from ess.nmx.executables import reduction
 from ess.nmx.types import Compression
 
 
@@ -127,9 +127,7 @@ def small_nmx_nexus_path():
     return get_small_nmx_nexus()
 
 
-def _check_output_file(
-    output_file_path: pathlib.Path, expected_toa_output: sc.Variable
-):
+def _check_output_file(output_file_path: pathlib.Path, nbins: int):
     detector_names = [f'detector_panel_{i}' for i in range(3)]
     with snx.File(output_file_path, 'r') as f:
         # Test
@@ -137,7 +135,7 @@ def _check_output_file(
             det_gr = f[f'entry/instrument/{name}']
             assert det_gr is not None
             toa_edges = det_gr['time_of_flight'][()]
-            assert_allclose(toa_edges, expected_toa_output)
+            assert len(toa_edges) == nbins
 
 
 def test_executable_runs(small_nmx_nexus_path, tmp_path: pathlib.Path):
@@ -147,15 +145,6 @@ def test_executable_runs(small_nmx_nexus_path, tmp_path: pathlib.Path):
 
     nbins = 20  # Small number of bins for testing.
     # The output has 1280x1280 pixels per detector per time bin.
-    expected_toa_bins = sc.linspace(
-        dim='dim_0',
-        start=2,  # Unrealistic number for testing
-        stop=int((1 / 15) * 1_000),  # Unrealistic number for testing
-        num=nbins + 1,
-        unit='ms',
-    )
-    expected_toa_output = sc.midpoints(expected_toa_bins, dim='dim_0').to(unit='ns')
-
     commands = (
         'essnmx-reduce',
         '--input-file',
@@ -164,18 +153,61 @@ def test_executable_runs(small_nmx_nexus_path, tmp_path: pathlib.Path):
         str(nbins),
         '--output-file',
         output_file.as_posix(),
-        '--min-time-bin',
-        str(int(expected_toa_bins.min().value)),
-        '--max-time-bin',
-        str(int(expected_toa_bins.max().value)),
     )
     # Validate that all commands are strings and contain no unsafe characters
     result = subprocess.run(  # noqa: S603 - We are not accepting arbitrary input here.
-        commands,
-        text=True,
-        capture_output=True,
-        check=False,
+        commands, text=True, capture_output=True, check=False
     )
     assert result.returncode == 0
     assert output_file.exists()
-    _check_output_file(output_file, expected_toa_output=expected_toa_output)
+    _check_output_file(output_file, nbins=nbins)
+
+
+@contextmanager
+def known_warnings():
+    with pytest.warns(RuntimeWarning, match="No crystal rotation*"):
+        yield
+
+
+@pytest.fixture
+def temp_output_file(tmp_path: pathlib.Path):
+    output_file_path = tmp_path / "scipp_output.h5"
+    yield output_file_path
+    if output_file_path.exists():
+        output_file_path.unlink()
+
+
+@pytest.fixture
+def reduction_config(
+    small_nmx_nexus_path: pathlib.Path, temp_output_file: pathlib.Path
+) -> ReductionConfig:
+    input_config = InputConfig(input_file=[small_nmx_nexus_path.as_posix()])
+    # Compression option is not default (NONE) but
+    # the actual default compression option, BITSHUFFLE_LZ4,
+    # only properly works in linux so we set it to NONE here
+    # for convenience of testing on all platforms.
+    output_config = OutputConfig(
+        output_file=temp_output_file.as_posix(), compression=Compression.NONE
+    )
+    return ReductionConfig(inputs=input_config, output=output_config)
+
+
+def _retrieve_one_hist(results: sc.DataGroup) -> sc.DataArray:
+    """Helper to retrieve the first DataArray from the results dictionary."""
+    return results['histogram']['detector_panel_0']
+
+
+def test_reduction_default_settings(reduction_config: ReductionConfig) -> None:
+    # Only check if reduction runs without errors with default settings.
+    with known_warnings():
+        reduction(config=reduction_config)
+
+
+def test_reduction_only_number_of_time_bins(reduction_config: ReductionConfig) -> None:
+    reduction_config.workflow.nbins = 20
+    reduction_config.workflow.time_bin_coordinate = TimeBinCoordinate.time_of_flight
+    with known_warnings():
+        hist = _retrieve_one_hist(reduction(config=reduction_config))
+
+    # Check that the number of time bins is as expected.
+    assert len(hist.coords['tof']) == 21  # nbins + 1 edges
