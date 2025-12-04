@@ -13,16 +13,18 @@ import ess.loki.data  # noqa: F401
 from ess import loki, sans
 from ess.sans.conversions import ElasticCoordTransformGraph
 from ess.sans.types import (
+    BackgroundRun,
     BackgroundSubtractedIofQ,
     BackgroundSubtractedIofQxy,
     BeamCenter,
-    CleanWavelength,
+    CorrectedDetector,
     CorrectForGravity,
     Denominator,
     DimsToKeep,
-    IofQ,
-    IofQxy,
-    MaskedData,
+    Filename,
+    IntensityQ,
+    IntensityQxQy,
+    NormalizedQ,
     Numerator,
     QBins,
     QxBins,
@@ -32,7 +34,7 @@ from ess.sans.types import (
     UncertaintyBroadcastMode,
     WavelengthBands,
     WavelengthBins,
-    WavelengthScaledQ,
+    WavelengthDetector,
 )
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -92,8 +94,8 @@ def test_pipeline_can_compute_IofQ(uncertainties, qxy: bool):
 @pytest.mark.parametrize(
     'target',
     [
-        IofQ[SampleRun],
-        IofQxy[SampleRun],
+        IntensityQ[SampleRun],
+        IntensityQxQy[SampleRun],
         BackgroundSubtractedIofQ,
         BackgroundSubtractedIofQxy,
     ],
@@ -105,7 +107,7 @@ def test_pipeline_can_compute_IofQ_in_event_mode(uncertainties, target):
     reference = pipeline.compute(target)
     pipeline[ReturnEvents] = True
     result = pipeline.compute(target)
-    qxy = target in (IofQxy[SampleRun], BackgroundSubtractedIofQxy)
+    qxy = target in (IntensityQxQy[SampleRun], BackgroundSubtractedIofQxy)
     assert result.bins is not None
     assert result.dims == ('Qy', 'Qx') if qxy else ('Q',)
     assert sc.allclose(
@@ -192,11 +194,16 @@ def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs():
     pipeline = make_workflow()
     pipeline[BeamCenter] = _compute_beam_center()
 
+    # Remove previously set runs so we can be sure that below we use the mapped ones
+    pipeline[Filename[SampleRun]] = None
+    pipeline[Filename[BackgroundRun]] = None
     pipeline = sans.with_sample_runs(pipeline, runs=sample_runs)
     pipeline = sans.with_background_runs(pipeline, runs=background_runs)
 
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('Q',)
+    result = pipeline.compute(BackgroundSubtractedIofQxy)
+    assert result.dims == ('Qy', 'Qx')
 
 
 def test_pipeline_can_compute_IofQ_by_bank():
@@ -252,21 +259,17 @@ def test_pipeline_IofQ_merging_events_yields_consistent_results():
     assert all(sc.variances(iofq1.data) > sc.variances(iofq3.data))
     assert sc.allclose(
         sc.values(
-            pipeline_single.compute(WavelengthScaledQ[SampleRun, Numerator]).hist().data
+            pipeline_single.compute(NormalizedQ[SampleRun, Numerator]).hist().data
         )
         * N,
         sc.values(
-            pipeline_triple.compute(WavelengthScaledQ[SampleRun, Numerator]).hist().data
+            pipeline_triple.compute(NormalizedQ[SampleRun, Numerator]).hist().data
         ),
     )
     assert sc.allclose(
-        sc.values(
-            pipeline_single.compute(WavelengthScaledQ[SampleRun, Denominator]).data
-        )
+        sc.values(pipeline_single.compute(NormalizedQ[SampleRun, Denominator]).data)
         * N,
-        sc.values(
-            pipeline_triple.compute(WavelengthScaledQ[SampleRun, Denominator]).data
-        ),
+        sc.values(pipeline_triple.compute(NormalizedQ[SampleRun, Denominator]).data),
     )
 
 
@@ -284,17 +287,17 @@ def test_phi_with_gravity():
     pipeline = make_workflow()
     pipeline[BeamCenter] = _compute_beam_center()
     pipeline[CorrectForGravity] = False
-    data_no_grav = pipeline.compute(CleanWavelength[SampleRun, Numerator]).flatten(
+    data_no_grav = pipeline.compute(WavelengthDetector[SampleRun, Numerator]).flatten(
         to='pixel'
     )
-    graph_no_grav = pipeline.compute(ElasticCoordTransformGraph)
+    graph_no_grav = pipeline.compute(ElasticCoordTransformGraph[SampleRun])
     pipeline[CorrectForGravity] = True
     data_with_grav = (
-        pipeline.compute(CleanWavelength[SampleRun, Numerator])
+        pipeline.compute(WavelengthDetector[SampleRun, Numerator])
         .flatten(to='pixel')
         .hist(wavelength=sc.linspace('wavelength', 1.0, 12.0, 101, unit='angstrom'))
     )
-    graph_with_grav = pipeline.compute(ElasticCoordTransformGraph)
+    graph_with_grav = pipeline.compute(ElasticCoordTransformGraph[SampleRun])
 
     no_grav = data_no_grav.transform_coords(('two_theta', 'phi'), graph_no_grav)
     phi_no_grav = no_grav.coords['phi']
@@ -306,7 +309,7 @@ def test_phi_with_gravity():
     # Exclude pixels near y=0, since phi with gravity could drop below y=0 and give a
     # difference of almost 2*pi.
     y = sc.abs(
-        pipeline.compute(MaskedData[SampleRun])
+        pipeline.compute(CorrectedDetector[SampleRun, Numerator])
         .coords['position']
         .fields.y.flatten(to='pixel')
     )

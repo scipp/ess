@@ -16,11 +16,12 @@ from .logging import get_logger
 from .types import (
     BeamCenter,
     CleanDirectBeam,
+    CorrectedDetector,
     DetectorBankSizes,
     DimsToKeep,
-    IofQ,
-    MaskedData,
+    IntensityQ,
     NeXusComponent,
+    Numerator,
     QBins,
     ReturnEvents,
     SampleRun,
@@ -51,7 +52,7 @@ def beam_center_from_center_of_mass(workflow: sciline.Pipeline) -> BeamCenter:
     Parameters
     ----------
     workflow:
-        The reduction workflow to compute MaskedData[SampleRun].
+        The reduction workflow to compute CorrectedDetector[SampleRun, Numerator].
 
     Returns
     -------
@@ -64,8 +65,8 @@ def beam_center_from_center_of_mass(workflow: sciline.Pipeline) -> BeamCenter:
         beam_center = sc.vector([0.0, 0.0, 0.0], unit='m')
         workflow = workflow.copy()
         workflow[BeamCenter] = beam_center
-    data = workflow.compute(MaskedData[SampleRun])
-    graph = workflow.compute(ElasticCoordTransformGraph)
+    data = workflow.compute(CorrectedDetector[SampleRun, Numerator])
+    graph = workflow.compute(ElasticCoordTransformGraph[SampleRun])
 
     dims_to_sum = set(data.dims) - set(data.coords['position'].dims)
     if dims_to_sum:
@@ -150,10 +151,10 @@ def _iofq_in_quadrants(
     phi_bins = sc.linspace('phi', -pi, pi, 5, unit='rad')
     quadrants = ['south-west', 'south-east', 'north-east', 'north-west']
 
-    graph = workflow.compute(ElasticCoordTransformGraph)
+    graph = workflow.compute(ElasticCoordTransformGraph[SampleRun])
     workflow = workflow.copy()
     workflow[BeamCenter] = _offsets_to_vector(data=detector, xy=xy, graph=graph)
-    calibrated = workflow.compute(MaskedData[SampleRun])
+    calibrated = workflow.compute(CorrectedDetector[SampleRun, Numerator])
     with_phi = calibrated.transform_coords(
         'phi', graph=graph, keep_intermediate=False, keep_inputs=False
     )
@@ -171,15 +172,15 @@ def _iofq_in_quadrants(
     for i, quad in enumerate(quadrants):
         # Select pixels based on phi
         sel = (phi >= phi_bins[i]) & (phi < phi_bins[i + 1])
-        # The beam center is applied when computing CalibratedDetector, set quadrant
+        # The beam center is applied when computing EmptyDetector, set quadrant
         # *before* that step.
         workflow[NeXusComponent[snx.NXdetector, SampleRun]] = sc.DataGroup(
             data=detector[sel]
         )
         # MaskedData would be computed automatically, but we did it above already
-        workflow[MaskedData[SampleRun]] = calibrated[sel]
+        workflow[CorrectedDetector[SampleRun, Numerator]] = calibrated[sel]
         workflow[CleanDirectBeam] = norm if norm.dims == ('wavelength',) else norm[sel]
-        out[quad] = workflow.compute(IofQ[SampleRun])
+        out[quad] = workflow.compute(IntensityQ[SampleRun])
     return out
 
 
@@ -364,18 +365,18 @@ def beam_center_from_iofq(
 
     keys = (
         NeXusComponent[snx.NXdetector, SampleRun],
-        MaskedData[SampleRun],
+        CorrectedDetector[SampleRun, Numerator],
         CleanDirectBeam,
-        ElasticCoordTransformGraph,
+        ElasticCoordTransformGraph[SampleRun],
     )
     workflow = workflow.copy()
     # Avoid reshape of detector, which would break boolean-indexing by cost function
     workflow[DetectorBankSizes] = {}
     results = workflow.compute(keys)
     detector = results[NeXusComponent[snx.NXdetector, SampleRun]]['data']
-    data = results[MaskedData[SampleRun]]
+    data = results[CorrectedDetector[SampleRun, Numerator]]
     norm = results[CleanDirectBeam]
-    graph = results[ElasticCoordTransformGraph]
+    graph = results[ElasticCoordTransformGraph[SampleRun]]
 
     # Avoid reloading the detector
     workflow[NeXusComponent[snx.NXdetector, SampleRun]] = sc.DataGroup(data=detector)

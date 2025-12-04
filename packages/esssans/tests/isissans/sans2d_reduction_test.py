@@ -14,20 +14,21 @@ from ess.sans.types import (
     BackgroundRun,
     BackgroundSubtractedIofQ,
     BeamCenter,
-    CalibratedDetector,
+    CorrectedDetector,
     CorrectForGravity,
-    DetectorData,
     DimsToKeep,
     DirectBeam,
     DirectBeamFilename,
     EmptyBeamRun,
+    EmptyDetector,
     Filename,
     Incident,
-    IofQ,
-    MaskedData,
+    IntensityQ,
     NeXusMonitorName,
     NonBackgroundWavelengthRange,
+    Numerator,
     QBins,
+    RawDetector,
     ReturnEvents,
     SampleRun,
     SolidAngle,
@@ -103,7 +104,7 @@ def pipeline():
 
 
 def test_can_create_pipeline(pipeline):
-    pipeline.get(IofQ[SampleRun])
+    pipeline.get(IntensityQ[SampleRun])
 
 
 @pytest.mark.parametrize(
@@ -141,7 +142,7 @@ def test_workflow_is_deterministic(pipeline):
     pipeline[BeamCenter] = sans.beam_center_from_center_of_mass(pipeline)
     # This is Sciline's default scheduler, but we want to be explicit here
     scheduler = sciline.scheduler.DaskScheduler()
-    graph = pipeline.get(IofQ[SampleRun], scheduler=scheduler)
+    graph = pipeline.get(IntensityQ[SampleRun], scheduler=scheduler)
     reference = graph.compute().data
     result = graph.compute().data
     assert sc.identical(sc.values(result), sc.values(reference))
@@ -162,9 +163,9 @@ def test_uncertainty_broadcast_mode_drop_yields_smaller_variances(pipeline):
         dim='Q', start=0.01, stop=0.5, num=141, unit='1/angstrom'
     )
     pipeline[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
-    drop = pipeline.compute(IofQ[SampleRun]).data
+    drop = pipeline.compute(IntensityQ[SampleRun]).data
     pipeline[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
-    upper_bound = pipeline.compute(IofQ[SampleRun]).data
+    upper_bound = pipeline.compute(IntensityQ[SampleRun]).data
     assert sc.all(sc.variances(drop) < sc.variances(upper_bound)).value
 
 
@@ -178,7 +179,7 @@ def test_pipeline_can_compute_intermediate_results(pipeline):
 
 
 def pixel_dependent_direct_beam(
-    filename: DirectBeamFilename, shape: CalibratedDetector[SampleRun]
+    filename: DirectBeamFilename, shape: EmptyDetector[SampleRun]
 ) -> DirectBeam:
     direct_beam = isis.io.load_tutorial_direct_beam(filename)
     sizes = {'spectrum': shape.sizes['spectrum'], **direct_beam.sizes}
@@ -224,7 +225,7 @@ def test_beam_center_finder_without_direct_beam_reproduces_verified_result(pipel
 
 def test_beam_center_can_get_closer_to_verified_result_with_low_counts_mask(pipeline):
     def low_counts_mask(
-        sample: DetectorData[SampleRun],
+        sample: RawDetector[SampleRun],
         low_counts_threshold: sans2d.LowCountThreshold,
     ) -> sans2d.SampleHolderMask:
         return sans2d.SampleHolderMask(sample.hist().data < low_counts_threshold)
@@ -269,7 +270,9 @@ def test_beam_center_finder_works_with_pixel_dependent_direct_beam(pipeline):
     direct_beam = pipeline.compute(DirectBeam)
     pixel_dependent_direct_beam = direct_beam.broadcast(
         sizes={
-            'spectrum': pipeline.compute(MaskedData[SampleRun]).sizes['spectrum'],
+            'spectrum': pipeline.compute(CorrectedDetector[SampleRun, Numerator]).sizes[
+                'spectrum'
+            ],
             'wavelength': direct_beam.sizes['wavelength'],
         }
     ).copy()
@@ -284,9 +287,9 @@ def test_beam_center_finder_works_with_pixel_dependent_direct_beam(pipeline):
 
 def test_workflow_runs_without_gravity_if_beam_center_is_provided(pipeline):
     pipeline[CorrectForGravity] = False
-    da = pipeline.compute(DetectorData[SampleRun])
+    da = pipeline.compute(RawDetector[SampleRun])
     del da.coords['gravity']
-    pipeline[DetectorData[SampleRun]] = da
+    pipeline[RawDetector[SampleRun]] = da
     pipeline[BeamCenter] = MANTID_BEAM_CENTER
     result = pipeline.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('Q',)
