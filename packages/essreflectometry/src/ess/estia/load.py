@@ -96,6 +96,7 @@ def load_mcstas_events(
     )
     da.bins.coords.pop('L')
     da.bins.coords.pop('t')
+    da.bins.coords['wavelength_from_mcstas'] = da.bins.coords.pop('wavelength')
     return RawDetector[RunType](da)
 
 

@@ -10,10 +10,8 @@ from ..reflectometry.types import (
     BeamDivergenceLimits,
     DetectorSpatialResolution,
     NeXusDetectorName,
-    ReferenceRun,
     RunType,
     SampleRotationOffset,
-    SampleRun,
 )
 from . import beamline, conversions, corrections, load, maskings, normalization, orso
 
@@ -67,11 +65,12 @@ def default_parameters() -> dict:
 
 def EstiaMcStasWorkflow() -> sciline.Pipeline:
     """Workflow for reduction of McStas data for the Estia instrument."""
-    return sciline.Pipeline(
-        providers=mcstas_providers,
-        params=mcstas_default_parameters(),
-        constraints={RunType: [SampleRun, ReferenceRun]},
-    )
+    workflow = beamline.LoadNeXusWorkflow()
+    for provider in mcstas_providers:
+        workflow.insert(provider)
+    for name, param in mcstas_default_parameters().items():
+        workflow[name] = param
+    return workflow
 
 
 def EstiaWorkflow() -> sciline.Pipeline:

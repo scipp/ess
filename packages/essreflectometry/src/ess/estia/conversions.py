@@ -1,10 +1,14 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import scipp as sc
+from scippneutron.conversion.tof import wavelength_from_tof
 
 from ..reflectometry.conversions import reflectometry_q
 from ..reflectometry.types import (
     CoordTransformationGraph,
+    DetectorLtotal,
+    RawDetector,
+    RunType,
 )
 
 
@@ -58,18 +62,15 @@ def divergence_angle(
     return sc.atan2(y=p.fields.x, x=p.fields.z) - detector_rotation.to(unit='rad')
 
 
-def wavelength(
-    event_time_offset,
-    # Other inputs
-):
-    "Converts event_time_offset to wavelength"
-    # Use frame unwrapping from scippneutron
-    raise NotImplementedError()
+def detector_ltotal_from_raw(
+    da: RawDetector[RunType], graph: CoordTransformationGraph
+) -> DetectorLtotal[RunType]:
+    return da.transform_coords(['Ltotal'], graph=graph).coords['Ltotal']
 
 
 def coordinate_transformation_graph() -> CoordTransformationGraph:
     return {
-        "wavelength": wavelength,
+        "wavelength": wavelength_from_tof,
         "theta": theta,
         "divergence_angle": divergence_angle,
         "Q": reflectometry_q,
@@ -77,7 +78,18 @@ def coordinate_transformation_graph() -> CoordTransformationGraph:
             sample_position - source_position
         ),  # + extra correction for guides?
         "L2": lambda position, sample_position: sc.norm(position - sample_position),
+        "Ltotal": lambda L1, L2: L1 + L2,
     }
 
 
-providers = (coordinate_transformation_graph,)
+def mcstas_wavelength_coordinate_transformation_graph() -> CoordTransformationGraph:
+    return {
+        **coordinate_transformation_graph(),
+        "wavelength": lambda wavelength_from_mcstas: wavelength_from_mcstas,
+    }
+
+
+providers = (
+    coordinate_transformation_graph,
+    detector_ltotal_from_raw,
+)

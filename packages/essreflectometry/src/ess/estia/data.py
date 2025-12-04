@@ -56,6 +56,7 @@ _registry = make_registry(
         "spin_flip_example/magnetic_supermirror_offon.h5": "md5:f2e06c989c347e8e1f32e3f2a48580ce",  # noqa: E501
         "spin_flip_example/supermirror_onoff.h5": "md5:3ae9863d13d79c24e29017948bd383ab",  # noqa: E501
         "spin_flip_example/supermirror_offoff.h5": "md5:22bc20099b2f456e459391189ee60977",  # noqa: E501
+        "estia-tof-lookup-table-pulse-stride-1.h5": "md5:696953c772209fadc9c4a2ca619cf04d",  # noqa: E501
     },
 )
 
@@ -163,6 +164,10 @@ def estia_mcstas_spin_flip_example_download_all_to_cache():
             ],
         ):
             pass
+
+
+def estia_tof_lookup_table():
+    return _registry.get_path('estia-tof-lookup-table-pulse-stride-1.h5')
 
 
 __all__ = [
