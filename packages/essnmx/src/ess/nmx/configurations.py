@@ -98,6 +98,11 @@ class WorkflowConfig(BaseModel):
         "If None, the lookup table will be computed on-the-fly.",
         default=None,
     )
+    tof_simulation_num_neutrons: int = Field(
+        title="Number of Neutrons for TOF Simulation",
+        description="Number of neutrons to simulate for TOF lookup table calculation.",
+        default=1_000_000,
+    )
     tof_simulation_min_wavelength: float = Field(
         title="TOF Simulation Minimum Wavelength",
         description="Minimum wavelength for TOF simulation in Angstrom.",

@@ -56,7 +56,12 @@ def _simulate_fixed_wavelength_tof(
     ----------
     """
     source = tof.Source(
-        facility="ess", neutrons=neutrons, pulses=2, seed=seed, wmax=wmax, wmin=wmin
+        facility="ess",
+        neutrons=neutrons,
+        pulses=1,  # NMX does not use pulse-skipping.
+        seed=seed,
+        wmax=wmax,
+        wmin=wmin,
     )
     nmx_det = tof.Detector(distance=max(ltotal_range), name="detector")
     model = tof.Model(source=source, choppers=[], detectors=[nmx_det])
