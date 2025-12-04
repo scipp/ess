@@ -33,16 +33,23 @@ from .types import (
 from .workflows import NMXWorkflow, compute_lookup_table, select_detector_names
 
 
-def _retrieve_input_file(input_file: list[pathlib.Path] | pathlib.Path) -> pathlib.Path:
+def _retrieve_input_file(input_file: list[str]) -> pathlib.Path:
     """Temporary helper to retrieve a single input file from the list
     Until multiple input file support is implemented.
     """
-    if isinstance(input_file, list) and len(input_file) != 1:
-        raise NotImplementedError(
-            "Currently, only a single input file is supported for reduction."
-        )
-    elif isinstance(input_file, list):
-        input_file_path = input_file[0]
+    if isinstance(input_file, list):
+        input_files = collect_matching_input_files(*input_file)
+        if len(input_files) == 0:
+            raise ValueError(
+                "No input files found for reduction."
+                "Check if the file paths are correct.",
+                input_file,
+            )
+        elif len(input_files) > 1:
+            raise NotImplementedError(
+                "Currently, only a single input file is supported for reduction."
+            )
+        input_file_path = input_files[0]
     else:
         input_file_path = input_file
 
@@ -132,9 +139,7 @@ def reduction(
 
     """
     display = _retrieve_display(logger, display)
-    input_file_path = _retrieve_input_file(
-        collect_matching_input_files(*config.inputs.input_file)
-    ).resolve()
+    input_file_path = _retrieve_input_file(config.inputs.input_file).resolve()
     display(f"Input file: {input_file_path}")
 
     output_file_path = pathlib.Path(config.output.output_file).resolve()
