@@ -29,7 +29,8 @@ TimeOfFlightLookupTableFilename = tof_t.TimeOfFlightLookupTableFilename
 DetectorLtotal = tof_t.DetectorLtotal
 
 
-CoordTransformationGraph = NewType("CoordTransformationGraph", dict)
+class CoordTransformationGraph(sciline.Scope[RunType, dict], dict):
+    pass
 
 
 class RawChopper(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):

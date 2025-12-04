@@ -14,6 +14,7 @@ from ..reflectometry.types import (
     ReducedReference,
     ReducibleData,
     Reference,
+    ReferenceRun,
     Sample,
     SampleRun,
 )
@@ -66,7 +67,7 @@ def mask_events_where_supermirror_does_not_cover(
 def evaluate_reference(
     reference: ReducedReference,
     sample: ReducibleData[SampleRun],
-    graph: CoordTransformationGraph,
+    graph: CoordTransformationGraph[ReferenceRun],
     detector_spatial_resolution: DetectorSpatialResolution[SampleRun],
 ) -> Reference:
     """

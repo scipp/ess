@@ -7,6 +7,7 @@ from ..reflectometry.conversions import reflectometry_q
 from ..reflectometry.types import (
     BeamDivergenceLimits,
     CoordTransformationGraph,
+    RunType,
     WavelengthBins,
     YIndexLimits,
     ZIndexLimits,
@@ -135,7 +136,9 @@ def wavelength(
     return out.to(unit='angstrom', copy=False)
 
 
-def coordinate_transformation_graph(gravity: GravityToggle) -> CoordTransformationGraph:
+def coordinate_transformation_graph(
+    gravity: GravityToggle, run_type: RunType
+) -> CoordTransformationGraph[RunType]:
     return {
         "wavelength": wavelength,
         "theta": theta if gravity else theta_no_gravity,

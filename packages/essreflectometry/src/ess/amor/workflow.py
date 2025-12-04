@@ -26,7 +26,7 @@ def add_coords_masks_and_apply_corrections(
     bdlim: BeamDivergenceLimits,
     wbins: WavelengthBins,
     proton_current: ProtonCurrent[RunType],
-    graph: CoordTransformationGraph,
+    graph: CoordTransformationGraph[RunType],
 ) -> ReducibleData[RunType]:
     """
     Computes coordinates, masks and corrections that are
