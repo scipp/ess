@@ -190,6 +190,17 @@ def _retrieve_input_file(input_file: list[pathlib.Path] | pathlib.Path) -> pathl
     return input_file_path
 
 
+def _retrieve_display(
+    logger: logging.Logger | None, display: Callable | None
+) -> Callable:
+    if display is not None:
+        return display
+    elif logger is not None:
+        return logger.info
+    else:
+        return logging.getLogger(__name__).info
+
+
 def reduction(
     *,
     config: ReductionConfig,
@@ -222,12 +233,7 @@ def reduction(
         A DataGroup containing the reduced data for each selected detector.
 
     """
-    import scippnexus as snx
-
-    if logger is None:
-        logger = logging.getLogger(__name__)
-    if display is None:
-        display = logger.info
+    display = _retrieve_display(logger, display)
 
     toa_bin_edges = build_toa_bin_edges(
         min_toa=config.workflow.min_time_bin or 0,
