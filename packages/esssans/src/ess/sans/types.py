@@ -167,12 +167,12 @@ class SolidAngle(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
     """Solid angle of detector pixels seen from sample position"""
 
 
-class TofDetector(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
-    """Data with a time-of-flight coordinate"""
+# class TofDetector(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
+#     """Data with a time-of-flight coordinate"""
 
 
-class TofMonitor(sciline.Scope[RunType, MonitorType, sc.DataGroup], sc.DataGroup):
-    """Monitor data with a time-of-flight coordinate"""
+# class TofMonitor(sciline.Scope[RunType, MonitorType, sc.DataGroup], sc.DataGroup):
+#     """Monitor data with a time-of-flight coordinate"""
 
 
 PixelMask = NewType('PixelMask', sc.Variable)

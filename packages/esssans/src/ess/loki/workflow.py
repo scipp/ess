@@ -58,25 +58,25 @@ def default_parameters() -> dict:
     }
 
 
-def _convert_to_tof(da: sc.DataArray) -> sc.DataArray:
-    event_time_offset = da.bins.coords['event_time_offset']
-    da = da.bins.drop_coords('event_time_offset')
-    da.bins.coords['tof'] = event_time_offset
-    if 'event_time_zero' in da.dims:
-        da = da.bins.concat('event_time_zero')
-    return da
+# def _convert_to_tof(da: sc.DataArray) -> sc.DataArray:
+#     event_time_offset = da.bins.coords['event_time_offset']
+#     da = da.bins.drop_coords('event_time_offset')
+#     da.bins.coords['tof'] = event_time_offset
+#     if 'event_time_zero' in da.dims:
+#         da = da.bins.concat('event_time_zero')
+#     return da
 
 
-def data_to_tof(
-    da: RawDetector[ScatteringRunType],
-) -> TofDetector[ScatteringRunType]:
-    return TofDetector[ScatteringRunType](_convert_to_tof(da))
+# def data_to_tof(
+#     da: RawDetector[ScatteringRunType],
+# ) -> TofDetector[ScatteringRunType]:
+#     return TofDetector[ScatteringRunType](_convert_to_tof(da))
 
 
-def monitor_to_tof(
-    da: RawMonitor[RunType, MonitorType],
-) -> TofMonitor[RunType, MonitorType]:
-    return TofMonitor[RunType, MonitorType](_convert_to_tof(da))
+# def monitor_to_tof(
+#     da: RawMonitor[RunType, MonitorType],
+# ) -> TofMonitor[RunType, MonitorType]:
+#     return TofMonitor[RunType, MonitorType](_convert_to_tof(da))
 
 
 def detector_pixel_shape(
@@ -91,7 +91,7 @@ def load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
     return DirectBeam(sc.io.load_hdf5(filename))
 
 
-loki_providers = (detector_pixel_shape, data_to_tof, load_direct_beam, monitor_to_tof)
+loki_providers = (detector_pixel_shape, load_direct_beam)
 
 
 @register_workflow
