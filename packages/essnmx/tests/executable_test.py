@@ -18,9 +18,8 @@ from ess.nmx._executable_helper import (
     WorkflowConfig,
     build_reduction_argument_parser,
     reduction_config_from_args,
-    to_command_arguments,
 )
-from ess.nmx.configurations import TimeBinCoordinate, TimeBinUnit
+from ess.nmx.configurations import TimeBinCoordinate, TimeBinUnit, to_command_arguments
 from ess.nmx.executables import reduction
 from ess.nmx.types import Compression
 
@@ -101,7 +100,11 @@ def test_reduction_config() -> None:
         tof_simulation_seed=12345,
     )
     output_options = OutputConfig(
-        output_file='test-output.h5', compression=Compression.NONE, verbose=True
+        output_file='test-output.h5',
+        compression=Compression.NONE,
+        verbose=True,
+        skip_file_output=True,
+        overwrite=True,
     )
     expected_config = ReductionConfig(
         inputs=input_options, workflow=workflow_options, output=output_options
@@ -113,7 +116,7 @@ def test_reduction_config() -> None:
     arg_list = _build_arg_list_from_pydantic_instance(
         input_options, workflow_options, output_options
     )
-    assert arg_list == to_command_arguments(expected_config, one_line=False)
+    assert arg_list == to_command_arguments(config=expected_config, one_line=False)
 
     # Parse arguments and build config from them.
     parser = build_reduction_argument_parser()
@@ -190,7 +193,9 @@ def reduction_config(
     # only properly works in linux so we set it to NONE here
     # for convenience of testing on all platforms.
     output_config = OutputConfig(
-        output_file=temp_output_file.as_posix(), compression=Compression.NONE
+        output_file=temp_output_file.as_posix(),
+        compression=Compression.NONE,
+        skip_file_output=True,  # No need to write output file for most tests.
     )
     return ReductionConfig(inputs=input_config, output=output_config)
 
