@@ -75,7 +75,9 @@ def normalize_by_monitor_and_proton_charge(
     norm = broadcast_uncertainties(
         norm, prototype=detector, mode=uncertainty_broadcast_mode
     )
-    return NormalizedIncidentEnergyDetector[RunType](detector.bins / sc.lookup(norm))
+    return NormalizedIncidentEnergyDetector[RunType](
+        detector.bins / sc.lookup(norm, dim=monitor.dim)
+    )
 
 
 def _monitor_distribution(
