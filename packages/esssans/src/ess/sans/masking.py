@@ -15,8 +15,8 @@ from .types import (
     MaskedDetectorIDs,
     Numerator,
     PixelMaskFilename,
-    SampleRun,
     RunType,
+    SampleRun,
     TofDetector,
 )
 

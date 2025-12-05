@@ -30,7 +30,6 @@ from ess.sans.types import (
     RawMonitor,
     RunType,
     SampleRun,
-    RunType,
     TofDetector,
     TofMonitor,
     Transmission,

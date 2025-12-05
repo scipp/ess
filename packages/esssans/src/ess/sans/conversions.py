@@ -29,7 +29,6 @@ from .types import (
     QDetector,
     QxyDetector,
     RunType,
-    RunType,
     TofMonitor,
     UncertaintyBroadcastMode,
     WavelengthDetector,

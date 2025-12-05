@@ -94,9 +94,7 @@ def mask_solid_angle(
     solid_angle: SolidAngle[RunType],
     masks: DetectorMasks,
 ) -> CorrectedDetector[RunType, Denominator]:
-    return CorrectedDetector[RunType, Denominator](
-        solid_angle.assign_masks(masks)
-    )
+    return CorrectedDetector[RunType, Denominator](solid_angle.assign_masks(masks))
 
 
 def _approximate_solid_angle_for_cylinder_shaped_pixel_of_detector(
@@ -139,9 +137,7 @@ def _approximate_solid_angle_for_cylinder_shaped_pixel_of_detector(
 
 
 def transmission_fraction(
-    sample_incident_monitor: CorrectedMonitor[
-        TransmissionRun[RunType], Incident
-    ],
+    sample_incident_monitor: CorrectedMonitor[TransmissionRun[RunType], Incident],
     sample_transmission_monitor: CorrectedMonitor[
         TransmissionRun[RunType], Transmission
     ],

@@ -30,7 +30,6 @@ from .types import (
     ReturnEvents,
     RunType,
     SampleRun,
-    RunType,
     WavelengthBins,
     WavelengthMonitor,
 )
