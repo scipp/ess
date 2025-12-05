@@ -232,21 +232,20 @@ def assemble_detector_metadata(
     empty_detector: EmptyDetector[SampleRun],
 ) -> NMXDetectorMetadata:
     """Assemble detector metadata for NMX reduction workflow."""
+    positions = empty_detector.coords['position']
     # Origin should be the center of the detector.
-    origin = empty_detector.coords['position'].mean()
+    origin = positions.mean()
     _fast_axis = _decide_fast_axis(empty_detector)
+    _slow_axis = 'y' if _fast_axis == 'x' else 'x'
     t_unit = transformation.value.unit
 
-    fast_axis_vector = transformation.value * (
-        sc.vector([1.0, 0, 0], unit=t_unit)
-        if _fast_axis == 'x'
-        else sc.vector([0.0, 1, 0], unit=t_unit)
-    )
-    slow_axis_vector = transformation.value * (
-        sc.vector([0.0, 1, 0], unit=t_unit)
-        if _fast_axis == 'x'
-        else sc.vector([1.0, 0, 0], unit=t_unit)
-    )
+    axis_vectors = {
+        'x': positions['x_pixel_offset', -1] - positions['x_pixel_offset', 0],
+        'y': positions['y_pixel_offset', -1] - positions['y_pixel_offset', 0],
+    }
+
+    fast_axis_vector = axis_vectors[_fast_axis].to(unit=t_unit)
+    slow_axis_vector = axis_vectors[_slow_axis].to(unit=t_unit)
     x_pixel_size = _decide_step(empty_detector.coords['x_pixel_offset'])
     y_pixel_size = _decide_step(empty_detector.coords['y_pixel_offset'])
     distance = sc.norm(origin - source_position.to(unit=origin.unit))
