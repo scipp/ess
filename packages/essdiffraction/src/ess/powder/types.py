@@ -107,6 +107,10 @@ class ElasticCoordTransformGraph(sciline.Scope[RunType, dict], dict):
     """Graph for transforming coordinates in elastic scattering."""
 
 
+class MonitorCoordTransformGraph(sciline.Scope[RunType, dict], dict):
+    """Graph for transforming coordinates of a monitor."""
+
+
 class FocussedDataDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Intensity vs d-spacing after focussing pixels."""
 

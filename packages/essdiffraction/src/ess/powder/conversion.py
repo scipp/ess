@@ -20,6 +20,7 @@ from .types import (
     GravityVector,
     IntensityDspacing,
     IntensityTof,
+    MonitorCoordTransformGraph,
     MonitorType,
     Position,
     RunType,
@@ -268,22 +269,52 @@ def convert_reduced_to_empty_can_subtracted_tof(
     )
 
 
+def powder_monitor_coordinate_transformation_graph(
+    source_position: Position[snx.NXsource, RunType],
+    sample_position: Position[snx.NXsample, RunType],
+    gravity: GravityVector,
+) -> MonitorCoordTransformGraph[RunType]:
+    """Generate a coordinate transformation graph for monitors,
+
+    Parameters
+    ----------
+    source_position:
+        Position of the neutron source.
+    sample_position:
+        Position of the sample.
+    gravity:
+        Gravity vector.
+
+    Returns
+    -------
+    :
+        A dictionary with the graph for the transformation.
+    """
+    return MonitorCoordTransformGraph(
+        {
+            **scn.conversion.graph.beamline.beamline(scatter=False),
+            **scn.conversion.graph.tof.elastic("tof"),
+            'source_position': lambda: source_position,
+            'sample_position': lambda: sample_position,
+            'gravity': lambda: gravity,
+        }
+    )
+
+
 def convert_monitor_to_wavelength(
     monitor: TofMonitor[RunType, MonitorType],
+    graph: MonitorCoordTransformGraph[RunType],
 ) -> WavelengthMonitor[RunType, MonitorType]:
-    graph = {
-        **scn.conversion.graph.beamline.beamline(scatter=False),
-        **scn.conversion.graph.tof.elastic("tof"),
-    }
     return WavelengthMonitor[RunType, MonitorType](
         monitor.transform_coords("wavelength", graph=graph, keep_intermediate=False)
     )
 
 
 providers = (
-    powder_coordinate_transformation_graph,
     add_scattering_coordinates_from_positions,
     convert_reduced_to_tof,
     convert_reduced_to_empty_can_subtracted_tof,
     convert_monitor_to_wavelength,
+    powder_coordinate_transformation_graph,
+    powder_monitor_coordinate_transformation_graph,
 )
