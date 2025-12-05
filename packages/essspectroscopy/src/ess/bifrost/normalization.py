@@ -69,7 +69,7 @@ def normalize_by_monitor_and_proton_charge(
 
     detector = _mask_detector_for_norm(detector=detector, monitor=monitor)
 
-    norm = _monitor_distribution(detector=detector, monitor=monitor)
+    norm = _monitor_distribution(monitor=monitor)
     # Combine monitor and proton charge so we only operate on events once.
     norm *= proton_charge
     norm = broadcast_uncertainties(
@@ -81,7 +81,6 @@ def normalize_by_monitor_and_proton_charge(
 
 
 def _monitor_distribution(
-    detector: sc.DataArray,
     monitor: sc.DataArray,
 ) -> sc.DataArray:
     coord = monitor.coords[monitor.dim]
