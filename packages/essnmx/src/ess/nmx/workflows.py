@@ -232,11 +232,8 @@ def assemble_detector_metadata(
     empty_detector: EmptyDetector[SampleRun],
 ) -> NMXDetectorMetadata:
     """Assemble detector metadata for NMX reduction workflow."""
-    first_id = empty_detector.coords['detector_number'].min()
-    # Assuming `empty_detector` has (`x_pixel_offset`, `y_pixel_offset`) dims
-    origin = empty_detector.flatten(dims=empty_detector.dims, to='detector_number')[
-        'detector_number', first_id
-    ].coords['position']
+    # Origin should be the center of the detector.
+    origin = empty_detector.coords['position'].mean()
     _fast_axis = _decide_fast_axis(empty_detector)
     t_unit = transformation.value.unit
 
