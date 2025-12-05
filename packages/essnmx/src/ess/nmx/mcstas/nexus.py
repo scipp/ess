@@ -1,14 +1,25 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import io
 import pathlib
 import warnings
-from functools import wraps
-from typing import Any
+from collections.abc import Callable, Generator
+from functools import partial, wraps
+from typing import Any, TypeVar
 
 import h5py
 import numpy as np
+import sciline as sl
 import scipp as sc
+
+from .types import (
+    DetectorIndex,
+    DetectorName,
+    FilePath,
+    NMXDetectorMetadata,
+    NMXExperimentMetadata,
+    NMXReducedDataGroup,
+)
 
 
 def _fallback_compute_positions(dg: sc.DataGroup) -> sc.DataGroup:
@@ -277,7 +288,9 @@ def _add_lauetof_instrument(nx_entry: h5py.Group) -> h5py.Group:
     return nx_instrument
 
 
-def _add_lauetof_source_group(dg, nx_instrument: h5py.Group) -> None:
+def _add_lauetof_source_group(
+    dg: NMXExperimentMetadata, nx_instrument: h5py.Group
+) -> None:
     nx_source = nx_instrument.create_group("source")
     nx_source.attrs["NX_class"] = "NXsource"
     _create_dataset_from_string(
@@ -333,7 +346,7 @@ def _add_lauetof_detector_group(dg: sc.DataGroup, nx_instrument: h5py.Group) -> 
     )
 
 
-def _add_lauetof_sample_group(dg, nx_entry: h5py.Group) -> None:
+def _add_lauetof_sample_group(dg: NMXExperimentMetadata, nx_entry: h5py.Group) -> None:
     nx_sample = nx_entry.create_group("sample")
     nx_sample.attrs["NX_class"] = "NXsample"
     _create_dataset_from_var(
@@ -414,7 +427,7 @@ def _add_arbitrary_metadata(
 
 
 def _export_static_metadata_as_nxlauetof(
-    experiment_metadata,
+    experiment_metadata: NMXExperimentMetadata,
     output_file: str | pathlib.Path | io.BytesIO,
     **arbitrary_metadata: sc.Variable,
 ) -> None:
@@ -451,7 +464,7 @@ def _export_static_metadata_as_nxlauetof(
 
 
 def _export_detector_metadata_as_nxlauetof(
-    *detector_metadatas,
+    *detector_metadatas: NMXDetectorMetadata,
     output_file: str | pathlib.Path | io.BytesIO,
     append_mode: bool = True,
 ) -> None:
@@ -494,7 +507,7 @@ def _extract_counts(dg: sc.DataGroup) -> sc.Variable:
 
 
 def _export_reduced_data_as_nxlauetof(
-    dg,
+    dg: NMXReducedDataGroup,
     output_file: str | pathlib.Path | io.BytesIO,
     *,
     append_mode: bool = True,
@@ -553,3 +566,92 @@ def _export_reduced_data_as_nxlauetof(
             root_entry=nx_detector,
             var=sc.midpoints(dg['counts'].coords['t'], dim='t'),
         )
+
+
+def _check_file(
+    filename: str | pathlib.Path | io.BytesIO, overwrite: bool
+) -> pathlib.Path | io.BytesIO:
+    if isinstance(filename, str | pathlib.Path):
+        filename = pathlib.Path(filename)
+        if filename.exists() and not overwrite:
+            raise FileExistsError(
+                f"File '{filename}' already exists. Use `overwrite=True` to overwrite."
+            )
+    return filename
+
+
+T = TypeVar("T", bound=sc.DataArray)
+
+
+class NXLauetofWriter:
+    def __init__(
+        self,
+        *,
+        output_filename: str | pathlib.Path | io.BytesIO,
+        workflow: sl.Pipeline,
+        chunk_generator: Callable[[FilePath, DetectorName], Generator[T, None, None]],
+        chunk_insert_key: type[T],
+        extra_meta: dict[str, sc.Variable] | None = None,
+        compress_counts: bool = True,
+        overwrite: bool = False,
+    ) -> None:
+        from ess.reduce.streaming import EternalAccumulator, StreamProcessor
+
+        from .types import FilePath, NMXReducedCounts
+
+        self.compress_counts = compress_counts
+        self._chunk_generator = chunk_generator
+        self._chunk_insert_key = chunk_insert_key
+        self._workflow = workflow
+        self._output_filename = _check_file(output_filename, overwrite)
+        self._input_filename = workflow.compute(FilePath)
+        self._final_stream_processor = partial(
+            StreamProcessor,
+            dynamic_keys=(chunk_insert_key,),
+            target_keys=(NMXReducedDataGroup,),
+            accumulators={NMXReducedCounts: EternalAccumulator},
+        )
+        self._detector_metas: dict[DetectorName, NMXDetectorMetadata] = {}
+        self._detector_reduced: dict[DetectorName, NMXReducedDataGroup] = {}
+        _export_static_metadata_as_nxlauetof(
+            experiment_metadata=self._workflow.compute(NMXExperimentMetadata),
+            output_file=self._output_filename,
+            **(extra_meta or {}),
+        )
+
+    def add_panel(
+        self, *, detector_id: DetectorIndex | DetectorName
+    ) -> NMXReducedDataGroup:
+        from .types import PixelIds
+
+        temp_wf = self._workflow.copy()
+        if isinstance(detector_id, int):
+            temp_wf[DetectorIndex] = detector_id
+        elif isinstance(detector_id, str):
+            temp_wf[DetectorName] = detector_id
+        else:
+            raise TypeError(
+                f"Expected detector_id to be an int or str, got {type(detector_id)}"
+            )
+
+        _export_detector_metadata_as_nxlauetof(
+            temp_wf.compute(NMXDetectorMetadata),
+            output_file=self._output_filename,
+        )
+        # First compute static information
+        detector_name = temp_wf.compute(DetectorName)
+        temp_wf[PixelIds] = temp_wf.compute(PixelIds)
+        processor = self._final_stream_processor(temp_wf)
+        # Then iterate over the chunks
+        for da in self._chunk_generator(self._input_filename, detector_name):
+            if any(da.sizes.values()) == 0:
+                continue
+            else:
+                results = processor.add_chunk({self._chunk_insert_key: da})
+
+        _export_reduced_data_as_nxlauetof(
+            results[NMXReducedDataGroup],
+            self._output_filename,
+            compress_counts=self.compress_counts,
+        )
+        return results[NMXReducedDataGroup]

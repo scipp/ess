@@ -11,15 +11,6 @@ except importlib.metadata.PackageNotFoundError:
 
 del importlib
 
-from .reduction import NMXReducedDataGroup
-from .types import MaximumCounts, NMXRawEventCountsDataGroup
+from .mcstas import NMXMcStasWorkflow
 
-default_parameters = {MaximumCounts: 10000}
-
-del MaximumCounts
-
-__all__ = [
-    "NMXRawEventCountsDataGroup",
-    "NMXReducedDataGroup",
-    "default_parameters",
-]
+__all__ = ["NMXMcStasWorkflow"]

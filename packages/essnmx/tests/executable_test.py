@@ -15,8 +15,12 @@ from ess.nmx._executable_helper import (
     InputConfig,
     OutputConfig,
     ReductionConfig,
-    TOAUnit,
+    TimeBinCoordinate,
+    TimeBinUnit,
     WorkflowConfig,
+    build_reduction_argument_parser,
+    reduction_config_from_args,
+    to_command_arguments,
 )
 from ess.nmx.types import Compression
 
@@ -25,7 +29,7 @@ def _build_arg_list_from_pydantic_instance(*instances: pydantic.BaseModel) -> li
     args = {}
     for instance in instances:
         args.update(instance.model_dump(mode='python'))
-    args = {f"--{k.replace('_', '-')}": v for k, v in args.items()}
+    args = {f"--{k.replace('_', '-')}": v for k, v in args.items() if v is not None}
 
     arg_list = []
     for k, v in args.items():
@@ -63,6 +67,9 @@ def _check_non_default_config(testing_config: ReductionConfig) -> None:
         testing_model = testing_child.model_dump(mode='python')
         default_model = default_child.model_dump(mode='python')
         for key, testing_value in testing_model.items():
+            if key == 'tof_lookup_table_file_path':
+                # This value may be None or default, so we skip the check.
+                continue
             default_value = default_model[key]
             assert (
                 testing_value != default_value
@@ -81,7 +88,14 @@ def test_reduction_config() -> None:
         chunk_size_events=100000,
     )
     workflow_options = WorkflowConfig(
-        nbins=100, min_toa=10, max_toa=100_000, toa_unit=TOAUnit.us, fast_axis='y'
+        nbins=100,
+        min_time_bin=10,
+        max_time_bin=100_000,
+        time_bin_coordinate=TimeBinCoordinate.time_of_flight,
+        time_bin_unit=TimeBinUnit.us,
+        tof_simulation_max_wavelength=5.0,
+        tof_simulation_min_wavelength=1.0,
+        tof_simulation_seed=12345,
     )
     output_options = OutputConfig(
         output_file='test-output.h5', compression=Compression.NONE, verbose=True
@@ -96,12 +110,12 @@ def test_reduction_config() -> None:
     arg_list = _build_arg_list_from_pydantic_instance(
         input_options, workflow_options, output_options
     )
-    assert arg_list == expected_config.to_command_arguments(one_line=False)
+    assert arg_list == to_command_arguments(expected_config, one_line=False)
 
     # Parse arguments and build config from them.
-    parser = ReductionConfig.build_argument_parser()
+    parser = build_reduction_argument_parser()
     args = parser.parse_args(arg_list)
-    config = ReductionConfig.from_args(args)
+    config = reduction_config_from_args(args)
     assert expected_config == config
 
 
@@ -150,9 +164,9 @@ def test_executable_runs(small_nmx_nexus_path, tmp_path: pathlib.Path):
         str(nbins),
         '--output-file',
         output_file.as_posix(),
-        '--min-toa',
+        '--min-time-bin',
         str(int(expected_toa_bins.min().value)),
-        '--max-toa',
+        '--max-time-bin',
         str(int(expected_toa_bins.max().value)),
     )
     # Validate that all commands are strings and contain no unsafe characters

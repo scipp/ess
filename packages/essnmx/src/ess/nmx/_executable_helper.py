@@ -140,21 +140,6 @@ def add_args_from_pydantic_model(
     return parser
 
 
-T = TypeVar('T', bound=BaseModel)
-
-
-def from_args(cls: type[T], args: argparse.Namespace) -> T:
-    """Create an instance of the pydantic model from the argparse namespace.
-
-    It ignores any extra arguments in the namespace that are not part of the model.
-    """
-    kwargs = {
-        field_name: _retrieve_field_value(field_name, field_info, args)
-        for field_name, field_info in cls.model_fields.items()
-    }
-    return cls(**kwargs)
-
-
 class InputConfig(BaseModel):
     # Add title of the basemodel
     model_config = {"title": "Input Configuration"}
@@ -201,41 +186,65 @@ class InputConfig(BaseModel):
     )
 
 
-class TOAUnit(enum.StrEnum):
+class TimeBinUnit(enum.StrEnum):
     ms = 'ms'
     us = 'us'
     ns = 'ns'
 
 
+class TimeBinCoordinate(enum.StrEnum):
+    event_time_offset = 'event_time_offset'
+    time_of_flight = 'time_of_flight'
+
+
 class WorkflowConfig(BaseModel):
     # Add title of the basemodel
     model_config = {"title": "Workflow Configuration"}
+    time_bin_coordinate: TimeBinCoordinate = Field(
+        title="Time Bin Coordinate",
+        description="Coordinate to bin the time data.",
+        default=TimeBinCoordinate.event_time_offset,
+    )
     nbins: int = Field(
-        title="Number of TOF Bins",
-        description="Number of TOF bins",
+        title="Number of Time Bins",
+        description="Number of Time bins",
         default=50,
     )
-    min_toa: int = Field(
-        title="Minimum Time of Arrival",
-        description="Minimum time of arrival (TOA) in [toa_unit].",
-        default=0,
-    )
-    max_toa: int = Field(
-        title="Maximum Time of Arrival",
-        description="Maximum time of arrival (TOA) in [toa_unit].",
-        default=int((1 / 14) * 1_000),
-    )
-    toa_unit: TOAUnit = Field(
-        title="Unit of TOA",
-        description="Unit of TOA.",
-        default=TOAUnit.ms,
-    )
-    fast_axis: Literal['x', 'y'] | None = Field(
-        title="Fast Axis",
-        description="Specify the fast axis of the detector. "
-        "If None, it will be determined "
-        "automatically based on the pixel offsets.",
+    min_time_bin: int | None = Field(
+        title="Minimum Time Bin",
+        description="Minimum time edge of [time_bin_coordinate] in [time_bin_unit].",
         default=None,
+    )
+    max_time_bin: int | None = Field(
+        title="Maximum Time Bin",
+        description="Maximum time edge of [time_bin_coordinate] in [time_bin_unit].",
+        default=None,
+    )
+    time_bin_unit: TimeBinUnit = Field(
+        title="Unit of Time Bins",
+        description="Unit of time bins.",
+        default=TimeBinUnit.ms,
+    )
+    tof_lookup_table_file_path: str | None = Field(
+        title="TOF Lookup Table File Path",
+        description="Path to the TOF lookup table file. "
+        "If None, the lookup table will be computed on-the-fly.",
+        default=None,
+    )
+    tof_simulation_min_wavelength: float = Field(
+        title="TOF Simulation Minimum Wavelength",
+        description="Minimum wavelength for TOF simulation in Angstrom.",
+        default=1.8,
+    )
+    tof_simulation_max_wavelength: float = Field(
+        title="TOF Simulation Maximum Wavelength",
+        description="Maximum wavelength for TOF simulation in Angstrom.",
+        default=3.6,
+    )
+    tof_simulation_seed: int = Field(
+        title="TOF Simulation Seed",
+        description="Random seed for TOF simulation.",
+        default=42,  # No reason.
     )
 
 
@@ -265,64 +274,82 @@ class ReductionConfig(BaseModel):
     """Container for all reduction configurations."""
 
     inputs: InputConfig
-    workflow: WorkflowConfig
-    output: OutputConfig
-
-    @classmethod
-    def build_argument_parser(cls) -> argparse.ArgumentParser:
-        parser = argparse.ArgumentParser(
-            description="Command line arguments for the ESS NMX reduction. "
-            "It assumes 14 Hz pulse speed."
-        )
-        parser = add_args_from_pydantic_model(model_cls=InputConfig, parser=parser)
-        parser = add_args_from_pydantic_model(model_cls=WorkflowConfig, parser=parser)
-        parser = add_args_from_pydantic_model(model_cls=OutputConfig, parser=parser)
-        return parser
-
-    @classmethod
-    def from_args(cls, args: argparse.Namespace) -> "ReductionConfig":
-        return cls(
-            inputs=from_args(InputConfig, args),
-            workflow=from_args(WorkflowConfig, args),
-            output=from_args(OutputConfig, args),
-        )
+    workflow: WorkflowConfig = Field(default_factory=WorkflowConfig)
+    output: OutputConfig = Field(default_factory=OutputConfig)
 
     @property
     def _children(self) -> list[BaseModel]:
         return [self.inputs, self.workflow, self.output]
 
-    def to_command_arguments(self, one_line: bool = True) -> list[str] | str:
-        """Convert the config to a list of command line arguments.
 
-        Parameters
-        ----------
-        one_line:
-            If True, return a single string with all arguments joined by spaces.
-            If False, return a list of argument strings.
+T = TypeVar('T', bound=BaseModel)
 
-        """
-        args = {}
-        for instance in self._children:
-            args.update(instance.model_dump(mode='python'))
-        args = {f"--{k.replace('_', '-')}": v for k, v in args.items()}
 
-        arg_list = []
-        for k, v in args.items():
-            if not isinstance(v, bool):
-                arg_list.append(k)
-                if isinstance(v, list):
-                    arg_list.extend(str(item) for item in v)
-                elif isinstance(v, enum.StrEnum):
-                    arg_list.append(v.value)
-                else:
-                    arg_list.append(str(v))
-            elif v is True:
-                arg_list.append(k)
+def from_args(cls: type[T], args: argparse.Namespace) -> T:
+    """Create an instance of the pydantic model from the argparse namespace.
 
-        if one_line:
-            return ' '.join(arg_list)
-        else:
-            return arg_list
+    It ignores any extra arguments in the namespace that are not part of the model.
+    """
+    kwargs = {
+        field_name: _retrieve_field_value(field_name, field_info, args)
+        for field_name, field_info in cls.model_fields.items()
+    }
+    return cls(**kwargs)
+
+
+def build_reduction_argument_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description="Command line arguments for the ESS NMX reduction. "
+        "It assumes 14 Hz pulse speed."
+    )
+    parser = add_args_from_pydantic_model(model_cls=InputConfig, parser=parser)
+    parser = add_args_from_pydantic_model(model_cls=WorkflowConfig, parser=parser)
+    parser = add_args_from_pydantic_model(model_cls=OutputConfig, parser=parser)
+    return parser
+
+
+def reduction_config_from_args(args: argparse.Namespace) -> ReductionConfig:
+    return ReductionConfig(
+        inputs=from_args(InputConfig, args),
+        workflow=from_args(WorkflowConfig, args),
+        output=from_args(OutputConfig, args),
+    )
+
+
+def to_command_arguments(
+    config: ReductionConfig, one_line: bool = True
+) -> list[str] | str:
+    """Convert the config to a list of command line arguments.
+
+    Parameters
+    ----------
+    one_line:
+        If True, return a single string with all arguments joined by spaces.
+        If False, return a list of argument strings.
+
+    """
+    args = {}
+    for instance in config._children:
+        args.update(instance.model_dump(mode='python'))
+    args = {f"--{k.replace('_', '-')}": v for k, v in args.items() if v is not None}
+
+    arg_list = []
+    for k, v in args.items():
+        if not isinstance(v, bool):
+            arg_list.append(k)
+            if isinstance(v, list):
+                arg_list.extend(str(item) for item in v)
+            elif isinstance(v, enum.StrEnum):
+                arg_list.append(v.value)
+            else:
+                arg_list.append(str(v))
+        elif v is True:
+            arg_list.append(k)
+
+    if one_line:
+        return ' '.join(arg_list)
+    else:
+        return arg_list
 
 
 def build_logger(args: argparse.Namespace | OutputConfig) -> logging.Logger:
