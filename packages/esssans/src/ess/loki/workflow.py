@@ -34,7 +34,6 @@ from ..sans.types import (
     RawMonitor,
     RunType,
     SampleRun,
-    ScatteringRunType,
     TofDetector,
     TofMonitor,
     Transmission,
@@ -58,32 +57,46 @@ def default_parameters() -> dict:
     }
 
 
-# def _convert_to_tof(da: sc.DataArray) -> sc.DataArray:
-#     event_time_offset = da.bins.coords['event_time_offset']
-#     da = da.bins.drop_coords('event_time_offset')
-#     da.bins.coords['tof'] = event_time_offset
-#     if 'event_time_zero' in da.dims:
-#         da = da.bins.concat('event_time_zero')
-#     return da
+def _larmor_convert_to_tof(da: sc.DataArray) -> sc.DataArray:
+    event_time_offset = da.bins.coords['event_time_offset']
+    da = da.bins.drop_coords('event_time_offset')
+    da.bins.coords['tof'] = event_time_offset
+    if 'event_time_zero' in da.dims:
+        da = da.bins.concat('event_time_zero')
+    return da
 
 
-# def data_to_tof(
-#     da: RawDetector[ScatteringRunType],
-# ) -> TofDetector[ScatteringRunType]:
-#     return TofDetector[ScatteringRunType](_convert_to_tof(da))
+def larmor_data_to_tof(da: RawDetector[RunType]) -> TofDetector[RunType]:
+    """
+    Compute time-of-flight coordinate for Loki detector data at Larmor.
+    This is different from the standard conversion from the GenericTofWorkflow because
+    the detector test was conducted as ISIS where the pulse has a different time
+    structure.
+    The conversion here is much simpler: the event_time_offset coordinate is directly
+    renamed as time-of-flight.
+    """
+    return TofDetector[RunType](_larmor_convert_to_tof(da))
 
 
-# def monitor_to_tof(
-#     da: RawMonitor[RunType, MonitorType],
-# ) -> TofMonitor[RunType, MonitorType]:
-#     return TofMonitor[RunType, MonitorType](_convert_to_tof(da))
+def larmor_monitor_to_tof(
+    da: RawMonitor[RunType, MonitorType],
+) -> TofMonitor[RunType, MonitorType]:
+    """
+    Compute time-of-flight coordinate for Loki monitor data at Larmor.
+    This is different from the standard conversion from the GenericTofWorkflow because
+    the detector test was conducted as ISIS where the pulse has a different time
+    structure.
+    The conversion here is much simpler: the event_time_offset coordinate is directly
+    renamed as time-of-flight.
+    """
+    return TofMonitor[RunType, MonitorType](_larmor_convert_to_tof(da))
 
 
 def detector_pixel_shape(
-    detector: NeXusComponent[snx.NXdetector, ScatteringRunType],
+    detector: NeXusComponent[snx.NXdetector, RunType],
     pixel_shape_path: PixelShapePath,
-) -> DetectorPixelShape[ScatteringRunType]:
-    return DetectorPixelShape[ScatteringRunType](detector[pixel_shape_path])
+) -> DetectorPixelShape[RunType]:
+    return DetectorPixelShape[RunType](detector[pixel_shape_path])
 
 
 def load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
@@ -114,6 +127,8 @@ def LokiAtLarmorWorkflow() -> sciline.Pipeline:
         workflow.insert(provider)
     for key, param in default_parameters().items():
         workflow[key] = param
+    workflow.insert(larmor_data_to_tof)
+    workflow.insert(larmor_monitor_to_tof)
     workflow.insert(read_xml_detector_masking)
     workflow[NeXusDetectorName] = 'larmor_detector'
     workflow.typical_outputs = typical_outputs

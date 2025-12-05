@@ -29,7 +29,7 @@ from .types import (
     ReducedQ,
     ReducedQxQy,
     ReturnEvents,
-    ScatteringRunType,
+    RunType,
     SolidAngle,
     Transmission,
     TransmissionFraction,
@@ -41,11 +41,11 @@ from .types import (
 
 
 def solid_angle(
-    data: EmptyDetector[ScatteringRunType],
-    pixel_shape: DetectorPixelShape[ScatteringRunType],
-    transform: NeXusTransformation[snx.NXdetector, ScatteringRunType],
-    sample_position: Position[snx.NXsample, ScatteringRunType],
-) -> SolidAngle[ScatteringRunType]:
+    data: EmptyDetector[RunType],
+    pixel_shape: DetectorPixelShape[RunType],
+    transform: NeXusTransformation[snx.NXdetector, RunType],
+    sample_position: Position[snx.NXsample, RunType],
+) -> SolidAngle[RunType]:
     """
     Solid angle for cylindrical pixels.
 
@@ -83,7 +83,7 @@ def solid_angle(
         radius=radius,
         length=length,
     )
-    return SolidAngle[ScatteringRunType](
+    return SolidAngle[RunType](
         concepts.rewrap_reduced_data(
             prototype=data, data=omega, dim=set(data.dims) - set(omega.dims)
         )
@@ -91,10 +91,10 @@ def solid_angle(
 
 
 def mask_solid_angle(
-    solid_angle: SolidAngle[ScatteringRunType],
+    solid_angle: SolidAngle[RunType],
     masks: DetectorMasks,
-) -> CorrectedDetector[ScatteringRunType, Denominator]:
-    return CorrectedDetector[ScatteringRunType, Denominator](
+) -> CorrectedDetector[RunType, Denominator]:
+    return CorrectedDetector[RunType, Denominator](
         solid_angle.assign_masks(masks)
     )
 
@@ -140,14 +140,14 @@ def _approximate_solid_angle_for_cylinder_shaped_pixel_of_detector(
 
 def transmission_fraction(
     sample_incident_monitor: CorrectedMonitor[
-        TransmissionRun[ScatteringRunType], Incident
+        TransmissionRun[RunType], Incident
     ],
     sample_transmission_monitor: CorrectedMonitor[
-        TransmissionRun[ScatteringRunType], Transmission
+        TransmissionRun[RunType], Transmission
     ],
     direct_incident_monitor: CorrectedMonitor[EmptyBeamRun, Incident],
     direct_transmission_monitor: CorrectedMonitor[EmptyBeamRun, Transmission],
-) -> TransmissionFraction[ScatteringRunType]:
+) -> TransmissionFraction[RunType]:
     """
     Approximation based on equations in
     `CalculateTransmission <https://docs.mantidproject.org/v4.0.0/algorithms/CalculateTransmission-v1.html>`_
@@ -176,13 +176,13 @@ def transmission_fraction(
     frac = (sample_transmission_monitor / direct_transmission_monitor) * (
         direct_incident_monitor / sample_incident_monitor
     )
-    return TransmissionFraction[ScatteringRunType](frac)
+    return TransmissionFraction[RunType](frac)
 
 
 def norm_monitor_term(
-    incident_monitor: CorrectedMonitor[ScatteringRunType, Incident],
-    transmission_fraction: TransmissionFraction[ScatteringRunType],
-) -> MonitorTerm[ScatteringRunType]:
+    incident_monitor: CorrectedMonitor[RunType, Incident],
+    transmission_fraction: TransmissionFraction[RunType],
+) -> MonitorTerm[RunType]:
     """
     Compute the monitor-dependent contribution to the denominator term of I(Q).
 
@@ -207,14 +207,14 @@ def norm_monitor_term(
     out = incident_monitor * transmission_fraction
     # Convert wavelength coordinate to midpoints for future histogramming
     out.coords['wavelength'] = sc.midpoints(out.coords['wavelength'])
-    return MonitorTerm[ScatteringRunType](out)
+    return MonitorTerm[RunType](out)
 
 
 def norm_detector_term(
-    solid_angle: CorrectedDetector[ScatteringRunType, Denominator],
+    solid_angle: CorrectedDetector[RunType, Denominator],
     direct_beam: CleanDirectBeam,
     uncertainties: UncertaintyBroadcastMode,
-) -> WavelengthDetector[ScatteringRunType, Denominator]:
+) -> WavelengthDetector[RunType, Denominator]:
     """
     Compute the detector-dependent contribution to the denominator term of I(Q).
 
@@ -255,7 +255,7 @@ def norm_detector_term(
     )
     # Convert wavelength coordinate to midpoints for future histogramming
     out.coords['wavelength'] = sc.midpoints(out.coords['wavelength'])
-    return WavelengthDetector[ScatteringRunType, Denominator](out)
+    return WavelengthDetector[RunType, Denominator](out)
 
 
 def process_wavelength_bands(
@@ -413,26 +413,26 @@ def _reduce(part: sc.DataArray, /, *, bands: ProcessedWavelengthBands) -> sc.Dat
 
 
 def reduce_q(
-    data: NormalizedQ[ScatteringRunType, IofQPart],
+    data: NormalizedQ[RunType, IofQPart],
     bands: ProcessedWavelengthBands,
-) -> ReducedQ[ScatteringRunType, IofQPart]:
-    return ReducedQ[ScatteringRunType, IofQPart](_reduce(data, bands=bands))
+) -> ReducedQ[RunType, IofQPart]:
+    return ReducedQ[RunType, IofQPart](_reduce(data, bands=bands))
 
 
 def reduce_qxy(
-    data: NormalizedQxQy[ScatteringRunType, IofQPart],
+    data: NormalizedQxQy[RunType, IofQPart],
     bands: ProcessedWavelengthBands,
-) -> ReducedQxQy[ScatteringRunType, IofQPart]:
-    return ReducedQxQy[ScatteringRunType, IofQPart](_reduce(data, bands=bands))
+) -> ReducedQxQy[RunType, IofQPart]:
+    return ReducedQxQy[RunType, IofQPart](_reduce(data, bands=bands))
 
 
 def normalize_q(
-    numerator: ReducedQ[ScatteringRunType, Numerator],
-    denominator: ReducedQ[ScatteringRunType, Denominator],
+    numerator: ReducedQ[RunType, Numerator],
+    denominator: ReducedQ[RunType, Denominator],
     return_events: ReturnEvents,
     uncertainties: UncertaintyBroadcastMode,
-) -> IntensityQ[ScatteringRunType]:
-    return IntensityQ[ScatteringRunType](
+) -> IntensityQ[RunType]:
+    return IntensityQ[RunType](
         _normalize(
             numerator=numerator,
             denominator=denominator,
@@ -443,12 +443,12 @@ def normalize_q(
 
 
 def normalize_qxy(
-    numerator: ReducedQxQy[ScatteringRunType, Numerator],
-    denominator: ReducedQxQy[ScatteringRunType, Denominator],
+    numerator: ReducedQxQy[RunType, Numerator],
+    denominator: ReducedQxQy[RunType, Denominator],
     return_events: ReturnEvents,
     uncertainties: UncertaintyBroadcastMode,
-) -> IntensityQxQy[ScatteringRunType]:
-    return IntensityQxQy[ScatteringRunType](
+) -> IntensityQxQy[RunType]:
+    return IntensityQxQy[RunType](
         _normalize(
             numerator=numerator,
             denominator=denominator,

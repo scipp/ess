@@ -13,6 +13,7 @@ import sciline
 import scipp as sc
 
 from ess.reduce.nexus import types as reduce_t
+from ess.reduce.time_of_flight import types as tof_t
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
 
 BackgroundRun = reduce_t.BackgroundRun
@@ -34,12 +35,16 @@ SampleRun = reduce_t.SampleRun
 Transmission = reduce_t.TransmissionMonitor
 TransmissionRun = reduce_t.TransmissionRun
 
+TofDetector = tof_t.TofDetector
+TofMonitor = tof_t.TofMonitor
+TimeOfFlightLookupTableFilename = tof_t.TimeOfFlightLookupTableFilename
+TimeOfFlightLookupTable = tof_t.TimeOfFlightLookupTable
+
 DetectorBankSizes = reduce_t.DetectorBankSizes
 NeXusDetectorName = reduce_t.NeXusDetectorName
 
 MonitorType = TypeVar('MonitorType', Incident, Transmission)
 RunType = reduce_t.RunType
-ScatteringRunType = TypeVar('ScatteringRunType', BackgroundRun, SampleRun)
 
 
 UncertaintyBroadcastMode = _UncertaintyBroadcastMode
@@ -149,9 +154,7 @@ DirectBeam = NewType('DirectBeam', sc.DataArray | None)
 """Direct beam"""
 
 
-class TransmissionFraction(
-    sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray
-):
+class TransmissionFraction(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Transmission fraction"""
 
 
@@ -159,15 +162,15 @@ CleanDirectBeam = NewType('CleanDirectBeam', sc.DataArray)
 """Direct beam after resampling to required wavelength bins, else and array of ones."""
 
 
-class DetectorPixelShape(sciline.Scope[ScatteringRunType, sc.DataGroup], sc.DataGroup):
+class DetectorPixelShape(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
     """Geometry of the detector from description in nexus file."""
 
 
-class SolidAngle(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
+class SolidAngle(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Solid angle of detector pixels seen from sample position"""
 
 
-# class TofDetector(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
+# class TofDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
 #     """Data with a time-of-flight coordinate"""
 
 
@@ -178,21 +181,17 @@ class SolidAngle(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
 PixelMask = NewType('PixelMask', sc.Variable)
 
 
-class MonitorTerm(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
+class MonitorTerm(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Monitor-dependent factor of the Normalization term (numerator) for IofQ."""
 
 
-class CorrectedDetector(
-    sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
-):
+class CorrectedDetector(sciline.Scope[RunType, IofQPart, sc.DataArray], sc.DataArray):
     """
     Data with masks and corrections applied, used for numerator or denominator of IofQ.
     """
 
 
-class WavelengthDetector(
-    sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
-):
+class WavelengthDetector(sciline.Scope[RunType, IofQPart, sc.DataArray], sc.DataArray):
     """
     Prerequisite for IofQ numerator or denominator.
 
@@ -202,55 +201,45 @@ class WavelengthDetector(
     """
 
 
-class NormalizedQ(
-    sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
-):
+class NormalizedQ(sciline.Scope[RunType, IofQPart, sc.DataArray], sc.DataArray):
     """Result of applying wavelength scaling/masking to :py:class:`BinnedQ`"""
 
 
-class NormalizedQxQy(
-    sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
-):
+class NormalizedQxQy(sciline.Scope[RunType, IofQPart, sc.DataArray], sc.DataArray):
     """Result of applying wavelength scaling/masking to :py:class:`BinnedQxQy`"""
 
 
-class QDetector(sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray):
+class QDetector(sciline.Scope[RunType, IofQPart, sc.DataArray], sc.DataArray):
     """Result of converting :py:class:`WavelengthDetectorMasked` to Q"""
 
 
-class QxyDetector(
-    sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
-):
+class QxyDetector(sciline.Scope[RunType, IofQPart, sc.DataArray], sc.DataArray):
     """Result of converting :py:class:`WavelengthDetectorMasked` to Qx and Qy"""
 
 
-class BinnedQ(sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray):
+class BinnedQ(sciline.Scope[RunType, IofQPart, sc.DataArray], sc.DataArray):
     """Result of histogramming/binning :py:class:`QDetector` over all pixels into Q
     bins"""
 
 
-class BinnedQxQy(
-    sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
-):
+class BinnedQxQy(sciline.Scope[RunType, IofQPart, sc.DataArray], sc.DataArray):
     """Result of histogramming/binning :py:class:`QxyDetector` over all pixels into Qx
     and Qy bins"""
 
 
-class ReducedQ(sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray):
+class ReducedQ(sciline.Scope[RunType, IofQPart, sc.DataArray], sc.DataArray):
     """Result of reducing :py:class:`BinnedQ` over the wavelength dimensions"""
 
 
-class ReducedQxQy(
-    sciline.Scope[ScatteringRunType, IofQPart, sc.DataArray], sc.DataArray
-):
+class ReducedQxQy(sciline.Scope[RunType, IofQPart, sc.DataArray], sc.DataArray):
     """Result of reducing :py:class:`BinnedQxQy` over the wavelength dimensions"""
 
 
-class IntensityQ(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
+class IntensityQ(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """I(Q)"""
 
 
-class IntensityQxQy(sciline.Scope[ScatteringRunType, sc.DataArray], sc.DataArray):
+class IntensityQxQy(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """I(Qx, Qy)"""
 
 

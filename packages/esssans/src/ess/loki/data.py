@@ -52,7 +52,7 @@ _registry = make_registry(
         # Direct beam from LoKI@Larmor detector test experiment
         'direct-beam-loki-all-pixels.h5': "md5:b85d7b486b312c5bb2a31d2bb6314f69",
         # TOF lookup table without choppers
-        'loki-tof-lookup-table-no-choppers.h5': 'md5:c977cb3ccb3cea0d4372b61bf22feed0',
+        'loki-tof-lookup-table-no-choppers.h5': 'md5:5b817466d3a07d4def12535d7317c044',
     },
     version='2',
 )
