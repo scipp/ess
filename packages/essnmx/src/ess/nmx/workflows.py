@@ -240,8 +240,10 @@ def assemble_detector_metadata(
     t_unit = transformation.value.unit
 
     axis_vectors = {
-        'x': positions['x_pixel_offset', -1] - positions['x_pixel_offset', 0],
-        'y': positions['y_pixel_offset', -1] - positions['y_pixel_offset', 0],
+        'x': positions['x_pixel_offset', 1]['y_pixel_offset', 0]
+        - positions['x_pixel_offset', 0]['y_pixel_offset', 0],
+        'y': positions['y_pixel_offset', 1]['x_pixel_offset', 0]
+        - positions['y_pixel_offset', 0]['x_pixel_offset', 0],
     }
 
     fast_axis_vector = axis_vectors[_fast_axis].to(unit=t_unit)
