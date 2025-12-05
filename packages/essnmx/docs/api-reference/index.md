@@ -31,9 +31,6 @@
 
    data
    mcstas
-   reduction
-   nexus
-   streaming
    types
    mtz_io
    scaling

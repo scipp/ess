@@ -7,22 +7,15 @@ import pytest
 import sciline as sl
 import scipp as sc
 
-from ess.nmx import default_parameters
+from ess.nmx import NMXMcStasWorkflow
 from ess.nmx.data import get_small_mcstas
-from ess.nmx.mcstas.load import providers as load_providers
-from ess.nmx.reduction import (
-    NMXReducedDataGroup,
-    format_nmx_reduced_data,
-    merge_panels,
-    proton_charge_from_event_counts,
-    raw_event_probability_to_counts,
-    reduce_raw_event_probability,
-)
-from ess.nmx.types import (
+from ess.nmx.mcstas.reduction import merge_panels
+from ess.nmx.mcstas.types import (
     DetectorIndex,
     FilePath,
     MaximumCounts,
     NMXRawEventCountsDataGroup,
+    NMXReducedDataGroup,
     TimeBinSteps,
 )
 
@@ -34,20 +27,10 @@ def mcstas_file_path(request: pytest.FixtureRequest) -> pathlib.Path:
 
 @pytest.fixture
 def mcstas_workflow(mcstas_file_path: pathlib.Path) -> sl.Pipeline:
-    return sl.Pipeline(
-        [
-            *load_providers,
-            reduce_raw_event_probability,
-            proton_charge_from_event_counts,
-            raw_event_probability_to_counts,
-            format_nmx_reduced_data,
-        ],
-        params={
-            FilePath: mcstas_file_path,
-            TimeBinSteps: 50,
-            **default_parameters,
-        },
-    )
+    wf = NMXMcStasWorkflow()
+    wf[FilePath] = mcstas_file_path
+    wf[TimeBinSteps] = 50
+    return wf
 
 
 @pytest.fixture
@@ -78,6 +61,8 @@ def test_pipeline_mcstas_loader(mcstas_workflow: sl.Pipeline) -> None:
 def test_pipeline_mcstas_reduction(multi_bank_mcstas_workflow: sl.Pipeline) -> None:
     """Test if the loader graph is complete."""
     from scipp.testing import assert_allclose, assert_identical
+
+    from ess.nmx.mcstas import default_parameters
 
     nmx_reduced_data = multi_bank_mcstas_workflow.compute(NMXReducedDataGroup)
     assert nmx_reduced_data.shape == (3, (1280, 1280)[0] * (1280, 1280)[1], 50)

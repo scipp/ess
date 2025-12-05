@@ -6,7 +6,7 @@ from collections.abc import Generator
 import scipp as sc
 import scippnexus as snx
 
-from ..types import (
+from .types import (
     CrystalRotation,
     DetectorBankPrefix,
     DetectorIndex,

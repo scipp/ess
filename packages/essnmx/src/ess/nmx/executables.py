@@ -12,16 +12,30 @@ import scippnexus as snx
 from ._executable_helper import (
     ReductionConfig,
     build_logger,
+    build_reduction_argument_parser,
     collect_matching_input_files,
+    reduction_config_from_args,
 )
-from .nexus import (
+
+# Temporarily keeping them until we migrate GenericWorkflow here
+from .mcstas.nexus import (
     _compute_positions,
     _export_detector_metadata_as_nxlauetof,
     _export_reduced_data_as_nxlauetof,
     _export_static_metadata_as_nxlauetof,
 )
-from .streaming import _validate_chunk_size
-from .types import Compression, NMXDetectorMetadata, NMXExperimentMetadata
+
+# Temporarily keeping them until we migrate GenericWorkflow here
+from .mcstas.types import NMXDetectorMetadata, NMXExperimentMetadata
+from .types import Compression
+
+
+def _validate_chunk_size(chunk_size: int) -> None:
+    """Validate the chunk size."""
+    if not isinstance(chunk_size, int):
+        raise TypeError("Chunk size must be an integer.")
+    if chunk_size < -1:
+        raise ValueError("Invalid chunk size. It should be -1(for all) or > 0.")
 
 
 def _retrieve_source_position(file: snx.File) -> sc.Variable:
@@ -176,59 +190,39 @@ def _retrieve_input_file(input_file: list[pathlib.Path] | pathlib.Path) -> pathl
     return input_file_path
 
 
+def _retrieve_display(
+    logger: logging.Logger | None, display: Callable | None
+) -> Callable:
+    if display is not None:
+        return display
+    elif logger is not None:
+        return logger.info
+    else:
+        return logging.getLogger(__name__).info
+
+
 def reduction(
     *,
-    input_file: list[pathlib.Path] | pathlib.Path,
-    output_file: pathlib.Path,
-    chunk_size: int = 1_000,
-    detector_ids: list[int | str],
-    compression: Compression = Compression.BITSHUFFLE_LZ4,
+    config: ReductionConfig,
     logger: logging.Logger | None = None,
-    min_toa: sc.Variable | int = 0,
-    max_toa: sc.Variable | int = int((1 / 14) * 1_000),  # Default for ESS NMX
-    toa_bin_edges: sc.Variable | int = 250,
-    fast_axis: Literal['x', 'y'] | None = None,  # 'x', 'y', or None to auto-detect
-    display: Callable | None = None,  # For Jupyter notebook display
+    display: Callable | None = None,
 ) -> sc.DataGroup:
     """Reduce NMX data from a Nexus file and export to NXLauetof(ESS NMX specific) file.
 
-    This workflow is written as a flatten function without using sciline Pipeline.
-    It is because the first part of NMX reduction only requires
-    a few steps of processing and it is overkill to use a Pipeline or GenericWorkflow.
-
-    We also do not apply frame unwrapping or pulse skipping here,
-    as it is not expected from NMX experiments.
-
-    Frame unwrapping may be applied later on the result of this function if needed
-    however, then the whole range of `event_time_offset` should have been histogrammed
-    so that the unwrapping can be applied.
-    i.e. `min_toa` should be 0 and `max_toa` should be 1/14 seconds
-    for 14 Hz pulse frequency.
-    TODO: Implement tof/wavelength workflow for NMX.
-
     Parameters
     ----------
-    input_file:
-        Path to the input Nexus file containing NMX data.
-    output_file:
-        Path to the output file where reduced data will be saved.
-    chunk_size:
-        Number of pulses to process in each chunk. If <= 0, all data is processed
-        at once. It represents the number of event_time_zero entries to read at once.
-    detector_ids:
-        List of detector IDs (as integers or names) to process.
-    compression:
-        If True, the output data will be compressed.
+    config:
+        Reduction configuration.
+
+        Data reduction parameters are taken from this config
+        instead of passing them directly as keyword arguments.
+        They can be either built from command-line arguments
+        using `ReductionConfig.from_args()` or constructed manually.
+
+        If the reduced data is successfully written to the output file
+        the configuration is also saved there for future reference.
     logger:
         Logger to use for logging messages. If None, a default logger is created.
-    min_toa:
-        Minimum time of arrival (TOA) in milliseconds. Default is 0 ms.
-    max_toa:
-        Maximum time of arrival (TOA) in milliseconds. Default is 1/14 seconds,
-        typical for ESS NMX.
-    toa_bin_edges:
-        Number of time of arrival (TOA) bin edges or a scipp Variable defining the
-        edges. Default is 250 edges.
     display:
         Callable for displaying messages, useful in Jupyter notebooks. If None,
         defaults to logger.info.
@@ -239,17 +233,20 @@ def reduction(
         A DataGroup containing the reduced data for each selected detector.
 
     """
-    import scippnexus as snx
+    display = _retrieve_display(logger, display)
+    input_file_path = _retrieve_input_file(
+        collect_matching_input_files(*config.inputs.input_file)
+    ).resolve()
+    display(f"Input file: {input_file_path}")
 
-    if logger is None:
-        logger = logging.getLogger(__name__)
-    if display is None:
-        display = logger.info
+    output_file_path = pathlib.Path(config.output.output_file).resolve()
+    display(f"Output file: {output_file_path}")
 
     toa_bin_edges = build_toa_bin_edges(
-        min_toa=min_toa, max_toa=max_toa, toa_bin_edges=toa_bin_edges
+        min_toa=config.workflow.min_time_bin or 0,
+        max_toa=config.workflow.max_time_bin or int((1 / 14) * 1_000),
+        toa_bin_edges=config.workflow.nbins,
     )
-    input_file_path = _retrieve_input_file(input_file)
     with snx.File(input_file_path) as f:
         intrument_group = f['entry/instrument']
         dets = intrument_group[snx.NXdetector]
@@ -258,11 +255,12 @@ def reduction(
         detector_id_map = {
             det_name: dets[det_name]
             for i, det_name in enumerate(detector_group_keys)
-            if i in detector_ids or det_name in detector_ids
+            if i in config.inputs.detector_ids or det_name in config.inputs.detector_ids
         }
-        if len(detector_id_map) != len(detector_ids):
+        if len(detector_id_map) != len(config.inputs.detector_ids):
             raise ValueError(
-                f"Requested detector ids {detector_ids} not found in the file.\n"
+                f"Requested detector ids {config.inputs.detector_ids} "
+                "not found in the file.\n"
                 f"Found {detector_group_keys}\n"
                 f"Try using integer indices instead of names."
             )
@@ -287,20 +285,19 @@ def reduction(
 
         _export_static_metadata_as_nxlauetof(
             experiment_metadata=experiment_metadata,
-            output_file=output_file,
+            output_file=output_file_path,
         )
         detector_grs = {}
         for det_name, det_group in detector_id_map.items():
             display(f"Processing {det_name}")
-            if chunk_size <= 0:
+            if config.inputs.chunk_size_events <= 0:
                 dg = det_group[()]
             else:
                 # Slice the first chunk for metadata extraction
-                dg = det_group['event_time_zero', 0:chunk_size]
-
+                dg = det_group['event_time_zero', 0 : config.inputs.chunk_size_events]
             display("Computing detector positions...")
             display(dg := _compute_positions(dg, auto_fix_transformations=True))
-            detector = build_detector_desc(det_name, dg, fast_axis=fast_axis)
+            detector = build_detector_desc(det_name, dg)
             detector_meta = sc.DataGroup(
                 {
                     'fast_axis': detector.fast_axis,
@@ -319,14 +316,15 @@ def reduction(
                 }
             )
             _export_detector_metadata_as_nxlauetof(
-                NMXDetectorMetadata(detector_meta), output_file=output_file
+                NMXDetectorMetadata(detector_meta),
+                output_file=output_file_path,
             )
 
             da: sc.DataArray = dg['data']
             event_time_offset_unit = da.bins.coords['event_time_offset'].bins.unit
             display("Event time offset unit: %s", event_time_offset_unit)
             toa_bin_edges = toa_bin_edges.to(unit=event_time_offset_unit, copy=False)
-            if chunk_size <= 0:
+            if config.inputs.chunk_size_events <= 0:
                 counts = da.hist(event_time_offset=toa_bin_edges).rename_dims(
                     x_pixel_offset='x', y_pixel_offset='y', event_time_offset='t'
                 )
@@ -334,7 +332,7 @@ def reduction(
 
             else:
                 num_chunks = calculate_number_of_chunks(
-                    det_group, chunk_size=chunk_size
+                    det_group, chunk_size=config.inputs.chunk_size_events
                 )
                 display(f"Number of chunks: {num_chunks}")
                 counts = da.hist(event_time_offset=toa_bin_edges).rename_dims(
@@ -344,7 +342,10 @@ def reduction(
                 for chunk_index in range(1, num_chunks):
                     cur_chunk = det_group[
                         'event_time_zero',
-                        chunk_index * chunk_size : (chunk_index + 1) * chunk_size,
+                        chunk_index * config.inputs.chunk_size_events : (
+                            chunk_index + 1
+                        )
+                        * config.inputs.chunk_size_events,
                     ]
                     display(f"Processing chunk {chunk_index + 1} of {num_chunks}")
                     cur_chunk = _compute_positions(
@@ -374,35 +375,21 @@ def reduction(
             display("Saving reduced data to Nexus file...")
             _export_reduced_data_as_nxlauetof(
                 dg,
-                output_file=output_file,
-                compress_counts=(compression == Compression.BITSHUFFLE_LZ4),
+                output_file=output_file_path,
+                compress_counts=(
+                    config.output.compression == Compression.BITSHUFFLE_LZ4
+                ),
             )
             detector_grs[det_name] = dg
 
     display("Reduction completed successfully.")
-    return sc.DataGroup(detector_grs)
+    histograms = {name: det_gr['counts'] for name, det_gr in detector_grs.items()}
+    return sc.DataGroup(histogram=sc.DataGroup(histograms))
 
 
 def main() -> None:
-    parser = ReductionConfig.build_argument_parser()
-    config = ReductionConfig.from_args(parser.parse_args())
-
-    input_file = collect_matching_input_files(*config.inputs.input_file)
-    output_file = pathlib.Path(config.output.output_file).resolve()
+    parser = build_reduction_argument_parser()
+    config = reduction_config_from_args(parser.parse_args())
     logger = build_logger(config.output)
 
-    logger.info("Input file: %s", input_file)
-    logger.info("Output file: %s", output_file)
-
-    reduction(
-        input_file=input_file,
-        output_file=output_file,
-        chunk_size=config.inputs.chunk_size_pulse,
-        detector_ids=config.inputs.detector_ids,
-        compression=config.output.compression,
-        toa_bin_edges=config.workflow.nbins,
-        min_toa=sc.scalar(config.workflow.min_toa, unit='ms'),
-        max_toa=sc.scalar(config.workflow.max_toa, unit='ms'),
-        fast_axis=config.workflow.fast_axis,
-        logger=logger,
-    )
+    reduction(config=config, logger=logger)
