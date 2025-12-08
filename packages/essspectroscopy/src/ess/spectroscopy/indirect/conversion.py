@@ -6,6 +6,7 @@
 import numpy as np
 import scipp as sc
 import scipp.constants
+import scippnexus as snx
 from scippneutron.conversion.tof import (
     energy_from_wavelength,
     wavelength_from_tof,
@@ -19,6 +20,7 @@ from ..types import (
     InelasticCoordTransformGraph,
     MonitorCoordTransformGraph,
     MonitorType,
+    Position,
     PrimarySpecCoordTransformGraph,
     RunType,
     SecondarySpecCoordTransformGraph,
@@ -291,13 +293,16 @@ def add_spectrometer_coords(
     )
 
 
-def monitor_coordinate_transformation_graph() -> MonitorCoordTransformGraph:
+def monitor_coordinate_transformation_graph(
+    source_position: Position[snx.NXsource, RunType],
+) -> MonitorCoordTransformGraph[RunType]:
     from scippneutron.conversion.graph import beamline, tof
 
-    return MonitorCoordTransformGraph(
+    return MonitorCoordTransformGraph[RunType](
         {
             **beamline.beamline(scatter=False),
             **tof.elastic_wavelength(start='tof'),
+            "source_position": lambda: source_position,
         }
     )
 
