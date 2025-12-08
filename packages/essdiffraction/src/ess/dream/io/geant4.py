@@ -87,6 +87,18 @@ def get_calibrated_geant4_detector(
     return detector["events"].copy(deep=False)
 
 
+def get_calibrated_geant4_monitor(
+    monitor: NeXusComponent[MonitorType, RunType],
+) -> EmptyMonitor[RunType, MonitorType]:
+    """
+    Replacement for :py:func:`ess.reduce.nexus.workflow.get_calibrated_monitor`.
+
+    Since the Geant4 monitors already have computed positions,
+    this just extracts the relevant data.
+    """
+    return monitor['data'].assign_coords(position=monitor['position'])
+
+
 def _load_raw_events(file_path: str) -> sc.DataArray:
     table = sc.io.load_csv(
         file_path, sep="\t", header_parser="bracket", data_columns=[]
@@ -336,6 +348,7 @@ providers = (
     load_geant4_csv,
     extract_geant4_detector,
     get_calibrated_geant4_detector,
+    get_calibrated_geant4_monitor,
     assemble_detector_data,
     assemble_monitor_data,
     load_mcstas_monitor,

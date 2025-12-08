@@ -5,9 +5,9 @@
 #
 #    requirements upgrade
 #
-cachetools==6.2.1
+cachetools==6.2.2
     # via tox
-certifi==2025.10.5
+certifi==2025.11.12
     # via requests
 chardet==5.2.0
     # via tox
@@ -32,7 +32,7 @@ packaging==25.0
     #   -r ci.in
     #   pyproject-api
     #   tox
-platformdirs==4.5.0
+platformdirs==4.5.1
     # via
     #   tox
     #   virtualenv

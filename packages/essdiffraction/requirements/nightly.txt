@@ -12,13 +12,13 @@ annotated-types==0.7.0
     # via pydantic
 ase==3.26.0
     # via ncrystal
-asttokens==3.0.0
+asttokens==3.0.1
     # via stack-data
-certifi==2025.10.5
+certifi==2025.11.12
     # via requests
 charset-normalizer==3.4.4
     # via requests
-click==8.3.0
+click==8.3.1
     # via dask
 cloudpickle==3.1.2
     # via dask
@@ -30,7 +30,7 @@ cyclebane==24.10.0
     # via sciline
 cycler==0.12.1
     # via matplotlib
-dask==2025.10.0
+dask==2025.11.0
     # via -r nightly.in
 decorator==5.2.1
     # via ipython
@@ -42,11 +42,11 @@ essreduce @ git+https://github.com/scipp/essreduce@main
     # via -r nightly.in
 executing==2.2.1
     # via stack-data
-fonttools==4.60.1
+fonttools==4.61.0
     # via matplotlib
-fsspec==2025.10.0
+fsspec==2025.12.0
     # via dask
-gemmi==0.7.3
+gemmi==0.7.4
     # via ncrystal
 graphviz==0.21
     # via -r nightly.in
@@ -64,7 +64,7 @@ iniconfig==2.3.0
     # via pytest
 ipydatawidgets==4.3.5
     # via pythreejs
-ipython==9.7.0
+ipython==9.8.0
     # via ipywidgets
 ipython-pygments-lexers==1.1.1
     # via ipython
@@ -101,9 +101,9 @@ ncrystal-core==4.2.10
     # via ncrystal
 ncrystal-python==4.2.10
     # via ncrystal
-networkx==3.6rc0
+networkx==3.6
     # via cyclebane
-numpy==2.3.4
+numpy==2.4.0rc1
     # via
     #   -r nightly.in
     #   ase
@@ -125,7 +125,7 @@ packaging==25.0
     #   matplotlib
     #   pooch
     #   pytest
-pandas==2.3.3
+pandas==3.0.0rc0
     # via -r nightly.in
 parso==0.8.5
     # via jedi
@@ -135,7 +135,7 @@ pexpect==4.9.0
     # via ipython
 pillow==12.0.0
     # via matplotlib
-platformdirs==4.5.0
+platformdirs==4.5.1
     # via pooch
 plopp @ git+https://github.com/scipp/plopp@main
     # via
@@ -145,14 +145,16 @@ plopp @ git+https://github.com/scipp/plopp@main
 pluggy==1.6.0
     # via pytest
 pooch==1.8.2
-    # via -r nightly.in
+    # via
+    #   -r nightly.in
+    #   tof
 prompt-toolkit==3.0.52
     # via ipython
 ptyprocess==0.7.0
     # via pexpect
 pure-eval==0.2.3
     # via stack-data
-pydantic==2.12.4
+pydantic==2.12.5
     # via scippneutron
 pydantic-core==2.41.5
     # via pydantic
@@ -161,9 +163,9 @@ pygments==2.19.2
     #   ipython
     #   ipython-pygments-lexers
     #   pytest
-pyparsing==3.3.0a1
+pyparsing==3.3.0b1
     # via matplotlib
-pytest==8.4.2
+pytest==9.0.1
     # via -r nightly.in
 python-dateutil==2.9.0.post0
     # via
@@ -172,8 +174,6 @@ python-dateutil==2.9.0.post0
     #   scippneutron
 pythreejs==2.4.2
     # via -r nightly.in
-pytz==2025.2
-    # via pandas
 pyyaml==6.0.3
     # via dask
 requests==2.32.5
@@ -203,7 +203,6 @@ scipy==1.16.3
     #   ase
     #   scippneutron
     #   scippnexus
-    #   tof
 six==1.17.0
     # via python-dateutil
 spglib==2.6.0
