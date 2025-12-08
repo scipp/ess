@@ -238,7 +238,7 @@ def add_incident_energy(
     transformed = data.transform_coords(
         [
             'incident_energy',
-            'incident_wavelength',  # TODO
+            'incident_wavelength',
             # These are inputs, but we need them for binning:
             'a3',
             'a4',
