@@ -114,9 +114,6 @@ class InstrumentAngle(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """
 
 
-MonitorCoordTransformGraph = NewType('MonitorCoordTransformGraph', dict)
-
-
 NXspeFileName = NewType('NXspeFileName', str)
 NXspeFileNames = NewType('NXspeFileNames', list[NXspeFileName])
 
@@ -133,6 +130,9 @@ InelasticCoordTransformGraph = NewType('InelasticCoordTransformGraph', dict)
 
 
 class ElasticCoordTransformGraph(sciline.Scope[RunType, dict], dict): ...
+
+
+class MonitorCoordTransformGraph(sciline.Scope[RunType, dict], dict): ...
 
 
 SQWBinSizes = NewType('SQWBinSizes', dict[str, int])
