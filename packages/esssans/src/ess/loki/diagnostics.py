@@ -113,7 +113,7 @@ class _DimensionSelector(ipw.VBox):
         return h_buttons, v_buttons
 
     def set_dims(self, new_dims: tuple[str, ...]) -> None:
-        default_h, default_v, _, _ = _STARTING_DIMS  # self._default_dims(new_dims)
+        default_v, default_h, _, _ = _STARTING_DIMS  # self._default_dims(new_dims)
         options = {dim.capitalize(): dim for dim in new_dims}
         self._lock = True
         self._horizontal_buttons.options = options
@@ -240,4 +240,4 @@ def _make_bank_selector(banks: Iterable[str]) -> ipw.ToggleButtons:
     options = (
         (' '.join(s.capitalize() for s in bank.split('_')), bank) for bank in banks
     )
-    return ipw.ToggleButtons(options=options)
+    return ipw.ToggleButtons(options=options, layout={'width': '50%'})
