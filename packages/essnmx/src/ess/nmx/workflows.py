@@ -58,7 +58,7 @@ def _simulate_fixed_wavelength_tof(
     source = tof.Source(
         facility="ess",
         neutrons=neutrons,
-        pulses=1,  # NMX does not use pulse-skipping.
+        pulses=2,
         seed=seed,
         wmax=wmax,
         wmin=wmin,
