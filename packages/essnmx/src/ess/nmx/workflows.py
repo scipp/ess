@@ -205,24 +205,29 @@ def _retrieve_crystal_rotation(
     file_path: Filename[SampleRun],
 ) -> Position[snx.NXcrystal, SampleRun]:
     """Temporary provider to retrieve crystal rotation from Nexus file."""
-    with snx.File(file_path) as file:
-        if 'crystal_rotation' not in file['entry/sample']:
-            import warnings
+    from ess.reduce.nexus._nexus_loader import load_from_path
+    from ess.reduce.nexus.types import NeXusLocationSpec
 
-            warnings.warn(
-                "No crystal rotation found in the Nexus file under "
-                "'entry/sample/crystal_rotation'. Returning zero rotation.",
-                RuntimeWarning,
-                stacklevel=1,
-            )
-            return Position[snx.NXcrystal, SampleRun](sc.vector([0, 0, 0], unit='deg'))
+    spec = NeXusLocationSpec(
+        filename=file_path,
+        component_name='sample/crystal_rotation',
+    )
+    try:
+        rotation: snx.nxtransformations.Transform = load_from_path(location=spec)
+    except KeyError:
+        import warnings
 
-        # Temporary way of storing crystal rotation.
-        # streaming-sample-mcstas module writes crystal rotation under
-        # 'entry/sample/crystal_rotation' as an array of three values.
-        return Position[snx.NXcrystal, SampleRun](
-            file['entry/sample/crystal_rotation'][()]
+        warnings.warn(
+            "No crystal rotation found in the Nexus file under "
+            f"'entry/{spec.component_name}'. Returning zero rotation.",
+            RuntimeWarning,
+            stacklevel=1,
         )
+        zero_rotation = sc.vector([0, 0, 0], unit='deg')
+        return Position[snx.NXcrystal, SampleRun](zero_rotation)
+    else:
+        # TODO: Make sure if retrieving rotation vector is enough here.
+        return Position[snx.NXcrystal, SampleRun](rotation.vector)
 
 
 def assemble_detector_metadata(
