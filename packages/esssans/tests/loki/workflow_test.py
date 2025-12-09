@@ -19,7 +19,7 @@ from ess.sans.types import (
     QBins,
     ReturnEvents,
     SampleRun,
-    TimeOfFlightLookupTableFilename
+    TimeOfFlightLookupTableFilename,
     TofDetector,
     UncertaintyBroadcastMode,
 )
@@ -88,6 +88,7 @@ def test_loki_workflow_can_compute_tof(loki_workflow, bank):
     wf[TimeOfFlightLookupTableFilename] = loki.data.loki_tof_lookup_table_no_choppers()
     result = wf.compute(TofDetector[SampleRun])
     assert 'tof' in result.bins.coords
+
 
 @pytest.mark.parametrize("bank", list(range(9)))
 def test_loki_workflow_can_compute_iofq(loki_workflow, bank):
