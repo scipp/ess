@@ -5,10 +5,9 @@
 import enum
 from typing import TypeVar
 
+import ess.reduce
 import sciline
 import scipp as sc
-
-import ess.reduce
 from ess.reduce.uncertainty import broadcast_uncertainties
 
 from ._util import event_or_outer_coord
@@ -151,14 +150,19 @@ def _normalize_by_vanadium(
     vanadium: sc.DataArray,
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
 ) -> sc.DataArray:
-    norm = vanadium.hist() if vanadium.bins is not None else vanadium
+    norm = (
+        vanadium.hist(dspacing=data.coords['dspacing'])
+        if vanadium.is_binned
+        else vanadium.rebin(dspacing=data.coords['dspacing'])
+    )
     norm = broadcast_uncertainties(
         norm, prototype=data, mode=uncertainty_broadcast_mode
     )
-    # Converting to unit 'one' because the division might produce a unit
-    # with a large scale if the proton charges in data and vanadium were
-    # measured with different units.
-    normed = (data / norm).to(unit="one", copy=False)
+    # Convert the unit such that the end-result has unit 'one' because the division
+    # might otherwise produce a unit with a large scale if the proton charges in data
+    # and vanadium were measured with different units.
+    norm = norm.to(unit=data.unit, copy=False)
+    normed = data / norm
     mask = norm.data == sc.scalar(0.0, unit=norm.unit)
     if mask.any():
         normed.masks['zero_vanadium'] = mask

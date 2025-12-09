@@ -10,13 +10,18 @@ from ess.powder.correction import (
     merge_calibration,
     normalize_by_monitor_histogram,
     normalize_by_monitor_integrated,
+    normalize_by_vanadium_dspacing,
+    normalize_by_vanadium_dspacing_and_two_theta,
 )
 from ess.powder.types import (
     CaveMonitor,
     CorrectedDspacing,
+    FocussedDataDspacing,
+    FocussedDataDspacingTwoTheta,
     NormalizedDspacing,
     SampleRun,
     UncertaintyBroadcastMode,
+    VanadiumRun,
     WavelengthMonitor,
 )
 
@@ -454,3 +459,96 @@ def test_normalize_by_monitor_integrated_assigns_mask_if_monitor_range_too_narro
             monitor=WavelengthMonitor[SampleRun, CaveMonitor](monitor),
             uncertainty_broadcast_mode=UncertaintyBroadcastMode.fail,
         )
+
+
+def random_variable(
+    rng: np.random.Generator, dim: str, n: int, unit: str, with_variances: bool = False
+) -> sc.Variable:
+    values = rng.uniform(0.1, 2.0, n)
+    variances = values * rng.uniform(0.1, 0.5, n) if with_variances else None
+    return sc.array(dims=[dim], values=values, variances=variances, unit=unit)
+
+
+def random_binned_data(
+    rng: np.random.Generator,
+    dim: str,
+    n_events: int,
+    n_bins: int,
+    unit: str,
+    coord_unit: str,
+    with_variances: bool = False,
+) -> sc.DataArray:
+    return sc.DataArray(
+        random_variable(rng, 'event', n_events, unit, with_variances=with_variances),
+        coords={dim: random_variable(rng, 'event', n_events, coord_unit)},
+    ).bin({dim: n_bins})
+
+
+def make_sample_and_vanadium() -> tuple[sc.DataArray, sc.DataArray]:
+    rng = np.random.default_rng(seed=495)
+    sample = random_binned_data(rng, 'dspacing', 84, 35, 'counts', 'Å', True)
+    vanadium = random_binned_data(rng, 'dspacing', 146, 79, 'counts', 'Å', True)
+    return sample, vanadium
+
+
+class TestNormalizeByVanadium:
+    def test_1d_binned_vanadium(self) -> None:
+        sample, vanadium = make_sample_and_vanadium()
+        normed = normalize_by_vanadium_dspacing(
+            FocussedDataDspacing[SampleRun](sample),
+            FocussedDataDspacing[VanadiumRun](vanadium),
+            UncertaintyBroadcastMode.drop,
+        )
+        # we test masks separately
+        normed = normed.drop_masks(list(normed.masks.keys()))
+
+        norm = vanadium.hist(dspacing=sample.coords['dspacing'])
+        expected = sample / sc.values(norm)
+        sc.testing.assert_allclose(normed, expected)
+
+    def test_1d_histogrammed_vanadium(self) -> None:
+        sample, vanadium = make_sample_and_vanadium()
+        vanadium = vanadium.hist()
+        normed = normalize_by_vanadium_dspacing(
+            FocussedDataDspacing[SampleRun](sample),
+            FocussedDataDspacing[VanadiumRun](vanadium),
+            UncertaintyBroadcastMode.drop,
+        )
+        # we test masks separately
+        normed = normed.drop_masks(list(normed.masks.keys()))
+
+        norm = vanadium.rebin(dspacing=sample.coords['dspacing'])
+        expected = sample / sc.values(norm)
+        sc.testing.assert_allclose(normed, expected)
+
+    def test_binned_vanadium_binning_has_no_effect(self) -> None:
+        sample, vanadium = make_sample_and_vanadium()
+        vana_binned_like_sample = vanadium.bin(dspacing=sample.coords['dspacing'])
+        normed_a = normalize_by_vanadium_dspacing(
+            FocussedDataDspacing[SampleRun](sample),
+            FocussedDataDspacing[VanadiumRun](vanadium),
+            UncertaintyBroadcastMode.drop,
+        )
+        normed_b = normalize_by_vanadium_dspacing(
+            FocussedDataDspacing[SampleRun](sample),
+            FocussedDataDspacing[VanadiumRun](vana_binned_like_sample),
+            UncertaintyBroadcastMode.drop,
+        )
+        sc.testing.assert_allclose(normed_a, normed_b)
+
+    def test_1d_masks_zero_vanadium_bins(self) -> None:
+        sample, vanadium = make_sample_and_vanadium()
+        vanadium['dspacing', 5] = sc.scalar(0.0, variance=0.0, unit='counts')
+        normed = normalize_by_vanadium_dspacing(
+            FocussedDataDspacing[SampleRun](sample),
+            FocussedDataDspacing[VanadiumRun](vanadium),
+            UncertaintyBroadcastMode.drop,
+        )
+
+        norm = vanadium.hist(dspacing=sample.coords['dspacing'])
+
+        sc.testing.assert_allclose(
+            normed.masks['zero_vanadium'], norm.data == sc.scalar(0.0, unit='counts')
+        )
+
+# TODO vanadium and 2theta
