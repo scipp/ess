@@ -108,6 +108,16 @@ class WorkflowConfig(BaseModel):
         description="Maximum wavelength for TOF simulation in Angstrom.",
         default=3.6,
     )
+    tof_simulation_min_ltotal: float = Field(
+        title="TOF Simulation Minimum Ltotal",
+        description="Minimum total flight path for TOF simulation in meters.",
+        default=150.0,
+    )
+    tof_simulation_max_ltotal: float = Field(
+        title="TOF Simulation Maximum Ltotal",
+        description="Maximum total flight path for TOF simulation in meters.",
+        default=170.0,
+    )
     tof_simulation_seed: int = Field(
         title="TOF Simulation Seed",
         description="Random seed for TOF simulation.",

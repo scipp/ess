@@ -2,7 +2,7 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import logging
 import pathlib
-from collections.abc import Callable, Iterable
+from collections.abc import Callable
 
 import sciline as sl
 import scipp as sc
@@ -71,25 +71,19 @@ def compute_and_cache_lookup_table(
     *,
     wf: sl.Pipeline,
     workflow_config: WorkflowConfig,
-    detector_names: Iterable[str],
     display: Callable,
 ) -> sl.Pipeline:
-    """Compute and cache the TOF lookup table in the workflow.
-
-    **Note**: ``base_wf`` is modified in-place and also returned.
-    """
-    # We compute one lookup table that covers all range
-    # to avoid multiple tof simulations.
+    """Compute and cache the TOF lookup table in the workflow."""
     if workflow_config.tof_lookup_table_file_path is None:
         display("Computing TOF lookup table from simulation...")
     else:
         display("Loading TOF lookup table from file...")
 
-    lookup_table = compute_lookup_table(
-        base_wf=wf, workflow_config=workflow_config, detector_names=detector_names
+    lookup_table_cached_wf = wf.copy()
+    lookup_table_cached_wf[TimeOfFlightLookupTable] = compute_lookup_table(
+        workflow_config=workflow_config
     )
-    wf[TimeOfFlightLookupTable] = lookup_table
-    return wf
+    return lookup_table_cached_wf
 
 
 def _finalize_tof_bin_edges(
@@ -150,15 +144,13 @@ def reduction(
     )
 
     base_wf = NMXWorkflow()
-    # Insert input file path into the workflow for later use
-    base_wf[Filename] = input_file_path
 
+    # Insert parameters and cache intermediate results
+    base_wf[Filename] = input_file_path
     base_wf = compute_and_cache_lookup_table(
-        wf=base_wf,
-        workflow_config=config.workflow,
-        detector_names=detector_names,
-        display=display,
+        wf=base_wf, workflow_config=config.workflow, display=display
     )
+
     metadatas = base_wf.compute((NMXSampleMetadata, NMXSourceMetadata))
     export_static_metadata_as_nxlauetof(
         sample_metadata=metadatas[NMXSampleMetadata],

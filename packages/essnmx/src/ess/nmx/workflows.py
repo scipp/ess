@@ -19,7 +19,6 @@ from ess.reduce.nexus.types import (
     SampleRun,
 )
 from ess.reduce.time_of_flight import (
-    DetectorLtotal,
     GenericTofWorkflow,
     LtotalRange,
     NumberOfSimulatedNeutrons,
@@ -46,26 +45,6 @@ default_parameters = {
     TofSimulationMaxWavelength: sc.scalar(3.6, unit='angstrom'),
     TofSimulationMinWavelength: sc.scalar(1.8, unit='angstrom'),
 }
-
-
-def _validate_mergable_workflow(wf: sciline.Pipeline):
-    if wf.indices:
-        raise NotImplementedError("Only flat workflow can be merged.")
-
-
-def _merge_workflows(
-    base_wf: sciline.Pipeline, merged_wf: sciline.Pipeline
-) -> sciline.Pipeline:
-    _validate_mergable_workflow(base_wf)
-    _validate_mergable_workflow(merged_wf)
-
-    for key, spec in merged_wf.underlying_graph.nodes.items():
-        if 'value' in spec:
-            base_wf[key] = spec['value']
-        elif (provider_spec := spec.get('provider')) is not None:
-            base_wf.insert(provider_spec.func)
-
-    return base_wf
 
 
 def _simulate_fixed_wavelength_tof(
@@ -96,25 +75,6 @@ def _simulate_fixed_wavelength_tof(
         weight=events.data,
         distance=results["detector"].distance,
     )
-
-
-def _ltotal_range(detector_ltotal: DetectorLtotal[SampleRun]) -> LtotalRange:
-    margin = sc.scalar(0.5, unit='m').to(
-        unit=detector_ltotal.unit
-    )  # Hardcoded margin of 50 cm. It's because the detector width is ~50 cm.
-    ltotal_min = sc.min(detector_ltotal) - margin
-    ltotal_max = sc.max(detector_ltotal) + margin
-    return LtotalRange((ltotal_min, ltotal_max))
-
-
-def patch_workflow_lookup_table_steps(*, wf: sciline.Pipeline) -> sciline.Pipeline:
-    patched_wf = wf.copy()
-
-    # Use TofLookupTableWorkflow
-    patched_wf = _merge_workflows(patched_wf, TofLookupTableWorkflow())
-    patched_wf.insert(_simulate_fixed_wavelength_tof)
-    patched_wf.insert(_ltotal_range)
-    return patched_wf
 
 
 def _merge_panels(*da: sc.DataArray) -> sc.DataArray:
@@ -282,28 +242,26 @@ def NMXWorkflow() -> sciline.Pipeline:
     return generic_wf
 
 
-def compute_lookup_table(
-    *,
-    base_wf: sciline.Pipeline,
-    workflow_config: WorkflowConfig,
-    detector_names: Iterable[str],
-) -> sc.DataArray:
-    wf = base_wf.copy()
+def compute_lookup_table(*, workflow_config: WorkflowConfig) -> sc.DataArray:
     if workflow_config.tof_lookup_table_file_path is not None:
+        wf = NMXWorkflow()
         wf[TimeOfFlightLookupTableFilename] = workflow_config.tof_lookup_table_file_path
     else:
-        wf = patch_workflow_lookup_table_steps(wf=wf)
+        wf = TofLookupTableWorkflow()
+        wf.insert(_simulate_fixed_wavelength_tof)
+
         wmax = sc.scalar(workflow_config.tof_simulation_max_wavelength, unit='angstrom')
         wmin = sc.scalar(workflow_config.tof_simulation_min_wavelength, unit='angstrom')
         wf[TofSimulationMaxWavelength] = wmax
         wf[TofSimulationMinWavelength] = wmin
         wf[SimulationSeed] = workflow_config.tof_simulation_seed
-        wf = map_detector_names(
-            wf=wf,
-            detector_names=detector_names,
-            mapped_type=DetectorLtotal[SampleRun],
-            reduce_func=_merge_panels,
+        ltotal_min = sc.scalar(
+            value=workflow_config.tof_simulation_min_ltotal, unit='m'
         )
+        ltotal_max = sc.scalar(
+            value=workflow_config.tof_simulation_max_ltotal, unit='m'
+        )
+        wf[LtotalRange] = LtotalRange((ltotal_min, ltotal_max))
 
     return wf.compute(TimeOfFlightLookupTable)
 
