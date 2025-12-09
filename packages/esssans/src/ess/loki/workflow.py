@@ -47,11 +47,21 @@ DETECTOR_BANK_SIZES = {
 }
 
 
-def default_parameters() -> dict:
+def larmor_default_parameters() -> dict:
     return {
         DetectorBankSizes: DETECTOR_BANK_SIZES,
         NeXusMonitorName[Incident]: 'monitor_1',
         NeXusMonitorName[Transmission]: 'monitor_2',
+        PixelShapePath: 'pixel_shape',
+        NonBackgroundWavelengthRange: None,
+    }
+
+
+def loki_default_parameters() -> dict:
+    return {
+        DetectorBankSizes: DETECTOR_BANK_SIZES,
+        NeXusMonitorName[Incident]: 'beam_monitor_1',
+        NeXusMonitorName[Transmission]: 'beam_monitor_3',
         PixelShapePath: 'pixel_shape',
         NonBackgroundWavelengthRange: None,
     }
@@ -125,7 +135,7 @@ def LokiAtLarmorWorkflow() -> sciline.Pipeline:
     workflow = sans.SansWorkflow()
     for provider in loki_providers:
         workflow.insert(provider)
-    for key, param in default_parameters().items():
+    for key, param in larmor_default_parameters().items():
         workflow[key] = param
     workflow.insert(larmor_data_to_tof)
     workflow.insert(larmor_monitor_to_tof)
@@ -168,7 +178,7 @@ def LokiWorkflow() -> sciline.Pipeline:
     workflow = sans.SansWorkflow()
     for provider in loki_providers:
         workflow.insert(provider)
-    for key, param in default_parameters().items():
+    for key, param in loki_default_parameters().items():
         workflow[key] = param
     workflow.typical_outputs = typical_outputs
     return workflow

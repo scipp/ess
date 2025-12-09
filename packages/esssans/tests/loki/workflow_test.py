@@ -19,6 +19,7 @@ from ess.sans.types import (
     QBins,
     ReturnEvents,
     SampleRun,
+    TimeOfFlightLookupTableFilename
     TofDetector,
     UncertaintyBroadcastMode,
 )
@@ -84,6 +85,18 @@ def test_loki_workflow_can_compute_tof(loki_workflow, bank):
     # For simplicity, insert a fake beam center instead of computing it.
     wf[BeamCenter] = sc.vector([0.0, 0.0, 0.0], unit='m')
     wf[NeXusDetectorName] = f'loki_detector_{bank}'
-    wf['tof_lookup_table'] = loki.data.loki_tof_lookup_table_no_choppers()
+    wf[TimeOfFlightLookupTableFilename] = loki.data.loki_tof_lookup_table_no_choppers()
     result = wf.compute(TofDetector[SampleRun])
     assert 'tof' in result.bins.coords
+
+@pytest.mark.parametrize("bank", list(range(9)))
+def test_loki_workflow_can_compute_iofq(loki_workflow, bank):
+    wf = loki_workflow()
+    # For simplicity, insert a fake beam center instead of computing it.
+    wf[BeamCenter] = sc.vector([0.0, 0.0, 0.0], unit='m')
+    wf[NeXusDetectorName] = f'loki_detector_{bank}'
+    wf[TimeOfFlightLookupTableFilename] = loki.data.loki_tof_lookup_table_no_choppers()
+
+    result = wf.compute(BackgroundSubtractedIofQ)
+    assert result.dims == ('Q',)
+    assert sc.identical(result.coords['Q'], wf.compute(QBins))

@@ -4,7 +4,12 @@
 import importlib.metadata
 
 from . import workflow
-from .workflow import LokiAtLarmorWorkflow, LokiWorkflow, default_parameters
+from .workflow import (
+    LokiAtLarmorWorkflow,
+    LokiWorkflow,
+    larmor_default_parameters,
+    loki_default_parameters,
+)
 
 try:
     __version__ = importlib.metadata.version(__package__ or __name__)
@@ -16,6 +21,7 @@ del importlib
 __all__ = [
     'LokiAtLarmorWorkflow',
     'LokiWorkflow',
-    'default_parameters',
+    'larmor_default_parameters',
+    'loki_default_parameters',
     'workflow',
 ]

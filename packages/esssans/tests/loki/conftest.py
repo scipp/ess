@@ -65,15 +65,16 @@ def larmor_workflow() -> sciline.Pipeline:
 def loki_workflow() -> sciline.Pipeline:
     def make_workflow() -> sciline.Pipeline:
         wf = loki.LokiWorkflow()
-        # wf[Filename[SampleRun]] = loki.data.loki_tutorial_sample_run_60339()
-        # wf[Filename[BackgroundRun]] = loki.data.loki_tutorial_background_run_60393()
-        # wf[Filename[TransmissionRun[SampleRun]]] = (
-        #     loki.data.loki_tutorial_sample_transmission_run()
-        # )
-        # wf[Filename[TransmissionRun[BackgroundRun]]] = (
-        #     loki.data.loki_tutorial_run_60392()
-        # )
-        # wf[Filename[EmptyBeamRun]] = loki.data.loki_tutorial_run_60392()
+
+        # For now, use a dummy file for all runs. This produces a result with all NaNs,
+        # but is sufficient to test that the workflow runs end-to-end.
+        # TODO: Replace with real test data when available.
+        file = loki.data.loki_coda_empty_run()
+        wf[Filename[SampleRun]] = file
+        wf[Filename[BackgroundRun]] = file
+        wf[Filename[TransmissionRun[SampleRun]]] = file
+        wf[Filename[TransmissionRun[BackgroundRun]]] = file
+        wf[Filename[EmptyBeamRun]] = file
 
         wf[WavelengthBins] = sc.linspace(
             'wavelength', start=1.0, stop=13.0, num=51, unit='angstrom'
