@@ -189,6 +189,28 @@ def get_monitor_data(
     )
 
 
+def get_calibrated_isis_monitor(
+    monitor: NeXusComponent[MonitorType, RunType],
+    offset: MonitorPositionOffset[RunType, MonitorType],
+) -> EmptyMonitor[RunType, MonitorType]:
+    """
+    Replacement for :py:func:`ess.reduce.nexus.workflow.get_calibrated_detector`.
+
+    Differences:
+
+    - The detector position is already pre-computed.
+    - The detector is not reshaped.
+
+    The reason for the partial duplication is to avoid having to put ISIS/Mantid
+    specific code in the generic workflow.
+    """
+    da = monitor['data']
+    position = monitor['data'].coords['position']
+    return EmptyMonitor[RunType, MonitorType](
+        da.assign_coords(position=position + offset.to(unit=position.unit))
+    )
+
+
 def dummy_assemble_detector_data(
     detector: EmptyDetector[RunType],
 ) -> RawDetector[RunType]:
@@ -285,6 +307,7 @@ providers = (
     get_sample_position,
     get_detector_data,
     get_calibrated_isis_detector,
+    get_calibrated_isis_monitor,
     get_detector_ids_from_sample_run,
     get_monitor_data,
     data_to_tof,
