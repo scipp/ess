@@ -95,6 +95,8 @@ def test_reduction_config() -> None:
         time_bin_unit=TimeBinUnit.us,
         tof_simulation_max_wavelength=5.0,
         tof_simulation_min_wavelength=1.0,
+        tof_simulation_min_ltotal=140.0,
+        tof_simulation_max_ltotal=200.0,
         tof_simulation_seed=12345,
     )
     output_options = OutputConfig(
