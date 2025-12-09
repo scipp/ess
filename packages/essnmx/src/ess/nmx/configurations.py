@@ -78,12 +78,12 @@ class WorkflowConfig(BaseModel):
         default=50,
     )
     min_time_bin: int | None = Field(
-        title="Minimum Time Bin",
+        title="Minimum Time",
         description="Minimum time edge of [time_bin_coordinate] in [time_bin_unit].",
         default=None,
     )
     max_time_bin: int | None = Field(
-        title="Maximum Time Bin",
+        title="Maximum Time",
         description="Maximum time edge of [time_bin_coordinate] in [time_bin_unit].",
         default=None,
     )
