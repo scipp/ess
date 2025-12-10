@@ -287,7 +287,7 @@ def test_beam_center_from_center_of_mass_is_close_to_verified_result(larmor_work
 
 def test_phi_with_gravity(larmor_workflow):
     pipeline = larmor_workflow()
-    pipeline[BeamCenter] = _compute_beam_center()
+    pipeline[BeamCenter] = _compute_beam_center(pipeline)
     pipeline[CorrectForGravity] = False
     data_no_grav = pipeline.compute(WavelengthDetector[SampleRun, Numerator]).flatten(
         to='pixel'
