@@ -22,6 +22,7 @@ _general_providers = (
     *maskings.providers,
     *normalization.providers,
     *orso.providers,
+    *load.providers,
 )
 
 mcstas_providers = (

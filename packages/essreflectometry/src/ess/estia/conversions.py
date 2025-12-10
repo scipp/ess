@@ -10,8 +10,10 @@ from ..reflectometry.conversions import reflectometry_q
 from ..reflectometry.types import (
     CoordTransformationGraph,
     DetectorLtotal,
+    DetectorRotation,
     RawDetector,
     RunType,
+    SampleRotation,
 )
 
 
@@ -77,6 +79,8 @@ def detector_ltotal_from_raw(
 def coordinate_transformation_graph(
     source_position: Position[NXsource, RunType],
     sample_position: Position[NXsample, RunType],
+    sample_rotation: SampleRotation[RunType],
+    detector_rotation: DetectorRotation[RunType],
     detector_bank_sizes: DetectorBankSizes,
 ) -> CoordTransformationGraph[RunType]:
     bank = detector_bank_sizes['multiblade_detector']
@@ -92,13 +96,13 @@ def coordinate_transformation_graph(
             position - sample_position.to(unit=position.unit)
         ),
         "Ltotal": lambda L1, L2: L1.to(unit=L2.unit) + L2,
-        'sample_rotation': lambda: sc.scalar(1.0, unit='deg'),
-        'detector_rotation': lambda: sc.scalar(3.65, unit='deg'),
+        'sample_rotation': lambda: sample_rotation,
+        'detector_rotation': lambda: detector_rotation,
         'source_position': lambda: source_position,
         'sample_position': lambda: sample_position,
-        'blade': lambda: sc.arange('blade', 0, bank['blade']),
-        'wire': lambda: sc.arange('wire', 0, bank['wire']),
-        'strip': lambda: sc.arange('strip', 0, bank['strip']),
+        'blade': lambda: sc.arange('blade', bank['blade'] - 1, -1, -1),
+        'wire': lambda: sc.arange('wire', bank['wire'] - 1, -1, -1),
+        'strip': lambda: sc.arange('strip', bank['strip'] - 1, -1, -1),
         'z_index': lambda blade, wire: blade * wire,
         'sample_size': lambda: sc.scalar(20.0, unit='mm'),
     }
