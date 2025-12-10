@@ -6,14 +6,24 @@ import scipp as sc
 from ..reflectometry.conversions import reflectometry_q
 from ..reflectometry.types import (
     BeamDivergenceLimits,
+    BeamSize,
     CoordTransformationGraph,
+    DetectorRotation,
     RunType,
+    SampleRotation,
+    SampleSize,
     WavelengthBins,
     YIndexLimits,
     ZIndexLimits,
 )
 from .geometry import Detector
-from .types import GravityToggle
+from .types import (
+    ChopperDistance,
+    ChopperFrequency,
+    ChopperPhase,
+    ChopperSeparation,
+    GravityToggle,
+)
 
 
 def theta(wavelength, pixel_divergence_angle, L2, sample_rotation, detector_rotation):
@@ -137,7 +147,15 @@ def wavelength(
 
 
 def coordinate_transformation_graph(
-    gravity: GravityToggle, run_type: RunType
+    gravity: GravityToggle,
+    detector_rotation: DetectorRotation[RunType],
+    sample_rotation: SampleRotation[RunType],
+    chopper_phase: ChopperPhase[RunType],
+    chopper_frequency: ChopperFrequency[RunType],
+    chopper_distance: ChopperDistance[RunType],
+    chopper_separation: ChopperSeparation[RunType],
+    sample_size: SampleSize[RunType],
+    beam_size: BeamSize[RunType],
 ) -> CoordTransformationGraph[RunType]:
     return {
         "wavelength": wavelength,
@@ -146,7 +164,48 @@ def coordinate_transformation_graph(
         "Q": reflectometry_q,
         "L1": lambda chopper_distance: sc.abs(chopper_distance),
         "L2": lambda distance_in_detector: distance_in_detector + Detector.distance,
+        "sample_rotation": lambda: sample_rotation.to(unit='rad'),
+        "detector_rotation": lambda: detector_rotation.to(unit='rad'),
+        "chopper_phase": lambda: chopper_phase,
+        "chopper_frequency": lambda: chopper_frequency,
+        "chopper_separation": lambda: chopper_separation,
+        "chopper_distance": lambda: chopper_distance,
+        "sample_size": lambda: sample_size,
+        "beam_size": lambda: beam_size,
     }
+
+
+def add_coords(
+    da: sc.DataArray,
+    graph: dict,
+) -> sc.DataArray:
+    "Adds scattering coordinates to the raw detector data."
+    return da.transform_coords(
+        (
+            "wavelength",
+            "theta",
+            "divergence_angle",
+            "Q",
+            "L1",
+            "L2",
+            "blade",
+            "wire",
+            "strip",
+            "z_index",
+            "sample_rotation",
+            "detector_rotation",
+            "sample_size",
+            "beam_size",
+            "chopper_phase",
+            "chopper_frequency",
+            "chopper_separation",
+            "chopper_distance",
+        ),
+        graph,
+        rename_dims=False,
+        keep_intermediate=False,
+        keep_aliases=False,
+    )
 
 
 def _not_between(v, a, b):

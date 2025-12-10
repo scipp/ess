@@ -3,7 +3,6 @@
 import scipp as sc
 
 from ..reflectometry.conversions import (
-    add_coords,
     add_proton_current_coord,
     add_proton_current_mask,
 )
@@ -19,6 +18,7 @@ from ..reflectometry.types import (
     YIndexLimits,
     ZIndexLimits,
 )
+from .conversions import add_coords
 from .maskings import add_masks
 
 

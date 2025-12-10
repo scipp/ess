@@ -127,6 +127,34 @@ def mcstas_wavelength_coordinate_transformation_graph(
     }
 
 
+def add_coords(
+    da: sc.DataArray,
+    graph: dict,
+) -> sc.DataArray:
+    "Adds scattering coordinates to the raw detector data."
+    return da.transform_coords(
+        (
+            "wavelength",
+            "theta",
+            "divergence_angle",
+            "Q",
+            "L1",
+            "L2",
+            "blade",
+            "wire",
+            "strip",
+            "z_index",
+            "sample_rotation",
+            "detector_rotation",
+            "sample_size",
+        ),
+        graph,
+        rename_dims=False,
+        keep_intermediate=False,
+        keep_aliases=False,
+    )
+
+
 providers = (
     coordinate_transformation_graph,
     detector_ltotal_from_raw,

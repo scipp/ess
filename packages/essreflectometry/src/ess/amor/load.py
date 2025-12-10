@@ -9,7 +9,6 @@ from ess.reduce.nexus.types import NeXusFileSpec
 from ..reflectometry.load import load_nx
 from ..reflectometry.types import (
     Beamline,
-    BeamSize,
     DetectorRotation,
     Filename,
     Measurement,
@@ -20,9 +19,7 @@ from ..reflectometry.types import (
     RawDetector,
     RawSampleRotation,
     RunType,
-    SampleRotation,
     SampleRun,
-    SampleSize,
 )
 from .geometry import pixel_coordinates_in_detector_system
 from .types import (
@@ -41,14 +38,6 @@ def load_detector(
 
 def load_events(
     detector: NeXusComponent[snx.NXdetector, RunType],
-    detector_rotation: DetectorRotation[RunType],
-    sample_rotation: SampleRotation[RunType],
-    chopper_phase: ChopperPhase[RunType],
-    chopper_frequency: ChopperFrequency[RunType],
-    chopper_distance: ChopperDistance[RunType],
-    chopper_separation: ChopperSeparation[RunType],
-    sample_size: SampleSize[RunType],
-    beam_size: BeamSize[RunType],
 ) -> RawDetector[RunType]:
     event_data = detector["data"]
     if 'event_time_zero' in event_data.coords:
@@ -69,14 +58,6 @@ def load_events(
             "data"
         ].data.values
 
-    data.coords["sample_rotation"] = sample_rotation.to(unit='rad')
-    data.coords["detector_rotation"] = detector_rotation.to(unit='rad')
-    data.coords["chopper_phase"] = chopper_phase
-    data.coords["chopper_frequency"] = chopper_frequency
-    data.coords["chopper_separation"] = chopper_separation
-    data.coords["chopper_distance"] = chopper_distance
-    data.coords["sample_size"] = sample_size
-    data.coords["beam_size"] = beam_size
     return RawDetector[RunType](data)
 
 
