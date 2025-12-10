@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
-import pathlib
 from collections.abc import Callable, Iterable
 
 import pandas as pd
@@ -83,23 +82,23 @@ def _merge_panels(*da: sc.DataArray) -> sc.DataArray:
     return merged
 
 
-def select_detector_names(
-    *,
-    input_files: list[pathlib.Path] | None = None,
-    detector_ids: Iterable[int] = (0, 1, 2),
-):
-    if input_files is not None:
-        detector_names = []
-        # Collect all detector names from input files
-        for input_file in input_files:
-            with snx.File(input_file) as nexus_file:
-                detector_names.extend(
-                    nexus_file['entry/instrument'][snx.NXdetector].keys()
-                )
-        detector_names = sorted(set(detector_names))
-        return [detector_names[i_d] for i_d in detector_ids]
+def select_detector_names(*, detector_ids: Iterable[int] = (0, 1, 2)):
+    import os
+
+    # Users can override detector names via environment variable
+    # It is a comma-separated list of detector names
+    # e.g., NMX_DETECTOR_NAMES=detector_panel_0,detector_panel_1,detector_panel_2
+    # The detector names are not expected to be changed from the default ones,
+    # but this option is provided for minimum flexibility.
+    DETECTOR_NAME_VAR = os.environ.get("NMX_DETECTOR_NAMES", None)
+    if DETECTOR_NAME_VAR is not None:
+        return tuple(
+            name
+            for i_name, name in enumerate(DETECTOR_NAME_VAR.split(','))
+            if i_name in detector_ids
+        )
     else:
-        return ['detector_panel_0', 'detector_panel_1', 'detector_panel_2']
+        return tuple(f'detector_panel_{i}' for i in detector_ids)
 
 
 def map_detector_names(
