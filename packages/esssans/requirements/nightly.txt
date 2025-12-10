@@ -88,7 +88,7 @@ matplotlib-inline==0.2.1
     # via ipython
 mpltoolbox==25.10.0
     # via scippneutron
-networkx==3.6
+networkx==3.6.1
     # via cyclebane
 numpy==2.4.0rc1
     # via
@@ -146,7 +146,7 @@ pygments==2.19.2
     #   pytest
 pyparsing==3.3.0b1
     # via matplotlib
-pytest==9.0.1
+pytest==9.0.2
     # via -r nightly.in
 python-dateutil==2.9.0.post0
     # via
@@ -178,7 +178,7 @@ scippnexus @ git+https://github.com/scipp/scippnexus@main
     #   -r nightly.in
     #   essreduce
     #   scippneutron
-scipy==1.16.3
+scipy==1.17.0rc1
     # via
     #   -r nightly.in
     #   scippneutron
@@ -210,7 +210,7 @@ typing-inspection==0.4.2
     # via pydantic
 tzdata==2025.2
     # via pandas
-urllib3==2.5.0
+urllib3==2.6.1
     # via requests
 wcwidth==0.2.14
     # via prompt-toolkit
