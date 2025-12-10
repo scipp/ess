@@ -139,9 +139,7 @@ def reduction(
     output_file_path = pathlib.Path(config.output.output_file).resolve()
     display(f"Output file: {output_file_path}")
 
-    detector_names = select_detector_names(
-        input_files=[input_file_path], detector_ids=config.inputs.detector_ids
-    )
+    detector_names = select_detector_names(detector_ids=config.inputs.detector_ids)
 
     base_wf = NMXWorkflow()
 
