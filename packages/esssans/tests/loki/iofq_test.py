@@ -208,7 +208,7 @@ def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs(larmor_work
 
 def test_pipeline_can_compute_IofQ_by_bank(larmor_workflow):
     pipeline = larmor_workflow()
-    pipeline[BeamCenter] = _compute_beam_center()
+    pipeline[BeamCenter] = _compute_beam_center(pipeline)
     pipeline = sans.with_banks(pipeline, banks=['larmor_detector'])
 
     results = sciline.compute_mapped(pipeline, BackgroundSubtractedIofQ)
@@ -227,7 +227,7 @@ def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs_by_bank(
         loki.data.loki_tutorial_background_run_60393(),
     ]
     pipeline = larmor_workflow()
-    pipeline[BeamCenter] = _compute_beam_center()
+    pipeline[BeamCenter] = _compute_beam_center(pipeline)
 
     pipeline = sans.with_sample_runs(pipeline, runs=sample_runs)
     pipeline = sans.with_background_runs(pipeline, runs=background_runs)
@@ -245,8 +245,8 @@ def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs_by_bank(
 
 def test_pipeline_IofQ_merging_events_yields_consistent_results(larmor_workflow):
     N = 3
-    center = _compute_beam_center()
     pipeline_single = larmor_workflow()
+    center = _compute_beam_center(pipeline_single)
     pipeline_single[BeamCenter] = center
 
     sample_runs = [loki.data.loki_tutorial_sample_run_60339()] * N
