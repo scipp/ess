@@ -1,8 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
-from collections.abc import Callable, Iterable
+from collections.abc import Iterable
 
-import pandas as pd
 import sciline
 import scipp as sc
 import scippnexus as snx
@@ -12,7 +11,6 @@ from ess.reduce.nexus.types import (
     EmptyDetector,
     Filename,
     NeXusComponent,
-    NeXusName,
     NeXusTransformation,
     Position,
     SampleRun,
@@ -96,20 +94,6 @@ def select_detector_names(*, detector_ids: Iterable[int] = (0, 1, 2)):
         )
     else:
         return tuple(f'detector_panel_{i}' for i in detector_ids)
-
-
-def map_detector_names(
-    *,
-    wf: sciline.Pipeline,
-    detector_names: Iterable[str],
-    mapped_type: type,
-    reduce_func: Callable = _merge_panels,
-) -> sciline.Pipeline:
-    """Map detector indices(`panel`) to detector names in the workflow."""
-    detector_name_map = pd.DataFrame({NeXusName[snx.NXdetector]: detector_names})
-    detector_name_map.rename_axis(index='panel', inplace=True)
-    wf[mapped_type] = wf[mapped_type].map(detector_name_map).reduce(func=reduce_func)
-    return wf
 
 
 def assemble_sample_metadata(
