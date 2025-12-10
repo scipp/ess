@@ -6,7 +6,7 @@
 #    requirements upgrade
 #
 -r test.txt
-librt==0.6.3
+librt==0.7.3
     # via mypy
 mypy==1.19.0
     # via -r mypy.in

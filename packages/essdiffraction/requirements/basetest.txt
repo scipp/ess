@@ -62,7 +62,7 @@ pygments==2.19.2
     #   ipython
     #   ipython-pygments-lexers
     #   pytest
-pytest==9.0.1
+pytest==9.0.2
     # via -r basetest.in
 python-dateutil==2.9.0.post0
     # via pandas
@@ -83,7 +83,7 @@ typing-extensions==4.15.0
     # via ipython
 tzdata==2025.2
     # via pandas
-urllib3==2.5.0
+urllib3==2.6.1
     # via requests
 wcwidth==0.2.14
     # via prompt-toolkit
