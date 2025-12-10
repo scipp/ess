@@ -25,10 +25,7 @@ from ess.reduce.time_of_flight import (
     SimulationSeed,
     TofLookupTableWorkflow,
 )
-from ess.reduce.time_of_flight.types import (
-    TimeOfFlightLookupTable,
-    TimeOfFlightLookupTableFilename,
-)
+from ess.reduce.time_of_flight.types import TimeOfFlightLookupTableFilename
 from ess.reduce.workflow import register_workflow
 
 from .configurations import WorkflowConfig
@@ -241,28 +238,60 @@ def NMXWorkflow() -> sciline.Pipeline:
     return generic_wf
 
 
-def compute_lookup_table(*, workflow_config: WorkflowConfig) -> sc.DataArray:
-    if workflow_config.tof_lookup_table_file_path is not None:
-        wf = NMXWorkflow()
-        wf[TimeOfFlightLookupTableFilename] = workflow_config.tof_lookup_table_file_path
-    else:
-        wf = TofLookupTableWorkflow()
-        wf.insert(_simulate_fixed_wavelength_tof)
+def _validate_mergable_workflow(wf: sciline.Pipeline):
+    if wf.indices:
+        raise NotImplementedError("Only flat workflow can be merged.")
 
-        wmax = sc.scalar(workflow_config.tof_simulation_max_wavelength, unit='angstrom')
-        wmin = sc.scalar(workflow_config.tof_simulation_min_wavelength, unit='angstrom')
+
+def _merge_workflows(
+    base_wf: sciline.Pipeline, merged_wf: sciline.Pipeline
+) -> sciline.Pipeline:
+    _validate_mergable_workflow(base_wf)
+    _validate_mergable_workflow(merged_wf)
+
+    for key, spec in merged_wf.underlying_graph.nodes.items():
+        if 'value' in spec:
+            base_wf[key] = spec['value']
+        elif (provider_spec := spec.get('provider')) is not None:
+            base_wf.insert(provider_spec.func)
+
+    return base_wf
+
+
+def initialize_nmx_workflow(*, config: WorkflowConfig) -> sciline.Pipeline:
+    """Initialize NMX workflow according to the workflow configuration.
+
+    If a TOF lookup table file path is provided in the configuration,
+    it is used directly. Otherwise, a TOF simulation workflow is added to
+    the NMX workflow to compute the lookup table on-the-fly.
+
+    All other parameters required for TOF simulation are also set
+    as parameters in the workflow.
+
+    Parameters
+    ----------
+    config:
+        Workflow configuration for NMX reduction.
+    params:
+        Additional parameters to set in the workflow.
+
+    """
+    wf = NMXWorkflow()
+    if config.tof_lookup_table_file_path is not None:
+        wf[TimeOfFlightLookupTableFilename] = config.tof_lookup_table_file_path
+    else:
+        wf = _merge_workflows(base_wf=wf, merged_wf=TofLookupTableWorkflow())
+        wf.insert(_simulate_fixed_wavelength_tof)
+        wmax = sc.scalar(config.tof_simulation_max_wavelength, unit='angstrom')
+        wmin = sc.scalar(config.tof_simulation_min_wavelength, unit='angstrom')
         wf[TofSimulationMaxWavelength] = wmax
         wf[TofSimulationMinWavelength] = wmin
-        wf[SimulationSeed] = workflow_config.tof_simulation_seed
-        ltotal_min = sc.scalar(
-            value=workflow_config.tof_simulation_min_ltotal, unit='m'
-        )
-        ltotal_max = sc.scalar(
-            value=workflow_config.tof_simulation_max_ltotal, unit='m'
-        )
+        wf[SimulationSeed] = config.tof_simulation_seed
+        ltotal_min = sc.scalar(value=config.tof_simulation_min_ltotal, unit='m')
+        ltotal_max = sc.scalar(value=config.tof_simulation_max_ltotal, unit='m')
         wf[LtotalRange] = LtotalRange((ltotal_min, ltotal_max))
 
-    return wf.compute(TimeOfFlightLookupTable)
+    return wf
 
 
 __all__ = ['NMXWorkflow']

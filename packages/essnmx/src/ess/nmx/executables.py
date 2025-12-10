@@ -4,7 +4,6 @@ import logging
 import pathlib
 from collections.abc import Callable
 
-import sciline as sl
 import scipp as sc
 import scippnexus as snx
 
@@ -30,7 +29,7 @@ from .types import (
     NMXSampleMetadata,
     NMXSourceMetadata,
 )
-from .workflows import NMXWorkflow, compute_lookup_table, select_detector_names
+from .workflows import initialize_nmx_workflow, select_detector_names
 
 
 def _retrieve_input_file(input_file: list[str]) -> pathlib.Path:
@@ -65,25 +64,6 @@ def _retrieve_display(
         return logger.info
     else:
         return logging.getLogger(__name__).info
-
-
-def compute_and_cache_lookup_table(
-    *,
-    wf: sl.Pipeline,
-    workflow_config: WorkflowConfig,
-    display: Callable,
-) -> sl.Pipeline:
-    """Compute and cache the TOF lookup table in the workflow."""
-    if workflow_config.tof_lookup_table_file_path is None:
-        display("Computing TOF lookup table from simulation...")
-    else:
-        display("Loading TOF lookup table from file...")
-
-    lookup_table_cached_wf = wf.copy()
-    lookup_table_cached_wf[TimeOfFlightLookupTable] = compute_lookup_table(
-        workflow_config=workflow_config
-    )
-    return lookup_table_cached_wf
 
 
 def _finalize_tof_bin_edges(
@@ -141,13 +121,11 @@ def reduction(
 
     detector_names = select_detector_names(detector_ids=config.inputs.detector_ids)
 
-    base_wf = NMXWorkflow()
-
+    # Initialize workflow
+    base_wf = initialize_nmx_workflow(config=config.workflow)
     # Insert parameters and cache intermediate results
-    base_wf[Filename] = input_file_path
-    base_wf = compute_and_cache_lookup_table(
-        wf=base_wf, workflow_config=config.workflow, display=display
-    )
+    base_wf[Filename[SampleRun]] = input_file_path
+    base_wf[TimeOfFlightLookupTable] = base_wf.compute(TimeOfFlightLookupTable)
 
     metadatas = base_wf.compute((NMXSampleMetadata, NMXSourceMetadata))
     export_static_metadata_as_nxlauetof(
