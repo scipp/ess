@@ -1,8 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
-"""Detector diagnostics for DREAM."""
+# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+"""Detector diagnostics for LOKI."""
 
-import math
 from collections.abc import Callable, Iterable, Mapping
 from functools import reduce
 from typing import Any
@@ -16,7 +15,7 @@ from plopp.core.typing import FigureLike
 _STARTING_DIMS = ('tube', 'pixel', 'layer', 'straw')
 
 
-class FlatVoxelViewer(ipw.VBox):
+class FlatDetectorViewer(ipw.VBox):
     """Interactive 2D plot for multi-dimensional detectors."""
 
     def __init__(
@@ -39,10 +38,8 @@ class FlatVoxelViewer(ipw.VBox):
             Additional arguments passed to the plotting function.
         """
         self._data = self._prepare_data(data)
-        print("self._data.dims", self._data.dims)
         self._bank_selector = _make_bank_selector(data.keys())
         self._bank = self._data[self._bank_selector.value]
-        print("self._bank.dims", self._bank.dims)
 
         self._dim_selector = _DimensionSelector(self._bank.dims, self._update_view)
 
@@ -68,7 +65,7 @@ class FlatVoxelViewer(ipw.VBox):
 
     def _make_figure(self) -> FigureLike:
         sel = self._dim_selector.value
-        fig = _flat_voxel_figure(
+        fig = _flat_detector_figure(
             self._bank, sel['horizontal'], sel['vertical'], **self._fig_kwargs
         )
         return fig
@@ -113,7 +110,7 @@ class _DimensionSelector(ipw.VBox):
         return h_buttons, v_buttons
 
     def set_dims(self, new_dims: tuple[str, ...]) -> None:
-        default_v, default_h, _, _ = _STARTING_DIMS  # self._default_dims(new_dims)
+        default_v, default_h, _, _ = _STARTING_DIMS
         options = {dim.capitalize(): dim for dim in new_dims}
         self._lock = True
         self._horizontal_buttons.options = options
@@ -121,10 +118,6 @@ class _DimensionSelector(ipw.VBox):
         self._horizontal_buttons.value = default_h
         self._vertical_buttons.value = default_v
         self._lock = False
-
-    # @staticmethod
-    # def _default_dims(dims: tuple[str, ...]) -> tuple[str, str]:
-    #     return dims[math.ceil(len(dims) / 2)], dims[0]
 
     @property
     def value(self):
@@ -149,11 +142,8 @@ class _DimensionSelector(ipw.VBox):
         self._callback(change)
 
 
-def _flat_voxel_figure(
-    data: sc.DataArray,
-    horizontal_dim: str,
-    vertical_dim: str,
-    **kwargs: Any,
+def _flat_detector_figure(
+    data: sc.DataArray, horizontal_dim: str, vertical_dim: str, **kwargs: Any
 ) -> FigureLike:
     kept_dims = {horizontal_dim, vertical_dim}
 
@@ -165,7 +155,6 @@ def _flat_voxel_figure(
     # Drop unused coordinates
     aux = data.drop_coords(list(set(data.coords.keys()) - kept_dims))
     reordered = aux.transpose(flatten_to_v + flatten_to_h)
-    print(kept_dims, aux.dims, reordered.dims)
 
     for dim in reordered.dims:
         if dim not in reordered.coords:
@@ -236,8 +225,8 @@ def _unwrap_flat_index(index: int, sizes: dict[str, int]) -> dict[str, int]:
     return dict(reversed(res))  # Reverse to reproduce the input order.
 
 
-def _make_bank_selector(banks: Iterable[str]) -> ipw.ToggleButtons:
+def _make_bank_selector(banks: Iterable[str]) -> ipw.Dropdown:
     options = (
         (' '.join(s.capitalize() for s in bank.split('_')), bank) for bank in banks
     )
-    return ipw.ToggleButtons(options=options, layout={'width': '50%'})
+    return ipw.Dropdown(options=options)
