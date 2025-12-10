@@ -3,6 +3,7 @@
 from pathlib import Path
 
 from ess.reduce.data import make_registry
+
 from ess.sans.types import (
     BackgroundRun,
     DirectBeamFilename,
@@ -53,6 +54,8 @@ _registry = make_registry(
         'direct-beam-loki-all-pixels.h5': "md5:b85d7b486b312c5bb2a31d2bb6314f69",
         # TOF lookup table without choppers
         'loki-tof-lookup-table-no-choppers.h5': 'md5:5b817466d3a07d4def12535d7317c044',
+        # CODA file with a single event per detector bank (for testing purposes)
+        'loki-coda-one-event.hdf': 'md5:ab9dbef793fad2fca96210c3b55d60ce',
     },
     version='2',
 )
@@ -98,9 +101,9 @@ def loki_tutorial_isis_polymer_sample_run() -> Filename[SampleRun]:
     return Filename[SampleRun](_registry.get_path("60395-2022-02-28_2215.nxs"))
 
 
-def loki_tutorial_isis_polymer_transmission_run() -> (
-    Filename[TransmissionRun[SampleRun]]
-):
+def loki_tutorial_isis_polymer_transmission_run() -> Filename[
+    TransmissionRun[SampleRun]
+]:
     """Transmission run for ISIS polymer run."""
     return Filename[TransmissionRun[SampleRun]](
         _registry.get_path("60394-2022-02-28_2215.nxs")
@@ -124,9 +127,9 @@ def loki_tutorial_porous_silica_sample_run() -> Filename[SampleRun]:
     return Filename[SampleRun](_registry.get_path("60385-2022-02-28_2215.nxs"))
 
 
-def loki_tutorial_porous_silica_transmission_run() -> (
-    Filename[TransmissionRun[SampleRun]]
-):
+def loki_tutorial_porous_silica_transmission_run() -> Filename[
+    TransmissionRun[SampleRun]
+]:
     """Transmission run for Porous silica run."""
     return Filename[TransmissionRun[SampleRun]](
         _registry.get_path("60384-2022-02-28_2215.nxs")
@@ -173,3 +176,14 @@ def loki_tof_lookup_table_no_choppers() -> Path:
     with ``NumberOfSimulatedNeutrons = 5_000_000``.
     """
     return _registry.get_path("loki-tof-lookup-table-no-choppers.h5")
+
+
+def loki_coda_file_one_event() -> Path:
+    """
+    LoKI CODA file with a single event per detector bank (for testing purposes).
+    The file was created from a CODA file 'loki_999999_00009928.hdf' but the event lists
+    were replaced by lists with a single event to reduce the size of the file.
+    The workflow should still be able to run, it will just produce results with NaNs
+    everywhere.
+    """
+    return _registry.get_path("loki-coda-one-event.hdf")

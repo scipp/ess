@@ -69,7 +69,7 @@ def loki_workflow() -> sciline.Pipeline:
         # For now, use a dummy file for all runs. This produces a result with all NaNs,
         # but is sufficient to test that the workflow runs end-to-end.
         # TODO: Replace with real test data when available.
-        file = loki.data.loki_coda_empty_run()
+        file = loki.data.loki_coda_file_one_event()
         wf[Filename[SampleRun]] = file
         wf[Filename[BackgroundRun]] = file
         wf[Filename[TransmissionRun[SampleRun]]] = file

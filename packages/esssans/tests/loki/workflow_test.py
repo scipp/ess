@@ -4,10 +4,11 @@
 
 import pytest
 import scipp as sc
+from ess.reduce import workflow
+from sciline import UnsatisfiedRequirement
 
 from ess import loki
 from ess.loki import LokiAtLarmorWorkflow
-from ess.reduce import workflow
 from ess.sans.types import (
     BackgroundRun,
     BackgroundSubtractedIofQ,
@@ -75,7 +76,7 @@ def test_loki_workflow_needs_tof_lookup_table(loki_workflow, bank):
     # For simplicity, insert a fake beam center instead of computing it.
     wf[BeamCenter] = sc.vector([0.0, 0.0, 0.0], unit='m')
     wf[NeXusDetectorName] = f'loki_detector_{bank}'
-    with pytest.raises(KeyError, match='tof_lookup_table'):
+    with pytest.raises(UnsatisfiedRequirement, match='TimeOfFlightLookupTableFilename'):
         wf.compute(TofDetector[SampleRun])
 
 
