@@ -85,7 +85,6 @@ def coordinate_transformation_graph(
 ) -> CoordTransformationGraph[RunType]:
     bank = detector_bank_sizes['multiblade_detector']
     return {
-        "wavelength": wavelength_from_tof,
         "theta": theta,
         "divergence_angle": divergence_angle,
         "Q": reflectometry_q,
@@ -96,23 +95,34 @@ def coordinate_transformation_graph(
             position - sample_position.to(unit=position.unit)
         ),
         "Ltotal": lambda L1, L2: L1.to(unit=L2.unit) + L2,
-        'sample_rotation': lambda: sample_rotation,
-        'detector_rotation': lambda: detector_rotation,
-        'source_position': lambda: source_position,
-        'sample_position': lambda: sample_position,
+        'sample_size': lambda: sc.scalar(20.0, unit='mm'),
         'blade': lambda: sc.arange('blade', bank['blade'] - 1, -1, -1),
         'wire': lambda: sc.arange('wire', bank['wire'] - 1, -1, -1),
         'strip': lambda: sc.arange('strip', bank['strip'] - 1, -1, -1),
         'z_index': lambda blade, wire: blade * wire,
-        'sample_size': lambda: sc.scalar(20.0, unit='mm'),
+        "wavelength": wavelength_from_tof,
+        'sample_rotation': lambda: sample_rotation,
+        'detector_rotation': lambda: detector_rotation,
+        'source_position': lambda: source_position,
+        'sample_position': lambda: sample_position,
     }
 
 
 def mcstas_wavelength_coordinate_transformation_graph(
-    run_type: RunType,
+    source_position: Position[NXsource, RunType],
+    sample_position: Position[NXsample, RunType],
+    sample_rotation: SampleRotation[RunType],
+    detector_rotation: DetectorRotation[RunType],
+    detector_bank_sizes: DetectorBankSizes,
 ) -> CoordTransformationGraph[RunType]:
     return {
-        **coordinate_transformation_graph(),
+        **coordinate_transformation_graph(
+            source_position,
+            sample_position,
+            sample_rotation,
+            detector_rotation,
+            detector_bank_sizes,
+        ),
         "wavelength": lambda wavelength_from_mcstas: wavelength_from_mcstas,
     }
 

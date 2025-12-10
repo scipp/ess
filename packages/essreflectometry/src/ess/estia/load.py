@@ -4,9 +4,9 @@ import pathlib
 
 import h5py
 import scipp as sc
-from scippnexus import NXdetector, NXsample
+from scippnexus import NXdetector, NXsample, NXsource
 
-from ess.reduce.nexus.types import NeXusComponent
+from ess.reduce.nexus.types import NeXusComponent, Position
 
 from ..reflectometry.types import (
     DetectorRotation,
@@ -118,6 +118,28 @@ def load_mcstas(
     return da
 
 
+def mcstas_load_sample_rotation(da: RawDetector[RunType]) -> RawSampleRotation[RunType]:
+    return da.coords['sample_rotation']
+
+
+def mcstas_load_detector_rotation(
+    da: RawDetector[RunType],
+) -> DetectorRotation[RunType]:
+    return da.coords['detector_rotation']
+
+
+def mcstas_load_source_position(
+    da: RawDetector[RunType],
+) -> Position[NXsource, RunType]:
+    return da.coords['source_position']
+
+
+def mcstas_load_sample_position(
+    da: RawDetector[RunType],
+) -> Position[NXsample, RunType]:
+    return da.coords['sample_position']
+
+
 def load_sample_rotation(
     sample: NeXusComponent[NXsample, RunType],
 ) -> RawSampleRotation[RunType]:
@@ -131,3 +153,10 @@ def load_detector_rotation(
 
 
 providers = (load_sample_rotation, load_detector_rotation)
+mcstas_providers = (
+    load_mcstas_provider,
+    mcstas_load_sample_position,
+    mcstas_load_source_position,
+    mcstas_load_detector_rotation,
+    mcstas_load_sample_rotation,
+)
