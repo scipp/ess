@@ -31,6 +31,9 @@ from .types import (
 )
 from .workflows import initialize_nmx_workflow, select_detector_names
 
+_TOF_COORD_NAME = 'tof'
+"""Name of the TOF coordinate used in DataArrays."""
+
 
 def _retrieve_input_file(input_file: list[str]) -> pathlib.Path:
     """Temporary helper to retrieve a single input file from the list
@@ -70,10 +73,11 @@ def _finalize_tof_bin_edges(
     *, tof_das: sc.DataGroup, config: WorkflowConfig
 ) -> sc.Variable:
     tof_bin_edges = sc.concat(
-        tuple(tof_da.coords['tof'] for tof_da in tof_das.values()), dim='tof'
+        tuple(tof_da.coords[_TOF_COORD_NAME] for tof_da in tof_das.values()),
+        dim=_TOF_COORD_NAME,
     )
     return sc.linspace(
-        dim='tof',
+        dim=_TOF_COORD_NAME,
         start=sc.min(tof_bin_edges),
         stop=sc.max(tof_bin_edges),
         num=config.nbins + 1,
@@ -145,16 +149,23 @@ def reduction(
         )
         detector_metas[detector_name] = detector_meta
         # Binning into 1 bin and getting final tof bin edges later.
-        tof_das[detector_name] = results[TofDetector[SampleRun]].bin(tof=1)
+        tof_das[detector_name] = results[TofDetector[SampleRun]]
 
-    tof_bin_edges = _finalize_tof_bin_edges(tof_das=tof_das, config=config.workflow)
+    # Make tof bin edges covering all detectors
+    # TODO: Allow user to specify tof binning parameters from config
+    min_tof = min(da.bins.coords[_TOF_COORD_NAME].min() for da in tof_das.values())
+    max_tof = max(da.bins.coords[_TOF_COORD_NAME].max() for da in tof_das.values())
+    n_edges = config.workflow.nbins + 1
+    tof_bin_edges = sc.linspace(
+        dim=_TOF_COORD_NAME, start=min_tof, stop=max_tof, num=n_edges
+    )
 
     monitor_metadata = NMXMonitorMetadata(
-        tof_bin_coord='tof',
+        tof_bin_coord=_TOF_COORD_NAME,
         # TODO: Use real monitor data
         # Currently NMX simulations or experiments do not have monitors
         monitor_histogram=sc.DataArray(
-            coords={'tof': tof_bin_edges},
+            coords={_TOF_COORD_NAME: tof_bin_edges},
             data=sc.ones_like(tof_bin_edges[:-1]),
         ),
     )
