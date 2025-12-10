@@ -3,6 +3,7 @@
 """Correction algorithms for powder diffraction."""
 
 import enum
+from collections.abc import Mapping, Sequence
 from typing import TypeVar
 
 import sciline
@@ -30,6 +31,8 @@ from .types import (
     VanadiumRun,
     WavelengthMonitor,
 )
+
+_T = TypeVar("_T")
 
 
 def normalize_by_monitor_histogram(
@@ -146,15 +149,32 @@ def _mask_out_of_monitor_range_data(
     return detector, False
 
 
+def _filter_keys(mapping: Mapping[str, _T], keys: Sequence[str]) -> dict[str, _T]:
+    return {key: value for key, value in mapping.items() if key in keys}
+
+
+def _histogram_vanadium(vanadium: sc.DataArray, sample: sc.DataArray) -> sc.DataArray:
+    target_coords = _filter_keys(sample.coords, ("dspacing", "two_theta"))
+    if "two_theta" in target_coords and "two_theta" not in vanadium.bins.coords:
+        # Need to provide a two_theta event coord so we can histogram.
+        if sc.identical(vanadium.coords["two_theta"], target_coords["two_theta"]):
+            # Skip the expensive event coord if possible:
+            return vanadium.hist(dspacing=sample.coords["dspacing"])
+        return vanadium.bins.assign_coords(
+            two_theta=sc.bins_like(vanadium, vanadium.coords["two_theta"])
+        ).hist(target_coords)
+    return vanadium.hist(target_coords)
+
+
 def _normalize_by_vanadium(
     data: sc.DataArray,
     vanadium: sc.DataArray,
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
 ) -> sc.DataArray:
     norm = (
-        vanadium.hist(data.coords)
+        _histogram_vanadium(vanadium, sample=data)
         if vanadium.is_binned
-        else vanadium.rebin(data.coords)
+        else vanadium.rebin(_filter_keys(data.coords, ("dspacing", "two_theta")))
     )
     norm = broadcast_uncertainties(
         norm, prototype=data, mode=uncertainty_broadcast_mode
