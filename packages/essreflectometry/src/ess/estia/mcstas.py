@@ -64,7 +64,7 @@ def parse_events_ascii(lines):
     raise ValueError('Could not parse the file as a list of events.')
 
 
-def parse_events_h5(f, nevents_to_sample=None):
+def parse_events_h5(f, events_to_sample_per_unit_weight=None):
     if isinstance(f, str):
         with h5py.File(f) as ff:
             return parse_events_h5(ff)
@@ -76,7 +76,7 @@ def parse_events_h5(f, nevents_to_sample=None):
         'NXentry/simulation/Param',
     )
     events = events[()]
-    if nevents_to_sample is None:
+    if events_to_sample_per_unit_weight is None:
         da = sc.DataArray(
             # The squares on the variances is the correct way to load
             # weighted event data.
@@ -91,10 +91,12 @@ def parse_events_h5(f, nevents_to_sample=None):
             da.coords[label] = sc.array(dims=['events'], values=events[:, i])
     else:
         probabilities = events[:, 0]
+        p_total = probabilities.sum()
+        nevents_to_sample = round(events_to_sample_per_unit_weight * p_total)
         inds = np.random.choice(
             np.arange(len(probabilities)),
             nevents_to_sample,
-            p=probabilities / probabilities.sum(),
+            p=probabilities / p_total,
         )
         da = sc.DataArray(
             sc.ones(dims=['events'], shape=(nevents_to_sample,), with_variances=True),
