@@ -5,9 +5,10 @@
 import enum
 from typing import TypeVar
 
-import ess.reduce
 import sciline
 import scipp as sc
+
+import ess.reduce
 from ess.reduce.uncertainty import broadcast_uncertainties
 
 from ._util import event_or_outer_coord
@@ -151,9 +152,9 @@ def _normalize_by_vanadium(
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
 ) -> sc.DataArray:
     norm = (
-        vanadium.hist(dspacing=data.coords['dspacing'])
+        vanadium.hist(data.coords)
         if vanadium.is_binned
-        else vanadium.rebin(dspacing=data.coords['dspacing'])
+        else vanadium.rebin(data.coords)
     )
     norm = broadcast_uncertainties(
         norm, prototype=data, mode=uncertainty_broadcast_mode
@@ -177,8 +178,18 @@ def normalize_by_vanadium_dspacing(
     vanadium: FocussedDataDspacing[VanadiumRun],
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
 ) -> IntensityDspacing[_RunTypeNoVanadium]:
-    """
-    Normalize sample data by a vanadium measurement and return intensity vs. d-spacing.
+    """Normalize sample data binned in d-spacing by a vanadium measurement.
+
+    If the vanadium data is binned, it gets :func:`histogrammed <scipp.hist>` to the
+    same bins as ``data``. If it is not binned, it gets :func:`rebinned <scipp.rebin>`
+    to the same coordinates as ``data``. Then, the result is computed as
+
+    .. code-block:: python
+
+        data / vanadium
+
+    And any bins where vanadium is zero are masked out
+    with a mask called "zero_vanadium".
 
     Parameters
     ----------
@@ -196,6 +207,11 @@ def normalize_by_vanadium_dspacing(
         ``data / vanadium``.
         May contain a mask "zero_vanadium" which is ``True``
         for bins where vanadium is zero.
+
+    See Also
+    --------
+    normalize_by_vanadium_dspacing_and_two_theta:
+        Normalization for 2d data binned in d-spacing and :math`2\\theta`.
     """
     return IntensityDspacing(
         _normalize_by_vanadium(data, vanadium, uncertainty_broadcast_mode)
@@ -207,9 +223,18 @@ def normalize_by_vanadium_dspacing_and_two_theta(
     vanadium: FocussedDataDspacingTwoTheta[VanadiumRun],
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
 ) -> IntensityDspacingTwoTheta[_RunTypeNoVanadium]:
-    """
-    Normalize sample data by a vanadium measurement and return intensity vs.
-    (d-spacing, 2theta).
+    """Normalize sample data binned in (d-spacing, 2theta) by a vanadium measurement.
+
+    If the vanadium data is binned, it gets :func:`histogrammed <scipp.hist>` to the
+    same bins as ``data``. If it is not binned, it gets :func:`rebinned <scipp.rebin>`
+    to the same coordinates as ``data``. Then, the result is computed as
+
+    .. code-block:: python
+
+        data / vanadium
+
+    And any bins where vanadium is zero are masked out
+    with a mask called "zero_vanadium".
 
     Parameters
     ----------
@@ -227,6 +252,11 @@ def normalize_by_vanadium_dspacing_and_two_theta(
         ``data / vanadium``.
         May contain a mask "zero_vanadium" which is ``True``
         for bins where vanadium is zero.
+
+    See Also
+    --------
+    normalize_by_vanadium_dspacing:
+        Normalization for 1d data binned in d-spacing.
     """
     return IntensityDspacingTwoTheta(
         _normalize_by_vanadium(data, vanadium, uncertainty_broadcast_mode)
