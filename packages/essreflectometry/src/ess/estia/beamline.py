@@ -6,9 +6,9 @@ from ess.reflectometry.types import ReferenceRun, SampleRun
 
 DETECTOR_BANK_SIZES = {
     "multiblade_detector": {
+        "strip": 64,
         "blade": 48,
         "wire": 32,
-        "strip": 64,
     },
 }
 
