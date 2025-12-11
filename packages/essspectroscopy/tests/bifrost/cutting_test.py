@@ -17,6 +17,7 @@ from ess.spectroscopy.types import (
     NeXusDetectorName,
     SampleRun,
     TimeOfFlightLookupTableFilename,
+    UncertaintyBroadcastMode,
 )
 
 
@@ -34,6 +35,7 @@ def energy_data(
     workflow = bifrost.BifrostSimulationWorkflow(simulation_detector_names)
     workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
     workflow[TimeOfFlightLookupTableFilename] = tof_lookup_table_simulation()
+    workflow[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
     return workflow.compute(EnergyQDetector[SampleRun])
 
 
@@ -62,9 +64,9 @@ def test_cut_along_q_norm_and_energy_transfer_preserves_counts(
     )
 
     # Verify no counts were lost during the cut
-    total_counts_before = sc.sum(energy_data.bins.size()).value
-    total_counts_after = sc.sum(cut_data).value
-    assert total_counts_before == total_counts_after
+    total_counts_before = sc.sum(energy_data.sum())
+    total_counts_after = sc.sum(cut_data)
+    sc.testing.assert_allclose(total_counts_before, total_counts_after)
 
 
 def test_cut_along_qx_direction_preserves_counts(
@@ -90,6 +92,6 @@ def test_cut_along_qx_direction_preserves_counts(
     )
 
     # Verify no counts were lost during the cut
-    total_counts_before = sc.sum(energy_data.bins.size()).value
-    total_counts_after = sc.sum(cut_data).value
-    assert total_counts_before == total_counts_after
+    total_counts_before = sc.sum(energy_data.sum())
+    total_counts_after = sc.sum(cut_data)
+    sc.testing.assert_allclose(total_counts_before, total_counts_after)

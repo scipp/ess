@@ -33,6 +33,7 @@ from ess.spectroscopy.types import (
     SampleRun,
     SQWBinSizes,
     TimeOfFlightLookupTableFilename,
+    UncertaintyBroadcastMode,
 )
 
 N_DETECTORS = 3
@@ -74,6 +75,7 @@ def common_workflow(
     wf[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
     wf[TimeOfFlightLookupTableFilename] = tof_lookup_table_simulation()
     wf[PreopenNeXusFile] = PreopenNeXusFile(True)
+    wf[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
     wf[sqw.SqwIXSample] = sample
     wf[EnergyBins] = ENERGY_BIN_SIZE
     wf[SQWBinSizes] = BIN_SIZES

@@ -10,6 +10,7 @@ import scipp as sc
 
 from ess.reduce import time_of_flight
 from ess.reduce.nexus import types as reduce_t
+from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
 
 # NeXus types
 
@@ -100,6 +101,12 @@ class IncidentEnergyDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray)
     """Detector counts with an incident energy coordinate."""
 
 
+class NormalizedIncidentEnergyDetector(
+    sciline.Scope[RunType, sc.DataArray], sc.DataArray
+):
+    """Normalized detector counts with an incident energy coordinate."""
+
+
 class SampleAngle(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Rotation angle of the sample, possibly as a function of time.
 
@@ -141,3 +148,10 @@ SQWBinSizes = NewType('SQWBinSizes', dict[str, int])
 class WavelengthMonitor(
     sciline.Scope[RunType, MonitorType, sc.DataArray], sc.DataArray
 ): ...
+
+
+UncertaintyBroadcastMode = _UncertaintyBroadcastMode
+
+
+class ProtonCharge(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Accumulated proton charge for a measurement."""
