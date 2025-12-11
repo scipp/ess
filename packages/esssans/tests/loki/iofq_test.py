@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import os
-import sys
 from pathlib import Path
 
 import pytest
@@ -37,18 +36,15 @@ from ess.sans.types import (
     WavelengthDetector,
 )
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import make_workflow
 
-
-def test_can_create_pipeline():
-    pipeline = make_workflow()
+def test_can_create_pipeline(larmor_workflow):
+    pipeline = larmor_workflow()
     pipeline[BeamCenter] = sc.vector([0, 0, 0], unit='m')
     pipeline.get(BackgroundSubtractedIofQ)
 
 
-def test_can_create_pipeline_with_pixel_masks():
-    pipeline = make_workflow(no_masks=False)
+def test_can_create_pipeline_with_pixel_masks(larmor_workflow):
+    pipeline = larmor_workflow(no_masks=False)
     pipeline = sans.with_pixel_mask_filenames(
         pipeline, loki.data.loki_tutorial_mask_filenames()
     )
@@ -61,8 +57,8 @@ def test_can_create_pipeline_with_pixel_masks():
     [UncertaintyBroadcastMode.drop, UncertaintyBroadcastMode.upper_bound],
 )
 @pytest.mark.parametrize('qxy', [False, True])
-def test_pipeline_can_compute_IofQ(uncertainties, qxy: bool):
-    pipeline = make_workflow(no_masks=False)
+def test_pipeline_can_compute_IofQ(larmor_workflow, uncertainties, qxy: bool):
+    pipeline = larmor_workflow(no_masks=False)
     pipeline[UncertaintyBroadcastMode] = uncertainties
     pipeline = sans.with_pixel_mask_filenames(
         pipeline, loki.data.loki_tutorial_mask_filenames()
@@ -100,8 +96,10 @@ def test_pipeline_can_compute_IofQ(uncertainties, qxy: bool):
         BackgroundSubtractedIofQxy,
     ],
 )
-def test_pipeline_can_compute_IofQ_in_event_mode(uncertainties, target):
-    pipeline = make_workflow()
+def test_pipeline_can_compute_IofQ_in_event_mode(
+    larmor_workflow, uncertainties, target
+):
+    pipeline = larmor_workflow()
     pipeline[UncertaintyBroadcastMode] = uncertainties
     pipeline[BeamCenter] = sans.beam_center_from_center_of_mass(pipeline)
     reference = pipeline.compute(target)
@@ -133,15 +131,15 @@ def test_pipeline_can_compute_IofQ_in_event_mode(uncertainties, target):
 
 
 @pytest.mark.parametrize('qxy', [False, True])
-def test_pipeline_can_compute_IofQ_in_wavelength_bands(qxy: bool):
-    pipeline = make_workflow()
+def test_pipeline_can_compute_IofQ_in_wavelength_bands(larmor_workflow, qxy: bool):
+    pipeline = larmor_workflow()
     pipeline[WavelengthBands] = sc.linspace(
         'wavelength',
         pipeline.compute(WavelengthBins).min(),
         pipeline.compute(WavelengthBins).max(),
         11,
     )
-    pipeline[BeamCenter] = _compute_beam_center()
+    pipeline[BeamCenter] = _compute_beam_center(pipeline)
     result = pipeline.compute(
         BackgroundSubtractedIofQxy if qxy else BackgroundSubtractedIofQ
     )
@@ -150,15 +148,17 @@ def test_pipeline_can_compute_IofQ_in_wavelength_bands(qxy: bool):
 
 
 @pytest.mark.parametrize('qxy', [False, True])
-def test_pipeline_can_compute_IofQ_in_overlapping_wavelength_bands(qxy: bool):
-    pipeline = make_workflow()
+def test_pipeline_can_compute_IofQ_in_overlapping_wavelength_bands(
+    larmor_workflow, qxy: bool
+):
+    pipeline = larmor_workflow()
     # Bands have double the width
     edges = pipeline.compute(WavelengthBins)
     edges = sc.linspace('band', edges.min(), edges.max(), 12)
     pipeline[WavelengthBands] = sc.concat(
         [edges[:-2], edges[2::]], dim='wavelength'
     ).transpose()
-    pipeline[BeamCenter] = _compute_beam_center()
+    pipeline[BeamCenter] = _compute_beam_center(pipeline)
     result = pipeline.compute(
         BackgroundSubtractedIofQxy if qxy else BackgroundSubtractedIofQ
     )
@@ -167,10 +167,10 @@ def test_pipeline_can_compute_IofQ_in_overlapping_wavelength_bands(qxy: bool):
 
 
 @pytest.mark.parametrize('qxy', [False, True])
-def test_pipeline_can_compute_IofQ_in_layers(qxy: bool):
-    pipeline = make_workflow()
+def test_pipeline_can_compute_IofQ_in_layers(larmor_workflow, qxy: bool):
+    pipeline = larmor_workflow()
     pipeline[DimsToKeep] = ['layer']
-    pipeline[BeamCenter] = _compute_beam_center()
+    pipeline[BeamCenter] = _compute_beam_center(pipeline)
     result = pipeline.compute(
         BackgroundSubtractedIofQxy if qxy else BackgroundSubtractedIofQ
     )
@@ -178,11 +178,11 @@ def test_pipeline_can_compute_IofQ_in_layers(qxy: bool):
     assert result.sizes['layer'] == 4
 
 
-def _compute_beam_center():
-    return sans.beam_center_from_center_of_mass(make_workflow())
+def _compute_beam_center(wf: sciline.Pipeline) -> sc.Variable:
+    return sans.beam_center_from_center_of_mass(wf)
 
 
-def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs():
+def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs(larmor_workflow):
     sample_runs = [
         loki.data.loki_tutorial_sample_run_60250(),
         loki.data.loki_tutorial_sample_run_60339(),
@@ -191,8 +191,8 @@ def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs():
         loki.data.loki_tutorial_background_run_60248(),
         loki.data.loki_tutorial_background_run_60393(),
     ]
-    pipeline = make_workflow()
-    pipeline[BeamCenter] = _compute_beam_center()
+    pipeline = larmor_workflow()
+    pipeline[BeamCenter] = _compute_beam_center(pipeline)
 
     # Remove previously set runs so we can be sure that below we use the mapped ones
     pipeline[Filename[SampleRun]] = None
@@ -206,16 +206,18 @@ def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs():
     assert result.dims == ('Qy', 'Qx')
 
 
-def test_pipeline_can_compute_IofQ_by_bank():
-    pipeline = make_workflow()
-    pipeline[BeamCenter] = _compute_beam_center()
+def test_pipeline_can_compute_IofQ_by_bank(larmor_workflow):
+    pipeline = larmor_workflow()
+    pipeline[BeamCenter] = _compute_beam_center(pipeline)
     pipeline = sans.with_banks(pipeline, banks=['larmor_detector'])
 
     results = sciline.compute_mapped(pipeline, BackgroundSubtractedIofQ)
     assert results['larmor_detector'].dims == ('Q',)
 
 
-def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs_by_bank():
+def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs_by_bank(
+    larmor_workflow,
+):
     sample_runs = [
         loki.data.loki_tutorial_sample_run_60250(),
         loki.data.loki_tutorial_sample_run_60339(),
@@ -224,8 +226,8 @@ def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs_by_bank():
         loki.data.loki_tutorial_background_run_60248(),
         loki.data.loki_tutorial_background_run_60393(),
     ]
-    pipeline = make_workflow()
-    pipeline[BeamCenter] = _compute_beam_center()
+    pipeline = larmor_workflow()
+    pipeline[BeamCenter] = _compute_beam_center(pipeline)
 
     pipeline = sans.with_sample_runs(pipeline, runs=sample_runs)
     pipeline = sans.with_background_runs(pipeline, runs=background_runs)
@@ -241,10 +243,10 @@ def test_pipeline_can_compute_IofQ_merging_events_from_multiple_runs_by_bank():
     assert_identical(sc.values(results['bank1']), sc.values(reference))
 
 
-def test_pipeline_IofQ_merging_events_yields_consistent_results():
+def test_pipeline_IofQ_merging_events_yields_consistent_results(larmor_workflow):
     N = 3
-    center = _compute_beam_center()
-    pipeline_single = make_workflow()
+    pipeline_single = larmor_workflow()
+    center = _compute_beam_center(pipeline_single)
     pipeline_single[BeamCenter] = center
 
     sample_runs = [loki.data.loki_tutorial_sample_run_60339()] * N
@@ -273,8 +275,8 @@ def test_pipeline_IofQ_merging_events_yields_consistent_results():
     )
 
 
-def test_beam_center_from_center_of_mass_is_close_to_verified_result():
-    pipeline = make_workflow(no_masks=False)
+def test_beam_center_from_center_of_mass_is_close_to_verified_result(larmor_workflow):
+    pipeline = larmor_workflow(no_masks=False)
     pipeline = sans.with_pixel_mask_filenames(
         pipeline, loki.data.loki_tutorial_mask_filenames()
     )
@@ -283,9 +285,9 @@ def test_beam_center_from_center_of_mass_is_close_to_verified_result():
     assert sc.allclose(center, reference)
 
 
-def test_phi_with_gravity():
-    pipeline = make_workflow()
-    pipeline[BeamCenter] = _compute_beam_center()
+def test_phi_with_gravity(larmor_workflow):
+    pipeline = larmor_workflow()
+    pipeline[BeamCenter] = _compute_beam_center(pipeline)
     pipeline[CorrectForGravity] = False
     data_no_grav = pipeline.compute(WavelengthDetector[SampleRun, Numerator]).flatten(
         to='pixel'

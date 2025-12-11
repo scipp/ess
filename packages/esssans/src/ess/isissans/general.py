@@ -30,7 +30,6 @@ from ess.sans.types import (
     RawMonitor,
     RunType,
     SampleRun,
-    ScatteringRunType,
     TofDetector,
     TofMonitor,
     Transmission,
@@ -227,11 +226,11 @@ def dummy_assemble_monitor_data(
 
 
 def data_to_tof(
-    da: RawDetector[ScatteringRunType],
-) -> TofDetector[ScatteringRunType]:
+    da: RawDetector[RunType],
+) -> TofDetector[RunType]:
     """Dummy conversion of data to time-of-flight data.
     The data already has a time-of-flight coordinate."""
-    return TofDetector[ScatteringRunType](da)
+    return TofDetector[RunType](da)
 
 
 def monitor_to_tof(
@@ -250,7 +249,7 @@ def experiment_metadata(dg: LoadedFileContents[RunType]) -> Measurement[RunType]
     )
 
 
-def helium3_tube_detector_pixel_shape() -> DetectorPixelShape[ScatteringRunType]:
+def helium3_tube_detector_pixel_shape() -> DetectorPixelShape[RunType]:
     # Pixel radius and length
     # found here:
     # https://github.com/mantidproject/mantid/blob/main/instrument/SANS2D_Definition_Tubes.xml
@@ -277,9 +276,9 @@ def helium3_tube_detector_pixel_shape() -> DetectorPixelShape[ScatteringRunType]
     return pixel_shape
 
 
-def lab_frame_transform() -> NeXusTransformation[snx.NXdetector, ScatteringRunType]:
+def lab_frame_transform() -> NeXusTransformation[snx.NXdetector, RunType]:
     # Rotate +y to -x
-    return NeXusTransformation[snx.NXdetector, ScatteringRunType](
+    return NeXusTransformation[snx.NXdetector, RunType](
         sc.spatial.rotation(value=[0, 0, 1 / 2**0.5, 1 / 2**0.5])
     )
 

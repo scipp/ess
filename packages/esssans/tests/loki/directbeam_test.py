@@ -1,7 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-import sys
-from pathlib import Path
 
 import scipp as sc
 from scipp.scipy.interpolate import interp1d
@@ -15,9 +13,6 @@ from ess.sans.types import (
     WavelengthBins,
 )
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import make_workflow
-
 
 def _get_I0(qbins: sc.Variable) -> sc.Variable:
     Iq_theory = sc.io.load_hdf5(loki.data.loki_tutorial_poly_gauss_I0())
@@ -25,9 +20,9 @@ def _get_I0(qbins: sc.Variable) -> sc.Variable:
     return f(sc.midpoints(qbins)).data[0]
 
 
-def test_can_compute_direct_beam_for_all_pixels():
+def test_can_compute_direct_beam_for_all_pixels(larmor_workflow):
     n_wavelength_bands = 10
-    pipeline = make_workflow()
+    pipeline = larmor_workflow()
     edges = pipeline.compute(WavelengthBins)
     pipeline[WavelengthBands] = sc.linspace(
         'wavelength', edges.min(), edges.max(), n_wavelength_bands + 1
@@ -46,10 +41,10 @@ def test_can_compute_direct_beam_for_all_pixels():
     assert direct_beam_function.sizes['wavelength'] == n_wavelength_bands
 
 
-def test_can_compute_direct_beam_with_overlapping_wavelength_bands():
+def test_can_compute_direct_beam_with_overlapping_wavelength_bands(larmor_workflow):
     n_wavelength_bands = 10
     # Bands have double the width
-    pipeline = make_workflow()
+    pipeline = larmor_workflow()
     edges = pipeline.compute(WavelengthBins)
     edges = sc.linspace('band', edges.min(), edges.max(), n_wavelength_bands + 2)
     pipeline[WavelengthBands] = sc.concat(
@@ -70,9 +65,9 @@ def test_can_compute_direct_beam_with_overlapping_wavelength_bands():
     assert direct_beam_function.sizes['wavelength'] == n_wavelength_bands
 
 
-def test_can_compute_direct_beam_per_layer():
+def test_can_compute_direct_beam_per_layer(larmor_workflow):
     n_wavelength_bands = 10
-    pipeline = make_workflow()
+    pipeline = larmor_workflow()
     edges = pipeline.compute(WavelengthBins)
     pipeline[WavelengthBands] = sc.linspace(
         'wavelength', edges.min(), edges.max(), n_wavelength_bands + 1
@@ -94,9 +89,9 @@ def test_can_compute_direct_beam_per_layer():
     assert direct_beam_function.sizes['layer'] == 4
 
 
-def test_can_compute_direct_beam_per_layer_and_straw():
+def test_can_compute_direct_beam_per_layer_and_straw(larmor_workflow):
     n_wavelength_bands = 10
-    pipeline = make_workflow()
+    pipeline = larmor_workflow()
     edges = pipeline.compute(WavelengthBins)
     pipeline[WavelengthBands] = sc.linspace(
         'wavelength', edges.min(), edges.max(), n_wavelength_bands + 1

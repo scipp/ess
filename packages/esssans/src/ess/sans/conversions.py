@@ -29,7 +29,6 @@ from .types import (
     QDetector,
     QxyDetector,
     RunType,
-    ScatteringRunType,
     TofMonitor,
     UncertaintyBroadcastMode,
     WavelengthDetector,
@@ -193,59 +192,59 @@ def monitor_to_wavelength(
 # for RawData, MaskedData, ... no reason to restrict necessarily.
 # Would we be fine with just choosing on option, or will this get in the way for users?
 def detector_to_wavelength(
-    detector: CorrectedDetector[ScatteringRunType, Numerator],
-    graph: ElasticCoordTransformGraph[ScatteringRunType],
-) -> WavelengthDetector[ScatteringRunType, Numerator]:
-    return WavelengthDetector[ScatteringRunType, Numerator](
+    detector: CorrectedDetector[RunType, Numerator],
+    graph: ElasticCoordTransformGraph[RunType],
+) -> WavelengthDetector[RunType, Numerator]:
+    return WavelengthDetector[RunType, Numerator](
         detector.transform_coords('wavelength', graph=graph, keep_inputs=False)
     )
 
 
 def mask_wavelength_q(
-    da: BinnedQ[ScatteringRunType, Numerator], mask: WavelengthMask
-) -> NormalizedQ[ScatteringRunType, Numerator]:
+    da: BinnedQ[RunType, Numerator], mask: WavelengthMask
+) -> NormalizedQ[RunType, Numerator]:
     if mask is not None:
         da = mask_range(da, mask=mask)
-    return NormalizedQ[ScatteringRunType, Numerator](da)
+    return NormalizedQ[RunType, Numerator](da)
 
 
 def mask_wavelength_qxy(
-    da: BinnedQxQy[ScatteringRunType, Numerator], mask: WavelengthMask
-) -> NormalizedQxQy[ScatteringRunType, Numerator]:
+    da: BinnedQxQy[RunType, Numerator], mask: WavelengthMask
+) -> NormalizedQxQy[RunType, Numerator]:
     if mask is not None:
         da = mask_range(da, mask=mask)
-    return NormalizedQxQy[ScatteringRunType, Numerator](da)
+    return NormalizedQxQy[RunType, Numerator](da)
 
 
 def mask_and_scale_wavelength_q(
-    da: BinnedQ[ScatteringRunType, Denominator],
+    da: BinnedQ[RunType, Denominator],
     mask: WavelengthMask,
-    wavelength_term: MonitorTerm[ScatteringRunType],
+    wavelength_term: MonitorTerm[RunType],
     uncertainties: UncertaintyBroadcastMode,
-) -> NormalizedQ[ScatteringRunType, Denominator]:
+) -> NormalizedQ[RunType, Denominator]:
     da = da * broadcast_uncertainties(wavelength_term, prototype=da, mode=uncertainties)
     if mask is not None:
         da = mask_range(da, mask=mask)
-    return NormalizedQ[ScatteringRunType, Denominator](da)
+    return NormalizedQ[RunType, Denominator](da)
 
 
 def mask_and_scale_wavelength_qxy(
-    da: BinnedQxQy[ScatteringRunType, Denominator],
+    da: BinnedQxQy[RunType, Denominator],
     mask: WavelengthMask,
-    wavelength_term: MonitorTerm[ScatteringRunType],
+    wavelength_term: MonitorTerm[RunType],
     uncertainties: UncertaintyBroadcastMode,
-) -> NormalizedQxQy[ScatteringRunType, Denominator]:
+) -> NormalizedQxQy[RunType, Denominator]:
     da = da * broadcast_uncertainties(wavelength_term, prototype=da, mode=uncertainties)
     if mask is not None:
         da = mask_range(da, mask=mask)
-    return NormalizedQxQy[ScatteringRunType, Denominator](da)
+    return NormalizedQxQy[RunType, Denominator](da)
 
 
 def _compute_Q(
     data: sc.DataArray, graph: ElasticCoordTransformGraph, target: tuple[str, ...]
 ) -> sc.DataArray:
     # Keep naming of wavelength dim, subsequent steps use a (Q[xy], wavelength) binning.
-    return QDetector[ScatteringRunType, IofQPart](
+    return QDetector[RunType, IofQPart](
         data.transform_coords(
             target,
             graph=graph,
@@ -256,25 +255,25 @@ def _compute_Q(
 
 
 def compute_Q(
-    data: WavelengthDetector[ScatteringRunType, IofQPart],
-    graph: ElasticCoordTransformGraph[ScatteringRunType],
-) -> QDetector[ScatteringRunType, IofQPart]:
+    data: WavelengthDetector[RunType, IofQPart],
+    graph: ElasticCoordTransformGraph[RunType],
+) -> QDetector[RunType, IofQPart]:
     """
     Convert a data array from wavelength to Q.
     """
-    return QDetector[ScatteringRunType, IofQPart](
+    return QDetector[RunType, IofQPart](
         _compute_Q(data=data, graph=graph, target=('Q',))
     )
 
 
 def compute_Qxy(
-    data: WavelengthDetector[ScatteringRunType, IofQPart],
-    graph: ElasticCoordTransformGraph[ScatteringRunType],
-) -> QxyDetector[ScatteringRunType, IofQPart]:
+    data: WavelengthDetector[RunType, IofQPart],
+    graph: ElasticCoordTransformGraph[RunType],
+) -> QxyDetector[RunType, IofQPart]:
     """
     Convert a data array from wavelength to Qx and Qy.
     """
-    return QxyDetector[ScatteringRunType, IofQPart](
+    return QxyDetector[RunType, IofQPart](
         _compute_Q(data=data, graph=graph, target=('Qx', 'Qy'))
     )
 
