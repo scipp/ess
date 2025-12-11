@@ -40,10 +40,17 @@ from ..sans.types import (
     TransmissionRun,
 )
 
-bank_size = {'layer': 4, 'tube': -1, 'straw': 7, 'pixel': 512}
 DETECTOR_BANK_SIZES = {
-    'larmor_detector': bank_size,
-    **{f'loki_detector_{i}': bank_size for i in range(9)},
+    'larmor_detector': {'layer': 4, 'tube': -1, 'straw': 7, 'pixel': 512},
+    'loki_detector_0': {'layer': 4, 'tube': 56, 'straw': 7, 'pixel': -1},
+    'loki_detector_1': {'layer': 4, 'tube': 16, 'straw': 7, 'pixel': -1},
+    'loki_detector_2': {'layer': 4, 'tube': 12, 'straw': 7, 'pixel': -1},
+    'loki_detector_3': {'layer': 4, 'tube': 16, 'straw': 7, 'pixel': -1},
+    'loki_detector_4': {'layer': 4, 'tube': 12, 'straw': 7, 'pixel': -1},
+    'loki_detector_5': {'layer': 4, 'tube': 28, 'straw': 7, 'pixel': -1},
+    'loki_detector_6': {'layer': 4, 'tube': 32, 'straw': 7, 'pixel': -1},
+    'loki_detector_7': {'layer': 4, 'tube': 20, 'straw': 7, 'pixel': -1},
+    'loki_detector_8': {'layer': 4, 'tube': 32, 'straw': 7, 'pixel': -1},
 }
 
 
