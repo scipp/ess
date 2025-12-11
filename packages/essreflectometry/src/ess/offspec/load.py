@@ -2,8 +2,14 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 
-from ..reflectometry.types import Filename, RawDetector, ReferenceRun, RunType
-from .types import CoordTransformationGraph, MonitorData, NeXusMonitorName
+from ..reflectometry.types import (
+    CoordTransformationGraph,
+    Filename,
+    RawDetector,
+    ReferenceRun,
+    RunType,
+)
+from .types import MonitorData, NeXusMonitorName
 
 
 def load_offspec_events(

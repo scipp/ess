@@ -4,6 +4,7 @@ import sciline
 
 from ..reflectometry import providers as reflectometry_providers
 from ..reflectometry.types import (
+    CoordTransformationGraph,
     RawDetector,
     ReducibleData,
     ReferenceRun,
@@ -16,7 +17,6 @@ from .corrections import correct_by_monitor
 from .maskings import add_masks
 from .types import (
     BackgroundMinWavelength,
-    CoordTransformationGraph,
     MonitorData,
     NeXusMonitorName,
     SpectrumLimits,
