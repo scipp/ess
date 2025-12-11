@@ -90,13 +90,13 @@ def parse_events_h5(f, events_to_sample_per_unit_weight=None):
                 continue
             da.coords[label] = sc.array(dims=['events'], values=events[:, i])
     else:
-        probabilities = events[:, 0]
-        p_total = probabilities.sum()
-        nevents_to_sample = round(events_to_sample_per_unit_weight * p_total)
+        weights = events[:, 0]
+        total_weight = weights.sum()
+        nevents_to_sample = round(events_to_sample_per_unit_weight * total_weight)
         inds = np.random.choice(
-            np.arange(len(probabilities)),
+            np.arange(len(weights)),
             nevents_to_sample,
-            p=probabilities / p_total,
+            p=weights / total_weight,
         )
         da = sc.DataArray(
             sc.ones(dims=['events'], shape=(nevents_to_sample,), with_variances=True),
