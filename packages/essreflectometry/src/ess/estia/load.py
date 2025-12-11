@@ -143,7 +143,7 @@ def mcstas_load_sample_position(
 def load_sample_rotation(
     sample: NeXusComponent[NXsample, RunType],
 ) -> RawSampleRotation[RunType]:
-    return sample['sample_rotation']['value']
+    return sample['sample_rotation'][0].data
 
 
 def load_detector_rotation(
