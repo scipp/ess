@@ -9,9 +9,7 @@ from ess.reduce.nexus.types import DetectorBankSizes, Position
 from ..reflectometry.conversions import reflectometry_q
 from ..reflectometry.types import (
     CoordTransformationGraph,
-    DetectorLtotal,
     DetectorRotation,
-    RawDetector,
     RunType,
     SampleRotation,
 )
@@ -65,15 +63,6 @@ def divergence_angle(
     """
     p = position - sample_position.to(unit=position.unit)
     return sc.atan2(y=p.fields.x, x=p.fields.z) - detector_rotation.to(unit='rad')
-
-
-def detector_ltotal_from_raw(
-    da: RawDetector[RunType], graph: CoordTransformationGraph[RunType]
-) -> DetectorLtotal[RunType]:
-    return da.transform_coords(
-        ['Ltotal'],
-        graph=graph,
-    ).coords['Ltotal']
 
 
 def coordinate_transformation_graph(
@@ -155,7 +144,4 @@ def add_coords(
     )
 
 
-providers = (
-    coordinate_transformation_graph,
-    detector_ltotal_from_raw,
-)
+providers = (coordinate_transformation_graph,)

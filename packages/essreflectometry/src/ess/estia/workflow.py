@@ -13,7 +13,16 @@ from ..reflectometry.types import (
     RunType,
     SampleRotationOffset,
 )
-from . import beamline, conversions, corrections, load, maskings, normalization, orso
+from . import (
+    beamline,
+    conversions,
+    corrections,
+    load,
+    maskings,
+    mcstas,
+    normalization,
+    orso,
+)
 
 _general_providers = (
     *reflectometry_providers,
@@ -27,7 +36,7 @@ _general_providers = (
 
 mcstas_providers = (
     *_general_providers,
-    *load.mcstas_providers,
+    *mcstas.providers,
 )
 """List of providers for setting up a Sciline pipeline for McStas data.
 
