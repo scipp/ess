@@ -6,8 +6,8 @@ import pandas as pd
 import sciline
 import scipp as sc
 
-from ess.reduce.nexus.workflow import GenericNeXusWorkflow
 from ess.reduce.parameter import parameter_mappers
+from ess.reduce.time_of_flight import GenericTofWorkflow
 
 from . import common, conversions, i_of_q, masking, normalization
 from .types import (
@@ -176,7 +176,7 @@ def SansWorkflow() -> sciline.Pipeline:
     :
         SANS workflow as a sciline.Pipeline
     """
-    workflow = GenericNeXusWorkflow(
+    workflow = GenericTofWorkflow(
         run_types=(
             SampleRun,
             EmptyBeamRun,

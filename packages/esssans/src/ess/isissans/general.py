@@ -30,7 +30,6 @@ from ess.sans.types import (
     RawMonitor,
     RunType,
     SampleRun,
-    ScatteringRunType,
     TofDetector,
     TofMonitor,
     Transmission,
@@ -190,6 +189,28 @@ def get_monitor_data(
     )
 
 
+def get_calibrated_isis_monitor(
+    monitor: NeXusComponent[MonitorType, RunType],
+    offset: MonitorPositionOffset[RunType, MonitorType],
+) -> EmptyMonitor[RunType, MonitorType]:
+    """
+    Replacement for :py:func:`ess.reduce.nexus.workflow.get_calibrated_detector`.
+
+    Differences:
+
+    - The detector position is already pre-computed.
+    - The detector is not reshaped.
+
+    The reason for the partial duplication is to avoid having to put ISIS/Mantid
+    specific code in the generic workflow.
+    """
+    da = monitor['data']
+    position = monitor['data'].coords['position']
+    return EmptyMonitor[RunType, MonitorType](
+        da.assign_coords(position=position + offset.to(unit=position.unit))
+    )
+
+
 def dummy_assemble_detector_data(
     detector: EmptyDetector[RunType],
 ) -> RawDetector[RunType]:
@@ -205,11 +226,11 @@ def dummy_assemble_monitor_data(
 
 
 def data_to_tof(
-    da: RawDetector[ScatteringRunType],
-) -> TofDetector[ScatteringRunType]:
+    da: RawDetector[RunType],
+) -> TofDetector[RunType]:
     """Dummy conversion of data to time-of-flight data.
     The data already has a time-of-flight coordinate."""
-    return TofDetector[ScatteringRunType](da)
+    return TofDetector[RunType](da)
 
 
 def monitor_to_tof(
@@ -228,7 +249,7 @@ def experiment_metadata(dg: LoadedFileContents[RunType]) -> Measurement[RunType]
     )
 
 
-def helium3_tube_detector_pixel_shape() -> DetectorPixelShape[ScatteringRunType]:
+def helium3_tube_detector_pixel_shape() -> DetectorPixelShape[RunType]:
     # Pixel radius and length
     # found here:
     # https://github.com/mantidproject/mantid/blob/main/instrument/SANS2D_Definition_Tubes.xml
@@ -255,9 +276,9 @@ def helium3_tube_detector_pixel_shape() -> DetectorPixelShape[ScatteringRunType]
     return pixel_shape
 
 
-def lab_frame_transform() -> NeXusTransformation[snx.NXdetector, ScatteringRunType]:
+def lab_frame_transform() -> NeXusTransformation[snx.NXdetector, RunType]:
     # Rotate +y to -x
-    return NeXusTransformation[snx.NXdetector, ScatteringRunType](
+    return NeXusTransformation[snx.NXdetector, RunType](
         sc.spatial.rotation(value=[0, 0, 1 / 2**0.5, 1 / 2**0.5])
     )
 
@@ -286,6 +307,7 @@ providers = (
     get_sample_position,
     get_detector_data,
     get_calibrated_isis_detector,
+    get_calibrated_isis_monitor,
     get_detector_ids_from_sample_run,
     get_monitor_data,
     data_to_tof,
