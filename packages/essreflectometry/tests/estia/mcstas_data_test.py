@@ -12,12 +12,12 @@ import scipp as sc
 from orsopy import fileio
 
 from ess.estia import EstiaMcStasWorkflow
-from ess.estia.conversions import mcstas_wavelength_coordinate_transformation_graph
 from ess.estia.data import (
     estia_mcstas_reference_run,
     estia_mcstas_sample_run,
     estia_tof_lookup_table,
 )
+from ess.estia.mcstas import mcstas_wavelength_coordinate_transformation_graph
 from ess.reflectometry import orso
 from ess.reflectometry.types import (
     BeamDivergenceLimits,

@@ -97,25 +97,6 @@ def coordinate_transformation_graph(
     }
 
 
-def mcstas_wavelength_coordinate_transformation_graph(
-    source_position: Position[NXsource, RunType],
-    sample_position: Position[NXsample, RunType],
-    sample_rotation: SampleRotation[RunType],
-    detector_rotation: DetectorRotation[RunType],
-    detector_bank_sizes: DetectorBankSizes,
-) -> CoordTransformationGraph[RunType]:
-    return {
-        **coordinate_transformation_graph(
-            source_position,
-            sample_position,
-            sample_rotation,
-            detector_rotation,
-            detector_bank_sizes,
-        ),
-        "wavelength": lambda wavelength_from_mcstas: wavelength_from_mcstas,
-    }
-
-
 def add_coords(
     da: sc.DataArray,
     graph: dict,

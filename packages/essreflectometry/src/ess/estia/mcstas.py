@@ -7,7 +7,7 @@ import pandas as pd
 import scipp as sc
 from scippnexus import NXsample, NXsource
 
-from ess.reduce.nexus.types import Position
+from ess.reduce.nexus.types import DetectorBankSizes, Position
 
 from ..reflectometry.load import load_h5
 from ..reflectometry.types import (
@@ -18,9 +18,11 @@ from ..reflectometry.types import (
     RawDetector,
     RawSampleRotation,
     RunType,
+    SampleRotation,
     SampleRotationOffset,
 )
 from .beamline import DETECTOR_BANK_SIZES
+from .conversions import coordinate_transformation_graph
 
 
 def parse_metadata_ascii(lines):
@@ -260,6 +262,25 @@ def detector_ltotal_from_raw(
         ['Ltotal'],
         graph=graph,
     ).coords['Ltotal']
+
+
+def mcstas_wavelength_coordinate_transformation_graph(
+    source_position: Position[NXsource, RunType],
+    sample_position: Position[NXsample, RunType],
+    sample_rotation: SampleRotation[RunType],
+    detector_rotation: DetectorRotation[RunType],
+    detector_bank_sizes: DetectorBankSizes,
+) -> CoordTransformationGraph[RunType]:
+    return {
+        **coordinate_transformation_graph(
+            source_position,
+            sample_position,
+            sample_rotation,
+            detector_rotation,
+            detector_bank_sizes,
+        ),
+        "wavelength": lambda wavelength_from_mcstas: wavelength_from_mcstas,
+    }
 
 
 providers = (
