@@ -16,7 +16,6 @@ from ..reflectometry.types import (
     DetectorRotation,
     Filename,
     RawDetector,
-    RawSampleRotation,
     RunType,
     SampleRotation,
     SampleRotationOffset,
@@ -233,7 +232,7 @@ def load_mcstas(
     return da
 
 
-def load_sample_rotation(da: RawDetector[RunType]) -> RawSampleRotation[RunType]:
+def load_sample_rotation(da: RawDetector[RunType]) -> SampleRotation[RunType]:
     return da.coords['sample_rotation']
 
 
