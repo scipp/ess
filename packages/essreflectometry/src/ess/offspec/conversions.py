@@ -3,10 +3,10 @@
 from scippneutron.conversion.graph import beamline, tof
 
 from ..reflectometry.types import (
+    CoordTransformationGraph,
     ReferenceRun,
     SampleRun,
 )
-from .types import CoordTransformationGraph
 
 
 def coordinate_transformation_graph_sample() -> CoordTransformationGraph[SampleRun]:
