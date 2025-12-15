@@ -47,15 +47,15 @@ def _find_beam_center(
     Each iteration the center of mass of the remaining intensity is computed
     and assigned to be the current beam center guess.
     Then three symmetrical masks are created to make sure that the remaining intensity
-    distribution does not extend outside of the detector and that the sample holder
+    distribution does not extend outside of the detector and that the beam stop
     does not make the remaining intensity asymmetrical.
 
     The three masks are:
 
       - one "outer" circular mask with radius less than the minimal distance
         from the current beam center guess to the border of the detector
-      - one "inner" circular mask with radius larger than the sample holder
-      - one "arm" rectangular mask with width wider than the sample holder arm
+      - one "inner" circular mask with radius larger than the beam stop
+      - one "arm" rectangular mask with width wider than the beam stop arm
 
     The "outer" mask radius is found from the detector size.
     The "inner" mask radius is supplied by the caller.
@@ -137,12 +137,12 @@ def beam_center_from_center_of_mass_alternative(
     the intensity distribution in the detector might not be, because
 
         - the detector has a finite extent,
-        - and there is a sample holder covering part of the detector.
+        - and there is a beam stop covering part of the detector.
 
     To deal with the limited size of the detector a mask can be applied that is small
     enough so that the the remaining intensity is entirely inside the detector.
-    To deal with the sample holder we can mask the region of the detector that the
-    sample holder covers.
+    To deal with the beam stop we can mask the region of the detector that the
+    beam stop covers.
 
     But to preserve the symmetry of the intensity around the beam center the masks
     also need to be symmetical around the beam center.
@@ -483,8 +483,8 @@ def beam_center_from_iofq(
 
     This was, however, not sufficient in cases where masks are applied to the detector
     pixels. It is indeed very common to mask broken pixels, as well as the region of
-    the detector where the sample holder is casting a shadow.
-    Such a sample holder will not appear in all 4 quadrants, and because it spans a
+    the detector where the beam stop is casting a shadow.
+    Such a beam stop will not appear in all 4 quadrants, and because it spans a
     range of scattering (:math:`2{\\theta}`) angles, it spans a range of :math:`Q` bins.
 
     All this means that we in fact need to perform a reduction as close as possible to
