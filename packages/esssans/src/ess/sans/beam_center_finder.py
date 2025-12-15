@@ -45,7 +45,7 @@ def _find_beam_center(
 ):
     '''
     Each iteration the center of mass of the remaining intensity is computed
-    and assigned to be the current beam center guess ``c``.
+    and assigned to be the current beam center guess.
     Then three symmetrical masks are created to make sure that the remaining intensity
     distribution does not extend outside of the detector and that the sample holder
     does not make the remaining intensity asymmetrical.
@@ -63,40 +63,65 @@ def _find_beam_center(
     around the current beam center guess, the "arm" mask width is an argument
     supplied by the caller.
     '''
-    m = data.copy()
-    m.masks.clear()
-    s = m.bins.sum()
+    events = data.copy()
+    events.masks.clear()
+    intensity = events.bins.sum()
 
     for i in range(20):
-        c = (s.coords['position'] * sc.values(s)).sum() / sc.values(s).sum()
-        d = s.coords['position'] - c.data
+        # Average position, weighted by intensity.
+        center = (
+            intensity.coords['position'] * sc.values(intensity)
+        ).sum() / sc.values(intensity).sum()
+        distance_to_center = intensity.coords['position'] - center.data
 
+        # Outer radius of annulus around center.
+        # Defined so that the annulus does not go outside of the bounds of the detector.
         outer = 0.9 * min(
-            sc.abs(d.fields.x.min()),
-            sc.abs(d.fields.x.max()),
-            sc.abs(d.fields.y.min()),
-            sc.abs(d.fields.y.max()),
+            sc.abs(distance_to_center.fields.x.min()),
+            sc.abs(distance_to_center.fields.x.max()),
+            sc.abs(distance_to_center.fields.y.min()),
+            sc.abs(distance_to_center.fields.y.max()),
         )
-        s.masks['_outer'] = d.fields.x**2 + d.fields.y**2 > outer**2
-        s.masks['_inner'] = d.fields.x**2 + d.fields.y**2 < beam_stop_radius**2
+        intensity.masks['outer'] = (
+            distance_to_center.fields.x**2 + distance_to_center.fields.y**2 > outer**2
+        )
+        # Inner radius defined by size of beam stop.
+        intensity.masks['inner'] = (
+            distance_to_center.fields.x**2 + distance_to_center.fields.y**2
+            < beam_stop_radius**2
+        )
 
+        # Iterate without the arm mask a few times to settle near the center
+        # before introducing the arm mask.
         if i > 10:
-            s.coords['th'] = sc.where(
-                d.fields.x > sc.scalar(0.0, unit='m'),
-                sc.atan2(y=d.fields.y, x=d.fields.x),
+            # Angle between +x and distance_to_center.
+            intensity.coords['theta'] = sc.where(
+                distance_to_center.fields.x > sc.scalar(0.0, unit='m'),
+                sc.atan2(y=distance_to_center.fields.y, x=distance_to_center.fields.x),
                 sc.scalar(sc.constants.pi.value, unit='rad')
-                - sc.atan2(y=d.fields.y, x=-d.fields.x),
+                - sc.atan2(
+                    y=distance_to_center.fields.y, x=-distance_to_center.fields.x
+                ),
             )
-            h = s.drop_masks(['_arm'] if '_arm' in s.masks else []).hist(th=100)
-            th = h.coords['th'][np.argmin(h.values)]
+            intensity_over_angle = intensity.drop_masks(
+                ['arm'] if 'arm' in intensity.masks else []
+            ).hist(theta=100)
+            # Assume angle of arm coincides with intensity minimum
+            arm_angle = intensity_over_angle.coords['theta'][
+                np.argmin(intensity_over_angle.values)
+            ]
 
-            slope = sc.tan(th)
-            s.masks['_arm'] = (
-                d.fields.y < slope * d.fields.x + beam_stop_arm_width
-            ) & (d.fields.y > slope * d.fields.x - beam_stop_arm_width)
+            slope = sc.tan(arm_angle)
+            intensity.masks['arm'] = (
+                distance_to_center.fields.y
+                < slope * distance_to_center.fields.x + beam_stop_arm_width
+            ) & (
+                distance_to_center.fields.y
+                > slope * distance_to_center.fields.x - beam_stop_arm_width
+            )
 
-    c.data.fields.z = sc.scalar(0.0, unit=c.data.unit)
-    return c.data
+    center.data.fields.z = sc.scalar(0.0, unit=center.data.unit)
+    return center.data
 
 
 def beam_center_from_center_of_mass_alternative(
