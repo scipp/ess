@@ -34,7 +34,6 @@ from ..sans.types import (
     RawMonitor,
     RunType,
     SampleRun,
-    ScatteringRunType,
     TofDetector,
     TofMonitor,
     Transmission,
@@ -42,11 +41,20 @@ from ..sans.types import (
 )
 
 DETECTOR_BANK_SIZES = {
-    'larmor_detector': {'layer': 4, 'tube': 32, 'straw': 7, 'pixel': 512}
+    'larmor_detector': {'layer': 4, 'tube': -1, 'straw': 7, 'pixel': 512},
+    'loki_detector_0': {'layer': 4, 'tube': 56, 'straw': 7, 'pixel': -1},
+    'loki_detector_1': {'layer': 4, 'tube': 16, 'straw': 7, 'pixel': -1},
+    'loki_detector_2': {'layer': 4, 'tube': 12, 'straw': 7, 'pixel': -1},
+    'loki_detector_3': {'layer': 4, 'tube': 16, 'straw': 7, 'pixel': -1},
+    'loki_detector_4': {'layer': 4, 'tube': 12, 'straw': 7, 'pixel': -1},
+    'loki_detector_5': {'layer': 4, 'tube': 28, 'straw': 7, 'pixel': -1},
+    'loki_detector_6': {'layer': 4, 'tube': 32, 'straw': 7, 'pixel': -1},
+    'loki_detector_7': {'layer': 4, 'tube': 20, 'straw': 7, 'pixel': -1},
+    'loki_detector_8': {'layer': 4, 'tube': 32, 'straw': 7, 'pixel': -1},
 }
 
 
-def default_parameters() -> dict:
+def larmor_default_parameters() -> dict:
     return {
         DetectorBankSizes: DETECTOR_BANK_SIZES,
         NeXusMonitorName[Incident]: 'monitor_1',
@@ -56,7 +64,17 @@ def default_parameters() -> dict:
     }
 
 
-def _convert_to_tof(da: sc.DataArray) -> sc.DataArray:
+def loki_default_parameters() -> dict:
+    return {
+        DetectorBankSizes: DETECTOR_BANK_SIZES,
+        NeXusMonitorName[Incident]: 'beam_monitor_1',
+        NeXusMonitorName[Transmission]: 'beam_monitor_3',
+        PixelShapePath: 'pixel_shape',
+        NonBackgroundWavelengthRange: None,
+    }
+
+
+def _larmor_convert_to_tof(da: sc.DataArray) -> sc.DataArray:
     event_time_offset = da.bins.coords['event_time_offset']
     da = da.bins.drop_coords('event_time_offset')
     da.bins.coords['tof'] = event_time_offset
@@ -65,23 +83,37 @@ def _convert_to_tof(da: sc.DataArray) -> sc.DataArray:
     return da
 
 
-def data_to_tof(
-    da: RawDetector[ScatteringRunType],
-) -> TofDetector[ScatteringRunType]:
-    return TofDetector[ScatteringRunType](_convert_to_tof(da))
+def larmor_data_to_tof(da: RawDetector[RunType]) -> TofDetector[RunType]:
+    """
+    Compute time-of-flight coordinate for Loki detector data at Larmor.
+    This is different from the standard conversion from the GenericTofWorkflow because
+    the detector test was conducted as ISIS where the pulse has a different time
+    structure.
+    The conversion here is much simpler: the event_time_offset coordinate is directly
+    renamed as time-of-flight.
+    """
+    return TofDetector[RunType](_larmor_convert_to_tof(da))
 
 
-def monitor_to_tof(
+def larmor_monitor_to_tof(
     da: RawMonitor[RunType, MonitorType],
 ) -> TofMonitor[RunType, MonitorType]:
-    return TofMonitor[RunType, MonitorType](_convert_to_tof(da))
+    """
+    Compute time-of-flight coordinate for Loki monitor data at Larmor.
+    This is different from the standard conversion from the GenericTofWorkflow because
+    the detector test was conducted as ISIS where the pulse has a different time
+    structure.
+    The conversion here is much simpler: the event_time_offset coordinate is directly
+    renamed as time-of-flight.
+    """
+    return TofMonitor[RunType, MonitorType](_larmor_convert_to_tof(da))
 
 
 def detector_pixel_shape(
-    detector: NeXusComponent[snx.NXdetector, ScatteringRunType],
+    detector: NeXusComponent[snx.NXdetector, RunType],
     pixel_shape_path: PixelShapePath,
-) -> DetectorPixelShape[ScatteringRunType]:
-    return DetectorPixelShape[ScatteringRunType](detector[pixel_shape_path])
+) -> DetectorPixelShape[RunType]:
+    return DetectorPixelShape[RunType](detector[pixel_shape_path])
 
 
 def load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
@@ -89,7 +121,7 @@ def load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
     return DirectBeam(sc.io.load_hdf5(filename))
 
 
-loki_providers = (detector_pixel_shape, data_to_tof, load_direct_beam, monitor_to_tof)
+loki_providers = (detector_pixel_shape, load_direct_beam)
 
 
 @register_workflow
@@ -110,8 +142,10 @@ def LokiAtLarmorWorkflow() -> sciline.Pipeline:
     workflow = sans.SansWorkflow()
     for provider in loki_providers:
         workflow.insert(provider)
-    for key, param in default_parameters().items():
+    for key, param in larmor_default_parameters().items():
         workflow[key] = param
+    workflow.insert(larmor_data_to_tof)
+    workflow.insert(larmor_monitor_to_tof)
     workflow.insert(read_xml_detector_masking)
     workflow[NeXusDetectorName] = 'larmor_detector'
     workflow.typical_outputs = typical_outputs
@@ -135,4 +169,23 @@ def LokiAtLarmorTutorialWorkflow() -> sciline.Pipeline:
     )
     workflow[Filename[EmptyBeamRun]] = str(data.loki_tutorial_run_60392())
     workflow[BeamCenter] = sc.vector(value=[-0.02914868, -0.01816138, 0.0], unit='m')
+    return workflow
+
+
+@register_workflow
+def LokiWorkflow() -> sciline.Pipeline:
+    """
+    Workflow with default parameters for Loki.
+
+    Returns
+    -------
+    :
+        Loki workflow as a sciline.Pipeline
+    """
+    workflow = sans.SansWorkflow()
+    for provider in loki_providers:
+        workflow.insert(provider)
+    for key, param in loki_default_parameters().items():
+        workflow[key] = param
+    workflow.typical_outputs = typical_outputs
     return workflow
