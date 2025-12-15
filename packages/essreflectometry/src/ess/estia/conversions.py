@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import scipp as sc
+from scipp.constants import pi
+from scippneutron._utils import elem_dtype
 from scippneutron.conversion.tof import wavelength_from_tof
 from scippnexus import NXsample, NXsource
 
@@ -13,6 +15,40 @@ from ..reflectometry.types import (
     RunType,
     SampleRotation,
 )
+
+
+def reflectometry_q_x(
+    wavelength: sc.Variable, theta: sc.Variable, sample_rotation: sc.Variable
+) -> sc.Variable:
+    """
+    Compute momentum transfer in off-specular direction.
+
+    Parameters
+    ----------
+    wavelength:
+        Wavelength values for the events.
+    theta:
+        Angle of reflection for the events.
+    sample_rotation:
+        Angle of incidence.
+
+    Returns
+    -------
+    :
+        Qx-values.
+    """
+    dtype = elem_dtype(wavelength)
+    c = (2 * pi).astype(dtype)
+    return (
+        c
+        * (
+            sc.cos(
+                theta.astype(dtype, copy=False)
+                - sc.cos(sample_rotation.astype(dtype, copy=True))
+            )
+        )
+        / wavelength
+    )
 
 
 def theta(
@@ -77,6 +113,7 @@ def coordinate_transformation_graph(
         "theta": theta,
         "divergence_angle": divergence_angle,
         "Q": reflectometry_q,
+        "Qx": reflectometry_q_x,
         "L1": lambda source_position, sample_position: sc.norm(
             sample_position - source_position.to(unit=sample_position.unit)
         ),  # + extra correction for guides?
@@ -108,6 +145,7 @@ def add_coords(
             "theta",
             "divergence_angle",
             "Q",
+            "Qx",
             "L1",
             "L2",
             "blade",
