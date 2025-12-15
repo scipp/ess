@@ -43,7 +43,7 @@ def reflectometry_q_x(
         c
         * (
             sc.cos(theta.astype(dtype, copy=False))
-            - sc.cos(sample_rotation.astype(dtype, copy=True))
+            - sc.cos(sample_rotation.to(unit=theta.unit, dtype=dtype))
         )
         / wavelength
     )
