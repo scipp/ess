@@ -2,231 +2,114 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 """Detector diagnostics for LOKI."""
 
-from collections.abc import Callable, Iterable, Mapping
-from functools import reduce
-from typing import Any
-
 import ipywidgets as ipw
-import numpy as np
+import matplotlib.pyplot as plt
+import plopp as pp
 import scipp as sc
-from plopp.core.typing import FigureLike
-
-# This leads to y-axis: tube, x-axis: pixel
-_STARTING_DIMS = ('tube', 'pixel', 'layer', 'straw')
 
 
-class FlatDetectorViewer(ipw.VBox):
-    """Interactive 2D plot for multi-dimensional detectors."""
+def _slice_or_sum(
+    da: sc.DataGroup, layer_ind: int, layer_sum: bool, straw_ind: int, straw_sum: bool
+) -> sc.DataGroup:
+    out = da.copy(deep=False)
+    if layer_sum:
+        out = out.sum('layer')
+    else:
+        out = out["layer", layer_ind - 1]
+    if straw_sum:
+        out = out.sum('straw')
+    else:
+        out = out["straw", straw_ind - 1]
+    return out
 
-    def __init__(
-        self,
-        data: Mapping[str, sc.DataArray],
-        *,
-        rasterized: bool = True,
-        **kwargs: Any,
-    ) -> None:
-        """Create a new viewer.
+
+class LokiBankViewer(ipw.VBox):
+    def __init__(self, data: sc.DataGroup):
+        """Widget to view LOKI detector banks.
 
         Parameters
         ----------
         data:
-            Histogrammed data, one entry per bank.
-        rasterized:
-            If ``True``, the figure is rasterized which improves rendering
-            speed but reduces resolution.
-        **kwargs:
-            Additional arguments passed to the plotting function.
+            DataGroup containing LOKI detector banks.
         """
-        self._data = self._prepare_data(data)
-        self._bank_selector = _make_bank_selector(data.keys())
-        self._bank = self._data[self._bank_selector.value]
+        self.data = data
 
-        self._dim_selector = _DimensionSelector(self._bank.dims, self._update_view)
+        self.layer_slider = ipw.IntSlider(
+            min=1, max=4, description="Layer", style={"description_width": 'initial'}
+        )
+        self.layer_sum = ipw.Checkbox(
+            description="Sum all layers",
+            value=False,
+            indent=False,
+            layout={"width": "initial"},
+        )
+        self.layer_ind_node = pp.widget_node(self.layer_slider)
+        self.layer_sum_node = pp.widget_node(self.layer_sum)
 
-        self._fig_kwargs = {'rasterized': rasterized} | kwargs
-        self._figure_box = ipw.HBox([self._make_figure()])
-        self._bank_selector.observe(self._select_bank, names='value')
+        self.straw_slider = ipw.IntSlider(
+            min=1, max=7, description="Straw", style={"description_width": 'initial'}
+        )
+        self.straw_sum = ipw.Checkbox(
+            description="Sum all straws",
+            value=False,
+            indent=False,
+            layout={"width": "initial"},
+        )
+        self.straw_ind_node = pp.widget_node(self.straw_slider)
+        self.straw_sum_node = pp.widget_node(self.straw_sum)
 
-        super().__init__(
-            [
-                ipw.HBox([ipw.Label('Bank:'), self._bank_selector]),
-                self._figure_box,
-                self._dim_selector,
-            ]
+        self.layer_link = ipw.jslink(
+            (self.layer_sum, 'value'), (self.layer_slider, 'disabled')
+        )
+        self.straw_link = ipw.jslink(
+            (self.straw_sum, 'value'), (self.straw_slider, 'disabled')
         )
 
-    def _select_bank(self, *_args: Any, **_kwargs: Any) -> None:
-        self._bank = self._data[self._bank_selector.value]
-        self._dim_selector.set_dims(self._bank.dims)
-        self._update_view()
-
-    def _update_view(self, *_args: Any, **_kwargs: Any) -> None:
-        self._figure_box.children = [self._make_figure()]
-
-    def _make_figure(self) -> FigureLike:
-        sel = self._dim_selector.value
-        fig = _flat_detector_figure(
-            self._bank, sel['horizontal'], sel['vertical'], **self._fig_kwargs
+        slice_node = pp.Node(
+            _slice_or_sum,
+            da=self.data,
+            layer_ind=self.layer_ind_node,
+            layer_sum=self.layer_sum_node,
+            straw_ind=self.straw_ind_node,
+            straw_sum=self.straw_sum_node,
         )
-        return fig
 
-    @staticmethod
-    def _prepare_data(dg: sc.DataGroup) -> sc.DataGroup:
-        return sc.DataGroup(
-            {
-                name: bank.transpose(
-                    [dim for dim in _STARTING_DIMS if dim in bank.dims]
+        with plt.ioff():
+            fig, axs = plt.subplots(3, 3, figsize=(12, 9))
+
+        figs = []
+        for i, ax in enumerate(axs.flatten()):
+            bank = f"loki_detector_{i}"
+            figs.append(
+                pp.plot(
+                    pp.Node(lambda da, key: da[key], da=slice_node, key=bank),
+                    ax=ax,
+                    title=bank,
                 )
-                for name, bank in dg.items()
-            }
+            )
+        fig.canvas.header_visible = False
+
+        self.log_button = ipw.ToggleButton(description="Log colormap")
+
+        def toggle_log(change):
+            for f in figs:
+                f.view.colormapper.norm = "log" if change["new"] else "linear"
+
+        self.log_button.observe(toggle_log, names="value")
+
+        layer_box = ipw.HBox(
+            [self.layer_slider, self.layer_sum],
+            layout={'border': '1px solid black', 'padding': '0px 10px 0px 10px'},
         )
-
-
-class _DimensionSelector(ipw.VBox):
-    def __init__(self, dims: tuple[str, ...], callback: Callable[[dict], None]) -> None:
-        self._lock = False
-        self._callback = callback
-
-        self._horizontal_buttons, self._vertical_buttons = self._make_buttons(
-            dims, _STARTING_DIMS[1], _STARTING_DIMS[0]
+        straw_box = ipw.HBox(
+            [self.straw_slider, self.straw_sum],
+            layout={'border': '1px solid black', 'padding': '0px 10px 0px 10px'},
         )
+        space = ipw.HTML('<div style="width: 20px;"></div>')
 
         super().__init__(
             [
-                ipw.HBox([ipw.Label('X'), self._horizontal_buttons]),
-                ipw.HBox([ipw.Label('Y'), self._vertical_buttons]),
+                ipw.HBox([layer_box, space, straw_box, space, self.log_button]),
+                fig.canvas,
             ]
         )
-
-    def _make_buttons(
-        self, dims: tuple[str, ...], h_dim: str, v_dim: str
-    ) -> tuple[ipw.ToggleButtons, ipw.ToggleButtons]:
-        style = {'button_width': '10em'}
-        options = {dim.capitalize(): dim for dim in dims}
-        h_buttons = ipw.ToggleButtons(options=options, value=h_dim, style=style)
-        v_buttons = ipw.ToggleButtons(options=options, value=v_dim, style=style)
-        h_buttons.observe(self.update, names='value')
-        v_buttons.observe(self.update, names='value')
-        return h_buttons, v_buttons
-
-    def set_dims(self, new_dims: tuple[str, ...]) -> None:
-        default_v, default_h, _, _ = _STARTING_DIMS
-        options = {dim.capitalize(): dim for dim in new_dims}
-        self._lock = True
-        self._horizontal_buttons.options = options
-        self._vertical_buttons.options = options
-        self._horizontal_buttons.value = default_h
-        self._vertical_buttons.value = default_v
-        self._lock = False
-
-    @property
-    def value(self):
-        return {
-            'horizontal': self._horizontal_buttons.value,
-            'vertical': self._vertical_buttons.value,
-        }
-
-    def update(self, change: dict) -> None:
-        if self._lock:
-            return
-        clicked = change['owner']
-        other = (
-            self._vertical_buttons
-            if clicked is self._horizontal_buttons
-            else self._horizontal_buttons
-        )
-        if other.value == clicked.value:
-            self._lock = True  # suppress update from `other`
-            other.value = change['old']
-            self._lock = False
-        self._callback(change)
-
-
-def _flat_detector_figure(
-    data: sc.DataArray, horizontal_dim: str, vertical_dim: str, **kwargs: Any
-) -> FigureLike:
-    kept_dims = {horizontal_dim, vertical_dim}
-
-    to_flatten = [dim for dim in data.dims if dim not in kept_dims]
-    n = len(to_flatten)
-    flatten_to_h = [horizontal_dim, *to_flatten[n // 2 :]]
-    flatten_to_v = [vertical_dim, *to_flatten[: n // 2]]
-
-    # Drop unused coordinates
-    aux = data.drop_coords(list(set(data.coords.keys()) - kept_dims))
-    reordered = aux.transpose(flatten_to_v + flatten_to_h)
-
-    for dim in reordered.dims:
-        if dim not in reordered.coords:
-            reordered.coords[dim] = sc.arange(dim, reordered.sizes[dim], unit=None)
-
-    h_coord = reordered.coords.pop(horizontal_dim)
-    v_coord = reordered.coords.pop(vertical_dim)
-
-    flat = reordered.flatten(flatten_to_v, to='vertical').flatten(
-        flatten_to_h, to='horizontal'
-    )
-    flat = flat.assign_coords(
-        {name: sc.arange(name, flat.sizes[name], unit=None) for name in flat.dims}
-    )
-
-    # This relies on the order of flatten_to_h/v
-    inner_volume_h = _product(data.sizes[d] for d in flatten_to_h[1:])
-    inner_volume_v = _product(data.sizes[d] for d in flatten_to_v[1:])
-    h_ticks = np.arange(0, flat.sizes['horizontal'], inner_volume_h)
-    v_ticks = np.arange(0, flat.sizes['vertical'], inner_volume_v)
-
-    h_labels = [str(value) for value in h_coord.values]
-    v_labels = [str(value) for value in v_coord.values]
-
-    fig = flat.plot(**kwargs)
-
-    fig.ax.xaxis.set_ticks(ticks=h_ticks, labels=h_labels)
-    fig.ax.yaxis.set_ticks(ticks=v_ticks, labels=v_labels)
-    fig.canvas.xlabel = horizontal_dim.capitalize()
-    fig.canvas.ylabel = vertical_dim.capitalize()
-
-    unwrap_indices = unwrap_flat_indices_2d(
-        {dim: reordered.sizes[dim] for dim in flatten_to_h},
-        {dim: reordered.sizes[dim] for dim in flatten_to_v},
-    )
-
-    def format_coord(x: float, y: float) -> str:
-        # Use round because axis coords are in the middle of bins.
-        indices = (
-            f'{key.capitalize()}: {val}'
-            for key, val in unwrap_indices(round(x), round(y)).items()
-        )
-        return f"{{{', '.join(indices)}}}"
-
-    fig.ax.format_coord = format_coord
-
-    return fig
-
-
-def _product(it):
-    return reduce(lambda a, b: a * b, it)
-
-
-def unwrap_flat_indices_2d(
-    x_sizes: dict[str, int], y_sizes: dict[str, int]
-) -> Callable[[int, int], dict[str, int]]:
-    def unwrap(x: int, y: int) -> dict[str, int]:
-        return {**_unwrap_flat_index(x, x_sizes), **_unwrap_flat_index(y, y_sizes)}
-
-    return unwrap
-
-
-def _unwrap_flat_index(index: int, sizes: dict[str, int]) -> dict[str, int]:
-    res = []
-    for key, size in reversed(sizes.items()):
-        res.append((key, index % size))
-        index //= size
-    return dict(reversed(res))  # Reverse to reproduce the input order.
-
-
-def _make_bank_selector(banks: Iterable[str]) -> ipw.Dropdown:
-    options = (
-        (' '.join(s.capitalize() for s in bank.split('_')), bank) for bank in banks
-    )
-    return ipw.Dropdown(options=options)
