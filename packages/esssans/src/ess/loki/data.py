@@ -51,6 +51,10 @@ _registry = make_registry(
         'mask_new_July2022.xml': 'md5:421b6dc9db74126ffbc5d88164d017b0',
         # Direct beam from LoKI@Larmor detector test experiment
         'direct-beam-loki-all-pixels.h5': "md5:b85d7b486b312c5bb2a31d2bb6314f69",
+        # TOF lookup table without choppers
+        'loki-tof-lookup-table-no-choppers.h5': 'md5:5b817466d3a07d4def12535d7317c044',
+        # CODA file with a single event per detector bank (for testing purposes)
+        'loki-coda-one-event.hdf': 'md5:ab9dbef793fad2fca96210c3b55d60ce',
     },
     version='2',
 )
@@ -159,3 +163,26 @@ def loki_tutorial_direct_beam_all_pixels() -> DirectBeamFilename:
     """File containing direct beam function computed using the direct beam iterations
     notebook, summing all pixels."""
     return DirectBeamFilename(_registry.get_path('direct-beam-loki-all-pixels.h5'))
+
+
+def loki_tof_lookup_table_no_choppers() -> Path:
+    """
+    LoKI TOF lookup table without choppers.
+    This file is used to convert the neutron arrival time to time-of-flight.
+
+    This table was computed using `Create a time-of-flight lookup table for LoKI
+    <../../loki/loki-make-tof-lookup-table.rst>`_
+    with ``NumberOfSimulatedNeutrons = 5_000_000``.
+    """
+    return _registry.get_path("loki-tof-lookup-table-no-choppers.h5")
+
+
+def loki_coda_file_one_event() -> Path:
+    """
+    LoKI CODA file with a single event per detector bank (for testing purposes).
+    The file was created from a CODA file 'loki_999999_00009928.hdf' but the event lists
+    were replaced by lists with a single event to reduce the size of the file.
+    The workflow should still be able to run, it will just produce results with NaNs
+    everywhere.
+    """
+    return _registry.get_path("loki-coda-one-event.hdf")

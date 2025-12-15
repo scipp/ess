@@ -30,7 +30,6 @@ from .types import (
     ReturnEvents,
     RunType,
     SampleRun,
-    ScatteringRunType,
     WavelengthBins,
     WavelengthMonitor,
 )
@@ -136,10 +135,10 @@ def resample_direct_beam(
 
 
 def bin_in_q(
-    data: QDetector[ScatteringRunType, IofQPart],
+    data: QDetector[RunType, IofQPart],
     q_bins: QBins,
     dims_to_keep: DimsToKeep,
-) -> BinnedQ[ScatteringRunType, IofQPart]:
+) -> BinnedQ[RunType, IofQPart]:
     """
     Merges data from all pixels into a single I(Q) spectrum:
 
@@ -162,15 +161,15 @@ def bin_in_q(
         The input data converted to Q and then summed over all detector pixels.
     """
     out = _bin_in_q(data=data, edges={'Q': q_bins}, dims_to_keep=dims_to_keep)
-    return BinnedQ[ScatteringRunType, IofQPart](out)
+    return BinnedQ[RunType, IofQPart](out)
 
 
 def bin_in_qxy(
-    data: QxyDetector[ScatteringRunType, IofQPart],
+    data: QxyDetector[RunType, IofQPart],
     qx_bins: QxBins,
     qy_bins: QyBins,
     dims_to_keep: DimsToKeep,
-) -> BinnedQxQy[ScatteringRunType, IofQPart]:
+) -> BinnedQxQy[RunType, IofQPart]:
     """
     Merges data from all pixels into a single I(Q) spectrum:
 
@@ -200,7 +199,7 @@ def bin_in_qxy(
         edges={'Qy': qy_bins, 'Qx': qx_bins},
         dims_to_keep=dims_to_keep,
     )
-    return BinnedQxQy[ScatteringRunType, IofQPart](out)
+    return BinnedQxQy[RunType, IofQPart](out)
 
 
 def _bin_in_q(
