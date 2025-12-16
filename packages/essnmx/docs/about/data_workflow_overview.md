@@ -92,7 +92,7 @@ dev.dials.simple_tof_integrate refined.expt refined.refl
 ```
 
 ### Scaling (LSCALE/pyscale)
-Currently [LSCALE](https://scripts.iucr.org/cgi-bin/paper?S0021889898015350) can be used in a docker container which makes it indented from the OS. <br>
+Currently [LSCALE](https://doi.org/10.1107/S0021889898015350) can be used in a docker container which makes it indented from the OS. <br>
 LSCALE is a program for scaling and normalisation of Laue intensity data.  <br>
 The source code is available on [Zenodo](https://zenodo.org/records/4381992).  <br>
 Since LSCALE is not maintained anymore we are currently developing a Python-based alternative to LSCALE called pyscale[^4].

@@ -269,4 +269,6 @@ linkcheck_ignore = [
     # Since DOIs are supposed to be permanent, we don't need to check them.'
     r'https?://doi\.org/',
     r'https?://dx\.doi\.org/',
+    r'https://www\.ccp4\.ac\.uk/*',  # Seems to be denied by the server.
+    # Manually checked and working
 ]
