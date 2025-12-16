@@ -34,5 +34,6 @@
    types
    mtz_io
    scaling
+   configurations
 
 ```

@@ -174,42 +174,6 @@ def reduction_config_from_args(args: argparse.Namespace) -> ReductionConfig:
     )
 
 
-def to_command_arguments(
-    config: ReductionConfig, one_line: bool = True
-) -> list[str] | str:
-    """Convert the config to a list of command line arguments.
-
-    Parameters
-    ----------
-    one_line:
-        If True, return a single string with all arguments joined by spaces.
-        If False, return a list of argument strings.
-
-    """
-    args = {}
-    for instance in config._children:
-        args.update(instance.model_dump(mode='python'))
-    args = {f"--{k.replace('_', '-')}": v for k, v in args.items() if v is not None}
-
-    arg_list = []
-    for k, v in args.items():
-        if not isinstance(v, bool):
-            arg_list.append(k)
-            if isinstance(v, list):
-                arg_list.extend(str(item) for item in v)
-            elif isinstance(v, enum.StrEnum):
-                arg_list.append(v.value)
-            else:
-                arg_list.append(str(v))
-        elif v is True:
-            arg_list.append(k)
-
-    if one_line:
-        return ' '.join(arg_list)
-    else:
-        return arg_list
-
-
 def build_logger(args: argparse.Namespace | OutputConfig) -> logging.Logger:
     logger = logging.getLogger(__name__)
     if args.verbose:
