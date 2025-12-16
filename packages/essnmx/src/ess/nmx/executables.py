@@ -16,7 +16,7 @@ from ._executable_helper import (
     collect_matching_input_files,
     reduction_config_from_args,
 )
-from .configurations import ReductionConfig
+from .configurations import OutputConfig, ReductionConfig
 from .nexus import (
     export_detector_metadata_as_nxlauetof,
     export_monitor_metadata_as_nxlauetof,
@@ -117,22 +117,13 @@ def reduction(
     base_wf[TimeOfFlightLookupTable] = base_wf.compute(TimeOfFlightLookupTable)
 
     metadatas = base_wf.compute((NMXSampleMetadata, NMXSourceMetadata))
-    export_static_metadata_as_nxlauetof(
-        sample_metadata=metadatas[NMXSampleMetadata],
-        source_metadata=metadatas[NMXSourceMetadata],
-        output_file=config.output.output_file,
-    )
     tof_das = sc.DataGroup()
     detector_metas = sc.DataGroup()
     for detector_name in detector_names:
         cur_wf = base_wf.copy()
         cur_wf[NeXusName[snx.NXdetector]] = detector_name
         results = cur_wf.compute((TofDetector[SampleRun], NMXDetectorMetadata))
-        detector_meta: NMXDetectorMetadata = results[NMXDetectorMetadata]
-        export_detector_metadata_as_nxlauetof(
-            detector_metadata=detector_meta, output_file=config.output.output_file
-        )
-        detector_metas[detector_name] = detector_meta
+        detector_metas[detector_name] = results[NMXDetectorMetadata]
         # Binning into 1 bin and getting final tof bin edges later.
         tof_das[detector_name] = results[TofDetector[SampleRun]]
 
@@ -154,28 +145,54 @@ def reduction(
             data=sc.ones_like(tof_bin_edges[:-1]),
         ),
     )
-    export_monitor_metadata_as_nxlauetof(
-        monitor_metadata=monitor_metadata, output_file=config.output.output_file
-    )
 
     # Histogram detector counts
     tof_histograms = sc.DataGroup()
     for detector_name, tof_da in tof_das.items():
-        det_meta: NMXDetectorMetadata = detector_metas[detector_name]
         histogram = tof_da.hist(tof=tof_bin_edges)
         tof_histograms[detector_name] = histogram
-        export_reduced_data_as_nxlauetof(
-            detector_name=det_meta.detector_name,
-            da=histogram,
-            output_file=config.output.output_file,
-            compress_mode=config.output.compression,
-        )
 
-    return sc.DataGroup(
-        metadata=detector_metas,
+    results = sc.DataGroup(
         histogram=tof_histograms,
+        detector=detector_metas,
+        sample=metadatas[NMXSampleMetadata],
+        source=metadatas[NMXSourceMetadata],
+        monitor=monitor_metadata,
         lookup_table=base_wf.compute(TimeOfFlightLookupTable),
     )
+    if not config.output.skip_file_output:
+        save_results(results=results, output_config=config.output)
+
+    return results
+
+
+def save_results(*, results: sc.DataGroup, output_config: OutputConfig) -> None:
+    # Validate if results have expected fields
+    for mandatory_key in ['histogram', 'detector', 'sample', 'source', 'monitor']:
+        if mandatory_key not in results:
+            raise ValueError(f"Missing '{mandatory_key}' in results to save.")
+
+    export_static_metadata_as_nxlauetof(
+        sample_metadata=results['sample'],
+        source_metadata=results['source'],
+        output_file=output_config.output_file,
+        overwrite=output_config.overwrite,
+    )
+    export_monitor_metadata_as_nxlauetof(
+        monitor_metadata=results['monitor'],
+        output_file=output_config.output_file,
+    )
+    for detector_name, detector_meta in results['detector'].items():
+        export_detector_metadata_as_nxlauetof(
+            detector_metadata=detector_meta,
+            output_file=output_config.output_file,
+        )
+        export_reduced_data_as_nxlauetof(
+            detector_name=detector_name,
+            da=results['histogram'][detector_name],
+            output_file=output_config.output_file,
+            compress_mode=output_config.compression,
+        )
 
 
 def main() -> None:
