@@ -16,7 +16,7 @@ from ._executable_helper import (
     collect_matching_input_files,
     reduction_config_from_args,
 )
-from .configurations import ReductionConfig, WorkflowConfig
+from .configurations import ReductionConfig
 from .nexus import (
     export_detector_metadata_as_nxlauetof,
     export_monitor_metadata_as_nxlauetof,
@@ -67,21 +67,6 @@ def _retrieve_display(
         return logger.info
     else:
         return logging.getLogger(__name__).info
-
-
-def _finalize_tof_bin_edges(
-    *, tof_das: sc.DataGroup, config: WorkflowConfig
-) -> sc.Variable:
-    tof_bin_edges = sc.concat(
-        tuple(tof_da.coords[_TOF_COORD_NAME] for tof_da in tof_das.values()),
-        dim=_TOF_COORD_NAME,
-    )
-    return sc.linspace(
-        dim=_TOF_COORD_NAME,
-        start=sc.min(tof_bin_edges),
-        stop=sc.max(tof_bin_edges),
-        num=config.nbins + 1,
-    )
 
 
 def reduction(
