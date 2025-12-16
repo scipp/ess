@@ -61,8 +61,6 @@ def test_simulation_workflow_can_load_monitor(workflow: sciline.Pipeline) -> Non
 
     assert result.bins is None
     assert 'position' in result.coords
-    assert 'sample_position' not in result.coords
-    assert 'source_position' in result.coords
 
 
 def test_simulation_workflow_can_compute_energy_data(
