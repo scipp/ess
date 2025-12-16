@@ -210,9 +210,11 @@ def _add_arbitrary_metadata(
 
 
 def export_static_metadata_as_nxlauetof(
+    *,
     sample_metadata: NMXSampleMetadata,
     source_metadata: NMXSourceMetadata,
     output_file: str | pathlib.Path | io.BytesIO,
+    overwrite: bool = False,
     **arbitrary_metadata: sc.Variable,
 ) -> None:
     """Export the metadata to a NeXus file with the LAUE_TOF application definition.
@@ -237,7 +239,7 @@ def export_static_metadata_as_nxlauetof(
         Arbitrary metadata that does not fit into the existing metadata objects.
 
     """
-    _check_file(output_file, overwrite=True)
+    _check_file(output_file, overwrite=overwrite)
     with h5py.File(output_file, "w") as f:
         f.attrs["NX_class"] = "NXlauetof"
         nx_entry = _create_lauetof_data_entry(f)
