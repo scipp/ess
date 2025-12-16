@@ -26,13 +26,15 @@ def _slice_or_sum(
 
 
 class LokiBankViewer(ipw.VBox):
-    def __init__(self, data: sc.DataGroup):
+    def __init__(self, data: sc.DataGroup, **kwargs):
         """Widget to view LOKI detector banks.
 
         Parameters
         ----------
         data:
             DataGroup containing LOKI detector banks.
+        kwargs:
+            Additional arguments are forwarded to the plotting function.
         """
         self.data = data
 
@@ -87,6 +89,7 @@ class LokiBankViewer(ipw.VBox):
                     pp.Node(lambda da, key: da[key], da=slice_node, key=bank),
                     ax=ax,
                     title=bank,
+                    **kwargs,
                 )
             )
         fig.canvas.header_visible = False
