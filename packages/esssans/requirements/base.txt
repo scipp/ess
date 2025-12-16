@@ -21,7 +21,7 @@ cyclebane==24.10.0
     # via sciline
 cycler==0.12.1
     # via matplotlib
-dask==2025.11.0
+dask==2025.12.0
     # via -r base.in
 decorator==5.2.1
     # via ipython
@@ -33,7 +33,7 @@ essreduce==25.12.1
     # via -r base.in
 executing==2.2.1
     # via stack-data
-fonttools==4.61.0
+fonttools==4.61.1
     # via matplotlib
 fsspec==2025.12.0
     # via dask
@@ -69,7 +69,7 @@ lazy-loader==0.4
     #   scippneutron
 locket==1.0.0
     # via partd
-matplotlib==3.10.7
+matplotlib==3.10.8
     # via
     #   mpltoolbox
     #   plopp
@@ -185,7 +185,7 @@ typing-extensions==4.15.0
     #   typing-inspection
 typing-inspection==0.4.2
     # via pydantic
-tzdata==2025.2
+tzdata==2025.3
     # via pandas
 wcwidth==0.2.14
     # via prompt-toolkit
