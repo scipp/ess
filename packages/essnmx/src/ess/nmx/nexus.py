@@ -3,79 +3,31 @@
 import io
 import pathlib
 import warnings
-from functools import wraps
 from typing import Any
 
 import h5py
 import numpy as np
 import scipp as sc
 
-
-def _fallback_compute_positions(dg: sc.DataGroup) -> sc.DataGroup:
-    import warnings
-
-    import scippnexus as snx
-
-    warnings.warn(
-        "Using fallback compute_positions due to empty log entries. "
-        "This may lead to incorrect results. Please check the data carefully."
-        "The fallback will replace empty logs with a scalar value of zero.",
-        UserWarning,
-        stacklevel=2,
-    )
-
-    empty_transformations = [
-        transformation
-        for transformation in dg['depends_on'].transformations.values()
-        if 'time' in transformation.value.dims
-        and transformation.sizes['time'] == 0  # empty log
-    ]
-    for transformation in empty_transformations:
-        orig_value = transformation.value
-        orig_value = sc.scalar(0, unit=orig_value.unit, dtype=orig_value.dtype)
-        transformation.value = orig_value
-    return snx.compute_positions(dg, store_transform='transform_matrix')
+from .configurations import Compression
+from .types import (
+    NMXDetectorMetadata,
+    NMXMonitorMetadata,
+    NMXSampleMetadata,
+    NMXSourceMetadata,
+)
 
 
-def _compute_positions(
-    dg: sc.DataGroup, auto_fix_transformations: bool = False
-) -> sc.DataGroup:
-    """Compute positions of the data group from transformations.
-
-    Wraps the `scippnexus.compute_positions` function
-    and provides a fallback for cases where the transformations
-    contain empty logs.
-
-    Parameters
-    ----------
-    dg:
-        Data group containing the transformations and data.
-    auto_fix_transformations:
-        If `True`, it will attempt to fix empty transformations.
-        It will replace them with a scalar value of zero.
-        It is because adding a time dimension will make it not possible
-        to compute positions of children due to time-dependent transformations.
-
-    Returns
-    -------
-    :
-        Data group with computed positions.
-
-    Warnings
-    --------
-    If `auto_fix_transformations` is `True`, it will warn about the fallback
-    being used due to empty logs or scalar transformations.
-    This is because the fallback may lead to incorrect results.
-
-    """
-    import scippnexus as snx
-
-    try:
-        return snx.compute_positions(dg, store_transform='transform_matrix')
-    except ValueError as e:
-        if auto_fix_transformations:
-            return _fallback_compute_positions(dg)
-        raise e
+def _check_file(
+    filename: str | pathlib.Path | io.BytesIO, overwrite: bool
+) -> pathlib.Path | io.BytesIO:
+    if isinstance(filename, str | pathlib.Path):
+        filename = pathlib.Path(filename)
+        if filename.exists() and not overwrite:
+            raise FileExistsError(
+                f"File '{filename}' already exists. Use `overwrite=True` to overwrite."
+            )
+    return filename
 
 
 def _create_dataset_from_string(*, root_entry: h5py.Group, name: str, var: str) -> None:
@@ -112,152 +64,29 @@ def _create_dataset_from_var(
     return dataset
 
 
-@wraps(_create_dataset_from_var)
-def _create_compressed_dataset(*args, **kwargs):
-    """Create dataset with compression options.
+def _retrieve_compression_arguments(compress_mode: Compression) -> dict:
+    if compress_mode == Compression.BITSHUFFLE_LZ4:
+        try:
+            import bitshuffle.h5
 
-    It will try to use ``bitshuffle`` for compression if available.
-    Otherwise, it will fall back to ``gzip`` compression.
+            compression_filter = bitshuffle.h5.H5FILTER
+            compression_opts = (0, bitshuffle.h5.H5_COMPRESS_LZ4)
+        except ImportError:
+            warnings.warn(
+                UserWarning(
+                    "Could not find the bitshuffle.h5 module from bitshuffle package. "
+                    "The bitshuffle package is not installed properly. "
+                    "Trying with gzip compression instead..."
+                ),
+                stacklevel=2,
+            )
+            compression_filter = "gzip"
+            compression_opts = 4
+    else:
+        compression_filter = None
+        compression_opts = None
 
-    [``Bitshuffle/LZ4``](https://github.com/kiyo-masui/bitshuffle)
-    is used for convenience.
-    Since ``Dectris`` uses it for their Nexus file compression,
-    it is compatible with DIALS.
-    ``Bitshuffle/LZ4`` tends to give similar results to
-    GZIP and other compression algorithms with better performance.
-    A naive implementation of bitshuffle/LZ4 compression,
-    shown in [issue #124](https://github.com/scipp/essnmx/issues/124),
-    led to 80% file reduction (365 MB vs 1.8 GB).
-
-    """
-    try:
-        import bitshuffle.h5
-
-        compression_filter = bitshuffle.h5.H5FILTER
-        default_compression_opts = (0, bitshuffle.h5.H5_COMPRESS_LZ4)
-    except ImportError:
-        warnings.warn(
-            UserWarning(
-                "Could not find the bitshuffle.h5 module from bitshuffle package. "
-                "The bitshuffle package is not installed or only partially installed. "
-                "Exporting to NeXus files with bitshuffle compression is not possible."
-            ),
-            stacklevel=2,
-        )
-        compression_filter = "gzip"
-        default_compression_opts = 4
-
-    return _create_dataset_from_var(
-        *args,
-        **kwargs,
-        compression=compression_filter,
-        compression_opts=default_compression_opts,
-    )
-
-
-def _create_root_data_entry(file_obj: h5py.File) -> h5py.Group:
-    nx_entry = file_obj.create_group("NMX_data")
-    nx_entry.attrs["NX_class"] = "NXentry"
-    nx_entry.attrs["default"] = "data"
-    nx_entry.attrs["name"] = "NMX"
-    nx_entry["name"] = "NMX"
-    nx_entry["definition"] = "TOFRAW"
-    return nx_entry
-
-
-def _create_sample_group(data: sc.DataGroup, nx_entry: h5py.Group) -> h5py.Group:
-    nx_sample = nx_entry.create_group("NXsample")
-    nx_sample["name"] = data['sample_name'].value
-    _create_dataset_from_var(
-        root_entry=nx_sample,
-        var=data['crystal_rotation'],
-        name='crystal_rotation',
-        long_name='crystal rotation in Phi (XYZ)',
-    )
-    return nx_sample
-
-
-def _create_instrument_group(data: sc.DataGroup, nx_entry: h5py.Group) -> h5py.Group:
-    nx_instrument = nx_entry.create_group("NXinstrument")
-    nx_instrument.create_dataset("proton_charge", data=data['proton_charge'].values)
-
-    nx_detector_1 = nx_instrument.create_group("detector_1")
-    # Detector counts
-    _create_compressed_dataset(
-        root_entry=nx_detector_1,
-        name="counts",
-        var=data['counts'],
-    )
-    # Time of arrival bin edges
-    _create_dataset_from_var(
-        root_entry=nx_detector_1,
-        var=data['counts'].coords['t'],
-        name="t_bin",
-        long_name="t_bin TOF (ms)",
-    )
-    # Pixel IDs
-    _create_compressed_dataset(
-        root_entry=nx_detector_1,
-        name="pixel_id",
-        var=data['counts'].coords['id'],
-        long_name="pixel ID",
-    )
-    return nx_instrument
-
-
-def _create_detector_group(data: sc.DataGroup, nx_entry: h5py.Group) -> h5py.Group:
-    nx_detector = nx_entry.create_group("NXdetector")
-    # Position of the first pixel (lowest ID) in the detector
-    _create_compressed_dataset(
-        root_entry=nx_detector,
-        name="origin",
-        var=data['origin_position'],
-    )
-    # Fast axis, along where the pixel ID increases by 1
-    _create_dataset_from_var(
-        root_entry=nx_detector, var=data['fast_axis'], name="fast_axis"
-    )
-    # Slow axis, along where the pixel ID increases
-    # by the number of pixels in the fast axis
-    _create_dataset_from_var(
-        root_entry=nx_detector, var=data['slow_axis'], name="slow_axis"
-    )
-    return nx_detector
-
-
-def _create_source_group(data: sc.DataGroup, nx_entry: h5py.Group) -> h5py.Group:
-    nx_source = nx_entry.create_group("NXsource")
-    nx_source["name"] = "European Spallation Source"
-    nx_source["short_name"] = "ESS"
-    nx_source["type"] = "Spallation Neutron Source"
-    nx_source["distance"] = sc.norm(data['source_position']).value
-    nx_source["probe"] = "neutron"
-    nx_source["target_material"] = "W"
-    return nx_source
-
-
-def export_as_nexus(
-    data: sc.DataGroup, output_file: str | pathlib.Path | io.BytesIO
-) -> None:
-    """Export the reduced data to a NeXus file.
-
-    Currently exporting step is not expected to be part of sciline pipelines.
-    """
-    warnings.warn(
-        DeprecationWarning(
-            "Exporting to custom NeXus format will be deprecated in the near future "
-            ">=26.12.0. "
-            "Please use ``export_as_nxlauetof`` instead."
-        ),
-        stacklevel=2,
-    )
-    with h5py.File(output_file, "w") as f:
-        f.attrs["default"] = "NMX_data"
-        nx_entry = _create_root_data_entry(f)
-        _create_sample_group(data, nx_entry)
-        _create_instrument_group(data, nx_entry)
-        _create_detector_group(data, nx_entry)
-        _create_source_group(data, nx_entry)
+    return {"compression": compression_filter, "compression_opts": compression_opts}
 
 
 def _create_lauetof_data_entry(file_obj: h5py.File) -> h5py.Group:
@@ -277,7 +106,9 @@ def _add_lauetof_instrument(nx_entry: h5py.Group) -> h5py.Group:
     return nx_instrument
 
 
-def _add_lauetof_source_group(dg, nx_instrument: h5py.Group) -> None:
+def _add_lauetof_source_group(
+    source_position: sc.Variable, nx_instrument: h5py.Group
+) -> None:
     nx_source = nx_instrument.create_group("source")
     nx_source.attrs["NX_class"] = "NXsource"
     _create_dataset_from_string(
@@ -288,106 +119,71 @@ def _add_lauetof_source_group(dg, nx_instrument: h5py.Group) -> None:
         root_entry=nx_source, name="type", var="Spallation Neutron Source"
     )
     _create_dataset_from_var(
-        root_entry=nx_source, name="distance", var=sc.norm(dg["source_position"])
+        root_entry=nx_source, name="distance", var=sc.norm(source_position)
     )
     # Legacy probe information.
     _create_dataset_from_string(root_entry=nx_source, name="probe", var="neutron")
 
 
-def _add_lauetof_detector_group(dg: sc.DataGroup, nx_instrument: h5py.Group) -> None:
-    nx_detector = nx_instrument.create_group(dg["detector_name"].value)  # Detector name
-    nx_detector.attrs["NX_class"] = "NXdetector"
+def _add_lauetof_detector_group(
+    *,
+    detector_name: str,
+    x_pixel_size: sc.Variable,
+    y_pixel_size: sc.Variable,
+    origin_position: sc.Variable,
+    fast_axis: sc.Variable,
+    slow_axis: sc.Variable,
+    distance: sc.Variable,
+    polar_angle: sc.Variable,
+    azimuthal_angle: sc.Variable,
+    nx_instrument: h5py.Group,
+) -> None:
+    nx_det = nx_instrument.create_group(detector_name)  # Detector name
+    nx_det.attrs["NX_class"] = "NXdetector"
+    _create_dataset_from_var(name="polar_angle", root_entry=nx_det, var=polar_angle)
     _create_dataset_from_var(
-        name="polar_angle",
-        root_entry=nx_detector,
-        var=sc.scalar(0, unit='deg'),  # TODO: Add real data
+        name="azimuthal_angle", root_entry=nx_det, var=azimuthal_angle
     )
-    _create_dataset_from_var(
-        name="azimuthal_angle",
-        root_entry=nx_detector,
-        var=sc.scalar(0, unit='deg'),  # TODO: Add real data
-    )
-    _create_dataset_from_var(
-        name="x_pixel_size", root_entry=nx_detector, var=dg["x_pixel_size"]
-    )
-    _create_dataset_from_var(
-        name="y_pixel_size", root_entry=nx_detector, var=dg["y_pixel_size"]
-    )
-    _create_dataset_from_var(
-        name="distance",
-        root_entry=nx_detector,
-        var=sc.scalar(0, unit='m'),  # TODO: Add real data
-    )
+    _create_dataset_from_var(name="x_pixel_size", root_entry=nx_det, var=x_pixel_size)
+    _create_dataset_from_var(name="y_pixel_size", root_entry=nx_det, var=y_pixel_size)
+    _create_dataset_from_var(name="distance", root_entry=nx_det, var=distance)
     # Legacy geometry information until we have a better way to store it
-    _create_dataset_from_var(
-        name="origin", root_entry=nx_detector, var=dg['origin_position']
-    )
+    _create_dataset_from_var(name="origin", root_entry=nx_det, var=origin_position)
     # Fast axis, along where the pixel ID increases by 1
-    _create_dataset_from_var(
-        root_entry=nx_detector, var=dg['fast_axis'], name="fast_axis"
-    )
+    _create_dataset_from_var(root_entry=nx_det, name="fast_axis", var=fast_axis)
     # Slow axis, along where the pixel ID increases
     # by the number of pixels in the fast axis
-    _create_dataset_from_var(
-        root_entry=nx_detector, var=dg['slow_axis'], name="slow_axis"
-    )
+    _create_dataset_from_var(root_entry=nx_det, name="slow_axis", var=slow_axis)
 
 
-def _add_lauetof_sample_group(dg, nx_entry: h5py.Group) -> None:
+def _add_lauetof_sample_group(
+    *,
+    crystal_rotation: sc.Variable,
+    sample_name: str | sc.Variable,
+    sample_orientation_matrix: sc.Variable,
+    sample_unit_cell: sc.Variable,
+    nx_entry: h5py.Group,
+) -> None:
     nx_sample = nx_entry.create_group("sample")
     nx_sample.attrs["NX_class"] = "NXsample"
     _create_dataset_from_var(
         root_entry=nx_sample,
-        var=dg['crystal_rotation'],
+        var=crystal_rotation,
         name='crystal_rotation',
         long_name='crystal rotation in Phi (XYZ)',
     )
     _create_dataset_from_string(
         root_entry=nx_sample,
         name='name',
-        var=dg['sample_name'].value,
+        var=sample_name if isinstance(sample_name, str) else sample_name.value,
     )
     _create_dataset_from_var(
-        name='orientation_matrix',
-        root_entry=nx_sample,
-        var=sc.array(
-            dims=['i', 'j'],
-            values=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
-            unit="dimensionless",
-        ),  # TODO: Add real data, the sample orientation matrix
+        name='orientation_matrix', root_entry=nx_sample, var=sample_orientation_matrix
     )
     _create_dataset_from_var(
         name='unit_cell',
         root_entry=nx_sample,
-        var=sc.array(
-            dims=['i'],
-            values=[1.0, 1.0, 1.0, 90.0, 90.0, 90.0],
-            unit="dimensionless",  # TODO: Add real data,
-            # a, b, c, alpha, beta, gamma
-        ),
-    )
-
-
-def _add_lauetof_monitor_group(data: sc.DataGroup, nx_entry: h5py.Group) -> None:
-    nx_monitor = nx_entry.create_group("control")
-    nx_monitor.attrs["NX_class"] = "NXmonitor"
-    _create_dataset_from_string(root_entry=nx_monitor, name='mode', var='monitor')
-    nx_monitor["preset"] = 0.0  # Check if this is the correct value
-    data_dset = _create_dataset_from_var(
-        name='data',
-        root_entry=nx_monitor,
-        var=sc.array(
-            dims=['tof'], values=[1, 1, 1], unit="counts"
-        ),  # TODO: Add real data, bin values
-    )
-    data_dset.attrs["signal"] = 1
-    data_dset.attrs["primary"] = 1
-    _create_dataset_from_var(
-        name='time_of_flight',
-        root_entry=nx_monitor,
-        var=sc.array(
-            dims=['tof'], values=[1, 1, 1], unit="s"
-        ),  # TODO: Add real data, bin edges
+        var=sample_unit_cell,
     )
 
 
@@ -413,9 +209,12 @@ def _add_arbitrary_metadata(
             )
 
 
-def _export_static_metadata_as_nxlauetof(
-    experiment_metadata,
+def export_static_metadata_as_nxlauetof(
+    *,
+    sample_metadata: NMXSampleMetadata,
+    source_metadata: NMXSourceMetadata,
     output_file: str | pathlib.Path | io.BytesIO,
+    overwrite: bool = False,
     **arbitrary_metadata: sc.Variable,
 ) -> None:
     """Export the metadata to a NeXus file with the LAUE_TOF application definition.
@@ -428,30 +227,70 @@ def _export_static_metadata_as_nxlauetof(
 
     Parameters
     ----------
-    experiment_metadata:
-        Experiment metadata object.
+    sample_metadata:
+        Sample metadata object.
+    source_metadata:
+        Source metadata object.
+    monitor_metadata:
+        Monitor metadata object.
     output_file:
         Output file path.
     arbitrary_metadata:
         Arbitrary metadata that does not fit into the existing metadata objects.
 
     """
+    _check_file(output_file, overwrite=overwrite)
     with h5py.File(output_file, "w") as f:
         f.attrs["NX_class"] = "NXlauetof"
         nx_entry = _create_lauetof_data_entry(f)
         _add_lauetof_definition(nx_entry)
-        _add_lauetof_sample_group(experiment_metadata, nx_entry)
+        _add_lauetof_sample_group(
+            crystal_rotation=sample_metadata.crystal_rotation,
+            sample_name=sample_metadata.sample_name,
+            sample_orientation_matrix=sample_metadata.sample_orientation_matrix,
+            sample_unit_cell=sample_metadata.sample_unit_cell,
+            nx_entry=nx_entry,
+        )
         nx_instrument = _add_lauetof_instrument(nx_entry)
-        _add_lauetof_source_group(experiment_metadata, nx_instrument)
-        # Placeholder for ``monitor`` group
-        _add_lauetof_monitor_group(experiment_metadata, nx_entry)
+        _add_lauetof_source_group(source_metadata.source_position, nx_instrument)
         # Skipping ``NXdata``(name) field with data link
         # Add arbitrary metadata
         _add_arbitrary_metadata(nx_entry, **arbitrary_metadata)
 
 
-def _export_detector_metadata_as_nxlauetof(
-    *detector_metadatas,
+def export_monitor_metadata_as_nxlauetof(
+    monitor_metadata: NMXMonitorMetadata,
+    output_file: str | pathlib.Path | io.BytesIO,
+    append_mode: bool = True,
+) -> None:
+    """Export the detector specific metadata to a NeXus file.
+
+    Since NMX can have arbitrary number of detectors,
+    this function can take multiple detector metadata objects.
+
+    Parameters
+    ----------
+    monitor_metadata:
+        Monitor metadata object.
+    output_file:
+        Output file path.
+
+    """
+    if not append_mode:
+        raise NotImplementedError("Only append mode is supported for now.")
+
+    with h5py.File(output_file, "r+") as f:
+        nx_entry = f["entry"]
+        # Placeholder for ``monitor`` group
+        _add_lauetof_monitor_group(
+            tof_bin_coord=monitor_metadata.tof_bin_coord,
+            monitor_histogram=monitor_metadata.monitor_histogram,
+            nx_entry=nx_entry,
+        )
+
+
+def export_detector_metadata_as_nxlauetof(
+    detector_metadata: NMXDetectorMetadata,
     output_file: str | pathlib.Path | io.BytesIO,
     append_mode: bool = True,
 ) -> None:
@@ -478,27 +317,54 @@ def _export_detector_metadata_as_nxlauetof(
             nx_instrument = _add_lauetof_instrument(f["entry"])
         else:
             nx_instrument = nx_entry["instrument"]
+
         # Add detector group metadata
-        for detector_metadata in detector_metadatas:
-            _add_lauetof_detector_group(detector_metadata, nx_instrument)
+        _add_lauetof_detector_group(
+            detector_name=detector_metadata.detector_name,
+            x_pixel_size=detector_metadata.x_pixel_size,
+            y_pixel_size=detector_metadata.y_pixel_size,
+            origin_position=detector_metadata.origin_position,
+            fast_axis=detector_metadata.fast_axis,
+            slow_axis=detector_metadata.slow_axis,
+            distance=detector_metadata.distance,
+            polar_angle=detector_metadata.polar_angle,
+            azimuthal_angle=detector_metadata.azimuthal_angle,
+            nx_instrument=nx_instrument,
+        )
 
 
-def _extract_counts(dg: sc.DataGroup) -> sc.Variable:
-    counts: sc.DataArray = dg['counts'].data
-    if 'id' in counts.dims:
-        num_x, num_y = dg["detector_shape"].value
-        return sc.fold(counts, dim='id', sizes={'x': num_x, 'y': num_y})
-    else:
-        # If there is no 'id' dimension, we assume it is already in the correct shape
-        return counts
+def _add_lauetof_monitor_group(
+    *,
+    tof_bin_coord: str,
+    monitor_histogram: sc.DataArray,
+    nx_entry: h5py.Group,
+) -> None:
+    nx_monitor = nx_entry.create_group("control")
+    nx_monitor.attrs["NX_class"] = "NXmonitor"
+    _create_dataset_from_string(root_entry=nx_monitor, name='mode', var='monitor')
+    nx_monitor["preset"] = 0.0  # Check if this is the correct value
+    data_dset = _create_dataset_from_var(
+        name='data',
+        root_entry=nx_monitor,
+        var=monitor_histogram.data,
+    )
+    data_dset.attrs["signal"] = 1
+    data_dset.attrs["primary"] = 1
+
+    _create_dataset_from_var(
+        name='time_of_flight',
+        root_entry=nx_monitor,
+        var=monitor_histogram.coords[tof_bin_coord],
+    )
 
 
-def _export_reduced_data_as_nxlauetof(
-    dg,
+def export_reduced_data_as_nxlauetof(
+    detector_name: str,
+    da: sc.DataArray,
     output_file: str | pathlib.Path | io.BytesIO,
     *,
     append_mode: bool = True,
-    compress_counts: bool = True,
+    compress_mode: Compression = Compression.BITSHUFFLE_LZ4,
 ) -> None:
     """Export the reduced data to a NeXus file with the LAUE_TOF application definition.
 
@@ -527,29 +393,30 @@ def _export_reduced_data_as_nxlauetof(
         raise NotImplementedError("Only append mode is supported for now.")
 
     with h5py.File(output_file, "r+") as f:
-        nx_detector: h5py.Group = f[f"entry/instrument/{dg['detector_name'].value}"]
+        nx_detector: h5py.Group = f[f"entry/instrument/{detector_name}"]
         # Data - shape: [n_x_pixels, n_y_pixels, n_tof_bins]
         # The actual application definition defines it as integer,
-        # but we keep the original data type for now
-        num_x, num_y = dg["detector_shape"].value  # Probably better way to do this
-        if compress_counts:
-            data_dset = _create_compressed_dataset(
-                name="data",
-                root_entry=nx_detector,
-                var=_extract_counts(dg),
-                chunks=(num_x, num_y, 1),
-                dtype=np.uint,
-            )
-        else:
+        # so we overwrite the dtype here.
+        num_x, num_y = da.sizes['x_pixel_offset'], da.sizes['y_pixel_offset']
+
+        if compress_mode != Compression.NONE:
+            compression_args = _retrieve_compression_arguments(compress_mode)
             data_dset = _create_dataset_from_var(
                 name="data",
                 root_entry=nx_detector,
-                var=_extract_counts(dg),
+                var=da.data,
+                chunks=(num_x, num_y, 1),  # Chunk along tof axis
                 dtype=np.uint,
+                **compression_args,
             )
+        else:
+            data_dset = _create_dataset_from_var(
+                name="data", root_entry=nx_detector, var=da.data, dtype=np.uint
+            )
+
         data_dset.attrs["signal"] = 1
         _create_dataset_from_var(
             name='time_of_flight',
             root_entry=nx_detector,
-            var=sc.midpoints(dg['counts'].coords['t'], dim='t'),
+            var=sc.midpoints(da.coords['tof'], dim='tof'),
         )
