@@ -3,25 +3,25 @@
 
 import pathlib
 import subprocess
+from contextlib import contextmanager
 from enum import Enum
 
 import pydantic
 import pytest
 import scipp as sc
 import scippnexus as snx
-from scipp.testing import assert_allclose
+from scipp.testing import assert_identical
 
 from ess.nmx._executable_helper import (
     InputConfig,
     OutputConfig,
     ReductionConfig,
-    TimeBinCoordinate,
-    TimeBinUnit,
     WorkflowConfig,
     build_reduction_argument_parser,
     reduction_config_from_args,
-    to_command_arguments,
 )
+from ess.nmx.configurations import TimeBinCoordinate, TimeBinUnit, to_command_arguments
+from ess.nmx.executables import reduction
 from ess.nmx.types import Compression
 
 
@@ -93,12 +93,19 @@ def test_reduction_config() -> None:
         max_time_bin=100_000,
         time_bin_coordinate=TimeBinCoordinate.time_of_flight,
         time_bin_unit=TimeBinUnit.us,
+        tof_simulation_num_neutrons=700_000,
         tof_simulation_max_wavelength=5.0,
         tof_simulation_min_wavelength=1.0,
+        tof_simulation_min_ltotal=140.0,
+        tof_simulation_max_ltotal=200.0,
         tof_simulation_seed=12345,
     )
     output_options = OutputConfig(
-        output_file='test-output.h5', compression=Compression.NONE, verbose=True
+        output_file='test-output.h5',
+        compression=Compression.NONE,
+        verbose=True,
+        skip_file_output=True,
+        overwrite=True,
     )
     expected_config = ReductionConfig(
         inputs=input_options, workflow=workflow_options, output=output_options
@@ -110,7 +117,7 @@ def test_reduction_config() -> None:
     arg_list = _build_arg_list_from_pydantic_instance(
         input_options, workflow_options, output_options
     )
-    assert arg_list == to_command_arguments(expected_config, one_line=False)
+    assert arg_list == to_command_arguments(config=expected_config, one_line=False)
 
     # Parse arguments and build config from them.
     parser = build_reduction_argument_parser()
@@ -127,9 +134,7 @@ def small_nmx_nexus_path():
     return get_small_nmx_nexus()
 
 
-def _check_output_file(
-    output_file_path: pathlib.Path, expected_toa_output: sc.Variable
-):
+def _check_output_file(output_file_path: pathlib.Path, nbins: int):
     detector_names = [f'detector_panel_{i}' for i in range(3)]
     with snx.File(output_file_path, 'r') as f:
         # Test
@@ -137,7 +142,7 @@ def _check_output_file(
             det_gr = f[f'entry/instrument/{name}']
             assert det_gr is not None
             toa_edges = det_gr['time_of_flight'][()]
-            assert_allclose(toa_edges, expected_toa_output)
+            assert len(toa_edges) == nbins
 
 
 def test_executable_runs(small_nmx_nexus_path, tmp_path: pathlib.Path):
@@ -147,15 +152,6 @@ def test_executable_runs(small_nmx_nexus_path, tmp_path: pathlib.Path):
 
     nbins = 20  # Small number of bins for testing.
     # The output has 1280x1280 pixels per detector per time bin.
-    expected_toa_bins = sc.linspace(
-        dim='dim_0',
-        start=2,  # Unrealistic number for testing
-        stop=int((1 / 15) * 1_000),  # Unrealistic number for testing
-        num=nbins + 1,
-        unit='ms',
-    )
-    expected_toa_output = sc.midpoints(expected_toa_bins, dim='dim_0').to(unit='ns')
-
     commands = (
         'essnmx-reduce',
         '--input-file',
@@ -164,18 +160,107 @@ def test_executable_runs(small_nmx_nexus_path, tmp_path: pathlib.Path):
         str(nbins),
         '--output-file',
         output_file.as_posix(),
-        '--min-time-bin',
-        str(int(expected_toa_bins.min().value)),
-        '--max-time-bin',
-        str(int(expected_toa_bins.max().value)),
     )
     # Validate that all commands are strings and contain no unsafe characters
     result = subprocess.run(  # noqa: S603 - We are not accepting arbitrary input here.
-        commands,
-        text=True,
-        capture_output=True,
-        check=False,
+        commands, text=True, capture_output=True, check=False
     )
     assert result.returncode == 0
     assert output_file.exists()
-    _check_output_file(output_file, expected_toa_output=expected_toa_output)
+    _check_output_file(output_file, nbins=nbins)
+
+
+@contextmanager
+def known_warnings():
+    with pytest.warns(RuntimeWarning, match="No crystal rotation*"):
+        yield
+
+
+@pytest.fixture
+def temp_output_file(tmp_path: pathlib.Path):
+    output_file_path = tmp_path / "scipp_output.h5"
+    yield output_file_path
+    if output_file_path.exists():
+        output_file_path.unlink()
+
+
+@pytest.fixture
+def reduction_config(
+    small_nmx_nexus_path: pathlib.Path, temp_output_file: pathlib.Path
+) -> ReductionConfig:
+    input_config = InputConfig(input_file=[small_nmx_nexus_path.as_posix()])
+    # Compression option is not default (NONE) but
+    # the actual default compression option, BITSHUFFLE_LZ4,
+    # only properly works in linux so we set it to NONE here
+    # for convenience of testing on all platforms.
+    output_config = OutputConfig(
+        output_file=temp_output_file.as_posix(),
+        compression=Compression.NONE,
+        skip_file_output=True,  # No need to write output file for most tests.
+    )
+    return ReductionConfig(inputs=input_config, output=output_config)
+
+
+def _retrieve_one_hist(results: sc.DataGroup) -> sc.DataArray:
+    """Helper to retrieve the first DataArray from the results dictionary."""
+    return results['histogram']['detector_panel_0']
+
+
+def test_reduction_default_settings(reduction_config: ReductionConfig) -> None:
+    # Only check if reduction runs without errors with default settings.
+    with known_warnings():
+        reduction(config=reduction_config)
+
+
+def test_reduction_only_number_of_time_bins(reduction_config: ReductionConfig) -> None:
+    reduction_config.workflow.nbins = 20
+    reduction_config.workflow.time_bin_coordinate = TimeBinCoordinate.time_of_flight
+    with known_warnings():
+        hist = _retrieve_one_hist(reduction(config=reduction_config))
+
+    # Check that the number of time bins is as expected.
+    assert len(hist.coords['tof']) == 21  # nbins + 1 edges
+
+
+@pytest.fixture
+def tof_lut_file_path(tmp_path: pathlib.Path):
+    """Fixture to provide the path to the small NMX NeXus file."""
+    from ess.nmx.workflows import initialize_nmx_workflow
+    from ess.reduce.time_of_flight import TimeOfFlightLookupTable
+
+    # Simply use the default workflow for testing.
+    workflow = initialize_nmx_workflow(config=WorkflowConfig())
+    tof_lut: TimeOfFlightLookupTable = workflow.compute(TimeOfFlightLookupTable)
+
+    # Change the tof range a bit for testing.
+    tof_lut.array *= 2
+
+    lut_file_path = tmp_path / "nmx_tof_lookup_table.h5"
+    tof_lut.save_hdf5(lut_file_path.as_posix())
+    yield lut_file_path
+    if lut_file_path.exists():
+        lut_file_path.unlink()
+
+
+def test_reduction_with_tof_lut_file(
+    reduction_config: ReductionConfig, tof_lut_file_path: pathlib.Path
+) -> None:
+    # Make sure the config uses no TOF lookup table file initially.
+    assert reduction_config.workflow.tof_lookup_table_file_path is None
+    with known_warnings():
+        default_results = reduction(config=reduction_config)
+
+    # Update config to use the TOF lookup table file.
+    reduction_config.workflow.tof_lookup_table_file_path = tof_lut_file_path.as_posix()
+    with known_warnings():
+        results = reduction(config=reduction_config)
+
+    for default_hist, hist in zip(
+        default_results['histogram'].values(),
+        results['histogram'].values(),
+        strict=True,
+    ):
+        tof_edges_default = default_hist.coords['tof']
+        tof_edges = hist.coords['tof']
+        assert_identical(default_hist.data, hist.data)
+        assert_identical(tof_edges_default * 2, tof_edges)
