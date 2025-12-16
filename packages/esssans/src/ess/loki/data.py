@@ -55,6 +55,8 @@ _registry = make_registry(
         'loki-tof-lookup-table-no-choppers.h5': 'md5:5b817466d3a07d4def12535d7317c044',
         # CODA file with a single event per detector bank (for testing purposes)
         'loki-coda-one-event.hdf': 'md5:ab9dbef793fad2fca96210c3b55d60ce',
+        # Small CODA file for testing purposes (data from only 30 pulses)
+        'loki_999999_00009928_small.hdf': 'md5:d2f293c293cc15d90fb588afa1dcb096',
     },
     version='2',
 )
@@ -186,3 +188,10 @@ def loki_coda_file_one_event() -> Path:
     everywhere.
     """
     return _registry.get_path("loki-coda-one-event.hdf")
+
+
+def loki_coda_file_small() -> Path:
+    """
+    Small LoKI CODA file for testing purposes (data from only 30 pulses).
+    """
+    return _registry.get_path("loki_999999_00009928_small.hdf")
