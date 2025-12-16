@@ -233,7 +233,7 @@ def tof_lut_file_path(tmp_path: pathlib.Path):
     tof_lut: sc.DataArray = workflow.compute(TimeOfFlightLookupTable)
 
     # Change the tof range a bit for testing.
-    tof_lut *= sc.scalar(2.0, unit='dimensionless')
+    tof_lut *= 2
 
     lut_file_path = tmp_path / "nmx_tof_lookup_table.h5"
     tof_lut.save_hdf5(lut_file_path.as_posix())
@@ -264,5 +264,5 @@ def test_reduction_with_tof_lut_file(
         tof_edges = hist.coords['tof']
         assert_identical(default_hist.data, hist.data)
         assert_identical(
-            tof_edges_default * sc.scalar(2.0, unit='dimensionless'), tof_edges
+            tof_edges_default * 2, tof_edges
         )
