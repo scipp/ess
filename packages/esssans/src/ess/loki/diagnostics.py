@@ -37,16 +37,15 @@ class LokiBankViewer(ipw.VBox):
             Additional arguments are forwarded to the plotting function.
         """
         self.data = data
+        self._lock = False
 
         self.layer_slider = ipw.IntSlider(
             min=1, max=4, description="Layer", style={"description_width": 'initial'}
         )
         self.layer_sum = ipw.Checkbox(
-            description="Sum all layers",
-            value=False,
-            indent=False,
-            layout={"width": "initial"},
+            description="Sum", value=False, indent=False, layout={"width": "initial"}
         )
+
         self.layer_ind_node = pp.widget_node(self.layer_slider)
         self.layer_sum_node = pp.widget_node(self.layer_sum)
 
@@ -54,10 +53,7 @@ class LokiBankViewer(ipw.VBox):
             min=1, max=7, description="Straw", style={"description_width": 'initial'}
         )
         self.straw_sum = ipw.Checkbox(
-            description="Sum all straws",
-            value=False,
-            indent=False,
-            layout={"width": "initial"},
+            description="Sum", value=False, indent=False, layout={"width": "initial"}
         )
         self.straw_ind_node = pp.widget_node(self.straw_slider)
         self.straw_sum_node = pp.widget_node(self.straw_sum)
@@ -69,7 +65,7 @@ class LokiBankViewer(ipw.VBox):
             (self.straw_sum, 'value'), (self.straw_slider, 'disabled')
         )
 
-        slice_node = pp.Node(
+        self.slice_node = pp.Node(
             _slice_or_sum,
             da=self.data,
             layer_ind=self.layer_ind_node,
@@ -79,28 +75,41 @@ class LokiBankViewer(ipw.VBox):
         )
 
         with plt.ioff():
-            fig, axs = plt.subplots(3, 3, figsize=(12, 9))
+            self.figure, axs = plt.subplots(3, 3, figsize=(12, 9))
 
-        figs = []
+        self.figs = []
         for i, ax in enumerate(axs.flatten()):
             bank = f"loki_detector_{i}"
-            figs.append(
+            self.figs.append(
                 pp.plot(
-                    pp.Node(lambda da, key: da[key], da=slice_node, key=bank),
+                    pp.Node(lambda da, key: da[key], da=self.slice_node, key=bank),
                     ax=ax,
                     title=bank,
                     **kwargs,
                 )
             )
-        fig.canvas.header_visible = False
+        self.figure.canvas.header_visible = False
 
-        self.log_button = ipw.ToggleButton(description="Log colormap")
+        # Create color map controls
+        self.cmap_vmin = ipw.Text(
+            description='Min:',
+            layout={'width': '130px'},
+            style={"description_width": 'initial'},
+        )
+        self.cmap_vmax = ipw.Text(
+            description='Max:',
+            layout={'width': '130px'},
+            style={"description_width": 'initial'},
+        )
+        self.cmap_vmin.observe(self.update_cmin, names='value')
+        self.cmap_vmax.observe(self.update_cmax, names='value')
 
-        def toggle_log(change):
-            for f in figs:
-                f.view.colormapper.norm = "log" if change["new"] else "linear"
-
-        self.log_button.observe(toggle_log, names="value")
+        self.log_button = ipw.ToggleButton(
+            description="log",
+            layout={"width": "40px"},
+            value=True if kwargs.get('norm', 'linear') == 'log' else False,
+        )
+        self.log_button.observe(self.toggle_log, names="value")
 
         layer_box = ipw.HBox(
             [self.layer_slider, self.layer_sum],
@@ -114,10 +123,56 @@ class LokiBankViewer(ipw.VBox):
 
         super().__init__(
             [
-                ipw.HBox([layer_box, space, straw_box, space, self.log_button]),
-                fig.canvas,
+                ipw.HBox(
+                    [
+                        layer_box,
+                        space,
+                        straw_box,
+                        space,
+                        ipw.Label("Colorscale:"),
+                        self.cmap_vmin,
+                        self.cmap_vmax,
+                        self.log_button,
+                    ]
+                ),
+                self.figure.canvas,
             ]
         )
+
+    def toggle_log(self, change: dict) -> None:
+        self.reset_cmap_range()
+        for f in self.figs:
+            f.view.colormapper.norm = "log" if change["new"] else "linear"
+
+    def _update_min_or_max(self, change: dict, bound: str) -> None:
+        try:
+            new = float(change["new"])
+            if self.log_button.value and new <= 0:
+                return
+        except ValueError:
+            new = None
+
+        for f in self.figs:
+            if new is None:
+                getattr(f.view.colormapper, f"_c{bound}").pop('user', None)
+            else:
+                setattr(f.view.colormapper, f"c{bound}", new)
+            if not self._lock:
+                f.view.colormapper.autoscale()
+        if not self._lock:
+            self.figure.canvas.draw_idle()
+
+    def update_cmin(self, change: dict) -> None:
+        self._update_min_or_max(change, 'min')
+
+    def update_cmax(self, change: dict) -> None:
+        self._update_min_or_max(change, 'max')
+
+    def reset_cmap_range(self, _=None) -> None:
+        self._lock = True
+        self.cmap_vmin.value = ''
+        self.cmap_vmax.value = ''
+        self._lock = False
 
 
 def _to_data_group(data: sc.DataArray | sc.DataGroup | dict) -> sc.DataGroup:
