@@ -10,6 +10,7 @@ import pydantic
 import pytest
 import scipp as sc
 import scippnexus as snx
+from scipp.testing import assert_identical
 
 from ess.nmx._executable_helper import (
     InputConfig,
@@ -219,3 +220,49 @@ def test_reduction_only_number_of_time_bins(reduction_config: ReductionConfig) -
 
     # Check that the number of time bins is as expected.
     assert len(hist.coords['tof']) == 21  # nbins + 1 edges
+
+
+@pytest.fixture
+def tof_lut_file_path(tmp_path: pathlib.Path):
+    """Fixture to provide the path to the small NMX NeXus file."""
+    from ess.nmx.workflows import initialize_nmx_workflow
+    from ess.reduce.time_of_flight import TimeOfFlightLookupTable
+
+    # Simply use the default workflow for testing.
+    workflow = initialize_nmx_workflow(config=WorkflowConfig())
+    tof_lut: sc.DataArray = workflow.compute(TimeOfFlightLookupTable)
+
+    # Change the tof range a bit for testing.
+    tof_lut *= sc.scalar(2.0, unit='dimensionless')
+
+    lut_file_path = tmp_path / "nmx_tof_lookup_table.h5"
+    tof_lut.save_hdf5(lut_file_path.as_posix())
+    yield lut_file_path
+    if lut_file_path.exists():
+        lut_file_path.unlink()
+
+
+def test_reduction_with_tof_lut_file(
+    reduction_config: ReductionConfig, tof_lut_file_path: pathlib.Path
+) -> None:
+    # Make sure the config uses no TOF lookup table file initially.
+    assert reduction_config.workflow.tof_lookup_table_file_path is None
+    with known_warnings():
+        default_results = reduction(config=reduction_config)
+
+    # Update config to use the TOF lookup table file.
+    reduction_config.workflow.tof_lookup_table_file_path = tof_lut_file_path.as_posix()
+    with known_warnings():
+        results = reduction(config=reduction_config)
+
+    for default_hist, hist in zip(
+        default_results['histogram'].values(),
+        results['histogram'].values(),
+        strict=True,
+    ):
+        tof_edges_default = default_hist.coords['tof']
+        tof_edges = hist.coords['tof']
+        assert_identical(default_hist.data, hist.data)
+        assert_identical(
+            tof_edges_default * sc.scalar(2.0, unit='dimensionless'), tof_edges
+        )
