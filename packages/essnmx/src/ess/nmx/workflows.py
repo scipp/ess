@@ -62,6 +62,11 @@ def _simulate_fixed_wavelength_tof(
     model = tof.Model(source=source, choppers=[], detectors=[nmx_det])
     results = model.run()
     events = results["detector"].data.squeeze().flatten(to="event")
+    # If there are any blocked neutrons, remove them
+    # it is not expected to have any in this simulation
+    # since it is not using any choppers
+    # but just in case we ever add any in the future
+    events = events[~events.masks["blocked_by_others"]]
     return SimulationResults(
         time_of_arrival=events.coords["toa"],
         speed=events.coords["speed"],
