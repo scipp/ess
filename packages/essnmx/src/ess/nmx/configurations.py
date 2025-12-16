@@ -98,6 +98,11 @@ class WorkflowConfig(BaseModel):
         "If None, the lookup table will be computed on-the-fly.",
         default=None,
     )
+    tof_simulation_num_neutrons: int = Field(
+        title="Number of Neutrons for TOF Simulation",
+        description="Number of neutrons to simulate for TOF lookup table calculation.",
+        default=1_000_000,
+    )
     tof_simulation_min_wavelength: float = Field(
         title="TOF Simulation Minimum Wavelength",
         description="Minimum wavelength for TOF simulation in Angstrom.",
@@ -135,10 +140,21 @@ class OutputConfig(BaseModel):
         default=False,
     )
     # File output
+    skip_file_output: bool = Field(
+        title="Skip File Output",
+        description="If True, the output file will not be written.",
+        default=False,
+    )
     output_file: str = Field(
         title="Output File",
-        description="Path to the output file.",
+        description="Path to the output file. "
+        "It will be overwritten if ``overwrite`` is True.",
         default="scipp_output.h5",
+    )
+    overwrite: bool = Field(
+        title="Overwrite Output File",
+        description="If True, overwrite the output file if ``output_file`` exists.",
+        default=False,
     )
     compression: Compression = Field(
         title="Compression",
@@ -157,3 +173,45 @@ class ReductionConfig(BaseModel):
     @property
     def _children(self) -> list[BaseModel]:
         return [self.inputs, self.workflow, self.output]
+
+
+def to_command_arguments(
+    *, config: ReductionConfig, one_line: bool = True, separator: str = '\\\n'
+) -> list[str] | str:
+    """Convert the config to a list of command line arguments.
+
+    Parameters
+    ----------
+    one_line:
+        If True, return a single string with all arguments joined by spaces.
+        If False, return a list of argument strings.
+
+    """
+    args = {}
+    for instance in config._children:
+        args.update(instance.model_dump(mode='python'))
+    args = {f"--{k.replace('_', '-')}": v for k, v in args.items() if v is not None}
+
+    arg_list = []
+    for k, v in args.items():
+        if not isinstance(v, bool):
+            arg_list.append(k)
+            if isinstance(v, list):
+                arg_list.extend(str(item) for item in v)
+            elif isinstance(v, enum.StrEnum):
+                arg_list.append(v.value)
+            else:
+                arg_list.append(str(v))
+        elif v is True:
+            arg_list.append(k)
+
+    if one_line:
+        # Default separator is backslash + newline for better readability
+        # Users can directly copy-paste the output in a terminal or a script.
+        return (
+            (separator + '--')
+            .join(" ".join(arg_list).split('--'))
+            .removeprefix(separator)
+        )
+    else:
+        return arg_list
