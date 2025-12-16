@@ -38,6 +38,155 @@ def _xy_extrema(pos: sc.Variable) -> sc.Variable:
     return sc.concat([x_min, x_max, y_min, y_max], dim='extremes')
 
 
+def _find_beam_center(
+    data,
+    beam_stop_radius,
+    beam_stop_arm_width,
+):
+    '''
+    Each iteration the center of mass of the remaining intensity is computed
+    and assigned to be the current beam center guess.
+    Then three symmetrical masks are created to make sure that the remaining intensity
+    distribution does not extend outside of the detector and that the beam stop
+    does not make the remaining intensity asymmetrical.
+
+    The three masks are:
+
+      - one "outer" circular mask with radius less than the minimal distance
+        from the current beam center guess to the border of the detector
+      - one "inner" circular mask with radius larger than the beam stop
+      - one "arm" rectangular mask with width wider than the beam stop arm
+
+    The "outer" mask radius is found from the detector size.
+    The "inner" mask radius is supplied by the caller.
+    The "arm" mask slope is determined by the direction of minimum intensity
+    around the current beam center guess, the "arm" mask width is an argument
+    supplied by the caller.
+    '''
+    events = data.copy()
+    events.masks.clear()
+    intensity = events.bins.sum()
+
+    for i in range(20):
+        # Average position, weighted by intensity.
+        center = (
+            intensity.coords['position'] * sc.values(intensity)
+        ).sum() / sc.values(intensity).sum()
+        distance_to_center = intensity.coords['position'] - center.data
+
+        # Outer radius of annulus around center.
+        # Defined so that the annulus does not go outside of the bounds of the detector.
+        outer = 0.9 * min(
+            sc.abs(distance_to_center.fields.x.min()),
+            sc.abs(distance_to_center.fields.x.max()),
+            sc.abs(distance_to_center.fields.y.min()),
+            sc.abs(distance_to_center.fields.y.max()),
+        )
+        intensity.masks['outer'] = (
+            distance_to_center.fields.x**2 + distance_to_center.fields.y**2 > outer**2
+        )
+        # Inner radius defined by size of beam stop.
+        intensity.masks['inner'] = (
+            distance_to_center.fields.x**2 + distance_to_center.fields.y**2
+            < beam_stop_radius**2
+        )
+
+        # Iterate without the arm mask a few times to settle near the center
+        # before introducing the arm mask.
+        if i > 10:
+            # Angle between +x and distance_to_center.
+            intensity.coords['theta'] = sc.where(
+                distance_to_center.fields.x > sc.scalar(0.0, unit='m'),
+                sc.atan2(y=distance_to_center.fields.y, x=distance_to_center.fields.x),
+                sc.scalar(sc.constants.pi.value, unit='rad')
+                - sc.atan2(
+                    y=distance_to_center.fields.y, x=-distance_to_center.fields.x
+                ),
+            )
+            intensity_over_angle = intensity.drop_masks(
+                ['arm'] if 'arm' in intensity.masks else []
+            ).hist(theta=100)
+            # Assume angle of arm coincides with intensity minimum
+            arm_angle = intensity_over_angle.coords['theta'][
+                np.argmin(intensity_over_angle.values)
+            ]
+
+            slope = sc.tan(arm_angle)
+            intensity.masks['arm'] = (
+                distance_to_center.fields.y
+                < slope * distance_to_center.fields.x + beam_stop_arm_width
+            ) & (
+                distance_to_center.fields.y
+                > slope * distance_to_center.fields.x - beam_stop_arm_width
+            )
+
+    center.data.fields.z = sc.scalar(0.0, unit=center.data.unit)
+    return center.data
+
+
+def beam_center_from_center_of_mass_alternative(
+    workflow,
+    beam_stop_radius=None,
+    beam_stop_arm_width=None,
+) -> BeamCenter:
+    """
+    Estimate the beam center via the center-of-mass of the data counts.
+
+    We are assuming the intensity distribution is symmetric around the beam center.
+    Even if the intensity distribution is symmetric around the beam center
+    the intensity distribution in the detector might not be, because
+
+        - the detector has a finite extent,
+        - and there is a beam stop covering part of the detector.
+
+    To deal with the limited size of the detector a mask can be applied that is small
+    enough so that the the remaining intensity is entirely inside the detector.
+    To deal with the beam stop we can mask the region of the detector that the
+    beam stop covers.
+
+    But to preserve the symmetry of the intensity around the beam center the masks
+    also need to be symmetical around the beam center.
+    The problem is, the beam center is unknown.
+    However, if the beam center was known to us, and we applied symmetrical masks
+    that covered the regions of the detector where the intensity distribution is
+    asymmetrical,
+    then the center of mass of the remaining intensity would equal the beam center.
+    Conversely, if we apply symmetrical masks around a point that is not the beam center
+    the center of mass of the remaining intensity will (likely) not equal the original
+    point.
+    This suggests the beam center can be found using a fixed point iteration where each
+    iteration we
+
+    1. Compute the center of mass of the remaining intensity and assign it to be our
+       current estimate of the beam center.
+    2. Create symmetrical masks around the current estimate of the beam center.
+    3. Repeat from 1. until convergence.
+
+    Parameters
+    ----------
+    workflow:
+        The reduction workflow to compute CorrectedDetector[SampleRun, Numerator].
+
+    Returns
+    -------
+    :
+        The beam center position as a vector.
+    """
+
+    if beam_stop_radius is None:
+        beam_stop_radius = sc.scalar(0.05, unit='m')
+    if beam_stop_arm_width is None:
+        beam_stop_arm_width = sc.scalar(0.02, unit='m')
+
+    try:
+        beam_center = workflow.compute(BeamCenter)
+    except sciline.UnsatisfiedRequirement:
+        beam_center = sc.vector([0.0, 0.0, 0.0], unit='m')
+        workflow[BeamCenter] = beam_center
+    data = workflow.compute(CorrectedDetector[SampleRun, Numerator])
+    return _find_beam_center(data, beam_stop_radius, beam_stop_arm_width) + beam_center
+
+
 def beam_center_from_center_of_mass(workflow: sciline.Pipeline) -> BeamCenter:
     """
     Estimate the beam center via the center-of-mass of the data counts.
@@ -334,8 +483,8 @@ def beam_center_from_iofq(
 
     This was, however, not sufficient in cases where masks are applied to the detector
     pixels. It is indeed very common to mask broken pixels, as well as the region of
-    the detector where the sample holder is casting a shadow.
-    Such a sample holder will not appear in all 4 quadrants, and because it spans a
+    the detector where the beam stop is casting a shadow.
+    Such a beam stop will not appear in all 4 quadrants, and because it spans a
     range of scattering (:math:`2{\\theta}`) angles, it spans a range of :math:`Q` bins.
 
     All this means that we in fact need to perform a reduction as close as possible to
