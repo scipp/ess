@@ -263,6 +263,4 @@ def test_reduction_with_tof_lut_file(
         tof_edges_default = default_hist.coords['tof']
         tof_edges = hist.coords['tof']
         assert_identical(default_hist.data, hist.data)
-        assert_identical(
-            tof_edges_default * 2, tof_edges
-        )
+        assert_identical(tof_edges_default * 2, tof_edges)
