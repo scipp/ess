@@ -58,7 +58,7 @@ def _simulate_fixed_wavelength_tof(
     source = tof.Source(
         facility="ess",
         neutrons=neutrons,
-        pulses=2,
+        pulses=1,
         seed=seed,
         wmax=wmax,
         wmin=wmin,
