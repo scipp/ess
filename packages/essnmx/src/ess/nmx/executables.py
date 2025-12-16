@@ -16,7 +16,7 @@ from ._executable_helper import (
     collect_matching_input_files,
     reduction_config_from_args,
 )
-from .configurations import ReductionConfig
+from .configurations import OutputConfig, ReductionConfig
 from .nexus import (
     export_detector_metadata_as_nxlauetof,
     export_monitor_metadata_as_nxlauetof,
