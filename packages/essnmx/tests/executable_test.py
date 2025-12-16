@@ -230,10 +230,10 @@ def tof_lut_file_path(tmp_path: pathlib.Path):
 
     # Simply use the default workflow for testing.
     workflow = initialize_nmx_workflow(config=WorkflowConfig())
-    tof_lut: sc.DataArray = workflow.compute(TimeOfFlightLookupTable)
+    tof_lut: TimeOfFlightLookupTable = workflow.compute(TimeOfFlightLookupTable)
 
     # Change the tof range a bit for testing.
-    tof_lut *= 2
+    tof_lut.array *= 2
 
     lut_file_path = tmp_path / "nmx_tof_lookup_table.h5"
     tof_lut.save_hdf5(lut_file_path.as_posix())
