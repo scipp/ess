@@ -225,6 +225,8 @@ def test_reduction_only_number_of_time_bins(reduction_config: ReductionConfig) -
 @pytest.fixture
 def tof_lut_file_path(tmp_path: pathlib.Path):
     """Fixture to provide the path to the small NMX NeXus file."""
+    from dataclasses import is_dataclass
+
     from ess.nmx.workflows import initialize_nmx_workflow
     from ess.reduce.time_of_flight import TimeOfFlightLookupTable
 
@@ -233,7 +235,12 @@ def tof_lut_file_path(tmp_path: pathlib.Path):
     tof_lut: TimeOfFlightLookupTable = workflow.compute(TimeOfFlightLookupTable)
 
     # Change the tof range a bit for testing.
-    tof_lut.array *= 2
+    if isinstance(tof_lut, sc.DataArray):
+        tof_lut *= 2
+    elif is_dataclass(tof_lut):
+        tof_lut.array *= 2
+    else:
+        raise TypeError("Unexpected type for TOF lookup table.")
 
     lut_file_path = tmp_path / "nmx_tof_lookup_table.h5"
     tof_lut.save_hdf5(lut_file_path.as_posix())
