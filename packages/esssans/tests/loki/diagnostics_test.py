@@ -35,13 +35,13 @@ def loki_data():
 def test_create_loki_bank_viewer(loki_data):
     matplotlib.use('module://ipympl.backend_nbagg')
     viewer = LokiBankViewer(loki_data.hist())
-    assert len(viewer.figs) == 9
+    assert len(viewer.tabs.children) == 9 + 1  # 9 banks + all banks tab
 
 
 def test_loki_bank_viewer_plotting_args(loki_data):
     matplotlib.use('module://ipympl.backend_nbagg')
     viewer = LokiBankViewer(loki_data.hist(), norm='log', cmap='jet')
-    for fig in viewer.figs:
+    for fig in viewer.subplots:
         mapper = fig.view.colormapper
         assert mapper.norm == 'log'
         assert mapper.cmap.name == 'jet'
@@ -50,11 +50,11 @@ def test_loki_bank_viewer_plotting_args(loki_data):
 def test_loki_bank_viewer_toggle_log_scale(loki_data):
     matplotlib.use('module://ipympl.backend_nbagg')
     viewer = LokiBankViewer(loki_data.hist())
-    for fig in viewer.figs:
+    for fig in viewer.subplots:
         mapper = fig.view.colormapper
         assert mapper.norm == 'linear'
     viewer.log_button.value = True
-    for fig in viewer.figs:
+    for fig in viewer.subplots:
         mapper = fig.view.colormapper
         assert mapper.norm == 'log'
 
@@ -62,19 +62,28 @@ def test_loki_bank_viewer_toggle_log_scale(loki_data):
 def test_loki_bank_viewer_sum_all_layers(loki_data):
     matplotlib.use('module://ipympl.backend_nbagg')
     viewer = LokiBankViewer(loki_data.hist())
-    old_max = [fig.view.colormapper.vmax for fig in viewer.figs]
+    old_max = [fig.view.colormapper.vmax for fig in viewer.subplots]
     viewer.layer_sum.value = True
-    for i, fig in enumerate(viewer.figs):
+    for i, fig in enumerate(viewer.subplots):
         assert fig.view.colormapper.vmax >= old_max[i]
 
 
 def test_loki_bank_viewer_sum_all_straws(loki_data):
     matplotlib.use('module://ipympl.backend_nbagg')
     viewer = LokiBankViewer(loki_data.hist())
-    old_max = [fig.view.colormapper.vmax for fig in viewer.figs]
+    old_max = [fig.view.colormapper.vmax for fig in viewer.subplots]
     viewer.straw_sum.value = True
-    for i, fig in enumerate(viewer.figs):
+    for i, fig in enumerate(viewer.subplots):
         assert fig.view.colormapper.vmax >= old_max[i]
+
+
+def test_loki_bank_viewer_change_bank(loki_data):
+    matplotlib.use('module://ipympl.backend_nbagg')
+    viewer = LokiBankViewer(loki_data.hist())
+    # For now, just check no error occurs when changing tab
+    viewer.tabs.selected_index = 2
+    # Change back to all banks
+    viewer.tabs.selected_index = 0
 
 
 def test_creat_loki_instrument_view(loki_data):

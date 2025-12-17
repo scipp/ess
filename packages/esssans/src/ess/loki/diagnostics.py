@@ -10,6 +10,12 @@ import plopp as pp
 import scipp as sc
 
 
+def _add_missing_coordinates(da: sc.DataArray) -> sc.DataArray:
+    return da.assign_coords(
+        {dim: sc.arange(dim=dim, start=1, stop=sz + 1) for dim, sz in da.sizes.items()}
+    )
+
+
 def _slice_or_sum(
     da: sc.DataGroup, layer_ind: int, layer_sum: bool, straw_ind: int, straw_sum: bool
 ) -> sc.DataGroup:
@@ -26,17 +32,21 @@ def _slice_or_sum(
 
 
 class LokiBankViewer(ipw.VBox):
-    def __init__(self, data: sc.DataGroup, **kwargs):
+    def __init__(self, data: sc.DataGroup, figsize=(12, 9), **kwargs):
         """Widget to view LOKI detector banks.
 
         Parameters
         ----------
         data:
             DataGroup containing LOKI detector banks.
+        figsize:
+            Size of the figures in inches (width, height).
         kwargs:
             Additional arguments are forwarded to the plotting function.
         """
-        self.data = data
+        self.data = sc.DataGroup(
+            {k: _add_missing_coordinates(da) for k, da in data.items()}
+        )
         self._lock = False
 
         self.layer_slider = ipw.IntSlider(
@@ -75,20 +85,31 @@ class LokiBankViewer(ipw.VBox):
         )
 
         with plt.ioff():
-            self.figure, axs = plt.subplots(3, 3, figsize=(12, 9))
+            self.main_figure, axs = plt.subplots(3, 3, figsize=figsize)
+            bank_figures = [plt.subplots(figsize=figsize) for _ in range(9)]
 
-        self.figs = []
+        self.subplots = []
+        self.tab_figs = []
+        self.nodes = []
         for i, ax in enumerate(axs.flatten()):
             bank = f"loki_detector_{i}"
-            self.figs.append(
-                pp.plot(
-                    pp.Node(lambda da, key: da[key], da=self.slice_node, key=bank),
-                    ax=ax,
+            n = pp.Node(lambda da, key: da[key], da=self.slice_node, key=bank)
+            self.nodes.append(n)
+            self.subplots.append(
+                pp.imagefigure(n, ax=ax, title=bank, cbar=True, **kwargs)
+            )
+            self.tab_figs.append(
+                pp.imagefigure(
+                    ax=bank_figures[i][1],
                     title=bank,
+                    cbar=True,
+                    figsize=figsize,
                     **kwargs,
                 )
             )
-        self.figure.canvas.header_visible = False
+            bank_figures[i][0].canvas.header_visible = False
+
+        self.main_figure.canvas.header_visible = False
 
         # Create color map controls
         self.cmap_vmin = ipw.Text(
@@ -121,6 +142,13 @@ class LokiBankViewer(ipw.VBox):
         )
         space = ipw.HTML('<div style="width: 20px;"></div>')
 
+        self.tabs = ipw.Tab(layout={'width': '70%'})
+        self.tabs.children = [self.main_figure.canvas] + [
+            f.fig.canvas for f in self.tab_figs
+        ]
+        self.tabs.titles = ["All", *(f"Bank {i}" for i in range(len(self.tab_figs)))]
+        self.tabs.observe(self.update_node_routing, names='selected_index')
+
         super().__init__(
             [
                 ipw.HBox(
@@ -135,14 +163,21 @@ class LokiBankViewer(ipw.VBox):
                         self.log_button,
                     ]
                 ),
-                self.figure.canvas,
+                self.tabs,
             ]
         )
 
-    def toggle_log(self, change: dict) -> None:
+    def update_colormapper_norm(self) -> None:
+        if self.tabs.selected_index == 0:
+            figs = self.subplots
+        else:
+            figs = [self.tab_figs[self.tabs.selected_index - 1]]
+        for f in figs:
+            f.view.colormapper.norm = "log" if self.log_button.value else "linear"
+
+    def toggle_log(self, _: dict) -> None:
         self.reset_cmap_range()
-        for f in self.figs:
-            f.view.colormapper.norm = "log" if change["new"] else "linear"
+        self.update_colormapper_norm()
 
     def _update_min_or_max(self, change: dict, bound: str) -> None:
         try:
@@ -152,7 +187,12 @@ class LokiBankViewer(ipw.VBox):
         except ValueError:
             new = None
 
-        for f in self.figs:
+        if self.tabs.selected_index == 0:
+            figs = self.subplots
+        else:
+            figs = [self.tab_figs[self.tabs.selected_index - 1]]
+
+        for f in figs:
             if new is None:
                 getattr(f.view.colormapper, f"_c{bound}").pop('user', None)
             else:
@@ -160,7 +200,10 @@ class LokiBankViewer(ipw.VBox):
             if not self._lock:
                 f.view.colormapper.autoscale()
         if not self._lock:
-            self.figure.canvas.draw_idle()
+            if self.tabs.selected_index == 0:
+                self.main_figure.canvas.draw_idle()
+            else:
+                self.tab_figs[self.tabs.selected_index - 1].canvas.draw()
 
     def update_cmin(self, change: dict) -> None:
         self._update_min_or_max(change, 'min')
@@ -173,6 +216,23 @@ class LokiBankViewer(ipw.VBox):
         self.cmap_vmin.value = ''
         self.cmap_vmax.value = ''
         self._lock = False
+
+    def update_node_routing(self, change: dict) -> None:
+        for n in self.nodes:
+            n.views.clear()
+        if change['new'] == 0:
+            for f, n in zip(self.subplots, self.nodes, strict=True):
+                n.add_view(f.view)
+        else:
+            n = self.nodes[change['new'] - 1]
+            f = self.tab_figs[change['new'] - 1]
+            n.add_view(f.view)
+        self.slice_node.notify_children(message=None)
+        self.update_colormapper_norm()
+        self._lock = True
+        self.update_cmin({'new': self.cmap_vmin.value})
+        self._lock = False
+        self.update_cmax({'new': self.cmap_vmax.value})
 
 
 def _to_data_group(data: sc.DataArray | sc.DataGroup | dict) -> sc.DataGroup:
