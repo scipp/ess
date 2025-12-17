@@ -130,3 +130,5 @@ WavelengthThetaFigure = NewType("WavelengthThetaFigure", Any)
 WavelengthZIndexFigure = NewType("WavelengthZIndexFigure", Any)
 QThetaFigure = NewType("QThetaFigure", Any)
 ReflectivityDiagnosticsView = NewType("ReflectivityDiagnosticsView", Any)
+
+CorrectionsToApply = NewType("CorrectionsToApply", set[str])

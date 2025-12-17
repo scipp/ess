@@ -10,6 +10,7 @@ from ..reflectometry.corrections import correct_by_proton_current
 from ..reflectometry.types import (
     BeamDivergenceLimits,
     CoordTransformationGraph,
+    CorrectionsToApply,
     ProtonCurrent,
     ReducibleData,
     RunType,
@@ -30,6 +31,7 @@ def add_coords_masks_and_apply_corrections(
     wbins: WavelengthBins,
     proton_current: ProtonCurrent[RunType],
     graph: CoordTransformationGraph[RunType],
+    corrections_to_apply: CorrectionsToApply,
 ) -> ReducibleData[RunType]:
     """
     Computes coordinates, masks and corrections that are
@@ -37,12 +39,14 @@ def add_coords_masks_and_apply_corrections(
     """
     da = add_coords(da, graph)
     da = add_masks(da, ylim, zlims, bdlim, wbins)
-    da = correct_by_footprint(da)
+    if 'footprint' in corrections_to_apply:
+        da = correct_by_footprint(da)
 
     if len(proton_current) != 0:
         da = add_proton_current_coord(da, proton_current)
-        da = add_proton_current_mask(da)
-        da = correct_by_proton_current(da)
+        if 'proton_current' in corrections_to_apply:
+            da = add_proton_current_mask(da)
+            da = correct_by_proton_current(da)
 
     return ReducibleData[RunType](da)
 
