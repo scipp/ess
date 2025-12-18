@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import scipp as sc
+from scippneutron.conversion import graph
 from scippneutron.conversion.tof import wavelength_from_tof
 from scippnexus import NXsample, NXsource
 
@@ -78,16 +79,10 @@ def coordinate_transformation_graph(
 ) -> CoordTransformationGraph[RunType]:
     bank = detector_bank_sizes['multiblade_detector']
     return {
+        **graph.beamline.beamline(scatter=True),
         "theta": theta,
         "divergence_angle": divergence_angle,
         "Q": reflectometry_q,
-        "L1": lambda source_position, sample_position: sc.norm(
-            sample_position - source_position.to(unit=sample_position.unit)
-        ),  # + extra correction for guides?
-        "L2": lambda position, sample_position: sc.norm(
-            position - sample_position.to(unit=position.unit)
-        ),
-        "Ltotal": lambda L1, L2: L1.to(unit=L2.unit) + L2,
         'sample_size': lambda: sc.scalar(20.0, unit='mm'),
         'blade': lambda: sc.arange('blade', bank['blade'] - 1, -1, -1),
         'wire': lambda: sc.arange('wire', bank['wire'] - 1, -1, -1),
