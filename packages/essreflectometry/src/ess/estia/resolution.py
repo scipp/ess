@@ -1,12 +1,15 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import scipp as sc
+from scipp import constants
 
 from ..reflectometry.tools import fwhm_to_std
 
 
 def wavelength_resolution(
-    # What parameters are needed?
+    source_pulse_length: sc.Variable,
+    wavelength: sc.Variable,
+    Ltotal: sc.Variable,
 ):
     """
     Find the wavelength resolution contribution of the ESTIA instrument.
@@ -14,18 +17,27 @@ def wavelength_resolution(
     Parameters
     ----------
 
-    L1:
-        Distance from midpoint between choppers to sample.
-    L2:
-        Distance from sample to detector.
+    source_pulse_length:
+        The length of the ESS source pulse.
+    wavelength:
+        The wavelength of the neutron.
+    Ltotal:
+        The distance from source to detector.
 
     Returns
     -------
     :
-        The wavelength resolution variable, as standard deviation.
+        The wavelength resolution,
+        ratio of the standard deviation of wavelength and the wavelength.
     """
-    # Don't yet know how to do this
-    raise NotImplementedError()
+    # The exact factor depends on the shape of the source pulse.
+    # The factor here assumes a rectangular source pulse:
+    # import sympy as sp
+    # x, D  = sp.symbols('x, D', positive=True)
+    # sp.sqrt(sp.integrate(1/D * (x-D/2)**2, (x, 0, D)))
+    standard_deviation_of_time_at_source = (1 / 12**0.5) * source_pulse_length
+    tof = wavelength * Ltotal * constants.m_n / constants.h
+    return (standard_deviation_of_time_at_source / tof).to(unit='dimensionless')
 
 
 def sample_size_resolution(
@@ -72,7 +84,7 @@ def angular_resolution(
     Returns
     -------
     :
-        Angular resolution standard deviation
+        Angular resolution standard deviation over the reflection angle.
     """
     return (
         fwhm_to_std(
