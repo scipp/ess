@@ -23,6 +23,7 @@ from .resolution import (
     angular_resolution,
     q_resolution,
     sample_size_resolution,
+    wavelength_resolution,
 )
 
 
@@ -101,9 +102,8 @@ def evaluate_reference(
         ),
         {
             **graph,
-            # The wavelength resolution of Estia is not implemented yet
-            # when it is this will be replaced by the correct value.
-            "wavelength_resolution": lambda: sc.scalar(0.05),
+            "source_pulse_length": lambda: sc.scalar(3.0, unit='ms').to(unit='ns'),
+            "wavelength_resolution": wavelength_resolution,
             "sample_size_resolution": sample_size_resolution,
             "angular_resolution": angular_resolution,
             "Q_resolution": q_resolution,
