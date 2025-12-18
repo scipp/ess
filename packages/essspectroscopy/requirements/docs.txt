@@ -32,7 +32,7 @@ comm==0.2.3
     # via
     #   ipykernel
     #   ipywidgets
-debugpy==1.8.17
+debugpy==1.8.19
     # via ipykernel
 decorator==5.2.1
     # via ipython
@@ -54,7 +54,7 @@ ipykernel==7.1.0
     # via -r docs.in
 ipympl==0.9.8
     # via -r docs.in
-ipython==9.7.0
+ipython==9.8.0
     # via
     #   -r docs.in
     #   ipykernel
@@ -78,7 +78,7 @@ jsonschema==4.25.1
     # via nbformat
 jsonschema-specifications==2025.9.1
     # via jsonschema
-jupyter-client==8.6.3
+jupyter-client==8.7.0
     # via
     #   ipykernel
     #   nbclient
@@ -164,7 +164,9 @@ referencing==0.37.0
     # via
     #   jsonschema
     #   jsonschema-specifications
-roman-numerals-py==3.1.0
+roman-numerals==4.1.0
+    # via roman-numerals-py
+roman-numerals-py==4.1.0
     # via sphinx
 rpds-py==0.30.0
     # via
@@ -206,7 +208,7 @@ stack-data==0.6.3
     # via ipython
 tinycss2==1.4.0
     # via bleach
-tornado==6.5.2
+tornado==6.5.4
     # via
     #   ipykernel
     #   jupyter-client
