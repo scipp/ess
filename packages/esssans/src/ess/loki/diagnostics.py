@@ -142,7 +142,9 @@ class LokiBankViewer(ipw.VBox):
         )
         space = ipw.HTML('<div style="width: 20px;"></div>')
 
-        self.tabs = ipw.Tab(layout={'width': '70%'})
+        self.tabs = ipw.Tab(
+            layout={'width': f'{figsize[0] * self.main_figure.get_dpi() + 40}px'}
+        )
         self.tabs.children = [self.main_figure.canvas] + [
             f.fig.canvas for f in self.tab_figs
         ]
