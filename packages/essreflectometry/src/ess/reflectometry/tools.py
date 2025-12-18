@@ -443,7 +443,7 @@ def combine_curves(
     r = _interpolate_on_qgrid(map(sc.values, curves), q_bin_edges)
     v = _interpolate_on_qgrid(map(sc.variances, curves), q_bin_edges)
 
-    v = sc.where(v == 0, sc.scalar(np.nan, unit=v.unit), v)
+    v = sc.where(v == sc.scalar(0.0, unit=v.unit), sc.scalar(np.nan, unit=v.unit), v)
     inv_v = 1.0 / v
     r_avg = sc.nansum(r * inv_v, dim='curves') / sc.nansum(inv_v, dim='curves')
     v_avg = 1 / sc.nansum(inv_v, dim='curves')
