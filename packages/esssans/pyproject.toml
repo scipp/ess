@@ -47,6 +47,7 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 test = [
+    "ipympl>=0.9.4",
     "pytest>=7.0",
     "pooch>=1.5",
     "scipy>=1.15.0",
@@ -77,6 +78,9 @@ testpaths = "tests"
 filterwarnings = [
   "error",
   'ignore:\n            Sentinel is not a public part of the traitlets API:DeprecationWarning',
+  'ignore:Passing unrecognized arguments to super:DeprecationWarning',
+  'ignore:Jupyter is migrating its paths:DeprecationWarning',
+  'ignore:More than 20 figures have been opened:RuntimeWarning',
 ]
 
 [tool.ruff]
