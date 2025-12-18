@@ -14,6 +14,7 @@ from ..reflectometry.types import (
     ReducedReference,
     ReducibleData,
     Reference,
+    ReferenceRun,
     Sample,
     SampleRun,
 )
@@ -71,7 +72,7 @@ def evaluate_reference_at_sample_coords(
     reference: ReducedReference,
     sample: ReducibleData[SampleRun],
     detector_spatial_resolution: DetectorSpatialResolution[SampleRun],
-    graph: CoordTransformationGraph,
+    graph: CoordTransformationGraph[ReferenceRun],
 ) -> Reference:
     """
     Adds a :math:`Q` and :math:`Q`-resolution coordinate to each bin of the ideal
@@ -85,9 +86,14 @@ def evaluate_reference_at_sample_coords(
     ref.coords["sample_size"] = sample.coords["sample_size"]
     ref.coords["detector_spatial_resolution"] = detector_spatial_resolution
     ref.coords["wavelength"] = sc.midpoints(ref.coords["wavelength"])
+
+    if "theta" in ref.coords:
+        ref.coords.pop("theta")
+
     ref = ref.transform_coords(
         (
             "Q",
+            "theta",
             "wavelength_resolution",
             "sample_size_resolution",
             "angular_resolution",

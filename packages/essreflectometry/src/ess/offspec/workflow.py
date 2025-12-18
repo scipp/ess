@@ -4,9 +4,12 @@ import sciline
 
 from ..reflectometry import providers as reflectometry_providers
 from ..reflectometry.types import (
-    DetectorData,
+    CoordTransformationGraph,
+    RawDetector,
     ReducibleData,
+    ReferenceRun,
     RunType,
+    SampleRun,
     WavelengthBins,
 )
 from . import conversions, load, maskings, normalization
@@ -14,7 +17,6 @@ from .corrections import correct_by_monitor
 from .maskings import add_masks
 from .types import (
     BackgroundMinWavelength,
-    CoordTransformationGraph,
     MonitorData,
     NeXusMonitorName,
     SpectrumLimits,
@@ -33,11 +35,15 @@ def OffspecWorkflow() -> sciline.Pipeline:
         *maskings.providers,
         *normalization.providers,
     )
-    return sciline.Pipeline(providers=ps, params={NeXusMonitorName: 'monitor2'})
+    return sciline.Pipeline(
+        providers=ps,
+        params={NeXusMonitorName: 'monitor2'},
+        constraints={RunType: [SampleRun, ReferenceRun]},
+    )
 
 
 def add_coords_masks_and_apply_corrections(
-    da: DetectorData[RunType],
+    da: RawDetector[RunType],
     spectrum_limits: SpectrumLimits,
     wlims: WavelengthBins,
     wbmin: BackgroundMinWavelength,

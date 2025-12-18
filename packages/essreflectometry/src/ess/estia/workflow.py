@@ -13,7 +13,16 @@ from ..reflectometry.types import (
     RunType,
     SampleRotationOffset,
 )
-from . import beamline, conversions, corrections, load, maskings, normalization, orso
+from . import (
+    beamline,
+    conversions,
+    corrections,
+    load,
+    maskings,
+    mcstas,
+    normalization,
+    orso,
+)
 
 _general_providers = (
     *reflectometry_providers,
@@ -22,12 +31,12 @@ _general_providers = (
     *maskings.providers,
     *normalization.providers,
     *orso.providers,
+    *load.providers,
 )
 
 mcstas_providers = (
     *_general_providers,
-    *load.providers,
-    load.load_mcstas_events,
+    *mcstas.providers,
 )
 """List of providers for setting up a Sciline pipeline for McStas data.
 
@@ -44,7 +53,8 @@ This provides a default Estia workflow including providers for loadings files.
 def mcstas_default_parameters() -> dict:
     return {
         supermirror.MValue: sc.scalar(5, unit=sc.units.dimensionless),
-        supermirror.CriticalEdge: 0.022 * sc.Unit("1/angstrom"),
+        # The reference sample in the McStas simulation has R=1 everywhere
+        supermirror.CriticalEdge: sc.scalar(float('inf'), unit='1/angstrom'),
         supermirror.Alpha: sc.scalar(0.25 / 0.088, unit=sc.units.angstrom),
         DetectorSpatialResolution[RunType]: 0.0025 * sc.units.m,
         NeXusDetectorName: "detector",
@@ -59,14 +69,18 @@ def mcstas_default_parameters() -> dict:
 def default_parameters() -> dict:
     return {
         NeXusDetectorName: "multiblade_detector",
+        SampleRotationOffset[RunType]: sc.scalar(0.0, unit='deg'),
     }
 
 
 def EstiaMcStasWorkflow() -> sciline.Pipeline:
     """Workflow for reduction of McStas data for the Estia instrument."""
-    return sciline.Pipeline(
-        providers=mcstas_providers, params=mcstas_default_parameters()
-    )
+    workflow = beamline.LoadNeXusWorkflow()
+    for provider in mcstas_providers:
+        workflow.insert(provider)
+    for name, param in mcstas_default_parameters().items():
+        workflow[name] = param
+    return workflow
 
 
 def EstiaWorkflow() -> sciline.Pipeline:

@@ -1,6 +1,5 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 from ..reflectometry.conversions import (
-    add_coords,
     add_proton_current_coord,
     add_proton_current_mask,
 )
@@ -8,25 +7,25 @@ from ..reflectometry.corrections import correct_by_footprint, correct_by_proton_
 from ..reflectometry.types import (
     BeamDivergenceLimits,
     CoordTransformationGraph,
-    DetectorData,
     ProtonCurrent,
+    RawDetector,
     ReducibleData,
     RunType,
     WavelengthBins,
     YIndexLimits,
     ZIndexLimits,
 )
-from .conversions import add_masks
+from .conversions import add_coords, add_masks
 
 
 def add_coords_masks_and_apply_corrections(
-    da: DetectorData[RunType],
+    da: RawDetector[RunType],
     ylim: YIndexLimits,
     zlims: ZIndexLimits,
     bdlim: BeamDivergenceLimits,
     wbins: WavelengthBins,
     proton_current: ProtonCurrent[RunType],
-    graph: CoordTransformationGraph,
+    graph: CoordTransformationGraph[RunType],
 ) -> ReducibleData[RunType]:
     """
     Computes coordinates, masks and corrections that are

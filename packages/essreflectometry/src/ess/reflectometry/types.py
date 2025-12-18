@@ -1,27 +1,40 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
-from typing import Any, NewType, TypeVar
+from typing import Any, NewType
 
 import sciline
 import scipp as sc
 
-from ess.reduce.nexus import types as reduce_t
+from ess.reduce.nexus import types as nexus_t
+from ess.reduce.time_of_flight import types as tof_t
 
-SampleRun = reduce_t.SampleRun
+SampleRun = nexus_t.SampleRun
 ReferenceRun = NewType("ReferenceRun", int)
-RunType = TypeVar("RunType", ReferenceRun, SampleRun)
+RunType = nexus_t.RunType
 
-Beamline = reduce_t.Beamline
-CalibratedDetector = reduce_t.CalibratedDetector
-DetectorData = reduce_t.DetectorData
-DetectorPositionOffset = reduce_t.DetectorPositionOffset
-Filename = reduce_t.Filename
-Measurement = reduce_t.Measurement
-NeXusComponent = reduce_t.NeXusComponent
-NeXusDetectorName = reduce_t.NeXusDetectorName
-Position = reduce_t.Position
+Beamline = nexus_t.Beamline
+EmptyDetector = nexus_t.EmptyDetector
+RawDetector = nexus_t.RawDetector
+DetectorPositionOffset = nexus_t.DetectorPositionOffset
+Filename = nexus_t.Filename
+Measurement = nexus_t.Measurement
+NeXusComponent = nexus_t.NeXusComponent
+NeXusDetectorName = nexus_t.NeXusDetectorName
+Position = nexus_t.Position
 
-CoordTransformationGraph = NewType("CoordTransformationGraph", dict)
+TofDetector = tof_t.TofDetector
+PulseStrideOffset = tof_t.PulseStrideOffset
+TimeOfFlightLookupTable = tof_t.TimeOfFlightLookupTable
+TimeOfFlightLookupTableFilename = tof_t.TimeOfFlightLookupTableFilename
+DetectorLtotal = tof_t.DetectorLtotal
+
+
+class CoordTransformationGraph(sciline.Scope[RunType, dict], dict):
+    pass
+
+
+class RawChopper(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+    """Chopper data loaded from nexus file."""
 
 
 class ReducibleData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):

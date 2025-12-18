@@ -4,6 +4,7 @@ from typing import NewType
 
 import sciline
 import scipp as sc
+import scippnexus as snx
 
 from ess.reduce.nexus import types as reduce_t
 
@@ -13,12 +14,8 @@ SpectrumLimits = NewType("SpectrumLimits", tuple[sc.Variable, sc.Variable])
 BackgroundMinWavelength = NewType("BackgroundMinWavelength", sc.Variable)
 
 
-class CoordTransformationGraph(sciline.Scope[RunType, dict], dict):
-    """Coordinate transformation for the runtype"""
-
-
 class MonitorData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """ "Monitor data from the run file, with background subtracted"""
 
 
-NeXusMonitorName = reduce_t.NeXusName
+NeXusMonitorName = reduce_t.NeXusName[snx.NXmonitor]

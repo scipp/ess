@@ -6,7 +6,6 @@ import pandas as pd
 import sciline
 import scipp as sc
 
-from ess.amor.types import RawChopper
 from ess.reflectometry.orso import (
     OrsoExperiment,
     OrsoOwner,
@@ -14,6 +13,7 @@ from ess.reflectometry.orso import (
     OrsoSampleFilenames,
 )
 from ess.reflectometry.types import (
+    DetectorRotation,
     Filename,
     ReducibleData,
     RunType,
@@ -62,26 +62,27 @@ def with_filenames(
 
     mapped = wf.map(df)
 
-    wf[ReducibleData[runtype]] = mapped[ReducibleData[runtype]].reduce(
-        index=axis_name, func=_concatenate_event_lists
-    )
-    wf[RawChopper[runtype]] = mapped[RawChopper[runtype]].reduce(
-        index=axis_name, func=_any_value
-    )
-    wf[SampleRotation[runtype]] = mapped[SampleRotation[runtype]].reduce(
-        index=axis_name, func=_any_value
-    )
-
+    reduce_functions = {
+        ReducibleData[runtype]: _concatenate_event_lists,
+        SampleRotation[runtype]: _any_value,
+        DetectorRotation[runtype]: _any_value,
+    }
     if runtype is SampleRun:
-        wf[OrsoSample] = mapped[OrsoSample].reduce(index=axis_name, func=_any_value)
-        wf[OrsoExperiment] = mapped[OrsoExperiment].reduce(
-            index=axis_name, func=_any_value
+        reduce_functions.update(
+            {
+                OrsoSample: _any_value,
+                OrsoExperiment: _any_value,
+                OrsoOwner: _any_value,
+                OrsoSampleFilenames: _concatenate_lists,
+            }
         )
-        wf[OrsoOwner] = mapped[OrsoOwner].reduce(index=axis_name, func=lambda x, *_: x)
-        wf[OrsoSampleFilenames] = mapped[OrsoSampleFilenames].reduce(
-            # When we don't map over filenames
-            # each OrsoSampleFilenames is a list with a single entry.
-            index=axis_name,
-            func=_concatenate_lists,
-        )
+
+    for tp, func in reduce_functions.items():
+        try:
+            wf[tp] = mapped[tp].reduce(index=axis_name, func=func)
+        except (ValueError, KeyError):
+            # ValueError: tp[runtype] is independent of Filename[runtype]
+            # KeyError: tp[runtype] not in workflow
+            pass
+
     return wf

@@ -14,8 +14,10 @@ from ..reflectometry.types import (
     DetectorSpatialResolution,
     NeXusDetectorName,
     Position,
+    ReferenceRun,
     RunType,
     SampleRotationOffset,
+    SampleRun,
 )
 from . import (
     conversions,
@@ -81,7 +83,11 @@ def AmorWorkflow() -> sciline.Pipeline:
     """
     Workflow with default parameters for the Amor PSI instrument.
     """
-    return sciline.Pipeline(providers=providers, params=default_parameters())
+    return sciline.Pipeline(
+        providers=providers,
+        params=default_parameters(),
+        constraints={RunType: [SampleRun, ReferenceRun]},
+    )
 
 
 __all__ = [

@@ -9,19 +9,17 @@ from ess.reduce.nexus.types import NeXusFileSpec
 from ..reflectometry.load import load_nx
 from ..reflectometry.types import (
     Beamline,
-    BeamSize,
-    DetectorData,
     DetectorRotation,
     Filename,
     Measurement,
     NeXusComponent,
     NeXusDetectorName,
     ProtonCurrent,
+    RawChopper,
+    RawDetector,
     RawSampleRotation,
     RunType,
-    SampleRotation,
     SampleRun,
-    SampleSize,
 )
 from .geometry import pixel_coordinates_in_detector_system
 from .types import (
@@ -29,7 +27,6 @@ from .types import (
     ChopperFrequency,
     ChopperPhase,
     ChopperSeparation,
-    RawChopper,
 )
 
 
@@ -41,15 +38,7 @@ def load_detector(
 
 def load_events(
     detector: NeXusComponent[snx.NXdetector, RunType],
-    detector_rotation: DetectorRotation[RunType],
-    sample_rotation: SampleRotation[RunType],
-    chopper_phase: ChopperPhase[RunType],
-    chopper_frequency: ChopperFrequency[RunType],
-    chopper_distance: ChopperDistance[RunType],
-    chopper_separation: ChopperSeparation[RunType],
-    sample_size: SampleSize[RunType],
-    beam_size: BeamSize[RunType],
-) -> DetectorData[RunType]:
+) -> RawDetector[RunType]:
     event_data = detector["data"]
     if 'event_time_zero' in event_data.coords:
         event_data.bins.coords['event_time_zero'] = sc.bins_like(
@@ -69,15 +58,7 @@ def load_events(
             "data"
         ].data.values
 
-    data.coords["sample_rotation"] = sample_rotation.to(unit='rad')
-    data.coords["detector_rotation"] = detector_rotation.to(unit='rad')
-    data.coords["chopper_phase"] = chopper_phase
-    data.coords["chopper_frequency"] = chopper_frequency
-    data.coords["chopper_separation"] = chopper_separation
-    data.coords["chopper_distance"] = chopper_distance
-    data.coords["sample_size"] = sample_size
-    data.coords["beam_size"] = beam_size
-    return DetectorData[RunType](data)
+    return RawDetector[RunType](data)
 
 
 def amor_chopper(f: Filename[RunType]) -> RawChopper[RunType]:
@@ -133,13 +114,13 @@ def load_amor_proton_current(
     return pc
 
 
-def load_beamline_metadata(filename: Filename[SampleRun]) -> Beamline:
+def load_beamline_metadata(filename: Filename[RunType]) -> Beamline[RunType]:
     return nexus_workflow.load_beamline_metadata_from_nexus(
         NeXusFileSpec[SampleRun](filename)
     )
 
 
-def load_measurement_metadata(filename: Filename[SampleRun]) -> Measurement:
+def load_measurement_metadata(filename: Filename[RunType]) -> Measurement[RunType]:
     return nexus_workflow.load_measurement_metadata_from_nexus(
         NeXusFileSpec[SampleRun](filename)
     )
