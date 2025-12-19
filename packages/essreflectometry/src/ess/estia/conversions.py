@@ -37,7 +37,7 @@ def theta(
     The reflection angle of the neutron.
     '''
     return divergence_angle + sample_rotation.to(
-        unit=divergence_angle.unit, dtype=divergence_angle.dtype
+        unit=divergence_angle.unit, dtype='float64'
     )
 
 

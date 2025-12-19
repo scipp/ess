@@ -33,11 +33,11 @@ def add_masks(
             da.coords["divergence_angle"],
             bdlim[0].to(
                 unit=da.coords["divergence_angle"].unit,
-                dtype=da.coords['divergence_angle'].dtype,
+                dtype='float64',
             ),
             bdlim[1].to(
                 unit=da.coords["divergence_angle"].unit,
-                dtype=da.coords['divergence_angle'].dtype,
+                dtype='float64',
             ),
         ),
     )
