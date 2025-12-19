@@ -89,7 +89,7 @@ def angular_resolution(
     return (
         fwhm_to_std(
             sc.atan(detector_spatial_resolution.to(unit=L2.unit, dtype='float64') / L2)
-        ).to(unit=theta.unit, dtype='float64')
+        ).to(unit=theta.unit, dtype='float64', copy=False)
         / theta
     )
 
