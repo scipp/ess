@@ -37,7 +37,9 @@ def theta(
     -----------
     The reflection angle of the neutron.
     '''
-    return divergence_angle + sample_rotation.to(unit=divergence_angle.unit)
+    return divergence_angle + sample_rotation.to(
+        unit=divergence_angle.unit, dtype='float64'
+    )
 
 
 def divergence_angle(
@@ -63,7 +65,9 @@ def divergence_angle(
     The divergence angle of the scattered beam.
     """
     p = position - sample_position.to(unit=position.unit)
-    return sc.atan2(y=p.fields.x, x=p.fields.z) - detector_rotation.to(unit='rad')
+    return sc.atan2(y=p.fields.x, x=p.fields.z) - detector_rotation.to(
+        unit='rad', dtype='float64'
+    )
 
 
 def coordinate_transformation_graph(
