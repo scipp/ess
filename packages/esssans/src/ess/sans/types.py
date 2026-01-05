@@ -37,8 +37,8 @@ TransmissionRun = reduce_t.TransmissionRun
 
 TofDetector = tof_t.TofDetector
 TofMonitor = tof_t.TofMonitor
-TimeOfFlightLookupTableFilename = tof_t.TimeOfFlightLookupTableFilename
-TimeOfFlightLookupTable = tof_t.TimeOfFlightLookupTable
+TofLookupTableFilename = tof_t.TofLookupTableFilename
+TofLookupTable = tof_t.TofLookupTable
 
 DetectorBankSizes = reduce_t.DetectorBankSizes
 NeXusDetectorName = reduce_t.NeXusDetectorName
