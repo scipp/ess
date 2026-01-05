@@ -24,6 +24,18 @@ def reflectometry_q_x(
     """
     Compute momentum transfer in off-specular direction.
 
+    .. math::
+        Q_x = \\frac{2 \\pi}{\\lambda} (cos(\\theta_o) - cos(\\theta_i))
+
+    Where :math:`\\theta_o` is the reflection angle and :math:`\\theta_i`
+    is the incident angle on the sample surface.
+
+    Assuming the sample is aligned with the beam the incident angle is what
+    we call the sample rotation.
+
+    Source:
+    `Frédéric Ott, "Off-specular data representations in neutron reflectivity" <https://doi.org/10.1107/S0021889811002858>`_
+
     Parameters
     ----------
     wavelength:
