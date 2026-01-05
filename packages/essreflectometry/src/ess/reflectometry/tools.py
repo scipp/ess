@@ -440,22 +440,42 @@ def combine_curves(
     if len({c.coords['Q'].unit for c in curves}) != 1:
         raise ValueError('The Q-coordinates must have the same unit for each curve')
 
-    r = _interpolate_on_qgrid(map(sc.values, curves), q_bin_edges).values
-    v = _interpolate_on_qgrid(map(sc.variances, curves), q_bin_edges).values
+    r = _interpolate_on_qgrid(map(sc.values, curves), q_bin_edges)
+    v = _interpolate_on_qgrid(map(sc.variances, curves), q_bin_edges)
 
-    v[v == 0] = np.nan
+    v = sc.where(v == sc.scalar(0.0, unit=v.unit), sc.scalar(np.nan, unit=v.unit), v)
     inv_v = 1.0 / v
-    r_avg = np.nansum(r * inv_v, axis=0) / np.nansum(inv_v, axis=0)
-    v_avg = 1 / np.nansum(inv_v, axis=0)
-    return sc.DataArray(
+    r_avg = sc.nansum(r * inv_v, dim='curves') / sc.nansum(inv_v, dim='curves')
+    v_avg = 1 / sc.nansum(inv_v, dim='curves')
+
+    out = sc.DataArray(
         data=sc.array(
             dims='Q',
-            values=r_avg,
-            variances=v_avg,
+            values=r_avg.values,
+            variances=v_avg.values,
             unit=next(iter(curves)).data.unit,
         ),
         coords={'Q': q_bin_edges},
     )
+    if any('Q_resolution' in c.coords for c in curves):
+        # This might need to be revisited. The question about how to combine curves
+        # with different Q-resolution is not completely resolved.
+        # However, in practice the difference in Q-resolution between different curves
+        # is small so it's not likely to make a big difference.
+        q_res = (
+            sc.DataArray(
+                data=c.coords.get(
+                    'Q_resolution', sc.full_like(c.coords['Q'], value=np.nan)
+                ),
+                coords={'Q': c.coords['Q']},
+            )
+            for c in curves
+        )
+        qs = _interpolate_on_qgrid(q_res, q_bin_edges)
+        out.coords['Q_resolution'] = sc.nansum(qs * inv_v, dim='curves') / sc.nansum(
+            sc.where(sc.isnan(qs), sc.scalar(0.0, unit=inv_v.unit), inv_v), dim='curves'
+        )
+    return out
 
 
 def batch_processor(
