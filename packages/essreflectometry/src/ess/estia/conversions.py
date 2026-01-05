@@ -27,7 +27,7 @@ def reflectometry_q_x(
     .. math::
         Q_x = \\frac{2 \\pi}{\\lambda} (cos(\\theta_o) - cos(\\theta_i))
 
-    Where :math:`\\theta_o` is the reflection angle and :math:`\\theta_i`
+    Where :math:`\\theta_o` is the reflection angle (:func:`theta`) and :math:`\\theta_i`
     is the incident angle on the sample surface.
 
     Assuming the sample is aligned with the beam the incident angle is what
