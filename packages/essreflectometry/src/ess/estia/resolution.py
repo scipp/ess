@@ -61,7 +61,7 @@ def sample_size_resolution(
     :
         Standard deviation of contribution from the sample size.
     """
-    return fwhm_to_std(sample_size / L2.to(unit=sample_size.unit))
+    return fwhm_to_std(sample_size.to(unit=L2.unit, dtype='float64') / L2)
 
 
 def angular_resolution(
@@ -88,11 +88,8 @@ def angular_resolution(
     """
     return (
         fwhm_to_std(
-            sc.atan(
-                detector_spatial_resolution
-                / L2.to(unit=detector_spatial_resolution.unit)
-            )
-        ).to(unit=theta.unit)
+            sc.atan(detector_spatial_resolution.to(unit=L2.unit, dtype='float64') / L2)
+        ).to(unit=theta.unit, dtype='float64', copy=False)
         / theta
     )
 
