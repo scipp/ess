@@ -6,6 +6,7 @@ import scipp as sc
 
 from ..reflectometry import providers as reflectometry_providers
 from ..reflectometry import supermirror
+from ..reflectometry.corrections import correct_by_proton_current
 from ..reflectometry.types import (
     BeamDivergenceLimits,
     CorrectionsToApply,
@@ -64,7 +65,8 @@ def mcstas_default_parameters() -> dict:
             sc.scalar(0.75, unit='deg'),
         ),
         SampleRotationOffset[RunType]: sc.scalar(0.0, unit='deg'),
-        CorrectionsToApply: {'footprint', 'proton_current'},
+        CorrectionsToApply: corrections.default_corrections
+        - {correct_by_proton_current},
     }
 
 
@@ -72,7 +74,7 @@ def default_parameters() -> dict:
     return {
         NeXusDetectorName: "multiblade_detector",
         SampleRotationOffset[RunType]: sc.scalar(0.0, unit='deg'),
-        CorrectionsToApply: {'footprint', 'proton_current'},
+        CorrectionsToApply: corrections.default_corrections,
     }
 
 

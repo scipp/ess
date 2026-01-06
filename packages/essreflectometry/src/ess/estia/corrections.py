@@ -39,14 +39,13 @@ def add_coords_masks_and_apply_corrections(
     """
     da = add_coords(da, graph)
     da = add_masks(da, ylim, zlims, bdlim, wbins)
-    if 'footprint' in corrections_to_apply:
-        da = correct_by_footprint(da)
 
     if len(proton_current) != 0:
         da = add_proton_current_coord(da, proton_current)
-        if 'proton_current' in corrections_to_apply:
-            da = add_proton_current_mask(da)
-            da = correct_by_proton_current(da)
+        da = add_proton_current_mask(da)
+
+    for correction in corrections_to_apply:
+        da = correction(da)
 
     return ReducibleData[RunType](da)
 
@@ -55,5 +54,7 @@ def correct_by_footprint(da: sc.DataArray) -> sc.DataArray:
     """Corrects the data by the size of the footprint on the sample."""
     return da / sc.sin(da.coords['theta'])
 
+
+default_corrections = {correct_by_proton_current, correct_by_footprint}
 
 providers = (add_coords_masks_and_apply_corrections,)
