@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import scipp as sc
+from scipp.constants import pi
+from scippneutron._utils import elem_dtype
 from scippneutron.conversion import graph
 from scippneutron.conversion.tof import wavelength_from_tof
 from scippnexus import NXsample, NXsource
@@ -14,6 +16,49 @@ from ..reflectometry.types import (
     RunType,
     SampleRotation,
 )
+
+
+def reflectometry_q_x(
+    wavelength: sc.Variable, theta: sc.Variable, sample_rotation: sc.Variable
+) -> sc.Variable:
+    """
+    Compute momentum transfer in off-specular direction.
+
+    .. math::
+        Q_x = \\frac{2 \\pi}{\\lambda} (cos(\\theta_o) - cos(\\theta_i))
+
+    Where :math:`\\theta_o` is the reflection angle (:func:`theta`)
+    and :math:`\\theta_i` is the incident angle on the sample surface.
+
+    Note that here we assume the incident angle is equal to ``sample_rotation``.
+
+    Source:
+    `Frédéric Ott, "Off-specular data representations in neutron reflectivity" <https://doi.org/10.1107/S0021889811002858>`_
+
+    Parameters
+    ----------
+    wavelength:
+        Wavelength values for the events.
+    theta:
+        Angle of reflection for the events.
+    sample_rotation:
+        Angle of incidence.
+
+    Returns
+    -------
+    :
+        Qx-values.
+    """
+    dtype = elem_dtype(wavelength)
+    c = (2 * pi).astype(dtype)
+    return (
+        c
+        * (
+            sc.cos(theta.astype(dtype, copy=False))
+            - sc.cos(sample_rotation.to(unit=theta.unit, dtype=dtype))
+        )
+        / wavelength
+    )
 
 
 def theta(
@@ -83,6 +128,7 @@ def coordinate_transformation_graph(
         "theta": theta,
         "divergence_angle": divergence_angle,
         "Q": reflectometry_q,
+        "Qx": reflectometry_q_x,
         'sample_size': lambda: sc.scalar(20.0, unit='mm'),
         'blade': lambda: sc.arange('blade', bank['blade'] - 1, -1, -1),
         'wire': lambda: sc.arange('wire', bank['wire'] - 1, -1, -1),
@@ -107,6 +153,7 @@ def add_coords(
             "theta",
             "divergence_angle",
             "Q",
+            "Qx",
             "L1",
             "L2",
             "blade",
