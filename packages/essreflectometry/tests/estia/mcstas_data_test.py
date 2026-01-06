@@ -83,7 +83,7 @@ def estia_mcstas_pipeline() -> sciline.Pipeline:
     return wf
 
 
-def test_mcstas_compute_reducible_data(estia_mcstas_pipeline: sciline.Pipeline):
+def test_compute_reducible_data(estia_mcstas_pipeline: sciline.Pipeline):
     estia_mcstas_pipeline[Filename[SampleRun]] = estia_mcstas_sample_run(11)
     da = estia_mcstas_pipeline.compute(ReducibleData[SampleRun])
     assert da.dims == ('strip', 'blade', 'wire')

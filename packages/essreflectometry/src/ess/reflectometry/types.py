@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+from collections.abc import Callable
 from typing import Any, NewType
 
 import sciline
@@ -130,3 +131,7 @@ WavelengthThetaFigure = NewType("WavelengthThetaFigure", Any)
 WavelengthZIndexFigure = NewType("WavelengthZIndexFigure", Any)
 QThetaFigure = NewType("QThetaFigure", Any)
 ReflectivityDiagnosticsView = NewType("ReflectivityDiagnosticsView", Any)
+
+CorrectionsToApply = NewType(
+    "CorrectionsToApply", set[Callable[[sc.DataArray], sc.DataArray]]
+)
