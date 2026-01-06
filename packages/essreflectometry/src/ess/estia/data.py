@@ -35,6 +35,11 @@ _registry = make_registry(
         "examples/NiTiML.ref": "md5:9769b884dfa09d34b6ae449b640463a1",
         "examples/Si-SiO2.ref": "md5:436e2312e137b63bf31cc39064d28864",
         "examples/Si-Ni.ref": "md5:76fcfc655635086060387163c9175ab4",
+        # McStas runs converted to NeXus files using event sampling
+        "examples/220573.nx": "md5:146cbc92c8a749e584be2a9acc8de54f",
+        "examples/220574.nx": "md5:ce6532c329b739916c3aaa269694ac7b",
+        "examples/220575.nx": "md5:5299660f41e331987f6ed2a88f1cf243",
+        "examples/220576.nx": "md5:1205ad3335e709dd44979090cb85944e",
         # Spin flip example from McStas simulation.
         # All runs have the same sample rotation angle but different samples.
         # Each sample is measured using all four flipper setting.
@@ -71,6 +76,21 @@ def estia_mcstas_sample_run(number: int | str) -> Filename[SampleRun]:
     return Filename[SampleRun](
         _registry.get_path(f"2186{int(number):02d}_tof_detector_list.p.x.y.t.L.sx.sy")
     )
+
+
+def estia_mcstas_nexus_example(name):
+    """Returns a list of NeXus files created from CODA files
+    filled with sampled McStas events."""
+    if name == 'reference':
+        return _registry.get_path("examples/220573.nx")
+    elif name == 'Ni/Ti-multilayer':
+        return list(
+            map(
+                _registry.get_path,
+                [f"examples/2205{i}.nx" for i in range(74, 77)],
+            )
+        )
+    raise ValueError(f'"{name}" is not a valid sample name')
 
 
 def estia_mcstas_example(name):
@@ -172,6 +192,7 @@ def estia_tof_lookup_table():
 
 __all__ = [
     "estia_mcstas_example",
+    "estia_mcstas_nexus_example",
     "estia_mcstas_reference_run",
     "estia_mcstas_sample_run",
     "estia_mcstas_spin_flip_example",
