@@ -31,8 +31,14 @@ def add_masks(
         z_range=_not_between(da.coords["z_index"], *zlims),
         divergence_too_large=_not_between(
             da.coords["divergence_angle"],
-            bdlim[0].to(unit=da.coords["divergence_angle"].unit),
-            bdlim[1].to(unit=da.coords["divergence_angle"].unit),
+            bdlim[0].to(
+                unit=da.coords["divergence_angle"].unit,
+                dtype='float64',
+            ),
+            bdlim[1].to(
+                unit=da.coords["divergence_angle"].unit,
+                dtype='float64',
+            ),
         ),
     )
     da = da.bins.assign_masks(
