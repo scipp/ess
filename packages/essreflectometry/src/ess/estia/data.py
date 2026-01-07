@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 from multiprocessing.pool import ThreadPool
+from pathlib import Path
 
 import scipp as sc
 
@@ -79,11 +80,11 @@ def estia_mcstas_sample_run(number: int | str) -> Filename[SampleRun]:
     )
 
 
-def estia_mcstas_nexus_example(name):
+def estia_mcstas_nexus_example(name: str) -> list[Path]:
     """Returns a list of NeXus files created from CODA files
     filled with sampled McStas events."""
     if name == 'reference':
-        return _registry.get_path("examples/220573.nx")
+        return [_registry.get_path("examples/220573.nx")]
     elif name == 'Ni/Ti-multilayer':
         return list(
             map(
@@ -94,10 +95,10 @@ def estia_mcstas_nexus_example(name):
     raise ValueError(f'"{name}" is not a valid sample name')
 
 
-def estia_mcstas_example(name):
+def estia_mcstas_example(name: str) -> list[Path]:
     """Returns a list of McStas files associated with the sample."""
     if name == 'reference':
-        return _registry.get_path("examples/220573/mccode.h5")
+        return [_registry.get_path("examples/220573/mccode.h5")]
     elif name == 'Ni/Ti-multilayer':
         return list(
             map(
