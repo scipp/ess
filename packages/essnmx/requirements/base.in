@@ -13,6 +13,6 @@ pooch>=1.5
 pandas>=2.1.2
 gemmi>=0.6.6
 defusedxml>=0.7.1
-bitshuffle>=0.5.2
 msgpack>=1.0.8
 tof>=25.12.1
+bitshuffle>=0.5.2;os_name == 'posix'
