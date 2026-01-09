@@ -80,12 +80,14 @@ def estia_mcstas_sample_run(number: int | str) -> Filename[SampleRun]:
     )
 
 
-def estia_mcstas_nexus_example(name: str) -> list[Path]:
+def estia_mcstas_nexus_reference_example() -> Path:
+    return _registry.get_path("examples/220573.nx")
+
+
+def estia_mcstas_nexus_sample_example(name: str) -> list[Path]:
     """Returns a list of NeXus files created from CODA files
     filled with sampled McStas events."""
-    if name == 'reference':
-        return [_registry.get_path("examples/220573.nx")]
-    elif name == 'Ni/Ti-multilayer':
+    if name == 'Ni/Ti-multilayer':
         return list(
             map(
                 _registry.get_path,
@@ -95,11 +97,13 @@ def estia_mcstas_nexus_example(name: str) -> list[Path]:
     raise ValueError(f'"{name}" is not a valid sample name')
 
 
-def estia_mcstas_example(name: str) -> list[Path]:
+def estia_mcstas_reference_example() -> Path:
+    return _registry.get_path("examples/220573/mccode.h5")
+
+
+def estia_mcstas_sample_example(name: str) -> list[Path]:
     """Returns a list of McStas files associated with the sample."""
-    if name == 'reference':
-        return [_registry.get_path("examples/220573/mccode.h5")]
-    elif name == 'Ni/Ti-multilayer':
+    if name == 'Ni/Ti-multilayer':
         return list(
             map(
                 _registry.get_path,
@@ -193,9 +197,11 @@ def estia_tof_lookup_table():
 
 
 __all__ = [
-    "estia_mcstas_example",
-    "estia_mcstas_nexus_example",
+    "estia_mcstas_nexus_reference_example",
+    "estia_mcstas_nexus_sample_example",
+    "estia_mcstas_reference_example",
     "estia_mcstas_reference_run",
+    "estia_mcstas_sample_example",
     "estia_mcstas_sample_run",
     "estia_mcstas_spin_flip_example",
     "estia_mcstas_spin_flip_example_download_all_to_cache",
