@@ -8,7 +8,6 @@ from functools import partial
 
 import sciline as sl
 import scipp as sc
-
 from ess.reduce.streaming import (
     EternalAccumulator,
     MaxAccumulator,
@@ -49,9 +48,9 @@ from .types import (
 from .xml import McStasInstrument
 
 
-def _build_metadata_streaming_processor_helper() -> (
-    Callable[[sl.Pipeline], StreamProcessor]
-):
+def _build_metadata_streaming_processor_helper() -> Callable[
+    [sl.Pipeline], StreamProcessor
+]:
     return partial(
         StreamProcessor,
         dynamic_keys=(RawEventProbability,),
@@ -64,9 +63,9 @@ def _build_metadata_streaming_processor_helper() -> (
     )
 
 
-def _build_final_streaming_processor_helper() -> (
-    Callable[[sl.Pipeline], StreamProcessor]
-):
+def _build_final_streaming_processor_helper() -> Callable[
+    [sl.Pipeline], StreamProcessor
+]:
     return partial(
         StreamProcessor,
         dynamic_keys=(RawEventProbability,),

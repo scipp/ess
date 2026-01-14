@@ -1,4 +1,4 @@
-# flake8: noqa
+# flake8: noqa: E501
 
 no_detectors = """
 SPLIT 999 COMPONENT Xtal = Single_crystal(

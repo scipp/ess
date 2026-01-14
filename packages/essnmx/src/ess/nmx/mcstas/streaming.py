@@ -4,7 +4,6 @@ from typing import Any
 
 import scipp as sc
 import scippnexus as snx
-
 from ess.reduce.streaming import Accumulator
 
 from .load import _validate_chunk_size, load_event_data_bank_name
