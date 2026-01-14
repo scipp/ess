@@ -71,9 +71,9 @@ def _check_non_default_config(testing_config: ReductionConfig) -> None:
                 # This value may be None or default, so we skip the check.
                 continue
             default_value = default_model[key]
-            assert (
-                testing_value != default_value
-            ), f"Value for '{key}' is default: {testing_value}"
+            assert testing_value != default_value, (
+                f"Value for '{key}' is default: {testing_value}"
+            )
 
 
 def test_reduction_config() -> None:
@@ -227,8 +227,9 @@ def tof_lut_file_path(tmp_path: pathlib.Path):
     """Fixture to provide the path to the small NMX NeXus file."""
     from dataclasses import is_dataclass
 
-    from ess.nmx.workflows import initialize_nmx_workflow
     from ess.reduce.time_of_flight import TimeOfFlightLookupTable
+
+    from ess.nmx.workflows import initialize_nmx_workflow
 
     # Simply use the default workflow for testing.
     workflow = initialize_nmx_workflow(config=WorkflowConfig())

@@ -6,7 +6,6 @@ from collections.abc import Callable
 
 import scipp as sc
 import scippnexus as snx
-
 from ess.reduce.nexus.types import Filename, NeXusName, SampleRun
 from ess.reduce.time_of_flight.types import TimeOfFlightLookupTable, TofDetector
 
