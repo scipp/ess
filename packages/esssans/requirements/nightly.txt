@@ -42,7 +42,7 @@ executing==2.2.1
     # via stack-data
 fonttools==4.61.1
     # via matplotlib
-fsspec==2025.12.0
+fsspec==2026.1.0
     # via dask
 graphviz==0.21
     # via -r nightly.in
@@ -62,7 +62,7 @@ ipydatawidgets==4.3.5
     # via pythreejs
 ipympl==0.9.8
     # via -r nightly.in
-ipython==9.8.0
+ipython==9.9.0
     # via
     #   ipympl
     #   ipywidgets
@@ -96,7 +96,7 @@ mpltoolbox==25.10.0
     # via scippneutron
 networkx==3.6.1
     # via cyclebane
-numpy==2.4.0
+numpy==2.4.1
     # via
     #   -r nightly.in
     #   contourpy
@@ -109,14 +109,14 @@ numpy==2.4.0
     #   scipp
     #   scippneutron
     #   scipy
-packaging==25.0
+packaging==26.0rc2
     # via
     #   dask
     #   lazy-loader
     #   matplotlib
     #   pooch
     #   pytest
-pandas==3.0.0rc1
+pandas==3.0.0rc2
     # via -r nightly.in
 parso==0.8.5
     # via jedi
@@ -187,7 +187,7 @@ scippnexus @ git+https://github.com/scipp/scippnexus@main
     #   -r nightly.in
     #   essreduce
     #   scippneutron
-scipy==1.17.0rc2
+scipy==1.17.0
     # via
     #   -r nightly.in
     #   scippneutron
@@ -218,7 +218,7 @@ typing-extensions==4.15.0
     #   typing-inspection
 typing-inspection==0.4.2
     # via pydantic
-urllib3==2.6.2
+urllib3==2.6.3
     # via requests
 wcwidth==0.2.14
     # via prompt-toolkit
