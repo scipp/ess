@@ -24,6 +24,7 @@ from .configurations import (
     WorkflowConfig,
 )
 from .nexus import (
+    _check_file,
     export_detector_metadata_as_nxlauetof,
     export_monitor_metadata_as_nxlauetof,
     export_reduced_data_as_nxlauetof,
@@ -189,6 +190,9 @@ def reduction(
         A DataGroup containing the reduced data for each selected detector.
 
     """
+    # Check the file output configuration before we start heavy computation.
+    _check_file(config.output.output_file, config.output.overwrite)
+
     display = _retrieve_display(logger, display)
     input_file_path = _retrieve_input_file(config.inputs.input_file).resolve()
     display(f"Input file: {input_file_path}")
