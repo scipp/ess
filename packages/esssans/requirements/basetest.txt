@@ -29,7 +29,7 @@ iniconfig==2.3.0
     # via pytest
 ipympl==0.9.8
     # via -r basetest.in
-ipython==9.8.0
+ipython==9.9.0
     # via
     #   ipympl
     #   ipywidgets
@@ -47,7 +47,7 @@ matplotlib==3.10.8
     # via ipympl
 matplotlib-inline==0.2.1
     # via ipython
-numpy==2.4.0
+numpy==2.4.1
     # via
     #   contourpy
     #   ipympl
@@ -91,7 +91,7 @@ python-dateutil==2.9.0.post0
     # via matplotlib
 requests==2.32.5
     # via pooch
-scipy==1.16.3
+scipy==1.17.0
     # via -r basetest.in
 six==1.17.0
     # via python-dateutil
@@ -105,7 +105,7 @@ traitlets==5.14.3
     #   matplotlib-inline
 typing-extensions==4.15.0
     # via ipython
-urllib3==2.6.2
+urllib3==2.6.3
     # via requests
 wcwidth==0.2.14
     # via prompt-toolkit
