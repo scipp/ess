@@ -347,7 +347,7 @@ def test_reduction_with_tof_lut_file(
         assert_identical(tof_edges_default * 2, tof_edges)
 
 
-def test_reduction_suceed_when_skipping_evenif_output_file_exists(
+def test_reduction_succeed_when_skipping_evenif_output_file_exists(
     reduction_config: ReductionConfig, temp_output_file: pathlib.Path
 ) -> None:
     # Make sure the file exists
