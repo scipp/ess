@@ -191,7 +191,8 @@ def reduction(
 
     """
     # Check the file output configuration before we start heavy computation.
-    _check_file(config.output.output_file, config.output.overwrite)
+    if not config.output.skip_file_output:
+        _check_file(config.output.output_file, config.output.overwrite)
 
     display = _retrieve_display(logger, display)
     input_file_path = _retrieve_input_file(config.inputs.input_file).resolve()
