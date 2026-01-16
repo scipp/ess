@@ -256,8 +256,11 @@ def reduction(
         sample=metadatas[NMXSampleMetadata],
         source=metadatas[NMXSourceMetadata],
         monitor=monitor_metadata,
-        lookup_table=base_wf.compute(TimeOfFlightLookupTable),
     )
+
+    if config.workflow.time_bin_coordinate == TimeBinCoordinate.time_of_flight:
+        results["lookup_table"] = base_wf.compute(TimeOfFlightLookupTable)
+
     if not config.output.skip_file_output:
         save_results(results=results, output_config=config.output)
 
