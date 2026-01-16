@@ -345,3 +345,39 @@ def test_reduction_with_tof_lut_file(
         tof_edges = hist.coords['tof']
         assert_identical(default_hist.data, hist.data)
         assert_identical(tof_edges_default * 2, tof_edges)
+
+
+def test_reduction_suceed_when_skipping_evenif_output_file_exists(
+    reduction_config: ReductionConfig, temp_output_file: pathlib.Path
+) -> None:
+    # Make sure the file exists
+    temp_output_file.touch(exist_ok=True)
+    # Make sure the file output is skipped.
+    reduction_config.output.skip_file_output = True
+
+    # Adjust workflow setting to finish fast.
+    reduction_config.workflow.nbins = 2
+    reduction_config.workflow.time_bin_coordinate = TimeBinCoordinate.event_time_offset
+    with known_warnings():
+        reduction(config=reduction_config)
+
+
+def test_reduction_fails_fast_if_output_file_exists(
+    reduction_config: ReductionConfig, temp_output_file: pathlib.Path
+) -> None:
+    import time
+
+    # Make sure the file exists
+    temp_output_file.touch()
+    # Make sure file output is NOT skipped.
+    reduction_config.output.skip_file_output = False
+
+    start = time.time()
+    with pytest.raises(FileExistsError):
+        reduction(config=reduction_config)
+    finish = time.time()
+
+    # Check if the `reduction` call fails within 1 second.
+    # There is no special reason why it is 1 second.
+    # It should just fail as fast as possible.
+    assert finish - start < 1
