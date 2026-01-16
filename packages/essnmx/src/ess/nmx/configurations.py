@@ -69,8 +69,14 @@ class WorkflowConfig(BaseModel):
     model_config = {"title": "Workflow Configuration"}
     time_bin_coordinate: TimeBinCoordinate = Field(
         title="Time Bin Coordinate",
-        description="Coordinate to bin the time data.",
-        default=TimeBinCoordinate.event_time_offset,
+        description="Coordinate to bin the time data. "
+        "Selecting `event_time_offset` means "
+        "reduction steps are skipped, "
+        "i.e. calculating `time of flight(tof)` "
+        "and simply saves histograms of the raw data.",
+        default=TimeBinCoordinate.time_of_flight,
+        # Default is time of flight since
+        # DIALS should expect the time of flight.
     )
     nbins: int = Field(
         title="Number of Time Bins",
