@@ -5,6 +5,7 @@ import pathlib
 import warnings
 from collections.abc import Callable
 
+import numpy as np
 import scipp as sc
 import scippnexus as snx
 from ess.reduce.nexus.types import Filename, NeXusName, RawDetector, SampleRun
@@ -83,6 +84,22 @@ def _retrieve_time_bin_coordinate_name(wf_config: WorkflowConfig) -> str:
         return _ETO_COORD_NAME
 
 
+def _warn_bin_edge_out_of_range(
+    *, edge: sc.Variable, coord_name: str, desc: str
+) -> None:
+    warnings.warn(
+        message=f"{edge} is {desc} than all "
+        f"{coord_name} values.\n"
+        "The histogram will all have zero values.",
+        category=UserWarning,
+        stacklevel=4,
+    )
+
+
+def _match_data_unit_dtype(config_var: sc.Variable, da: sc.Variable) -> sc.Variable:
+    return config_var.to(unit=da.unit, dtype=da.dtype)
+
+
 def _build_time_bin_edges(
     *,
     wf_config: WorkflowConfig,
@@ -95,53 +112,49 @@ def _build_time_bin_edges(
 
     # Use the user-set parameters if available
     # and validate them according to the data.
+    # Lower Time Bin Edge
     if wf_config.min_time_bin is not None:
-        min_t = sc.scalar(wf_config.min_time_bin, unit=wf_config.time_bin_unit).to(
-            unit=da_min_t.unit, dtype=da_min_t.dtype
-        )
+        min_t = sc.scalar(wf_config.min_time_bin, unit=wf_config.time_bin_unit)
+        min_t = _match_data_unit_dtype(min_t, da=da_min_t)
         # If the user-set minimum time bin value
         # is bigger than all time-bin-coordinate values.
-        if min_t >= da_max_t:
-            warnings.warn(
-                message=f"{min_t} is bigger than all "
-                f"{wf_config.time_bin_coordinate} values.\n"
-                "The histogram will all have zero values.",
-                category=UserWarning,
-                stacklevel=4,
+        if min_t > da_max_t:
+            _warn_bin_edge_out_of_range(
+                edge=min_t, coord_name=wf_config.time_bin_coordinate, desc='bigger'
             )
     else:
         min_t = da_min_t
 
+    # Upper Time Bin Edge
     if wf_config.max_time_bin is not None:
-        max_t = sc.scalar(wf_config.max_time_bin, unit=wf_config.time_bin_unit).to(
-            unit=da_max_t.unit
-        )
+        max_t = sc.scalar(wf_config.max_time_bin, unit=wf_config.time_bin_unit)
+        max_t = _match_data_unit_dtype(max_t, da=da_max_t)
         # If the user-set maximum time bin value
         # is smaller than all time-bin-coordinate values.
-        if max_tof <= da_min_t:
-            warnings.warn(
-                message=f"{max_tof} is smaller than all "
-                f"{wf_config.time_bin_coordinate} values.\n"
-                "The histogram will all have zero values.",
-                category=UserWarning,
-                stacklevel=3,
+        if max_t <= da_min_t:
+            _warn_bin_edge_out_of_range(
+                edge=max_t, coord_name=wf_config.time_bin_coordinate, desc='smaller'
             )
     else:
-        max_tof = da_max_t
+        max_t = da_max_t
+
+    # Avoid dropping the event that has the exact same
+    # `event_time_offset`` or `tof` value as the upper bin edge.
+    max_t.value = np.nextafter(max_t.value, np.inf)
 
     # Validate the results.
-    if min_t >= max_tof:
+    if min_t >= max_t:
         raise ValueError(
             f"Minimum time bin edge, {min_t} "
             "is bigger than or equal to the "
-            f"maximum time bin edge, {max_tof}.\n"
+            f"maximum time bin edge, {max_t}.\n"
             "Cannot build a time bin edges coordinate.\n"
             "Please check your configurations again."
         )
 
     # Build the bin-edges to histogram the results.
     n_edges = wf_config.nbins + 1
-    return sc.linspace(dim=t_coord_name, start=min_t, stop=max_tof, num=n_edges)
+    return sc.linspace(dim=t_coord_name, start=min_t, stop=max_t, num=n_edges)
 
 
 def reduction(
