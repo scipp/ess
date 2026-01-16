@@ -113,7 +113,7 @@ def _build_time_bin_edges(
         min_t = da_min_t
 
     if wf_config.max_time_bin is not None:
-        max_tof = sc.scalar(wf_config.max_time_bin, unit=wf_config.time_bin_unit).to(
+        max_t = sc.scalar(wf_config.max_time_bin, unit=wf_config.time_bin_unit).to(
             unit=da_max_t.unit
         )
         # If the user-set maximum time bin value
@@ -133,7 +133,7 @@ def _build_time_bin_edges(
     if min_t >= max_tof:
         raise ValueError(
             f"Minimum time bin edge, {min_t} "
-            "is bigger or equal than the "
+            "is bigger than or equal to the "
             f"maximum time bin edge, {max_tof}.\n"
             "Cannot build a time bin edges coordinate.\n"
             "Please check your configurations again."
