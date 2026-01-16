@@ -221,8 +221,20 @@ def test_reduction_only_number_of_time_bins(reduction_config: ReductionConfig) -
     assert len(hist.coords['tof']) == 21  # nbins + 1 edges
 
 
-def test_histogram_invalid_min_max_raises(reduction_config: ReductionConfig) -> None:
+def test_histogram_event_time_offset(reduction_config: ReductionConfig) -> None:
     reduction_config.workflow.nbins = 20
+    reduction_config.workflow.time_bin_coordinate = TimeBinCoordinate.event_time_offset
+    with known_warnings():
+        hist = _retrieve_one_hist(reduction(config=reduction_config))
+
+    # Check that the number of time bins is as expected.
+    assert len(hist.coords['event_time_offset']) == 21  # nbins + 1 edges
+    # Check if the histogram result is reasonable
+    zero = sc.scalar(0.0, unit='counts', dtype='float32', variance=0.0)
+    assert bool(hist.data.sum() > zero)
+
+
+def test_histogram_invalid_min_max_raises(reduction_config: ReductionConfig) -> None:
     reduction_config.workflow.min_time_bin = 120
     reduction_config.workflow.max_time_bin = 100
     with pytest.raises(ValueError, match='Cannot build a time bin edges coordinate'):
@@ -230,7 +242,25 @@ def test_histogram_invalid_min_max_raises(reduction_config: ReductionConfig) -> 
             reduction(config=reduction_config)
 
 
-def test_histogram_out_of_range_min_warns(reduction_config: ReductionConfig) -> None:
+def test_histogram_invalid_min_max_raises_eto(
+    reduction_config: ReductionConfig,
+) -> None:
+    reduction_config.workflow.time_bin_coordinate = TimeBinCoordinate.event_time_offset
+    reduction_config.workflow.min_time_bin = 50
+    reduction_config.workflow.max_time_bin = 40
+    with pytest.raises(ValueError, match='Cannot build a time bin edges coordinate'):
+        with known_warnings():
+            reduction(config=reduction_config)
+
+
+@pytest.mark.parametrize(
+    argnames="t_coord",
+    argvalues=[TimeBinCoordinate.time_of_flight, TimeBinCoordinate.event_time_offset],
+)
+def test_histogram_out_of_range_min_warns(
+    reduction_config: ReductionConfig, t_coord: TimeBinCoordinate
+) -> None:
+    reduction_config.workflow.time_bin_coordinate = t_coord
     reduction_config.workflow.nbins = 20
     reduction_config.workflow.min_time_bin = 1_000
     reduction_config.workflow.max_time_bin = 2_000
@@ -244,10 +274,17 @@ def test_histogram_out_of_range_min_warns(reduction_config: ReductionConfig) -> 
         )
 
 
-def test_histogram_out_of_range_max_warns(reduction_config: ReductionConfig) -> None:
-    reduction_config.workflow.nbins = 20
-    reduction_config.workflow.min_time_bin = 1
-    reduction_config.workflow.max_time_bin = 2
+@pytest.mark.parametrize(
+    argnames="t_coord",
+    argvalues=[TimeBinCoordinate.time_of_flight, TimeBinCoordinate.event_time_offset],
+)
+def test_histogram_out_of_range_max_warns(
+    reduction_config: ReductionConfig, t_coord: TimeBinCoordinate
+) -> None:
+    reduction_config.workflow.time_bin_coordinate = t_coord
+    reduction_config.workflow.nbins = 10
+    reduction_config.workflow.min_time_bin = -1
+    reduction_config.workflow.max_time_bin = 0
     with pytest.warns(UserWarning, match='is smaller than all'):
         with known_warnings():
             results = reduction(config=reduction_config)
@@ -256,19 +293,6 @@ def test_histogram_out_of_range_max_warns(reduction_config: ReductionConfig) -> 
         assert_identical(
             da.data.sum(), sc.scalar(0.0, unit='counts', dtype='float32', variance=0.0)
         )
-
-
-def test_histogram_event_time_offset(reduction_config: ReductionConfig) -> None:
-    reduction_config.workflow.nbins = 20
-    reduction_config.workflow.time_bin_coordinate = TimeBinCoordinate.event_time_offset
-    with known_warnings():
-        hist = _retrieve_one_hist(reduction(config=reduction_config))
-
-    # Check that the number of time bins is as expected.
-    assert len(hist.coords['event_time_offset']) == 21  # nbins + 1 edges
-    # Check if the histogram result is reasonable
-    zero = sc.scalar(0.0, unit='counts', dtype='float32', variance=0.0)
-    assert bool(hist.data.sum() > zero)
 
 
 @pytest.fixture
