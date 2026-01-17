@@ -173,7 +173,7 @@ def loki_tof_lookup_table_no_choppers() -> Path:
     This file is used to convert the neutron arrival time to time-of-flight.
 
     This table was computed using `Create a time-of-flight lookup table for LoKI
-    <../../loki/loki-make-tof-lookup-table.rst>`_
+    <../../user-guide/loki/loki-make-tof-lookup-table.ipynb>`_
     with ``NumberOfSimulatedNeutrons = 5_000_000``.
     """
     return _registry.get_path("loki-tof-lookup-table-no-choppers.h5")
