@@ -37,10 +37,23 @@ def blockify(
     return out
 
 
+def _is_1d_sorted_bin_edge(img: sc.DataArray, coord_name: str) -> bool:
+    orig_coord = img.coords[coord_name]
+    return len(orig_coord.dims) == 1 and (
+        len(orig_coord) == img.sizes[orig_coord.dim] + 1
+    )
+
+
+def _has_bin_edge(img: sc.DataArray, coord_name: str) -> bool:
+    orig_coord = img.coords[coord_name]
+    return any(orig_coord.sizes[dim] == img.sizes[dim] + 1 for dim in orig_coord.dims)
+
+
 def resample(
     image: sc.Variable | sc.DataArray,
     sizes: dict[str, int],
     method: str | Callable = 'sum',
+    keep: tuple[str, ...] = ('position',),
 ) -> sc.Variable | sc.DataArray:
     """
     Resample an image by folding it into blocks of specified sizes and applying a
@@ -63,14 +76,39 @@ def resample(
         signature should accept a ``scipp.Variable`` or ``scipp.DataArray`` as first
         argument and a set of dimensions to reduce over as second argument. The
         function should return a ``scipp.Variable`` or ``scipp.DataArray``.
+    keep:
+        Coordinates to keep in the output.
+        This argument is ignored if the `image` is not a ``scipp.DataArray``.
+        If the length of the coordinate is same as the dimension size,
+        values of each resampled block will be averaged.
+        New bin edge coordinate will be calculated
+        only if the original bin edge coordinate is
+        1-dimensional and sorted in the ascending order.
+        Any coordinate that does not exist in the original coordinates
+        or does not match the condition to be kept, will be ignored.
+
     """
     blocked = blockify(image, sizes=sizes)
     _method = getattr(sc, method) if isinstance(method, str) else method
     out = _method(blocked, set(blocked.dims) - set(image.dims))
-    if 'position' in blocked.coords:
-        out.coords['position'] = blocked.coords['position'].mean(
-            set(blocked.dims) - set(image.dims)
-        )
+    if isinstance(image, sc.DataArray) and isinstance(blocked, sc.DataArray):
+        relevant_keeps = [kcoord for kcoord in keep if kcoord in image.coords]
+
+        for keep_coordinate in relevant_keeps:
+            coord = blocked.coords[keep_coordinate]
+            reduced_dims = set(coord.dims) - set(image.coords[keep_coordinate].dims)
+            if _is_1d_sorted_bin_edge(image, keep_coordinate):
+                orig_dim = next(iter(image.coords[keep_coordinate].dims))
+                reduced_dim = next(iter(reduced_dims))
+                out.coords[keep_coordinate] = sc.concat(
+                    [coord.min(reduced_dim), coord.max(dim=reduced_dim)],
+                    dim=orig_dim,
+                )
+            elif _has_bin_edge(image, keep_coordinate):
+                ...
+            else:
+                out.coords[keep_coordinate] = coord.mean(reduced_dims)
+
     return out
 
 
@@ -78,6 +116,7 @@ def resize(
     image: sc.Variable | sc.DataArray,
     sizes: dict[str, int],
     method: str | Callable = 'sum',
+    keep: tuple[str, ...] = ('position',),
 ) -> sc.Variable | sc.DataArray:
     """
     Resize an image by folding it into blocks of specified sizes and applying a
@@ -102,6 +141,16 @@ def resize(
         signature should accept a ``scipp.Variable`` or ``scipp.DataArray`` as first
         argument and a set of dimensions to reduce over as second argument. The
         function should return a ``scipp.Variable`` or ``scipp.DataArray``.
+    keep:
+        Coordinates to keep in the output.
+        If the length of the coordinate is same as the dimension size,
+        values of each resized block will be averaged.
+        New bin edge coordinate will be calculated
+        only if the original bin edge coordinate is
+        1-dimensional and sorted in the ascending order.
+        Any coordinate that does not exist in the original coordinates
+        or does not match the condition to be kept, will be ignored.
+
     """
     block_sizes = {}
     for dim, size in sizes.items():
@@ -111,7 +160,7 @@ def resize(
                 f" the requested size ({size})."
             )
         block_sizes[dim] = image.sizes[dim] // size
-    return resample(image, sizes=block_sizes, method=method)
+    return resample(image, sizes=block_sizes, method=method, keep=keep)
 
 
 def laplace_2d(
