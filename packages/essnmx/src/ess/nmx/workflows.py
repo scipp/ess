@@ -112,7 +112,7 @@ def assemble_sample_metadata(
 ) -> NMXSampleMetadata:
     """Assemble sample metadata for NMX reduction workflow."""
     name = sample_component['name']
-    if isinstance(name, sc.Variable) and name.dtype is str:
+    if isinstance(name, sc.Variable) and name.dtype == str:
         sample_name = name.value
     elif isinstance(name, str):
         sample_name = name
