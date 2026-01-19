@@ -8,6 +8,7 @@ from typing import Any
 import h5py
 import numpy as np
 import scipp as sc
+import scippnexus as snx
 
 from .configurations import Compression
 from .types import (
@@ -89,40 +90,11 @@ def _retrieve_compression_arguments(compress_mode: Compression) -> dict:
     return {"compression": compression_filter, "compression_opts": compression_opts}
 
 
-def _create_lauetof_data_entry(file_obj: h5py.File) -> h5py.Group:
-    nx_entry = file_obj.create_group("entry")
-    nx_entry.attrs["NX_class"] = "NXentry"
-    return nx_entry
-
-
-def _add_lauetof_definition(nx_entry: h5py.Group) -> None:
-    _create_dataset_from_string(root_entry=nx_entry, name="definition", var="NXlauetof")
-
-
 def _add_lauetof_instrument(nx_entry: h5py.Group) -> h5py.Group:
     nx_instrument = nx_entry.create_group("instrument")
     nx_instrument.attrs["NX_class"] = "NXinstrument"
     _create_dataset_from_string(root_entry=nx_instrument, name="name", var="NMX")
     return nx_instrument
-
-
-def _add_lauetof_source_group(
-    source_position: sc.Variable, nx_instrument: h5py.Group
-) -> None:
-    nx_source = nx_instrument.create_group("source")
-    nx_source.attrs["NX_class"] = "NXsource"
-    _create_dataset_from_string(
-        root_entry=nx_source, name="name", var="European Spallation Source"
-    )
-    _create_dataset_from_string(root_entry=nx_source, name="short_name", var="ESS")
-    _create_dataset_from_string(
-        root_entry=nx_source, name="type", var="Spallation Neutron Source"
-    )
-    _create_dataset_from_var(
-        root_entry=nx_source, name="distance", var=sc.norm(source_position)
-    )
-    # Legacy probe information.
-    _create_dataset_from_string(root_entry=nx_source, name="probe", var="neutron")
 
 
 def _add_lauetof_detector_group(
@@ -154,37 +126,6 @@ def _add_lauetof_detector_group(
     # Slow axis, along where the pixel ID increases
     # by the number of pixels in the fast axis
     _create_dataset_from_var(root_entry=nx_det, name="slow_axis", var=slow_axis)
-
-
-def _add_lauetof_sample_group(
-    *,
-    crystal_rotation: sc.Variable,
-    sample_name: str | sc.Variable,
-    sample_orientation_matrix: sc.Variable,
-    sample_unit_cell: sc.Variable,
-    nx_entry: h5py.Group,
-) -> None:
-    nx_sample = nx_entry.create_group("sample")
-    nx_sample.attrs["NX_class"] = "NXsample"
-    _create_dataset_from_var(
-        root_entry=nx_sample,
-        var=crystal_rotation,
-        name='crystal_rotation',
-        long_name='crystal rotation in Phi (XYZ)',
-    )
-    _create_dataset_from_string(
-        root_entry=nx_sample,
-        name='name',
-        var=sample_name if isinstance(sample_name, str) else sample_name.value,
-    )
-    _create_dataset_from_var(
-        name='orientation_matrix', root_entry=nx_sample, var=sample_orientation_matrix
-    )
-    _create_dataset_from_var(
-        name='unit_cell',
-        root_entry=nx_sample,
-        var=sample_unit_cell,
-    )
 
 
 def _add_arbitrary_metadata(
@@ -240,22 +181,15 @@ def export_static_metadata_as_nxlauetof(
 
     """
     _check_file(output_file, overwrite=overwrite)
-    with h5py.File(output_file, "w") as f:
-        f.attrs["NX_class"] = "NXlauetof"
-        nx_entry = _create_lauetof_data_entry(f)
-        _add_lauetof_definition(nx_entry)
-        _add_lauetof_sample_group(
-            crystal_rotation=sample_metadata.crystal_rotation,
-            sample_name=sample_metadata.sample_name,
-            sample_orientation_matrix=sample_metadata.sample_orientation_matrix,
-            sample_unit_cell=sample_metadata.sample_unit_cell,
-            nx_entry=nx_entry,
-        )
-        nx_instrument = _add_lauetof_instrument(nx_entry)
-        _add_lauetof_source_group(source_metadata.source_position, nx_instrument)
-        # Skipping ``NXdata``(name) field with data link
-        # Add arbitrary metadata
-        _add_arbitrary_metadata(nx_entry, **arbitrary_metadata)
+    with snx.File(output_file, "w") as f:
+        f._group.attrs["NX_class"] = "NXlauetof"
+        nx_entry = f.create_class(name='entry', class_name='NXlauetof')
+        nx_entry.create_field('definitions', value='NXlauetof')
+        nx_entry['sample'] = sample_metadata
+
+        nx_instrument = nx_entry.create_class('instrument', snx.NXinstrument)
+        nx_instrument['source'] = source_metadata
+        _add_arbitrary_metadata(nx_entry._group, **arbitrary_metadata)
 
 
 def export_monitor_metadata_as_nxlauetof(
