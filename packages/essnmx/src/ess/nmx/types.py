@@ -71,6 +71,7 @@ class NMXSourceMetadata:
 
 @dataclass(kw_only=True)
 class NMXMonitorMetadata:
+    nx_class = snx.NXmonitor
     monitor_histogram: sc.DataArray
     tof_bin_coord: str = field(
         default='tof',
@@ -80,9 +81,21 @@ class NMXMonitorMetadata:
         },
     )
 
+    def __write_to_nexus_group__(self, group: h5py.Group):
+        snx.create_field(group, 'mode', 'monitor')
+        snx.create_field(group, 'preset', 0.0)
+        data_field = snx.create_field(group, 'data', self.monitor_histogram.data)
+        data_field.attrs['signal'] = 1
+        data_field.attrs['primary'] = 1
+        snx.create_field(
+            group, 'time_of_flight', self.monitor_histogram.coords[self.tof_bin_coord]
+        )
+
 
 @dataclass(kw_only=True)
 class NMXDetectorMetadata:
+    nx_class = snx.NXdetector
+
     detector_name: str
     x_pixel_size: sc.Variable
     y_pixel_size: sc.Variable
@@ -95,3 +108,13 @@ class NMXDetectorMetadata:
     azimuthal_angle: sc.Variable = field(
         default_factory=lambda: sc.scalar(0, unit='deg')
     )
+
+    def __write_to_nexus_group__(self, group: h5py.Group):
+        snx.create_field(group, 'x_pixel_size', self.x_pixel_size)
+        snx.create_field(group, 'y_pixel_size', self.y_pixel_size)
+        snx.create_field(group, 'origin', self.origin_position)
+        snx.create_field(group, 'fast_axis', self.fast_axis)
+        snx.create_field(group, 'slow_axis', self.slow_axis)
+        snx.create_field(group, 'distance', self.distance)
+        snx.create_field(group, 'polar_angle', self.polar_angle)
+        snx.create_field(group, 'azimuthal_angle', self.azimuthal_angle)
