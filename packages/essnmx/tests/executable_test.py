@@ -136,13 +136,25 @@ def small_nmx_nexus_path():
 
 def _check_output_file(output_file_path: pathlib.Path, nbins: int):
     detector_names = [f'detector_panel_{i}' for i in range(3)]
+    mandatory_fields = (
+        'data',
+        'distance',
+        'fast_axis',
+        'slow_axis',
+        'origin',
+        'x_pixel_size',
+        'y_pixel_size',
+        'origin',
+    )
     with snx.File(output_file_path, 'r') as f:
         # Test
+        assert f['entry/instrument/name'][()] == 'NMX'
         for name in detector_names:
             det_gr = f[f'entry/instrument/{name}']
             assert det_gr is not None
             toa_edges = det_gr['time_of_flight'][()]
             assert len(toa_edges) == nbins
+            assert all(field_name in det_gr for field_name in mandatory_fields)
 
 
 def test_executable_runs(small_nmx_nexus_path, tmp_path: pathlib.Path):
