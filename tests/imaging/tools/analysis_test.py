@@ -3,6 +3,7 @@
 import numpy as np
 import pytest
 import scipp as sc
+from scipp.testing import assert_allclose, assert_identical
 from scitiff.io import load_scitiff
 
 from ess import imaging as img
@@ -33,6 +34,23 @@ def test_resample_with_position_coord() -> None:
         resampled.coords['position'].values,
         vectors.reshape(ny, 2, nx, 2, 3).mean((1, 3)),
     )
+
+
+def test_resample_keep_specific_coordinates() -> None:
+    da = load_scitiff(siemens_star_path())["image"]
+    resampled = img.tools.resample(da, sizes={'x': 2, 'y': 2}, keep=('x',))
+    expected_x = img.tools.blockify(da.coords['x'], sizes={'x': 2}).mean('newdim0')
+    assert_allclose(expected_x, resampled.coords['x'])
+    assert 'y' not in resampled.coords
+
+
+def test_resample_keep_bin_edge_coordinate() -> None:
+    da = load_scitiff(siemens_star_path())["image"]
+    # Overwrite the coordinate 't' to be a bin-edge.
+    da.coords['t'] = sc.array(dims=['t'], values=[0, 1, 2, 3])
+    resampled = img.tools.resample(da, sizes={'x': 2, 'y': 2, 't': 3}, keep=('t',))
+    expected_x = sc.array(dims=['t'], values=[0, 3], unit='dimensionless')
+    assert_identical(expected_x, resampled.coords['t'])
 
 
 def test_resample_mean() -> None:
@@ -71,6 +89,25 @@ def test_resize_callable() -> None:
     resized = img.tools.resize(da, sizes={'x': 256, 'y': 256}, method=sc.max)
     assert resized.sizes['x'] == 256
     assert resized.sizes['y'] == 256
+
+
+def test_resize_keep_specific_coordinates() -> None:
+    da = load_scitiff(siemens_star_path())["image"]
+    resized = img.tools.resize(
+        da, sizes={'x': 256, 'y': 256}, method=sc.max, keep=('x',)
+    )
+    expected_x = img.tools.blockify(da.coords['x'], sizes={'x': 5}).mean('newdim0')
+    assert_identical(expected_x, resized.coords['x'])
+    assert 'y' not in resized.coords
+
+
+def test_resize_keep_bin_edge_coordinate() -> None:
+    da = load_scitiff(siemens_star_path())["image"]
+    # Overwrite the coordinate 't' to be a bin-edge.
+    da.coords['t'] = sc.array(dims=['t'], values=[0, 1, 2, 3])
+    resized = img.tools.resize(da, sizes={'x': 256, 'y': 256, 't': 1}, keep=('t',))
+    expected_x = sc.array(dims=['t'], values=[0, 3], unit='dimensionless')
+    assert_identical(expected_x, resized.coords['t'])
 
 
 def test_resize_bad_size_requested_raises():
