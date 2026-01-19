@@ -31,10 +31,6 @@ def _check_file(
     return filename
 
 
-def _create_dataset_from_string(*, root_entry: h5py.Group, name: str, var: str) -> None:
-    root_entry.create_dataset(name, dtype=h5py.string_dtype(), data=var)
-
-
 def _create_dataset_from_var(
     *,
     root_entry: h5py.Group,
@@ -88,44 +84,6 @@ def _retrieve_compression_arguments(compress_mode: Compression) -> dict:
         compression_opts = None
 
     return {"compression": compression_filter, "compression_opts": compression_opts}
-
-
-def _add_lauetof_instrument(nx_entry: h5py.Group) -> h5py.Group:
-    nx_instrument = nx_entry.create_group("instrument")
-    nx_instrument.attrs["NX_class"] = "NXinstrument"
-    _create_dataset_from_string(root_entry=nx_instrument, name="name", var="NMX")
-    return nx_instrument
-
-
-def _add_lauetof_detector_group(
-    *,
-    detector_name: str,
-    x_pixel_size: sc.Variable,
-    y_pixel_size: sc.Variable,
-    origin_position: sc.Variable,
-    fast_axis: sc.Variable,
-    slow_axis: sc.Variable,
-    distance: sc.Variable,
-    polar_angle: sc.Variable,
-    azimuthal_angle: sc.Variable,
-    nx_instrument: h5py.Group,
-) -> None:
-    nx_det = nx_instrument.create_group(detector_name)  # Detector name
-    nx_det.attrs["NX_class"] = "NXdetector"
-    _create_dataset_from_var(name="polar_angle", root_entry=nx_det, var=polar_angle)
-    _create_dataset_from_var(
-        name="azimuthal_angle", root_entry=nx_det, var=azimuthal_angle
-    )
-    _create_dataset_from_var(name="x_pixel_size", root_entry=nx_det, var=x_pixel_size)
-    _create_dataset_from_var(name="y_pixel_size", root_entry=nx_det, var=y_pixel_size)
-    _create_dataset_from_var(name="distance", root_entry=nx_det, var=distance)
-    # Legacy geometry information until we have a better way to store it
-    _create_dataset_from_var(name="origin", root_entry=nx_det, var=origin_position)
-    # Fast axis, along where the pixel ID increases by 1
-    _create_dataset_from_var(root_entry=nx_det, name="fast_axis", var=fast_axis)
-    # Slow axis, along where the pixel ID increases
-    # by the number of pixels in the fast axis
-    _create_dataset_from_var(root_entry=nx_det, name="slow_axis", var=slow_axis)
 
 
 def _add_arbitrary_metadata(
@@ -213,14 +171,9 @@ def export_monitor_metadata_as_nxlauetof(
     if not append_mode:
         raise NotImplementedError("Only append mode is supported for now.")
 
-    with h5py.File(output_file, "r+") as f:
+    with snx.File(output_file, "r+") as f:
         nx_entry = f["entry"]
-        # Placeholder for ``monitor`` group
-        _add_lauetof_monitor_group(
-            tof_bin_coord=monitor_metadata.tof_bin_coord,
-            monitor_histogram=monitor_metadata.monitor_histogram,
-            nx_entry=nx_entry,
-        )
+        nx_entry["control"] = monitor_metadata
 
 
 def export_detector_metadata_as_nxlauetof(
@@ -245,51 +198,15 @@ def export_detector_metadata_as_nxlauetof(
     if not append_mode:
         raise NotImplementedError("Only append mode is supported for now.")
 
-    with h5py.File(output_file, "r+") as f:
-        nx_entry = f["entry"]
+    with snx.File(output_file, "r+") as f:
+        nx_entry: snx.Group = f["entry"]
         if "instrument" not in nx_entry:
-            nx_instrument = _add_lauetof_instrument(f["entry"])
+            nx_instrument = nx_entry.create_class("instrument", 'NXinstrument')
+            nx_instrument.create_field(key='name', value='NMX')
         else:
             nx_instrument = nx_entry["instrument"]
 
-        # Add detector group metadata
-        _add_lauetof_detector_group(
-            detector_name=detector_metadata.detector_name,
-            x_pixel_size=detector_metadata.x_pixel_size,
-            y_pixel_size=detector_metadata.y_pixel_size,
-            origin_position=detector_metadata.origin_position,
-            fast_axis=detector_metadata.fast_axis,
-            slow_axis=detector_metadata.slow_axis,
-            distance=detector_metadata.distance,
-            polar_angle=detector_metadata.polar_angle,
-            azimuthal_angle=detector_metadata.azimuthal_angle,
-            nx_instrument=nx_instrument,
-        )
-
-
-def _add_lauetof_monitor_group(
-    *,
-    tof_bin_coord: str,
-    monitor_histogram: sc.DataArray,
-    nx_entry: h5py.Group,
-) -> None:
-    nx_monitor = nx_entry.create_group("control")
-    nx_monitor.attrs["NX_class"] = "NXmonitor"
-    _create_dataset_from_string(root_entry=nx_monitor, name='mode', var='monitor')
-    nx_monitor["preset"] = 0.0  # Check if this is the correct value
-    data_dset = _create_dataset_from_var(
-        name='data',
-        root_entry=nx_monitor,
-        var=monitor_histogram.data,
-    )
-    data_dset.attrs["signal"] = 1
-    data_dset.attrs["primary"] = 1
-
-    _create_dataset_from_var(
-        name='time_of_flight',
-        root_entry=nx_monitor,
-        var=monitor_histogram.coords[tof_bin_coord],
-    )
+        nx_instrument[detector_metadata.detector_name] = detector_metadata
 
 
 def export_reduced_data_as_nxlauetof(
