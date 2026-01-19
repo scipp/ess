@@ -110,10 +110,11 @@ class NMXDetectorMetadata:
     )
 
     def __write_to_nexus_group__(self, group: h5py.Group):
-        snx.create_field(group, 'polar_angle', self.polar_angle)
-        snx.create_field(group, 'azimuthal_angle', self.azimuthal_angle)
         snx.create_field(group, 'x_pixel_size', self.x_pixel_size)
-        snx.create_field(group, 'distance', self.distance)
+        snx.create_field(group, 'y_pixel_size', self.y_pixel_size)
         snx.create_field(group, 'origin', self.origin_position)
         snx.create_field(group, 'fast_axis', self.fast_axis)
         snx.create_field(group, 'slow_axis', self.slow_axis)
+        snx.create_field(group, 'distance', self.distance)
+        snx.create_field(group, 'polar_angle', self.polar_angle)
+        snx.create_field(group, 'azimuthal_angle', self.azimuthal_angle)
