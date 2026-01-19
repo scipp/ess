@@ -2,7 +2,9 @@ import enum
 from dataclasses import dataclass, field
 from typing import NewType
 
+import h5py
 import scipp as sc
+import scippnexus as snx
 
 
 class Compression(enum.StrEnum):
@@ -24,9 +26,11 @@ TofSimulationMaxWavelength = NewType("TofSimulationMaxWavelength", sc.Variable)
 
 @dataclass(kw_only=True)
 class NMXSampleMetadata:
+    nx_class = snx.NXsample
+
     crystal_rotation: sc.Variable
     sample_position: sc.Variable
-    sample_name: sc.Variable | str
+    sample_name: str
     # Temporarily hardcoding some values
     # TODO: Remove hardcoded values
     sample_orientation_matrix: sc.Variable = field(
@@ -45,10 +49,24 @@ class NMXSampleMetadata:
         )
     )
 
+    def __write_to_nexus_group__(self, group: h5py.Group):
+        cr_field = snx.create_field(group, 'crystal_rotation', self.crystal_rotation)
+        cr_field.attrs['long_name'] = 'crystal rotation in Phi (XYZ)'
+        snx.create_field(group, 'name', self.sample_name)
+        snx.create_field(group, 'orientation_matrix', self.sample_orientation_matrix)
+        snx.create_field(group, 'unit_cell', self.sample_unit_cell)
+
 
 @dataclass(kw_only=True)
 class NMXSourceMetadata:
+    nx_class = snx.NXsource
     source_position: sc.Variable
+
+    def __write_to_nexus_group__(self, group: h5py.Group):
+        snx.create_field(group, 'name', 'European Spallation Source')
+        snx.create_field(group, 'type', 'Spallation Neutron Source')
+        snx.create_field(group, 'distance', sc.norm(self.source_position))
+        snx.create_field(group, 'probe', 'neutron')
 
 
 @dataclass(kw_only=True)

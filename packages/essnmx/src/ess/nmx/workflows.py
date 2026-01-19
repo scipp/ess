@@ -111,8 +111,16 @@ def assemble_sample_metadata(
     sample_component: NeXusComponent[snx.NXsample, SampleRun],
 ) -> NMXSampleMetadata:
     """Assemble sample metadata for NMX reduction workflow."""
+    name = sample_component['name']
+    if isinstance(name, sc.Variable) and name.dtype == str:
+        sample_name = name.value
+    elif isinstance(name, str):
+        sample_name = name
+    else:
+        raise TypeError(f'Sample name {name}is in a wrong type: ', type(name))
+
     return NMXSampleMetadata(
-        sample_name=sample_component['name'],
+        sample_name=sample_name,
         crystal_rotation=crystal_rotation,
         sample_position=sample_position,
     )
