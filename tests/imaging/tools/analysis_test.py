@@ -53,6 +53,14 @@ def test_resample_keep_bin_edge_coordinate() -> None:
     assert_identical(expected_x, resampled.coords['t'])
 
 
+def test_resample_keep_unsorted_bin_edge_coordinate_ignored() -> None:
+    da = load_scitiff(siemens_star_path())["image"]
+    # Overwrite the coordinate 't' to be a bin-edge.
+    da.coords['t'] = sc.array(dims=['t'], values=[0, 1, 3, 2])
+    resampled = img.tools.resample(da, sizes={'x': 2, 'y': 2, 't': 3}, keep=('t',))
+    assert 't' not in resampled.coords
+
+
 def test_resample_mean() -> None:
     da = load_scitiff(siemens_star_path())["image"]
     resampled = img.tools.resample(da, sizes={'x': 2, 'y': 2}, method='mean')
