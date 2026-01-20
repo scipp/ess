@@ -39,14 +39,16 @@ def blockify(
 
 def _is_1d_sorted_bin_edge(img: sc.DataArray, coord_name: str) -> bool:
     orig_coord = img.coords[coord_name]
-    return len(orig_coord.dims) == 1 and (
-        len(orig_coord) == img.sizes[orig_coord.dim] + 1
+    return (
+        len(orig_coord.dims) == 1
+        and bool(sc.issorted(orig_coord, dim=orig_coord.dim, order='ascending'))
+        and (len(orig_coord) == img.sizes[orig_coord.dim] + 1)
     )
 
 
 def _has_bin_edge(img: sc.DataArray, coord_name: str) -> bool:
     orig_coord = img.coords[coord_name]
-    return any(orig_coord.sizes[dim] == img.sizes[dim] + 1 for dim in orig_coord.dims)
+    return any(img.coords.is_edges(coord_name, dim) for dim in orig_coord.dims)
 
 
 def resample(
