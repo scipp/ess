@@ -102,10 +102,9 @@ def resample(
             if _is_1d_sorted_bin_edge(image, keep_coordinate):
                 orig_dim = next(iter(image.coords[keep_coordinate].dims))
                 reduced_dim = next(iter(reduced_dims))
-                out.coords[keep_coordinate] = sc.concat(
-                    [coord.min(reduced_dim), coord.max(dim=reduced_dim)],
-                    dim=orig_dim,
-                )
+                out.coords[keep_coordinate] = image.coords[keep_coordinate][
+                    orig_dim, :: blocked.sizes[reduced_dim]
+                ]
             elif _has_bin_edge(image, keep_coordinate):
                 ...
             else:
