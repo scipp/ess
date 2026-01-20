@@ -55,7 +55,7 @@ def resample(
     image: sc.Variable | sc.DataArray,
     sizes: dict[str, int],
     method: str | Callable = 'sum',
-    keep: tuple[str, ...] = ('position',),
+    keep: tuple[str, ...] = (),
 ) -> sc.Variable | sc.DataArray:
     """
     Resample an image by folding it into blocks of specified sizes and applying a
@@ -117,7 +117,7 @@ def resize(
     image: sc.Variable | sc.DataArray,
     sizes: dict[str, int],
     method: str | Callable = 'sum',
-    keep: tuple[str, ...] = ('position',),
+    keep: tuple[str, ...] = (),
 ) -> sc.Variable | sc.DataArray:
     """
     Resize an image by folding it into blocks of specified sizes and applying a
