@@ -62,6 +62,12 @@ def _create_dataset_from_var(
 
 
 def _retrieve_compression_arguments(compress_mode: Compression) -> dict:
+    """Returns compression filter and opts arguments for the ``compress_mode``.
+
+    Returns an empty dictionary if an unimplemented compression mode
+    or `NONE` compression mode is selected.
+
+    """
     if compress_mode == Compression.BITSHUFFLE_LZ4:
         try:
             import bitshuffle.h5
@@ -79,9 +85,21 @@ def _retrieve_compression_arguments(compress_mode: Compression) -> dict:
             )
             compression_filter = "gzip"
             compression_opts = 4
+    elif compress_mode == Compression.GZIP:
+        compression_filter = "gzip"
+        compression_opts = 4
+    elif compress_mode == Compression.NONE:
+        return {}
     else:
-        compression_filter = None
-        compression_opts = None
+        warnings.warn(
+            UserWarning(
+                f"Compression Mode {compress_mode} is not implemented yet. "
+                "Not Compressing the dataset... "
+                "Try `GZIP` or `BITSHUFFLE_LZ4` if compression is needed."
+            ),
+            stacklevel=2,
+        )
+        return {}
 
     return {"compression": compression_filter, "compression_opts": compression_opts}
 
@@ -246,9 +264,13 @@ def export_reduced_data_as_nxlauetof(
         If ``False``, the file is opened in None-append mode.
         > None-append mode is not supported for now.
         > Only append mode is supported for now.
-    compress_counts:
-        If ``True``, the detector counts are compressed using bitshuffle.
+    compress_mode:
+        The detector counts are compressed using the ``compress_mode``.
         It is because only the detector counts are expected to be large.
+        If ``Compression.BITSHUFFLE_LZ4`` is selected
+        but the bitshuffle is not supported for the environment,
+        it will fall back to ``Compression.GZIP``.
+        Select ``Compression.NONE`` if compression is not needed.
 
     """
     if not append_mode:
@@ -259,22 +281,19 @@ def export_reduced_data_as_nxlauetof(
         # Data - shape: [n_x_pixels, n_y_pixels, n_tof_bins]
         # The actual application definition defines it as integer,
         # so we overwrite the dtype here.
-        num_x, num_y = da.sizes['x_pixel_offset'], da.sizes['y_pixel_offset']
 
-        if compress_mode != Compression.NONE:
-            compression_args = _retrieve_compression_arguments(compress_mode)
-            data_dset = _create_dataset_from_var(
-                name="data",
-                root_entry=nx_detector,
-                var=da.data,
-                chunks=(num_x, num_y, 1),  # Chunk along tof axis
-                dtype=np.uint,
-                **compression_args,
-            )
-        else:
-            data_dset = _create_dataset_from_var(
-                name="data", root_entry=nx_detector, var=da.data, dtype=np.uint
-            )
+        compression_args = _retrieve_compression_arguments(compress_mode)
+        if compress_mode != Compression.NONE:  # Calculate the chunk sizes
+            num_x, num_y = da.sizes['x_pixel_offset'], da.sizes['y_pixel_offset']
+            compression_args['chunks'] = (num_x, num_y, 1)  # Chunk along tof axis
+
+        data_dset = _create_dataset_from_var(
+            name="data",
+            root_entry=nx_detector,
+            var=da.data,
+            dtype=np.uint,
+            **compression_args,
+        )
 
         data_dset.attrs["signal"] = 1
 
