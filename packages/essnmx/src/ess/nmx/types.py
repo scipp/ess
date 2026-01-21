@@ -14,6 +14,7 @@ class Compression(enum.StrEnum):
     """
 
     NONE = 'NONE'
+    GZIP = 'GZIP'
     BITSHUFFLE_LZ4 = 'BITSHUFFLE_LZ4'
 
 
