@@ -36,13 +36,22 @@ def test_resample_with_2d_position_coord() -> None:
     )
 
 
+def test_resample_keep_coordinate() -> None:
+    da = load_scitiff(siemens_star_path())["image"]
+    # Overwrite the coordinate 't' to be a bin-edge.
+    da.coords['t'] = sc.array(dims=['t'], values=[1, 2, 3])
+    resampled = img.tools.resample(da, sizes={'x': 2, 'y': 2, 't': 3})
+    expected_t = sc.array(dims=['t'], values=[2.0], unit='dimensionless')
+    assert_identical(expected_t, resampled.coords['t'])
+
+
 def test_resample_keep_bin_edge_coordinate() -> None:
     da = load_scitiff(siemens_star_path())["image"]
     # Overwrite the coordinate 't' to be a bin-edge.
     da.coords['t'] = sc.array(dims=['t'], values=[0, 1, 2, 3])
     resampled = img.tools.resample(da, sizes={'x': 2, 'y': 2, 't': 3})
-    expected_x = sc.array(dims=['t'], values=[0, 3], unit='dimensionless')
-    assert_identical(expected_x, resampled.coords['t'])
+    expected_t = sc.array(dims=['t'], values=[0, 3], unit='dimensionless')
+    assert_identical(expected_t, resampled.coords['t'])
 
 
 def test_resample_unsorted_bin_edge_coordinate_ignored() -> None:
@@ -109,13 +118,22 @@ def test_resize_callable() -> None:
     assert resized.sizes['y'] == 256
 
 
+def test_resize_keep_coordinate() -> None:
+    da = load_scitiff(siemens_star_path())["image"]
+    # Overwrite the coordinate 't' to be a bin-edge.
+    da.coords['t'] = sc.array(dims=['t'], values=[1, 2, 3])
+    resampled = img.tools.resize(da, sizes={'t': 1})
+    expected_t = sc.array(dims=['t'], values=[2.0], unit='dimensionless')
+    assert_identical(expected_t, resampled.coords['t'])
+
+
 def test_resize_keep_bin_edge_coordinate() -> None:
     da = load_scitiff(siemens_star_path())["image"]
     # Overwrite the coordinate 't' to be a bin-edge.
     da.coords['t'] = sc.array(dims=['t'], values=[0, 1, 2, 3])
     resized = img.tools.resize(da, sizes={'x': 256, 'y': 256, 't': 1})
-    expected_x = sc.array(dims=['t'], values=[0, 3], unit='dimensionless')
-    assert_identical(expected_x, resized.coords['t'])
+    expected_t = sc.array(dims=['t'], values=[0, 3], unit='dimensionless')
+    assert_identical(expected_t, resized.coords['t'])
 
 
 def test_resize_unsorted_bin_edge_ignored() -> None:
