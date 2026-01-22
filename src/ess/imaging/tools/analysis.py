@@ -179,7 +179,6 @@ def resize(
                 f" the requested size ({size})."
             )
         block_sizes[dim] = image.sizes[dim] // size
-
     return resample(image, sizes=block_sizes, method=method)
 
 
