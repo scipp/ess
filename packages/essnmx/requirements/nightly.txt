@@ -55,6 +55,8 @@ idna==3.11
     # via
     #   email-validator
     #   requests
+importlib-metadata==8.7.1
+    # via dask
 iniconfig==2.3.0
     # via pytest
 kiwisolver==1.4.10rc0
@@ -170,6 +172,8 @@ typing-inspection==0.4.2
     # via pydantic
 urllib3==2.6.3
     # via requests
+zipp==3.23.0
+    # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

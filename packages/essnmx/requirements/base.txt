@@ -52,6 +52,8 @@ idna==3.11
     # via
     #   email-validator
     #   requests
+importlib-metadata==8.7.1
+    # via dask
 kiwisolver==1.4.9
     # via matplotlib
 lazy-loader==0.4
@@ -158,6 +160,8 @@ typing-inspection==0.4.2
     # via pydantic
 urllib3==2.6.3
     # via requests
+zipp==3.23.0
+    # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
