@@ -37,6 +37,23 @@ def blockify(
     return out
 
 
+def _is_1d_sorted_bin_edges(coords: sc.Coords, coord_name: str) -> bool:
+    return (
+        (coord := coords[coord_name]).ndim == 1
+        and coords.is_edges(coord_name)
+        and (
+            bool(sc.issorted(coord, dim=coord.dim, order='ascending'))
+            or bool(sc.issorted(coord, dim=coord.dim, order='descending'))
+        )
+    )
+
+
+def _is_non_bin_edges(coords: sc.Coords, coord_name: str) -> bool:
+    return not any(
+        coords.is_edges(coord_name, dim=dim) for dim in coords[coord_name].dims
+    )
+
+
 def resample(
     image: sc.Variable | sc.DataArray,
     sizes: dict[str, int],
@@ -56,6 +73,9 @@ def resample(
     sizes:
         A dictionary specifying the block sizes for each dimension.
         For example, ``{'x': 4, 'y': 4}`` will create blocks of size 4x4.
+        Any dimensions with size ``1`` will be ignored.
+        If all sizes are set to ``1``,
+        it will not apply ``method`` and return a copy of the input resampling image.
     method:
         The reduction method to apply to the blocks. This can be a string referring to
         any valid Scipp reduction method, such as 'sum', 'mean', 'max', etc.
@@ -63,14 +83,44 @@ def resample(
         signature should accept a ``scipp.Variable`` or ``scipp.DataArray`` as first
         argument and a set of dimensions to reduce over as second argument. The
         function should return a ``scipp.Variable`` or ``scipp.DataArray``.
+
+
+    Notes
+    -----
+    If the image is a ``scipp.DataArray``,
+    bin edges in the resampling dimensions
+    will be preserved if they are 1-dimensional and sorted (they are dropped otherwise).
+    New bin edges will be chosen according to the resampling sizes.
+    For midpoint coordinates, new coordinates will be average values
+    of each resampled block.
+
+    .. warning::
+        The coordinates in the output may not be correct
+        if they are not sorted or not linear.
+
     """
+    # Filter the resample sizes first.
+    sizes = {dim: size for dim, size in sizes.items() if size != 1}
+    if not sizes:
+        return image.copy(deep=False)
+
     blocked = blockify(image, sizes=sizes)
     _method = getattr(sc, method) if isinstance(method, str) else method
     out = _method(blocked, set(blocked.dims) - set(image.dims))
-    if 'position' in blocked.coords:
-        out.coords['position'] = blocked.coords['position'].mean(
-            set(blocked.dims) - set(image.dims)
-        )
+
+    if isinstance(image, sc.DataArray):
+        # Restore the coordinates dropped by the `_method` if possible.
+        _dropped_cnames = set(image.coords.keys()) - set(out.coords.keys())
+
+        for name in _dropped_cnames:
+            coord = image.coords[name]
+            if _is_1d_sorted_bin_edges(image.coords, name):
+                out.coords[name] = coord[coord.dim, :: sizes[coord.dim]]
+            elif _is_non_bin_edges(image.coords, name):
+                folded_coord = blocked.coords[name]
+                reduced_dims = set(folded_coord.dims) - set(coord.dims)
+                out.coords[name] = folded_coord.mean(reduced_dims)
+
     return out
 
 
@@ -95,6 +145,9 @@ def resize(
         The original sizes should be divisible by the specified sizes.
         For example, ``{'x': 128, 'y': 128}`` will create an output image of size
         128x128.
+        Any dimensions with same sizes to the resizing image will be ignored.
+        If the output image sizes will be same as the input image sizes,
+        it will not apply the ``method`` and return a copy of the input image.
     method:
         The reduction method to apply to the blocks. This can be a string referring to
         any valid Scipp reduction method, such as 'sum', 'mean', 'max', etc.
@@ -102,6 +155,21 @@ def resize(
         signature should accept a ``scipp.Variable`` or ``scipp.DataArray`` as first
         argument and a set of dimensions to reduce over as second argument. The
         function should return a ``scipp.Variable`` or ``scipp.DataArray``.
+
+
+    Notes
+    -----
+    If the image is a ``scipp.DataArray``,
+    bin edges in the resizing dimensions
+    will be preserved if they are 1-dimensional and sorted.
+    New bin edges will be chosen according to the resizing sizes.
+    For other coordinates, new coordinates will be average values
+    of each resized blocks.
+
+    .. warning::
+        The coordinates in the output may not be correct
+        if they are not sorted or not linear.
+
     """
     block_sizes = {}
     for dim, size in sizes.items():
