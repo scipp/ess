@@ -21,7 +21,7 @@ cyclebane==24.10.0
     # via sciline
 cycler==0.12.1
     # via matplotlib
-dask==2025.12.0
+dask==2026.1.1
     # via -r base.in
 decorator==5.2.1
     # via ipython
@@ -91,12 +91,12 @@ numpy==2.4.1
     #   scipp
     #   scippneutron
     #   scipy
-packaging==25.0
+packaging==26.0
     # via
     #   dask
     #   lazy-loader
     #   matplotlib
-pandas==2.3.3
+pandas==3.0.0
     # via -r base.in
 parso==0.8.5
     # via jedi
@@ -124,7 +124,7 @@ pygments==2.19.2
     # via
     #   ipython
     #   ipython-pygments-lexers
-pyparsing==3.3.1
+pyparsing==3.3.2
     # via matplotlib
 python-dateutil==2.9.0.post0
     # via
@@ -133,8 +133,6 @@ python-dateutil==2.9.0.post0
     #   scippneutron
 pythreejs==2.4.2
     # via -r base.in
-pytz==2025.2
-    # via pandas
 pyyaml==6.0.3
     # via dask
 sciline==25.11.1
@@ -151,7 +149,7 @@ scippneutron==25.11.2
     # via
     #   -r base.in
     #   essreduce
-scippnexus==25.11.0
+scippnexus==26.1.0
     # via
     #   -r base.in
     #   essreduce
@@ -185,9 +183,7 @@ typing-extensions==4.15.0
     #   typing-inspection
 typing-inspection==0.4.2
     # via pydantic
-tzdata==2025.3
-    # via pandas
-wcwidth==0.2.14
+wcwidth==0.3.0
     # via prompt-toolkit
 widgetsnbextension==4.0.15
     # via ipywidgets
