@@ -178,8 +178,7 @@ def resize(
                 f"Size of dimension '{dim}' ({image.sizes[dim]}) is not divisible by"
                 f" the requested size ({size})."
             )
-        if (_resample_size := image.sizes[dim] // size) != 1:
-            block_sizes[dim] = _resample_size
+        block_sizes[dim] = image.sizes[dim] // size
 
     return resample(image, sizes=block_sizes, method=method)
 
