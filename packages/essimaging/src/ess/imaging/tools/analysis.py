@@ -94,10 +94,10 @@ def resample(
     -----
     If the image is a ``scipp.DataArray``,
     bin edges in the resampling dimensions
-    will be preserved if they are 1-dimensional and sorted.
+    will be preserved if they are 1-dimensional and sorted (they are dropped otherwise).
     New bin edges will be chosen according to the resampling sizes.
-    For other coordinates, new coordinates will be average values
-    of each resampled blocks.
+    For midpoint coordinates, new coordinates will be average values
+    of each resampled block.
 
     .. warning::
         The coordinates in the output may not be correct
