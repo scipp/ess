@@ -102,7 +102,7 @@ def resample(
     # Filter the resample sizes first.
     sizes = {dim: size for dim, size in sizes.items() if size != 1}
     if not sizes:
-        return image.copy()
+        return image.copy(deep=False)
 
     blocked = blockify(image, sizes=sizes)
     _method = getattr(sc, method) if isinstance(method, str) else method
