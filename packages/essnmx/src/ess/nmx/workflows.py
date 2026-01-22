@@ -73,7 +73,6 @@ def _simulate_fixed_wavelength_tof(
     events = events[~events.masks["blocked_by_others"]]
     return SimulationResults(
         time_of_arrival=events.coords["toa"],
-        speed=events.coords["speed"],
         wavelength=events.coords["wavelength"],
         weight=events.data,
         distance=results["detector"].distance,
