@@ -6,6 +6,7 @@ graphviz
 numpy>=1.25
 pythreejs>=2.4.1
 ncrystal[cif]>=4.1.0
+spglib!=2.7
 pandas>=2.1.2
 pooch>=1.5
 pytest>=7.0
