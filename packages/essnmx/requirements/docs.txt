@@ -38,7 +38,7 @@ debugpy==1.8.19
     # via ipykernel
 decorator==5.2.1
     # via ipython
-docutils==0.21.2
+docutils==0.22.4
     # via
     #   myst-parser
     #   nbsphinx
@@ -92,7 +92,7 @@ jupyterlab-pygments==0.3.0
     # via nbconvert
 jupyterlab-widgets==3.0.16
     # via ipywidgets
-markdown-it-py==3.0.0
+markdown-it-py==4.0.0
     # via
     #   mdit-py-plugins
     #   myst-parser
@@ -110,7 +110,7 @@ mdurl==0.1.2
     # via markdown-it-py
 mistune==3.2.0
     # via nbconvert
-myst-parser==4.0.1
+myst-parser==5.0.0
     # via -r docs.in
 nbclient==0.10.4
     # via nbconvert
@@ -164,8 +164,6 @@ referencing==0.37.0
     #   jsonschema
     #   jsonschema-specifications
 roman-numerals==4.1.0
-    # via roman-numerals-py
-roman-numerals-py==4.1.0
     # via sphinx
 rpds-py==0.30.0
     # via
@@ -173,9 +171,9 @@ rpds-py==0.30.0
     #   referencing
 snowballstemmer==3.0.1
     # via sphinx
-soupsieve==2.8.1
+soupsieve==2.8.3
     # via beautifulsoup4
-sphinx==8.2.3
+sphinx==9.1.0
     # via
     #   -r docs.in
     #   autodoc-pydantic
@@ -185,11 +183,11 @@ sphinx==8.2.3
     #   sphinx-autodoc-typehints
     #   sphinx-copybutton
     #   sphinx-design
-sphinx-autodoc-typehints==3.5.2
+sphinx-autodoc-typehints==3.6.2
     # via -r docs.in
 sphinx-copybutton==0.5.2
     # via -r docs.in
-sphinx-design==0.6.1
+sphinx-design==0.7.0
     # via -r docs.in
 sphinxcontrib-applehelp==2.0.0
     # via sphinx
@@ -227,7 +225,7 @@ traitlets==5.14.3
     #   traittypes
 traittypes==0.2.3
     # via ipydatawidgets
-wcwidth==0.2.14
+wcwidth==0.3.0
     # via prompt-toolkit
 webencodings==0.5.1
     # via
