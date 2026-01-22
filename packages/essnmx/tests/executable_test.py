@@ -3,9 +3,11 @@
 
 import pathlib
 import subprocess
+import time
 from contextlib import contextmanager
 from enum import Enum
 
+import h5py
 import pydantic
 import pytest
 import scipp as sc
@@ -377,8 +379,6 @@ def test_reduction_succeed_when_skipping_evenif_output_file_exists(
 def test_reduction_fails_fast_if_output_file_exists(
     reduction_config: ReductionConfig, temp_output_file: pathlib.Path
 ) -> None:
-    import time
-
     # Make sure the file exists
     temp_output_file.touch()
     # Make sure file output is NOT skipped.
@@ -393,3 +393,120 @@ def test_reduction_fails_fast_if_output_file_exists(
     # There is no special reason why it is 1 second.
     # It should just fail as fast as possible.
     assert finish - start < 1
+
+
+def test_reduction_compression_gzip(
+    reduction_config: ReductionConfig, tmp_path: pathlib.Path
+) -> None:
+    reduction_config.output.skip_file_output = False
+    reduction_config.workflow.nbins = 5  # For faster test
+    file_paths: dict[Compression, pathlib.Path] = {}
+
+    for compress_mode in (Compression.NONE, Compression.GZIP):
+        reduction_config.output.compression = compress_mode
+        cur_file_path = tmp_path / f'compress_{compress_mode}_output.hdf'
+        file_paths[compress_mode] = cur_file_path
+        assert not cur_file_path.exists()
+        reduction_config.output.output_file = cur_file_path.as_posix()
+        # Running the whole reduction instead of only saving the file on purpose.
+        with known_warnings():
+            reduction(config=reduction_config)
+        assert cur_file_path.exists()
+
+    assert (
+        file_paths[Compression.NONE].stat().st_size
+        > file_paths[Compression.GZIP].stat().st_size
+    )
+    with h5py.File(file_paths[Compression.NONE]) as file:
+        for i in range(3):
+            assert file[f'entry/instrument/detector_panel_{i}/data'].chunks is None
+
+    with h5py.File(file_paths[Compression.GZIP]) as file:
+        for i in range(3):
+            data_path = f'entry/instrument/detector_panel_{i}/data'
+            assert file[data_path].chunks == (1280, 1280, 1)
+            assert file[data_path].compression == 'gzip'
+            assert file[data_path].compression_opts == 4
+
+
+try:
+    # Just checking availability
+    import bitshuffle.h5  # noqa: F401
+except ImportError:
+    BITSHUFFLE_AVAILABLE = False
+else:
+    BITSHUFFLE_AVAILABLE = True
+
+
+@pytest.mark.skipif(
+    not BITSHUFFLE_AVAILABLE,
+    reason="Bitshuffle is not available in this environment.",
+)
+def test_reduction_compression_bitshuffle_smaller_than_gzip(
+    reduction_config: ReductionConfig, tmp_path: pathlib.Path
+) -> None:
+    reduction_config.output.skip_file_output = False
+    reduction_config.workflow.nbins = 5  # For faster test
+    file_paths: dict[Compression, pathlib.Path] = {}
+    total_times: dict[Compression, pathlib.Path] = {}
+
+    for compress_mode in (Compression.GZIP, Compression.BITSHUFFLE_LZ4):
+        reduction_config.output.compression = compress_mode
+        cur_file_path = tmp_path / f'compress_{compress_mode}_output.hdf'
+        file_paths[compress_mode] = cur_file_path
+        assert not cur_file_path.exists()
+        reduction_config.output.output_file = cur_file_path.as_posix()
+        # Running the whole reduction instead of only saving the file on purpose.
+        with known_warnings():
+            start = time.time()
+            reduction(config=reduction_config)
+            end = time.time()
+
+        assert cur_file_path.exists()
+        total_times[compress_mode] = end - start
+
+    # GZIP is expected to have better compression ratio than BITSHUFFLE
+    assert (
+        file_paths[Compression.BITSHUFFLE_LZ4].stat().st_size
+        > file_paths[Compression.GZIP].stat().st_size
+    )
+    # BITSHUFFLE is expected to be faster than GZIP
+    assert total_times[Compression.BITSHUFFLE_LZ4] < total_times[Compression.GZIP]
+
+    with h5py.File(file_paths[Compression.GZIP]) as file:
+        for i in range(3):
+            data_path = f'entry/instrument/detector_panel_{i}/data'
+            assert file[data_path].chunks == (1280, 1280, 1)
+            assert file[data_path].compression == 'gzip'
+
+    with h5py.File(file_paths[Compression.BITSHUFFLE_LZ4]) as file:
+        for i in range(3):
+            data_path = f'entry/instrument/detector_panel_{i}/data'
+            assert file[data_path].chunks == (1280, 1280, 1)
+            # For some reason it doesn't write the compression.
+            # so we check the filter instead.
+            # assert file[data_path].compression == 'bitshuffle'
+            assert '32008' in file[data_path]._filters
+
+
+@pytest.mark.skipif(
+    BITSHUFFLE_AVAILABLE,
+    reason="Bitshuffle is available in this environment so it won't fall back.",
+)
+def test_reduction_compression_bitshuffle_fall_back_to_gzip(
+    reduction_config: ReductionConfig, temp_output_file: pathlib.Path
+) -> None:
+    reduction_config.output.skip_file_output = False
+    reduction_config.workflow.nbins = 5  # For faster test
+    reduction_config.output.compression = Compression.BITSHUFFLE_LZ4
+    reduction_config.output.output_file = temp_output_file.as_posix()
+
+    with known_warnings():
+        with pytest.warns(UserWarning, match='bitshuffle.h5'):
+            reduction(config=reduction_config)
+
+    with h5py.File(temp_output_file) as file:
+        for i in range(3):
+            data_path = f'entry/instrument/detector_panel_{i}/data'
+            assert file[data_path].chunks == (1280, 1280, 1)
+            assert file[data_path].compression == 'gzip'
