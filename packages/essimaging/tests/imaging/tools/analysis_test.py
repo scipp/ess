@@ -24,6 +24,13 @@ def test_resample() -> None:
     assert resampled.sizes['y'] == da.sizes['y'] // 2
 
 
+def test_resample_with_sizes_1() -> None:
+    da = load_scitiff(siemens_star_path())["image"]
+    resampled = img.tools.resample(da, sizes=dict.fromkeys(da.dims, 1))
+    assert_identical(resampled, da)
+    assert da is not resampled
+
+
 def test_resample_with_2d_position_coord() -> None:
     da = load_scitiff(siemens_star_path())["image"]
     vectors = np.random.randn(*da.shape[1:], 3)
@@ -116,6 +123,13 @@ def test_resize_callable() -> None:
     resized = img.tools.resize(da, sizes={'x': 256, 'y': 256}, method=sc.max)
     assert resized.sizes['x'] == 256
     assert resized.sizes['y'] == 256
+
+
+def test_resize_same_sizes() -> None:
+    da = load_scitiff(siemens_star_path())["image"]
+    resized = img.tools.resize(da, sizes=da.sizes)
+    assert_identical(resized, da)
+    assert da is not resized
 
 
 def test_resize_keep_coordinate() -> None:
