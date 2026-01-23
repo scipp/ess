@@ -54,7 +54,7 @@ essnmx-reduce = "ess.nmx.executables:main"
 
 [project.optional-dependencies]
 test = [
-    "pytest>=7.0",
+    "pytest>=8.0",
 ]
 
 [project.urls]
