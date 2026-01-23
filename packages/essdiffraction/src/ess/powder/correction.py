@@ -343,7 +343,8 @@ def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.Data
             "Cannot add calibration mask 'calibration' tp data, "
             "there already is a mask with the same name."
         )
-    out.masks["calibration"] = calibration["mask"].data
+    if (mask := calibration.get("mask")) is not None:
+        out.masks["calibration"] = mask.data
     return out
 
 
