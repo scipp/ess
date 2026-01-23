@@ -25,10 +25,12 @@ Filename = Filename
 SampleRun = SampleRun
 TofDetector = TofDetector
 
+DetectorBank = NewType('DetectorBank', int)
 
 TwoThetaLimits = NewType("TwoThetaLimits", tuple[sc.Variable, sc.Variable])
 
 TofCoordTransformGraph = NewType("TofCoordTransformGraph", dict)
+GeometryCoordTransformGraph = NewType("GeometryCoordTransformGraph", dict)
 
 PulseLength = NewType("PulseLength", sc.Variable)
 """Length of the neutron source pulse in time."""
