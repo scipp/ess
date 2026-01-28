@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+import re
+
 import numpy as np
 import pytest
 import scipp as sc
@@ -168,7 +170,9 @@ def test_resize_2d_coordinate_not_dropped_if_not_changed() -> None:
 
 def test_resize_bad_size_requested_raises():
     da = load_scitiff(siemens_star_path())["image"]
-    with pytest.raises(ValueError, match="Size of dimension 'x' .* is not divisible"):
+    with pytest.raises(
+        ValueError, match=re.escape("Size of dimension 'x' .* is not divisible")
+    ):
         img.tools.resize(da, sizes={'x': 127, 'y': 127})
 
 

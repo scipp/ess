@@ -306,7 +306,8 @@ def test_normalize_workflow(
         pytest.warns(expected_warning=UserWarning, match=normalize_warning_msg),
     ):
         normalized = wf.compute(NormalizedSampleImages)
-        assert isinstance(normalized, sc.DataArray)
-        assert normalized.sizes['time'] == 2
-        assert normalized.unit == "dimensionless"
-        assert_allclose(normalized, expected_normalized_sample_images)
+
+    assert isinstance(normalized, sc.DataArray)
+    assert normalized.sizes['time'] == 2
+    assert normalized.unit == "dimensionless"
+    assert_allclose(normalized, expected_normalized_sample_images)
