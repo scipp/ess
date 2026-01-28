@@ -58,7 +58,7 @@ def mcstas_default_parameters() -> dict:
         # The reference sample in the McStas simulation has R=1 everywhere
         supermirror.CriticalEdge: sc.scalar(float('inf'), unit='1/angstrom'),
         supermirror.Alpha: sc.scalar(0.25 / 0.088, unit=sc.units.angstrom),
-        DetectorSpatialResolution[RunType]: 0.0025 * sc.units.m,
+        DetectorSpatialResolution: 0.0025 * sc.units.m,
         NeXusDetectorName: "detector",
         BeamDivergenceLimits: (
             sc.scalar(-0.75, unit='deg'),
@@ -75,6 +75,7 @@ def default_parameters() -> dict:
         NeXusDetectorName: "multiblade_detector",
         SampleRotationOffset[RunType]: sc.scalar(0.0, unit='deg'),
         CorrectionsToApply: corrections.default_corrections,
+        DetectorSpatialResolution: 0.0025 * sc.units.m,
     }
 
 

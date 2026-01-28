@@ -65,7 +65,7 @@ def default_parameters() -> dict:
         supermirror.CriticalEdge: 0.022 * sc.Unit("1/angstrom"),
         supermirror.Alpha: sc.scalar(0.25 / 0.088, unit=sc.units.angstrom),
         BeamSize[RunType]: 2.0 * sc.units.mm,
-        DetectorSpatialResolution[RunType]: 0.0025 * sc.units.m,
+        DetectorSpatialResolution: 0.0025 * sc.units.m,
         Position[snx.NXsample, RunType]: sc.vector([0, 0, 0], unit="m"),
         NeXusDetectorName: "detector",
         ChopperPhase[RunType]: sc.scalar(7.0, unit="deg"),

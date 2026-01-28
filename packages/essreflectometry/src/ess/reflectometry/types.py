@@ -71,6 +71,9 @@ QBins = NewType("QBins", sc.Variable)
 WavelengthBins = NewType("WavelengthBins", sc.Variable)
 """Bins for the wavelength histogram, also used to filter the event data."""
 
+DetectorSpatialResolution = NewType("DetectorSpatialResolution", sc.Variable)
+"""Spatial resolution of the detector."""
+
 
 class ThetaBins(sciline.Scope[RunType, sc.Variable], sc.Variable):
     """Binning in theta that takes into consideration that some
@@ -96,11 +99,6 @@ class DetectorRotation(sciline.Scope[RunType, sc.Variable], sc.Variable):
 
 class BeamSize(sciline.Scope[RunType, sc.Variable], sc.Variable):
     """Full-Width-Half-maximum of the incoming beam."""
-
-
-class DetectorSpatialResolution(sciline.Scope[RunType, sc.Variable], sc.Variable):
-    # TODO what is the definition of this?
-    """Spatial resolution of the detector."""
 
 
 class SampleSize(sciline.Scope[RunType, sc.Variable], sc.Variable):
