@@ -51,6 +51,8 @@ h5py==3.15.1
     #   scippnexus
 idna==3.11
     # via email-validator
+importlib-metadata==8.7.1
+    # via dask
 ipydatawidgets==4.3.5
     # via pythreejs
 ipympl==0.10.0
@@ -212,6 +214,7 @@ traittypes==0.2.3
     # via ipydatawidgets
 typing-extensions==4.15.0
     # via
+    #   ipython
     #   pydantic
     #   pydantic-core
     #   referencing
@@ -222,3 +225,5 @@ wcwidth==0.5.0
     # via prompt-toolkit
 widgetsnbextension==4.0.15
     # via ipywidgets
+zipp==3.23.0
+    # via importlib-metadata
