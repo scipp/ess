@@ -4,6 +4,8 @@
 import pytest
 import sciline as sl
 import scipp as sc
+from ess.reduce import time_of_flight
+from ess.reduce.nexus.types import AnyRun
 
 import ess.tbl.data  # noqa: F401
 from ess import tbl
@@ -17,8 +19,6 @@ from ess.imaging.types import (
     TofDetector,
     WavelengthDetector,
 )
-from ess.reduce import time_of_flight
-from ess.reduce.nexus.types import AnyRun
 
 
 @pytest.fixture(scope="module")
