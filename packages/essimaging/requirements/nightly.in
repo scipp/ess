@@ -4,10 +4,8 @@
 dask>=2022.1.0
 graphviz
 tifffile>=2024.7.2
-scitiff>=25.7
 pytest>=8.0
 pooch>=1.5
-scitiff>=24.6.0
 scipp
 --index-url=https://pypi.anaconda.org/scipp-nightly-wheels/simple/
 --extra-index-url=https://pypi.org/simple
@@ -18,3 +16,4 @@ plopp @ git+https://github.com/scipp/plopp@main
 essreduce @ git+https://github.com/scipp/essreduce@main
 scippneutron @ git+https://github.com/scipp/scippneutron@main
 tof @ git+https://github.com/scipp/tof@main
+scitiff @ git+https://github.com/scipp/scitiff@main
