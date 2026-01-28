@@ -486,34 +486,36 @@ def batch_processor(
 
     Example:
 
-    ```
-    from ess.reflectometry import amor, tools
+    .. highlight:: python
+    .. code-block:: python
 
-    workflow = amor.AmorWorkflow()
+        from ess.reflectometry import amor, tools
 
-    runs = {
-        '608': {
-            SampleRotationOffset[SampleRun]: sc.scalar(0.05, unit='deg'),
-            Filename[SampleRun]: "file_608.hdf",
-        },
-        '609': {
-            SampleRotationOffset[SampleRun]: sc.scalar(0.05, unit='deg'),
-            Filename[SampleRun]: "file_609.hdf",
-        },
-        '610': {
-            SampleRotationOffset[SampleRun]: sc.scalar(0.05, unit='deg'),
-            Filename[SampleRun]: "file_610.hdf",
-        },
-        '611': {
-            SampleRotationOffset[SampleRun]: sc.scalar(0.05, unit='deg'),
-            Filename[SampleRun]: "file_611.hdf",
-        },
-    }
+        workflow = amor.AmorWorkflow()
 
-    batch = tools.batch_processor(workflow, runs)
+        runs = {
+            '608': {
+                SampleRotationOffset[SampleRun]: sc.scalar(0.05, unit='deg'),
+                Filename[SampleRun]: "file_608.hdf",
+            },
+            '609': {
+                SampleRotationOffset[SampleRun]: sc.scalar(0.05, unit='deg'),
+                Filename[SampleRun]: "file_609.hdf",
+            },
+            '610': {
+                SampleRotationOffset[SampleRun]: sc.scalar(0.05, unit='deg'),
+                Filename[SampleRun]: "file_610.hdf",
+            },
+            '611': {
+                SampleRotationOffset[SampleRun]: sc.scalar(0.05, unit='deg'),
+                Filename[SampleRun]: "file_611.hdf",
+            },
+        }
 
-    results = batch.compute(ReflectivityOverQ)
-    ```
+        batch = tools.batch_processor(workflow, runs)
+
+        results = batch.compute(ReflectivityOverQ)
+
 
     Additionally, if a list of filenames is provided for
     ``Filename[SampleRun]``, the events from the files will be concatenated
@@ -521,16 +523,18 @@ def batch_processor(
 
     Example:
 
-    ```
-    runs = {
-        '608': {
-            Filename[SampleRun]: "file_608.hdf",
-        },
-        '609+610': {
-            Filename[SampleRun]: ["file_609.hdf", "file_610.hdf"],
-        },
-    }
-    ```
+    .. highlight:: python
+    .. code-block:: python
+
+        runs = {
+            '608': {
+                Filename[SampleRun]: "file_608.hdf",
+            },
+            '609+610': {
+                Filename[SampleRun]: ["file_609.hdf", "file_610.hdf"],
+            },
+        }
+
 
     Parameters
     ----------
@@ -589,32 +593,34 @@ def batch_compute(
 
     Example:
 
-    ```
-    from ess.reflectometry import amor, tools
+    .. highlight:: python
+    .. code-block:: python
 
-    workflow = amor.AmorWorkflow()
+        from ess.reflectometry import amor, tools
 
-    runs = {
-        '608': {
-            SampleRotationOffset[SampleRun]: sc.scalar(0.05, unit='deg'),
-            Filename[SampleRun]: "file_608.hdf",
-        },
-        '609': {
-            SampleRotationOffset[SampleRun]: sc.scalar(0.05, unit='deg'),
-            Filename[SampleRun]: "file_609.hdf",
-        },
-        '610': {
-            SampleRotationOffset[SampleRun]: sc.scalar(0.05, unit='deg'),
-            Filename[SampleRun]: "file_610.hdf",
-        },
-        '611': {
-            SampleRotationOffset[SampleRun]: sc.scalar(0.05, unit='deg'),
-            Filename[SampleRun]: "file_611.hdf",
-        },
-    }
+        workflow = amor.AmorWorkflow()
 
-    r_of_q = tools.batch_compute(workflow, runs, target=ReflectivityOverQ)
-    ```
+        runs = {
+            '608': {
+                SampleRotationOffset[SampleRun]: sc.scalar(0.05, unit='deg'),
+                Filename[SampleRun]: "file_608.hdf",
+            },
+            '609': {
+                SampleRotationOffset[SampleRun]: sc.scalar(0.05, unit='deg'),
+                Filename[SampleRun]: "file_609.hdf",
+            },
+            '610': {
+                SampleRotationOffset[SampleRun]: sc.scalar(0.05, unit='deg'),
+                Filename[SampleRun]: "file_610.hdf",
+            },
+            '611': {
+                SampleRotationOffset[SampleRun]: sc.scalar(0.05, unit='deg'),
+                Filename[SampleRun]: "file_611.hdf",
+            },
+        }
+
+        r_of_q = tools.batch_compute(workflow, runs, target=ReflectivityOverQ)
+
 
     Additionally, if a list of filenames is provided for
     ``Filename[SampleRun]``, the events from the files will be concatenated
@@ -622,16 +628,18 @@ def batch_compute(
 
     Example:
 
-    ```
-    runs = {
-        '608': {
-            Filename[SampleRun]: "file_608.hdf",
-        },
-        '609+610': {
-            Filename[SampleRun]: ["file_609.hdf", "file_610.hdf"],
-        },
-    }
-    ```
+    .. highlight:: python
+    .. code-block:: python
+
+        runs = {
+            '608': {
+                Filename[SampleRun]: "file_608.hdf",
+            },
+            '609+610': {
+                Filename[SampleRun]: ["file_609.hdf", "file_610.hdf"],
+            },
+        }
+
 
     Parameters
     -----------
