@@ -166,7 +166,16 @@ html_theme_options = {
         "image_light": "_static/logo.svg",
         "image_dark": "_static/logo-dark.svg",
     },
-    "external_links": [],
+    "external_links": [
+        {"name": "Essreduce", "url": "https://scipp.github.io/essreduce"},
+        {"name": "Plopp", "url": "https://scipp.github.io/plopp"},
+        {"name": "Sciline", "url": "https://scipp.github.io/sciline"},
+        {"name": "Scipp", "url": "https://scipp.github.io"},
+        {"name": "ScippNeutron", "url": "https://scipp.github.io/scippneutron"},
+        {"name": "ScippNexus", "url": "https://scipp.github.io/scippnexus"},
+        {"name": "Scitiff", "url": "https://scipp.github.io/scitiff"},
+        {"name": "Tof", "url": "https://scipp.github.io/tof"},
+    ],
     "icon_links": [
         {
             "name": "GitHub",
