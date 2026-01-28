@@ -5,7 +5,6 @@ Contains the providers to apply masks to detector data.
 """
 
 import scipp as sc
-
 from ess.reduce.nexus.types import RawDetector
 
 from ..imaging.types import CorrectedDetector, MaskingRules, RunType
