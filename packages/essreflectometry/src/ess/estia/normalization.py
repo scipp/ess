@@ -69,7 +69,7 @@ def evaluate_reference(
     reference: ReducedReference,
     sample: ReducibleData[SampleRun],
     graph: CoordTransformationGraph[ReferenceRun],
-    detector_spatial_resolution: DetectorSpatialResolution[SampleRun],
+    detector_spatial_resolution: DetectorSpatialResolution,
 ) -> Reference:
     """
     Adds a :math:`Q` and :math:`Q`-resolution coordinate to each bin of the ideal

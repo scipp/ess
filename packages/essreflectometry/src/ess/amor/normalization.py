@@ -71,7 +71,7 @@ def mask_events_where_supermirror_does_not_cover(
 def evaluate_reference_at_sample_coords(
     reference: ReducedReference,
     sample: ReducibleData[SampleRun],
-    detector_spatial_resolution: DetectorSpatialResolution[SampleRun],
+    detector_spatial_resolution: DetectorSpatialResolution,
     graph: CoordTransformationGraph[ReferenceRun],
 ) -> Reference:
     """
