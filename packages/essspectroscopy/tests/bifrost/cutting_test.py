@@ -65,6 +65,8 @@ def test_cut_along_q_norm_and_energy_transfer_preserves_counts(
 
     # Verify no counts were lost during the cut
     total_counts_before = sc.sum(energy_data.sum())
+    # Remove left over scalar coords that are dropped by `cut`:
+    total_counts_before = total_counts_before.drop_coords(total_counts_before.coords)
     total_counts_after = sc.sum(cut_data)
     sc.testing.assert_allclose(total_counts_before, total_counts_after)
 
@@ -93,5 +95,7 @@ def test_cut_along_qx_direction_preserves_counts(
 
     # Verify no counts were lost during the cut
     total_counts_before = sc.sum(energy_data.sum())
+    # Remove left over scalar coords that are dropped by `cut`:
+    total_counts_before = total_counts_before.drop_coords(total_counts_before.coords)
     total_counts_after = sc.sum(cut_data)
     sc.testing.assert_allclose(total_counts_before, total_counts_after)
