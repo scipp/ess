@@ -48,6 +48,16 @@ def _retrieve_input_file(input_file: list[str]) -> pathlib.Path:
     """Temporary helper to retrieve a single input file from the list
     Until multiple input file support is implemented.
     """
+    from collections import Counter
+
+    # Check duplicated pattern or paths
+    _counts = Counter(input_file)
+    duplicating_patterns = {pattern for pattern, num in _counts.items() if num > 1}
+    if duplicating_patterns:
+        raise ValueError(
+            f"Duplicated file paths or pattern found. {duplicating_patterns}"
+        )
+
     if isinstance(input_file, list):
         input_files = collect_matching_input_files(*input_file)
         if len(input_files) == 0:
