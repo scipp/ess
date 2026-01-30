@@ -58,7 +58,7 @@ params = {
     dream.InstrumentConfiguration: dream.beamline.InstrumentConfiguration.high_flux,
     CalibrationFilename: None,
     UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
-    DspacingBins: sc.linspace('dspacing', 0.3, 2.3434, 201, unit='angstrom'),
+    DspacingBins: sc.linspace('dspacing', 0.0, 2.3434, 201, unit='angstrom'),
     TofMask: lambda x: (x < sc.scalar(0.0, unit='us').to(unit=elem_unit(x)))
     | (x > sc.scalar(86e3, unit='us').to(unit=elem_unit(x))),
     TwoThetaMask: None,
@@ -304,6 +304,7 @@ def test_pipeline_save_data_to_disk(output_folder: Path):
     wf[Filename[SampleRun]] = dream.data.simulated_diamond_sample(small=False)
     wf[Filename[VanadiumRun]] = dream.data.simulated_vanadium_sample(small=False)
     wf[Filename[EmptyCanRun]] = dream.data.simulated_empty_can(small=False)
+    wf[DspacingBins] = sc.linspace('dspacing', 0.3, 2.3434, 2001, unit='angstrom')
     wf = powder.with_pixel_mask_filenames(wf, [])
 
     result = wf.compute(ReducedTofCIF)
