@@ -1,8 +1,10 @@
 import scipp as sc
 import scipp.constants
+from scippneutron.conversion import graph
 
 from .types import (
     DHKLList,
+    GeometryCoordTransformGraph,
     ModulationPeriod,
     PulseLength,
     RawDetector,
@@ -79,7 +81,7 @@ def _linear_regression_by_bin(
     return b1, b0
 
 
-def _compute_d(
+def _compute_d_given_list_of_peaks(
     time_of_arrival: sc.Variable,
     theta: sc.Variable,
     dhkl_list: sc.Variable,
@@ -92,15 +94,14 @@ def _compute_d(
     sinth = sc.sin(theta)
     t = time_of_arrival
 
-    d = sc.empty(dims=sinth.dims, shape=sinth.shape, unit=dhkl_list[0].unit)
-    d[:] = sc.scalar(float('nan'), unit=dhkl_list[0].unit)
-    dtfound = sc.empty(dims=sinth.dims, shape=sinth.shape, dtype='float64', unit=t.unit)
-    dtfound[:] = sc.scalar(float('nan'), unit=t.unit)
+    d = sc.full_like(
+        time_of_arrival, value=float('nan'), unit=dhkl_list[0].unit, dtype='float64'
+    )
+    dtfound = sc.full_like(time_of_arrival, value=float('nan'), dtype='float64')
 
     const = (2 * sinth * L0 / (scipp.constants.h / scipp.constants.m_n)).to(
         unit=f'{time_of_arrival.unit}/angstrom'
     )
-
     for dhkl in dhkl_list:
         dt = sc.abs(t - dhkl * const)
         dt_in_range = dt < pulse_length / 2
@@ -145,9 +146,8 @@ def _tof_from_dhkl(
     c = (-2 * 1.0 / (scipp.constants.h / scipp.constants.m_n)).to(
         unit=f'{time_of_arrival.unit}/m/angstrom'
     )
-    out = sc.sin(theta)
-    out *= c
-    out *= coarse_dhkl
+    out = c * coarse_dhkl
+    out *= sc.sin(theta)
     out *= Ltotal
     out += time_of_arrival
     out -= time0
@@ -161,11 +161,16 @@ def _tof_from_dhkl(
     return out
 
 
+def geometry_graph() -> GeometryCoordTransformGraph:
+    return graph.beamline.beamline(scatter=True)
+
+
 def tof_from_known_dhkl_graph(
     mod_period: ModulationPeriod,
     pulse_length: PulseLength,
     time0: WavelengthDefinitionChopperDelay,
     dhkl_list: DHKLList,
+    gg: GeometryCoordTransformGraph,
 ) -> TofCoordTransformGraph:
     """Graph computing ``tof`` in modulation chopper modes using
     list of peak positions."""
@@ -182,7 +187,7 @@ def tof_from_known_dhkl_graph(
         The error happens because data arrays do not allow coordinates
         with dimensions not present on the data.
         """
-        return _compute_d(
+        return _compute_d_given_list_of_peaks(
             time_of_arrival=time_of_arrival,
             theta=theta,
             pulse_length=pulse_length,
@@ -191,6 +196,8 @@ def tof_from_known_dhkl_graph(
         )
 
     return {
+        **gg,
+        **graph.tof.elastic("tof"),
         'pulse_length': lambda: pulse_length,
         'mod_period': lambda: mod_period,
         'time0': lambda: time0,
@@ -223,9 +230,13 @@ def _tof_from_t0(
     return time_of_arrival - t0
 
 
-def tof_from_t0_estimate_graph() -> TofCoordTransformGraph:
+def tof_from_t0_estimate_graph(
+    gg: GeometryCoordTransformGraph,
+) -> TofCoordTransformGraph:
     """Graph for computing ``tof`` in pulse shaping chopper modes."""
     return {
+        **gg,
+        **graph.tof.elastic("tof"),
         't0': t0_estimate,
         'tof': _tof_from_t0,
         'time_of_arrival': time_of_arrival,
@@ -240,11 +251,13 @@ def compute_tof(
 
 
 convert_from_known_peaks_providers = (
+    geometry_graph,
     tof_from_known_dhkl_graph,
     compute_tof,
 )
 convert_pulse_shaping = (
+    geometry_graph,
     tof_from_t0_estimate_graph,
     compute_tof,
 )
-providers = (compute_tof_in_each_cluster,)
+providers = (compute_tof_in_each_cluster, geometry_graph)

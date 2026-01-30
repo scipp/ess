@@ -1,31 +1,29 @@
 import scipp as sc
-from scippneutron.conversion.tof import dspacing_from_tof
 from scipy.signal import find_peaks, medfilt
 
-from .conversions import t0_estimate, time_of_arrival
-from .types import RawDetector, RunType, StreakClusteredData
+from .conversions import tof_from_t0_estimate_graph
+from .types import (
+    GeometryCoordTransformGraph,
+    RawDetector,
+    RunType,
+    StreakClusteredData,
+)
 
 
-def cluster_events_by_streak(da: RawDetector[RunType]) -> StreakClusteredData[RunType]:
-    if isinstance(da, sc.DataGroup):
-        return sc.DataGroup({k: cluster_events_by_streak(v) for k, v in da.items()})
-    da = da.copy(deep=False)
+def cluster_events_by_streak(
+    da: RawDetector[RunType], gg: GeometryCoordTransformGraph
+) -> StreakClusteredData[RunType]:
+    graph = tof_from_t0_estimate_graph(gg)
 
-    t = time_of_arrival(
-        da.coords['event_time_offset'],
-        da.coords['tc'].to(unit=da.coords['event_time_offset'].unit),
-    )
-    approximate_t0 = t0_estimate(
-        da.coords['wavelength_estimate'], da.coords['L0'], da.coords['Ltotal']
-    ).to(unit=t.unit)
+    da = da.transform_coords(['dspacing'], graph=graph)
+    da.bins.coords['coarse_d'] = da.bins.coords.pop('dspacing').to(unit='angstrom')
 
-    da.coords['coarse_d'] = dspacing_from_tof(
-        tof=t - approximate_t0,
-        Ltotal=da.coords['Ltotal'],
-        two_theta=da.coords['two_theta'],
-    ).to(unit='angstrom')
+    # We need to keep these coordinates after binning,
+    # adding them to the binned data coords achieves this.
+    for coord in ('two_theta', 'Ltotal'):
+        da.bins.coords[coord] = sc.bins_like(da, da.coords[coord])
 
-    h = da.hist(coarse_d=1000)
+    h = da.bins.concat().hist(coarse_d=1000)
     i_peaks, _ = find_peaks(
         h.data.values, height=medfilt(h.values, kernel_size=99), distance=3
     )
@@ -52,8 +50,10 @@ def cluster_events_by_streak(da: RawDetector[RunType]) -> StreakClusteredData[Ru
         )
     ]
     has_peak = peaks.bin(coarse_d=filtered_valleys).bins.size().data
-    b = da.bin(coarse_d=filtered_valleys).assign_masks(
-        no_peak=has_peak != sc.scalar(1, unit=None)
+    b = (
+        da.bins.concat()
+        .bin(coarse_d=filtered_valleys)
+        .assign_masks(no_peak=has_peak != sc.scalar(1, unit=None))
     )
     b = b.drop_coords(('coarse_d',))
     b = b.bins.drop_coords(('coarse_d',))
