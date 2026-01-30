@@ -8,7 +8,9 @@ import pytest
 import sciline
 import scipp as sc
 import scipp.testing
-import scippnexus as snx
+from ess.reduce import time_of_flight
+from ess.reduce import workflow as reduce_workflow
+from ess.reduce.nexus.types import AnyRun
 from scippneutron import metadata
 from scippneutron._utils import elem_unit
 
@@ -20,9 +22,7 @@ from ess.dream.workflows import (
     DreamGeant4ProtonChargeWorkflow,
 )
 from ess.powder.types import (
-    AccumulatedProtonCharge,
     CalibrationFilename,
-    CaveMonitorPosition,
     CIFAuthors,
     CorrectedDetector,
     DspacingBins,
@@ -36,7 +36,6 @@ from ess.powder.types import (
     KeepEvents,
     MonitorFilename,
     NeXusDetectorName,
-    Position,
     ReducedTofCIF,
     SampleRun,
     TimeOfFlightLookupTable,
@@ -48,14 +47,6 @@ from ess.powder.types import (
     VanadiumRun,
     WavelengthMask,
 )
-from ess.reduce import time_of_flight
-from ess.reduce import workflow as reduce_workflow
-from ess.reduce.nexus.types import AnyRun
-
-sample_position = sc.vector([0.0, 0.0, 0.0], unit='mm')
-source_position = sc.vector([-3.478, 0.0, -76550], unit='mm')
-proton_charge = sc.scalar(1.0, unit='µAh')
-dream_source_position = sc.vector(value=[0, 0, -76.55], unit="m")
 
 params = {
     Filename[SampleRun]: dream.data.simulated_diamond_sample(small=True),
@@ -67,18 +58,11 @@ params = {
     dream.InstrumentConfiguration: dream.beamline.InstrumentConfiguration.high_flux,
     CalibrationFilename: None,
     UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
-    DspacingBins: sc.linspace('dspacing', 0.0, 2.3434, 201, unit='angstrom'),
+    DspacingBins: sc.linspace('dspacing', 0.3, 2.3434, 201, unit='angstrom'),
     TofMask: lambda x: (x < sc.scalar(0.0, unit='us').to(unit=elem_unit(x)))
     | (x > sc.scalar(86e3, unit='us').to(unit=elem_unit(x))),
-    Position[snx.NXsample, SampleRun]: sample_position,
-    Position[snx.NXsample, VanadiumRun]: sample_position,
-    Position[snx.NXsource, SampleRun]: source_position,
-    Position[snx.NXsource, VanadiumRun]: source_position,
-    AccumulatedProtonCharge[SampleRun]: proton_charge,
-    AccumulatedProtonCharge[VanadiumRun]: proton_charge,
     TwoThetaMask: None,
     WavelengthMask: None,
-    CaveMonitorPosition: sc.vector([0.0, 0.0, -4220.0], unit='mm'),
     CIFAuthors: CIFAuthors(
         [
             metadata.Person(
@@ -140,7 +124,7 @@ def dream_tof_lookup_table():
     lut_wf[time_of_flight.DiskChoppers[AnyRun]] = dream.beamline.choppers(
         dream.beamline.InstrumentConfiguration.high_flux
     )
-    lut_wf[time_of_flight.SourcePosition] = dream_source_position
+    lut_wf[time_of_flight.SourcePosition] = sc.vector(value=[0, 0, -76.55], unit="m")
     lut_wf[time_of_flight.NumberOfSimulatedNeutrons] = 500_000
     lut_wf[time_of_flight.SimulationSeed] = 555
     lut_wf[time_of_flight.PulseStride] = 1
@@ -304,9 +288,25 @@ def test_pipeline_can_save_data(workflow):
     _assert_contains_tof_data(content)
 
 
-def test_pipeline_save_data_to_disk(workflow, output_folder: Path):
-    workflow = powder.with_pixel_mask_filenames(workflow, [])
-    result = workflow.compute(ReducedTofCIF)
+def test_pipeline_save_data_to_disk(output_folder: Path):
+    """
+    This test saves a reduced CIF file to disk using the DREAM workflow.
+    The reduced results are uploaded as an artifact in GH actions, and is subsequently
+    used by analysis software as part of the integration tests. Therefore, we need
+    to have enough signal: we thus use the large files instead of small, and use the
+    mantle detector bank.
+    """
+    wf = make_workflow(
+        {**params, NeXusDetectorName: "mantle"},
+        run_norm=powder.RunNormalization.proton_charge,
+    )
+
+    wf[Filename[SampleRun]] = dream.data.simulated_diamond_sample(small=False)
+    wf[Filename[VanadiumRun]] = dream.data.simulated_vanadium_sample(small=False)
+    wf[Filename[EmptyCanRun]] = dream.data.simulated_empty_can(small=False)
+    wf = powder.with_pixel_mask_filenames(wf, [])
+
+    result = wf.compute(ReducedTofCIF)
     result.comment = """This file was generated with the DREAM data reduction user guide
     in the documentation of ESSdiffraction.
     See https://scipp.github.io/essdiffraction/
