@@ -510,3 +510,12 @@ def test_reduction_compression_bitshuffle_fall_back_to_gzip(
             data_path = f'entry/instrument/detector_panel_{i}/data'
             assert file[data_path].chunks == (1280, 1280, 1)
             assert file[data_path].compression == 'gzip'
+
+
+def test_reduction_duplicated_path_raises(reduction_config: ReductionConfig) -> None:
+    # Run with two files with same names.
+    reduction_config.inputs.input_file = reduction_config.inputs.input_file * 2
+    with pytest.raises(
+        ValueError, match=r'Duplicated file paths or pattern found.*small_nmx_nexus.hdf'
+    ):
+        reduction(config=reduction_config)
