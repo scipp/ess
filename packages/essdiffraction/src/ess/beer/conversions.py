@@ -90,7 +90,7 @@ def _compute_d_given_list_of_peaks(
 ) -> sc.Variable:
     """Determines the ``d_hkl`` peak each event belongs to,
     given a list of known peaks."""
-    # Source: https://www2.mcstas.org/download/components/3.4/contrib/NPI_tof_dhkl_detector.comp
+    # Source: https://www.mcstas.org/download/components/current/contrib/NPI_tof_dhkl_detector.comp
     sinth = sc.sin(theta)
     t = time_of_arrival
 
@@ -138,7 +138,7 @@ def _tof_from_dhkl(
     time0: sc.Variable,
 ) -> sc.Variable:
     """Computes tof for BEER given the dhkl peak that the event belongs to"""
-    # Source: https://www2.mcstas.org/download/components/3.4/contrib/NPI_tof_dhkl_detector.comp
+    # Source: https://www.mcstas.org/download/components/current/contrib/NPI_tof_dhkl_detector.comp
     # tref = 2 * d_hkl * sin(theta) / hm * Ltotal
     # tc = time_of_arrival - time0 - tref
     # dt = floor(tc / mod_period + 0.5) * mod_period + time0
