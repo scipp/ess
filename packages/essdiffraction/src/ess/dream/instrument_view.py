@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
 
 import plopp as pp
 import scipp as sc
@@ -29,6 +29,13 @@ def _to_data_array(
     return sc.concat(pieces, dim="pixel").squeeze()
 
 
+def _slice_dim(
+    da: sc.DataArray, slice_params: dict[str, tuple[int, int]]
+) -> sc.DataArray:
+    (params,) = slice_params.items()
+    return da[params[0], params[1][0] : params[1][1]].sum(params[0])
+
+
 def instrument_view(
     data: sc.DataArray | sc.DataGroup | dict,
     dim: str | None = None,
@@ -36,15 +43,15 @@ def instrument_view(
     autoscale: bool = False,
     **kwargs,
 ) -> FigureLike:
-    from plopp.widgets import ClippingPlanes, SliceWidget, ToggleTool, VBar, slice_dims
+    from plopp.widgets import ClippingPlanes, RangeSliceWidget, ToggleTool, VBar
 
     data = _to_data_array(data, dim)
 
     if dim is not None:
-        slider = SliceWidget(data, dims=[dim])
+        slider = RangeSliceWidget(data, dims=[dim])
         slider.controls[dim].slider.layout = {"width": "600px"}
         slider_node = pp.widget_node(slider)
-        to_scatter = slice_dims(data, slider_node)
+        to_scatter = pp.Node(_slice_dim, da=data, slice_params=slider_node)
     else:
         to_scatter = pp.Node(data)
 
