@@ -48,10 +48,13 @@ def instrument_view(
     data = _to_data_array(data, dim)
 
     if dim is not None:
-        slider = RangeSliceWidget(data, dims=[dim])
-        slider.controls[dim].slider.layout = {"width": "600px"}
-        slider_node = pp.widget_node(slider)
+        range_slicer = RangeSliceWidget(data, dims=[dim])
+        slider = range_slicer.controls[dim].slider
+        slider.value = 0, data.sizes[dim]
+        slider.layout = {"width": "600px"}
+        slider_node = pp.widget_node(range_slicer)
         to_scatter = pp.Node(_slice_dim, da=data, slice_params=slider_node)
+
     else:
         to_scatter = pp.Node(data)
 
@@ -74,7 +77,14 @@ def instrument_view(
     )
     widgets = [clip_planes]
     if dim is not None:
-        widgets.append(slider)
+        widgets.append(range_slicer)
+
+        # def _maybe_update_value_cut(_):
+        #     if any(cut._direction == "v" for cut in clip_planes.cuts):
+        #         clip_planes.update_state()
+
+        # range_slicer.observe(_maybe_update_value_cut, names='value')
+
     fig.bottom_bar.add(VBar(widgets))
 
     return fig
