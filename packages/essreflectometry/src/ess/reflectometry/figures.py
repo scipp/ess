@@ -274,7 +274,13 @@ def wavelength_theta_diagnostic_figure(
     wbins: WavelengthBins,
     thbins: ThetaBins[SampleRun],
 ) -> WavelengthThetaFigure:
-    """Create a wavelength-theta diagnostic figure for a sample/reference pair."""
+    """Create a wavelength-theta diagnostic figure for a sample/reference pair.
+
+    Returns
+    -------
+    :
+        Diagnostic wavelength-theta figure.
+    """
     s = da.hist(wavelength=wbins, theta=thbins)
     r = ref.hist(theta=s.coords['theta'], wavelength=s.coords['wavelength']).data
     return wavelength_theta_figure(s / r)
@@ -286,7 +292,13 @@ def q_theta_diagnostic_figure(
     thbins: ThetaBins[SampleRun],
     qbins: QBins,
 ) -> QThetaFigure:
-    """Create a Q-theta diagnostic figure for a sample/reference pair."""
+    """Create a Q-theta diagnostic figure for a sample/reference pair.
+
+    Returns
+    -------
+    :
+        Diagnostic Q-theta figure.
+    """
     s = da.hist(theta=thbins, Q=qbins)
     r = ref.hist(theta=s.coords['theta'], Q=s.coords['Q']).data
     return q_theta_figure(s / r)
@@ -295,7 +307,13 @@ def q_theta_diagnostic_figure(
 def wavelength_z_diagnostic_figure(
     da: ReflectivityOverZW,
 ) -> WavelengthZIndexFigure:
-    """Create a wavelength vs. detector z-index diagnostic figure."""
+    """Create a wavelength vs. detector z-index diagnostic figure.
+
+    Returns
+    -------
+    :
+        Diagnostic wavelength vs. z-index figure.
+    """
     return wavelength_z_figure(da)
 
 
@@ -305,7 +323,13 @@ def diagnostic_view(
     qth: QThetaFigure,
     ioq: ReflectivityOverQ,
 ) -> ReflectivityDiagnosticsView:
-    """Compose a multi-panel diagnostic view for reflectometry reduction."""
+    """Compose a multi-panel diagnostic view for reflectometry reduction.
+
+    Returns
+    -------
+    :
+        Composite diagnostics view.
+    """
     ioq = ioq.hist().plot(norm="log")
     return (ioq + laz) / (lath + qth)
 

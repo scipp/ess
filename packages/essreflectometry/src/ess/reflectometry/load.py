@@ -24,6 +24,11 @@ def load_nx(
         NeXus group or file path.
     *paths:
         One or more NeXus paths to load.
+
+    Returns
+    -------
+    :
+        Iterator of loaded NeXus objects (group or array), or ``None`` if missing.
     """
     with open_nexus_file(group) as g:
         for path in paths:
@@ -60,6 +65,11 @@ def load_h5(
         HDF5 group or file path.
     *paths:
         One or more HDF5 paths to load.
+
+    Returns
+    -------
+    :
+        Iterator of loaded HDF5 objects (group or dataset), or ``None`` if missing.
     """
     if isinstance(group, str):
         with h5py.File(group) as group:
@@ -97,11 +107,22 @@ def save_reference(pl: sciline.Pipeline, fname: str) -> str:
         Sciline pipeline that can compute ``ReducedReference``.
     fname:
         Output file path.
+
+    Returns
+    -------
+    :
+        The output file path.
     """
     pl.compute(ReducedReference).save_hdf5(fname)
     return fname
 
 
 def load_reference(fname: ReferenceFilePath) -> ReducedReference:
-    """Load a reduced reference from HDF5."""
+    """Load a reduced reference from HDF5.
+
+    Returns
+    -------
+    :
+        The reduced reference data.
+    """
     return sc.io.hdf5.load_hdf5(fname)

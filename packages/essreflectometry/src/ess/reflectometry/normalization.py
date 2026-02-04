@@ -29,6 +29,11 @@ def reduce_to_q(da: sc.DataArray, qbins: int | sc.Variable) -> sc.DataArray:
         Input events or histogram.
     qbins:
         Q bin edges or number of bins.
+
+    Returns
+    -------
+    :
+        Histogrammed data over Q.
     """
     if da.bins:
         return da.bin(Q=qbins, dim=da.dims)
@@ -46,6 +51,11 @@ def reduce_from_events_to_lz(
         Input events.
     wbins:
         Wavelength bin edges or number of bins.
+
+    Returns
+    -------
+    :
+        Binned data over wavelength and detector strip.
     """
     out = da.bin(wavelength=wbins, dim=('strip',))
     if 'position' in da.coords:
