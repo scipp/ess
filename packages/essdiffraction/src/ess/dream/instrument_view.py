@@ -43,15 +43,50 @@ def instrument_view(
     autoscale: bool = False,
     **kwargs,
 ) -> FigureLike:
-    from plopp.widgets import ClippingPlanes, RangeSliceWidget, ToggleTool, VBar
+    from ipywidgets import ToggleButton
+    from plopp.widgets import (
+        ClippingPlanes,
+        HBar,
+        RangeSliceWidget,
+        SliceWidget,
+        ToggleTool,
+        VBar,
+    )
 
     data = _to_data_array(data, dim)
 
     if dim is not None:
+        int_slicer = SliceWidget(data, dims=[dim])
+        int_slider = int_slicer.controls[dim].slider
+        int_slider.layout = {"width": "600px"}
+
         range_slicer = RangeSliceWidget(data, dims=[dim])
-        slider = range_slicer.controls[dim].slider
-        slider.value = 0, data.sizes[dim]
-        slider.layout = {"width": "600px"}
+        range_slider = range_slicer.controls[dim].slider
+        range_slider.value = 0, data.sizes[dim]
+        range_slider.layout = {"width": "600px"}
+
+        def move_range(change):
+            range_slider.value = (change["new"], change["new"] + 1)
+
+        int_slider.observe(move_range, names='value')
+        slider_toggler = ToggleButton(
+            value=True,
+            tooltip="Toggle slicing mode (range/single-slice)",
+            icon="arrows-h",
+            layout={"width": "37px"},
+        )
+
+        slicing_container = HBar([range_slicer, slider_toggler])
+
+        def toggle_slider_mode(change):
+            if change["new"]:
+                slicing_container.children = [range_slicer, slider_toggler]
+            else:
+                int_slider.value = int(0.5 * sum(range_slider.value))
+                slicing_container.children = [int_slicer, slider_toggler]
+
+        slider_toggler.observe(toggle_slider_mode, names='value')
+
         slider_node = pp.widget_node(range_slicer)
         to_scatter = pp.Node(_slice_dim, da=data, slice_params=slider_node)
 
@@ -77,7 +112,7 @@ def instrument_view(
     )
     widgets = [clip_planes]
     if dim is not None:
-        widgets.append(range_slicer)
+        widgets.append(slicing_container)
 
         # def _maybe_update_value_cut(_):
         #     if any(cut._direction == "v" for cut in clip_planes.cuts):
