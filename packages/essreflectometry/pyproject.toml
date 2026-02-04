@@ -52,11 +52,14 @@ test = [
     "pytest>=7.0",
     "pooch>=1.5",
 ]
-all = [
+gui = [
   "ipywidgets",
   "ipydatagrid",
   "ipytree",
   "pythreejs",
+]
+all = [
+  "essreflectometry[gui]",
 ]
 
 [project.urls]
