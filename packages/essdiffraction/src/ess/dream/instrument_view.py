@@ -43,6 +43,32 @@ def instrument_view(
     autoscale: bool = False,
     **kwargs,
 ) -> FigureLike:
+    """
+    Three-dimensional visualization of the DREAM instrument.
+    The instrument view is capable of slicing the input data with a slider widget along
+    a dimension (e.g. ``tof``) by using the ``dim`` argument.
+
+    Use the clipping tool to create cuts in 3d space, as well as according to data
+    values.
+
+    Parameters
+    ----------
+    data:
+        Data to visualize. The data can be a single detector module (``DataArray``),
+        or a group of detector modules (``dict`` or ``DataGroup``).
+        The data must contain a ``position`` coordinate.
+    dim:
+        Dimension to use for the slider. No slider will be shown if this is None.
+    pixel_size:
+        Size of the pixels.
+    autoscale:
+        If ``True``, the color scale will be automatically adjusted to the data as it
+        gets updated. This can be somewhat expensive with many pixels, so it is set to
+        ``False`` by default.
+    **kwargs:
+        Additional arguments are forwarded to the scatter3d figure
+        (see https://scipp.github.io/plopp/generated/plopp.scatter3d.html).
+    """
     from ipywidgets import ToggleButtons
     from plopp.widgets import (
         ClippingManager,
