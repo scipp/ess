@@ -103,7 +103,8 @@ def wavelength_theta_figure(
         A Plopp figure displaying the histogram.
     '''
 
-    if isinstance(da, sc.DataArray):
+    # Double check is workaround for github.com/davidhalter/jedi/issues/2085
+    if not isinstance(da, tuple) and isinstance(da, sc.DataArray):
         return wavelength_theta_figure(
             (da,),
             wavelength_bins=(wavelength_bins,),
@@ -181,7 +182,8 @@ def q_theta_figure(
         A Plopp figure displaying the histogram.
     '''
 
-    if isinstance(da, sc.DataArray):
+    # Double check is workaround for github.com/davidhalter/jedi/issues/2085
+    if not isinstance(da, tuple) and isinstance(da, sc.DataArray):
         return q_theta_figure(
             (da,),
             q_bins=(q_bins,),
@@ -244,7 +246,8 @@ def wavelength_z_figure(
         A Plopp figure displaying the histogram.
     '''
 
-    if isinstance(da, sc.DataArray):
+    # Double check is workaround for github.com/davidhalter/jedi/issues/2085
+    if not isinstance(da, tuple) and isinstance(da, sc.DataArray):
         return wavelength_z_figure((da,), wavelength_bins=(wavelength_bins,), **kwargs)
 
     wavelength_bins = _repeat_variable_argument(len(da), wavelength_bins)
