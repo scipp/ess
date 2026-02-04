@@ -26,7 +26,9 @@ from .types import (
 )
 
 
-def theta(wavelength, pixel_divergence_angle, L2, sample_rotation, detector_rotation):
+def theta(
+    wavelength, pixel_divergence_angle, L2, sample_rotation, detector_rotation
+) -> sc.Variable:
     '''
     Angle of reflection.
 
@@ -83,7 +85,7 @@ def theta(wavelength, pixel_divergence_angle, L2, sample_rotation, detector_rota
 
 def theta_no_gravity(
     wavelength, pixel_divergence_angle, sample_rotation, detector_rotation
-):
+) -> sc.Variable:
     '''
     Angle of reflection.
 
@@ -101,7 +103,7 @@ def theta_no_gravity(
     return theta
 
 
-def divergence_angle(theta, sample_rotation, detector_rotation):
+def divergence_angle(theta, sample_rotation, detector_rotation) -> sc.Variable:
     """
     Difference between the incident angle and the center of the incident beam.
     Useful for filtering parts of the beam that have too high divergence.
@@ -118,7 +120,7 @@ def divergence_angle(theta, sample_rotation, detector_rotation):
 
 def wavelength(
     event_time_offset, pixel_divergence_angle, L1, L2, chopper_phase, chopper_frequency
-):
+) -> sc.Variable:
     "Converts event_time_offset to wavelength using the chopper settings."
     out = event_time_offset.to(unit="ns", dtype="float64", copy=True)
     unit = out.bins.unit

@@ -24,7 +24,7 @@ from .beamline import DETECTOR_BANK_SIZES
 from .conversions import coordinate_transformation_graph
 
 
-def parse_metadata_ascii(lines):
+def parse_metadata_ascii(lines) -> dict:
     """Parse McStas ASCII metadata sections from a file-like iterator."""
     data = {}
     section = None
@@ -42,7 +42,7 @@ def parse_metadata_ascii(lines):
     return data
 
 
-def parse_events_ascii(lines):
+def parse_events_ascii(lines) -> sc.DataArray:
     """Parse McStas ASCII events into a Scipp DataArray."""
     meta = {}
     data = []
@@ -83,7 +83,7 @@ def parse_events_ascii(lines):
     raise ValueError('Could not parse the file as a list of events.')
 
 
-def parse_events_h5(f, events_to_sample_per_unit_weight=None):
+def parse_events_h5(f, events_to_sample_per_unit_weight=None) -> sc.DataArray:
     """Parse McStas HDF5 events into a Scipp DataArray."""
     if isinstance(f, str):
         with h5py.File(f) as ff:

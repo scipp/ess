@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
+from collections.abc import Iterator
 from pathlib import Path
 
 import h5py
@@ -12,7 +13,9 @@ from ess.reduce.nexus import open_nexus_file
 from .types import ReducedReference, ReferenceFilePath
 
 
-def load_nx(group: snx.Group | str | Path, *paths: str):
+def load_nx(
+    group: snx.Group | str | Path, *paths: str
+) -> Iterator[sc.DataGroup | sc.DataArray | None]:
     """Yield NeXus groups or arrays at the provided paths.
 
     Parameters
@@ -46,7 +49,9 @@ def _unique_child_group(
     return next(iter(children.values()))  # type: ignore[return-value]
 
 
-def load_h5(group: h5py.Group | str, *paths: str):
+def load_h5(
+    group: h5py.Group | str, *paths: str
+) -> Iterator[h5py.Group | h5py.Dataset | None]:
     """Yield HDF5 groups or datasets at the provided paths.
 
     Parameters
@@ -83,7 +88,7 @@ def _unique_child_group_h5(
     return out
 
 
-def save_reference(pl: sciline.Pipeline, fname: str):
+def save_reference(pl: sciline.Pipeline, fname: str) -> str:
     """Compute and save a reduced reference to HDF5.
 
     Parameters

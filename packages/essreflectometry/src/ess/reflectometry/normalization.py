@@ -20,7 +20,7 @@ from .types import (
 )
 
 
-def reduce_to_q(da: sc.DataArray, qbins: int | sc.Variable):
+def reduce_to_q(da: sc.DataArray, qbins: int | sc.Variable) -> sc.DataArray:
     """Reduce data to a histogram over Q.
 
     Parameters
@@ -35,7 +35,9 @@ def reduce_to_q(da: sc.DataArray, qbins: int | sc.Variable):
     return da.hist(Q=qbins)
 
 
-def reduce_from_events_to_lz(da: sc.DataArray, wbins: int | sc.Variable):
+def reduce_from_events_to_lz(
+    da: sc.DataArray, wbins: int | sc.Variable
+) -> sc.DataArray:
     """Reduce events to wavelength vs. detector strip bins.
 
     Parameters

@@ -131,7 +131,7 @@ def estia_mcstas_sample_example(name: str) -> list[Path]:
     raise ValueError(f'"{name}" is not a valid sample name')
 
 
-def estia_mcstas_groundtruth(name):
+def estia_mcstas_groundtruth(name) -> sc.DataArray:
     """Returns the ground truth reflectivity curve for the sample."""
 
     def parse(fname):
@@ -156,12 +156,12 @@ def estia_mcstas_groundtruth(name):
     raise ValueError(f'"{name}" is not a valid sample name')
 
 
-def estia_mcstas_spin_flip_example(sample, flipper_setting):
+def estia_mcstas_spin_flip_example(sample, flipper_setting) -> Path:
     """Return path to a spin-flip McStas example file."""
     return _registry.get_path(f'spin_flip_example/{sample}_{flipper_setting}.h5')
 
 
-def estia_mcstas_spin_flip_example_groundtruth(up_or_down):
+def estia_mcstas_spin_flip_example_groundtruth(up_or_down) -> Path:
     """Return path to the spin-flip ground truth reflectivity curve."""
     if up_or_down == 'down':
         return _registry.get_path(
@@ -178,7 +178,7 @@ def _refresh_cache(args):
     estia_mcstas_spin_flip_example(*args)
 
 
-def estia_mcstas_spin_flip_example_download_all_to_cache():
+def estia_mcstas_spin_flip_example_download_all_to_cache() -> None:
     """Download all spin-flip example files into the local cache."""
     # Run once to create the folder structure without conflicts
     _refresh_cache(('supermirror', 'offoff'))
@@ -199,7 +199,7 @@ def estia_mcstas_spin_flip_example_download_all_to_cache():
             pass
 
 
-def estia_tof_lookup_table():
+def estia_tof_lookup_table() -> Path:
     """Return path to the ESTIA time-of-flight lookup table."""
     return _registry.get_path('estia-tof-lookup-table-pulse-stride-1.h5')
 

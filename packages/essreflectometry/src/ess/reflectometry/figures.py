@@ -4,6 +4,7 @@ from collections.abc import Sequence
 import numpy as np
 import plopp as pp
 import scipp as sc
+from plopp.core.typing import FigureLike
 
 from .types import (
     QBins,
@@ -63,7 +64,7 @@ def wavelength_theta_figure(
     q_edges_to_display: Sequence[sc.Variable] = (),
     linewidth: float = 1.0,
     **kwargs,
-):
+) -> FigureLike:
     '''
     Creates a figure displaying a histogram over :math:`\\theta`
     and :math:`\\lambda`.
@@ -152,7 +153,7 @@ def q_theta_figure(
     q_bins: (sc.Variable | None) | Sequence[sc.Variable | None] = None,
     theta_bins: (sc.Variable | None) | Sequence[sc.Variable | None] = None,
     **kwargs,
-):
+) -> FigureLike:
     '''
     Creates a figure displaying a histogram over :math:`\\theta`
     and :math:`Q`.
@@ -216,7 +217,7 @@ def wavelength_z_figure(
     *,
     wavelength_bins: (sc.Variable | None) | Sequence[sc.Variable | None] = None,
     **kwargs,
-):
+) -> FigureLike:
     '''
     Creates a figure displaying a histogram over the detector "Z"-direction,
     corresponding to the combination of the logical detector coordinates
