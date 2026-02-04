@@ -33,7 +33,7 @@ def _slice_dim(
     da: sc.DataArray, slice_params: dict[str, tuple[int, int]]
 ) -> sc.DataArray:
     (params,) = slice_params.items()
-    return da[params[0], params[1][0] : params[1][1]].sum(params[0])
+    return da[params[0], params[1][0] : params[1][1] + 1].sum(params[0])
 
 
 def instrument_view(
@@ -43,9 +43,9 @@ def instrument_view(
     autoscale: bool = False,
     **kwargs,
 ) -> FigureLike:
-    from ipywidgets import ToggleButton
+    from ipywidgets import ToggleButtons
     from plopp.widgets import (
-        ClippingPlanes,
+        ClippingManager,
         HBar,
         RangeSliceWidget,
         SliceWidget,
@@ -58,32 +58,31 @@ def instrument_view(
     if dim is not None:
         int_slicer = SliceWidget(data, dims=[dim])
         int_slider = int_slicer.controls[dim].slider
-        int_slider.layout = {"width": "600px"}
+        int_slider.layout = {"width": "550px"}
 
         range_slicer = RangeSliceWidget(data, dims=[dim])
         range_slider = range_slicer.controls[dim].slider
         range_slider.value = 0, data.sizes[dim]
-        range_slider.layout = {"width": "600px"}
+        range_slider.layout = {"width": "550px"}
 
         def move_range(change):
-            range_slider.value = (change["new"], change["new"] + 1)
+            range_slider.value = (change["new"], change["new"])
 
         int_slider.observe(move_range, names='value')
-        slider_toggler = ToggleButton(
-            value=True,
-            tooltip="Toggle slicing mode (range/single-slice)",
-            icon="arrows-h",
-            layout={"width": "37px"},
+        slider_toggler = ToggleButtons(
+            options=["o-o", "-o-"],
+            tooltips=['Range slider', 'Single slice slider'],
+            style={"button_width": "39px"},
         )
 
-        slicing_container = HBar([range_slicer, slider_toggler])
+        slicing_container = HBar([slider_toggler, range_slicer])
 
         def toggle_slider_mode(change):
-            if change["new"]:
-                slicing_container.children = [range_slicer, slider_toggler]
+            if change["new"] == "o-o":
+                slicing_container.children = [slider_toggler, range_slicer]
             else:
                 int_slider.value = int(0.5 * sum(range_slider.value))
-                slicing_container.children = [int_slicer, slider_toggler]
+                slicing_container.children = [slider_toggler, int_slicer]
 
         slider_toggler.observe(toggle_slider_mode, names='value')
 
@@ -104,7 +103,7 @@ def instrument_view(
         **kwargs,
     )
 
-    clip_planes = ClippingPlanes(fig)
+    clip_planes = ClippingManager(fig)
     fig.toolbar['cut3d'] = ToggleTool(
         callback=clip_planes.toggle_visibility,
         icon='layer-group',
@@ -114,11 +113,11 @@ def instrument_view(
     if dim is not None:
         widgets.append(slicing_container)
 
-        # def _maybe_update_value_cut(_):
-        #     if any(cut._direction == "v" for cut in clip_planes.cuts):
-        #         clip_planes.update_state()
+        def _maybe_update_value_cut(_):
+            if any(cut.kind == "v" for cut in clip_planes.cuts):
+                clip_planes.update_state()
 
-        # range_slicer.observe(_maybe_update_value_cut, names='value')
+        range_slicer.observe(_maybe_update_value_cut, names='value')
 
     fig.bottom_bar.add(VBar(widgets))
 
