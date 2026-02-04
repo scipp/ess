@@ -1,3 +1,4 @@
+ipydatagrid
 # Anything above "--- END OF CUSTOM SECTION ---"
 # will not be touched by ``make_base.py``
 # --- END OF CUSTOM SECTION ---

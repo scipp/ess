@@ -10,8 +10,6 @@ accessible-pygments==0.0.5
     # via pydata-sphinx-theme
 alabaster==1.0.0
     # via sphinx
-asttokens==3.0.1
-    # via stack-data
 attrs==25.4.0
     # via
     #   jsonschema
@@ -32,14 +30,8 @@ certifi==2026.1.4
     # via requests
 charset-normalizer==3.4.4
     # via requests
-comm==0.2.3
-    # via
-    #   ipykernel
-    #   ipywidgets
 debugpy==1.8.20
     # via ipykernel
-decorator==5.2.1
-    # via ipython
 defusedxml==0.7.1
     # via nbconvert
 docutils==0.22.4
@@ -50,8 +42,6 @@ docutils==0.22.4
     #   pydata-sphinx-theme
     #   sphinx
     #   sphinxcontrib-bibtex
-executing==2.2.1
-    # via stack-data
 fastjsonschema==2.21.2
     # via nbformat
 imagesize==1.4.1
@@ -60,23 +50,8 @@ ipykernel==7.1.0
     # via -r docs.in
 ipympl==0.10.0
     # via -r docs.in
-ipython==9.10.0
-    # via
-    #   -r docs.in
-    #   ipykernel
-    #   ipympl
-    #   ipywidgets
-ipython-pygments-lexers==1.1.1
-    # via ipython
 ipytree==0.2.2
     # via -r docs.in
-ipywidgets==8.1.8
-    # via
-    #   -r docs.in
-    #   ipympl
-    #   ipytree
-jedi==0.19.2
-    # via ipython
 jinja2==3.1.6
     # via
     #   myst-parser
@@ -100,8 +75,6 @@ jupyter-core==5.9.1
     #   nbformat
 jupyterlab-pygments==0.3.0
     # via nbconvert
-jupyterlab-widgets==3.0.16
-    # via ipywidgets
 latexcodec==3.0.1
     # via pybtex
 markdown-it-py==4.0.0
@@ -112,10 +85,6 @@ markupsafe==3.0.3
     # via
     #   jinja2
     #   nbconvert
-matplotlib-inline==0.2.1
-    # via
-    #   ipykernel
-    #   ipython
 mdit-py-plugins==0.5.0
     # via myst-parser
 mdurl==0.1.2
@@ -139,10 +108,6 @@ nest-asyncio==1.6.0
     # via ipykernel
 pandocfilters==1.5.1
     # via nbconvert
-parso==0.8.5
-    # via jedi
-pexpect==4.9.0
-    # via ipython
 platformdirs==4.5.1
     # via
     #   jupyter-core
@@ -151,14 +116,8 @@ pooch==1.9.0
     # via
     #   -r docs.in
     #   tof
-prompt-toolkit==3.0.52
-    # via ipython
 psutil==7.2.2
     # via ipykernel
-ptyprocess==0.7.0
-    # via pexpect
-pure-eval==0.2.3
-    # via stack-data
 pybtex==0.25.1
     # via
     #   pybtex-docutils
@@ -169,14 +128,6 @@ pydantic-settings==2.12.0
     # via autodoc-pydantic
 pydata-sphinx-theme==0.16.1
     # via -r docs.in
-pygments==2.19.2
-    # via
-    #   accessible-pygments
-    #   ipython
-    #   ipython-pygments-lexers
-    #   nbconvert
-    #   pydata-sphinx-theme
-    #   sphinx
 python-dotenv==1.2.1
     # via pydantic-settings
 pyzmq==27.1.0
@@ -232,8 +183,6 @@ sphinxcontrib-qthelp==2.0.0
     # via sphinx
 sphinxcontrib-serializinghtml==2.0.0
     # via sphinx
-stack-data==0.6.3
-    # via ipython
 tinycss2==1.4.0
     # via bleach
 tof==26.1.0
@@ -242,26 +191,9 @@ tornado==6.5.4
     # via
     #   ipykernel
     #   jupyter-client
-traitlets==5.14.3
-    # via
-    #   ipykernel
-    #   ipympl
-    #   ipython
-    #   ipywidgets
-    #   jupyter-client
-    #   jupyter-core
-    #   matplotlib-inline
-    #   nbclient
-    #   nbconvert
-    #   nbformat
-    #   nbsphinx
 urllib3==2.6.3
     # via requests
-wcwidth==0.5.3
-    # via prompt-toolkit
 webencodings==0.5.1
     # via
     #   bleach
     #   tinycss2
-widgetsnbextension==4.0.15
-    # via ipywidgets
