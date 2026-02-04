@@ -19,6 +19,11 @@
    :recursive:
 
    providers
+   batch_compute
+   batch_processor
+   scale_for_reflectivity_overlap
+   linlogspace
+   combine_curves
 ```
 
 ## Submodules
@@ -77,5 +82,23 @@
    resolution
    types
    normalization
+   workflow
+```
+
+## Offspec
+
+```{eval-rst}
+.. currentmodule:: ess.offspec
+
+.. autosummary::
+   :toctree: ../generated/modules
+   :template: module-template.rst
+   :recursive:
+
+   conversions
+   data
+   load
+   normalization
+   types
    workflow
 ```

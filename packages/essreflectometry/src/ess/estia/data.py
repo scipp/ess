@@ -69,18 +69,21 @@ _registry = make_registry(
 
 
 def estia_mcstas_reference_run() -> Filename[ReferenceRun]:
+    """Return path to the McStas reference events file."""
     return Filename[ReferenceRun](
         _registry.get_path("218610_tof_detector_list.p.x.y.t.L.sx.sy")
     )
 
 
 def estia_mcstas_sample_run(number: int | str) -> Filename[SampleRun]:
+    """Return path to a McStas sample events file by run number."""
     return Filename[SampleRun](
         _registry.get_path(f"2186{int(number):02d}_tof_detector_list.p.x.y.t.L.sx.sy")
     )
 
 
 def estia_mcstas_nexus_reference_example() -> Path:
+    """Return path to a NeXus reference example file."""
     return _registry.get_path("examples/220573.nx")
 
 
@@ -98,6 +101,7 @@ def estia_mcstas_nexus_sample_example(name: str) -> list[Path]:
 
 
 def estia_mcstas_reference_example() -> Path:
+    """Return path to a McStas reference example file."""
     return _registry.get_path("examples/220573/mccode.h5")
 
 
@@ -153,10 +157,12 @@ def estia_mcstas_groundtruth(name):
 
 
 def estia_mcstas_spin_flip_example(sample, flipper_setting):
+    """Return path to a spin-flip McStas example file."""
     return _registry.get_path(f'spin_flip_example/{sample}_{flipper_setting}.h5')
 
 
 def estia_mcstas_spin_flip_example_groundtruth(up_or_down):
+    """Return path to the spin-flip ground truth reflectivity curve."""
     if up_or_down == 'down':
         return _registry.get_path(
             'spin_flip_example/ground_truth_spin_down_reflectivity.h5'
@@ -173,6 +179,7 @@ def _refresh_cache(args):
 
 
 def estia_mcstas_spin_flip_example_download_all_to_cache():
+    """Download all spin-flip example files into the local cache."""
     # Run once to create the folder structure without conflicts
     _refresh_cache(('supermirror', 'offoff'))
     with ThreadPool(20) as pool:
@@ -193,6 +200,7 @@ def estia_mcstas_spin_flip_example_download_all_to_cache():
 
 
 def estia_tof_lookup_table():
+    """Return path to the ESTIA time-of-flight lookup table."""
     return _registry.get_path('estia-tof-lookup-table-pulse-stride-1.h5')
 
 

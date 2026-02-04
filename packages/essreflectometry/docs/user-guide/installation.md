@@ -21,7 +21,7 @@ including dependencies used in the graphical user interface for batch reduction,
 `````{tab-set}
 ````{tab-item} pip
 ```sh
-pip install essreflectometry[all]
+pip install essreflectometry[gui]
 ```
 ````
 ````{tab-item} conda

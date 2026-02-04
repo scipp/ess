@@ -157,6 +157,7 @@ def coordinate_transformation_graph(
     sample_size: SampleSize[RunType],
     beam_size: BeamSize[RunType],
 ) -> CoordTransformationGraph[RunType]:
+    """Build the coordinate transformation graph for Amor."""
     return {
         "wavelength": wavelength,
         "theta": theta if gravity else theta_no_gravity,

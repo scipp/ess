@@ -10,6 +10,7 @@ from ..reflectometry.types import (
 
 
 def coordinate_transformation_graph_sample() -> CoordTransformationGraph[SampleRun]:
+    """Build coordinate transformation graph for OFFSPEC sample runs."""
     return {
         **beamline.beamline(scatter=True),
         **tof.elastic_wavelength("tof"),
@@ -19,6 +20,7 @@ def coordinate_transformation_graph_sample() -> CoordTransformationGraph[SampleR
 def coordinate_transformation_graph_reference() -> CoordTransformationGraph[
     ReferenceRun
 ]:
+    """Build coordinate transformation graph for OFFSPEC reference runs."""
     return {
         **beamline.beamline(scatter=False),
         **tof.elastic_wavelength("tof"),

@@ -53,6 +53,7 @@ This provides a default Estia workflow including providers for loadings files.
 
 
 def mcstas_default_parameters() -> dict:
+    """Return default parameters for the McStas Estia workflow."""
     return {
         supermirror.MValue: sc.scalar(5, unit=sc.units.dimensionless),
         # The reference sample in the McStas simulation has R=1 everywhere
@@ -71,6 +72,7 @@ def mcstas_default_parameters() -> dict:
 
 
 def default_parameters() -> dict:
+    """Return default parameters for the NeXus Estia workflow."""
     return {
         NeXusDetectorName: "multiblade_detector",
         SampleRotationOffset[RunType]: sc.scalar(0.0, unit='deg'),

@@ -25,6 +25,7 @@ from .conversions import coordinate_transformation_graph
 
 
 def parse_metadata_ascii(lines):
+    """Parse McStas ASCII metadata sections from a file-like iterator."""
     data = {}
     section = None
     for line in lines:
@@ -42,6 +43,7 @@ def parse_metadata_ascii(lines):
 
 
 def parse_events_ascii(lines):
+    """Parse McStas ASCII events into a Scipp DataArray."""
     meta = {}
     data = []
     for line in lines:
@@ -82,6 +84,7 @@ def parse_events_ascii(lines):
 
 
 def parse_events_h5(f, events_to_sample_per_unit_weight=None):
+    """Parse McStas HDF5 events into a Scipp DataArray."""
     if isinstance(f, str):
         with h5py.File(f) as ff:
             return parse_events_h5(ff)
@@ -233,30 +236,35 @@ def load_mcstas(
 
 
 def load_sample_rotation(da: RawDetector[RunType]) -> SampleRotation[RunType]:
+    """Extract sample rotation from McStas-derived raw detector data."""
     return da.coords['sample_rotation']
 
 
 def load_detector_rotation(
     da: RawDetector[RunType],
 ) -> DetectorRotation[RunType]:
+    """Extract detector rotation from McStas-derived raw detector data."""
     return da.coords['detector_rotation']
 
 
 def load_source_position(
     da: RawDetector[RunType],
 ) -> Position[NXsource, RunType]:
+    """Extract source position from McStas-derived raw detector data."""
     return da.coords['source_position']
 
 
 def load_sample_position(
     da: RawDetector[RunType],
 ) -> Position[NXsample, RunType]:
+    """Extract sample position from McStas-derived raw detector data."""
     return da.coords['sample_position']
 
 
 def detector_ltotal_from_raw(
     da: RawDetector[RunType], graph: CoordTransformationGraph[RunType]
 ) -> DetectorLtotal[RunType]:
+    """Compute detector total flight path length from raw data."""
     return da.transform_coords(
         ['Ltotal'],
         graph=graph,
@@ -270,6 +278,7 @@ def mcstas_wavelength_coordinate_transformation_graph(
     detector_rotation: DetectorRotation[RunType],
     detector_bank_sizes: DetectorBankSizes,
 ) -> CoordTransformationGraph[RunType]:
+    """Build a coordinate transformation graph using McStas wavelengths."""
     return {
         **coordinate_transformation_graph(
             source_position,

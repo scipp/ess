@@ -13,6 +13,15 @@ from .types import ReducedReference, ReferenceFilePath
 
 
 def load_nx(group: snx.Group | str | Path, *paths: str):
+    """Yield NeXus groups or arrays at the provided paths.
+
+    Parameters
+    ----------
+    group:
+        NeXus group or file path.
+    *paths:
+        One or more NeXus paths to load.
+    """
     with open_nexus_file(group) as g:
         for path in paths:
             for p in path.strip('/').split('/'):
@@ -38,6 +47,15 @@ def _unique_child_group(
 
 
 def load_h5(group: h5py.Group | str, *paths: str):
+    """Yield HDF5 groups or datasets at the provided paths.
+
+    Parameters
+    ----------
+    group:
+        HDF5 group or file path.
+    *paths:
+        One or more HDF5 paths to load.
+    """
     if isinstance(group, str):
         with h5py.File(group) as group:
             yield from load_h5(group, *paths)
@@ -66,9 +84,19 @@ def _unique_child_group_h5(
 
 
 def save_reference(pl: sciline.Pipeline, fname: str):
+    """Compute and save a reduced reference to HDF5.
+
+    Parameters
+    ----------
+    pl:
+        Sciline pipeline that can compute ``ReducedReference``.
+    fname:
+        Output file path.
+    """
     pl.compute(ReducedReference).save_hdf5(fname)
     return fname
 
 
 def load_reference(fname: ReferenceFilePath) -> ReducedReference:
+    """Load a reduced reference from HDF5."""
     return sc.io.hdf5.load_hdf5(fname)

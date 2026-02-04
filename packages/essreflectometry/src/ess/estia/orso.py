@@ -4,6 +4,7 @@ from ess.reflectometry.orso import OrsoCorrectionList
 
 
 def orso_estia_corrections() -> OrsoCorrectionList:
+    """Return list of corrections applied in Estia reductions."""
     return OrsoCorrectionList(
         [
             "chopper ToF correction",
