@@ -66,7 +66,7 @@ def odin_tof_lookup_table(full_beamline: bool = False) -> pathlib.Path:
     This file is used to convert the time-of-flight to wavelength.
     Use the ``full_beamline`` argument to get the lookup table for the full beamline,
     which covers the range 5-65m.
-    The fulle range should be prefered, and the shorter range is kept for
+    The full range should be preferred, and the shorter range is kept for
     retro-compatibility.
 
     These tables were computed using `Create a time-of-flight lookup table for ODIN
