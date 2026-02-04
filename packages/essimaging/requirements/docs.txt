@@ -14,7 +14,7 @@ appnope==0.1.4
     # via ipykernel
 autodoc-pydantic==2.2.0
     # via -r docs.in
-babel==2.17.0
+babel==2.18.0
     # via
     #   pydata-sphinx-theme
     #   sphinx
@@ -28,7 +28,7 @@ certifi==2026.1.4
     # via requests
 charset-normalizer==3.4.4
     # via requests
-debugpy==1.8.19
+debugpy==1.8.20
     # via ipykernel
 defusedxml==0.7.1
     # via nbconvert
@@ -81,7 +81,7 @@ myst-parser==5.0.0
     # via -r docs.in
 nbclient==0.10.4
     # via nbconvert
-nbconvert==7.16.6
+nbconvert==7.17.0
     # via nbsphinx
 nbformat==5.10.4
     # via
@@ -98,11 +98,11 @@ platformdirs==4.5.1
     # via
     #   jupyter-core
     #   pooch
-pooch==1.8.2
+pooch==1.9.0
     # via
     #   -r docs.in
     #   tof
-psutil==7.2.1
+psutil==7.2.2
     # via ipykernel
 pydantic-settings==2.12.0
     # via autodoc-pydantic
@@ -160,7 +160,7 @@ tornado==6.5.4
     # via
     #   ipykernel
     #   jupyter-client
-tqdm==4.67.1
+tqdm==4.67.2
     # via -r docs.in
 urllib3==2.6.3
     # via requests

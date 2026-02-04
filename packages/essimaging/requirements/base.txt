@@ -25,7 +25,7 @@ cyclebane==24.10.0
     # via sciline
 cycler==0.12.1
     # via matplotlib
-dask==2026.1.1
+dask==2026.1.2
     # via -r base.in
 decorator==5.2.1
     # via ipython
@@ -33,7 +33,7 @@ dnspython==2.8.0
     # via email-validator
 email-validator==2.3.0
     # via scippneutron
-essreduce==26.1.1
+essreduce==26.2.0
     # via -r base.in
 executing==2.2.1
     # via stack-data
@@ -57,7 +57,7 @@ ipydatawidgets==4.3.5
     # via pythreejs
 ipympl==0.10.0
     # via plopp
-ipython==9.9.0
+ipython==9.10.0
     # via
     #   ipympl
     #   ipywidgets
@@ -98,7 +98,7 @@ mpltoolbox==25.10.0
     #   scippneutron
 networkx==3.6.1
     # via cyclebane
-numpy==2.4.1
+numpy==2.4.2
     # via
     #   contourpy
     #   h5py
@@ -167,7 +167,7 @@ sciline==25.11.1
     # via
     #   -r base.in
     #   essreduce
-scipp==26.1.0
+scipp==26.2.0
     # via
     #   -r base.in
     #   essreduce
@@ -179,7 +179,7 @@ scippneutron==25.11.2
     # via
     #   -r base.in
     #   essreduce
-scippnexus==26.1.0
+scippnexus==26.1.1
     # via
     #   -r base.in
     #   essreduce
@@ -188,13 +188,13 @@ scipy==1.17.0
     # via
     #   scippneutron
     #   scippnexus
-scitiff==25.12.0
+scitiff==26.1.0
     # via -r base.in
 six==1.17.0
     # via python-dateutil
 stack-data==0.6.3
     # via ipython
-tifffile==2026.1.14
+tifffile==2026.1.28
     # via
     #   -r base.in
     #   scitiff
@@ -221,7 +221,7 @@ typing-extensions==4.15.0
     #   typing-inspection
 typing-inspection==0.4.2
     # via pydantic
-wcwidth==0.5.0
+wcwidth==0.5.3
     # via prompt-toolkit
 widgetsnbextension==4.0.15
     # via ipywidgets

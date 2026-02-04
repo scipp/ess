@@ -28,7 +28,7 @@ cyclebane==24.10.0
     # via sciline
 cycler==0.12.1
     # via matplotlib
-dask==2026.1.1
+dask==2026.1.2
     # via -r nightly.in
 dnspython==2.8.0
     # via email-validator
@@ -75,7 +75,7 @@ mpltoolbox==25.10.0
     # via scippneutron
 networkx==3.6.1
     # via cyclebane
-numpy==2.4.1
+numpy==2.4.2
     # via
     #   contourpy
     #   h5py
@@ -104,7 +104,7 @@ plopp @ git+https://github.com/scipp/plopp@main
     #   tof
 pluggy==1.6.0
     # via pytest
-pooch==1.8.2
+pooch==1.9.0
     # via
     #   -r nightly.in
     #   tof
@@ -165,7 +165,7 @@ scitiff @ git+https://github.com/scipp/scitiff@main
     # via -r nightly.in
 six==1.17.0
     # via python-dateutil
-tifffile==2026.1.14
+tifffile==2026.1.28
     # via
     #   -r nightly.in
     #   scitiff
