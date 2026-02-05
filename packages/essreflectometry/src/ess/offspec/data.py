@@ -15,10 +15,12 @@ _registry = make_registry(
 
 
 def offspec_sample_run() -> Filename[SampleRun]:
+    """Return path to the OFFSPEC sample run example file."""
     return Filename[SampleRun](_registry.get_path("sample.h5"))
 
 
 def offspec_direct_beam_run() -> Filename[ReferenceRun]:
+    """Return path to the OFFSPEC direct-beam reference file."""
     return Filename[ReferenceRun](_registry.get_path("direct_beam.h5"))
 
 

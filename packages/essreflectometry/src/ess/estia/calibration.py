@@ -6,6 +6,8 @@ import scipp as sc
 
 @dataclass
 class PolarizationCalibrationParameters:
+    """Calibration parameters for polarized reflectometry."""
+
     I0: sc.DataArray
     '''Reference intensity.'''
     Pp: sc.DataArray

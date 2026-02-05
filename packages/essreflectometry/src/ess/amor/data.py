@@ -68,14 +68,17 @@ _registry = make_registry(
 
 
 def amor_old_sample_run() -> Path:
+    """Return path to a legacy sample run used in tests/examples."""
     return _registry.get_path("sample.nxs")
 
 
 def amor_old_reference_run() -> Path:
+    """Return path to a legacy reference run used in tests/examples."""
     return _registry.get_path("reference.nxs")
 
 
 def amor_run(number: int | str) -> Path:
+    """Return path to an Amor NeXus file by run number."""
     fnames = [
         name
         for name in _files.keys()
@@ -87,6 +90,7 @@ def amor_run(number: int | str) -> Path:
 
 
 def amor_psi_software_result(number: int | str) -> Path:
+    """Return path to a PSI reduction result (.ort) by run number."""
     return _registry.get_path(f"{int(number):03d}.Rqz.ort")
 
 
