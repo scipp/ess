@@ -31,7 +31,7 @@ DetectorLtotal = tof_t.DetectorLtotal
 
 
 class CoordTransformationGraph(sciline.Scope[RunType, dict], dict):
-    pass
+    """Coordinate transformation graph for converting raw to physical coordinates."""
 
 
 class RawChopper(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):

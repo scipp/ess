@@ -67,6 +67,8 @@ def _get_selected_rows(grid):
 
 
 class DetectorView(widgets.HBox):
+    """Interactive detector view for selected runs."""
+
     is_active_tab = Bool(False).tag(sync=True)
 
     def __init__(
@@ -153,6 +155,8 @@ class DetectorView(widgets.HBox):
 
 
 class NexusExplorer(widgets.VBox):
+    """Interactive browser for inspecting NeXus file structure."""
+
     def __init__(
         self, runs_table: DataGrid, run_to_filepath: Callable[[str], str], **kwargs
     ):
@@ -701,6 +705,8 @@ class ReflectometryBatchReductionGUI:
 
 
 class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
+    """Amor-specific batch reduction GUI."""
+
     def __init__(self):
         super().__init__()
         self.nexus_explorer = NexusExplorer(self.runs_table, self.get_filepath_from_run)

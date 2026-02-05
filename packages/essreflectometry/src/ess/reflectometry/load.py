@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
+from collections.abc import Iterator
 from pathlib import Path
 
 import h5py
@@ -12,7 +13,23 @@ from ess.reduce.nexus import open_nexus_file
 from .types import ReducedReference, ReferenceFilePath
 
 
-def load_nx(group: snx.Group | str | Path, *paths: str):
+def load_nx(
+    group: snx.Group | str | Path, *paths: str
+) -> Iterator[sc.DataGroup | sc.DataArray | None]:
+    """Yield NeXus groups or arrays at the provided paths.
+
+    Parameters
+    ----------
+    group:
+        NeXus group or file path.
+    *paths:
+        One or more NeXus paths to load.
+
+    Returns
+    -------
+    :
+        Iterator of loaded NeXus objects (group or array), or ``None`` if missing.
+    """
     with open_nexus_file(group) as g:
         for path in paths:
             for p in path.strip('/').split('/'):
@@ -37,7 +54,23 @@ def _unique_child_group(
     return next(iter(children.values()))  # type: ignore[return-value]
 
 
-def load_h5(group: h5py.Group | str, *paths: str):
+def load_h5(
+    group: h5py.Group | str, *paths: str
+) -> Iterator[h5py.Group | h5py.Dataset | None]:
+    """Yield HDF5 groups or datasets at the provided paths.
+
+    Parameters
+    ----------
+    group:
+        HDF5 group or file path.
+    *paths:
+        One or more HDF5 paths to load.
+
+    Returns
+    -------
+    :
+        Iterator of loaded HDF5 objects (group or dataset), or ``None`` if missing.
+    """
     if isinstance(group, str):
         with h5py.File(group) as group:
             yield from load_h5(group, *paths)
@@ -65,10 +98,31 @@ def _unique_child_group_h5(
     return out
 
 
-def save_reference(pl: sciline.Pipeline, fname: str):
+def save_reference(pl: sciline.Pipeline, fname: str) -> str:
+    """Compute and save a reduced reference to HDF5.
+
+    Parameters
+    ----------
+    pl:
+        Sciline pipeline that can compute ``ReducedReference``.
+    fname:
+        Output file path.
+
+    Returns
+    -------
+    :
+        The output file path.
+    """
     pl.compute(ReducedReference).save_hdf5(fname)
     return fname
 
 
 def load_reference(fname: ReferenceFilePath) -> ReducedReference:
+    """Load a reduced reference from HDF5.
+
+    Returns
+    -------
+    :
+        The reduced reference data.
+    """
     return sc.io.hdf5.load_hdf5(fname)

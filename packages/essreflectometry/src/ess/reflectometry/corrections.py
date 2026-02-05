@@ -51,6 +51,7 @@ def correct_by_proton_current(da: sc.DataArray) -> sc.DataArray:
 def correct_sample_rotation(
     mu: RawSampleRotation[RunType], mu_offset: SampleRotationOffset[RunType]
 ) -> SampleRotation[RunType]:
+    """Apply a rotation offset to the raw sample rotation."""
     return mu + mu_offset.to(unit=mu.unit, dtype='float64')
 
 

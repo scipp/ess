@@ -20,13 +20,43 @@ from .types import (
 )
 
 
-def reduce_to_q(da: sc.DataArray, qbins: int | sc.Variable):
+def reduce_to_q(da: sc.DataArray, qbins: int | sc.Variable) -> sc.DataArray:
+    """Reduce data to a histogram over Q.
+
+    Parameters
+    ----------
+    da:
+        Input events or histogram.
+    qbins:
+        Q bin edges or number of bins.
+
+    Returns
+    -------
+    :
+        Histogrammed data over Q.
+    """
     if da.bins:
         return da.bin(Q=qbins, dim=da.dims)
     return da.hist(Q=qbins)
 
 
-def reduce_from_events_to_lz(da: sc.DataArray, wbins: int | sc.Variable):
+def reduce_from_events_to_lz(
+    da: sc.DataArray, wbins: int | sc.Variable
+) -> sc.DataArray:
+    """Reduce events to wavelength vs. detector strip bins.
+
+    Parameters
+    ----------
+    da:
+        Input events.
+    wbins:
+        Wavelength bin edges or number of bins.
+
+    Returns
+    -------
+    :
+        Binned data over wavelength and detector strip.
+    """
     out = da.bin(wavelength=wbins, dim=('strip',))
     if 'position' in da.coords:
         out.coords['position'] = da.coords['position'].mean('strip')

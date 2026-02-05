@@ -4,6 +4,7 @@ from ess.reflectometry.orso import OrsoCorrectionList
 
 
 def orso_amor_corrections() -> OrsoCorrectionList:
+    """Return list of corrections applied in Amor reductions."""
     return OrsoCorrectionList(
         [
             "chopper ToF correction",

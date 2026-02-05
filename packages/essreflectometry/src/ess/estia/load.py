@@ -14,12 +14,14 @@ from ..reflectometry.types import (
 def load_sample_rotation(
     sample: NeXusComponent[NXsample, RunType],
 ) -> RawSampleRotation[RunType]:
+    """Load sample rotation from the NeXus sample group."""
     return sample['sample_rotation'][0].data
 
 
 def load_detector_rotation(
     detector: NeXusComponent[NXdetector, RunType],
 ) -> DetectorRotation[RunType]:
+    """Load detector rotation from the NeXus detector group."""
     return detector['transformations']['detector_rotation'].value[0].data
 
 
