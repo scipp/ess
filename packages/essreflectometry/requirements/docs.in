@@ -13,6 +13,5 @@ sphinxcontrib-bibtex
 pooch
 ipympl
 ipywidgets
-ipydatagrid
 ipytree
 tof
