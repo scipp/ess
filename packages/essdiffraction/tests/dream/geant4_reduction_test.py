@@ -96,7 +96,7 @@ def make_workflow(params_for_det, *, run_norm):
 
 def test_pipeline_can_compute_dspacing_result(workflow):
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    result = workflow.compute(EmptyCanSubtractedIofDspacing[SampleRun])
+    result = workflow.compute(EmptyCanSubtractedIofDspacing)
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
@@ -113,7 +113,7 @@ def test_pipeline_can_compute_dspacing_result_without_empty_can(workflow):
 def test_pipeline_can_compute_dspacing_result_using_lookup_table_filename(workflow):
     workflow = powder.with_pixel_mask_filenames(workflow, [])
     workflow[TimeOfFlightLookupTableFilename] = dream.data.tof_lookup_table_high_flux()
-    result = workflow.compute(EmptyCanSubtractedIofDspacing[SampleRun])
+    result = workflow.compute(EmptyCanSubtractedIofDspacing)
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
@@ -191,7 +191,7 @@ def test_pipeline_normalizes_and_subtracts_empty_can_as_expected(
     workflow[FocussedDataDspacing[EmptyCanRun]] = empty_can
     workflow[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    result = workflow.compute(EmptyCanSubtractedIofDspacing[SampleRun])
+    result = workflow.compute(EmptyCanSubtractedIofDspacing)
 
     subtracted = sample.bins.concatenate(-empty_can)
     expected = powder.correction.normalize_by_vanadium_dspacing(
