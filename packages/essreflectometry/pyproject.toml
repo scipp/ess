@@ -41,7 +41,6 @@ dependencies = [
   "scippnexus>=24.9.1",
   "essreduce>=25.11.0",
   "esspolarization>=25.7.0",
-  "essreduce>=25.4.0",
   "pandas>=2.1.2",
 ]
 
