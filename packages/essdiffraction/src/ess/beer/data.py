@@ -41,6 +41,9 @@ _registry = make_registry(
         "silicon-mode7-new-model.h5": "md5:d2070d3132722bb551d99b243c62752f",
         "silicon-mode8-new-model.h5": "md5:d6dfdf7e87eccedf4f83c67ec552ca22",
         "silicon-mode9-new-model.h5": "md5:694a17fb616b7f1c20e94d9da113d201",
+        # Simulation with 3D detector model - almost no events
+        # - only used to verify we can load the 3D geometry.
+        "few_neutrons_3d_detector_example.h5": "md5:88cbe29cb539c8acebf9fd7cee9d3c57",
     },
 )
 
@@ -72,6 +75,10 @@ def mcstas_silicon_new_model(mode: int) -> Path:
     Simulated intensity from duplex sample with ``mode`` chopper configuration.
     """
     return _registry.get_path(f'silicon-mode{mode}-new-model.h5')
+
+
+def mcstas_few_neutrons_3d_detector_example():
+    return _registry.get_path('few_neutrons_3d_detector_example.h5')
 
 
 def duplex_peaks() -> Path:
