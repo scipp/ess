@@ -84,12 +84,13 @@ def instrument_view(
     if dim is not None:
         int_slicer = SliceWidget(data, dims=[dim])
         int_slider = int_slicer.controls[dim].slider
-        int_slider.layout = {"width": "550px"}
+        int_slider.value = int_slider.min
+        int_slider.layout = {"width": "42em"}
 
         range_slicer = RangeSliceWidget(data, dims=[dim])
         range_slider = range_slicer.controls[dim].slider
         range_slider.value = 0, data.sizes[dim]
-        range_slider.layout = {"width": "550px"}
+        range_slider.layout = {"width": "42em"}
 
         def move_range(change):
             range_slider.value = (change["new"], change["new"])
@@ -98,7 +99,7 @@ def instrument_view(
         slider_toggler = ToggleButtons(
             options=["o-o", "-o-"],
             tooltips=['Range slider', 'Single slice slider'],
-            style={"button_width": "39px"},
+            style={"button_width": "3.2em"},
         )
 
         slicing_container = HBar([slider_toggler, range_slicer])
