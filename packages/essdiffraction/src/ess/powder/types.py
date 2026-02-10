@@ -127,14 +127,14 @@ class IntensityDspacingTwoTheta(sciline.Scope[RunType, sc.DataArray], sc.DataArr
     """Data that has been normalized by a vanadium run, and grouped into 2theta bins."""
 
 
-class EmptyCanSubtractedIofDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Intensity vs. d-spacing, subtracted by empty can measurement."""
+EmptyCanSubtractedIofDspacing = NewType("EmptyCanSubtractedIofDspacing", sc.DataArray)
+"""Intensity vs. d-spacing, subtracted by empty can measurement."""
 
 
-class EmptyCanSubtractedIofDspacingTwoTheta(
-    sciline.Scope[RunType, sc.DataArray], sc.DataArray
-):
-    """Intensity vs. d-spacing and 2theta, subtracted by empty can measurement."""
+EmptyCanSubtractedIofDspacingTwoTheta = NewType(
+    "EmptyCanSubtractedIofDspacingTwoTheta", sc.DataArray
+)
+"""Intensity vs. d-spacing and 2theta, subtracted by empty can measurement."""
 
 
 IntensityTof = NewType("IntensityTof", sc.DataArray)
