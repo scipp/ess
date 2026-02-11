@@ -6,6 +6,10 @@ import itertools
 import sciline
 import scipp as sc
 import scippnexus as snx
+from ess.reduce.nexus.types import DetectorBankSizes, NeXusName
+from ess.reduce.parameter import parameter_mappers
+from ess.reduce.time_of_flight import GenericTofWorkflow
+from ess.reduce.workflow import register_workflow
 from scippneutron.metadata import Software
 
 from ess.powder import providers as powder_providers
@@ -18,6 +22,7 @@ from ess.powder.types import (
     CaveMonitorPosition,  # Should this be a DREAM-only parameter?
     EmptyCanRun,
     KeepEvents,
+    LookupTableRelativeErrorThreshold,
     PixelMaskFilename,
     Position,
     ReducerSoftware,
@@ -28,10 +33,6 @@ from ess.powder.types import (
     VanadiumRun,
     WavelengthMask,
 )
-from ess.reduce.nexus.types import DetectorBankSizes, NeXusName
-from ess.reduce.parameter import parameter_mappers
-from ess.reduce.time_of_flight import GenericTofWorkflow
-from ess.reduce.workflow import register_workflow
 
 from .beamline import InstrumentConfiguration
 from .io.cif import (
@@ -88,7 +89,7 @@ def _get_lookup_table_filename_from_configuration(
 def _collect_reducer_software() -> ReducerSoftware:
     return ReducerSoftware(
         [
-            # Software.from_package_metadata('essdiffraction'),
+            Software.from_package_metadata('essdiffraction'),
             Software.from_package_metadata('scippneutron'),
             Software.from_package_metadata('scipp'),
         ]
@@ -209,6 +210,7 @@ def DreamGeant4Workflow(*, run_norm: RunNormalization, **kwargs) -> sciline.Pipe
         AccumulatedProtonCharge[VanadiumRun]: charge,
         AccumulatedProtonCharge[EmptyCanRun]: charge,
         CaveMonitorPosition: sc.vector([0.0, 0.0, -4220.0], unit='mm'),
+        LookupTableRelativeErrorThreshold: 0.02,
     }
     for key, value in additional_parameters.items():
         wf[key] = value
