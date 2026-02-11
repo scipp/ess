@@ -16,7 +16,7 @@ attrs==25.4.0
     #   referencing
 autodoc-pydantic==2.2.0
     # via -r docs.in
-babel==2.17.0
+babel==2.18.0
     # via
     #   pydata-sphinx-theme
     #   sphinx
@@ -26,7 +26,7 @@ beautifulsoup4==4.14.3
     #   pydata-sphinx-theme
 bleach[css]==6.3.0
     # via nbconvert
-debugpy==1.8.19
+debugpy==1.8.20
     # via ipykernel
 defusedxml==0.7.1
     # via nbconvert
@@ -89,7 +89,7 @@ myst-parser==5.0.0
     # via -r docs.in
 nbclient==0.10.4
     # via nbconvert
-nbconvert==7.16.6
+nbconvert==7.17.0
     # via nbsphinx
 nbformat==5.10.4
     # via
@@ -104,7 +104,7 @@ pandas==3.0.0
     # via -r docs.in
 pandocfilters==1.5.1
     # via nbconvert
-psutil==7.2.1
+psutil==7.2.2
     # via ipykernel
 pyarrow==23.0.0
     # via -r docs.in

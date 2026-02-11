@@ -34,7 +34,7 @@ dependencies = [
   "essreduce>=25.12.1",
   "graphviz",
   "numpy>=2",
-  "plopp>=25.07.0",
+  "plopp>=26.2.0",
   "pythreejs>=2.4.1",
   "sciline>=25.04.1",
   "scipp>=25.11.0",
