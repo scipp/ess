@@ -262,7 +262,7 @@ def convert_reduced_to_tof(
 
 
 def convert_reduced_to_empty_can_subtracted_tof(
-    data: EmptyCanSubtractedIofDspacing[SampleRun], calibration: OutputCalibrationData
+    data: EmptyCanSubtractedIofDspacing, calibration: OutputCalibrationData
 ) -> EmptyCanSubtractedIntensityTof:
     return EmptyCanSubtractedIntensityTof(
         _convert_reduced_to_tof_impl(data, calibration)

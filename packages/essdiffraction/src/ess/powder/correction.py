@@ -389,14 +389,14 @@ def apply_lorentz_correction(da: sc.DataArray) -> sc.DataArray:
 def subtract_empty_can(
     data: IntensityDspacing[SampleRun],
     background: IntensityDspacing[EmptyCanRun],
-) -> EmptyCanSubtractedIofDspacing[SampleRun]:
+) -> EmptyCanSubtractedIofDspacing:
     return EmptyCanSubtractedIofDspacing(data.bins.concatenate(-background))
 
 
 def subtract_empty_can_two_theta(
     data: IntensityDspacingTwoTheta[SampleRun],
     background: IntensityDspacingTwoTheta[EmptyCanRun],
-) -> EmptyCanSubtractedIofDspacingTwoTheta[SampleRun]:
+) -> EmptyCanSubtractedIofDspacingTwoTheta:
     return EmptyCanSubtractedIofDspacingTwoTheta(data.bins.concatenate(-background))
 
 

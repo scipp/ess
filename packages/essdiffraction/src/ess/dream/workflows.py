@@ -88,7 +88,7 @@ def _get_lookup_table_filename_from_configuration(
 def _collect_reducer_software() -> ReducerSoftware:
     return ReducerSoftware(
         [
-            Software.from_package_metadata('essdiffraction'),
+            # Software.from_package_metadata('essdiffraction'),
             Software.from_package_metadata('scippneutron'),
             Software.from_package_metadata('scipp'),
         ]

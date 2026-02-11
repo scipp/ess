@@ -39,7 +39,7 @@ def _find_h5(group: h5py.Group, matches):
         if re.match(matches, p):
             return group[p]
     else:
-        raise RuntimeError(f'Could not find "{matches}" in {group}.')
+        raise ValueError(f'Could not find "{matches}" in {group}.')
 
 
 def _load_h5(group: h5py.Group | str, *paths: str):
@@ -127,7 +127,7 @@ def _effective_chopper_position_from_mode(
         raise ValueError(f'Unkonwn chopper mode {mode}.')
 
 
-def _load_beer_mcstas(f, bank=1):
+def _load_beer_mcstas(f, north_or_south=None, *, number):
     positions = {
         name: f'/entry1/instrument/components/{key}/Position'
         for key in f['/entry1/instrument/components']
@@ -147,8 +147,16 @@ def _load_beer_mcstas(f, bank=1):
         mcc_pos,
     ) = _load_h5(
         f,
-        f'NXentry/NXdetector/bank{bank:02}_events_dat_list_p_x_y_n_id_t',
-        f'NXentry/NXdetector/bank{bank:02}_events_dat_list_p_x_y_n_id_t/events',
+        (
+            f'NXentry/NXdetector/bank_{north_or_south}{number}_events_dat_list_p_x_y_n_id_t'
+            if north_or_south is not None
+            else f'NXentry/NXdetector/bank{number:02}_events_dat_list_p_x_y_n_id_t'
+        ),
+        (
+            f'NXentry/NXdetector/bank_{north_or_south}{number}_events_dat_list_p_x_y_n_id_t/events'
+            if north_or_south is not None
+            else f'NXentry/NXdetector/bank{number:02}_events_dat_list_p_x_y_n_id_t/events'  # noqa: E501
+        ),
         'NXentry/simulation/Param',
         positions['sampleMantid'],
         positions['PSC1'],
@@ -162,7 +170,10 @@ def _load_beer_mcstas(f, bank=1):
         'Rotation'
     ]
     detector_rotation = _find_h5(
-        f['/entry1/instrument/components'], f'.*nD_Mantid_?{bank}.*'
+        f['/entry1/instrument/components'],
+        f'.*nD_Mantid_?{north_or_south}_{number}.*'
+        if north_or_south is not None
+        else f'.*nD_Mantid_?{number}.*',
     )['Rotation']
 
     events = events[()]
@@ -286,15 +297,74 @@ def _not_between(x, a, b):
     return (x < a) | (b < x)
 
 
-def load_beer_mcstas(f: str | Path | h5py.File, bank: int) -> sc.DataArray:
+def load_beer_mcstas(f: str | Path | h5py.File, bank: DetectorBank) -> sc.DataArray:
     '''Load beer McStas data from a file to a
     data group with one data array for each bank.
     '''
+    if not isinstance(bank, DetectorBank):
+        raise ValueError(
+            '"bank" must be either ``DetectorBank.north`` or ``DetectorBank.south``'
+        )
+
     if isinstance(f, str | Path):
         with h5py.File(f) as ff:
             return load_beer_mcstas(ff, bank=bank)
 
-    return _load_beer_mcstas(f, bank=bank)
+    try:
+        _find_h5(f['/entry1/instrument/components'], '.*nD_Mantid_?south_1.*')
+    except ValueError:
+        # The file did not have a detector named 'south'-something.
+        # Load old 2D structure where banks were not named 'north' and 'south'.
+        return _load_beer_mcstas(
+            f, north_or_south=None, number=1 if bank == DetectorBank.south else 2
+        )
+
+    return sc.concat(
+        [
+            _load_beer_mcstas(f, north_or_south=bank.name, number=number)
+            for number in range(1, 13)
+        ],
+        dim='panel',
+    )
+
+
+def load_beer_mcstas_monitor(f: str | Path | h5py.File):
+    if isinstance(f, str | Path):
+        with h5py.File(f) as ff:
+            return load_beer_mcstas_monitor(ff)
+    (
+        monitor,
+        wavelengths,
+        data,
+        errors,
+        ncount,
+    ) = _load_h5(
+        f,
+        'NXentry/NXdetector/Lmon_hereon_dat',
+        'NXentry/NXdetector/Lmon_hereon_dat/Wavelength__AA_',
+        'NXentry/NXdetector/Lmon_hereon_dat/data',
+        'NXentry/NXdetector/Lmon_hereon_dat/errors',
+        'NXentry/NXdetector/Lmon_hereon_dat/ncount',
+    )
+    da = sc.DataArray(
+        sc.array(
+            dims=['wavelength'], values=data[:], variances=errors[:], unit='counts'
+        ),
+        coords={
+            'wavelength': sc.array(
+                dims=['wavelength'], values=wavelengths[:], unit='angstrom'
+            ),
+            'ncount': sc.array(dims=['wavelength'], values=ncount[:], unit='counts'),
+        },
+    )
+    for name, value in monitor.attrs.items():
+        if name in ('position',):
+            da.coords[name] = sc.scalar(value.decode())
+
+    da.coords['position'] = sc.vector(
+        list(map(float, da.coords.pop('position').value.split(' '))), unit='m'
+    )
+    return da
 
 
 def load_beer_mcstas_provider(

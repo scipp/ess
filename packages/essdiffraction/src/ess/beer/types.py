@@ -7,6 +7,7 @@ The domain types are used to define parameters and to request results from a Sci
 pipeline.
 """
 
+from enum import Enum
 from typing import NewType
 
 import sciline
@@ -25,7 +26,11 @@ Filename = Filename
 SampleRun = SampleRun
 TofDetector = TofDetector
 
-DetectorBank = NewType('DetectorBank', int)
+
+class DetectorBank(Enum):
+    north = 'north'
+    south = 'south'
+
 
 TwoThetaLimits = NewType("TwoThetaLimits", tuple[sc.Variable, sc.Variable])
 
