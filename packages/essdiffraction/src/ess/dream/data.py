@@ -27,8 +27,8 @@ _registry = make_registry(
         # Time-of-flight lookup tables
         "DREAM-high-flux-tof-lookup-table.h5": "md5:1b95a359fa7b0d8b4277806ece9bf279",
         "DREAM-high-flux-tof-lookup-table-BC240-new0.h5": "md5:2cc9dc802082101933429a2ea3624126",  # noqa: E501
-        "DREAM-high-flux-tof-lut-5m-80m.h5": "md5:29027043c422213acbc4a0acdcfaadd7",
-        "DREAM-high-flux-tof-lut-5m-80m-bc240.h5": "md5:e97ffd491bd11bdceec28036802a00ad",  # noqa: E501
+        "DREAM-high-flux-tof-lut-5m-80m.h5": "md5:0db099795027e283f70cb48f738a1c44",
+        "DREAM-high-flux-tof-lut-5m-80m-bc240.h5": "md5:85c0a8acd7ed7f9793ef29f47776f63f",  # noqa: E501
         # Smaller files for unit tests
         "DREAM_simple_pwd_workflow/TEST_data_dream_diamond_vana_container_sample_union.csv.zip": "md5:405df9b5ade9d61ab71fe8d8c19bb51b",  # noqa: E501
         "DREAM_simple_pwd_workflow/TEST_data_dream_vana_container_sample_union.csv.zip": "md5:20186119d1debfb0c2352f9db384cd0a",  # noqa: E501
@@ -262,9 +262,7 @@ def simulated_monitor_empty_can() -> Path:
     return get_path("DREAM_simple_pwd_workflow/Cave_TOF_Monitor_van_can.dat")
 
 
-def tof_lookup_table_high_flux(
-    bc: Literal[215, 240] = 215, full_beamline: bool = False
-) -> Path:
+def tof_lookup_table_high_flux(bc: Literal[215, 240] = 215) -> Path:
     """Path to a HDF5 file containing a lookup table for high-flux ToF.
 
     The table was created using the ``tof`` package and the chopper settings for the
@@ -287,20 +285,11 @@ def tof_lookup_table_high_flux(
     bc:
         Band-control chopper (BC) setting. The default is 215, which corresponds to the
         settings of the choppers in the tutorial data.
-    full_beamline:
-        If True, return a lookup table for the full beamline (5 m to 80 m).
-        If False, return a lookup table for the range 60 m to 80 m.
     """
     match bc:
         case 215:
-            if full_beamline:
-                return get_path("DREAM-high-flux-tof-lut-5m-80m.h5")
-            else:
-                return get_path("DREAM-high-flux-tof-lookup-table.h5")
+            return get_path("DREAM-high-flux-tof-lut-5m-80m.h5")
         case 240:
-            if full_beamline:
-                return get_path("DREAM-high-flux-tof-lut-5m-80m-bc240.h5")
-            else:
-                return get_path("DREAM-high-flux-tof-lookup-table-BC240-new0.h5")
+            return get_path("DREAM-high-flux-tof-lut-5m-80m-bc240.h5")
         case _:
             raise ValueError(f"Unsupported band-control chopper (BC) value: {bc}")
