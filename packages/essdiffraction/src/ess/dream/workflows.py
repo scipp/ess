@@ -6,10 +6,6 @@ import itertools
 import sciline
 import scipp as sc
 import scippnexus as snx
-from ess.reduce.nexus.types import DetectorBankSizes, NeXusName
-from ess.reduce.parameter import parameter_mappers
-from ess.reduce.time_of_flight import GenericTofWorkflow
-from ess.reduce.workflow import register_workflow
 from scippneutron.metadata import Software
 
 from ess.powder import providers as powder_providers
@@ -33,6 +29,10 @@ from ess.powder.types import (
     VanadiumRun,
     WavelengthMask,
 )
+from ess.reduce.nexus.types import DetectorBankSizes, NeXusName
+from ess.reduce.parameter import parameter_mappers
+from ess.reduce.time_of_flight import GenericTofWorkflow
+from ess.reduce.workflow import register_workflow
 
 from .beamline import InstrumentConfiguration
 from .io.cif import (

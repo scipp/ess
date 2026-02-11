@@ -14,11 +14,12 @@ from typing import Any, Generic, NewType, TypeVar
 
 import sciline
 import scipp as sc
+from scippneutron.io import cif
+from scippneutron.metadata import Person, Software
+
 from ess.reduce.nexus import types as reduce_t
 from ess.reduce.time_of_flight import types as tof_t
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
-from scippneutron.io import cif
-from scippneutron.metadata import Person, Software
 
 EmptyDetector = reduce_t.EmptyDetector
 EmptyMonitor = reduce_t.EmptyMonitor
