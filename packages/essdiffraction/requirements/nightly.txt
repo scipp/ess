@@ -44,7 +44,7 @@ executing==2.2.1
     # via stack-data
 fonttools==4.61.1
     # via matplotlib
-fsspec==2026.1.0
+fsspec==2026.2.0
     # via dask
 gemmi==0.7.4
     # via ncrystal
@@ -127,13 +127,13 @@ packaging==26.0
     #   pytest
 pandas==3.0.0
     # via -r nightly.in
-parso==0.8.5
+parso==0.8.6
     # via jedi
 partd==1.4.2
     # via dask
 pexpect==4.9.0
     # via ipython
-pillow==12.1.0
+pillow==12.1.1
     # via matplotlib
 platformdirs==4.5.1
     # via pooch
@@ -237,7 +237,7 @@ typing-inspection==0.4.2
     # via pydantic
 urllib3==2.6.3
     # via requests
-wcwidth==0.5.3
+wcwidth==0.6.0
     # via prompt-toolkit
 widgetsnbextension==4.0.15
     # via ipywidgets
