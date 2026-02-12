@@ -22,6 +22,7 @@ from ess.reduce.time_of_flight import (
     SimulationSeed,
     TofLookupTableWorkflow,
 )
+from ess.reduce.time_of_flight.lut import BeamlineComponentReading
 from ess.reduce.time_of_flight.types import TimeOfFlightLookupTableFilename
 from ess.reduce.workflow import register_workflow
 
@@ -43,16 +44,24 @@ default_parameters = {
 def _simulate_fixed_wavelength_tof(
     wmin: TofSimulationMinWavelength,
     wmax: TofSimulationMaxWavelength,
-    ltotal_range: LtotalRange,
     neutrons: NumberOfSimulatedNeutrons,
     seed: SimulationSeed,
 ) -> SimulationResults:
     """
-    Simulate a pulse of neutrons propagating through a chopper cascade using the
+    Simulate a pulse of neutrons propagating through the instrument using the
     ``tof`` package (https://tof.readthedocs.io).
+    This runs a simulation assuming there are no choppers in the instrument.
 
     Parameters
     ----------
+    wmin:
+        Minimum wavelength of the simulated neutrons.
+    wmax:
+        Maximum wavelength of the simulated neutrons.
+    neutrons:
+        Number of neutrons to simulate.
+    seed:
+        Random seed for the simulation.
     """
     source = tof.Source(
         facility="ess",
@@ -62,20 +71,18 @@ def _simulate_fixed_wavelength_tof(
         wmax=wmax,
         wmin=wmin,
     )
-    nmx_det = tof.Detector(distance=max(ltotal_range), name="detector")
-    model = tof.Model(source=source, choppers=[], detectors=[nmx_det])
-    results = model.run()
-    events = results["detector"].data.squeeze().flatten(to="event")
-    # If there are any blocked neutrons, remove them
-    # it is not expected to have any in this simulation
-    # since it is not using any choppers
-    # but just in case we ever add any in the future
-    events = events[~events.masks["blocked_by_others"]]
+    events = source.data.squeeze().flatten(to="event")
+
     return SimulationResults(
-        time_of_arrival=events.coords["toa"],
-        wavelength=events.coords["wavelength"],
-        weight=events.data,
-        distance=results["detector"].distance,
+        readings={
+            "source": BeamlineComponentReading(
+                time_of_arrival=events.coords["birth_time"],
+                wavelength=events.coords["wavelength"],
+                weight=events.data,
+                distance=source.distance,
+            )
+        },
+        choppers=None,
     )
 
 
