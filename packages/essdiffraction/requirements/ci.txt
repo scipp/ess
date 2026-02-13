@@ -5,7 +5,7 @@
 #
 #    requirements upgrade
 #
-cachetools==7.0.0
+cachetools==7.0.1
     # via tox
 certifi==2026.1.4
     # via requests

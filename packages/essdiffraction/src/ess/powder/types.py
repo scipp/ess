@@ -41,6 +41,7 @@ TofMonitor = tof_t.TofMonitor
 PulseStrideOffset = tof_t.PulseStrideOffset
 TimeOfFlightLookupTable = tof_t.TimeOfFlightLookupTable
 TimeOfFlightLookupTableFilename = tof_t.TimeOfFlightLookupTableFilename
+LookupTableRelativeErrorThreshold = tof_t.LookupTableRelativeErrorThreshold
 
 SampleRun = reduce_t.SampleRun
 VanadiumRun = reduce_t.VanadiumRun
