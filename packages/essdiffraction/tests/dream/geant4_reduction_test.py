@@ -55,7 +55,7 @@ params = {
     MonitorFilename[SampleRun]: dream.data.simulated_monitor_diamond_sample(),
     MonitorFilename[VanadiumRun]: dream.data.simulated_monitor_vanadium_sample(),
     MonitorFilename[EmptyCanRun]: dream.data.simulated_monitor_empty_can(),
-    dream.InstrumentConfiguration: dream.beamline.InstrumentConfiguration.high_flux,
+    dream.InstrumentConfiguration: dream.beamline.InstrumentConfiguration.high_flux_BC215,  # noqa: E501
     CalibrationFilename: None,
     UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
     DspacingBins: sc.linspace('dspacing', 0.0, 2.3434, 201, unit='angstrom'),
@@ -122,7 +122,7 @@ def test_pipeline_can_compute_dspacing_result_using_lookup_table_filename(workfl
 def dream_tof_lookup_table():
     lut_wf = time_of_flight.TofLookupTableWorkflow()
     lut_wf[time_of_flight.DiskChoppers[AnyRun]] = dream.beamline.choppers(
-        dream.beamline.InstrumentConfiguration.high_flux
+        dream.beamline.InstrumentConfiguration.high_flux_BC215
     )
     lut_wf[time_of_flight.SourcePosition] = sc.vector(value=[0, 0, -76.55], unit="m")
     lut_wf[time_of_flight.NumberOfSimulatedNeutrons] = 500_000

@@ -43,7 +43,7 @@ parameter_registry[CalibrationFilename] = FilenameParameter.from_type(
     CalibrationFilename
 )
 parameter_registry[InstrumentConfiguration] = ParamWithOptions.from_enum(
-    InstrumentConfiguration, default=InstrumentConfiguration.high_flux
+    InstrumentConfiguration, default=InstrumentConfiguration.high_flux_BC215
 )
 parameter_registry[MonitorFilename[SampleRun]] = FilenameParameter.from_type(
     MonitorFilename[SampleRun]
