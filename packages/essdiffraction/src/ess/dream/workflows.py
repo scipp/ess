@@ -224,6 +224,8 @@ def DreamGeant4Workflow(*, run_norm: RunNormalization, **kwargs) -> sciline.Pipe
             "endcap_forward": 0.02,
             "endcap_backward": 0.02,
             "high_resolution": 0.02,
+            "monitor_bunker": float("inf"),
+            "monitor_cave": float("inf"),
         },
     }
     for key, value in additional_parameters.items():
