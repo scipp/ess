@@ -26,7 +26,7 @@ async-lru==2.1.0
     # via jupyterlab
 cffi==2.0.0
     # via argon2-cffi-bindings
-copier==9.11.2
+copier==9.11.3
     # via -r dev.in
 dunamai==1.25.0
     # via copier
@@ -65,7 +65,7 @@ jupyter-server==2.17.0
     #   notebook-shim
 jupyter-server-terminals==0.5.4
     # via jupyter-server
-jupyterlab==4.5.2
+jupyterlab==4.5.4
     # via -r dev.in
 jupyterlab-server==2.28.0
     # via jupyterlab
@@ -77,7 +77,7 @@ overrides==7.7.0
     # via jupyter-server
 pip-compile-multi==3.2.2
     # via -r dev.in
-pip-tools==7.5.2
+pip-tools==7.5.3
     # via pip-compile-multi
 plumbum==1.10.0
     # via copier

@@ -10,8 +10,6 @@ accessible-pygments==0.0.5
     # via pydata-sphinx-theme
 alabaster==1.0.0
     # via sphinx
-appnope==0.1.4
-    # via ipykernel
 asttokens==3.0.1
     # via stack-data
 attrs==25.4.0
@@ -20,7 +18,7 @@ attrs==25.4.0
     #   referencing
 autodoc-pydantic==2.2.0
     # via -r docs.in
-babel==2.17.0
+babel==2.18.0
     # via
     #   pydata-sphinx-theme
     #   sphinx
@@ -34,7 +32,7 @@ comm==0.2.3
     # via
     #   ipykernel
     #   ipywidgets
-debugpy==1.8.19
+debugpy==1.8.20
     # via ipykernel
 decorator==5.2.1
     # via ipython
@@ -52,9 +50,9 @@ imagesize==1.4.1
     # via sphinx
 ipydatawidgets==4.3.5
     # via pythreejs
-ipykernel==7.1.0
+ipykernel==7.2.0
     # via -r docs.in
-ipython==9.9.0
+ipython==9.10.0
     # via
     #   -r docs.in
     #   ipykernel
@@ -114,7 +112,7 @@ myst-parser==5.0.0
     # via -r docs.in
 nbclient==0.10.4
     # via nbconvert
-nbconvert==7.16.6
+nbconvert==7.17.0
     # via nbsphinx
 nbformat==5.10.4
     # via
@@ -127,13 +125,13 @@ nest-asyncio==1.6.0
     # via ipykernel
 pandocfilters==1.5.1
     # via nbconvert
-parso==0.8.5
+parso==0.8.6
     # via jedi
 pexpect==4.9.0
     # via ipython
 prompt-toolkit==3.0.52
     # via ipython
-psutil==7.2.1
+psutil==7.2.2
     # via ipykernel
 ptyprocess==0.7.0
     # via pexpect
@@ -225,7 +223,7 @@ traitlets==5.14.3
     #   traittypes
 traittypes==0.2.3
     # via ipydatawidgets
-wcwidth==0.3.0
+wcwidth==0.6.0
     # via prompt-toolkit
 webencodings==0.5.1
     # via
