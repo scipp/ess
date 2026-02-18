@@ -104,6 +104,11 @@ class NMXDetectorMetadata:
     fast_axis: sc.Variable
     slow_axis: sc.Variable
     distance: sc.Variable
+    first_pixel_position: sc.Variable
+    """First pixel position with respect to the sample.
+
+    Additional field for DIALS. It should be a 3D vector.
+    """
     # TODO: Remove hardcoded values
     polar_angle: sc.Variable = field(default_factory=lambda: sc.scalar(0, unit='deg'))
     azimuthal_angle: sc.Variable = field(
@@ -117,5 +122,6 @@ class NMXDetectorMetadata:
         snx.create_field(group, 'fast_axis', self.fast_axis)
         snx.create_field(group, 'slow_axis', self.slow_axis)
         snx.create_field(group, 'distance', self.distance)
+        snx.create_field(group, 'first_pixel_position', self.first_pixel_position)
         snx.create_field(group, 'polar_angle', self.polar_angle)
         snx.create_field(group, 'azimuthal_angle', self.azimuthal_angle)
