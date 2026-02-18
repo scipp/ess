@@ -196,6 +196,7 @@ def _retrieve_crystal_rotation(
 def assemble_detector_metadata(
     detector_component: NeXusComponent[snx.NXdetector, SampleRun],
     transformation: NeXusTransformation[snx.NXdetector, SampleRun],
+    sample_position: Position[snx.NXsample, SampleRun],
     source_position: Position[snx.NXsource, SampleRun],
     empty_detector: EmptyDetector[SampleRun],
 ) -> NMXDetectorMetadata:
@@ -220,6 +221,14 @@ def assemble_detector_metadata(
     y_pixel_size = _decide_step(empty_detector.coords['y_pixel_offset'])
     distance = sc.norm(origin - source_position.to(unit=origin.unit))
 
+    # We save the first pixel position so that DIALS can read use it.
+    flattened = empty_detector.flatten(to='detector_number')
+    first_pixel_number = flattened.coords['detector_number'].min()
+    first_pixel_position = flattened['detector_number', first_pixel_number].coords[
+        'position'
+    ]
+    first_pixel_position_from_sample = first_pixel_position - sample_position
+
     return NMXDetectorMetadata(
         detector_name=detector_component['nexus_component_name'],
         x_pixel_size=x_pixel_size,
@@ -228,6 +237,7 @@ def assemble_detector_metadata(
         fast_axis=_normalize_vector(fast_axis_vector),
         slow_axis=_normalize_vector(slow_axis_vector),
         distance=distance,
+        first_pixel_position=first_pixel_position_from_sample,
     )
 
 
