@@ -126,9 +126,9 @@ def assemble_sample_metadata(
         raise TypeError(f'Sample name {name}is in a wrong type: ', type(name))
 
     return NMXSampleMetadata(
-        sample_name=sample_name,
+        name=sample_name,
         crystal_rotation=crystal_rotation,
-        sample_position=sample_position,
+        position=sample_position,
     )
 
 

@@ -32,7 +32,10 @@ from .nexus import (
 )
 from .types import (
     NMXDetectorMetadata,
+    NMXInstrument,
+    NMXLauetof,
     NMXMonitorMetadata,
+    NMXReducedDetector,
     NMXSampleMetadata,
     NMXSourceMetadata,
 )
@@ -173,7 +176,7 @@ def reduction(
     config: ReductionConfig,
     logger: logging.Logger | None = None,
     display: Callable | None = None,
-) -> sc.DataGroup:
+) -> NMXLauetof:
     """Reduce NMX data from a Nexus file and export to NXLauetof(ESS NMX specific) file.
 
     Parameters
@@ -265,16 +268,25 @@ def reduction(
         histogram = tof_da.hist({t_coord_name: t_bin_edges})
         tof_histograms[detector_name] = histogram
 
-    results = sc.DataGroup(
-        histogram=tof_histograms,
-        detector=detector_metas,
-        sample=metadatas[NMXSampleMetadata],
-        source=metadatas[NMXSourceMetadata],
+    detector_results = sc.DataGroup(
+        {
+            detector_name: NMXReducedDetector(
+                data=histogram, metadata=detector_metas[detector_name]
+            )
+            for detector_name, histogram in tof_histograms.items()
+        }
+    )
+    source_meta: NMXSourceMetadata = metadatas[NMXSourceMetadata]
+    sample_meta: NMXSampleMetadata = metadatas[NMXSampleMetadata]
+
+    results = NMXLauetof(
         control=monitor_metadata,
+        instrument=NMXInstrument(detectors=detector_results, source=source_meta),
+        sample=sample_meta,
     )
 
     if config.workflow.time_bin_coordinate == TimeBinCoordinate.time_of_flight:
-        results["lookup_table"] = base_wf.compute(TimeOfFlightLookupTable)
+        results.lookup_table = base_wf.compute(TimeOfFlightLookupTable)
 
     if not config.output.skip_file_output:
         save_results(results=results, output_config=config.output)
@@ -282,33 +294,33 @@ def reduction(
     return results
 
 
-def save_results(*, results: sc.DataGroup, output_config: OutputConfig) -> None:
+def save_results(*, results: NMXLauetof, output_config: OutputConfig) -> None:
     # Validate if results have expected fields
-    for mandatory_key in ['histogram', 'detector', 'sample', 'source', 'control']:
-        if mandatory_key not in results:
-            raise ValueError(f"Missing '{mandatory_key}' in results to save.")
 
     export_static_metadata_as_nxlauetof(
-        sample_metadata=results['sample'],
-        source_metadata=results['source'],
+        sample_metadata=results.sample,
+        source_metadata=results.instrument.source,
         output_file=output_config.output_file,
         overwrite=output_config.overwrite,
     )
     export_monitor_metadata_as_nxlauetof(
-        monitor_metadata=results['control'],
+        monitor_metadata=results.control,
         output_file=output_config.output_file,
     )
-    for detector_name, detector_meta in results['detector'].items():
+    for detector_name, detector_result in results.instrument.detectors.items():
         export_detector_metadata_as_nxlauetof(
-            detector_metadata=detector_meta,
+            detector_metadata=detector_result.metadata,
             output_file=output_config.output_file,
         )
-        export_reduced_data_as_nxlauetof(
-            detector_name=detector_name,
-            da=results['histogram'][detector_name],
-            output_file=output_config.output_file,
-            compress_mode=output_config.compression,
-        )
+        if isinstance(detector_result.data, sc.DataArray):
+            export_reduced_data_as_nxlauetof(
+                detector_name=detector_name,
+                da=detector_result.data,
+                output_file=output_config.output_file,
+                compress_mode=output_config.compression,
+            )
+        else:
+            raise ValueError(f"Detector counts histogram missing in {detector_name}")
 
 
 def main() -> None:
