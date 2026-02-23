@@ -41,9 +41,8 @@ class ControlMode(enum.StrEnum):
 
 
 def _unit_matrix() -> sc.Variable:
-    return sc.array(
-        dims=['i', 'j'],
-        values=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
+    return sc.spatial.linear_transform(
+        value=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
         unit="dimensionless",
     )
 
