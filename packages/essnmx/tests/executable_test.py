@@ -24,7 +24,7 @@ from ess.nmx._executable_helper import (
 )
 from ess.nmx.configurations import TimeBinCoordinate, TimeBinUnit, to_command_arguments
 from ess.nmx.executables import reduction
-from ess.nmx.types import Compression
+from ess.nmx.types import Compression, NMXLauetof
 
 
 def _build_arg_list_from_pydantic_instance(*instances: pydantic.BaseModel) -> list[str]:
@@ -215,9 +215,12 @@ def reduction_config(
     return ReductionConfig(inputs=input_config, output=output_config)
 
 
-def _retrieve_one_hist(results: sc.DataGroup) -> sc.DataArray:
+def _retrieve_one_hist(results: NMXLauetof) -> sc.DataArray:
     """Helper to retrieve the first DataArray from the results dictionary."""
-    return results['histogram']['detector_panel_0']
+    da = results.instrument.detectors['detector_panel_0'].data
+    if not isinstance(da, sc.DataArray):
+        raise TypeError("Histogram is not a DataArray.")
+    return da
 
 
 def test_reduction_default_settings(reduction_config: ReductionConfig) -> None:
@@ -282,7 +285,9 @@ def test_histogram_out_of_range_min_warns(
         with known_warnings():
             results = reduction(config=reduction_config)
 
-    for da in results['histogram'].values():
+    for histogram in results.instrument.detectors.values():
+        assert isinstance(histogram.data, sc.DataArray)
+        da = histogram.data
         assert_identical(
             da.data.sum(), sc.scalar(0.0, unit='counts', dtype='float32', variance=0.0)
         )
@@ -303,7 +308,9 @@ def test_histogram_out_of_range_max_warns(
         with known_warnings():
             results = reduction(config=reduction_config)
 
-    for da in results['histogram'].values():
+    for det in results.instrument.detectors.values():
+        da = det.data
+        assert isinstance(da, sc.DataArray)
         assert_identical(
             da.data.sum(), sc.scalar(0.0, unit='counts', dtype='float32', variance=0.0)
         )
@@ -350,11 +357,12 @@ def test_reduction_with_tof_lut_file(
     with known_warnings():
         results = reduction(config=reduction_config)
 
-    for default_hist, hist in zip(
-        default_results['histogram'].values(),
-        results['histogram'].values(),
-        strict=True,
-    ):
+    default_hists = [det.data for det in default_results.instrument.detectors.values()]
+    hists = [det.data for det in results.instrument.detectors.values()]
+
+    for default_hist, hist in zip(default_hists, hists, strict=True):
+        assert isinstance(default_hist, sc.DataArray)
+        assert isinstance(hist, sc.DataArray)
         tof_edges_default = default_hist.coords['tof']
         tof_edges = hist.coords['tof']
         assert_identical(default_hist.data, hist.data)
