@@ -270,7 +270,7 @@ def reduction(
         detector=detector_metas,
         sample=metadatas[NMXSampleMetadata],
         source=metadatas[NMXSourceMetadata],
-        monitor=monitor_metadata,
+        control=monitor_metadata,
     )
 
     if config.workflow.time_bin_coordinate == TimeBinCoordinate.time_of_flight:
@@ -284,7 +284,7 @@ def reduction(
 
 def save_results(*, results: sc.DataGroup, output_config: OutputConfig) -> None:
     # Validate if results have expected fields
-    for mandatory_key in ['histogram', 'detector', 'sample', 'source', 'monitor']:
+    for mandatory_key in ['histogram', 'detector', 'sample', 'source', 'control']:
         if mandatory_key not in results:
             raise ValueError(f"Missing '{mandatory_key}' in results to save.")
 
@@ -295,7 +295,7 @@ def save_results(*, results: sc.DataGroup, output_config: OutputConfig) -> None:
         overwrite=output_config.overwrite,
     )
     export_monitor_metadata_as_nxlauetof(
-        monitor_metadata=results['monitor'],
+        monitor_metadata=results['control'],
         output_file=output_config.output_file,
     )
     for detector_name, detector_meta in results['detector'].items():
