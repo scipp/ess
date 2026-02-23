@@ -1,10 +1,13 @@
 import enum
 from dataclasses import dataclass, field
-from typing import NewType
+from typing import Literal, NewType
 
 import h5py
 import scipp as sc
 import scippnexus as snx
+from ess.reduce.time_of_flight.types import TofLookupTable
+
+from ._display_helper import to_datagroup
 
 
 class Compression(enum.StrEnum):
@@ -37,23 +40,25 @@ class ControlMode(enum.StrEnum):
     """Count to a preset value based on clock time"""
 
 
+def _unit_matrix() -> sc.Variable:
+    return sc.array(
+        dims=['i', 'j'],
+        values=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
+        unit="dimensionless",
+    )
+
+
 @dataclass(kw_only=True)
 class NMXSampleMetadata:
     nx_class = snx.NXsample
 
     crystal_rotation: sc.Variable
-    sample_position: sc.Variable
-    sample_name: str
+    name: str
+    position: sc.Variable
     # Temporarily hardcoding some values
     # TODO: Remove hardcoded values
-    sample_orientation_matrix: sc.Variable = field(
-        default_factory=lambda: sc.array(
-            dims=['i', 'j'],
-            values=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
-            unit="dimensionless",
-        )
-    )
-    sample_unit_cell: sc.Variable = field(
+    orientation_matrix: sc.Variable = field(default_factory=_unit_matrix)
+    unit_cell: sc.Variable = field(
         default_factory=lambda: sc.array(
             dims=['i'],
             values=[1.0, 1.0, 1.0, 90.0, 90.0, 90.0],
@@ -65,9 +70,10 @@ class NMXSampleMetadata:
     def __write_to_nexus_group__(self, group: h5py.Group):
         cr_field = snx.create_field(group, 'crystal_rotation', self.crystal_rotation)
         cr_field.attrs['long_name'] = 'crystal rotation in Phi (XYZ)'
-        snx.create_field(group, 'name', self.sample_name)
-        snx.create_field(group, 'orientation_matrix', self.sample_orientation_matrix)
-        snx.create_field(group, 'unit_cell', self.sample_unit_cell)
+        snx.create_field(group, 'name', self.name)
+        snx.create_field(group, 'position', self.position)
+        snx.create_field(group, 'orientation_matrix', self.orientation_matrix)
+        snx.create_field(group, 'unit_cell', self.unit_cell)
 
 
 @dataclass(kw_only=True)
@@ -149,3 +155,47 @@ class NMXDetectorMetadata:
         snx.create_field(group, 'distance', self.distance)
         snx.create_field(group, 'polar_angle', self.polar_angle)
         snx.create_field(group, 'azimuthal_angle', self.azimuthal_angle)
+
+
+@dataclass(kw_only=True)
+class NMXReducedDetector:
+    """Reduced Detector data and metadata container.
+
+    In an output file, all metadata fields are stored on the same level as the `data`.
+    However, in this reduced detector data container, the `data` and `metadata` are
+    separated with an extra hierarchy.
+    It is because the `data` needs more control how to be stored,
+    i.e. compression option.
+    Also, the histogram may need chunk-wise processing
+    and therefore metadata may need to be written in advance so that
+    the `data` can be appended to the existing `NXdetector` HDF5 Group.
+
+    """
+
+    data: sc.DataArray | None = None
+    """3D Histogram of the detector counts or its place holder."""
+    metadata: NMXDetectorMetadata
+    """NMX Detector metadata."""
+
+
+@dataclass(kw_only=True)
+class NMXInstrument:
+    nx_class = snx.NXinstrument
+
+    detectors: sc.DataGroup[NMXReducedDetector]
+    name: str = "NMX"
+    source: NMXSourceMetadata
+
+
+@dataclass(kw_only=True)
+class NMXLauetof:
+    nx_class = "NXlauetof"
+
+    control: NMXMonitorMetadata
+    definitions: Literal['NXlauetof'] = 'NXlauetof'
+    instrument: NMXInstrument
+    sample: NMXSampleMetadata
+    lookup_table: TofLookupTable | None = None
+
+    def to_datagroup(self) -> sc.DataGroup:
+        return to_datagroup(self)
