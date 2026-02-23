@@ -25,6 +25,18 @@ TofSimulationMaxWavelength = NewType("TofSimulationMaxWavelength", sc.Variable)
 """Maximum wavelength for tof simulation to calculate look up table."""
 
 
+class ControlMode(enum.StrEnum):
+    """Control mode of counting.
+
+    Based on the NXlauetof definition of `control`(NXmonitor) field.
+    """
+
+    monitor = 'monitor'
+    """Count to a preset value based on received monitor counts."""
+    timer = 'timer'
+    """Count to a preset value based on clock time"""
+
+
 @dataclass(kw_only=True)
 class NMXSampleMetadata:
     nx_class = snx.NXsample
@@ -70,6 +82,10 @@ class NMXSourceMetadata:
         snx.create_field(group, 'probe', 'neutron')
 
 
+def _zero_float_count() -> sc.Variable:
+    return sc.scalar(0.0, unit='count')
+
+
 @dataclass(kw_only=True)
 class NMXMonitorMetadata:
     nx_class = snx.NXmonitor
@@ -81,10 +97,18 @@ class NMXMonitorMetadata:
             "in the monitor histogram."
         },
     )
+    mode: ControlMode = field(
+        default=ControlMode.monitor,
+        metadata={"description": "Mode of counting. One of `monitor` or `timer`."},
+    )
+    preset: sc.Variable = field(
+        default_factory=_zero_float_count,
+        metadata={"description": "Preset value of counting for the `mode`."},
+    )
 
     def __write_to_nexus_group__(self, group: h5py.Group):
-        snx.create_field(group, 'mode', 'monitor')
-        snx.create_field(group, 'preset', 0.0)
+        snx.create_field(group, 'mode', str(self.mode))
+        snx.create_field(group, 'preset', self.preset)
         data_field = snx.create_field(group, 'data', self.monitor_histogram.data)
         data_field.attrs['signal'] = 1
         data_field.attrs['primary'] = 1
