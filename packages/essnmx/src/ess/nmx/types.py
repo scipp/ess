@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from typing import Literal, NewType
 
 import h5py
+import numpy as np
 import scipp as sc
 import scippnexus as snx
 from ess.reduce.time_of_flight.types import TofLookupTable
@@ -47,6 +48,14 @@ def _unit_matrix() -> sc.Variable:
     )
 
 
+def _uniform_unit_cell_length() -> sc.Variable:
+    return sc.vector([1.0, 1.0, 1.0], unit='dimensionless')
+
+
+def _cube_unit_cell_angle() -> sc.Variable:
+    return sc.vector([90.0, 90.0, 90.0], unit='deg')
+
+
 @dataclass(kw_only=True)
 class NMXSampleMetadata:
     nx_class = snx.NXsample
@@ -57,14 +66,14 @@ class NMXSampleMetadata:
     # Temporarily hardcoding some values
     # TODO: Remove hardcoded values
     orientation_matrix: sc.Variable = field(default_factory=_unit_matrix)
-    unit_cell: sc.Variable = field(
-        default_factory=lambda: sc.array(
-            dims=['i'],
-            values=[1.0, 1.0, 1.0, 90.0, 90.0, 90.0],
-            unit="dimensionless",  # TODO: Add real data,
-            # a, b, c, alpha, beta, gamma
-        )
-    )
+    unit_cell_length: sc.Variable = field(default_factory=_uniform_unit_cell_length)
+    unit_cell_angle: sc.Variable = field(default_factory=_cube_unit_cell_angle)
+
+    @property
+    def unit_cell(self) -> sc.Variable:
+        """a, b, c, alpha, beta, gamma."""
+
+        return np.concat([self.unit_cell_length.values, self.unit_cell_angle.values])
 
     def __write_to_nexus_group__(self, group: h5py.Group):
         cr_field = snx.create_field(group, 'crystal_rotation', self.crystal_rotation)
@@ -72,7 +81,9 @@ class NMXSampleMetadata:
         snx.create_field(group, 'name', self.name)
         snx.create_field(group, 'position', self.position)
         snx.create_field(group, 'orientation_matrix', self.orientation_matrix)
-        snx.create_field(group, 'unit_cell', self.unit_cell)
+        unit_cell = snx.create_field(group, 'unit_cell', self.unit_cell)
+        unit_cell.attrs['length-unit'] = str(self.unit_cell_length.unit)
+        unit_cell.attrs['angle-unit'] = str(self.unit_cell_angle.unit)
 
 
 @dataclass(kw_only=True)
