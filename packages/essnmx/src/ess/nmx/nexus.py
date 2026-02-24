@@ -296,6 +296,7 @@ def export_reduced_data_as_nxlauetof(
         )
 
         data_dset.attrs["signal"] = 1
+        data_dset.attrs["axes"] = list(da.dims)
 
         if 'tof' in da.coords:
             _create_dataset_from_var(

@@ -136,7 +136,7 @@ def assemble_source_metadata(
     source_position: Position[snx.NXsource, SampleRun],
 ) -> NMXSourceMetadata:
     """Assemble source metadata for NMX reduction workflow."""
-    return NMXSourceMetadata(source_position=source_position)
+    return NMXSourceMetadata(position=source_position)
 
 
 def _decide_fast_axis(da: sc.DataArray) -> str:
