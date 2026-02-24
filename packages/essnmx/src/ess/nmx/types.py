@@ -109,7 +109,13 @@ def _zero_float_count() -> sc.Variable:
 @dataclass(kw_only=True)
 class NMXMonitorMetadata:
     nx_class = snx.NXmonitor
-    monitor_histogram: sc.DataArray
+    data: sc.DataArray
+    """Monitor counts."""
+
+    @property
+    def time_of_flight(self) -> sc.Variable:
+        return self.data.coords[self.tof_bin_coord]
+
     tof_bin_coord: str = field(
         default='tof',
         metadata={
@@ -127,14 +133,14 @@ class NMXMonitorMetadata:
     )
 
     def __write_to_nexus_group__(self, group: h5py.Group):
+        group.attrs['axes'] = self.data.dims
+        group.attrs['tof_bin_coord'] = self.tof_bin_coord
         snx.create_field(group, 'mode', str(self.mode))
         snx.create_field(group, 'preset', self.preset)
-        data_field = snx.create_field(group, 'data', self.monitor_histogram.data)
+        data_field = snx.create_field(group, 'data', self.data.data)
         data_field.attrs['signal'] = 1
         data_field.attrs['primary'] = 1
-        snx.create_field(
-            group, 'time_of_flight', self.monitor_histogram.coords[self.tof_bin_coord]
-        )
+        snx.create_field(group, 'time_of_flight', self.time_of_flight)
 
 
 @dataclass(kw_only=True)

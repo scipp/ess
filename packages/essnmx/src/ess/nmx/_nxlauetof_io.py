@@ -6,6 +6,8 @@ import scipp as sc
 import scippnexus as snx
 from ess.reduce.nexus.types import FilePath, NeXusFile
 
+from .types import ControlMode
+
 
 def _validate_entry(entry: snx.Group) -> None:
     if str(entry.attrs['NX_class']) != 'NXlauetof':
@@ -45,11 +47,28 @@ def _handle_sample(sample: snx.Group) -> sc.DataGroup:
     return sample_dg
 
 
+def _handle_monitor(control_dg: sc.DataGroup, control: snx.Group) -> sc.DataGroup:
+    tof_bin_coord_key = 'tof_bin_coord'
+
+    if tof_bin_coord_key in control.attrs:
+        tof_bin_coord = control.attrs['tof_bin_coord']
+        control_dg['tof_bin_coord'] = tof_bin_coord
+        data: sc.DataArray = control_dg['data']
+        data.coords[tof_bin_coord] = data.coords.pop('time_of_flight')
+
+    control_dg['mode'] = ControlMode[control_dg['mode']]
+
+    return control_dg
+
+
 def load_essnmx_nxlauetof(file: str | FilePath | NeXusFile) -> sc.DataGroup:
     dg = snx.load(file)
 
     with snx.File(file) as f:
         _validate_entry(entry := f['entry'])
         dg['entry']['sample'] = _handle_sample(entry['sample'])
+        dg['entry']['control'] = _handle_monitor(
+            dg['entry']['control'], entry['control']
+        )
 
     return dg['entry']
