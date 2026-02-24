@@ -1,0 +1,905 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>ess.ymir.io.TIME_COORD_NAME &#8212; ESSimaging</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=e92c9768"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/modules/ess.ymir.io.TIME_COORD_NAME';</script>
+    <script src="../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <link rel="icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="ess.ymir.io.ROTATION_ANGLE_COORD_NAME" href="ess.ymir.io.ROTATION_ANGLE_COORD_NAME.html" />
+    <link rel="prev" title="ess.ymir.io.IMAGE_KEY_COORD_NAME" href="ess.ymir.io.IMAGE_KEY_COORD_NAME.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1.dev1609+g2ad6cc133" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/logo.svg" class="logo__image only-light" alt="ESSimaging - Home"/>
+    <img src="../../_static/logo-dark.svg" class="logo__image only-dark pst-js-only" alt="ESSimaging - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../odin/index.html">
+    Odin
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../tbl/index.html">
+    Test beamline
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../ymir/index.html">
+    Ymir
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../tools/index.html">
+    Tools
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../about/index.html">
+    About
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essreduce">
+    Essreduce
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scitiff">
+    Scitiff
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/tof">
+    Tof
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/essimaging" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essimaging/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essimaging" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp" title="Scipp" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/favicon.ico" class="icon-link-image" alt="Scipp"/></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../odin/index.html">
+    Odin
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../tbl/index.html">
+    Test beamline
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../ymir/index.html">
+    Ymir
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../tools/index.html">
+    Tools
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../about/index.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/essreduce">
+    Essreduce
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scitiff">
+    Scitiff
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/tof">
+    Tof
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/essimaging" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essimaging/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essimaging" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp" title="Scipp" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/favicon.ico" class="icon-link-image" alt="Scipp"/></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.imaging.conversion.html">ess.imaging.conversion</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.imaging.conversion.providers.html">ess.imaging.conversion.providers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.imaging.conversion.compute_detector_wavelength.html">ess.imaging.conversion.compute_detector_wavelength</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.imaging.conversion.make_coordinate_transform_graph.html">ess.imaging.conversion.make_coordinate_transform_graph</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.imaging.data.html">ess.imaging.data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.imaging.data.jparc_siemens_star_measured_path.html">ess.imaging.data.jparc_siemens_star_measured_path</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.imaging.data.jparc_siemens_star_openbeam_path.html">ess.imaging.data.jparc_siemens_star_openbeam_path</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.imaging.data.resolving_power_test_target_path.html">ess.imaging.data.resolving_power_test_target_path</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.imaging.data.siemens_star_path.html">ess.imaging.data.siemens_star_path</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.imaging.tools.html">ess.imaging.tools</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="ess.imaging.tools.analysis.html">ess.imaging.tools.analysis</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="ess.imaging.tools.analysis.blockify.html">ess.imaging.tools.analysis.blockify</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.imaging.tools.analysis.laplace_2d.html">ess.imaging.tools.analysis.laplace_2d</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.imaging.tools.analysis.resample.html">ess.imaging.tools.analysis.resample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.imaging.tools.analysis.resize.html">ess.imaging.tools.analysis.resize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.imaging.tools.analysis.sharpness.html">ess.imaging.tools.analysis.sharpness</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="ess.imaging.tools.resolution.html">ess.imaging.tools.resolution</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="ess.imaging.tools.resolution.estimate_cut_off_frequency.html">ess.imaging.tools.resolution.estimate_cut_off_frequency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.imaging.tools.resolution.maximum_resolution_achievable.html">ess.imaging.tools.resolution.maximum_resolution_achievable</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.imaging.tools.resolution.modulation_transfer_function.html">ess.imaging.tools.resolution.modulation_transfer_function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.imaging.tools.resolution.mtf_less_than.html">ess.imaging.tools.resolution.mtf_less_than</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="ess.imaging.tools.saturation.html">ess.imaging.tools.saturation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="ess.imaging.tools.saturation.saturation_indicator.html">ess.imaging.tools.saturation.saturation_indicator</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.imaging.types.html">ess.imaging.types</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.SampleRun.html">ess.imaging.types.SampleRun</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.DarkBackgroundRun.html">ess.imaging.types.DarkBackgroundRun</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.OpenBeamRun.html">ess.imaging.types.OpenBeamRun</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.BeamMonitor1.html">ess.imaging.types.BeamMonitor1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.BeamMonitor2.html">ess.imaging.types.BeamMonitor2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.BeamMonitor3.html">ess.imaging.types.BeamMonitor3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.BeamMonitor4.html">ess.imaging.types.BeamMonitor4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.MaskingRules.html">ess.imaging.types.MaskingRules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.NormalizedImage.html">ess.imaging.types.NormalizedImage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.BackgroundSubtractedDetector.html">ess.imaging.types.BackgroundSubtractedDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.CoordTransformGraph.html">ess.imaging.types.CoordTransformGraph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.CorrectedDetector.html">ess.imaging.types.CorrectedDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.ExposureTime.html">ess.imaging.types.ExposureTime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.FluxNormalizedDetector.html">ess.imaging.types.FluxNormalizedDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.ProtonCharge.html">ess.imaging.types.ProtonCharge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.WavelengthDetector.html">ess.imaging.types.WavelengthDetector</a></li>
+</ul>
+</details></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.odin.beamline.html">ess.odin.beamline</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.odin.beamline.choppers.html">ess.odin.beamline.choppers</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.odin.data.html">ess.odin.data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.odin.data.iron_simulation_ob_large.html">ess.odin.data.iron_simulation_ob_large</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.odin.data.iron_simulation_ob_small.html">ess.odin.data.iron_simulation_ob_small</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.odin.data.iron_simulation_sample_large.html">ess.odin.data.iron_simulation_sample_large</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.odin.data.iron_simulation_sample_small.html">ess.odin.data.iron_simulation_sample_small</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.odin.data.odin_tof_lookup_table.html">ess.odin.data.odin_tof_lookup_table</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.odin.masking.html">ess.odin.masking</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.odin.masking.apply_masks.html">ess.odin.masking.apply_masks</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.odin.workflows.html">ess.odin.workflows</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.odin.workflows.OdinBraggEdgeWorkflow.html">ess.odin.workflows.OdinBraggEdgeWorkflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.odin.workflows.OdinWorkflow.html">ess.odin.workflows.OdinWorkflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.odin.workflows.default_parameters.html">ess.odin.workflows.default_parameters</a></li>
+</ul>
+</details></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.tbl.data.html">ess.tbl.data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.tbl.data.tbl_lego_dark_run.html">ess.tbl.data.tbl_lego_dark_run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.tbl.data.tbl_lego_openbeam_run.html">ess.tbl.data.tbl_lego_openbeam_run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.tbl.data.tbl_lego_sample_run.html">ess.tbl.data.tbl_lego_sample_run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.tbl.data.tbl_orca_focussing_data.html">ess.tbl.data.tbl_orca_focussing_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.tbl.data.tbl_tof_lookup_table_no_choppers.html">ess.tbl.data.tbl_tof_lookup_table_no_choppers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.tbl.data.tutorial_sample_data.html">ess.tbl.data.tutorial_sample_data</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.tbl.workflow.html">ess.tbl.workflow</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.tbl.workflow.TblWorkflow.html">ess.tbl.workflow.TblWorkflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.tbl.workflow.default_parameters.html">ess.tbl.workflow.default_parameters</a></li>
+</ul>
+</details></li>
+</ul>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.ymir.data.html">ess.ymir.data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.data.ymir_lego_images_path.html">ess.ymir.data.ymir_lego_images_path</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="ess.ymir.io.html">ess.ymir.io</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.io.FileLock.html">ess.ymir.io.FileLock</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.io.HistogramModeDetector.html">ess.ymir.io.HistogramModeDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.io.HistogramModeDetectorData.html">ess.ymir.io.HistogramModeDetectorData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.io.ImageKeyCoord.html">ess.ymir.io.ImageKeyCoord</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.io.SampleImageStacksWithLogs.html">ess.ymir.io.SampleImageStacksWithLogs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.io.RotationAngleCoord.html">ess.ymir.io.RotationAngleCoord</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.io.RawSampleImageStacks.html">ess.ymir.io.RawSampleImageStacks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.io.OpenBeamImageStacks.html">ess.ymir.io.OpenBeamImageStacks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.io.DarkCurrentImageStacks.html">ess.ymir.io.DarkCurrentImageStacks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.io.IMAGE_KEY_COORD_NAME.html">ess.ymir.io.IMAGE_KEY_COORD_NAME</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">ess.ymir.io.TIME_COORD_NAME</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.io.ROTATION_ANGLE_COORD_NAME.html">ess.ymir.io.ROTATION_ANGLE_COORD_NAME</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.io.DIM1_COORD_NAME.html">ess.ymir.io.DIM1_COORD_NAME</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.io.DIM2_COORD_NAME.html">ess.ymir.io.DIM2_COORD_NAME</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.io.MinDim1.html">ess.ymir.io.MinDim1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.io.MaxDim1.html">ess.ymir.io.MaxDim1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.io.MinDim2.html">ess.ymir.io.MinDim2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.io.apply_logs_as_coords.html">ess.ymir.io.apply_logs_as_coords</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.io.derive_log_coord_by_range.html">ess.ymir.io.derive_log_coord_by_range</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.io.dummy_progress_wrapper.html">ess.ymir.io.dummy_progress_wrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.io.export_image_stacks_as_tiff.html">ess.ymir.io.export_image_stacks_as_tiff</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.io.load_nexus_histogram_mode_detector.html">ess.ymir.io.load_nexus_histogram_mode_detector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.io.load_nexus_rotation_logs.html">ess.ymir.io.load_nexus_rotation_logs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.io.retrieve_dark_current_images.html">ess.ymir.io.retrieve_dark_current_images</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.io.retrieve_open_beam_images.html">ess.ymir.io.retrieve_open_beam_images</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.io.retrieve_sample_images.html">ess.ymir.io.retrieve_sample_images</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.io.separate_detector_images.html">ess.ymir.io.separate_detector_images</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.io.separate_image_by_keys.html">ess.ymir.io.separate_image_by_keys</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.io.separate_image_key_logs.html">ess.ymir.io.separate_image_key_logs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.io.tiff_from_nexus.html">ess.ymir.io.tiff_from_nexus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.io.ImageKey.html">ess.ymir.io.ImageKey</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.ymir.normalize.html">ess.ymir.normalize</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.normalize.AverageBackgroundPixelCounts.html">ess.ymir.normalize.AverageBackgroundPixelCounts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.normalize.AverageSamplePixelCounts.html">ess.ymir.normalize.AverageSamplePixelCounts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.normalize.ScaleFactor.html">ess.ymir.normalize.ScaleFactor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.normalize.OpenBeamImage.html">ess.ymir.normalize.OpenBeamImage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.normalize.DarkCurrentImage.html">ess.ymir.normalize.DarkCurrentImage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.normalize.CleansedOpenBeamImage.html">ess.ymir.normalize.CleansedOpenBeamImage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.normalize.CleansedSampleImages.html">ess.ymir.normalize.CleansedSampleImages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.normalize.SampleImageStacks.html">ess.ymir.normalize.SampleImageStacks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.normalize.BackgroundImage.html">ess.ymir.normalize.BackgroundImage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.normalize.NormalizedSampleImages.html">ess.ymir.normalize.NormalizedSampleImages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.normalize.BackgroundPixelThreshold.html">ess.ymir.normalize.BackgroundPixelThreshold</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.normalize.SamplePixelThreshold.html">ess.ymir.normalize.SamplePixelThreshold</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.normalize.apply_threshold_to_background_image.html">ess.ymir.normalize.apply_threshold_to_background_image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.normalize.apply_threshold_to_sample_images.html">ess.ymir.normalize.apply_threshold_to_sample_images</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.normalize.average_background_pixel_counts.html">ess.ymir.normalize.average_background_pixel_counts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.normalize.average_dark_current_images.html">ess.ymir.normalize.average_dark_current_images</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.normalize.average_open_beam_images.html">ess.ymir.normalize.average_open_beam_images</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.normalize.average_sample_pixel_counts.html">ess.ymir.normalize.average_sample_pixel_counts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.normalize.calculate_scale_factor.html">ess.ymir.normalize.calculate_scale_factor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.normalize.cleanse_open_beam_image.html">ess.ymir.normalize.cleanse_open_beam_image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.normalize.cleanse_sample_images.html">ess.ymir.normalize.cleanse_sample_images</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.normalize.normalize_sample_images.html">ess.ymir.normalize.normalize_sample_images</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.ymir.types.html">ess.ymir.types</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.types.ImageDetectorName.html">ess.ymir.types.ImageDetectorName</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.types.ImageKeyLogs.html">ess.ymir.types.ImageKeyLogs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.types.RotationMotionSensorName.html">ess.ymir.types.RotationMotionSensorName</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.types.RotationLogs.html">ess.ymir.types.RotationLogs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.types.HistogramModeDetectorsPath.html">ess.ymir.types.HistogramModeDetectorsPath</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.ymir.workflow.html">ess.ymir.workflow</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.ymir.workflow.YmirImageNormalizationWorkflow.html">ess.ymir.workflow.YmirImageNormalizationWorkflow</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+        <div class="sidebar-primary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ess.ymir.io.TIME_COORD_NAME"><code class="docutils literal notranslate"><span class="pre">TIME_COORD_NAME</span></code></a></li>
+</ul>
+  </nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/generated/modules/ess.ymir.io.TIME_COORD_NAME.rst"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../api-reference/index.html" class="nav-link">API Reference</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="ess.ymir.io.html" class="nav-link">ess.ymir.io</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ess.ymir.io.TIME_COORD_NAME</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="ess-ymir-io-time-coord-name">
+<h1>ess.ymir.io.TIME_COORD_NAME<a class="headerlink" href="#ess-ymir-io-time-coord-name" title="Link to this heading">#</a></h1>
+<dl class="py data">
+<dt class="sig sig-object py" id="ess.ymir.io.TIME_COORD_NAME">
+<span class="sig-prename descclassname"><span class="pre">ess.ymir.io.</span></span><span class="sig-name descname"><span class="pre">TIME_COORD_NAME</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'time'</span></span><a class="headerlink" href="#ess.ymir.io.TIME_COORD_NAME" title="Link to this definition">#</a></dt>
+<dd><p>Time coordinate name. <strong>Note that it is not time of flight.</strong></p>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="ess.ymir.io.IMAGE_KEY_COORD_NAME.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">ess.ymir.io.IMAGE_KEY_COORD_NAME</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="ess.ymir.io.ROTATION_ANGLE_COORD_NAME.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">ess.ymir.io.ROTATION_ANGLE_COORD_NAME</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025 Scipp contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><!-- This will display the version of the docs -->
+Current ESSimaging version: 0.1.dev1609+g2ad6cc133 (<a href="https://github.com/scipp/essimaging/releases">older versions</a>).</div>
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

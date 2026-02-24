@@ -1,0 +1,1977 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Histogram Mode Detector &#8212; ESSimaging</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=e92c9768"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'ymir/histogram_mode_detector';</script>
+    <script src="../_static/anaconda-icon.js?v=461bdc62"></script>
+    <link rel="icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Tools" href="../tools/index.html" />
+    <link rel="prev" title="Ymir" href="index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1.dev1609+g2ad6cc133" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.svg" class="logo__image only-light" alt="ESSimaging - Home"/>
+    <img src="../_static/logo-dark.svg" class="logo__image only-dark pst-js-only" alt="ESSimaging - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../odin/index.html">
+    Odin
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tbl/index.html">
+    Test beamline
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Ymir
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tools/index.html">
+    Tools
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../about/index.html">
+    About
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essreduce">
+    Essreduce
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scitiff">
+    Scitiff
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/tof">
+    Tof
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/essimaging" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essimaging/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essimaging" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp" title="Scipp" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/favicon.ico" class="icon-link-image" alt="Scipp"/></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../odin/index.html">
+    Odin
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tbl/index.html">
+    Test beamline
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Ymir
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tools/index.html">
+    Tools
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../about/index.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/essreduce">
+    Essreduce
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scitiff">
+    Scitiff
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/tof">
+    Tof
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/essimaging" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essimaging/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essimaging" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp" title="Scipp" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/favicon.ico" class="icon-link-image" alt="Scipp"/></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Histogram Mode Detector</a></li>
+</ul>
+</div>
+</nav></div>
+        <div class="sidebar-primary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#TL;DR---Get-normalized-sample-images-averaged-along-the-rotation-angle.">TL;DR - Get normalized sample images averaged along the rotation angle.</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#IO">IO</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Load-the-data-as-a-stack-of-images">Load the data as a stack of images</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Save-Individual-Frame">Save Individual Frame</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Save-All-Frames-in-One-File">Save All Frames in One File</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Normalization">Normalization</a></li>
+</ul>
+  </nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/ymir/histogram_mode_detector.ipynb"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Ymir</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Histogram Mode Detector</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Histogram-Mode-Detector">
+<h1>Histogram Mode Detector<a class="headerlink" href="#Histogram-Mode-Detector" title="Link to this heading">#</a></h1>
+<section id="TL;DR---Get-normalized-sample-images-averaged-along-the-rotation-angle.">
+<h2>TL;DR - Get normalized sample images averaged along the rotation angle.<a class="headerlink" href="#TL;DR---Get-normalized-sample-images-averaged-along-the-rotation-angle." title="Link to this heading">#</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ess.ymir.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">ymir_lego_images_path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.ymir.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">FilePath</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.ymir.normalize</span><span class="w"> </span><span class="kn">import</span> <span class="n">NormalizedSampleImages</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.ymir.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">YmirImageNormalizationWorkflow</span><span class="p">,</span>
+    <span class="n">ImageDetectorName</span><span class="p">,</span>
+    <span class="n">RotationMotionSensorName</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">wf</span> <span class="o">=</span> <span class="n">YmirImageNormalizationWorkflow</span><span class="p">()</span>
+<span class="n">wf</span><span class="p">[</span><span class="n">FilePath</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">ymir_lego_images_path</span><span class="p">()</span>
+<span class="p">)</span>  <span class="c1"># Replace with the path to your images in nexus file.</span>
+<span class="n">wf</span><span class="p">[</span><span class="n">ImageDetectorName</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;orca&#39;</span>
+<span class="n">wf</span><span class="p">[</span><span class="n">RotationMotionSensorName</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;motion_cabinet_2&#39;</span>
+<span class="n">normalized</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">NormalizedSampleImages</span><span class="p">)</span>
+<span class="n">normalized</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Downloading file &#39;small_ymir_images.hdf&#39; from &#39;https://public.esss.dk/groups/scipp/ess/ymir/1/small_ymir_images.hdf&#39; to &#39;/home/runner/.cache/ess/ymir&#39;.
+/home/runner/work/ess/ess/packages/essimaging/src/ess/ymir/io.py:106: UserWarning: The unit of the histogram detector data is [None]. It is expected to be [counts]. The loader manually assigned the unit to be [counts].
+  warnings.warn(
+/home/runner/work/ess/ess/packages/essimaging/src/ess/ymir/normalize.py:47: UserWarning: Computing average open beam image assuming constant exposure time.
+  warnings.warn(warning_message, stacklevel=1)
+/home/runner/work/ess/ess/packages/essimaging/src/ess/ymir/normalize.py:47: UserWarning: Computing average dark current image assuming constant exposure time.
+  warnings.warn(warning_message, stacklevel=1)
+/home/runner/work/ess/ess/packages/essimaging/src/ess/ymir/normalize.py:47: UserWarning: Computing average background pixel counts assuming constant exposure time.
+  warnings.warn(warning_message, stacklevel=1)
+/home/runner/work/ess/ess/packages/essimaging/src/ess/ymir/normalize.py:47: UserWarning: Computing average sample pixel counts assuming constant exposure time.
+  warnings.warn(warning_message, stacklevel=1)
+/home/runner/work/ess/ess/packages/essimaging/src/ess/ymir/normalize.py:47: UserWarning: Computing normalized sample image stack assuming constant exposure time.
+  warnings.warn(warning_message, stacklevel=1)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div><!-- Original source from -->
+<!-- https://github.com/jsignell/xarray/blob/1d960933ab252e0f79f7e050e6c9261d55568057/xarray/static/html/icons-svg-inline.html -->
+<svg style="position: absolute; width: 0; height: 0; overflow: hidden">
+<defs>
+<symbol id="icon-database" viewBox="0 0 32 32">
+<title>Show/Hide data repr</title>
+<path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
+<path d="M16 17c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+<path d="M16 26c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+</symbol>
+<symbol id="icon-file-text2" viewBox="0 0 32 32">
+<title>Show/Hide attributes</title>
+<path d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"></path>
+<path d="M23 26h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 22h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+</symbol>
+</defs>
+</svg><style id="scipp-style-sheet">.sc-root{--sc-background-color0:var(--jp-layout-color0,#fff);--sc-background-color1:var(--jp-layout-color1,#fcfcfc);--sc-background-color2:var(--jp-layout-color2,#efefef);--sc-inverse-background-color0:var(--jp-inverse-layout-color4,#111);--sc-font-color0:var(--jp-content-font-color0,#000);--sc-font-color1:var(--jp-content-font-color1,#555);--sc-font-color2:var(--jp-content-font-color2,#888);--sc-font-color3:var(--jp-content-font-color3,#ccc);}body.vscode-dark .sc-root{--sc-font-color0:rgba(255,255,255,1);--sc-font-color1:rgba(255,255,255,0.70);--sc-font-color2:rgba(255,255,255,0.54);--sc-font-color3:rgba(255,255,255,0.38);--sc-border-color:#1F1F1F;--sc-disabled-color:#515151;--sc-background-color0:#111111;--sc-background-color1:#111111;--sc-background-color2:#313131;}.sc-wrap{font-size:14px;min-width:300px;max-width:800px;}.sc-var-attrs .sc-wrap{padding-left:3em;}.sc-header{padding-top:6px;padding-bottom:6px;margin-bottom:4px;border-bottom:solid 1px #ddd;}.sc-header > div,.sc-header > ul{display:inline;margin-top:0;margin-bottom:0;}.sc-obj-type,.sc-array-name{margin-left:2px;margin-right:10px;}.sc-obj-type{color:var(--sc-font-color1);}.sc-underlying-size{color:var(--sc-font-color2);}.sc-sections,.reveal .sc-sections{padding-left:0 !important;display:grid;grid-template-columns:150px auto auto auto 1fr 20px 20px;}.sc-section-item{display:contents;}.sc-section-item input{display:none;}.sc-section-item input:enabled + label{cursor:pointer;color:var(--sc-font-color1);}.sc-section-item input:enabled + label:hover{color:var(--sc-font-color0);}.sc-section-summary{grid-column:1;font-weight:500;}.sc-section-summary > span{display:inline-block;padding-left:0.5em;}.sc-section-summary-in:disabled + label{color:var(--sc-font-color1);}.sc-section-summary-in + label:before{display:inline-block;content:'►';font-size:11px;width:15px;text-align:center;}.sc-section-summary-in:disabled + label:before{display:none;}.sc-section-summary-in:checked + label:before{content:'▼';}.sc-section-summary-in:checked + label > span{display:none;}.sc-section-summary,.sc-section-inline-details{padding-top:4px;padding-bottom:4px;}.sc-section-inline-details{grid-column:2 / 6;}.sc-section-details{display:none;grid-column:1 / -1;margin-bottom:5px;}.sc-section-summary-in:checked ~ .sc-section-details{display:contents;}.sc-array-wrap{grid-column:1 / -1;display:grid;grid-template-columns:20px auto;}.sc-array-wrap > label{grid-column:1;vertical-align:top;}.sc-preview{color:var(--sc-font-color2);}.sc-array-preview,.sc-array-data{padding:0 5px !important;grid-column:2;}.sc-array-data,.sc-array-in:checked ~ .sc-array-preview{display:none;}.sc-array-in:checked ~ .sc-array-data,.sc-array-preview{display:inline-block;}.sc-dim-list{display:inline-block !important;list-style:none;padding:0 !important;margin:0;}.sc-dim-list li{display:inline-block;padding:0;margin:0!important;}.sc-dim-list:before{content:'(';}.sc-dim-list:after{content:')';}.sc-dim-list li:not(:last-child):after{content:',';padding-right:5px;}.sc-dim-list li span,.sc-standalone-var-name > span span,.sc-var-name > span span{padding:0 !important;}.sc-aligned{font-weight:bold;}.sc-var-list,.sc-var-item,.reveal .sc-var-list,.reveal .sc-var-item{display:contents;}.sc-var-item > div,.sc-var-item label,.sc-var-item > .sc-var-name span{background-color:var(--sc-background-color1);margin-bottom:0;}.sc-var-item > .sc-var-name:hover span{padding-right:5px;}.sc-var-list > li:nth-child(odd) > div,.sc-var-list > li:nth-child(odd) > label,.sc-var-list > li:nth-child(odd) > .sc-var-name span{background-color:var(--sc-background-color2);}.sc-var-name{grid-column:1;}.sc-var-dims{grid-column:2;}.sc-var-dtype{grid-column:3;text-align:right;color:var(--sc-font-color2);}.sc-var-unit{grid-column:4;text-align:left;color:var(--sc-font-color1);max-width:50pt;text-overflow:ellipsis;}.sc-value-preview{grid-column:5;}.sc-var-preview-variances{text-align:right;}.sc-sections .sc-section-item .sc-section-summary,.sc-sections .sc-section-item .sc-section-inline-details,.sc-section-item .sc-var-list .sc-var-item > div,.sc-section-item .sc-var-list .sc-var-item > label,.sc-section-details .sc-var-list .sc-var-item > div,.sc-section-details .sc-var-list .sc-var-item > label{margin-top:0;margin-bottom:0;}.sc-var-name,.sc-var-dims,.sc-var-dtype,.sc-var-unit,.sc-preview,.sc-attrs dt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:10px;}.sc-var-name:hover,.sc-var-dims:hover,.sc-var-dtype:hover,.sc-var-unit:hover,.sc-attrs dt:hover{overflow:visible;width:auto;z-index:1;}.sc-var-attrs{display:block;}.sc-var-data,.reveal .sc-var-data{display:none;}.sc-var-attrs,.sc-var-data{background-color:var(--sc-background-color0) !important;padding-bottom:5px !important;}.sc-var-attrs-in:checked ~ .sc-var-attrs{display:none;}.sc-var-data-in:checked ~ .sc-var-data{display:block;}.sc-var-data > table{float:right;}.sc-var-name span,.sc-var-data{padding-left:25px !important;}.sc-var-attrs,.sc-var-data{grid-column:1 / -1;}dl.sc-attrs{padding:0;margin:0;display:grid;grid-template-columns:125px auto;}.sc-attrs dt,dd{padding:0;margin:0;float:left;padding-right:10px;width:auto;}.sc-attrs dt{font-weight:normal;grid-column:1;}.sc-attrs dt:hover span{display:inline-block;padding-right:10px;}.sc-attrs dd{grid-column:2;white-space:pre-wrap;word-break:break-all;}.sc-icon-database,.sc-icon-file-text2{display:inline-block;vertical-align:middle;width:1em;height:1.5em !important;stroke-width:0;stroke:currentColor;fill:currentColor;}label.sc-hide-icon svg{opacity:0;}.sc-standalone-var-name{grid-column:1/3;}.sc-standalone-var-name span{padding-left:25px;padding-right:10px;}.sc-title{font-weight:bold;font-size:1.5em;}.sc-subtitle{font-weight:normal;font-style:italic;text-align:left;font-size:1.2em;padding:1px;}.sc-label{fill:var(--sc-font-color0,#444444);text-anchor:middle;}.sc-name{fill:var(--sc-font-color0,#111111);}.sc-inset-line{stroke:var(--sc-font-color1);stroke-width:0.05;stroke-dasharray:0.2,0.2;}.sc-log-wrap{height:25ex;resize:vertical;overflow-y:scroll;display:flex;flex-direction:column-reverse;border:1px solid;border-color:var(--jp-border-color2);background-color:var(--sc-background-color1);}div.sc-log{line-height:2.5ex;}table.sc-log{table-layout:auto;border-collapse:collapse;}tr.sc-log:nth-child(even){background-color:var(--sc-background-color0);}tr.sc-log > td{vertical-align:top;padding-bottom:0.5ex;}.sc-log-time-stamp{min-width:22ch;font-family:var(--jp-code-font-family);color:var(--sc-font-color2);}.sc-log-level{min-width:10ch;}tr.sc-log-debug td.sc-log-level{color:var(--jp-accent-color1);}tr.sc-log-info td.sc-log-level{color:var(--jp-info-color1);}tr.sc-log-warning td.sc-log-level{color:var(--jp-warn-color1);}tr.sc-log-error td.sc-log-level{font-weight:bold;color:var(--jp-error-color2);}tr.sc-log-critical td.sc-log-level{font-weight:bold;color:var(--sc-background-color0);background-color:var(--jp-error-color1);}.sc-log-message{white-space:pre-wrap;width:100%;}.sc-log-html-payload{white-space:normal;}.sc-log-name{padding-right:0.5em;text-align:right;white-space:pre-wrap;color:var(--sc-font-color3);}</style><div class='sc-wrap sc-root'><div class='sc-header'><div class='sc-obj-type'>scipp.DataArray (20.26 MB <span class='sc-underlying-size'>out of 20.26 MB</span>)</div></div><ul class='sc-sections'><li class='sc-section-item'><input id='section-7b1bbf3d-6fd8-48f8-aabe-0a6f941c5fdc' class='sc-section-summary-in' type='checkbox' disabled ><label for='section-7b1bbf3d-6fd8-48f8-aabe-0a6f941c5fdc' class='sc-section-summary' >Dimensions:</label><div class='sc-section-inline-details'><ul class='sc-dim-list'><li><span class='sc-has-index'>time</span>: 36</li><li><span class='sc-has-index'>dim_1</span>: 256</li><li><span class='sc-has-index'>dim_2</span>: 256</li></ul></div><div class='sc-section-details'></div></li><li class='sc-section-item'><input id='section-f266bf6b-2d87-4088-807f-38d0eb857321' class='sc-section-summary-in' type='checkbox'  checked><label for='section-f266bf6b-2d87-4088-807f-38d0eb857321' class='sc-section-summary'  title='Expand/collapse section'>Coordinates: <span>(4)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>dim_1</span></div><div class='sc-var-dims'>(dim_1)</div><div class='sc-var-dtype'>int64</div><div class='sc-var-unit'>𝟙</div><div class='sc-value-preview sc-preview'><span><div>0, 1, ..., 254, 255</div></span></div><input id='attrs-2f1c14d5-58c1-49e2-acb5-836da30a9130' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-2f1c14d5-58c1-49e2-acb5-836da30a9130' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-df10fddb-9e0a-454e-be66-947cd45fdfbe' class='sc-var-data-in' type='checkbox'><label for='data-df10fddb-9e0a-454e-be66-947cd45fdfbe' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([  0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,
+        13,  14,  15,  16,  17,  18,  19,  20,  21,  22,  23,  24,  25,
+        26,  27,  28,  29,  30,  31,  32,  33,  34,  35,  36,  37,  38,
+        39,  40,  41,  42,  43,  44,  45,  46,  47,  48,  49,  50,  51,
+        52,  53,  54,  55,  56,  57,  58,  59,  60,  61,  62,  63,  64,
+        65,  66,  67,  68,  69,  70,  71,  72,  73,  74,  75,  76,  77,
+        78,  79,  80,  81,  82,  83,  84,  85,  86,  87,  88,  89,  90,
+        91,  92,  93,  94,  95,  96,  97,  98,  99, 100, 101, 102, 103,
+       104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116,
+       117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129,
+       130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142,
+       143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155,
+       156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168,
+       169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181,
+       182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194,
+       195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207,
+       208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220,
+       221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233,
+       234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246,
+       247, 248, 249, 250, 251, 252, 253, 254, 255])</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>dim_2</span></div><div class='sc-var-dims'>(dim_2)</div><div class='sc-var-dtype'>int64</div><div class='sc-var-unit'>𝟙</div><div class='sc-value-preview sc-preview'><span><div>0, 1, ..., 254, 255</div></span></div><input id='attrs-824c7838-530f-4a6b-9b10-5a3ac3672dc1' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-824c7838-530f-4a6b-9b10-5a3ac3672dc1' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-b4a70620-9261-4a7d-b413-df1a16638e95' class='sc-var-data-in' type='checkbox'><label for='data-b4a70620-9261-4a7d-b413-df1a16638e95' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([  0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,
+        13,  14,  15,  16,  17,  18,  19,  20,  21,  22,  23,  24,  25,
+        26,  27,  28,  29,  30,  31,  32,  33,  34,  35,  36,  37,  38,
+        39,  40,  41,  42,  43,  44,  45,  46,  47,  48,  49,  50,  51,
+        52,  53,  54,  55,  56,  57,  58,  59,  60,  61,  62,  63,  64,
+        65,  66,  67,  68,  69,  70,  71,  72,  73,  74,  75,  76,  77,
+        78,  79,  80,  81,  82,  83,  84,  85,  86,  87,  88,  89,  90,
+        91,  92,  93,  94,  95,  96,  97,  98,  99, 100, 101, 102, 103,
+       104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116,
+       117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129,
+       130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142,
+       143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155,
+       156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168,
+       169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181,
+       182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194,
+       195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207,
+       208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220,
+       221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233,
+       234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246,
+       247, 248, 249, 250, 251, 252, 253, 254, 255])</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>rotation_angle</span></div><div class='sc-var-dims'>(time)</div><div class='sc-var-dtype'>float64</div><div class='sc-var-unit'>deg</div><div class='sc-value-preview sc-preview'><span><div>1.007, 11.034, ..., 341.951, 351.979</div></span></div><input id='attrs-1f34f0f4-3311-4d30-94f9-c98107cd08ab' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-1f34f0f4-3311-4d30-94f9-c98107cd08ab' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-7f534f49-89c7-4dd6-a5a5-199416a54559' class='sc-var-data-in' type='checkbox'><label for='data-7f534f49-89c7-4dd6-a5a5-199416a54559' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([  1.00731091,  11.03435639,  21.06173445,  31.08968206,
+        41.11822052,  51.14620862,  61.17432276,  71.20250242,
+        81.22770456,  91.25705069, 101.28393277, 111.31280002,
+       121.33981109, 131.36662637, 141.39534187, 151.42282542,
+       161.45027075, 171.47811035, 181.50597898, 191.53482643,
+       201.56200906, 211.58970896, 221.61798686, 231.64625132,
+       241.67332848, 251.70052385, 261.72550702, 271.75563946,
+       281.78514837, 291.81166234, 301.83935011, 311.86674052,
+       321.89460518, 331.92353937, 341.95077558, 351.97860336])</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>time</span></div><div class='sc-var-dims'>(time)</div><div class='sc-var-dtype'>datetime64</div><div class='sc-var-unit'>ns</div><div class='sc-value-preview sc-preview'><span><div>2024-08-14T14:16:57.997255602, 2024-08-14T14:17:46.682255224, ..., 2024-08-14T14:44:41.925222722, 2024-08-14T14:45:30.825154517</div></span></div><input id='attrs-a9516ae6-32de-4757-96a8-e088ee607666' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-a9516ae6-32de-4757-96a8-e088ee607666' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-28069329-93f2-4a8b-9394-54b7e3120140' class='sc-var-data-in' type='checkbox'><label for='data-28069329-93f2-4a8b-9394-54b7e3120140' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([&#x27;2024-08-14T14:16:57.997255602&#x27;, &#x27;2024-08-14T14:17:46.682255224&#x27;,
+       &#x27;2024-08-14T14:18:35.853205911&#x27;, &#x27;2024-08-14T14:19:24.975128719&#x27;,
+       &#x27;2024-08-14T14:20:13.955183413&#x27;, &#x27;2024-08-14T14:21:02.993115782&#x27;,
+       &#x27;2024-08-14T14:21:51.865167018&#x27;, &#x27;2024-08-14T14:22:40.700159043&#x27;,
+       &#x27;2024-08-14T14:23:30.120165136&#x27;, &#x27;2024-08-14T14:24:19.211202454&#x27;,
+       &#x27;2024-08-14T14:25:07.781151541&#x27;, &#x27;2024-08-14T14:25:56.672195037&#x27;,
+       &#x27;2024-08-14T14:26:45.768113531&#x27;, &#x27;2024-08-14T14:27:34.491207424&#x27;,
+       &#x27;2024-08-14T14:28:23.784141401&#x27;, &#x27;2024-08-14T14:29:12.714194238&#x27;,
+       &#x27;2024-08-14T14:30:01.238209345&#x27;, &#x27;2024-08-14T14:30:50.167144757&#x27;,
+       &#x27;2024-08-14T14:31:38.958162332&#x27;, &#x27;2024-08-14T14:32:27.831177947&#x27;,
+       &#x27;2024-08-14T14:33:16.678124259&#x27;, &#x27;2024-08-14T14:34:05.873147398&#x27;,
+       &#x27;2024-08-14T14:34:54.972148922&#x27;, &#x27;2024-08-14T14:35:43.545102329&#x27;,
+       &#x27;2024-08-14T14:36:32.141243180&#x27;, &#x27;2024-08-14T14:37:21.510179315&#x27;,
+       &#x27;2024-08-14T14:38:10.617163791&#x27;, &#x27;2024-08-14T14:39:00.045194764&#x27;,
+       &#x27;2024-08-14T14:39:48.289190220&#x27;, &#x27;2024-08-14T14:40:36.650186469&#x27;,
+       &#x27;2024-08-14T14:41:25.774189010&#x27;, &#x27;2024-08-14T14:42:15.149107963&#x27;,
+       &#x27;2024-08-14T14:43:03.915278596&#x27;, &#x27;2024-08-14T14:43:53.077218381&#x27;,
+       &#x27;2024-08-14T14:44:41.925222722&#x27;, &#x27;2024-08-14T14:45:30.825154517&#x27;],
+      dtype=&#x27;datetime64[ns]&#x27;)</pre></span></li></ul></div></li><li class='sc-section-item'><input id='section-8fb591ac-960f-46b5-8a37-732bb9af77a3' class='sc-section-summary-in' type='checkbox'  checked><label for='section-8fb591ac-960f-46b5-8a37-732bb9af77a3' class='sc-section-summary'  title='Expand/collapse section'>Data: <span>(1)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span></span></div><div class='sc-var-dims'>(time, dim_1, dim_2)</div><div class='sc-var-dtype'>float64</div><div class='sc-var-unit'>𝟙</div><div class='sc-value-preview sc-preview'><span><div>1.048, 1.062, ..., 0.992, 0.997</div></span></div><input id='attrs-c9b546fa-e08e-48de-a129-cc78d5205c4f' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-c9b546fa-e08e-48de-a129-cc78d5205c4f' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-dd37b647-1717-431f-b837-c200fe88b7d5' class='sc-var-data-in' type='checkbox'><label for='data-dd37b647-1717-431f-b837-c200fe88b7d5' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([[[1.0476282 , 1.06165906, 1.04531464, ..., 1.05644014,
+         1.0414165 , 1.05037228],
+        [1.05502979, 1.03332636, 1.05998197, ..., 1.04956501,
+         1.05474718, 1.04747274],
+        [1.04426372, 1.06543977, 1.02916858, ..., 1.06201682,
+         1.05465958, 1.0536832 ],
+        ...,
+        [0.82613202, 0.81359233, 0.80103089, ..., 1.05969303,
+         1.04164473, 1.03079426],
+        [0.83522123, 0.80806379, 0.77136373, ..., 1.08613709,
+         1.10307506, 0.97883198],
+        [0.82829581, 0.76003729, 0.82939737, ..., 1.0779487 ,
+         1.06083292, 1.0388744 ]],
+
+       [[1.07754557, 1.06728106, 1.04837291, ..., 1.04092882,
+         1.0414165 , 1.04447528],
+        [1.05981017, 1.04834564, 1.07451759, ..., 1.05978473,
+         1.06356613, 1.04971428],
+        [1.04545417, 1.06432785, 1.03143697, ..., 1.07656832,
+         1.05465958, 1.04840317],
+        ...,
+        [0.77715187, 0.76736549, 0.77057344, ..., 0.90499331,
+         1.01437654, 1.0036681 ],
+        [0.83522123, 0.7607163 , 0.78654806, ..., 1.00762116,
+         1.00959412, 0.96574599],
+        [0.79692097, 0.76003729, 0.79674393, ..., 0.9941703 ,
+         0.96489196, 0.9696161 ]],
+
+       [[1.08665086, 1.07740067, 1.05550886, ..., 1.04092882,
+         1.04598111, 1.05037228],
+        [1.07056602, 1.04950097, 1.07339946, ..., 1.05595233,
+         1.07112524, 1.05307659],
+        [1.05735868, 1.06655169, 1.02916858, ..., 1.0511032 ,
+         1.05922619, 1.06001924],
+        ...,
+        [0.80980531, 0.75195655, 0.77057344, ..., 0.98234317,
+         0.98710835, 0.96297885],
+        [0.78758504, 0.7449338 , 0.77136373, ..., 0.96836319,
+         0.94282202, 0.90031605],
+        [0.82829581, 0.76003729, 0.79674393, ..., 0.98020724,
+         0.99230366, 0.99731942]],
+
+       ...,
+
+       [[1.16209465, 1.11225709, 1.08099439, ..., 1.01945161,
+         1.01631112, 1.04329588],
+        [1.09685811, 1.08878215, 1.11812444, ..., 1.04317768,
+         1.05222747, 1.03850657],
+        [1.06331094, 1.07211128, 1.0473157 , ..., 1.07656832,
+         1.03525147, 1.01777898],
+        ...,
+        [0.8914389 , 0.90604601, 0.87717451, ..., 0.94366824,
+         1.00074245, 0.9222896 ],
+        [0.86697869, 0.83962878, 0.87765401, ..., 1.02070714,
+         0.9962397 , 0.92648802],
+        [0.89104549, 0.86601858, 0.89470425, ..., 0.9941703 ,
+         0.97859781, 0.98346776]],
+
+       [[1.1607939 , 1.10888388, 1.07385844, ..., 1.00632665,
+         0.99805267, 1.0279637 ],
+        [1.09805321, 1.0864715 , 1.11029757, ..., 1.04828754,
+         1.04214867, 1.03850657],
+        [1.05973958, 1.07211128, 1.0484499 , ..., 1.06807995,
+         1.03981808, 1.01355496],
+        ...,
+        [0.8914389 , 0.87522811, 0.89240323, ..., 0.94366824,
+         1.02801063, 0.96297885],
+        [0.89873615, 0.85541128, 0.86246969, ..., 0.99453517,
+         0.95617644, 0.96574599],
+        [0.85967065, 0.8508784 , 0.86205081, ..., 0.98020724,
+         1.04712707, 0.9696161 ]],
+
+       [[1.17510221, 1.11000828, 1.07080018, ..., 1.0146789 ,
+         1.00489959, 1.02678431],
+        [1.11000416, 1.08069485, 1.11477007, ..., 1.02657064,
+         1.04340852, 1.03066117],
+        [1.0764059 , 1.07099936, 1.04277892, ..., 1.07414307,
+         1.04324304, 1.01989099],
+        ...,
+        [0.92409234, 0.92145495, 0.83148833, ..., 1.04680138,
+         1.01437654, 0.97654193],
+        [0.83522123, 0.88697627, 0.92320699, ..., 1.04687912,
+         0.9962397 , 0.97883198],
+        [0.93810775, 0.8508784 , 0.92735769, ..., 1.0360595 ,
+         0.99230366, 0.99731942]]], shape=(36, 256, 256))</pre></li></ul></div></li><li class='sc-section-item'><input id='section-02505b88-d6f7-4f10-bcf7-9444b2b396a2' class='sc-section-summary-in' type='checkbox'  checked><label for='section-02505b88-d6f7-4f10-bcf7-9444b2b396a2' class='sc-section-summary'  title='Expand/collapse section'>Masks: <span>(1)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span>counts</span></div><div class='sc-var-dims'>(time, dim_1, dim_2)</div><div class='sc-var-dtype'>bool</div><div class='sc-var-unit'></div><div class='sc-value-preview sc-preview'><span><div>False, False, ..., False, False</div></span></div><input id='attrs-cc9e8729-29d1-4637-bac6-20fb450eef62' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-cc9e8729-29d1-4637-bac6-20fb450eef62' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-ac59c29f-2ecc-453e-949d-28f40f07f0ca' class='sc-var-data-in' type='checkbox'><label for='data-ac59c29f-2ecc-453e-949d-28f40f07f0ca' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([[[False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        ...,
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False]],
+
+       [[False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        ...,
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False]],
+
+       [[False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        ...,
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False]],
+
+       ...,
+
+       [[False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        ...,
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False]],
+
+       [[False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        ...,
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False]],
+
+       [[False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        ...,
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False]]],
+      shape=(36, 256, 256))</pre></span></li></ul></div></li></ul></div></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">normalized</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Normalized Sample Image at Rotation Angle of </span><span class="si">{</span><span class="n">normalized</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s2">&quot;rotation_angle&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">&#39;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/ymir_histogram_mode_detector_2_0.svg" src="../_images/ymir_histogram_mode_detector_2_0.svg" />
+</div>
+</div>
+<p>You can use a slicer to browse images along the rotation angle.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">matplotlib</span> <span class="n">widget</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">plopp</span><span class="w"> </span><span class="kn">import</span> <span class="n">slicer</span>
+
+<span class="n">slicer</span><span class="p">(</span><span class="n">normalized</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you want to bin the images by linear steps of angles, you can use <code class="docutils literal notranslate"><span class="pre">sc.groupby</span></code> like below.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">matplotlib</span> <span class="n">widget</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">plopp</span><span class="w"> </span><span class="kn">import</span> <span class="n">slicer</span>
+
+<span class="n">slicer</span><span class="p">(</span><span class="n">normalized</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span>
+    <span class="s1">&#39;rotation_angle&#39;</span><span class="p">,</span>
+    <span class="n">bins</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s1">&#39;rotation_angle&#39;</span><span class="p">,</span> <span class="n">start</span><span class="o">=-</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="mf">4.5</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;deg&#39;</span><span class="p">),</span>
+<span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="s1">&#39;rotation_angle&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+</section>
+<section id="IO">
+<h2>IO<a class="headerlink" href="#IO" title="Link to this heading">#</a></h2>
+<p>I/O providers can load white beam images and slice them according to the image key.</p>
+<p>Note that not like the <code class="docutils literal notranslate"><span class="pre">rotation_angle</span></code>, <code class="docutils literal notranslate"><span class="pre">image_key</span></code> is not assigned as a coordinate.</p>
+<p>Instead, we slice the data according to the <code class="docutils literal notranslate"><span class="pre">image_key</span></code> and separate image stacks earlier due to performance limitation of 3-dimensional data binning.</p>
+<blockquote>
+<div><p>For example, for 400 images of 2_048 x 2_048 pixels couldn’t be done in the regular laptop.</p>
+</div></blockquote>
+<section id="Load-the-data-as-a-stack-of-images">
+<h3>Load the data as a stack of images<a class="headerlink" href="#Load-the-data-as-a-stack-of-images" title="Link to this heading">#</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ess.ymir.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">ymir_lego_images_path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.ymir.io</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">FilePath</span><span class="p">,</span>
+    <span class="n">SampleImageStacksWithLogs</span><span class="p">,</span>
+    <span class="n">RawSampleImageStacks</span><span class="p">,</span>
+    <span class="n">OpenBeamImageStacks</span><span class="p">,</span>
+    <span class="n">DarkCurrentImageStacks</span><span class="p">,</span>
+    <span class="n">AllImageStacks</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.ymir.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">YmirImageNormalizationWorkflow</span><span class="p">,</span>
+    <span class="n">ImageDetectorName</span><span class="p">,</span>
+    <span class="n">RotationMotionSensorName</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">wf</span> <span class="o">=</span> <span class="n">YmirImageNormalizationWorkflow</span><span class="p">()</span>
+<span class="n">wf</span><span class="p">[</span><span class="n">FilePath</span><span class="p">]</span> <span class="o">=</span> <span class="n">ymir_lego_images_path</span><span class="p">()</span>
+<span class="n">wf</span><span class="p">[</span><span class="n">ImageDetectorName</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;orca&#39;</span>
+<span class="n">wf</span><span class="p">[</span><span class="n">RotationMotionSensorName</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;motion_cabinet_2&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">image_stack_types</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">AllImageStacks</span><span class="p">,</span>
+    <span class="n">RawSampleImageStacks</span><span class="p">,</span>
+    <span class="n">OpenBeamImageStacks</span><span class="p">,</span>
+    <span class="n">DarkCurrentImageStacks</span><span class="p">,</span>
+    <span class="n">SampleImageStacksWithLogs</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">visualize</span><span class="p">(</span><span class="n">image_stack_types</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">FileNotFoundError</span>                         Traceback (most recent call last)
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/backend/execute.py:76</span>, in <span class="ansi-cyan-fg">run_check</span><span class="ansi-blue-fg">(cmd, input_lines, encoding, quiet, **kwargs)</span>
+<span class="ansi-green-fg">     75</span>         kwargs[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">stdout</span><span class="ansi-yellow-fg">&#39;</span>] = kwargs[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">stderr</span><span class="ansi-yellow-fg">&#39;</span>] = subprocess.PIPE
+<span class="ansi-green-fg">---&gt; </span><span class="ansi-green-fg">76</span>     proc = <span class="ansi-yellow-bg">_run_input_lines</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">cmd</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">input_lines</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">     77</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span>:
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/backend/execute.py:96</span>, in <span class="ansi-cyan-fg">_run_input_lines</span><span class="ansi-blue-fg">(cmd, input_lines, kwargs)</span>
+<span class="ansi-green-fg">     95</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-fg">_run_input_lines</span>(cmd, input_lines, *, kwargs):
+<span class="ansi-green-fg">---&gt; </span><span class="ansi-green-fg">96</span>     popen = <span class="ansi-yellow-bg">subprocess</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">Popen</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">cmd</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">stdin</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">subprocess</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">PIPE</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">     98</span>     stdin_write = popen.stdin.write
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/subprocess.py:1026</span>, in <span class="ansi-cyan-fg">Popen.__init__</span><span class="ansi-blue-fg">(self, args, bufsize, executable, stdin, stdout, stderr, preexec_fn, close_fds, shell, cwd, env, universal_newlines, startupinfo, creationflags, restore_signals, start_new_session, pass_fds, user, group, extra_groups, encoding, errors, text, umask, pipesize, process_group)</span>
+<span class="ansi-green-fg">   1023</span>             <span style="color: rgb(0,135,0)">self</span>.stderr = io.TextIOWrapper(<span style="color: rgb(0,135,0)">self</span>.stderr,
+<span class="ansi-green-fg">   1024</span>                     encoding=encoding, errors=errors)
+<span class="ansi-green-fg">-&gt; </span><span class="ansi-green-fg">1026</span>     <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">_execute_child</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">args</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">executable</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">preexec_fn</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">close_fds</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">   1027</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">pass_fds</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">cwd</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">env</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">   1028</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">startupinfo</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">creationflags</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">shell</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">   1029</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">p2cread</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">p2cwrite</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">   1030</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">c2pread</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">c2pwrite</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">   1031</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">errread</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">errwrite</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">   1032</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">restore_signals</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">   1033</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">gid</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">gids</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">uid</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">umask</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">   1034</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">start_new_session</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">process_group</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">   1035</span> <span class="ansi-bold" style="color: rgb(0,135,0)">except</span>:
+<span class="ansi-green-fg">   1036</span>     <span style="color: rgb(95,135,135)"># Cleanup if the child failed starting.</span>
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/subprocess.py:1955</span>, in <span class="ansi-cyan-fg">Popen._execute_child</span><span class="ansi-blue-fg">(self, args, executable, preexec_fn, close_fds, pass_fds, cwd, env, startupinfo, creationflags, shell, p2cread, p2cwrite, c2pread, c2pwrite, errread, errwrite, restore_signals, gid, gids, uid, umask, start_new_session, process_group)</span>
+<span class="ansi-green-fg">   1954</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> err_filename <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>:
+<span class="ansi-green-fg">-&gt; </span><span class="ansi-green-fg">1955</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> child_exception_type(errno_num, err_msg, err_filename)
+<span class="ansi-green-fg">   1956</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span>:
+
+<span class="ansi-red-fg">FileNotFoundError</span>: [Errno 2] No such file or directory: PosixPath(&#39;dot&#39;)
+
+The above exception was the direct cause of the following exception:
+
+<span class="ansi-red-fg">ExecutableNotFound</span>                        Traceback (most recent call last)
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/IPython/core/formatters.py:1036</span>, in <span class="ansi-cyan-fg">MimeBundleFormatter.__call__</span><span class="ansi-blue-fg">(self, obj, include, exclude)</span>
+<span class="ansi-green-fg">   1033</span>     method = get_real_method(obj, <span style="color: rgb(0,135,0)">self</span>.print_method)
+<span class="ansi-green-fg">   1035</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> method <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>:
+<span class="ansi-green-fg">-&gt; </span><span class="ansi-green-fg">1036</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg">method</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">include</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">include</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">exclude</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">exclude</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">   1037</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>
+<span class="ansi-green-fg">   1038</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span>:
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/jupyter_integration.py:98</span>, in <span class="ansi-cyan-fg">JupyterIntegration._repr_mimebundle_</span><span class="ansi-blue-fg">(self, include, exclude, **_)</span>
+<span class="ansi-green-fg">     96</span> include = <span style="color: rgb(0,135,0)">set</span>(include) <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> include <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span> {<span style="color: rgb(0,135,0)">self</span>._jupyter_mimetype}
+<span class="ansi-green-fg">     97</span> include -= <span style="color: rgb(0,135,0)">set</span>(exclude <span class="ansi-bold" style="color: rgb(175,0,255)">or</span> [])
+<span class="ansi-green-fg">---&gt; </span><span class="ansi-green-fg">98</span> <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg">{</span><span class="ansi-yellow-bg">mimetype</span><span class="ansi-yellow-bg">:</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">getattr</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">method_name</span><span class="ansi-yellow-bg">)</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">     99</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(0,135,0)">for</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">mimetype</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">method_name</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(175,0,255)">in</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">MIME_TYPES</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">items</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">    100</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(0,135,0)">if</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">mimetype</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(175,0,255)">in</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">include</span><span class="ansi-yellow-bg">}</span>
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/jupyter_integration.py:98</span>, in <span class="ansi-cyan-fg">&lt;dictcomp&gt;</span><span class="ansi-blue-fg">(.0)</span>
+<span class="ansi-green-fg">     96</span> include = <span style="color: rgb(0,135,0)">set</span>(include) <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> include <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span> {<span style="color: rgb(0,135,0)">self</span>._jupyter_mimetype}
+<span class="ansi-green-fg">     97</span> include -= <span style="color: rgb(0,135,0)">set</span>(exclude <span class="ansi-bold" style="color: rgb(175,0,255)">or</span> [])
+<span class="ansi-green-fg">---&gt; </span><span class="ansi-green-fg">98</span> <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> {mimetype: <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">getattr</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">method_name</span><span class="ansi-yellow-bg">)</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">     99</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">for</span> mimetype, method_name <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> MIME_TYPES.items()
+<span class="ansi-green-fg">    100</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> mimetype <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> include}
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/jupyter_integration.py:112</span>, in <span class="ansi-cyan-fg">JupyterIntegration._repr_image_svg_xml</span><span class="ansi-blue-fg">(self)</span>
+<span class="ansi-green-fg">    110</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-fg">_repr_image_svg_xml</span>(<span style="color: rgb(0,135,0)">self</span>) -&gt; <span style="color: rgb(0,135,0)">str</span>:
+<span class="ansi-green-fg">    111</span> <span style="color: rgb(188,188,188)">    </span><span class="ansi-yellow-fg">&#34;&#34;&#34;Return the rendered graph as SVG string.&#34;&#34;&#34;</span>
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">112</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">pipe</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">format</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-fg ansi-yellow-bg">&#39;</span><span class="ansi-yellow-fg ansi-yellow-bg">svg</span><span class="ansi-yellow-fg ansi-yellow-bg">&#39;</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">encoding</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">SVG_ENCODING</span><span class="ansi-yellow-bg">)</span>
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/piping.py:104</span>, in <span class="ansi-cyan-fg">Pipe.pipe</span><span class="ansi-blue-fg">(self, format, renderer, formatter, neato_no_op, quiet, engine, encoding)</span>
+<span class="ansi-green-fg">     55</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-fg">pipe</span>(<span style="color: rgb(0,135,0)">self</span>,
+<span class="ansi-green-fg">     56</span>          <span style="color: rgb(0,135,0)">format</span>: typing.Optional[<span style="color: rgb(0,135,0)">str</span>] = <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>,
+<span class="ansi-green-fg">     57</span>          renderer: typing.Optional[<span style="color: rgb(0,135,0)">str</span>] = <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>,
+<span class="ansi-green-fg">   (...)</span><span class="ansi-green-fg">     61</span>          engine: typing.Optional[<span style="color: rgb(0,135,0)">str</span>] = <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>,
+<span class="ansi-green-fg">     62</span>          encoding: typing.Optional[<span style="color: rgb(0,135,0)">str</span>] = <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>) -&gt; typing.Union[<span style="color: rgb(0,135,0)">bytes</span>, <span style="color: rgb(0,135,0)">str</span>]:
+<span class="ansi-green-fg">     63</span> <span style="color: rgb(188,188,188)">    </span><span class="ansi-yellow-fg">&#34;&#34;&#34;Return the source piped through the Graphviz layout command.</span>
+<span class="ansi-green-fg">     64</span>
+<span class="ansi-green-fg">     65</span> <span class="ansi-yellow-fg">    Args:</span>
+<span class="ansi-green-fg">   (...)</span><span class="ansi-green-fg">    102</span> <span class="ansi-yellow-fg">        &#39;&lt;?xml version=&#39;</span>
+<span class="ansi-green-fg">    103</span> <span class="ansi-yellow-fg">    &#34;&#34;&#34;</span>
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">104</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">_pipe_legacy</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">format</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    105</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">renderer</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">renderer</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    106</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">formatter</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">formatter</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    107</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">neato_no_op</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">neato_no_op</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    108</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">quiet</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">quiet</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    109</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">engine</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">engine</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    110</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">encoding</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">encoding</span><span class="ansi-yellow-bg">)</span>
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/_tools.py:185</span>, in <span class="ansi-cyan-fg">deprecate_positional_args.&lt;locals&gt;.decorator.&lt;locals&gt;.wrapper</span><span class="ansi-blue-fg">(*args, **kwargs)</span>
+<span class="ansi-green-fg">    177</span>     wanted = <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">, </span><span class="ansi-yellow-fg">&#39;</span>.join(<span class="ansi-yellow-fg">f</span><span class="ansi-yellow-fg">&#39;</span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>name<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-fg">=</span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>value<span class="ansi-bold" style="color: rgb(175,95,135)">!r}</span><span class="ansi-yellow-fg">&#39;</span>
+<span class="ansi-green-fg">    178</span>                        <span class="ansi-bold" style="color: rgb(0,135,0)">for</span> name, value <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> deprecated.items())
+<span class="ansi-green-fg">    179</span>     warnings.warn(<span class="ansi-yellow-fg">f</span><span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">The signature of </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>func_name<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-fg"> will be reduced</span><span class="ansi-yellow-fg">&#39;</span>
+<span class="ansi-green-fg">    180</span>                   <span class="ansi-yellow-fg">f</span><span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg"> to </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>supported_number<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-fg"> positional arg</span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>s_<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>qualification<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-fg">&#39;</span>
+<span class="ansi-green-fg">    181</span>                   <span class="ansi-yellow-fg">f</span><span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg"> </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span><span style="color: rgb(0,135,0)">list</span>(supported)<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-fg">: pass </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>wanted<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-fg"> as keyword arg</span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>s_<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-fg">&#39;</span>,
+<span class="ansi-green-fg">    182</span>                   stacklevel=stacklevel,
+<span class="ansi-green-fg">    183</span>                   category=category)
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">185</span> <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg">func</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">args</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">)</span>
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/piping.py:121</span>, in <span class="ansi-cyan-fg">Pipe._pipe_legacy</span><span class="ansi-blue-fg">(self, format, renderer, formatter, neato_no_op, quiet, engine, encoding)</span>
+<span class="ansi-green-fg">    112</span> <span style="color: rgb(175,0,255)">@_tools</span>.deprecate_positional_args(supported_number=<span class="ansi-green-fg">1</span>, ignore_arg=<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">self</span><span class="ansi-yellow-fg">&#39;</span>)
+<span class="ansi-green-fg">    113</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-fg">_pipe_legacy</span>(<span style="color: rgb(0,135,0)">self</span>,
+<span class="ansi-green-fg">    114</span>                  <span style="color: rgb(0,135,0)">format</span>: typing.Optional[<span style="color: rgb(0,135,0)">str</span>] = <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>,
+<span class="ansi-green-fg">   (...)</span><span class="ansi-green-fg">    119</span>                  engine: typing.Optional[<span style="color: rgb(0,135,0)">str</span>] = <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>,
+<span class="ansi-green-fg">    120</span>                  encoding: typing.Optional[<span style="color: rgb(0,135,0)">str</span>] = <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>) -&gt; typing.Union[<span style="color: rgb(0,135,0)">bytes</span>, <span style="color: rgb(0,135,0)">str</span>]:
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">121</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">_pipe_future</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">format</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    122</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">renderer</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">renderer</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    123</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">formatter</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">formatter</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    124</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">neato_no_op</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">neato_no_op</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    125</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">quiet</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">quiet</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    126</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">engine</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">engine</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    127</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">encoding</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">encoding</span><span class="ansi-yellow-bg">)</span>
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/piping.py:149</span>, in <span class="ansi-cyan-fg">Pipe._pipe_future</span><span class="ansi-blue-fg">(self, format, renderer, formatter, neato_no_op, quiet, engine, encoding)</span>
+<span class="ansi-green-fg">    146</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> encoding <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>:
+<span class="ansi-green-fg">    147</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> codecs.lookup(encoding) <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> codecs.lookup(<span style="color: rgb(0,135,0)">self</span>.encoding):
+<span class="ansi-green-fg">    148</span>         <span style="color: rgb(95,135,135)"># common case: both stdin and stdout need the same encoding</span>
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">149</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">_pipe_lines_string</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">args</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">encoding</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">encoding</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">    150</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">try</span>:
+<span class="ansi-green-fg">    151</span>         raw = <span style="color: rgb(0,135,0)">self</span>._pipe_lines(*args, input_encoding=<span style="color: rgb(0,135,0)">self</span>.encoding, **kwargs)
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/backend/piping.py:212</span>, in <span class="ansi-cyan-fg">pipe_lines_string</span><span class="ansi-blue-fg">(engine, format, input_lines, encoding, renderer, formatter, neato_no_op, quiet)</span>
+<span class="ansi-green-fg">    206</span> cmd = dot_command.command(engine, <span style="color: rgb(0,135,0)">format</span>,
+<span class="ansi-green-fg">    207</span>                           renderer=renderer,
+<span class="ansi-green-fg">    208</span>                           formatter=formatter,
+<span class="ansi-green-fg">    209</span>                           neato_no_op=neato_no_op)
+<span class="ansi-green-fg">    210</span> kwargs = {<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">input_lines</span><span class="ansi-yellow-fg">&#39;</span>: input_lines, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">encoding</span><span class="ansi-yellow-fg">&#39;</span>: encoding}
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">212</span> proc = <span class="ansi-yellow-bg">execute</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">run_check</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">cmd</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">capture_output</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(0,135,0)">True</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">quiet</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">quiet</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">    213</span> <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> proc.stdout
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/backend/execute.py:81</span>, in <span class="ansi-cyan-fg">run_check</span><span class="ansi-blue-fg">(cmd, input_lines, encoding, quiet, **kwargs)</span>
+<span class="ansi-green-fg">     79</span> <span class="ansi-bold" style="color: rgb(0,135,0)">except</span> <span class="ansi-bold" style="color: rgb(215,95,95)">OSError</span> <span class="ansi-bold" style="color: rgb(0,135,0)">as</span> e:
+<span class="ansi-green-fg">     80</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> e.errno == errno.ENOENT:
+<span class="ansi-green-fg">---&gt; </span><span class="ansi-green-fg">81</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> ExecutableNotFound(cmd) <span class="ansi-bold" style="color: rgb(0,135,0)">from</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-intense-fg ansi-bold">e</span>
+<span class="ansi-green-fg">     82</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span>
+<span class="ansi-green-fg">     84</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> quiet <span class="ansi-bold" style="color: rgb(175,0,255)">and</span> proc.stderr:
+
+<span class="ansi-red-fg">ExecutableNotFound</span>: failed to execute PosixPath(&#39;dot&#39;), make sure the Graphviz executables are on your systems&#39; PATH
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;graphviz.graphs.Digraph at 0x7f7716da1d50&gt;
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">image_stack_types</span><span class="p">)</span>
+<span class="n">results</span><span class="p">[</span><span class="n">SampleImageStacksWithLogs</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/runner/work/ess/ess/packages/essimaging/src/ess/ymir/io.py:106: UserWarning: The unit of the histogram detector data is [None]. It is expected to be [counts]. The loader manually assigned the unit to be [counts].
+  warnings.warn(
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div><!-- Original source from -->
+<!-- https://github.com/jsignell/xarray/blob/1d960933ab252e0f79f7e050e6c9261d55568057/xarray/static/html/icons-svg-inline.html -->
+<svg style="position: absolute; width: 0; height: 0; overflow: hidden">
+<defs>
+<symbol id="icon-database" viewBox="0 0 32 32">
+<title>Show/Hide data repr</title>
+<path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
+<path d="M16 17c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+<path d="M16 26c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+</symbol>
+<symbol id="icon-file-text2" viewBox="0 0 32 32">
+<title>Show/Hide attributes</title>
+<path d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"></path>
+<path d="M23 26h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 22h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+</symbol>
+</defs>
+</svg><style id="scipp-style-sheet">.sc-root{--sc-background-color0:var(--jp-layout-color0,#fff);--sc-background-color1:var(--jp-layout-color1,#fcfcfc);--sc-background-color2:var(--jp-layout-color2,#efefef);--sc-inverse-background-color0:var(--jp-inverse-layout-color4,#111);--sc-font-color0:var(--jp-content-font-color0,#000);--sc-font-color1:var(--jp-content-font-color1,#555);--sc-font-color2:var(--jp-content-font-color2,#888);--sc-font-color3:var(--jp-content-font-color3,#ccc);}body.vscode-dark .sc-root{--sc-font-color0:rgba(255,255,255,1);--sc-font-color1:rgba(255,255,255,0.70);--sc-font-color2:rgba(255,255,255,0.54);--sc-font-color3:rgba(255,255,255,0.38);--sc-border-color:#1F1F1F;--sc-disabled-color:#515151;--sc-background-color0:#111111;--sc-background-color1:#111111;--sc-background-color2:#313131;}.sc-wrap{font-size:14px;min-width:300px;max-width:800px;}.sc-var-attrs .sc-wrap{padding-left:3em;}.sc-header{padding-top:6px;padding-bottom:6px;margin-bottom:4px;border-bottom:solid 1px #ddd;}.sc-header > div,.sc-header > ul{display:inline;margin-top:0;margin-bottom:0;}.sc-obj-type,.sc-array-name{margin-left:2px;margin-right:10px;}.sc-obj-type{color:var(--sc-font-color1);}.sc-underlying-size{color:var(--sc-font-color2);}.sc-sections,.reveal .sc-sections{padding-left:0 !important;display:grid;grid-template-columns:150px auto auto auto 1fr 20px 20px;}.sc-section-item{display:contents;}.sc-section-item input{display:none;}.sc-section-item input:enabled + label{cursor:pointer;color:var(--sc-font-color1);}.sc-section-item input:enabled + label:hover{color:var(--sc-font-color0);}.sc-section-summary{grid-column:1;font-weight:500;}.sc-section-summary > span{display:inline-block;padding-left:0.5em;}.sc-section-summary-in:disabled + label{color:var(--sc-font-color1);}.sc-section-summary-in + label:before{display:inline-block;content:'►';font-size:11px;width:15px;text-align:center;}.sc-section-summary-in:disabled + label:before{display:none;}.sc-section-summary-in:checked + label:before{content:'▼';}.sc-section-summary-in:checked + label > span{display:none;}.sc-section-summary,.sc-section-inline-details{padding-top:4px;padding-bottom:4px;}.sc-section-inline-details{grid-column:2 / 6;}.sc-section-details{display:none;grid-column:1 / -1;margin-bottom:5px;}.sc-section-summary-in:checked ~ .sc-section-details{display:contents;}.sc-array-wrap{grid-column:1 / -1;display:grid;grid-template-columns:20px auto;}.sc-array-wrap > label{grid-column:1;vertical-align:top;}.sc-preview{color:var(--sc-font-color2);}.sc-array-preview,.sc-array-data{padding:0 5px !important;grid-column:2;}.sc-array-data,.sc-array-in:checked ~ .sc-array-preview{display:none;}.sc-array-in:checked ~ .sc-array-data,.sc-array-preview{display:inline-block;}.sc-dim-list{display:inline-block !important;list-style:none;padding:0 !important;margin:0;}.sc-dim-list li{display:inline-block;padding:0;margin:0!important;}.sc-dim-list:before{content:'(';}.sc-dim-list:after{content:')';}.sc-dim-list li:not(:last-child):after{content:',';padding-right:5px;}.sc-dim-list li span,.sc-standalone-var-name > span span,.sc-var-name > span span{padding:0 !important;}.sc-aligned{font-weight:bold;}.sc-var-list,.sc-var-item,.reveal .sc-var-list,.reveal .sc-var-item{display:contents;}.sc-var-item > div,.sc-var-item label,.sc-var-item > .sc-var-name span{background-color:var(--sc-background-color1);margin-bottom:0;}.sc-var-item > .sc-var-name:hover span{padding-right:5px;}.sc-var-list > li:nth-child(odd) > div,.sc-var-list > li:nth-child(odd) > label,.sc-var-list > li:nth-child(odd) > .sc-var-name span{background-color:var(--sc-background-color2);}.sc-var-name{grid-column:1;}.sc-var-dims{grid-column:2;}.sc-var-dtype{grid-column:3;text-align:right;color:var(--sc-font-color2);}.sc-var-unit{grid-column:4;text-align:left;color:var(--sc-font-color1);max-width:50pt;text-overflow:ellipsis;}.sc-value-preview{grid-column:5;}.sc-var-preview-variances{text-align:right;}.sc-sections .sc-section-item .sc-section-summary,.sc-sections .sc-section-item .sc-section-inline-details,.sc-section-item .sc-var-list .sc-var-item > div,.sc-section-item .sc-var-list .sc-var-item > label,.sc-section-details .sc-var-list .sc-var-item > div,.sc-section-details .sc-var-list .sc-var-item > label{margin-top:0;margin-bottom:0;}.sc-var-name,.sc-var-dims,.sc-var-dtype,.sc-var-unit,.sc-preview,.sc-attrs dt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:10px;}.sc-var-name:hover,.sc-var-dims:hover,.sc-var-dtype:hover,.sc-var-unit:hover,.sc-attrs dt:hover{overflow:visible;width:auto;z-index:1;}.sc-var-attrs{display:block;}.sc-var-data,.reveal .sc-var-data{display:none;}.sc-var-attrs,.sc-var-data{background-color:var(--sc-background-color0) !important;padding-bottom:5px !important;}.sc-var-attrs-in:checked ~ .sc-var-attrs{display:none;}.sc-var-data-in:checked ~ .sc-var-data{display:block;}.sc-var-data > table{float:right;}.sc-var-name span,.sc-var-data{padding-left:25px !important;}.sc-var-attrs,.sc-var-data{grid-column:1 / -1;}dl.sc-attrs{padding:0;margin:0;display:grid;grid-template-columns:125px auto;}.sc-attrs dt,dd{padding:0;margin:0;float:left;padding-right:10px;width:auto;}.sc-attrs dt{font-weight:normal;grid-column:1;}.sc-attrs dt:hover span{display:inline-block;padding-right:10px;}.sc-attrs dd{grid-column:2;white-space:pre-wrap;word-break:break-all;}.sc-icon-database,.sc-icon-file-text2{display:inline-block;vertical-align:middle;width:1em;height:1.5em !important;stroke-width:0;stroke:currentColor;fill:currentColor;}label.sc-hide-icon svg{opacity:0;}.sc-standalone-var-name{grid-column:1/3;}.sc-standalone-var-name span{padding-left:25px;padding-right:10px;}.sc-title{font-weight:bold;font-size:1.5em;}.sc-subtitle{font-weight:normal;font-style:italic;text-align:left;font-size:1.2em;padding:1px;}.sc-label{fill:var(--sc-font-color0,#444444);text-anchor:middle;}.sc-name{fill:var(--sc-font-color0,#111111);}.sc-inset-line{stroke:var(--sc-font-color1);stroke-width:0.05;stroke-dasharray:0.2,0.2;}.sc-log-wrap{height:25ex;resize:vertical;overflow-y:scroll;display:flex;flex-direction:column-reverse;border:1px solid;border-color:var(--jp-border-color2);background-color:var(--sc-background-color1);}div.sc-log{line-height:2.5ex;}table.sc-log{table-layout:auto;border-collapse:collapse;}tr.sc-log:nth-child(even){background-color:var(--sc-background-color0);}tr.sc-log > td{vertical-align:top;padding-bottom:0.5ex;}.sc-log-time-stamp{min-width:22ch;font-family:var(--jp-code-font-family);color:var(--sc-font-color2);}.sc-log-level{min-width:10ch;}tr.sc-log-debug td.sc-log-level{color:var(--jp-accent-color1);}tr.sc-log-info td.sc-log-level{color:var(--jp-info-color1);}tr.sc-log-warning td.sc-log-level{color:var(--jp-warn-color1);}tr.sc-log-error td.sc-log-level{font-weight:bold;color:var(--jp-error-color2);}tr.sc-log-critical td.sc-log-level{font-weight:bold;color:var(--sc-background-color0);background-color:var(--jp-error-color1);}.sc-log-message{white-space:pre-wrap;width:100%;}.sc-log-html-payload{white-space:normal;}.sc-log-name{padding-right:0.5em;text-align:right;white-space:pre-wrap;color:var(--sc-font-color3);}</style><div class='sc-wrap sc-root'><div class='sc-header'><div class='sc-obj-type'>scipp.DataArray (9.01 MB <span class='sc-underlying-size'>out of 11.51 MB</span>)</div></div><ul class='sc-sections'><li class='sc-section-item'><input id='section-7c6dbbde-0fde-4e57-a012-d7d596b8a2e0' class='sc-section-summary-in' type='checkbox' disabled ><label for='section-7c6dbbde-0fde-4e57-a012-d7d596b8a2e0' class='sc-section-summary' >Dimensions:</label><div class='sc-section-inline-details'><ul class='sc-dim-list'><li><span class='sc-has-index'>time</span>: 36</li><li><span class='sc-has-index'>dim_1</span>: 256</li><li><span class='sc-has-index'>dim_2</span>: 256</li></ul></div><div class='sc-section-details'></div></li><li class='sc-section-item'><input id='section-a476d0ce-103b-4af7-8937-f3387472e0ad' class='sc-section-summary-in' type='checkbox'  checked><label for='section-a476d0ce-103b-4af7-8937-f3387472e0ad' class='sc-section-summary'  title='Expand/collapse section'>Coordinates: <span>(4)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>dim_1</span></div><div class='sc-var-dims'>(dim_1)</div><div class='sc-var-dtype'>int64</div><div class='sc-var-unit'>𝟙</div><div class='sc-value-preview sc-preview'><span><div>0, 1, ..., 254, 255</div></span></div><input id='attrs-ea0595d6-628c-48ca-9b3a-5ca449a0543e' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-ea0595d6-628c-48ca-9b3a-5ca449a0543e' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-3c09f4f0-f5cd-4d29-b73b-bad3add1ab54' class='sc-var-data-in' type='checkbox'><label for='data-3c09f4f0-f5cd-4d29-b73b-bad3add1ab54' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([  0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,
+        13,  14,  15,  16,  17,  18,  19,  20,  21,  22,  23,  24,  25,
+        26,  27,  28,  29,  30,  31,  32,  33,  34,  35,  36,  37,  38,
+        39,  40,  41,  42,  43,  44,  45,  46,  47,  48,  49,  50,  51,
+        52,  53,  54,  55,  56,  57,  58,  59,  60,  61,  62,  63,  64,
+        65,  66,  67,  68,  69,  70,  71,  72,  73,  74,  75,  76,  77,
+        78,  79,  80,  81,  82,  83,  84,  85,  86,  87,  88,  89,  90,
+        91,  92,  93,  94,  95,  96,  97,  98,  99, 100, 101, 102, 103,
+       104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116,
+       117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129,
+       130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142,
+       143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155,
+       156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168,
+       169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181,
+       182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194,
+       195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207,
+       208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220,
+       221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233,
+       234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246,
+       247, 248, 249, 250, 251, 252, 253, 254, 255])</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>dim_2</span></div><div class='sc-var-dims'>(dim_2)</div><div class='sc-var-dtype'>int64</div><div class='sc-var-unit'>𝟙</div><div class='sc-value-preview sc-preview'><span><div>0, 1, ..., 254, 255</div></span></div><input id='attrs-676c3f81-6105-4d17-b0c5-08c29465ac0a' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-676c3f81-6105-4d17-b0c5-08c29465ac0a' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-5929c590-acc1-49dd-a891-107639c32822' class='sc-var-data-in' type='checkbox'><label for='data-5929c590-acc1-49dd-a891-107639c32822' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([  0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,
+        13,  14,  15,  16,  17,  18,  19,  20,  21,  22,  23,  24,  25,
+        26,  27,  28,  29,  30,  31,  32,  33,  34,  35,  36,  37,  38,
+        39,  40,  41,  42,  43,  44,  45,  46,  47,  48,  49,  50,  51,
+        52,  53,  54,  55,  56,  57,  58,  59,  60,  61,  62,  63,  64,
+        65,  66,  67,  68,  69,  70,  71,  72,  73,  74,  75,  76,  77,
+        78,  79,  80,  81,  82,  83,  84,  85,  86,  87,  88,  89,  90,
+        91,  92,  93,  94,  95,  96,  97,  98,  99, 100, 101, 102, 103,
+       104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116,
+       117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129,
+       130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142,
+       143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155,
+       156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168,
+       169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181,
+       182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194,
+       195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207,
+       208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220,
+       221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233,
+       234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246,
+       247, 248, 249, 250, 251, 252, 253, 254, 255])</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>rotation_angle</span></div><div class='sc-var-dims'>(time)</div><div class='sc-var-dtype'>float64</div><div class='sc-var-unit'>deg</div><div class='sc-value-preview sc-preview'><span><div>1.007, 11.034, ..., 341.951, 351.979</div></span></div><input id='attrs-3b056630-0053-49ce-a9fa-6244e05978a0' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-3b056630-0053-49ce-a9fa-6244e05978a0' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-104700a6-3450-4ff9-af64-209ae86c0d5c' class='sc-var-data-in' type='checkbox'><label for='data-104700a6-3450-4ff9-af64-209ae86c0d5c' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([  1.00731091,  11.03435639,  21.06173445,  31.08968206,
+        41.11822052,  51.14620862,  61.17432276,  71.20250242,
+        81.22770456,  91.25705069, 101.28393277, 111.31280002,
+       121.33981109, 131.36662637, 141.39534187, 151.42282542,
+       161.45027075, 171.47811035, 181.50597898, 191.53482643,
+       201.56200906, 211.58970896, 221.61798686, 231.64625132,
+       241.67332848, 251.70052385, 261.72550702, 271.75563946,
+       281.78514837, 291.81166234, 301.83935011, 311.86674052,
+       321.89460518, 331.92353937, 341.95077558, 351.97860336])</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>time</span></div><div class='sc-var-dims'>(time)</div><div class='sc-var-dtype'>datetime64</div><div class='sc-var-unit'>ns</div><div class='sc-value-preview sc-preview'><span><div>2024-08-14T14:16:57.997255602, 2024-08-14T14:17:46.682255224, ..., 2024-08-14T14:44:41.925222722, 2024-08-14T14:45:30.825154517</div></span></div><input id='attrs-a2195673-7452-4743-9579-799f99154860' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-a2195673-7452-4743-9579-799f99154860' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-fe637577-dfa5-4c9f-bc96-6f92f8196663' class='sc-var-data-in' type='checkbox'><label for='data-fe637577-dfa5-4c9f-bc96-6f92f8196663' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([&#x27;2024-08-14T14:16:57.997255602&#x27;, &#x27;2024-08-14T14:17:46.682255224&#x27;,
+       &#x27;2024-08-14T14:18:35.853205911&#x27;, &#x27;2024-08-14T14:19:24.975128719&#x27;,
+       &#x27;2024-08-14T14:20:13.955183413&#x27;, &#x27;2024-08-14T14:21:02.993115782&#x27;,
+       &#x27;2024-08-14T14:21:51.865167018&#x27;, &#x27;2024-08-14T14:22:40.700159043&#x27;,
+       &#x27;2024-08-14T14:23:30.120165136&#x27;, &#x27;2024-08-14T14:24:19.211202454&#x27;,
+       &#x27;2024-08-14T14:25:07.781151541&#x27;, &#x27;2024-08-14T14:25:56.672195037&#x27;,
+       &#x27;2024-08-14T14:26:45.768113531&#x27;, &#x27;2024-08-14T14:27:34.491207424&#x27;,
+       &#x27;2024-08-14T14:28:23.784141401&#x27;, &#x27;2024-08-14T14:29:12.714194238&#x27;,
+       &#x27;2024-08-14T14:30:01.238209345&#x27;, &#x27;2024-08-14T14:30:50.167144757&#x27;,
+       &#x27;2024-08-14T14:31:38.958162332&#x27;, &#x27;2024-08-14T14:32:27.831177947&#x27;,
+       &#x27;2024-08-14T14:33:16.678124259&#x27;, &#x27;2024-08-14T14:34:05.873147398&#x27;,
+       &#x27;2024-08-14T14:34:54.972148922&#x27;, &#x27;2024-08-14T14:35:43.545102329&#x27;,
+       &#x27;2024-08-14T14:36:32.141243180&#x27;, &#x27;2024-08-14T14:37:21.510179315&#x27;,
+       &#x27;2024-08-14T14:38:10.617163791&#x27;, &#x27;2024-08-14T14:39:00.045194764&#x27;,
+       &#x27;2024-08-14T14:39:48.289190220&#x27;, &#x27;2024-08-14T14:40:36.650186469&#x27;,
+       &#x27;2024-08-14T14:41:25.774189010&#x27;, &#x27;2024-08-14T14:42:15.149107963&#x27;,
+       &#x27;2024-08-14T14:43:03.915278596&#x27;, &#x27;2024-08-14T14:43:53.077218381&#x27;,
+       &#x27;2024-08-14T14:44:41.925222722&#x27;, &#x27;2024-08-14T14:45:30.825154517&#x27;],
+      dtype=&#x27;datetime64[ns]&#x27;)</pre></span></li></ul></div></li><li class='sc-section-item'><input id='section-a400fbce-2e6f-4ea0-ba8d-4d1176c4e26d' class='sc-section-summary-in' type='checkbox'  checked><label for='section-a400fbce-2e6f-4ea0-ba8d-4d1176c4e26d' class='sc-section-summary'  title='Expand/collapse section'>Data: <span>(1)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span></span></div><div class='sc-var-dims'>(time, dim_1, dim_2)</div><div class='sc-var-dtype'>int32</div><div class='sc-var-unit'>counts</div><div class='sc-value-preview sc-preview'><span><div>950, 1090, ..., 204, 203</div></span></div><input id='attrs-6243ba29-44f8-47da-aa5e-7428770ea3a4' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-6243ba29-44f8-47da-aa5e-7428770ea3a4' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-7fea7da0-0443-49e0-b0b8-8fbb60467abf' class='sc-var-data-in' type='checkbox'><label for='data-7fea7da0-0443-49e0-b0b8-8fbb60467abf' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([[[ 950, 1090, 1171, ..., 1058, 1087, 1065],
+        [1027, 1039, 1094, ...,  996, 1012, 1108],
+        [1022, 1104, 1054, ..., 1050, 1100, 1174],
+        ...,
+        [ 169,  171,  171, ...,  215,  209,  208],
+        [ 171,  170,  169, ...,  213,  213,  205],
+        [ 171,  169,  170, ...,  211,  209,  206]],
+
+       [[ 973, 1095, 1174, ..., 1045, 1087, 1060],
+        [1031, 1052, 1107, ..., 1004, 1019, 1110],
+        [1023, 1103, 1056, ..., 1062, 1100, 1169],
+        ...,
+        [ 166,  168,  169, ...,  203,  207,  206],
+        [ 171,  167,  170, ...,  207,  206,  204],
+        [ 169,  169,  168, ...,  205,  202,  201]],
+
+       [[ 980, 1104, 1181, ..., 1045, 1091, 1065],
+        [1040, 1053, 1106, ..., 1001, 1025, 1113],
+        [1033, 1105, 1054, ..., 1041, 1104, 1180],
+        ...,
+        [ 168,  167,  169, ...,  209,  205,  203],
+        [ 168,  166,  169, ...,  204,  201,  199],
+        [ 171,  169,  168, ...,  204,  204,  203]],
+
+       ...,
+
+       [[1038, 1135, 1206, ..., 1027, 1065, 1059],
+        [1062, 1087, 1146, ...,  991, 1010, 1100],
+        [1038, 1110, 1070, ..., 1062, 1083, 1140],
+        ...,
+        [ 173,  177,  176, ...,  206,  206,  200],
+        [ 173,  172,  176, ...,  208,  205,  201],
+        [ 175,  176,  174, ...,  205,  203,  202]],
+
+       [[1037, 1132, 1199, ..., 1016, 1049, 1046],
+        [1063, 1085, 1139, ...,  995, 1002, 1100],
+        [1035, 1110, 1071, ..., 1055, 1087, 1136],
+        ...,
+        [ 173,  175,  177, ...,  206,  208,  203],
+        [ 175,  173,  175, ...,  206,  202,  204],
+        [ 173,  175,  172, ...,  204,  208,  201]],
+
+       [[1048, 1133, 1196, ..., 1023, 1055, 1045],
+        [1073, 1080, 1143, ...,  978, 1003, 1093],
+        [1049, 1109, 1066, ..., 1060, 1090, 1142],
+        ...,
+        [ 175,  178,  173, ...,  214,  207,  204],
+        [ 171,  175,  179, ...,  210,  205,  205],
+        [ 178,  175,  176, ...,  208,  204,  203]]],
+      shape=(36, 256, 256), dtype=int32)</pre></li></ul></div></li></ul></div></div></div>
+</div>
+</section>
+<section id="Save-Individual-Frame">
+<h3>Save Individual Frame<a class="headerlink" href="#Save-Individual-Frame" title="Link to this heading">#</a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ess.ymir.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">export_image_stacks_as_tiff</span><span class="p">,</span> <span class="n">ImageKey</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
+
+
+<span class="n">output_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;images&quot;</span><span class="p">)</span>
+<span class="n">export_image_stacks_as_tiff</span><span class="p">(</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="n">output_dir</span><span class="p">,</span>
+    <span class="n">image_stacks</span><span class="o">=</span><span class="n">results</span><span class="p">[</span><span class="n">AllImageStacks</span><span class="p">],</span>
+    <span class="n">merge_image_by_key</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">progress_wrapper</span><span class="o">=</span><span class="n">tqdm</span><span class="p">,</span>
+    <span class="n">image_prefix_map</span><span class="o">=</span><span class="p">{</span>
+        <span class="n">ImageKey</span><span class="o">.</span><span class="n">SAMPLE</span><span class="p">:</span> <span class="s2">&quot;sample&quot;</span><span class="p">,</span>
+        <span class="n">ImageKey</span><span class="o">.</span><span class="n">DARK_CURRENT</span><span class="p">:</span> <span class="s2">&quot;dc&quot;</span><span class="p">,</span>
+        <span class="n">ImageKey</span><span class="o">.</span><span class="n">OPEN_BEAM</span><span class="p">:</span> <span class="s2">&quot;ob&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|██████████| 36/36 [00:00&lt;00:00, 2144.91it/s]
+
+100%|██████████| 5/5 [00:00&lt;00:00, 1820.76it/s]
+
+100%|██████████| 5/5 [00:00&lt;00:00, 1769.90it/s]
+100%|██████████| 3/3 [00:00&lt;00:00, 100.14it/s]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">sorted</span><span class="p">(</span><span class="n">output_dir</span><span class="o">.</span><span class="n">iterdir</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[PosixPath(&#39;images/dc_0000.tiff&#39;),
+ PosixPath(&#39;images/dc_0001.tiff&#39;),
+ PosixPath(&#39;images/dc_0002.tiff&#39;),
+ PosixPath(&#39;images/dc_0003.tiff&#39;),
+ PosixPath(&#39;images/dc_0004.tiff&#39;),
+ PosixPath(&#39;images/ob_0000.tiff&#39;),
+ PosixPath(&#39;images/ob_0001.tiff&#39;),
+ PosixPath(&#39;images/ob_0002.tiff&#39;),
+ PosixPath(&#39;images/ob_0003.tiff&#39;),
+ PosixPath(&#39;images/ob_0004.tiff&#39;),
+ PosixPath(&#39;images/sample_0000.tiff&#39;),
+ PosixPath(&#39;images/sample_0001.tiff&#39;),
+ PosixPath(&#39;images/sample_0002.tiff&#39;),
+ PosixPath(&#39;images/sample_0003.tiff&#39;),
+ PosixPath(&#39;images/sample_0004.tiff&#39;),
+ PosixPath(&#39;images/sample_0005.tiff&#39;),
+ PosixPath(&#39;images/sample_0006.tiff&#39;),
+ PosixPath(&#39;images/sample_0007.tiff&#39;),
+ PosixPath(&#39;images/sample_0008.tiff&#39;),
+ PosixPath(&#39;images/sample_0009.tiff&#39;),
+ PosixPath(&#39;images/sample_0010.tiff&#39;),
+ PosixPath(&#39;images/sample_0011.tiff&#39;),
+ PosixPath(&#39;images/sample_0012.tiff&#39;),
+ PosixPath(&#39;images/sample_0013.tiff&#39;),
+ PosixPath(&#39;images/sample_0014.tiff&#39;),
+ PosixPath(&#39;images/sample_0015.tiff&#39;),
+ PosixPath(&#39;images/sample_0016.tiff&#39;),
+ PosixPath(&#39;images/sample_0017.tiff&#39;),
+ PosixPath(&#39;images/sample_0018.tiff&#39;),
+ PosixPath(&#39;images/sample_0019.tiff&#39;),
+ PosixPath(&#39;images/sample_0020.tiff&#39;),
+ PosixPath(&#39;images/sample_0021.tiff&#39;),
+ PosixPath(&#39;images/sample_0022.tiff&#39;),
+ PosixPath(&#39;images/sample_0023.tiff&#39;),
+ PosixPath(&#39;images/sample_0024.tiff&#39;),
+ PosixPath(&#39;images/sample_0025.tiff&#39;),
+ PosixPath(&#39;images/sample_0026.tiff&#39;),
+ PosixPath(&#39;images/sample_0027.tiff&#39;),
+ PosixPath(&#39;images/sample_0028.tiff&#39;),
+ PosixPath(&#39;images/sample_0029.tiff&#39;),
+ PosixPath(&#39;images/sample_0030.tiff&#39;),
+ PosixPath(&#39;images/sample_0031.tiff&#39;),
+ PosixPath(&#39;images/sample_0032.tiff&#39;),
+ PosixPath(&#39;images/sample_0033.tiff&#39;),
+ PosixPath(&#39;images/sample_0034.tiff&#39;),
+ PosixPath(&#39;images/sample_0035.tiff&#39;)]
+</pre></div></div>
+</div>
+</section>
+<section id="Save-All-Frames-in-One-File">
+<h3>Save All Frames in One File<a class="headerlink" href="#Save-All-Frames-in-One-File" title="Link to this heading">#</a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ess.ymir.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">export_image_stacks_as_tiff</span><span class="p">,</span> <span class="n">ImageKey</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+
+<span class="n">output_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;images&quot;</span><span class="p">)</span>
+<span class="n">export_image_stacks_as_tiff</span><span class="p">(</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="n">output_dir</span><span class="p">,</span>
+    <span class="n">image_stacks</span><span class="o">=</span><span class="n">results</span><span class="p">[</span><span class="n">AllImageStacks</span><span class="p">],</span>
+    <span class="n">merge_image_by_key</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">progress_wrapper</span><span class="o">=</span><span class="n">tqdm</span><span class="p">,</span>
+    <span class="n">image_prefix_map</span><span class="o">=</span><span class="p">{</span>
+        <span class="n">ImageKey</span><span class="o">.</span><span class="n">SAMPLE</span><span class="p">:</span> <span class="s2">&quot;sample&quot;</span><span class="p">,</span>
+        <span class="n">ImageKey</span><span class="o">.</span><span class="n">DARK_CURRENT</span><span class="p">:</span> <span class="s2">&quot;dc&quot;</span><span class="p">,</span>
+        <span class="n">ImageKey</span><span class="o">.</span><span class="n">OPEN_BEAM</span><span class="p">:</span> <span class="s2">&quot;ob&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+100%|██████████| 3/3 [00:00&lt;00:00, 324.08it/s]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">tuple</span><span class="p">(</span><span class="n">output_dir</span><span class="o">.</span><span class="n">iterdir</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(PosixPath(&#39;images/sample_0000_0036.tiff&#39;),
+ PosixPath(&#39;images/ob_0000_0005.tiff&#39;),
+ PosixPath(&#39;images/dc_0000_0005.tiff&#39;))
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>rm<span class="w"> </span>-rf<span class="w"> </span>images
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="Normalization">
+<h2>Normalization<a class="headerlink" href="#Normalization" title="Link to this heading">#</a></h2>
+<p>See :attr:ess.imaging.normalize.normalize_sample_images for more details.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ess.ymir.normalize</span><span class="w"> </span><span class="kn">import</span> <span class="n">NormalizedSampleImages</span>
+
+<span class="n">wf</span><span class="p">[</span><span class="n">OpenBeamImageStacks</span><span class="p">]</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="n">OpenBeamImageStacks</span><span class="p">]</span>
+<span class="n">wf</span><span class="p">[</span><span class="n">DarkCurrentImageStacks</span><span class="p">]</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="n">DarkCurrentImageStacks</span><span class="p">]</span>
+<span class="n">wf</span><span class="p">[</span><span class="n">SampleImageStacksWithLogs</span><span class="p">]</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="n">SampleImageStacksWithLogs</span><span class="p">]</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">visualize</span><span class="p">(</span><span class="n">NormalizedSampleImages</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">FileNotFoundError</span>                         Traceback (most recent call last)
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/backend/execute.py:76</span>, in <span class="ansi-cyan-fg">run_check</span><span class="ansi-blue-fg">(cmd, input_lines, encoding, quiet, **kwargs)</span>
+<span class="ansi-green-fg">     75</span>         kwargs[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">stdout</span><span class="ansi-yellow-fg">&#39;</span>] = kwargs[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">stderr</span><span class="ansi-yellow-fg">&#39;</span>] = subprocess.PIPE
+<span class="ansi-green-fg">---&gt; </span><span class="ansi-green-fg">76</span>     proc = <span class="ansi-yellow-bg">_run_input_lines</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">cmd</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">input_lines</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">     77</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span>:
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/backend/execute.py:96</span>, in <span class="ansi-cyan-fg">_run_input_lines</span><span class="ansi-blue-fg">(cmd, input_lines, kwargs)</span>
+<span class="ansi-green-fg">     95</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-fg">_run_input_lines</span>(cmd, input_lines, *, kwargs):
+<span class="ansi-green-fg">---&gt; </span><span class="ansi-green-fg">96</span>     popen = <span class="ansi-yellow-bg">subprocess</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">Popen</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">cmd</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">stdin</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">subprocess</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">PIPE</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">     98</span>     stdin_write = popen.stdin.write
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/subprocess.py:1026</span>, in <span class="ansi-cyan-fg">Popen.__init__</span><span class="ansi-blue-fg">(self, args, bufsize, executable, stdin, stdout, stderr, preexec_fn, close_fds, shell, cwd, env, universal_newlines, startupinfo, creationflags, restore_signals, start_new_session, pass_fds, user, group, extra_groups, encoding, errors, text, umask, pipesize, process_group)</span>
+<span class="ansi-green-fg">   1023</span>             <span style="color: rgb(0,135,0)">self</span>.stderr = io.TextIOWrapper(<span style="color: rgb(0,135,0)">self</span>.stderr,
+<span class="ansi-green-fg">   1024</span>                     encoding=encoding, errors=errors)
+<span class="ansi-green-fg">-&gt; </span><span class="ansi-green-fg">1026</span>     <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">_execute_child</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">args</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">executable</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">preexec_fn</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">close_fds</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">   1027</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">pass_fds</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">cwd</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">env</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">   1028</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">startupinfo</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">creationflags</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">shell</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">   1029</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">p2cread</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">p2cwrite</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">   1030</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">c2pread</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">c2pwrite</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">   1031</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">errread</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">errwrite</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">   1032</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">restore_signals</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">   1033</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">gid</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">gids</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">uid</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">umask</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">   1034</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">start_new_session</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">process_group</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">   1035</span> <span class="ansi-bold" style="color: rgb(0,135,0)">except</span>:
+<span class="ansi-green-fg">   1036</span>     <span style="color: rgb(95,135,135)"># Cleanup if the child failed starting.</span>
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/subprocess.py:1955</span>, in <span class="ansi-cyan-fg">Popen._execute_child</span><span class="ansi-blue-fg">(self, args, executable, preexec_fn, close_fds, pass_fds, cwd, env, startupinfo, creationflags, shell, p2cread, p2cwrite, c2pread, c2pwrite, errread, errwrite, restore_signals, gid, gids, uid, umask, start_new_session, process_group)</span>
+<span class="ansi-green-fg">   1954</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> err_filename <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>:
+<span class="ansi-green-fg">-&gt; </span><span class="ansi-green-fg">1955</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> child_exception_type(errno_num, err_msg, err_filename)
+<span class="ansi-green-fg">   1956</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span>:
+
+<span class="ansi-red-fg">FileNotFoundError</span>: [Errno 2] No such file or directory: PosixPath(&#39;dot&#39;)
+
+The above exception was the direct cause of the following exception:
+
+<span class="ansi-red-fg">ExecutableNotFound</span>                        Traceback (most recent call last)
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/IPython/core/formatters.py:1036</span>, in <span class="ansi-cyan-fg">MimeBundleFormatter.__call__</span><span class="ansi-blue-fg">(self, obj, include, exclude)</span>
+<span class="ansi-green-fg">   1033</span>     method = get_real_method(obj, <span style="color: rgb(0,135,0)">self</span>.print_method)
+<span class="ansi-green-fg">   1035</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> method <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>:
+<span class="ansi-green-fg">-&gt; </span><span class="ansi-green-fg">1036</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg">method</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">include</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">include</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">exclude</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">exclude</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">   1037</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>
+<span class="ansi-green-fg">   1038</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span>:
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/jupyter_integration.py:98</span>, in <span class="ansi-cyan-fg">JupyterIntegration._repr_mimebundle_</span><span class="ansi-blue-fg">(self, include, exclude, **_)</span>
+<span class="ansi-green-fg">     96</span> include = <span style="color: rgb(0,135,0)">set</span>(include) <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> include <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span> {<span style="color: rgb(0,135,0)">self</span>._jupyter_mimetype}
+<span class="ansi-green-fg">     97</span> include -= <span style="color: rgb(0,135,0)">set</span>(exclude <span class="ansi-bold" style="color: rgb(175,0,255)">or</span> [])
+<span class="ansi-green-fg">---&gt; </span><span class="ansi-green-fg">98</span> <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg">{</span><span class="ansi-yellow-bg">mimetype</span><span class="ansi-yellow-bg">:</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">getattr</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">method_name</span><span class="ansi-yellow-bg">)</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">     99</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(0,135,0)">for</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">mimetype</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">method_name</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(175,0,255)">in</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">MIME_TYPES</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">items</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">    100</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(0,135,0)">if</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">mimetype</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(175,0,255)">in</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">include</span><span class="ansi-yellow-bg">}</span>
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/jupyter_integration.py:98</span>, in <span class="ansi-cyan-fg">&lt;dictcomp&gt;</span><span class="ansi-blue-fg">(.0)</span>
+<span class="ansi-green-fg">     96</span> include = <span style="color: rgb(0,135,0)">set</span>(include) <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> include <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span> {<span style="color: rgb(0,135,0)">self</span>._jupyter_mimetype}
+<span class="ansi-green-fg">     97</span> include -= <span style="color: rgb(0,135,0)">set</span>(exclude <span class="ansi-bold" style="color: rgb(175,0,255)">or</span> [])
+<span class="ansi-green-fg">---&gt; </span><span class="ansi-green-fg">98</span> <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> {mimetype: <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">getattr</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">method_name</span><span class="ansi-yellow-bg">)</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">     99</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">for</span> mimetype, method_name <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> MIME_TYPES.items()
+<span class="ansi-green-fg">    100</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> mimetype <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> include}
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/jupyter_integration.py:112</span>, in <span class="ansi-cyan-fg">JupyterIntegration._repr_image_svg_xml</span><span class="ansi-blue-fg">(self)</span>
+<span class="ansi-green-fg">    110</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-fg">_repr_image_svg_xml</span>(<span style="color: rgb(0,135,0)">self</span>) -&gt; <span style="color: rgb(0,135,0)">str</span>:
+<span class="ansi-green-fg">    111</span> <span style="color: rgb(188,188,188)">    </span><span class="ansi-yellow-fg">&#34;&#34;&#34;Return the rendered graph as SVG string.&#34;&#34;&#34;</span>
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">112</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">pipe</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">format</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-fg ansi-yellow-bg">&#39;</span><span class="ansi-yellow-fg ansi-yellow-bg">svg</span><span class="ansi-yellow-fg ansi-yellow-bg">&#39;</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">encoding</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">SVG_ENCODING</span><span class="ansi-yellow-bg">)</span>
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/piping.py:104</span>, in <span class="ansi-cyan-fg">Pipe.pipe</span><span class="ansi-blue-fg">(self, format, renderer, formatter, neato_no_op, quiet, engine, encoding)</span>
+<span class="ansi-green-fg">     55</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-fg">pipe</span>(<span style="color: rgb(0,135,0)">self</span>,
+<span class="ansi-green-fg">     56</span>          <span style="color: rgb(0,135,0)">format</span>: typing.Optional[<span style="color: rgb(0,135,0)">str</span>] = <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>,
+<span class="ansi-green-fg">     57</span>          renderer: typing.Optional[<span style="color: rgb(0,135,0)">str</span>] = <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>,
+<span class="ansi-green-fg">   (...)</span><span class="ansi-green-fg">     61</span>          engine: typing.Optional[<span style="color: rgb(0,135,0)">str</span>] = <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>,
+<span class="ansi-green-fg">     62</span>          encoding: typing.Optional[<span style="color: rgb(0,135,0)">str</span>] = <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>) -&gt; typing.Union[<span style="color: rgb(0,135,0)">bytes</span>, <span style="color: rgb(0,135,0)">str</span>]:
+<span class="ansi-green-fg">     63</span> <span style="color: rgb(188,188,188)">    </span><span class="ansi-yellow-fg">&#34;&#34;&#34;Return the source piped through the Graphviz layout command.</span>
+<span class="ansi-green-fg">     64</span>
+<span class="ansi-green-fg">     65</span> <span class="ansi-yellow-fg">    Args:</span>
+<span class="ansi-green-fg">   (...)</span><span class="ansi-green-fg">    102</span> <span class="ansi-yellow-fg">        &#39;&lt;?xml version=&#39;</span>
+<span class="ansi-green-fg">    103</span> <span class="ansi-yellow-fg">    &#34;&#34;&#34;</span>
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">104</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">_pipe_legacy</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">format</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    105</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">renderer</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">renderer</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    106</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">formatter</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">formatter</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    107</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">neato_no_op</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">neato_no_op</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    108</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">quiet</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">quiet</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    109</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">engine</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">engine</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    110</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">encoding</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">encoding</span><span class="ansi-yellow-bg">)</span>
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/_tools.py:185</span>, in <span class="ansi-cyan-fg">deprecate_positional_args.&lt;locals&gt;.decorator.&lt;locals&gt;.wrapper</span><span class="ansi-blue-fg">(*args, **kwargs)</span>
+<span class="ansi-green-fg">    177</span>     wanted = <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">, </span><span class="ansi-yellow-fg">&#39;</span>.join(<span class="ansi-yellow-fg">f</span><span class="ansi-yellow-fg">&#39;</span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>name<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-fg">=</span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>value<span class="ansi-bold" style="color: rgb(175,95,135)">!r}</span><span class="ansi-yellow-fg">&#39;</span>
+<span class="ansi-green-fg">    178</span>                        <span class="ansi-bold" style="color: rgb(0,135,0)">for</span> name, value <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> deprecated.items())
+<span class="ansi-green-fg">    179</span>     warnings.warn(<span class="ansi-yellow-fg">f</span><span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">The signature of </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>func_name<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-fg"> will be reduced</span><span class="ansi-yellow-fg">&#39;</span>
+<span class="ansi-green-fg">    180</span>                   <span class="ansi-yellow-fg">f</span><span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg"> to </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>supported_number<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-fg"> positional arg</span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>s_<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>qualification<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-fg">&#39;</span>
+<span class="ansi-green-fg">    181</span>                   <span class="ansi-yellow-fg">f</span><span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg"> </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span><span style="color: rgb(0,135,0)">list</span>(supported)<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-fg">: pass </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>wanted<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-fg"> as keyword arg</span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>s_<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-fg">&#39;</span>,
+<span class="ansi-green-fg">    182</span>                   stacklevel=stacklevel,
+<span class="ansi-green-fg">    183</span>                   category=category)
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">185</span> <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg">func</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">args</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">)</span>
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/piping.py:121</span>, in <span class="ansi-cyan-fg">Pipe._pipe_legacy</span><span class="ansi-blue-fg">(self, format, renderer, formatter, neato_no_op, quiet, engine, encoding)</span>
+<span class="ansi-green-fg">    112</span> <span style="color: rgb(175,0,255)">@_tools</span>.deprecate_positional_args(supported_number=<span class="ansi-green-fg">1</span>, ignore_arg=<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">self</span><span class="ansi-yellow-fg">&#39;</span>)
+<span class="ansi-green-fg">    113</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-fg">_pipe_legacy</span>(<span style="color: rgb(0,135,0)">self</span>,
+<span class="ansi-green-fg">    114</span>                  <span style="color: rgb(0,135,0)">format</span>: typing.Optional[<span style="color: rgb(0,135,0)">str</span>] = <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>,
+<span class="ansi-green-fg">   (...)</span><span class="ansi-green-fg">    119</span>                  engine: typing.Optional[<span style="color: rgb(0,135,0)">str</span>] = <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>,
+<span class="ansi-green-fg">    120</span>                  encoding: typing.Optional[<span style="color: rgb(0,135,0)">str</span>] = <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>) -&gt; typing.Union[<span style="color: rgb(0,135,0)">bytes</span>, <span style="color: rgb(0,135,0)">str</span>]:
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">121</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">_pipe_future</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">format</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    122</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">renderer</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">renderer</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    123</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">formatter</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">formatter</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    124</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">neato_no_op</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">neato_no_op</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    125</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">quiet</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">quiet</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    126</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">engine</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">engine</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    127</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">encoding</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">encoding</span><span class="ansi-yellow-bg">)</span>
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/piping.py:149</span>, in <span class="ansi-cyan-fg">Pipe._pipe_future</span><span class="ansi-blue-fg">(self, format, renderer, formatter, neato_no_op, quiet, engine, encoding)</span>
+<span class="ansi-green-fg">    146</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> encoding <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>:
+<span class="ansi-green-fg">    147</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> codecs.lookup(encoding) <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> codecs.lookup(<span style="color: rgb(0,135,0)">self</span>.encoding):
+<span class="ansi-green-fg">    148</span>         <span style="color: rgb(95,135,135)"># common case: both stdin and stdout need the same encoding</span>
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">149</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">_pipe_lines_string</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">args</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">encoding</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">encoding</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">    150</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">try</span>:
+<span class="ansi-green-fg">    151</span>         raw = <span style="color: rgb(0,135,0)">self</span>._pipe_lines(*args, input_encoding=<span style="color: rgb(0,135,0)">self</span>.encoding, **kwargs)
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/backend/piping.py:212</span>, in <span class="ansi-cyan-fg">pipe_lines_string</span><span class="ansi-blue-fg">(engine, format, input_lines, encoding, renderer, formatter, neato_no_op, quiet)</span>
+<span class="ansi-green-fg">    206</span> cmd = dot_command.command(engine, <span style="color: rgb(0,135,0)">format</span>,
+<span class="ansi-green-fg">    207</span>                           renderer=renderer,
+<span class="ansi-green-fg">    208</span>                           formatter=formatter,
+<span class="ansi-green-fg">    209</span>                           neato_no_op=neato_no_op)
+<span class="ansi-green-fg">    210</span> kwargs = {<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">input_lines</span><span class="ansi-yellow-fg">&#39;</span>: input_lines, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">encoding</span><span class="ansi-yellow-fg">&#39;</span>: encoding}
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">212</span> proc = <span class="ansi-yellow-bg">execute</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">run_check</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">cmd</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">capture_output</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(0,135,0)">True</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">quiet</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">quiet</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">    213</span> <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> proc.stdout
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/backend/execute.py:81</span>, in <span class="ansi-cyan-fg">run_check</span><span class="ansi-blue-fg">(cmd, input_lines, encoding, quiet, **kwargs)</span>
+<span class="ansi-green-fg">     79</span> <span class="ansi-bold" style="color: rgb(0,135,0)">except</span> <span class="ansi-bold" style="color: rgb(215,95,95)">OSError</span> <span class="ansi-bold" style="color: rgb(0,135,0)">as</span> e:
+<span class="ansi-green-fg">     80</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> e.errno == errno.ENOENT:
+<span class="ansi-green-fg">---&gt; </span><span class="ansi-green-fg">81</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> ExecutableNotFound(cmd) <span class="ansi-bold" style="color: rgb(0,135,0)">from</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-intense-fg ansi-bold">e</span>
+<span class="ansi-green-fg">     82</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span>
+<span class="ansi-green-fg">     84</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> quiet <span class="ansi-bold" style="color: rgb(175,0,255)">and</span> proc.stderr:
+
+<span class="ansi-red-fg">ExecutableNotFound</span>: failed to execute PosixPath(&#39;dot&#39;), make sure the Graphviz executables are on your systems&#39; PATH
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;graphviz.graphs.Digraph at 0x7f77145e2450&gt;
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">wf</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">NormalizedSampleImages</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/runner/work/ess/ess/packages/essimaging/src/ess/ymir/normalize.py:47: UserWarning: Computing average open beam image assuming constant exposure time.
+  warnings.warn(warning_message, stacklevel=1)
+/home/runner/work/ess/ess/packages/essimaging/src/ess/ymir/normalize.py:47: UserWarning: Computing average dark current image assuming constant exposure time.
+  warnings.warn(warning_message, stacklevel=1)
+/home/runner/work/ess/ess/packages/essimaging/src/ess/ymir/normalize.py:47: UserWarning: Computing average sample pixel counts assuming constant exposure time.
+  warnings.warn(warning_message, stacklevel=1)
+/home/runner/work/ess/ess/packages/essimaging/src/ess/ymir/normalize.py:47: UserWarning: Computing average background pixel counts assuming constant exposure time.
+  warnings.warn(warning_message, stacklevel=1)
+/home/runner/work/ess/ess/packages/essimaging/src/ess/ymir/normalize.py:47: UserWarning: Computing normalized sample image stack assuming constant exposure time.
+  warnings.warn(warning_message, stacklevel=1)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div><!-- Original source from -->
+<!-- https://github.com/jsignell/xarray/blob/1d960933ab252e0f79f7e050e6c9261d55568057/xarray/static/html/icons-svg-inline.html -->
+<svg style="position: absolute; width: 0; height: 0; overflow: hidden">
+<defs>
+<symbol id="icon-database" viewBox="0 0 32 32">
+<title>Show/Hide data repr</title>
+<path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
+<path d="M16 17c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+<path d="M16 26c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+</symbol>
+<symbol id="icon-file-text2" viewBox="0 0 32 32">
+<title>Show/Hide attributes</title>
+<path d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"></path>
+<path d="M23 26h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 22h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+</symbol>
+</defs>
+</svg><style id="scipp-style-sheet">.sc-root{--sc-background-color0:var(--jp-layout-color0,#fff);--sc-background-color1:var(--jp-layout-color1,#fcfcfc);--sc-background-color2:var(--jp-layout-color2,#efefef);--sc-inverse-background-color0:var(--jp-inverse-layout-color4,#111);--sc-font-color0:var(--jp-content-font-color0,#000);--sc-font-color1:var(--jp-content-font-color1,#555);--sc-font-color2:var(--jp-content-font-color2,#888);--sc-font-color3:var(--jp-content-font-color3,#ccc);}body.vscode-dark .sc-root{--sc-font-color0:rgba(255,255,255,1);--sc-font-color1:rgba(255,255,255,0.70);--sc-font-color2:rgba(255,255,255,0.54);--sc-font-color3:rgba(255,255,255,0.38);--sc-border-color:#1F1F1F;--sc-disabled-color:#515151;--sc-background-color0:#111111;--sc-background-color1:#111111;--sc-background-color2:#313131;}.sc-wrap{font-size:14px;min-width:300px;max-width:800px;}.sc-var-attrs .sc-wrap{padding-left:3em;}.sc-header{padding-top:6px;padding-bottom:6px;margin-bottom:4px;border-bottom:solid 1px #ddd;}.sc-header > div,.sc-header > ul{display:inline;margin-top:0;margin-bottom:0;}.sc-obj-type,.sc-array-name{margin-left:2px;margin-right:10px;}.sc-obj-type{color:var(--sc-font-color1);}.sc-underlying-size{color:var(--sc-font-color2);}.sc-sections,.reveal .sc-sections{padding-left:0 !important;display:grid;grid-template-columns:150px auto auto auto 1fr 20px 20px;}.sc-section-item{display:contents;}.sc-section-item input{display:none;}.sc-section-item input:enabled + label{cursor:pointer;color:var(--sc-font-color1);}.sc-section-item input:enabled + label:hover{color:var(--sc-font-color0);}.sc-section-summary{grid-column:1;font-weight:500;}.sc-section-summary > span{display:inline-block;padding-left:0.5em;}.sc-section-summary-in:disabled + label{color:var(--sc-font-color1);}.sc-section-summary-in + label:before{display:inline-block;content:'►';font-size:11px;width:15px;text-align:center;}.sc-section-summary-in:disabled + label:before{display:none;}.sc-section-summary-in:checked + label:before{content:'▼';}.sc-section-summary-in:checked + label > span{display:none;}.sc-section-summary,.sc-section-inline-details{padding-top:4px;padding-bottom:4px;}.sc-section-inline-details{grid-column:2 / 6;}.sc-section-details{display:none;grid-column:1 / -1;margin-bottom:5px;}.sc-section-summary-in:checked ~ .sc-section-details{display:contents;}.sc-array-wrap{grid-column:1 / -1;display:grid;grid-template-columns:20px auto;}.sc-array-wrap > label{grid-column:1;vertical-align:top;}.sc-preview{color:var(--sc-font-color2);}.sc-array-preview,.sc-array-data{padding:0 5px !important;grid-column:2;}.sc-array-data,.sc-array-in:checked ~ .sc-array-preview{display:none;}.sc-array-in:checked ~ .sc-array-data,.sc-array-preview{display:inline-block;}.sc-dim-list{display:inline-block !important;list-style:none;padding:0 !important;margin:0;}.sc-dim-list li{display:inline-block;padding:0;margin:0!important;}.sc-dim-list:before{content:'(';}.sc-dim-list:after{content:')';}.sc-dim-list li:not(:last-child):after{content:',';padding-right:5px;}.sc-dim-list li span,.sc-standalone-var-name > span span,.sc-var-name > span span{padding:0 !important;}.sc-aligned{font-weight:bold;}.sc-var-list,.sc-var-item,.reveal .sc-var-list,.reveal .sc-var-item{display:contents;}.sc-var-item > div,.sc-var-item label,.sc-var-item > .sc-var-name span{background-color:var(--sc-background-color1);margin-bottom:0;}.sc-var-item > .sc-var-name:hover span{padding-right:5px;}.sc-var-list > li:nth-child(odd) > div,.sc-var-list > li:nth-child(odd) > label,.sc-var-list > li:nth-child(odd) > .sc-var-name span{background-color:var(--sc-background-color2);}.sc-var-name{grid-column:1;}.sc-var-dims{grid-column:2;}.sc-var-dtype{grid-column:3;text-align:right;color:var(--sc-font-color2);}.sc-var-unit{grid-column:4;text-align:left;color:var(--sc-font-color1);max-width:50pt;text-overflow:ellipsis;}.sc-value-preview{grid-column:5;}.sc-var-preview-variances{text-align:right;}.sc-sections .sc-section-item .sc-section-summary,.sc-sections .sc-section-item .sc-section-inline-details,.sc-section-item .sc-var-list .sc-var-item > div,.sc-section-item .sc-var-list .sc-var-item > label,.sc-section-details .sc-var-list .sc-var-item > div,.sc-section-details .sc-var-list .sc-var-item > label{margin-top:0;margin-bottom:0;}.sc-var-name,.sc-var-dims,.sc-var-dtype,.sc-var-unit,.sc-preview,.sc-attrs dt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:10px;}.sc-var-name:hover,.sc-var-dims:hover,.sc-var-dtype:hover,.sc-var-unit:hover,.sc-attrs dt:hover{overflow:visible;width:auto;z-index:1;}.sc-var-attrs{display:block;}.sc-var-data,.reveal .sc-var-data{display:none;}.sc-var-attrs,.sc-var-data{background-color:var(--sc-background-color0) !important;padding-bottom:5px !important;}.sc-var-attrs-in:checked ~ .sc-var-attrs{display:none;}.sc-var-data-in:checked ~ .sc-var-data{display:block;}.sc-var-data > table{float:right;}.sc-var-name span,.sc-var-data{padding-left:25px !important;}.sc-var-attrs,.sc-var-data{grid-column:1 / -1;}dl.sc-attrs{padding:0;margin:0;display:grid;grid-template-columns:125px auto;}.sc-attrs dt,dd{padding:0;margin:0;float:left;padding-right:10px;width:auto;}.sc-attrs dt{font-weight:normal;grid-column:1;}.sc-attrs dt:hover span{display:inline-block;padding-right:10px;}.sc-attrs dd{grid-column:2;white-space:pre-wrap;word-break:break-all;}.sc-icon-database,.sc-icon-file-text2{display:inline-block;vertical-align:middle;width:1em;height:1.5em !important;stroke-width:0;stroke:currentColor;fill:currentColor;}label.sc-hide-icon svg{opacity:0;}.sc-standalone-var-name{grid-column:1/3;}.sc-standalone-var-name span{padding-left:25px;padding-right:10px;}.sc-title{font-weight:bold;font-size:1.5em;}.sc-subtitle{font-weight:normal;font-style:italic;text-align:left;font-size:1.2em;padding:1px;}.sc-label{fill:var(--sc-font-color0,#444444);text-anchor:middle;}.sc-name{fill:var(--sc-font-color0,#111111);}.sc-inset-line{stroke:var(--sc-font-color1);stroke-width:0.05;stroke-dasharray:0.2,0.2;}.sc-log-wrap{height:25ex;resize:vertical;overflow-y:scroll;display:flex;flex-direction:column-reverse;border:1px solid;border-color:var(--jp-border-color2);background-color:var(--sc-background-color1);}div.sc-log{line-height:2.5ex;}table.sc-log{table-layout:auto;border-collapse:collapse;}tr.sc-log:nth-child(even){background-color:var(--sc-background-color0);}tr.sc-log > td{vertical-align:top;padding-bottom:0.5ex;}.sc-log-time-stamp{min-width:22ch;font-family:var(--jp-code-font-family);color:var(--sc-font-color2);}.sc-log-level{min-width:10ch;}tr.sc-log-debug td.sc-log-level{color:var(--jp-accent-color1);}tr.sc-log-info td.sc-log-level{color:var(--jp-info-color1);}tr.sc-log-warning td.sc-log-level{color:var(--jp-warn-color1);}tr.sc-log-error td.sc-log-level{font-weight:bold;color:var(--jp-error-color2);}tr.sc-log-critical td.sc-log-level{font-weight:bold;color:var(--sc-background-color0);background-color:var(--jp-error-color1);}.sc-log-message{white-space:pre-wrap;width:100%;}.sc-log-html-payload{white-space:normal;}.sc-log-name{padding-right:0.5em;text-align:right;white-space:pre-wrap;color:var(--sc-font-color3);}</style><div class='sc-wrap sc-root'><div class='sc-header'><div class='sc-obj-type'>scipp.DataArray (20.26 MB <span class='sc-underlying-size'>out of 20.26 MB</span>)</div></div><ul class='sc-sections'><li class='sc-section-item'><input id='section-de7bc6d1-ca6e-4ead-9c09-923c37b68258' class='sc-section-summary-in' type='checkbox' disabled ><label for='section-de7bc6d1-ca6e-4ead-9c09-923c37b68258' class='sc-section-summary' >Dimensions:</label><div class='sc-section-inline-details'><ul class='sc-dim-list'><li><span class='sc-has-index'>time</span>: 36</li><li><span class='sc-has-index'>dim_1</span>: 256</li><li><span class='sc-has-index'>dim_2</span>: 256</li></ul></div><div class='sc-section-details'></div></li><li class='sc-section-item'><input id='section-a7518c7d-da92-488e-ab88-35aa84fbbb77' class='sc-section-summary-in' type='checkbox'  checked><label for='section-a7518c7d-da92-488e-ab88-35aa84fbbb77' class='sc-section-summary'  title='Expand/collapse section'>Coordinates: <span>(4)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>dim_1</span></div><div class='sc-var-dims'>(dim_1)</div><div class='sc-var-dtype'>int64</div><div class='sc-var-unit'>𝟙</div><div class='sc-value-preview sc-preview'><span><div>0, 1, ..., 254, 255</div></span></div><input id='attrs-e015e498-8ef8-404e-aca3-8c9e95c82b1c' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-e015e498-8ef8-404e-aca3-8c9e95c82b1c' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-c99375dd-b4b7-4799-baf8-dd8ff2b5adf9' class='sc-var-data-in' type='checkbox'><label for='data-c99375dd-b4b7-4799-baf8-dd8ff2b5adf9' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([  0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,
+        13,  14,  15,  16,  17,  18,  19,  20,  21,  22,  23,  24,  25,
+        26,  27,  28,  29,  30,  31,  32,  33,  34,  35,  36,  37,  38,
+        39,  40,  41,  42,  43,  44,  45,  46,  47,  48,  49,  50,  51,
+        52,  53,  54,  55,  56,  57,  58,  59,  60,  61,  62,  63,  64,
+        65,  66,  67,  68,  69,  70,  71,  72,  73,  74,  75,  76,  77,
+        78,  79,  80,  81,  82,  83,  84,  85,  86,  87,  88,  89,  90,
+        91,  92,  93,  94,  95,  96,  97,  98,  99, 100, 101, 102, 103,
+       104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116,
+       117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129,
+       130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142,
+       143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155,
+       156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168,
+       169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181,
+       182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194,
+       195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207,
+       208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220,
+       221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233,
+       234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246,
+       247, 248, 249, 250, 251, 252, 253, 254, 255])</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>dim_2</span></div><div class='sc-var-dims'>(dim_2)</div><div class='sc-var-dtype'>int64</div><div class='sc-var-unit'>𝟙</div><div class='sc-value-preview sc-preview'><span><div>0, 1, ..., 254, 255</div></span></div><input id='attrs-4092e433-39fc-4952-a514-e4f7f9d06dfd' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-4092e433-39fc-4952-a514-e4f7f9d06dfd' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-5920679b-1d8f-4465-9a94-295a3f3c7199' class='sc-var-data-in' type='checkbox'><label for='data-5920679b-1d8f-4465-9a94-295a3f3c7199' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([  0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,
+        13,  14,  15,  16,  17,  18,  19,  20,  21,  22,  23,  24,  25,
+        26,  27,  28,  29,  30,  31,  32,  33,  34,  35,  36,  37,  38,
+        39,  40,  41,  42,  43,  44,  45,  46,  47,  48,  49,  50,  51,
+        52,  53,  54,  55,  56,  57,  58,  59,  60,  61,  62,  63,  64,
+        65,  66,  67,  68,  69,  70,  71,  72,  73,  74,  75,  76,  77,
+        78,  79,  80,  81,  82,  83,  84,  85,  86,  87,  88,  89,  90,
+        91,  92,  93,  94,  95,  96,  97,  98,  99, 100, 101, 102, 103,
+       104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116,
+       117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129,
+       130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142,
+       143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155,
+       156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168,
+       169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181,
+       182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194,
+       195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207,
+       208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220,
+       221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233,
+       234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246,
+       247, 248, 249, 250, 251, 252, 253, 254, 255])</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>rotation_angle</span></div><div class='sc-var-dims'>(time)</div><div class='sc-var-dtype'>float64</div><div class='sc-var-unit'>deg</div><div class='sc-value-preview sc-preview'><span><div>1.007, 11.034, ..., 341.951, 351.979</div></span></div><input id='attrs-b502add7-2ef1-4932-afe4-4810b59e1e3e' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-b502add7-2ef1-4932-afe4-4810b59e1e3e' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-e3c4659a-31da-415d-b3e7-68290a370d0d' class='sc-var-data-in' type='checkbox'><label for='data-e3c4659a-31da-415d-b3e7-68290a370d0d' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([  1.00731091,  11.03435639,  21.06173445,  31.08968206,
+        41.11822052,  51.14620862,  61.17432276,  71.20250242,
+        81.22770456,  91.25705069, 101.28393277, 111.31280002,
+       121.33981109, 131.36662637, 141.39534187, 151.42282542,
+       161.45027075, 171.47811035, 181.50597898, 191.53482643,
+       201.56200906, 211.58970896, 221.61798686, 231.64625132,
+       241.67332848, 251.70052385, 261.72550702, 271.75563946,
+       281.78514837, 291.81166234, 301.83935011, 311.86674052,
+       321.89460518, 331.92353937, 341.95077558, 351.97860336])</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>time</span></div><div class='sc-var-dims'>(time)</div><div class='sc-var-dtype'>datetime64</div><div class='sc-var-unit'>ns</div><div class='sc-value-preview sc-preview'><span><div>2024-08-14T14:16:57.997255602, 2024-08-14T14:17:46.682255224, ..., 2024-08-14T14:44:41.925222722, 2024-08-14T14:45:30.825154517</div></span></div><input id='attrs-63a4ed18-e65f-4d30-bd4e-6d12ac85eaee' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-63a4ed18-e65f-4d30-bd4e-6d12ac85eaee' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-1a8ef1bd-48da-4853-a0cc-c2271136d803' class='sc-var-data-in' type='checkbox'><label for='data-1a8ef1bd-48da-4853-a0cc-c2271136d803' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([&#x27;2024-08-14T14:16:57.997255602&#x27;, &#x27;2024-08-14T14:17:46.682255224&#x27;,
+       &#x27;2024-08-14T14:18:35.853205911&#x27;, &#x27;2024-08-14T14:19:24.975128719&#x27;,
+       &#x27;2024-08-14T14:20:13.955183413&#x27;, &#x27;2024-08-14T14:21:02.993115782&#x27;,
+       &#x27;2024-08-14T14:21:51.865167018&#x27;, &#x27;2024-08-14T14:22:40.700159043&#x27;,
+       &#x27;2024-08-14T14:23:30.120165136&#x27;, &#x27;2024-08-14T14:24:19.211202454&#x27;,
+       &#x27;2024-08-14T14:25:07.781151541&#x27;, &#x27;2024-08-14T14:25:56.672195037&#x27;,
+       &#x27;2024-08-14T14:26:45.768113531&#x27;, &#x27;2024-08-14T14:27:34.491207424&#x27;,
+       &#x27;2024-08-14T14:28:23.784141401&#x27;, &#x27;2024-08-14T14:29:12.714194238&#x27;,
+       &#x27;2024-08-14T14:30:01.238209345&#x27;, &#x27;2024-08-14T14:30:50.167144757&#x27;,
+       &#x27;2024-08-14T14:31:38.958162332&#x27;, &#x27;2024-08-14T14:32:27.831177947&#x27;,
+       &#x27;2024-08-14T14:33:16.678124259&#x27;, &#x27;2024-08-14T14:34:05.873147398&#x27;,
+       &#x27;2024-08-14T14:34:54.972148922&#x27;, &#x27;2024-08-14T14:35:43.545102329&#x27;,
+       &#x27;2024-08-14T14:36:32.141243180&#x27;, &#x27;2024-08-14T14:37:21.510179315&#x27;,
+       &#x27;2024-08-14T14:38:10.617163791&#x27;, &#x27;2024-08-14T14:39:00.045194764&#x27;,
+       &#x27;2024-08-14T14:39:48.289190220&#x27;, &#x27;2024-08-14T14:40:36.650186469&#x27;,
+       &#x27;2024-08-14T14:41:25.774189010&#x27;, &#x27;2024-08-14T14:42:15.149107963&#x27;,
+       &#x27;2024-08-14T14:43:03.915278596&#x27;, &#x27;2024-08-14T14:43:53.077218381&#x27;,
+       &#x27;2024-08-14T14:44:41.925222722&#x27;, &#x27;2024-08-14T14:45:30.825154517&#x27;],
+      dtype=&#x27;datetime64[ns]&#x27;)</pre></span></li></ul></div></li><li class='sc-section-item'><input id='section-a1ff2530-4c77-4071-9355-c2bda1ee558a' class='sc-section-summary-in' type='checkbox'  checked><label for='section-a1ff2530-4c77-4071-9355-c2bda1ee558a' class='sc-section-summary'  title='Expand/collapse section'>Data: <span>(1)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span></span></div><div class='sc-var-dims'>(time, dim_1, dim_2)</div><div class='sc-var-dtype'>float64</div><div class='sc-var-unit'>𝟙</div><div class='sc-value-preview sc-preview'><span><div>1.048, 1.062, ..., 0.992, 0.997</div></span></div><input id='attrs-43feaff0-4875-44c0-979d-9c8d63c85019' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-43feaff0-4875-44c0-979d-9c8d63c85019' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-e5c25e3c-c55c-4269-bcdf-551a3282c25d' class='sc-var-data-in' type='checkbox'><label for='data-e5c25e3c-c55c-4269-bcdf-551a3282c25d' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([[[1.0476282 , 1.06165906, 1.04531464, ..., 1.05644014,
+         1.0414165 , 1.05037228],
+        [1.05502979, 1.03332636, 1.05998197, ..., 1.04956501,
+         1.05474718, 1.04747274],
+        [1.04426372, 1.06543977, 1.02916858, ..., 1.06201682,
+         1.05465958, 1.0536832 ],
+        ...,
+        [0.82613202, 0.81359233, 0.80103089, ..., 1.05969303,
+         1.04164473, 1.03079426],
+        [0.83522123, 0.80806379, 0.77136373, ..., 1.08613709,
+         1.10307506, 0.97883198],
+        [0.82829581, 0.76003729, 0.82939737, ..., 1.0779487 ,
+         1.06083292, 1.0388744 ]],
+
+       [[1.07754557, 1.06728106, 1.04837291, ..., 1.04092882,
+         1.0414165 , 1.04447528],
+        [1.05981017, 1.04834564, 1.07451759, ..., 1.05978473,
+         1.06356613, 1.04971428],
+        [1.04545417, 1.06432785, 1.03143697, ..., 1.07656832,
+         1.05465958, 1.04840317],
+        ...,
+        [0.77715187, 0.76736549, 0.77057344, ..., 0.90499331,
+         1.01437654, 1.0036681 ],
+        [0.83522123, 0.7607163 , 0.78654806, ..., 1.00762116,
+         1.00959412, 0.96574599],
+        [0.79692097, 0.76003729, 0.79674393, ..., 0.9941703 ,
+         0.96489196, 0.9696161 ]],
+
+       [[1.08665086, 1.07740067, 1.05550886, ..., 1.04092882,
+         1.04598111, 1.05037228],
+        [1.07056602, 1.04950097, 1.07339946, ..., 1.05595233,
+         1.07112524, 1.05307659],
+        [1.05735868, 1.06655169, 1.02916858, ..., 1.0511032 ,
+         1.05922619, 1.06001924],
+        ...,
+        [0.80980531, 0.75195655, 0.77057344, ..., 0.98234317,
+         0.98710835, 0.96297885],
+        [0.78758504, 0.7449338 , 0.77136373, ..., 0.96836319,
+         0.94282202, 0.90031605],
+        [0.82829581, 0.76003729, 0.79674393, ..., 0.98020724,
+         0.99230366, 0.99731942]],
+
+       ...,
+
+       [[1.16209465, 1.11225709, 1.08099439, ..., 1.01945161,
+         1.01631112, 1.04329588],
+        [1.09685811, 1.08878215, 1.11812444, ..., 1.04317768,
+         1.05222747, 1.03850657],
+        [1.06331094, 1.07211128, 1.0473157 , ..., 1.07656832,
+         1.03525147, 1.01777898],
+        ...,
+        [0.8914389 , 0.90604601, 0.87717451, ..., 0.94366824,
+         1.00074245, 0.9222896 ],
+        [0.86697869, 0.83962878, 0.87765401, ..., 1.02070714,
+         0.9962397 , 0.92648802],
+        [0.89104549, 0.86601858, 0.89470425, ..., 0.9941703 ,
+         0.97859781, 0.98346776]],
+
+       [[1.1607939 , 1.10888388, 1.07385844, ..., 1.00632665,
+         0.99805267, 1.0279637 ],
+        [1.09805321, 1.0864715 , 1.11029757, ..., 1.04828754,
+         1.04214867, 1.03850657],
+        [1.05973958, 1.07211128, 1.0484499 , ..., 1.06807995,
+         1.03981808, 1.01355496],
+        ...,
+        [0.8914389 , 0.87522811, 0.89240323, ..., 0.94366824,
+         1.02801063, 0.96297885],
+        [0.89873615, 0.85541128, 0.86246969, ..., 0.99453517,
+         0.95617644, 0.96574599],
+        [0.85967065, 0.8508784 , 0.86205081, ..., 0.98020724,
+         1.04712707, 0.9696161 ]],
+
+       [[1.17510221, 1.11000828, 1.07080018, ..., 1.0146789 ,
+         1.00489959, 1.02678431],
+        [1.11000416, 1.08069485, 1.11477007, ..., 1.02657064,
+         1.04340852, 1.03066117],
+        [1.0764059 , 1.07099936, 1.04277892, ..., 1.07414307,
+         1.04324304, 1.01989099],
+        ...,
+        [0.92409234, 0.92145495, 0.83148833, ..., 1.04680138,
+         1.01437654, 0.97654193],
+        [0.83522123, 0.88697627, 0.92320699, ..., 1.04687912,
+         0.9962397 , 0.97883198],
+        [0.93810775, 0.8508784 , 0.92735769, ..., 1.0360595 ,
+         0.99230366, 0.99731942]]], shape=(36, 256, 256))</pre></li></ul></div></li><li class='sc-section-item'><input id='section-e2391b42-be04-4edc-bce9-038ab7006347' class='sc-section-summary-in' type='checkbox'  checked><label for='section-e2391b42-be04-4edc-bce9-038ab7006347' class='sc-section-summary'  title='Expand/collapse section'>Masks: <span>(1)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span>counts</span></div><div class='sc-var-dims'>(time, dim_1, dim_2)</div><div class='sc-var-dtype'>bool</div><div class='sc-var-unit'></div><div class='sc-value-preview sc-preview'><span><div>False, False, ..., False, False</div></span></div><input id='attrs-e29f0890-091d-4e98-add9-d7543bbea9ab' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-e29f0890-091d-4e98-add9-d7543bbea9ab' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-81768f76-fcb2-461b-9907-0b515d9e1f5b' class='sc-var-data-in' type='checkbox'><label for='data-81768f76-fcb2-461b-9907-0b515d9e1f5b' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([[[False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        ...,
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False]],
+
+       [[False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        ...,
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False]],
+
+       [[False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        ...,
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False]],
+
+       ...,
+
+       [[False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        ...,
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False]],
+
+       [[False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        ...,
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False]],
+
+       [[False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        ...,
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False],
+        [False, False, False, ..., False, False, False]]],
+      shape=(36, 256, 256))</pre></span></li></ul></div></li></ul></div></div></div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Ymir</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../tools/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Tools</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025 Scipp contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><!-- This will display the version of the docs -->
+Current ESSimaging version: 0.1.dev1609+g2ad6cc133 (<a href="https://github.com/scipp/essimaging/releases">older versions</a>).</div>
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

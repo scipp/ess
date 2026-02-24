@@ -1,0 +1,1136 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ess.ymir.io &#8212; ESSimaging</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../../_static/documentation_options.js?v=e92c9768"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ess/ymir/io';</script>
+    <script src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <link rel="icon" href="../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1.dev1609+g2ad6cc133" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/logo.svg" class="logo__image only-light" alt="ESSimaging - Home"/>
+    <img src="../../../_static/logo-dark.svg" class="logo__image only-dark pst-js-only" alt="ESSimaging - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../odin/index.html">
+    Odin
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../tbl/index.html">
+    Test beamline
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../ymir/index.html">
+    Ymir
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../tools/index.html">
+    Tools
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../about/index.html">
+    About
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essreduce">
+    Essreduce
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scitiff">
+    Scitiff
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/tof">
+    Tof
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/essimaging" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essimaging/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essimaging" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp" title="Scipp" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../../_static/favicon.ico" class="icon-link-image" alt="Scipp"/></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../odin/index.html">
+    Odin
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../tbl/index.html">
+    Test beamline
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../ymir/index.html">
+    Ymir
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../tools/index.html">
+    Tools
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../about/index.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/essreduce">
+    Essreduce
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scitiff">
+    Scitiff
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/tof">
+    Tof
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/essimaging" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essimaging/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essimaging" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp" title="Scipp" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../../_static/favicon.ico" class="icon-link-image" alt="Scipp"/></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ess.ymir.io</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for ess.ymir.io</h1><div class="highlight"><pre>
+<span></span><span class="c1"># SPDX-License-Identifier: BSD-3-Clause</span>
+<span class="c1"># Copyright (c) 2024 Scipp contributors (https://github.com/scipp)</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">Iterable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">pairwise</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NewType</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scippnexus</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">snx</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scitiff</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.nexus.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">FilePath</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tifffile</span><span class="w"> </span><span class="kn">import</span> <span class="n">imwrite</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DEFAULT_HISTOGRAM_PATH</span><span class="p">,</span>
+    <span class="n">HistogramModeDetectorsPath</span><span class="p">,</span>
+    <span class="n">ImageDetectorName</span><span class="p">,</span>
+    <span class="n">ImageKeyLogs</span><span class="p">,</span>
+    <span class="n">RotationLogs</span><span class="p">,</span>
+    <span class="n">RotationMotionSensorName</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">FileLock</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;FileLock&quot;</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;File lock mode for reading nexus file.&quot;&quot;&quot;</span>
+<span class="n">DEFAULT_FILE_LOCK</span> <span class="o">=</span> <span class="n">FileLock</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">HistogramModeDetector</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;HistogramModeDetector&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Histogram mode detector data group.&quot;&quot;&quot;</span>
+<span class="n">HistogramModeDetectorData</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;HistogramModeDetectorData&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Histogram mode detector data.&quot;&quot;&quot;</span>
+<span class="n">ImageKeyCoord</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;ImageKeyCoord&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Image key coordinate.&quot;&quot;&quot;</span>
+<span class="n">SampleImageStacksWithLogs</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;SampleImageStacksWithLogs&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Raw image stacks separated by ImageKey values via timestamp.&quot;&quot;&quot;</span>
+<span class="n">RotationAngleCoord</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;RotationAngleCoord&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Rotation angle coordinate.&quot;&quot;&quot;</span>
+
+<span class="n">RawSampleImageStacks</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;RawSampleImageStacks&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Sample image stacks.&quot;&quot;&quot;</span>
+<span class="n">OpenBeamImageStacks</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;OpenBeamImageStacks&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Open beam image stacks.&quot;&quot;&quot;</span>
+<span class="n">DarkCurrentImageStacks</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;DarkCurrentImageStacks&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Dark current image stacks.&quot;&quot;&quot;</span>
+
+
+<span class="n">IMAGE_KEY_COORD_NAME</span> <span class="o">=</span> <span class="s2">&quot;image_key&quot;</span>
+<span class="sd">&quot;&quot;&quot;Image key coordinate name.&quot;&quot;&quot;</span>
+<span class="n">TIME_COORD_NAME</span> <span class="o">=</span> <span class="s2">&quot;time&quot;</span>
+<span class="sd">&quot;&quot;&quot;Time coordinate name. **Note that it is not time of flight.**&quot;&quot;&quot;</span>
+<span class="n">ROTATION_ANGLE_COORD_NAME</span> <span class="o">=</span> <span class="s2">&quot;rotation_angle&quot;</span>
+<span class="sd">&quot;&quot;&quot;Rotation angle coordinate name.&quot;&quot;&quot;</span>
+<span class="n">DIM1_COORD_NAME</span> <span class="o">=</span> <span class="s2">&quot;dim_1&quot;</span>
+<span class="sd">&quot;&quot;&quot;Dimension 1 coordinate name.&quot;&quot;&quot;</span>
+<span class="n">DIM2_COORD_NAME</span> <span class="o">=</span> <span class="s2">&quot;dim_2&quot;</span>
+<span class="sd">&quot;&quot;&quot;Dimension 2 coordinate name.&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="ImageKey">
+<a class="viewcode-back" href="../../../generated/modules/ess.ymir.io.ImageKey.html#ess.ymir.io.ImageKey">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ImageKey</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Image key values.&quot;&quot;&quot;</span>
+
+    <span class="n">SAMPLE</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">OPEN_BEAM</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">DARK_CURRENT</span> <span class="o">=</span> <span class="mi">2</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">as_index</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s2">&quot;ImageKey&quot;</span><span class="p">,</span> <span class="n">target_da</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">target_da</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="bp">cls</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">IMAGE_KEY_COORD_NAME</span> <span class="ow">in</span> <span class="n">target_da</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span>
+                <span class="bp">cls</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="n">unit</span><span class="o">=</span><span class="n">target_da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">IMAGE_KEY_COORD_NAME</span><span class="p">]</span><span class="o">.</span><span class="n">unit</span><span class="p">,</span>
+                <span class="n">dtype</span><span class="o">=</span><span class="n">target_da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">IMAGE_KEY_COORD_NAME</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="bp">cls</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">target_da</span><span class="o">.</span><span class="n">unit</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">target_da</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="load_nexus_histogram_mode_detector">
+<a class="viewcode-back" href="../../../generated/modules/ess.ymir.io.load_nexus_histogram_mode_detector.html#ess.ymir.io.load_nexus_histogram_mode_detector">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_nexus_histogram_mode_detector</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">file_path</span><span class="p">:</span> <span class="n">FilePath</span><span class="p">,</span>
+    <span class="n">image_detector_name</span><span class="p">:</span> <span class="n">ImageDetectorName</span><span class="p">,</span>
+    <span class="n">histogram_mode_detectors_path</span><span class="p">:</span> <span class="n">HistogramModeDetectorsPath</span> <span class="o">=</span> <span class="n">DEFAULT_HISTOGRAM_PATH</span><span class="p">,</span>
+    <span class="n">locking</span><span class="p">:</span> <span class="n">FileLock</span> <span class="o">=</span> <span class="n">DEFAULT_FILE_LOCK</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">HistogramModeDetector</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">snx</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">locking</span><span class="o">=</span><span class="n">locking</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">img_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">histogram_mode_detectors_path</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">image_detector_name</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">dg</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="n">img_path</span><span class="p">][()]</span>
+    <span class="k">except</span> <span class="ne">PermissionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">PermissionError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Permission denied to read the nexus file [</span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">]. &quot;</span>
+            <span class="s2">&quot;Please check the permission of the file or the directory. &quot;</span>
+            <span class="s2">&quot;Consider using the `file_lock` parameter to avoid file locking &quot;</span>
+            <span class="s2">&quot;if the file system is mounted on a network file system. &quot;</span>
+            <span class="s2">&quot;and it is safe to read the file without locking.&quot;</span>
+        <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+
+    <span class="c1"># Manually assign unit to the histogram detector mode data</span>
+    <span class="n">img</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">=</span> <span class="n">dg</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">original_unit</span> <span class="o">:=</span> <span class="n">img</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span> <span class="o">!=</span> <span class="s1">&#39;counts&#39;</span><span class="p">:</span>
+        <span class="n">img</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="s1">&#39;counts&#39;</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;The unit of the histogram detector data is [</span><span class="si">{</span><span class="n">original_unit</span><span class="si">}</span><span class="s2">]. &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;It is expected to be [</span><span class="si">{</span><span class="n">img</span><span class="o">.</span><span class="n">unit</span><span class="si">}</span><span class="s2">]. &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;The loader manually assigned the unit to be [</span><span class="si">{</span><span class="n">img</span><span class="o">.</span><span class="n">unit</span><span class="si">}</span><span class="s2">].&quot;</span><span class="p">,</span>
+            <span class="n">stacklevel</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">HistogramModeDetector</span><span class="p">(</span><span class="n">dg</span><span class="p">)</span></div>
+
+
+
+<span class="n">MinDim1</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;MinDim1&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Minimum value of the first dimension.&quot;&quot;&quot;</span>
+<span class="n">MaxDim1</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;MaxDim1&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Maximum value of the first dimension.&quot;&quot;&quot;</span>
+<span class="n">MinDim2</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;MinDim2&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Minimum value of the second dimension.&quot;&quot;&quot;</span>
+<span class="n">MaxDim2</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;MaxDim2&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_make_coord_if_needed</span><span class="p">(</span><span class="n">da</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">dim</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">dim</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="n">dim</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="n">da</span><span class="o">.</span><span class="n">sizes</span><span class="p">[</span><span class="n">dim</span><span class="p">])</span>
+
+
+<div class="viewcode-block" id="separate_detector_images">
+<a class="viewcode-back" href="../../../generated/modules/ess.ymir.io.separate_detector_images.html#ess.ymir.io.separate_detector_images">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">separate_detector_images</span><span class="p">(</span>
+    <span class="n">dg</span><span class="p">:</span> <span class="n">HistogramModeDetector</span><span class="p">,</span>
+    <span class="n">min_dim_1</span><span class="p">:</span> <span class="n">MinDim1</span><span class="p">,</span>
+    <span class="n">max_dim_1</span><span class="p">:</span> <span class="n">MaxDim1</span><span class="p">,</span>
+    <span class="n">min_dim_2</span><span class="p">:</span> <span class="n">MinDim2</span><span class="p">,</span>
+    <span class="n">max_dim_2</span><span class="p">:</span> <span class="n">MaxDim2</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">HistogramModeDetectorData</span><span class="p">:</span>
+    <span class="n">da</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">dg</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="s1">&#39;time&#39;</span><span class="p">)</span>
+    <span class="c1"># Assign position coordinates to the detector data</span>
+    <span class="n">_make_coord_if_needed</span><span class="p">(</span><span class="n">da</span><span class="p">,</span> <span class="n">DIM1_COORD_NAME</span><span class="p">)</span>
+    <span class="n">_make_coord_if_needed</span><span class="p">(</span><span class="n">da</span><span class="p">,</span> <span class="n">DIM2_COORD_NAME</span><span class="p">)</span>
+    <span class="c1"># Crop the detector data by the given coordinates</span>
+    <span class="n">da</span> <span class="o">=</span> <span class="n">da</span><span class="p">[</span><span class="n">DIM1_COORD_NAME</span><span class="p">,</span> <span class="n">min_dim_1</span><span class="p">:</span><span class="n">max_dim_1</span><span class="p">][</span><span class="n">DIM2_COORD_NAME</span><span class="p">,</span> <span class="n">min_dim_2</span><span class="p">:</span><span class="n">max_dim_2</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">HistogramModeDetectorData</span><span class="p">(</span><span class="n">da</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="separate_image_key_logs">
+<a class="viewcode-back" href="../../../generated/modules/ess.ymir.io.separate_image_key_logs.html#ess.ymir.io.separate_image_key_logs">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">separate_image_key_logs</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">dg</span><span class="p">:</span> <span class="n">HistogramModeDetector</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ImageKeyLogs</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">ImageKeyLogs</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">dg</span><span class="p">[</span><span class="s1">&#39;image_key&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">],</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;time&#39;</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="load_nexus_rotation_logs">
+<a class="viewcode-back" href="../../../generated/modules/ess.ymir.io.load_nexus_rotation_logs.html#ess.ymir.io.load_nexus_rotation_logs">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_nexus_rotation_logs</span><span class="p">(</span>
+    <span class="n">file_path</span><span class="p">:</span> <span class="n">FilePath</span><span class="p">,</span>
+    <span class="n">motion_sensor_name</span><span class="p">:</span> <span class="n">RotationMotionSensorName</span><span class="p">,</span>
+    <span class="n">locking</span><span class="p">:</span> <span class="n">FileLock</span> <span class="o">=</span> <span class="n">DEFAULT_FILE_LOCK</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RotationLogs</span><span class="p">:</span>
+    <span class="n">log_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;entry/instrument/</span><span class="si">{</span><span class="n">motion_sensor_name</span><span class="si">}</span><span class="s2">/rotation_stage_readback&quot;</span>
+    <span class="k">with</span> <span class="n">snx</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">locking</span><span class="o">=</span><span class="n">locking</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">RotationLogs</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="n">log_path</span><span class="p">][()][</span><span class="s1">&#39;value&#39;</span><span class="p">])</span></div>
+
+
+
+<div class="viewcode-block" id="derive_log_coord_by_range">
+<a class="viewcode-back" href="../../../generated/modules/ess.ymir.io.derive_log_coord_by_range.html#ess.ymir.io.derive_log_coord_by_range">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">derive_log_coord_by_range</span><span class="p">(</span><span class="n">da</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">log</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sort the logs by time and decide which log entry corresponds to each time bin.</span>
+
+<span class="sd">    It assumes a log value is valid until the next log entry.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="n">TIME_COORD_NAME</span><span class="p">)</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">log</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">TIME_COORD_NAME</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">sc</span><span class="o">.</span><span class="n">broadcast</span><span class="p">(</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">TIME_COORD_NAME</span><span class="p">,</span> <span class="n">i_time</span><span class="p">],</span>
+                <span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="n">TIME_COORD_NAME</span><span class="p">],</span>
+                <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">da</span><span class="p">[</span><span class="n">TIME_COORD_NAME</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span><span class="o">.</span><span class="n">sizes</span><span class="p">[</span><span class="n">TIME_COORD_NAME</span><span class="p">],),</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">i_time</span><span class="p">,</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pairwise</span><span class="p">(</span><span class="n">indices</span><span class="p">))</span>
+        <span class="p">],</span>
+        <span class="n">TIME_COORD_NAME</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_slice_da_by_keys</span><span class="p">(</span>
+    <span class="n">da</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">image_keys</span><span class="p">:</span> <span class="n">ImageKeyLogs</span><span class="p">,</span> <span class="n">image_key</span><span class="p">:</span> <span class="n">ImageKey</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+    <span class="n">matching_value</span> <span class="o">=</span> <span class="n">image_key</span><span class="o">.</span><span class="n">as_index</span><span class="p">(</span><span class="n">image_key</span><span class="p">,</span> <span class="n">image_keys</span><span class="p">)</span>
+    <span class="n">time_coord</span> <span class="o">=</span> <span class="n">image_keys</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">TIME_COORD_NAME</span><span class="p">]</span>
+    <span class="n">time_intervals</span> <span class="o">=</span> <span class="n">image_keys</span><span class="o">.</span><span class="n">sizes</span><span class="p">[</span><span class="n">TIME_COORD_NAME</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i_time</span><span class="p">,</span> <span class="p">(</span><span class="n">cur_time</span><span class="p">,</span> <span class="n">image_key</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+        <span class="nb">zip</span><span class="p">(</span><span class="n">time_coord</span><span class="p">,</span> <span class="n">image_keys</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">image_key</span> <span class="o">==</span> <span class="n">matching_value</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">i_time</span> <span class="o">==</span> <span class="n">time_intervals</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">da</span><span class="p">[</span><span class="n">TIME_COORD_NAME</span><span class="p">,</span> <span class="n">cur_time</span><span class="p">:]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">next_time</span> <span class="o">=</span> <span class="n">time_coord</span><span class="p">[</span><span class="n">i_time</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="k">yield</span> <span class="n">da</span><span class="p">[</span><span class="n">TIME_COORD_NAME</span><span class="p">,</span> <span class="n">cur_time</span><span class="p">:</span><span class="n">next_time</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_retrieve_image_stacks_by_key</span><span class="p">(</span>
+    <span class="n">da</span><span class="p">:</span> <span class="n">HistogramModeDetectorData</span><span class="p">,</span> <span class="n">image_keys</span><span class="p">:</span> <span class="n">ImageKeyLogs</span><span class="p">,</span> <span class="n">image_key</span><span class="p">:</span> <span class="n">ImageKey</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+    <span class="n">images</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">sliced_da</span>
+        <span class="k">for</span> <span class="n">sliced_da</span> <span class="ow">in</span> <span class="n">_slice_da_by_keys</span><span class="p">(</span><span class="n">da</span><span class="p">,</span> <span class="n">image_keys</span><span class="p">,</span> <span class="n">image_key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">da</span><span class="o">.</span><span class="n">sizes</span><span class="p">[</span><span class="n">TIME_COORD_NAME</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="p">]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">images</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No images found for </span><span class="si">{</span><span class="n">image_key</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">images</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">)</span>
+
+
+<span class="n">AllImageStacks</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;AllImageStacks&quot;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="n">ImageKey</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">])</span>
+
+
+<div class="viewcode-block" id="separate_image_by_keys">
+<a class="viewcode-back" href="../../../generated/modules/ess.ymir.io.separate_image_by_keys.html#ess.ymir.io.separate_image_by_keys">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">separate_image_by_keys</span><span class="p">(</span>
+    <span class="n">da</span><span class="p">:</span> <span class="n">HistogramModeDetectorData</span><span class="p">,</span>
+    <span class="n">image_keys</span><span class="p">:</span> <span class="n">ImageKeyLogs</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AllImageStacks</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">AllImageStacks</span><span class="p">(</span>
+        <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">_retrieve_image_stacks_by_key</span><span class="p">(</span><span class="n">da</span><span class="p">,</span> <span class="n">image_keys</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">ImageKey</span><span class="p">}</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="retrieve_open_beam_images">
+<a class="viewcode-back" href="../../../generated/modules/ess.ymir.io.retrieve_open_beam_images.html#ess.ymir.io.retrieve_open_beam_images">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">retrieve_open_beam_images</span><span class="p">(</span>
+    <span class="n">da</span><span class="p">:</span> <span class="n">HistogramModeDetectorData</span><span class="p">,</span> <span class="n">image_keys</span><span class="p">:</span> <span class="n">ImageKeyLogs</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OpenBeamImageStacks</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">OpenBeamImageStacks</span><span class="p">(</span>
+        <span class="n">_retrieve_image_stacks_by_key</span><span class="p">(</span><span class="n">da</span><span class="p">,</span> <span class="n">image_keys</span><span class="p">,</span> <span class="n">ImageKey</span><span class="o">.</span><span class="n">OPEN_BEAM</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="retrieve_dark_current_images">
+<a class="viewcode-back" href="../../../generated/modules/ess.ymir.io.retrieve_dark_current_images.html#ess.ymir.io.retrieve_dark_current_images">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">retrieve_dark_current_images</span><span class="p">(</span>
+    <span class="n">da</span><span class="p">:</span> <span class="n">HistogramModeDetectorData</span><span class="p">,</span> <span class="n">image_keys</span><span class="p">:</span> <span class="n">ImageKeyLogs</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DarkCurrentImageStacks</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">DarkCurrentImageStacks</span><span class="p">(</span>
+        <span class="n">_retrieve_image_stacks_by_key</span><span class="p">(</span><span class="n">da</span><span class="p">,</span> <span class="n">image_keys</span><span class="p">,</span> <span class="n">ImageKey</span><span class="o">.</span><span class="n">DARK_CURRENT</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="retrieve_sample_images">
+<a class="viewcode-back" href="../../../generated/modules/ess.ymir.io.retrieve_sample_images.html#ess.ymir.io.retrieve_sample_images">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">retrieve_sample_images</span><span class="p">(</span>
+    <span class="n">da</span><span class="p">:</span> <span class="n">HistogramModeDetectorData</span><span class="p">,</span> <span class="n">image_keys</span><span class="p">:</span> <span class="n">ImageKeyLogs</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RawSampleImageStacks</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">RawSampleImageStacks</span><span class="p">(</span>
+        <span class="n">_retrieve_image_stacks_by_key</span><span class="p">(</span><span class="n">da</span><span class="p">,</span> <span class="n">image_keys</span><span class="p">,</span> <span class="n">ImageKey</span><span class="o">.</span><span class="n">SAMPLE</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="apply_logs_as_coords">
+<a class="viewcode-back" href="../../../generated/modules/ess.ymir.io.apply_logs_as_coords.html#ess.ymir.io.apply_logs_as_coords">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">apply_logs_as_coords</span><span class="p">(</span>
+    <span class="n">samples</span><span class="p">:</span> <span class="n">RawSampleImageStacks</span><span class="p">,</span> <span class="n">rotation_angles</span><span class="p">:</span> <span class="n">RotationLogs</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SampleImageStacksWithLogs</span><span class="p">:</span>
+    <span class="c1"># Make sure the data has the same range as the rotation angle coordinate</span>
+    <span class="n">min_log_time</span> <span class="o">=</span> <span class="n">rotation_angles</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">TIME_COORD_NAME</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">TIME_COORD_NAME</span><span class="p">)</span>
+    <span class="n">sliced</span> <span class="o">=</span> <span class="n">samples</span><span class="p">[</span><span class="n">TIME_COORD_NAME</span><span class="p">,</span> <span class="n">min_log_time</span><span class="p">:]</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">sliced</span><span class="o">.</span><span class="n">sizes</span> <span class="o">!=</span> <span class="n">samples</span><span class="o">.</span><span class="n">sizes</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;The sample data has been sliced to match the rotation angle coordinate.&quot;</span><span class="p">,</span>
+            <span class="n">stacklevel</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="n">rotation_angle_coord</span> <span class="o">=</span> <span class="n">derive_log_coord_by_range</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">rotation_angles</span><span class="p">)</span>
+    <span class="n">sliced</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;rotation_angle&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rotation_angle_coord</span>
+    <span class="k">return</span> <span class="n">SampleImageStacksWithLogs</span><span class="p">(</span><span class="n">sliced</span><span class="p">)</span></div>
+
+
+
+<span class="n">DEFAULT_IMAGE_NAME_PREFIX_MAP</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">ImageKey</span><span class="o">.</span><span class="n">SAMPLE</span><span class="p">:</span> <span class="s2">&quot;sample&quot;</span><span class="p">,</span>
+    <span class="n">ImageKey</span><span class="o">.</span><span class="n">DARK_CURRENT</span><span class="p">:</span> <span class="s2">&quot;dc&quot;</span><span class="p">,</span>
+    <span class="n">ImageKey</span><span class="o">.</span><span class="n">OPEN_BEAM</span><span class="p">:</span> <span class="s2">&quot;ob&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="dummy_progress_wrapper">
+<a class="viewcode-back" href="../../../generated/modules/ess.ymir.io.dummy_progress_wrapper.html#ess.ymir.io.dummy_progress_wrapper">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">dummy_progress_wrapper</span><span class="p">(</span><span class="n">core_iterator</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">:</span>
+    <span class="k">yield from</span> <span class="n">core_iterator</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_save_merged_images</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span> <span class="n">image_stacks</span><span class="p">:</span> <span class="n">SampleImageStacksWithLogs</span><span class="p">,</span> <span class="n">image_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">:</span> <span class="n">Path</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">image_path</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="n">Path</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">image_prefix</span><span class="si">}</span><span class="s2">_0000_</span><span class="si">{</span><span class="n">image_stacks</span><span class="o">.</span><span class="n">sizes</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">04d</span><span class="si">}</span><span class="s2">.tiff&quot;</span>
+    <span class="p">)</span>
+    <span class="n">imwrite</span><span class="p">(</span><span class="n">image_path</span><span class="p">,</span> <span class="n">image_stacks</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_save_individual_images</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">image_stacks</span><span class="p">:</span> <span class="n">SampleImageStacksWithLogs</span><span class="p">,</span>
+    <span class="n">image_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">output_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">progress_wrapper</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Iterable</span><span class="p">],</span> <span class="n">Iterable</span><span class="p">]</span> <span class="o">=</span> <span class="n">dummy_progress_wrapper</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">i_image</span> <span class="ow">in</span> <span class="n">progress_wrapper</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">image_stacks</span><span class="o">.</span><span class="n">sizes</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">])):</span>
+        <span class="n">cur_image</span> <span class="o">=</span> <span class="n">image_stacks</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="n">i_image</span><span class="p">]</span>
+        <span class="n">image_path</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="n">Path</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">image_prefix</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">i_image</span><span class="si">:</span><span class="s2">04d</span><span class="si">}</span><span class="s2">.tiff&quot;</span><span class="p">)</span>
+        <span class="n">imwrite</span><span class="p">(</span><span class="n">image_path</span><span class="p">,</span> <span class="n">cur_image</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_validate_output_dir</span><span class="p">(</span><span class="n">output_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">output_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">output_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="c1"># make sure the output directory exists</span>
+        <span class="n">output_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">output_dir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Output directory </span><span class="si">{</span><span class="n">output_dir</span><span class="si">}</span><span class="s2"> is not a directory.&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">next</span><span class="p">(</span><span class="n">output_dir</span><span class="o">.</span><span class="n">iterdir</span><span class="p">(),</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Output directory </span><span class="si">{</span><span class="n">output_dir</span><span class="si">}</span><span class="s2"> is not empty.&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="export_image_stacks_as_tiff">
+<a class="viewcode-back" href="../../../generated/modules/ess.ymir.io.export_image_stacks_as_tiff.html#ess.ymir.io.export_image_stacks_as_tiff">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">export_image_stacks_as_tiff</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">output_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">image_stacks</span><span class="p">:</span> <span class="n">AllImageStacks</span><span class="p">,</span>
+    <span class="n">merge_image_by_key</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">progress_wrapper</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Iterable</span><span class="p">],</span> <span class="n">Iterable</span><span class="p">]</span> <span class="o">=</span> <span class="n">dummy_progress_wrapper</span><span class="p">,</span>
+    <span class="n">image_prefix_map</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">ImageKey</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">DEFAULT_IMAGE_NAME_PREFIX_MAP</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Save images into disk.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    output_dir:</span>
+<span class="sd">        Output directory to save images.</span>
+
+<span class="sd">    image_stacks:</span>
+<span class="sd">        Image stacks to save.</span>
+
+<span class="sd">    merge_image_by_key:</span>
+<span class="sd">        Flag to merge images into one file.</span>
+
+<span class="sd">    overwrite:</span>
+<span class="sd">        Flag to overwrite existing files.</span>
+<span class="sd">        If True, it will clear the output directory before saving images.</span>
+
+<span class="sd">    image_prefix_map:</span>
+<span class="sd">        Map of image name prefixes to their corresponding image key.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Remove existing files if overwrite is True</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="n">overwrite</span>
+        <span class="ow">and</span> <span class="p">(</span><span class="n">output_path</span> <span class="o">:=</span> <span class="n">Path</span><span class="p">(</span><span class="n">output_dir</span><span class="p">))</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+        <span class="ow">and</span> <span class="n">output_path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span>
+    <span class="p">):</span>
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">output_path</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+
+    <span class="n">_validate_output_dir</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">image_key</span><span class="p">,</span> <span class="n">cur_images</span> <span class="ow">in</span> <span class="n">progress_wrapper</span><span class="p">(</span><span class="n">image_stacks</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="k">if</span> <span class="n">merge_image_by_key</span><span class="p">:</span>
+            <span class="n">_save_merged_images</span><span class="p">(</span>
+                <span class="n">image_stacks</span><span class="o">=</span><span class="n">SampleImageStacksWithLogs</span><span class="p">(</span><span class="n">cur_images</span><span class="p">),</span>
+                <span class="n">image_prefix</span><span class="o">=</span><span class="n">image_prefix_map</span><span class="p">[</span><span class="n">image_key</span><span class="p">],</span>
+                <span class="n">output_dir</span><span class="o">=</span><span class="n">output_path</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_save_individual_images</span><span class="p">(</span>
+                <span class="n">image_stacks</span><span class="o">=</span><span class="n">SampleImageStacksWithLogs</span><span class="p">(</span><span class="n">cur_images</span><span class="p">),</span>
+                <span class="n">image_prefix</span><span class="o">=</span><span class="n">image_prefix_map</span><span class="p">[</span><span class="n">image_key</span><span class="p">],</span>
+                <span class="n">output_dir</span><span class="o">=</span><span class="n">output_path</span><span class="p">,</span>
+                <span class="n">progress_wrapper</span><span class="o">=</span><span class="n">progress_wrapper</span><span class="p">,</span>
+            <span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_add_to_event_time_offset_in_case_of_pulse_skipping</span><span class="p">(</span>
+    <span class="n">event_time_zero</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="n">pulse_stride</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">pulse_period</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+    <span class="n">_pulse_period</span> <span class="o">=</span> <span class="n">pulse_period</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">event_time_zero</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
+    <span class="n">etz</span> <span class="o">=</span> <span class="n">event_time_zero</span> <span class="o">-</span> <span class="n">sc</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">event_time_zero</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
+    <span class="c1"># The offset is used to place some etz value in the center of a binning</span>
+    <span class="c1"># where the bins have constant width pulse_period.</span>
+    <span class="c1"># That way small deviations in etz will not move the etz to the next</span>
+    <span class="c1"># or previous bin and each subsequent pulse will have a different index.</span>
+    <span class="n">offset</span> <span class="o">=</span> <span class="n">_pulse_period</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">etz</span><span class="o">.</span><span class="n">nanmin</span><span class="p">()</span> <span class="o">%</span> <span class="n">_pulse_period</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="p">((</span><span class="n">etz</span> <span class="o">+</span> <span class="n">offset</span><span class="p">)</span> <span class="o">//</span> <span class="n">_pulse_period</span><span class="p">)</span> <span class="o">%</span> <span class="n">pulse_stride</span>
+    <span class="k">return</span> <span class="n">index</span> <span class="o">*</span> <span class="n">pulse_period</span>
+
+
+<div class="viewcode-block" id="tiff_from_nexus">
+<a class="viewcode-back" href="../../../generated/modules/ess.ymir.io.tiff_from_nexus.html#ess.ymir.io.tiff_from_nexus">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">tiff_from_nexus</span><span class="p">(</span>
+    <span class="n">nexus_file_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">,</span>
+    <span class="n">output_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">time_bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="n">pulse_stride</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Write a tiff image file representing the data from the nexus file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ------------</span>
+<span class="sd">    nexus_file_name:</span>
+<span class="sd">        The file name of the nexus file to write to tiff.</span>
+<span class="sd">    output_path:</span>
+<span class="sd">        Where to write the tiff file.</span>
+<span class="sd">    time_bins:</span>
+<span class="sd">        The number of time slices the image should have.</span>
+<span class="sd">    pulse_stride:</span>
+<span class="sd">        The pulse stride that was used when doing the measurement.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">with</span> <span class="n">snx</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">nexus_file_name</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;/entry/instrument/event_mode_detectors/timepix3&#39;</span><span class="p">][()][</span>
+            <span class="s1">&#39;timepix3_events&#39;</span>
+        <span class="p">]</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;event_time_offset&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span>
+        <span class="n">_add_to_event_time_offset_in_case_of_pulse_skipping</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;event_time_zero&#39;</span><span class="p">],</span>
+            <span class="n">pulse_stride</span><span class="o">=</span><span class="n">pulse_stride</span><span class="p">,</span>
+            <span class="n">pulse_period</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">14</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span>
+                <span class="n">unit</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;event_time_offset&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unit</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">data</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">event_time_offset</span><span class="o">=</span><span class="n">time_bins</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">rename_dims</span><span class="p">(</span><span class="n">event_time_offset</span><span class="o">=</span><span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="n">dim_0</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">dim_1</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">drop_coords</span><span class="p">([</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">image</span><span class="o">.</span><span class="n">coords</span> <span class="k">if</span> <span class="n">image</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="n">scitiff</span><span class="o">.</span><span class="n">save_scitiff</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">output_path</span><span class="p">)</span></div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025 Scipp contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><!-- This will display the version of the docs -->
+Current ESSimaging version: 0.1.dev1609+g2ad6cc133 (<a href="https://github.com/scipp/essimaging/releases">older versions</a>).</div>
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

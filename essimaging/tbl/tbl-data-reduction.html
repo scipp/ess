@@ -1,0 +1,1485 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>TBL data reduction &#8212; ESSimaging</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=e92c9768"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tbl/tbl-data-reduction';</script>
+    <script src="../_static/anaconda-icon.js?v=461bdc62"></script>
+    <link rel="icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="TBL: Orca image normalization workflow" href="orca-image-normalization.html" />
+    <link rel="prev" title="Test beamline" href="index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1.dev1609+g2ad6cc133" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.svg" class="logo__image only-light" alt="ESSimaging - Home"/>
+    <img src="../_static/logo-dark.svg" class="logo__image only-dark pst-js-only" alt="ESSimaging - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../odin/index.html">
+    Odin
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Test beamline
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../ymir/index.html">
+    Ymir
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tools/index.html">
+    Tools
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../about/index.html">
+    About
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essreduce">
+    Essreduce
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scitiff">
+    Scitiff
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/tof">
+    Tof
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/essimaging" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essimaging/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essimaging" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp" title="Scipp" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/favicon.ico" class="icon-link-image" alt="Scipp"/></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../odin/index.html">
+    Odin
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Test beamline
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../ymir/index.html">
+    Ymir
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tools/index.html">
+    Tools
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../about/index.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/essreduce">
+    Essreduce
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scitiff">
+    Scitiff
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/tof">
+    Tof
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/essimaging" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essimaging/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essimaging" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp" title="Scipp" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/favicon.ico" class="icon-link-image" alt="Scipp"/></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">TBL data reduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="orca-image-normalization.html">TBL: Orca image normalization workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tbl-make-tof-lookup-table.html">Create a time-of-flight lookup table for TBL</a></li>
+</ul>
+</div>
+</nav></div>
+        <div class="sidebar-primary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Create-and-configure-the-workflow">Create and configure the workflow</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nGEM-detector-data">nGEM detector data</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Time-of-flight">Time-of-flight</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Visualize-the-time-of-flight-lookup-table">Visualize the time-of-flight lookup table</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Results">Results</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#He3-detector-data">He3 detector data</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Time-of-flight</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/tbl/tbl-data-reduction.ipynb"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Test beamline</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">TBL data reduction</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="TBL-data-reduction">
+<h1>TBL data reduction<a class="headerlink" href="#TBL-data-reduction" title="Link to this heading">#</a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">plopp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce</span><span class="w"> </span><span class="kn">import</span> <span class="n">time_of_flight</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess</span><span class="w"> </span><span class="kn">import</span> <span class="n">tbl</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ess.tbl.data</span>  <span class="c1"># noqa: F401</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.imaging.types</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+</pre></div>
+</div>
+</div>
+<section id="Create-and-configure-the-workflow">
+<h2>Create and configure the workflow<a class="headerlink" href="#Create-and-configure-the-workflow" title="Link to this heading">#</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">wf</span> <span class="o">=</span> <span class="n">tbl</span><span class="o">.</span><span class="n">TblWorkflow</span><span class="p">()</span>
+
+<span class="n">wf</span><span class="p">[</span><span class="n">Filename</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]]</span> <span class="o">=</span> <span class="n">tbl</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">tutorial_sample_data</span><span class="p">()</span>
+<span class="n">wf</span><span class="p">[</span><span class="n">TimeOfFlightLookupTableFilename</span><span class="p">]</span> <span class="o">=</span> <span class="n">tbl</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">tbl_tof_lookup_table_no_choppers</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Downloading file &#39;tbl_sample_data_2025-03.hdf&#39; from &#39;https://public.esss.dk/groups/scipp/ess/tbl/2/tbl_sample_data_2025-03.hdf&#39; to &#39;/home/runner/.cache/ess/tbl&#39;.
+Downloading file &#39;TBL-tof-lookup-table-no-choppers.h5&#39; from &#39;https://public.esss.dk/groups/scipp/ess/tbl/2/TBL-tof-lookup-table-no-choppers.h5&#39; to &#39;/home/runner/.cache/ess/tbl&#39;.
+</pre></div></div>
+</div>
+</section>
+<section id="nGEM-detector-data">
+<h2>nGEM detector data<a class="headerlink" href="#nGEM-detector-data" title="Link to this heading">#</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">wf</span><span class="p">[</span><span class="n">NeXusDetectorName</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;ngem_detector&quot;</span>
+
+<span class="n">wf</span><span class="o">.</span><span class="n">visualize</span><span class="p">(</span><span class="n">RawDetector</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">],</span> <span class="n">graph_attr</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;rankdir&quot;</span><span class="p">:</span> <span class="s2">&quot;LR&quot;</span><span class="p">})</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">FileNotFoundError</span>                         Traceback (most recent call last)
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/backend/execute.py:76</span>, in <span class="ansi-cyan-fg">run_check</span><span class="ansi-blue-fg">(cmd, input_lines, encoding, quiet, **kwargs)</span>
+<span class="ansi-green-fg">     75</span>         kwargs[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">stdout</span><span class="ansi-yellow-fg">&#39;</span>] = kwargs[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">stderr</span><span class="ansi-yellow-fg">&#39;</span>] = subprocess.PIPE
+<span class="ansi-green-fg">---&gt; </span><span class="ansi-green-fg">76</span>     proc = <span class="ansi-yellow-bg">_run_input_lines</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">cmd</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">input_lines</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">     77</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span>:
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/backend/execute.py:96</span>, in <span class="ansi-cyan-fg">_run_input_lines</span><span class="ansi-blue-fg">(cmd, input_lines, kwargs)</span>
+<span class="ansi-green-fg">     95</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-fg">_run_input_lines</span>(cmd, input_lines, *, kwargs):
+<span class="ansi-green-fg">---&gt; </span><span class="ansi-green-fg">96</span>     popen = <span class="ansi-yellow-bg">subprocess</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">Popen</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">cmd</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">stdin</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">subprocess</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">PIPE</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">     98</span>     stdin_write = popen.stdin.write
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/subprocess.py:1026</span>, in <span class="ansi-cyan-fg">Popen.__init__</span><span class="ansi-blue-fg">(self, args, bufsize, executable, stdin, stdout, stderr, preexec_fn, close_fds, shell, cwd, env, universal_newlines, startupinfo, creationflags, restore_signals, start_new_session, pass_fds, user, group, extra_groups, encoding, errors, text, umask, pipesize, process_group)</span>
+<span class="ansi-green-fg">   1023</span>             <span style="color: rgb(0,135,0)">self</span>.stderr = io.TextIOWrapper(<span style="color: rgb(0,135,0)">self</span>.stderr,
+<span class="ansi-green-fg">   1024</span>                     encoding=encoding, errors=errors)
+<span class="ansi-green-fg">-&gt; </span><span class="ansi-green-fg">1026</span>     <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">_execute_child</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">args</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">executable</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">preexec_fn</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">close_fds</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">   1027</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">pass_fds</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">cwd</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">env</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">   1028</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">startupinfo</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">creationflags</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">shell</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">   1029</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">p2cread</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">p2cwrite</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">   1030</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">c2pread</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">c2pwrite</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">   1031</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">errread</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">errwrite</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">   1032</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">restore_signals</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">   1033</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">gid</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">gids</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">uid</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">umask</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">   1034</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">start_new_session</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">process_group</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">   1035</span> <span class="ansi-bold" style="color: rgb(0,135,0)">except</span>:
+<span class="ansi-green-fg">   1036</span>     <span style="color: rgb(95,135,135)"># Cleanup if the child failed starting.</span>
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/subprocess.py:1955</span>, in <span class="ansi-cyan-fg">Popen._execute_child</span><span class="ansi-blue-fg">(self, args, executable, preexec_fn, close_fds, pass_fds, cwd, env, startupinfo, creationflags, shell, p2cread, p2cwrite, c2pread, c2pwrite, errread, errwrite, restore_signals, gid, gids, uid, umask, start_new_session, process_group)</span>
+<span class="ansi-green-fg">   1954</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> err_filename <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>:
+<span class="ansi-green-fg">-&gt; </span><span class="ansi-green-fg">1955</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> child_exception_type(errno_num, err_msg, err_filename)
+<span class="ansi-green-fg">   1956</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span>:
+
+<span class="ansi-red-fg">FileNotFoundError</span>: [Errno 2] No such file or directory: PosixPath(&#39;dot&#39;)
+
+The above exception was the direct cause of the following exception:
+
+<span class="ansi-red-fg">ExecutableNotFound</span>                        Traceback (most recent call last)
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/IPython/core/formatters.py:1036</span>, in <span class="ansi-cyan-fg">MimeBundleFormatter.__call__</span><span class="ansi-blue-fg">(self, obj, include, exclude)</span>
+<span class="ansi-green-fg">   1033</span>     method = get_real_method(obj, <span style="color: rgb(0,135,0)">self</span>.print_method)
+<span class="ansi-green-fg">   1035</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> method <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>:
+<span class="ansi-green-fg">-&gt; </span><span class="ansi-green-fg">1036</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg">method</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">include</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">include</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">exclude</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">exclude</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">   1037</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>
+<span class="ansi-green-fg">   1038</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span>:
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/jupyter_integration.py:98</span>, in <span class="ansi-cyan-fg">JupyterIntegration._repr_mimebundle_</span><span class="ansi-blue-fg">(self, include, exclude, **_)</span>
+<span class="ansi-green-fg">     96</span> include = <span style="color: rgb(0,135,0)">set</span>(include) <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> include <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span> {<span style="color: rgb(0,135,0)">self</span>._jupyter_mimetype}
+<span class="ansi-green-fg">     97</span> include -= <span style="color: rgb(0,135,0)">set</span>(exclude <span class="ansi-bold" style="color: rgb(175,0,255)">or</span> [])
+<span class="ansi-green-fg">---&gt; </span><span class="ansi-green-fg">98</span> <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg">{</span><span class="ansi-yellow-bg">mimetype</span><span class="ansi-yellow-bg">:</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">getattr</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">method_name</span><span class="ansi-yellow-bg">)</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">     99</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(0,135,0)">for</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">mimetype</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">method_name</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(175,0,255)">in</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">MIME_TYPES</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">items</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">    100</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(0,135,0)">if</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">mimetype</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(175,0,255)">in</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">include</span><span class="ansi-yellow-bg">}</span>
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/jupyter_integration.py:98</span>, in <span class="ansi-cyan-fg">&lt;dictcomp&gt;</span><span class="ansi-blue-fg">(.0)</span>
+<span class="ansi-green-fg">     96</span> include = <span style="color: rgb(0,135,0)">set</span>(include) <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> include <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span> {<span style="color: rgb(0,135,0)">self</span>._jupyter_mimetype}
+<span class="ansi-green-fg">     97</span> include -= <span style="color: rgb(0,135,0)">set</span>(exclude <span class="ansi-bold" style="color: rgb(175,0,255)">or</span> [])
+<span class="ansi-green-fg">---&gt; </span><span class="ansi-green-fg">98</span> <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> {mimetype: <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">getattr</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">method_name</span><span class="ansi-yellow-bg">)</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">     99</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">for</span> mimetype, method_name <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> MIME_TYPES.items()
+<span class="ansi-green-fg">    100</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> mimetype <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> include}
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/jupyter_integration.py:112</span>, in <span class="ansi-cyan-fg">JupyterIntegration._repr_image_svg_xml</span><span class="ansi-blue-fg">(self)</span>
+<span class="ansi-green-fg">    110</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-fg">_repr_image_svg_xml</span>(<span style="color: rgb(0,135,0)">self</span>) -&gt; <span style="color: rgb(0,135,0)">str</span>:
+<span class="ansi-green-fg">    111</span> <span style="color: rgb(188,188,188)">    </span><span class="ansi-yellow-fg">&#34;&#34;&#34;Return the rendered graph as SVG string.&#34;&#34;&#34;</span>
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">112</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">pipe</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">format</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-fg ansi-yellow-bg">&#39;</span><span class="ansi-yellow-fg ansi-yellow-bg">svg</span><span class="ansi-yellow-fg ansi-yellow-bg">&#39;</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">encoding</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">SVG_ENCODING</span><span class="ansi-yellow-bg">)</span>
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/piping.py:104</span>, in <span class="ansi-cyan-fg">Pipe.pipe</span><span class="ansi-blue-fg">(self, format, renderer, formatter, neato_no_op, quiet, engine, encoding)</span>
+<span class="ansi-green-fg">     55</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-fg">pipe</span>(<span style="color: rgb(0,135,0)">self</span>,
+<span class="ansi-green-fg">     56</span>          <span style="color: rgb(0,135,0)">format</span>: typing.Optional[<span style="color: rgb(0,135,0)">str</span>] = <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>,
+<span class="ansi-green-fg">     57</span>          renderer: typing.Optional[<span style="color: rgb(0,135,0)">str</span>] = <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>,
+<span class="ansi-green-fg">   (...)</span><span class="ansi-green-fg">     61</span>          engine: typing.Optional[<span style="color: rgb(0,135,0)">str</span>] = <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>,
+<span class="ansi-green-fg">     62</span>          encoding: typing.Optional[<span style="color: rgb(0,135,0)">str</span>] = <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>) -&gt; typing.Union[<span style="color: rgb(0,135,0)">bytes</span>, <span style="color: rgb(0,135,0)">str</span>]:
+<span class="ansi-green-fg">     63</span> <span style="color: rgb(188,188,188)">    </span><span class="ansi-yellow-fg">&#34;&#34;&#34;Return the source piped through the Graphviz layout command.</span>
+<span class="ansi-green-fg">     64</span>
+<span class="ansi-green-fg">     65</span> <span class="ansi-yellow-fg">    Args:</span>
+<span class="ansi-green-fg">   (...)</span><span class="ansi-green-fg">    102</span> <span class="ansi-yellow-fg">        &#39;&lt;?xml version=&#39;</span>
+<span class="ansi-green-fg">    103</span> <span class="ansi-yellow-fg">    &#34;&#34;&#34;</span>
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">104</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">_pipe_legacy</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">format</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    105</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">renderer</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">renderer</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    106</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">formatter</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">formatter</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    107</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">neato_no_op</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">neato_no_op</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    108</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">quiet</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">quiet</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    109</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">engine</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">engine</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    110</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">encoding</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">encoding</span><span class="ansi-yellow-bg">)</span>
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/_tools.py:185</span>, in <span class="ansi-cyan-fg">deprecate_positional_args.&lt;locals&gt;.decorator.&lt;locals&gt;.wrapper</span><span class="ansi-blue-fg">(*args, **kwargs)</span>
+<span class="ansi-green-fg">    177</span>     wanted = <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">, </span><span class="ansi-yellow-fg">&#39;</span>.join(<span class="ansi-yellow-fg">f</span><span class="ansi-yellow-fg">&#39;</span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>name<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-fg">=</span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>value<span class="ansi-bold" style="color: rgb(175,95,135)">!r}</span><span class="ansi-yellow-fg">&#39;</span>
+<span class="ansi-green-fg">    178</span>                        <span class="ansi-bold" style="color: rgb(0,135,0)">for</span> name, value <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> deprecated.items())
+<span class="ansi-green-fg">    179</span>     warnings.warn(<span class="ansi-yellow-fg">f</span><span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">The signature of </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>func_name<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-fg"> will be reduced</span><span class="ansi-yellow-fg">&#39;</span>
+<span class="ansi-green-fg">    180</span>                   <span class="ansi-yellow-fg">f</span><span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg"> to </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>supported_number<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-fg"> positional arg</span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>s_<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>qualification<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-fg">&#39;</span>
+<span class="ansi-green-fg">    181</span>                   <span class="ansi-yellow-fg">f</span><span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg"> </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span><span style="color: rgb(0,135,0)">list</span>(supported)<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-fg">: pass </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>wanted<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-fg"> as keyword arg</span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>s_<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-fg">&#39;</span>,
+<span class="ansi-green-fg">    182</span>                   stacklevel=stacklevel,
+<span class="ansi-green-fg">    183</span>                   category=category)
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">185</span> <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg">func</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">args</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">)</span>
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/piping.py:121</span>, in <span class="ansi-cyan-fg">Pipe._pipe_legacy</span><span class="ansi-blue-fg">(self, format, renderer, formatter, neato_no_op, quiet, engine, encoding)</span>
+<span class="ansi-green-fg">    112</span> <span style="color: rgb(175,0,255)">@_tools</span>.deprecate_positional_args(supported_number=<span class="ansi-green-fg">1</span>, ignore_arg=<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">self</span><span class="ansi-yellow-fg">&#39;</span>)
+<span class="ansi-green-fg">    113</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-fg">_pipe_legacy</span>(<span style="color: rgb(0,135,0)">self</span>,
+<span class="ansi-green-fg">    114</span>                  <span style="color: rgb(0,135,0)">format</span>: typing.Optional[<span style="color: rgb(0,135,0)">str</span>] = <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>,
+<span class="ansi-green-fg">   (...)</span><span class="ansi-green-fg">    119</span>                  engine: typing.Optional[<span style="color: rgb(0,135,0)">str</span>] = <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>,
+<span class="ansi-green-fg">    120</span>                  encoding: typing.Optional[<span style="color: rgb(0,135,0)">str</span>] = <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>) -&gt; typing.Union[<span style="color: rgb(0,135,0)">bytes</span>, <span style="color: rgb(0,135,0)">str</span>]:
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">121</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">_pipe_future</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">format</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    122</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">renderer</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">renderer</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    123</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">formatter</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">formatter</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    124</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">neato_no_op</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">neato_no_op</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    125</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">quiet</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">quiet</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    126</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">engine</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">engine</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    127</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">encoding</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">encoding</span><span class="ansi-yellow-bg">)</span>
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/piping.py:149</span>, in <span class="ansi-cyan-fg">Pipe._pipe_future</span><span class="ansi-blue-fg">(self, format, renderer, formatter, neato_no_op, quiet, engine, encoding)</span>
+<span class="ansi-green-fg">    146</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> encoding <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>:
+<span class="ansi-green-fg">    147</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> codecs.lookup(encoding) <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> codecs.lookup(<span style="color: rgb(0,135,0)">self</span>.encoding):
+<span class="ansi-green-fg">    148</span>         <span style="color: rgb(95,135,135)"># common case: both stdin and stdout need the same encoding</span>
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">149</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">_pipe_lines_string</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">args</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">encoding</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">encoding</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">    150</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">try</span>:
+<span class="ansi-green-fg">    151</span>         raw = <span style="color: rgb(0,135,0)">self</span>._pipe_lines(*args, input_encoding=<span style="color: rgb(0,135,0)">self</span>.encoding, **kwargs)
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/backend/piping.py:212</span>, in <span class="ansi-cyan-fg">pipe_lines_string</span><span class="ansi-blue-fg">(engine, format, input_lines, encoding, renderer, formatter, neato_no_op, quiet)</span>
+<span class="ansi-green-fg">    206</span> cmd = dot_command.command(engine, <span style="color: rgb(0,135,0)">format</span>,
+<span class="ansi-green-fg">    207</span>                           renderer=renderer,
+<span class="ansi-green-fg">    208</span>                           formatter=formatter,
+<span class="ansi-green-fg">    209</span>                           neato_no_op=neato_no_op)
+<span class="ansi-green-fg">    210</span> kwargs = {<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">input_lines</span><span class="ansi-yellow-fg">&#39;</span>: input_lines, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">encoding</span><span class="ansi-yellow-fg">&#39;</span>: encoding}
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">212</span> proc = <span class="ansi-yellow-bg">execute</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">run_check</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">cmd</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">capture_output</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(0,135,0)">True</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">quiet</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">quiet</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">    213</span> <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> proc.stdout
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/backend/execute.py:81</span>, in <span class="ansi-cyan-fg">run_check</span><span class="ansi-blue-fg">(cmd, input_lines, encoding, quiet, **kwargs)</span>
+<span class="ansi-green-fg">     79</span> <span class="ansi-bold" style="color: rgb(0,135,0)">except</span> <span class="ansi-bold" style="color: rgb(215,95,95)">OSError</span> <span class="ansi-bold" style="color: rgb(0,135,0)">as</span> e:
+<span class="ansi-green-fg">     80</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> e.errno == errno.ENOENT:
+<span class="ansi-green-fg">---&gt; </span><span class="ansi-green-fg">81</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> ExecutableNotFound(cmd) <span class="ansi-bold" style="color: rgb(0,135,0)">from</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-intense-fg ansi-bold">e</span>
+<span class="ansi-green-fg">     82</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span>
+<span class="ansi-green-fg">     84</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> quiet <span class="ansi-bold" style="color: rgb(175,0,255)">and</span> proc.stderr:
+
+<span class="ansi-red-fg">ExecutableNotFound</span>: failed to execute PosixPath(&#39;dot&#39;), make sure the Graphviz executables are on your systems&#39; PATH
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;graphviz.graphs.Digraph at 0x7f88cc3cc690&gt;
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ngem</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">RawDetector</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">])</span>
+<span class="n">ngem</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div><!-- Original source from -->
+<!-- https://github.com/jsignell/xarray/blob/1d960933ab252e0f79f7e050e6c9261d55568057/xarray/static/html/icons-svg-inline.html -->
+<svg style="position: absolute; width: 0; height: 0; overflow: hidden">
+<defs>
+<symbol id="icon-database" viewBox="0 0 32 32">
+<title>Show/Hide data repr</title>
+<path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
+<path d="M16 17c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+<path d="M16 26c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+</symbol>
+<symbol id="icon-file-text2" viewBox="0 0 32 32">
+<title>Show/Hide attributes</title>
+<path d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"></path>
+<path d="M23 26h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 22h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+</symbol>
+</defs>
+</svg><style id="scipp-style-sheet">.sc-root{--sc-background-color0:var(--jp-layout-color0,#fff);--sc-background-color1:var(--jp-layout-color1,#fcfcfc);--sc-background-color2:var(--jp-layout-color2,#efefef);--sc-inverse-background-color0:var(--jp-inverse-layout-color4,#111);--sc-font-color0:var(--jp-content-font-color0,#000);--sc-font-color1:var(--jp-content-font-color1,#555);--sc-font-color2:var(--jp-content-font-color2,#888);--sc-font-color3:var(--jp-content-font-color3,#ccc);}body.vscode-dark .sc-root{--sc-font-color0:rgba(255,255,255,1);--sc-font-color1:rgba(255,255,255,0.70);--sc-font-color2:rgba(255,255,255,0.54);--sc-font-color3:rgba(255,255,255,0.38);--sc-border-color:#1F1F1F;--sc-disabled-color:#515151;--sc-background-color0:#111111;--sc-background-color1:#111111;--sc-background-color2:#313131;}.sc-wrap{font-size:14px;min-width:300px;max-width:800px;}.sc-var-attrs .sc-wrap{padding-left:3em;}.sc-header{padding-top:6px;padding-bottom:6px;margin-bottom:4px;border-bottom:solid 1px #ddd;}.sc-header > div,.sc-header > ul{display:inline;margin-top:0;margin-bottom:0;}.sc-obj-type,.sc-array-name{margin-left:2px;margin-right:10px;}.sc-obj-type{color:var(--sc-font-color1);}.sc-underlying-size{color:var(--sc-font-color2);}.sc-sections,.reveal .sc-sections{padding-left:0 !important;display:grid;grid-template-columns:150px auto auto auto 1fr 20px 20px;}.sc-section-item{display:contents;}.sc-section-item input{display:none;}.sc-section-item input:enabled + label{cursor:pointer;color:var(--sc-font-color1);}.sc-section-item input:enabled + label:hover{color:var(--sc-font-color0);}.sc-section-summary{grid-column:1;font-weight:500;}.sc-section-summary > span{display:inline-block;padding-left:0.5em;}.sc-section-summary-in:disabled + label{color:var(--sc-font-color1);}.sc-section-summary-in + label:before{display:inline-block;content:'►';font-size:11px;width:15px;text-align:center;}.sc-section-summary-in:disabled + label:before{display:none;}.sc-section-summary-in:checked + label:before{content:'▼';}.sc-section-summary-in:checked + label > span{display:none;}.sc-section-summary,.sc-section-inline-details{padding-top:4px;padding-bottom:4px;}.sc-section-inline-details{grid-column:2 / 6;}.sc-section-details{display:none;grid-column:1 / -1;margin-bottom:5px;}.sc-section-summary-in:checked ~ .sc-section-details{display:contents;}.sc-array-wrap{grid-column:1 / -1;display:grid;grid-template-columns:20px auto;}.sc-array-wrap > label{grid-column:1;vertical-align:top;}.sc-preview{color:var(--sc-font-color2);}.sc-array-preview,.sc-array-data{padding:0 5px !important;grid-column:2;}.sc-array-data,.sc-array-in:checked ~ .sc-array-preview{display:none;}.sc-array-in:checked ~ .sc-array-data,.sc-array-preview{display:inline-block;}.sc-dim-list{display:inline-block !important;list-style:none;padding:0 !important;margin:0;}.sc-dim-list li{display:inline-block;padding:0;margin:0!important;}.sc-dim-list:before{content:'(';}.sc-dim-list:after{content:')';}.sc-dim-list li:not(:last-child):after{content:',';padding-right:5px;}.sc-dim-list li span,.sc-standalone-var-name > span span,.sc-var-name > span span{padding:0 !important;}.sc-aligned{font-weight:bold;}.sc-var-list,.sc-var-item,.reveal .sc-var-list,.reveal .sc-var-item{display:contents;}.sc-var-item > div,.sc-var-item label,.sc-var-item > .sc-var-name span{background-color:var(--sc-background-color1);margin-bottom:0;}.sc-var-item > .sc-var-name:hover span{padding-right:5px;}.sc-var-list > li:nth-child(odd) > div,.sc-var-list > li:nth-child(odd) > label,.sc-var-list > li:nth-child(odd) > .sc-var-name span{background-color:var(--sc-background-color2);}.sc-var-name{grid-column:1;}.sc-var-dims{grid-column:2;}.sc-var-dtype{grid-column:3;text-align:right;color:var(--sc-font-color2);}.sc-var-unit{grid-column:4;text-align:left;color:var(--sc-font-color1);max-width:50pt;text-overflow:ellipsis;}.sc-value-preview{grid-column:5;}.sc-var-preview-variances{text-align:right;}.sc-sections .sc-section-item .sc-section-summary,.sc-sections .sc-section-item .sc-section-inline-details,.sc-section-item .sc-var-list .sc-var-item > div,.sc-section-item .sc-var-list .sc-var-item > label,.sc-section-details .sc-var-list .sc-var-item > div,.sc-section-details .sc-var-list .sc-var-item > label{margin-top:0;margin-bottom:0;}.sc-var-name,.sc-var-dims,.sc-var-dtype,.sc-var-unit,.sc-preview,.sc-attrs dt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:10px;}.sc-var-name:hover,.sc-var-dims:hover,.sc-var-dtype:hover,.sc-var-unit:hover,.sc-attrs dt:hover{overflow:visible;width:auto;z-index:1;}.sc-var-attrs{display:block;}.sc-var-data,.reveal .sc-var-data{display:none;}.sc-var-attrs,.sc-var-data{background-color:var(--sc-background-color0) !important;padding-bottom:5px !important;}.sc-var-attrs-in:checked ~ .sc-var-attrs{display:none;}.sc-var-data-in:checked ~ .sc-var-data{display:block;}.sc-var-data > table{float:right;}.sc-var-name span,.sc-var-data{padding-left:25px !important;}.sc-var-attrs,.sc-var-data{grid-column:1 / -1;}dl.sc-attrs{padding:0;margin:0;display:grid;grid-template-columns:125px auto;}.sc-attrs dt,dd{padding:0;margin:0;float:left;padding-right:10px;width:auto;}.sc-attrs dt{font-weight:normal;grid-column:1;}.sc-attrs dt:hover span{display:inline-block;padding-right:10px;}.sc-attrs dd{grid-column:2;white-space:pre-wrap;word-break:break-all;}.sc-icon-database,.sc-icon-file-text2{display:inline-block;vertical-align:middle;width:1em;height:1.5em !important;stroke-width:0;stroke:currentColor;fill:currentColor;}label.sc-hide-icon svg{opacity:0;}.sc-standalone-var-name{grid-column:1/3;}.sc-standalone-var-name span{padding-left:25px;padding-right:10px;}.sc-title{font-weight:bold;font-size:1.5em;}.sc-subtitle{font-weight:normal;font-style:italic;text-align:left;font-size:1.2em;padding:1px;}.sc-label{fill:var(--sc-font-color0,#444444);text-anchor:middle;}.sc-name{fill:var(--sc-font-color0,#111111);}.sc-inset-line{stroke:var(--sc-font-color1);stroke-width:0.05;stroke-dasharray:0.2,0.2;}.sc-log-wrap{height:25ex;resize:vertical;overflow-y:scroll;display:flex;flex-direction:column-reverse;border:1px solid;border-color:var(--jp-border-color2);background-color:var(--sc-background-color1);}div.sc-log{line-height:2.5ex;}table.sc-log{table-layout:auto;border-collapse:collapse;}tr.sc-log:nth-child(even){background-color:var(--sc-background-color0);}tr.sc-log > td{vertical-align:top;padding-bottom:0.5ex;}.sc-log-time-stamp{min-width:22ch;font-family:var(--jp-code-font-family);color:var(--sc-font-color2);}.sc-log-level{min-width:10ch;}tr.sc-log-debug td.sc-log-level{color:var(--jp-accent-color1);}tr.sc-log-info td.sc-log-level{color:var(--jp-info-color1);}tr.sc-log-warning td.sc-log-level{color:var(--jp-warn-color1);}tr.sc-log-error td.sc-log-level{font-weight:bold;color:var(--jp-error-color2);}tr.sc-log-critical td.sc-log-level{font-weight:bold;color:var(--sc-background-color0);background-color:var(--jp-error-color1);}.sc-log-message{white-space:pre-wrap;width:100%;}.sc-log-html-payload{white-space:normal;}.sc-log-name{padding-right:0.5em;text-align:right;white-space:pre-wrap;color:var(--sc-font-color3);}</style><div class='sc-wrap sc-root'><div class='sc-header'><div class='sc-obj-type'>scipp.DataArray (8.86 MB <span class='sc-underlying-size'>out of 8.86 MB</span>)</div></div><ul class='sc-sections'><li class='sc-section-item'><input id='section-9931848d-eb64-425a-aec2-beff38400510' class='sc-section-summary-in' type='checkbox' disabled ><label for='section-9931848d-eb64-425a-aec2-beff38400510' class='sc-section-summary' >Dimensions:</label><div class='sc-section-inline-details'><ul class='sc-dim-list'><li><span>dim_0</span>: 2</li><li><span>dim_1</span>: 128</li><li><span>dim_2</span>: 128</li></ul></div><div class='sc-section-details'></div></li><li class='sc-section-item'><input id='section-fd08968c-a835-4a63-b262-2464be25d322' class='sc-section-summary-in' type='checkbox'  checked><label for='section-fd08968c-a835-4a63-b262-2464be25d322' class='sc-section-summary'  title='Expand/collapse section'>Coordinates: <span>(5)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>detector_number</span></div><div class='sc-var-dims'>(dim_0, dim_1, dim_2)</div><div class='sc-var-dtype'>int32</div><div class='sc-var-unit'></div><div class='sc-value-preview sc-preview'><span><div>1, 2, ..., 32767, 32768</div></span></div><input id='attrs-1447de51-2b23-4b12-8417-a13a9f0b5bb0' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-1447de51-2b23-4b12-8417-a13a9f0b5bb0' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-d46ddb44-de76-472c-a9c5-6c0bf3ed5bb5' class='sc-var-data-in' type='checkbox'><label for='data-d46ddb44-de76-472c-a9c5-6c0bf3ed5bb5' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([[[    1,     2,     3, ...,   126,   127,   128],
+        [  129,   130,   131, ...,   254,   255,   256],
+        [  257,   258,   259, ...,   382,   383,   384],
+        ...,
+        [16001, 16002, 16003, ..., 16126, 16127, 16128],
+        [16129, 16130, 16131, ..., 16254, 16255, 16256],
+        [16257, 16258, 16259, ..., 16382, 16383, 16384]],
+
+       [[16385, 16386, 16387, ..., 16510, 16511, 16512],
+        [16513, 16514, 16515, ..., 16638, 16639, 16640],
+        [16641, 16642, 16643, ..., 16766, 16767, 16768],
+        ...,
+        [32385, 32386, 32387, ..., 32510, 32511, 32512],
+        [32513, 32514, 32515, ..., 32638, 32639, 32640],
+        [32641, 32642, 32643, ..., 32766, 32767, 32768]]],
+      shape=(2, 128, 128), dtype=int32)</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>position</span></div><div class='sc-var-dims'>(dim_0, dim_1, dim_2)</div><div class='sc-var-dtype'>vector3</div><div class='sc-var-unit'>m</div><div class='sc-value-preview sc-preview'><span><div>[-0.1488  0.1488 -0.995 ], [-0.1465  0.1488 -0.995 ], ..., [ 0.1465 -0.1488 -1.005 ], [ 0.1488 -0.1488 -1.005 ]</div></span></div><input id='attrs-f50f5e92-f717-4927-aca2-1fa8b2b3b4d1' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-f50f5e92-f717-4927-aca2-1fa8b2b3b4d1' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-3159d8fc-ab3a-423e-b658-ea9697797bd1' class='sc-var-data-in' type='checkbox'><label for='data-3159d8fc-ab3a-423e-b658-ea9697797bd1' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([[[[-0.1488,  0.1488, -0.995 ],
+         [-0.1465,  0.1488, -0.995 ],
+         [-0.1441,  0.1488, -0.995 ],
+         ...,
+         [ 0.1441,  0.1488, -0.995 ],
+         [ 0.1465,  0.1488, -0.995 ],
+         [ 0.1488,  0.1488, -0.995 ]],
+
+        [[-0.1488,  0.1465, -0.995 ],
+         [-0.1465,  0.1465, -0.995 ],
+         [-0.1441,  0.1465, -0.995 ],
+         ...,
+         [ 0.1441,  0.1465, -0.995 ],
+         [ 0.1465,  0.1465, -0.995 ],
+         [ 0.1488,  0.1465, -0.995 ]],
+
+        [[-0.1488,  0.1441, -0.995 ],
+         [-0.1465,  0.1441, -0.995 ],
+         [-0.1441,  0.1441, -0.995 ],
+         ...,
+         [ 0.1441,  0.1441, -0.995 ],
+         [ 0.1465,  0.1441, -0.995 ],
+         [ 0.1488,  0.1441, -0.995 ]],
+
+        ...,
+
+        [[-0.1488, -0.1441, -0.995 ],
+         [-0.1465, -0.1441, -0.995 ],
+         [-0.1441, -0.1441, -0.995 ],
+         ...,
+         [ 0.1441, -0.1441, -0.995 ],
+         [ 0.1465, -0.1441, -0.995 ],
+         [ 0.1488, -0.1441, -0.995 ]],
+
+        [[-0.1488, -0.1465, -0.995 ],
+         [-0.1465, -0.1465, -0.995 ],
+         [-0.1441, -0.1465, -0.995 ],
+         ...,
+         [ 0.1441, -0.1465, -0.995 ],
+         [ 0.1465, -0.1465, -0.995 ],
+         [ 0.1488, -0.1465, -0.995 ]],
+
+        [[-0.1488, -0.1488, -0.995 ],
+         [-0.1465, -0.1488, -0.995 ],
+         [-0.1441, -0.1488, -0.995 ],
+         ...,
+         [ 0.1441, -0.1488, -0.995 ],
+         [ 0.1465, -0.1488, -0.995 ],
+         [ 0.1488, -0.1488, -0.995 ]]],
+
+
+       [[[-0.1488,  0.1488, -1.005 ],
+         [-0.1465,  0.1488, -1.005 ],
+         [-0.1441,  0.1488, -1.005 ],
+         ...,
+         [ 0.1441,  0.1488, -1.005 ],
+         [ 0.1465,  0.1488, -1.005 ],
+         [ 0.1488,  0.1488, -1.005 ]],
+
+        [[-0.1488,  0.1465, -1.005 ],
+         [-0.1465,  0.1465, -1.005 ],
+         [-0.1441,  0.1465, -1.005 ],
+         ...,
+         [ 0.1441,  0.1465, -1.005 ],
+         [ 0.1465,  0.1465, -1.005 ],
+         [ 0.1488,  0.1465, -1.005 ]],
+
+        [[-0.1488,  0.1441, -1.005 ],
+         [-0.1465,  0.1441, -1.005 ],
+         [-0.1441,  0.1441, -1.005 ],
+         ...,
+         [ 0.1441,  0.1441, -1.005 ],
+         [ 0.1465,  0.1441, -1.005 ],
+         [ 0.1488,  0.1441, -1.005 ]],
+
+        ...,
+
+        [[-0.1488, -0.1441, -1.005 ],
+         [-0.1465, -0.1441, -1.005 ],
+         [-0.1441, -0.1441, -1.005 ],
+         ...,
+         [ 0.1441, -0.1441, -1.005 ],
+         [ 0.1465, -0.1441, -1.005 ],
+         [ 0.1488, -0.1441, -1.005 ]],
+
+        [[-0.1488, -0.1465, -1.005 ],
+         [-0.1465, -0.1465, -1.005 ],
+         [-0.1441, -0.1465, -1.005 ],
+         ...,
+         [ 0.1441, -0.1465, -1.005 ],
+         [ 0.1465, -0.1465, -1.005 ],
+         [ 0.1488, -0.1465, -1.005 ]],
+
+        [[-0.1488, -0.1488, -1.005 ],
+         [-0.1465, -0.1488, -1.005 ],
+         [-0.1441, -0.1488, -1.005 ],
+         ...,
+         [ 0.1441, -0.1488, -1.005 ],
+         [ 0.1465, -0.1488, -1.005 ],
+         [ 0.1488, -0.1488, -1.005 ]]]], shape=(2, 128, 128, 3))</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>x_pixel_offset</span></div><div class='sc-var-dims'>(dim_0, dim_1, dim_2)</div><div class='sc-var-dtype'>float64</div><div class='sc-var-unit'>m</div><div class='sc-value-preview sc-preview'><span><div>-0.149, -0.146, ..., 0.146, 0.149</div></span></div><input id='attrs-4eaf41af-2986-4ea9-a84a-bf49a5500ca0' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-4eaf41af-2986-4ea9-a84a-bf49a5500ca0' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-17754d44-e116-456d-a14c-6e7a6ec35ab9' class='sc-var-data-in' type='checkbox'><label for='data-17754d44-e116-456d-a14c-6e7a6ec35ab9' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([[[-0.1488, -0.1465, -0.1441, ...,  0.1441,  0.1465,  0.1488],
+        [-0.1488, -0.1465, -0.1441, ...,  0.1441,  0.1465,  0.1488],
+        [-0.1488, -0.1465, -0.1441, ...,  0.1441,  0.1465,  0.1488],
+        ...,
+        [-0.1488, -0.1465, -0.1441, ...,  0.1441,  0.1465,  0.1488],
+        [-0.1488, -0.1465, -0.1441, ...,  0.1441,  0.1465,  0.1488],
+        [-0.1488, -0.1465, -0.1441, ...,  0.1441,  0.1465,  0.1488]],
+
+       [[-0.1488, -0.1465, -0.1441, ...,  0.1441,  0.1465,  0.1488],
+        [-0.1488, -0.1465, -0.1441, ...,  0.1441,  0.1465,  0.1488],
+        [-0.1488, -0.1465, -0.1441, ...,  0.1441,  0.1465,  0.1488],
+        ...,
+        [-0.1488, -0.1465, -0.1441, ...,  0.1441,  0.1465,  0.1488],
+        [-0.1488, -0.1465, -0.1441, ...,  0.1441,  0.1465,  0.1488],
+        [-0.1488, -0.1465, -0.1441, ...,  0.1441,  0.1465,  0.1488]]],
+      shape=(2, 128, 128))</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>y_pixel_offset</span></div><div class='sc-var-dims'>(dim_0, dim_1, dim_2)</div><div class='sc-var-dtype'>float64</div><div class='sc-var-unit'>m</div><div class='sc-value-preview sc-preview'><span><div>0.149, 0.149, ..., -0.149, -0.149</div></span></div><input id='attrs-c6100fa6-1f8b-4717-a15b-fe89c8199b79' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-c6100fa6-1f8b-4717-a15b-fe89c8199b79' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-d11ab737-c0c9-471d-8569-0b00ec2e15cc' class='sc-var-data-in' type='checkbox'><label for='data-d11ab737-c0c9-471d-8569-0b00ec2e15cc' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([[[ 0.1488,  0.1488,  0.1488, ...,  0.1488,  0.1488,  0.1488],
+        [ 0.1465,  0.1465,  0.1465, ...,  0.1465,  0.1465,  0.1465],
+        [ 0.1441,  0.1441,  0.1441, ...,  0.1441,  0.1441,  0.1441],
+        ...,
+        [-0.1441, -0.1441, -0.1441, ..., -0.1441, -0.1441, -0.1441],
+        [-0.1465, -0.1465, -0.1465, ..., -0.1465, -0.1465, -0.1465],
+        [-0.1488, -0.1488, -0.1488, ..., -0.1488, -0.1488, -0.1488]],
+
+       [[ 0.1488,  0.1488,  0.1488, ...,  0.1488,  0.1488,  0.1488],
+        [ 0.1465,  0.1465,  0.1465, ...,  0.1465,  0.1465,  0.1465],
+        [ 0.1441,  0.1441,  0.1441, ...,  0.1441,  0.1441,  0.1441],
+        ...,
+        [-0.1441, -0.1441, -0.1441, ..., -0.1441, -0.1441, -0.1441],
+        [-0.1465, -0.1465, -0.1465, ..., -0.1465, -0.1465, -0.1465],
+        [-0.1488, -0.1488, -0.1488, ..., -0.1488, -0.1488, -0.1488]]],
+      shape=(2, 128, 128))</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>z_pixel_offset</span></div><div class='sc-var-dims'>(dim_0, dim_1, dim_2)</div><div class='sc-var-dtype'>float64</div><div class='sc-var-unit'>m</div><div class='sc-value-preview sc-preview'><span><div>0.005, 0.005, ..., -0.005, -0.005</div></span></div><input id='attrs-216d1c87-7643-4a40-a990-e7df1a8a52f0' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-216d1c87-7643-4a40-a990-e7df1a8a52f0' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-5767dadb-f4c1-41e6-a43a-8ef0a5836228' class='sc-var-data-in' type='checkbox'><label for='data-5767dadb-f4c1-41e6-a43a-8ef0a5836228' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([[[ 0.005,  0.005,  0.005, ...,  0.005,  0.005,  0.005],
+        [ 0.005,  0.005,  0.005, ...,  0.005,  0.005,  0.005],
+        [ 0.005,  0.005,  0.005, ...,  0.005,  0.005,  0.005],
+        ...,
+        [ 0.005,  0.005,  0.005, ...,  0.005,  0.005,  0.005],
+        [ 0.005,  0.005,  0.005, ...,  0.005,  0.005,  0.005],
+        [ 0.005,  0.005,  0.005, ...,  0.005,  0.005,  0.005]],
+
+       [[-0.005, -0.005, -0.005, ..., -0.005, -0.005, -0.005],
+        [-0.005, -0.005, -0.005, ..., -0.005, -0.005, -0.005],
+        [-0.005, -0.005, -0.005, ..., -0.005, -0.005, -0.005],
+        ...,
+        [-0.005, -0.005, -0.005, ..., -0.005, -0.005, -0.005],
+        [-0.005, -0.005, -0.005, ..., -0.005, -0.005, -0.005],
+        [-0.005, -0.005, -0.005, ..., -0.005, -0.005, -0.005]]],
+      shape=(2, 128, 128))</pre></span></li></ul></div></li><li class='sc-section-item'><input id='section-4e43c34a-b833-4077-ad47-35e8dd10c8b3' class='sc-section-summary-in' type='checkbox'  checked><label for='section-4e43c34a-b833-4077-ad47-35e8dd10c8b3' class='sc-section-summary'  title='Expand/collapse section'>Data: <span>(1)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span></span></div><div class='sc-var-dims'>(dim_0, dim_1, dim_2)</div><div class='sc-var-dtype'>float32</div><div class='sc-var-unit'>counts</div><div class='sc-value-preview sc-preview'><span><div>binned data [len=4, len=12, ..., len=18, len=13]</div></span></div><input id='attrs-660a37a0-e735-4836-ad79-dc93768eb2a2' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-660a37a0-e735-4836-ad79-dc93768eb2a2' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-38720999-112a-43d0-a50f-dfb02ff5d970' class='sc-var-data-in' type='checkbox'><label for='data-38720999-112a-43d0-a50f-dfb02ff5d970' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>dim=&#x27;event&#x27;,
+content=DataArray(
+          dims=(event: 352698),
+          data=float32[counts],
+          coords={&#x27;event_time_offset&#x27;:int32[ns], &#x27;event_time_zero&#x27;:datetime64[ns]})</pre></li></ul></div></li></ul></div></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ngem</span><span class="p">[</span><span class="s1">&#39;dim_0&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">hist</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;equal&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;First detection&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">ngem</span><span class="p">[</span><span class="s1">&#39;dim_0&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">hist</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;equal&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Last detection&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tbl_tbl-data-reduction_7_0.svg" src="../_images/tbl_tbl-data-reduction_7_0.svg" />
+</div>
+</div>
+<section id="Time-of-flight">
+<h3>Time-of-flight<a class="headerlink" href="#Time-of-flight" title="Link to this heading">#</a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">wf</span><span class="o">.</span><span class="n">visualize</span><span class="p">(</span><span class="n">TofDetector</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">],</span> <span class="n">graph_attr</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;rankdir&quot;</span><span class="p">:</span> <span class="s2">&quot;LR&quot;</span><span class="p">})</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">FileNotFoundError</span>                         Traceback (most recent call last)
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/backend/execute.py:76</span>, in <span class="ansi-cyan-fg">run_check</span><span class="ansi-blue-fg">(cmd, input_lines, encoding, quiet, **kwargs)</span>
+<span class="ansi-green-fg">     75</span>         kwargs[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">stdout</span><span class="ansi-yellow-fg">&#39;</span>] = kwargs[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">stderr</span><span class="ansi-yellow-fg">&#39;</span>] = subprocess.PIPE
+<span class="ansi-green-fg">---&gt; </span><span class="ansi-green-fg">76</span>     proc = <span class="ansi-yellow-bg">_run_input_lines</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">cmd</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">input_lines</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">     77</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span>:
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/backend/execute.py:96</span>, in <span class="ansi-cyan-fg">_run_input_lines</span><span class="ansi-blue-fg">(cmd, input_lines, kwargs)</span>
+<span class="ansi-green-fg">     95</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-fg">_run_input_lines</span>(cmd, input_lines, *, kwargs):
+<span class="ansi-green-fg">---&gt; </span><span class="ansi-green-fg">96</span>     popen = <span class="ansi-yellow-bg">subprocess</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">Popen</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">cmd</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">stdin</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">subprocess</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">PIPE</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">     98</span>     stdin_write = popen.stdin.write
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/subprocess.py:1026</span>, in <span class="ansi-cyan-fg">Popen.__init__</span><span class="ansi-blue-fg">(self, args, bufsize, executable, stdin, stdout, stderr, preexec_fn, close_fds, shell, cwd, env, universal_newlines, startupinfo, creationflags, restore_signals, start_new_session, pass_fds, user, group, extra_groups, encoding, errors, text, umask, pipesize, process_group)</span>
+<span class="ansi-green-fg">   1023</span>             <span style="color: rgb(0,135,0)">self</span>.stderr = io.TextIOWrapper(<span style="color: rgb(0,135,0)">self</span>.stderr,
+<span class="ansi-green-fg">   1024</span>                     encoding=encoding, errors=errors)
+<span class="ansi-green-fg">-&gt; </span><span class="ansi-green-fg">1026</span>     <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">_execute_child</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">args</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">executable</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">preexec_fn</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">close_fds</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">   1027</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">pass_fds</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">cwd</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">env</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">   1028</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">startupinfo</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">creationflags</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">shell</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">   1029</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">p2cread</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">p2cwrite</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">   1030</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">c2pread</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">c2pwrite</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">   1031</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">errread</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">errwrite</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">   1032</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">restore_signals</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">   1033</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">gid</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">gids</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">uid</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">umask</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">   1034</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">start_new_session</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">process_group</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">   1035</span> <span class="ansi-bold" style="color: rgb(0,135,0)">except</span>:
+<span class="ansi-green-fg">   1036</span>     <span style="color: rgb(95,135,135)"># Cleanup if the child failed starting.</span>
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/subprocess.py:1955</span>, in <span class="ansi-cyan-fg">Popen._execute_child</span><span class="ansi-blue-fg">(self, args, executable, preexec_fn, close_fds, pass_fds, cwd, env, startupinfo, creationflags, shell, p2cread, p2cwrite, c2pread, c2pwrite, errread, errwrite, restore_signals, gid, gids, uid, umask, start_new_session, process_group)</span>
+<span class="ansi-green-fg">   1954</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> err_filename <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>:
+<span class="ansi-green-fg">-&gt; </span><span class="ansi-green-fg">1955</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> child_exception_type(errno_num, err_msg, err_filename)
+<span class="ansi-green-fg">   1956</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span>:
+
+<span class="ansi-red-fg">FileNotFoundError</span>: [Errno 2] No such file or directory: PosixPath(&#39;dot&#39;)
+
+The above exception was the direct cause of the following exception:
+
+<span class="ansi-red-fg">ExecutableNotFound</span>                        Traceback (most recent call last)
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/IPython/core/formatters.py:1036</span>, in <span class="ansi-cyan-fg">MimeBundleFormatter.__call__</span><span class="ansi-blue-fg">(self, obj, include, exclude)</span>
+<span class="ansi-green-fg">   1033</span>     method = get_real_method(obj, <span style="color: rgb(0,135,0)">self</span>.print_method)
+<span class="ansi-green-fg">   1035</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> method <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>:
+<span class="ansi-green-fg">-&gt; </span><span class="ansi-green-fg">1036</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg">method</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">include</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">include</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">exclude</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">exclude</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">   1037</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>
+<span class="ansi-green-fg">   1038</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span>:
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/jupyter_integration.py:98</span>, in <span class="ansi-cyan-fg">JupyterIntegration._repr_mimebundle_</span><span class="ansi-blue-fg">(self, include, exclude, **_)</span>
+<span class="ansi-green-fg">     96</span> include = <span style="color: rgb(0,135,0)">set</span>(include) <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> include <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span> {<span style="color: rgb(0,135,0)">self</span>._jupyter_mimetype}
+<span class="ansi-green-fg">     97</span> include -= <span style="color: rgb(0,135,0)">set</span>(exclude <span class="ansi-bold" style="color: rgb(175,0,255)">or</span> [])
+<span class="ansi-green-fg">---&gt; </span><span class="ansi-green-fg">98</span> <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg">{</span><span class="ansi-yellow-bg">mimetype</span><span class="ansi-yellow-bg">:</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">getattr</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">method_name</span><span class="ansi-yellow-bg">)</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">     99</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(0,135,0)">for</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">mimetype</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">method_name</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(175,0,255)">in</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">MIME_TYPES</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">items</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">    100</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(0,135,0)">if</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">mimetype</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(175,0,255)">in</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">include</span><span class="ansi-yellow-bg">}</span>
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/jupyter_integration.py:98</span>, in <span class="ansi-cyan-fg">&lt;dictcomp&gt;</span><span class="ansi-blue-fg">(.0)</span>
+<span class="ansi-green-fg">     96</span> include = <span style="color: rgb(0,135,0)">set</span>(include) <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> include <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span> {<span style="color: rgb(0,135,0)">self</span>._jupyter_mimetype}
+<span class="ansi-green-fg">     97</span> include -= <span style="color: rgb(0,135,0)">set</span>(exclude <span class="ansi-bold" style="color: rgb(175,0,255)">or</span> [])
+<span class="ansi-green-fg">---&gt; </span><span class="ansi-green-fg">98</span> <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> {mimetype: <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">getattr</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">method_name</span><span class="ansi-yellow-bg">)</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">     99</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">for</span> mimetype, method_name <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> MIME_TYPES.items()
+<span class="ansi-green-fg">    100</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> mimetype <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> include}
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/jupyter_integration.py:112</span>, in <span class="ansi-cyan-fg">JupyterIntegration._repr_image_svg_xml</span><span class="ansi-blue-fg">(self)</span>
+<span class="ansi-green-fg">    110</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-fg">_repr_image_svg_xml</span>(<span style="color: rgb(0,135,0)">self</span>) -&gt; <span style="color: rgb(0,135,0)">str</span>:
+<span class="ansi-green-fg">    111</span> <span style="color: rgb(188,188,188)">    </span><span class="ansi-yellow-fg">&#34;&#34;&#34;Return the rendered graph as SVG string.&#34;&#34;&#34;</span>
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">112</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">pipe</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">format</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-fg ansi-yellow-bg">&#39;</span><span class="ansi-yellow-fg ansi-yellow-bg">svg</span><span class="ansi-yellow-fg ansi-yellow-bg">&#39;</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">encoding</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">SVG_ENCODING</span><span class="ansi-yellow-bg">)</span>
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/piping.py:104</span>, in <span class="ansi-cyan-fg">Pipe.pipe</span><span class="ansi-blue-fg">(self, format, renderer, formatter, neato_no_op, quiet, engine, encoding)</span>
+<span class="ansi-green-fg">     55</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-fg">pipe</span>(<span style="color: rgb(0,135,0)">self</span>,
+<span class="ansi-green-fg">     56</span>          <span style="color: rgb(0,135,0)">format</span>: typing.Optional[<span style="color: rgb(0,135,0)">str</span>] = <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>,
+<span class="ansi-green-fg">     57</span>          renderer: typing.Optional[<span style="color: rgb(0,135,0)">str</span>] = <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>,
+<span class="ansi-green-fg">   (...)</span><span class="ansi-green-fg">     61</span>          engine: typing.Optional[<span style="color: rgb(0,135,0)">str</span>] = <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>,
+<span class="ansi-green-fg">     62</span>          encoding: typing.Optional[<span style="color: rgb(0,135,0)">str</span>] = <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>) -&gt; typing.Union[<span style="color: rgb(0,135,0)">bytes</span>, <span style="color: rgb(0,135,0)">str</span>]:
+<span class="ansi-green-fg">     63</span> <span style="color: rgb(188,188,188)">    </span><span class="ansi-yellow-fg">&#34;&#34;&#34;Return the source piped through the Graphviz layout command.</span>
+<span class="ansi-green-fg">     64</span>
+<span class="ansi-green-fg">     65</span> <span class="ansi-yellow-fg">    Args:</span>
+<span class="ansi-green-fg">   (...)</span><span class="ansi-green-fg">    102</span> <span class="ansi-yellow-fg">        &#39;&lt;?xml version=&#39;</span>
+<span class="ansi-green-fg">    103</span> <span class="ansi-yellow-fg">    &#34;&#34;&#34;</span>
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">104</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">_pipe_legacy</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">format</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    105</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">renderer</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">renderer</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    106</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">formatter</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">formatter</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    107</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">neato_no_op</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">neato_no_op</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    108</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">quiet</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">quiet</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    109</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">engine</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">engine</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    110</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">encoding</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">encoding</span><span class="ansi-yellow-bg">)</span>
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/_tools.py:185</span>, in <span class="ansi-cyan-fg">deprecate_positional_args.&lt;locals&gt;.decorator.&lt;locals&gt;.wrapper</span><span class="ansi-blue-fg">(*args, **kwargs)</span>
+<span class="ansi-green-fg">    177</span>     wanted = <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">, </span><span class="ansi-yellow-fg">&#39;</span>.join(<span class="ansi-yellow-fg">f</span><span class="ansi-yellow-fg">&#39;</span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>name<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-fg">=</span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>value<span class="ansi-bold" style="color: rgb(175,95,135)">!r}</span><span class="ansi-yellow-fg">&#39;</span>
+<span class="ansi-green-fg">    178</span>                        <span class="ansi-bold" style="color: rgb(0,135,0)">for</span> name, value <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> deprecated.items())
+<span class="ansi-green-fg">    179</span>     warnings.warn(<span class="ansi-yellow-fg">f</span><span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">The signature of </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>func_name<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-fg"> will be reduced</span><span class="ansi-yellow-fg">&#39;</span>
+<span class="ansi-green-fg">    180</span>                   <span class="ansi-yellow-fg">f</span><span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg"> to </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>supported_number<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-fg"> positional arg</span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>s_<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>qualification<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-fg">&#39;</span>
+<span class="ansi-green-fg">    181</span>                   <span class="ansi-yellow-fg">f</span><span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg"> </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span><span style="color: rgb(0,135,0)">list</span>(supported)<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-fg">: pass </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>wanted<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-fg"> as keyword arg</span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>s_<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-fg">&#39;</span>,
+<span class="ansi-green-fg">    182</span>                   stacklevel=stacklevel,
+<span class="ansi-green-fg">    183</span>                   category=category)
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">185</span> <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg">func</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">args</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">)</span>
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/piping.py:121</span>, in <span class="ansi-cyan-fg">Pipe._pipe_legacy</span><span class="ansi-blue-fg">(self, format, renderer, formatter, neato_no_op, quiet, engine, encoding)</span>
+<span class="ansi-green-fg">    112</span> <span style="color: rgb(175,0,255)">@_tools</span>.deprecate_positional_args(supported_number=<span class="ansi-green-fg">1</span>, ignore_arg=<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">self</span><span class="ansi-yellow-fg">&#39;</span>)
+<span class="ansi-green-fg">    113</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-fg">_pipe_legacy</span>(<span style="color: rgb(0,135,0)">self</span>,
+<span class="ansi-green-fg">    114</span>                  <span style="color: rgb(0,135,0)">format</span>: typing.Optional[<span style="color: rgb(0,135,0)">str</span>] = <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>,
+<span class="ansi-green-fg">   (...)</span><span class="ansi-green-fg">    119</span>                  engine: typing.Optional[<span style="color: rgb(0,135,0)">str</span>] = <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>,
+<span class="ansi-green-fg">    120</span>                  encoding: typing.Optional[<span style="color: rgb(0,135,0)">str</span>] = <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>) -&gt; typing.Union[<span style="color: rgb(0,135,0)">bytes</span>, <span style="color: rgb(0,135,0)">str</span>]:
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">121</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">_pipe_future</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">format</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    122</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">renderer</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">renderer</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    123</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">formatter</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">formatter</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    124</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">neato_no_op</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">neato_no_op</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    125</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">quiet</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">quiet</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    126</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">engine</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">engine</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">    127</span> <span class="ansi-yellow-bg">                             </span><span class="ansi-yellow-bg">encoding</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">encoding</span><span class="ansi-yellow-bg">)</span>
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/piping.py:149</span>, in <span class="ansi-cyan-fg">Pipe._pipe_future</span><span class="ansi-blue-fg">(self, format, renderer, formatter, neato_no_op, quiet, engine, encoding)</span>
+<span class="ansi-green-fg">    146</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> encoding <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>:
+<span class="ansi-green-fg">    147</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> codecs.lookup(encoding) <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> codecs.lookup(<span style="color: rgb(0,135,0)">self</span>.encoding):
+<span class="ansi-green-fg">    148</span>         <span style="color: rgb(95,135,135)"># common case: both stdin and stdout need the same encoding</span>
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">149</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">_pipe_lines_string</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">args</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">encoding</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">encoding</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">    150</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">try</span>:
+<span class="ansi-green-fg">    151</span>         raw = <span style="color: rgb(0,135,0)">self</span>._pipe_lines(*args, input_encoding=<span style="color: rgb(0,135,0)">self</span>.encoding, **kwargs)
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/backend/piping.py:212</span>, in <span class="ansi-cyan-fg">pipe_lines_string</span><span class="ansi-blue-fg">(engine, format, input_lines, encoding, renderer, formatter, neato_no_op, quiet)</span>
+<span class="ansi-green-fg">    206</span> cmd = dot_command.command(engine, <span style="color: rgb(0,135,0)">format</span>,
+<span class="ansi-green-fg">    207</span>                           renderer=renderer,
+<span class="ansi-green-fg">    208</span>                           formatter=formatter,
+<span class="ansi-green-fg">    209</span>                           neato_no_op=neato_no_op)
+<span class="ansi-green-fg">    210</span> kwargs = {<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">input_lines</span><span class="ansi-yellow-fg">&#39;</span>: input_lines, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">encoding</span><span class="ansi-yellow-fg">&#39;</span>: encoding}
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">212</span> proc = <span class="ansi-yellow-bg">execute</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">run_check</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">cmd</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">capture_output</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(0,135,0)">True</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">quiet</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">quiet</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">    213</span> <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> proc.stdout
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/graphviz/backend/execute.py:81</span>, in <span class="ansi-cyan-fg">run_check</span><span class="ansi-blue-fg">(cmd, input_lines, encoding, quiet, **kwargs)</span>
+<span class="ansi-green-fg">     79</span> <span class="ansi-bold" style="color: rgb(0,135,0)">except</span> <span class="ansi-bold" style="color: rgb(215,95,95)">OSError</span> <span class="ansi-bold" style="color: rgb(0,135,0)">as</span> e:
+<span class="ansi-green-fg">     80</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> e.errno == errno.ENOENT:
+<span class="ansi-green-fg">---&gt; </span><span class="ansi-green-fg">81</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> ExecutableNotFound(cmd) <span class="ansi-bold" style="color: rgb(0,135,0)">from</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-intense-fg ansi-bold">e</span>
+<span class="ansi-green-fg">     82</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span>
+<span class="ansi-green-fg">     84</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> quiet <span class="ansi-bold" style="color: rgb(175,0,255)">and</span> proc.stderr:
+
+<span class="ansi-red-fg">ExecutableNotFound</span>: failed to execute PosixPath(&#39;dot&#39;), make sure the Graphviz executables are on your systems&#39; PATH
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;graphviz.graphs.Digraph at 0x7f88b8be9690&gt;
+</pre></div></div>
+</div>
+<section id="Visualize-the-time-of-flight-lookup-table">
+<h4>Visualize the time-of-flight lookup table<a class="headerlink" href="#Visualize-the-time-of-flight-lookup-table" title="Link to this heading">#</a></h4>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">table</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">time_of_flight</span><span class="o">.</span><span class="n">TimeOfFlightLookupTable</span><span class="p">)</span>
+<span class="n">table</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tbl_tbl-data-reduction_11_0.svg" src="../_images/tbl_tbl-data-reduction_11_0.svg" />
+</div>
+</div>
+</section>
+<section id="Results">
+<h4>Results<a class="headerlink" href="#Results" title="Link to this heading">#</a></h4>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ngem_tofs</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">TofDetector</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">])</span>
+<span class="n">ngem_wavs</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">WavelengthDetector</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">])</span>
+
+<span class="n">ngem_tofs</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">tof</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span> <span class="o">+</span> <span class="n">ngem_wavs</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">wavelength</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">UnsatisfiedRequirement</span>                    Traceback (most recent call last)
+<span class="ansi-cyan-fg">Cell</span><span class="ansi-cyan-fg"> </span><span class="ansi-green-fg">In[8]</span><span class="ansi-green-fg">, line 1</span>
+<span class="ansi-green-fg">----&gt; </span><span class="ansi-green-fg">1</span> ngem_tofs = <span class="ansi-yellow-bg">wf</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">compute</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">TofDetector</span><span class="ansi-yellow-bg">[</span><span class="ansi-yellow-bg">SampleRun</span><span class="ansi-yellow-bg">]</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">      2</span> ngem_wavs = wf.compute(WavelengthDetector[SampleRun])
+<span class="ansi-green-fg">      4</span> ngem_tofs.bins.concat().hist(tof=<span class="ansi-green-fg">100</span>).plot() + ngem_wavs.bins.concat().hist(wavelength=<span class="ansi-green-fg">100</span>).plot()
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/sciline/pipeline.py:191</span>, in <span class="ansi-cyan-fg">Pipeline.compute</span><span class="ansi-blue-fg">(self, tp, reporter, **kwargs)</span>
+<span class="ansi-green-fg">    170</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-fg">compute</span>(
+<span class="ansi-green-fg">    171</span>     <span style="color: rgb(0,135,0)">self</span>,
+<span class="ansi-green-fg">    172</span>     tp: <span style="color: rgb(0,135,0)">type</span> | Iterable[<span style="color: rgb(0,135,0)">type</span>] | <span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">UnionType</span><span class="ansi-yellow-fg">&#34;</span>,  <span style="color: rgb(95,135,135)"># noqa: UP037 (needed by Sphinx)</span>
+<span class="ansi-green-fg">    173</span>     reporter: Reporter | <span class="ansi-bold" style="color: rgb(0,135,0)">None</span> = <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>,
+<span class="ansi-green-fg">    174</span>     **kwargs: Any,
+<span class="ansi-green-fg">    175</span> ) -&gt; Any:
+<span class="ansi-green-fg">    176</span> <span style="color: rgb(188,188,188)">    </span><span class="ansi-yellow-fg">&#34;&#34;&#34;</span>
+<span class="ansi-green-fg">    177</span> <span class="ansi-yellow-fg">    Compute result for the given keys.</span>
+<span class="ansi-green-fg">    178</span>
+<span class="ansi-green-fg">   (...)</span><span class="ansi-green-fg">    189</span> <span class="ansi-yellow-fg">        Keyword arguments passed to the ``.get()`` method.</span>
+<span class="ansi-green-fg">    190</span> <span class="ansi-yellow-fg">    &#34;&#34;&#34;</span>
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">191</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">get</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">tp</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">)</span>.compute(reporter=reporter)
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/sciline/pipeline.py:281</span>, in <span class="ansi-cyan-fg">Pipeline.get</span><span class="ansi-blue-fg">(self, keys, scheduler, handler, max_depth)</span>
+<span class="ansi-green-fg">    278</span>         info = <span class="ansi-yellow-fg">f</span><span class="ansi-yellow-fg">&#39;</span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>e<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-fg"> Requested node not in graph. Did you mean one of: </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>nodes<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-fg">?</span><span class="ansi-yellow-fg">&#39;</span>
+<span class="ansi-green-fg">    279</span>     <span style="color: rgb(95,135,135)"># Not raising `from e` because that includes noisy traceback of internals,</span>
+<span class="ansi-green-fg">    280</span>     <span style="color: rgb(95,135,135)"># which are not relevant to the user.</span>
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">281</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> <span style="color: rgb(0,135,0)">type</span>(e)(<span class="ansi-yellow-fg">f</span><span class="ansi-yellow-fg">&#39;</span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>info<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-bold" style="color: rgb(175,95,0)">\n</span><span class="ansi-bold" style="color: rgb(175,95,0)">\n</span><span class="ansi-yellow-fg">&#39;</span>) <span class="ansi-bold" style="color: rgb(0,135,0)">from</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-bold" style="color: rgb(0,135,0)">None</span>
+<span class="ansi-green-fg">    282</span> <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> TaskGraph(
+<span class="ansi-green-fg">    283</span>     graph=graph,
+<span class="ansi-green-fg">    284</span>     targets=targets <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> multi <span class="ansi-bold" style="color: rgb(0,135,0)">else</span> keys,  <span style="color: rgb(95,135,135)"># type: ignore[arg-type]</span>
+<span class="ansi-green-fg">    285</span>     scheduler=scheduler,
+<span class="ansi-green-fg">    286</span> )
+
+<span class="ansi-red-fg">UnsatisfiedRequirement</span>: Missing input node &#39;LookupTableRelativeErrorThreshold&#39;. Affects requested targets (via providers given in parentheses):
+1. LookupTableRelativeErrorThreshold → (ess.reduce.time_of_flight.eto_to_tof.mask_large_uncertainty_in_lut_detector) → ErrorLimitedTofLookupTable[NXdetector] → (ess.reduce.time_of_flight.eto_to_tof.detector_time_of_flight_data) → TofDetector[SampleRun]
+
+
+</pre></div></div>
+</div>
+</section>
+</section>
+</section>
+<section id="He3-detector-data">
+<h2>He3 detector data<a class="headerlink" href="#He3-detector-data" title="Link to this heading">#</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">he3_wf</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+<span class="n">he3</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">for</span> <span class="n">bank</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;he3_detector_bank0&#39;</span><span class="p">,</span> <span class="s1">&#39;he3_detector_bank1&#39;</span><span class="p">):</span>
+    <span class="n">he3_wf</span><span class="p">[</span><span class="n">NeXusDetectorName</span><span class="p">]</span> <span class="o">=</span> <span class="n">bank</span>
+    <span class="n">he3</span><span class="p">[</span><span class="n">bank</span><span class="p">]</span> <span class="o">=</span> <span class="n">he3_wf</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">RawDetector</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lims</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;vmin&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;vmax&#39;</span><span class="p">:</span> <span class="mi">4500</span><span class="p">}</span>
+
+<span class="n">he3</span><span class="p">[</span><span class="s1">&#39;he3_detector_bank0&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">hist</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;he3_bank0&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">lims</span><span class="p">)</span> <span class="o">+</span> <span class="n">he3</span><span class="p">[</span><span class="s1">&#39;he3_detector_bank1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">hist</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;he3_bank1&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">lims</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tbl_tbl-data-reduction_16_0.svg" src="../_images/tbl_tbl-data-reduction_16_0.svg" />
+</div>
+</div>
+<section id="id1">
+<h3>Time-of-flight<a class="headerlink" href="#id1" title="Link to this heading">#</a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">he3_tofs</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">he3_wavs</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="k">for</span> <span class="n">bank</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;he3_detector_bank0&#39;</span><span class="p">,</span> <span class="s1">&#39;he3_detector_bank1&#39;</span><span class="p">):</span>
+    <span class="n">he3_wf</span><span class="p">[</span><span class="n">NeXusDetectorName</span><span class="p">]</span> <span class="o">=</span> <span class="n">bank</span>
+    <span class="n">he3_tofs</span><span class="p">[</span><span class="n">bank</span><span class="p">]</span> <span class="o">=</span> <span class="n">he3_wf</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">TofDetector</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">])</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">tof</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">he3_wavs</span><span class="p">[</span><span class="n">bank</span><span class="p">]</span> <span class="o">=</span> <span class="n">he3_wf</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">WavelengthDetector</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">])</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">concat</span><span class="p">()</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">wavelength</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+
+<span class="n">pp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">he3_tofs</span><span class="p">)</span> <span class="o">+</span> <span class="n">pp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">he3_wavs</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">UnsatisfiedRequirement</span>                    Traceback (most recent call last)
+<span class="ansi-cyan-fg">Cell</span><span class="ansi-cyan-fg"> </span><span class="ansi-green-fg">In[11]</span><span class="ansi-green-fg">, line 6</span>
+<span class="ansi-green-fg">      4</span> <span class="ansi-bold" style="color: rgb(0,135,0)">for</span> bank <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> (<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">he3_detector_bank0</span><span class="ansi-yellow-fg">&#39;</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">he3_detector_bank1</span><span class="ansi-yellow-fg">&#39;</span>):
+<span class="ansi-green-fg">      5</span>     he3_wf[NeXusDetectorName] = bank
+<span class="ansi-green-fg">----&gt; </span><span class="ansi-green-fg">6</span>     he3_tofs[bank] = <span class="ansi-yellow-bg">he3_wf</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">compute</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">TofDetector</span><span class="ansi-yellow-bg">[</span><span class="ansi-yellow-bg">SampleRun</span><span class="ansi-yellow-bg">]</span><span class="ansi-yellow-bg">)</span>.bins.concat().hist(tof=<span class="ansi-green-fg">100</span>)
+<span class="ansi-green-fg">      7</span>     he3_wavs[bank] = he3_wf.compute(WavelengthDetector[SampleRun]).bins.concat().hist(wavelength=<span class="ansi-green-fg">100</span>)
+<span class="ansi-green-fg">      9</span> pp.plot(he3_tofs) + pp.plot(he3_wavs)
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/sciline/pipeline.py:191</span>, in <span class="ansi-cyan-fg">Pipeline.compute</span><span class="ansi-blue-fg">(self, tp, reporter, **kwargs)</span>
+<span class="ansi-green-fg">    170</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-fg">compute</span>(
+<span class="ansi-green-fg">    171</span>     <span style="color: rgb(0,135,0)">self</span>,
+<span class="ansi-green-fg">    172</span>     tp: <span style="color: rgb(0,135,0)">type</span> | Iterable[<span style="color: rgb(0,135,0)">type</span>] | <span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">UnionType</span><span class="ansi-yellow-fg">&#34;</span>,  <span style="color: rgb(95,135,135)"># noqa: UP037 (needed by Sphinx)</span>
+<span class="ansi-green-fg">    173</span>     reporter: Reporter | <span class="ansi-bold" style="color: rgb(0,135,0)">None</span> = <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>,
+<span class="ansi-green-fg">    174</span>     **kwargs: Any,
+<span class="ansi-green-fg">    175</span> ) -&gt; Any:
+<span class="ansi-green-fg">    176</span> <span style="color: rgb(188,188,188)">    </span><span class="ansi-yellow-fg">&#34;&#34;&#34;</span>
+<span class="ansi-green-fg">    177</span> <span class="ansi-yellow-fg">    Compute result for the given keys.</span>
+<span class="ansi-green-fg">    178</span>
+<span class="ansi-green-fg">   (...)</span><span class="ansi-green-fg">    189</span> <span class="ansi-yellow-fg">        Keyword arguments passed to the ``.get()`` method.</span>
+<span class="ansi-green-fg">    190</span> <span class="ansi-yellow-fg">    &#34;&#34;&#34;</span>
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">191</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">get</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">tp</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">*</span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">)</span>.compute(reporter=reporter)
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/ess/ess/.pixi/envs/docs-essimaging/lib/python3.11/site-packages/sciline/pipeline.py:281</span>, in <span class="ansi-cyan-fg">Pipeline.get</span><span class="ansi-blue-fg">(self, keys, scheduler, handler, max_depth)</span>
+<span class="ansi-green-fg">    278</span>         info = <span class="ansi-yellow-fg">f</span><span class="ansi-yellow-fg">&#39;</span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>e<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-fg"> Requested node not in graph. Did you mean one of: </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>nodes<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-fg">?</span><span class="ansi-yellow-fg">&#39;</span>
+<span class="ansi-green-fg">    279</span>     <span style="color: rgb(95,135,135)"># Not raising `from e` because that includes noisy traceback of internals,</span>
+<span class="ansi-green-fg">    280</span>     <span style="color: rgb(95,135,135)"># which are not relevant to the user.</span>
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">281</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> <span style="color: rgb(0,135,0)">type</span>(e)(<span class="ansi-yellow-fg">f</span><span class="ansi-yellow-fg">&#39;</span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>info<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-bold" style="color: rgb(175,95,0)">\n</span><span class="ansi-bold" style="color: rgb(175,95,0)">\n</span><span class="ansi-yellow-fg">&#39;</span>) <span class="ansi-bold" style="color: rgb(0,135,0)">from</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-bold" style="color: rgb(0,135,0)">None</span>
+<span class="ansi-green-fg">    282</span> <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> TaskGraph(
+<span class="ansi-green-fg">    283</span>     graph=graph,
+<span class="ansi-green-fg">    284</span>     targets=targets <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> multi <span class="ansi-bold" style="color: rgb(0,135,0)">else</span> keys,  <span style="color: rgb(95,135,135)"># type: ignore[arg-type]</span>
+<span class="ansi-green-fg">    285</span>     scheduler=scheduler,
+<span class="ansi-green-fg">    286</span> )
+
+<span class="ansi-red-fg">UnsatisfiedRequirement</span>: Missing input node &#39;LookupTableRelativeErrorThreshold&#39;. Affects requested targets (via providers given in parentheses):
+1. LookupTableRelativeErrorThreshold → (ess.reduce.time_of_flight.eto_to_tof.mask_large_uncertainty_in_lut_detector) → ErrorLimitedTofLookupTable[NXdetector] → (ess.reduce.time_of_flight.eto_to_tof.detector_time_of_flight_data) → TofDetector[SampleRun]
+
+
+</pre></div></div>
+</div>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Test beamline</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="orca-image-normalization.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">TBL: Orca image normalization workflow</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025 Scipp contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><!-- This will display the version of the docs -->
+Current ESSimaging version: 0.1.dev1609+g2ad6cc133 (<a href="https://github.com/scipp/essimaging/releases">older versions</a>).</div>
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

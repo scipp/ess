@@ -1,0 +1,972 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ess.ymir.normalize &#8212; ESSimaging</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../../_static/documentation_options.js?v=e92c9768"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ess/ymir/normalize';</script>
+    <script src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <link rel="icon" href="../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1.dev1609+g2ad6cc133" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/logo.svg" class="logo__image only-light" alt="ESSimaging - Home"/>
+    <img src="../../../_static/logo-dark.svg" class="logo__image only-dark pst-js-only" alt="ESSimaging - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../odin/index.html">
+    Odin
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../tbl/index.html">
+    Test beamline
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../ymir/index.html">
+    Ymir
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../tools/index.html">
+    Tools
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../about/index.html">
+    About
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essreduce">
+    Essreduce
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scitiff">
+    Scitiff
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/tof">
+    Tof
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/essimaging" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essimaging/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essimaging" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp" title="Scipp" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../../_static/favicon.ico" class="icon-link-image" alt="Scipp"/></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../odin/index.html">
+    Odin
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../tbl/index.html">
+    Test beamline
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../ymir/index.html">
+    Ymir
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../tools/index.html">
+    Tools
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../about/index.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/essreduce">
+    Essreduce
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scitiff">
+    Scitiff
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/tof">
+    Tof
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/essimaging" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essimaging/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essimaging" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp" title="Scipp" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../../_static/favicon.ico" class="icon-link-image" alt="Scipp"/></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ess.ymir.normalize</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for ess.ymir.normalize</h1><div class="highlight"><pre>
+<span></span><span class="c1"># SPDX-License-Identifier: BSD-3-Clause</span>
+<span class="c1"># Copyright (c) 2024 Scipp contributors (https://github.com/scipp)</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NewType</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.io</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">TIME_COORD_NAME</span><span class="p">,</span>
+    <span class="n">DarkCurrentImageStacks</span><span class="p">,</span>
+    <span class="n">OpenBeamImageStacks</span><span class="p">,</span>
+    <span class="n">SampleImageStacksWithLogs</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">AverageBackgroundPixelCounts</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;AverageBackgroundPixelCounts&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;mean(background).&quot;&quot;&quot;</span>
+<span class="n">AverageSamplePixelCounts</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;AverageSamplePixelCounts&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;mean(sample).&quot;&quot;&quot;</span>
+<span class="n">ScaleFactor</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;ScaleFactor&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;AverageBackgroundPixelCounts / AverageSamplePixelCounts.&quot;&quot;&quot;</span>
+
+<span class="n">OpenBeamImage</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;OpenBeamImage&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Open beam image. mean(OpenBeam)&quot;&quot;&quot;</span>
+<span class="n">DarkCurrentImage</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;DarkCurrentImage&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Dark current image. mean(DarkCurrentImages)&quot;&quot;&quot;</span>
+<span class="n">CleansedOpenBeamImage</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;CleansedOpenBeamImage&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;OpenBeam - DarkCrrent&quot;&quot;&quot;</span>
+<span class="n">CleansedSampleImages</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;CleansedSampleImages&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;SampleImageStack - DarkCurrent&quot;&quot;&quot;</span>
+<span class="n">SampleImageStacks</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;SampleImageStacks&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Sample image stack ready to be used for normalization.&quot;&quot;&quot;</span>
+<span class="n">BackgroundImage</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;BackgroundImage&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Background image ready to be used for normalization.&quot;&quot;&quot;</span>
+<span class="n">NormalizedSampleImages</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;NormalizedSampleImages&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Normalized sample image stack. SampleImages / Background * ScaleFactor&quot;&quot;&quot;</span>
+
+
+<span class="n">BackgroundPixelThreshold</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;BackgroundPixelThreshold&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Threshold of the background pixel values.&quot;&quot;&quot;</span>
+<span class="n">SamplePixelThreshold</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;SamplePixelThreshold&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Threshold of the sample pixel values.&quot;&quot;&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_warn_constant_exposure_time</span><span class="p">(</span><span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">warning_message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Computing </span><span class="si">{</span><span class="n">target</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2"> assuming constant exposure time.&quot;</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">warning_message</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_mean_all_dims</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the mean of all dimensions one by one to avoid overflow.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">():</span>  <span class="c1"># scalar</span>
+        <span class="k">return</span> <span class="n">data</span>
+    <span class="k">return</span> <span class="n">_mean_all_dims</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">dims</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+
+<div class="viewcode-block" id="average_open_beam_images">
+<a class="viewcode-back" href="../../../generated/modules/ess.ymir.normalize.average_open_beam_images.html#ess.ymir.normalize.average_open_beam_images">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">average_open_beam_images</span><span class="p">(</span><span class="n">open_beam</span><span class="p">:</span> <span class="n">OpenBeamImageStacks</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OpenBeamImage</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Average the open beam image stack.</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        OpenBeam = mean(OpenBeam, dim=\\text{&#39;time&#39;})</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_warn_constant_exposure_time</span><span class="p">(</span><span class="s2">&quot;average open beam image&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">OpenBeamImage</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">open_beam</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">TIME_COORD_NAME</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="average_dark_current_images">
+<a class="viewcode-back" href="../../../generated/modules/ess.ymir.normalize.average_dark_current_images.html#ess.ymir.normalize.average_dark_current_images">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">average_dark_current_images</span><span class="p">(</span>
+    <span class="n">dark_current</span><span class="p">:</span> <span class="n">DarkCurrentImageStacks</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DarkCurrentImage</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Average the dark current image stack.</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        DarkCurrent = mean(DarkCurrent, dim=\\text{&#39;time&#39;})</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_warn_constant_exposure_time</span><span class="p">(</span><span class="s2">&quot;average dark current image&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">DarkCurrentImage</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dark_current</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">TIME_COORD_NAME</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="cleanse_open_beam_image">
+<a class="viewcode-back" href="../../../generated/modules/ess.ymir.normalize.cleanse_open_beam_image.html#ess.ymir.normalize.cleanse_open_beam_image">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cleanse_open_beam_image</span><span class="p">(</span>
+    <span class="n">open_beam</span><span class="p">:</span> <span class="n">OpenBeamImage</span><span class="p">,</span> <span class="n">dark_current</span><span class="p">:</span> <span class="n">DarkCurrentImage</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CleansedOpenBeamImage</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the background image stack.</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        Background = OpenBeam - DarkCurrent</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    open_beam:</span>
+<span class="sd">        Open beam image.</span>
+
+<span class="sd">    dark_current:</span>
+<span class="sd">        Dark current image.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">CleansedOpenBeamImage</span><span class="p">(</span><span class="n">open_beam</span> <span class="o">-</span> <span class="n">dark_current</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="cleanse_sample_images">
+<a class="viewcode-back" href="../../../generated/modules/ess.ymir.normalize.cleanse_sample_images.html#ess.ymir.normalize.cleanse_sample_images">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cleanse_sample_images</span><span class="p">(</span>
+    <span class="n">sample_images</span><span class="p">:</span> <span class="n">SampleImageStacksWithLogs</span><span class="p">,</span> <span class="n">dark_current</span><span class="p">:</span> <span class="n">DarkCurrentImage</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CleansedSampleImages</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Cleanse the sample image stack.</span>
+
+<span class="sd">    We subtract the averaged dark current image from the sample image stack.</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        CleansedSample_{i} = Sample_{i} - mean(DarkCurrent, dim=\\text{&#39;time&#39;})</span>
+
+<span class="sd">        \\text{where } i \\text{ is an index of an image.}</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ------</span>
+<span class="sd">    sample_images:</span>
+<span class="sd">        Sample image stack.</span>
+
+<span class="sd">    dark_current:</span>
+<span class="sd">        Dark current image.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">CleansedSampleImages</span><span class="p">(</span><span class="n">sample_images</span> <span class="o">-</span> <span class="n">dark_current</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="average_background_pixel_counts">
+<a class="viewcode-back" href="../../../generated/modules/ess.ymir.normalize.average_background_pixel_counts.html#ess.ymir.normalize.average_background_pixel_counts">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">average_background_pixel_counts</span><span class="p">(</span>
+    <span class="n">background</span><span class="p">:</span> <span class="n">BackgroundImage</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AverageBackgroundPixelCounts</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the average background pixel counts.&quot;&quot;&quot;</span>
+    <span class="n">_warn_constant_exposure_time</span><span class="p">(</span><span class="s2">&quot;average background pixel counts&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">AverageBackgroundPixelCounts</span><span class="p">(</span><span class="n">background</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span></div>
+
+
+
+<div class="viewcode-block" id="average_sample_pixel_counts">
+<a class="viewcode-back" href="../../../generated/modules/ess.ymir.normalize.average_sample_pixel_counts.html#ess.ymir.normalize.average_sample_pixel_counts">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">average_sample_pixel_counts</span><span class="p">(</span>
+    <span class="n">sample_images</span><span class="p">:</span> <span class="n">SampleImageStacks</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AverageSamplePixelCounts</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the average sample pixel counts.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    For performance reason, we tried calculating</span>
+<span class="sd">    the mean of sample images and dark current images</span>
+<span class="sd">    first and subtract them afterwards,</span>
+<span class="sd">    instead of using the subtracted image stack directly.</span>
+<span class="sd">    It was to utilize that the integer operation is faster than</span>
+<span class="sd">    the floating point operation.</span>
+
+<span class="sd">    However, we are ceiling negative values to zero</span>
+<span class="sd">    after cleansing the sample images with dark current images.</span>
+
+<span class="sd">    Therefore we need to calculate the mean of the cleansed sample images</span>
+<span class="sd">    to avoid negative values in the average calculation.</span>
+
+<span class="sd">    We don&#39;t calculate ``mean(cleansed_sample_images)`` at once</span>
+<span class="sd">    since it is a large array and it may cause memory issues.</span>
+
+<span class="sd">    There was an example of 361 images of 2048x2048 pixels with 32-bit integer data</span>
+<span class="sd">    exceeded the limit of the maximum integer so the average calculation failed</span>
+<span class="sd">    and returned negative values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_warn_constant_exposure_time</span><span class="p">(</span><span class="s2">&quot;average sample pixel counts&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">AverageSamplePixelCounts</span><span class="p">(</span><span class="n">_mean_all_dims</span><span class="p">(</span><span class="n">sample_images</span><span class="o">.</span><span class="n">data</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="calculate_scale_factor">
+<a class="viewcode-back" href="../../../generated/modules/ess.ymir.normalize.calculate_scale_factor.html#ess.ymir.normalize.calculate_scale_factor">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">calculate_scale_factor</span><span class="p">(</span>
+    <span class="n">average_bg</span><span class="p">:</span> <span class="n">AverageBackgroundPixelCounts</span><span class="p">,</span> <span class="n">average_sample</span><span class="p">:</span> <span class="n">AverageSamplePixelCounts</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ScaleFactor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the scale factor from average background and sample pixel counts.</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">            ScaleFactor = AverageBackgroundPixelCounts / AverageSamplePixelCounts</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">ScaleFactor</span><span class="p">(</span><span class="n">average_bg</span> <span class="o">/</span> <span class="n">average_sample</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="apply_threshold_to_sample_images">
+<a class="viewcode-back" href="../../../generated/modules/ess.ymir.normalize.apply_threshold_to_sample_images.html#ess.ymir.normalize.apply_threshold_to_sample_images">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">apply_threshold_to_sample_images</span><span class="p">(</span>
+    <span class="n">samples</span><span class="p">:</span> <span class="n">CleansedSampleImages</span><span class="p">,</span> <span class="n">sample_threshold</span><span class="p">:</span> <span class="n">SamplePixelThreshold</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SampleImageStacks</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply a mask based on the threshold to the sample image stack.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    samples:</span>
+<span class="sd">        Sample image stack.</span>
+
+<span class="sd">    sample_threshold:</span>
+<span class="sd">        Threshold for the sample pixel values.</span>
+<span class="sd">        Any pixel values less than ``sample_threshold`` will be masked.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">SampleImageStacks</span><span class="p">(</span>
+        <span class="n">samples</span><span class="o">.</span><span class="n">assign_masks</span><span class="p">(</span><span class="n">counts</span><span class="o">=</span><span class="n">samples</span><span class="o">.</span><span class="n">data</span> <span class="o">&lt;</span> <span class="n">sample_threshold</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="apply_threshold_to_background_image">
+<a class="viewcode-back" href="../../../generated/modules/ess.ymir.normalize.apply_threshold_to_background_image.html#ess.ymir.normalize.apply_threshold_to_background_image">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">apply_threshold_to_background_image</span><span class="p">(</span>
+    <span class="n">background</span><span class="p">:</span> <span class="n">CleansedOpenBeamImage</span><span class="p">,</span> <span class="n">background_threshold</span><span class="p">:</span> <span class="n">BackgroundPixelThreshold</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BackgroundImage</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply a mask based on the threshold to the background image.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    background:</span>
+<span class="sd">        Background image.</span>
+
+<span class="sd">    background_threshold:</span>
+<span class="sd">        Threshold for the background pixel values.</span>
+<span class="sd">        Any pixel values less than ``background_threshold`` will be masked.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">BackgroundImage</span><span class="p">(</span>
+        <span class="n">background</span><span class="o">.</span><span class="n">assign_masks</span><span class="p">(</span><span class="n">counts</span><span class="o">=</span><span class="n">background</span><span class="o">.</span><span class="n">data</span> <span class="o">&lt;</span> <span class="n">background_threshold</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="normalize_sample_images">
+<a class="viewcode-back" href="../../../generated/modules/ess.ymir.normalize.normalize_sample_images.html#ess.ymir.normalize.normalize_sample_images">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">normalize_sample_images</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span> <span class="n">samples</span><span class="p">:</span> <span class="n">SampleImageStacks</span><span class="p">,</span> <span class="n">background</span><span class="p">:</span> <span class="n">BackgroundImage</span><span class="p">,</span> <span class="n">factor</span><span class="p">:</span> <span class="n">ScaleFactor</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NormalizedSampleImages</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Normalize the sample image stack.</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">            NormalizedImages = SampleImages / Background * ScaleFactor</span>
+
+<span class="sd">    .. note::</span>
+<span class="sd">        `factor` should correct the different neutron flux</span>
+<span class="sd">        between the sample and the background.</span>
+
+<span class="sd">        For example, if the open beam(background) image</span>
+<span class="sd">        is taken with longer exposure time</span>
+<span class="sd">        than the sample image with the same neutron rate,</span>
+<span class="sd">        the scale factor should be larger than 1.</span>
+
+<span class="sd">        The scale factor could be derived from the exposure time,</span>
+<span class="sd">        proton charge or monitor counts depending on the experiment.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    samples:</span>
+<span class="sd">        Sample image stack to be normalized.</span>
+
+<span class="sd">    background:</span>
+<span class="sd">        Background image to be used for normalization.</span>
+
+<span class="sd">    factor:</span>
+<span class="sd">        Scale factor for the normalization.</span>
+
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError:</span>
+<span class="sd">        If the scale factor is negative.</span>
+<span class="sd">        It is for the safety of the calculation on short data type.</span>
+<span class="sd">        Depending on how you calculate the scale factor,</span>
+<span class="sd">        the operation might fail and return negative values.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">factor</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Scale factor must be positive, but got </span><span class="si">{</span><span class="n">factor</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+    <span class="n">_warn_constant_exposure_time</span><span class="p">(</span><span class="s2">&quot;normalized sample image stack&quot;</span><span class="p">)</span>
+    <span class="c1"># For performance reason, background / factor is calculated first.</span>
+    <span class="k">return</span> <span class="n">NormalizedSampleImages</span><span class="p">(</span><span class="n">samples</span> <span class="o">/</span> <span class="p">(</span><span class="n">background</span> <span class="o">/</span> <span class="n">factor</span><span class="p">))</span></div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025 Scipp contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><!-- This will display the version of the docs -->
+Current ESSimaging version: 0.1.dev1609+g2ad6cc133 (<a href="https://github.com/scipp/essimaging/releases">older versions</a>).</div>
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
