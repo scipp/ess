@@ -235,7 +235,9 @@ def assemble_detector_metadata(
         y_pixel_size=y_pixel_size,
         origin_position=origin,
         fast_axis=_normalize_vector(fast_axis_vector),
+        fast_axis_dim=_fast_axis + '_pixel_offset',
         slow_axis=_normalize_vector(slow_axis_vector),
+        slow_axis_dim=_slow_axis + '_pixel_offset',
         distance=distance,
         first_pixel_position=first_pixel_position_from_sample,
     )

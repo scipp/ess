@@ -166,6 +166,7 @@ class NMXDetectorMetadata:
     for each detector number.
 
     """
+    fast_axis_dim: str
     slow_axis: sc.Variable
     """Outer most dimension if the data is sorted by detector number.
 
@@ -177,6 +178,7 @@ class NMXDetectorMetadata:
     for each detector number.
 
     """
+    slow_axis_dim: str
     distance: sc.Variable
     first_pixel_position: sc.Variable
     """First pixel position with respect to the sample.
@@ -194,8 +196,10 @@ class NMXDetectorMetadata:
         snx.create_field(group, 'y_pixel_size', self.y_pixel_size)
         origin = snx.create_field(group, 'origin', self.origin_position)
         origin.attrs['first_pixel_position'] = self.first_pixel_position.values
-        snx.create_field(group, 'fast_axis', self.fast_axis)
-        snx.create_field(group, 'slow_axis', self.slow_axis)
+        fast_axis = snx.create_field(group, 'fast_axis', self.fast_axis)
+        fast_axis.attrs['dim'] = self.fast_axis_dim
+        slow_axis = snx.create_field(group, 'slow_axis', self.slow_axis)
+        slow_axis.attrs['dim'] = self.slow_axis_dim
         snx.create_field(group, 'distance', self.distance)
         snx.create_field(group, 'polar_angle', self.polar_angle)
         snx.create_field(group, 'azimuthal_angle', self.azimuthal_angle)
