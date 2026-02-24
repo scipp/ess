@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ESS Data Reduction</title>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+  <link href="/pagefind/pagefind-ui.css" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #0094ca;
+      --blue: #0099dc;
+      --text: #2c3e50;
+      --muted: #607080;
+      --border: #d8dee6;
+      --bg: #f5f7f9;
+      --white: #ffffff;
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Source Sans 3', sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    header {
+      background: var(--navy);
+      color: var(--white);
+      padding: 3rem 2rem;
+    }
+    header div {
+      max-width: 56rem;
+      margin: 0 auto;
+    }
+    header h1 {
+      font-size: 1.6rem;
+      font-weight: 300;
+      margin-bottom: 0.3rem;
+    }
+    header p {
+      font-size: 0.95rem;
+      font-weight: 300;
+      opacity: 0.8;
+    }
+
+    main {
+      max-width: 56rem;
+      margin: 2.5rem auto;
+      padding: 0 2rem;
+    }
+
+    .search-section {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .search-section label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      margin-bottom: 0.6rem;
+    }
+
+    .label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+      gap: 1rem;
+    }
+
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.5rem;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .card:hover {
+      border-color: var(--blue);
+      box-shadow: 0 2px 8px rgba(0, 33, 69, 0.07);
+    }
+
+    .card-name {
+      font-family: 'Source Code Pro', monospace;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--navy);
+      margin-bottom: 0.35rem;
+    }
+    .card p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    footer {
+      text-align: center;
+      padding: 3rem 2rem;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+    footer a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+    footer a:hover { text-decoration: underline; }
+
+    .pagefind-ui .pagefind-ui__search-input {
+      font-family: 'Source Sans 3', sans-serif !important;
+      border-radius: 4px !important;
+      border: 1px solid var(--border) !important;
+      font-size: 0.92rem !important;
+    }
+    .pagefind-ui .pagefind-ui__search-input:focus {
+      border-color: var(--blue) !important;
+      box-shadow: 0 0 0 2px rgba(0, 153, 220, 0.15) !important;
+      outline: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <h1>ESS Data Reduction</h1>
+      <p>Documentation for neutron scattering data reduction packages</p>
+    </div>
+  </header>
+
+  <main>
+    <div class="search-section">
+      <label>Search all packages</label>
+      <div id="search"></div>
+    </div>
+
+    <div class="label">Packages</div>
+    <div class="cards">
+      <a class="card" href="/essreduce/">
+        <div class="card-name">essreduce</div>
+        <p>Common data reduction tools for the ESS facility</p>
+      </a>
+      <a class="card" href="/essimaging/">
+        <div class="card-name">essimaging</div>
+        <p>Neutron imaging data reduction (ODIN, TBL, YMIR)</p>
+      </a>
+    </div>
+  </main>
+
+  <footer>
+    <a href="https://github.com/scipp/ess">github.com/scipp/ess</a>
+  </footer>
+
+  <script src="/pagefind/pagefind-ui.js"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', function() {
+      new PagefindUI({ element: "#search", showSubResults: true });
+    });
+  </script>
+</body>
+</html>

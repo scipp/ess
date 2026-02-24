@@ -66,8 +66,17 @@ jobs:
           environments: docs-${{ needs.determine-package.outputs.package }}
       - name: Build docs
         run: pixi run -e docs-${{ needs.determine-package.outputs.package }} docs ${{ needs.determine-package.outputs.package }}
+      - name: Prepare site
+        run: |
+          PACKAGE=${{ needs.determine-package.outputs.package }}
+          git fetch origin gh-pages:gh-pages || true
+          git worktree add gh-pages-site gh-pages || mkdir -p gh-pages-site
+          rm -rf gh-pages-site/$PACKAGE
+          cp -r packages/$PACKAGE/html gh-pages-site/$PACKAGE
+          cp docs/index.html gh-pages-site/index.html
+      - name: Build search index
+        run: npx pagefind@latest --site gh-pages-site --bundle-dir pagefind
       - uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
-          folder: packages/${{ needs.determine-package.outputs.package }}/html
-          target-folder: ${{ needs.determine-package.outputs.package }}
+          folder: gh-pages-site

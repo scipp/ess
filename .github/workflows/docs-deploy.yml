@@ -1,0 +1,55 @@
+name: Deploy docs
+
+on:
+  workflow_dispatch:
+
+jobs:
+  docs:
+    name: Build and deploy docs
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    strategy:
+      matrix:
+        package: [essreduce, essimaging]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: prefix-dev/setup-pixi@v0.9.4
+        with:
+          environments: docs-${{ matrix.package }}
+      - name: Build docs
+        run: pixi run -e docs-${{ matrix.package }} docs ${{ matrix.package }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: docs-${{ matrix.package }}
+          path: packages/${{ matrix.package }}/html
+
+  deploy:
+    name: Deploy site
+    needs: docs
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: site
+          pattern: docs-*
+          merge-multiple: false
+      - name: Prepare site
+        run: |
+          mkdir -p gh-pages-site
+          for dir in site/docs-*; do
+            package="${dir#site/docs-}"
+            cp -r "$dir" "gh-pages-site/$package"
+          done
+          cp docs/index.html gh-pages-site/index.html
+      - name: Build search index
+        run: npx pagefind@latest --site gh-pages-site --bundle-dir pagefind
+      - uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: gh-pages-site
