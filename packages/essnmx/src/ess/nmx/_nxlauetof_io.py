@@ -33,8 +33,7 @@ def _as_vector(var: sc.Variable) -> sc.Variable:
         return var
 
 
-def _handle_sample(sample: snx.Group) -> sc.DataGroup:
-    sample_dg = sample[...]
+def _handle_sample(sample_dg: sc.DataGroup, sample: snx.Group) -> sc.DataGroup:
     sample_dg['crystal_rotation'] = _as_vector(sample_dg['crystal_rotation'])
     sample_dg['position'] = _as_vector(sample_dg['position'])
     unit_cell = sample_dg.pop('unit_cell')
@@ -69,6 +68,68 @@ def _handle_source(instrument_dg: sc.DataGroup, instrument: snx.Group) -> sc.Dat
     instrument_dg['source']['position'] = position
 
 
+def _restore_bin_edges(time_midpoints: sc.Variable) -> sc.Variable:
+    left = time_midpoints[:-1]
+    right = time_midpoints[1:]
+    widths = right - left
+    if not bool(sc.allclose(sc.broadcast(widths[0], sizes=widths.sizes), widths)):
+        warnings.warn(
+            "Time coordinate does not have uniform width. Cannot restore bid-edges. "
+            "Keeping midpoint values...",
+            UserWarning,
+            stacklevel=3,
+        )
+        return time_midpoints
+
+    half_width = widths[0] / 2
+    return sc.concat(
+        [time_midpoints - half_width, time_midpoints[-1] + half_width],
+        dim=time_midpoints.dim,
+    )
+
+
+def _restore_positions(
+    *, metadatas: sc.DataGroup, fast_axis_dim: str, slow_axis_dim: str, sizes: dict
+) -> sc.Variable:
+    fast_axis = metadatas['fast_axis']
+    fast_axis_size = sizes[fast_axis_dim]
+    slow_axis = metadatas['slow_axis']
+    slow_axis_size = sizes[slow_axis_dim]
+
+    pixel_sizes = {
+        'x_pixel_offset': metadatas['x_pixel_size'],
+        'y_pixel_offset': metadatas['y_pixel_size'],
+    }
+
+    fast_axis_offsets = (
+        sc.arange(dim=fast_axis_dim, start=0.0, stop=fast_axis_size)
+        * pixel_sizes[fast_axis_dim]
+        * fast_axis
+    )
+    slow_axis_offsets = (
+        sc.arange(dim=slow_axis_dim, start=0.0, stop=slow_axis_size)
+        * pixel_sizes[slow_axis_dim]
+        * slow_axis
+    )
+    # The slow axis should be the outer most dimension.
+    detector_sizes = {slow_axis_dim: slow_axis_size, fast_axis_dim: fast_axis_size}
+
+    pixel_offsets = fast_axis_offsets.broadcast(
+        sizes=detector_sizes
+    ) + slow_axis_offsets.broadcast(sizes=detector_sizes)
+
+    detetor_center = metadatas['origin']
+    slow_axis_width = pixel_sizes[slow_axis_dim] * slow_axis_size
+    fast_axis_width = pixel_sizes[fast_axis_dim] * fast_axis_size
+    detector_corner = (
+        detetor_center
+        - (slow_axis_width / 2) * slow_axis
+        - (fast_axis_width / 2) * fast_axis
+    )
+
+    return pixel_offsets + detector_corner
+
+
 def _handle_detector_data(
     instrument_dg: sc.DataGroup, instrument: snx.Group
 ) -> sc.DataGroup:
@@ -79,12 +140,35 @@ def _handle_detector_data(
         }
     )
     instrument_dg['detectors'] = detectors
-    for det_gr in detectors.values():
+    time_coord_name = next(iter({'tof', 'event_time_offset'} & set(detectors.dims)))
+    time_field_name = (
+        'time_of_flight' if time_coord_name == 'tof' else 'event_time_offset'
+    )
+
+    for det_name, det_gr in detectors.items():
         all_keys = list(filter(lambda key: key != 'data', det_gr.keys()))
         metadatas = sc.DataGroup()
         for key in all_keys:
             metadatas[key] = det_gr.pop(key)
+
+        for vector_field in ('slow_axis', 'fast_axis', 'origin'):
+            metadatas[vector_field] = _as_vector(metadatas[vector_field])
+
         det_gr['metadata'] = metadatas
+        slow_axis_dim = instrument[det_name]['slow_axis'].attrs['dim']
+        fast_axis_dim = instrument[det_name]['fast_axis'].attrs['dim']
+        det_gr['data'] = sc.DataArray(
+            data=det_gr['data'],
+            coords={
+                time_coord_name: _restore_bin_edges(metadatas[time_field_name]),
+                'position': _restore_positions(
+                    metadatas=metadatas,
+                    fast_axis_dim=fast_axis_dim,
+                    slow_axis_dim=slow_axis_dim,
+                    sizes=det_gr['data'].sizes,
+                ),
+            },
+        )
 
 
 def load_essnmx_nxlauetof(file: str | FilePath | NeXusFile) -> sc.DataGroup:
@@ -92,10 +176,8 @@ def load_essnmx_nxlauetof(file: str | FilePath | NeXusFile) -> sc.DataGroup:
 
     with snx.File(file, mode='r') as f:
         _validate_entry(entry := f['entry'])
-        dg['entry']['sample'] = _handle_sample(entry['sample'])
-        dg['entry']['control'] = _handle_monitor(
-            dg['entry']['control'], entry['control']
-        )
+        _handle_sample(dg['entry']['sample'], entry['sample'])
+        _handle_monitor(dg['entry']['control'], entry['control'])
         _handle_source(dg['entry']['instrument'], entry['instrument'])
         _handle_detector_data(dg['entry']['instrument'], entry['instrument'])
 
