@@ -156,20 +156,24 @@ class NMXDetectorMetadata:
     y_pixel_size: sc.Variable
     origin_position: sc.Variable
     fast_axis: sc.Variable
-    """The index of the fast axis changes fast along the detector number.
+    """Inner most dimension if the data is sorted by detector number.
 
-    i.e. When detector numbers grows: ``1, 2, 3, 4, 5, ...``
+    The index of the fast axis changes fast along the detector number.
+
+    i.e. When detector numbers grows: ``0, 1, 2, 3, 4, 5, 6, ...``
     and the size of the fast axis is ``3``,
-    the fast axis index will be: ``1, 2, 3, 1, 2, ...``
+    the fast axis index will be: ``0, 1, 2, 0, 1, 2, 0 ...``
     for each detector number.
 
     """
     slow_axis: sc.Variable
-    """The index of the slow axis changes slowly along the detector number.
+    """Outer most dimension if the data is sorted by detector number.
 
-    i.e.When detector numbers grows: ``1, 2, 3, 4, 5, 6, 7, ...``
+    The index of the slow axis changes slowly along the detector number.
+
+    i.e. When detector numbers grows: ``0, 1, 2, 3, 4, 5, 6, ...``
     and the size of the fast axis is ``3``,
-    the slow axis index will be: ``1, 1, 1, 2, 2, 2, 3, ...``
+    the slow axis index will be: ``0, 0, 0, 1, 1, 1, 2, ...``
     for each detector number.
 
     """
