@@ -31,15 +31,25 @@ def _as_vector(var: sc.Variable) -> sc.Variable:
         return var
 
 
+def _handle_sample(sample: snx.Group) -> sc.DataGroup:
+    sample_dg = sample[...]
+    sample_dg['crystal_rotation'] = _as_vector(sample_dg['crystal_rotation'])
+    sample_dg['position'] = _as_vector(sample_dg['position'])
+    unit_cell = sample_dg.pop('unit_cell')
+    sample_dg['unit_cell_length'] = sc.vector(
+        unit_cell[:3], unit=sample['unit_cell'].attrs['length-unit']
+    )
+    sample_dg['unit_cell_angle'] = sc.vector(
+        unit_cell[3:], unit=sample['unit_cell'].attrs['angle-unit']
+    )
+    return sample_dg
+
+
 def load_essnmx_nxlauetof(file: str | FilePath | NeXusFile) -> sc.DataGroup:
     dg = snx.load(file)
 
     with snx.File(file) as f:
         _validate_entry(entry := f['entry'])
-        sample = entry['sample'][...]
-        sample['crystal_rotation'] = _as_vector(sample['crystal_rotation'])
-        sample['position'] = _as_vector(sample['position'])
-        sample['unit_cell'] = sample['unit_cell'].rename_dims(dim_0='i')
-        dg['entry']['sample'] = sample
+        dg['entry']['sample'] = _handle_sample(entry['sample'])
 
     return dg['entry']
