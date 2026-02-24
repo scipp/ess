@@ -61,14 +61,42 @@ def _handle_monitor(control_dg: sc.DataGroup, control: snx.Group) -> sc.DataGrou
     return control_dg
 
 
+def _handle_source(instrument_dg: sc.DataGroup, instrument: snx.Group) -> sc.DataGroup:
+    distance = instrument_dg['source'].pop('distance')
+    position = sc.vector(
+        instrument['source']['distance'].attrs['position'], unit=distance.unit
+    )
+    instrument_dg['source']['position'] = position
+
+
+def _handle_detector_data(
+    instrument_dg: sc.DataGroup, instrument: snx.Group
+) -> sc.DataGroup:
+    detectors: sc.DataGroup[sc.DataGroup] = sc.DataGroup(
+        {
+            det_name: instrument_dg.pop(det_name)
+            for det_name in instrument[snx.NXdetector].keys()
+        }
+    )
+    instrument_dg['detectors'] = detectors
+    for det_gr in detectors.values():
+        all_keys = list(filter(lambda key: key != 'data', det_gr.keys()))
+        metadatas = sc.DataGroup()
+        for key in all_keys:
+            metadatas[key] = det_gr.pop(key)
+        det_gr['metadata'] = metadatas
+
+
 def load_essnmx_nxlauetof(file: str | FilePath | NeXusFile) -> sc.DataGroup:
     dg = snx.load(file)
 
-    with snx.File(file) as f:
+    with snx.File(file, mode='r') as f:
         _validate_entry(entry := f['entry'])
         dg['entry']['sample'] = _handle_sample(entry['sample'])
         dg['entry']['control'] = _handle_monitor(
             dg['entry']['control'], entry['control']
         )
+        _handle_source(dg['entry']['instrument'], entry['instrument'])
+        _handle_detector_data(dg['entry']['instrument'], entry['instrument'])
 
     return dg['entry']

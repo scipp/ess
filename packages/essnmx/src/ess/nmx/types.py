@@ -89,16 +89,20 @@ class NMXSampleMetadata:
 @dataclass(kw_only=True)
 class NMXSourceMetadata:
     nx_class = snx.NXsource
-    source_position: sc.Variable
+    position: sc.Variable
     name: Literal['European Spallation Source'] = "European Spallation Source"
     type: Literal['Spallation Neutron Source'] = "Spallation Neutron Source"
     probe: Literal['neutron'] = "neutron"
 
+    @property
+    def distance(self) -> sc.Variable:
+        return sc.norm(self.position)
+
     def __write_to_nexus_group__(self, group: h5py.Group):
         snx.create_field(group, 'name', self.name)
         snx.create_field(group, 'type', self.type)
-        distance = snx.create_field(group, 'distance', sc.norm(self.source_position))
-        distance.attrs['position'] = self.source_position.values
+        distance = snx.create_field(group, 'distance', self.distance)
+        distance.attrs['position'] = self.position.values
         snx.create_field(group, 'probe', self.probe)
 
 
