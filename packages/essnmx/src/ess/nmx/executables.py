@@ -256,7 +256,7 @@ def reduction(
         tof_bin_coord=t_coord_name,
         # TODO: Use real monitor data
         # Currently NMX simulations or experiments do not have monitors
-        monitor_histogram=sc.DataArray(
+        data=sc.DataArray(
             coords={t_coord_name: t_bin_edges},
             data=sc.ones_like(t_bin_edges[:-1]),
         ),
