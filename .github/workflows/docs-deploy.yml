@@ -47,6 +47,7 @@ jobs:
             cp -r "$dir" "gh-pages-site/$package"
           done
           cp docs/index.html gh-pages-site/index.html
+          touch gh-pages-site/.nojekyll
       - name: Build search index
         run: npx pagefind@latest --site gh-pages-site --bundle-dir pagefind
       - uses: JamesIves/github-pages-deploy-action@v4
