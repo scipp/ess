@@ -10,7 +10,7 @@ name = "essreduce"
 description = "Common data reduction tools for the ESS facility"
 authors = [{ name = "Scipp contributors" }]
 license = "BSD-3-Clause"
-license-files = ["LICENSE"]
+license-files = ["../../LICENSE"]
 readme = "README.md"
 classifiers = [
     "Intended Audience :: Science/Research",
@@ -26,17 +26,14 @@ classifiers = [
 ]
 requires-python = ">=3.11"
 
-# IMPORTANT:
-# Run 'tox -e deps' after making changes here. This will update requirement files.
-# Make sure to list one dependency per line.
+dynamic = ["version"]
+
 dependencies = [
     "sciline>=25.11.0",
     "scipp>=25.04.0",
     "scippneutron>=25.11.1",
     "scippnexus>=25.06.0",
 ]
-
-dynamic = ["version"]
 
 [project.optional-dependencies]
 test = [
@@ -59,6 +56,9 @@ grow-nexus = "ess.reduce.scripts.grow_nexus:main"
 "Source" = "https://github.com/scipp/essreduce"
 
 [tool.setuptools_scm]
+root = "../.."
+tag_regex = "^essreduce/(?P<version>[vV]?\\d+(?:\\.\\d+)*(?:[._-]?\\w+)*)$"
+git_describe_command = ["git", "describe", "--dirty", "--tags", "--long", "--match", "essreduce/*[0-9]*"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"

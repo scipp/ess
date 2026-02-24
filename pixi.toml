@@ -1,0 +1,82 @@
+[workspace]
+name = "ess"
+channels = ["conda-forge"]
+platforms = ["linux-64", "osx-64", "osx-arm64", "win-64"]
+version = "2026.2.0"
+
+[dependencies]
+python = "3.11.*"
+
+# ==================== Parameterized tasks ====================
+
+[tasks.test]
+cmd = "pytest packages/{{ package }}/tests/"
+args = ["package"]
+
+[tasks.docs]
+cmd = "python -m sphinx -v -b html -d /tmp/docs_doctrees packages/{{ package }}/docs packages/{{ package }}/html"
+args = ["package"]
+
+# ==================== Package features ====================
+
+# essreduce (core package, no workspace deps)
+[feature.essreduce.pypi-dependencies]
+essreduce = { path = "packages/essreduce", editable = true, extras = ["test"] }
+
+# essimaging (depends on essreduce)
+[feature.essimaging.pypi-dependencies]
+essimaging = { path = "packages/essimaging", editable = true, extras = ["test"] }
+
+# ==================== Lint feature ====================
+
+[feature.lint.pypi-dependencies]
+pre-commit = "*"
+ruff = ">=0.15"
+
+[feature.lint.tasks]
+lint = "pre-commit run --all-files"
+check = "ruff check ."
+format = "ruff format ."
+
+# ==================== Docs feature ====================
+
+[feature.docs.dependencies]
+graphviz = "*"
+pandoc = "*"
+
+[feature.docs.pypi-dependencies]
+sphinx = ">=7"
+sphinx-autodoc-typehints = "*"
+sphinx-copybutton = "*"
+sphinx-design = "*"
+autodoc-pydantic = "*"
+nbsphinx = "*"
+myst-parser = "*"
+pydata-sphinx-theme = ">=0.14"
+ipykernel = "*"
+ipywidgets = "*"
+numba = "*"
+plopp = "*"
+tof = "*"
+pooch = "*"
+
+# ==================== Environments ====================
+
+[environments]
+# Default: all packages (for full dev setup)
+default = { features = ["essreduce", "essimaging"], solve-group = "default" }
+
+# Per-package test environments (include workspace dep features)
+essreduce = { features = ["essreduce"], solve-group = "default" }
+essimaging = { features = ["essimaging", "essreduce"], solve-group = "default" }
+
+# Lower-bound test environments (separate resolution)
+lb-essreduce = { features = ["essreduce"], solve-group = "lower-bound" }
+lb-essimaging = { features = ["essimaging", "essreduce"], solve-group = "lower-bound" }
+
+# Docs environments (package + workspace deps + graphviz/pandoc/sphinx)
+docs-essreduce = { features = ["essreduce", "docs"], solve-group = "default" }
+docs-essimaging = { features = ["essimaging", "essreduce", "docs"], solve-group = "default" }
+
+# Lint environment (standalone, no package deps)
+lint = { features = ["lint"], solve-group = "lint" }

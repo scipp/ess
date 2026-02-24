@@ -10,7 +10,7 @@ name = "essimaging"
 description = "Imaging data reduction for the European Spallation Source"
 authors = [{ name = "Scipp contributors" }]
 license = "BSD-3-Clause"
-license-files = ["LICENSE"]
+license-files = ["../../LICENSE"]
 readme = "README.md"
 classifiers = [
     "Intended Audience :: Science/Research",
@@ -26,9 +26,8 @@ classifiers = [
 ]
 requires-python = ">=3.11"
 
-# IMPORTANT:
-# Run 'tox -e deps' after making changes here. This will update requirement files.
-# Make sure to list one dependency per line.
+dynamic = ["version"]
+
 dependencies = [
   "dask>=2022.1.0",
   "graphviz",
@@ -41,8 +40,6 @@ dependencies = [
   "essreduce>=25.11.2",
   "scitiff>=25.7",
 ]
-
-dynamic = ["version"]
 
 [project.optional-dependencies]
 test = [
@@ -58,6 +55,9 @@ test = [
 "Source" = "https://github.com/scipp/essimaging"
 
 [tool.setuptools_scm]
+root = "../.."
+tag_regex = "^essimaging/(?P<version>[vV]?\\d+(?:\\.\\d+)*(?:[._-]?\\w+)*)$"
+git_describe_command = ["git", "describe", "--dirty", "--tags", "--long", "--match", "essimaging/*[0-9]*"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"

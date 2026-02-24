@@ -1,0 +1,25 @@
+name: Weekly Platform Tests
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 2 * * 1'
+
+jobs:
+  test:
+    name: ${{ matrix.package }} on ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+        package:
+          - essreduce
+          - essimaging
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: prefix-dev/setup-pixi@v0.9.4
+        with:
+          environments: ${{ matrix.package }}
+      - name: Run tests
+        run: pixi run -e ${{ matrix.package }} test ${{ matrix.package }}

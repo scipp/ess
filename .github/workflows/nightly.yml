@@ -1,0 +1,41 @@
+name: Nightly Tests
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '30 1 * * 1-5'
+
+jobs:
+  test:
+    name: Nightly ${{ matrix.package }}
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - essreduce
+          - essimaging
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: prefix-dev/setup-pixi@v0.9.4
+        with:
+          environments: ${{ matrix.package }}
+      - name: Run tests
+        run: pixi run -e ${{ matrix.package }} test ${{ matrix.package }}
+
+  lower-bound:
+    name: Lower bound ${{ matrix.package }}
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - essreduce
+          - essimaging
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: prefix-dev/setup-pixi@v0.9.4
+        with:
+          environments: lb-${{ matrix.package }}
+      - name: Test with lowest direct dependencies
+        run: pixi run -e lb-${{ matrix.package }} test ${{ matrix.package }}

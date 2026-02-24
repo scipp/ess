@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-24.04
+    outputs:
+      packages: ${{ steps.filter.outputs.changes }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            essreduce:
+              - 'packages/essreduce/**'
+              - 'pyproject.toml'
+              - 'pixi.lock'
+            essimaging:
+              - 'packages/essimaging/**'
+              - 'packages/essreduce/**'
+              - 'pyproject.toml'
+              - 'pixi.lock'
+
+  formatting:
+    name: Formatting and static analysis
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: prefix-dev/setup-pixi@v0.9.4
+        with:
+          environments: lint
+      - run: pixi run -e lint lint
+
+  test:
+    name: Test ${{ matrix.package }}
+    needs: [changes, formatting]
+    if: needs.changes.outputs.packages != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJSON(needs.changes.outputs.packages) }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: prefix-dev/setup-pixi@v0.9.4
+        with:
+          environments: ${{ matrix.package }}
+      - name: Run tests
+        run: pixi run -e ${{ matrix.package }} test ${{ matrix.package }}
+
+  docs:
+    name: Docs ${{ matrix.package }}
+    needs: [changes, test]
+    if: needs.changes.outputs.packages != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJSON(needs.changes.outputs.packages) }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: prefix-dev/setup-pixi@v0.9.4
+        with:
+          environments: docs-${{ matrix.package }}
+      - name: Build docs
+        run: pixi run -e docs-${{ matrix.package }} docs ${{ matrix.package }}
