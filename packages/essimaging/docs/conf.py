@@ -46,6 +46,7 @@ try:
 except ModuleNotFoundError:
     pass
 
+nbsphinx_allow_errors = True
 
 myst_enable_extensions = [
     "amsmath",
