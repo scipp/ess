@@ -41,24 +41,14 @@ format = "ruff format ."
 # ==================== Docs feature ====================
 
 [feature.docs.dependencies]
-graphviz = "*"
 pandoc = "*"
 
-[feature.docs.pypi-dependencies]
-sphinx = ">=7"
-sphinx-autodoc-typehints = "*"
-sphinx-copybutton = "*"
-sphinx-design = "*"
-autodoc-pydantic = "*"
-nbsphinx = "*"
-myst-parser = "*"
-pydata-sphinx-theme = ">=0.14"
-ipykernel = "*"
-ipywidgets = "*"
-numba = "*"
-plopp = "*"
-tof = "*"
-pooch = "*"
+# Per-package docs features (install with docs extra)
+[feature.docs-essreduce.pypi-dependencies]
+essreduce = { path = "packages/essreduce", editable = true, extras = ["test", "docs"] }
+
+[feature.docs-essimaging.pypi-dependencies]
+essimaging = { path = "packages/essimaging", editable = true, extras = ["test", "docs"] }
 
 # ==================== Environments ====================
 
@@ -74,9 +64,9 @@ essimaging = { features = ["essimaging", "essreduce"], solve-group = "default" }
 lb-essreduce = { features = ["essreduce"], solve-group = "lower-bound" }
 lb-essimaging = { features = ["essimaging", "essreduce"], solve-group = "lower-bound" }
 
-# Docs environments (package + workspace deps + graphviz/pandoc/sphinx)
-docs-essreduce = { features = ["essreduce", "docs"], solve-group = "default" }
-docs-essimaging = { features = ["essimaging", "essreduce", "docs"], solve-group = "default" }
+# Docs environments (package with docs extra + pandoc)
+docs-essreduce = { features = ["docs-essreduce", "docs"], solve-group = "default" }
+docs-essimaging = { features = ["docs-essimaging", "docs-essreduce", "docs"], solve-group = "default" }
 
 # Lint environment (standalone, no package deps)
 lint = { features = ["lint"], solve-group = "lint" }

@@ -111,14 +111,3 @@ packages/
     src/ess/imaging/        ← source code (ess.imaging namespace)
     ...
 ```
-
-### Key differences from the old multi-repo setup
-
-| Before | After |
-|--------|-------|
-| Separate git repos | 1 monorepo |
-| `pip-compile-multi` + `requirements/*.txt` | `pixi install` + `pixi.lock` |
-| `tox -e py311` | `pixi run test <package>` |
-| Per-repo CI workflows | 4 shared workflow files |
-| Tag `26.2.0` | Tag `essreduce/26.2.0` |
-| Coordinated cross-repo PRs | Single atomic PR |
