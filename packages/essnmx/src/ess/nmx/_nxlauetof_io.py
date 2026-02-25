@@ -124,7 +124,9 @@ def _restore_positions(
     detector_corner = (
         detetor_center
         - (slow_axis_width / 2) * slow_axis
+        + pixel_sizes[slow_axis_dim] * slow_axis / 2
         - (fast_axis_width / 2) * fast_axis
+        + pixel_sizes[fast_axis_dim] * fast_axis / 2
     )
 
     return pixel_offsets + detector_corner
