@@ -2,15 +2,15 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 
 """
-Utilities for computing real neutron time-of-flight from chopper settings and
+Utilities for computing neutron wavelength from chopper settings and
 neutron time-of-arrival at the detectors.
 """
 
 from ..nexus.types import DiskChoppers
-from .eto_to_tof import providers
 from .lut import (
     BeamlineComponentReading,
     DistanceResolution,
+    LookupTableWorkflow,
     LtotalRange,
     NumberOfSimulatedNeutrons,
     PulsePeriod,
@@ -19,35 +19,38 @@ from .lut import (
     SimulationSeed,
     SourcePosition,
     TimeResolution,
-    TofLookupTableWorkflow,
     simulate_chopper_cascade_using_tof,
 )
+from .to_wavelength import providers
 from .types import (
     DetectorLtotal,
-    ErrorLimitedTofLookupTable,
+    ErrorLimitedLookupTable,
+    LookupTable,
+    LookupTableFilename,
     LookupTableRelativeErrorThreshold,
     MonitorLtotal,
     PulseStrideOffset,
-    TimeOfFlightLookupTable,
-    TimeOfFlightLookupTableFilename,
-    ToaDetector,
-    TofDetector,
-    TofLookupTable,
-    TofLookupTableFilename,
-    TofMonitor,
+    # ToaDetector,
+    # TofDetector,
+    # TofLookupTable,
+    # TofLookupTableFilename,
+    # TofMonitor,
     WavelengthDetector,
     WavelengthMonitor,
 )
-from .workflow import GenericTofWorkflow
+from .workflow import GenericWavelengthWorkflow
 
 __all__ = [
     "BeamlineComponentReading",
     "DetectorLtotal",
     "DiskChoppers",
     "DistanceResolution",
-    "ErrorLimitedTofLookupTable",
-    "GenericTofWorkflow",
+    "ErrorLimitedLookupTable",
+    "GenericWavelengthWorkflow",
+    "LookupTable",
+    "LookupTableFilename",
     "LookupTableRelativeErrorThreshold",
+    "LookupTableWorkflow",
     "LtotalRange",
     "MonitorLtotal",
     "NumberOfSimulatedNeutrons",
@@ -57,15 +60,7 @@ __all__ = [
     "SimulationResults",
     "SimulationSeed",
     "SourcePosition",
-    "TimeOfFlightLookupTable",
-    "TimeOfFlightLookupTableFilename",
     "TimeResolution",
-    "ToaDetector",
-    "TofDetector",
-    "TofLookupTable",
-    "TofLookupTableFilename",
-    "TofLookupTableWorkflow",
-    "TofMonitor",
     "WavelengthDetector",
     "WavelengthMonitor",
     "providers",

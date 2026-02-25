@@ -11,7 +11,7 @@ import sciline as sl
 import scipp as sc
 
 from ..nexus.types import AnyRun, DiskChoppers
-from .types import TofLookupTable
+from .types import LookupTable
 
 
 @dataclass
@@ -136,7 +136,7 @@ Facility where the experiment is performed, e.g., 'ess'.
 """
 
 
-def _compute_mean_tof(
+def _compute_mean_wavelength(
     simulation: BeamlineComponentReading,
     distance: sc.Variable,
     time_bins: sc.Variable,
@@ -168,11 +168,11 @@ def _compute_mean_tof(
     toas = simulation.time_of_arrival + (travel_length / simulation.speed).to(
         unit=time_unit, copy=False
     )
-    tofs = distance / simulation.speed
+    # tofs = distance / simulation.speed
 
     data = sc.DataArray(
         data=simulation.weight,
-        coords={"toa": toas, "tof": tofs.to(unit=time_unit, copy=False)},
+        coords={"toa": toas, "wavelength": simulation.wavelength},
     )
 
     # Add the event_time_offset coordinate, wrapped to the frame_period
@@ -189,27 +189,29 @@ def _compute_mean_tof(
 
     binned = data.bin(event_time_offset=time_bins)
     binned_sum = binned.bins.sum()
-    # Weighted mean of tof inside each bin
-    mean_tof = (binned.bins.data * binned.bins.coords["tof"]).bins.sum() / binned_sum
-    # Compute the variance of the tofs to track regions with large uncertainty
+    # Weighted mean of wavelength inside each bin
+    mean_wavelength = (
+        binned.bins.data * binned.bins.coords["wavelength"]
+    ).bins.sum() / binned_sum
+    # Compute the variance of the wavelengths to track regions with large uncertainty
     variance = (
-        binned.bins.data * (binned.bins.coords["tof"] - mean_tof) ** 2
+        binned.bins.data * (binned.bins.coords["wavelength"] - mean_wavelength) ** 2
     ).bins.sum() / binned_sum
 
-    mean_tof.variances = variance.values
-    return mean_tof
+    mean_wavelength.variances = variance.values
+    return mean_wavelength
 
 
-def make_tof_lookup_table(
+def make_wavelength_lookup_table(
     simulation: SimulationResults,
     ltotal_range: LtotalRange,
     distance_resolution: DistanceResolution,
     time_resolution: TimeResolution,
     pulse_period: PulsePeriod,
     pulse_stride: PulseStride,
-) -> TofLookupTable:
+) -> LookupTable:
     """
-    Compute a lookup table for time-of-flight as a function of distance and
+    Compute a lookup table for wavelength as a function of distance and
     time-of-arrival.
 
     Parameters
@@ -328,7 +330,7 @@ def make_tof_lookup_table(
             )
 
         pieces.append(
-            _compute_mean_tof(
+            _compute_mean_wavelength(
                 simulation=simulation_reading,
                 distance=dist,
                 time_bins=time_bins,
@@ -355,7 +357,7 @@ def make_tof_lookup_table(
         },
     )
 
-    return TofLookupTable(
+    return LookupTable(
         array=table,
         pulse_period=pulse_period,
         pulse_stride=pulse_stride,
@@ -442,13 +444,13 @@ def simulate_chopper_cascade_using_tof(
     return SimulationResults(readings=sim_readings, choppers=choppers)
 
 
-def TofLookupTableWorkflow():
+def LookupTableWorkflow():
     """
-    Create a workflow for computing a time-of-flight lookup table from a
+    Create a workflow for computing a wavelength lookup table from a
     simulation of neutrons propagating through a chopper cascade.
     """
     wf = sl.Pipeline(
-        (make_tof_lookup_table, simulate_chopper_cascade_using_tof),
+        (make_wavelength_lookup_table, simulate_chopper_cascade_using_tof),
         params={
             PulsePeriod: 1.0 / sc.scalar(14.0, unit="Hz"),
             PulseStride: 1,

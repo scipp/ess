@@ -38,23 +38,27 @@ from ..nexus.types import (
 from .resample import rebin_strictly_increasing
 from .types import (
     DetectorLtotal,
-    ErrorLimitedTofLookupTable,
+    ErrorLimitedLookupTable,
+    LookupTable,
     LookupTableRelativeErrorThreshold,
     MonitorLtotal,
     PulseStrideOffset,
-    ToaDetector,
-    TofDetector,
-    TofLookupTable,
-    TofMonitor,
     WavelengthDetector,
     WavelengthMonitor,
 )
 
 
-class TofInterpolator:
-    def __init__(self, lookup: sc.DataArray, distance_unit: str, time_unit: str):
+class WavelengthInterpolator:
+    def __init__(
+        self,
+        lookup: sc.DataArray,
+        distance_unit: str,
+        time_unit: str,
+        wavelength_unit: str = 'angstrom',
+    ):
         self._distance_unit = distance_unit
         self._time_unit = time_unit
+        self._wavelength_unit = wavelength_unit
 
         self._time_edges = (
             lookup.coords["event_time_offset"]
@@ -68,7 +72,7 @@ class TofInterpolator:
         self._interpolator = InterpolatorImpl(
             time_edges=self._time_edges,
             distance_edges=self._distance_edges,
-            values=lookup.data.to(unit=self._time_unit, copy=False).values,
+            values=lookup.data.to(unit=self._wavelength_unit, copy=False).values,
         )
 
     def __call__(
@@ -100,12 +104,12 @@ class TofInterpolator:
                 pulse_index=pulse_index.values if pulse_index is not None else None,
                 pulse_period=pulse_period.value,
             ),
-            unit=self._time_unit,
+            unit=self._wavelength_unit,
         )
 
 
-def _time_of_flight_data_histogram(
-    da: sc.DataArray, lookup: ErrorLimitedTofLookupTable, ltotal: sc.Variable
+def _compute_wavelength_histogram(
+    da: sc.DataArray, lookup: ErrorLimitedLookupTable, ltotal: sc.Variable
 ) -> sc.DataArray:
     # In NeXus, 'time_of_flight' is the canonical name in NXmonitor, but in some files,
     # it may be called 'tof' or 'frame_time'.
@@ -126,18 +130,18 @@ def _time_of_flight_data_histogram(
     etos = rebinned.coords[key]
 
     # Create linear interpolator
-    interp = TofInterpolator(
+    interp = WavelengthInterpolator(
         lookup.array, distance_unit=ltotal.unit, time_unit=eto_unit
     )
 
-    # Compute time-of-flight of the bin edges using the interpolator
-    tofs = interp(
+    # Compute wavelengths of the bin edges using the interpolator
+    wavs = interp(
         ltotal=ltotal.broadcast(sizes=etos.sizes),
         event_time_offset=etos,
         pulse_period=pulse_period,
     )
 
-    return rebinned.assign_coords(tof=tofs).drop_coords(
+    return rebinned.assign_coords(wavelength=wavs).drop_coords(
         list({key} & {"time_of_flight", "frame_time"})
     )
 
@@ -148,11 +152,11 @@ def _guess_pulse_stride_offset(
     event_time_offset: sc.Variable,
     pulse_period: sc.Variable,
     pulse_stride: int,
-    interp: TofInterpolator,
+    interp: WavelengthInterpolator,
 ) -> int:
     """
     Using the minimum ``event_time_zero`` to calculate a reference time when computing
-    the time-of-flight for the neutron events makes the workflow depend on when the
+    the wavelength for the neutron events makes the workflow depend on when the
     first event was recorded. There is no straightforward way to know if we started
     recording at the beginning of a frame, or half-way through a frame, without looking
     at the chopper logs. This can be manually corrected using the pulse_stride_offset
@@ -161,9 +165,9 @@ def _guess_pulse_stride_offset(
 
     Here, we perform a simple guess for the ``pulse_stride_offset`` if it is not
     provided.
-    We choose a few random events, compute the time-of-flight for every possible value
+    We choose a few random events, compute the wavelength for every possible value
     of pulse_stride_offset, and return the value that yields the least number of NaNs
-    in the computed time-of-flight.
+    in the computed wavelength.
 
     Parameters
     ----------
@@ -180,8 +184,8 @@ def _guess_pulse_stride_offset(
     interp:
         Interpolator for the lookup table.
     """
-    tofs = {}
-    # Choose a few random events to compute the time-of-flight
+    wavs = {}
+    # Choose a few random events for which to compute the wavelength
     inds = np.random.choice(
         len(event_time_offset), min(5000, len(event_time_offset)), replace=False
     )
@@ -198,25 +202,25 @@ def _guess_pulse_stride_offset(
     )
     for i in range(pulse_stride):
         pulse_inds = (pulse_index + i) % pulse_stride
-        tofs[i] = interp(
+        wavs[i] = interp(
             ltotal=ltotal,
             event_time_offset=etos,
             pulse_index=pulse_inds,
             pulse_period=pulse_period,
         )
     # Find the entry in the list with the least number of nan values
-    return sorted(tofs, key=lambda x: sc.isnan(tofs[x]).sum())[0]
+    return sorted(wavs, key=lambda x: sc.isnan(wavs[x]).sum())[0]
 
 
-def _prepare_tof_interpolation_inputs(
+def _prepare_wavelength_interpolation_inputs(
     da: sc.DataArray,
-    lookup: ErrorLimitedTofLookupTable,
+    lookup: ErrorLimitedLookupTable,
     ltotal: sc.Variable,
     pulse_stride_offset: int | None,
 ) -> dict:
     """
-    Prepare the inputs required for the time-of-flight interpolation.
-    This function is used when computing the time-of-flight for event data, and for
+    Prepare the inputs required for the wavelength interpolation.
+    This function is used when computing the wavelength for event data, and for
     computing the time-of-arrival for event data (as they both require guessing the
     pulse_stride_offset if not provided).
 
@@ -225,8 +229,7 @@ def _prepare_tof_interpolation_inputs(
     da:
         Data array with event data.
     lookup:
-        Lookup table giving time-of-flight as a function of distance and time of
-        arrival.
+        Lookup table giving wavelength as a function of distance and time of arrival.
     ltotal:
         Total length of the flight path from the source to the detector.
     pulse_stride_offset:
@@ -238,7 +241,7 @@ def _prepare_tof_interpolation_inputs(
     eto_unit = elem_unit(etos)
 
     # Create linear interpolator
-    interp = TofInterpolator(
+    interp = WavelengthInterpolator(
         lookup.array, distance_unit=ltotal.unit, time_unit=eto_unit
     )
 
@@ -302,21 +305,21 @@ def _prepare_tof_interpolation_inputs(
     }
 
 
-def _time_of_flight_data_events(
+def _compute_wavelength_events(
     da: sc.DataArray,
-    lookup: ErrorLimitedTofLookupTable,
+    lookup: ErrorLimitedLookupTable,
     ltotal: sc.Variable,
     pulse_stride_offset: int | None,
 ) -> sc.DataArray:
-    inputs = _prepare_tof_interpolation_inputs(
+    inputs = _prepare_wavelength_interpolation_inputs(
         da=da,
         lookup=lookup,
         ltotal=ltotal,
         pulse_stride_offset=pulse_stride_offset,
     )
 
-    # Compute time-of-flight for all neutrons using the interpolator
-    tofs = inputs["interp"](
+    # Compute wavelength for all neutrons using the interpolator
+    wavs = inputs["interp"](
         ltotal=inputs["ltotal"],
         event_time_offset=inputs["eto"],
         pulse_index=inputs["pulse_index"],
@@ -324,8 +327,8 @@ def _time_of_flight_data_events(
     )
 
     parts = da.bins.constituents
-    parts["data"] = tofs
-    result = da.bins.assign_coords(tof=sc.bins(**parts, validate_indices=False))
+    parts["data"] = wavs
+    result = da.bins.assign_coords(wavelength=sc.bins(**parts, validate_indices=False))
     out = result.bins.drop_coords("event_time_offset")
 
     # The result may still have an 'event_time_zero' dimension (in the case of an
@@ -363,6 +366,7 @@ def detector_ltotal_from_straight_line_approximation(
     gravity:
         Gravity vector.
     """
+    # TODO: scatter=True should not be hard-coded here
     graph = {
         **scn.conversion.graph.beamline.beamline(scatter=True),
         'source_position': lambda: source_position,
@@ -403,10 +407,10 @@ def monitor_ltotal_from_straight_line_approximation(
 
 
 def _mask_large_uncertainty_in_lut(
-    table: TofLookupTable, error_threshold: float
-) -> TofLookupTable:
+    table: LookupTable, error_threshold: float
+) -> LookupTable:
     """
-    Mask regions in the time-of-flight lookup table with large uncertainty using NaNs.
+    Mask regions in the lookup table with large uncertainty using NaNs.
 
     Parameters
     ----------
@@ -416,12 +420,10 @@ def _mask_large_uncertainty_in_lut(
         Threshold for the relative standard deviation (coefficient of variation) of the
         projected time-of-flight above which values are masked.
     """
-    # TODO: The error threshold could be made dependent on the time-of-flight or
-    # distance, instead of being a single value for the whole table.
     da = table.array
     relative_error = sc.stddevs(da.data) / sc.values(da.data)
     mask = relative_error > sc.scalar(error_threshold)
-    return TofLookupTable(
+    return LookupTable(
         **{
             **asdict(table),
             "array": sc.where(mask, sc.scalar(np.nan, unit=da.unit), da),
@@ -430,25 +432,25 @@ def _mask_large_uncertainty_in_lut(
 
 
 def mask_large_uncertainty_in_lut_detector(
-    table: TofLookupTable,
+    table: LookupTable,
     error_threshold: LookupTableRelativeErrorThreshold,
     detector_name: NeXusDetectorName,
-) -> ErrorLimitedTofLookupTable[snx.NXdetector]:
+) -> ErrorLimitedLookupTable[snx.NXdetector]:
     """
-    Mask regions in the time-of-flight lookup table with large uncertainty using NaNs.
+    Mask regions in the wavelength lookup table with large uncertainty using NaNs.
 
     Parameters
     ----------
     table:
-        Lookup table with time-of-flight as a function of distance and time-of-arrival.
+        Lookup table with wavelength as a function of distance and time-of-arrival.
     error_threshold:
         Threshold for the relative standard deviation (coefficient of variation) of the
-        projected time-of-flight above which values are masked.
+        projected wavelength above which values are masked.
     detector_name:
         Name of the detector for which to apply the error threshold. This is used to
         get the correct error threshold from the dictionary of error thresholds.
     """
-    return ErrorLimitedTofLookupTable[snx.NXdetector](
+    return ErrorLimitedLookupTable[snx.NXdetector](
         _mask_large_uncertainty_in_lut(
             table=table, error_threshold=error_threshold[detector_name]
         )
@@ -456,42 +458,42 @@ def mask_large_uncertainty_in_lut_detector(
 
 
 def mask_large_uncertainty_in_lut_monitor(
-    table: TofLookupTable,
+    table: LookupTable,
     error_threshold: LookupTableRelativeErrorThreshold,
     monitor_name: NeXusName[MonitorType],
-) -> ErrorLimitedTofLookupTable[MonitorType]:
+) -> ErrorLimitedLookupTable[MonitorType]:
     """
-    Mask regions in the time-of-flight lookup table with large uncertainty using NaNs.
+    Mask regions in the wavelength lookup table with large uncertainty using NaNs.
 
     Parameters
     ----------
     table:
-        Lookup table with time-of-flight as a function of distance and time-of-arrival.
+        Lookup table with wavelength as a function of distance and time-of-arrival.
     error_threshold:
         Threshold for the relative standard deviation (coefficient of variation) of the
-        projected time-of-flight above which values are masked.
+        projected wavelength above which values are masked.
     monitor_name:
         Name of the monitor for which to apply the error threshold. This is used to
         get the correct error threshold from the dictionary of error thresholds.
     """
-    return ErrorLimitedTofLookupTable[MonitorType](
+    return ErrorLimitedLookupTable[MonitorType](
         _mask_large_uncertainty_in_lut(
             table=table, error_threshold=error_threshold[monitor_name]
         )
     )
 
 
-def _compute_tof_data(
+def _compute_wavelength_data(
     da: sc.DataArray,
-    lookup: ErrorLimitedTofLookupTable[Component],
+    lookup: ErrorLimitedLookupTable[Component],
     ltotal: sc.Variable,
     pulse_stride_offset: int,
 ) -> sc.DataArray:
     if da.bins is None:
-        data = _time_of_flight_data_histogram(da=da, lookup=lookup, ltotal=ltotal)
-        out = rebin_strictly_increasing(data, dim='tof')
+        data = _compute_wavelength_histogram(da=da, lookup=lookup, ltotal=ltotal)
+        out = rebin_strictly_increasing(data, dim='wavelength')
     else:
-        out = _time_of_flight_data_events(
+        out = _compute_wavelength_events(
             da=da,
             lookup=lookup,
             ltotal=ltotal,
@@ -500,16 +502,16 @@ def _compute_tof_data(
     return out.assign_coords(Ltotal=ltotal)
 
 
-def detector_time_of_flight_data(
+def detector_wavelength_data(
     detector_data: RawDetector[RunType],
-    lookup: ErrorLimitedTofLookupTable[snx.NXdetector],
+    lookup: ErrorLimitedLookupTable[snx.NXdetector],
     ltotal: DetectorLtotal[RunType],
     pulse_stride_offset: PulseStrideOffset,
-) -> TofDetector[RunType]:
+) -> WavelengthDetector[RunType]:
     """
-    Convert the time-of-arrival (event_time_offset) data to time-of-flight data using a
+    Convert the time-of-arrival (event_time_offset) data to wavelength data using a
     lookup table.
-    The output data will have two new coordinates: time-of-flight and Ltotal.
+    The output data will have two new coordinates: wavelength and Ltotal.
 
     Parameters
     ----------
@@ -517,7 +519,7 @@ def detector_time_of_flight_data(
         Raw detector data loaded from a NeXus file, e.g., NXdetector containing
         NXevent_data.
     lookup:
-        Lookup table giving time-of-flight as a function of distance and time of
+        Lookup table giving wavelength as a function of distance and time of
         arrival.
     ltotal:
         Total length of the flight path from the source to the detector.
@@ -525,8 +527,8 @@ def detector_time_of_flight_data(
         When pulse-skipping, the offset of the first pulse in the stride. This is
         typically zero but can be a small integer < pulse_stride.
     """
-    return TofDetector[RunType](
-        _compute_tof_data(
+    return WavelengthDetector[RunType](
+        _compute_wavelength_data(
             da=detector_data,
             lookup=lookup,
             ltotal=ltotal,
@@ -535,16 +537,16 @@ def detector_time_of_flight_data(
     )
 
 
-def monitor_time_of_flight_data(
+def monitor_wavelength_data(
     monitor_data: RawMonitor[RunType, MonitorType],
-    lookup: ErrorLimitedTofLookupTable[MonitorType],
+    lookup: ErrorLimitedLookupTable[MonitorType],
     ltotal: MonitorLtotal[RunType, MonitorType],
     pulse_stride_offset: PulseStrideOffset,
-) -> TofMonitor[RunType, MonitorType]:
+) -> WavelengthMonitor[RunType, MonitorType]:
     """
-    Convert the time-of-arrival (event_time_offset) data to time-of-flight data using a
+    Convert the time-of-arrival (event_time_offset) data to wavelength data using a
     lookup table.
-    The output data will have two new coordinates: time-of-flight and Ltotal.
+    The output data will have two new coordinates: wavelength and Ltotal.
 
     Parameters
     ----------
@@ -552,7 +554,7 @@ def monitor_time_of_flight_data(
         Raw monitor data loaded from a NeXus file, e.g., NXmonitor containing
         NXevent_data.
     lookup:
-        Lookup table giving time-of-flight as a function of distance and time of
+        Lookup table giving wavelength as a function of distance and time of
         arrival.
     ltotal:
         Total length of the flight path from the source to the monitor.
@@ -560,8 +562,8 @@ def monitor_time_of_flight_data(
         When pulse-skipping, the offset of the first pulse in the stride. This is
         typically zero but can be a small integer < pulse_stride.
     """
-    return TofMonitor[RunType, MonitorType](
-        _compute_tof_data(
+    return WavelengthMonitor[RunType, MonitorType](
+        _compute_wavelength_data(
             da=monitor_data,
             lookup=lookup,
             ltotal=ltotal,
@@ -570,109 +572,13 @@ def monitor_time_of_flight_data(
     )
 
 
-def detector_time_of_arrival_data(
-    detector_data: RawDetector[RunType],
-    lookup: ErrorLimitedTofLookupTable[snx.NXdetector],
-    ltotal: DetectorLtotal[RunType],
-    pulse_stride_offset: PulseStrideOffset,
-) -> ToaDetector[RunType]:
-    """
-    Convert the time-of-flight data to time-of-arrival data using a lookup table.
-    The output data will have a time-of-arrival coordinate.
-    The time-of-arrival is the time since the neutron was emitted from the source.
-    It is basically equal to event_time_offset + pulse_index * pulse_period.
-
-    TODO: This is not actually the 'time-of-arrival' in the strict sense, as it is
-    still wrapped over the frame period. We should consider unwrapping it in the future
-    to get the true time-of-arrival.
-    Or give it a different name to avoid confusion.
-
-    Parameters
-    ----------
-    da:
-        Raw detector data loaded from a NeXus file, e.g., NXdetector containing
-        NXevent_data.
-    lookup:
-        Lookup table giving time-of-flight as a function of distance and time of
-        arrival.
-    ltotal:
-        Total length of the flight path from the source to the detector.
-    pulse_stride_offset:
-        When pulse-skipping, the offset of the first pulse in the stride. This is
-        typically zero but can be a small integer < pulse_stride.
-    """
-    if detector_data.bins is None:
-        raise NotImplementedError(
-            "Computing time-of-arrival in histogram mode is not implemented yet."
-        )
-    inputs = _prepare_tof_interpolation_inputs(
-        da=detector_data,
-        lookup=lookup,
-        ltotal=ltotal,
-        pulse_stride_offset=pulse_stride_offset,
-    )
-    parts = detector_data.bins.constituents
-    parts["data"] = inputs["eto"]
-    # The pulse index is None if pulse_stride == 1 (i.e., no pulse skipping)
-    if inputs["pulse_index"] is not None:
-        parts["data"] = parts["data"] + inputs["pulse_index"] * inputs["pulse_period"]
-    result = detector_data.bins.assign_coords(
-        toa=sc.bins(**parts, validate_indices=False)
-    )
-    return ToaDetector[RunType](result)
-
-
-def _tof_to_wavelength(da: sc.DataArray) -> sc.DataArray:
-    """
-    Convert time-of-flight data to wavelength data.
-
-    Here we assume that the input data contains a Ltotal coordinate, which is required
-    for the conversion.
-    This coordinate is assigned in the ``_compute_tof_data`` function.
-    """
-    return da.transform_coords(
-        'wavelength', graph={"wavelength": wavelength_from_tof}, keep_intermediate=False
-    )
-
-
-def detector_wavelength_data(
-    detector_data: TofDetector[RunType],
-) -> WavelengthDetector[RunType]:
-    """
-    Convert time-of-flight coordinate of the detector data to wavelength.
-
-    Parameters
-    ----------
-    da:
-        Detector data with time-of-flight coordinate.
-    """
-    return WavelengthDetector[RunType](_tof_to_wavelength(detector_data))
-
-
-def monitor_wavelength_data(
-    monitor_data: TofMonitor[RunType, MonitorType],
-) -> WavelengthMonitor[RunType, MonitorType]:
-    """
-    Convert time-of-flight coordinate of the monitor data to wavelength.
-
-    Parameters
-    ----------
-    da:
-        Monitor data with time-of-flight coordinate.
-    """
-    return WavelengthMonitor[RunType, MonitorType](_tof_to_wavelength(monitor_data))
-
-
 def providers() -> tuple[Callable]:
     """
     Providers of the time-of-flight workflow.
     """
     return (
-        detector_time_of_flight_data,
-        monitor_time_of_flight_data,
         detector_ltotal_from_straight_line_approximation,
         monitor_ltotal_from_straight_line_approximation,
-        detector_time_of_arrival_data,
         detector_wavelength_data,
         monitor_wavelength_data,
         mask_large_uncertainty_in_lut_detector,

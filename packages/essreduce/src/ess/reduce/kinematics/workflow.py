@@ -6,12 +6,12 @@ import sciline
 import scipp as sc
 
 from ..nexus import GenericNeXusWorkflow
-from . import eto_to_tof
-from .types import PulseStrideOffset, TofLookupTable, TofLookupTableFilename
+from . import to_wavelength
+from .types import LookupTable, LookupTableFilename, PulseStrideOffset
 
 
-def load_tof_lookup_table(filename: TofLookupTableFilename) -> TofLookupTable:
-    """Load a time-of-flight lookup table from an HDF5 file."""
+def load_lookup_table(filename: LookupTableFilename) -> LookupTable:
+    """Load a wavelength lookup table from an HDF5 file."""
     table = sc.io.load_hdf5(filename)
 
     # Support old format where the metadata were stored as coordinates of the DataArray.
@@ -38,19 +38,19 @@ def load_tof_lookup_table(filename: TofLookupTableFilename) -> TofLookupTable:
     if "error_threshold" in table:
         del table["error_threshold"]
 
-    return TofLookupTable(**table)
+    return LookupTable(**table)
 
 
-def GenericTofWorkflow(
+def GenericWavelengthWorkflow(
     *,
     run_types: Iterable[sciline.typing.Key],
     monitor_types: Iterable[sciline.typing.Key],
 ) -> sciline.Pipeline:
     """
-    Generic workflow for computing the neutron time-of-flight for detector and monitor
+    Generic workflow for computing the neutron wavelength for detector and monitor
     data.
 
-    This workflow builds on the ``GenericNeXusWorkflow`` and computes time-of-flight
+    This workflow builds on the ``GenericNeXusWorkflow`` and computes wavelength
     from a lookup table that is created from the chopper settings, detector Ltotal and
     the neutron time-of-arrival.
 
@@ -82,10 +82,10 @@ def GenericTofWorkflow(
     """
     wf = GenericNeXusWorkflow(run_types=run_types, monitor_types=monitor_types)
 
-    for provider in eto_to_tof.providers():
+    for provider in to_wavelength.providers():
         wf.insert(provider)
 
-    wf.insert(load_tof_lookup_table)
+    wf.insert(load_lookup_table)
 
     # Default parameters
     wf[PulseStrideOffset] = None
