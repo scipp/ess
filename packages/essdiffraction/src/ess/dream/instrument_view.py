@@ -13,7 +13,7 @@ def _to_data_array(
         data = sc.DataGroup({"": data})
     pieces = []
     for da in data.values():
-        da = da.drop_coords(set(da.coords) - {"position", dim})
+        da = da.drop_coords(list(set(da.coords) - {"position", dim}))
         dims = list(da.dims)
         if (dim is not None) and (dim in dims):
             # Ensure that the dims to be flattened are contiguous

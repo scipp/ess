@@ -11,13 +11,10 @@ class InstrumentConfiguration(enum.Enum):
     """
     Choose between high-flux and high-resolution configurations.
 
-    The high_flux setting is the same as the high_flux_BC215. Setting the band chopper
-    phase explicitly should be favored over using the high_flux setting which is kept
-    for backwards compatibility.
+    The ``BCxxx`` suffix indicates the phase of the band chopper.
     """
 
     high_flux_BC215 = 1
-    high_flux = 1  # Legacy alias for high_flux
     high_flux_BC240 = 2
     high_resolution = 3
 
@@ -27,8 +24,7 @@ def choppers(configuration: InstrumentConfiguration) -> dict[str, DiskChopper]:
 
     match configuration:
         case (
-            InstrumentConfiguration.high_flux
-            | InstrumentConfiguration.high_flux_BC215
+            InstrumentConfiguration.high_flux_BC215
             | InstrumentConfiguration.high_flux_BC240
         ):
             return {
