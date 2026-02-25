@@ -233,7 +233,7 @@ def assemble_detector_metadata(
         detector_name=detector_component['nexus_component_name'],
         x_pixel_size=x_pixel_size,
         y_pixel_size=y_pixel_size,
-        origin_position=origin,
+        origin=origin,
         fast_axis=_normalize_vector(fast_axis_vector),
         fast_axis_dim=_fast_axis + '_pixel_offset',
         slow_axis=_normalize_vector(slow_axis_vector),

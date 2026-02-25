@@ -4,7 +4,7 @@ import pathlib
 from contextlib import contextmanager
 
 import pytest
-from scipp.testing.assertions import assert_identical
+from scipp.testing.assertions import assert_allclose, assert_identical
 
 from ess.nmx._nxlauetof_io import load_essnmx_nxlauetof
 from ess.nmx.configurations import InputConfig, OutputConfig, ReductionConfig
@@ -46,7 +46,30 @@ def test_loaded_data_same_as_in_memory_result(
         result = reduction(config=reduction_config)
     original_result_dg = result.to_datagroup()
 
+    # Adjust original result to be same as expected loaded data group.
+    original_result_dg.pop('lookup_table')
+    original_positions = {}
+    detectors = original_result_dg['instrument']['detectors']
+    for det_name, det in detectors.items():
+        # Removing coordinates that are not kept in the file or reconstructed.
+        det['data'].coords.pop('Ltotal')
+        det['data'].coords.pop('detector_number')
+        det['data'].coords.pop('x_pixel_offset')
+        det['data'].coords.pop('y_pixel_offset')
+        # Saving position coordinate to compare them by allclose instead of eq.
+        original_positions[det_name] = det['data'].coords.pop('position')
+
     with pytest.warns(UserWarning, match=r'Could not determine'):
         loaded_dg = load_essnmx_nxlauetof(reduction_config.output.output_file)
 
-    assert_identical(loaded_dg['sample'], original_result_dg['sample'])
+    loaded_detector_positions = {}
+    for det_name, loaded_det in loaded_dg['instrument']['detectors'].items():
+        loaded_detector_positions[det_name] = loaded_det['data'].coords.pop('position')
+
+    assert_identical(loaded_dg, original_result_dg)
+    # Using the x_pixel_size of the first panel to get absolute tolerance.
+    pixel_size = next(iter(detectors.values()))['metadata']['x_pixel_size']
+    atol = pixel_size / 10.0
+    for det_name, original_position in original_positions.items():
+        loaded_position = loaded_detector_positions[det_name]
+        assert_allclose(original_position, loaded_position, atol=atol)

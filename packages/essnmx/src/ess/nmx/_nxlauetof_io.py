@@ -123,23 +123,39 @@ def _handle_detector_data(
     )
     instrument_dg['detectors'] = detectors
     time_coord_name = next(iter({'tof', 'event_time_offset'} & set(detectors.dims)))
+    time_field_name = 'time_of_flight' if time_coord_name == 'tof' else time_coord_name
 
     for det_name, det_gr in detectors.items():
-        all_keys = list(filter(lambda key: key != 'data', det_gr.keys()))
-        metadatas = sc.DataGroup()
-        for key in all_keys:
-            metadatas[key] = det_gr.pop(key)
+        # These fields are part of the histogram as data and coordinate.
+        non_meta_keys = ('data', 'time_of_flight', 'event_time_offset')
+        all_keys = list(filter(lambda key: key not in non_meta_keys, det_gr.keys()))
+        metadatas = sc.DataGroup({key: det_gr.pop(key) for key in all_keys})
 
         for vector_field in ('slow_axis', 'fast_axis', 'origin'):
             metadatas[vector_field] = _as_vector(metadatas[vector_field])
 
         det_gr['metadata'] = metadatas
-        slow_axis_dim = instrument[det_name]['slow_axis'].attrs['dim']
         fast_axis_dim = instrument[det_name]['fast_axis'].attrs['dim']
+        slow_axis_dim = instrument[det_name]['slow_axis'].attrs['dim']
+        metadatas['fast_axis_dim'] = fast_axis_dim
+        metadatas['slow_axis_dim'] = slow_axis_dim
+        metadatas['detector_name'] = det_name
+        metadatas['first_pixel_position'] = sc.vector(
+            instrument[det_name]['origin'].attrs['first_pixel_position'],
+            unit=metadatas['origin'].unit,
+        )
+        time_coord = metadatas.pop('original_time_edges')
+        mid_time = det_gr.pop(time_field_name)
+        if sc.any(sc.midpoints(time_coord) != mid_time):
+            warnings.warn(
+                "Time bin edges and mid point coordinates do not agree.",
+                UserWarning,
+                stacklevel=3,
+            )
         det_gr['data'] = sc.DataArray(
             data=det_gr['data'],
             coords={
-                time_coord_name: metadatas.pop('original_time_edges'),
+                time_coord_name: time_coord,
                 'position': _restore_positions(
                     metadatas=metadatas,
                     fast_axis_dim=fast_axis_dim,
