@@ -154,7 +154,8 @@ class NMXDetectorMetadata:
     detector_name: str
     x_pixel_size: sc.Variable
     y_pixel_size: sc.Variable
-    origin_position: sc.Variable
+    origin: sc.Variable
+    """Center of the detector panel."""
     fast_axis: sc.Variable
     """Inner most dimension if the data is sorted by detector number.
 
@@ -194,7 +195,7 @@ class NMXDetectorMetadata:
     def __write_to_nexus_group__(self, group: h5py.Group):
         snx.create_field(group, 'x_pixel_size', self.x_pixel_size)
         snx.create_field(group, 'y_pixel_size', self.y_pixel_size)
-        origin = snx.create_field(group, 'origin', self.origin_position)
+        origin = snx.create_field(group, 'origin', self.origin)
         origin.attrs['first_pixel_position'] = self.first_pixel_position.values
         fast_axis = snx.create_field(group, 'fast_axis', self.fast_axis)
         fast_axis.attrs['dim'] = self.fast_axis_dim
