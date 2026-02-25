@@ -68,26 +68,6 @@ def _handle_source(instrument_dg: sc.DataGroup, instrument: snx.Group) -> sc.Dat
     instrument_dg['source']['position'] = position
 
 
-def _restore_bin_edges(time_midpoints: sc.Variable) -> sc.Variable:
-    left = time_midpoints[:-1]
-    right = time_midpoints[1:]
-    widths = right - left
-    if not bool(sc.allclose(sc.broadcast(widths[0], sizes=widths.sizes), widths)):
-        warnings.warn(
-            "Time coordinate does not have uniform width. Cannot restore bid-edges. "
-            "Keeping midpoint values...",
-            UserWarning,
-            stacklevel=3,
-        )
-        return time_midpoints
-
-    half_width = widths[0] / 2
-    return sc.concat(
-        [time_midpoints - half_width, time_midpoints[-1] + half_width],
-        dim=time_midpoints.dim,
-    )
-
-
 def _restore_positions(
     *, metadatas: sc.DataGroup, fast_axis_dim: str, slow_axis_dim: str, sizes: dict
 ) -> sc.Variable:
@@ -143,9 +123,6 @@ def _handle_detector_data(
     )
     instrument_dg['detectors'] = detectors
     time_coord_name = next(iter({'tof', 'event_time_offset'} & set(detectors.dims)))
-    time_field_name = (
-        'time_of_flight' if time_coord_name == 'tof' else 'event_time_offset'
-    )
 
     for det_name, det_gr in detectors.items():
         all_keys = list(filter(lambda key: key != 'data', det_gr.keys()))
@@ -162,7 +139,7 @@ def _handle_detector_data(
         det_gr['data'] = sc.DataArray(
             data=det_gr['data'],
             coords={
-                time_coord_name: _restore_bin_edges(metadatas[time_field_name]),
+                time_coord_name: metadatas.pop('original_time_edges'),
                 'position': _restore_positions(
                     metadatas=metadatas,
                     fast_axis_dim=fast_axis_dim,

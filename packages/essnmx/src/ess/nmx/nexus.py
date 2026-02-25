@@ -299,18 +299,24 @@ def export_reduced_data_as_nxlauetof(
         data_dset.attrs["axes"] = list(da.dims)
 
         if 'tof' in da.coords:
-            _create_dataset_from_var(
-                name='time_of_flight',
-                root_entry=nx_detector,
-                var=sc.midpoints(da.coords['tof'], dim='tof'),
-            )
+            time_field_name = "time_of_flight"
+            time_coord_name = "tof"
+            time_dim = "tof"
         elif 'event_time_offset' in da.coords:
-            _create_dataset_from_var(
-                name='event_time_offset',
-                root_entry=nx_detector,
-                var=sc.midpoints(
-                    da.coords['event_time_offset'], dim='event_time_offset'
-                ),
-            )
+            time_field_name = "event_time_offset"
+            time_coord_name = "event_time_offset"
+            time_dim = "event_time_offset"
         else:
             raise ValueError("Could not find time-related bin edges to store.")
+
+        _create_dataset_from_var(
+            name=time_field_name,
+            root_entry=nx_detector,
+            var=sc.midpoints(da.coords[time_coord_name], dim=time_dim),
+        )
+
+        _create_dataset_from_var(
+            name='original_time_edges',
+            root_entry=nx_detector,
+            var=da.coords[time_coord_name],
+        )
