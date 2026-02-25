@@ -32,7 +32,7 @@ TofSimulationMaxWavelength = NewType("TofSimulationMaxWavelength", sc.Variable)
 class ControlMode(enum.StrEnum):
     """Control mode of counting.
 
-    Based on the NXlauetof definition of `control`(NXmonitor) field.
+    Based on the NXlauetof definition of ``control``(NXmonitor) field.
     """
 
     monitor = 'monitor'
