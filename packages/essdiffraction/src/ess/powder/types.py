@@ -14,12 +14,11 @@ from typing import Any, Generic, NewType, TypeVar
 
 import sciline
 import scipp as sc
+from ess.reduce.kinematics import types as kin_t
+from ess.reduce.nexus import types as reduce_t
+from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
 from scippneutron.io import cif
 from scippneutron.metadata import Person, Software
-
-from ess.reduce.nexus import types as reduce_t
-from ess.reduce.time_of_flight import types as tof_t
-from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
 
 EmptyDetector = reduce_t.EmptyDetector
 EmptyMonitor = reduce_t.EmptyMonitor
@@ -36,12 +35,12 @@ Position = reduce_t.Position
 
 DetectorBankSizes = reduce_t.DetectorBankSizes
 
-TofDetector = tof_t.TofDetector
-TofMonitor = tof_t.TofMonitor
-PulseStrideOffset = tof_t.PulseStrideOffset
-TimeOfFlightLookupTable = tof_t.TimeOfFlightLookupTable
-TimeOfFlightLookupTableFilename = tof_t.TimeOfFlightLookupTableFilename
-LookupTableRelativeErrorThreshold = tof_t.LookupTableRelativeErrorThreshold
+WavelengthDetector = kin_t.WavelengthDetector
+WavelengthMonitor = kin_t.WavelengthMonitor
+PulseStrideOffset = kin_t.PulseStrideOffset
+LookupTable = kin_t.LookupTable
+LookupTableFilename = kin_t.LookupTableFilename
+LookupTableRelativeErrorThreshold = kin_t.LookupTableRelativeErrorThreshold
 
 SampleRun = reduce_t.SampleRun
 VanadiumRun = reduce_t.VanadiumRun
@@ -95,7 +94,7 @@ CalibrationData = NewType("CalibrationData", sc.Dataset | None)
 """Detector calibration data."""
 
 
-class WavelengthDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+class DspacingDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Data with scattering coordinates computed for all events: wavelength, 2theta,
     d-spacing."""
 
@@ -170,9 +169,7 @@ class MonitorFilename(sciline.Scope[RunType, Path], Path):
     """
 
 
-class WavelengthMonitor(
-    sciline.Scope[RunType, MonitorType, sc.DataArray], sc.DataArray
-):
+class DspacingMonitor(sciline.Scope[RunType, MonitorType, sc.DataArray], sc.DataArray):
     """Monitor histogram in wavelength."""
 
 

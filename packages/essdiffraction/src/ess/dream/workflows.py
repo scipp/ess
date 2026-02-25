@@ -7,9 +7,9 @@ from collections import defaultdict
 import sciline
 import scipp as sc
 import scippnexus as snx
+from ess.reduce.kinematics import GenericWavelengthWorkflow
 from ess.reduce.nexus.types import DetectorBankSizes, NeXusName
 from ess.reduce.parameter import parameter_mappers
-from ess.reduce.time_of_flight import GenericTofWorkflow
 from ess.reduce.workflow import register_workflow
 from scippneutron.metadata import Software
 
@@ -23,12 +23,12 @@ from ess.powder.types import (
     CaveMonitorPosition,  # Should this be a DREAM-only parameter?
     EmptyCanRun,
     KeepEvents,
+    LookupTableFilename,
     LookupTableRelativeErrorThreshold,
     PixelMaskFilename,
     Position,
     ReducerSoftware,
     SampleRun,
-    TimeOfFlightLookupTableFilename,
     TofMask,
     TwoThetaMask,
     VanadiumRun,
@@ -73,7 +73,7 @@ DETECTOR_BANK_SIZES = {
 
 def _get_lookup_table_filename_from_configuration(
     configuration: InstrumentConfiguration,
-) -> TimeOfFlightLookupTableFilename:
+) -> LookupTableFilename:
     from .data import tof_lookup_table_high_flux
 
     match configuration:
@@ -84,13 +84,13 @@ def _get_lookup_table_filename_from_configuration(
         case InstrumentConfiguration.high_resolution:
             raise NotImplementedError("High resolution configuration not yet supported")
 
-    return TimeOfFlightLookupTableFilename(out)
+    return LookupTableFilename(out)
 
 
 def _collect_reducer_software() -> ReducerSoftware:
     return ReducerSoftware(
         [
-            Software.from_package_metadata('essdiffraction'),
+            # Software.from_package_metadata('essdiffraction'),
             Software.from_package_metadata('scippneutron'),
             Software.from_package_metadata('scipp'),
         ]
@@ -100,7 +100,7 @@ def _collect_reducer_software() -> ReducerSoftware:
 def DreamWorkflow(**kwargs) -> sciline.Pipeline:
     """
     Dream generic workflow with default parameters.
-    The workflow is based on the GenericTofWorkflow.
+    The workflow is based on the GenericWavelengthWorkflow.
     It can load data from a NeXus file recorded on the DREAM instrument, and can
     compute time-of-flight for the neutron events.
 
@@ -111,9 +111,9 @@ def DreamWorkflow(**kwargs) -> sciline.Pipeline:
     ----------
     kwargs:
         Additional keyword arguments are forwarded to the base
-        :func:`GenericTofWorkflow`.
+        :func:`GenericWavelengthWorkflow`.
     """
-    wf = GenericTofWorkflow(
+    wf = GenericWavelengthWorkflow(
         run_types=[SampleRun, VanadiumRun, EmptyCanRun],
         monitor_types=[BunkerMonitor, CaveMonitor],
         **kwargs,
