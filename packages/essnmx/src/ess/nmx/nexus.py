@@ -14,6 +14,7 @@ from .configurations import Compression
 from .types import (
     NMXDetectorMetadata,
     NMXMonitorMetadata,
+    NMXProgram,
     NMXSampleMetadata,
     NMXSourceMetadata,
 )
@@ -146,6 +147,7 @@ def export_static_metadata_as_nxlauetof(
     *,
     sample_metadata: NMXSampleMetadata,
     source_metadata: NMXSourceMetadata,
+    program: NMXProgram,
     output_file: str | pathlib.Path | io.BytesIO,
     overwrite: bool = False,
     **arbitrary_metadata: sc.Variable,
@@ -178,6 +180,7 @@ def export_static_metadata_as_nxlauetof(
         nx_entry = f.create_class(name='entry', class_name='NXlauetof')
         nx_entry.create_field('definitions', value='NXlauetof')
         nx_entry['sample'] = sample_metadata
+        nx_entry['reducer'] = program
 
         nx_instrument = _set_default_instrument(nx_entry)
         nx_instrument['source'] = source_metadata
