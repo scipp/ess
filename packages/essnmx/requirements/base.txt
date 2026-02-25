@@ -9,7 +9,7 @@ annotated-types==0.7.0
     # via pydantic
 bitshuffle==0.5.2 ; os_name == "posix"
     # via -r base.in
-certifi==2026.1.4
+certifi==2026.2.25
     # via requests
 charset-normalizer==3.4.4
     # via requests
@@ -52,8 +52,6 @@ idna==3.11
     # via
     #   email-validator
     #   requests
-importlib-metadata==8.7.1
-    # via dask
 kiwisolver==1.4.9
     # via matplotlib
 lazy-loader==0.4
@@ -67,7 +65,7 @@ matplotlib==3.10.8
     # via
     #   mpltoolbox
     #   plopp
-mpltoolbox==25.10.0
+mpltoolbox==26.2.0
     # via scippneutron
 msgpack==1.1.2
     # via -r base.in
@@ -89,15 +87,15 @@ packaging==26.0
     #   lazy-loader
     #   matplotlib
     #   pooch
-pandas==3.0.0
+pandas==3.0.1
     # via -r base.in
 partd==1.4.2
     # via dask
 pillow==12.1.1
     # via matplotlib
-platformdirs==4.5.1
+platformdirs==4.9.2
     # via pooch
-plopp==26.2.0
+plopp==26.2.1
     # via
     #   -r base.in
     #   scippneutron
@@ -139,7 +137,7 @@ scippnexus==26.1.1
     #   -r base.in
     #   essreduce
     #   scippneutron
-scipy==1.17.0
+scipy==1.17.1
     # via
     #   scippneutron
     #   scippnexus
@@ -160,8 +158,6 @@ typing-inspection==0.4.2
     # via pydantic
 urllib3==2.6.3
     # via requests
-zipp==3.23.0
-    # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
