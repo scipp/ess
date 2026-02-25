@@ -12,7 +12,7 @@ annotated-types==0.7.0
     # via pydantic
 bitshuffle==0.5.2 ; os_name == "posix"
     # via -r nightly.in
-certifi==2026.1.4
+certifi==2026.2.25
     # via requests
 charset-normalizer==3.4.4
     # via requests
@@ -55,8 +55,6 @@ idna==3.11
     # via
     #   email-validator
     #   requests
-importlib-metadata==8.7.1
-    # via dask
 iniconfig==2.3.0
     # via pytest
 kiwisolver==1.4.10rc0
@@ -72,7 +70,7 @@ matplotlib==3.10.8
     # via
     #   mpltoolbox
     #   plopp
-mpltoolbox==25.10.0
+mpltoolbox==26.2.0
     # via scippneutron
 msgpack==1.1.2
     # via -r nightly.in
@@ -95,13 +93,13 @@ packaging==26.0
     #   matplotlib
     #   pooch
     #   pytest
-pandas==3.0.0
+pandas==3.0.1
     # via -r nightly.in
 partd==1.4.2
     # via dask
 pillow==12.1.1
     # via matplotlib
-platformdirs==4.5.1
+platformdirs==4.9.2
     # via pooch
 plopp @ git+https://github.com/scipp/plopp@main
     # via
@@ -114,9 +112,9 @@ pooch==1.9.0
     # via
     #   -r nightly.in
     #   tof
-pydantic==2.12.5
+pydantic==2.13.0b2
     # via scippneutron
-pydantic-core==2.41.5
+pydantic-core==2.42.0
     # via pydantic
 pygments==2.19.2
     # via pytest
@@ -151,7 +149,7 @@ scippnexus @ git+https://github.com/scipp/scippnexus@main
     #   -r nightly.in
     #   essreduce
     #   scippneutron
-scipy==1.17.0
+scipy==1.17.1
     # via
     #   scippneutron
     #   scippnexus
@@ -172,8 +170,6 @@ typing-inspection==0.4.2
     # via pydantic
 urllib3==2.6.3
     # via requests
-zipp==3.23.0
-    # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
