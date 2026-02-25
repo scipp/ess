@@ -15,7 +15,6 @@ import scipp as sc
 import scippneutron as scn
 import scippnexus as snx
 from scippneutron._utils import elem_unit
-from scippneutron.conversion.tof import wavelength_from_tof
 
 try:
     from .interpolator_numba import Interpolator as InterpolatorImpl
