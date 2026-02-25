@@ -59,8 +59,7 @@ def test_loaded_data_same_as_in_memory_result(
         # Saving position coordinate to compare them by allclose instead of eq.
         original_positions[det_name] = det['data'].coords.pop('position')
 
-    with pytest.warns(UserWarning, match=r'Could not determine'):
-        loaded_dg = load_essnmx_nxlauetof(reduction_config.output.output_file)
+    loaded_dg = load_essnmx_nxlauetof(reduction_config.output.output_file)
 
     loaded_detector_positions = {}
     for det_name, loaded_det in loaded_dg['instrument']['detectors'].items():

@@ -167,9 +167,12 @@ def _handle_detector_data(
 
 
 def load_essnmx_nxlauetof(file: str | FilePath | NeXusFile) -> sc.DataGroup:
-    dg = snx.load(file)
-
     with snx.File(file, mode='r') as f:
+        with warnings.catch_warnings(action='ignore'):
+            # Expecting warnings for loading NXdetectors.
+            # The data array reconstruction is handled manually later.
+            dg = f[()]
+
         _validate_entry(entry := f['entry'])
         _handle_sample(dg['entry']['sample'], entry['sample'])
         _handle_monitor(dg['entry']['control'], entry['control'])
