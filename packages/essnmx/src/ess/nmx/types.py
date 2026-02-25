@@ -237,6 +237,19 @@ class NMXInstrument:
 
 
 @dataclass(kw_only=True)
+class NMXProgram:
+    nx_class = 'NXprogram'
+
+    program: str = 'essnmx'
+
+    def __write_to_nexus_group__(self, group: h5py.Group):
+        from ess.nmx import __version__ as essnmxversion
+
+        prog = snx.create_field(group, 'program', self.program)
+        prog.attrs['version'] = essnmxversion
+
+
+@dataclass(kw_only=True)
 class NMXLauetof:
     nx_class = "NXlauetof"
 
@@ -245,6 +258,8 @@ class NMXLauetof:
     instrument: NMXInstrument
     sample: NMXSampleMetadata
     lookup_table: TofLookupTable | None = None
+    reducer: NMXProgram = field(default_factory=NMXProgram)
+    "Information of the reduction software."
 
     def to_datagroup(self) -> sc.DataGroup:
         return to_datagroup(self)
