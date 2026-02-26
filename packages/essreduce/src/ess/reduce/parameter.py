@@ -5,14 +5,13 @@ from __future__ import annotations
 from collections.abc import MutableMapping
 from dataclasses import dataclass
 from enum import Enum
-from typing import Generic, TypeVar
+from typing import Generic, Self, TypeVar
 
 import scipp as sc
 from sciline._utils import key_name
 from sciline.typing import Key
 
 T = TypeVar('T')
-C = TypeVar('C', bound='Parameter')
 
 
 class KeepDefaultType:
@@ -37,7 +36,7 @@ class Parameter(Generic[T]):
     switchable: bool = False
     """If True, widget has checkbox to enable/disable parameter."""
 
-    def with_default(self: C, default: T | KeepDefaultType = keep_default) -> C:
+    def with_default(self: Self, default: T | KeepDefaultType = keep_default) -> Self:
         if default == keep_default:
             return self
         # TODO I think some subclasses currently cannot be instantiated with this method
@@ -47,12 +46,12 @@ class Parameter(Generic[T]):
 
     @classmethod
     def from_type(
-        cls: type[C],
+        cls: type[Self],
         t: type[T],
         default: T | None = None,
         optional: bool = False,
         switchable: bool = False,
-    ) -> C:
+    ) -> Self:
         # TODO __doc__ not correct when using NewType
         # TODO __doc__ not correct when using Generic
         # use sciline type->string helper
@@ -70,7 +69,7 @@ class ParamWithOptions(Parameter[T]):
     options: Enum
 
     @classmethod
-    def from_enum(cls: type[C], t: type[T], default: T) -> C:
+    def from_enum(cls: type[Self], t: type[T], default: T) -> Self:
         return cls(
             name=t.__name__,
             description=t.__doc__,

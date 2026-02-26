@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
-# ruff: noqa: E402, F401
-from functools import singledispatch
+from collections.abc import Callable
+from functools import singledispatch, wraps
 from typing import Any, Protocol
 
 import ipywidgets as widgets
@@ -40,10 +40,6 @@ class EssWidget(Protocol):
 
     @property
     def value(self) -> Any: ...
-
-
-from collections.abc import Callable
-from functools import wraps
 
 
 def switchable_widget(
