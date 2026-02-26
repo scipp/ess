@@ -55,7 +55,6 @@
    :recursive:
 
    data
-   live
    workflow
 ```
 
