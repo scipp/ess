@@ -3,6 +3,7 @@
 
 import pytest
 import sciline as sl
+from ess.reduce.time_of_flight import LookupTableRelativeErrorThreshold
 
 import ess.odin.data  # noqa: F401
 from ess import odin
@@ -17,7 +18,6 @@ from ess.imaging.types import (
     TofDetector,
     WavelengthDetector,
 )
-from ess.reduce.time_of_flight import LookupTableRelativeErrorThreshold
 
 
 @pytest.fixture(scope="module")
