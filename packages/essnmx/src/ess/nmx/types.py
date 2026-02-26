@@ -7,6 +7,7 @@ import numpy as np
 import scipp as sc
 import scippnexus as snx
 from ess.reduce.time_of_flight.types import TofLookupTable
+from scippneutron.metadata import RadiationProbe, SourceType
 
 from ._display_helper import to_datagroup
 
@@ -89,10 +90,21 @@ class NMXSampleMetadata:
 @dataclass(kw_only=True)
 class NMXSourceMetadata:
     nx_class = snx.NXsource
+
     position: sc.Variable
+    """Position of the source (from the sample)."""
+
+    # These three fields are matching fields as ``scippneutron.metadata.Source``.
+    # However, NMX needs to store `position` as a vector,
+    # not only the name, type and probe
+    # essnmx cannot use ``scippneutron.metadata.Source`` as it is.
+    # We will need to implement unpacking function for vector scalar value.
+    # Therefore we decided not to use the ``scippneutron.metadata.Source`` for now
+    # but the ``NMXSourceMetadata`` 's ``source_type`` and ``probe`` fields
+    # have the same Enum types as ``scippneutron.metadata.Source``.
     name: Literal['European Spallation Source'] = "European Spallation Source"
-    type: Literal['Spallation Neutron Source'] = "Spallation Neutron Source"
-    probe: Literal['neutron'] = "neutron"
+    source_type: SourceType = SourceType.SpallationNeutronSource
+    probe: RadiationProbe = RadiationProbe.Neutron
 
     @property
     def distance(self) -> sc.Variable:
@@ -100,10 +112,10 @@ class NMXSourceMetadata:
 
     def __write_to_nexus_group__(self, group: h5py.Group):
         snx.create_field(group, 'name', self.name)
-        snx.create_field(group, 'type', self.type)
+        snx.create_field(group, 'type', self.source_type.value)
         distance = snx.create_field(group, 'distance', self.distance)
         distance.attrs['position'] = self.position.values
-        snx.create_field(group, 'probe', self.probe)
+        snx.create_field(group, 'probe', self.probe.value)
 
 
 def _zero_float_count() -> sc.Variable:
