@@ -1,6 +1,6 @@
 # Development
 
-```{include} ../../CONTRIBUTING.md
+```{include} ../../../../CONTRIBUTING.md
 ```
 
 ## Table of contents
