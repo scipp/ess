@@ -5,6 +5,7 @@ import warnings
 import scipp as sc
 import scippnexus as snx
 from ess.reduce.nexus.types import FilePath, NeXusFile
+from scippneutron.metadata import RadiationProbe, SourceType
 
 from .types import ControlMode
 
@@ -61,11 +62,14 @@ def _handle_monitor(control_dg: sc.DataGroup, control: snx.Group) -> sc.DataGrou
 
 
 def _handle_source(instrument_dg: sc.DataGroup, instrument: snx.Group) -> sc.DataGroup:
-    distance = instrument_dg['source'].pop('distance')
+    source_dg = instrument_dg['source']
+    distance = source_dg.pop('distance')
     position = sc.vector(
         instrument['source']['distance'].attrs['position'], unit=distance.unit
     )
-    instrument_dg['source']['position'] = position
+    source_dg['position'] = position
+    source_dg['source_type'] = SourceType(source_dg.pop('type'))
+    source_dg['probe'] = RadiationProbe(source_dg['probe'])
 
 
 def _restore_positions(
