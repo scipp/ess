@@ -47,7 +47,7 @@ jobs:
 
   test:
     name: Test ${{ matrix.package }}
-    needs: [changes, formatting]
+    needs: [changes]
     if: needs.changes.outputs.packages != '[]'
     strategy:
       fail-fast: false
@@ -64,7 +64,7 @@ jobs:
 
   docs:
     name: Docs ${{ matrix.package }}
-    needs: [changes, test]
+    needs: [changes]
     if: needs.changes.outputs.packages != '[]'
     strategy:
       fail-fast: false
