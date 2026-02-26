@@ -17,6 +17,7 @@ from ess.imaging.types import (
     TofDetector,
     WavelengthDetector,
 )
+from ess.reduce.time_of_flight import LookupTableRelativeErrorThreshold
 
 
 @pytest.fixture(scope="module")
@@ -29,6 +30,9 @@ def workflow() -> sl.Pipeline:
     wf[Filename[OpenBeamRun]] = odin.data.iron_simulation_ob_small()
     wf[NeXusDetectorName] = "event_mode_detectors/timepix3"
     wf[TimeOfFlightLookupTableFilename] = odin.data.odin_tof_lookup_table()
+    wf[LookupTableRelativeErrorThreshold] = {
+        "event_mode_detectors/timepix3": float('inf')
+    }
     # Cache the lookup table
     wf[TimeOfFlightLookupTable] = wf.compute(TimeOfFlightLookupTable)
     return wf
