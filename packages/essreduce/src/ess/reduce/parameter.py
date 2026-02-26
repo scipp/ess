@@ -15,7 +15,7 @@ T = TypeVar('T')
 C = TypeVar('C', bound='Parameter')
 
 
-class KeepDefaultType:
+class KeepDefaultType
     pass
 
 
