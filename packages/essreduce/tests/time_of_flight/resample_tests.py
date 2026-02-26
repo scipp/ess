@@ -167,7 +167,7 @@ class TestGetMinMax:
     def test_with_empty_slices_list_raises_error(self):
         var = sc.array(dims=['x'], values=[1, 2, 3, 4, 5])
         slices = []
-        with pytest.raises(ValueError, match="No strictly increasing sections found."):
+        with pytest.raises(ValueError, match=r"No strictly increasing sections found."):
             resample.get_min_max(var, dim='x', slices=slices)
 
     def test_integration_with_find_strictly_increasing_sections(self):
@@ -243,7 +243,7 @@ class TestMakeRegularGrid:
     def test_empty_slices_list_raises_error(self):
         var = sc.array(dims=['x'], values=[1, 2, 3, 4, 5])
         slices = []
-        with pytest.raises(ValueError, match="No strictly increasing sections found."):
+        with pytest.raises(ValueError, match=r"No strictly increasing sections found."):
             resample.make_regular_grid(var, dim='x', slices=slices)
 
     def test_integration_with_find_strictly_increasing_sections(self):
@@ -401,7 +401,7 @@ class TestRebinStrictlyIncreasing:
         data = sc.array(dims=['tof'], values=[10, 20, 30, 40, 50])
         da = sc.DataArray(data=data, coords={'tof': tof})
 
-        with pytest.raises(ValueError, match="No strictly increasing sections found."):
+        with pytest.raises(ValueError, match=r"No strictly increasing sections found."):
             resample.rebin_strictly_increasing(da, 'tof')
 
     def test_with_variances(self):
