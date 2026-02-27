@@ -19,6 +19,14 @@ from ess.spectroscopy.types import (
 )
 
 
+def _no_time(x: sc.Variable | sc.DataArray) -> sc.Variable:
+    if isinstance(x, sc.DataArray) and 'time' in x.coords:
+        return x['time', 0].data
+    elif isinstance(x, sc.DataArray):
+        raise ValueError("Only `DataArray`s with a time-coordinate allowed")
+    return x
+
+
 def sample_analyzer_vector(
     sample_position: sc.Variable,
     analyzer_position: sc.Variable,
@@ -52,6 +60,17 @@ def sample_analyzer_vector(
         The vector from the sample position to the interaction point on the analyzer
         for each detector element.
     """
+    # FIXME time-dependent depends-on chains produce positions and transformations
+    #       which are `scipp.DataArray`s with a 'time' coordinate. We don't need the
+    #       time-dependence here since all calculations are done in the rotating
+    #       detector-tank coordinate system where these *have no* time-dependence
+    # TODO: Verify that we are actually using the rotating detector-tank coordinate
+    #       frame, otherwise we will misidentify the Q vector for each detector
+    sample_position = _no_time(sample_position)
+    analyzer_position = _no_time(analyzer_position)
+    analyzer_transform = _no_time(analyzer_transform)
+    detector_position = _no_time(detector_position)
+
     # Scipp does not distinguish between coordinates and directions, so we need to do
     # some extra legwork to ensure we can apply the orientation transformation
     # _and_ obtain a dimensionless direction vector
@@ -123,6 +142,16 @@ def analyzer_detector_vector(
     detector_position: sc.Variable,
 ) -> sc.Variable:
     """Calculate the analyzer-detector vector"""
+    # FIXME time-dependent depends-on chains produce positions and transformations
+    #       which are `scipp.DataArray`s with a 'time' coordinate. We don't need the
+    #       time-dependence here since all calculations are done in the rotating
+    #       detector-tank coordinate system where these *have no* time-dependence
+    # TODO: Verify that we are actually using the rotating detector-tank coordinate
+    #       frame, otherwise we will misidentify the Q vector for each detector
+    sample_position = _no_time(sample_position)
+    sample_analyzer_vector = _no_time(sample_analyzer_vector)  # FIXME unnecessary?
+    detector_position = _no_time(detector_position)
+
     analyzer_position = sample_position + sample_analyzer_vector.to(
         unit=sample_analyzer_vector.unit
     )
