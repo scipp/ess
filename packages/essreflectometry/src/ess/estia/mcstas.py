@@ -89,12 +89,20 @@ def parse_events_h5(f, events_to_sample_per_unit_weight=None) -> sc.DataArray:
         with h5py.File(f) as ff:
             return parse_events_h5(ff)
 
-    data, events, params = load_h5(
+    detector, params = load_h5(
         f,
-        'NXentry/NXdetector/NXdata',
-        'NXentry/NXdetector/NXdata/events',
+        'NXentry/NXdetector',
         'NXentry/simulation/Param',
     )
+
+    for v in detector.values():
+        if v.attrs['NX_class'].decode() == 'NXdata' and 'events' in v:
+            data = v
+            events = v['events']
+            break
+    else:
+        raise ValueError('Could not locate event data in file.')
+
     events = events[()]
     if events_to_sample_per_unit_weight is None:
         da = sc.DataArray(
@@ -213,9 +221,12 @@ def load_mcstas(
     da.bins.coords['event_time_offset'] = (
         sc.scalar(1, unit='s') * da.bins.coords['t']
     ).to(unit='ns') % sc.scalar(1 / 14, unit='s').to(unit='ns')
-    da.bins.coords['wavelength_from_mcstas'] = (
-        sc.scalar(1.0, unit='angstrom') * da.bins.coords['L']
-    )
+    da.bins.coords.pop('t')
+
+    if 'L' in da.bins.coords:
+        da.bins.coords['wavelength_from_mcstas'] = sc.scalar(
+            1.0, unit='angstrom'
+        ) * da.bins.coords.pop('L')
 
     da.coords["sample_size"] = sc.scalar(1.0, unit='m') * float(
         da.coords['sample_length'].value
@@ -230,8 +241,6 @@ def load_mcstas(
             if k in ('blade', 'wire')
         },
     )
-    da.bins.coords.pop('L')
-    da.bins.coords.pop('t')
     return da
 
 
