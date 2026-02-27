@@ -7,6 +7,3 @@
 #
 -r base.txt
 -r basetest.txt
-
-# The following packages are considered to be unsafe in a requirements file:
-# setuptools
