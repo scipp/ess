@@ -55,6 +55,7 @@ essnmx-reduce = "ess.nmx.executables:main"
 [project.optional-dependencies]
 test = [
     "pytest>=8.0",
+    "bitshuffle>=0.5.2;os_name == 'posix'",
 ]
 
 [project.urls]
