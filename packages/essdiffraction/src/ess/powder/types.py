@@ -36,6 +36,7 @@ Position = reduce_t.Position
 
 DetectorBankSizes = reduce_t.DetectorBankSizes
 
+DetectorLtotal = tof_t.DetectorLtotal
 TofDetector = tof_t.TofDetector
 TofMonitor = tof_t.TofMonitor
 PulseStrideOffset = tof_t.PulseStrideOffset
@@ -101,6 +102,10 @@ class WavelengthDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
 
 DspacingHistogram = NewType("DspacingHistogram", sc.DataArray)
 """Histogrammed intensity vs d-spacing."""
+
+
+class DetectorTwoTheta(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """Scattering angle (two-theta) for each detector pixel."""
 
 
 class ElasticCoordTransformGraph(sciline.Scope[RunType, dict], dict):

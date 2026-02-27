@@ -8,8 +8,18 @@ from collections.abc import Callable, ItemsView, Iterable, Iterator, KeysView, M
 
 import scipp as sc
 import scipp.constants
+import scippneutron as scn
+import scippnexus as snx
 
-from .types import CorrectedDetector, SampleRun
+from .types import (
+    DetectorLtotal,
+    DetectorTwoTheta,
+    EmptyDetector,
+    GravityVector,
+    Position,
+    RunType,
+    SampleRun,
+)
 
 
 class OutputCalibrationData(Mapping[int, sc.Variable]):
@@ -93,13 +103,45 @@ class OutputCalibrationData(Mapping[int, sc.Variable]):
         )
 
 
+def detector_two_theta(
+    detector: EmptyDetector[RunType],
+    source_position: Position[snx.NXsource, RunType],
+    sample_position: Position[snx.NXsample, RunType],
+    gravity: GravityVector,
+) -> DetectorTwoTheta[RunType]:
+    """Compute the scattering angle (two-theta) for each detector pixel.
+
+    Parameters
+    ----------
+    detector:
+        Data array with detector positions.
+    source_position:
+        Position of the neutron source.
+    sample_position:
+        Position of the sample.
+    gravity:
+        Gravity vector.
+    """
+    graph = {
+        **scn.conversion.graph.beamline.beamline(scatter=True),
+        'source_position': lambda: source_position,
+        'sample_position': lambda: sample_position,
+        'gravity': lambda: gravity,
+    }
+    return DetectorTwoTheta[RunType](
+        detector.transform_coords(
+            "two_theta", graph=graph, keep_intermediate=False
+        ).coords["two_theta"]
+    )
+
+
 def assemble_output_calibration(
-    data: CorrectedDetector[SampleRun],
+    ltotal: DetectorLtotal[SampleRun],
+    two_theta: DetectorTwoTheta[SampleRun],
 ) -> OutputCalibrationData:
     """Construct output calibration data from average pixel positions."""
-    # Use nanmean because pixels without events have position=NaN.
-    average_l = sc.nanmean(data.coords["Ltotal"])
-    average_two_theta = sc.nanmean(data.coords["two_theta"])
+    average_l = sc.nanmean(ltotal)
+    average_two_theta = sc.nanmean(two_theta)
     difc = sc.to_unit(
         2
         * sc.constants.m_n
@@ -111,4 +153,4 @@ def assemble_output_calibration(
     return OutputCalibrationData({1: difc})
 
 
-providers = (assemble_output_calibration,)
+providers = (detector_two_theta, assemble_output_calibration)
