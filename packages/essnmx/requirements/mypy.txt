@@ -14,3 +14,6 @@ mypy-extensions==1.1.0
     # via mypy
 pathspec==1.0.4
     # via mypy
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools
