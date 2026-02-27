@@ -126,9 +126,9 @@ def assemble_sample_metadata(
         raise TypeError(f'Sample name {name}is in a wrong type: ', type(name))
 
     return NMXSampleMetadata(
-        sample_name=sample_name,
+        name=sample_name,
         crystal_rotation=crystal_rotation,
-        sample_position=sample_position,
+        position=sample_position,
     )
 
 
@@ -136,7 +136,7 @@ def assemble_source_metadata(
     source_position: Position[snx.NXsource, SampleRun],
 ) -> NMXSourceMetadata:
     """Assemble source metadata for NMX reduction workflow."""
-    return NMXSourceMetadata(source_position=source_position)
+    return NMXSourceMetadata(position=source_position)
 
 
 def _decide_fast_axis(da: sc.DataArray) -> str:
@@ -196,6 +196,7 @@ def _retrieve_crystal_rotation(
 def assemble_detector_metadata(
     detector_component: NeXusComponent[snx.NXdetector, SampleRun],
     transformation: NeXusTransformation[snx.NXdetector, SampleRun],
+    sample_position: Position[snx.NXsample, SampleRun],
     source_position: Position[snx.NXsource, SampleRun],
     empty_detector: EmptyDetector[SampleRun],
 ) -> NMXDetectorMetadata:
@@ -220,14 +221,25 @@ def assemble_detector_metadata(
     y_pixel_size = _decide_step(empty_detector.coords['y_pixel_offset'])
     distance = sc.norm(origin - source_position.to(unit=origin.unit))
 
+    # We save the first pixel position so that DIALS can read use it.
+    flattened = empty_detector.flatten(to='detector_number')
+    first_pixel_number = flattened.coords['detector_number'].min()
+    first_pixel_position = flattened['detector_number', first_pixel_number].coords[
+        'position'
+    ]
+    first_pixel_position_from_sample = first_pixel_position - sample_position
+
     return NMXDetectorMetadata(
         detector_name=detector_component['nexus_component_name'],
         x_pixel_size=x_pixel_size,
         y_pixel_size=y_pixel_size,
-        origin_position=origin,
+        origin=origin,
         fast_axis=_normalize_vector(fast_axis_vector),
+        fast_axis_dim=_fast_axis + '_pixel_offset',
         slow_axis=_normalize_vector(slow_axis_vector),
+        slow_axis_dim=_slow_axis + '_pixel_offset',
         distance=distance,
+        first_pixel_position=first_pixel_position_from_sample,
     )
 
 
