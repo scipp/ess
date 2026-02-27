@@ -14,6 +14,7 @@ from .configurations import Compression
 from .types import (
     NMXDetectorMetadata,
     NMXMonitorMetadata,
+    NMXProgram,
     NMXSampleMetadata,
     NMXSourceMetadata,
 )
@@ -146,6 +147,7 @@ def export_static_metadata_as_nxlauetof(
     *,
     sample_metadata: NMXSampleMetadata,
     source_metadata: NMXSourceMetadata,
+    program: NMXProgram,
     output_file: str | pathlib.Path | io.BytesIO,
     overwrite: bool = False,
     **arbitrary_metadata: sc.Variable,
@@ -178,6 +180,7 @@ def export_static_metadata_as_nxlauetof(
         nx_entry = f.create_class(name='entry', class_name='NXlauetof')
         nx_entry.create_field('definitions', value='NXlauetof')
         nx_entry['sample'] = sample_metadata
+        nx_entry['reducer'] = program
 
         nx_instrument = _set_default_instrument(nx_entry)
         nx_instrument['source'] = source_metadata
@@ -296,20 +299,27 @@ def export_reduced_data_as_nxlauetof(
         )
 
         data_dset.attrs["signal"] = 1
+        data_dset.attrs["axes"] = list(da.dims)
 
         if 'tof' in da.coords:
-            _create_dataset_from_var(
-                name='time_of_flight',
-                root_entry=nx_detector,
-                var=sc.midpoints(da.coords['tof'], dim='tof'),
-            )
+            time_field_name = "time_of_flight"
+            time_coord_name = "tof"
+            time_dim = "tof"
         elif 'event_time_offset' in da.coords:
-            _create_dataset_from_var(
-                name='event_time_offset',
-                root_entry=nx_detector,
-                var=sc.midpoints(
-                    da.coords['event_time_offset'], dim='event_time_offset'
-                ),
-            )
+            time_field_name = "event_time_offset"
+            time_coord_name = "event_time_offset"
+            time_dim = "event_time_offset"
         else:
             raise ValueError("Could not find time-related bin edges to store.")
+
+        _create_dataset_from_var(
+            name=time_field_name,
+            root_entry=nx_detector,
+            var=sc.midpoints(da.coords[time_coord_name], dim=time_dim),
+        )
+
+        _create_dataset_from_var(
+            name='original_time_edges',
+            root_entry=nx_detector,
+            var=da.coords[time_coord_name],
+        )
