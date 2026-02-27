@@ -44,7 +44,6 @@ dependencies = [
   "defusedxml>=0.7.1",
   "msgpack>=1.0.8",
   "tof>=25.12.1",
-  "bitshuffle>=0.5.2;os_name == 'posix'"
 ]
 
 dynamic = ["version"]
@@ -56,6 +55,7 @@ essnmx-reduce = "ess.nmx.executables:main"
 [project.optional-dependencies]
 test = [
     "pytest>=8.0",
+    "bitshuffle>=0.5.2;os_name == 'posix'",
 ]
 
 [project.urls]
