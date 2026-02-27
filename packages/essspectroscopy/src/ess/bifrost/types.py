@@ -21,3 +21,6 @@ class McStasRawDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray): ...
 
 
 ArcEnergy = NewType('ArcEnergy', sc.Variable)
+
+
+DetectorAnalyzerMap = NewType('DetectorAnalyzerMap', dict[str, str])
