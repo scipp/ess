@@ -142,7 +142,7 @@ scipp==100.0.0.dev0
     #   scippneutron
     #   scippnexus
     #   tof
-scippneutron==25.11.2
+scippneutron==26.2.0
     # via essreduce
 scippnexus @ git+https://github.com/scipp/scippnexus@main
     # via
