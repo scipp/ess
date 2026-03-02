@@ -11,13 +11,10 @@ class InstrumentConfiguration(enum.Enum):
     """
     Choose between high-flux and high-resolution configurations.
 
-    The high_flux setting is the same as the high_flux_BC215. Setting the band chopper
-    phase explicitly should be favored over using the high_flux setting which is kept
-    for backwards compatibility.
+    The ``BCxxx`` suffix indicates the phase of the band chopper.
     """
 
     high_flux_BC215 = 1
-    high_flux = 1  # Legacy alias for high_flux
     high_flux_BC240 = 2
     high_resolution = 3
 
@@ -26,7 +23,10 @@ def choppers(configuration: InstrumentConfiguration) -> dict[str, DiskChopper]:
     """Return the chopper configuration for the given instrument configuration."""
 
     match configuration:
-        case InstrumentConfiguration.high_flux:
+        case (
+            InstrumentConfiguration.high_flux_BC215
+            | InstrumentConfiguration.high_flux_BC240
+        ):
             return {
                 "psc1": DiskChopper(
                     frequency=sc.scalar(14.0, unit="Hz"),
@@ -115,9 +115,15 @@ def choppers(configuration: InstrumentConfiguration) -> dict[str, DiskChopper]:
                 "bcc": DiskChopper(
                     frequency=sc.scalar(112.0, unit="Hz"),
                     beam_position=sc.scalar(0.0, unit="deg"),
-                    phase=sc.scalar(215 - 180, unit="deg"),
-                    # Use 240 to reduce overlap between frames
-                    # phase=sc.scalar(240 - 180, unit="deg"),
+                    phase=sc.scalar(
+                        (
+                            240
+                            if configuration == InstrumentConfiguration.high_flux_BC240
+                            else 215
+                        )
+                        - 180,
+                        unit="deg",
+                    ),
                     axle_position=sc.vector(value=[0, 0, 9.78], unit="m"),
                     slit_begin=sc.array(
                         dims=["cutout"], values=[-36.875, 143.125], unit="deg"

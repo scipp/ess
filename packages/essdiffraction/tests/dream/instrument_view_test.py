@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 import scipp as sc
 
-from ess.dream.instrument_view import InstrumentView
+from ess.dream import instrument_view
 
 
 @pytest.fixture
@@ -35,54 +35,33 @@ def fake_instrument_data(modules=('bank1', 'bank2', 'bank3', 'bank4', 'bank5')):
 
 
 def test_instrument_view_all_modules(fake_instrument_data):
-    view = InstrumentView(fake_instrument_data, dim='tof')
-    assert hasattr(view, 'checkboxes')
-    assert hasattr(view, 'fig')
-    assert hasattr(view, 'slider')
+    instrument_view(fake_instrument_data, dim='tof')
 
 
 def test_instrument_view_one_module(fake_instrument_data):
-    view = InstrumentView(fake_instrument_data['bank1'], dim='tof')
-    assert not hasattr(view, 'checkboxes')
-    assert hasattr(view, 'fig')
-    assert hasattr(view, 'slider')
+    instrument_view(fake_instrument_data['bank1'], dim='tof')
 
 
 def test_instrument_view_slider_not_last_dim_dataarray(fake_instrument_data):
     da = fake_instrument_data['bank1']
     da = da.transpose(('tof', *(set(da.dims) - {'tof'})))
-    InstrumentView(da, dim='tof')
+    instrument_view(da, dim='tof')
 
 
 def test_instrument_view_slider_not_last_dim_datagroup(fake_instrument_data):
-    da = fake_instrument_data
+    dg = fake_instrument_data
     # Add extra dim so that not all entries in the group have the same set of dimensions
-    da['bank2'] = da['bank2'].broadcast(
-        dims=[*da['bank2'].dims, 'extra_dimension'], shape=[*da['bank2'].shape, 1]
+    dg['bank2'] = dg['bank2'].broadcast(
+        dims=[*dg['bank2'].dims, 'extra_dimension'], shape=[*dg['bank2'].shape, 1]
     )
-    for k, v in da.items():
-        da[k] = v.transpose(('tof', *(set(v.dims) - {'tof'})))
-    InstrumentView(da, dim='tof')
+    for k, v in dg.items():
+        dg[k] = v.transpose(('tof', *(set(v.dims) - {'tof'})))
+    instrument_view(dg, dim='tof')
 
 
 def test_instrument_view_no_tof_slider(fake_instrument_data):
-    view = InstrumentView(fake_instrument_data.sum('tof'))
-    assert hasattr(view, 'checkboxes')
-    assert hasattr(view, 'fig')
-    assert not hasattr(view, 'slider')
+    instrument_view(fake_instrument_data.sum('tof'))
 
 
 def test_instrument_view_one_module_no_tof_slider(fake_instrument_data):
-    view = InstrumentView(fake_instrument_data['bank3'].sum('tof'))
-    assert not hasattr(view, 'checkboxes')
-    assert hasattr(view, 'fig')
-    assert not hasattr(view, 'slider')
-
-
-def test_instrument_view_toggle_module(fake_instrument_data):
-    view = InstrumentView(fake_instrument_data, dim='tof')
-    for name in fake_instrument_data:
-        key = view.artist_mapping[name]
-        assert view.fig.artists[key].points.visible
-        view.checkboxes[name].value = False
-        assert not view.fig.artists[key].points.visible
+    instrument_view(fake_instrument_data['bank3'].sum('tof'))

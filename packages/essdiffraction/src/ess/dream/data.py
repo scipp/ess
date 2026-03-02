@@ -24,9 +24,11 @@ _registry = make_registry(
         "DREAM_simple_pwd_workflow/Cave_TOF_Monitor_diam_in_can.dat": "md5:ef24f4a4186c628574046e6629e31611",  # noqa: E501
         "DREAM_simple_pwd_workflow/Cave_TOF_Monitor_van_can.dat": "md5:2cdef7ad9912652149b7e687381d2e99",  # noqa: E501
         "DREAM_simple_pwd_workflow/Cave_TOF_Monitor_vana_inc_coh.dat": "md5:701d66792f20eb283a4ce76bae0c8f8f",  # noqa: E501
-        # BC215
+        # Time-of-flight lookup tables
         "DREAM-high-flux-tof-lookup-table.h5": "md5:1b95a359fa7b0d8b4277806ece9bf279",
         "DREAM-high-flux-tof-lookup-table-BC240-new0.h5": "md5:2cc9dc802082101933429a2ea3624126",  # noqa: E501
+        "DREAM-high-flux-tof-lut-5m-80m.h5": "md5:0db099795027e283f70cb48f738a1c44",
+        "DREAM-high-flux-tof-lut-5m-80m-bc240.h5": "md5:85c0a8acd7ed7f9793ef29f47776f63f",  # noqa: E501
         # Smaller files for unit tests
         "DREAM_simple_pwd_workflow/TEST_data_dream_diamond_vana_container_sample_union.csv.zip": "md5:405df9b5ade9d61ab71fe8d8c19bb51b",  # noqa: E501
         "DREAM_simple_pwd_workflow/TEST_data_dream_vana_container_sample_union.csv.zip": "md5:20186119d1debfb0c2352f9db384cd0a",  # noqa: E501
@@ -265,9 +267,14 @@ def tof_lookup_table_high_flux(bc: Literal[215, 240] = 215) -> Path:
 
     The table was created using the ``tof`` package and the chopper settings for the
     DREAM instrument in high-resolution mode.
-    Note that the phase of the band-control chopper (BCC) was set to 240 degrees to
-    match that of the simulated data (this has since been found to be non-optimal as it
-    leads to time overlap between the two frames).
+    Can return tables for two different band-control chopper (BC) settings:
+    - ``bc=215``: corresponds to the settings of the choppers in the tutorial data.
+    - ``bc=240``: a setting with less time overlap between frames.
+
+    Note that the phase of the band-control chopper (BCC) was set to 215 degrees in the
+    Geant4 simulation which generated the data used in the documentation notebooks.
+    This has since been found to be non-optimal as it leads to time overlap between the
+    two frames, and a value of 240 degrees is now recommended.
 
     This table was computed using `Create a time-of-flight lookup table for DREAM
     <../../user-guide/dream/dream-make-tof-lookup-table.rst>`_
@@ -281,8 +288,8 @@ def tof_lookup_table_high_flux(bc: Literal[215, 240] = 215) -> Path:
     """
     match bc:
         case 215:
-            return get_path("DREAM-high-flux-tof-lookup-table.h5")
+            return get_path("DREAM-high-flux-tof-lut-5m-80m.h5")
         case 240:
-            return get_path("DREAM-high-flux-tof-lookup-table-BC240-new0.h5")
+            return get_path("DREAM-high-flux-tof-lut-5m-80m-bc240.h5")
         case _:
             raise ValueError(f"Unsupported band-control chopper (BC) value: {bc}")
