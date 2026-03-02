@@ -44,6 +44,7 @@ dependencies = [
   "defusedxml>=0.7.1",
   "msgpack>=1.0.8",
   "tof>=25.12.1",
+  "numpy>=1.20.0",
 ]
 
 dynamic = ["version"]
