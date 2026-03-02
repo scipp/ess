@@ -9,7 +9,14 @@ from collections.abc import Callable, ItemsView, Iterable, Iterator, KeysView, M
 import scipp as sc
 import scipp.constants
 
-from .types import CorrectedDetector, SampleRun
+from .types import (
+    DetectorLtotal,
+    DetectorTwoTheta,
+    ElasticCoordTransformGraph,
+    EmptyDetector,
+    RunType,
+    SampleRun,
+)
 
 
 class OutputCalibrationData(Mapping[int, sc.Variable]):
@@ -93,13 +100,34 @@ class OutputCalibrationData(Mapping[int, sc.Variable]):
         )
 
 
+def detector_two_theta(
+    detector: EmptyDetector[RunType],
+    graph: ElasticCoordTransformGraph[RunType],
+) -> DetectorTwoTheta[RunType]:
+    """Compute the scattering angle (two-theta) for each detector pixel.
+
+    Parameters
+    ----------
+    detector:
+        Data array with detector positions.
+    graph:
+        Coordinate transformation graph for elastic scattering.
+    """
+    return DetectorTwoTheta[RunType](
+        detector.transform_coords(
+            "two_theta", graph=graph, keep_intermediate=False
+        ).coords["two_theta"]
+    )
+
+
 def assemble_output_calibration(
-    data: CorrectedDetector[SampleRun],
+    ltotal: DetectorLtotal[SampleRun],
+    two_theta: DetectorTwoTheta[SampleRun],
 ) -> OutputCalibrationData:
     """Construct output calibration data from average pixel positions."""
     # Use nanmean because pixels without events have position=NaN.
-    average_l = sc.nanmean(data.coords["Ltotal"])
-    average_two_theta = sc.nanmean(data.coords["two_theta"])
+    average_l = sc.nanmean(ltotal)
+    average_two_theta = sc.nanmean(two_theta)
     difc = sc.to_unit(
         2
         * sc.constants.m_n
@@ -111,4 +139,4 @@ def assemble_output_calibration(
     return OutputCalibrationData({1: difc})
 
 
-providers = (assemble_output_calibration,)
+providers = (detector_two_theta, assemble_output_calibration)
