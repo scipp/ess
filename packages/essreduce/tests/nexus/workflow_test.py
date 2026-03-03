@@ -8,6 +8,7 @@ import sciline as sl
 import scipp as sc
 import scippnexus as snx
 from scipp.testing import assert_identical
+from scippneutron.metadata import RadiationProbe, SourceType
 
 from ess.reduce.nexus import compute_component_position, load_from_path, workflow
 from ess.reduce.nexus.types import (
@@ -32,6 +33,7 @@ from ess.reduce.nexus.types import (
     RawMonitor,
     RunType,
     SampleRun,
+    Source,
     TimeInterval,
     TransmissionMonitor,
 )
@@ -776,6 +778,18 @@ def test_generic_nexus_workflow_load_beamline_metadata(
     assert beamline.name == 'BIFROST'
     assert beamline.facility == 'ESS'
     assert beamline.site == 'ESS'
+
+
+def test_generic_nexus_workflow_load_source_metadata(
+    dream_coda_test_file: Path,
+) -> None:
+    wf = GenericNeXusWorkflow(run_types=[SampleRun], monitor_types=[])
+    wf[Filename[SampleRun]] = dream_coda_test_file
+    source = wf.compute(Source[SampleRun])
+
+    assert source.name == 'ESS'
+    assert source.probe == RadiationProbe.Neutron
+    assert source.source_type == SourceType.SpallationNeutronSource
 
 
 def test_generic_nexus_workflow_load_measurement_metadata(
