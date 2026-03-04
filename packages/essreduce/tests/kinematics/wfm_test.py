@@ -9,8 +9,8 @@ from scippneutron.conversion.graph.beamline import beamline as beamline_graph
 from scippneutron.conversion.graph.tof import elastic as elastic_graph
 
 from ess.reduce import kinematics
-from ess.reduce.nexus.types import AnyRun, NeXusDetectorName, RawDetector, SampleRun
 from ess.reduce.kinematics import GenericWavelengthWorkflow, LookupTableWorkflow, fakes
+from ess.reduce.nexus.types import AnyRun, NeXusDetectorName, RawDetector, SampleRun
 
 sl = pytest.importorskip("sciline")
 
@@ -117,9 +117,7 @@ def lut_workflow_dream_choppers() -> sl.Pipeline:
     lut_wf[kinematics.NumberOfSimulatedNeutrons] = 100_000
     lut_wf[kinematics.SimulationSeed] = 432
     lut_wf[kinematics.PulseStride] = 1
-    lut_wf[kinematics.SimulationResults] = lut_wf.compute(
-        kinematics.SimulationResults
-    )
+    lut_wf[kinematics.SimulationResults] = lut_wf.compute(kinematics.SimulationResults)
     return lut_wf
 
 
@@ -138,7 +136,7 @@ def setup_workflow(
     lut_wf = lut_workflow.copy()
     lut_wf[kinematics.LtotalRange] = ltotal.min(), ltotal.max()
 
-    pl[kinematics.TofLookupTable] = lut_wf.compute(kinematics.TofLookupTable)
+    pl[kinematics.LookupTable] = lut_wf.compute(kinematics.LookupTable)
     return pl
 
 
@@ -193,11 +191,7 @@ def test_dream_wfm(
         raw_data=raw, ltotal=ltotal, lut_workflow=lut_workflow_dream_choppers
     )
 
-    tofs = pl.compute(kinematics.TofDetector[SampleRun])
-
-    # Convert to wavelength
-    graph = {**beamline_graph(scatter=False), **elastic_graph("tof")}
-    wavs = tofs.transform_coords("wavelength", graph=graph)
+    wavs = pl.compute(kinematics.WavelengthDetector[SampleRun])
 
     for da in wavs.flatten(to='pixel'):
         x = sc.sort(da.value, key='id')
@@ -217,9 +211,7 @@ def lut_workflow_dream_choppers_time_overlap():
     lut_wf[kinematics.NumberOfSimulatedNeutrons] = 100_000
     lut_wf[kinematics.SimulationSeed] = 432
     lut_wf[kinematics.PulseStride] = 1
-    lut_wf[kinematics.SimulationResults] = lut_wf.compute(
-        kinematics.SimulationResults
-    )
+    lut_wf[kinematics.SimulationResults] = lut_wf.compute(kinematics.SimulationResults)
     return lut_wf
 
 
@@ -280,11 +272,7 @@ def test_dream_wfm_with_subframe_time_overlap(
         error_threshold=0.01,
     )
 
-    tofs = pl.compute(kinematics.TofDetector[SampleRun])
-
-    # Convert to wavelength
-    graph = {**beamline_graph(scatter=False), **elastic_graph("tof")}
-    wavs = tofs.transform_coords("wavelength", graph=graph)
+    wavs = pl.compute(kinematics.WavelengthDetector[SampleRun])
 
     for da in wavs.flatten(to='pixel'):
         x = sc.sort(da.value, key='id')
@@ -409,9 +397,7 @@ def lut_workflow_v20_choppers():
     lut_wf[kinematics.NumberOfSimulatedNeutrons] = 300_000
     lut_wf[kinematics.SimulationSeed] = 431
     lut_wf[kinematics.PulseStride] = 1
-    lut_wf[kinematics.SimulationResults] = lut_wf.compute(
-        kinematics.SimulationResults
-    )
+    lut_wf[kinematics.SimulationResults] = lut_wf.compute(kinematics.SimulationResults)
     return lut_wf
 
 
@@ -463,11 +449,7 @@ def test_v20_compute_wavelengths_from_wfm(
         raw_data=raw, ltotal=ltotal, lut_workflow=lut_workflow_v20_choppers
     )
 
-    tofs = pl.compute(kinematics.TofDetector[SampleRun])
-
-    # Convert to wavelength
-    graph = {**beamline_graph(scatter=False), **elastic_graph("tof")}
-    wavs = tofs.transform_coords("wavelength", graph=graph)
+    wavs = pl.compute(kinematics.WavelengthDetector[SampleRun])
 
     for da in wavs.flatten(to='pixel'):
         x = sc.sort(da.value, key='id')
