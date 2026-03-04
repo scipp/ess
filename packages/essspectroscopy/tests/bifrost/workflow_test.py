@@ -16,10 +16,10 @@ from ess.bifrost.data import (
 from ess.spectroscopy.types import (
     EnergyQDetector,
     Filename,
-    FrameMonitor3,
     LookupTableFilename,
     LookupTableRelativeErrorThreshold,
     NeXusDetectorName,
+    NormalizationMonitor,
     RawDetector,
     RawMonitor,
     SampleRun,
@@ -63,7 +63,7 @@ def test_simulation_workflow_can_load_detector() -> None:
 
 
 def test_simulation_workflow_can_load_monitor(workflow: sciline.Pipeline) -> None:
-    result = workflow.compute(RawMonitor[SampleRun, FrameMonitor3])
+    result = workflow.compute(RawMonitor[SampleRun, NormalizationMonitor])
 
     assert result.bins is None
     assert 'position' in result.coords
@@ -100,7 +100,7 @@ def test_simulation_workflow_can_compute_energy_data(
 def test_simulation_workflow_can_compute_wavelength_monitor(
     workflow: sciline.Pipeline,
 ) -> None:
-    monitor = workflow.compute(WavelengthMonitor[SampleRun, FrameMonitor3])
+    monitor = workflow.compute(WavelengthMonitor[SampleRun, NormalizationMonitor])
     assert set(monitor.dims) == {'time', 'incident_wavelength'}
     expected_coords = {'position', 'incident_wavelength', 'time'}
     assert expected_coords.issubset(monitor.coords)

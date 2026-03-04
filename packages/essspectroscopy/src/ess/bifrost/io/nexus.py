@@ -7,7 +7,7 @@ import scipp as sc
 import scippnexus as snx
 
 from ess.bifrost.types import DetectorAnalyzerMap
-from ess.reduce.nexus import load_all_components, open_component_group
+from ess.reduce.nexus import load_all_components, open_component_group, open_nexus_file
 from ess.reduce.nexus.types import NeXusAllLocationSpec, NeXusLocationSpec
 from ess.spectroscopy.types import (
     Analyzer,
@@ -122,13 +122,15 @@ def analyzer_search(hdf5_instrument_group, analyzers, hdf5_detector_group):
     )
 
 
-def get_detector_analyzer_map(file_spec: NeXusFileSpec[RunType]) -> DetectorAnalyzerMap:
+def get_detector_analyzer_map(
+    file_spec: NeXusFileSpec[RunType],
+) -> DetectorAnalyzerMap[RunType]:
     """Probably not the right sciline way to do this."""
 
-    from scippnexus import File, NXcrystal, NXdetector
+    from scippnexus import NXcrystal, NXdetector
 
     filename = file_spec.value
-    with File(filename, 'r') as file:
+    with open_nexus_file(filename) as file:
         inst = file['entry/instrument']
         analyzers = inst[NXcrystal]
         detectors = inst[NXdetector]
@@ -138,7 +140,7 @@ def get_detector_analyzer_map(file_spec: NeXusFileSpec[RunType]) -> DetectorAnal
 def analyzer_for_detector(
     analyzers: Analyzers[RunType],
     detector_location: NeXusComponentLocationSpec[snx.NXdetector, RunType],
-    detector_analyzer_map: DetectorAnalyzerMap,
+    detector_analyzer_map: DetectorAnalyzerMap[RunType],
 ) -> Analyzer[RunType]:
     """Extract the analyzer for a given detector.
 

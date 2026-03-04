@@ -7,8 +7,8 @@ import scipp as sc
 
 from ess.reduce.uncertainty import broadcast_uncertainties
 from ess.spectroscopy.types import (
-    FrameMonitor3,
     IncidentEnergyDetector,
+    NormalizationMonitor,
     NormalizedIncidentEnergyDetector,
     ProtonCharge,
     RunType,
@@ -19,7 +19,7 @@ from ess.spectroscopy.types import (
 
 def normalize_by_monitor_and_proton_charge(
     detector: IncidentEnergyDetector[RunType],
-    monitor: WavelengthMonitor[RunType, FrameMonitor3],
+    monitor: WavelengthMonitor[RunType, NormalizationMonitor],
     proton_charge: ProtonCharge[RunType],
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
 ) -> NormalizedIncidentEnergyDetector[RunType]:
