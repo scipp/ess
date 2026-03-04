@@ -60,7 +60,7 @@ class BinEdgesWidget(ipw.HBox, ipw.ValueWidget, WidgetWithFieldsMixin):
                 layout={"width": "initial"},
             ),
         }
-        self.children = [ipw.Label(f"{name}:")] + list(self.fields.values())[1:]
+        self.children = [ipw.Label(f"{name}:"), *list(self.fields.values())[1:]]
 
     @property
     def value(self) -> sc.Variable:

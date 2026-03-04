@@ -48,6 +48,11 @@ def workflow() -> sl.Pipeline:
     wf = tbl.TblWorkflow()
     wf[Filename[SampleRun]] = tbl.data.tutorial_sample_data()
     wf[TimeOfFlightLookupTableFilename] = tbl.data.tbl_tof_lookup_table_no_choppers()
+    wf[time_of_flight.LookupTableRelativeErrorThreshold] = {
+        "ngem_detector": float('inf'),
+        "he3_detector_bank0": float('inf'),
+        "he3_detector_bank1": float('inf'),
+    }
     return wf
 
 

@@ -3685,8 +3685,8 @@ packages:
   requires_python: '>=3.8'
 - pypi: ./packages/essimaging
   name: essimaging
-  version: 26.1.1.dev1192+gbc021bc.d20260224
-  sha256: 98650e119951a99fc1d19b3e446438ecd9ab3ccf7862f57ca9a57c01b6a394bd
+  version: 26.1.1.dev1198+gbcc8a6f.d20260226
+  sha256: a8e5ca76e8f0394bfe2d09155889730f5889b48ccf696c48ecd568d0cb79bbc4
   requires_dist:
   - dask>=2022.1.0
   - graphviz
@@ -3718,8 +3718,8 @@ packages:
   requires_python: '>=3.11'
 - pypi: ./packages/essreduce
   name: essreduce
-  version: 26.2.3.dev451+gbc021bc.d20260224
-  sha256: 0d21e92446cf529abc02ed9c2a1f4094b2ee7a0985c5957e08e62ec1ca731560
+  version: 26.2.3.dev457+gbcc8a6f.d20260226
+  sha256: 2ace4ae640f740ccef8e9661e37e4ffb2322eca20341684a49a89499dd378cb2
   requires_dist:
   - sciline>=25.11.0
   - scipp>=25.4.0
