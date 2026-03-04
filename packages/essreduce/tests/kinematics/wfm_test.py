@@ -10,7 +10,7 @@ from scippneutron.conversion.graph.tof import elastic as elastic_graph
 
 from ess.reduce import kinematics
 from ess.reduce.nexus.types import AnyRun, NeXusDetectorName, RawDetector, SampleRun
-from ess.reduce.kinematics import GenericWavelengthWorkflow, TofLookupTableWorkflow, fakes
+from ess.reduce.kinematics import GenericWavelengthWorkflow, LookupTableWorkflow, fakes
 
 sl = pytest.importorskip("sciline")
 
@@ -111,7 +111,7 @@ def dream_source_position() -> sc.Variable:
 
 @pytest.fixture(scope="module")
 def lut_workflow_dream_choppers() -> sl.Pipeline:
-    lut_wf = TofLookupTableWorkflow()
+    lut_wf = LookupTableWorkflow()
     lut_wf[kinematics.DiskChoppers[AnyRun]] = dream_choppers()
     lut_wf[kinematics.SourcePosition] = dream_source_position()
     lut_wf[kinematics.NumberOfSimulatedNeutrons] = 100_000
@@ -211,7 +211,7 @@ def test_dream_wfm(
 
 @pytest.fixture(scope="module")
 def lut_workflow_dream_choppers_time_overlap():
-    lut_wf = TofLookupTableWorkflow()
+    lut_wf = LookupTableWorkflow()
     lut_wf[kinematics.DiskChoppers[AnyRun]] = dream_choppers_with_frame_overlap()
     lut_wf[kinematics.SourcePosition] = dream_source_position()
     lut_wf[kinematics.NumberOfSimulatedNeutrons] = 100_000
@@ -403,7 +403,7 @@ def v20_source_position():
 
 @pytest.fixture(scope="module")
 def lut_workflow_v20_choppers():
-    lut_wf = TofLookupTableWorkflow()
+    lut_wf = LookupTableWorkflow()
     lut_wf[kinematics.DiskChoppers[AnyRun]] = v20_choppers()
     lut_wf[kinematics.SourcePosition] = v20_source_position()
     lut_wf[kinematics.NumberOfSimulatedNeutrons] = 300_000

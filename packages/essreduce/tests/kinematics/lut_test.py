@@ -27,7 +27,7 @@ def test_lut_workflow_computes_table():
     wf[kinematics.DistanceResolution] = dres
     wf[kinematics.TimeResolution] = tres
 
-    table = wf.compute(kinematics.TofLookupTable)
+    table = wf.compute(kinematics.LookupTable)
 
     assert table.array.coords['distance'].min() < lmin
     assert table.array.coords['distance'].max() > lmax
@@ -56,7 +56,7 @@ def test_lut_workflow_pulse_skipping():
     wf[kinematics.DistanceResolution] = dres
     wf[kinematics.TimeResolution] = tres
 
-    table = wf.compute(kinematics.TofLookupTable)
+    table = wf.compute(kinematics.LookupTable)
 
     assert table.array.coords['event_time_offset'].max() == 2 * sc.scalar(
         1 / 14, unit='s'
@@ -79,7 +79,7 @@ def test_lut_workflow_non_exact_distance_range():
     wf[kinematics.DistanceResolution] = dres
     wf[kinematics.TimeResolution] = tres
 
-    table = wf.compute(kinematics.TofLookupTable)
+    table = wf.compute(kinematics.LookupTable)
 
     assert table.array.coords['distance'].min() < lmin
     assert table.array.coords['distance'].max() > lmax
@@ -160,7 +160,7 @@ def test_lut_workflow_computes_table_with_choppers():
     wf[kinematics.DistanceResolution] = sc.scalar(0.1, unit='m')
     wf[kinematics.TimeResolution] = sc.scalar(250.0, unit='us')
 
-    table = wf.compute(kinematics.TofLookupTable)
+    table = wf.compute(kinematics.LookupTable)
 
     # At low distance, the rays are more focussed
     low_dist = table.array['distance', 2]
@@ -194,7 +194,7 @@ def test_lut_workflow_computes_table_with_choppers_full_beamline_range():
     wf[kinematics.DistanceResolution] = sc.scalar(0.1, unit='m')
     wf[kinematics.TimeResolution] = sc.scalar(250.0, unit='us')
 
-    table = wf.compute(kinematics.TofLookupTable)
+    table = wf.compute(kinematics.LookupTable)
 
     # Close to source: early times and large spread
     da = table.array['distance', 2]
@@ -246,5 +246,5 @@ def test_lut_workflow_raises_for_distance_before_source():
     wf[kinematics.DistanceResolution] = sc.scalar(0.1, unit='m')
     wf[kinematics.TimeResolution] = sc.scalar(250.0, unit='us')
 
-    with pytest.raises(ValueError, match="Building the Tof lookup table failed"):
-        _ = wf.compute(kinematics.TofLookupTable)
+    with pytest.raises(ValueError, match="Building the lookup table failed"):
+        _ = wf.compute(kinematics.LookupTable)

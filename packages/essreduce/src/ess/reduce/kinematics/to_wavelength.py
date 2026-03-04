@@ -112,7 +112,8 @@ def _compute_wavelength_histogram(
 ) -> sc.DataArray:
     # In NeXus, 'time_of_flight' is the canonical name in NXmonitor, but in some files,
     # it may be called 'tof' or 'frame_time'.
-    key = next(iter(set(da.coords.keys()) & {"time_of_flight", "tof", "frame_time"}))
+    possible_names = {"time_of_flight", "tof", "frame_time"}
+    key = next(iter(set(da.coords.keys()) & possible_names))
     raw_eto = da.coords[key].to(dtype=float, copy=False)
     eto_unit = raw_eto.unit
     pulse_period = lookup.pulse_period.to(unit=eto_unit)
@@ -141,7 +142,7 @@ def _compute_wavelength_histogram(
     )
 
     return rebinned.assign_coords(wavelength=wavs).drop_coords(
-        list({key} & {"time_of_flight", "frame_time"})
+        list({key} & possible_names)
     )
 
 

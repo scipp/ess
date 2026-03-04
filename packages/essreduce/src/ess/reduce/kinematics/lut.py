@@ -323,7 +323,7 @@ def make_wavelength_lookup_table(
         if simulation_reading is None:
             closest = sorted_simulation_results[-1]
             raise ValueError(
-                "Building the Tof lookup table failed: the requested position "
+                "Building the lookup table failed: the requested position "
                 f"{dist.value} {dist.unit} is before the component with the lowest "
                 "distance in the simulation. The first component in the beamline "
                 f"has distance {closest.distance.value} {closest.distance.unit}."
