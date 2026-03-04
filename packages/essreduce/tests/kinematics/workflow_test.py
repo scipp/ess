@@ -7,7 +7,7 @@ import scipp as sc
 import scippnexus as snx
 from scipp.testing import assert_identical
 
-from ess.reduce import time_of_flight
+from ess.reduce import kinematics
 from ess.reduce.nexus.types import (
     AnyRun,
     DiskChoppers,
@@ -18,8 +18,8 @@ from ess.reduce.nexus.types import (
     RawDetector,
     SampleRun,
 )
-from ess.reduce.time_of_flight import (
-    GenericTofWorkflow,
+from ess.reduce.kinematics import (
+    GenericWavelengthWorkflow,
     TofLookupTableWorkflow,
     fakes,
 )
@@ -28,7 +28,7 @@ sl = pytest.importorskip("sciline")
 
 
 @pytest.fixture
-def workflow() -> GenericTofWorkflow:
+def workflow() -> GenericWavelengthWorkflow:
     sizes = {'detector_number': 10}
     calibrated_beamline = sc.DataArray(
         data=sc.ones(sizes=sizes),
@@ -63,9 +63,9 @@ def workflow() -> GenericTofWorkflow:
         )
     )
 
-    wf = GenericTofWorkflow(run_types=[SampleRun], monitor_types=[])
+    wf = GenericWavelengthWorkflow(run_types=[SampleRun], monitor_types=[])
     wf[NeXusDetectorName] = "detector"
-    wf[time_of_flight.LookupTableRelativeErrorThreshold] = {'detector': np.inf}
+    wf[kinematics.LookupTableRelativeErrorThreshold] = {'detector': np.inf}
     wf[EmptyDetector[SampleRun]] = calibrated_beamline
     wf[NeXusData[snx.NXdetector, SampleRun]] = nexus_data
     wf[Position[snx.NXsample, SampleRun]] = sc.vector([0, 0, 77], unit='m')
@@ -77,13 +77,13 @@ def workflow() -> GenericTofWorkflow:
 def test_TofLookupTableWorkflow_can_compute_tof_lut():
     wf = TofLookupTableWorkflow()
     wf[DiskChoppers[AnyRun]] = fakes.psc_choppers()
-    wf[time_of_flight.NumberOfSimulatedNeutrons] = 10_000
-    wf[time_of_flight.LtotalRange] = (
+    wf[kinematics.NumberOfSimulatedNeutrons] = 10_000
+    wf[kinematics.LtotalRange] = (
         sc.scalar(75.0, unit="m"),
         sc.scalar(85.0, unit="m"),
     )
-    wf[time_of_flight.SourcePosition] = fakes.source_position()
-    lut = wf.compute(time_of_flight.TofLookupTable)
+    wf[kinematics.SourcePosition] = fakes.source_position()
+    lut = wf.compute(kinematics.TofLookupTable)
     assert lut.array is not None
     assert lut.distance_resolution is not None
     assert lut.time_resolution is not None
@@ -93,54 +93,54 @@ def test_TofLookupTableWorkflow_can_compute_tof_lut():
 
 
 @pytest.mark.parametrize("coord", ["tof", "wavelength"])
-def test_GenericTofWorkflow_with_tof_lut_from_tof_simulation(workflow, coord: str):
+def test_GenericWavelengthWorkflow_with_tof_lut_from_tof_simulation(workflow, coord: str):
     # Should be able to compute DetectorData without chopper and simulation params
     # This contains event_time_offset (time-of-arrival).
     _ = workflow.compute(RawDetector[SampleRun])
     # By default, the workflow tries to load the LUT from file
     with pytest.raises(sciline.UnsatisfiedRequirement):
-        _ = workflow.compute(time_of_flight.TofLookupTable)
+        _ = workflow.compute(kinematics.TofLookupTable)
     with pytest.raises(sciline.UnsatisfiedRequirement):
-        _ = workflow.compute(time_of_flight.TofDetector[SampleRun])
+        _ = workflow.compute(kinematics.TofDetector[SampleRun])
 
     lut_wf = TofLookupTableWorkflow()
     lut_wf[DiskChoppers[AnyRun]] = fakes.psc_choppers()
-    lut_wf[time_of_flight.NumberOfSimulatedNeutrons] = 10_000
-    lut_wf[time_of_flight.LtotalRange] = (
+    lut_wf[kinematics.NumberOfSimulatedNeutrons] = 10_000
+    lut_wf[kinematics.LtotalRange] = (
         sc.scalar(75.0, unit="m"),
         sc.scalar(85.0, unit="m"),
     )
-    lut_wf[time_of_flight.SourcePosition] = fakes.source_position()
-    table = lut_wf.compute(time_of_flight.TofLookupTable)
+    lut_wf[kinematics.SourcePosition] = fakes.source_position()
+    table = lut_wf.compute(kinematics.TofLookupTable)
 
-    workflow[time_of_flight.TofLookupTable] = table
+    workflow[kinematics.TofLookupTable] = table
 
     if coord == "tof":
-        detector = workflow.compute(time_of_flight.TofDetector[SampleRun])
+        detector = workflow.compute(kinematics.TofDetector[SampleRun])
         assert 'tof' in detector.bins.coords
     else:
-        detector = workflow.compute(time_of_flight.WavelengthDetector[SampleRun])
+        detector = workflow.compute(kinematics.WavelengthDetector[SampleRun])
         assert 'wavelength' in detector.bins.coords
 
 
 @pytest.mark.parametrize("coord", ["tof", "wavelength"])
-def test_GenericTofWorkflow_with_tof_lut_from_file(
+def test_GenericWavelengthWorkflow_with_tof_lut_from_file(
     workflow, tmp_path: pytest.TempPathFactory, coord: str
 ):
     lut_wf = TofLookupTableWorkflow()
     lut_wf[DiskChoppers[AnyRun]] = fakes.psc_choppers()
-    lut_wf[time_of_flight.NumberOfSimulatedNeutrons] = 10_000
-    lut_wf[time_of_flight.LtotalRange] = (
+    lut_wf[kinematics.NumberOfSimulatedNeutrons] = 10_000
+    lut_wf[kinematics.LtotalRange] = (
         sc.scalar(75.0, unit="m"),
         sc.scalar(85.0, unit="m"),
     )
-    lut_wf[time_of_flight.SourcePosition] = fakes.source_position()
-    lut = lut_wf.compute(time_of_flight.TofLookupTable)
+    lut_wf[kinematics.SourcePosition] = fakes.source_position()
+    lut = lut_wf.compute(kinematics.TofLookupTable)
     lut.save_hdf5(filename=tmp_path / "lut.h5")
 
-    workflow[time_of_flight.TofLookupTableFilename] = (tmp_path / "lut.h5").as_posix()
+    workflow[kinematics.TofLookupTableFilename] = (tmp_path / "lut.h5").as_posix()
 
-    loaded_lut = workflow.compute(time_of_flight.TofLookupTable)
+    loaded_lut = workflow.compute(kinematics.TofLookupTable)
     assert_identical(lut.array, loaded_lut.array)
     assert_identical(lut.pulse_period, loaded_lut.pulse_period)
     assert lut.pulse_stride == loaded_lut.pulse_stride
@@ -149,25 +149,25 @@ def test_GenericTofWorkflow_with_tof_lut_from_file(
     assert_identical(lut.choppers, loaded_lut.choppers)
 
     if coord == "tof":
-        detector = workflow.compute(time_of_flight.TofDetector[SampleRun])
+        detector = workflow.compute(kinematics.TofDetector[SampleRun])
         assert 'tof' in detector.bins.coords
     else:
-        detector = workflow.compute(time_of_flight.WavelengthDetector[SampleRun])
+        detector = workflow.compute(kinematics.WavelengthDetector[SampleRun])
         assert 'wavelength' in detector.bins.coords
 
 
-def test_GenericTofWorkflow_with_tof_lut_from_file_old_format(
+def test_GenericWavelengthWorkflow_with_tof_lut_from_file_old_format(
     workflow, tmp_path: pytest.TempPathFactory
 ):
     lut_wf = TofLookupTableWorkflow()
     lut_wf[DiskChoppers[AnyRun]] = fakes.psc_choppers()
-    lut_wf[time_of_flight.NumberOfSimulatedNeutrons] = 10_000
-    lut_wf[time_of_flight.LtotalRange] = (
+    lut_wf[kinematics.NumberOfSimulatedNeutrons] = 10_000
+    lut_wf[kinematics.LtotalRange] = (
         sc.scalar(75.0, unit="m"),
         sc.scalar(85.0, unit="m"),
     )
-    lut_wf[time_of_flight.SourcePosition] = fakes.source_position()
-    lut = lut_wf.compute(time_of_flight.TofLookupTable)
+    lut_wf[kinematics.SourcePosition] = fakes.source_position()
+    lut = lut_wf.compute(kinematics.TofLookupTable)
     old_lut = sc.DataArray(
         data=lut.array.data,
         coords={
@@ -181,8 +181,8 @@ def test_GenericTofWorkflow_with_tof_lut_from_file_old_format(
     )
     old_lut.save_hdf5(filename=tmp_path / "lut.h5")
 
-    workflow[time_of_flight.TofLookupTableFilename] = (tmp_path / "lut.h5").as_posix()
-    loaded_lut = workflow.compute(time_of_flight.TofLookupTable)
+    workflow[kinematics.TofLookupTableFilename] = (tmp_path / "lut.h5").as_posix()
+    loaded_lut = workflow.compute(kinematics.TofLookupTable)
     assert_identical(lut.array, loaded_lut.array)
     assert_identical(lut.pulse_period, loaded_lut.pulse_period)
     assert lut.pulse_stride == loaded_lut.pulse_stride
@@ -190,49 +190,49 @@ def test_GenericTofWorkflow_with_tof_lut_from_file_old_format(
     assert_identical(lut.time_resolution, loaded_lut.time_resolution)
     assert loaded_lut.choppers is None  # No chopper info in old format
 
-    detector = workflow.compute(time_of_flight.TofDetector[SampleRun])
+    detector = workflow.compute(kinematics.TofDetector[SampleRun])
     assert 'tof' in detector.bins.coords
 
 
-def test_GenericTofWorkflow_with_tof_lut_from_tof_simulation_using_alias(workflow):
+def test_GenericWavelengthWorkflow_with_tof_lut_from_tof_simulation_using_alias(workflow):
     # Should be able to compute DetectorData without chopper and simulation params
     # This contains event_time_offset (time-of-arrival).
     _ = workflow.compute(RawDetector[SampleRun])
 
     lut_wf = TofLookupTableWorkflow()
     lut_wf[DiskChoppers[AnyRun]] = fakes.psc_choppers()
-    lut_wf[time_of_flight.NumberOfSimulatedNeutrons] = 10_000
-    lut_wf[time_of_flight.LtotalRange] = (
+    lut_wf[kinematics.NumberOfSimulatedNeutrons] = 10_000
+    lut_wf[kinematics.LtotalRange] = (
         sc.scalar(75.0, unit="m"),
         sc.scalar(85.0, unit="m"),
     )
-    lut_wf[time_of_flight.SourcePosition] = fakes.source_position()
-    table = lut_wf.compute(time_of_flight.TimeOfFlightLookupTable)
+    lut_wf[kinematics.SourcePosition] = fakes.source_position()
+    table = lut_wf.compute(kinematics.TimeOfFlightLookupTable)
 
-    workflow[time_of_flight.TimeOfFlightLookupTable] = table
+    workflow[kinematics.TimeOfFlightLookupTable] = table
     # Should now be able to compute DetectorData with chopper and simulation params
-    detector = workflow.compute(time_of_flight.TofDetector[SampleRun])
+    detector = workflow.compute(kinematics.TofDetector[SampleRun])
     assert 'tof' in detector.bins.coords
 
 
-def test_GenericTofWorkflow_with_tof_lut_from_file_using_alias(
+def test_GenericWavelengthWorkflow_with_tof_lut_from_file_using_alias(
     workflow, tmp_path: pytest.TempPathFactory
 ):
     lut_wf = TofLookupTableWorkflow()
     lut_wf[DiskChoppers[AnyRun]] = fakes.psc_choppers()
-    lut_wf[time_of_flight.NumberOfSimulatedNeutrons] = 10_000
-    lut_wf[time_of_flight.LtotalRange] = (
+    lut_wf[kinematics.NumberOfSimulatedNeutrons] = 10_000
+    lut_wf[kinematics.LtotalRange] = (
         sc.scalar(75.0, unit="m"),
         sc.scalar(85.0, unit="m"),
     )
-    lut_wf[time_of_flight.SourcePosition] = fakes.source_position()
-    lut = lut_wf.compute(time_of_flight.TimeOfFlightLookupTable)
+    lut_wf[kinematics.SourcePosition] = fakes.source_position()
+    lut = lut_wf.compute(kinematics.TimeOfFlightLookupTable)
     lut.save_hdf5(filename=tmp_path / "lut.h5")
 
-    workflow[time_of_flight.TimeOfFlightLookupTableFilename] = (
+    workflow[kinematics.TimeOfFlightLookupTableFilename] = (
         tmp_path / "lut.h5"
     ).as_posix()
-    loaded_lut = workflow.compute(time_of_flight.TimeOfFlightLookupTable)
+    loaded_lut = workflow.compute(kinematics.TimeOfFlightLookupTable)
     assert_identical(lut.array, loaded_lut.array)
     assert_identical(lut.pulse_period, loaded_lut.pulse_period)
     assert lut.pulse_stride == loaded_lut.pulse_stride
@@ -240,30 +240,30 @@ def test_GenericTofWorkflow_with_tof_lut_from_file_using_alias(
     assert_identical(lut.time_resolution, loaded_lut.time_resolution)
     assert_identical(lut.choppers, loaded_lut.choppers)
 
-    detector = workflow.compute(time_of_flight.TofDetector[SampleRun])
+    detector = workflow.compute(kinematics.TofDetector[SampleRun])
     assert 'tof' in detector.bins.coords
 
 
 @pytest.mark.parametrize("coord", ["tof", "wavelength"])
-def test_GenericTofWorkflow_assigns_Ltotal_coordinate(workflow, coord):
+def test_GenericWavelengthWorkflow_assigns_Ltotal_coordinate(workflow, coord):
     raw = workflow.compute(RawDetector[SampleRun])
 
     assert "Ltotal" not in raw.coords
 
     lut_wf = TofLookupTableWorkflow()
     lut_wf[DiskChoppers[AnyRun]] = fakes.psc_choppers()
-    lut_wf[time_of_flight.NumberOfSimulatedNeutrons] = 10_000
-    lut_wf[time_of_flight.LtotalRange] = (
+    lut_wf[kinematics.NumberOfSimulatedNeutrons] = 10_000
+    lut_wf[kinematics.LtotalRange] = (
         sc.scalar(20.0, unit="m"),
         sc.scalar(100.0, unit="m"),
     )
-    lut_wf[time_of_flight.SourcePosition] = fakes.source_position()
-    table = lut_wf.compute(time_of_flight.TofLookupTable)
-    workflow[time_of_flight.TofLookupTable] = table
+    lut_wf[kinematics.SourcePosition] = fakes.source_position()
+    table = lut_wf.compute(kinematics.TofLookupTable)
+    workflow[kinematics.TofLookupTable] = table
 
     if coord == "tof":
-        result = workflow.compute(time_of_flight.TofDetector[SampleRun])
+        result = workflow.compute(kinematics.TofDetector[SampleRun])
     else:
-        result = workflow.compute(time_of_flight.WavelengthDetector[SampleRun])
+        result = workflow.compute(kinematics.WavelengthDetector[SampleRun])
 
     assert "Ltotal" in result.coords

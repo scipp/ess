@@ -8,9 +8,9 @@ from scippneutron.chopper import DiskChopper
 from scippneutron.conversion.graph.beamline import beamline as beamline_graph
 from scippneutron.conversion.graph.tof import elastic as elastic_graph
 
-from ess.reduce import time_of_flight
+from ess.reduce import kinematics
 from ess.reduce.nexus.types import AnyRun, NeXusDetectorName, RawDetector, SampleRun
-from ess.reduce.time_of_flight import GenericTofWorkflow, TofLookupTableWorkflow, fakes
+from ess.reduce.kinematics import GenericWavelengthWorkflow, TofLookupTableWorkflow, fakes
 
 sl = pytest.importorskip("sciline")
 
@@ -112,13 +112,13 @@ def dream_source_position() -> sc.Variable:
 @pytest.fixture(scope="module")
 def lut_workflow_dream_choppers() -> sl.Pipeline:
     lut_wf = TofLookupTableWorkflow()
-    lut_wf[time_of_flight.DiskChoppers[AnyRun]] = dream_choppers()
-    lut_wf[time_of_flight.SourcePosition] = dream_source_position()
-    lut_wf[time_of_flight.NumberOfSimulatedNeutrons] = 100_000
-    lut_wf[time_of_flight.SimulationSeed] = 432
-    lut_wf[time_of_flight.PulseStride] = 1
-    lut_wf[time_of_flight.SimulationResults] = lut_wf.compute(
-        time_of_flight.SimulationResults
+    lut_wf[kinematics.DiskChoppers[AnyRun]] = dream_choppers()
+    lut_wf[kinematics.SourcePosition] = dream_source_position()
+    lut_wf[kinematics.NumberOfSimulatedNeutrons] = 100_000
+    lut_wf[kinematics.SimulationSeed] = 432
+    lut_wf[kinematics.PulseStride] = 1
+    lut_wf[kinematics.SimulationResults] = lut_wf.compute(
+        kinematics.SimulationResults
     )
     return lut_wf
 
@@ -129,16 +129,16 @@ def setup_workflow(
     lut_workflow: sl.Pipeline,
     error_threshold: float = 0.1,
 ) -> sl.Pipeline:
-    pl = GenericTofWorkflow(run_types=[SampleRun], monitor_types=[])
+    pl = GenericWavelengthWorkflow(run_types=[SampleRun], monitor_types=[])
     pl[RawDetector[SampleRun]] = raw_data
-    pl[time_of_flight.DetectorLtotal[SampleRun]] = ltotal
+    pl[kinematics.DetectorLtotal[SampleRun]] = ltotal
     pl[NeXusDetectorName] = "detector"
-    pl[time_of_flight.LookupTableRelativeErrorThreshold] = {"detector": error_threshold}
+    pl[kinematics.LookupTableRelativeErrorThreshold] = {"detector": error_threshold}
 
     lut_wf = lut_workflow.copy()
-    lut_wf[time_of_flight.LtotalRange] = ltotal.min(), ltotal.max()
+    lut_wf[kinematics.LtotalRange] = ltotal.min(), ltotal.max()
 
-    pl[time_of_flight.TofLookupTable] = lut_wf.compute(time_of_flight.TofLookupTable)
+    pl[kinematics.TofLookupTable] = lut_wf.compute(kinematics.TofLookupTable)
     return pl
 
 
@@ -193,7 +193,7 @@ def test_dream_wfm(
         raw_data=raw, ltotal=ltotal, lut_workflow=lut_workflow_dream_choppers
     )
 
-    tofs = pl.compute(time_of_flight.TofDetector[SampleRun])
+    tofs = pl.compute(kinematics.TofDetector[SampleRun])
 
     # Convert to wavelength
     graph = {**beamline_graph(scatter=False), **elastic_graph("tof")}
@@ -212,13 +212,13 @@ def test_dream_wfm(
 @pytest.fixture(scope="module")
 def lut_workflow_dream_choppers_time_overlap():
     lut_wf = TofLookupTableWorkflow()
-    lut_wf[time_of_flight.DiskChoppers[AnyRun]] = dream_choppers_with_frame_overlap()
-    lut_wf[time_of_flight.SourcePosition] = dream_source_position()
-    lut_wf[time_of_flight.NumberOfSimulatedNeutrons] = 100_000
-    lut_wf[time_of_flight.SimulationSeed] = 432
-    lut_wf[time_of_flight.PulseStride] = 1
-    lut_wf[time_of_flight.SimulationResults] = lut_wf.compute(
-        time_of_flight.SimulationResults
+    lut_wf[kinematics.DiskChoppers[AnyRun]] = dream_choppers_with_frame_overlap()
+    lut_wf[kinematics.SourcePosition] = dream_source_position()
+    lut_wf[kinematics.NumberOfSimulatedNeutrons] = 100_000
+    lut_wf[kinematics.SimulationSeed] = 432
+    lut_wf[kinematics.PulseStride] = 1
+    lut_wf[kinematics.SimulationResults] = lut_wf.compute(
+        kinematics.SimulationResults
     )
     return lut_wf
 
@@ -280,7 +280,7 @@ def test_dream_wfm_with_subframe_time_overlap(
         error_threshold=0.01,
     )
 
-    tofs = pl.compute(time_of_flight.TofDetector[SampleRun])
+    tofs = pl.compute(kinematics.TofDetector[SampleRun])
 
     # Convert to wavelength
     graph = {**beamline_graph(scatter=False), **elastic_graph("tof")}
@@ -404,13 +404,13 @@ def v20_source_position():
 @pytest.fixture(scope="module")
 def lut_workflow_v20_choppers():
     lut_wf = TofLookupTableWorkflow()
-    lut_wf[time_of_flight.DiskChoppers[AnyRun]] = v20_choppers()
-    lut_wf[time_of_flight.SourcePosition] = v20_source_position()
-    lut_wf[time_of_flight.NumberOfSimulatedNeutrons] = 300_000
-    lut_wf[time_of_flight.SimulationSeed] = 431
-    lut_wf[time_of_flight.PulseStride] = 1
-    lut_wf[time_of_flight.SimulationResults] = lut_wf.compute(
-        time_of_flight.SimulationResults
+    lut_wf[kinematics.DiskChoppers[AnyRun]] = v20_choppers()
+    lut_wf[kinematics.SourcePosition] = v20_source_position()
+    lut_wf[kinematics.NumberOfSimulatedNeutrons] = 300_000
+    lut_wf[kinematics.SimulationSeed] = 431
+    lut_wf[kinematics.PulseStride] = 1
+    lut_wf[kinematics.SimulationResults] = lut_wf.compute(
+        kinematics.SimulationResults
     )
     return lut_wf
 
@@ -463,7 +463,7 @@ def test_v20_compute_wavelengths_from_wfm(
         raw_data=raw, ltotal=ltotal, lut_workflow=lut_workflow_v20_choppers
     )
 
-    tofs = pl.compute(time_of_flight.TofDetector[SampleRun])
+    tofs = pl.compute(kinematics.TofDetector[SampleRun])
 
     # Convert to wavelength
     graph = {**beamline_graph(scatter=False), **elastic_graph("tof")}
