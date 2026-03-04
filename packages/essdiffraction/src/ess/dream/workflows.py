@@ -19,6 +19,7 @@ from ess.powder.types import (
     EmptyCanRun,
     KeepEvents,
     LookupTableRelativeErrorThreshold,
+    Measurement,
     PixelMaskFilename,
     Position,
     ReducerSoftware,
@@ -227,6 +228,10 @@ def DreamGeant4Workflow(*, run_norm: RunNormalization, **kwargs) -> sciline.Pipe
             "monitor_bunker": float("inf"),
             "monitor_cave": float("inf"),
         },
+        # The GEANT4 files do not encode measurement information
+        Measurement[SampleRun]: Measurement[SampleRun](title=None),
+        Measurement[VanadiumRun]: Measurement[VanadiumRun](title=None),
+        Measurement[EmptyCanRun]: Measurement[EmptyCanRun](title=None),
     }
     for key, value in additional_parameters.items():
         wf[key] = value
