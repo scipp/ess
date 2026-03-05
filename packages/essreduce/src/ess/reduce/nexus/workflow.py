@@ -7,6 +7,7 @@ from collections.abc import Iterable
 from copy import deepcopy
 from typing import Any, TypeVar
 
+import numpy as np
 import sciline
 import sciline.typing
 import scipp as sc
@@ -272,26 +273,51 @@ def load_nexus_data(
 
 
 def get_transformation_chain(
-    detector: NeXusComponent[Component, RunType],
+    component: NeXusComponent[Component, RunType],
 ) -> NeXusTransformationChain[Component, RunType]:
     """
-    Extract the transformation chain from a NeXus detector group.
+    Extract the transformation chain from a NeXus component group.
 
     Parameters
     ----------
-    detector:
-        NeXus detector group.
+    component:
+        NeXus component group.
     """
-    chain = detector['depends_on']
+    chain = component['depends_on']
     return NeXusTransformationChain[Component, RunType](chain)
 
 
-def _time_filter(transform: sc.DataArray) -> sc.Variable:
+def _collapse_runs(transform: sc.DataArray, dim: str) -> sc.DataArray:
+    """Collapse runs of equal values into a single value."""
+    # Find indices where the data changes
+    different_from_previous = np.hstack(
+        [True, ~np.isclose(transform.values[:-1], transform.values[1:])]
+    )
+    change_indices = np.flatnonzero(different_from_previous)
+    if change_indices.shape == transform.shape:
+        return transform  # Return early to avoid expensive indexing
+    # Get unique values
+    unique_values = transform[change_indices]
+
+    # Make bin-edges and extend range to include the whole measurement
+    last = unique_values.coords[dim][-1]
+    unique_values.coords[dim] = sc.concat(
+        [
+            sc.epoch(unit=last.unit),
+            unique_values.coords[dim][1:],
+            # Surely, no experiment will last more than 10 years...
+            last + sc.scalar(10, unit='Y').to(unit=last.unit),
+        ],
+        dim=dim,
+    )
+
+    return unique_values
+
+
+def _time_filter(transform: sc.DataArray) -> sc.Variable | sc.DataArray:
     if transform.ndim == 0 or transform.sizes == {'time': 1}:
         return transform.data.squeeze()
-    raise ValueError(
-        f"Transform is time-dependent: {transform}, but no filter is provided."
-    )
+    return _collapse_runs(transform, dim='time')
 
 
 def to_transformation(
@@ -366,6 +392,10 @@ def get_calibrated_detector(
     The data array is reshaped to the logical detector shape, by folding the data
     array along the detector_number dimension.
 
+    The output contains pixel positions computed from ``transform`` and ``offset``.
+    If ``transform`` is time-dependent, the output contains a 'time' dimension
+    and coordinate corresponding to the time coordinate of ``transform``.
+
     Parameters
     ----------
     detector:
@@ -398,9 +428,17 @@ def get_calibrated_detector(
     else:
         transform_value = transform.value
     position = transform_value * offsets
-    return EmptyDetector[RunType](
-        da.assign_coords(position=position + offset.to(unit=position.unit))
-    )
+
+    position = position + offset.to(unit=position.unit)
+    if isinstance(position, sc.DataArray):  # time-dependent transform
+        # Store position and time as separate coords because we can't store data arrays.
+        return EmptyDetector[RunType](
+            da.broadcast(
+                dims=['time', *da.dims], shape=[position.sizes['time'], *da.shape]
+            ).assign_coords(position=position.data, time=position.coords['time'])
+        )
+
+    return EmptyDetector[RunType](da.assign_coords(position=position))
 
 
 def assemble_detector_data(
@@ -419,13 +457,30 @@ def assemble_detector_data(
     neutron_data:
         Neutron data array (events or histogram).
     """
-    if neutron_data.bins is not None:
+    detector_coords = dict(detector.coords)
+    position = detector_coords.get('position')
+    if neutron_data.is_binned:
         neutron_data = nexus.group_event_data(
             event_data=neutron_data, detector_number=detector.coords['detector_number']
         )
+        if position is not None and 'time' in position.dims:
+            del detector_coords['position']
+            time = detector_coords.pop('time')
+            pos_lookup = sc.lookup(
+                sc.DataArray(position, coords={'time': time}), dim='time'
+            )
+            neutron_data.bins.coords['position'] = pos_lookup[
+                neutron_data.bins.coords['event_time_zero']
+            ]
+    else:
+        if position is not None and 'time' in position.dims:
+            raise NotImplementedError(
+                "Time-dependent positions are not yet supported for histogram data."
+            )
+
     return RawDetector[RunType](
         _add_variances(neutron_data)
-        .assign_coords(detector.coords)
+        .assign_coords(detector_coords)
         .assign_masks(detector.masks)
     )
 
@@ -632,7 +687,6 @@ def load_measurement_metadata_from_nexus(
 definitions = snx.base_definitions()
 definitions["NXdetector"] = _StrippedDetector
 definitions["NXmonitor"] = _StrippedMonitor
-
 
 _common_providers = (
     gravity_vector_neg_y,
