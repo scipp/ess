@@ -280,7 +280,7 @@ class NeXusTransformationChain(
 
 @dataclass
 class NeXusTransformation(Generic[Component, RunType]):
-    value: sc.Variable
+    value: sc.Variable | sc.DataArray
 
     @staticmethod
     def from_chain(
@@ -295,8 +295,8 @@ class NeXusTransformation(Generic[Component, RunType]):
         therefore currently raise an error if the transformation chain does not compute
         to a scalar.
         """
-        if chain.transformations.sizes != {}:
-            raise ValueError(f"Expected scalar transformation, got {chain}")
+        # if chain.transformations.sizes != {}:
+        #     raise ValueError(f"Expected scalar transformation, got {chain}")
         transform = chain.compute()
         return NeXusTransformation(value=transform)
 
