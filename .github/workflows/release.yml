@@ -30,6 +30,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Copy LICENSE into package
+        run: cp LICENSE packages/${{ needs.determine-package.outputs.package }}/LICENSE
       - name: Build package
         run: pip install build && python -m build packages/${{ needs.determine-package.outputs.package }}
       - uses: actions/upload-artifact@v4
