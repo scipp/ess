@@ -12,7 +12,7 @@ from ess import imaging as pkg
 
 def test_has_version():
     assert hasattr(pkg, '__version__')
-    assert 1 == 2
+    assert 1 == 1
 
 
 # This is for CI package tests. They need to run tests with minimal dependencies,
