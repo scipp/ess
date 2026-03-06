@@ -8,11 +8,6 @@ import scippnexus as snx
 from scipp.testing import assert_identical
 
 from ess.reduce import unwrap
-from ess.reduce.unwrap import (
-    GenericUnwrapWorkflow,
-    LookupTableWorkflow,
-    fakes,
-)
 from ess.reduce.nexus.types import (
     AnyRun,
     DiskChoppers,
@@ -22,6 +17,11 @@ from ess.reduce.nexus.types import (
     Position,
     RawDetector,
     SampleRun,
+)
+from ess.reduce.unwrap import (
+    GenericUnwrapWorkflow,
+    LookupTableWorkflow,
+    fakes,
 )
 
 sl = pytest.importorskip("sciline")
@@ -100,7 +100,7 @@ def test_GenericUnwrapWorkflow_with_lut_from_tof_simulation(workflow):
     with pytest.raises(sciline.UnsatisfiedRequirement):
         _ = workflow.compute(unwrap.LookupTable)
     with pytest.raises(sciline.UnsatisfiedRequirement):
-        _ = workflow.compute(unwrap.TofDetector[SampleRun])
+        _ = workflow.compute(unwrap.WavelengthDetector[SampleRun])
 
     lut_wf = LookupTableWorkflow()
     lut_wf[DiskChoppers[AnyRun]] = fakes.psc_choppers()

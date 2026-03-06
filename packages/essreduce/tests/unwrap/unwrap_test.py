@@ -6,12 +6,6 @@ import scipp as sc
 from scippneutron.chopper import DiskChopper
 
 from ess.reduce import unwrap
-from ess.reduce.unwrap import (
-    GenericUnwrapWorkflow,
-    LookupTableWorkflow,
-    PulsePeriod,
-    fakes,
-)
 from ess.reduce.nexus.types import (
     AnyRun,
     FrameMonitor0,
@@ -20,6 +14,12 @@ from ess.reduce.nexus.types import (
     RawDetector,
     RawMonitor,
     SampleRun,
+)
+from ess.reduce.unwrap import (
+    GenericUnwrapWorkflow,
+    LookupTableWorkflow,
+    PulsePeriod,
+    fakes,
 )
 
 sl = pytest.importorskip("sciline")
@@ -551,65 +551,3 @@ def test_unwrap_int(dtype, detector_or_monitor, lut_workflow_psc_choppers) -> No
     _validate_result_events(
         wavs=wavs, ref=ref, percentile=100, diff_threshold=0.02, rtol=0.05
     )
-
-
-def test_compute_toa():
-    distance = sc.scalar(80.0, unit="m")
-    choppers = fakes.psc_choppers()
-
-    lut_wf = make_lut_workflow(
-        choppers=choppers, neutrons=500_000, seed=1234, pulse_stride=1
-    )
-
-    pl, _ = _make_workflow_event_mode(
-        distance=distance,
-        choppers=choppers,
-        lut_workflow=lut_wf,
-        seed=2,
-        pulse_stride_offset=0,
-        error_threshold=0.1,
-        detector_or_monitor="detector",
-    )
-
-    toas = pl.compute(unwrap.ToaDetector[SampleRun])
-
-    assert "toa" in toas.bins.coords
-    raw = pl.compute(RawDetector[SampleRun])
-    assert sc.allclose(toas.bins.coords["toa"], raw.bins.coords["event_time_offset"])
-
-
-def test_compute_toa_pulse_skipping():
-    distance = sc.scalar(100.0, unit="m")
-    choppers = fakes.pulse_skipping_choppers()
-
-    lut_wf = make_lut_workflow(
-        choppers=choppers, neutrons=500_000, seed=1234, pulse_stride=2
-    )
-
-    pl, _ = _make_workflow_event_mode(
-        distance=distance,
-        choppers=choppers,
-        lut_workflow=lut_wf,
-        seed=2,
-        pulse_stride_offset=1,
-        error_threshold=0.1,
-        detector_or_monitor="detector",
-    )
-
-    raw = pl.compute(RawDetector[SampleRun])
-
-    toas = pl.compute(unwrap.ToaDetector[SampleRun])
-
-    assert "toa" in toas.bins.coords
-    pulse_period = lut_wf.compute(PulsePeriod)
-    hist = toas.bins.concat().hist(
-        toa=sc.array(
-            dims=["toa"],
-            values=[0, pulse_period.value, pulse_period.value * 2],
-            unit=pulse_period.unit,
-        ).to(unit=toas.bins.coords["toa"].unit)
-    )
-    # There should be counts in both bins
-    n = raw.sum().value
-    assert hist.data[0].value > n / 5
-    assert hist.data[1].value > n / 5
