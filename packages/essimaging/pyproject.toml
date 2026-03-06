@@ -10,7 +10,6 @@ name = "essimaging"
 description = "Imaging data reduction for the European Spallation Source"
 authors = [{ name = "Scipp contributors" }]
 license = "BSD-3-Clause"
-license-files = ["../../LICENSE"]
 readme = "README.md"
 classifiers = [
     "Intended Audience :: Science/Research",
@@ -24,6 +23,8 @@ classifiers = [
     "Topic :: Scientific/Engineering",
     "Typing :: Typed",
 ]
+# The min python version should be updated in the root pixi.toml file
+# pre-commit will automatically update the following pin
 requires-python = ">=3.11"
 
 dynamic = ["version"]
