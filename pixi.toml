@@ -27,6 +27,10 @@ essreduce = { path = "packages/essreduce", editable = true, extras = ["test"] }
 [feature.essimaging.pypi-dependencies]
 essimaging = { path = "packages/essimaging", editable = true, extras = ["test"] }
 
+# essnmx (depends on essreduce)
+[feature.essnmx.pypi-dependencies]
+essnmx = { path = "packages/essnmx", editable = true, extras = ["test"] }
+
 # ==================== Lint feature ====================
 
 [feature.lint.pypi-dependencies]
@@ -50,23 +54,29 @@ essreduce = { path = "packages/essreduce", editable = true, extras = ["test", "d
 [feature.docs-essimaging.pypi-dependencies]
 essimaging = { path = "packages/essimaging", editable = true, extras = ["test", "docs"] }
 
+[feature.docs-essnmx.pypi-dependencies]
+essnmx = { path = "packages/essnmx", editable = true, extras = ["test", "docs"] }
+
 # ==================== Environments ====================
 
 [environments]
 # Default: all packages (for full dev setup)
-default = { features = ["essreduce", "essimaging"], solve-group = "default" }
+default = { features = ["essreduce", "essimaging", "essnmx"], solve-group = "default" }
 
 # Per-package test environments (include workspace dep features)
 essreduce = { features = ["essreduce"], solve-group = "default" }
 essimaging = { features = ["essimaging", "essreduce"], solve-group = "default" }
+essnmx = { features = ["essnmx", "essreduce"], solve-group = "default" }
 
 # Lower-bound test environments (separate resolution)
 lb-essreduce = { features = ["essreduce"], solve-group = "lower-bound" }
 lb-essimaging = { features = ["essimaging", "essreduce"], solve-group = "lower-bound" }
+lb-essnmx = { features = ["essnmx", "essreduce"], solve-group = "lower-bound" }
 
 # Docs environments (package with docs extra + pandoc)
 docs-essreduce = { features = ["docs-essreduce", "docs"], solve-group = "default" }
 docs-essimaging = { features = ["docs-essimaging", "docs-essreduce", "docs"], solve-group = "default" }
+docs-essnmx = { features = ["docs-essnmx", "docs-essreduce", "docs"], solve-group = "default" }
 
 # Lint environment (standalone, no package deps)
 lint = { features = ["lint"], solve-group = "lint" }
