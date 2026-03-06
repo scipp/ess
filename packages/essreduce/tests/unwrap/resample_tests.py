@@ -6,7 +6,7 @@ import pytest
 import scipp as sc
 from scipp.testing import assert_identical
 
-from ess.reduce.time_of_flight import resample
+from ess.reduce.unwrap import resample
 
 
 class TestFindStrictlyIncreasingSections:
