@@ -7,8 +7,8 @@ import scipp as sc
 import scippnexus as snx
 from scipp.testing import assert_identical
 
-from ess.reduce import kinematics
-from ess.reduce.kinematics import (
+from ess.reduce import unwrap
+from ess.reduce.unwrap import (
     GenericWavelengthWorkflow,
     LookupTableWorkflow,
     fakes,
@@ -65,7 +65,7 @@ def workflow() -> GenericWavelengthWorkflow:
 
     wf = GenericWavelengthWorkflow(run_types=[SampleRun], monitor_types=[])
     wf[NeXusDetectorName] = "detector"
-    wf[kinematics.LookupTableRelativeErrorThreshold] = {'detector': np.inf}
+    wf[unwrap.LookupTableRelativeErrorThreshold] = {'detector': np.inf}
     wf[EmptyDetector[SampleRun]] = calibrated_beamline
     wf[NeXusData[snx.NXdetector, SampleRun]] = nexus_data
     wf[Position[snx.NXsample, SampleRun]] = sc.vector([0, 0, 77], unit='m')
@@ -77,13 +77,13 @@ def workflow() -> GenericWavelengthWorkflow:
 def test_LookupTableWorkflow_can_compute_lut():
     wf = LookupTableWorkflow()
     wf[DiskChoppers[AnyRun]] = fakes.psc_choppers()
-    wf[kinematics.NumberOfSimulatedNeutrons] = 10_000
-    wf[kinematics.LtotalRange] = (
+    wf[unwrap.NumberOfSimulatedNeutrons] = 10_000
+    wf[unwrap.LtotalRange] = (
         sc.scalar(75.0, unit="m"),
         sc.scalar(85.0, unit="m"),
     )
-    wf[kinematics.SourcePosition] = fakes.source_position()
-    lut = wf.compute(kinematics.LookupTable)
+    wf[unwrap.SourcePosition] = fakes.source_position()
+    lut = wf.compute(unwrap.LookupTable)
     assert lut.array is not None
     assert lut.distance_resolution is not None
     assert lut.time_resolution is not None
@@ -98,22 +98,22 @@ def test_GenericWavelengthWorkflow_with_lut_from_tof_simulation(workflow):
     _ = workflow.compute(RawDetector[SampleRun])
     # By default, the workflow tries to load the LUT from file
     with pytest.raises(sciline.UnsatisfiedRequirement):
-        _ = workflow.compute(kinematics.LookupTable)
+        _ = workflow.compute(unwrap.LookupTable)
     with pytest.raises(sciline.UnsatisfiedRequirement):
-        _ = workflow.compute(kinematics.TofDetector[SampleRun])
+        _ = workflow.compute(unwrap.TofDetector[SampleRun])
 
     lut_wf = LookupTableWorkflow()
     lut_wf[DiskChoppers[AnyRun]] = fakes.psc_choppers()
-    lut_wf[kinematics.NumberOfSimulatedNeutrons] = 10_000
-    lut_wf[kinematics.LtotalRange] = (
+    lut_wf[unwrap.NumberOfSimulatedNeutrons] = 10_000
+    lut_wf[unwrap.LtotalRange] = (
         sc.scalar(75.0, unit="m"),
         sc.scalar(85.0, unit="m"),
     )
-    lut_wf[kinematics.SourcePosition] = fakes.source_position()
-    table = lut_wf.compute(kinematics.LookupTable)
+    lut_wf[unwrap.SourcePosition] = fakes.source_position()
+    table = lut_wf.compute(unwrap.LookupTable)
 
-    workflow[kinematics.LookupTable] = table
-    detector = workflow.compute(kinematics.WavelengthDetector[SampleRun])
+    workflow[unwrap.LookupTable] = table
+    detector = workflow.compute(unwrap.WavelengthDetector[SampleRun])
     assert 'wavelength' in detector.bins.coords
 
 
@@ -122,18 +122,18 @@ def test_GenericWavelengthWorkflow_with_lut_from_file(
 ):
     lut_wf = LookupTableWorkflow()
     lut_wf[DiskChoppers[AnyRun]] = fakes.psc_choppers()
-    lut_wf[kinematics.NumberOfSimulatedNeutrons] = 10_000
-    lut_wf[kinematics.LtotalRange] = (
+    lut_wf[unwrap.NumberOfSimulatedNeutrons] = 10_000
+    lut_wf[unwrap.LtotalRange] = (
         sc.scalar(75.0, unit="m"),
         sc.scalar(85.0, unit="m"),
     )
-    lut_wf[kinematics.SourcePosition] = fakes.source_position()
-    lut = lut_wf.compute(kinematics.LookupTable)
+    lut_wf[unwrap.SourcePosition] = fakes.source_position()
+    lut = lut_wf.compute(unwrap.LookupTable)
     lut.save_hdf5(filename=tmp_path / "lut.h5")
 
-    workflow[kinematics.LookupTableFilename] = (tmp_path / "lut.h5").as_posix()
+    workflow[unwrap.LookupTableFilename] = (tmp_path / "lut.h5").as_posix()
 
-    loaded_lut = workflow.compute(kinematics.LookupTable)
+    loaded_lut = workflow.compute(unwrap.LookupTable)
     assert_identical(lut.array, loaded_lut.array)
     assert_identical(lut.pulse_period, loaded_lut.pulse_period)
     assert lut.pulse_stride == loaded_lut.pulse_stride
@@ -141,7 +141,7 @@ def test_GenericWavelengthWorkflow_with_lut_from_file(
     assert_identical(lut.time_resolution, loaded_lut.time_resolution)
     assert_identical(lut.choppers, loaded_lut.choppers)
 
-    detector = workflow.compute(kinematics.WavelengthDetector[SampleRun])
+    detector = workflow.compute(unwrap.WavelengthDetector[SampleRun])
     assert 'wavelength' in detector.bins.coords
 
 
@@ -150,13 +150,13 @@ def test_GenericWavelengthWorkflow_with_lut_from_file_old_format(
 ):
     lut_wf = LookupTableWorkflow()
     lut_wf[DiskChoppers[AnyRun]] = fakes.psc_choppers()
-    lut_wf[kinematics.NumberOfSimulatedNeutrons] = 10_000
-    lut_wf[kinematics.LtotalRange] = (
+    lut_wf[unwrap.NumberOfSimulatedNeutrons] = 10_000
+    lut_wf[unwrap.LtotalRange] = (
         sc.scalar(75.0, unit="m"),
         sc.scalar(85.0, unit="m"),
     )
-    lut_wf[kinematics.SourcePosition] = fakes.source_position()
-    lut = lut_wf.compute(kinematics.LookupTable)
+    lut_wf[unwrap.SourcePosition] = fakes.source_position()
+    lut = lut_wf.compute(unwrap.LookupTable)
     old_lut = sc.DataArray(
         data=lut.array.data,
         coords={
@@ -170,8 +170,8 @@ def test_GenericWavelengthWorkflow_with_lut_from_file_old_format(
     )
     old_lut.save_hdf5(filename=tmp_path / "lut.h5")
 
-    workflow[kinematics.LookupTableFilename] = (tmp_path / "lut.h5").as_posix()
-    loaded_lut = workflow.compute(kinematics.LookupTable)
+    workflow[unwrap.LookupTableFilename] = (tmp_path / "lut.h5").as_posix()
+    loaded_lut = workflow.compute(unwrap.LookupTable)
     assert_identical(lut.array, loaded_lut.array)
     assert_identical(lut.pulse_period, loaded_lut.pulse_period)
     assert lut.pulse_stride == loaded_lut.pulse_stride
@@ -179,5 +179,5 @@ def test_GenericWavelengthWorkflow_with_lut_from_file_old_format(
     assert_identical(lut.time_resolution, loaded_lut.time_resolution)
     assert loaded_lut.choppers is None  # No chopper info in old format
 
-    detector = workflow.compute(kinematics.WavelengthDetector[SampleRun])
+    detector = workflow.compute(unwrap.WavelengthDetector[SampleRun])
     assert 'wavelength' in detector.bins.coords

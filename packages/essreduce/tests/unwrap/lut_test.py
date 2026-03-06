@@ -4,8 +4,8 @@ import pytest
 import scipp as sc
 from scippneutron.chopper import DiskChopper
 
-from ess.reduce import kinematics
-from ess.reduce.kinematics import LookupTableWorkflow
+from ess.reduce import unwrap
+from ess.reduce.unwrap import LookupTableWorkflow
 from ess.reduce.nexus.types import AnyRun
 
 sl = pytest.importorskip("sciline")
@@ -13,21 +13,21 @@ sl = pytest.importorskip("sciline")
 
 def test_lut_workflow_computes_table():
     wf = LookupTableWorkflow()
-    wf[kinematics.DiskChoppers[AnyRun]] = {}
-    wf[kinematics.SourcePosition] = sc.vector([0, 0, 0], unit='m')
-    wf[kinematics.NumberOfSimulatedNeutrons] = 100_000
-    wf[kinematics.SimulationSeed] = 60
-    wf[kinematics.PulseStride] = 1
+    wf[unwrap.DiskChoppers[AnyRun]] = {}
+    wf[unwrap.SourcePosition] = sc.vector([0, 0, 0], unit='m')
+    wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
+    wf[unwrap.SimulationSeed] = 60
+    wf[unwrap.PulseStride] = 1
 
     lmin, lmax = sc.scalar(25.0, unit='m'), sc.scalar(35.0, unit='m')
     dres = sc.scalar(0.1, unit='m')
     tres = sc.scalar(333.0, unit='us')
 
-    wf[kinematics.LtotalRange] = lmin, lmax
-    wf[kinematics.DistanceResolution] = dres
-    wf[kinematics.TimeResolution] = tres
+    wf[unwrap.LtotalRange] = lmin, lmax
+    wf[unwrap.DistanceResolution] = dres
+    wf[unwrap.TimeResolution] = tres
 
-    table = wf.compute(kinematics.LookupTable)
+    table = wf.compute(unwrap.LookupTable)
 
     assert table.array.coords['distance'].min() < lmin
     assert table.array.coords['distance'].max() > lmax
@@ -42,21 +42,21 @@ def test_lut_workflow_computes_table():
 
 def test_lut_workflow_pulse_skipping():
     wf = LookupTableWorkflow()
-    wf[kinematics.DiskChoppers[AnyRun]] = {}
-    wf[kinematics.SourcePosition] = sc.vector([0, 0, 0], unit='m')
-    wf[kinematics.NumberOfSimulatedNeutrons] = 100_000
-    wf[kinematics.SimulationSeed] = 62
-    wf[kinematics.PulseStride] = 2
+    wf[unwrap.DiskChoppers[AnyRun]] = {}
+    wf[unwrap.SourcePosition] = sc.vector([0, 0, 0], unit='m')
+    wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
+    wf[unwrap.SimulationSeed] = 62
+    wf[unwrap.PulseStride] = 2
 
     lmin, lmax = sc.scalar(55.0, unit='m'), sc.scalar(65.0, unit='m')
     dres = sc.scalar(0.1, unit='m')
     tres = sc.scalar(250.0, unit='us')
 
-    wf[kinematics.LtotalRange] = lmin, lmax
-    wf[kinematics.DistanceResolution] = dres
-    wf[kinematics.TimeResolution] = tres
+    wf[unwrap.LtotalRange] = lmin, lmax
+    wf[unwrap.DistanceResolution] = dres
+    wf[unwrap.TimeResolution] = tres
 
-    table = wf.compute(kinematics.LookupTable)
+    table = wf.compute(unwrap.LookupTable)
 
     assert table.array.coords['event_time_offset'].max() == 2 * sc.scalar(
         1 / 14, unit='s'
@@ -65,21 +65,21 @@ def test_lut_workflow_pulse_skipping():
 
 def test_lut_workflow_non_exact_distance_range():
     wf = LookupTableWorkflow()
-    wf[kinematics.DiskChoppers[AnyRun]] = {}
-    wf[kinematics.SourcePosition] = sc.vector([0, 0, 0], unit='m')
-    wf[kinematics.NumberOfSimulatedNeutrons] = 100_000
-    wf[kinematics.SimulationSeed] = 63
-    wf[kinematics.PulseStride] = 1
+    wf[unwrap.DiskChoppers[AnyRun]] = {}
+    wf[unwrap.SourcePosition] = sc.vector([0, 0, 0], unit='m')
+    wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
+    wf[unwrap.SimulationSeed] = 63
+    wf[unwrap.PulseStride] = 1
 
     lmin, lmax = sc.scalar(25.0, unit='m'), sc.scalar(35.0, unit='m')
     dres = sc.scalar(0.33, unit='m')
     tres = sc.scalar(250.0, unit='us')
 
-    wf[kinematics.LtotalRange] = lmin, lmax
-    wf[kinematics.DistanceResolution] = dres
-    wf[kinematics.TimeResolution] = tres
+    wf[unwrap.LtotalRange] = lmin, lmax
+    wf[unwrap.DistanceResolution] = dres
+    wf[unwrap.TimeResolution] = tres
 
-    table = wf.compute(kinematics.LookupTable)
+    table = wf.compute(unwrap.LookupTable)
 
     assert table.array.coords['distance'].min() < lmin
     assert table.array.coords['distance'].max() > lmax
@@ -147,20 +147,20 @@ def _make_choppers():
 
 def test_lut_workflow_computes_table_with_choppers():
     wf = LookupTableWorkflow()
-    wf[kinematics.DiskChoppers[AnyRun]] = _make_choppers()
-    wf[kinematics.SourcePosition] = sc.vector([0, 0, 0], unit='m')
-    wf[kinematics.NumberOfSimulatedNeutrons] = 100_000
-    wf[kinematics.SimulationSeed] = 64
-    wf[kinematics.PulseStride] = 1
+    wf[unwrap.DiskChoppers[AnyRun]] = _make_choppers()
+    wf[unwrap.SourcePosition] = sc.vector([0, 0, 0], unit='m')
+    wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
+    wf[unwrap.SimulationSeed] = 64
+    wf[unwrap.PulseStride] = 1
 
-    wf[kinematics.LtotalRange] = (
+    wf[unwrap.LtotalRange] = (
         sc.scalar(35.0, unit='m'),
         sc.scalar(65.0, unit='m'),
     )
-    wf[kinematics.DistanceResolution] = sc.scalar(0.1, unit='m')
-    wf[kinematics.TimeResolution] = sc.scalar(250.0, unit='us')
+    wf[unwrap.DistanceResolution] = sc.scalar(0.1, unit='m')
+    wf[unwrap.TimeResolution] = sc.scalar(250.0, unit='us')
 
-    table = wf.compute(kinematics.LookupTable)
+    table = wf.compute(unwrap.LookupTable)
 
     # At low distance, the rays are more focussed
     low_dist = table.array['distance', 2]
@@ -181,20 +181,20 @@ def test_lut_workflow_computes_table_with_choppers():
 
 def test_lut_workflow_computes_table_with_choppers_full_beamline_range():
     wf = LookupTableWorkflow()
-    wf[kinematics.DiskChoppers[AnyRun]] = _make_choppers()
-    wf[kinematics.SourcePosition] = sc.vector([0, 0, 0], unit='m')
-    wf[kinematics.NumberOfSimulatedNeutrons] = 100_000
-    wf[kinematics.SimulationSeed] = 64
-    wf[kinematics.PulseStride] = 1
+    wf[unwrap.DiskChoppers[AnyRun]] = _make_choppers()
+    wf[unwrap.SourcePosition] = sc.vector([0, 0, 0], unit='m')
+    wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
+    wf[unwrap.SimulationSeed] = 64
+    wf[unwrap.PulseStride] = 1
 
-    wf[kinematics.LtotalRange] = (
+    wf[unwrap.LtotalRange] = (
         sc.scalar(5.0, unit='m'),
         sc.scalar(65.0, unit='m'),
     )
-    wf[kinematics.DistanceResolution] = sc.scalar(0.1, unit='m')
-    wf[kinematics.TimeResolution] = sc.scalar(250.0, unit='us')
+    wf[unwrap.DistanceResolution] = sc.scalar(0.1, unit='m')
+    wf[unwrap.TimeResolution] = sc.scalar(250.0, unit='us')
 
-    table = wf.compute(kinematics.LookupTable)
+    table = wf.compute(unwrap.LookupTable)
 
     # Close to source: early times and large spread
     da = table.array['distance', 2]
@@ -231,20 +231,20 @@ def test_lut_workflow_computes_table_with_choppers_full_beamline_range():
 
 def test_lut_workflow_raises_for_distance_before_source():
     wf = LookupTableWorkflow()
-    wf[kinematics.DiskChoppers[AnyRun]] = {}
-    wf[kinematics.SourcePosition] = sc.vector([0, 0, 10], unit='m')
-    wf[kinematics.NumberOfSimulatedNeutrons] = 100_000
-    wf[kinematics.SimulationSeed] = 65
-    wf[kinematics.PulseStride] = 1
+    wf[unwrap.DiskChoppers[AnyRun]] = {}
+    wf[unwrap.SourcePosition] = sc.vector([0, 0, 10], unit='m')
+    wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
+    wf[unwrap.SimulationSeed] = 65
+    wf[unwrap.PulseStride] = 1
 
     # Setting the starting point at zero will make a table that would cover a range
     # from -0.2m to 65.0m
-    wf[kinematics.LtotalRange] = (
+    wf[unwrap.LtotalRange] = (
         sc.scalar(0.0, unit='m'),
         sc.scalar(65.0, unit='m'),
     )
-    wf[kinematics.DistanceResolution] = sc.scalar(0.1, unit='m')
-    wf[kinematics.TimeResolution] = sc.scalar(250.0, unit='us')
+    wf[unwrap.DistanceResolution] = sc.scalar(0.1, unit='m')
+    wf[unwrap.TimeResolution] = sc.scalar(250.0, unit='us')
 
     with pytest.raises(ValueError, match="Building the lookup table failed"):
-        _ = wf.compute(kinematics.LookupTable)
+        _ = wf.compute(unwrap.LookupTable)

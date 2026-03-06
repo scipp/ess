@@ -8,8 +8,8 @@ from scippneutron.chopper import DiskChopper
 from scippneutron.conversion.graph.beamline import beamline as beamline_graph
 from scippneutron.conversion.graph.tof import elastic as elastic_graph
 
-from ess.reduce import kinematics
-from ess.reduce.kinematics import GenericWavelengthWorkflow, LookupTableWorkflow, fakes
+from ess.reduce import unwrap
+from ess.reduce.unwrap import GenericWavelengthWorkflow, LookupTableWorkflow, fakes
 from ess.reduce.nexus.types import AnyRun, NeXusDetectorName, RawDetector, SampleRun
 
 sl = pytest.importorskip("sciline")
@@ -112,12 +112,12 @@ def dream_source_position() -> sc.Variable:
 @pytest.fixture(scope="module")
 def lut_workflow_dream_choppers() -> sl.Pipeline:
     lut_wf = LookupTableWorkflow()
-    lut_wf[kinematics.DiskChoppers[AnyRun]] = dream_choppers()
-    lut_wf[kinematics.SourcePosition] = dream_source_position()
-    lut_wf[kinematics.NumberOfSimulatedNeutrons] = 100_000
-    lut_wf[kinematics.SimulationSeed] = 432
-    lut_wf[kinematics.PulseStride] = 1
-    lut_wf[kinematics.SimulationResults] = lut_wf.compute(kinematics.SimulationResults)
+    lut_wf[unwrap.DiskChoppers[AnyRun]] = dream_choppers()
+    lut_wf[unwrap.SourcePosition] = dream_source_position()
+    lut_wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
+    lut_wf[unwrap.SimulationSeed] = 432
+    lut_wf[unwrap.PulseStride] = 1
+    lut_wf[unwrap.SimulationResults] = lut_wf.compute(unwrap.SimulationResults)
     return lut_wf
 
 
@@ -129,14 +129,14 @@ def setup_workflow(
 ) -> sl.Pipeline:
     pl = GenericWavelengthWorkflow(run_types=[SampleRun], monitor_types=[])
     pl[RawDetector[SampleRun]] = raw_data
-    pl[kinematics.DetectorLtotal[SampleRun]] = ltotal
+    pl[unwrap.DetectorLtotal[SampleRun]] = ltotal
     pl[NeXusDetectorName] = "detector"
-    pl[kinematics.LookupTableRelativeErrorThreshold] = {"detector": error_threshold}
+    pl[unwrap.LookupTableRelativeErrorThreshold] = {"detector": error_threshold}
 
     lut_wf = lut_workflow.copy()
-    lut_wf[kinematics.LtotalRange] = ltotal.min(), ltotal.max()
+    lut_wf[unwrap.LtotalRange] = ltotal.min(), ltotal.max()
 
-    pl[kinematics.LookupTable] = lut_wf.compute(kinematics.LookupTable)
+    pl[unwrap.LookupTable] = lut_wf.compute(unwrap.LookupTable)
     return pl
 
 
@@ -191,7 +191,7 @@ def test_dream_wfm(
         raw_data=raw, ltotal=ltotal, lut_workflow=lut_workflow_dream_choppers
     )
 
-    wavs = pl.compute(kinematics.WavelengthDetector[SampleRun])
+    wavs = pl.compute(unwrap.WavelengthDetector[SampleRun])
 
     for da in wavs.flatten(to='pixel'):
         x = sc.sort(da.value, key='id')
@@ -206,12 +206,12 @@ def test_dream_wfm(
 @pytest.fixture(scope="module")
 def lut_workflow_dream_choppers_time_overlap():
     lut_wf = LookupTableWorkflow()
-    lut_wf[kinematics.DiskChoppers[AnyRun]] = dream_choppers_with_frame_overlap()
-    lut_wf[kinematics.SourcePosition] = dream_source_position()
-    lut_wf[kinematics.NumberOfSimulatedNeutrons] = 100_000
-    lut_wf[kinematics.SimulationSeed] = 432
-    lut_wf[kinematics.PulseStride] = 1
-    lut_wf[kinematics.SimulationResults] = lut_wf.compute(kinematics.SimulationResults)
+    lut_wf[unwrap.DiskChoppers[AnyRun]] = dream_choppers_with_frame_overlap()
+    lut_wf[unwrap.SourcePosition] = dream_source_position()
+    lut_wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
+    lut_wf[unwrap.SimulationSeed] = 432
+    lut_wf[unwrap.PulseStride] = 1
+    lut_wf[unwrap.SimulationResults] = lut_wf.compute(unwrap.SimulationResults)
     return lut_wf
 
 
@@ -272,7 +272,7 @@ def test_dream_wfm_with_subframe_time_overlap(
         error_threshold=0.01,
     )
 
-    wavs = pl.compute(kinematics.WavelengthDetector[SampleRun])
+    wavs = pl.compute(unwrap.WavelengthDetector[SampleRun])
 
     for da in wavs.flatten(to='pixel'):
         x = sc.sort(da.value, key='id')
@@ -392,12 +392,12 @@ def v20_source_position():
 @pytest.fixture(scope="module")
 def lut_workflow_v20_choppers():
     lut_wf = LookupTableWorkflow()
-    lut_wf[kinematics.DiskChoppers[AnyRun]] = v20_choppers()
-    lut_wf[kinematics.SourcePosition] = v20_source_position()
-    lut_wf[kinematics.NumberOfSimulatedNeutrons] = 300_000
-    lut_wf[kinematics.SimulationSeed] = 431
-    lut_wf[kinematics.PulseStride] = 1
-    lut_wf[kinematics.SimulationResults] = lut_wf.compute(kinematics.SimulationResults)
+    lut_wf[unwrap.DiskChoppers[AnyRun]] = v20_choppers()
+    lut_wf[unwrap.SourcePosition] = v20_source_position()
+    lut_wf[unwrap.NumberOfSimulatedNeutrons] = 300_000
+    lut_wf[unwrap.SimulationSeed] = 431
+    lut_wf[unwrap.PulseStride] = 1
+    lut_wf[unwrap.SimulationResults] = lut_wf.compute(unwrap.SimulationResults)
     return lut_wf
 
 
@@ -449,7 +449,7 @@ def test_v20_compute_wavelengths_from_wfm(
         raw_data=raw, ltotal=ltotal, lut_workflow=lut_workflow_v20_choppers
     )
 
-    wavs = pl.compute(kinematics.WavelengthDetector[SampleRun])
+    wavs = pl.compute(unwrap.WavelengthDetector[SampleRun])
 
     for da in wavs.flatten(to='pixel'):
         x = sc.sort(da.value, key='id')

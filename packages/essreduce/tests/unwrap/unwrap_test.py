@@ -5,8 +5,8 @@ import pytest
 import scipp as sc
 from scippneutron.chopper import DiskChopper
 
-from ess.reduce import kinematics
-from ess.reduce.kinematics import (
+from ess.reduce import unwrap
+from ess.reduce.unwrap import (
     GenericWavelengthWorkflow,
     LookupTableWorkflow,
     PulsePeriod,
@@ -27,12 +27,12 @@ sl = pytest.importorskip("sciline")
 
 def make_lut_workflow(choppers, neutrons, seed, pulse_stride):
     lut_wf = LookupTableWorkflow()
-    lut_wf[kinematics.DiskChoppers[AnyRun]] = choppers
-    lut_wf[kinematics.SourcePosition] = fakes.source_position()
-    lut_wf[kinematics.NumberOfSimulatedNeutrons] = neutrons
-    lut_wf[kinematics.SimulationSeed] = seed
-    lut_wf[kinematics.PulseStride] = pulse_stride
-    lut_wf[kinematics.SimulationResults] = lut_wf.compute(kinematics.SimulationResults)
+    lut_wf[unwrap.DiskChoppers[AnyRun]] = choppers
+    lut_wf[unwrap.SourcePosition] = fakes.source_position()
+    lut_wf[unwrap.NumberOfSimulatedNeutrons] = neutrons
+    lut_wf[unwrap.SimulationSeed] = seed
+    lut_wf[unwrap.PulseStride] = pulse_stride
+    lut_wf[unwrap.SimulationResults] = lut_wf.compute(unwrap.SimulationResults)
     return lut_wf
 
 
@@ -75,22 +75,22 @@ def _make_workflow_event_mode(
     if detector_or_monitor == "detector":
         pl[NeXusDetectorName] = "detector"
         pl[RawDetector[SampleRun]] = mon
-        pl[kinematics.DetectorLtotal[SampleRun]] = distance
+        pl[unwrap.DetectorLtotal[SampleRun]] = distance
     else:
         pl[NeXusName[FrameMonitor0]] = "monitor"
         pl[RawMonitor[SampleRun, FrameMonitor0]] = mon
-        pl[kinematics.MonitorLtotal[SampleRun, FrameMonitor0]] = distance
+        pl[unwrap.MonitorLtotal[SampleRun, FrameMonitor0]] = distance
 
-    pl[kinematics.LookupTableRelativeErrorThreshold] = {
+    pl[unwrap.LookupTableRelativeErrorThreshold] = {
         'detector': error_threshold,
         'monitor': error_threshold,
     }
-    pl[kinematics.PulseStrideOffset] = pulse_stride_offset
+    pl[unwrap.PulseStrideOffset] = pulse_stride_offset
 
     lut_wf = lut_workflow.copy()
-    lut_wf[kinematics.LtotalRange] = distance, distance
+    lut_wf[unwrap.LtotalRange] = distance, distance
 
-    pl[kinematics.LookupTable] = lut_wf.compute(kinematics.LookupTable)
+    pl[unwrap.LookupTable] = lut_wf.compute(unwrap.LookupTable)
 
     return pl, ref
 
@@ -116,21 +116,21 @@ def _make_workflow_histogram_mode(
     if detector_or_monitor == "detector":
         pl[NeXusDetectorName] = "detector"
         pl[RawDetector[SampleRun]] = mon
-        pl[kinematics.DetectorLtotal[SampleRun]] = distance
+        pl[unwrap.DetectorLtotal[SampleRun]] = distance
     else:
         pl[NeXusName[FrameMonitor0]] = "monitor"
         pl[RawMonitor[SampleRun, FrameMonitor0]] = mon
-        pl[kinematics.MonitorLtotal[SampleRun, FrameMonitor0]] = distance
+        pl[unwrap.MonitorLtotal[SampleRun, FrameMonitor0]] = distance
 
-    pl[kinematics.LookupTableRelativeErrorThreshold] = {
+    pl[unwrap.LookupTableRelativeErrorThreshold] = {
         'detector': error_threshold,
         'monitor': error_threshold,
     }
 
     lut_wf = lut_workflow.copy()
-    lut_wf[kinematics.LtotalRange] = distance, distance
+    lut_wf[unwrap.LtotalRange] = distance, distance
 
-    pl[kinematics.LookupTable] = lut_wf.compute(kinematics.LookupTable)
+    pl[unwrap.LookupTable] = lut_wf.compute(unwrap.LookupTable)
 
     return pl, ref
 
@@ -193,9 +193,9 @@ def test_unwrap_with_no_choppers(detector_or_monitor) -> None:
     )
 
     if detector_or_monitor == "detector":
-        wavs = pl.compute(kinematics.WavelengthDetector[SampleRun])
+        wavs = pl.compute(unwrap.WavelengthDetector[SampleRun])
     else:
-        wavs = pl.compute(kinematics.WavelengthMonitor[SampleRun, FrameMonitor0])
+        wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
     _validate_result_events(
         wavs=wavs, ref=ref, percentile=96, diff_threshold=1.0, rtol=0.02
@@ -221,9 +221,9 @@ def test_standard_unwrap(dist, detector_or_monitor, lut_workflow_psc_choppers) -
     )
 
     if detector_or_monitor == "detector":
-        wavs = pl.compute(kinematics.WavelengthDetector[SampleRun])
+        wavs = pl.compute(unwrap.WavelengthDetector[SampleRun])
     else:
-        wavs = pl.compute(kinematics.WavelengthMonitor[SampleRun, FrameMonitor0])
+        wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
     _validate_result_events(
         wavs=wavs, ref=ref, percentile=100, diff_threshold=0.02, rtol=0.05
@@ -251,9 +251,9 @@ def test_standard_unwrap_histogram_mode(
     )
 
     if detector_or_monitor == "detector":
-        wavs = pl.compute(kinematics.WavelengthDetector[SampleRun])
+        wavs = pl.compute(unwrap.WavelengthDetector[SampleRun])
     else:
-        wavs = pl.compute(kinematics.WavelengthMonitor[SampleRun, FrameMonitor0])
+        wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
     _validate_result_histogram_mode(
         wavs=wavs, ref=ref, percentile=96, diff_threshold=0.4, rtol=0.05
@@ -277,9 +277,9 @@ def test_pulse_skipping_unwrap(
     )
 
     if detector_or_monitor == "detector":
-        wavs = pl.compute(kinematics.WavelengthDetector[SampleRun])
+        wavs = pl.compute(unwrap.WavelengthDetector[SampleRun])
     else:
-        wavs = pl.compute(kinematics.WavelengthMonitor[SampleRun, FrameMonitor0])
+        wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
     _validate_result_events(
         wavs=wavs, ref=ref, percentile=100, diff_threshold=0.1, rtol=0.05
@@ -306,9 +306,9 @@ def test_pulse_skipping_unwrap_180_phase_shift(detector_or_monitor) -> None:
     )
 
     if detector_or_monitor == "detector":
-        wavs = pl.compute(kinematics.WavelengthDetector[SampleRun])
+        wavs = pl.compute(unwrap.WavelengthDetector[SampleRun])
     else:
-        wavs = pl.compute(kinematics.WavelengthMonitor[SampleRun, FrameMonitor0])
+        wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
     _validate_result_events(
         wavs=wavs, ref=ref, percentile=100, diff_threshold=0.1, rtol=0.05
@@ -331,9 +331,9 @@ def test_pulse_skipping_stride_offset_guess_gives_expected_result(
     )
 
     if detector_or_monitor == "detector":
-        wavs = pl.compute(kinematics.WavelengthDetector[SampleRun])
+        wavs = pl.compute(unwrap.WavelengthDetector[SampleRun])
     else:
-        wavs = pl.compute(kinematics.WavelengthMonitor[SampleRun, FrameMonitor0])
+        wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
     _validate_result_events(
         wavs=wavs, ref=ref, percentile=100, diff_threshold=0.1, rtol=0.05
@@ -371,9 +371,9 @@ def test_pulse_skipping_unwrap_when_all_neutrons_arrive_after_second_pulse(
     )
 
     if detector_or_monitor == "detector":
-        wavs = pl.compute(kinematics.WavelengthDetector[SampleRun])
+        wavs = pl.compute(unwrap.WavelengthDetector[SampleRun])
     else:
-        wavs = pl.compute(kinematics.WavelengthMonitor[SampleRun, FrameMonitor0])
+        wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
     _validate_result_events(
         wavs=wavs, ref=ref, percentile=100, diff_threshold=0.1, rtol=0.05
@@ -399,7 +399,7 @@ def test_pulse_skipping_unwrap_when_first_half_of_first_pulse_is_missing(
     lut_wf = make_lut_workflow(
         choppers=choppers, neutrons=300_000, seed=1234, pulse_stride=2
     )
-    lut_wf[kinematics.LtotalRange] = distance, distance
+    lut_wf[unwrap.LtotalRange] = distance, distance
 
     pl = GenericWavelengthWorkflow(run_types=[SampleRun], monitor_types=[FrameMonitor0])
 
@@ -408,9 +408,9 @@ def test_pulse_skipping_unwrap_when_first_half_of_first_pulse_is_missing(
     a.bins.coords['event_time_zero'] = sc.bins_like(a, a.coords['event_time_zero'])
     concatenated = a.bins.concat('event_time_zero')
 
-    pl[kinematics.LookupTable] = lut_wf.compute(kinematics.LookupTable)
-    pl[kinematics.PulseStrideOffset] = 1  # Start the stride at the second pulse
-    pl[kinematics.LookupTableRelativeErrorThreshold] = {
+    pl[unwrap.LookupTable] = lut_wf.compute(unwrap.LookupTable)
+    pl[unwrap.PulseStrideOffset] = 1  # Start the stride at the second pulse
+    pl[unwrap.LookupTableRelativeErrorThreshold] = {
         'detector': np.inf,
         'monitor': np.inf,
     }
@@ -418,13 +418,13 @@ def test_pulse_skipping_unwrap_when_first_half_of_first_pulse_is_missing(
     if detector_or_monitor == "detector":
         pl[NeXusDetectorName] = "detector"
         pl[RawDetector[SampleRun]] = concatenated
-        pl[kinematics.DetectorLtotal[SampleRun]] = distance
-        wavs = pl.compute(kinematics.WavelengthDetector[SampleRun])
+        pl[unwrap.DetectorLtotal[SampleRun]] = distance
+        wavs = pl.compute(unwrap.WavelengthDetector[SampleRun])
     else:
         pl[NeXusName[FrameMonitor0]] = "monitor"
         pl[RawMonitor[SampleRun, FrameMonitor0]] = concatenated
-        pl[kinematics.MonitorLtotal[SampleRun, FrameMonitor0]] = distance
-        wavs = pl.compute(kinematics.WavelengthMonitor[SampleRun, FrameMonitor0])
+        pl[unwrap.MonitorLtotal[SampleRun, FrameMonitor0]] = distance
+        wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
     # Convert to wavelength
     # graph = {**beamline_graph(scatter=False), **elastic_graph("tof")}
@@ -487,9 +487,9 @@ def test_pulse_skipping_stride_3(detector_or_monitor) -> None:
     )
 
     if detector_or_monitor == "detector":
-        wavs = pl.compute(kinematics.WavelengthDetector[SampleRun])
+        wavs = pl.compute(unwrap.WavelengthDetector[SampleRun])
     else:
-        wavs = pl.compute(kinematics.WavelengthMonitor[SampleRun, FrameMonitor0])
+        wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
     _validate_result_events(
         wavs=wavs, ref=ref, percentile=100, diff_threshold=0.1, rtol=0.05
@@ -511,9 +511,9 @@ def test_pulse_skipping_unwrap_histogram_mode(
     )
 
     if detector_or_monitor == "detector":
-        wavs = pl.compute(kinematics.WavelengthDetector[SampleRun])
+        wavs = pl.compute(unwrap.WavelengthDetector[SampleRun])
     else:
-        wavs = pl.compute(kinematics.WavelengthMonitor[SampleRun, FrameMonitor0])
+        wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
     _validate_result_histogram_mode(
         wavs=wavs, ref=ref, percentile=96, diff_threshold=0.4, rtol=0.05
@@ -544,9 +544,9 @@ def test_unwrap_int(dtype, detector_or_monitor, lut_workflow_psc_choppers) -> No
     pl[target] = mon
 
     if detector_or_monitor == "detector":
-        wavs = pl.compute(kinematics.WavelengthDetector[SampleRun])
+        wavs = pl.compute(unwrap.WavelengthDetector[SampleRun])
     else:
-        wavs = pl.compute(kinematics.WavelengthMonitor[SampleRun, FrameMonitor0])
+        wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
     _validate_result_events(
         wavs=wavs, ref=ref, percentile=100, diff_threshold=0.02, rtol=0.05
@@ -571,7 +571,7 @@ def test_compute_toa():
         detector_or_monitor="detector",
     )
 
-    toas = pl.compute(kinematics.ToaDetector[SampleRun])
+    toas = pl.compute(unwrap.ToaDetector[SampleRun])
 
     assert "toa" in toas.bins.coords
     raw = pl.compute(RawDetector[SampleRun])
@@ -598,7 +598,7 @@ def test_compute_toa_pulse_skipping():
 
     raw = pl.compute(RawDetector[SampleRun])
 
-    toas = pl.compute(kinematics.ToaDetector[SampleRun])
+    toas = pl.compute(unwrap.ToaDetector[SampleRun])
 
     assert "toa" in toas.bins.coords
     pulse_period = lut_wf.compute(PulsePeriod)
