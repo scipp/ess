@@ -9,7 +9,7 @@ from scipp.testing import assert_identical
 
 from ess.reduce import unwrap
 from ess.reduce.unwrap import (
-    GenericWavelengthWorkflow,
+    GenericUnwrapWorkflow,
     LookupTableWorkflow,
     fakes,
 )
@@ -28,7 +28,7 @@ sl = pytest.importorskip("sciline")
 
 
 @pytest.fixture
-def workflow() -> GenericWavelengthWorkflow:
+def workflow() -> GenericUnwrapWorkflow:
     sizes = {'detector_number': 10}
     calibrated_beamline = sc.DataArray(
         data=sc.ones(sizes=sizes),
@@ -63,7 +63,7 @@ def workflow() -> GenericWavelengthWorkflow:
         )
     )
 
-    wf = GenericWavelengthWorkflow(run_types=[SampleRun], monitor_types=[])
+    wf = GenericUnwrapWorkflow(run_types=[SampleRun], monitor_types=[])
     wf[NeXusDetectorName] = "detector"
     wf[unwrap.LookupTableRelativeErrorThreshold] = {'detector': np.inf}
     wf[EmptyDetector[SampleRun]] = calibrated_beamline
@@ -92,7 +92,7 @@ def test_LookupTableWorkflow_can_compute_lut():
     assert lut.choppers is not None
 
 
-def test_GenericWavelengthWorkflow_with_lut_from_tof_simulation(workflow):
+def test_GenericUnwrapWorkflow_with_lut_from_tof_simulation(workflow):
     # Should be able to compute DetectorData without chopper and simulation params
     # This contains event_time_offset (time-of-arrival).
     _ = workflow.compute(RawDetector[SampleRun])
@@ -117,7 +117,7 @@ def test_GenericWavelengthWorkflow_with_lut_from_tof_simulation(workflow):
     assert 'wavelength' in detector.bins.coords
 
 
-def test_GenericWavelengthWorkflow_with_lut_from_file(
+def test_GenericUnwrapWorkflow_with_lut_from_file(
     workflow, tmp_path: pytest.TempPathFactory
 ):
     lut_wf = LookupTableWorkflow()
@@ -145,7 +145,7 @@ def test_GenericWavelengthWorkflow_with_lut_from_file(
     assert 'wavelength' in detector.bins.coords
 
 
-def test_GenericWavelengthWorkflow_with_lut_from_file_old_format(
+def test_GenericUnwrapWorkflow_with_lut_from_file_old_format(
     workflow, tmp_path: pytest.TempPathFactory
 ):
     lut_wf = LookupTableWorkflow()

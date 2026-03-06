@@ -9,7 +9,7 @@ from scippneutron.conversion.graph.beamline import beamline as beamline_graph
 from scippneutron.conversion.graph.tof import elastic as elastic_graph
 
 from ess.reduce import unwrap
-from ess.reduce.unwrap import GenericWavelengthWorkflow, LookupTableWorkflow, fakes
+from ess.reduce.unwrap import GenericUnwrapWorkflow, LookupTableWorkflow, fakes
 from ess.reduce.nexus.types import AnyRun, NeXusDetectorName, RawDetector, SampleRun
 
 sl = pytest.importorskip("sciline")
@@ -127,7 +127,7 @@ def setup_workflow(
     lut_workflow: sl.Pipeline,
     error_threshold: float = 0.1,
 ) -> sl.Pipeline:
-    pl = GenericWavelengthWorkflow(run_types=[SampleRun], monitor_types=[])
+    pl = GenericUnwrapWorkflow(run_types=[SampleRun], monitor_types=[])
     pl[RawDetector[SampleRun]] = raw_data
     pl[unwrap.DetectorLtotal[SampleRun]] = ltotal
     pl[NeXusDetectorName] = "detector"

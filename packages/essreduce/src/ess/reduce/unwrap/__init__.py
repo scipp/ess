@@ -38,7 +38,7 @@ from .types import (
     WavelengthDetector,
     WavelengthMonitor,
 )
-from .workflow import GenericWavelengthWorkflow
+from .workflow import GenericUnwrapWorkflow
 
 __all__ = [
     "BeamlineComponentReading",
@@ -46,7 +46,7 @@ __all__ = [
     "DiskChoppers",
     "DistanceResolution",
     "ErrorLimitedLookupTable",
-    "GenericWavelengthWorkflow",
+    "GenericUnwrapWorkflow",
     "LookupTable",
     "LookupTableFilename",
     "LookupTableRelativeErrorThreshold",

@@ -41,7 +41,7 @@ def load_lookup_table(filename: LookupTableFilename) -> LookupTable:
     return LookupTable(**table)
 
 
-def GenericWavelengthWorkflow(
+def GenericUnwrapWorkflow(
     *,
     run_types: Iterable[sciline.typing.Key],
     monitor_types: Iterable[sciline.typing.Key],

@@ -7,7 +7,7 @@ from scippneutron.chopper import DiskChopper
 
 from ess.reduce import unwrap
 from ess.reduce.unwrap import (
-    GenericWavelengthWorkflow,
+    GenericUnwrapWorkflow,
     LookupTableWorkflow,
     PulsePeriod,
     fakes,
@@ -71,7 +71,7 @@ def _make_workflow_event_mode(
     )
     mon, ref = beamline.get_monitor("detector")
 
-    pl = GenericWavelengthWorkflow(run_types=[SampleRun], monitor_types=[FrameMonitor0])
+    pl = GenericUnwrapWorkflow(run_types=[SampleRun], monitor_types=[FrameMonitor0])
     if detector_or_monitor == "detector":
         pl[NeXusDetectorName] = "detector"
         pl[RawDetector[SampleRun]] = mon
@@ -112,7 +112,7 @@ def _make_workflow_histogram_mode(
         ).to(unit=mon.bins.coords["event_time_offset"].bins.unit)
     ).rename(event_time_offset=dim)
 
-    pl = GenericWavelengthWorkflow(run_types=[SampleRun], monitor_types=[FrameMonitor0])
+    pl = GenericUnwrapWorkflow(run_types=[SampleRun], monitor_types=[FrameMonitor0])
     if detector_or_monitor == "detector":
         pl[NeXusDetectorName] = "detector"
         pl[RawDetector[SampleRun]] = mon
@@ -401,7 +401,7 @@ def test_pulse_skipping_unwrap_when_first_half_of_first_pulse_is_missing(
     )
     lut_wf[unwrap.LtotalRange] = distance, distance
 
-    pl = GenericWavelengthWorkflow(run_types=[SampleRun], monitor_types=[FrameMonitor0])
+    pl = GenericUnwrapWorkflow(run_types=[SampleRun], monitor_types=[FrameMonitor0])
 
     # Skip first pulse = half of the first frame
     a = mon.group('event_time_zero')['event_time_zero', 1:]
