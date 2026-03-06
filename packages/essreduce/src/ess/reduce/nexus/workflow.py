@@ -15,6 +15,7 @@ import scippnexus as snx
 from scipp.constants import g
 from scipp.core import label_based_index_to_positional_index
 from scippneutron.chopper import extract_chopper_from_nexus
+from scippneutron.metadata import RadiationProbe, SourceType
 
 from . import _nexus_loader as nexus
 from .types import (
@@ -638,8 +639,6 @@ def load_source_metadata_from_nexus(
 
     Supplements the result with data from ``beamline`` if necessary.
     """
-    from scippneutron.metadata import RadiationProbe, SourceType
-
     name = source_component.get("name")
     if name is None:
         name = beamline.facility
