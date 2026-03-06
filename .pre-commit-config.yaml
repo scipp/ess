@@ -53,3 +53,11 @@ repos:
       - id: actionlint
         # Disable because of false-positive SC2046
         args: ["-shellcheck="]
+  - repo: local
+    hooks:
+      - id: sync-python-version
+        name: sync python version with pixi.toml
+        entry: python tools/sync-python-version.py
+        language: python
+        files: '(pixi\.toml|pyproject\.toml)$'
+        pass_filenames: false
