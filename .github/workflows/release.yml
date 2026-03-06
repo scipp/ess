@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - '*/[0-9]*'
+      - "*/[0-9]*"
 
 jobs:
   determine-package:
@@ -67,6 +67,7 @@ jobs:
           fetch-depth: 0
       - uses: prefix-dev/setup-pixi@v0.9.4
         with:
+          frozen: true
           environments: docs-${{ needs.determine-package.outputs.package }}
       - name: Build docs
         run: pixi run -e docs-${{ needs.determine-package.outputs.package }} docs ${{ needs.determine-package.outputs.package }}
