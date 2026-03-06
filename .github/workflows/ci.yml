@@ -51,7 +51,7 @@ jobs:
   test:
     name: Test ${{ matrix.package }}
     needs: [changes, formatting]
-    # if: needs.changes.outputs.packages != '[]'
+    if: needs.changes.outputs.packages != '[]'
     strategy:
       fail-fast: false
       matrix:
@@ -71,7 +71,7 @@ jobs:
   docs:
     name: Docs ${{ matrix.package }}
     needs: [changes, test]
-    # if: needs.changes.outputs.packages != '[]'
+    if: needs.changes.outputs.packages != '[]'
     strategy:
       fail-fast: false
       matrix:
@@ -91,7 +91,10 @@ jobs:
   report:
     name: Report Job Status
     needs: [changes, formatting, test, docs]
-    if : success()
+    if: |
+      always() &&
+      (needs.test.result == 'skipped' || needs.test.result == 'success') &&
+      (needs.docs.result == 'skipped' || needs.docs.result == 'success')
     runs-on: ubuntu-24.04
     steps:
       - name: Report Job Status
