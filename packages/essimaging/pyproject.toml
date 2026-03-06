@@ -66,9 +66,9 @@ docs = [
 ]
 
 [project.urls]
-"Bug Tracker" = "https://github.com/scipp/essimaging/issues"
+"Bug Tracker" = "https://github.com/scipp/ess/issues"
 "Documentation" = "https://scipp.github.io/essimaging"
-"Source" = "https://github.com/scipp/essimaging"
+"Source" = "https://github.com/scipp/ess/tree/main/packages/essimaging"
 
 [tool.setuptools_scm]
 root = "../.."
