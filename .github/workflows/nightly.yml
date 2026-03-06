@@ -3,7 +3,7 @@ name: Nightly Tests
 on:
   workflow_dispatch:
   schedule:
-    - cron: '30 1 * * 1-5'
+    - cron: "30 1 * * 1-5"
 
 jobs:
   test:
@@ -17,8 +17,11 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: prefix-dev/setup-pixi@v0.9.4
         with:
+          frozen: true
           environments: ${{ matrix.package }}
       - name: Run tests
         run: pixi run -e ${{ matrix.package }} test ${{ matrix.package }}
@@ -34,8 +37,11 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: prefix-dev/setup-pixi@v0.9.4
         with:
+          frozen: true
           environments: lb-${{ matrix.package }}
       - name: Test with lowest direct dependencies
         run: pixi run -e lb-${{ matrix.package }} test ${{ matrix.package }}
