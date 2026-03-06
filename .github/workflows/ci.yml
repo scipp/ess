@@ -87,3 +87,12 @@ jobs:
           environments: docs-${{ matrix.package }}
       - name: Build docs
         run: pixi run -e docs-${{ matrix.package }} docs ${{ matrix.package }}
+
+  report:
+    name: Report Job Status
+    needs: [changes, formatting, test, docs]
+    if : success()
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Report Job Status
+        run: echo "All Tests Succeeded"
