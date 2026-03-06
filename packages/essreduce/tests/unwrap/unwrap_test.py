@@ -15,12 +15,7 @@ from ess.reduce.nexus.types import (
     RawMonitor,
     SampleRun,
 )
-from ess.reduce.unwrap import (
-    GenericUnwrapWorkflow,
-    LookupTableWorkflow,
-    PulsePeriod,
-    fakes,
-)
+from ess.reduce.unwrap import GenericUnwrapWorkflow, LookupTableWorkflow, fakes
 
 sl = pytest.importorskip("sciline")
 

@@ -5,12 +5,10 @@ import numpy as np
 import pytest
 import scipp as sc
 from scippneutron.chopper import DiskChopper
-from scippneutron.conversion.graph.beamline import beamline as beamline_graph
-from scippneutron.conversion.graph.tof import elastic as elastic_graph
 
 from ess.reduce import unwrap
-from ess.reduce.unwrap import GenericUnwrapWorkflow, LookupTableWorkflow, fakes
 from ess.reduce.nexus.types import AnyRun, NeXusDetectorName, RawDetector, SampleRun
+from ess.reduce.unwrap import GenericUnwrapWorkflow, LookupTableWorkflow, fakes
 
 sl = pytest.importorskip("sciline")
 

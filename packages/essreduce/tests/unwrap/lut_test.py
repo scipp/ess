@@ -5,8 +5,8 @@ import scipp as sc
 from scippneutron.chopper import DiskChopper
 
 from ess.reduce import unwrap
-from ess.reduce.unwrap import LookupTableWorkflow
 from ess.reduce.nexus.types import AnyRun
+from ess.reduce.unwrap import LookupTableWorkflow
 
 sl = pytest.importorskip("sciline")
 
