@@ -11,11 +11,11 @@ import ess.tbl.data  # noqa: F401
 from ess import tbl
 from ess.imaging.types import (
     Filename,
+    LookupTable,
+    LookupTableFilename,
     NeXusDetectorName,
     RawDetector,
     SampleRun,
-    LookupTable,
-    LookupTableFilename,
     WavelengthDetector,
 )
 

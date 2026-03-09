@@ -9,12 +9,12 @@ import ess.odin.data  # noqa: F401
 from ess import odin
 from ess.imaging.types import (
     Filename,
+    LookupTable,
+    LookupTableFilename,
     NeXusDetectorName,
     OpenBeamRun,
     RawDetector,
     SampleRun,
-    LookupTable,
-    LookupTableFilename,
     WavelengthDetector,
 )
 

@@ -7,8 +7,8 @@ from typing import NewType
 import sciline
 import scipp as sc
 from ess.reduce.nexus import types as reduce_t
-from ess.reduce.unwrap import types as unwrap_t
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
+from ess.reduce.unwrap import types as unwrap_t
 
 # 1 TypeVars used to parametrize the generic parts of the workflow
 
