@@ -26,9 +26,9 @@ beautifulsoup4==4.14.3
     #   pydata-sphinx-theme
 bleach[css]==6.3.0
     # via nbconvert
-certifi==2026.1.4
+certifi==2026.2.25
     # via requests
-charset-normalizer==3.4.4
+charset-normalizer==3.4.5
     # via requests
 debugpy==1.8.20
     # via ipykernel
@@ -44,9 +44,9 @@ docutils==0.22.4
     #   sphinxcontrib-bibtex
 fastjsonschema==2.21.2
     # via nbformat
-imagesize==1.4.1
+imagesize==2.0.0
     # via sphinx
-ipykernel==7.1.0
+ipykernel==7.2.0
     # via -r docs.in
 ipympl==0.10.0
     # via -r docs.in
@@ -108,7 +108,7 @@ nest-asyncio==1.6.0
     # via ipykernel
 pandocfilters==1.5.1
     # via nbconvert
-platformdirs==4.5.1
+platformdirs==4.9.4
     # via
     #   jupyter-core
     #   pooch
@@ -124,11 +124,11 @@ pybtex==0.25.1
     #   sphinxcontrib-bibtex
 pybtex-docutils==1.0.3
     # via sphinxcontrib-bibtex
-pydantic-settings==2.12.0
+pydantic-settings==2.13.1
     # via autodoc-pydantic
 pydata-sphinx-theme==0.16.1
     # via -r docs.in
-python-dotenv==1.2.1
+python-dotenv==1.2.2
     # via pydantic-settings
 pyzmq==27.1.0
     # via

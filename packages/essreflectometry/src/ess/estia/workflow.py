@@ -11,6 +11,7 @@ from ..reflectometry.types import (
     BeamDivergenceLimits,
     CorrectionsToApply,
     DetectorSpatialResolution,
+    LookupTableRelativeErrorThreshold,
     NeXusDetectorName,
     RunType,
     SampleRotationOffset,
@@ -68,6 +69,9 @@ def mcstas_default_parameters() -> dict:
         SampleRotationOffset[RunType]: sc.scalar(0.0, unit='deg'),
         CorrectionsToApply: corrections.default_corrections
         - {correct_by_proton_current},
+        LookupTableRelativeErrorThreshold: {
+            "detector": float('inf'),
+        },
     }
 
 
@@ -78,6 +82,9 @@ def default_parameters() -> dict:
         SampleRotationOffset[RunType]: sc.scalar(0.0, unit='deg'),
         CorrectionsToApply: corrections.default_corrections,
         DetectorSpatialResolution: 0.0025 * sc.units.m,
+        LookupTableRelativeErrorThreshold: {
+            "detector": float('inf'),
+        },
     }
 
 

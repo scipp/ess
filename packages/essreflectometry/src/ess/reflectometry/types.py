@@ -28,6 +28,7 @@ PulseStrideOffset = tof_t.PulseStrideOffset
 TimeOfFlightLookupTable = tof_t.TimeOfFlightLookupTable
 TimeOfFlightLookupTableFilename = tof_t.TimeOfFlightLookupTableFilename
 DetectorLtotal = tof_t.DetectorLtotal
+LookupTableRelativeErrorThreshold = tof_t.LookupTableRelativeErrorThreshold
 
 
 class CoordTransformationGraph(sciline.Scope[RunType, dict], dict):
