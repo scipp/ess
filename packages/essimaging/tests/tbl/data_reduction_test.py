@@ -14,8 +14,8 @@ from ess.imaging.types import (
     NeXusDetectorName,
     RawDetector,
     SampleRun,
-    TimeOfFlightLookupTable,
-    TimeOfFlightLookupTableFilename,
+    LookupTable,
+    LookupTableFilename,
     TofDetector,
     WavelengthDetector,
 )
@@ -37,7 +37,7 @@ def tof_lookup_table() -> sl.Pipeline:
         sc.scalar(25.0, unit="m"),
         sc.scalar(35.0, unit="m"),
     )
-    return lut_wf.compute(TimeOfFlightLookupTable)
+    return lut_wf.compute(LookupTable)
 
 
 @pytest.fixture
@@ -47,7 +47,7 @@ def workflow() -> sl.Pipeline:
     """
     wf = tbl.TblWorkflow()
     wf[Filename[SampleRun]] = tbl.data.tutorial_sample_data()
-    wf[TimeOfFlightLookupTableFilename] = tbl.data.tbl_tof_lookup_table_no_choppers()
+    wf[LookupTableFilename] = tbl.data.tbl_tof_lookup_table_no_choppers()
     wf[unwrap.LookupTableRelativeErrorThreshold] = {
         "ngem_detector": float('inf'),
         "he3_detector_bank0": float('inf'),
@@ -91,7 +91,7 @@ def test_can_compute_unwrap_from_custom_lut(
     workflow, tof_lookup_table, bank_name
 ):
     workflow[NeXusDetectorName] = bank_name
-    workflow[TimeOfFlightLookupTable] = tof_lookup_table
+    workflow[LookupTable] = tof_lookup_table
     da = workflow.compute(TofDetector[SampleRun])
 
     assert "tof" in da.bins.coords

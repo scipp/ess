@@ -7,7 +7,7 @@ from typing import NewType
 import sciline
 import scipp as sc
 from ess.reduce.nexus import types as reduce_t
-from ess.reduce.unwrap import types as tof_t
+from ess.reduce.unwrap import types as unwrap_t
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
 
 # 1 TypeVars used to parametrize the generic parts of the workflow
@@ -21,11 +21,11 @@ Position = reduce_t.Position
 RawDetector = reduce_t.RawDetector
 RawMonitor = reduce_t.RawMonitor
 
-DetectorLtotal = tof_t.DetectorLtotal
-TofDetector = tof_t.TofDetector
-PulseStrideOffset = tof_t.PulseStrideOffset
-TimeOfFlightLookupTable = tof_t.TimeOfFlightLookupTable
-TimeOfFlightLookupTableFilename = tof_t.TimeOfFlightLookupTableFilename
+DetectorLtotal = unwrap_t.DetectorLtotal
+TofDetector = unwrap_t.TofDetector
+PulseStrideOffset = unwrap_t.PulseStrideOffset
+LookupTable = unwrap_t.LookupTable
+LookupTableFilename = unwrap_t.LookupTableFilename
 
 UncertaintyBroadcastMode = _UncertaintyBroadcastMode
 
