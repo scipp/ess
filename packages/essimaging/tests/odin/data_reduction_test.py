@@ -15,7 +15,6 @@ from ess.imaging.types import (
     SampleRun,
     LookupTable,
     LookupTableFilename,
-    TofDetector,
     WavelengthDetector,
 )
 
@@ -31,7 +30,7 @@ def workflow() -> sl.Pipeline:
     wf[NeXusDetectorName] = "event_mode_detectors/timepix3"
     wf[LookupTableFilename] = odin.data.odin_tof_lookup_table()
     wf[LookupTableRelativeErrorThreshold] = {
-        "event_mode_detectors/timepix3": float('inf')
+        "event_mode_detectors/timepix3": float("inf")
     }
     # Cache the lookup table
     wf[LookupTable] = wf.compute(LookupTable)
@@ -50,13 +49,6 @@ def test_can_load_detector_data(workflow, run_type):
     assert da.bins is not None
     assert "event_time_offset" in da.bins.coords
     assert "event_time_zero" in da.bins.coords
-
-
-@pytest.mark.parametrize("run_type", [SampleRun, OpenBeamRun])
-def test_can_compute_unwrap(workflow, run_type):
-    da = workflow.compute(TofDetector[run_type])
-
-    assert "tof" in da.bins.coords
 
 
 @pytest.mark.parametrize("run_type", [SampleRun, OpenBeamRun])

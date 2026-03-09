@@ -16,18 +16,17 @@ from ess.imaging.types import (
     SampleRun,
     LookupTable,
     LookupTableFilename,
-    TofDetector,
     WavelengthDetector,
 )
 
 
 @pytest.fixture(scope="module")
-def tof_lookup_table() -> sl.Pipeline:
+def wavelength_lookup_table() -> sl.Pipeline:
     """
-    Compute tof lookup table on-the-fly.
+    Compute wavelength lookup table on-the-fly.
     """
 
-    lut_wf = unwrap.TofLookupTableWorkflow()
+    lut_wf = unwrap.LookupTableWorkflow()
     lut_wf[unwrap.DiskChoppers[AnyRun]] = {}
     lut_wf[unwrap.SourcePosition] = sc.vector([0, 0, 0], unit="m")
     lut_wf[unwrap.NumberOfSimulatedNeutrons] = 200_000
@@ -49,9 +48,9 @@ def workflow() -> sl.Pipeline:
     wf[Filename[SampleRun]] = tbl.data.tutorial_sample_data()
     wf[LookupTableFilename] = tbl.data.tbl_tof_lookup_table_no_choppers()
     wf[unwrap.LookupTableRelativeErrorThreshold] = {
-        "ngem_detector": float('inf'),
-        "he3_detector_bank0": float('inf'),
-        "he3_detector_bank1": float('inf'),
+        "ngem_detector": float("inf"),
+        "he3_detector_bank0": float("inf"),
+        "he3_detector_bank1": float("inf"),
     }
     return wf
 
@@ -77,31 +76,21 @@ def test_can_load_detector_data(workflow, bank_name):
 @pytest.mark.parametrize(
     "bank_name", ["ngem_detector", "he3_detector_bank0", "he3_detector_bank1"]
 )
-def test_can_compute_unwrap(workflow, bank_name):
-    workflow[NeXusDetectorName] = bank_name
-    da = workflow.compute(TofDetector[SampleRun])
-
-    assert "tof" in da.bins.coords
-
-
-@pytest.mark.parametrize(
-    "bank_name", ["ngem_detector", "he3_detector_bank0", "he3_detector_bank1"]
-)
-def test_can_compute_unwrap_from_custom_lut(
-    workflow, tof_lookup_table, bank_name
-):
-    workflow[NeXusDetectorName] = bank_name
-    workflow[LookupTable] = tof_lookup_table
-    da = workflow.compute(TofDetector[SampleRun])
-
-    assert "tof" in da.bins.coords
-
-
-@pytest.mark.parametrize(
-    "bank_name", ["ngem_detector", "he3_detector_bank0", "he3_detector_bank1"]
-)
 def test_can_compute_wavelength(workflow, bank_name):
     workflow[NeXusDetectorName] = bank_name
+    da = workflow.compute(WavelengthDetector[SampleRun])
+
+    assert "wavelength" in da.bins.coords
+
+
+@pytest.mark.parametrize(
+    "bank_name", ["ngem_detector", "he3_detector_bank0", "he3_detector_bank1"]
+)
+def test_can_compute_wavelength_from_custom_lut(
+    workflow, wavelength_lookup_table, bank_name
+):
+    workflow[NeXusDetectorName] = bank_name
+    workflow[LookupTable] = wavelength_lookup_table
     da = workflow.compute(WavelengthDetector[SampleRun])
 
     assert "wavelength" in da.bins.coords

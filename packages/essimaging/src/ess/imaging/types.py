@@ -64,10 +64,6 @@ class CoordTransformGraph(sciline.Scope[RunType, dict], dict):
     """
 
 
-class WavelengthDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Detector counts with wavelength information."""
-
-
 MaskingRules = NewType("MaskingRules", MappingProxyType[str, Callable])
 """Functions to mask different dimensions of Odin data."""
 
