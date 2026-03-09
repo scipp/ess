@@ -40,7 +40,7 @@ docutils==0.22.4
     #   sphinxcontrib-bibtex
 fastjsonschema==2.21.2
     # via nbformat
-imagesize==1.4.1
+imagesize==2.0.0
     # via sphinx
 ipykernel==7.2.0
     # via -r docs.in
@@ -100,13 +100,13 @@ nbsphinx==0.9.8
     # via -r docs.in
 nest-asyncio==1.6.0
     # via ipykernel
-pandas==3.0.0
+pandas==3.0.1
     # via -r docs.in
 pandocfilters==1.5.1
     # via nbconvert
 psutil==7.2.2
     # via ipykernel
-pyarrow==23.0.0
+pyarrow==23.0.1
     # via -r docs.in
 pybtex==0.25.1
     # via
@@ -114,11 +114,11 @@ pybtex==0.25.1
     #   sphinxcontrib-bibtex
 pybtex-docutils==1.0.3
     # via sphinxcontrib-bibtex
-pydantic-settings==2.12.0
+pydantic-settings==2.13.1
     # via autodoc-pydantic
 pydata-sphinx-theme==0.16.1
     # via -r docs.in
-python-dotenv==1.2.1
+python-dotenv==1.2.2
     # via pydantic-settings
 pyzmq==27.1.0
     # via
