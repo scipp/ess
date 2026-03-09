@@ -32,10 +32,7 @@ def wavelength_lookup_table() -> sl.Pipeline:
     lut_wf[unwrap.NumberOfSimulatedNeutrons] = 200_000
     lut_wf[unwrap.SimulationSeed] = 333
     lut_wf[unwrap.PulseStride] = 1
-    lut_wf[unwrap.LtotalRange] = (
-        sc.scalar(25.0, unit="m"),
-        sc.scalar(35.0, unit="m"),
-    )
+    lut_wf[unwrap.LtotalRange] = (sc.scalar(25.0, unit="m"), sc.scalar(35.0, unit="m"))
     return lut_wf.compute(LookupTable)
 
 
@@ -46,7 +43,7 @@ def workflow() -> sl.Pipeline:
     """
     wf = tbl.TblWorkflow()
     wf[Filename[SampleRun]] = tbl.data.tutorial_sample_data()
-    wf[LookupTableFilename] = tbl.data.tbl_tof_lookup_table_no_choppers()
+    wf[LookupTableFilename] = tbl.data.tbl_wavelength_lookup_table_no_choppers()
     wf[unwrap.LookupTableRelativeErrorThreshold] = {
         "ngem_detector": float("inf"),
         "he3_detector_bank0": float("inf"),

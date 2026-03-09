@@ -28,7 +28,7 @@ def workflow() -> sl.Pipeline:
     wf[Filename[SampleRun]] = odin.data.iron_simulation_sample_small()
     wf[Filename[OpenBeamRun]] = odin.data.iron_simulation_ob_small()
     wf[NeXusDetectorName] = "event_mode_detectors/timepix3"
-    wf[LookupTableFilename] = odin.data.odin_tof_lookup_table()
+    wf[LookupTableFilename] = odin.data.odin_wavelength_lookup_table()
     wf[LookupTableRelativeErrorThreshold] = {
         "event_mode_detectors/timepix3": float("inf")
     }
