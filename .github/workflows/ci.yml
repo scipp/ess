@@ -29,6 +29,10 @@ jobs:
               - 'packages/essreduce/**'
               - 'pyproject.toml'
               - 'pixi.lock'
+              - 'pixi.toml'
+              - '.github/workflows/**'
+              - '.pre-commit-config.yaml'
+              - '.python-version'
             essimaging:
               - 'packages/essimaging/**'
               - 'packages/essreduce/**'
@@ -87,3 +91,9 @@ jobs:
           environments: docs-${{ matrix.package }}
       - name: Build docs
         run: pixi run -e docs-${{ matrix.package }} docs ${{ matrix.package }}
+      - uses: actions/upload-artifact@v4
+        id: artifact-upload-step
+        with:
+          name: docs-${{ matrix.package }}
+          path: packages/${{ matrix.package }}/html
+      - run: echo "::notice::https://remote-unzip.deno.dev/${{ github.repository }}/artifacts/${{ steps.artifact-upload-step.outputs.artifact-id }}"
