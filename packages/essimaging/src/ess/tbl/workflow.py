@@ -9,6 +9,7 @@ from ess.reduce.unwrap.workflow import GenericUnwrapWorkflow
 
 from ..imaging.types import (
     BeamMonitor1,
+    LookupTableRelativeErrorThreshold,
     NeXusMonitorName,
     PulseStrideOffset,
     SampleRun,
@@ -19,6 +20,14 @@ def default_parameters() -> dict:
     return {
         NeXusMonitorName[BeamMonitor1]: "monitor_1",
         PulseStrideOffset: None,
+        LookupTableRelativeErrorThreshold: {
+            "ngem_detector": float("inf"),
+            "he3_detector_bank0": float("inf"),
+            "he3_detector_bank1": float("inf"),
+            "multiblade_detector": float("inf"),
+            "timepix3_detector": float("inf"),
+            "monitor_1": float("inf"),
+        },
     }
 
 

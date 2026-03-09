@@ -13,6 +13,7 @@ from ..imaging.types import (
     BeamMonitor3,
     BeamMonitor4,
     DarkBackgroundRun,
+    LookupTableRelativeErrorThreshold,
     NeXusMonitorName,
     OpenBeamRun,
     PulseStrideOffset,
@@ -28,6 +29,14 @@ def default_parameters() -> dict:
         NeXusMonitorName[BeamMonitor3]: "beam_monitor_3",
         NeXusMonitorName[BeamMonitor4]: "beam_monitor_4",
         PulseStrideOffset: None,
+        LookupTableRelativeErrorThreshold: {
+            "event_mode_detectors/timepix3": float("inf"),
+            "histogram_mode_detectors/orca": float("inf"),
+            "beam_monitor_1": float("inf"),
+            "beam_monitor_2": float("inf"),
+            "beam_monitor_3": float("inf"),
+            "beam_monitor_4": float("inf"),
+        },
     }
 
 

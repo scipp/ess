@@ -26,6 +26,7 @@ WavelengthDetector = unwrap_t.WavelengthDetector
 PulseStrideOffset = unwrap_t.PulseStrideOffset
 LookupTable = unwrap_t.LookupTable
 LookupTableFilename = unwrap_t.LookupTableFilename
+LookupTableRelativeErrorThreshold = unwrap_t.LookupTableRelativeErrorThreshold
 
 UncertaintyBroadcastMode = _UncertaintyBroadcastMode
 
