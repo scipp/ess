@@ -22,7 +22,7 @@ RawDetector = reduce_t.RawDetector
 RawMonitor = reduce_t.RawMonitor
 
 DetectorLtotal = unwrap_t.DetectorLtotal
-TofDetector = unwrap_t.TofDetector
+WavelengthDetector = unwrap_t.WavelengthDetector
 PulseStrideOffset = unwrap_t.PulseStrideOffset
 LookupTable = unwrap_t.LookupTable
 LookupTableFilename = unwrap_t.LookupTableFilename
@@ -30,27 +30,27 @@ LookupTableFilename = unwrap_t.LookupTableFilename
 UncertaintyBroadcastMode = _UncertaintyBroadcastMode
 
 
-SampleRun = NewType('SampleRun', int)
+SampleRun = NewType("SampleRun", int)
 """Sample run; a run with a sample in the beam."""
 
-DarkBackgroundRun = NewType('DarkBackgroundRun', int)
+DarkBackgroundRun = NewType("DarkBackgroundRun", int)
 """Dark background run; a run with no sample in the beam, and the shutter closed, to
 measure the dark current of the detector."""
 
-OpenBeamRun = NewType('OpenBeamRun', int)
+OpenBeamRun = NewType("OpenBeamRun", int)
 """Open beam run; a run with no sample in the beam, and the shutter open, to measure the
 beam profile."""
 
-BeamMonitor1 = NewType('BeamMonitor1', int)
+BeamMonitor1 = NewType("BeamMonitor1", int)
 """Beam monitor number 1"""
 
-BeamMonitor2 = NewType('BeamMonitor2', int)
+BeamMonitor2 = NewType("BeamMonitor2", int)
 """Beam monitor number 2"""
 
-BeamMonitor3 = NewType('BeamMonitor3', int)
+BeamMonitor3 = NewType("BeamMonitor3", int)
 """Beam monitor number 3"""
 
-BeamMonitor4 = NewType('BeamMonitor4', int)
+BeamMonitor4 = NewType("BeamMonitor4", int)
 """Beam monitor number 4"""
 
 RunType = reduce_t.RunType
@@ -68,7 +68,7 @@ class WavelengthDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Detector counts with wavelength information."""
 
 
-MaskingRules = NewType('MaskingRules', MappingProxyType[str, Callable])
+MaskingRules = NewType("MaskingRules", MappingProxyType[str, Callable])
 """Functions to mask different dimensions of Odin data."""
 
 
@@ -84,7 +84,7 @@ class BackgroundSubtractedDetector(sciline.Scope[RunType, sc.DataArray], sc.Data
     """Detector counts with dark background subtracted."""
 
 
-NormalizedImage = NewType('NormalizedImage', sc.DataArray)
+NormalizedImage = NewType("NormalizedImage", sc.DataArray)
 """Final image: background-subtracted sample run divided by background-subtracted open
 beam run."""
 

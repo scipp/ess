@@ -5,9 +5,8 @@ Default parameters and workflow for Odin.
 """
 
 import sciline
-from ess.reduce.unwrap.workflow import GenericTofWorkflow
+from ess.reduce.unwrap.workflow import GenericUnwrapWorkflow
 
-from ..imaging.conversion import providers as conversion_providers
 from ..imaging.types import (
     BeamMonitor1,
     BeamMonitor2,
@@ -36,7 +35,7 @@ def OdinWorkflow(**kwargs) -> sciline.Pipeline:
     """
     Workflow with default parameters for Odin.
     """
-    workflow = GenericTofWorkflow(
+    workflow = GenericUnwrapWorkflow(
         run_types=[SampleRun, OpenBeamRun, DarkBackgroundRun],
         monitor_types=[BeamMonitor1, BeamMonitor2, BeamMonitor3, BeamMonitor4],
         **kwargs,
@@ -51,7 +50,7 @@ def OdinBraggEdgeWorkflow(**kwargs) -> sciline.Pipeline:
     Workflow with default parameters for Odin.
     """
     workflow = OdinWorkflow(**kwargs)
-    for provider in (*conversion_providers, *masking_providers):
+    for provider in (*masking_providers,):
         workflow.insert(provider)
     return workflow
 

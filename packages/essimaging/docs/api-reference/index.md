@@ -10,7 +10,6 @@
    :template: module-template.rst
    :recursive:
 
-   conversion
    data
    tools
    types

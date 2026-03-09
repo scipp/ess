@@ -5,9 +5,8 @@ Default parameters, providers and utility functions for the TBL workflow.
 """
 
 import sciline
-from ess.reduce.unwrap.workflow import GenericTofWorkflow
+from ess.reduce.unwrap.workflow import GenericUnwrapWorkflow
 
-from ..imaging.conversion import providers as conversion_providers
 from ..imaging.types import (
     BeamMonitor1,
     NeXusMonitorName,
@@ -23,18 +22,13 @@ def default_parameters() -> dict:
     }
 
 
-providers = (*conversion_providers,)
-
-
 def TblWorkflow(**kwargs) -> sciline.Pipeline:
     """
     Workflow with default parameters for TBL.
     """
-    workflow = GenericTofWorkflow(
+    workflow = GenericUnwrapWorkflow(
         run_types=[SampleRun], monitor_types=[BeamMonitor1], **kwargs
     )
-    for provider in providers:
-        workflow.insert(provider)
     for key, param in default_parameters().items():
         workflow[key] = param
     return workflow
