@@ -37,6 +37,7 @@
    grouping
    logging
    masking
+   peaks
    smoothing
    transform
    types
