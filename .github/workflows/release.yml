@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - '*/[0-9]*'
+      - "*/[0-9]*"
 
 jobs:
   determine-package:
@@ -27,15 +27,19 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Copy LICENSE into package
+        run: cp LICENSE packages/${{ needs.determine-package.outputs.package }}/LICENSE
       - name: Build package
         run: pip install build && python -m build packages/${{ needs.determine-package.outputs.package }}
       - uses: actions/upload-artifact@v4
         with:
           name: dist
-          path: dist/
+          path: packages/${{ needs.determine-package.outputs.package }}/dist/
 
   publish:
     name: Publish to PyPI
@@ -50,6 +54,8 @@ jobs:
           name: dist
           path: dist/
       - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
 
   docs:
     name: Publish docs
@@ -63,6 +69,7 @@ jobs:
           fetch-depth: 0
       - uses: prefix-dev/setup-pixi@v0.9.4
         with:
+          frozen: true
           environments: docs-${{ needs.determine-package.outputs.package }}
       - name: Build docs
         run: pixi run -e docs-${{ needs.determine-package.outputs.package }} docs ${{ needs.determine-package.outputs.package }}
@@ -81,3 +88,30 @@ jobs:
         with:
           branch: gh-pages
           folder: gh-pages-site
+      - uses: actions/upload-artifact@v4
+        with:
+          name: docs_html
+          path: packages/${{ needs.determine-package.outputs.package }}/html
+
+  assets:
+    name: Upload docs
+    needs: [docs, determine-package]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: docs_html
+          path: docs_html
+      - name: Zip documentation
+        run: |
+          PACKAGE=${{ needs.determine-package.outputs.package }}
+          VERSION=${{ needs.determine-package.outputs.version }}
+          mv docs_html documentation-${PACKAGE}-${VERSION}
+          zip -r documentation-${PACKAGE}-${VERSION}.zip documentation-${PACKAGE}-${VERSION}
+      - name: Upload release assets
+        uses: svenstaro/upload-release-action@v2
+        with:
+          file: ./documentation-${{ needs.determine-package.outputs.package }}-${{ needs.determine-package.outputs.version }}.zip
+          overwrite: false

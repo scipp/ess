@@ -3,7 +3,7 @@ name: Weekly Platform Tests
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 2 * * 1'
+    - cron: "0 2 * * 1"
 
 jobs:
   test:
@@ -18,8 +18,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: prefix-dev/setup-pixi@v0.9.4
         with:
+          frozen: true
           environments: ${{ matrix.package }}
       - name: Run tests
         run: pixi run -e ${{ matrix.package }} test ${{ matrix.package }}

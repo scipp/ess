@@ -10,7 +10,6 @@ name = "essreduce"
 description = "Common data reduction tools for the ESS facility"
 authors = [{ name = "Scipp contributors" }]
 license = "BSD-3-Clause"
-license-files = ["../../LICENSE"]
 readme = "README.md"
 classifiers = [
     "Intended Audience :: Science/Research",
@@ -70,9 +69,9 @@ docs = [
 grow-nexus = "ess.reduce.scripts.grow_nexus:main"
 
 [project.urls]
-"Bug Tracker" = "https://github.com/scipp/essreduce/issues"
+"Bug Tracker" = "https://github.com/scipp/ess/issues"
 "Documentation" = "https://scipp.github.io/essreduce"
-"Source" = "https://github.com/scipp/essreduce"
+"Source" = "https://github.com/scipp/ess/tree/main/packages/essreduce"
 
 [tool.setuptools_scm]
 root = "../.."
