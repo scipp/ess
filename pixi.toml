@@ -42,6 +42,7 @@ format = "ruff format ."
 
 [feature.docs.dependencies]
 pandoc = "*"
+python-graphviz = "*"
 
 # Per-package docs features (install with docs extra)
 [feature.docs-essreduce.pypi-dependencies]
