@@ -4,7 +4,7 @@
 import pytest
 import sciline as sl
 import scipp as sc
-from ess.reduce import time_of_flight
+from ess.reduce import unwrap
 from ess.reduce.nexus.types import AnyRun
 
 import ess.tbl.data  # noqa: F401
@@ -27,13 +27,13 @@ def tof_lookup_table() -> sl.Pipeline:
     Compute tof lookup table on-the-fly.
     """
 
-    lut_wf = time_of_flight.TofLookupTableWorkflow()
-    lut_wf[time_of_flight.DiskChoppers[AnyRun]] = {}
-    lut_wf[time_of_flight.SourcePosition] = sc.vector([0, 0, 0], unit="m")
-    lut_wf[time_of_flight.NumberOfSimulatedNeutrons] = 200_000
-    lut_wf[time_of_flight.SimulationSeed] = 333
-    lut_wf[time_of_flight.PulseStride] = 1
-    lut_wf[time_of_flight.LtotalRange] = (
+    lut_wf = unwrap.TofLookupTableWorkflow()
+    lut_wf[unwrap.DiskChoppers[AnyRun]] = {}
+    lut_wf[unwrap.SourcePosition] = sc.vector([0, 0, 0], unit="m")
+    lut_wf[unwrap.NumberOfSimulatedNeutrons] = 200_000
+    lut_wf[unwrap.SimulationSeed] = 333
+    lut_wf[unwrap.PulseStride] = 1
+    lut_wf[unwrap.LtotalRange] = (
         sc.scalar(25.0, unit="m"),
         sc.scalar(35.0, unit="m"),
     )
@@ -48,7 +48,7 @@ def workflow() -> sl.Pipeline:
     wf = tbl.TblWorkflow()
     wf[Filename[SampleRun]] = tbl.data.tutorial_sample_data()
     wf[TimeOfFlightLookupTableFilename] = tbl.data.tbl_tof_lookup_table_no_choppers()
-    wf[time_of_flight.LookupTableRelativeErrorThreshold] = {
+    wf[unwrap.LookupTableRelativeErrorThreshold] = {
         "ngem_detector": float('inf'),
         "he3_detector_bank0": float('inf'),
         "he3_detector_bank1": float('inf'),
@@ -77,7 +77,7 @@ def test_can_load_detector_data(workflow, bank_name):
 @pytest.mark.parametrize(
     "bank_name", ["ngem_detector", "he3_detector_bank0", "he3_detector_bank1"]
 )
-def test_can_compute_time_of_flight(workflow, bank_name):
+def test_can_compute_unwrap(workflow, bank_name):
     workflow[NeXusDetectorName] = bank_name
     da = workflow.compute(TofDetector[SampleRun])
 
@@ -87,7 +87,7 @@ def test_can_compute_time_of_flight(workflow, bank_name):
 @pytest.mark.parametrize(
     "bank_name", ["ngem_detector", "he3_detector_bank0", "he3_detector_bank1"]
 )
-def test_can_compute_time_of_flight_from_custom_lut(
+def test_can_compute_unwrap_from_custom_lut(
     workflow, tof_lookup_table, bank_name
 ):
     workflow[NeXusDetectorName] = bank_name

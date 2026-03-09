@@ -3,7 +3,7 @@
 
 import pytest
 import sciline as sl
-from ess.reduce.time_of_flight import LookupTableRelativeErrorThreshold
+from ess.reduce.unwrap import LookupTableRelativeErrorThreshold
 
 import ess.odin.data  # noqa: F401
 from ess import odin
@@ -53,7 +53,7 @@ def test_can_load_detector_data(workflow, run_type):
 
 
 @pytest.mark.parametrize("run_type", [SampleRun, OpenBeamRun])
-def test_can_compute_time_of_flight(workflow, run_type):
+def test_can_compute_unwrap(workflow, run_type):
     da = workflow.compute(TofDetector[run_type])
 
     assert "tof" in da.bins.coords

@@ -5,7 +5,7 @@ Default parameters, providers and utility functions for the TBL workflow.
 """
 
 import sciline
-from ess.reduce.time_of_flight.workflow import GenericTofWorkflow
+from ess.reduce.unwrap.workflow import GenericTofWorkflow
 
 from ..imaging.conversion import providers as conversion_providers
 from ..imaging.types import (
