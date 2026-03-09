@@ -42,7 +42,7 @@ essreduce @ git+https://github.com/scipp/essreduce@main
     # via -r nightly.in
 executing==2.2.1
     # via stack-data
-fonttools==4.61.1
+fonttools==4.62.0
     # via matplotlib
 fsspec==2026.2.0
     # via dask
