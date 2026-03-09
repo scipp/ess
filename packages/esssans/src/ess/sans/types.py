@@ -35,6 +35,7 @@ SampleRun = reduce_t.SampleRun
 Transmission = reduce_t.TransmissionMonitor
 TransmissionRun = reduce_t.TransmissionRun
 
+LookupTableRelativeErrorThreshold = tof_t.LookupTableRelativeErrorThreshold
 TofDetector = tof_t.TofDetector
 TofMonitor = tof_t.TofMonitor
 TofLookupTableFilename = tof_t.TofLookupTableFilename
