@@ -61,3 +61,5 @@ Add the new feature to the `default` environment.
 Add a change filter and matrix entry. If the package depends on `essreduce`, include essreduce paths in the filter.
 
 ## 5. Run `pixi install` and commit
+
+## 6. Push the changes and tags with `essdiffraction` prefix.
