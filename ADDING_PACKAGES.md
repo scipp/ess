@@ -26,7 +26,7 @@ git remote remove essdiffraction
   git_describe_command = ["git", "describe", "--dirty", "--tags", "--long", "--match", "essdiffraction/*[0-9]*"]
   ```
 - Add `docs` extra with deps from `requirements/docs.in` (minus base deps)
-- Remove unecessary configurations in the pyproject.toml file. i.e. `tools.codespell`.
+- Remove unnecessary configurations in the pyproject.toml file. i.e. `tools.codespell`.
 - Delete unnecessary files:
   `tox.ini`, `requirements/`, `.github/`, `.pre-commit-config.yaml`, `MANIFEST.in`, `.gitignore`, `.python-version`.
 
