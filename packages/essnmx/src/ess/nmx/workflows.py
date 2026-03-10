@@ -16,6 +16,7 @@ from ess.reduce.nexus.types import (
 )
 from ess.reduce.time_of_flight import (
     GenericTofWorkflow,
+    LookupTableRelativeErrorThreshold,
     LtotalRange,
     NumberOfSimulatedNeutrons,
     SimulationResults,
@@ -38,6 +39,7 @@ from .types import (
 default_parameters = {
     TofSimulationMaxWavelength: sc.scalar(3.6, unit='angstrom'),
     TofSimulationMinWavelength: sc.scalar(1.8, unit='angstrom'),
+    LookupTableRelativeErrorThreshold: {f'detector_panel_{i}': 0.1 for i in range(5)},
 }
 
 
