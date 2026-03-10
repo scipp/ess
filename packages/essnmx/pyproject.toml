@@ -58,6 +58,20 @@ test = [
     "pytest>=8.0",
     "bitshuffle>=0.5.2;os_name == 'posix'",
 ]
+docs = [
+  "autodoc-pydantic",
+  "ipykernel",
+  "ipython!=8.7.0", # Breaks syntax highlighting in Jupyter code cells.
+  "myst-parser",
+  "nbsphinx",
+  "pydata-sphinx-theme>=0.14",
+  "sphinx<9.0.0",
+  "sphinx-autodoc-typehints",
+  "sphinx-copybutton",
+  "sphinx-design",
+  "pythreejs", # For instrument view.
+  "scippneutron",
+]
 
 [project.urls]
 "Bug Tracker" = "https://github.com/scipp/essnmx/issues"
@@ -65,6 +79,9 @@ test = [
 "Source" = "https://github.com/scipp/essnmx"
 
 [tool.setuptools_scm]
+root = "../.."
+tag_regex = "^essnmx/(?P<version>[vV]?\\d+.*)$"
+git_describe_command = [ "git", "describe", "--dirty", "--long", "--match", "essnmx/*[0-9]*"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
