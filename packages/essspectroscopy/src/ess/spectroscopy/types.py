@@ -73,10 +73,6 @@ class Analyzer(sciline.Scope[RunType, sc.DataGroup[Any]], sc.DataGroup[Any]):
     """
 
 
-class Analyzers(sciline.Scope[RunType, sc.DataGroup[Any]], sc.DataGroup[Any]):
-    """All wavelength analyzers loaded from a NXcrystals."""
-
-
 class DataAtSample(sciline.Scope[RunType, sc.DataArray], sc.DataArray): ...
 
 
