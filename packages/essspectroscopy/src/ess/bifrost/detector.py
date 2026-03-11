@@ -135,9 +135,41 @@ def get_calibrated_detector_bifrost(
     da.coords['arc'] = arc
     da.coords['channel'] = channel
 
-    da = add_spectrometer_coords(da, analyzer, primary_graph, secondary_graph)
+    da = _add_analyzer_coords(da, analyzer)
+    da = add_spectrometer_coords(da, primary_graph, secondary_graph)
 
     return EmptyDetector[RunType](da)
+
+
+def _add_analyzer_coords(
+    detector: sc.DataArray,
+    analyzer: Analyzer[RunType],
+) -> sc.DataArray:
+    ana_pos = analyzer['position']
+    if isinstance(ana_pos, sc.DataArray):
+        if 'time' not in detector.coords:
+            raise sc.CoordError(
+                "The analyzer position is time-dependent but the detector is not"
+            )
+        if not sc.identical(ana_pos.coords['time'], detector.coords['time']):
+            raise sc.CoordError(
+                f"The analyzer and detector positions are not at the same times.\n"
+                f"Analyzer: {ana_pos.coords['time']}\n"
+                f"Detector: {detector.coords['time']}\n"
+                "This is likely due to a change in the NeXus structure. It used to "
+                "guarantee that the times are identical."
+            )
+        analyzer_position = ana_pos.data
+        analyzer_transform = analyzer['transform'].value.data
+    else:
+        analyzer_position = ana_pos
+        analyzer_transform = analyzer['transform'].value
+
+    return detector.assign_coords(
+        analyzer_dspacing=analyzer['dspacing'],
+        analyzer_position=analyzer_position,
+        analyzer_transform=analyzer_transform,
+    )
 
 
 def merge_triplets(
