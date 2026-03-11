@@ -102,3 +102,24 @@ jobs:
           name: docs-${{ matrix.package }}
           path: packages/${{ matrix.package }}/html
       - run: echo "::notice::https://remote-unzip.deno.dev/${{ github.repository }}/artifacts/${{ steps.artifact-upload-step.outputs.artifact-id }}"
+
+  report:
+    name: Report Job Status
+    needs: [changes, formatting, test, docs]
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Report Job Success
+        run: echo "All Tests Succeeded"
+        if: |
+          needs.formatting.result == 'success' &&
+          (needs.test.result == 'skipped' || needs.test.result == 'success') &&
+          (needs.docs.result == 'skipped' || needs.docs.result == 'success')
+      - name: Report Job Failure
+        run: |
+          echo "Not All Tests Succeeded..."
+          exit 1
+        if: |
+          needs.formatting.result != 'success' ||
+          (needs.test.result != 'skipped' && needs.test.result == 'failure') ||
+          (needs.docs.result != 'skipped' && needs.docs.result == 'failure')
