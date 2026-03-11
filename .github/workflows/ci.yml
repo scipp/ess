@@ -38,6 +38,11 @@ jobs:
               - 'packages/essreduce/**'
               - 'pyproject.toml'
               - 'pixi.lock'
+            essnmx:
+              - 'packages/essnmx/**'
+              - 'packages/essreduce/**'
+              - 'pyproject.toml'
+              - 'pixi.lock'
 
   formatting:
     name: Formatting and static analysis
