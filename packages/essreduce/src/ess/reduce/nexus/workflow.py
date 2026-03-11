@@ -3,6 +3,7 @@
 
 """Workflow and workflow components for interacting with NeXus files."""
 
+import warnings
 from collections.abc import Iterable
 from copy import deepcopy
 from typing import Any, TypeVar
@@ -14,6 +15,7 @@ import scippnexus as snx
 from scipp.constants import g
 from scipp.core import label_based_index_to_positional_index
 from scippneutron.chopper import extract_chopper_from_nexus
+from scippneutron.metadata import RadiationProbe, SourceType
 
 from . import _nexus_loader as nexus
 from .types import (
@@ -46,6 +48,7 @@ from .types import (
     RawDetector,
     RawMonitor,
     RunType,
+    Source,
     TimeInterval,
     UniqueComponent,
 )
@@ -629,6 +632,29 @@ def load_measurement_metadata_from_nexus(
     return nexus.load_metadata(file_spec.value, Measurement)
 
 
+def load_source_metadata_from_nexus(
+    source_component: NeXusComponent[snx.NXsource, RunType], beamline: Beamline[RunType]
+) -> Source[RunType]:
+    """Load source metadata from a NeXus file.
+
+    Supplements the result with data from ``beamline`` if necessary.
+    """
+    name = source_component.get("name")
+    if name is None:
+        name = beamline.facility
+    if not isinstance(name, str):
+        warnings.warn("NeXus field 'name' of NXsource is not a string", stacklevel=2)
+        name = str(name)
+
+    source_type = SourceType(source_component['type'])
+    probe = RadiationProbe(source_component['probe'])
+    return Source[RunType](
+        name=name,
+        source_type=source_type,
+        probe=probe,
+    )
+
+
 definitions = snx.base_definitions()
 definitions["NXdetector"] = _StrippedDetector
 definitions["NXmonitor"] = _StrippedMonitor
@@ -673,6 +699,7 @@ _chopper_providers = (parse_disk_choppers,)
 _metadata_providers = (
     load_beamline_metadata_from_nexus,
     load_measurement_metadata_from_nexus,
+    load_source_metadata_from_nexus,
 )
 
 
