@@ -8,6 +8,7 @@ import scippnexus as snx
 
 from ess.spectroscopy.indirect.conversion import add_spectrometer_coords
 from ess.spectroscopy.types import (
+    Analyzer,
     DetectorPositionOffset,
     EmptyDetector,
     NeXusComponent,
@@ -78,6 +79,7 @@ def arc_and_channel_from_detector_number(
 
 def get_calibrated_detector_bifrost(
     detector: NeXusComponent[snx.NXdetector, RunType],
+    analyzer: Analyzer[RunType],
     *,
     transform: NeXusTransformation[snx.NXdetector, RunType],
     offset: DetectorPositionOffset[RunType],
@@ -97,6 +99,8 @@ def get_calibrated_detector_bifrost(
     ----------
     detector:
         Loaded NeXus detector.
+    analyzer:
+        Loaded analyzer parameters.
     transform:
         Transformation that determines the detector position.
     offset:
@@ -131,7 +135,7 @@ def get_calibrated_detector_bifrost(
     da.coords['arc'] = arc
     da.coords['channel'] = channel
 
-    da = add_spectrometer_coords(da, primary_graph, secondary_graph)
+    da = add_spectrometer_coords(da, analyzer, primary_graph, secondary_graph)
 
     return EmptyDetector[RunType](da)
 

@@ -51,13 +51,8 @@ def default_parameters() -> dict[type, Any]:
 def simulation_default_parameters() -> dict[type, Any]:
     """Default parameters for BifrostSimulationWorkflow."""
     return {
-        NeXusMonitorName[ElasticMonitor]: "elastic_monitor",
-        NeXusMonitorName[NormalizationMonitor]: "normalization_monitor",
-        NeXusMonitorName[OverlapMonitor]: "overlap_monitor",
-        NeXusMonitorName[PSCMonitor]: "psc_monitor",
-        PulsePeriod: 1.0 / sc.scalar(14.0, unit="Hz"),
+        **default_parameters(),
         ProtonCharge[SampleRun]: sc.DataArray(sc.scalar(1.0, unit='pC')),
-        UncertaintyBroadcastMode: UncertaintyBroadcastMode.fail,
     }
 
 

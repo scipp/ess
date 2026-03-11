@@ -13,6 +13,7 @@ from scippneutron.conversion.tof import (
 )
 
 from ..types import (
+    Analyzer,
     EnergyQDetector,
     GravityVector,
     IncidentEnergyDetector,
@@ -244,7 +245,8 @@ def add_incident_energy(
 
 
 def add_spectrometer_coords(
-    data: sc.DataArray,
+    detector: sc.DataArray,
+    analyzer: Analyzer[RunType],
     primary_graph: PrimarySpecCoordTransformGraph[RunType],
     secondary_graph: SecondarySpecCoordTransformGraph[RunType],
 ) -> sc.DataArray:
@@ -252,10 +254,12 @@ def add_spectrometer_coords(
 
     Parameters
     ----------
-    data:
+    detector:
         Data array with beamline coordinates "position", "source_position", and
         "sample_position".
         Does not need to contain events or flight times.
+    analyzer:
+        Data group with analyzer parameters.
     primary_graph:
         Coordinate transformation graph for the primary spectrometer.
     secondary_graph:
@@ -269,7 +273,12 @@ def add_spectrometer_coords(
         Input data with added spectrometer coordinates.
         This includes "final_energy", "secondary_flight_time", and "L1".
     """
-    return data.transform_coords(
+    # TODO lookup time-dep analyzers based on `data` and isert into graph
+
+    # "analyzer_dspacing": lambda: analyzer["dspacing"],
+    # "analyzer_position": lambda: analyzer["position"],
+    # "analyzer_transform": lambda: analyzer["transform"],
+    return detector.transform_coords(
         (
             'final_energy',
             'final_wavevector',
@@ -278,7 +287,7 @@ def add_spectrometer_coords(
             'secondary_flight_time',
         ),
         graph={**primary_graph, **secondary_graph},
-        keep_intermediate=False,
+        keep_intermediate=True,  # TODO
         keep_aliases=False,
         rename_dims=False,
     )

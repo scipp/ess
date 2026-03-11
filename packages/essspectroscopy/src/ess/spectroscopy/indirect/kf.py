@@ -10,7 +10,6 @@ from scippneutron.conversion.beamline import (
 )
 
 from ess.spectroscopy.types import (
-    Analyzer,
     DataAtSample,
     DataGroupedByRotation,
     PulsePeriod,
@@ -19,6 +18,7 @@ from ess.spectroscopy.types import (
 )
 
 
+# TODO remove?
 def _no_time(x: sc.Variable | sc.DataArray) -> sc.Variable:
     if isinstance(x, sc.DataArray) and 'time' in x.coords:
         return x['time', 0].data
@@ -240,30 +240,21 @@ def secondary_flight_time(
     return sc.to_unit(L2 / velocity, 'ms', copy=False)
 
 
-def secondary_spectrometer_coordinate_transformation_graph(
-    analyzer: Analyzer[RunType],
-) -> SecondarySpecCoordTransformGraph[RunType]:
+def secondary_spectrometer_coordinate_transformation_graph() -> (
+    SecondarySpecCoordTransformGraph[RunType]
+):
     """Return a coordinate transformation graph for the secondary spectrometer.
-
-    Parameters
-    ----------
-    analyzer:
-        Data group with analyzer parameters.
 
     Returns
     -------
     :
         Coordinate transformation graph for the secondary spectrometer.
-        The graph captures the relevant parameters of ``analyzer``.
     """
     from scippneutron.conversion.beamline import beam_aligned_unit_vectors
 
     return SecondarySpecCoordTransformGraph[RunType](
         {
             "a4": detector_geometric_a4,
-            "analyzer_dspacing": lambda: analyzer["dspacing"],
-            "analyzer_position": lambda: analyzer["position"],
-            "analyzer_transform": lambda: analyzer["transform"],
             "beam_aligned_unit_vectors": beam_aligned_unit_vectors,
             "detector_position": "position",
             "sample_analyzer_vector": sample_analyzer_vector,
