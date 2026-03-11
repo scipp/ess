@@ -14,9 +14,9 @@ ase==3.27.0
     # via ncrystal
 asttokens==3.0.1
     # via stack-data
-certifi==2026.1.4
+certifi==2026.2.25
     # via requests
-charset-normalizer==3.4.4
+charset-normalizer==3.4.5
     # via requests
 click==8.3.1
     # via dask
@@ -46,11 +46,11 @@ fonttools==4.61.1
     # via matplotlib
 fsspec==2026.2.0
     # via dask
-gemmi==0.7.4
+gemmi==0.7.5
     # via ncrystal
 graphviz==0.21
     # via -r nightly.in
-h5py==3.15.1
+h5py==3.16.0
     # via
     #   scippneutron
     #   scippnexus
@@ -77,9 +77,9 @@ jedi==0.19.2
     # via ipython
 jupyterlab-widgets==3.0.16
     # via ipywidgets
-kiwisolver==1.4.10rc0
+kiwisolver==1.5.0
     # via matplotlib
-lazy-loader==0.4
+lazy-loader==0.5
     # via
     #   plopp
     #   scippneutron
@@ -93,7 +93,7 @@ matplotlib==3.10.8
     #   plopp
 matplotlib-inline==0.2.1
     # via ipython
-mpltoolbox==25.10.0
+mpltoolbox==26.2.0
     # via scippneutron
 ncrystal[cif]==4.2.12
     # via -r nightly.in
@@ -103,7 +103,7 @@ ncrystal-python==4.2.12
     # via ncrystal
 networkx==3.6.1
     # via cyclebane
-numpy==2.4.2
+numpy==2.4.3
     # via
     #   -r nightly.in
     #   ase
@@ -125,7 +125,7 @@ packaging==26.0
     #   matplotlib
     #   pooch
     #   pytest
-pandas==3.0.0
+pandas==3.0.1
     # via -r nightly.in
 parso==0.8.6
     # via jedi
@@ -135,7 +135,7 @@ pexpect==4.9.0
     # via ipython
 pillow==12.1.1
     # via matplotlib
-platformdirs==4.5.1
+platformdirs==4.9.4
     # via pooch
 plopp @ git+https://github.com/scipp/plopp@main
     # via
@@ -154,9 +154,9 @@ ptyprocess==0.7.0
     # via pexpect
 pure-eval==0.2.3
     # via stack-data
-pydantic==2.12.5
+pydantic==2.13.0b2
     # via scippneutron
-pydantic-core==2.41.5
+pydantic-core==2.42.0
     # via pydantic
 pygments==2.19.2
     # via
@@ -198,7 +198,7 @@ scippnexus @ git+https://github.com/scipp/scippnexus@main
     #   -r nightly.in
     #   essreduce
     #   scippneutron
-scipy==1.17.0
+scipy==1.17.1
     # via
     #   ase
     #   scippneutron

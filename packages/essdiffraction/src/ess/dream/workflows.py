@@ -122,6 +122,15 @@ def DreamWorkflow(**kwargs) -> sciline.Pipeline:
     wf[NeXusName[CaveMonitor]] = "monitor_cave"
     wf.insert(_get_lookup_table_filename_from_configuration)
     wf[ReducerSoftware] = _collect_reducer_software()
+    wf[LookupTableRelativeErrorThreshold] = {
+        "endcap_backward_detector": float('inf'),
+        "endcap_forward_detector": float('inf'),
+        "mantle_detector": float('inf'),
+        "high_resolution_detector": float('inf'),
+        "sans_detector": float('inf'),
+        "monitor_bunker": float('inf'),
+        "monitor_cave": float('inf'),
+    }
     return wf
 
 
@@ -210,7 +219,14 @@ def DreamGeant4Workflow(*, run_norm: RunNormalization, **kwargs) -> sciline.Pipe
         AccumulatedProtonCharge[VanadiumRun]: charge,
         AccumulatedProtonCharge[EmptyCanRun]: charge,
         CaveMonitorPosition: sc.vector([0.0, 0.0, -4220.0], unit='mm'),
-        LookupTableRelativeErrorThreshold: 0.02,
+        LookupTableRelativeErrorThreshold: {
+            "mantle": 0.02,
+            "endcap_forward": 0.02,
+            "endcap_backward": 0.02,
+            "high_resolution": 0.02,
+            "monitor_bunker": float("inf"),
+            "monitor_cave": float("inf"),
+        },
     }
     for key, value in additional_parameters.items():
         wf[key] = value
