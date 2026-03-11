@@ -3,6 +3,8 @@
 
 """Detector handling for BIFROST."""
 
+from collections.abc import Callable
+
 import scipp as sc
 import scippnexus as snx
 
@@ -135,16 +137,25 @@ def get_calibrated_detector_bifrost(
     da.coords['arc'] = arc
     da.coords['channel'] = channel
 
-    da = _add_analyzer_coords(da, analyzer)
-    da = add_spectrometer_coords(da, primary_graph, secondary_graph)
+    da = add_spectrometer_coords(
+        da,
+        primary_graph,
+        SecondarySpecCoordTransformGraph[RunType](
+            {**secondary_graph, **_make_analyzer_coord_graph(da, analyzer)}
+        ),
+    )
 
     return EmptyDetector[RunType](da)
 
 
-def _add_analyzer_coords(
+# We insert the analyzer coords into the graph so that they don't end up as coords
+# in the output. This could be done in the provider of SecondarySpecCoordTransformGraph
+# but that provider would then have to request the detector component to check
+# the time coordinates.
+def _make_analyzer_coord_graph(
     detector: sc.DataArray,
     analyzer: Analyzer[RunType],
-) -> sc.DataArray:
+) -> dict[str, Callable[[], sc.Variable]]:
     ana_pos = analyzer['position']
     if isinstance(ana_pos, sc.DataArray):
         if 'time' not in detector.coords:
@@ -165,11 +176,11 @@ def _add_analyzer_coords(
         analyzer_position = ana_pos
         analyzer_transform = analyzer['transform'].value
 
-    return detector.assign_coords(
-        analyzer_dspacing=analyzer['dspacing'],
-        analyzer_position=analyzer_position,
-        analyzer_transform=analyzer_transform,
-    )
+    return {
+        'analyzer_dspacing': lambda: analyzer['dspacing'],
+        'analyzer_position': lambda: analyzer_position,
+        'analyzer_transform': lambda: analyzer_transform,
+    }
 
 
 def merge_triplets(
