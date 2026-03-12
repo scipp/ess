@@ -15,6 +15,7 @@ import scipp as sc
 import scippneutron as scn
 import scippnexus as snx
 from scippneutron._utils import elem_unit
+from scippneutron.conversion.tof import wavelength_from_tof
 
 try:
     from .interpolator_numba import Interpolator as InterpolatorImpl
@@ -47,17 +48,10 @@ from .types import (
 )
 
 
-class WavelengthInterpolator:
-    def __init__(
-        self,
-        lookup: sc.DataArray,
-        distance_unit: str,
-        time_unit: str,
-        wavelength_unit: str = 'angstrom',
-    ):
+class TofInterpolator:
+    def __init__(self, lookup: sc.DataArray, distance_unit: str, time_unit: str):
         self._distance_unit = distance_unit
         self._time_unit = time_unit
-        self._wavelength_unit = wavelength_unit
 
         self._time_edges = (
             lookup.coords["event_time_offset"]
@@ -71,7 +65,7 @@ class WavelengthInterpolator:
         self._interpolator = InterpolatorImpl(
             time_edges=self._time_edges,
             distance_edges=self._distance_edges,
-            values=lookup.data.to(unit=self._wavelength_unit, copy=False).values,
+            values=lookup.data.to(unit=self._time_unit, copy=False).values,
         )
 
     def __call__(
@@ -103,17 +97,16 @@ class WavelengthInterpolator:
                 pulse_index=pulse_index.values if pulse_index is not None else None,
                 pulse_period=pulse_period.value,
             ),
-            unit=self._wavelength_unit,
+            unit=self._time_unit,
         )
 
 
-def _compute_wavelength_histogram(
+def _compute_tof_histogram(
     da: sc.DataArray, lookup: ErrorLimitedLookupTable, ltotal: sc.Variable
 ) -> sc.DataArray:
     # In NeXus, 'time_of_flight' is the canonical name in NXmonitor, but in some files,
     # it may be called 'tof' or 'frame_time'.
-    possible_names = {"time_of_flight", "tof", "frame_time"}
-    key = next(iter(set(da.coords.keys()) & possible_names))
+    key = next(iter(set(da.coords.keys()) & {"time_of_flight", "tof", "frame_time"}))
     raw_eto = da.coords[key].to(dtype=float, copy=False)
     eto_unit = raw_eto.unit
     pulse_period = lookup.pulse_period.to(unit=eto_unit)
@@ -130,19 +123,19 @@ def _compute_wavelength_histogram(
     etos = rebinned.coords[key]
 
     # Create linear interpolator
-    interp = WavelengthInterpolator(
+    interp = TofInterpolator(
         lookup.array, distance_unit=ltotal.unit, time_unit=eto_unit
     )
 
-    # Compute wavelengths of the bin edges using the interpolator
-    wavs = interp(
+    # Compute time-of-flight of the bin edges using the interpolator
+    tofs = interp(
         ltotal=ltotal.broadcast(sizes=etos.sizes),
         event_time_offset=etos,
         pulse_period=pulse_period,
     )
 
-    return rebinned.assign_coords(wavelength=wavs).drop_coords(
-        list({key} & possible_names)
+    return rebinned.assign_coords(tof=tofs).drop_coords(
+        list({key} & {"time_of_flight", "frame_time"})
     )
 
 
@@ -152,7 +145,7 @@ def _guess_pulse_stride_offset(
     event_time_offset: sc.Variable,
     pulse_period: sc.Variable,
     pulse_stride: int,
-    interp: WavelengthInterpolator,
+    interp: TofInterpolator,
 ) -> int:
     """
     Using the minimum ``event_time_zero`` to calculate a reference time when computing
@@ -241,7 +234,7 @@ def _prepare_wavelength_interpolation_inputs(
     eto_unit = elem_unit(etos)
 
     # Create linear interpolator
-    interp = WavelengthInterpolator(
+    interp = TofInterpolator(
         lookup.array, distance_unit=ltotal.unit, time_unit=eto_unit
     )
 
@@ -490,16 +483,18 @@ def _compute_wavelength_data(
     pulse_stride_offset: int,
 ) -> sc.DataArray:
     if da.bins is None:
-        data = _compute_wavelength_histogram(da=da, lookup=lookup, ltotal=ltotal)
-        out = rebin_strictly_increasing(data, dim='wavelength')
+        tofs = _compute_tof_histogram(da=da, lookup=lookup, ltotal=ltotal)
+        tofs = rebin_strictly_increasing(tofs, dim='time_of_flight')
     else:
-        out = _compute_wavelength_events(
+        tofs = _compute_tof_events(
             da=da,
             lookup=lookup,
             ltotal=ltotal,
             pulse_stride_offset=pulse_stride_offset,
         )
-    return out.assign_coords(Ltotal=ltotal)
+    return tofs.assign_coords(Ltotal=ltotal).transform_coords(
+        'wavelength', graph={"wavelength": wavelength_from_tof}, keep_intermediate=False
+    )
 
 
 def detector_wavelength_data(
