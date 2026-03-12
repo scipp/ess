@@ -1,0 +1,1074 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ess.nmx.mcstas.xml &#8212; ESSnmx</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../../../_static/documentation_options.js?v=8ecd6c2c"></script>
+    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ess/nmx/mcstas/xml';</script>
+    <script src="../../../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <link rel="icon" href="../../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="26.3.0" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../../_static/logo.svg" class="logo__image only-light" alt="ESSnmx - Home"/>
+    <img src="../../../../_static/logo-dark.svg" class="logo__image only-dark pst-js-only" alt="ESSnmx - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../about/index.html">
+    About
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/essnmx" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essnmx/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essnmx" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../about/index.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/essnmx" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essnmx/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essnmx" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../../index.html" class="nav-link">Module code</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../mcstas.html" class="nav-link">ess.nmx.mcstas</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ess.nmx.mcstas.xml</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for ess.nmx.mcstas.xml</h1><div class="highlight"><pre>
+<span></span><span class="c1"># SPDX-License-Identifier: BSD-3-Clause</span>
+<span class="c1"># Copyright (c) 2023 Scipp contributors (https://github.com/scipp)</span>
+<span class="c1"># McStas instrument geometry xml description related functions.</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">types</span><span class="w"> </span><span class="kn">import</span> <span class="n">MappingProxyType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Protocol</span><span class="p">,</span> <span class="n">TypeVar</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">h5py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">defusedxml.ElementTree</span><span class="w"> </span><span class="kn">import</span> <span class="n">fromstring</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..rotation</span><span class="w"> </span><span class="kn">import</span> <span class="n">axis_angle_to_quaternion</span><span class="p">,</span> <span class="n">quaternion_to_matrix</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">FilePath</span>
+
+<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;T&#39;</span><span class="p">)</span>
+
+
+<span class="n">_AXISNAME_TO_UNIT_VECTOR</span> <span class="o">=</span> <span class="n">MappingProxyType</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">vector</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]),</span>
+        <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">vector</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]),</span>
+        <span class="s1">&#39;z&#39;</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">vector</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]),</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_XML</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;XML element or tree type.</span>
+
+<span class="sd">    Temporarily used for type hinting.</span>
+<span class="sd">    Builtin XML type is blocked by bandit security check.&quot;&quot;&quot;</span>
+
+    <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">attrib</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">find</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_XML | None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_XML&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_XML&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_and_unpack_if_only_one</span><span class="p">(</span><span class="n">xml_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">_XML</span><span class="p">],</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_XML</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if there is only one element with ``name``.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">xml_items</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Multiple </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">s found.&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">xml_items</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> found.&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">xml_items</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="select_by_tag">
+<a class="viewcode-back" href="../../../../generated/modules/ess.nmx.mcstas.xml.select_by_tag.html#ess.nmx.mcstas.xml.select_by_tag">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">select_by_tag</span><span class="p">(</span><span class="n">xml_items</span><span class="p">:</span> <span class="n">_XML</span><span class="p">,</span> <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_XML</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Select element with ``tag`` if there is only one.&quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">_check_and_unpack_if_only_one</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">filter_by_tag</span><span class="p">(</span><span class="n">xml_items</span><span class="p">,</span> <span class="n">tag</span><span class="p">)),</span> <span class="n">tag</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="filter_by_tag">
+<a class="viewcode-back" href="../../../../generated/modules/ess.nmx.mcstas.xml.filter_by_tag.html#ess.nmx.mcstas.xml.filter_by_tag">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">filter_by_tag</span><span class="p">(</span><span class="n">xml_items</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">_XML</span><span class="p">],</span> <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">_XML</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Filter xml items by tag.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">xml_items</span> <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="n">tag</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="filter_by_type_prefix">
+<a class="viewcode-back" href="../../../../generated/modules/ess.nmx.mcstas.xml.filter_by_type_prefix.html#ess.nmx.mcstas.xml.filter_by_type_prefix">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">filter_by_type_prefix</span><span class="p">(</span><span class="n">xml_items</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">_XML</span><span class="p">],</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">_XML</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Filter xml items by type prefix.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">xml_items</span> <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="select_by_type_prefix">
+<a class="viewcode-back" href="../../../../generated/modules/ess.nmx.mcstas.xml.select_by_type_prefix.html#ess.nmx.mcstas.xml.select_by_type_prefix">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">select_by_type_prefix</span><span class="p">(</span><span class="n">xml_items</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">_XML</span><span class="p">],</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_XML</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Select xml item by type prefix.&quot;&quot;&quot;</span>
+
+    <span class="n">cands</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">filter_by_type_prefix</span><span class="p">(</span><span class="n">xml_items</span><span class="p">,</span> <span class="n">prefix</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">_check_and_unpack_if_only_one</span><span class="p">(</span><span class="n">cands</span><span class="p">,</span> <span class="n">prefix</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="find_attributes">
+<a class="viewcode-back" href="../../../../generated/modules/ess.nmx.mcstas.xml.find_attributes.html#ess.nmx.mcstas.xml.find_attributes">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_attributes</span><span class="p">(</span><span class="n">component</span><span class="p">:</span> <span class="n">_XML</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieve ``args`` as float from xml.&quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">component</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="n">key</span><span class="p">])</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">args</span><span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="SimulationSettings">
+<a class="viewcode-back" href="../../../../generated/modules/ess.nmx.mcstas.xml.SimulationSettings.html#ess.nmx.mcstas.xml.SimulationSettings">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SimulationSettings</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Simulation settings extracted from McStas instrument xml description.&quot;&quot;&quot;</span>
+
+    <span class="c1"># From &lt;defaults&gt;</span>
+    <span class="n">length_unit</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># &#39;unit&#39; of &lt;length&gt;</span>
+    <span class="n">angle_unit</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># &#39;unit&#39; of &lt;angle&gt;</span>
+    <span class="c1"># From &lt;reference-frame&gt;</span>
+    <span class="n">beam_axis</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># &#39;axis&#39; of &lt;along-beam&gt;</span>
+    <span class="n">handedness</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># &#39;val&#39; of &lt;handedness&gt;</span>
+
+<div class="viewcode-block" id="SimulationSettings.from_xml">
+<a class="viewcode-back" href="../../../../generated/modules/ess.nmx.mcstas.xml.SimulationSettings.html#ess.nmx.mcstas.xml.SimulationSettings.from_xml">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_xml</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">tree</span><span class="p">:</span> <span class="n">_XML</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;SimulationSettings&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create simulation settings from xml.&quot;&quot;&quot;</span>
+        <span class="n">defaults</span> <span class="o">=</span> <span class="n">select_by_tag</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="s1">&#39;defaults&#39;</span><span class="p">)</span>
+        <span class="n">length_desc</span> <span class="o">=</span> <span class="n">select_by_tag</span><span class="p">(</span><span class="n">defaults</span><span class="p">,</span> <span class="s1">&#39;length&#39;</span><span class="p">)</span>
+        <span class="n">angle_desc</span> <span class="o">=</span> <span class="n">select_by_tag</span><span class="p">(</span><span class="n">defaults</span><span class="p">,</span> <span class="s1">&#39;angle&#39;</span><span class="p">)</span>
+        <span class="n">reference_frame</span> <span class="o">=</span> <span class="n">select_by_tag</span><span class="p">(</span><span class="n">defaults</span><span class="p">,</span> <span class="s1">&#39;reference-frame&#39;</span><span class="p">)</span>
+        <span class="n">along_beam</span> <span class="o">=</span> <span class="n">select_by_tag</span><span class="p">(</span><span class="n">reference_frame</span><span class="p">,</span> <span class="s1">&#39;along-beam&#39;</span><span class="p">)</span>
+        <span class="n">handedness</span> <span class="o">=</span> <span class="n">select_by_tag</span><span class="p">(</span><span class="n">reference_frame</span><span class="p">,</span> <span class="s1">&#39;handedness&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">length_unit</span><span class="o">=</span><span class="n">length_desc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">],</span>
+            <span class="n">angle_unit</span><span class="o">=</span><span class="n">angle_desc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">],</span>
+            <span class="n">beam_axis</span><span class="o">=</span><span class="n">along_beam</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;axis&#39;</span><span class="p">],</span>
+            <span class="n">handedness</span><span class="o">=</span><span class="n">handedness</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;val&#39;</span><span class="p">],</span>
+        <span class="p">)</span></div>
+</div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_position_from_location</span><span class="p">(</span><span class="n">location</span><span class="p">:</span> <span class="n">_XML</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;m&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieve position from location.&quot;&quot;&quot;</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">find_attributes</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">vector</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_rotation_matrix_from_location</span><span class="p">(</span>
+    <span class="n">location</span><span class="p">:</span> <span class="n">_XML</span><span class="p">,</span> <span class="n">angle_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;degree&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieve rotation matrix from location.&quot;&quot;&quot;</span>
+
+    <span class="n">attribs</span> <span class="o">=</span> <span class="n">find_attributes</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="s1">&#39;axis-x&#39;</span><span class="p">,</span> <span class="s1">&#39;axis-y&#39;</span><span class="p">,</span> <span class="s1">&#39;axis-z&#39;</span><span class="p">,</span> <span class="s1">&#39;rot&#39;</span><span class="p">)</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">w</span> <span class="o">=</span> <span class="n">axis_angle_to_quaternion</span><span class="p">(</span>
+        <span class="n">x</span><span class="o">=</span><span class="n">attribs</span><span class="p">[</span><span class="s1">&#39;axis-x&#39;</span><span class="p">],</span>
+        <span class="n">y</span><span class="o">=</span><span class="n">attribs</span><span class="p">[</span><span class="s1">&#39;axis-y&#39;</span><span class="p">],</span>
+        <span class="n">z</span><span class="o">=</span><span class="n">attribs</span><span class="p">[</span><span class="s1">&#39;axis-z&#39;</span><span class="p">],</span>
+        <span class="n">theta</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="o">-</span><span class="n">attribs</span><span class="p">[</span><span class="s1">&#39;rot&#39;</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="n">angle_unit</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">quaternion_to_matrix</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">w</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="DetectorDesc">
+<a class="viewcode-back" href="../../../../generated/modules/ess.nmx.mcstas.xml.DetectorDesc.html#ess.nmx.mcstas.xml.DetectorDesc">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DetectorDesc</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Detector information extracted from McStas instrument xml description.&quot;&quot;&quot;</span>
+
+    <span class="c1"># From &lt;component type=&quot;MonNDtype-n&quot; ...&gt;</span>
+    <span class="n">component_type</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># &#39;type&#39;</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">id_start</span><span class="p">:</span> <span class="nb">int</span>  <span class="c1"># &#39;idstart&#39;</span>
+    <span class="n">fast_axis_name</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># &#39;idfillbyfirst&#39;</span>
+    <span class="c1"># From &lt;type name=&quot;MonNDtype-n&quot; ...&gt;</span>
+    <span class="n">num_x</span><span class="p">:</span> <span class="nb">int</span>  <span class="c1"># &#39;xpixels&#39;</span>
+    <span class="n">num_y</span><span class="p">:</span> <span class="nb">int</span>  <span class="c1"># &#39;ypixels&#39;</span>
+    <span class="n">step_x</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>  <span class="c1"># &#39;xstep&#39;</span>
+    <span class="n">step_y</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>  <span class="c1"># &#39;ystep&#39;</span>
+    <span class="n">start_x</span><span class="p">:</span> <span class="nb">float</span>  <span class="c1"># &#39;xstart&#39;</span>
+    <span class="n">start_y</span><span class="p">:</span> <span class="nb">float</span>  <span class="c1"># &#39;ystart&#39;</span>
+    <span class="c1"># From &lt;location&gt; under &lt;component type=&quot;MonNDtype-n&quot; ...&gt;</span>
+    <span class="n">position</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>  <span class="c1"># &lt;location&gt; &#39;x&#39;, &#39;y&#39;, &#39;z&#39;</span>
+    <span class="c1"># Calculated fields</span>
+    <span class="n">rotation_matrix</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>
+    <span class="n">slow_axis_name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">fast_axis</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>
+    <span class="n">slow_axis</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>
+
+<div class="viewcode-block" id="DetectorDesc.from_xml">
+<a class="viewcode-back" href="../../../../generated/modules/ess.nmx.mcstas.xml.DetectorDesc.html#ess.nmx.mcstas.xml.DetectorDesc.from_xml">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_xml</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">component</span><span class="p">:</span> <span class="n">_XML</span><span class="p">,</span>
+        <span class="n">type_desc</span><span class="p">:</span> <span class="n">_XML</span><span class="p">,</span>
+        <span class="n">simulation_settings</span><span class="p">:</span> <span class="n">SimulationSettings</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DetectorDesc&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create detector description from xml component and type.&quot;&quot;&quot;</span>
+
+        <span class="n">location</span> <span class="o">=</span> <span class="n">select_by_tag</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="s1">&#39;location&#39;</span><span class="p">)</span>
+        <span class="n">rotation_matrix</span> <span class="o">=</span> <span class="n">_rotation_matrix_from_location</span><span class="p">(</span>
+            <span class="n">location</span><span class="p">,</span> <span class="n">simulation_settings</span><span class="o">.</span><span class="n">angle_unit</span>
+        <span class="p">)</span>
+        <span class="n">fast_axis_name</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;idfillbyfirst&#39;</span><span class="p">]</span>
+        <span class="n">slow_axis_name</span> <span class="o">=</span> <span class="s1">&#39;xy&#39;</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">fast_axis_name</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+        <span class="n">length_unit</span> <span class="o">=</span> <span class="n">simulation_settings</span><span class="o">.</span><span class="n">length_unit</span>
+
+        <span class="c1"># Type casting from str to float and then int to allow *e* notation</span>
+        <span class="c1"># For example, &#39;1e4&#39; -&gt; 10000.0 -&gt; 10_000</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">component_type</span><span class="o">=</span><span class="n">type_desc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">component</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
+            <span class="n">id_start</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">component</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;idstart&#39;</span><span class="p">])),</span>
+            <span class="n">fast_axis_name</span><span class="o">=</span><span class="n">fast_axis_name</span><span class="p">,</span>
+            <span class="n">slow_axis_name</span><span class="o">=</span><span class="n">slow_axis_name</span><span class="p">,</span>
+            <span class="n">num_x</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">type_desc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;xpixels&#39;</span><span class="p">])),</span>
+            <span class="n">num_y</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">type_desc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;ypixels&#39;</span><span class="p">])),</span>
+            <span class="n">step_x</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">type_desc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;xstep&#39;</span><span class="p">]),</span> <span class="n">unit</span><span class="o">=</span><span class="n">length_unit</span><span class="p">),</span>
+            <span class="n">step_y</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">type_desc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;ystep&#39;</span><span class="p">]),</span> <span class="n">unit</span><span class="o">=</span><span class="n">length_unit</span><span class="p">),</span>
+            <span class="n">start_x</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">type_desc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;xstart&#39;</span><span class="p">]),</span>
+            <span class="n">start_y</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">type_desc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;ystart&#39;</span><span class="p">]),</span>
+            <span class="n">position</span><span class="o">=</span><span class="n">_position_from_location</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="n">simulation_settings</span><span class="o">.</span><span class="n">length_unit</span><span class="p">),</span>
+            <span class="n">rotation_matrix</span><span class="o">=</span><span class="n">rotation_matrix</span><span class="p">,</span>
+            <span class="n">fast_axis</span><span class="o">=</span><span class="n">rotation_matrix</span> <span class="o">*</span> <span class="n">_AXISNAME_TO_UNIT_VECTOR</span><span class="p">[</span><span class="n">fast_axis_name</span><span class="p">],</span>
+            <span class="n">slow_axis</span><span class="o">=</span><span class="n">rotation_matrix</span> <span class="o">*</span> <span class="n">_AXISNAME_TO_UNIT_VECTOR</span><span class="p">[</span><span class="n">slow_axis_name</span><span class="p">],</span>
+        <span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">total_pixels</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_x</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_y</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">slow_step</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">step_y</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fast_axis_name</span> <span class="o">==</span> <span class="s1">&#39;x&#39;</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">step_x</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fast_step</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">step_x</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fast_axis_name</span> <span class="o">==</span> <span class="s1">&#39;x&#39;</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">step_y</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">num_fast_pixels_per_row</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Number of pixels in each row of the detector along the fast axis.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_x</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fast_axis_name</span> <span class="o">==</span> <span class="s1">&#39;x&#39;</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_y</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">detector_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Shape of the detector panel. (num_x, num_y)&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_y</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_collect_detector_descriptions</span><span class="p">(</span><span class="n">tree</span><span class="p">:</span> <span class="n">_XML</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">DetectorDesc</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieve detector geometry descriptions from mcstas file.&quot;&quot;&quot;</span>
+    <span class="n">type_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">filter_by_tag</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">))</span>
+    <span class="n">simulation_settings</span> <span class="o">=</span> <span class="n">SimulationSettings</span><span class="o">.</span><span class="n">from_xml</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_find_type_desc</span><span class="p">(</span><span class="n">det</span><span class="p">:</span> <span class="n">_XML</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_XML</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">type_</span> <span class="ow">in</span> <span class="n">type_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">type_</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">det</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]:</span>
+                <span class="k">return</span> <span class="n">type_</span>
+
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Cannot find type </span><span class="si">{</span><span class="n">det</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> for </span><span class="si">{</span><span class="n">det</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">detector_components</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">DetectorDesc</span><span class="o">.</span><span class="n">from_xml</span><span class="p">(</span>
+            <span class="n">component</span><span class="o">=</span><span class="n">det</span><span class="p">,</span>
+            <span class="n">type_desc</span><span class="o">=</span><span class="n">_find_type_desc</span><span class="p">(</span><span class="n">det</span><span class="p">),</span>
+            <span class="n">simulation_settings</span><span class="o">=</span><span class="n">simulation_settings</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">det</span> <span class="ow">in</span> <span class="n">filter_by_type_prefix</span><span class="p">(</span><span class="n">filter_by_tag</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="s1">&#39;component&#39;</span><span class="p">),</span> <span class="s1">&#39;MonNDtype&#39;</span><span class="p">)</span>
+    <span class="p">]</span>
+
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">detector_components</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">id_start</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="SampleDesc">
+<a class="viewcode-back" href="../../../../generated/modules/ess.nmx.mcstas.xml.SampleDesc.html#ess.nmx.mcstas.xml.SampleDesc">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SampleDesc</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sample description extracted from McStas instrument xml description.&quot;&quot;&quot;</span>
+
+    <span class="c1"># From &lt;component type=&quot;sampleMantid-type&quot; ...&gt;</span>
+    <span class="n">component_type</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="c1"># From &lt;location&gt; under &lt;component type=&quot;sampleMantid-type&quot; ...&gt;</span>
+    <span class="n">position</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>
+    <span class="n">rotation_matrix</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="SampleDesc.from_xml">
+<a class="viewcode-back" href="../../../../generated/modules/ess.nmx.mcstas.xml.SampleDesc.html#ess.nmx.mcstas.xml.SampleDesc.from_xml">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_xml</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">tree</span><span class="p">:</span> <span class="n">_XML</span><span class="p">,</span> <span class="n">simulation_settings</span><span class="p">:</span> <span class="n">SimulationSettings</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;SampleDesc&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create sample description from xml component.&quot;&quot;&quot;</span>
+        <span class="n">source_xml</span> <span class="o">=</span> <span class="n">select_by_type_prefix</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="s1">&#39;sampleMantid-type&#39;</span><span class="p">)</span>
+        <span class="n">location</span> <span class="o">=</span> <span class="n">select_by_tag</span><span class="p">(</span><span class="n">source_xml</span><span class="p">,</span> <span class="s1">&#39;location&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">rotation_matrix</span> <span class="o">=</span> <span class="n">_rotation_matrix_from_location</span><span class="p">(</span>
+                <span class="n">location</span><span class="p">,</span> <span class="n">simulation_settings</span><span class="o">.</span><span class="n">angle_unit</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">rotation_matrix</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">component_type</span><span class="o">=</span><span class="n">source_xml</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">],</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">source_xml</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
+            <span class="n">position</span><span class="o">=</span><span class="n">_position_from_location</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="n">simulation_settings</span><span class="o">.</span><span class="n">length_unit</span><span class="p">),</span>
+            <span class="n">rotation_matrix</span><span class="o">=</span><span class="n">rotation_matrix</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SampleDesc.position_from_sample">
+<a class="viewcode-back" href="../../../../generated/modules/ess.nmx.mcstas.xml.SampleDesc.html#ess.nmx.mcstas.xml.SampleDesc.position_from_sample">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">position_from_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Position of ``other`` relative to the sample.</span>
+
+<span class="sd">        All positions and distance are stored relative to the sample position.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        other:</span>
+<span class="sd">            Position of the other object in 3D vector.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">other</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="SourceDesc">
+<a class="viewcode-back" href="../../../../generated/modules/ess.nmx.mcstas.xml.SourceDesc.html#ess.nmx.mcstas.xml.SourceDesc">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SourceDesc</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Source description extracted from McStas instrument xml description.&quot;&quot;&quot;</span>
+
+    <span class="c1"># From &lt;component type=&quot;Source&quot; ...&gt;</span>
+    <span class="n">component_type</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="c1"># From &lt;location&gt; under &lt;component type=&quot;Source&quot; ...&gt;</span>
+    <span class="n">position</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>
+
+<div class="viewcode-block" id="SourceDesc.from_xml">
+<a class="viewcode-back" href="../../../../generated/modules/ess.nmx.mcstas.xml.SourceDesc.html#ess.nmx.mcstas.xml.SourceDesc.from_xml">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_xml</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">tree</span><span class="p">:</span> <span class="n">_XML</span><span class="p">,</span> <span class="n">simulation_settings</span><span class="p">:</span> <span class="n">SimulationSettings</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;SourceDesc&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create source description from xml component.&quot;&quot;&quot;</span>
+        <span class="n">source_xml</span> <span class="o">=</span> <span class="n">select_by_type_prefix</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="s1">&#39;sourceMantid-type&#39;</span><span class="p">)</span>
+        <span class="n">location</span> <span class="o">=</span> <span class="n">select_by_tag</span><span class="p">(</span><span class="n">source_xml</span><span class="p">,</span> <span class="s1">&#39;location&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">component_type</span><span class="o">=</span><span class="n">source_xml</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">],</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">source_xml</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
+            <span class="n">position</span><span class="o">=</span><span class="n">_position_from_location</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="n">simulation_settings</span><span class="o">.</span><span class="n">length_unit</span><span class="p">),</span>
+        <span class="p">)</span></div>
+</div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_construct_pixel_id</span><span class="p">(</span><span class="n">detector_desc</span><span class="p">:</span> <span class="n">DetectorDesc</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Pixel IDs for single detector.&quot;&quot;&quot;</span>
+    <span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">detector_desc</span><span class="o">.</span><span class="n">id_start</span><span class="p">,</span>
+        <span class="n">detector_desc</span><span class="o">.</span><span class="n">id_start</span> <span class="o">+</span> <span class="n">detector_desc</span><span class="o">.</span><span class="n">total_pixels</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_construct_pixel_ids</span><span class="p">(</span><span class="n">detector_descs</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">DetectorDesc</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Pixel IDs for all detectors.&quot;&quot;&quot;</span>
+    <span class="n">ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">_construct_pixel_id</span><span class="p">(</span><span class="n">det</span><span class="p">)</span> <span class="k">for</span> <span class="n">det</span> <span class="ow">in</span> <span class="n">detector_descs</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="s1">&#39;id&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_pixel_positions</span><span class="p">(</span>
+    <span class="n">detector</span><span class="p">:</span> <span class="n">DetectorDesc</span><span class="p">,</span> <span class="n">position_offset</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Position of pixels of the ``detector``.</span>
+
+<span class="sd">    Position of each pixel is relative to the position_offset.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pixel_idx</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="n">detector</span><span class="o">.</span><span class="n">total_pixels</span><span class="p">)</span>
+    <span class="n">n_col</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="n">detector</span><span class="o">.</span><span class="n">num_fast_pixels_per_row</span><span class="p">)</span>
+
+    <span class="n">pixel_n_slow</span> <span class="o">=</span> <span class="n">pixel_idx</span> <span class="o">//</span> <span class="n">n_col</span>
+    <span class="n">pixel_n_fast</span> <span class="o">=</span> <span class="n">pixel_idx</span> <span class="o">%</span> <span class="n">n_col</span>
+
+    <span class="n">fast_axis_steps</span> <span class="o">=</span> <span class="n">detector</span><span class="o">.</span><span class="n">fast_axis</span> <span class="o">*</span> <span class="n">detector</span><span class="o">.</span><span class="n">fast_step</span>
+    <span class="n">slow_axis_steps</span> <span class="o">=</span> <span class="n">detector</span><span class="o">.</span><span class="n">slow_axis</span> <span class="o">*</span> <span class="n">detector</span><span class="o">.</span><span class="n">slow_step</span>
+
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">pixel_n_slow</span> <span class="o">*</span> <span class="n">slow_axis_steps</span><span class="p">)</span>
+        <span class="o">+</span> <span class="p">(</span><span class="n">pixel_n_fast</span> <span class="o">*</span> <span class="n">fast_axis_steps</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">detector</span><span class="o">.</span><span class="n">rotation_matrix</span>
+        <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">vector</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">detector</span><span class="o">.</span><span class="n">start_x</span><span class="p">,</span> <span class="n">detector</span><span class="o">.</span><span class="n">start_y</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="n">position_offset</span><span class="o">.</span><span class="n">unit</span>
+        <span class="p">)</span>  <span class="c1"># Detector pixel offset should also be rotated first.</span>
+    <span class="p">)</span> <span class="o">+</span> <span class="n">position_offset</span>
+
+
+<div class="viewcode-block" id="McStasInstrument">
+<a class="viewcode-back" href="../../../../generated/modules/ess.nmx.mcstas.xml.McStasInstrument.html#ess.nmx.mcstas.xml.McStasInstrument">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">McStasInstrument</span><span class="p">:</span>
+    <span class="n">simulation_settings</span><span class="p">:</span> <span class="n">SimulationSettings</span>
+    <span class="n">detectors</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">DetectorDesc</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+    <span class="n">source</span><span class="p">:</span> <span class="n">SourceDesc</span>
+    <span class="n">sample</span><span class="p">:</span> <span class="n">SampleDesc</span>
+
+<div class="viewcode-block" id="McStasInstrument.from_xml">
+<a class="viewcode-back" href="../../../../generated/modules/ess.nmx.mcstas.xml.McStasInstrument.html#ess.nmx.mcstas.xml.McStasInstrument.from_xml">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_xml</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">tree</span><span class="p">:</span> <span class="n">_XML</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;McStasInstrument&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create McStas instrument from xml.&quot;&quot;&quot;</span>
+        <span class="n">simulation_settings</span> <span class="o">=</span> <span class="n">SimulationSettings</span><span class="o">.</span><span class="n">from_xml</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">simulation_settings</span><span class="o">=</span><span class="n">simulation_settings</span><span class="p">,</span>
+            <span class="n">detectors</span><span class="o">=</span><span class="n">_collect_detector_descriptions</span><span class="p">(</span><span class="n">tree</span><span class="p">),</span>
+            <span class="n">source</span><span class="o">=</span><span class="n">SourceDesc</span><span class="o">.</span><span class="n">from_xml</span><span class="p">(</span>
+                <span class="n">tree</span><span class="o">=</span><span class="n">tree</span><span class="p">,</span> <span class="n">simulation_settings</span><span class="o">=</span><span class="n">simulation_settings</span>
+            <span class="p">),</span>
+            <span class="n">sample</span><span class="o">=</span><span class="n">SampleDesc</span><span class="o">.</span><span class="n">from_xml</span><span class="p">(</span>
+                <span class="n">tree</span><span class="o">=</span><span class="n">tree</span><span class="p">,</span> <span class="n">simulation_settings</span><span class="o">=</span><span class="n">simulation_settings</span>
+            <span class="p">),</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="McStasInstrument.pixel_ids">
+<a class="viewcode-back" href="../../../../generated/modules/ess.nmx.mcstas.xml.McStasInstrument.html#ess.nmx.mcstas.xml.McStasInstrument.pixel_ids">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pixel_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">det_names</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Pixel IDs for the detectors.</span>
+
+<span class="sd">        If multiple detectors are requested, all pixel IDs will be concatenated along</span>
+<span class="sd">        the &#39;id&#39; dimension.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        det_names:</span>
+<span class="sd">            Names of the detectors to extract pixel IDs for.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">detectors</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">det</span> <span class="k">for</span> <span class="n">det</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">detectors</span> <span class="k">if</span> <span class="n">det</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">det_names</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_construct_pixel_ids</span><span class="p">(</span><span class="n">detectors</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="McStasInstrument.experiment_metadata">
+<a class="viewcode-back" href="../../../../generated/modules/ess.nmx.mcstas.xml.McStasInstrument.html#ess.nmx.mcstas.xml.McStasInstrument.experiment_metadata">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">experiment_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract experiment metadata from the McStas instrument description.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;sample_position&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">position_from_sample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">position</span><span class="p">),</span>
+            <span class="s1">&#39;source_position&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">position_from_sample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">position</span><span class="p">),</span>
+            <span class="s1">&#39;sample_name&#39;</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">name</span><span class="p">),</span>
+        <span class="p">}</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_detector_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">det_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">]:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">detector</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">det</span> <span class="k">for</span> <span class="n">det</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">detectors</span> <span class="k">if</span> <span class="n">det</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">det_name</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">StopIteration</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Detector </span><span class="si">{</span><span class="n">det_name</span><span class="si">}</span><span class="s2"> not found.&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;fast_axis&#39;</span><span class="p">:</span> <span class="n">detector</span><span class="o">.</span><span class="n">fast_axis</span><span class="p">,</span>
+            <span class="s1">&#39;slow_axis&#39;</span><span class="p">:</span> <span class="n">detector</span><span class="o">.</span><span class="n">slow_axis</span><span class="p">,</span>
+            <span class="s1">&#39;origin_position&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">position_from_sample</span><span class="p">(</span><span class="n">detector</span><span class="o">.</span><span class="n">position</span><span class="p">),</span>
+            <span class="s1">&#39;position&#39;</span><span class="p">:</span> <span class="n">_pixel_positions</span><span class="p">(</span>
+                <span class="n">detector</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">position_from_sample</span><span class="p">(</span><span class="n">detector</span><span class="o">.</span><span class="n">position</span><span class="p">)</span>
+            <span class="p">),</span>
+            <span class="s1">&#39;detector_shape&#39;</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="n">detector</span><span class="o">.</span><span class="n">detector_shape</span><span class="p">),</span>
+            <span class="s1">&#39;x_pixel_size&#39;</span><span class="p">:</span> <span class="n">detector</span><span class="o">.</span><span class="n">step_x</span><span class="p">,</span>
+            <span class="s1">&#39;y_pixel_size&#39;</span><span class="p">:</span> <span class="n">detector</span><span class="o">.</span><span class="n">step_y</span><span class="p">,</span>
+            <span class="s1">&#39;detector_name&#39;</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="n">detector</span><span class="o">.</span><span class="n">name</span><span class="p">),</span>
+        <span class="p">}</span>
+
+<div class="viewcode-block" id="McStasInstrument.detector_metadata">
+<a class="viewcode-back" href="../../../../generated/modules/ess.nmx.mcstas.xml.McStasInstrument.html#ess.nmx.mcstas.xml.McStasInstrument.detector_metadata">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">detector_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">det_names</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract detector metadata from the McStas instrument description.</span>
+
+<span class="sd">        If multiple detector is requested, all metadata will be concatenated along the</span>
+<span class="sd">        &#39;panel&#39; dimension.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        det_names:</span>
+<span class="sd">            Names of the detectors to extract metadata for.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">det_names</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_detector_metadata</span><span class="p">(</span><span class="n">det_names</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">detector_metadatas</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">det_name</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_detector_metadata</span><span class="p">(</span><span class="n">det_name</span><span class="p">)</span> <span class="k">for</span> <span class="n">det_name</span> <span class="ow">in</span> <span class="n">det_names</span>
+        <span class="p">}</span>
+        <span class="c1"># Concat all metadata into panel dimension</span>
+        <span class="n">metadata_keys</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span><span class="o">.</span><span class="n">union</span><span class="p">(</span>
+            <span class="nb">set</span><span class="p">(</span><span class="n">detector_metadatas</span><span class="p">[</span><span class="n">det_name</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="k">for</span> <span class="n">det_name</span> <span class="ow">in</span> <span class="n">det_names</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">key</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">metadata</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">metadata</span> <span class="ow">in</span> <span class="n">detector_metadatas</span><span class="o">.</span><span class="n">values</span><span class="p">()],</span> <span class="s1">&#39;panel&#39;</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">metadata_keys</span>
+        <span class="p">}</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="read_mcstas_geometry_xml">
+<a class="viewcode-back" href="../../../../generated/modules/ess.nmx.mcstas.xml.read_mcstas_geometry_xml.html#ess.nmx.mcstas.xml.read_mcstas_geometry_xml">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_mcstas_geometry_xml</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="n">FilePath</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">McStasInstrument</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieve geometry parameters from mcstas file&quot;&quot;&quot;</span>
+    <span class="n">instrument_xml_path</span> <span class="o">=</span> <span class="s1">&#39;entry1/instrument/instrument_xml/data&#39;</span>
+    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">tree</span> <span class="o">=</span> <span class="n">fromstring</span><span class="p">(</span><span class="n">file</span><span class="p">[</span><span class="n">instrument_xml_path</span><span class="p">][</span><span class="o">...</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">McStasInstrument</span><span class="o">.</span><span class="n">from_xml</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span></div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025 Scipp contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><!-- This will display the version of the docs -->
+Current ESSnmx version: 26.3.0 (<a href="https://github.com/scipp/essnmx/releases">older versions</a>).</div>
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,861 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ess.nmx.types &#8212; ESSnmx</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../../_static/documentation_options.js?v=8ecd6c2c"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ess/nmx/types';</script>
+    <script src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <link rel="icon" href="../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="26.3.0" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/logo.svg" class="logo__image only-light" alt="ESSnmx - Home"/>
+    <img src="../../../_static/logo-dark.svg" class="logo__image only-dark pst-js-only" alt="ESSnmx - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../about/index.html">
+    About
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/essnmx" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essnmx/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essnmx" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../about/index.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/essnmx" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essnmx/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essnmx" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ess.nmx.types</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for ess.nmx.types</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">NewType</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">h5py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scippnexus</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">snx</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.time_of_flight.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">TofLookupTable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scippneutron.metadata</span><span class="w"> </span><span class="kn">import</span> <span class="n">RadiationProbe</span><span class="p">,</span> <span class="n">SourceType</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">._display_helper</span><span class="w"> </span><span class="kn">import</span> <span class="n">to_datagroup</span>
+
+
+<div class="viewcode-block" id="Compression">
+<a class="viewcode-back" href="../../../generated/modules/ess.nmx.types.Compression.html#ess.nmx.types.Compression">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Compression</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">StrEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compression type of the output file.</span>
+
+<span class="sd">    These options are written as enum for future extensibility.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">NONE</span> <span class="o">=</span> <span class="s1">&#39;NONE&#39;</span>
+    <span class="n">GZIP</span> <span class="o">=</span> <span class="s1">&#39;GZIP&#39;</span>
+    <span class="n">BITSHUFFLE_LZ4</span> <span class="o">=</span> <span class="s1">&#39;BITSHUFFLE_LZ4&#39;</span></div>
+
+
+
+<span class="n">TofSimulationMinWavelength</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;TofSimulationMinWavelength&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Minimum wavelength for tof simulation to calculate look up table.&quot;&quot;&quot;</span>
+
+<span class="n">TofSimulationMaxWavelength</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;TofSimulationMaxWavelength&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Maximum wavelength for tof simulation to calculate look up table.&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="ControlMode">
+<a class="viewcode-back" href="../../../generated/modules/ess.nmx.types.ControlMode.html#ess.nmx.types.ControlMode">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ControlMode</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">StrEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Control mode of counting.</span>
+
+<span class="sd">    Based on the NXlauetof definition of ``control`` (NXmonitor) field.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">monitor</span> <span class="o">=</span> <span class="s1">&#39;monitor&#39;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Count to a preset value based on received monitor counts.&quot;&quot;&quot;</span>
+    <span class="n">timer</span> <span class="o">=</span> <span class="s1">&#39;timer&#39;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Count to a preset value based on clock time&quot;&quot;&quot;</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_unit_matrix</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">spatial</span><span class="o">.</span><span class="n">linear_transform</span><span class="p">(</span>
+        <span class="n">value</span><span class="o">=</span><span class="p">[[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]],</span>
+        <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;dimensionless&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_uniform_unit_cell_length</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">vector</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;dimensionless&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_cube_unit_cell_angle</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">vector</span><span class="p">([</span><span class="mf">90.0</span><span class="p">,</span> <span class="mf">90.0</span><span class="p">,</span> <span class="mf">90.0</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;deg&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="NMXSampleMetadata">
+<a class="viewcode-back" href="../../../generated/modules/ess.nmx.types.NMXSampleMetadata.html#ess.nmx.types.NMXSampleMetadata">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">kw_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NMXSampleMetadata</span><span class="p">:</span>
+    <span class="n">nx_class</span> <span class="o">=</span> <span class="n">snx</span><span class="o">.</span><span class="n">NXsample</span>
+
+    <span class="n">crystal_rotation</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">position</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>
+    <span class="c1"># Temporarily hardcoding some values</span>
+    <span class="c1"># TODO: Remove hardcoded values</span>
+    <span class="n">orientation_matrix</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">_unit_matrix</span><span class="p">)</span>
+    <span class="n">unit_cell_length</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">_uniform_unit_cell_length</span><span class="p">)</span>
+    <span class="n">unit_cell_angle</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">_cube_unit_cell_angle</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">unit_cell</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;a, b, c, alpha, beta, gamma.&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">unit_cell_length</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit_cell_angle</span><span class="o">.</span><span class="n">values</span><span class="p">])</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__write_to_nexus_group__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">Group</span><span class="p">):</span>
+        <span class="n">cr_field</span> <span class="o">=</span> <span class="n">snx</span><span class="o">.</span><span class="n">create_field</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s1">&#39;crystal_rotation&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crystal_rotation</span><span class="p">)</span>
+        <span class="n">cr_field</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;long_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;crystal rotation in Phi (XYZ)&#39;</span>
+        <span class="n">snx</span><span class="o">.</span><span class="n">create_field</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">snx</span><span class="o">.</span><span class="n">create_field</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s1">&#39;position&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">)</span>
+        <span class="n">snx</span><span class="o">.</span><span class="n">create_field</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s1">&#39;orientation_matrix&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">orientation_matrix</span><span class="p">)</span>
+        <span class="n">unit_cell</span> <span class="o">=</span> <span class="n">snx</span><span class="o">.</span><span class="n">create_field</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s1">&#39;unit_cell&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit_cell</span><span class="p">)</span>
+        <span class="n">unit_cell</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;length-unit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unit_cell_length</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
+        <span class="n">unit_cell</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;angle-unit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unit_cell_angle</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="NMXSourceMetadata">
+<a class="viewcode-back" href="../../../generated/modules/ess.nmx.types.NMXSourceMetadata.html#ess.nmx.types.NMXSourceMetadata">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">kw_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NMXSourceMetadata</span><span class="p">:</span>
+    <span class="n">nx_class</span> <span class="o">=</span> <span class="n">snx</span><span class="o">.</span><span class="n">NXsource</span>
+
+    <span class="n">position</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Position of the source (from the sample).&quot;&quot;&quot;</span>
+
+    <span class="c1"># These three fields are matching fields as ``scippneutron.metadata.Source``.</span>
+    <span class="c1"># However, NMX needs to store `position` as a vector,</span>
+    <span class="c1"># not only the name, type and probe</span>
+    <span class="c1"># essnmx cannot use ``scippneutron.metadata.Source`` as it is.</span>
+    <span class="c1"># We will need to implement unpacking function for vector scalar value.</span>
+    <span class="c1"># Therefore we decided not to use the ``scippneutron.metadata.Source`` for now</span>
+    <span class="c1"># but the ``NMXSourceMetadata`` &#39;s ``source_type`` and ``probe`` fields</span>
+    <span class="c1"># have the same Enum types as ``scippneutron.metadata.Source``.</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;European Spallation Source&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;European Spallation Source&quot;</span>
+    <span class="n">source_type</span><span class="p">:</span> <span class="n">SourceType</span> <span class="o">=</span> <span class="n">SourceType</span><span class="o">.</span><span class="n">SpallationNeutronSource</span>
+    <span class="n">probe</span><span class="p">:</span> <span class="n">RadiationProbe</span> <span class="o">=</span> <span class="n">RadiationProbe</span><span class="o">.</span><span class="n">Neutron</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">distance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__write_to_nexus_group__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">Group</span><span class="p">):</span>
+        <span class="n">snx</span><span class="o">.</span><span class="n">create_field</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">snx</span><span class="o">.</span><span class="n">create_field</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_type</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">distance</span> <span class="o">=</span> <span class="n">snx</span><span class="o">.</span><span class="n">create_field</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s1">&#39;distance&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">distance</span><span class="p">)</span>
+        <span class="n">distance</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">snx</span><span class="o">.</span><span class="n">create_field</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s1">&#39;probe&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">probe</span><span class="o">.</span><span class="n">value</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_zero_float_count</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;count&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="NMXMonitorMetadata">
+<a class="viewcode-back" href="../../../generated/modules/ess.nmx.types.NMXMonitorMetadata.html#ess.nmx.types.NMXMonitorMetadata">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">kw_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NMXMonitorMetadata</span><span class="p">:</span>
+    <span class="n">nx_class</span> <span class="o">=</span> <span class="n">snx</span><span class="o">.</span><span class="n">NXmonitor</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Monitor counts.&quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">time_of_flight</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">tof_bin_coord</span><span class="p">]</span>
+
+    <span class="n">tof_bin_coord</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default</span><span class="o">=</span><span class="s1">&#39;tof&#39;</span><span class="p">,</span>
+        <span class="n">metadata</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Name of the time-of-flight coordinate &quot;</span>
+            <span class="s2">&quot;in the monitor histogram.&quot;</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="n">ControlMode</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default</span><span class="o">=</span><span class="n">ControlMode</span><span class="o">.</span><span class="n">monitor</span><span class="p">,</span>
+        <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Mode of counting. One of `monitor` or `timer`.&quot;</span><span class="p">},</span>
+    <span class="p">)</span>
+    <span class="n">preset</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="n">_zero_float_count</span><span class="p">,</span>
+        <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Preset value of counting for the `mode`.&quot;</span><span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__write_to_nexus_group__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">Group</span><span class="p">):</span>
+        <span class="n">group</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;axes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dims</span>
+        <span class="n">group</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;tof_bin_coord&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tof_bin_coord</span>
+        <span class="n">snx</span><span class="o">.</span><span class="n">create_field</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s1">&#39;mode&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="p">))</span>
+        <span class="n">snx</span><span class="o">.</span><span class="n">create_field</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s1">&#39;preset&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">preset</span><span class="p">)</span>
+        <span class="n">data_field</span> <span class="o">=</span> <span class="n">snx</span><span class="o">.</span><span class="n">create_field</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">data_field</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;signal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">data_field</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;primary&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">snx</span><span class="o">.</span><span class="n">create_field</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s1">&#39;time_of_flight&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_of_flight</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="NMXDetectorMetadata">
+<a class="viewcode-back" href="../../../generated/modules/ess.nmx.types.NMXDetectorMetadata.html#ess.nmx.types.NMXDetectorMetadata">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">kw_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NMXDetectorMetadata</span><span class="p">:</span>
+    <span class="n">nx_class</span> <span class="o">=</span> <span class="n">snx</span><span class="o">.</span><span class="n">NXdetector</span>
+
+    <span class="n">detector_name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">x_pixel_size</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>
+    <span class="n">y_pixel_size</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>
+    <span class="n">origin</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Center of the detector panel.&quot;&quot;&quot;</span>
+    <span class="n">fast_axis</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Inner most dimension if the data is sorted by detector number.</span>
+
+<span class="sd">    The index of the fast axis changes fast along the detector number.</span>
+
+<span class="sd">    i.e. When detector numbers grows: ``0, 1, 2, 3, 4, 5, 6, ...``</span>
+<span class="sd">    and the size of the fast axis is ``3``,</span>
+<span class="sd">    the fast axis index will be: ``0, 1, 2, 0, 1, 2, 0 ...``</span>
+<span class="sd">    for each detector number.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fast_axis_dim</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">slow_axis</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Outer most dimension if the data is sorted by detector number.</span>
+
+<span class="sd">    The index of the slow axis changes slowly along the detector number.</span>
+
+<span class="sd">    i.e. When detector numbers grows: ``0, 1, 2, 3, 4, 5, 6, ...``</span>
+<span class="sd">    and the size of the fast axis is ``3``,</span>
+<span class="sd">    the slow axis index will be: ``0, 0, 0, 1, 1, 1, 2, ...``</span>
+<span class="sd">    for each detector number.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">slow_axis_dim</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">distance</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>
+    <span class="n">first_pixel_position</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;First pixel position with respect to the sample.</span>
+
+<span class="sd">    Additional field for DIALS. It should be a 3D vector.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TODO: Remove hardcoded values</span>
+    <span class="n">polar_angle</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;deg&#39;</span><span class="p">))</span>
+    <span class="n">azimuthal_angle</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;deg&#39;</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__write_to_nexus_group__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">Group</span><span class="p">):</span>
+        <span class="n">snx</span><span class="o">.</span><span class="n">create_field</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s1">&#39;x_pixel_size&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_pixel_size</span><span class="p">)</span>
+        <span class="n">snx</span><span class="o">.</span><span class="n">create_field</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s1">&#39;y_pixel_size&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_pixel_size</span><span class="p">)</span>
+        <span class="n">origin</span> <span class="o">=</span> <span class="n">snx</span><span class="o">.</span><span class="n">create_field</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s1">&#39;origin&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="p">)</span>
+        <span class="n">origin</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;first_pixel_position&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_pixel_position</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">fast_axis</span> <span class="o">=</span> <span class="n">snx</span><span class="o">.</span><span class="n">create_field</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s1">&#39;fast_axis&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fast_axis</span><span class="p">)</span>
+        <span class="n">fast_axis</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;dim&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fast_axis_dim</span>
+        <span class="n">slow_axis</span> <span class="o">=</span> <span class="n">snx</span><span class="o">.</span><span class="n">create_field</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s1">&#39;slow_axis&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">slow_axis</span><span class="p">)</span>
+        <span class="n">slow_axis</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;dim&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">slow_axis_dim</span>
+        <span class="n">snx</span><span class="o">.</span><span class="n">create_field</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s1">&#39;distance&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">distance</span><span class="p">)</span>
+        <span class="n">snx</span><span class="o">.</span><span class="n">create_field</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s1">&#39;polar_angle&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">polar_angle</span><span class="p">)</span>
+        <span class="n">snx</span><span class="o">.</span><span class="n">create_field</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s1">&#39;azimuthal_angle&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">azimuthal_angle</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="NMXReducedDetector">
+<a class="viewcode-back" href="../../../generated/modules/ess.nmx.types.NMXReducedDetector.html#ess.nmx.types.NMXReducedDetector">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">kw_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NMXReducedDetector</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reduced Detector data and metadata container.</span>
+
+<span class="sd">    In an output file, all metadata fields are stored on the same level as the `data`.</span>
+<span class="sd">    However, in this reduced detector data container, the `data` and `metadata` are</span>
+<span class="sd">    separated with an extra hierarchy.</span>
+<span class="sd">    It is because the `data` needs more control how to be stored,</span>
+<span class="sd">    i.e. compression option.</span>
+<span class="sd">    Also, the histogram may need chunk-wise processing</span>
+<span class="sd">    and therefore metadata may need to be written in advance so that</span>
+<span class="sd">    the `data` can be appended to the existing `NXdetector` HDF5 Group.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">data</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;3D Histogram of the detector counts or its place holder.&quot;&quot;&quot;</span>
+    <span class="n">metadata</span><span class="p">:</span> <span class="n">NMXDetectorMetadata</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NMX Detector metadata.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NMXInstrument">
+<a class="viewcode-back" href="../../../generated/modules/ess.nmx.types.NMXInstrument.html#ess.nmx.types.NMXInstrument">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">kw_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NMXInstrument</span><span class="p">:</span>
+    <span class="n">nx_class</span> <span class="o">=</span> <span class="n">snx</span><span class="o">.</span><span class="n">NXinstrument</span>
+
+    <span class="n">detectors</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">[</span><span class="n">NMXReducedDetector</span><span class="p">]</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;NMX&quot;</span>
+    <span class="n">source</span><span class="p">:</span> <span class="n">NMXSourceMetadata</span></div>
+
+
+
+<div class="viewcode-block" id="NMXProgram">
+<a class="viewcode-back" href="../../../generated/modules/ess.nmx.types.NMXProgram.html#ess.nmx.types.NMXProgram">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">kw_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NMXProgram</span><span class="p">:</span>
+    <span class="n">nx_class</span> <span class="o">=</span> <span class="s1">&#39;NXprogram&#39;</span>
+
+    <span class="n">program</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;essnmx&#39;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__write_to_nexus_group__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">Group</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">ess.nmx</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span> <span class="k">as</span> <span class="n">essnmxversion</span>
+
+        <span class="n">prog</span> <span class="o">=</span> <span class="n">snx</span><span class="o">.</span><span class="n">create_field</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s1">&#39;program&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="p">)</span>
+        <span class="n">prog</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;version&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">essnmxversion</span></div>
+
+
+
+<div class="viewcode-block" id="NMXLauetof">
+<a class="viewcode-back" href="../../../generated/modules/ess.nmx.types.NMXLauetof.html#ess.nmx.types.NMXLauetof">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">kw_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NMXLauetof</span><span class="p">:</span>
+    <span class="n">nx_class</span> <span class="o">=</span> <span class="s2">&quot;NXlauetof&quot;</span>
+
+    <span class="n">control</span><span class="p">:</span> <span class="n">NMXMonitorMetadata</span>
+    <span class="n">definitions</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;NXlauetof&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;NXlauetof&#39;</span>
+    <span class="n">instrument</span><span class="p">:</span> <span class="n">NMXInstrument</span>
+    <span class="n">sample</span><span class="p">:</span> <span class="n">NMXSampleMetadata</span>
+    <span class="n">lookup_table</span><span class="p">:</span> <span class="n">TofLookupTable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">reducer</span><span class="p">:</span> <span class="n">NMXProgram</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">NMXProgram</span><span class="p">)</span>
+    <span class="s2">&quot;Information of the reduction software.&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_datagroup</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">to_datagroup</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025 Scipp contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><!-- This will display the version of the docs -->
+Current ESSnmx version: 26.3.0 (<a href="https://github.com/scipp/essnmx/releases">older versions</a>).</div>
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

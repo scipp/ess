@@ -1,0 +1,992 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>NMX Reduction Workflow &#8212; ESSnmx</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=8ecd6c2c"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/workflow';</script>
+    <script src="../_static/anaconda-icon.js?v=461bdc62"></script>
+    <link rel="icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="McStas Workflow" href="mcstas_workflow.html" />
+    <link rel="prev" title="User Guide" href="index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="26.3.0" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.svg" class="logo__image only-light" alt="ESSnmx - Home"/>
+    <img src="../_static/logo-dark.svg" class="logo__image only-dark pst-js-only" alt="ESSnmx - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../about/index.html">
+    About
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/essnmx" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essnmx/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essnmx" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../about/index.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/essnmx" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essnmx/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essnmx" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">NMX Reduction Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mcstas_workflow.html">McStas Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mcstas_workflow_chunk.html">McStas Workflow - Chunk by Chunk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scaling_workflow.html">Scaling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+</ul>
+</div>
+</nav></div>
+        <div class="sidebar-primary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#TL;DR">TL;DR</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Configuration">Configuration</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Reduce-Nexus-File(s)">Reduce Nexus File(s)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Loading-Reduced-File">Loading Reduced File</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Compression-Modes">Compression Modes</a></li>
+</ul>
+  </nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/user-guide/workflow.ipynb"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">User Guide</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">NMX Reduction Workflow</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="NMX-Reduction-Workflow">
+<h1>NMX Reduction Workflow<a class="headerlink" href="#NMX-Reduction-Workflow" title="Link to this heading">#</a></h1>
+<blockquote>
+<div><p>NMX does not expect users to use python interface directly. This documentation is mostly for instrument data scientists or instrument scientists.</p>
+</div></blockquote>
+<section id="TL;DR">
+<h2>TL;DR<a class="headerlink" href="#TL;DR" title="Link to this heading">#</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ess.nmx.executables</span><span class="w"> </span><span class="kn">import</span> <span class="n">reduction</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.nmx.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_small_nmx_nexus</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.nmx.configurations</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ReductionConfig</span><span class="p">,</span>
+    <span class="n">OutputConfig</span><span class="p">,</span>
+    <span class="n">InputConfig</span><span class="p">,</span>
+    <span class="n">WorkflowConfig</span><span class="p">,</span>
+    <span class="n">TimeBinCoordinate</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Build Configuration</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">ReductionConfig</span><span class="p">(</span>
+    <span class="n">inputs</span><span class="o">=</span><span class="n">InputConfig</span><span class="p">(</span>
+        <span class="n">input_file</span><span class="o">=</span><span class="p">[</span><span class="n">get_small_nmx_nexus</span><span class="p">()</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()],</span>
+        <span class="n">detector_ids</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+    <span class="p">),</span>
+    <span class="n">output</span><span class="o">=</span><span class="n">OutputConfig</span><span class="p">(</span>
+        <span class="n">output_file</span><span class="o">=</span><span class="s2">&quot;scipp_output.hdf&quot;</span><span class="p">,</span> <span class="n">skip_file_output</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">),</span>
+    <span class="n">workflow</span><span class="o">=</span><span class="n">WorkflowConfig</span><span class="p">(</span>
+        <span class="n">time_bin_coordinate</span><span class="o">=</span><span class="n">TimeBinCoordinate</span><span class="o">.</span><span class="n">time_of_flight</span><span class="p">,</span>
+        <span class="n">nbins</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">tof_simulation_num_neutrons</span><span class="o">=</span><span class="mi">1_000_000</span><span class="p">,</span>
+        <span class="n">tof_simulation_min_wavelength</span><span class="o">=</span><span class="mf">1.8</span><span class="p">,</span>
+        <span class="n">tof_simulation_max_wavelength</span><span class="o">=</span><span class="mf">3.6</span><span class="p">,</span>
+        <span class="n">tof_simulation_seed</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1"># Run reduction and display the result.</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">reduction</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="n">display</span><span class="p">)</span>
+<span class="n">dg</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">to_datagroup</span><span class="p">()</span>
+<span class="n">dg</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Downloading file &#39;small_nmx_nexus.hdf.zip&#39; from &#39;https://public.esss.dk/groups/scipp/ess/nmx/1/small_nmx_nexus.hdf.zip&#39; to &#39;/home/runner/.cache/ess/nmx&#39;.
+Unzipping contents of &#39;/home/runner/.cache/ess/nmx/small_nmx_nexus.hdf.zip&#39; to &#39;/home/runner/.cache/ess/nmx/small_nmx_nexus.hdf.zip.unzip&#39;
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&#39;Input file: /home/runner/.cache/ess/nmx/small_nmx_nexus.hdf.zip.unzip/small_nmx_nexus.hdf&#39;
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&#39;Output file: /home/runner/work/ess/ess/packages/essnmx/docs/user-guide/scipp_output.hdf&#39;
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Downloading file &#39;ess/ess.h5&#39; from &#39;https://github.com/scipp/tof-sources/raw/refs/heads/main/1/ess/ess.h5&#39; to &#39;/home/runner/.cache/tof&#39;.
+/home/runner/work/ess/ess/packages/essnmx/src/ess/nmx/workflows.py:185: RuntimeWarning: No crystal rotation found in the Nexus file under &#39;entry/sample/crystal_rotation&#39;. Returning zero rotation.
+  warnings.warn(
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div><style id="scipp-style-sheet">.sc-root{--sc-background-color0:var(--jp-layout-color0,#fff);--sc-background-color1:var(--jp-layout-color1,#fcfcfc);--sc-background-color2:var(--jp-layout-color2,#efefef);--sc-inverse-background-color0:var(--jp-inverse-layout-color4,#111);--sc-font-color0:var(--jp-content-font-color0,#000);--sc-font-color1:var(--jp-content-font-color1,#555);--sc-font-color2:var(--jp-content-font-color2,#888);--sc-font-color3:var(--jp-content-font-color3,#ccc);}body.vscode-dark .sc-root{--sc-font-color0:rgba(255,255,255,1);--sc-font-color1:rgba(255,255,255,0.70);--sc-font-color2:rgba(255,255,255,0.54);--sc-font-color3:rgba(255,255,255,0.38);--sc-border-color:#1F1F1F;--sc-disabled-color:#515151;--sc-background-color0:#111111;--sc-background-color1:#111111;--sc-background-color2:#313131;}.sc-wrap{font-size:14px;min-width:300px;max-width:800px;}.sc-var-attrs .sc-wrap{padding-left:3em;}.sc-header{padding-top:6px;padding-bottom:6px;margin-bottom:4px;border-bottom:solid 1px #ddd;}.sc-header > div,.sc-header > ul{display:inline;margin-top:0;margin-bottom:0;}.sc-obj-type,.sc-array-name{margin-left:2px;margin-right:10px;}.sc-obj-type{color:var(--sc-font-color1);}.sc-underlying-size{color:var(--sc-font-color2);}.sc-sections,.reveal .sc-sections{padding-left:0 !important;display:grid;grid-template-columns:150px auto auto auto 1fr 20px 20px;}.sc-section-item{display:contents;}.sc-section-item input{display:none;}.sc-section-item input:enabled + label{cursor:pointer;color:var(--sc-font-color1);}.sc-section-item input:enabled + label:hover{color:var(--sc-font-color0);}.sc-section-summary{grid-column:1;font-weight:500;}.sc-section-summary > span{display:inline-block;padding-left:0.5em;}.sc-section-summary-in:disabled + label{color:var(--sc-font-color1);}.sc-section-summary-in + label:before{display:inline-block;content:'►';font-size:11px;width:15px;text-align:center;}.sc-section-summary-in:disabled + label:before{display:none;}.sc-section-summary-in:checked + label:before{content:'▼';}.sc-section-summary-in:checked + label > span{display:none;}.sc-section-summary,.sc-section-inline-details{padding-top:4px;padding-bottom:4px;}.sc-section-inline-details{grid-column:2 / 6;}.sc-section-details{display:none;grid-column:1 / -1;margin-bottom:5px;}.sc-section-summary-in:checked ~ .sc-section-details{display:contents;}.sc-array-wrap{grid-column:1 / -1;display:grid;grid-template-columns:20px auto;}.sc-array-wrap > label{grid-column:1;vertical-align:top;}.sc-preview{color:var(--sc-font-color2);}.sc-array-preview,.sc-array-data{padding:0 5px !important;grid-column:2;}.sc-array-data,.sc-array-in:checked ~ .sc-array-preview{display:none;}.sc-array-in:checked ~ .sc-array-data,.sc-array-preview{display:inline-block;}.sc-dim-list{display:inline-block !important;list-style:none;padding:0 !important;margin:0;}.sc-dim-list li{display:inline-block;padding:0;margin:0!important;}.sc-dim-list:before{content:'(';}.sc-dim-list:after{content:')';}.sc-dim-list li:not(:last-child):after{content:',';padding-right:5px;}.sc-dim-list li span,.sc-standalone-var-name > span span,.sc-var-name > span span{padding:0 !important;}.sc-aligned{font-weight:bold;}.sc-var-list,.sc-var-item,.reveal .sc-var-list,.reveal .sc-var-item{display:contents;}.sc-var-item > div,.sc-var-item label,.sc-var-item > .sc-var-name span{background-color:var(--sc-background-color1);margin-bottom:0;}.sc-var-item > .sc-var-name:hover span{padding-right:5px;}.sc-var-list > li:nth-child(odd) > div,.sc-var-list > li:nth-child(odd) > label,.sc-var-list > li:nth-child(odd) > .sc-var-name span{background-color:var(--sc-background-color2);}.sc-var-name{grid-column:1;}.sc-var-dims{grid-column:2;}.sc-var-dtype{grid-column:3;text-align:right;color:var(--sc-font-color2);}.sc-var-unit{grid-column:4;text-align:left;color:var(--sc-font-color1);max-width:50pt;text-overflow:ellipsis;}.sc-value-preview{grid-column:5;}.sc-var-preview-variances{text-align:right;}.sc-sections .sc-section-item .sc-section-summary,.sc-sections .sc-section-item .sc-section-inline-details,.sc-section-item .sc-var-list .sc-var-item > div,.sc-section-item .sc-var-list .sc-var-item > label,.sc-section-details .sc-var-list .sc-var-item > div,.sc-section-details .sc-var-list .sc-var-item > label{margin-top:0;margin-bottom:0;}.sc-var-name,.sc-var-dims,.sc-var-dtype,.sc-var-unit,.sc-preview,.sc-attrs dt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:10px;}.sc-var-name:hover,.sc-var-dims:hover,.sc-var-dtype:hover,.sc-var-unit:hover,.sc-attrs dt:hover{overflow:visible;width:auto;z-index:1;}.sc-var-attrs{display:block;}.sc-var-data,.reveal .sc-var-data{display:none;}.sc-var-attrs,.sc-var-data{background-color:var(--sc-background-color0) !important;padding-bottom:5px !important;}.sc-var-attrs-in:checked ~ .sc-var-attrs{display:none;}.sc-var-data-in:checked ~ .sc-var-data{display:block;}.sc-var-data > table{float:right;}.sc-var-name span,.sc-var-data{padding-left:25px !important;}.sc-var-attrs,.sc-var-data{grid-column:1 / -1;}dl.sc-attrs{padding:0;margin:0;display:grid;grid-template-columns:125px auto;}.sc-attrs dt,dd{padding:0;margin:0;float:left;padding-right:10px;width:auto;}.sc-attrs dt{font-weight:normal;grid-column:1;}.sc-attrs dt:hover span{display:inline-block;padding-right:10px;}.sc-attrs dd{grid-column:2;white-space:pre-wrap;word-break:break-all;}.sc-icon-database,.sc-icon-file-text2{display:inline-block;vertical-align:middle;width:1em;height:1.5em !important;stroke-width:0;stroke:currentColor;fill:currentColor;}label.sc-hide-icon svg{opacity:0;}.sc-standalone-var-name{grid-column:1/3;}.sc-standalone-var-name span{padding-left:25px;padding-right:10px;}.sc-title{font-weight:bold;font-size:1.5em;}.sc-subtitle{font-weight:normal;font-style:italic;text-align:left;font-size:1.2em;padding:1px;}.sc-label{fill:var(--sc-font-color0,#444444);text-anchor:middle;}.sc-name{fill:var(--sc-font-color0,#111111);}.sc-inset-line{stroke:var(--sc-font-color1);stroke-width:0.05;stroke-dasharray:0.2,0.2;}.sc-log-wrap{height:25ex;resize:vertical;overflow-y:scroll;display:flex;flex-direction:column-reverse;border:1px solid;border-color:var(--jp-border-color2);background-color:var(--sc-background-color1);}div.sc-log{line-height:2.5ex;}table.sc-log{table-layout:auto;border-collapse:collapse;}tr.sc-log:nth-child(even){background-color:var(--sc-background-color0);}tr.sc-log > td{vertical-align:top;padding-bottom:0.5ex;}.sc-log-time-stamp{min-width:22ch;font-family:var(--jp-code-font-family);color:var(--sc-font-color2);}.sc-log-level{min-width:10ch;}tr.sc-log-debug td.sc-log-level{color:var(--jp-accent-color1);}tr.sc-log-info td.sc-log-level{color:var(--jp-info-color1);}tr.sc-log-warning td.sc-log-level{color:var(--jp-warn-color1);}tr.sc-log-error td.sc-log-level{font-weight:bold;color:var(--jp-error-color2);}tr.sc-log-critical td.sc-log-level{font-weight:bold;color:var(--sc-background-color0);background-color:var(--jp-error-color1);}.sc-log-message{white-space:pre-wrap;width:100%;}.sc-log-html-payload{white-space:normal;}.sc-log-name{padding-right:0.5em;text-align:right;white-space:pre-wrap;color:var(--sc-font-color3);}</style><style id="datagroup-style-sheet">.dg-root{white-space:normal;font-size:14px;min-width:300px;max-width:1200px;}.dg-root *{box-sizing:border-box;}.sc-header > label,.sc-header > label > div,.sc-header > label > div > ul{display:inline;margin-bottom:0;}.dg-header-in{display:none;}.dg-header-in + .sc-header > label:before{display:inline-block;font-size:11px;text-align:left;content:'►';}.dg-header-in:checked + .sc-header > label:before{content:'▼';}.dg-header-in ~ .dg-detail-box{display:none;}.dg-header-in:checked ~ .dg-detail-box{display:grid;}.dg-detail-box{margin-top:5px;margin-bottom:5px;column-gap:0 !important;display:grid;grid-template-columns:max-content max-content max-content max-content max-content max-content max-content;grid-template-areas:"name        parent      object-type shape       dtype       unit        preview";}.dg-detail-box *{margin-top:0;margin-bottom:0;}.dg-detail-list{display:contents;}.dg-detail-item{display:contents;list-style-type:none;}.dg-detail-item-in{display:none;}.dg-detail-item-in + .dg-detail-name > label:before{display:inline-block;font-size:14px;text-align:left;content:'►';}.dg-detail-item-in:checked + .dg-detail-name > label:before{content:'▼';}.dg-detail-item div,.dg-detail-item span,.dg-detail-item label{word-break:break-all;min-width:1em;max-width:20em;width:100%;}.dg-detail-item > div{display:contents;}.dg-detail-item > div > div > div{width:100%;}.dg-detail-item:hover > div > div{background-color:var(--sc-background-color2) !important;}.dg-detail-item > div span{padding-left:10px;padding-right:10px;}.dg-detail-item > div > div:first-of-type{grid-column-start:1;}.dg-detail-item-subsection{display:none;}.dg-detail-item-in{margin:0;}.dg-detail-item-in:checked ~ .dg-detail-item-subsection{display:contents;}.dg-detail-item .dg-detail-name{grid-area:"name";min-width:5em;}.dg-detail-name{padding-left:calc(var(--depth)*2em);}.dg-detail-name > label{padding-left:8px;}.dg-detail-name > label > span{padding-left:0.1em;}.dg-detail-item .dg-detail-parent{grid-area:"parent";text-align:right;}.dg-detail-item .dg-detail-objtype{grid-area:"objtype";text-align:left;}.dg-detail-item .dg-detail-shape{max-width:30em;grid-area:"shape";text-align:left;}.sc-header .dg-detail-shape{margin-left:1em;text-align:left;}.dg-detail-item .dg-detail-dtype{grid-area:"dtype";text-align:left;}.dg-detail-item .dg-detail-unit{grid-area:"unit";text-align:center;}.dg-detail-item .dg-detail-preview{grid-area:"preview";min-width:15em;max-width:100em !important;text-align:left;}.dg-detail-preview .sc-preview span,.dg-detail-shape span{padding:0 !important;}</style><div class='sc-root dg-root'><input class='dg-header-in' id='datagroup-view-d1c322a3-94a0-477f-9f5c-de56bc3cd529' type='checkbox' checked><div class='sc-header'><label for=datagroup-view-d1c322a3-94a0-477f-9f5c-de56bc3cd529 title='Expand/collapse'><div class='sc-obj-type'>scipp.DataGroup </div><div class='dg-detail-shape'>(tof: 10, y_pixel_offset: 1280, x_pixel_offset: 1280, distance: 204, event_time_offset: 287)</div></label></div><div class='dg-detail-box'><ul class='dg-detail-list'><li class='dg-detail-item'><div><input class='dg-detail-item-in' id='summary-a4f742ea-d8ee-41a8-ae78-e88b840da041' type='checkbox' ><div class='dg-detail-name' style='--depth: 0;'><label for=summary-a4f742ea-d8ee-41a8-ae78-e88b840da041 title='Expand/collapse'><span>control<span></label></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataGroup</span></div><div class='dg-detail-shape'>(tof: 10)</div><div class='dg-detail-dtype'></div><div class='dg-detail-unit'></div><div class='dg-detail-preview'></div><ul class='dg-detail-item-subsection'><ul class='dg-detail-list'><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>data</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(tof: 10)</div><div class='dg-detail-dtype'><span>float64</span></div><div class='dg-detail-unit'><span>ns</span></div><div class='dg-detail-preview'><span class='sc-preview'>1.0, 1.0, ..., 1.0, 1.0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>tof_bin_coord</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>tof</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>mode</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>ess</span></div><div class='dg-detail-objtype'><span>ControlMode</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>monitor</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>preset</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>float64</span></div><div class='dg-detail-unit'><span>counts</span></div><div class='dg-detail-preview'><span class='sc-preview'>0.0</span></div></div></li></ul></ul></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>definitions</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>NXlauetof</span></div></div></li><li class='dg-detail-item'><div><input class='dg-detail-item-in' id='summary-db0d118e-a5e8-47de-bd69-213d7fd5461d' type='checkbox' ><div class='dg-detail-name' style='--depth: 0;'><label for=summary-db0d118e-a5e8-47de-bd69-213d7fd5461d title='Expand/collapse'><span>instrument<span></label></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataGroup</span></div><div class='dg-detail-shape'>(y_pixel_offset: 1280, <br>&nbspx_pixel_offset: 1280, <br>&nbsptof: 10)</div><div class='dg-detail-dtype'></div><div class='dg-detail-unit'></div><div class='dg-detail-preview'></div><ul class='dg-detail-item-subsection'><ul class='dg-detail-list'><li class='dg-detail-item'><div><input class='dg-detail-item-in' id='summary-701a1eba-9915-44b0-8c3d-c88abd8bb1bd' type='checkbox' ><div class='dg-detail-name' style='--depth: 1;'><label for=summary-701a1eba-9915-44b0-8c3d-c88abd8bb1bd title='Expand/collapse'><span>detectors<span></label></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataGroup</span></div><div class='dg-detail-shape'>(y_pixel_offset: 1280, <br>&nbspx_pixel_offset: 1280, <br>&nbsptof: 10)</div><div class='dg-detail-dtype'></div><div class='dg-detail-unit'></div><div class='dg-detail-preview'></div><ul class='dg-detail-item-subsection'><ul class='dg-detail-list'><li class='dg-detail-item'><div><input class='dg-detail-item-in' id='summary-a5f057f9-123d-4c96-bba5-e3e586b83360' type='checkbox' ><div class='dg-detail-name' style='--depth: 2;'><label for=summary-a5f057f9-123d-4c96-bba5-e3e586b83360 title='Expand/collapse'><span>detector_panel_0<span></label></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataGroup</span></div><div class='dg-detail-shape'>(y_pixel_offset: 1280, <br>&nbspx_pixel_offset: 1280, <br>&nbsptof: 10)</div><div class='dg-detail-dtype'></div><div class='dg-detail-unit'></div><div class='dg-detail-preview'></div><ul class='dg-detail-item-subsection'><ul class='dg-detail-list'><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 3;'><span>data</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(y_pixel_offset: 1280, <br>&nbspx_pixel_offset: 1280, <br>&nbsptof: 10)</div><div class='dg-detail-dtype'><span>float32</span></div><div class='dg-detail-unit'><span>counts</span></div><div class='dg-detail-preview'><span class='sc-preview'>0.0, 0.0, ..., 0.0, 0.0</span></div></div></li><li class='dg-detail-item'><div><input class='dg-detail-item-in' id='summary-d92f171c-093f-48dc-bceb-68ccb0064501' type='checkbox' ><div class='dg-detail-name' style='--depth: 3;'><label for=summary-d92f171c-093f-48dc-bceb-68ccb0064501 title='Expand/collapse'><span>metadata<span></label></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataGroup</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'></div><div class='dg-detail-unit'></div><div class='dg-detail-preview'></div><ul class='dg-detail-item-subsection'><ul class='dg-detail-list'><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>detector_name</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>detector_panel_0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>x_pixel_size</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>float64</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>0.00040000000000001146</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>y_pixel_size</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>float64</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>0.00040000000000001146</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>origin</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>[2.06883872e-03 5.97658521e-11 3.35998496e-01]</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>fast_axis</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>𝟙</span></div><div class='dg-detail-preview'><span class='sc-preview'>[-0.70709694  0.70710663  0.00375908]</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>fast_axis_dim</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>x_pixel_offset</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>slow_axis</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>𝟙</span></div><div class='dg-detail-preview'><span class='sc-preview'>[-0.70709664 -0.70710693  0.00375908]</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>slow_axis_dim</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>y_pixel_offset</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>distance</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>float64</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>157.0507742521214</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>first_pixel_position</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>[3.63819556e-01 7.65002180e-08 3.34075352e-01]</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>polar_angle</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>int64</span></div><div class='dg-detail-unit'><span>deg</span></div><div class='dg-detail-preview'><span class='sc-preview'>0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>azimuthal_angle</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>int64</span></div><div class='dg-detail-unit'><span>deg</span></div><div class='dg-detail-preview'><span class='sc-preview'>0</span></div></div></li></ul></ul></div></li></ul></ul></div></li><li class='dg-detail-item'><div><input class='dg-detail-item-in' id='summary-94b87a50-b2a9-44b3-b3c4-15d69077e622' type='checkbox' ><div class='dg-detail-name' style='--depth: 2;'><label for=summary-94b87a50-b2a9-44b3-b3c4-15d69077e622 title='Expand/collapse'><span>detector_panel_1<span></label></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataGroup</span></div><div class='dg-detail-shape'>(y_pixel_offset: 1280, <br>&nbspx_pixel_offset: 1280, <br>&nbsptof: 10)</div><div class='dg-detail-dtype'></div><div class='dg-detail-unit'></div><div class='dg-detail-preview'></div><ul class='dg-detail-item-subsection'><ul class='dg-detail-list'><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 3;'><span>data</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(y_pixel_offset: 1280, <br>&nbspx_pixel_offset: 1280, <br>&nbsptof: 10)</div><div class='dg-detail-dtype'><span>float32</span></div><div class='dg-detail-unit'><span>counts</span></div><div class='dg-detail-preview'><span class='sc-preview'>0.0, 0.0, ..., 0.0, 0.0</span></div></div></li><li class='dg-detail-item'><div><input class='dg-detail-item-in' id='summary-eeb74ae2-4797-4b51-bb67-ea39ba9cbe73' type='checkbox' ><div class='dg-detail-name' style='--depth: 3;'><label for=summary-eeb74ae2-4797-4b51-bb67-ea39ba9cbe73 title='Expand/collapse'><span>metadata<span></label></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataGroup</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'></div><div class='dg-detail-unit'></div><div class='dg-detail-preview'></div><ul class='dg-detail-item-subsection'><ul class='dg-detail-list'><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>detector_name</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>detector_panel_1</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>x_pixel_size</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>float64</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>0.00040000000000001146</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>y_pixel_size</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>float64</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>0.00040000000000001146</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>origin</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>[ 0.23785452  0.23814142 -0.00119925]</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>fast_axis</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>𝟙</span></div><div class='dg-detail-preview'><span class='sc-preview'>[ 5.31616869e-03 -4.11957968e-08  9.99985869e-01]</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>fast_axis_dim</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>x_pixel_offset</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>slow_axis</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>𝟙</span></div><div class='dg-detail-preview'><span class='sc-preview'>[ 0.70709653 -0.70710704 -0.00375913]</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>slow_axis_dim</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>y_pixel_offset</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>distance</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>float64</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>156.71467918292365</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>first_pixel_position</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>[ 0.05561935  0.41901941 -0.25603405]</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>polar_angle</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>int64</span></div><div class='dg-detail-unit'><span>deg</span></div><div class='dg-detail-preview'><span class='sc-preview'>0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>azimuthal_angle</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>int64</span></div><div class='dg-detail-unit'><span>deg</span></div><div class='dg-detail-preview'><span class='sc-preview'>0</span></div></div></li></ul></ul></div></li></ul></ul></div></li><li class='dg-detail-item'><div><input class='dg-detail-item-in' id='summary-58b7f844-0a8f-461f-91e1-40db3c646a15' type='checkbox' ><div class='dg-detail-name' style='--depth: 2;'><label for=summary-58b7f844-0a8f-461f-91e1-40db3c646a15 title='Expand/collapse'><span>detector_panel_2<span></label></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataGroup</span></div><div class='dg-detail-shape'>(y_pixel_offset: 1280, <br>&nbspx_pixel_offset: 1280, <br>&nbsptof: 10)</div><div class='dg-detail-dtype'></div><div class='dg-detail-unit'></div><div class='dg-detail-preview'></div><ul class='dg-detail-item-subsection'><ul class='dg-detail-list'><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 3;'><span>data</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(y_pixel_offset: 1280, <br>&nbspx_pixel_offset: 1280, <br>&nbsptof: 10)</div><div class='dg-detail-dtype'><span>float32</span></div><div class='dg-detail-unit'><span>counts</span></div><div class='dg-detail-preview'><span class='sc-preview'>0.0, 0.0, ..., 0.0, 0.0</span></div></div></li><li class='dg-detail-item'><div><input class='dg-detail-item-in' id='summary-78be3cbe-df75-449c-95b5-8bc3e565bbdf' type='checkbox' ><div class='dg-detail-name' style='--depth: 3;'><label for=summary-78be3cbe-df75-449c-95b5-8bc3e565bbdf title='Expand/collapse'><span>metadata<span></label></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataGroup</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'></div><div class='dg-detail-unit'></div><div class='dg-detail-preview'></div><ul class='dg-detail-item-subsection'><ul class='dg-detail-list'><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>detector_name</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>detector_panel_2</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>x_pixel_size</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>float64</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>0.00040000000000001146</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>y_pixel_size</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>float64</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>0.00040000000000001146</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>origin</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>[-0.23785452  0.23814142  0.00119925]</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>fast_axis</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>𝟙</span></div><div class='dg-detail-preview'><span class='sc-preview'>[-5.31611173e-03  4.14934753e-08 -9.99985869e-01]</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>fast_axis_dim</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>x_pixel_offset</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>slow_axis</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>𝟙</span></div><div class='dg-detail-preview'><span class='sc-preview'>[-0.70709653 -0.70710704  0.00375903]</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>slow_axis_dim</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>y_pixel_offset</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>distance</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>float64</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>156.71558553728565</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>first_pixel_position</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>[-0.05561936  0.41901939  0.25603407]</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>polar_angle</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>int64</span></div><div class='dg-detail-unit'><span>deg</span></div><div class='dg-detail-preview'><span class='sc-preview'>0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>azimuthal_angle</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>int64</span></div><div class='dg-detail-unit'><span>deg</span></div><div class='dg-detail-preview'><span class='sc-preview'>0</span></div></div></li></ul></ul></div></li></ul></ul></div></li></ul></ul></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>name</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>NMX</span></div></div></li><li class='dg-detail-item'><div><input class='dg-detail-item-in' id='summary-29e1904a-6629-4e2a-a162-80519747f213' type='checkbox' ><div class='dg-detail-name' style='--depth: 1;'><label for=summary-29e1904a-6629-4e2a-a162-80519747f213 title='Expand/collapse'><span>source<span></label></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataGroup</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'></div><div class='dg-detail-unit'></div><div class='dg-detail-preview'></div><ul class='dg-detail-item-subsection'><ul class='dg-detail-list'><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 2;'><span>position</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>[  -0.491556    0.       -156.714   ]</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 2;'><span>name</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>European Spallation Source</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 2;'><span>source_type</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scippneutron</span></div><div class='dg-detail-objtype'><span>SourceType</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>SourceType.SpallationNeutronSource</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 2;'><span>probe</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scippneutron</span></div><div class='dg-detail-objtype'><span>RadiationProbe</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>RadiationProbe.Neutron</span></div></div></li></ul></ul></div></li></ul></ul></div></li><li class='dg-detail-item'><div><input class='dg-detail-item-in' id='summary-426b19a6-ad12-47c2-9b32-90288478b022' type='checkbox' ><div class='dg-detail-name' style='--depth: 0;'><label for=summary-426b19a6-ad12-47c2-9b32-90288478b022 title='Expand/collapse'><span>sample<span></label></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataGroup</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'></div><div class='dg-detail-unit'></div><div class='dg-detail-preview'></div><ul class='dg-detail-item-subsection'><ul class='dg-detail-list'><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>crystal_rotation</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>deg</span></div><div class='dg-detail-preview'><span class='sc-preview'>[0. 0. 0.]</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>name</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>sample name</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>position</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>[0. 0. 0.]</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>orientation_matrix</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>linear_transform3</span></div><div class='dg-detail-unit'><span>𝟙</span></div><div class='dg-detail-preview'><span class='sc-preview'>[[1. 0. 0.]
+ [0. 1. 0.]
+ [0. 0. 1.]]</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>unit_cell_length</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>𝟙</span></div><div class='dg-detail-preview'><span class='sc-preview'>[1. 1. 1.]</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>unit_cell_angle</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>deg</span></div><div class='dg-detail-preview'><span class='sc-preview'>[90. 90. 90.]</span></div></div></li></ul></ul></div></li><li class='dg-detail-item'><div><input class='dg-detail-item-in' id='summary-54bbcc10-5583-48d3-8f19-aefabee04ff1' type='checkbox' ><div class='dg-detail-name' style='--depth: 0;'><label for=summary-54bbcc10-5583-48d3-8f19-aefabee04ff1 title='Expand/collapse'><span>lookup_table<span></label></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataGroup</span></div><div class='dg-detail-shape'>(distance: 204, <br>&nbspevent_time_offset: 287)</div><div class='dg-detail-dtype'></div><div class='dg-detail-unit'></div><div class='dg-detail-preview'></div><ul class='dg-detail-item-subsection'><ul class='dg-detail-list'><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>array</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(distance: 204, <br>&nbspevent_time_offset: 287)</div><div class='dg-detail-dtype'><span>float64</span></div><div class='dg-detail-unit'><span>µs</span></div><div class='dg-detail-preview'><span class='sc-preview'>6.974e+04, 6.995e+04, ..., 1.408e+05, 1.411e+05</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>pulse_period</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>float64</span></div><div class='dg-detail-unit'><span>µs</span></div><div class='dg-detail-preview'><span class='sc-preview'>71428.57142857142</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>pulse_stride</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>int</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>1</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>distance_resolution</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>float64</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>0.09999999999999432</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>time_resolution</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>float64</span></div><div class='dg-detail-unit'><span>µs</span></div><div class='dg-detail-preview'><span class='sc-preview'>249.7502497502497</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>choppers</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>NoneType</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>None</span></div></div></li></ul></ul></div></li><li class='dg-detail-item'><div><input class='dg-detail-item-in' id='summary-f114d9f7-da73-4396-a1f7-f2ddc8fca97c' type='checkbox' ><div class='dg-detail-name' style='--depth: 0;'><label for=summary-f114d9f7-da73-4396-a1f7-f2ddc8fca97c title='Expand/collapse'><span>reducer<span></label></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataGroup</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'></div><div class='dg-detail-unit'></div><div class='dg-detail-preview'></div><ul class='dg-detail-item-subsection'><ul class='dg-detail-list'><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>program</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>essnmx</span></div></div></li></ul></ul></div></li></ul></div></div></div></div>
+</div>
+</section>
+<section id="Configuration">
+<h2>Configuration<a class="headerlink" href="#Configuration" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">essnmx</span></code> provides a command line data reduction tool. The <code class="docutils literal notranslate"><span class="pre">essnmx-reduce</span></code> interface will reduce <code class="docutils literal notranslate"><span class="pre">nexus</span></code> file and save the results into <code class="docutils literal notranslate"><span class="pre">NXlauetof</span></code>(not exactly but very close) format for <code class="docutils literal notranslate"><span class="pre">dials</span></code>.</p>
+<p>For conveniences and safety, all configuration options are wrapped in a nested pydantic model. Here is a python API you can use to build the configuration and turn it into command line arguments.</p>
+<p><strong>The configuration object is a pydantic model, and it thus enforces strict checks on the types of the arguments.</strong></p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ess.nmx.configurations</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ReductionConfig</span><span class="p">,</span>
+    <span class="n">OutputConfig</span><span class="p">,</span>
+    <span class="n">InputConfig</span><span class="p">,</span>
+    <span class="n">WorkflowConfig</span><span class="p">,</span>
+    <span class="n">TimeBinCoordinate</span><span class="p">,</span>
+    <span class="n">Compression</span><span class="p">,</span>
+    <span class="n">to_command_arguments</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">config</span> <span class="o">=</span> <span class="n">ReductionConfig</span><span class="p">(</span>
+    <span class="n">inputs</span><span class="o">=</span><span class="n">InputConfig</span><span class="p">(</span>
+        <span class="n">input_file</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;PATH_TO_THE_NEXUS_FILE.hdf&quot;</span><span class="p">],</span>
+        <span class="n">detector_ids</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>  <span class="c1"># Detector index to be reduced in alphabetical order.</span>
+    <span class="p">),</span>
+    <span class="n">output</span><span class="o">=</span><span class="n">OutputConfig</span><span class="p">(</span><span class="n">output_file</span><span class="o">=</span><span class="s2">&quot;scipp_output.hdf&quot;</span><span class="p">,</span> <span class="n">skip_file_output</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="n">workflow</span><span class="o">=</span><span class="n">WorkflowConfig</span><span class="p">(</span>
+        <span class="n">time_bin_coordinate</span><span class="o">=</span><span class="n">TimeBinCoordinate</span><span class="o">.</span><span class="n">time_of_flight</span><span class="p">,</span>
+        <span class="n">nbins</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">tof_simulation_num_neutrons</span><span class="o">=</span><span class="mi">1_000_000</span><span class="p">,</span>
+        <span class="n">tof_simulation_min_wavelength</span><span class="o">=</span><span class="mf">1.8</span><span class="p">,</span>
+        <span class="n">tof_simulation_max_wavelength</span><span class="o">=</span><span class="mf">3.6</span><span class="p">,</span>
+        <span class="n">tof_simulation_seed</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">display</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">to_command_arguments</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span> <span class="n">one_line</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+ReductionConfig(inputs=InputConfig(input_file=[&#39;PATH_TO_THE_NEXUS_FILE.hdf&#39;], swmr=False, detector_ids=[0, 1, 2], iter_chunk=False, chunk_size_pulse=0, chunk_size_events=0), workflow=WorkflowConfig(time_bin_coordinate=&lt;TimeBinCoordinate.time_of_flight: &#39;time_of_flight&#39;&gt;, nbins=10, min_time_bin=None, max_time_bin=None, time_bin_unit=&lt;TimeBinUnit.ms: &#39;ms&#39;&gt;, tof_lookup_table_file_path=None, tof_simulation_num_neutrons=1000000, tof_simulation_min_wavelength=1.8, tof_simulation_max_wavelength=3.6, tof_simulation_min_ltotal=150.0, tof_simulation_max_ltotal=170.0, tof_simulation_seed=42), output=OutputConfig(verbose=False, skip_file_output=True, output_file=&#39;scipp_output.hdf&#39;, overwrite=False, compression=&lt;Compression.BITSHUFFLE_LZ4: &#39;BITSHUFFLE_LZ4&#39;&gt;))
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+--input-file PATH_TO_THE_NEXUS_FILE.hdf \
+--detector-ids 0 1 2 \
+--chunk-size-pulse 0 \
+--chunk-size-events 0 \
+--time-bin-coordinate time_of_flight \
+--nbins 10 \
+--time-bin-unit ms \
+--tof-simulation-num-neutrons 1000000 \
+--tof-simulation-min-wavelength 1.8 \
+--tof-simulation-max-wavelength 3.6 \
+--tof-simulation-min-ltotal 150.0 \
+--tof-simulation-max-ltotal 170.0 \
+--tof-simulation-seed 42 \
+--skip-file-output \
+--output-file scipp_output.hdf \
+--compression BITSHUFFLE_LZ4
+</pre></div></div>
+</div>
+</section>
+<section id="Reduce-Nexus-File(s)">
+<h2>Reduce Nexus File(s)<a class="headerlink" href="#Reduce-Nexus-File(s)" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">OutputConfig</span></code> has an option called <code class="docutils literal notranslate"><span class="pre">skip_file_output</span></code> if you want to reduce the file and use it only on the memory. Then you can use <code class="docutils literal notranslate"><span class="pre">save_results</span></code> function to explicitly save the results.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ess.nmx.executables</span><span class="w"> </span><span class="kn">import</span> <span class="n">reduction</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.nmx.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_small_nmx_nexus</span>
+
+<span class="n">config</span> <span class="o">=</span> <span class="n">ReductionConfig</span><span class="p">(</span>
+    <span class="n">inputs</span><span class="o">=</span><span class="n">InputConfig</span><span class="p">(</span><span class="n">input_file</span><span class="o">=</span><span class="p">[</span><span class="n">get_small_nmx_nexus</span><span class="p">()</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()]),</span>
+    <span class="n">output</span><span class="o">=</span><span class="n">OutputConfig</span><span class="p">(</span><span class="n">skip_file_output</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">reduction</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="n">display</span><span class="p">)</span>
+<span class="n">results</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&#39;Input file: /home/runner/.cache/ess/nmx/small_nmx_nexus.hdf.zip.unzip/small_nmx_nexus.hdf&#39;
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&#39;Output file: /home/runner/work/ess/ess/packages/essnmx/docs/user-guide/scipp_output.h5&#39;
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/runner/work/ess/ess/packages/essnmx/src/ess/nmx/workflows.py:185: RuntimeWarning: No crystal rotation found in the Nexus file under &#39;entry/sample/crystal_rotation&#39;. Returning zero rotation.
+  warnings.warn(
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+NMXLauetof(control=NMXMonitorMetadata(data=&lt;scipp.DataArray&gt;
+Dimensions: Sizes[tof:50, ]
+Coordinates:
+* tof                       float64             [ns]  (tof [bin-edge])  [7.37443e+07, 7.50908e+07, ..., 1.39722e+08, 1.41069e+08]
+Data:
+                            float64             [ns]  (tof)  [1, 1, ..., 1, 1]
+
+, tof_bin_coord=&#39;tof&#39;, mode=&lt;ControlMode.monitor: &#39;monitor&#39;&gt;, preset=&lt;scipp.Variable&gt; ()    float64         [counts]  0), definitions=&#39;NXlauetof&#39;, instrument=NMXInstrument(detectors=DataGroup(sizes={}, keys=[
+    detector_panel_0: NMXReducedDetector(data=&lt;scipp.DataArray&gt;
+Dimensions: Sizes[y_pixel_offset:1280, x_pixel_offset:1280, tof:50, ]
+Coordinates:
+* Ltotal                    float64              [m]  (y_pixel_offset, x_pixel_offset)  [157.209, 157.208, ..., 157.208, 157.208]
+* detector_number             int32        &lt;no unit&gt;  (y_pixel_offset, x_pixel_offset)  [0, 1, ..., 1638398, 1638399]
+* position                  vector3              [m]  (y_pixel_offset, x_pixel_offset)  [(0.36382, 7.65002e-08, 0.334075), (0.363537, 0.000282919, 0.334077), ..., (-0.359399, -0.000282919, 0.33792), (-0.359682, -7.63807e-08, 0.337922)]
+* tof                       float64             [ns]  (tof [bin-edge])  [7.37443e+07, 7.50908e+07, ..., 1.39722e+08, 1.41069e+08]
+* x_pixel_offset            float64              [m]  (x_pixel_offset)  [-0.256, -0.2556, ..., 0.2552, 0.2556]
+* y_pixel_offset            float64              [m]  (y_pixel_offset)  [-0.256, -0.2556, ..., 0.2552, 0.2556]
+Data:
+                            float32         [counts]  (y_pixel_offset, x_pixel_offset, tof)  [0, 0, ..., 0, 0]  [0, 0, ..., 0, 0]
+
+, metadata=NMXDetectorMetadata(detector_name=&#39;detector_panel_0&#39;, x_pixel_size=&lt;scipp.Variable&gt; ()    float64              [m]  0.0004, y_pixel_size=&lt;scipp.Variable&gt; ()    float64              [m]  0.0004, origin=&lt;scipp.Variable&gt; ()    vector3              [m]  (0.00206884, 5.97659e-11, 0.335998), fast_axis=&lt;scipp.Variable&gt; ()    vector3  [dimensionless]  (-0.707097, 0.707107, 0.00375908), fast_axis_dim=&#39;x_pixel_offset&#39;, slow_axis=&lt;scipp.Variable&gt; ()    vector3  [dimensionless]  (-0.707097, -0.707107, 0.00375908), slow_axis_dim=&#39;y_pixel_offset&#39;, distance=&lt;scipp.Variable&gt; ()    float64              [m]  157.051, first_pixel_position=&lt;scipp.Variable&gt; ()    vector3              [m]  (0.36382, 7.65002e-08, 0.334075), polar_angle=&lt;scipp.Variable&gt; ()      int64            [deg]  0, azimuthal_angle=&lt;scipp.Variable&gt; ()      int64            [deg]  0)),
+    detector_panel_1: NMXReducedDetector(data=&lt;scipp.DataArray&gt;
+Dimensions: Sizes[y_pixel_offset:1280, x_pixel_offset:1280, tof:50, ]
+Coordinates:
+* Ltotal                    float64              [m]  (y_pixel_offset, x_pixel_offset)  [157.209, 157.209, ..., 157.209, 157.209]
+* detector_number             int32        &lt;no unit&gt;  (y_pixel_offset, x_pixel_offset)  [1638400, 1638401, ..., 3276798, 3276799]
+* position                  vector3              [m]  (y_pixel_offset, x_pixel_offset)  [(0.0556193, 0.419019, -0.256034), (0.0556215, 0.419019, -0.255634), ..., (0.420088, 0.0572634, 0.253236), (0.42009, 0.0572634, 0.253636)]
+* tof                       float64             [ns]  (tof [bin-edge])  [7.37443e+07, 7.50908e+07, ..., 1.39722e+08, 1.41069e+08]
+* x_pixel_offset            float64              [m]  (x_pixel_offset)  [-0.256, -0.2556, ..., 0.2552, 0.2556]
+* y_pixel_offset            float64              [m]  (y_pixel_offset)  [-0.256, -0.2556, ..., 0.2552, 0.2556]
+Data:
+                            float32         [counts]  (y_pixel_offset, x_pixel_offset, tof)  [0, 0, ..., 0, 0]  [0, 0, ..., 0, 0]
+
+, metadata=NMXDetectorMetadata(detector_name=&#39;detector_panel_1&#39;, x_pixel_size=&lt;scipp.Variable&gt; ()    float64              [m]  0.0004, y_pixel_size=&lt;scipp.Variable&gt; ()    float64              [m]  0.0004, origin=&lt;scipp.Variable&gt; ()    vector3              [m]  (0.237855, 0.238141, -0.00119925), fast_axis=&lt;scipp.Variable&gt; ()    vector3  [dimensionless]  (0.00531617, -4.11958e-08, 0.999986), fast_axis_dim=&#39;x_pixel_offset&#39;, slow_axis=&lt;scipp.Variable&gt; ()    vector3  [dimensionless]  (0.707097, -0.707107, -0.00375913), slow_axis_dim=&#39;y_pixel_offset&#39;, distance=&lt;scipp.Variable&gt; ()    float64              [m]  156.715, first_pixel_position=&lt;scipp.Variable&gt; ()    vector3              [m]  (0.0556193, 0.419019, -0.256034), polar_angle=&lt;scipp.Variable&gt; ()      int64            [deg]  0, azimuthal_angle=&lt;scipp.Variable&gt; ()      int64            [deg]  0)),
+    detector_panel_2: NMXReducedDetector(data=&lt;scipp.DataArray&gt;
+Dimensions: Sizes[y_pixel_offset:1280, x_pixel_offset:1280, tof:50, ]
+Coordinates:
+* Ltotal                    float64              [m]  (y_pixel_offset, x_pixel_offset)  [157.209, 157.209, ..., 157.209, 157.209]
+* detector_number             int32        &lt;no unit&gt;  (y_pixel_offset, x_pixel_offset)  [3276800, 3276801, ..., 4915198, 4915199]
+* position                  vector3              [m]  (y_pixel_offset, x_pixel_offset)  [(-0.0556194, 0.419019, 0.256034), (-0.0556215, 0.419019, 0.255634), ..., (-0.420088, 0.0572635, -0.253236), (-0.42009, 0.0572635, -0.253636)]
+* tof                       float64             [ns]  (tof [bin-edge])  [7.37443e+07, 7.50908e+07, ..., 1.39722e+08, 1.41069e+08]
+* x_pixel_offset            float64              [m]  (x_pixel_offset)  [-0.256, -0.2556, ..., 0.2552, 0.2556]
+* y_pixel_offset            float64              [m]  (y_pixel_offset)  [-0.256, -0.2556, ..., 0.2552, 0.2556]
+Data:
+                            float32         [counts]  (y_pixel_offset, x_pixel_offset, tof)  [0, 0, ..., 0, 0]  [0, 0, ..., 0, 0]
+
+, metadata=NMXDetectorMetadata(detector_name=&#39;detector_panel_2&#39;, x_pixel_size=&lt;scipp.Variable&gt; ()    float64              [m]  0.0004, y_pixel_size=&lt;scipp.Variable&gt; ()    float64              [m]  0.0004, origin=&lt;scipp.Variable&gt; ()    vector3              [m]  (-0.237855, 0.238141, 0.00119925), fast_axis=&lt;scipp.Variable&gt; ()    vector3  [dimensionless]  (-0.00531611, 4.14935e-08, -0.999986), fast_axis_dim=&#39;x_pixel_offset&#39;, slow_axis=&lt;scipp.Variable&gt; ()    vector3  [dimensionless]  (-0.707097, -0.707107, 0.00375903), slow_axis_dim=&#39;y_pixel_offset&#39;, distance=&lt;scipp.Variable&gt; ()    float64              [m]  156.716, first_pixel_position=&lt;scipp.Variable&gt; ()    vector3              [m]  (-0.0556194, 0.419019, 0.256034), polar_angle=&lt;scipp.Variable&gt; ()      int64            [deg]  0, azimuthal_angle=&lt;scipp.Variable&gt; ()      int64            [deg]  0)),
+]), name=&#39;NMX&#39;, source=NMXSourceMetadata(position=&lt;scipp.Variable&gt; ()    vector3              [m]  (-0.491556, 0, -156.714), name=&#39;European Spallation Source&#39;, source_type=&lt;SourceType.SpallationNeutronSource: &#39;Spallation Neutron Source&#39;&gt;, probe=&lt;RadiationProbe.Neutron: &#39;neutron&#39;&gt;)), sample=NMXSampleMetadata(crystal_rotation=&lt;scipp.Variable&gt; ()    vector3            [deg]  (0, 0, 0), name=&#39;sample name&#39;, position=&lt;scipp.Variable&gt; ()    vector3              [m]  (0, 0, 0), orientation_matrix=&lt;scipp.Variable&gt; ()  linear_transform3  [dimensionless]  ((1, 0, 0), (0, 1, 0), (0, 0, 1)), unit_cell_length=&lt;scipp.Variable&gt; ()    vector3  [dimensionless]  (1, 1, 1), unit_cell_angle=&lt;scipp.Variable&gt; ()    vector3            [deg]  (90, 90, 90)), lookup_table=TofLookupTable(array=&lt;scipp.DataArray&gt;
+Dimensions: Sizes[distance:204, event_time_offset:287, ]
+Coordinates:
+* distance                  float64              [m]  (distance)  [149.8, 149.9, ..., 170, 170.1]
+* event_time_offset         float64            [µs]  (event_time_offset)  [0, 249.75, ..., 71178.8, 71428.6]
+Data:
+                            float64            [µs]  (distance, event_time_offset)  [69739.3, 69948.4, ..., 140842, 141079]  [687152, 742069, ..., 782770, 784423]
+
+, pulse_period=&lt;scipp.Variable&gt; ()    float64            [µs]  71428.6, pulse_stride=1, distance_resolution=&lt;scipp.Variable&gt; ()    float64              [m]  0.1, time_resolution=&lt;scipp.Variable&gt; ()    float64            [µs]  249.75, choppers=None), reducer=NMXProgram(program=&#39;essnmx&#39;))
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ess.nmx.executables</span><span class="w"> </span><span class="kn">import</span> <span class="n">save_results</span>
+
+<span class="n">output_config</span> <span class="o">=</span> <span class="n">OutputConfig</span><span class="p">(</span>
+    <span class="n">output_file</span><span class="o">=</span><span class="s2">&quot;scipp_output.hdf&quot;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="n">Compression</span><span class="o">.</span><span class="n">GZIP</span>
+<span class="p">)</span>
+<span class="n">save_results</span><span class="p">(</span><span class="n">results</span><span class="o">=</span><span class="n">results</span><span class="p">,</span> <span class="n">output_config</span><span class="o">=</span><span class="n">output_config</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Loading-Reduced-File">
+<h2>Loading Reduced File<a class="headerlink" href="#Loading-Reduced-File" title="Link to this heading">#</a></h2>
+<p>There is a custom loader for NXlauetof file for NMX. It reconstructs the position coordinates from the file and adds them back to the data array. The data group should almost look the same as the in-memory results. The loaded data group will not have some coordinates compared to the in-memory results.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ess.nmx._nxlauetof_io</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_essnmx_nxlauetof</span>
+
+<span class="n">loaded</span> <span class="o">=</span> <span class="n">load_essnmx_nxlauetof</span><span class="p">(</span><span class="s1">&#39;scipp_output.hdf&#39;</span><span class="p">)</span>
+<span class="n">loaded</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div><style id="scipp-style-sheet">.sc-root{--sc-background-color0:var(--jp-layout-color0,#fff);--sc-background-color1:var(--jp-layout-color1,#fcfcfc);--sc-background-color2:var(--jp-layout-color2,#efefef);--sc-inverse-background-color0:var(--jp-inverse-layout-color4,#111);--sc-font-color0:var(--jp-content-font-color0,#000);--sc-font-color1:var(--jp-content-font-color1,#555);--sc-font-color2:var(--jp-content-font-color2,#888);--sc-font-color3:var(--jp-content-font-color3,#ccc);}body.vscode-dark .sc-root{--sc-font-color0:rgba(255,255,255,1);--sc-font-color1:rgba(255,255,255,0.70);--sc-font-color2:rgba(255,255,255,0.54);--sc-font-color3:rgba(255,255,255,0.38);--sc-border-color:#1F1F1F;--sc-disabled-color:#515151;--sc-background-color0:#111111;--sc-background-color1:#111111;--sc-background-color2:#313131;}.sc-wrap{font-size:14px;min-width:300px;max-width:800px;}.sc-var-attrs .sc-wrap{padding-left:3em;}.sc-header{padding-top:6px;padding-bottom:6px;margin-bottom:4px;border-bottom:solid 1px #ddd;}.sc-header > div,.sc-header > ul{display:inline;margin-top:0;margin-bottom:0;}.sc-obj-type,.sc-array-name{margin-left:2px;margin-right:10px;}.sc-obj-type{color:var(--sc-font-color1);}.sc-underlying-size{color:var(--sc-font-color2);}.sc-sections,.reveal .sc-sections{padding-left:0 !important;display:grid;grid-template-columns:150px auto auto auto 1fr 20px 20px;}.sc-section-item{display:contents;}.sc-section-item input{display:none;}.sc-section-item input:enabled + label{cursor:pointer;color:var(--sc-font-color1);}.sc-section-item input:enabled + label:hover{color:var(--sc-font-color0);}.sc-section-summary{grid-column:1;font-weight:500;}.sc-section-summary > span{display:inline-block;padding-left:0.5em;}.sc-section-summary-in:disabled + label{color:var(--sc-font-color1);}.sc-section-summary-in + label:before{display:inline-block;content:'►';font-size:11px;width:15px;text-align:center;}.sc-section-summary-in:disabled + label:before{display:none;}.sc-section-summary-in:checked + label:before{content:'▼';}.sc-section-summary-in:checked + label > span{display:none;}.sc-section-summary,.sc-section-inline-details{padding-top:4px;padding-bottom:4px;}.sc-section-inline-details{grid-column:2 / 6;}.sc-section-details{display:none;grid-column:1 / -1;margin-bottom:5px;}.sc-section-summary-in:checked ~ .sc-section-details{display:contents;}.sc-array-wrap{grid-column:1 / -1;display:grid;grid-template-columns:20px auto;}.sc-array-wrap > label{grid-column:1;vertical-align:top;}.sc-preview{color:var(--sc-font-color2);}.sc-array-preview,.sc-array-data{padding:0 5px !important;grid-column:2;}.sc-array-data,.sc-array-in:checked ~ .sc-array-preview{display:none;}.sc-array-in:checked ~ .sc-array-data,.sc-array-preview{display:inline-block;}.sc-dim-list{display:inline-block !important;list-style:none;padding:0 !important;margin:0;}.sc-dim-list li{display:inline-block;padding:0;margin:0!important;}.sc-dim-list:before{content:'(';}.sc-dim-list:after{content:')';}.sc-dim-list li:not(:last-child):after{content:',';padding-right:5px;}.sc-dim-list li span,.sc-standalone-var-name > span span,.sc-var-name > span span{padding:0 !important;}.sc-aligned{font-weight:bold;}.sc-var-list,.sc-var-item,.reveal .sc-var-list,.reveal .sc-var-item{display:contents;}.sc-var-item > div,.sc-var-item label,.sc-var-item > .sc-var-name span{background-color:var(--sc-background-color1);margin-bottom:0;}.sc-var-item > .sc-var-name:hover span{padding-right:5px;}.sc-var-list > li:nth-child(odd) > div,.sc-var-list > li:nth-child(odd) > label,.sc-var-list > li:nth-child(odd) > .sc-var-name span{background-color:var(--sc-background-color2);}.sc-var-name{grid-column:1;}.sc-var-dims{grid-column:2;}.sc-var-dtype{grid-column:3;text-align:right;color:var(--sc-font-color2);}.sc-var-unit{grid-column:4;text-align:left;color:var(--sc-font-color1);max-width:50pt;text-overflow:ellipsis;}.sc-value-preview{grid-column:5;}.sc-var-preview-variances{text-align:right;}.sc-sections .sc-section-item .sc-section-summary,.sc-sections .sc-section-item .sc-section-inline-details,.sc-section-item .sc-var-list .sc-var-item > div,.sc-section-item .sc-var-list .sc-var-item > label,.sc-section-details .sc-var-list .sc-var-item > div,.sc-section-details .sc-var-list .sc-var-item > label{margin-top:0;margin-bottom:0;}.sc-var-name,.sc-var-dims,.sc-var-dtype,.sc-var-unit,.sc-preview,.sc-attrs dt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:10px;}.sc-var-name:hover,.sc-var-dims:hover,.sc-var-dtype:hover,.sc-var-unit:hover,.sc-attrs dt:hover{overflow:visible;width:auto;z-index:1;}.sc-var-attrs{display:block;}.sc-var-data,.reveal .sc-var-data{display:none;}.sc-var-attrs,.sc-var-data{background-color:var(--sc-background-color0) !important;padding-bottom:5px !important;}.sc-var-attrs-in:checked ~ .sc-var-attrs{display:none;}.sc-var-data-in:checked ~ .sc-var-data{display:block;}.sc-var-data > table{float:right;}.sc-var-name span,.sc-var-data{padding-left:25px !important;}.sc-var-attrs,.sc-var-data{grid-column:1 / -1;}dl.sc-attrs{padding:0;margin:0;display:grid;grid-template-columns:125px auto;}.sc-attrs dt,dd{padding:0;margin:0;float:left;padding-right:10px;width:auto;}.sc-attrs dt{font-weight:normal;grid-column:1;}.sc-attrs dt:hover span{display:inline-block;padding-right:10px;}.sc-attrs dd{grid-column:2;white-space:pre-wrap;word-break:break-all;}.sc-icon-database,.sc-icon-file-text2{display:inline-block;vertical-align:middle;width:1em;height:1.5em !important;stroke-width:0;stroke:currentColor;fill:currentColor;}label.sc-hide-icon svg{opacity:0;}.sc-standalone-var-name{grid-column:1/3;}.sc-standalone-var-name span{padding-left:25px;padding-right:10px;}.sc-title{font-weight:bold;font-size:1.5em;}.sc-subtitle{font-weight:normal;font-style:italic;text-align:left;font-size:1.2em;padding:1px;}.sc-label{fill:var(--sc-font-color0,#444444);text-anchor:middle;}.sc-name{fill:var(--sc-font-color0,#111111);}.sc-inset-line{stroke:var(--sc-font-color1);stroke-width:0.05;stroke-dasharray:0.2,0.2;}.sc-log-wrap{height:25ex;resize:vertical;overflow-y:scroll;display:flex;flex-direction:column-reverse;border:1px solid;border-color:var(--jp-border-color2);background-color:var(--sc-background-color1);}div.sc-log{line-height:2.5ex;}table.sc-log{table-layout:auto;border-collapse:collapse;}tr.sc-log:nth-child(even){background-color:var(--sc-background-color0);}tr.sc-log > td{vertical-align:top;padding-bottom:0.5ex;}.sc-log-time-stamp{min-width:22ch;font-family:var(--jp-code-font-family);color:var(--sc-font-color2);}.sc-log-level{min-width:10ch;}tr.sc-log-debug td.sc-log-level{color:var(--jp-accent-color1);}tr.sc-log-info td.sc-log-level{color:var(--jp-info-color1);}tr.sc-log-warning td.sc-log-level{color:var(--jp-warn-color1);}tr.sc-log-error td.sc-log-level{font-weight:bold;color:var(--jp-error-color2);}tr.sc-log-critical td.sc-log-level{font-weight:bold;color:var(--sc-background-color0);background-color:var(--jp-error-color1);}.sc-log-message{white-space:pre-wrap;width:100%;}.sc-log-html-payload{white-space:normal;}.sc-log-name{padding-right:0.5em;text-align:right;white-space:pre-wrap;color:var(--sc-font-color3);}</style><style id="datagroup-style-sheet">.dg-root{white-space:normal;font-size:14px;min-width:300px;max-width:1200px;}.dg-root *{box-sizing:border-box;}.sc-header > label,.sc-header > label > div,.sc-header > label > div > ul{display:inline;margin-bottom:0;}.dg-header-in{display:none;}.dg-header-in + .sc-header > label:before{display:inline-block;font-size:11px;text-align:left;content:'►';}.dg-header-in:checked + .sc-header > label:before{content:'▼';}.dg-header-in ~ .dg-detail-box{display:none;}.dg-header-in:checked ~ .dg-detail-box{display:grid;}.dg-detail-box{margin-top:5px;margin-bottom:5px;column-gap:0 !important;display:grid;grid-template-columns:max-content max-content max-content max-content max-content max-content max-content;grid-template-areas:"name        parent      object-type shape       dtype       unit        preview";}.dg-detail-box *{margin-top:0;margin-bottom:0;}.dg-detail-list{display:contents;}.dg-detail-item{display:contents;list-style-type:none;}.dg-detail-item-in{display:none;}.dg-detail-item-in + .dg-detail-name > label:before{display:inline-block;font-size:14px;text-align:left;content:'►';}.dg-detail-item-in:checked + .dg-detail-name > label:before{content:'▼';}.dg-detail-item div,.dg-detail-item span,.dg-detail-item label{word-break:break-all;min-width:1em;max-width:20em;width:100%;}.dg-detail-item > div{display:contents;}.dg-detail-item > div > div > div{width:100%;}.dg-detail-item:hover > div > div{background-color:var(--sc-background-color2) !important;}.dg-detail-item > div span{padding-left:10px;padding-right:10px;}.dg-detail-item > div > div:first-of-type{grid-column-start:1;}.dg-detail-item-subsection{display:none;}.dg-detail-item-in{margin:0;}.dg-detail-item-in:checked ~ .dg-detail-item-subsection{display:contents;}.dg-detail-item .dg-detail-name{grid-area:"name";min-width:5em;}.dg-detail-name{padding-left:calc(var(--depth)*2em);}.dg-detail-name > label{padding-left:8px;}.dg-detail-name > label > span{padding-left:0.1em;}.dg-detail-item .dg-detail-parent{grid-area:"parent";text-align:right;}.dg-detail-item .dg-detail-objtype{grid-area:"objtype";text-align:left;}.dg-detail-item .dg-detail-shape{max-width:30em;grid-area:"shape";text-align:left;}.sc-header .dg-detail-shape{margin-left:1em;text-align:left;}.dg-detail-item .dg-detail-dtype{grid-area:"dtype";text-align:left;}.dg-detail-item .dg-detail-unit{grid-area:"unit";text-align:center;}.dg-detail-item .dg-detail-preview{grid-area:"preview";min-width:15em;max-width:100em !important;text-align:left;}.dg-detail-preview .sc-preview span,.dg-detail-shape span{padding:0 !important;}</style><div class='sc-root dg-root'><input class='dg-header-in' id='datagroup-view-dd0ae66c-a1a8-45c9-818f-39f7ff2e2c46' type='checkbox' checked><div class='sc-header'><label for=datagroup-view-dd0ae66c-a1a8-45c9-818f-39f7ff2e2c46 title='Expand/collapse'><div class='sc-obj-type'>scipp.DataGroup </div><div class='dg-detail-shape'>(tof: 50, y_pixel_offset: 1280, x_pixel_offset: 1280)</div></label></div><div class='dg-detail-box'><ul class='dg-detail-list'><li class='dg-detail-item'><div><input class='dg-detail-item-in' id='summary-7c994454-01d0-46b3-a82a-41e54ffc15d7' type='checkbox' ><div class='dg-detail-name' style='--depth: 0;'><label for=summary-7c994454-01d0-46b3-a82a-41e54ffc15d7 title='Expand/collapse'><span>control<span></label></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataGroup</span></div><div class='dg-detail-shape'>(tof: 50)</div><div class='dg-detail-dtype'></div><div class='dg-detail-unit'></div><div class='dg-detail-preview'></div><ul class='dg-detail-item-subsection'><ul class='dg-detail-list'><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>mode</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>ess</span></div><div class='dg-detail-objtype'><span>ControlMode</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>monitor</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>preset</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>float64</span></div><div class='dg-detail-unit'><span>counts</span></div><div class='dg-detail-preview'><span class='sc-preview'>0.0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>data</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(tof: 50)</div><div class='dg-detail-dtype'><span>float64</span></div><div class='dg-detail-unit'><span>ns</span></div><div class='dg-detail-preview'><span class='sc-preview'>1.0, 1.0, ..., 1.0, 1.0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>tof_bin_coord</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>tof</span></div></div></li></ul></ul></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>definitions</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>NXlauetof</span></div></div></li><li class='dg-detail-item'><div><input class='dg-detail-item-in' id='summary-1ee9e82b-4d1e-4b99-bd3e-9ad4bc5f0f55' type='checkbox' ><div class='dg-detail-name' style='--depth: 0;'><label for=summary-1ee9e82b-4d1e-4b99-bd3e-9ad4bc5f0f55 title='Expand/collapse'><span>instrument<span></label></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataGroup</span></div><div class='dg-detail-shape'>(y_pixel_offset: 1280, <br>&nbspx_pixel_offset: 1280, <br>&nbsptof: 50)</div><div class='dg-detail-dtype'></div><div class='dg-detail-unit'></div><div class='dg-detail-preview'></div><ul class='dg-detail-item-subsection'><ul class='dg-detail-list'><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>name</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>NMX</span></div></div></li><li class='dg-detail-item'><div><input class='dg-detail-item-in' id='summary-08d144c8-7c00-4a0a-8f8f-9de0e06bdd66' type='checkbox' ><div class='dg-detail-name' style='--depth: 1;'><label for=summary-08d144c8-7c00-4a0a-8f8f-9de0e06bdd66 title='Expand/collapse'><span>source<span></label></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataGroup</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'></div><div class='dg-detail-unit'></div><div class='dg-detail-preview'></div><ul class='dg-detail-item-subsection'><ul class='dg-detail-list'><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 2;'><span>name</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>European Spallation Source</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 2;'><span>probe</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scippneutron</span></div><div class='dg-detail-objtype'><span>RadiationProbe</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>RadiationProbe.Neutron</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 2;'><span>position</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>[  -0.491556    0.       -156.714   ]</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 2;'><span>source_type</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scippneutron</span></div><div class='dg-detail-objtype'><span>SourceType</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>SourceType.SpallationNeutronSource</span></div></div></li></ul></ul></div></li><li class='dg-detail-item'><div><input class='dg-detail-item-in' id='summary-a1c6f4fb-81c2-44fb-bf79-03552ac33d3c' type='checkbox' ><div class='dg-detail-name' style='--depth: 1;'><label for=summary-a1c6f4fb-81c2-44fb-bf79-03552ac33d3c title='Expand/collapse'><span>detectors<span></label></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataGroup</span></div><div class='dg-detail-shape'>(y_pixel_offset: 1280, <br>&nbspx_pixel_offset: 1280, <br>&nbsptof: 50)</div><div class='dg-detail-dtype'></div><div class='dg-detail-unit'></div><div class='dg-detail-preview'></div><ul class='dg-detail-item-subsection'><ul class='dg-detail-list'><li class='dg-detail-item'><div><input class='dg-detail-item-in' id='summary-a3438f7d-2568-49a9-83af-6f0c53599b6d' type='checkbox' ><div class='dg-detail-name' style='--depth: 2;'><label for=summary-a3438f7d-2568-49a9-83af-6f0c53599b6d title='Expand/collapse'><span>detector_panel_0<span></label></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataGroup</span></div><div class='dg-detail-shape'>(y_pixel_offset: 1280, <br>&nbspx_pixel_offset: 1280, <br>&nbsptof: 50)</div><div class='dg-detail-dtype'></div><div class='dg-detail-unit'></div><div class='dg-detail-preview'></div><ul class='dg-detail-item-subsection'><ul class='dg-detail-list'><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 3;'><span>data</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(y_pixel_offset: 1280, <br>&nbspx_pixel_offset: 1280, <br>&nbsptof: 50)</div><div class='dg-detail-dtype'><span>int64</span></div><div class='dg-detail-unit'><span>counts</span></div><div class='dg-detail-preview'><span class='sc-preview'>0, 0, ..., 0, 0</span></div></div></li><li class='dg-detail-item'><div><input class='dg-detail-item-in' id='summary-ca138118-2ee0-4787-86e1-2c3c1de0f465' type='checkbox' ><div class='dg-detail-name' style='--depth: 3;'><label for=summary-ca138118-2ee0-4787-86e1-2c3c1de0f465 title='Expand/collapse'><span>metadata<span></label></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataGroup</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'></div><div class='dg-detail-unit'></div><div class='dg-detail-preview'></div><ul class='dg-detail-item-subsection'><ul class='dg-detail-list'><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>azimuthal_angle</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>int64</span></div><div class='dg-detail-unit'><span>deg</span></div><div class='dg-detail-preview'><span class='sc-preview'>0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>distance</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>float64</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>157.0507742521214</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>fast_axis</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>𝟙</span></div><div class='dg-detail-preview'><span class='sc-preview'>[-0.70709694  0.70710663  0.00375908]</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>origin</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>[2.06883872e-03 5.97658521e-11 3.35998496e-01]</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>polar_angle</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>int64</span></div><div class='dg-detail-unit'><span>deg</span></div><div class='dg-detail-preview'><span class='sc-preview'>0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>slow_axis</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>𝟙</span></div><div class='dg-detail-preview'><span class='sc-preview'>[-0.70709664 -0.70710693  0.00375908]</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>x_pixel_size</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>float64</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>0.00040000000000001146</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>y_pixel_size</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>float64</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>0.00040000000000001146</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>fast_axis_dim</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>x_pixel_offset</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>slow_axis_dim</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>y_pixel_offset</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>detector_name</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>detector_panel_0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>first_pixel_position</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>[3.63819556e-01 7.65002180e-08 3.34075352e-01]</span></div></div></li></ul></ul></div></li></ul></ul></div></li><li class='dg-detail-item'><div><input class='dg-detail-item-in' id='summary-7a1cdf68-9725-469c-a491-47e3561dbf30' type='checkbox' ><div class='dg-detail-name' style='--depth: 2;'><label for=summary-7a1cdf68-9725-469c-a491-47e3561dbf30 title='Expand/collapse'><span>detector_panel_1<span></label></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataGroup</span></div><div class='dg-detail-shape'>(y_pixel_offset: 1280, <br>&nbspx_pixel_offset: 1280, <br>&nbsptof: 50)</div><div class='dg-detail-dtype'></div><div class='dg-detail-unit'></div><div class='dg-detail-preview'></div><ul class='dg-detail-item-subsection'><ul class='dg-detail-list'><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 3;'><span>data</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(y_pixel_offset: 1280, <br>&nbspx_pixel_offset: 1280, <br>&nbsptof: 50)</div><div class='dg-detail-dtype'><span>int64</span></div><div class='dg-detail-unit'><span>counts</span></div><div class='dg-detail-preview'><span class='sc-preview'>0, 0, ..., 0, 0</span></div></div></li><li class='dg-detail-item'><div><input class='dg-detail-item-in' id='summary-f469d6b7-89e4-491f-ae2d-06213198e175' type='checkbox' ><div class='dg-detail-name' style='--depth: 3;'><label for=summary-f469d6b7-89e4-491f-ae2d-06213198e175 title='Expand/collapse'><span>metadata<span></label></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataGroup</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'></div><div class='dg-detail-unit'></div><div class='dg-detail-preview'></div><ul class='dg-detail-item-subsection'><ul class='dg-detail-list'><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>azimuthal_angle</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>int64</span></div><div class='dg-detail-unit'><span>deg</span></div><div class='dg-detail-preview'><span class='sc-preview'>0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>distance</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>float64</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>156.71467918292365</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>fast_axis</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>𝟙</span></div><div class='dg-detail-preview'><span class='sc-preview'>[ 5.31616869e-03 -4.11957968e-08  9.99985869e-01]</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>origin</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>[ 0.23785452  0.23814142 -0.00119925]</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>polar_angle</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>int64</span></div><div class='dg-detail-unit'><span>deg</span></div><div class='dg-detail-preview'><span class='sc-preview'>0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>slow_axis</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>𝟙</span></div><div class='dg-detail-preview'><span class='sc-preview'>[ 0.70709653 -0.70710704 -0.00375913]</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>x_pixel_size</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>float64</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>0.00040000000000001146</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>y_pixel_size</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>float64</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>0.00040000000000001146</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>fast_axis_dim</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>x_pixel_offset</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>slow_axis_dim</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>y_pixel_offset</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>detector_name</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>detector_panel_1</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>first_pixel_position</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>[ 0.05561935  0.41901941 -0.25603405]</span></div></div></li></ul></ul></div></li></ul></ul></div></li><li class='dg-detail-item'><div><input class='dg-detail-item-in' id='summary-80e36c03-22c2-44b8-9b31-90b8f0c180f1' type='checkbox' ><div class='dg-detail-name' style='--depth: 2;'><label for=summary-80e36c03-22c2-44b8-9b31-90b8f0c180f1 title='Expand/collapse'><span>detector_panel_2<span></label></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataGroup</span></div><div class='dg-detail-shape'>(y_pixel_offset: 1280, <br>&nbspx_pixel_offset: 1280, <br>&nbsptof: 50)</div><div class='dg-detail-dtype'></div><div class='dg-detail-unit'></div><div class='dg-detail-preview'></div><ul class='dg-detail-item-subsection'><ul class='dg-detail-list'><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 3;'><span>data</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(y_pixel_offset: 1280, <br>&nbspx_pixel_offset: 1280, <br>&nbsptof: 50)</div><div class='dg-detail-dtype'><span>int64</span></div><div class='dg-detail-unit'><span>counts</span></div><div class='dg-detail-preview'><span class='sc-preview'>0, 0, ..., 0, 0</span></div></div></li><li class='dg-detail-item'><div><input class='dg-detail-item-in' id='summary-a23ba6c2-2a7a-4bd9-a795-9e59ad478c38' type='checkbox' ><div class='dg-detail-name' style='--depth: 3;'><label for=summary-a23ba6c2-2a7a-4bd9-a795-9e59ad478c38 title='Expand/collapse'><span>metadata<span></label></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataGroup</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'></div><div class='dg-detail-unit'></div><div class='dg-detail-preview'></div><ul class='dg-detail-item-subsection'><ul class='dg-detail-list'><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>azimuthal_angle</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>int64</span></div><div class='dg-detail-unit'><span>deg</span></div><div class='dg-detail-preview'><span class='sc-preview'>0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>distance</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>float64</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>156.71558553728565</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>fast_axis</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>𝟙</span></div><div class='dg-detail-preview'><span class='sc-preview'>[-5.31611173e-03  4.14934753e-08 -9.99985869e-01]</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>origin</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>[-0.23785452  0.23814142  0.00119925]</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>polar_angle</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>int64</span></div><div class='dg-detail-unit'><span>deg</span></div><div class='dg-detail-preview'><span class='sc-preview'>0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>slow_axis</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>𝟙</span></div><div class='dg-detail-preview'><span class='sc-preview'>[-0.70709653 -0.70710704  0.00375903]</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>x_pixel_size</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>float64</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>0.00040000000000001146</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>y_pixel_size</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>float64</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>0.00040000000000001146</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>fast_axis_dim</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>x_pixel_offset</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>slow_axis_dim</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>y_pixel_offset</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>detector_name</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>detector_panel_2</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 4;'><span>first_pixel_position</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>[-0.05561936  0.41901939  0.25603407]</span></div></div></li></ul></ul></div></li></ul></ul></div></li></ul></ul></div></li></ul></ul></div></li><li class='dg-detail-item'><div><input class='dg-detail-item-in' id='summary-5dfe3645-02fd-4922-a433-512eaada2723' type='checkbox' ><div class='dg-detail-name' style='--depth: 0;'><label for=summary-5dfe3645-02fd-4922-a433-512eaada2723 title='Expand/collapse'><span>reducer<span></label></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataGroup</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'></div><div class='dg-detail-unit'></div><div class='dg-detail-preview'></div><ul class='dg-detail-item-subsection'><ul class='dg-detail-list'><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>program</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>essnmx</span></div></div></li></ul></ul></div></li><li class='dg-detail-item'><div><input class='dg-detail-item-in' id='summary-a33b8fe0-4ad6-4704-ba27-bfcb4ace281b' type='checkbox' ><div class='dg-detail-name' style='--depth: 0;'><label for=summary-a33b8fe0-4ad6-4704-ba27-bfcb4ace281b title='Expand/collapse'><span>sample<span></label></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataGroup</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'></div><div class='dg-detail-unit'></div><div class='dg-detail-preview'></div><ul class='dg-detail-item-subsection'><ul class='dg-detail-list'><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>crystal_rotation</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>deg</span></div><div class='dg-detail-preview'><span class='sc-preview'>[0. 0. 0.]</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>name</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>sample name</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>orientation_matrix</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>linear_transform3</span></div><div class='dg-detail-unit'><span>𝟙</span></div><div class='dg-detail-preview'><span class='sc-preview'>[[1. 0. 0.]
+ [0. 1. 0.]
+ [0. 0. 1.]]</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>position</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>m</span></div><div class='dg-detail-preview'><span class='sc-preview'>[0. 0. 0.]</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>unit_cell_length</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>𝟙</span></div><div class='dg-detail-preview'><span class='sc-preview'>[1. 1. 1.]</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>unit_cell_angle</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>vector3</span></div><div class='dg-detail-unit'><span>deg</span></div><div class='dg-detail-preview'><span class='sc-preview'>[90. 90. 90.]</span></div></div></li></ul></ul></div></li></ul></div></div></div></div>
+</div>
+<p>You can then plot the loaded data array exactly same as the in-memory results.</p>
+<p>For example, you can plot the 3D instrument view:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">matplotlib</span> <span class="n">widget</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scippneutron</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">scn</span>
+
+
+<span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;y_pixel_offset&#39;</span><span class="p">,</span> <span class="s1">&#39;x_pixel_offset&#39;</span><span class="p">)</span>
+<span class="n">merged_2d_das</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="n">det</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="s1">&#39;tof&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="n">dims</span><span class="p">,</span> <span class="n">to</span><span class="o">=</span><span class="s1">&#39;detector_number&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">det</span> <span class="ow">in</span> <span class="n">loaded</span><span class="p">[</span><span class="s1">&#39;instrument&#39;</span><span class="p">][</span><span class="s1">&#39;detectors&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+    <span class="p">],</span>
+    <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;detector_number&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">scn</span><span class="o">.</span><span class="n">instrument_view</span><span class="p">(</span><span class="n">merged_2d_das</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="Compression-Modes">
+<h2>Compression Modes<a class="headerlink" href="#Compression-Modes" title="Link to this heading">#</a></h2>
+<p>There are multiple compression modes for <code class="docutils literal notranslate"><span class="pre">detector</span> <span class="pre">counts</span></code> data(other datasets are not compressed). The default mode is <code class="docutils literal notranslate"><span class="pre">BITSHUFFLE_LZ4</span></code>.</p>
+<p>Here is the rough benchmark results with the small test dataset. With the result, users can decide which compression mode to use.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Compression Mode</p></th>
+<th class="head"><p>Final Size [MB]</p></th>
+<th class="head"><p>Compression Ratio</p></th>
+<th class="head"><p>Writing Time [s]</p></th>
+<th class="head"><p>Reading Time [s]</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>NONE</p></td>
+<td><p>1_966</p></td>
+<td><p>1</p></td>
+<td><p>4</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-odd"><td><p>GZIP</p></td>
+<td><p>5</p></td>
+<td><p>370</p></td>
+<td><p>18</p></td>
+<td><p>5</p></td>
+</tr>
+<tr class="row-even"><td><p>BITSHUFFLE_LZ4</p></td>
+<td><p>17</p></td>
+<td><p>114</p></td>
+<td><p>10</p></td>
+<td><p>3</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<blockquote>
+<div><p>In the ESS standard VISA environment. (64 GB mem/6 VCPUs)</p>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">BITSHUFFLE_LZ4</span></code> showed almost twice faster speed for writing/reading the reduced file. <code class="docutils literal notranslate"><span class="pre">GZIP</span></code> and <code class="docutils literal notranslate"><span class="pre">BITSHUFFLE</span></code> could both compress the data more than 99% (when the histogram was very empty) but <code class="docutils literal notranslate"><span class="pre">GZIP</span></code> had 3 times better compression ratio than <code class="docutils literal notranslate"><span class="pre">BITSHUFFLE</span></code> for this particular dataset.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Why <code class="docutils literal notranslate"><span class="pre">BITSHUFFLE</span></code> is the default compression mode? - <code class="docutils literal notranslate"><span class="pre">Bitshuffle</span></code> is compatible with <code class="docutils literal notranslate"><span class="pre">DIALS</span></code> and other crystallography packages. It is the primary compression mode of all data collected on <code class="docutils literal notranslate"><span class="pre">DECTRIS</span> <span class="pre">EIGER</span></code> detectors, which are the primary detectors used at synchrotron X-ray MX beamlines. Most of these packages can also read <code class="docutils literal notranslate"><span class="pre">gzip</span></code> data but the slow readout makes <code class="docutils literal notranslate"><span class="pre">gzip</span></code> less attractive than <code class="docutils literal notranslate"><span class="pre">bitshuffle</span></code>.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code class="docutils literal notranslate"><span class="pre">Bitshuffle</span></code> may not be supported in cerntain environments, such as MacOS or Windows. It was accepted to be default because the first step of the reduction workflow (this workflow) is expected to be run by ESS in the specific environment that bitshuffle supports.</p>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">User Guide</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="mcstas_workflow.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">McStas Workflow</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025 Scipp contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><!-- This will display the version of the docs -->
+Current ESSnmx version: 26.3.0 (<a href="https://github.com/scipp/essnmx/releases">older versions</a>).</div>
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
