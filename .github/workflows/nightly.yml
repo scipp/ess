@@ -47,3 +47,24 @@ jobs:
           environments: lb-${{ matrix.package }}
       - name: Test with lowest direct dependencies
         run: pixi run -e lb-${{ matrix.package }} test ${{ matrix.package }}
+
+  unpinned:
+    name: Unpinned Test ${{ matrix.package }}
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - essreduce
+          - essimaging
+          - essnmx
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: prefix-dev/setup-pixi@v0.9.4
+        with:
+          frozen: true
+          environments: ess-unpinned
+      - name: Test with latest dependencies
+        run: pixi run pytest packages/${{ matrix.package }}/tests
