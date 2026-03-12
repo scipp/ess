@@ -7,15 +7,15 @@ This workflow is used to convert raw detector data with event_time_zero and
 event_time_offset coordinates to data with a time-of-flight coordinate.
 """
 
+import dataclasses as dtc
 from collections.abc import Callable
-from dataclasses import asdict
 
 import numpy as np
 import scipp as sc
 import scippneutron as scn
 import scippnexus as snx
 from scippneutron._utils import elem_unit
-from scippneutron.conversion.tof import wavelength_from_tof
+from scippneutron.conversion.tof import tof_from_wavelength, wavelength_from_tof
 
 try:
     from .interpolator_numba import Interpolator as InterpolatorImpl
@@ -418,7 +418,7 @@ def _mask_large_uncertainty_in_lut(
     mask = relative_error > sc.scalar(error_threshold)
     return LookupTable(
         **{
-            **asdict(table),
+            **dtc.asdict(table),
             "array": sc.where(mask, sc.scalar(np.nan, unit=da.unit), da),
         }
     )
@@ -482,6 +482,13 @@ def _compute_wavelength_data(
     ltotal: sc.Variable,
     pulse_stride_offset: int,
 ) -> sc.DataArray:
+    # The lookup table gives wavelength as a function of (eot, distance). We operate
+    # on tofs to reduce interpolation errors.
+    table_tof = tof_from_wavelength(
+        wavelength=lookup.array.data, Ltotal=lookup.array.coords['distance']
+    ).to(unit=lookup.array.coords['event_time_offset'].unit)
+    # Make copy of dataclass with replace
+    lookup = dtc.replace(lookup, array=lookup.array.assign(table_tof))
     if da.bins is None:
         tofs = _compute_tof_histogram(da=da, lookup=lookup, ltotal=ltotal)
         tofs = rebin_strictly_increasing(tofs, dim='time_of_flight')
