@@ -1,4 +1,12 @@
 #!/bin/bash
+#
+# You need `gh` client and it needs to be authenticated before you run this script.
+# It creates a label of the original repository name in both `ess*` and `ess` repository
+# and assign the label to all issues to be transferred.
+# And then it transfers all issues to `ess` repository.
+# All links to the other issues from the original repo will be updated.
+# It only finds 200 issues, which should be enough for all issues,
+# but if you have more issues left, you may need to manually run the script again.
 
 RED='\033[0;31m'
 BLUE='\033[0;34m'
