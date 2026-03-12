@@ -67,4 +67,4 @@ jobs:
           frozen: true
           environments: ess-unpinned
       - name: Test with latest dependencies
-        run: pixi run pytest packages/${{ matrix.package }}/tests
+        run: pixi run -e ess-unpinned pytest packages/${{ matrix.package }}/tests
