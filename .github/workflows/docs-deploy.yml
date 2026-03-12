@@ -11,7 +11,7 @@ jobs:
       contents: write
     strategy:
       matrix:
-        package: [essreduce, essimaging]
+        package: [essreduce, essimaging, essnmx]
     steps:
       - uses: actions/checkout@v6
         with:
