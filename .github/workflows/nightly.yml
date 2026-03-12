@@ -64,7 +64,7 @@ jobs:
           fetch-depth: 0
       - uses: prefix-dev/setup-pixi@v0.9.4
         with:
-          frozen: true
+          cache: false
           environments: ess-unpinned
       - name: Test with latest dependencies
         run: pixi run -e ess-unpinned pytest packages/${{ matrix.package }}/tests
