@@ -461,21 +461,20 @@ def assemble_detector_data(
         Neutron data array (events or histogram).
     """
     detector_coords = dict(detector.coords)
-    position = detector_coords.get('position')
     if neutron_data.is_binned:
         neutron_data = nexus.group_event_data(
             event_data=neutron_data, detector_number=detector.coords['detector_number']
         )
-        if position is not None and 'time' in position.dims:
-            del detector_coords['position']
-            time = detector_coords.pop('time')
-            pos_lookup = sc.lookup(
-                sc.DataArray(position, coords={'time': time}), dim='time'
-            )
-            neutron_data.bins.coords['position'] = pos_lookup[
-                neutron_data.bins.coords['event_time_zero']
-            ]
+        if 'time' in detector.dims:
+            # Give the neutron data a 'time' dimension matching the times in the
+            # detector data. Preserve the `event_time_zero` event coord.
+            # This is needed to add time-dependent detector coords and masks below.
+            neutron_data = neutron_data.bin(
+                event_time_zero=detector_coords['time'].rename(time='event_time_zero')
+            ).rename_dims(event_time_zero='time')
+            neutron_data.coords['time'] = neutron_data.coords.pop('event_time_zero')
     else:
+        position = detector_coords.get('position')
         if position is not None and 'time' in position.dims:
             raise NotImplementedError(
                 "Time-dependent positions are not yet supported for histogram data."
@@ -728,6 +727,7 @@ _common_providers = (
     load_nexus_component,
     load_all_nexus_components,
     data_by_name,
+    nx_class_for_crystal,
     nx_class_for_detector,
     nx_class_for_monitor,
     nx_class_for_source,
