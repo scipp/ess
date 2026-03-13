@@ -81,8 +81,8 @@ class WavelengthInterpolator:
         larger when we interpolate :math:`\\lambda` rather than when we interpolate
         :math:`t_{of}`.
 
-        For this reason, we internall convert to tof and then back to wavelengths before
-        returning the result.
+        For this reason, we internally convert to tof and then back to wavelength
+        before returning the result.
         """
         self._distance_unit = distance_unit
         self._time_unit = time_unit
