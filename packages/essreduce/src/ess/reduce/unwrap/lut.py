@@ -168,6 +168,7 @@ def _compute_mean_wavelength(
     toas = simulation.time_of_arrival + (travel_length / simulation.speed).to(
         unit=time_unit, copy=False
     )
+    # tofs = distance / simulation.speed
 
     data = sc.DataArray(
         data=simulation.weight,

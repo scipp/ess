@@ -7,15 +7,14 @@ This workflow is used to convert raw detector data with event_time_zero and
 event_time_offset coordinates to data with a time-of-flight coordinate.
 """
 
-import dataclasses as dtc
 from collections.abc import Callable
+from dataclasses import asdict
 
 import numpy as np
 import scipp as sc
 import scippneutron as scn
 import scippnexus as snx
 from scippneutron._utils import elem_unit
-from scippneutron.conversion.tof import tof_from_wavelength, wavelength_from_tof
 
 try:
     from .interpolator_numba import Interpolator as InterpolatorImpl
@@ -48,10 +47,17 @@ from .types import (
 )
 
 
-class TofInterpolator:
-    def __init__(self, lookup: sc.DataArray, distance_unit: str, time_unit: str):
+class WavelengthInterpolator:
+    def __init__(
+        self,
+        lookup: sc.DataArray,
+        distance_unit: str,
+        time_unit: str,
+        wavelength_unit: str = 'angstrom',
+    ):
         self._distance_unit = distance_unit
         self._time_unit = time_unit
+        self._wavelength_unit = wavelength_unit
 
         self._time_edges = (
             lookup.coords["event_time_offset"]
@@ -65,7 +71,7 @@ class TofInterpolator:
         self._interpolator = InterpolatorImpl(
             time_edges=self._time_edges,
             distance_edges=self._distance_edges,
-            values=lookup.data.to(unit=self._time_unit, copy=False).values,
+            values=lookup.data.to(unit=self._wavelength_unit, copy=False).values,
         )
 
     def __call__(
@@ -97,16 +103,17 @@ class TofInterpolator:
                 pulse_index=pulse_index.values if pulse_index is not None else None,
                 pulse_period=pulse_period.value,
             ),
-            unit=self._time_unit,
+            unit=self._wavelength_unit,
         )
 
 
-def _compute_tof_histogram(
+def _compute_wavelength_histogram(
     da: sc.DataArray, lookup: ErrorLimitedLookupTable, ltotal: sc.Variable
 ) -> sc.DataArray:
     # In NeXus, 'time_of_flight' is the canonical name in NXmonitor, but in some files,
     # it may be called 'tof' or 'frame_time'.
-    key = next(iter(set(da.coords.keys()) & {"time_of_flight", "tof", "frame_time"}))
+    possible_names = {"time_of_flight", "tof", "frame_time"}
+    key = next(iter(set(da.coords.keys()) & possible_names))
     raw_eto = da.coords[key].to(dtype=float, copy=False)
     eto_unit = raw_eto.unit
     pulse_period = lookup.pulse_period.to(unit=eto_unit)
@@ -123,19 +130,19 @@ def _compute_tof_histogram(
     etos = rebinned.coords[key]
 
     # Create linear interpolator
-    interp = TofInterpolator(
+    interp = WavelengthInterpolator(
         lookup.array, distance_unit=ltotal.unit, time_unit=eto_unit
     )
 
-    # Compute time-of-flight of the bin edges using the interpolator
-    tofs = interp(
+    # Compute wavelengths of the bin edges using the interpolator
+    wavs = interp(
         ltotal=ltotal.broadcast(sizes=etos.sizes),
         event_time_offset=etos,
         pulse_period=pulse_period,
     )
 
-    return rebinned.assign_coords(tof=tofs).drop_coords(
-        list({key} & {"time_of_flight", "frame_time"})
+    return rebinned.assign_coords(wavelength=wavs).drop_coords(
+        list({key} & possible_names)
     )
 
 
@@ -145,7 +152,7 @@ def _guess_pulse_stride_offset(
     event_time_offset: sc.Variable,
     pulse_period: sc.Variable,
     pulse_stride: int,
-    interp: TofInterpolator,
+    interp: WavelengthInterpolator,
 ) -> int:
     """
     Using the minimum ``event_time_zero`` to calculate a reference time when computing
@@ -234,7 +241,7 @@ def _prepare_wavelength_interpolation_inputs(
     eto_unit = elem_unit(etos)
 
     # Create linear interpolator
-    interp = TofInterpolator(
+    interp = WavelengthInterpolator(
         lookup.array, distance_unit=ltotal.unit, time_unit=eto_unit
     )
 
@@ -418,7 +425,7 @@ def _mask_large_uncertainty_in_lut(
     mask = relative_error > sc.scalar(error_threshold)
     return LookupTable(
         **{
-            **dtc.asdict(table),
+            **asdict(table),
             "array": sc.where(mask, sc.scalar(np.nan, unit=da.unit), da),
         }
     )
@@ -482,27 +489,17 @@ def _compute_wavelength_data(
     ltotal: sc.Variable,
     pulse_stride_offset: int,
 ) -> sc.DataArray:
-    # The lookup table gives wavelength as a function of (eot, distance). We operate
-    # on tofs to reduce interpolation errors.
-    table_tof = tof_from_wavelength(
-        wavelength=lookup.array.data, Ltotal=lookup.array.coords['distance']
-    ).to(unit=lookup.array.coords['event_time_offset'].unit)
-    # Make copy of dataclass with replace
-    lookup = dtc.replace(lookup, array=lookup.array.assign(table_tof))
     if da.bins is None:
-        tofs = _compute_tof_histogram(da=da, lookup=lookup, ltotal=ltotal)
-        tofs = rebin_strictly_increasing(tofs, dim='time_of_flight')
+        data = _compute_wavelength_histogram(da=da, lookup=lookup, ltotal=ltotal)
+        out = rebin_strictly_increasing(data, dim='wavelength')
     else:
-        tofs = _compute_tof_events(
+        out = _compute_wavelength_events(
             da=da,
             lookup=lookup,
             ltotal=ltotal,
             pulse_stride_offset=pulse_stride_offset,
         )
-    # Convert to wavelength before returning
-    return tofs.assign_coords(Ltotal=ltotal).transform_coords(
-        'wavelength', graph={"wavelength": wavelength_from_tof}, keep_intermediate=False
-    )
+    return out.assign_coords(Ltotal=ltotal)
 
 
 def detector_wavelength_data(
