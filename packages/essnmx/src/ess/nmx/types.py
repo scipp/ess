@@ -4,11 +4,11 @@ from typing import Literal, NewType
 
 import h5py
 import numpy as np
+import sciline as sl
 import scipp as sc
 import scippnexus as snx
-import sciline as sl
-from ess.reduce.unwrap.types import LookupTable
 from ess.reduce.nexus.types import RunType
+from ess.reduce.unwrap.types import LookupTable
 from scippneutron.metadata import RadiationProbe, SourceType
 
 from ._display_helper import to_datagroup

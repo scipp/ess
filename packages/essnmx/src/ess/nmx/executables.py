@@ -38,9 +38,9 @@ from .types import (
     NMXReducedDetector,
     NMXSampleMetadata,
     NMXSourceMetadata,
+    TofDetector,
 )
 from .workflows import initialize_nmx_workflow, select_detector_names
-from .types import TofDetector
 
 _TOF_COORD_NAME = 'tof'
 """Name of the TOF coordinate used in DataArrays."""

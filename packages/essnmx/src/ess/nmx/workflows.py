@@ -12,8 +12,8 @@ from ess.reduce.nexus.types import (
     NeXusComponent,
     NeXusTransformation,
     Position,
-    SampleRun,
     RunType,
+    SampleRun,
 )
 from ess.reduce.unwrap import (
     BeamlineComponentReading,
@@ -35,9 +35,9 @@ from .types import (
     NMXDetectorMetadata,
     NMXSampleMetadata,
     NMXSourceMetadata,
+    TofDetector,
     TofSimulationMaxWavelength,
     TofSimulationMinWavelength,
-    TofDetector,
 )
 
 default_parameters = {
