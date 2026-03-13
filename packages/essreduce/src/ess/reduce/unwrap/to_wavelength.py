@@ -55,23 +55,53 @@ class WavelengthInterpolator:
         time_unit: str,
         wavelength_unit: str = 'angstrom',
     ):
+        """
+        Interpolator object that converts event_time_offset and distances to
+        wavelengths.
+
+        Note that interpolating wavelength directly instead of time-of-flight can lead
+        to higher interpolation errors. Considering
+
+        .. math::
+
+            \\lambda = \\frac{t - t_0(t, L)}{L}
+
+        while
+
+        .. math::
+
+        t_{of} = t - t_0(t, L)
+
+        and assuming :math:`t_0(t, L)` is an affine function, or slowly varying relative
+        to grid density, linear interpolation in :math:`t` and :math:`L` will represent
+        :math:`t_{tof}` exactly.
+
+        But linear interpolation does not represent :math:`\\lambda` exactly even if
+        :math:`t_0` is slowly varying or affine, so the interpolation error is probably
+        larger when we interpolate :math:`\\lambda` rather than when we interpolate
+        :math:`t_{of}`.
+
+        For this reason, we internall convert to tof and then back to wavelengths before
+        returning the result.
+        """
         self._distance_unit = distance_unit
         self._time_unit = time_unit
         self._wavelength_unit = wavelength_unit
 
-        self._time_edges = (
+        time_coord = (
             lookup.coords["event_time_offset"]
             .to(unit=self._time_unit, copy=False)
             .values
         )
-        self._distance_edges = (
-            lookup.coords["distance"].to(unit=distance_unit, copy=False).values
-        )
+
+        distances = lookup.coords["distance"].to(unit=distance_unit, copy=False)
 
         self._interpolator = InterpolatorImpl(
-            time_edges=self._time_edges,
-            distance_edges=self._distance_edges,
-            values=lookup.data.to(unit=self._wavelength_unit, copy=False).values,
+            time_edges=time_coord,
+            distance_edges=distances.values,
+            values=(
+                lookup.data.to(unit=self._wavelength_unit, copy=False) * distances
+            ).values,
         )
 
     def __call__(
@@ -95,16 +125,15 @@ class WavelengthInterpolator:
         ltotal = ltotal.values
         event_time_offset = event_time_offset.values
 
-        return sc.array(
-            dims=out_dims,
-            values=self._interpolator(
-                times=event_time_offset,
-                distances=ltotal,
-                pulse_index=pulse_index.values if pulse_index is not None else None,
-                pulse_period=pulse_period.value,
-            ),
-            unit=self._wavelength_unit,
+        out = self._interpolator(
+            times=event_time_offset,
+            distances=ltotal,
+            pulse_index=pulse_index.values if pulse_index is not None else None,
+            pulse_period=pulse_period.value,
         )
+        out /= ltotal
+
+        return sc.array(dims=out_dims, values=out, unit=self._wavelength_unit)
 
 
 def _compute_wavelength_histogram(
