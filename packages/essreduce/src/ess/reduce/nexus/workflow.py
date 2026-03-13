@@ -306,8 +306,8 @@ def _collapse_runs(transform: sc.DataArray, dim: str) -> sc.DataArray:
     last = unique_values.coords[dim][-1]
     unique_values.coords[dim] = sc.concat(
         [
-            sc.epoch(unit=last.unit),
-            unique_values.coords[dim][1:],
+            # bin-edges are left-inclusive, so we can start with coord[0] as first edge
+            unique_values.coords[dim],
             # Surely, no experiment will last more than 10 years...
             last + sc.scalar(10, unit='Y').to(unit=last.unit),
         ],
