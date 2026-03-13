@@ -9,7 +9,7 @@ import numpy as np
 import scipp as sc
 import scippnexus as snx
 from ess.reduce.nexus.types import Filename, NeXusName, RawDetector, SampleRun
-from ess.reduce.time_of_flight.types import TimeOfFlightLookupTable, TofDetector
+from ess.reduce.unwrap.types import LookupTable
 
 from ._executable_helper import (
     build_logger,
@@ -40,6 +40,7 @@ from .types import (
     NMXSourceMetadata,
 )
 from .workflows import initialize_nmx_workflow, select_detector_names
+from .types import TofDetector
 
 _TOF_COORD_NAME = 'tof'
 """Name of the TOF coordinate used in DataArrays."""
@@ -222,11 +223,10 @@ def reduction(
     base_wf[Filename[SampleRun]] = input_file_path
 
     if config.workflow.time_bin_coordinate == TimeBinCoordinate.time_of_flight:
-        # We cache the time of flight look up table
-        # only if we need to calculate time-of-flight coordinates.
-        # If `event_time_offset` was requested,
-        # we do not have to calculate the look up table at all.
-        base_wf[TimeOfFlightLookupTable] = base_wf.compute(TimeOfFlightLookupTable)
+        # We cache the lookup table only if we need to calculate time-of-flight
+        # coordinates. If `event_time_offset` was requested,
+        # we do not have to calculate the lookup table at all.
+        base_wf[LookupTable] = base_wf.compute(LookupTable)
 
     metadatas = base_wf.compute((NMXSampleMetadata, NMXSourceMetadata))
 
@@ -286,7 +286,7 @@ def reduction(
     )
 
     if config.workflow.time_bin_coordinate == TimeBinCoordinate.time_of_flight:
-        results.lookup_table = base_wf.compute(TimeOfFlightLookupTable)
+        results.lookup_table = base_wf.compute(LookupTable)
 
     if not config.output.skip_file_output:
         save_results(results=results, output_config=config.output)
