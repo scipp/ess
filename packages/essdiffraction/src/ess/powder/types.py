@@ -14,9 +14,9 @@ from typing import Any, Generic, NewType, TypeVar
 
 import sciline
 import scipp as sc
-from ess.reduce.kinematics import types as kin_t
 from ess.reduce.nexus import types as reduce_t
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
+from ess.reduce.unwrap import types as unwrap_t
 from scippneutron.io import cif
 from scippneutron.metadata import Person, Software
 
@@ -35,12 +35,12 @@ Position = reduce_t.Position
 
 DetectorBankSizes = reduce_t.DetectorBankSizes
 
-WavelengthDetector = kin_t.WavelengthDetector
-WavelengthMonitor = kin_t.WavelengthMonitor
-PulseStrideOffset = kin_t.PulseStrideOffset
-LookupTable = kin_t.LookupTable
-LookupTableFilename = kin_t.LookupTableFilename
-LookupTableRelativeErrorThreshold = kin_t.LookupTableRelativeErrorThreshold
+WavelengthDetector = unwrap_t.WavelengthDetector
+WavelengthMonitor = unwrap_t.WavelengthMonitor
+PulseStrideOffset = unwrap_t.PulseStrideOffset
+LookupTable = unwrap_t.LookupTable
+LookupTableFilename = unwrap_t.LookupTableFilename
+LookupTableRelativeErrorThreshold = unwrap_t.LookupTableRelativeErrorThreshold
 
 SampleRun = reduce_t.SampleRun
 VanadiumRun = reduce_t.VanadiumRun

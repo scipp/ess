@@ -6,9 +6,9 @@ import itertools
 import sciline
 import scipp as sc
 import scippnexus as snx
-from ess.reduce.kinematics import GenericWavelengthWorkflow
 from ess.reduce.nexus.types import DetectorBankSizes, NeXusName
 from ess.reduce.parameter import parameter_mappers
+from ess.reduce.unwrap import GenericUnwrapWorkflow
 from ess.reduce.workflow import register_workflow
 from scippneutron.metadata import Software
 
@@ -99,7 +99,7 @@ def _collect_reducer_software() -> ReducerSoftware:
 def DreamWorkflow(**kwargs) -> sciline.Pipeline:
     """
     Dream generic workflow with default parameters.
-    The workflow is based on the GenericWavelengthWorkflow.
+    The workflow is based on the GenericUnwrapWorkflow.
     It can load data from a NeXus file recorded on the DREAM instrument, and can
     compute time-of-flight for the neutron events.
 
@@ -110,9 +110,9 @@ def DreamWorkflow(**kwargs) -> sciline.Pipeline:
     ----------
     kwargs:
         Additional keyword arguments are forwarded to the base
-        :func:`GenericWavelengthWorkflow`.
+        :func:`GenericUnwrapWorkflow`.
     """
-    wf = GenericWavelengthWorkflow(
+    wf = GenericUnwrapWorkflow(
         run_types=[SampleRun, VanadiumRun, EmptyCanRun],
         monitor_types=[BunkerMonitor, CaveMonitor],
         **kwargs,

@@ -171,7 +171,7 @@ def powder_coordinate_transformation_graph(
     return ElasticCoordTransformGraph(
         {
             **scn.conversion.graph.beamline.beamline(scatter=True),
-            **scn.conversion.graph.kinematics.elastic("wavelength"),
+            **scn.conversion.graph.tof.elastic("wavelength"),
             'source_position': lambda: source_position,
             'sample_position': lambda: sample_position,
             'gravity': lambda: gravity,
@@ -286,7 +286,7 @@ def powder_monitor_coordinate_transformation_graph(
     return MonitorCoordTransformGraph(
         {
             **scn.conversion.graph.beamline.beamline(scatter=False),
-            **scn.conversion.graph.kinematics.elastic("wavelength"),
+            **scn.conversion.graph.tof.elastic("wavelength"),
             'source_position': lambda: source_position,
             'sample_position': lambda: sample_position,
             'gravity': lambda: gravity,
