@@ -17,7 +17,7 @@ _registry = make_registry(
 )
 
 
-def siemens_star_path() -> pathlib.Path:
+def siemens_star_path() -> pathlib.Path
     """
     Return the path to the Siemens star test image.
     """
