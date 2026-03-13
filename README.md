@@ -6,6 +6,7 @@ Monorepo for ESS neutron scattering data reduction packages, managed with [pixi]
 |---------|-------------|
 | [essreduce](packages/essreduce/) | Common data reduction tools (core) |
 | [essimaging](packages/essimaging/) | Neutron imaging (ODIN, TBL, YMIR) |
+| [essnmx](packages/essnmx/) | Data reduction for NMX at the European Spallation Source. |
 
 ## Dependency graph
 
