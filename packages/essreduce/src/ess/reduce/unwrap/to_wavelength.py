@@ -499,6 +499,7 @@ def _compute_wavelength_data(
             ltotal=ltotal,
             pulse_stride_offset=pulse_stride_offset,
         )
+    # Convert to wavelength before returning
     return tofs.assign_coords(Ltotal=ltotal).transform_coords(
         'wavelength', graph={"wavelength": wavelength_from_tof}, keep_intermediate=False
     )
