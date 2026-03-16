@@ -5,23 +5,23 @@
 #
 #    requirements upgrade
 #
-certifi==2026.1.4
+certifi==2026.2.25
     # via requests
-charset-normalizer==3.4.4
+charset-normalizer==3.4.6
     # via requests
 idna==3.11
     # via requests
 iniconfig==2.3.0
     # via pytest
-packaging==25.0
+packaging==26.0
     # via
     #   pooch
     #   pytest
-platformdirs==4.5.1
+platformdirs==4.9.4
     # via pooch
 pluggy==1.6.0
     # via pytest
-pooch==1.8.2
+pooch==1.9.0
     # via -r basetest.in
 pygments==2.19.2
     # via pytest

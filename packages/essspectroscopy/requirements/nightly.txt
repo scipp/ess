@@ -10,9 +10,9 @@
 
 annotated-types==0.7.0
     # via pydantic
-certifi==2026.1.4
+certifi==2026.2.25
     # via requests
-charset-normalizer==3.4.4
+charset-normalizer==3.4.6
     # via requests
 contourpy==1.3.3
     # via matplotlib
@@ -26,11 +26,11 @@ email-validator==2.3.0
     # via scippneutron
 essreduce @ git+https://github.com/scipp/essreduce@main
     # via -r nightly.in
-fonttools==4.61.1
+fonttools==4.62.1
     # via matplotlib
 graphviz==0.21
     # via -r nightly.in
-h5py==3.15.1
+h5py==3.16.0
     # via
     #   scippneutron
     #   scippnexus
@@ -40,9 +40,9 @@ idna==3.11
     #   requests
 iniconfig==2.3.0
     # via pytest
-kiwisolver==1.4.10rc0
+kiwisolver==1.5.0
     # via matplotlib
-lazy-loader==0.4
+lazy-loader==0.5
     # via
     #   plopp
     #   scippneutron
@@ -51,31 +51,30 @@ matplotlib==3.10.8
     # via
     #   mpltoolbox
     #   plopp
-mpltoolbox==25.10.0
+mpltoolbox==26.2.0
     # via scippneutron
 networkx==3.6.1
     # via cyclebane
-numpy==2.3.5
+numpy==2.4.3
     # via
     #   contourpy
-    #   essreduce
     #   h5py
     #   matplotlib
     #   pandas
     #   scipp
     #   scippneutron
     #   scipy
-packaging==26.0rc3
+packaging==26.0
     # via
     #   lazy-loader
     #   matplotlib
     #   pooch
     #   pytest
-pandas==3.0.0rc2
+pandas==3.0.1
     # via -r nightly.in
-pillow==12.1.0
+pillow==12.1.1
     # via matplotlib
-platformdirs==4.5.1
+platformdirs==4.9.4
     # via pooch
 plopp @ git+https://github.com/scipp/plopp@main
     # via
@@ -84,13 +83,13 @@ plopp @ git+https://github.com/scipp/plopp@main
     #   tof
 pluggy==1.6.0
     # via pytest
-pooch==1.8.2
+pooch==1.9.0
     # via
     #   -r nightly.in
     #   tof
-pydantic==2.12.5
+pydantic==2.13.0b2
     # via scippneutron
-pydantic-core==2.41.5
+pydantic-core==2.42.0
     # via pydantic
 pygments==2.19.2
     # via pytest
@@ -125,13 +124,13 @@ scippnexus @ git+https://github.com/scipp/scippnexus@main
     #   -r nightly.in
     #   essreduce
     #   scippneutron
-scipy==1.17.0
+scipy==1.17.1
     # via
     #   scippneutron
     #   scippnexus
 six==1.17.0
     # via python-dateutil
-tof==26.1.0
+tof==26.3.0
     # via -r nightly.in
 typing-extensions==4.15.0
     # via
