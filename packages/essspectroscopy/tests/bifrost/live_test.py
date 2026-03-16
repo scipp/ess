@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+import numpy as np
 import pytest
 import sciline
 import scipp as sc
@@ -13,10 +14,11 @@ from ess.bifrost.data import (
 from ess.bifrost.live import BifrostQCutWorkflow, CutAxis, CutAxis1, CutAxis2, CutData
 from ess.spectroscopy.types import (
     Filename,
+    LookupTableRelativeErrorThreshold,
     NeXusDetectorName,
     ProtonCharge,
     SampleRun,
-    TimeOfFlightLookupTableFilename,
+    TofLookupTableFilename,
     UncertaintyBroadcastMode,
 )
 
@@ -35,7 +37,11 @@ class TestBifrostQCutWorkflow:
     ) -> sciline.Pipeline:
         workflow = BifrostQCutWorkflow(simulation_detector_names)
         workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
-        workflow[TimeOfFlightLookupTableFilename] = tof_lookup_table_simulation()
+        workflow[TofLookupTableFilename] = tof_lookup_table_simulation()
+        workflow[LookupTableRelativeErrorThreshold] = {
+            'detector': np.inf,
+            '110_frame_3': np.inf,
+        }
         workflow[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
         workflow[ProtonCharge[SampleRun]] = sc.DataArray(sc.scalar(1.0, unit='pC'))
         return workflow

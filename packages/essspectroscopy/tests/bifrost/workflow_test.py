@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+import numpy as np
 import pytest
 import sciline
 import scipp as sc
@@ -16,11 +17,12 @@ from ess.spectroscopy.types import (
     EnergyQDetector,
     Filename,
     FrameMonitor3,
+    LookupTableRelativeErrorThreshold,
     NeXusDetectorName,
     RawDetector,
     RawMonitor,
     SampleRun,
-    TimeOfFlightLookupTableFilename,
+    TofLookupTableFilename,
     UncertaintyBroadcastMode,
     WavelengthMonitor,
 )
@@ -37,7 +39,11 @@ def simulation_detector_names() -> list[NeXusDetectorName]:
 def workflow(simulation_detector_names: list[NeXusDetectorName]) -> sciline.Pipeline:
     workflow = bifrost.BifrostSimulationWorkflow(simulation_detector_names)
     workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
-    workflow[TimeOfFlightLookupTableFilename] = tof_lookup_table_simulation()
+    workflow[TofLookupTableFilename] = tof_lookup_table_simulation()
+    workflow[LookupTableRelativeErrorThreshold] = {
+        'detector': np.inf,
+        '110_frame_3': np.inf,
+    }
     workflow[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
     return workflow
 

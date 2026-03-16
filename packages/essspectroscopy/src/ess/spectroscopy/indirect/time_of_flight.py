@@ -6,21 +6,25 @@
 from collections.abc import Iterable
 
 import sciline
+import scippnexus as snx
 
 from ess.reduce import time_of_flight as reduce_time_of_flight
 from ess.reduce.time_of_flight.types import DetectorLtotal
 
 from ..types import (
     DataAtSample,
+    ErrorLimitedTofLookupTable,
+    LookupTableRelativeErrorThreshold,
     MonitorCoordTransformGraph,
     MonitorLtotal,
     MonitorType,
+    NeXusDetectorName,
     PulseStrideOffset,
     RawDetector,
     RawMonitor,
     RunType,
-    TimeOfFlightLookupTable,
     TofDetector,
+    TofLookupTable,
     TofMonitor,
 )
 
@@ -41,7 +45,7 @@ def TofWorkflow(
 
 def detector_time_of_flight_data(
     sample_data: DataAtSample[RunType],
-    lookup: TimeOfFlightLookupTable,
+    lookup: ErrorLimitedTofLookupTable[snx.NXdetector],
     pulse_stride_offset: PulseStrideOffset,
 ) -> TofDetector[RunType]:
     """
@@ -67,7 +71,7 @@ def detector_time_of_flight_data(
 
 def monitor_time_of_flight_data(
     monitor_data: RawMonitor[RunType, MonitorType],
-    lookup: TimeOfFlightLookupTable,
+    lookup: ErrorLimitedTofLookupTable[snx.NXdetector],
     ltotal: MonitorLtotal[RunType, MonitorType],
     pulse_stride_offset: PulseStrideOffset,
 ) -> TofMonitor[RunType, MonitorType]:
@@ -105,9 +109,46 @@ def compute_monitor_ltotal(
     )
 
 
+def mask_large_uncertainty_in_lut_detector(
+    table: TofLookupTable,
+    error_threshold: LookupTableRelativeErrorThreshold,
+) -> ErrorLimitedTofLookupTable[snx.NXdetector]:
+    """
+    Mask regions in the time-of-flight lookup table with large uncertainty using NaNs.
+
+    The threshold is looked up under the key ``'detector'``.
+    The same threshold is applied to all triplets.
+
+    Parameters
+    ----------
+    table:
+        Lookup table with time-of-flight as a function of distance and time-of-arrival.
+    error_threshold:
+        Threshold for the relative standard deviation (coefficient of variation) of the
+        projected time-of-flight above which values are masked.
+
+    See also
+    --------
+    essreduce.time_of_flight.mask_large_uncertainty_in_lut:
+        The underlying implementation.
+    """
+    from ess.reduce.time_of_flight.eto_to_tof import (
+        mask_large_uncertainty_in_lut_detector,
+    )
+
+    return ErrorLimitedTofLookupTable[snx.NXdetector](
+        mask_large_uncertainty_in_lut_detector(
+            table=table,
+            error_threshold=error_threshold,
+            detector_name=NeXusDetectorName('detector'),
+        )
+    )
+
+
 providers = (
     compute_monitor_ltotal,
     detector_time_of_flight_data,
+    mask_large_uncertainty_in_lut_detector,
     monitor_time_of_flight_data,
 )
 """Providers for time-of-flight calculation on indirect geometry spectrometers.

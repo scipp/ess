@@ -56,11 +56,15 @@ MonitorType = TypeVar(
 
 TofDetector = time_of_flight.TofDetector
 TofMonitor = time_of_flight.TofMonitor
+LookupTableRelativeErrorThreshold = time_of_flight.LookupTableRelativeErrorThreshold
 MonitorLtotal = time_of_flight.MonitorLtotal
 PulseStride = time_of_flight.PulseStride
 PulseStrideOffset = time_of_flight.PulseStrideOffset
 PulsePeriod = time_of_flight.PulsePeriod
-TimeOfFlightLookupTable = time_of_flight.TimeOfFlightLookupTable
+ErrorLimitedTofLookupTable = time_of_flight.ErrorLimitedTofLookupTable
+TofLookupTable = time_of_flight.TofLookupTable
+TofLookupTableFilename = time_of_flight.TofLookupTableFilename
+# Legacy alias:
 TimeOfFlightLookupTableFilename = time_of_flight.TimeOfFlightLookupTableFilename
 
 # Custom types
