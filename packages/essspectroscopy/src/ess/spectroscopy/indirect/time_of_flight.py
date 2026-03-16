@@ -71,7 +71,7 @@ def detector_time_of_flight_data(
 
 def monitor_time_of_flight_data(
     monitor_data: RawMonitor[RunType, MonitorType],
-    lookup: ErrorLimitedTofLookupTable[snx.NXdetector],
+    lookup: ErrorLimitedTofLookupTable[MonitorType],
     ltotal: MonitorLtotal[RunType, MonitorType],
     pulse_stride_offset: PulseStrideOffset,
 ) -> TofMonitor[RunType, MonitorType]:
