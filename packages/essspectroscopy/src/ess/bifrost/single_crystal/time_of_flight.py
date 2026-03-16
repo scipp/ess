@@ -3,21 +3,23 @@
 
 """Utilities for computing real neutron time-of-flight."""
 
+import scippnexus as snx
+
 from ess.reduce import time_of_flight as reduce_time_of_flight
 from ess.reduce.time_of_flight.types import DetectorLtotal
 from ess.spectroscopy.types import (
     DataGroupedByRotation,
+    ErrorLimitedTofLookupTable,
     PulseStrideOffset,
     RawDetector,
     RunType,
-    TimeOfFlightLookupTable,
     TofDetector,
 )
 
 
 def detector_time_of_flight_data(
     sample_data: DataGroupedByRotation[RunType],
-    lookup: TimeOfFlightLookupTable,
+    lookup: ErrorLimitedTofLookupTable[snx.NXdetector],
     ltotal: DetectorLtotal[RunType],
     pulse_stride_offset: PulseStrideOffset,
 ) -> TofDetector[RunType]:

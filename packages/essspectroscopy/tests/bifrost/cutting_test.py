@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+import numpy as np
 import pytest
 import scipp as sc
 import scipp.testing
@@ -14,9 +15,10 @@ from ess.bifrost.live import CutAxis, CutAxis1, CutAxis2, arc_energy, cut
 from ess.spectroscopy.types import (
     EnergyQDetector,
     Filename,
+    LookupTableRelativeErrorThreshold,
     NeXusDetectorName,
     SampleRun,
-    TimeOfFlightLookupTableFilename,
+    TofLookupTableFilename,
     UncertaintyBroadcastMode,
 )
 
@@ -34,7 +36,11 @@ def energy_data(
 ) -> EnergyQDetector[SampleRun]:
     workflow = bifrost.BifrostSimulationWorkflow(simulation_detector_names)
     workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
-    workflow[TimeOfFlightLookupTableFilename] = tof_lookup_table_simulation()
+    workflow[TofLookupTableFilename] = tof_lookup_table_simulation()
+    workflow[LookupTableRelativeErrorThreshold] = {
+        'detector': np.inf,
+        '110_frame_3': np.inf,
+    }
     workflow[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
     return workflow.compute(EnergyQDetector[SampleRun])
 
