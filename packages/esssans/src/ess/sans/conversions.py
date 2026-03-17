@@ -3,12 +3,13 @@
 import sciline
 import scipp as sc
 import scippnexus as snx
-from ess.reduce.uncertainty import broadcast_uncertainties
 from scippneutron.conversion.beamline import (
     beam_aligned_unit_vectors,
     scattering_angles_with_gravity,
 )
 from scippneutron.conversion.graph import beamline, tof
+
+from ess.reduce.uncertainty import broadcast_uncertainties
 
 from .common import mask_range
 from .types import (
@@ -193,7 +194,8 @@ def sans_elastic(
 
 # # TODO This demonstrates a problem: Transforming to wavelength should be possible
 # # for RawData, MaskedData, ... no reason to restrict necessarily.
-# # Would we be fine with just choosing on option, or will this get in the way for users?
+# # Would we be fine with just choosing on option, or will this get in the way for
+# # users?
 # def detector_to_wavelength(
 #     detector: CorrectedDetector[RunType, Numerator],
 #     graph: ElasticCoordTransformGraph[RunType],

@@ -57,6 +57,8 @@ _registry = make_registry(
         'loki-coda-one-event.hdf': 'md5:ab9dbef793fad2fca96210c3b55d60ce',
         # Small CODA file for testing purposes (data from only 30 pulses)
         'loki_999999_00009928_small.hdf': 'md5:d2f293c293cc15d90fb588afa1dcb096',
+        # Wavelength lookup table without choppers
+        'loki-wavelength-lookup-table-no-choppers.h5': 'md5:3fb133962af6554a9999a753c1724ed4',  # noqa: E501
     },
     version='2',
 )
@@ -177,6 +179,18 @@ def loki_tof_lookup_table_no_choppers() -> Path:
     with ``NumberOfSimulatedNeutrons = 5_000_000``.
     """
     return _registry.get_path("loki-tof-lookup-table-no-choppers.h5")
+
+
+def loki_lookup_table_no_choppers() -> Path:
+    """
+    LoKI wavelength lookup table without choppers.
+    This file is used to convert the neutron arrival time to wavelength.
+
+    This table was computed using `Create a wavelength lookup table for LoKI
+    <../../user-guide/loki/loki-make-wavelength-lookup-table.ipynb>`_
+    with ``NumberOfSimulatedNeutrons = 5_000_000``.
+    """
+    return _registry.get_path("loki-wavelength-lookup-table-no-choppers.h5")
 
 
 def loki_coda_file_one_event() -> Path:

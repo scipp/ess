@@ -19,6 +19,7 @@ from ess.sans.types import (
     CorrectedDetector,
     CorrectForGravity,
     Denominator,
+    DetectorTerm,
     DimsToKeep,
     Filename,
     IntensityQ,
@@ -33,7 +34,6 @@ from ess.sans.types import (
     UncertaintyBroadcastMode,
     WavelengthBands,
     WavelengthBins,
-    DetectorTerm,
 )
 
 
