@@ -2,9 +2,8 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 import scippnexus as snx
-from scipp.core import concepts
-
 from ess.reduce.uncertainty import UncertaintyBroadcastMode, broadcast_uncertainties
+from scipp.core import concepts
 
 from .types import (
     CleanDirectBeam,
@@ -169,7 +168,6 @@ def transmission_fraction(
     :
         The transmission fraction computed from the monitor counts.
     """  # noqa: E501
-
     frac = (sample_transmission_monitor / direct_transmission_monitor) * (
         direct_incident_monitor / sample_incident_monitor
     )
