@@ -35,11 +35,10 @@ Transmission = reduce_t.TransmissionMonitor
 TransmissionRun = reduce_t.TransmissionRun
 
 LookupTableRelativeErrorThreshold = unwrap_t.LookupTableRelativeErrorThreshold
-TofDetector = unwrap_t.TofDetector
-TofMonitor = unwrap_t.TofMonitor
-TofLookupTableFilename = unwrap_t.TofLookupTableFilename
-TofLookupTable = unwrap_t.TofLookupTable
+LookupTableFilename = unwrap_t.LookupTableFilename
+LookupTable = unwrap_t.LookupTable
 WavelengthMonitor = unwrap_t.WavelengthMonitor
+WavelengthDetector = unwrap_t.WavelengthDetector
 
 DetectorBankSizes = reduce_t.DetectorBankSizes
 NeXusDetectorName = reduce_t.NeXusDetectorName

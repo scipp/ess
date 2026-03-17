@@ -17,7 +17,7 @@ from .types import (
     PixelMaskFilename,
     RunType,
     SampleRun,
-    TofDetector,
+    WavelengthDetector,
 )
 
 
@@ -53,7 +53,7 @@ def to_detector_mask(
 
 
 def apply_pixel_masks(
-    data: TofDetector[RunType],
+    data: WavelengthDetector[RunType],
     masks: DetectorMasks,
 ) -> CorrectedDetector[RunType, Numerator]:
     """Apply pixel-specific masks to raw data.

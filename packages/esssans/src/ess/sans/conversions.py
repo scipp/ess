@@ -3,13 +3,12 @@
 import sciline
 import scipp as sc
 import scippnexus as snx
+from ess.reduce.uncertainty import broadcast_uncertainties
 from scippneutron.conversion.beamline import (
     beam_aligned_unit_vectors,
     scattering_angles_with_gravity,
 )
 from scippneutron.conversion.graph import beamline, tof
-
-from ess.reduce.uncertainty import broadcast_uncertainties
 
 from .common import mask_range
 from .types import (
@@ -18,6 +17,7 @@ from .types import (
     CorrectedDetector,
     CorrectForGravity,
     Denominator,
+    DetectorTerm,
     GravityVector,
     IofQPart,
     MonitorTerm,
@@ -31,7 +31,6 @@ from .types import (
     RunType,
     TofMonitor,
     UncertaintyBroadcastMode,
-    DetectorTerm,
     WavelengthMask,
     WavelengthMonitor,
 )
@@ -179,33 +178,33 @@ def sans_monitor(
     )
 
 
-def monitor_to_wavelength(
-    monitor: TofMonitor[RunType, MonitorType],
-    graph: MonitorCoordTransformGraph[RunType],
-) -> WavelengthMonitor[RunType, MonitorType]:
-    """
-    This is a temporary fix: we need to remove the 'position' coordinate if present.
-    This should be done in essreduce; see https://github.com/scipp/ess/issues/247.
-    Once that is implemented, this provider should be removed and we should instead
-    use the ``WavelengthMonitor`` provided by the generic essreduce workflow.
-    """
+# def monitor_to_wavelength(
+#     monitor: TofMonitor[RunType, MonitorType],
+#     graph: MonitorCoordTransformGraph[RunType],
+# ) -> WavelengthMonitor[RunType, MonitorType]:
+#     """
+#     This is a temporary fix: we need to remove the 'position' coordinate if present.
+#     This should be done in essreduce; see https://github.com/scipp/ess/issues/247.
+#     Once that is implemented, this provider should be removed and we should instead
+#     use the ``WavelengthMonitor`` provided by the generic essreduce workflow.
+#     """
 
-    out = monitor.transform_coords('wavelength', graph=graph, keep_intermediate=False)
-    if 'position' in out.coords:
-        out = out.drop_coords('position')
-    return WavelengthMonitor[RunType, MonitorType](out)
+#     out = monitor.transform_coords('wavelength', graph=graph, keep_intermediate=False)
+#     if 'position' in out.coords:
+#         out = out.drop_coords('position')
+#     return WavelengthMonitor[RunType, MonitorType](out)
 
 
-# TODO This demonstrates a problem: Transforming to wavelength should be possible
-# for RawData, MaskedData, ... no reason to restrict necessarily.
-# Would we be fine with just choosing on option, or will this get in the way for users?
-def detector_to_wavelength(
-    detector: CorrectedDetector[RunType, Numerator],
-    graph: ElasticCoordTransformGraph[RunType],
-) -> DetectorTerm[RunType, Numerator]:
-    return DetectorTerm[RunType, Numerator](
-        detector.transform_coords('wavelength', graph=graph, keep_inputs=False)
-    )
+# # TODO This demonstrates a problem: Transforming to wavelength should be possible
+# # for RawData, MaskedData, ... no reason to restrict necessarily.
+# # Would we be fine with just choosing on option, or will this get in the way for users?
+# def detector_to_wavelength(
+#     detector: CorrectedDetector[RunType, Numerator],
+#     graph: ElasticCoordTransformGraph[RunType],
+# ) -> DetectorTerm[RunType, Numerator]:
+#     return DetectorTerm[RunType, Numerator](
+#         detector.transform_coords('wavelength', graph=graph, keep_inputs=False)
+#     )
 
 
 def mask_wavelength_q(
@@ -289,8 +288,8 @@ def compute_Qxy(
 providers = (
     sans_elastic,
     sans_monitor,
-    monitor_to_wavelength,
-    detector_to_wavelength,
+    # monitor_to_wavelength,
+    # detector_to_wavelength,
     mask_wavelength_q,
     mask_wavelength_qxy,
     mask_and_scale_wavelength_q,

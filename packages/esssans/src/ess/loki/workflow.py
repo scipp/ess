@@ -7,9 +7,9 @@ Default parameters, providers and utility functions for the Loki workflow.
 import sciline
 import scipp as sc
 import scippnexus as snx
+from ess.reduce.workflow import register_workflow
 
 from ess import sans
-from ess.reduce.workflow import register_workflow
 from ess.sans.io import read_xml_detector_masking
 from ess.sans.parameters import typical_outputs
 
@@ -20,6 +20,7 @@ from ..sans.types import (
     DetectorPixelShape,
     DirectBeam,
     DirectBeamFilename,
+    ElasticCoordTransformGraph,
     EmptyBeamRun,
     Filename,
     Incident,
@@ -35,10 +36,10 @@ from ..sans.types import (
     RawMonitor,
     RunType,
     SampleRun,
-    TofDetector,
-    TofMonitor,
     Transmission,
     TransmissionRun,
+    WavelengthDetector,
+    WavelengthMonitor,
 )
 
 DETECTOR_BANK_SIZES = {
@@ -82,39 +83,43 @@ def loki_default_parameters() -> dict:
     }
 
 
-def _larmor_convert_to_tof(da: sc.DataArray) -> sc.DataArray:
+def _larmor_convert_to_wavelength(da: sc.DataArray, graph: dict) -> sc.DataArray:
     event_time_offset = da.bins.coords['event_time_offset']
     da = da.bins.drop_coords('event_time_offset')
     da.bins.coords['tof'] = event_time_offset
     if 'event_time_zero' in da.dims:
         da = da.bins.concat('event_time_zero')
-    return da
+    return da.transform_coords('wavelength', graph=graph, keep_intermediate=False)
 
 
-def larmor_data_to_tof(da: RawDetector[RunType]) -> TofDetector[RunType]:
+def larmor_data_to_wavelength(
+    da: RawDetector[RunType], graph: ElasticCoordTransformGraph[RunType]
+) -> WavelengthDetector[RunType]:
     """
-    Compute time-of-flight coordinate for Loki detector data at Larmor.
-    This is different from the standard conversion from the GenericTofWorkflow because
-    the detector test was conducted as ISIS where the pulse has a different time
+    Compute wavelength coordinate for Loki detector data at Larmor.
+    This is different from the standard conversion from the GenericUnwrapWorkflow
+    because the detector test was conducted as ISIS where the pulse has a different time
     structure.
     The conversion here is much simpler: the event_time_offset coordinate is directly
-    renamed as time-of-flight.
+    renamed as time-of-flight, and a wavelength is computed from that.
     """
-    return TofDetector[RunType](_larmor_convert_to_tof(da))
+    return WavelengthDetector[RunType](_larmor_convert_to_wavelength(da, graph=graph))
 
 
-def larmor_monitor_to_tof(
-    da: RawMonitor[RunType, MonitorType],
-) -> TofMonitor[RunType, MonitorType]:
+def larmor_monitor_to_wavelength(
+    da: RawMonitor[RunType, MonitorType], graph: ElasticCoordTransformGraph[RunType]
+) -> WavelengthMonitor[RunType, MonitorType]:
     """
-    Compute time-of-flight coordinate for Loki monitor data at Larmor.
-    This is different from the standard conversion from the GenericTofWorkflow because
-    the detector test was conducted as ISIS where the pulse has a different time
+    Compute wavelength coordinate for Loki monitor data at Larmor.
+    This is different from the standard conversion from the GenericUnwrapWorkflow
+    because the detector test was conducted as ISIS where the pulse has a different time
     structure.
     The conversion here is much simpler: the event_time_offset coordinate is directly
-    renamed as time-of-flight.
+    renamed as time-of-flight, and a wavelength is computed from that.
     """
-    return TofMonitor[RunType, MonitorType](_larmor_convert_to_tof(da))
+    return WavelengthMonitor[RunType, MonitorType](
+        _larmor_convert_to_wavelength(da, graph=graph)
+    )
 
 
 def detector_pixel_shape(
@@ -152,8 +157,8 @@ def LokiAtLarmorWorkflow() -> sciline.Pipeline:
         workflow.insert(provider)
     for key, param in larmor_default_parameters().items():
         workflow[key] = param
-    workflow.insert(larmor_data_to_tof)
-    workflow.insert(larmor_monitor_to_tof)
+    workflow.insert(larmor_data_to_wavelength)
+    workflow.insert(larmor_monitor_to_wavelength)
     workflow.insert(read_xml_detector_masking)
     workflow[NeXusDetectorName] = 'larmor_detector'
     workflow.typical_outputs = typical_outputs
