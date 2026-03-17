@@ -33,7 +33,7 @@ from ess.sans.types import (
     UncertaintyBroadcastMode,
     WavelengthBands,
     WavelengthBins,
-    WavelengthDetector,
+    DetectorTerm,
 )
 
 
@@ -303,13 +303,13 @@ def test_phi_with_gravity(larmor_workflow):
     pipeline = larmor_workflow()
     pipeline[BeamCenter] = _compute_beam_center(pipeline)
     pipeline[CorrectForGravity] = False
-    data_no_grav = pipeline.compute(WavelengthDetector[SampleRun, Numerator]).flatten(
+    data_no_grav = pipeline.compute(DetectorTerm[SampleRun, Numerator]).flatten(
         to='pixel'
     )
     graph_no_grav = pipeline.compute(ElasticCoordTransformGraph[SampleRun])
     pipeline[CorrectForGravity] = True
     data_with_grav = (
-        pipeline.compute(WavelengthDetector[SampleRun, Numerator])
+        pipeline.compute(DetectorTerm[SampleRun, Numerator])
         .flatten(to='pixel')
         .hist(wavelength=sc.linspace('wavelength', 1.0, 12.0, 101, unit='angstrom'))
     )

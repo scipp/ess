@@ -36,7 +36,7 @@ from .types import (
     TransmissionRun,
     WavelengthBands,
     WavelengthBins,
-    WavelengthDetector,
+    DetectorTerm,
 )
 
 
@@ -210,7 +210,7 @@ def norm_detector_term(
     solid_angle: CorrectedDetector[RunType, Denominator],
     direct_beam: CleanDirectBeam,
     uncertainties: UncertaintyBroadcastMode,
-) -> WavelengthDetector[RunType, Denominator]:
+) -> DetectorTerm[RunType, Denominator]:
     """
     Compute the detector-dependent contribution to the denominator term of I(Q).
 
@@ -251,7 +251,7 @@ def norm_detector_term(
     )
     # Convert wavelength coordinate to midpoints for future histogramming
     out.coords['wavelength'] = sc.midpoints(out.coords['wavelength'])
-    return WavelengthDetector[RunType, Denominator](out)
+    return DetectorTerm[RunType, Denominator](out)
 
 
 def process_wavelength_bands(

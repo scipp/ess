@@ -31,7 +31,7 @@ from .types import (
     RunType,
     TofMonitor,
     UncertaintyBroadcastMode,
-    WavelengthDetector,
+    DetectorTerm,
     WavelengthMask,
     WavelengthMonitor,
 )
@@ -202,8 +202,8 @@ def monitor_to_wavelength(
 def detector_to_wavelength(
     detector: CorrectedDetector[RunType, Numerator],
     graph: ElasticCoordTransformGraph[RunType],
-) -> WavelengthDetector[RunType, Numerator]:
-    return WavelengthDetector[RunType, Numerator](
+) -> DetectorTerm[RunType, Numerator]:
+    return DetectorTerm[RunType, Numerator](
         detector.transform_coords('wavelength', graph=graph, keep_inputs=False)
     )
 
@@ -263,7 +263,7 @@ def _compute_Q(
 
 
 def compute_Q(
-    data: WavelengthDetector[RunType, IofQPart],
+    data: DetectorTerm[RunType, IofQPart],
     graph: ElasticCoordTransformGraph[RunType],
 ) -> QDetector[RunType, IofQPart]:
     """
@@ -275,7 +275,7 @@ def compute_Q(
 
 
 def compute_Qxy(
-    data: WavelengthDetector[RunType, IofQPart],
+    data: DetectorTerm[RunType, IofQPart],
     graph: ElasticCoordTransformGraph[RunType],
 ) -> QxyDetector[RunType, IofQPart]:
     """
