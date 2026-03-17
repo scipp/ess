@@ -170,18 +170,6 @@ def transmission_fraction(
         The transmission fraction computed from the monitor counts.
     """  # noqa: E501
 
-    # TODO: temporary fix: we need to remove the 'position' if present.
-    # See https://github.com/scipp/ess/issues/247
-    def _maybe_strip_position(da: sc.DataArray) -> sc.DataArray:
-        if 'position' in da.coords:
-            return da.drop_coords('position')
-        return da
-
-    sample_transmission_monitor = _maybe_strip_position(sample_transmission_monitor)
-    direct_transmission_monitor = _maybe_strip_position(direct_transmission_monitor)
-    sample_incident_monitor = _maybe_strip_position(sample_incident_monitor)
-    direct_incident_monitor = _maybe_strip_position(direct_incident_monitor)
-
     frac = (sample_transmission_monitor / direct_transmission_monitor) * (
         direct_incident_monitor / sample_incident_monitor
     )

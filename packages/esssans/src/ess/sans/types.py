@@ -40,6 +40,7 @@ TofDetector = tof_t.TofDetector
 TofMonitor = tof_t.TofMonitor
 TofLookupTableFilename = tof_t.TofLookupTableFilename
 TofLookupTable = tof_t.TofLookupTable
+WavelengthMonitor = tof_t.WavelengthMonitor
 
 DetectorBankSizes = reduce_t.DetectorBankSizes
 NeXusDetectorName = reduce_t.NeXusDetectorName
@@ -241,12 +242,6 @@ BackgroundSubtractedIofQ = NewType('BackgroundSubtractedIofQ', sc.DataArray)
 
 BackgroundSubtractedIofQxy = NewType('BackgroundSubtractedIofQxy', sc.DataArray)
 """I(Qx, Qy) with background (given by I(Qx, Qy) of the background run) subtracted"""
-
-
-class WavelengthMonitor(
-    sciline.Scope[RunType, MonitorType, sc.DataArray], sc.DataArray
-):
-    """Monitor data converted to wavelength"""
 
 
 class CorrectedMonitor(sciline.Scope[RunType, MonitorType, sc.DataArray], sc.DataArray):
