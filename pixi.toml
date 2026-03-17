@@ -50,6 +50,7 @@ essreduce = { path = "packages/essreduce", editable = true, extras = ["test", "d
 
 [feature.docs-essreduce.tasks.docs-essreduce]
 cmd = "python -m sphinx -v -b html -d packages/essreduce/.docs_doctrees packages/essreduce/docs packages/essreduce/html"
+default-environment = "docs-essreduce"
 
 [feature.docs-essimaging.pypi-dependencies]
 essimaging = { path = "packages/essimaging", editable = true, extras = ["test", "docs"] }
