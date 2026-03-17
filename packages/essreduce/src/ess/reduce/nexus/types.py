@@ -280,25 +280,21 @@ class NeXusTransformationChain(
 
 @dataclass
 class NeXusTransformation(Generic[Component, RunType]):
-    value: sc.Variable
+    """A NeXus transformation computed from a transformation chain.
+
+    If the transformation is time-dependent, it is stored as a data array
+    with a 'time' coordinate.
+    Otherwise, the transformation is stored as a variable.
+    """
+
+    value: sc.Variable | sc.DataArray
 
     @staticmethod
     def from_chain(
         chain: NeXusTransformationChain[Component, RunType],
     ) -> 'NeXusTransformation[Component, RunType]':
-        """
-        Convert a transformation chain to a single transformation.
-
-        As transformation chains may be time-dependent, this method will need to select
-        a specific time point to convert to a single transformation. This may include
-        averaging as well as threshold checks. This is not implemented yet and we
-        therefore currently raise an error if the transformation chain does not compute
-        to a scalar.
-        """
-        if chain.transformations.sizes != {}:
-            raise ValueError(f"Expected scalar transformation, got {chain}")
-        transform = chain.compute()
-        return NeXusTransformation(value=transform)
+        """Convert a transformation chain to a single transformation."""
+        return NeXusTransformation(value=chain.compute())
 
 
 class RawChoppers(
