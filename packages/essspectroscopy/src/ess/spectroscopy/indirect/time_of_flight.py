@@ -85,7 +85,7 @@ def monitor_wavelength_data(
     for indirect geometry spectrometers.
     """
     result = reduce_unwrap.to_wavelength.monitor_wavelength_data(
-        monitor_data=monitor_data.rename(t='tof'),
+        monitor_data=monitor_data.rename(t='frame_time'),
         lookup=lookup,
         ltotal=ltotal,
         pulse_stride_offset=pulse_stride_offset,
