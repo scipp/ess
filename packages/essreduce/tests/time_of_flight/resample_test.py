@@ -321,6 +321,51 @@ class TestRebinStrictlyIncreasing:
         # For a single increasing section, should return just that section
         assert sc.identical(result, da)
 
+    def test_with_single_increasing_section_decreasing_last(self):
+        tof = sc.array(dims=['tof'], values=[1, 2, 3, 4, 5, 4])
+        data = sc.array(dims=['tof'], values=[10, 20, 30, 40, 50])
+        da = sc.DataArray(data=data, coords={'tof': tof})
+
+        result = resample.rebin_strictly_increasing(da, 'tof')
+
+        # Check the rebinned result has a regular grid from 1 to 5
+        expected_tof = sc.array(dims=['tof'], values=[1, 2, 3, 4, 5])
+        assert_identical(result.coords['tof'], expected_tof)
+
+        # Check the data values are sliced
+        expected_data = sc.array(dims=['tof'], values=[10, 20, 30, 40])
+        assert_identical(result.data, expected_data)
+
+    def test_with_single_increasing_section_nan_at_end(self):
+        tof = sc.array(dims=['tof'], values=[1, 2, 3, 4, 5, np.nan])
+        data = sc.array(dims=['tof'], values=[10, 20, 30, 40, 50])
+        da = sc.DataArray(data=data, coords={'tof': tof})
+
+        result = resample.rebin_strictly_increasing(da, 'tof')
+
+        # Check the rebinned result has a regular grid from 1 to 5
+        expected_tof = sc.array(dims=['tof'], values=[1.0, 2, 3, 4, 5])
+        assert_identical(result.coords['tof'], expected_tof)
+
+        # Check the data values are sliced
+        expected_data = sc.array(dims=['tof'], values=[10, 20, 30, 40])
+        assert_identical(result.data, expected_data)
+
+    def test_with_single_increasing_section_2_nans_at_end(self):
+        tof = sc.array(dims=['tof'], values=[1, 2, 3, 4, np.nan, np.nan])
+        data = sc.array(dims=['tof'], values=[10, 20, 30, 40, 50])
+        da = sc.DataArray(data=data, coords={'tof': tof})
+
+        result = resample.rebin_strictly_increasing(da, 'tof')
+
+        # Check the rebinned result has a regular grid from 1 to 4
+        expected_tof = sc.array(dims=['tof'], values=[1.0, 2, 3, 4])
+        assert_identical(result.coords['tof'], expected_tof)
+
+        # Check the data values are sliced
+        expected_data = sc.array(dims=['tof'], values=[10, 20, 30])
+        assert_identical(result.data, expected_data)
+
     def test_with_single_section_minimum_length(self):
         """Test with a single section of the minimum length (2 points)."""
         tof = sc.array(dims=['tof'], values=[1, 2])
