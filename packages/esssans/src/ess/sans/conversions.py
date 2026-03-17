@@ -183,9 +183,17 @@ def monitor_to_wavelength(
     monitor: TofMonitor[RunType, MonitorType],
     graph: MonitorCoordTransformGraph[RunType],
 ) -> WavelengthMonitor[RunType, MonitorType]:
-    return WavelengthMonitor[RunType, MonitorType](
-        monitor.transform_coords('wavelength', graph=graph, keep_inputs=False)
-    )
+    """
+    This is a temporary fix: we need to remove the 'position' coordinate if present.
+    This should be done in essreduce; see https://github.com/scipp/ess/issues/247.
+    Once that is implemented, this provider should be removed and we should instead
+    use the ``WavelengthMonitor`` provided by the generic essreduce workflow.
+    """
+
+    out = monitor.transform_coords('wavelength', graph=graph, keep_intermediate=False)
+    if 'position' in out.coords:
+        out = out.drop_coords('position')
+    return WavelengthMonitor[RunType, MonitorType](out)
 
 
 # TODO This demonstrates a problem: Transforming to wavelength should be possible

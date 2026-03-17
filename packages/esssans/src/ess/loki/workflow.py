@@ -23,6 +23,7 @@ from ..sans.types import (
     EmptyBeamRun,
     Filename,
     Incident,
+    LookupTableRelativeErrorThreshold,
     MonitorType,
     NeXusComponent,
     NeXusDetectorName,
@@ -71,6 +72,13 @@ def loki_default_parameters() -> dict:
         NeXusMonitorName[Transmission]: 'beam_monitor_3',
         PixelShapePath: 'pixel_shape',
         NonBackgroundWavelengthRange: None,
+        LookupTableRelativeErrorThreshold: {
+            **{f'loki_detector_{i}': float('inf') for i in range(9)},
+            # Monitors where renamed, beam_monitor_i is the old name
+            # and beam_monitor_mi is the new.
+            **{f'beam_monitor_{i}': float('inf') for i in range(5)},
+            **{f'beam_monitor_m{i}': float('inf') for i in range(5)},
+        },
     }
 
 
