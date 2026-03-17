@@ -13,6 +13,7 @@ from ess import sans
 from ess.sans.io import read_xml_detector_masking
 from ess.sans.parameters import typical_outputs
 
+from ..sans.conversions import ElasticCoordTransformGraph
 from ..sans.types import (
     BackgroundRun,
     BeamCenter,
@@ -20,7 +21,6 @@ from ..sans.types import (
     DetectorPixelShape,
     DirectBeam,
     DirectBeamFilename,
-    ElasticCoordTransformGraph,
     EmptyBeamRun,
     Filename,
     Incident,

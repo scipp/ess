@@ -14,14 +14,12 @@ from .common import mask_range
 from .types import (
     BinnedQ,
     BinnedQxQy,
-    CorrectedDetector,
     CorrectForGravity,
     Denominator,
     DetectorTerm,
     GravityVector,
     IofQPart,
     MonitorTerm,
-    MonitorType,
     NormalizedQ,
     NormalizedQxQy,
     Numerator,
@@ -29,10 +27,8 @@ from .types import (
     QDetector,
     QxyDetector,
     RunType,
-    TofMonitor,
     UncertaintyBroadcastMode,
     WavelengthMask,
-    WavelengthMonitor,
 )
 
 
@@ -146,7 +142,7 @@ def sans_elastic(
     """  # noqa: E501
     graph = {
         **beamline.beamline(scatter=True),
-        **tof.elastic_Q('tof'),
+        **tof.elastic_Q('wavelength'),
         'sample_position': lambda: sample_position,
         'source_position': lambda: source_position,
         'gravity': lambda: gravity,
@@ -163,19 +159,19 @@ def sans_elastic(
     return ElasticCoordTransformGraph(graph)
 
 
-def sans_monitor(
-    source_position: Position[snx.NXsource, RunType],
-) -> MonitorCoordTransformGraph[RunType]:
-    """
-    Generate a coordinate transformation graph for SANS monitor (no scattering).
-    """
-    return MonitorCoordTransformGraph(
-        {
-            **beamline.beamline(scatter=False),
-            **tof.elastic_wavelength('tof'),
-            'source_position': lambda: source_position,
-        }
-    )
+# def sans_monitor(
+#     source_position: Position[snx.NXsource, RunType],
+# ) -> MonitorCoordTransformGraph[RunType]:
+#     """
+#     Generate a coordinate transformation graph for SANS monitor (no scattering).
+#     """
+#     return MonitorCoordTransformGraph(
+#         {
+#             **beamline.beamline(scatter=False),
+#             **tof.elastic_wavelength('wavelength'),
+#             'source_position': lambda: source_position,
+#         }
+#     )
 
 
 # def monitor_to_wavelength(
@@ -287,7 +283,7 @@ def compute_Qxy(
 
 providers = (
     sans_elastic,
-    sans_monitor,
+    # sans_monitor,
     # monitor_to_wavelength,
     # detector_to_wavelength,
     mask_wavelength_q,
