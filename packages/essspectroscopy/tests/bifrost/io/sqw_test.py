@@ -27,12 +27,13 @@ from ess.bifrost.data import (
 from ess.spectroscopy.types import (
     EnergyBins,
     Filename,
+    LookupTableRelativeErrorThreshold,
     NeXusDetectorName,
     OutFilename,
     PreopenNeXusFile,
     SampleRun,
     SQWBinSizes,
-    TimeOfFlightLookupTableFilename,
+    TofLookupTableFilename,
     UncertaintyBroadcastMode,
 )
 
@@ -73,7 +74,11 @@ def common_workflow(
     wf = bifrost.BifrostSimulationWorkflow(detector_names)
 
     wf[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
-    wf[TimeOfFlightLookupTableFilename] = tof_lookup_table_simulation()
+    wf[TofLookupTableFilename] = tof_lookup_table_simulation()
+    wf[LookupTableRelativeErrorThreshold] = {
+        'detector': np.inf,
+        '110_frame_3': np.inf,
+    }
     wf[PreopenNeXusFile] = PreopenNeXusFile(True)
     wf[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
     wf[sqw.SqwIXSample] = sample
