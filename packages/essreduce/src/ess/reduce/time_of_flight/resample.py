@@ -84,14 +84,15 @@ def rebin_strictly_increasing(da: sc.DataArray, dim: str) -> sc.DataArray:
     da = da.rename_dims({da.coords[dim].dim: dim})
     slices = find_strictly_increasing_sections(da.coords[dim])
     if len(slices) == 1:
-        return da[dim, slices[0]]
+        # Slices refer to the indices in the coord, which are bin edges.
+        # For slicing data we need to stop at the last index minus one.
+        return da[dim, slices[0].start : slices[0].stop - 1]
     if not slices:
         raise ValueError("No strictly increasing sections found.")
     if da.coords[dim].dtype not in (sc.DType.float64, sc.DType.float32):
         # rebin does not like integer coords.
         da = da.assign_coords({dim: da.coords[dim].to(dtype='float64')})
-    # Slices refer to the indices in the coord, which are bin edges. For slicing data
-    # we need to stop at the last index minus one.
+    # Same -1 as above in the len(slices) == 1 case.
     sections = [da[dim, section.start : section.stop - 1] for section in slices]
     edges = make_regular_grid(da.coords[dim], dim=dim, slices=slices)
     return sc.reduce([sc.rebin(section, {dim: edges}) for section in sections]).sum()
