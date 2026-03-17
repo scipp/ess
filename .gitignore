@@ -29,6 +29,7 @@ __pycache__/
 .mypy_cache
 .ruff_cache
 packages/*/docs/generated/
+packages/*/.docs_doctrees
 
 # Editor settings
 .idea/

@@ -95,7 +95,7 @@ jobs:
           frozen: true
           environments: docs-${{ matrix.package }}
       - name: Build docs
-        run: pixi run -e docs-${{ matrix.package }} docs ${{ matrix.package }}
+        run: pixi run docs-${{ matrix.package }}
       - uses: actions/upload-artifact@v4
         id: artifact-upload-step
         with:
