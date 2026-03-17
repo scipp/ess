@@ -26,6 +26,7 @@ TofDetector = tof_t.TofDetector
 PulseStrideOffset = tof_t.PulseStrideOffset
 TimeOfFlightLookupTable = tof_t.TimeOfFlightLookupTable
 TimeOfFlightLookupTableFilename = tof_t.TimeOfFlightLookupTableFilename
+LookupTableRelativeErrorThreshold = tof_t.LookupTableRelativeErrorThreshold
 
 UncertaintyBroadcastMode = _UncertaintyBroadcastMode
 
