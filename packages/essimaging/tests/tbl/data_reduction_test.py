@@ -44,11 +44,6 @@ def workflow() -> sl.Pipeline:
     wf = tbl.TblWorkflow()
     wf[Filename[SampleRun]] = tbl.data.tutorial_sample_data()
     wf[LookupTableFilename] = tbl.data.tbl_wavelength_lookup_table_no_choppers()
-    wf[unwrap.LookupTableRelativeErrorThreshold] = {
-        "ngem_detector": float("inf"),
-        "he3_detector_bank0": float("inf"),
-        "he3_detector_bank1": float("inf"),
-    }
     return wf
 
 

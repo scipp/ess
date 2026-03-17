@@ -3,7 +3,6 @@
 
 import pytest
 import sciline as sl
-from ess.reduce.unwrap import LookupTableRelativeErrorThreshold
 
 import ess.odin.data  # noqa: F401
 from ess import odin
@@ -29,9 +28,6 @@ def workflow() -> sl.Pipeline:
     wf[Filename[OpenBeamRun]] = odin.data.iron_simulation_ob_small()
     wf[NeXusDetectorName] = "event_mode_detectors/timepix3"
     wf[LookupTableFilename] = odin.data.odin_wavelength_lookup_table()
-    wf[LookupTableRelativeErrorThreshold] = {
-        "event_mode_detectors/timepix3": float("inf")
-    }
     # Cache the lookup table
     wf[LookupTable] = wf.compute(LookupTable)
     return wf
