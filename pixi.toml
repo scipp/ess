@@ -19,6 +19,12 @@ args = ["package"]
 
 # ==================== Package features ====================
 
+# ess-unpinned (All packages latest releases)
+[feature.ess-unpinned.pypi-dependencies]
+essreduce = { extras = ["test"] }
+essimaging = { extras = ["test"] }
+essnmx = { extras = ["test"] }
+
 # essreduce (core package, no workspace deps)
 [feature.essreduce.pypi-dependencies]
 essreduce = { path = "packages/essreduce", editable = true, extras = ["test"] }
@@ -73,6 +79,9 @@ essnmx = { features = ["essnmx", "essreduce"], solve-group = "default" }
 lb-essreduce = { features = ["essreduce"], solve-group = "lower-bound" }
 lb-essimaging = { features = ["essimaging", "essreduce"], solve-group = "lower-bound" }
 lb-essnmx = { features = ["essnmx", "essreduce"], solve-group = "lower-bound" }
+
+# Unpinned test environment
+ess-unpinned = { features = ["ess-unpinned"], solve-group = "unpinned" }
 
 # Docs environments (package with docs extra + pandoc)
 docs-essreduce = { features = ["docs-essreduce", "docs"], solve-group = "default" }
