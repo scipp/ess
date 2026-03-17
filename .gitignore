@@ -8,7 +8,7 @@ dist
 html
 .tox
 *.egg-info
-# we lock dependencies with pip-compile, not uv
+# we lock dependencies with pixi
 uv.lock
 
 *.sw?
@@ -27,8 +27,8 @@ __pycache__/
 .hypothesis
 .pytest_cache
 .mypy_cache
-docs/generated/
 .ruff_cache
+packages/*/docs/generated/
 
 # Editor settings
 .idea/
