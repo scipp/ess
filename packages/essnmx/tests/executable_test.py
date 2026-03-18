@@ -321,9 +321,8 @@ def tof_lut_file_path(tmp_path: pathlib.Path):
     """Fixture to provide the path to the small NMX NeXus file."""
     from dataclasses import is_dataclass
 
-    from ess.reduce.time_of_flight import TimeOfFlightLookupTable
-
     from ess.nmx.workflows import initialize_nmx_workflow
+    from ess.reduce.time_of_flight import TimeOfFlightLookupTable
 
     # Simply use the default workflow for testing.
     workflow = initialize_nmx_workflow(config=WorkflowConfig())

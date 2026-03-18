@@ -2,8 +2,6 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 import pytest
 import scipp as sc
-from scipp.testing import assert_identical
-
 from ess.ymir.data import ymir_lego_images_path
 from ess.ymir.io import (
     FilePath,
@@ -14,6 +12,7 @@ from ess.ymir.io import (
     load_nexus_rotation_logs,
 )
 from ess.ymir.types import DEFAULT_HISTOGRAM_PATH
+from scipp.testing import assert_identical
 
 
 def test_nexus_histogram_mode_detector_loading_warnings() -> None:

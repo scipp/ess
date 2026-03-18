@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 
+import ess.odin.data  # noqa: F401
 import pytest
 import sciline as sl
-
-import ess.odin.data  # noqa: F401
 from ess import odin
+
 from ess.imaging.types import (
     Filename,
     NeXusDetectorName,
