@@ -3,10 +3,10 @@
 import numpy as np
 import pytest
 import scipp as sc
+from ess import imaging as img
 from scipp.testing import assert_identical
 from scitiff.io import load_scitiff
 
-from ess import imaging as img
 from ess.imaging.data import siemens_star_path
 
 

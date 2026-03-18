@@ -6,6 +6,7 @@ from typing import NewType
 
 import sciline
 import scipp as sc
+
 from ess.reduce.nexus import types as reduce_t
 from ess.reduce.time_of_flight import types as tof_t
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode

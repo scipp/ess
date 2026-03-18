@@ -6,6 +6,7 @@ import sciline
 import scipp as sc
 import scippnexus as snx
 import tof
+
 from ess.reduce.nexus.types import (
     EmptyDetector,
     Filename,

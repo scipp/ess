@@ -6,8 +6,9 @@ import h5py
 import numpy as np
 import scipp as sc
 import scippnexus as snx
-from ess.reduce.time_of_flight.types import TofLookupTable
 from scippneutron.metadata import RadiationProbe, SourceType
+
+from ess.reduce.time_of_flight.types import TofLookupTable
 
 from ._display_helper import to_datagroup
 

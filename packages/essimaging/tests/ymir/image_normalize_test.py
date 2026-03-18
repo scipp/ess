@@ -2,8 +2,6 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 import pytest
 import scipp as sc
-from scipp.testing.assertions import assert_allclose, assert_identical
-
 from ess.ymir.io import (
     DarkCurrentImageStacks,
     OpenBeamImageStacks,
@@ -29,6 +27,7 @@ from ess.ymir.normalize import (
     normalize_sample_images,
 )
 from ess.ymir.workflow import YmirImageNormalizationWorkflow
+from scipp.testing.assertions import assert_allclose, assert_identical
 
 
 @pytest.fixture
