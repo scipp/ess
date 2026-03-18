@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 from multiprocessing.pool import ThreadPool
 from pathlib import Path
@@ -64,6 +63,7 @@ _registry = make_registry(
         "spin_flip_example/supermirror_onoff.h5": "md5:3ae9863d13d79c24e29017948bd383ab",  # noqa: E501
         "spin_flip_example/supermirror_offoff.h5": "md5:22bc20099b2f456e459391189ee60977",  # noqa: E501
         "estia-tof-lookup-table-pulse-stride-1.h5": "md5:696953c772209fadc9c4a2ca619cf04d",  # noqa: E501
+        "estia-lookup-table-pulse-stride-1.h5": "md5:01787012c678ea6ddce6a5f3a33d8895",
     },
 )
 
@@ -199,9 +199,9 @@ def estia_mcstas_spin_flip_example_download_all_to_cache() -> None:
             pass
 
 
-def estia_tof_lookup_table() -> Path:
-    """Return path to the ESTIA time-of-flight lookup table."""
-    return _registry.get_path('estia-tof-lookup-table-pulse-stride-1.h5')
+def estia_wavelength_lookup_table() -> Path:
+    """Return path to the ESTIA wavelength lookup table."""
+    return _registry.get_path('estia-lookup-table-pulse-stride-1.h5')
 
 
 __all__ = [

@@ -7,7 +7,7 @@ import sciline
 import scipp as sc
 
 from ess.reduce.nexus import types as nexus_t
-from ess.reduce.time_of_flight import types as tof_t
+from ess.reduce.unwrap import types as unwrap_t
 
 SampleRun = nexus_t.SampleRun
 ReferenceRun = NewType("ReferenceRun", int)
@@ -23,12 +23,11 @@ NeXusComponent = nexus_t.NeXusComponent
 NeXusDetectorName = nexus_t.NeXusDetectorName
 Position = nexus_t.Position
 
-TofDetector = tof_t.TofDetector
-PulseStrideOffset = tof_t.PulseStrideOffset
-TimeOfFlightLookupTable = tof_t.TimeOfFlightLookupTable
-TimeOfFlightLookupTableFilename = tof_t.TimeOfFlightLookupTableFilename
-DetectorLtotal = tof_t.DetectorLtotal
-LookupTableRelativeErrorThreshold = tof_t.LookupTableRelativeErrorThreshold
+PulseStrideOffset = unwrap_t.PulseStrideOffset
+LookupTable = unwrap_t.LookupTable
+LookupTableFilename = unwrap_t.LookupTableFilename
+DetectorLtotal = unwrap_t.DetectorLtotal
+LookupTableRelativeErrorThreshold = unwrap_t.LookupTableRelativeErrorThreshold
 
 
 class CoordTransformationGraph(sciline.Scope[RunType, dict], dict):
