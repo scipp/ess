@@ -117,6 +117,29 @@ def test_can_compute_position_of_group(depends_on: snx.TransformationChain) -> N
     assert_identical(workflow.compute_position(trans), position)
 
 
+def test_can_compute_position_of_group_time_dependent(
+    time_dependent_depends_on: snx.TransformationChain,
+) -> None:
+    position = sc.DataArray(
+        sc.vectors(
+            dims=['time'],
+            values=[[1.0, 1.0, 0.0], [1.0, 2.0, 0.0], [1.0, 3.0, 0.0]],
+            unit='m',
+        ),
+        coords={'time': sc.array(dims=['time'], values=[0.0, 1.0, 2.0], unit='s')},
+    )
+
+    group = workflow.NeXusComponent[snx.NXsource, SampleRun](
+        sc.DataGroup(depends_on=time_dependent_depends_on)
+    )
+    chain = workflow.get_transformation_chain(group)
+    trans = workflow.to_transformation(
+        chain,
+        interval=TimeInterval(slice(None, None)),
+    )
+    assert_identical(workflow.compute_position(trans), position)
+
+
 def test_to_transform_with_positional_time_interval(
     time_dependent_depends_on: snx.TransformationChain,
 ) -> None:
@@ -170,16 +193,6 @@ def test_to_transform_with_label_based_time_interval_single_point(
         TimeInterval(slice(sc.scalar(1000.0, unit='s'), sc.scalar(2000.0, unit='s'))),
     ).value
     assert sc.identical(transform * origin, sc.vector([1.0, 3.0, 0.0], unit='m'))
-
-
-def test_to_transform_raises_if_interval_does_not_yield_unique_value(
-    time_dependent_depends_on: snx.TransformationChain,
-) -> None:
-    with pytest.raises(ValueError, match='Transform is time-dependent'):
-        workflow.to_transformation(
-            time_dependent_depends_on,
-            TimeInterval(slice(sc.scalar(0.1, unit='s'), sc.scalar(1.9, unit='s'))),
-        )
 
 
 def test_given_no_sample_load_nexus_sample_returns_group_with_origin_depends_on(
