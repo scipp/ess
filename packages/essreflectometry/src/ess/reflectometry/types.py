@@ -23,6 +23,7 @@ NeXusComponent = nexus_t.NeXusComponent
 NeXusDetectorName = nexus_t.NeXusDetectorName
 Position = nexus_t.Position
 
+WavelengthDetector = unwrap_t.WavelengthDetector
 PulseStrideOffset = unwrap_t.PulseStrideOffset
 LookupTable = unwrap_t.LookupTable
 LookupTableFilename = unwrap_t.LookupTableFilename
