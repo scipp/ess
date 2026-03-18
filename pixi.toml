@@ -13,10 +13,6 @@ python = "3.11.*"
 cmd = "pytest packages/{{ package }}/tests/"
 args = ["package"]
 
-[tasks.docs]
-cmd = "python -m sphinx -v -b html -d /tmp/docs_doctrees packages/{{ package }}/docs packages/{{ package }}/html"
-args = ["package"]
-
 # ==================== Package features ====================
 
 # essreduce (core package, no workspace deps)
@@ -52,11 +48,21 @@ python-graphviz = "*"
 [feature.docs-essreduce.pypi-dependencies]
 essreduce = { path = "packages/essreduce", editable = true, extras = ["test", "docs"] }
 
+[feature.docs-essreduce.tasks.docs-essreduce]
+cmd = "python -m sphinx -v -b html -d packages/essreduce/.docs_doctrees packages/essreduce/docs packages/essreduce/html"
+default-environment = "docs-essreduce"
+
 [feature.docs-essimaging.pypi-dependencies]
 essimaging = { path = "packages/essimaging", editable = true, extras = ["test", "docs"] }
 
+[feature.docs-essimaging.tasks.docs-essimaging]
+cmd = "python -m sphinx -v -b html -d packages/essimaging/.docs_doctrees packages/essimaging/docs packages/essimaging/html"
+
 [feature.docs-essnmx.pypi-dependencies]
 essnmx = { path = "packages/essnmx", editable = true, extras = ["test", "docs"] }
+
+[feature.docs-essnmx.tasks.docs-essnmx]
+cmd = "python -m sphinx -v -b html -d packages/essnmx/.docs_doctrees packages/essnmx/docs packages/essnmx/html"
 
 # ==================== Environments ====================
 
