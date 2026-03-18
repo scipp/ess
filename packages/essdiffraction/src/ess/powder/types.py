@@ -215,6 +215,9 @@ WavelengthMask = NewType("WavelengthMask", Callable | None)
 Beamline = reduce_t.Beamline
 """Beamline metadata."""
 
+Measurement = reduce_t.Measurement
+"""Measurement metadata."""
+
 ReducerSoftware = NewType('ReducerSoftware', list[Software])
 """Pieces of software used to reduce the data."""
 

@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-
+import datetime
 import io
 
 import pytest
@@ -14,6 +14,7 @@ from ess.powder.types import (
     Beamline,
     CIFAuthors,
     IntensityTof,
+    Measurement,
     ReducerSoftware,
     Software,
 )
@@ -60,6 +61,10 @@ def test_save_reduced_tof(ioftof: IntensityTof, cal: OutputCalibrationData) -> N
             site="ESS",
         ),
         source=ESS_SOURCE,
+        measurement=Measurement(
+            title="Test measurement",
+            start_time=datetime.datetime(2026, 1, 2, 14, 58, 2, tzinfo=datetime.UTC),
+        ),
         reducers=ReducerSoftware(
             [
                 Software.from_package_metadata('ess.diffraction'),
@@ -78,6 +83,8 @@ def test_save_reduced_tof(ioftof: IntensityTof, cal: OutputCalibrationData) -> N
     assert f"ess.dream {__version__}" in result
     assert f"ess.powder {__version__}" in result
     assert '_diffrn_source.beamline DREAM' in result
+    assert "_sc_meas.title 'Test measurement'" in result
+    assert "_pd_meas.datetime_initiated 2026-01-02T14:58:02" in result
     assert 'ZERO 0 0.2' in result
     assert 'DIFC 1 1.2' in result
     assert 'DIFA 2 -1.4' in result
