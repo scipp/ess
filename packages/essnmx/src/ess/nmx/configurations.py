@@ -98,10 +98,10 @@ class WorkflowConfig(BaseModel):
         description="Unit of time bins.",
         default=TimeBinUnit.ms,
     )
-    tof_lookup_table_file_path: str | None = Field(
-        title="TOF Lookup Table File Path",
-        description="Path to the TOF lookup table file. "
-        "If None, the lookup table will be computed on-the-fly.",
+    lookup_table_file_path: str | None = Field(
+        title="Lookup Table File Path",
+        description="Path to the lookup table file that allows to compute wavelength/"
+        "time-of-flight. If None, the lookup table will be computed on-the-fly.",
         default=None,
     )
     tof_simulation_num_neutrons: int = Field(

@@ -3,10 +3,10 @@
 
 import numpy as np
 
-from ess.reduce.time_of_flight.interpolator_numba import (
+from ess.reduce.unwrap.interpolator_numba import (
     Interpolator as InterpolatorNumba,
 )
-from ess.reduce.time_of_flight.interpolator_scipy import (
+from ess.reduce.unwrap.interpolator_scipy import (
     Interpolator as InterpolatorScipy,
 )
 

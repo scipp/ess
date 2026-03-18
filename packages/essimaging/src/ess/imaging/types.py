@@ -7,8 +7,8 @@ from typing import NewType
 import sciline
 import scipp as sc
 from ess.reduce.nexus import types as reduce_t
-from ess.reduce.time_of_flight import types as tof_t
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
+from ess.reduce.unwrap import types as unwrap_t
 
 # 1 TypeVars used to parametrize the generic parts of the workflow
 
@@ -21,37 +21,37 @@ Position = reduce_t.Position
 RawDetector = reduce_t.RawDetector
 RawMonitor = reduce_t.RawMonitor
 
-DetectorLtotal = tof_t.DetectorLtotal
-TofDetector = tof_t.TofDetector
-PulseStrideOffset = tof_t.PulseStrideOffset
-TimeOfFlightLookupTable = tof_t.TimeOfFlightLookupTable
-TimeOfFlightLookupTableFilename = tof_t.TimeOfFlightLookupTableFilename
-LookupTableRelativeErrorThreshold = tof_t.LookupTableRelativeErrorThreshold
+DetectorLtotal = unwrap_t.DetectorLtotal
+WavelengthDetector = unwrap_t.WavelengthDetector
+PulseStrideOffset = unwrap_t.PulseStrideOffset
+LookupTable = unwrap_t.LookupTable
+LookupTableFilename = unwrap_t.LookupTableFilename
+LookupTableRelativeErrorThreshold = unwrap_t.LookupTableRelativeErrorThreshold
 
 UncertaintyBroadcastMode = _UncertaintyBroadcastMode
 
 
-SampleRun = NewType('SampleRun', int)
+SampleRun = NewType("SampleRun", int)
 """Sample run; a run with a sample in the beam."""
 
-DarkBackgroundRun = NewType('DarkBackgroundRun', int)
+DarkBackgroundRun = NewType("DarkBackgroundRun", int)
 """Dark background run; a run with no sample in the beam, and the shutter closed, to
 measure the dark current of the detector."""
 
-OpenBeamRun = NewType('OpenBeamRun', int)
+OpenBeamRun = NewType("OpenBeamRun", int)
 """Open beam run; a run with no sample in the beam, and the shutter open, to measure the
 beam profile."""
 
-BeamMonitor1 = NewType('BeamMonitor1', int)
+BeamMonitor1 = NewType("BeamMonitor1", int)
 """Beam monitor number 1"""
 
-BeamMonitor2 = NewType('BeamMonitor2', int)
+BeamMonitor2 = NewType("BeamMonitor2", int)
 """Beam monitor number 2"""
 
-BeamMonitor3 = NewType('BeamMonitor3', int)
+BeamMonitor3 = NewType("BeamMonitor3", int)
 """Beam monitor number 3"""
 
-BeamMonitor4 = NewType('BeamMonitor4', int)
+BeamMonitor4 = NewType("BeamMonitor4", int)
 """Beam monitor number 4"""
 
 RunType = reduce_t.RunType
@@ -65,11 +65,7 @@ class CoordTransformGraph(sciline.Scope[RunType, dict], dict):
     """
 
 
-class WavelengthDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Detector counts with wavelength information."""
-
-
-MaskingRules = NewType('MaskingRules', MappingProxyType[str, Callable])
+MaskingRules = NewType("MaskingRules", MappingProxyType[str, Callable])
 """Functions to mask different dimensions of Odin data."""
 
 
@@ -85,7 +81,7 @@ class BackgroundSubtractedDetector(sciline.Scope[RunType, sc.DataArray], sc.Data
     """Detector counts with dark background subtracted."""
 
 
-NormalizedImage = NewType('NormalizedImage', sc.DataArray)
+NormalizedImage = NewType("NormalizedImage", sc.DataArray)
 """Final image: background-subtracted sample run divided by background-subtracted open
 beam run."""
 

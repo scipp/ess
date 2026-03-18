@@ -6,5 +6,5 @@ maxdepth: 1
 ---
 
 odin-data-reduction
-odin-make-tof-lookup-table
+odin-make-wavelength-lookup-table
 ```

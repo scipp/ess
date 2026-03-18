@@ -10,22 +10,19 @@ import scipp as sc
 
 from ..nexus.types import Component, MonitorType, RunType
 
-TofLookupTableFilename = NewType("TofLookupTableFilename", str)
-"""Filename of the time-of-flight lookup table."""
-
-TimeOfFlightLookupTableFilename = TofLookupTableFilename
-"""Filename of the time-of-flight lookup table (alias)."""
+LookupTableFilename = NewType("LookupTableFilename", str)
+"""Filename of the wavelength lookup table."""
 
 
 @dataclass
-class TofLookupTable:
+class LookupTable:
     """
-    Lookup table giving time-of-flight as a function of distance and time of arrival.
+    Lookup table giving wavelength as a function of distance and ``event_time_offset``.
     """
 
     array: sc.DataArray
-    """The lookup table data array that maps (distance, time_of_arrival) to
-    time_of_flight."""
+    """The lookup table data array that maps (distance, event_time_offset) to
+    wavelength."""
     pulse_period: sc.Variable
     """Pulse period of the neutron source."""
     pulse_stride: int
@@ -33,7 +30,7 @@ class TofLookupTable:
     distance_resolution: sc.Variable
     """Resolution of the distance coordinate in the lookup table."""
     time_resolution: sc.Variable
-    """Resolution of the time_of_arrival coordinate in the lookup table."""
+    """Resolution of the event_time_offset coordinate in the lookup table."""
     choppers: sc.DataGroup | None = None
     """Chopper parameters used when generating the lookup table, if any. This is made
     optional so we can still support old lookup tables without chopper info."""
@@ -47,14 +44,9 @@ class TofLookupTable:
         return self.array.plot(*args, **kwargs)
 
 
-TimeOfFlightLookupTable = TofLookupTable
-"""Lookup table giving time-of-flight as a function of distance and time of arrival
-(alias)."""
-
-
-class ErrorLimitedTofLookupTable(sl.Scope[Component, TofLookupTable], TofLookupTable):
+class ErrorLimitedLookupTable(sl.Scope[Component, LookupTable], LookupTable):
     """Lookup table that is masked with NaNs in regions where the standard deviation of
-    the time-of-flight is above a certain threshold."""
+    the wavelength is above a certain threshold."""
 
 
 PulseStrideOffset = NewType("PulseStrideOffset", int | None)
@@ -66,7 +58,7 @@ zero but can be a small integer < pulse_stride. If None, a guess is made.
 LookupTableRelativeErrorThreshold = NewType("LookupTableRelativeErrorThreshold", dict)
 """
 Threshold for the relative standard deviation (coefficient of variation) of the
-projected time-of-flight above which values are masked.
+projected wavelength above which values are masked.
 The threshold can be different for different beamline components (monitors, detector
 banks, etc.). The dictionary should have the component names as keys and the
 corresponding thresholds as values.
@@ -89,26 +81,6 @@ class DetectorLtotal(sl.Scope[RunType, sc.Variable], sc.Variable):
 
 class MonitorLtotal(sl.Scope[RunType, MonitorType, sc.Variable], sc.Variable):
     """Total path length of neutrons from source to monitor."""
-
-
-class TofDetector(sl.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Detector data with time-of-flight coordinate."""
-
-
-class ToaDetector(sl.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Detector data with time-of-arrival coordinate.
-
-    When the pulse stride is 1 (i.e., no pulse skipping), the time-of-arrival is the
-    same as the event_time_offset. When pulse skipping is used, the time-of-arrival is
-    the event_time_offset + pulse_offset * pulse_period.
-    This means that the time-of-arrival is basically the event_time_offset wrapped
-    over the frame period instead of the pulse period
-    (where frame_period = pulse_stride * pulse_period).
-    """
-
-
-class TofMonitor(sl.Scope[RunType, MonitorType, sc.DataArray], sc.DataArray):
-    """Monitor data with time-of-flight coordinate."""
 
 
 class WavelengthDetector(sl.Scope[RunType, sc.DataArray], sc.DataArray):

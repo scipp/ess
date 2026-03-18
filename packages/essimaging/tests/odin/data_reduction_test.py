@@ -8,13 +8,12 @@ import ess.odin.data  # noqa: F401
 from ess import odin
 from ess.imaging.types import (
     Filename,
+    LookupTable,
+    LookupTableFilename,
     NeXusDetectorName,
     OpenBeamRun,
     RawDetector,
     SampleRun,
-    TimeOfFlightLookupTable,
-    TimeOfFlightLookupTableFilename,
-    TofDetector,
     WavelengthDetector,
 )
 
@@ -28,9 +27,9 @@ def workflow() -> sl.Pipeline:
     wf[Filename[SampleRun]] = odin.data.iron_simulation_sample_small()
     wf[Filename[OpenBeamRun]] = odin.data.iron_simulation_ob_small()
     wf[NeXusDetectorName] = "event_mode_detectors/timepix3"
-    wf[TimeOfFlightLookupTableFilename] = odin.data.odin_tof_lookup_table()
+    wf[LookupTableFilename] = odin.data.odin_wavelength_lookup_table()
     # Cache the lookup table
-    wf[TimeOfFlightLookupTable] = wf.compute(TimeOfFlightLookupTable)
+    wf[LookupTable] = wf.compute(LookupTable)
     return wf
 
 
@@ -46,13 +45,6 @@ def test_can_load_detector_data(workflow, run_type):
     assert da.bins is not None
     assert "event_time_offset" in da.bins.coords
     assert "event_time_zero" in da.bins.coords
-
-
-@pytest.mark.parametrize("run_type", [SampleRun, OpenBeamRun])
-def test_can_compute_time_of_flight(workflow, run_type):
-    da = workflow.compute(TofDetector[run_type])
-
-    assert "tof" in da.bins.coords
 
 
 @pytest.mark.parametrize("run_type", [SampleRun, OpenBeamRun])
