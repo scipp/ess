@@ -268,9 +268,23 @@ def _open_nexus_file_from_path(
     definitions: Mapping | None | NoNewDefinitionsType,
     **kwargs: object,
 ) -> AbstractContextManager[snx.Group]:
-    if definitions is NoNewDefinitions:
-        return snx.File(file_path, **kwargs)
-    return snx.File(file_path, definitions=definitions, **kwargs)
+    new_kwargs = (
+        kwargs |
+        ({} if definitions is NoNewDefinitions else {'definitions': definitions}) |
+        # ESS nexus files are always written in swmr mode.
+        # By default, try to open in swmr mode.
+        ({'swmr': True} if 'swmr' not in kwargs else {})
+    )
+    try:
+        return snx.File(file_path, **new_kwargs)
+    except OSError as e:
+        # If the file type does not support swmr
+        # and the caller did not exlicitly request swmr
+        # open the file without swmr.
+        if 'swmr' not in kwargs:
+            new_kwargs.pop('swmr')
+            return snx.File(file_path, **new_kwargs)
+        raise e
 
 
 @contextmanager
