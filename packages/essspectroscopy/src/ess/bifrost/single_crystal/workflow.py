@@ -4,7 +4,7 @@
 
 import sciline
 
-from ess.reduce import time_of_flight as reduce_time_of_flight
+from ess.reduce import unwrap as reduce_unwrap
 from ess.spectroscopy.indirect.time_of_flight import TofWorkflow
 from ess.spectroscopy.types import (
     FrameMonitor1,
@@ -43,7 +43,7 @@ def BifrostBraggPeakMonitorWorkflow() -> sciline.Pipeline:
         monitor_types=(FrameMonitor1, FrameMonitor2, FrameMonitor3),
     )
     # Use the vanilla implementation instead of the indirect geometry one:
-    workflow.insert(reduce_time_of_flight.eto_to_tof.detector_time_of_flight_data)
+    workflow.insert(reduce_unwrap.eto_to_wavelength.detector_wavelength_data)
     for provider in _PROVIDERS:
         workflow.insert(provider)
     for key, val in default_parameters().items():
@@ -57,7 +57,7 @@ def BifrostSimulationBraggPeakMonitorWorkflow() -> sciline.Pipeline:
         monitor_types=(FrameMonitor1, FrameMonitor2, FrameMonitor3),
     )
     # Use the vanilla implementation instead of the indirect geometry one:
-    workflow.insert(reduce_time_of_flight.eto_to_tof.detector_time_of_flight_data)
+    workflow.insert(reduce_unwrap.eto_to_wavelength.detector_wavelength_data)
     for provider in _SIMULATION_PROVIDERS:
         workflow.insert(provider)
     for key, val in simulation_default_parameters().items():

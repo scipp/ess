@@ -10,19 +10,19 @@ import scippnexus as snx
 from ess import bifrost
 from ess.bifrost.data import (
     computed_energy_data_simulated_5x2,
+    lookup_table_simulation,
     simulated_elastic_incoherent_with_phonon,
-    tof_lookup_table_simulation,
 )
 from ess.spectroscopy.types import (
     EnergyQDetector,
     Filename,
     FrameMonitor3,
+    LookupTableFilename,
     LookupTableRelativeErrorThreshold,
     NeXusDetectorName,
     RawDetector,
     RawMonitor,
     SampleRun,
-    TofLookupTableFilename,
     UncertaintyBroadcastMode,
     WavelengthMonitor,
 )
@@ -39,7 +39,7 @@ def simulation_detector_names() -> list[NeXusDetectorName]:
 def workflow(simulation_detector_names: list[NeXusDetectorName]) -> sciline.Pipeline:
     workflow = bifrost.BifrostSimulationWorkflow(simulation_detector_names)
     workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
-    workflow[TofLookupTableFilename] = tof_lookup_table_simulation()
+    workflow[LookupTableFilename] = lookup_table_simulation()
     workflow[LookupTableRelativeErrorThreshold] = {
         'detector': np.inf,
         '110_frame_3': np.inf,

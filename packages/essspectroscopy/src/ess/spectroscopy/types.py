@@ -8,7 +8,7 @@ from typing import Any, NewType, TypeVar
 import sciline
 import scipp as sc
 
-from ess.reduce import time_of_flight
+from ess.reduce import unwrap
 from ess.reduce.nexus import types as reduce_t
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
 
@@ -54,18 +54,18 @@ MonitorType = TypeVar(
 
 # Time-of-flight types
 
-TofDetector = time_of_flight.TofDetector
-TofMonitor = time_of_flight.TofMonitor
-LookupTableRelativeErrorThreshold = time_of_flight.LookupTableRelativeErrorThreshold
-MonitorLtotal = time_of_flight.MonitorLtotal
-PulseStride = time_of_flight.PulseStride
-PulseStrideOffset = time_of_flight.PulseStrideOffset
-PulsePeriod = time_of_flight.PulsePeriod
-ErrorLimitedTofLookupTable = time_of_flight.ErrorLimitedTofLookupTable
-TofLookupTable = time_of_flight.TofLookupTable
-TofLookupTableFilename = time_of_flight.TofLookupTableFilename
+WavelengthDetector = unwrap.WavelengthDetector
+WavelengthMonitor = unwrap.WavelengthMonitor
+LookupTableRelativeErrorThreshold = unwrap.LookupTableRelativeErrorThreshold
+MonitorLtotal = unwrap.MonitorLtotal
+PulseStride = unwrap.PulseStride
+PulseStrideOffset = unwrap.PulseStrideOffset
+PulsePeriod = unwrap.PulsePeriod
+ErrorLimitedLookupTable = unwrap.ErrorLimitedLookupTable
+LookupTable = unwrap.LookupTable
+LookupTableFilename = unwrap.LookupTableFilename
 # Legacy alias:
-TimeOfFlightLookupTableFilename = time_of_flight.TimeOfFlightLookupTableFilename
+LookupTableFilename = unwrap.LookupTableFilename
 
 # Custom types
 
@@ -147,11 +147,6 @@ class MonitorCoordTransformGraph(sciline.Scope[RunType, dict], dict): ...
 
 
 SQWBinSizes = NewType('SQWBinSizes', dict[str, int])
-
-
-class WavelengthMonitor(
-    sciline.Scope[RunType, MonitorType, sc.DataArray], sc.DataArray
-): ...
 
 
 UncertaintyBroadcastMode = _UncertaintyBroadcastMode
