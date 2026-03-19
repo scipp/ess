@@ -72,7 +72,7 @@ docs = [
 
 [tool.setuptools_scm]
 root = "../.."
-tag_regex = "^essimaging/(?P<version>[vV]?\\d+(?:\\.\\d+)*(?:[._-]?\\w+)*)$"
+tag_regex = "^essimaging/(?P<version>\\d+.*)$"
 git_describe_command = ["git", "describe", "--dirty", "--tags", "--long", "--match", "essimaging/*[0-9]*"]
 
 [tool.pytest.ini_options]

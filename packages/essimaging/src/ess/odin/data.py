@@ -16,6 +16,7 @@ _registry = make_registry(
         "iron_simulation_sample_small.nxs": "md5:dda6fb30aa88780c5a3d4cef6ea05278",
         "ODIN-tof-lookup-table.h5": "md5:e657021f4508f167b2a2eb550853b06b",
         "ODIN-tof-lookup-table-5m-65m.h5": "md5:c815eed6835a98d0b8d5252ffe250964",
+        "ODIN-wavelength-lookup-table-5m-65m.h5": "md5:44eef2a2e826cec688aeb1b985eb9f9e",  # noqa: E501
     },
 )
 
@@ -70,3 +71,15 @@ def odin_tof_lookup_table() -> pathlib.Path:
     with ``NumberOfSimulatedNeutrons = 5_000_000``.
     """
     return _registry.get_path("ODIN-tof-lookup-table-5m-65m.h5")
+
+
+def odin_wavelength_lookup_table() -> pathlib.Path:
+    """
+    Odin wavelength lookup table.
+    This file is used to convert the raw ``event_time_offset`` to wavelength.
+
+    This table was computed using `Create a wavelength lookup table for ODIN
+    <../../odin/odin-make-wavelength-lookup-table.rst>`_
+    with ``NumberOfSimulatedNeutrons = 5_000_000``.
+    """
+    return _registry.get_path("ODIN-wavelength-lookup-table-5m-65m.h5")

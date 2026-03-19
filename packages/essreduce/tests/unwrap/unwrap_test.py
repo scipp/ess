@@ -4,10 +4,8 @@ import numpy as np
 import pytest
 import scipp as sc
 from scippneutron.chopper import DiskChopper
-from scippneutron.conversion.graph.beamline import beamline as beamline_graph
-from scippneutron.conversion.graph.tof import elastic as elastic_graph
 
-from ess.reduce import time_of_flight
+from ess.reduce import unwrap
 from ess.reduce.nexus.types import (
     AnyRun,
     FrameMonitor0,
@@ -17,26 +15,19 @@ from ess.reduce.nexus.types import (
     RawMonitor,
     SampleRun,
 )
-from ess.reduce.time_of_flight import (
-    GenericTofWorkflow,
-    PulsePeriod,
-    TofLookupTableWorkflow,
-    fakes,
-)
+from ess.reduce.unwrap import GenericUnwrapWorkflow, LookupTableWorkflow, fakes
 
 sl = pytest.importorskip("sciline")
 
 
 def make_lut_workflow(choppers, neutrons, seed, pulse_stride):
-    lut_wf = TofLookupTableWorkflow()
-    lut_wf[time_of_flight.DiskChoppers[AnyRun]] = choppers
-    lut_wf[time_of_flight.SourcePosition] = fakes.source_position()
-    lut_wf[time_of_flight.NumberOfSimulatedNeutrons] = neutrons
-    lut_wf[time_of_flight.SimulationSeed] = seed
-    lut_wf[time_of_flight.PulseStride] = pulse_stride
-    lut_wf[time_of_flight.SimulationResults] = lut_wf.compute(
-        time_of_flight.SimulationResults
-    )
+    lut_wf = LookupTableWorkflow()
+    lut_wf[unwrap.DiskChoppers[AnyRun]] = choppers
+    lut_wf[unwrap.SourcePosition] = fakes.source_position()
+    lut_wf[unwrap.NumberOfSimulatedNeutrons] = neutrons
+    lut_wf[unwrap.SimulationSeed] = seed
+    lut_wf[unwrap.PulseStride] = pulse_stride
+    lut_wf[unwrap.SimulationResults] = lut_wf.compute(unwrap.SimulationResults)
     return lut_wf
 
 
@@ -75,26 +66,26 @@ def _make_workflow_event_mode(
     )
     mon, ref = beamline.get_monitor("detector")
 
-    pl = GenericTofWorkflow(run_types=[SampleRun], monitor_types=[FrameMonitor0])
+    pl = GenericUnwrapWorkflow(run_types=[SampleRun], monitor_types=[FrameMonitor0])
     if detector_or_monitor == "detector":
         pl[NeXusDetectorName] = "detector"
         pl[RawDetector[SampleRun]] = mon
-        pl[time_of_flight.DetectorLtotal[SampleRun]] = distance
+        pl[unwrap.DetectorLtotal[SampleRun]] = distance
     else:
         pl[NeXusName[FrameMonitor0]] = "monitor"
         pl[RawMonitor[SampleRun, FrameMonitor0]] = mon
-        pl[time_of_flight.MonitorLtotal[SampleRun, FrameMonitor0]] = distance
+        pl[unwrap.MonitorLtotal[SampleRun, FrameMonitor0]] = distance
 
-    pl[time_of_flight.LookupTableRelativeErrorThreshold] = {
+    pl[unwrap.LookupTableRelativeErrorThreshold] = {
         'detector': error_threshold,
         'monitor': error_threshold,
     }
-    pl[time_of_flight.PulseStrideOffset] = pulse_stride_offset
+    pl[unwrap.PulseStrideOffset] = pulse_stride_offset
 
     lut_wf = lut_workflow.copy()
-    lut_wf[time_of_flight.LtotalRange] = distance, distance
+    lut_wf[unwrap.LtotalRange] = distance, distance
 
-    pl[time_of_flight.TofLookupTable] = lut_wf.compute(time_of_flight.TofLookupTable)
+    pl[unwrap.LookupTable] = lut_wf.compute(unwrap.LookupTable)
 
     return pl, ref
 
@@ -116,35 +107,34 @@ def _make_workflow_histogram_mode(
         ).to(unit=mon.bins.coords["event_time_offset"].bins.unit)
     ).rename(event_time_offset=dim)
 
-    pl = GenericTofWorkflow(run_types=[SampleRun], monitor_types=[FrameMonitor0])
+    pl = GenericUnwrapWorkflow(run_types=[SampleRun], monitor_types=[FrameMonitor0])
     if detector_or_monitor == "detector":
         pl[NeXusDetectorName] = "detector"
         pl[RawDetector[SampleRun]] = mon
-        pl[time_of_flight.DetectorLtotal[SampleRun]] = distance
+        pl[unwrap.DetectorLtotal[SampleRun]] = distance
     else:
         pl[NeXusName[FrameMonitor0]] = "monitor"
         pl[RawMonitor[SampleRun, FrameMonitor0]] = mon
-        pl[time_of_flight.MonitorLtotal[SampleRun, FrameMonitor0]] = distance
+        pl[unwrap.MonitorLtotal[SampleRun, FrameMonitor0]] = distance
 
-    pl[time_of_flight.LookupTableRelativeErrorThreshold] = {
+    pl[unwrap.LookupTableRelativeErrorThreshold] = {
         'detector': error_threshold,
         'monitor': error_threshold,
     }
 
     lut_wf = lut_workflow.copy()
-    lut_wf[time_of_flight.LtotalRange] = distance, distance
+    lut_wf[unwrap.LtotalRange] = distance, distance
 
-    pl[time_of_flight.TofLookupTable] = lut_wf.compute(time_of_flight.TofLookupTable)
+    pl[unwrap.LookupTable] = lut_wf.compute(unwrap.LookupTable)
 
     return pl, ref
 
 
-def _validate_result_events(tofs, ref, percentile, diff_threshold, rtol):
-    assert "event_time_offset" not in tofs.coords
+def _validate_result_events(wavs, ref, percentile, diff_threshold, rtol):
+    assert "event_time_offset" not in wavs.coords
+    assert "tof" not in wavs.coords
 
-    # Convert to wavelength
-    graph = {**beamline_graph(scatter=False), **elastic_graph("tof")}
-    wavs = tofs.transform_coords("wavelength", graph=graph).bins.concat().value
+    wavs = wavs.bins.concat().value
 
     diff = abs(
         (wavs.coords["wavelength"] - ref.coords["wavelength"])
@@ -159,12 +149,13 @@ def _validate_result_events(tofs, ref, percentile, diff_threshold, rtol):
     assert sc.isclose(ref.data.sum(), nevents, rtol=sc.scalar(rtol))
 
 
-def _validate_result_histogram_mode(tofs, ref, percentile, diff_threshold, rtol):
-    assert "time_of_flight" not in tofs.coords
-    assert "frame_time" not in tofs.coords
+def _validate_result_histogram_mode(wavs, ref, percentile, diff_threshold, rtol):
+    assert "tof" not in wavs.coords
+    assert "time_of_flight" not in wavs.coords
+    assert "frame_time" not in wavs.coords
 
-    graph = {**beamline_graph(scatter=False), **elastic_graph("tof")}
-    wavs = tofs.transform_coords("wavelength", graph=graph)
+    # graph = {**beamline_graph(scatter=False), **elastic_graph("tof")}
+    # wavs = tofs.transform_coords("wavelength", graph=graph)
     ref = ref.hist(wavelength=wavs.coords["wavelength"])
     # We divide by the maximum to avoid large relative differences at the edges of the
     # frames where the counts are low.
@@ -172,7 +163,7 @@ def _validate_result_histogram_mode(tofs, ref, percentile, diff_threshold, rtol)
     assert np.nanpercentile(diff.values, percentile) < diff_threshold
     # Make sure that we have not lost too many events (we lose some because they may be
     # given a NaN tof from the lookup).
-    assert sc.isclose(ref.data.nansum(), tofs.data.nansum(), rtol=sc.scalar(rtol))
+    assert sc.isclose(ref.data.nansum(), wavs.data.nansum(), rtol=sc.scalar(rtol))
 
 
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
@@ -197,12 +188,12 @@ def test_unwrap_with_no_choppers(detector_or_monitor) -> None:
     )
 
     if detector_or_monitor == "detector":
-        tofs = pl.compute(time_of_flight.TofDetector[SampleRun])
+        wavs = pl.compute(unwrap.WavelengthDetector[SampleRun])
     else:
-        tofs = pl.compute(time_of_flight.TofMonitor[SampleRun, FrameMonitor0])
+        wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
     _validate_result_events(
-        tofs=tofs, ref=ref, percentile=96, diff_threshold=1.0, rtol=0.02
+        wavs=wavs, ref=ref, percentile=96, diff_threshold=1.0, rtol=0.02
     )
 
 
@@ -225,12 +216,12 @@ def test_standard_unwrap(dist, detector_or_monitor, lut_workflow_psc_choppers) -
     )
 
     if detector_or_monitor == "detector":
-        tofs = pl.compute(time_of_flight.TofDetector[SampleRun])
+        wavs = pl.compute(unwrap.WavelengthDetector[SampleRun])
     else:
-        tofs = pl.compute(time_of_flight.TofMonitor[SampleRun, FrameMonitor0])
+        wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
     _validate_result_events(
-        tofs=tofs, ref=ref, percentile=100, diff_threshold=0.02, rtol=0.05
+        wavs=wavs, ref=ref, percentile=100, diff_threshold=0.02, rtol=0.05
     )
 
 
@@ -255,12 +246,12 @@ def test_standard_unwrap_histogram_mode(
     )
 
     if detector_or_monitor == "detector":
-        tofs = pl.compute(time_of_flight.TofDetector[SampleRun])
+        wavs = pl.compute(unwrap.WavelengthDetector[SampleRun])
     else:
-        tofs = pl.compute(time_of_flight.TofMonitor[SampleRun, FrameMonitor0])
+        wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
     _validate_result_histogram_mode(
-        tofs=tofs, ref=ref, percentile=96, diff_threshold=0.4, rtol=0.05
+        wavs=wavs, ref=ref, percentile=96, diff_threshold=0.4, rtol=0.05
     )
 
 
@@ -281,12 +272,12 @@ def test_pulse_skipping_unwrap(
     )
 
     if detector_or_monitor == "detector":
-        tofs = pl.compute(time_of_flight.TofDetector[SampleRun])
+        wavs = pl.compute(unwrap.WavelengthDetector[SampleRun])
     else:
-        tofs = pl.compute(time_of_flight.TofMonitor[SampleRun, FrameMonitor0])
+        wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
     _validate_result_events(
-        tofs=tofs, ref=ref, percentile=100, diff_threshold=0.1, rtol=0.05
+        wavs=wavs, ref=ref, percentile=100, diff_threshold=0.1, rtol=0.05
     )
 
 
@@ -310,12 +301,12 @@ def test_pulse_skipping_unwrap_180_phase_shift(detector_or_monitor) -> None:
     )
 
     if detector_or_monitor == "detector":
-        tofs = pl.compute(time_of_flight.TofDetector[SampleRun])
+        wavs = pl.compute(unwrap.WavelengthDetector[SampleRun])
     else:
-        tofs = pl.compute(time_of_flight.TofMonitor[SampleRun, FrameMonitor0])
+        wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
     _validate_result_events(
-        tofs=tofs, ref=ref, percentile=100, diff_threshold=0.1, rtol=0.05
+        wavs=wavs, ref=ref, percentile=100, diff_threshold=0.1, rtol=0.05
     )
 
 
@@ -335,12 +326,12 @@ def test_pulse_skipping_stride_offset_guess_gives_expected_result(
     )
 
     if detector_or_monitor == "detector":
-        tofs = pl.compute(time_of_flight.TofDetector[SampleRun])
+        wavs = pl.compute(unwrap.WavelengthDetector[SampleRun])
     else:
-        tofs = pl.compute(time_of_flight.TofMonitor[SampleRun, FrameMonitor0])
+        wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
     _validate_result_events(
-        tofs=tofs, ref=ref, percentile=100, diff_threshold=0.1, rtol=0.05
+        wavs=wavs, ref=ref, percentile=100, diff_threshold=0.1, rtol=0.05
     )
 
 
@@ -375,12 +366,12 @@ def test_pulse_skipping_unwrap_when_all_neutrons_arrive_after_second_pulse(
     )
 
     if detector_or_monitor == "detector":
-        tofs = pl.compute(time_of_flight.TofDetector[SampleRun])
+        wavs = pl.compute(unwrap.WavelengthDetector[SampleRun])
     else:
-        tofs = pl.compute(time_of_flight.TofMonitor[SampleRun, FrameMonitor0])
+        wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
     _validate_result_events(
-        tofs=tofs, ref=ref, percentile=100, diff_threshold=0.1, rtol=0.05
+        wavs=wavs, ref=ref, percentile=100, diff_threshold=0.1, rtol=0.05
     )
 
 
@@ -403,18 +394,18 @@ def test_pulse_skipping_unwrap_when_first_half_of_first_pulse_is_missing(
     lut_wf = make_lut_workflow(
         choppers=choppers, neutrons=300_000, seed=1234, pulse_stride=2
     )
-    lut_wf[time_of_flight.LtotalRange] = distance, distance
+    lut_wf[unwrap.LtotalRange] = distance, distance
 
-    pl = GenericTofWorkflow(run_types=[SampleRun], monitor_types=[FrameMonitor0])
+    pl = GenericUnwrapWorkflow(run_types=[SampleRun], monitor_types=[FrameMonitor0])
 
     # Skip first pulse = half of the first frame
     a = mon.group('event_time_zero')['event_time_zero', 1:]
     a.bins.coords['event_time_zero'] = sc.bins_like(a, a.coords['event_time_zero'])
     concatenated = a.bins.concat('event_time_zero')
 
-    pl[time_of_flight.TofLookupTable] = lut_wf.compute(time_of_flight.TofLookupTable)
-    pl[time_of_flight.PulseStrideOffset] = 1  # Start the stride at the second pulse
-    pl[time_of_flight.LookupTableRelativeErrorThreshold] = {
+    pl[unwrap.LookupTable] = lut_wf.compute(unwrap.LookupTable)
+    pl[unwrap.PulseStrideOffset] = 1  # Start the stride at the second pulse
+    pl[unwrap.LookupTableRelativeErrorThreshold] = {
         'detector': np.inf,
         'monitor': np.inf,
     }
@@ -422,17 +413,17 @@ def test_pulse_skipping_unwrap_when_first_half_of_first_pulse_is_missing(
     if detector_or_monitor == "detector":
         pl[NeXusDetectorName] = "detector"
         pl[RawDetector[SampleRun]] = concatenated
-        pl[time_of_flight.DetectorLtotal[SampleRun]] = distance
-        tofs = pl.compute(time_of_flight.TofDetector[SampleRun])
+        pl[unwrap.DetectorLtotal[SampleRun]] = distance
+        wavs = pl.compute(unwrap.WavelengthDetector[SampleRun])
     else:
         pl[NeXusName[FrameMonitor0]] = "monitor"
         pl[RawMonitor[SampleRun, FrameMonitor0]] = concatenated
-        pl[time_of_flight.MonitorLtotal[SampleRun, FrameMonitor0]] = distance
-        tofs = pl.compute(time_of_flight.TofMonitor[SampleRun, FrameMonitor0])
+        pl[unwrap.MonitorLtotal[SampleRun, FrameMonitor0]] = distance
+        wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
     # Convert to wavelength
-    graph = {**beamline_graph(scatter=False), **elastic_graph("tof")}
-    wavs = tofs.transform_coords("wavelength", graph=graph).bins.concat().value
+    # graph = {**beamline_graph(scatter=False), **elastic_graph("tof")}
+    wavs = wavs.bins.concat().value
     # Bin the events in toa starting from the pulse period to skip the first pulse.
     ref = (
         ref.bin(
@@ -459,14 +450,14 @@ def test_pulse_skipping_unwrap_when_first_half_of_first_pulse_is_missing(
     # All errors should be small
     assert np.nanpercentile(diff.values, 100) < 0.05
     # Make sure that we have not lost too many events (we lose some because they may be
-    # given a NaN tof from the lookup).
+    # given a NaN wavelength from the lookup).
     if detector_or_monitor == "detector":
         target = RawDetector[SampleRun]
     else:
         target = RawMonitor[SampleRun, FrameMonitor0]
     assert sc.isclose(
         pl.compute(target).data.nansum(),
-        tofs.data.nansum(),
+        wavs.data.nansum(),
         rtol=sc.scalar(1.0e-3),
     )
 
@@ -491,12 +482,12 @@ def test_pulse_skipping_stride_3(detector_or_monitor) -> None:
     )
 
     if detector_or_monitor == "detector":
-        tofs = pl.compute(time_of_flight.TofDetector[SampleRun])
+        wavs = pl.compute(unwrap.WavelengthDetector[SampleRun])
     else:
-        tofs = pl.compute(time_of_flight.TofMonitor[SampleRun, FrameMonitor0])
+        wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
     _validate_result_events(
-        tofs=tofs, ref=ref, percentile=100, diff_threshold=0.1, rtol=0.05
+        wavs=wavs, ref=ref, percentile=100, diff_threshold=0.1, rtol=0.05
     )
 
 
@@ -515,12 +506,12 @@ def test_pulse_skipping_unwrap_histogram_mode(
     )
 
     if detector_or_monitor == "detector":
-        tofs = pl.compute(time_of_flight.TofDetector[SampleRun])
+        wavs = pl.compute(unwrap.WavelengthDetector[SampleRun])
     else:
-        tofs = pl.compute(time_of_flight.TofMonitor[SampleRun, FrameMonitor0])
+        wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
     _validate_result_histogram_mode(
-        tofs=tofs, ref=ref, percentile=96, diff_threshold=0.4, rtol=0.05
+        wavs=wavs, ref=ref, percentile=96, diff_threshold=0.4, rtol=0.05
     )
 
 
@@ -548,72 +539,10 @@ def test_unwrap_int(dtype, detector_or_monitor, lut_workflow_psc_choppers) -> No
     pl[target] = mon
 
     if detector_or_monitor == "detector":
-        tofs = pl.compute(time_of_flight.TofDetector[SampleRun])
+        wavs = pl.compute(unwrap.WavelengthDetector[SampleRun])
     else:
-        tofs = pl.compute(time_of_flight.TofMonitor[SampleRun, FrameMonitor0])
+        wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
     _validate_result_events(
-        tofs=tofs, ref=ref, percentile=100, diff_threshold=0.02, rtol=0.05
+        wavs=wavs, ref=ref, percentile=100, diff_threshold=0.02, rtol=0.05
     )
-
-
-def test_compute_toa():
-    distance = sc.scalar(80.0, unit="m")
-    choppers = fakes.psc_choppers()
-
-    lut_wf = make_lut_workflow(
-        choppers=choppers, neutrons=500_000, seed=1234, pulse_stride=1
-    )
-
-    pl, _ = _make_workflow_event_mode(
-        distance=distance,
-        choppers=choppers,
-        lut_workflow=lut_wf,
-        seed=2,
-        pulse_stride_offset=0,
-        error_threshold=0.1,
-        detector_or_monitor="detector",
-    )
-
-    toas = pl.compute(time_of_flight.ToaDetector[SampleRun])
-
-    assert "toa" in toas.bins.coords
-    raw = pl.compute(RawDetector[SampleRun])
-    assert sc.allclose(toas.bins.coords["toa"], raw.bins.coords["event_time_offset"])
-
-
-def test_compute_toa_pulse_skipping():
-    distance = sc.scalar(100.0, unit="m")
-    choppers = fakes.pulse_skipping_choppers()
-
-    lut_wf = make_lut_workflow(
-        choppers=choppers, neutrons=500_000, seed=1234, pulse_stride=2
-    )
-
-    pl, _ = _make_workflow_event_mode(
-        distance=distance,
-        choppers=choppers,
-        lut_workflow=lut_wf,
-        seed=2,
-        pulse_stride_offset=1,
-        error_threshold=0.1,
-        detector_or_monitor="detector",
-    )
-
-    raw = pl.compute(RawDetector[SampleRun])
-
-    toas = pl.compute(time_of_flight.ToaDetector[SampleRun])
-
-    assert "toa" in toas.bins.coords
-    pulse_period = lut_wf.compute(PulsePeriod)
-    hist = toas.bins.concat().hist(
-        toa=sc.array(
-            dims=["toa"],
-            values=[0, pulse_period.value, pulse_period.value * 2],
-            unit=pulse_period.unit,
-        ).to(unit=toas.bins.coords["toa"].unit)
-    )
-    # There should be counts in both bins
-    n = raw.sum().value
-    assert hist.data[0].value > n / 5
-    assert hist.data[1].value > n / 5

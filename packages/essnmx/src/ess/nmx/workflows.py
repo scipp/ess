@@ -12,26 +12,30 @@ from ess.reduce.nexus.types import (
     NeXusComponent,
     NeXusTransformation,
     Position,
+    RunType,
     SampleRun,
 )
-from ess.reduce.time_of_flight import (
-    GenericTofWorkflow,
+from ess.reduce.unwrap import (
+    BeamlineComponentReading,
+    GenericUnwrapWorkflow,
+    LookupTableFilename,
     LookupTableRelativeErrorThreshold,
+    LookupTableWorkflow,
     LtotalRange,
     NumberOfSimulatedNeutrons,
     SimulationResults,
     SimulationSeed,
-    TofLookupTableWorkflow,
+    WavelengthDetector,
 )
-from ess.reduce.time_of_flight.lut import BeamlineComponentReading
-from ess.reduce.time_of_flight.types import TimeOfFlightLookupTableFilename
 from ess.reduce.workflow import register_workflow
+from scippneutron.conversion.tof import tof_from_wavelength
 
 from .configurations import WorkflowConfig
 from .types import (
     NMXDetectorMetadata,
     NMXSampleMetadata,
     NMXSourceMetadata,
+    TofDetector,
     TofSimulationMaxWavelength,
     TofSimulationMinWavelength,
 )
@@ -51,7 +55,7 @@ def _simulate_fixed_wavelength_tof(
 ) -> SimulationResults:
     """
     Simulate a pulse of neutrons propagating through the instrument using the
-    ``tof`` package (https://tof.readthedocs.io).
+    ``tof`` package (https://scipp.github.io/tof/).
     This runs a simulation assuming there are no choppers in the instrument.
 
     Parameters
@@ -245,14 +249,24 @@ def assemble_detector_metadata(
     )
 
 
+def compute_detector_tof(da: WavelengthDetector[RunType]) -> TofDetector[RunType]:
+    """
+    Compute the time-of-flight of neutrons from their wavelength.
+    """
+    return da.transform_coords(
+        "tof", graph={"tof": tof_from_wavelength}, keep_intermediate=False
+    )
+
+
 @register_workflow
 def NMXWorkflow() -> sciline.Pipeline:
-    generic_wf = GenericTofWorkflow(run_types=[SampleRun], monitor_types=[])
+    generic_wf = GenericUnwrapWorkflow(run_types=[SampleRun], monitor_types=[])
 
     generic_wf.insert(_retrieve_crystal_rotation)
     generic_wf.insert(assemble_sample_metadata)
     generic_wf.insert(assemble_source_metadata)
     generic_wf.insert(assemble_detector_metadata)
+    generic_wf.insert(compute_detector_tof)
     for key, value in default_parameters.items():
         generic_wf[key] = value
 
@@ -282,7 +296,7 @@ def _merge_workflows(
 def initialize_nmx_workflow(*, config: WorkflowConfig) -> sciline.Pipeline:
     """Initialize NMX workflow according to the workflow configuration.
 
-    If a TOF lookup table file path is provided in the configuration,
+    If a lookup table file path is provided in the configuration,
     it is used directly. Otherwise, a TOF simulation workflow is added to
     the NMX workflow to compute the lookup table on-the-fly.
 
@@ -298,10 +312,10 @@ def initialize_nmx_workflow(*, config: WorkflowConfig) -> sciline.Pipeline:
 
     """
     wf = NMXWorkflow()
-    if config.tof_lookup_table_file_path is not None:
-        wf[TimeOfFlightLookupTableFilename] = config.tof_lookup_table_file_path
+    if config.lookup_table_file_path is not None:
+        wf[LookupTableFilename] = config.lookup_table_file_path
     else:
-        wf = _merge_workflows(base_wf=wf, merged_wf=TofLookupTableWorkflow())
+        wf = _merge_workflows(base_wf=wf, merged_wf=LookupTableWorkflow())
         wf.insert(_simulate_fixed_wavelength_tof)
         wmax = sc.scalar(config.tof_simulation_max_wavelength, unit='angstrom')
         wmin = sc.scalar(config.tof_simulation_min_wavelength, unit='angstrom')

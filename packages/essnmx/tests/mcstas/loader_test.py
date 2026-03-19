@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 import pathlib
-import sys
 from collections.abc import Generator
 
 import pytest
@@ -17,14 +16,6 @@ from ess.nmx.mcstas.types import (
     DetectorIndex,
     FilePath,
     NMXRawEventCountsDataGroup,
-)
-
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-from mcstas_description_examples import (
-    no_detectors,
-    one_detector_no_filename,
-    two_detectors_same_filename,
-    two_detectors_two_filenames,
 )
 
 
@@ -133,25 +124,25 @@ def test_missing_rotation(rotation_mission_tmp_file: FilePath) -> None:
         # McStasInstrument is not used due to error in the file.
 
 
-def test_bank_names_to_detector_names_two_detectors():
-    res = bank_names_to_detector_names(two_detectors_two_filenames)
+def test_bank_names_to_detector_names_two_detectors(two_detectors_two_filenames_desc):
+    res = bank_names_to_detector_names(two_detectors_two_filenames_desc)
     assert len(res) == 2
     assert all(len(v) == 1 for v in res.values())
 
 
-def test_bank_names_to_detector_names_same_filename():
-    res = bank_names_to_detector_names(two_detectors_same_filename)
+def test_bank_names_to_detector_names_same_filename(two_detectors_same_filename_desc):
+    res = bank_names_to_detector_names(two_detectors_same_filename_desc)
     assert len(res) == 1
     assert all(len(v) == 2 for v in res.values())
 
 
-def test_bank_names_to_detector_names_no_detectors():
-    res = bank_names_to_detector_names(no_detectors)
+def test_bank_names_to_detector_names_no_detectors(no_detectors_desc):
+    res = bank_names_to_detector_names(no_detectors_desc)
     assert len(res) == 0
 
 
-def test_bank_names_to_detector_names_no_filename():
-    res = bank_names_to_detector_names(one_detector_no_filename)
+def test_bank_names_to_detector_names_no_filename(one_detector_no_filename_desc):
+    res = bank_names_to_detector_names(one_detector_no_filename_desc)
     assert len(res) == 1
     ((bank, (detector,)),) = res.items()
     assert bank == detector
