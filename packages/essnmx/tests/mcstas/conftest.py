@@ -1,6 +1,15 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
+# These fixtures are only for mcstas related tests.
+# They are mcstas descriptions to be parsed by essnmx mcstas helper functions.
 # flake8: noqa: E501
 
-no_detectors = """
+import pytest
+
+
+@pytest.fixture
+def no_detectors_desc() -> str:
+    return """
 SPLIT 999 COMPONENT Xtal = Single_crystal(
                 order = 1,
                 p_transmit=0.001,
@@ -23,7 +32,10 @@ COMPONENT Sphere = PSD_monitor_4PI(
 AT (0, 0, deltaz) RELATIVE armSample
 """
 
-two_detectors_two_filenames = """
+
+@pytest.fixture
+def two_detectors_two_filenames_desc() -> str:
+    return """
 COMPONENT nD_Mantid_0 = Monitor_nD(
         options ="mantid square x limits=[0 0.512] bins=1280 y limits=[0 0.512] bins=1280, neutron pixel min=1 t, list all neutrons",
     xmin = 0,
@@ -47,7 +59,10 @@ COMPONENT nD_Mantid_1 = Monitor_nD(
   ROTATED (0, 90, 0) RELATIVE armSample
 """
 
-one_detector_no_filename = """
+
+@pytest.fixture
+def one_detector_no_filename_desc() -> str:
+    return """
 COMPONENT nD_Mantid_2 = Monitor_nD(
         options ="mantid square x limits=[0 0.512] bins=1280 y limits=[0 0.512] bins=1280, neutron pixel min=2000000 t, list all neutrons",
     xmin = 0,
@@ -59,7 +74,10 @@ COMPONENT nD_Mantid_2 = Monitor_nD(
   ROTATED (0, 90, 0) RELATIVE armSample
 """
 
-two_detectors_same_filename = """
+
+@pytest.fixture
+def two_detectors_same_filename_desc() -> str:
+    return """
 COMPONENT nD_Mantid_0 = Monitor_nD(
         options ="mantid square x limits=[0 0.512] bins=1280 y limits=[0 0.512] bins=1280, neutron pixel min=1 t, list all neutrons",
     xmin = 0,

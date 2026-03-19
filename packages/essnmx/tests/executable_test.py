@@ -69,7 +69,7 @@ def _check_non_default_config(testing_config: ReductionConfig) -> None:
         testing_model = testing_child.model_dump(mode='python')
         default_model = default_child.model_dump(mode='python')
         for key, testing_value in testing_model.items():
-            if key == 'tof_lookup_table_file_path':
+            if key == 'lookup_table_file_path':
                 # This value may be None or default, so we skip the check.
                 continue
             default_value = default_model[key]
@@ -317,43 +317,43 @@ def test_histogram_out_of_range_max_warns(
 
 
 @pytest.fixture
-def tof_lut_file_path(tmp_path: pathlib.Path):
+def lut_file_path(tmp_path: pathlib.Path):
     """Fixture to provide the path to the small NMX NeXus file."""
     from dataclasses import is_dataclass
 
-    from ess.reduce.time_of_flight import TimeOfFlightLookupTable
+    from ess.reduce.unwrap import LookupTable
 
     from ess.nmx.workflows import initialize_nmx_workflow
 
     # Simply use the default workflow for testing.
     workflow = initialize_nmx_workflow(config=WorkflowConfig())
-    tof_lut: TimeOfFlightLookupTable = workflow.compute(TimeOfFlightLookupTable)
+    lut: LookupTable = workflow.compute(LookupTable)
 
     # Change the tof range a bit for testing.
-    if isinstance(tof_lut, sc.DataArray):
-        tof_lut *= 2
-    elif is_dataclass(tof_lut):
-        tof_lut.array *= 2
+    if isinstance(lut, sc.DataArray):
+        lut *= 2
+    elif is_dataclass(lut):
+        lut.array *= 2
     else:
         raise TypeError("Unexpected type for TOF lookup table.")
 
-    lut_file_path = tmp_path / "nmx_tof_lookup_table.h5"
-    tof_lut.save_hdf5(lut_file_path.as_posix())
+    lut_file_path = tmp_path / "nmx_lookup_table.h5"
+    lut.save_hdf5(lut_file_path.as_posix())
     yield lut_file_path
     if lut_file_path.exists():
         lut_file_path.unlink()
 
 
-def test_reduction_with_tof_lut_file(
-    reduction_config: ReductionConfig, tof_lut_file_path: pathlib.Path
+def test_reduction_with_lut_file(
+    reduction_config: ReductionConfig, lut_file_path: pathlib.Path
 ) -> None:
-    # Make sure the config uses no TOF lookup table file initially.
-    assert reduction_config.workflow.tof_lookup_table_file_path is None
+    # Make sure the config uses no lookup table file initially.
+    assert reduction_config.workflow.lookup_table_file_path is None
     with known_warnings():
         default_results = reduction(config=reduction_config)
 
-    # Update config to use the TOF lookup table file.
-    reduction_config.workflow.tof_lookup_table_file_path = tof_lut_file_path.as_posix()
+    # Update config to use the lookup table file.
+    reduction_config.workflow.lookup_table_file_path = lut_file_path.as_posix()
     with known_warnings():
         results = reduction(config=reduction_config)
 
