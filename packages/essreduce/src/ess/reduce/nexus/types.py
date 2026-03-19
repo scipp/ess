@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, BinaryIO, Generic, NewType, TypeVar
+from typing import Any, BinaryIO, Generic, NewType, TypeVar,Self
 
 import sciline
 import scipp as sc
@@ -185,8 +185,53 @@ class NeXusData(sciline.Scope[Component, RunType, sc.DataArray], sc.DataArray):
     """
 
 
-class Position(sciline.Scope[Component, RunType, sc.Variable], sc.Variable):
-    """Position of a component such as source, sample, monitor, or detector."""
+@dataclass(init=False, repr=False, slots=True)
+class Position(Generic[Component, RunType]):
+    """Position of a component such as source, sample, monitor, or detector.
+
+    The position can depend on time. In this case, a time coordinate is also stored.
+    Use ``position`` to get the position if it is scalar, or ``positions``
+    to get the position as a (potentially time-dependent) DataArray.
+    """
+    _position: sc.Variable
+    _time: sc.Variable | None
+
+    def __init__(self, pos: sc.DataArray|sc.Variable)->None:
+        if pos.ndim == 0:
+            self._position = pos.data if isinstance(pos, sc.DataArray) else pos
+            self._time = None
+        else:
+            if not isinstance(pos, sc.DataArray):
+                raise sc.DimensionError("Position is not a scalar, so it must be a DataArray")
+            self._position = pos.data
+            self._time = pos.coords['time']
+
+    @property
+    def is_dynamic(self)->bool:
+        return self._time is not None
+
+    @property
+    def position(self) -> sc.Variable:
+        if self.is_dynamic:
+            raise sc.DimensionError("Position is time-dependent, use `positions` instead.")
+        return self._position
+
+    @property
+    def positions(self) -> sc.DataArray:
+        da = sc.DataArray(self._position)
+        if self._time is not None:
+            da.coords['time'] = self._time
+        return da
+
+    def __str__(self)->str:
+        if self.is_dynamic:
+            time_str = f", time={self._time}"
+        else:
+            time_str = ""
+        return f"Position(position={self._position}{time_str})"
+
+    def __repr__(self)->str:
+        return f"Position(position={self._position}, time={self._time})"
 
 
 class DetectorPositionOffset(sciline.Scope[RunType, sc.Variable], sc.Variable):
