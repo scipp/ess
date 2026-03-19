@@ -674,6 +674,7 @@ _common_providers = (
     load_nexus_component,
     load_all_nexus_components,
     data_by_name,
+    nx_class_for_crystal,
     nx_class_for_detector,
     nx_class_for_monitor,
     nx_class_for_source,
