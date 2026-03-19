@@ -29,8 +29,8 @@ def make_coordinate_transform_graph(
     graph = {
         **scn.conversion.graph.beamline.beamline(scatter=False),
         **scn.conversion.graph.tof.elastic("tof"),
-        'sample_position': lambda: sample_position,
-        'source_position': lambda: source_position,
+        'sample_position': lambda: sample_position.position,
+        'source_position': lambda: source_position.position,
         'gravity': lambda: gravity,
     }
     return CoordTransformGraph(graph)

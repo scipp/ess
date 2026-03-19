@@ -68,8 +68,8 @@ def workflow() -> GenericTofWorkflow:
     wf[time_of_flight.LookupTableRelativeErrorThreshold] = {'detector': np.inf}
     wf[EmptyDetector[SampleRun]] = calibrated_beamline
     wf[NeXusData[snx.NXdetector, SampleRun]] = nexus_data
-    wf[Position[snx.NXsample, SampleRun]] = sc.vector([0, 0, 77], unit='m')
-    wf[Position[snx.NXsource, SampleRun]] = sc.vector([0, 0, 0], unit='m')
+    wf[Position[snx.NXsample, SampleRun]] = Position[snx.NXsample, SampleRun](sc.vector([0, 0, 77], unit='m'))
+    wf[Position[snx.NXsource, SampleRun]] = Position[snx.NXsample, SampleRun](sc.vector([0, 0, 0], unit='m'))
 
     return wf
 

@@ -129,8 +129,8 @@ def assemble_sample_metadata(
 
     return NMXSampleMetadata(
         name=sample_name,
-        crystal_rotation=crystal_rotation,
-        position=sample_position,
+        crystal_rotation=crystal_rotation.position,
+        position=sample_position.position,
     )
 
 
@@ -138,7 +138,7 @@ def assemble_source_metadata(
     source_position: Position[snx.NXsource, SampleRun],
 ) -> NMXSourceMetadata:
     """Assemble source metadata for NMX reduction workflow."""
-    return NMXSourceMetadata(position=source_position)
+    return NMXSourceMetadata(position=source_position.position)
 
 
 def _decide_fast_axis(da: sc.DataArray) -> str:
@@ -221,7 +221,7 @@ def assemble_detector_metadata(
     slow_axis_vector = axis_vectors[_slow_axis].to(unit=t_unit)
     x_pixel_size = _decide_step(empty_detector.coords['x_pixel_offset'])
     y_pixel_size = _decide_step(empty_detector.coords['y_pixel_offset'])
-    distance = sc.norm(origin - source_position.to(unit=origin.unit))
+    distance = sc.norm(origin - source_position.position.to(unit=origin.unit))
 
     # We save the first pixel position so that DIALS can read use it.
     flattened = empty_detector.flatten(to='detector_number')
@@ -229,7 +229,7 @@ def assemble_detector_metadata(
     first_pixel_position = flattened['detector_number', first_pixel_number].coords[
         'position'
     ]
-    first_pixel_position_from_sample = first_pixel_position - sample_position
+    first_pixel_position_from_sample = first_pixel_position - sample_position.position
 
     return NMXDetectorMetadata(
         detector_name=detector_component['nexus_component_name'],

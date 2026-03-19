@@ -114,7 +114,7 @@ def test_can_compute_position_of_group(depends_on: snx.TransformationChain) -> N
         chain,
         interval=TimeInterval(slice(None, None)),
     )
-    assert_identical(workflow.compute_position(trans), position)
+    assert_identical(workflow.compute_position(trans).position, position)
 
 
 def test_can_compute_position_of_group_time_dependent(
@@ -137,7 +137,7 @@ def test_can_compute_position_of_group_time_dependent(
         chain,
         interval=TimeInterval(slice(None, None)),
     )
-    assert_identical(workflow.compute_position(trans), position)
+    assert_identical(workflow.compute_position(trans).positions, position)
 
 
 def test_to_transform_with_positional_time_interval(
@@ -211,7 +211,7 @@ def test_given_no_sample_load_nexus_sample_returns_group_with_origin_depends_on(
         interval=TimeInterval(slice(None, None)),
     )
     position = workflow.compute_position(transformation)
-    assert_identical(position, sc.vector([0.0, 0.0, 0.0], unit='m'))
+    assert_identical(position.position, sc.vector([0.0, 0.0, 0.0], unit='m'))
 
 
 def test_get_transformation_chain_raises_exception_if_position_not_found(
