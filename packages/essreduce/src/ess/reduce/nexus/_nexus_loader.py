@@ -271,10 +271,9 @@ def _open_nexus_file_from_path(
     new_kwargs = (
         kwargs
         | ({} if definitions is NoNewDefinitions else {'definitions': definitions})
-        |
         # ESS nexus files are always written in swmr mode.
         # By default, try to open in swmr mode.
-        ({'swmr': True} if 'swmr' not in kwargs else {})
+        | ({'swmr': True} if 'swmr' not in kwargs else {})
     )
     try:
         return snx.File(file_path, **new_kwargs)
