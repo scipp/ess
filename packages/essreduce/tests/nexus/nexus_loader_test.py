@@ -199,6 +199,13 @@ def nexus_file_no_snx(request):
         yield store
 
 
+@pytest.fixture(params=[Path])
+def nexus_file_only_path(request):
+    with _file_store(request) as store:
+        _write_nexus_data(store)
+        yield store
+
+
 @pytest.fixture
 def expected_bank12():
     components = _event_data_components()
@@ -753,3 +760,10 @@ def test_open_nonexisting_file_raises_filenotfounderror():
 
     with pytest.raises(FileNotFoundError):
         open_nexus_file(nexus.types.FilePath(Path("doesnotexist.hdf")))
+
+
+def test_file_opens_in_swmr_mode(nexus_file_only_path):
+    from ess.reduce.nexus._nexus_loader import open_nexus_file
+
+    with open_nexus_file(nexus_file_only_path) as f:
+        assert f._group.file.swmr_mode
