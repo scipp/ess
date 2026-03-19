@@ -9,7 +9,6 @@ import scipp.constants
 import scippnexus as snx
 from scippneutron.conversion.tof import (
     energy_from_wavelength,
-    wavelength_from_tof,
     wavevector_from_wavelength,
 )
 
@@ -25,8 +24,7 @@ from ..types import (
     PrimarySpecCoordTransformGraph,
     RunType,
     SecondarySpecCoordTransformGraph,
-    TofDetector,
-    TofMonitor,
+    WavelengthDetector,
     WavelengthMonitor,
 )
 
@@ -35,10 +33,11 @@ def incident_energy_from_wavelength(*, incident_wavelength: sc.Variable) -> sc.V
     return energy_from_wavelength(wavelength=incident_wavelength)
 
 
-def incident_wavelength_from_tof(
-    *, sample_tof: sc.Variable, L1: sc.Variable
+def incident_wavelength_from_wavelength(
+    *,
+    sample_wavelength: sc.Variable,
 ) -> sc.Variable:
-    return wavelength_from_tof(tof=sample_tof, Ltotal=L1)
+    return sample_wavelength
 
 
 def incident_wavevector_from_incident_wavelength(
@@ -203,7 +202,7 @@ def inelastic_coordinate_transformation_graph_at_sample(
         {
             'energy_transfer': energy_transfer,
             'incident_energy': incident_energy_from_wavelength,
-            'incident_wavelength': incident_wavelength_from_tof,
+            'incident_wavelength': incident_wavelength_from_wavelength,
             'incident_wavevector': incident_wavevector_from_incident_wavelength,
             'gravity': lambda: gravity,
             'lab_momentum_transfer': lab_momentum_transfer_from_wavevectors,
@@ -233,7 +232,7 @@ def add_inelastic_coordinates(
 
 
 def add_incident_energy(
-    data: TofDetector[RunType], graph: InelasticCoordTransformGraph
+    data: WavelengthDetector[RunType], graph: InelasticCoordTransformGraph
 ) -> IncidentEnergyDetector[RunType]:
     transformed = data.transform_coords(
         [
@@ -311,7 +310,7 @@ def monitor_coordinate_transformation_graph(
 
 
 def add_monitor_wavelength_coord(
-    monitor: TofMonitor[RunType, MonitorType], graph: MonitorCoordTransformGraph
+    monitor: WavelengthMonitor[RunType, MonitorType], graph: MonitorCoordTransformGraph
 ) -> WavelengthMonitor[RunType, MonitorType]:
     return WavelengthMonitor[RunType, MonitorType](
         monitor.transform_coords(

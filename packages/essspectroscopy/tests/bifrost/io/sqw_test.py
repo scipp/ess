@@ -21,19 +21,19 @@ from scippneutron.io import sqw
 
 from ess import bifrost
 from ess.bifrost.data import (
+    lookup_table_simulation,
     simulated_elastic_incoherent_with_phonon,
-    tof_lookup_table_simulation,
 )
 from ess.spectroscopy.types import (
     EnergyBins,
     Filename,
+    LookupTableFilename,
     LookupTableRelativeErrorThreshold,
     NeXusDetectorName,
     OutFilename,
     PreopenNeXusFile,
     SampleRun,
     SQWBinSizes,
-    TofLookupTableFilename,
     UncertaintyBroadcastMode,
 )
 
@@ -74,7 +74,7 @@ def common_workflow(
     wf = bifrost.BifrostSimulationWorkflow(detector_names)
 
     wf[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
-    wf[TofLookupTableFilename] = tof_lookup_table_simulation()
+    wf[LookupTableFilename] = lookup_table_simulation()
     wf[LookupTableRelativeErrorThreshold] = {
         'detector': np.inf,
         '110_frame_3': np.inf,
