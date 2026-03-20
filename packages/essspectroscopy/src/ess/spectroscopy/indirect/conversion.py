@@ -18,26 +18,17 @@ from ..types import (
     IncidentEnergyDetector,
     InelasticCoordTransformGraph,
     MonitorCoordTransformGraph,
-    MonitorType,
     NormalizedIncidentEnergyDetector,
     Position,
     PrimarySpecCoordTransformGraph,
     RunType,
     SecondarySpecCoordTransformGraph,
     WavelengthDetector,
-    WavelengthMonitor,
 )
 
 
 def incident_energy_from_wavelength(*, incident_wavelength: sc.Variable) -> sc.Variable:
     return energy_from_wavelength(wavelength=incident_wavelength)
-
-
-def incident_wavelength_from_wavelength(
-    *,
-    sample_wavelength: sc.Variable,
-) -> sc.Variable:
-    return sample_wavelength
 
 
 def incident_wavevector_from_incident_wavelength(
@@ -202,7 +193,6 @@ def inelastic_coordinate_transformation_graph_at_sample(
         {
             'energy_transfer': energy_transfer,
             'incident_energy': incident_energy_from_wavelength,
-            'incident_wavelength': incident_wavelength_from_wavelength,
             'incident_wavevector': incident_wavevector_from_incident_wavelength,
             'gravity': lambda: gravity,
             'lab_momentum_transfer': lab_momentum_transfer_from_wavevectors,
@@ -303,29 +293,14 @@ def monitor_coordinate_transformation_graph(
         {
             **beamline.beamline(scatter=False),
             **tof.elastic_wavelength(start='tof'),
-            'incident_wavelength': 'wavelength',
             'source_position': lambda: source_position,
         }
-    )
-
-
-def add_monitor_wavelength_coord(
-    monitor: WavelengthMonitor[RunType, MonitorType], graph: MonitorCoordTransformGraph
-) -> WavelengthMonitor[RunType, MonitorType]:
-    return WavelengthMonitor[RunType, MonitorType](
-        monitor.transform_coords(
-            'incident_wavelength',
-            graph=graph,
-            keep_intermediate=False,
-            keep_aliases=False,
-        )
     )
 
 
 providers = (
     add_inelastic_coordinates,
     add_incident_energy,
-    add_monitor_wavelength_coord,
     inelastic_coordinate_transformation_graph_at_sample,
     monitor_coordinate_transformation_graph,
 )

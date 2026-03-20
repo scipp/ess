@@ -34,7 +34,7 @@ def TofWorkflow(
     run_types: Iterable[sciline.typing.Key],
     monitor_types: Iterable[sciline.typing.Key],
 ) -> sciline.Pipeline:
-    workflow = reduce_unwrap.GenericTofWorkflow(
+    workflow = reduce_unwrap.GenericUnwrapWorkflow(
         run_types=run_types,
         monitor_types=monitor_types,
     )
@@ -57,7 +57,7 @@ def detector_wavelength_data(
     :func:`ess.reduce.unwrap.detector_wavelength_data`
     for indirect geometry spectrometers.
     """
-    result = reduce_unwrap.eto_to_tof.detector_wavelength_data(
+    result = reduce_unwrap.to_wavelength.detector_wavelength_data(
         detector_data=RawDetector[RunType](sample_data),
         lookup=lookup,
         ltotal=DetectorLtotal(sample_data.coords['L1']),
@@ -84,12 +84,13 @@ def monitor_wavelength_data(
     :func:`ess.reduce.unwrap.monitor_wavelength_data`
     for indirect geometry spectrometers.
     """
-    result = reduce_unwrap.eto_to_wavelength.monitor_wavelength_data(
+    result = reduce_unwrap.to_wavelength.monitor_wavelength_data(
         monitor_data=monitor_data.rename(t='tof'),
         lookup=lookup,
         ltotal=ltotal,
         pulse_stride_offset=pulse_stride_offset,
     )
+    result = result.rename(wavelength='incident_wavelength')
     return result
 
 
@@ -132,7 +133,7 @@ def mask_large_uncertainty_in_lut_detector(
     essreduce.unwrap.mask_large_uncertainty_in_lut:
         The underlying implementation.
     """
-    from ess.reduce.unwrap.eto_to_wavelength import (
+    from ess.reduce.unwrap.to_wavelength import (
         mask_large_uncertainty_in_lut_detector,
     )
 
