@@ -24,7 +24,7 @@ def detector_wavelength_data(
     pulse_stride_offset: PulseStrideOffset,
 ) -> WavelengthDetector[RunType]:
     """
-    Convert the arrival-time data to wavelength data using a lookup table.
+    Convert the time-of-arrival data to wavelength data using a lookup table.
 
     The output data will have a wavelength coordinate.
 
