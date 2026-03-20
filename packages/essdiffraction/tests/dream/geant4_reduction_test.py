@@ -59,10 +59,7 @@ params = {
     CalibrationFilename: None,
     UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
     DspacingBins: sc.linspace('dspacing', 0.0, 2.3434, 201, unit='angstrom'),
-    TofMask: lambda x: (
-        (x < sc.scalar(0.0, unit='us').to(unit=elem_unit(x)))
-        | (x > sc.scalar(86e3, unit='us').to(unit=elem_unit(x)))
-    ),
+    TofMask: None,
     TwoThetaMask: None,
     WavelengthMask: None,
     CIFAuthors: CIFAuthors(
@@ -114,14 +111,14 @@ def test_pipeline_can_compute_dspacing_result_without_empty_can(workflow):
 
 def test_pipeline_can_compute_dspacing_result_using_lookup_table_filename(workflow):
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    workflow[LookupTableFilename] = dream.data.tof_lookup_table_high_flux()
+    workflow[LookupTableFilename] = dream.data.lookup_table_high_flux()
     result = workflow.compute(EmptyCanSubtractedIofDspacing)
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
 
 @pytest.fixture(scope="module")
-def dream_tof_lookup_table():
+def dream_lookup_table():
     lut_wf = unwrap.LookupTableWorkflow()
     lut_wf[unwrap.DiskChoppers[AnyRun]] = dream.beamline.choppers(
         dream.beamline.InstrumentConfiguration.high_flux_BC215
@@ -140,10 +137,10 @@ def dream_tof_lookup_table():
 
 
 def test_pipeline_can_compute_dspacing_result_using_custom_built_tof_lookup(
-    workflow, dream_tof_lookup_table
+    workflow, dream_lookup_table
 ):
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    workflow[LookupTable] = dream_tof_lookup_table
+    workflow[LookupTable] = dream_lookup_table
 
     result = workflow.compute(IntensityDspacing[SampleRun])
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
