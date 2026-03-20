@@ -10,12 +10,10 @@ import scippnexus as snx
 
 from .calibration import OutputCalibrationData
 from .correction import merge_calibration
-from .logging import get_logger
 from .types import (
     CalibrationData,
     CorrectedDetector,
     DspacingDetector,
-    DspacingMonitor,
     ElasticCoordTransformGraph,
     EmptyCanSubtractedIntensityTof,
     EmptyCanSubtractedIofDspacing,
@@ -23,14 +21,10 @@ from .types import (
     IntensityDspacing,
     IntensityTof,
     MonitorCoordTransformGraph,
-    MonitorType,
     Position,
     RunType,
     SampleRun,
-    # TofDetector,
-    # TofMonitor,
     WavelengthDetector,
-    WavelengthMonitor,
 )
 
 
@@ -179,22 +173,6 @@ def powder_coordinate_transformation_graph(
     )
 
 
-# def _restore_tof_from_wavelength(data: sc.DataArray) -> sc.DataArray:
-#     out = data.copy(deep=False)
-#     outer = out.coords.get("wavelength", None)
-#     if out.bins is not None:
-#         binned = out.bins.coords.get("wavelength", None)
-#     else:
-#         binned = None
-
-#     if outer is not None or binned is not None:
-#         get_logger().info("Discarded coordinate 'wavelength' in favor of 'tof'.")
-
-#     if "wavelength" in out.dims:
-#         out = out.rename_dims(wavelength="tof")
-#     return out
-
-
 def add_scattering_coordinates_from_positions(
     data: WavelengthDetector[RunType],
     graph: ElasticCoordTransformGraph[RunType],
@@ -294,20 +272,10 @@ def powder_monitor_coordinate_transformation_graph(
     )
 
 
-# def convert_monitor_to_wavelength(
-#     monitor: TofMonitor[RunType, MonitorType],
-#     graph: MonitorCoordTransformGraph[RunType],
-# ) -> WavelengthMonitor[RunType, MonitorType]:
-#     return WavelengthMonitor[RunType, MonitorType](
-#         monitor.transform_coords("wavelength", graph=graph, keep_intermediate=False)
-#     )
-
-
 providers = (
     add_scattering_coordinates_from_positions,
     convert_reduced_to_tof,
     convert_reduced_to_empty_can_subtracted_tof,
-    # convert_monitor_to_wavelength,
     powder_coordinate_transformation_graph,
     powder_monitor_coordinate_transformation_graph,
 )
