@@ -32,7 +32,7 @@ def detector_wavelength_data(
     :func:`ess.reduce.unwrap.detector_wavelength_data`
     for different input types.
     """
-    return reduce_unwrap.eto_to_wavelength.detector_wavelength_data(
+    return reduce_unwrap.to_wavelength.detector_wavelength_data(
         detector_data=RawDetector[RunType](sample_data),
         lookup=lookup,
         ltotal=ltotal,
