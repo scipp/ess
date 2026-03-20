@@ -111,6 +111,7 @@ def test_simulation_workflow_produces_the_same_data_as_before(
     workflow: sciline.Pipeline,
 ) -> None:
     energy_data = workflow.compute(EnergyQDetector[SampleRun])
+    sc.io.save_hdf5(energy_data, 'computed_energy_data_simulated_5x2.h5')
     expected = sc.io.load_hdf5(computed_energy_data_simulated_5x2())
 
     assert not energy_data.masks

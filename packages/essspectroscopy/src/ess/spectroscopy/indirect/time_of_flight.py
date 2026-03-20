@@ -155,6 +155,6 @@ providers = (
 """Providers for wavelength calculation on indirect geometry spectrometers.
 
 The providers here override the default providers of
-:class:`ess.reduce.wavelength.GenericUnwrapWorkflow`
+:class:`ess.reduce.unwrap.GenericUnwrapWorkflow`
 to customize the workflow for indirect geometry spectrometers.
 """
