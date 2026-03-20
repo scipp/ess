@@ -63,8 +63,8 @@ def detector_wavelength_data(
         ltotal=DetectorLtotal(sample_data.coords['L1']),
         pulse_stride_offset=pulse_stride_offset,
     )
-    # This is wavelength at the sample.
-    result.bins.coords['sample_wavelength'] = result.bins.coords.pop('wavelength')
+    # This is the incident wavelength at the sample.
+    result.bins.coords['incident_wavelength'] = result.bins.coords.pop('wavelength')
     del result.bins.coords['event_time_zero']
     return result
 
