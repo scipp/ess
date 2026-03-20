@@ -5,22 +5,38 @@
 
 from pathlib import Path
 
+import sciline as sl
 import scipp as sc
 import scippnexus as snx
+from ess.reduce.data import Entry, make_registry
 
 from ess.powder.types import (
     AccumulatedProtonCharge,
     CalibrationData,
     CalibrationFilename,
     DetectorBankSizes,
+    ElasticCoordTransformGraph,
     Filename,
+    MonitorCoordTransformGraph,
+    MonitorType,
     Position,
     ProtonCharge,
     RawDataAndMetadata,
     RunType,
-    TofDetector,
+    WavelengthDetector,
+    WavelengthMonitor,
 )
-from ess.reduce.data import Entry, make_registry
+
+
+class TofDetector(sl.Scope[RunType, sc.DataArray], sc.DataArray):
+    """
+    Detector with a time-of-flight coordinate
+    """
+
+
+class TofMonitor(sl.Scope[RunType, MonitorType, sc.DataArray], sc.DataArray):
+    """Monitor data with time-of-flight coordinate."""
+
 
 _registry = make_registry(
     "ess/powgen",
@@ -234,6 +250,24 @@ def sample_position(dg: RawDataAndMetadata[RunType]) -> Position[snx.NXsample, R
     return Position[snx.NXsample, RunType](dg["data"].coords["sample_position"])
 
 
+def convert_detector_to_wavelength(
+    da: TofDetector[RunType],
+    graph: ElasticCoordTransformGraph[RunType],
+) -> WavelengthDetector[RunType]:
+    return WavelengthDetector[RunType](
+        da.transform_coords("wavelength", graph=graph, keep_intermediate=False)
+    )
+
+
+def convert_monitor_to_wavelength(
+    monitor: TofMonitor[RunType, MonitorType],
+    graph: MonitorCoordTransformGraph[RunType],
+) -> WavelengthMonitor[RunType, MonitorType]:
+    return WavelengthMonitor[RunType, MonitorType](
+        monitor.transform_coords("wavelength", graph=graph, keep_intermediate=False)
+    )
+
+
 providers = (
     pooch_load,
     pooch_load_calibration,
@@ -242,5 +276,7 @@ providers = (
     extract_raw_data,
     sample_position,
     source_position,
+    convert_detector_to_wavelength,
+    convert_monitor_to_wavelength,
 )
 """Sciline Providers for loading POWGEN data."""

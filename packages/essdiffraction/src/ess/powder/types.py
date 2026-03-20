@@ -194,7 +194,7 @@ class RawDataAndMetadata(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
 
 
 TofMask = NewType("TofMask", Callable | None)
-"""TofMask is a callable that returns a mask for a given TofData."""
+"""TofMask is a callable that returns a mask for masking time-of-flight regions."""
 
 
 TwoThetaMask = NewType("TwoThetaMask", Callable | None)

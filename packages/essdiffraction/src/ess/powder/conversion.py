@@ -60,7 +60,9 @@ def _dspacing_from_diff_calibration_a0_impl(t, t0, c):
 
 
 def _dspacing_from_diff_calibration(
-    unwrapped_eto: sc.Variable,
+    # TODO: should not be tof here but a time-of-arrival
+    # See https://github.com/scipp/essdiffraction/issues/255
+    tof: sc.Variable,
     tzero: sc.Variable,
     difa: sc.Variable,
     difc: sc.Variable,
@@ -71,7 +73,7 @@ def _dspacing_from_diff_calibration(
 
     d-spacing is the positive solution of
 
-    .. math:: \mathsf{eto} = \mathsf{DIFA} * d^2 + \mathsf{DIFC} * d + t_0
+    .. math:: \mathsf{tof} = \mathsf{DIFA} * d^2 + \mathsf{DIFC} * d + t_0
 
     This function can be used with :func:`scipp.transform_coords`.
 
@@ -80,10 +82,8 @@ def _dspacing_from_diff_calibration(
     ess.powder.conversions.to_dspacing_with_calibration
     """
     if sc.all(difa == sc.scalar(0.0, unit=difa.unit)).value:
-        return _dspacing_from_diff_calibration_a0_impl(unwrapped_eto, tzero, difc)
-    return _dspacing_from_diff_calibration_generic_impl(
-        unwrapped_eto, tzero, difa, difc
-    )
+        return _dspacing_from_diff_calibration_a0_impl(tof, tzero, difc)
+    return _dspacing_from_diff_calibration_generic_impl(tof, tzero, difa, difc)
 
 
 def _consume_positions(position, sample_position, source_position):
@@ -122,6 +122,10 @@ def to_dspacing_with_calibration(
     ess.powder.conversions.dspacing_from_diff_calibration
     """
     out = merge_calibration(into=data, calibration=calibration)
+
+    # TODO: we should not be restoring tof here, as the calibration should be converting
+    # a time of arrival to d-spacing, and not a tof.
+    # We defer this to a later step: https://github.com/scipp/essdiffraction/issues/255
     # Restore tof from wavelength
     out = out.transform_coords("tof", graph=graph, keep_intermediate=False)
 
