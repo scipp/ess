@@ -64,8 +64,7 @@ PulsePeriod = unwrap.PulsePeriod
 ErrorLimitedLookupTable = unwrap.ErrorLimitedLookupTable
 LookupTable = unwrap.LookupTable
 LookupTableFilename = unwrap.LookupTableFilename
-# Legacy alias:
-LookupTableFilename = unwrap.LookupTableFilename
+
 
 # Custom types
 
