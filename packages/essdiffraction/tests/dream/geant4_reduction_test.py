@@ -8,6 +8,9 @@ import pytest
 import sciline
 import scipp as sc
 import scipp.testing
+from ess.reduce import unwrap
+from ess.reduce import workflow as reduce_workflow
+from ess.reduce.nexus.types import AnyRun
 from scippneutron import metadata
 from scippneutron._utils import elem_unit
 
@@ -31,12 +34,12 @@ from ess.powder.types import (
     IntensityDspacingTwoTheta,
     IntensityTof,
     KeepEvents,
+    LookupTable,
+    LookupTableFilename,
     MonitorFilename,
     NeXusDetectorName,
     ReducedTofCIF,
     SampleRun,
-    TimeOfFlightLookupTable,
-    TimeOfFlightLookupTableFilename,
     TofMask,
     TwoThetaBins,
     TwoThetaMask,
@@ -44,9 +47,6 @@ from ess.powder.types import (
     VanadiumRun,
     WavelengthMask,
 )
-from ess.reduce import time_of_flight
-from ess.reduce import workflow as reduce_workflow
-from ess.reduce.nexus.types import AnyRun
 
 params = {
     Filename[SampleRun]: dream.data.simulated_diamond_sample(small=True),
@@ -59,8 +59,10 @@ params = {
     CalibrationFilename: None,
     UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
     DspacingBins: sc.linspace('dspacing', 0.0, 2.3434, 201, unit='angstrom'),
-    TofMask: lambda x: (x < sc.scalar(0.0, unit='us').to(unit=elem_unit(x)))
-    | (x > sc.scalar(86e3, unit='us').to(unit=elem_unit(x))),
+    TofMask: lambda x: (
+        (x < sc.scalar(0.0, unit='us').to(unit=elem_unit(x)))
+        | (x > sc.scalar(86e3, unit='us').to(unit=elem_unit(x)))
+    ),
     TwoThetaMask: None,
     WavelengthMask: None,
     CIFAuthors: CIFAuthors(
@@ -112,7 +114,7 @@ def test_pipeline_can_compute_dspacing_result_without_empty_can(workflow):
 
 def test_pipeline_can_compute_dspacing_result_using_lookup_table_filename(workflow):
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    workflow[TimeOfFlightLookupTableFilename] = dream.data.tof_lookup_table_high_flux()
+    workflow[LookupTableFilename] = dream.data.tof_lookup_table_high_flux()
     result = workflow.compute(EmptyCanSubtractedIofDspacing)
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
@@ -120,29 +122,28 @@ def test_pipeline_can_compute_dspacing_result_using_lookup_table_filename(workfl
 
 @pytest.fixture(scope="module")
 def dream_tof_lookup_table():
-    lut_wf = time_of_flight.TofLookupTableWorkflow()
-    lut_wf[time_of_flight.DiskChoppers[AnyRun]] = dream.beamline.choppers(
+    lut_wf = unwrap.LookupTableWorkflow()
+    lut_wf[unwrap.DiskChoppers[AnyRun]] = dream.beamline.choppers(
         dream.beamline.InstrumentConfiguration.high_flux_BC215
     )
-    lut_wf[time_of_flight.SourcePosition] = sc.vector(value=[0, 0, -76.55], unit="m")
-    lut_wf[time_of_flight.NumberOfSimulatedNeutrons] = 500_000
-    lut_wf[time_of_flight.SimulationSeed] = 555
-    lut_wf[time_of_flight.PulseStride] = 1
-    lut_wf[time_of_flight.LtotalRange] = (
+    lut_wf[unwrap.SourcePosition] = sc.vector(value=[0, 0, -76.55], unit="m")
+    lut_wf[unwrap.NumberOfSimulatedNeutrons] = 500_000
+    lut_wf[unwrap.SimulationSeed] = 555
+    lut_wf[unwrap.PulseStride] = 1
+    lut_wf[unwrap.LtotalRange] = (
         sc.scalar(60.0, unit="m"),
         sc.scalar(80.0, unit="m"),
     )
-    lut_wf[time_of_flight.DistanceResolution] = sc.scalar(0.1, unit="m")
-    lut_wf[time_of_flight.TimeResolution] = sc.scalar(250.0, unit='us')
-    lut_wf[time_of_flight.LookupTableRelativeErrorThreshold] = 0.02
-    return lut_wf.compute(time_of_flight.TimeOfFlightLookupTable)
+    lut_wf[unwrap.DistanceResolution] = sc.scalar(0.1, unit="m")
+    lut_wf[unwrap.TimeResolution] = sc.scalar(250.0, unit='us')
+    return lut_wf.compute(unwrap.LookupTable)
 
 
 def test_pipeline_can_compute_dspacing_result_using_custom_built_tof_lookup(
     workflow, dream_tof_lookup_table
 ):
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    workflow[TimeOfFlightLookupTable] = dream_tof_lookup_table
+    workflow[LookupTable] = dream_tof_lookup_table
 
     result = workflow.compute(IntensityDspacing[SampleRun])
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}

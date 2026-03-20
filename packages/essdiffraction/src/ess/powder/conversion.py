@@ -60,7 +60,7 @@ def _dspacing_from_diff_calibration_a0_impl(t, t0, c):
 
 
 def _dspacing_from_diff_calibration(
-    tof: sc.Variable,
+    unwrapped_eto: sc.Variable,
     tzero: sc.Variable,
     difa: sc.Variable,
     difc: sc.Variable,
@@ -71,7 +71,7 @@ def _dspacing_from_diff_calibration(
 
     d-spacing is the positive solution of
 
-    .. math:: \mathsf{tof} = \mathsf{DIFA} * d^2 + \mathsf{DIFC} * d + t_0
+    .. math:: \mathsf{eto} = \mathsf{DIFA} * d^2 + \mathsf{DIFC} * d + t_0
 
     This function can be used with :func:`scipp.transform_coords`.
 
@@ -80,8 +80,10 @@ def _dspacing_from_diff_calibration(
     ess.powder.conversions.to_dspacing_with_calibration
     """
     if sc.all(difa == sc.scalar(0.0, unit=difa.unit)).value:
-        return _dspacing_from_diff_calibration_a0_impl(tof, tzero, difc)
-    return _dspacing_from_diff_calibration_generic_impl(tof, tzero, difa, difc)
+        return _dspacing_from_diff_calibration_a0_impl(unwrapped_eto, tzero, difc)
+    return _dspacing_from_diff_calibration_generic_impl(
+        unwrapped_eto, tzero, difa, difc
+    )
 
 
 def _consume_positions(position, sample_position, source_position):

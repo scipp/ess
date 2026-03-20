@@ -1,6 +1,7 @@
 import numpy as np
 import scipp as sc
 import scippneutron as scn
+from ess.reduce.nexus.types import Filename, SampleRun
 from scipp.testing import assert_allclose
 
 from ess.beer import (
@@ -15,9 +16,7 @@ from ess.beer.data import (
     mcstas_silicon_new_model,
 )
 from ess.beer.io import load_beer_mcstas, load_beer_mcstas_monitor
-from ess.beer.types import DetectorBank, DHKLList
-from ess.reduce.nexus.types import Filename, SampleRun
-from ess.reduce.time_of_flight.types import TofDetector
+from ess.beer.types import DetectorBank, DHKLList, TofDetector
 
 
 def test_can_reduce_using_known_peaks_workflow():

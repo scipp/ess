@@ -12,9 +12,7 @@ from typing import NewType
 
 import sciline
 import scipp as sc
-
 from ess.reduce.nexus.types import Filename, RawDetector, RunType, SampleRun
-from ess.reduce.time_of_flight.types import TofDetector
 
 
 class StreakClusteredData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
@@ -24,7 +22,6 @@ class StreakClusteredData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
 RawDetector = RawDetector
 Filename = Filename
 SampleRun = SampleRun
-TofDetector = TofDetector
 
 
 class DetectorBank(Enum):
@@ -58,3 +55,9 @@ CIFIdentifierForPeakPositions = NewType("CIFIdentifierForPeakPositions", object)
 
 CIFPeaksMinIntensity = NewType("CIFPeaksMinIntensity", sc.Variable)
 """Minimum peak intensity for peaks from CIF file to be included in :py:`DHKLList`."""
+
+
+class TofDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """
+    Detector with a time-of-flight coordinate
+    """
