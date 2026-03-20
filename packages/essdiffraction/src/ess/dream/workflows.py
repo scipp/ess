@@ -73,13 +73,13 @@ DETECTOR_BANK_SIZES = {
 def _get_lookup_table_filename_from_configuration(
     configuration: InstrumentConfiguration,
 ) -> LookupTableFilename:
-    from .data import tof_lookup_table_high_flux
+    from .data import lookup_table_high_flux
 
     match configuration:
         case InstrumentConfiguration.high_flux_BC215:
-            out = tof_lookup_table_high_flux(bc=215)
+            out = lookup_table_high_flux(bc=215)
         case InstrumentConfiguration.high_flux_BC240:
-            out = tof_lookup_table_high_flux(bc=240)
+            out = lookup_table_high_flux(bc=240)
         case InstrumentConfiguration.high_resolution:
             raise NotImplementedError("High resolution configuration not yet supported")
 

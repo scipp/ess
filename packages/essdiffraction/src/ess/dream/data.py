@@ -40,6 +40,9 @@ _registry = make_registry(
         # `shrink_nexus.py` script in the `tools` folder at the top level of the
         # `essdiffraction` repository.
         "TEST_DREAM_nexus_sorted-2023-12-07.nxs": "md5:599b426a93c46a7b4b09a874bf288c53",  # noqa: E501
+        # Wavelength lookup tables
+        "DREAM-high-flux-wavelength-lut-5m-80m-bc215.h5": "md5:10c80c9de311cfa246f7b2c165eb0b49",  # noqa: E501
+        "DREAM-high-flux-wavelength-lut-5m-80m-bc240.h5": "md5:9741176f8da9b34c2a15967a43e21462",  # noqa: E501
     },
 )
 
@@ -291,5 +294,38 @@ def tof_lookup_table_high_flux(bc: Literal[215, 240] = 215) -> Path:
             return get_path("DREAM-high-flux-tof-lut-5m-80m.h5")
         case 240:
             return get_path("DREAM-high-flux-tof-lut-5m-80m-bc240.h5")
+        case _:
+            raise ValueError(f"Unsupported band-control chopper (BC) value: {bc}")
+
+
+def lookup_table_high_flux(bc: Literal[215, 240] = 215) -> Path:
+    """Path to a HDF5 file containing a wavelength lookup table for high-flux mode.
+
+    The table was created using the ``tof`` package and the chopper settings for the
+    DREAM instrument in high-resolution mode.
+    Can return tables for two different band-control chopper (BC) settings:
+    - ``bc=215``: corresponds to the settings of the choppers in the tutorial data.
+    - ``bc=240``: a setting with less time overlap between frames.
+
+    Note that the phase of the band-control chopper (BCC) was set to 215 degrees in the
+    Geant4 simulation which generated the data used in the documentation notebooks.
+    This has since been found to be non-optimal as it leads to time overlap between the
+    two frames, and a value of 240 degrees is now recommended.
+
+    This table was computed using `Create a wavelength lookup table for DREAM
+    <../../user-guide/dream/dream-make-wavelength-lookup-table.rst>`_
+    with ``NumberOfSimulatedNeutrons = 5_000_000``.
+
+    Parameters
+    ----------
+    bc:
+        Band-control chopper (BC) setting. The default is 215, which corresponds to the
+        settings of the choppers in the tutorial data.
+    """
+    match bc:
+        case 215:
+            return get_path("DREAM-high-flux-wavelength-lut-5m-80m-bc215.h5")
+        case 240:
+            return get_path("DREAM-high-flux-wavelength-lut-5m-80m-bc240.h5")
         case _:
             raise ValueError(f"Unsupported band-control chopper (BC) value: {bc}")
