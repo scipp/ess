@@ -12,6 +12,7 @@ from ess.powder.types import (
     CIFAuthors,
     EmptyCanSubtractedIntensityTof,
     IntensityTof,
+    Measurement,
     ReducedEmptyCanSubtractedTofCIF,
     ReducedTofCIF,
     ReducerSoftware,
@@ -26,6 +27,7 @@ def prepare_reduced_tof_cif(
     authors: CIFAuthors,
     beamline: Beamline[SampleRun],
     source: Source[SampleRun],
+    measurement: Measurement[SampleRun],
     reducers: ReducerSoftware,
     calibration: OutputCalibrationData,
 ) -> ReducedTofCIF:
@@ -61,6 +63,7 @@ def prepare_reduced_tof_cif(
         authors=authors,
         beamline=beamline,
         source=source,
+        measurement=measurement,
         reducers=reducers,
         calibration=calibration,
     )
@@ -72,6 +75,7 @@ def prepare_reduced_empty_can_subtracted_tof_cif(
     authors: CIFAuthors,
     beamline: Beamline[SampleRun],
     source: Source[SampleRun],
+    measurement: Measurement[SampleRun],
     reducers: ReducerSoftware,
     calibration: OutputCalibrationData,
 ) -> ReducedEmptyCanSubtractedTofCIF:
@@ -107,6 +111,7 @@ def prepare_reduced_empty_can_subtracted_tof_cif(
         authors=authors,
         beamline=beamline,
         source=source,
+        measurement=measurement,
         reducers=reducers,
         calibration=calibration,
     )
@@ -118,12 +123,14 @@ def _prepare_reduced_tof_cif_impl(
     authors: CIFAuthors,
     beamline: Beamline[SampleRun],
     source: Source[SampleRun],
+    measurement: Measurement[SampleRun],
     reducers: ReducerSoftware,
     calibration: OutputCalibrationData,
 ) -> ReducedTofCIF:
     to_save = _prepare_data(da)
     return ReducedTofCIF(
         cif.CIF('reduced_tof')
+        .with_measurement(measurement)
         .with_reducers(*(reducer.compact_repr for reducer in reducers))
         .with_authors(*authors)
         .with_beamline(beamline, source)

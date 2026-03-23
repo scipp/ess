@@ -36,6 +36,7 @@ Position = reduce_t.Position
 
 DetectorBankSizes = reduce_t.DetectorBankSizes
 
+DetectorLtotal = unwrap_t.DetectorLtotal
 WavelengthDetector = unwrap_t.WavelengthDetector
 WavelengthMonitor = unwrap_t.WavelengthMonitor
 PulseStrideOffset = unwrap_t.PulseStrideOffset
@@ -102,6 +103,10 @@ class DspacingDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
 
 DspacingHistogram = NewType("DspacingHistogram", sc.DataArray)
 """Histogrammed intensity vs d-spacing."""
+
+
+class DetectorTwoTheta(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """Scattering angle (two-theta) for each detector pixel."""
 
 
 class ElasticCoordTransformGraph(sciline.Scope[RunType, dict], dict):
@@ -207,6 +212,9 @@ WavelengthMask = NewType("WavelengthMask", Callable | None)
 
 Beamline = reduce_t.Beamline
 """Beamline metadata."""
+
+Measurement = reduce_t.Measurement
+"""Measurement metadata."""
 
 ReducerSoftware = NewType('ReducerSoftware', list[Software])
 """Pieces of software used to reduce the data."""

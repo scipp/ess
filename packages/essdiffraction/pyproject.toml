@@ -31,16 +31,16 @@ requires-python = ">=3.11"
 # Make sure to list one dependency per line.
 dependencies = [
   "dask>=2022.1.0",
-  "essreduce>=26.2.1",
+  "essreduce>=26.3.1",
   "graphviz",
   "numpy>=2",
   "plopp>=26.2.0",
   "pythreejs>=2.4.1",
   "sciline>=25.04.1",
   "scipp>=25.11.0",
-  "scippneutron>=25.02.0",
+  "scippneutron>=26.3.0",
   "scippnexus>=23.12.0",
-  "tof>=25.11.1",
+  "tof>=25.12.0",
   "ncrystal[cif]>=4.1.0",
   "spglib!=2.7",  # https://github.com/mctools/ncrystal/issues/320
 ]
