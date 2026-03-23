@@ -12,6 +12,7 @@ from typing import NewType
 
 import sciline
 import scipp as sc
+
 from ess.reduce.nexus.types import Filename, RawDetector, RunType, SampleRun
 
 

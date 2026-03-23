@@ -165,7 +165,7 @@ def powder_coordinate_transformation_graph(
     :
         A dictionary with the graph for the transformation.
     """
-    return ElasticCoordTransformGraph(
+    return ElasticCoordTransformGraph[RunType](
         {
             **scn.conversion.graph.beamline.beamline(scatter=True),
             **scn.conversion.graph.tof.elastic("wavelength"),
@@ -264,7 +264,7 @@ def powder_monitor_coordinate_transformation_graph(
     :
         A dictionary with the graph for the transformation.
     """
-    return MonitorCoordTransformGraph(
+    return MonitorCoordTransformGraph[RunType](
         {
             **scn.conversion.graph.beamline.beamline(scatter=False),
             **scn.conversion.graph.tof.elastic("wavelength"),

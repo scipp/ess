@@ -7,8 +7,8 @@ from pathlib import Path
 
 import sciline as sl
 import scipp as sc
+import scippneutron as scn
 import scippnexus as snx
-from ess.reduce.data import Entry, make_registry
 
 from ess.powder.types import (
     AccumulatedProtonCharge,
@@ -17,6 +17,7 @@ from ess.powder.types import (
     DetectorBankSizes,
     ElasticCoordTransformGraph,
     Filename,
+    GravityVector,
     MonitorCoordTransformGraph,
     MonitorType,
     Position,
@@ -26,6 +27,7 @@ from ess.powder.types import (
     WavelengthDetector,
     WavelengthMonitor,
 )
+from ess.reduce.data import Entry, make_registry
 
 
 class TofDetector(sl.Scope[RunType, sc.DataArray], sc.DataArray):
@@ -250,6 +252,77 @@ def sample_position(dg: RawDataAndMetadata[RunType]) -> Position[snx.NXsample, R
     return Position[snx.NXsample, RunType](dg["data"].coords["sample_position"])
 
 
+def _coordinate_transformation_graph(
+    source_position: sc.Variable,
+    sample_position: sc.Variable,
+    gravity: sc.Variable,
+    scatter: bool,
+) -> dict:
+    return {
+        **scn.conversion.graph.beamline.beamline(scatter=scatter),
+        **scn.conversion.graph.tof.elastic("tof"),
+        'source_position': lambda: source_position,
+        'sample_position': lambda: sample_position,
+        'gravity': lambda: gravity,
+    }
+
+
+def detector_coordinate_transformation_graph(
+    source_position: Position[snx.NXsource, RunType],
+    sample_position: Position[snx.NXsample, RunType],
+    gravity: GravityVector,
+) -> ElasticCoordTransformGraph[RunType]:
+    """Generate a coordinate transformation graph for detectors.
+
+    Parameters
+    ----------
+    source_position:
+        Position of the neutron source.
+    sample_position:
+        Position of the sample.
+    gravity:
+        Gravity vector.
+
+    Returns
+    -------
+    :
+        A dictionary graph for the transformation.
+    """
+    return ElasticCoordTransformGraph[RunType](
+        _coordinate_transformation_graph(
+            source_position, sample_position, gravity, scatter=True
+        )
+    )
+
+
+def monitor_coordinate_transformation_graph(
+    source_position: Position[snx.NXsource, RunType],
+    sample_position: Position[snx.NXsample, RunType],
+    gravity: GravityVector,
+) -> MonitorCoordTransformGraph[RunType]:
+    """Generate a coordinate transformation graph for monitors.
+
+    Parameters
+    ----------
+    source_position:
+        Position of the neutron source.
+    sample_position:
+        Position of the sample.
+    gravity:
+        Gravity vector.
+
+    Returns
+    -------
+    :
+        A dictionary graph for the transformation.
+    """
+    return MonitorCoordTransformGraph[RunType](
+        _coordinate_transformation_graph(
+            source_position, sample_position, gravity, scatter=False
+        )
+    )
+
+
 def convert_detector_to_wavelength(
     da: TofDetector[RunType],
     graph: ElasticCoordTransformGraph[RunType],
@@ -276,6 +349,8 @@ providers = (
     extract_raw_data,
     sample_position,
     source_position,
+    detector_coordinate_transformation_graph,
+    monitor_coordinate_transformation_graph,
     convert_detector_to_wavelength,
     convert_monitor_to_wavelength,
 )

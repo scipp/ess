@@ -8,11 +8,7 @@ import pytest
 import sciline
 import scipp as sc
 import scipp.testing
-from ess.reduce import unwrap
-from ess.reduce import workflow as reduce_workflow
-from ess.reduce.nexus.types import AnyRun
 from scippneutron import metadata
-from scippneutron._utils import elem_unit
 
 import ess.dream.data  # noqa: F401
 from ess import dream, powder
@@ -47,6 +43,9 @@ from ess.powder.types import (
     VanadiumRun,
     WavelengthMask,
 )
+from ess.reduce import unwrap
+from ess.reduce import workflow as reduce_workflow
+from ess.reduce.nexus.types import AnyRun
 
 params = {
     Filename[SampleRun]: dream.data.simulated_diamond_sample(small=True),
