@@ -94,13 +94,11 @@ def _consume_positions(position, sample_position, source_position):
 
 
 def to_dspacing_with_calibration(
-    data: sc.DataArray,
-    calibration: sc.Dataset,
-    graph: dict,
+    data: sc.DataArray, calibration: sc.Dataset
 ) -> sc.DataArray:
     """
-    Transform coordinates to d-spacing from calibration parameters.
-    Computes d-spacing from wavelength stored in `data`.
+    Transform coordinates from a detector time of arrival offset to d-spacing using
+    calibration parameters.
 
     Parameters
     ----------
@@ -109,8 +107,6 @@ def to_dspacing_with_calibration(
         Must have a wavelength coordinate.
     calibration:
         Calibration data.
-    graph:
-        Graph for the coordinate transformation, used to restore tof from wavelength.
 
     Returns
     -------
@@ -127,6 +123,7 @@ def to_dspacing_with_calibration(
     # a time of arrival to d-spacing, and not a tof.
     # We defer this to a later step: https://github.com/scipp/essdiffraction/issues/255
     # Restore tof from wavelength
+    graph = {"tof": scn.conversion.tof.tof_from_wavelength}
     out = out.transform_coords("tof", graph=graph, keep_intermediate=False)
 
     pos_graph = {"dspacing": _dspacing_from_diff_calibration}
@@ -214,7 +211,7 @@ def convert_to_dspacing(
     if calibration is None:
         out = data.transform_coords(["dspacing"], graph=graph, keep_intermediate=False)
     else:
-        out = to_dspacing_with_calibration(data, calibration=calibration, graph=graph)
+        out = to_dspacing_with_calibration(data, calibration=calibration)
         for key in ("wavelength", "two_theta"):
             if key in out.coords.keys():
                 out.coords.set_aligned(key, False)

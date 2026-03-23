@@ -56,6 +56,12 @@ def test_dspacing_with_calibration_roundtrip(calibration):
     tzero = calibration['tzero'].data
     recomputed_tof = difa * d**2 + difc * d + tzero
     recomputed_tof = recomputed_tof.rename_dims({'dspacing': 'tof'})
+    # Note that here, the recomputed_tof is 2D (spectrum, tof) while the initial_tof
+    # is 1D (tof), but the values should be the same along the spectrum dimension for
+    # recomputed_tof. The allclose check takes the difference between the 2 arrays and
+    # checks that all values are close to zero. In that process, the 1D initial_tof is
+    # automatically broadcast to the shape of recomputed_tof, so the check is
+    # effectively comparing each spectrum's recomputed_tof to the same initial_tof.
     assert sc.allclose(recomputed_tof, initial_tof.coords['tof'])
 
 
@@ -77,11 +83,13 @@ def test_dspacing_with_calibration_roundtrip_with_wavelength(calibration):
     difc = calibration['difc'].data
     tzero = calibration['tzero'].data
     recomputed_tof = difa * d**2 + difc * d + tzero
-    recomputed_tof = recomputed_tof.rename_dims({'dspacing': 'tof'})
-    assert sc.allclose(
-        recomputed_tof,
-        initial_wavelength.coords['tof'].rename_dims({'wavelength': 'tof'}),
-    )
+    # Note that here, the recomputed_tof is 2D (spectrum, tof) while the initial_tof
+    # is 1D (tof), but the values should be the same along the spectrum dimension for
+    # recomputed_tof. The allclose check takes the difference between the 2 arrays and
+    # checks that all values are close to zero. In that process, the 1D initial_tof is
+    # automatically broadcast to the shape of recomputed_tof, so the check is
+    # effectively comparing each spectrum's recomputed_tof to the same initial_tof.
+    assert sc.allclose(recomputed_tof, initial_wavelength.coords['tof'])
 
 
 def test_dspacing_with_calibration_consumes_positions(calibration):
