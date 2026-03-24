@@ -40,9 +40,9 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=20e248fc"></script>
-    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
-    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/documentation_options.js?v=1558ef6b"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../../_static/copybutton.js?v=f281be69"></script>
     <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -55,7 +55,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.dev1611+gbcc8a6fc6" />
+  <meta name="docsearch:version" content="26.4.0" />
   </head>
   
   
@@ -602,15 +602,15 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">sciline</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.time_of_flight.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">GenericTofWorkflow</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.unwrap.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">GenericUnwrapWorkflow</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">..imaging.conversion</span><span class="w"> </span><span class="kn">import</span> <span class="n">providers</span> <span class="k">as</span> <span class="n">conversion_providers</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..imaging.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">BeamMonitor1</span><span class="p">,</span>
     <span class="n">BeamMonitor2</span><span class="p">,</span>
     <span class="n">BeamMonitor3</span><span class="p">,</span>
     <span class="n">BeamMonitor4</span><span class="p">,</span>
     <span class="n">DarkBackgroundRun</span><span class="p">,</span>
+    <span class="n">LookupTableRelativeErrorThreshold</span><span class="p">,</span>
     <span class="n">NeXusMonitorName</span><span class="p">,</span>
     <span class="n">OpenBeamRun</span><span class="p">,</span>
     <span class="n">PulseStrideOffset</span><span class="p">,</span>
@@ -628,6 +628,14 @@
         <span class="n">NeXusMonitorName</span><span class="p">[</span><span class="n">BeamMonitor3</span><span class="p">]:</span> <span class="s2">&quot;beam_monitor_3&quot;</span><span class="p">,</span>
         <span class="n">NeXusMonitorName</span><span class="p">[</span><span class="n">BeamMonitor4</span><span class="p">]:</span> <span class="s2">&quot;beam_monitor_4&quot;</span><span class="p">,</span>
         <span class="n">PulseStrideOffset</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">LookupTableRelativeErrorThreshold</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;event_mode_detectors/timepix3&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;histogram_mode_detectors/orca&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;beam_monitor_1&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;beam_monitor_2&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;beam_monitor_3&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;beam_monitor_4&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">),</span>
+        <span class="p">},</span>
     <span class="p">}</span></div>
 
 
@@ -638,7 +646,7 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Workflow with default parameters for Odin.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">workflow</span> <span class="o">=</span> <span class="n">GenericTofWorkflow</span><span class="p">(</span>
+    <span class="n">workflow</span> <span class="o">=</span> <span class="n">GenericUnwrapWorkflow</span><span class="p">(</span>
         <span class="n">run_types</span><span class="o">=</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">,</span> <span class="n">OpenBeamRun</span><span class="p">,</span> <span class="n">DarkBackgroundRun</span><span class="p">],</span>
         <span class="n">monitor_types</span><span class="o">=</span><span class="p">[</span><span class="n">BeamMonitor1</span><span class="p">,</span> <span class="n">BeamMonitor2</span><span class="p">,</span> <span class="n">BeamMonitor3</span><span class="p">,</span> <span class="n">BeamMonitor4</span><span class="p">],</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
@@ -656,7 +664,7 @@
 <span class="sd">    Workflow with default parameters for Odin.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">workflow</span> <span class="o">=</span> <span class="n">OdinWorkflow</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">provider</span> <span class="ow">in</span> <span class="p">(</span><span class="o">*</span><span class="n">conversion_providers</span><span class="p">,</span> <span class="o">*</span><span class="n">masking_providers</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">provider</span> <span class="ow">in</span> <span class="p">(</span><span class="o">*</span><span class="n">masking_providers</span><span class="p">,):</span>
         <span class="n">workflow</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">provider</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">workflow</span></div>
 
@@ -716,7 +724,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
     <br/>
   </p>
 </div>
@@ -728,7 +736,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSimaging version: 0.1.dev1611+gbcc8a6fc6 (<a href="https://github.com/scipp/essimaging/releases">older versions</a>).</div>
+Current ESSimaging version: 26.4.0 (<a href="https://github.com/scipp/essimaging/releases">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

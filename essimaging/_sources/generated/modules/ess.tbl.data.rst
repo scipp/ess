@@ -19,6 +19,7 @@
       tbl_lego_sample_run
       tbl_orca_focussing_data
       tbl_tof_lookup_table_no_choppers
+      tbl_wavelength_lookup_table_no_choppers
       tutorial_sample_data
    
    

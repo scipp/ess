@@ -40,7 +40,6 @@
       ExposureTime
       FluxNormalizedDetector
       ProtonCharge
-      WavelengthDetector
    
    
 

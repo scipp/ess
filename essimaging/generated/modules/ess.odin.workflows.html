@@ -41,9 +41,9 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../_static/documentation_options.js?v=20e248fc"></script>
-    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
-    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/documentation_options.js?v=1558ef6b"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../_static/copybutton.js?v=f281be69"></script>
     <script src="../../_static/design-tabs.js?v=f930bc37"></script>
@@ -58,7 +58,7 @@
     <link rel="prev" title="ess.odin.masking.apply_masks" href="ess.odin.masking.apply_masks.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.dev1611+gbcc8a6fc6" />
+  <meta name="docsearch:version" content="26.4.0" />
   </head>
   
   
@@ -553,12 +553,6 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="ess.imaging.conversion.html">ess.imaging.conversion</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="ess.imaging.conversion.providers.html">ess.imaging.conversion.providers</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ess.imaging.conversion.compute_detector_wavelength.html">ess.imaging.conversion.compute_detector_wavelength</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ess.imaging.conversion.make_coordinate_transform_graph.html">ess.imaging.conversion.make_coordinate_transform_graph</a></li>
-</ul>
-</details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.imaging.data.html">ess.imaging.data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="ess.imaging.data.jparc_siemens_star_measured_path.html">ess.imaging.data.jparc_siemens_star_measured_path</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.imaging.data.jparc_siemens_star_openbeam_path.html">ess.imaging.data.jparc_siemens_star_openbeam_path</a></li>
@@ -604,7 +598,6 @@
 <li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.ExposureTime.html">ess.imaging.types.ExposureTime</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.FluxNormalizedDetector.html">ess.imaging.types.FluxNormalizedDetector</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.ProtonCharge.html">ess.imaging.types.ProtonCharge</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.WavelengthDetector.html">ess.imaging.types.WavelengthDetector</a></li>
 </ul>
 </details></li>
 </ul>
@@ -619,6 +612,7 @@
 <li class="toctree-l2"><a class="reference internal" href="ess.odin.data.iron_simulation_sample_large.html">ess.odin.data.iron_simulation_sample_large</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.odin.data.iron_simulation_sample_small.html">ess.odin.data.iron_simulation_sample_small</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.odin.data.odin_tof_lookup_table.html">ess.odin.data.odin_tof_lookup_table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.odin.data.odin_wavelength_lookup_table.html">ess.odin.data.odin_wavelength_lookup_table</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.odin.masking.html">ess.odin.masking</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -639,6 +633,7 @@
 <li class="toctree-l2"><a class="reference internal" href="ess.tbl.data.tbl_lego_sample_run.html">ess.tbl.data.tbl_lego_sample_run</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.tbl.data.tbl_orca_focussing_data.html">ess.tbl.data.tbl_orca_focussing_data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.tbl.data.tbl_tof_lookup_table_no_choppers.html">ess.tbl.data.tbl_tof_lookup_table_no_choppers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.tbl.data.tbl_wavelength_lookup_table_no_choppers.html">ess.tbl.data.tbl_wavelength_lookup_table_no_choppers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.tbl.data.tutorial_sample_data.html">ess.tbl.data.tutorial_sample_data</a></li>
 </ul>
 </details></li>
@@ -872,7 +867,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
     <br/>
   </p>
 </div>
@@ -884,7 +879,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSimaging version: 0.1.dev1611+gbcc8a6fc6 (<a href="https://github.com/scipp/essimaging/releases">older versions</a>).</div>
+Current ESSimaging version: 26.4.0 (<a href="https://github.com/scipp/essimaging/releases">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

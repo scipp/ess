@@ -19,6 +19,7 @@
       iron_simulation_sample_large
       iron_simulation_sample_small
       odin_tof_lookup_table
+      odin_wavelength_lookup_table
    
    
 
