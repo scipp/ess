@@ -165,7 +165,7 @@ def _check_output_file(
             else:
                 assert (toa_edges[1] - toa_edges[0]) == sc.scalar(
                     bin_width, unit='ms'
-                ).to(unit='ns')
+                ).to(unit='us')
             assert all(field_name in det_gr for field_name in mandatory_fields)
 
 
@@ -272,7 +272,7 @@ def test_reduction_only_time_bin_width(reduction_config: ReductionConfig) -> Non
         hist = _retrieve_one_hist(reduction(config=reduction_config))
 
     width = hist.coords['tof'][1] - hist.coords['tof'][0]
-    assert width == sc.scalar(20.0, unit='ms').to(unit='ns')
+    assert width == sc.scalar(20.0, unit='ms').to(unit='us')
 
 
 def test_reduction_only_number_of_time_bins(reduction_config: ReductionConfig) -> None:
@@ -409,6 +409,15 @@ def lut_file_path(tmp_path: pathlib.Path):
 def test_reduction_with_lut_file(
     reduction_config: ReductionConfig, lut_file_path: pathlib.Path
 ) -> None:
+    # We cannot use `time_bin_width` configuration
+    # since the lookup table is written in wavelength
+    # and it is not trivial to change lookup table
+    # and test the expected time of flight result by setting time bin width.
+    # i.e. if the look up table wavelength rage changes,
+    # the number of bins changes and the histogram data sizes changes.
+    # This test is only for checking if the look up table is used as expected or not
+    # therefore using number of bins should be fine.
+    reduction_config.workflow.time_bin_width = 0
     # Make sure the config uses no lookup table file initially.
     assert reduction_config.workflow.lookup_table_file_path is None
     with known_warnings():
