@@ -182,22 +182,21 @@ def add_scattering_coordinates_from_positions(
     calibration: CalibrationData,
 ) -> DspacingDetector[RunType]:
     """
-    Add ``wavelength``, ``two_theta`` and ``dspacing`` coordinates to the data.
-    The input ``data`` must have a ``tof`` coordinate, as well as the necessary
-    positions of the beamline components (source, sample, detectors) to compute
-    the scattering coordinates.
+    Add ``two_theta`` and ``dspacing`` coordinates to the data.
+
+    The input ``data`` must have a ``wavelength`` coordinate.
+    The positions of the required beamline components (source, sample, detectors)
+    can be provided either by the graph or as coordinates.
 
     Parameters
     ----------
     data:
-        Input data with a ``tof`` coordinate.
+        Input data with a ``wavelength`` coordinate.
     graph:
         Coordinate transformation graph.
     """
     out = data.transform_coords(
-        ["two_theta", "wavelength", "Ltotal"],
-        graph=graph,
-        keep_intermediate=False,
+        ["two_theta", "Ltotal"], graph=graph, keep_intermediate=False
     )
     out = convert_to_dspacing(out, graph, calibration)
     return DspacingDetector[RunType](out)
