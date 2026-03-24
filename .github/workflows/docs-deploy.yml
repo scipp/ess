@@ -6,6 +6,11 @@ on:
       package:
         required: true
         description: 'Select which package to build docs for'
+        type: choice
+        options:
+          - essreduce
+          - essimaging
+          - essnmx
       publish:
         default: false
         type: boolean
