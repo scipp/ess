@@ -6850,8 +6850,8 @@ packages:
   timestamp: 1758743805063
 - pypi: ./packages/essimaging
   name: essimaging
-  version: 26.1.1.dev1781+gee0f6314
-  sha256: 355348e060bcdb6ce30b35b84dac63c1701f6a82af28492ac4b26afb5e59b5a7
+  version: 26.1.1.dev1808+ge49e87fa
+  sha256: 94c92001fd0d849741381e8db99baf4eec8be0a82c9e2311e98ab5cc03b3f263
   requires_dist:
   - dask>=2022.1.0
   - graphviz
@@ -6861,7 +6861,7 @@ packages:
   - scippneutron>=24.12.0
   - scippnexus>=23.11.1
   - tifffile>=2024.7.2
-  - essreduce>=26.2.1
+  - essreduce>=26.4.0
   - scitiff>=25.7
   - pytest>=8.0 ; extra == 'test'
   - pooch>=1.5 ; extra == 'test'
@@ -6883,11 +6883,11 @@ packages:
   requires_python: '>=3.11'
 - pypi: ./packages/essnmx
   name: essnmx
-  version: 26.3.1.dev36+gee0f6314.d20260313
-  sha256: 72f9c838cf718dea47dc86355e437514d9a65672a5591d2f7ad9c49c4f4a73f8
+  version: 26.3.1.dev63+ge49e87fa
+  sha256: 5fdce7c25228815620e2decefcc290a82c99ff9cefab8d1a2d97df9c25669e80
   requires_dist:
   - dask>=2022.1.0
-  - essreduce>=26.2.1
+  - essreduce>=26.4.0
   - graphviz
   - plopp>=24.7.0
   - sciline>=24.6.0
@@ -6918,8 +6918,8 @@ packages:
   requires_python: '>=3.11'
 - pypi: ./packages/essreduce
   name: essreduce
-  version: 26.3.2.dev569+gee0f6314
-  sha256: da2355e81efef8083540fefb2101259cb0fe5809aae38b0884487acac71e1df8
+  version: 26.4.1.dev1+ge49e87fa
+  sha256: 448b4d7039223253477c5e0beb4a42bde6dc52293ff8ece9b38268f8229c136b
   requires_dist:
   - sciline>=25.11.0
   - scipp>=26.3.0
