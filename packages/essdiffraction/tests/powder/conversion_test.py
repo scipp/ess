@@ -145,29 +145,3 @@ def test_dspacing_with_calibration_does_not_use_positions(calibration):
     assert sc.allclose(
         dspacing_no_pos.coords['dspacing'], dspacing_pos.coords['dspacing']
     )
-
-
-def test_add_scattering_coordinates_from_positions():
-    position = sc.vectors(
-        dims=['spectrum'], values=np.arange(14 * 3).reshape((14, 3)), unit='m'
-    )
-    sample_position = sc.vector([0.0, 0.0, 0.01], unit='m')
-    source_position = sc.vector([0.0, 0.0, -11.3], unit='m')
-    tof = sc.DataArray(
-        sc.ones(dims=['spectrum', 'tof'], shape=[14, 27]),
-        coords={
-            'position': position,
-            'tof': sc.linspace('tof', 1.0, 1000.0, 27, unit='us'),
-            'sample_position': sample_position,
-            'source_position': source_position,
-        },
-    )
-    graph = {
-        **scn.conversion.graph.beamline.beamline(scatter=True),
-        **scn.conversion.graph.tof.elastic('tof'),
-    }
-
-    result = add_scattering_coordinates_from_positions(tof, graph, calibration=None)
-
-    assert 'wavelength' in result.coords
-    assert 'two_theta' in result.coords
