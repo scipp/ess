@@ -23,6 +23,7 @@ from .configurations import (
     ReductionConfig,
     TimeBinCoordinate,
     WorkflowConfig,
+    validate_time_bin_config,
 )
 from .nexus import (
     _check_file,
@@ -168,9 +169,22 @@ def _build_time_bin_edges(
             "Please check your configurations again."
         )
 
-    # Build the bin-edges to histogram the results.
-    n_edges = wf_config.nbins + 1
-    return sc.linspace(dim=t_coord_name, start=min_t, stop=max_t, num=n_edges)
+    # If either min/max were manually selected and bin width is set.
+    if wf_config.time_bin_width > 0:
+        # We do not return a scalar bin width since we histogram
+        # detector panel individually.
+        return sc.arange(
+            dim=t_coord_name,
+            start=min_t.to(unit=wf_config.time_bin_unit),
+            stop=max_t.to(unit=wf_config.time_bin_unit),
+            step=sc.scalar(wf_config.time_bin_width, unit=wf_config.time_bin_unit),
+        )
+    else:  # Number of bin edges are given but not the bin width.
+        n_edges = wf_config.nbins + 1
+        if min_t.unit != max_t.unit:
+            min_t = min_t.to(unit=wf_config.time_bin_unit)
+            max_t = max_t.to(unit=wf_config.time_bin_unit)
+        return sc.linspace(dim=t_coord_name, start=min_t, stop=max_t, num=n_edges)
 
 
 def reduction(
@@ -208,6 +222,8 @@ def reduction(
     # Check the file output configuration before we start heavy computation.
     if not config.output.skip_file_output:
         _check_file(config.output.output_file, config.output.overwrite)
+
+    validate_time_bin_config(config=config)
 
     display = _retrieve_display(logger, display)
     input_file_path = _retrieve_input_file(config.inputs.input_file).resolve()
@@ -253,22 +269,23 @@ def reduction(
         wf_config=config.workflow, result_das=tof_das, t_coord_name=t_coord_name
     )
 
+    # Histogram detector counts
+    tof_histograms = sc.DataGroup()
+    for detector_name, tof_da in tof_das.items():
+        t_coord_unit = tof_da.bins.coords[t_coord_name].unit
+        histogram = tof_da.hist({t_coord_name: t_bin_edges.to(unit=t_coord_unit)})
+        tof_histograms[detector_name] = histogram
+
+    _tof_histogram = next(iter(tof_histograms.values()))
     monitor_metadata = NMXMonitorMetadata(
         tof_bin_coord=t_coord_name,
         # TODO: Use real monitor data
         # Currently NMX simulations or experiments do not have monitors
         data=sc.DataArray(
-            coords={t_coord_name: t_bin_edges},
-            data=sc.ones_like(t_bin_edges[:-1]),
+            coords={t_coord_name: _tof_histogram.coords[t_coord_name]},
+            data=sc.ones_like(_tof_histogram.data),
         ),
     )
-
-    # Histogram detector counts
-    tof_histograms = sc.DataGroup()
-    for detector_name, tof_da in tof_das.items():
-        histogram = tof_da.hist({t_coord_name: t_bin_edges})
-        tof_histograms[detector_name] = histogram
-
     detector_results = sc.DataGroup(
         {
             detector_name: NMXReducedDetector(

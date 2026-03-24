@@ -78,9 +78,18 @@ class WorkflowConfig(BaseModel):
         # Default is time of flight since
         # DIALS should expect the time of flight.
     )
+    time_bin_width: int = Field(
+        title="Time Bin Width",
+        description="Width(Length) of each Time Bin in [time_bin_unit]. "
+        "If `time_bin_width` and `nbins` are both given, "
+        "`time_bin_width` will be preferred. "
+        "Set it to `0` if you want to use `nbins` instead.",
+        default=3,
+    )
     nbins: int = Field(
         title="Number of Time Bins",
-        description="Number of Time bins",
+        description="Number of Time bins. "
+        "If `bin_width` is given, `nbins` will be ignored.",
         default=50,
     )
     min_time_bin: int | None = Field(
@@ -221,3 +230,11 @@ def to_command_arguments(
         )
     else:
         return arg_list
+
+
+def validate_time_bin_config(config: ReductionConfig) -> None:
+    wfconfig = config.workflow
+    if not (wfconfig.time_bin_width > 0 or (wfconfig.nbins > 0)):
+        raise ValueError(
+            "Either `time-bin-width` or `nbins` should be a positive number."
+        )
