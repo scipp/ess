@@ -8,12 +8,13 @@ from collections.abc import Iterable
 import sciline
 import scippnexus as snx
 
-from ess.reduce import time_of_flight as reduce_time_of_flight
-from ess.reduce.time_of_flight.types import DetectorLtotal
+from ess.reduce import unwrap as reduce_unwrap
+from ess.reduce.unwrap.types import DetectorLtotal
 
 from ..types import (
     DataAtSample,
-    ErrorLimitedTofLookupTable,
+    ErrorLimitedLookupTable,
+    LookupTable,
     LookupTableRelativeErrorThreshold,
     MonitorCoordTransformGraph,
     MonitorLtotal,
@@ -23,9 +24,8 @@ from ..types import (
     RawDetector,
     RawMonitor,
     RunType,
-    TofDetector,
-    TofLookupTable,
-    TofMonitor,
+    WavelengthDetector,
+    WavelengthMonitor,
 )
 
 
@@ -34,7 +34,7 @@ def TofWorkflow(
     run_types: Iterable[sciline.typing.Key],
     monitor_types: Iterable[sciline.typing.Key],
 ) -> sciline.Pipeline:
-    workflow = reduce_time_of_flight.GenericTofWorkflow(
+    workflow = reduce_unwrap.GenericUnwrapWorkflow(
         run_types=run_types,
         monitor_types=monitor_types,
     )
@@ -43,53 +43,54 @@ def TofWorkflow(
     return workflow
 
 
-def detector_time_of_flight_data(
+def detector_wavelength_data(
     sample_data: DataAtSample[RunType],
-    lookup: ErrorLimitedTofLookupTable[snx.NXdetector],
+    lookup: ErrorLimitedLookupTable[snx.NXdetector],
     pulse_stride_offset: PulseStrideOffset,
-) -> TofDetector[RunType]:
+) -> WavelengthDetector[RunType]:
     """
-    Convert the time-of-arrival data to time-of-flight data using a lookup table.
+    Convert the time-of-arrival data to wavelength data using a lookup table.
 
-    The output data will have a time-of-flight coordinate.
+    The output data will have a wavelength coordinate.
 
     This is a wrapper around
-    :func:`ess.reduce.time_of_flight.detector_time_of_flight_data`
+    :func:`ess.reduce.unwrap.detector_wavelength_data`
     for indirect geometry spectrometers.
     """
-    result = reduce_time_of_flight.eto_to_tof.detector_time_of_flight_data(
+    result = reduce_unwrap.to_wavelength.detector_wavelength_data(
         detector_data=RawDetector[RunType](sample_data),
         lookup=lookup,
         ltotal=DetectorLtotal(sample_data.coords['L1']),
         pulse_stride_offset=pulse_stride_offset,
     )
-    # This is time-of-flight at the sample.
-    result.bins.coords['sample_tof'] = result.bins.coords.pop('tof')
+    # This is the incident wavelength at the sample.
+    result.bins.coords['incident_wavelength'] = result.bins.coords.pop('wavelength')
     del result.bins.coords['event_time_zero']
     return result
 
 
-def monitor_time_of_flight_data(
+def monitor_wavelength_data(
     monitor_data: RawMonitor[RunType, MonitorType],
-    lookup: ErrorLimitedTofLookupTable[MonitorType],
+    lookup: ErrorLimitedLookupTable[MonitorType],
     ltotal: MonitorLtotal[RunType, MonitorType],
     pulse_stride_offset: PulseStrideOffset,
-) -> TofMonitor[RunType, MonitorType]:
+) -> WavelengthMonitor[RunType, MonitorType]:
     """
-    Convert the time-of-arrival data to time-of-flight data using a lookup table.
+    Convert the time-of-arrival data to wavelength data using a lookup table.
 
-    The output data will have a time-of-flight coordinate.
+    The output data will have a wavelength coordinate.
 
     This is a wrapper around
-    :func:`ess.reduce.time_of_flight.monitor_time_of_flight_data`
+    :func:`ess.reduce.unwrap.monitor_wavelength_data`
     for indirect geometry spectrometers.
     """
-    result = reduce_time_of_flight.eto_to_tof.monitor_time_of_flight_data(
+    result = reduce_unwrap.to_wavelength.monitor_wavelength_data(
         monitor_data=monitor_data.rename(t='tof'),
         lookup=lookup,
         ltotal=ltotal,
         pulse_stride_offset=pulse_stride_offset,
     )
+    result = result.rename(wavelength='incident_wavelength')
     return result
 
 
@@ -110,11 +111,11 @@ def compute_monitor_ltotal(
 
 
 def mask_large_uncertainty_in_lut_detector(
-    table: TofLookupTable,
+    table: LookupTable,
     error_threshold: LookupTableRelativeErrorThreshold,
-) -> ErrorLimitedTofLookupTable[snx.NXdetector]:
+) -> ErrorLimitedLookupTable[snx.NXdetector]:
     """
-    Mask regions in the time-of-flight lookup table with large uncertainty using NaNs.
+    Mask regions in the wavelength lookup table with large uncertainty using NaNs.
 
     The threshold is looked up under the key ``'detector'``.
     The same threshold is applied to all triplets.
@@ -122,21 +123,21 @@ def mask_large_uncertainty_in_lut_detector(
     Parameters
     ----------
     table:
-        Lookup table with time-of-flight as a function of distance and time-of-arrival.
+        Lookup table with wavelength as a function of distance and time-of-arrival.
     error_threshold:
         Threshold for the relative standard deviation (coefficient of variation) of the
-        projected time-of-flight above which values are masked.
+        projected wavelength above which values are masked.
 
     See also
     --------
-    essreduce.time_of_flight.mask_large_uncertainty_in_lut:
+    essreduce.unwrap.mask_large_uncertainty_in_lut:
         The underlying implementation.
     """
-    from ess.reduce.time_of_flight.eto_to_tof import (
+    from ess.reduce.unwrap.to_wavelength import (
         mask_large_uncertainty_in_lut_detector,
     )
 
-    return ErrorLimitedTofLookupTable[snx.NXdetector](
+    return ErrorLimitedLookupTable[snx.NXdetector](
         mask_large_uncertainty_in_lut_detector(
             table=table,
             error_threshold=error_threshold,
@@ -147,13 +148,13 @@ def mask_large_uncertainty_in_lut_detector(
 
 providers = (
     compute_monitor_ltotal,
-    detector_time_of_flight_data,
+    detector_wavelength_data,
     mask_large_uncertainty_in_lut_detector,
-    monitor_time_of_flight_data,
+    monitor_wavelength_data,
 )
-"""Providers for time-of-flight calculation on indirect geometry spectrometers.
+"""Providers for wavelength calculation on indirect geometry spectrometers.
 
 The providers here override the default providers of
-:class:`ess.reduce.time_of_flight.GenericTofWorkflow`
+:class:`ess.reduce.unwrap.GenericUnwrapWorkflow`
 to customize the workflow for indirect geometry spectrometers.
 """

@@ -11,10 +11,11 @@ _registry = make_registry(
     'ess/bifrost',
     files={
         "BIFROST_20240914T053723.h5": "md5:0f2fa5c9a851f8e3a4fa61defaa3752e",
-        "computed_energy_data_simulated_5x2.h5": "blake2b:d21290ab012268391785a83ee59d5aa24a9a230fb341f8defb1f2672bc374616423bc76908078af1ff686a0adb7fd408d70c3e9bd8aae23c1fdd8dcfffca2f23",  # noqa: E501
+        "computed_energy_data_simulated_5x2.h5": "md5:57408fa10aa4689c43630f994cff8d30",
         "BIFROST-simulation-tof-lookup-table.h5": "blake2b:682021920a355f789da37b18029719fe20569d86db26cdaf5f3d916d2f76f9360907960ba86903be4cab489d39f1b6f9f265f3a4ab3f82c5e095afa4a2c456af",  # noqa: E501
+        "BIFROST-simulation-lookup-table.h5": "md5:6d776afa591d4a83c91ad0142bbfc53d",
     },
-    version="6",
+    version="7",
 )
 
 
@@ -33,15 +34,15 @@ def simulated_elastic_incoherent_with_phonon() -> Path:
     return get_path("BIFROST_20240914T053723.h5")
 
 
-def tof_lookup_table_simulation() -> Path:
-    """Time-of-flight lookup table for the simulated BIFROST data.
+def lookup_table_simulation() -> Path:
+    """Wavelength lookup table for the simulated BIFROST data.
 
     This table was computed with `tof <https://github.com/scipp/tof>`_
-    using `Create a time-of-flight lookup table for BIFROST
-    <../../user-guide/bifrost/bifrost-make-tof-lookup-table.rst>`_
+    using `Create a wavelength lookup table for BIFROST
+    <../../user-guide/bifrost/bifrost-make-lookup-table.rst>`_
     with ``NumberOfSimulatedNeutrons = 5_000_000``.
     """
-    return get_path("BIFROST-simulation-tof-lookup-table.h5")
+    return get_path("BIFROST-simulation-lookup-table.h5")
 
 
 def computed_energy_data_simulated_5x2() -> Path:
@@ -56,6 +57,6 @@ def computed_energy_data_simulated_5x2() -> Path:
 __all__ = [
     "computed_energy_data_simulated_5x2",
     "get_path",
+    "lookup_table_simulation",
     "simulated_elastic_incoherent_with_phonon",
-    "tof_lookup_table_simulation",
 ]

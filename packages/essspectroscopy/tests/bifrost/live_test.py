@@ -8,17 +8,17 @@ import scipp.testing
 import scippnexus as snx
 
 from ess.bifrost.data import (
+    lookup_table_simulation,
     simulated_elastic_incoherent_with_phonon,
-    tof_lookup_table_simulation,
 )
 from ess.bifrost.live import BifrostQCutWorkflow, CutAxis, CutAxis1, CutAxis2, CutData
 from ess.spectroscopy.types import (
     Filename,
+    LookupTableFilename,
     LookupTableRelativeErrorThreshold,
     NeXusDetectorName,
     ProtonCharge,
     SampleRun,
-    TofLookupTableFilename,
     UncertaintyBroadcastMode,
 )
 
@@ -37,7 +37,7 @@ class TestBifrostQCutWorkflow:
     ) -> sciline.Pipeline:
         workflow = BifrostQCutWorkflow(simulation_detector_names)
         workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
-        workflow[TofLookupTableFilename] = tof_lookup_table_simulation()
+        workflow[LookupTableFilename] = lookup_table_simulation()
         workflow[LookupTableRelativeErrorThreshold] = {
             'detector': np.inf,
             '110_frame_3': np.inf,

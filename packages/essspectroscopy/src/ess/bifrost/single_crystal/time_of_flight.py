@@ -5,34 +5,34 @@
 
 import scippnexus as snx
 
-from ess.reduce import time_of_flight as reduce_time_of_flight
-from ess.reduce.time_of_flight.types import DetectorLtotal
+from ess.reduce import unwrap as reduce_unwrap
+from ess.reduce.unwrap.types import DetectorLtotal
 from ess.spectroscopy.types import (
     DataGroupedByRotation,
-    ErrorLimitedTofLookupTable,
+    ErrorLimitedLookupTable,
     PulseStrideOffset,
     RawDetector,
     RunType,
-    TofDetector,
+    WavelengthDetector,
 )
 
 
-def detector_time_of_flight_data(
+def detector_wavelength_data(
     sample_data: DataGroupedByRotation[RunType],
-    lookup: ErrorLimitedTofLookupTable[snx.NXdetector],
+    lookup: ErrorLimitedLookupTable[snx.NXdetector],
     ltotal: DetectorLtotal[RunType],
     pulse_stride_offset: PulseStrideOffset,
-) -> TofDetector[RunType]:
+) -> WavelengthDetector[RunType]:
     """
-    Convert the time-of-arrival data to time-of-flight data using a lookup table.
+    Convert the time-of-arrival data to wavelength data using a lookup table.
 
-    The output data will have a time-of-flight coordinate.
+    The output data will have a wavelength coordinate.
 
     This is a wrapper around
-    :func:`ess.reduce.time_of_flight.detector_time_of_flight_data`
+    :func:`ess.reduce.unwrap.detector_wavelength_data`
     for different input types.
     """
-    return reduce_time_of_flight.eto_to_tof.detector_time_of_flight_data(
+    return reduce_unwrap.to_wavelength.detector_wavelength_data(
         detector_data=RawDetector[RunType](sample_data),
         lookup=lookup,
         ltotal=ltotal,
@@ -40,4 +40,4 @@ def detector_time_of_flight_data(
     )
 
 
-providers = (detector_time_of_flight_data,)
+providers = (detector_wavelength_data,)

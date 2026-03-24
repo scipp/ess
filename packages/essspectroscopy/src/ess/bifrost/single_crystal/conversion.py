@@ -16,7 +16,7 @@ from ess.spectroscopy.types import (
     Position,
     QDetector,
     RunType,
-    TofDetector,
+    WavelengthDetector,
 )
 
 
@@ -40,13 +40,13 @@ def single_crystal_coordinate_transformation_graph(
     )
 
 
-def convert_tof_to_q(
-    with_tof: TofDetector[RunType],
+def convert_wavelength_to_q(
+    with_wavelength: WavelengthDetector[RunType],
     *,
     graph: ElasticCoordTransformGraph[RunType],
 ) -> QDetector[RunType]:
     """Convert ToF to Q."""
-    transformed = with_tof.transform_coords(
+    transformed = with_wavelength.transform_coords(
         ['a3', 'sample_table_momentum_transfer'],
         graph=graph,
         keep_intermediate=False,
@@ -57,4 +57,4 @@ def convert_tof_to_q(
     return QDetector[RunType](transformed)
 
 
-providers = (single_crystal_coordinate_transformation_graph, convert_tof_to_q)
+providers = (single_crystal_coordinate_transformation_graph, convert_wavelength_to_q)
