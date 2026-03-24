@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../_static/documentation_options.js?v=8ecd6c2c"></script>
+    <script src="../../_static/documentation_options.js?v=1558ef6b"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -58,7 +58,7 @@
     <link rel="prev" title="ess.nmx.scaling.get_reference_intensities" href="ess.nmx.scaling.get_reference_intensities.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.3.0" />
+  <meta name="docsearch:version" content="26.4.0" />
   </head>
   
   
@@ -541,6 +541,7 @@
 <li class="toctree-l2"><a class="reference internal" href="ess.nmx.types.NMXReducedDetector.html">ess.nmx.types.NMXReducedDetector</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.nmx.types.NMXSampleMetadata.html">ess.nmx.types.NMXSampleMetadata</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.nmx.types.NMXSourceMetadata.html">ess.nmx.types.NMXSourceMetadata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.nmx.types.TofDetector.html">ess.nmx.types.TofDetector</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.nmx.mtz_io.html">ess.nmx.mtz_io</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -682,14 +683,14 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>binned</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="ess.nmx.scaling.WavelengthBinned.html#ess.nmx.scaling.WavelengthBinned" title="ess.nmx.scaling.WavelengthBinned"><code class="xref py py-class docutils literal notranslate"><span class="pre">scaling.WavelengthBinned</span></code></a> (<a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipp.DataArray</span></code></a>)</span>) – The wavelength binned data.</p></li>
+<li><p><strong>binned</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="ess.nmx.scaling.WavelengthBinned.html#ess.nmx.scaling.WavelengthBinned" title="ess.nmx.scaling.WavelengthBinned"><code class="xref py py-class docutils literal notranslate"><span class="pre">scaling.WavelengthBinned</span></code></a> (<a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipp.DataArray</span></code></a>)</span>) – The wavelength binned data.</p></li>
 <li><p><strong>reference_wavelength</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="ess.nmx.scaling.ReferenceWavelength.html#ess.nmx.scaling.ReferenceWavelength" title="ess.nmx.scaling.ReferenceWavelength"><code class="xref py py-class docutils literal notranslate"><span class="pre">scaling.ReferenceWavelength</span></code></a> (<code class="xref py py-class docutils literal notranslate"><span class="pre">types.scipp._scipp.core.Variable</span> <span class="pre">|</span> <span class="pre">None</span></code>)</span>) – The reference wavelength to select the intensities.
 If <code class="docutils literal notranslate"><span class="pre">None</span></code>, the middle group is selected.
 It should be a scalar variable as it is selecting one of bins.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="ess.nmx.scaling.SelectedReferenceWavelength.html#ess.nmx.scaling.SelectedReferenceWavelength" title="ess.nmx.scaling.SelectedReferenceWavelength"><code class="xref py py-class docutils literal notranslate"><span class="pre">scaling.SelectedReferenceWavelength</span></code></a> (<a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipp.Variable</span></code></a>)</span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="ess.nmx.scaling.SelectedReferenceWavelength.html#ess.nmx.scaling.SelectedReferenceWavelength" title="ess.nmx.scaling.SelectedReferenceWavelength"><code class="xref py py-class docutils literal notranslate"><span class="pre">scaling.SelectedReferenceWavelength</span></code></a> (<a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipp.Variable</span></code></a>)</span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -775,7 +776,7 @@ It should be a scalar variable as it is selecting one of bins.</p></li>
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSnmx version: 26.3.0 (<a href="https://github.com/scipp/essnmx/releases">older versions</a>).</div>
+Current ESSnmx version: 26.4.0 (<a href="https://github.com/scipp/essnmx/releases">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

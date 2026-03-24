@@ -37,6 +37,7 @@
       NMXReducedDetector
       NMXSampleMetadata
       NMXSourceMetadata
+      TofDetector
    
    
 

@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=8ecd6c2c"></script>
+    <script src="../../../_static/documentation_options.js?v=1558ef6b"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -55,7 +55,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.3.0" />
+  <meta name="docsearch:version" content="26.4.0" />
   </head>
   
   
@@ -481,9 +481,11 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">h5py</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sciline</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sl</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scippnexus</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">snx</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.time_of_flight.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">TofLookupTable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.nexus.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.unwrap.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">LookupTable</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scippneutron.metadata</span><span class="w"> </span><span class="kn">import</span> <span class="n">RadiationProbe</span><span class="p">,</span> <span class="n">SourceType</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">._display_helper</span><span class="w"> </span><span class="kn">import</span> <span class="n">to_datagroup</span>
@@ -775,12 +777,19 @@
     <span class="n">definitions</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;NXlauetof&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;NXlauetof&#39;</span>
     <span class="n">instrument</span><span class="p">:</span> <span class="n">NMXInstrument</span>
     <span class="n">sample</span><span class="p">:</span> <span class="n">NMXSampleMetadata</span>
-    <span class="n">lookup_table</span><span class="p">:</span> <span class="n">TofLookupTable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">lookup_table</span><span class="p">:</span> <span class="n">LookupTable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">reducer</span><span class="p">:</span> <span class="n">NMXProgram</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">NMXProgram</span><span class="p">)</span>
     <span class="s2">&quot;Information of the reduction software.&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_datagroup</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">to_datagroup</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="TofDetector">
+<a class="viewcode-back" href="../../../generated/modules/ess.nmx.types.TofDetector.html#ess.nmx.types.TofDetector">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TofDetector</span><span class="p">(</span><span class="n">sl</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Detector data with time-of-flight coordinate.&quot;&quot;&quot;</span></div>
 
 </pre></div>
 
@@ -844,7 +853,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSnmx version: 26.3.0 (<a href="https://github.com/scipp/essnmx/releases">older versions</a>).</div>
+Current ESSnmx version: 26.4.0 (<a href="https://github.com/scipp/essnmx/releases">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">
