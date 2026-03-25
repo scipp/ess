@@ -86,7 +86,7 @@ def larmor_data_to_wavelength(
 
 
 def larmor_monitor_to_wavelength(
-    da: RawMonitor[RunType, MonitorType], graph: ElasticCoordTransformGraph[RunType]
+    da: RawMonitor[RunType, MonitorType], graph: MonitorCoordTransformGraph[RunType]
 ) -> WavelengthMonitor[RunType, MonitorType]:
     """
     Compute wavelength coordinate for Loki monitor data at Larmor.

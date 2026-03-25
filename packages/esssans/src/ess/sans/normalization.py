@@ -251,8 +251,8 @@ def norm_detector_term_denominator(
     )
     # Convert wavelength coordinate to midpoints for future histogramming
     out.coords['wavelength'] = sc.midpoints(out.coords['wavelength'])
-    if 'position' in out.coords:
-        out = out.drop_coords('position')
+    # if 'position' in out.coords:
+    #     out = out.drop_coords('position')
     return DetectorTerm[RunType, Denominator](out)
 
 
@@ -263,8 +263,8 @@ def norm_detector_term_numerator(
     Strip the position coordinate from the detector, to allow the normalization
     operation further down the line.
     """
-    if 'position' in detector.coords:
-        detector = detector.drop_coords('position')
+    # if 'position' in detector.coords:
+    #     detector = detector.drop_coords('position')
     return DetectorTerm[RunType, Numerator](detector)
 
 
