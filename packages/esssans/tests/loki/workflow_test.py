@@ -15,14 +15,14 @@ from ess.sans.types import (
     BeamCenter,
     Filename,
     IntensityQ,
+    LookupTableFilename,
     NeXusDetectorName,
     PixelMaskFilename,
     QBins,
     ReturnEvents,
     SampleRun,
-    TofDetector,
-    TofLookupTableFilename,
     UncertaintyBroadcastMode,
+    WavelengthDetector,
 )
 
 
@@ -71,24 +71,24 @@ def test_loki_larmor_workflow_compute_with_single_pixel_mask(larmor_workflow):
 
 
 @pytest.mark.parametrize("bank", list(range(9)))
-def test_loki_workflow_needs_tof_lookup_table(loki_workflow, bank):
+def test_loki_workflow_needs_lookup_table(loki_workflow, bank):
     wf = loki_workflow()
     # For simplicity, insert a fake beam center instead of computing it.
     wf[BeamCenter] = sc.vector([0.0, 0.0, 0.0], unit='m')
     wf[NeXusDetectorName] = f'loki_detector_{bank}'
-    with pytest.raises(UnsatisfiedRequirement, match='TofLookupTableFilename'):
-        wf.compute(TofDetector[SampleRun])
+    with pytest.raises(UnsatisfiedRequirement, match='LookupTableFilename'):
+        wf.compute(WavelengthDetector[SampleRun])
 
 
 @pytest.mark.parametrize("bank", list(range(9)))
-def test_loki_workflow_can_compute_tof(loki_workflow, bank):
+def test_loki_workflow_can_compute_wavelength(loki_workflow, bank):
     wf = loki_workflow()
     # For simplicity, insert a fake beam center instead of computing it.
     wf[BeamCenter] = sc.vector([0.0, 0.0, 0.0], unit='m')
     wf[NeXusDetectorName] = f'loki_detector_{bank}'
-    wf[TofLookupTableFilename] = loki.data.loki_tof_lookup_table_no_choppers()
-    result = wf.compute(TofDetector[SampleRun])
-    assert 'tof' in result.bins.coords
+    wf[LookupTableFilename] = loki.data.loki_lookup_table_no_choppers()
+    result = wf.compute(WavelengthDetector[SampleRun])
+    assert 'wavelength' in result.bins.coords
 
 
 @pytest.mark.parametrize("bank", list(range(9)))
@@ -97,7 +97,7 @@ def test_loki_workflow_can_compute_iofq(loki_workflow, bank):
     # For simplicity, insert a fake beam center instead of computing it.
     wf[BeamCenter] = sc.vector([0.0, 0.0, 0.0], unit='m')
     wf[NeXusDetectorName] = f'loki_detector_{bank}'
-    wf[TofLookupTableFilename] = loki.data.loki_tof_lookup_table_no_choppers()
+    wf[LookupTableFilename] = loki.data.loki_lookup_table_no_choppers()
 
     result = wf.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('Q',)
