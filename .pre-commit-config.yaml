@@ -14,6 +14,13 @@ repos:
       - id: trailing-whitespace
         args: [ --markdown-linebreak-ext=md ]
         exclude: '\.svg'
+  - repo: local
+    hooks:
+      - id: check-test-file-name
+        name: check test file name convention
+        entry: python tools/check-test-file-name.py
+        language: python
+        files: '(tests/.*\.py)$'
   - repo: https://github.com/kynan/nbstripout
     rev: 0.7.1
     hooks:
