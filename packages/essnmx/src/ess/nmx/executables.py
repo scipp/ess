@@ -23,7 +23,6 @@ from .configurations import (
     ReductionConfig,
     TimeBinCoordinate,
     WorkflowConfig,
-    validate_time_bin_config,
 )
 from .nexus import (
     _check_file,
@@ -170,14 +169,20 @@ def _build_time_bin_edges(
         )
 
     # If either min/max were manually selected and bin width is set.
-    if wf_config.time_bin_width > 0:
+    if wf_config.nbins is None:
+        if wf_config.time_bin_width is None:
+            time_bin_width = sc.scalar(3, unit='ms').to(unit=wf_config.time_bin_unit)
+        elif wf_config.time_bin_width is not None:
+            time_bin_width = sc.scalar(
+                wf_config.time_bin_width, unit=wf_config.time_bin_unit
+            )
         # We do not return a scalar bin width since we histogram
         # detector panel individually.
         return sc.arange(
             dim=t_coord_name,
             start=min_t.to(unit=wf_config.time_bin_unit),
             stop=max_t.to(unit=wf_config.time_bin_unit),
-            step=sc.scalar(wf_config.time_bin_width, unit=wf_config.time_bin_unit),
+            step=time_bin_width,
         )
     else:  # Number of bin edges are given but not the bin width.
         n_edges = wf_config.nbins + 1
@@ -222,8 +227,6 @@ def reduction(
     # Check the file output configuration before we start heavy computation.
     if not config.output.skip_file_output:
         _check_file(config.output.output_file, config.output.overwrite)
-
-    validate_time_bin_config(config=config)
 
     display = _retrieve_display(logger, display)
     input_file_path = _retrieve_input_file(config.inputs.input_file).resolve()

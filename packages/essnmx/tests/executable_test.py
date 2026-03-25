@@ -69,7 +69,7 @@ def _check_non_default_config(testing_config: ReductionConfig) -> None:
         testing_model = testing_child.model_dump(mode='python')
         default_model = default_child.model_dump(mode='python')
         for key, testing_value in testing_model.items():
-            if key == 'lookup_table_file_path':
+            if key in ['lookup_table_file_path', 'nbins']:
                 # This value may be None or default, so we skip the check.
                 continue
             default_value = default_model[key]
@@ -91,7 +91,6 @@ def test_reduction_config() -> None:
     )
     workflow_options = WorkflowConfig(
         time_bin_width=5,
-        nbins=100,
         min_time_bin=10,
         max_time_bin=100_000,
         time_bin_coordinate=TimeBinCoordinate.event_time_offset,
@@ -194,7 +193,7 @@ def test_executable_runs(small_nmx_nexus_path, tmp_path: pathlib.Path):
     _check_output_file(output_file, bin_width=bin_width)
 
 
-def test_executable_runs_nbins(small_nmx_nexus_path, tmp_path: pathlib.Path):
+def test_executable_runs_exclusive_mutual(small_nmx_nexus_path, tmp_path: pathlib.Path):
     """Test that the executable runs and returns the expected output."""
     output_file = tmp_path / "output.h5"
     assert not output_file.exists()
@@ -206,7 +205,30 @@ def test_executable_runs_nbins(small_nmx_nexus_path, tmp_path: pathlib.Path):
         '--input-file',
         small_nmx_nexus_path,
         '--time-bin-width',
-        '0',
+        '3',
+        '--nbins',
+        str(nbins),
+        '--output-file',
+        output_file.as_posix(),
+    )
+    # Validate that all commands are strings and contain no unsafe characters
+    result = subprocess.run(  # noqa: S603 - We are not accepting arbitrary input here.
+        commands, text=True, capture_output=True, check=False
+    )
+    assert result.returncode == 2  # Should fail with command syntax error.
+
+
+def test_executable_runs_nbins(small_nmx_nexus_path, tmp_path: pathlib.Path):
+    """Test that the executable runs and returns the expected output."""
+    output_file = tmp_path / "output.h5"
+    assert not output_file.exists()
+
+    nbins = 20  # Small number of bins for testing.
+    # The output has 1280x1280 pixels per detector per time bin.
+    commands = (
+        'essnmx-reduce',
+        '--input-file',
+        small_nmx_nexus_path,
         '--nbins',
         str(nbins),
         '--output-file',
@@ -276,7 +298,7 @@ def test_reduction_only_time_bin_width(reduction_config: ReductionConfig) -> Non
 
 
 def test_reduction_only_number_of_time_bins(reduction_config: ReductionConfig) -> None:
-    reduction_config.workflow.time_bin_width = 0
+    reduction_config.workflow.time_bin_width = None
     reduction_config.workflow.nbins = 20
     with known_warnings():
         hist = _retrieve_one_hist(reduction(config=reduction_config))
@@ -300,7 +322,7 @@ def test_histogram_event_time_offset(reduction_config: ReductionConfig) -> None:
 
 
 def test_histogram_event_time_offset_nbins(reduction_config: ReductionConfig) -> None:
-    reduction_config.workflow.time_bin_width = 0
+    reduction_config.workflow.time_bin_width = None
     reduction_config.workflow.nbins = 20
     reduction_config.workflow.time_bin_coordinate = TimeBinCoordinate.event_time_offset
     with known_warnings():
@@ -416,7 +438,8 @@ def test_reduction_with_lut_file(
     # the number of bins changes and the histogram data sizes changes.
     # This test is only for checking if the look up table is used as expected or not
     # therefore using number of bins should be fine.
-    reduction_config.workflow.time_bin_width = 0
+    reduction_config.workflow.time_bin_width = None
+    reduction_config.workflow.nbins = 20
     # Make sure the config uses no lookup table file initially.
     assert reduction_config.workflow.lookup_table_file_path is None
     with known_warnings():

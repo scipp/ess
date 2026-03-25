@@ -2,7 +2,7 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import enum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from .types import Compression
 
@@ -64,8 +64,37 @@ class TimeBinCoordinate(enum.StrEnum):
     time_of_flight = 'time_of_flight'
 
 
+class _NotSet: ...
+
+
+_notset = _NotSet()
+
+
 class WorkflowConfig(BaseModel):
     # Add title of the basemodel
+    @model_validator(mode='after')
+    def nbins_or_time_bin_width(self):
+        if self.time_bin_width is not None and self.nbins is not None:
+            raise ValueError(
+                "Either `nbins` or `time_bin_width` should be set. "
+                "They cannot be set at the same time. "
+                "It is allowed not setting any of them. "
+                "Then 3 [ms] of `time_bin_width` will be used."
+            )
+        return self
+
+    @model_validator(mode='after')
+    def positive_time_bin_width(self):
+        if self.time_bin_width is not None and self.time_bin_width <= 0:
+            raise ValueError("`time_bin_width` should be a positive number.")
+        return self
+
+    @model_validator(mode='after')
+    def positive_nbins(self):
+        if self.nbins is not None and self.nbins <= 0:
+            raise ValueError("`nbins` should be a positive integer.")
+        return self
+
     model_config = {"title": "Workflow Configuration"}
     time_bin_coordinate: TimeBinCoordinate = Field(
         title="Time Bin Coordinate",
@@ -78,19 +107,17 @@ class WorkflowConfig(BaseModel):
         # Default is time of flight since
         # DIALS should expect the time of flight.
     )
-    time_bin_width: int = Field(
+    time_bin_width: int | None = Field(
         title="Time Bin Width",
         description="Width(Length) of each Time Bin in [time_bin_unit]. "
-        "If `time_bin_width` and `nbins` are both given, "
-        "`time_bin_width` will be preferred. "
-        "Set it to `0` if you want to use `nbins` instead.",
-        default=3,
+        "If none of `time_bin_width` or `nbins` is given, "
+        "3 [ms] of `time_bin_width` will be used.",
+        default=None,
     )
-    nbins: int = Field(
+    nbins: int | None = Field(
         title="Number of Time Bins",
-        description="Number of Time bins. "
-        "If `bin_width` is given, `nbins` will be ignored.",
-        default=50,
+        description="Number of Time bins. ",
+        default=None,
     )
     min_time_bin: int | None = Field(
         title="Minimum Time",
@@ -230,11 +257,3 @@ def to_command_arguments(
         )
     else:
         return arg_list
-
-
-def validate_time_bin_config(config: ReductionConfig) -> None:
-    wfconfig = config.workflow
-    if not (wfconfig.time_bin_width > 0 or (wfconfig.nbins > 0)):
-        raise ValueError(
-            "Either `time-bin-width` or `nbins` should be a positive number."
-        )
