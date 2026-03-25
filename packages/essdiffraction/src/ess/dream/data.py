@@ -24,11 +24,6 @@ _registry = make_registry(
         "DREAM_simple_pwd_workflow/Cave_TOF_Monitor_diam_in_can.dat": "md5:ef24f4a4186c628574046e6629e31611",  # noqa: E501
         "DREAM_simple_pwd_workflow/Cave_TOF_Monitor_van_can.dat": "md5:2cdef7ad9912652149b7e687381d2e99",  # noqa: E501
         "DREAM_simple_pwd_workflow/Cave_TOF_Monitor_vana_inc_coh.dat": "md5:701d66792f20eb283a4ce76bae0c8f8f",  # noqa: E501
-        # Time-of-flight lookup tables
-        "DREAM-high-flux-tof-lookup-table.h5": "md5:1b95a359fa7b0d8b4277806ece9bf279",
-        "DREAM-high-flux-tof-lookup-table-BC240-new0.h5": "md5:2cc9dc802082101933429a2ea3624126",  # noqa: E501
-        "DREAM-high-flux-tof-lut-5m-80m.h5": "md5:0db099795027e283f70cb48f738a1c44",
-        "DREAM-high-flux-tof-lut-5m-80m-bc240.h5": "md5:85c0a8acd7ed7f9793ef29f47776f63f",  # noqa: E501
         # Smaller files for unit tests
         "DREAM_simple_pwd_workflow/TEST_data_dream_diamond_vana_container_sample_union.csv.zip": "md5:405df9b5ade9d61ab71fe8d8c19bb51b",  # noqa: E501
         "DREAM_simple_pwd_workflow/TEST_data_dream_vana_container_sample_union.csv.zip": "md5:20186119d1debfb0c2352f9db384cd0a",  # noqa: E501
@@ -40,6 +35,9 @@ _registry = make_registry(
         # `shrink_nexus.py` script in the `tools` folder at the top level of the
         # `essdiffraction` repository.
         "TEST_DREAM_nexus_sorted-2023-12-07.nxs": "md5:599b426a93c46a7b4b09a874bf288c53",  # noqa: E501
+        # Wavelength lookup tables
+        "DREAM-high-flux-wavelength-lut-5m-80m-bc215.h5": "md5:10c80c9de311cfa246f7b2c165eb0b49",  # noqa: E501
+        "DREAM-high-flux-wavelength-lut-5m-80m-bc240.h5": "md5:9741176f8da9b34c2a15967a43e21462",  # noqa: E501
     },
 )
 
@@ -262,8 +260,8 @@ def simulated_monitor_empty_can() -> Path:
     return get_path("DREAM_simple_pwd_workflow/Cave_TOF_Monitor_van_can.dat")
 
 
-def tof_lookup_table_high_flux(bc: Literal[215, 240] = 215) -> Path:
-    """Path to a HDF5 file containing a lookup table for high-flux ToF.
+def lookup_table_high_flux(bc: Literal[215, 240] = 215) -> Path:
+    """Path to a HDF5 file containing a wavelength lookup table for high-flux mode.
 
     The table was created using the ``tof`` package and the chopper settings for the
     DREAM instrument in high-resolution mode.
@@ -276,8 +274,8 @@ def tof_lookup_table_high_flux(bc: Literal[215, 240] = 215) -> Path:
     This has since been found to be non-optimal as it leads to time overlap between the
     two frames, and a value of 240 degrees is now recommended.
 
-    This table was computed using `Create a time-of-flight lookup table for DREAM
-    <../../user-guide/dream/dream-make-tof-lookup-table.rst>`_
+    This table was computed using `Create a wavelength lookup table for DREAM
+    <../../user-guide/dream/dream-make-wavelength-lookup-table.rst>`_
     with ``NumberOfSimulatedNeutrons = 5_000_000``.
 
     Parameters
@@ -288,8 +286,8 @@ def tof_lookup_table_high_flux(bc: Literal[215, 240] = 215) -> Path:
     """
     match bc:
         case 215:
-            return get_path("DREAM-high-flux-tof-lut-5m-80m.h5")
+            return get_path("DREAM-high-flux-wavelength-lut-5m-80m-bc215.h5")
         case 240:
-            return get_path("DREAM-high-flux-tof-lut-5m-80m-bc240.h5")
+            return get_path("DREAM-high-flux-wavelength-lut-5m-80m-bc240.h5")
         case _:
             raise ValueError(f"Unsupported band-control chopper (BC) value: {bc}")

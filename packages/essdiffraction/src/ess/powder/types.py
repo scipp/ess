@@ -18,8 +18,8 @@ from scippneutron.io import cif
 from scippneutron.metadata import Person, Software
 
 from ess.reduce.nexus import types as reduce_t
-from ess.reduce.time_of_flight import types as tof_t
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
+from ess.reduce.unwrap import types as unwrap_t
 
 EmptyDetector = reduce_t.EmptyDetector
 EmptyMonitor = reduce_t.EmptyMonitor
@@ -36,13 +36,13 @@ Position = reduce_t.Position
 
 DetectorBankSizes = reduce_t.DetectorBankSizes
 
-DetectorLtotal = tof_t.DetectorLtotal
-TofDetector = tof_t.TofDetector
-TofMonitor = tof_t.TofMonitor
-PulseStrideOffset = tof_t.PulseStrideOffset
-TimeOfFlightLookupTable = tof_t.TimeOfFlightLookupTable
-TimeOfFlightLookupTableFilename = tof_t.TimeOfFlightLookupTableFilename
-LookupTableRelativeErrorThreshold = tof_t.LookupTableRelativeErrorThreshold
+DetectorLtotal = unwrap_t.DetectorLtotal
+WavelengthDetector = unwrap_t.WavelengthDetector
+WavelengthMonitor = unwrap_t.WavelengthMonitor
+PulseStrideOffset = unwrap_t.PulseStrideOffset
+LookupTable = unwrap_t.LookupTable
+LookupTableFilename = unwrap_t.LookupTableFilename
+LookupTableRelativeErrorThreshold = unwrap_t.LookupTableRelativeErrorThreshold
 
 SampleRun = reduce_t.SampleRun
 VanadiumRun = reduce_t.VanadiumRun
@@ -96,7 +96,7 @@ CalibrationData = NewType("CalibrationData", sc.Dataset | None)
 """Detector calibration data."""
 
 
-class WavelengthDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+class DspacingDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Data with scattering coordinates computed for all events: wavelength, 2theta,
     d-spacing."""
 
@@ -175,9 +175,7 @@ class MonitorFilename(sciline.Scope[RunType, Path], Path):
     """
 
 
-class WavelengthMonitor(
-    sciline.Scope[RunType, MonitorType, sc.DataArray], sc.DataArray
-):
+class DspacingMonitor(sciline.Scope[RunType, MonitorType, sc.DataArray], sc.DataArray):
     """Monitor histogram in wavelength."""
 
 
@@ -202,7 +200,7 @@ class RawDataAndMetadata(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
 
 
 TofMask = NewType("TofMask", Callable | None)
-"""TofMask is a callable that returns a mask for a given TofData."""
+"""TofMask is a callable that returns a mask for masking time-of-flight regions."""
 
 
 TwoThetaMask = NewType("TwoThetaMask", Callable | None)

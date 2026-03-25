@@ -2,17 +2,17 @@ from .correction import apply_lorentz_correction
 from .masking import apply_masks
 from .types import (
     CorrectedDetector,
+    DspacingDetector,
     MaskedDetectorIDs,
     RunType,
     TofMask,
     TwoThetaMask,
-    WavelengthDetector,
     WavelengthMask,
 )
 
 
 def add_masks_and_corrections(
-    da: WavelengthDetector[RunType],
+    da: DspacingDetector[RunType],
     masked_pixel_ids: MaskedDetectorIDs,
     tof_mask_func: TofMask,
     wavelength_mask_func: WavelengthMask,

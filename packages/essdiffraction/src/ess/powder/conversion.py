@@ -10,10 +10,10 @@ import scippnexus as snx
 
 from .calibration import OutputCalibrationData
 from .correction import merge_calibration
-from .logging import get_logger
 from .types import (
     CalibrationData,
     CorrectedDetector,
+    DspacingDetector,
     ElasticCoordTransformGraph,
     EmptyCanSubtractedIntensityTof,
     EmptyCanSubtractedIofDspacing,
@@ -21,14 +21,10 @@ from .types import (
     IntensityDspacing,
     IntensityTof,
     MonitorCoordTransformGraph,
-    MonitorType,
     Position,
     RunType,
     SampleRun,
-    TofDetector,
-    TofMonitor,
     WavelengthDetector,
-    WavelengthMonitor,
 )
 
 
@@ -64,6 +60,8 @@ def _dspacing_from_diff_calibration_a0_impl(t, t0, c):
 
 
 def _dspacing_from_diff_calibration(
+    # TODO: should not be tof here but a time-of-arrival
+    # See https://github.com/scipp/essdiffraction/issues/255
     tof: sc.Variable,
     tzero: sc.Variable,
     difa: sc.Variable,
@@ -96,31 +94,17 @@ def _consume_positions(position, sample_position, source_position):
 
 
 def to_dspacing_with_calibration(
-    data: sc.DataArray,
-    calibration: sc.Dataset,
+    data: sc.DataArray, calibration: sc.Dataset
 ) -> sc.DataArray:
     """
-    Transform coordinates to d-spacing from calibration parameters.
-
-    Computes d-spacing from time-of-flight stored in `data`.
-
-    Attention
-    ---------
-    `data` may have a wavelength coordinate and dimension,
-    but those are discarded.
-    Only the stored time-of-flight is used, that is, any modifications to
-    the wavelength coordinate after it was computed from time-of-flight are lost.
-
-    Raises
-    ------
-    KeyError
-        If `data` does not contain a 'tof' coordinate.
+    Transform coordinates from a detector time of arrival offset to d-spacing using
+    calibration parameters.
 
     Parameters
     ----------
     data:
-        Input data in tof or wavelength dimension.
-        Must have a tof coordinate.
+        Input data in wavelength dimension.
+        Must have a wavelength coordinate.
     calibration:
         Calibration data.
 
@@ -134,9 +118,15 @@ def to_dspacing_with_calibration(
     ess.powder.conversions.dspacing_from_diff_calibration
     """
     out = merge_calibration(into=data, calibration=calibration)
-    out = _restore_tof_if_in_wavelength(out)
 
-    graph = {"dspacing": _dspacing_from_diff_calibration}
+    # TODO: we should not be restoring tof here, as the calibration should be converting
+    # a time of arrival to d-spacing, and not a tof.
+    # We defer this to a later step: https://github.com/scipp/essdiffraction/issues/255
+    # Restore tof from wavelength
+    graph = {"tof": scn.conversion.tof.tof_from_wavelength}
+    out = out.transform_coords("tof", graph=graph, keep_intermediate=False)
+
+    pos_graph = {"dspacing": _dspacing_from_diff_calibration}
     # `_dspacing_from_diff_calibration` does not need positions but conceptually,
     # the conversion maps from positions to d-spacing.
     # The mechanism with `_tag_positions_consumed` is meant to ensure that,
@@ -145,10 +135,10 @@ def to_dspacing_with_calibration(
     if "position" in out.coords or (
         out.bins is not None and "position" in out.bins.coords
     ):
-        graph["_tag_positions_consumed"] = _consume_positions
+        pos_graph["_tag_positions_consumed"] = _consume_positions
     else:
-        graph["_tag_positions_consumed"] = lambda: sc.scalar(0)
-    out = out.transform_coords("dspacing", graph=graph, keep_intermediate=False)
+        pos_graph["_tag_positions_consumed"] = lambda: sc.scalar(0)
+    out = out.transform_coords("dspacing", graph=pos_graph, keep_intermediate=False)
     out.coords.pop("_tag_positions_consumed", None)
     return CorrectedDetector[RunType](out)
 
@@ -175,10 +165,10 @@ def powder_coordinate_transformation_graph(
     :
         A dictionary with the graph for the transformation.
     """
-    return ElasticCoordTransformGraph(
+    return ElasticCoordTransformGraph[RunType](
         {
             **scn.conversion.graph.beamline.beamline(scatter=True),
-            **scn.conversion.graph.tof.elastic("tof"),
+            **scn.conversion.graph.tof.elastic("wavelength"),
             'source_position': lambda: source_position,
             'sample_position': lambda: sample_position,
             'gravity': lambda: gravity,
@@ -186,47 +176,30 @@ def powder_coordinate_transformation_graph(
     )
 
 
-def _restore_tof_if_in_wavelength(data: sc.DataArray) -> sc.DataArray:
-    out = data.copy(deep=False)
-    outer = out.coords.get("wavelength", None)
-    if out.bins is not None:
-        binned = out.bins.coords.get("wavelength", None)
-    else:
-        binned = None
-
-    if outer is not None or binned is not None:
-        get_logger().info("Discarded coordinate 'wavelength' in favor of 'tof'.")
-
-    if "wavelength" in out.dims:
-        out = out.rename_dims(wavelength="tof")
-    return out
-
-
 def add_scattering_coordinates_from_positions(
-    data: TofDetector[RunType],
+    data: WavelengthDetector[RunType],
     graph: ElasticCoordTransformGraph[RunType],
     calibration: CalibrationData,
-) -> WavelengthDetector[RunType]:
+) -> DspacingDetector[RunType]:
     """
-    Add ``wavelength``, ``two_theta`` and ``dspacing`` coordinates to the data.
-    The input ``data`` must have a ``tof`` coordinate, as well as the necessary
-    positions of the beamline components (source, sample, detectors) to compute
-    the scattering coordinates.
+    Add ``two_theta`` and ``dspacing`` coordinates to the data.
+
+    The input ``data`` must have a ``wavelength`` coordinate.
+    The positions of the required beamline components (source, sample, detectors)
+    can be provided either by the graph or as coordinates.
 
     Parameters
     ----------
     data:
-        Input data with a ``tof`` coordinate.
+        Input data with a ``wavelength`` coordinate.
     graph:
         Coordinate transformation graph.
     """
     out = data.transform_coords(
-        ["two_theta", "wavelength", "Ltotal"],
-        graph=graph,
-        keep_intermediate=False,
+        ["two_theta", "Ltotal"], graph=graph, keep_intermediate=False
     )
     out = convert_to_dspacing(out, graph, calibration)
-    return WavelengthDetector[RunType](out)
+    return DspacingDetector[RunType](out)
 
 
 def convert_to_dspacing(
@@ -290,10 +263,10 @@ def powder_monitor_coordinate_transformation_graph(
     :
         A dictionary with the graph for the transformation.
     """
-    return MonitorCoordTransformGraph(
+    return MonitorCoordTransformGraph[RunType](
         {
             **scn.conversion.graph.beamline.beamline(scatter=False),
-            **scn.conversion.graph.tof.elastic("tof"),
+            **scn.conversion.graph.tof.elastic("wavelength"),
             'source_position': lambda: source_position,
             'sample_position': lambda: sample_position,
             'gravity': lambda: gravity,
@@ -301,20 +274,10 @@ def powder_monitor_coordinate_transformation_graph(
     )
 
 
-def convert_monitor_to_wavelength(
-    monitor: TofMonitor[RunType, MonitorType],
-    graph: MonitorCoordTransformGraph[RunType],
-) -> WavelengthMonitor[RunType, MonitorType]:
-    return WavelengthMonitor[RunType, MonitorType](
-        monitor.transform_coords("wavelength", graph=graph, keep_intermediate=False)
-    )
-
-
 providers = (
     add_scattering_coordinates_from_positions,
     convert_reduced_to_tof,
     convert_reduced_to_empty_can_subtracted_tof,
-    convert_monitor_to_wavelength,
     powder_coordinate_transformation_graph,
     powder_monitor_coordinate_transformation_graph,
 )

@@ -10,13 +10,13 @@
 
 annotated-types==0.7.0
     # via pydantic
-ase==3.27.0
+ase==3.28.0
     # via ncrystal
 asttokens==3.0.1
     # via stack-data
 certifi==2026.2.25
     # via requests
-charset-normalizer==3.4.5
+charset-normalizer==3.4.6
     # via requests
 click==8.3.1
     # via dask
@@ -30,7 +30,7 @@ cyclebane==24.10.0
     # via sciline
 cycler==0.12.1
     # via matplotlib
-dask==2026.1.2
+dask==2026.3.0
     # via -r nightly.in
 decorator==5.2.1
     # via ipython
@@ -42,7 +42,7 @@ essreduce @ git+https://github.com/scipp/essreduce@main
     # via -r nightly.in
 executing==2.2.1
     # via stack-data
-fonttools==4.62.0
+fonttools==4.62.1
     # via matplotlib
 fsspec==2026.2.0
     # via dask
@@ -58,7 +58,7 @@ idna==3.11
     # via
     #   email-validator
     #   requests
-importlib-metadata==8.7.1
+importlib-metadata==9.0.0
     # via dask
 iniconfig==2.3.0
     # via pytest

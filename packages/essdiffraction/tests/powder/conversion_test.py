@@ -4,12 +4,8 @@ import numpy as np
 import pytest
 import scipp as sc
 import scipp.testing
-import scippneutron as scn
 
-from ess.powder.conversion import (
-    add_scattering_coordinates_from_positions,
-    to_dspacing_with_calibration,
-)
+from ess.powder.conversion import to_dspacing_with_calibration
 
 
 @pytest.fixture(params=['random', 'zero'])
@@ -56,6 +52,12 @@ def test_dspacing_with_calibration_roundtrip(calibration):
     tzero = calibration['tzero'].data
     recomputed_tof = difa * d**2 + difc * d + tzero
     recomputed_tof = recomputed_tof.rename_dims({'dspacing': 'tof'})
+    # Note that here, the recomputed_tof is 2D (spectrum, tof) while the initial_tof
+    # is 1D (tof), but the values should be the same along the spectrum dimension for
+    # recomputed_tof. The allclose check takes the difference between the 2 arrays and
+    # checks that all values are close to zero. In that process, the 1D initial_tof is
+    # automatically broadcast to the shape of recomputed_tof, so the check is
+    # effectively comparing each spectrum's recomputed_tof to the same initial_tof.
     assert sc.allclose(recomputed_tof, initial_tof.coords['tof'])
 
 
@@ -77,11 +79,13 @@ def test_dspacing_with_calibration_roundtrip_with_wavelength(calibration):
     difc = calibration['difc'].data
     tzero = calibration['tzero'].data
     recomputed_tof = difa * d**2 + difc * d + tzero
-    recomputed_tof = recomputed_tof.rename_dims({'dspacing': 'tof'})
-    assert sc.allclose(
-        recomputed_tof,
-        initial_wavelength.coords['tof'].rename_dims({'wavelength': 'tof'}),
-    )
+    # Note that here, the recomputed_tof is 2D (spectrum, tof) while the initial_tof
+    # is 1D (tof), but the values should be the same along the spectrum dimension for
+    # recomputed_tof. The allclose check takes the difference between the 2 arrays and
+    # checks that all values are close to zero. In that process, the 1D initial_tof is
+    # automatically broadcast to the shape of recomputed_tof, so the check is
+    # effectively comparing each spectrum's recomputed_tof to the same initial_tof.
+    assert sc.allclose(recomputed_tof, initial_wavelength.coords['tof'])
 
 
 def test_dspacing_with_calibration_consumes_positions(calibration):
@@ -137,29 +141,3 @@ def test_dspacing_with_calibration_does_not_use_positions(calibration):
     assert sc.allclose(
         dspacing_no_pos.coords['dspacing'], dspacing_pos.coords['dspacing']
     )
-
-
-def test_add_scattering_coordinates_from_positions():
-    position = sc.vectors(
-        dims=['spectrum'], values=np.arange(14 * 3).reshape((14, 3)), unit='m'
-    )
-    sample_position = sc.vector([0.0, 0.0, 0.01], unit='m')
-    source_position = sc.vector([0.0, 0.0, -11.3], unit='m')
-    tof = sc.DataArray(
-        sc.ones(dims=['spectrum', 'tof'], shape=[14, 27]),
-        coords={
-            'position': position,
-            'tof': sc.linspace('tof', 1.0, 1000.0, 27, unit='us'),
-            'sample_position': sample_position,
-            'source_position': source_position,
-        },
-    )
-    graph = {
-        **scn.conversion.graph.beamline.beamline(scatter=True),
-        **scn.conversion.graph.tof.elastic('tof'),
-    }
-
-    result = add_scattering_coordinates_from_positions(tof, graph, calibration=None)
-
-    assert 'wavelength' in result.coords
-    assert 'two_theta' in result.coords

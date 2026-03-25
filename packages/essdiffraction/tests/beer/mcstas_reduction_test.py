@@ -15,9 +15,8 @@ from ess.beer.data import (
     mcstas_silicon_new_model,
 )
 from ess.beer.io import load_beer_mcstas, load_beer_mcstas_monitor
-from ess.beer.types import DetectorBank, DHKLList
+from ess.beer.types import DetectorBank, DHKLList, TofDetector
 from ess.reduce.nexus.types import Filename, SampleRun
-from ess.reduce.time_of_flight.types import TofDetector
 
 
 def test_can_reduce_using_known_peaks_workflow():
