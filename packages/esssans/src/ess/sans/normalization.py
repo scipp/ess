@@ -251,6 +251,8 @@ def norm_detector_term_denominator(
     )
     # Convert wavelength coordinate to midpoints for future histogramming
     out.coords['wavelength'] = sc.midpoints(out.coords['wavelength'])
+    if 'position' in out.coords:
+        out = out.drop_coords('position')
     return DetectorTerm[RunType, Denominator](out)
 
 
@@ -258,13 +260,11 @@ def norm_detector_term_numerator(
     detector: CorrectedDetector[RunType, Numerator],
 ) -> DetectorTerm[RunType, Numerator]:
     """
-    A dummy provider to convert CorrectedDetector into DetectorTerm.
-    This is added instead of having the masking operation directly return the
-    DetectorTerm, as it is more consistent that Denominator and Numerator have a
-    CorrectedDetector step. We also do not make :func:`compute_Q` accept
-    the CorrectedDetector directly, because this would lead to complications when we
-    want to swap it out for :func:`compute_Qxy`.
+    Strip the position coordinate from the detector, to allow the normalization
+    operation further down the line.
     """
+    if 'position' in detector.coords:
+        detector = detector.drop_coords('position')
     return DetectorTerm[RunType, Numerator](detector)
 
 

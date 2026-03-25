@@ -157,7 +157,7 @@ def sans_elastic(
     graph['cylindrical_x'] = cylindrical_x
     graph['cylindrical_y'] = cylindrical_y
     graph[('Qx', 'Qy')] = Qxy
-    return ElasticCoordTransformGraph(graph)
+    return ElasticCoordTransformGraph[RunType](graph)
 
 
 # def sans_monitor(
