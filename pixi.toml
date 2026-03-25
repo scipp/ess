@@ -2,7 +2,7 @@
 name = "ess"
 channels = ["conda-forge"]
 platforms = ["linux-64", "osx-64", "osx-arm64", "win-64"]
-version = "2026.2.0"
+exclude-newer = "2026-03-18"
 
 [dependencies]
 python = "3.11.*"
