@@ -54,5 +54,5 @@ dream-instrument-view
 workflow-widget-dream
 dream-detector-diagnostics
 dream-visualize-absorption
-dream-make-tof-lookup-table
+dream-make-wavelength-lookup-table
 ```
