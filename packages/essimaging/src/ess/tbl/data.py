@@ -11,8 +11,6 @@ _registry = make_registry(
     version="2",
     files={
         "tbl_sample_data_2025-03.hdf": "md5:12db6bc06721278b3abe47992eac3e77",
-        "TBL-tof-lookup-table-no-choppers.h5": "md5:8bc98fac0ee64fc8f5decf509c75bafe",
-        "TBL-tof-lookup-table-no-choppers-5m-35m.h5": "md5:be7e73f32d395abd3c28b95f75934d61",  # noqa: E501
         "TBL-wavelength-lookup-table-no-choppers-5m-35m.h5": "md5:e28793b7e1c12986ee63a1df68723268",  # noqa: E501
         'tbl-orca-focussing.hdf.zip': Entry(
             alg='md5', chk='f365acd9ea45dd205c0b9398d163cfa4', unzip=True
@@ -27,18 +25,6 @@ _registry = make_registry(
 def tutorial_sample_data() -> pathlib.Path:
     """ """
     return _registry.get_path("tbl_sample_data_2025-03.hdf")
-
-
-def tbl_tof_lookup_table_no_choppers() -> pathlib.Path:
-    """
-    TBL TOF lookup table without choppers.
-    This file is used to convert the neutron arrival time to time-of-flight.
-
-    This table was computed using `Create a time-of-flight lookup table for TBL
-    <../../tbl/tbl-make-tof-lookup-table.rst>`_
-    with ``NumberOfSimulatedNeutrons = 5_000_000``.
-    """
-    return _registry.get_path("TBL-tof-lookup-table-no-choppers-5m-35m.h5")
 
 
 def tbl_wavelength_lookup_table_no_choppers() -> pathlib.Path:
