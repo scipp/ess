@@ -7,5 +7,5 @@ maxdepth: 1
 
 tbl-data-reduction
 orca-image-normalization
-tbl-make-tof-lookup-table
+tbl-make-wavelength-lookup-table
 ```

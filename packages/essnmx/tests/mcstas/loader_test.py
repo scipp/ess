@@ -1,0 +1,148 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
+import pathlib
+from collections.abc import Generator
+
+import pytest
+import scipp as sc
+import scippnexus as snx
+from scipp.testing import assert_allclose, assert_identical
+
+from ess.nmx import NMXMcStasWorkflow
+from ess.nmx.data import get_small_mcstas
+from ess.nmx.mcstas.load import bank_names_to_detector_names, load_crystal_rotation
+from ess.nmx.mcstas.types import (
+    DetectorBankPrefix,
+    DetectorIndex,
+    FilePath,
+    NMXRawEventCountsDataGroup,
+)
+
+
+def check_nmxdata_properties(
+    dg: NMXRawEventCountsDataGroup, fast_axis, slow_axis
+) -> None:
+    assert isinstance(dg, sc.DataGroup)
+    assert_allclose(dg['fast_axis'], fast_axis, atol=sc.scalar(0.005))
+    assert_identical(dg['slow_axis'], slow_axis)
+
+
+def check_scalar_properties_mcstas_3(dg: NMXRawEventCountsDataGroup):
+    """Test helper for NMXData loaded from McStas 3.
+
+    Expected numbers are hard-coded based on the sample file.
+    """
+    assert_identical(dg['crystal_rotation'], sc.vector([0, 0, 0], unit='deg'))
+    assert_identical(dg['sample_position'], sc.vector(value=[0, 0, 0], unit='m'))
+    assert_identical(
+        dg['source_position'], sc.vector(value=[-0.53123, 0.0, -157.405], unit='m')
+    )
+    assert dg['sample_name'] == sc.scalar("sampleMantid")
+
+
+@pytest.mark.parametrize(
+    ('detector_index', 'fast_axis', 'slow_axis'),
+    [
+        # Expected values are provided by the IDS
+        # based on the simulation settings of the sample file.
+        (0, (1.0, 0.0, -0.01), (0.0, 1.0, 0.0)),
+        (1, (-0.01, 0.0, -1.0), (0.0, 1.0, 0.0)),
+        (2, (0.01, 0.0, 1.0), (0.0, 1.0, 0.0)),
+    ],
+)
+def test_file_reader_mcstas3(detector_index, fast_axis, slow_axis) -> None:
+    file_path = get_small_mcstas()
+
+    pl = NMXMcStasWorkflow()
+    pl[FilePath] = file_path
+    pl[DetectorIndex] = detector_index
+    dg, bank = pl.compute((NMXRawEventCountsDataGroup, DetectorBankPrefix)).values()
+
+    entry_path = f"entry1/data/{bank}_dat_list_p_x_y_n_id_t"
+    with snx.File(file_path) as file:
+        raw_data = file[entry_path]["events"][()]
+        data_length = raw_data.sizes['dim_0']
+
+    check_scalar_properties_mcstas_3(dg)
+    assert dg['weights'].sizes['event'] == data_length
+    check_nmxdata_properties(dg, sc.vector(fast_axis), sc.vector(slow_axis))
+
+
+@pytest.fixture(params=[get_small_mcstas])
+def tmp_mcstas_file(
+    tmp_path: pathlib.Path,
+    request: pytest.FixtureRequest,
+) -> Generator[pathlib.Path, None, None]:
+    import os
+    import shutil
+
+    original_file_path = request.param()
+
+    tmp_file = tmp_path / pathlib.Path('file.h5')
+    shutil.copy(original_file_path, tmp_file)
+    yield tmp_file
+    os.remove(tmp_file)
+
+
+def test_file_reader_mcstas_additional_fields(tmp_mcstas_file: pathlib.Path) -> None:
+    """Check if additional fields names do not break the loader."""
+    import h5py
+
+    entry_path = "entry1/data/bank01_events_dat_list_p_x_y_n_id_t"
+    new_entry_path = entry_path + '_L'
+
+    with h5py.File(tmp_mcstas_file, 'r+') as file:
+        dataset = file[entry_path]
+        del file[entry_path]
+        file[new_entry_path] = dataset
+
+    pl = NMXMcStasWorkflow()
+    pl[FilePath] = str(tmp_mcstas_file)
+    pl[DetectorIndex] = 0
+    dg = pl.compute(NMXRawEventCountsDataGroup)
+
+    assert isinstance(dg, sc.DataGroup)
+
+
+@pytest.fixture
+def rotation_mission_tmp_file(tmp_mcstas_file: pathlib.Path) -> pathlib.Path:
+    import h5py
+
+    param_keys = tuple(f"entry1/simulation/Param/XtalPhi{key}" for key in "XYZ")
+
+    # Remove the rotation parameters from the file.
+    with h5py.File(tmp_mcstas_file, 'a') as file:
+        for key in param_keys:
+            del file[key]
+
+    return tmp_mcstas_file
+
+
+def test_missing_rotation(rotation_mission_tmp_file: FilePath) -> None:
+    with pytest.raises(KeyError, match="XtalPhiX"):
+        load_crystal_rotation(rotation_mission_tmp_file, None)
+        # McStasInstrument is not used due to error in the file.
+
+
+def test_bank_names_to_detector_names_two_detectors(two_detectors_two_filenames_desc):
+    res = bank_names_to_detector_names(two_detectors_two_filenames_desc)
+    assert len(res) == 2
+    assert all(len(v) == 1 for v in res.values())
+
+
+def test_bank_names_to_detector_names_same_filename(two_detectors_same_filename_desc):
+    res = bank_names_to_detector_names(two_detectors_same_filename_desc)
+    assert len(res) == 1
+    assert all(len(v) == 2 for v in res.values())
+
+
+def test_bank_names_to_detector_names_no_detectors(no_detectors_desc):
+    res = bank_names_to_detector_names(no_detectors_desc)
+    assert len(res) == 0
+
+
+def test_bank_names_to_detector_names_no_filename(one_detector_no_filename_desc):
+    res = bank_names_to_detector_names(one_detector_no_filename_desc)
+    assert len(res) == 1
+    ((bank, (detector,)),) = res.items()
+    assert bank == detector

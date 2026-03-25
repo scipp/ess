@@ -26,7 +26,7 @@ jobs:
     needs: determine-package
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - uses: actions/setup-python@v5
@@ -64,7 +64,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - uses: prefix-dev/setup-pixi@v0.9.4
@@ -72,7 +72,7 @@ jobs:
           frozen: true
           environments: docs-${{ needs.determine-package.outputs.package }}
       - name: Build docs
-        run: pixi run -e docs-${{ needs.determine-package.outputs.package }} docs ${{ needs.determine-package.outputs.package }}
+        run: pixi run docs-${{ needs.determine-package.outputs.package }}
       - name: Prepare site
         run: |
           PACKAGE=${{ needs.determine-package.outputs.package }}

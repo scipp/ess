@@ -26,7 +26,9 @@ git remote remove essdiffraction
   git_describe_command = ["git", "describe", "--dirty", "--tags", "--long", "--match", "essdiffraction/*[0-9]*"]
   ```
 - Add `docs` extra with deps from `requirements/docs.in` (minus base deps)
-- Delete `tox.ini`, `requirements/`, `.github/`, `.pre-commit-config.yaml`
+- Remove unnecessary configurations in the pyproject.toml file. i.e. `tools.codespell`.
+- Delete unnecessary files:
+  `tox.ini`, `requirements/`, `.github/`, `.pre-commit-config.yaml`, `MANIFEST.in`, `.gitignore`, `.python-version`.
 
 ## 3. Add to `pixi.toml`
 
@@ -59,3 +61,5 @@ Add the new feature to the `default` environment.
 Add a change filter and matrix entry. If the package depends on `essreduce`, include essreduce paths in the filter.
 
 ## 5. Run `pixi install` and commit
+
+## 6. Push the changes and tags with `essdiffraction` prefix.

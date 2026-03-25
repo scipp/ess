@@ -13,10 +13,6 @@ python = "3.11.*"
 cmd = "pytest packages/{{ package }}/tests/"
 args = ["package"]
 
-[tasks.docs]
-cmd = "python -m sphinx -v -b html -d /tmp/docs_doctrees packages/{{ package }}/docs packages/{{ package }}/html"
-args = ["package"]
-
 # ==================== Package features ====================
 
 # essreduce (core package, no workspace deps)
@@ -26,6 +22,10 @@ essreduce = { path = "packages/essreduce", editable = true, extras = ["test"] }
 # essimaging (depends on essreduce)
 [feature.essimaging.pypi-dependencies]
 essimaging = { path = "packages/essimaging", editable = true, extras = ["test"] }
+
+# essnmx (depends on essreduce)
+[feature.essnmx.pypi-dependencies]
+essnmx = { path = "packages/essnmx", editable = true, extras = ["test"] }
 
 # ==================== Lint feature ====================
 
@@ -48,26 +48,42 @@ python-graphviz = "*"
 [feature.docs-essreduce.pypi-dependencies]
 essreduce = { path = "packages/essreduce", editable = true, extras = ["test", "docs"] }
 
+[feature.docs-essreduce.tasks.docs-essreduce]
+cmd = "python -m sphinx -v -b html -d packages/essreduce/.docs_doctrees packages/essreduce/docs packages/essreduce/html"
+default-environment = "docs-essreduce"
+
 [feature.docs-essimaging.pypi-dependencies]
 essimaging = { path = "packages/essimaging", editable = true, extras = ["test", "docs"] }
+
+[feature.docs-essimaging.tasks.docs-essimaging]
+cmd = "python -m sphinx -v -b html -d packages/essimaging/.docs_doctrees packages/essimaging/docs packages/essimaging/html"
+
+[feature.docs-essnmx.pypi-dependencies]
+essnmx = { path = "packages/essnmx", editable = true, extras = ["test", "docs"] }
+
+[feature.docs-essnmx.tasks.docs-essnmx]
+cmd = "python -m sphinx -v -b html -d packages/essnmx/.docs_doctrees packages/essnmx/docs packages/essnmx/html"
 
 # ==================== Environments ====================
 
 [environments]
 # Default: all packages (for full dev setup)
-default = { features = ["essreduce", "essimaging"], solve-group = "default" }
+default = { features = ["essreduce", "essimaging", "essnmx"], solve-group = "default" }
 
 # Per-package test environments (include workspace dep features)
 essreduce = { features = ["essreduce"], solve-group = "default" }
 essimaging = { features = ["essimaging", "essreduce"], solve-group = "default" }
+essnmx = { features = ["essnmx", "essreduce"], solve-group = "default" }
 
 # Lower-bound test environments (separate resolution)
 lb-essreduce = { features = ["essreduce"], solve-group = "lower-bound" }
 lb-essimaging = { features = ["essimaging", "essreduce"], solve-group = "lower-bound" }
+lb-essnmx = { features = ["essnmx", "essreduce"], solve-group = "lower-bound" }
 
 # Docs environments (package with docs extra + pandoc)
 docs-essreduce = { features = ["docs-essreduce", "docs"], solve-group = "default" }
 docs-essimaging = { features = ["docs-essimaging", "docs-essreduce", "docs"], solve-group = "default" }
+docs-essnmx = { features = ["docs-essnmx", "docs-essreduce", "docs"], solve-group = "default" }
 
 # Lint environment (standalone, no package deps)
 lint = { features = ["lint"], solve-group = "lint" }

@@ -38,7 +38,7 @@ dependencies = [
   "scippneutron>=24.12.0",
   "scippnexus>=23.11.1",
   "tifffile>=2024.7.2",
-  "essreduce>=26.2.1",
+  "essreduce>=26.4.0",
   "scitiff>=25.7",
 ]
 
@@ -72,7 +72,7 @@ docs = [
 
 [tool.setuptools_scm]
 root = "../.."
-tag_regex = "^essimaging/(?P<version>[vV]?\\d+(?:\\.\\d+)*(?:[._-]?\\w+)*)$"
+tag_regex = "^essimaging/(?P<version>\\d+.*)$"
 git_describe_command = ["git", "describe", "--dirty", "--tags", "--long", "--match", "essimaging/*[0-9]*"]
 
 [tool.pytest.ini_options]
