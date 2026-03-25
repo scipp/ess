@@ -341,6 +341,8 @@ providers = (
     get_monitor_data,
     data_to_tof,
     monitor_to_tof,
+    data_to_wavelength,
+    monitor_to_wavelength,
     lab_frame_transform,
     helium3_tube_detector_pixel_shape,
 )
