@@ -42,5 +42,5 @@ hidden:
 estia-mcstas-reduction
 estia-advanced-mcstas-reduction
 simulated-spin-flip-sample
-create-estia-tof-lookup-table
+create-estia-wavelength-lookup-table
 ```
