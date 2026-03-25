@@ -11,17 +11,25 @@ from ess.reduce.nexus.types import DetectorBankSizes, Position
 
 from ..reflectometry.load import load_h5
 from ..reflectometry.types import (
+    BeamDivergenceLimits,
     CoordTransformationGraph,
+    CorrectionsToApply,
     DetectorLtotal,
     DetectorRotation,
     Filename,
+    ProtonCurrent,
     RawDetector,
+    ReducibleData,
     RunType,
     SampleRotation,
     SampleRotationOffset,
+    WavelengthBins,
+    YIndexLimits,
+    ZIndexLimits,
 )
 from .beamline import DETECTOR_BANK_SIZES
 from .conversions import coordinate_transformation_graph
+from .corrections import add_coords_masks_and_apply_corrections
 
 
 def parse_metadata_ascii(lines) -> dict:
@@ -298,6 +306,35 @@ def mcstas_wavelength_coordinate_transformation_graph(
         ),
         "wavelength": lambda wavelength_from_mcstas: wavelength_from_mcstas,
     }
+
+
+def mcstas_add_coords_masks_and_apply_corrections(
+    da: RawDetector[RunType],
+    ylim: YIndexLimits,
+    zlims: ZIndexLimits,
+    bdlim: BeamDivergenceLimits,
+    wbins: WavelengthBins,
+    proton_current: ProtonCurrent[RunType],
+    graph: CoordTransformationGraph[RunType],
+    corrections_to_apply: CorrectionsToApply,
+) -> ReducibleData[RunType]:
+    # TODO: maybe make new files with the mcstas true wavelength as a new coord, and
+    # then use that instead of overwriting the wavelength coord?
+    #
+    # with_mcstas_wavelength = da.bins.assign_coords(
+    #     wavelength=da.bins.coords['wavelength_from_mcstas']
+    # )
+    out = add_coords_masks_and_apply_corrections(
+        da=da,
+        ylim=ylim,
+        zlims=zlims,
+        bdlim=bdlim,
+        wbins=wbins,
+        proton_current=proton_current,
+        graph=graph,
+        corrections_to_apply=corrections_to_apply,
+    )
+    return ReducibleData[RunType](out)
 
 
 providers = (
