@@ -9,7 +9,7 @@ asttokens==3.0.1
     # via stack-data
 certifi==2026.2.25
     # via requests
-charset-normalizer==3.4.5
+charset-normalizer==3.4.6
     # via requests
 comm==0.2.3
     # via ipywidgets
@@ -21,7 +21,7 @@ decorator==5.2.1
     # via ipython
 executing==2.2.1
     # via stack-data
-fonttools==4.62.0
+fonttools==4.62.1
     # via matplotlib
 idna==3.11
     # via requests
@@ -89,7 +89,7 @@ pytest==9.0.2
     # via -r basetest.in
 python-dateutil==2.9.0.post0
     # via matplotlib
-requests==2.32.5
+requests==2.33.0
     # via pooch
 scipy==1.17.1
     # via -r basetest.in
