@@ -70,7 +70,7 @@ def mcstas_default_parameters() -> dict:
         CorrectionsToApply: corrections.default_corrections
         - {correct_by_proton_current},
         LookupTableRelativeErrorThreshold: {
-            "detector": float('inf'),
+            "detector": 0.06,
         },
     }
 
