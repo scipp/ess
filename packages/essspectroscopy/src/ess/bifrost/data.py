@@ -39,7 +39,7 @@ def lookup_table_simulation() -> Path:
 
     This table was computed with `tof <https://github.com/scipp/tof>`_
     using `Create a wavelength lookup table for BIFROST
-    <../../user-guide/bifrost/bifrost-make-lookup-table.rst>`_
+    <../../user-guide/bifrost/bifrost-make-wavelength-lookup-table.rst>`_
     with ``NumberOfSimulatedNeutrons = 5_000_000``.
     """
     return get_path("BIFROST-simulation-lookup-table.h5")
