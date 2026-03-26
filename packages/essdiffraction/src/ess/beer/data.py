@@ -44,6 +44,7 @@ _registry = make_registry(
         # Simulation with 3D detector model - almost no events
         # - only used to verify we can load the 3D geometry.
         "few_neutrons_3d_detector_example.h5": "md5:88cbe29cb539c8acebf9fd7cee9d3c57",
+        "silicon-mode9-3d-more-neutrons.h5": "md5:a6afdc4ee9827a57f88c2a3c6ef27383",
     },
 )
 
@@ -79,6 +80,10 @@ def mcstas_silicon_new_model(mode: int) -> Path:
 
 def mcstas_few_neutrons_3d_detector_example():
     return _registry.get_path('few_neutrons_3d_detector_example.h5')
+
+
+def mcstas_more_neutrons_3d_detector_example():
+    return _registry.get_path('silicon-mode9-3d-more-neutrons.h5')
 
 
 def duplex_peaks() -> Path:

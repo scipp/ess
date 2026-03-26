@@ -18,6 +18,7 @@ from .types import (
 
 def compute_tof_in_each_cluster(
     da: StreakClusteredData[RunType],
+    chopper_delay: WavelengthDefinitionChopperDelay,
     mod_period: ModulationPeriod,
 ) -> TofDetector[RunType]:
     """Fits a line through each cluster, the intercept of the line is t0.
@@ -32,6 +33,7 @@ def compute_tof_in_each_cluster(
        of the points in the cluster, and probably should belong to another cluster or
        are part of the background.
     3. Go back to 1) and iterate until convergence. A few iterations should be enough.
+    4. Finally, round the estimated t0 to the closest known chopper opening time.
     """
     if isinstance(da, sc.DataGroup):
         return sc.DataGroup(
@@ -42,7 +44,7 @@ def compute_tof_in_each_cluster(
     sin_theta_L = sc.sin(da.bins.coords['two_theta'] / 2) * da.bins.coords['Ltotal']
     t = time_of_arrival(
         da.bins.coords['event_time_offset'],
-        da.coords['tc'].to(unit=da.bins.coords['event_time_offset'].unit),
+        da.bins.coords['frame_cutoff_time'],
     )
     for _ in range(15):
         s, t0 = _linear_regression_by_bin(sin_theta_L, t, da.data)
@@ -54,9 +56,31 @@ def compute_tof_in_each_cluster(
             too_far_from_center=(distance_to_self > max_distance_from_streak_line),
         )
 
-    da = da.assign_coords(t0=sc.values(t0))
-    da = da.bins.assign_coords(tof=(t - sc.values(t0)))
+    # The t0 estimate from fitting is influenced by peak overlap, background,
+    # and other factors that can make the estimate offset from the true
+    # chopper opening time that it should match.
+    # We know the true chopper opening times, so instead of using the t0 estimte
+    # directly we can round the estimate to the closest chopper opening time.
+    # That way the t0 estimate becomes more robust and is guaranteed to correspond to
+    # a true chopper opening time.
+    t0 = _round_t0_to_nearest_chopper_opening(sc.values(t0), mod_period, chopper_delay)
+    da = da.assign_coords(t0=t0)
+    da = da.bins.assign_coords(tof=(t - t0))
     return da
+
+
+def _round_t0_to_nearest_chopper_opening(
+    t0: sc.Variable,
+    mod_period: sc.Variable,
+    chopper_delay: sc.Variable,
+) -> sc.Variable:
+    out = t0 - chopper_delay
+    out /= mod_period
+    out += 0.5
+    sc.floor(out, out=out)
+    out *= mod_period
+    out += chopper_delay
+    return out
 
 
 def _linear_regression_by_bin(
@@ -118,14 +142,14 @@ def _compute_d_given_list_of_peaks(
 
 def time_of_arrival(
     event_time_offset: sc.Variable,
-    tc: sc.Variable,
+    frame_cutoff_time: sc.Variable,
 ):
     """Does frame unwrapping for pulse shaping chopper modes.
 
-    Events before the "cutoff time" `tc` are assumed to come from the previous pulse."""
+    Events before the "cutoff time" are assumed to come from the previous pulse."""
     _eto = event_time_offset
     T = sc.scalar(1 / 14, unit='s').to(unit=_eto.unit)
-    tc = tc.to(unit=_eto.unit)
+    tc = frame_cutoff_time.to(unit=_eto.unit)
     return sc.where(_eto >= tc, _eto, _eto + T)
 
 
@@ -135,13 +159,13 @@ def _tof_from_dhkl(
     coarse_dhkl: sc.Variable,
     Ltotal: sc.Variable,
     mod_period: sc.Variable,
-    time0: sc.Variable,
+    chopper_delay: sc.Variable,
 ) -> sc.Variable:
     """Computes tof for BEER given the dhkl peak that the event belongs to"""
     # Source: https://www.mcstas.org/download/components/current/contrib/NPI_tof_dhkl_detector.comp
     # tref = 2 * d_hkl * sin(theta) / hm * Ltotal
-    # tc = time_of_arrival - time0 - tref
-    # dt = floor(tc / mod_period + 0.5) * mod_period + time0
+    # tc = time_of_arrival - chopper_delay - tref
+    # dt = floor(tc / mod_period + 0.5) * mod_period + chopper_delay
     # tof = time_of_arrival - dt
     c = (-2 * 1.0 / (scipp.constants.h / scipp.constants.m_n)).to(
         unit=f'{time_of_arrival.unit}/m/angstrom'
@@ -150,12 +174,12 @@ def _tof_from_dhkl(
     out *= sc.sin(theta)
     out *= Ltotal
     out += time_of_arrival
-    out -= time0
+    out -= chopper_delay
     out /= mod_period
     out += 0.5
     sc.floor(out, out=out)
     out *= mod_period
-    out += time0
+    out += chopper_delay
     out *= -1
     out += time_of_arrival
     return out
@@ -168,7 +192,7 @@ def geometry_graph() -> GeometryCoordTransformGraph:
 def tof_from_known_dhkl_graph(
     mod_period: ModulationPeriod,
     pulse_length: PulseLength,
-    time0: WavelengthDefinitionChopperDelay,
+    chopper_delay: WavelengthDefinitionChopperDelay,
     dhkl_list: DHKLList,
     gg: GeometryCoordTransformGraph,
 ) -> TofCoordTransformGraph:
@@ -200,7 +224,7 @@ def tof_from_known_dhkl_graph(
         **graph.tof.elastic("tof"),
         'pulse_length': lambda: pulse_length,
         'mod_period': lambda: mod_period,
-        'time0': lambda: time0,
+        'chopper_delay': lambda: chopper_delay,
         'tof': _tof_from_dhkl,
         'time_of_arrival': time_of_arrival,
         'coarse_dhkl': _compute_coarse_dspacing,

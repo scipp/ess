@@ -20,7 +20,7 @@ def cluster_events_by_streak(
 
     # We need to keep these coordinates after binning,
     # adding them to the binned data coords achieves this.
-    for coord in ('two_theta', 'Ltotal'):
+    for coord in ('two_theta', 'Ltotal', 'frame_cutoff_time'):
         da.bins.coords[coord] = sc.bins_like(da, da.coords[coord])
 
     h = da.bins.concat().hist(coarse_d=1000)

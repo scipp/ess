@@ -234,8 +234,8 @@ def _load_beer_mcstas(f, north_or_south=None, *, number):
     # Bin detector panel into rectangular "pixels"
     # similar in size to the physical detector pixels.
     da = da.bin(
-        y=sc.linspace('y', -0.5, 0.5, 501, unit='m'),
-        x=sc.linspace('x', -0.5, 0.5, 201, unit='m'),
+        y=sc.linspace('y', -0.5, 0.5, 201, unit='m'),
+        x=sc.linspace('x', -0.5, 0.5, 501, unit='m'),
     )
 
     # Compute the position of each pixel in the global coordinate system.
@@ -279,7 +279,7 @@ def _load_beer_mcstas(f, north_or_south=None, *, number):
     # Used in modulation mode automatic-peak-finding reduction to estimate d.
     # In practice this will probably be replaced by the regular tof workflow.
     # But I'm not 100% sure.
-    da.coords["tc"] = (
+    da.coords["frame_cutoff_time"] = (
         sc.constants.m_n
         / sc.constants.h
         * da.coords['wavelength_estimate']
