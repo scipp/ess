@@ -3,12 +3,13 @@
 import sciline
 import scipp as sc
 import scippnexus as snx
-from ess.reduce.uncertainty import broadcast_uncertainties
 from scippneutron.conversion.beamline import (
     beam_aligned_unit_vectors,
     scattering_angles_with_gravity,
 )
 from scippneutron.conversion.graph import beamline, tof
+
+from ess.reduce.uncertainty import broadcast_uncertainties
 
 from .common import mask_range
 from .types import (
