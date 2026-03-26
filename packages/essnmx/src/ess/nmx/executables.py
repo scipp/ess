@@ -8,6 +8,7 @@ from collections.abc import Callable
 import numpy as np
 import scipp as sc
 import scippnexus as snx
+
 from ess.reduce.nexus.types import Filename, NeXusName, RawDetector, SampleRun
 from ess.reduce.unwrap.types import LookupTable
 
