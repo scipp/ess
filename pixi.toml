@@ -27,6 +27,13 @@ essimaging = { path = "packages/essimaging", editable = true, extras = ["test"] 
 [feature.essnmx.pypi-dependencies]
 essnmx = { path = "packages/essnmx", editable = true, extras = ["test"] }
 
+# ==================== Dev feature ====================
+
+[feature.dev.pypi-dependencies]
+# Matplotlib is buggy for later ipykernel
+ipykernel = "<7"
+jupyterlab = ">=4.4"
+
 # ==================== Lint feature ====================
 
 [feature.lint.pypi-dependencies]
@@ -68,7 +75,7 @@ cmd = "python -m sphinx -v -b html -d packages/essnmx/.docs_doctrees packages/es
 
 [environments]
 # Default: all packages (for full dev setup)
-default = { features = ["essreduce", "essimaging", "essnmx"], solve-group = "default" }
+default = { features = ["dev", "essreduce", "essimaging", "essnmx"], solve-group = "default" }
 
 # Per-package test environments (include workspace dep features)
 essreduce = { features = ["essreduce"], solve-group = "default" }
