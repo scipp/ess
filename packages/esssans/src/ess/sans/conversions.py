@@ -3,13 +3,12 @@
 import sciline
 import scipp as sc
 import scippnexus as snx
+from ess.reduce.uncertainty import broadcast_uncertainties
 from scippneutron.conversion.beamline import (
     beam_aligned_unit_vectors,
     scattering_angles_with_gravity,
 )
 from scippneutron.conversion.graph import beamline, tof
-
-from ess.reduce.uncertainty import broadcast_uncertainties
 
 from .common import mask_range
 from .types import (
@@ -89,10 +88,12 @@ def Qxy(Q: sc.Variable, phi: sc.Variable) -> dict[str, sc.Variable]:
     return {'Qx': Qx, 'Qy': Qy}
 
 
-class ElasticCoordTransformGraph(sciline.Scope[RunType, dict], dict): ...
-
-
-class MonitorCoordTransformGraph(sciline.Scope[RunType, dict], dict): ...
+class ElasticCoordTransformGraph(sciline.Scope[RunType, dict], dict):
+    """
+    Coordinate transformation graph for SANS elastic scattering (which possibly
+    includes the effects of gravitationaly pull on the neutrons).
+    See :func:`sans_elastic` for more details.
+    """
 
 
 def sans_elastic(

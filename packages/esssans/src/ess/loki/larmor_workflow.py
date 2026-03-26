@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
 """
 Default parameters, providers and utility functions for the Loki workflow.
 """
@@ -7,18 +7,14 @@ Default parameters, providers and utility functions for the Loki workflow.
 import sciline
 import scipp as sc
 import scippnexus as snx
+from ess.reduce.workflow import register_workflow
 from scippneutron.conversion.graph import beamline, tof
 
 from ess import sans
-from ess.reduce.workflow import register_workflow
 from ess.sans.io import read_xml_detector_masking
 from ess.sans.parameters import typical_outputs
 
-from ..sans.conversions import (
-    ElasticCoordTransformGraph,
-    MonitorCoordTransformGraph,
-    sans_elastic,
-)
+from ..sans.conversions import ElasticCoordTransformGraph, sans_elastic
 from ..sans.types import (
     BackgroundRun,
     BeamCenter,
@@ -49,6 +45,13 @@ from .workflow import loki_providers
 DETECTOR_BANK_SIZES = {
     'larmor_detector': {'layer': 4, 'tube': -1, 'straw': 7, 'pixel': 512},
 }
+
+
+class MonitorCoordTransformGraph(sciline.Scope[RunType, dict], dict):
+    """
+    Coordinate transformation graph that allows to compute wavelength from tof for
+    Larmor monitors (no scattering).
+    """
 
 
 def larmor_default_parameters() -> dict:
