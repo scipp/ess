@@ -88,10 +88,9 @@ def preprocess_monitor_data(
             background, prototype=monitor, mode=uncertainties
         )
 
-    # If the position coord is present, we need to remove it to allow for dividing
-    # counts in different monitors to compute the transmission fraction
-    if 'position' in monitor.coords:
-        monitor = monitor.drop_coords('position')
+    # If the position-related coords are present, we need to remove them to allow for
+    # dividing counts in different monitors to compute the transmission fraction.
+    monitor = monitor.drop_coords({'position', 'Ltotal'} & set(monitor.coords))
 
     return CorrectedMonitor(monitor)
 
