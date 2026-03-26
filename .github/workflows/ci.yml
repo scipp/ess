@@ -114,7 +114,7 @@ jobs:
   report:
     name: Report Job Status
     needs: [changes, formatting, test, docs]
-    if: always()
+    if: always() && ( github.ref != 'refs/heads/main' )  # This job is for branch protection rule so it doesn't have to run on main branch.
     runs-on: ubuntu-24.04
     steps:
       - name: Report Job Success
