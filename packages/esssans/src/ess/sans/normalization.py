@@ -2,8 +2,9 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 import scippnexus as snx
-from ess.reduce.uncertainty import UncertaintyBroadcastMode, broadcast_uncertainties
 from scipp.core import concepts
+
+from ess.reduce.uncertainty import UncertaintyBroadcastMode, broadcast_uncertainties
 
 from .types import (
     CleanDirectBeam,
