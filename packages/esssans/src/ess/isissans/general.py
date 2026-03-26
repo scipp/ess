@@ -61,16 +61,6 @@ DetectorBankOffset = NewType('DetectorBankOffset', sc.Variable)
 SampleOffset = NewType('SampleOffset', sc.Variable)
 
 
-class TofDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """
-    Detector with a time-of-flight coordinate
-    """
-
-
-class TofMonitor(sciline.Scope[RunType, MonitorType, sc.DataArray], sc.DataArray):
-    """Monitor data with time-of-flight coordinate."""
-
-
 def default_parameters() -> dict:
     return {
         MonitorOffset[Incident]: MonitorOffset[Incident](
@@ -236,20 +226,6 @@ def dummy_assemble_monitor_data(
     return RawMonitor[RunType, MonitorType](monitor)
 
 
-def data_to_tof(da: RawDetector[RunType]) -> TofDetector[RunType]:
-    """Dummy conversion of data to time-of-flight data.
-    The data already has a time-of-flight coordinate."""
-    return TofDetector[RunType](da)
-
-
-def monitor_to_tof(
-    da: RawMonitor[RunType, MonitorType],
-) -> TofMonitor[RunType, MonitorType]:
-    """Dummy conversion of monitor data to time-of-flight data.
-    The monitor data already has a time-of-flight coordinate."""
-    return TofMonitor[RunType, MonitorType](da)
-
-
 def _isis_convert_to_wavelength(da: sc.DataArray, scatter: bool) -> sc.DataArray:
     graph = {
         **scn.conversion.graph.beamline.beamline(scatter=scatter),
@@ -258,12 +234,12 @@ def _isis_convert_to_wavelength(da: sc.DataArray, scatter: bool) -> sc.DataArray
     return da.transform_coords('wavelength', graph=graph, keep_intermediate=False)
 
 
-def data_to_wavelength(da: TofDetector[RunType]) -> WavelengthDetector[RunType]:
+def data_to_wavelength(da: RawDetector[RunType]) -> WavelengthDetector[RunType]:
     return WavelengthDetector[RunType](_isis_convert_to_wavelength(da, scatter=True))
 
 
 def monitor_to_wavelength(
-    da: TofMonitor[RunType, MonitorType],
+    da: RawMonitor[RunType, MonitorType],
 ) -> WavelengthMonitor[RunType, MonitorType]:
     return WavelengthMonitor[RunType, MonitorType](
         _isis_convert_to_wavelength(da, scatter=False)
@@ -312,7 +288,7 @@ def lab_frame_transform() -> NeXusTransformation[snx.NXdetector, RunType]:
     )
 
 
-def get_detector_ids_from_sample_run(data: TofDetector[SampleRun]) -> DetectorIDs:
+def get_detector_ids_from_sample_run(data: RawDetector[SampleRun]) -> DetectorIDs:
     """Extract detector IDs from sample run.
 
     This overrides the function in the masking module which gets the detector IDs from
@@ -339,8 +315,6 @@ providers = (
     get_calibrated_isis_monitor,
     get_detector_ids_from_sample_run,
     get_monitor_data,
-    data_to_tof,
-    monitor_to_tof,
     data_to_wavelength,
     monitor_to_wavelength,
     lab_frame_transform,
