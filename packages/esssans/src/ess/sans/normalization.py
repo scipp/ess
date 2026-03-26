@@ -2,9 +2,8 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 import scippnexus as snx
-from scipp.core import concepts
-
 from ess.reduce.uncertainty import UncertaintyBroadcastMode, broadcast_uncertainties
+from scipp.core import concepts
 
 from .types import (
     CleanDirectBeam,
@@ -251,8 +250,6 @@ def norm_detector_term_denominator(
     )
     # Convert wavelength coordinate to midpoints for future histogramming
     out.coords['wavelength'] = sc.midpoints(out.coords['wavelength'])
-    # if 'position' in out.coords:
-    #     out = out.drop_coords('position')
     return DetectorTerm[RunType, Denominator](out)
 
 
@@ -263,8 +260,6 @@ def norm_detector_term_numerator(
     Strip the position coordinate from the detector, to allow the normalization
     operation further down the line.
     """
-    # if 'position' in detector.coords:
-    #     detector = detector.drop_coords('position')
     return DetectorTerm[RunType, Numerator](detector)
 
 
