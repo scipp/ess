@@ -14,8 +14,6 @@ _registry = make_registry(
         "iron_simulation_ob_small.nxs": "md5:7591ed8f0adec2658fb08190bd530b12",
         "iron_simulation_sample_large.nxs": "md5:c162b6abeccb51984880d8d5002bae95",
         "iron_simulation_sample_small.nxs": "md5:dda6fb30aa88780c5a3d4cef6ea05278",
-        "ODIN-tof-lookup-table.h5": "md5:e657021f4508f167b2a2eb550853b06b",
-        "ODIN-tof-lookup-table-5m-65m.h5": "md5:c815eed6835a98d0b8d5252ffe250964",
         "ODIN-wavelength-lookup-table-5m-65m.h5": "md5:44eef2a2e826cec688aeb1b985eb9f9e",  # noqa: E501
     },
 )
@@ -59,18 +57,6 @@ def iron_simulation_ob_large() -> pathlib.Path:
     10M events from the McStas results.
     """
     return _registry.get_path("iron_simulation_ob_large.nxs")
-
-
-def odin_tof_lookup_table() -> pathlib.Path:
-    """
-    Odin TOF lookup table.
-    This file is used to convert the raw ``event_time_offset`` to time-of-flight.
-
-    This table was computed using `Create a time-of-flight lookup table for ODIN
-    <../../odin/odin-make-tof-lookup-table.rst>`_
-    with ``NumberOfSimulatedNeutrons = 5_000_000``.
-    """
-    return _registry.get_path("ODIN-tof-lookup-table-5m-65m.h5")
 
 
 def odin_wavelength_lookup_table() -> pathlib.Path:
