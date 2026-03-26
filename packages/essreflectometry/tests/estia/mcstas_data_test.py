@@ -17,7 +17,9 @@ from ess.estia.data import (
     estia_mcstas_sample_run,
     estia_wavelength_lookup_table,
 )
-from ess.estia.mcstas import mcstas_wavelength_coordinate_transformation_graph
+from ess.estia.mcstas import (
+    use_mcstas_wavelengths_instead_of_estimates_from_time_of_arrival,
+)
 from ess.reflectometry import orso
 from ess.reflectometry.types import (
     BeamDivergenceLimits,
@@ -100,7 +102,7 @@ def test_can_compute_reflectivity_curve_exact_wavelengths(
     estia_mcstas_pipeline: sciline.Pipeline,
 ):
     wf = estia_mcstas_pipeline.copy()
-    wf.insert(mcstas_wavelength_coordinate_transformation_graph)
+    wf.insert(use_mcstas_wavelengths_instead_of_estimates_from_time_of_arrival)
     wf[Filename[SampleRun]] = estia_mcstas_sample_run(11)
     r = wf.compute(ReflectivityOverQ)
 

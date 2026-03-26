@@ -147,6 +147,7 @@ def add_coords(
     "Adds scattering coordinates to the raw detector data."
     return da.transform_coords(
         (
+            "wavelength",
             "theta",
             "divergence_angle",
             "Q",
