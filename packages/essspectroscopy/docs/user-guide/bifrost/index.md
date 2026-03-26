@@ -35,5 +35,5 @@ bifrost-bragg-peak-monitor
 maxdepth: 1
 ---
 
-bifrost-make-tof-lookup-table
+bifrost-make-wavelength-lookup-table
 ```
