@@ -167,9 +167,28 @@ def _build_time_bin_edges(
             "Please check your configurations again."
         )
 
-    # Build the bin-edges to histogram the results.
-    n_edges = wf_config.nbins + 1
-    return sc.linspace(dim=t_coord_name, start=min_t, stop=max_t, num=n_edges)
+    # If either min/max were manually selected and bin width is set.
+    if wf_config.nbins is None:
+        if wf_config.time_bin_width is None:
+            time_bin_width = sc.scalar(3, unit='ms').to(unit=wf_config.time_bin_unit)
+        elif wf_config.time_bin_width is not None:
+            time_bin_width = sc.scalar(
+                wf_config.time_bin_width, unit=wf_config.time_bin_unit
+            )
+        # We do not return a scalar bin width since we histogram
+        # detector panel individually.
+        return sc.arange(
+            dim=t_coord_name,
+            start=min_t.to(unit=wf_config.time_bin_unit),
+            stop=max_t.to(unit=wf_config.time_bin_unit),
+            step=time_bin_width,
+        )
+    else:  # Number of bin edges are given but not the bin width.
+        n_edges = wf_config.nbins + 1
+        if min_t.unit != max_t.unit:
+            min_t = min_t.to(unit=wf_config.time_bin_unit)
+            max_t = max_t.to(unit=wf_config.time_bin_unit)
+        return sc.linspace(dim=t_coord_name, start=min_t, stop=max_t, num=n_edges)
 
 
 def reduction(
@@ -252,22 +271,23 @@ def reduction(
         wf_config=config.workflow, result_das=tof_das, t_coord_name=t_coord_name
     )
 
+    # Histogram detector counts
+    tof_histograms = sc.DataGroup()
+    for detector_name, tof_da in tof_das.items():
+        t_coord_unit = tof_da.bins.coords[t_coord_name].unit
+        histogram = tof_da.hist({t_coord_name: t_bin_edges.to(unit=t_coord_unit)})
+        tof_histograms[detector_name] = histogram
+
+    _tof_histogram = next(iter(tof_histograms.values()))
     monitor_metadata = NMXMonitorMetadata(
         tof_bin_coord=t_coord_name,
         # TODO: Use real monitor data
         # Currently NMX simulations or experiments do not have monitors
         data=sc.DataArray(
-            coords={t_coord_name: t_bin_edges},
-            data=sc.ones_like(t_bin_edges[:-1]),
+            coords={t_coord_name: _tof_histogram.coords[t_coord_name]},
+            data=sc.ones_like(_tof_histogram.data),
         ),
     )
-
-    # Histogram detector counts
-    tof_histograms = sc.DataGroup()
-    for detector_name, tof_da in tof_das.items():
-        histogram = tof_da.hist({t_coord_name: t_bin_edges})
-        tof_histograms[detector_name] = histogram
-
     detector_results = sc.DataGroup(
         {
             detector_name: NMXReducedDetector(
