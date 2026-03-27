@@ -53,7 +53,7 @@ _registry = make_registry(
         "spin_flip_example/magnetic_supermirror_offoff.h5": "md5:7b209e1d0ae00bfba956b17e261aab78",  # noqa: E501
         "spin_flip_example/magnetic_supermirror_offon.h5": "md5:288bfc8c355e4f2b71815cb71b928685",  # noqa: E501
         "spin_flip_example/magnetic_supermirror_onoff.h5": "md5:357f31b745d04f61bc5c12b5f138485d",  # noqa: E501
-        "spin_flip_example/magnetic_supermirror_onon.h5": "md5:eadb542686850159c3a18818efd276b3",  # noqa: E501
+        "spin_flip_example/magnetic_supermirror_onon.h5": "md5:d82911bd7b90a666c8ee391465ecff4b",  # noqa: E501
         "spin_flip_example/spin_flip_sample_offoff.h5": "md5:6a9f7d2a2ffe7532873c4bc571e785d4",  # noqa: E501
         "spin_flip_example/spin_flip_sample_offon.h5": "md5:7aedce342969c7a6742db0ff291cfd1d",  # noqa: E501
         "spin_flip_example/spin_flip_sample_onoff.h5": "md5:33193aa189ac56dac00d3d9dbf0a5f9e",  # noqa: E501
