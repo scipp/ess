@@ -13,8 +13,8 @@ import sciline
 import scipp as sc
 
 from ess.reduce.nexus import types as reduce_t
-from ess.reduce.time_of_flight import types as tof_t
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
+from ess.reduce.unwrap import types as unwrap_t
 
 BackgroundRun = reduce_t.BackgroundRun
 EmptyDetector = reduce_t.EmptyDetector
@@ -35,12 +35,11 @@ SampleRun = reduce_t.SampleRun
 Transmission = reduce_t.TransmissionMonitor
 TransmissionRun = reduce_t.TransmissionRun
 
-LookupTableRelativeErrorThreshold = tof_t.LookupTableRelativeErrorThreshold
-TofDetector = tof_t.TofDetector
-TofMonitor = tof_t.TofMonitor
-TofLookupTableFilename = tof_t.TofLookupTableFilename
-TofLookupTable = tof_t.TofLookupTable
-WavelengthMonitor = tof_t.WavelengthMonitor
+LookupTableRelativeErrorThreshold = unwrap_t.LookupTableRelativeErrorThreshold
+LookupTableFilename = unwrap_t.LookupTableFilename
+LookupTable = unwrap_t.LookupTable
+WavelengthMonitor = unwrap_t.WavelengthMonitor
+WavelengthDetector = unwrap_t.WavelengthDetector
 
 DetectorBankSizes = reduce_t.DetectorBankSizes
 NeXusDetectorName = reduce_t.NeXusDetectorName
@@ -185,7 +184,7 @@ class CorrectedDetector(sciline.Scope[RunType, IofQPart, sc.DataArray], sc.DataA
     """
 
 
-class WavelengthDetector(sciline.Scope[RunType, IofQPart, sc.DataArray], sc.DataArray):
+class DetectorTerm(sciline.Scope[RunType, IofQPart, sc.DataArray], sc.DataArray):
     """
     Prerequisite for IofQ numerator or denominator.
 
@@ -204,11 +203,11 @@ class NormalizedQxQy(sciline.Scope[RunType, IofQPart, sc.DataArray], sc.DataArra
 
 
 class QDetector(sciline.Scope[RunType, IofQPart, sc.DataArray], sc.DataArray):
-    """Result of converting :py:class:`WavelengthDetectorMasked` to Q"""
+    """Result of converting :py:class:`DetectorTermMasked` to Q"""
 
 
 class QxyDetector(sciline.Scope[RunType, IofQPart, sc.DataArray], sc.DataArray):
-    """Result of converting :py:class:`WavelengthDetectorMasked` to Qx and Qy"""
+    """Result of converting :py:class:`DetectorTermMasked` to Qx and Qy"""
 
 
 class BinnedQ(sciline.Scope[RunType, IofQPart, sc.DataArray], sc.DataArray):

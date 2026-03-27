@@ -7,7 +7,7 @@ import sciline
 import scipp as sc
 
 from ess.reduce.parameter import parameter_mappers
-from ess.reduce.time_of_flight import GenericTofWorkflow
+from ess.reduce.unwrap import GenericUnwrapWorkflow
 
 from . import common, conversions, i_of_q, masking, normalization
 from .types import (
@@ -176,7 +176,7 @@ def SansWorkflow() -> sciline.Pipeline:
     :
         SANS workflow as a sciline.Pipeline
     """
-    workflow = GenericTofWorkflow(
+    workflow = GenericUnwrapWorkflow(
         run_types=(
             SampleRun,
             EmptyBeamRun,

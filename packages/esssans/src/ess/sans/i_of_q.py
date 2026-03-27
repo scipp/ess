@@ -87,6 +87,11 @@ def preprocess_monitor_data(
         monitor -= broadcast_uncertainties(
             background, prototype=monitor, mode=uncertainties
         )
+
+    # If the position-related coords are present, we need to remove them to allow for
+    # dividing counts in different monitors to compute the transmission fraction.
+    monitor = monitor.drop_coords({'position', 'Ltotal'} & set(monitor.coords))
+
     return CorrectedMonitor(monitor)
 
 

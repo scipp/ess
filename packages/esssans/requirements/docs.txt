@@ -11,7 +11,7 @@ accessible-pygments==0.0.5
     # via pydata-sphinx-theme
 alabaster==1.0.0
     # via sphinx
-attrs==25.4.0
+attrs==26.1.0
     # via
     #   jsonschema
     #   referencing
@@ -153,9 +153,9 @@ sphinxcontrib-serializinghtml==2.0.0
     # via sphinx
 tinycss2==1.4.0
     # via bleach
-tof==26.1.0
+tof==26.3.0
     # via -r docs.in
-tornado==6.5.4
+tornado==6.5.5
     # via
     #   ipykernel
     #   jupyter-client

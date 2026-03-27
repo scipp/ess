@@ -15,13 +15,12 @@ from .common import mask_range
 from .types import (
     BinnedQ,
     BinnedQxQy,
-    CorrectedDetector,
     CorrectForGravity,
     Denominator,
+    DetectorTerm,
     GravityVector,
     IofQPart,
     MonitorTerm,
-    MonitorType,
     NormalizedQ,
     NormalizedQxQy,
     Numerator,
@@ -29,11 +28,8 @@ from .types import (
     QDetector,
     QxyDetector,
     RunType,
-    TofMonitor,
     UncertaintyBroadcastMode,
-    WavelengthDetector,
     WavelengthMask,
-    WavelengthMonitor,
 )
 
 
@@ -93,10 +89,12 @@ def Qxy(Q: sc.Variable, phi: sc.Variable) -> dict[str, sc.Variable]:
     return {'Qx': Qx, 'Qy': Qy}
 
 
-class ElasticCoordTransformGraph(sciline.Scope[RunType, dict], dict): ...
-
-
-class MonitorCoordTransformGraph(sciline.Scope[RunType, dict], dict): ...
+class ElasticCoordTransformGraph(sciline.Scope[RunType, dict], dict):
+    """
+    Coordinate transformation graph for SANS elastic scattering (which possibly
+    includes the effects of gravitationaly pull on the neutrons).
+    See :func:`sans_elastic` for more details.
+    """
 
 
 def sans_elastic(
@@ -147,7 +145,7 @@ def sans_elastic(
     """  # noqa: E501
     graph = {
         **beamline.beamline(scatter=True),
-        **tof.elastic_Q('tof'),
+        **tof.elastic_Q('wavelength'),
         'sample_position': lambda: sample_position,
         'source_position': lambda: source_position,
         'gravity': lambda: gravity,
@@ -161,51 +159,7 @@ def sans_elastic(
     graph['cylindrical_x'] = cylindrical_x
     graph['cylindrical_y'] = cylindrical_y
     graph[('Qx', 'Qy')] = Qxy
-    return ElasticCoordTransformGraph(graph)
-
-
-def sans_monitor(
-    source_position: Position[snx.NXsource, RunType],
-) -> MonitorCoordTransformGraph[RunType]:
-    """
-    Generate a coordinate transformation graph for SANS monitor (no scattering).
-    """
-    return MonitorCoordTransformGraph(
-        {
-            **beamline.beamline(scatter=False),
-            **tof.elastic_wavelength('tof'),
-            'source_position': lambda: source_position,
-        }
-    )
-
-
-def monitor_to_wavelength(
-    monitor: TofMonitor[RunType, MonitorType],
-    graph: MonitorCoordTransformGraph[RunType],
-) -> WavelengthMonitor[RunType, MonitorType]:
-    """
-    This is a temporary fix: we need to remove the 'position' coordinate if present.
-    This should be done in essreduce; see https://github.com/scipp/ess/issues/247.
-    Once that is implemented, this provider should be removed and we should instead
-    use the ``WavelengthMonitor`` provided by the generic essreduce workflow.
-    """
-
-    out = monitor.transform_coords('wavelength', graph=graph, keep_intermediate=False)
-    if 'position' in out.coords:
-        out = out.drop_coords('position')
-    return WavelengthMonitor[RunType, MonitorType](out)
-
-
-# TODO This demonstrates a problem: Transforming to wavelength should be possible
-# for RawData, MaskedData, ... no reason to restrict necessarily.
-# Would we be fine with just choosing on option, or will this get in the way for users?
-def detector_to_wavelength(
-    detector: CorrectedDetector[RunType, Numerator],
-    graph: ElasticCoordTransformGraph[RunType],
-) -> WavelengthDetector[RunType, Numerator]:
-    return WavelengthDetector[RunType, Numerator](
-        detector.transform_coords('wavelength', graph=graph, keep_inputs=False)
-    )
+    return ElasticCoordTransformGraph[RunType](graph)
 
 
 def mask_wavelength_q(
@@ -263,7 +217,7 @@ def _compute_Q(
 
 
 def compute_Q(
-    data: WavelengthDetector[RunType, IofQPart],
+    data: DetectorTerm[RunType, IofQPart],
     graph: ElasticCoordTransformGraph[RunType],
 ) -> QDetector[RunType, IofQPart]:
     """
@@ -275,7 +229,7 @@ def compute_Q(
 
 
 def compute_Qxy(
-    data: WavelengthDetector[RunType, IofQPart],
+    data: DetectorTerm[RunType, IofQPart],
     graph: ElasticCoordTransformGraph[RunType],
 ) -> QxyDetector[RunType, IofQPart]:
     """
@@ -288,9 +242,6 @@ def compute_Qxy(
 
 providers = (
     sans_elastic,
-    sans_monitor,
-    monitor_to_wavelength,
-    detector_to_wavelength,
     mask_wavelength_q,
     mask_wavelength_qxy,
     mask_and_scale_wavelength_q,

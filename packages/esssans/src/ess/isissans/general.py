@@ -9,6 +9,7 @@ from typing import Generic, NewType
 
 import sciline
 import scipp as sc
+import scippneutron as scn
 import scippnexus as snx
 
 from ess.reduce.nexus.types import NeXusTransformation, Position
@@ -30,9 +31,9 @@ from ess.sans.types import (
     RawMonitor,
     RunType,
     SampleRun,
-    TofDetector,
-    TofMonitor,
     Transmission,
+    WavelengthDetector,
+    WavelengthMonitor,
 )
 
 from .io import LoadedFileContents
@@ -225,20 +226,24 @@ def dummy_assemble_monitor_data(
     return RawMonitor[RunType, MonitorType](monitor)
 
 
-def data_to_tof(
-    da: RawDetector[RunType],
-) -> TofDetector[RunType]:
-    """Dummy conversion of data to time-of-flight data.
-    The data already has a time-of-flight coordinate."""
-    return TofDetector[RunType](da)
+def _isis_convert_to_wavelength(da: sc.DataArray, scatter: bool) -> sc.DataArray:
+    graph = {
+        **scn.conversion.graph.beamline.beamline(scatter=scatter),
+        **scn.conversion.graph.tof.elastic("tof"),
+    }
+    return da.transform_coords('wavelength', graph=graph, keep_intermediate=False)
 
 
-def monitor_to_tof(
+def data_to_wavelength(da: RawDetector[RunType]) -> WavelengthDetector[RunType]:
+    return WavelengthDetector[RunType](_isis_convert_to_wavelength(da, scatter=True))
+
+
+def monitor_to_wavelength(
     da: RawMonitor[RunType, MonitorType],
-) -> TofMonitor[RunType, MonitorType]:
-    """Dummy conversion of monitor data to time-of-flight data.
-    The monitor data already has a time-of-flight coordinate."""
-    return TofMonitor[RunType, MonitorType](da)
+) -> WavelengthMonitor[RunType, MonitorType]:
+    return WavelengthMonitor[RunType, MonitorType](
+        _isis_convert_to_wavelength(da, scatter=False)
+    )
 
 
 def experiment_metadata(dg: LoadedFileContents[RunType]) -> Measurement[RunType]:
@@ -283,7 +288,7 @@ def lab_frame_transform() -> NeXusTransformation[snx.NXdetector, RunType]:
     )
 
 
-def get_detector_ids_from_sample_run(data: TofDetector[SampleRun]) -> DetectorIDs:
+def get_detector_ids_from_sample_run(data: RawDetector[SampleRun]) -> DetectorIDs:
     """Extract detector IDs from sample run.
 
     This overrides the function in the masking module which gets the detector IDs from
@@ -310,8 +315,8 @@ providers = (
     get_calibrated_isis_monitor,
     get_detector_ids_from_sample_run,
     get_monitor_data,
-    data_to_tof,
-    monitor_to_tof,
+    data_to_wavelength,
+    monitor_to_wavelength,
     lab_frame_transform,
     helium3_tube_detector_pixel_shape,
 )

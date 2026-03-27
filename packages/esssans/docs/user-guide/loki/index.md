@@ -10,5 +10,5 @@ loki-iofq
 loki-reduction-ess
 workflow-widget-loki
 loki-detector-diagnostics
-loki-make-tof-lookup-table
+loki-make-wavelength-lookup-table
 ```

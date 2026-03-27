@@ -13,6 +13,7 @@ from .types import (
     Denominator,
     DetectorMasks,
     DetectorPixelShape,
+    DetectorTerm,
     EmptyBeamRun,
     EmptyDetector,
     Incident,
@@ -36,7 +37,6 @@ from .types import (
     TransmissionRun,
     WavelengthBands,
     WavelengthBins,
-    WavelengthDetector,
 )
 
 
@@ -206,11 +206,11 @@ def norm_monitor_term(
     return MonitorTerm[RunType](out)
 
 
-def norm_detector_term(
+def norm_detector_term_denominator(
     solid_angle: CorrectedDetector[RunType, Denominator],
     direct_beam: CleanDirectBeam,
     uncertainties: UncertaintyBroadcastMode,
-) -> WavelengthDetector[RunType, Denominator]:
+) -> DetectorTerm[RunType, Denominator]:
     """
     Compute the detector-dependent contribution to the denominator term of I(Q).
 
@@ -251,7 +251,21 @@ def norm_detector_term(
     )
     # Convert wavelength coordinate to midpoints for future histogramming
     out.coords['wavelength'] = sc.midpoints(out.coords['wavelength'])
-    return WavelengthDetector[RunType, Denominator](out)
+    return DetectorTerm[RunType, Denominator](out)
+
+
+def norm_detector_term_numerator(
+    detector: CorrectedDetector[RunType, Numerator],
+) -> DetectorTerm[RunType, Numerator]:
+    """
+    A dummy provider to convert CorrectedDetector into DetectorTerm.
+    This is added instead of having the masking operation directly return the
+    DetectorTerm, as it is more consistent that Denominator and Numerator have a
+    CorrectedDetector step. We also do not make :func:`compute_Q` accept
+    the CorrectedDetector directly, because this would lead to complications when we
+    want to swap it out for :func:`compute_Qxy`.
+    """
+    return DetectorTerm[RunType, Numerator](detector)
 
 
 def process_wavelength_bands(
@@ -463,7 +477,8 @@ normalize_qxy.__doc__ = _normalize.__doc__
 providers = (
     transmission_fraction,
     norm_monitor_term,
-    norm_detector_term,
+    norm_detector_term_denominator,
+    norm_detector_term_numerator,
     reduce_q,
     reduce_qxy,
     normalize_q,

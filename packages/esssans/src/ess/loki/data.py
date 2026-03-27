@@ -51,12 +51,12 @@ _registry = make_registry(
         'mask_new_July2022.xml': 'md5:421b6dc9db74126ffbc5d88164d017b0',
         # Direct beam from LoKI@Larmor detector test experiment
         'direct-beam-loki-all-pixels.h5': "md5:b85d7b486b312c5bb2a31d2bb6314f69",
-        # TOF lookup table without choppers
-        'loki-tof-lookup-table-no-choppers.h5': 'md5:5b817466d3a07d4def12535d7317c044',
         # CODA file with a single event per detector bank (for testing purposes)
         'loki-coda-one-event.hdf': 'md5:ab9dbef793fad2fca96210c3b55d60ce',
         # Small CODA file for testing purposes (data from only 30 pulses)
         'loki_999999_00009928_small.hdf': 'md5:d2f293c293cc15d90fb588afa1dcb096',
+        # Wavelength lookup table without choppers
+        'loki-wavelength-lookup-table-no-choppers.h5': 'md5:3fb133962af6554a9999a753c1724ed4',  # noqa: E501
     },
     version='2',
 )
@@ -167,16 +167,16 @@ def loki_tutorial_direct_beam_all_pixels() -> DirectBeamFilename:
     return DirectBeamFilename(_registry.get_path('direct-beam-loki-all-pixels.h5'))
 
 
-def loki_tof_lookup_table_no_choppers() -> Path:
+def loki_lookup_table_no_choppers() -> Path:
     """
-    LoKI TOF lookup table without choppers.
-    This file is used to convert the neutron arrival time to time-of-flight.
+    LoKI wavelength lookup table without choppers.
+    This file is used to convert the neutron arrival time to wavelength.
 
-    This table was computed using `Create a time-of-flight lookup table for LoKI
-    <../../user-guide/loki/loki-make-tof-lookup-table.ipynb>`_
+    This table was computed using `Create a wavelength lookup table for LoKI
+    <../../user-guide/loki/loki-make-wavelength-lookup-table.ipynb>`_
     with ``NumberOfSimulatedNeutrons = 5_000_000``.
     """
-    return _registry.get_path("loki-tof-lookup-table-no-choppers.h5")
+    return _registry.get_path("loki-wavelength-lookup-table-no-choppers.h5")
 
 
 def loki_coda_file_one_event() -> Path:
