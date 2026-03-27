@@ -7,21 +7,28 @@ import pandas as pd
 import scipp as sc
 from scippnexus import NXsample, NXsource
 
-from ess.reduce.nexus.types import DetectorBankSizes, Position
+from ess.reduce.nexus.types import Position
 
 from ..reflectometry.load import load_h5
 from ..reflectometry.types import (
+    BeamDivergenceLimits,
     CoordTransformationGraph,
+    CorrectionsToApply,
     DetectorLtotal,
     DetectorRotation,
     Filename,
+    ProtonCurrent,
     RawDetector,
+    ReducibleData,
     RunType,
     SampleRotation,
     SampleRotationOffset,
+    WavelengthBins,
+    YIndexLimits,
+    ZIndexLimits,
 )
 from .beamline import DETECTOR_BANK_SIZES
-from .conversions import coordinate_transformation_graph
+from .corrections import add_coords_masks_and_apply_corrections
 
 
 def parse_metadata_ascii(lines) -> dict:
@@ -280,24 +287,30 @@ def detector_ltotal_from_raw(
     ).coords['Ltotal']
 
 
-def mcstas_wavelength_coordinate_transformation_graph(
-    source_position: Position[NXsource, RunType],
-    sample_position: Position[NXsample, RunType],
-    sample_rotation: SampleRotation[RunType],
-    detector_rotation: DetectorRotation[RunType],
-    detector_bank_sizes: DetectorBankSizes,
-) -> CoordTransformationGraph[RunType]:
-    """Build a coordinate transformation graph using McStas wavelengths."""
-    return {
-        **coordinate_transformation_graph(
-            source_position,
-            sample_position,
-            sample_rotation,
-            detector_rotation,
-            detector_bank_sizes,
-        ),
-        "wavelength": lambda wavelength_from_mcstas: wavelength_from_mcstas,
-    }
+def use_mcstas_wavelengths_instead_of_estimates_from_time_of_arrival(
+    da: RawDetector[RunType],
+    ylim: YIndexLimits,
+    zlims: ZIndexLimits,
+    bdlim: BeamDivergenceLimits,
+    wbins: WavelengthBins,
+    proton_current: ProtonCurrent[RunType],
+    graph: CoordTransformationGraph[RunType],
+    corrections_to_apply: CorrectionsToApply,
+) -> ReducibleData[RunType]:
+    out = add_coords_masks_and_apply_corrections(
+        da=da,
+        ylim=ylim,
+        zlims=zlims,
+        bdlim=bdlim,
+        wbins=wbins,
+        proton_current=proton_current,
+        graph={
+            **graph,
+            "wavelength": lambda wavelength_from_mcstas: wavelength_from_mcstas,
+        },
+        corrections_to_apply=corrections_to_apply,
+    )
+    return ReducibleData[RunType](out)
 
 
 providers = (

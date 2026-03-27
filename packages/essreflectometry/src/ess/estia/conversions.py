@@ -4,7 +4,6 @@ import scipp as sc
 from scipp.constants import pi
 from scippneutron._utils import elem_dtype
 from scippneutron.conversion import graph
-from scippneutron.conversion.tof import wavelength_from_tof
 from scippnexus import NXsample, NXsource
 
 from ess.reduce.nexus.types import DetectorBankSizes, Position
@@ -134,7 +133,6 @@ def coordinate_transformation_graph(
         'wire': lambda: sc.arange('wire', bank['wire'] - 1, -1, -1),
         'strip': lambda: sc.arange('strip', bank['strip'] - 1, -1, -1),
         'z_index': lambda blade, wire: blade * wire,
-        "wavelength": wavelength_from_tof,
         'sample_rotation': lambda: sample_rotation,
         'detector_rotation': lambda: detector_rotation,
         'source_position': lambda: source_position,

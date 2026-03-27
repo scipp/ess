@@ -15,20 +15,22 @@ from ess.estia import EstiaMcStasWorkflow
 from ess.estia.data import (
     estia_mcstas_reference_run,
     estia_mcstas_sample_run,
-    estia_tof_lookup_table,
+    estia_wavelength_lookup_table,
 )
-from ess.estia.mcstas import mcstas_wavelength_coordinate_transformation_graph
+from ess.estia.mcstas import (
+    use_mcstas_wavelengths_instead_of_estimates_from_time_of_arrival,
+)
 from ess.reflectometry import orso
 from ess.reflectometry.types import (
     BeamDivergenceLimits,
     Filename,
+    LookupTableFilename,
     ProtonCurrent,
     QBins,
     ReducibleData,
     ReferenceRun,
     ReflectivityOverQ,
     SampleRun,
-    TimeOfFlightLookupTableFilename,
     WavelengthBins,
     YIndexLimits,
     ZIndexLimits,
@@ -46,7 +48,7 @@ def estia_mcstas_pipeline() -> sciline.Pipeline:
     wf[WavelengthBins] = sc.geomspace('wavelength', 3.5, 12, 2001, unit='angstrom')
     wf[QBins] = sc.geomspace('Q', 0.005, 0.1, 200, unit='1/angstrom')
 
-    wf[TimeOfFlightLookupTableFilename] = estia_tof_lookup_table()
+    wf[LookupTableFilename] = estia_wavelength_lookup_table()
 
     wf[ProtonCurrent[SampleRun]] = sc.DataArray(
         sc.array(dims=('time',), values=[]),
@@ -100,7 +102,7 @@ def test_can_compute_reflectivity_curve_exact_wavelengths(
     estia_mcstas_pipeline: sciline.Pipeline,
 ):
     wf = estia_mcstas_pipeline.copy()
-    wf.insert(mcstas_wavelength_coordinate_transformation_graph)
+    wf.insert(use_mcstas_wavelengths_instead_of_estimates_from_time_of_arrival)
     wf[Filename[SampleRun]] = estia_mcstas_sample_run(11)
     r = wf.compute(ReflectivityOverQ)
 

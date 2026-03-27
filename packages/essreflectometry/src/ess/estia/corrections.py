@@ -14,8 +14,8 @@ from ..reflectometry.types import (
     ProtonCurrent,
     ReducibleData,
     RunType,
-    TofDetector,
     WavelengthBins,
+    WavelengthDetector,
     YIndexLimits,
     ZIndexLimits,
 )
@@ -24,7 +24,7 @@ from .maskings import add_masks
 
 
 def add_coords_masks_and_apply_corrections(
-    da: TofDetector[RunType],
+    da: WavelengthDetector[RunType],
     ylim: YIndexLimits,
     zlims: ZIndexLimits,
     bdlim: BeamDivergenceLimits,

@@ -658,7 +658,11 @@ def batch_compute(
         If a tuple is provided, it is interpreted as a critical edge interval where
         the reflectivity is known to be 1.
     '''
-    batch = batch_processor(workflow=workflow, runs=runs)
+    runs_is_mapping = hasattr(runs, 'items')
+    batch = batch_processor(
+        workflow=workflow,
+        runs=runs if runs_is_mapping else {str(i): r for i, r in enumerate(runs)},
+    )
 
     if scale_to_overlap:
         results = batch.compute((ReflectivityOverQ, ReducibleData[SampleRun]))
@@ -673,4 +677,5 @@ def batch_compute(
         )
         batch[ReflectivityOverQ] = scale_factors * results[ReflectivityOverQ]
 
-    return batch.compute(target)
+    result = batch.compute(target)
+    return result if runs_is_mapping else list(result.values())
