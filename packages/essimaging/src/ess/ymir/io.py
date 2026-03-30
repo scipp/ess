@@ -11,8 +11,9 @@ from typing import NewType
 import scipp as sc
 import scippnexus as snx
 import scitiff
-from ess.reduce.nexus.types import FilePath
 from tifffile import imwrite
+
+from ess.reduce.nexus.types import FilePath
 
 from .types import (
     DEFAULT_HISTOGRAM_PATH,

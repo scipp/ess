@@ -6,6 +6,8 @@ import sciline
 import scipp as sc
 import scippnexus as snx
 import tof
+from scippneutron.conversion.tof import tof_from_wavelength
+
 from ess.reduce.nexus.types import (
     EmptyDetector,
     Filename,
@@ -28,7 +30,6 @@ from ess.reduce.unwrap import (
     WavelengthDetector,
 )
 from ess.reduce.workflow import register_workflow
-from scippneutron.conversion.tof import tof_from_wavelength
 
 from .configurations import WorkflowConfig
 from .types import (

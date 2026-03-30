@@ -1,14 +1,15 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 
+import ess.tbl.data  # noqa: F401
 import pytest
 import sciline as sl
 import scipp as sc
 import scippnexus as sx
+from ess import tbl
+from ess.tbl import orca
 from scipp.testing import assert_identical
 
-import ess.tbl.data  # noqa: F401
-from ess import tbl
 from ess.imaging.types import (
     BackgroundSubtractedDetector,
     CorrectedDetector,
@@ -25,7 +26,6 @@ from ess.imaging.types import (
     SampleRun,
     UncertaintyBroadcastMode,
 )
-from ess.tbl import orca
 
 
 @pytest.fixture

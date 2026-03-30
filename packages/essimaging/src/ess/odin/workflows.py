@@ -5,6 +5,7 @@ Default parameters and workflow for Odin.
 """
 
 import sciline
+
 from ess.reduce.unwrap.workflow import GenericUnwrapWorkflow
 
 from ..imaging.types import (

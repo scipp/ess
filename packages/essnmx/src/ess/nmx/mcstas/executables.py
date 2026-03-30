@@ -8,6 +8,7 @@ from functools import partial
 
 import sciline as sl
 import scipp as sc
+
 from ess.reduce.streaming import (
     EternalAccumulator,
     MaxAccumulator,

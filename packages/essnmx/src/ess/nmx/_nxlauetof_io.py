@@ -4,8 +4,9 @@ import warnings
 
 import scipp as sc
 import scippnexus as snx
-from ess.reduce.nexus.types import FilePath, NeXusFile
 from scippneutron.metadata import RadiationProbe, SourceType
+
+from ess.reduce.nexus.types import FilePath, NeXusFile
 
 from .types import ControlMode
 
