@@ -8,6 +8,7 @@ from collections.abc import Callable
 import scipp as sc
 import scippnexus as snx
 
+from ess.reduce.nexus.types import Position
 from ess.spectroscopy.indirect.conversion import add_spectrometer_coords
 from ess.spectroscopy.types import (
     Analyzer,
@@ -156,24 +157,25 @@ def _make_analyzer_coord_graph(
     detector: sc.DataArray,
     analyzer: Analyzer[RunType],
 ) -> dict[str, Callable[[], sc.Variable]]:
-    ana_pos = analyzer['position']
-    if isinstance(ana_pos, sc.DataArray):
+    ana_pos: Position[snx.NXcrystal, RunType] = analyzer['position']
+    if ana_pos.is_dynamic:
         if 'time' not in detector.coords:
             raise sc.CoordError(
                 "The analyzer position is time-dependent but the detector is not"
             )
-        if not sc.identical(ana_pos.coords['time'], detector.coords['time']):
+        analyzer_positions = ana_pos.positions
+        if not sc.identical(analyzer_positions.coords['time'], detector.coords['time']):
             raise sc.CoordError(
                 f"The analyzer and detector positions are not at the same times.\n"
-                f"Analyzer: {ana_pos.coords['time']}\n"
+                f"Analyzer: {analyzer_positions.coords['time']}\n"
                 f"Detector: {detector.coords['time']}\n"
                 "This is likely due to a change in the NeXus structure. It used to "
                 "guarantee that the times are identical."
             )
-        analyzer_position = ana_pos.data
+        analyzer_position = analyzer_positions.data
         analyzer_transform = analyzer['transform'].value.data
     else:
-        analyzer_position = ana_pos
+        analyzer_position = ana_pos.position
         analyzer_transform = analyzer['transform'].value
 
     return {

@@ -253,9 +253,8 @@ def add_spectrometer_coords(
     Parameters
     ----------
     detector:
-        Data array with beamline coordinates "position", "source_position", and
-        "sample_position".
-        Does not need to contain events or flight times.
+        Data array with a "position" coordinate.
+        Does not need to contain events, wavelength, or flight times.
     primary_graph:
         Coordinate transformation graph for the primary spectrometer.
     secondary_graph:
@@ -293,7 +292,7 @@ def monitor_coordinate_transformation_graph(
         {
             **beamline.beamline(scatter=False),
             **tof.elastic_wavelength(start='tof'),
-            'source_position': lambda: source_position,
+            'source_position': lambda: source_position.position,
         }
     )
 

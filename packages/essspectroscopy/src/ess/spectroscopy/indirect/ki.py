@@ -50,8 +50,8 @@ def primary_spectrometer_coordinate_transformation_graph(
         {
             "incident_beam": straight_incident_beam,
             "L1": L1,
-            "sample_position": lambda: sample_position,
-            "source_position": lambda: source_position,
+            "sample_position": lambda: sample_position.position,
+            "source_position": lambda: source_position.position,
             "gravity": lambda: gravity,
         }
     )
