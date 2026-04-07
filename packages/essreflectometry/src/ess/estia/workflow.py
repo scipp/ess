@@ -83,7 +83,7 @@ def default_parameters() -> dict:
         CorrectionsToApply: corrections.default_corrections,
         DetectorSpatialResolution: 0.0025 * sc.units.m,
         LookupTableRelativeErrorThreshold: {
-            "detector": float('inf'),
+            "multiblade_detector": float('inf'),
         },
     }
 
