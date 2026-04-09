@@ -193,7 +193,7 @@ def _build_time_bin_edges(
         if min_t.unit != max_t.unit:
             min_t = min_t.to(unit=wf_config.time_bin_unit)
             max_t = max_t.to(unit=wf_config.time_bin_unit)
-        
+
         # Avoid dropping the event that has the exact same
         # `event_time_offset`` or `tof` value as the upper bin edge.
         max_t.value = np.nextafter(max_t.value, np.inf)
