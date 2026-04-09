@@ -172,12 +172,13 @@ def _build_time_bin_edges(
     if wf_config.nbins is None:
         if wf_config.time_bin_width is None:
             time_bin_width = sc.scalar(3, unit='ms').to(unit=wf_config.time_bin_unit)
-        elif wf_config.time_bin_width is not None:
+        else:
             time_bin_width = sc.scalar(
                 wf_config.time_bin_width, unit=wf_config.time_bin_unit
             )
         # We do not return a scalar bin width since we histogram
-        # detector panel individually.
+        # detector panels individually
+        # and all histograms should have the same bin edges.
         return sc.arange(
             dim=t_coord_name,
             start=min_t.to(unit=wf_config.time_bin_unit),
