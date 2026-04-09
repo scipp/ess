@@ -179,12 +179,21 @@ def _build_time_bin_edges(
         # We do not return a scalar bin width since we histogram
         # detector panels individually
         # and all histograms should have the same bin edges.
-        return sc.arange(
-            dim=t_coord_name,
-            start=min_t.to(unit=wf_config.time_bin_unit),
-            stop=max_t.to(unit=wf_config.time_bin_unit),
-            step=time_bin_width,
+        min_t = min_t.to(unit=wf_config.time_bin_unit)
+        max_t = max_t.to(unit=wf_config.time_bin_unit)
+        bin_edges = sc.arange(
+            dim=t_coord_name, start=min_t, stop=max_t, step=time_bin_width
         )
+        # Check if the last bin edge is equal to the max_t
+        if bin_edges[t_coord_name, -1] == max_t:
+            ...  # Perfect!
+        else:
+            # Need to append one more edge to cover the whole range.
+            true_last_bin_edge = bin_edges[t_coord_name, -1] + time_bin_width
+            bin_edges = sc.concat([bin_edges, true_last_bin_edge], dim=t_coord_name)
+
+        return bin_edges
+
     else:  # Number of bin edges are given but not the bin width.
         n_edges = wf_config.nbins + 1
         if min_t.unit != max_t.unit:
