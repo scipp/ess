@@ -69,7 +69,7 @@ def _check_non_default_config(testing_config: ReductionConfig) -> None:
         testing_model = testing_child.model_dump(mode='python')
         default_model = default_child.model_dump(mode='python')
         for key, testing_value in testing_model.items():
-            if key in ['lookup_table_file_path', 'nbins']:
+            if key in ['lookup_table_file_path', 'nbins', 'time_bin_width']:
                 # This value may be None or default, so we skip the check.
                 continue
             default_value = default_model[key]
@@ -434,7 +434,7 @@ def test_reduction_with_lut_file(
     # since the lookup table is written in wavelength
     # and it is not trivial to change lookup table
     # and test the expected time of flight result by setting time bin width.
-    # i.e. if the look up table wavelength rage changes,
+    # i.e. if the lookup table wavelength range changes,
     # the number of bins changes and the histogram data sizes changes.
     # This test is only for checking if the look up table is used as expected or not
     # therefore using number of bins should be fine.
