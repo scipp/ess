@@ -154,10 +154,6 @@ def _build_time_bin_edges(
     else:
         max_t = da_max_t
 
-    # Avoid dropping the event that has the exact same
-    # `event_time_offset`` or `tof` value as the upper bin edge.
-    max_t.value = np.nextafter(max_t.value, np.inf)
-
     # Validate the results.
     if min_t >= max_t:
         raise ValueError(
@@ -184,10 +180,8 @@ def _build_time_bin_edges(
         bin_edges = sc.arange(
             dim=t_coord_name, start=min_t, stop=max_t, step=time_bin_width
         )
-        # Check if the last bin edge is equal to the max_t
-        if bin_edges[t_coord_name, -1] == max_t:
-            ...  # Perfect!
-        else:
+        # If the last bin edge is smaller than `max_t`
+        if bin_edges[t_coord_name, -1] < max_t:
             # Need to append one more edge to cover the whole range.
             true_last_bin_edge = bin_edges[t_coord_name, -1] + time_bin_width
             bin_edges = sc.concat([bin_edges, true_last_bin_edge], dim=t_coord_name)
@@ -199,6 +193,10 @@ def _build_time_bin_edges(
         if min_t.unit != max_t.unit:
             min_t = min_t.to(unit=wf_config.time_bin_unit)
             max_t = max_t.to(unit=wf_config.time_bin_unit)
+        
+        # Avoid dropping the event that has the exact same
+        # `event_time_offset`` or `tof` value as the upper bin edge.
+        max_t.value = np.nextafter(max_t.value, np.inf)
         return sc.linspace(dim=t_coord_name, start=min_t, stop=max_t, num=n_edges)
 
 
