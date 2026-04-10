@@ -407,30 +407,13 @@ def get_calibrated_detector(
         sizes := (bank_sizes or {}).get(detector.get('nexus_component_name'))
     ) is not None:
         da = da.fold(dim="detector_number", sizes=sizes)
-    # Note: We apply offset as early as possible, i.e., right in this function
-    # the detector array from the raw loader NeXus group, to prevent a source of bugs.
-    # If the NXdetector in the file is not 1-D, we want to match the order of dims.
-    # zip_pixel_offsets otherwise yields a vector with dimensions in the order given
-    # by the x/y/z offsets.
-    offsets = snx.zip_pixel_offsets(da.coords)
-    # Get the dims in the order of the detector data array, but filter out dims that
-    # don't exist in the offsets (e.g. the detector data may have a 'time' dimension).
-    dims = [dim for dim in da.dims if dim in offsets.dims]
-    offsets = offsets.transpose(dims).copy()
-    # We use the unit of the offsets as this is likely what the user expects.
-    if transform.value.unit is not None and transform.value.unit != '':
-        transform_value = transform.value.to(unit=offsets.unit)
-    else:
-        transform_value = transform.value
-    position = transform_value * offsets
 
-    position = position + offset.to(unit=position.unit)
+    position = nexus.compute_detector_position(da, transform=transform, offset=offset)
+
     if isinstance(position, sc.DataArray):  # time-dependent transform
-        # Store position and time as separate coords because we can't store data arrays.
-        return EmptyDetector[RunType](
-            da.broadcast(
-                dims=['time', *da.dims], shape=[position.sizes['time'], *da.shape]
-            ).assign_coords(position=position.data, time=position.coords['time'])
+        raise ValueError(
+            "Time-dependent positions are not supported by default. Either select a "
+            "time interval or override `get_calibrated_detector`."
         )
 
     return EmptyDetector[RunType](da.assign_coords(position=position))
