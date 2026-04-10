@@ -6,9 +6,8 @@
 import warnings
 from collections.abc import Iterable
 from copy import deepcopy
-from typing import Any, TypeVar
+from typing import Any, Never, TypeVar
 
-import numpy as np
 import sciline
 import sciline.typing
 import scipp as sc
@@ -51,6 +50,7 @@ from .types import (
     RunType,
     Source,
     TimeInterval,
+    TransformationTimeFilter,
     UniqueComponent,
 )
 
@@ -290,44 +290,33 @@ def get_transformation_chain(
     return NeXusTransformationChain[Component, RunType](chain)
 
 
-def _collapse_runs(transform: sc.DataArray, dim: str) -> sc.DataArray:
-    """Collapse runs of equal values into a single value."""
-    # Find indices where the data changes
-    different_from_previous = np.hstack(
-        [True, ~np.isclose(transform.values[:-1], transform.values[1:])]
-    )
-    change_indices = np.flatnonzero(different_from_previous)
-    if change_indices.shape == transform.shape:
-        return transform  # Return early to avoid expensive indexing
-    # Get unique values
-    unique_values = transform[change_indices]
-
-    # Make bin-edges and extend range to include the whole measurement
-    last = unique_values.coords[dim][-1]
-    unique_values.coords[dim] = sc.concat(
-        [
-            # bin-edges are left-inclusive, so we can start with coord[0] as first edge
-            unique_values.coords[dim],
-            # Surely, no experiment will last more than 10 years...
-            last + sc.scalar(10, unit='Y').to(unit=last.unit),
-        ],
-        dim=dim,
+def reject_time_dependent_transform(
+    transform: sc.DataArray,
+) -> Never:
+    """Raise a value error to forbid time-dependent transformations by default."""
+    raise ValueError(
+        f"Transform is time-dependent: {transform}, but no filter is provided."
     )
 
-    return unique_values
 
-
-def _time_filter(transform: sc.DataArray) -> sc.Variable | sc.DataArray:
+def _time_filter(
+    transform: sc.DataArray,
+    user_filter: TransformationTimeFilter[Component, RunType],
+) -> sc.Variable | sc.DataArray:
     if transform.ndim == 0 or transform.sizes == {'time': 1}:
         return transform.data.squeeze()
-    return _collapse_runs(transform, dim='time')
+    return user_filter(transform)
 
 
 def to_transformation(
-    chain: NeXusTransformationChain[Component, RunType], interval: TimeInterval[RunType]
+    chain: NeXusTransformationChain[Component, RunType],
+    interval: TimeInterval[RunType],
+    time_filter: TransformationTimeFilter[
+        Component, RunType
+    ] = reject_time_dependent_transform,
 ) -> NeXusTransformation[Component, RunType]:
     """
-    Convert transformation chain into a single transformation matrix.
+    Convert a transformation chain into a single transformation matrix.
 
     If one or more transformations in the chain are time-dependent, the time interval
     is used to select a specific time point. If the interval is not a single time point,
@@ -340,6 +329,9 @@ def to_transformation(
         Transformation chain.
     interval:
         Time interval to select from the transformation chain.
+    time_filter:
+        Callable to apply to time-dependent transformations.
+        Defaults to raising a :class:`ValueError`.
     """
 
     chain = deepcopy(chain)
@@ -362,9 +354,9 @@ def to_transformation(
             idx = label_based_index_to_positional_index(
                 sizes=t.sizes, coord=time, index=interval.value
             )
-            t.value = _time_filter(t.value[idx])
+            t.value = _time_filter(t.value[idx], time_filter)
         else:
-            t.value = _time_filter(t.value['time', interval.value])
+            t.value = _time_filter(t.value['time', interval.value], time_filter)
 
     return NeXusTransformation[Component, RunType].from_chain(chain)
 
@@ -764,11 +756,14 @@ def LoadMonitorWorkflow(
     """Generic workflow for loading monitor data from a NeXus file."""
     wf = sciline.Pipeline(
         (*_common_providers, *_monitor_providers),
+        params={
+            PreopenNeXusFile: PreopenNeXusFile(False),
+            TransformationTimeFilter: reject_time_dependent_transform,
+        },
         constraints=_gather_constraints(
             run_types=run_types, monitor_types=monitor_types
         ),
     )
-    wf[PreopenNeXusFile] = PreopenNeXusFile(False)
     return wf
 
 
@@ -778,10 +773,13 @@ def LoadDetectorWorkflow(
     """Generic workflow for loading detector data from a NeXus file."""
     wf = sciline.Pipeline(
         (*_common_providers, *_detector_providers),
+        params={
+            DetectorBankSizes: DetectorBankSizes({}),
+            PreopenNeXusFile: PreopenNeXusFile(False),
+            TransformationTimeFilter: reject_time_dependent_transform,
+        },
         constraints=_gather_constraints(run_types=run_types, monitor_types=[]),
     )
-    wf[DetectorBankSizes] = DetectorBankSizes({})
-    wf[PreopenNeXusFile] = PreopenNeXusFile(False)
     return wf
 
 
@@ -827,12 +825,15 @@ def GenericNeXusWorkflow(
             *_chopper_providers,
             *_metadata_providers,
         ),
+        params={
+            DetectorBankSizes: DetectorBankSizes({}),
+            PreopenNeXusFile: PreopenNeXusFile(False),
+            TransformationTimeFilter: reject_time_dependent_transform,
+        },
         constraints=_gather_constraints(
             run_types=run_types, monitor_types=monitor_types
         ),
     )
-    wf[DetectorBankSizes] = DetectorBankSizes({})
-    wf[PreopenNeXusFile] = PreopenNeXusFile(False)
 
     return wf
 
