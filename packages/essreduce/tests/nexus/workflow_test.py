@@ -35,6 +35,7 @@ from ess.reduce.nexus.types import (
     SampleRun,
     Source,
     TimeInterval,
+    TransformationTimeFilter,
     TransmissionMonitor,
 )
 from ess.reduce.nexus.workflow import (
@@ -117,7 +118,7 @@ def test_can_compute_position_of_group(depends_on: snx.TransformationChain) -> N
     assert_identical(workflow.compute_position(trans).position, position)
 
 
-def test_can_compute_position_of_group_time_dependent(
+def test_time_dependent_position_with_filter(
     time_dependent_depends_on: snx.TransformationChain,
 ) -> None:
     position = sc.DataArray(
@@ -136,6 +137,7 @@ def test_can_compute_position_of_group_time_dependent(
     trans = workflow.to_transformation(
         chain,
         interval=TimeInterval(slice(None, None)),
+        time_filter=TransformationTimeFilter(lambda t: t),
     )
     assert_identical(workflow.compute_position(trans).positions, position)
 

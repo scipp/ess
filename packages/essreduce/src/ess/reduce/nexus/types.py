@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, BinaryIO, Generic, NewType, TypeVar,Self
+from typing import Any, BinaryIO, Generic, NewType, TypeVar
 
 import sciline
 import scipp as sc
@@ -193,27 +193,32 @@ class Position(Generic[Component, RunType]):
     Use ``position`` to get the position if it is scalar, or ``positions``
     to get the position as a (potentially time-dependent) DataArray.
     """
+
     _position: sc.Variable
     _time: sc.Variable | None
 
-    def __init__(self, pos: sc.DataArray|sc.Variable)->None:
+    def __init__(self, pos: sc.DataArray | sc.Variable) -> None:
         if pos.ndim == 0:
             self._position = pos.data if isinstance(pos, sc.DataArray) else pos
             self._time = None
         else:
             if not isinstance(pos, sc.DataArray):
-                raise sc.DimensionError("Position is not a scalar, so it must be a DataArray")
+                raise sc.DimensionError(
+                    "Position is not a scalar, so it must be a DataArray"
+                )
             self._position = pos.data
             self._time = pos.coords['time']
 
     @property
-    def is_dynamic(self)->bool:
+    def is_dynamic(self) -> bool:
         return self._time is not None
 
     @property
     def position(self) -> sc.Variable:
         if self.is_dynamic:
-            raise sc.DimensionError("Position is time-dependent, use `positions` instead.")
+            raise sc.DimensionError(
+                "Position is time-dependent, use `positions` instead."
+            )
         return self._position
 
     @property
@@ -223,14 +228,14 @@ class Position(Generic[Component, RunType]):
             da.coords['time'] = self._time
         return da
 
-    def __str__(self)->str:
+    def __str__(self) -> str:
         if self.is_dynamic:
             time_str = f", time={self._time}"
         else:
             time_str = ""
         return f"Position(position={self._position}{time_str})"
 
-    def __repr__(self)->str:
+    def __repr__(self) -> str:
         return f"Position(position={self._position}, time={self._time})"
 
 
@@ -268,6 +273,15 @@ class TimeInterval(Generic[RunType]):
     """Range of neutron pulses to load from NXevent_data or NXdata groups."""
 
     value: slice
+
+
+class TransformationTimeFilter(Generic[Component, RunType]):
+    """Filter for time-dependent transformations."""
+
+    def __new__(cls, x: Any) -> Any:
+        return x
+
+    def __call__(self, transform: sc.DataArray) -> sc.Variable | sc.DataArray: ...
 
 
 @dataclass
