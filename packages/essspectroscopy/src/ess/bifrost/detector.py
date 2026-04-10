@@ -122,17 +122,13 @@ def get_calibrated_detector_bifrost(
         This includes "final_energy", "secondary_flight_time", and "L1".
     """
 
-    from ess.reduce.nexus.types import DetectorBankSizes
-    from ess.reduce.nexus.workflow import get_calibrated_detector
+    from ess.reduce.nexus import compute_detector_position, extract_signal_data_array
 
-    da = get_calibrated_detector(
-        detector=detector,
-        transform=transform,
-        offset=offset,
-        # The detectors are folded in the file, no need to do that here.
-        bank_sizes=DetectorBankSizes({}),
-    )
+    da = extract_signal_data_array(detector)
     da = da.rename(dim_0='tube', dim_1='length')
+
+    position = compute_detector_position(da, transform=transform, offset=offset)
+    da = _assign_detector_position(da, position)
 
     arc, channel = arc_and_channel_from_detector_number(da.coords['detector_number'])
     da.coords['arc'] = arc
@@ -147,6 +143,17 @@ def get_calibrated_detector_bifrost(
     )
 
     return EmptyDetector[RunType](da)
+
+
+def _assign_detector_position(
+    da: sc.DataArray, position: sc.Variable | sc.DataArray
+) -> sc.DataArray:
+    if isinstance(position, sc.DataArray):  # time-dependent transform
+        # Store position and time as separate coords because we can't store data arrays.
+        return da.broadcast(
+            dims=['time', *da.dims], shape=[position.sizes['time'], *da.shape]
+        ).assign_coords(position=position.data, time=position.coords['time'])
+    return da.assign_coords(position=position)
 
 
 # We insert the analyzer coords into the graph so that they don't end up as coords

@@ -5,11 +5,12 @@
 
 import warnings
 
+import numpy as np
 import scipp as sc
 import scippnexus as snx
 
 from ess.reduce.nexus import open_component_group
-from ess.reduce.nexus.types import NeXusLocationSpec
+from ess.reduce.nexus.types import NeXusLocationSpec, TransformationTimeFilter
 from ess.spectroscopy.types import (
     Analyzer,
     InstrumentAngle,
@@ -147,6 +148,46 @@ def get_calibrated_analyzer(
     )
 
 
+def _collapse_runs(transform: sc.DataArray, dim: str) -> sc.DataArray:
+    """Collapse runs of equal values into a single value."""
+    # Find indices where the data changes
+    different_from_previous = np.hstack(
+        [True, ~np.isclose(transform.values[:-1], transform.values[1:])]
+    )
+    change_indices = np.flatnonzero(different_from_previous)
+    if change_indices.shape == transform.shape:
+        return transform  # Return early to avoid expensive indexing
+    # Get unique values
+    unique_values = transform[change_indices]
+
+    # Make bin-edges and extend range to include the whole measurement
+    last = unique_values.coords[dim][-1]
+    unique_values.coords[dim] = sc.concat(
+        [
+            # bin-edges are left-inclusive, so we can start with coord[0] as first edge
+            unique_values.coords[dim],
+            # Surely, no experiment will last more than 10 years...
+            last + sc.scalar(10, unit='Y').to(unit=last.unit),
+        ],
+        dim=dim,
+    )
+
+    return unique_values
+
+
+def stepwise_transformation_time_filter(transform: sc.DataArray) -> sc.DataArray:
+    """Collapse runs of equal values into a single value.
+
+    This can be used as a time filter for NeXus transformations when the component
+    mostly stays at a position and only rarely moves.
+    For example, a stepwise scan across detector rotations.
+    """
+    collapsed = _collapse_runs(transform, 'time')
+    if collapsed.sizes['time'] == 1:
+        return collapsed.squeeze('time')
+    return collapsed
+
+
 providers = (
     get_calibrated_analyzer,
     load_analyzer_for_detector,
@@ -154,3 +195,7 @@ providers = (
     load_sample_angle,
     moderator_class_for_source,
 )
+
+parameters = {
+    TransformationTimeFilter: stepwise_transformation_time_filter,
+}
