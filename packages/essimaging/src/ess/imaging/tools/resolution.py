@@ -1,8 +1,14 @@
-from math import floor, log2
+from itertools import zip_longest
 
 import numpy as np
 import scipp as sc
 from numpy.typing import NDArray
+
+
+def _all_divisors(n):
+    for i in range(1, n + 1):
+        if n % i == 0:
+            yield i
 
 
 def maximum_resolution_achievable(
@@ -22,41 +28,32 @@ def maximum_resolution_achievable(
     -------------
     events:
         DataArray binned in at least the ``image_dims`` dimensions and optionally more.
-        The number of bins in each ``image_dims`` dimension ought to be power of ``2``.
+        The method works best when the number of bins in each ``image_dims`` dimension
+        is a power of ``2``.
 
     Returns
     -------------
-        The event data array folded to the coarsest possible resolution.
+        The event data array folded to the finest resolution where there is at least
+        one event in every pixel.
     """
     if events.bins is None:
         raise ValueError(
-            'Input data must be binned to the finest possible pixel binning.'
+            'Input data must be binned.'
             ' For best result, number of bins in each image dimension should'
             ' be a power of 2.'
         )
 
     x, y = image_dims
 
-    for d in image_dims:
-        if events.sizes[d] % 2 == 1:
-            raise ValueError(
-                'Input data must have an even number of bins in each image dimension.'
-                ' For best result, number of bins in each image dimension should'
-                ' be a power of 2.'
-            )
+    xdivisors = list(_all_divisors(events.sizes[x]))
+    ydivisors = list(_all_divisors(events.sizes[y]))
 
-    refinements = (
-        min(
-            floor(log2(events.sizes[image_dims[0]])),
-            floor(log2(events.sizes[image_dims[1]])),
-        )
-        + 1
-    )
-
-    for i in range(refinements):
+    for i, j in zip_longest(xdivisors, ydivisors):
+        i = xdivisors[-1] if i is None else i
+        j = ydivisors[-1] if j is None else j
         tmp_events = (
-            events.fold(x, sizes={x: -1, '_x_aux': 2**i})
-            .fold(y, sizes={y: -1, '_y_aux': 2**i})
+            events.fold(x, sizes={x: -1, '_x_aux': i})
+            .fold(y, sizes={y: -1, '_y_aux': j})
             .bins.concat(['_x_aux', '_y_aux'])
         )
         min_counts_per_pixel = tmp_events.bins.size().min()
