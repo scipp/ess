@@ -25,7 +25,6 @@ def test_finds_maximum_resolution():
         events,
         sc.linspace('x', 0, 1, 2),
         sc.linspace('x', 0, 1, 2),
-        sc.linspace('t', 0, 2, 2),
     )
     assert len(x_be) == 11
     assert len(y_be) == 11
@@ -51,7 +50,6 @@ def test_finds_maximum_resolution_random(seed):
         events,
         sc.linspace('x', 0, 1, 2),
         sc.linspace('y', 0, 1, 2),
-        sc.linspace('t', 0, 2, 2),
         # Need enough tries to be sure we find the optimum
         max_tries=100,
     )
@@ -64,6 +62,45 @@ def test_finds_maximum_resolution_random(seed):
             x=sc.linspace('x', 0, 1, len(x_be) + 1),
             y=sc.linspace('y', 0, 1, len(y_be) + 1),
             t=sc.linspace('t', 0, 2, 2),
+        )
+        .bins.size()
+        .min()
+        .value
+        == 0
+    )
+
+
+def test_finds_maximum_resolution_binned_input():
+    np.random.seed(0)
+    n = np.random.randint(1000, 100_000)
+    events = sc.DataArray(
+        sc.ones(dims=['events'], shape=(n,)),
+        coords={
+            'x': sc.array(dims=['events'], values=np.random.random(n)),
+            'y': sc.array(dims=['events'], values=np.random.random(n)),
+            't': sc.array(dims=['events'], values=np.random.random(n)),
+        },
+    )
+    events = events.bin(x=100, y=100, t=500)
+    del events.bins.coords['x']
+    del events.bins.coords['y']
+    x_be, y_be = maximum_resolution_achievable(
+        events,
+        sc.linspace('x', 0, 1, 2),
+        sc.linspace('y', 0, 1, 2),
+        # Need enough tries to be sure we find the optimum
+        max_tries=100,
+    )
+
+    events.bins.coords['x'] = sc.bins_like(events, sc.midpoints(events.coords['x']))
+    events.bins.coords['y'] = sc.bins_like(events, sc.midpoints(events.coords['y']))
+    events = events.bins.concat(['x', 'y'])
+
+    assert events.bin(x=x_be, y=y_be).bins.size().min().value > 0
+    assert (
+        events.bin(
+            x=sc.linspace('x', 0, 1, len(x_be) + 1),
+            y=sc.linspace('y', 0, 1, len(y_be) + 1),
         )
         .bins.size()
         .min()

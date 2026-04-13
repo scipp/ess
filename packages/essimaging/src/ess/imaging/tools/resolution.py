@@ -7,7 +7,6 @@ def maximum_resolution_achievable(
     events: sc.DataArray,
     coarse_x_bin_edges: sc.Variable,
     coarse_y_bin_edges: sc.Variable,
-    time_bin_edges: sc.Variable,
     max_tries: int = 10,
     max_pixels_x: int = 2048,
     max_pixels_y: int = 2048,
@@ -31,8 +30,6 @@ def maximum_resolution_achievable(
         Minimum acceptable resolution in ``x``.
     coarse_y_bin_edges:
         Minimum acceptable resolution in ``y``.
-    time_bin_edges:
-        Desired resolution in ``t``.
     max_tries:
         The maximum number of iterations before giving up.
     max_pixels_x:
@@ -59,7 +56,17 @@ def maximum_resolution_achievable(
 
     nx = int(2**0.5 * lower_nx) + 1
     ny = int(2**0.5 * lower_ny) + 1
-    events = events.bin({time_bin_edges.dim: time_bin_edges})
+
+    events = events.copy(deep=False)
+
+    if events.bins is not None:
+        image_dims = (coarse_x_bin_edges.dim, coarse_y_bin_edges.dim)
+        for c in image_dims:
+            if c not in events.bins.coords:
+                events.bins.coords[c] = sc.bins_like(
+                    events, sc.midpoints(events.coords[c])
+                )
+        events = events.bins.concat(image_dims)
 
     for _ in range(max_tries):
         xbins = sc.linspace(
@@ -88,7 +95,7 @@ def maximum_resolution_achievable(
             upper_nx = nx
             upper_ny = ny
             nx = min(round((lower_nx * nx) ** 0.5), upper_nx - 1)
-            ny = min(round((lower_ny * ny) ** 0.5), upper_nx - 1)
+            ny = min(round((lower_ny * ny) ** 0.5), upper_ny - 1)
 
         if upper_nx - lower_nx < 2 and upper_ny - lower_ny < 2:
             break
