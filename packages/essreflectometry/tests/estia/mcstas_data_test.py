@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
-# flake8: noqa: F403, F405
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
