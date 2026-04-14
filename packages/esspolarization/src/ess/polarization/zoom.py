@@ -2,11 +2,9 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 from collections.abc import Sequence
 
+import ess.isissans as isis
 import sciline as sl
 import scipp as sc
-from scippnexus import NXsource
-
-import ess.isissans as isis
 from ess.isissans.io import LoadedFileContents
 from ess.reduce.nexus.types import Position
 from ess.sans.types import (
@@ -20,6 +18,7 @@ from ess.sans.types import (
     Transmission,
     TransmissionRun,
 )
+from scippnexus import NXsource
 
 # In this case the "sample" is the analyzer cell, of which we want to measure
 # the transmission fraction.
