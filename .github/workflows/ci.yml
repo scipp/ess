@@ -51,6 +51,15 @@ jobs:
               - '.github/workflows/**'
               - '.pre-commit-config.yaml'
               - '.python-version'
+            esspolarization:
+              - 'packages/esspolarization/**'
+              - 'packages/essreduce/**'
+              - 'pyproject.toml'
+              - 'pixi.lock'
+              - 'pixi.toml'
+              - '.github/workflows/**'
+              - '.pre-commit-config.yaml'
+              - '.python-version'
 
   formatting:
     name: Formatting and static analysis

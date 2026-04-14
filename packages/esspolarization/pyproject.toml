@@ -10,7 +10,7 @@ name = "esspolarization"
 description = "Polarization data reduction for the European Spallation Source"
 authors = [{ name = "Scipp contributors" }]
 license = "BSD-3-Clause"
-license-files = ["LICENSE"]
+license-files = ["../../LICENSE"]
 readme = "README.md"
 classifiers = [
     "Intended Audience :: Science/Research",
@@ -46,6 +46,22 @@ test = [
     "pandas>=2.1.2",
     "pooch>=1.5",
 ]
+docs = [
+    "esssans",
+    "autodoc-pydantic",
+    "ipykernel",
+    # Breaks syntax highlighting in Jupyter code cells.
+    "ipython!=8.7.0",
+    "myst-parser",
+    "nbsphinx",
+    "pydata-sphinx-theme>=0.14",
+    "sphinx",
+    "sphinx-autodoc-typehints",
+    "sphinx-copybutton",
+    "sphinx-design",
+    "sphinxcontrib-mermaid",
+    "sympy",
+]
 
 [project.urls]
 "Bug Tracker" = "https://github.com/scipp/esspolarization/issues"
@@ -53,6 +69,9 @@ test = [
 "Source" = "https://github.com/scipp/esspolarization"
 
 [tool.setuptools_scm]
+root = "../.."
+tag_regex = "^esspolarization/(?P<version>[vV]?\\d+(?:\\.\\d+)*(?:[._-]?\\w+)*)$"
+git_describe_command = ["git", "describe", "--dirty", "--tags", "--long", "--match", "esspolarization/*[0-9]*"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
@@ -114,12 +133,3 @@ enable_error_code = [
     "truthy-bool",
 ]
 warn_unreachable = true
-
-[tool.codespell]
-ignore-words-list = [
-    # Codespell wants "socioeconomic" which seems to be the standard spelling.
-    # But we use the word in our code of conduct which is the contributor covenant.
-    # Let's not modify it if we don't have to.
-    "socio-economic",
-    "tung",
-]
