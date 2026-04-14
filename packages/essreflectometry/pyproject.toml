@@ -74,6 +74,7 @@ docs = [
     "ipympl",
     "ipywidgets",
     "ipytree",
+    "ipydatagrid",
     "tof",
 ]
 all = [
