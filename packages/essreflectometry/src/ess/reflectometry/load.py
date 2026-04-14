@@ -7,7 +7,6 @@ import h5py
 import sciline
 import scipp as sc
 import scippnexus as snx
-
 from ess.reduce.nexus import open_nexus_file
 
 from .types import ReducedReference, ReferenceFilePath

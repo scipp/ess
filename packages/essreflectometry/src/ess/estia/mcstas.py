@@ -5,9 +5,8 @@ import h5py
 import numpy as np
 import pandas as pd
 import scipp as sc
-from scippnexus import NXsample, NXsource
-
 from ess.reduce.nexus.types import Position
+from scippnexus import NXsample, NXsource
 
 from ..reflectometry.load import load_h5
 from ..reflectometry.types import (

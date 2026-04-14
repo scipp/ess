@@ -5,7 +5,6 @@ from typing import Any, NewType
 
 import sciline
 import scipp as sc
-
 from ess.reduce.nexus import types as nexus_t
 from ess.reduce.unwrap import types as unwrap_t
 

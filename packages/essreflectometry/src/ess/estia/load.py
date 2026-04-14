@@ -1,8 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
-from scippnexus import NXdetector, NXsample
-
 from ess.reduce.nexus.types import NeXusComponent
+from scippnexus import NXdetector, NXsample
 
 from ..reflectometry.types import (
     DetectorRotation,

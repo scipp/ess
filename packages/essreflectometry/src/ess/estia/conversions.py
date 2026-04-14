@@ -1,12 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import scipp as sc
+from ess.reduce.nexus.types import DetectorBankSizes, Position
 from scipp.constants import pi
 from scippneutron._utils import elem_dtype
 from scippneutron.conversion import graph
 from scippnexus import NXsample, NXsource
-
-from ess.reduce.nexus.types import DetectorBankSizes, Position
 
 from ..reflectometry.conversions import reflectometry_q
 from ..reflectometry.types import (

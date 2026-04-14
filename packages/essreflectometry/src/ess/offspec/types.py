@@ -5,7 +5,6 @@ from typing import NewType
 import sciline
 import scipp as sc
 import scippnexus as snx
-
 from ess.reduce.nexus import types as reduce_t
 
 from ..reflectometry.types import RunType

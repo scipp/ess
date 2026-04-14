@@ -3,7 +3,6 @@ from multiprocessing.pool import ThreadPool
 from pathlib import Path
 
 import scipp as sc
-
 from ess.reduce.data import make_registry
 
 from ..reflectometry.types import Filename, ReferenceRun, SampleRun

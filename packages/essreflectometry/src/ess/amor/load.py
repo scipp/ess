@@ -2,7 +2,6 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 import scippnexus as snx
-
 from ess.reduce.nexus import workflow as nexus_workflow
 from ess.reduce.nexus.types import NeXusFileSpec
 

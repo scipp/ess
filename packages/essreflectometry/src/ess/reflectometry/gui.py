@@ -834,9 +834,9 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
         df = self.custom_reduction_table.data.copy()
         if 'Runs' in df.columns:
             df['Runs'] = df['Runs'].map(
-                lambda x: tuple(x)
-                if isinstance(x, tuple | list)
-                else tuple(x.split(','))
+                lambda x: (
+                    tuple(x) if isinstance(x, tuple | list) else tuple(x.split(','))
+                )
             )
         self.custom_reduction_table.data = df
         self.set_table_colors(self.custom_reduction_table)
