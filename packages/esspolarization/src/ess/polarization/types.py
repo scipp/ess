@@ -28,7 +28,7 @@ PolarizingElement = TypeVar('PolarizingElement', Analyzer, Polarizer)
 PlusMinus = Literal['plus', 'minus']
 
 
-class TransmissionFunction(Generic[PolarizingElement], ABC):
+class TransmissionFunction(ABC, Generic[PolarizingElement]):
     """Wavelength- and time-dependent transmission for a given cell."""
 
     @abstractmethod

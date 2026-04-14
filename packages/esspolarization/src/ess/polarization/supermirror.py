@@ -13,7 +13,7 @@ import scipp as sc
 from .types import PlusMinus, PolarizingElement, TransmissionFunction
 
 
-class SupermirrorEfficiencyFunction(Generic[PolarizingElement], ABC):
+class SupermirrorEfficiencyFunction(ABC, Generic[PolarizingElement]):
     """Base class for supermirror efficiency functions"""
 
     @abstractmethod
