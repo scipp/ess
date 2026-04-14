@@ -181,7 +181,7 @@ def _build_time_bin_edges(
             dim=t_coord_name, start=min_t, stop=max_t, step=time_bin_width
         )
         # If the last bin edge is smaller than `max_t`
-        if bin_edges[t_coord_name, -1] < max_t:
+        if bin_edges[t_coord_name, -1] <= max_t:
             # Need to append one more edge to cover the whole range.
             true_last_bin_edge = bin_edges[t_coord_name, -1] + time_bin_width
             bin_edges = sc.concat([bin_edges, true_last_bin_edge], dim=t_coord_name)
