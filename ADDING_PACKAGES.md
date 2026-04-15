@@ -36,7 +36,7 @@ git remote remove essdiffraction
   ```
 - Remove unnecessary configurations in the pyproject.toml file. i.e. `[tool.codespell]`, `[tool.ruff]`, `[tool.ruff.lint]`, `[tool.ruff.format]`, etc
 - Delete unnecessary files:
-  `tox.ini`, `requirements/`, `.github/`, `.pre-commit-config.yaml`, `MANIFEST.in`, `.gitignore`, `.python-version`.
+  `tox.ini`, `requirements/`, `.github/`, `.pre-commit-config.yaml`, `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `LICENSE`, `MANIFEST.in`, `.gitignore`, `.python-version`.
 
 ## 3. Add to `pixi.toml`
 
