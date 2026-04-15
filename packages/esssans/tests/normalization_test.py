@@ -5,10 +5,10 @@ import numpy as np
 import pytest
 import scipp as sc
 import scippnexus as snx
-
 from ess.isissans.data import sans2d_solid_angle_reference
-from ess.reduce.nexus.types import NeXusTransformation, SampleRun
 from ess.sans import normalization
+
+from ess.reduce.nexus.types import NeXusTransformation, SampleRun
 
 # See https://github.com/mantidproject/mantid/blob/main/instrument/SANS2D_Definition_Tubes.xml  # noqa: E501
 _SANS2D_PIXEL_RADIUS = 0.00405 * sc.Unit('m')

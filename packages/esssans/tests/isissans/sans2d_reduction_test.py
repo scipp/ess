@@ -2,11 +2,10 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 from functools import lru_cache
 
+import ess.isissans.data  # noqa: F401
 import pytest
 import sciline
 import scipp as sc
-
-import ess.isissans.data  # noqa: F401
 from ess import isissans as isis
 from ess import sans
 from ess.isissans import MonitorOffset, SampleOffset, sans2d

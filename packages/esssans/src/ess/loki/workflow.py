@@ -7,10 +7,10 @@ Default parameters, providers and utility functions for the Loki workflow.
 import sciline
 import scipp as sc
 import scippnexus as snx
-
 from ess import sans
-from ess.reduce.workflow import register_workflow
 from ess.sans.parameters import typical_outputs
+
+from ess.reduce.workflow import register_workflow
 
 from ..sans.types import (
     DetectorBankSizes,

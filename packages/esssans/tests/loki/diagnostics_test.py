@@ -1,11 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 
+import ess.loki.data  # noqa: F401
 import matplotlib
 import pytest
 import scipp as sc
-
-import ess.loki.data  # noqa: F401
 from ess import loki
 from ess.loki.diagnostics import InstrumentView, LokiBankViewer
 from ess.sans.types import (

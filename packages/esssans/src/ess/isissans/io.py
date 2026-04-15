@@ -8,7 +8,6 @@ from typing import NewType
 
 import sciline
 import scipp as sc
-
 from ess.sans.types import (
     BackgroundRun,
     DirectBeam,

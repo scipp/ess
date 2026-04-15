@@ -11,8 +11,6 @@ import sciline
 import scipp as sc
 import scippneutron as scn
 import scippnexus as snx
-
-from ess.reduce.nexus.types import NeXusTransformation, Position
 from ess.sans.types import (
     BeamCenter,
     DetectorIDs,
@@ -35,6 +33,8 @@ from ess.sans.types import (
     WavelengthDetector,
     WavelengthMonitor,
 )
+
+from ess.reduce.nexus.types import NeXusTransformation, Position
 
 from .io import LoadedFileContents
 from .mantidio import Period

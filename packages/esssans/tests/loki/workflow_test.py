@@ -4,11 +4,8 @@
 
 import pytest
 import scipp as sc
-from sciline import UnsatisfiedRequirement
-
 from ess import loki
 from ess.loki import LokiAtLarmorWorkflow
-from ess.reduce import workflow
 from ess.sans.types import (
     BackgroundRun,
     BackgroundSubtractedIofQ,
@@ -24,6 +21,9 @@ from ess.sans.types import (
     UncertaintyBroadcastMode,
     WavelengthDetector,
 )
+from sciline import UnsatisfiedRequirement
+
+from ess.reduce import workflow
 
 
 def test_sans_workflow_registers_subclasses():

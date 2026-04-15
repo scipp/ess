@@ -2,8 +2,6 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 import scipp as sc
-from scipp.scipy.interpolate import interp1d
-
 from ess import loki, sans
 from ess.sans.types import (
     BeamCenter,
@@ -12,6 +10,7 @@ from ess.sans.types import (
     WavelengthBands,
     WavelengthBins,
 )
+from scipp.scipy.interpolate import interp1d
 
 
 def _get_I0(qbins: sc.Variable) -> sc.Variable:

@@ -2,7 +2,6 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 from pathlib import Path
 
-from ess.reduce.data import Entry, make_registry
 from ess.sans.types import (
     BackgroundRun,
     DirectBeamFilename,
@@ -11,6 +10,8 @@ from ess.sans.types import (
     PixelMaskFilename,
     SampleRun,
 )
+
+from ess.reduce.data import Entry, make_registry
 
 from .io import CalibrationFilename
 

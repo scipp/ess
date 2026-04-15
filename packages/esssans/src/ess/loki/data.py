@@ -2,7 +2,6 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 from pathlib import Path
 
-from ess.reduce.data import make_registry
 from ess.sans.types import (
     BackgroundRun,
     DirectBeamFilename,
@@ -11,6 +10,8 @@ from ess.sans.types import (
     SampleRun,
     TransmissionRun,
 )
+
+from ess.reduce.data import make_registry
 
 _registry = make_registry(
     'ess/loki',
@@ -102,9 +103,9 @@ def loki_tutorial_isis_polymer_sample_run() -> Filename[SampleRun]:
     return Filename[SampleRun](_registry.get_path("60395-2022-02-28_2215.nxs"))
 
 
-def loki_tutorial_isis_polymer_transmission_run() -> (
-    Filename[TransmissionRun[SampleRun]]
-):
+def loki_tutorial_isis_polymer_transmission_run() -> Filename[
+    TransmissionRun[SampleRun]
+]:
     """Transmission run for ISIS polymer run."""
     return Filename[TransmissionRun[SampleRun]](
         _registry.get_path("60394-2022-02-28_2215.nxs")
@@ -128,9 +129,9 @@ def loki_tutorial_porous_silica_sample_run() -> Filename[SampleRun]:
     return Filename[SampleRun](_registry.get_path("60385-2022-02-28_2215.nxs"))
 
 
-def loki_tutorial_porous_silica_transmission_run() -> (
-    Filename[TransmissionRun[SampleRun]]
-):
+def loki_tutorial_porous_silica_transmission_run() -> Filename[
+    TransmissionRun[SampleRun]
+]:
     """Transmission run for Porous silica run."""
     return Filename[TransmissionRun[SampleRun]](
         _registry.get_path("60384-2022-02-28_2215.nxs")

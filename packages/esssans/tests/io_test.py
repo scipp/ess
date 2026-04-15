@@ -6,10 +6,9 @@ import sciline
 import scipp as sc
 import scipp.testing
 import scippnexus as snx
-from scippnexus.application_definitions import nxcansas
-
 from ess.sans.io import save_background_subtracted_iofq
 from ess.sans.types import BackgroundSubtractedIofQ, Measurement, OutFilename, SampleRun
+from scippnexus.application_definitions import nxcansas
 
 
 @pytest.mark.parametrize('use_edges', [True, False])

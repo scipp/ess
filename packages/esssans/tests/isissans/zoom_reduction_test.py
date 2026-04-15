@@ -1,9 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+import ess.isissans.data  # noqa: F401
 import pytest
 import scipp as sc
-
-import ess.isissans.data  # noqa: F401
 from ess import isissans as isis
 from ess import sans
 from ess.sans.types import (

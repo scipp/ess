@@ -3,12 +3,10 @@
 import os
 from pathlib import Path
 
+import ess.loki.data  # noqa: F401
 import pytest
 import sciline
 import scipp as sc
-from scipp.testing import assert_identical
-
-import ess.loki.data  # noqa: F401
 from ess import loki, sans
 from ess.sans.conversions import ElasticCoordTransformGraph
 from ess.sans.types import (
@@ -35,6 +33,7 @@ from ess.sans.types import (
     WavelengthBands,
     WavelengthBins,
 )
+from scipp.testing import assert_identical
 
 
 def test_can_create_pipeline(larmor_workflow):
