@@ -70,8 +70,8 @@ conda install -c conda-forge essimaging
 
 ## Get in touch
 
-- If you have questions that are not answered by these documentation pages, ask on [discussions](https://github.com/scipp/essimaging/discussions). Please include a self-contained reproducible example if possible.
-- Report bugs (including unclear, missing, or wrong documentation!), suggest features or view the source code [on GitHub](https://github.com/scipp/essimaging).
+- If you have questions that are not answered by these documentation pages, ask on [discussions](https://github.com/scipp/ess/discussions). Please include a self-contained reproducible example if possible.
+- Report bugs (including unclear, missing, or wrong documentation!), suggest features or view the source code [on GitHub](https://github.com/scipp/ess/tree/main/packages/essimaging).
 
 ```{toctree}
 ---

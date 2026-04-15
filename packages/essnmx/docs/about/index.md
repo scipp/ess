@@ -26,9 +26,9 @@ To cite a specific version of ESSnmx, select the desired version on Zenodo to ge
 
 ## Older versions of the documentation
 
-Older versions of the documentation pages can be found under the assets of each [release](https://github.com/scipp/essnmx/releases).
+Older versions of the documentation pages can be found under the assets of each [release](https://github.com/scipp/ess/releases?q=essnmx).
 Simply download the archive, unzip and view locally in a web browser.
 
 ## Source code and development
 
-ESSnmx is hosted and developed [on GitHub](https://github.com/scipp/essnmx).
+ESSnmx is hosted and developed [on GitHub](https://github.com/scipp/ess/tree/main/packages/essnmx).

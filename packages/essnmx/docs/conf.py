@@ -167,6 +167,7 @@ html_theme_options = {
         "image_dark": "_static/logo-dark.svg",
     },
     "external_links": [
+        {"name": "Essreduce", "url": "https://scipp.github.io/ess/reduce"},
         {"name": "Plopp", "url": "https://scipp.github.io/plopp"},
         {"name": "Sciline", "url": "https://scipp.github.io/sciline"},
         {"name": "Scipp", "url": "https://scipp.github.io"},
@@ -175,7 +176,7 @@ html_theme_options = {
     "icon_links": [
         {
             "name": "GitHub",
-            "url": "https://github.com/scipp/essnmx",
+            "url": "https://github.com/scipp/ess/tree/main/packages/essnmx",
             "icon": "fa-brands fa-github",
             "type": "fontawesome",
         },
