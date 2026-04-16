@@ -7,6 +7,10 @@ version = "2026.2.0"
 [dependencies]
 python = "3.11.*"
 
+[system-requirements]
+# Scipp does not support older OSX versions.
+macos = "14.0"
+
 # ==================== Parameterized tasks ====================
 
 [tasks.test]
