@@ -28,7 +28,8 @@ _registry = make_registry(
         "silicon-dhkl.tab": "md5:59ee9ed57a7c039ce416c8df886da9cc",
         "duplex-dhkl.tab": "md5:b4c6c2fcd66466ad291f306b2d6b346e",
         "dhkl_quartz_nc.tab": "md5:40887d736e3acf859e44488bfd9a9213",
-        # Simulations from new model with corrected(?) L0.
+        # Simulations from new model with corrected(?) moderator to detector
+        # distance.
         # For correct reduction you need to use
         # beer.io.mcstas_chopper_delay_from_mode_new_simulations
         # to obtain the correct WavelengthDefinitionChopperDelay for these files.

@@ -21,8 +21,9 @@ from ess.beer.io import (
     load_beer_mcstas_monitor,
     mcstas_chopper_delay_from_mode_new_simulations,
 )
-from ess.beer.types import DetectorBank, DHKLList, TofDetector
-from ess.reduce.nexus.types import Filename, SampleRun
+from ess.beer.types import DetectorBank, DHKLList, WavelengthDetector
+from ess.powder.types import ElasticCoordTransformGraph, SampleRun
+from ess.reduce.nexus.types import Filename
 
 
 def test_can_reduce_using_known_peaks_workflow():
@@ -30,8 +31,8 @@ def test_can_reduce_using_known_peaks_workflow():
     wf[DHKLList] = duplex_peaks_array()
     wf[DetectorBank] = DetectorBank.north
     wf[Filename[SampleRun]] = mcstas_duplex(7)
-    da = wf.compute(TofDetector[SampleRun])
-    assert 'tof' in da.bins.coords
+    da = wf.compute(WavelengthDetector[SampleRun])
+    assert 'wavelength' in da.bins.coords
     # assert dataarray has all coords required to compute dspacing
     da = da.transform_coords(
         ('dspacing',),
@@ -54,7 +55,7 @@ def test_can_reduce_using_unknown_peaks_workflow(fname):
     wf[Filename[SampleRun]] = fname
     wf[DetectorBank] = DetectorBank.north
     wf.insert(mcstas_chopper_delay_from_mode_new_simulations)
-    da = wf.compute(TofDetector[SampleRun])
+    da = wf.compute(WavelengthDetector[SampleRun])
     da = da.transform_coords(
         ('dspacing',),
         graph=scn.conversion.graph.tof.elastic('tof'),
@@ -76,12 +77,15 @@ def test_pulse_shaping_workflow():
     wf = BeerMcStasWorkflowPulseShaping()
     wf[Filename[SampleRun]] = mcstas_silicon_new_model(6)
     wf[DetectorBank] = DetectorBank.north
-    da = wf.compute(TofDetector[SampleRun])
-    assert 'tof' in da.bins.coords
+    res = wf.compute(
+        (WavelengthDetector[SampleRun], ElasticCoordTransformGraph[SampleRun])
+    )
+    da = res[WavelengthDetector[SampleRun]]
+    assert 'wavelength' in da.bins.coords
     # assert dataarray has all coords required to compute dspacing
     da = da.transform_coords(
         ('dspacing',),
-        graph=scn.conversion.graph.tof.elastic('tof'),
+        graph=res[ElasticCoordTransformGraph[SampleRun]],
     )
     h = da.hist(dspacing=2000, dim=da.dims)
     max_peak_d = sc.midpoints(h['dspacing', np.argmax(h.values)].coords['dspacing'])[0]

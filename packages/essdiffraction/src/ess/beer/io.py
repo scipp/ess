@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+import os
 import re
 from pathlib import Path
 
@@ -8,14 +9,14 @@ import numpy as np
 import scipp as sc
 import scipp.constants
 
+from ess.powder.types import CaveMonitor, RunType, WavelengthMonitor
+
 from .types import (
     DetectorBank,
     Filename,
-    GeometryCoordTransformGraph,
     ModulationPeriod,
     RawDetector,
     SampleRun,
-    TwoThetaLimits,
     WavelengthDefinitionChopperDelay,
 )
 
@@ -34,6 +35,19 @@ def _rotation_from_y_rotation_matrix(rot):
     )
 
 
+def _find_all_h5(group: h5py.Group, matches, nxclass=None):
+    name = group.name
+    for p in group.keys():
+        if re.match(matches, os.path.join(name, p)) and (
+            nxclass is None or nxclass.encode() == group[p].attrs.get('NX_class')
+        ):
+            yield group[p]
+    # Breadth first
+    for p in group.keys():
+        if isinstance(group[p], h5py.Group):
+            yield from _find_all_h5(group[p], matches, nxclass)
+
+
 def _find_h5(group: h5py.Group, matches):
     for p in group.keys():
         if re.match(matches, p):
@@ -42,15 +56,21 @@ def _find_h5(group: h5py.Group, matches):
         raise ValueError(f'Could not find "{matches}" in {group}.')
 
 
-def _load_h5(group: h5py.Group | str, *paths: str):
-    if isinstance(group, str):
+def _load_h5(group: h5py.Group | str | Path, *paths: str):
+    if isinstance(group, str | Path):
         with h5py.File(group) as group:
             yield from _load_h5(group, *paths)
         return
     for path in paths:
         g = group
         for p in path.strip('/').split('/'):
-            g = _unique_child_group_h5(g, p) if p.startswith('NX') else g.get(p)
+            g = (
+                _unique_child_group_h5(g, p)
+                if p.startswith('NX')
+                else g.get(p)
+                if p in g
+                else _find_h5(g, p)
+            )
         yield g
 
 
@@ -127,7 +147,7 @@ def _effective_chopper_position_from_mode(
         raise ValueError(f'Unkonwn chopper mode {mode}.')
 
 
-def _load_beer_mcstas(f, north_or_south=None, *, number):
+def _load_beer_mcstas(f, north_or_south=None, number=None):
     positions = {
         name: f'/entry1/instrument/components/{key}/Position'
         for key in f['/entry1/instrument/components']
@@ -135,8 +155,7 @@ def _load_beer_mcstas(f, north_or_south=None, *, number):
         if name in key
     }
     (
-        data,
-        events,
+        data_dir,
         params,
         sample_pos,
         psc1_pos,
@@ -147,16 +166,7 @@ def _load_beer_mcstas(f, north_or_south=None, *, number):
         mcc_pos,
     ) = _load_h5(
         f,
-        (
-            f'NXentry/NXdetector/bank_{north_or_south}{number}_events_dat_list_p_x_y_n_id_t'
-            if north_or_south is not None
-            else f'NXentry/NXdetector/bank{number:02}_events_dat_list_p_x_y_n_id_t'
-        ),
-        (
-            f'NXentry/NXdetector/bank_{north_or_south}{number}_events_dat_list_p_x_y_n_id_t/events'
-            if north_or_south is not None
-            else f'NXentry/NXdetector/bank{number:02}_events_dat_list_p_x_y_n_id_t/events'  # noqa: E501
-        ),
+        'NXentry/NXdetector',
         'NXentry/simulation/Param',
         positions['sampleMantid'],
         positions['PSC1'],
@@ -166,12 +176,23 @@ def _load_beer_mcstas(f, north_or_south=None, *, number):
         positions['MCB'],
         positions['MCC'],
     )
+    data = (
+        next(_find_all_h5(data_dir, f'.*{north_or_south}{number}'))
+        if north_or_south is not None and number is not None
+        else next(_find_all_h5(data_dir, f'.*{north_or_south}'))
+        if north_or_south is not None
+        else next(_find_all_h5(data_dir, f'/entry1.*bank.*{number}'))
+    )
+    events = data['events']
+
     beam_rotation = _find_h5(f['/entry1/instrument/components'], '.*sourceMantid.*')[
         'Rotation'
     ]
     detector_rotation = _find_h5(
         f['/entry1/instrument/components'],
         f'.*nD_Mantid_?{north_or_south}_{number}.*'
+        if north_or_south is not None and number is not None
+        else f'.*nD_Mantid_?{north_or_south}.*'
         if north_or_south is not None
         else f'.*nD_Mantid_?{number}.*',
     )['Rotation']
@@ -267,8 +288,12 @@ def _load_beer_mcstas(f, north_or_south=None, *, number):
     # some entry in the Nexus file.
     da.coords['source_position'] = da.coords['sample_position'] - incident_beam
 
-    # L0 is the total length of the instrument
-    da.coords['L0'] = L1 + L2 + sc.norm(da.coords['chopper_position'])
+    da.coords['moderator_to_detector_distance'] = (
+        L1 + L2 + sc.norm(da.coords['chopper_position'])
+    )
+    da.coords['source_to_wavelength_definition_chopper_distance'] = sc.norm(
+        da.coords['chopper_position']
+    )
 
     t = da.bins.coords['t']
     da.bins.coords['event_time_offset'] = t % sc.scalar(1 / 14, unit='s').to(
@@ -283,7 +308,7 @@ def _load_beer_mcstas(f, north_or_south=None, *, number):
         sc.constants.m_n
         / sc.constants.h
         * da.coords['wavelength_estimate']
-        * da.coords['L0'].min().to(unit='angstrom')
+        * da.coords['moderator_to_detector_distance'].min().to(unit='angstrom')
     ).to(unit='s') - sc.scalar(1 / 14, unit='s') / 2
 
     del da.coords['x']
@@ -293,14 +318,8 @@ def _load_beer_mcstas(f, north_or_south=None, *, number):
     return da
 
 
-def _not_between(x, a, b):
-    return (x < a) | (b < x)
-
-
 def load_beer_mcstas(f: str | Path | h5py.File, bank: DetectorBank) -> sc.DataArray:
-    '''Load beer McStas data from a file to a
-    data group with one data array for each bank.
-    '''
+    '''Load beer McStas data from a file to a data array.'''
     if not isinstance(bank, DetectorBank):
         raise ValueError(
             '"bank" must be either ``DetectorBank.north`` or ``DetectorBank.south``'
@@ -310,11 +329,11 @@ def load_beer_mcstas(f: str | Path | h5py.File, bank: DetectorBank) -> sc.DataAr
         with h5py.File(f) as ff:
             return load_beer_mcstas(ff, bank=bank)
 
-    try:
-        _find_h5(f['/entry1/instrument/components'], '.*nD_Mantid_?south_1.*')
-    except ValueError:
-        # The file did not have a detector named 'south'-something.
-        # Load old 2D structure where banks were not named 'north' and 'south'.
+    if len(list(_find_all_h5(f['/entry1/data'], '.*bank', nxclass='NXdata'))) < 8:
+        # If we don't find ~13 detectors, then assume the detectors are 2D
+        if len(list(_find_all_h5(f['/entry1/data'], '.*south', nxclass='NXdata'))) > 0:
+            return _load_beer_mcstas(f, north_or_south=bank.name)
+
         return _load_beer_mcstas(
             f, north_or_south=None, number=1 if bank == DetectorBank.south else 2
         )
@@ -325,6 +344,18 @@ def load_beer_mcstas(f: str | Path | h5py.File, bank: DetectorBank) -> sc.DataAr
             for number in range(1, 13)
         ],
         dim='panel',
+    )
+
+
+def _to_edges(centers: sc.Variable) -> sc.Variable:
+    interior_edges = sc.midpoints(centers)
+    return sc.concat(
+        [
+            2 * centers[0] - interior_edges[0],
+            interior_edges,
+            2 * centers[-1] - interior_edges[-1],
+        ],
+        dim=centers.dim,
     )
 
 
@@ -351,8 +382,8 @@ def load_beer_mcstas_monitor(f: str | Path | h5py.File):
             dims=['wavelength'], values=data[:], variances=errors[:], unit='counts'
         ),
         coords={
-            'wavelength': sc.array(
-                dims=['wavelength'], values=wavelengths[:], unit='angstrom'
+            'wavelength': _to_edges(
+                sc.array(dims=['wavelength'], values=wavelengths[:], unit='angstrom')
             ),
             'ncount': sc.array(dims=['wavelength'], values=ncount[:], unit='counts'),
         },
@@ -368,17 +399,16 @@ def load_beer_mcstas_monitor(f: str | Path | h5py.File):
 
 
 def load_beer_mcstas_provider(
-    fname: Filename[SampleRun],
+    fname: Filename[RunType],
     bank: DetectorBank,
-    two_theta_limits: TwoThetaLimits,
-    graph: GeometryCoordTransformGraph,
-) -> RawDetector[SampleRun]:
-    da = load_beer_mcstas(fname, bank)
-    da = da.transform_coords(['two_theta'], graph=graph)
-    da = da.assign_masks(
-        two_theta=_not_between(da.coords['two_theta'], *two_theta_limits)
-    )
-    return da
+) -> RawDetector[RunType]:
+    return load_beer_mcstas(fname, bank)
+
+
+def load_beer_mcstas_monitor_provider(
+    fname: Filename[RunType],
+) -> WavelengthMonitor[RunType, CaveMonitor]:
+    return load_beer_mcstas_monitor(fname)
 
 
 def mcstas_chopper_delay_from_mode(
@@ -430,5 +460,6 @@ def mcstas_modulation_period_from_mode(da: RawDetector[SampleRun]) -> Modulation
 
 mcstas_providers = (
     load_beer_mcstas_provider,
+    load_beer_mcstas_monitor_provider,
     mcstas_chopper_delay_from_mode,
 )

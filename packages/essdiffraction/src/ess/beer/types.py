@@ -14,6 +14,7 @@ import sciline
 import scipp as sc
 
 from ess.reduce.nexus.types import Filename, RawDetector, RunType, SampleRun
+from ess.reduce.unwrap.types import WavelengthDetector
 
 
 class StreakClusteredData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
@@ -23,6 +24,7 @@ class StreakClusteredData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
 RawDetector = RawDetector
 Filename = Filename
 SampleRun = SampleRun
+WavelengthDetector = WavelengthDetector
 
 
 class DetectorBank(Enum):
@@ -30,9 +32,6 @@ class DetectorBank(Enum):
     south = 'south'
 
 
-TwoThetaLimits = NewType("TwoThetaLimits", tuple[sc.Variable, sc.Variable])
-
-TofCoordTransformGraph = NewType("TofCoordTransformGraph", dict)
 GeometryCoordTransformGraph = NewType("GeometryCoordTransformGraph", dict)
 
 PulseLength = NewType("PulseLength", sc.Variable)
@@ -56,9 +55,3 @@ CIFIdentifierForPeakPositions = NewType("CIFIdentifierForPeakPositions", object)
 
 CIFPeaksMinIntensity = NewType("CIFPeaksMinIntensity", sc.Variable)
 """Minimum peak intensity for peaks from CIF file to be included in :py:`DHKLList`."""
-
-
-class TofDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """
-    Detector with a time-of-flight coordinate
-    """
