@@ -27,14 +27,13 @@ essimaging = { path = "packages/essimaging", editable = true, extras = ["test"] 
 [feature.essnmx.pypi-dependencies]
 essnmx = { path = "packages/essnmx", editable = true, extras = ["test"] }
 
-<<<<<<< HEAD
+# essreflectometry (depends on essreduce)
+[feature.essreflectometry.pypi-dependencies]
+essreflectometry = { path = "packages/essreflectometry", editable = true, extras = ["test"] }
+
 # esssans (depends on essreduce)
 [feature.esssans.pypi-dependencies]
 esssans = { path = "packages/esssans", editable = true, extras = ["test"] }
-=======
-[feature.essreflectometry.pypi-dependencies]
-essreflectometry = { path = "packages/essreflectometry", editable = true, extras = ["test"] }
->>>>>>> main
 
 # ==================== Dev feature ====================
 
