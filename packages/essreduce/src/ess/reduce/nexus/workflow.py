@@ -25,6 +25,7 @@ from .types import (
     Component,
     DetectorBankSizes,
     DetectorPositionOffset,
+    DynamicPosition,
     EmptyDetector,
     EmptyMonitor,
     Filename,
@@ -365,7 +366,20 @@ def compute_position(
     transformation: NeXusTransformation[Component, RunType],
 ) -> Position[Component, RunType]:
     """Compute the position of a component from a transformation matrix."""
+    if isinstance(transformation.value, sc.DataArray):
+        raise ValueError(
+            "Attempted to compute a static position from a time-dependent "
+            "transformation. Either provide a time interval parameter or "
+            "time filter."
+        )
     return Position[Component, RunType](transformation.value * origin)
+
+
+def compute_dynamic_position(
+    transformation: NeXusTransformation[Component, RunType],
+) -> DynamicPosition[Component, RunType]:
+    """Compute the position of a component from a transformation matrix."""
+    return DynamicPosition[Component, RunType](transformation.value * origin)
 
 
 def get_calibrated_detector(
@@ -698,6 +712,7 @@ _common_providers = (
     get_transformation_chain,
     to_transformation,
     compute_position,
+    compute_dynamic_position,
     load_nexus_data,
     load_nexus_component,
     load_all_nexus_components,
