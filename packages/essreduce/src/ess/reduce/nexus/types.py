@@ -185,9 +185,13 @@ class NeXusData(sciline.Scope[Component, RunType, sc.DataArray], sc.DataArray):
     """
 
 
+class Position(sciline.Scope[Component, RunType, sc.Variable], sc.Variable):
+    """Position of a component that does not move, such as source or sample."""
+
+
 @dataclass(init=False, repr=False, slots=True)
-class Position(Generic[Component, RunType]):
-    """Position of a component such as source, sample, monitor, or detector.
+class DynamicPosition(Generic[Component, RunType]):
+    """Position of a potentially moving component such as an analyzer or detector.
 
     The position can depend on time. In this case, a time coordinate is also stored.
     Use ``position`` to get the position if it is scalar, or ``positions``
