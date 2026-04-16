@@ -1,0 +1,13 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: 024a41b
+_src_path: gh:scipp/copier_template
+description: Reflectometry data reduction for the European Spallation Source
+max_python: '3.13'
+min_python: '3.11'
+namespace_package: ess
+nightly_deps: plopp,sciline,scippneutron,scippnexus,scipp
+orgname: scipp
+prettyname: ESSreflectometry
+projectname: essreflectometry
+related_projects: Scipp,ScippNexus,ScippNeutron,Sciline,Plopp
+year: 2025

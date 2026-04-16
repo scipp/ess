@@ -1,0 +1,135 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+from collections.abc import Callable
+from typing import Any, NewType
+
+import sciline
+import scipp as sc
+from ess.reduce.nexus import types as nexus_t
+from ess.reduce.unwrap import types as unwrap_t
+
+SampleRun = nexus_t.SampleRun
+ReferenceRun = NewType("ReferenceRun", int)
+RunType = nexus_t.RunType
+
+Beamline = nexus_t.Beamline
+EmptyDetector = nexus_t.EmptyDetector
+RawDetector = nexus_t.RawDetector
+DetectorPositionOffset = nexus_t.DetectorPositionOffset
+Filename = nexus_t.Filename
+Measurement = nexus_t.Measurement
+NeXusComponent = nexus_t.NeXusComponent
+NeXusDetectorName = nexus_t.NeXusDetectorName
+Position = nexus_t.Position
+
+WavelengthDetector = unwrap_t.WavelengthDetector
+PulseStrideOffset = unwrap_t.PulseStrideOffset
+LookupTable = unwrap_t.LookupTable
+LookupTableFilename = unwrap_t.LookupTableFilename
+DetectorLtotal = unwrap_t.DetectorLtotal
+LookupTableRelativeErrorThreshold = unwrap_t.LookupTableRelativeErrorThreshold
+
+
+class CoordTransformationGraph(sciline.Scope[RunType, dict], dict):
+    """Coordinate transformation graph for converting raw to physical coordinates."""
+
+
+class RawChopper(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+    """Chopper data loaded from nexus file."""
+
+
+class ReducibleData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Event data with common coordinates added"""
+
+
+ReducedReference = NewType("ReducedReference", sc.DataArray)
+"""Intensity distribution on the detector for a sample with :math`R(Q) = 1`"""
+
+Reference = NewType("Reference", sc.DataArray)
+""":code`ReducedReference` histogrammed in sample ``Q``"""
+
+Sample = NewType("Sample", sc.DataArray)
+""":code`Sample` measurement prepared for reduction"""
+
+ReflectivityOverQ = NewType("ReflectivityOverQ", sc.DataArray)
+"""Intensity histogram over momentum transfer
+normalized by the calibrated reference measurement."""
+
+ReflectivityOverZW = NewType("ReflectivityOverZW", sc.DataArray)
+"""Intensity histogram over z- and wavelength- grid.
+normalized by the calibrated reference measurement."""
+
+QResolution = NewType("QResolution", sc.Variable)
+"""Resolution term for the momentum transfer for each bin of QBins."""
+
+
+""" Parameters for the workflow """
+
+QBins = NewType("QBins", sc.Variable)
+"""Bins for the momentum transfer histogram."""
+
+WavelengthBins = NewType("WavelengthBins", sc.Variable)
+"""Bins for the wavelength histogram, also used to filter the event data."""
+
+DetectorSpatialResolution = NewType("DetectorSpatialResolution", sc.Variable)
+"""Spatial resolution of the detector."""
+
+
+class ThetaBins(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """Binning in theta that takes into consideration that some
+    detector pixels have the same theta value."""
+
+
+class RawSampleRotation(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """The rotation of the sample registered in the NeXus file."""
+
+
+class SampleRotation(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """The rotation of the sample relative to the center of the incoming beam."""
+
+
+class SampleRotationOffset(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """The difference between the true slope of the sample surface
+    and the sample rotation value in the file."""
+
+
+class DetectorRotation(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """The rotation of the detector relative to the horizon"""
+
+
+class BeamSize(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """Full-Width-Half-maximum of the incoming beam."""
+
+
+class SampleSize(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """Diameter of the sample. If None it is assumed to be the same as the reference."""
+
+
+class ProtonCurrent(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Proton current log from file"""
+
+
+YIndexLimits = NewType("YIndexLimits", tuple[sc.Variable, sc.Variable])
+"""Limit of the (logical) 'y' detector pixel index"""
+
+
+ZIndexLimits = NewType("ZIndexLimits", tuple[sc.Variable, sc.Variable])
+"""Limit of the (logical) 'z' detector pixel index"""
+
+
+BeamDivergenceLimits = NewType("BeamDivergenceLimits", tuple[sc.Variable, sc.Variable])
+"""Limit of the beam divergence"""
+
+
+ReferenceFilePath = NewType("ReferenceFilePath", str)
+"""Path to the cached normalization matrix"""
+
+
+WavelengthThetaFigure = NewType("WavelengthThetaFigure", Any)
+WavelengthZIndexFigure = NewType("WavelengthZIndexFigure", Any)
+QThetaFigure = NewType("QThetaFigure", Any)
+ReflectivityDiagnosticsView = NewType("ReflectivityDiagnosticsView", Any)
+
+CorrectionsToApply = NewType(
+    "CorrectionsToApply", set[Callable[[sc.DataArray], sc.DataArray]]
+)
