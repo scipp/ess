@@ -16,6 +16,7 @@ from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroad
 
 Beamline = reduce_t.Beamline
 DetectorPositionOffset = reduce_t.DetectorPositionOffset
+DynamicPosition = reduce_t.DynamicPosition
 EmptyDetector = reduce_t.EmptyDetector
 Filename = reduce_t.Filename
 GravityVector = reduce_t.GravityVector

@@ -292,7 +292,7 @@ def monitor_coordinate_transformation_graph(
         {
             **beamline.beamline(scatter=False),
             **tof.elastic_wavelength(start='tof'),
-            'source_position': lambda: source_position.position,
+            'source_position': lambda: source_position,
         }
     )
 

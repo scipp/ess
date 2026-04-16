@@ -13,13 +13,13 @@ from ess.reduce.nexus import open_component_group
 from ess.reduce.nexus.types import NeXusLocationSpec, TransformationTimeFilter
 from ess.spectroscopy.types import (
     Analyzer,
+    DynamicPosition,
     InstrumentAngle,
     NeXusClass,
     NeXusComponent,
     NeXusComponentLocationSpec,
     NeXusFileSpec,
     NeXusTransformation,
-    Position,
     RunType,
     SampleAngle,
 )
@@ -119,7 +119,7 @@ def _get_inputs(group: snx.Group) -> list[str]:
 def get_calibrated_analyzer(
     analyzer_component: NeXusComponent[snx.NXcrystal, RunType],
     analyzer_transform: NeXusTransformation[snx.NXcrystal, RunType],
-    analyzer_position: Position[snx.NXcrystal, RunType],
+    analyzer_position: DynamicPosition[snx.NXcrystal, RunType],
 ) -> Analyzer[RunType]:
     """Collect the data for a single analyzer.
 
