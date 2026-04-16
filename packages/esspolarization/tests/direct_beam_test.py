@@ -3,10 +3,9 @@
 import numpy as np
 import pytest
 import scipp as sc
-from scipp.testing import assert_allclose, assert_identical
-
 from ess import polarization as pol
 from ess.polarization import base
+from scipp.testing import assert_allclose, assert_identical
 
 # Setup logs for four sections of length 250:
 # - 10 s direct beam no cell (only in beginning)

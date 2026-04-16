@@ -2,9 +2,8 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 import pytest
 import scipp as sc
-from scipp.testing import assert_identical
-
 from ess.polarization import he3
+from scipp.testing import assert_identical
 
 
 def test_opacity_from_cell_params() -> None:

@@ -6,7 +6,6 @@ import ess.isissans as isis
 import sciline as sl
 import scipp as sc
 from ess.isissans.io import LoadedFileContents
-from ess.reduce.nexus.types import Position
 from ess.sans.types import (
     Filename,
     Incident,
@@ -19,6 +18,8 @@ from ess.sans.types import (
     TransmissionRun,
 )
 from scippnexus import NXsource
+
+from ess.reduce.nexus.types import Position
 
 # In this case the "sample" is the analyzer cell, of which we want to measure
 # the transmission fraction.

@@ -3,7 +3,6 @@
 import numpy as np
 import pytest
 import scipp as sc
-
 from ess.polarization import he3
 
 
