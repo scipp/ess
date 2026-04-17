@@ -23,6 +23,8 @@ from .types import (
     NeXusFile,
     NeXusGroup,
     NeXusLocationSpec,
+    NeXusTransformation,
+    RunType,
 )
 
 
@@ -452,6 +454,55 @@ def _to_snx_selection(selection, *, for_events: bool) -> snx.typing.ScippIndex:
             return {'event_time_zero': selection}
         return {'time': selection}
     return selection
+
+
+def compute_detector_position(
+    da: sc.DataArray,
+    *,
+    transform: NeXusTransformation[snx.NXdetector, RunType],
+    # Strictly speaking we could apply an offset by modifying the transformation chain,
+    # using a more generic implementation. However, this may in general require
+    # extending the chain and it is currently not clear if that is desirable. As far as
+    # I am aware the offset is currently mainly used for handling files from other
+    # facilities and it is not clear if it is needed for ESS data and should be kept at
+    # all.
+    offset: sc.Variable,
+) -> sc.Variable | sc.DataArray:
+    """Compute the positions of detector pixels.
+
+    Parameters
+    ----------
+    da:
+        Detector (event) data as returned by :func:`extract_signal_data_array`.
+    transform:
+        Transformation matrix for the detector.
+    offset:
+        Offset to add to the detector position.
+
+    Returns
+    -------
+    :
+        The detector position as a data array if ``transform`` is time-dependent
+        or as a variable otherwise.
+    """
+    # Note: We apply offset as early as possible, i.e., right in this function
+    # the detector array from the raw loader NeXus group, to prevent a source of bugs.
+    # If the NXdetector in the file is not 1-D, we want to match the order of dims.
+    # zip_pixel_offsets otherwise yields a vector with dimensions in the order given
+    # by the x/y/z offsets.
+    offsets = snx.zip_pixel_offsets(da.coords)
+    # Get the dims in the order of the detector data array, but filter out dims that
+    # don't exist in the offsets (e.g. the detector data may have a 'time' dimension).
+    dims = [dim for dim in da.dims if dim in offsets.dims]
+    offsets = offsets.transpose(dims).copy()
+    # We use the unit of the offsets as this is likely what the user expects.
+    if transform.value.unit is not None and transform.value.unit != '':
+        transform_value = transform.value.to(unit=offsets.unit)
+    else:
+        transform_value = transform.value
+    position = transform_value * offsets
+    position += offset.to(unit=position.unit, copy=False)
+    return position
 
 
 def load_data(
