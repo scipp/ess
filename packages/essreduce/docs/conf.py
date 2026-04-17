@@ -168,8 +168,8 @@ html_theme_options = {
     },
     "external_links": [
         {"name": "ESSdiffraction", "url": "https://scipp.github.io/essdiffraction"},
-        {"name": "ESSimaging", "url": "https://scipp.github.io/essimaging"},
-        {"name": "ESSnmx", "url": "https://scipp.github.io/essnmx"},
+        {"name": "ESSimaging", "url": "https://scipp.github.io/ess/imaging"},
+        {"name": "ESSnmx", "url": "https://scipp.github.io/ess/nmx"},
         {"name": "ESSpolarization", "url": "https://scipp.github.io/esspolarization"},
         {"name": "ESSreflectometry", "url": "https://scipp.github.io/essreflectometry"},
         {"name": "ESSsans", "url": "https://scipp.github.io/esssans"},
@@ -178,7 +178,7 @@ html_theme_options = {
     "icon_links": [
         {
             "name": "GitHub",
-            "url": "https://github.com/scipp/essreduce",
+            "url": "https://github.com/scipp/ess/tree/main/packages/essreduce",
             "icon": "fa-brands fa-github",
             "type": "fontawesome",
         },

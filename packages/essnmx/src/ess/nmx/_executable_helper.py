@@ -68,6 +68,53 @@ def _retrieve_field_value(
     return getattr(args, field_name)
 
 
+_EXCLUSIVE_FIELDS_GROUP = {
+    'time_bin_width': 'Bin Edges Configuration',
+    'nbins': 'Bin Edges Configuration',
+}
+
+
+def _add_argument_from_field(
+    group: argparse._ArgumentGroup, field_name: str, field_info: FieldInfo
+):
+    add_argument = partial(group.add_argument, f"--{field_name.replace('_', '-')}")
+
+    if not _validate_annotation(field_info.annotation):
+        raise TypeError(f"Unsupported annotation type: {field_info.annotation}")
+
+    arg_type = _get_no_nonetype_args(field_info.annotation)
+    if _is_appendable_type(arg_type):
+        nargs = '+'
+        arg_type = get_args(field_info.annotation)[0]
+    else:
+        nargs = None
+        arg_type = arg_type
+
+    required = field_info.default is PydanticUndefined
+    default = ... if required else field_info.default
+
+    if arg_type is bool:
+        add_argument = partial(add_argument, action='store_true')
+    elif isinstance(arg_type, type) and issubclass(arg_type, enum.StrEnum):
+        add_argument = partial(
+            add_argument,
+            type=str,
+            choices=[str(e) for e in arg_type],
+        )
+        default = default.name if isinstance(default, enum.StrEnum) else default
+    elif get_origin(arg_type) is Literal:
+        add_argument = partial(
+            add_argument,
+            type=str,
+            choices=[str(lit) for lit in get_args(arg_type)],
+        )
+    else:
+        add_argument = partial(add_argument, type=arg_type, nargs=nargs)
+
+    help_text = ' '.join([field_info.description or '', f"(default: {default})"])
+    add_argument(default=default, required=required, help=help_text)
+
+
 def add_args_from_pydantic_model(
     *, model_cls: type[BaseModel], parser: argparse.ArgumentParser
 ) -> argparse.ArgumentParser:
@@ -99,43 +146,22 @@ def add_args_from_pydantic_model(
     group = parser.add_argument_group(
         model_cls.model_config.get("title", model_cls.__name__)
     )
+    exclusive_groups: dict[str, list[tuple[str, FieldInfo]]] = {}
     for field_name, field_info in model_cls.model_fields.items():
-        add_argument = partial(group.add_argument, f"--{field_name.replace('_', '-')}")
-
-        if not _validate_annotation(field_info.annotation):
-            raise TypeError(f"Unsupported annotation type: {field_info.annotation}")
-
-        arg_type = _get_no_nonetype_args(field_info.annotation)
-        if _is_appendable_type(arg_type):
-            nargs = '+'
-            arg_type = get_args(field_info.annotation)[0]
-        else:
-            nargs = None
-            arg_type = arg_type
-
-        required = field_info.default is PydanticUndefined
-        default = ... if required else field_info.default
-
-        if arg_type is bool:
-            add_argument = partial(add_argument, action='store_true')
-        elif isinstance(arg_type, type) and issubclass(arg_type, enum.StrEnum):
-            add_argument = partial(
-                add_argument,
-                type=str,
-                choices=[str(e) for e in arg_type],
+        if field_name in _EXCLUSIVE_FIELDS_GROUP:
+            cur_grp = exclusive_groups.setdefault(
+                _EXCLUSIVE_FIELDS_GROUP[field_name], []
             )
-            default = default.name if isinstance(default, enum.StrEnum) else default
-        elif get_origin(arg_type) is Literal:
-            add_argument = partial(
-                add_argument,
-                type=str,
-                choices=[str(lit) for lit in get_args(arg_type)],
-            )
+            cur_grp.append((field_name, field_info))
         else:
-            add_argument = partial(add_argument, type=arg_type, nargs=nargs)
+            _add_argument_from_field(
+                group=group, field_name=field_name, field_info=field_info
+            )
 
-        help_text = ' '.join([field_info.description or '', f"(default: {default})"])
-        add_argument(default=default, required=required, help=help_text)
+    for fields in exclusive_groups.values():
+        exclusive_group = group.add_mutually_exclusive_group(required=False)
+        for field_name, field_info in fields:
+            _add_argument_from_field(exclusive_group, field_name, field_info)
 
     return parser
 

@@ -13,7 +13,7 @@ The main scientific driver is to locate the hydrogen atoms relevant to the funct
 
 ### From single event data to binned image-like data (scipp)
 The first step in the data reduction is to reduce the data from single event data to image-like data. <br>
-Therefore the [essNMX](https://github.com/scipp/essnmx) package is used.
+Therefore the [essNMX](https://github.com/scipp/ess/tree/main/packages/essnmx) package is used.
 
 The time of arrival (TOA) should be converted into time of flight (TOF).
 <!--Not implemented for measurement data-->

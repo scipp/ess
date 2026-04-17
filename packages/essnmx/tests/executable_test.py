@@ -69,7 +69,7 @@ def _check_non_default_config(testing_config: ReductionConfig) -> None:
         testing_model = testing_child.model_dump(mode='python')
         default_model = default_child.model_dump(mode='python')
         for key, testing_value in testing_model.items():
-            if key == 'lookup_table_file_path':
+            if key in ['lookup_table_file_path', 'nbins', 'time_bin_width']:
                 # This value may be None or default, so we skip the check.
                 continue
             default_value = default_model[key]
@@ -90,7 +90,7 @@ def test_reduction_config() -> None:
         chunk_size_events=100000,
     )
     workflow_options = WorkflowConfig(
-        nbins=100,
+        time_bin_width=5,
         min_time_bin=10,
         max_time_bin=100_000,
         time_bin_coordinate=TimeBinCoordinate.event_time_offset,
@@ -136,7 +136,11 @@ def small_nmx_nexus_path():
     return get_small_nmx_nexus()
 
 
-def _check_output_file(output_file_path: pathlib.Path, nbins: int):
+def _check_output_file(
+    output_file_path: pathlib.Path,
+    bin_width: float | None = None,
+    nbins: int | None = None,
+):
     detector_names = [f'detector_panel_{i}' for i in range(3)]
     mandatory_fields = (
         'data',
@@ -155,11 +159,66 @@ def _check_output_file(output_file_path: pathlib.Path, nbins: int):
             det_gr = f[f'entry/instrument/{name}']
             assert det_gr is not None
             toa_edges = det_gr['time_of_flight'][()]
-            assert len(toa_edges) == nbins
+            if nbins and bin_width is None:
+                assert len(toa_edges) == nbins
+            else:
+                assert (toa_edges[1] - toa_edges[0]) == sc.scalar(
+                    bin_width, unit='ms'
+                ).to(unit='us')
             assert all(field_name in det_gr for field_name in mandatory_fields)
 
 
 def test_executable_runs(small_nmx_nexus_path, tmp_path: pathlib.Path):
+    """Test that the executable runs and returns the expected output."""
+    output_file = tmp_path / "output.h5"
+    assert not output_file.exists()
+
+    bin_width = 10  # Bigger bins for testing.
+    # The output has 1280x1280 pixels per detector per time bin.
+    commands = (
+        'essnmx-reduce',
+        '--input-file',
+        small_nmx_nexus_path,
+        '--time-bin-width',
+        str(bin_width),
+        '--output-file',
+        output_file.as_posix(),
+    )
+    # Validate that all commands are strings and contain no unsafe characters
+    result = subprocess.run(  # noqa: S603 - We are not accepting arbitrary input here.
+        commands, text=True, capture_output=True, check=False
+    )
+    assert result.returncode == 0
+    assert output_file.exists()
+    _check_output_file(output_file, bin_width=bin_width)
+
+
+def test_executable_runs_exclusive_mutual(small_nmx_nexus_path, tmp_path: pathlib.Path):
+    """Test that the executable runs and returns the expected output."""
+    output_file = tmp_path / "output.h5"
+    assert not output_file.exists()
+
+    nbins = 20  # Small number of bins for testing.
+    # The output has 1280x1280 pixels per detector per time bin.
+    commands = (
+        'essnmx-reduce',
+        '--input-file',
+        small_nmx_nexus_path,
+        '--time-bin-width',
+        '3',
+        '--nbins',
+        str(nbins),
+        '--output-file',
+        output_file.as_posix(),
+    )
+    # Validate that all commands are strings and contain no unsafe characters
+    result = subprocess.run(  # noqa: S603 - We are not accepting arbitrary input here.
+        commands, text=True, capture_output=True, check=False
+    )
+    assert result.returncode == 2  # Should fail with command syntax error.
+
+
+def test_executable_runs_nbins(small_nmx_nexus_path, tmp_path: pathlib.Path):
     """Test that the executable runs and returns the expected output."""
     output_file = tmp_path / "output.h5"
     assert not output_file.exists()
@@ -229,7 +288,17 @@ def test_reduction_default_settings(reduction_config: ReductionConfig) -> None:
         reduction(config=reduction_config)
 
 
+def test_reduction_only_time_bin_width(reduction_config: ReductionConfig) -> None:
+    reduction_config.workflow.time_bin_width = 20.0
+    with known_warnings():
+        hist = _retrieve_one_hist(reduction(config=reduction_config))
+
+    width = hist.coords['tof'][1] - hist.coords['tof'][0]
+    assert width == sc.scalar(20.0, unit='ms').to(unit='us')
+
+
 def test_reduction_only_number_of_time_bins(reduction_config: ReductionConfig) -> None:
+    reduction_config.workflow.time_bin_width = None
     reduction_config.workflow.nbins = 20
     with known_warnings():
         hist = _retrieve_one_hist(reduction(config=reduction_config))
@@ -239,6 +308,21 @@ def test_reduction_only_number_of_time_bins(reduction_config: ReductionConfig) -
 
 
 def test_histogram_event_time_offset(reduction_config: ReductionConfig) -> None:
+    reduction_config.workflow.time_bin_width = 20
+    reduction_config.workflow.time_bin_coordinate = TimeBinCoordinate.event_time_offset
+    with known_warnings():
+        hist = _retrieve_one_hist(reduction(config=reduction_config))
+
+    # Check that the number of time bins is as expected.
+    width = hist.coords['event_time_offset'][1] - hist.coords['event_time_offset'][0]
+    assert_identical(width, sc.scalar(20.0, unit='ms').to(unit='ns'))
+    # Check if the histogram result is reasonable
+    zero = sc.scalar(0.0, unit='counts', dtype='float32', variance=0.0)
+    assert bool(hist.data.sum() > zero)
+
+
+def test_histogram_event_time_offset_nbins(reduction_config: ReductionConfig) -> None:
+    reduction_config.workflow.time_bin_width = None
     reduction_config.workflow.nbins = 20
     reduction_config.workflow.time_bin_coordinate = TimeBinCoordinate.event_time_offset
     with known_warnings():
@@ -346,6 +430,16 @@ def lut_file_path(tmp_path: pathlib.Path):
 def test_reduction_with_lut_file(
     reduction_config: ReductionConfig, lut_file_path: pathlib.Path
 ) -> None:
+    # We cannot use `time_bin_width` configuration
+    # since the lookup table is written in wavelength
+    # and it is not trivial to change lookup table
+    # and test the expected time of flight result by setting time bin width.
+    # i.e. if the lookup table wavelength range changes,
+    # the number of bins changes and the histogram data sizes changes.
+    # This test is only for checking if the look up table is used as expected or not
+    # therefore using number of bins should be fine.
+    reduction_config.workflow.time_bin_width = None
+    reduction_config.workflow.nbins = 20
     # Make sure the config uses no lookup table file initially.
     assert reduction_config.workflow.lookup_table_file_path is None
     with known_warnings():
