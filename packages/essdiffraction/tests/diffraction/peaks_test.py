@@ -2,7 +2,6 @@ import urllib.request
 
 import pytest
 import scipp as sc
-
 from ess.diffraction.peaks import dspacing_peaks_from_cif
 
 

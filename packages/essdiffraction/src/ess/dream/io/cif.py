@@ -4,8 +4,6 @@
 """CIF writer for DREAM."""
 
 import scipp as sc
-from scippneutron.io import cif
-
 from ess.powder.calibration import OutputCalibrationData
 from ess.powder.types import (
     Beamline,
@@ -19,6 +17,7 @@ from ess.powder.types import (
     SampleRun,
     Source,
 )
+from scippneutron.io import cif
 
 
 def prepare_reduced_tof_cif(

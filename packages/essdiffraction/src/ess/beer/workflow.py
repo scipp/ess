@@ -4,7 +4,6 @@ import itertools
 
 import sciline as sl
 import scipp as sc
-
 from ess.powder import providers as powder_providers
 from ess.powder.correction import RunNormalization, insert_run_normalization
 from ess.powder.types import (
@@ -15,6 +14,7 @@ from ess.powder.types import (
     SampleRun,
     VanadiumRun,
 )
+
 from ess.reduce.nexus.types import DetectorBankSizes, NeXusName
 from ess.reduce.unwrap import GenericUnwrapWorkflow
 

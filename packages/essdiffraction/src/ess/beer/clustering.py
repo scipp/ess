@@ -1,7 +1,6 @@
 import scipp as sc
-from scipy.signal import find_peaks, medfilt
-
 from ess.powder.types import RunType
+from scipy.signal import find_peaks, medfilt
 
 from .conversions import tof_from_t0_estimate_graph
 from .types import (

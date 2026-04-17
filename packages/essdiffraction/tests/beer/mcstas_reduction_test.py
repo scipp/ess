@@ -2,8 +2,6 @@ import numpy as np
 import pytest
 import scipp as sc
 import scippneutron as scn
-from scipp.testing import assert_allclose
-
 from ess.beer import (
     BeerMcStasWorkflowPulseShaping,
     BeerModMcStasWorkflow,
@@ -23,6 +21,8 @@ from ess.beer.io import (
 )
 from ess.beer.types import DetectorBank, DHKLList, WavelengthDetector
 from ess.powder.types import ElasticCoordTransformGraph, SampleRun
+from scipp.testing import assert_allclose
+
 from ess.reduce.nexus.types import Filename
 
 

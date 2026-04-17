@@ -9,7 +9,6 @@ import pytest
 import scipp as sc
 import scipp.testing
 import scippnexus as snx
-
 from ess.dream import DreamGeant4ProtonChargeWorkflow, data, io, load_geant4_csv
 from ess.powder.types import (
     CaveMonitorPosition,

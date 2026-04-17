@@ -3,7 +3,6 @@
 import pytest
 import scipp as sc
 import scipp.testing
-
 from ess.powder.transform import (
     _covariance_of_matrix_vector_product,
     compute_pdf_from_structure_factor,
@@ -42,7 +41,7 @@ def test_pdf_structure_factor_can_return_covariances():
     )
     da.variances = da.data.values.copy()
     r = sc.array(dims='r', values=[2, 3, 4, 5.0], unit='angstrom')
-    _, cov = compute_pdf_from_structure_factor(da, r, return_covariances=True)
+    compute_pdf_from_structure_factor(da, r, return_covariances=True)
 
 
 def test_pdf_structure_factor_result_unchanged():

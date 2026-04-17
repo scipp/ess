@@ -8,7 +8,6 @@ import h5py
 import numpy as np
 import scipp as sc
 import scipp.constants
-
 from ess.powder.types import CaveMonitor, RunType, WavelengthMonitor
 
 from .types import (

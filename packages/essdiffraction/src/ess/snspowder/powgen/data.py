@@ -9,7 +9,6 @@ import sciline as sl
 import scipp as sc
 import scippneutron as scn
 import scippnexus as snx
-
 from ess.powder.types import (
     AccumulatedProtonCharge,
     CalibrationData,
@@ -27,6 +26,7 @@ from ess.powder.types import (
     WavelengthDetector,
     WavelengthMonitor,
 )
+
 from ess.reduce.data import Entry, make_registry
 
 

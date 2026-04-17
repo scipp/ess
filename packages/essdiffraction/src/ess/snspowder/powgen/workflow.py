@@ -2,7 +2,6 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 
 import sciline
-
 from ess.powder import providers as powder_providers
 from ess.powder.types import (
     EmptyCanRun,
@@ -11,6 +10,7 @@ from ess.powder.types import (
     SampleRun,
     VanadiumRun,
 )
+
 from ess.reduce.nexus.workflow import gravity_vector_neg_y
 
 from . import beamline

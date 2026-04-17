@@ -19,6 +19,7 @@ from ess.powder.types import (
     UncertaintyBroadcastMode,
     VanadiumRun,
 )
+
 from ess.reduce.parameter import (
     BinEdgesParameter,
     FilenameParameter,

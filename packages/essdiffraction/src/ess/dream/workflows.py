@@ -6,8 +6,6 @@ import itertools
 import sciline
 import scipp as sc
 import scippnexus as snx
-from scippneutron.metadata import Software
-
 from ess.powder import providers as powder_providers
 from ess.powder import with_pixel_mask_filenames
 from ess.powder.correction import RunNormalization, insert_run_normalization
@@ -30,6 +28,8 @@ from ess.powder.types import (
     VanadiumRun,
     WavelengthMask,
 )
+from scippneutron.metadata import Software
+
 from ess.reduce.nexus.types import DetectorBankSizes, NeXusName
 from ess.reduce.parameter import parameter_mappers
 from ess.reduce.unwrap import GenericUnwrapWorkflow

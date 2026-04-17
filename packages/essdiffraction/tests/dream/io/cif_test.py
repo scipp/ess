@@ -3,12 +3,9 @@
 import datetime
 import io
 
+import ess.dream.io.cif
 import pytest
 import scipp as sc
-from scippneutron.io import cif
-from scippneutron.metadata import ESS_SOURCE, Person
-
-import ess.dream.io.cif
 from ess.powder.calibration import OutputCalibrationData
 from ess.powder.types import (
     Beamline,
@@ -18,6 +15,8 @@ from ess.powder.types import (
     ReducerSoftware,
     Software,
 )
+from scippneutron.io import cif
+from scippneutron.metadata import ESS_SOURCE, Person
 
 
 @pytest.fixture

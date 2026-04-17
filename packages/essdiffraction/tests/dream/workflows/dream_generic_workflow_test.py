@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+import ess.dream.data  # noqa: F401
 import pytest
 import sciline
 import scipp as sc
-
-import ess.dream.data  # noqa: F401
 from ess import dream
+
 from ess.reduce.nexus.types import (
     CaveMonitor,
     DetectorBankSizes,

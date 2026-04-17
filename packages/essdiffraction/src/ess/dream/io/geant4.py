@@ -5,8 +5,6 @@ import numpy as np
 import sciline
 import scipp as sc
 import scippnexus as snx
-from scippneutron.metadata import ESS_SOURCE
-
 from ess.powder.types import (
     Beamline,
     CalibrationData,
@@ -26,6 +24,7 @@ from ess.powder.types import (
     RunType,
     Source,
 )
+from scippneutron.metadata import ESS_SOURCE
 
 MANTLE_DETECTOR_ID = sc.index(7)
 HIGH_RES_DETECTOR_ID = sc.index(8)

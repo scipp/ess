@@ -1,8 +1,7 @@
 import scipp as sc
 import scipp.constants
-from scippneutron.conversion import graph
-
 from ess.powder.types import ElasticCoordTransformGraph, RunType
+from scippneutron.conversion import graph
 
 from .types import (
     DHKLList,

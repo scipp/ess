@@ -4,13 +4,11 @@
 import io
 from pathlib import Path
 
+import ess.dream.data  # noqa: F401
 import pytest
 import sciline
 import scipp as sc
 import scipp.testing
-from scippneutron import metadata
-
-import ess.dream.data  # noqa: F401
 from ess import dream, powder
 from ess.dream.workflows import (
     DreamGeant4MonitorHistogramWorkflow,
@@ -43,6 +41,8 @@ from ess.powder.types import (
     VanadiumRun,
     WavelengthMask,
 )
+from scippneutron import metadata
+
 from ess.reduce import unwrap
 from ess.reduce import workflow as reduce_workflow
 from ess.reduce.nexus.types import AnyRun

@@ -1,12 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
+import ess.snspowder.powgen.data  # noqa: F401
 import pytest
 import sciline
 import scipp as sc
-from scippneutron._utils import elem_unit
-
-import ess.snspowder.powgen.data  # noqa: F401
 from ess import powder
 from ess.powder.types import (
     CalibrationFilename,
@@ -28,6 +26,7 @@ from ess.powder.types import (
     WavelengthMask,
 )
 from ess.snspowder import powgen
+from scippneutron._utils import elem_unit
 
 
 @pytest.fixture
@@ -48,8 +47,10 @@ def params():
         CalibrationFilename: powgen.data.powgen_tutorial_calibration_file(small=True),
         UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
         DspacingBins: sc.linspace('dspacing', 0.0, 2.3434, 200, unit='angstrom'),
-        TofMask: lambda x: (x < sc.scalar(0.0, unit="us").to(unit=elem_unit(x)))
-        | (x > sc.scalar(16666.67, unit="us").to(unit=elem_unit(x))),
+        TofMask: lambda x: (
+            (x < sc.scalar(0.0, unit="us").to(unit=elem_unit(x)))
+            | (x > sc.scalar(16666.67, unit="us").to(unit=elem_unit(x)))
+        ),
         TwoThetaMask: None,
         WavelengthMask: None,
         GravityVector: sc.vector(value=[0, -1, 0]) * sc.constants.g,
