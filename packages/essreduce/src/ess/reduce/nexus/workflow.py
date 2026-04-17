@@ -300,7 +300,7 @@ def reject_time_dependent_transform(
     )
 
 
-def _time_filter(
+def _apply_time_filter(
     transform: sc.DataArray,
     user_filter: TransformationTimeFilter[Component, RunType],
 ) -> sc.Variable | sc.DataArray:
@@ -355,9 +355,9 @@ def to_transformation(
             idx = label_based_index_to_positional_index(
                 sizes=t.sizes, coord=time, index=interval.value
             )
-            t.value = _time_filter(t.value[idx], time_filter)
+            t.value = _apply_time_filter(t.value[idx], time_filter)
         else:
-            t.value = _time_filter(t.value['time', interval.value], time_filter)
+            t.value = _apply_time_filter(t.value['time', interval.value], time_filter)
 
     return NeXusTransformation[Component, RunType].from_chain(chain)
 
