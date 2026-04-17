@@ -2,11 +2,12 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 import io
 
-import ess.polarization as pol
 import pytest
 import scipp as sc
-from ess.polarization.data import example_polarization_efficiency_table
 from scipp.testing import assert_allclose
+
+import ess.reduce.polarization as pol
+from ess.reduce.polarization.data import example_polarization_efficiency_table
 
 
 def test_SecondDegreePolynomialEfficiency_raises_if_units_incompatible():
