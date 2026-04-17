@@ -115,31 +115,7 @@ def test_can_compute_position_of_group(depends_on: snx.TransformationChain) -> N
         chain,
         interval=TimeInterval(slice(None, None)),
     )
-    assert_identical(workflow.compute_position(trans).position, position)
-
-
-def test_time_dependent_position_with_filter(
-    time_dependent_depends_on: snx.TransformationChain,
-) -> None:
-    position = sc.DataArray(
-        sc.vectors(
-            dims=['time'],
-            values=[[1.0, 1.0, 0.0], [1.0, 2.0, 0.0], [1.0, 3.0, 0.0]],
-            unit='m',
-        ),
-        coords={'time': sc.array(dims=['time'], values=[0.0, 1.0, 2.0], unit='s')},
-    )
-
-    group = workflow.NeXusComponent[snx.NXsource, SampleRun](
-        sc.DataGroup(depends_on=time_dependent_depends_on)
-    )
-    chain = workflow.get_transformation_chain(group)
-    trans = workflow.to_transformation(
-        chain,
-        interval=TimeInterval(slice(None, None)),
-        time_filter=TransformationTimeFilter(lambda t: t),
-    )
-    assert_identical(workflow.compute_position(trans).positions, position)
+    assert_identical(workflow.compute_position(trans), position)
 
 
 def test_to_transform_with_positional_time_interval(
@@ -213,7 +189,7 @@ def test_given_no_sample_load_nexus_sample_returns_group_with_origin_depends_on(
         interval=TimeInterval(slice(None, None)),
     )
     position = workflow.compute_position(transformation)
-    assert_identical(position.position, sc.vector([0.0, 0.0, 0.0], unit='m'))
+    assert_identical(position, sc.vector([0.0, 0.0, 0.0], unit='m'))
 
 
 def test_get_transformation_chain_raises_exception_if_position_not_found(
