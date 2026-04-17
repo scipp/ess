@@ -1,0 +1,110 @@
+[build-system]
+requires = [
+  "setuptools>=77",
+  "setuptools_scm[toml]>=8.0",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "esssans"
+description = "SANS data reduction for the European Spallation Source"
+authors = [{ name = "Scipp contributors" }]
+license = "BSD-3-Clause"
+license-files = ["../../LICENSE"]
+readme = "README.md"
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering",
+    "Typing :: Typed",
+]
+# The min python version should be updated in the root pixi.toml file
+# pre-commit will automatically update the following pin
+requires-python = ">=3.11"
+
+dynamic = ["version"]
+
+dependencies = [
+  "dask>=2022.1.0",
+  "graphviz>=0.20",
+  "essreduce>=26.4.0",
+  "numpy>=1.26.4",
+  "pandas>=2.1.2",
+  "plopp>=25.10.0",
+  "pythreejs>=2.4.1",
+  "sciline>=25.08.0",
+  "scipp>=24.09.1",  # Fixed new hist/bin API
+  "scippneutron>=25.02.1",
+  "scippnexus>=23.12.1",  # 23.12.0 and below deadlock in threaded use
+]
+
+[project.optional-dependencies]
+test = [
+    "ipympl>=0.9.4",
+    "pytest>=7.0",
+    "pooch>=1.5",
+    "scipy>=1.15.0",
+]
+docs = [
+    "autodoc-pydantic",
+    "ipykernel",
+    "ipython!=8.7.0",
+    "myst-parser",
+    "nbsphinx",
+    "pooch",
+    "pydata-sphinx-theme>=0.14",
+    "sphinx",
+    "sphinx-autodoc-typehints",
+    "sphinx-copybutton",
+    "sphinx-design",
+    "tof",
+]
+
+[project.urls]
+"Bug Tracker" = "https://github.com/scipp/esssans/issues"
+"Documentation" = "https://scipp.github.io/esssans"
+"Source" = "https://github.com/scipp/esssans"
+
+[project.entry-points."beamlime.workflow_plugin"]
+ess-loki-monitor = "ess.loki.live:LokiMonitorTestWorkflow"
+ess-loki-transmission-run = "ess.loki.live:LokiTransmissionRunTestWorkflow"
+ess-loki = "ess.loki.live:LokiAtLarmorAgBehTestWorkflow"
+
+[tool.setuptools_scm]
+root = "../.."
+tag_regex = "^esssans/(?P<version>[vV]?\\d+(?:\\.\\d+)*(?:[._-]?\\w+)*)$"
+git_describe_command = ["git", "describe", "--dirty", "--tags", "--long", "--match", "esssans/*[0-9]*"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = """
+--strict-config
+--strict-markers
+--import-mode=importlib
+-ra
+-v
+"""
+testpaths = "tests"
+filterwarnings = [
+  "error",
+  'ignore:\n            Sentinel is not a public part of the traitlets API:DeprecationWarning',
+  'ignore:Passing unrecognized arguments to super:DeprecationWarning',
+  'ignore:Jupyter is migrating its paths:DeprecationWarning',
+  'ignore:More than 20 figures have been opened:RuntimeWarning',
+]
+
+[tool.mypy]
+strict = true
+ignore_missing_imports = true
+enable_error_code = [
+    "ignore-without-code",
+    "redundant-expr",
+    "truthy-bool",
+]
+warn_unreachable = true
