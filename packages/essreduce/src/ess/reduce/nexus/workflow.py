@@ -321,8 +321,8 @@ def to_transformation(
 
     If one or more transformations in the chain are time-dependent, the time interval
     is used to select a specific time point. If the interval is not a single time point,
-    an error is raised. This may be extended in the future to a more sophisticated
-    mechanism, e.g., averaging over the interval to remove noise.
+    ``time_filter`` is applied to the transformation. By default, this will raise an
+    exception. Provide a different filter to customize how time-dependence is handled.
 
     Parameters
     ----------
