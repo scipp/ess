@@ -1,0 +1,18 @@
+-r base.in
+autodoc-pydantic
+ipykernel
+ipympl
+ipython!=8.7.0  # Breaks syntax highlighting in Jupyter code cells.
+myst-parser
+nbsphinx
+pandas
+pooch
+pydata-sphinx-theme>=0.14
+sphinx
+sphinx-autodoc-typehints
+sphinx-copybutton
+sphinx-design
+sphinxcontrib-bibtex
+
+# needed by pandas < 3.0
+pyarrow

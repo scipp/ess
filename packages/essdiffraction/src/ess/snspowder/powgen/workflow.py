@@ -1,0 +1,47 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
+
+import sciline
+
+from ess.powder import providers as powder_providers
+from ess.powder.types import (
+    EmptyCanRun,
+    KeepEvents,
+    NeXusDetectorName,
+    SampleRun,
+    VanadiumRun,
+)
+from ess.reduce.nexus.workflow import gravity_vector_neg_y
+
+from . import beamline
+
+
+def default_parameters() -> dict:
+    return {
+        KeepEvents[SampleRun]: KeepEvents[SampleRun](True),
+        KeepEvents[VanadiumRun]: KeepEvents[VanadiumRun](False),
+        KeepEvents[EmptyCanRun]: KeepEvents[EmptyCanRun](True),
+        NeXusDetectorName: "powgen_detector",
+    }
+
+
+def PowgenWorkflow() -> sciline.Pipeline:
+    """
+    Workflow with default parameters for the Powgen SNS instrument.
+    """
+    # The package does not depend on pooch which is needed for the tutorial
+    # data. Delay import until workflow is actually used.
+    from . import data
+
+    return sciline.Pipeline(
+        providers=(
+            *powder_providers,
+            *beamline.providers,
+            *data.providers,
+            gravity_vector_neg_y,
+        ),
+        params=default_parameters(),
+    )
+
+
+__all__ = ['PowgenWorkflow', 'default_parameters']
