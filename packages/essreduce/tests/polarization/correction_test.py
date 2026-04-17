@@ -1,21 +1,23 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
-import ess.polarization as pol
 import numpy as np
 import pytest
 import sciline
 import scipp as sc
-from ess.polarization import (
+from scipp.testing import assert_allclose
+
+import ess.reduce.polarization as pol
+from ess.reduce.polarization import (
     CorrectionWorkflow,
     He3CellWorkflow,
     PolarizationAnalysisWorkflow,
     SupermirrorWorkflow,
 )
-from ess.polarization.correction import (
+from ess.reduce.polarization.correction import (
     FlipperEfficiency,
     compute_polarizing_element_correction,
 )
-from ess.polarization.types import (
+from ess.reduce.polarization.types import (
     Analyzer,
     Down,
     HalfPolarizedCorrectedData,
@@ -26,7 +28,6 @@ from ess.polarization.types import (
     TransmissionFunction,
     Up,
 )
-from scipp.testing import assert_allclose
 
 
 class SimpleTransmissionFunction:
