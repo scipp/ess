@@ -18,9 +18,9 @@ To cite a specific version of ESSreduce, select the desired version on Zenodo to
 
 ## Older versions of the documentation
 
-Older versions of the documentation pages can be found under the assets of each [release](https://github.com/scipp/essreduce/releases).
+Older versions of the documentation pages can be found under the assets of each [release](https://github.com/scipp/ess/releases?q=essreduce).
 Simply download the archive, unzip and view locally in a web browser.
 
 ## Source code and development
 
-ESSreduce is hosted and developed [on GitHub](https://github.com/scipp/essreduce).
+ESSreduce is hosted and developed [on GitHub](https://github.com/scipp/ess/tree/main/packages/essreduce).

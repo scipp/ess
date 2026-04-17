@@ -70,7 +70,7 @@ grow-nexus = "ess.reduce.scripts.grow_nexus:main"
 
 [project.urls]
 "Bug Tracker" = "https://github.com/scipp/ess/issues"
-"Documentation" = "https://scipp.github.io/essreduce"
+"Documentation" = "https://scipp.github.io/ess/reduce"
 "Source" = "https://github.com/scipp/ess/tree/main/packages/essreduce"
 
 [tool.setuptools_scm]
