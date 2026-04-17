@@ -172,6 +172,36 @@ def test_to_transform_with_label_based_time_interval_single_point(
     assert sc.identical(transform * origin, sc.vector([1.0, 3.0, 0.0], unit='m'))
 
 
+def test_to_transform_raises_if_interval_does_not_yield_unique_value(
+    time_dependent_depends_on: snx.TransformationChain,
+) -> None:
+    with pytest.raises(ValueError, match='Transform is time-dependent'):
+        workflow.to_transformation(
+            time_dependent_depends_on,
+            TimeInterval(slice(sc.scalar(0.1, unit='s'), sc.scalar(1.9, unit='s'))),
+        )
+
+
+def test_to_transform_with_custom_time_filter(
+    time_dependent_depends_on: snx.TransformationChain,
+) -> None:
+    def time_filter(transformation: sc.DataArray)->sc.DataArray:
+        # -1* so we can see that the filter does something
+        return -1 * transformation
+
+    transform = workflow.to_transformation(
+        time_dependent_depends_on,
+        TimeInterval(slice(sc.scalar(0.1, unit='s'), sc.scalar(1.9, unit='s'))),
+        time_filter=time_filter
+    ).value
+
+    expected = sc.DataArray(
+        sc.vectors(dims=['time'], values=[[1.0, -1.0, 0.0], [1.0,-2.0,0.0]], unit='m'),
+        coords={'time': sc.array(dims=['time'], values=[0.0, 1.0], unit='s')}
+    )
+    sc.testing.assert_identical(transform * sc.vector([0.,0.,0.],unit='m'), expected)
+
+
 def test_given_no_sample_load_nexus_sample_returns_group_with_origin_depends_on(
     loki_tutorial_sample_run_60250: Path,
 ) -> None:
