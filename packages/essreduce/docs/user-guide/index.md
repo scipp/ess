@@ -6,7 +6,7 @@ maxdepth: 2
 ---
 
 installation
-polarization
+polarization/index
 unwrap/index
 widget
 reduction-workflow-guidelines
