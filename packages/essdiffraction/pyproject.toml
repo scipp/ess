@@ -1,0 +1,112 @@
+[build-system]
+requires = [
+  "setuptools>=77",
+  "setuptools_scm[toml]>=8.0",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "essdiffraction"
+description = "Diffraction data reduction for the European Spallation Source"
+authors = [{ name = "Scipp contributors" }]
+license = "BSD-3-Clause"
+license-files = ["../../LICENSE"]
+readme = "README.md"
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering",
+    "Typing :: Typed",
+]
+requires-python = ">=3.11"
+
+# IMPORTANT:
+# Run 'tox -e deps' after making changes here. This will update requirement files.
+# Make sure to list one dependency per line.
+dependencies = [
+  "dask>=2022.1.0",
+  "essreduce>=26.4.0",
+  "graphviz",
+  "numpy>=2",
+  "plopp>=26.2.0",
+  "pythreejs>=2.4.1",
+  "sciline>=25.04.1",
+  "scipp>=25.11.0",
+  "scippneutron>=26.3.0",
+  "scippnexus>=23.12.0",
+  "tof>=25.12.0",
+  "ncrystal[cif]>=4.1.0",
+  "spglib!=2.7",  # https://github.com/mctools/ncrystal/issues/320
+]
+
+dynamic = ["version"]
+
+[project.optional-dependencies]
+test = [
+    "pandas>=2.1.2",
+    "pooch>=1.5",
+    "pytest>=7.0",
+    "ipywidgets>=8.1.7",
+]
+docs = [
+    "autodoc-pydantic",
+    "ipykernel",
+    "ipympl",
+    # Breaks syntax highlighting in Jupyter code cells.
+    "ipython!=8.7.0",
+    "myst-parser",
+    "nbsphinx",
+    "pandas",
+    "pooch",
+    "pydata-sphinx-theme>=0.14",
+    "sphinx",
+    "sphinx-autodoc-typehints",
+    "sphinx-copybutton",
+    "sphinx-design",
+    "sphinxcontrib-bibtex",
+    # needed by pandas < 3.0
+    "pyarrow",
+]
+
+[project.urls]
+"Bug Tracker" = "https://github.com/scipp/essdiffraction/issues"
+"Documentation" = "https://scipp.github.io/essdiffraction"
+"Source" = "https://github.com/scipp/essdiffraction"
+
+[tool.setuptools_scm]
+root = "../.."
+tag_regex = "^essdiffraction/(?P<version>[vV]?\\d+(?:\\.\\d+)*(?:[._-]?\\w+)*)$"
+git_describe_command = ["git", "describe", "--dirty", "--tags", "--long", "--match", "essdiffraction/*[0-9]*"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = """
+--strict-config
+--strict-markers
+--import-mode=importlib
+-ra
+-v
+"""
+testpaths = "tests"
+filterwarnings = [
+  "error",
+  'ignore:\s*Sentinel is not a public part of the traitlets API:DeprecationWarning',
+  # We don't need to do anything, this will go away when we update to pandas 3:
+  'ignore:\s*Pyarrow will become a required dependency of pandas:DeprecationWarning',
+]
+
+[tool.mypy]
+strict = true
+ignore_missing_imports = true
+enable_error_code = [
+    "ignore-without-code",
+    "redundant-expr",
+    "truthy-bool",
+]
+warn_unreachable = true
