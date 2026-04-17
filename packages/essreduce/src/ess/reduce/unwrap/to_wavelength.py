@@ -398,8 +398,8 @@ def detector_ltotal_from_straight_line_approximation(
     # TODO: scatter=True should not be hard-coded here
     graph = {
         **scn.conversion.graph.beamline.beamline(scatter=True),
-        'source_position': lambda: source_position.position,
-        'sample_position': lambda: sample_position.position,
+        'source_position': lambda: source_position,
+        'sample_position': lambda: sample_position,
         'gravity': lambda: gravity,
     }
     return DetectorLtotal[RunType](
@@ -426,7 +426,7 @@ def monitor_ltotal_from_straight_line_approximation(
     """
     graph = {
         **scn.conversion.graph.beamline.beamline(scatter=False),
-        'source_position': lambda: source_position.position,
+        'source_position': lambda: source_position,
     }
     return MonitorLtotal[RunType, MonitorType](
         monitor_beamline.transform_coords(
