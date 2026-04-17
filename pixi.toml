@@ -27,6 +27,10 @@ essimaging = { path = "packages/essimaging", editable = true, extras = ["test"] 
 [feature.essnmx.pypi-dependencies]
 essnmx = { path = "packages/essnmx", editable = true, extras = ["test"] }
 
+# essdiffraction (depends on essreduce)
+[feature.essdiffraction.pypi-dependencies]
+essdiffraction = { path = "packages/essdiffraction", editable = true, extras = ["test"] }
+
 # ==================== Dev feature ====================
 
 [feature.dev.pypi-dependencies]
@@ -71,26 +75,35 @@ essnmx = { path = "packages/essnmx", editable = true, extras = ["test", "docs"] 
 [feature.docs-essnmx.tasks.docs-essnmx]
 cmd = "python -m sphinx -v -b html -d packages/essnmx/.docs_doctrees packages/essnmx/docs packages/essnmx/html"
 
+[feature.docs-essdiffraction.pypi-dependencies]
+essdiffraction = { path = "packages/essdiffraction", editable = true, extras = ["test", "docs"] }
+
+[feature.docs-essdiffraction.tasks.docs-essdiffraction]
+cmd = "python -m sphinx -v -b html -d packages/essdiffraction/.docs_doctrees packages/essdiffraction/docs packages/essdiffraction/html"
+
 # ==================== Environments ====================
 
 [environments]
 # Default: all packages (for full dev setup)
-default = { features = ["dev", "essreduce", "essimaging", "essnmx"], solve-group = "default" }
+default = { features = ["dev", "essreduce", "essimaging", "essnmx", "essdiffraction"], solve-group = "default" }
 
 # Per-package test environments (include workspace dep features)
 essreduce = { features = ["essreduce"], solve-group = "default" }
 essimaging = { features = ["essimaging", "essreduce"], solve-group = "default" }
 essnmx = { features = ["essnmx", "essreduce"], solve-group = "default" }
+essdiffraction = { features = ["essdiffraction", "essreduce"], solve-group = "default" }
 
 # Lower-bound test environments (separate resolution)
 lb-essreduce = { features = ["essreduce"], solve-group = "lower-bound" }
 lb-essimaging = { features = ["essimaging", "essreduce"], solve-group = "lower-bound" }
 lb-essnmx = { features = ["essnmx", "essreduce"], solve-group = "lower-bound" }
+lb-essdiffraction = { features = ["essdiffraction", "essreduce"], solve-group = "lower-bound" }
 
 # Docs environments (package with docs extra + pandoc)
 docs-essreduce = { features = ["docs-essreduce", "docs"], solve-group = "default" }
 docs-essimaging = { features = ["docs-essimaging", "docs-essreduce", "docs"], solve-group = "default" }
-docs-essnmx = { features = ["docs-essnmx", "docs-essreduce", "docs"], solve-group = "default" }
+ddocs-essnmx = { features = ["docs-essnmx", "docs-essreduce", "docs"], solve-group = "default" }
+ocs-essdiffraction = { features = ["docs-essdiffraction", "docs-essreduce", "docs"], solve-group = "default" }
 
 # Lint environment (standalone, no package deps)
 lint = { features = ["lint"], solve-group = "lint" }
