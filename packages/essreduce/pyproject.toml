@@ -30,10 +30,12 @@ requires-python = ">=3.11"
 dynamic = ["version"]
 
 dependencies = [
+    "dask>=2022.1.0",
     "sciline>=25.11.0",
     "scipp>=26.3.0",
     "scippneutron>=25.11.1",
     "scippnexus>=25.06.0",
+    "scipy>=1.14",
 ]
 
 [project.optional-dependencies]
@@ -46,6 +48,7 @@ test = [
     "pytest>=7.0",
     "scipy>=1.14",
     "tof>=25.12.0",
+    "pandas>=2.1.2",
 ]
 docs = [
     "autodoc-pydantic",
