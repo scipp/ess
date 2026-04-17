@@ -35,7 +35,6 @@ from ess.reduce.nexus.types import (
     SampleRun,
     Source,
     TimeInterval,
-    TransformationTimeFilter,
     TransmissionMonitor,
 )
 from ess.reduce.nexus.workflow import (
