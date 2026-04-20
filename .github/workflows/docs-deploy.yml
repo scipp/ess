@@ -36,7 +36,7 @@ jobs:
           frozen: true
           environments: docs-${{ inputs.package }}
       - name: Build docs
-        run: pixi run docs-${{ inputs.package }}}}
+        run: pixi run docs-${{ inputs.package }}
       - name: Prepare site
         if: ${{ inputs.publish }}
         run: |
