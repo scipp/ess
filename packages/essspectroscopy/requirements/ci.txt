@@ -9,13 +9,13 @@ cachetools==7.0.5
     # via tox
 certifi==2026.2.25
     # via requests
-charset-normalizer==3.4.6
+charset-normalizer==3.4.7
     # via requests
 colorama==0.4.6
     # via tox
 distlib==0.4.0
     # via virtualenv
-filelock==3.25.2
+filelock==3.29.0
     # via
     #   python-discovery
     #   tox
@@ -26,12 +26,12 @@ gitpython==3.1.46
     # via -r ci.in
 idna==3.11
     # via requests
-packaging==26.0
+packaging==26.1
     # via
     #   -r ci.in
     #   pyproject-api
     #   tox
-platformdirs==4.9.4
+platformdirs==4.9.6
     # via
     #   python-discovery
     #   tox
@@ -40,17 +40,19 @@ pluggy==1.6.0
     # via tox
 pyproject-api==1.10.0
     # via tox
-python-discovery==1.2.0
-    # via virtualenv
-requests==2.32.5
+python-discovery==1.2.2
+    # via
+    #   tox
+    #   virtualenv
+requests==2.33.1
     # via -r ci.in
 smmap==5.0.3
     # via gitdb
 tomli-w==1.2.0
     # via tox
-tox==4.50.3
+tox==4.53.0
     # via -r ci.in
 urllib3==2.6.3
     # via requests
-virtualenv==21.2.0
+virtualenv==21.2.4
     # via tox

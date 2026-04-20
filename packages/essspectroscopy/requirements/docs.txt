@@ -54,7 +54,7 @@ ipykernel==7.2.0
     # via -r docs.in
 ipympl==0.10.0
     # via -r docs.in
-ipython==9.10.0
+ipython==9.10.1
     # via
     #   -r docs.in
     #   ipykernel
@@ -115,7 +115,7 @@ myst-parser==5.0.0
     # via -r docs.in
 nbclient==0.10.4
     # via nbconvert
-nbconvert==7.17.0
+nbconvert==7.17.1
     # via nbsphinx
 nbformat==5.10.4
     # via
@@ -142,9 +142,9 @@ pure-eval==0.2.3
     # via stack-data
 pydantic-settings==2.13.1
     # via autodoc-pydantic
-pydata-sphinx-theme==0.16.1
+pydata-sphinx-theme==0.17.0
     # via -r docs.in
-pygments==2.19.2
+pygments==2.20.0
     # via
     #   accessible-pygments
     #   ipython

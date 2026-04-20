@@ -7,27 +7,27 @@
 #
 certifi==2026.2.25
     # via requests
-charset-normalizer==3.4.6
+charset-normalizer==3.4.7
     # via requests
 idna==3.11
     # via requests
 iniconfig==2.3.0
     # via pytest
-packaging==26.0
+packaging==26.1
     # via
     #   pooch
     #   pytest
-platformdirs==4.9.4
+platformdirs==4.9.6
     # via pooch
 pluggy==1.6.0
     # via pytest
 pooch==1.9.0
     # via -r basetest.in
-pygments==2.19.2
+pygments==2.20.0
     # via pytest
-pytest==9.0.2
+pytest==9.0.3
     # via -r basetest.in
-requests==2.32.5
+requests==2.33.1
     # via pooch
 urllib3==2.6.3
     # via requests
