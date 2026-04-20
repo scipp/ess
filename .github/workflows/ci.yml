@@ -60,6 +60,15 @@ jobs:
               - '.github/workflows/**'
               - '.pre-commit-config.yaml'
               - '.python-version'
+            essdiffraction:
+              - 'packages/essdiffraction/**'
+              - 'packages/essreduce/**'
+              - 'pyproject.toml'
+              - 'pixi.lock'
+              - 'pixi.toml'
+              - '.github/workflows/**'
+              - '.pre-commit-config.yaml'
+              - '.python-version'
             esssans:
               - 'packages/esssans/**'
               - 'packages/essreduce/**'

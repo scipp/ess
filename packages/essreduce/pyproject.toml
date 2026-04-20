@@ -30,22 +30,24 @@ requires-python = ">=3.11"
 dynamic = ["version"]
 
 dependencies = [
+    "dask>=2022.1.0",
+    "graphviz>=0.20",
     "sciline>=25.11.0",
-    "scipp>=26.3.0",
+    "scipp>=26.3.1",
     "scippneutron>=25.11.1",
     "scippnexus>=25.06.0",
+    "scipy>=1.14",
 ]
 
 [project.optional-dependencies]
 test = [
-    "graphviz>=0.20",
     "ipywidgets>=8.1",
     "matplotlib>=3.10.7",
     "numba>=0.63",
     "pooch>=1.9.0",
     "pytest>=7.0",
-    "scipy>=1.14",
     "tof>=25.12.0",
+    "pandas>=2.1.2",
 ]
 docs = [
     "autodoc-pydantic",
@@ -63,6 +65,8 @@ docs = [
     "sphinx-copybutton",
     "sphinx-design",
     "tof>=25.12.0",
+    "sphinxcontrib-mermaid",
+    "sympy",
 ]
 
 [project.scripts]
@@ -70,7 +74,7 @@ grow-nexus = "ess.reduce.scripts.grow_nexus:main"
 
 [project.urls]
 "Bug Tracker" = "https://github.com/scipp/ess/issues"
-"Documentation" = "https://scipp.github.io/essreduce"
+"Documentation" = "https://scipp.github.io/ess/reduce"
 "Source" = "https://github.com/scipp/ess/tree/main/packages/essreduce"
 
 [tool.setuptools_scm]

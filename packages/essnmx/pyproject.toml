@@ -74,9 +74,9 @@ docs = [
 ]
 
 [project.urls]
-"Bug Tracker" = "https://github.com/scipp/essnmx/issues"
-"Documentation" = "https://scipp.github.io/essnmx"
-"Source" = "https://github.com/scipp/essnmx"
+"Bug Tracker" = "https://github.com/scipp/ess/issues"
+"Documentation" = "https://scipp.github.io/ess/nmx"
+"Source" = "https://github.com/scipp/ess/tree/main/packages/essnmx"
 
 [tool.setuptools_scm]
 root = "../.."

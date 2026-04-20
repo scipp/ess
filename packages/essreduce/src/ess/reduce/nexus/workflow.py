@@ -6,7 +6,7 @@
 import warnings
 from collections.abc import Iterable
 from copy import deepcopy
-from typing import Any, TypeVar
+from typing import Any, Never, TypeVar
 
 import sciline
 import sciline.typing
@@ -25,6 +25,7 @@ from .types import (
     Component,
     DetectorBankSizes,
     DetectorPositionOffset,
+    DynamicPosition,
     EmptyDetector,
     EmptyMonitor,
     Filename,
@@ -50,6 +51,7 @@ from .types import (
     RunType,
     Source,
     TimeInterval,
+    TransformationTimeFilter,
     UniqueComponent,
 )
 
@@ -275,38 +277,52 @@ def load_nexus_data(
 
 
 def get_transformation_chain(
-    detector: NeXusComponent[Component, RunType],
+    component: NeXusComponent[Component, RunType],
 ) -> NeXusTransformationChain[Component, RunType]:
     """
-    Extract the transformation chain from a NeXus detector group.
+    Extract the transformation chain from a NeXus component group.
 
     Parameters
     ----------
-    detector:
-        NeXus detector group.
+    component:
+        NeXus component group.
     """
-    chain = detector['depends_on']
+    chain = component['depends_on']
     return NeXusTransformationChain[Component, RunType](chain)
 
 
-def _time_filter(transform: sc.DataArray) -> sc.Variable:
-    if transform.ndim == 0 or transform.sizes == {'time': 1}:
-        return transform.data.squeeze()
+def reject_time_dependent_transform(
+    transform: sc.DataArray,
+) -> Never:
+    """Raise a value error to forbid time-dependent transformations by default."""
     raise ValueError(
         f"Transform is time-dependent: {transform}, but no filter is provided."
     )
 
 
+def _apply_time_filter(
+    transform: sc.DataArray,
+    user_filter: TransformationTimeFilter[Component, RunType],
+) -> sc.Variable | sc.DataArray:
+    if transform.ndim == 0 or transform.sizes == {'time': 1}:
+        return transform.data.squeeze()
+    return user_filter(transform)
+
+
 def to_transformation(
-    chain: NeXusTransformationChain[Component, RunType], interval: TimeInterval[RunType]
+    chain: NeXusTransformationChain[Component, RunType],
+    interval: TimeInterval[RunType],
+    time_filter: TransformationTimeFilter[
+        Component, RunType
+    ] = reject_time_dependent_transform,
 ) -> NeXusTransformation[Component, RunType]:
     """
-    Convert transformation chain into a single transformation matrix.
+    Convert a transformation chain into a single transformation matrix.
 
     If one or more transformations in the chain are time-dependent, the time interval
     is used to select a specific time point. If the interval is not a single time point,
-    an error is raised. This may be extended in the future to a more sophisticated
-    mechanism, e.g., averaging over the interval to remove noise.
+    ``time_filter`` is applied to the transformation. By default, this will raise an
+    exception. Provide a different filter to customize how time-dependence is handled.
 
     Parameters
     ----------
@@ -314,6 +330,9 @@ def to_transformation(
         Transformation chain.
     interval:
         Time interval to select from the transformation chain.
+    time_filter:
+        Callable to apply to time-dependent transformations.
+        Defaults to raising a :class:`ValueError`.
     """
 
     chain = deepcopy(chain)
@@ -336,9 +355,9 @@ def to_transformation(
             idx = label_based_index_to_positional_index(
                 sizes=t.sizes, coord=time, index=interval.value
             )
-            t.value = _time_filter(t.value[idx])
+            t.value = _apply_time_filter(t.value[idx], time_filter)
         else:
-            t.value = _time_filter(t.value['time', interval.value])
+            t.value = _apply_time_filter(t.value['time', interval.value], time_filter)
 
     return NeXusTransformation[Component, RunType].from_chain(chain)
 
@@ -347,7 +366,20 @@ def compute_position(
     transformation: NeXusTransformation[Component, RunType],
 ) -> Position[Component, RunType]:
     """Compute the position of a component from a transformation matrix."""
+    if isinstance(transformation.value, sc.DataArray):
+        raise ValueError(
+            "Attempted to compute a static position from a time-dependent "
+            "transformation. Either provide a time interval parameter or "
+            "time filter."
+        )
     return Position[Component, RunType](transformation.value * origin)
+
+
+def compute_dynamic_position(
+    transformation: NeXusTransformation[Component, RunType],
+) -> DynamicPosition[Component, RunType]:
+    """Compute the position of a component from a transformation matrix."""
+    return DynamicPosition[Component, RunType](transformation.value * origin)
 
 
 def get_calibrated_detector(
@@ -369,6 +401,10 @@ def get_calibrated_detector(
     The data array is reshaped to the logical detector shape, by folding the data
     array along the detector_number dimension.
 
+    The output contains pixel positions computed from ``transform`` and ``offset``.
+    If ``transform`` is time-dependent, the output contains a 'time' dimension
+    and coordinate corresponding to the time coordinate of ``transform``.
+
     Parameters
     ----------
     detector:
@@ -385,25 +421,16 @@ def get_calibrated_detector(
         sizes := (bank_sizes or {}).get(detector.get('nexus_component_name'))
     ) is not None:
         da = da.fold(dim="detector_number", sizes=sizes)
-    # Note: We apply offset as early as possible, i.e., right in this function
-    # the detector array from the raw loader NeXus group, to prevent a source of bugs.
-    # If the NXdetector in the file is not 1-D, we want to match the order of dims.
-    # zip_pixel_offsets otherwise yields a vector with dimensions in the order given
-    # by the x/y/z offsets.
-    offsets = snx.zip_pixel_offsets(da.coords)
-    # Get the dims in the order of the detector data array, but filter out dims that
-    # don't exist in the offsets (e.g. the detector data may have a 'time' dimension).
-    dims = [dim for dim in da.dims if dim in offsets.dims]
-    offsets = offsets.transpose(dims).copy()
-    # We use the unit of the offsets as this is likely what the user expects.
-    if transform.value.unit is not None and transform.value.unit != '':
-        transform_value = transform.value.to(unit=offsets.unit)
-    else:
-        transform_value = transform.value
-    position = transform_value * offsets
-    return EmptyDetector[RunType](
-        da.assign_coords(position=position + offset.to(unit=position.unit))
-    )
+
+    position = nexus.compute_detector_position(da, transform=transform, offset=offset)
+
+    if isinstance(position, sc.DataArray):  # time-dependent transform
+        raise ValueError(
+            "Time-dependent positions are not supported by default. Either select a "
+            "time interval or override `get_calibrated_detector`."
+        )
+
+    return EmptyDetector[RunType](da.assign_coords(position=position))
 
 
 def assemble_detector_data(
@@ -422,13 +449,29 @@ def assemble_detector_data(
     neutron_data:
         Neutron data array (events or histogram).
     """
-    if neutron_data.bins is not None:
+    detector_coords = dict(detector.coords)
+    if neutron_data.is_binned:
         neutron_data = nexus.group_event_data(
             event_data=neutron_data, detector_number=detector.coords['detector_number']
         )
+        if 'time' in detector.dims:
+            # Give the neutron data a 'time' dimension matching the times in the
+            # detector data. Preserve the `event_time_zero` event coord.
+            # This is needed to add time-dependent detector coords and masks below.
+            neutron_data = neutron_data.bin(
+                event_time_zero=detector_coords['time'].rename(time='event_time_zero')
+            ).rename_dims(event_time_zero='time')
+            neutron_data.coords['time'] = neutron_data.coords.pop('event_time_zero')
+    else:
+        position = detector_coords.get('position')
+        if position is not None and 'time' in position.dims:
+            raise NotImplementedError(
+                "Time-dependent positions are not yet supported for histogram data."
+            )
+
     return RawDetector[RunType](
         _add_variances(neutron_data)
-        .assign_coords(detector.coords)
+        .assign_coords(detector_coords)
         .assign_masks(detector.masks)
     )
 
@@ -659,7 +702,6 @@ definitions = snx.base_definitions()
 definitions["NXdetector"] = _StrippedDetector
 definitions["NXmonitor"] = _StrippedMonitor
 
-
 _common_providers = (
     gravity_vector_neg_y,
     file_path_to_file_spec,
@@ -670,11 +712,11 @@ _common_providers = (
     get_transformation_chain,
     to_transformation,
     compute_position,
+    compute_dynamic_position,
     load_nexus_data,
     load_nexus_component,
     load_all_nexus_components,
     data_by_name,
-    nx_class_for_crystal,
     nx_class_for_detector,
     nx_class_for_monitor,
     nx_class_for_source,
@@ -712,11 +754,14 @@ def LoadMonitorWorkflow(
     """Generic workflow for loading monitor data from a NeXus file."""
     wf = sciline.Pipeline(
         (*_common_providers, *_monitor_providers),
+        params={
+            PreopenNeXusFile: PreopenNeXusFile(False),
+            TransformationTimeFilter: reject_time_dependent_transform,
+        },
         constraints=_gather_constraints(
             run_types=run_types, monitor_types=monitor_types
         ),
     )
-    wf[PreopenNeXusFile] = PreopenNeXusFile(False)
     return wf
 
 
@@ -726,10 +771,13 @@ def LoadDetectorWorkflow(
     """Generic workflow for loading detector data from a NeXus file."""
     wf = sciline.Pipeline(
         (*_common_providers, *_detector_providers),
+        params={
+            DetectorBankSizes: DetectorBankSizes({}),
+            PreopenNeXusFile: PreopenNeXusFile(False),
+            TransformationTimeFilter: reject_time_dependent_transform,
+        },
         constraints=_gather_constraints(run_types=run_types, monitor_types=[]),
     )
-    wf[DetectorBankSizes] = DetectorBankSizes({})
-    wf[PreopenNeXusFile] = PreopenNeXusFile(False)
     return wf
 
 
@@ -775,12 +823,15 @@ def GenericNeXusWorkflow(
             *_chopper_providers,
             *_metadata_providers,
         ),
+        params={
+            DetectorBankSizes: DetectorBankSizes({}),
+            PreopenNeXusFile: PreopenNeXusFile(False),
+            TransformationTimeFilter: reject_time_dependent_transform,
+        },
         constraints=_gather_constraints(
             run_types=run_types, monitor_types=monitor_types
         ),
     )
-    wf[DetectorBankSizes] = DetectorBankSizes({})
-    wf[PreopenNeXusFile] = PreopenNeXusFile(False)
 
     return wf
 

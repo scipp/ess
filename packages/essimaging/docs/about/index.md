@@ -18,9 +18,9 @@ To cite a specific version of ESSimaging, select the desired version on Zenodo t
 
 ## Older versions of the documentation
 
-Older versions of the documentation pages can be found under the assets of each [release](https://github.com/scipp/essimaging/releases).
+Older versions of the documentation pages can be found under the assets of each [release](https://github.com/scipp/ess/releases?q=essimaging).
 Simply download the archive, unzip and view locally in a web browser.
 
 ## Source code and development
 
-ESSimaging is hosted and developed [on GitHub](https://github.com/scipp/essimaging).
+ESSimaging is hosted and developed [on GitHub](https://github.com/scipp/ess/tree/main/packages/essimaging).
