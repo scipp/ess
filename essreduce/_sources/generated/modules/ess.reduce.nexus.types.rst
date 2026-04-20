@@ -50,13 +50,12 @@ ess.reduce.nexus.types
       :template: class-template.rst
    
       AllNeXusComponents
-      Beamline
       DetectorPositionOffset
       DiskChoppers
+      DynamicPosition
       EmptyDetector
       EmptyMonitor
       Filename
-      Measurement
       MonitorPositionOffset
       NeXusAllComponentLocationSpec
       NeXusAllLocationSpec
@@ -74,8 +73,8 @@ ess.reduce.nexus.types
       RawChoppers
       RawDetector
       RawMonitor
-      Source
       TimeInterval
+      TransformationTimeFilter
       TransmissionRun
    
    

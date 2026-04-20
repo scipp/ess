@@ -29,6 +29,7 @@ ess.reduce.nexus.workflow
       assemble_detector_data
       assemble_monitor_data
       component_spec_by_name
+      compute_dynamic_position
       compute_position
       data_by_name
       file_path_to_file_spec
@@ -43,6 +44,7 @@ ess.reduce.nexus.workflow
       load_nexus_component
       load_nexus_data
       load_nexus_sample
+      load_source_metadata_from_nexus
       no_detector_position_offset
       no_monitor_position_offset
       nx_class_for_crystal
@@ -52,6 +54,7 @@ ess.reduce.nexus.workflow
       nx_class_for_sample
       nx_class_for_source
       parse_disk_choppers
+      reject_time_dependent_transform
       to_transformation
       unique_component_spec
    

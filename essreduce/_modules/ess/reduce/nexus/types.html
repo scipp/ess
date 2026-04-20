@@ -40,9 +40,9 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../../_static/documentation_options.js?v=20e248fc"></script>
-    <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
-    <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../../_static/documentation_options.js?v=aea46d76"></script>
+    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../../../_static/copybutton.js?v=f281be69"></script>
     <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -55,7 +55,7 @@
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.dev1611+gbcc8a6fc6" />
+  <meta name="docsearch:version" content="26.4.1" />
   </head>
   
   
@@ -180,14 +180,14 @@
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essimaging">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/ess/imaging">
     ESSimaging
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essnmx">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/ess/nmx">
     ESSnmx
   </a>
 </li>
@@ -259,7 +259,7 @@
           
           
           
-          <a href="https://github.com/scipp/essreduce" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+          <a href="https://github.com/scipp/ess/tree/main/packages/essreduce" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
             <span class="sr-only">GitHub</span></a>
         </li>
         <li class="nav-item">
@@ -366,14 +366,14 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-external" href="https://scipp.github.io/essimaging">
+  <a class="nav-link nav-external" href="https://scipp.github.io/ess/imaging">
     ESSimaging
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-external" href="https://scipp.github.io/essnmx">
+  <a class="nav-link nav-external" href="https://scipp.github.io/ess/nmx">
     ESSnmx
   </a>
 </li>
@@ -435,7 +435,7 @@
           
           
           
-          <a href="https://github.com/scipp/essreduce" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+          <a href="https://github.com/scipp/ess/tree/main/packages/essreduce" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
             <span class="sr-only">GitHub</span></a>
         </li>
         <li class="nav-item">
@@ -667,25 +667,16 @@
 <span class="sd">&quot;&quot;&quot;Components that can be identified by their type as there will only be one.&quot;&quot;&quot;</span>
 
 
-<div class="viewcode-block" id="Beamline">
-<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.types.Beamline.html#ess.reduce.nexus.types.Beamline">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Beamline</span><span class="p">(</span><span class="n">scn_meta</span><span class="o">.</span><span class="n">Beamline</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">RunType</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Beamline metadata.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Beamline metadata.&quot;&quot;&quot;</span>
 
 
-
-<div class="viewcode-block" id="Measurement">
-<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.types.Measurement.html#ess.reduce.nexus.types.Measurement">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Measurement</span><span class="p">(</span><span class="n">scn_meta</span><span class="o">.</span><span class="n">Measurement</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">RunType</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;measurement metadata.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;measurement metadata.&quot;&quot;&quot;</span>
 
 
-
-<div class="viewcode-block" id="Source">
-<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.types.Source.html#ess.reduce.nexus.types.Source">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Source</span><span class="p">(</span><span class="n">scn_meta</span><span class="o">.</span><span class="n">Source</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">RunType</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Neutron source metadata.&quot;&quot;&quot;</span></div>
-
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Neutron source metadata.&quot;&quot;&quot;</span>
 
 
 <div class="viewcode-block" id="NeXusName">
@@ -734,7 +725,67 @@
 <div class="viewcode-block" id="Position">
 <a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.types.Position.html#ess.reduce.nexus.types.Position">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Position</span><span class="p">(</span><span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Position of a component such as source, sample, monitor, or detector.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Position of a component that does not move, such as source or sample.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="DynamicPosition">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.types.DynamicPosition.html#ess.reduce.nexus.types.DynamicPosition">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DynamicPosition</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Position of a potentially moving component such as an analyzer or detector.</span>
+
+<span class="sd">    The position can depend on time. In this case, a time coordinate is also stored.</span>
+<span class="sd">    Use ``position`` to get the position if it is scalar, or ``positions``</span>
+<span class="sd">    to get the position as a (potentially time-dependent) DataArray.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_position</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>
+    <span class="n">_time</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="DynamicPosition.__init__">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.types.DynamicPosition.html#ess.reduce.nexus.types.DynamicPosition.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">pos</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_position</span> <span class="o">=</span> <span class="n">pos</span><span class="o">.</span><span class="n">data</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span> <span class="k">else</span> <span class="n">pos</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_time</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">sc</span><span class="o">.</span><span class="n">DimensionError</span><span class="p">(</span>
+                    <span class="s2">&quot;Position is not a scalar, so it must be a DataArray&quot;</span>
+                <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_position</span> <span class="o">=</span> <span class="n">pos</span><span class="o">.</span><span class="n">data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_time</span> <span class="o">=</span> <span class="n">pos</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_dynamic</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">position</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_dynamic</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">sc</span><span class="o">.</span><span class="n">DimensionError</span><span class="p">(</span>
+                <span class="s2">&quot;Position is time-dependent, use `positions` instead.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_position</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">positions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+        <span class="n">da</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_position</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time</span>
+        <span class="k">return</span> <span class="n">da</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_dynamic</span><span class="p">:</span>
+            <span class="n">time_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;, time=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_time</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">time_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Position(position=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_position</span><span class="si">}{</span><span class="n">time_str</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Position(position=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_position</span><span class="si">}</span><span class="s2">, time=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_time</span><span class="si">}</span><span class="s2">)&quot;</span></div>
 
 
 
@@ -795,6 +846,18 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Range of neutron pulses to load from NXevent_data or NXdata groups.&quot;&quot;&quot;</span>
 
     <span class="n">value</span><span class="p">:</span> <span class="nb">slice</span></div>
+
+
+
+<div class="viewcode-block" id="TransformationTimeFilter">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.types.TransformationTimeFilter.html#ess.reduce.nexus.types.TransformationTimeFilter">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TransformationTimeFilter</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Filter for time-dependent transformations.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">x</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transform</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -876,7 +939,14 @@
 <a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.types.NeXusTransformation.html#ess.reduce.nexus.types.NeXusTransformation">[docs]</a>
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">NeXusTransformation</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">]):</span>
-    <span class="n">value</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A NeXus transformation computed from a transformation chain.</span>
+
+<span class="sd">    If the transformation is time-dependent, it is stored as a data array</span>
+<span class="sd">    with a &#39;time&#39; coordinate.</span>
+<span class="sd">    Otherwise, the transformation is stored as a variable.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">value</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span>
 
 <div class="viewcode-block" id="NeXusTransformation.from_chain">
 <a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.types.NeXusTransformation.html#ess.reduce.nexus.types.NeXusTransformation.from_chain">[docs]</a>
@@ -884,19 +954,8 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">from_chain</span><span class="p">(</span>
         <span class="n">chain</span><span class="p">:</span> <span class="n">NeXusTransformationChain</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NeXusTransformation[Component, RunType]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Convert a transformation chain to a single transformation.</span>
-
-<span class="sd">        As transformation chains may be time-dependent, this method will need to select</span>
-<span class="sd">        a specific time point to convert to a single transformation. This may include</span>
-<span class="sd">        averaging as well as threshold checks. This is not implemented yet and we</span>
-<span class="sd">        therefore currently raise an error if the transformation chain does not compute</span>
-<span class="sd">        to a scalar.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">chain</span><span class="o">.</span><span class="n">transformations</span><span class="o">.</span><span class="n">sizes</span> <span class="o">!=</span> <span class="p">{}:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expected scalar transformation, got </span><span class="si">{</span><span class="n">chain</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">transform</span> <span class="o">=</span> <span class="n">chain</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">NeXusTransformation</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">transform</span><span class="p">)</span></div>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert a transformation chain to a single transformation.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">NeXusTransformation</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">chain</span><span class="o">.</span><span class="n">compute</span><span class="p">())</span></div>
 </div>
 
 
@@ -969,7 +1028,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
     <br/>
   </p>
 </div>
@@ -981,7 +1040,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreduce version: 0.1.dev1611+gbcc8a6fc6 (<a href="https://github.com/scipp/essreduce/releases">older versions</a>).</div>
+Current ESSreduce version: 26.4.1 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

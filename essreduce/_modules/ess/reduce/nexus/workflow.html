@@ -40,9 +40,9 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../../_static/documentation_options.js?v=20e248fc"></script>
-    <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
-    <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../../_static/documentation_options.js?v=aea46d76"></script>
+    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../../../_static/copybutton.js?v=f281be69"></script>
     <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -55,7 +55,7 @@
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.dev1611+gbcc8a6fc6" />
+  <meta name="docsearch:version" content="26.4.1" />
   </head>
   
   
@@ -180,14 +180,14 @@
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essimaging">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/ess/imaging">
     ESSimaging
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essnmx">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/ess/nmx">
     ESSnmx
   </a>
 </li>
@@ -259,7 +259,7 @@
           
           
           
-          <a href="https://github.com/scipp/essreduce" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+          <a href="https://github.com/scipp/ess/tree/main/packages/essreduce" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
             <span class="sr-only">GitHub</span></a>
         </li>
         <li class="nav-item">
@@ -366,14 +366,14 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-external" href="https://scipp.github.io/essimaging">
+  <a class="nav-link nav-external" href="https://scipp.github.io/ess/imaging">
     ESSimaging
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-external" href="https://scipp.github.io/essnmx">
+  <a class="nav-link nav-external" href="https://scipp.github.io/ess/nmx">
     ESSnmx
   </a>
 </li>
@@ -435,7 +435,7 @@
           
           
           
-          <a href="https://github.com/scipp/essreduce" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+          <a href="https://github.com/scipp/ess/tree/main/packages/essreduce" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
             <span class="sr-only">GitHub</span></a>
         </li>
         <li class="nav-item">
@@ -522,9 +522,10 @@
 
 <span class="sd">&quot;&quot;&quot;Workflow and workflow components for interacting with NeXus files.&quot;&quot;&quot;</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterable</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">TypeVar</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Never</span><span class="p">,</span> <span class="n">TypeVar</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">sciline</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sciline.typing</span>
@@ -533,6 +534,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipp.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">g</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipp.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">label_based_index_to_positional_index</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scippneutron.chopper</span><span class="w"> </span><span class="kn">import</span> <span class="n">extract_chopper_from_nexus</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scippneutron.metadata</span><span class="w"> </span><span class="kn">import</span> <span class="n">RadiationProbe</span><span class="p">,</span> <span class="n">SourceType</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_nexus_loader</span> <span class="k">as</span> <span class="n">nexus</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
@@ -542,6 +544,7 @@
     <span class="n">Component</span><span class="p">,</span>
     <span class="n">DetectorBankSizes</span><span class="p">,</span>
     <span class="n">DetectorPositionOffset</span><span class="p">,</span>
+    <span class="n">DynamicPosition</span><span class="p">,</span>
     <span class="n">EmptyDetector</span><span class="p">,</span>
     <span class="n">EmptyMonitor</span><span class="p">,</span>
     <span class="n">Filename</span><span class="p">,</span>
@@ -565,7 +568,9 @@
     <span class="n">RawDetector</span><span class="p">,</span>
     <span class="n">RawMonitor</span><span class="p">,</span>
     <span class="n">RunType</span><span class="p">,</span>
+    <span class="n">Source</span><span class="p">,</span>
     <span class="n">TimeInterval</span><span class="p">,</span>
+    <span class="n">TransformationTimeFilter</span><span class="p">,</span>
     <span class="n">UniqueComponent</span><span class="p">,</span>
 <span class="p">)</span>
 
@@ -850,41 +855,58 @@
 <div class="viewcode-block" id="get_transformation_chain">
 <a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.workflow.get_transformation_chain.html#ess.reduce.nexus.workflow.get_transformation_chain">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_transformation_chain</span><span class="p">(</span>
-    <span class="n">detector</span><span class="p">:</span> <span class="n">NeXusComponent</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="n">component</span><span class="p">:</span> <span class="n">NeXusComponent</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NeXusTransformationChain</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Extract the transformation chain from a NeXus detector group.</span>
+<span class="sd">    Extract the transformation chain from a NeXus component group.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    detector:</span>
-<span class="sd">        NeXus detector group.</span>
+<span class="sd">    component:</span>
+<span class="sd">        NeXus component group.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">chain</span> <span class="o">=</span> <span class="n">detector</span><span class="p">[</span><span class="s1">&#39;depends_on&#39;</span><span class="p">]</span>
+    <span class="n">chain</span> <span class="o">=</span> <span class="n">component</span><span class="p">[</span><span class="s1">&#39;depends_on&#39;</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">NeXusTransformationChain</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">](</span><span class="n">chain</span><span class="p">)</span></div>
 
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_time_filter</span><span class="p">(</span><span class="n">transform</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">transform</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">transform</span><span class="o">.</span><span class="n">sizes</span> <span class="o">==</span> <span class="p">{</span><span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}:</span>
-        <span class="k">return</span> <span class="n">transform</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+<div class="viewcode-block" id="reject_time_dependent_transform">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.workflow.reject_time_dependent_transform.html#ess.reduce.nexus.workflow.reject_time_dependent_transform">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">reject_time_dependent_transform</span><span class="p">(</span>
+    <span class="n">transform</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Never</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raise a value error to forbid time-dependent transformations by default.&quot;&quot;&quot;</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
         <span class="sa">f</span><span class="s2">&quot;Transform is time-dependent: </span><span class="si">{</span><span class="n">transform</span><span class="si">}</span><span class="s2">, but no filter is provided.&quot;</span>
-    <span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_apply_time_filter</span><span class="p">(</span>
+    <span class="n">transform</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+    <span class="n">user_filter</span><span class="p">:</span> <span class="n">TransformationTimeFilter</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">transform</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">transform</span><span class="o">.</span><span class="n">sizes</span> <span class="o">==</span> <span class="p">{</span><span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}:</span>
+        <span class="k">return</span> <span class="n">transform</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">user_filter</span><span class="p">(</span><span class="n">transform</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="to_transformation">
 <a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.workflow.to_transformation.html#ess.reduce.nexus.workflow.to_transformation">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">to_transformation</span><span class="p">(</span>
-    <span class="n">chain</span><span class="p">:</span> <span class="n">NeXusTransformationChain</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span> <span class="n">interval</span><span class="p">:</span> <span class="n">TimeInterval</span><span class="p">[</span><span class="n">RunType</span><span class="p">]</span>
+    <span class="n">chain</span><span class="p">:</span> <span class="n">NeXusTransformationChain</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="n">interval</span><span class="p">:</span> <span class="n">TimeInterval</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">time_filter</span><span class="p">:</span> <span class="n">TransformationTimeFilter</span><span class="p">[</span>
+        <span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="n">reject_time_dependent_transform</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NeXusTransformation</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Convert transformation chain into a single transformation matrix.</span>
+<span class="sd">    Convert a transformation chain into a single transformation matrix.</span>
 
 <span class="sd">    If one or more transformations in the chain are time-dependent, the time interval</span>
 <span class="sd">    is used to select a specific time point. If the interval is not a single time point,</span>
-<span class="sd">    an error is raised. This may be extended in the future to a more sophisticated</span>
-<span class="sd">    mechanism, e.g., averaging over the interval to remove noise.</span>
+<span class="sd">    ``time_filter`` is applied to the transformation. By default, this will raise an</span>
+<span class="sd">    exception. Provide a different filter to customize how time-dependence is handled.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -892,6 +914,9 @@
 <span class="sd">        Transformation chain.</span>
 <span class="sd">    interval:</span>
 <span class="sd">        Time interval to select from the transformation chain.</span>
+<span class="sd">    time_filter:</span>
+<span class="sd">        Callable to apply to time-dependent transformations.</span>
+<span class="sd">        Defaults to raising a :class:`ValueError`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">chain</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">chain</span><span class="p">)</span>
@@ -914,9 +939,9 @@
             <span class="n">idx</span> <span class="o">=</span> <span class="n">label_based_index_to_positional_index</span><span class="p">(</span>
                 <span class="n">sizes</span><span class="o">=</span><span class="n">t</span><span class="o">.</span><span class="n">sizes</span><span class="p">,</span> <span class="n">coord</span><span class="o">=</span><span class="n">time</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">interval</span><span class="o">.</span><span class="n">value</span>
             <span class="p">)</span>
-            <span class="n">t</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">_time_filter</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">_apply_time_filter</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">time_filter</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">t</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">_time_filter</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="n">interval</span><span class="o">.</span><span class="n">value</span><span class="p">])</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">_apply_time_filter</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="n">interval</span><span class="o">.</span><span class="n">value</span><span class="p">],</span> <span class="n">time_filter</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">NeXusTransformation</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">]</span><span class="o">.</span><span class="n">from_chain</span><span class="p">(</span><span class="n">chain</span><span class="p">)</span></div>
 
@@ -928,7 +953,23 @@
     <span class="n">transformation</span><span class="p">:</span> <span class="n">NeXusTransformation</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Position</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the position of a component from a transformation matrix.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">transformation</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Attempted to compute a static position from a time-dependent &quot;</span>
+            <span class="s2">&quot;transformation. Either provide a time interval parameter or &quot;</span>
+            <span class="s2">&quot;time filter.&quot;</span>
+        <span class="p">)</span>
     <span class="k">return</span> <span class="n">Position</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">](</span><span class="n">transformation</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">origin</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="compute_dynamic_position">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.workflow.compute_dynamic_position.html#ess.reduce.nexus.workflow.compute_dynamic_position">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_dynamic_position</span><span class="p">(</span>
+    <span class="n">transformation</span><span class="p">:</span> <span class="n">NeXusTransformation</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DynamicPosition</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the position of a component from a transformation matrix.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">DynamicPosition</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">](</span><span class="n">transformation</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">origin</span><span class="p">)</span></div>
 
 
 
@@ -953,6 +994,10 @@
 <span class="sd">    The data array is reshaped to the logical detector shape, by folding the data</span>
 <span class="sd">    array along the detector_number dimension.</span>
 
+<span class="sd">    The output contains pixel positions computed from ``transform`` and ``offset``.</span>
+<span class="sd">    If ``transform`` is time-dependent, the output contains a &#39;time&#39; dimension</span>
+<span class="sd">    and coordinate corresponding to the time coordinate of ``transform``.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    detector:</span>
@@ -969,25 +1014,16 @@
         <span class="n">sizes</span> <span class="o">:=</span> <span class="p">(</span><span class="n">bank_sizes</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">detector</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;nexus_component_name&#39;</span><span class="p">))</span>
     <span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">da</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">fold</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s2">&quot;detector_number&quot;</span><span class="p">,</span> <span class="n">sizes</span><span class="o">=</span><span class="n">sizes</span><span class="p">)</span>
-    <span class="c1"># Note: We apply offset as early as possible, i.e., right in this function</span>
-    <span class="c1"># the detector array from the raw loader NeXus group, to prevent a source of bugs.</span>
-    <span class="c1"># If the NXdetector in the file is not 1-D, we want to match the order of dims.</span>
-    <span class="c1"># zip_pixel_offsets otherwise yields a vector with dimensions in the order given</span>
-    <span class="c1"># by the x/y/z offsets.</span>
-    <span class="n">offsets</span> <span class="o">=</span> <span class="n">snx</span><span class="o">.</span><span class="n">zip_pixel_offsets</span><span class="p">(</span><span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
-    <span class="c1"># Get the dims in the order of the detector data array, but filter out dims that</span>
-    <span class="c1"># don&#39;t exist in the offsets (e.g. the detector data may have a &#39;time&#39; dimension).</span>
-    <span class="n">dims</span> <span class="o">=</span> <span class="p">[</span><span class="n">dim</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">da</span><span class="o">.</span><span class="n">dims</span> <span class="k">if</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">offsets</span><span class="o">.</span><span class="n">dims</span><span class="p">]</span>
-    <span class="n">offsets</span> <span class="o">=</span> <span class="n">offsets</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">dims</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="c1"># We use the unit of the offsets as this is likely what the user expects.</span>
-    <span class="k">if</span> <span class="n">transform</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">unit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">transform</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">unit</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
-        <span class="n">transform_value</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">offsets</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">transform_value</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">value</span>
-    <span class="n">position</span> <span class="o">=</span> <span class="n">transform_value</span> <span class="o">*</span> <span class="n">offsets</span>
-    <span class="k">return</span> <span class="n">EmptyDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">](</span>
-        <span class="n">da</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="n">position</span> <span class="o">+</span> <span class="n">offset</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">position</span><span class="o">.</span><span class="n">unit</span><span class="p">))</span>
-    <span class="p">)</span></div>
+
+    <span class="n">position</span> <span class="o">=</span> <span class="n">nexus</span><span class="o">.</span><span class="n">compute_detector_position</span><span class="p">(</span><span class="n">da</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>  <span class="c1"># time-dependent transform</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Time-dependent positions are not supported by default. Either select a &quot;</span>
+            <span class="s2">&quot;time interval or override `get_calibrated_detector`.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">EmptyDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">](</span><span class="n">da</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">))</span></div>
 
 
 
@@ -1009,13 +1045,29 @@
 <span class="sd">    neutron_data:</span>
 <span class="sd">        Neutron data array (events or histogram).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">neutron_data</span><span class="o">.</span><span class="n">bins</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">detector_coords</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">detector</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">neutron_data</span><span class="o">.</span><span class="n">is_binned</span><span class="p">:</span>
         <span class="n">neutron_data</span> <span class="o">=</span> <span class="n">nexus</span><span class="o">.</span><span class="n">group_event_data</span><span class="p">(</span>
             <span class="n">event_data</span><span class="o">=</span><span class="n">neutron_data</span><span class="p">,</span> <span class="n">detector_number</span><span class="o">=</span><span class="n">detector</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;detector_number&#39;</span><span class="p">]</span>
         <span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;time&#39;</span> <span class="ow">in</span> <span class="n">detector</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+            <span class="c1"># Give the neutron data a &#39;time&#39; dimension matching the times in the</span>
+            <span class="c1"># detector data. Preserve the `event_time_zero` event coord.</span>
+            <span class="c1"># This is needed to add time-dependent detector coords and masks below.</span>
+            <span class="n">neutron_data</span> <span class="o">=</span> <span class="n">neutron_data</span><span class="o">.</span><span class="n">bin</span><span class="p">(</span>
+                <span class="n">event_time_zero</span><span class="o">=</span><span class="n">detector_coords</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="s1">&#39;event_time_zero&#39;</span><span class="p">)</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">rename_dims</span><span class="p">(</span><span class="n">event_time_zero</span><span class="o">=</span><span class="s1">&#39;time&#39;</span><span class="p">)</span>
+            <span class="n">neutron_data</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">neutron_data</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;event_time_zero&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">position</span> <span class="o">=</span> <span class="n">detector_coords</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;position&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">position</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s1">&#39;time&#39;</span> <span class="ow">in</span> <span class="n">position</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;Time-dependent positions are not yet supported for histogram data.&quot;</span>
+            <span class="p">)</span>
+
     <span class="k">return</span> <span class="n">RawDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">](</span>
         <span class="n">_add_variances</span><span class="p">(</span><span class="n">neutron_data</span><span class="p">)</span>
-        <span class="o">.</span><span class="n">assign_coords</span><span class="p">(</span><span class="n">detector</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">assign_coords</span><span class="p">(</span><span class="n">detector_coords</span><span class="p">)</span>
         <span class="o">.</span><span class="n">assign_masks</span><span class="p">(</span><span class="n">detector</span><span class="o">.</span><span class="n">masks</span><span class="p">)</span>
     <span class="p">)</span></div>
 
@@ -1235,10 +1287,35 @@
 
 
 
+<div class="viewcode-block" id="load_source_metadata_from_nexus">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.workflow.load_source_metadata_from_nexus.html#ess.reduce.nexus.workflow.load_source_metadata_from_nexus">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_source_metadata_from_nexus</span><span class="p">(</span>
+    <span class="n">source_component</span><span class="p">:</span> <span class="n">NeXusComponent</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsource</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span> <span class="n">beamline</span><span class="p">:</span> <span class="n">Beamline</span><span class="p">[</span><span class="n">RunType</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Source</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load source metadata from a NeXus file.</span>
+
+<span class="sd">    Supplements the result with data from ``beamline`` if necessary.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">source_component</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">beamline</span><span class="o">.</span><span class="n">facility</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;NeXus field &#39;name&#39; of NXsource is not a string&quot;</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="n">source_type</span> <span class="o">=</span> <span class="n">SourceType</span><span class="p">(</span><span class="n">source_component</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">])</span>
+    <span class="n">probe</span> <span class="o">=</span> <span class="n">RadiationProbe</span><span class="p">(</span><span class="n">source_component</span><span class="p">[</span><span class="s1">&#39;probe&#39;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">Source</span><span class="p">[</span><span class="n">RunType</span><span class="p">](</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+        <span class="n">source_type</span><span class="o">=</span><span class="n">source_type</span><span class="p">,</span>
+        <span class="n">probe</span><span class="o">=</span><span class="n">probe</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
 <span class="n">definitions</span> <span class="o">=</span> <span class="n">snx</span><span class="o">.</span><span class="n">base_definitions</span><span class="p">()</span>
 <span class="n">definitions</span><span class="p">[</span><span class="s2">&quot;NXdetector&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_StrippedDetector</span>
 <span class="n">definitions</span><span class="p">[</span><span class="s2">&quot;NXmonitor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_StrippedMonitor</span>
-
 
 <span class="n">_common_providers</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">gravity_vector_neg_y</span><span class="p">,</span>
@@ -1250,6 +1327,7 @@
     <span class="n">get_transformation_chain</span><span class="p">,</span>
     <span class="n">to_transformation</span><span class="p">,</span>
     <span class="n">compute_position</span><span class="p">,</span>
+    <span class="n">compute_dynamic_position</span><span class="p">,</span>
     <span class="n">load_nexus_data</span><span class="p">,</span>
     <span class="n">load_nexus_component</span><span class="p">,</span>
     <span class="n">load_all_nexus_components</span><span class="p">,</span>
@@ -1279,6 +1357,7 @@
 <span class="n">_metadata_providers</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">load_beamline_metadata_from_nexus</span><span class="p">,</span>
     <span class="n">load_measurement_metadata_from_nexus</span><span class="p">,</span>
+    <span class="n">load_source_metadata_from_nexus</span><span class="p">,</span>
 <span class="p">)</span>
 
 
@@ -1292,11 +1371,14 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generic workflow for loading monitor data from a NeXus file.&quot;&quot;&quot;</span>
     <span class="n">wf</span> <span class="o">=</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">(</span>
         <span class="p">(</span><span class="o">*</span><span class="n">_common_providers</span><span class="p">,</span> <span class="o">*</span><span class="n">_monitor_providers</span><span class="p">),</span>
+        <span class="n">params</span><span class="o">=</span><span class="p">{</span>
+            <span class="n">PreopenNeXusFile</span><span class="p">:</span> <span class="n">PreopenNeXusFile</span><span class="p">(</span><span class="kc">False</span><span class="p">),</span>
+            <span class="n">TransformationTimeFilter</span><span class="p">:</span> <span class="n">reject_time_dependent_transform</span><span class="p">,</span>
+        <span class="p">},</span>
         <span class="n">constraints</span><span class="o">=</span><span class="n">_gather_constraints</span><span class="p">(</span>
             <span class="n">run_types</span><span class="o">=</span><span class="n">run_types</span><span class="p">,</span> <span class="n">monitor_types</span><span class="o">=</span><span class="n">monitor_types</span>
         <span class="p">),</span>
     <span class="p">)</span>
-    <span class="n">wf</span><span class="p">[</span><span class="n">PreopenNeXusFile</span><span class="p">]</span> <span class="o">=</span> <span class="n">PreopenNeXusFile</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">wf</span></div>
 
 
@@ -1309,10 +1391,13 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generic workflow for loading detector data from a NeXus file.&quot;&quot;&quot;</span>
     <span class="n">wf</span> <span class="o">=</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">(</span>
         <span class="p">(</span><span class="o">*</span><span class="n">_common_providers</span><span class="p">,</span> <span class="o">*</span><span class="n">_detector_providers</span><span class="p">),</span>
+        <span class="n">params</span><span class="o">=</span><span class="p">{</span>
+            <span class="n">DetectorBankSizes</span><span class="p">:</span> <span class="n">DetectorBankSizes</span><span class="p">({}),</span>
+            <span class="n">PreopenNeXusFile</span><span class="p">:</span> <span class="n">PreopenNeXusFile</span><span class="p">(</span><span class="kc">False</span><span class="p">),</span>
+            <span class="n">TransformationTimeFilter</span><span class="p">:</span> <span class="n">reject_time_dependent_transform</span><span class="p">,</span>
+        <span class="p">},</span>
         <span class="n">constraints</span><span class="o">=</span><span class="n">_gather_constraints</span><span class="p">(</span><span class="n">run_types</span><span class="o">=</span><span class="n">run_types</span><span class="p">,</span> <span class="n">monitor_types</span><span class="o">=</span><span class="p">[]),</span>
     <span class="p">)</span>
-    <span class="n">wf</span><span class="p">[</span><span class="n">DetectorBankSizes</span><span class="p">]</span> <span class="o">=</span> <span class="n">DetectorBankSizes</span><span class="p">({})</span>
-    <span class="n">wf</span><span class="p">[</span><span class="n">PreopenNeXusFile</span><span class="p">]</span> <span class="o">=</span> <span class="n">PreopenNeXusFile</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">wf</span></div>
 
 
@@ -1361,12 +1446,15 @@
             <span class="o">*</span><span class="n">_chopper_providers</span><span class="p">,</span>
             <span class="o">*</span><span class="n">_metadata_providers</span><span class="p">,</span>
         <span class="p">),</span>
+        <span class="n">params</span><span class="o">=</span><span class="p">{</span>
+            <span class="n">DetectorBankSizes</span><span class="p">:</span> <span class="n">DetectorBankSizes</span><span class="p">({}),</span>
+            <span class="n">PreopenNeXusFile</span><span class="p">:</span> <span class="n">PreopenNeXusFile</span><span class="p">(</span><span class="kc">False</span><span class="p">),</span>
+            <span class="n">TransformationTimeFilter</span><span class="p">:</span> <span class="n">reject_time_dependent_transform</span><span class="p">,</span>
+        <span class="p">},</span>
         <span class="n">constraints</span><span class="o">=</span><span class="n">_gather_constraints</span><span class="p">(</span>
             <span class="n">run_types</span><span class="o">=</span><span class="n">run_types</span><span class="p">,</span> <span class="n">monitor_types</span><span class="o">=</span><span class="n">monitor_types</span>
         <span class="p">),</span>
     <span class="p">)</span>
-    <span class="n">wf</span><span class="p">[</span><span class="n">DetectorBankSizes</span><span class="p">]</span> <span class="o">=</span> <span class="n">DetectorBankSizes</span><span class="p">({})</span>
-    <span class="n">wf</span><span class="p">[</span><span class="n">PreopenNeXusFile</span><span class="p">]</span> <span class="o">=</span> <span class="n">PreopenNeXusFile</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">wf</span></div>
 
@@ -1434,7 +1522,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
     <br/>
   </p>
 </div>
@@ -1446,7 +1534,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreduce version: 0.1.dev1611+gbcc8a6fc6 (<a href="https://github.com/scipp/essreduce/releases">older versions</a>).</div>
+Current ESSreduce version: 26.4.1 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">
