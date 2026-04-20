@@ -10998,7 +10998,7 @@ packages:
   timestamp: 1758743805063
 - pypi: ./packages/essdiffraction
   name: essdiffraction
-  version: 0.1.dev2567+g6d663e796.d20260417
+  version: 26.4.2.dev3494+g34223b73.d20260420
   sha256: f7442fcb8892eb5baf1f2ab6b3206185a64df9d910462810d00d61961a1eb16f
   requires_dist:
   - dask>=2022.1.0
@@ -11036,7 +11036,7 @@ packages:
   requires_python: '>=3.11'
 - pypi: ./packages/essimaging
   name: essimaging
-  version: 26.4.1.dev332+g6d663e79.d20260417
+  version: 26.4.1.dev2050+g34223b73.d20260420
   sha256: f0070a5ae1f7957e8ed16a9a8e451dc47af25af14056a52bea18969ccdfa3aff
   requires_dist:
   - dask>=2022.1.0
@@ -11069,7 +11069,7 @@ packages:
   requires_python: '>=3.11'
 - pypi: ./packages/essnmx
   name: essnmx
-  version: 26.4.1.dev332+g6d663e79.d20260417
+  version: 26.4.1.dev2050+g34223b73.d20260420
   sha256: 55671f87213d0cad915b5def554cb8380e6bcc8f2a0af5acbcdc8a8ebcfd9531
   requires_dist:
   - dask>=2022.1.0
@@ -11119,11 +11119,11 @@ packages:
   requires_python: '>=3.11'
 - pypi: ./packages/essreduce
   name: essreduce
-  version: 26.4.1.dev347+g6d663e79.d20260417
-  sha256: 13cb0465a26df32340f26d3c9b42d1765542d30cdf0d09b87298285872d5fdee
+  version: 26.4.1.dev2065+g34223b73.d20260420
+  sha256: 043a6aefd64757fb4d669459aa893cb3a9d7e81aa6591d9d6ce8fcc0f79a545b
   requires_dist:
   - sciline>=25.11.0
-  - scipp>=26.3.0
+  - scipp>=26.3.1
   - scippneutron>=25.11.1
   - scippnexus>=25.6.0
   - graphviz>=0.20 ; extra == 'test'
@@ -11152,7 +11152,7 @@ packages:
   requires_python: '>=3.11'
 - pypi: ./packages/essreflectometry
   name: essreflectometry
-  version: 0.1.dev2567+g6d663e796.d20260417
+  version: 26.4.1.dev3398+g34223b73.d20260420
   sha256: 1bdaf0414f6474e2d20b379284338a01705165a8ebabc9848312675ca2a89b0e
   requires_dist:
   - dask>=2022.1.0
