@@ -64,8 +64,8 @@ pixi run -e lint format     # ruff format
 ### Building docs
 
 ```bash
-pixi run docs essreduce
-pixi run docs essimaging
+pixi run docs-essreduce
+pixi run docs-essimaging
 ```
 
 ### Adding or changing dependencies
