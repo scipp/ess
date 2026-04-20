@@ -65,7 +65,6 @@ docs = [
     "sphinx-copybutton",
     "sphinx-design",
     "tof>=25.12.0",
-    "esssans",
     "sphinxcontrib-mermaid",
     "sympy",
 ]
