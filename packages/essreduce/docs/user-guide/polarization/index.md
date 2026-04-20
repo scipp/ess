@@ -1,6 +1,4 @@
-# User Guide
-
-## Overview
+# Polarization
 
 ```{mermaid}
 graph TD
@@ -21,8 +19,6 @@ graph TD
     style G fill:yellowgreen
     style H fill:yellowgreen
 ```
-
-## Content
 
 ```{toctree}
 ---
