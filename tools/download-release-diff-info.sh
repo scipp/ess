@@ -63,10 +63,14 @@ download_commit_and_pr_info () {
 	for pr_number in ${pr_numbers[@]}; do
 	  echo ${pr_number};
 	  pr_commit_json=${commit_dir}/pr-${pr_number}-commits.json;
-	  echo $(gh api \
-		-H "Accept: application/vnd.github+json" \
-		-H "X-GitHub-Api-Version: 2026-03-10" \
-		/repos/scipp/ess/pulls/${pr_number}/commits) >> ${pr_commit_json};
+	  if [ -f ${pr_commit_json} ]; then
+		echo "${pr_commit_json} already exists. Skipping downloading...";
+	  else
+		echo $(gh api \
+		  -H "Accept: application/vnd.github+json" \
+		  -H "X-GitHub-Api-Version: 2026-03-10" \
+		  /repos/scipp/ess/pulls/${pr_number}/commits) >> ${pr_commit_json};
+	  fi
     done
   done
 }
