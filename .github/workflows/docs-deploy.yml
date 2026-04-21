@@ -11,6 +11,8 @@ on:
           - essreduce
           - essimaging
           - essnmx
+          - essdiffraction
+          - essreflectometry
       publish:
         default: false
         type: boolean
