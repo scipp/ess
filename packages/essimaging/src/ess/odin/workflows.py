@@ -24,6 +24,7 @@ from .masking import providers as masking_providers
 
 
 def default_parameters() -> dict:
+    """Return the default workflow parameters for Odin."""
     return {
         NeXusMonitorName[BeamMonitor1]: "beam_monitor_1",
         NeXusMonitorName[BeamMonitor2]: "beam_monitor_2",
@@ -57,7 +58,8 @@ def OdinWorkflow(**kwargs) -> sciline.Pipeline:
 
 def OdinBraggEdgeWorkflow(**kwargs) -> sciline.Pipeline:
     """
-    Workflow with default parameters for Odin.
+    Workflow with default parameters and masking providers
+    for Odin Bragg-edge reduction.
     """
     workflow = OdinWorkflow(**kwargs)
     for provider in (*masking_providers,):

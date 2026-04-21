@@ -149,6 +149,7 @@ providers = (
 
 
 def default_parameters() -> dict:
+    """Return the default NeXus names and detector name for the ORCA workflow."""
     return {
         NeXusDetectorName: 'orca_detector',
         NeXusName[ProtonCharge]: '/entry/neutron_prod_info/pulse_charge',
@@ -158,7 +159,7 @@ def default_parameters() -> dict:
 
 def OrcaNormalizedImagesWorkflow(**kwargs) -> sl.Pipeline:
     """
-    Workflow with default parameters for TBL.
+    Workflow with default parameters for ORCA image normalization.
     """
 
     wf = GenericNeXusWorkflow(

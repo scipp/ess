@@ -14,6 +14,7 @@ from ..imaging.types import CorrectedDetector, MaskingRules, RunType
 def apply_masks(
     da: RawDetector[RunType], masks: MaskingRules
 ) -> CorrectedDetector[RunType]:
+    """Apply configured masking rules to detector data."""
     if not masks:
         return CorrectedDetector[RunType](da)
     out = da.copy(deep=False)

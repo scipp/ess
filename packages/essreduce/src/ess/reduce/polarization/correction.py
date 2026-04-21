@@ -29,7 +29,7 @@ from .types import (
 
 @dataclass
 class InverseFlipperMatrix(Generic[PolarizerSpin, PolarizingElement]):
-    """Flipper matrix, combined with component flip for down component"""
+    """Inverse flipper matrix for a polarizing element."""
 
     efficiency: FlipperEfficiency[PolarizingElement]
     swap: bool
@@ -37,7 +37,7 @@ class InverseFlipperMatrix(Generic[PolarizerSpin, PolarizingElement]):
     def from_left(
         self, up: sc.Variable, down: sc.Variable
     ) -> tuple[sc.Variable, sc.Variable]:
-        """Apply inverse flipper matrix from the left (for analyzer)"""
+        """Apply the inverse flipper matrix from the left."""
         if self.swap:
             up, down = down, up
         f = 1 / self.efficiency.value
@@ -48,7 +48,7 @@ class InverseFlipperMatrix(Generic[PolarizerSpin, PolarizingElement]):
     def from_right(
         self, up: sc.Variable, down: sc.Variable
     ) -> tuple[sc.Variable, sc.Variable]:
-        """Apply inverse flipper matrix from the right (for polarizer)"""
+        """Apply the inverse flipper matrix from the right."""
         f = 1 / self.efficiency.value
         if f == 1:
             return (down, up) if self.swap else (up, down)
@@ -61,6 +61,7 @@ class InverseFlipperMatrix(Generic[PolarizerSpin, PolarizingElement]):
 def make_spin_flipping_matrix_up(
     efficiency: FlipperEfficiency[PolarizingElement],
 ) -> InverseFlipperMatrix[Up, PolarizingElement]:
+    """Create the inverse flipper matrix for the spin-up flipper state."""
     return InverseFlipperMatrix[Up, PolarizingElement](
         efficiency=efficiency, swap=False
     )
@@ -69,6 +70,7 @@ def make_spin_flipping_matrix_up(
 def make_spin_flipping_matrix_down(
     efficiency: FlipperEfficiency[PolarizingElement],
 ) -> InverseFlipperMatrix[Down, PolarizingElement]:
+    """Create the inverse flipper matrix for the spin-down flipper state."""
     return InverseFlipperMatrix[Down, PolarizingElement](
         efficiency=efficiency, swap=True
     )
@@ -82,10 +84,13 @@ def compute_polarizing_element_correction(
     Compute matrix coefficients for the correction of a polarizing element.
 
     The coefficients stem from the inverse of a symmetric matrix of the form
-    [[Tplus, Tminus], [Tminus, Tplus]]. The inverse is given by a matrix
-        mat = 1/denom * [[Tplus, -Tminus], [-Tminus, Tplus]],
+    ``[[Tplus, Tminus], [Tminus, Tplus]]``. The inverse is
+
+    ``mat = 1 / denom * [[Tplus, -Tminus], [-Tminus, Tplus]]``
+
     with
-        denom = Tplus**2 - Tminus**2.
+    ``denom = Tplus**2 - Tminus**2``.
+
     As there are only two unique elements in the matrix, we return them as a dataclass
     with diagonal and off-diagonal elements.
 
@@ -160,6 +165,7 @@ def compute_polarization_corrected_data(
     channel: ReducedSampleDataBySpinChannel[PolarizerSpin, AnalyzerSpin],
     polarization_correction: PolarizationCorrection[PolarizerSpin, AnalyzerSpin],
 ) -> PolarizationCorrectedData[PolarizerSpin, AnalyzerSpin]:
+    """Apply polarization-correction coefficients to one measured spin channel."""
     # TODO Would like to use inplace ops, but modifying input is dodgy. Maybe combine
     # into a single function?
     return PolarizationCorrectedData(
@@ -177,11 +183,11 @@ def sum_polarization_contributions(
     downdown: PolarizationCorrectedData[Down, Down],
 ) -> TotalPolarizationCorrectedData:
     """
-    Sums contributions from the flipper state channels to the spin state channels.
+    Sum flipper-state contributions into spin-state channels.
 
     Returns
-    ------------
-        :
+    -------
+    :
         The polarization corrected data.
     """
     if upup.upup.bins is not None:
@@ -212,6 +218,8 @@ def compute_half_polarized_correction(
     polarizer: PolarizingElementCorrection[PolarizerSpin, NoAnalyzer, Polarizer],
     polarizer_flipper: InverseFlipperMatrix[PolarizerSpin, Polarizer],
 ) -> HalfPolarizedCorrection[PolarizerSpin]:
+    """Combine the polarizer correction and flipper correction for
+    a half-polarized workflow."""
     p_up, p_down = polarizer_flipper.from_right(polarizer.diag, polarizer.off_diag)
     return HalfPolarizedCorrection[PolarizerSpin](up=p_up, down=p_down)
 
@@ -220,6 +228,7 @@ def compute_half_polarized_corrected_data(
     channel: ReducedSampleDataBySpinChannel[PolarizerSpin, NoAnalyzer],
     polarization_correction: HalfPolarizedCorrection[PolarizerSpin],
 ) -> HalfPolarizedCorrectedData[PolarizerSpin]:
+    """Apply half-polarized correction coefficients to one measured spin channel."""
     return HalfPolarizedCorrectedData(
         up=channel * polarization_correction.up,
         down=channel * polarization_correction.down,

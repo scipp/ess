@@ -17,6 +17,7 @@ from . import beamline
 
 
 def default_parameters() -> dict:
+    """Return the default parameters for the POWGEN workflow."""
     return {
         KeepEvents[SampleRun]: KeepEvents[SampleRun](True),
         KeepEvents[VanadiumRun]: KeepEvents[VanadiumRun](False),

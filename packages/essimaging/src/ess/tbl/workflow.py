@@ -18,6 +18,7 @@ from ..imaging.types import (
 
 
 def default_parameters() -> dict:
+    """Return the default workflow parameters for TBL."""
     return {
         NeXusMonitorName[BeamMonitor1]: "monitor_1",
         PulseStrideOffset: None,
