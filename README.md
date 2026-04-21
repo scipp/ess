@@ -9,6 +9,7 @@ Monorepo for ESS neutron scattering data reduction packages, managed with [pixi]
 | [essreflectometry](packages/essreflectometry/) | Reflectometry data reduction for the European Spallation Source |
 | [essdiffraction](packages/essdiffraction/) | Diffraction data reduction for the European Spallation Source |
 | [essnmx](packages/essnmx/) | Data reduction for NMX at the European Spallation Source. |
+| [esssans](packages/esssans/) | Data reduction for SANS at the European Spallation Source. |
 
 ## Dependency graph
 
@@ -17,7 +18,8 @@ essreduce
 ├── essimaging
 ├── essreflectometry
 ├── essdiffraction
-└── essnmx
+├── essnmx
+└── esssans
 ```
 
 ---
@@ -56,6 +58,7 @@ pixi run test essimaging
 pixi run test essreflectometry
 pixi run test essdiffraction
 pixi run test essnmx
+pixi run test esssans
 
 # Test a single file:
 pixi run -e essreduce pytest packages/essreduce/tests/normalization_test.py
@@ -77,6 +80,7 @@ pixi run docs-essimaging
 pixi run docs-essreflectometry
 pixi run docs-essdiffraction
 pixi run docs-essnmx
+pixi run docs-esssans
 ```
 
 ### Adding or changing dependencies
@@ -131,6 +135,10 @@ packages/
     src/ess/diffraction/    ← source code (ess.diffraction namespace)
     ...
   essnmx/
+    pyproject.toml
+    src/ess/nmx/            ← source code (ess.nmx namespace)
+    ...
+  esssans/
     pyproject.toml
     src/ess/nmx/            ← source code (ess.nmx namespace)
     ...
