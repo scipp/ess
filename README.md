@@ -72,11 +72,11 @@ pixi run -e lint format     # ruff format
 ### Building docs
 
 ```bash
-pixi run docs essreduce
-pixi run docs essimaging
-pixi run docs essreflectometry
-pixi run docs essdiffraction
-pixi run docs essnmx
+pixi run docs-essreduce
+pixi run docs-essimaging
+pixi run docs-essreflectometry
+pixi run docs-essdiffraction
+pixi run docs-essnmx
 ```
 
 ### Adding or changing dependencies
