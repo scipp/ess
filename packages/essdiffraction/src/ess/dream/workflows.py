@@ -144,6 +144,7 @@ parameter_mappers[PixelMaskFilename] = with_pixel_mask_filenames
 
 
 def default_parameters() -> dict:
+    """Return the default reduction parameters shared by DREAM powder workflows."""
     return {
         KeepEvents[SampleRun]: KeepEvents[SampleRun](True),
         KeepEvents[VanadiumRun]: KeepEvents[VanadiumRun](True),
