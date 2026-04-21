@@ -3,7 +3,8 @@
 import numpy as np
 import pytest
 import scipp as sc
-from ess.polarization import he3
+
+from ess.reduce.polarization import he3
 
 
 def test_incoming_unpolarized_reproduces_input_params_within_errors() -> None:

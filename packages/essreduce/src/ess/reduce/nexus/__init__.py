@@ -15,6 +15,7 @@ The submodule :mod:`types` defines all domain types.
 from . import types
 from ._nexus_loader import (
     compute_component_position,
+    compute_detector_position,
     extract_signal_data_array,
     group_event_data,
     load_all_components,
@@ -29,6 +30,7 @@ from .workflow import GenericNeXusWorkflow
 __all__ = [
     'GenericNeXusWorkflow',
     'compute_component_position',
+    'compute_detector_position',
     'extract_signal_data_array',
     'group_event_data',
     'load_all_components',
