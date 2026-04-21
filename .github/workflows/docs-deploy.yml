@@ -12,7 +12,6 @@ on:
           - essimaging
           - essnmx
           - essdiffraction
-          - esspolarization
           - essreflectometry
       publish:
         default: false
