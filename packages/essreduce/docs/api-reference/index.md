@@ -31,6 +31,7 @@
    logging
    nexus
    normalization
+   polarization
    streaming
    time_of_flight
    ui
