@@ -6,13 +6,18 @@ Monorepo for ESS neutron scattering data reduction packages, managed with [pixi]
 |---------|-------------|
 | [essreduce](packages/essreduce/) | Common data reduction tools (core) |
 | [essimaging](packages/essimaging/) | Neutron imaging (ODIN, TBL, YMIR) |
+| [essreflectometry](packages/essreflectometry/) | Reflectometry data reduction for the European Spallation Source |
+| [essdiffraction](packages/essdiffraction/) | Diffraction data reduction for the European Spallation Source |
 | [essnmx](packages/essnmx/) | Data reduction for NMX at the European Spallation Source. |
 
 ## Dependency graph
 
 ```
 essreduce
-└── essimaging
+├── essimaging
+├── essreflectometry
+├── essdiffraction
+└── essnmx
 ```
 
 ---
@@ -48,6 +53,9 @@ The `pixi.lock` file pins all dependencies reproducibly. No tox, no pip-compile,
 # Test a package:
 pixi run test essreduce
 pixi run test essimaging
+pixi run test essreflectometry
+pixi run test essdiffraction
+pixi run test essnmx
 
 # Test a single file:
 pixi run -e essreduce pytest packages/essreduce/tests/normalization_test.py
@@ -66,6 +74,9 @@ pixi run -e lint format     # ruff format
 ```bash
 pixi run docs essreduce
 pixi run docs essimaging
+pixi run docs essreflectometry
+pixi run docs essdiffraction
+pixi run docs essnmx
 ```
 
 ### Adding or changing dependencies
@@ -110,5 +121,17 @@ packages/
   essimaging/
     pyproject.toml
     src/ess/imaging/        ← source code (ess.imaging namespace)
+    ...
+  essreflectometry/
+    pyproject.toml
+    src/ess/reflectometry/  ← source code (ess.reflectometry namespace)
+    ...
+  essdiffraction/
+    pyproject.toml
+    src/ess/diffraction/    ← source code (ess.diffraction namespace)
+    ...
+  essnmx/
+    pyproject.toml
+    src/ess/nmx/            ← source code (ess.nmx namespace)
     ...
 ```
