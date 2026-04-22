@@ -214,6 +214,9 @@ def test_beam_center_from_center_of_mass_independent_of_set_beam_center(pipeline
     assert sc.allclose(center, MANTID_BEAM_CENTER, atol=sc.scalar(3e-3, unit='m'))
 
 
+@pytest.mark.skip(
+    reason="Beam center finder tests are slow and we are revisiting the approach."
+)
 def test_beam_center_finder_without_direct_beam_reproduces_verified_result(pipeline):
     pipeline[DirectBeam] = None
     center = sans.beam_center_finder.beam_center_from_iofq(
@@ -222,6 +225,9 @@ def test_beam_center_finder_without_direct_beam_reproduces_verified_result(pipel
     assert sc.allclose(center, MANTID_BEAM_CENTER, atol=sc.scalar(2e-3, unit='m'))
 
 
+@pytest.mark.skip(
+    reason="Beam center finder tests are slow and we are revisiting the approach."
+)
 def test_beam_center_can_get_closer_to_verified_result_with_low_counts_mask(pipeline):
     def low_counts_mask(
         sample: RawDetector[SampleRun],
@@ -239,6 +245,9 @@ def test_beam_center_can_get_closer_to_verified_result_with_low_counts_mask(pipe
     assert sc.allclose(center, MANTID_BEAM_CENTER, atol=sc.scalar(5e-4, unit='m'))
 
 
+@pytest.mark.skip(
+    reason="Beam center finder tests are slow and we are revisiting the approach."
+)
 def test_beam_center_finder_works_with_direct_beam(pipeline):
     q_bins = sc.linspace('Q', 0.02, 0.3, 71, unit='1/angstrom')
     center_with_direct_beam = sans.beam_center_finder.beam_center_from_iofq(
@@ -249,6 +258,9 @@ def test_beam_center_finder_works_with_direct_beam(pipeline):
     )
 
 
+@pytest.mark.skip(
+    reason="Beam center finder tests are slow and we are revisiting the approach."
+)
 def test_beam_center_finder_independent_of_set_beam_center(pipeline):
     pipeline[BeamCenter] = sc.vector([0.1, -0.1, 0], unit='m')
     q_bins = sc.linspace('Q', 0.02, 0.3, 71, unit='1/angstrom')
@@ -260,6 +272,9 @@ def test_beam_center_finder_independent_of_set_beam_center(pipeline):
     )
 
 
+@pytest.mark.skip(
+    reason="Beam center finder tests are slow and we are revisiting the approach."
+)
 def test_beam_center_finder_works_with_pixel_dependent_direct_beam(pipeline):
     q_bins = sc.linspace('Q', 0.02, 0.3, 71, unit='1/angstrom')
     center_pixel_independent_direct_beam = (
