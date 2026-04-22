@@ -6,6 +6,7 @@ default_parameters = {MaximumCounts: 10000}
 
 
 def NMXMcStasWorkflow():
+    """Create the workflow for reducing NMX McStas simulation data."""
     import sciline as sl
 
     from .load import providers as loader_providers

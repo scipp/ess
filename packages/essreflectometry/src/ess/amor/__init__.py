@@ -60,6 +60,7 @@ This provides a default Amor workflow including providers for loadings files.
 
 
 def default_parameters() -> dict:
+    """Return the default parameters for the Amor workflow."""
     return {
         supermirror.MValue: sc.scalar(5, unit=sc.units.dimensionless),
         supermirror.CriticalEdge: 0.022 * sc.Unit("1/angstrom"),

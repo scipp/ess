@@ -13,6 +13,7 @@ def apply_masks(
     da: WavelengthDetector[RunType],
     masks: MaskingRules,
 ) -> CorrectedDetector[RunType]:
+    """Apply configured masking rules to wavelength-resolved detector data."""
     out = da.copy(deep=False)
     for coord_name, mask in masks.items():
         if (out.bins is not None) and (coord_name in out.bins.coords):

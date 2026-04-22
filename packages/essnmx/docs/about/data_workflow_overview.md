@@ -17,7 +17,7 @@ Therefore the [essNMX](https://github.com/scipp/ess/tree/main/packages/essnmx) p
 
 The time of arrival (TOA) should be converted into time of flight (TOF).
 <!--Not implemented for measurement data-->
-Then the single events get binned into pixels and then histogramed in the TOF dimension.  <br>
+Then the single events get binned into pixels and then histogrammed in the TOF dimension.  <br>
 This result can be exported to an HDF5 file
 along with additional metadata and instrument coordinates (pixel IDs).
 
@@ -59,7 +59,7 @@ dials.find_spots imported.expt find_spots.phil
 #### 3. Index Instrument Geometry
 
 In the [indexing](https://dials.github.io/documentation/programs/dials_index.html) step the unit cell is determined. <br>
-A list of indexed reflexes and an instrument model including a crystal model is returned. <br>
+A list of indexed reflections and an instrument model including a crystal model is returned. <br>
 One-dimensional and three-dimensional fast Fourier transform-based methods are available.
 
 As input parameters the ``imported.exp`` and ``strong.refl`` files are used. <br>
@@ -83,7 +83,7 @@ dials.refine indexed.refl indexed.expt detector.panels=hierarchical
 The last step in DIALS is to integrate each reflex.[^3]
 [^3]: https://dials.github.io/documentation/programs/dials_integrate.html
 
-Currently, different approach is used to integrate the dimension of the image and the dimension of TOF. <br>
+Currently, a different approach is used to integrate the image dimension and the TOF dimension. <br>
 In the dimension of the image, a simple summation is used
 and in the TOF dimension, a profile-fitting approach is used.
 
@@ -92,7 +92,7 @@ dev.dials.simple_tof_integrate refined.expt refined.refl
 ```
 
 ### Scaling (LSCALE/pyscale)
-Currently [LSCALE](https://doi.org/10.1107/S0021889898015350) can be used in a docker container which makes it indented from the OS. <br>
+Currently [LSCALE](https://doi.org/10.1107/S0021889898015350) can be used in a Docker container, which makes it independent of the OS. <br>
 LSCALE is a program for scaling and normalisation of Laue intensity data.  <br>
 The source code is available on [Zenodo](https://zenodo.org/records/4381992).  <br>
 Since LSCALE is not maintained anymore we are currently developing a Python-based alternative to LSCALE called pyscale[^4].

@@ -109,6 +109,7 @@ def BeerPowderWorkflow(
 
 
 def BeerPowderMcStasWorkflow(**kwargs) -> sl.Pipeline:
+    """Create the BEER powder workflow with McStas loaders inserted."""
     wf = BeerPowderWorkflow(**kwargs)
     for provider in mcstas_providers:
         wf.insert(provider)
