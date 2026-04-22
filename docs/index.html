@@ -208,6 +208,16 @@
       padding: 0.1rem 0.4rem;
       border-radius: 3px;
     }
+    .note a {
+      color: var(--scipp-blue);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .note a:hover {
+      color: var(--ess-cyan);
+      border-color: var(--ess-cyan);
+    }
 
     .section-gap { margin-top: 3rem; }
 
@@ -432,6 +442,9 @@
       </div>
       <p class="note">
         ESS internal users: ping <code>#&lt;instrument&gt;-dmsc</code> on Slack for instrument-specific questions, or <code>#scipp</code> for anything general.
+      </p>
+      <p class="note">
+        External users: open an <a href="https://github.com/scipp/ess/issues">issue</a> or start a <a href="https://github.com/scipp/ess/discussions">discussion</a> on the <a href="https://github.com/scipp/ess">scipp/ess</a> repo.
       </p>
     </section>
 
