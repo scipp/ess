@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=bbf05b72"></script>
+    <script src="../../../_static/documentation_options.js?v=0467d2c1"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -623,6 +623,7 @@
 <div class="viewcode-block" id="default_parameters">
 <a class="viewcode-back" href="../../../generated/modules/ess.odin.workflows.default_parameters.html#ess.odin.workflows.default_parameters">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">default_parameters</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the default workflow parameters for Odin.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">{</span>
         <span class="n">NeXusMonitorName</span><span class="p">[</span><span class="n">BeamMonitor1</span><span class="p">]:</span> <span class="s2">&quot;beam_monitor_1&quot;</span><span class="p">,</span>
         <span class="n">NeXusMonitorName</span><span class="p">[</span><span class="n">BeamMonitor2</span><span class="p">]:</span> <span class="s2">&quot;beam_monitor_2&quot;</span><span class="p">,</span>
@@ -662,7 +663,8 @@
 <a class="viewcode-back" href="../../../generated/modules/ess.odin.workflows.OdinBraggEdgeWorkflow.html#ess.odin.workflows.OdinBraggEdgeWorkflow">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">OdinBraggEdgeWorkflow</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Workflow with default parameters for Odin.</span>
+<span class="sd">    Workflow with default parameters and masking providers</span>
+<span class="sd">    for Odin Bragg-edge reduction.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">workflow</span> <span class="o">=</span> <span class="n">OdinWorkflow</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">provider</span> <span class="ow">in</span> <span class="p">(</span><span class="o">*</span><span class="n">masking_providers</span><span class="p">,):</span>
