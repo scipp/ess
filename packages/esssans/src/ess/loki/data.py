@@ -56,6 +56,8 @@ _registry = make_registry(
         'loki-coda-one-event.hdf': 'md5:ab9dbef793fad2fca96210c3b55d60ce',
         # Small CODA file for testing purposes (data from only 30 pulses)
         'loki_999999_00009928_small.hdf': 'md5:d2f293c293cc15d90fb588afa1dcb096',
+        # Small CODA file for testing purposes (data from only 5 pulses)
+        'loki-coda-5-pulses.hdf': 'md5:8368779651ccf101612b35ca075d0298',
         # Wavelength lookup table without choppers
         'loki-wavelength-lookup-table-no-choppers.h5': 'md5:3fb133962af6554a9999a753c1724ed4',  # noqa: E501
     },
