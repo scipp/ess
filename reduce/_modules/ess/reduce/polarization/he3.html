@@ -1,0 +1,1637 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ess.reduce.polarization.he3 &#8212; ESSreduce</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../../../_static/documentation_options.js?v=4480c773"></script>
+    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+    <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
+
+
+
+
+
+const initStyles = () => {
+    const defaultStyle = document.createElement('style');
+    defaultStyle.textContent = `pre.mermaid {
+    /* Same as .mermaid-container > pre */
+    display: block;
+    width: 100%;
+}
+
+pre.mermaid > svg {
+    /* Same as .mermaid-container > pre > svg */
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}`;
+    document.head.appendChild(defaultStyle);
+
+    const fullscreenStyle = document.createElement('style');
+    fullscreenStyle.textContent = `.mermaid-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+.mermaid-container > pre {
+    display: block;
+    width: 100%;
+}
+
+.mermaid-container > pre > svg {
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}
+
+.mermaid-fullscreen-btn {
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    color: #333;
+}
+
+.mermaid-fullscreen-btn:hover {
+    opacity: 100% !important;
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-btn.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-btn.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal {
+    display: none;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 95vw;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.98);
+    z-index: 9999;
+    padding: 20px;
+    overflow: auto;
+}
+
+.mermaid-fullscreen-modal.dark-theme {
+    background: rgba(0, 0, 0, 0.98);
+}
+
+.mermaid-fullscreen-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen {
+    position: relative;
+    width: 95vw;
+    height: 90vh;
+    max-width: 95vw;
+    max-height: 90vh;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen.dark-theme {
+    background: #1a1a1a;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+}
+
+.mermaid-container-fullscreen pre.mermaid {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen .mermaid svg {
+    height: 100% !important;
+    width: 100% !important;
+    cursor: grab;
+}
+
+.mermaid-fullscreen-close {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s;
+    font-size: 24px;
+    line-height: 1;
+    color: #333;
+}
+
+.mermaid-fullscreen-close:hover {
+    background: white;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-close.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-close.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal .mermaid-fullscreen-btn {
+    display: none !important;
+}`;
+    document.head.appendChild(fullscreenStyle);
+}
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    // We use a set of heuristics:
+    // 1. Check for common dark mode classes or attributes
+    // 2. Check computed background color brightness
+    if (document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.body.classList.contains('dark') ||
+        document.body.getAttribute('data-theme') === 'dark') {
+        // console.log("Dark theme detected via class/attribute");
+        return true;
+    }
+    if (document.documentElement.classList.contains('light') ||
+        document.documentElement.getAttribute('data-theme') === 'light' ||
+        document.body.classList.contains('light') ||
+        document.body.getAttribute('data-theme') === 'light') {
+        // console.log("Light theme detected via class/attribute");
+        return false;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // console.log("Dark theme detected via prefers-color-scheme");
+        return true;
+    }
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        // console.log("Background color brightness:", brightness);
+        return brightness < 128;
+    }
+    // console.log("No dark or light theme detected, defaulting to light theme");
+    return false;
+};
+
+let darkTheme = isDarkTheme();
+let modal = null;
+let modalContent = null;
+let previousScrollOffset = [window.scrollX, window.scrollY];
+
+const runMermaid = async (rerun) => {
+    console.log("Running mermaid diagrams, rerun =", rerun);
+    // clear all existing mermaid charts
+    let all_mermaids = document.querySelectorAll(".mermaid");
+
+    if (rerun) {
+        all_mermaids.forEach((el) => {
+            if(!el.hasAttribute("data-original-code")) {
+                // store original code
+                // console.log(`Storing original code for first run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+            if(el.getAttribute("data-processed") === "true") {
+                // remove and restore original
+                el.removeAttribute("data-processed");
+                // console.log(`Restoring original code for re-run: `, el.getAttribute('data-original-code'));
+                el.innerHTML = el.getAttribute('data-original-code');
+            } else {
+                // store original code
+                // console.log(`Storing original code for re-run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+        });
+        await mermaid.run();
+    }
+
+    all_mermaids = document.querySelectorAll(".mermaid");
+    const mermaids_processed = document.querySelectorAll(".mermaid[data-processed='true']");
+
+    if ("False" === "True") {
+        const mermaids_to_add_zoom = -1 === -1 ? all_mermaids.length : -1;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll("");
+            if(all_mermaids.length !== mermaids_processed.length) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            } else if(svgs.size() !== mermaids_to_add_zoom) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            } else {
+                svgs.each(function() {
+                    var svg = d3.select(this);
+                    svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+                    var inner = svg.select("g");
+                    var zoom = d3.zoom().on("zoom", function(event) {
+                        inner.attr("transform", event.transform);
+                    });
+                    svg.call(zoom);
+                });
+            }
+        }
+    } else if(all_mermaids.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(() => runMermaid(false), 200);
+        return;
+    }
+
+    // Stop here if not adding fullscreen capability
+    if ("True" !== "True") return;
+
+    if (modal !== null ) {
+        // Destroy existing modal
+        modal.remove();
+        modal = null;
+        modalContent = null;
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    const closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            // Already processed, adjust button class if needed
+            const existingBtn = mermaidDiv.parentNode.querySelector('.mermaid-fullscreen-btn');
+            if (existingBtn) {
+                existingBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+            }
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = '⛶';
+        fullscreenBtn.style.opacity = '50%';
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scroll, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.sdisplay = 'block';
+
+                if ("False" === "True") {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        container.appendChild(fullscreenBtn);
+    });
+};
+
+const load = async () => {
+    initStyles();
+
+    await runMermaid(true);
+
+    const reRunIfThemeChanges = async () => {
+        const newDarkTheme = isDarkTheme();
+        if (newDarkTheme !== darkTheme) {
+            darkTheme = newDarkTheme;
+            console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
+            await mermaid.initialize(
+                {...JSON.parse(
+                    `{"startOnLoad": false}`
+                ),
+                ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+                }
+            );
+            await runMermaid(true);
+        }
+    };
+
+    // Update theme classes when theme changes
+    const themeObserver = new MutationObserver(reRunIfThemeChanges);
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+};
+
+
+
+
+
+console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
+mermaid.initialize(
+    {...JSON.parse(
+        `{"startOnLoad": false}`
+    ),
+    ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+    }
+);
+
+window.addEventListener("load", load);
+window.runMermaid = runMermaid;</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ess/reduce/polarization/he3';</script>
+    <script src="../../../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <link rel="icon" href="../../../../_static/favicon.svg"/>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="26.4.2" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../../_static/logo.svg" class="logo__image only-light" alt="ESSreduce - Home"/>
+    <img src="../../../../_static/logo-dark.svg" class="logo__image only-dark pst-js-only" alt="ESSreduce - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../about/index.html">
+    About
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essdiffraction">
+    ESSdiffraction
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/ess/imaging">
+    ESSimaging
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/ess/nmx">
+    ESSnmx
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/esspolarization">
+    ESSpolarization
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essreflectometry">
+    ESSreflectometry
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/esssans">
+    ESSsans
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essspectroscopy">
+    ESSspectroscopy
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/ess/tree/main/packages/essreduce" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essreduce/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essreduce" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../about/index.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/essdiffraction">
+    ESSdiffraction
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/ess/imaging">
+    ESSimaging
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/ess/nmx">
+    ESSnmx
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/esspolarization">
+    ESSpolarization
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/essreflectometry">
+    ESSreflectometry
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/esssans">
+    ESSsans
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/essspectroscopy">
+    ESSspectroscopy
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/ess/tree/main/packages/essreduce" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essreduce/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essreduce" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ess.reduce.polarization.he3</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for ess.reduce.polarization.he3</h1><div class="highlight"><pre>
+<span></span><span class="c1"># SPDX-License-Identifier: BSD-3-Clause</span>
+<span class="c1"># Copyright (c) 2023 Scipp contributors (https://github.com/scipp)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">NewType</span><span class="p">,</span> <span class="n">TypeVar</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">sciline</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sl</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.uncertainty</span><span class="w"> </span><span class="kn">import</span> <span class="n">broadcast_with_upper_bound_variances</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Analyzer</span><span class="p">,</span>
+    <span class="n">AnalyzerSpin</span><span class="p">,</span>
+    <span class="n">Down</span><span class="p">,</span>
+    <span class="n">PlusMinus</span><span class="p">,</span>
+    <span class="n">PolarizerSpin</span><span class="p">,</span>
+    <span class="n">PolarizingElement</span><span class="p">,</span>
+    <span class="n">TransmissionFunction</span><span class="p">,</span>
+    <span class="n">Up</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">Depolarized</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s1">&#39;Depolarized&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+<span class="n">Polarized</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s1">&#39;Polarized&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Polarized either up or down, don&#39;t care.&quot;&quot;&quot;</span>
+<span class="n">PolarizationState</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;PolarizationState&#39;</span><span class="p">,</span> <span class="n">Polarized</span><span class="p">,</span> <span class="n">Depolarized</span><span class="p">)</span>
+
+
+<span class="n">DirectBeamNoCell</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s1">&#39;DirectBeamNoCell&#39;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Direct beam without cells and sample as a function of wavelength.&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="He3CellPressure">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.polarization.he3.He3CellPressure.html#ess.reduce.polarization.he3.He3CellPressure">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">He3CellPressure</span><span class="p">(</span><span class="n">sl</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Pressure for a given cell.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="He3CellLength">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.polarization.he3.He3CellLength.html#ess.reduce.polarization.he3.He3CellLength">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">He3CellLength</span><span class="p">(</span><span class="n">sl</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Length for a given cell.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="He3CellTemperature">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.polarization.he3.He3CellTemperature.html#ess.reduce.polarization.he3.He3CellTemperature">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">He3CellTemperature</span><span class="p">(</span><span class="n">sl</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Temperature for a given cell.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="He3FillingTime">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.polarization.he3.He3FillingTime.html#ess.reduce.polarization.he3.He3FillingTime">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">He3FillingTime</span><span class="p">(</span><span class="n">sl</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Filling wall-clock time for a given cell.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="He3CellTransmissionFractionIncomingUnpolarized">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.polarization.he3.He3CellTransmissionFractionIncomingUnpolarized.html#ess.reduce.polarization.he3.He3CellTransmissionFractionIncomingUnpolarized">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">He3CellTransmissionFractionIncomingUnpolarized</span><span class="p">(</span>
+    <span class="n">sl</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">,</span> <span class="n">PolarizationState</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Transmission fraction for a given cell&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="He3AnalyzerTransmissionFractionIncomingPolarized">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.polarization.he3.He3AnalyzerTransmissionFractionIncomingPolarized.html#ess.reduce.polarization.he3.He3AnalyzerTransmissionFractionIncomingPolarized">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">He3AnalyzerTransmissionFractionIncomingPolarized</span><span class="p">(</span>
+    <span class="n">sl</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">PolarizerSpin</span><span class="p">,</span> <span class="n">AnalyzerSpin</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Transmission fraction of the analyzer with polarized incoming beam&quot;&quot;&quot;</span></div>
+
+
+
+<span class="n">He3AnalyzerTransmissionFractionParallel</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span>
+    <span class="s1">&#39;He3AnalyzerTransmissionFractionParallel&#39;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span>
+<span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Transmission fraction of analyzer with parallel polarized incoming beam&quot;&quot;&quot;</span>
+
+
+<span class="n">He3AnalyzerTransmissionFractionAntiParallel</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span>
+    <span class="s1">&#39;He3AnalyzerTransmissionFractionAntiParallel&#39;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span>
+<span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Transmission fraction of analyzer with anti-parallel polarized incoming beam&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="He3TransmissionEmptyGlass">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.polarization.he3.He3TransmissionEmptyGlass.html#ess.reduce.polarization.he3.He3TransmissionEmptyGlass">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">He3TransmissionEmptyGlass</span><span class="p">(</span><span class="n">sl</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Transmission of the empty glass for a given cell.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="He3DirectBeam">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.polarization.he3.He3DirectBeam.html#ess.reduce.polarization.he3.He3DirectBeam">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">He3DirectBeam</span><span class="p">(</span>
+    <span class="n">sl</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">,</span> <span class="n">PolarizationState</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Direct beam data for a given cell and spin state as a function of wavelength.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="He3Opacity0">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.polarization.he3.He3Opacity0.html#ess.reduce.polarization.he3.He3Opacity0">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">He3Opacity0</span><span class="p">(</span><span class="n">sl</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Opacity at 1 Angstrom for a given cell.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="He3OpacityFunction">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.polarization.he3.He3OpacityFunction.html#ess.reduce.polarization.he3.He3OpacityFunction">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">He3OpacityFunction</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Wavelength-dependent opacity function for a given cell.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="He3OpacityFunction.__init__">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.polarization.he3.He3OpacityFunction.html#ess.reduce.polarization.he3.He3OpacityFunction.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opacity0</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_opacity0</span> <span class="o">=</span> <span class="n">opacity0</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s1">&#39;1/Angstrom&#39;</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">opacity0</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opacity0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="n">broadcast_with_upper_bound_variances</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">opacity0</span><span class="p">,</span> <span class="n">prototype</span><span class="o">=</span><span class="n">wavelength</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">scale</span> <span class="o">*</span> <span class="n">wavelength</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="he3_opacity_from_cell_params">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.polarization.he3.he3_opacity_from_cell_params.html#ess.reduce.polarization.he3.he3_opacity_from_cell_params">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">he3_opacity_from_cell_params</span><span class="p">(</span>
+    <span class="n">pressure</span><span class="p">:</span> <span class="n">He3CellPressure</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">],</span>
+    <span class="n">length</span><span class="p">:</span> <span class="n">He3CellLength</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">],</span>
+    <span class="n">temperature</span><span class="p">:</span> <span class="n">He3CellTemperature</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">He3Opacity0</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Opacity 0 for a given cell, estimated from pressure and cell length.&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipp.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">Boltzmann</span> <span class="k">as</span> <span class="n">k_B</span>
+
+    <span class="n">he3_neutron_absorption_cross_section_at_1_angstrom</span> <span class="o">=</span> <span class="mf">2966.0e-24</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span>
+        <span class="s1">&#39;cm^2/Angstrom&#39;</span>
+    <span class="p">)</span>
+    <span class="c1"># Try to convert to Kelvin, since we get a more cryptic error message later if we</span>
+    <span class="c1"># do not, in case the user passes in a temperature in degree Celsius.</span>
+    <span class="n">temperature</span> <span class="o">=</span> <span class="n">temperature</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s1">&#39;K&#39;</span><span class="p">)</span>
+
+    <span class="n">opacity0</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">he3_neutron_absorption_cross_section_at_1_angstrom</span>
+        <span class="o">/</span> <span class="p">(</span><span class="n">k_B</span> <span class="o">*</span> <span class="n">temperature</span><span class="p">)</span>
+        <span class="o">*</span> <span class="n">pressure</span>
+        <span class="o">*</span> <span class="n">length</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">He3Opacity0</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">](</span><span class="n">opacity0</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="he3_opacity_function_from_cell_opacity">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.polarization.he3.he3_opacity_function_from_cell_opacity.html#ess.reduce.polarization.he3.he3_opacity_function_from_cell_opacity">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">he3_opacity_function_from_cell_opacity</span><span class="p">(</span>
+    <span class="n">opacity0</span><span class="p">:</span> <span class="n">He3Opacity0</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">He3OpacityFunction</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Opacity function for a given cell, based on pressure and cell length.</span>
+
+<span class="sd">    Note that this can alternatively be defined via neutron beam data, see</span>
+<span class="sd">    :py:func:`he3_opacity_function_from_beam_data`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">He3OpacityFunction</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">](</span><span class="n">opacity0</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_with_midpoints</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">dim</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">is_edges</span><span class="p">(</span><span class="n">dim</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">({</span><span class="n">dim</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">midpoints</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">dim</span><span class="p">])})</span>
+    <span class="k">return</span> <span class="n">data</span>
+
+
+<div class="viewcode-block" id="he3_opacity_function_from_beam_data">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.polarization.he3.he3_opacity_function_from_beam_data.html#ess.reduce.polarization.he3.he3_opacity_function_from_beam_data">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">he3_opacity_function_from_beam_data</span><span class="p">(</span>
+    <span class="n">transmission_empty_glass</span><span class="p">:</span> <span class="n">He3TransmissionEmptyGlass</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">],</span>
+    <span class="n">transmission_fraction</span><span class="p">:</span> <span class="n">He3CellTransmissionFractionIncomingUnpolarized</span><span class="p">[</span>
+        <span class="n">PolarizingElement</span><span class="p">,</span> <span class="n">Depolarized</span>
+    <span class="p">],</span>
+    <span class="n">opacity0_initial_guess</span><span class="p">:</span> <span class="n">He3Opacity0</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">He3OpacityFunction</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Opacity function for a given cell, based on direct beam data.</span>
+
+<span class="sd">    Note that this can alternatively be defined via cell parameters, see</span>
+<span class="sd">    :py:func:`he3_opacity_function_from_cell_opacity`. The cell opacity is used as an</span>
+<span class="sd">    initial guess for the fit.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># TODO Fit the exponent, since too much weight on low wavelengths?</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">intensity</span><span class="p">(</span><span class="n">wavelength</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">opacity0</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+        <span class="n">opacity</span> <span class="o">=</span> <span class="n">He3OpacityFunction</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">](</span><span class="n">opacity0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">transmission_empty_glass</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">opacity</span><span class="p">(</span><span class="n">wavelength</span><span class="p">))</span>
+
+    <span class="n">popt</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">curve_fit</span><span class="p">(</span>
+        <span class="p">[</span><span class="s1">&#39;wavelength&#39;</span><span class="p">],</span>
+        <span class="n">intensity</span><span class="p">,</span>
+        <span class="n">_with_midpoints</span><span class="p">(</span><span class="n">transmission_fraction</span><span class="p">,</span> <span class="s1">&#39;wavelength&#39;</span><span class="p">),</span>
+        <span class="n">p0</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;opacity0&#39;</span><span class="p">:</span> <span class="n">opacity0_initial_guess</span><span class="p">},</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">He3OpacityFunction</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">](</span><span class="n">sc</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="n">popt</span><span class="p">[</span><span class="s1">&#39;opacity0&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">data</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="He3PolarizationFunction">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.polarization.he3.He3PolarizationFunction.html#ess.reduce.polarization.he3.He3PolarizationFunction">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">He3PolarizationFunction</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Time-dependent polarization function for a given cell.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="He3PolarizationFunction.__init__">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.polarization.he3.He3PolarizationFunction.html#ess.reduce.polarization.he3.He3PolarizationFunction.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">C</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">T1</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_C</span> <span class="o">=</span> <span class="n">C</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_T1</span> <span class="o">=</span> <span class="n">T1</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">C</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">T1</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_T1</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">time</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">T1</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="He3TransmissionFunction">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.polarization.he3.He3TransmissionFunction.html#ess.reduce.polarization.he3.He3TransmissionFunction">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">He3TransmissionFunction</span><span class="p">(</span><span class="n">TransmissionFunction</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Wavelength- and time-dependent transmission for a given cell.&quot;&quot;&quot;</span>
+
+    <span class="n">opacity_function</span><span class="p">:</span> <span class="n">He3OpacityFunction</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">]</span>
+    <span class="n">polarization_function</span><span class="p">:</span> <span class="n">He3PolarizationFunction</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">]</span>
+    <span class="n">transmission_empty_glass</span><span class="p">:</span> <span class="n">He3TransmissionEmptyGlass</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">plus_minus</span><span class="p">:</span> <span class="n">PlusMinus</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+        <span class="n">opacity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">opacity_function</span><span class="p">(</span><span class="n">wavelength</span><span class="p">)</span>
+        <span class="n">polarization</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">polarization_function</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">plus_minus</span> <span class="o">==</span> <span class="s1">&#39;plus&#39;</span><span class="p">:</span>
+            <span class="n">polarization</span> <span class="o">*=</span> <span class="o">-</span><span class="mf">1.0</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">plus_minus</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
+            <span class="n">polarization</span> <span class="o">*=</span> <span class="o">-</span><span class="n">plus_minus</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transmission_empty_glass</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">opacity</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">polarization</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">plus_minus</span><span class="p">:</span> <span class="n">PlusMinus</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">(</span>
+            <span class="n">time</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">],</span>
+            <span class="n">wavelength</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;wavelength&#39;</span><span class="p">],</span>
+            <span class="n">plus_minus</span><span class="o">=</span><span class="n">plus_minus</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="transmission_incoming_unpolarized">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.polarization.he3.transmission_incoming_unpolarized.html#ess.reduce.polarization.he3.transmission_incoming_unpolarized">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">transmission_incoming_unpolarized</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">transmission_empty_glass</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="n">opacity</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="n">polarization</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">transmission_empty_glass</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">opacity</span><span class="p">)</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">cosh</span><span class="p">(</span><span class="n">opacity</span> <span class="o">*</span> <span class="n">polarization</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="compute_transmission_fraction_from_direct_beam">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.polarization.he3.compute_transmission_fraction_from_direct_beam.html#ess.reduce.polarization.he3.compute_transmission_fraction_from_direct_beam">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_transmission_fraction_from_direct_beam</span><span class="p">(</span>
+    <span class="n">direct_beam_no_cell</span><span class="p">:</span> <span class="n">DirectBeamNoCell</span><span class="p">,</span>
+    <span class="n">direct_beam_polarized</span><span class="p">:</span> <span class="n">He3DirectBeam</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">,</span> <span class="n">PolarizationState</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">He3CellTransmissionFractionIncomingUnpolarized</span><span class="p">[</span>
+    <span class="n">PolarizingElement</span><span class="p">,</span> <span class="n">PolarizationState</span>
+<span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the transmission fraction for a given cell and polarization state.</span>
+
+<span class="sd">    This is defined as the ratio of the direct beam with the cell to the direct beam</span>
+<span class="sd">    without the cell. The result is a function of wavelength and time.</span>
+
+<span class="sd">    Note that this is possible only if the main detector is used to measure direct</span>
+<span class="sd">    beam data. If direct beam is computed from monitors then, e.g., the SANS</span>
+<span class="sd">    transmission fraction (as computed by a regular SANS workflow) should be used</span>
+<span class="sd">    directly. Note that the regular SANS workflow also normalized to an empty beam</span>
+<span class="sd">    run, make sure to not perform the division twice.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">He3CellTransmissionFractionIncomingUnpolarized</span><span class="p">[</span>
+        <span class="n">PolarizingElement</span><span class="p">,</span> <span class="n">PolarizationState</span>
+    <span class="p">](</span><span class="n">direct_beam_polarized</span> <span class="o">/</span> <span class="n">direct_beam_no_cell</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_he3_transmission_incoming_unpolarized_from_fit_to_direct_beam">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.polarization.he3.get_he3_transmission_incoming_unpolarized_from_fit_to_direct_beam.html#ess.reduce.polarization.he3.get_he3_transmission_incoming_unpolarized_from_fit_to_direct_beam">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_he3_transmission_incoming_unpolarized_from_fit_to_direct_beam</span><span class="p">(</span>
+    <span class="n">transmission_fraction</span><span class="p">:</span> <span class="n">He3CellTransmissionFractionIncomingUnpolarized</span><span class="p">[</span>
+        <span class="n">PolarizingElement</span><span class="p">,</span> <span class="n">Polarized</span>
+    <span class="p">],</span>
+    <span class="n">opacity_function</span><span class="p">:</span> <span class="n">He3OpacityFunction</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">],</span>
+    <span class="n">transmission_empty_glass</span><span class="p">:</span> <span class="n">He3TransmissionEmptyGlass</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TransmissionFunction</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Transmission function for a given cell, with unpolarized incoming beam.</span>
+
+<span class="sd">    This is composed from the opacity-function and the polarization-function.</span>
+<span class="sd">    The implementation fits a time- and wavelength-dependent equation and returns</span>
+<span class="sd">    the fitted T(t, lambda).</span>
+
+<span class="sd">    DB_pol/DB = T_E * cosh(O(lambda)*P(t))*exp(-O(lambda))</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">expected_transmission</span><span class="p">(</span>
+        <span class="n">wavelength</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">C</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">T1</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+        <span class="n">polarization_function</span> <span class="o">=</span> <span class="n">He3PolarizationFunction</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">](</span><span class="n">C</span><span class="o">=</span><span class="n">C</span><span class="p">,</span> <span class="n">T1</span><span class="o">=</span><span class="n">T1</span><span class="p">)</span>
+        <span class="n">opacity</span> <span class="o">=</span> <span class="n">opacity_function</span><span class="p">(</span><span class="n">wavelength</span><span class="p">)</span>
+        <span class="n">polarization</span> <span class="o">=</span> <span class="n">polarization_function</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">transmission_incoming_unpolarized</span><span class="p">(</span>
+            <span class="n">transmission_empty_glass</span><span class="o">=</span><span class="n">transmission_empty_glass</span><span class="p">,</span>
+            <span class="n">opacity</span><span class="o">=</span><span class="n">opacity</span><span class="p">,</span>
+            <span class="n">polarization</span><span class="o">=</span><span class="n">polarization</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="n">popt</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">curve_fit</span><span class="p">(</span>
+        <span class="p">[</span><span class="s1">&#39;wavelength&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">],</span>
+        <span class="n">expected_transmission</span><span class="p">,</span>
+        <span class="n">_with_midpoints</span><span class="p">(</span><span class="n">transmission_fraction</span><span class="p">,</span> <span class="s1">&#39;wavelength&#39;</span><span class="p">),</span>
+        <span class="n">p0</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="s1">&#39;T1&#39;</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">400000.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)},</span>
+    <span class="p">)</span>
+    <span class="c1"># TODO Consider including variances from fit</span>
+    <span class="n">polarization_function</span> <span class="o">=</span> <span class="n">He3PolarizationFunction</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">](</span>
+        <span class="n">C</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="n">popt</span><span class="p">[</span><span class="s1">&#39;C&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">T1</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="n">popt</span><span class="p">[</span><span class="s1">&#39;T1&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">data</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">He3TransmissionFunction</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">](</span>
+        <span class="n">opacity_function</span><span class="o">=</span><span class="n">opacity_function</span><span class="p">,</span>
+        <span class="n">polarization_function</span><span class="o">=</span><span class="n">polarization_function</span><span class="p">,</span>
+        <span class="n">transmission_empty_glass</span><span class="o">=</span><span class="n">transmission_empty_glass</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="transmission_fraction_analyzer_parallel">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.polarization.he3.transmission_fraction_analyzer_parallel.html#ess.reduce.polarization.he3.transmission_fraction_analyzer_parallel">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">transmission_fraction_analyzer_parallel</span><span class="p">(</span>
+    <span class="n">upup</span><span class="p">:</span> <span class="n">He3AnalyzerTransmissionFractionIncomingPolarized</span><span class="p">[</span><span class="n">Up</span><span class="p">,</span> <span class="n">Up</span><span class="p">],</span>
+    <span class="n">downdown</span><span class="p">:</span> <span class="n">He3AnalyzerTransmissionFractionIncomingPolarized</span><span class="p">[</span><span class="n">Down</span><span class="p">,</span> <span class="n">Down</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">He3AnalyzerTransmissionFractionParallel</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Analyzer Transmission fraction with polarization parallel to incoming beam.</span>
+
+<span class="sd">    It may not always we desirable to use both up-up and down-down transmission,</span>
+<span class="sd">    fractions. If that is the case, set He3AnalyzerTransmissionFractionPlus directly</span>
+<span class="sd">    instead of using this helper.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># The transmission fractions do not share a common time coordinate. Therefore,</span>
+    <span class="c1"># we cannot concat along a third dimension for the fit, but concat along time,</span>
+    <span class="c1"># with an additional coordinate for whether polarizations are parallel or</span>
+    <span class="c1"># antiparallel.</span>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">upup</span><span class="p">,</span> <span class="n">downdown</span><span class="p">],</span> <span class="s1">&#39;time&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">(</span><span class="n">plus_minus</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="transmission_fraction_analyzer_antiparallel">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.polarization.he3.transmission_fraction_analyzer_antiparallel.html#ess.reduce.polarization.he3.transmission_fraction_analyzer_antiparallel">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">transmission_fraction_analyzer_antiparallel</span><span class="p">(</span>
+    <span class="n">updown</span><span class="p">:</span> <span class="n">He3AnalyzerTransmissionFractionIncomingPolarized</span><span class="p">[</span><span class="n">Up</span><span class="p">,</span> <span class="n">Down</span><span class="p">],</span>
+    <span class="n">downup</span><span class="p">:</span> <span class="n">He3AnalyzerTransmissionFractionIncomingPolarized</span><span class="p">[</span><span class="n">Down</span><span class="p">,</span> <span class="n">Up</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">He3AnalyzerTransmissionFractionAntiParallel</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Analyzer transmission fraction with polarization anti-parallel to incoming beam.</span>
+
+<span class="sd">    It may not always we desirable to use both up-down and down-up transmission,</span>
+<span class="sd">    fractions. If that is the case, set He3AnalyzerTransmissionFractionMinus directly</span>
+<span class="sd">    instead of using this helper.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># The transmission fractions do not share a common time coordinate. Therefore,</span>
+    <span class="c1"># we cannot concat along a third dimension for the fit, but concat along time,</span>
+    <span class="c1"># with an additional coordinate for whether polarizations are parallel or</span>
+    <span class="c1"># antiparallel.</span>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">updown</span><span class="p">,</span> <span class="n">downup</span><span class="p">],</span> <span class="s1">&#39;time&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">(</span><span class="n">plus_minus</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="get_he3_transmission_incoming_polarized_from_fit_to_direct_beam">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.polarization.he3.get_he3_transmission_incoming_polarized_from_fit_to_direct_beam.html#ess.reduce.polarization.he3.get_he3_transmission_incoming_polarized_from_fit_to_direct_beam">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_he3_transmission_incoming_polarized_from_fit_to_direct_beam</span><span class="p">(</span>
+    <span class="n">plus</span><span class="p">:</span> <span class="n">He3AnalyzerTransmissionFractionParallel</span><span class="p">,</span>
+    <span class="n">minus</span><span class="p">:</span> <span class="n">He3AnalyzerTransmissionFractionAntiParallel</span><span class="p">,</span>
+    <span class="n">opacity_function</span><span class="p">:</span> <span class="n">He3OpacityFunction</span><span class="p">[</span><span class="n">Analyzer</span><span class="p">],</span>
+    <span class="n">transmission_empty_glass</span><span class="p">:</span> <span class="n">He3TransmissionEmptyGlass</span><span class="p">[</span><span class="n">Analyzer</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TransmissionFunction</span><span class="p">[</span><span class="n">Analyzer</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Transmission function for the analyzer, computed with incoming polarized beam.</span>
+
+<span class="sd">    This is composed from the opacity-function and the polarization-function.</span>
+<span class="sd">    The implementation fits a time- and wavelength-dependent equation and returns</span>
+<span class="sd">    the fitted T(t, lambda).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">plus_minus</span> <span class="o">:=</span> <span class="n">plus</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;plus_minus&#39;</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">sc</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">plus_minus</span> <span class="o">==</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mi">1</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Expected plus-minus coordinate of plus channel to be +1.&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">plus</span> <span class="o">=</span> <span class="n">plus</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">(</span><span class="n">plus_minus</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">plus_minus</span> <span class="o">:=</span> <span class="n">minus</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;plus_minus&#39;</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">sc</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">plus_minus</span> <span class="o">==</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;Expected plus-minus coordinate of minus channel to be -1.&#39;</span>
+            <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">minus</span> <span class="o">=</span> <span class="n">minus</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">(</span><span class="n">plus_minus</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+
+    <span class="n">transmission_fraction</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">plus</span><span class="p">,</span> <span class="n">minus</span><span class="p">],</span> <span class="s1">&#39;time&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">expected_transmission</span><span class="p">(</span>
+        <span class="n">wavelength</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+        <span class="n">time</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+        <span class="n">plus_minus</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+        <span class="n">C</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+        <span class="n">T1</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+        <span class="n">polarization_function</span> <span class="o">=</span> <span class="n">He3PolarizationFunction</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">](</span><span class="n">C</span><span class="o">=</span><span class="n">C</span><span class="p">,</span> <span class="n">T1</span><span class="o">=</span><span class="n">T1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">He3TransmissionFunction</span><span class="p">(</span>
+            <span class="n">opacity_function</span><span class="o">=</span><span class="n">opacity_function</span><span class="p">,</span>
+            <span class="n">polarization_function</span><span class="o">=</span><span class="n">polarization_function</span><span class="p">,</span>
+            <span class="n">transmission_empty_glass</span><span class="o">=</span><span class="n">transmission_empty_glass</span><span class="p">,</span>
+        <span class="p">)(</span><span class="n">time</span><span class="o">=</span><span class="n">time</span><span class="p">,</span> <span class="n">wavelength</span><span class="o">=</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">plus_minus</span><span class="o">=</span><span class="n">plus_minus</span><span class="p">)</span>
+
+    <span class="n">popt</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">curve_fit</span><span class="p">(</span>
+        <span class="p">[</span><span class="s1">&#39;wavelength&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;plus_minus&#39;</span><span class="p">],</span>
+        <span class="n">expected_transmission</span><span class="p">,</span>
+        <span class="n">_with_midpoints</span><span class="p">(</span><span class="n">transmission_fraction</span><span class="p">,</span> <span class="s1">&#39;wavelength&#39;</span><span class="p">),</span>
+        <span class="n">p0</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="s1">&#39;T1&#39;</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">400000.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)},</span>
+    <span class="p">)</span>
+    <span class="c1"># TODO Consider including variances from fit</span>
+    <span class="n">polarization_function</span> <span class="o">=</span> <span class="n">He3PolarizationFunction</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">](</span>
+        <span class="n">C</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="n">popt</span><span class="p">[</span><span class="s1">&#39;C&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">T1</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="n">popt</span><span class="p">[</span><span class="s1">&#39;T1&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">data</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">He3TransmissionFunction</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">](</span>
+        <span class="n">opacity_function</span><span class="o">=</span><span class="n">opacity_function</span><span class="p">,</span>
+        <span class="n">polarization_function</span><span class="o">=</span><span class="n">polarization_function</span><span class="p">,</span>
+        <span class="n">transmission_empty_glass</span><span class="o">=</span><span class="n">transmission_empty_glass</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="compute_direct_beam">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.polarization.he3.compute_direct_beam.html#ess.reduce.polarization.he3.compute_direct_beam">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_direct_beam</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+    <span class="n">q_range</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="n">background_q_range</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute background-subtracted direct beam function.</span>
+
+<span class="sd">    The input must be normalized data, not counts.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">unit</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Input data must be normalized, got unit </span><span class="si">{</span><span class="n">data</span><span class="o">.</span><span class="n">unit</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">q_range</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">background_q_range</span><span class="o">.</span><span class="n">min</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Background range must be after direct beam range.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">q_range</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;1/angstrom&#39;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Q-range must be positive.&#39;</span><span class="p">)</span>
+    <span class="n">q_range</span> <span class="o">=</span> <span class="n">q_range</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">background_q_range</span> <span class="o">=</span> <span class="n">background_q_range</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">start_db</span> <span class="o">=</span> <span class="n">q_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">stop_db</span> <span class="o">=</span> <span class="n">q_range</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">start_bg</span> <span class="o">=</span> <span class="n">background_q_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">stop_bg</span> <span class="o">=</span> <span class="n">background_q_range</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="c1"># Simple approach for now: Assume we can treat this as rotation invariant</span>
+    <span class="n">qx</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Qx&#39;</span><span class="p">]</span>
+    <span class="n">qy</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Qy&#39;</span><span class="p">]</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q_squared&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">qx</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">qy</span><span class="o">**</span><span class="mi">2</span>
+    <span class="c1"># The input is binned in time and wavelength, we simply take the per-bin mean</span>
+    <span class="c1"># without changes.</span>
+    <span class="n">beam_region</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="s1">&#39;Q_squared&#39;</span><span class="p">,</span> <span class="n">start_db</span><span class="p">:</span><span class="n">stop_db</span><span class="p">]</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">background</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="s1">&#39;Q_squared&#39;</span><span class="p">,</span> <span class="n">start_bg</span><span class="p">:</span><span class="n">stop_bg</span><span class="p">]</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">beam_region</span> <span class="o">-</span> <span class="n">background</span></div>
+
+
+
+<span class="n">DirectBeamQRange</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s1">&#39;DirectBeamQRange&#39;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Q-range defining the direct beam region in a direct beam measurement.&quot;&quot;&quot;</span>
+
+<span class="n">DirectBeamBackgroundQRange</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s1">&#39;DirectBeamBackgroundQRange&#39;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Q-range defining the direct beam background region in a direct beam measurement.&quot;&quot;&quot;</span>
+
+<span class="n">ReducedDirectBeamDataNoCell</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s1">&#39;ReducedDirectBeamDataNoCell&#39;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ReducedDirectBeamData">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.polarization.he3.ReducedDirectBeamData.html#ess.reduce.polarization.he3.ReducedDirectBeamData">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ReducedDirectBeamData</span><span class="p">(</span>
+    <span class="n">sl</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">,</span> <span class="n">PolarizationState</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Direct beam data for a given cell, as a function of wavelength and time.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="direct_beam">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.polarization.he3.direct_beam.html#ess.reduce.polarization.he3.direct_beam">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">direct_beam</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">ReducedDirectBeamDataNoCell</span><span class="p">,</span>
+    <span class="n">q_range</span><span class="p">:</span> <span class="n">DirectBeamQRange</span><span class="p">,</span>
+    <span class="n">background_q_range</span><span class="p">:</span> <span class="n">DirectBeamBackgroundQRange</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DirectBeamNoCell</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the direct beam function without any cells.</span>
+
+<span class="sd">    The result is background-subtracted and returned as function of wavelength.</span>
+<span class="sd">    Other dimensions of the input are preserved. In particular, the time dimension,</span>
+<span class="sd">    corresponding to different direct beam measurements, is preserved.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">DirectBeamNoCell</span><span class="p">(</span>
+        <span class="n">compute_direct_beam</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+            <span class="n">q_range</span><span class="o">=</span><span class="n">q_range</span><span class="p">,</span>
+            <span class="n">background_q_range</span><span class="o">=</span><span class="n">background_q_range</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="direct_beam_with_cell">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.polarization.he3.direct_beam_with_cell.html#ess.reduce.polarization.he3.direct_beam_with_cell">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">direct_beam_with_cell</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">ReducedDirectBeamData</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">,</span> <span class="n">PolarizationState</span><span class="p">],</span>
+    <span class="n">q_range</span><span class="p">:</span> <span class="n">DirectBeamQRange</span><span class="p">,</span>
+    <span class="n">background_q_range</span><span class="p">:</span> <span class="n">DirectBeamBackgroundQRange</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">He3DirectBeam</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">,</span> <span class="n">PolarizationState</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the direct beam function for a given cell.</span>
+
+<span class="sd">    The result is background-subtracted and returned as function of wavelength and</span>
+<span class="sd">    wall-clock time. The time dependence is coarse, i.e., due to different time</span>
+<span class="sd">    intervals at which the direct beam is measured.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">He3DirectBeam</span><span class="p">[</span><span class="n">PolarizingElement</span><span class="p">,</span> <span class="n">PolarizationState</span><span class="p">](</span>
+        <span class="n">compute_direct_beam</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+            <span class="n">q_range</span><span class="o">=</span><span class="n">q_range</span><span class="p">,</span>
+            <span class="n">background_q_range</span><span class="o">=</span><span class="n">background_q_range</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="n">providers</span> <span class="o">=</span> <span class="p">(</span><span class="n">he3_opacity_from_cell_params</span><span class="p">,</span> <span class="n">direct_beam</span><span class="p">,</span> <span class="n">direct_beam_with_cell</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="He3CellWorkflow">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.polarization.he3.He3CellWorkflow.html#ess.reduce.polarization.he3.He3CellWorkflow">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">He3CellWorkflow</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span> <span class="n">in_situ</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">incoming_polarized</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sl</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Workflow for computing transmission functions for He3 cells.</span>
+
+<span class="sd">    This can handle polarizers as well as analyzers.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    in_situ :</span>
+<span class="sd">        Whether to use an in-situ definition of the cell opacity based on cell</span>
+<span class="sd">        parameters, or an ex-situ definition based on direct beam data. The latter</span>
+<span class="sd">        requires a direct-beam measurement with depolarized cells.</span>
+<span class="sd">    incoming_polarized :</span>
+<span class="sd">        Whether the incoming beam for computing the analyzer transmission is polarized.</span>
+<span class="sd">        This is the case in beamlines with a supermirror polarizer, but also if the</span>
+<span class="sd">        polarizer is not removed from the beam during the analyzer transmission</span>
+<span class="sd">        measurement.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">workflow</span> <span class="o">=</span> <span class="n">sl</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">(</span><span class="n">providers</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">in_situ</span><span class="p">:</span>
+        <span class="n">workflow</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">he3_opacity_function_from_cell_opacity</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">workflow</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">he3_opacity_function_from_beam_data</span><span class="p">)</span>
+    <span class="c1"># Note that the incoming-unpolarized function is inserted even if</span>
+    <span class="c1"># incoming_polarized=True, since the incoming-unpolarized function is still</span>
+    <span class="c1"># required for computing the *polarizer* transmission calculation.</span>
+    <span class="n">workflow</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">get_he3_transmission_incoming_unpolarized_from_fit_to_direct_beam</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">incoming_polarized</span><span class="p">:</span>
+        <span class="n">workflow</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">transmission_fraction_analyzer_parallel</span><span class="p">)</span>
+        <span class="n">workflow</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">transmission_fraction_analyzer_antiparallel</span><span class="p">)</span>
+        <span class="n">workflow</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">get_he3_transmission_incoming_polarized_from_fit_to_direct_beam</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">workflow</span></div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2024 Scipp contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><!-- This will display the version of the docs -->
+Current ESSreduce version: 26.4.2 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

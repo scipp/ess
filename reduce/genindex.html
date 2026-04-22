@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="_static/documentation_options.js?v=33b2a406"></script>
+    <script src="_static/documentation_options.js?v=4480c773"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -48,6 +48,442 @@
     <script src="_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+    <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
+
+
+
+
+
+const initStyles = () => {
+    const defaultStyle = document.createElement('style');
+    defaultStyle.textContent = `pre.mermaid {
+    /* Same as .mermaid-container > pre */
+    display: block;
+    width: 100%;
+}
+
+pre.mermaid > svg {
+    /* Same as .mermaid-container > pre > svg */
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}`;
+    document.head.appendChild(defaultStyle);
+
+    const fullscreenStyle = document.createElement('style');
+    fullscreenStyle.textContent = `.mermaid-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+.mermaid-container > pre {
+    display: block;
+    width: 100%;
+}
+
+.mermaid-container > pre > svg {
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}
+
+.mermaid-fullscreen-btn {
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    color: #333;
+}
+
+.mermaid-fullscreen-btn:hover {
+    opacity: 100% !important;
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-btn.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-btn.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal {
+    display: none;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 95vw;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.98);
+    z-index: 9999;
+    padding: 20px;
+    overflow: auto;
+}
+
+.mermaid-fullscreen-modal.dark-theme {
+    background: rgba(0, 0, 0, 0.98);
+}
+
+.mermaid-fullscreen-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen {
+    position: relative;
+    width: 95vw;
+    height: 90vh;
+    max-width: 95vw;
+    max-height: 90vh;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen.dark-theme {
+    background: #1a1a1a;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+}
+
+.mermaid-container-fullscreen pre.mermaid {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen .mermaid svg {
+    height: 100% !important;
+    width: 100% !important;
+    cursor: grab;
+}
+
+.mermaid-fullscreen-close {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s;
+    font-size: 24px;
+    line-height: 1;
+    color: #333;
+}
+
+.mermaid-fullscreen-close:hover {
+    background: white;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-close.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-close.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal .mermaid-fullscreen-btn {
+    display: none !important;
+}`;
+    document.head.appendChild(fullscreenStyle);
+}
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    // We use a set of heuristics:
+    // 1. Check for common dark mode classes or attributes
+    // 2. Check computed background color brightness
+    if (document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.body.classList.contains('dark') ||
+        document.body.getAttribute('data-theme') === 'dark') {
+        // console.log("Dark theme detected via class/attribute");
+        return true;
+    }
+    if (document.documentElement.classList.contains('light') ||
+        document.documentElement.getAttribute('data-theme') === 'light' ||
+        document.body.classList.contains('light') ||
+        document.body.getAttribute('data-theme') === 'light') {
+        // console.log("Light theme detected via class/attribute");
+        return false;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // console.log("Dark theme detected via prefers-color-scheme");
+        return true;
+    }
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        // console.log("Background color brightness:", brightness);
+        return brightness < 128;
+    }
+    // console.log("No dark or light theme detected, defaulting to light theme");
+    return false;
+};
+
+let darkTheme = isDarkTheme();
+let modal = null;
+let modalContent = null;
+let previousScrollOffset = [window.scrollX, window.scrollY];
+
+const runMermaid = async (rerun) => {
+    console.log("Running mermaid diagrams, rerun =", rerun);
+    // clear all existing mermaid charts
+    let all_mermaids = document.querySelectorAll(".mermaid");
+
+    if (rerun) {
+        all_mermaids.forEach((el) => {
+            if(!el.hasAttribute("data-original-code")) {
+                // store original code
+                // console.log(`Storing original code for first run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+            if(el.getAttribute("data-processed") === "true") {
+                // remove and restore original
+                el.removeAttribute("data-processed");
+                // console.log(`Restoring original code for re-run: `, el.getAttribute('data-original-code'));
+                el.innerHTML = el.getAttribute('data-original-code');
+            } else {
+                // store original code
+                // console.log(`Storing original code for re-run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+        });
+        await mermaid.run();
+    }
+
+    all_mermaids = document.querySelectorAll(".mermaid");
+    const mermaids_processed = document.querySelectorAll(".mermaid[data-processed='true']");
+
+    if ("False" === "True") {
+        const mermaids_to_add_zoom = -1 === -1 ? all_mermaids.length : -1;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll("");
+            if(all_mermaids.length !== mermaids_processed.length) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            } else if(svgs.size() !== mermaids_to_add_zoom) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            } else {
+                svgs.each(function() {
+                    var svg = d3.select(this);
+                    svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+                    var inner = svg.select("g");
+                    var zoom = d3.zoom().on("zoom", function(event) {
+                        inner.attr("transform", event.transform);
+                    });
+                    svg.call(zoom);
+                });
+            }
+        }
+    } else if(all_mermaids.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(() => runMermaid(false), 200);
+        return;
+    }
+
+    // Stop here if not adding fullscreen capability
+    if ("True" !== "True") return;
+
+    if (modal !== null ) {
+        // Destroy existing modal
+        modal.remove();
+        modal = null;
+        modalContent = null;
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    const closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            // Already processed, adjust button class if needed
+            const existingBtn = mermaidDiv.parentNode.querySelector('.mermaid-fullscreen-btn');
+            if (existingBtn) {
+                existingBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+            }
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = '⛶';
+        fullscreenBtn.style.opacity = '50%';
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scroll, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.sdisplay = 'block';
+
+                if ("False" === "True") {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        container.appendChild(fullscreenBtn);
+    });
+};
+
+const load = async () => {
+    initStyles();
+
+    await runMermaid(true);
+
+    const reRunIfThemeChanges = async () => {
+        const newDarkTheme = isDarkTheme();
+        if (newDarkTheme !== darkTheme) {
+            darkTheme = newDarkTheme;
+            console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
+            await mermaid.initialize(
+                {...JSON.parse(
+                    `{"startOnLoad": false}`
+                ),
+                ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+                }
+            );
+            await runMermaid(true);
+        }
+    };
+
+    // Update theme classes when theme changes
+    const themeObserver = new MutationObserver(reRunIfThemeChanges);
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+};
+
+
+
+
+
+console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
+mermaid.initialize(
+    {...JSON.parse(
+        `{"startOnLoad": false}`
+    ),
+    ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+    }
+);
+
+window.addEventListener("load", load);
+window.runMermaid = runMermaid;</script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'genindex';</script>
     <script src="_static/anaconda-icon.js?v=461bdc62"></script>
     <link rel="icon" href="_static/favicon.svg"/>
@@ -55,7 +491,7 @@
     <link rel="search" title="Search" href="search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.4.1" />
+  <meta name="docsearch:version" content="26.4.2" />
   </head>
   
   
@@ -549,6 +985,8 @@
 </li>
         <li><a href="generated/modules/ess.reduce.nexus.types.DiskChoppers.html#ess.reduce.nexus.types.DiskChoppers.__init__">(ess.reduce.nexus.types.DiskChoppers method)</a>
 </li>
+        <li><a href="generated/modules/ess.reduce.nexus.types.DynamicPosition.html#ess.reduce.nexus.types.DynamicPosition.__init__">(ess.reduce.nexus.types.DynamicPosition method)</a>
+</li>
         <li><a href="generated/modules/ess.reduce.nexus.types.EmptyDetector.html#ess.reduce.nexus.types.EmptyDetector.__init__">(ess.reduce.nexus.types.EmptyDetector method)</a>
 </li>
         <li><a href="generated/modules/ess.reduce.nexus.types.EmptyMonitor.html#ess.reduce.nexus.types.EmptyMonitor.__init__">(ess.reduce.nexus.types.EmptyMonitor method)</a>
@@ -591,7 +1029,65 @@
 </li>
         <li><a href="generated/modules/ess.reduce.nexus.types.TimeInterval.html#ess.reduce.nexus.types.TimeInterval.__init__">(ess.reduce.nexus.types.TimeInterval method)</a>
 </li>
+        <li><a href="generated/modules/ess.reduce.nexus.types.TransformationTimeFilter.html#ess.reduce.nexus.types.TransformationTimeFilter.__init__">(ess.reduce.nexus.types.TransformationTimeFilter method)</a>
+</li>
         <li><a href="generated/modules/ess.reduce.nexus.types.TransmissionRun.html#ess.reduce.nexus.types.TransmissionRun.__init__">(ess.reduce.nexus.types.TransmissionRun method)</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.base.CellInBeamLog.html#ess.reduce.polarization.base.CellInBeamLog.__init__">(ess.reduce.polarization.base.CellInBeamLog method)</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.base.CellSpinLog.html#ess.reduce.polarization.base.CellSpinLog.__init__">(ess.reduce.polarization.base.CellSpinLog method)</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.correction.InverseFlipperMatrix.html#ess.reduce.polarization.correction.InverseFlipperMatrix.__init__">(ess.reduce.polarization.correction.InverseFlipperMatrix method)</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.he3.He3AnalyzerTransmissionFractionIncomingPolarized.html#ess.reduce.polarization.he3.He3AnalyzerTransmissionFractionIncomingPolarized.__init__">(ess.reduce.polarization.he3.He3AnalyzerTransmissionFractionIncomingPolarized method)</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.he3.He3CellLength.html#ess.reduce.polarization.he3.He3CellLength.__init__">(ess.reduce.polarization.he3.He3CellLength method)</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.he3.He3CellPressure.html#ess.reduce.polarization.he3.He3CellPressure.__init__">(ess.reduce.polarization.he3.He3CellPressure method)</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.he3.He3CellTemperature.html#ess.reduce.polarization.he3.He3CellTemperature.__init__">(ess.reduce.polarization.he3.He3CellTemperature method)</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.he3.He3CellTransmissionFractionIncomingUnpolarized.html#ess.reduce.polarization.he3.He3CellTransmissionFractionIncomingUnpolarized.__init__">(ess.reduce.polarization.he3.He3CellTransmissionFractionIncomingUnpolarized method)</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.he3.He3DirectBeam.html#ess.reduce.polarization.he3.He3DirectBeam.__init__">(ess.reduce.polarization.he3.He3DirectBeam method)</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.he3.He3FillingTime.html#ess.reduce.polarization.he3.He3FillingTime.__init__">(ess.reduce.polarization.he3.He3FillingTime method)</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.he3.He3Opacity0.html#ess.reduce.polarization.he3.He3Opacity0.__init__">(ess.reduce.polarization.he3.He3Opacity0 method)</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.he3.He3OpacityFunction.html#ess.reduce.polarization.he3.He3OpacityFunction.__init__">(ess.reduce.polarization.he3.He3OpacityFunction method)</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.he3.He3PolarizationFunction.html#ess.reduce.polarization.he3.He3PolarizationFunction.__init__">(ess.reduce.polarization.he3.He3PolarizationFunction method)</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.he3.He3TransmissionEmptyGlass.html#ess.reduce.polarization.he3.He3TransmissionEmptyGlass.__init__">(ess.reduce.polarization.he3.He3TransmissionEmptyGlass method)</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.he3.He3TransmissionFunction.html#ess.reduce.polarization.he3.He3TransmissionFunction.__init__">(ess.reduce.polarization.he3.He3TransmissionFunction method)</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.he3.ReducedDirectBeamData.html#ess.reduce.polarization.he3.ReducedDirectBeamData.__init__">(ess.reduce.polarization.he3.ReducedDirectBeamData method)</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.supermirror.EfficiencyLookupTable.html#ess.reduce.polarization.supermirror.EfficiencyLookupTable.__init__">(ess.reduce.polarization.supermirror.EfficiencyLookupTable method)</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.supermirror.SecondDegreePolynomialEfficiency.html#ess.reduce.polarization.supermirror.SecondDegreePolynomialEfficiency.__init__">(ess.reduce.polarization.supermirror.SecondDegreePolynomialEfficiency method)</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.supermirror.SupermirrorEfficiencyFunction.html#ess.reduce.polarization.supermirror.SupermirrorEfficiencyFunction.__init__">(ess.reduce.polarization.supermirror.SupermirrorEfficiencyFunction method)</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.supermirror.SupermirrorTransmissionFunction.html#ess.reduce.polarization.supermirror.SupermirrorTransmissionFunction.__init__">(ess.reduce.polarization.supermirror.SupermirrorTransmissionFunction method)</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.types.FlipperEfficiency.html#ess.reduce.polarization.types.FlipperEfficiency.__init__">(ess.reduce.polarization.types.FlipperEfficiency method)</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.types.HalfPolarizedCorrectedData.html#ess.reduce.polarization.types.HalfPolarizedCorrectedData.__init__">(ess.reduce.polarization.types.HalfPolarizedCorrectedData method)</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.types.HalfPolarizedCorrection.html#ess.reduce.polarization.types.HalfPolarizedCorrection.__init__">(ess.reduce.polarization.types.HalfPolarizedCorrection method)</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.types.PolarizationCorrectedData.html#ess.reduce.polarization.types.PolarizationCorrectedData.__init__">(ess.reduce.polarization.types.PolarizationCorrectedData method)</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.types.PolarizationCorrection.html#ess.reduce.polarization.types.PolarizationCorrection.__init__">(ess.reduce.polarization.types.PolarizationCorrection method)</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.types.PolarizingElementCorrection.html#ess.reduce.polarization.types.PolarizingElementCorrection.__init__">(ess.reduce.polarization.types.PolarizingElementCorrection method)</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.types.ReducedSampleDataBySpinChannel.html#ess.reduce.polarization.types.ReducedSampleDataBySpinChannel.__init__">(ess.reduce.polarization.types.ReducedSampleDataBySpinChannel method)</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.types.TransmissionFunction.html#ess.reduce.polarization.types.TransmissionFunction.__init__">(ess.reduce.polarization.types.TransmissionFunction method)</a>
 </li>
         <li><a href="generated/modules/ess.reduce.streaming.Accumulator.html#ess.reduce.streaming.Accumulator.__init__">(ess.reduce.streaming.Accumulator method)</a>
 </li>
@@ -638,14 +1134,18 @@
 </li>
       <li><a href="generated/modules/ess.reduce.nexus.workflow.all_component_spec.html#ess.reduce.nexus.workflow.all_component_spec">all_component_spec() (in module ess.reduce.nexus.workflow)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/modules/ess.reduce.nexus.types.AllNeXusComponents.html#ess.reduce.nexus.types.AllNeXusComponents">AllNeXusComponents (class in ess.reduce.nexus.types)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/modules/ess.reduce.nexus.types.AnyRun.html#ess.reduce.nexus.types.AnyRun">AnyRun (in module ess.reduce.nexus.types)</a>
 </li>
       <li><a href="generated/modules/ess.reduce.live.roi.ROIFilter.html#ess.reduce.live.roi.ROIFilter.apply">apply() (ess.reduce.live.roi.ROIFilter method)</a>
+
+      <ul>
+        <li><a href="generated/modules/ess.reduce.polarization.supermirror.SupermirrorTransmissionFunction.html#ess.reduce.polarization.supermirror.SupermirrorTransmissionFunction.apply">(ess.reduce.polarization.supermirror.SupermirrorTransmissionFunction method)</a>
 </li>
+      </ul></li>
       <li><a href="generated/modules/ess.reduce.live.raw.Histogrammer.html#ess.reduce.live.raw.Histogrammer.apply_full">apply_full() (ess.reduce.live.raw.Histogrammer method)</a>
 </li>
       <li><a href="generated/modules/ess.reduce.live.roi.apply_selection.html#ess.reduce.live.roi.apply_selection">apply_selection() (in module ess.reduce.live.roi)</a>
@@ -680,6 +1180,10 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/modules/ess.reduce.nexus.types.CaveMonitor.html#ess.reduce.nexus.types.CaveMonitor">CaveMonitor (in module ess.reduce.nexus.types)</a>
 </li>
+      <li><a href="generated/modules/ess.reduce.polarization.base.CellInBeamLog.html#ess.reduce.polarization.base.CellInBeamLog">CellInBeamLog (class in ess.reduce.polarization.base)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.base.CellSpinLog.html#ess.reduce.polarization.base.CellSpinLog">CellSpinLog (class in ess.reduce.polarization.base)</a>
+</li>
       <li><a href="generated/modules/ess.reduce.streaming.Accumulator.html#ess.reduce.streaming.Accumulator.clear">clear() (ess.reduce.streaming.Accumulator method)</a>
 
       <ul>
@@ -696,8 +1200,6 @@
         <li><a href="generated/modules/ess.reduce.streaming.StreamProcessor.html#ess.reduce.streaming.StreamProcessor.clear">(ess.reduce.streaming.StreamProcessor method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/modules/ess.reduce.live.raw.RollingDetectorView.html#ess.reduce.live.raw.RollingDetectorView.clear_counts">clear_counts() (ess.reduce.live.raw.RollingDetectorView method)</a>
 </li>
       <li><a href="generated/modules/ess.reduce.nexus.types.Component.html#ess.reduce.nexus.types.Component">Component (in module ess.reduce.nexus.types)</a>
@@ -706,13 +1208,33 @@
 </li>
       <li><a href="generated/modules/ess.reduce.nexus.workflow.component_spec_by_name.html#ess.reduce.nexus.workflow.component_spec_by_name">component_spec_by_name() (in module ess.reduce.nexus.workflow)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/modules/ess.reduce.polarization.he3.compute_direct_beam.html#ess.reduce.polarization.he3.compute_direct_beam">compute_direct_beam() (in module ess.reduce.polarization.he3)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.nexus.workflow.compute_dynamic_position.html#ess.reduce.nexus.workflow.compute_dynamic_position">compute_dynamic_position() (in module ess.reduce.nexus.workflow)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.correction.compute_half_polarized_corrected_data.html#ess.reduce.polarization.correction.compute_half_polarized_corrected_data">compute_half_polarized_corrected_data() (in module ess.reduce.polarization.correction)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.correction.compute_half_polarized_correction.html#ess.reduce.polarization.correction.compute_half_polarized_correction">compute_half_polarized_correction() (in module ess.reduce.polarization.correction)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.correction.compute_polarization_corrected_data.html#ess.reduce.polarization.correction.compute_polarization_corrected_data">compute_polarization_corrected_data() (in module ess.reduce.polarization.correction)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.correction.compute_polarization_correction.html#ess.reduce.polarization.correction.compute_polarization_correction">compute_polarization_correction() (in module ess.reduce.polarization.correction)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.correction.compute_polarizing_element_correction.html#ess.reduce.polarization.correction.compute_polarizing_element_correction">compute_polarizing_element_correction() (in module ess.reduce.polarization.correction)</a>
+</li>
       <li><a href="generated/modules/ess.reduce.nexus.workflow.compute_position.html#ess.reduce.nexus.workflow.compute_position">compute_position() (in module ess.reduce.nexus.workflow)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.he3.compute_transmission_fraction_from_direct_beam.html#ess.reduce.polarization.he3.compute_transmission_fraction_from_direct_beam">compute_transmission_fraction_from_direct_beam() (in module ess.reduce.polarization.he3)</a>
 </li>
       <li><a href="generated/modules/ess.reduce.ui.connect_output_selection_and_parameter_run_button.html#ess.reduce.ui.connect_output_selection_and_parameter_run_button">connect_output_selection_and_parameter_run_button() (in module ess.reduce.ui)</a>
 </li>
       <li><a href="generated/modules/ess.reduce.ui.connect_refresh_button.html#ess.reduce.ui.connect_refresh_button">connect_refresh_button() (in module ess.reduce.ui)</a>
 </li>
       <li><a href="generated/modules/ess.reduce.nexus.json_nexus.contains_stream.html#ess.reduce.nexus.json_nexus.contains_stream">contains_stream() (in module ess.reduce.nexus.json_nexus)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.correction.CorrectionWorkflow.html#ess.reduce.polarization.correction.CorrectionWorkflow">CorrectionWorkflow() (in module ess.reduce.polarization.correction)</a>
 </li>
       <li><a href="generated/modules/ess.reduce.widgets.create_parameter_widget.html#ess.reduce.widgets.create_parameter_widget">create_parameter_widget() (in module ess.reduce.widgets)</a>
 </li>
@@ -728,13 +1250,29 @@
 </li>
       <li><a href="generated/modules/ess.reduce.nexus.types.DetectorPositionOffset.html#ess.reduce.nexus.types.DetectorPositionOffset">DetectorPositionOffset (class in ess.reduce.nexus.types)</a>
 </li>
+      <li><a href="generated/modules/ess.reduce.polarization.base.determine_run_section.html#ess.reduce.polarization.base.determine_run_section">determine_run_section() (in module ess.reduce.polarization.base)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.he3.direct_beam.html#ess.reduce.polarization.he3.direct_beam">direct_beam() (in module ess.reduce.polarization.he3)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.he3.direct_beam_with_cell.html#ess.reduce.polarization.he3.direct_beam_with_cell">direct_beam_with_cell() (in module ess.reduce.polarization.he3)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.he3.DirectBeamBackgroundQRange.html#ess.reduce.polarization.he3.DirectBeamBackgroundQRange">DirectBeamBackgroundQRange (in module ess.reduce.polarization.he3)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/modules/ess.reduce.polarization.he3.DirectBeamNoCell.html#ess.reduce.polarization.he3.DirectBeamNoCell">DirectBeamNoCell (in module ess.reduce.polarization.he3)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.he3.DirectBeamQRange.html#ess.reduce.polarization.he3.DirectBeamQRange">DirectBeamQRange (in module ess.reduce.polarization.he3)</a>
+</li>
       <li><a href="generated/modules/ess.reduce.nexus.types.DiskChoppers.html#ess.reduce.nexus.types.DiskChoppers">DiskChoppers (class in ess.reduce.nexus.types)</a>
 </li>
       <li><a href="generated/modules/ess.reduce.uncertainty.UncertaintyBroadcastMode.html#ess.reduce.uncertainty.UncertaintyBroadcastMode.drop">drop (ess.reduce.uncertainty.UncertaintyBroadcastMode attribute)</a>
 </li>
       <li><a href="generated/modules/ess.reduce.uncertainty.drop_variances_if_broadcast.html#ess.reduce.uncertainty.drop_variances_if_broadcast">drop_variances_if_broadcast() (in module ess.reduce.uncertainty)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.base.dummy_reduction.html#ess.reduce.polarization.base.dummy_reduction">dummy_reduction() (in module ess.reduce.polarization.base)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.nexus.types.DynamicPosition.html#ess.reduce.nexus.types.DynamicPosition">DynamicPosition (class in ess.reduce.nexus.types)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -742,6 +1280,8 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/modules/ess.reduce.polarization.supermirror.EfficiencyLookupTable.html#ess.reduce.polarization.supermirror.EfficiencyLookupTable">EfficiencyLookupTable (class in ess.reduce.polarization.supermirror)</a>
+</li>
       <li><a href="generated/modules/ess.reduce.nexus.types.EmptyBeamRun.html#ess.reduce.nexus.types.EmptyBeamRun">EmptyBeamRun (in module ess.reduce.nexus.types)</a>
 </li>
       <li><a href="generated/modules/ess.reduce.nexus.types.EmptyDetector.html#ess.reduce.nexus.types.EmptyDetector">EmptyDetector (class in ess.reduce.nexus.types)</a>
@@ -797,8 +1337,6 @@
         <li><a href="generated/modules/ess.reduce.nexus.json_nexus.html#module-ess.reduce.nexus.json_nexus">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     ess.reduce.nexus.types
 
@@ -818,6 +1356,57 @@
 
       <ul>
         <li><a href="generated/modules/ess.reduce.normalization.html#module-ess.reduce.normalization">module</a>
+</li>
+      </ul></li>
+      <li>
+    ess.reduce.polarization
+
+      <ul>
+        <li><a href="generated/modules/ess.reduce.polarization.html#module-ess.reduce.polarization">module</a>
+</li>
+      </ul></li>
+      <li>
+    ess.reduce.polarization.base
+
+      <ul>
+        <li><a href="generated/modules/ess.reduce.polarization.base.html#module-ess.reduce.polarization.base">module</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    ess.reduce.polarization.correction
+
+      <ul>
+        <li><a href="generated/modules/ess.reduce.polarization.correction.html#module-ess.reduce.polarization.correction">module</a>
+</li>
+      </ul></li>
+      <li>
+    ess.reduce.polarization.data
+
+      <ul>
+        <li><a href="generated/modules/ess.reduce.polarization.data.html#module-ess.reduce.polarization.data">module</a>
+</li>
+      </ul></li>
+      <li>
+    ess.reduce.polarization.he3
+
+      <ul>
+        <li><a href="generated/modules/ess.reduce.polarization.he3.html#module-ess.reduce.polarization.he3">module</a>
+</li>
+      </ul></li>
+      <li>
+    ess.reduce.polarization.supermirror
+
+      <ul>
+        <li><a href="generated/modules/ess.reduce.polarization.supermirror.html#module-ess.reduce.polarization.supermirror">module</a>
+</li>
+      </ul></li>
+      <li>
+    ess.reduce.polarization.types
+
+      <ul>
+        <li><a href="generated/modules/ess.reduce.polarization.types.html#module-ess.reduce.polarization.types">module</a>
 </li>
       </ul></li>
       <li>
@@ -854,6 +1443,22 @@
 </li>
       <li><a href="generated/modules/ess.reduce.nexus.json_generator.event_data_generator.html#ess.reduce.nexus.json_generator.event_data_generator">event_data_generator() (in module ess.reduce.nexus.json_generator)</a>
 </li>
+      <li><a href="generated/modules/ess.reduce.polarization.data.example_polarization_efficiency_table.html#ess.reduce.polarization.data.example_polarization_efficiency_table">example_polarization_efficiency_table() (in module ess.reduce.polarization.data)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.base.extract_analyzer_direct_beam_polarized.html#ess.reduce.polarization.base.extract_analyzer_direct_beam_polarized">extract_analyzer_direct_beam_polarized() (in module ess.reduce.polarization.base)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.base.extract_direct_beam.html#ess.reduce.polarization.base.extract_direct_beam">extract_direct_beam() (in module ess.reduce.polarization.base)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.base.extract_polarizer_direct_beam_polarized.html#ess.reduce.polarization.base.extract_polarizer_direct_beam_polarized">extract_polarizer_direct_beam_polarized() (in module ess.reduce.polarization.base)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.base.extract_sample_data_down_down.html#ess.reduce.polarization.base.extract_sample_data_down_down">extract_sample_data_down_down() (in module ess.reduce.polarization.base)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.base.extract_sample_data_down_up.html#ess.reduce.polarization.base.extract_sample_data_down_up">extract_sample_data_down_up() (in module ess.reduce.polarization.base)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.base.extract_sample_data_up_down.html#ess.reduce.polarization.base.extract_sample_data_up_down">extract_sample_data_up_down() (in module ess.reduce.polarization.base)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.base.extract_sample_data_up_up.html#ess.reduce.polarization.base.extract_sample_data_up_up">extract_sample_data_up_up() (in module ess.reduce.polarization.base)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -872,12 +1477,14 @@
 </li>
       <li><a href="generated/modules/ess.reduce.streaming.StreamProcessor.html#ess.reduce.streaming.StreamProcessor.finalize">finalize() (ess.reduce.streaming.StreamProcessor method)</a>
 </li>
+      <li><a href="generated/modules/ess.reduce.polarization.types.FlipperEfficiency.html#ess.reduce.polarization.types.FlipperEfficiency">FlipperEfficiency (class in ess.reduce.polarization.types)</a>
+</li>
       <li><a href="generated/modules/ess.reduce.nexus.types.FrameMonitor0.html#ess.reduce.nexus.types.FrameMonitor0">FrameMonitor0 (in module ess.reduce.nexus.types)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.nexus.types.FrameMonitor1.html#ess.reduce.nexus.types.FrameMonitor1">FrameMonitor1 (in module ess.reduce.nexus.types)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="generated/modules/ess.reduce.nexus.types.FrameMonitor1.html#ess.reduce.nexus.types.FrameMonitor1">FrameMonitor1 (in module ess.reduce.nexus.types)</a>
-</li>
       <li><a href="generated/modules/ess.reduce.nexus.types.FrameMonitor2.html#ess.reduce.nexus.types.FrameMonitor2">FrameMonitor2 (in module ess.reduce.nexus.types)</a>
 </li>
       <li><a href="generated/modules/ess.reduce.nexus.types.FrameMonitor3.html#ess.reduce.nexus.types.FrameMonitor3">FrameMonitor3 (in module ess.reduce.nexus.types)</a>
@@ -888,7 +1495,11 @@
 </li>
       <li><a href="generated/modules/ess.reduce.live.raw.RollingDetectorView.html#ess.reduce.live.raw.RollingDetectorView.from_detector_and_histogrammer">from_detector_and_histogrammer() (ess.reduce.live.raw.RollingDetectorView static method)</a>
 </li>
+      <li><a href="generated/modules/ess.reduce.polarization.correction.InverseFlipperMatrix.html#ess.reduce.polarization.correction.InverseFlipperMatrix.from_left">from_left() (ess.reduce.polarization.correction.InverseFlipperMatrix method)</a>
+</li>
       <li><a href="generated/modules/ess.reduce.live.raw.RollingDetectorView.html#ess.reduce.live.raw.RollingDetectorView.from_nexus">from_nexus() (ess.reduce.live.raw.RollingDetectorView static method)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.correction.InverseFlipperMatrix.html#ess.reduce.polarization.correction.InverseFlipperMatrix.from_right">from_right() (ess.reduce.polarization.correction.InverseFlipperMatrix method)</a>
 </li>
       <li><a href="generated/modules/ess.reduce.nexus.workflow.full_time_interval.html#ess.reduce.nexus.workflow.full_time_interval">full_time_interval() (in module ess.reduce.nexus.workflow)</a>
 </li>
@@ -907,16 +1518,24 @@
       <ul>
         <li><a href="generated/modules/ess.reduce.nexus.json_nexus.JSONAttributeManager.html#ess.reduce.nexus.json_nexus.JSONAttributeManager.get">(ess.reduce.nexus.json_nexus.JSONAttributeManager method)</a>
 </li>
+        <li><a href="generated/modules/ess.reduce.polarization.types.PolarizingElementCorrection.html#ess.reduce.polarization.types.PolarizingElementCorrection.get">(ess.reduce.polarization.types.PolarizingElementCorrection method)</a>
+</li>
       </ul></li>
       <li><a href="generated/modules/ess.reduce.nexus.workflow.get_calibrated_detector.html#ess.reduce.nexus.workflow.get_calibrated_detector">get_calibrated_detector() (in module ess.reduce.nexus.workflow)</a>
 </li>
+      <li><a href="generated/modules/ess.reduce.nexus.workflow.get_calibrated_monitor.html#ess.reduce.nexus.workflow.get_calibrated_monitor">get_calibrated_monitor() (in module ess.reduce.nexus.workflow)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="generated/modules/ess.reduce.nexus.workflow.get_calibrated_monitor.html#ess.reduce.nexus.workflow.get_calibrated_monitor">get_calibrated_monitor() (in module ess.reduce.nexus.workflow)</a>
+      <li><a href="generated/modules/ess.reduce.polarization.he3.get_he3_transmission_incoming_polarized_from_fit_to_direct_beam.html#ess.reduce.polarization.he3.get_he3_transmission_incoming_polarized_from_fit_to_direct_beam">get_he3_transmission_incoming_polarized_from_fit_to_direct_beam() (in module ess.reduce.polarization.he3)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.he3.get_he3_transmission_incoming_unpolarized_from_fit_to_direct_beam.html#ess.reduce.polarization.he3.get_he3_transmission_incoming_unpolarized_from_fit_to_direct_beam">get_he3_transmission_incoming_unpolarized_from_fit_to_direct_beam() (in module ess.reduce.polarization.he3)</a>
 </li>
       <li><a href="generated/modules/ess.reduce.logging.get_logger.html#ess.reduce.logging.get_logger">get_logger() (in module ess.reduce.logging)</a>
 </li>
       <li><a href="generated/modules/ess.reduce.ui.get_parameter_widget_values.html#ess.reduce.ui.get_parameter_widget_values">get_parameter_widget_values() (in module ess.reduce.ui)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.supermirror.get_supermirror_transmission_function.html#ess.reduce.polarization.supermirror.get_supermirror_transmission_function">get_supermirror_transmission_function() (in module ess.reduce.polarization.supermirror)</a>
 </li>
       <li><a href="generated/modules/ess.reduce.nexus.workflow.get_transformation_chain.html#ess.reduce.nexus.workflow.get_transformation_chain">get_transformation_chain() (in module ess.reduce.nexus.workflow)</a>
 </li>
@@ -928,6 +1547,50 @@
 <h2 id="H">H</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/modules/ess.reduce.polarization.types.HalfPolarizedCorrectedData.html#ess.reduce.polarization.types.HalfPolarizedCorrectedData">HalfPolarizedCorrectedData (class in ess.reduce.polarization.types)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.types.HalfPolarizedCorrection.html#ess.reduce.polarization.types.HalfPolarizedCorrection">HalfPolarizedCorrection (class in ess.reduce.polarization.types)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.correction.HalfPolarizedWorkflow.html#ess.reduce.polarization.correction.HalfPolarizedWorkflow">HalfPolarizedWorkflow() (in module ess.reduce.polarization.correction)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.he3.he3_opacity_from_cell_params.html#ess.reduce.polarization.he3.he3_opacity_from_cell_params">he3_opacity_from_cell_params() (in module ess.reduce.polarization.he3)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.he3.he3_opacity_function_from_beam_data.html#ess.reduce.polarization.he3.he3_opacity_function_from_beam_data">he3_opacity_function_from_beam_data() (in module ess.reduce.polarization.he3)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.he3.he3_opacity_function_from_cell_opacity.html#ess.reduce.polarization.he3.he3_opacity_function_from_cell_opacity">he3_opacity_function_from_cell_opacity() (in module ess.reduce.polarization.he3)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.he3.He3AnalyzerTransmissionFractionAntiParallel.html#ess.reduce.polarization.he3.He3AnalyzerTransmissionFractionAntiParallel">He3AnalyzerTransmissionFractionAntiParallel (in module ess.reduce.polarization.he3)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.he3.He3AnalyzerTransmissionFractionIncomingPolarized.html#ess.reduce.polarization.he3.He3AnalyzerTransmissionFractionIncomingPolarized">He3AnalyzerTransmissionFractionIncomingPolarized (class in ess.reduce.polarization.he3)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.he3.He3AnalyzerTransmissionFractionParallel.html#ess.reduce.polarization.he3.He3AnalyzerTransmissionFractionParallel">He3AnalyzerTransmissionFractionParallel (in module ess.reduce.polarization.he3)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.he3.He3CellLength.html#ess.reduce.polarization.he3.He3CellLength">He3CellLength (class in ess.reduce.polarization.he3)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.he3.He3CellPressure.html#ess.reduce.polarization.he3.He3CellPressure">He3CellPressure (class in ess.reduce.polarization.he3)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/modules/ess.reduce.polarization.he3.He3CellTemperature.html#ess.reduce.polarization.he3.He3CellTemperature">He3CellTemperature (class in ess.reduce.polarization.he3)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.he3.He3CellTransmissionFractionIncomingUnpolarized.html#ess.reduce.polarization.he3.He3CellTransmissionFractionIncomingUnpolarized">He3CellTransmissionFractionIncomingUnpolarized (class in ess.reduce.polarization.he3)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.he3.He3CellWorkflow.html#ess.reduce.polarization.he3.He3CellWorkflow">He3CellWorkflow() (in module ess.reduce.polarization.he3)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.he3.He3DirectBeam.html#ess.reduce.polarization.he3.He3DirectBeam">He3DirectBeam (class in ess.reduce.polarization.he3)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.he3.He3FillingTime.html#ess.reduce.polarization.he3.He3FillingTime">He3FillingTime (class in ess.reduce.polarization.he3)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.he3.He3Opacity0.html#ess.reduce.polarization.he3.He3Opacity0">He3Opacity0 (class in ess.reduce.polarization.he3)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.he3.He3OpacityFunction.html#ess.reduce.polarization.he3.He3OpacityFunction">He3OpacityFunction (class in ess.reduce.polarization.he3)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.he3.He3PolarizationFunction.html#ess.reduce.polarization.he3.He3PolarizationFunction">He3PolarizationFunction (class in ess.reduce.polarization.he3)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.he3.He3TransmissionEmptyGlass.html#ess.reduce.polarization.he3.He3TransmissionEmptyGlass">He3TransmissionEmptyGlass (class in ess.reduce.polarization.he3)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.he3.He3TransmissionFunction.html#ess.reduce.polarization.he3.He3TransmissionFunction">He3TransmissionFunction (class in ess.reduce.polarization.he3)</a>
+</li>
       <li><a href="generated/modules/ess.reduce.live.raw.Histogrammer.html#ess.reduce.live.raw.Histogrammer">Histogrammer (class in ess.reduce.live.raw)</a>
 </li>
   </ul></td>
@@ -944,6 +1607,8 @@
         <li><a href="generated/modules/ess.reduce.live.raw.LogicalView.html#ess.reduce.live.raw.LogicalView.input_indices">(ess.reduce.live.raw.LogicalView method)</a>
 </li>
       </ul></li>
+      <li><a href="generated/modules/ess.reduce.polarization.correction.InverseFlipperMatrix.html#ess.reduce.polarization.correction.InverseFlipperMatrix">InverseFlipperMatrix (class in ess.reduce.polarization.correction)</a>
+</li>
       <li><a href="generated/modules/ess.reduce.streaming.Accumulator.html#ess.reduce.streaming.Accumulator.is_empty">is_empty (ess.reduce.streaming.Accumulator property)</a>
 
       <ul>
@@ -956,6 +1621,10 @@
         <li><a href="generated/modules/ess.reduce.streaming.RollingAccumulator.html#ess.reduce.streaming.RollingAccumulator.is_empty">(ess.reduce.streaming.RollingAccumulator property)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/modules/ess.reduce.polarization.base.is_sample_channel.html#ess.reduce.polarization.base.is_sample_channel">is_sample_channel() (in module ess.reduce.polarization.base)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -1020,6 +1689,10 @@
 </li>
       <li><a href="generated/modules/ess.reduce.live.raw.RollingDetectorView.html#ess.reduce.live.raw.RollingDetectorView.make_roi_filter">make_roi_filter() (ess.reduce.live.raw.RollingDetectorView method)</a>
 </li>
+      <li><a href="generated/modules/ess.reduce.polarization.correction.make_spin_flipping_matrix_down.html#ess.reduce.polarization.correction.make_spin_flipping_matrix_down">make_spin_flipping_matrix_down() (in module ess.reduce.polarization.correction)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.correction.make_spin_flipping_matrix_up.html#ess.reduce.polarization.correction.make_spin_flipping_matrix_up">make_spin_flipping_matrix_up() (in module ess.reduce.polarization.correction)</a>
+</li>
       <li><a href="generated/modules/ess.reduce.live.raw.make_xy_plane_coords.html#ess.reduce.live.raw.make_xy_plane_coords">make_xy_plane_coords() (in module ess.reduce.live.raw)</a>
 </li>
       <li><a href="generated/modules/ess.reduce.streaming.MaxAccumulator.html#ess.reduce.streaming.MaxAccumulator">MaxAccumulator (class in ess.reduce.streaming)</a>
@@ -1055,6 +1728,20 @@
         <li><a href="generated/modules/ess.reduce.nexus.workflow.html#module-ess.reduce.nexus.workflow">ess.reduce.nexus.workflow</a>
 </li>
         <li><a href="generated/modules/ess.reduce.normalization.html#module-ess.reduce.normalization">ess.reduce.normalization</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.html#module-ess.reduce.polarization">ess.reduce.polarization</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.base.html#module-ess.reduce.polarization.base">ess.reduce.polarization.base</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.correction.html#module-ess.reduce.polarization.correction">ess.reduce.polarization.correction</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.data.html#module-ess.reduce.polarization.data">ess.reduce.polarization.data</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.he3.html#module-ess.reduce.polarization.he3">ess.reduce.polarization.he3</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.supermirror.html#module-ess.reduce.polarization.supermirror">ess.reduce.polarization.supermirror</a>
+</li>
+        <li><a href="generated/modules/ess.reduce.polarization.types.html#module-ess.reduce.polarization.types">ess.reduce.polarization.types</a>
 </li>
         <li><a href="generated/modules/ess.reduce.streaming.html#module-ess.reduce.streaming">ess.reduce.streaming</a>
 </li>
@@ -1123,6 +1810,8 @@
 </li>
       <li><a href="generated/modules/ess.reduce.nexus.workflow.no_offset.html#ess.reduce.nexus.workflow.no_offset">no_offset (in module ess.reduce.nexus.workflow)</a>
 </li>
+      <li><a href="generated/modules/ess.reduce.polarization.types.NoAnalyzer.html#ess.reduce.polarization.types.NoAnalyzer">NoAnalyzer (in module ess.reduce.polarization.types)</a>
+</li>
       <li><a href="generated/modules/ess.reduce.normalization.normalize_by_monitor_histogram.html#ess.reduce.normalization.normalize_by_monitor_histogram">normalize_by_monitor_histogram() (in module ess.reduce.normalization)</a>
 </li>
       <li><a href="generated/modules/ess.reduce.normalization.normalize_by_monitor_integrated.html#ess.reduce.normalization.normalize_by_monitor_integrated">normalize_by_monitor_integrated() (in module ess.reduce.normalization)</a>
@@ -1175,8 +1864,18 @@
 </li>
       <li><a href="generated/modules/ess.reduce.live.raw.pixel_shape.html#ess.reduce.live.raw.pixel_shape">pixel_shape() (in module ess.reduce.live.raw)</a>
 </li>
+      <li><a href="generated/modules/ess.reduce.polarization.correction.PolarizationAnalysisWorkflow.html#ess.reduce.polarization.correction.PolarizationAnalysisWorkflow">PolarizationAnalysisWorkflow() (in module ess.reduce.polarization.correction)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.types.PolarizationCorrectedData.html#ess.reduce.polarization.types.PolarizationCorrectedData">PolarizationCorrectedData (class in ess.reduce.polarization.types)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/modules/ess.reduce.polarization.types.PolarizationCorrection.html#ess.reduce.polarization.types.PolarizationCorrection">PolarizationCorrection (class in ess.reduce.polarization.types)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.he3.Polarized.html#ess.reduce.polarization.he3.Polarized">Polarized (in module ess.reduce.polarization.he3)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.types.PolarizingElementCorrection.html#ess.reduce.polarization.types.PolarizingElementCorrection">PolarizingElementCorrection (class in ess.reduce.polarization.types)</a>
+</li>
       <li><a href="generated/modules/ess.reduce.nexus.types.Position.html#ess.reduce.nexus.types.Position">Position (class in ess.reduce.nexus.types)</a>
 </li>
       <li><a href="generated/modules/ess.reduce.live.raw.position_noise_for_cylindrical_pixel.html#ess.reduce.live.raw.position_noise_for_cylindrical_pixel">position_noise_for_cylindrical_pixel() (in module ess.reduce.live.raw)</a>
@@ -1203,6 +1902,12 @@
 </li>
       <li><a href="generated/modules/ess.reduce.nexus.types.RawMonitor.html#ess.reduce.nexus.types.RawMonitor">RawMonitor (class in ess.reduce.nexus.types)</a>
 </li>
+      <li><a href="generated/modules/ess.reduce.polarization.he3.ReducedDirectBeamData.html#ess.reduce.polarization.he3.ReducedDirectBeamData">ReducedDirectBeamData (class in ess.reduce.polarization.he3)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.types.ReducedSampleDataBySpinChannel.html#ess.reduce.polarization.types.ReducedSampleDataBySpinChannel">ReducedSampleDataBySpinChannel (class in ess.reduce.polarization.types)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.nexus.workflow.reject_time_dependent_transform.html#ess.reduce.nexus.workflow.reject_time_dependent_transform">reject_time_dependent_transform() (in module ess.reduce.nexus.workflow)</a>
+</li>
       <li><a href="generated/modules/ess.reduce.live.raw.LogicalView.html#ess.reduce.live.raw.LogicalView.replicas">replicas (ess.reduce.live.raw.LogicalView property)</a>
 </li>
   </ul></td>
@@ -1215,6 +1920,10 @@
 </li>
       <li><a href="generated/modules/ess.reduce.live.raw.RollingDetectorView.html#ess.reduce.live.raw.RollingDetectorView">RollingDetectorView (class in ess.reduce.live.raw)</a>
 </li>
+      <li><a href="generated/modules/ess.reduce.polarization.base.run_reduction_workflow.html#ess.reduce.polarization.base.run_reduction_workflow">run_reduction_workflow() (in module ess.reduce.polarization.base)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.base.RunSectionLog.html#ess.reduce.polarization.base.RunSectionLog">RunSectionLog (in module ess.reduce.polarization.base)</a>
+</li>
       <li><a href="generated/modules/ess.reduce.nexus.types.RunType.html#ess.reduce.nexus.types.RunType">RunType (in module ess.reduce.nexus.types)</a>
 </li>
   </ul></td>
@@ -1223,7 +1932,11 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/modules/ess.reduce.polarization.base.SampleInBeamLog.html#ess.reduce.polarization.base.SampleInBeamLog">SampleInBeamLog (in module ess.reduce.polarization.base)</a>
+</li>
       <li><a href="generated/modules/ess.reduce.nexus.types.SampleRun.html#ess.reduce.nexus.types.SampleRun">SampleRun (in module ess.reduce.nexus.types)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.supermirror.SecondDegreePolynomialEfficiency.html#ess.reduce.polarization.supermirror.SecondDegreePolynomialEfficiency">SecondDegreePolynomialEfficiency (class in ess.reduce.polarization.supermirror)</a>
 </li>
       <li><a href="generated/modules/ess.reduce.live.roi.select_indices_in_intervals.html#ess.reduce.live.roi.select_indices_in_intervals">select_indices_in_intervals() (in module ess.reduce.live.roi)</a>
 </li>
@@ -1233,10 +1946,10 @@
 </li>
       <li><a href="generated/modules/ess.reduce.ui.set_parameter_widget_values.html#ess.reduce.ui.set_parameter_widget_values">set_parameter_widget_values() (in module ess.reduce.ui)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/modules/ess.reduce.live.roi.ROIFilter.html#ess.reduce.live.roi.ROIFilter.set_roi_from_intervals">set_roi_from_intervals() (ess.reduce.live.roi.ROIFilter method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/modules/ess.reduce.live.roi.ROIFilter.html#ess.reduce.live.roi.ROIFilter.set_roi_from_polygon">set_roi_from_polygon() (ess.reduce.live.roi.ROIFilter method)</a>
 </li>
       <li><a href="generated/modules/ess.reduce.live.roi.ROIFilter.html#ess.reduce.live.roi.ROIFilter.spatial_dims">spatial_dims (ess.reduce.live.roi.ROIFilter property)</a>
@@ -1244,6 +1957,14 @@
       <li><a href="generated/modules/ess.reduce.streaming.StreamProcessor.html#ess.reduce.streaming.StreamProcessor">StreamProcessor (class in ess.reduce.streaming)</a>
 </li>
       <li><a href="generated/modules/ess.reduce.widgets.string_parameter_widget.html#ess.reduce.widgets.string_parameter_widget">string_parameter_widget() (in module ess.reduce.widgets)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.correction.sum_polarization_contributions.html#ess.reduce.polarization.correction.sum_polarization_contributions">sum_polarization_contributions() (in module ess.reduce.polarization.correction)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.supermirror.SupermirrorEfficiencyFunction.html#ess.reduce.polarization.supermirror.SupermirrorEfficiencyFunction">SupermirrorEfficiencyFunction (class in ess.reduce.polarization.supermirror)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.supermirror.SupermirrorTransmissionFunction.html#ess.reduce.polarization.supermirror.SupermirrorTransmissionFunction">SupermirrorTransmissionFunction (class in ess.reduce.polarization.supermirror)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.supermirror.SupermirrorWorkflow.html#ess.reduce.polarization.supermirror.SupermirrorWorkflow">SupermirrorWorkflow() (in module ess.reduce.polarization.supermirror)</a>
 </li>
       <li><a href="generated/modules/ess.reduce.widgets.switchable_widget.html#ess.reduce.widgets.switchable_widget">switchable_widget() (in module ess.reduce.widgets)</a>
 </li>
@@ -1257,9 +1978,19 @@
 </li>
       <li><a href="generated/modules/ess.reduce.nexus.workflow.to_transformation.html#ess.reduce.nexus.workflow.to_transformation">to_transformation() (in module ess.reduce.nexus.workflow)</a>
 </li>
+      <li><a href="generated/modules/ess.reduce.live.raw.RollingDetectorView.html#ess.reduce.live.raw.RollingDetectorView.transform_weights">transform_weights() (ess.reduce.live.raw.RollingDetectorView method)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.nexus.types.TransformationTimeFilter.html#ess.reduce.nexus.types.TransformationTimeFilter">TransformationTimeFilter (class in ess.reduce.nexus.types)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.he3.transmission_fraction_analyzer_antiparallel.html#ess.reduce.polarization.he3.transmission_fraction_analyzer_antiparallel">transmission_fraction_analyzer_antiparallel() (in module ess.reduce.polarization.he3)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="generated/modules/ess.reduce.live.raw.RollingDetectorView.html#ess.reduce.live.raw.RollingDetectorView.transform_weights">transform_weights() (ess.reduce.live.raw.RollingDetectorView method)</a>
+      <li><a href="generated/modules/ess.reduce.polarization.he3.transmission_fraction_analyzer_parallel.html#ess.reduce.polarization.he3.transmission_fraction_analyzer_parallel">transmission_fraction_analyzer_parallel() (in module ess.reduce.polarization.he3)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.he3.transmission_incoming_unpolarized.html#ess.reduce.polarization.he3.transmission_incoming_unpolarized">transmission_incoming_unpolarized() (in module ess.reduce.polarization.he3)</a>
+</li>
+      <li><a href="generated/modules/ess.reduce.polarization.types.TransmissionFunction.html#ess.reduce.polarization.types.TransmissionFunction">TransmissionFunction (class in ess.reduce.polarization.types)</a>
 </li>
       <li><a href="generated/modules/ess.reduce.nexus.types.TransmissionMonitor.html#ess.reduce.nexus.types.TransmissionMonitor">TransmissionMonitor (in module ess.reduce.nexus.types)</a>
 </li>
@@ -1382,7 +2113,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreduce version: 26.4.1 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
+Current ESSreduce version: 26.4.2 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

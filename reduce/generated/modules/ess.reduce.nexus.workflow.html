@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../_static/documentation_options.js?v=33b2a406"></script>
+    <script src="../../_static/documentation_options.js?v=4480c773"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -58,7 +58,7 @@
     <link rel="prev" title="ess.reduce.nexus.types.TransmissionRun" href="ess.reduce.nexus.types.TransmissionRun.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.4.1" />
+  <meta name="docsearch:version" content="26.4.2" />
   </head>
   
   
@@ -553,6 +553,7 @@
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.types.AllNeXusComponents.html">ess.reduce.nexus.types.AllNeXusComponents</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.types.DetectorPositionOffset.html">ess.reduce.nexus.types.DetectorPositionOffset</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.types.DiskChoppers.html">ess.reduce.nexus.types.DiskChoppers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.types.DynamicPosition.html">ess.reduce.nexus.types.DynamicPosition</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.types.EmptyDetector.html">ess.reduce.nexus.types.EmptyDetector</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.types.EmptyMonitor.html">ess.reduce.nexus.types.EmptyMonitor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.types.Filename.html">ess.reduce.nexus.types.Filename</a></li>
@@ -574,6 +575,7 @@
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.types.RawDetector.html">ess.reduce.nexus.types.RawDetector</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.types.RawMonitor.html">ess.reduce.nexus.types.RawMonitor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.types.TimeInterval.html">ess.reduce.nexus.types.TimeInterval</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.types.TransformationTimeFilter.html">ess.reduce.nexus.types.TransformationTimeFilter</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.types.TransmissionRun.html">ess.reduce.nexus.types.TransmissionRun</a></li>
 </ul>
 </details></li>
@@ -587,6 +589,7 @@
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.assemble_detector_data.html">ess.reduce.nexus.workflow.assemble_detector_data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.assemble_monitor_data.html">ess.reduce.nexus.workflow.assemble_monitor_data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.component_spec_by_name.html">ess.reduce.nexus.workflow.component_spec_by_name</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.compute_dynamic_position.html">ess.reduce.nexus.workflow.compute_dynamic_position</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.compute_position.html">ess.reduce.nexus.workflow.compute_position</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.data_by_name.html">ess.reduce.nexus.workflow.data_by_name</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.file_path_to_file_spec.html">ess.reduce.nexus.workflow.file_path_to_file_spec</a></li>
@@ -611,6 +614,7 @@
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.nx_class_for_sample.html">ess.reduce.nexus.workflow.nx_class_for_sample</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.nx_class_for_source.html">ess.reduce.nexus.workflow.nx_class_for_source</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.parse_disk_choppers.html">ess.reduce.nexus.workflow.parse_disk_choppers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.reject_time_dependent_transform.html">ess.reduce.nexus.workflow.reject_time_dependent_transform</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.to_transformation.html">ess.reduce.nexus.workflow.to_transformation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.unique_component_spec.html">ess.reduce.nexus.workflow.unique_component_spec</a></li>
 </ul>
@@ -620,6 +624,102 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.reduce.normalization.html">ess.reduce.normalization</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="ess.reduce.normalization.normalize_by_monitor_histogram.html">ess.reduce.normalization.normalize_by_monitor_histogram</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.reduce.normalization.normalize_by_monitor_integrated.html">ess.reduce.normalization.normalize_by_monitor_integrated</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.reduce.polarization.html">ess.reduce.polarization</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="ess.reduce.polarization.base.html">ess.reduce.polarization.base</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.base.SampleInBeamLog.html">ess.reduce.polarization.base.SampleInBeamLog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.base.RunSectionLog.html">ess.reduce.polarization.base.RunSectionLog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.base.determine_run_section.html">ess.reduce.polarization.base.determine_run_section</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.base.dummy_reduction.html">ess.reduce.polarization.base.dummy_reduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.base.extract_analyzer_direct_beam_polarized.html">ess.reduce.polarization.base.extract_analyzer_direct_beam_polarized</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.base.extract_direct_beam.html">ess.reduce.polarization.base.extract_direct_beam</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.base.extract_polarizer_direct_beam_polarized.html">ess.reduce.polarization.base.extract_polarizer_direct_beam_polarized</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.base.extract_sample_data_down_down.html">ess.reduce.polarization.base.extract_sample_data_down_down</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.base.extract_sample_data_down_up.html">ess.reduce.polarization.base.extract_sample_data_down_up</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.base.extract_sample_data_up_down.html">ess.reduce.polarization.base.extract_sample_data_up_down</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.base.extract_sample_data_up_up.html">ess.reduce.polarization.base.extract_sample_data_up_up</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.base.is_sample_channel.html">ess.reduce.polarization.base.is_sample_channel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.base.run_reduction_workflow.html">ess.reduce.polarization.base.run_reduction_workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.base.CellInBeamLog.html">ess.reduce.polarization.base.CellInBeamLog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.base.CellSpinLog.html">ess.reduce.polarization.base.CellSpinLog</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="ess.reduce.polarization.correction.html">ess.reduce.polarization.correction</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.correction.CorrectionWorkflow.html">ess.reduce.polarization.correction.CorrectionWorkflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.correction.HalfPolarizedWorkflow.html">ess.reduce.polarization.correction.HalfPolarizedWorkflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.correction.PolarizationAnalysisWorkflow.html">ess.reduce.polarization.correction.PolarizationAnalysisWorkflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.correction.compute_half_polarized_corrected_data.html">ess.reduce.polarization.correction.compute_half_polarized_corrected_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.correction.compute_half_polarized_correction.html">ess.reduce.polarization.correction.compute_half_polarized_correction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.correction.compute_polarization_corrected_data.html">ess.reduce.polarization.correction.compute_polarization_corrected_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.correction.compute_polarization_correction.html">ess.reduce.polarization.correction.compute_polarization_correction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.correction.compute_polarizing_element_correction.html">ess.reduce.polarization.correction.compute_polarizing_element_correction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.correction.make_spin_flipping_matrix_down.html">ess.reduce.polarization.correction.make_spin_flipping_matrix_down</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.correction.make_spin_flipping_matrix_up.html">ess.reduce.polarization.correction.make_spin_flipping_matrix_up</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.correction.sum_polarization_contributions.html">ess.reduce.polarization.correction.sum_polarization_contributions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.correction.InverseFlipperMatrix.html">ess.reduce.polarization.correction.InverseFlipperMatrix</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="ess.reduce.polarization.data.html">ess.reduce.polarization.data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.data.example_polarization_efficiency_table.html">ess.reduce.polarization.data.example_polarization_efficiency_table</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="ess.reduce.polarization.he3.html">ess.reduce.polarization.he3</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.he3.Polarized.html">ess.reduce.polarization.he3.Polarized</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.he3.DirectBeamNoCell.html">ess.reduce.polarization.he3.DirectBeamNoCell</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.he3.He3AnalyzerTransmissionFractionParallel.html">ess.reduce.polarization.he3.He3AnalyzerTransmissionFractionParallel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.he3.He3AnalyzerTransmissionFractionAntiParallel.html">ess.reduce.polarization.he3.He3AnalyzerTransmissionFractionAntiParallel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.he3.DirectBeamQRange.html">ess.reduce.polarization.he3.DirectBeamQRange</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.he3.DirectBeamBackgroundQRange.html">ess.reduce.polarization.he3.DirectBeamBackgroundQRange</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.he3.He3CellWorkflow.html">ess.reduce.polarization.he3.He3CellWorkflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.he3.compute_direct_beam.html">ess.reduce.polarization.he3.compute_direct_beam</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.he3.compute_transmission_fraction_from_direct_beam.html">ess.reduce.polarization.he3.compute_transmission_fraction_from_direct_beam</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.he3.direct_beam.html">ess.reduce.polarization.he3.direct_beam</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.he3.direct_beam_with_cell.html">ess.reduce.polarization.he3.direct_beam_with_cell</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.he3.get_he3_transmission_incoming_polarized_from_fit_to_direct_beam.html">ess.reduce.polarization.he3.get_he3_transmission_incoming_polarized_from_fit_to_direct_beam</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.he3.get_he3_transmission_incoming_unpolarized_from_fit_to_direct_beam.html">ess.reduce.polarization.he3.get_he3_transmission_incoming_unpolarized_from_fit_to_direct_beam</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.he3.he3_opacity_from_cell_params.html">ess.reduce.polarization.he3.he3_opacity_from_cell_params</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.he3.he3_opacity_function_from_beam_data.html">ess.reduce.polarization.he3.he3_opacity_function_from_beam_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.he3.he3_opacity_function_from_cell_opacity.html">ess.reduce.polarization.he3.he3_opacity_function_from_cell_opacity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.he3.transmission_fraction_analyzer_antiparallel.html">ess.reduce.polarization.he3.transmission_fraction_analyzer_antiparallel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.he3.transmission_fraction_analyzer_parallel.html">ess.reduce.polarization.he3.transmission_fraction_analyzer_parallel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.he3.transmission_incoming_unpolarized.html">ess.reduce.polarization.he3.transmission_incoming_unpolarized</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.he3.He3AnalyzerTransmissionFractionIncomingPolarized.html">ess.reduce.polarization.he3.He3AnalyzerTransmissionFractionIncomingPolarized</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.he3.He3CellLength.html">ess.reduce.polarization.he3.He3CellLength</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.he3.He3CellPressure.html">ess.reduce.polarization.he3.He3CellPressure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.he3.He3CellTemperature.html">ess.reduce.polarization.he3.He3CellTemperature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.he3.He3CellTransmissionFractionIncomingUnpolarized.html">ess.reduce.polarization.he3.He3CellTransmissionFractionIncomingUnpolarized</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.he3.He3DirectBeam.html">ess.reduce.polarization.he3.He3DirectBeam</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.he3.He3FillingTime.html">ess.reduce.polarization.he3.He3FillingTime</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.he3.He3Opacity0.html">ess.reduce.polarization.he3.He3Opacity0</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.he3.He3OpacityFunction.html">ess.reduce.polarization.he3.He3OpacityFunction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.he3.He3PolarizationFunction.html">ess.reduce.polarization.he3.He3PolarizationFunction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.he3.He3TransmissionEmptyGlass.html">ess.reduce.polarization.he3.He3TransmissionEmptyGlass</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.he3.He3TransmissionFunction.html">ess.reduce.polarization.he3.He3TransmissionFunction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.he3.ReducedDirectBeamData.html">ess.reduce.polarization.he3.ReducedDirectBeamData</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="ess.reduce.polarization.supermirror.html">ess.reduce.polarization.supermirror</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.supermirror.SupermirrorWorkflow.html">ess.reduce.polarization.supermirror.SupermirrorWorkflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.supermirror.get_supermirror_transmission_function.html">ess.reduce.polarization.supermirror.get_supermirror_transmission_function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.supermirror.EfficiencyLookupTable.html">ess.reduce.polarization.supermirror.EfficiencyLookupTable</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.supermirror.SecondDegreePolynomialEfficiency.html">ess.reduce.polarization.supermirror.SecondDegreePolynomialEfficiency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.supermirror.SupermirrorEfficiencyFunction.html">ess.reduce.polarization.supermirror.SupermirrorEfficiencyFunction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.supermirror.SupermirrorTransmissionFunction.html">ess.reduce.polarization.supermirror.SupermirrorTransmissionFunction</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="ess.reduce.polarization.types.html">ess.reduce.polarization.types</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.types.NoAnalyzer.html">ess.reduce.polarization.types.NoAnalyzer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.types.FlipperEfficiency.html">ess.reduce.polarization.types.FlipperEfficiency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.types.HalfPolarizedCorrectedData.html">ess.reduce.polarization.types.HalfPolarizedCorrectedData</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.types.HalfPolarizedCorrection.html">ess.reduce.polarization.types.HalfPolarizedCorrection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.types.PolarizationCorrectedData.html">ess.reduce.polarization.types.PolarizationCorrectedData</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.types.PolarizationCorrection.html">ess.reduce.polarization.types.PolarizationCorrection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.types.PolarizingElementCorrection.html">ess.reduce.polarization.types.PolarizingElementCorrection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.types.ReducedSampleDataBySpinChannel.html">ess.reduce.polarization.types.ReducedSampleDataBySpinChannel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.polarization.types.TransmissionFunction.html">ess.reduce.polarization.types.TransmissionFunction</a></li>
+</ul>
+</details></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.reduce.streaming.html">ess.reduce.streaming</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -772,80 +872,86 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.component_spec_by_name.html#ess.reduce.nexus.workflow.component_spec_by_name" title="ess.reduce.nexus.workflow.component_spec_by_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">component_spec_by_name</span></code></a>(filename, name)</p></td>
 <td><p>Create a location spec for a component group in a NeXus file.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.compute_position.html#ess.reduce.nexus.workflow.compute_position" title="ess.reduce.nexus.workflow.compute_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_position</span></code></a>(transformation)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.compute_dynamic_position.html#ess.reduce.nexus.workflow.compute_dynamic_position" title="ess.reduce.nexus.workflow.compute_dynamic_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_dynamic_position</span></code></a>(transformation)</p></td>
 <td><p>Compute the position of a component from a transformation matrix.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.data_by_name.html#ess.reduce.nexus.workflow.data_by_name" title="ess.reduce.nexus.workflow.data_by_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_by_name</span></code></a>(filename, name, selection)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.compute_position.html#ess.reduce.nexus.workflow.compute_position" title="ess.reduce.nexus.workflow.compute_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_position</span></code></a>(transformation)</p></td>
+<td><p>Compute the position of a component from a transformation matrix.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.data_by_name.html#ess.reduce.nexus.workflow.data_by_name" title="ess.reduce.nexus.workflow.data_by_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_by_name</span></code></a>(filename, name, selection)</p></td>
 <td><p>Create a location spec for monitor or detector data in a NeXus file.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.file_path_to_file_spec.html#ess.reduce.nexus.workflow.file_path_to_file_spec" title="ess.reduce.nexus.workflow.file_path_to_file_spec"><code class="xref py py-obj docutils literal notranslate"><span class="pre">file_path_to_file_spec</span></code></a>(filename, preopen)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.file_path_to_file_spec.html#ess.reduce.nexus.workflow.file_path_to_file_spec" title="ess.reduce.nexus.workflow.file_path_to_file_spec"><code class="xref py py-obj docutils literal notranslate"><span class="pre">file_path_to_file_spec</span></code></a>(filename, preopen)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.full_time_interval.html#ess.reduce.nexus.workflow.full_time_interval" title="ess.reduce.nexus.workflow.full_time_interval"><code class="xref py py-obj docutils literal notranslate"><span class="pre">full_time_interval</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.full_time_interval.html#ess.reduce.nexus.workflow.full_time_interval" title="ess.reduce.nexus.workflow.full_time_interval"><code class="xref py py-obj docutils literal notranslate"><span class="pre">full_time_interval</span></code></a>()</p></td>
 <td><p>Select all neutron pulses in the data.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.get_calibrated_detector.html#ess.reduce.nexus.workflow.get_calibrated_detector" title="ess.reduce.nexus.workflow.get_calibrated_detector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_calibrated_detector</span></code></a>(detector, *, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.get_calibrated_detector.html#ess.reduce.nexus.workflow.get_calibrated_detector" title="ess.reduce.nexus.workflow.get_calibrated_detector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_calibrated_detector</span></code></a>(detector, *, ...)</p></td>
 <td><p>Extract the data array corresponding to a detector's signal field.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.get_calibrated_monitor.html#ess.reduce.nexus.workflow.get_calibrated_monitor" title="ess.reduce.nexus.workflow.get_calibrated_monitor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_calibrated_monitor</span></code></a>(monitor, transform, ...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.get_calibrated_monitor.html#ess.reduce.nexus.workflow.get_calibrated_monitor" title="ess.reduce.nexus.workflow.get_calibrated_monitor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_calibrated_monitor</span></code></a>(monitor, transform, ...)</p></td>
 <td><p>Extract the data array corresponding to a monitor's signal field.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.get_transformation_chain.html#ess.reduce.nexus.workflow.get_transformation_chain" title="ess.reduce.nexus.workflow.get_transformation_chain"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_transformation_chain</span></code></a>(detector)</p></td>
-<td><p>Extract the transformation chain from a NeXus detector group.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.get_transformation_chain.html#ess.reduce.nexus.workflow.get_transformation_chain" title="ess.reduce.nexus.workflow.get_transformation_chain"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_transformation_chain</span></code></a>(component)</p></td>
+<td><p>Extract the transformation chain from a NeXus component group.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.gravity_vector_neg_y.html#ess.reduce.nexus.workflow.gravity_vector_neg_y" title="ess.reduce.nexus.workflow.gravity_vector_neg_y"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gravity_vector_neg_y</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.gravity_vector_neg_y.html#ess.reduce.nexus.workflow.gravity_vector_neg_y" title="ess.reduce.nexus.workflow.gravity_vector_neg_y"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gravity_vector_neg_y</span></code></a>()</p></td>
 <td><p>Gravity vector for default instrument coordinate system where y is up.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.load_all_nexus_components.html#ess.reduce.nexus.workflow.load_all_nexus_components" title="ess.reduce.nexus.workflow.load_all_nexus_components"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_all_nexus_components</span></code></a>(location, nx_class)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.load_all_nexus_components.html#ess.reduce.nexus.workflow.load_all_nexus_components" title="ess.reduce.nexus.workflow.load_all_nexus_components"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_all_nexus_components</span></code></a>(location, nx_class)</p></td>
 <td><p>Load all NeXus components of one class from one entry a file.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.load_beamline_metadata_from_nexus.html#ess.reduce.nexus.workflow.load_beamline_metadata_from_nexus" title="ess.reduce.nexus.workflow.load_beamline_metadata_from_nexus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_beamline_metadata_from_nexus</span></code></a>(file_spec)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.load_beamline_metadata_from_nexus.html#ess.reduce.nexus.workflow.load_beamline_metadata_from_nexus" title="ess.reduce.nexus.workflow.load_beamline_metadata_from_nexus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_beamline_metadata_from_nexus</span></code></a>(file_spec)</p></td>
 <td><p>Load beamline metadata from a sample NeXus file.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.load_measurement_metadata_from_nexus.html#ess.reduce.nexus.workflow.load_measurement_metadata_from_nexus" title="ess.reduce.nexus.workflow.load_measurement_metadata_from_nexus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_measurement_metadata_from_nexus</span></code></a>(file_spec)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.load_measurement_metadata_from_nexus.html#ess.reduce.nexus.workflow.load_measurement_metadata_from_nexus" title="ess.reduce.nexus.workflow.load_measurement_metadata_from_nexus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_measurement_metadata_from_nexus</span></code></a>(file_spec)</p></td>
 <td><p>Load measurement metadata from a sample NeXus file.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.load_nexus_component.html#ess.reduce.nexus.workflow.load_nexus_component" title="ess.reduce.nexus.workflow.load_nexus_component"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_nexus_component</span></code></a>(location, nx_class)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.load_nexus_component.html#ess.reduce.nexus.workflow.load_nexus_component" title="ess.reduce.nexus.workflow.load_nexus_component"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_nexus_component</span></code></a>(location, nx_class)</p></td>
 <td><p>Load a NeXus component group from a file.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.load_nexus_data.html#ess.reduce.nexus.workflow.load_nexus_data" title="ess.reduce.nexus.workflow.load_nexus_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_nexus_data</span></code></a>(location)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.load_nexus_data.html#ess.reduce.nexus.workflow.load_nexus_data" title="ess.reduce.nexus.workflow.load_nexus_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_nexus_data</span></code></a>(location)</p></td>
 <td><p>Load event or histogram data from a NeXus detector group.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.load_nexus_sample.html#ess.reduce.nexus.workflow.load_nexus_sample" title="ess.reduce.nexus.workflow.load_nexus_sample"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_nexus_sample</span></code></a>(location)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.load_nexus_sample.html#ess.reduce.nexus.workflow.load_nexus_sample" title="ess.reduce.nexus.workflow.load_nexus_sample"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_nexus_sample</span></code></a>(location)</p></td>
 <td><p>Load a NeXus sample group from a file.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.load_source_metadata_from_nexus.html#ess.reduce.nexus.workflow.load_source_metadata_from_nexus" title="ess.reduce.nexus.workflow.load_source_metadata_from_nexus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_source_metadata_from_nexus</span></code></a>(...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.load_source_metadata_from_nexus.html#ess.reduce.nexus.workflow.load_source_metadata_from_nexus" title="ess.reduce.nexus.workflow.load_source_metadata_from_nexus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_source_metadata_from_nexus</span></code></a>(...)</p></td>
 <td><p>Load source metadata from a NeXus file.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.no_detector_position_offset.html#ess.reduce.nexus.workflow.no_detector_position_offset" title="ess.reduce.nexus.workflow.no_detector_position_offset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">no_detector_position_offset</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.no_detector_position_offset.html#ess.reduce.nexus.workflow.no_detector_position_offset" title="ess.reduce.nexus.workflow.no_detector_position_offset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">no_detector_position_offset</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.no_monitor_position_offset.html#ess.reduce.nexus.workflow.no_monitor_position_offset" title="ess.reduce.nexus.workflow.no_monitor_position_offset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">no_monitor_position_offset</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.no_monitor_position_offset.html#ess.reduce.nexus.workflow.no_monitor_position_offset" title="ess.reduce.nexus.workflow.no_monitor_position_offset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">no_monitor_position_offset</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.nx_class_for_crystal.html#ess.reduce.nexus.workflow.nx_class_for_crystal" title="ess.reduce.nexus.workflow.nx_class_for_crystal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nx_class_for_crystal</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.nx_class_for_crystal.html#ess.reduce.nexus.workflow.nx_class_for_crystal" title="ess.reduce.nexus.workflow.nx_class_for_crystal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nx_class_for_crystal</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.nx_class_for_detector.html#ess.reduce.nexus.workflow.nx_class_for_detector" title="ess.reduce.nexus.workflow.nx_class_for_detector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nx_class_for_detector</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.nx_class_for_detector.html#ess.reduce.nexus.workflow.nx_class_for_detector" title="ess.reduce.nexus.workflow.nx_class_for_detector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nx_class_for_detector</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.nx_class_for_disk_chopper.html#ess.reduce.nexus.workflow.nx_class_for_disk_chopper" title="ess.reduce.nexus.workflow.nx_class_for_disk_chopper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nx_class_for_disk_chopper</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.nx_class_for_disk_chopper.html#ess.reduce.nexus.workflow.nx_class_for_disk_chopper" title="ess.reduce.nexus.workflow.nx_class_for_disk_chopper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nx_class_for_disk_chopper</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.nx_class_for_monitor.html#ess.reduce.nexus.workflow.nx_class_for_monitor" title="ess.reduce.nexus.workflow.nx_class_for_monitor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nx_class_for_monitor</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.nx_class_for_monitor.html#ess.reduce.nexus.workflow.nx_class_for_monitor" title="ess.reduce.nexus.workflow.nx_class_for_monitor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nx_class_for_monitor</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.nx_class_for_sample.html#ess.reduce.nexus.workflow.nx_class_for_sample" title="ess.reduce.nexus.workflow.nx_class_for_sample"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nx_class_for_sample</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.nx_class_for_sample.html#ess.reduce.nexus.workflow.nx_class_for_sample" title="ess.reduce.nexus.workflow.nx_class_for_sample"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nx_class_for_sample</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.nx_class_for_source.html#ess.reduce.nexus.workflow.nx_class_for_source" title="ess.reduce.nexus.workflow.nx_class_for_source"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nx_class_for_source</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.nx_class_for_source.html#ess.reduce.nexus.workflow.nx_class_for_source" title="ess.reduce.nexus.workflow.nx_class_for_source"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nx_class_for_source</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.parse_disk_choppers.html#ess.reduce.nexus.workflow.parse_disk_choppers" title="ess.reduce.nexus.workflow.parse_disk_choppers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_disk_choppers</span></code></a>(choppers)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.parse_disk_choppers.html#ess.reduce.nexus.workflow.parse_disk_choppers" title="ess.reduce.nexus.workflow.parse_disk_choppers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_disk_choppers</span></code></a>(choppers)</p></td>
 <td><p>Convert the NeXus representation of a chopper to ours.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.to_transformation.html#ess.reduce.nexus.workflow.to_transformation" title="ess.reduce.nexus.workflow.to_transformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_transformation</span></code></a>(chain, interval)</p></td>
-<td><p>Convert transformation chain into a single transformation matrix.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.reject_time_dependent_transform.html#ess.reduce.nexus.workflow.reject_time_dependent_transform" title="ess.reduce.nexus.workflow.reject_time_dependent_transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reject_time_dependent_transform</span></code></a>(transform)</p></td>
+<td><p>Raise a value error to forbid time-dependent transformations by default.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.to_transformation.html#ess.reduce.nexus.workflow.to_transformation" title="ess.reduce.nexus.workflow.to_transformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_transformation</span></code></a>(chain, interval[, time_filter])</p></td>
+<td><p>Convert a transformation chain into a single transformation matrix.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.unique_component_spec.html#ess.reduce.nexus.workflow.unique_component_spec" title="ess.reduce.nexus.workflow.unique_component_spec"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unique_component_spec</span></code></a>(filename)</p></td>
 <td><p>Create a location spec for a unique component group in a NeXus file.</p></td>
@@ -934,7 +1040,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreduce version: 26.4.1 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
+Current ESSreduce version: 26.4.2 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

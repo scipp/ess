@@ -1,29 +1,33 @@
-# Workflow Widget in Jupyter Notebook
+# Workflow Widget in Jupyter Notebooks
 
-Users can run a workflow with our widget in a jupyter notebook.
+You can run a workflow with the ESSreduce widget inside a Jupyter notebook.
 
 ## Widget with All Workflows
 
-``workflow_widget`` will build a widget that you can select workflows among ``ess.reduce.workflow.workflow_registry``.
+`workflow_widget` builds a widget that lets you choose from the workflows registered in `ess.reduce.workflow.workflow_registry`.
 
-**In order to select workflows from other ess packages, you will need to import the module that has the workflow constructor like the [Voila Example](#deploying-voila-application).**
+To make workflows from other `ess` packages available, import the module that registers them before creating the widget, as shown in the [Voila example](#deploying-voila-application).
 
 ## Deploying Voila Application
-You need a jupyter notebook that contains these lines.
+
+The notebook needs to import `workflow_widget` and at least one module that registers workflows:
 
 
 ```python
-from ess import loki  # loki module register workflows itself
+import ess.dream  # Example: importing a package registers its workflows.
 from ess.reduce.ui import workflow_widget
 
-ess_widget = workflow_widget()
+widget = workflow_widget()
 ```
-And you can deploy the notebook as an application using voila command.
+
+You can then deploy the notebook as an application using `voila`:
+
 ```bash
 voila {PATH_TO_THE_NOTEBOOK}
 ```
 
 ## Widget from a Workflow in a Notebook
+
 ```python
 %matplotlib widget
 from ess.reduce.ui import workflow_widget

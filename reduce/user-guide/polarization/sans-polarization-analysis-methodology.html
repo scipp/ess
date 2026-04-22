@@ -1,0 +1,939 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>SANS Polarization Analysis Methodology &#8212; ESSreduce</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=4480c773"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/polarization/sans-polarization-analysis-methodology';</script>
+    <script src="../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <link rel="icon" href="../../_static/favicon.svg"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Polarization matrices for He3 cells and supermirror" href="inverse_of_polarization_matrices.html" />
+    <link rel="prev" title="Workflows" href="workflow.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="26.4.2" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/logo.svg" class="logo__image only-light" alt="ESSreduce - Home"/>
+    <img src="../../_static/logo-dark.svg" class="logo__image only-dark pst-js-only" alt="ESSreduce - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../about/index.html">
+    About
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essdiffraction">
+    ESSdiffraction
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/ess/imaging">
+    ESSimaging
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/ess/nmx">
+    ESSnmx
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/esspolarization">
+    ESSpolarization
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essreflectometry">
+    ESSreflectometry
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/esssans">
+    ESSsans
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essspectroscopy">
+    ESSspectroscopy
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/ess/tree/main/packages/essreduce" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essreduce/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essreduce" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../about/index.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/essdiffraction">
+    ESSdiffraction
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/ess/imaging">
+    ESSimaging
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/ess/nmx">
+    ESSnmx
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/esspolarization">
+    ESSpolarization
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/essreflectometry">
+    ESSreflectometry
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/esssans">
+    ESSsans
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/essspectroscopy">
+    ESSspectroscopy
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/ess/tree/main/packages/essreduce" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essreduce/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essreduce" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Polarization</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="workflow.html">Workflows</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">SANS Polarization Analysis Methodology</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inverse_of_polarization_matrices.html">Polarization matrices for He3 cells and supermirror</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zoom.html">Zoom Polarization Analysis</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../unwrap/index.html">Time-of-flight</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../unwrap/frame-unwrapping.html">Frame Unwrapping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../unwrap/wfm.html">Wavelength frame multiplication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../unwrap/dream.html">The DREAM chopper cascade</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../widget.html">Workflow Widget in Jupyter Notebooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reduction-workflow-guidelines.html">Reduction Workflow Guidelines</a></li>
+</ul>
+</div>
+</nav></div>
+        <div class="sidebar-primary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Notation">Notation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Overview-and-general-workflow">Overview and general workflow</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Data-correction">Data correction</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Calculation-of-3He-opacity">Calculation of 3He opacity</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Workflow-1">Workflow 1</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Workflow-2">Workflow 2</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Calculation-of-time-dependent-3He-polarization">Calculation of time-dependent 3He-polarization</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Spin-dependent-transmission-values">Spin-dependent transmission values</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Sample-data-correction">Sample data correction</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Literature">Literature</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Open-questions-regarding-DREAM">Open questions regarding DREAM</a></li>
+</ul>
+  </nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/user-guide/polarization/sans-polarization-analysis-methodology.ipynb"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">User Guide</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Polarization</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">SANS Polarization Analysis Methodology</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="SANS-Polarization-Analysis-Methodology">
+<h1>SANS Polarization Analysis Methodology<a class="headerlink" href="#SANS-Polarization-Analysis-Methodology" title="Link to this heading">#</a></h1>
+<section id="Notation">
+<h2>Notation<a class="headerlink" href="#Notation" title="Link to this heading">#</a></h2>
+<p>Note on notation:</p>
+<ul class="simple">
+<li><p>subscripts = discretization variable from measurement</p></li>
+<li><p>superscripts = Names</p></li>
+<li><p>() = continuous function of….</p></li>
+</ul>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Value</p></th>
+<th class="head"><p>Meaning</p></th>
+<th class="head"><p>shape</p></th>
+<th class="head"><p>How acquired?</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(I^{\pm\pm}_{t,\lambda}\)</span></p></td>
+<td><p>uncorrected sample data of ++/+-/-+/– channels</p></td>
+<td><p>data arrays with columns for <span class="math notranslate nohighlight">\(I\)</span>, <span class="math notranslate nohighlight">\(\lambda\)</span>, <span class="math notranslate nohighlight">\(t\)</span></p></td>
+<td><p>neutron data</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(S^{\pm\pm}_{t,\lambda}\)</span></p></td>
+<td><p>corrected sample data of ++/+-/-+/– channels</p></td>
+<td><p>data arrays with columns for <span class="math notranslate nohighlight">\(I\)</span>, <span class="math notranslate nohighlight">\(\lambda\)</span>, <span class="math notranslate nohighlight">\(t\)</span></p></td>
+<td><p>by pol-correction</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(p^{cell}\)</span></p></td>
+<td><p>pressure of 3He-polarizer/analyzer</p></td>
+<td><p>scalar, 1-dim</p></td>
+<td><p>from metadata</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(l^{cell}\)</span></p></td>
+<td><p>length of 3He-polarizer/analyzer</p></td>
+<td><p>scalar, 1-dim</p></td>
+<td><p>from metadata</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(T^{\textup{g}, cell}(\lambda)\)</span></p></td>
+<td><p>transmission of empty glass of polarizer/analyzer</p></td>
+<td><p>scalar, 1-dim</p></td>
+<td><p>from metadata</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(O^{cell}(\lambda)=O^{0, cell}\cdot\lambda\)</span></p></td>
+<td><p>wavelength-dependent opacity of 3He-polarizer/analyzer</p></td>
+<td><p>continuous function of <span class="math notranslate nohighlight">\(\lambda\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(O^{0, cell}\)</span> fit to data</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(O^{0, cell}\)</span></p></td>
+<td><p>wavelength-independent pre-factor of opacity of 3He-polarizer/analyzer</p></td>
+<td><p>scalar, 1-dim</p></td>
+<td><p>fit to data</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(P^{^3\textup{He}, cell}(t) = C^{cell}e^{-t/T^{1, cell}}\)</span></p></td>
+<td><p>time-dependent nuclear polarization of 3He-polarizer/analyzer</p></td>
+<td><p>continuous function of <span class="math notranslate nohighlight">\(t\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(C^{cell}, T^{1, cell}\)</span> fit to data</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(C^{cell}\)</span></p></td>
+<td><p>Pre-factor of nuclear polarization exponential decay of 3He-polarizer/analyzer</p></td>
+<td><p>scalar, 1-dim</p></td>
+<td><p>fit to data</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(T^{1, cell}\)</span></p></td>
+<td><p>Decay constant of nuclear polarization exponential decay of 3He-polarizer/analyzer</p></td>
+<td><p>scalar, 1-dim</p></td>
+<td><p>fit to data</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(I^{\textup{DB},unpol-in,cell}_{\lambda, t}\)</span></p></td>
+<td><p>Intensity of direct-beam of an unpolarized-incoming beam to the polarized 3He-polarizer/analyzer</p></td>
+<td><p>data array with columns for <span class="math notranslate nohighlight">\(I\)</span>, <span class="math notranslate nohighlight">\(\lambda\)</span>, <span class="math notranslate nohighlight">\(t\)</span></p></td>
+<td><p>neutron data</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(I^{\textup{DB},{\textup{depol}},cell}_{\lambda}\)</span></p></td>
+<td><p>Intensity of direct-beam of an unpolarized-incoming beam to the depolarized 3He-polarizer/analyzer</p></td>
+<td><p>data array with columns for <span class="math notranslate nohighlight">\(I\)</span>, <span class="math notranslate nohighlight">\(\lambda\)</span></p></td>
+<td><p>neutron data</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(I^{\textup{DB}, no-cell}_{\lambda}\)</span></p></td>
+<td><p>Intensity of direct-beam of an unpolarized-incoming beam to detector without passing cells or sample</p></td>
+<td><p>data array with columns for <span class="math notranslate nohighlight">\(I\)</span>, <span class="math notranslate nohighlight">\(\lambda\)</span></p></td>
+<td><p>neutron data</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\hat{T}^{\pm, cell}(t,\lambda)\)</span></p></td>
+<td><p>Transmission-function of a in-coming polarized neutron beam into 3He-polarizer/analyzer</p></td>
+<td><p>Row 1</p></td>
+<td><p>by inserting <span class="math notranslate nohighlight">\(P^{^3\textup{He}, cell}(t)\)</span>, <span class="math notranslate nohighlight">\(O^{cell}(\lambda)\)</span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="Overview-and-general-workflow">
+<h2>Overview and general workflow<a class="headerlink" href="#Overview-and-general-workflow" title="Link to this heading">#</a></h2>
+<p>Different to unpolarized SANS, the spin-dependent cross section <span class="math notranslate nohighlight">\(\vec{S}\)</span> after sample-scattering are correlated and cannot be corrected individually [Ref 1, 2, 3]. Instead, a beamline-component dependent correction Matrix <span class="math notranslate nohighlight">\(\hat{M}\)</span> has to be applied to all spin-dependent measurements simultaneously to retrieve <span class="math notranslate nohighlight">\(\vec{S}\)</span> from the measured intensities <span class="math notranslate nohighlight">\(\vec{I}\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{pmatrix} I^{++}_{t,\lambda} \\ I^{+-}_{t,\lambda}  \\ I^{-+}_{t,\lambda} \\  I^{--}_{t,\lambda}\end{pmatrix} = \hat{M}(t,\lambda)
+\cdot
+\begin{pmatrix} S^{++}_{t,\lambda} \\ S^{+-}_{t,\lambda}  \\ S^{-+}_{t,\lambda} \\  S^{--}_{t,\lambda}\end{pmatrix}\end{split}\]</div>
+<p>Here, we describe the correction of TOF-SANS data with polarization analysis of the <code class="docutils literal notranslate"><span class="pre">esspolarization</span></code> package using two time-dependent 3He-polarized cells. Hence, the polarization-related beamline components in <span class="math notranslate nohighlight">\(\hat{M}\)</span> are the time- and spin-dependent transmission matrices of the 3He-polarizer <span class="math notranslate nohighlight">\(\hat{T^p}\)</span> and 3He-analyzer <span class="math notranslate nohighlight">\(\hat{T^a}\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{pmatrix} I^{++}_{t,\lambda} \\ I^{+-}_{t,\lambda}  \\ I^{-+}_{t,\lambda} \\  I^{--}_{t,\lambda}\end{pmatrix} = \hat{T}^{\textup{a}}(t,\lambda)\cdot\hat{T}^{\textup{p}}(t,\lambda)
+\cdot
+\begin{pmatrix} S^{++}_{t,\lambda} \\ S^{+-}_{t,\lambda}  \\ S^{-+}_{t,\lambda} \\  S^{--}_{t,\lambda}\end{pmatrix}\end{split}\]</div>
+<p>Both <span class="math notranslate nohighlight">\(\hat{T^{\textup{p}}}\)</span> and <span class="math notranslate nohighlight">\(\hat{T^{\textup{a}}}\)</span> can be derived from their cell parameters (the transmission of the empty cell <span class="math notranslate nohighlight">\(T^{\textup{g}}\)</span>, and the cell opacity <span class="math notranslate nohighlight">\(O\)</span>), and the time-dependent nuclear polarization of the cell <span class="math notranslate nohighlight">\(P^{^3\textup{He}}(t)\)</span>. This general method for time-dependent 3He-cells can be adapted for other use-cases such as using supermirrors or in-situ polarized 3He-cells, see “Note” at the end of the page.</p>
+<p>First, the created test-data needs to be readout and grouped by purpose, e.g., if it describes a sample-run, a direct-beam-run, or a background measurement without cells and sample. All data will be reduced using the normalization term described in <a class="reference external" href="https://scipp.github.io/ess/techniques/sans/sans-beam-center-finder.html">https://scipp.github.io/ess/techniques/sans/sans-beam-center-finder.html</a>. Second, for the calculation of time-dependent <span class="math notranslate nohighlight">\(P^{^3\textup{He}}(t)\)</span>, the ROI’s of the direct-beam region and background region have to be defined (USING BEAMCENTER FINDER
+OPTION OF SANS2D?). Third, we will describe the data correction workflow with a calculation of <span class="math notranslate nohighlight">\(O\)</span>, <span class="math notranslate nohighlight">\(P^{^3\textup{He}}(t)\)</span>, and <span class="math notranslate nohighlight">\(T^{\pm}\)</span> of the polarizer and analyzer, and the application on the sample-data.</p>
+<p>To facilitate an in-situ data correction during the experiments, we have implemented two different approaches:</p>
+<ol class="arabic simple">
+<li><p>A rough data-correction based on a 3He-cell opacity calculated by its cell parameters and filling pressure (see <a class="reference internal" href="#Workflow-1"><span class="std std-ref">Workflow 1</span></a>) which can be used in-situ during the experiment.</p></li>
+<li><p>precise calculation based on the calculation of opacity by a direct-beam measurement on the depolarized cell at its end of lifetime (i.e., end of cell-usage for this experiment) (see <a class="reference internal" href="#Workflow-2"><span class="std std-ref">Workflow 2</span></a>).</p></li>
+</ol>
+</section>
+<section id="Data-correction">
+<h2>Data correction<a class="headerlink" href="#Data-correction" title="Link to this heading">#</a></h2>
+<section id="Calculation-of-3He-opacity">
+<h3>Calculation of 3He opacity<a class="headerlink" href="#Calculation-of-3He-opacity" title="Link to this heading">#</a></h3>
+<p>The 3He opacity is a cell-specific parameter and can vary after each filling process. Hence, for precise data correction, it must be measured for each newly filled cell. It linearly depends on the neutron wavelength as follows:</p>
+<div class="math notranslate nohighlight">
+\[O(\lambda)=n\cdot \sigma_0\cdot l \cdot\lambda\]</div>
+<p>with n being the number density of 3He gas in the cell, <span class="math notranslate nohighlight">\(\sigma_0\)</span> the absorption cross section of <span class="math notranslate nohighlight">\(1~Å\)</span> neutrons by 3He (<span class="math notranslate nohighlight">\(\sigma_0 = (2966\pm 1) \cdot 10^{−24} cm^2\)</span> [Ref. 4]), and the path length through the cell <span class="math notranslate nohighlight">\(l\)</span> [Ref. 1]. Note that <span class="math notranslate nohighlight">\((2966\pm 1) \cdot 10^{−24} cm^2\)</span> at 1 <span class="math notranslate nohighlight">\(1~Å\)</span> is the unpolarised neutron cross-section. For polarised neutrons, it is a polarization dependent value with <span class="math notranslate nohighlight">\((5933\pm 1) \cdot 10^{−24} cm^2\)</span> at 1 <span class="math notranslate nohighlight">\(1~Å\)</span> for neutrons
+with spin anti-parallel to the 3He and 0 for neutrons with spin parallel to the 3He. As 3He can be considered to follow the ideal gas law, <span class="math notranslate nohighlight">\(n\)</span> can be replaced via <span class="math notranslate nohighlight">\(p=n\cdot k_{\textup{B}}\cdot T\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[O(\lambda)=\frac{\sigma_0}{k_{\textup{B}}\cdot T}\cdot p\cdot l \cdot\lambda\]</div>
+<p>For this workflow, we will calculate the wavelength independent part <span class="math notranslate nohighlight">\(O^{0, cell}\)</span> of the opacity for each cell in the beamline, and multiply by the neutron wavelength:</p>
+<div class="math notranslate nohighlight">
+\[O^{cell}(\lambda)=O^{0, cell}\cdot\lambda\]</div>
+<p>In the following, two different approaches are presented to measure <span class="math notranslate nohighlight">\(O^{0, cell}\)</span>.</p>
+</section>
+<section id="Workflow-1">
+<h3>Workflow 1<a class="headerlink" href="#Workflow-1" title="Link to this heading">#</a></h3>
+<p>For an in-situ quick data correction, a measure of the cell pressure <span class="math notranslate nohighlight">\(p\)</span> (typically taken at 20°C) during filling the cell can be used to calculate <span class="math notranslate nohighlight">\(O^{0, cell}\)</span> by following relation (Ref 1):</p>
+<div class="math notranslate nohighlight">
+\[O^{0, cell}= \frac{\sigma_0}{k_{\textup{B}}\cdot T}\cdot p\cdot l\]</div>
+<p>However, a measurement of the opacity by neutron transmission in a depolarized cell condition yields more precise values and can be performed at the end of the cell-lifetime during the user’s neutron experiments, i.e., leading to <a class="reference internal" href="#Workflow-2"><span class="std std-ref">Workflow 2</span></a>.</p>
+<ul class="simple">
+<li><p>Note: <span class="math notranslate nohighlight">\(l\)</span> is assumed constant over the area of the 3He-cell. In case of too large cell volumes, only the fraction with constant <span class="math notranslate nohighlight">\(l\)</span> &amp; constant <span class="math notranslate nohighlight">\(O\)</span> will be used for the neutron measurements. The same assumption holds for both SANS-cells as well as wide-angle cells</p></li>
+<li><p>Note: until now, we have treated <span class="math notranslate nohighlight">\(T^{\textup{g}, cell}\)</span> as constant parameter and ignored its wavelength-dependence, as its variation with wavelength is small enough to not impact the correction procedure. However, to keep it generic and enable to insert a wavelength-dependent <span class="math notranslate nohighlight">\(T^{\textup{g}, cell}(\lambda)\)</span>, the dependence on wavelength will be pre-characterized (during fabrication of the cell) and inserted as function into this workflow instead of a scalar.</p></li>
+</ul>
+</section>
+<section id="Workflow-2">
+<h3>Workflow 2<a class="headerlink" href="#Workflow-2" title="Link to this heading">#</a></h3>
+<p>A more precise data correction is based on a direct-beam measurement through the depolarized cell (i.e., <span class="math notranslate nohighlight">\(P_{^3\textup{He}}(t) \rightarrow 0\)</span>)(Ref. 2). For such a depolarized cell and an unpolarized incident beam (i.e., <span class="math notranslate nohighlight">\(\hat{T}^\textup{depol} = (\hat{T}^++\hat{T}^-)/2\)</span>), the neutron transmission becomes:</p>
+<div class="math notranslate nohighlight">
+\[T^{\textup{depol}, cell}(\lambda)=T^{\textup{g}, cell}(\lambda)e^{-O^{0, cell}\cdot\lambda}\]</div>
+<p>This leads to following direct beam intensity <span class="math notranslate nohighlight">\(I^{\textup{DB},\textup{depol},cell}_{\lambda}\)</span> measured on a depolarized cell:</p>
+<div class="math notranslate nohighlight">
+\[\frac{I^{\textup{DB},\textup{depol},cell}_{\lambda}}{I^{\textup{DB,no-cell}}_{\lambda}}=T^{\textup{g}, cell}(\lambda)e^{-O^{0, cell}\cdot\lambda}\]</div>
+<p>where <span class="math notranslate nohighlight">\(I^{\textup{DB,no-cell}}_{\lambda}\)</span> is the intensity of a direct beam through an open neutron path (without cell and sample) and acts as a background measurement. For a measurement of <span class="math notranslate nohighlight">\(I^{\textup{DB},\textup{depol},cell}_{\lambda}\)</span>, the 3He cell needs to be depolarized at the end of its lifetime and <span class="math notranslate nohighlight">\(I^{\textup{DB},\textup{depol},cell}_{\lambda}\)</span> has to be acquired for each cell (having the other cell and the sample out of beam). The wavelength-independent opacity can be
+acquired by a fit of above equation to the ratio <span class="math notranslate nohighlight">\(\frac{I^{\textup{DB},\textup{depol},cell}_{\lambda}}{I^{\textup{DB,no-cell}}_{\lambda}}\)</span>. As this procedure results in a more precise value of <span class="math notranslate nohighlight">\(O^{0, cell}\)</span> than using workflow 1, we will use these two workflows in following way:</p>
+<ol class="arabic simple">
+<li><p>During the user experiment, <span class="math notranslate nohighlight">\(O^{0, cell}\)</span> will be calculated by its cell parameters via workflow 1 and inserted to the 3He nuclear polarization and cell transmission functions (described in the following) for a first in-situ data correction.</p></li>
+<li><p>At the end of its lifetime of each employed 3He-cell, the cell will be depolarized. After a measurement of <span class="math notranslate nohighlight">\(I^{DB,\textup{depol},cell}\)</span>, workflow 2 can be used for a precise evaluation of <span class="math notranslate nohighlight">\(O^{0, cell}\)</span>, and the user may overwrite the data correction results from workflow 1 with results from workflow 2 for post-experiment analysis.</p></li>
+</ol>
+<ul class="simple">
+<li><p>Note: Different to the sample data, <span class="math notranslate nohighlight">\(I^{\textup{DB},\textup{depol},cell}\)</span> and <span class="math notranslate nohighlight">\(I^{DB,no-cell}\)</span> are not time-dependent</p></li>
+<li><p>Note: It is important to fit <span class="math notranslate nohighlight">\(I_{\textup{depol}}/I^{\textup{DB, no-cell}}_{\lambda}\)</span> instead of <span class="math notranslate nohighlight">\(I_\textup{depol}\)</span>, such that all the parameters in the fit-functions are scalars.</p></li>
+</ul>
+</section>
+<section id="Calculation-of-time-dependent-3He-polarization">
+<h3>Calculation of time-dependent 3He-polarization<a class="headerlink" href="#Calculation-of-time-dependent-3He-polarization" title="Link to this heading">#</a></h3>
+<p>Now <span class="math notranslate nohighlight">\(O^{cell}(\lambda)=O^{0, cell}\cdot\lambda\)</span> is known. The next step for getting the transmission functions <span class="math notranslate nohighlight">\(\hat{T}^{\pm}\)</span> is to calculate the nuclear polarization of the 3He-cell, which decays exponentially with a decay-time <span class="math notranslate nohighlight">\(T^{1, cell}\)</span> and is given by:</p>
+<div class="math notranslate nohighlight">
+\[P^{^3\textup{He}, cell}(t) = C^{cell}e^{-t/T^{1, cell}}\]</div>
+<p>.</p>
+<p>From the neutron measurement, this again can be retrieved by measuring the transmission through each cell (i.e., for an unpolarized incoming beam into the polarized cell):</p>
+<div class="math notranslate nohighlight">
+\[\hat{T}^{\textup{unpol-in}}(\lambda, t) = T^{\textup{g}, cell}(\lambda)e^{-O^{0, cell}\cdot\lambda}\cosh({P_{^3\textup{He}}(t)\cdot O^{0, cell}\cdot\lambda})\]</div>
+<p></p>
+<div class="math notranslate nohighlight">
+\[\frac{I^{\textup{DB,unpol-in},cell}_{\lambda, t}}{I^{\textup{DB, no-cell}}_{\lambda}} = T^{\textup{g}, cell}(\lambda)e^{-O^{0, cell}\cdot\lambda}\cosh({P^{^3\textup{He}, cell}(t)\cdot O^{0, cell}\cdot\lambda})\]</div>
+<p>Fitting this equation to the direct-beam data will yield <span class="math notranslate nohighlight">\(C^{cell}\)</span> and <span class="math notranslate nohighlight">\(T^{1, cell}\)</span>, which then can be used to calculate <span class="math notranslate nohighlight">\(P^{^3\textup{He}, cell}(t)\)</span>, which shall be the output of the procedure.</p>
+<ul class="simple">
+<li><p>Note: Some instruments cannot move the polarizer, and in those cases the incoming beam on the analyzer would be polarized. In such cases, another workflow has to be used.</p></li>
+<li><p>Note: The readout of which spin-channel to use for <span class="math notranslate nohighlight">\(I^{\textup{DB,unpol-in},cell}_{\lambda, t}\)</span> is irrelevant, as they are the same.</p></li>
+</ul>
+</section>
+<section id="Spin-dependent-transmission-values">
+<h3>Spin-dependent transmission values<a class="headerlink" href="#Spin-dependent-transmission-values" title="Link to this heading">#</a></h3>
+<p>Now both <span class="math notranslate nohighlight">\(O^{cell}(\lambda)=O^{0, cell}\cdot\lambda\)</span> and <span class="math notranslate nohighlight">\(P^{^3\textup{He}, cell}(t)\)</span> are known. Following Refs (1, 3), the polarization-dependent transmission matrices of a polarized neutron beam through the ^3:nbsphinx-math:<cite>textup{He}</cite> cells can be computed by inserting</p>
+<div class="math notranslate nohighlight">
+\[\hat{T}^{\pm, cell}(t,\lambda) = T^\textup{g}\cdot \exp\left(-O^{0, cell}\cdot\lambda\left(1\mp  P^{^3\textup{He}, cell}(t)\right)\right)\]</div>
+<p>into:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\hat{T}^{\textup{p}}=
+\begin{pmatrix}
+T^\textup{p,+}(t,\lambda) &amp; 0 &amp; T^\textup{p,-}(t,\lambda) &amp; 0 \\ 0 &amp; T^\textup{p,+}(t,\lambda) &amp; 0 &amp; T^\textup{p,-}(t,\lambda) \\ T^\textup{p,-}(t,\lambda) &amp; 0 &amp; T^\textup{p,+}(t,\lambda) &amp; 0 \\ 0 &amp; T^\textup{p,-}(t,\lambda) &amp; 0 &amp; T^\textup{p,+}(t,\lambda)
+\end{pmatrix}\end{split}\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}\hat{T}^{\textup{a}}=
+\begin{pmatrix}
+T^\textup{a,+}(t,\lambda) &amp;  T^\textup{a,-}(t,\lambda) &amp; 0 &amp;0\\ T^\textup{a,-}(t,\lambda) &amp;  T^\textup{a,+}(t,\lambda) &amp; 0 &amp; 0\\ 0&amp;0&amp; T^\textup{a,+}(t,\lambda) &amp;  T^\textup{a,-}(t,\lambda) \\ 0&amp;0&amp; T^\textup{a,-}(t,\lambda) &amp;  T^\textup{a,+}(t,\lambda)
+\end{pmatrix}\end{split}\]</div>
+<ul class="simple">
+<li><p>Note: same function for both cells, but with different input parameters</p></li>
+<li><p>Note: in principle the incoming beam to the polarizer is unpolarized, so <span class="math notranslate nohighlight">\(\hat{T}^{\textup{unpol-in}}(\lambda, t)\)</span> instead of <span class="math notranslate nohighlight">\(\hat{T}^{\pm, cell}(t,\lambda)\)</span> could be used. However, the results will be the same in this case without the need to differ between the cases.</p></li>
+</ul>
+</section>
+<section id="Sample-data-correction">
+<h3>Sample data correction<a class="headerlink" href="#Sample-data-correction" title="Link to this heading">#</a></h3>
+<p>For polarizing 3He-cells without neutron flippers in the beamline, the correction matrix <span class="math notranslate nohighlight">\(\hat{M}\)</span> becomes <span class="math notranslate nohighlight">\(\hat{M} = \hat{T}^{\textup{a}}\hat{T}^{\textup{p}}\)</span>. To correct the measured data I, we need to apply the inverse matrix to the data <span class="math notranslate nohighlight">\((\hat{M})^{-1}\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{pmatrix} I^{++}_{t,\lambda} \\ I^{+-}_{t,\lambda}  \\ I^{-+}_{t,\lambda} \\  I^{--}_{t,\lambda}\end{pmatrix} = \hat{T}^{\textup{a}}(t,\lambda)\cdot\hat{T}^{\textup{p}}(t,\lambda)
+\begin{pmatrix} S^{++}_{t,\lambda} \\ S^{+-}_{t,\lambda}  \\ S^{-+}_{t,\lambda} \\  S^{--}_{t,\lambda}\end{pmatrix}\end{split}\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}\left(\hat{T}^{\textup{a}}(t,\lambda)\cdot\hat{T}^\textup{p}t,\lambda)\right)^{-1} \begin{pmatrix} I^{++}_{t,\lambda} \\ I^{+-}_{t,\lambda}  \\ I^{-+}_{t,\lambda} \\  I^{--}_{t,\lambda}\end{pmatrix} =
+\begin{pmatrix} S^{++}_{t,\lambda} \\ S^{+-}_{t,\lambda}  \\ S^{-+}_{t,\lambda} \\  S^{--}_{t,\lambda}\end{pmatrix}\end{split}\]</div>
+<ul class="simple">
+<li><p>Note: probably easier to first put functions into the matrix product <span class="math notranslate nohighlight">\(T^\textup{a}\)</span> <span class="math notranslate nohighlight">\(\cdot\)</span> <span class="math notranslate nohighlight">\(T^\textup{p}\)</span>, then analytically get the inverse of that matrix product.</p></li>
+<li><p>Note: we need to perform computation of matrix on channels all together, so we always need all four sets of T+-, a,p together</p></li>
+</ul>
+</section>
+</section>
+<section id="Literature">
+<h2>Literature<a class="headerlink" href="#Literature" title="Link to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><ol class="upperalpha simple" start="23">
+<li><ol class="upperalpha simple" start="20">
+<li><p>Lee et al., Polarisation Development at the European Spallation Source</p></li>
+</ol>
+</li>
+</ol>
+</li>
+<li><ol class="upperalpha simple" start="11">
+<li><p>Krycka et al., Polarization-analyzed small-angle neutron scattering. I. Polarized data reduction using Pol-Corr</p></li>
+</ol>
+</li>
+<li><ol class="upperalpha simple">
+<li><p>Wildes, The polarizer-analyzer correction problem in neutron polarization analysis experiments</p></li>
+</ol>
+</li>
+<li><ol class="upperalpha simple" start="22">
+<li><p>McLane et al., “Neutron Cross. Sections, Vol. 2, Neutron Cross Section Curves”, Academic. Press Inc., New York (1988)</p></li>
+</ol>
+</li>
+<li><ol class="upperalpha simple" start="20">
+<li><p>Gentile et al., Optically polarized 3He</p></li>
+</ol>
+</li>
+</ol>
+<p>Note 1: This workflow can be applied on polarization analyzed sample-data using two time-dependent ex-situ polarized 3He-based spin filters as both polarizer and analyzer. To be used for the instruments SKADI and DREAM, following adaptations have to be made:</p>
+<p>1: DREAM-SANS: operated with a movable in-situ SEOP 3He-polarizer and a movable ex-situ SEOP small-angle 3He-analyzer (nm-SANS-option): –&gt; the polarizer is continuously pumped and considered as time-independent. Values like the opacity, nuclear polarization, and transmission will be pre-characterized and inserted to the workflow as constant parameters.</p>
+<p>2: DREAM-Diffraction: operated with a movable in-situ SEOP 3He-polarizer and a NOT-movable ex-situ MEOP wide-angle 3He-analyzer –&gt; for the polarizer, the same treatment as stated in 1. will be applied. For the analyzer a new workflow considering that the analyzer cannot be moved out of the beam has to be written.</p>
+<p>3: SKADI: operated with a movable supermirror V-cavity polarizer, a spin flipper, and a movable ex-situ SEOP/MEOP 3He-analyzer: –&gt; The supermirror polarizer (time-independent and wavelength-dependent) and spin flipper transmission values can be pre-characterized and inserted to the workflow as constant parameters. For the analyzer, the current workflow can be adapted.</p>
+</section>
+<section id="Open-questions-regarding-DREAM">
+<h2>Open questions regarding DREAM<a class="headerlink" href="#Open-questions-regarding-DREAM" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Should the incident beam monitor be moved behind the polarizer?</p></li>
+<li><p>–&gt; we would need a monitor after polarizer if analyzer cannot be moved and polarizer also needs to be characterized</p></li>
+<li><p>–&gt; current decision: moving monitor to after polarizer (but on another stage, so moves of polarizer do not move monitor</p></li>
+<li><p>–&gt; The “unpolarized SANS” data correction then will be taken on the monitor AFTER polarizer. But as it is an in-situ polarizer with constant polarization, this just leads to a constant offset which will be corrected for using this workflow. If sudden fluctuations in intensity are observed, the polarizer has to be moved out to characterize the neutron beam from the target.</p></li>
+<li><p>How to treat an in-situ polarizer?</p></li>
+<li><p>–&gt; instead of exponential decay use a step-function, something like: “if C changes, then shift P” - basically constant in time, but with adaptable C (piecewise constant function)</p></li>
+<li><p>How to adapt workflow for the non-movable wide-angle analyzer?</p></li>
+<li><p>–&gt; needs to be changed as following: instead of moving analyzer out during measuring P, measure with different monitor for P, and just move out polarizer for measuring analyzer</p></li>
+<li><p>How to treat the “SANS-window” of the high-angle analyzer?</p></li>
+<li><p>–&gt; characterizing the wide-angle would be done outside user experiments, just measured sometimes in between by beamline scientists - here then parameters are treated constant for both parts (big part and SANS-window-part)</p></li>
+</ul>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="workflow.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Workflows</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="inverse_of_polarization_matrices.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Polarization matrices for He3 cells and supermirror</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2024 Scipp contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><!-- This will display the version of the docs -->
+Current ESSreduce version: 26.4.2 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,1173 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Zoom Polarization Analysis &#8212; ESSreduce</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=4480c773"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/polarization/zoom';</script>
+    <script src="../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <link rel="icon" href="../../_static/favicon.svg"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Time-of-flight" href="../unwrap/index.html" />
+    <link rel="prev" title="Polarization matrices for He3 cells and supermirror" href="inverse_of_polarization_matrices.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="26.4.2" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/logo.svg" class="logo__image only-light" alt="ESSreduce - Home"/>
+    <img src="../../_static/logo-dark.svg" class="logo__image only-dark pst-js-only" alt="ESSreduce - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../about/index.html">
+    About
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essdiffraction">
+    ESSdiffraction
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/ess/imaging">
+    ESSimaging
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/ess/nmx">
+    ESSnmx
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/esspolarization">
+    ESSpolarization
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essreflectometry">
+    ESSreflectometry
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/esssans">
+    ESSsans
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essspectroscopy">
+    ESSspectroscopy
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/ess/tree/main/packages/essreduce" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essreduce/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essreduce" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../about/index.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/essdiffraction">
+    ESSdiffraction
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/ess/imaging">
+    ESSimaging
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/ess/nmx">
+    ESSnmx
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/esspolarization">
+    ESSpolarization
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/essreflectometry">
+    ESSreflectometry
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/esssans">
+    ESSsans
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/essspectroscopy">
+    ESSspectroscopy
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/ess/tree/main/packages/essreduce" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essreduce/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essreduce" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Polarization</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="workflow.html">Workflows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sans-polarization-analysis-methodology.html">SANS Polarization Analysis Methodology</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inverse_of_polarization_matrices.html">Polarization matrices for He3 cells and supermirror</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Zoom Polarization Analysis</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../unwrap/index.html">Time-of-flight</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../unwrap/frame-unwrapping.html">Frame Unwrapping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../unwrap/wfm.html">Wavelength frame multiplication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../unwrap/dream.html">The DREAM chopper cascade</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../widget.html">Workflow Widget in Jupyter Notebooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reduction-workflow-guidelines.html">Reduction Workflow Guidelines</a></li>
+</ul>
+</div>
+</nav></div>
+        <div class="sidebar-primary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Introduction">Introduction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Setup-SANS-workflow-for-computing-transmission-fraction">Setup SANS workflow for computing transmission fraction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Inspect-data-for-one-of-the-runs-with-analyzer-cell">Inspect data for one of the runs with analyzer cell</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Compute-transmission-fractions">Compute transmission fractions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Sample-data">Sample data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Correction-workflow">Correction workflow</a></li>
+</ul>
+  </nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/user-guide/polarization/zoom.ipynb"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">User Guide</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Polarization</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Zoom Polarization Analysis</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Zoom-Polarization-Analysis">
+<h1>Zoom Polarization Analysis<a class="headerlink" href="#Zoom-Polarization-Analysis" title="Link to this heading">#</a></h1>
+<section id="Introduction">
+<h2>Introduction<a class="headerlink" href="#Introduction" title="Link to this heading">#</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> widget
+<span class="kn">import</span><span class="w"> </span><span class="nn">plopp</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sciline</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce</span><span class="w"> </span><span class="kn">import</span> <span class="n">polarization</span> <span class="k">as</span> <span class="n">pol</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess</span><span class="w"> </span><span class="kn">import</span> <span class="n">sans</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess</span><span class="w"> </span><span class="kn">import</span> <span class="n">isissans</span> <span class="k">as</span> <span class="n">isis</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ess.isissans.data</span>  <span class="c1"># noqa: F401</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.sans.types</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="n">data_folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;zoom-data-2025-07&#39;</span><span class="p">)</span>
+<span class="c1"># Runs with analyzer at 4 different times</span>
+<span class="n">cell_runs</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="nb">str</span><span class="p">(</span><span class="n">data_folder</span> <span class="o">/</span> <span class="s1">&#39;3He_unpolarized_in&#39;</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;ZOOM00038</span><span class="si">{</span><span class="n">run</span><span class="si">}</span><span class="s1">.nxs&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">run</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">423</span><span class="p">,</span> <span class="mi">425</span><span class="p">,</span> <span class="mi">427</span><span class="p">,</span> <span class="mi">429</span><span class="p">,</span> <span class="mi">431</span><span class="p">,</span> <span class="mi">433</span><span class="p">,</span> <span class="mi">435</span><span class="p">,</span> <span class="mi">437</span><span class="p">]</span>
+<span class="p">]</span>
+<span class="n">empty_run</span> <span class="o">=</span> <span class="n">data_folder</span> <span class="o">/</span> <span class="s1">&#39;Background_files&#39;</span> <span class="o">/</span> <span class="s1">&#39;ZOOM00038336.nxs&#39;</span>
+<span class="n">depolarized_run</span> <span class="o">=</span> <span class="n">data_folder</span> <span class="o">/</span> <span class="s1">&#39;Background_files&#39;</span> <span class="o">/</span> <span class="s1">&#39;ZOOM00038470.nxs&#39;</span>
+<span class="n">cell_runs</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">cell_runs</span><span class="p">,</span> <span class="n">depolarized_run</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Setup-SANS-workflow-for-computing-transmission-fraction">
+<h2>Setup SANS workflow for computing transmission fraction<a class="headerlink" href="#Setup-SANS-workflow-for-computing-transmission-fraction" title="Link to this heading">#</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">WavelengthBins</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">geomspace</span><span class="p">(</span>
+        <span class="s1">&#39;wavelength&#39;</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mf">1.75</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="mf">16.5</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">141</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;Å&#39;</span>
+    <span class="p">),</span>
+    <span class="n">isis</span><span class="o">.</span><span class="n">mantidio</span><span class="o">.</span><span class="n">CalibrationWorkspace</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="c1"># Spectrum numbers used for histogram files (Workspace2D)</span>
+    <span class="n">isis</span><span class="o">.</span><span class="n">MonitorSpectrumNumber</span><span class="p">[</span><span class="n">Incident</span><span class="p">]:</span> <span class="n">isis</span><span class="o">.</span><span class="n">MonitorSpectrumNumber</span><span class="p">[</span><span class="n">Incident</span><span class="p">](</span><span class="mi">3</span><span class="p">),</span>
+    <span class="n">isis</span><span class="o">.</span><span class="n">MonitorSpectrumNumber</span><span class="p">[</span><span class="n">Transmission</span><span class="p">]:</span> <span class="n">isis</span><span class="o">.</span><span class="n">MonitorSpectrumNumber</span><span class="p">[</span><span class="n">Transmission</span><span class="p">](</span>
+        <span class="mi">4</span>
+    <span class="p">),</span>
+    <span class="c1"># Monitor names used for event files (EventWorkspace)</span>
+    <span class="n">NeXusMonitorName</span><span class="p">[</span><span class="n">Incident</span><span class="p">]:</span> <span class="n">NeXusMonitorName</span><span class="p">[</span><span class="n">Incident</span><span class="p">](</span><span class="s2">&quot;monitor3&quot;</span><span class="p">),</span>
+    <span class="n">NeXusMonitorName</span><span class="p">[</span><span class="n">Transmission</span><span class="p">]:</span> <span class="n">NeXusMonitorName</span><span class="p">[</span><span class="n">Transmission</span><span class="p">](</span><span class="s2">&quot;monitor4&quot;</span><span class="p">),</span>
+    <span class="n">UncertaintyBroadcastMode</span><span class="p">:</span> <span class="n">UncertaintyBroadcastMode</span><span class="o">.</span><span class="n">upper_bound</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.polarization.zoom</span><span class="w"> </span><span class="kn">import</span> <span class="n">ZoomTransmissionFractionWorkflow</span>
+
+<span class="n">sans_workflow</span> <span class="o">=</span> <span class="n">ZoomTransmissionFractionWorkflow</span><span class="p">(</span><span class="n">cell_runs</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">sans_workflow</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+<span class="n">sans_workflow</span><span class="p">[</span><span class="n">isis</span><span class="o">.</span><span class="n">mantidio</span><span class="o">.</span><span class="n">Period</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">sans_workflow</span><span class="p">[</span><span class="n">Filename</span><span class="p">[</span><span class="n">EmptyBeamRun</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">empty_run</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Inspect-data-for-one-of-the-runs-with-analyzer-cell">
+<h2>Inspect data for one of the runs with analyzer cell<a class="headerlink" href="#Inspect-data-for-one-of-the-runs-with-analyzer-cell" title="Link to this heading">#</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">loaded</span> <span class="o">=</span> <span class="n">sciline</span><span class="o">.</span><span class="n">get_mapped_node_names</span><span class="p">(</span>
+    <span class="n">sans_workflow</span><span class="p">,</span> <span class="n">isis</span><span class="o">.</span><span class="n">mantidio</span><span class="o">.</span><span class="n">LoadedFileContents</span><span class="p">[</span><span class="n">TransmissionRun</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]]</span>
+<span class="p">)</span>
+<span class="c1"># Load only first run</span>
+<span class="n">first_run</span> <span class="o">=</span> <span class="n">sans_workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">loaded</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">collapse</span><span class="p">(</span><span class="n">first_run</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="n">keep</span><span class="o">=</span><span class="s1">&#39;tof&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">first_run</span>
+</pre></div>
+</div>
+</div>
+<p>We can load the combined time-dependent incident and transmission monitors. Note that the last run is the depolarized run:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mons</span> <span class="o">=</span> <span class="n">sans_workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span>
+    <span class="p">(</span>
+        <span class="n">NeXusComponent</span><span class="p">[</span><span class="n">Incident</span><span class="p">,</span> <span class="n">TransmissionRun</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]],</span>
+        <span class="n">NeXusComponent</span><span class="p">[</span><span class="n">Transmission</span><span class="p">,</span> <span class="n">TransmissionRun</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]],</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+<span class="n">mons</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">(</span>
+    <span class="n">incident</span><span class="o">=</span><span class="n">mons</span><span class="p">[</span><span class="n">NeXusComponent</span><span class="p">[</span><span class="n">Incident</span><span class="p">,</span> <span class="n">TransmissionRun</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]]][</span><span class="s1">&#39;data&#39;</span><span class="p">],</span>
+    <span class="n">transmission</span><span class="o">=</span><span class="n">mons</span><span class="p">[</span><span class="n">NeXusComponent</span><span class="p">[</span><span class="n">Transmission</span><span class="p">,</span> <span class="n">TransmissionRun</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]]][</span><span class="s1">&#39;data&#39;</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">collapse</span><span class="p">(</span><span class="n">mons</span><span class="p">[</span><span class="s1">&#39;incident&#39;</span><span class="p">],</span> <span class="n">keep</span><span class="o">=</span><span class="s1">&#39;tof&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">plot</span><span class="p">())</span>
+<span class="n">display</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">collapse</span><span class="p">(</span><span class="n">mons</span><span class="p">[</span><span class="s1">&#39;transmission&#39;</span><span class="p">],</span> <span class="n">keep</span><span class="o">=</span><span class="s1">&#39;tof&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">plot</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<p>The task graph for computing the transmission fraction is:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sans_workflow</span><span class="o">.</span><span class="n">visualize</span><span class="p">(</span>
+    <span class="n">TransmissionFraction</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">],</span> <span class="n">graph_attr</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;rankdir&#39;</span><span class="p">:</span> <span class="s1">&#39;LR&#39;</span><span class="p">},</span> <span class="n">compact</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Compute-transmission-fractions">
+<h2>Compute transmission fractions<a class="headerlink" href="#Compute-transmission-fractions" title="Link to this heading">#</a></h2>
+<p>There are multiple files which together define the time-dependence of the analyzer cell transmission. Note that as before the final run (time) is the depolarized run:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">raw_transmission</span> <span class="o">=</span> <span class="n">sans_workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">TransmissionFraction</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<p>We can plot the computed transmission fractions:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">transmission_depolarized</span> <span class="o">=</span> <span class="n">raw_transmission</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">transmission</span> <span class="o">=</span> <span class="n">raw_transmission</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">trans</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">(</span>
+    <span class="p">{</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">time</span><span class="si">:</span><span class="s2">c</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span> <span class="n">transmission</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="n">time</span><span class="p">]</span> <span class="k">for</span> <span class="n">time</span> <span class="ow">in</span> <span class="n">transmission</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]}</span>
+<span class="p">)</span>
+<span class="n">trans</span><span class="p">[</span><span class="s1">&#39;depolarized&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">transmission_depolarized</span>
+<span class="n">display</span><span class="p">(</span><span class="n">trans</span><span class="o">.</span><span class="n">plot</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Sanity check: Where can cosh yield values that can be fitted?</span>
+<span class="n">transmission_empty_glass</span> <span class="o">=</span> <span class="mf">0.9</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;dimensionless&#39;</span><span class="p">)</span>
+<span class="n">wavelength</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">midpoints</span><span class="p">(</span><span class="n">transmission</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;wavelength&#39;</span><span class="p">])</span>
+<span class="n">opacity0</span> <span class="o">=</span> <span class="mf">0.8797823016804095</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;1/angstrom&#39;</span><span class="p">)</span>
+<span class="p">(</span>
+    <span class="n">sc</span><span class="o">.</span><span class="n">acosh</span><span class="p">(</span>
+        <span class="n">sc</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="n">transmission</span><span class="p">)</span>
+        <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">opacity0</span> <span class="o">*</span> <span class="n">wavelength</span><span class="p">)</span>
+        <span class="o">/</span> <span class="n">transmission_empty_glass</span>
+    <span class="p">)</span>
+    <span class="o">/</span> <span class="p">(</span><span class="n">opacity0</span> <span class="o">*</span> <span class="n">wavelength</span><span class="p">)</span>
+<span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">wav_min</span> <span class="o">=</span> <span class="mf">1.75</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+<span class="n">wav_max</span> <span class="o">=</span> <span class="mf">16.5</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+<span class="n">transmission_truncated</span> <span class="o">=</span> <span class="n">raw_transmission</span><span class="p">[</span><span class="s1">&#39;wavelength&#39;</span><span class="p">,</span> <span class="n">wav_min</span><span class="p">:</span><span class="n">wav_max</span><span class="p">]</span>
+<span class="n">transmission_depolarized</span> <span class="o">=</span> <span class="n">transmission_truncated</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">transmission</span> <span class="o">=</span> <span class="n">transmission_truncated</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>We can now setup the polarization analysis workflow. The previously computed transmission fractions are used as workflow inputs:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">he3_workflow</span> <span class="o">=</span> <span class="n">pol</span><span class="o">.</span><span class="n">he3</span><span class="o">.</span><span class="n">He3CellWorkflow</span><span class="p">(</span><span class="n">in_situ</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">incoming_polarized</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># TODO Is plus correct here, this is period 0? Do we also have minus data?</span>
+<span class="n">he3_workflow</span><span class="p">[</span><span class="n">pol</span><span class="o">.</span><span class="n">he3</span><span class="o">.</span><span class="n">He3AnalyzerTransmissionFractionParallel</span><span class="p">]</span> <span class="o">=</span> <span class="n">transmission</span>
+<span class="c1"># TODO Fake empty transmission for now, would need to load different period</span>
+<span class="n">he3_workflow</span><span class="p">[</span><span class="n">pol</span><span class="o">.</span><span class="n">he3</span><span class="o">.</span><span class="n">He3AnalyzerTransmissionFractionAntiParallel</span><span class="p">]</span> <span class="o">=</span> <span class="n">transmission</span><span class="p">[</span>
+    <span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">0</span>
+<span class="p">]</span>
+<span class="n">he3_workflow</span><span class="p">[</span>
+    <span class="n">pol</span><span class="o">.</span><span class="n">he3</span><span class="o">.</span><span class="n">He3CellTransmissionFractionIncomingUnpolarized</span><span class="p">[</span>
+        <span class="n">pol</span><span class="o">.</span><span class="n">Analyzer</span><span class="p">,</span> <span class="n">pol</span><span class="o">.</span><span class="n">Depolarized</span>
+    <span class="p">]</span>
+<span class="p">]</span> <span class="o">=</span> <span class="n">transmission_depolarized</span>
+
+<span class="c1"># When in_situ=False, these params are used as starting guess for the fit</span>
+<span class="n">he3_workflow</span><span class="p">[</span><span class="n">pol</span><span class="o">.</span><span class="n">he3</span><span class="o">.</span><span class="n">He3CellLength</span><span class="p">[</span><span class="n">pol</span><span class="o">.</span><span class="n">Analyzer</span><span class="p">]]</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
+<span class="n">he3_workflow</span><span class="p">[</span><span class="n">pol</span><span class="o">.</span><span class="n">he3</span><span class="o">.</span><span class="n">He3CellPressure</span><span class="p">[</span><span class="n">pol</span><span class="o">.</span><span class="n">Analyzer</span><span class="p">]]</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;bar&#39;</span><span class="p">)</span>
+<span class="n">he3_workflow</span><span class="p">[</span><span class="n">pol</span><span class="o">.</span><span class="n">he3</span><span class="o">.</span><span class="n">He3CellTemperature</span><span class="p">[</span><span class="n">pol</span><span class="o">.</span><span class="n">Analyzer</span><span class="p">]]</span> <span class="o">=</span> <span class="mf">300.0</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;K&#39;</span><span class="p">)</span>
+
+<span class="n">he3_workflow</span><span class="p">[</span><span class="n">pol</span><span class="o">.</span><span class="n">he3</span><span class="o">.</span><span class="n">He3TransmissionEmptyGlass</span><span class="p">[</span><span class="n">pol</span><span class="o">.</span><span class="n">Analyzer</span><span class="p">]]</span> <span class="o">=</span> <span class="n">transmission_empty_glass</span>
+<span class="n">he3_workflow</span><span class="o">.</span><span class="n">visualize</span><span class="p">(</span>
+    <span class="n">pol</span><span class="o">.</span><span class="n">TransmissionFunction</span><span class="p">[</span><span class="n">pol</span><span class="o">.</span><span class="n">Analyzer</span><span class="p">],</span> <span class="n">graph_attr</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;rankdir&#39;</span><span class="p">:</span> <span class="s1">&#39;LR&#39;</span><span class="p">}</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>The workflow can compute the transmission function:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">func</span> <span class="o">=</span> <span class="n">he3_workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">pol</span><span class="o">.</span><span class="n">TransmissionFunction</span><span class="p">[</span><span class="n">pol</span><span class="o">.</span><span class="n">Analyzer</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<p>We can evaluate this transmission function at desired time and wavelength points:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">wavelength</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="s1">&#39;wavelength&#39;</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="mf">16.0</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">141</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+<span class="n">time</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="mi">100000</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">101</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">opacity_function</span><span class="p">(</span><span class="n">wavelength</span><span class="o">=</span><span class="n">wavelength</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">())</span>
+<span class="n">display</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">polarization_function</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">time</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">())</span>
+<span class="n">display</span><span class="p">(</span><span class="n">func</span><span class="p">(</span><span class="n">wavelength</span><span class="o">=</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">time</span><span class="p">,</span> <span class="n">plus_minus</span><span class="o">=</span><span class="s1">&#39;plus&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">norm</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">))</span>
+<span class="n">display</span><span class="p">(</span><span class="n">func</span><span class="p">(</span><span class="n">wavelength</span><span class="o">=</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">time</span><span class="p">,</span> <span class="n">plus_minus</span><span class="o">=</span><span class="s1">&#39;minus&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">norm</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">trans</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
+    <span class="n">func</span><span class="p">(</span><span class="n">wavelength</span><span class="o">=</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">time</span><span class="p">,</span> <span class="n">plus_minus</span><span class="o">=</span><span class="s1">&#39;plus&#39;</span><span class="p">),</span>
+    <span class="n">coords</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;wavelength&#39;</span><span class="p">:</span> <span class="n">wavelength</span><span class="p">,</span>
+        <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="n">time</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">(</span>
+    <span class="p">{</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">time</span><span class="si">:</span><span class="s2">c</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span> <span class="n">trans</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="n">time</span><span class="p">]</span> <span class="k">for</span> <span class="n">time</span> <span class="ow">in</span> <span class="n">trans</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">][::</span><span class="mi">20</span><span class="p">]}</span>
+<span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">norm</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;solid&#39;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">trans</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
+    <span class="n">func</span><span class="p">(</span><span class="n">wavelength</span><span class="o">=</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">time</span><span class="p">,</span> <span class="n">plus_minus</span><span class="o">=</span><span class="s1">&#39;plus&#39;</span><span class="p">),</span>
+    <span class="n">coords</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;wavelength&#39;</span><span class="p">:</span> <span class="n">wavelength</span><span class="p">,</span>
+        <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="n">time</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">(</span>
+    <span class="p">{</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">wav</span><span class="si">:</span><span class="s2">c</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span> <span class="n">trans</span><span class="p">[</span><span class="s1">&#39;wavelength&#39;</span><span class="p">,</span> <span class="n">wav</span><span class="p">]</span> <span class="k">for</span> <span class="n">wav</span> <span class="ow">in</span> <span class="n">trans</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;wavelength&#39;</span><span class="p">][::</span><span class="mi">20</span><span class="p">]}</span>
+<span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">norm</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;solid&#39;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">func</span><span class="o">.</span><span class="n">opacity_function</span><span class="o">.</span><span class="n">opacity0</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">func</span><span class="o">.</span><span class="n">polarization_function</span><span class="o">.</span><span class="n">C</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">func</span><span class="o">.</span><span class="n">polarization_function</span><span class="o">.</span><span class="n">T1</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Sample-data">
+<h2>Sample data<a class="headerlink" href="#Sample-data" title="Link to this heading">#</a></h2>
+<p>We now proceed to process the sample data. We use the Zoom workflow from ESSsans, configured as follows:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">make_sample_workflow</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
+    <span class="n">wf</span> <span class="o">=</span> <span class="n">isis</span><span class="o">.</span><span class="n">zoom</span><span class="o">.</span><span class="n">ZoomWorkflow</span><span class="p">()</span>
+    <span class="n">wf</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">isis</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">transmission_from_background_run</span><span class="p">)</span>
+    <span class="n">wf</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">isis</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">transmission_from_sample_run</span><span class="p">)</span>
+
+    <span class="c1"># TODO Are these masks correct? Provide correct XML files!</span>
+    <span class="n">masks</span> <span class="o">=</span> <span class="n">isis</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">zoom_tutorial_mask_filenames</span><span class="p">()</span>
+    <span class="n">wf</span> <span class="o">=</span> <span class="n">sans</span><span class="o">.</span><span class="n">with_pixel_mask_filenames</span><span class="p">(</span><span class="n">wf</span><span class="p">,</span> <span class="n">masks</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">wf</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="n">wf</span><span class="p">[</span><span class="n">QBins</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">geomspace</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mf">0.004</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">141</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;1/angstrom&#39;</span><span class="p">)</span>
+    <span class="n">wf</span><span class="p">[</span><span class="n">QxBins</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="s1">&#39;Qx&#39;</span><span class="p">,</span> <span class="n">start</span><span class="o">=-</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">101</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;1/angstrom&#39;</span><span class="p">)</span>
+    <span class="n">wf</span><span class="p">[</span><span class="n">QyBins</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="s1">&#39;Qy&#39;</span><span class="p">,</span> <span class="n">start</span><span class="o">=-</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">101</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;1/angstrom&#39;</span><span class="p">)</span>
+    <span class="n">wf</span><span class="p">[</span><span class="n">NonBackgroundWavelengthRange</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;wavelength&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="mf">0.7</span><span class="p">,</span> <span class="mf">17.1</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span>
+    <span class="p">)</span>
+    <span class="n">wf</span><span class="p">[</span><span class="n">CorrectForGravity</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">wf</span><span class="p">[</span><span class="n">UncertaintyBroadcastMode</span><span class="p">]</span> <span class="o">=</span> <span class="n">UncertaintyBroadcastMode</span><span class="o">.</span><span class="n">upper_bound</span>
+    <span class="n">wf</span><span class="p">[</span><span class="n">ReturnEvents</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1"># TODO Configure offsets and beam center correctly!</span>
+    <span class="c1"># sample_workflow[isis.SampleOffset] = sc.vector([0.0, 0.0, 0.11], unit=&#39;m&#39;)</span>
+    <span class="c1"># sample_workflow[isis.DetectorBankOffset] = sc.vector([0.0, 0.0, 0.5], unit=&#39;m&#39;)</span>
+    <span class="n">wf</span><span class="p">[</span><span class="n">BeamCenter</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">vector</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
+
+    <span class="c1"># TODO Use direct beam!</span>
+    <span class="c1"># sample_workflow[DirectBeamFilename]</span>
+    <span class="n">wf</span><span class="p">[</span><span class="n">DirectBeam</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="n">wf</span>
+</pre></div>
+</div>
+</div>
+<p>The sample runs are event data, so we can simply merge all runs to obtain a single event-mode <span class="math notranslate nohighlight">\(I(Q)\)</span>. We use <code class="docutils literal notranslate"><span class="pre">sans.with_sample_runs</span></code> to obtain a workflow that merges the runs and computes the <span class="math notranslate nohighlight">\(I(Q)\)</span>:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">water_folder</span> <span class="o">=</span> <span class="n">data_folder</span> <span class="o">/</span> <span class="s1">&#39;Sample_water_cell3&#39;</span>
+<span class="n">sample_runs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">water_folder</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;ZOOM00038</span><span class="si">{</span><span class="n">run</span><span class="si">}</span><span class="s1">.nxs&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">run</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">439</span><span class="p">,</span> <span class="mi">466</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sample_workflow</span> <span class="o">=</span> <span class="n">make_sample_workflow</span><span class="p">()</span>
+<span class="n">sample_workflow</span><span class="p">[</span><span class="n">Filename</span><span class="p">[</span><span class="n">EmptyBeamRun</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">empty_run</span><span class="p">)</span>
+<span class="n">multi_run_sample_workflow</span> <span class="o">=</span> <span class="n">sans</span><span class="o">.</span><span class="n">with_sample_runs</span><span class="p">(</span><span class="n">sample_workflow</span><span class="p">,</span> <span class="n">runs</span><span class="o">=</span><span class="n">sample_runs</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>The sample workflow looks like this:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">multi_run_sample_workflow</span><span class="o">.</span><span class="n">visualize</span><span class="p">(</span>
+    <span class="n">IofQ</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">],</span> <span class="n">graph_attr</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;rankdir&#39;</span><span class="p">:</span> <span class="s1">&#39;LR&#39;</span><span class="p">},</span> <span class="n">compact</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>ESSsans does not support processing multiple periods (and there are no plans for this, as this is ISIS-specific). We therefore run the workflow once per period. Note that is is inefficient as it loads every file four times.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># WARNING: Running this cell takes a couple of minutes when all sample runs are used.</span>
+
+<span class="c1"># TODO Is this correct? We get very large times. Are we using the correct transmission</span>
+<span class="c1"># runs above?</span>
+<span class="n">time_base</span> <span class="o">=</span> <span class="n">transmission</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;datetime&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+
+<span class="n">periods</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">period</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
+    <span class="n">multi_run_sample_workflow</span><span class="p">[</span><span class="n">isis</span><span class="o">.</span><span class="n">mantidio</span><span class="o">.</span><span class="n">Period</span><span class="p">]</span> <span class="o">=</span> <span class="n">period</span>
+    <span class="n">iofq</span> <span class="o">=</span> <span class="n">multi_run_sample_workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">IofQxy</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">])</span>
+    <span class="n">iofq</span> <span class="o">=</span> <span class="n">iofq</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">(</span>
+        <span class="n">time</span><span class="o">=</span><span class="n">iofq</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;pulse_time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">time_base</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span> <span class="o">-</span> <span class="n">time_base</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">drop_coords</span><span class="p">(</span><span class="s1">&#39;wavelength&#39;</span><span class="p">)</span>  <span class="c1"># Wavelength bounds get in the way</span>
+    <span class="n">periods</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">iofq</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plopp</span><span class="o">.</span><span class="n">slicer</span><span class="p">(</span>
+    <span class="n">sc</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">periods</span><span class="p">,</span> <span class="s1">&#39;period&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">pulse_time</span><span class="o">=</span><span class="mi">10</span><span class="p">)),</span> <span class="n">keep</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Qx&#39;</span><span class="p">,</span> <span class="s1">&#39;Qy&#39;</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Correction-workflow">
+<h2>Correction workflow<a class="headerlink" href="#Correction-workflow" title="Link to this heading">#</a></h2>
+<p>In the previous section we have setup the workflow for the analyzer. We also computed the transmission function there, but in production this will be done implicitly by running the entire workflow we will setup here. We can combine this with the workflow for the polarizer to obtain the full correction workflow:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">supermirror_workflow</span> <span class="o">=</span> <span class="n">pol</span><span class="o">.</span><span class="n">SupermirrorWorkflow</span><span class="p">()</span>
+<span class="n">supermirror_workflow</span><span class="o">.</span><span class="n">visualize</span><span class="p">(</span><span class="n">pol</span><span class="o">.</span><span class="n">TransmissionFunction</span><span class="p">[</span><span class="n">pol</span><span class="o">.</span><span class="n">Polarizer</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<p>We will use a second-order polynomial supermirror efficiency function:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.polarization.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">example_polarization_efficiency_table</span>
+
+<span class="n">supermirror_workflow</span><span class="p">[</span><span class="n">pol</span><span class="o">.</span><span class="n">SupermirrorEfficiencyFunction</span><span class="p">[</span><span class="n">pol</span><span class="o">.</span><span class="n">Polarizer</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">pol</span><span class="o">.</span><span class="n">EfficiencyLookupTable</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span>
+        <span class="n">example_polarization_efficiency_table</span><span class="p">(),</span>
+        <span class="n">wavelength_colname</span><span class="o">=</span><span class="s1">&#39;# X &#39;</span><span class="p">,</span>
+        <span class="n">efficiency_colname</span><span class="o">=</span><span class="s1">&#39; Y &#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">workflow</span> <span class="o">=</span> <span class="n">pol</span><span class="o">.</span><span class="n">PolarizationAnalysisWorkflow</span><span class="p">(</span>
+    <span class="n">polarizer_workflow</span><span class="o">=</span><span class="n">supermirror_workflow</span><span class="p">,</span>
+    <span class="n">analyzer_workflow</span><span class="o">=</span><span class="n">he3_workflow</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>For a single channel, the complete workflow looks as follows:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">workflow</span><span class="o">.</span><span class="n">visualize</span><span class="p">(</span>
+    <span class="n">pol</span><span class="o">.</span><span class="n">PolarizationCorrectedData</span><span class="p">[</span><span class="n">pol</span><span class="o">.</span><span class="n">Up</span><span class="p">,</span> <span class="n">pol</span><span class="o">.</span><span class="n">Up</span><span class="p">],</span> <span class="n">graph_attr</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;rankdir&#39;</span><span class="p">:</span> <span class="s1">&#39;LR&#39;</span><span class="p">}</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>We can now set the reduced sample data for each measured channel:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">workflow</span><span class="p">[</span><span class="n">pol</span><span class="o">.</span><span class="n">ReducedSampleDataBySpinChannel</span><span class="p">[</span><span class="n">pol</span><span class="o">.</span><span class="n">Up</span><span class="p">,</span> <span class="n">pol</span><span class="o">.</span><span class="n">Up</span><span class="p">]]</span> <span class="o">=</span> <span class="n">periods</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">workflow</span><span class="p">[</span><span class="n">pol</span><span class="o">.</span><span class="n">ReducedSampleDataBySpinChannel</span><span class="p">[</span><span class="n">pol</span><span class="o">.</span><span class="n">Down</span><span class="p">,</span> <span class="n">pol</span><span class="o">.</span><span class="n">Up</span><span class="p">]]</span> <span class="o">=</span> <span class="n">periods</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">workflow</span><span class="p">[</span><span class="n">pol</span><span class="o">.</span><span class="n">ReducedSampleDataBySpinChannel</span><span class="p">[</span><span class="n">pol</span><span class="o">.</span><span class="n">Up</span><span class="p">,</span> <span class="n">pol</span><span class="o">.</span><span class="n">Down</span><span class="p">]]</span> <span class="o">=</span> <span class="n">periods</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+<span class="n">workflow</span><span class="p">[</span><span class="n">pol</span><span class="o">.</span><span class="n">ReducedSampleDataBySpinChannel</span><span class="p">[</span><span class="n">pol</span><span class="o">.</span><span class="n">Down</span><span class="p">,</span> <span class="n">pol</span><span class="o">.</span><span class="n">Down</span><span class="p">]]</span> <span class="o">=</span> <span class="n">periods</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<p>The result for a single input channel (up-up) is:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">channels</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">pol</span><span class="o">.</span><span class="n">PolarizationCorrectedData</span><span class="p">[</span><span class="n">pol</span><span class="o">.</span><span class="n">Up</span><span class="p">,</span> <span class="n">pol</span><span class="o">.</span><span class="n">Up</span><span class="p">])</span>
+<span class="n">tiled</span> <span class="o">=</span> <span class="n">plopp</span><span class="o">.</span><span class="n">tiled</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">tiled</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">channels</span><span class="o">.</span><span class="n">upup</span><span class="o">.</span><span class="n">nanhist</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">tiled</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">channels</span><span class="o">.</span><span class="n">updown</span><span class="o">.</span><span class="n">nanhist</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">tiled</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">channels</span><span class="o">.</span><span class="n">downup</span><span class="o">.</span><span class="n">nanhist</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">tiled</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">channels</span><span class="o">.</span><span class="n">downdown</span><span class="o">.</span><span class="n">nanhist</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">tiled</span>
+</pre></div>
+</div>
+</div>
+<p>The combination of all four channels is:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">channels</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">pol</span><span class="o">.</span><span class="n">TotalPolarizationCorrectedData</span><span class="p">)</span>
+<span class="n">tiled</span> <span class="o">=</span> <span class="n">plopp</span><span class="o">.</span><span class="n">tiled</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">tiled</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">channels</span><span class="o">.</span><span class="n">upup</span><span class="o">.</span><span class="n">nanhist</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">tiled</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">channels</span><span class="o">.</span><span class="n">updown</span><span class="o">.</span><span class="n">nanhist</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">tiled</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">channels</span><span class="o">.</span><span class="n">downup</span><span class="o">.</span><span class="n">nanhist</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">tiled</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">channels</span><span class="o">.</span><span class="n">downdown</span><span class="o">.</span><span class="n">nanhist</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">tiled</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="inverse_of_polarization_matrices.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Polarization matrices for He3 cells and supermirror</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../unwrap/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Time-of-flight</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2024 Scipp contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><!-- This will display the version of the docs -->
+Current ESSreduce version: 26.4.2 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

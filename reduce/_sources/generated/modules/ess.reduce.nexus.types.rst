@@ -52,6 +52,7 @@ ess.reduce.nexus.types
       AllNeXusComponents
       DetectorPositionOffset
       DiskChoppers
+      DynamicPosition
       EmptyDetector
       EmptyMonitor
       Filename
@@ -73,6 +74,7 @@ ess.reduce.nexus.types
       RawDetector
       RawMonitor
       TimeInterval
+      TransformationTimeFilter
       TransmissionRun
    
    

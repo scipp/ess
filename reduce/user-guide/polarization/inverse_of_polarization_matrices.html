@@ -1,0 +1,1342 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Polarization matrices for He3 cells and supermirror &#8212; ESSreduce</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=4480c773"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/polarization/inverse_of_polarization_matrices';</script>
+    <script src="../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <link rel="icon" href="../../_static/favicon.svg"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Zoom Polarization Analysis" href="zoom.html" />
+    <link rel="prev" title="SANS Polarization Analysis Methodology" href="sans-polarization-analysis-methodology.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="26.4.2" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/logo.svg" class="logo__image only-light" alt="ESSreduce - Home"/>
+    <img src="../../_static/logo-dark.svg" class="logo__image only-dark pst-js-only" alt="ESSreduce - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../about/index.html">
+    About
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essdiffraction">
+    ESSdiffraction
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/ess/imaging">
+    ESSimaging
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/ess/nmx">
+    ESSnmx
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/esspolarization">
+    ESSpolarization
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essreflectometry">
+    ESSreflectometry
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/esssans">
+    ESSsans
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essspectroscopy">
+    ESSspectroscopy
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/ess/tree/main/packages/essreduce" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essreduce/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essreduce" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../about/index.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/essdiffraction">
+    ESSdiffraction
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/ess/imaging">
+    ESSimaging
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/ess/nmx">
+    ESSnmx
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/esspolarization">
+    ESSpolarization
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/essreflectometry">
+    ESSreflectometry
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/esssans">
+    ESSsans
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/essspectroscopy">
+    ESSspectroscopy
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/ess/tree/main/packages/essreduce" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essreduce/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essreduce" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Polarization</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="workflow.html">Workflows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sans-polarization-analysis-methodology.html">SANS Polarization Analysis Methodology</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Polarization matrices for He3 cells and supermirror</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zoom.html">Zoom Polarization Analysis</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../unwrap/index.html">Time-of-flight</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../unwrap/frame-unwrapping.html">Frame Unwrapping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../unwrap/wfm.html">Wavelength frame multiplication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../unwrap/dream.html">The DREAM chopper cascade</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../widget.html">Workflow Widget in Jupyter Notebooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reduction-workflow-guidelines.html">Reduction Workflow Guidelines</a></li>
+</ul>
+</div>
+</nav></div>
+        <div class="sidebar-primary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Helium-cell-case">Helium cell case</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Supermirror-case">Supermirror case</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Latex-formatting">Latex formatting</a></li>
+</ul>
+  </nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/user-guide/polarization/inverse_of_polarization_matrices.ipynb"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">User Guide</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Polarization</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Polarization matrices for He3 cells and supermirror</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sp</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Tp</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">symbols</span><span class="p">(</span><span class="s1">&#39;T^p_+, T^p_-&#39;</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">Ta</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">symbols</span><span class="p">(</span><span class="s1">&#39;T^a_+, T^a_-&#39;</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">I</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">symbols</span><span class="p">(</span><span class="s1">&#39;Ipp, Ipm, Imp, Imm&#39;</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># noqa: E741</span>
+<br/></pre></div>
+</div>
+</div>
+<section id="Polarization-matrices-for-He3-cells-and-supermirror">
+<h1>Polarization matrices for He3 cells and supermirror<a class="headerlink" href="#Polarization-matrices-for-He3-cells-and-supermirror" title="Link to this heading">#</a></h1>
+<p>From <a class="reference external" href="https://www.epj-conferences.org/articles/epjconf/abs/2023/12/epjconf_ecns2023_03004/epjconf_ecns2023_03004.html">https://www.epj-conferences.org/articles/epjconf/abs/2023/12/epjconf_ecns2023_03004/epjconf_ecns2023_03004.html</a></p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">I</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">ImmutableDenseMatrix</span><span class="p">([[</span><span class="n">I</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="p">[</span><span class="n">I</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="p">[</span><span class="n">I</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span> <span class="p">[</span><span class="n">I</span><span class="p">[</span><span class="mi">3</span><span class="p">]]])</span>  <span class="c1"># noqa: E741</span>
+<span class="n">I</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}Ipp\\Ipm\\Imp\\Imm\end{matrix}\right]$</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">TP</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">ImmutableDenseMatrix</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">[</span><span class="n">Tp</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Tp</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">Tp</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Tp</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+        <span class="p">[</span><span class="n">Tp</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Tp</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">Tp</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Tp</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="n">TP</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}T^{p}_{+} &amp; 0 &amp; T^{p}_{-} &amp; 0\\0 &amp; T^{p}_{+} &amp; 0 &amp; T^{p}_{-}\\T^{p}_{-} &amp; 0 &amp; T^{p}_{+} &amp; 0\\0 &amp; T^{p}_{-} &amp; 0 &amp; T^{p}_{+}\end{matrix}\right]$</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">TP</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}\frac{T^{p}_{+}}{\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}} &amp; 0 &amp; - \frac{T^{p}_{-}}{\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}} &amp; 0\\0 &amp; \frac{T^{p}_{+}}{\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}} &amp; 0 &amp; - \frac{T^{p}_{-}}{\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}}\\- \frac{T^{p}_{-}}{\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}} &amp; 0 &amp; \frac{T^{p}_{+}}{\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}} &amp; 0\\0 &amp; - \frac{T^{p}_{-}}{\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}} &amp; 0 &amp; \frac{T^{p}_{+}}{\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}}\end{matrix}\right]$</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">TA</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">ImmutableDenseMatrix</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">[</span><span class="n">Ta</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Ta</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="n">Ta</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">Ta</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Ta</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Ta</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Ta</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">Ta</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="n">TA</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}T^{a}_{+} &amp; T^{a}_{-} &amp; 0 &amp; 0\\T^{a}_{-} &amp; T^{a}_{+} &amp; 0 &amp; 0\\0 &amp; 0 &amp; T^{a}_{+} &amp; T^{a}_{-}\\0 &amp; 0 &amp; T^{a}_{-} &amp; T^{a}_{+}\end{matrix}\right]$</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">TA</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}\frac{T^{a}_{+}}{\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}} &amp; - \frac{T^{a}_{-}}{\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}} &amp; 0 &amp; 0\\- \frac{T^{a}_{-}}{\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}} &amp; \frac{T^{a}_{+}}{\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}} &amp; 0 &amp; 0\\0 &amp; 0 &amp; \frac{T^{a}_{+}}{\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}} &amp; - \frac{T^{a}_{-}}{\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}}\\0 &amp; 0 &amp; - \frac{T^{a}_{-}}{\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}} &amp; \frac{T^{a}_{+}}{\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}}\end{matrix}\right]$</div></div>
+</div>
+<section id="Helium-cell-case">
+<h2>Helium cell case<a class="headerlink" href="#Helium-cell-case" title="Link to this heading">#</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">TA</span> <span class="o">@</span> <span class="n">TP</span><span class="p">)</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span><span class="o">.</span><span class="n">factor</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}\frac{T^{a}_{+} T^{p}_{+}}{\left(T^{a}_{+}\right)^{2} \left(T^{p}_{+}\right)^{2} - \left(T^{a}_{+}\right)^{2} \left(T^{p}_{-}\right)^{2} - \left(T^{a}_{-}\right)^{2} \left(T^{p}_{+}\right)^{2} + \left(T^{a}_{-}\right)^{2} \left(T^{p}_{-}\right)^{2}} &amp; - \frac{T^{a}_{-} T^{p}_{+}}{\left(T^{a}_{+}\right)^{2} \left(T^{p}_{+}\right)^{2} - \left(T^{a}_{+}\right)^{2} \left(T^{p}_{-}\right)^{2} - \left(T^{a}_{-}\right)^{2} \left(T^{p}_{+}\right)^{2} + \left(T^{a}_{-}\right)^{2} \left(T^{p}_{-}\right)^{2}} &amp; - \frac{T^{a}_{+} T^{p}_{-}}{\left(T^{a}_{+}\right)^{2} \left(T^{p}_{+}\right)^{2} - \left(T^{a}_{+}\right)^{2} \left(T^{p}_{-}\right)^{2} - \left(T^{a}_{-}\right)^{2} \left(T^{p}_{+}\right)^{2} + \left(T^{a}_{-}\right)^{2} \left(T^{p}_{-}\right)^{2}} &amp; \frac{T^{a}_{-} T^{p}_{-}}{\left(T^{a}_{+}\right)^{2} \left(T^{p}_{+}\right)^{2} - \left(T^{a}_{+}\right)^{2} \left(T^{p}_{-}\right)^{2} - \left(T^{a}_{-}\right)^{2} \left(T^{p}_{+}\right)^{2} + \left(T^{a}_{-}\right)^{2} \left(T^{p}_{-}\right)^{2}}\\- \frac{T^{a}_{-} T^{p}_{+}}{\left(T^{a}_{+}\right)^{2} \left(T^{p}_{+}\right)^{2} - \left(T^{a}_{+}\right)^{2} \left(T^{p}_{-}\right)^{2} - \left(T^{a}_{-}\right)^{2} \left(T^{p}_{+}\right)^{2} + \left(T^{a}_{-}\right)^{2} \left(T^{p}_{-}\right)^{2}} &amp; \frac{T^{a}_{+} T^{p}_{+}}{\left(T^{a}_{+}\right)^{2} \left(T^{p}_{+}\right)^{2} - \left(T^{a}_{+}\right)^{2} \left(T^{p}_{-}\right)^{2} - \left(T^{a}_{-}\right)^{2} \left(T^{p}_{+}\right)^{2} + \left(T^{a}_{-}\right)^{2} \left(T^{p}_{-}\right)^{2}} &amp; \frac{T^{a}_{-} T^{p}_{-}}{\left(T^{a}_{+}\right)^{2} \left(T^{p}_{+}\right)^{2} - \left(T^{a}_{+}\right)^{2} \left(T^{p}_{-}\right)^{2} - \left(T^{a}_{-}\right)^{2} \left(T^{p}_{+}\right)^{2} + \left(T^{a}_{-}\right)^{2} \left(T^{p}_{-}\right)^{2}} &amp; - \frac{T^{a}_{+} T^{p}_{-}}{\left(T^{a}_{+}\right)^{2} \left(T^{p}_{+}\right)^{2} - \left(T^{a}_{+}\right)^{2} \left(T^{p}_{-}\right)^{2} - \left(T^{a}_{-}\right)^{2} \left(T^{p}_{+}\right)^{2} + \left(T^{a}_{-}\right)^{2} \left(T^{p}_{-}\right)^{2}}\\- \frac{T^{a}_{+} T^{p}_{-}}{\left(T^{a}_{+}\right)^{2} \left(T^{p}_{+}\right)^{2} - \left(T^{a}_{+}\right)^{2} \left(T^{p}_{-}\right)^{2} - \left(T^{a}_{-}\right)^{2} \left(T^{p}_{+}\right)^{2} + \left(T^{a}_{-}\right)^{2} \left(T^{p}_{-}\right)^{2}} &amp; \frac{T^{a}_{-} T^{p}_{-}}{\left(T^{a}_{+}\right)^{2} \left(T^{p}_{+}\right)^{2} - \left(T^{a}_{+}\right)^{2} \left(T^{p}_{-}\right)^{2} - \left(T^{a}_{-}\right)^{2} \left(T^{p}_{+}\right)^{2} + \left(T^{a}_{-}\right)^{2} \left(T^{p}_{-}\right)^{2}} &amp; \frac{T^{a}_{+} T^{p}_{+}}{\left(T^{a}_{+}\right)^{2} \left(T^{p}_{+}\right)^{2} - \left(T^{a}_{+}\right)^{2} \left(T^{p}_{-}\right)^{2} - \left(T^{a}_{-}\right)^{2} \left(T^{p}_{+}\right)^{2} + \left(T^{a}_{-}\right)^{2} \left(T^{p}_{-}\right)^{2}} &amp; - \frac{T^{a}_{-} T^{p}_{+}}{\left(T^{a}_{+}\right)^{2} \left(T^{p}_{+}\right)^{2} - \left(T^{a}_{+}\right)^{2} \left(T^{p}_{-}\right)^{2} - \left(T^{a}_{-}\right)^{2} \left(T^{p}_{+}\right)^{2} + \left(T^{a}_{-}\right)^{2} \left(T^{p}_{-}\right)^{2}}\\\frac{T^{a}_{-} T^{p}_{-}}{\left(T^{a}_{+}\right)^{2} \left(T^{p}_{+}\right)^{2} - \left(T^{a}_{+}\right)^{2} \left(T^{p}_{-}\right)^{2} - \left(T^{a}_{-}\right)^{2} \left(T^{p}_{+}\right)^{2} + \left(T^{a}_{-}\right)^{2} \left(T^{p}_{-}\right)^{2}} &amp; - \frac{T^{a}_{+} T^{p}_{-}}{\left(T^{a}_{+}\right)^{2} \left(T^{p}_{+}\right)^{2} - \left(T^{a}_{+}\right)^{2} \left(T^{p}_{-}\right)^{2} - \left(T^{a}_{-}\right)^{2} \left(T^{p}_{+}\right)^{2} + \left(T^{a}_{-}\right)^{2} \left(T^{p}_{-}\right)^{2}} &amp; - \frac{T^{a}_{-} T^{p}_{+}}{\left(T^{a}_{+}\right)^{2} \left(T^{p}_{+}\right)^{2} - \left(T^{a}_{+}\right)^{2} \left(T^{p}_{-}\right)^{2} - \left(T^{a}_{-}\right)^{2} \left(T^{p}_{+}\right)^{2} + \left(T^{a}_{-}\right)^{2} \left(T^{p}_{-}\right)^{2}} &amp; \frac{T^{a}_{+} T^{p}_{+}}{\left(T^{a}_{+}\right)^{2} \left(T^{p}_{+}\right)^{2} - \left(T^{a}_{+}\right)^{2} \left(T^{p}_{-}\right)^{2} - \left(T^{a}_{-}\right)^{2} \left(T^{p}_{+}\right)^{2} + \left(T^{a}_{-}\right)^{2} \left(T^{p}_{-}\right)^{2}}\end{matrix}\right]$</div></div>
+</div>
+<p>Same denominator in all entries, maybe easier to evaluate this way:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">Ta</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">Ta</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">Tp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">Tp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">d</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)$</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">d</span> <span class="o">*</span> <span class="p">(</span><span class="n">TA</span> <span class="o">@</span> <span class="n">TP</span><span class="p">)</span><span class="o">.</span><span class="n">inv</span><span class="p">())</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}T^{a}_{+} T^{p}_{+} &amp; - T^{a}_{-} T^{p}_{+} &amp; - T^{a}_{+} T^{p}_{-} &amp; T^{a}_{-} T^{p}_{-}\\- T^{a}_{-} T^{p}_{+} &amp; T^{a}_{+} T^{p}_{+} &amp; T^{a}_{-} T^{p}_{-} &amp; - T^{a}_{+} T^{p}_{-}\\- T^{a}_{+} T^{p}_{-} &amp; T^{a}_{-} T^{p}_{-} &amp; T^{a}_{+} T^{p}_{+} &amp; - T^{a}_{-} T^{p}_{+}\\T^{a}_{-} T^{p}_{-} &amp; - T^{a}_{+} T^{p}_{-} &amp; - T^{a}_{-} T^{p}_{+} &amp; T^{a}_{+} T^{p}_{+}\end{matrix}\right]$</div></div>
+</div>
+</section>
+<section id="Supermirror-case">
+<h2>Supermirror case<a class="headerlink" href="#Supermirror-case" title="Link to this heading">#</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">f1</span><span class="p">,</span> <span class="n">f2</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">symbols</span><span class="p">(</span><span class="s1">&#39;f_1:3&#39;</span><span class="p">)</span>
+<span class="n">F1_parallel</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">ImmutableDenseMatrix</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">1</span> <span class="o">-</span> <span class="n">f1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">f1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">f1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">f1</span><span class="p">],</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="n">F1_parallel</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}1 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 1 &amp; 0 &amp; 0\\1 - f_{1} &amp; 0 &amp; f_{1} &amp; 0\\0 &amp; 1 - f_{1} &amp; 0 &amp; f_{1}\end{matrix}\right]$</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">F1_parallel</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}1 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 1 &amp; 0 &amp; 0\\\frac{f_{1} - 1}{f_{1}} &amp; 0 &amp; \frac{1}{f_{1}} &amp; 0\\0 &amp; \frac{f_{1} - 1}{f_{1}} &amp; 0 &amp; \frac{1}{f_{1}}\end{matrix}\right]$</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">F1_parallel</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">@</span> <span class="n">F1_parallel</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}1 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 1 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 1 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 1\end{matrix}\right]$</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">F2_parallel</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">ImmutableDenseMatrix</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">1</span> <span class="o">-</span> <span class="n">f2</span><span class="p">,</span> <span class="n">f2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">f2</span><span class="p">,</span> <span class="n">f2</span><span class="p">],</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="n">F2_parallel</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}1 &amp; 0 &amp; 0 &amp; 0\\1 - f_{2} &amp; f_{2} &amp; 0 &amp; 0\\0 &amp; 0 &amp; 1 &amp; 0\\0 &amp; 0 &amp; 1 - f_{2} &amp; f_{2}\end{matrix}\right]$</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">F1_antiparallel</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">ImmutableDenseMatrix</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">[</span><span class="n">f1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">f1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">f1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">f1</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="n">F1_antiparallel</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}f_{1} &amp; 0 &amp; 1 - f_{1} &amp; 0\\0 &amp; f_{1} &amp; 0 &amp; 1 - f_{1}\\0 &amp; 0 &amp; 1 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 1\end{matrix}\right]$</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">F2_antiparallel</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">ImmutableDenseMatrix</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">f2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">f2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">f2</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">f2</span><span class="p">],</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="n">F2_antiparallel</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}1 &amp; 1 - f_{2} &amp; 0 &amp; 0\\0 &amp; f_{2} &amp; 0 &amp; 0\\0 &amp; 0 &amp; 1 &amp; 1 - f_{2}\\0 &amp; 0 &amp; 0 &amp; f_{2}\end{matrix}\right]$</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">F1_antiparallel</span> <span class="o">@</span> <span class="n">F1_antiparallel</span><span class="o">.</span><span class="n">inv</span><span class="p">())</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}1 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 1 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 1 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 1\end{matrix}\right]$</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">F2_antiparallel</span> <span class="o">@</span> <span class="n">F2_antiparallel</span><span class="o">.</span><span class="n">inv</span><span class="p">())</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}1 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 1 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 1 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 1\end{matrix}\right]$</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">TP</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">@</span> <span class="n">F1_parallel</span><span class="o">.</span><span class="n">inv</span><span class="p">())</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}\frac{T^{p}_{+} f_{1} - T^{p}_{-} \left(f_{1} - 1\right)}{f_{1} \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; 0 &amp; - \frac{T^{p}_{-}}{f_{1} \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; 0\\0 &amp; \frac{T^{p}_{+} f_{1} - T^{p}_{-} \left(f_{1} - 1\right)}{f_{1} \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; 0 &amp; - \frac{T^{p}_{-}}{f_{1} \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)}\\\frac{T^{p}_{+} \left(f_{1} - 1\right) - T^{p}_{-} f_{1}}{f_{1} \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; 0 &amp; \frac{T^{p}_{+}}{f_{1} \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; 0\\0 &amp; \frac{T^{p}_{+} \left(f_{1} - 1\right) - T^{p}_{-} f_{1}}{f_{1} \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; 0 &amp; \frac{T^{p}_{+}}{f_{1} \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)}\end{matrix}\right]$</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">TP</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">@</span> <span class="n">F1_antiparallel</span><span class="o">.</span><span class="n">inv</span><span class="p">())</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}\frac{T^{p}_{+}}{f_{1} \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; 0 &amp; \frac{T^{p}_{+} \left(f_{1} - 1\right) - T^{p}_{-} f_{1}}{f_{1} \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; 0\\0 &amp; \frac{T^{p}_{+}}{f_{1} \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; 0 &amp; \frac{T^{p}_{+} \left(f_{1} - 1\right) - T^{p}_{-} f_{1}}{f_{1} \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)}\\- \frac{T^{p}_{-}}{f_{1} \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; 0 &amp; \frac{T^{p}_{+} f_{1} - T^{p}_{-} \left(f_{1} - 1\right)}{f_{1} \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; 0\\0 &amp; - \frac{T^{p}_{-}}{f_{1} \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; 0 &amp; \frac{T^{p}_{+} f_{1} - T^{p}_{-} \left(f_{1} - 1\right)}{f_{1} \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)}\end{matrix}\right]$</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">F2_parallel</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">@</span> <span class="n">TA</span><span class="o">.</span><span class="n">inv</span><span class="p">())</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}\frac{T^{a}_{+}}{\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}} &amp; - \frac{T^{a}_{-}}{\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}} &amp; 0 &amp; 0\\\frac{T^{a}_{+} \left(f_{2} - 1\right) - T^{a}_{-}}{f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right)} &amp; \frac{T^{a}_{+} - T^{a}_{-} \left(f_{2} - 1\right)}{f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right)} &amp; 0 &amp; 0\\0 &amp; 0 &amp; \frac{T^{a}_{+}}{\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}} &amp; - \frac{T^{a}_{-}}{\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}}\\0 &amp; 0 &amp; \frac{T^{a}_{+} \left(f_{2} - 1\right) - T^{a}_{-}}{f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right)} &amp; \frac{T^{a}_{+} - T^{a}_{-} \left(f_{2} - 1\right)}{f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right)}\end{matrix}\right]$</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">F2_antiparallel</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">@</span> <span class="n">TA</span><span class="o">.</span><span class="n">inv</span><span class="p">())</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}\frac{T^{a}_{+} f_{2} - T^{a}_{-} \left(f_{2} - 1\right)}{f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right)} &amp; \frac{T^{a}_{+} \left(f_{2} - 1\right) - T^{a}_{-} f_{2}}{f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right)} &amp; 0 &amp; 0\\- \frac{T^{a}_{-}}{f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right)} &amp; \frac{T^{a}_{+}}{f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right)} &amp; 0 &amp; 0\\0 &amp; 0 &amp; \frac{T^{a}_{+} f_{2} - T^{a}_{-} \left(f_{2} - 1\right)}{f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right)} &amp; \frac{T^{a}_{+} \left(f_{2} - 1\right) - T^{a}_{-} f_{2}}{f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right)}\\0 &amp; 0 &amp; - \frac{T^{a}_{-}}{f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right)} &amp; \frac{T^{a}_{+}}{f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right)}\end{matrix}\right]$</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(((</span><span class="n">F2_parallel</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">@</span> <span class="n">TA</span><span class="o">.</span><span class="n">inv</span><span class="p">())</span> <span class="o">@</span> <span class="n">I</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">Ta</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">Ta</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}- Ipm T^{a}_{-} + Ipp T^{a}_{+}\\\frac{Ipm \left(T^{a}_{+} - T^{a}_{-} \left(f_{2} - 1\right)\right) + Ipp \left(T^{a}_{+} \left(f_{2} - 1\right) - T^{a}_{-}\right)}{f_{2}}\\- Imm T^{a}_{-} + Imp T^{a}_{+}\\\frac{Imm \left(T^{a}_{+} - T^{a}_{-} \left(f_{2} - 1\right)\right) + Imp \left(T^{a}_{+} \left(f_{2} - 1\right) - T^{a}_{-}\right)}{f_{2}}\end{matrix}\right]$</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(((</span><span class="n">TP</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">@</span> <span class="n">F1_parallel</span><span class="o">.</span><span class="n">inv</span><span class="p">())</span> <span class="o">@</span> <span class="n">I</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">Tp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">Tp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}\frac{- Imp T^{p}_{-} + Ipp \left(T^{p}_{+} f_{1} - T^{p}_{-} \left(f_{1} - 1\right)\right)}{f_{1}}\\\frac{- Imm T^{p}_{-} + Ipm \left(T^{p}_{+} f_{1} - T^{p}_{-} \left(f_{1} - 1\right)\right)}{f_{1}}\\\frac{Imp T^{p}_{+} + Ipp \left(T^{p}_{+} \left(f_{1} - 1\right) - T^{p}_{-} f_{1}\right)}{f_{1}}\\\frac{Imm T^{p}_{+} + Ipm \left(T^{p}_{+} \left(f_{1} - 1\right) - T^{p}_{-} f_{1}\right)}{f_{1}}\end{matrix}\right]$</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">TP</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">@</span> <span class="n">F1_parallel</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">@</span> <span class="n">F2_parallel</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">@</span> <span class="n">TA</span><span class="o">.</span><span class="n">inv</span><span class="p">())</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}\frac{T^{a}_{+} \left(T^{p}_{+} f_{1} - T^{p}_{-} \left(f_{1} - 1\right)\right)}{f_{1} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; - \frac{T^{a}_{-} \left(T^{p}_{+} f_{1} - T^{p}_{-} \left(f_{1} - 1\right)\right)}{f_{1} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; - \frac{T^{a}_{+} T^{p}_{-}}{f_{1} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; \frac{T^{a}_{-} T^{p}_{-}}{f_{1} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)}\\\frac{\left(T^{a}_{+} \left(f_{2} - 1\right) - T^{a}_{-}\right) \left(T^{p}_{+} f_{1} - T^{p}_{-} \left(f_{1} - 1\right)\right)}{f_{1} f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; \frac{\left(T^{a}_{+} - T^{a}_{-} \left(f_{2} - 1\right)\right) \left(T^{p}_{+} f_{1} - T^{p}_{-} \left(f_{1} - 1\right)\right)}{f_{1} f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; \frac{T^{p}_{-} \left(- T^{a}_{+} \left(f_{2} - 1\right) + T^{a}_{-}\right)}{f_{1} f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; \frac{T^{p}_{-} \left(- T^{a}_{+} + T^{a}_{-} \left(f_{2} - 1\right)\right)}{f_{1} f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)}\\\frac{T^{a}_{+} \left(T^{p}_{+} \left(f_{1} - 1\right) - T^{p}_{-} f_{1}\right)}{f_{1} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; - \frac{T^{a}_{-} \left(T^{p}_{+} \left(f_{1} - 1\right) - T^{p}_{-} f_{1}\right)}{f_{1} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; \frac{T^{a}_{+} T^{p}_{+}}{f_{1} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; - \frac{T^{a}_{-} T^{p}_{+}}{f_{1} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)}\\\frac{\left(T^{a}_{+} \left(f_{2} - 1\right) - T^{a}_{-}\right) \left(T^{p}_{+} \left(f_{1} - 1\right) - T^{p}_{-} f_{1}\right)}{f_{1} f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; \frac{\left(T^{a}_{+} - T^{a}_{-} \left(f_{2} - 1\right)\right) \left(T^{p}_{+} \left(f_{1} - 1\right) - T^{p}_{-} f_{1}\right)}{f_{1} f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; \frac{T^{p}_{+} \left(T^{a}_{+} \left(f_{2} - 1\right) - T^{a}_{-}\right)}{f_{1} f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; \frac{T^{p}_{+} \left(T^{a}_{+} - T^{a}_{-} \left(f_{2} - 1\right)\right)}{f_{1} f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)}\end{matrix}\right]$</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">TP</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">@</span> <span class="n">F1_antiparallel</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">@</span> <span class="n">F2_antiparallel</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">@</span> <span class="n">TA</span><span class="o">.</span><span class="n">inv</span><span class="p">())</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}\frac{T^{p}_{+} \left(T^{a}_{+} f_{2} - T^{a}_{-} \left(f_{2} - 1\right)\right)}{f_{1} f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; \frac{T^{p}_{+} \left(T^{a}_{+} \left(f_{2} - 1\right) - T^{a}_{-} f_{2}\right)}{f_{1} f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; \frac{\left(T^{a}_{+} f_{2} - T^{a}_{-} \left(f_{2} - 1\right)\right) \left(T^{p}_{+} \left(f_{1} - 1\right) - T^{p}_{-} f_{1}\right)}{f_{1} f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; \frac{\left(T^{a}_{+} \left(f_{2} - 1\right) - T^{a}_{-} f_{2}\right) \left(T^{p}_{+} \left(f_{1} - 1\right) - T^{p}_{-} f_{1}\right)}{f_{1} f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)}\\- \frac{T^{a}_{-} T^{p}_{+}}{f_{1} f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; \frac{T^{a}_{+} T^{p}_{+}}{f_{1} f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; - \frac{T^{a}_{-} \left(T^{p}_{+} \left(f_{1} - 1\right) - T^{p}_{-} f_{1}\right)}{f_{1} f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; \frac{T^{a}_{+} \left(T^{p}_{+} \left(f_{1} - 1\right) - T^{p}_{-} f_{1}\right)}{f_{1} f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)}\\\frac{T^{p}_{-} \left(- T^{a}_{+} f_{2} + T^{a}_{-} \left(f_{2} - 1\right)\right)}{f_{1} f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; \frac{T^{p}_{-} \left(- T^{a}_{+} \left(f_{2} - 1\right) + T^{a}_{-} f_{2}\right)}{f_{1} f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; \frac{\left(T^{a}_{+} f_{2} - T^{a}_{-} \left(f_{2} - 1\right)\right) \left(T^{p}_{+} f_{1} - T^{p}_{-} \left(f_{1} - 1\right)\right)}{f_{1} f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; \frac{\left(T^{a}_{+} \left(f_{2} - 1\right) - T^{a}_{-} f_{2}\right) \left(T^{p}_{+} f_{1} - T^{p}_{-} \left(f_{1} - 1\right)\right)}{f_{1} f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)}\\\frac{T^{a}_{-} T^{p}_{-}}{f_{1} f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; - \frac{T^{a}_{+} T^{p}_{-}}{f_{1} f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; - \frac{T^{a}_{-} \left(T^{p}_{+} f_{1} - T^{p}_{-} \left(f_{1} - 1\right)\right)}{f_{1} f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)} &amp; \frac{T^{a}_{+} \left(T^{p}_{+} f_{1} - T^{p}_{-} \left(f_{1} - 1\right)\right)}{f_{1} f_{2} \left(\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}\right) \left(\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}\right)}\end{matrix}\right]$</div></div>
+</div>
+<p>Now we will test if the flipper matrices together with the polarizer/analyzer matrices yield physically useful results for the examples:</p>
+<ol class="lowerroman simple">
+<li><p>collinear magnetic moments &amp; no chiral terms, i.e., P=F=1 &amp; S+-=S-+</p></li>
+<li><p>chiral magnetic moments with S++=S–=0 &amp; S+- :nbsphinx-math:<a href="#id1"><span class="problematic" id="id2">`</span></a>neq <a href="#id3"><span class="problematic" id="id4">`</span></a>S-+</p></li>
+</ol>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">S_test_i</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">symbols</span><span class="p">(</span><span class="s1">&#39;Spp, Spm, Smp, Smm&#39;</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">S_test_i</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">ImmutableDenseMatrix</span><span class="p">([[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="n">S_test_i</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="p">[</span><span class="n">S_test_i</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span> <span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+<span class="n">S_test_i</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}0\\Spm\\Smp\\0\end{matrix}\right]$</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">((</span><span class="n">TA</span> <span class="o">@</span> <span class="n">F2_parallel</span> <span class="o">@</span> <span class="n">F1_parallel</span> <span class="o">@</span> <span class="n">TP</span><span class="p">)</span> <span class="o">@</span> <span class="n">S_test_i</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}Smp T^{p}_{-} \left(T^{a}_{+} - T^{a}_{-} \left(f_{2} - 1\right)\right) + Spm T^{a}_{-} T^{p}_{+} f_{2}\\- Smp T^{p}_{-} \left(T^{a}_{+} \left(f_{2} - 1\right) - T^{a}_{-}\right) + Spm T^{a}_{+} T^{p}_{+} f_{2}\\Smp \left(T^{a}_{+} - T^{a}_{-} \left(f_{2} - 1\right)\right) \left(T^{p}_{+} f_{1} - T^{p}_{-} \left(f_{1} - 1\right)\right) - Spm T^{a}_{-} f_{2} \left(T^{p}_{+} \left(f_{1} - 1\right) - T^{p}_{-} f_{1}\right)\\- Smp \left(T^{a}_{+} \left(f_{2} - 1\right) - T^{a}_{-}\right) \left(T^{p}_{+} f_{1} - T^{p}_{-} \left(f_{1} - 1\right)\right) - Spm T^{a}_{+} f_{2} \left(T^{p}_{+} \left(f_{1} - 1\right) - T^{p}_{-} f_{1}\right)\end{matrix}\right]$</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">S_test_ii</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">symbols</span><span class="p">(</span><span class="s1">&#39;Spp, Spm, Smp, Smm&#39;</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">S_test_ii</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">ImmutableDenseMatrix</span><span class="p">(</span>
+    <span class="p">[[</span><span class="n">S_test_ii</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="p">[</span><span class="n">S_test_ii</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="p">[</span><span class="n">S_test_ii</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="p">[</span><span class="n">S_test_ii</span><span class="p">[</span><span class="mi">3</span><span class="p">]]]</span>
+<span class="p">)</span>
+<span class="n">S_test_ii</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}Spp\\Spm\\Spm\\Smm\end{matrix}\right]$</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">((</span><span class="n">TA</span> <span class="o">@</span> <span class="n">F2_antiparallel</span><span class="p">)</span> <span class="o">@</span> <span class="n">S_test_ii</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}- Spm \left(T^{a}_{+} \left(f_{2} - 1\right) - T^{a}_{-} f_{2}\right) + Spp T^{a}_{+}\\Spm \left(T^{a}_{+} f_{2} - T^{a}_{-} \left(f_{2} - 1\right)\right) + Spp T^{a}_{-}\\- Smm \left(T^{a}_{+} \left(f_{2} - 1\right) - T^{a}_{-} f_{2}\right) + Spm T^{a}_{+}\\Smm \left(T^{a}_{+} f_{2} - T^{a}_{-} \left(f_{2} - 1\right)\right) + Spm T^{a}_{-}\end{matrix}\right]$</div></div>
+</div>
+<p>Now trying the same with the to 2-dim converted matrices</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">S_test_iii</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+<span class="n">f1_test</span> <span class="o">=</span> <span class="mf">0.9</span>
+<span class="n">f2_test</span> <span class="o">=</span> <span class="mf">0.9</span>
+<span class="n">F1_parallel_test</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">1</span> <span class="o">-</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">],</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="n">F2_parallel_test</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">1</span> <span class="o">-</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">],</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="n">Tp_test</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">])</span>
+<span class="n">TP_test</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">[</span><span class="n">Tp_test</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Tp_test</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">Tp_test</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Tp_test</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+        <span class="p">[</span><span class="n">Tp_test</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Tp_test</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">Tp_test</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Tp_test</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="n">Ta_test</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">])</span>
+<span class="n">TA_test</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">[</span><span class="n">Ta_test</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Ta_test</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="n">Ta_test</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">Ta_test</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Ta_test</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Ta_test</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Ta_test</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">Ta_test</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="n">TA_test</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+array([[0.8, 0.2, 0. , 0. ],
+       [0.2, 0.8, 0. , 0. ],
+       [0. , 0. , 0.8, 0.2],
+       [0. , 0. , 0.2, 0.8]])
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">TP_test</span> <span class="o">@</span> <span class="n">TA_test</span><span class="p">)</span> <span class="o">@</span> <span class="n">S_test_iii</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+array([[1.44],
+       [2.76],
+       [3.36],
+       [1.44]])
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ground_truth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="n">analyzer</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">]])</span>
+<span class="n">polarizer</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">]])</span>
+<span class="n">identity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]])</span>
+<span class="n">intensity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">kron</span><span class="p">(</span><span class="n">identity</span><span class="p">,</span> <span class="n">analyzer</span><span class="p">)</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">kron</span><span class="p">(</span><span class="n">polarizer</span><span class="p">,</span> <span class="n">identity</span><span class="p">)</span> <span class="o">@</span> <span class="n">ground_truth</span>
+<span class="n">intensity</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+array([1.44, 2.76, 3.36, 1.44])
+</pre></div></div>
+</div>
+</section>
+<section id="Latex-formatting">
+<h2>Latex formatting<a class="headerlink" href="#Latex-formatting" title="Link to this heading">#</a></h2>
+<p>(For convenience)</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Latex formatted for copying to other docs</span>
+<span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="p">(</span>
+    <span class="sa">r</span><span class="s1">&#39;\hat</span><span class="si">{T}</span><span class="s1">_P^{-1} = &#39;</span> <span class="o">+</span> <span class="n">sp</span><span class="o">.</span><span class="n">latex</span><span class="p">(</span><span class="n">TP</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span><span class="o">.</span><span class="n">simplify</span><span class="p">()),</span>
+    <span class="sa">r</span><span class="s1">&#39;\hat</span><span class="si">{T}</span><span class="s1">_A^{-1} = &#39;</span> <span class="o">+</span> <span class="n">sp</span><span class="o">.</span><span class="n">latex</span><span class="p">(</span><span class="n">TA</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span><span class="o">.</span><span class="n">simplify</span><span class="p">()),</span>
+    <span class="sa">r</span><span class="s1">&#39;\hat</span><span class="si">{F}</span><span class="s1">_1^{-1} = &#39;</span> <span class="o">+</span> <span class="n">sp</span><span class="o">.</span><span class="n">latex</span><span class="p">(</span><span class="n">F1_parallel</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span><span class="o">.</span><span class="n">simplify</span><span class="p">()),</span>
+    <span class="sa">r</span><span class="s1">&#39;\hat</span><span class="si">{F}</span><span class="s1">_2^{-1} = &#39;</span> <span class="o">+</span> <span class="n">sp</span><span class="o">.</span><span class="n">latex</span><span class="p">(</span><span class="n">F2_parallel</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span><span class="o">.</span><span class="n">simplify</span><span class="p">()),</span>
+<span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+\hat{T}_P^{-1} = \left[\begin{matrix}\frac{T^{p}_{+}}{\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}} &amp; 0 &amp; - \frac{T^{p}_{-}}{\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}} &amp; 0\\0 &amp; \frac{T^{p}_{+}}{\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}} &amp; 0 &amp; - \frac{T^{p}_{-}}{\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}}\\- \frac{T^{p}_{-}}{\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}} &amp; 0 &amp; \frac{T^{p}_{+}}{\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}} &amp; 0\\0 &amp; - \frac{T^{p}_{-}}{\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}} &amp; 0 &amp; \frac{T^{p}_{+}}{\left(T^{p}_{+}\right)^{2} - \left(T^{p}_{-}\right)^{2}}\end{matrix}\right]
+
+\hat{T}_A^{-1} = \left[\begin{matrix}\frac{T^{a}_{+}}{\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}} &amp; - \frac{T^{a}_{-}}{\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}} &amp; 0 &amp; 0\\- \frac{T^{a}_{-}}{\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}} &amp; \frac{T^{a}_{+}}{\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}} &amp; 0 &amp; 0\\0 &amp; 0 &amp; \frac{T^{a}_{+}}{\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}} &amp; - \frac{T^{a}_{-}}{\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}}\\0 &amp; 0 &amp; - \frac{T^{a}_{-}}{\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}} &amp; \frac{T^{a}_{+}}{\left(T^{a}_{+}\right)^{2} - \left(T^{a}_{-}\right)^{2}}\end{matrix}\right]
+
+\hat{F}_1^{-1} = \left[\begin{matrix}1 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 1 &amp; 0 &amp; 0\\\frac{f_{1} - 1}{f_{1}} &amp; 0 &amp; \frac{1}{f_{1}} &amp; 0\\0 &amp; \frac{f_{1} - 1}{f_{1}} &amp; 0 &amp; \frac{1}{f_{1}}\end{matrix}\right]
+
+\hat{F}_2^{-1} = \left[\begin{matrix}1 &amp; 0 &amp; 0 &amp; 0\\\frac{f_{2} - 1}{f_{2}} &amp; \frac{1}{f_{2}} &amp; 0 &amp; 0\\0 &amp; 0 &amp; 1 &amp; 0\\0 &amp; 0 &amp; \frac{f_{2} - 1}{f_{2}} &amp; \frac{1}{f_{2}}\end{matrix}\right]
+
+</pre></div></div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="sans-polarization-analysis-methodology.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">SANS Polarization Analysis Methodology</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="zoom.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Zoom Polarization Analysis</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2024 Scipp contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><!-- This will display the version of the docs -->
+Current ESSreduce version: 26.4.2 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
