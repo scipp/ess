@@ -182,19 +182,10 @@ def loki_lookup_table_no_choppers() -> Path:
     return _registry.get_path("loki-wavelength-lookup-table-no-choppers.h5")
 
 
-def loki_coda_file_one_event() -> Path:
+def loki_coda_file() -> Path:
     """
-    LoKI CODA file with a single event per detector bank (for testing purposes).
-    The file was created from a CODA file 'loki_999999_00009928.hdf' but the event lists
-    were replaced by lists with a single event to reduce the size of the file.
-    The workflow should still be able to run, it will just produce results with NaNs
-    everywhere.
+    Small LoKI CODA file for testing purposes (data from only 5 pulses).
+    The file was generated from a CODA file coda_loki_999999_00027624.hdf (22/04/2026)
+    using the tools/shrink_loki_nexus.py script.
     """
-    return _registry.get_path("loki-coda-one-event.hdf")
-
-
-def loki_coda_file_small() -> Path:
-    """
-    Small LoKI CODA file for testing purposes (data from only 30 pulses).
-    """
-    return _registry.get_path("loki_999999_00009928_small.hdf")
+    return _registry.get_path("loki-coda-5-pulses.hdf")
