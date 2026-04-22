@@ -1,0 +1,990 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Comparison with PSI reduction software &#8212; ESSreflectometry</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=d3570e94"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/amor/compare-to-eos';</script>
+    <script src="../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <link rel="icon" href="../../_static/favicon.svg"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Workflow widget" href="workflow-widget.html" />
+    <link rel="prev" title="Divergent data reduction for Amor - advanced" href="amor-reduction-advanced.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="26.4.1" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/logo.svg" class="logo__image only-light" alt="ESSreflectometry - Home"/>
+    <img src="../../_static/logo-dark.svg" class="logo__image only-dark pst-js-only" alt="ESSreflectometry - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../about/index.html">
+    About
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/essreflectometry" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essreflectometry/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essreflectometry" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../about/index.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/essreflectometry" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essreflectometry/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essreflectometry" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Amor</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="amor-reduction.html">Divergent data reduction for Amor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="amor-reduction-advanced.html">Divergent data reduction for Amor - advanced</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Comparison with PSI reduction software</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow-widget.html">Workflow widget</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../estia/index.html">ESTIA</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../estia/estia-mcstas-reduction.html">Reduction of ESTIA McStas data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../estia/estia-advanced-mcstas-reduction.html">ESTIA advanced data reduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../estia/simulated-spin-flip-sample.html">Reduction of spin flip data from McStas simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../estia/create-estia-wavelength-lookup-table.html">Create a wavelength lookup table for ESTIA</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../offspec/index.html">Offspec</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../offspec/offspec_reduction.html">Collimated data reduction for OFFSPEC</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../focused-reflectometry-data-reduction.html">Focused reflectometry data reduction</a></li>
+</ul>
+</div>
+</nav></div>
+        <div class="sidebar-primary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Recreate-reference-files-using-Jochens-Amor-data-reduction-software">Recreate reference files using Jochens Amor data reduction software</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1">step 1</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2">step 2</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Run-essreflectometry-on-the-same-files">Run essreflectometry on the same files</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Plot-reflectivity-curve-comparison">Plot reflectivity curve comparison</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Overlay-curves-from-same-sample-at-different-angle,-should-be-on-top-of-each-other">Overlay curves from same sample at different angle, should be on top of each other</a></li>
+</ul>
+  </nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/user-guide/amor/compare-to-eos.ipynb"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">User Guide</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Amor</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Comparison with PSI reduction software</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Comparison-with-PSI-reduction-software">
+<h1>Comparison with PSI reduction software<a class="headerlink" href="#Comparison-with-PSI-reduction-software" title="Link to this heading">#</a></h1>
+<p>This notebook is for validating the results from the <code class="docutils literal notranslate"><span class="pre">essreflectometry</span></code> packages by comparing them to the ones obtained by the PSI software at the Amor beamline.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">orsopy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">plopp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess</span><span class="w"> </span><span class="kn">import</span> <span class="n">amor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.amor</span><span class="w"> </span><span class="kn">import</span> <span class="n">data</span>  <span class="c1"># noqa: F401</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reflectometry.types</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.amor.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChopperPhase</span>
+
+<span class="c1"># The files used in this tutorial have some issues that makes scippnexus</span>
+<span class="c1"># raise warnings when loading them. To avoid noise in the notebook the warnings are silenced.</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="s1">&#39;Failed to convert .* into a transformation&#39;</span><span class="p">)</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="s1">&#39;Invalid transformation, missing attribute&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<section id="Recreate-reference-files-using-Jochens-Amor-data-reduction-software">
+<h2>Recreate reference files using Jochens Amor data reduction software<a class="headerlink" href="#Recreate-reference-files-using-Jochens-Amor-data-reduction-software" title="Link to this heading">#</a></h2>
+<section id="step-1">
+<h3>step 1<a class="headerlink" href="#step-1" title="Link to this heading">#</a></h3>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>%%bash
+git clone https://github.com/jochenstahn/amor.git
+wget -P raw https://public.esss.dk/groups/scipp/ess/amor/1/amor2023n000{608..614}.hdf
+</pre></div>
+</div>
+</section>
+<section id="step-2">
+<h3>step 2<a class="headerlink" href="#step-2" title="Link to this heading">#</a></h3>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>%%bash
+args=&#39;-Y 2023 -d raw -n 614 -m 0.05 -co -7.5 -of ort&#39;
+
+rm raw/614.norm
+python amor/neos.py $args -f 614
+
+for i in `seq 608 613`
+do
+    python amor/neos.py $args -f $i -o $i
+done
+</pre></div>
+</div>
+</section>
+</section>
+<section id="Run-essreflectometry-on-the-same-files">
+<h2>Run essreflectometry on the same files<a class="headerlink" href="#Run-essreflectometry-on-the-same-files" title="Link to this heading">#</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">workflow</span> <span class="o">=</span> <span class="n">amor</span><span class="o">.</span><span class="n">AmorWorkflow</span><span class="p">()</span>
+
+<span class="n">workflow</span><span class="p">[</span><span class="n">SampleSize</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;mm&#39;</span><span class="p">)</span>
+<span class="n">workflow</span><span class="p">[</span><span class="n">SampleSize</span><span class="p">[</span><span class="n">ReferenceRun</span><span class="p">]]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;mm&#39;</span><span class="p">)</span>
+<span class="n">workflow</span><span class="p">[</span><span class="n">ChopperPhase</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="o">-</span><span class="mf">7.5</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;deg&#39;</span><span class="p">)</span>
+
+<span class="n">workflow</span><span class="p">[</span><span class="n">WavelengthBins</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">geomspace</span><span class="p">(</span><span class="s1">&#39;wavelength&#39;</span><span class="p">,</span> <span class="mf">2.8</span><span class="p">,</span> <span class="mf">12.5</span><span class="p">,</span> <span class="mi">2001</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+<span class="n">workflow</span><span class="p">[</span><span class="n">QBins</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">geomspace</span><span class="p">(</span>
+    <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mf">0.00505</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="mf">2.93164766e-01</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">391</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;1/angstrom&#39;</span>
+<span class="p">)</span>
+<span class="n">workflow</span><span class="p">[</span><span class="n">YIndexLimits</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mi">11</span><span class="p">),</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mi">41</span><span class="p">)</span>
+<span class="n">workflow</span><span class="p">[</span><span class="n">ZIndexLimits</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mi">80</span><span class="p">),</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mi">370</span><span class="p">)</span>
+<span class="n">workflow</span><span class="p">[</span><span class="n">BeamDivergenceLimits</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="o">-</span><span class="mf">0.75</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;deg&#39;</span><span class="p">),</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.75</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;deg&#39;</span><span class="p">)</span>
+
+<span class="c1"># Chopper phase value in the file is wrong, so we set it manually</span>
+<span class="n">workflow</span><span class="p">[</span><span class="n">ChopperPhase</span><span class="p">[</span><span class="n">ReferenceRun</span><span class="p">]]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="o">-</span><span class="mf">7.5</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;deg&#39;</span><span class="p">)</span>
+<span class="c1"># The sample rotation value in the file is slightly off, so we set it manually</span>
+<span class="n">workflow</span><span class="p">[</span><span class="n">SampleRotationOffset</span><span class="p">[</span><span class="n">ReferenceRun</span><span class="p">]]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;deg&#39;</span><span class="p">)</span>
+<span class="n">workflow</span><span class="p">[</span><span class="n">Filename</span><span class="p">[</span><span class="n">ReferenceRun</span><span class="p">]]</span> <span class="o">=</span> <span class="n">amor</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">amor_run</span><span class="p">(</span><span class="mi">614</span><span class="p">)</span>
+
+<span class="n">reference_result</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">ReducedReference</span><span class="p">)</span>
+<span class="c1"># Set the result back onto the pipeline to cache it</span>
+<span class="n">workflow</span><span class="p">[</span><span class="n">ReducedReference</span><span class="p">]</span> <span class="o">=</span> <span class="n">reference_result</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/runner/work/ess/ess/.pixi/envs/docs-essreflectometry/lib/python3.11/site-packages/scippnexus/base.py:402: UserWarning: Invalid transformation, /entry1/Amor/detector/transformation/height missing attribute &#39;vector&#39;
+  return maybe_transformation(self, value=dg)
+/home/runner/work/ess/ess/.pixi/envs/docs-essreflectometry/lib/python3.11/site-packages/scippnexus/base.py:402: UserWarning: Invalid transformation, /entry1/Amor/detector/transformation/rotation missing attribute &#39;vector&#39;
+  return maybe_transformation(self, value=dg)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mu</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;608&#39;</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span>
+    <span class="s1">&#39;609&#39;</span><span class="p">:</span> <span class="mf">2.2</span><span class="p">,</span>
+    <span class="s1">&#39;610&#39;</span><span class="p">:</span> <span class="mf">3.6</span><span class="p">,</span>
+    <span class="s1">&#39;611&#39;</span><span class="p">:</span> <span class="mf">5.0</span><span class="p">,</span>
+    <span class="s1">&#39;612&#39;</span><span class="p">:</span> <span class="mf">0.6</span><span class="p">,</span>
+    <span class="s1">&#39;613&#39;</span><span class="p">:</span> <span class="mf">0.6</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">results</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">({</span><span class="s1">&#39;ess&#39;</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">(),</span> <span class="s1">&#39;psi&#39;</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">()})</span>
+
+<span class="c1"># ESS results</span>
+<span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">mu</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s1">&#39;... &#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">workflow</span><span class="p">[</span><span class="n">SampleRotationOffset</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;deg&#39;</span><span class="p">)</span>
+    <span class="n">workflow</span><span class="p">[</span><span class="n">Filename</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]]</span> <span class="o">=</span> <span class="n">amor</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">amor_run</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="n">da</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">ReflectivityOverQ</span><span class="p">)</span><span class="o">.</span><span class="n">hist</span><span class="p">()</span>
+    <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">midpoints</span><span class="p">(</span><span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;Q&#39;</span><span class="p">)</span>
+    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;ess&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">da</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done!&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+608 ...
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/runner/work/ess/ess/.pixi/envs/docs-essreflectometry/lib/python3.11/site-packages/scippnexus/base.py:402: UserWarning: Invalid transformation, /entry1/Amor/detector/transformation/height missing attribute &#39;vector&#39;
+  return maybe_transformation(self, value=dg)
+/home/runner/work/ess/ess/.pixi/envs/docs-essreflectometry/lib/python3.11/site-packages/scippnexus/base.py:402: UserWarning: Invalid transformation, /entry1/Amor/detector/transformation/rotation missing attribute &#39;vector&#39;
+  return maybe_transformation(self, value=dg)
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Done!
+609 ...
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/runner/work/ess/ess/.pixi/envs/docs-essreflectometry/lib/python3.11/site-packages/scippnexus/base.py:402: UserWarning: Invalid transformation, /entry1/Amor/detector/transformation/height missing attribute &#39;vector&#39;
+  return maybe_transformation(self, value=dg)
+/home/runner/work/ess/ess/.pixi/envs/docs-essreflectometry/lib/python3.11/site-packages/scippnexus/base.py:402: UserWarning: Invalid transformation, /entry1/Amor/detector/transformation/rotation missing attribute &#39;vector&#39;
+  return maybe_transformation(self, value=dg)
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Done!
+610 ...
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/runner/work/ess/ess/.pixi/envs/docs-essreflectometry/lib/python3.11/site-packages/scippnexus/base.py:402: UserWarning: Invalid transformation, /entry1/Amor/detector/transformation/height missing attribute &#39;vector&#39;
+  return maybe_transformation(self, value=dg)
+/home/runner/work/ess/ess/.pixi/envs/docs-essreflectometry/lib/python3.11/site-packages/scippnexus/base.py:402: UserWarning: Invalid transformation, /entry1/Amor/detector/transformation/rotation missing attribute &#39;vector&#39;
+  return maybe_transformation(self, value=dg)
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Done!
+611 ...
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/runner/work/ess/ess/.pixi/envs/docs-essreflectometry/lib/python3.11/site-packages/scippnexus/base.py:402: UserWarning: Invalid transformation, /entry1/Amor/detector/transformation/height missing attribute &#39;vector&#39;
+  return maybe_transformation(self, value=dg)
+/home/runner/work/ess/ess/.pixi/envs/docs-essreflectometry/lib/python3.11/site-packages/scippnexus/base.py:402: UserWarning: Invalid transformation, /entry1/Amor/detector/transformation/rotation missing attribute &#39;vector&#39;
+  return maybe_transformation(self, value=dg)
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Done!
+612 ...
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/runner/work/ess/ess/.pixi/envs/docs-essreflectometry/lib/python3.11/site-packages/scippnexus/base.py:402: UserWarning: Invalid transformation, /entry1/Amor/detector/transformation/height missing attribute &#39;vector&#39;
+  return maybe_transformation(self, value=dg)
+/home/runner/work/ess/ess/.pixi/envs/docs-essreflectometry/lib/python3.11/site-packages/scippnexus/base.py:402: UserWarning: Invalid transformation, /entry1/Amor/detector/transformation/rotation missing attribute &#39;vector&#39;
+  return maybe_transformation(self, value=dg)
+Downloading file &#39;amor2023n000613.hdf&#39; from &#39;https://public.esss.dk/groups/scipp/ess/amor/2/amor2023n000613.hdf&#39; to &#39;/home/runner/.cache/ess/amor&#39;.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Done!
+613 ...
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/runner/work/ess/ess/.pixi/envs/docs-essreflectometry/lib/python3.11/site-packages/scippnexus/base.py:402: UserWarning: Invalid transformation, /entry1/Amor/detector/transformation/height missing attribute &#39;vector&#39;
+  return maybe_transformation(self, value=dg)
+/home/runner/work/ess/ess/.pixi/envs/docs-essreflectometry/lib/python3.11/site-packages/scippnexus/base.py:402: UserWarning: Invalid transformation, /entry1/Amor/detector/transformation/rotation missing attribute &#39;vector&#39;
+  return maybe_transformation(self, value=dg)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Done!
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># PSI results</span>
+<span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">mu</span><span class="p">:</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">orsopy</span><span class="o">.</span><span class="n">fileio</span><span class="o">.</span><span class="n">load_orso</span><span class="p">(</span><span class="n">amor</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">amor_psi_software_result</span><span class="p">(</span><span class="n">key</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="n">d</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">variances</span><span class="o">=</span><span class="n">d</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;psi&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Q&#39;</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="n">d</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;1/angstrom&#39;</span><span class="p">)}</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Downloading file &#39;608.Rqz.ort&#39; from &#39;https://public.esss.dk/groups/scipp/ess/amor/2/608.Rqz.ort&#39; to &#39;/home/runner/.cache/ess/amor&#39;.
+Downloading file &#39;609.Rqz.ort&#39; from &#39;https://public.esss.dk/groups/scipp/ess/amor/2/609.Rqz.ort&#39; to &#39;/home/runner/.cache/ess/amor&#39;.
+Downloading file &#39;610.Rqz.ort&#39; from &#39;https://public.esss.dk/groups/scipp/ess/amor/2/610.Rqz.ort&#39; to &#39;/home/runner/.cache/ess/amor&#39;.
+Downloading file &#39;611.Rqz.ort&#39; from &#39;https://public.esss.dk/groups/scipp/ess/amor/2/611.Rqz.ort&#39; to &#39;/home/runner/.cache/ess/amor&#39;.
+Downloading file &#39;612.Rqz.ort&#39; from &#39;https://public.esss.dk/groups/scipp/ess/amor/2/612.Rqz.ort&#39; to &#39;/home/runner/.cache/ess/amor&#39;.
+Downloading file &#39;613.Rqz.ort&#39; from &#39;https://public.esss.dk/groups/scipp/ess/amor/2/613.Rqz.ort&#39; to &#39;/home/runner/.cache/ess/amor&#39;.
+</pre></div></div>
+</div>
+</section>
+<section id="Plot-reflectivity-curve-comparison">
+<h2>Plot reflectivity curve comparison<a class="headerlink" href="#Plot-reflectivity-curve-comparison" title="Link to this heading">#</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">angle</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axs</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">mu</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="n">pp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="n">facility</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="n">facility</span><span class="p">][</span><span class="n">key</span><span class="p">][</span><span class="n">results</span><span class="p">[</span><span class="n">facility</span><span class="p">][</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">data</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">facility</span> <span class="ow">in</span> <span class="n">results</span>
+        <span class="p">},</span>
+        <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+        <span class="n">norm</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">,</span>
+        <span class="n">ls</span><span class="o">=</span><span class="s1">&#39;solid&#39;</span><span class="p">,</span>
+        <span class="n">marker</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">vmin</span><span class="o">=</span><span class="mf">1.0e-4</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Angle: </span><span class="si">{</span><span class="n">angle</span><span class="si">}</span><span class="s1"> deg&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/user-guide_amor_compare-to-eos_8_0.png" src="../../_images/user-guide_amor_compare-to-eos_8_0.png" />
+</div>
+</div>
+</section>
+<section id="Overlay-curves-from-same-sample-at-different-angle,-should-be-on-top-of-each-other">
+<h2>Overlay curves from same sample at different angle, should be on top of each other<a class="headerlink" href="#Overlay-curves-from-same-sample-at-different-angle,-should-be-on-top-of-each-other" title="Link to this heading">#</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="p">(</span><span class="n">facility</span><span class="p">,</span> <span class="n">res</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axs</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="n">pp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="nb">dict</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">items</span><span class="p">())[:</span><span class="mi">4</span><span class="p">]),</span>  <span class="c1"># First 4 curves</span>
+        <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+        <span class="n">norm</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">,</span>
+        <span class="n">ls</span><span class="o">=</span><span class="s1">&#39;solid&#39;</span><span class="p">,</span>
+        <span class="n">marker</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">vmin</span><span class="o">=</span><span class="mf">1.0e-4</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="n">facility</span><span class="p">,</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/user-guide_amor_compare-to-eos_10_0.png" src="../../_images/user-guide_amor_compare-to-eos_10_0.png" />
+</div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="amor-reduction-advanced.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Divergent data reduction for Amor - advanced</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="workflow-widget.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Workflow widget</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025 Scipp contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><!-- This will display the version of the docs -->
+Current ESSreflectometry version: 26.4.1 (<a href="https://github.com/scipp/essreflectometry/releases">older versions</a>).</div>
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

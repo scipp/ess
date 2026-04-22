@@ -1,0 +1,1291 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ess.reflectometry.tools &#8212; ESSreflectometry</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../../_static/documentation_options.js?v=d3570e94"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ess/reflectometry/tools';</script>
+    <script src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <link rel="icon" href="../../../_static/favicon.svg"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="26.4.1" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/logo.svg" class="logo__image only-light" alt="ESSreflectometry - Home"/>
+    <img src="../../../_static/logo-dark.svg" class="logo__image only-dark pst-js-only" alt="ESSreflectometry - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../about/index.html">
+    About
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/essreflectometry" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essreflectometry/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essreflectometry" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../about/index.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/essreflectometry" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essreflectometry/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essreflectometry" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ess.reflectometry.tools</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for ess.reflectometry.tools</h1><div class="highlight"><pre>
+<span></span><span class="c1"># SPDX-License-Identifier: BSD-3-Clause</span>
+<span class="c1"># Copyright (c) 2025 Scipp contributors (https://github.com/scipp)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">uuid</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">chain</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sciline</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sl</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">opt</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reflectometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">orso</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reflectometry.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Filename</span><span class="p">,</span>
+    <span class="n">ReducibleData</span><span class="p">,</span>
+    <span class="n">ReflectivityOverQ</span><span class="p">,</span>
+    <span class="n">SampleRun</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reflectometry.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">with_filenames</span>
+
+<span class="n">_STD_TO_FWHM</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)))</span>
+
+
+<div class="viewcode-block" id="fwhm_to_std">
+<a class="viewcode-back" href="../../../generated/modules/ess.reflectometry.tools.fwhm_to_std.html#ess.reflectometry.fwhm_to_std">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fwhm_to_std</span><span class="p">(</span><span class="n">fwhm</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert from full-width half maximum to standard deviation.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fwhm:</span>
+<span class="sd">        Full-width half maximum.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :</span>
+<span class="sd">        Standard deviation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Enables the conversion from full width half</span>
+    <span class="c1"># maximum to standard deviation</span>
+    <span class="k">return</span> <span class="n">fwhm</span> <span class="o">/</span> <span class="n">_STD_TO_FWHM</span></div>
+
+
+
+<div class="viewcode-block" id="linlogspace">
+<a class="viewcode-back" href="../../../generated/modules/ess.reflectometry.tools.linlogspace.html#ess.reflectometry.linlogspace">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">linlogspace</span><span class="p">(</span>
+    <span class="n">dim</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">edges</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">scale</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">num</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a 1d array of bin edges with a mixture of linear and/or logarithmic</span>
+<span class="sd">    spacings.</span>
+
+<span class="sd">    Examples:</span>
+
+<span class="sd">    - Create linearly spaced edges (equivalent to `sc.linspace`):</span>
+<span class="sd">        linlogspace(dim=&#39;x&#39;, edges=[0.008, 0.08], scale=&#39;linear&#39;, num=50, unit=&#39;m&#39;)</span>
+<span class="sd">    - Create logarithmically spaced edges (equivalent to `sc.geomspace`):</span>
+<span class="sd">        linlogspace(dim=&#39;x&#39;, edges=[0.008, 0.08], scale=&#39;log&#39;, num=50, unit=&#39;m&#39;)</span>
+<span class="sd">    - Create edges with a linear and a logarithmic part:</span>
+<span class="sd">        linlogspace(dim=&#39;x&#39;, edges=[1, 3, 8], scale=[&#39;linear&#39;, &#39;log&#39;], num=[16, 20])</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dim:</span>
+<span class="sd">        The dimension of the output Variable.</span>
+<span class="sd">    edges:</span>
+<span class="sd">        The edges for the different parts of the mesh.</span>
+<span class="sd">    scale:</span>
+<span class="sd">        A string or list of strings specifying the scaling for the different</span>
+<span class="sd">        parts of the mesh. Possible values for the scaling are `&quot;linear&quot;` and `&quot;log&quot;`.</span>
+<span class="sd">        If a list is supplied, the length of the list must be one less than the length</span>
+<span class="sd">        of the `edges` parameter.</span>
+<span class="sd">    num:</span>
+<span class="sd">        An integer or a list of integers specifying the number of points to use</span>
+<span class="sd">        in each part of the mesh. If a list is supplied, the length of the list must be</span>
+<span class="sd">        one less than the length of the `edges` parameter.</span>
+<span class="sd">    unit:</span>
+<span class="sd">        The unit of the output Variable.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :</span>
+<span class="sd">        Lin-log spaced Q-bin edges.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="p">[</span><span class="n">scale</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="p">[</span><span class="n">num</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Sizes do not match. The length of edges should be one greater than scale.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">funcs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;linear&quot;</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">linspace</span><span class="p">,</span> <span class="s2">&quot;log&quot;</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">geomspace</span><span class="p">}</span>
+    <span class="n">grids</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="c1"># Skip the leading edge in the piece when concatenating</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">mesh</span> <span class="o">=</span> <span class="n">funcs</span><span class="p">[</span><span class="n">scale</span><span class="p">[</span><span class="n">i</span><span class="p">]](</span>
+            <span class="n">dim</span><span class="o">=</span><span class="n">dim</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">edges</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">stop</span><span class="o">=</span><span class="n">edges</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">num</span><span class="o">=</span><span class="n">num</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">start</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span>
+        <span class="p">)</span>
+        <span class="n">grids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mesh</span><span class="p">[</span><span class="n">dim</span><span class="p">,</span> <span class="n">start</span><span class="p">:])</span>
+
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">grids</span><span class="p">,</span> <span class="n">dim</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="MultiGraphViz">
+<a class="viewcode-back" href="../../../generated/modules/ess.reflectometry.tools.MultiGraphViz.html#ess.reflectometry.MultiGraphViz">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MultiGraphViz</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A dummy class to concatenate multiple graphviz visualizations into a single repr</span>
+<span class="sd">    output for Jupyter notebooks.</span>
+<span class="sd">    This combines the SVG representations of multiple graphs vertically with a small gap</span>
+<span class="sd">    in between.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="MultiGraphViz.__init__">
+<a class="viewcode-back" href="../../../generated/modules/ess.reflectometry.tools.MultiGraphViz.html#ess.reflectometry.MultiGraphViz.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">graphs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">graphs</span> <span class="o">=</span> <span class="n">graphs</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_repr_mimebundle_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">include</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">gap</span> <span class="o">=</span> <span class="mi">10</span>
+        <span class="n">parsed</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">svg</span> <span class="ow">in</span> <span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">_repr_image_svg_xml</span><span class="p">()</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphs</span><span class="p">]:</span>
+            <span class="c1"># extract width, height, and inner &lt;g&gt; content</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;width=&quot;([\d.]+)pt&quot;.*?height=&quot;([\d.]+)pt&quot;&#39;</span><span class="p">,</span> <span class="n">svg</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">S</span><span class="p">)</span>
+            <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)),</span> <span class="nb">float</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+            <span class="n">inner</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;&lt;svg[^&gt;]*&gt;(.*)&lt;/svg&gt;&#39;</span><span class="p">,</span> <span class="n">svg</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">S</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">parsed</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">inner</span><span class="p">))</span>
+
+        <span class="c1"># vertical shift</span>
+        <span class="n">total_width</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">w</span> <span class="k">for</span> <span class="n">w</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">parsed</span><span class="p">)</span>
+        <span class="n">total_height</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">h</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">parsed</span><span class="p">)</span> <span class="o">+</span> <span class="n">gap</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">parsed</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">pieces</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">offset_x</span> <span class="o">=</span> <span class="n">offset_y</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">inner</span> <span class="ow">in</span> <span class="n">parsed</span><span class="p">:</span>
+            <span class="n">pieces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;&lt;g transform=&quot;translate(</span><span class="si">{</span><span class="n">offset_x</span><span class="si">}</span><span class="s1">,</span><span class="si">{</span><span class="n">offset_y</span><span class="si">}</span><span class="s1">)&quot;&gt;</span><span class="si">{</span><span class="n">inner</span><span class="si">}</span><span class="s1">&lt;/g&gt;&#39;</span>
+            <span class="p">)</span>
+            <span class="n">offset_y</span> <span class="o">+=</span> <span class="n">h</span> <span class="o">+</span> <span class="n">gap</span>
+
+        <span class="c1"># TODO: for some reason, combining the svgs seems to scale them down. This</span>
+        <span class="c1"># then means that the computed bounding box is too large. For now, we</span>
+        <span class="c1"># apply a fudge factor of 0.75 to the width and height. It is unclear where</span>
+        <span class="c1"># exactly this comes from.</span>
+        <span class="n">combined</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">        &lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot;</span>
+<span class="s1">            width=&quot;</span><span class="si">{</span><span class="n">total_width</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.75</span><span class="si">}</span><span class="s1">pt&quot; height=&quot;</span><span class="si">{</span><span class="n">total_height</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.75</span><span class="si">}</span><span class="s1">pt&quot;&gt;</span>
+<span class="s1">        </span><span class="si">{</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pieces</span><span class="p">)</span><span class="si">}</span>
+<span class="s1">        &lt;/svg&gt;</span>
+<span class="s1">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;image/svg+xml&quot;</span><span class="p">:</span> <span class="n">combined</span><span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="BatchProcessor">
+<a class="viewcode-back" href="../../../generated/modules/ess.reflectometry.tools.BatchProcessor.html#ess.reflectometry.BatchProcessor">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BatchProcessor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A collection of sciline workflows that can be used to compute multiple</span>
+<span class="sd">    targets from multiple workflows.</span>
+<span class="sd">    It can also be used to set parameters for all workflows in a single shot.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="BatchProcessor.__init__">
+<a class="viewcode-back" href="../../../generated/modules/ess.reflectometry.tools.BatchProcessor.html#ess.reflectometry.BatchProcessor.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflows</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">sl</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workflows</span> <span class="o">=</span> <span class="n">workflows</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">type</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A mapping (dict or DataGroup) should be supplied as the value. The keys</span>
+<span class="sd">        of the mapping should correspond to the names of the workflows in the</span>
+<span class="sd">        collection. The node matching the key will be set to the corresponding value for</span>
+<span class="sd">        each of the workflows.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">workflows</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+<div class="viewcode-block" id="BatchProcessor.__getitem__">
+<a class="viewcode-back" href="../../../generated/modules/ess.reflectometry.tools.BatchProcessor.html#ess.reflectometry.BatchProcessor.__getitem__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BatchProcessor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get a new BatchProcessor where the workflows are the sub-workflows that lead to</span>
+<span class="sd">        the node with the given name.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">BatchProcessor</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">wf</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">wf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflows</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span></div>
+
+
+<div class="viewcode-block" id="BatchProcessor.compute">
+<a class="viewcode-back" href="../../../generated/modules/ess.reflectometry.tools.BatchProcessor.html#ess.reflectometry.BatchProcessor.compute">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">targets</span><span class="p">:</span> <span class="nb">type</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">type</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the given target(s) for all workflows in the collection.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        targets:</span>
+<span class="sd">            The target type(s) to compute.</span>
+<span class="sd">        **kwargs:</span>
+<span class="sd">            Additional keyword arguments passed to `sciline.Pipeline.compute`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="nb">list</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">targets</span> <span class="o">=</span> <span class="p">[</span><span class="n">targets</span><span class="p">]</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">:</span>
+            <span class="n">out</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">wf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflows</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">out</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">sl</span><span class="o">.</span><span class="n">UnsatisfiedRequirement</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">out</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">sl</span><span class="o">.</span><span class="n">compute_mapped</span><span class="p">(</span>
+                            <span class="n">wf</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+                        <span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                    <span class="k">except</span> <span class="p">(</span><span class="n">sl</span><span class="o">.</span><span class="n">UnsatisfiedRequirement</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+                        <span class="c1"># ValueError is raised when the requested type is not mapped</span>
+                        <span class="k">raise</span> <span class="n">e</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+        <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">out</span></div>
+
+
+<div class="viewcode-block" id="BatchProcessor.copy">
+<a class="viewcode-back" href="../../../generated/modules/ess.reflectometry.tools.BatchProcessor.html#ess.reflectometry.BatchProcessor.copy">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BatchProcessor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a copy of the workflow collection.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">BatchProcessor</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">wf</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">wf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflows</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span></div>
+
+
+<div class="viewcode-block" id="BatchProcessor.visualize">
+<a class="viewcode-back" href="../../../generated/modules/ess.reflectometry.tools.BatchProcessor.html#ess.reflectometry.BatchProcessor.visualize">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">visualize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">targets</span><span class="p">:</span> <span class="nb">type</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">type</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiGraphViz</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Visualize all workflows in the collection.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        targets : type | Sequence[type]</span>
+<span class="sd">            The target type(s) to visualize.</span>
+<span class="sd">        **kwargs:</span>
+<span class="sd">            Additional keyword arguments passed to `sciline.Pipeline.visualize`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">graphviz</span><span class="w"> </span><span class="kn">import</span> <span class="n">Digraph</span>
+
+        <span class="c1"># Place all the graphviz Digraphs side by side into a single one.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="nb">list</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">targets</span> <span class="o">=</span> <span class="p">[</span><span class="n">targets</span><span class="p">]</span>
+        <span class="n">graphs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">wf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflows</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">visualize</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">g</span> <span class="o">=</span> <span class="n">Digraph</span><span class="p">(</span>
+                <span class="n">graph_attr</span><span class="o">=</span><span class="n">v</span><span class="o">.</span><span class="n">graph_attr</span><span class="p">,</span> <span class="n">node_attr</span><span class="o">=</span><span class="n">v</span><span class="o">.</span><span class="n">node_attr</span><span class="p">,</span> <span class="n">edge_attr</span><span class="o">=</span><span class="n">v</span><span class="o">.</span><span class="n">edge_attr</span>
+            <span class="p">)</span>
+            <span class="k">with</span> <span class="n">g</span><span class="o">.</span><span class="n">subgraph</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;cluster_</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">c</span><span class="p">:</span>
+                <span class="n">c</span><span class="o">.</span><span class="n">attr</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;rounded&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">)</span>
+                <span class="n">c</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+
+            <span class="n">graphs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">MultiGraphViz</span><span class="p">(</span><span class="n">graphs</span><span class="p">)</span></div>
+</div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_sort_by</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">by</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">by</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_find_interval_overlaps</span><span class="p">(</span><span class="n">intervals</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Returns the intervals where at least</span>
+<span class="sd">    two or more of the provided intervals</span>
+<span class="sd">    are overlapping.&#39;&#39;&#39;</span>
+    <span class="n">edges</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span><span class="n">intervals</span><span class="p">))</span>
+    <span class="n">is_start_edge</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">((</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">intervals</span><span class="p">))</span>
+    <span class="n">edges_sorted</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span>
+    <span class="n">is_start_edge_sorted</span> <span class="o">=</span> <span class="n">_sort_by</span><span class="p">(</span><span class="n">is_start_edge</span><span class="p">,</span> <span class="n">edges</span><span class="p">)</span>
+
+    <span class="n">number_overlapping</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">overlap_intervals</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">is_start</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">edges_sorted</span><span class="p">,</span> <span class="n">is_start_edge_sorted</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">number_overlapping</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">is_start</span><span class="p">:</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="k">if</span> <span class="n">number_overlapping</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_start</span><span class="p">:</span>
+            <span class="n">overlap_intervals</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">start</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">is_start</span><span class="p">:</span>
+            <span class="n">number_overlapping</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">number_overlapping</span> <span class="o">-=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">overlap_intervals</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_searchsorted</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">e</span> <span class="o">&gt;</span> <span class="n">v</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">i</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_create_qgrid_where_overlapping</span><span class="p">(</span><span class="n">qgrids</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Given a number of Q-grids, construct a new grid</span>
+<span class="sd">    covering the regions where (any two of the) provided grids overlap.&#39;&#39;&#39;</span>
+    <span class="n">pieces</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="ow">in</span> <span class="n">_find_interval_overlaps</span><span class="p">([(</span><span class="n">q</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">q</span><span class="o">.</span><span class="n">max</span><span class="p">())</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">qgrids</span><span class="p">]):</span>
+        <span class="n">interval_sliced_from_qgrids</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">q</span><span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="n">_searchsorted</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="p">:</span> <span class="n">_searchsorted</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">qgrids</span>
+        <span class="p">]</span>
+        <span class="n">densest_grid_in_interval</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">interval_sliced_from_qgrids</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">)</span>
+        <span class="n">pieces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">densest_grid_in_interval</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">pieces</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;Q&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_same_dtype</span><span class="p">(</span><span class="n">arrays</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">arr</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">arr</span> <span class="ow">in</span> <span class="n">arrays</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_interpolate_on_qgrid</span><span class="p">(</span><span class="n">curves</span><span class="p">,</span> <span class="n">grid</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+        <span class="n">_same_dtype</span><span class="p">([</span><span class="n">sc</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">grid</span><span class="o">.</span><span class="n">dim</span><span class="p">)[</span><span class="n">sc</span><span class="o">.</span><span class="n">midpoints</span><span class="p">(</span><span class="n">grid</span><span class="p">)]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">curves</span><span class="p">]),</span>
+        <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;curves&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<div class="viewcode-block" id="scale_for_reflectivity_overlap">
+<a class="viewcode-back" href="../../../generated/modules/ess.reflectometry.tools.scale_for_reflectivity_overlap.html#ess.reflectometry.scale_for_reflectivity_overlap">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">scale_for_reflectivity_overlap</span><span class="p">(</span>
+    <span class="n">reflectivities</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">|</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">,</span>
+    <span class="n">critical_edge_interval</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">]</span>
+    <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">]</span>
+    <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Compute a scaling for 1D reflectivity curves in a way that would makes the curves</span>
+<span class="sd">    overlap.</span>
+<span class="sd">    One can supply either a single curve or a collection/DataGroup of curves.</span>
+
+<span class="sd">    If :code:`critical_edge_interval` is not provided, all curves are scaled except</span>
+<span class="sd">    the data with the lowest Q-range, which is considered to be the reference curve.</span>
+<span class="sd">    The scaling factors are determined by a maximum likelihood estimate</span>
+<span class="sd">    (assuming the errors are normal distributed).</span>
+
+<span class="sd">    If :code:`critical_edge_interval` is provided then all data are scaled.</span>
+
+<span class="sd">    All reflectivity curves must be have the same unit for data and the Q-coordinate.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ---------</span>
+<span class="sd">    reflectivities:</span>
+<span class="sd">        The reflectivity curves that should be scaled.</span>
+<span class="sd">    critical_edge_interval:</span>
+<span class="sd">        A tuple denoting an interval that is known to belong</span>
+<span class="sd">        to the critical edge, i.e. where the reflectivity is</span>
+<span class="sd">        known to be 1.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    ---------</span>
+<span class="sd">    :</span>
+<span class="sd">        A DataGroup with the same keys as the input containing the</span>
+<span class="sd">        scaling factors for each reflectivity curve.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">only_one_curve</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reflectivities</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">only_one_curve</span><span class="p">:</span>
+        <span class="n">reflectivities</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;&quot;</span><span class="p">:</span> <span class="n">reflectivities</span><span class="p">}</span>
+
+    <span class="c1"># First sort the dict of reflectivities by the Q min value</span>
+    <span class="n">curves</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">hist</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">bins</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">v</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="n">reflectivities</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">value</span>
+        <span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="n">critical_edge_key</span> <span class="o">=</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span>
+    <span class="k">if</span> <span class="n">critical_edge_interval</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">curves</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">q_</span><span class="p">:</span> <span class="n">q_</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+        <span class="c1"># TODO: This is slightly different from before: it extracts the bins from the</span>
+        <span class="c1"># QBins variable that cover the critical edge interval. This means that the</span>
+        <span class="c1"># resulting curve will not necessarily begin and end exactly at the values</span>
+        <span class="c1"># specified, but rather at the closest bin edges.</span>
+        <span class="n">edge</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">sizes</span><span class="o">=</span><span class="p">{</span><span class="n">q</span><span class="o">.</span><span class="n">dim</span><span class="p">:</span> <span class="n">q</span><span class="o">.</span><span class="n">sizes</span><span class="p">[</span><span class="n">q</span><span class="o">.</span><span class="n">dim</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">},</span> <span class="n">with_variances</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="n">q</span><span class="o">.</span><span class="n">dim</span><span class="p">:</span> <span class="n">q</span><span class="p">},</span>
+        <span class="p">)[</span><span class="n">q</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span> <span class="n">critical_edge_interval</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="n">critical_edge_interval</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="c1"># Now place the critical edge at the beginning</span>
+        <span class="n">curves</span> <span class="o">=</span> <span class="p">{</span><span class="n">critical_edge_key</span><span class="p">:</span> <span class="n">edge</span><span class="p">}</span> <span class="o">|</span> <span class="n">curves</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">({</span><span class="n">c</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">unit</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">curves</span><span class="o">.</span><span class="n">values</span><span class="p">()})</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The reflectivity curves must have the same unit&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">({</span><span class="n">c</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unit</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">curves</span><span class="o">.</span><span class="n">values</span><span class="p">()})</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The Q-coordinates must have the same unit for each curve&#39;</span><span class="p">)</span>
+
+    <span class="n">qgrid</span> <span class="o">=</span> <span class="n">_create_qgrid_where_overlapping</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">curves</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
+
+    <span class="n">r</span> <span class="o">=</span> <span class="n">_interpolate_on_qgrid</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">curves</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span> <span class="n">qgrid</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">_interpolate_on_qgrid</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">variances</span><span class="p">,</span> <span class="n">curves</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span> <span class="n">qgrid</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">cost</span><span class="p">(</span><span class="n">scaling_factors</span><span class="p">):</span>
+        <span class="n">scaling_factors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">],</span> <span class="n">scaling_factors</span><span class="p">])[:,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="n">r_scaled</span> <span class="o">=</span> <span class="n">scaling_factors</span> <span class="o">*</span> <span class="n">r</span>
+        <span class="n">v_scaled</span> <span class="o">=</span> <span class="n">scaling_factors</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">v</span>
+        <span class="n">v_scaled</span><span class="p">[</span><span class="n">v_scaled</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="n">inv_v_scaled</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">v_scaled</span>
+        <span class="n">r_avg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">r_scaled</span> <span class="o">*</span> <span class="n">inv_v_scaled</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span>
+            <span class="n">inv_v_scaled</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">((</span><span class="n">r_scaled</span> <span class="o">-</span> <span class="n">r_avg</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">inv_v_scaled</span><span class="p">)</span>
+
+    <span class="n">sol</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">cost</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">curves</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">scaling_factors</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">sol</span><span class="o">.</span><span class="n">x</span><span class="p">))</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="n">k</span><span class="p">:</span> <span class="n">v</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">curves</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">scaling_factors</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="n">critical_edge_key</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">only_one_curve</span> <span class="k">else</span> <span class="n">out</span></div>
+
+
+
+<div class="viewcode-block" id="combine_curves">
+<a class="viewcode-back" href="../../../generated/modules/ess.reflectometry.tools.combine_curves.html#ess.reflectometry.combine_curves">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">combine_curves</span><span class="p">(</span>
+    <span class="n">curves</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span> <span class="o">|</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span>
+    <span class="n">q_bin_edges</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Combines the given curves by interpolating them</span>
+<span class="sd">    on a 1d grid defined by :code:`q_bin_edges` and averaging</span>
+<span class="sd">    over the provided reflectivity curves.</span>
+
+<span class="sd">    The averaging is done using a weighted mean where the weights</span>
+<span class="sd">    are proportional to the variances.</span>
+
+<span class="sd">    Unless the curves are already scaled correctly they might</span>
+<span class="sd">    need to be scaled using :func:`scale_reflectivity_curves_to_overlap`</span>
+<span class="sd">    before calling this function.</span>
+
+<span class="sd">    All curves must be have the same unit for data and the Q-coordinate.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    curves:</span>
+<span class="sd">        the reflectivity curves that should be combined</span>
+<span class="sd">    q_bin_edges:</span>
+<span class="sd">        the Q bin edges of the resulting combined reflectivity curve</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    ---------</span>
+<span class="sd">    :</span>
+<span class="sd">        A data array representing the combined reflectivity curve</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">curves</span><span class="p">,</span> <span class="s1">&#39;items&#39;</span><span class="p">):</span>
+        <span class="n">curves</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">curves</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">({</span><span class="n">c</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">unit</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">curves</span><span class="p">})</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The reflectivity curves must have the same unit&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">({</span><span class="n">c</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unit</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">curves</span><span class="p">})</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The Q-coordinates must have the same unit for each curve&#39;</span><span class="p">)</span>
+
+    <span class="n">r</span> <span class="o">=</span> <span class="n">_interpolate_on_qgrid</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">curves</span><span class="p">),</span> <span class="n">q_bin_edges</span><span class="p">)</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">_interpolate_on_qgrid</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">variances</span><span class="p">,</span> <span class="n">curves</span><span class="p">),</span> <span class="n">q_bin_edges</span><span class="p">)</span>
+
+    <span class="n">v</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">v</span> <span class="o">==</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">v</span><span class="o">.</span><span class="n">unit</span><span class="p">),</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">v</span><span class="o">.</span><span class="n">unit</span><span class="p">),</span> <span class="n">v</span><span class="p">)</span>
+    <span class="n">inv_v</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">v</span>
+    <span class="n">r_avg</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">r</span> <span class="o">*</span> <span class="n">inv_v</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;curves&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="n">sc</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">inv_v</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;curves&#39;</span><span class="p">)</span>
+    <span class="n">v_avg</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">sc</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">inv_v</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;curves&#39;</span><span class="p">)</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="n">dims</span><span class="o">=</span><span class="s1">&#39;Q&#39;</span><span class="p">,</span>
+            <span class="n">values</span><span class="o">=</span><span class="n">r_avg</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+            <span class="n">variances</span><span class="o">=</span><span class="n">v_avg</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+            <span class="n">unit</span><span class="o">=</span><span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">curves</span><span class="p">))</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">unit</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Q&#39;</span><span class="p">:</span> <span class="n">q_bin_edges</span><span class="p">},</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="s1">&#39;Q_resolution&#39;</span> <span class="ow">in</span> <span class="n">c</span><span class="o">.</span><span class="n">coords</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">curves</span><span class="p">):</span>
+        <span class="c1"># This might need to be revisited. The question about how to combine curves</span>
+        <span class="c1"># with different Q-resolution is not completely resolved.</span>
+        <span class="c1"># However, in practice the difference in Q-resolution between different curves</span>
+        <span class="c1"># is small so it&#39;s not likely to make a big difference.</span>
+        <span class="n">q_res</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">c</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                    <span class="s1">&#39;Q_resolution&#39;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">],</span> <span class="n">value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                <span class="p">),</span>
+                <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Q&#39;</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]},</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">curves</span>
+        <span class="p">)</span>
+        <span class="n">qs</span> <span class="o">=</span> <span class="n">_interpolate_on_qgrid</span><span class="p">(</span><span class="n">q_res</span><span class="p">,</span> <span class="n">q_bin_edges</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Q_resolution&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">qs</span> <span class="o">*</span> <span class="n">inv_v</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;curves&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="n">sc</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span>
+            <span class="n">sc</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">qs</span><span class="p">),</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">inv_v</span><span class="o">.</span><span class="n">unit</span><span class="p">),</span> <span class="n">inv_v</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;curves&#39;</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+
+<div class="viewcode-block" id="batch_processor">
+<a class="viewcode-back" href="../../../generated/modules/ess.reflectometry.tools.batch_processor.html#ess.reflectometry.batch_processor">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">batch_processor</span><span class="p">(</span>
+    <span class="n">workflow</span><span class="p">:</span> <span class="n">sl</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">,</span> <span class="n">runs</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">type</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BatchProcessor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a collection of sciline workflows from the provided runs.</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        from ess.reflectometry import amor, tools</span>
+
+<span class="sd">        workflow = amor.AmorWorkflow()</span>
+
+<span class="sd">        runs = {</span>
+<span class="sd">            &#39;608&#39;: {</span>
+<span class="sd">                SampleRotationOffset[SampleRun]: sc.scalar(0.05, unit=&#39;deg&#39;),</span>
+<span class="sd">                Filename[SampleRun]: &quot;file_608.hdf&quot;,</span>
+<span class="sd">            },</span>
+<span class="sd">            &#39;609&#39;: {</span>
+<span class="sd">                SampleRotationOffset[SampleRun]: sc.scalar(0.05, unit=&#39;deg&#39;),</span>
+<span class="sd">                Filename[SampleRun]: &quot;file_609.hdf&quot;,</span>
+<span class="sd">            },</span>
+<span class="sd">            &#39;610&#39;: {</span>
+<span class="sd">                SampleRotationOffset[SampleRun]: sc.scalar(0.05, unit=&#39;deg&#39;),</span>
+<span class="sd">                Filename[SampleRun]: &quot;file_610.hdf&quot;,</span>
+<span class="sd">            },</span>
+<span class="sd">            &#39;611&#39;: {</span>
+<span class="sd">                SampleRotationOffset[SampleRun]: sc.scalar(0.05, unit=&#39;deg&#39;),</span>
+<span class="sd">                Filename[SampleRun]: &quot;file_611.hdf&quot;,</span>
+<span class="sd">            },</span>
+<span class="sd">        }</span>
+
+<span class="sd">        batch = tools.batch_processor(workflow, runs)</span>
+
+<span class="sd">        results = batch.compute(ReflectivityOverQ)</span>
+
+
+<span class="sd">    Additionally, if a list of filenames is provided for</span>
+<span class="sd">    ``Filename[SampleRun]``, the events from the files will be concatenated</span>
+<span class="sd">    into a single event list before processing.</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        runs = {</span>
+<span class="sd">            &#39;608&#39;: {</span>
+<span class="sd">                Filename[SampleRun]: &quot;file_608.hdf&quot;,</span>
+<span class="sd">            },</span>
+<span class="sd">            &#39;609+610&#39;: {</span>
+<span class="sd">                Filename[SampleRun]: [&quot;file_609.hdf&quot;, &quot;file_610.hdf&quot;],</span>
+<span class="sd">            },</span>
+<span class="sd">        }</span>
+
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    workflow:</span>
+<span class="sd">        The sciline workflow used to compute the targets for each of the runs.</span>
+<span class="sd">    runs:</span>
+<span class="sd">        The sciline parameters to be used for each run.</span>
+<span class="sd">        Should be a mapping where the keys are the names of the runs</span>
+<span class="sd">        and the values are mappings of type to value pairs.</span>
+<span class="sd">        In addition, if one of the values for ``Filename[SampleRun]``</span>
+<span class="sd">        is a list or a tuple, then the events from the files</span>
+<span class="sd">        will be concatenated into a single event list.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">workflows</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">parameters</span> <span class="ow">in</span> <span class="n">runs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">wf</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">tp</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">tp</span> <span class="ow">is</span> <span class="n">Filename</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]:</span>
+                <span class="k">continue</span>
+            <span class="n">wf</span><span class="p">[</span><span class="n">tp</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">if</span> <span class="n">Filename</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="p">[</span><span class="n">Filename</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]],</span> <span class="nb">list</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">):</span>
+                <span class="n">wf</span> <span class="o">=</span> <span class="n">with_filenames</span><span class="p">(</span><span class="n">wf</span><span class="p">,</span> <span class="n">SampleRun</span><span class="p">,</span> <span class="n">parameters</span><span class="p">[</span><span class="n">Filename</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">wf</span><span class="p">[</span><span class="n">Filename</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]]</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="n">Filename</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]]</span>
+        <span class="n">workflows</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">wf</span>
+    <span class="k">return</span> <span class="n">BatchProcessor</span><span class="p">(</span><span class="n">workflows</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="batch_compute">
+<a class="viewcode-back" href="../../../generated/modules/ess.reflectometry.tools.batch_compute.html#ess.reflectometry.batch_compute">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">batch_compute</span><span class="p">(</span>
+    <span class="n">workflow</span><span class="p">:</span> <span class="n">sl</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">,</span>
+    <span class="n">runs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">type</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="n">Mapping</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">type</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
+    <span class="n">target</span><span class="p">:</span> <span class="nb">type</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">type</span><span class="p">]</span> <span class="o">=</span> <span class="n">orso</span><span class="o">.</span><span class="n">OrsoIofQDataset</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">scale_to_overlap</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">]</span>
+    <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span> <span class="o">|</span> <span class="n">Mapping</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Computes requested target(s) from a supplied workflow for a number of runs.</span>
+<span class="sd">    Each entry of :code:`runs` is a mapping of parameters and</span>
+<span class="sd">    values needed to produce the targets.</span>
+
+<span class="sd">    This is an alternative to using :func:`batch_processor`: instead of returning a</span>
+<span class="sd">    BatchProcessor object which can operate on multiple workflows at once,</span>
+<span class="sd">    this function directly computes the requested targets, reducing the risk of</span>
+<span class="sd">    accidentally compromizing the workflows in the collection.</span>
+
+<span class="sd">    It also provides the option to scale the reflectivity curves so that they overlap</span>
+<span class="sd">    in the regions where they have the same Q-value.</span>
+
+<span class="sd">    Beginners should prefer this function over :func:`batch_processor` unless</span>
+<span class="sd">    they need the extra flexibility of the latter (caching intermediate results,</span>
+<span class="sd">    quickly exploring results, etc).</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        from ess.reflectometry import amor, tools</span>
+
+<span class="sd">        workflow = amor.AmorWorkflow()</span>
+
+<span class="sd">        runs = {</span>
+<span class="sd">            &#39;608&#39;: {</span>
+<span class="sd">                SampleRotationOffset[SampleRun]: sc.scalar(0.05, unit=&#39;deg&#39;),</span>
+<span class="sd">                Filename[SampleRun]: &quot;file_608.hdf&quot;,</span>
+<span class="sd">            },</span>
+<span class="sd">            &#39;609&#39;: {</span>
+<span class="sd">                SampleRotationOffset[SampleRun]: sc.scalar(0.05, unit=&#39;deg&#39;),</span>
+<span class="sd">                Filename[SampleRun]: &quot;file_609.hdf&quot;,</span>
+<span class="sd">            },</span>
+<span class="sd">            &#39;610&#39;: {</span>
+<span class="sd">                SampleRotationOffset[SampleRun]: sc.scalar(0.05, unit=&#39;deg&#39;),</span>
+<span class="sd">                Filename[SampleRun]: &quot;file_610.hdf&quot;,</span>
+<span class="sd">            },</span>
+<span class="sd">            &#39;611&#39;: {</span>
+<span class="sd">                SampleRotationOffset[SampleRun]: sc.scalar(0.05, unit=&#39;deg&#39;),</span>
+<span class="sd">                Filename[SampleRun]: &quot;file_611.hdf&quot;,</span>
+<span class="sd">            },</span>
+<span class="sd">        }</span>
+
+<span class="sd">        r_of_q = tools.batch_compute(workflow, runs, target=ReflectivityOverQ)</span>
+
+
+<span class="sd">    Additionally, if a list of filenames is provided for</span>
+<span class="sd">    ``Filename[SampleRun]``, the events from the files will be concatenated</span>
+<span class="sd">    into a single event list before processing.</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        runs = {</span>
+<span class="sd">            &#39;608&#39;: {</span>
+<span class="sd">                Filename[SampleRun]: &quot;file_608.hdf&quot;,</span>
+<span class="sd">            },</span>
+<span class="sd">            &#39;609+610&#39;: {</span>
+<span class="sd">                Filename[SampleRun]: [&quot;file_609.hdf&quot;, &quot;file_610.hdf&quot;],</span>
+<span class="sd">            },</span>
+<span class="sd">        }</span>
+
+
+<span class="sd">    Parameters</span>
+<span class="sd">    -----------</span>
+<span class="sd">    workflow:</span>
+<span class="sd">        The sciline workflow used to compute `ReflectivityOverQ` for each of the runs.</span>
+
+<span class="sd">    runs:</span>
+<span class="sd">        The sciline parameters to be used for each run.</span>
+
+<span class="sd">    target:</span>
+<span class="sd">        The domain type(s) to compute for each run.</span>
+
+<span class="sd">    scale_to_overlap:</span>
+<span class="sd">        If ``True`` the loaded data will be scaled so that the computed reflectivity</span>
+<span class="sd">        curves to overlap.</span>
+<span class="sd">        If a tuple is provided, it is interpreted as a critical edge interval where</span>
+<span class="sd">        the reflectivity is known to be 1.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">runs_is_mapping</span> <span class="o">=</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">runs</span><span class="p">,</span> <span class="s1">&#39;items&#39;</span><span class="p">)</span>
+    <span class="n">batch</span> <span class="o">=</span> <span class="n">batch_processor</span><span class="p">(</span>
+        <span class="n">workflow</span><span class="o">=</span><span class="n">workflow</span><span class="p">,</span>
+        <span class="n">runs</span><span class="o">=</span><span class="n">runs</span> <span class="k">if</span> <span class="n">runs_is_mapping</span> <span class="k">else</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">):</span> <span class="n">r</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">runs</span><span class="p">)},</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">scale_to_overlap</span><span class="p">:</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">batch</span><span class="o">.</span><span class="n">compute</span><span class="p">((</span><span class="n">ReflectivityOverQ</span><span class="p">,</span> <span class="n">ReducibleData</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]))</span>
+        <span class="n">scale_factors</span> <span class="o">=</span> <span class="n">scale_for_reflectivity_overlap</span><span class="p">(</span>
+            <span class="n">results</span><span class="p">[</span><span class="n">ReflectivityOverQ</span><span class="p">]</span><span class="o">.</span><span class="n">hist</span><span class="p">(),</span>
+            <span class="n">critical_edge_interval</span><span class="o">=</span><span class="n">scale_to_overlap</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scale_to_overlap</span><span class="p">,</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="nb">list</span><span class="p">)</span>
+            <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">batch</span><span class="p">[</span><span class="n">ReducibleData</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">scale_factors</span> <span class="o">*</span> <span class="n">results</span><span class="p">[</span><span class="n">ReducibleData</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]]</span>
+        <span class="p">)</span>
+        <span class="n">batch</span><span class="p">[</span><span class="n">ReflectivityOverQ</span><span class="p">]</span> <span class="o">=</span> <span class="n">scale_factors</span> <span class="o">*</span> <span class="n">results</span><span class="p">[</span><span class="n">ReflectivityOverQ</span><span class="p">]</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">batch</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span> <span class="k">if</span> <span class="n">runs_is_mapping</span> <span class="k">else</span> <span class="nb">list</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">values</span><span class="p">())</span></div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025 Scipp contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><!-- This will display the version of the docs -->
+Current ESSreflectometry version: 26.4.1 (<a href="https://github.com/scipp/essreflectometry/releases">older versions</a>).</div>
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
