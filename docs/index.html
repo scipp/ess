@@ -4,179 +4,489 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ESS Data Reduction</title>
-  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+  <script>
+    // Resolve theme before first paint to avoid a flash.
+    (function () {
+      try {
+        var stored = localStorage.getItem('theme');
+        var system = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = stored || system;
+      } catch (e) {
+        document.documentElement.dataset.theme = 'light';
+      }
+    })();
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link href="pagefind/pagefind-ui.css" rel="stylesheet">
   <style>
     :root {
-      --navy: #0094ca;
-      --blue: #0099dc;
-      --text: #2c3e50;
-      --muted: #607080;
-      --border: #d8dee6;
-      --bg: #f5f7f9;
-      --white: #ffffff;
+      /* Brand colors sampled directly from the official logo SVGs */
+      --scipp-blue:    #0065ac;   /* Scipp logo fill */
+      --ess-cyan:      #0099dc;   /* ESS logo fill */
+      --brand-deep:    #003d6b;   /* darker tone for headings */
+      --brand-soft:    #e6f2f9;   /* pale tint for hover wash */
+
+      --ink:       #1a1a1a;
+      --ink-soft:  #3a3f45;
+      --muted:     #6b7380;
+      --rule:      #dde2e8;
+      --bg:        #ffffff;
+      --bg-soft:   #f6f8fa;
+
+      --mono:      'JetBrains Mono', ui-monospace, monospace;
+      --sans:      'Inter', -apple-system, sans-serif;
+
+      --focus-ring: rgba(0, 101, 172, 0.12);
     }
+
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
     body {
-      font-family: 'Source Sans 3', sans-serif;
-      color: var(--text);
+      font-family: var(--sans);
+      color: var(--ink);
       background: var(--bg);
       -webkit-font-smoothing: antialiased;
-    }
-
-    header {
-      background: var(--navy);
-      color: var(--white);
-      padding: 3rem 2rem;
-    }
-    header div {
-      max-width: 56rem;
-      margin: 0 auto;
-    }
-    header h1 {
-      font-size: 1.6rem;
-      font-weight: 300;
-      margin-bottom: 0.3rem;
-    }
-    header p {
-      font-size: 0.95rem;
-      font-weight: 300;
-      opacity: 0.8;
-    }
-
-    main {
-      max-width: 56rem;
-      margin: 2.5rem auto;
-      padding: 0 2rem;
-    }
-
-    .search-section {
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 1.25rem 1.5rem;
-      margin-bottom: 2rem;
-    }
-    .search-section label {
-      display: block;
-      font-size: 0.78rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: var(--muted);
-      margin-bottom: 0.6rem;
-    }
-
-    .label {
-      font-size: 0.78rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: var(--muted);
-      margin-bottom: 0.75rem;
-    }
-
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-      gap: 1rem;
-    }
-
-    .card {
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 1.5rem;
-      text-decoration: none;
-      color: inherit;
-      display: flex;
-      flex-direction: column;
-      transition: border-color 0.15s, box-shadow 0.15s;
-    }
-    .card:hover {
-      border-color: var(--blue);
-      box-shadow: 0 2px 8px rgba(0, 33, 69, 0.07);
-    }
-
-    .card-name {
-      font-family: 'Source Code Pro', monospace;
-      font-size: 0.95rem;
-      font-weight: 500;
-      color: var(--navy);
-      margin-bottom: 0.35rem;
-    }
-    .card p {
-      font-size: 0.88rem;
-      color: var(--muted);
       line-height: 1.5;
     }
 
-    footer {
-      text-align: center;
-      padding: 3rem 2rem;
-      font-size: 0.82rem;
+    .wrap {
+      max-width: 44rem;
+      margin: 0 auto;
+      padding: 3.5rem 1.5rem 3rem;
+    }
+
+    /* ---------- Masthead ---------- */
+    .masthead {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 1.25rem;
+      border-bottom: 2px solid var(--scipp-blue);
+      margin-bottom: 2.5rem;
+      gap: 1rem;
+    }
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 1.1rem;
+    }
+    .brand-logo {
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+      transition: opacity 0.2s ease;
+    }
+    .brand-logo:hover { opacity: 0.75; }
+    .brand-logo svg { display: block; }
+
+    /* Size the two logos — they have different native aspect ratios */
+    .brand-logo.ess svg { height: 3.6rem; width: auto; }
+    .brand-logo.scipp svg { height: 2.6rem; width: auto; }
+
+    .brand-divider {
+      width: 1px;
+      height: 2.6rem;
+      background: var(--rule);
+    }
+    .masthead .org-label {
+      font-family: var(--mono);
+      font-size: 0.68rem;
       color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-align: right;
+      line-height: 1.4;
+    }
+
+    .lede {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: var(--ink-soft);
+      max-width: 38rem;
+      margin-bottom: 2.5rem;
+    }
+    .lede a {
+      color: var(--scipp-blue);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .lede a:hover {
+      color: var(--ess-cyan);
+      border-color: var(--ess-cyan);
+    }
+
+    .search-wrap { margin-bottom: 4rem; }
+
+    /* ---------- Section header ---------- */
+    .section-label {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: 0.25rem;
+    }
+    .section-label .label-text { color: var(--scipp-blue); font-weight: 600; }
+    .section-label .count { color: var(--ink-soft); }
+
+    /* ---------- Packages list ---------- */
+    .pkg-list { list-style: none; }
+    .pkg {
+      display: grid;
+      grid-template-columns: 9.5rem 1fr auto;
+      gap: 1.5rem;
+      align-items: baseline;
+      padding: 1.1rem 0;
+      border-bottom: 1px solid var(--rule);
+      text-decoration: none;
+      color: inherit;
+      transition: padding-left 0.2s ease, background 0.2s ease;
+      position: relative;
+    }
+    .pkg::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--ess-cyan);
+      transform: scaleY(0);
+      transform-origin: top;
+      transition: transform 0.2s ease;
+    }
+    .pkg:hover {
+      padding-left: 0.75rem;
+      background: var(--brand-soft);
+    }
+    .pkg:hover::before { transform: scaleY(1); }
+    .pkg:hover .pkg-name { color: var(--scipp-blue); }
+    .pkg:hover .pkg-arrow { transform: translateX(3px); color: var(--scipp-blue); }
+
+    .pkg-name {
+      font-family: var(--mono);
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--brand-deep);
+      letter-spacing: -0.01em;
+      transition: color 0.2s ease;
+    }
+    .pkg-desc {
+      font-size: 0.92rem;
+      color: var(--ink-soft);
+    }
+    .pkg-desc .tag {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-left: 0.4rem;
+    }
+    .pkg-arrow {
+      font-family: var(--mono);
+      color: var(--muted);
+      font-size: 0.9rem;
+      transition: transform 0.2s ease, color 0.2s ease;
+    }
+
+    /* ---------- Note / support block ---------- */
+    .note {
+      padding: 1.1rem 0;
+      font-size: 0.95rem;
+      color: var(--ink-soft);
+    }
+    .note code {
+      font-family: var(--mono);
+      font-size: 0.88rem;
+      color: var(--brand-deep);
+      background: var(--bg-soft);
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+    }
+    .note a {
+      color: var(--scipp-blue);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .note a:hover {
+      color: var(--ess-cyan);
+      border-color: var(--ess-cyan);
+    }
+
+    .section-gap { margin-top: 3rem; }
+
+    @media (max-width: 560px) {
+      .masthead { flex-wrap: wrap; }
+      .brand-group { gap: 0.85rem; }
+      .brand-logo.ess svg { height: 3rem; }
+      .brand-logo.scipp svg { height: 2.1rem; }
+      .masthead .org-label { display: none; }
+      .pkg {
+        grid-template-columns: 1fr auto;
+        row-gap: 0.25rem;
+      }
+      .pkg-desc { grid-column: 1 / -1; }
+    }
+
+    /* ---------- Footer ---------- */
+    footer {
+      margin-top: 4rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--rule);
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.04em;
     }
     footer a {
-      color: var(--blue);
+      color: var(--scipp-blue);
       text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.2s, color 0.2s;
     }
-    footer a:hover { text-decoration: underline; }
+    footer a:hover {
+      color: var(--ess-cyan);
+      border-color: var(--ess-cyan);
+    }
 
-    .pagefind-ui .pagefind-ui__search-input {
-      font-family: 'Source Sans 3', sans-serif !important;
-      border-radius: 4px !important;
-      border: 1px solid var(--border) !important;
-      font-size: 0.92rem !important;
+    /* ---------- Pagefind overrides ---------- */
+    .pagefind-ui {
+      --pagefind-ui-font: var(--sans) !important;
+      --pagefind-ui-primary: var(--scipp-blue) !important;
+      --pagefind-ui-text: var(--ink) !important;
+      --pagefind-ui-background: transparent !important;
+      --pagefind-ui-border: var(--rule) !important;
+      --pagefind-ui-tag: var(--bg-soft) !important;
+      --pagefind-ui-border-width: 1px !important;
+      --pagefind-ui-border-radius: 3px !important;
+      --pagefind-ui-scale: 1 !important;
     }
-    .pagefind-ui .pagefind-ui__search-input:focus {
-      border-color: var(--blue) !important;
-      box-shadow: 0 0 0 2px rgba(0, 153, 220, 0.15) !important;
+    .pagefind-ui__search-input {
+      font-family: var(--sans) !important;
+      font-size: 1rem !important;
+      font-weight: 400 !important;
+      padding: 0.85rem 2.75rem !important;
+      background: var(--bg) !important;
+      color: var(--ink) !important;
+      border: 1px solid var(--rule) !important;
+    }
+    .pagefind-ui__search-input::placeholder { color: var(--muted) !important; }
+    .pagefind-ui__search-input:focus {
       outline: none !important;
+      border-color: var(--scipp-blue) !important;
+      box-shadow: 0 0 0 3px var(--focus-ring) !important;
+    }
+    .pagefind-ui__search-clear { color: var(--muted) !important; }
+    .pagefind-ui__result-link { color: var(--scipp-blue) !important; }
+    .pagefind-ui__result-link:hover { color: var(--ess-cyan) !important; }
+
+    /* ---------- Dark mode ---------- */
+    /* The <html> element's data-theme attribute is set by an inline script in
+       <head> before paint, based on localStorage or prefers-color-scheme. */
+    :root[data-theme="dark"] {
+      --scipp-blue:   #4aa8dd;
+      --ess-cyan:     #35b6f0;
+      --brand-deep:   #8cc7ec;
+      --brand-soft:   #142a3f;
+
+      --ink:       #e6e9ee;
+      --ink-soft:  #b8bec7;
+      --muted:     #848a93;
+      --rule:      #2a3038;
+      --bg:        #0f1216;
+      --bg-soft:   #181c22;
+
+      --focus-ring: rgba(74, 168, 221, 0.22);
+
+      color-scheme: dark;
+    }
+
+    /* ---------- Theme toggle button ---------- */
+    .theme-toggle {
+      width: 2rem;
+      height: 2rem;
+      padding: 0;
+      border: 1px solid var(--rule);
+      border-radius: 3px;
+      background: transparent;
+      color: var(--ink-soft);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+    .theme-toggle:hover {
+      border-color: var(--scipp-blue);
+      color: var(--scipp-blue);
+      background: var(--brand-soft);
+    }
+    .theme-toggle:focus-visible {
+      outline: none;
+      border-color: var(--scipp-blue);
+      box-shadow: 0 0 0 3px var(--focus-ring);
+    }
+    .theme-toggle svg { width: 1rem; height: 1rem; }
+    .theme-toggle .icon-sun { display: none; }
+    :root[data-theme="dark"] .theme-toggle .icon-sun  { display: block; }
+    :root[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+
+    .masthead-right {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <div>
-      <h1>ESS Data Reduction</h1>
-      <p>Documentation for neutron scattering data reduction packages</p>
-    </div>
-  </header>
+  <div class="wrap">
 
-  <main>
-    <div class="search-section">
-      <label>Search all packages</label>
+    <div class="masthead">
+      <div class="brand-group">
+        <a class="brand-logo ess" href="https://ess.eu" aria-label="European Spallation Source">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396.85 212.598" role="img" aria-hidden="true">
+            <path fill="#0099DC" d="M369.037,59.893h-3.25v15.041h-0.469l-6.06-15.041h-5.234v19.063h3.223V63.914h0.468l6.226,15.041h5.096V59.893z M247.832,105.987h3.691c4.325,0,6.474-2.507,6.474-6.832c0-4.325-2.149-6.474-6.474-6.474h-6.914v19.063h3.223V105.987z M247.832,95.795h3.664c2.176,0,3.196,1.075,3.196,3.361c0,2.314-1.019,3.719-3.196,3.719h-3.664V95.795z M234.805,100.698c-3.195-0.909-4.132-1.322-4.132-2.948c0-1.543,1.129-2.259,3.388-2.259c1.598,0,5.454,0.441,5.454,0.441l0.248-2.893c0,0-3.581-0.688-5.702-0.688c-4.105,0-6.612,1.818-6.612,5.454c0,3.416,1.708,4.683,5.84,5.757c2.837,0.717,3.636,1.295,3.636,2.783c0,1.846-1.019,2.562-3.278,2.562c-1.956,0-5.454-0.468-5.454-0.468l-0.33,2.893c0,0,3.719,0.716,5.812,0.716c3.857,0,6.501-1.818,6.501-5.785C240.177,102.929,238.772,101.855,234.805,100.698z M251.965,79.203c4.573,0,7.025-1.818,7.025-6.391v-12.92h-3.251v12.92c0,2.452-1.515,3.223-3.774,3.223c-2.204,0-3.691-0.743-3.691-3.223v-12.92h-3.251v12.92C245.022,77.385,247.447,79.203,251.965,79.203z M234.805,133.487c-3.195-0.909-4.132-1.322-4.132-2.948c0-1.543,1.129-2.259,3.388-2.259c1.598,0,5.454,0.441,5.454,0.441l0.248-2.893c0,0-3.581-0.688-5.702-0.688c-4.105,0-6.612,1.818-6.612,5.454c0,3.416,1.708,4.683,5.84,5.757c2.837,0.717,3.636,1.295,3.636,2.783c0,1.846-1.019,2.562-3.278,2.562c-1.956,0-5.454-0.468-5.454-0.468l-0.33,2.893c0,0,3.719,0.716,5.812,0.716c3.857,0,6.501-1.818,6.501-5.785C240.177,135.718,238.772,134.643,234.805,133.487z M289.79,79.258c5.895,0,7.686-3.251,7.686-9.697c0-6.391-1.791-9.972-7.686-9.972s-7.686,3.581-7.686,9.972C282.104,75.953,283.895,79.258,289.79,79.258z M289.79,62.703c3.499,0,4.353,2.424,4.353,6.859c0,4.491-0.826,6.584-4.353,6.584c-3.526,0-4.352-2.149-4.352-6.584C285.438,65.127,286.292,62.703,289.79,62.703z M305.699,73.198h3.691c4.325,0,6.474-2.507,6.474-6.831c0-4.325-2.149-6.474-6.474-6.474h-6.915v19.063h3.223V73.198z M305.699,63.006h3.664c2.176,0,3.196,1.074,3.196,3.361c0,2.314-1.02,3.719-3.196,3.719h-3.664V63.006z M228.607,78.956h11.901V75.87h-8.705v-4.876h7.052v-3.03h-7.052v-4.986h8.705v-3.085h-11.901V78.956z M331.713,75.87h-8.705v-4.876h7.052v-3.03h-7.052v-4.986h8.705v-3.085h-11.901v19.063h11.901V75.87z M377.006,92.682v15.041h-0.469l-6.06-15.041h-5.234v19.063h3.223V96.703h0.468l6.226,15.041h5.096V92.682H377.006z M292.702,92.682v19.063h10.42v-3.113h-7.197v-15.95H292.702z M352.558,92.379c-5.895,0-7.686,3.581-7.686,9.972c0,6.391,1.791,9.697,7.686,9.697c5.895,0,7.686-3.251,7.686-9.697C360.243,95.96,358.453,92.379,352.558,92.379z M352.558,108.934c-3.526,0-4.353-2.149-4.353-6.584c0-4.435,0.854-6.859,4.353-6.859c3.499,0,4.353,2.424,4.353,6.859C356.91,106.841,356.084,108.934,352.558,108.934z M297.211,131.614c0-4.353-2.094-6.143-6.446-6.143h-7.19v19.063h3.223v-6.501h4.242l2.617,6.501h3.554l-3.003-7.438C296.164,136.131,297.211,134.478,297.211,131.614z M290.82,134.947h-4.022v-6.391h3.967c2.093,0,3.113,1.02,3.113,3.113C293.878,133.625,293.051,134.947,290.82,134.947z M308.839,128.335c1.653,0,4.876,0.413,4.876,0.413l0.11-2.838c0,0-3.03-0.743-5.427-0.743c-5.399,0-7.08,2.92-7.08,9.862c0,6.501,1.322,9.807,7.08,9.807c2.176,0,5.399-0.688,5.399-0.688l-0.083-2.92c0,0-3.278,0.441-4.766,0.441c-3.636,0-4.297-1.791-4.297-6.638C304.652,129.933,305.506,128.335,308.839,128.335z M320.104,95.795h5.289v15.95h3.251v-15.95h5.234v-3.113h-13.774V95.795z M338.835,75.209h6.914l1.047,3.746h3.251l-4.491-19.063h-6.363l-4.546,19.063h3.251L338.835,75.209z M341.7,62.868h1.295l2.121,9.228h-5.592L341.7,62.868z M317.052,144.533h11.901v-3.085h-8.705v-4.876h7.052v-3.03h-7.052v-4.986h8.705v-3.086h-11.901V144.533z M315.615,92.682h-6.364l-4.545,19.063h3.25l0.937-3.746h6.915l1.046,3.746h3.251L315.615,92.682z M309.581,104.885l2.177-9.228h1.294l2.122,9.228H309.581z M289.976,108.631h-7.197v-15.95h-3.223v19.063h10.42V108.631z M271.281,107.998l1.047,3.746h3.251l-4.491-19.063h-6.363l-4.546,19.063h3.251l0.936-3.746H271.281z M267.232,95.657h1.295l2.121,9.228h-5.592L267.232,95.657z M251.551,125.167c-5.895,0-7.686,3.581-7.686,9.972c0,6.391,1.79,9.697,7.686,9.697s7.686-3.251,7.686-9.697C259.237,128.749,257.447,125.167,251.551,125.167z M251.551,141.723c-3.526,0-4.352-2.149-4.352-6.584c0-4.435,0.854-6.859,4.352-6.859c3.499,0,4.353,2.424,4.353,6.859C255.904,139.63,255.077,141.723,251.551,141.723z M278.183,66.035c0-4.352-2.094-6.143-6.446-6.143h-7.19v19.063h3.223v-6.501h4.242l2.617,6.501h3.554l-3.003-7.438C277.136,70.553,278.183,68.901,278.183,66.035z M271.792,69.369h-4.022v-6.391h3.967c2.093,0,3.113,1.019,3.113,3.112C274.849,68.047,274.023,69.369,271.792,69.369z M336.621,111.744h3.251V92.682h-3.251V111.744z M274.767,138.39c0,2.452-1.515,3.223-3.774,3.223c-2.204,0-3.691-0.743-3.691-3.223v-12.92h-3.251v12.92c0,4.573,2.424,6.391,6.942,6.391c4.573,0,7.025-1.818,7.025-6.391v-12.92h-3.251V138.39z"/>
+            <path fill="#0099DC" d="M22.281,54.887c6.711-17.482,20.582-31.019,39.059-38.118c18.503-7.109,39.406-6.911,58.858,0.556c11.778,4.521,22.075,11.29,30.604,20.117c6.548,6.777,11.814,14.632,15.45,22.996c-5.851-8.122-13.372-14.981-22.035-20.05c-10.903-6.378-23.38-9.75-36.083-9.75c-11.534,0-22.546,2.66-32.729,7.905c-9.715,5.004-18.297,12.301-24.818,21.103c-0.233,0.315-0.167,0.758,0.147,0.991c0.314,0.232,0.758,0.167,0.991-0.147c6.393-8.629,14.806-15.783,24.328-20.687c9.981-5.141,20.774-7.747,32.08-7.747c12.451,0,24.681,3.305,35.367,9.556c10.372,6.068,19.073,14.752,25.161,25.115c0.184,0.312,0.574,0.436,0.903,0.287c0.33-0.149,0.494-0.524,0.381-0.868c-3.578-10.853-9.845-21.119-18.125-29.688c-8.674-8.978-19.143-15.86-31.116-20.456c-19.78-7.593-41.043-7.79-59.874-0.555C41.975,22.69,27.814,36.517,20.958,54.379c-5.84,15.215-5.818,31.668,0.065,47.58c0.106,0.286,0.377,0.463,0.665,0.463c0.082,0,0.165-0.014,0.246-0.044c0.367-0.136,0.554-0.543,0.419-0.911C16.591,85.883,16.566,69.775,22.281,54.887z M151.378,176.783c-0.301-0.25-0.748-0.208-0.998,0.092c-10.615,12.782-24.552,20.857-40.304,23.352c-18.495,2.929-37.154-2.315-52.54-14.768c-15.408-12.47-25.688-30.671-28.948-51.25c-1.974-12.46-1.26-24.762,2.12-36.562c2.595-9.059,6.765-17.547,12.189-24.878c-4.109,9.128-6.288,19.071-6.346,29.108C36.479,114.508,39.798,127,46.149,138c5.767,9.989,13.576,18.195,23.21,24.392c9.191,5.911,19.801,9.695,30.685,10.941c0.389,0.045,0.74-0.234,0.785-0.623c0.044-0.388-0.235-0.74-0.623-0.785c-10.67-1.222-21.071-4.931-30.08-10.725c-9.443-6.073-17.096-14.117-22.75-23.909c-6.225-10.783-9.479-23.026-9.408-35.407c0.069-12.016,3.24-23.894,9.169-34.348c0.179-0.315,0.091-0.715-0.203-0.925c-0.294-0.211-0.701-0.166-0.942,0.104c-7.61,8.525-13.367,19.086-16.648,30.541c-3.438,12.001-4.164,24.508-2.157,37.175c3.314,20.926,13.775,39.439,29.456,52.13c15.702,12.709,34.757,18.059,53.654,15.066c16.097-2.55,30.334-10.796,41.173-23.846c0.195-0.235,0.213-0.558,0.068-0.807C151.498,176.903,151.444,176.838,151.378,176.783z M193.149,50.633c-10.256-12.665-24.516-20.872-41.238-23.734c-0.301-0.051-0.59,0.095-0.733,0.344c-0.041,0.071-0.07,0.15-0.085,0.235c-0.066,0.386,0.193,0.752,0.579,0.818c16.377,2.802,30.339,10.834,40.376,23.228c11.785,14.553,16.572,33.334,13.481,52.885c-3.095,19.579-13.718,37.582-29.91,50.695c-9.804,7.939-20.814,13.472-32.724,16.445c-9.143,2.282-18.579,2.915-27.64,1.883c9.96-1.006,19.66-4.09,28.381-9.058c10.975-6.253,20.134-15.373,26.485-26.374c5.767-9.989,8.97-20.855,9.519-32.297c0.524-10.915-1.505-21.996-5.867-32.045c-0.156-0.359-0.573-0.524-0.932-0.368c-0.358,0.156-0.523,0.573-0.368,0.932c4.276,9.851,6.265,20.714,5.752,31.413c-0.538,11.214-3.678,21.865-9.331,31.656c-6.226,10.783-15.202,19.722-25.959,25.851c-10.441,5.948-22.312,9.141-34.331,9.233c-0.362,0.003-0.665,0.279-0.7,0.639c-0.036,0.361,0.206,0.69,0.561,0.764c11.188,2.328,23.212,2.033,34.773-0.853c12.112-3.023,23.307-8.648,33.273-16.719c16.465-13.333,27.268-31.65,30.418-51.575C210.083,84.678,205.19,65.502,193.149,50.633z M148.915,85.511c5.314,0,8.548,2.509,9.075,6.187h11.67c-0.129-4.429-2.064-8.104-5.816-10.93c-3.886-2.927-8.897-4.441-15.032-4.441c-13.448,0-17.969,6.959-18.918,8.576c-0.944-1.532-5.709-8.576-18.878-8.576c-14.119,0-18.487,7.543-19.44,9.567c-4.207-5.386-10.77-9.567-20.511-9.567c-7.499,0-13.732,2.422-18.601,7.266c-4.967,4.945-7.402,11.1-7.402,18.67c0,7.569,2.435,13.724,7.402,18.568c4.869,4.844,11.101,7.266,18.601,7.266c12.381,0,18.47-7.031,20.204-9.035c1.023,1.661,6.227,9.035,20.36,9.035c13.017,0,17.96-6.169,18.804-7.192c1.072,1.264,6.366,7.192,18.992,7.192c6.442,0,11.657-1.413,15.747-4.34c3.988-2.926,6.033-6.661,6.033-11.202c0-9.09-7.987-12.974-17.792-14.835c-9.624-1.827-12.791-3.128-12.791-6.761C140.623,87.731,143.61,85.511,148.915,85.511z M71.164,86.233c6.725,0,11.752,4.458,13.439,10.076H58.211C60.026,90.645,64.891,86.233,71.164,86.233z M111.528,118.712c-5.867,0-9.612-2.724-9.919-6.761H81.978c-1.475,3.342-5.273,6.241-10.814,6.241c-7.254,0-12.952-5.458-13.439-11.893H96.58c0.29-1.1,0.388-2.398,0.389-3.894c2.644,1.625,6.07,2.887,10.26,3.739c9.711,1.975,12.954,3.182,12.954,6.816C120.185,116.291,116.967,118.712,111.528,118.712z M145.026,106.145c9.711,1.975,12.954,3.182,12.954,6.816c0,3.33-3.217,5.752-8.656,5.752c-5.867,0-9.612-2.724-9.919-6.761h-6.012c-0.35-8.657-8.192-12.411-17.775-14.23c-9.625-1.827-12.791-3.128-12.791-6.761c0-3.229,2.988-5.449,8.292-5.449c5.314,0,8.548,2.509,9.075,6.187h7.967C128.231,98.794,133.969,103.896,145.026,106.145z"/>
+          </svg>
+        </a>
+        <span class="brand-divider" aria-hidden="true"></span>
+        <a class="brand-logo scipp" href="https://scipp.github.io" aria-label="Scipp">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 146.95078 42.177414" role="img" aria-hidden="true">
+            <g transform="translate(-25.582031,-19.09881)">
+              <path style="fill:#0065ac;fill-rule:evenodd" d="m 43.508533,19.221628 -6.011207,3.470806 a 0.91643846,0.91643846 0.0011682 0 1 -0.916517,-1.8e-5 l -1.68115,-0.97077 a 0.9162711,0.9162711 179.99664 0 0 -0.916475,5.4e-5 l -2.745665,1.585897 a 0.91674198,0.91674198 119.99463 0 0 -0.458222,0.793836 v 1.939712 a 0.9167438,0.9167438 119.99458 0 1 -0.458222,0.793837 l -4.280822,2.472614 a 0.9167438,0.9167438 119.99458 0 0 -0.458222,0.793837 v 18.0569 2.115234 a 0.91692071,0.91692071 60.010206 0 0 0.458177,0.793914 l 0.915677,0.5291 a 2286.8691,2286.8691 30.007154 0 0 0.916477,0.529282 l 1.979885,1.142805 a 0.3055521,0.3055521 149.99695 0 0 0.4583,-0.264632 l 0,-1.402603 a 0.91721489,0.91721489 60.018162 0 0 -0.458104,-0.794041 l -1.681448,-0.972206 a 0.91721489,0.91721489 60.018162 0 1 -0.458104,-0.794041 v -17.70729 a 0.91688301,0.91688301 119.99081 0 1 0.458187,-0.793897 l 3.214485,-1.857259 a 0.91613021,0.91613021 179.99282 0 1 0.91644,-1.15e-4 l 1.68115,0.97077 a 0.91651552,0.91651552 0.00325425 0 0 0.916536,5.2e-5 l 2.747497,-1.586109 a 0.91649747,0.91649747 120.00125 0 0 0.458283,-0.79373 v -1.939712 a 0.91690648,0.91690648 119.99018 0 1 0.458181,-0.793907 l 4.944966,-2.857239 a 0.916451,0.916451 179.98286 0 1 0.91652,-2.74e-4 l 1.682931,0.971068 a 0.91673323,0.91673323 179.9905 0 0 0.916591,-1.52e-4 l 1.214356,-0.701233 a 0.30550399,0.30550399 89.994781 0 0 -4.8e-5,-0.529153 l -3.813869,-2.201399 a 0.91662478,0.91662478 179.99612 0 0 -0.916564,6.2e-5 z m -8.609052,4.961266 0.617053,0.356869 a 0.91733263,0.91733263 60.021345 0 1 0.458075,0.794092 v 0.70729 a 0.91733263,0.91733263 119.97865 0 1 -0.458075,0.794092 l -0.617053,0.356869 a 0.91496847,0.91496847 0 0 1 -0.91615,0 l -0.617053,-0.356869 a 0.91733263,0.91733263 60.021345 0 1 -0.458075,-0.794092 v -0.70729 a 0.91733263,0.91733263 119.97865 0 1 0.458075,-0.794092 l 0.617053,-0.356869 a 0.91496847,0.91496847 0 0 1 0.91615,0 z m 17.27115,0.03871 -17.470168,10.086081 a 0.91652881,0.91652881 120.0004 0 0 -0.458275,0.793744 v 5.939712 a 0.91721471,0.91721471 119.98184 0 1 -0.458104,0.794041 l -1.681449,0.972206 a 0.91721471,0.91721471 119.98184 0 0 -0.458104,0.794041 l 0,3.172134 a 0.91721471,0.91721471 60.018157 0 0 0.458104,0.794041 l 1.681449,0.972206 a 0.91721471,0.91721471 60.018157 0 1 0.458104,0.794041 v 5.939712 a 0.91692071,0.91692071 60.010206 0 0 0.458177,0.793914 l 0.915677,0.5291 a 2863.0058,2863.0058 30.009822 0 0 0.916452,0.529324 l 6.976028,4.027487 a 0.91689642,0.91689642 0.00878088 0 0 0.916631,1.4e-4 l 0.149694,-0.08636 a 0.91620508,0.91620508 120.00916 0 0 0.458356,-0.793604 l 0,-18.939712 A 0.91676162,0.91676162 119.9941 0 1 45.49142,40.54001 l 5.612863,-3.242129 A 0.30544185,0.30544185 29.994098 0 1 51.5625,37.56237 v 18.941666 a 0.30548758,0.30548758 29.997812 0 0 0.458252,0.264549 l 1.214355,-0.701233 a 0.91662439,0.91662439 119.99781 0 0 0.458252,-0.793785 V 35.103386 a 0.91765905,0.91765905 60.030168 0 0 -0.457993,-0.794233 l -0.15042,-0.08706 a 0.91537068,0.91537068 0.02855605 0 0 -0.91625,-4.57e-4 l -8.808095,5.086017 a 0.91660309,0.91660309 119.99839 0 0 -0.458257,0.793776 V 57.81263 a 0.30544185,0.30544185 150.0059 0 1 -0.458217,0.264489 L 36.831264,54.83499 a 0.91676162,0.91676162 60.005902 0 1 -0.458217,-0.793845 v -4.70729 a 0.91721489,0.91721489 119.98184 0 1 0.458104,-0.794041 l 1.681448,-0.972206 a 0.91721489,0.91721489 119.98184 0 0 0.458104,-0.794041 v -3.172134 a 0.91721489,0.91721489 60.018162 0 0 -0.458104,-0.794041 l -1.681448,-0.972206 a 0.91721489,0.91721489 60.018162 0 1 -0.458104,-0.794041 v -4.70729 a 0.9166131,0.9166131 119.99812 0 1 0.458254,-0.79378 L 54.301512,25.452113 a 0.30556457,0.30556457 90.0003 0 0 2e-6,-0.529231 l -1.214356,-0.701233 a 0.9164777,0.9164777 0.00258113 0 0 -0.916527,-4.1e-5 z m 6.062419,3.49986 -1.2161,0.701595 a 0.30552722,0.30552722 90.019381 0 0 -1.79e-4,0.529184 l 2.747708,1.587694 a 0.91692071,0.91692071 60.010206 0 1 0.458177,0.793914 v 5.70729 a 0.91721489,0.91721489 119.98184 0 1 -0.458104,0.794041 l -1.681448,0.972206 A 0.91721489,0.91721489 119.98184 0 0 57.625,39.601433 v 3.172134 a 0.91721489,0.91721489 60.018162 0 0 0.458104,0.794041 l 1.681448,0.972206 a 0.91721489,0.91721489 60.018162 0 1 0.458104,0.794041 l 0,3.70729 a 0.91721489,0.91721489 119.98184 0 1 -0.458104,0.794041 l -1.681448,0.972206 A 0.91721489,0.91721489 119.98184 0 0 57.625,51.601433 v 1.402603 a 0.30548884,0.30548884 29.997914 0 0 0.458253,0.26455 l 3.81201,-2.201235 a 0.91662061,0.91662061 119.99791 0 0 0.458253,-0.793784 v -4.939712 a 0.91721489,0.91721489 119.98184 0 1 0.458104,-0.794041 l 1.681448,-0.972206 a 0.91721489,0.91721489 119.98184 0 0 0.458104,-0.794041 V 39.601433 A 0.91721489,0.91721489 60.018162 0 0 64.493068,38.807392 L 62.81162,37.835186 a 0.91721489,0.91721489 60.018162 0 1 -0.458104,-0.794041 l 0,-6.939712 A 0.91674185,0.91674185 60.005367 0 0 61.895294,29.307597 L 59.149628,27.7217 a 0.91668426,0.91668426 0.01454155 0 0 -0.916578,-2.32e-4 z m 3.512134,11.961426 0.617053,0.356869 a 0.91733263,0.91733263 60.021345 0 1 0.458075,0.794092 l 0,0.70729 a 0.91733263,0.91733263 119.97865 0 1 -0.458075,0.794092 l -0.617053,0.356869 a 0.91438545,0.91438545 0.0158301 0 1 -0.916003,-2.53e-4 L 60.213787,42.33549 a 0.91791847,0.91791847 60.037176 0 1 -0.457928,-0.794345 v -0.70729 a 0.91791847,0.91791847 119.96282 0 1 0.457928,-0.794345 l 0.615394,-0.356363 a 0.91438545,0.91438545 179.98417 0 1 0.916003,-2.53e-4 z m -25.980468,4 0.617053,0.356869 a 0.91733263,0.91733263 60.021345 0 1 0.458075,0.794092 v 0.70729 a 0.91733263,0.91733263 119.97865 0 1 -0.458075,0.794092 l -0.617053,0.356869 a 0.91496847,0.91496847 180 0 1 -0.91615,0 l -0.617053,-0.356869 a 0.91733263,0.91733263 60.021345 0 1 -0.458075,-0.794092 v -0.70729 a 0.91733263,0.91733263 119.97865 0 1 0.458075,-0.794092 l 0.617053,-0.356869 a 0.91496847,0.91496847 0 0 1 0.91615,0 z"/>
+              <g aria-label="scipp" style="font-family:Lato;letter-spacing:0;word-spacing:0;fill:#0065ac">
+                <path style="font-weight:bold" d="m 96.605021,33.760453 q -0.205044,0.328071 -0.430593,0.471602 -0.225549,0.123027 -0.574125,0.123027 -0.36908,0 -0.799674,-0.205045 -0.410089,-0.205044 -0.963709,-0.451098 -0.55362,-0.266557 -1.271276,-0.471602 -0.697151,-0.205044 -1.66086,-0.205044 -1.496825,0 -2.358012,0.635637 -0.840682,0.635638 -0.840682,1.660861 0,0.676647 0.430593,1.148249 0.451098,0.451098 1.168754,0.799674 0.73816,0.348575 1.66086,0.635638 0.922701,0.266557 1.865905,0.594629 0.963709,0.328071 1.88641,0.758664 0.9227,0.410089 1.640356,1.066232 0.73816,0.635638 1.168753,1.537833 0.451098,0.902196 0.451098,2.173472 0,1.517329 -0.55362,2.80911 -0.533116,1.271276 -1.599347,2.21448 -1.066231,0.922701 -2.645074,1.455816 -1.558338,0.512611 -3.608783,0.512611 -1.086736,0 -2.132463,-0.205044 -1.025223,-0.18454 -1.988932,-0.533116 -0.943204,-0.348575 -1.763382,-0.820178 -0.799674,-0.471602 -1.414807,-1.025222 l 1.168753,-1.927418 q 0.225549,-0.348576 0.533116,-0.533116 0.307567,-0.18454 0.779169,-0.18454 0.471602,0 0.881691,0.266558 0.430594,0.266557 0.984214,0.574124 0.55362,0.307567 1.29178,0.574125 0.758665,0.266558 1.906914,0.266558 0.902196,0 1.537834,-0.205045 0.656142,-0.225549 1.066231,-0.574124 0.430594,-0.348576 0.615134,-0.799674 0.205044,-0.471602 0.205044,-0.963709 0,-0.73816 -0.451098,-1.209763 -0.430593,-0.471602 -1.168753,-0.820178 -0.717656,-0.348575 -1.660861,-0.615133 -0.9227,-0.287062 -1.906914,-0.615134 -0.963709,-0.328071 -1.906913,-0.758664 -0.922701,-0.451098 -1.660861,-1.127745 -0.717656,-0.676647 -1.168753,-1.66086 -0.430594,-0.984214 -0.430594,-2.378517 0,-1.29178 0.512611,-2.460534 0.512612,-1.168753 1.496825,-2.02994 1.004718,-0.881691 2.481039,-1.394303 1.496824,-0.533115 3.444747,-0.533115 2.173472,0 3.957359,0.717655 1.783887,0.717656 2.973145,1.88641 z"/>
+                <path style="font-weight:bold" d="m 116.86337,34.109028 q -0.22555,0.287063 -0.45109,0.451098 -0.20505,0.164036 -0.61514,0.164036 -0.38958,0 -0.75866,-0.225549 -0.36908,-0.246053 -0.88169,-0.533116 -0.51262,-0.307567 -1.23027,-0.533115 -0.69715,-0.246054 -1.74288,-0.246054 -1.33279,0 -2.33751,0.492107 -1.00471,0.471602 -1.68136,1.373798 -0.65614,0.902196 -0.98422,2.193976 -0.32807,1.271276 -0.32807,2.891128 0,1.681365 0.34858,2.993649 0.36908,1.312285 1.04573,2.214481 0.67664,0.881691 1.64035,1.353294 0.96371,0.451097 2.17347,0.451097 1.20977,0 1.94793,-0.287062 0.75866,-0.307567 1.27127,-0.656142 0.51261,-0.36908 0.88169,-0.656143 0.38959,-0.307566 0.86119,-0.307566 0.61513,0 0.9227,0.471602 l 1.45582,1.8454 q -0.84069,0.984214 -1.8249,1.660861 -0.98421,0.656142 -2.05044,1.066231 -1.04573,0.389585 -2.17348,0.55362 -1.10724,0.164036 -2.21448,0.164036 -1.94792,0 -3.67029,-0.717656 -1.72238,-0.73816 -3.01416,-2.132462 -1.29178,-1.394303 -2.05044,-3.403739 -0.73816,-2.029941 -0.73816,-4.613501 0,-2.317003 0.65614,-4.28543 0.67665,-1.988932 1.96843,-3.424244 1.29178,-1.455815 3.19869,-2.275993 1.90692,-0.820178 4.38795,-0.820178 2.35802,0 4.1214,0.758664 1.78389,0.758665 3.19869,2.173472 z"/>
+                <path style="font-weight:bold" d="m 126.80797,29.659563 v 21.037565 h -5.08511 V 29.659563 Z m 0.69715,-6.130831 q 0,0.656143 -0.26656,1.230267 -0.26656,0.574125 -0.71765,1.004718 -0.4306,0.430594 -1.02523,0.697152 -0.59463,0.246053 -1.27127,0.246053 -0.65615,0 -1.25077,-0.246053 -0.57413,-0.266558 -1.00472,-0.697152 -0.4306,-0.430593 -0.69715,-1.004718 -0.24606,-0.574124 -0.24606,-1.230267 0,-0.676647 0.24606,-1.271276 0.26655,-0.594629 0.69715,-1.025222 0.43059,-0.430594 1.00472,-0.676647 0.59462,-0.266558 1.25077,-0.266558 0.67664,0 1.27127,0.266558 0.59463,0.246053 1.02523,0.676647 0.45109,0.430593 0.71765,1.025222 0.26656,0.594629 0.26656,1.271276 z"/>
+                <path style="font-weight:300" d="M 132.83626,57.914695 V 30.295201 h 1.08674 q 0.51261,0 0.59463,0.512611 l 0.18454,3.157685 q 1.35329,-1.8454 3.17819,-2.932136 1.82489,-1.086736 4.08038,-1.086736 3.75232,0 5.84377,2.604065 2.11196,2.604065 2.11196,7.812196 0,2.234985 -0.59463,4.182907 -0.57412,1.927419 -1.72237,3.36273 -1.12775,1.414807 -2.78861,2.234985 -1.64035,0.820178 -3.79332,0.820178 -2.07095,0 -3.58828,-0.758665 -1.51733,-0.758664 -2.62457,-2.234985 v 9.944659 z m 8.57086,-26.389227 q -2.02994,0 -3.67029,1.045727 -1.64036,1.045727 -2.93214,2.911632 v 10.764836 q 1.16875,1.763382 2.58356,2.481038 1.41481,0.697151 3.26021,0.697151 1.80439,0 3.15768,-0.656142 1.3533,-0.656142 2.25549,-1.8454 0.9227,-1.209763 1.3738,-2.870623 0.4716,-1.681365 0.4716,-3.690801 0,-4.551988 -1.68136,-6.684451 -1.68137,-2.152967 -4.81855,-2.152967 z"/>
+                <path style="font-weight:300" d="M 155.4526,57.914695 V 30.295201 h 1.08674 q 0.51261,0 0.59463,0.512611 l 0.18454,3.157685 q 1.35329,-1.8454 3.17819,-2.932136 1.82489,-1.086736 4.08038,-1.086736 3.75232,0 5.84377,2.604065 2.11196,2.604065 2.11196,7.812196 0,2.234985 -0.59463,4.182907 -0.57412,1.927419 -1.72237,3.36273 -1.12775,1.414807 -2.78861,2.234985 -1.64035,0.820178 -3.79332,0.820178 -2.07095,0 -3.58828,-0.758665 -1.51733,-0.758664 -2.62457,-2.234985 v 9.944659 z m 8.57086,-26.389227 q -2.02994,0 -3.67029,1.045727 -1.64036,1.045727 -2.93214,2.911632 v 10.764836 q 1.16875,1.763382 2.58356,2.481038 1.41481,0.697151 3.26021,0.697151 1.80439,0 3.15768,-0.656142 1.3533,-0.656142 2.25549,-1.8454 0.9227,-1.209763 1.3738,-2.870623 0.4716,-1.681365 0.4716,-3.690801 0,-4.551988 -1.68136,-6.684451 -1.68137,-2.152967 -4.81855,-2.152967 z"/>
+              </g>
+            </g>
+          </svg>
+        </a>
+      </div>
+      <div class="masthead-right">
+        <span class="org-label">Data Reduction<br>Documentation</span>
+        <button type="button" class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <p class="lede">
+      A suite of Python packages, built on <a href="https://scipp.github.io">Scipp</a>, for reducing raw neutron-scattering data from instruments at the European Spallation Source. Use the search below to look across all packages.
+    </p>
+
+    <section class="search-wrap">
       <div id="search"></div>
-    </div>
+    </section>
 
-    <div class="label">Packages</div>
-    <div class="cards">
-      <a class="card" href="reduce/">
-        <div class="card-name">essreduce</div>
-        <p>Common data reduction tools for the ESS facility</p>
-      </a>
-      <a class="card" href="imaging/">
-        <div class="card-name">essimaging</div>
-        <p>Neutron imaging data reduction (ODIN, TBL, YMIR)</p>
-      </a>
-      <a class="card" href="nmx/">
-        <div class="card-name">essnmx</div>
-        <p>Macromolecular crystallography data reduction (NMX)</p>
-      </a>
-    </div>
-  </main>
+    <section>
+      <div class="section-label">
+        <span class="label-text">Packages</span>
+        <span class="count">06</span>
+      </div>
 
-  <footer>
-    <a href="https://github.com/scipp/ess">github.com/scipp/ess</a>
-  </footer>
+      <div class="pkg-list">
+        <a class="pkg" href="diffraction/">
+          <span class="pkg-name">essdiffraction</span>
+          <span class="pkg-desc">Powder &amp; single-crystal diffraction <span class="tag">DREAM</span></span>
+          <span class="pkg-arrow">→</span>
+        </a>
+        <a class="pkg" href="imaging/">
+          <span class="pkg-name">essimaging</span>
+          <span class="pkg-desc">Neutron imaging <span class="tag">ODIN · TBL · YMIR</span></span>
+          <span class="pkg-arrow">→</span>
+        </a>
+        <a class="pkg" href="nmx/">
+          <span class="pkg-name">essnmx</span>
+          <span class="pkg-desc">Macromolecular crystallography <span class="tag">NMX</span></span>
+          <span class="pkg-arrow">→</span>
+        </a>
+        <a class="pkg" href="reflectometry/">
+          <span class="pkg-name">essreflectometry</span>
+          <span class="pkg-desc">Neutron reflectometry <span class="tag">ESTIA · FREIA</span></span>
+          <span class="pkg-arrow">→</span>
+        </a>
+        <a class="pkg" href="sans/">
+          <span class="pkg-name">esssans</span>
+          <span class="pkg-desc">Small-angle neutron scattering <span class="tag">LOKI · SKADI</span></span>
+          <span class="pkg-arrow">→</span>
+        </a>
+        <a class="pkg" href="reduce/">
+          <span class="pkg-name">essreduce</span>
+          <span class="pkg-desc">Common data reduction tools for the ESS facility</span>
+          <span class="pkg-arrow">→</span>
+        </a>
+      </div>
+    </section>
 
-  <script src="pagefind/pagefind-ui.js"></script>
+    <section class="section-gap">
+      <div class="section-label">
+        <span class="label-text">Support</span>
+      </div>
+      <p class="note">
+        ESS internal users: ping <code>#&lt;instrument&gt;-dmsc</code> on Slack for instrument-specific questions, or <code>#scipp</code> for anything general.
+      </p>
+      <p class="note">
+        External users: open an <a href="https://github.com/scipp/ess/issues">issue</a> or start a <a href="https://github.com/scipp/ess/discussions">discussion</a> on the <a href="https://github.com/scipp/ess">scipp/ess</a> repo.
+      </p>
+    </section>
+
+    <footer>
+      <span>European Spallation Source &middot; Scipp</span>
+      <a href="https://github.com/scipp/ess">github.com/scipp/ess ↗</a>
+    </footer>
+
+  </div>
+
   <script>
-    window.addEventListener('DOMContentLoaded', function() {
+    // Theme toggle — updates <html data-theme>, persists explicit choice.
+    (function () {
+      var root = document.documentElement;
+      var btn = document.querySelector('.theme-toggle');
+      if (!btn) return;
+      btn.addEventListener('click', function () {
+        var next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+        root.dataset.theme = next;
+        try { localStorage.setItem('theme', next); } catch (e) {}
+      });
+      // Track system changes only while the user has no explicit choice.
+      var mq = window.matchMedia('(prefers-color-scheme: dark)');
+      mq.addEventListener('change', function (e) {
+        try {
+          if (localStorage.getItem('theme')) return;
+        } catch (err) { return; }
+        root.dataset.theme = e.matches ? 'dark' : 'light';
+      });
+    })();
+
+    function initPagefind() {
+      if (typeof PagefindUI === 'undefined') { pagefindFailed(); return; }
       new PagefindUI({ element: "#search", showSubResults: true });
-    });
+    }
+    function pagefindFailed() {
+      document.getElementById('search').innerHTML =
+        '<p style="font-family:var(--mono);font-size:0.85rem;color:var(--muted);padding:0.85rem 0;">' +
+        'Search index not found. Run <code>pagefind</code> against your built docs to generate it.' +
+        '</p>';
+    }
   </script>
+  <script src="pagefind/pagefind-ui.js" onload="initPagefind()" onerror="pagefindFailed()"></script>
 </body>
 </html>
