@@ -30,6 +30,7 @@ __pycache__/
 .ruff_cache
 packages/*/docs/generated/
 packages/*/.docs_doctrees
+# tools/download-release-diff-info.sh, tools/collect-release-notes.py cache folder.
 .ess_release_cache/*
 
 # Editor settings
