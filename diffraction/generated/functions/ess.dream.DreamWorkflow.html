@@ -1,0 +1,939 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>ess.dream.DreamWorkflow &#8212; ESSdiffraction</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=f74c911a"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/functions/ess.dream.DreamWorkflow';</script>
+    <script src="../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <link rel="icon" href="../../_static/favicon.svg"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="ess.dream.instrument_view" href="ess.dream.instrument_view.html" />
+    <link rel="prev" title="ess.dream.DreamPowderWorkflow" href="ess.dream.DreamPowderWorkflow.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="26.4.2" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/logo.svg" class="logo__image only-light" alt="ESSdiffraction - Home"/>
+    <img src="../../_static/logo-dark.svg" class="logo__image only-dark pst-js-only" alt="ESSdiffraction - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../about/index.html">
+    About
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essreduce">
+    ESSreduce
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/essdiffraction" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essdiffraction/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essdiffraction" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../about/index.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/essreduce">
+    ESSreduce
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/essdiffraction" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essdiffraction/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essdiffraction" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../attributes/ess.powder.providers.html">ess.powder.providers</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../classes/ess.powder.RunNormalization.html">ess.powder.RunNormalization</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ess.powder.with_pixel_mask_filenames.html">ess.powder.with_pixel_mask_filenames</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../modules/ess.powder.calibration.html">ess.powder.calibration</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.calibration.assemble_output_calibration.html">ess.powder.calibration.assemble_output_calibration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.calibration.detector_two_theta.html">ess.powder.calibration.detector_two_theta</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.calibration.OutputCalibrationData.html">ess.powder.calibration.OutputCalibrationData</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../modules/ess.powder.conversion.html">ess.powder.conversion</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.conversion.add_scattering_coordinates_from_positions.html">ess.powder.conversion.add_scattering_coordinates_from_positions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.conversion.convert_reduced_to_empty_can_subtracted_tof.html">ess.powder.conversion.convert_reduced_to_empty_can_subtracted_tof</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.conversion.convert_reduced_to_tof.html">ess.powder.conversion.convert_reduced_to_tof</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.conversion.convert_to_dspacing.html">ess.powder.conversion.convert_to_dspacing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.conversion.powder_coordinate_transformation_graph.html">ess.powder.conversion.powder_coordinate_transformation_graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.conversion.powder_monitor_coordinate_transformation_graph.html">ess.powder.conversion.powder_monitor_coordinate_transformation_graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.conversion.to_dspacing_with_calibration.html">ess.powder.conversion.to_dspacing_with_calibration</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../modules/ess.powder.correction.html">ess.powder.correction</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.correction.providers.html">ess.powder.correction.providers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.correction.apply_lorentz_correction.html">ess.powder.correction.apply_lorentz_correction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.correction.insert_run_normalization.html">ess.powder.correction.insert_run_normalization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.correction.merge_calibration.html">ess.powder.correction.merge_calibration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.correction.normalize_by_monitor_histogram.html">ess.powder.correction.normalize_by_monitor_histogram</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.correction.normalize_by_monitor_integrated.html">ess.powder.correction.normalize_by_monitor_integrated</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.correction.normalize_by_proton_charge.html">ess.powder.correction.normalize_by_proton_charge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.correction.normalize_by_vanadium_dspacing.html">ess.powder.correction.normalize_by_vanadium_dspacing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.correction.normalize_by_vanadium_dspacing_and_two_theta.html">ess.powder.correction.normalize_by_vanadium_dspacing_and_two_theta</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.correction.subtract_empty_can.html">ess.powder.correction.subtract_empty_can</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.correction.subtract_empty_can_two_theta.html">ess.powder.correction.subtract_empty_can_two_theta</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.correction.RunNormalization.html">ess.powder.correction.RunNormalization</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../modules/ess.powder.filtering.html">ess.powder.filtering</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.filtering.providers.html">ess.powder.filtering.providers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.filtering.remove_bad_pulses.html">ess.powder.filtering.remove_bad_pulses</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../modules/ess.powder.grouping.html">ess.powder.grouping</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.grouping.providers.html">ess.powder.grouping.providers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.grouping.collect_detectors.html">ess.powder.grouping.collect_detectors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.grouping.focus_data_dspacing_and_two_theta.html">ess.powder.grouping.focus_data_dspacing_and_two_theta</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.grouping.group_two_theta.html">ess.powder.grouping.group_two_theta</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.grouping.integrate_two_theta.html">ess.powder.grouping.integrate_two_theta</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../modules/ess.powder.logging.html">ess.powder.logging</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.logging.get_logger.html">ess.powder.logging.get_logger</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../modules/ess.powder.masking.html">ess.powder.masking</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.masking.apply_masks.html">ess.powder.masking.apply_masks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.masking.read_pixel_masks.html">ess.powder.masking.read_pixel_masks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.masking.with_pixel_mask_filenames.html">ess.powder.masking.with_pixel_mask_filenames</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../modules/ess.powder.smoothing.html">ess.powder.smoothing</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.smoothing.lowpass.html">ess.powder.smoothing.lowpass</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../modules/ess.powder.transform.html">ess.powder.transform</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.transform.compute_pdf_from_structure_factor.html">ess.powder.transform.compute_pdf_from_structure_factor</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../modules/ess.powder.types.html">ess.powder.types</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.CalibrationFilename.html">ess.powder.types.CalibrationFilename</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.DspacingBins.html">ess.powder.types.DspacingBins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.OutFilename.html">ess.powder.types.OutFilename</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.TwoThetaBins.html">ess.powder.types.TwoThetaBins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.UncertaintyBroadcastMode.html">ess.powder.types.UncertaintyBroadcastMode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.ValidTofRange.html">ess.powder.types.ValidTofRange</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.CalibrationData.html">ess.powder.types.CalibrationData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.DspacingHistogram.html">ess.powder.types.DspacingHistogram</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.EmptyCanSubtractedIofDspacing.html">ess.powder.types.EmptyCanSubtractedIofDspacing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.EmptyCanSubtractedIofDspacingTwoTheta.html">ess.powder.types.EmptyCanSubtractedIofDspacingTwoTheta</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.IntensityTof.html">ess.powder.types.IntensityTof</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.EmptyCanSubtractedIntensityTof.html">ess.powder.types.EmptyCanSubtractedIntensityTof</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.MaskedDetectorIDs.html">ess.powder.types.MaskedDetectorIDs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.CaveMonitorPosition.html">ess.powder.types.CaveMonitorPosition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.PixelMaskFilename.html">ess.powder.types.PixelMaskFilename</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.TofMask.html">ess.powder.types.TofMask</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.TwoThetaMask.html">ess.powder.types.TwoThetaMask</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.WavelengthMask.html">ess.powder.types.WavelengthMask</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.Beamline.html">ess.powder.types.Beamline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.Measurement.html">ess.powder.types.Measurement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.ReducerSoftware.html">ess.powder.types.ReducerSoftware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.Source.html">ess.powder.types.Source</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.CIFAuthors.html">ess.powder.types.CIFAuthors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.ReducedTofCIF.html">ess.powder.types.ReducedTofCIF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.ReducedEmptyCanSubtractedTofCIF.html">ess.powder.types.ReducedEmptyCanSubtractedTofCIF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.AccumulatedProtonCharge.html">ess.powder.types.AccumulatedProtonCharge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.CorrectedDetector.html">ess.powder.types.CorrectedDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.CorrectedDspacing.html">ess.powder.types.CorrectedDspacing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.DetectorTwoTheta.html">ess.powder.types.DetectorTwoTheta</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.DspacingDetector.html">ess.powder.types.DspacingDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.DspacingMonitor.html">ess.powder.types.DspacingMonitor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.ElasticCoordTransformGraph.html">ess.powder.types.ElasticCoordTransformGraph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.FocussedDataDspacing.html">ess.powder.types.FocussedDataDspacing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.FocussedDataDspacingTwoTheta.html">ess.powder.types.FocussedDataDspacingTwoTheta</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.IntensityDspacing.html">ess.powder.types.IntensityDspacing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.IntensityDspacingTwoTheta.html">ess.powder.types.IntensityDspacingTwoTheta</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.KeepEvents.html">ess.powder.types.KeepEvents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.MonitorCoordTransformGraph.html">ess.powder.types.MonitorCoordTransformGraph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.MonitorFilename.html">ess.powder.types.MonitorFilename</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.NormalizedDspacing.html">ess.powder.types.NormalizedDspacing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.ProtonCharge.html">ess.powder.types.ProtonCharge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.powder.types.RawDataAndMetadata.html">ess.powder.types.RawDataAndMetadata</a></li>
+</ul>
+</details></li>
+</ul>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ess.dream.DreamGeant4MonitorHistogramWorkflow.html">ess.dream.DreamGeant4MonitorHistogramWorkflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ess.dream.DreamGeant4MonitorIntegratedWorkflow.html">ess.dream.DreamGeant4MonitorIntegratedWorkflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ess.dream.DreamGeant4ProtonChargeWorkflow.html">ess.dream.DreamGeant4ProtonChargeWorkflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ess.dream.DreamGeant4Workflow.html">ess.dream.DreamGeant4Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ess.dream.DreamPowderWorkflow.html">ess.dream.DreamPowderWorkflow</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">ess.dream.DreamWorkflow</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ess.dream.instrument_view.html">ess.dream.instrument_view</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ess.dream.load_geant4_csv.html">ess.dream.load_geant4_csv</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../classes/ess.dream.InstrumentConfiguration.html">ess.dream.InstrumentConfiguration</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../modules/ess.dream.beamline.html">ess.dream.beamline</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.dream.beamline.choppers.html">ess.dream.beamline.choppers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.dream.beamline.InstrumentConfiguration.html">ess.dream.beamline.InstrumentConfiguration</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../modules/ess.dream.data.html">ess.dream.data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.dream.data.get_path.html">ess.dream.data.get_path</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.dream.data.lookup_table_high_flux.html">ess.dream.data.lookup_table_high_flux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.dream.data.simulated_diamond_sample.html">ess.dream.data.simulated_diamond_sample</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.dream.data.simulated_empty_can.html">ess.dream.data.simulated_empty_can</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.dream.data.simulated_monitor_diamond_sample.html">ess.dream.data.simulated_monitor_diamond_sample</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.dream.data.simulated_monitor_empty_can.html">ess.dream.data.simulated_monitor_empty_can</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.dream.data.simulated_monitor_vanadium_sample.html">ess.dream.data.simulated_monitor_vanadium_sample</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.dream.data.simulated_vanadium_sample.html">ess.dream.data.simulated_vanadium_sample</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.dream.data.simulated_vanadium_sample_incoherent.html">ess.dream.data.simulated_vanadium_sample_incoherent</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../modules/ess.dream.diagnostics.html">ess.dream.diagnostics</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.dream.diagnostics.unwrap_flat_indices_2d.html">ess.dream.diagnostics.unwrap_flat_indices_2d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.dream.diagnostics.FlatVoxelViewer.html">ess.dream.diagnostics.FlatVoxelViewer</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../modules/ess.dream.io.html">ess.dream.io</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../modules/ess.dream.io.cif.html">ess.dream.io.cif</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.dream.io.cif.prepare_reduced_empty_can_subtracted_tof_cif.html">ess.dream.io.cif.prepare_reduced_empty_can_subtracted_tof_cif</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.dream.io.cif.prepare_reduced_tof_cif.html">ess.dream.io.cif.prepare_reduced_tof_cif</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../modules/ess.dream.io.geant4.html">ess.dream.io.geant4</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.dream.io.geant4.assemble_detector_data.html">ess.dream.io.geant4.assemble_detector_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.dream.io.geant4.assemble_monitor_data.html">ess.dream.io.geant4.assemble_monitor_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.dream.io.geant4.dream_beamline.html">ess.dream.io.geant4.dream_beamline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.dream.io.geant4.dummy_sample_position.html">ess.dream.io.geant4.dummy_sample_position</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.dream.io.geant4.dummy_source_position.html">ess.dream.io.geant4.dummy_source_position</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.dream.io.geant4.ess_source.html">ess.dream.io.geant4.ess_source</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.dream.io.geant4.extract_geant4_detector.html">ess.dream.io.geant4.extract_geant4_detector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.dream.io.geant4.geant4_load_calibration.html">ess.dream.io.geant4.geant4_load_calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.dream.io.geant4.get_calibrated_geant4_detector.html">ess.dream.io.geant4.get_calibrated_geant4_detector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.dream.io.geant4.get_calibrated_geant4_monitor.html">ess.dream.io.geant4.get_calibrated_geant4_monitor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.dream.io.geant4.load_geant4_csv.html">ess.dream.io.geant4.load_geant4_csv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.dream.io.geant4.load_mcstas_monitor.html">ess.dream.io.geant4.load_mcstas_monitor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.dream.io.geant4.AllRawDetectors.html">ess.dream.io.geant4.AllRawDetectors</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ess.beer.BeerModMcStasWorkflowKnownPeaks.html">ess.beer.BeerModMcStasWorkflowKnownPeaks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ess.beer.BeerModMcStasWorkflow.html">ess.beer.BeerModMcStasWorkflow</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ess.beer.load_beer_mcstas.html">ess.beer.load_beer_mcstas</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../modules/ess.beer.clustering.html">ess.beer.clustering</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.beer.clustering.cluster_events_by_streak.html">ess.beer.clustering.cluster_events_by_streak</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../modules/ess.beer.conversions.html">ess.beer.conversions</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.beer.conversions.compute_wavelength_in_each_cluster.html">ess.beer.conversions.compute_wavelength_in_each_cluster</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.beer.conversions.geometry_graph.html">ess.beer.conversions.geometry_graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.beer.conversions.t0_estimate.html">ess.beer.conversions.t0_estimate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.beer.conversions.time_of_arrival.html">ess.beer.conversions.time_of_arrival</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.beer.conversions.tof_from_known_dhkl_graph.html">ess.beer.conversions.tof_from_known_dhkl_graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.beer.conversions.tof_from_t0_estimate_graph.html">ess.beer.conversions.tof_from_t0_estimate_graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.beer.conversions.wavelength_detector.html">ess.beer.conversions.wavelength_detector</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../modules/ess.beer.data.html">ess.beer.data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.beer.data.duplex_peaks.html">ess.beer.data.duplex_peaks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.beer.data.duplex_peaks_array.html">ess.beer.data.duplex_peaks_array</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.beer.data.mcstas_duplex.html">ess.beer.data.mcstas_duplex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.beer.data.mcstas_few_neutrons_3d_detector_example.html">ess.beer.data.mcstas_few_neutrons_3d_detector_example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.beer.data.mcstas_more_neutrons_3d_detector_example.html">ess.beer.data.mcstas_more_neutrons_3d_detector_example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.beer.data.mcstas_quartz.html">ess.beer.data.mcstas_quartz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.beer.data.mcstas_silicon_medium_resolution.html">ess.beer.data.mcstas_silicon_medium_resolution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.beer.data.mcstas_silicon_new_model.html">ess.beer.data.mcstas_silicon_new_model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.beer.data.quartz_peaks.html">ess.beer.data.quartz_peaks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.beer.data.quartz_peaks_array.html">ess.beer.data.quartz_peaks_array</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.beer.data.silicon_peaks.html">ess.beer.data.silicon_peaks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.beer.data.silicon_peaks_array.html">ess.beer.data.silicon_peaks_array</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../modules/ess.beer.io.html">ess.beer.io</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.beer.io.load_beer_mcstas.html">ess.beer.io.load_beer_mcstas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.beer.io.load_beer_mcstas_monitor.html">ess.beer.io.load_beer_mcstas_monitor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.beer.io.load_beer_mcstas_monitor_provider.html">ess.beer.io.load_beer_mcstas_monitor_provider</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.beer.io.load_beer_mcstas_provider.html">ess.beer.io.load_beer_mcstas_provider</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.beer.io.mcstas_chopper_delay_from_mode.html">ess.beer.io.mcstas_chopper_delay_from_mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.beer.io.mcstas_chopper_delay_from_mode_new_simulations.html">ess.beer.io.mcstas_chopper_delay_from_mode_new_simulations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.beer.io.mcstas_modulation_period_from_mode.html">ess.beer.io.mcstas_modulation_period_from_mode</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../modules/ess.beer.workflow.html">ess.beer.workflow</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.beer.workflow.BeerMcStasWorkflowPulseShaping.html">ess.beer.workflow.BeerMcStasWorkflowPulseShaping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.beer.workflow.BeerModMcStasWorkflow.html">ess.beer.workflow.BeerModMcStasWorkflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.beer.workflow.BeerModMcStasWorkflowKnownPeaks.html">ess.beer.workflow.BeerModMcStasWorkflowKnownPeaks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.beer.workflow.BeerPowderMcStasWorkflow.html">ess.beer.workflow.BeerPowderMcStasWorkflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.beer.workflow.BeerPowderWorkflow.html">ess.beer.workflow.BeerPowderWorkflow</a></li>
+</ul>
+</details></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../modules/ess.snspowder.powgen.html">ess.snspowder.powgen</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.snspowder.powgen.providers.html">ess.snspowder.powgen.providers</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../modules/ess.snspowder.powgen.beamline.html">ess.snspowder.powgen.beamline</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.snspowder.powgen.beamline.providers.html">ess.snspowder.powgen.beamline.providers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.snspowder.powgen.beamline.map_detector_to_spectrum.html">ess.snspowder.powgen.beamline.map_detector_to_spectrum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.snspowder.powgen.beamline.powgen_detector_dimensions.html">ess.snspowder.powgen.beamline.powgen_detector_dimensions</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../modules/ess.snspowder.powgen.calibration.html">ess.snspowder.powgen.calibration</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.snspowder.powgen.calibration.load_calibration.html">ess.snspowder.powgen.calibration.load_calibration</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../modules/ess.snspowder.powgen.data.html">ess.snspowder.powgen.data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.snspowder.powgen.data.providers.html">ess.snspowder.powgen.data.providers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.snspowder.powgen.data.convert_detector_to_wavelength.html">ess.snspowder.powgen.data.convert_detector_to_wavelength</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.snspowder.powgen.data.convert_monitor_to_wavelength.html">ess.snspowder.powgen.data.convert_monitor_to_wavelength</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.snspowder.powgen.data.detector_coordinate_transformation_graph.html">ess.snspowder.powgen.data.detector_coordinate_transformation_graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.snspowder.powgen.data.extract_accumulated_proton_charge.html">ess.snspowder.powgen.data.extract_accumulated_proton_charge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.snspowder.powgen.data.extract_proton_charge.html">ess.snspowder.powgen.data.extract_proton_charge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.snspowder.powgen.data.extract_raw_data.html">ess.snspowder.powgen.data.extract_raw_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.snspowder.powgen.data.monitor_coordinate_transformation_graph.html">ess.snspowder.powgen.data.monitor_coordinate_transformation_graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.snspowder.powgen.data.pooch_load.html">ess.snspowder.powgen.data.pooch_load</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.snspowder.powgen.data.pooch_load_calibration.html">ess.snspowder.powgen.data.pooch_load_calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.snspowder.powgen.data.powgen_tutorial_calibration_file.html">ess.snspowder.powgen.data.powgen_tutorial_calibration_file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.snspowder.powgen.data.powgen_tutorial_mantid_calibration_file.html">ess.snspowder.powgen.data.powgen_tutorial_mantid_calibration_file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.snspowder.powgen.data.powgen_tutorial_mantid_empty_instrument_file.html">ess.snspowder.powgen.data.powgen_tutorial_mantid_empty_instrument_file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.snspowder.powgen.data.powgen_tutorial_mantid_sample_file.html">ess.snspowder.powgen.data.powgen_tutorial_mantid_sample_file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.snspowder.powgen.data.powgen_tutorial_mantid_vanadium_file.html">ess.snspowder.powgen.data.powgen_tutorial_mantid_vanadium_file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.snspowder.powgen.data.powgen_tutorial_sample_file.html">ess.snspowder.powgen.data.powgen_tutorial_sample_file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.snspowder.powgen.data.powgen_tutorial_vanadium_file.html">ess.snspowder.powgen.data.powgen_tutorial_vanadium_file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.snspowder.powgen.data.sample_position.html">ess.snspowder.powgen.data.sample_position</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.snspowder.powgen.data.source_position.html">ess.snspowder.powgen.data.source_position</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.snspowder.powgen.data.TofDetector.html">ess.snspowder.powgen.data.TofDetector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.snspowder.powgen.data.TofMonitor.html">ess.snspowder.powgen.data.TofMonitor</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.snspowder.powgen.instrument_view.html">ess.snspowder.powgen.instrument_view</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../modules/ess.snspowder.powgen.peaks.html">ess.snspowder.powgen.peaks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.snspowder.powgen.peaks.fit_vanadium_peaks.html">ess.snspowder.powgen.peaks.fit_vanadium_peaks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.snspowder.powgen.peaks.theoretical_vanadium_dspacing.html">ess.snspowder.powgen.peaks.theoretical_vanadium_dspacing</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../modules/ess.snspowder.powgen.workflow.html">ess.snspowder.powgen.workflow</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.snspowder.powgen.workflow.PowgenWorkflow.html">ess.snspowder.powgen.workflow.PowgenWorkflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ess.snspowder.powgen.workflow.default_parameters.html">ess.snspowder.powgen.workflow.default_parameters</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+        <div class="sidebar-primary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ess.dream.DreamWorkflow"><code class="docutils literal notranslate"><span class="pre">DreamWorkflow()</span></code></a></li>
+</ul>
+  </nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/generated/functions/ess.dream.DreamWorkflow.rst"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../api-reference/index.html" class="nav-link">API Reference</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ess.dream.DreamWorkflow</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="ess-dream-dreamworkflow">
+<h1>ess.dream.DreamWorkflow<a class="headerlink" href="#ess-dream-dreamworkflow" title="Link to this heading">#</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="ess.dream.DreamWorkflow">
+<span class="sig-prename descclassname"><span class="pre">ess.dream.</span></span><span class="sig-name descname"><span class="pre">DreamWorkflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ess/dream/workflows.html#DreamWorkflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ess.dream.DreamWorkflow" title="Link to this definition">#</a></dt>
+<dd><p>Dream generic workflow with default parameters.
+The workflow is based on the GenericUnwrapWorkflow.
+It can load data from a NeXus file recorded on the DREAM instrument, and can
+compute time-of-flight for the neutron events.</p>
+<p>It can be used as is, or as a base for more specific workflows, such as
+<code class="docutils literal notranslate"><span class="pre">DreamPowderWorkflow</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kwargs</strong> – Additional keyword arguments are forwarded to the base
+<code class="xref py py-func docutils literal notranslate"><span class="pre">GenericUnwrapWorkflow()</span></code>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/sciline/generated/classes/sciline.Pipeline.html#sciline.Pipeline" title="(in Sciline v25.11.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="ess.dream.DreamPowderWorkflow.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">ess.dream.DreamPowderWorkflow</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="ess.dream.instrument_view.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">ess.dream.instrument_view</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025 Scipp contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><!-- This will display the version of the docs -->
+Current ESSdiffraction version: 26.4.2 (<a href="https://github.com/scipp/essdiffraction/releases">older versions</a>).</div>
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

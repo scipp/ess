@@ -1,0 +1,1067 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ess.beer.io &#8212; ESSdiffraction</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../../_static/documentation_options.js?v=f74c911a"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ess/beer/io';</script>
+    <script src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <link rel="icon" href="../../../_static/favicon.svg"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="26.4.2" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/logo.svg" class="logo__image only-light" alt="ESSdiffraction - Home"/>
+    <img src="../../../_static/logo-dark.svg" class="logo__image only-dark pst-js-only" alt="ESSdiffraction - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../about/index.html">
+    About
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essreduce">
+    ESSreduce
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/essdiffraction" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essdiffraction/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essdiffraction" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../about/index.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/essreduce">
+    ESSreduce
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/essdiffraction" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essdiffraction/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essdiffraction" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ess.beer.io</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for ess.beer.io</h1><div class="highlight"><pre>
+<span></span><span class="c1"># SPDX-License-Identifier: BSD-3-Clause</span>
+<span class="c1"># Copyright (c) 2025 Scipp contributors (https://github.com/scipp)</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">h5py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipp.constants</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.powder.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">CaveMonitor</span><span class="p">,</span> <span class="n">RunType</span><span class="p">,</span> <span class="n">WavelengthMonitor</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DetectorBank</span><span class="p">,</span>
+    <span class="n">Filename</span><span class="p">,</span>
+    <span class="n">ModulationPeriod</span><span class="p">,</span>
+    <span class="n">RawDetector</span><span class="p">,</span>
+    <span class="n">SampleRun</span><span class="p">,</span>
+    <span class="n">WavelengthDefinitionChopperDelay</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_rotation_from_y_rotation_matrix</span><span class="p">(</span><span class="n">rot</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Assuming the rotation is around the y-axis</span>
+<span class="sd">    this function creates a rotation operator from the rotation matrix.&#39;&#39;&#39;</span>
+    <span class="n">angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">rot</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">rot</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">spatial</span><span class="o">.</span><span class="n">rotation</span><span class="p">(</span>
+        <span class="n">value</span><span class="o">=</span><span class="p">[</span>
+            <span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_find_all_h5</span><span class="p">(</span><span class="n">group</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">Group</span><span class="p">,</span> <span class="n">matches</span><span class="p">,</span> <span class="n">nxclass</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">group</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">matches</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">p</span><span class="p">))</span> <span class="ow">and</span> <span class="p">(</span>
+            <span class="n">nxclass</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">nxclass</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span> <span class="o">==</span> <span class="n">group</span><span class="p">[</span><span class="n">p</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;NX_class&#39;</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">yield</span> <span class="n">group</span><span class="p">[</span><span class="n">p</span><span class="p">]</span>
+    <span class="c1"># Breadth first</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">group</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="n">p</span><span class="p">],</span> <span class="n">h5py</span><span class="o">.</span><span class="n">Group</span><span class="p">):</span>
+            <span class="k">yield from</span> <span class="n">_find_all_h5</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="n">p</span><span class="p">],</span> <span class="n">matches</span><span class="p">,</span> <span class="n">nxclass</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_find_h5</span><span class="p">(</span><span class="n">group</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">Group</span><span class="p">,</span> <span class="n">matches</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">group</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">matches</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">group</span><span class="p">[</span><span class="n">p</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Could not find &quot;</span><span class="si">{</span><span class="n">matches</span><span class="si">}</span><span class="s1">&quot; in </span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_load_h5</span><span class="p">(</span><span class="n">group</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">Group</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="o">*</span><span class="n">paths</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">group</span><span class="p">)</span> <span class="k">as</span> <span class="n">group</span><span class="p">:</span>
+            <span class="k">yield from</span> <span class="n">_load_h5</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="o">*</span><span class="n">paths</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">group</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">path</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
+            <span class="n">g</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">_unique_child_group_h5</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;NX&#39;</span><span class="p">)</span>
+                <span class="k">else</span> <span class="n">g</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">g</span>
+                <span class="k">else</span> <span class="n">_find_h5</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">yield</span> <span class="n">g</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_unique_child_group_h5</span><span class="p">(</span>
+    <span class="n">group</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">Group</span><span class="p">,</span>
+    <span class="n">nx_class</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">h5py</span><span class="o">.</span><span class="n">Group</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">group</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;NX_class&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">nx_class</span><span class="o">.</span><span class="n">encode</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="n">v</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;Expected exactly one </span><span class="si">{</span><span class="n">nx_class</span><span class="si">}</span><span class="s1"> group, but found more&#39;</span>
+                <span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_center_wavelength_from_mode</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">value_in_file</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">value_in_file</span> <span class="o">!=</span> <span class="s1">&#39;0&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">value_in_file</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span>
+        <span class="s1">&#39;0&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;3&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;4&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;5&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;6&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;7&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;8&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;9&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;10&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;15&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;16&#39;</span><span class="p">,</span>
+    <span class="p">]:</span>
+        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">2.1</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">3.1</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;11&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">3.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;12&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;13&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">6.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;14&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">4.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unkonwn chopper mode </span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_effective_chopper_position_from_mode</span><span class="p">(</span>
+    <span class="n">mode</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">psc1_pos</span><span class="p">,</span>
+    <span class="n">psc2_pos</span><span class="p">,</span>
+    <span class="n">psc3_pos</span><span class="p">,</span>
+    <span class="n">mca_pos</span><span class="p">,</span>
+    <span class="n">mcb_pos</span><span class="p">,</span>
+    <span class="n">mcc_pos</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="s1">&#39;11&#39;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">vector</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;3&#39;</span><span class="p">,</span> <span class="s1">&#39;4&#39;</span><span class="p">,</span> <span class="s1">&#39;12&#39;</span><span class="p">,</span> <span class="s1">&#39;13&#39;</span><span class="p">,</span> <span class="s1">&#39;15&#39;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">vector</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">psc1_pos</span> <span class="o">+</span> <span class="n">psc3_pos</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;5&#39;</span><span class="p">,</span> <span class="s1">&#39;6&#39;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">vector</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">psc1_pos</span> <span class="o">+</span> <span class="n">psc2_pos</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;7&#39;</span><span class="p">,</span> <span class="s1">&#39;8&#39;</span><span class="p">,</span> <span class="s1">&#39;9&#39;</span><span class="p">,</span> <span class="s1">&#39;10&#39;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">vector</span><span class="p">(</span><span class="n">mca_pos</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;14&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">vector</span><span class="p">(</span><span class="n">mcc_pos</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;16&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">vector</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">mca_pos</span> <span class="o">+</span> <span class="n">mcb_pos</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unkonwn chopper mode </span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_load_beer_mcstas</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">north_or_south</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">positions</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">name</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;/entry1/instrument/components/</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">/Position&#39;</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;/entry1/instrument/components&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;sampleMantid&#39;</span><span class="p">,</span> <span class="s1">&#39;PSC1&#39;</span><span class="p">,</span> <span class="s1">&#39;PSC2&#39;</span><span class="p">,</span> <span class="s1">&#39;PSC3&#39;</span><span class="p">,</span> <span class="s1">&#39;MCA&#39;</span><span class="p">,</span> <span class="s1">&#39;MCB&#39;</span><span class="p">,</span> <span class="s1">&#39;MCC&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">key</span>
+    <span class="p">}</span>
+    <span class="p">(</span>
+        <span class="n">data_dir</span><span class="p">,</span>
+        <span class="n">params</span><span class="p">,</span>
+        <span class="n">sample_pos</span><span class="p">,</span>
+        <span class="n">psc1_pos</span><span class="p">,</span>
+        <span class="n">psc2_pos</span><span class="p">,</span>
+        <span class="n">psc3_pos</span><span class="p">,</span>
+        <span class="n">mca_pos</span><span class="p">,</span>
+        <span class="n">mcb_pos</span><span class="p">,</span>
+        <span class="n">mcc_pos</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">=</span> <span class="n">_load_h5</span><span class="p">(</span>
+        <span class="n">f</span><span class="p">,</span>
+        <span class="s1">&#39;NXentry/NXdetector&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;NXentry/simulation/Param&#39;</span><span class="p">,</span>
+        <span class="n">positions</span><span class="p">[</span><span class="s1">&#39;sampleMantid&#39;</span><span class="p">],</span>
+        <span class="n">positions</span><span class="p">[</span><span class="s1">&#39;PSC1&#39;</span><span class="p">],</span>
+        <span class="n">positions</span><span class="p">[</span><span class="s1">&#39;PSC2&#39;</span><span class="p">],</span>
+        <span class="n">positions</span><span class="p">[</span><span class="s1">&#39;PSC3&#39;</span><span class="p">],</span>
+        <span class="n">positions</span><span class="p">[</span><span class="s1">&#39;MCA&#39;</span><span class="p">],</span>
+        <span class="n">positions</span><span class="p">[</span><span class="s1">&#39;MCB&#39;</span><span class="p">],</span>
+        <span class="n">positions</span><span class="p">[</span><span class="s1">&#39;MCC&#39;</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="nb">next</span><span class="p">(</span><span class="n">_find_all_h5</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;.*</span><span class="si">{</span><span class="n">north_or_south</span><span class="si">}{</span><span class="n">number</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">north_or_south</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">number</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">else</span> <span class="nb">next</span><span class="p">(</span><span class="n">_find_all_h5</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;.*</span><span class="si">{</span><span class="n">north_or_south</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">north_or_south</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">else</span> <span class="nb">next</span><span class="p">(</span><span class="n">_find_all_h5</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;/entry1.*bank.*</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">))</span>
+    <span class="p">)</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;events&#39;</span><span class="p">]</span>
+
+    <span class="n">beam_rotation</span> <span class="o">=</span> <span class="n">_find_h5</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;/entry1/instrument/components&#39;</span><span class="p">],</span> <span class="s1">&#39;.*sourceMantid.*&#39;</span><span class="p">)[</span>
+        <span class="s1">&#39;Rotation&#39;</span>
+    <span class="p">]</span>
+    <span class="n">detector_rotation</span> <span class="o">=</span> <span class="n">_find_h5</span><span class="p">(</span>
+        <span class="n">f</span><span class="p">[</span><span class="s1">&#39;/entry1/instrument/components&#39;</span><span class="p">],</span>
+        <span class="sa">f</span><span class="s1">&#39;.*nD_Mantid_?</span><span class="si">{</span><span class="n">north_or_south</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s1">.*&#39;</span>
+        <span class="k">if</span> <span class="n">north_or_south</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">number</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">else</span> <span class="sa">f</span><span class="s1">&#39;.*nD_Mantid_?</span><span class="si">{</span><span class="n">north_or_south</span><span class="si">}</span><span class="s1">.*&#39;</span>
+        <span class="k">if</span> <span class="n">north_or_south</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">else</span> <span class="sa">f</span><span class="s1">&#39;.*nD_Mantid_?</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s1">.*&#39;</span><span class="p">,</span>
+    <span class="p">)[</span><span class="s1">&#39;Rotation&#39;</span><span class="p">]</span>
+
+    <span class="n">events</span> <span class="o">=</span> <span class="n">events</span><span class="p">[()]</span>
+    <span class="n">da</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
+        <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;events&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="n">events</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">variances</span><span class="o">=</span><span class="n">events</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;position&#39;</span><span class="p">,):</span>
+            <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;ylabel&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">label</span> <span class="o">==</span> <span class="s1">&#39;p&#39;</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;events&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="n">events</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;mode&#39;</span><span class="p">,</span> <span class="s1">&#39;sample_filename&#39;</span><span class="p">,</span> <span class="s1">&#39;lambda&#39;</span><span class="p">):</span>
+            <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+
+    <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;wavelength_estimate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_center_wavelength_from_mode</span><span class="p">(</span>
+        <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;mode&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+        <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;lambda&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="s1">&#39;lambda&#39;</span> <span class="ow">in</span> <span class="n">da</span><span class="o">.</span><span class="n">coords</span> <span class="k">else</span> <span class="s1">&#39;0&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Depending on the mode the effective chopper position is either the position</span>
+    <span class="c1"># of one chopper or the midpoint between two choppers.</span>
+    <span class="c1"># A neutron with &quot;center wavelength&quot; (called &quot;lambda&quot; in the McStas files)</span>
+    <span class="c1"># emitted from the middle of the pulse reaches the effective chopper position</span>
+    <span class="c1"># at the moment that is the center of the effective chopper opening window.</span>
+    <span class="c1"># That means we can use the effective chopper position and the center wavelength</span>
+    <span class="c1"># to obtain `t0`, the time when the neutron can be said to have passed the chopper.</span>
+    <span class="c1">#</span>
+    <span class="c1"># In real files we might not have this &quot;lambda&quot; parameter.</span>
+    <span class="c1"># But we will have chopper settings that can be used to get the same information.</span>
+    <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;chopper_position&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_effective_chopper_position_from_mode</span><span class="p">(</span>
+        <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;mode&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+        <span class="n">psc1_pos</span><span class="o">=</span><span class="n">psc1_pos</span><span class="p">[:],</span>
+        <span class="n">psc2_pos</span><span class="o">=</span><span class="n">psc2_pos</span><span class="p">[:],</span>
+        <span class="n">psc3_pos</span><span class="o">=</span><span class="n">psc3_pos</span><span class="p">[:],</span>
+        <span class="n">mca_pos</span><span class="o">=</span><span class="n">mca_pos</span><span class="p">[:],</span>
+        <span class="n">mcb_pos</span><span class="o">=</span><span class="n">mcb_pos</span><span class="p">[:],</span>
+        <span class="n">mcc_pos</span><span class="o">=</span><span class="n">mcc_pos</span><span class="p">[:],</span>
+    <span class="p">)</span>
+
+    <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;sample_position&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">vector</span><span class="p">(</span><span class="n">sample_pos</span><span class="p">[:],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
+    <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;detector_position&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">vector</span><span class="p">(</span>
+        <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;position&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">))),</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span>
+    <span class="p">)</span>
+
+    <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;n&#39;</span><span class="p">)</span>
+    <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="s1">&#39;m&#39;</span>
+    <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="s1">&#39;m&#39;</span>
+    <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="s1">&#39;s&#39;</span>
+
+    <span class="c1"># Bin detector panel into rectangular &quot;pixels&quot;</span>
+    <span class="c1"># similar in size to the physical detector pixels.</span>
+    <span class="n">da</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">bin</span><span class="p">(</span>
+        <span class="n">y</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">201</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">),</span>
+        <span class="n">x</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">501</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Compute the position of each pixel in the global coordinate system.</span>
+    <span class="c1"># The detector local coordinate system is rotatated by the detector rotation,</span>
+    <span class="c1"># and translated to the location of the detector in the global coordinate system.</span>
+    <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;detector_position&#39;</span><span class="p">]</span>
+        <span class="o">+</span> <span class="n">_rotation_from_y_rotation_matrix</span><span class="p">(</span><span class="n">detector_rotation</span><span class="p">)</span>
+        <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">spatial</span><span class="o">.</span><span class="n">as_vectors</span><span class="p">(</span>
+            <span class="n">sc</span><span class="o">.</span><span class="n">midpoints</span><span class="p">(</span><span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]),</span>
+            <span class="n">sc</span><span class="o">.</span><span class="n">midpoints</span><span class="p">(</span><span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]),</span>
+            <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="c1"># We need the dimension order of the positions to be the same</span>
+        <span class="c1"># as the dimension order of the binned data array.</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">da</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span>
+
+    <span class="n">L1</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;sample_position&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;chopper_position&#39;</span><span class="p">])</span>
+    <span class="n">L2</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;sample_position&#39;</span><span class="p">])</span>
+
+    <span class="c1"># Define the incident beam by rotating the z-axis by</span>
+    <span class="c1"># the rotation of the &quot;source&quot; in McStas.</span>
+    <span class="n">incident_beam</span> <span class="o">=</span> <span class="n">L1</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="n">_rotation_from_y_rotation_matrix</span><span class="p">(</span><span class="n">beam_rotation</span><span class="p">)</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">vector</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
+    <span class="p">)</span>
+    <span class="c1"># Create a source position that gives us the incident beam</span>
+    <span class="c1"># direction and length that we want.</span>
+    <span class="c1"># In practice this should be hardcoded or determined from</span>
+    <span class="c1"># some entry in the Nexus file.</span>
+    <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;source_position&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;sample_position&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">incident_beam</span>
+
+    <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;moderator_to_detector_distance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">L1</span> <span class="o">+</span> <span class="n">L2</span> <span class="o">+</span> <span class="n">sc</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;chopper_position&#39;</span><span class="p">])</span>
+    <span class="p">)</span>
+    <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;source_to_wavelength_definition_chopper_distance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span>
+        <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;chopper_position&#39;</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">t</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span>
+    <span class="n">da</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;event_time_offset&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span> <span class="o">%</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">14</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span>
+        <span class="n">unit</span><span class="o">=</span><span class="n">t</span><span class="o">.</span><span class="n">unit</span>
+    <span class="p">)</span>
+    <span class="c1"># Estimate of the time the neutron passed the virtual source chopper.</span>
+    <span class="c1"># Used in pulse shaping mode to determine the wavelength.</span>
+    <span class="c1"># Used in modulation mode automatic-peak-finding reduction to estimate d.</span>
+    <span class="c1"># In practice this will probably be replaced by the regular tof workflow.</span>
+    <span class="c1"># But I&#39;m not 100% sure.</span>
+    <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s2">&quot;frame_cutoff_time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">sc</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">m_n</span>
+        <span class="o">/</span> <span class="n">sc</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">h</span>
+        <span class="o">*</span> <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;wavelength_estimate&#39;</span><span class="p">]</span>
+        <span class="o">*</span> <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;moderator_to_detector_distance&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">14</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+
+    <span class="k">del</span> <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span>
+    <span class="k">del</span> <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span>
+    <span class="c1"># The binned t coordinate is kept because it can be useful</span>
+    <span class="c1"># to understand resolution and to debug tof estimation.</span>
+    <span class="k">return</span> <span class="n">da</span>
+
+
+<div class="viewcode-block" id="load_beer_mcstas">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.io.load_beer_mcstas.html#ess.beer.load_beer_mcstas">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_beer_mcstas</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">,</span> <span class="n">bank</span><span class="p">:</span> <span class="n">DetectorBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Load beer McStas data from a file to a data array.&#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bank</span><span class="p">,</span> <span class="n">DetectorBank</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s1">&#39;&quot;bank&quot; must be either ``DetectorBank.north`` or ``DetectorBank.south``&#39;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">as</span> <span class="n">ff</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">load_beer_mcstas</span><span class="p">(</span><span class="n">ff</span><span class="p">,</span> <span class="n">bank</span><span class="o">=</span><span class="n">bank</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">_find_all_h5</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;/entry1/data&#39;</span><span class="p">],</span> <span class="s1">&#39;.*bank&#39;</span><span class="p">,</span> <span class="n">nxclass</span><span class="o">=</span><span class="s1">&#39;NXdata&#39;</span><span class="p">)))</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">:</span>
+        <span class="c1"># If we don&#39;t find ~13 detectors, then assume the detectors are 2D</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">_find_all_h5</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;/entry1/data&#39;</span><span class="p">],</span> <span class="s1">&#39;.*south&#39;</span><span class="p">,</span> <span class="n">nxclass</span><span class="o">=</span><span class="s1">&#39;NXdata&#39;</span><span class="p">)))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_load_beer_mcstas</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">north_or_south</span><span class="o">=</span><span class="n">bank</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">_load_beer_mcstas</span><span class="p">(</span>
+            <span class="n">f</span><span class="p">,</span> <span class="n">north_or_south</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="mi">1</span> <span class="k">if</span> <span class="n">bank</span> <span class="o">==</span> <span class="n">DetectorBank</span><span class="o">.</span><span class="n">south</span> <span class="k">else</span> <span class="mi">2</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">_load_beer_mcstas</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">north_or_south</span><span class="o">=</span><span class="n">bank</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="n">number</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">number</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">13</span><span class="p">)</span>
+        <span class="p">],</span>
+        <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;panel&#39;</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_to_edges</span><span class="p">(</span><span class="n">centers</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+    <span class="n">interior_edges</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">midpoints</span><span class="p">(</span><span class="n">centers</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="mi">2</span> <span class="o">*</span> <span class="n">centers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">interior_edges</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">interior_edges</span><span class="p">,</span>
+            <span class="mi">2</span> <span class="o">*</span> <span class="n">centers</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">interior_edges</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+        <span class="p">],</span>
+        <span class="n">dim</span><span class="o">=</span><span class="n">centers</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<div class="viewcode-block" id="load_beer_mcstas_monitor">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.io.load_beer_mcstas_monitor.html#ess.beer.load_beer_mcstas_monitor">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_beer_mcstas_monitor</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">as</span> <span class="n">ff</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">load_beer_mcstas_monitor</span><span class="p">(</span><span class="n">ff</span><span class="p">)</span>
+    <span class="p">(</span>
+        <span class="n">monitor</span><span class="p">,</span>
+        <span class="n">wavelengths</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">,</span>
+        <span class="n">errors</span><span class="p">,</span>
+        <span class="n">ncount</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">=</span> <span class="n">_load_h5</span><span class="p">(</span>
+        <span class="n">f</span><span class="p">,</span>
+        <span class="s1">&#39;NXentry/NXdetector/Lmon_hereon_dat&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;NXentry/NXdetector/Lmon_hereon_dat/Wavelength__AA_&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;NXentry/NXdetector/Lmon_hereon_dat/data&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;NXentry/NXdetector/Lmon_hereon_dat/errors&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;NXentry/NXdetector/Lmon_hereon_dat/ncount&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">da</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
+        <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;wavelength&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="n">data</span><span class="p">[:],</span> <span class="n">variances</span><span class="o">=</span><span class="n">errors</span><span class="p">[:],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;counts&#39;</span>
+        <span class="p">),</span>
+        <span class="n">coords</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;wavelength&#39;</span><span class="p">:</span> <span class="n">_to_edges</span><span class="p">(</span>
+                <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;wavelength&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="n">wavelengths</span><span class="p">[:],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+            <span class="p">),</span>
+            <span class="s1">&#39;ncount&#39;</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;wavelength&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="n">ncount</span><span class="p">[:],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;counts&#39;</span><span class="p">),</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">monitor</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;position&#39;</span><span class="p">,):</span>
+            <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
+
+    <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">vector</span><span class="p">(</span>
+        <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;position&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">))),</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">da</span></div>
+
+
+
+<div class="viewcode-block" id="load_beer_mcstas_provider">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.io.load_beer_mcstas_provider.html#ess.beer.load_beer_mcstas_provider">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_beer_mcstas_provider</span><span class="p">(</span>
+    <span class="n">fname</span><span class="p">:</span> <span class="n">Filename</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">bank</span><span class="p">:</span> <span class="n">DetectorBank</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RawDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
+    <span class="k">return</span> <span class="n">load_beer_mcstas</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">bank</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="load_beer_mcstas_monitor_provider">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.io.load_beer_mcstas_monitor_provider.html#ess.beer.load_beer_mcstas_monitor_provider">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_beer_mcstas_monitor_provider</span><span class="p">(</span>
+    <span class="n">fname</span><span class="p">:</span> <span class="n">Filename</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WavelengthMonitor</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">CaveMonitor</span><span class="p">]:</span>
+    <span class="k">return</span> <span class="n">load_beer_mcstas_monitor</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="mcstas_chopper_delay_from_mode">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.io.mcstas_chopper_delay_from_mode.html#ess.beer.mcstas_chopper_delay_from_mode">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mcstas_chopper_delay_from_mode</span><span class="p">(</span>
+    <span class="n">da</span><span class="p">:</span> <span class="n">RawDetector</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WavelengthDefinitionChopperDelay</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;These settings are good for the set of McStas runs that we</span>
+<span class="sd">    use in the docs currently.</span>
+<span class="sd">    Eventually we will want to determine this from the chopper information</span>
+<span class="sd">    in the files, but that information is not in the simulation output.&#39;&#39;&#39;</span>
+    <span class="n">mode</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;mode&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;7&#39;</span><span class="p">,</span> <span class="s1">&#39;8&#39;</span><span class="p">,</span> <span class="s1">&#39;9&#39;</span><span class="p">,</span> <span class="s1">&#39;10&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.0024730158730158727</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;16&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.000876984126984127</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Mode </span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s1"> is not known.&#39;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="mcstas_chopper_delay_from_mode_new_simulations">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.io.mcstas_chopper_delay_from_mode_new_simulations.html#ess.beer.mcstas_chopper_delay_from_mode_new_simulations">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mcstas_chopper_delay_from_mode_new_simulations</span><span class="p">(</span>
+    <span class="n">da</span><span class="p">:</span> <span class="n">RawDetector</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WavelengthDefinitionChopperDelay</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Celine has a new simulation with some changes to the chopper placement(?).</span>
+<span class="sd">    For those simulations we need to adapt the chopper delay values.&#39;&#39;&#39;</span>
+    <span class="n">mode</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;mode&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;7&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.001370158730158727</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;8&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.001370158730158727</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;9&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.0022630158730158727</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;10&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.0022630158730158727</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;16&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.000476984126984127</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Mode </span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s1"> is not known.&#39;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="mcstas_modulation_period_from_mode">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.io.mcstas_modulation_period_from_mode.html#ess.beer.mcstas_modulation_period_from_mode">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mcstas_modulation_period_from_mode</span><span class="p">(</span><span class="n">da</span><span class="p">:</span> <span class="n">RawDetector</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">ModulationPeriod</span><span class="p">:</span>
+    <span class="n">mode</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;mode&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;7&#39;</span><span class="p">,</span> <span class="s1">&#39;8&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="mi">70</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;9&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="mi">140</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;10&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="mi">280</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;16&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="mi">280</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Mode </span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s1"> is not known.&#39;</span><span class="p">)</span></div>
+
+
+
+<span class="n">mcstas_providers</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">load_beer_mcstas_provider</span><span class="p">,</span>
+    <span class="n">load_beer_mcstas_monitor_provider</span><span class="p">,</span>
+    <span class="n">mcstas_chopper_delay_from_mode</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025 Scipp contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><!-- This will display the version of the docs -->
+Current ESSdiffraction version: 26.4.2 (<a href="https://github.com/scipp/essdiffraction/releases">older versions</a>).</div>
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

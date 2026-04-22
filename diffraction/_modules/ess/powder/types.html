@@ -1,0 +1,882 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ess.powder.types &#8212; ESSdiffraction</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../../_static/documentation_options.js?v=f74c911a"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ess/powder/types';</script>
+    <script src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <link rel="icon" href="../../../_static/favicon.svg"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="26.4.2" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/logo.svg" class="logo__image only-light" alt="ESSdiffraction - Home"/>
+    <img src="../../../_static/logo-dark.svg" class="logo__image only-dark pst-js-only" alt="ESSdiffraction - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../about/index.html">
+    About
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essreduce">
+    ESSreduce
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/essdiffraction" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essdiffraction/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essdiffraction" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../about/index.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/essreduce">
+    ESSreduce
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/essdiffraction" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essdiffraction/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essdiffraction" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ess.powder.types</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for ess.powder.types</h1><div class="highlight"><pre>
+<span></span><span class="c1"># SPDX-License-Identifier: BSD-3-Clause</span>
+<span class="c1"># Copyright (c) 2025 Scipp contributors (https://github.com/scipp)</span>
+
+<span class="sd">&quot;&quot;&quot;This module defines the domain types used in ess.powder.</span>
+
+<span class="sd">The domain types are used to define parameters and to request results from a Sciline</span>
+<span class="sd">pipeline.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">NewType</span><span class="p">,</span> <span class="n">TypeVar</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">sciline</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scippneutron.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">cif</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scippneutron.metadata</span><span class="w"> </span><span class="kn">import</span> <span class="n">Person</span><span class="p">,</span> <span class="n">Software</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.nexus</span><span class="w"> </span><span class="kn">import</span> <span class="n">types</span> <span class="k">as</span> <span class="n">reduce_t</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.uncertainty</span><span class="w"> </span><span class="kn">import</span> <span class="n">UncertaintyBroadcastMode</span> <span class="k">as</span> <span class="n">_UncertaintyBroadcastMode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.unwrap</span><span class="w"> </span><span class="kn">import</span> <span class="n">types</span> <span class="k">as</span> <span class="n">unwrap_t</span>
+
+<span class="n">EmptyDetector</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">EmptyDetector</span>
+<span class="n">EmptyMonitor</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">EmptyMonitor</span>
+<span class="n">RawDetector</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">RawDetector</span>
+<span class="n">DetectorPositionOffset</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">DetectorPositionOffset</span>
+<span class="n">Filename</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">Filename</span>
+<span class="n">GravityVector</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">GravityVector</span>
+<span class="n">RawMonitor</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">RawMonitor</span>
+<span class="n">MonitorPositionOffset</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">MonitorPositionOffset</span>
+<span class="n">NeXusDetectorName</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">NeXusDetectorName</span>
+<span class="n">NeXusMonitorName</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">NeXusName</span>
+<span class="n">NeXusComponent</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">NeXusComponent</span>
+<span class="n">Position</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">Position</span>
+
+<span class="n">DetectorBankSizes</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">DetectorBankSizes</span>
+
+<span class="n">DetectorLtotal</span> <span class="o">=</span> <span class="n">unwrap_t</span><span class="o">.</span><span class="n">DetectorLtotal</span>
+<span class="n">WavelengthDetector</span> <span class="o">=</span> <span class="n">unwrap_t</span><span class="o">.</span><span class="n">WavelengthDetector</span>
+<span class="n">WavelengthMonitor</span> <span class="o">=</span> <span class="n">unwrap_t</span><span class="o">.</span><span class="n">WavelengthMonitor</span>
+<span class="n">PulseStrideOffset</span> <span class="o">=</span> <span class="n">unwrap_t</span><span class="o">.</span><span class="n">PulseStrideOffset</span>
+<span class="n">LookupTable</span> <span class="o">=</span> <span class="n">unwrap_t</span><span class="o">.</span><span class="n">LookupTable</span>
+<span class="n">LookupTableFilename</span> <span class="o">=</span> <span class="n">unwrap_t</span><span class="o">.</span><span class="n">LookupTableFilename</span>
+<span class="n">LookupTableRelativeErrorThreshold</span> <span class="o">=</span> <span class="n">unwrap_t</span><span class="o">.</span><span class="n">LookupTableRelativeErrorThreshold</span>
+
+<span class="n">SampleRun</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">SampleRun</span>
+<span class="n">VanadiumRun</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">VanadiumRun</span>
+<span class="n">EmptyCanRun</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;EmptyCanRun&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+
+<span class="n">CaveMonitor</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">CaveMonitor</span>
+<span class="n">BunkerMonitor</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;BunkerMonitor&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+
+<span class="n">RunType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;RunType&quot;</span><span class="p">,</span> <span class="n">SampleRun</span><span class="p">,</span> <span class="n">VanadiumRun</span><span class="p">,</span> <span class="n">EmptyCanRun</span><span class="p">)</span>
+<span class="n">MonitorType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;MonitorType&quot;</span><span class="p">,</span> <span class="n">CaveMonitor</span><span class="p">,</span> <span class="n">BunkerMonitor</span><span class="p">)</span>
+
+
+<span class="n">CalibrationFilename</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;CalibrationFilename&quot;</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Filename of the instrument calibration file.&quot;&quot;&quot;</span>
+
+<span class="n">DspacingBins</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;DspacingBins&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Bin edges for d-spacing.&quot;&quot;&quot;</span>
+
+<span class="n">OutFilename</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;OutFilename&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Filename of the output.&quot;&quot;&quot;</span>
+
+<span class="n">TwoThetaBins</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;TwoThetaBins&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Bin edges for grouping in 2theta.</span>
+
+<span class="sd">This is used by an alternative focussing step that groups detector</span>
+<span class="sd">pixels by scattering angle into bins given by these edges.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">UncertaintyBroadcastMode</span> <span class="o">=</span> <span class="n">_UncertaintyBroadcastMode</span>
+<span class="sd">&quot;&quot;&quot;Mode for broadcasting uncertainties.</span>
+
+<span class="sd">See https://doi.org/10.3233/JNR-220049 for context.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">ValidTofRange</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;ValidTofRange&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Min and max tof value of the instrument.&quot;&quot;&quot;</span>
+
+<span class="c1"># 3 Workflow (intermediate) results</span>
+
+
+<div class="viewcode-block" id="AccumulatedProtonCharge">
+<a class="viewcode-back" href="../../../generated/modules/ess.powder.types.AccumulatedProtonCharge.html#ess.powder.types.AccumulatedProtonCharge">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AccumulatedProtonCharge</span><span class="p">(</span><span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Total proton charge.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Override the docstring of super().__init__ because if contains a broken link</span>
+    <span class="c1"># when used by Sphinx in ESSdiffraction.</span>
+<div class="viewcode-block" id="AccumulatedProtonCharge.__init__">
+<a class="viewcode-back" href="../../../generated/modules/ess.powder.types.AccumulatedProtonCharge.html#ess.powder.types.AccumulatedProtonCharge.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+</div>
+
+
+
+<span class="n">CalibrationData</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;CalibrationData&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Detector calibration data.&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="DspacingDetector">
+<a class="viewcode-back" href="../../../generated/modules/ess.powder.types.DspacingDetector.html#ess.powder.types.DspacingDetector">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DspacingDetector</span><span class="p">(</span><span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data with scattering coordinates computed for all events: wavelength, 2theta,</span>
+<span class="sd">    d-spacing.&quot;&quot;&quot;</span></div>
+
+
+
+<span class="n">DspacingHistogram</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;DspacingHistogram&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Histogrammed intensity vs d-spacing.&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="DetectorTwoTheta">
+<a class="viewcode-back" href="../../../generated/modules/ess.powder.types.DetectorTwoTheta.html#ess.powder.types.DetectorTwoTheta">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DetectorTwoTheta</span><span class="p">(</span><span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Scattering angle (two-theta) for each detector pixel.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="ElasticCoordTransformGraph">
+<a class="viewcode-back" href="../../../generated/modules/ess.powder.types.ElasticCoordTransformGraph.html#ess.powder.types.ElasticCoordTransformGraph">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ElasticCoordTransformGraph</span><span class="p">(</span><span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Graph for transforming coordinates in elastic scattering.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="MonitorCoordTransformGraph">
+<a class="viewcode-back" href="../../../generated/modules/ess.powder.types.MonitorCoordTransformGraph.html#ess.powder.types.MonitorCoordTransformGraph">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MonitorCoordTransformGraph</span><span class="p">(</span><span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Graph for transforming coordinates of a monitor.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="FocussedDataDspacing">
+<a class="viewcode-back" href="../../../generated/modules/ess.powder.types.FocussedDataDspacing.html#ess.powder.types.FocussedDataDspacing">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FocussedDataDspacing</span><span class="p">(</span><span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Intensity vs d-spacing after focussing pixels.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="FocussedDataDspacingTwoTheta">
+<a class="viewcode-back" href="../../../generated/modules/ess.powder.types.FocussedDataDspacingTwoTheta.html#ess.powder.types.FocussedDataDspacingTwoTheta">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FocussedDataDspacingTwoTheta</span><span class="p">(</span><span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Intensity vs (d-spacing, 2theta) after focussing pixels.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="IntensityDspacing">
+<a class="viewcode-back" href="../../../generated/modules/ess.powder.types.IntensityDspacing.html#ess.powder.types.IntensityDspacing">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">IntensityDspacing</span><span class="p">(</span><span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data that has been normalized by a vanadium run.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="IntensityDspacingTwoTheta">
+<a class="viewcode-back" href="../../../generated/modules/ess.powder.types.IntensityDspacingTwoTheta.html#ess.powder.types.IntensityDspacingTwoTheta">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">IntensityDspacingTwoTheta</span><span class="p">(</span><span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data that has been normalized by a vanadium run, and grouped into 2theta bins.&quot;&quot;&quot;</span></div>
+
+
+
+<span class="n">EmptyCanSubtractedIofDspacing</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;EmptyCanSubtractedIofDspacing&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Intensity vs. d-spacing, subtracted by empty can measurement.&quot;&quot;&quot;</span>
+
+
+<span class="n">EmptyCanSubtractedIofDspacingTwoTheta</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span>
+    <span class="s2">&quot;EmptyCanSubtractedIofDspacingTwoTheta&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span>
+<span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Intensity vs. d-spacing and 2theta, subtracted by empty can measurement.&quot;&quot;&quot;</span>
+
+
+<span class="n">IntensityTof</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;IntensityTof&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Normalized data that has been converted to ToF.&quot;&quot;&quot;</span>
+
+<span class="n">EmptyCanSubtractedIntensityTof</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;EmptyCanSubtractedIntensityTof&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Normalized and empty-can-subtracted data that has been converted to ToF.&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="CorrectedDetector">
+<a class="viewcode-back" href="../../../generated/modules/ess.powder.types.CorrectedDetector.html#ess.powder.types.CorrectedDetector">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CorrectedDetector</span><span class="p">(</span><span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data with masks and applied corrections.</span>
+
+<span class="sd">    Corrections can include</span>
+
+<span class="sd">    - Lorentz correction</span>
+<span class="sd">    - Absorption correction</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+
+<span class="n">MaskedDetectorIDs</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;MaskedDetectorIDs&quot;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">])</span>
+<span class="sd">&quot;&quot;&quot;1-D variable listing all masked detector IDs.&quot;&quot;&quot;</span>
+
+<span class="n">CaveMonitorPosition</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;CaveMonitorPosition&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Position of DREAM&#39;s cave monitor.&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="MonitorFilename">
+<a class="viewcode-back" href="../../../generated/modules/ess.powder.types.MonitorFilename.html#ess.powder.types.MonitorFilename">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MonitorFilename</span><span class="p">(</span><span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="n">Path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Filename for monitor data.</span>
+
+<span class="sd">    Usually, monitors should be stored in the same file as detector data.</span>
+<span class="sd">    But McStas simulations may output monitors and detectors as separate files.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="DspacingMonitor">
+<a class="viewcode-back" href="../../../generated/modules/ess.powder.types.DspacingMonitor.html#ess.powder.types.DspacingMonitor">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DspacingMonitor</span><span class="p">(</span><span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">MonitorType</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Monitor histogram in wavelength.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="CorrectedDspacing">
+<a class="viewcode-back" href="../../../generated/modules/ess.powder.types.CorrectedDspacing.html#ess.powder.types.CorrectedDspacing">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CorrectedDspacing</span><span class="p">(</span><span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Detector data in d-spacing - 2theta space including corrections.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NormalizedDspacing">
+<a class="viewcode-back" href="../../../generated/modules/ess.powder.types.NormalizedDspacing.html#ess.powder.types.NormalizedDspacing">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NormalizedDspacing</span><span class="p">(</span><span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Detector data in d-spacing - 2theta space normalized by monitor/proton charge.&quot;&quot;&quot;</span></div>
+
+
+
+<span class="n">PixelMaskFilename</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;PixelMaskFilename&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Filename of a pixel mask.&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="ProtonCharge">
+<a class="viewcode-back" href="../../../generated/modules/ess.powder.types.ProtonCharge.html#ess.powder.types.ProtonCharge">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ProtonCharge</span><span class="p">(</span><span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Time-dependent proton charge.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="RawDataAndMetadata">
+<a class="viewcode-back" href="../../../generated/modules/ess.powder.types.RawDataAndMetadata.html#ess.powder.types.RawDataAndMetadata">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">RawDataAndMetadata</span><span class="p">(</span><span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raw data and associated metadata.&quot;&quot;&quot;</span></div>
+
+
+
+<span class="n">TofMask</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;TofMask&quot;</span><span class="p">,</span> <span class="n">Callable</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;TofMask is a callable that returns a mask for masking time-of-flight regions.&quot;&quot;&quot;</span>
+
+
+<span class="n">TwoThetaMask</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;TwoThetaMask&quot;</span><span class="p">,</span> <span class="n">Callable</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;TwoThetaMask is a callable that returns a mask for a given TwoThetaData.&quot;&quot;&quot;</span>
+
+
+<span class="n">WavelengthMask</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;WavelengthMask&quot;</span><span class="p">,</span> <span class="n">Callable</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;WavelengthMask is a callable that returns a mask for a given WavelengthData.&quot;&quot;&quot;</span>
+
+<span class="n">Beamline</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">Beamline</span>
+<span class="sd">&quot;&quot;&quot;Beamline metadata.&quot;&quot;&quot;</span>
+
+<span class="n">Measurement</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">Measurement</span>
+<span class="sd">&quot;&quot;&quot;Measurement metadata.&quot;&quot;&quot;</span>
+
+<span class="n">ReducerSoftware</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s1">&#39;ReducerSoftware&#39;</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Software</span><span class="p">])</span>
+<span class="sd">&quot;&quot;&quot;Pieces of software used to reduce the data.&quot;&quot;&quot;</span>
+
+<span class="n">Source</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">Source</span>
+<span class="sd">&quot;&quot;&quot;Neutron source metadata.&quot;&quot;&quot;</span>
+
+<span class="n">CIFAuthors</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s1">&#39;CIFAuthors&#39;</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Person</span><span class="p">])</span>
+<span class="sd">&quot;&quot;&quot;List of authors to save to output CIF files.&quot;&quot;&quot;</span>
+
+<span class="n">ReducedTofCIF</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;ReducedTofCIF&quot;</span><span class="p">,</span> <span class="n">cif</span><span class="o">.</span><span class="n">CIF</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Reduced data in time-of-flight, ready to be saved to a CIF file.&quot;&quot;&quot;</span>
+
+<span class="n">ReducedEmptyCanSubtractedTofCIF</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;ReducedEmptyCanSubtractedTofCIF&quot;</span><span class="p">,</span> <span class="n">cif</span><span class="o">.</span><span class="n">CIF</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Reduced data in time-of-flight, ready to be saved to a CIF file.&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="KeepEvents">
+<a class="viewcode-back" href="../../../generated/modules/ess.powder.types.KeepEvents.html#ess.powder.types.KeepEvents">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">KeepEvents</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">RunType</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Flag indicating whether the workflow should keep all events when focussing data.</span>
+
+<span class="sd">    If False, data will be histogrammed when focussing.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">value</span><span class="p">:</span> <span class="nb">bool</span></div>
+
+
+
+<span class="k">del</span> <span class="n">sc</span><span class="p">,</span> <span class="n">sciline</span><span class="p">,</span> <span class="n">NewType</span><span class="p">,</span> <span class="n">TypeVar</span>
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025 Scipp contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><!-- This will display the version of the docs -->
+Current ESSdiffraction version: 26.4.2 (<a href="https://github.com/scipp/essdiffraction/releases">older versions</a>).</div>
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
