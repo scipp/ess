@@ -43,27 +43,32 @@ Usage:
 """
 
 import argparse
+import logging
 import os
 import shutil
 import subprocess
 
 import h5py
 
+logger = logging.getLogger(__name__)
+
 
 def repack(filepath):
     """Run h5repack on filepath in-place (repacks to a temp file then replaces)."""
     if shutil.which("h5repack") is None:
-        print("Warning: 'h5repack' not found on PATH, skipping repacking.")
+        logger.warning("'h5repack' not found on PATH, skipping repacking.")
         return
 
     tmp = filepath + ".repacked"
     try:
-        subprocess.run(["h5repack", filepath, tmp], check=True)
+        h5repack_path = shutil.which("h5repack")
+        subprocess.run([h5repack_path, filepath, tmp], check=True, shell=False)  # noqa: S603
         shutil.move(tmp, filepath)
-        print("h5repack completed successfully.")
+        logger.info("h5repack completed successfully.")
     except subprocess.CalledProcessError as e:
-        print(
-            f"Warning: h5repack failed (exit code {e.returncode}), output file is kept as-is."
+        logger.warning(
+            "h5repack failed (exit code %d), output file is kept as-is.",
+            e.returncode,
         )
         if os.path.exists(tmp):
             os.remove(tmp)
@@ -103,9 +108,10 @@ def trim_nxevent_data(group, n_pulses):
 
     actual_pulses = len(event_time_zero)
     if n_pulses >= actual_pulses:
-        print(
-            f"  Group '{group.name}': only {actual_pulses} pulse(s) available, "
-            "nothing to trim."
+        logger.info(
+            "Group '%s': only %d pulse(s) available, nothing to trim.",
+            group.name,
+            actual_pulses,
         )
         return
 
@@ -119,9 +125,13 @@ def trim_nxevent_data(group, n_pulses):
         # n_pulses == actual_pulses (already handled above, but be safe)
         n_events = len(group["event_id"])
 
-    print(
-        f"  Group '{group.name}': keeping {n_pulses}/{actual_pulses} pulses "
-        f"and {n_events}/{len(group['event_id'])} events."
+    logger.info(
+        "Group '%s': keeping %d/%d pulses and %d/%d events.",
+        group.name,
+        n_pulses,
+        actual_pulses,
+        n_events,
+        len(group["event_id"]),
     )
 
     # -- Trim each dataset and replace it -------------------------------------
@@ -145,7 +155,8 @@ def trim_nxevent_data(group, n_pulses):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Trim a NeXus file to the first N pulses in every NXevent_data group."
+        description="Given a NeXus file, only keep the first N pulses in every "
+        "NXevent_data group."
     )
     parser.add_argument(
         "input_file", help="Path to the input NeXus (.nxs / .hdf5) file"
@@ -165,25 +176,27 @@ def main():
         parser.error("n_pulses must be a positive integer.")
 
     # Copy the entire file so we never touch the original
-    print(f"Copying '{args.input_file}' -> '{args.output_file}' ...")
+    logger.info("Copying '%s' -> '%s' ...", args.input_file, args.output_file)
     shutil.copyfile(args.input_file, args.output_file)
 
     with h5py.File(args.output_file, "r+") as f:
         groups = find_nxevent_data_groups(f)
 
         if not groups:
-            print("No NXevent_data groups found. Output file is an unmodified copy.")
+            logger.info(
+                "No NXevent_data groups found. Output file is an unmodified copy."
+            )
             return
 
-        print(f"Found {len(groups)} NXevent_data group(s): {groups}\n")
+        logger.info("Found %d NXevent_data group(s): %s", len(groups), groups)
 
         for group_path in groups:
             trim_nxevent_data(f[group_path], args.n_pulses)
 
-    print("\nRepacking output file...")
+    logger.info("Repacking output file...")
     repack(args.output_file)
 
-    print("\nDone.")
+    logger.info("Done.")
 
 
 if __name__ == "__main__":
