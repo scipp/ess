@@ -1,14 +1,12 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
   pull_request:
   merge_group:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -142,7 +140,7 @@ jobs:
   report:
     name: Report Job Status
     needs: [changes, formatting, test, docs]
-    if: always() && ( github.ref != 'refs/heads/main' )  # This job is for branch protection rule so it doesn't have to run on main branch.
+    if: always()
     runs-on: ubuntu-24.04
     steps:
       - name: Report Job Success
