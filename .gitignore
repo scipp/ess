@@ -30,6 +30,7 @@ __pycache__/
 .ruff_cache
 packages/*/docs/generated/
 packages/*/.docs_doctrees
+.ess_release_cache/*
 
 # Editor settings
 .idea/
