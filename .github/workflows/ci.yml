@@ -1,14 +1,12 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
   pull_request:
   merge_group:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -31,7 +29,7 @@ jobs:
               - 'pyproject.toml'
               - 'pixi.lock'
               - 'pixi.toml'
-              - '.github/workflows/**'
+              - '.github/workflows/ci.yml'
               - '.pre-commit-config.yaml'
               - '.python-version'
             essimaging:
@@ -40,7 +38,7 @@ jobs:
               - 'pyproject.toml'
               - 'pixi.lock'
               - 'pixi.toml'
-              - '.github/workflows/**'
+              - '.github/workflows/ci.yml'
               - '.pre-commit-config.yaml'
               - '.python-version'
             essnmx:
@@ -49,7 +47,7 @@ jobs:
               - 'pyproject.toml'
               - 'pixi.lock'
               - 'pixi.toml'
-              - '.github/workflows/**'
+              - '.github/workflows/ci.yml'
               - '.pre-commit-config.yaml'
               - '.python-version'
             essreflectometry:
@@ -58,7 +56,7 @@ jobs:
               - 'pyproject.toml'
               - 'pixi.lock'
               - 'pixi.toml'
-              - '.github/workflows/**'
+              - '.github/workflows/ci.yml'
               - '.pre-commit-config.yaml'
               - '.python-version'
             essdiffraction:
@@ -67,7 +65,7 @@ jobs:
               - 'pyproject.toml'
               - 'pixi.lock'
               - 'pixi.toml'
-              - '.github/workflows/**'
+              - '.github/workflows/ci.yml'
               - '.pre-commit-config.yaml'
               - '.python-version'
             esssans:
@@ -76,7 +74,7 @@ jobs:
               - 'pyproject.toml'
               - 'pixi.lock'
               - 'pixi.toml'
-              - '.github/workflows/**'
+              - '.github/workflows/ci.yml'
               - '.pre-commit-config.yaml'
               - '.python-version'
 
@@ -142,7 +140,7 @@ jobs:
   report:
     name: Report Job Status
     needs: [changes, formatting, test, docs]
-    if: always() && ( github.ref != 'refs/heads/main' )  # This job is for branch protection rule so it doesn't have to run on main branch.
+    if: always()  # Should always run regardless of the state of the needs jobs.
     runs-on: ubuntu-24.04
     steps:
       - name: Report Job Success
