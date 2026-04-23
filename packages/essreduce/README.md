@@ -7,10 +7,11 @@
 
 ## About
 
-Common data reduction tools for the ESS facility
+Common data reduction tools for the ESS facility.
 
 ## Installation
 
 ```sh
 python -m pip install essreduce
 ```
+
