@@ -61,7 +61,7 @@ def mcstas_default_parameters() -> dict:
         supermirror.CriticalEdge: sc.scalar(float('inf'), unit='1/angstrom'),
         supermirror.Alpha: sc.scalar(0.25 / 0.088, unit=sc.units.angstrom),
         DetectorSpatialResolution: 0.0025 * sc.units.m,
-        NeXusDetectorName: "detector",
+        NeXusDetectorName: "multiblade_detector",
         BeamDivergenceLimits: (
             sc.scalar(-0.75, unit='deg'),
             sc.scalar(0.75, unit='deg'),
@@ -70,7 +70,7 @@ def mcstas_default_parameters() -> dict:
         CorrectionsToApply: corrections.default_corrections
         - {correct_by_proton_current},
         LookupTableRelativeErrorThreshold: {
-            "detector": 0.06,
+            "multiblade_detector": 0.06,
         },
     }
 
