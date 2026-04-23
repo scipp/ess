@@ -170,7 +170,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           echo "Title already has prefix but not same as the expected one. Reporting in the comment...";
-          echo "Hi! Your PR has unexpected title. Recommended prefix is: ${title_prefix}." >> pr-comment.md;
+          echo "Your PR has unexpected title. Recommended prefix is: ${title_prefix}." >> pr-comment.md;
           echo "But feel free to use your own...! Bye 👋...!" >> pr-comment.md;
           gh pr comment ${PR_NUM} \
             --edit-last \
@@ -185,7 +185,7 @@ jobs:
         run: |
           echo "Title doesn't have expected prefix... adding one...";
           gh pr edit ${PR_NUM} --title "${title_prefix} ${original_title}";
-          echo "Hi! Your PR title didn't have any prefix yet. I added the prefix: ${title_prefix} to the title." >> pr-comment.md;
+          echo "Your PR title didn't have any prefix yet. I added the prefix: ${title_prefix} to the title." >> pr-comment.md;
           echo "But feel free to use your own...! Bye 👋...!" >> pr-comment.md;
           gh pr comment ${PR_NUM} \
             --edit-last \
