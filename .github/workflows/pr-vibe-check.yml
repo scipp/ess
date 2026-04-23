@@ -79,7 +79,7 @@ jobs:
           echo "Hi! Your PR was missing some labels 🔖 so I added them." >> pr-comment.md;
           echo "It looks like you're working on these packages/features: ${all_labels}" >> pr-comment.md;
           echo "These labels were missing: ${new_labels}" >> pr-comment.md;
-          gh pr comment ${PR_NUM} --edit-last --create-if-none -F pr-comment.md;
+          gh pr comment ${PR_NUM} -F pr-comment.md;
       - id: export-comment
         if: ${{ steps.new-labels.outputs.new_labels }}
         uses: actions/upload-artifact@v7
