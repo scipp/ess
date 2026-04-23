@@ -5,7 +5,6 @@ import sciline
 import scipp as sc
 
 from ..reflectometry import providers as reflectometry_providers
-from ..reflectometry import supermirror
 from ..reflectometry.corrections import correct_by_proton_current
 from ..reflectometry.types import (
     BeamDivergenceLimits,
@@ -56,10 +55,6 @@ This provides a default Freia workflow including providers for loadings files.
 def mcstas_default_parameters() -> dict:
     """Return default parameters for the McStas Freia workflow."""
     return {
-        supermirror.MValue: sc.scalar(5, unit=sc.units.dimensionless),
-        # The reference sample in the McStas simulation has R=1 everywhere
-        supermirror.CriticalEdge: sc.scalar(float('inf'), unit='1/angstrom'),
-        supermirror.Alpha: sc.scalar(0.25 / 0.088, unit=sc.units.angstrom),
         DetectorSpatialResolution: 0.0025 * sc.units.m,
         NeXusDetectorName: "detector",
         BeamDivergenceLimits: (
