@@ -14,3 +14,12 @@ Data reduction for NMX at the European Spallation Source.
 ```sh
 python -m pip install essnmx
 ```
+
+## Command Line Tool
+
+essnmx has a command line tool called `essnmx-reduce`.
+
+```
+essnmx-reduce --help
+```
+
