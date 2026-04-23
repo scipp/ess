@@ -77,8 +77,9 @@ jobs:
         if: ${{ steps.new-labels.outputs.new_labels }}
         run: |
           echo "Hi! Your PR was missing some labels 🔖 so I added them." >> pr-comment.md;
-          echo "It looks like you're working on these packages/features: ${new_labels}" >> pr-comment.md;
-          gh pr comment ${PR_NUM} -F pr-comment.md;
+          echo "It looks like you're working on these packages/features: ${all_labels}" >> pr-comment.md;
+          echo "These labels were missing: ${new_labels}" >> pr-comment.md;
+          gh pr comment ${PR_NUM} --edit-last --create-if-none -F pr-comment.md;
       - id: export-comment
         if: ${{ steps.new-labels.outputs.new_labels }}
         uses: actions/upload-artifact@v7
@@ -107,7 +108,7 @@ jobs:
         with:
           path: ./
           name: pr-comment.md
-      - run: if [[ -f pr-commit.md ]]; then echo "" >> pre-comment.md; echo "Found existing pr-comment file."; cat pr-comment.md; fi
+      - run: if [[ -f pr-commit.md ]]; then echo "\nHi Again!" >> pre-comment.md; echo "Found existing pr-comment file."; cat pr-comment.md; else echo "Hi!" >> pre-comment.md; fi
       - id: title-prefix
         name: Compose title prefix.
         run: |
