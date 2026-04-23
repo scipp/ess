@@ -3,15 +3,14 @@
 from ess.reflectometry.orso import OrsoCorrectionList
 
 
-def orso_estia_corrections() -> OrsoCorrectionList:
-    """Return list of corrections applied in Estia reductions."""
+def orso_freia_corrections() -> OrsoCorrectionList:
+    """Return list of corrections applied in Freia reductions."""
     return OrsoCorrectionList(
         [
             "chopper ToF correction",
             "footprint correction",
-            "supermirror calibration",
         ]
     )
 
 
-providers = (orso_estia_corrections,)
+providers = (orso_freia_corrections,)

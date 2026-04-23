@@ -1,28 +1,16 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import scipp as sc
-from scipp import constants
 
 from ..reflectometry.tools import fwhm_to_std
 
 
 def wavelength_resolution(
-    source_pulse_length: sc.Variable,
-    wavelength: sc.Variable,
-    Ltotal: sc.Variable,
+    *args,
+    **kwargs,
 ):
     """
-    Find the wavelength resolution contribution of the ESTIA instrument.
-
-    Parameters
-    ----------
-
-    source_pulse_length:
-        The length of the ESS source pulse.
-    wavelength:
-        The wavelength of the neutron.
-    Ltotal:
-        The distance from source to detector.
+    Find the wavelength resolution contribution of the FREIA instrument.
 
     Returns
     -------
@@ -30,14 +18,7 @@ def wavelength_resolution(
         The wavelength resolution,
         ratio of the standard deviation of wavelength and the wavelength.
     """
-    # The exact factor depends on the shape of the source pulse.
-    # The factor here assumes a rectangular source pulse:
-    # import sympy as sp
-    # x, D  = sp.symbols('x, D', positive=True)
-    # sp.sqrt(sp.integrate(1/D * (x-D/2)**2, (x, 0, D)))
-    standard_deviation_of_time_at_source = (1 / 12**0.5) * source_pulse_length
-    tof = wavelength * Ltotal * constants.m_n / constants.h
-    return (standard_deviation_of_time_at_source / tof).to(unit='dimensionless')
+    raise NotImplementedError
 
 
 def sample_size_resolution(
@@ -70,7 +51,7 @@ def angular_resolution(
     detector_spatial_resolution: sc.Variable,
 ):
     """
-    Determine the angular resolution of the ESTIA instrument.
+    Determine the angular resolution of the FREIA instrument.
 
     Parameters
     ----------

@@ -9,7 +9,7 @@ from .types import (
     SampleSizeResolution,
     WavelengthResolution,
 )
-from .workflow import EstiaMcStasWorkflow, EstiaWorkflow
+from .workflow import FreiaMcStasWorkflow, FreiaWorkflow
 
 try:
     __version__ = importlib.metadata.version(__package__ or __name__)
@@ -18,8 +18,8 @@ except importlib.metadata.PackageNotFoundError:
 
 __all__ = [
     "AngularResolution",
-    "EstiaMcStasWorkflow",
-    "EstiaWorkflow",
+    "FreiaMcStasWorkflow",
+    "FreiaWorkflow",
     "SampleSizeResolution",
     "WavelengthResolution",
     "conversions",

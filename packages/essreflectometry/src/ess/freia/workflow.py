@@ -43,18 +43,18 @@ mcstas_providers = (
 )
 """List of providers for setting up a Sciline pipeline for McStas data.
 
-This provides a default Estia workflow including providers for loadings files.
+This provides a default Freia workflow including providers for loadings files.
 """
 
 providers = (*_general_providers,)
 """List of providers for setting up a Sciline pipeline data.
 
-This provides a default Estia workflow including providers for loadings files.
+This provides a default Freia workflow including providers for loadings files.
 """
 
 
 def mcstas_default_parameters() -> dict:
-    """Return default parameters for the McStas Estia workflow."""
+    """Return default parameters for the McStas Freia workflow."""
     return {
         supermirror.MValue: sc.scalar(5, unit=sc.units.dimensionless),
         # The reference sample in the McStas simulation has R=1 everywhere
@@ -76,7 +76,7 @@ def mcstas_default_parameters() -> dict:
 
 
 def default_parameters() -> dict:
-    """Return default parameters for the NeXus Estia workflow."""
+    """Return default parameters for the NeXus Freia workflow."""
     return {
         NeXusDetectorName: "multiblade_detector",
         SampleRotationOffset[RunType]: sc.scalar(0.0, unit='deg'),
@@ -88,8 +88,8 @@ def default_parameters() -> dict:
     }
 
 
-def EstiaMcStasWorkflow() -> sciline.Pipeline:
-    """Workflow for reduction of McStas data for the Estia instrument."""
+def FreiaMcStasWorkflow() -> sciline.Pipeline:
+    """Workflow for reduction of McStas data for the Freia instrument."""
     workflow = beamline.LoadNeXusWorkflow()
     for provider in mcstas_providers:
         workflow.insert(provider)
@@ -98,8 +98,8 @@ def EstiaMcStasWorkflow() -> sciline.Pipeline:
     return workflow
 
 
-def EstiaWorkflow() -> sciline.Pipeline:
-    """Workflow for reduction of data for the Estia instrument."""
+def FreiaWorkflow() -> sciline.Pipeline:
+    """Workflow for reduction of data for the Freia instrument."""
     workflow = beamline.LoadNeXusWorkflow()
     for provider in providers:
         workflow.insert(provider)
